@@ -2,11 +2,12 @@ import type { FoodItem, Language, Restaurant, TouristDestination } from '../type
 import { tr } from '../utils/i18n';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { isMedicalOrHealthQuery, buildMedicalScopeNotice, describeDish, type BrainChip } from './aiFoodBrain';
-import { getAiFoodAdvisorRecommendations } from './aiFoodAdvisorService';
+import { getAiFoodAdvisorRecommendations, isVegetarianQuery } from './aiFoodAdvisorService';
 
 export type AiTurnIntent =
   | 'welcome'
   | 'food_discovery'
+  | 'dish_comparison'
   | 'recipe_detail'
   | 'restaurant_recommend'
   | 'tourism_discovery'
@@ -26,6 +27,11 @@ export interface AiAssistantMessage {
   timestamp: string;
   intent?: AiTurnIntent;
   dishes?: FoodItem[];
+  similarDishes?: FoodItem[];
+  compareDishes?: FoodItem[];
+  vegetarianNote?: string;
+  restaurantUnavailableNote?: string;
+  googleMapsSearchQuery?: string;
   recipePreview?: AiRecipePreview;
   restaurants?: Restaurant[];
   destinations?: TouristDestination[];
@@ -492,9 +498,11 @@ export function generateConversationalAiResponse(params: {
     };
   }
 
-  // 6. FOOD DISCOVERY / CRAVING / FLAVOR / FOLLOW-UP ("more") INTENT
+  // 6. FOOD DISCOVERY / CRAVING / FLAVOR / VEGETARIAN / FOLLOW-UP ("more") INTENT
   const isMoreFollowUp = MORE_FOLLOWUP_RE.test(trimmed);
+  const isCompareQuery = /ប្រៀបធៀប|ខុសគ្នា|compare|comparison|vs\b|versus|对比|比较|区别/i.test(trimmed);
   const effectiveQuery = isMoreFollowUp && memory.lastQuery ? memory.lastQuery : trimmed;
+  const isVegQuery = isVegetarianQuery(effectiveQuery);
 
   const advisor = getAiFoodAdvisorRecommendations({
     foods,
@@ -527,20 +535,57 @@ export function generateConversationalAiResponse(params: {
     chosenDishes = advisor.dishes.slice(0, 4);
   }
 
+  const chosenIds = new Set(chosenDishes.map((d) => d.id));
+  const similarDishes = (advisor.allMatchedDishes || [])
+    .filter((d) => !chosenIds.has(d.id))
+    .slice(0, 4);
+
   const firstDish = chosenDishes[0];
   const firstLoc = firstDish ? getLocalizedFood(firstDish, language) : null;
 
   let conversationalText = advisor.aiSummaryText;
-  if (advisor.brain) {
+  let vegetarianNote: string | undefined;
+
+  if (isVegQuery) {
+    vegetarianNote = tr(
+      language,
+      '💡 សម្គាល់ពីម្ហូបបួសក្នុងទិន្នន័យកម្មវិធី៖ មុខម្ហូបបន្លែឆាខ្មែរ (ដូចជា ឆាត្រកួន និងឆាផ្កាខាត់ណាបៃតង) អាចចម្អិន ឬកុម្ម៉ង់ជា «ម្ហូបបួសសុទ្ធ ១០០%» ដោយប្រើទឹកស៊ីអ៊ីវ ប្រេងខ្ចងផ្សិតបួស និងតៅហ៊ូ ជំនួសទឹកត្រី ឬប្រហុក។ ចំណែកអាហារសម្រន់ និងបង្អែមខ្មែរខាងក្រោម (ក្រឡាន នំគ្រក់ខ្ទិះដូង អំបុក ទឹកសណ្តែកសៀង នំល្ពៅចំហុយ) គឺផ្សំពីរុក្ខជាតិសុទ្ធ ១០០%។',
+      '💡 Vegetarian Culinary Note: Traditional Khmer vegetable stir-fries in our database (such as Morning Glory and Broccoli Stir-Fry) are easily prepared or ordered 100% vegetarian by using soy sauce, mushroom sauce, and tofu instead of oyster/fish sauce. Meanwhile, the traditional Khmer snacks and desserts below (Kralan bamboo sticky rice, Num Krok coconut pancakes, Ambok, hot soy milk, steamed pumpkin cake) are 100% plant-based.',
+      '💡 高棉素食贴士：数据库中的高棉时蔬热炒（如蒜蓉空心菜、清炒西兰花）在餐厅点餐或在家烹饪时，只需将鱼露/蚝油替换为酱油、素食香菇酱与豆腐，即可做成 100% 纯素菜品；下方的竹筒饭、椰浆葱花米饼、扁米、热豆浆及蒸南瓜糕等传统小吃与甜品均为 100% 纯植物食材制作。'
+    );
+  } else if (advisor.brain) {
     conversationalText = `${advisor.brain.headline}${advisor.brain.explanation ? `\n${advisor.brain.explanation}` : ''}`;
   } else if (firstDish && firstLoc) {
     const flavorDesc = describeDish(firstDish, language);
     conversationalText = tr(
       language,
-      `${advisor.aiSummaryText}\n✨ មុខម្ហូបលេចធ្លោ៖ «${firstLoc.name}» (${flavorDesc})។ ចុចលើមុខម្ហូបខាងក្រោមដើម្បីមើលរូបមន្តពេញ ឬសួរខ្ញុំបន្តអំពីរបៀបធ្វើ និងហាងលក់!`,
-      `${advisor.aiSummaryText}\n✨ Highlight: "${firstLoc.name}" (${flavorDesc}). Tap any dish below for its full recipe, or ask me how to cook it or where to eat it!`,
-      `${advisor.aiSummaryText}\n✨ 重点推荐：“${firstLoc.name}”（${flavorDesc}）。点击下方菜品可查看完整食谱，也可以继续问我做法或推荐餐厅！`
+      `${advisor.aiSummaryText}\n✨ មុខម្ហូបលេចធ្លោ៖ «${firstLoc.name}» (${flavorDesc}) — អ្នកអាចមើលគ្រឿងផ្សំ របៀបធ្វើ ប្រៀបធៀបមុខម្ហូប ឬបើកមើលព័ត៌មានលម្អិតខាងក្រោម៖`,
+      `${advisor.aiSummaryText}\n✨ Featured Pick: "${firstLoc.name}" (${flavorDesc}) — explore ingredients, cooking methods, compare dishes side-by-side, or open full details below:`,
+      `${advisor.aiSummaryText}\n✨ 重点推荐：“${firstLoc.name}”（${flavorDesc}）——您可在下方直接查看食材配料、烹饪方法、对比菜品或打开完整食谱详情：`
     );
+  }
+
+  const matchedRestaurants = advisor.shops.slice(0, 3);
+  let restaurantUnavailableNote: string | undefined;
+  let googleMapsSearchQuery: string | undefined;
+
+  if (matchedRestaurants.length === 0) {
+    googleMapsSearchQuery = isVegQuery
+      ? 'ភោជនីយដ្ឋានម្ហូបបួស Vegetarian Restaurant Phnom Penh Cambodia'
+      : `${firstDish ? `${firstDish.nameKh} ${firstDish.nameEn}` : effectiveQuery} restaurant Cambodia`;
+    restaurantUnavailableNote = isVegQuery
+      ? tr(
+          language,
+          '📌 ព័ត៌មានហាងអាហារ៖ បច្ចុប្បន្នក្នុងបញ្ជីហាងដៃគូរបស់កម្មវិធី មិនទាន់មានហាងអាហារបួសដាច់ដោយឡែកទេ ប៉ុន្តែភោជនីយដ្ឋានម្ហូបខ្មែរទូទៅអាចឆាបន្លែ និងតៅហ៊ូបួសតាមការកុម្ម៉ង់បាន ឬអ្នកអាចចុចប៊ូតុងខាងក្រោមដើម្បីស្វែងរក «ហាងម្ហូបបួស» ផ្ទាល់នៅលើ Google Maps៖',
+          '📌 Restaurant Availability Note: Our in-app directory currently does not list dedicated vegetarian-only partner shops, though most Khmer restaurants prepare vegetarian vegetable & tofu dishes upon request. Tap below to find dedicated Vegetarian Restaurants directly on Google Maps:',
+          '📌 餐厅数据说明：当前应用合作餐厅名录中暂未单独收录纯素食专营店，但大多数高棉餐厅均可按要求现炒全素时蔬与豆腐菜肴。您也可以点击下方按钮直接在 Google 地图中搜索附近的素食餐厅：'
+        )
+      : tr(
+          language,
+          `📌 ព័ត៌មានហាងអាហារ៖ មិនទាន់មានហាងក្នុងបញ្ជីដែលដាក់ឈ្មោះមុខម្ហូប «${firstLoc?.name || effectiveQuery}» ជាម្ហូបប្រចាំហាងផ្ទាល់ទេ។ ចុចប៊ូតុងខាងក្រោមដើម្បីស្វែងរកហាងលក់មុខម្ហូបនេះនៅលើ Google Maps៖`,
+          `📌 Restaurant Availability Note: No shop in our directory explicitly lists "${firstLoc?.name || effectiveQuery}" as its signature dish yet. Tap below to search for restaurants serving it on Google Maps:`,
+          `📌 餐厅数据说明：名录中暂无店铺将“${firstLoc?.name || effectiveQuery}”列为招牌菜。点击下方按钮可在 Google 地图上搜索供应此菜品的餐厅：`
+        );
   }
 
   const followUps: BrainChip[] = [
@@ -552,9 +597,9 @@ export function generateConversationalAiResponse(params: {
             query: tr(language, `សុំគ្រឿងផ្សំ និងរបៀបធ្វើ ${firstDish.nameKh}`, `Show me the recipe and ingredients for ${firstDish.nameEn}`, `请告诉我${firstLoc.name}的食材和做法`),
           },
           {
-            id: 'ask_shops',
-            label: tr(language, '🏪 ហាងលក់ម្ហូបនេះ', '🏪 Where to Eat', '🏪 推荐餐厅'),
-            query: tr(language, `មានហាងណាលក់ ${firstDish.nameKh}?`, `Where can I eat ${firstDish.nameEn}?`, `哪里可以吃到${firstLoc.name}？`),
+            id: 'ask_compare',
+            label: tr(language, '⚖️ ប្រៀបធៀបមុខម្ហូបទាំងនេះ', '⚖️ Compare These Dishes', '⚖️ 对比推荐菜品'),
+            query: tr(language, `ប្រៀបធៀប ${ effectiveQuery }`, `compare ${effectiveQuery}`, `对比${effectiveQuery}`),
           },
         ]
       : []),
@@ -574,9 +619,14 @@ export function generateConversationalAiResponse(params: {
     id: `ai-${Date.now()}`,
     role: 'assistant',
     timestamp: new Date().toISOString(),
-    intent: 'food_discovery',
+    intent: isCompareQuery ? 'dish_comparison' : 'food_discovery',
     dishes: chosenDishes,
-    restaurants: advisor.shops.slice(0, 2),
+    similarDishes,
+    compareDishes: isCompareQuery ? chosenDishes.slice(0, 3) : undefined,
+    vegetarianNote,
+    restaurantUnavailableNote,
+    googleMapsSearchQuery,
+    restaurants: matchedRestaurants,
     text: conversationalText,
     followUpChips: followUps,
   };
@@ -586,7 +636,7 @@ export function generateConversationalAiResponse(params: {
     nextMemory: {
       ...memory,
       lastDishes: chosenDishes,
-      lastRestaurants: advisor.shops.slice(0, 2),
+      lastRestaurants: matchedRestaurants,
       activeProvinceKh,
       lastQuery: effectiveQuery,
       turnSeed: nextSeed,

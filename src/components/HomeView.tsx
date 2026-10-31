@@ -262,10 +262,9 @@ export const HomeView: React.FC = () => {
   }, [setIsNearMeModalOpen]);
 
   const handleNearbyPlaces = useCallback(() => {
-    (window as any).__kft_near_me_initial_tab = 'destinations';
-    window.dispatchEvent(new CustomEvent('kft:near-me-tab', { detail: 'destinations' }));
-    setIsNearMeModalOpen(true);
-  }, [setIsNearMeModalOpen]);
+    (window as any).__kft_wte_open_compare_mode = true;
+    setIsWhatToEatModalOpen(true);
+  }, [setIsWhatToEatModalOpen]);
 
   const handleFoodRecommendations = useCallback(() => setIsWhatToEatModalOpen(true), [setIsWhatToEatModalOpen]);
 

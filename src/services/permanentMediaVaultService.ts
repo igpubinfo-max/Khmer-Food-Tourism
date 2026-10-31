@@ -15,7 +15,7 @@
  * Default seed images NEVER overwrite any record present in this vault.
  */
 
-import { FoodItem, Restaurant, TouristDestination, TrendingFoodItem, RestaurantMenuItem, RestaurantReview, RestaurantPriceLevel, GoogleMapsPlaceMetadata } from '../types';
+import { FoodItem, Restaurant, TouristDestination, TrendingFoodItem, RestaurantMenuItem, RestaurantReview, RestaurantPriceLevel, GoogleMapsPlaceMetadata, ShopPhotoReplacementRequest } from '../types';
 import { initial100Destinations } from '../data/seedDestinations';
 import { initial200Foods } from '../data/seedFoods';
 import {
@@ -115,6 +115,7 @@ export interface RestaurantMediaOverride {
   googleMapsMeta?: GoogleMapsPlaceMetadata;
   isAdminEdited?: boolean;
   adminEditedAt?: string;
+  pendingPhotoReplacement?: ShopPhotoReplacementRequest;
   isCustomPhoto: boolean;
   updatedAt: string;
 }
@@ -140,6 +141,7 @@ export interface DestinationMediaOverride {
   googleMapsMeta?: GoogleMapsPlaceMetadata;
   isAdminEdited?: boolean;
   adminEditedAt?: string;
+  pendingPhotoReplacement?: ShopPhotoReplacementRequest;
   isCustomPhoto: boolean;
   updatedAt: string;
 }
@@ -295,6 +297,7 @@ function isObsoleteSeedPhoto(url?: string): boolean {
 
 function isFakeSeedRestaurantOverride(rec?: RestaurantMediaOverride | null): boolean {
   if (!rec || !rec.id) return true;
+  if (rec.pendingPhotoReplacement) return false;
   const isSeedId = /^rest-\d+$/.test(String(rec.id).trim());
   if (!isSeedId) return false;
   const url = String(rec.photoUrl || rec.profileImage || '').trim();
@@ -511,7 +514,12 @@ export function mergeOverrideBundles(
 ): AllMediaOverridesBundle {
   if (!incoming) return base;
 
-  const mergeMaps = <T extends { updatedAt?: string; photoUrl?: string }>(
+  const isCustomMediaUrl = (url?: string): boolean => {
+    if (!url || typeof url !== 'string') return false;
+    return url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://');
+  };
+
+  const mergeMaps = <T extends { updatedAt?: string; photoUrl?: string; profileImage?: string }>(
     a: Record<string, T> = {},
     b: Record<string, T> = {}
   ): Record<string, T> => {
@@ -524,7 +532,16 @@ export function mergeOverrideBundles(
       } else {
         const timeA = itemA.updatedAt ? new Date(itemA.updatedAt).getTime() : 0;
         const timeB = itemB.updatedAt ? new Date(itemB.updatedAt).getTime() : 0;
-        out[id] = timeB >= timeA ? { ...itemA, ...itemB } : { ...itemB, ...itemA };
+        const merged = timeB >= timeA ? { ...itemA, ...itemB } : { ...itemB, ...itemA };
+        // Never allow a static local seed path (/foods/*, /Shop/*, /destinations/*) to overwrite a custom data:/http: photo
+        if (isCustomMediaUrl(itemA.photoUrl) && !isCustomMediaUrl(itemB.photoUrl)) {
+          merged.photoUrl = itemA.photoUrl;
+          if (itemA.profileImage) merged.profileImage = itemA.profileImage;
+        } else if (isCustomMediaUrl(itemB.photoUrl) && !isCustomMediaUrl(itemA.photoUrl)) {
+          merged.photoUrl = itemB.photoUrl;
+          if (itemB.profileImage) merged.profileImage = itemB.profileImage;
+        }
+        out[id] = merged;
       }
     }
     return out;
@@ -696,6 +713,7 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     googleMapsMeta: rest.googleMapsMeta,
     isAdminEdited: rest.isAdminEdited ?? true,
     adminEditedAt: rest.adminEditedAt || now,
+    pendingPhotoReplacement: rest.pendingPhotoReplacement,
     isCustomPhoto: true,
     updatedAt: now,
   };
@@ -1113,6 +1131,7 @@ export function applyRestaurantOverrides(
       r.addressKh === (ov.addressKh || r.addressKh) &&
       r.provinceKh === (ov.provinceKh || r.provinceKh) &&
       r.phone === (ov.phone !== undefined ? ov.phone : r.phone) &&
+      r.pendingPhotoReplacement === (ov.pendingPhotoReplacement !== undefined ? ov.pendingPhotoReplacement : r.pendingPhotoReplacement) &&
       (r.menuItems || []).length === resolvedMenuItems.length &&
       (r.reviews || []).length === (Array.isArray(ov.reviews) ? ov.reviews : r.reviews || []).length
     ) {
@@ -1166,6 +1185,7 @@ export function applyRestaurantOverrides(
       googleMapsMeta: ov.googleMapsMeta || r.googleMapsMeta,
       isAdminEdited: ov.isAdminEdited ?? r.isAdminEdited,
       adminEditedAt: ov.adminEditedAt || r.adminEditedAt,
+      pendingPhotoReplacement: ov.pendingPhotoReplacement !== undefined ? ov.pendingPhotoReplacement : r.pendingPhotoReplacement,
       isCustomPhoto: true,
       photoUpdatedAt: nextPhotoUpdatedAt,
       updatedAt: nextUpdatedAt,

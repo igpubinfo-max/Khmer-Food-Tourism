@@ -96,6 +96,15 @@ export const QUICK_CRAVING_CHIPS: QuickCravingChip[] = [
     labelZh: '🍨 传统甜品',
   },
   {
+    id: 'vegetarian',
+    queryKh: 'ម្ហូបបួស',
+    queryEn: 'vegetarian',
+    queryZh: '素食',
+    labelKh: '🥬 ម្ហូបបួស & បន្លែ',
+    labelEn: '🥬 Vegetarian & Veggie',
+    labelZh: '🥬 素食与蔬菜',
+  },
+  {
     id: 'drink_pairing',
     queryKh: 'ម្ហូបអមស្រាបៀរ',
     queryEn: 'beer food',
@@ -117,6 +126,61 @@ function normalizeSearchText(input: string): string {
     .replace(/[.,/#!$%^&*;:{}=\-_`~()?"'«»៖។]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+const MEAT_FISH_SEAFOOD_TITLE_RE =
+  /សាច់គោ|សាច់ជ្រូក|សាច់មាន់|មាន់|ទា|ត្រី|បង្គា|បង្កង|ក្តាម|ក្ដាម|មឹក|ងាវ|ខ្យង|គ្រំ|អយស្ទ័រ|កង្កែប|អន្ទង់|ពោះគោ|ឆ្អឹងជំនី|ប្រហិត|ប្រហុក|ផ្អក|កាពិ|ពងទាកូន|ងៀត|ក្រក|គ្រឿងសមុទ្រ|\bbeef\b|\bpork\b|\bchicken\b|\bduck\b|\bfish\b|\bprawn\b|\bshrimp\b|\bcrab\b|\bsquid\b|\bclam\b|\bsnail\b|\boyster\b|\bfrog\b|\beel\b|\btripe\b|\brib\b|\bmeatball\b|\bprahok\b|\bseafood\b|\bbalut\b|\bsausage\b|\bjerky\b/i;
+
+export const VEGETARIAN_QUERY_RE =
+  /បួស|ម្ហូបបួស|អាហារបួស|គ្មានសាច់|បន្លែសុទ្ធ|vegetarian|vegan|plant[\s-]*based|meatless|meat[\s-]*free|素食|斋菜|纯素|全素/i;
+
+export function isVegetarianQuery(input: string): boolean {
+  return VEGETARIAN_QUERY_RE.test(input || '');
+}
+
+export type VegetarianDishClass =
+  | 'savory_veggie_adaptable'
+  | 'plant_based_savory_snack'
+  | 'plant_based_sweet'
+  | 'none';
+
+export function classifyVegetarianDish(food: FoodItem): VegetarianDishClass {
+  const title = `${food.nameKh || ''} ${food.nameEn || ''}`;
+  if (MEAT_FISH_SEAFOOD_TITLE_RE.test(title)) {
+    return 'none';
+  }
+  const ingText = (food.ingredients || [])
+    .map((i) => `${i.nameKh || ''} ${i.nameEn || ''}`)
+    .join(' ');
+
+  // Savory vegetable stir-fries / salads without meat/fish in the dish name (adaptable 100% vegetarian by using soy/mushroom sauce)
+  if (
+    /^ឆាត្រកួន|^ឆាផ្កាខាត់ណា|^ឆាបន្លែ|^ឆាផ្សិត|^ឆាត្រប់|^ឆាពពុះសណ្តែក|^ឆាតៅហ៊ូ|morning glory|broccoli|vegetable stir/i.test(
+      title
+    )
+  ) {
+    return 'savory_veggie_adaptable';
+  }
+
+  // Strictly exclude any other dish whose ingredients contain meat, poultry, fish, seafood, or prahok
+  if (MEAT_FISH_SEAFOOD_TITLE_RE.test(ingText)) {
+    return 'none';
+  }
+
+  // Savory or light plant-based traditional Khmer snacks & drinks (Kralan, Num Krok, Ambok, Hot Soy Milk, Steamed Cassava/Pumpkin/Corn)
+  if (
+    /ក្រឡាន|នំគ្រក់|អំបុក|ទឹកសណ្តែក|ដំឡូងមីចំហុយ|នំល្ពៅចំហុយ|នំពោតចំហុយ|ចេកណាំវ៉ាស្ងោរ|ចេកចៀន|kralan|num krok|ambok|soy milk|cassava/i.test(
+      title
+    )
+  ) {
+    return 'plant_based_savory_snack';
+  }
+
+  if (food.categorySlug === 'dessert' || food.categorySlug === 'cake' || /^បង្អែម|^នំ/i.test(food.nameKh || '')) {
+    return 'plant_based_sweet';
+  }
+
+  return 'savory_veggie_adaptable';
 }
 
 interface SemanticRule {
@@ -239,13 +303,24 @@ const SEMANTIC_CRAVING_RULES: SemanticRule[] = [
   },
   {
     id: 'steamed_boiled_style',
-    triggerRegex: /ស្ងោរ|ចំហុយ|បន្លែ|បួស|steamed|boiled|veggie|vegetarian|vegan|清蒸|水煮|蔬菜|素食/i,
+    triggerRegex: /ស្ងោរ|ចំហុយ|steamed|boiled|清蒸|水煮/i,
     matchFood: (_f, titleText, _fullText, tags) => {
       let score = 0;
       if (tags.includes('steamed_boiled')) score += 80;
-      if (tags.includes('vegetable_rich') || tags.includes('vegetarian_friendly')) score += 70;
-      if (/ស្ងោរ|ចំហុយ|បបរ|សម្លប្រហើរ|បន្លែ|steamed|boiled|porridge|clear soup|vegetable/i.test(titleText)) score += 80;
+      if (/ស្ងោរ|ចំហុយ|បបរ|សម្លប្រហើរ|steamed|boiled|porridge|clear soup/i.test(titleText)) score += 110;
       return score;
+    },
+  },
+  {
+    id: 'vegetarian_plant_based',
+    triggerRegex: /បួស|ម្ហូបបួស|អាហារបួស|គ្មានសាច់|បន្លែសុទ្ធ|vegetarian|vegan|plant[\s-]*based|meatless|meat[\s-]*free|素食|斋菜|纯素|全素/i,
+    matchFood: (f) => {
+      const vClass = classifyVegetarianDish(f);
+      if (vClass === 'none') return -999;
+      if (vClass === 'savory_veggie_adaptable') return 260;
+      if (vClass === 'plant_based_savory_snack') return 245;
+      if (vClass === 'plant_based_sweet') return 195;
+      return 0;
     },
   },
   {
@@ -402,6 +477,10 @@ export function getAiFoodAdvisorRecommendations(params: {
         score += 18;
       }
 
+      if (isVegetarianQuery(query) && classifyVegetarianDish(food) === 'none') {
+        score = -999;
+      }
+
       if (score >= 40) {
         scoredFoods.push({ food, score });
       }
@@ -471,11 +550,15 @@ export function getAiFoodAdvisorRecommendations(params: {
   }
 
   // Match restaurants serving these dishes or matching the query
+  const isVeg = isVegetarianQuery(query);
   const matchedShops = restaurants
     .filter((r) => {
       const hay = normalizeSearchText(
         `${r.nameKh} ${r.nameEn} ${(r.signatureDishesKh || []).join(' ')} ${r.provinceKh} ${r.cuisineType || ''}`
       );
+      if (isVeg) {
+        return /បួស|បន្លែ|តៅហ៊ូ|vegetarian|vegan|veggie|plant|素食|斋/i.test(hay);
+      }
       if (hasActiveQuery && hay.includes(cleanQuery)) return true;
       return topDishes.some((d) =>
         (r.signatureDishesKh || []).some((sig) => {
@@ -495,13 +578,14 @@ export function getAiFoodAdvisorRecommendations(params: {
         totalMatchedCount,
         goal,
         language,
+        topDishes,
       });
 
   return {
     dishes: topDishes,
     allMatchedDishes,
     totalMatchedCount,
-    shops: matchedShops.length > 0 ? matchedShops : restaurants.slice(0, 2),
+    shops: matchedShops,
     hasActiveQuery,
     aiSummaryText,
     brain,
@@ -552,23 +636,36 @@ function buildAiSummaryText(params: {
   totalMatchedCount: number;
   goal: AdvisorGoalId;
   language: Language;
+  topDishes?: FoodItem[];
 }): string {
-  const { hasActiveQuery, query, totalMatchedCount, goal, language } = params;
+  const { hasActiveQuery, query, totalMatchedCount, goal, language, topDishes = [] } = params;
 
   if (hasActiveQuery) {
-    if (totalMatchedCount > 0) {
+    if (isVegetarianQuery(query)) {
       return tr(
         language,
-        `🤖 AI បានរកឃើញមុខម្ហូបដែលត្រូវនឹង «${query}» ចំនួន ${totalMatchedCount} មុខ សម្រាប់អ្នក៖`,
-        `🤖 AI matched ${totalMatchedCount} dish(es) for "${query}":`,
-        `🤖 AI 已为您智能匹配 ${totalMatchedCount} 道符合“${query}”的推荐美食：`
+        `🥬 ការណែនាំម្ហូបបួស និងអាហាររុក្ខជាតិពី AI សម្រាប់ «${query}»៖\nយើងបានជ្រើសរើសមុខម្ហូបបន្លែស្រស់ អាហារសម្រន់ និងបង្អែមខ្មែរគ្មានសាច់ រួមទាំងគ្រឿងផ្សំ របៀបធ្វើ និងរសជាតិលម្អិតខាងក្រោម៖`,
+        `🥬 AI Vegetarian & Plant-Based Culinary Guide for "${query}":\nHere are curated meat-free Cambodian vegetable dishes, traditional plant-based snacks, and desserts with full ingredients, cooking methods, and taste profiles:`,
+        `🥬 AI 为您定制的“${query}”高棉素食与植物性美食指南：\n已为您精选无肉时蔬热炒、传统植物性小吃与高棉甜品，并附上详细食材、烹饪方法与风味解析：`
+      );
+    }
+    if (totalMatchedCount > 0) {
+      const previewNames = topDishes
+        .slice(0, 3)
+        .map((d) => getLocalizedFood(d, language).name)
+        .join(language === 'zh' ? '、' : ', ');
+      return tr(
+        language,
+        `✨ ការណែនាំមុខម្ហូបពិសេសពី AI សម្រាប់ «${query}»៖\nរួមមាន ${previewNames} និងមុខម្ហូបដែលត្រូវនឹងចំណង់ចំណូលចិត្តរបស់អ្នក ជាមួយគ្រឿងផ្សំ របៀបចម្អិន និងហាងអាហារណែនាំ៖`,
+        `✨ AI Personalized Food Recommendations for "${query}":\nFeaturing ${previewNames} — complete with taste profiles, ingredients, cooking methods, and places to eat:`,
+        `✨ AI 为您定制的“${query}”美食推荐：\n精选 ${previewNames} 等契合您口味的佳肴，包含风味特色、食材做法及推荐餐厅：`
       );
     }
     return tr(
       language,
-      `🤖 មិនមានឈ្មោះម្ហូប «${query}» ផ្ទាល់ទេ តែនេះជាមុខម្ហូបពេញនិយមដែល AI ណែនាំជំនួស៖`,
-      `🤖 No exact match for "${query}" — here are popular AI recommendations instead:`,
-      `🤖 未找到“${query}”的直接匹配，AI 为您推荐以下人气美食：`
+      `🤖 មិនមានឈ្មោះម្ហូប «${query}» ផ្ទាល់នៅក្នុងទិន្នន័យទេ តែនេះជាមុខម្ហូបខ្មែរដែលមានរសជាតិស្រដៀងគ្នា ដែល AI សូមណែនាំជំនួស៖`,
+      `🤖 "${query}" is not listed directly in our database — here are the closest authentic Cambodian dishes recommended by AI:`,
+      `🤖 数据库中暂无直接名为“${query}”的菜品，以下是 AI 为您推荐的风味最相近的正宗高棉美食：`
     );
   }
 

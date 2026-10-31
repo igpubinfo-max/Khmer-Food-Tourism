@@ -40,6 +40,7 @@ export const AdminDashboard: React.FC = () => {
     isAdminOpen, setIsAdminOpen, language,
     foods, addFood, updateFood, deleteFood,
     restaurants, deleteRestaurant, approveRestaurant, rejectRestaurant, toggleVerifyRestaurant,
+    approveShopPhotoReplacement, rejectShopPhotoReplacement,
     destinations, addDestination, updateDestination, deleteDestination,
     users, deletedUsers, updateUserRole, adminGrantUserVip, cancelUserVip, restoreUserAccess, disableUserAccount, deleteUserAccount, clearAllRegisteredUsers,
     transactions, verifyTransaction, rejectTransaction, requestMorePaymentInfo, deleteTransactions, getAuthorizedPaymentProof,
@@ -277,6 +278,12 @@ export const AdminDashboard: React.FC = () => {
 
   const isKm = language === 'km';
   const pendingRestaurants = restaurants.filter(r => r.status === 'pending');
+  const pendingPhotoReplacementRestaurants = restaurants.filter(
+    r => r.pendingPhotoReplacement?.status === 'pending'
+  );
+  const reviewedPhotoReplacementRestaurants = restaurants.filter(
+    r => r.pendingPhotoReplacement && r.pendingPhotoReplacement.status !== 'pending'
+  );
   const verifiedRestaurantsCount = restaurants.filter(r => r.isVerified).length;
   const pendingTxns = transactions.filter(
     t => t.status === 'pending_verification' || t.status === 'needs_more_info'
@@ -719,8 +726,10 @@ export const AdminDashboard: React.FC = () => {
           >
             <Store className="w-3.5 h-3.5 shrink-0" />
             <span className="truncate">{isKm ? `ហាងអាហារ (${restaurants.length})` : `Shops (${restaurants.length})`}</span>
-            {pendingRestaurants.length > 0 && (
-              <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
+            {(pendingRestaurants.length + pendingPhotoReplacementRestaurants.length) > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[9px] font-bold shrink-0">
+                {pendingRestaurants.length + pendingPhotoReplacementRestaurants.length}
+              </span>
             )}
           </button>
 
@@ -2373,6 +2382,155 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Pending & Recently Reviewed Shop Photo Replacement Requests */}
+              {(pendingPhotoReplacementRestaurants.length > 0 || reviewedPhotoReplacementRestaurants.length > 0) && (
+                <div
+                  id="kft-admin-photo-replacement-queue"
+                  className="p-4 rounded-2xl bg-amber-50/90 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-700/60 space-y-3"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                      <h4 className="font-bold text-amber-900 dark:text-amber-300 font-khmer text-xs sm:text-sm">
+                        {isKm
+                          ? `📸 សំណើប្តូររូបភាពហាងថ្មី (${pendingPhotoReplacementRestaurants.length} រង់ចាំការអនុម័ត)`
+                          : `📸 Shop Photo Replacement Requests (${pendingPhotoReplacementRestaurants.length} Pending Approval)`}
+                      </h4>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-200/80 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 text-[10px] font-bold font-khmer">
+                      {isKm ? 'រក្សារូបភាពចាស់រហូតដល់អនុម័ត' : 'Keeps Approved Photo Until Verified'}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {[...pendingPhotoReplacementRestaurants, ...reviewedPhotoReplacementRestaurants].map((rest) => {
+                      const req = rest.pendingPhotoReplacement!;
+                      const isPending = req.status === 'pending';
+                      const isApproved = req.status === 'approved';
+                      return (
+                        <div
+                          key={`photo-req-${rest.id}`}
+                          className="p-3 bg-white dark:bg-stone-900 rounded-xl border border-amber-200 dark:border-amber-800/60 flex flex-col gap-3 shadow-xs"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                              <h5 className="font-bold text-slate-900 dark:text-white font-khmer text-xs sm:text-sm flex items-center gap-1.5">
+                                <span>{rest.nameKh}</span>
+                                <span
+                                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold font-khmer ${
+                                    isPending
+                                      ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'
+                                      : isApproved
+                                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300'
+                                      : 'bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300'
+                                  }`}
+                                >
+                                  {isPending
+                                    ? isKm
+                                      ? '⏳ រង់ចាំការអនុម័តពី Admin'
+                                      : '⏳ Pending Admin Approval'
+                                    : isApproved
+                                    ? isKm
+                                      ? '✅ អនុម័តរួចរាល់'
+                                      : '✅ Approved'
+                                    : isKm
+                                    ? '🚫 បដិសេធ'
+                                    : '🚫 Rejected'}
+                                </span>
+                              </h5>
+                              <p className="text-[11px] text-slate-500 dark:text-stone-400 font-khmer mt-0.5">
+                                {rest.provinceKh} • 📞 {rest.phone}
+                                {rest.ownerName ? ` • 👤 ${rest.ownerName}` : ''}
+                              </p>
+                            </div>
+
+                            {isPending && (
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  id={`kft-admin-approve-photo-${rest.id}`}
+                                  onClick={() => approveShopPhotoReplacement(rest.id)}
+                                  className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold font-khmer flex items-center gap-1 shadow-xs transition cursor-pointer"
+                                >
+                                  <Check className="w-3.5 h-3.5" />
+                                  <span>{isKm ? 'អនុម័តរូបភាពថ្មី' : 'Approve New Photo'}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  id={`kft-admin-reject-photo-${rest.id}`}
+                                  onClick={() =>
+                                    rejectShopPhotoReplacement(
+                                      rest.id,
+                                      isKm
+                                        ? 'រូបភាពហាងថ្មីមិនត្រូវតាមស្តង់ដារ ត្រូវបានបដិសេធដោយ Admin (រក្សាទុករូបភាពចាស់ដដែល)'
+                                        : 'Rejected by Admin — original approved shop photo retained'
+                                    )
+                                  }
+                                  className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold font-khmer flex items-center gap-1 shadow-xs transition cursor-pointer"
+                                >
+                                  <Ban className="w-3.5 h-3.5" />
+                                  <span>{isKm ? 'បដិសេធ' : 'Reject'}</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Side-by-side comparison: Current Approved Photo vs New Submitted Photo */}
+                          <div className="grid grid-cols-2 gap-2.5">
+                            <div className="p-2 rounded-xl bg-slate-50 dark:bg-stone-800/80 border border-slate-200 dark:border-stone-700">
+                              <span className="block text-[10px] font-bold text-slate-600 dark:text-stone-300 font-khmer mb-1">
+                                {isKm ? '១. រូបភាពហាងកំពុងបង្ហាញ (Approved)' : '1. Active Approved Shop Photo'}
+                              </span>
+                              <img
+                                src={rest.photoUrl}
+                                alt="Current Approved"
+                                className="w-full h-24 object-cover rounded-lg border border-slate-200 dark:border-stone-700"
+                              />
+                            </div>
+                            <div className="p-2 rounded-xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/70">
+                              <span className="block text-[10px] font-bold text-amber-800 dark:text-amber-300 font-khmer mb-1">
+                                {isKm ? '២. រូបភាពហាងថ្មីដែលស្នើប្តូរ (Submitted)' : '2. Submitted Replacement Photo'}
+                              </span>
+                              <img
+                                src={req.newPhotoUrl}
+                                alt="Submitted Replacement"
+                                className="w-full h-24 object-cover rounded-lg border border-amber-300 dark:border-amber-600"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Audit timestamps & Admin Decision */}
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 text-[10px] font-khmer bg-slate-50 dark:bg-stone-800/60 p-2 rounded-lg border border-slate-200/70 dark:border-stone-700">
+                            <div>
+                              <span className="text-slate-400">{isKm ? 'កាលបរិច្ឆេទដាក់ស្នើ៖ ' : 'Submitted: '}</span>
+                              <span className="font-bold text-slate-700 dark:text-stone-200">
+                                {new Date(req.submittedAt).toLocaleString()}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-slate-400">{isKm ? 'កាលបរិច្ឆេទត្រួតពិនិត្យ៖ ' : 'Reviewed: '}</span>
+                              <span className="font-bold text-slate-700 dark:text-stone-200">
+                                {req.reviewedAt
+                                  ? new Date(req.reviewedAt).toLocaleString()
+                                  : isKm
+                                  ? 'រង់ចាំ Admin ពិនិត្យ'
+                                  : 'Awaiting Review'}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-slate-400">{isKm ? 'សេចក្តីសម្រេច Admin៖ ' : 'Admin Decision: '}</span>
+                              <span className="font-bold text-slate-700 dark:text-stone-200">
+                                {req.adminDecision || (isKm ? 'កំពុងរង់ចាំការពិនិត្យ' : 'Pending Review')}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}

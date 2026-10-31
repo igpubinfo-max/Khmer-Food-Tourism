@@ -16,10 +16,9 @@ import { tr } from '../utils/i18n';
 import {
   isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
-  processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
-import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
-import { ShopMultiPhotoUploader } from './ShopMultiPhotoUploader';
+import { validateAndModerateShopImage } from '../utils/imageModeration';
+import { DefaultShopIcon } from './icons/DefaultShopIcon';
 import { ShopLocationCheckInPickerModal, ShopCheckInLocationResult } from './ShopLocationCheckInPickerModal';
 
 export const ManageMenuModal: React.FC = () => {
@@ -37,6 +36,9 @@ export const ManageMenuModal: React.FC = () => {
     deleteRestaurantMenuItem,
     updateRestaurant,
     deleteRestaurant,
+    submitShopPhotoReplacementRequest,
+    approveShopPhotoReplacement,
+    rejectShopPhotoReplacement,
     upgradeRestaurantToPremium,
     getOwnedRestaurantsForUser,
     setActiveManagedShopId,
@@ -64,103 +66,22 @@ export const ManageMenuModal: React.FC = () => {
   const [confirmDeleteMenuItemId, setConfirmDeleteMenuItemId] = useState<string | null>(null);
   const [statusBanner, setStatusBanner] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Menu item fields
+  // Menu item fields (Name & Description Only — No Individual Dish Photo Uploads)
   const [nameKh, setNameKh] = useState('');
   const [nameEn, setNameEn] = useState('');
-  const [dishPhotoUrl, setDishPhotoUrl] = useState('https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80');
+  const [dishPhotoUrl, setDishPhotoUrl] = useState('');
   const [descriptionKh, setDescriptionKh] = useState('');
-  const [isSearchingOnlineDish, setIsSearchingOnlineDish] = useState(false);
-  const [onlineDishCandidates, setOnlineDishCandidates] = useState<OnlineFoodImageCandidate[]>([]);
 
-  const foodDishGalleryRef = useRef<HTMLInputElement>(null);
-  const foodDishCameraRef = useRef<HTMLInputElement>(null);
   const modalBodyRef = useRef<HTMLDivElement>(null);
   const nameKhInputRef = useRef<HTMLInputElement>(null);
-  const [isUploadingDishPhoto, setIsUploadingDishPhoto] = useState(false);
   const [isSavingDish, setIsSavingDish] = useState(false);
 
-  const handleDishFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setIsUploadingDishPhoto(true);
-    try {
-      const dataUrl = await processAndCompressImageFile(file, 1000, 0.85);
-      if (dataUrl) {
-        setDishPhotoUrl(dataUrl);
-        showToast(
-          isKm ? '✅ បានផ្ទុករូបភាពមុខម្ហូបជោគជ័យ!' : '✅ Food photo uploaded successfully!',
-          'success'
-        );
-      }
-    } catch (err: any) {
-      showToast(err?.message || (isKm ? 'រូបភាពមិនត្រឹមត្រូវ' : 'Invalid image file'), 'error');
-    } finally {
-      setIsUploadingDishPhoto(false);
-      if (e.target) e.target.value = '';
-    }
-  };
-
-  const handlePickDishNativeGallery = async () => {
-    if (!isNativeAndroidOrIosPlatform()) {
-      foodDishGalleryRef.current?.click();
-      return;
-    }
-    setIsUploadingDishPhoto(true);
-    try {
-      const nativeRes = await pickImageUsingNativeAndroidGallery();
-      if (nativeRes && nativeRes.cancelled) {
-        setIsUploadingDishPhoto(false);
-        return;
-      }
-      if (nativeRes && !nativeRes.cancelled && nativeRes.dataUrl) {
-        setDishPhotoUrl(nativeRes.dataUrl);
-        showToast(
-          isKm ? '✅ បានជ្រើសរូបភាពពី Gallery ជោគជ័យ!' : '✅ Photo selected from Gallery!',
-          'success'
-        );
-        setIsUploadingDishPhoto(false);
-        return;
-      }
-    } catch {}
-    setIsUploadingDishPhoto(false);
-    foodDishGalleryRef.current?.click();
-  };
-
-  const handlePickDishCamera = () => {
-    foodDishCameraRef.current?.click();
-  };
-
-  const handleRemoveDishPhoto = () => {
-    setDishPhotoUrl('');
-    showToast(isKm ? 'បានលុបរូបភាពចេញ' : 'Photo removed', 'info');
-  };
-
-  const handleSearchOnlineDishPhotos = async () => {
-    setIsSearchingOnlineDish(true);
-    try {
-      const qKh = nameKh.trim() || storeNameKh.trim() || 'ម្ហូបខ្មែរ';
-      const results = await searchOnlineFoodImages({
-        nameKh: qKh,
-        nameEn: nameEn.trim() || qKh,
-        categorySlug: 'soup',
-        existingUrls: dishPhotoUrl ? [dishPhotoUrl] : [],
-      });
-      setOnlineDishCandidates(results);
-      if (results.length > 0) {
-        setDishPhotoUrl(results[0].url);
-        showToast(
-          isKm
-            ? `✨ រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${results.length} សន្លឹក!`
-            : `✨ Found ${results.length} online food photos!`,
-          'success'
-        );
-      }
-    } catch {
-      showToast(isKm ? 'មិនអាចស្វែងរករូបភាពពី Online បានទេ' : 'Failed to search online food photos', 'warning');
-    } finally {
-      setIsSearchingOnlineDish(false);
-    }
-  };
+  // Single Shop Photo Replacement State
+  const shopPhotoFileRef = useRef<HTMLInputElement>(null);
+  const shopPhotoCameraRef = useRef<HTMLInputElement>(null);
+  const [isUploadingShopPhoto, setIsUploadingShopPhoto] = useState(false);
+  const [shopPhotoModerationWarning, setShopPhotoModerationWarning] = useState<string | null>(null);
+  const [stagedReplacementPhoto, setStagedReplacementPhoto] = useState<string>('');
 
   // Self-Service Store Info fields
   const [storeNameKh, setStoreNameKh] = useState(managingRestaurant?.nameKh || '');
@@ -218,6 +139,8 @@ export const ManageMenuModal: React.FC = () => {
       setStoreLongitude(typeof fresh.longitude === 'number' ? fresh.longitude : 104.9282);
       setStoreCoverPhoto(fresh.photoUrl || '');
       setStoreGalleryPhotos(fresh.galleryPhotos || []);
+      setStagedReplacementPhoto('');
+      setShopPhotoModerationWarning(null);
       setStorePromoVideoUrl(fresh.promoVideoUrl || '');
       setStoreTelegramUrl(fresh.telegramUrl || '');
       setStoreFacebookUrl(fresh.facebookUrl || '');
@@ -316,19 +239,108 @@ export const ManageMenuModal: React.FC = () => {
   const resetMenuForm = () => {
     setNameKh('');
     setNameEn('');
-    setDishPhotoUrl('https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80');
+    setDishPhotoUrl('');
     setDescriptionKh('');
     setEditingItemId(null);
-    setOnlineDishCandidates([]);
     setMenuMode('list');
   };
 
-  const sampleFoodPhotos = [
-    'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=800&auto=format&fit=crop&q=80',
-  ];
+  // Single Shop Photo Picker & Moderation Handlers
+  const handlePickSingleShopPhotoFromGallery = async () => {
+    setShopPhotoModerationWarning(null);
+    if (!isNativeAndroidOrIosPlatform()) {
+      shopPhotoFileRef.current?.click();
+      return;
+    }
+    setIsUploadingShopPhoto(true);
+    try {
+      const nativePick = await pickImageUsingNativeAndroidGallery(1200, 0.85);
+      if (nativePick?.cancelled) {
+        setIsUploadingShopPhoto(false);
+        return;
+      }
+      if (nativePick?.dataUrl) {
+        const modRes = await validateAndModerateShopImage(nativePick.dataUrl, language);
+        if (!modRes.valid || !modRes.dataUrl) {
+          setShopPhotoModerationWarning(modRes.reason || null);
+          showToast(modRes.reason || tr(language, '⚠️ រូបភាពមិនត្រឹមត្រូវ', '⚠️ Invalid shop image', '⚠️ 图片无效'), 'warning');
+          setIsUploadingShopPhoto(false);
+          return;
+        }
+        setStagedReplacementPhoto(modRes.dataUrl);
+        showToast(
+          tr(
+            language,
+            '✅ បានជ្រើសរូបភាពហាងថ្មីរួចរាល់! សូមចុចប៊ូតុងដាក់ស្នើប្តូររូបភាព។',
+            '✅ New shop photo selected & verified! Tap Submit below.',
+            '✅ 新店铺照片已选定！请点击下方提交按钮。'
+          ),
+          'success'
+        );
+        setIsUploadingShopPhoto(false);
+        return;
+      }
+    } catch {}
+    setIsUploadingShopPhoto(false);
+    shopPhotoFileRef.current?.click();
+  };
+
+  const handleSingleShopPhotoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setShopPhotoModerationWarning(null);
+    setIsUploadingShopPhoto(true);
+    try {
+      const modRes = await validateAndModerateShopImage(file, language);
+      if (!modRes.valid || !modRes.dataUrl) {
+        setShopPhotoModerationWarning(modRes.reason || null);
+        showToast(modRes.reason || tr(language, '⚠️ រូបភាពមិនត្រឹមត្រូវ', '⚠️ Invalid shop image', '⚠️ 图片无效'), 'warning');
+        return;
+      }
+      setStagedReplacementPhoto(modRes.dataUrl);
+      showToast(
+        tr(
+          language,
+          '✅ បានជ្រើសរូបភាពហាងថ្មីរួចរាល់! សូមចុចប៊ូតុងដាក់ស្នើប្តូររូបភាព។',
+          '✅ New shop photo selected & verified! Tap Submit below.',
+          '✅ 新店铺照片已选定！请点击下方提交按钮。'
+        ),
+        'success'
+      );
+    } catch {
+      showToast(tr(language, '⚠️ មិនអាចអានរូបភាពបានទេ', '⚠️ Could not read image', '⚠️ 无法读取图片'), 'warning');
+    } finally {
+      setIsUploadingShopPhoto(false);
+    }
+  };
+
+  const handleSubmitStagedShopPhotoReplacement = () => {
+    const newPhoto = stagedReplacementPhoto.trim();
+    if (!newPhoto) {
+      showToast(
+        tr(language, '⚠️ សូមជ្រើសរើស ឬថតរូបភាពហាងថ្មីជាមុនសិន!', '⚠️ Please select or take a new shop photo first!', '⚠️ 请先选择或拍摄一张新店铺照片！'),
+        'warning'
+      );
+      return;
+    }
+    const ok = submitShopPhotoReplacementRequest(currentRest.id, newPhoto);
+    if (ok) {
+      setStagedReplacementPhoto('');
+      setStatusBanner({
+        type: 'success',
+        text: isAdmin
+          ? tr(language, '✅ បានប្តូរ និងអនុម័តរូបភាពហាងថ្មីជោគជ័យ!', '✅ Shop photo replaced & approved!', '✅ 店铺照片已更换并批准！')
+          : tr(
+              language,
+              '⏳ បានបញ្ជូនរូបភាពហាងថ្មីទៅកាន់ Admin (Pending Admin Approval)! រូបភាពចាស់នៅតែបង្ហាញជាធម្មតារហូតដល់មានការអនុម័ត។',
+              '⏳ New shop photo submitted for Admin review (Pending Admin Approval)! Your existing approved photo remains visible until approved.',
+              '⏳ 新店铺照片已提交管理员审核（Pending Admin Approval）！审核通过前将继续显示原照片。'
+            ),
+      });
+      modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const handleStartAdd = () => {
     if (menuItems.length >= maxMenuLimit) {
@@ -397,7 +409,7 @@ export const ManageMenuModal: React.FC = () => {
       return;
     }
 
-    const finalPhoto = dishPhotoUrl.trim() || sampleFoodPhotos[0];
+    const finalPhoto = currentRest.photoUrl || '/Shop/rest-1.jpg';
 
     setIsSavingDish(true);
     try {
@@ -1123,11 +1135,8 @@ export const ManageMenuModal: React.FC = () => {
                           className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-2.5 shadow-xs"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
-                              <img src={item.photoUrl} alt={item.nameKh} className="w-full h-full object-cover" />
-                              <span className="absolute top-1 left-1 w-5 h-5 rounded-full bg-[#064E3B] text-white text-[10px] font-bold flex items-center justify-center shadow">
-                                {index + 1}
-                              </span>
+                            <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-700 text-[#064E3B] dark:text-emerald-300 text-xs font-extrabold flex items-center justify-center shrink-0">
+                              #{index + 1}
                             </div>
 
                             <div className="flex-1 min-w-0">
@@ -1261,189 +1270,6 @@ export const ManageMenuModal: React.FC = () => {
                     />
                   </div>
 
-                  {/* Quick Save / Cancel Bar RIGHT HERE so mobile users never have to scroll past online photos to save */}
-                  <div className="grid grid-cols-2 gap-2.5 py-1">
-                    <button
-                      type="button"
-                      onClick={resetMenuForm}
-                      className="py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs cursor-pointer"
-                    >
-                      {isKm ? 'បោះបង់ (Cancel)' : 'Cancel'}
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isSavingDish || isUploadingDishPhoto}
-                      className="py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] disabled:opacity-60 text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer"
-                    >
-                      {isSavingDish
-                        ? tr(language, '⏳ កំពុងរក្សាទុក...', '⏳ Saving...', '⏳ 正在保存...')
-                        : menuMode === 'add'
-                        ? tr(language, '💾 រក្សាទុកមុខម្ហូប', '💾 Save Dish', '💾 保存菜品')
-                        : tr(language, '💾 រក្សាទុកការកែប្រែ', '💾 Save Changes', '💾 保存修改')}
-                    </button>
-                  </div>
-
-                  <div className="pt-1 border-t border-slate-200 dark:border-slate-700">
-                    <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                      {isKm ? '៤. រូបភាពមុខម្ហូប (ជ្រើសពីទូរស័ព្ទ ឬ ស្វែងរក Online) *' : '4. Dish Photo (Phone Upload or Online Search) *'}
-                    </label>
-
-                    {/* Hidden Native / Web File Inputs */}
-                    <input
-                      ref={foodDishGalleryRef}
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp"
-                      onChange={handleDishFileSelect}
-                      className="hidden"
-                    />
-                    <input
-                      ref={foodDishCameraRef}
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png"
-                      capture="environment"
-                      onChange={handleDishFileSelect}
-                      className="hidden"
-                    />
-
-                    {/* Active Selected Photo Preview Card (Requirement 2: Image Preview with Replace & Remove) */}
-                    {dishPhotoUrl && (
-                      <div className="p-3 mb-2.5 rounded-2xl bg-emerald-50 dark:bg-slate-800/90 border-2 border-emerald-500/60 flex items-center justify-between gap-3 shadow-xs">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <img
-                            src={dishPhotoUrl}
-                            alt="Dish preview"
-                            className="w-16 h-16 rounded-xl object-cover shrink-0 border border-emerald-300 shadow-xs"
-                          />
-                          <div className="min-w-0">
-                            <span className="inline-block px-2 py-0.5 rounded-full bg-[#064E3B] text-white text-[10px] font-bold">
-                              {isKm ? '✓ រូបភាពដែលបានជ្រើស' : '✓ Active Photo Selected'}
-                            </span>
-                            <p className="text-[11px] text-slate-600 dark:text-slate-300 truncate mt-1 font-mono">
-                              {dishPhotoUrl.startsWith('data:') 
-                                ? (isKm ? 'រូបថតផ្ទាល់ពីទូរស័ព្ទ (បានបង្ហាប់រួច)' : 'Phone Camera/Gallery Upload') 
-                                : dishPhotoUrl}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button
-                            type="button"
-                            onClick={handlePickDishNativeGallery}
-                            className="p-2 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-emerald-100 hover:text-[#064E3B] transition cursor-pointer"
-                            title={isKm ? 'ផ្លាស់ប្តូររូបភាព' : 'Change Photo'}
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleRemoveDishPhoto}
-                            className="p-2 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-red-50 hover:text-red-600 transition cursor-pointer"
-                            title={isKm ? 'លុបរូបភាព' : 'Remove Photo'}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Option A: Phone Image Upload (Gallery or Camera) */}
-                    <div className="grid grid-cols-2 gap-2 mb-2.5">
-                      <button
-                        type="button"
-                        disabled={isUploadingDishPhoto}
-                        onClick={handlePickDishNativeGallery}
-                        className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition active:scale-95 cursor-pointer disabled:opacity-50"
-                      >
-                        <Image className="w-4 h-4 text-slate-950" />
-                        <span>{isUploadingDishPhoto ? (isKm ? 'កំពុងដំណើរការ...' : 'Uploading...') : (isKm ? '🖼️ ជ្រើសពី Gallery' : '🖼️ Pick Gallery')}</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        disabled={isUploadingDishPhoto}
-                        onClick={handlePickDishCamera}
-                        className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition active:scale-95 cursor-pointer disabled:opacity-50"
-                      >
-                        <Camera className="w-4 h-4 text-amber-300" />
-                        <span>{isUploadingDishPhoto ? (isKm ? 'កំពុងដំណើរការ...' : 'Uploading...') : (isKm ? '📸 ថតរូបពី Camera' : '📸 Take Photo')}</span>
-                      </button>
-                    </div>
-
-                    {/* Option B: Online AI Food Photo Search Button */}
-                    <button
-                      type="button"
-                      disabled={isSearchingOnlineDish || isUploadingDishPhoto}
-                      onClick={handleSearchOnlineDishPhotos}
-                      className="w-full mb-2.5 py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition active:scale-98 disabled:opacity-60 cursor-pointer"
-                    >
-                      <Sparkles className={`w-4 h-4 text-amber-300 shrink-0 ${isSearchingOnlineDish ? 'animate-spin' : ''}`} />
-                      <span>
-                        {isSearchingOnlineDish
-                          ? (isKm ? 'កំពុងស្វែងរករូបភាពម្ហូបពី Online...' : 'Searching online food photos...')
-                          : (isKm
-                              ? '🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ (ឥតគិតថ្លៃ $0)'
-                              : '🤖 Auto-Search Matching Food Photos Online (Free $0)')}
-                      </span>
-                    </button>
-
-                    {onlineDishCandidates.length > 0 && (
-                      <div className="space-y-1.5 mb-2.5">
-                        <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 block">
-                          {isKm
-                            ? `✨ រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${onlineDishCandidates.length} សន្លឹក (ចុចជ្រើសរើស)៖`
-                            : `✨ Found ${onlineDishCandidates.length} online food photos (tap to select):`}
-                        </span>
-                        <div className="grid grid-cols-3 gap-2">
-                          {onlineDishCandidates.map((cand, idx) => (
-                            <button
-                              key={`${cand.url}-${idx}`}
-                              type="button"
-                              onClick={() => setDishPhotoUrl(cand.url)}
-                              className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition cursor-pointer ${
-                                dishPhotoUrl === cand.url
-                                  ? 'border-emerald-600 ring-2 ring-emerald-500/40'
-                                  : 'border-slate-200 dark:border-slate-700 hover:border-emerald-400'
-                              }`}
-                            >
-                              <img src={cand.url} alt={cand.title} className="w-full h-full object-cover" />
-                              <div className="absolute bottom-0 inset-x-0 bg-black/70 text-white text-[9px] px-1.5 py-0.5 truncate">
-                                {cand.source}
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Sample Photos & URL input fallback */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-[11px] text-slate-500">
-                        <span>{isKm ? 'រូបភាពគំរូ ឬតំណភ្ជាប់ URL' : 'Sample Photos or Direct URL'}</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={dishPhotoUrl}
-                        onChange={e => setDishPhotoUrl(e.target.value)}
-                        placeholder="https://..."
-                        className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono text-[11px]"
-                      />
-                      <div className="grid grid-cols-4 gap-2 pt-1">
-                        {sampleFoodPhotos.map((url, i) => (
-                          <div
-                            key={i}
-                            onClick={() => setDishPhotoUrl(url)}
-                            className={`aspect-16/10 rounded-lg overflow-hidden cursor-pointer border-2 transition ${
-                              dishPhotoUrl === url ? 'border-[#064E3B] ring-2 ring-emerald-300' : 'border-transparent opacity-70 hover:opacity-100'
-                            }`}
-                          >
-                            <img src={url} alt="sample" className="w-full h-full object-cover" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
                   <div className="grid grid-cols-2 gap-3 pt-2">
                     <button
                       type="button"
@@ -1455,7 +1281,7 @@ export const ManageMenuModal: React.FC = () => {
 
                     <button
                       type="submit"
-                      disabled={isSavingDish || isUploadingDishPhoto}
+                      disabled={isSavingDish}
                       className="py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] disabled:opacity-60 text-white font-bold shadow-xs transition active:scale-95 cursor-pointer"
                     >
                       {isSavingDish
@@ -1726,57 +1552,285 @@ export const ManageMenuModal: React.FC = () => {
             </form>
           )}
 
-          {/* TAB 3: DEDICATED STORE PHOTOS & GALLERY SECTION */}
+          {/* TAB 3: SINGLE SHOP PHOTO & ADMIN REVIEW WORKFLOW */}
           {mainTab === 'photos' && (
             <div className="space-y-3.5 font-khmer">
-              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-2">
-                <div className="space-y-0.5">
+              {/* Hidden Single File Inputs */}
+              <input
+                ref={shopPhotoFileRef}
+                type="file"
+                accept="image/*"
+                onChange={handleSingleShopPhotoFileChange}
+                className="hidden"
+              />
+              <input
+                ref={shopPhotoCameraRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleSingleShopPhotoFileChange}
+                className="hidden"
+              />
+
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 space-y-1">
+                <div className="flex items-center justify-between gap-2">
                   <h3 className="font-bold text-xs text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
                     <Camera className="w-4 h-4" />
                     <span>
                       {tr(
                         language,
-                        `📸 រូបភាពមុខហាង និងរូបភាពម្ហូប (រហូតដល់ ${maxPhotoLimit} សន្លឹក)`,
-                        `📸 Store Cover & Food Gallery (Up to ${maxPhotoLimit} Photos)`,
-                        `📸 店铺封面与美食相册（最多 ${maxPhotoLimit} 张）`
+                        '📸 រូបភាពតំណាងហាង (អនុញ្ញាតតែ ១ សន្លឹកគត់)',
+                        '📸 Single Shop Photo (1 Storefront Photo Only)',
+                        '📸 店铺代表照片（仅限 1 张）'
                       )}
                     </span>
                   </h3>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                    {tr(
-                      language,
-                      'រូបទី ១ គឺជារូបភាពមុខហាងគោល (Cover)។ បន្ទាប់ពីបន្ថែម ឬផ្លាស់ប្តូររូបភាព សូមចុចប៊ូតុង "💾 រក្សាទុករូបភាពហាង"។',
-                      'Photo #1 is your main storefront cover. Tap "Save Store Photos" after adding or reordering photos.',
-                      '第 1 张照片为主封面。添加或调整照片后，请点击“💾 保存店铺照片”。'
-                    )}
-                  </p>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-bold text-[10px]">
+                    1/1
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {tr(
+                    language,
+                    'រូបភាពដែលបង្ហោះត្រូវតែជារូបភាពតំណាងឱ្យហាងតែប៉ុណ្ណោះ (មិនមានការបង្ហោះរូបមុខម្ហូបនីមួយៗទេ)។ រាល់ការប្តូររូបភាពហាងថ្មីត្រូវឆ្លងកាត់ការពិនិត្យ និងអនុម័តពី Admin ជាមុនសិន។',
+                    'The uploaded photo must represent the shop only (no individual food/menu photos). Any replacement photo requires Admin review and approval before replacing your active photo.',
+                    '上传的照片必须仅代表店铺（不支持单道菜品照片）。更换店铺照片需经管理员审核批准后才会生效。'
+                  )}
+                </p>
+              </div>
+
+              {/* Current Active Approved Shop Photo Card */}
+              <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2.5 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>
+                      {tr(
+                        language,
+                        'រូបភាពហាងដែលបានអនុម័ត និងកំពុងបង្ហាញបច្ចុប្បន្ន',
+                        'Currently Active Approved Shop Photo',
+                        '当前已批准并公开展示的店铺照片'
+                      )}
+                    </span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 font-bold text-[10px]">
+                    {tr(language, 'កំពុងបង្ហាញ (Active)', 'Active', '生效中')}
+                  </span>
+                </div>
+                <div className="relative w-full h-44 rounded-2xl overflow-hidden border-2 border-emerald-500/60 bg-slate-100 dark:bg-slate-900">
+                  {currentRest.photoUrl ? (
+                    <img
+                      src={currentRest.photoUrl}
+                      alt={currentRest.nameKh}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <DefaultShopIcon className="w-full h-full" />
+                  )}
                 </div>
               </div>
 
-              <ShopMultiPhotoUploader
-                photos={Array.from(new Set([storeCoverPhoto, ...storeGalleryPhotos])).filter(Boolean)}
-                onChangePhotos={(updated) => {
-                  if (updated.length > 0) {
-                    setStoreCoverPhoto(updated[0]);
-                    setStoreGalleryPhotos(updated.slice(1));
-                  } else {
-                    setStoreCoverPhoto('');
-                    setStoreGalleryPhotos([]);
-                  }
-                }}
-                shopName={storeNameKh}
-                isKm={isKm}
-                onToast={showToast}
-                maxPhotos={maxPhotoLimit}
-              />
+              {/* Pending / Reviewed Shop Photo Replacement Status Card (Item 5B) */}
+              {currentRest.pendingPhotoReplacement && (
+                <div
+                  id="kft-shop-photo-replacement-status"
+                  className={`p-3.5 rounded-2xl border-2 space-y-2.5 ${
+                    currentRest.pendingPhotoReplacement.status === 'pending'
+                      ? 'bg-amber-50/90 dark:bg-amber-950/40 border-amber-400'
+                      : currentRest.pendingPhotoReplacement.status === 'approved'
+                      ? 'bg-emerald-50/90 dark:bg-emerald-950/40 border-emerald-400'
+                      : 'bg-rose-50/90 dark:bg-rose-950/40 border-rose-400'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>
+                        {tr(
+                          language,
+                          'ស្ថានភាពសំណើប្តូររូបភាពហាងថ្មី',
+                          'Shop Photo Replacement Status',
+                          '店铺照片更换审核状态'
+                        )}
+                      </span>
+                    </span>
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full font-extrabold text-[10px] ${
+                        currentRest.pendingPhotoReplacement.status === 'pending'
+                          ? 'bg-amber-400 text-slate-950'
+                          : currentRest.pendingPhotoReplacement.status === 'approved'
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-rose-600 text-white'
+                      }`}
+                    >
+                      {currentRest.pendingPhotoReplacement.status === 'pending'
+                        ? tr(language, '⏳ កំពុងរង់ចាំការអនុម័តពី Admin (Pending Admin Approval)', '⏳ Pending Admin Approval', '⏳ 等待管理员审核批准')
+                        : currentRest.pendingPhotoReplacement.status === 'approved'
+                        ? tr(language, '✅ បានអនុម័តដោយ Admin (Approved)', '✅ Approved by Admin', '✅ 管理员已批准')
+                        : tr(language, '🚫 ត្រូវបានបដិសេធដោយ Admin (Rejected)', '🚫 Rejected by Admin', '🚫 管理员已拒绝')}
+                    </span>
+                  </div>
 
-              <button
-                type="button"
-                onClick={handleSavePhotosOnly}
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#065F46] text-white font-bold text-xs sm:text-sm shadow-md transition active:scale-[0.98] cursor-pointer"
-              >
-                {isKm ? '💾 រក្សាទុករូបភាពហាងទាំងអស់ (Save Store Photos)' : '💾 Save All Store Photos'}
-              </button>
+                  <div className="flex items-center gap-3">
+                    <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-amber-500 shrink-0 bg-slate-200 dark:bg-slate-800">
+                      <img
+                        src={currentRest.pendingPhotoReplacement.newPhotoUrl}
+                        alt="New replacement photo"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1 text-[11px]">
+                      <div>
+                        <span className="text-slate-500 dark:text-slate-400">
+                          {tr(language, '📅 ថ្ងៃដាក់ស្នើ៖ ', '📅 Submitted Date: ', '📅 提交时间：')}
+                        </span>
+                        <span className="font-mono font-bold text-slate-900 dark:text-white">
+                          {currentRest.pendingPhotoReplacement.submittedAt.replace('T', ' ').slice(0, 16)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 dark:text-slate-400">
+                          {tr(language, '🕒 ថ្ងៃពិនិត្យ៖ ', '🕒 Review Date: ', '🕒 审核时间：')}
+                        </span>
+                        <span className="font-mono font-bold text-slate-900 dark:text-white">
+                          {currentRest.pendingPhotoReplacement.reviewedAt
+                            ? currentRest.pendingPhotoReplacement.reviewedAt.replace('T', ' ').slice(0, 16)
+                            : tr(language, 'កំពុងរង់ចាំការពិនិត្យ', 'Awaiting Admin Review', '等待审核')}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 dark:text-slate-400">
+                          {tr(language, '⚖️ ការសម្រេចរបស់ Admin៖ ', '⚖️ Admin Decision: ', '⚖️ 管理员决定：')}
+                        </span>
+                        <span className="font-bold text-slate-900 dark:text-white">
+                          {currentRest.pendingPhotoReplacement.adminDecision === 'approved'
+                            ? tr(language, 'អនុម័ត (Approved — បានជំនួសរូបភាពថ្មី)', 'Approved (Photo Replaced)', '已批准（已替换新照片）')
+                            : currentRest.pendingPhotoReplacement.adminDecision === 'rejected'
+                            ? tr(language, 'បដិសេធ (Rejected — រក្សារូបភាពដើមដដែល)', 'Rejected (Original Photo Kept)', '已拒绝（保留原照片）')
+                            : tr(language, 'កំពុងរង់ចាំការអនុម័ត (Pending Admin Approval)', 'Pending Admin Approval', '等待管理员批准')}
+                        </span>
+                      </div>
+                      {currentRest.pendingPhotoReplacement.rejectionReason && (
+                        <p className="text-[10px] text-rose-700 dark:text-rose-300 font-semibold pt-0.5">
+                          💬 {currentRest.pendingPhotoReplacement.rejectionReason}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Direct Admin Review Controls if currentUser is Admin */}
+                  {isAdmin && currentRest.pendingPhotoReplacement.status === 'pending' && (
+                    <div className="pt-2 border-t border-amber-300/70 dark:border-amber-800/70 grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => approveShopPhotoReplacement(currentRest.id)}
+                        className="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>{tr(language, '✅ អនុម័តរូបភាពថ្មី (Admin)', '✅ Approve New Photo', '✅ 批准新照片')}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => rejectShopPhotoReplacement(currentRest.id)}
+                        className="py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                      >
+                        <X className="w-4 h-4" />
+                        <span>{tr(language, '🚫 បដិសេធរូបភាពថ្មី', '🚫 Reject New Photo', '🚫 拒绝新照片')}</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Replace / Update Single Shop Photo Card */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="font-bold text-xs text-slate-900 dark:text-white">
+                  {tr(
+                    language,
+                    '🔄 ប្តូរ ឬធ្វើបច្ចុប្បន្នភាពរូបភាពហាងថ្មី (១ សន្លឹកគត់)',
+                    '🔄 Replace or Update Single Shop Photo',
+                    '🔄 更换或更新单张店铺照片'
+                  )}
+                </div>
+
+                {stagedReplacementPhoto && (
+                  <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-400 flex items-center gap-3">
+                    <img
+                      src={stagedReplacementPhoto}
+                      alt="Staged New Shop Photo"
+                      className="w-16 h-16 rounded-xl object-cover border border-emerald-500 shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-emerald-900 dark:text-emerald-200 text-xs">
+                        {tr(language, '✨ រូបភាពហាងថ្មីដែលបានជ្រើសរើស', '✨ New Shop Photo Selected', '✨ 已选定的新店铺照片')}
+                      </div>
+                      <p className="text-[10px] text-slate-600 dark:text-slate-300 mt-0.5">
+                        {tr(
+                          language,
+                          'ចុចប៊ូតុងដាក់ស្នើខាងក្រោមដើម្បីបញ្ជូនទៅកាន់ Admin អនុម័ត។',
+                          'Tap the submit button below to send for Admin approval.',
+                          '点击下方提交按钮发送给管理员审核。'
+                        )}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setStagedReplacementPhoto('')}
+                      className="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
+                {shopPhotoModerationWarning && (
+                  <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-400 text-rose-800 dark:text-rose-200 text-[11px] font-bold">
+                    {shopPhotoModerationWarning}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    disabled={isUploadingShopPhoto}
+                    onClick={handlePickSingleShopPhotoFromGallery}
+                    className="py-2.5 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer disabled:opacity-50"
+                  >
+                    <Image className="w-4 h-4" />
+                    <span>
+                      {isUploadingShopPhoto
+                        ? tr(language, 'កំពុងពិនិត្យ...', 'Checking...', '审核中...')
+                        : tr(language, '🖼️ ជ្រើសរូបពីទូរស័ព្ទ', '🖼️ Pick from Gallery', '🖼️ 从相册选择')}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isUploadingShopPhoto}
+                    onClick={() => shopPhotoCameraRef.current?.click()}
+                    className="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer disabled:opacity-50"
+                  >
+                    <Camera className="w-4 h-4" />
+                    <span>{tr(language, '📸 ថតរូបហាងថ្មី', '📸 Take Shop Photo', '📸 拍摄新店铺照')}</span>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={!stagedReplacementPhoto || isUploadingShopPhoto}
+                  onClick={handleSubmitStagedShopPhotoReplacement}
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#065F46] disabled:opacity-50 text-white font-bold text-xs sm:text-sm shadow-md transition active:scale-[0.98] cursor-pointer"
+                >
+                  {isAdmin
+                    ? tr(language, '💾 រក្សាទុក និងអនុម័តរូបភាពហាងថ្មីភ្លាមៗ (Admin)', '💾 Save & Approve New Shop Photo (Admin)', '💾 立即保存并批准新店铺照片')
+                    : tr(
+                        language,
+                        '📤 ដាក់ស្នើប្តូររូបភាពហាងថ្មីទៅកាន់ Admin (Submit for Admin Approval)',
+                        '📤 Submit New Shop Photo for Admin Review',
+                        '📤 提交新店铺照片供管理员审核'
+                      )}
+                </button>
+              </div>
             </div>
           )}
 

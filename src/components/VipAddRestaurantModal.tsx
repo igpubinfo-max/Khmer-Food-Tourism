@@ -26,22 +26,14 @@ import { RestaurantPriceLevel, GoogleMapsPlaceMetadata, isUserVipActive, getDyna
 import {
   isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
-  pickMultipleImagesUsingNativeAndroidGallery,
-  processAndCompressImageFile,
-  batchProcessAndCompressImageFiles,
   savePngDataUrlToGallery,
 } from '../utils/androidMediaHelper';
+import { validateAndModerateShopImage } from '../utils/imageModeration';
+import { DefaultShopIcon } from './icons/DefaultShopIcon';
 import { tr } from '../utils/i18n';
 import { ShopLocationCheckInPickerModal, ShopCheckInLocationResult } from './ShopLocationCheckInPickerModal';
 import { GoogleMapsShopImporterModal, ImportedGoogleShopData } from './GoogleMapsShopImporterModal';
 import { resolveProvinceGeoConfig } from '../services/googlePlacesService';
-
-const SAMPLE_SHOP_PHOTOS = [
-  '/foods/food-1.jpg',
-  '/foods/food-2.jpg',
-  '/foods/food-3.jpg',
-  '/foods/food-4.jpg',
-];
 
 const PROVINCES = [
   { nameKh: 'រាជធានីភ្នំពេញ', nameEn: 'Phnom Penh' },
@@ -120,7 +112,8 @@ export const VipAddRestaurantModal: React.FC = () => {
   const [phone, setPhone] = useState(currentUser?.phone || '');
   const [openingHoursKh, setOpeningHoursKh] = useState('០៧:០០ ព្រឹក - ០៩:០០ យប់');
   const [priceLevel, setPriceLevel] = useState<RestaurantPriceLevel>('$');
-  const [shopPhotos, setShopPhotos] = useState<string[]>(['/foods/food-1.jpg']);
+  const [shopPhoto, setShopPhoto] = useState<string>('');
+  const [moderationWarning, setModerationWarning] = useState<string | null>(null);
   const [descriptionKh, setDescriptionKh] = useState('');
   const [isGoogleImportModalOpen, setIsGoogleImportModalOpen] = useState(false);
   const [importedGooglePlaceId, setImportedGooglePlaceId] = useState<string | undefined>(undefined);
@@ -158,7 +151,8 @@ export const VipAddRestaurantModal: React.FC = () => {
     setShopLng(null);
     setShopMapUrl('');
     setDescriptionKh('');
-    setShopPhotos(['/foods/food-1.jpg']);
+    setShopPhoto('');
+    setModerationWarning(null);
     setReplacingStoreId(null);
     setShowMoreOptions(false);
     setImportedGooglePlaceId(undefined);
@@ -180,11 +174,8 @@ export const VipAddRestaurantModal: React.FC = () => {
     setShopMapUrl(store.mapUrl || '');
     setPhone(store.phone || currentUser?.phone || '');
     setOpeningHoursKh(store.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់');
-    setShopPhotos(
-      Array.isArray(store.galleryPhotos) && store.galleryPhotos.length > 0
-        ? store.galleryPhotos
-        : [store.photoUrl || '/foods/food-1.jpg']
-    );
+    setShopPhoto(store.profileImage || store.photoUrl || '');
+    setModerationWarning(null);
     setDescriptionKh(store.descriptionKh || '');
     setImportedGooglePlaceId(store.googlePlaceId);
     setImportedGoogleMeta(store.googleMapsMeta);
@@ -219,25 +210,31 @@ export const VipAddRestaurantModal: React.FC = () => {
 
   if (!isVipAddRestaurantModalOpen) return null;
 
-  // Pick Shop Photo from Gallery
+  // Pick ONE Shop Photo from Gallery with Image Moderation & Validation
   const handlePickFromGallery = async () => {
+    setModerationWarning(null);
     if (!isNativeAndroidOrIosPlatform()) {
       fileInputRef.current?.click();
       return;
     }
     setIsUploadingPhoto(true);
     try {
-      const nativePick = await pickMultipleImagesUsingNativeAndroidGallery(5, 1200);
-      if (nativePick.cancelled) {
+      const nativePick = await pickImageUsingNativeAndroidGallery(1200, 0.85);
+      if (nativePick?.cancelled) {
         setIsUploadingPhoto(false);
         return;
       }
-      if (nativePick.success && Array.isArray(nativePick.dataUrls) && nativePick.dataUrls.length > 0) {
-        const cleanExisting = shopPhotos.filter((p) => !SAMPLE_SHOP_PHOTOS.includes(p));
-        const nextPhotos = [...nativePick.dataUrls, ...cleanExisting].slice(0, 20);
-        setShopPhotos(nextPhotos);
+      if (nativePick?.dataUrl) {
+        const modRes = await validateAndModerateShopImage(nativePick.dataUrl, language);
+        if (!modRes.valid || !modRes.dataUrl) {
+          setModerationWarning(modRes.reason || null);
+          showToast(modRes.reason || tr(language, '⚠️ រូបភាពមិនត្រឹមត្រូវ', '⚠️ Invalid shop image', '⚠️ 图片无效'), 'warning');
+          setIsUploadingPhoto(false);
+          return;
+        }
+        setShopPhoto(modRes.dataUrl);
         showToast(
-          tr(language, '✅ បានជ្រើសរូបភាពហាងជោគជ័យ!', '✅ Shop photo selected!', '✅ 店铺图片已选择！'),
+          tr(language, '✅ បានជ្រើសរូបភាពតំណាងហាង ១ សន្លឹកជោគជ័យ!', '✅ Single shop photo selected & verified!', '✅ 店铺代表照片已选择并通过验证！'),
           'success'
         );
         setIsUploadingPhoto(false);
@@ -249,20 +246,23 @@ export const VipAddRestaurantModal: React.FC = () => {
   };
 
   const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
+    const file = e.target.files?.[0];
     e.target.value = '';
-    if (files.length === 0) return;
+    if (!file) return;
+    setModerationWarning(null);
     setIsUploadingPhoto(true);
     try {
-      const dataUrls = await batchProcessAndCompressImageFiles(files, 5, 1200, 0.84);
-      if (dataUrls.length > 0) {
-        const cleanExisting = shopPhotos.filter((p) => !SAMPLE_SHOP_PHOTOS.includes(p));
-        setShopPhotos([...dataUrls, ...cleanExisting].slice(0, 20));
-        showToast(
-          tr(language, '✅ បានជ្រើសរូបភាពហាងជោគជ័យ!', '✅ Shop photo selected!', '✅ 店铺图片已选择！'),
-          'success'
-        );
+      const modRes = await validateAndModerateShopImage(file, language);
+      if (!modRes.valid || !modRes.dataUrl) {
+        setModerationWarning(modRes.reason || null);
+        showToast(modRes.reason || tr(language, '⚠️ រូបភាពមិនត្រឹមត្រូវ', '⚠️ Invalid shop image', '⚠️ 图片无效'), 'warning');
+        return;
       }
+      setShopPhoto(modRes.dataUrl);
+      showToast(
+        tr(language, '✅ បានជ្រើសរូបភាពតំណាងហាង ១ សន្លឹកជោគជ័យ!', '✅ Single shop photo selected & verified!', '✅ 店铺代表照片已选择并通过验证！'),
+        'success'
+      );
     } catch {
       showToast(tr(language, '⚠️ មិនអាចអានរូបភាពបានទេ', '⚠️ Could not read image', '⚠️ 无法读取图片'), 'warning');
     } finally {
@@ -274,17 +274,20 @@ export const VipAddRestaurantModal: React.FC = () => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
+    setModerationWarning(null);
     setIsUploadingPhoto(true);
     try {
-      const dataUrl = await processAndCompressImageFile(file, 1200, 0.85);
-      if (dataUrl) {
-        const cleanExisting = shopPhotos.filter((p) => !SAMPLE_SHOP_PHOTOS.includes(p));
-        setShopPhotos([dataUrl, ...cleanExisting].slice(0, 20));
-        showToast(
-          tr(language, '✅ បានថតរូបហាងជោគជ័យ!', '✅ Shop photo captured!', '✅ 拍照成功！'),
-          'success'
-        );
+      const modRes = await validateAndModerateShopImage(file, language);
+      if (!modRes.valid || !modRes.dataUrl) {
+        setModerationWarning(modRes.reason || null);
+        showToast(modRes.reason || tr(language, '⚠️ រូបភាពមិនត្រឹមត្រូវ', '⚠️ Invalid shop photo', '⚠️ 照片无效'), 'warning');
+        return;
       }
+      setShopPhoto(modRes.dataUrl);
+      showToast(
+        tr(language, '✅ បានថតរូបតំណាងហាងជោគជ័យ!', '✅ Shop photo captured & verified!', '✅ 拍照并通过验证成功！'),
+        'success'
+      );
     } catch {
       showToast(tr(language, '⚠️ មិនអាចអានរូបភាពបានទេ', '⚠️ Could not read photo', '⚠️ 无法读取照片'), 'warning');
     } finally {
@@ -338,8 +341,8 @@ export const VipAddRestaurantModal: React.FC = () => {
 
     const finalNameKh = trimmedNameKh || trimmedNameEn;
     const finalNameEn = trimmedNameEn || trimmedNameKh;
-    const finalProfile = (shopPhotos[0] || '').trim() || '/foods/food-1.jpg';
-    const combinedGallery = Array.from(new Set([finalProfile, ...shopPhotos])).filter(Boolean);
+    const finalProfile = shopPhoto.trim() || '/Shop/rest-1.jpg';
+    const combinedGallery = [finalProfile];
 
     setIsSaving(true);
     try {
@@ -438,9 +441,13 @@ export const VipAddRestaurantModal: React.FC = () => {
     e.target.value = '';
     if (!file) return;
     try {
-      const dataUrl = await processAndCompressImageFile(file, 1200, 0.84);
+      const modRes = await validateAndModerateShopImage(file, language);
+      if (!modRes.valid || !modRes.dataUrl) {
+        showToast(modRes.reason || (isKm ? 'មិនអាចអានឯកសាររូបភាពបានទេ' : 'Failed to read image'), 'warning');
+        return;
+      }
       setSlotProofData({
-        dataUrl,
+        dataUrl: modRes.dataUrl,
         fileName: file.name || 'aba_store_slot_receipt.jpg',
         mimeType: file.type || 'image/jpeg',
       });
@@ -484,7 +491,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     }
   };
 
-  const coverPhoto = shopPhotos[0] || '/foods/food-1.jpg';
+  const coverPhoto = shopPhoto.trim();
 
   return (
     <div
@@ -498,12 +505,11 @@ export const VipAddRestaurantModal: React.FC = () => {
         className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-emerald-500/30 my-auto max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Hidden File Inputs */}
+        {/* Hidden File Inputs (Single Shop Photo Only — No Multi-Photo or Food Photo Upload) */}
         <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
-          multiple
           onChange={handleFileInputChange}
           className="hidden"
         />
@@ -1224,27 +1230,44 @@ export const VipAddRestaurantModal: React.FC = () => {
               )}
             </div>
 
-            {/* 1. Shop Photo Section (Simple Cover Preview + 2 Clear Buttons) */}
+            {/* 1. Single Shop Photo Section (Strictly 1 Shop Storefront Photo — No Food/Menu Photos) */}
             <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2.5">
               <div className="flex items-center gap-3">
                 <div className="relative w-20 h-20 rounded-2xl overflow-hidden border-2 border-emerald-500 shrink-0 bg-slate-200 dark:bg-slate-700 shadow-xs">
-                  <img
-                    src={coverPhoto}
-                    alt="Shop Cover"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/foods/food-1.jpg';
-                    }}
-                  />
-                  <span className="absolute bottom-0 inset-x-0 bg-black/65 text-white text-[9px] text-center py-0.5 font-bold">
-                    {tr(language, 'រូបហាង', 'Shop Photo', '店铺照片')}
+                  {coverPhoto ? (
+                    <img
+                      src={coverPhoto}
+                      alt="Shop Photo"
+                      className="w-full h-full object-cover"
+                      onError={() => setShopPhoto('')}
+                    />
+                  ) : (
+                    <DefaultShopIcon className="w-full h-full" />
+                  )}
+                  <span className="absolute bottom-0 inset-x-0 bg-black/70 text-white text-[9px] text-center py-0.5 font-bold">
+                    {tr(language, '១ រូបហាង', '1 Shop Photo', '1 张店铺照')}
                   </span>
                 </div>
 
                 <div className="flex-1 space-y-1.5">
-                  <div className="font-bold text-slate-800 dark:text-slate-100 text-xs">
-                    {tr(language, '១. រូបភាពតំណាងហាង', '1. Shop Cover Photo', '1. 店铺封面照片')}
+                  <div className="flex items-center justify-between gap-1">
+                    <div className="font-bold text-slate-800 dark:text-slate-100 text-xs">
+                      {targetReplacingStore
+                        ? tr(language, '១. ប្តូររូបភាពតំណាងហាង (១ សន្លឹកគត់)', '1. Replace Single Shop Photo', '1. 更换单张店铺照片')
+                        : tr(language, '១. រូបភាពតំណាងហាង (១ សន្លឹកគត់)', '1. Single Shop Photo Only', '1. 店铺代表照片（仅限1张）')}
+                    </div>
+                    <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 font-bold text-[9px]">
+                      1/1
+                    </span>
                   </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-snug">
+                    {tr(
+                      language,
+                      'អនុញ្ញាតតែរូបភាពមុខហាង ១ សន្លឹកប៉ុណ្ណោះ (មិនមានការបញ្ចូលរូបមុខម្ហូបនីមួយៗទេ)។',
+                      'Only 1 photo representing the shop is allowed (no individual food/menu photos).',
+                      '仅允许上传 1 张代表店铺的照片（不支持单道菜品照片上传）。'
+                    )}
+                  </p>
                   <div className="grid grid-cols-2 gap-1.5">
                     <button
                       type="button"
@@ -1255,7 +1278,9 @@ export const VipAddRestaurantModal: React.FC = () => {
                       <ImageIcon className="w-3.5 h-3.5 shrink-0" />
                       <span>
                         {isUploadingPhoto
-                          ? tr(language, 'កំពុងរើស...', 'Loading...', '加载中...')
+                          ? tr(language, 'កំពុងពិនិត្យ...', 'Checking...', '审核中...')
+                          : coverPhoto
+                          ? tr(language, 'ប្តូររូបពីទូរស័ព្ទ', 'Replace Photo', '更换照片')
                           : tr(language, 'រើសពីទូរស័ព្ទ', 'Gallery', '相册选图')}
                       </span>
                     </button>
@@ -1267,32 +1292,63 @@ export const VipAddRestaurantModal: React.FC = () => {
                       className="py-2 px-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-[11px] flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer disabled:opacity-50"
                     >
                       <Camera className="w-3.5 h-3.5 shrink-0" />
-                      <span>{tr(language, 'ថតរូប', 'Camera', '拍照')}</span>
+                      <span>{tr(language, 'ថតរូបហាង', 'Take Photo', '拍摄店铺')}</span>
                     </button>
-                  </div>
-
-                  {/* Quick Sample Thumbnails */}
-                  <div className="flex items-center gap-1.5 pt-0.5">
-                    <span className="text-[10px] text-slate-500 shrink-0">
-                      {tr(language, 'រូបគំរូ៖', 'Samples:', '示例：')}
-                    </span>
-                    {SAMPLE_SHOP_PHOTOS.map((url, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setShopPhotos([url])}
-                        className={`w-7 h-7 rounded-lg overflow-hidden border-2 transition cursor-pointer ${
-                          coverPhoto === url
-                            ? 'border-emerald-600 scale-105'
-                            : 'border-transparent opacity-65 hover:opacity-100'
-                        }`}
-                      >
-                        <img src={url} alt="sample" className="w-full h-full object-cover" />
-                      </button>
-                    ))}
                   </div>
                 </div>
               </div>
+
+              {moderationWarning && (
+                <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-400 text-rose-800 dark:text-rose-200 text-[10px] font-bold">
+                  {moderationWarning}
+                </div>
+              )}
+
+              {/* If replacing an existing shop photo, show Pending Admin Approval workflow notice */}
+              {targetReplacingStore && !isAdmin && (
+                <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-400/70 space-y-1 text-[10px]">
+                  <div className="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span>
+                      {tr(
+                        language,
+                        'ការប្តូររូបភាពហាងតម្រូវឱ្យមានការអនុម័តពី Admin (Pending Admin Approval)',
+                        'Replacing an existing shop photo requires Admin Approval',
+                        '更换现有店铺照片需经管理员审核批准'
+                      )}
+                    </span>
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                    {tr(
+                      language,
+                      'រូបភាពដែលបានអនុម័តចាស់នឹងនៅតែបង្ហាញជាធម្មតា រហូតដល់ Admin ពិនិត្យ និងអនុម័តរូបភាពថ្មីរបស់អ្នក។',
+                      'Your existing approved photo remains visible until Admin approves the new replacement photo.',
+                      '在管理员批准新照片之前，现有的已批准照片将继续正常显示。'
+                    )}
+                  </p>
+                  {targetReplacingStore.pendingPhotoReplacement && (
+                    <div className="pt-1 border-t border-amber-300/60 dark:border-amber-800/60 flex flex-wrap items-center gap-2 text-[9.5px] font-semibold">
+                      <span className="px-1.5 py-0.5 rounded bg-amber-200/80 dark:bg-amber-900 text-amber-950 dark:text-amber-200">
+                        {targetReplacingStore.pendingPhotoReplacement.status === 'pending'
+                          ? tr(language, '⏳ កំពុងរង់ចាំការអនុម័តពី Admin', '⏳ Pending Admin Approval', '⏳ 等待管理员批准')
+                          : targetReplacingStore.pendingPhotoReplacement.status === 'approved'
+                          ? tr(language, '✅ បានអនុម័តដោយ Admin', '✅ Approved by Admin', '✅ 管理员已批准')
+                          : tr(language, '🚫 ត្រូវបានបដិសេធដោយ Admin', '🚫 Rejected by Admin', '🚫 管理员已拒绝')}
+                      </span>
+                      <span className="text-slate-500">
+                        {tr(language, 'ថ្ងៃដាក់ស្នើ៖', 'Submitted:', '提交时间：')}{' '}
+                        {targetReplacingStore.pendingPhotoReplacement.submittedAt.replace('T', ' ').slice(0, 16)}
+                      </span>
+                      {targetReplacingStore.pendingPhotoReplacement.reviewedAt && (
+                        <span className="text-slate-500">
+                          • {tr(language, 'ថ្ងៃពិនិត្យ៖', 'Reviewed:', '审核时间：')}{' '}
+                          {targetReplacingStore.pendingPhotoReplacement.reviewedAt.replace('T', ' ').slice(0, 16)}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* 2. Shop Name (Khmer Required, English Optional) */}
@@ -1607,8 +1663,8 @@ export const VipAddRestaurantModal: React.FC = () => {
             if (shop.priceLevel) {
               setPriceLevel(shop.priceLevel);
             }
-            if (Array.isArray(shop.photoUrls) && shop.photoUrls.length > 0) {
-              setShopPhotos(shop.photoUrls.slice(0, 20));
+            if (Array.isArray(shop.photoUrls) && shop.photoUrls.length > 0 && shop.photoUrls[0]) {
+              setShopPhoto(shop.photoUrls[0]);
             }
             if (shop.descriptionKh) {
               setDescriptionKh(shop.descriptionKh);

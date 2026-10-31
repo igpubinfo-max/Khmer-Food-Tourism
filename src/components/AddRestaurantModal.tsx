@@ -320,11 +320,11 @@ export const AddRestaurantModal: React.FC = () => {
             </div>
             <div>
               <h2 className="font-moul text-sm text-white leading-snug">
-                {isKm ? 'ចុះបញ្ជីហាងអាហារ (បង្ហោះរូបហាង & រូបម្ហូប)' : 'Register Restaurant (Profile & Food Photos)'}
+                {isKm ? 'ចុះបញ្ជីហាងអាហារ (បង្ហោះរូបហាង ១ សន្លឹកគត់)' : 'Register Restaurant (Single Shop Photo)'}
               </h2>
               <div className="flex items-center gap-1.5 text-[10px] text-emerald-200 font-khmer">
                 <span className={`px-2 py-0.5 rounded-full ${step === 1 ? 'bg-[#10B981] text-white font-bold' : 'bg-white/20'}`}>
-                  {isKm ? '១. ព័ត៌មានហាង & រូបភាព' : '1. Shop & Photos'}
+                  {isKm ? '១. ព័ត៌មានហាង & រូបភាព ១ សន្លឹក' : '1. Shop Info & 1 Photo'}
                 </span>
                 {selectedTier === 'premium' && (
                   <>
@@ -595,7 +595,7 @@ export const AddRestaurantModal: React.FC = () => {
                     </div>
                     <ul className="text-[10px] text-slate-600 dark:text-slate-300 space-y-1">
                       <li>✓ {isKm ? 'បង្ហាញក្នុងបញ្ជីហាងផ្លូវការ' : 'Listed in directory'}</li>
-                      <li>✓ {isKm ? 'រូបតំណាងហាង & រូបម្ហូប' : 'Shop profile & food photos'}</li>
+                      <li>✓ {isKm ? 'រូបតំណាងហាង ១ សន្លឹកគត់' : 'Single shop profile photo'}</li>
                       <li>✓ {isKm ? 'អាសយដ្ឋាន និងលេខទូរស័ព្ទ' : 'Address & contact info'}</li>
                     </ul>
                   </div>
@@ -628,9 +628,9 @@ export const AddRestaurantModal: React.FC = () => {
                     </div>
                     <ul className="text-[10px] text-slate-600 dark:text-slate-300 space-y-1">
                       <li className="text-[#064E3B] dark:text-emerald-400 font-bold">
-                        ✓ {isKm ? 'មុខម្ហូប ៥ មុខ ជាមួយរូបភាព និងការពិពណ៌នា' : 'Up to 5 food items with photos & descriptions'}
+                        ✓ {isKm ? 'បញ្ជីមុខម្ហូប និងការពិពណ៌នា' : 'Menu items & descriptions'}
                       </li>
-                      <li>✓ {isKm ? 'រូបតំណាងហាង & រូបភាពម្ហូបច្រើនសន្លឹក' : 'Shop profile & multiple food photos'}</li>
+                      <li>✓ {isKm ? 'រូបតំណាងហាង ១ សន្លឹកគត់' : 'Single shop profile photo'}</li>
                       <li>✓ {isKm ? 'កែប្រែព័ត៌មានហាងដោយខ្លួនឯង' : 'Self-service editing'}</li>
                       <li className="text-[#059669] font-medium pt-0.5">
                         ✓ {isKm
@@ -1079,8 +1079,8 @@ export const AddRestaurantModal: React.FC = () => {
             if (shop.phone) setPhone(shop.phone);
             if (shop.openingHoursKh) setOpeningHoursKh(shop.openingHoursKh);
             if (shop.priceLevel) setPriceLevel(shop.priceLevel);
-            if (Array.isArray(shop.photoUrls) && shop.photoUrls.length > 0) {
-              setShopPhotos(shop.photoUrls.slice(0, 20));
+            if (Array.isArray(shop.photoUrls) && shop.photoUrls.length > 0 && shop.photoUrls[0]) {
+              setShopPhotos([shop.photoUrls[0]]);
             }
             if (shop.descriptionKh) setDescriptionKh(shop.descriptionKh);
             setBusinessCategory(shop.businessCategory || '');

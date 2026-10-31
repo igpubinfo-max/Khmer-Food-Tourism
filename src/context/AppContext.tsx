@@ -189,6 +189,9 @@ interface AppContextType {
   approveRestaurant: (id: string) => void;
   rejectRestaurant: (id: string, reasonKh?: string) => void;
   toggleVerifyRestaurant: (id: string) => void;
+  submitShopPhotoReplacementRequest: (restaurantId: string, newPhotoUrl: string) => boolean;
+  approveShopPhotoReplacement: (restaurantId: string) => void;
+  rejectShopPhotoReplacement: (restaurantId: string, reason?: string) => void;
 
   // Restaurant Menu Items (Max 20 for Active Premium) & Genuine Customer Reviews
   addRestaurantMenuItem: (restaurantId: string, item: Omit<RestaurantMenuItem, 'id' | 'createdAt' | 'restaurantId'>) => boolean;
@@ -744,14 +747,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 f.photoUrl.startsWith('https://') ||
                 (f.imageAuditNote && (f.imageAuditNote.includes('រដ្ឋបាល') || f.imageAuditNote.includes('Online'))));
             const isContentModifiedFromSeed =
-              Boolean(f.isCustomPhoto) ||
               (f.nameKh && f.nameKh !== seed.nameKh) ||
+              (f.nameEn && f.nameEn !== seed.nameEn) ||
+              (f.descriptionKh && f.descriptionKh !== seed.descriptionKh) ||
               (f.imageAuditNote && f.imageAuditNote.includes('រដ្ឋបាល'));
 
             if ((isPhotoModifiedFromSeed || isContentModifiedFromSeed) && !existingOverride) {
               vault.foods[f.id] = {
                 id: f.id,
-                photoUrl: isPhotoModifiedFromSeed ? f.photoUrl : seed.photoUrl,
+                photoUrl: isPhotoModifiedFromSeed ? f.photoUrl : undefined,
                 nameKh: f.nameKh,
                 nameEn: f.nameEn,
                 categorySlug: f.categorySlug,
@@ -775,9 +779,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               vaultChanged = true;
             }
           }
-          if (vaultChanged) {
-            saveLocalMediaOverrides(vault);
-          }
+          // Note: Do NOT call saveLocalMediaOverrides(vault) synchronously before hydrateFromLocalIdbImmediate() completes,
+          // so we never clobber full IndexedDB data:image/ overrides with localStorage-stripped seed paths.
           const combined = customAddedFoods.length > 0 ? [...customAddedFoods, ...initialFoods] : initialFoods;
           return applyFoodOverrides(combined, vault.foods);
         }
@@ -892,6 +895,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isAdminEdited: Boolean(r.isAdminEdited),
       adminEditedAt: r.adminEditedAt,
       aiCategoryVerification: r.aiCategoryVerification,
+      pendingPhotoReplacement: r.pendingPhotoReplacement,
       created_at: getRestaurantCreatedAtIso(r),
       createdAt: getRestaurantCreatedAtIso(r),
       updatedAt: r.updatedAt || r.photoUpdatedAt || r.adminEditedAt,
@@ -1908,7 +1912,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (
             f &&
             typeof f.photoUrl === 'string' &&
-            f.photoUrl.startsWith('data:')
+            f.photoUrl.startsWith('data:') &&
+            isOverridePersistedInLocalStorage('foods', f.id)
           ) {
             return {
               ...f,
@@ -5500,19 +5505,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return null;
     }
 
-    const profileImg = restData.profileImage || restData.photoUrl || '/foods/food-1.jpg';
-    const galleryImgs = Array.isArray(restData.galleryPhotos) && restData.galleryPhotos.length > 0
-      ? Array.from(new Set([profileImg, ...restData.galleryPhotos])).filter(Boolean)
-      : [profileImg].filter(Boolean);
-    const galleryImgSet = new Set(galleryImgs);
-    const foodImgs = Array.isArray(restData.foodImages)
-      ? restData.foodImages.filter((u: string) => u && !galleryImgSet.has(u))
-      : [];
+    const requestedProfileImg = restData.profileImage || restData.photoUrl || '/Shop/rest-1.jpg';
+    const existingApprovedImg = targetToReplace?.profileImage || targetToReplace?.photoUrl || '';
+    const isReplacingExistingShopPhoto = Boolean(
+      !isAdmin &&
+      targetToReplace &&
+      existingApprovedImg &&
+      requestedProfileImg &&
+      requestedProfileImg !== existingApprovedImg
+    );
+    const profileImg = isReplacingExistingShopPhoto ? existingApprovedImg : requestedProfileImg;
+    const galleryImgs = [profileImg].filter(Boolean);
+    const foodImgs: string[] = [];
 
     const isPendingPayment = !isAdmin && restData.paymentStatus === 'pending_verification';
-    const isPendingManualReview = !isAdmin;
-    const finalStatus: 'approved' | 'pending' | 'rejected' = isPendingManualReview ? 'pending' : 'approved';
-    const finalIsVerified = !isPendingManualReview;
+    const isPendingManualReview = !isAdmin && !targetToReplace;
+    const finalStatus: 'approved' | 'pending' | 'rejected' = isPendingManualReview
+      ? 'pending'
+      : (targetToReplace?.status || 'approved');
+    const finalIsVerified = !isPendingManualReview && (targetToReplace ? Boolean(targetToReplace.isVerified) : true);
     const finalIsPromoted = !isPendingManualReview && (isAdmin || isApprovedVip);
 
     const nowIso = new Date().toISOString();
@@ -5534,6 +5545,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       profileImage: profileImg,
       galleryPhotos: galleryImgs,
       foodImages: foodImgs,
+      pendingPhotoReplacement: isReplacingExistingShopPhoto
+        ? {
+            newPhotoUrl: requestedProfileImg,
+            status: 'pending',
+            submittedAt: nowIso,
+            submittedByUserId: currentUser.id,
+            submittedByName: currentUser.name,
+          }
+        : targetToReplace?.pendingPhotoReplacement,
       id: uniqueShopId,
       // Do NOT auto-assign a 5-star rating when registering a VIP shop; ratings come strictly from genuine customer reviews
       rating: 0,
@@ -5735,18 +5755,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
-    const profileImg = updated.profileImage || updated.photoUrl || original?.profileImage || original?.photoUrl || '/foods/food-1.jpg';
-    const galleryImgs = Array.isArray(updated.galleryPhotos) && updated.galleryPhotos.length > 0
-      ? Array.from(new Set([profileImg, ...updated.galleryPhotos])).filter(Boolean)
-      : (Array.isArray(original?.galleryPhotos) && original.galleryPhotos.length > 0
-          ? Array.from(new Set([profileImg, ...original.galleryPhotos])).filter(Boolean)
-          : [profileImg].filter(Boolean));
-    const galleryImgSet = new Set(galleryImgs);
-    const foodImgs = Array.isArray(updated.foodImages)
-      ? updated.foodImages.filter((u: string) => u && !galleryImgSet.has(u))
-      : (Array.isArray(original?.foodImages)
-          ? original.foodImages.filter((u: string) => u && !galleryImgSet.has(u))
-          : []);
+    const requestedImg = updated.profileImage || updated.photoUrl || original?.profileImage || original?.photoUrl || '/Shop/rest-1.jpg';
+    const existingApprovedImg = original?.profileImage || original?.photoUrl || requestedImg;
+    const isPhotoChangedByOwner = Boolean(
+      !isAdmin &&
+      original &&
+      requestedImg &&
+      existingApprovedImg &&
+      requestedImg !== existingApprovedImg
+    );
+
+    // Keep existing approved photo visible while replacement is pending Admin review
+    const profileImg = isPhotoChangedByOwner ? existingApprovedImg : requestedImg;
+    const galleryImgs = [profileImg].filter(Boolean);
+    const foodImgs: string[] = [];
 
     // Prevent VIP users from bypassing verification by editing an approved store into a non-food business
     const updatedAiVerification = updated.aiCategoryVerification || original?.aiCategoryVerification;
@@ -5766,12 +5788,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       (effectiveTier === 'premium' ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() : undefined);
     const editNowIso = new Date().toISOString();
 
+    const nextPendingPhotoReplacement = isPhotoChangedByOwner
+      ? {
+          newPhotoUrl: requestedImg,
+          status: 'pending' as const,
+          submittedAt: editNowIso,
+          submittedByUserId: currentUser?.id,
+          submittedByName: currentUser?.name,
+        }
+      : (updated.pendingPhotoReplacement !== undefined ? updated.pendingPhotoReplacement : original?.pendingPhotoReplacement);
+
     const safeUpdated: Restaurant = normalizeRestaurant(isAdmin ? {
       ...updated,
       photoUrl: profileImg,
       profileImage: profileImg,
       galleryPhotos: galleryImgs,
       foodImages: foodImgs,
+      pendingPhotoReplacement: updated.pendingPhotoReplacement,
       updatedAt: editNowIso,
       photoUpdatedAt: editNowIso,
       isAdminEdited: true,
@@ -5784,6 +5817,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       profileImage: profileImg,
       galleryPhotos: galleryImgs,
       foodImages: foodImgs,
+      pendingPhotoReplacement: nextPendingPhotoReplacement,
       updatedAt: editNowIso,
       photoUpdatedAt: editNowIso,
       membershipTier: effectiveTier,
@@ -5824,7 +5858,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSelectedRestaurant(safeUpdated);
     }
     if (managingRestaurant?.id === updated.id) setManagingRestaurant(safeUpdated);
-    showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានហាង និងរក្សាទុករូបភាពជាអចិន្ត្រៃយ៍រួចរាល់!' : 'Restaurant details and photos permanently saved!', 'success');
+
+    if (isPhotoChangedByOwner) {
+      setNotifications(prev => [
+        {
+          id: `notif-photo-req-${safeUpdated.id}-${Date.now()}`,
+          titleKh: `📸 សំណើប្តូររូបភាពហាងថ្មី៖ ${safeUpdated.nameKh}`,
+          titleEn: `📸 Shop Photo Replacement Request: ${safeUpdated.nameEn || safeUpdated.nameKh}`,
+          messageKh: `ម្ចាស់ហាង «${currentUser?.name || safeUpdated.ownerName || 'Shop Owner'}» បានដាក់ស្នើប្តូររូបភាពហាងថ្មីសម្រាប់ «${safeUpdated.nameKh}»។ រូបភាពចាស់នៅតែបង្ហាញជាធម្មតារហូតដល់ Admin អនុម័ត។`,
+          messageEn: `Shop owner "${currentUser?.name || safeUpdated.ownerName || 'Shop Owner'}" submitted a new shop photo for "${safeUpdated.nameEn || safeUpdated.nameKh}". The original photo remains visible until Admin approval.`,
+          type: 'system',
+          targetId: safeUpdated.id,
+          targetType: 'restaurant',
+          imageUrl: requestedImg,
+          isRead: false,
+          createdAt: editNowIso,
+        },
+        ...prev,
+      ]);
+      showToast(
+        language === 'km'
+          ? '⏳ បានបញ្ជូនរូបភាពហាងថ្មីទៅកាន់ Admin ដើម្បីត្រួតពិនិត្យ! រូបភាពចាស់នៅតែបង្ហាញជាធម្មតារហូតដល់មានការអនុម័ត។'
+          : language === 'zh'
+          ? '⏳ 新店铺照片已提交管理员审核！审核通过前将继续显示原照片。'
+          : '⏳ New shop photo submitted for Admin review! Your existing approved photo remains visible until approved.',
+        'info'
+      );
+    } else {
+      showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានហាង និងរក្សាទុករូបភាពជាអចិន្ត្រៃយ៍រួចរាល់!' : 'Restaurant details and photos permanently saved!', 'success');
+    }
   };
 
   // Restaurant Food Menu Items (Up to 20 items for Active VIP)
@@ -6426,8 +6488,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const next = prev.map(r => {
         if (r.id !== id) return r;
+        const hasPendingPhoto = r.pendingPhotoReplacement?.status === 'pending' && r.pendingPhotoReplacement.newPhotoUrl;
+        const nextPhoto = hasPendingPhoto ? r.pendingPhotoReplacement!.newPhotoUrl : r.photoUrl;
         const approvedRest: Restaurant = {
           ...r,
+          photoUrl: nextPhoto,
+          profileImage: hasPendingPhoto ? nextPhoto : (r.profileImage || r.photoUrl),
+          galleryPhotos: [nextPhoto].filter(Boolean),
+          foodImages: [],
+          pendingPhotoReplacement: hasPendingPhoto
+            ? {
+                ...r.pendingPhotoReplacement!,
+                status: 'approved',
+                adminDecision: 'approved',
+                reviewedAt: nowIso,
+                reviewedBy: currentUser?.name || 'Administrator',
+              }
+            : r.pendingPhotoReplacement,
           status: 'approved',
           isVerified: true,
           isPromoted: r.membershipTier === 'premium' ? true : Boolean(r.isPromoted),
@@ -6536,6 +6613,279 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       return { ...r, isVerified: nextVerified };
     }));
+  };
+
+  // Shop Photo Replacement Workflow with Admin Review & Approval
+  const submitShopPhotoReplacementRequest = (restaurantId: string, newPhotoUrl: string): boolean => {
+    const targetRest = restaurants.find(r => r.id === restaurantId);
+    if (!targetRest || !newPhotoUrl?.trim()) return false;
+
+    const isAdmin =
+      currentUser?.role === 'admin' ||
+      currentUser?.id === 'admin-authorized-single' ||
+      currentUser?.username === 'admin' ||
+      currentUser?.username === 'cheasavuth';
+
+    const isOwner = Boolean(
+      currentUser &&
+        (targetRest.ownerId === currentUser.id ||
+          (currentUser.email &&
+            targetRest.ownerEmail &&
+            targetRest.ownerEmail.trim().toLowerCase() === currentUser.email.trim().toLowerCase()))
+    );
+
+    if (!isAdmin && !isOwner) {
+      showToast(
+        language === 'km'
+          ? '🔒 គ្មានសិទ្ធិប្តូររូបភាពហាងនេះទេ! មានតែម្ចាស់ហាងផ្ទាល់ ឬ Admin ប៉ុណ្ណោះ។'
+          : language === 'zh'
+          ? '🔒 无权更换此店铺照片！仅限店主或管理员。'
+          : '🔒 Unauthorized! Only the shop owner or Admin can replace the shop photo.',
+        'warning'
+      );
+      return false;
+    }
+
+    const nowIso = new Date().toISOString();
+    const trimmedPhoto = newPhotoUrl.trim();
+
+    if (isAdmin) {
+      const adminUpdated: Restaurant = normalizeRestaurant({
+        ...targetRest,
+        photoUrl: trimmedPhoto,
+        profileImage: trimmedPhoto,
+        galleryPhotos: [trimmedPhoto],
+        foodImages: [],
+        pendingPhotoReplacement: {
+          newPhotoUrl: trimmedPhoto,
+          status: 'approved',
+          submittedAt: nowIso,
+          reviewedAt: nowIso,
+          adminDecision: 'approved',
+          reviewedBy: currentUser?.name || 'Admin',
+          submittedByUserId: currentUser?.id,
+          submittedByName: currentUser?.name,
+        },
+        updatedAt: nowIso,
+        photoUpdatedAt: nowIso,
+        isAdminEdited: true,
+        adminEditedAt: nowIso,
+      });
+
+      lastLocalRestaurantEditAtRef.current = Date.now();
+      recordPermanentRestaurantOverride(adminUpdated);
+      setRestaurants(prev => {
+        const next = prev.map(r => (r.id === restaurantId ? adminUpdated : r));
+        latestSyncStateRef.current.restaurants = next;
+        scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
+        if (!isSeedRestaurantId(adminUpdated.id) && isSupabaseConfigured()) {
+          try {
+            pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          } catch {}
+        }
+        return next;
+      });
+      if (selectedRestaurant?.id === restaurantId) setSelectedRestaurant(adminUpdated);
+      if (managingRestaurant?.id === restaurantId) setManagingRestaurant(adminUpdated);
+      showToast(
+        language === 'km'
+          ? '✅ បានប្តូរ និងអនុម័តរូបភាពហាងថ្មីជោគជ័យ (Admin)!'
+          : '✅ Replaced and approved shop photo immediately (Admin)!',
+        'success'
+      );
+      return true;
+    }
+
+    // Shop owner (non-Admin): keep existing approved photo visible and mark new photo as Pending Admin Approval
+    const pendingUpdated: Restaurant = normalizeRestaurant({
+      ...targetRest,
+      pendingPhotoReplacement: {
+        newPhotoUrl: trimmedPhoto,
+        status: 'pending',
+        submittedAt: nowIso,
+        submittedByUserId: currentUser?.id,
+        submittedByName: currentUser?.name || targetRest.ownerName || 'Shop Owner',
+      },
+      updatedAt: nowIso,
+    });
+
+    lastLocalRestaurantEditAtRef.current = Date.now();
+    recordPermanentRestaurantOverride(pendingUpdated);
+    setRestaurants(prev => {
+      const next = prev.map(r => (r.id === restaurantId ? pendingUpdated : r));
+      latestSyncStateRef.current.restaurants = next;
+      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
+      if (!isSeedRestaurantId(pendingUpdated.id) && isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
+    if (selectedRestaurant?.id === restaurantId) setSelectedRestaurant(pendingUpdated);
+    if (managingRestaurant?.id === restaurantId) setManagingRestaurant(pendingUpdated);
+
+    setNotifications(prev => [
+      {
+        id: `notif-photo-req-${restaurantId}-${Date.now()}`,
+        titleKh: `📸 សំណើប្តូររូបភាពហាងថ្មី៖ ${targetRest.nameKh}`,
+        titleEn: `📸 Shop Photo Replacement Pending Approval: ${targetRest.nameEn || targetRest.nameKh}`,
+        messageKh: `ម្ចាស់ហាង «${currentUser?.name || targetRest.ownerName || 'Shop Owner'}» បានដាក់ស្នើរូបភាពហាងថ្មី។ រូបភាពចាស់នៅតែបង្ហាញជាធម្មតារហូតដល់ Admin អនុម័ត។`,
+        messageEn: `Shop owner "${currentUser?.name || targetRest.ownerName || 'Shop Owner'}" submitted a replacement shop photo. Existing photo remains active until Admin review.`,
+        type: 'system',
+        targetId: restaurantId,
+        targetType: 'restaurant',
+        imageUrl: trimmedPhoto,
+        isRead: false,
+        createdAt: nowIso,
+      },
+      ...prev,
+    ]);
+
+    showToast(
+      language === 'km'
+        ? '⏳ បានបញ្ជូនរូបភាពថ្មីទៅកាន់ Admin (Pending Admin Approval)! រូបភាពចាស់នៅតែបង្ហាញជាធម្មតារហូតដល់ Admin អនុម័ត។'
+        : language === 'zh'
+        ? '⏳ 新店铺照片已提交管理员审核（Pending Admin Approval）！审核通过前将继续显示原照片。'
+        : '⏳ New photo submitted for Admin review (Pending Admin Approval)! Existing photo remains visible until approved.',
+      'info'
+    );
+    return true;
+  };
+
+  const approveShopPhotoReplacement = (restaurantId: string) => {
+    const targetRest = restaurants.find(r => r.id === restaurantId);
+    if (!targetRest || !targetRest.pendingPhotoReplacement?.newPhotoUrl) return;
+
+    const nowIso = new Date().toISOString();
+    const req = targetRest.pendingPhotoReplacement;
+    const newPhoto = req.newPhotoUrl;
+
+    const approvedRest: Restaurant = normalizeRestaurant({
+      ...targetRest,
+      photoUrl: newPhoto,
+      profileImage: newPhoto,
+      galleryPhotos: [newPhoto],
+      foodImages: [],
+      pendingPhotoReplacement: {
+        ...req,
+        status: 'approved',
+        adminDecision: 'approved',
+        reviewedAt: nowIso,
+        reviewedBy: currentUser?.name || 'Administrator',
+      },
+      updatedAt: nowIso,
+      photoUpdatedAt: nowIso,
+      isAdminEdited: true,
+      adminEditedAt: nowIso,
+    });
+
+    lastLocalRestaurantEditAtRef.current = Date.now();
+    recordPermanentRestaurantOverride(approvedRest);
+    setRestaurants(prev => {
+      const next = prev.map(r => (r.id === restaurantId ? approvedRest : r));
+      latestSyncStateRef.current.restaurants = next;
+      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
+      if (!isSeedRestaurantId(approvedRest.id) && isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
+    if (selectedRestaurant?.id === restaurantId) setSelectedRestaurant(approvedRest);
+    if (managingRestaurant?.id === restaurantId) setManagingRestaurant(approvedRest);
+
+    setNotifications(prev => [
+      {
+        id: `notif-photo-approved-${restaurantId}-${Date.now()}`,
+        titleKh: `✅ រូបភាពហាងថ្មីត្រូវបានអនុម័ត៖ ${targetRest.nameKh}`,
+        titleEn: `✅ New Shop Photo Approved: ${targetRest.nameEn || targetRest.nameKh}`,
+        messageKh: `Admin បានអនុម័តរូបភាពហាងថ្មីសម្រាប់ «${targetRest.nameKh}» រួចរាល់! ឥឡូវនេះរូបភាពថ្មីត្រូវបានដាក់បង្ហាញជាសាធារណៈ។`,
+        messageEn: `Admin approved the new shop photo for "${targetRest.nameEn || targetRest.nameKh}". The new photo is now live!`,
+        type: 'system',
+        targetId: restaurantId,
+        targetType: 'restaurant',
+        imageUrl: newPhoto,
+        isRead: false,
+        createdAt: nowIso,
+      },
+      ...prev,
+    ]);
+
+    showToast(
+      language === 'km'
+        ? `✅ បានអនុម័តរូបភាពថ្មីសម្រាប់ហាង «${targetRest.nameKh}» ជោគជ័យ!`
+        : `✅ Approved new shop photo for "${targetRest.nameEn || targetRest.nameKh}"!`,
+      'success'
+    );
+  };
+
+  const rejectShopPhotoReplacement = (restaurantId: string, reason?: string) => {
+    const targetRest = restaurants.find(r => r.id === restaurantId);
+    if (!targetRest || !targetRest.pendingPhotoReplacement) return;
+
+    const nowIso = new Date().toISOString();
+    const req = targetRest.pendingPhotoReplacement;
+    const rejectionNote =
+      reason?.trim() ||
+      (language === 'km'
+        ? 'រូបភាពមិនសមស្របតាមគោលការណ៍រូបភាពហាងអាហារ — រក្សារូបភាពដើមដដែល។'
+        : 'Photo does not meet shop image guidelines — original photo kept.');
+
+    // Keep original approved photoUrl and profileImage untouched
+    const rejectedRest: Restaurant = normalizeRestaurant({
+      ...targetRest,
+      pendingPhotoReplacement: {
+        ...req,
+        status: 'rejected',
+        adminDecision: 'rejected',
+        reviewedAt: nowIso,
+        reviewedBy: currentUser?.name || 'Administrator',
+        rejectionReason: rejectionNote,
+      },
+      updatedAt: nowIso,
+    });
+
+    lastLocalRestaurantEditAtRef.current = Date.now();
+    recordPermanentRestaurantOverride(rejectedRest);
+    setRestaurants(prev => {
+      const next = prev.map(r => (r.id === restaurantId ? rejectedRest : r));
+      latestSyncStateRef.current.restaurants = next;
+      scheduleStorageWrite('kft_restaurants_real_v11', next, 300);
+      if (!isSeedRestaurantId(rejectedRest.id) && isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
+    if (selectedRestaurant?.id === restaurantId) setSelectedRestaurant(rejectedRest);
+    if (managingRestaurant?.id === restaurantId) setManagingRestaurant(rejectedRest);
+
+    setNotifications(prev => [
+      {
+        id: `notif-photo-rejected-${restaurantId}-${Date.now()}`,
+        titleKh: `🚫 សំណើប្តូររូបភាពហាងត្រូវបានបដិសេធ៖ ${targetRest.nameKh}`,
+        titleEn: `🚫 Shop Photo Replacement Rejected: ${targetRest.nameEn || targetRest.nameKh}`,
+        messageKh: `សំណើប្តូររូបភាពថ្មីសម្រាប់ «${targetRest.nameKh}» ត្រូវបានបដិសេធដោយ Admin (${rejectionNote})។ រូបភាពដើមរបស់ហាងត្រូវបានរក្សាទុកដដែល។`,
+        messageEn: `The replacement photo for "${targetRest.nameEn || targetRest.nameKh}" was rejected by Admin (${rejectionNote}). Your original approved photo remains active.`,
+        type: 'system',
+        targetId: restaurantId,
+        targetType: 'restaurant',
+        imageUrl: targetRest.photoUrl,
+        isRead: false,
+        createdAt: nowIso,
+      },
+      ...prev,
+    ]);
+
+    showToast(
+      language === 'km'
+        ? `🚫 បានបដិសេធរូបភាពថ្មី និងរក្សារូបភាពដើមរបស់ហាង «${targetRest.nameKh}» ដដែល!`
+        : `🚫 Rejected replacement photo and kept original photo for "${targetRest.nameEn || targetRest.nameKh}"!`,
+      'info'
+    );
   };
 
   const checkDuplicateDestination = (
@@ -9544,6 +9894,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         approveRestaurant,
         rejectRestaurant,
         toggleVerifyRestaurant,
+        submitShopPhotoReplacementRequest,
+        approveShopPhotoReplacement,
+        rejectShopPhotoReplacement,
         addRestaurantMenuItem,
         updateRestaurantMenuItem,
         deleteRestaurantMenuItem,

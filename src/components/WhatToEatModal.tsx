@@ -45,8 +45,13 @@ import { useBodyScrollLock } from '../utils/useBodyScrollLock';
 import { hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { getDishTagIds, type DishTagId } from '../utils/dishTags';
 import { getMatchingRestaurantsForDish } from '../utils/foodFilters';
-import { getAiFoodAdvisorRecommendations, QUICK_CRAVING_CHIPS } from '../services/aiFoodAdvisorService';
-import { isMedicalOrHealthQuery } from '../services/aiFoodBrain';
+import {
+  getAiFoodAdvisorRecommendations,
+  QUICK_CRAVING_CHIPS,
+  isVegetarianQuery,
+  classifyVegetarianDish,
+} from '../services/aiFoodAdvisorService';
+import { isMedicalOrHealthQuery, describeDish } from '../services/aiFoodBrain';
 import {
   buildWelcomeAssistantMessage,
   generateConversationalAiResponse,
@@ -319,17 +324,42 @@ export const WhatToEatModal: React.FC = () => {
 
   // Current dish index and history of seen dish IDs to prevent repetition
   const [currentDishId, setCurrentDishId] = useState<string>('');
+  const [comparedDishIds, setComparedDishIds] = useState<string[]>([]);
   const seenDishIdsRef = useRef<Set<string>>(new Set());
+  const comparePanelRef = useRef<HTMLDivElement>(null);
   useBodyScrollLock(isWhatToEatModalOpen);
+
+  const toggleCompareDish = (dishId: string) => {
+    setComparedDishIds((prev) => {
+      if (prev.includes(dishId)) {
+        return prev.filter((id) => id !== dishId);
+      }
+      const next = [...prev, dishId].slice(-3);
+      setTimeout(() => {
+        comparePanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 80);
+      return next;
+    });
+  };
 
   // Initialize welcome message when modal opens or language changes
   useEffect(() => {
-    if (isWhatToEatModalOpen && chatMessages.length === 0) {
-      setChatMessages([
-        buildWelcomeAssistantMessage(language, foods.length, restaurants.length, destinations.length),
-      ]);
+    if (isWhatToEatModalOpen) {
+      if (chatMessages.length === 0) {
+        setChatMessages([
+          buildWelcomeAssistantMessage(language, foods.length, restaurants.length, destinations.length),
+        ]);
+      }
+      if ((window as any).__kft_wte_open_compare_mode) {
+        (window as any).__kft_wte_open_compare_mode = false;
+        const defaultCompare = foods.slice(0, 3).map((f) => f.id);
+        setComparedDishIds(defaultCompare);
+        setTimeout(() => {
+          comparePanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 120);
+      }
     }
-  }, [isWhatToEatModalOpen, language, foods.length, restaurants.length, destinations.length, chatMessages.length]);
+  }, [isWhatToEatModalOpen, language, foods, restaurants.length, destinations.length, chatMessages.length]);
 
   // Determine current mealtime in Cambodia
   const currentMealInfo = useMemo(() => {
@@ -510,6 +540,9 @@ export const WhatToEatModal: React.FC = () => {
         if (qTrim === 'បង្អែម' || qTrim === 'dessert' || qTrim === '甜品') {
           return isDessertDish;
         }
+        if (isVegetarianQuery(qTrim)) {
+          return classifyVegetarianDish(f) !== 'none';
+        }
         return true;
       };
 
@@ -674,6 +707,10 @@ export const WhatToEatModal: React.FC = () => {
       setCurrentDishId(reply.dishes[0].id);
     }
 
+    if (reply.compareDishes && reply.compareDishes.length >= 2) {
+      setComparedDishIds(reply.compareDishes.slice(0, 3).map((d) => d.id));
+    }
+
     setTimeout(() => {
       chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 60);
@@ -692,6 +729,7 @@ export const WhatToEatModal: React.FC = () => {
     setMealSlotFilter('auto');
     setVipDietFilter('none');
     setDrinkMode(false);
+    setComparedDishIds([]);
     setChatMemory({
       lastDishes: [],
       lastRestaurants: [],
@@ -1130,7 +1168,7 @@ export const WhatToEatModal: React.FC = () => {
                   )}
                 </div>
 
-                <div className="space-y-2.5 max-h-80 overflow-y-auto pr-0.5">
+                <div className="space-y-2.5 max-h-[30rem] overflow-y-auto pr-0.5">
                   {chatMessages.map((msg) => {
                     if (msg.role === 'user') {
                       return (
@@ -1152,6 +1190,196 @@ export const WhatToEatModal: React.FC = () => {
                           }`}
                         >
                           {msg.text}
+
+                          {/* Vegetarian / Plant-Based Culinary Guidance Banner */}
+                          {msg.vegetarianNote && (
+                            <div className="mt-2.5 p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-[11px] text-emerald-950 dark:text-emerald-200 leading-relaxed">
+                              {msg.vegetarianNote}
+                            </div>
+                          )}
+
+                          {/* Detailed Matching Dishes from Database (Photo, Description, Taste Profile, Ingredients, Cooking Method, Explore/Compare) */}
+                          {msg.dishes && msg.dishes.length > 0 && !msg.recipePreview && (
+                            <div className="mt-2.5 pt-2.5 border-t border-slate-200 dark:border-slate-700 space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
+                                  <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                                  <span>
+                                    {tr(
+                                      language,
+                                      'មុខម្ហូបណែនាំលម្អិតពីទិន្នន័យកម្មវិធី៖',
+                                      'Matching Dishes & Culinary Details:',
+                                      '数据库匹配菜品与详细风味做法：'
+                                    )}
+                                  </span>
+                                </div>
+                                {msg.dishes.length >= 2 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setComparedDishIds(msg.dishes!.slice(0, 3).map((d) => d.id))}
+                                    className="px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-[10px] font-extrabold text-amber-900 dark:text-amber-200 hover:bg-amber-200 transition cursor-pointer"
+                                  >
+                                    ⚖️ {tr(language, 'ប្រៀបធៀបទាំងអស់', 'Compare All', '一键对比')}
+                                  </button>
+                                )}
+                              </div>
+
+                              <div className="space-y-2">
+                                {msg.dishes.slice(0, 3).map((dish) => {
+                                  const dLoc = getLocalizedFood(dish, language);
+                                  const tasteProfile = describeDish(dish, language);
+                                  const isCompared = comparedDishIds.includes(dish.id);
+                                  const topIngs = (dish.ingredients || []).slice(0, 3).map((ing, idx) =>
+                                    language === 'km'
+                                      ? ing.nameKh
+                                      : language === 'zh'
+                                        ? dLoc.ingredients?.[idx] || ing.nameEn || ing.nameKh
+                                        : ing.nameEn || ing.nameKh
+                                  );
+                                  const methodStep = (dish.steps || [])[0];
+                                  const methodSummary = methodStep
+                                    ? language === 'km'
+                                      ? methodStep.instructionKh
+                                      : language === 'zh'
+                                        ? dLoc.steps?.[0] || methodStep.instructionEn || methodStep.instructionKh
+                                        : methodStep.instructionEn || methodStep.instructionKh
+                                    : '';
+
+                                  return (
+                                    <div
+                                      key={dish.id}
+                                      data-testid={`ai-chat-dish-card-${dish.id}`}
+                                      className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900/75 border border-slate-200/90 dark:border-slate-700 space-y-2"
+                                    >
+                                      <div className="flex items-start gap-2.5">
+                                        <img
+                                          src={dish.photoUrl}
+                                          alt={dLoc.name}
+                                          loading="lazy"
+                                          className="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-200 border border-slate-200 dark:border-slate-700"
+                                        />
+                                        <div className="min-w-0 flex-1 space-y-0.5">
+                                          <div className="flex items-center justify-between gap-1">
+                                            <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                                              {dLoc.name}
+                                            </span>
+                                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 shrink-0">
+                                              ⭐ {dish.rating}
+                                            </span>
+                                          </div>
+                                          <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
+                                            {dLoc.category} • ⏱️ {dLoc.cookTime} • {dish.calories || 280} kcal
+                                          </div>
+                                          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100/80 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 text-[10px] font-bold">
+                                            <span>✨ {tr(language, 'រសជាតិ៖', 'Taste:', '风味：')} {tasteProfile}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug line-clamp-2">
+                                        {dLoc.description}
+                                      </p>
+
+                                      {topIngs.length > 0 && (
+                                        <div className="text-[10px] text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/90 px-2 py-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/70">
+                                          <span className="font-extrabold text-[#064E3B] dark:text-emerald-300">
+                                            🥗 {tr(language, 'គ្រឿងផ្សំ៖ ', 'Ingredients: ', '主要食材：')}
+                                          </span>
+                                          <span>{topIngs.join(' • ')}</span>
+                                        </div>
+                                      )}
+
+                                      {methodSummary && (
+                                        <div className="text-[10px] text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/90 px-2 py-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/70 line-clamp-2">
+                                          <span className="font-extrabold text-[#064E3B] dark:text-emerald-300">
+                                            👩‍🍳 {tr(language, 'របៀបចម្អិន៖ ', 'Cooking Method: ', '烹饪方法：')}
+                                          </span>
+                                          <span>{methodSummary}</span>
+                                        </div>
+                                      )}
+
+                                      <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setSelectedFood(dish);
+                                            setIsWhatToEatModalOpen(false);
+                                          }}
+                                          className="py-1.5 px-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer"
+                                        >
+                                          <ChefHat className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                                          <span className="truncate">{tr(language, 'មើលលម្អិតពេញ', 'Full Details', '查看完整详情')}</span>
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => toggleCompareDish(dish.id)}
+                                          className={`py-1.5 px-2.5 rounded-xl border text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer transition ${
+                                            isCompared
+                                              ? 'bg-amber-400 text-slate-950 border-amber-500'
+                                              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600 hover:border-emerald-500'
+                                          }`}
+                                        >
+                                          <span>
+                                            {isCompared
+                                              ? `✓ ${tr(language, 'កំពុងប្រៀបធៀប', 'Comparing', '已加入对比')}`
+                                              : `⚖️ ${tr(language, 'ប្រៀបធៀប', 'Compare', '加入对比')}`}
+                                          </span>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Similar Dishes & Alternative Recommendations */}
+                          {msg.similarDishes && msg.similarDishes.length > 0 && (
+                            <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
+                              <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
+                                <Shuffle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                <span>
+                                  {tr(
+                                    language,
+                                    'មុខម្ហូបស្រដៀងគ្នា និងជម្រើសជំនួស៖',
+                                    'Similar Dishes & Alternative Recommendations:',
+                                    '相似菜品与替代推荐：'
+                                  )}
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-1.5">
+                                {msg.similarDishes.slice(0, 4).map((sim) => {
+                                  const sLoc = getLocalizedFood(sim, language);
+                                  return (
+                                    <button
+                                      key={sim.id}
+                                      type="button"
+                                      onClick={() => {
+                                        setSelectedFood(sim);
+                                        setIsWhatToEatModalOpen(false);
+                                      }}
+                                      className="p-1.5 rounded-xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 flex items-center gap-2 text-left transition cursor-pointer"
+                                    >
+                                      <img
+                                        src={sim.photoUrl}
+                                        alt={sLoc.name}
+                                        loading="lazy"
+                                        className="w-9 h-9 rounded-lg object-cover shrink-0 bg-slate-200"
+                                      />
+                                      <div className="min-w-0 flex-1">
+                                        <div className="text-[11px] font-bold text-slate-900 dark:text-white truncate">
+                                          {sLoc.name}
+                                        </div>
+                                        <div className="text-[9px] text-emerald-700 dark:text-emerald-400 font-semibold truncate">
+                                          ⭐ {sim.rating} • {sLoc.category}
+                                        </div>
+                                      </div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
 
                           {/* Inline Recipe Preview when user asks for ingredients / how to cook */}
                           {msg.recipePreview && (
@@ -1241,46 +1469,84 @@ export const WhatToEatModal: React.FC = () => {
                             <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
                               <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
                                 <Store className="w-3.5 h-3.5 shrink-0" />
-                                <span>{tr(language, 'ភោជនីយដ្ឋានណែនាំ៖', 'Recommended Restaurants:', '推荐餐厅：')}</span>
+                                <span>{tr(language, 'ភោជនីយដ្ឋានណែនាំ និងទីតាំង៖', 'Recommended Restaurants & Locations:', '推荐餐厅与位置导航：')}</span>
                               </div>
-                              <div className="space-y-1">
+                              <div className="space-y-1.5">
                                 {msg.restaurants.map((r) => {
                                   const rLoc = getLocalizedRestaurant(r, language);
                                   const isGpip = isGpipRegisteredRestaurant(r);
                                   return (
-                                    <button
+                                    <div
                                       key={r.id}
-                                      type="button"
-                                      onClick={() => {
-                                        if (isGpip) {
-                                          setSelectedRestaurant(r);
-                                          setIsWhatToEatModalOpen(false);
-                                        } else {
-                                          openRestaurantGoogleExternal(r, 'maps');
-                                        }
-                                      }}
-                                      className="w-full p-1.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 flex items-center gap-2 text-left transition cursor-pointer"
+                                      className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 flex items-center gap-2"
                                     >
-                                      <ShopAvatar
-                                        restaurant={r}
-                                        alt={rLoc.name}
-                                        className="w-9 h-9 rounded-lg"
-                                      />
-                                      <div className="min-w-0 flex-1">
-                                        <div className="text-xs font-bold text-slate-900 dark:text-white truncate">{rLoc.name}</div>
-                                        <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">📍 {rLoc.province}</div>
-                                      </div>
-                                      {isGpip ? (
-                                        <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[9px] font-extrabold shrink-0">
-                                          ✓ {tr(language, 'ហាងដៃគូ', 'Verified', '认证')}
-                                        </span>
-                                      ) : (
-                                        <ExternalLink className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                      )}
-                                    </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          if (isGpip) {
+                                            setSelectedRestaurant(r);
+                                            setIsWhatToEatModalOpen(false);
+                                          } else {
+                                            openRestaurantGoogleExternal(r, 'maps');
+                                          }
+                                        }}
+                                        className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
+                                      >
+                                        <ShopAvatar
+                                          restaurant={r}
+                                          alt={rLoc.name}
+                                          className="w-9 h-9 rounded-lg shrink-0"
+                                        />
+                                        <div className="min-w-0 flex-1">
+                                          <div className="text-xs font-bold text-slate-900 dark:text-white truncate">{rLoc.name}</div>
+                                          <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                                            📍 {rLoc.address || rLoc.province}
+                                          </div>
+                                        </div>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => openRestaurantGoogleExternal(r, 'maps')}
+                                        className="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold inline-flex items-center gap-1 shrink-0 cursor-pointer"
+                                      >
+                                        <Navigation className="w-3 h-3" />
+                                        <span>{tr(language, 'ផ្លូវទៅហាង', 'Maps', '导航')}</span>
+                                      </button>
+                                    </div>
                                   );
                                 })}
                               </div>
+                            </div>
+                          )}
+
+                          {/* Honest explanation + Google Maps Navigation when no partner shop explicitly lists the dish */}
+                          {msg.restaurantUnavailableNote && (
+                            <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
+                              <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                                {msg.restaurantUnavailableNote}
+                              </p>
+                              {msg.googleMapsSearchQuery && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                                      msg.googleMapsSearchQuery!
+                                    )}`;
+                                    window.open(url, '_blank', 'noopener,noreferrer');
+                                  }}
+                                  className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                                >
+                                  <Navigation className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                                  <span>
+                                    {tr(
+                                      language,
+                                      'ស្វែងរកហាង និងទីតាំងផ្ទាល់លើ Google Maps',
+                                      'Find Restaurants & Navigate on Google Maps',
+                                      '在 Google 地图上搜索餐厅并导航'
+                                    )}
+                                  </span>
+                                </button>
+                              )}
                             </div>
                           )}
                         </div>
@@ -1435,22 +1701,130 @@ export const WhatToEatModal: React.FC = () => {
               </div>
             )}
 
+            {/* Interactive Side-by-Side Dish Comparison Panel */}
+            {comparedDishIds.length > 0 && (
+              <div
+                id="kft-wte-compare-panel"
+                ref={comparePanelRef}
+                className="p-3 rounded-2xl bg-amber-50/90 dark:bg-slate-800/90 border border-amber-300 dark:border-amber-700/70 space-y-2.5 font-khmer"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-xs font-extrabold text-amber-950 dark:text-amber-300 flex items-center gap-1.5">
+                    <span>⚖️</span>
+                    <span>
+                      {tr(
+                        language,
+                        `ប្រៀបធៀបមុខម្ហូបដោយផ្ទាល់ (${comparedDishIds.length}/3)`,
+                        `Side-by-Side Dish Comparison (${comparedDishIds.length}/3)`,
+                        `菜品直观对比 (${comparedDishIds.length}/3)`
+                      )}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setComparedDishIds([])}
+                    className="px-2 py-0.5 rounded-lg bg-white dark:bg-slate-700 border border-amber-300 dark:border-slate-600 text-[10px] font-bold text-slate-700 dark:text-slate-200 hover:text-rose-600 cursor-pointer"
+                  >
+                    {tr(language, 'សម្អាត', 'Clear', '清空')}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {comparedDishIds.map((cId) => {
+                    const cDish = foods.find((f) => f.id === cId);
+                    if (!cDish) return null;
+                    const cLoc = getLocalizedFood(cDish, language);
+                    const cTaste = describeDish(cDish, language);
+                    const cIngs = (cDish.ingredients || [])
+                      .slice(0, 3)
+                      .map((ing, idx) =>
+                        language === 'km'
+                          ? ing.nameKh
+                          : language === 'zh'
+                            ? cLoc.ingredients?.[idx] || ing.nameEn || ing.nameKh
+                            : ing.nameEn || ing.nameKh
+                      )
+                      .join(', ');
+                    return (
+                      <div
+                        key={cDish.id}
+                        className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-amber-200 dark:border-slate-700 flex flex-col justify-between gap-1.5 text-[11px]"
+                      >
+                        <div className="space-y-1">
+                          <div className="relative aspect-16/10 rounded-lg overflow-hidden bg-slate-200">
+                            <img src={cDish.photoUrl} alt={cLoc.name} className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => toggleCompareDish(cDish.id)}
+                              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/65 text-white flex items-center justify-center text-[10px] cursor-pointer"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                          <div className="font-extrabold text-slate-900 dark:text-white line-clamp-1">{cLoc.name}</div>
+                          <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
+                            ⭐ {cDish.rating} • {cLoc.cookTime} • {cDish.calories || 280} kcal
+                          </div>
+                          <div className="text-[10px] text-amber-800 dark:text-amber-300 font-semibold line-clamp-1">
+                            ✨ {cTaste}
+                          </div>
+                          {cIngs && (
+                            <div className="text-[10px] text-slate-600 dark:text-slate-400 line-clamp-2">
+                              🥗 {cIngs}
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedFood(cDish);
+                            setIsWhatToEatModalOpen(false);
+                          }}
+                          className="w-full py-1 px-2 rounded-lg bg-[#064E3B] text-white text-[10px] font-bold text-center cursor-pointer"
+                        >
+                          {tr(language, 'មើលរូបមន្តពេញ', 'Full Recipe', '完整食谱')}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {!showSets && !isMedicalRefusalActive && currentDish && currentLoc && (
               <div
                 className={`space-y-2.5 transition-all duration-300 ${
                   isSpinning ? 'opacity-30 scale-95' : 'opacity-100 scale-100'
                 }`}
               >
-                {/* AI Filter Match Summary Banner */}
+                {/* AI Filter Match Summary Banner (Personalized Culinary Header + Quick Compare) */}
                 <div
                   id="kft-wte-ai-match-banner"
-                  className="p-3 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-300/70 dark:border-emerald-700/60 text-xs font-extrabold text-[#064E3B] dark:text-emerald-200 leading-relaxed font-khmer"
+                  className="p-3 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-300/70 dark:border-emerald-700/60 flex items-center justify-between gap-2 text-xs font-extrabold text-[#064E3B] dark:text-emerald-200 leading-relaxed font-khmer"
                 >
-                  {tr(
-                    language,
-                    `🤖 AI បានរកឃើញមុខម្ហូបដែលត្រូវនឹង «${activeCriteriaLabel}» ចំនួន ${matchingFoods.length} មុខ សម្រាប់អ្នក៖`,
-                    `🤖 AI matched ${matchingFoods.length} dish(es) for “${activeCriteriaLabel}”:`,
-                    `🤖 AI 已为您智能匹配 ${matchingFoods.length} 道符合“${activeCriteriaLabel}”的推荐美食：`
+                  <span>
+                    {tr(
+                      language,
+                      `✨ ការណែនាំមុខម្ហូបពិសេសពី AI សម្រាប់ «${activeCriteriaLabel}»៖`,
+                      `✨ AI Personalized Recommendation for “${activeCriteriaLabel}”:`,
+                      `✨ AI 为您精选的“${activeCriteriaLabel}”招牌美食：`
+                    )}
+                  </span>
+                  {matchingFoods.length >= 2 && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setComparedDishIds(
+                          [currentDish, ...alternativeDishes.slice(0, 2)]
+                            .filter(Boolean)
+                            .slice(0, 3)
+                            .map((d) => d.id)
+                        )
+                      }
+                      className="px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-[10px] font-black shrink-0 shadow-2xs transition cursor-pointer"
+                    >
+                      ⚖️ {tr(language, 'ប្រៀបធៀបម្ហូប', 'Compare Dishes', '对比菜品')}
+                    </button>
                   )}
                 </div>
 

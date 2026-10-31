@@ -1,7 +1,7 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1270;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1271;
 export const APP_RELEASE_DATE = '2026-10-31';
 
 export interface GoogleMapsPlaceMetadata {
@@ -651,6 +651,17 @@ export interface AiStoreCategoryVerificationReport {
   verifiedByModel: 'hybrid_gemini_and_rules_v1' | 'deterministic_semantic_guard_v1' | 'admin_manual_override';
 }
 
+export interface ShopPhotoReplacementRequest {
+  newPhotoUrl: string;
+  status: 'pending' | 'approved' | 'rejected';
+  submittedAt: string;
+  reviewedAt?: string;
+  adminDecision?: 'approved' | 'rejected';
+  rejectionReason?: string;
+  submittedByUserId?: string;
+  submittedByName?: string;
+}
+
 export interface Restaurant {
   id: string;
   nameKh: string;
@@ -739,6 +750,9 @@ export interface Restaurant {
   approvedAt?: string;
   featuredFromAt?: string;
   featuredUntilAt?: string;
+
+  // Shop Photo Replacement Workflow (Pending Admin Review & Approval)
+  pendingPhotoReplacement?: ShopPhotoReplacementRequest;
 }
 
 // Helper to resolve original created_at ISO timestamp for chronological sorting

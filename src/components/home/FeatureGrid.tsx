@@ -4,7 +4,7 @@ import type { Language } from '../../types';
 import { tr } from '../../utils/i18n';
 import {
   IconNearbyFood,
-  IconNearbyPlaces,
+  IconCravingSpark,
   IconFoodPicks,
   IconProvinceFood,
   IconMapRoute,
@@ -54,9 +54,9 @@ const FeatureGridImpl: React.FC<Props> = ({
       onClick: onNearbyFoodSearch,
     },
     {
-      id: 'nearby-places',
-      label: tr(language, 'កន្លែងជិតខ្ញុំ', 'Nearby Places', '附近地点'),
-      icon: IconNearbyPlaces,
+      id: 'compare-dishes',
+      label: tr(language, 'ប្រៀបធៀបម្ហូប', 'Compare Dishes', '美食对比'),
+      icon: IconCravingSpark,
       badgeType: 'free',
       badgeLabel: tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费'),
       iconContainerClass:
@@ -116,6 +116,7 @@ const FeatureGridImpl: React.FC<Props> = ({
           return (
             <button
               key={it.id}
+              id={`kft-feature-${it.id}-btn`}
               type="button"
               onClick={it.onClick}
               className={`group relative rounded-2xl py-2.5 px-1.5 flex flex-col items-center justify-center gap-1 transition active:scale-[0.97] cursor-pointer shadow-xs ${
