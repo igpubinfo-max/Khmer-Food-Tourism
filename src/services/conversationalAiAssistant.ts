@@ -1,4 +1,4 @@
-import type { FoodItem, Language, Restaurant, TouristDestination } from '../types';
+import { isPlaceLocationVerified, type FoodItem, type Language, type Restaurant, type TouristDestination } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { isMedicalOrHealthQuery, buildMedicalScopeNotice, describeDish, type BrainChip } from './aiFoodBrain';
@@ -342,7 +342,10 @@ export function generateConversationalAiResponse(params: {
     const provKh = detectedProv?.kh || activeProvinceKh;
     const normProv = provKh.replace(/ណ្ដ/g, 'ណ្ត');
 
-    let matchedDests = destinations.filter((d) => {
+    const verifiedDestinations = destinations.filter((d) => isPlaceLocationVerified(d));
+    const destSource = verifiedDestinations.length > 0 ? verifiedDestinations : destinations;
+
+    let matchedDests = destSource.filter((d) => {
       const dProv = (d.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត');
       const dText = `${d.nameKh} ${d.nameEn} ${d.descriptionKh || ''} ${d.descriptionEn || ''} ${d.categoryKh || ''}`.toLowerCase();
       if (normProv && dProv.includes(normProv)) {
@@ -362,8 +365,8 @@ export function generateConversationalAiResponse(params: {
 
     if (matchedDests.length === 0) {
       matchedDests = normProv
-        ? destinations.filter((d) => (d.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត').includes(normProv))
-        : destinations;
+        ? destSource.filter((d) => (d.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត').includes(normProv))
+        : destSource;
     }
 
     const topDests = matchedDests.slice(0, 4);
@@ -430,7 +433,10 @@ export function generateConversationalAiResponse(params: {
     const provKh = detectedProv?.kh || activeProvinceKh;
     const normProv = provKh.replace(/ណ្ដ/g, 'ណ្ត');
 
-    let matchedShops = restaurants.filter((r) => {
+    const verifiedShops = restaurants.filter((r) => isPlaceLocationVerified(r));
+    const shopSource = verifiedShops.length > 0 ? verifiedShops : restaurants;
+
+    let matchedShops = shopSource.filter((r) => {
       const rProv = (r.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត');
       if (normProv && !rProv.includes(normProv)) return false;
       if (targetFood) {
@@ -441,12 +447,12 @@ export function generateConversationalAiResponse(params: {
     });
 
     if (matchedShops.length === 0 && targetFood) {
-      matchedShops = restaurants.filter((r) =>
+      matchedShops = shopSource.filter((r) =>
         (r.signatureDishesKh || []).some((sig) => sig.includes(targetFood.nameKh) || targetFood.nameKh.includes(sig))
       );
     }
     if (matchedShops.length === 0) {
-      matchedShops = restaurants.slice(0, 4);
+      matchedShops = shopSource.slice(0, 4);
     }
 
     const topShops = matchedShops.slice(0, 4);

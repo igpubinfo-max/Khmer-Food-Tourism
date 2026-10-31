@@ -1,8 +1,10 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1272;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1273;
 export const APP_RELEASE_DATE = '2026-10-31';
+
+export type LocationVerificationStatus = 'verified' | 'needs_admin_review';
 
 export interface GoogleMapsPlaceMetadata {
   placeId: string;
@@ -315,6 +317,10 @@ export interface FoodItem {
   googleMapsMeta?: GoogleMapsPlaceMetadata;
   isAdminEdited?: boolean;
   adminEditedAt?: string;
+  locationVerificationStatus?: LocationVerificationStatus;
+  locationNeedsReview?: boolean;
+  locationReviewNote?: string;
+  locationVerifiedAt?: string;
 }
 
 export type KhmerFoodPrimaryGroup = 'samlor' | 'cha' | 'sngor' | 'bong_aem';
@@ -753,6 +759,12 @@ export interface Restaurant {
 
   // Shop Photo Replacement Workflow (Pending Admin Review & Approval)
   pendingPhotoReplacement?: ShopPhotoReplacementRequest;
+
+  // GPS & Google Maps Location Audit & Verification Status
+  locationVerificationStatus?: LocationVerificationStatus;
+  locationNeedsReview?: boolean;
+  locationReviewNote?: string;
+  locationVerifiedAt?: string;
 }
 
 // Helper to resolve original created_at ISO timestamp for chronological sorting
@@ -872,58 +884,245 @@ export const isGpipRegisteredRestaurant = (restaurant?: Partial<Restaurant> | nu
   return true;
 };
 
+export const isValidCambodiaCoordinates = (
+  lat?: number | null,
+  lng?: number | null
+): boolean => {
+  return (
+    typeof lat === 'number' &&
+    typeof lng === 'number' &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= 9.8 &&
+    lat <= 14.8 &&
+    lng >= 102.2 &&
+    lng <= 107.7
+  );
+};
+
+/**
+ * Validates whether a Google Place ID is an official Google Maps identifier
+ * rather than a synthetic human-readable internal directory string.
+ */
+export const isValidOfficialGooglePlaceId = (placeId?: string | null): boolean => {
+  if (!placeId || typeof placeId !== 'string') return false;
+  const trimmed = placeId.trim();
+  if (/^0x[0-9a-f]{10,20}:0x[0-9a-f]{10,20}$/i.test(trimmed)) {
+    return true;
+  }
+  if (!/^ChIJ[A-Za-z0-9_-]{21,32}$/.test(trimmed)) {
+    return false;
+  }
+  // Reject human-readable synthetic IDs ending with KH or containing concatenated English words
+  if (/KH$/.test(trimmed)) return false;
+  if (/(PhnomPenh|SiemReap|Battambang|Kampot|Kep|KienSvay|Sihanouk|Cambodia|Restaurant|Kitchen|Cafe|Pizza|Coffee)/.test(trimmed)) {
+    return false;
+  }
+  return true;
+};
+
+export const isPlaceLocationVerified = (
+  place?: {
+    latitude?: number | null;
+    longitude?: number | null;
+    lat?: number | null;
+    lng?: number | null;
+    locationNeedsReview?: boolean;
+    locationVerificationStatus?: LocationVerificationStatus;
+  } | null
+): boolean => {
+  if (!place) return false;
+  if (place.locationNeedsReview === true || place.locationVerificationStatus === 'needs_admin_review') {
+    return false;
+  }
+  const lat = typeof place.latitude === 'number' ? place.latitude : place.lat;
+  const lng = typeof place.longitude === 'number' ? place.longitude : place.lng;
+  return isValidCambodiaCoordinates(lat, lng);
+};
+
+export const buildCanonicalGoogleMapsPinUrl = (
+  lat: number,
+  lng: number,
+  googlePlaceId?: string | null
+): string => {
+  const latFixed = Number(lat.toFixed(6));
+  const lngFixed = Number(lng.toFixed(6));
+  if (isValidOfficialGooglePlaceId(googlePlaceId)) {
+    const cleanId = googlePlaceId!.trim();
+    if (cleanId.startsWith('0x')) {
+      return `https://www.google.com/maps?q=${latFixed},${lngFixed}&ftid=${encodeURIComponent(cleanId)}`;
+    }
+    return `https://www.google.com/maps/search/?api=1&query=${latFixed},${lngFixed}&query_place_id=${encodeURIComponent(cleanId)}`;
+  }
+  return `https://www.google.com/maps/search/?api=1&query=${latFixed},${lngFixed}`;
+};
+
+export const buildCanonicalGoogleMapsDirectionsUrl = (
+  lat: number,
+  lng: number,
+  origin?: { lat: number; lng: number } | null,
+  googlePlaceId?: string | null
+): string => {
+  const latFixed = Number(lat.toFixed(6));
+  const lngFixed = Number(lng.toFixed(6));
+  let url = `https://www.google.com/maps/dir/?api=1&destination=${latFixed},${lngFixed}`;
+  if (origin && isValidCambodiaCoordinates(origin.lat, origin.lng)) {
+    url += `&origin=${Number(origin.lat.toFixed(6))},${Number(origin.lng.toFixed(6))}`;
+  }
+  if (isValidOfficialGooglePlaceId(googlePlaceId) && googlePlaceId!.trim().startsWith('ChIJ')) {
+    url += `&destination_place_id=${encodeURIComponent(googlePlaceId!.trim())}`;
+  }
+  return url;
+};
+
+export const openExternalUrlNativeSafe = (url: string): void => {
+  if (!url || typeof window === 'undefined') return;
+  const cap = (window as any).Capacitor;
+  if (cap?.isNativePlatform?.() && cap?.Plugins?.NativeAbaLauncher?.openExternalUrl) {
+    cap.Plugins.NativeAbaLauncher.openExternalUrl({ url }).catch(() => {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
+    return;
+  }
+  window.open(url, '_blank', 'noopener,noreferrer');
+};
+
+export const notifyUnverifiedLocationBlocked = (placeName?: string): void => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('kft:unverified-location-blocked', {
+        detail: { placeName: placeName || '' },
+      })
+    );
+  }
+};
+
 export const getRestaurantGoogleExternalUrl = (
   restaurant: Partial<Restaurant>,
-  mode: 'search' | 'maps' = 'maps'
+  mode: 'search' | 'maps' | 'directions' = 'maps',
+  origin?: { lat: number; lng: number } | null
 ): string => {
   const name = (restaurant.nameKh || restaurant.nameEn || '').trim();
   const province = (restaurant.provinceKh || restaurant.provinceEn || '').trim();
   const query = [name, province, 'Cambodia'].filter(Boolean).join(' ');
-  if (mode === 'maps') {
-    const metaUri = restaurant.googleMapsMeta?.googleMapsUri;
-    if (metaUri && metaUri.startsWith('http')) {
-      return metaUri;
-    }
-    if (
-      restaurant.mapUrl &&
-      (restaurant.mapUrl.includes('google.com/maps') ||
-        restaurant.mapUrl.includes('maps.app.goo.gl') ||
-        restaurant.mapUrl.includes('maps.google.com'))
-    ) {
-      return restaurant.mapUrl;
-    }
-    if (
-      typeof restaurant.latitude === 'number' &&
-      typeof restaurant.longitude === 'number' &&
-      Number.isFinite(restaurant.latitude) &&
-      Number.isFinite(restaurant.longitude) &&
-      Math.abs(restaurant.latitude) > 0.01 &&
-      Math.abs(restaurant.longitude) > 0.01
-    ) {
-      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-        query || `${restaurant.latitude},${restaurant.longitude}`
-      )}`;
-    }
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+
+  if (mode === 'search') {
+    return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
   }
-  return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+
+  // Strictly block unverified or flagged locations from opening incorrect/estimated map pins
+  if (!isPlaceLocationVerified(restaurant)) {
+    return '';
+  }
+
+  const lat = restaurant.latitude!;
+  const lng = restaurant.longitude!;
+  const placeId = restaurant.googlePlaceId || restaurant.googleMapsMeta?.placeId;
+
+  if (mode === 'directions') {
+    return buildCanonicalGoogleMapsDirectionsUrl(lat, lng, origin, placeId);
+  }
+
+  // Honor explicit Google Maps shortlinks added manually by Admin or VIP Owner
+  if (
+    (restaurant.isAdminEdited || restaurant.dataSource === 'vip_owner') &&
+    restaurant.mapUrl &&
+    restaurant.mapUrl.includes('maps.app.goo.gl')
+  ) {
+    return restaurant.mapUrl.trim();
+  }
+
+  const metaUri = restaurant.googleMapsMeta?.googleMapsUri;
+  if (metaUri && metaUri.startsWith('http') && isValidOfficialGooglePlaceId(placeId)) {
+    return metaUri;
+  }
+
+  return buildCanonicalGoogleMapsPinUrl(lat, lng, placeId);
 };
 
 export const openRestaurantGoogleExternal = (
   restaurant: Partial<Restaurant>,
-  mode: 'search' | 'maps' = 'maps'
-): void => {
-  const url = getRestaurantGoogleExternalUrl(restaurant, mode);
-  if (typeof window !== 'undefined') {
-    const cap = (window as any).Capacitor;
-    if (cap?.isNativePlatform?.() && cap?.Plugins?.NativeAbaLauncher?.openExternalUrl) {
-      cap.Plugins.NativeAbaLauncher.openExternalUrl({ url }).catch(() => {
-        window.open(url, '_blank', 'noopener,noreferrer');
-      });
-      return;
-    }
-    window.open(url, '_blank', 'noopener,noreferrer');
+  mode: 'search' | 'maps' | 'directions' = 'maps',
+  origin?: { lat: number; lng: number } | null
+): boolean => {
+  const url = getRestaurantGoogleExternalUrl(restaurant, mode, origin);
+  if (!url) {
+    notifyUnverifiedLocationBlocked(restaurant.nameKh || restaurant.nameEn);
+    return false;
   }
+  openExternalUrlNativeSafe(url);
+  return true;
+};
+
+export const getDestinationGoogleExternalUrl = (
+  destination: Partial<TouristDestination>,
+  mode: 'maps' | 'directions' = 'maps',
+  origin?: { lat: number; lng: number } | null
+): string => {
+  if (!isPlaceLocationVerified(destination)) {
+    return '';
+  }
+  const lat = destination.latitude!;
+  const lng = destination.longitude!;
+  const placeId = destination.googlePlaceId || destination.googleMapsMeta?.placeId;
+
+  if (mode === 'directions') {
+    return buildCanonicalGoogleMapsDirectionsUrl(lat, lng, origin, placeId);
+  }
+
+  if (
+    destination.isAdminEdited &&
+    destination.mapUrl &&
+    destination.mapUrl.includes('maps.app.goo.gl')
+  ) {
+    return destination.mapUrl.trim();
+  }
+
+  return buildCanonicalGoogleMapsPinUrl(lat, lng, placeId);
+};
+
+export const openDestinationGoogleExternal = (
+  destination: Partial<TouristDestination>,
+  mode: 'maps' | 'directions' = 'maps',
+  origin?: { lat: number; lng: number } | null
+): boolean => {
+  const url = getDestinationGoogleExternalUrl(destination, mode, origin);
+  if (!url) {
+    notifyUnverifiedLocationBlocked(destination.nameKh || destination.nameEn);
+    return false;
+  }
+  openExternalUrlNativeSafe(url);
+  return true;
+};
+
+export const getTrendingFoodGoogleExternalUrl = (
+  item: Partial<TrendingFoodItem>,
+  mode: 'maps' | 'directions' = 'maps',
+  origin?: { lat: number; lng: number } | null
+): string => {
+  if (!isPlaceLocationVerified(item)) {
+    return '';
+  }
+  const lat = item.latitude!;
+  const lng = item.longitude!;
+  if (mode === 'directions') {
+    return buildCanonicalGoogleMapsDirectionsUrl(lat, lng, origin);
+  }
+  return buildCanonicalGoogleMapsPinUrl(lat, lng);
+};
+
+export const openTrendingFoodGoogleExternal = (
+  item: Partial<TrendingFoodItem>,
+  mode: 'maps' | 'directions' = 'maps',
+  origin?: { lat: number; lng: number } | null
+): boolean => {
+  const url = getTrendingFoodGoogleExternalUrl(item, mode, origin);
+  if (!url) {
+    notifyUnverifiedLocationBlocked(item.restaurantNameKh || item.foodNameKh);
+    return false;
+  }
+  openExternalUrlNativeSafe(url);
+  return true;
 };
 
 // Helper to compute genuine customer rating & review count (VIP status never inflates rating)
@@ -1139,6 +1338,10 @@ export interface TrendingFoodItem {
   fallbackFoodIds?: string[];
   isCustomPhoto?: boolean;
   photoUpdatedAt?: string;
+  locationVerificationStatus?: LocationVerificationStatus;
+  locationNeedsReview?: boolean;
+  locationReviewNote?: string;
+  locationVerifiedAt?: string;
 }
 
 // AI Smart Check-in & Auto Add Restaurant Types
@@ -1217,6 +1420,10 @@ export interface TouristDestination {
   googleMapsMeta?: GoogleMapsPlaceMetadata;
   isAdminEdited?: boolean;
   adminEditedAt?: string;
+  locationVerificationStatus?: LocationVerificationStatus;
+  locationNeedsReview?: boolean;
+  locationReviewNote?: string;
+  locationVerifiedAt?: string;
 }
 
 // User Wishlist Item & Custom Lists (បញ្ជីកន្លែងដែលចង់ទៅ)
@@ -2068,12 +2275,15 @@ export const sortRestaurantsWithVipRotation = (
   });
 
   const topFeatured: Restaurant[] = [];
-  const restList: Restaurant[] = [];
+  const verifiedLocRestList: Restaurant[] = [];
+  const reviewLocRestList: Restaurant[] = [];
   for (const r of restaurants) {
     if (featuredOrderMap.has(r.id)) {
       topFeatured.push(r);
+    } else if (isPlaceLocationVerified(r)) {
+      verifiedLocRestList.push(r);
     } else {
-      restList.push(r);
+      reviewLocRestList.push(r);
     }
   }
 
@@ -2081,5 +2291,5 @@ export const sortRestaurantsWithVipRotation = (
     (a, b) => (featuredOrderMap.get(a.id) ?? 999) - (featuredOrderMap.get(b.id) ?? 999)
   );
 
-  return [...topFeatured, ...restList];
+  return [...topFeatured, ...verifiedLocRestList, ...reviewLocRestList];
 };

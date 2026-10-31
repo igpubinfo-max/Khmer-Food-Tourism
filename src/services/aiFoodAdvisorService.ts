@@ -1,4 +1,4 @@
-import { FoodItem, Language, Restaurant } from '../types';
+import { FoodItem, Language, Restaurant, isPlaceLocationVerified } from '../types';
 import { getDishTagIds, DishTagId } from '../utils/dishTags';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { tr } from '../utils/i18n';
@@ -549,10 +549,11 @@ export function getAiFoodAdvisorRecommendations(params: {
     topDishes = fallbackPool.slice(0, 4);
   }
 
-  // Match restaurants serving these dishes or matching the query
+  // Match verified-location restaurants serving these dishes or matching the query
   const isVeg = isVegetarianQuery(query);
   const matchedShops = restaurants
     .filter((r) => {
+      if (!isPlaceLocationVerified(r)) return false;
       const hay = normalizeSearchText(
         `${r.nameKh} ${r.nameEn} ${(r.signatureDishesKh || []).join(' ')} ${r.provinceKh} ${r.cuisineType || ''}`
       );

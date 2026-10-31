@@ -5,6 +5,14 @@ import { tr } from '../utils/i18n';
 import { shareText } from '../utils/shareApp';
 import { getLocalizedDestination, getLocalizedFood, getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { FOOD_TRIP_TEMPLATES, SLOT_LABELS, FoodTripTemplate, TripStop } from '../data/foodTripTemplates';
+import {
+  getDestinationGoogleExternalUrl,
+  getRestaurantGoogleExternalUrl,
+  isPlaceLocationVerified,
+  openDestinationGoogleExternal,
+  openExternalUrlNativeSafe,
+  openRestaurantGoogleExternal,
+} from '../types';
 
 interface ResolvedStop {
   key: string;
@@ -13,6 +21,7 @@ interface ResolvedStop {
   photoUrl?: string;
   mapLink: string;
   onOpen?: () => void;
+  onOpenMap: () => void;
 }
 
 interface ProvinceSelectItem {
@@ -69,13 +78,15 @@ export const FoodTripTemplates: React.FC = () => {
         const f = foodMap.get(stop.id);
         if (!f) return null;
         const name = getLocalizedFood(f, language).name;
+        const foodMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${f.nameEn} ${tpl.mapHint}`)}`;
         return {
           key: stop.id,
           type: 'food',
           name,
           photoUrl: f.photoUrl,
-          mapLink: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${f.nameEn} ${tpl.mapHint}`)}`,
+          mapLink: foodMapUrl,
           onOpen: () => setSelectedFood(f),
+          onOpenMap: () => openExternalUrlNativeSafe(foodMapUrl),
         };
       }
       if (stop.type === 'restaurant') {
@@ -86,8 +97,9 @@ export const FoodTripTemplates: React.FC = () => {
           type: 'restaurant',
           name: getLocalizedRestaurant(r, language).name,
           photoUrl: r.photoUrl,
-          mapLink: r.mapUrl || `https://www.google.com/maps/search/?api=1&query=${r.latitude},${r.longitude}`,
+          mapLink: getRestaurantGoogleExternalUrl(r, 'maps'),
           onOpen: () => setSelectedRestaurant(r),
+          onOpenMap: () => openRestaurantGoogleExternal(r, 'maps'),
         };
       }
       const d = destMap.get(stop.id);
@@ -97,8 +109,9 @@ export const FoodTripTemplates: React.FC = () => {
         type: 'destination',
         name: getLocalizedDestination(d, language).name,
         photoUrl: d.photoUrl,
-        mapLink: d.mapUrl || `https://www.google.com/maps/search/?api=1&query=${d.latitude},${d.longitude}`,
+        mapLink: getDestinationGoogleExternalUrl(d, 'maps'),
         onOpen: () => setSelectedDestination(d),
+        onOpenMap: () => openDestinationGoogleExternal(d, 'maps'),
       };
     };
   }, [foods, restaurants, destinations, language, setSelectedFood, setSelectedRestaurant, setSelectedDestination]);
@@ -115,12 +128,17 @@ export const FoodTripTemplates: React.FC = () => {
       const cleanEn = prov.en.replace(/^\d+\.\s*/, '');
       const cleanZh = prov.zh.replace(/^\d+\.\s*/, '').replace(/\s*\([^)]*\)$/, '');
 
-      const provDests = destinations.filter((d) =>
+      const provDestsAll = destinations.filter((d) =>
         (d.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត').includes(coreKh)
       );
-      const provRests = restaurants.filter((r) =>
+      const provDestsVerified = provDestsAll.filter((d) => isPlaceLocationVerified(d));
+      const provDests = provDestsVerified.length > 0 ? provDestsVerified : provDestsAll;
+
+      const provRestsAll = restaurants.filter((r) =>
         (r.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត').includes(coreKh)
       );
+      const provRestsVerified = provRestsAll.filter((r) => isPlaceLocationVerified(r));
+      const provRests = provRestsVerified.length > 0 ? provRestsVerified : provRestsAll;
 
       const d1 = provDests[0]?.id || 'dest-1';
       const d2 = provDests[1]?.id || provDests[0]?.id || 'dest-2';
@@ -336,16 +354,15 @@ export const FoodTripTemplates: React.FC = () => {
                       <span className="block text-sm font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug">{st.name}</span>
                       <span className="text-[11px] text-slate-500 dark:text-slate-400">{typeEmoji(st.type)} {typeLabel(st.type)}</span>
                     </button>
-                    <a
-                      href={st.mapLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="min-h-[44px] px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1 shrink-0 active:scale-95 transition"
+                    <button
+                      type="button"
+                      onClick={st.onOpenMap}
+                      className="min-h-[44px] px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1 shrink-0 active:scale-95 transition cursor-pointer"
                       title={tr(language, 'បើកក្នុង Google Maps', 'Open in Google Maps', '在谷歌地图中打开')}
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                       <span>Maps</span>
-                    </a>
+                    </button>
                   </div>
                 ))}
               </div>

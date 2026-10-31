@@ -22,7 +22,15 @@ import {
   CreditCard,
   Clock,
 } from 'lucide-react';
-import { RestaurantPriceLevel, GoogleMapsPlaceMetadata, isUserVipActive, getDynamicVipPlans, isAdminAccount } from '../types';
+import {
+  RestaurantPriceLevel,
+  GoogleMapsPlaceMetadata,
+  isUserVipActive,
+  getDynamicVipPlans,
+  isAdminAccount,
+  isValidCambodiaCoordinates,
+  buildCanonicalGoogleMapsPinUrl,
+} from '../types';
 import {
   isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
@@ -344,6 +352,34 @@ export const VipAddRestaurantModal: React.FC = () => {
     const finalProfile = shopPhoto.trim() || '/Shop/rest-1.jpg';
     const combinedGallery = [finalProfile];
 
+    let resolvedLat = shopLat;
+    let resolvedLng = shopLng;
+    if ((resolvedLat === null || resolvedLng === null) && shopMapUrl.trim()) {
+      const decodedUrl = (() => {
+        try {
+          return decodeURIComponent(shopMapUrl.trim());
+        } catch {
+          return shopMapUrl.trim();
+        }
+      })();
+      const m =
+        decodedUrl.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) ||
+        decodedUrl.match(/@(-?\d+\.\d+),\s*(-?\d+\.\d+)/) ||
+        decodedUrl.match(/[?&](?:query|q|destination|ll)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+      if (m) {
+        const pLat = Number(m[1]);
+        const pLng = Number(m[2]);
+        if (isValidCambodiaCoordinates(pLat, pLng)) {
+          resolvedLat = pLat;
+          resolvedLng = pLng;
+        }
+      }
+    }
+    const hasVerifiedCoords =
+      resolvedLat !== null &&
+      resolvedLng !== null &&
+      isValidCambodiaCoordinates(resolvedLat, resolvedLng);
+
     setIsSaving(true);
     try {
       const newRestData = {
@@ -364,13 +400,19 @@ export const VipAddRestaurantModal: React.FC = () => {
         openingHoursKh: openingHoursKh.trim() || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
         openingHoursEn: '07:00 AM - 09:00 PM',
         priceLevel,
-        mapUrl:
-          shopMapUrl.trim() ||
-          (shopLat !== null && shopLng !== null
-            ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${finalNameKh} ${shopLat},${shopLng}`)}`
-            : `https://maps.google.com/?q=${encodeURIComponent(finalNameKh)}`),
-        latitude: shopLat !== null ? shopLat : (resolveProvinceGeoConfig(provinceKh)?.lat ?? 11.5564),
-        longitude: shopLng !== null ? shopLng : (resolveProvinceGeoConfig(provinceKh)?.lng ?? 104.9282),
+        mapUrl: hasVerifiedCoords
+          ? buildCanonicalGoogleMapsPinUrl(resolvedLat!, resolvedLng!, importedGooglePlaceId)
+          : '',
+        latitude: hasVerifiedCoords ? resolvedLat! : 0,
+        longitude: hasVerifiedCoords ? resolvedLng! : 0,
+        locationVerificationStatus: hasVerifiedCoords
+          ? ('verified' as const)
+          : ('needs_admin_review' as const),
+        locationNeedsReview: !hasVerifiedCoords,
+        locationVerifiedAt: hasVerifiedCoords ? new Date().toISOString() : undefined,
+        locationReviewNote: hasVerifiedCoords
+          ? undefined
+          : 'New shop registered without verified GPS coordinates — flagged for Admin location review.',
         signatureDishesKh: signatureDishesKh.length > 0 ? signatureDishesKh : ['ម្ហូបពិសេសប្រចាំហាង'],
         googlePlaceId: importedGooglePlaceId,
         dataSource: importedGooglePlaceId ? ('google_maps' as const) : ('vip_owner' as const),

@@ -5,7 +5,14 @@ import {
   Send, Share2, Sparkles, Compass, Camera, Bookmark, Edit2, Save
 } from 'lucide-react';
 import { TouristImageModal } from './TouristImageModal';
-import { TouristDestination } from '../types';
+import {
+  TouristDestination,
+  getDestinationGoogleExternalUrl,
+  openDestinationGoogleExternal,
+  isPlaceLocationVerified,
+  isValidCambodiaCoordinates,
+  buildCanonicalGoogleMapsPinUrl,
+} from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import {
@@ -35,6 +42,8 @@ export const TouristDetailModal: React.FC = () => {
   const [editBestTimeKh, setEditBestTimeKh] = useState('');
   const [editBestTimeEn, setEditBestTimeEn] = useState('');
   const [editMapUrl, setEditMapUrl] = useState('');
+  const [editLat, setEditLat] = useState('');
+  const [editLng, setEditLng] = useState('');
   const [editPhotoUrl, setEditPhotoUrl] = useState('');
   const [editDescriptionKh, setEditDescriptionKh] = useState('');
   const [editDescriptionEn, setEditDescriptionEn] = useState('');
@@ -55,6 +64,16 @@ export const TouristDetailModal: React.FC = () => {
       setEditBestTimeKh(selectedDestination.bestTimeToVisitKh || 'ពេញមួយឆ្នាំ');
       setEditBestTimeEn(selectedDestination.bestTimeToVisitEn || 'All year round');
       setEditMapUrl(selectedDestination.mapUrl || '');
+      setEditLat(
+        typeof selectedDestination.latitude === 'number' && selectedDestination.latitude !== 0
+          ? String(selectedDestination.latitude)
+          : ''
+      );
+      setEditLng(
+        typeof selectedDestination.longitude === 'number' && selectedDestination.longitude !== 0
+          ? String(selectedDestination.longitude)
+          : ''
+      );
       setEditPhotoUrl(selectedDestination.photoUrl || '');
       setEditDescriptionKh(selectedDestination.descriptionKh || '');
       setEditDescriptionEn(selectedDestination.descriptionEn || '');
@@ -84,7 +103,25 @@ export const TouristDetailModal: React.FC = () => {
       .map((s) => s.trim())
       .filter(Boolean);
 
+    let parsedLat = parseFloat(editLat.trim());
+    let parsedLng = parseFloat(editLng.trim());
+    const trimmedMapUrl = editMapUrl.trim();
+    const urlCoordMatch = trimmedMapUrl.match(/(?:@|[?&](?:q|query)=)(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
+    if ((!Number.isFinite(parsedLat) || !Number.isFinite(parsedLng)) && urlCoordMatch) {
+      parsedLat = parseFloat(urlCoordMatch[1]);
+      parsedLng = parseFloat(urlCoordMatch[2]);
+    }
+    const hasVerifiedCoords = isValidCambodiaCoordinates(parsedLat, parsedLng);
+    const nextLat = hasVerifiedCoords ? Number(parsedLat.toFixed(6)) : selectedDestination.latitude;
+    const nextLng = hasVerifiedCoords ? Number(parsedLng.toFixed(6)) : selectedDestination.longitude;
+    const nextMapUrl = hasVerifiedCoords
+      ? trimmedMapUrl.includes('maps.app.goo.gl')
+        ? trimmedMapUrl
+        : buildCanonicalGoogleMapsPinUrl(nextLat, nextLng, selectedDestination.googlePlaceId)
+      : trimmedMapUrl || selectedDestination.mapUrl;
+
     const customPhotoFlag = editPhotoUrl.trim() !== '' ? true : selectedDestination.isCustomPhoto;
+    const nowIso = new Date().toISOString();
     const updated: TouristDestination = {
       ...selectedDestination,
       nameKh: editNameKh.trim() || selectedDestination.nameKh,
@@ -99,13 +136,25 @@ export const TouristDetailModal: React.FC = () => {
       entranceFeeEn: '',
       bestTimeToVisitKh: editBestTimeKh.trim() || selectedDestination.bestTimeToVisitKh,
       bestTimeToVisitEn: editBestTimeEn.trim() || selectedDestination.bestTimeToVisitEn,
-      mapUrl: editMapUrl.trim() || selectedDestination.mapUrl,
+      latitude: nextLat,
+      longitude: nextLng,
+      mapUrl: nextMapUrl,
       photoUrl: editPhotoUrl.trim() || selectedDestination.photoUrl,
       descriptionKh: editDescriptionKh.trim() || selectedDestination.descriptionKh,
       descriptionEn: editDescriptionEn.trim() || selectedDestination.descriptionEn,
       highlightsKh: highlights.length > 0 ? highlights : selectedDestination.highlightsKh,
       isCustomPhoto: customPhotoFlag,
-      photoUpdatedAt: new Date().toISOString(),
+      photoUpdatedAt: nowIso,
+      isAdminEdited: true,
+      adminEditedAt: nowIso,
+      ...(hasVerifiedCoords
+        ? {
+            locationVerificationStatus: 'verified',
+            locationNeedsReview: false,
+            locationReviewNote: undefined,
+            locationVerifiedAt: nowIso,
+          }
+        : {}),
     };
 
     updateDestination(updated);
@@ -121,6 +170,7 @@ export const TouristDetailModal: React.FC = () => {
   const bookmarked = isBookmarked(selectedDestination.id);
 
   const isKm = language === 'km';
+  const verifiedDestMapUrl = getDestinationGoogleExternalUrl(selectedDestination, 'maps');
   const sharePayload = {
     title: isKm ? selectedDestination.nameKh : selectedDestination.nameEn,
     nameKh: selectedDestination.nameKh,
@@ -131,7 +181,7 @@ export const TouristDetailModal: React.FC = () => {
       : `${selectedDestination.addressEn} (${selectedDestination.provinceEn})`,
     signatureDishes: selectedDestination.highlightsKh,
     photoUrl: selectedDestination.photoUrl,
-    mapUrl: selectedDestination.mapUrl,
+    mapUrl: verifiedDestMapUrl,
     itemType: 'destination' as const,
     itemId: selectedDestination.id,
     isKm,
@@ -140,13 +190,13 @@ export const TouristDetailModal: React.FC = () => {
   const handleShareTelegram = () => {
     const { fullText, directLink } = formatRichShareText(sharePayload);
     const text = encodeURIComponent(fullText);
-    const url = encodeURIComponent(selectedDestination.mapUrl || directLink);
+    const url = encodeURIComponent(verifiedDestMapUrl || directLink);
     window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
   };
 
   const handleShareFacebook = () => {
     const { fullText, directLink } = formatRichShareText(sharePayload);
-    const url = encodeURIComponent(selectedDestination.mapUrl || directLink);
+    const url = encodeURIComponent(verifiedDestMapUrl || directLink);
     const quote = encodeURIComponent(fullText);
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${quote}`, '_blank');
   };
@@ -362,7 +412,35 @@ export const TouristDetailModal: React.FC = () => {
                     type="text"
                     value={editMapUrl}
                     onChange={(e) => setEditMapUrl(e.target.value)}
-                    placeholder="https://maps.google.com/?q=..."
+                    placeholder="https://www.google.com/maps/search/?api=1&query=..."
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* GPS Coordinates (Latitude / Longitude) */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'រយៈទទឹង (Latitude)' : 'Latitude'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editLat}
+                    onChange={(e) => setEditLat(e.target.value)}
+                    placeholder="13.4125"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-xs text-slate-800 dark:text-slate-200 mb-1">
+                    {isKm ? 'រយៈបណ្តោយ (Longitude)' : 'Longitude'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editLng}
+                    onChange={(e) => setEditLng(e.target.value)}
+                    placeholder="103.8670"
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white font-mono"
                   />
                 </div>
@@ -455,18 +533,38 @@ export const TouristDetailModal: React.FC = () => {
           </div>
 
           <div className="p-4 sm:p-6 space-y-5">
-            {/* Direct Google Maps Action Button */}
-            <div>
-              <a
-                href={selectedDestination.mapUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md transition active:scale-98"
+            {/* Admin-only Location Review Notice if flagged */}
+            {isAdmin && !isPlaceLocationVerified(selectedDestination) && (
+              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-xs font-khmer text-amber-900 dark:text-amber-200">
+                📍{' '}
+                {tr(
+                  language,
+                  'ទីតាំង GPS នេះត្រូវបានដាក់សម្គាល់សម្រាប់ Admin ផ្ទៀងផ្ទាត់ (ចុច កែប្រែ ដើម្បីបញ្ចូល GPS ពិតប្រាកដ)',
+                  'Location flagged for Admin GPS verification (tap Edit to save verified GPS)',
+                  '该景点 GPS 已标记待管理员核验（点击编辑可保存核实后的坐标）'
+                )}
+              </div>
+            )}
+
+            {/* Direct Google Maps & Navigation Action Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => openDestinationGoogleExternal(selectedDestination, 'maps')}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md transition active:scale-98 cursor-pointer"
               >
-                <Compass className="w-4 h-4" />
-                <span>{tr(language, 'បើកមើលលើ Google Maps & នាំផ្លូវ', 'Open in Google Maps & Get Directions', '在 Google 地图中打开并导航')}</span>
-                <ExternalLink className="w-3.5 h-3.5 opacity-80" />
-              </a>
+                <MapPin className="w-4 h-4 shrink-0" />
+                <span>{tr(language, 'បើកមើលលើ Google Maps', 'Open in Google Maps', '在 Google 地图中查看')}</span>
+                <ExternalLink className="w-3.5 h-3.5 opacity-80 shrink-0" />
+              </button>
+              <button
+                type="button"
+                onClick={() => openDestinationGoogleExternal(selectedDestination, 'directions')}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white text-xs font-bold shadow-md transition active:scale-98 cursor-pointer"
+              >
+                <Compass className="w-4 h-4 shrink-0" />
+                <span>{tr(language, 'នាំផ្លូវទៅកាន់ទីតាំង', 'Navigate / Directions', '开始路线导航')}</span>
+              </button>
             </div>
 
             {/* Viral TikTok & Facebook Trending Card */}

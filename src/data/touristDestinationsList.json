@@ -31,7 +31,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-129.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-2",
@@ -51,9 +54,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេញមួយឆ្នាំ ម៉ោង ០៨:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Year-round 08:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5658,104.9292",
-    "latitude": 11.5658,
-    "longitude": 104.9292,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5655,104.9293",
+    "latitude": 11.5655,
+    "longitude": 104.9293,
     "rating": 4.8,
     "reviewCount": 980,
     "highlightsKh": [
@@ -64,7 +67,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-140.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-3",
@@ -97,7 +103,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-3.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-4",
@@ -130,7 +139,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-144.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-5",
@@ -163,7 +175,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-145.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-6",
@@ -196,7 +211,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-146.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-7",
@@ -229,7 +247,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-161.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-8",
@@ -262,7 +283,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-170.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-9",
@@ -306,7 +330,10 @@
     "reviewerName": "Rath Travel & Discovery",
     "galleryPhotos": [
       "/destinations/dest-184.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-10",
@@ -339,7 +366,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-187.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-11",
@@ -372,7 +402,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-201.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-12",
@@ -405,7 +438,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-216.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-13",
@@ -448,7 +484,10 @@
     "reviewerName": "Sokha Vlogger",
     "galleryPhotos": [
       "/destinations/dest-92.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-14",
@@ -468,9 +507,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវវស្សា និងរដូវរំហើយ ខែកក្កដា ដល់ខែធ្នូ",
     "bestTimeToVisitEn": "July to December when river flows clear",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.6872,104.0152",
-    "latitude": 13.6872,
-    "longitude": 104.0152,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.708361,104.025583",
+    "latitude": 13.708361,
+    "longitude": 104.025583,
     "rating": 4.7,
     "reviewCount": 680,
     "highlightsKh": [
@@ -481,7 +520,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-244.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-15",
@@ -514,7 +556,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-235.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-16",
@@ -547,7 +592,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-237.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-17",
@@ -580,7 +628,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-265.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-18",
@@ -613,7 +664,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-243.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-19",
@@ -646,7 +700,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-247.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-20",
@@ -679,7 +736,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-170.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-21",
@@ -712,7 +772,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-37.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-22",
@@ -755,7 +818,10 @@
     "reviewerName": "Dara Island Life",
     "galleryPhotos": [
       "/destinations/dest-147.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-23",
@@ -798,7 +864,10 @@
     "reviewerName": "SreyLeak Travel",
     "galleryPhotos": [
       "/destinations/dest-149.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-24",
@@ -818,9 +887,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែតុលា ដល់ខែមេសា",
     "bestTimeToVisitEn": "October to April",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5167,103.6833",
-    "latitude": 10.5167,
-    "longitude": 103.6833,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.506409,103.734364",
+    "latitude": 10.506409,
+    "longitude": 103.734364,
     "rating": 4.6,
     "reviewCount": 520,
     "highlightsKh": [
@@ -831,7 +900,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-84.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-25",
@@ -864,7 +936,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-88.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-26",
@@ -897,7 +972,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-140.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-27",
@@ -930,7 +1008,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-154.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-28",
@@ -950,9 +1031,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រាំង ខែវិច្ឆិកា ដល់ឧសភា",
     "bestTimeToVisitEn": "Dry season November to May",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6489,103.4689",
-    "latitude": 10.6489,
-    "longitude": 103.4689,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.635278,103.456667",
+    "latitude": 10.635278,
+    "longitude": 103.456667,
     "rating": 4.6,
     "reviewCount": 290,
     "highlightsKh": [
@@ -963,7 +1044,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-28.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-29",
@@ -1006,7 +1090,10 @@
     "reviewerName": "Chan Tourist Review",
     "galleryPhotos": [
       "/destinations/dest-96.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-30",
@@ -1039,7 +1126,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-30.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-31",
@@ -1072,7 +1162,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-31.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-32",
@@ -1105,7 +1198,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-119.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-33",
@@ -1138,7 +1234,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-33.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-34",
@@ -1171,7 +1270,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-163.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-35",
@@ -1204,7 +1306,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-82.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-36",
@@ -1237,7 +1342,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-143.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-37",
@@ -1280,7 +1388,10 @@
     "reviewerName": "Foodie Khmer Review",
     "galleryPhotos": [
       "/destinations/dest-37.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-38",
@@ -1300,9 +1411,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:០០ ដល់ ១១:០០ និងពេលរសៀល",
     "bestTimeToVisitEn": "Morning and late afternoon for freshly landed crab catch",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.4989,104.2872",
-    "latitude": 10.4989,
-    "longitude": 104.2872,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.488528,104.289028",
+    "latitude": 10.488528,
+    "longitude": 104.289028,
     "rating": 4.8,
     "reviewCount": 1390,
     "highlightsKh": [
@@ -1313,7 +1424,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-140.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-39",
@@ -1346,7 +1460,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-58.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-40",
@@ -1379,7 +1496,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-175.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-41",
@@ -1399,9 +1519,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹកព្រលឹម ឬរសៀល",
     "bestTimeToVisitEn": "Morning or late afternoon",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5658,104.3547",
-    "latitude": 10.5658,
-    "longitude": 104.3547,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.565833,104.283889",
+    "latitude": 10.565833,
+    "longitude": 104.283889,
     "rating": 4.5,
     "reviewCount": 340,
     "highlightsKh": [
@@ -1412,7 +1532,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-85.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-42",
@@ -1445,7 +1568,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-42.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-43",
@@ -1478,7 +1604,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-161.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-44",
@@ -1511,7 +1640,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-227.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-45",
@@ -1544,7 +1676,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-235.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-46",
@@ -1577,7 +1712,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-46.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-47",
@@ -1610,7 +1748,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-47.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-48",
@@ -1643,7 +1784,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-118.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-49",
@@ -1676,7 +1820,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-49.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-50",
@@ -1709,7 +1856,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-50.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-51",
@@ -1729,9 +1879,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេញមួយឆ្នាំ ពេលរសៀលទស្សនាថ្ងៃលិច",
     "bestTimeToVisitEn": "Year-round, especially late afternoon",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5547,102.9872",
-    "latitude": 11.5547,
-    "longitude": 102.9872,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.560806,102.993222",
+    "latitude": 11.560806,
+    "longitude": 102.993222,
     "rating": 4.8,
     "reviewCount": 1120,
     "highlightsKh": [
@@ -1742,7 +1892,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-79.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-52",
@@ -1762,9 +1915,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែវិច្ឆិកា ដល់ខែឧសភា",
     "bestTimeToVisitEn": "November to May for calm crystal seas",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.9167,103.0833",
-    "latitude": 10.9167,
-    "longitude": 103.0833,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.933333,103.066667",
+    "latitude": 10.933333,
+    "longitude": 103.066667,
     "rating": 4.8,
     "reviewCount": 760,
     "highlightsKh": [
@@ -1775,7 +1928,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-176.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-53",
@@ -1808,7 +1964,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-53.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-54",
@@ -1841,7 +2000,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-54.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-55",
@@ -1874,7 +2036,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-55.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-56",
@@ -1917,7 +2082,10 @@
     "reviewerName": "Drone Cambodia Explorer",
     "galleryPhotos": [
       "/destinations/dest-104.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-57",
@@ -1950,7 +2118,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-109.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-58",
@@ -1983,7 +2154,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-58.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-59",
@@ -2016,7 +2190,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-59.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-60",
@@ -2049,7 +2226,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-60.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-61",
@@ -2082,7 +2262,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-162.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-62",
@@ -2115,7 +2298,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-62.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-63",
@@ -2148,7 +2334,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-165.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-64",
@@ -2181,7 +2370,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-172.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-65",
@@ -2214,7 +2406,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-65.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-66",
@@ -2247,7 +2442,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-233.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-67",
@@ -2290,7 +2488,10 @@
     "reviewerName": "Heritage Lover KH",
     "galleryPhotos": [
       "/destinations/dest-156.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-68",
@@ -2323,7 +2524,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-180.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-69",
@@ -2343,9 +2547,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រាំង ខែវិច្ឆិកា ដល់មេសា",
     "bestTimeToVisitEn": "Dry season November to April for road access",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4114,104.9872",
-    "latitude": 13.4114,
-    "longitude": 104.9872,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.408,104.748472",
+    "latitude": 13.408,
+    "longitude": 104.748472,
     "rating": 4.7,
     "reviewCount": 380,
     "highlightsKh": [
@@ -2356,7 +2560,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-184.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-70",
@@ -2389,7 +2596,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-244.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-71",
@@ -2422,7 +2632,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-249.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-72",
@@ -2455,7 +2668,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-216.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-73",
@@ -2475,9 +2691,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៧:៣០ ដល់ ១០:៣០",
     "bestTimeToVisitEn": "Early morning for ascending the steps",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5989,105.0114",
-    "latitude": 12.5989,
-    "longitude": 105.0114,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.633333,105",
+    "latitude": 12.633333,
+    "longitude": 105,
     "rating": 4.6,
     "reviewCount": 680,
     "highlightsKh": [
@@ -2488,7 +2704,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-92.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-74",
@@ -2521,7 +2740,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-30.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-75",
@@ -2554,7 +2776,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-235.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-76",
@@ -2587,7 +2812,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-53.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-77",
@@ -2620,7 +2848,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-77.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-78",
@@ -2653,7 +2884,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-243.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-79",
@@ -2686,7 +2920,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-79.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-80",
@@ -2719,7 +2956,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-248.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-81",
@@ -2752,7 +2992,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-244.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-82",
@@ -2785,7 +3028,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-82.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-83",
@@ -2818,7 +3064,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-82.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-84",
@@ -2851,7 +3100,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-84.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-85",
@@ -2884,7 +3136,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-85.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-86",
@@ -2917,7 +3172,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-117.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-87",
@@ -2950,7 +3208,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-87.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-88",
@@ -2983,7 +3244,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-88.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-89",
@@ -3016,7 +3280,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-162.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-90",
@@ -3049,7 +3316,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-90.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-91",
@@ -3082,7 +3352,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-91.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-92",
@@ -3125,7 +3398,10 @@
     "reviewerName": "Adventure Boys KH",
     "galleryPhotos": [
       "/destinations/dest-92.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-93",
@@ -3158,7 +3434,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-173.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-94",
@@ -3191,7 +3470,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-168.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-95",
@@ -3224,7 +3506,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-95.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-96",
@@ -3257,7 +3542,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-96.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-97",
@@ -3290,7 +3578,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-97.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-98",
@@ -3323,7 +3614,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-98.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-99",
@@ -3356,7 +3650,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-249.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-100",
@@ -3376,9 +3673,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹកព្រលឹម",
     "bestTimeToVisitEn": "Early morning to climb comfortably",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0348,104.9872",
-    "latitude": 11.0348,
-    "longitude": 104.9872,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.184444,104.823333",
+    "latitude": 11.184444,
+    "longitude": 104.823333,
     "rating": 4.7,
     "reviewCount": 680,
     "highlightsKh": [
@@ -3389,7 +3686,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-187.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-101",
@@ -3409,9 +3709,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេញមួយឆ្នាំ ពិសេសចុងសប្តាហ៍",
     "bestTimeToVisitEn": "Year-round weekend picnic spot",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.2814,104.8872",
-    "latitude": 11.2814,
-    "longitude": 104.8872,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.33592,104.84551",
+    "latitude": 11.33592,
+    "longitude": 104.84551,
     "rating": 4.6,
     "reviewCount": 840,
     "highlightsKh": [
@@ -3422,7 +3722,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-201.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-102",
@@ -3455,7 +3758,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-216.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-103",
@@ -3488,7 +3794,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-31.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-104",
@@ -3521,7 +3830,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-104.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-105",
@@ -3554,7 +3866,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-105.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-106",
@@ -3587,7 +3902,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-237.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-107",
@@ -3620,7 +3938,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-107.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-108",
@@ -3653,7 +3974,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-84.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-109",
@@ -3686,7 +4010,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-109.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-110",
@@ -3719,7 +4046,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-248.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-111",
@@ -3752,7 +4082,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-95.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-112",
@@ -3785,7 +4118,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-255.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-113",
@@ -3818,7 +4154,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-113.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-114",
@@ -3851,7 +4190,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-260.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-115",
@@ -3884,7 +4226,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-159.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-116",
@@ -3917,7 +4262,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-161.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-117",
@@ -3950,7 +4298,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-117.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-118",
@@ -3983,7 +4334,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-118.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-119",
@@ -4016,7 +4370,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-119.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-120",
@@ -4051,7 +4408,10 @@
     "socialPlatform": "tiktok",
     "galleryPhotos": [
       "/destinations/dest-118.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-121",
@@ -4086,7 +4446,10 @@
     "socialPlatform": "tiktok",
     "galleryPhotos": [
       "/destinations/dest-122.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-122",
@@ -4119,7 +4482,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-122.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-123",
@@ -4153,7 +4519,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-131.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-124",
@@ -4188,7 +4557,10 @@
     "socialPlatform": "facebook",
     "galleryPhotos": [
       "/destinations/dest-198.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-125",
@@ -4222,7 +4594,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-136.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-126",
@@ -4256,7 +4631,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-143.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-127",
@@ -4290,7 +4668,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-156.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-128",
@@ -4324,7 +4705,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-128.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-129",
@@ -4358,7 +4742,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-129.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-130",
@@ -4392,7 +4779,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-130.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-131",
@@ -4426,7 +4816,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-131.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-132",
@@ -4460,7 +4853,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-216.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-133",
@@ -4494,7 +4890,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-133.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-134",
@@ -4528,7 +4927,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-227.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-135",
@@ -4562,7 +4964,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-235.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-136",
@@ -4596,7 +5001,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-136.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-137",
@@ -4630,7 +5038,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-137.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-138",
@@ -4664,7 +5075,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-138.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-139",
@@ -4698,7 +5112,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-247.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-140",
@@ -4732,7 +5149,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-140.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-141",
@@ -4766,7 +5186,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-141.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-142",
@@ -4800,7 +5223,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-142.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-143",
@@ -4834,7 +5260,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-143.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-144",
@@ -4868,7 +5297,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-144.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-145",
@@ -4902,7 +5334,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-145.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-146",
@@ -4936,7 +5371,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-146.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-147",
@@ -4970,7 +5408,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-147.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-148",
@@ -5004,7 +5445,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-154.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-149",
@@ -5038,7 +5482,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-149.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-150",
@@ -5072,7 +5519,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-150.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-152",
@@ -5106,7 +5556,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-152.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-153",
@@ -5140,7 +5593,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-153.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-154",
@@ -5174,7 +5630,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-154.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-155",
@@ -5208,7 +5667,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-136.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-156",
@@ -5242,7 +5704,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-156.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-157",
@@ -5276,7 +5741,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-157.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-158",
@@ -5310,7 +5778,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-158.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-159",
@@ -5344,7 +5815,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-159.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-160",
@@ -5378,7 +5852,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-160.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-161",
@@ -5412,7 +5889,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-161.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-162",
@@ -5446,7 +5926,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-162.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-163",
@@ -5480,7 +5963,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-163.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-164",
@@ -5514,7 +6000,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-164.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-165",
@@ -5548,7 +6037,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-165.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-166",
@@ -5582,7 +6074,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-166.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-167",
@@ -5616,7 +6111,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-150.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-168",
@@ -5650,7 +6148,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-168.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-169",
@@ -5670,9 +6171,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលល្ងាច ម៉ោង ០៣:០០ - ០៦:០០",
     "bestTimeToVisitEn": "Late Afternoon 03:00 PM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5264,104.4289",
-    "latitude": 10.5264,
-    "longitude": 104.4289,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.463558,104.380566",
+    "latitude": 10.463558,
+    "longitude": 104.380566,
     "rating": 4.7,
     "reviewCount": 1680,
     "highlightsKh": [
@@ -5684,7 +6185,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-153.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-170",
@@ -5718,7 +6222,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-170.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-172",
@@ -5752,7 +6259,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-172.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-173",
@@ -5786,7 +6296,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-173.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-174",
@@ -5820,7 +6333,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-174.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-175",
@@ -5840,7 +6356,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលរសៀល ម៉ោង ០៨:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Daytime 08:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6667,102.9500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6667,102.95",
     "latitude": 11.6667,
     "longitude": 102.95,
     "rating": 4.6,
@@ -5854,7 +6370,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-175.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-176",
@@ -5888,7 +6407,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-176.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-177",
@@ -5922,7 +6444,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-173.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-178",
@@ -5956,7 +6481,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-178.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-179",
@@ -5976,7 +6504,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែវិច្ឆិកា ដល់ ខែឧសភា",
     "bestTimeToVisitEn": "Nov - May",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4500,103.4000",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.45,103.4",
     "latitude": 11.45,
     "longitude": 103.4,
     "rating": 4.8,
@@ -5990,7 +6518,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-194.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-180",
@@ -6024,7 +6555,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-180.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-181",
@@ -6058,7 +6592,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-122.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-182",
@@ -6092,7 +6629,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-140.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-183",
@@ -6126,7 +6666,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-141.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-184",
@@ -6160,7 +6703,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-184.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-185",
@@ -6180,7 +6726,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ឬពេលល្ងាច ម៉ោង ០៤:០០ - ០៦:០០",
     "bestTimeToVisitEn": "Late Afternoon 04:00 PM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.9667,103.0500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.9667,103.05",
     "latitude": 12.9667,
     "longitude": 103.05,
     "rating": 4.6,
@@ -6194,7 +6740,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-229.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-186",
@@ -6228,7 +6777,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-146.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-187",
@@ -6262,7 +6814,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-187.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-188",
@@ -6282,7 +6837,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវវស្សា និងដើមរដូវរំហើយ (ខែកក្កដា ដល់ ខែមករា)",
     "bestTimeToVisitEn": "Jul - Jan",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2167,103.3500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2167,103.35",
     "latitude": 12.2167,
     "longitude": 103.35,
     "rating": 4.7,
@@ -6296,7 +6851,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-53.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-189",
@@ -6330,7 +6888,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-184.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-190",
@@ -6364,7 +6925,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-62.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-191",
@@ -6384,7 +6948,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹកព្រលឹម ម៉ោង ០៦:០០ - ០៩:០០ (សមុទ្រពពក)",
     "bestTimeToVisitEn": "Early Morning 06:00 AM - 09:00 AM (Sea of clouds)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2833,103.2500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2833,103.25",
     "latitude": 12.2833,
     "longitude": 103.25,
     "rating": 4.8,
@@ -6398,7 +6962,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-85.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-192",
@@ -6432,7 +6999,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-118.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-193",
@@ -6452,7 +7022,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែវិច្ឆិកា ដល់ ខែឧសភា",
     "bestTimeToVisitEn": "Nov - May (Dry season)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0500,103.1833",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.05,103.1833",
     "latitude": 12.05,
     "longitude": 103.1833,
     "rating": 4.8,
@@ -6466,7 +7036,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-88.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-194",
@@ -6500,7 +7073,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-194.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-195",
@@ -6534,7 +7110,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-95.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-196",
@@ -6568,7 +7147,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-144.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-197",
@@ -6588,7 +7170,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែសីហា ដល់ ខែកុម្ភៈ",
     "bestTimeToVisitEn": "Aug - Feb",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2500,106.9500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.25,106.95",
     "latitude": 12.25,
     "longitude": 106.95,
     "rating": 4.8,
@@ -6602,7 +7184,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-109.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-198",
@@ -6622,7 +7207,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:០០ - ១១:០០ (ភ្លក្សកាហ្វេក្តៅ)",
     "bestTimeToVisitEn": "Morning 08:00 AM - 11:00 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4500,107.1950",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.45,107.195",
     "latitude": 12.45,
     "longitude": 107.195,
     "rating": 4.8,
@@ -6636,7 +7221,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-198.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-199",
@@ -6656,7 +7244,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែវិច្ឆិកា ដល់ ខែមេសា",
     "bestTimeToVisitEn": "Nov - Apr",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.1833,106.8500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.1833,106.85",
     "latitude": 12.1833,
     "longitude": 106.85,
     "rating": 4.6,
@@ -6670,7 +7258,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-159.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-200",
@@ -6690,7 +7281,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវវស្សា ខែកក្កដា ដល់ ខែធ្នូ",
     "bestTimeToVisitEn": "Jul - Dec",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.3500,107.0833",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.35,107.0833",
     "latitude": 12.35,
     "longitude": 107.0833,
     "rating": 4.7,
@@ -6704,7 +7295,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-161.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-201",
@@ -6738,7 +7332,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-201.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-202",
@@ -6772,7 +7369,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-163.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-203",
@@ -6806,7 +7406,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-165.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-204",
@@ -6826,7 +7429,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:០០ - ១១:៣០",
     "bestTimeToVisitEn": "Morning 08:00 AM - 11:30 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7000,107.2167",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7,107.2167",
     "latitude": 13.7,
     "longitude": 107.2167,
     "rating": 4.6,
@@ -6840,7 +7443,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-118.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-205",
@@ -6874,7 +7480,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-173.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-206",
@@ -6894,7 +7503,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវវស្សា និងរដូវរំហើយ",
     "bestTimeToVisitEn": "Aug - Jan",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.6167,106.8500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.6167,106.85",
     "latitude": 13.6167,
     "longitude": 106.85,
     "rating": 4.6,
@@ -6908,7 +7517,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-174.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-207",
@@ -6942,7 +7554,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-279.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-208",
@@ -6976,7 +7591,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-92.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-209",
@@ -7010,7 +7628,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-97.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-210",
@@ -7044,7 +7665,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-128.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-211",
@@ -7078,7 +7702,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-129.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-212",
@@ -7112,7 +7739,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-130.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-213",
@@ -7146,7 +7776,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-131.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-214",
@@ -7166,7 +7799,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:០០ - ១១:០០",
     "bestTimeToVisitEn": "Morning 08:00 AM - 11:00 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8750,105.0417",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.875,105.0417",
     "latitude": 12.875,
     "longitude": 105.0417,
     "rating": 4.8,
@@ -7180,7 +7813,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-133.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-215",
@@ -7214,7 +7850,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-136.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-216",
@@ -7248,7 +7887,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-216.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-217",
@@ -7282,7 +7924,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-122.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-218",
@@ -7302,9 +7947,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវទឹកឡើង ខែកញ្ញា ដល់ ខែកុម្ភៈ",
     "bestTimeToVisitEn": "Sep - Feb",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8167,104.3333",
-    "latitude": 12.8167,
-    "longitude": 104.3333,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.818889,104.276389",
+    "latitude": 12.818889,
+    "longitude": 104.276389,
     "rating": 4.8,
     "reviewCount": 1420,
     "highlightsKh": [
@@ -7316,7 +7961,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-62.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-219",
@@ -7350,7 +7998,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-219.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-221",
@@ -7384,7 +8035,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-201.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-222",
@@ -7404,7 +8058,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:៣០ - ១១:៣០",
     "bestTimeToVisitEn": "Morning 08:30 AM - 11:30 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0500,105.1000",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.05,105.1",
     "latitude": 12.05,
     "longitude": 105.1,
     "rating": 4.8,
@@ -7418,7 +8072,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-146.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-223",
@@ -7438,7 +8095,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវវស្សា ខែកក្កដា ដល់ ខែធ្នូ",
     "bestTimeToVisitEn": "Jul - Dec",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0667,105.3500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0667,105.35",
     "latitude": 12.0667,
     "longitude": 105.35,
     "rating": 4.6,
@@ -7452,7 +8109,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-95.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-224",
@@ -7486,7 +8146,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-170.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-225",
@@ -7520,7 +8183,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-225.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-226",
@@ -7540,7 +8206,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលល្ងាច ម៉ោង ០៣:៣០ - ០៦:០០",
     "bestTimeToVisitEn": "Late Afternoon 03:30 PM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.8500,105.8500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.85,105.85",
     "latitude": 11.85,
     "longitude": 105.85,
     "rating": 4.7,
@@ -7554,7 +8220,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-117.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-227",
@@ -7588,7 +8257,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-227.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-228",
@@ -7622,7 +8294,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-161.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-229",
@@ -7642,7 +8317,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែមិថុនា ដល់ ខែមករា (រដូវស្មៅបៃតង និងពពក)",
     "bestTimeToVisitEn": "Jun - Jan (Peak sea of clouds)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6667,104.0500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6667,104.05",
     "latitude": 11.6667,
     "longitude": 104.05,
     "rating": 5,
@@ -7661,7 +8336,10 @@
     "socialLikes": "320K Likes",
     "galleryPhotos": [
       "/destinations/dest-229.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-230",
@@ -7695,7 +8373,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-230.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-231",
@@ -7729,7 +8410,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-231.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-232",
@@ -7749,7 +8433,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវវស្សា ខែកក្កដា ដល់ ខែមករា",
     "bestTimeToVisitEn": "Jul - Jan",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.3167,104.0500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.3167,104.05",
     "latitude": 11.3167,
     "longitude": 104.05,
     "rating": 4.7,
@@ -7763,7 +8447,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-172.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-233",
@@ -7797,7 +8484,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-233.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-234",
@@ -7817,7 +8507,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែមិថុនា ដល់ ខែមករា",
     "bestTimeToVisitEn": "Jun - Jan",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6500,104.0333",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.65,104.0333",
     "latitude": 11.65,
     "longitude": 104.0333,
     "rating": 4.9,
@@ -7831,7 +8521,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-58.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-235",
@@ -7851,7 +8544,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:០០ - ១១:០០",
     "bestTimeToVisitEn": "Morning 08:00 AM - 11:00 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2500,104.7500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.25,104.75",
     "latitude": 12.25,
     "longitude": 104.75,
     "rating": 4.6,
@@ -7865,7 +8558,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-235.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-236",
@@ -7899,7 +8595,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-85.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-237",
@@ -7933,7 +8632,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-237.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-238",
@@ -7953,7 +8655,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រាំង ខែវិច្ឆិកា ដល់ ខែឧសភា",
     "bestTimeToVisitEn": "Nov - May",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.1500,104.4500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.15,104.45",
     "latitude": 12.15,
     "longitude": 104.45,
     "rating": 4.6,
@@ -7967,7 +8669,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-92.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-239",
@@ -8001,7 +8706,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-82.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-240",
@@ -8035,7 +8743,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-240.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-241",
@@ -8069,7 +8780,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-122.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-242",
@@ -8103,7 +8817,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-242.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-243",
@@ -8123,7 +8840,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ឬក្នុងពិធីបុណ្យចូលឆ្នាំខ្មែរ",
     "bestTimeToVisitEn": "Morning / Khmer New Year (Performance season)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6000,105.0167",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6,105.0167",
     "latitude": 11.6,
     "longitude": 105.0167,
     "rating": 4.8,
@@ -8137,7 +8854,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-243.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-244",
@@ -8157,7 +8877,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ថ្ងៃចុងសប្តាហ៍ ម៉ោង ១០:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Daytime 10:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4500,104.9333",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.45,104.9333",
     "latitude": 11.45,
     "longitude": 104.9333,
     "rating": 4.6,
@@ -8171,7 +8891,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-244.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-245",
@@ -8191,9 +8914,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:៣០ - ១១:៣០",
     "bestTimeToVisitEn": "Morning 08:30 AM - 11:30 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.9833,105.0167",
-    "latitude": 10.9833,
-    "longitude": 105.0167,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.995,104.974722",
+    "latitude": 10.995,
+    "longitude": 104.974722,
     "rating": 4.8,
     "reviewCount": 1420,
     "highlightsKh": [
@@ -8205,7 +8928,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-145.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-246",
@@ -8239,7 +8965,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-143.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-247",
@@ -8273,7 +9002,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-247.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-248",
@@ -8293,7 +9025,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៧:៣០ - ១០:៣០",
     "bestTimeToVisitEn": "Morning 07:30 AM - 10:30 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0333,104.8500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0333,104.85",
     "latitude": 11.0333,
     "longitude": 104.85,
     "rating": 4.8,
@@ -8307,7 +9039,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-248.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-249",
@@ -8327,7 +9062,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:០០ - ១១:០០",
     "bestTimeToVisitEn": "Morning 08:00 AM - 11:00 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.9500,104.7833",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.95,104.7833",
     "latitude": 10.95,
     "longitude": 104.7833,
     "rating": 4.6,
@@ -8341,7 +9076,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-249.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-250",
@@ -8375,7 +9113,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-250.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-251",
@@ -8395,7 +9136,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រាំង ខែវិច្ឆិកា ដល់ ខែឧសភា",
     "bestTimeToVisitEn": "Dry season (November to May)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.7833,105.9500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.7833,105.95",
     "latitude": 12.7833,
     "longitude": 105.95,
     "rating": 4.8,
@@ -8409,7 +9150,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-269.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-252",
@@ -8429,7 +9173,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលរសៀល ម៉ោង ០៧:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Morning and afternoon 07:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.7983,105.9610",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.7983,105.961",
     "latitude": 12.7983,
     "longitude": 105.961,
     "rating": 4.7,
@@ -8443,7 +9187,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-252.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-253",
@@ -8463,7 +9210,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រាំង ខែធ្នូ ដល់ ខែមេសា",
     "bestTimeToVisitEn": "Dry season (December to April)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5500,105.9800",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.55,105.98",
     "latitude": 12.55,
     "longitude": 105.98,
     "rating": 4.6,
@@ -8477,7 +9224,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-53.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-254",
@@ -8497,7 +9247,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រាំង និងរដូវត្រជាក់ ខែវិច្ឆិកា ដល់ ខែឧសភា",
     "bestTimeToVisitEn": "Cool & dry season (November to May)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.6050,106.0120",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.605,106.012",
     "latitude": 12.605,
     "longitude": 106.012,
     "rating": 4.6,
@@ -8511,7 +9261,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-117.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-255",
@@ -8531,7 +9284,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលរសៀល ម៉ោង ០៧:០០ - ១៧:៣០",
     "bestTimeToVisitEn": "Morning and afternoon 07:00 AM - 05:30 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4695,106.0210",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4695,106.021",
     "latitude": 12.4695,
     "longitude": 106.021,
     "rating": 4.8,
@@ -8545,7 +9298,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-255.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-256",
@@ -8565,7 +9321,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រលឹម ឬពេលល្ងាចថ្ងៃលិច ម៉ោង ០៦:០០ - ១៨:០០",
     "bestTimeToVisitEn": "Sunrise or sunset 06:00 AM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5833,106.0250",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5833,106.025",
     "latitude": 12.5833,
     "longitude": 106.025,
     "rating": 4.7,
@@ -8579,7 +9335,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-256.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-257",
@@ -8613,7 +9372,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-172.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-258",
@@ -8633,7 +9395,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រៀងរាល់ថ្ងៃធ្វើការ ម៉ោង ០៨:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Monday to Sunday 08:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5283,105.9720",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5283,105.972",
     "latitude": 13.5283,
     "longitude": 105.972,
     "rating": 4.8,
@@ -8647,7 +9409,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-156.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-259",
@@ -8667,7 +9432,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលល្ងាចថ្ងៃលិច ម៉ោង ០៤:៣០ - ០៦:៣០",
     "bestTimeToVisitEn": "Sunset 04:30 PM - 06:30 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5300,105.9650",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.53,105.965",
     "latitude": 13.53,
     "longitude": 105.965,
     "rating": 4.7,
@@ -8681,7 +9446,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-165.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-260",
@@ -8701,7 +9469,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹកត្រជាក់ ម៉ោង ០៧:០០ - ១១:០០",
     "bestTimeToVisitEn": "Cool morning 07:00 AM - 11:00 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5650,105.9380",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.565,105.938",
     "latitude": 13.565,
     "longitude": 105.938,
     "rating": 4.6,
@@ -8715,7 +9483,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-260.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-261",
@@ -8749,7 +9520,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-230.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-263",
@@ -8783,7 +9557,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-240.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-264",
@@ -8817,7 +9594,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-264.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-265",
@@ -8851,7 +9631,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-265.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-266",
@@ -8871,7 +9654,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលល្ងាច ម៉ោង ០៤:៣០ - ២០:០០",
     "bestTimeToVisitEn": "Evening 04:30 PM - 08:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5850,102.9750",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.585,102.975",
     "latitude": 13.585,
     "longitude": 102.975,
     "rating": 4.7,
@@ -8885,7 +9668,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-141.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-267",
@@ -8905,7 +9691,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលរសៀល ម៉ោង ០៦:៣០ - ១៧:៣០",
     "bestTimeToVisitEn": "Morning & afternoon 06:30 AM - 05:30 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.0500,102.9833",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.05,102.9833",
     "latitude": 14.05,
     "longitude": 102.9833,
     "rating": 4.7,
@@ -8919,7 +9705,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-279.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-268",
@@ -8953,7 +9742,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-268.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-269",
@@ -8973,7 +9765,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលល្ងាចថ្ងៃលិច ម៉ោង ០៤:០០ - ០៦:០០",
     "bestTimeToVisitEn": "Sunset 04:00 PM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.0750,103.1250",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.075,103.125",
     "latitude": 14.075,
     "longitude": 103.125,
     "rating": 4.7,
@@ -8987,7 +9779,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-269.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-270",
@@ -9007,7 +9802,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលរសៀល និងពេលល្ងាច ម៉ោង ០៣:០០ - ១៨:០០",
     "bestTimeToVisitEn": "Afternoon and sunset 03:00 PM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4333,103.0500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4333,103.05",
     "latitude": 13.4333,
     "longitude": 103.05,
     "rating": 4.6,
@@ -9021,7 +9816,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-30.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-271",
@@ -9041,9 +9839,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រលឹមអ័ព្ទ និងពេលល្ងាចថ្ងៃលិច ម៉ោង ០៦:០០ - ១៨:០០",
     "bestTimeToVisitEn": "Early morning mist & sunset 06:00 AM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.4167,104.0500",
-    "latitude": 14.4167,
-    "longitude": 104.05,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.3423,104.06484",
+    "latitude": 14.3423,
+    "longitude": 104.06484,
     "rating": 4.8,
     "reviewCount": 1100,
     "highlightsKh": [
@@ -9055,7 +9853,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-113.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-272",
@@ -9075,7 +9876,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវរងា និងរដូវប្រាំង ខែវិច្ឆិកា ដល់ ខែមេសា",
     "bestTimeToVisitEn": "Cool and dry season (November to April)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.4333,103.7000",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.4333,103.7",
     "latitude": 14.4333,
     "longitude": 103.7,
     "rating": 4.6,
@@ -9089,7 +9890,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-119.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-273",
@@ -9123,7 +9927,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-173.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-274",
@@ -9143,7 +9950,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលរសៀល និងពេលល្ងាច ម៉ោង ០៤:០០ - ១៨:៣០",
     "bestTimeToVisitEn": "Afternoon & sunset 04:00 PM - 06:30 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.3500,104.2333",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.35,104.2333",
     "latitude": 14.35,
     "longitude": 104.2333,
     "rating": 4.6,
@@ -9157,7 +9964,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-274.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-275",
@@ -9177,9 +9987,9 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលរសៀល ម៉ោង ០៧:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Morning & afternoon 07:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.2833,104.5500",
-    "latitude": 14.2833,
-    "longitude": 104.55,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.188,104.353",
+    "latitude": 14.188,
+    "longitude": 104.353,
     "rating": 4.7,
     "reviewCount": 610,
     "highlightsKh": [
@@ -9191,7 +10001,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-275.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-276",
@@ -9225,7 +10038,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-140.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-277",
@@ -9245,7 +10061,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រាំង ខែវិច្ឆិកា ដល់ ខែឧសភា",
     "bestTimeToVisitEn": "Dry season (November to May)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.3000,103.6500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.3,103.65",
     "latitude": 14.3,
     "longitude": 103.65,
     "rating": 4.9,
@@ -9259,7 +10075,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-231.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-278",
@@ -9279,7 +10098,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រៀងរាល់ថ្ងៃ ម៉ោង ០៨:០០ - ១៧:៣០",
     "bestTimeToVisitEn": "Daily 08:00 AM - 05:30 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8333,102.6000",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8333,102.6",
     "latitude": 12.8333,
     "longitude": 102.6,
     "rating": 4.8,
@@ -9293,7 +10112,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-91.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-279",
@@ -9313,7 +10135,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលរសៀល ម៉ោង ០៧:០០ - ១៧:៣០",
     "bestTimeToVisitEn": "Morning & afternoon 07:00 AM - 05:30 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8500,102.6167",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.85,102.6167",
     "latitude": 12.85,
     "longitude": 102.6167,
     "rating": 4.7,
@@ -9327,7 +10149,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-279.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-280",
@@ -9347,7 +10172,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវវស្សា និងដើមរដូវរងា ខែសីហា ដល់ ខែកុម្ភៈ",
     "bestTimeToVisitEn": "Rainy & early dry season (August to February)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8000,102.6333",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8,102.6333",
     "latitude": 12.8,
     "longitude": 102.6333,
     "rating": 4.8,
@@ -9361,7 +10186,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-104.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-281",
@@ -9395,7 +10223,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-85.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-282",
@@ -9429,7 +10260,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-256.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-283",
@@ -9449,7 +10283,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រមូលផល ខែមិថុនា ដល់ ខែតុលា",
     "bestTimeToVisitEn": "Harvesting peak (June to October)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8667,102.6500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8667,102.65",
     "latitude": 12.8667,
     "longitude": 102.65,
     "rating": 4.8,
@@ -9463,7 +10297,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-53.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-284",
@@ -9483,7 +10320,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលល្ងាច ម៉ោង ០៦:០០ - ១៨:០០",
     "bestTimeToVisitEn": "Morning and evening 06:00 AM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8583,102.6250",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8583,102.625",
     "latitude": 12.8583,
     "longitude": 102.625,
     "rating": 4.7,
@@ -9497,7 +10334,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-227.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-285",
@@ -9517,7 +10357,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រលឹម និងពេលល្ងាចសត្វហើរចូលសំបុក ម៉ោង ០៦:០០ - ១៨:០០",
     "bestTimeToVisitEn": "Sunrise & sunset roosting 06:00 AM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4500,105.3500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.45,105.35",
     "latitude": 11.45,
     "longitude": 105.35,
     "rating": 4.9,
@@ -9531,7 +10371,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-137.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-286",
@@ -9565,7 +10408,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-237.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-287",
@@ -9599,7 +10445,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-165.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-288",
@@ -9633,7 +10482,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-141.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-289",
@@ -9653,7 +10505,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលរសៀល ម៉ោង ០៧:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Morning & afternoon 07:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.3833,105.3000",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.3833,105.3",
     "latitude": 11.3833,
     "longitude": 105.3,
     "rating": 4.6,
@@ -9667,7 +10519,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-247.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-290",
@@ -9701,7 +10556,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-174.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-291",
@@ -9735,7 +10593,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-156.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-292",
@@ -9769,7 +10630,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-255.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-293",
@@ -9789,7 +10653,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលរសៀល និងពេលយប់ ម៉ោង ០៤:០០ - ២២:០០",
     "bestTimeToVisitEn": "Afternoon & night bazaar 04:00 PM - 10:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0833,106.1500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0833,106.15",
     "latitude": 11.0833,
     "longitude": 106.15,
     "rating": 4.7,
@@ -9803,7 +10667,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-256.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-294",
@@ -9837,7 +10704,10 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-268.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-295",
@@ -9857,7 +10727,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹកត្រជាក់ ម៉ោង ០៧:០០ - ១១:០០",
     "bestTimeToVisitEn": "Cool morning 07:00 AM - 11:00 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0500,105.7333",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.05,105.7333",
     "latitude": 11.05,
     "longitude": 105.7333,
     "rating": 4.7,
@@ -9871,7 +10741,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-268.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-296",
@@ -9891,7 +10764,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវរងា និងរដូវប្រាំង ខែវិច្ឆិកា ដល់ ខែមេសា",
     "bestTimeToVisitEn": "Cool and dry season (November to April)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.2500,105.9500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.25,105.95",
     "latitude": 11.25,
     "longitude": 105.95,
     "rating": 4.6,
@@ -9905,7 +10778,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-269.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-297",
@@ -9939,7 +10815,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-138.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-299",
@@ -9959,7 +10838,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលរសៀល និងពេលល្ងាច ម៉ោង ០៣:០០ - ១៨:០០",
     "bestTimeToVisitEn": "Afternoon & sunset 03:00 PM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.1000,105.9000",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.1,105.9",
     "latitude": 11.1,
     "longitude": 105.9,
     "rating": 4.6,
@@ -9973,7 +10852,10 @@
     "isFeatured": false,
     "galleryPhotos": [
       "/destinations/dest-31.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-300",
@@ -9993,7 +10875,7 @@
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ថ្ងៃចន្ទ ដល់ ថ្ងៃសុក្រ ម៉ោង ០៨:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Monday to Friday 08:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0850,105.8020",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.085,105.802",
     "latitude": 11.085,
     "longitude": 105.802,
     "rating": 4.7,
@@ -10007,6 +10889,9 @@
     "isFeatured": true,
     "galleryPhotos": [
       "/destinations/dest-142.jpg"
-    ]
+    ],
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   }
 ]

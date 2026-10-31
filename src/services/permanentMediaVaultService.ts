@@ -15,7 +15,22 @@
  * Default seed images NEVER overwrite any record present in this vault.
  */
 
-import { FoodItem, Restaurant, TouristDestination, TrendingFoodItem, RestaurantMenuItem, RestaurantReview, RestaurantPriceLevel, GoogleMapsPlaceMetadata, ShopPhotoReplacementRequest } from '../types';
+import {
+  FoodItem,
+  Restaurant,
+  TouristDestination,
+  TrendingFoodItem,
+  RestaurantMenuItem,
+  RestaurantReview,
+  RestaurantPriceLevel,
+  GoogleMapsPlaceMetadata,
+  ShopPhotoReplacementRequest,
+  LocationVerificationStatus,
+  isSeedRestaurantId,
+  isValidCambodiaCoordinates,
+  isValidOfficialGooglePlaceId,
+  buildCanonicalGoogleMapsPinUrl,
+} from '../types';
 import { initial100Destinations } from '../data/seedDestinations';
 import { initial200Foods } from '../data/seedFoods';
 import {
@@ -113,6 +128,10 @@ export interface RestaurantMediaOverride {
   googlePlaceId?: string;
   dataSource?: Restaurant['dataSource'];
   googleMapsMeta?: GoogleMapsPlaceMetadata;
+  locationVerificationStatus?: LocationVerificationStatus;
+  locationNeedsReview?: boolean;
+  locationReviewNote?: string;
+  locationVerifiedAt?: string;
   isAdminEdited?: boolean;
   adminEditedAt?: string;
   pendingPhotoReplacement?: ShopPhotoReplacementRequest;
@@ -139,6 +158,10 @@ export interface DestinationMediaOverride {
   googlePlaceId?: string;
   dataSource?: TouristDestination['dataSource'];
   googleMapsMeta?: GoogleMapsPlaceMetadata;
+  locationVerificationStatus?: LocationVerificationStatus;
+  locationNeedsReview?: boolean;
+  locationReviewNote?: string;
+  locationVerifiedAt?: string;
   isAdminEdited?: boolean;
   adminEditedAt?: string;
   pendingPhotoReplacement?: ShopPhotoReplacementRequest;
@@ -711,6 +734,10 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     googlePlaceId: rest.googlePlaceId,
     dataSource: rest.dataSource,
     googleMapsMeta: rest.googleMapsMeta,
+    locationVerificationStatus: rest.locationVerificationStatus,
+    locationNeedsReview: rest.locationNeedsReview,
+    locationReviewNote: rest.locationReviewNote,
+    locationVerifiedAt: rest.locationVerifiedAt,
     isAdminEdited: rest.isAdminEdited ?? true,
     adminEditedAt: rest.adminEditedAt || now,
     pendingPhotoReplacement: rest.pendingPhotoReplacement,
@@ -814,6 +841,10 @@ export function recordPermanentDestinationOverride(dest: TouristDestination): vo
     googlePlaceId: dest.googlePlaceId,
     dataSource: dest.dataSource,
     googleMapsMeta: dest.googleMapsMeta,
+    locationVerificationStatus: dest.locationVerificationStatus,
+    locationNeedsReview: dest.locationNeedsReview,
+    locationReviewNote: dest.locationReviewNote,
+    locationVerifiedAt: dest.locationVerifiedAt,
     isAdminEdited: dest.isAdminEdited ?? true,
     adminEditedAt: dest.adminEditedAt || now,
     isCustomPhoto: true,
@@ -1177,10 +1208,20 @@ export function applyRestaurantOverrides(
       ownerId: ov.ownerId || r.ownerId,
       ownerName: ov.ownerName || r.ownerName,
       ownerEmail: ov.ownerEmail || r.ownerEmail,
-      mapUrl: ov.mapUrl || r.mapUrl,
-      latitude: typeof ov.latitude === 'number' ? ov.latitude : r.latitude,
-      longitude: typeof ov.longitude === 'number' ? ov.longitude : r.longitude,
-      googlePlaceId: ov.googlePlaceId || r.googlePlaceId,
+      ...(Boolean(ov.locationVerifiedAt) || !isSeedRestaurantId(r.id)
+        ? {
+            mapUrl: ov.mapUrl !== undefined ? ov.mapUrl : r.mapUrl,
+            latitude: typeof ov.latitude === 'number' ? ov.latitude : r.latitude,
+            longitude: typeof ov.longitude === 'number' ? ov.longitude : r.longitude,
+            locationVerificationStatus: ov.locationVerificationStatus ?? r.locationVerificationStatus,
+            locationNeedsReview: ov.locationNeedsReview ?? r.locationNeedsReview,
+            locationReviewNote: ov.locationReviewNote ?? r.locationReviewNote,
+            locationVerifiedAt: ov.locationVerifiedAt ?? r.locationVerifiedAt,
+          }
+        : {}),
+      googlePlaceId: isValidOfficialGooglePlaceId(ov.googlePlaceId)
+        ? ov.googlePlaceId
+        : (isValidOfficialGooglePlaceId(r.googlePlaceId) ? r.googlePlaceId : undefined),
       dataSource: ov.dataSource || r.dataSource,
       googleMapsMeta: ov.googleMapsMeta || r.googleMapsMeta,
       isAdminEdited: ov.isAdminEdited ?? r.isAdminEdited,
@@ -1198,6 +1239,8 @@ export function applyRestaurantOverrides(
       anyChanged = true;
       seenIds.add(ovId);
       const photoUrl = ov.photoUrl || ov.profileImage || '/Shop/rest-1.jpg';
+      const hasValidOvCoords = isValidCambodiaCoordinates(ov.latitude, ov.longitude) && !ov.locationNeedsReview;
+      const cleanGpid = isValidOfficialGooglePlaceId(ov.googlePlaceId) ? ov.googlePlaceId : undefined;
       mapped.push({
         id: ovId,
         nameKh: ov.nameKh,
@@ -1218,9 +1261,13 @@ export function applyRestaurantOverrides(
         openingHoursKh: ov.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
         openingHoursEn: '07:00 AM - 09:00 PM',
         priceLevel: ov.priceLevel || '$$',
-        mapUrl: ov.mapUrl || 'https://maps.google.com',
-        latitude: typeof ov.latitude === 'number' ? ov.latitude : 11.5564,
-        longitude: typeof ov.longitude === 'number' ? ov.longitude : 104.9282,
+        mapUrl: hasValidOvCoords ? buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, cleanGpid) : '',
+        latitude: hasValidOvCoords ? ov.latitude! : 0,
+        longitude: hasValidOvCoords ? ov.longitude! : 0,
+        locationVerificationStatus: hasValidOvCoords ? 'verified' : 'needs_admin_review',
+        locationNeedsReview: !hasValidOvCoords,
+        locationReviewNote: hasValidOvCoords ? ov.locationReviewNote : (ov.locationReviewNote || 'Unverified custom shop GPS — flagged for Admin review'),
+        locationVerifiedAt: ov.locationVerifiedAt,
         rating: typeof ov.rating === 'number' && ov.rating > 0 ? ov.rating : 4.9,
         reviewCount: typeof ov.reviewCount === 'number' ? ov.reviewCount : 1,
         signatureDishesKh: ['ម្ហូបប្រចាំហាង'],
@@ -1316,12 +1363,22 @@ export function applyDestinationOverrides(
       provinceKh: ov.provinceKh || d.provinceKh,
       provinceEn: ov.provinceEn || d.provinceEn,
       addressKh: ov.addressKh || d.addressKh,
-      mapUrl: ov.mapUrl || d.mapUrl,
-      latitude: typeof ov.latitude === 'number' ? ov.latitude : d.latitude,
-      longitude: typeof ov.longitude === 'number' ? ov.longitude : d.longitude,
+      ...(Boolean(ov.locationVerifiedAt) || !seedItem
+        ? {
+            mapUrl: ov.mapUrl !== undefined ? ov.mapUrl : d.mapUrl,
+            latitude: typeof ov.latitude === 'number' ? ov.latitude : d.latitude,
+            longitude: typeof ov.longitude === 'number' ? ov.longitude : d.longitude,
+            locationVerificationStatus: ov.locationVerificationStatus ?? d.locationVerificationStatus,
+            locationNeedsReview: ov.locationNeedsReview ?? d.locationNeedsReview,
+            locationReviewNote: ov.locationReviewNote ?? d.locationReviewNote,
+            locationVerifiedAt: ov.locationVerifiedAt ?? d.locationVerifiedAt,
+          }
+        : {}),
       entryFeeKh: '',
       openingHoursKh: ov.openingHoursKh || d.openingHoursKh,
-      googlePlaceId: ov.googlePlaceId || d.googlePlaceId,
+      googlePlaceId: isValidOfficialGooglePlaceId(ov.googlePlaceId)
+        ? ov.googlePlaceId
+        : (isValidOfficialGooglePlaceId(d.googlePlaceId) ? d.googlePlaceId : undefined),
       dataSource: ov.dataSource || d.dataSource,
       googleMapsMeta: ov.googleMapsMeta || d.googleMapsMeta,
       isAdminEdited: ov.isAdminEdited ?? d.isAdminEdited,
@@ -1336,6 +1393,8 @@ export function applyDestinationOverrides(
     if (!seenIds.has(ovId) && ov && ov.photoUrl && !isObsoleteSeedPhoto(ov.photoUrl) && ov.nameKh) {
       anyChanged = true;
       seenIds.add(ovId);
+      const hasValidOvCoords = isValidCambodiaCoordinates(ov.latitude, ov.longitude) && !ov.locationNeedsReview;
+      const cleanGpid = isValidOfficialGooglePlaceId(ov.googlePlaceId) ? ov.googlePlaceId : undefined;
       mapped.push({
         id: ovId,
         nameKh: ov.nameKh,
@@ -1355,9 +1414,13 @@ export function applyDestinationOverrides(
         entranceFeeEn: '',
         bestTimeToVisitKh: ov.openingHoursKh || '០៧:០០ ព្រឹក - ០៦:០០ ល្ងាច',
         bestTimeToVisitEn: '07:00 AM - 06:00 PM',
-        mapUrl: ov.mapUrl || 'https://www.google.com/maps',
-        latitude: typeof ov.latitude === 'number' ? ov.latitude : 11.5564,
-        longitude: typeof ov.longitude === 'number' ? ov.longitude : 104.9282,
+        mapUrl: hasValidOvCoords ? buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, cleanGpid) : '',
+        latitude: hasValidOvCoords ? ov.latitude! : 0,
+        longitude: hasValidOvCoords ? ov.longitude! : 0,
+        locationVerificationStatus: hasValidOvCoords ? 'verified' : 'needs_admin_review',
+        locationNeedsReview: !hasValidOvCoords,
+        locationReviewNote: hasValidOvCoords ? ov.locationReviewNote : (ov.locationReviewNote || 'Unverified attraction GPS — flagged for Admin review'),
+        locationVerifiedAt: ov.locationVerifiedAt,
         rating: 4.8,
         reviewCount: 120,
         highlightsKh: [ov.nameKh],

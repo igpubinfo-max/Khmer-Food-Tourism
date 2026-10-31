@@ -12,7 +12,8 @@ import {
   getDynamicVipPlans, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
   getUserStoreQuotaSummary, UserStoreQuotaSummary,
   isAdminAccount, getVipFeaturedRotationConfig, sanitizeManualFeaturedSchedule,
-  parseSafeDateMs, isGpipRegisteredRestaurant, openRestaurantGoogleExternal
+  parseSafeDateMs, isGpipRegisteredRestaurant, openRestaurantGoogleExternal,
+  isValidCambodiaCoordinates, isValidOfficialGooglePlaceId, buildCanonicalGoogleMapsPinUrl
 } from '../types';
 import {
   verifyAbaPaymentAndReceipt,
@@ -855,9 +856,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       openingHoursKh: stripForeignScripts(r.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់'),
       openingHoursEn: stripForeignScripts(r.openingHoursEn || '07:00 AM - 09:00 PM'),
       priceLevel: r.priceLevel || '$$',
-      mapUrl: r.mapUrl || `https://maps.google.com/?q=${encodeURIComponent(r.nameKh || 'Cambodia')}`,
-      latitude: typeof r.latitude === 'number' ? r.latitude : 11.5564,
-      longitude: typeof r.longitude === 'number' ? r.longitude : 104.9282,
+      ...(() => {
+        const cleanGpid = isValidOfficialGooglePlaceId(r.googlePlaceId) ? r.googlePlaceId : undefined;
+        const isFlagged =
+          r.locationNeedsReview === true ||
+          r.locationVerificationStatus === 'needs_admin_review' ||
+          !isValidCambodiaCoordinates(r.latitude, r.longitude);
+        if (isFlagged) {
+          return {
+            mapUrl: '',
+            latitude: 0,
+            longitude: 0,
+            googlePlaceId: cleanGpid,
+            locationVerificationStatus: 'needs_admin_review' as const,
+            locationNeedsReview: true,
+            locationReviewNote:
+              r.locationReviewNote ||
+              'Unverified business address/GPS — flagged for Admin location verification',
+            locationVerifiedAt: undefined,
+          };
+        }
+        return {
+          mapUrl: buildCanonicalGoogleMapsPinUrl(r.latitude, r.longitude, cleanGpid),
+          latitude: r.latitude,
+          longitude: r.longitude,
+          googlePlaceId: cleanGpid,
+          locationVerificationStatus: 'verified' as const,
+          locationNeedsReview: false,
+          locationReviewNote: r.locationReviewNote,
+          locationVerifiedAt: r.locationVerifiedAt,
+        };
+      })(),
       rating: ratingSummary.averageRating,
       reviewCount: ratingSummary.reviewCount,
       reviews: genuineReviews,
@@ -889,7 +918,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       facebookUrl: r.facebookUrl,
       websiteUrl: r.websiteUrl,
       businessCategory: r.businessCategory,
-      googlePlaceId: r.googlePlaceId,
       dataSource: r.dataSource,
       googleMapsMeta: r.googleMapsMeta,
       isAdminEdited: Boolean(r.isAdminEdited),
@@ -1019,9 +1047,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 addressEn: seed.addressEn,
                 provinceKh: ov?.provinceKh || seed.provinceKh,
                 provinceEn: seed.provinceEn,
-                mapUrl: seed.mapUrl || r.mapUrl,
-                latitude: typeof seed.latitude === 'number' ? seed.latitude : r.latitude,
-                longitude: typeof seed.longitude === 'number' ? seed.longitude : r.longitude,
+                ...(Boolean(ov?.locationVerifiedAt || r.locationVerifiedAt)
+                  ? {
+                      mapUrl: ov?.mapUrl ?? r.mapUrl,
+                      latitude: typeof ov?.latitude === 'number' ? ov.latitude : r.latitude,
+                      longitude: typeof ov?.longitude === 'number' ? ov.longitude : r.longitude,
+                      locationVerificationStatus: ov?.locationVerificationStatus ?? r.locationVerificationStatus,
+                      locationNeedsReview: ov?.locationNeedsReview ?? r.locationNeedsReview,
+                      locationReviewNote: ov?.locationReviewNote ?? r.locationReviewNote,
+                      locationVerifiedAt: ov?.locationVerifiedAt ?? r.locationVerifiedAt,
+                    }
+                  : {
+                      mapUrl: seed.mapUrl,
+                      latitude: seed.latitude,
+                      longitude: seed.longitude,
+                      googlePlaceId: seed.googlePlaceId,
+                      locationVerificationStatus: seed.locationVerificationStatus,
+                      locationNeedsReview: seed.locationNeedsReview,
+                      locationReviewNote: seed.locationReviewNote,
+                      locationVerifiedAt: seed.locationVerifiedAt,
+                    }),
                 signatureDishesKh: seed.signatureDishesKh,
                 created_at: seed.created_at || getRestaurantCreatedAtIso(seed),
                 createdAt: seed.created_at || getRestaurantCreatedAtIso(seed),
@@ -1199,6 +1244,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 ovTime > seedTime + 1000 ||
                 seedTime === 0;
               const chosenPhoto = useOvPhoto ? ov.photoUrl : seed.photoUrl;
+              const useCustomDestLoc = Boolean(ov.locationVerifiedAt || d.locationVerifiedAt);
               return {
                 ...seed,
                 ...d,
@@ -1209,6 +1255,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 provinceKh: ov.provinceKh || seed.provinceKh,
                 provinceEn: ov.provinceEn || seed.provinceEn,
                 addressKh: ov.addressKh || seed.addressKh,
+                addressEn: seed.addressEn,
+                mapUrl: useCustomDestLoc ? (ov.mapUrl ?? d.mapUrl ?? seed.mapUrl) : seed.mapUrl,
+                latitude: useCustomDestLoc ? (typeof ov.latitude === 'number' ? ov.latitude : d.latitude) : seed.latitude,
+                longitude: useCustomDestLoc ? (typeof ov.longitude === 'number' ? ov.longitude : d.longitude) : seed.longitude,
+                locationVerificationStatus: useCustomDestLoc ? (ov.locationVerificationStatus ?? d.locationVerificationStatus) : seed.locationVerificationStatus,
+                locationNeedsReview: useCustomDestLoc ? (ov.locationNeedsReview ?? d.locationNeedsReview) : seed.locationNeedsReview,
+                locationReviewNote: useCustomDestLoc ? (ov.locationReviewNote ?? d.locationReviewNote) : seed.locationReviewNote,
+                locationVerifiedAt: useCustomDestLoc ? (ov.locationVerifiedAt ?? d.locationVerifiedAt) : seed.locationVerifiedAt,
                 photoUrl: chosenPhoto,
                 galleryPhotos: [chosenPhoto],
                 isCustomPhoto: true,
@@ -1249,6 +1303,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               vaultChanged = true;
             }
 
+            const useCachedDestLoc = Boolean(d.locationVerifiedAt);
             return {
               ...seed,
               ...d,
@@ -1259,6 +1314,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               provinceKh: d.isAdminEdited && !isBundledStaticTempleSeed ? d.provinceKh : seed.provinceKh,
               provinceEn: d.isAdminEdited && !isBundledStaticTempleSeed ? d.provinceEn : seed.provinceEn,
               addressKh: d.isAdminEdited && !isBundledStaticTempleSeed ? d.addressKh : seed.addressKh,
+              addressEn: seed.addressEn,
+              mapUrl: useCachedDestLoc ? d.mapUrl : seed.mapUrl,
+              latitude: useCachedDestLoc ? d.latitude : seed.latitude,
+              longitude: useCachedDestLoc ? d.longitude : seed.longitude,
+              locationVerificationStatus: useCachedDestLoc ? d.locationVerificationStatus : seed.locationVerificationStatus,
+              locationNeedsReview: useCachedDestLoc ? d.locationNeedsReview : seed.locationNeedsReview,
+              locationReviewNote: useCachedDestLoc ? d.locationReviewNote : seed.locationReviewNote,
+              locationVerifiedAt: useCachedDestLoc ? d.locationVerifiedAt : seed.locationVerifiedAt,
               photoUrl: effectivePhoto,
               galleryPhotos: [effectivePhoto],
               isCustomPhoto: isValidCustomPhoto || Boolean(seed.isCustomPhoto),
@@ -1503,12 +1566,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               const isItemCustomPhoto =
                 typeof item.photoUrl === 'string' &&
                 (item.photoUrl.startsWith('data:') || item.photoUrl.startsWith('http'));
+              const useTrendCustomLoc = Boolean(item.locationVerifiedAt);
               return {
                 ...seed,
                 ...item,
                 matchedFoodId: seed.matchedFoodId || item.matchedFoodId,
                 fallbackFoodIds: seed.fallbackFoodIds || item.fallbackFoodIds,
                 photoUrl: isItemCustomPhoto ? item.photoUrl : seed.photoUrl,
+                addressKh: useTrendCustomLoc ? item.addressKh : seed.addressKh,
+                addressEn: useTrendCustomLoc ? item.addressEn : seed.addressEn,
+                mapUrl: useTrendCustomLoc ? item.mapUrl : seed.mapUrl,
+                latitude: useTrendCustomLoc ? item.latitude : seed.latitude,
+                longitude: useTrendCustomLoc ? item.longitude : seed.longitude,
+                locationVerificationStatus: useTrendCustomLoc ? item.locationVerificationStatus : seed.locationVerificationStatus,
+                locationNeedsReview: useTrendCustomLoc ? item.locationNeedsReview : seed.locationNeedsReview,
+                locationReviewNote: useTrendCustomLoc ? item.locationReviewNote : seed.locationReviewNote,
+                locationVerifiedAt: useTrendCustomLoc ? item.locationVerifiedAt : seed.locationVerifiedAt,
               };
             })
             .filter((item) => Boolean(item.foodNameKh || item.foodNameEn));
@@ -1856,6 +1929,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       toastTimerRef.current = null;
     }, 3200);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleUnverifiedLocationBlocked = () => {
+      showToast(
+        tr(
+          language,
+          '📍 ទីតាំងនេះត្រូវបានដាក់សម្គាល់សម្រាប់ Admin ផ្ទៀងផ្ទាត់ — មិនបង្ហាញទីតាំងស្មានឡើយ',
+          '📍 Location flagged for Admin review — unverified map pin hidden',
+          '📍 该位置已标记待管理员核实，暂不显示未验证的定位'
+        ),
+        'warning'
+      );
+    };
+    window.addEventListener('kft:unverified-location-blocked', handleUnverifiedLocationBlocked);
+    return () => {
+      window.removeEventListener('kft:unverified-location-blocked', handleUnverifiedLocationBlocked);
+    };
+  }, [language, showToast]);
 
   // Non-blocking debounced localStorage writer to prevent CPU spikes & phone heating on large arrays
   const storageWriteTimersRef = useRef<Record<string, number>>({});
@@ -5798,8 +5890,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       : (updated.pendingPhotoReplacement !== undefined ? updated.pendingPhotoReplacement : original?.pendingPhotoReplacement);
 
+    const hasEditedValidCoords = isValidCambodiaCoordinates(updated.latitude, updated.longitude);
+    const locStamp = hasEditedValidCoords
+      ? {
+          locationVerificationStatus: 'verified' as const,
+          locationNeedsReview: false,
+          locationVerifiedAt: editNowIso,
+        }
+      : {
+          locationVerificationStatus: 'needs_admin_review' as const,
+          locationNeedsReview: true,
+          locationVerifiedAt: undefined,
+        };
+
     const safeUpdated: Restaurant = normalizeRestaurant(isAdmin ? {
       ...updated,
+      ...locStamp,
       photoUrl: profileImg,
       profileImage: profileImg,
       galleryPhotos: galleryImgs,
@@ -5813,6 +5919,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: preservedCreatedAt,
     } : {
       ...updated,
+      ...locStamp,
       photoUrl: profileImg,
       profileImage: profileImg,
       galleryPhotos: galleryImgs,
@@ -6944,9 +7051,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const nowIso = new Date().toISOString();
+    const hasValidDestCoords = isValidCambodiaCoordinates(destData.latitude, destData.longitude) && !destData.locationNeedsReview;
+    const cleanGpid = isValidOfficialGooglePlaceId(destData.googlePlaceId) ? destData.googlePlaceId : undefined;
     const newDest: TouristDestination = {
       ...destData,
       id: `dest-${Date.now()}`,
+      latitude: hasValidDestCoords ? destData.latitude : 0,
+      longitude: hasValidDestCoords ? destData.longitude : 0,
+      mapUrl: hasValidDestCoords ? buildCanonicalGoogleMapsPinUrl(destData.latitude, destData.longitude, cleanGpid) : '',
+      googlePlaceId: cleanGpid,
+      locationVerificationStatus: hasValidDestCoords ? 'verified' : 'needs_admin_review',
+      locationNeedsReview: !hasValidDestCoords,
+      locationReviewNote: hasValidDestCoords ? destData.locationReviewNote : 'Unverified attraction coordinates — flagged for Admin review',
+      locationVerifiedAt: hasValidDestCoords ? nowIso : undefined,
       rating: 5.0,
       reviewCount: 1,
       isCustomPhoto: true,
@@ -6964,8 +7081,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateDestination = (updated: TouristDestination) => {
     const nowIso = new Date().toISOString();
+    const hasValidDestCoords = isValidCambodiaCoordinates(updated.latitude, updated.longitude) && updated.locationNeedsReview !== true;
+    const cleanGpid = isValidOfficialGooglePlaceId(updated.googlePlaceId) ? updated.googlePlaceId : undefined;
     const customUpdated: TouristDestination = {
       ...updated,
+      latitude: hasValidDestCoords ? updated.latitude : 0,
+      longitude: hasValidDestCoords ? updated.longitude : 0,
+      mapUrl: hasValidDestCoords ? buildCanonicalGoogleMapsPinUrl(updated.latitude, updated.longitude, cleanGpid) : '',
+      googlePlaceId: cleanGpid,
+      locationVerificationStatus: hasValidDestCoords ? 'verified' : 'needs_admin_review',
+      locationNeedsReview: !hasValidDestCoords,
+      locationVerifiedAt: hasValidDestCoords ? (updated.locationVerifiedAt || nowIso) : undefined,
       galleryPhotos: updated.photoUrl
         ? [updated.photoUrl, ...(Array.isArray(updated.galleryPhotos) ? updated.galleryPhotos.filter(p => p && p !== updated.photoUrl && !p.startsWith('data:image/')) : [])].slice(0, 6)
         : updated.galleryPhotos,

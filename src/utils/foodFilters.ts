@@ -1,4 +1,4 @@
-import type { FoodItem, Language, Restaurant } from '../types';
+import { isPlaceLocationVerified, type FoodItem, type Language, type Restaurant } from '../types';
 
 export interface ProvinceFilterOption {
   id: string;
@@ -836,7 +836,9 @@ export function getMatchingRestaurantsForProvinceDish(
   restaurants: Restaurant[],
   rotationSeed = 0
 ): Restaurant[] {
-  const approved = restaurants.filter((r) => r && r.id && (r.status === 'approved' || !r.status));
+  const approvedAll = restaurants.filter((r) => r && r.id && (r.status === 'approved' || !r.status));
+  const verifiedLocations = approvedAll.filter((r) => isPlaceLocationVerified(r));
+  const approved = verifiedLocations.length > 0 ? verifiedLocations : approvedAll;
   const cleanKh = prov.kh.trim();
   const inProvince = approved.filter(
     (r) =>

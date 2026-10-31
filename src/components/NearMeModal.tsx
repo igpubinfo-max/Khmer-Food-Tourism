@@ -15,7 +15,14 @@ import {
   GooglePlaceCachedItem,
   buildPlaceSpecificNoPhotoSvg,
 } from '../services/googlePlacesService';
-import { Restaurant, TouristDestination, isGpipRegisteredRestaurant, openRestaurantGoogleExternal } from '../types';
+import {
+  Restaurant,
+  TouristDestination,
+  isGpipRegisteredRestaurant,
+  isPlaceLocationVerified,
+  openRestaurantGoogleExternal,
+  openDestinationGoogleExternal,
+} from '../types';
 import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { ShopAvatar } from './icons/DefaultShopIcon';
@@ -305,8 +312,9 @@ export const NearMeModal: React.FC = () => {
   const nearbyRestaurants = useMemo(() => {
     const mergedMap = new Map<string, Restaurant>();
 
-    // 1. Add existing Supabase/in-app restaurants strictly within selectedRadiusMeters
+    // 1. Add existing verified-location in-app restaurants strictly within selectedRadiusMeters
     for (const r of restaurants) {
+      if (!isPlaceLocationVerified(r)) continue;
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, r.latitude, r.longitude);
       if (dist <= selectedRadiusMeters) {
         mergedMap.set(r.id, r);
@@ -341,6 +349,7 @@ export const NearMeModal: React.FC = () => {
     const mergedMap = new Map<string, TouristDestination>();
 
     for (const d of destinations) {
+      if (!isPlaceLocationVerified(d)) continue;
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, d.latitude, d.longitude);
       if (dist <= selectedRadiusMeters) {
         mergedMap.set(d.id, d);
@@ -370,25 +379,32 @@ export const NearMeModal: React.FC = () => {
   const filteredNearbyRestaurants = useMemo(() => {
     const q = nearbyQuery.trim().toLowerCase();
     return nearbyRestaurants.filter((r) => {
+      const zhLoc = getLocalizedRestaurant(r, 'zh');
       const haystack = [
         r.nameKh,
         r.nameEn,
+        zhLoc.name,
         r.addressKh,
         r.addressEn,
+        zhLoc.address,
+        r.provinceKh,
+        r.provinceEn,
+        zhLoc.province,
         r.categoryKh,
         r.categoryEn,
         ...(r.signatureDishesKh || []),
         ...(r.signatureDishesEn || []),
+        ...(zhLoc.signatureDishes || []),
         ...((r.menuItems || []).map((m) => `${m.nameKh} ${m.nameEn || ''}`)),
       ]
         .filter(Boolean)
         .join(' ')
         .toLowerCase();
 
-      if (quickFilterId === 'noodles' && !/គុយទាវ|មី|នំបញ្ចុក|noodle|soup|ស៊ុប/.test(haystack)) return false;
-      if (quickFilterId === 'rice_khmer' && !/បាយ|ម្ហូបខ្មែរ|សម្ល|អាម៉ុក|khmer|rice|restaurant|ភោជនីយដ្ឋាន|អាហារដ្ឋាន/.test(haystack)) return false;
-      if (quickFilterId === 'coffee' && !/កាហ្វេ|តែ|ភេសជ្ជៈ|coffee|cafe|café|tea|bakery/.test(haystack)) return false;
-      if (quickFilterId === 'bbq_seafood' && !/សាច់អាំង|គ្រឿងសមុទ្រ|ស៊ុប|bbq|seafood|grill|hotpot|buffet/.test(haystack)) return false;
+      if (quickFilterId === 'noodles' && !/គុយទាវ|មី|នំបញ្ចុក|noodle|soup|ស៊ុប|面|粉|粿条|汤/.test(haystack)) return false;
+      if (quickFilterId === 'rice_khmer' && !/បាយ|ម្ហូបខ្មែរ|សម្ល|អាម៉ុក|khmer|rice|restaurant|ភោជនីយដ្ឋាន|អាហារដ្ឋាន|饭|高棉|餐厅/.test(haystack)) return false;
+      if (quickFilterId === 'coffee' && !/កាហ្វេ|តែ|ភេសជ្ជៈ|coffee|cafe|café|tea|bakery|咖啡|茶|烘焙/.test(haystack)) return false;
+      if (quickFilterId === 'bbq_seafood' && !/សាច់អាំង|គ្រឿងសមុទ្រ|ស៊ុប|bbq|seafood|grill|hotpot|buffet|烧烤|海鲜|火锅/.test(haystack)) return false;
       if (q && !haystack.includes(q)) return false;
       return true;
     });
@@ -397,13 +413,30 @@ export const NearMeModal: React.FC = () => {
   const filteredNearbyDestinations = useMemo(() => {
     const q = nearbyQuery.trim().toLowerCase();
     return nearbyDestinations.filter((d) => {
-      const haystack = [d.nameKh, d.nameEn, d.categoryKh, d.categoryEn, d.descriptionKh, d.descriptionEn, d.addressKh, d.addressEn]
+      const zhLoc = getLocalizedDestination(d, 'zh');
+      const haystack = [
+        d.nameKh,
+        d.nameEn,
+        zhLoc.name,
+        d.categoryKh,
+        d.categoryEn,
+        zhLoc.category,
+        d.descriptionKh,
+        d.descriptionEn,
+        zhLoc.description,
+        d.addressKh,
+        d.addressEn,
+        zhLoc.address,
+        d.provinceKh,
+        d.provinceEn,
+        zhLoc.province,
+      ]
         .filter(Boolean)
         .join(' ')
         .toLowerCase();
-      if (quickFilterId === 'culture' && !/វត្ត|ប្រាសាទ|សារមន្ទីរ|វប្បធម៌|ប្រវត្តិ|temple|pagoda|museum|palace|heritage|វាំង/.test(haystack)) return false;
-      if (quickFilterId === 'nature' && !/ធម្មជាតិ|សួន|ទន្លេ|ភ្នំ|បឹង|ឆ្នេរ|park|river|nature|garden|beach|mountain/.test(haystack)) return false;
-      if (quickFilterId === 'leisure' && !/ផ្សារ|កម្សាន្ត|ដើរលេង|រមណីយដ្ឋាន|market|mall|walk|night|plaza/.test(haystack)) return false;
+      if (quickFilterId === 'culture' && !/វត្ត|ប្រាសាទ|សារមន្ទីរ|វប្បធម៌|ប្រវត្តិ|temple|pagoda|museum|palace|heritage|វាំង|寺|庙|宫|博物馆|古迹/.test(haystack)) return false;
+      if (quickFilterId === 'nature' && !/ធម្មជាតិ|សួន|ទន្លេ|ភ្នំ|បឹង|ឆ្នេរ|park|river|nature|garden|beach|mountain|自然|公园|河|山|海滩/.test(haystack)) return false;
+      if (quickFilterId === 'leisure' && !/ផ្សារ|កម្សាន្ត|ដើរលេង|រមណីយដ្ឋាន|market|mall|walk|night|plaza|市场|夜市|步道|广场/.test(haystack)) return false;
       if (q && !haystack.includes(q)) return false;
       return true;
     });
@@ -437,13 +470,6 @@ export const NearMeModal: React.FC = () => {
       return language === 'en' ? `${provLabel}, Cambodia` : provLabel;
     }
     return cleaned;
-  };
-
-  const buildDirectionsUrl = (targetLat: number, targetLng: number, fallbackName: string, existingMapUrl?: string) => {
-    if (Number.isFinite(targetLat) && Number.isFinite(targetLng) && Number.isFinite(baseCoords.lat) && Number.isFinite(baseCoords.lng)) {
-      return `https://www.google.com/maps/dir/?api=1&origin=${baseCoords.lat},${baseCoords.lng}&destination=${targetLat},${targetLng}&travelmode=walking`;
-    }
-    return existingMapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fallbackName)}`;
   };
 
   return (
@@ -846,15 +872,14 @@ export const NearMeModal: React.FC = () => {
 
                     {/* Direct Directions & Details Action Buttons */}
                     <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-700/60">
-                      <a
-                        href={buildDirectionsUrl(r.latitude, r.longitude, `${r.nameKh} ${r.addressKh}`, r.mapUrl)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 py-2 px-3 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#064E3B] text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5"
+                      <button
+                        type="button"
+                        onClick={() => openRestaurantGoogleExternal(r, 'directions', baseCoords)}
+                        className="flex-1 py-2 px-3 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#064E3B] text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <Navigation className="w-3.5 h-3.5 text-emerald-300" />
                         <span>{tr(language, 'បង្ហាញផ្លូវ', 'Directions', '路线导航')}</span>
-                      </a>
+                      </button>
 
                       {sanitizeDialablePhone(r.phone) && (
                         <a
@@ -962,7 +987,7 @@ export const NearMeModal: React.FC = () => {
                           <h4 
                             onClick={() => {
                               if (String(d.id).startsWith('gplace_dest_')) {
-                                window.open(buildDirectionsUrl(d.latitude, d.longitude, `${d.nameKh} ${d.provinceKh}`, d.mapUrl), '_blank', 'noopener,noreferrer');
+                                openDestinationGoogleExternal(d, 'directions', baseCoords);
                                 return;
                               }
                               setSelectedDestination(d);
@@ -994,20 +1019,19 @@ export const NearMeModal: React.FC = () => {
 
                     {/* Direct Navigation */}
                     <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-700/60">
-                      <a
-                        href={buildDirectionsUrl(d.latitude, d.longitude, `${d.nameKh} ${d.provinceKh}`, d.mapUrl)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 py-2 px-3 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#064E3B] text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5"
+                      <button
+                        type="button"
+                        onClick={() => openDestinationGoogleExternal(d, 'directions', baseCoords)}
+                        className="flex-1 py-2 px-3 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#064E3B] text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <Navigation className="w-3.5 h-3.5 text-emerald-300" />
                         <span>{tr(language, 'បង្ហាញផ្លូវ', 'Directions', '路线导航')}</span>
-                      </a>
+                      </button>
 
                       <button
                         onClick={() => {
                           if (String(d.id).startsWith('gplace_dest_')) {
-                            window.open(buildDirectionsUrl(d.latitude, d.longitude, `${d.nameKh} ${d.provinceKh}`, d.mapUrl), '_blank', 'noopener,noreferrer');
+                            openDestinationGoogleExternal(d, 'directions', baseCoords);
                             return;
                           }
                           setSelectedDestination(d);

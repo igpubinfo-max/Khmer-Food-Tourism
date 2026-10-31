@@ -13,17 +13,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-1.jpg"
     ],
-    "addressKh": "ផ្ទះលេខ ១៣៦ មហាវិថីព្រះនរោត្តម សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន",
-    "addressEn": "No. 136 Norodom Blvd, Sangkat Tonle Bassac, Khan Chamkarmon, Phnom Penh",
+    "addressKh": "ផ្ទះលេខ ១៣៦ មហាវិថីព្រះនរោត្តម សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន រាជធានីភ្នំពេញ",
+    "addressEn": "No. 136 Preah Norodom Blvd, Sangkat Tonle Bassac, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "phone": "015 814 888",
     "openingHoursKh": "០៦:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "06:00 AM - 10:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5528,104.9282",
-    "latitude": 11.5528,
-    "longitude": 104.9282,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.553152,104.928957",
+    "latitude": 11.553152,
+    "longitude": 104.928957,
     "rating": 4.9,
     "reviewCount": 420,
     "signatureDishesKh": [
@@ -38,7 +38,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-1.jpg"
+    "profileImage": "/Shop/rest-1.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-2",
@@ -51,7 +54,7 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-2.jpg"
     ],
-    "addressKh": "ផ្ទះលេខ ៧៤ ផ្លូវ ១៧៤ សង្កាត់ផ្សារថ្មី ៣ ខណ្ឌដូនពេញ",
+    "addressKh": "ផ្ទះលេខ ៧៤ ផ្លូវ ១៧៤ សង្កាត់ផ្សារថ្មីទី៣ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
     "addressEn": "No. 74 Street 174, Sangkat Phsar Thmey 3, Khan Daun Penh, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
@@ -59,9 +62,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "១១:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "11:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5647,104.9221",
-    "latitude": 11.5647,
-    "longitude": 104.9221,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.559,104.92387",
+    "latitude": 11.559,
+    "longitude": 104.92387,
     "rating": 4.7,
     "reviewCount": 310,
     "signatureDishesKh": [
@@ -76,7 +79,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-2.jpg"
+    "profileImage": "/Shop/rest-2.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-3",
@@ -89,17 +95,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-3.jpg"
     ],
-    "addressKh": "ផ្ទះលេខ ៣៧ ផ្លូវ ៣៣៤ សង្កាត់បឹងកេងកង ១",
-    "addressEn": "No. 37 Street 334, BKK1, Khan Boeng Keng Kang, Phnom Penh",
+    "addressKh": "ផ្ទះលេខ ២០ ផ្លូវ ៣៣៤ សង្កាត់បឹងកេងកងទី១ ខណ្ឌបឹងកេងកង រាជធានីភ្នំពេញ",
+    "addressEn": "No. 20 Street 334, Sangkat Boeng Keng Kang 1 (BKK1), Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "phone": "086 516 111",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5492,104.9248",
-    "latitude": 11.5492,
-    "longitude": 104.9248,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.550114,104.925439",
+    "latitude": 11.550114,
+    "longitude": 104.925439,
     "rating": 4.8,
     "reviewCount": 260,
     "signatureDishesKh": [
@@ -114,7 +120,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-3.jpg"
+    "profileImage": "/Shop/rest-3.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-4",
@@ -127,17 +136,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-4.jpg"
     ],
-    "addressKh": "ផ្ទះលេខ ១១២ ផ្លូវព្រះសុធារស សង្កាត់ជ័យជំនះ",
-    "addressEn": "No. 112 Sothearos Blvd, Sangkat Chey Chumneah, Phnom Penh",
+    "addressKh": "ផ្ទះលេខ ១១២ មហាវិថីសម្តេចសុធារស សង្កាត់ចតុមុខ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
+    "addressEn": "No. 112 Samdach Sothearos Blvd, Sangkat Chakto Mukh, Khan Daun Penh, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "phone": "012 841 846",
     "openingHoursKh": "១០:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "10:00 AM - 09:30 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5601,104.9312",
-    "latitude": 11.5601,
-    "longitude": 104.9312,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.557382,104.933324",
+    "latitude": 11.557382,
+    "longitude": 104.933324,
     "rating": 4.7,
     "reviewCount": 180,
     "signatureDishesKh": [
@@ -152,7 +161,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-4.jpg"
+    "profileImage": "/Shop/rest-4.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-5",
@@ -165,17 +177,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-5.jpg"
     ],
-    "addressKh": "ផ្ទះលេខ ៩ ផ្លូវ ៥៧ សង្កាត់បឹងកេងកង ១",
-    "addressEn": "No. 9 Street 57, BKK1, Phnom Penh",
+    "addressKh": "ផ្ទះលេខ ៩ ផ្លូវ ៥៧ សង្កាត់បឹងកេងកងទី១ ខណ្ឌបឹងកេងកង រាជធានីភ្នំពេញ",
+    "addressEn": "No. 9 Street 57, Sangkat Boeng Keng Kang 1 (BKK1), Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "phone": "012 888 560",
     "openingHoursKh": "១០:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "10:00 AM - 10:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5512,104.9219",
-    "latitude": 11.5512,
-    "longitude": 104.9219,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.555057,104.924525",
+    "latitude": 11.555057,
+    "longitude": 104.924525,
     "rating": 4.6,
     "reviewCount": 340,
     "signatureDishesKh": [
@@ -190,7 +202,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-5.jpg"
+    "profileImage": "/Shop/rest-5.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-6",
@@ -203,17 +218,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-6.jpg"
     ],
-    "addressKh": "ផ្លូវ ២១ សង្កាត់ទន្លេបាសាក់ រាជធានីភ្នំពេញ",
-    "addressEn": "Street 21, Sangkat Tonle Bassac, Phnom Penh",
+    "addressKh": "ផ្ទះលេខ ២C ផ្លូវ ២១ សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន រាជធានីភ្នំពេញ",
+    "addressEn": "No. 2C Street 21 (Abdul Carime St), Sangkat Tonle Bassac, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "phone": "012 840 055",
     "openingHoursKh": "០៤:០០ ល្ងាច - ១១:០០ យប់",
     "openingHoursEn": "04:00 PM - 11:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5516,104.9265",
-    "latitude": 11.5516,
-    "longitude": 104.9265,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.55064,104.930277",
+    "latitude": 11.55064,
+    "longitude": 104.930277,
     "rating": 4.6,
     "reviewCount": 290,
     "signatureDishesKh": [
@@ -228,7 +243,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-6.jpg"
+    "profileImage": "/Shop/rest-6.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-7",
@@ -241,17 +259,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-7.jpg"
     ],
-    "addressKh": "ផ្លូវ ៣១៥ សង្កាត់បឹងកក់ ១ ខណ្ឌទួលគោក",
-    "addressEn": "Street 315, Boeng Kak 1, Toul Kork, Phnom Penh",
+    "addressKh": "ផ្ទះលេខ ៣៧ ផ្លូវ ៣១៥ សង្កាត់បឹងកក់ទី១ ខណ្ឌទួលគោក រាជធានីភ្នំពេញ",
+    "addressEn": "No. 37 Street 315, Sangkat Boeng Kak 1, Khan Tuol Kouk, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "phone": "023 888 222",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "06:30 AM - 09:30 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5741,104.8982",
-    "latitude": 11.5741,
-    "longitude": 104.8982,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.583051,104.898124",
+    "latitude": 11.583051,
+    "longitude": 104.898124,
     "rating": 4.8,
     "reviewCount": 210,
     "signatureDishesKh": [
@@ -266,7 +284,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-7.jpg"
+    "profileImage": "/Shop/rest-7.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-8",
@@ -279,17 +300,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-8.jpg"
     ],
-    "addressKh": "ផ្ទះលេខ ៦៣ ផ្លូវ ២៩ សង្កាត់ទន្លេបាសាក់",
-    "addressEn": "No. 63 Street 29, Tonle Bassac, Phnom Penh",
+    "addressKh": "ផ្ទះលេខ ៦៣C ផ្លូវ ២៩៤ សង្កាត់បឹងកេងកងទី១ ខណ្ឌបឹងកេងកង រាជធានីភ្នំពេញ",
+    "addressEn": "No. 63C Street 294, Sangkat Boeng Keng Kang 1 (BKK1), Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "phone": "095 970 888",
     "openingHoursKh": "១១:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "11:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5544,104.9301",
-    "latitude": 11.5544,
-    "longitude": 104.9301,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.553706,104.925791",
+    "latitude": 11.553706,
+    "longitude": 104.925791,
     "rating": 4.7,
     "reviewCount": 175,
     "signatureDishesKh": [
@@ -304,7 +325,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-8.jpg"
+    "profileImage": "/Shop/rest-8.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-9",
@@ -317,17 +341,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-9.jpg"
     ],
-    "addressKh": "ផ្ទះលេខ ២១៥ ផ្លូវលេខ ១៣ សង្កាត់ជ័យជំនះ",
-    "addressEn": "No. 215 Street 13, near National Museum, Phnom Penh",
+    "addressKh": "ផ្ទះលេខ ២១៥ ផ្លូវលេខ ១៣ សង្កាត់ជ័យជំនះ ក្បែរសារមន្ទីរជាតិ រាជធានីភ្នំពេញ",
+    "addressEn": "No. 215 Street 13, Sangkat Chey Chumneas (near National Museum), Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "phone": "012 802 072",
     "openingHoursKh": "១១:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "11:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5661,104.9288",
-    "latitude": 11.5661,
-    "longitude": 104.9288,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5675,104.9292",
+    "latitude": 11.5675,
+    "longitude": 104.9292,
     "rating": 4.8,
     "reviewCount": 360,
     "signatureDishesKh": [
@@ -342,7 +366,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-9.jpg"
+    "profileImage": "/Shop/rest-9.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-10",
@@ -355,17 +382,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-10.jpg"
     ],
-    "addressKh": "វិថីព្រះស៊ីសុវត្ថិ សង្កាត់ផ្សារចាស់ រាជធានីភ្នំពេញ",
-    "addressEn": "Sisowath Quay, riverside, Phnom Penh",
+    "addressKh": "តីរវិថីព្រះស៊ីសុវត្ថិ (ជិតផ្លូវ ១០៦) សង្កាត់វត្តភ្នំ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
+    "addressEn": "Sisowath Quay (near Street 106), Sangkat Wat Phnom, Khan Daun Penh, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "phone": "023 427 209",
     "openingHoursKh": "១១:០០ ព្រឹក - ១០:៣០ យប់",
     "openingHoursEn": "11:00 AM - 10:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5721,104.9299",
-    "latitude": 11.5721,
-    "longitude": 104.9299,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.57489,104.92743",
+    "latitude": 11.57489,
+    "longitude": 104.92743,
     "rating": 4.6,
     "reviewCount": 290,
     "signatureDishesKh": [
@@ -380,7 +407,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-10.jpg"
+    "profileImage": "/Shop/rest-10.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-11",
@@ -393,17 +423,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-11.jpg"
     ],
-    "addressKh": "ផ្លូវតាវ៉ាន់ ភូមិវត្តបូព៌ ក្រុងសៀមរាប",
-    "addressEn": "Taphul Village / Wat Bo area, Siem Reap, Cambodia",
+    "addressKh": "ផ្លូវលេខ ២៧ ភូមិវត្តបូព៌ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប",
+    "addressEn": "Street 27, Wat Bo Village, Sangkat Sala Kamreuk, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "phone": "063 964 838",
     "openingHoursKh": "១១:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "11:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3564,103.8569",
-    "latitude": 13.3564,
-    "longitude": 103.8569,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3522,103.8611",
+    "latitude": 13.3522,
+    "longitude": 103.8611,
     "rating": 4.8,
     "reviewCount": 390,
     "signatureDishesKh": [
@@ -418,7 +448,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-11.jpg"
+    "profileImage": "/Shop/rest-11.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-12",
@@ -431,17 +464,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-12.jpg"
     ],
-    "addressKh": "ផ្លូវមាត់ស្ទឹងពោធិ៍ ក្រុងសៀមរាប",
-    "addressEn": "Pokambor Avenue, Riverside, Siem Reap",
+    "addressKh": "មហាវិថីពោធិ៍កំបោរ មាត់ស្ទឹងសៀមរាប សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប",
+    "addressEn": "Pokambor Avenue, Siem Reap Riverside, Sangkat Svay Dangkum, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "phone": "063 967 997",
     "openingHoursKh": "១១:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "11:00 AM - 10:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3611,103.8572",
-    "latitude": 13.3611,
-    "longitude": 103.8572,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3521,103.8562",
+    "latitude": 13.3521,
+    "longitude": 103.8562,
     "rating": 4.9,
     "reviewCount": 480,
     "signatureDishesKh": [
@@ -456,7 +489,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-12.jpg"
+    "profileImage": "/Shop/rest-12.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-13",
@@ -469,17 +505,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-13.jpg"
     ],
-    "addressKh": "ភូមិវត្តដំណាក់ ក្រុងសៀមរាប",
-    "addressEn": "Wat Damnak Village, Siem Reap, Cambodia",
+    "addressKh": "ភូមិវត្តដំណាក់ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប",
+    "addressEn": "Wat Damnak Village, Sangkat Sala Kamreuk, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "phone": "077 347 705",
     "openingHoursKh": "០៦:៣០ ល្ងាច - ១០:៣០ យប់",
     "openingHoursEn": "06:30 PM - 10:30 PM",
     "priceLevel": "$$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3512,103.8614",
-    "latitude": 13.3512,
-    "longitude": 103.8614,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.349634,103.860148",
+    "latitude": 13.349634,
+    "longitude": 103.860148,
     "rating": 4.9,
     "reviewCount": 520,
     "signatureDishesKh": [
@@ -494,7 +530,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-13.jpg"
+    "profileImage": "/Shop/rest-13.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-14",
@@ -507,17 +546,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-14.jpg"
     ],
-    "addressKh": "ផ្ទះលេខ ៨A ផ្លូវ ៧ មករា ភូមិវត្តបូព៌ ក្រុងសៀមរាប",
-    "addressEn": "No. 8A, Phum Slokram, Wat Bo area, Siem Reap",
+    "addressKh": "ផ្ទះលេខ ៨A ភូមិស្លក្រាម សង្កាត់ស្លក្រាម ក្រុងសៀមរាប",
+    "addressEn": "No. 8A Phum Slokram, Sangkat Slorkram, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "phone": "017 363 284",
     "openingHoursKh": "១១:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "11:00 AM - 10:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3592,103.8631",
-    "latitude": 13.3592,
-    "longitude": 103.8631,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.364821,103.862614",
+    "latitude": 13.364821,
+    "longitude": 103.862614,
     "rating": 4.8,
     "reviewCount": 360,
     "signatureDishesKh": [
@@ -532,7 +571,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-14.jpg"
+    "profileImage": "/Shop/rest-14.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-15",
@@ -545,17 +587,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-15.jpg"
     ],
-    "addressKh": "ផ្លូវសូកូឡា ភូមិវត្តបូព៌ ក្រុងសៀមរាប",
-    "addressEn": "Chocolate Road, Wat Damnak Area, Siem Reap",
+    "addressKh": "ផ្លូវ Chocolate Road តំបន់វត្តដំណាក់ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប",
+    "addressEn": "Chocolate Road, Wat Damnak Area, Sangkat Sala Kamreuk, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "phone": "078 340 140",
     "openingHoursKh": "១១:៣០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "11:30 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3524,103.8598",
-    "latitude": 13.3524,
-    "longitude": 103.8598,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3497,103.8608",
+    "latitude": 13.3497,
+    "longitude": 103.8608,
     "rating": 4.9,
     "reviewCount": 430,
     "signatureDishesKh": [
@@ -570,7 +612,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-15.jpg"
+    "profileImage": "/Shop/rest-15.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-16",
@@ -583,17 +628,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-16.jpg"
     ],
-    "addressKh": "ផ្លូវវត្តបូព៌ ក្រុងសៀមរាប",
-    "addressEn": "Wat Bo Road, Siem Reap",
+    "addressKh": "ផ្លូវលេខ ២៤ តំបន់វត្តបូព៌ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប",
+    "addressEn": "Street 24, Wat Bo Area, Sangkat Sala Kamreuk, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "phone": "012 826 346",
     "openingHoursKh": "១១:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "11:00 AM - 10:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3571,103.8618",
-    "latitude": 13.3571,
-    "longitude": 103.8618,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.356506,103.860076",
+    "latitude": 13.356506,
+    "longitude": 103.860076,
     "rating": 4.9,
     "reviewCount": 450,
     "signatureDishesKh": [
@@ -608,7 +653,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-16.jpg"
+    "profileImage": "/Shop/rest-16.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-17",
@@ -621,17 +669,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-17.jpg"
     ],
-    "addressKh": "ភូមិវត្តបូព៌ ក្រុងសៀមរាប",
-    "addressEn": "Wat Bo Village, Siem Reap",
+    "addressKh": "ភូមិវត្តដំណាក់ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប",
+    "addressEn": "Wat Damnak / Sambatt Mean Chey, Sangkat Sala Kamreuk, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "phone": "076 226 2662",
     "openingHoursKh": "១១:៣០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "11:30 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3548,103.8639",
-    "latitude": 13.3548,
-    "longitude": 103.8639,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.349204,103.857159",
+    "latitude": 13.349204,
+    "longitude": 103.857159,
     "rating": 4.9,
     "reviewCount": 320,
     "signatureDishesKh": [
@@ -646,7 +694,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-17.jpg"
+    "profileImage": "/Shop/rest-17.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-18",
@@ -659,17 +710,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-18.jpg"
     ],
-    "addressKh": "ផ្លូវវត្តបូព៌ ក្រុងសៀមរាប",
-    "addressEn": "Wat Bo Road, Siem Reap",
+    "addressKh": "ផ្លូវវត្តបូព៌ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប",
+    "addressEn": "Wat Bo Road, Sangkat Sala Kamreuk, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "phone": "012 368 765",
     "openingHoursKh": "១១:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "11:00 AM - 10:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3582,103.8601",
-    "latitude": 13.3582,
-    "longitude": 103.8601,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.351935,103.855589",
+    "latitude": 13.351935,
+    "longitude": 103.855589,
     "rating": 4.8,
     "reviewCount": 290,
     "signatureDishesKh": [
@@ -684,7 +735,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-18.jpg"
+    "profileImage": "/Shop/rest-18.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-19",
@@ -697,17 +751,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-19.jpg"
     ],
-    "addressKh": "ផ្សារក្តាមខេត្តកែប ជាប់មាត់សមុទ្រ ក្រុងកែប",
-    "addressEn": "Crab Market Waterfront, Kep, Cambodia",
+    "addressKh": "ផ្លូវជាតិលេខ ៣៣A ផ្សារក្តាមកែប ភូមិថ្មី សង្កាត់ព្រៃធំ ក្រុងកែប",
+    "addressEn": "National Road 33A, Crab Market Waterfront, Sangkat Prey Thom, Kep",
     "provinceKh": "ខេត្តកែប",
     "provinceEn": "Kep",
     "phone": "012 858 003",
     "openingHoursKh": "១០:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "10:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.4822,104.2981",
-    "latitude": 10.4822,
-    "longitude": 104.2981,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.48825,104.28908",
+    "latitude": 10.48825,
+    "longitude": 104.28908,
     "rating": 4.9,
     "reviewCount": 490,
     "signatureDishesKh": [
@@ -722,7 +776,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-19.jpg"
+    "profileImage": "/Shop/rest-19.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-20",
@@ -735,17 +792,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-20.jpg"
     ],
-    "addressKh": "ផ្សារក្តាមកែប ក្រុងកែប",
-    "addressEn": "Crab Market Waterfront, Kep City",
+    "addressKh": "ផ្សារក្តាមកែបមាត់សមុទ្រ សង្កាត់ព្រៃធំ ក្រុងកែប",
+    "addressEn": "Kep Crab Market Waterfront (Plus Code F7PQ+VPC), Krong Kaeb, Kep",
     "provinceKh": "ខេត្តកែប",
     "provinceEn": "Kep",
     "phone": "097 912 3456",
     "openingHoursKh": "១០:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "10:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.4827,104.2979",
-    "latitude": 10.4827,
-    "longitude": 104.2979,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.487187,104.289266",
+    "latitude": 10.487187,
+    "longitude": 104.289266,
     "rating": 4.7,
     "reviewCount": 240,
     "signatureDishesKh": [
@@ -760,7 +817,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-20.jpg"
+    "profileImage": "/Shop/rest-20.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-21",
@@ -773,17 +833,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-21.jpg"
     ],
-    "addressKh": "ផ្លូវមាត់ព្រែកកំពត ក្រុងកំពត",
-    "addressEn": "Riverside Road, Kampot City, Cambodia",
+    "addressKh": "ផ្លូវមាត់ព្រែក (ផ្លូវ ៧៣៥) សង្កាត់កំពង់កណ្តាល ក្រុងកំពត",
+    "addressEn": "Riverside Road (Street 735), Sangkat Kampong Kandal, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "phone": "012 235 102",
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:៣០ យប់",
     "openingHoursEn": "07:00 AM - 10:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6092,104.1784",
-    "latitude": 10.6092,
-    "longitude": 104.1784,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.60647,104.1797",
+    "latitude": 10.60647,
+    "longitude": 104.1797,
     "rating": 4.8,
     "reviewCount": 380,
     "signatureDishesKh": [
@@ -798,7 +858,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-21.jpg"
+    "profileImage": "/Shop/rest-21.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-22",
@@ -811,17 +874,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-22.jpg"
     ],
-    "addressKh": "ផ្លូវមាត់ព្រែក ក្រុងកំពត",
-    "addressEn": "Riverside Street, Kampot City",
+    "addressKh": "ផ្លូវមាត់ព្រែកលេខ ៧៣៥ តំបន់ផ្សារចាស់ សង្កាត់កំពង់កណ្តាល ក្រុងកំពត",
+    "addressEn": "Street 735 (Riverside Road), Old Town, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "phone": "096 339 9888",
     "openingHoursKh": "១១:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "11:00 AM - 09:30 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6105,104.1791",
-    "latitude": 10.6105,
-    "longitude": 104.1791,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6042,104.1772",
+    "latitude": 10.6042,
+    "longitude": 104.1772,
     "rating": 4.9,
     "reviewCount": 290,
     "signatureDishesKh": [
@@ -836,7 +899,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-22.jpg"
+    "profileImage": "/Shop/rest-22.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-23",
@@ -849,17 +915,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-23.jpg"
     ],
-    "addressKh": "ឆ្នេរខេត្តកែប ក្រុងកែប",
-    "addressEn": "Phum Thmey, Sangkat Prey Thom, Kep",
+    "addressKh": "ផ្លូវមាត់សមុទ្រ ភូមិថ្មី សង្កាត់ព្រៃធំ ក្រុងកែប",
+    "addressEn": "Phum Thmey Waterfront (Knai Bang Chatt / Plus Code F7RQ+VQ), Sangkat Prey Thom, Kep",
     "provinceKh": "ខេត្តកែប",
     "provinceEn": "Kep",
     "phone": "078 888 556",
     "openingHoursKh": "១១:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "11:00 AM - 10:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.4789,104.2891",
-    "latitude": 10.4789,
-    "longitude": 104.2891,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.4919,104.2895",
+    "latitude": 10.4919,
+    "longitude": 104.2895,
     "rating": 4.9,
     "reviewCount": 410,
     "signatureDishesKh": [
@@ -874,7 +940,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-23.jpg"
+    "profileImage": "/Shop/rest-23.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-24",
@@ -895,9 +964,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៩:០០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "09:00 AM - 08:30 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.0957,103.2022",
-    "latitude": 13.0957,
-    "longitude": 103.2022,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 220,
     "signatureDishesKh": [
@@ -912,7 +981,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-24.jpg"
+    "profileImage": "/Shop/rest-24.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-25",
@@ -925,17 +997,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-25.jpg"
     ],
-    "addressKh": "ផ្លូវលេខ ២ ជិតផ្សារណាត់ ក្រុងបាត់ដំបង",
-    "addressEn": "Street 2, near Psar Nat, Battambang",
+    "addressKh": "ផ្លូវលេខ ២ ជិតផ្សារណាត់ សង្កាត់ស្វាយប៉ោ ក្រុងបាត់ដំបង",
+    "addressEn": "Street 2 (near Psar Nat Central Market), Sangkat Svay Pao, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
     "phone": "070 283 262",
     "openingHoursKh": "១១:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "11:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.1021,103.1994",
-    "latitude": 13.1021,
-    "longitude": 103.1994,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.101518,103.198719",
+    "latitude": 13.101518,
+    "longitude": 103.198719,
     "rating": 4.8,
     "reviewCount": 310,
     "signatureDishesKh": [
@@ -950,7 +1022,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-25.jpg"
+    "profileImage": "/Shop/rest-25.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-26",
@@ -963,17 +1038,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-26.jpg"
     ],
-    "addressKh": "ផ្លូវ ១១១ ក្រុងបាត់ដំបង",
-    "addressEn": "Street 111, Battambang City",
+    "addressKh": "ផ្ទះលេខ ៦៥០ ផ្លូវលេខ ១១១ ភូមិព្រែកមហាទេព សង្កាត់ស្វាយប៉ោ ក្រុងបាត់ដំបង",
+    "addressEn": "No. 650 Street 111, Prek Mohatep Village, Sangkat Svay Pao, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
     "phone": "012 763 950",
     "openingHoursKh": "០៧:៣០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:30 AM - 09:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.1008,103.1989",
-    "latitude": 13.1008,
-    "longitude": 103.1989,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.103325,103.196403",
+    "latitude": 13.103325,
+    "longitude": 103.196403,
     "rating": 4.8,
     "reviewCount": 260,
     "signatureDishesKh": [
@@ -988,7 +1063,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-26.jpg"
+    "profileImage": "/Shop/rest-26.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-27",
@@ -1001,17 +1079,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-27.jpg"
     ],
-    "addressKh": "ផ្លូវក្បែរឆ្នេរអូរឈើទាល ក្រុងព្រះសីហនុ",
-    "addressEn": "Near Ochheuteal Beach, Sihanoukville",
+    "addressKh": "ក្បែរឆ្នេរអូរឈើទាល សង្កាត់លេខ៤ ក្រុងព្រះសីហនុ",
+    "addressEn": "Near Ochheuteal Beach, Sangkat Buon, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
     "phone": "034 934 744",
     "openingHoursKh": "១១:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "11:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6184,103.5264",
-    "latitude": 10.6184,
-    "longitude": 103.5264,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.618956,103.5228",
+    "latitude": 10.618956,
+    "longitude": 103.5228,
     "rating": 4.7,
     "reviewCount": 270,
     "signatureDishesKh": [
@@ -1026,7 +1104,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-27.jpg"
+    "profileImage": "/Shop/rest-27.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-28",
@@ -1047,9 +1128,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "07:00 AM - 08:30 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.9928,105.4641",
-    "latitude": 11.9928,
-    "longitude": 105.4641,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 190,
     "signatureDishesKh": [
@@ -1064,7 +1145,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-28.jpg"
+    "profileImage": "/Shop/rest-28.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-29",
@@ -1085,9 +1169,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4558,107.1895",
-    "latitude": 12.4558,
-    "longitude": 107.1895,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 160,
     "signatureDishesKh": [
@@ -1102,7 +1186,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-29.jpg"
+    "profileImage": "/Shop/rest-29.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-30",
@@ -1123,9 +1210,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "១០:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "10:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6153,102.9839",
-    "latitude": 11.6153,
-    "longitude": 102.9839,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 140,
     "signatureDishesKh": [
@@ -1140,7 +1227,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-30.jpg"
+    "profileImage": "/Shop/rest-30.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-31",
@@ -1161,9 +1251,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៨:០០ ព្រឹក - ០៧:០០ យប់",
     "openingHoursEn": "08:00 AM - 07:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.9908,104.7849",
-    "latitude": 10.9908,
-    "longitude": 104.7849,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 310,
     "signatureDishesKh": [
@@ -1179,7 +1269,10 @@ export const initial100Restaurants: Restaurant[] = [
     "isPromoted": false,
     "paymentDate": "2026-01-15",
     "profileImage": "/Shop/rest-31.jpg",
-    "subtitle": "Lakeside Fresh River Prawn & Khmer Dining in Takeo"
+    "subtitle": "Lakeside Fresh River Prawn & Khmer Dining in Takeo",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-32",
@@ -1200,9 +1293,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4883,106.0188",
-    "latitude": 12.4883,
-    "longitude": 106.0188,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 130,
     "signatureDishesKh": [
@@ -1217,7 +1310,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-32.jpg"
+    "profileImage": "/Shop/rest-32.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-33",
@@ -1238,9 +1334,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "07:00 AM - 08:30 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5388,103.9192",
-    "latitude": 12.5388,
-    "longitude": 103.9192,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 735,
     "signatureDishesKh": [
@@ -1255,7 +1351,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-33.jpg"
+    "profileImage": "/Shop/rest-33.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-34",
@@ -1276,9 +1375,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៦:៣០ ល្ងាច",
     "openingHoursEn": "07:00 AM - 06:30 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7314,107.0125",
-    "latitude": 13.7314,
-    "longitude": 107.0125,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 140,
     "signatureDishesKh": [
@@ -1293,7 +1392,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-34.jpg"
+    "profileImage": "/Shop/rest-34.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-35",
@@ -1314,9 +1416,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.7111,104.8887",
-    "latitude": 12.7111,
-    "longitude": 104.8887,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 170,
     "signatureDishesKh": [
@@ -1331,7 +1433,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-35.jpg"
+    "profileImage": "/Shop/rest-35.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-36",
@@ -1352,9 +1457,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:០០ ព្រឹក - ០៧:៣០ យប់",
     "openingHoursEn": "06:00 AM - 07:30 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2503,104.6658",
-    "latitude": 12.2503,
-    "longitude": 104.6658,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 150,
     "signatureDishesKh": [
@@ -1370,7 +1475,10 @@ export const initial100Restaurants: Restaurant[] = [
     "isPromoted": false,
     "paymentDate": "2026-01-15",
     "profileImage": "/Shop/rest-36.jpg",
-    "subtitle": "Authentic Riverside Dining in Kampong Chhnang"
+    "subtitle": "Authentic Riverside Dining in Kampong Chhnang",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-37",
@@ -1391,9 +1499,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "07:00 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4833,104.95",
-    "latitude": 11.4833,
-    "longitude": 104.95,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 340,
     "signatureDishesKh": [
@@ -1409,7 +1517,10 @@ export const initial100Restaurants: Restaurant[] = [
     "isPromoted": false,
     "paymentDate": "2026-01-15",
     "profileImage": "/Shop/rest-37.jpg",
-    "subtitle": "Family Riverside Dining & Roast Specialties in Kandal"
+    "subtitle": "Family Riverside Dining & Roast Specialties in Kandal",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-38",
@@ -1430,9 +1541,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5259,105.9683",
-    "latitude": 13.5259,
-    "longitude": 105.9683,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 140,
     "signatureDishesKh": [
@@ -1448,7 +1559,10 @@ export const initial100Restaurants: Restaurant[] = [
     "isPromoted": false,
     "paymentDate": "2026-01-15",
     "profileImage": "/Shop/rest-38.jpg",
-    "subtitle": "Mekong & Sekong Riverfront Restaurant in Stung Treng"
+    "subtitle": "Mekong & Sekong Riverfront Restaurant in Stung Treng",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-39",
@@ -1469,9 +1583,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:០០ ព្រឹក - ០៧:០០ យប់",
     "openingHoursEn": "06:00 AM - 07:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.3908,104.68",
-    "latitude": 14.3908,
-    "longitude": 104.68,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 825,
     "signatureDishesKh": [
@@ -1486,7 +1600,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-39.jpg"
+    "profileImage": "/Shop/rest-39.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-40",
@@ -1507,9 +1624,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8489,102.6092",
-    "latitude": 12.8489,
-    "longitude": 102.6092,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 840,
     "signatureDishesKh": [
@@ -1524,7 +1641,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-40.jpg"
+    "profileImage": "/Shop/rest-40.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-41",
@@ -1545,9 +1665,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.449,105.3114",
-    "latitude": 11.449,
-    "longitude": 105.3114,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 514,
     "signatureDishesKh": [
@@ -1564,7 +1684,10 @@ export const initial100Restaurants: Restaurant[] = [
     "isPromoted": false,
     "paymentDate": "2026-02-01",
     "profileImage": "/Shop/rest-41.jpg",
-    "subtitle": "Mekong Riverbank Dining Pavilion in Prey Veng"
+    "subtitle": "Mekong Riverbank Dining Pavilion in Prey Veng",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-42",
@@ -1577,17 +1700,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-42.jpg"
     ],
-    "addressKh": "វិថីពោកំបោរ មាត់ស្ទឹងសៀមរាប ក្រុងសៀមរាប",
-    "addressEn": "Pokambor Ave, Siem Reap Riverside, Siem Reap",
+    "addressKh": "មហាវិថីពោធិ៍កំបោរ មាត់ស្ទឹងសៀមរាប ក្រុងសៀមរាប",
+    "addressEn": "Pokambor Avenue, Siem Reap Riverfront, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "phone": "063 968 123",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ១០:៣០ យប់",
     "openingHoursEn": "06:30 AM - 10:30 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3393,103.8414",
-    "latitude": 13.3393,
-    "longitude": 103.8414,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.356338,103.857669",
+    "latitude": 13.356338,
+    "longitude": 103.857669,
     "rating": 4.9,
     "reviewCount": 724,
     "signatureDishesKh": [
@@ -1602,7 +1725,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/Shop/rest-42.jpg"
+    "profileImage": "/Shop/rest-42.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-43",
@@ -1615,17 +1741,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-43.jpg"
     ],
-    "addressKh": "ផ្លូវលេខ ១.៥ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង",
-    "addressEn": "Street 1.5, Battambang City, Battambang",
+    "addressKh": "ផ្លូវលេខ ១.៥ សង្កាត់ស្វាយប៉ោ ក្រុងបាត់ដំបង",
+    "addressEn": "Street 1.5, Sangkat Svay Pao, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
     "phone": "017 860 003",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៦:០០ ល្ងាច",
     "openingHoursEn": "07:00 AM - 06:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.0837,103.2022",
-    "latitude": 13.0837,
-    "longitude": 103.2022,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.1027,103.1977",
+    "latitude": 13.1027,
+    "longitude": 103.1977,
     "rating": 4.6,
     "reviewCount": 761,
     "signatureDishesKh": [
@@ -1642,7 +1768,10 @@ export const initial100Restaurants: Restaurant[] = [
     "isPromoted": false,
     "paymentDate": "2026-02-01",
     "profileImage": "/Shop/rest-43.jpg",
-    "subtitle": "Award-Winning Specialty Roastery & Bistro in Battambang"
+    "subtitle": "Award-Winning Specialty Roastery & Bistro in Battambang",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-44",
@@ -1655,17 +1784,17 @@ export const initial100Restaurants: Restaurant[] = [
     "galleryPhotos": [
       "/Shop/rest-44.jpg"
     ],
-    "addressKh": "ឃុំកូនសត្វ ស្រុកទឹកឈូ ខេត្តកំពត",
-    "addressEn": "Bosjheng Village, Kon Sat, Teuk Chhou, Kampot",
+    "addressKh": "ភូមិបុសញិញ ឃុំកូនសត្វ ស្រុកទឹកឈូ ខេត្តកំពត",
+    "addressEn": "Bosjheng Village, Kon Sat Commune, Teuk Chhou District, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
     "phone": "092 948 076",
     "openingHoursKh": "០៩:០០ ព្រឹក - ០៥:៣០ ល្ងាច",
     "openingHoursEn": "09:00 AM - 05:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6092,104.1934",
-    "latitude": 10.6092,
-    "longitude": 104.1934,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6122,104.3163",
+    "latitude": 10.6122,
+    "longitude": 104.3163,
     "rating": 4.8,
     "reviewCount": 798,
     "signatureDishesKh": [
@@ -1682,7 +1811,10 @@ export const initial100Restaurants: Restaurant[] = [
     "isPromoted": false,
     "paymentDate": "2026-02-01",
     "profileImage": "/Shop/rest-44.jpg",
-    "subtitle": "Authentic Kampot Pepper Estate Restaurant & Bistro"
+    "subtitle": "Authentic Kampot Pepper Estate Restaurant & Bistro",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-45",
@@ -1703,9 +1835,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៩:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "09:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.4942,104.3281",
-    "latitude": 10.4942,
-    "longitude": 104.3281,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 835,
     "signatureDishesKh": [
@@ -1722,7 +1854,10 @@ export const initial100Restaurants: Restaurant[] = [
     "isPromoted": false,
     "paymentDate": "2026-02-01",
     "profileImage": "/Shop/rest-45.jpg",
-    "subtitle": "Coastal Sunset Dining & Seafood Restaurant in Kep"
+    "subtitle": "Coastal Sunset Dining & Seafood Restaurant in Kep",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-46",
@@ -1743,9 +1878,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "១០:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "10:00 AM - 10:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6424,103.4964",
-    "latitude": 10.6424,
-    "longitude": 103.4964,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 872,
     "signatureDishesKh": [
@@ -1762,7 +1897,10 @@ export const initial100Restaurants: Restaurant[] = [
     "isPromoted": false,
     "paymentDate": "2026-02-01",
     "profileImage": "/Shop/rest-46.jpg",
-    "subtitle": "Coastal Khmer & Fresh Seafood Restaurant in Sihanoukville"
+    "subtitle": "Coastal Khmer & Fresh Seafood Restaurant in Sihanoukville",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-47",
@@ -1783,9 +1921,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៨:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "08:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5979,102.9889",
-    "latitude": 13.5979,
-    "longitude": 102.9889,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 403,
     "signatureDishesKh": [
@@ -1802,7 +1940,10 @@ export const initial100Restaurants: Restaurant[] = [
     "isPromoted": false,
     "paymentDate": "2026-02-01",
     "profileImage": "/Shop/rest-47.jpg",
-    "subtitle": "Traditional Khmer Family Restaurant in Banteay Meanchey"
+    "subtitle": "Traditional Khmer Family Restaurant in Banteay Meanchey",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-48",
@@ -1823,9 +1964,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "07:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4413,104.5358",
-    "latitude": 11.4413,
-    "longitude": 104.5358,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 588,
     "signatureDishesKh": [
@@ -1842,7 +1983,10 @@ export const initial100Restaurants: Restaurant[] = [
     "isPromoted": false,
     "paymentDate": "2026-02-01",
     "profileImage": "/Shop/rest-48.jpg",
-    "subtitle": "Garden Dining & Regional Khmer Cuisine in Kampong Speu"
+    "subtitle": "Garden Dining & Regional Khmer Cuisine in Kampong Speu",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-49",
@@ -1863,9 +2007,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៨:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "08:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0638,105.7994",
-    "latitude": 11.0638,
-    "longitude": 105.7994,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 551,
     "signatureDishesKh": [
@@ -1881,7 +2025,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "profileImage": "/Shop/rest-49.jpg",
-    "subtitle": "Lakeside & Riverfront Restaurant in Svay Rieng City"
+    "subtitle": "Lakeside & Riverfront Restaurant in Svay Rieng City",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-50",
@@ -1902,9 +2049,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "07:00 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.8906,105.6875",
-    "latitude": 11.8906,
-    "longitude": 105.6875,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 625,
     "signatureDishesKh": [
@@ -1921,7 +2068,10 @@ export const initial100Restaurants: Restaurant[] = [
     "isPromoted": false,
     "paymentDate": "2026-02-01",
     "profileImage": "/Shop/rest-50.jpg",
-    "subtitle": "Spacious Khmer Family Dining Hall in Tboung Khmum"
+    "subtitle": "Spacious Khmer Family Dining Hall in Tboung Khmum",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-51",
@@ -1943,9 +2093,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.7111,104.8587",
-    "latitude": 12.7111,
-    "longitude": 104.8587,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 1057,
     "signatureDishesKh": [
@@ -1961,7 +2111,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-31.jpg"
+    "profileImage": "/foods/food-31.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-52",
@@ -1982,9 +2135,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៨:០០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "08:00 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.2059,103.5478",
-    "latitude": 14.2059,
-    "longitude": 103.5478,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 440,
     "signatureDishesKh": [
@@ -2001,7 +2154,10 @@ export const initial100Restaurants: Restaurant[] = [
     "isPromoted": false,
     "paymentDate": "2026-02-01",
     "profileImage": "/Shop/rest-52.jpg",
-    "subtitle": "Scenic Lakefront Khmer Restaurant in Samraong City"
+    "subtitle": "Scenic Lakefront Khmer Restaurant in Samraong City",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-53",
@@ -2023,9 +2179,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6393,102.9839",
-    "latitude": 11.6393,
-    "longitude": 102.9839,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 181,
     "signatureDishesKh": [
@@ -2041,7 +2197,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-25.jpg"
+    "profileImage": "/foods/food-25.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-54",
@@ -2063,9 +2222,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4918,107.2045",
-    "latitude": 12.4918,
-    "longitude": 107.2045,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 218,
     "signatureDishesKh": [
@@ -2081,7 +2240,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-21.jpg"
+    "profileImage": "/foods/food-21.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-55",
@@ -2103,9 +2265,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.6954,107.0425",
-    "latitude": 13.6954,
-    "longitude": 107.0425,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 255,
     "signatureDishesKh": [
@@ -2121,7 +2283,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-31.jpg"
+    "profileImage": "/foods/food-31.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-56",
@@ -2143,9 +2308,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4643,105.9888",
-    "latitude": 12.4643,
-    "longitude": 105.9888,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 292,
     "signatureDishesKh": [
@@ -2160,7 +2325,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-21.jpg"
+    "profileImage": "/foods/food-21.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-57",
@@ -2182,9 +2350,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5139,105.9533",
-    "latitude": 13.5139,
-    "longitude": 105.9533,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 329,
     "signatureDishesKh": [
@@ -2200,7 +2368,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-31.jpg"
+    "profileImage": "/foods/food-31.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-58",
@@ -2222,9 +2393,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.8073,104.9814",
-    "latitude": 13.8073,
-    "longitude": 104.9814,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 366,
     "signatureDishesKh": [
@@ -2240,7 +2411,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-7.jpg"
+    "profileImage": "/foods/food-7.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-59",
@@ -2262,9 +2436,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5979,102.9889",
-    "latitude": 13.5979,
-    "longitude": 102.9889,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 403,
     "signatureDishesKh": [
@@ -2280,7 +2454,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-59.jpg"
+    "profileImage": "/foods/food-59.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-60",
@@ -2302,9 +2479,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.2059,103.5478",
-    "latitude": 14.2059,
-    "longitude": 103.5478,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 440,
     "signatureDishesKh": [
@@ -2320,7 +2497,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-20.jpg"
+    "profileImage": "/foods/food-20.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-61",
@@ -2342,9 +2522,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8849,102.5792",
-    "latitude": 12.8849,
-    "longitude": 102.5792,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 477,
     "signatureDishesKh": [
@@ -2360,7 +2540,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-65.jpg"
+    "profileImage": "/foods/food-65.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-62",
@@ -2382,9 +2565,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.449,105.3114",
-    "latitude": 11.449,
-    "longitude": 105.3114,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 514,
     "signatureDishesKh": [
@@ -2400,7 +2583,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-21.jpg"
+    "profileImage": "/foods/food-21.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-63",
@@ -2422,9 +2608,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0638,105.7994",
-    "latitude": 11.0638,
-    "longitude": 105.7994,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 551,
     "signatureDishesKh": [
@@ -2439,7 +2625,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-31.jpg"
+    "profileImage": "/foods/food-31.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-64",
@@ -2461,9 +2650,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4413,104.5358",
-    "latitude": 11.4413,
-    "longitude": 104.5358,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 588,
     "signatureDishesKh": [
@@ -2479,7 +2668,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-7.jpg"
+    "profileImage": "/foods/food-7.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-65",
@@ -2501,9 +2693,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.8906,105.6875",
-    "latitude": 11.8906,
-    "longitude": 105.6875,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 625,
     "signatureDishesKh": [
@@ -2519,7 +2711,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-59.jpg"
+    "profileImage": "/foods/food-59.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-66",
@@ -2541,9 +2736,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5684,104.8982",
-    "latitude": 11.5684,
-    "longitude": 104.8982,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 662,
     "signatureDishesKh": [
@@ -2559,7 +2754,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-25.jpg"
+    "profileImage": "/foods/food-25.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-67",
@@ -2573,17 +2771,17 @@ export const initial100Restaurants: Restaurant[] = [
       "/foods/food-1.jpg",
       "/foods/food-4.jpg"
     ],
-    "addressKh": "ផ្លូវផ្សារចាស់ សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប",
-    "addressEn": "Old Market Alley, Svay Dangkum, Siem Reap",
+    "addressKh": "កែងផ្លូវលេខ ៩ តំបន់ផ្សារចាស់ សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប",
+    "addressEn": "Corner of Street 9 & Alley West, Old Market (Psar Chas), Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "phone": "094 569 271",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3873,103.8414",
-    "latitude": 13.3873,
-    "longitude": 103.8414,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.354338,103.854205",
+    "latitude": 13.354338,
+    "longitude": 103.854205,
     "rating": 4.9,
     "reviewCount": 699,
     "signatureDishesKh": [
@@ -2599,7 +2797,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-1.jpg"
+    "profileImage": "/foods/food-1.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-68",
@@ -2621,9 +2822,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.1317,103.2022",
-    "latitude": 13.1317,
-    "longitude": 103.2022,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 736,
     "signatureDishesKh": [
@@ -2639,7 +2840,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-59.jpg"
+    "profileImage": "/foods/food-59.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-69",
@@ -2661,9 +2865,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5732,104.1934",
-    "latitude": 10.5732,
-    "longitude": 104.1934,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 773,
     "signatureDishesKh": [
@@ -2679,7 +2883,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-70",
@@ -2701,9 +2908,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.4582,104.3281",
-    "latitude": 10.4582,
-    "longitude": 104.3281,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 810,
     "signatureDishesKh": [
@@ -2718,7 +2925,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-27.jpg"
+    "profileImage": "/foods/food-27.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-71",
@@ -2740,9 +2950,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6064,103.4964",
-    "latitude": 10.6064,
-    "longitude": 103.4964,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 847,
     "signatureDishesKh": [
@@ -2758,7 +2968,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-25.jpg"
+    "profileImage": "/foods/food-25.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-72",
@@ -2780,9 +2993,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.9928,105.4491",
-    "latitude": 11.9928,
-    "longitude": 105.4491,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 884,
     "signatureDishesKh": [
@@ -2798,7 +3011,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-73",
@@ -2820,9 +3036,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4953,104.95",
-    "latitude": 11.4953,
-    "longitude": 104.95,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 921,
     "signatureDishesKh": [
@@ -2838,7 +3054,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-41.jpg"
+    "profileImage": "/foods/food-41.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-74",
@@ -2860,9 +3079,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0148,104.7999",
-    "latitude": 11.0148,
-    "longitude": 104.7999,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 958,
     "signatureDishesKh": [
@@ -2878,7 +3097,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-39.jpg"
+    "profileImage": "/foods/food-39.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-75",
@@ -2900,9 +3122,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5748,103.9492",
-    "latitude": 12.5748,
-    "longitude": 103.9492,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 995,
     "signatureDishesKh": [
@@ -2918,7 +3140,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-76",
@@ -2940,9 +3165,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.6751,104.8587",
-    "latitude": 12.6751,
-    "longitude": 104.8587,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 1032,
     "signatureDishesKh": [
@@ -2958,7 +3183,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-85.jpg"
+    "profileImage": "/foods/food-85.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-77",
@@ -2980,9 +3208,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2263,104.6508",
-    "latitude": 12.2263,
-    "longitude": 104.6508,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 1069,
     "signatureDishesKh": [
@@ -2997,7 +3225,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-78",
@@ -3019,9 +3250,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6033,102.9839",
-    "latitude": 11.6033,
-    "longitude": 102.9839,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 156,
     "signatureDishesKh": [
@@ -3037,7 +3268,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-23.jpg"
+    "profileImage": "/foods/food-23.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-79",
@@ -3059,9 +3293,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4558,107.2045",
-    "latitude": 12.4558,
-    "longitude": 107.2045,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 193,
     "signatureDishesKh": [
@@ -3077,7 +3311,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-39.jpg"
+    "profileImage": "/foods/food-39.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-80",
@@ -3099,9 +3336,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7434,107.0425",
-    "latitude": 13.7434,
-    "longitude": 107.0425,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 230,
     "signatureDishesKh": [
@@ -3117,7 +3354,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-19.jpg"
+    "profileImage": "/foods/food-19.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-81",
@@ -3139,9 +3379,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5123,105.9888",
-    "latitude": 12.5123,
-    "longitude": 105.9888,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 267,
     "signatureDishesKh": [
@@ -3157,7 +3397,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-85.jpg"
+    "profileImage": "/foods/food-85.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-82",
@@ -3179,9 +3422,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5619,105.9533",
-    "latitude": 13.5619,
-    "longitude": 105.9533,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 304,
     "signatureDishesKh": [
@@ -3197,7 +3440,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-83",
@@ -3219,9 +3465,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7713,104.9814",
-    "latitude": 13.7713,
-    "longitude": 104.9814,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 341,
     "signatureDishesKh": [
@@ -3237,7 +3483,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-41.jpg"
+    "profileImage": "/foods/food-41.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-84",
@@ -3259,9 +3508,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5619,102.9889",
-    "latitude": 13.5619,
-    "longitude": 102.9889,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 378,
     "signatureDishesKh": [
@@ -3276,7 +3525,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-39.jpg"
+    "profileImage": "/foods/food-39.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-85",
@@ -3298,9 +3550,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.1699,103.5478",
-    "latitude": 14.1699,
-    "longitude": 103.5478,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 415,
     "signatureDishesKh": [
@@ -3316,7 +3568,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-86",
@@ -3338,9 +3593,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8489,102.5792",
-    "latitude": 12.8489,
-    "longitude": 102.5792,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 452,
     "signatureDishesKh": [
@@ -3356,7 +3611,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-85.jpg"
+    "profileImage": "/foods/food-85.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-87",
@@ -3378,9 +3636,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.497,105.3114",
-    "latitude": 11.497,
-    "longitude": 105.3114,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 489,
     "signatureDishesKh": [
@@ -3396,7 +3654,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-88",
@@ -3418,9 +3679,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.1118,105.7994",
-    "latitude": 11.1118,
-    "longitude": 105.7994,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 526,
     "signatureDishesKh": [
@@ -3436,7 +3697,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-41.jpg"
+    "profileImage": "/foods/food-41.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-89",
@@ -3458,9 +3722,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4893,104.5358",
-    "latitude": 11.4893,
-    "longitude": 104.5358,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 563,
     "signatureDishesKh": [
@@ -3476,7 +3740,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-39.jpg"
+    "profileImage": "/foods/food-39.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-90",
@@ -3498,9 +3765,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.8546,105.6875",
-    "latitude": 11.8546,
-    "longitude": 105.6875,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 600,
     "signatureDishesKh": [
@@ -3516,7 +3783,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-91",
@@ -3538,9 +3808,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5324,104.8982",
-    "latitude": 11.5324,
-    "longitude": 104.8982,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 637,
     "signatureDishesKh": [
@@ -3555,7 +3825,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-92",
@@ -3569,17 +3842,17 @@ export const initial100Restaurants: Restaurant[] = [
       "/foods/food-34.jpg",
       "/foods/food-47.jpg"
     ],
-    "addressKh": "ភូមិត្រពាំងសេះ សង្កាត់គោកចក ក្រុងសៀមរាប",
-    "addressEn": "Trapeang Seh, Kok Chak, Siem Reap",
+    "addressKh": "ផ្ទះលេខ ១៣៧ ភូមិត្រាញ់ សង្កាត់ស្លក្រាម ក្រុងសៀមរាប",
+    "addressEn": "No. 137 Traing Village, Sangkat Slorkram, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "phone": "092 744 596",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3513,103.8414",
-    "latitude": 13.3513,
-    "longitude": 103.8414,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.373,103.864",
+    "latitude": 13.373,
+    "longitude": 103.864,
     "rating": 4.9,
     "reviewCount": 674,
     "signatureDishesKh": [
@@ -3595,7 +3868,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-34.jpg"
+    "profileImage": "/foods/food-34.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-93",
@@ -3617,9 +3893,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.0957,103.2022",
-    "latitude": 13.0957,
-    "longitude": 103.2022,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 711,
     "signatureDishesKh": [
@@ -3635,7 +3911,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-94",
@@ -3657,9 +3936,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6212,104.1934",
-    "latitude": 10.6212,
-    "longitude": 104.1934,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 748,
     "signatureDishesKh": [
@@ -3675,7 +3954,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-26.jpg"
+    "profileImage": "/foods/food-26.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Duplicate storefront listing of rest-44 (La Plantation Pepper Farm Kampot) — flagged for Admin consolidation/location review."
   },
   {
     "id": "rest-95",
@@ -3697,9 +3979,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5062,104.3281",
-    "latitude": 10.5062,
-    "longitude": 104.3281,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 785,
     "signatureDishesKh": [
@@ -3715,7 +3997,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-68.jpg"
+    "profileImage": "/foods/food-68.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-96",
@@ -3737,9 +4022,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6544,103.4964",
-    "latitude": 10.6544,
-    "longitude": 103.4964,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 822,
     "signatureDishesKh": [
@@ -3755,7 +4040,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-43.jpg"
+    "profileImage": "/foods/food-43.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-97",
@@ -3777,9 +4065,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.9568,105.4491",
-    "latitude": 11.9568,
-    "longitude": 105.4491,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 859,
     "signatureDishesKh": [
@@ -3795,7 +4083,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-1.jpg"
+    "profileImage": "/foods/food-1.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-98",
@@ -3817,9 +4108,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4593,104.95",
-    "latitude": 11.4593,
-    "longitude": 104.95,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 896,
     "signatureDishesKh": [
@@ -3834,7 +4125,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-2.jpg"
+    "profileImage": "/foods/food-2.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-99",
@@ -3856,9 +4150,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.9788,104.7999",
-    "latitude": 10.9788,
-    "longitude": 104.7999,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 933,
     "signatureDishesKh": [
@@ -3874,7 +4168,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-72.jpg"
+    "profileImage": "/foods/food-72.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-100",
@@ -3896,9 +4193,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5388,103.9492",
-    "latitude": 12.5388,
-    "longitude": 103.9492,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 970,
     "signatureDishesKh": [
@@ -3914,7 +4211,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-78.jpg"
+    "profileImage": "/foods/food-78.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-101",
@@ -3936,9 +4236,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.7231,104.8587",
-    "latitude": 12.7231,
-    "longitude": 104.8587,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 1007,
     "signatureDishesKh": [
@@ -3954,7 +4254,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-75.jpg"
+    "profileImage": "/foods/food-75.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-102",
@@ -3976,9 +4279,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2743,104.6508",
-    "latitude": 12.2743,
-    "longitude": 104.6508,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 1044,
     "signatureDishesKh": [
@@ -3994,7 +4297,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-33.jpg"
+    "profileImage": "/foods/food-33.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-103",
@@ -4016,9 +4322,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6513,102.9839",
-    "latitude": 11.6513,
-    "longitude": 102.9839,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 131,
     "signatureDishesKh": [
@@ -4034,7 +4340,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-59.jpg"
+    "profileImage": "/foods/food-59.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-104",
@@ -4056,9 +4365,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4198,107.2045",
-    "latitude": 12.4198,
-    "longitude": 107.2045,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 168,
     "signatureDishesKh": [
@@ -4074,7 +4383,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-21.jpg"
+    "profileImage": "/foods/food-21.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-105",
@@ -4096,9 +4408,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7074,107.0425",
-    "latitude": 13.7074,
-    "longitude": 107.0425,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 205,
     "signatureDishesKh": [
@@ -4113,7 +4425,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-39.jpg"
+    "profileImage": "/foods/food-39.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-106",
@@ -4135,9 +4450,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4763,105.9888",
-    "latitude": 12.4763,
-    "longitude": 105.9888,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 242,
     "signatureDishesKh": [
@@ -4153,7 +4468,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-78.jpg"
+    "profileImage": "/foods/food-78.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-107",
@@ -4175,9 +4493,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5259,105.9533",
-    "latitude": 13.5259,
-    "longitude": 105.9533,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 279,
     "signatureDishesKh": [
@@ -4193,7 +4511,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-75.jpg"
+    "profileImage": "/foods/food-75.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-108",
@@ -4215,9 +4536,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.8193,104.9814",
-    "latitude": 13.8193,
-    "longitude": 104.9814,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 316,
     "signatureDishesKh": [
@@ -4233,7 +4554,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-33.jpg"
+    "profileImage": "/foods/food-33.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-109",
@@ -4255,9 +4579,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.6099,102.9889",
-    "latitude": 13.6099,
-    "longitude": 102.9889,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 353,
     "signatureDishesKh": [
@@ -4273,7 +4597,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-1.jpg"
+    "profileImage": "/foods/food-1.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-110",
@@ -4295,9 +4622,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.2179,103.5478",
-    "latitude": 14.2179,
-    "longitude": 103.5478,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 390,
     "signatureDishesKh": [
@@ -4313,7 +4640,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-2.jpg"
+    "profileImage": "/foods/food-2.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-111",
@@ -4335,9 +4665,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8129,102.5792",
-    "latitude": 12.8129,
-    "longitude": 102.5792,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 427,
     "signatureDishesKh": [
@@ -4353,7 +4683,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-72.jpg"
+    "profileImage": "/foods/food-72.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-112",
@@ -4375,9 +4708,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.461,105.3114",
-    "latitude": 11.461,
-    "longitude": 105.3114,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 464,
     "signatureDishesKh": [
@@ -4392,7 +4725,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-78.jpg"
+    "profileImage": "/foods/food-78.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-113",
@@ -4414,9 +4750,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0758,105.7994",
-    "latitude": 11.0758,
-    "longitude": 105.7994,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 501,
     "signatureDishesKh": [
@@ -4432,7 +4768,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-75.jpg"
+    "profileImage": "/foods/food-75.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-114",
@@ -4454,9 +4793,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4533,104.5358",
-    "latitude": 11.4533,
-    "longitude": 104.5358,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 538,
     "signatureDishesKh": [
@@ -4472,7 +4811,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-33.jpg"
+    "profileImage": "/foods/food-33.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-115",
@@ -4494,9 +4836,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.9026,105.6875",
-    "latitude": 11.9026,
-    "longitude": 105.6875,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 575,
     "signatureDishesKh": [
@@ -4512,7 +4854,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-1.jpg"
+    "profileImage": "/foods/food-1.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-116",
@@ -4534,9 +4879,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5804,104.8982",
-    "latitude": 11.5804,
-    "longitude": 104.8982,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 612,
     "signatureDishesKh": [
@@ -4552,7 +4897,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-33.jpg"
+    "profileImage": "/foods/food-33.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-117",
@@ -4574,9 +4922,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3993,103.8414",
-    "latitude": 13.3993,
-    "longitude": 103.8414,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 649,
     "signatureDishesKh": [
@@ -4592,7 +4940,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-37.jpg"
+    "profileImage": "/foods/food-37.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-118",
@@ -4614,9 +4965,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.0597,103.2022",
-    "latitude": 13.0597,
-    "longitude": 103.2022,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 686,
     "signatureDishesKh": [
@@ -4632,7 +4983,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-49.jpg"
+    "profileImage": "/foods/food-49.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Duplicate storefront listing of rest-43 (Kinyei Cafe Battambang) — flagged for Admin consolidation/location review."
   },
   {
     "id": "rest-119",
@@ -4654,9 +5008,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5852,104.1934",
-    "latitude": 10.5852,
-    "longitude": 104.1934,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 723,
     "signatureDishesKh": [
@@ -4671,7 +5025,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-21.jpg"
+    "profileImage": "/foods/food-21.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-120",
@@ -4685,17 +5042,17 @@ export const initial100Restaurants: Restaurant[] = [
       "/foods/food-43.jpg",
       "/foods/food-49.jpg"
     ],
-    "addressKh": "ផ្លូវឡើងឧទ្យានជាតិកែប ក្រុងកែប ខេត្តកែប",
-    "addressEn": "Kep National Park Trailhead, Kep City",
+    "addressKh": "ផ្លូវឡើងឧទ្យានជាតិកែប សង្កាត់កែប ក្រុងកែប",
+    "addressEn": "Kep National Park Hillside Trail (Plus Code F7QW+WC5), Krong Kaeb, Kep",
     "provinceKh": "ខេត្តកែប",
     "provinceEn": "Kep",
     "phone": "093 940 960",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.4702,104.3281",
-    "latitude": 10.4702,
-    "longitude": 104.3281,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.489762,104.296109",
+    "latitude": 10.489762,
+    "longitude": 104.296109,
     "rating": 4.5,
     "reviewCount": 760,
     "signatureDishesKh": [
@@ -4711,7 +5068,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-43.jpg"
+    "profileImage": "/foods/food-43.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-121",
@@ -4733,9 +5093,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6184,103.4964",
-    "latitude": 10.6184,
-    "longitude": 103.4964,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 797,
     "signatureDishesKh": [
@@ -4751,7 +5111,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-25.jpg"
+    "profileImage": "/foods/food-25.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-122",
@@ -4773,9 +5136,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0048,105.4491",
-    "latitude": 12.0048,
-    "longitude": 105.4491,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 834,
     "signatureDishesKh": [
@@ -4791,7 +5154,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-19.jpg"
+    "profileImage": "/foods/food-19.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-123",
@@ -4813,9 +5179,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5073,104.95",
-    "latitude": 11.5073,
-    "longitude": 104.95,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 871,
     "signatureDishesKh": [
@@ -4831,7 +5197,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-64.jpg"
+    "profileImage": "/foods/food-64.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-124",
@@ -4853,9 +5222,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0268,104.7999",
-    "latitude": 11.0268,
-    "longitude": 104.7999,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 908,
     "signatureDishesKh": [
@@ -4871,7 +5240,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-63.jpg"
+    "profileImage": "/foods/food-63.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-125",
@@ -4893,9 +5265,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5028,103.9492",
-    "latitude": 12.5028,
-    "longitude": 103.9492,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 945,
     "signatureDishesKh": [
@@ -4911,7 +5283,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-24.jpg"
+    "profileImage": "/foods/food-24.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-126",
@@ -4933,9 +5308,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.6871,104.8587",
-    "latitude": 12.6871,
-    "longitude": 104.8587,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 982,
     "signatureDishesKh": [
@@ -4950,7 +5325,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-58.jpg"
+    "profileImage": "/foods/food-58.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-127",
@@ -4972,9 +5350,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2383,104.6508",
-    "latitude": 12.2383,
-    "longitude": 104.6508,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 1019,
     "signatureDishesKh": [
@@ -4990,7 +5368,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-20.jpg"
+    "profileImage": "/foods/food-20.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-128",
@@ -5012,9 +5393,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6153,102.9839",
-    "latitude": 11.6153,
-    "longitude": 102.9839,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 1056,
     "signatureDishesKh": [
@@ -5030,7 +5411,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-129",
@@ -5052,9 +5436,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4678,107.2045",
-    "latitude": 12.4678,
-    "longitude": 107.2045,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 143,
     "signatureDishesKh": [
@@ -5070,7 +5454,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-19.jpg"
+    "profileImage": "/foods/food-19.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-130",
@@ -5092,9 +5479,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7554,107.0425",
-    "latitude": 13.7554,
-    "longitude": 107.0425,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 180,
     "signatureDishesKh": [
@@ -5110,7 +5497,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-21.jpg"
+    "profileImage": "/foods/food-21.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-131",
@@ -5132,9 +5522,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5243,105.9888",
-    "latitude": 12.5243,
-    "longitude": 105.9888,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 217,
     "signatureDishesKh": [
@@ -5150,7 +5540,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-24.jpg"
+    "profileImage": "/foods/food-24.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-132",
@@ -5172,9 +5565,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4899,105.9533",
-    "latitude": 13.4899,
-    "longitude": 105.9533,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 254,
     "signatureDishesKh": [
@@ -5190,7 +5583,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-58.jpg"
+    "profileImage": "/foods/food-58.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-133",
@@ -5212,9 +5608,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7833,104.9814",
-    "latitude": 13.7833,
-    "longitude": 104.9814,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 291,
     "signatureDishesKh": [
@@ -5229,7 +5625,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-20.jpg"
+    "profileImage": "/foods/food-20.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-134",
@@ -5251,9 +5650,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5739,102.9889",
-    "latitude": 13.5739,
-    "longitude": 102.9889,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 328,
     "signatureDishesKh": [
@@ -5269,7 +5668,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-19.jpg"
+    "profileImage": "/foods/food-19.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-135",
@@ -5291,9 +5693,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.1819,103.5478",
-    "latitude": 14.1819,
-    "longitude": 103.5478,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 365,
     "signatureDishesKh": [
@@ -5309,7 +5711,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-64.jpg"
+    "profileImage": "/foods/food-64.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-136",
@@ -5331,9 +5736,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8609,102.5792",
-    "latitude": 12.8609,
-    "longitude": 102.5792,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 402,
     "signatureDishesKh": [
@@ -5349,7 +5754,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-63.jpg"
+    "profileImage": "/foods/food-63.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-137",
@@ -5371,9 +5779,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.509,105.3114",
-    "latitude": 11.509,
-    "longitude": 105.3114,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 439,
     "signatureDishesKh": [
@@ -5389,7 +5797,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-24.jpg"
+    "profileImage": "/foods/food-24.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-138",
@@ -5411,9 +5822,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.1238,105.7994",
-    "latitude": 11.1238,
-    "longitude": 105.7994,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 476,
     "signatureDishesKh": [
@@ -5429,7 +5840,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-58.jpg"
+    "profileImage": "/foods/food-58.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-139",
@@ -5451,9 +5865,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4173,104.5358",
-    "latitude": 11.4173,
-    "longitude": 104.5358,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 513,
     "signatureDishesKh": [
@@ -5469,7 +5883,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-20.jpg"
+    "profileImage": "/foods/food-20.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-140",
@@ -5491,9 +5908,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.8666,105.6875",
-    "latitude": 11.8666,
-    "longitude": 105.6875,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 550,
     "signatureDishesKh": [
@@ -5508,7 +5925,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-19.jpg"
+    "profileImage": "/foods/food-19.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-141",
@@ -5530,9 +5950,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5444,104.8982",
-    "latitude": 11.5444,
-    "longitude": 104.8982,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 587,
     "signatureDishesKh": [
@@ -5548,7 +5968,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-35.jpg"
+    "profileImage": "/foods/food-35.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-142",
@@ -5570,9 +5993,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3633,103.8414",
-    "latitude": 13.3633,
-    "longitude": 103.8414,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 624,
     "signatureDishesKh": [
@@ -5588,7 +6011,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-2.jpg"
+    "profileImage": "/foods/food-2.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-143",
@@ -5610,9 +6036,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.1077,103.2022",
-    "latitude": 13.1077,
-    "longitude": 103.2022,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 661,
     "signatureDishesKh": [
@@ -5628,7 +6054,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-38.jpg"
+    "profileImage": "/foods/food-38.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-144",
@@ -5650,9 +6079,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6332,104.1934",
-    "latitude": 10.6332,
-    "longitude": 104.1934,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 698,
     "signatureDishesKh": [
@@ -5668,7 +6097,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-37.jpg"
+    "profileImage": "/foods/food-37.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-145",
@@ -5690,9 +6122,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5182,104.3281",
-    "latitude": 10.5182,
-    "longitude": 104.3281,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 735,
     "signatureDishesKh": [
@@ -5708,7 +6140,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-27.jpg"
+    "profileImage": "/foods/food-27.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-146",
@@ -5730,9 +6165,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5824,103.4964",
-    "latitude": 10.5824,
-    "longitude": 103.4964,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 772,
     "signatureDishesKh": [
@@ -5748,7 +6183,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-74.jpg"
+    "profileImage": "/foods/food-74.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-147",
@@ -5770,9 +6208,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.9688,105.4491",
-    "latitude": 11.9688,
-    "longitude": 105.4491,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 809,
     "signatureDishesKh": [
@@ -5787,7 +6225,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-37.jpg"
+    "profileImage": "/foods/food-37.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-148",
@@ -5809,9 +6250,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4713,104.95",
-    "latitude": 11.4713,
-    "longitude": 104.95,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 846,
     "signatureDishesKh": [
@@ -5827,7 +6268,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-81.jpg"
+    "profileImage": "/foods/food-81.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-149",
@@ -5849,9 +6293,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.9908,104.7999",
-    "latitude": 10.9908,
-    "longitude": 104.7999,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 883,
     "signatureDishesKh": [
@@ -5867,7 +6311,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-82.jpg"
+    "profileImage": "/foods/food-82.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-150",
@@ -5889,9 +6336,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5508,103.9492",
-    "latitude": 12.5508,
-    "longitude": 103.9492,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 920,
     "signatureDishesKh": [
@@ -5907,7 +6354,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-37.jpg"
+    "profileImage": "/foods/food-37.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-151",
@@ -5929,9 +6379,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.7351,104.8587",
-    "latitude": 12.7351,
-    "longitude": 104.8587,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 957,
     "signatureDishesKh": [
@@ -5947,7 +6397,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-81.jpg"
+    "profileImage": "/foods/food-81.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-152",
@@ -5969,9 +6422,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2863,104.6508",
-    "latitude": 12.2863,
-    "longitude": 104.6508,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 994,
     "signatureDishesKh": [
@@ -5987,7 +6440,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-82.jpg"
+    "profileImage": "/foods/food-82.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-153",
@@ -6009,9 +6465,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5793,102.9839",
-    "latitude": 11.5793,
-    "longitude": 102.9839,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 1031,
     "signatureDishesKh": [
@@ -6027,7 +6483,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-23.jpg"
+    "profileImage": "/foods/food-23.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-154",
@@ -6049,9 +6508,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4318,107.2045",
-    "latitude": 12.4318,
-    "longitude": 107.2045,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 1068,
     "signatureDishesKh": [
@@ -6066,7 +6525,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-155",
@@ -6088,9 +6550,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7194,107.0425",
-    "latitude": 13.7194,
-    "longitude": 107.0425,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 155,
     "signatureDishesKh": [
@@ -6106,7 +6568,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-156",
@@ -6128,9 +6593,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4883,105.9888",
-    "latitude": 12.4883,
-    "longitude": 105.9888,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 192,
     "signatureDishesKh": [
@@ -6146,7 +6611,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-37.jpg"
+    "profileImage": "/foods/food-37.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-157",
@@ -6168,9 +6636,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5379,105.9533",
-    "latitude": 13.5379,
-    "longitude": 105.9533,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 229,
     "signatureDishesKh": [
@@ -6186,7 +6654,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-81.jpg"
+    "profileImage": "/foods/food-81.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-158",
@@ -6208,9 +6679,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.8313,104.9814",
-    "latitude": 13.8313,
-    "longitude": 104.9814,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 266,
     "signatureDishesKh": [
@@ -6226,7 +6697,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-82.jpg"
+    "profileImage": "/foods/food-82.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-159",
@@ -6248,9 +6722,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.6219,102.9889",
-    "latitude": 13.6219,
-    "longitude": 102.9889,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 303,
     "signatureDishesKh": [
@@ -6266,7 +6740,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-37.jpg"
+    "profileImage": "/foods/food-37.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-160",
@@ -6288,9 +6765,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.1459,103.5478",
-    "latitude": 14.1459,
-    "longitude": 103.5478,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 340,
     "signatureDishesKh": [
@@ -6306,7 +6783,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-81.jpg"
+    "profileImage": "/foods/food-81.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-161",
@@ -6328,9 +6808,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8249,102.5792",
-    "latitude": 12.8249,
-    "longitude": 102.5792,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 377,
     "signatureDishesKh": [
@@ -6345,7 +6825,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-82.jpg"
+    "profileImage": "/foods/food-82.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-162",
@@ -6367,9 +6850,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.473,105.3114",
-    "latitude": 11.473,
-    "longitude": 105.3114,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 414,
     "signatureDishesKh": [
@@ -6385,7 +6868,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-37.jpg"
+    "profileImage": "/foods/food-37.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-163",
@@ -6407,9 +6893,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0878,105.7994",
-    "latitude": 11.0878,
-    "longitude": 105.7994,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 451,
     "signatureDishesKh": [
@@ -6425,7 +6911,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-81.jpg"
+    "profileImage": "/foods/food-81.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-164",
@@ -6447,9 +6936,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4653,104.5358",
-    "latitude": 11.4653,
-    "longitude": 104.5358,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 488,
     "signatureDishesKh": [
@@ -6465,7 +6954,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-82.jpg"
+    "profileImage": "/foods/food-82.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-165",
@@ -6487,9 +6979,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.9146,105.6875",
-    "latitude": 11.9146,
-    "longitude": 105.6875,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 525,
     "signatureDishesKh": [
@@ -6505,7 +6997,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-37.jpg"
+    "profileImage": "/foods/food-37.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-166",
@@ -6527,9 +7022,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5924,104.8982",
-    "latitude": 11.5924,
-    "longitude": 104.8982,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 562,
     "signatureDishesKh": [
@@ -6545,7 +7040,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-81.jpg"
+    "profileImage": "/foods/food-81.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-167",
@@ -6567,9 +7065,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3273,103.8414",
-    "latitude": 13.3273,
-    "longitude": 103.8414,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 599,
     "signatureDishesKh": [
@@ -6585,7 +7083,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-20.jpg"
+    "profileImage": "/foods/food-20.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-168",
@@ -6607,9 +7108,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.0717,103.2022",
-    "latitude": 13.0717,
-    "longitude": 103.2022,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 636,
     "signatureDishesKh": [
@@ -6624,7 +7125,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-21.jpg"
+    "profileImage": "/foods/food-21.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-169",
@@ -6646,9 +7150,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5972,104.1934",
-    "latitude": 10.5972,
-    "longitude": 104.1934,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 673,
     "signatureDishesKh": [
@@ -6664,7 +7168,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-49.jpg"
+    "profileImage": "/foods/food-49.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-170",
@@ -6686,9 +7193,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.4822,104.3281",
-    "latitude": 10.4822,
-    "longitude": 104.3281,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 710,
     "signatureDishesKh": [
@@ -6704,7 +7211,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-27.jpg"
+    "profileImage": "/foods/food-27.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-171",
@@ -6726,9 +7236,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6304,103.4964",
-    "latitude": 10.6304,
-    "longitude": 103.4964,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 747,
     "signatureDishesKh": [
@@ -6744,7 +7254,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-172",
@@ -6766,9 +7279,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0168,105.4491",
-    "latitude": 12.0168,
-    "longitude": 105.4491,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 784,
     "signatureDishesKh": [
@@ -6784,7 +7297,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-84.jpg"
+    "profileImage": "/foods/food-84.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-173",
@@ -6806,9 +7322,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5193,104.95",
-    "latitude": 11.5193,
-    "longitude": 104.95,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 821,
     "signatureDishesKh": [
@@ -6824,7 +7340,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-49.jpg"
+    "profileImage": "/foods/food-49.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-174",
@@ -6846,9 +7365,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.9548,104.7999",
-    "latitude": 10.9548,
-    "longitude": 104.7999,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 858,
     "signatureDishesKh": [
@@ -6864,7 +7383,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-40.jpg"
+    "profileImage": "/foods/food-40.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-175",
@@ -6886,9 +7408,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5148,103.9492",
-    "latitude": 12.5148,
-    "longitude": 103.9492,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 895,
     "signatureDishesKh": [
@@ -6903,7 +7425,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-86.jpg"
+    "profileImage": "/foods/food-86.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-176",
@@ -6925,9 +7450,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.6991,104.8587",
-    "latitude": 12.6991,
-    "longitude": 104.8587,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 932,
     "signatureDishesKh": [
@@ -6943,7 +7468,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-84.jpg"
+    "profileImage": "/foods/food-84.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-177",
@@ -6965,9 +7493,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2503,104.6508",
-    "latitude": 12.2503,
-    "longitude": 104.6508,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 969,
     "signatureDishesKh": [
@@ -6983,7 +7511,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-49.jpg"
+    "profileImage": "/foods/food-49.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-178",
@@ -7005,9 +7536,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6273,102.9839",
-    "latitude": 11.6273,
-    "longitude": 102.9839,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 1006,
     "signatureDishesKh": [
@@ -7023,7 +7554,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-84.jpg"
+    "profileImage": "/foods/food-84.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-179",
@@ -7045,9 +7579,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4798,107.2045",
-    "latitude": 12.4798,
-    "longitude": 107.2045,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 1043,
     "signatureDishesKh": [
@@ -7063,7 +7597,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-86.jpg"
+    "profileImage": "/foods/food-86.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-180",
@@ -7085,9 +7622,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7674,107.0425",
-    "latitude": 13.7674,
-    "longitude": 107.0425,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 130,
     "signatureDishesKh": [
@@ -7103,7 +7640,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-26.jpg"
+    "profileImage": "/foods/food-26.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-181",
@@ -7125,9 +7665,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4523,105.9888",
-    "latitude": 12.4523,
-    "longitude": 105.9888,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 167,
     "signatureDishesKh": [
@@ -7143,7 +7683,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-49.jpg"
+    "profileImage": "/foods/food-49.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-182",
@@ -7165,9 +7708,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5019,105.9533",
-    "latitude": 13.5019,
-    "longitude": 105.9533,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 204,
     "signatureDishesKh": [
@@ -7182,7 +7725,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-40.jpg"
+    "profileImage": "/foods/food-40.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-183",
@@ -7204,9 +7750,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7953,104.9814",
-    "latitude": 13.7953,
-    "longitude": 104.9814,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 241,
     "signatureDishesKh": [
@@ -7222,7 +7768,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-86.jpg"
+    "profileImage": "/foods/food-86.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-184",
@@ -7244,9 +7793,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5859,102.9889",
-    "latitude": 13.5859,
-    "longitude": 102.9889,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 278,
     "signatureDishesKh": [
@@ -7262,7 +7811,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-84.jpg"
+    "profileImage": "/foods/food-84.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-185",
@@ -7284,9 +7836,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.1939,103.5478",
-    "latitude": 14.1939,
-    "longitude": 103.5478,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 315,
     "signatureDishesKh": [
@@ -7302,7 +7854,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-49.jpg"
+    "profileImage": "/foods/food-49.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-186",
@@ -7324,9 +7879,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8729,102.5792",
-    "latitude": 12.8729,
-    "longitude": 102.5792,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 352,
     "signatureDishesKh": [
@@ -7342,7 +7897,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-40.jpg"
+    "profileImage": "/foods/food-40.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-187",
@@ -7364,9 +7922,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.521,105.3114",
-    "latitude": 11.521,
-    "longitude": 105.3114,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 389,
     "signatureDishesKh": [
@@ -7382,7 +7940,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-86.jpg"
+    "profileImage": "/foods/food-86.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-188",
@@ -7404,9 +7965,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0518,105.7994",
-    "latitude": 11.0518,
-    "longitude": 105.7994,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 426,
     "signatureDishesKh": [
@@ -7422,7 +7983,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-84.jpg"
+    "profileImage": "/foods/food-84.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-189",
@@ -7444,9 +8008,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4293,104.5358",
-    "latitude": 11.4293,
-    "longitude": 104.5358,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 463,
     "signatureDishesKh": [
@@ -7461,7 +8025,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-49.jpg"
+    "profileImage": "/foods/food-49.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-190",
@@ -7483,9 +8050,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.8786,105.6875",
-    "latitude": 11.8786,
-    "longitude": 105.6875,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 500,
     "signatureDishesKh": [
@@ -7501,7 +8068,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-40.jpg"
+    "profileImage": "/foods/food-40.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-191",
@@ -7523,9 +8093,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5564,104.8982",
-    "latitude": 11.5564,
-    "longitude": 104.8982,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 537,
     "signatureDishesKh": [
@@ -7541,7 +8111,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-21.jpg"
+    "profileImage": "/foods/food-21.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-192",
@@ -7555,17 +8128,17 @@ export const initial100Restaurants: Restaurant[] = [
       "/foods/food-86.jpg",
       "/foods/food-49.jpg"
     ],
-    "addressKh": "មាត់ស្ទឹង ក្បែរស្ពានផ្សារចាស់ ក្រុងសៀមរាប",
-    "addressEn": "Pokambor Ave near Old Market Bridge, Siem Reap",
+    "addressKh": "ផ្ទះលេខ ២០០ មហាវិថីពោធិ៍កំបោរ ជិតស្ពានផ្សារចាស់ ក្រុងសៀមរាប",
+    "addressEn": "No. 200 Pokambor Avenue, Old Market Bridge, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
     "phone": "093 544 296",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3753,103.8414",
-    "latitude": 13.3753,
-    "longitude": 103.8414,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.354011,103.856211",
+    "latitude": 13.354011,
+    "longitude": 103.856211,
     "rating": 4.9,
     "reviewCount": 574,
     "signatureDishesKh": [
@@ -7581,7 +8154,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-86.jpg"
+    "profileImage": "/foods/food-86.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-193",
@@ -7603,9 +8179,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.1197,103.2022",
-    "latitude": 13.1197,
-    "longitude": 103.2022,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 611,
     "signatureDishesKh": [
@@ -7621,7 +8197,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-74.jpg"
+    "profileImage": "/foods/food-74.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-194",
@@ -7643,9 +8222,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6452,104.1934",
-    "latitude": 10.6452,
-    "longitude": 104.1934,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 648,
     "signatureDishesKh": [
@@ -7661,7 +8240,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-25.jpg"
+    "profileImage": "/foods/food-25.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-195",
@@ -7683,9 +8265,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.4462,104.3281",
-    "latitude": 10.4462,
-    "longitude": 104.3281,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 685,
     "signatureDishesKh": [
@@ -7701,7 +8283,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-23.jpg"
+    "profileImage": "/foods/food-23.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-196",
@@ -7723,9 +8308,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5944,103.4964",
-    "latitude": 10.5944,
-    "longitude": 103.4964,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 722,
     "signatureDishesKh": [
@@ -7740,7 +8325,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-25.jpg"
+    "profileImage": "/foods/food-25.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-197",
@@ -7762,9 +8350,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.9808,105.4491",
-    "latitude": 11.9808,
-    "longitude": 105.4491,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 759,
     "signatureDishesKh": [
@@ -7780,7 +8368,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-33.jpg"
+    "profileImage": "/foods/food-33.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-198",
@@ -7802,9 +8393,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4833,104.95",
-    "latitude": 11.4833,
-    "longitude": 104.95,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 796,
     "signatureDishesKh": [
@@ -7820,7 +8411,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-17.jpg"
+    "profileImage": "/foods/food-17.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-199",
@@ -7842,9 +8436,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0028,104.7999",
-    "latitude": 11.0028,
-    "longitude": 104.7999,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 833,
     "signatureDishesKh": [
@@ -7860,7 +8454,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-29.jpg"
+    "profileImage": "/foods/food-29.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-200",
@@ -7882,9 +8479,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5628,103.9492",
-    "latitude": 12.5628,
-    "longitude": 103.9492,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 870,
     "signatureDishesKh": [
@@ -7900,7 +8497,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-47.jpg"
+    "profileImage": "/foods/food-47.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-201",
@@ -7922,9 +8522,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.7471,104.8587",
-    "latitude": 12.7471,
-    "longitude": 104.8587,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 907,
     "signatureDishesKh": [
@@ -7940,7 +8540,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-78.jpg"
+    "profileImage": "/foods/food-78.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-202",
@@ -7962,9 +8565,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2143,104.6508",
-    "latitude": 12.2143,
-    "longitude": 104.6508,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 944,
     "signatureDishesKh": [
@@ -7980,7 +8583,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-14.jpg"
+    "profileImage": "/foods/food-14.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-203",
@@ -8002,9 +8608,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5913,102.9839",
-    "latitude": 11.5913,
-    "longitude": 102.9839,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 981,
     "signatureDishesKh": [
@@ -8019,7 +8625,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-27.jpg"
+    "profileImage": "/foods/food-27.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-204",
@@ -8041,9 +8650,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4438,107.2045",
-    "latitude": 12.4438,
-    "longitude": 107.2045,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 1018,
     "signatureDishesKh": [
@@ -8059,7 +8668,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-33.jpg"
+    "profileImage": "/foods/food-33.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-205",
@@ -8081,9 +8693,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7314,107.0425",
-    "latitude": 13.7314,
-    "longitude": 107.0425,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 1055,
     "signatureDishesKh": [
@@ -8099,7 +8711,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-78.jpg"
+    "profileImage": "/foods/food-78.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-206",
@@ -8121,9 +8736,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5003,105.9888",
-    "latitude": 12.5003,
-    "longitude": 105.9888,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 142,
     "signatureDishesKh": [
@@ -8139,7 +8754,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-47.jpg"
+    "profileImage": "/foods/food-47.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-207",
@@ -8161,9 +8779,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5499,105.9533",
-    "latitude": 13.5499,
-    "longitude": 105.9533,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 179,
     "signatureDishesKh": [
@@ -8179,7 +8797,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-78.jpg"
+    "profileImage": "/foods/food-78.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-208",
@@ -8201,9 +8822,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.8433,104.9814",
-    "latitude": 13.8433,
-    "longitude": 104.9814,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 216,
     "signatureDishesKh": [
@@ -8219,7 +8840,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-14.jpg"
+    "profileImage": "/foods/food-14.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-209",
@@ -8241,9 +8865,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5499,102.9889",
-    "latitude": 13.5499,
-    "longitude": 102.9889,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 253,
     "signatureDishesKh": [
@@ -8259,7 +8883,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-33.jpg"
+    "profileImage": "/foods/food-33.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-210",
@@ -8281,9 +8908,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.1579,103.5478",
-    "latitude": 14.1579,
-    "longitude": 103.5478,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 290,
     "signatureDishesKh": [
@@ -8298,7 +8925,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-17.jpg"
+    "profileImage": "/foods/food-17.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-211",
@@ -8320,9 +8950,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8369,102.5792",
-    "latitude": 12.8369,
-    "longitude": 102.5792,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 327,
     "signatureDishesKh": [
@@ -8338,7 +8968,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-29.jpg"
+    "profileImage": "/foods/food-29.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-212",
@@ -8360,9 +8993,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.485,105.3114",
-    "latitude": 11.485,
-    "longitude": 105.3114,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 364,
     "signatureDishesKh": [
@@ -8378,7 +9011,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-47.jpg"
+    "profileImage": "/foods/food-47.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-213",
@@ -8400,9 +9036,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0998,105.7994",
-    "latitude": 11.0998,
-    "longitude": 105.7994,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 401,
     "signatureDishesKh": [
@@ -8418,7 +9054,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-78.jpg"
+    "profileImage": "/foods/food-78.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-214",
@@ -8440,9 +9079,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4773,104.5358",
-    "latitude": 11.4773,
-    "longitude": 104.5358,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 438,
     "signatureDishesKh": [
@@ -8458,7 +9097,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-14.jpg"
+    "profileImage": "/foods/food-14.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-215",
@@ -8480,9 +9122,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.9266,105.6875",
-    "latitude": 11.9266,
-    "longitude": 105.6875,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 475,
     "signatureDishesKh": [
@@ -8498,7 +9140,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-33.jpg"
+    "profileImage": "/foods/food-33.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-216",
@@ -8520,9 +9165,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "06:30 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5515,104.9258",
-    "latitude": 11.5515,
-    "longitude": 104.9258,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 512,
     "signatureDishesKh": [
@@ -8538,7 +9183,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-10-22",
-    "profileImage": "/foods/food-22.jpg"
+    "profileImage": "/foods/food-22.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-217",
@@ -8560,9 +9208,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:០០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:00 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5564,104.9282",
-    "latitude": 11.5564,
-    "longitude": 104.9282,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 549,
     "signatureDishesKh": [
@@ -8578,7 +9226,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-10-22",
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-218",
@@ -8600,9 +9251,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "06:00 AM - 10:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3522,103.8568",
-    "latitude": 13.3522,
-    "longitude": 103.8568,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 586,
     "signatureDishesKh": [
@@ -8618,7 +9269,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-10-22",
-    "profileImage": "/foods/food-19.jpg"
+    "profileImage": "/foods/food-19.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-219",
@@ -8640,9 +9294,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៦:០០ ល្ងាច",
     "openingHoursEn": "07:00 AM - 06:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3535,103.8559",
-    "latitude": 13.3535,
-    "longitude": 103.8559,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 623,
     "signatureDishesKh": [
@@ -8658,7 +9312,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-10-22",
-    "profileImage": "/foods/food-36.jpg"
+    "profileImage": "/foods/food-36.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-220",
@@ -8680,9 +9337,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៥:០០ ល្ងាច",
     "openingHoursEn": "07:00 AM - 05:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6085,104.1818",
-    "latitude": 10.6085,
-    "longitude": 104.1818,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 660,
     "signatureDishesKh": [
@@ -8698,7 +9355,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-10-22",
-    "profileImage": "/foods/food-27.jpg"
+    "profileImage": "/foods/food-27.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-221",
@@ -8720,9 +9380,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៨:០០ ព្រឹក - ០៧:០០ យប់",
     "openingHoursEn": "08:00 AM - 07:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.9908,104.7849",
-    "latitude": 10.9908,
-    "longitude": 104.7849,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 310,
     "signatureDishesKh": [
@@ -8737,7 +9397,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/foods/food-25.jpg"
+    "profileImage": "/foods/food-25.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-222",
@@ -8759,9 +9422,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:០០ ព្រឹក - ០៧:៣០ យប់",
     "openingHoursEn": "06:00 AM - 07:30 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2503,104.6658",
-    "latitude": 12.2503,
-    "longitude": 104.6658,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.7,
     "reviewCount": 150,
     "signatureDishesKh": [
@@ -8776,7 +9439,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/foods/food-2.jpg"
+    "profileImage": "/foods/food-2.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-223",
@@ -8798,9 +9464,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "07:00 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4833,104.95",
-    "latitude": 11.4833,
-    "longitude": 104.95,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 340,
     "signatureDishesKh": [
@@ -8815,7 +9481,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/foods/food-57.jpg"
+    "profileImage": "/foods/food-57.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-224",
@@ -8829,17 +9498,17 @@ export const initial100Restaurants: Restaurant[] = [
       "/foods/food-1.jpg",
       "/foods/food-19.jpg"
     ],
-    "addressKh": "មហាវិថីម៉ៅសេទុង ខណ្ឌចំការមន រាជធានីភ្នំពេញ",
-    "addressEn": "Mao Tse Toung Blvd, Chamkarmon, Phnom Penh",
+    "addressKh": "ផ្ទះលេខ ៥៣៤ មហាវិថីព្រះមុនីវង្ស សង្កាត់ផ្សារដើមថ្កូវ ខណ្ឌចំការមន រាជធានីភ្នំពេញ",
+    "addressEn": "No. 534 Preah Monivong Blvd, Sangkat Phsar Daeum Thkov, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "phone": "095 387 733",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5204,104.8982",
-    "latitude": 11.5204,
-    "longitude": 104.8982,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.530221,104.929304",
+    "latitude": 11.530221,
+    "longitude": 104.929304,
     "rating": 4.7,
     "reviewCount": 687,
     "signatureDishesKh": [
@@ -8855,7 +9524,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-1.jpg"
+    "profileImage": "/foods/food-1.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-225",
@@ -8869,17 +9541,17 @@ export const initial100Restaurants: Restaurant[] = [
       "/foods/food-26.jpg",
       "/foods/food-1.jpg"
     ],
-    "addressKh": "ផ្លូវលេខ ២ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង",
-    "addressEn": "Street 2, Battambang City, Battambang",
+    "addressKh": "ផ្លូវលេខ ២ សង្កាត់ស្វាយប៉ោ ក្រុងបាត់ដំបង",
+    "addressEn": "Street 2, Sangkat Svay Pao, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
     "phone": "097 401 759",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.0837,103.2022",
-    "latitude": 13.0837,
-    "longitude": 103.2022,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.099167,103.198333",
+    "latitude": 13.099167,
+    "longitude": 103.198333,
     "rating": 4.6,
     "reviewCount": 761,
     "signatureDishesKh": [
@@ -8895,7 +9567,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-26.jpg"
+    "profileImage": "/foods/food-26.jpg",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "rest-226",
@@ -8917,9 +9592,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6092,104.1934",
-    "latitude": 10.6092,
-    "longitude": 104.1934,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 798,
     "signatureDishesKh": [
@@ -8935,7 +9610,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-27.jpg"
+    "profileImage": "/foods/food-27.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-227",
@@ -8957,9 +9635,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.4942,104.3281",
-    "latitude": 10.4942,
-    "longitude": 104.3281,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 835,
     "signatureDishesKh": [
@@ -8975,7 +9653,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-27.jpg"
+    "profileImage": "/foods/food-27.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-228",
@@ -8997,9 +9678,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0288,105.4491",
-    "latitude": 12.0288,
-    "longitude": 105.4491,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 909,
     "signatureDishesKh": [
@@ -9015,7 +9696,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-59.jpg"
+    "profileImage": "/foods/food-59.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-229",
@@ -9037,9 +9721,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4473,104.95",
-    "latitude": 11.4473,
-    "longitude": 104.95,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.6,
     "reviewCount": 946,
     "signatureDishesKh": [
@@ -9055,7 +9739,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-20.jpg"
+    "profileImage": "/foods/food-20.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-230",
@@ -9077,9 +9764,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.9668,104.7999",
-    "latitude": 10.9668,
-    "longitude": 104.7999,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.8,
     "reviewCount": 983,
     "signatureDishesKh": [
@@ -9094,7 +9781,10 @@ export const initial100Restaurants: Restaurant[] = [
     "paymentStatus": "verified",
     "promotionalPrice": 4.99,
     "isPromoted": false,
-    "profileImage": "/foods/food-65.jpg"
+    "profileImage": "/foods/food-65.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-231",
@@ -9116,9 +9806,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5268,103.9492",
-    "latitude": 12.5268,
-    "longitude": 103.9492,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.5,
     "reviewCount": 1020,
     "signatureDishesKh": [
@@ -9134,7 +9824,10 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-21.jpg"
+    "profileImage": "/foods/food-21.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   },
   {
     "id": "rest-232",
@@ -9156,9 +9849,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2623,104.6508",
-    "latitude": 12.2623,
-    "longitude": 104.6508,
+    "mapUrl": "",
+    "latitude": 0,
+    "longitude": 0,
     "rating": 4.9,
     "reviewCount": 144,
     "signatureDishesKh": [
@@ -9174,6 +9867,9 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/foods/food-7.jpg"
+    "profileImage": "/foods/food-7.jpg",
+    "locationVerificationStatus": "needs_admin_review",
+    "locationNeedsReview": true,
+    "locationReviewNote": "Unverified or estimated template coordinates cleared during Oct 2026 GPS audit — pending Admin street & GPS verification."
   }
 ];

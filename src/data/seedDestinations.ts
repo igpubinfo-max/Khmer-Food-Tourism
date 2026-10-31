@@ -34,7 +34,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-129.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-2",
@@ -54,9 +57,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេញមួយឆ្នាំ ម៉ោង ០៨:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Year-round 08:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5658,104.9292",
-    "latitude": 11.5658,
-    "longitude": 104.9292,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5655,104.9293",
+    "latitude": 11.5655,
+    "longitude": 104.9293,
     "rating": 4.8,
     "reviewCount": 980,
     "highlightsKh": [
@@ -68,7 +71,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-140.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-3",
@@ -102,7 +108,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-3.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-4",
@@ -136,7 +145,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-144.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-5",
@@ -170,7 +182,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-145.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-6",
@@ -204,7 +219,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-146.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-7",
@@ -238,7 +256,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-161.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-8",
@@ -272,7 +293,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-170.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-9",
@@ -317,7 +341,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-184.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-10",
@@ -351,7 +378,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-187.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-11",
@@ -385,7 +415,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-201.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-12",
@@ -419,7 +452,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-216.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-13",
@@ -463,7 +499,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-92.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-14",
@@ -483,9 +522,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវវស្សា និងរដូវរំហើយ ខែកក្កដា ដល់ខែធ្នូ",
     "bestTimeToVisitEn": "July to December when river flows clear",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.6872,104.0152",
-    "latitude": 13.6872,
-    "longitude": 104.0152,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.708361,104.025583",
+    "latitude": 13.708361,
+    "longitude": 104.025583,
     "rating": 4.7,
     "reviewCount": 680,
     "highlightsKh": [
@@ -497,7 +536,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-244.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-15",
@@ -531,7 +573,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-235.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-16",
@@ -565,7 +610,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-237.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-17",
@@ -599,7 +647,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-265.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-18",
@@ -633,7 +684,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-243.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-19",
@@ -667,7 +721,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-247.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-20",
@@ -701,7 +758,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-170.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-21",
@@ -735,7 +795,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-37.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-22",
@@ -779,7 +842,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-147.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-23",
@@ -823,7 +889,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-149.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-24",
@@ -843,9 +912,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែតុលា ដល់ខែមេសា",
     "bestTimeToVisitEn": "October to April",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5167,103.6833",
-    "latitude": 10.5167,
-    "longitude": 103.6833,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.506409,103.734364",
+    "latitude": 10.506409,
+    "longitude": 103.734364,
     "rating": 4.6,
     "reviewCount": 520,
     "highlightsKh": [
@@ -857,7 +926,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-84.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-25",
@@ -891,7 +963,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-88.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-26",
@@ -925,7 +1000,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-140.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-27",
@@ -959,7 +1037,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-154.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-28",
@@ -979,9 +1060,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រាំង ខែវិច្ឆិកា ដល់ឧសភា",
     "bestTimeToVisitEn": "Dry season November to May",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6489,103.4689",
-    "latitude": 10.6489,
-    "longitude": 103.4689,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.635278,103.456667",
+    "latitude": 10.635278,
+    "longitude": 103.456667,
     "rating": 4.6,
     "reviewCount": 290,
     "highlightsKh": [
@@ -993,7 +1074,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-28.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-29",
@@ -1037,7 +1121,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-96.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-30",
@@ -1073,7 +1160,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-31",
@@ -1109,7 +1199,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-32",
@@ -1143,7 +1236,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-119.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-33",
@@ -1178,7 +1274,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-33.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-34",
@@ -1212,7 +1311,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-163.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-35",
@@ -1246,7 +1348,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-82.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-36",
@@ -1280,7 +1385,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-143.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-37",
@@ -1326,7 +1434,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-38",
@@ -1346,9 +1457,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:០០ ដល់ ១១:០០ និងពេលរសៀល",
     "bestTimeToVisitEn": "Morning and late afternoon for freshly landed crab catch",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.4989,104.2872",
-    "latitude": 10.4989,
-    "longitude": 104.2872,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.488528,104.289028",
+    "latitude": 10.488528,
+    "longitude": 104.289028,
     "rating": 4.8,
     "reviewCount": 1390,
     "highlightsKh": [
@@ -1360,7 +1471,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-140.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-39",
@@ -1394,7 +1508,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-58.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-40",
@@ -1428,7 +1545,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-175.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-41",
@@ -1448,9 +1568,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹកព្រលឹម ឬរសៀល",
     "bestTimeToVisitEn": "Morning or late afternoon",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5658,104.3547",
-    "latitude": 10.5658,
-    "longitude": 104.3547,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.565833,104.283889",
+    "latitude": 10.565833,
+    "longitude": 104.283889,
     "rating": 4.5,
     "reviewCount": 340,
     "highlightsKh": [
@@ -1462,7 +1582,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-85.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-42",
@@ -1498,7 +1621,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-43",
@@ -1532,7 +1658,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-161.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-44",
@@ -1566,7 +1695,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-227.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-45",
@@ -1600,7 +1732,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-235.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-46",
@@ -1636,7 +1771,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-47",
@@ -1672,7 +1810,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-48",
@@ -1706,7 +1847,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-118.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-49",
@@ -1742,7 +1886,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-50",
@@ -1778,7 +1925,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-51",
@@ -1798,9 +1948,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេញមួយឆ្នាំ ពេលរសៀលទស្សនាថ្ងៃលិច",
     "bestTimeToVisitEn": "Year-round, especially late afternoon",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5547,102.9872",
-    "latitude": 11.5547,
-    "longitude": 102.9872,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.560806,102.993222",
+    "latitude": 11.560806,
+    "longitude": 102.993222,
     "rating": 4.8,
     "reviewCount": 1120,
     "highlightsKh": [
@@ -1812,7 +1962,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-79.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-52",
@@ -1832,9 +1985,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែវិច្ឆិកា ដល់ខែឧសភា",
     "bestTimeToVisitEn": "November to May for calm crystal seas",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.9167,103.0833",
-    "latitude": 10.9167,
-    "longitude": 103.0833,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.933333,103.066667",
+    "latitude": 10.933333,
+    "longitude": 103.066667,
     "rating": 4.8,
     "reviewCount": 760,
     "highlightsKh": [
@@ -1846,7 +1999,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-176.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-53",
@@ -1880,7 +2036,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-53.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-54",
@@ -1916,7 +2075,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-55",
@@ -1951,7 +2113,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-55.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-56",
@@ -1995,7 +2160,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-104.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-57",
@@ -2029,7 +2197,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-109.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-58",
@@ -2065,7 +2236,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-59",
@@ -2101,7 +2275,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-60",
@@ -2137,7 +2314,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-61",
@@ -2171,7 +2351,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-162.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-62",
@@ -2206,7 +2389,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-62.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-63",
@@ -2240,7 +2426,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-165.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-64",
@@ -2274,7 +2463,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-172.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-65",
@@ -2310,7 +2502,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-66",
@@ -2344,7 +2539,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-233.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-67",
@@ -2388,7 +2586,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-156.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-68",
@@ -2422,7 +2623,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-180.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-69",
@@ -2442,9 +2646,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រាំង ខែវិច្ឆិកា ដល់មេសា",
     "bestTimeToVisitEn": "Dry season November to April for road access",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4114,104.9872",
-    "latitude": 13.4114,
-    "longitude": 104.9872,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.408,104.748472",
+    "latitude": 13.408,
+    "longitude": 104.748472,
     "rating": 4.7,
     "reviewCount": 380,
     "highlightsKh": [
@@ -2456,7 +2660,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-184.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-70",
@@ -2490,7 +2697,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-244.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-71",
@@ -2524,7 +2734,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-249.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-72",
@@ -2558,7 +2771,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-216.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-73",
@@ -2578,9 +2794,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៧:៣០ ដល់ ១០:៣០",
     "bestTimeToVisitEn": "Early morning for ascending the steps",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5989,105.0114",
-    "latitude": 12.5989,
-    "longitude": 105.0114,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.633333,105",
+    "latitude": 12.633333,
+    "longitude": 105,
     "rating": 4.6,
     "reviewCount": 680,
     "highlightsKh": [
@@ -2592,7 +2808,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-92.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-74",
@@ -2626,7 +2845,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-30.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-75",
@@ -2660,7 +2882,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-235.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-76",
@@ -2694,7 +2919,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-53.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-77",
@@ -2729,7 +2957,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-77.jpg"
     ],
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isCustomPhoto": true
+    "isCustomPhoto": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-78",
@@ -2763,7 +2994,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-243.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-79",
@@ -2799,7 +3033,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-80",
@@ -2833,7 +3070,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-248.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-81",
@@ -2867,7 +3107,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-244.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-82",
@@ -2903,7 +3146,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-83",
@@ -2937,7 +3183,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-82.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-84",
@@ -2973,7 +3222,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-85",
@@ -3009,7 +3261,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-86",
@@ -3043,7 +3298,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-117.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-87",
@@ -3079,7 +3337,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-88",
@@ -3115,7 +3376,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-89",
@@ -3149,7 +3413,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-162.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-90",
@@ -3185,7 +3452,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-91",
@@ -3221,7 +3491,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-92",
@@ -3267,7 +3540,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-93",
@@ -3301,7 +3577,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-173.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-94",
@@ -3335,7 +3614,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-168.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-95",
@@ -3371,7 +3653,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-96",
@@ -3407,7 +3692,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-97",
@@ -3443,7 +3731,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-98",
@@ -3477,7 +3768,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-98.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-99",
@@ -3511,7 +3805,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-249.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-100",
@@ -3531,9 +3828,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹកព្រលឹម",
     "bestTimeToVisitEn": "Early morning to climb comfortably",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0348,104.9872",
-    "latitude": 11.0348,
-    "longitude": 104.9872,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.184444,104.823333",
+    "latitude": 11.184444,
+    "longitude": 104.823333,
     "rating": 4.7,
     "reviewCount": 680,
     "highlightsKh": [
@@ -3545,7 +3842,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-187.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-101",
@@ -3565,9 +3865,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេញមួយឆ្នាំ ពិសេសចុងសប្តាហ៍",
     "bestTimeToVisitEn": "Year-round weekend picnic spot",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.2814,104.8872",
-    "latitude": 11.2814,
-    "longitude": 104.8872,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.33592,104.84551",
+    "latitude": 11.33592,
+    "longitude": 104.84551,
     "rating": 4.6,
     "reviewCount": 840,
     "highlightsKh": [
@@ -3579,7 +3879,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-201.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-102",
@@ -3613,7 +3916,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-216.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-103",
@@ -3647,7 +3953,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-31.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-104",
@@ -3683,7 +3992,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-105",
@@ -3717,7 +4029,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-105.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-106",
@@ -3751,7 +4066,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-237.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-107",
@@ -3787,7 +4105,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-108",
@@ -3821,7 +4142,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-84.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-109",
@@ -3856,7 +4180,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-109.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-110",
@@ -3890,7 +4217,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-248.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-111",
@@ -3924,7 +4254,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-95.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-112",
@@ -3958,7 +4291,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-255.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-113",
@@ -3994,7 +4330,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-114",
@@ -4028,7 +4367,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-260.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-115",
@@ -4062,7 +4404,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-159.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-116",
@@ -4096,7 +4441,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-161.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-117",
@@ -4132,7 +4480,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-118",
@@ -4167,7 +4518,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-118.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-119",
@@ -4203,7 +4557,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-120",
@@ -4239,7 +4596,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-118.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-121",
@@ -4275,7 +4635,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-122.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-122",
@@ -4311,7 +4674,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-123",
@@ -4346,7 +4712,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-131.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-124",
@@ -4382,7 +4751,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-198.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-125",
@@ -4417,7 +4789,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-136.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-126",
@@ -4452,7 +4827,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-143.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-127",
@@ -4487,7 +4865,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-156.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-128",
@@ -4524,7 +4905,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-129",
@@ -4561,7 +4945,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-130",
@@ -4598,7 +4985,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-131",
@@ -4635,7 +5025,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-132",
@@ -4670,7 +5063,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-216.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-133",
@@ -4707,7 +5103,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-134",
@@ -4742,7 +5141,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-227.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-135",
@@ -4777,7 +5179,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-235.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-136",
@@ -4814,7 +5219,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-137",
@@ -4851,7 +5259,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-138",
@@ -4887,7 +5298,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-138.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-139",
@@ -4922,7 +5336,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-247.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-140",
@@ -4958,7 +5375,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-140.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-141",
@@ -4994,7 +5414,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-141.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-142",
@@ -5030,7 +5453,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-142.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-143",
@@ -5066,7 +5492,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-143.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-144",
@@ -5102,7 +5531,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-144.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-145",
@@ -5138,7 +5570,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-145.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-146",
@@ -5174,7 +5609,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-146.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-147",
@@ -5210,7 +5648,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-147.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-148",
@@ -5245,7 +5686,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-154.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-149",
@@ -5281,7 +5725,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-149.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-150",
@@ -5317,7 +5764,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-150.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-152",
@@ -5353,7 +5803,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-152.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-153",
@@ -5389,7 +5842,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-153.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-154",
@@ -5425,7 +5881,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-154.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-155",
@@ -5460,7 +5919,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-136.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-156",
@@ -5497,7 +5959,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-157",
@@ -5533,7 +5998,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-157.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-158",
@@ -5569,7 +6037,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-158.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-159",
@@ -5605,7 +6076,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-159.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-160",
@@ -5642,7 +6116,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-161",
@@ -5678,7 +6155,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-161.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-162",
@@ -5714,7 +6194,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-162.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-163",
@@ -5750,7 +6233,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-163.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-164",
@@ -5786,7 +6272,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-164.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-165",
@@ -5822,7 +6311,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-165.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-166",
@@ -5858,7 +6350,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-166.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-167",
@@ -5893,7 +6388,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-150.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-168",
@@ -5930,7 +6428,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-169",
@@ -5950,9 +6451,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលល្ងាច ម៉ោង ០៣:០០ - ០៦:០០",
     "bestTimeToVisitEn": "Late Afternoon 03:00 PM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.5264,104.4289",
-    "latitude": 10.5264,
-    "longitude": 104.4289,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.463558,104.380566",
+    "latitude": 10.463558,
+    "longitude": 104.380566,
     "rating": 4.7,
     "reviewCount": 1680,
     "highlightsKh": [
@@ -5965,7 +6466,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-153.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-170",
@@ -6001,7 +6505,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-170.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-172",
@@ -6037,7 +6544,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-172.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-173",
@@ -6073,7 +6583,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-173.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-174",
@@ -6109,7 +6622,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-174.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-175",
@@ -6129,7 +6645,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលរសៀល ម៉ោង ០៨:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Daytime 08:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6667,102.9500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6667,102.95",
     "latitude": 11.6667,
     "longitude": 102.95,
     "rating": 4.6,
@@ -6145,7 +6661,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-175.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-176",
@@ -6182,7 +6701,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-177",
@@ -6217,7 +6739,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-173.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-178",
@@ -6252,7 +6777,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-178.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-179",
@@ -6272,7 +6800,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែវិច្ឆិកា ដល់ ខែឧសភា",
     "bestTimeToVisitEn": "Nov - May",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4500,103.4000",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.45,103.4",
     "latitude": 11.45,
     "longitude": 103.4,
     "rating": 4.8,
@@ -6287,7 +6815,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-194.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-180",
@@ -6324,7 +6855,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-181",
@@ -6359,7 +6893,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-122.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-182",
@@ -6394,7 +6931,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-140.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-183",
@@ -6429,7 +6969,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-141.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-184",
@@ -6466,7 +7009,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-185",
@@ -6486,7 +7032,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ឬពេលល្ងាច ម៉ោង ០៤:០០ - ០៦:០០",
     "bestTimeToVisitEn": "Late Afternoon 04:00 PM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.9667,103.0500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.9667,103.05",
     "latitude": 12.9667,
     "longitude": 103.05,
     "rating": 4.6,
@@ -6501,7 +7047,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-229.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-186",
@@ -6536,7 +7085,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-146.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-187",
@@ -6573,7 +7125,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-188",
@@ -6593,7 +7148,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវវស្សា និងដើមរដូវរំហើយ (ខែកក្កដា ដល់ ខែមករា)",
     "bestTimeToVisitEn": "Jul - Jan",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2167,103.3500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2167,103.35",
     "latitude": 12.2167,
     "longitude": 103.35,
     "rating": 4.7,
@@ -6608,7 +7163,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-53.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-189",
@@ -6643,7 +7201,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-184.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-190",
@@ -6678,7 +7239,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-62.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-191",
@@ -6698,7 +7262,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹកព្រលឹម ម៉ោង ០៦:០០ - ០៩:០០ (សមុទ្រពពក)",
     "bestTimeToVisitEn": "Early Morning 06:00 AM - 09:00 AM (Sea of clouds)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2833,103.2500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2833,103.25",
     "latitude": 12.2833,
     "longitude": 103.25,
     "rating": 4.8,
@@ -6713,7 +7277,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-85.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-192",
@@ -6748,7 +7315,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-118.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-193",
@@ -6768,7 +7338,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែវិច្ឆិកា ដល់ ខែឧសភា",
     "bestTimeToVisitEn": "Nov - May (Dry season)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0500,103.1833",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.05,103.1833",
     "latitude": 12.05,
     "longitude": 103.1833,
     "rating": 4.8,
@@ -6783,7 +7353,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-88.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-194",
@@ -6818,7 +7391,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-194.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-195",
@@ -6853,7 +7429,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-95.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-196",
@@ -6888,7 +7467,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-144.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-197",
@@ -6908,7 +7490,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែសីហា ដល់ ខែកុម្ភៈ",
     "bestTimeToVisitEn": "Aug - Feb",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2500,106.9500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.25,106.95",
     "latitude": 12.25,
     "longitude": 106.95,
     "rating": 4.8,
@@ -6923,7 +7505,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-109.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-198",
@@ -6943,7 +7528,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:០០ - ១១:០០ (ភ្លក្សកាហ្វេក្តៅ)",
     "bestTimeToVisitEn": "Morning 08:00 AM - 11:00 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4500,107.1950",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.45,107.195",
     "latitude": 12.45,
     "longitude": 107.195,
     "rating": 4.8,
@@ -6958,7 +7543,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-198.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-199",
@@ -6978,7 +7566,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែវិច្ឆិកា ដល់ ខែមេសា",
     "bestTimeToVisitEn": "Nov - Apr",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.1833,106.8500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.1833,106.85",
     "latitude": 12.1833,
     "longitude": 106.85,
     "rating": 4.6,
@@ -6993,7 +7581,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-159.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-200",
@@ -7013,7 +7604,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវវស្សា ខែកក្កដា ដល់ ខែធ្នូ",
     "bestTimeToVisitEn": "Jul - Dec",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.3500,107.0833",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.35,107.0833",
     "latitude": 12.35,
     "longitude": 107.0833,
     "rating": 4.7,
@@ -7028,7 +7619,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-161.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-201",
@@ -7065,7 +7659,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-202",
@@ -7100,7 +7697,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-163.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-203",
@@ -7135,7 +7735,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-165.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-204",
@@ -7155,7 +7758,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:០០ - ១១:៣០",
     "bestTimeToVisitEn": "Morning 08:00 AM - 11:30 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7000,107.2167",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.7,107.2167",
     "latitude": 13.7,
     "longitude": 107.2167,
     "rating": 4.6,
@@ -7170,7 +7773,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-118.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-205",
@@ -7205,7 +7811,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-173.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-206",
@@ -7225,7 +7834,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវវស្សា និងរដូវរំហើយ",
     "bestTimeToVisitEn": "Aug - Jan",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.6167,106.8500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.6167,106.85",
     "latitude": 13.6167,
     "longitude": 106.85,
     "rating": 4.6,
@@ -7240,7 +7849,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-174.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-207",
@@ -7275,7 +7887,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-279.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-208",
@@ -7310,7 +7925,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-92.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-209",
@@ -7345,7 +7963,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-97.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-210",
@@ -7380,7 +8001,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-128.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-211",
@@ -7415,7 +8039,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-129.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-212",
@@ -7450,7 +8077,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-130.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-213",
@@ -7485,7 +8115,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-131.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-214",
@@ -7505,7 +8138,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:០០ - ១១:០០",
     "bestTimeToVisitEn": "Morning 08:00 AM - 11:00 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8750,105.0417",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.875,105.0417",
     "latitude": 12.875,
     "longitude": 105.0417,
     "rating": 4.8,
@@ -7520,7 +8153,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-133.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-215",
@@ -7555,7 +8191,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-136.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-216",
@@ -7592,7 +8231,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-217",
@@ -7627,7 +8269,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-122.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-218",
@@ -7647,9 +8292,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវទឹកឡើង ខែកញ្ញា ដល់ ខែកុម្ភៈ",
     "bestTimeToVisitEn": "Sep - Feb",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8167,104.3333",
-    "latitude": 12.8167,
-    "longitude": 104.3333,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.818889,104.276389",
+    "latitude": 12.818889,
+    "longitude": 104.276389,
     "rating": 4.8,
     "reviewCount": 1420,
     "highlightsKh": [
@@ -7662,7 +8307,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-62.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-219",
@@ -7698,7 +8346,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-219.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-221",
@@ -7733,7 +8384,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-201.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-222",
@@ -7753,7 +8407,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:៣០ - ១១:៣០",
     "bestTimeToVisitEn": "Morning 08:30 AM - 11:30 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0500,105.1000",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.05,105.1",
     "latitude": 12.05,
     "longitude": 105.1,
     "rating": 4.8,
@@ -7768,7 +8422,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-146.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-223",
@@ -7788,7 +8445,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវវស្សា ខែកក្កដា ដល់ ខែធ្នូ",
     "bestTimeToVisitEn": "Jul - Dec",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0667,105.3500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.0667,105.35",
     "latitude": 12.0667,
     "longitude": 105.35,
     "rating": 4.6,
@@ -7803,7 +8460,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-95.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-224",
@@ -7838,7 +8498,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-170.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-225",
@@ -7875,7 +8538,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-226",
@@ -7895,7 +8561,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលល្ងាច ម៉ោង ០៣:៣០ - ០៦:០០",
     "bestTimeToVisitEn": "Late Afternoon 03:30 PM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.8500,105.8500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.85,105.85",
     "latitude": 11.85,
     "longitude": 105.85,
     "rating": 4.7,
@@ -7910,7 +8576,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-117.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-227",
@@ -7947,7 +8616,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-228",
@@ -7982,7 +8654,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-161.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-229",
@@ -8002,7 +8677,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែមិថុនា ដល់ ខែមករា (រដូវស្មៅបៃតង និងពពក)",
     "bestTimeToVisitEn": "Jun - Jan (Peak sea of clouds)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6667,104.0500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6667,104.05",
     "latitude": 11.6667,
     "longitude": 104.05,
     "rating": 5,
@@ -8024,7 +8699,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-230",
@@ -8060,7 +8738,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-230.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-231",
@@ -8096,7 +8777,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-231.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-232",
@@ -8116,7 +8800,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវវស្សា ខែកក្កដា ដល់ ខែមករា",
     "bestTimeToVisitEn": "Jul - Jan",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.3167,104.0500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.3167,104.05",
     "latitude": 11.3167,
     "longitude": 104.05,
     "rating": 4.7,
@@ -8131,7 +8815,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-172.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-233",
@@ -8166,7 +8853,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-233.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-234",
@@ -8186,7 +8876,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ខែមិថុនា ដល់ ខែមករា",
     "bestTimeToVisitEn": "Jun - Jan",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6500,104.0333",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.65,104.0333",
     "latitude": 11.65,
     "longitude": 104.0333,
     "rating": 4.9,
@@ -8201,7 +8891,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-58.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-235",
@@ -8221,7 +8914,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:០០ - ១១:០០",
     "bestTimeToVisitEn": "Morning 08:00 AM - 11:00 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.2500,104.7500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.25,104.75",
     "latitude": 12.25,
     "longitude": 104.75,
     "rating": 4.6,
@@ -8238,7 +8931,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-236",
@@ -8273,7 +8969,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-85.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-237",
@@ -8310,7 +9009,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-238",
@@ -8330,7 +9032,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រាំង ខែវិច្ឆិកា ដល់ ខែឧសភា",
     "bestTimeToVisitEn": "Nov - May",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.1500,104.4500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.15,104.45",
     "latitude": 12.15,
     "longitude": 104.45,
     "rating": 4.6,
@@ -8345,7 +9047,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-92.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-239",
@@ -8380,7 +9085,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-82.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-240",
@@ -8417,7 +9125,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-241",
@@ -8452,7 +9163,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-122.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-242",
@@ -8489,7 +9203,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-243",
@@ -8509,7 +9226,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ឬក្នុងពិធីបុណ្យចូលឆ្នាំខ្មែរ",
     "bestTimeToVisitEn": "Morning / Khmer New Year (Performance season)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6000,105.0167",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.6,105.0167",
     "latitude": 11.6,
     "longitude": 105.0167,
     "rating": 4.8,
@@ -8526,7 +9243,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-244",
@@ -8546,7 +9266,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ថ្ងៃចុងសប្តាហ៍ ម៉ោង ១០:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Daytime 10:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4500,104.9333",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.45,104.9333",
     "latitude": 11.45,
     "longitude": 104.9333,
     "rating": 4.6,
@@ -8562,7 +9282,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-244.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-245",
@@ -8582,9 +9305,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:៣០ - ១១:៣០",
     "bestTimeToVisitEn": "Morning 08:30 AM - 11:30 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.9833,105.0167",
-    "latitude": 10.9833,
-    "longitude": 105.0167,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.995,104.974722",
+    "latitude": 10.995,
+    "longitude": 104.974722,
     "rating": 4.8,
     "reviewCount": 1420,
     "highlightsKh": [
@@ -8597,7 +9320,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-145.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-246",
@@ -8632,7 +9358,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-143.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-247",
@@ -8669,7 +9398,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-248",
@@ -8689,7 +9421,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៧:៣០ - ១០:៣០",
     "bestTimeToVisitEn": "Morning 07:30 AM - 10:30 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0333,104.8500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0333,104.85",
     "latitude": 11.0333,
     "longitude": 104.85,
     "rating": 4.8,
@@ -8706,7 +9438,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-249",
@@ -8726,7 +9461,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក ម៉ោង ០៨:០០ - ១១:០០",
     "bestTimeToVisitEn": "Morning 08:00 AM - 11:00 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.9500,104.7833",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.95,104.7833",
     "latitude": 10.95,
     "longitude": 104.7833,
     "rating": 4.6,
@@ -8743,7 +9478,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-250",
@@ -8779,7 +9517,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-250.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-251",
@@ -8799,7 +9540,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រាំង ខែវិច្ឆិកា ដល់ ខែឧសភា",
     "bestTimeToVisitEn": "Dry season (November to May)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.7833,105.9500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.7833,105.95",
     "latitude": 12.7833,
     "longitude": 105.95,
     "rating": 4.8,
@@ -8814,7 +9555,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-269.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-252",
@@ -8834,7 +9578,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលរសៀល ម៉ោង ០៧:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Morning and afternoon 07:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.7983,105.9610",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.7983,105.961",
     "latitude": 12.7983,
     "longitude": 105.961,
     "rating": 4.7,
@@ -8851,7 +9595,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-253",
@@ -8871,7 +9618,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រាំង ខែធ្នូ ដល់ ខែមេសា",
     "bestTimeToVisitEn": "Dry season (December to April)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5500,105.9800",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.55,105.98",
     "latitude": 12.55,
     "longitude": 105.98,
     "rating": 4.6,
@@ -8886,7 +9633,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-53.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-254",
@@ -8906,7 +9656,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រាំង និងរដូវត្រជាក់ ខែវិច្ឆិកា ដល់ ខែឧសភា",
     "bestTimeToVisitEn": "Cool & dry season (November to May)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.6050,106.0120",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.605,106.012",
     "latitude": 12.605,
     "longitude": 106.012,
     "rating": 4.6,
@@ -8921,7 +9671,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-117.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-255",
@@ -8941,7 +9694,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលរសៀល ម៉ោង ០៧:០០ - ១៧:៣០",
     "bestTimeToVisitEn": "Morning and afternoon 07:00 AM - 05:30 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4695,106.0210",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.4695,106.021",
     "latitude": 12.4695,
     "longitude": 106.021,
     "rating": 4.8,
@@ -8958,7 +9711,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-256",
@@ -8978,7 +9734,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រលឹម ឬពេលល្ងាចថ្ងៃលិច ម៉ោង ០៦:០០ - ១៨:០០",
     "bestTimeToVisitEn": "Sunrise or sunset 06:00 AM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5833,106.0250",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5833,106.025",
     "latitude": 12.5833,
     "longitude": 106.025,
     "rating": 4.7,
@@ -8995,7 +9751,10 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
-    "isAdminEdited": true
+    "isAdminEdited": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-257",
@@ -9030,7 +9789,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-172.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-258",
@@ -9050,7 +9812,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រៀងរាល់ថ្ងៃធ្វើការ ម៉ោង ០៨:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Monday to Sunday 08:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5283,105.9720",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5283,105.972",
     "latitude": 13.5283,
     "longitude": 105.972,
     "rating": 4.8,
@@ -9065,7 +9827,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-156.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-259",
@@ -9085,7 +9850,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលល្ងាចថ្ងៃលិច ម៉ោង ០៤:៣០ - ០៦:៣០",
     "bestTimeToVisitEn": "Sunset 04:30 PM - 06:30 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5300,105.9650",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.53,105.965",
     "latitude": 13.53,
     "longitude": 105.965,
     "rating": 4.7,
@@ -9100,7 +9865,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-165.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-260",
@@ -9120,7 +9888,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹកត្រជាក់ ម៉ោង ០៧:០០ - ១១:០០",
     "bestTimeToVisitEn": "Cool morning 07:00 AM - 11:00 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5650,105.9380",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.565,105.938",
     "latitude": 13.565,
     "longitude": 105.938,
     "rating": 4.6,
@@ -9136,7 +9904,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-260.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-261",
@@ -9171,7 +9942,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-230.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-263",
@@ -9206,7 +9980,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-240.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-264",
@@ -9242,7 +10019,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-264.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-265",
@@ -9278,7 +10058,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-265.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-266",
@@ -9298,7 +10081,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលល្ងាច ម៉ោង ០៤:៣០ - ២០:០០",
     "bestTimeToVisitEn": "Evening 04:30 PM - 08:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.5850,102.9750",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.585,102.975",
     "latitude": 13.585,
     "longitude": 102.975,
     "rating": 4.7,
@@ -9313,7 +10096,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-141.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-267",
@@ -9333,7 +10119,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលរសៀល ម៉ោង ០៦:៣០ - ១៧:៣០",
     "bestTimeToVisitEn": "Morning & afternoon 06:30 AM - 05:30 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.0500,102.9833",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.05,102.9833",
     "latitude": 14.05,
     "longitude": 102.9833,
     "rating": 4.7,
@@ -9348,7 +10134,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-279.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-268",
@@ -9383,7 +10172,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-268.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-269",
@@ -9403,7 +10195,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលល្ងាចថ្ងៃលិច ម៉ោង ០៤:០០ - ០៦:០០",
     "bestTimeToVisitEn": "Sunset 04:00 PM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.0750,103.1250",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.075,103.125",
     "latitude": 14.075,
     "longitude": 103.125,
     "rating": 4.7,
@@ -9419,7 +10211,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-269.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-270",
@@ -9439,7 +10234,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលរសៀល និងពេលល្ងាច ម៉ោង ០៣:០០ - ១៨:០០",
     "bestTimeToVisitEn": "Afternoon and sunset 03:00 PM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4333,103.0500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.4333,103.05",
     "latitude": 13.4333,
     "longitude": 103.05,
     "rating": 4.6,
@@ -9454,7 +10249,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-30.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-271",
@@ -9474,9 +10272,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រលឹមអ័ព្ទ និងពេលល្ងាចថ្ងៃលិច ម៉ោង ០៦:០០ - ១៨:០០",
     "bestTimeToVisitEn": "Early morning mist & sunset 06:00 AM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.4167,104.0500",
-    "latitude": 14.4167,
-    "longitude": 104.05,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.3423,104.06484",
+    "latitude": 14.3423,
+    "longitude": 104.06484,
     "rating": 4.8,
     "reviewCount": 1100,
     "highlightsKh": [
@@ -9489,7 +10287,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-113.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-272",
@@ -9509,7 +10310,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវរងា និងរដូវប្រាំង ខែវិច្ឆិកា ដល់ ខែមេសា",
     "bestTimeToVisitEn": "Cool and dry season (November to April)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.4333,103.7000",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.4333,103.7",
     "latitude": 14.4333,
     "longitude": 103.7,
     "rating": 4.6,
@@ -9524,7 +10325,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-119.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-273",
@@ -9559,7 +10363,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-173.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-274",
@@ -9579,7 +10386,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលរសៀល និងពេលល្ងាច ម៉ោង ០៤:០០ - ១៨:៣០",
     "bestTimeToVisitEn": "Afternoon & sunset 04:00 PM - 06:30 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.3500,104.2333",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.35,104.2333",
     "latitude": 14.35,
     "longitude": 104.2333,
     "rating": 4.6,
@@ -9594,7 +10401,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-274.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-275",
@@ -9614,9 +10424,9 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលរសៀល ម៉ោង ០៧:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Morning & afternoon 07:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.2833,104.5500",
-    "latitude": 14.2833,
-    "longitude": 104.55,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.188,104.353",
+    "latitude": 14.188,
+    "longitude": 104.353,
     "rating": 4.7,
     "reviewCount": 610,
     "highlightsKh": [
@@ -9630,7 +10440,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-275.jpg"
     ],
     "isCustomPhoto": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-276",
@@ -9665,7 +10478,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-140.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-277",
@@ -9685,7 +10501,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រាំង ខែវិច្ឆិកា ដល់ ខែឧសភា",
     "bestTimeToVisitEn": "Dry season (November to May)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.3000,103.6500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=14.3,103.65",
     "latitude": 14.3,
     "longitude": 103.65,
     "rating": 4.9,
@@ -9700,7 +10516,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-231.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-278",
@@ -9720,7 +10539,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រៀងរាល់ថ្ងៃ ម៉ោង ០៨:០០ - ១៧:៣០",
     "bestTimeToVisitEn": "Daily 08:00 AM - 05:30 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8333,102.6000",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8333,102.6",
     "latitude": 12.8333,
     "longitude": 102.6,
     "rating": 4.8,
@@ -9735,7 +10554,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-91.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-279",
@@ -9755,7 +10577,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលរសៀល ម៉ោង ០៧:០០ - ១៧:៣០",
     "bestTimeToVisitEn": "Morning & afternoon 07:00 AM - 05:30 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8500,102.6167",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.85,102.6167",
     "latitude": 12.85,
     "longitude": 102.6167,
     "rating": 4.7,
@@ -9770,7 +10592,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-279.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-280",
@@ -9790,7 +10615,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវវស្សា និងដើមរដូវរងា ខែសីហា ដល់ ខែកុម្ភៈ",
     "bestTimeToVisitEn": "Rainy & early dry season (August to February)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8000,102.6333",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8,102.6333",
     "latitude": 12.8,
     "longitude": 102.6333,
     "rating": 4.8,
@@ -9806,7 +10631,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-60.webp"
     ],
     "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
-    "isCustomPhoto": true
+    "isCustomPhoto": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-281",
@@ -9841,7 +10669,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-85.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-282",
@@ -9876,7 +10707,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-256.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-283",
@@ -9896,7 +10730,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវប្រមូលផល ខែមិថុនា ដល់ ខែតុលា",
     "bestTimeToVisitEn": "Harvesting peak (June to October)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8667,102.6500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8667,102.65",
     "latitude": 12.8667,
     "longitude": 102.65,
     "rating": 4.8,
@@ -9912,7 +10746,10 @@ export const initial100Destinations: TouristDestination[] = [
       "/destinations/dest-31.webp"
     ],
     "photoUpdatedAt": "2026-10-27T12:00:00.000Z",
-    "isCustomPhoto": true
+    "isCustomPhoto": true,
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-284",
@@ -9932,7 +10769,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលល្ងាច ម៉ោង ០៦:០០ - ១៨:០០",
     "bestTimeToVisitEn": "Morning and evening 06:00 AM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8583,102.6250",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.8583,102.625",
     "latitude": 12.8583,
     "longitude": 102.625,
     "rating": 4.7,
@@ -9947,7 +10784,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-227.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-285",
@@ -9967,7 +10807,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រលឹម និងពេលល្ងាចសត្វហើរចូលសំបុក ម៉ោង ០៦:០០ - ១៨:០០",
     "bestTimeToVisitEn": "Sunrise & sunset roosting 06:00 AM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.4500,105.3500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.45,105.35",
     "latitude": 11.45,
     "longitude": 105.35,
     "rating": 4.9,
@@ -9982,7 +10822,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-137.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-286",
@@ -10017,7 +10860,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-237.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-287",
@@ -10052,7 +10898,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-165.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-288",
@@ -10087,7 +10936,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-141.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-289",
@@ -10107,7 +10959,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹក និងពេលរសៀល ម៉ោង ០៧:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Morning & afternoon 07:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.3833,105.3000",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.3833,105.3",
     "latitude": 11.3833,
     "longitude": 105.3,
     "rating": 4.6,
@@ -10122,7 +10974,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-247.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-290",
@@ -10157,7 +11012,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-174.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-291",
@@ -10192,7 +11050,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-156.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-292",
@@ -10227,7 +11088,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-255.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-293",
@@ -10247,7 +11111,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលរសៀល និងពេលយប់ ម៉ោង ០៤:០០ - ២២:០០",
     "bestTimeToVisitEn": "Afternoon & night bazaar 04:00 PM - 10:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0833,106.1500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0833,106.15",
     "latitude": 11.0833,
     "longitude": 106.15,
     "rating": 4.7,
@@ -10262,7 +11126,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-256.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-294",
@@ -10297,7 +11164,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-268.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-295",
@@ -10317,7 +11187,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលព្រឹកត្រជាក់ ម៉ោង ០៧:០០ - ១១:០០",
     "bestTimeToVisitEn": "Cool morning 07:00 AM - 11:00 AM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0500,105.7333",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.05,105.7333",
     "latitude": 11.05,
     "longitude": 105.7333,
     "rating": 4.7,
@@ -10332,7 +11202,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-268.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-296",
@@ -10352,7 +11225,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "រដូវរងា និងរដូវប្រាំង ខែវិច្ឆិកា ដល់ ខែមេសា",
     "bestTimeToVisitEn": "Cool and dry season (November to April)",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.2500,105.9500",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.25,105.95",
     "latitude": 11.25,
     "longitude": 105.95,
     "rating": 4.6,
@@ -10367,7 +11240,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-269.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-297",
@@ -10402,7 +11278,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-138.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-299",
@@ -10422,7 +11301,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ពេលរសៀល និងពេលល្ងាច ម៉ោង ០៣:០០ - ១៨:០០",
     "bestTimeToVisitEn": "Afternoon & sunset 03:00 PM - 06:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.1000,105.9000",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.1,105.9",
     "latitude": 11.1,
     "longitude": 105.9,
     "rating": 4.6,
@@ -10437,7 +11316,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-31.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "dest-300",
@@ -10457,7 +11339,7 @@ export const initial100Destinations: TouristDestination[] = [
     "entranceFeeEn": "",
     "bestTimeToVisitKh": "ថ្ងៃចន្ទ ដល់ ថ្ងៃសុក្រ ម៉ោង ០៨:០០ - ១៧:០០",
     "bestTimeToVisitEn": "Monday to Friday 08:00 AM - 05:00 PM",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0850,105.8020",
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.085,105.802",
     "latitude": 11.085,
     "longitude": 105.802,
     "rating": 4.7,
@@ -10472,7 +11354,10 @@ export const initial100Destinations: TouristDestination[] = [
     "galleryPhotos": [
       "/destinations/dest-142.jpg"
     ],
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   },
   {
     "id": "gmap-kandal-kbal-koh-ecotourism",
@@ -10509,6 +11394,9 @@ export const initial100Destinations: TouristDestination[] = [
     ],
     "isCustomPhoto": true,
     "isAdminEdited": true,
-    "photoUpdatedAt": "2026-10-30T16:00:00.000Z"
+    "photoUpdatedAt": "2026-10-30T16:00:00.000Z",
+    "locationVerificationStatus": "verified",
+    "locationNeedsReview": false,
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   }
 ];

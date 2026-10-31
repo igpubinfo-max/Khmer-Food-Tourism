@@ -10,7 +10,8 @@ import {
   RestaurantMenuItem, RestaurantPriceLevel, isRestaurantPremiumActive, isUserVipActive, 
   VipPlanType, getVipAccountState, getVipRemainingDays,
   getRestaurantRatingSummary, isSeedRestaurantId, getRestaurantCreatedAtMs,
-  getDynamicVipPlans, getDynamicVipBenefits
+  getDynamicVipPlans, getDynamicVipBenefits,
+  isValidCambodiaCoordinates, buildCanonicalGoogleMapsPinUrl
 } from '../types';
 import { tr } from '../utils/i18n';
 import {
@@ -93,8 +94,12 @@ export const ManageMenuModal: React.FC = () => {
   const [storePriceLevel, setStorePriceLevel] = useState<RestaurantPriceLevel>(managingRestaurant?.priceLevel || '$$');
   const [storeDescriptionKh, setStoreDescriptionKh] = useState(managingRestaurant?.descriptionKh || '');
   const [storeMapUrl, setStoreMapUrl] = useState(managingRestaurant?.mapUrl || '');
-  const [storeLatitude, setStoreLatitude] = useState<number>(managingRestaurant?.latitude || 11.5564);
-  const [storeLongitude, setStoreLongitude] = useState<number>(managingRestaurant?.longitude || 104.9282);
+  const [storeLatitude, setStoreLatitude] = useState<number>(
+    typeof managingRestaurant?.latitude === 'number' ? managingRestaurant.latitude : 0
+  );
+  const [storeLongitude, setStoreLongitude] = useState<number>(
+    typeof managingRestaurant?.longitude === 'number' ? managingRestaurant.longitude : 0
+  );
   const [isStoreCheckInOpen, setIsStoreCheckInOpen] = useState(false);
   const [storeCoverPhoto, setStoreCoverPhoto] = useState(managingRestaurant?.photoUrl || '');
   const [storeGalleryPhotos, setStoreGalleryPhotos] = useState<string[]>(managingRestaurant?.galleryPhotos || []);
@@ -135,8 +140,8 @@ export const ManageMenuModal: React.FC = () => {
       setStorePriceLevel(fresh.priceLevel || '$$');
       setStoreDescriptionKh(fresh.descriptionKh || '');
       setStoreMapUrl(fresh.mapUrl || '');
-      setStoreLatitude(typeof fresh.latitude === 'number' ? fresh.latitude : 11.5564);
-      setStoreLongitude(typeof fresh.longitude === 'number' ? fresh.longitude : 104.9282);
+      setStoreLatitude(typeof fresh.latitude === 'number' ? fresh.latitude : 0);
+      setStoreLongitude(typeof fresh.longitude === 'number' ? fresh.longitude : 0);
       setStoreCoverPhoto(fresh.photoUrl || '');
       setStoreGalleryPhotos(fresh.galleryPhotos || []);
       setStagedReplacementPhoto('');
@@ -503,6 +508,47 @@ export const ManageMenuModal: React.FC = () => {
       return;
     }
 
+    const parseCoordsFromUrl = (rawUrl: string): { lat: number; lng: number } | null => {
+      if (!rawUrl) return null;
+      const decoded = (() => {
+        try {
+          return decodeURIComponent(rawUrl);
+        } catch {
+          return rawUrl;
+        }
+      })();
+      const patterns = [
+        /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,
+        /@(-?\d+\.\d+),\s*(-?\d+\.\d+)/,
+        /[?&](?:query|q|destination|ll)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/,
+      ];
+      for (const rx of patterns) {
+        const m = decoded.match(rx);
+        if (m) {
+          const lat = Number(m[1]);
+          const lng = Number(m[2]);
+          if (isValidCambodiaCoordinates(lat, lng)) return { lat, lng };
+        }
+      }
+      return null;
+    };
+
+    let resolvedLat = Number(storeLatitude);
+    let resolvedLng = Number(storeLongitude);
+    if (!isValidCambodiaCoordinates(resolvedLat, resolvedLng)) {
+      const parsed = parseCoordsFromUrl(storeMapUrl.trim());
+      if (parsed) {
+        resolvedLat = parsed.lat;
+        resolvedLng = parsed.lng;
+      }
+    }
+    const hasVerifiedCoords = isValidCambodiaCoordinates(resolvedLat, resolvedLng);
+    const finalLat = hasVerifiedCoords ? resolvedLat : 0;
+    const finalLng = hasVerifiedCoords ? resolvedLng : 0;
+    const finalMapUrl = hasVerifiedCoords
+      ? buildCanonicalGoogleMapsPinUrl(finalLat, finalLng, managingRestaurant.googlePlaceId)
+      : '';
+
     const finalCover = storeCoverPhoto.trim() || managingRestaurant.photoUrl;
     const finalGallery = Array.from(new Set([finalCover, ...storeGalleryPhotos])).filter(Boolean).slice(0, maxPhotoLimit);
     updateRestaurant({
@@ -515,9 +561,15 @@ export const ManageMenuModal: React.FC = () => {
       openingHoursKh: storeOpeningHours.trim(),
       priceLevel: storePriceLevel,
       descriptionKh: storeDescriptionKh.trim(),
-      mapUrl: storeMapUrl.trim(),
-      latitude: storeLatitude,
-      longitude: storeLongitude,
+      mapUrl: finalMapUrl,
+      latitude: finalLat,
+      longitude: finalLng,
+      locationVerificationStatus: hasVerifiedCoords ? 'verified' : 'needs_admin_review',
+      locationNeedsReview: !hasVerifiedCoords,
+      locationVerifiedAt: hasVerifiedCoords ? new Date().toISOString() : undefined,
+      locationReviewNote: hasVerifiedCoords
+        ? undefined
+        : 'Flagged for Admin location review — please verify exact GPS coordinates.',
       photoUrl: finalCover,
       profileImage: finalCover,
       foodImages: Array.isArray(managingRestaurant.foodImages)
@@ -1425,9 +1477,48 @@ export const ManageMenuModal: React.FC = () => {
                   >
                     <span>📍 កំណត់ទីតាំងហាង (Check In)</span>
                   </button>
-                  <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-300">
-                    📍 GPS: {storeLatitude.toFixed(5)}, {storeLongitude.toFixed(5)}
-                  </span>
+                  {isValidCambodiaCoordinates(storeLatitude, storeLongitude) ? (
+                    <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-300 font-bold">
+                      ✅ GPS: {storeLatitude.toFixed(6)}, {storeLongitude.toFixed(6)}
+                    </span>
+                  ) : (
+                    <span className="text-[11px] font-khmer text-amber-700 dark:text-amber-300 font-bold">
+                      {tr(
+                        language,
+                        '📍 រង់ចាំការផ្ទៀងផ្ទាត់ GPS (Needs GPS Review)',
+                        '📍 Needs Verified GPS Coordinates',
+                        '📍 待核实 GPS 坐标'
+                      )}
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-0.5">
+                      Latitude (9.4 – 14.7)
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={storeLatitude || ''}
+                      placeholder="e.g. 11.553152"
+                      onChange={e => setStoreLatitude(e.target.value === '' ? 0 : Number(e.target.value))}
+                      className="w-full px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-[#0F172A] dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-0.5">
+                      Longitude (102.3 – 107.7)
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={storeLongitude || ''}
+                      placeholder="e.g. 104.928957"
+                      onChange={e => setStoreLongitude(e.target.value === '' ? 0 : Number(e.target.value))}
+                      className="w-full px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-[#0F172A] dark:text-white"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1451,7 +1542,30 @@ export const ManageMenuModal: React.FC = () => {
                 <input
                   type="text"
                   value={storeMapUrl}
-                  onChange={e => setStoreMapUrl(e.target.value)}
+                  placeholder="https://www.google.com/maps/search/?api=1&query=11.553152,104.928957"
+                  onChange={e => {
+                    const val = e.target.value;
+                    setStoreMapUrl(val);
+                    const decoded = (() => {
+                      try {
+                        return decodeURIComponent(val);
+                      } catch {
+                        return val;
+                      }
+                    })();
+                    const m =
+                      decoded.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) ||
+                      decoded.match(/@(-?\d+\.\d+),\s*(-?\d+\.\d+)/) ||
+                      decoded.match(/[?&](?:query|q|destination|ll)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+                    if (m) {
+                      const parsedLat = Number(m[1]);
+                      const parsedLng = Number(m[2]);
+                      if (isValidCambodiaCoordinates(parsedLat, parsedLng)) {
+                        setStoreLatitude(parsedLat);
+                        setStoreLongitude(parsedLng);
+                      }
+                    }
+                  }}
                   className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono text-[11px]"
                 />
               </div>

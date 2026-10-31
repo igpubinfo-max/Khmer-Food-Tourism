@@ -5,7 +5,12 @@ import {
   UtensilsCrossed, RefreshCw, ChefHat, CheckCircle2, Play,
   Search, AlertCircle, RotateCcw, ChevronRight, Loader2
 } from 'lucide-react';
-import { TrendingFoodCategorySlug } from '../types';
+import {
+  TrendingFoodCategorySlug,
+  openTrendingFoodGoogleExternal,
+  getTrendingFoodGoogleExternalUrl,
+  openExternalUrlNativeSafe,
+} from '../types';
 import { shareRichContent } from '../utils/androidMediaHelper';
 import { tr, translateProvince } from '../utils/i18n';
 import {
@@ -536,22 +541,28 @@ export const TrendingSocialModal: React.FC = () => {
 
   const handleMap = (item: OnlineFoodDiscoveryItem) => {
     const t = item.trendingItem;
-    if (t?.mapUrl) {
-      window.open(t.mapUrl, '_blank', 'noopener,noreferrer');
-    } else if (t?.latitude && t?.longitude) {
-      window.open(`https://maps.google.com/?q=${t.latitude},${t.longitude}`, '_blank', 'noopener,noreferrer');
-    } else {
-      window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.titleEn + ' Cambodia')}`, '_blank', 'noopener,noreferrer');
+    if (t) {
+      openTrendingFoodGoogleExternal(t, 'maps');
+      return;
     }
+    if (item.sourceUrl && item.sourceUrl.startsWith('http')) {
+      openExternalUrlNativeSafe(item.sourceUrl);
+      return;
+    }
+    showToast(
+      tr(
+        language,
+        '📍 ទីតាំងនេះត្រូវបានដាក់សម្គាល់សម្រាប់ Admin ផ្ទៀងផ្ទាត់ — មិនបង្ហាញទីតាំងស្មានឡើយ',
+        '📍 Location flagged for Admin review — unverified map pin hidden',
+        '📍 该位置已标记待管理员核实，暂不显示未验证的定位'
+      ),
+      'warning'
+    );
   };
 
   const handleShare = (item: OnlineFoodDiscoveryItem) => {
     const t = item.trendingItem;
-    const mapLink =
-      t?.mapUrl ||
-      (t?.latitude && t?.longitude
-        ? `https://www.google.com/maps/search/?api=1&query=${t.latitude},${t.longitude}`
-        : item.sourceUrl);
+    const mapLink = (t ? getTrendingFoodGoogleExternalUrl(t, 'maps') : '') || item.sourceUrl;
     shareRichContent(
       {
         title: isKm ? item.titleKh : item.titleEn,

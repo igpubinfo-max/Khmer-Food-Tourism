@@ -20,6 +20,13 @@ import {
   DestinationCategorySlug,
   RestaurantPriceLevel,
   GoogleMapsPlaceMetadata,
+  isValidCambodiaCoordinates,
+  isValidOfficialGooglePlaceId,
+  isPlaceLocationVerified,
+  buildCanonicalGoogleMapsPinUrl,
+  buildCanonicalGoogleMapsDirectionsUrl,
+  openExternalUrlNativeSafe,
+  notifyUnverifiedLocationBlocked,
 } from '../types';
 import {
   getCloudApiConfig,
@@ -32,6 +39,11 @@ import { initial100Restaurants as SEED_RESTAURANTS } from '../data/seedRestauran
 import { initial100Destinations as SEED_DESTINATIONS } from '../data/seedDestinations';
 import { isRestaurantIdDeleted, loadDeletedRestaurantIdsMap } from './permanentMediaVaultService';
 import { stripForeignScripts } from '../utils/i18n';
+import {
+  getLocalizedFood,
+  getLocalizedRestaurant,
+  getLocalizedDestination,
+} from '../utils/zhDynamicTranslator';
 
 export type GooglePlaceSearchCategory =
   | 'all'
@@ -390,7 +402,7 @@ export function formatDisplayPhone(rawPhone?: string): string {
  * Verified Phnom Penh & Cambodia Real Places with strictly matched photos
  * (No generic Unsplash stock photos or mismatched storefront images)
  */
-const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
+export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
   {
     placeId: 'gmap-pp-chumnor-kbal-koh',
     googlePlaceId: '0x31095729de2b8f21:0x7c6cd6284a4f844c',
@@ -413,13 +425,13 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ភោជនីយដ្ឋាន ជំនោរក្បាលកោះ', 'ខណ្ឌច្បារអំពៅ រាជធានីភ្នំពេញ', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps?q=GWRW+QF4+%E1%9E%87%E1%9F%86%E1%9E%93%E1%9F%84%E1%9E%9A%E2%80%8B%E1%9E%80%E1%9F%92%E1%9E%94%E1%9E%B6%E1%9E%9B%E1%9E%80%E1%9F%84%E1%9F%87,+Koh+Rong+Samrong+Sangkat+Nerothor,+12357&ftid=0x31095729de2b8f21:0x7c6cd6284a4f844c',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.541938,104.946187&query_place_id=0x31095729de2b8f21%3A0x7c6cd6284a4f844c',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
   },
   {
     placeId: 'gmap-kandal-kbal-koh-ecotourism',
-    googlePlaceId: 'ChIJKbalKohKienSvayKH',
+    googlePlaceId: '',
     nameKh: 'រមណីយដ្ឋាន ក្បាលកោះ កៀនស្វាយ (Kbal Koh Riverside Resort)',
     nameEn: 'Kbal Koh Riverside Resort (Chbar Ampov / Kien Svay)',
     nameZh: '戈巴岛河畔度假村 (Kbal Koh Resort)',
@@ -446,17 +458,17 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
   },
   {
     placeId: 'gmap-pp-malis-restaurant',
-    googlePlaceId: 'ChIJMalisPhnomPenhKH',
+    googlePlaceId: '',
     nameKh: 'ភោជនីយដ្ឋាន ម៉ាលីស (Malis Restaurant Phnom Penh)',
     nameEn: 'Malis Restaurant Phnom Penh',
     nameZh: '金边茉莉餐厅 (Malis Restaurant)',
     category: 'restaurant',
     province: 'ភ្នំពេញ',
     provinceKh: 'រាជធានីភ្នំពេញ',
-    address: 'មហាវិថីព្រះនរោត្តម (៤១) សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
-    addressKh: 'មហាវិថីព្រះនរោត្តម (៤១) សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
-    lat: 11.5542,
-    lng: 104.9305,
+    address: 'ផ្ទះលេខ ១៣៦ មហាវិថីព្រះនរោត្តម (៤១) សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
+    addressKh: 'ផ្ទះលេខ ១៣៦ មហាវិថីព្រះនរោត្តម (៤១) សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
+    lat: 11.553152,
+    lng: 104.928957,
     phone: '015 814 888',
     openHours: '06:30 AM - 10:30 PM',
     priceLevel: '$$$',
@@ -466,13 +478,13 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['/Shop/rest-1.jpg'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5542,104.9305',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.553152,104.928957',
     source: 'cambodia_extended_directory',
-    cachedAt: '2026-10-24T00:00:00.000Z',
+    cachedAt: '2026-10-31T00:00:00.000Z',
   },
   {
     placeId: 'gmap-pp-romdeng',
-    googlePlaceId: 'ChIJRomdengPhnomPenhKH',
+    googlePlaceId: '',
     nameKh: 'ភោជនីយដ្ឋាន រំដេង (Romdeng Restaurant)',
     nameEn: 'Romdeng Restaurant Phnom Penh',
     nameZh: '金边高良姜餐厅 (Romdeng Restaurant)',
@@ -481,8 +493,8 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     provinceKh: 'រាជធានីភ្នំពេញ',
     address: 'ផ្ទះលេខ ៧៤ ផ្លូវ ១៧៤ សង្កាត់ផ្សារថ្មីទី៣ ខណ្ឌដូនពេញ ភ្នំពេញ',
     addressKh: 'ផ្ទះលេខ ៧៤ ផ្លូវ ១៧៤ សង្កាត់ផ្សារថ្មីទី៣ ខណ្ឌដូនពេញ ភ្នំពេញ',
-    lat: 11.5648,
-    lng: 104.9231,
+    lat: 11.559000,
+    lng: 104.923870,
     phone: '092 219 565',
     openHours: '11:00 AM - 10:00 PM',
     priceLevel: '$$',
@@ -492,23 +504,23 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['/Shop/rest-2.jpg'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5648,104.9231',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.559,104.92387',
     source: 'cambodia_extended_directory',
-    cachedAt: '2026-10-24T00:00:00.000Z',
+    cachedAt: '2026-10-31T00:00:00.000Z',
   },
   {
     placeId: 'gmap-pp-kravanh',
-    googlePlaceId: 'ChIJKravanhPhnomPenhKH',
+    googlePlaceId: '',
     nameKh: 'ភោជនីយដ្ឋាន ក្រវាញ (Kravanh Cambodian Restaurant)',
     nameEn: 'Kravanh Restaurant Phnom Penh',
     nameZh: '金边豆蔻高棉餐厅 (Kravanh Restaurant)',
     category: 'restaurant',
     province: 'ភ្នំពេញ',
     provinceKh: 'រាជធានីភ្នំពេញ',
-    address: 'មហាវិថីសម្តេចសុធារស សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
-    addressKh: 'មហាវិថីសម្តេចសុធារស សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
-    lat: 11.5588,
-    lng: 104.9322,
+    address: 'ផ្ទះលេខ ១១២ មហាវិថីសម្តេចសុធារស សង្កាត់ចតុមុខ ខណ្ឌដូនពេញ ភ្នំពេញ',
+    addressKh: 'ផ្ទះលេខ ១១២ មហាវិថីសម្តេចសុធារស សង្កាត់ចតុមុខ ខណ្ឌដូនពេញ ភ្នំពេញ',
+    lat: 11.557382,
+    lng: 104.933324,
     phone: '096 668 9998',
     openHours: '10:30 AM - 09:30 PM',
     priceLevel: '$$',
@@ -518,23 +530,23 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['/Shop/rest-4.jpg'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5588,104.9322',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.557382,104.933324',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
   },
   {
     placeId: 'gmap-pp-one-more-restaurant',
-    googlePlaceId: 'ChIJOneMorePhnomPenhKH',
+    googlePlaceId: '',
     nameKh: 'ភោជនីយដ្ឋាន វ័នម៉រ (One More Restaurant Toul Kork)',
     nameEn: 'One More Restaurant Toul Kork Phnom Penh',
     nameZh: '金边堆谷区 One More 餐厅',
     category: 'restaurant',
     province: 'ភ្នំពេញ',
     provinceKh: 'រាជធានីភ្នំពេញ',
-    address: 'ផ្លូវ ៣១៥ សង្កាត់បឹងកក់ទី១ ខណ្ឌទួលគោក ភ្នំពេញ',
-    addressKh: 'ផ្លូវ ៣១៥ សង្កាត់បឹងកក់ទី១ ខណ្ឌទួលគោក ភ្នំពេញ',
-    lat: 11.5792,
-    lng: 104.8965,
+    address: 'ផ្ទះលេខ ៣៧ ផ្លូវ ៣១៥ សង្កាត់បឹងកក់ទី១ ខណ្ឌទួលគោក ភ្នំពេញ',
+    addressKh: 'ផ្ទះលេខ ៣៧ ផ្លូវ ៣១៥ សង្កាត់បឹងកក់ទី១ ខណ្ឌទួលគោក ភ្នំពេញ',
+    lat: 11.583051,
+    lng: 104.898124,
     phone: '023 888 222',
     openHours: '06:30 AM - 10:00 PM',
     priceLevel: '$$',
@@ -544,23 +556,23 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['/Shop/rest-7.jpg'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5792,104.8965',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.583051,104.898124',
     source: 'cambodia_extended_directory',
-    cachedAt: '2026-10-24T00:00:00.000Z',
+    cachedAt: '2026-10-31T00:00:00.000Z',
   },
   {
     placeId: 'gmap-pp-sovanna-bbq',
-    googlePlaceId: 'ChIJSovannaBBQPhnomPenhKH',
+    googlePlaceId: '',
     nameKh: 'សុវណ្ណា សាច់អាំង និងគ្រឿងសមុទ្រ (Sovanna BBQ & Seafood)',
     nameEn: 'Sovanna BBQ Restaurant Phnom Penh',
     nameZh: '金边苏万纳烧烤海鲜餐厅 (Sovanna BBQ)',
     category: 'restaurant',
     province: 'ភ្នំពេញ',
     provinceKh: 'រាជធានីភ្នំពេញ',
-    address: 'ផ្លូវ ២១ សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
-    addressKh: 'ផ្លូវ ២១ សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
-    lat: 11.5478,
-    lng: 104.9285,
+    address: 'ផ្ទះលេខ ២C ផ្លូវ ២១ សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
+    addressKh: 'ផ្ទះលេខ ២C ផ្លូវ ២១ សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន ភ្នំពេញ',
+    lat: 11.550640,
+    lng: 104.930277,
     phone: '012 885 522',
     openHours: '04:00 PM - 11:30 PM',
     priceLevel: '$$',
@@ -570,15 +582,15 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: ['/Shop/rest-6.jpg'],
     hasOfficialGooglePhoto: true,
     hasRealGooglePhoto: true,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5478,104.9285',
-        source: 'cambodia_extended_directory',
-    cachedAt: '2026-10-24T00:00:00.000Z',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.55064,104.930277',
+    source: 'cambodia_extended_directory',
+    cachedAt: '2026-10-31T00:00:00.000Z',
   },
   {
     placeId: 'gmap-pp-pizza-4ps-bkk1',
-    googlePlaceId: 'ChIJPizza4PsPhnomPenhKH',
+    googlePlaceId: '',
     nameKh: 'ភោជនីយដ្ឋាន ភីហ្សា 4P’s (Pizza 4P’s Phnom Penh BKK1)',
-    nameEn: "Pizza 4P's Phnom Penh (BKK1 & Riverside)",
+    nameEn: "Pizza 4P's Phnom Penh (BKK1)",
     nameZh: "金边 Pizza 4P's 手工披萨餐厅",
     category: 'restaurant',
     province: 'ភ្នំពេញ',
@@ -596,23 +608,23 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg("ភោជនីយដ្ឋាន ភីហ្សា 4P's (Pizza 4P's)", 'រាជធានីភ្នំពេញ', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Pizza+4Ps+Phnom+Penh',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5535,104.9268',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
   },
   {
     placeId: 'gmap-pp-the-pizza-company-riverside',
-    googlePlaceId: 'ChIJThePizzaCompanyPhnomPenhKH',
+    googlePlaceId: '',
     nameKh: 'ដឹ ភីហ្សា ខមផានី មាត់ទន្លេ (The Pizza Company Sisowath Quay)',
     nameEn: 'The Pizza Company Riverside Phnom Penh',
     nameZh: '金边河畔必胜客披萨餐厅 (The Pizza Company)',
     category: 'restaurant',
     province: 'ភ្នំពេញ',
     provinceKh: 'រាជធានីភ្នំពេញ',
-    address: 'តីរវិថីព្រះស៊ីសុវត្ថិ សង្កាត់ផ្សារកណ្តាល ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ',
-    addressKh: 'តីរវិថីព្រះស៊ីសុវត្ថិ សង្កាត់ផ្សារកណ្តាល ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ',
-    lat: 11.5682,
-    lng: 104.9312,
+    address: 'ផ្ទះលេខ ២៩៣ តីរវិថីព្រះស៊ីសុវត្ថិ សង្កាត់ផ្សារកណ្តាល ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ',
+    addressKh: 'ផ្ទះលេខ ២៩៣ តីរវិថីព្រះស៊ីសុវត្ថិ សង្កាត់ផ្សារកណ្តាល ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ',
+    lat: 11.569560,
+    lng: 104.929640,
     phone: '023 880 880',
     openHours: '09:00 AM - 10:00 PM',
     priceLevel: '$',
@@ -622,13 +634,13 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ដឹ ភីហ្សា ខមផានី (The Pizza Company)', 'រាជធានីភ្នំពេញ', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=The+Pizza+Company+Riverside+Phnom+Penh',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.56956,104.92964',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
   },
   {
     placeId: 'gmap-sr-brooklyn-pizza-bistro',
-    googlePlaceId: 'ChIJBrooklynPizzaSiemReapKH',
+    googlePlaceId: '',
     nameKh: 'ប្រ៊ុកលីន ភីហ្សា និង ប៊ីស្រ្តូ សៀមរាប (Brooklyn Pizza & Bistro Siem Reap)',
     nameEn: 'Brooklyn Pizza & Bistro Siem Reap',
     nameZh: '暹粒布鲁克林披萨西餐厅 (Brooklyn Pizza & Bistro)',
@@ -648,13 +660,13 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ប្រ៊ុកលីន ភីហ្សា សៀមរាប (Brooklyn Pizza)', 'ខេត្តសៀមរាប', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Brooklyn+Pizza+Siem+Reap',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=13.3562,103.8548',
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-24T00:00:00.000Z',
   },
   {
     placeId: 'gmap-bb-manna-kitchen',
-    googlePlaceId: 'ChIJMannaKitchenBattambangKH',
+    googlePlaceId: '',
     nameKh: 'ម៉ាន់ណា ឃីតឆិន (Manna Kitchen)',
     nameEn: 'Manna Kitchen',
     nameZh: 'Manna Kitchen (玛娜韩式素食餐厅)',
@@ -677,14 +689,14 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('Manna Kitchen (ម៉ាន់ណា ឃីតឆិន)', 'ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Manna+Kitchen+Battambang',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=13.0984,103.2062',
     types: ['vegetarian_restaurant', 'vegan_restaurant', 'korean_restaurant', 'restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-27T00:00:00.000Z',
   },
   {
     placeId: 'gmap-bb-jaan-bai',
-    googlePlaceId: 'ChIJJaanBaiBattambangKH',
+    googlePlaceId: '',
     nameKh: 'ភោជនីយដ្ឋាន ចានបាយ (Jaan Bai Restaurant)',
     nameEn: 'Jaan Bai Restaurant Battambang',
     nameZh: '马德望 Jaan Bai 餐厅 (ចានបាយ)',
@@ -695,8 +707,8 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     provinceKh: 'ខេត្តបាត់ដំបង',
     address: 'ផ្លូវលេខ ២ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង (Street 2, Krong Battambang)',
     addressKh: 'ផ្លូវលេខ ២ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង',
-    lat: 13.1018,
-    lng: 103.1986,
+    lat: 13.101518,
+    lng: 103.198719,
     phone: '078 263 144',
     websiteUri: 'https://www.jaanbai.org',
     openHours: '11:30 AM - 09:30 PM',
@@ -707,14 +719,14 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ភោជនីយដ្ឋាន ចានបាយ (Jaan Bai)', 'ខេត្តបាត់ដំបង', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Jaan+Bai+Restaurant+Battambang',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=13.101518,103.198719',
     types: ['restaurant', 'cambodian_restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-27T00:00:00.000Z',
   },
   {
     placeId: 'gmap-bb-kinyei-cafe',
-    googlePlaceId: 'ChIJKinyeiCafeBattambangKH',
+    googlePlaceId: '',
     nameKh: 'ហាងកាហ្វេ គិនយី (Kinyei Café Battambang)',
     nameEn: 'Kinyei Café Battambang',
     nameZh: '马德望 Kinyei 精品咖啡馆',
@@ -736,14 +748,14 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ហាងកាហ្វេ គិនយី (Kinyei Café)', 'ខេត្តបាត់ដំបង', 'cafe')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Kinyei+Cafe+Battambang',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=13.1027,103.1977',
     types: ['cafe', 'coffee_shop'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-27T00:00:00.000Z',
   },
   {
     placeId: 'gmap-bb-nary-kitchen',
-    googlePlaceId: 'ChIJNaryKitchenBattambangKH',
+    googlePlaceId: '',
     nameKh: 'ផ្ទះបាយ ណារី (Nary Kitchen Battambang)',
     nameEn: 'Nary Kitchen Battambang',
     nameZh: '马德望娜丽高棉厨房餐厅 (Nary Kitchen)',
@@ -752,10 +764,10 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     editorialSummary: 'Authentic family-run Khmer restaurant and cooking class serving traditional Fish Amok, Beef Lok Lak, and fresh Battambang spring rolls.',
     province: 'បាត់ដំបង',
     provinceKh: 'ខេត្តបាត់ដំបង',
-    address: 'ផ្លូវលេខ ១១១ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង (Street 111, Krong Battambang)',
-    addressKh: 'ផ្លូវលេខ ១១១ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង',
-    lat: 13.1045,
-    lng: 103.1965,
+    address: 'ផ្ទះលេខ ៦៥០ ផ្លូវលេខ ១១១ សង្កាត់ស្វាយប៉ោ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង (No. 650 Street 111, Krong Battambang)',
+    addressKh: 'ផ្ទះលេខ ៦៥០ ផ្លូវលេខ ១១១ សង្កាត់ស្វាយប៉ោ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង',
+    lat: 13.103325,
+    lng: 103.196403,
     phone: '012 763 950',
     openHours: '08:30 AM - 09:30 PM',
     priceLevel: '$',
@@ -765,14 +777,14 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ផ្ទះបាយ ណារី (Nary Kitchen)', 'ខេត្តបាត់ដំបង', 'restaurant')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Nary+Kitchen+Battambang',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=13.103325,103.196403',
     types: ['restaurant', 'cambodian_restaurant'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-27T00:00:00.000Z',
   },
   {
     placeId: 'gmap-pp-brown-coffee-roastery-bkk1',
-    googlePlaceId: 'ChIJBrownCoffeeRoasteryBKK1KH',
+    googlePlaceId: '',
     nameKh: 'ហាងកាហ្វេ ប្រោន បឹងកេងកង (BROWN Coffee Roastery BKK1)',
     nameEn: 'BROWN Coffee and Bakery Roastery BKK1 Phnom Penh',
     nameZh: '金边 BROWN 烘焙咖啡旗舰店 (BKK1)',
@@ -795,7 +807,7 @@ const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     photoUrls: [buildPlaceSpecificNoPhotoSvg('ហាងកាហ្វេ ប្រោន (BROWN Coffee Roastery)', 'រាជធានីភ្នំពេញ', 'cafe')],
     hasOfficialGooglePhoto: false,
     hasRealGooglePhoto: false,
-    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=BROWN+Coffee+Roastery+BKK1+Phnom+Penh',
+    googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=11.5533,104.9248',
     types: ['cafe', 'coffee_shop', 'bakery'],
     source: 'cambodia_extended_directory',
     cachedAt: '2026-10-27T00:00:00.000Z',
@@ -857,8 +869,18 @@ function buildLocalSmartCache(raw: string | null): GooglePlaceCachedItem[] {
       if (Array.isArray(parsed)) {
         const valid = parsed.filter(isValidSmartCachePlace);
         for (const item of valid) {
+          // Never allow legacy cached entries with fake ChIJ...KH Place IDs to override verified seeds or pollute URLs
+          if (mergedMap.has(item.placeId)) continue;
+          const cleanGpid = isValidOfficialGooglePlaceId(item.googlePlaceId) ? item.googlePlaceId : '';
+          const hasValidCoords = isValidCambodiaCoordinates(item.lat, item.lng);
+          if (!hasValidCoords && !cleanGpid) continue;
+          const cleanMapsUrl = hasValidCoords
+            ? buildCanonicalGoogleMapsPinUrl(item.lat, item.lng, cleanGpid || undefined)
+            : item.googleMapsUrl;
           mergedMap.set(item.placeId, {
             ...item,
+            googlePlaceId: cleanGpid,
+            googleMapsUrl: cleanMapsUrl,
             provinceKh: item.provinceKh || item.province,
             addressKh: item.addressKh || item.address,
             hasRealGooglePhoto: item.hasRealGooglePhoto ?? item.hasOfficialGooglePhoto,
@@ -1107,61 +1129,70 @@ export function calculateHaversineMeters(
  * Build a reliable Google Maps URL for any external place so tapping it opens that exact place
  * or navigation directly in Google Maps.
  */
-export function buildExternalGoogleMapsUrl(place: {
-  nameKh?: string;
-  nameEn?: string;
-  lat?: number;
-  lng?: number;
-  googlePlaceId?: string;
-  googleMapsUrl?: string;
-}): string {
+export function buildExternalGoogleMapsUrl(
+  place: {
+    nameKh?: string;
+    nameEn?: string;
+    lat?: number;
+    lng?: number;
+    googlePlaceId?: string;
+    googleMapsUrl?: string;
+  },
+  mode: 'place' | 'directions' = 'place',
+  origin?: { lat: number; lng: number } | null
+): string {
+  const validPlaceId = isValidOfficialGooglePlaceId(place.googlePlaceId)
+    ? place.googlePlaceId!.trim()
+    : undefined;
+  const hasCoords = isValidCambodiaCoordinates(place.lat, place.lng);
+
+  if (hasCoords) {
+    if (mode === 'directions') {
+      return buildCanonicalGoogleMapsDirectionsUrl(place.lat!, place.lng!, origin, validPlaceId);
+    }
+    return buildCanonicalGoogleMapsPinUrl(place.lat!, place.lng!, validPlaceId);
+  }
+
+  if (validPlaceId && mode !== 'directions') {
+    const displayName = (place.nameEn || place.nameKh || 'Cambodia').trim();
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayName)}&query_place_id=${encodeURIComponent(validPlaceId)}`;
+  }
+
   if (
+    mode !== 'directions' &&
     place.googleMapsUrl &&
     place.googleMapsUrl.startsWith('http') &&
-    !place.googleMapsUrl.includes('undefined')
+    !place.googleMapsUrl.includes('undefined') &&
+    (/[?&]query=-?\d+\.\d+,-?\d+\.\d+/.test(place.googleMapsUrl) || /@-?\d+\.\d+,-?\d+\.\d+/.test(place.googleMapsUrl))
   ) {
     return place.googleMapsUrl;
   }
-  const displayName = (place.nameEn || place.nameKh || 'Cambodia').trim();
-  const hasCoords =
-    typeof place.lat === 'number' &&
-    typeof place.lng === 'number' &&
-    Number.isFinite(place.lat) &&
-    Number.isFinite(place.lng);
-  const isOfficialChIJ =
-    place.googlePlaceId &&
-    (place.googlePlaceId.startsWith('ChIJ') || place.googlePlaceId.startsWith('0x'));
 
-  if (isOfficialChIJ && hasCoords) {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-      `${displayName} ${place.lat},${place.lng}`
-    )}&query_place_id=${encodeURIComponent(place.googlePlaceId!)}`;
-  }
-  if (hasCoords) {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-      `${displayName} ${place.lat},${place.lng}`
-    )}`;
-  }
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${displayName} Cambodia`
-  )}`;
+  return '';
 }
 
 /**
  * Open an external Google Maps place directly in Google Maps or Google Maps navigation.
+ * Blocks unverified/missing GPS coordinates instead of opening random estimated searches.
  */
-export function openExternalPlaceInGoogleMaps(place: {
-  nameKh?: string;
-  nameEn?: string;
-  lat?: number;
-  lng?: number;
-  googlePlaceId?: string;
-  googleMapsUrl?: string;
-}): void {
-  const targetUrl = buildExternalGoogleMapsUrl(place);
-  if (typeof window !== 'undefined') {
-    window.open(targetUrl, '_blank', 'noopener,noreferrer');
+export function openExternalPlaceInGoogleMaps(
+  place: {
+    nameKh?: string;
+    nameEn?: string;
+    lat?: number;
+    lng?: number;
+    googlePlaceId?: string;
+    googleMapsUrl?: string;
+  },
+  mode: 'place' | 'directions' = 'place',
+  origin?: { lat: number; lng: number } | null
+): void {
+  const targetUrl = buildExternalGoogleMapsUrl(place, mode, origin);
+  if (!targetUrl) {
+    notifyUnverifiedLocationBlocked(place.nameKh || place.nameEn);
+    return;
   }
+  openExternalUrlNativeSafe(targetUrl);
 }
 
 /**
@@ -1864,9 +1895,10 @@ function searchAppVerifiedCambodiaDirectory(
   const qNorm = normalizeKhmerSearchText(rawQuery).replace(/[éèêë]/g, 'e');
   const distinctiveTokens = extractDistinctiveQueryTokens(rawQuery);
 
-  // 1. Search SEED_RESTAURANTS
+  // 1. Search SEED_RESTAURANTS (verified GPS locations only)
   if (typeFilter !== 'tourism' && !['tourism', 'temple', 'nature', 'beach', 'mountain', 'resort'].includes(categoryFilter)) {
     for (const r of SEED_RESTAURANTS) {
+      if (!isPlaceLocationVerified(r)) continue;
       if (provGeo) {
         const rProv = inferCambodiaProvinceFromAddressOrGps(`${r.provinceKh} ${r.addressKh}`, r.latitude, r.longitude);
         if (rProv !== provGeo.kh && !r.provinceKh.includes(provGeo.kh)) continue;
@@ -1876,15 +1908,16 @@ function searchAppVerifiedCambodiaDirectory(
         if (d > radiusVal) continue;
       }
 
+      const rZh = getLocalizedRestaurant(r, 'zh');
       const hay = normalizeKhmerSearchText(
-        `${r.nameKh} ${r.nameEn} ${r.descriptionKh || ''} ${r.addressKh} ${(r.signatureDishesKh || []).join(' ')}`
+        `${r.nameKh} ${r.nameEn} ${rZh.name || ''} ${r.descriptionKh || ''} ${r.addressKh} ${r.addressEn || ''} ${rZh.address || ''} ${(r.signatureDishesKh || []).join(' ')} ${(rZh.signatureDishes || []).join(' ')}`
       ).replace(/[éèêë]/g, 'e');
 
-      const isCafeItem = /(coffee|cafe|café|កាហ្វេ|ភេសជ្ជៈ|នំដុត|bakery|tea|តែគុជ)/i.test(hay);
+      const isCafeItem = /(coffee|cafe|café|កាហ្វេ|ភេសជ្ជៈ|នំដុត|bakery|tea|តែគុជ|咖啡)/i.test(hay);
       if (categoryFilter === 'cafe' && !isCafeItem) continue;
 
       if (distinctiveTokens.length > 0) {
-        if (!doesPlaceMatchDistinctiveQuery({ nameKh: r.nameKh, nameEn: r.nameEn }, distinctiveTokens)) {
+        if (!doesPlaceMatchDistinctiveQuery({ nameKh: r.nameKh, nameEn: r.nameEn, nameZh: rZh.name }, distinctiveTokens)) {
           continue;
         }
       } else {
@@ -1897,12 +1930,13 @@ function searchAppVerifiedCambodiaDirectory(
       }
 
       const prov = inferCambodiaProvinceFromAddressOrGps(`${r.provinceKh} ${r.addressKh}`, r.latitude, r.longitude);
+      const cleanGpid = isValidOfficialGooglePlaceId(r.googlePlaceId) ? r.googlePlaceId! : '';
       out.push({
-        placeId: r.googlePlaceId ? `gmap-${r.googlePlaceId}` : `gmap-dir-${r.id}`,
-        googlePlaceId: r.googlePlaceId || `dir-${r.id}`,
+        placeId: cleanGpid ? `gmap-${cleanGpid}` : `gmap-dir-${r.id}`,
+        googlePlaceId: cleanGpid,
         nameKh: r.nameKh,
         nameEn: r.nameEn || r.nameKh,
-        nameZh: r.nameEn || r.nameKh,
+        nameZh: rZh.name || r.nameEn || r.nameKh,
         category: isCafeItem ? 'cafe' : 'restaurant',
         province: prov,
         provinceKh: r.provinceKh || prov,
@@ -1919,18 +1953,17 @@ function searchAppVerifiedCambodiaDirectory(
         photoUrls: r.galleryPhotos && r.galleryPhotos.length > 0 ? r.galleryPhotos : [r.photoUrl],
         hasOfficialGooglePhoto: true,
         hasRealGooglePhoto: true,
-        googleMapsUrl:
-          r.mapUrl ||
-          `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${r.nameEn || r.nameKh} ${r.latitude},${r.longitude}`)}`,
+        googleMapsUrl: buildCanonicalGoogleMapsPinUrl(r.latitude, r.longitude, cleanGpid || undefined),
         source: 'cambodia_extended_directory',
         cachedAt: new Date().toISOString(),
       });
     }
   }
 
-  // 2. Search SEED_DESTINATIONS
+  // 2. Search SEED_DESTINATIONS (verified GPS locations only)
   if (typeFilter !== 'restaurant' && (categoryFilter === 'all' || ['tourism', 'temple', 'nature', 'beach', 'mountain', 'resort'].includes(categoryFilter))) {
     for (const d of SEED_DESTINATIONS) {
+      if (!isPlaceLocationVerified(d)) continue;
       if (provGeo) {
         const dProv = inferCambodiaProvinceFromAddressOrGps(`${d.provinceKh} ${d.addressKh}`, d.latitude, d.longitude);
         if (dProv !== provGeo.kh && !d.provinceKh.includes(provGeo.kh)) continue;
@@ -1943,11 +1976,12 @@ function searchAppVerifiedCambodiaDirectory(
         continue;
       }
 
+      const dZh = getLocalizedDestination(d, 'zh');
       const hay = normalizeKhmerSearchText(
-        `${d.nameKh} ${d.nameEn} ${d.descriptionKh || ''} ${d.addressKh} ${d.provinceKh}`
+        `${d.nameKh} ${d.nameEn} ${dZh.name || ''} ${d.descriptionKh || ''} ${dZh.description || ''} ${d.addressKh} ${d.addressEn || ''} ${d.provinceKh} ${d.provinceEn || ''} ${dZh.province || ''}`
       );
       if (distinctiveTokens.length > 0) {
-        if (!doesPlaceMatchDistinctiveQuery({ nameKh: d.nameKh, nameEn: d.nameEn }, distinctiveTokens)) {
+        if (!doesPlaceMatchDistinctiveQuery({ nameKh: d.nameKh, nameEn: d.nameEn, nameZh: dZh.name }, distinctiveTokens)) {
           continue;
         }
       } else {
@@ -1959,12 +1993,13 @@ function searchAppVerifiedCambodiaDirectory(
       }
 
       const prov = inferCambodiaProvinceFromAddressOrGps(`${d.provinceKh} ${d.addressKh}`, d.latitude, d.longitude);
+      const cleanGpid = isValidOfficialGooglePlaceId(d.googlePlaceId) ? d.googlePlaceId! : '';
       out.push({
-        placeId: d.googlePlaceId ? `gmap-${d.googlePlaceId}` : `gmap-dest-${d.id}`,
-        googlePlaceId: d.googlePlaceId || `dest-${d.id}`,
+        placeId: cleanGpid ? `gmap-${cleanGpid}` : `gmap-dest-${d.id}`,
+        googlePlaceId: cleanGpid,
         nameKh: d.nameKh,
         nameEn: d.nameEn || d.nameKh,
-        nameZh: d.nameEn || d.nameKh,
+        nameZh: dZh.name || d.nameEn || d.nameKh,
         category: 'tourism',
         subCategorySlug: d.categorySlug,
         province: prov,
@@ -1982,9 +2017,7 @@ function searchAppVerifiedCambodiaDirectory(
         photoUrls: d.galleryPhotos && d.galleryPhotos.length > 0 ? d.galleryPhotos : [d.photoUrl],
         hasOfficialGooglePhoto: true,
         hasRealGooglePhoto: true,
-        googleMapsUrl:
-          d.mapUrl ||
-          `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${d.nameEn || d.nameKh} ${d.latitude},${d.longitude}`)}`,
+        googleMapsUrl: buildCanonicalGoogleMapsPinUrl(d.latitude, d.longitude, cleanGpid || undefined),
         source: 'cambodia_extended_directory',
         cachedAt: new Date().toISOString(),
       });
@@ -4077,16 +4110,19 @@ function buildSeedDirectoryNearbyCandidates(
   const deletedMap = loadDeletedRestaurantIdsMap();
 
   for (const r of SEED_RESTAURANTS) {
+    if (!isPlaceLocationVerified(r)) continue;
     if (isRestaurantIdDeleted(r.id, undefined, deletedMap, r.googlePlaceId)) continue;
     const dist = calculateHaversineMeters(lat, lng, r.latitude, r.longitude);
     if (dist > maxDistanceMeters) continue;
     const prov = inferCambodiaProvinceFromAddressOrGps(`${r.provinceKh} ${r.addressKh}`, r.latitude, r.longitude);
+    const rZh = getLocalizedRestaurant(r, 'zh');
+    const cleanGpid = isValidOfficialGooglePlaceId(r.googlePlaceId) ? r.googlePlaceId! : '';
     out.push({
-      placeId: r.googlePlaceId ? `gmap-${r.googlePlaceId}` : `gmap-seed-rest-${r.id}`,
-      googlePlaceId: r.googlePlaceId || `seed-rest-${r.id}`,
+      placeId: cleanGpid ? `gmap-${cleanGpid}` : `gmap-seed-rest-${r.id}`,
+      googlePlaceId: cleanGpid,
       nameKh: r.nameKh,
       nameEn: r.nameEn || r.nameKh,
-      nameZh: r.nameEn || r.nameKh,
+      nameZh: rZh.name || r.nameEn || r.nameKh,
       category: /(កាហ្វេ|coffee|cafe|café|bakery)/i.test(`${r.nameKh} ${r.nameEn || ''}`) ? 'cafe' : 'restaurant',
       province: prov,
       provinceKh: r.provinceKh || prov,
@@ -4103,26 +4139,25 @@ function buildSeedDirectoryNearbyCandidates(
       photoUrls: r.galleryPhotos && r.galleryPhotos.length > 0 ? r.galleryPhotos : [r.photoUrl],
       hasOfficialGooglePhoto: true,
       hasRealGooglePhoto: true,
-      googleMapsUrl:
-        r.mapUrl ||
-        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          `${r.nameEn || r.nameKh} ${r.latitude},${r.longitude}`
-        )}`,
+      googleMapsUrl: buildCanonicalGoogleMapsPinUrl(r.latitude, r.longitude, cleanGpid || undefined),
       source: 'cambodia_extended_directory',
       cachedAt: new Date().toISOString(),
     });
   }
 
   for (const d of SEED_DESTINATIONS) {
+    if (!isPlaceLocationVerified(d)) continue;
     const dist = calculateHaversineMeters(lat, lng, d.latitude, d.longitude);
     if (dist > maxDistanceMeters) continue;
     const prov = inferCambodiaProvinceFromAddressOrGps(`${d.provinceKh} ${d.addressKh}`, d.latitude, d.longitude);
+    const dZh = getLocalizedDestination(d, 'zh');
+    const cleanGpid = isValidOfficialGooglePlaceId(d.googlePlaceId) ? d.googlePlaceId! : '';
     out.push({
-      placeId: d.googlePlaceId ? `gmap-${d.googlePlaceId}` : `gmap-seed-dest-${d.id}`,
-      googlePlaceId: d.googlePlaceId || `seed-dest-${d.id}`,
+      placeId: cleanGpid ? `gmap-${cleanGpid}` : `gmap-seed-dest-${d.id}`,
+      googlePlaceId: cleanGpid,
       nameKh: d.nameKh,
       nameEn: d.nameEn || d.nameKh,
-      nameZh: d.nameEn || d.nameKh,
+      nameZh: dZh.name || d.nameEn || d.nameKh,
       category: 'tourism',
       subCategorySlug: d.categorySlug,
       province: prov,
@@ -4140,11 +4175,7 @@ function buildSeedDirectoryNearbyCandidates(
       photoUrls: d.galleryPhotos && d.galleryPhotos.length > 0 ? d.galleryPhotos : [d.photoUrl],
       hasOfficialGooglePhoto: true,
       hasRealGooglePhoto: true,
-      googleMapsUrl:
-        d.mapUrl ||
-        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          `${d.nameEn || d.nameKh} ${d.latitude},${d.longitude}`
-        )}`,
+      googleMapsUrl: buildCanonicalGoogleMapsPinUrl(d.latitude, d.longitude, cleanGpid || undefined),
       source: 'cambodia_extended_directory',
       cachedAt: new Date().toISOString(),
     });
@@ -4759,12 +4790,13 @@ export function performUnifiedCambodiaSearch(
   };
 
   const matchedFoods = foods.filter((f) => {
+    const fZh = getLocalizedFood(f, 'zh');
     if (cleanSelProv) {
-      const provText = `${f.nameKh} ${f.nameEn} ${f.descriptionKh || ''} ${f.descriptionEn || ''}`;
+      const provText = `${f.nameKh} ${f.nameEn} ${fZh.name || ''} ${f.descriptionKh || ''} ${f.descriptionEn || ''} ${fZh.description || ''}`;
       if (!matchesProvinceText(provText)) return false;
     }
     const hay = normalizeKhmerSearchText(
-      `${f.nameKh} ${f.nameEn} ${f.descriptionKh || ''} ${f.descriptionEn || ''} ${f.categoryKh || ''} ${f.categoryEn || ''} ${(f.ingredients || []).map((i) => `${i.nameKh} ${i.nameEn}`).join(' ')}`
+      `${f.nameKh} ${f.nameEn} ${fZh.name || ''} ${f.descriptionKh || ''} ${f.descriptionEn || ''} ${fZh.description || ''} ${f.categoryKh || ''} ${f.categoryEn || ''} ${fZh.category || ''} ${(f.ingredients || []).map((i) => `${i.nameKh} ${i.nameEn}`).join(' ')}`
     );
     return includesKhmerSafeToken(hay, q) || tokens.some((tok) => tok.length >= 2 && includesKhmerSafeToken(hay, tok));
   });
@@ -4774,29 +4806,33 @@ export function performUnifiedCambodiaSearch(
   );
 
   const localRestaurants = approvedAppRestaurants.filter((r) => {
-    if (cleanSelProv && !matchesProvinceText(`${r.provinceKh || ''} ${r.addressKh || ''}`)) {
+    const rZh = getLocalizedRestaurant(r, 'zh');
+    if (cleanSelProv && !matchesProvinceText(`${r.provinceKh || ''} ${r.provinceEn || ''} ${rZh.province || ''} ${r.addressKh || ''} ${r.addressEn || ''}`)) {
       return false;
     }
     if (hasRadiusFilter) {
+      if (!isPlaceLocationVerified(r)) return false;
       const dist = calculateHaversineMeters(userLat, userLng, r.latitude, r.longitude);
       if (dist > radiusMeters!) return false;
     }
     const hay = normalizeKhmerSearchText(
-      `${r.nameKh || ''} ${r.nameEn || ''} ${r.descriptionKh || ''} ${r.addressKh || ''} ${r.provinceKh || ''} ${(r.signatureDishesKh || []).join(' ')} ${(r.menuItems || []).map((m) => `${m.nameKh || ''} ${m.nameEn || ''}`).join(' ')}`
+      `${r.nameKh || ''} ${r.nameEn || ''} ${rZh.name || ''} ${r.descriptionKh || ''} ${r.descriptionEn || ''} ${rZh.description || ''} ${r.addressKh || ''} ${r.addressEn || ''} ${rZh.address || ''} ${r.provinceKh || ''} ${r.provinceEn || ''} ${rZh.province || ''} ${(r.signatureDishesKh || []).join(' ')} ${(rZh.signatureDishes || []).join(' ')} ${(r.menuItems || []).map((m) => `${m.nameKh || ''} ${m.nameEn || ''}`).join(' ')}`
     );
     return includesKhmerSafeToken(hay, q) || tokens.some((tok) => tok.length >= 2 && includesKhmerSafeToken(hay, tok));
   });
 
   const localDestinations = destinations.filter((d) => {
-    if (cleanSelProv && !matchesProvinceText(`${d.provinceKh || ''} ${d.addressKh || ''}`)) {
+    const dZh = getLocalizedDestination(d, 'zh');
+    if (cleanSelProv && !matchesProvinceText(`${d.provinceKh || ''} ${d.provinceEn || ''} ${dZh.province || ''} ${d.addressKh || ''} ${d.addressEn || ''}`)) {
       return false;
     }
     if (hasRadiusFilter) {
+      if (!isPlaceLocationVerified(d)) return false;
       const dist = calculateHaversineMeters(userLat, userLng, d.latitude, d.longitude);
       if (dist > radiusMeters!) return false;
     }
     const hay = normalizeKhmerSearchText(
-      `${d.nameKh || ''} ${d.nameEn || ''} ${d.descriptionKh || ''} ${d.descriptionEn || ''} ${d.provinceKh || ''} ${d.categoryKh || ''} ${d.categoryEn || ''}`
+      `${d.nameKh || ''} ${d.nameEn || ''} ${dZh.name || ''} ${d.descriptionKh || ''} ${d.descriptionEn || ''} ${dZh.description || ''} ${d.addressKh || ''} ${d.addressEn || ''} ${dZh.address || ''} ${d.provinceKh || ''} ${d.provinceEn || ''} ${dZh.province || ''} ${d.categoryKh || ''} ${d.categoryEn || ''} ${dZh.category || ''}`
     );
     return includesKhmerSafeToken(hay, q) || tokens.some((tok) => tok.length >= 2 && includesKhmerSafeToken(hay, tok));
   });

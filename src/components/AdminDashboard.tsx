@@ -11,7 +11,8 @@ import {
   FoodCategorySlug, DestinationCategorySlug, UserRole, User, RegistrationTransaction, FoodItem, TouristDestination, isSeedRestaurantId,
   VipBenefitItem, TEN_VIP_BENEFITS, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
   getVipFeaturedRotationConfig, getVipFeaturedRotationState,
-  sanitizeManualFeaturedSchedule, getManualFeaturedSlotEndMs, ManualFeaturedSlot, MAX_MANUAL_FEATURED_SLOTS
+  sanitizeManualFeaturedSchedule, getManualFeaturedSlotEndMs, ManualFeaturedSlot, MAX_MANUAL_FEATURED_SLOTS,
+  isPlaceLocationVerified
 } from '../types';
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession, getOfficialOwnershipCertificate, verifyAppOwnershipAndDomainIntegrity } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
@@ -48,7 +49,7 @@ export const AdminDashboard: React.FC = () => {
     aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn,
     setIsAiCheckInModalOpen, triggerCloudSyncNow, isSyncingUsers, lastUsersSyncedAt, syncUsersNow,
     supportTickets, replyToSupportTicket, updateSupportTicketStatus, approveVipFromSupportTicket, markSupportTicketRead,
-    openGoogleMapsSearchModal, openManageMyVipStore, setSelectedRestaurant
+    openGoogleMapsSearchModal, openManageMyVipStore, setSelectedRestaurant, setSelectedDestination
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'stats' | 'support_tickets' | 'food' | 'restaurants' | 'destinations' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>(() => {
@@ -132,7 +133,9 @@ export const AdminDashboard: React.FC = () => {
   const [selectedDestForImageEdit, setSelectedDestForImageEdit] = useState<TouristDestination | null>(null);
   const [destSearchQuery, setDestSearchQuery] = useState('');
   const [destProvinceFilter, setDestProvinceFilter] = useState('all');
+  const [destLocationFilter, setDestLocationFilter] = useState<'all' | 'verified_gps' | 'needs_gps_review'>('all');
   const [adminRestSearchQuery, setAdminRestSearchQuery] = useState('');
+  const [adminRestLocationFilter, setAdminRestLocationFilter] = useState<'all' | 'verified_gps' | 'needs_gps_review'>('all');
 
   // Form states for Settings & Promotional pricing
   const [playStoreUrl, setPlayStoreUrl] = useState(appSettings.playStoreUrl);
@@ -380,9 +383,12 @@ export const AdminDashboard: React.FC = () => {
       entranceFeeEn: newDestFee,
       bestTimeToVisitKh: newDestBestTime,
       bestTimeToVisitEn: newDestBestTime,
-      mapUrl: `https://maps.google.com/?q=${encodeURIComponent(newDestNameKh)}`,
-      latitude: 12.5,
-      longitude: 104.9,
+      mapUrl: '',
+      latitude: 0,
+      longitude: 0,
+      locationVerificationStatus: 'needs_admin_review',
+      locationNeedsReview: true,
+      locationReviewNote: 'New attraction added without GPS coordinates — open Edit GPS to set exact coordinates',
       highlightsKh: ['ទេសភាពស្រស់ស្អាត', 'វប្បធម៌ខ្មែរ', 'ខ្យល់អាកាសបរិសុទ្ធ'],
     });
     setNewDestNameKh('');
@@ -2535,6 +2541,51 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               )}
 
+              {/* Admin GPS Location Verification Filter Pills */}
+              <div className="flex items-center gap-1.5 flex-wrap font-khmer">
+                {(() => {
+                  const verifiedCount = restaurants.filter((r) => isPlaceLocationVerified(r)).length;
+                  const reviewCount = restaurants.length - verifiedCount;
+                  return (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setAdminRestLocationFilter('all')}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
+                          adminRestLocationFilter === 'all'
+                            ? 'bg-[#064E3B] text-white shadow-xs'
+                            : 'bg-white dark:bg-stone-800 text-slate-700 dark:text-stone-300 border border-slate-200 dark:border-stone-700'
+                        }`}
+                      >
+                        {isKm ? `ហាងទាំងអស់ (${restaurants.length})` : `All Shops (${restaurants.length})`}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAdminRestLocationFilter('verified_gps')}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
+                          adminRestLocationFilter === 'verified_gps'
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                        }`}
+                      >
+                        {isKm ? `✅ ទីតាំង GPS ត្រឹមត្រូវ (${verifiedCount})` : `✅ Verified GPS (${verifiedCount})`}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAdminRestLocationFilter('needs_gps_review')}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
+                          adminRestLocationFilter === 'needs_gps_review'
+                            ? 'bg-amber-500 text-slate-950 shadow-xs'
+                            : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700'
+                        }`}
+                      >
+                        {isKm ? `📍 ត្រូវផ្ទៀងផ្ទាត់ GPS (${reviewCount})` : `📍 Needs GPS Review (${reviewCount})`}
+                      </button>
+                    </>
+                  );
+                })()}
+              </div>
+
               {/* Admin Search Input for Shops */}
               <div className="relative">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -2563,6 +2614,9 @@ export const AdminDashboard: React.FC = () => {
               <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
                 {restaurants
                   .filter((rest) => {
+                    const gpsOk = isPlaceLocationVerified(rest);
+                    if (adminRestLocationFilter === 'verified_gps' && !gpsOk) return false;
+                    if (adminRestLocationFilter === 'needs_gps_review' && gpsOk) return false;
                     const q = adminRestSearchQuery.trim().toLowerCase();
                     if (!q) return true;
                     return (
@@ -2588,6 +2642,15 @@ export const AdminDashboard: React.FC = () => {
                       <div className="overflow-hidden">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <h4 className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer truncate group-hover:text-emerald-600 transition">{rest.nameKh}</h4>
+                          {isPlaceLocationVerified(rest) ? (
+                            <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 text-[9px] font-bold font-khmer">
+                              📍 GPS {rest.latitude.toFixed(4)}, {rest.longitude.toFixed(4)}
+                            </span>
+                          ) : (
+                            <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 text-[9px] font-bold font-khmer">
+                              📍 {isKm ? 'ត្រូវផ្ទៀងផ្ទាត់ GPS' : 'Needs GPS Review'}
+                            </span>
+                          )}
                           {rest.status === 'pending' && (
                             <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[9px] font-bold font-khmer">
                               ⏳ រង់ចាំពិនិត្យ
@@ -2876,10 +2939,58 @@ export const AdminDashboard: React.FC = () => {
                 </form>
               )}
 
+              {/* Destination GPS Verification Filter Pills */}
+              <div className="flex items-center gap-1.5 flex-wrap font-khmer">
+                {(() => {
+                  const verifiedDestCount = destinations.filter((d) => isPlaceLocationVerified(d)).length;
+                  const reviewDestCount = destinations.length - verifiedDestCount;
+                  return (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setDestLocationFilter('all')}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
+                          destLocationFilter === 'all'
+                            ? 'bg-[#064E3B] text-white shadow-xs'
+                            : 'bg-white dark:bg-stone-800 text-slate-700 dark:text-stone-300 border border-slate-200 dark:border-stone-700'
+                        }`}
+                      >
+                        {isKm ? `តំបន់ទាំងអស់ (${destinations.length})` : `All Attractions (${destinations.length})`}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDestLocationFilter('verified_gps')}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
+                          destLocationFilter === 'verified_gps'
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                        }`}
+                      >
+                        {isKm ? `✅ GPS ត្រឹមត្រូវ (${verifiedDestCount})` : `✅ Verified GPS (${verifiedDestCount})`}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDestLocationFilter('needs_gps_review')}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
+                          destLocationFilter === 'needs_gps_review'
+                            ? 'bg-amber-500 text-slate-950 shadow-xs'
+                            : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700'
+                        }`}
+                      >
+                        {isKm ? `📍 ត្រូវផ្ទៀងផ្ទាត់ GPS (${reviewDestCount})` : `📍 Needs GPS Review (${reviewDestCount})`}
+                      </button>
+                    </>
+                  );
+                })()}
+              </div>
+
               {/* Destination Items List */}
               <div className="space-y-2.5 max-h-[58vh] overflow-y-auto no-scrollbar">
                 {destinations
                   .filter(d => {
+                    const gpsOk = isPlaceLocationVerified(d);
+                    if (destLocationFilter === 'verified_gps' && !gpsOk) return false;
+                    if (destLocationFilter === 'needs_gps_review' && gpsOk) return false;
                     const q = destSearchQuery.toLowerCase().trim();
                     const matchesSearch = !q || 
                       d.nameKh.toLowerCase().includes(q) ||
@@ -2919,6 +3030,15 @@ export const AdminDashboard: React.FC = () => {
                             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-[#064E3B] border border-slate-200 dark:border-slate-700 font-khmer">
                               {d.provinceKh}
                             </span>
+                            {isPlaceLocationVerified(d) ? (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 font-mono">
+                                📍 {d.latitude.toFixed(4)}, {d.longitude.toFixed(4)}
+                              </span>
+                            ) : (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 font-khmer">
+                                📍 {isKm ? 'ត្រូវផ្ទៀងផ្ទាត់ GPS' : 'Needs GPS Review'}
+                              </span>
+                            )}
                           </div>
                           <h4 className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer text-xs truncate mt-0.5">
                             {d.nameKh}
@@ -2930,6 +3050,18 @@ export const AdminDashboard: React.FC = () => {
                       </div>
 
                       <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            (window as any).__kft_open_dest_edit = true;
+                            setIsAdminOpen(false);
+                            setSelectedDestination(d);
+                          }}
+                          className="px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-khmer font-bold text-xs flex items-center gap-1 transition active:scale-95 shadow-2xs cursor-pointer"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                          <span>{isKm ? 'កែ GPS' : 'Edit GPS'}</span>
+                        </button>
                         {/* Change Photo Button */}
                         <button
                           type="button"

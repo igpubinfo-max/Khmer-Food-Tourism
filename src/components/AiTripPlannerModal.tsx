@@ -23,7 +23,7 @@ import {
   Search,
   HeartPulse,
 } from 'lucide-react';
-import { TripPlan, isUserVipActive, isAdminAccount } from '../types';
+import { TripPlan, isUserVipActive, isAdminAccount, openRestaurantGoogleExternal } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
 import { IconSmartAssistant } from './icons/HandcraftedIcons';
 import {
@@ -679,11 +679,6 @@ export const AiTripPlannerModal: React.FC = () => {
                     </div>
                     {aiAdvisorResults.shops.map((shop) => {
                       const sLoc = getLocalizedRestaurant(shop, language);
-                      const navUrl =
-                        shop.mapUrl ||
-                        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                          `${shop.nameKh} ${shop.provinceKh} Cambodia`
-                        )}`;
                       return (
                         <div
                           key={shop.id}
@@ -703,15 +698,14 @@ export const AiTripPlannerModal: React.FC = () => {
                               📍 {sLoc.province} • ⭐ {shop.rating}
                             </div>
                           </div>
-                          <a
-                            href={navUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-2.5 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-[10px] font-bold inline-flex items-center gap-1 shrink-0"
+                          <button
+                            type="button"
+                            onClick={() => openRestaurantGoogleExternal(shop, 'directions')}
+                            className="px-2.5 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-[10px] font-bold inline-flex items-center gap-1 shrink-0 cursor-pointer"
                           >
                             <Navigation className="w-3 h-3 text-emerald-300" />
                             <span>{tr(language, 'នាំផ្លូវ', 'Navigate', '导航')}</span>
-                          </a>
+                          </button>
                         </div>
                       );
                     })}

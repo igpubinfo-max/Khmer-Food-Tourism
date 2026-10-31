@@ -6,6 +6,7 @@ import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { Store, Plus, Edit2, Shield, Settings, MapPin, Globe, RefreshCw, Search, X } from 'lucide-react';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
 import { tr, translateProvince } from '../utils/i18n';
+import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 
 const RESTAURANT_BATCH_SIZE = 40;
 
@@ -176,7 +177,8 @@ export const RestaurantView: React.FC = () => {
         return false;
       }
       if (normQuery || rawQueryLower) {
-        const hayRaw = `${r.nameKh || ''} ${r.nameEn || ''} ${r.provinceKh || ''} ${r.provinceEn || ''} ${r.addressKh || ''} ${(r.signatureDishesKh || []).join(' ')}`.toLowerCase();
+        const zhLoc = getLocalizedRestaurant(r, 'zh');
+        const hayRaw = `${r.nameKh || ''} ${r.nameEn || ''} ${zhLoc.name || ''} ${r.provinceKh || ''} ${r.provinceEn || ''} ${zhLoc.province || ''} ${r.addressKh || ''} ${r.addressEn || ''} ${zhLoc.address || ''} ${(r.signatureDishesKh || []).join(' ')} ${(zhLoc.signatureDishes || []).join(' ')}`.toLowerCase();
         const hayNorm = normalizeKhmerSearchText(hayRaw);
         if (!hayRaw.includes(rawQueryLower) && (!normQuery || !hayNorm.includes(normQuery))) {
           return false;

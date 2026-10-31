@@ -5,6 +5,9 @@ import {
   FoodItem,
   Restaurant,
   TouristDestination,
+  isPlaceLocationVerified,
+  getDestinationGoogleExternalUrl,
+  getRestaurantGoogleExternalUrl,
 } from '../types';
 
 const SUPABASE_URL = 'https://ryvltobwuwuulazqjnza.supabase.co';
@@ -226,7 +229,7 @@ export function buildCuratedCambodiaDiscoveryItems(
   const usedDestIds = new Set<string>();
 
   for (const id of featuredDestIds) {
-    const found = destinations.find((d) => d.id === id);
+    const found = destinations.find((d) => d.id === id && isPlaceLocationVerified(d));
     if (found && !usedDestIds.has(found.id)) {
       pickedDests.push(found);
       usedDestIds.add(found.id);
@@ -234,6 +237,7 @@ export function buildCuratedCambodiaDiscoveryItems(
   }
   for (const d of sortedDests) {
     if (pickedDests.length >= 10) break;
+    if (!isPlaceLocationVerified(d)) continue;
     if (!usedDestIds.has(d.id)) {
       pickedDests.push(d);
       usedDestIds.add(d.id);
@@ -241,9 +245,7 @@ export function buildCuratedCambodiaDiscoveryItems(
   }
 
   pickedDests.forEach((d, idx) => {
-    const mapUrl =
-      d.mapUrl ||
-      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.nameEn || d.nameKh)}`;
+    const mapUrl = getDestinationGoogleExternalUrl(d, 'maps');
     items.push({
       id: `disc-dest-${d.id}`,
       category: 'attraction',
@@ -275,8 +277,10 @@ export function buildCuratedCambodiaDiscoveryItems(
     });
   });
 
-  // 2. Dynamically surface Newest & VIP Approved Restaurants / Shops
-  const approvedRests = restaurants.filter((r) => r.status === 'approved' || !r.status);
+  // 2. Dynamically surface Newest & VIP Approved Restaurants / Shops (verified GPS locations prioritized)
+  const approvedRests = restaurants.filter(
+    (r) => (r.status === 'approved' || !r.status) && isPlaceLocationVerified(r)
+  );
   const sortedRests = [...approvedRests].sort((a, b) => {
     const aVip = a.membershipTier === 'premium' ? 1 : 0;
     const bVip = b.membershipTier === 'premium' ? 1 : 0;
@@ -290,8 +294,7 @@ export function buildCuratedCambodiaDiscoveryItems(
     const sourceLink =
       r.facebookUrl ||
       r.telegramUrl ||
-      r.mapUrl ||
-      `https://www.google.com/maps/search/?api=1&query=${r.latitude || 11.5564},${r.longitude || 104.9282}`;
+      getRestaurantGoogleExternalUrl(r, 'maps');
     items.push({
       id: `disc-rest-${r.id}`,
       category: 'restaurant',

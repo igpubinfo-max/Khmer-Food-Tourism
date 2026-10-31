@@ -5,7 +5,13 @@ import {
   Send, Share2, UtensilsCrossed, Sparkles, CheckCircle2, AlertCircle, Copy, Camera, Bookmark,
   BarChart3, Video, Crown, Edit2, MessageSquare, Trash2
 } from 'lucide-react';
-import { isUserVipActive, getRestaurantRatingSummary } from '../types';
+import {
+  isUserVipActive,
+  getRestaurantRatingSummary,
+  getRestaurantGoogleExternalUrl,
+  openRestaurantGoogleExternal,
+  isPlaceLocationVerified,
+} from '../types';
 import { RestaurantImageModal } from './RestaurantImageModal';
 import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant, translateSignatureDish, translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
@@ -128,15 +134,15 @@ export const RestaurantDetailModal: React.FC = () => {
       window.location.href = `tel:${cleanFound}`;
       return;
     }
-    showToast(
-      isKm
-        ? 'ហាងនេះមិនបានដាក់លេខទូរស័ព្ទលើផែនទីទេ — កំពុងបើកទីតាំងលើ Google Maps ជូនលោកអ្នក!'
-        : 'This shop has not listed a phone number on the map — opening Google Maps!',
-      'warning'
-    );
-    if (selectedRestaurant.mapUrl) {
-      window.open(selectedRestaurant.mapUrl, '_blank');
+    if (isPlaceLocationVerified(selectedRestaurant)) {
+      showToast(
+        isKm
+          ? 'ហាងនេះមិនបានដាក់លេខទូរស័ព្ទលើផែនទីទេ — កំពុងបើកទីតាំងលើ Google Maps ជូនលោកអ្នក!'
+          : 'This shop has not listed a phone number on the map — opening Google Maps!',
+        'warning'
+      );
     }
+    openRestaurantGoogleExternal(selectedRestaurant, 'maps');
   };
 
   const shopProfilePic = selectedRestaurant.profileImage || selectedRestaurant.photoUrl;
@@ -171,6 +177,8 @@ export const RestaurantDetailModal: React.FC = () => {
 
   const allPhotos = categorizedPhotos.map((item) => item.url);
 
+  const verifiedExternalMapUrl = getRestaurantGoogleExternalUrl(selectedRestaurant, 'maps');
+
   const sharePayload = {
     title: isKm ? selectedRestaurant.nameKh : selectedRestaurant.nameEn,
     nameKh: selectedRestaurant.nameKh,
@@ -182,7 +190,7 @@ export const RestaurantDetailModal: React.FC = () => {
     phone: displayPhone || selectedRestaurant.phone,
     signatureDishes: selectedRestaurant.signatureDishesKh,
     photoUrl: activePhoto || selectedRestaurant.photoUrl,
-    mapUrl: selectedRestaurant.mapUrl,
+    mapUrl: verifiedExternalMapUrl,
     itemType: 'restaurant' as const,
     itemId: selectedRestaurant.id,
     isKm,
@@ -196,7 +204,7 @@ export const RestaurantDetailModal: React.FC = () => {
   const handleShareTelegram = () => {
     trackRestaurantShare(selectedRestaurant.id);
     const { fullText, directLink } = formatRichShareText(sharePayload);
-    const encUrl = encodeURIComponent(selectedRestaurant.mapUrl || directLink);
+    const encUrl = encodeURIComponent(verifiedExternalMapUrl || directLink);
     const encText = encodeURIComponent(fullText);
     window.open(`https://t.me/share/url?url=${encUrl}&text=${encText}`, '_blank');
   };
@@ -204,7 +212,7 @@ export const RestaurantDetailModal: React.FC = () => {
   const handleShareFacebook = () => {
     trackRestaurantShare(selectedRestaurant.id);
     const { fullText, directLink } = formatRichShareText(sharePayload);
-    const encUrl = encodeURIComponent(selectedRestaurant.mapUrl || directLink);
+    const encUrl = encodeURIComponent(verifiedExternalMapUrl || directLink);
     const encQuote = encodeURIComponent(fullText);
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encUrl}&quote=${encQuote}`, '_blank');
   };
@@ -425,18 +433,35 @@ export const RestaurantDetailModal: React.FC = () => {
               </div>
             ) : null}
 
+            {/* Admin-only Location Review Notice if flagged */}
+            {isAdmin && !isPlaceLocationVerified(selectedRestaurant) && (
+              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-xs font-khmer text-amber-900 dark:text-amber-200 flex items-center justify-between gap-2">
+                <span>
+                  📍{' '}
+                  {tr(
+                    language,
+                    'ទីតាំង GPS របស់ហាងនេះត្រូវបានដាក់សម្គាល់សម្រាប់ Admin ផ្ទៀងផ្ទាត់ (មិនបើកទីតាំងស្មានឡើយ)',
+                    'Location flagged for Admin GPS verification (unverified pin hidden)',
+                    '该店铺 GPS 位置已标记待管理员核验（隐藏未核实定位）'
+                  )}
+                </span>
+              </div>
+            )}
+
             {/* Quick action bar: Maps and Call */}
             <div className="grid grid-cols-2 gap-2">
-              <a
-                href={selectedRestaurant.mapUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackRestaurantMap(selectedRestaurant.id)}
-                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow transition active:scale-95 font-khmer"
+              <button
+                type="button"
+                onClick={() => {
+                  if (openRestaurantGoogleExternal(selectedRestaurant, 'maps')) {
+                    trackRestaurantMap(selectedRestaurant.id);
+                  }
+                }}
+                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow transition active:scale-95 font-khmer cursor-pointer"
               >
                 <MapPin className="w-4 h-4 shrink-0" />
                 <span className="truncate">{tr(language, 'ផែនទី', 'Maps', '地图导航')}</span>
-              </a>
+              </button>
 
               <button
                 type="button"

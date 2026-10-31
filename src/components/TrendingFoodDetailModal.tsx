@@ -5,6 +5,7 @@ import {
   Calendar, Sparkles, Navigation, Bookmark, MessageSquareQuote, Play, Utensils, ChefHat
 } from 'lucide-react';
 import { tr, translateProvince } from '../utils/i18n';
+import { openTrendingFoodGoogleExternal } from '../types';
 import { translateDynamicTextToZh, sanitizeStrictLanguageText, toConciseSummary } from '../utils/zhDynamicTranslator';
 import { extractYouTubeVideoId, isKnownUnavailableVideo } from '../services/onlineFoodDiscoveryService';
 
@@ -150,13 +151,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
   };
 
   const handleOpenMap = () => {
-    if (item.mapUrl) {
-      window.open(item.mapUrl, '_blank', 'noopener,noreferrer');
-    } else if (item.latitude && item.longitude) {
-      window.open(`https://maps.google.com/?q=${item.latitude},${item.longitude}`, '_blank', 'noopener,noreferrer');
-    } else {
-      window.open(`https://maps.google.com/?q=${encodeURIComponent(safeRestKh + ' ' + (item.provinceKh || 'Cambodia'))}`, '_blank', 'noopener,noreferrer');
-    }
+    openTrendingFoodGoogleExternal(item, 'maps');
   };
 
   return (
