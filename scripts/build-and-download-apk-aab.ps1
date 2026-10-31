@@ -37,8 +37,35 @@ $CurlExe = "$env:SystemRoot\System32\curl.exe"
 $OwnerRepo = "igpubinfo-max/Khmer-Food-Tourism"
 $WorkflowFile = "build-apk.yml"
 $OutDir = Join-Path $RepoRoot "Release_APK_AAB"
+$ArchiveDir = Join-Path $OutDir "Old_Builds"
 if (-not (Test-Path $OutDir)) {
     New-Item -ItemType Directory -Path $OutDir -Force | Out-Null
+}
+
+# Read GitHub token from git credential manager so API calls never hit rate limits
+$GitHubToken = ""
+try {
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $credInput = "protocol=https`nhost=github.com`n`n"
+    $credOutput = $credInput | & $GitExe credential fill 2>$null
+    $ErrorActionPreference = $prevEAP
+    $GitHubToken = (($credOutput | Where-Object { $_ -match '^password=' }) -replace '^password=', '').Trim()
+} catch {
+    $ErrorActionPreference = 'Stop'
+}
+
+function Invoke-GitQuiet {
+    param([string[]]$GitArgs)
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $out = & $GitExe @GitArgs 2>&1
+        $code = $LASTEXITCODE
+        return @{ Output = ($out -join "`n").Trim(); ExitCode = $code }
+    } finally {
+        $ErrorActionPreference = $prev
+    }
 }
 
 function Write-Banner($text) {
@@ -51,7 +78,7 @@ function Write-Banner($text) {
 function Get-LocalBuildInfo {
     $gradlePath = Join-Path $RepoRoot "android\app\build.gradle"
     $content = Get-Content -LiteralPath $gradlePath -Raw
-    $vc = 1275
+    $vc = 1291
     $vn = "2.5.0"
     if ($content -match 'versionCode\s+(\d+)') {
         $vc = [int]$Matches[1]
@@ -64,11 +91,24 @@ function Get-LocalBuildInfo {
 
 function Get-GitHubJson($url) {
     $headers = @{
-        "User-Agent" = "KhmerFoodTourism-Builder/1.0"
-        "Accept"     = "application/vnd.github+json"
+        "User-Agent"    = "KhmerFoodTourism-Builder/2.0"
+        "Accept"        = "application/vnd.github+json"
         "Cache-Control" = "no-cache"
     }
-    return Invoke-RestMethod -Uri $url -Headers $headers -TimeoutSec 20
+    if ($GitHubToken) {
+        $headers["Authorization"] = "Bearer $GitHubToken"
+    }
+    return Invoke-RestMethod -Uri $url -Headers $headers -TimeoutSec 25
+}
+
+function ConvertTo-UtcDateTime($val) {
+    if ($null -eq $val) { return [datetime]::MinValue }
+    if ($val -is [datetime]) { return $val.ToUniversalTime() }
+    return [datetime]::Parse(
+        $val.ToString(),
+        [System.Globalization.CultureInfo]::InvariantCulture,
+        [System.Globalization.DateTimeStyles]::RoundtripKind
+    ).ToUniversalTime()
 }
 
 function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, [datetime]$minAssetTimeUtc) {
@@ -78,7 +118,7 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
     $apkAsset = $null
     $aabAsset = $null
 
-    for ($attempt = 1; $attempt -le 8; $attempt++) {
+    for ($attempt = 1; $attempt -le 10; $attempt++) {
         try {
             $cb = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
             try {
@@ -93,16 +133,17 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
             }
 
             if ($apkAsset -and $aabAsset) {
-                $apkUpdated = [datetime]::Parse($apkAsset.updated_at).ToUniversalTime()
-                $aabUpdated = [datetime]::Parse($aabAsset.updated_at).ToUniversalTime()
+                $apkUpdated = ConvertTo-UtcDateTime $apkAsset.updated_at
+                $aabUpdated = ConvertTo-UtcDateTime $aabAsset.updated_at
                 if (($apkUpdated -ge $minAssetTimeUtc) -and ($aabUpdated -ge $minAssetTimeUtc)) {
                     break
                 }
+                Write-Host "  Waiting for fresh release assets to finish uploading (attempt $attempt/10)..." -ForegroundColor Yellow
             }
         } catch {
-            Write-Host "  Waiting for GitHub Release CDN sync (attempt $attempt/8)..." -ForegroundColor Yellow
+            Write-Host "  Waiting for GitHub Release CDN sync (attempt $attempt/10)..." -ForegroundColor Yellow
         }
-        if ($attempt -lt 8) {
+        if ($attempt -lt 10) {
             Start-Sleep -Seconds 4
         }
     }
@@ -115,6 +156,21 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
     $aabOutName = "DiscoverCambodia-v$versionName-PlayStore-Build$displayBuildCode.aab"
     $apkOutPath = Join-Path $OutDir $apkOutName
     $aabOutPath = Join-Path $OutDir $aabOutName
+
+    # Move any older APK/AAB files out of Release_APK_AAB into Old_Builds so only the newest build is visible
+    try {
+        $oldPackages = Get-ChildItem -LiteralPath $OutDir -File | Where-Object {
+            ($_.Extension -in @('.apk', '.aab')) -and ($_.Name -notin @($apkOutName, $aabOutName))
+        }
+        if ($oldPackages) {
+            if (-not (Test-Path $ArchiveDir)) {
+                New-Item -ItemType Directory -Path $ArchiveDir -Force | Out-Null
+            }
+            foreach ($oldFile in $oldPackages) {
+                Move-Item -LiteralPath $oldFile.FullName -Destination (Join-Path $ArchiveDir $oldFile.Name) -Force
+            }
+        }
+    } catch {}
 
     $ts = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 
@@ -142,6 +198,12 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
         throw "Downloaded package size looks incomplete. Please check internet connection and retry."
     }
 
+    # Also keep root DiscoverCambodia-v2.5.0.apk updated so any copy in the root folder is also the newest version
+    try {
+        $rootApkPath = Join-Path $RepoRoot "DiscoverCambodia-v$versionName.apk"
+        Copy-Item -LiteralPath $apkOutPath -Destination $rootApkPath -Force
+    } catch {}
+
     $apkSizeMb = [Math]::Round($apkFile.Length / 1MB, 2)
     $aabSizeMb = [Math]::Round($aabFile.Length / 1MB, 2)
 
@@ -161,7 +223,7 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
 
     if (-not $NoOpenExplorer) {
         try {
-            Start-Process explorer.exe -ArgumentList "/select,`"$aabOutPath`""
+            Start-Process explorer.exe -ArgumentList "/select,`"$apkOutPath`""
         } catch {}
     }
 }
@@ -179,7 +241,7 @@ function Wait-ForGitHubWorkflow([string]$targetSha, [datetime]$notBeforeUtc) {
         $elapsedStr = "{0:mm\:ss}" -f $sw.Elapsed
         try {
             $cb = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
-            $resp = Get-GitHubJson "https://api.github.com/repos/$OwnerRepo/actions/workflows/$WorkflowFile/runs?branch=main&per_page=6&cb=$cb"
+            $resp = Get-GitHubJson "https://api.github.com/repos/$OwnerRepo/actions/workflows/$WorkflowFile/runs?branch=main&per_page=8&cb=$cb"
             $runs = @($resp.workflow_runs | Where-Object { $_.head_sha -eq $targetSha })
             if ($runs.Count -gt 0) {
                 $matchedRun = $runs | Sort-Object -Property run_number -Descending | Select-Object -First 1
@@ -227,28 +289,24 @@ Write-Host "  App Version    : v$versionName (Local Build Code: $localVC)" -Fore
 
 # Fetch origin/main quietly so we can compare accurately
 Write-Host "  Checking Git & Cloud Build status..." -ForegroundColor Cyan
-try {
-    & $GitExe fetch origin main --quiet 2>$null
-} catch {}
+$null = Invoke-GitQuiet @("fetch", "origin", "main", "--quiet")
 
-$headSha = (& $GitExe rev-parse HEAD).Trim()
-$remoteMainSha = ""
-try {
-    $remoteMainSha = (& $GitExe rev-parse origin/main 2>$null).Trim()
-} catch {}
+$headSha = (Invoke-GitQuiet @("rev-parse", "HEAD")).Output
+$remoteMainSha = (Invoke-GitQuiet @("rev-parse", "origin/main")).Output
 
 # Check uncommitted app changes (ignore this helper script itself when deciding if app code changed)
-$rawStatus = @(& $GitExe status --porcelain)
+$statusRes = Invoke-GitQuiet @("status", "--porcelain")
+$rawStatus = @($statusRes.Output -split "`r?`n" | Where-Object { $_ })
 $helperIgnoreRegex = '^.. (Build_APK_and_AAB\.bat|scripts/build-and-download-apk-aab\.ps1|\.gitignore)$'
 $appDirtyLines = @($rawStatus | Where-Object { $_ -and ($_ -notmatch $helperIgnoreRegex) })
 
 $hasAppChanges = ($appDirtyLines.Count -gt 0) -or ($headSha -ne $remoteMainSha)
 
 # Query latest GitHub Actions run on main
-$latestRunNumber = 389
+$latestRunNumber = 391
 $matchingHeadRun = $null
 try {
-    $runsResp = Get-GitHubJson "https://api.github.com/repos/$OwnerRepo/actions/workflows/$WorkflowFile/runs?branch=main&per_page=5"
+    $runsResp = Get-GitHubJson "https://api.github.com/repos/$OwnerRepo/actions/workflows/$WorkflowFile/runs?branch=main&per_page=8"
     if ($runsResp.workflow_runs -and $runsResp.workflow_runs.Count -gt 0) {
         $latestRunNumber = [int]($runsResp.workflow_runs[0].run_number)
         $matchingHeadRun = $runsResp.workflow_runs | Where-Object { $_.head_sha -eq $headSha } | Select-Object -First 1
@@ -310,12 +368,10 @@ if (-not $hasAppChanges -and -not $ForceNewBuild) {
 # NEW BUILD PATH: Bump Build Code -> Verify Local Build -> Push -> Wait -> Download
 # ---------------------------------------------------------------------------
 $remoteVC = 0
-try {
-    $remoteGradle = (& $GitExe show origin/main:android/app/build.gradle 2>$null) -join "`n"
-    if ($remoteGradle -match 'versionCode\s+(\d+)') {
-        $remoteVC = [int]$Matches[1]
-    }
-} catch {}
+$remoteGradleRes = Invoke-GitQuiet @("show", "origin/main:android/app/build.gradle")
+if ($remoteGradleRes.ExitCode -eq 0 -and $remoteGradleRes.Output -match 'versionCode\s+(\d+)') {
+    $remoteVC = [int]$Matches[1]
+}
 
 # Ensure new versionCode is strictly higher than local, remote, and GitHub Actions' (900 + run_number) formula
 $minNextVC = [Math]::Max([Math]::Max($localVC, $remoteVC) + 1, 900 + $latestRunNumber + 2)
@@ -352,8 +408,13 @@ if (Test-Path $typesFile) {
 Write-Host "  Updated versionCode & APP_BUILD_CODE -> $nextVC" -ForegroundColor Green
 Write-Host "  Running local production compile check (npm run build)..." -ForegroundColor Cyan
 
+$prevEAP = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
 & $NpmExe run build
-if ($LASTEXITCODE -ne 0) {
+$buildExitCode = $LASTEXITCODE
+$ErrorActionPreference = $prevEAP
+
+if ($buildExitCode -ne 0) {
     throw "Local 'npm run build' failed! Please ask AI to fix the TypeScript/Vite compile error above before building APK/AAB."
 }
 Write-Host "  Local production compile passed with 0 errors!" -ForegroundColor Green
@@ -362,30 +423,30 @@ Write-Banner "STEP 2: PUSHING CODE TO GITHUB CLOUD BUILDER"
 
 $buildStartTimeUtc = [datetime]::UtcNow.AddSeconds(-10)
 
-& $GitExe add -A
-& $GitExe diff --cached --quiet
-if ($LASTEXITCODE -ne 0) {
-    & $GitExe commit -m "v$versionName (build $nextVC): Release Android APK & Play Store AAB"
+$null = Invoke-GitQuiet @("add", "-A")
+$diffRes = Invoke-GitQuiet @("diff", "--cached", "--quiet")
+if ($diffRes.ExitCode -ne 0) {
+    $commitRes = Invoke-GitQuiet @("commit", "-m", "v$versionName (build $nextVC): Release Android APK & Play Store AAB")
 } else {
-    & $GitExe commit --allow-empty -m "v$versionName (build $nextVC): Trigger Android APK & Play Store AAB"
+    $commitRes = Invoke-GitQuiet @("commit", "--allow-empty", "-m", "v$versionName (build $nextVC): Trigger Android APK & Play Store AAB")
 }
-if ($LASTEXITCODE -ne 0) {
-    throw "Git commit failed."
+if ($commitRes.ExitCode -ne 0) {
+    throw "Git commit failed: $($commitRes.Output)"
 }
 
-$newSha = (& $GitExe rev-parse HEAD).Trim()
-& $GitExe branch -f main HEAD 2>$null
+$newSha = (Invoke-GitQuiet @("rev-parse", "HEAD")).Output
+$null = Invoke-GitQuiet @("branch", "-f", "main", "HEAD")
 
 Write-Host "  Pushing commit $($newSha.Substring(0,7)) to origin/main..." -ForegroundColor Cyan
-& $GitExe push origin HEAD:main --force-with-lease
-if ($LASTEXITCODE -ne 0) {
-    throw "Git push to origin/main failed. Check internet connection or GitHub credentials."
+$pushMainRes = Invoke-GitQuiet @("push", "origin", "HEAD:main", "--force-with-lease")
+if ($pushMainRes.ExitCode -ne 0) {
+    throw "Git push to origin/main failed: $($pushMainRes.Output)"
 }
 
-# Keep test-ui-apk branch synced quietly so any open workspace branch stays identical
-$currentBranch = (& $GitExe branch --show-current).Trim()
+# Keep current workspace branch synced quietly without ever throwing on git stderr output
+$currentBranch = (Invoke-GitQuiet @("branch", "--show-current")).Output
 if ($currentBranch -and $currentBranch -ne "main") {
-    & $GitExe push -u origin "$currentBranch" --force-with-lease 2>$null
+    $null = Invoke-GitQuiet @("push", "-u", "origin", $currentBranch, "--force-with-lease")
 }
 
 $completedRun = Wait-ForGitHubWorkflow -targetSha $newSha -notBeforeUtc $buildStartTimeUtc

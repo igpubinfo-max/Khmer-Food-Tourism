@@ -245,18 +245,40 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                MAIN SCREEN: CONTINUE WITH GOOGLE (HERO OPTION)
                ========================================================== */
             <div className="space-y-4 font-khmer">
-              {/* Feature Highlights */}
-              <div className="p-3 bg-emerald-50/70 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200/70 dark:border-emerald-800/60 text-[11px] text-[#064E3B] dark:text-emerald-300 space-y-1">
-                <div className="flex items-center gap-1.5 font-bold">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>{isKm ? 'មុខងារពិសេសសម្រាប់សមាជិក៖' : 'Member Benefits:'}</span>
+              {authModalInitialView.requireEmailForVip ? (
+                <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/35 border border-amber-300 dark:border-amber-700/70 text-[11px] text-amber-900 dark:text-amber-200 flex items-start gap-2.5 shadow-2xs">
+                  <Crown className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div className="space-y-0.5 leading-relaxed">
+                    <div className="font-bold">
+                      {language === 'km'
+                        ? 'ចូលគណនីដោយអ៊ីមែល មុនដំឡើង VIP'
+                        : language === 'zh'
+                        ? '升级 VIP 前需先登录 Google 账号'
+                        : 'Sign In Required for VIP Upgrade'}
+                    </div>
+                    <div className="text-[10.5px] opacity-90">
+                      {language === 'km'
+                        ? 'សូមចុច «បន្តជាមួយ Google» ខាងក្រោមដើម្បីជ្រើសរើសអ៊ីមែលរបស់អ្នកដោយស្វ័យប្រវត្តិ មុននឹងបន្តទៅទំព័រទូទាត់ប្រាក់ VIP និងបង្ហាញ ABA QR Code។'
+                        : language === 'zh'
+                        ? '请点击下方“使用 Google 账号继续”快速验证您的邮箱，验证成功后将自动跳转至 VIP 付款与 ABA 二维码页面。'
+                        : 'Tap "Continue with Google" below to sign in with your account before proceeding to the VIP payment page and ABA QR code.'}
+                    </div>
+                  </div>
                 </div>
-                <ul className="text-[10.5px] text-slate-600 dark:text-slate-300 space-y-0.5 pl-4 list-disc">
-                  <li>{isKm ? 'រក្សាទុកមុខម្ហូប និងហាងដែលពេញចិត្ត' : 'Save favorite dishes & restaurants'}</li>
-                  <li>{language === 'km' ? 'ស្វែងរកហាងអាហារនៅក្បែរអ្នក និងរៀបចំផែនការដើរលេង' : language === 'zh' ? '发现附近地道餐厅并规划出行路线' : 'Find nearby local restaurants & plan your trips'}</li>
-                  <li>{isKm ? 'ចុះឈ្មោះហាងអាហារ និងផ្សព្វផ្សាយមុខម្ហូបខ្មែរ' : 'Register food stalls & promote Khmer cuisine'}</li>
-                </ul>
-              </div>
+              ) : (
+                /* Feature Highlights */
+                <div className="p-3 bg-emerald-50/70 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200/70 dark:border-emerald-800/60 text-[11px] text-[#064E3B] dark:text-emerald-300 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span>{isKm ? 'មុខងារពិសេសសម្រាប់សមាជិក៖' : 'Member Benefits:'}</span>
+                  </div>
+                  <ul className="text-[10.5px] text-slate-600 dark:text-slate-300 space-y-0.5 pl-4 list-disc">
+                    <li>{isKm ? 'រក្សាទុកមុខម្ហូប និងហាងដែលពេញចិត្ត' : 'Save favorite dishes & restaurants'}</li>
+                    <li>{language === 'km' ? 'ស្វែងរកហាងអាហារនៅក្បែរអ្នក និងរៀបចំផែនការដើរលេង' : language === 'zh' ? '发现附近地道餐厅并规划出行路线' : 'Find nearby local restaurants & plan your trips'}</li>
+                    <li>{isKm ? 'ចុះឈ្មោះហាងអាហារ និងផ្សព្វផ្សាយមុខម្ហូបខ្មែរ' : 'Register food stalls & promote Khmer cuisine'}</li>
+                  </ul>
+                </div>
+              )}
 
               {/* Quick Continue if User Already Has an Active Email Session on This Device */}
               {currentUser && hasAuthenticatedEmailAccount(currentUser) && (
@@ -297,10 +319,10 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                 type="button"
                 disabled={isGoogleLoading}
                 onClick={handleGoogleSignIn}
-                className="w-full group relative p-3 rounded-2xl bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-slate-50 dark:hover:bg-slate-750 shadow-md hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-between"
+                className="w-full group relative p-3.5 rounded-2xl bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-slate-50 dark:hover:bg-slate-750 shadow-md hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-white shadow-xs border border-slate-100 flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-white shadow-xs border border-slate-100 flex items-center justify-center shrink-0">
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
                       <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.27v3.15C3.25 21.3 7.31 24 12 24z"/>
@@ -326,24 +348,28 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                 )}
               </button>
 
-              {/* Divider */}
-              <div className="relative flex py-1 items-center">
-                <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
-                <span className="flex-shrink mx-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  {isKm ? 'ឬ' : 'Or'}
-                </span>
-                <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
-              </div>
+              {!authModalInitialView.requireEmailForVip && (
+                <>
+                  {/* Divider */}
+                  <div className="relative flex py-1 items-center">
+                    <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                    <span className="flex-shrink mx-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      {isKm ? 'ឬ' : 'Or'}
+                    </span>
+                    <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                  </div>
 
-              {/* Secondary Option: Continue with Email */}
-              <button
-                type="button"
-                onClick={() => setAuthMode('email')}
-                className="w-full py-2.5 px-3 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-bold transition flex items-center justify-center gap-2"
-              >
-                <Mail className="w-4 h-4 text-slate-500" />
-                <span>{language === 'km' ? 'បន្តដោយប្រើអាសយដ្ឋានអ៊ីមែល' : language === 'zh' ? '使用电子邮箱登录' : 'Continue with Email'}</span>
-              </button>
+                  {/* Secondary Option: Continue with Email */}
+                  <button
+                    type="button"
+                    onClick={() => setAuthMode('email')}
+                    className="w-full py-2.5 px-3 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-bold transition flex items-center justify-center gap-2"
+                  >
+                    <Mail className="w-4 h-4 text-slate-500" />
+                    <span>{language === 'km' ? 'បន្តដោយប្រើអាសយដ្ឋានអ៊ីមែល' : language === 'zh' ? '使用电子邮箱登录' : 'Continue with Email'}</span>
+                  </button>
+                </>
+              )}
             </div>
           ) : authMode === 'google_quick' ? (
             /* ==========================================================

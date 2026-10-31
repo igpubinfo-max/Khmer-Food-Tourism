@@ -1,8 +1,8 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1291;
-export const APP_RELEASE_DATE = '2026-10-31';
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1292;
+export const APP_RELEASE_DATE = '2026-11-01';
 
 /**
  * Authoritative baseline timestamp for the verified bundled 200-dish food photo library (`public/foods/*.jpg`).
@@ -195,22 +195,22 @@ export const VIP_PLANS: Record<'quarterly' | 'annual', VipPlanConfig> = {
   quarterly: {
     id: 'quarterly',
     nameEn: 'VIP 1 Month (30 Days)',
-    nameKh: 'VIP áŸ¡ ážáŸ‚ (30 ážáŸ’áž„áŸƒ)',
+    nameKh: 'VIP Ã¡Å¸Â¡ Ã¡Å¾ÂÃ¡Å¸â€š (30 Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸Æ’)',
     priceUsd: VIP_QUARTERLY_PRICE_USD,
     durationDays: VIP_QUARTERLY_DAYS,
     labelEn: `VIP 1 Month / ${VIP_QUARTERLY_DAYS} Days ($${VIP_QUARTERLY_PRICE_USD.toFixed(2)} USD)`,
-    labelKh: `VIP áŸ¡ ážáŸ‚ / ${VIP_QUARTERLY_DAYS} ážáŸ’áž„áŸƒ ($${VIP_QUARTERLY_PRICE_USD.toFixed(2)} USD)`,
-    priceKhrDisplay: `${Math.round(VIP_QUARTERLY_PRICE_USD * 4100).toLocaleString()} ážšáŸ€áž›`
+    labelKh: `VIP Ã¡Å¸Â¡ Ã¡Å¾ÂÃ¡Å¸â€š / ${VIP_QUARTERLY_DAYS} Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸Æ’ ($${VIP_QUARTERLY_PRICE_USD.toFixed(2)} USD)`,
+    priceKhrDisplay: `${Math.round(VIP_QUARTERLY_PRICE_USD * 4100).toLocaleString()} Ã¡Å¾Å¡Ã¡Å¸â‚¬Ã¡Å¾â€º`
   },
   annual: {
     id: 'annual',
     nameEn: 'VIP 2 Months (60 Days)',
-    nameKh: 'VIP áŸ¢ ážáŸ‚ (60 ážáŸ’áž„áŸƒ)',
+    nameKh: 'VIP Ã¡Å¸Â¢ Ã¡Å¾ÂÃ¡Å¸â€š (60 Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸Æ’)',
     priceUsd: VIP_ANNUAL_PRICE_USD,
     durationDays: VIP_SUBSCRIPTION_DAYS,
     labelEn: `VIP 2 Months / ${VIP_SUBSCRIPTION_DAYS} Days ($${VIP_ANNUAL_PRICE_USD.toFixed(2)} USD)`,
-    labelKh: `VIP áŸ¢ ážáŸ‚ / ${VIP_SUBSCRIPTION_DAYS} ážáŸ’áž„áŸƒ ($${VIP_ANNUAL_PRICE_USD.toFixed(2)} USD)`,
-    priceKhrDisplay: `${Math.round(VIP_ANNUAL_PRICE_USD * 4100).toLocaleString()} ážšáŸ€áž›`
+    labelKh: `VIP Ã¡Å¸Â¢ Ã¡Å¾ÂÃ¡Å¸â€š / ${VIP_SUBSCRIPTION_DAYS} Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸Æ’ ($${VIP_ANNUAL_PRICE_USD.toFixed(2)} USD)`,
+    priceKhrDisplay: `${Math.round(VIP_ANNUAL_PRICE_USD * 4100).toLocaleString()} Ã¡Å¾Å¡Ã¡Å¸â‚¬Ã¡Å¾â€º`
   }
 };
 
@@ -300,90 +300,90 @@ export interface VipBenefitItem {
 export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   {
     id: 1,
-    titleKh: 'áž‘áž˜áŸ’ážšáž„áŸ‹áž áž¶áž„áž€áž˜áŸ’ážšáž·ážážáŸ’áž–ážŸáŸ‹',
+    titleKh: 'Ã¡Å¾â€˜Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾â€žÃ¡Å¸â€¹Ã¡Å¾Â Ã¡Å¾Â¶Ã¡Å¾â€žÃ¡Å¾â‚¬Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â·Ã¡Å¾ÂÃ¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€“Ã¡Å¾Å¸Ã¡Å¸â€¹',
     titleEn: 'Enhanced Restaurant Profile',
-    descriptionKh: 'áž€áŸ‚áž”áŸ’ážšáŸ‚áž‘áž˜áŸ’ážšáž„áŸ‹áž áž¶áž„áž‡áž¶áž˜áž½áž™ Theme áž˜áž¶ážŸ áž“áž·áž„áž•áŸ’áž›áž¶áž€ážŸáž‰áŸ’áž‰áž¶áž”áž‰áŸ’áž‡áž¶áž€áŸ‹áž•áŸ’áž›áž¼ážœáž€áž¶ážš Iconic VIP',
+    descriptionKh: 'Ã¡Å¾â‚¬Ã¡Å¸â€šÃ¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¸â€šÃ¡Å¾â€˜Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾â€žÃ¡Å¸â€¹Ã¡Å¾Â Ã¡Å¾Â¶Ã¡Å¾â€žÃ¡Å¾â€¡Ã¡Å¾Â¶Ã¡Å¾ËœÃ¡Å¾Â½Ã¡Å¾â„¢ Theme Ã¡Å¾ËœÃ¡Å¾Â¶Ã¡Å¾Å¸ Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾Â¶Ã¡Å¾â‚¬Ã¡Å¾Å¸Ã¡Å¾â€°Ã¡Å¸â€™Ã¡Å¾â€°Ã¡Å¾Â¶Ã¡Å¾â€Ã¡Å¾â€°Ã¡Å¸â€™Ã¡Å¾â€¡Ã¡Å¾Â¶Ã¡Å¾â‚¬Ã¡Å¸â€¹Ã¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾Â¼Ã¡Å¾Å“Ã¡Å¾â‚¬Ã¡Å¾Â¶Ã¡Å¾Å¡ Iconic VIP',
     descriptionEn: 'Customized golden theme, verified iconic badge, and custom branding for your restaurant.',
     iconName: 'Sparkles',
     category: 'profile'
   },
   {
     id: 2,
-    titleKh: 'ážšáž¼áž”ážážáž…áŸ’ážšáž¾áž“ážŸáž“áŸ’áž›áž¹áž€ áž“áž·áž„áž˜áž»ážáž˜áŸ’áž áž¼áž”ážšáž áž¼ážážŠáž›áŸ‹ áŸ¢áŸ  áž˜áž»áž',
+    titleKh: 'Ã¡Å¾Å¡Ã¡Å¾Â¼Ã¡Å¾â€Ã¡Å¾ÂÃ¡Å¾ÂÃ¡Å¾â€¦Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¾Ã¡Å¾â€œÃ¡Å¾Å¸Ã¡Å¾â€œÃ¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾Â¹Ã¡Å¾â‚¬ Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾ËœÃ¡Å¾Â»Ã¡Å¾ÂÃ¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾Â Ã¡Å¾Â¼Ã¡Å¾â€Ã¡Å¾Å¡Ã¡Å¾Â Ã¡Å¾Â¼Ã¡Å¾ÂÃ¡Å¾Å Ã¡Å¾â€ºÃ¡Å¸â€¹ Ã¡Å¸Â¢Ã¡Å¸Â  Ã¡Å¾ËœÃ¡Å¾Â»Ã¡Å¾Â',
     titleEn: 'More Food Photos & Menu Items',
-    descriptionKh: 'áž”áž„áŸ’áž áŸ„áŸ‡áž˜áž»ážáž˜áŸ’áž áž¼áž”áž€áŸ’áž“áž»áž„áž”áž‰áŸ’áž‡áž¸áž”áž¶áž“ážšáž áž¼ážážŠáž›áŸ‹ áŸ¢áŸ  áž˜áž»áž áž–áŸ’ážšáž˜áž‘áž¶áŸ†áž„ážšáž¼áž”ážáž Gallery áž…áŸ’ážšáž¾áž“ážŸáž“áŸ’áž›áž¹áž€',
+    descriptionKh: 'Ã¡Å¾â€Ã¡Å¾â€žÃ¡Å¸â€™Ã¡Å¾Â Ã¡Å¸â€žÃ¡Å¸â€¡Ã¡Å¾ËœÃ¡Å¾Â»Ã¡Å¾ÂÃ¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾Â Ã¡Å¾Â¼Ã¡Å¾â€Ã¡Å¾â‚¬Ã¡Å¸â€™Ã¡Å¾â€œÃ¡Å¾Â»Ã¡Å¾â€žÃ¡Å¾â€Ã¡Å¾â€°Ã¡Å¸â€™Ã¡Å¾â€¡Ã¡Å¾Â¸Ã¡Å¾â€Ã¡Å¾Â¶Ã¡Å¾â€œÃ¡Å¾Å¡Ã¡Å¾Â Ã¡Å¾Â¼Ã¡Å¾ÂÃ¡Å¾Å Ã¡Å¾â€ºÃ¡Å¸â€¹ Ã¡Å¸Â¢Ã¡Å¸Â  Ã¡Å¾ËœÃ¡Å¾Â»Ã¡Å¾Â Ã¡Å¾â€“Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾ËœÃ¡Å¾â€˜Ã¡Å¾Â¶Ã¡Å¸â€ Ã¡Å¾â€žÃ¡Å¾Å¡Ã¡Å¾Â¼Ã¡Å¾â€Ã¡Å¾ÂÃ¡Å¾Â Gallery Ã¡Å¾â€¦Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¾Ã¡Å¾â€œÃ¡Å¾Å¸Ã¡Å¾â€œÃ¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾Â¹Ã¡Å¾â‚¬',
     descriptionEn: 'Add up to 20 menu items (free accounts limited to 5) with high-res photo gallery.',
     iconName: 'UtensilsCrossed',
     category: 'profile'
   },
   {
     id: 3,
-    titleKh: 'áž”áž„áŸ’áž áŸ„áŸ‡ážœáž¸ážŠáŸáž¢áž¼áž•áŸ’ážŸáž–áŸ’ážœáž•áŸ’ážŸáž¶áž™áž˜áŸ’áž áž¼áž”',
+    titleKh: 'Ã¡Å¾â€Ã¡Å¾â€žÃ¡Å¸â€™Ã¡Å¾Â Ã¡Å¸â€žÃ¡Å¸â€¡Ã¡Å¾Å“Ã¡Å¾Â¸Ã¡Å¾Å Ã¡Å¸ÂÃ¡Å¾Â¢Ã¡Å¾Â¼Ã¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾Å¸Ã¡Å¾â€“Ã¡Å¸â€™Ã¡Å¾Å“Ã¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾Å¸Ã¡Å¾Â¶Ã¡Å¾â„¢Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾Â Ã¡Å¾Â¼Ã¡Å¾â€',
     titleEn: 'Food Promotional Video Uploads',
-    descriptionKh: 'áž—áŸ’áž‡áž¶áž”áŸ‹ážœáž¸ážŠáŸáž¢áž¼áž•áŸ’ážŸáž–áŸ’ážœáž•áŸ’ážŸáž¶áž™áž˜áŸ’áž áž¼áž” YouTube, TikTok áž¬ MP4 áž›áž¾áž‘áŸ†áž–áŸážšáž áž¶áž„áž•áŸ’áž‘áž¶áž›áŸ‹',
+    descriptionKh: 'Ã¡Å¾â€”Ã¡Å¸â€™Ã¡Å¾â€¡Ã¡Å¾Â¶Ã¡Å¾â€Ã¡Å¸â€¹Ã¡Å¾Å“Ã¡Å¾Â¸Ã¡Å¾Å Ã¡Å¸ÂÃ¡Å¾Â¢Ã¡Å¾Â¼Ã¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾Å¸Ã¡Å¾â€“Ã¡Å¸â€™Ã¡Å¾Å“Ã¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾Å¸Ã¡Å¾Â¶Ã¡Å¾â„¢Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾Â Ã¡Å¾Â¼Ã¡Å¾â€ YouTube, TikTok Ã¡Å¾Â¬ MP4 Ã¡Å¾â€ºÃ¡Å¾Â¾Ã¡Å¾â€˜Ã¡Å¸â€ Ã¡Å¾â€“Ã¡Å¸ÂÃ¡Å¾Å¡Ã¡Å¾Â Ã¡Å¾Â¶Ã¡Å¾â€žÃ¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾â€˜Ã¡Å¾Â¶Ã¡Å¾â€ºÃ¡Å¸â€¹',
     descriptionEn: 'Embed promotional video clips (YouTube, TikTok, MP4) directly on restaurant cards.',
     iconName: 'Video',
     category: 'promotion'
   },
   {
     id: 4,
-    titleKh: 'áž•áŸ’áž›áž¶áž€ážŸáž‰áŸ’áž‰áž¶ VIP áž–ážŽáŸŒáž˜áž¶ážŸ',
+    titleKh: 'Ã¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾Â¶Ã¡Å¾â‚¬Ã¡Å¾Å¸Ã¡Å¾â€°Ã¡Å¸â€™Ã¡Å¾â€°Ã¡Å¾Â¶ VIP Ã¡Å¾â€“Ã¡Å¾Å½Ã¡Å¸Å’Ã¡Å¾ËœÃ¡Å¾Â¶Ã¡Å¾Å¸',
     titleEn: 'Premium VIP Badge',
-    descriptionKh: 'áž”áž„áŸ’áž áž¶áž‰áž•áŸ’áž›áž¶áž€ážŸáž‰áŸ’áž‰áž¶ VIP áž–ážŽáŸŒáž˜áž¶ážŸáž›áž¾áž€áž˜áŸ’ážšáž„ Profile, Comments áž“áž·áž„áž€áž¶ážáž áž¶áž„',
+    descriptionKh: 'Ã¡Å¾â€Ã¡Å¾â€žÃ¡Å¸â€™Ã¡Å¾Â Ã¡Å¾Â¶Ã¡Å¾â€°Ã¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾Â¶Ã¡Å¾â‚¬Ã¡Å¾Å¸Ã¡Å¾â€°Ã¡Å¸â€™Ã¡Å¾â€°Ã¡Å¾Â¶ VIP Ã¡Å¾â€“Ã¡Å¾Å½Ã¡Å¸Å’Ã¡Å¾ËœÃ¡Å¾Â¶Ã¡Å¾Å¸Ã¡Å¾â€ºÃ¡Å¾Â¾Ã¡Å¾â‚¬Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾â€ž Profile, Comments Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾â‚¬Ã¡Å¾Â¶Ã¡Å¾ÂÃ¡Å¾Â Ã¡Å¾Â¶Ã¡Å¾â€ž',
     descriptionEn: 'Distinguished golden VIP badge on your profile, comments, reviews, and restaurant listings.',
     iconName: 'Crown',
     category: 'profile'
   },
   {
     id: 5,
-    titleKh: 'áž‘áž¸ážáž¶áŸ†áž„áž•áŸ’ážŸáž–áŸ’ážœáž•áŸ’ážŸáž¶áž™áž›áž¾áž‘áŸ†áž–áŸážšážŠáž¾áž˜',
+    titleKh: 'Ã¡Å¾â€˜Ã¡Å¾Â¸Ã¡Å¾ÂÃ¡Å¾Â¶Ã¡Å¸â€ Ã¡Å¾â€žÃ¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾Å¸Ã¡Å¾â€“Ã¡Å¸â€™Ã¡Å¾Å“Ã¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾Å¸Ã¡Å¾Â¶Ã¡Å¾â„¢Ã¡Å¾â€ºÃ¡Å¾Â¾Ã¡Å¾â€˜Ã¡Å¸â€ Ã¡Å¾â€“Ã¡Å¸ÂÃ¡Å¾Å¡Ã¡Å¾Å Ã¡Å¾Â¾Ã¡Å¾Ëœ',
     titleEn: 'Additional Promotional Placement',
-    descriptionKh: 'áž‘áž‘áž½áž›áž”áž¶áž“áž€áž¶ážšáž•áŸ’ážŸáž–áŸ’ážœáž•áŸ’ážŸáž¶áž™áž›áž¾áž‚áŸáž€áŸ’áž“áž»áž„áž‘áŸ†áž–áŸážšážŠáž¾áž˜ Home Screen áž“áž·áž„áž”áž‰áŸ’áž‡áž¸ Top Recommended',
+    descriptionKh: 'Ã¡Å¾â€˜Ã¡Å¾â€˜Ã¡Å¾Â½Ã¡Å¾â€ºÃ¡Å¾â€Ã¡Å¾Â¶Ã¡Å¾â€œÃ¡Å¾â‚¬Ã¡Å¾Â¶Ã¡Å¾Å¡Ã¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾Å¸Ã¡Å¾â€“Ã¡Å¸â€™Ã¡Å¾Å“Ã¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾Å¸Ã¡Å¾Â¶Ã¡Å¾â„¢Ã¡Å¾â€ºÃ¡Å¾Â¾Ã¡Å¾â€šÃ¡Å¸ÂÃ¡Å¾â‚¬Ã¡Å¸â€™Ã¡Å¾â€œÃ¡Å¾Â»Ã¡Å¾â€žÃ¡Å¾â€˜Ã¡Å¸â€ Ã¡Å¾â€“Ã¡Å¸ÂÃ¡Å¾Å¡Ã¡Å¾Å Ã¡Å¾Â¾Ã¡Å¾Ëœ Home Screen Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾â€Ã¡Å¾â€°Ã¡Å¸â€™Ã¡Å¾â€¡Ã¡Å¾Â¸ Top Recommended',
     descriptionEn: 'Prime featured spot on the home page carousel and top recommendations section.',
     iconName: 'Flame',
     category: 'promotion'
   },
   {
     id: 6,
-    titleKh: 'áž‘áž¸ážáž¶áŸ†áž„áž›áŸáž…áž’áŸ’áž›áŸ„áž›áž¾áž•áŸ‚áž“áž‘áž¸',
+    titleKh: 'Ã¡Å¾â€˜Ã¡Å¾Â¸Ã¡Å¾ÂÃ¡Å¾Â¶Ã¡Å¸â€ Ã¡Å¾â€žÃ¡Å¾â€ºÃ¡Å¸ÂÃ¡Å¾â€¦Ã¡Å¾â€™Ã¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¸â€žÃ¡Å¾â€ºÃ¡Å¾Â¾Ã¡Å¾â€¢Ã¡Å¸â€šÃ¡Å¾â€œÃ¡Å¾â€˜Ã¡Å¾Â¸',
     titleEn: 'Restaurant Location on the Map',
-    descriptionKh: 'ážŸáž˜áŸ’áž‚áž¶áž›áŸ‹áž‘áž¸ážáž¶áŸ†áž„áž áž¶áž„ážŠáŸ„áž™ Pin áž–ážŽáŸŒáž˜áž¶ážŸáž›áž¾áž•áŸ‚áž“áž‘áž¸ GPS áž“áž·áž„áž”áŸŠáž¼ážáž»áž„áž“áž¶áŸ†áž•áŸ’áž›áž¼ážœ 1-Tap Directions',
+    descriptionKh: 'Ã¡Å¾Å¸Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾â€šÃ¡Å¾Â¶Ã¡Å¾â€ºÃ¡Å¸â€¹Ã¡Å¾â€˜Ã¡Å¾Â¸Ã¡Å¾ÂÃ¡Å¾Â¶Ã¡Å¸â€ Ã¡Å¾â€žÃ¡Å¾Â Ã¡Å¾Â¶Ã¡Å¾â€žÃ¡Å¾Å Ã¡Å¸â€žÃ¡Å¾â„¢ Pin Ã¡Å¾â€“Ã¡Å¾Å½Ã¡Å¸Å’Ã¡Å¾ËœÃ¡Å¾Â¶Ã¡Å¾Å¸Ã¡Å¾â€ºÃ¡Å¾Â¾Ã¡Å¾â€¢Ã¡Å¸â€šÃ¡Å¾â€œÃ¡Å¾â€˜Ã¡Å¾Â¸ GPS Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾â€Ã¡Å¸Å Ã¡Å¾Â¼Ã¡Å¾ÂÃ¡Å¾Â»Ã¡Å¾â€žÃ¡Å¾â€œÃ¡Å¾Â¶Ã¡Å¸â€ Ã¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾Â¼Ã¡Å¾Å“ 1-Tap Directions',
     descriptionEn: 'Highlighted golden map pin with instant turn-by-turn navigation for visitors.',
     iconName: 'MapPin',
     category: 'reach'
   },
   {
     id: 7,
-    titleKh: 'áž”áŸŠáž¼ážáž»áž„áž‘áŸ†áž“áž¶áž€áŸ‹áž‘áŸ†áž“áž„ážšáž áŸážŸ',
+    titleKh: 'Ã¡Å¾â€Ã¡Å¸Å Ã¡Å¾Â¼Ã¡Å¾ÂÃ¡Å¾Â»Ã¡Å¾â€žÃ¡Å¾â€˜Ã¡Å¸â€ Ã¡Å¾â€œÃ¡Å¾Â¶Ã¡Å¾â‚¬Ã¡Å¸â€¹Ã¡Å¾â€˜Ã¡Å¸â€ Ã¡Å¾â€œÃ¡Å¾â€žÃ¡Å¾Å¡Ã¡Å¾Â Ã¡Å¸ÂÃ¡Å¾Å¸',
     titleEn: 'Quick Contact Buttons',
-    descriptionKh: 'áž”áŸŠáž¼ážáž»áž„áž‘áž¶áž€áŸ‹áž‘áž„ážšáž áŸážŸ áž áŸ…áž‘áž¼ážšážŸáŸáž–áŸ’áž‘ (Call), Telegram áž“áž·áž„ Facebook ážŠáŸ„áž™áž•áŸ’áž‘áž¶áž›áŸ‹áž›áž¾áž€áž¶ážáž áž¶áž„',
+    descriptionKh: 'Ã¡Å¾â€Ã¡Å¸Å Ã¡Å¾Â¼Ã¡Å¾ÂÃ¡Å¾Â»Ã¡Å¾â€žÃ¡Å¾â€˜Ã¡Å¾Â¶Ã¡Å¾â‚¬Ã¡Å¸â€¹Ã¡Å¾â€˜Ã¡Å¾â€žÃ¡Å¾Å¡Ã¡Å¾Â Ã¡Å¸ÂÃ¡Å¾Å¸ Ã¡Å¾Â Ã¡Å¸â€¦Ã¡Å¾â€˜Ã¡Å¾Â¼Ã¡Å¾Å¡Ã¡Å¾Å¸Ã¡Å¸ÂÃ¡Å¾â€“Ã¡Å¸â€™Ã¡Å¾â€˜ (Call), Telegram Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€ž Facebook Ã¡Å¾Å Ã¡Å¸â€žÃ¡Å¾â„¢Ã¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾â€˜Ã¡Å¾Â¶Ã¡Å¾â€ºÃ¡Å¸â€¹Ã¡Å¾â€ºÃ¡Å¾Â¾Ã¡Å¾â‚¬Ã¡Å¾Â¶Ã¡Å¾ÂÃ¡Å¾Â Ã¡Å¾Â¶Ã¡Å¾â€ž',
     descriptionEn: 'One-tap direct contact buttons for Phone Call, Telegram chat, and Facebook page.',
     iconName: 'Zap',
     category: 'reach'
   },
   {
     id: 8,
-    titleKh: 'ážŸáŸ’ážáž·ážáž·áž¢áŸ’áž“áž€áž…áž¼áž›áž˜áž¾áž›áž áž¶áž„',
+    titleKh: 'Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾ÂÃ¡Å¾Â·Ã¡Å¾ÂÃ¡Å¾Â·Ã¡Å¾Â¢Ã¡Å¸â€™Ã¡Å¾â€œÃ¡Å¾â‚¬Ã¡Å¾â€¦Ã¡Å¾Â¼Ã¡Å¾â€ºÃ¡Å¾ËœÃ¡Å¾Â¾Ã¡Å¾â€ºÃ¡Å¾Â Ã¡Å¾Â¶Ã¡Å¾â€ž',
     titleEn: 'Profile View & Contact Click Statistics',
-    descriptionKh: 'áž•áŸ’áž‘áž¶áŸ†áž„áž‚áŸ’ážšáž”áŸ‹áž‚áŸ’ážšáž„áž˜áž¾áž›áž…áŸ†áž“áž½áž“áž¢áŸ’áž“áž€áž‘ážŸáŸ’ážŸáž“áž¶áž áž¶áž„ áž…áŸ†áž“áž½áž“áž¢áŸ’áž“áž€áž…áž»áž… Call áž“áž·áž„áž…áŸ†áž“áž½áž“áž¢áŸ’áž“áž€áž…áž»áž… Map',
+    descriptionKh: 'Ã¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾â€˜Ã¡Å¾Â¶Ã¡Å¸â€ Ã¡Å¾â€žÃ¡Å¾â€šÃ¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾â€Ã¡Å¸â€¹Ã¡Å¾â€šÃ¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾â€žÃ¡Å¾ËœÃ¡Å¾Â¾Ã¡Å¾â€ºÃ¡Å¾â€¦Ã¡Å¸â€ Ã¡Å¾â€œÃ¡Å¾Â½Ã¡Å¾â€œÃ¡Å¾Â¢Ã¡Å¸â€™Ã¡Å¾â€œÃ¡Å¾â‚¬Ã¡Å¾â€˜Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾Å¸Ã¡Å¾â€œÃ¡Å¾Â¶Ã¡Å¾Â Ã¡Å¾Â¶Ã¡Å¾â€ž Ã¡Å¾â€¦Ã¡Å¸â€ Ã¡Å¾â€œÃ¡Å¾Â½Ã¡Å¾â€œÃ¡Å¾Â¢Ã¡Å¸â€™Ã¡Å¾â€œÃ¡Å¾â‚¬Ã¡Å¾â€¦Ã¡Å¾Â»Ã¡Å¾â€¦ Call Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾â€¦Ã¡Å¸â€ Ã¡Å¾â€œÃ¡Å¾Â½Ã¡Å¾â€œÃ¡Å¾Â¢Ã¡Å¸â€™Ã¡Å¾â€œÃ¡Å¾â‚¬Ã¡Å¾â€¦Ã¡Å¾Â»Ã¡Å¾â€¦ Map',
     descriptionEn: 'Detailed real-time analytics dashboard on visitor views, calls, and direction clicks.',
     iconName: 'BarChart3',
     category: 'analytics'
   },
   {
     id: 9,
-    titleKh: 'ážáŸ†ážŽáž—áŸ’áž‡áž¶áž”áŸ‹áž…áŸ‚áž€ážšáŸ†áž›áŸ‚áž€áž‘áŸ†áž–áŸážšáž áž¶áž„',
+    titleKh: 'Ã¡Å¾ÂÃ¡Å¸â€ Ã¡Å¾Å½Ã¡Å¾â€”Ã¡Å¸â€™Ã¡Å¾â€¡Ã¡Å¾Â¶Ã¡Å¾â€Ã¡Å¸â€¹Ã¡Å¾â€¦Ã¡Å¸â€šÃ¡Å¾â‚¬Ã¡Å¾Å¡Ã¡Å¸â€ Ã¡Å¾â€ºÃ¡Å¸â€šÃ¡Å¾â‚¬Ã¡Å¾â€˜Ã¡Å¸â€ Ã¡Å¾â€“Ã¡Å¸ÂÃ¡Å¾Å¡Ã¡Å¾Â Ã¡Å¾Â¶Ã¡Å¾â€ž',
     titleEn: 'Shareable Restaurant Profile Link',
-    descriptionKh: 'ážáŸ†ážŽáž—áŸ’áž‡áž¶áž”áŸ‹ Deep Link áž•áŸ’áž‘áž¶áž›áŸ‹ážáŸ’áž›áž½áž“ áž…áž˜áŸ’áž›áž„ áž“áž·áž„áž…áŸ‚áž€ážšáŸ†áž›áŸ‚áž€áž‘áŸ…áž”ážŽáŸ’ážáž¶áž‰ážŸáž„áŸ’áž‚áž˜ Telegram áž“áž·áž„ Facebook',
+    descriptionKh: 'Ã¡Å¾ÂÃ¡Å¸â€ Ã¡Å¾Å½Ã¡Å¾â€”Ã¡Å¸â€™Ã¡Å¾â€¡Ã¡Å¾Â¶Ã¡Å¾â€Ã¡Å¸â€¹ Deep Link Ã¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾â€˜Ã¡Å¾Â¶Ã¡Å¾â€ºÃ¡Å¸â€¹Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾Â½Ã¡Å¾â€œ Ã¡Å¾â€¦Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾â€ž Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾â€¦Ã¡Å¸â€šÃ¡Å¾â‚¬Ã¡Å¾Å¡Ã¡Å¸â€ Ã¡Å¾â€ºÃ¡Å¸â€šÃ¡Å¾â‚¬Ã¡Å¾â€˜Ã¡Å¸â€¦Ã¡Å¾â€Ã¡Å¾Å½Ã¡Å¸â€™Ã¡Å¾ÂÃ¡Å¾Â¶Ã¡Å¾â€°Ã¡Å¾Å¸Ã¡Å¾â€žÃ¡Å¸â€™Ã¡Å¾â€šÃ¡Å¾Ëœ Telegram Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€ž Facebook',
     descriptionEn: 'Direct custom deep-link to share your profile across Telegram, Facebook, and WhatsApp.',
     iconName: 'Share2',
     category: 'reach'
   },
   {
     id: 10,
-    titleKh: 'áž¢áž¶áž‘áž·áž—áž¶áž–ážáŸ’áž–ážŸáŸ‹áž€áŸ’áž“áž»áž„áž€áž¶ážšážŸáŸ’ážœáŸ‚áž„ážšáž€',
+    titleKh: 'Ã¡Å¾Â¢Ã¡Å¾Â¶Ã¡Å¾â€˜Ã¡Å¾Â·Ã¡Å¾â€”Ã¡Å¾Â¶Ã¡Å¾â€“Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€“Ã¡Å¾Å¸Ã¡Å¸â€¹Ã¡Å¾â‚¬Ã¡Å¸â€™Ã¡Å¾â€œÃ¡Å¾Â»Ã¡Å¾â€žÃ¡Å¾â‚¬Ã¡Å¾Â¶Ã¡Å¾Å¡Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾Å“Ã¡Å¸â€šÃ¡Å¾â€žÃ¡Å¾Å¡Ã¡Å¾â‚¬',
     titleEn: 'Improved Search Visibility & Priority Ranking',
-    descriptionKh: 'áž‘áž‘áž½áž›áž”áž¶áž“áž¢áž¶áž‘áž·áž—áž¶áž–áž”áž„áŸ’áž áž¶áž‰áž›áž¾áž‚áŸáž–áŸáž›áž¢ážáž·ážáž·áž‡áž“ážŸáŸ’ážœáŸ‚áž„ážšáž€áž˜áž»ážáž˜áŸ’áž áž¼áž” áž“áž·áž„ážˆáŸ’áž˜áŸ„áŸ‡áž áž¶áž„áž€áŸ’áž“áž»áž„áž€áž˜áŸ’áž˜ážœáž·áž’áž¸',
+    descriptionKh: 'Ã¡Å¾â€˜Ã¡Å¾â€˜Ã¡Å¾Â½Ã¡Å¾â€ºÃ¡Å¾â€Ã¡Å¾Â¶Ã¡Å¾â€œÃ¡Å¾Â¢Ã¡Å¾Â¶Ã¡Å¾â€˜Ã¡Å¾Â·Ã¡Å¾â€”Ã¡Å¾Â¶Ã¡Å¾â€“Ã¡Å¾â€Ã¡Å¾â€žÃ¡Å¸â€™Ã¡Å¾Â Ã¡Å¾Â¶Ã¡Å¾â€°Ã¡Å¾â€ºÃ¡Å¾Â¾Ã¡Å¾â€šÃ¡Å¸ÂÃ¡Å¾â€“Ã¡Å¸ÂÃ¡Å¾â€ºÃ¡Å¾Â¢Ã¡Å¾ÂÃ¡Å¾Â·Ã¡Å¾ÂÃ¡Å¾Â·Ã¡Å¾â€¡Ã¡Å¾â€œÃ¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾Å“Ã¡Å¸â€šÃ¡Å¾â€žÃ¡Å¾Å¡Ã¡Å¾â‚¬Ã¡Å¾ËœÃ¡Å¾Â»Ã¡Å¾ÂÃ¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾Â Ã¡Å¾Â¼Ã¡Å¾â€ Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾Ë†Ã¡Å¸â€™Ã¡Å¾ËœÃ¡Å¸â€žÃ¡Å¸â€¡Ã¡Å¾Â Ã¡Å¾Â¶Ã¡Å¾â€žÃ¡Å¾â‚¬Ã¡Å¸â€™Ã¡Å¾â€œÃ¡Å¾Â»Ã¡Å¾â€žÃ¡Å¾â‚¬Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾ËœÃ¡Å¾Å“Ã¡Å¾Â·Ã¡Å¾â€™Ã¡Å¾Â¸',
     descriptionEn: 'Algorithm boost ensuring your listings appear at the top of search and filter queries.',
     iconName: 'Search',
     category: 'promotion'
@@ -473,42 +473,42 @@ export const KHMER_FOOD_PRIMARY_CATEGORIES: KhmerFoodPrimaryCategoryMeta[] = [
   {
     id: 'samlor',
     order: 1,
-    nameKh: 'ážŸáž˜áŸ’áž› áž“áž·áž„áž€áž¶ážšáž¸',
-    shortNameKh: 'ážŸáž˜áŸ’áž›',
+    nameKh: 'Ã¡Å¾Å¸Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾â€º Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾â‚¬Ã¡Å¾Â¶Ã¡Å¾Å¡Ã¡Å¾Â¸',
+    shortNameKh: 'Ã¡Å¾Å¸Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾â€º',
     nameEn: 'Samlor & Curries',
-    subtitleKh: 'ážŸáž˜áŸ’áž›ážáŸ’áž˜áŸ‚ážš ážŸáž˜áŸ’áž›áž€áž€áž¼ážš ážŸáž˜áŸ’áž›áž€áž¶ážšáž¸ ážŸáž˜áŸ’áž›áž˜áŸ’áž‡áž¼ážš áž¢áž¶áž˜áŸ‰áž»áž€ áž”áŸ’ážšáž áž»áž€ážáŸ’áž‘áž·áŸ‡ áž“áž·áž„áž',
+    subtitleKh: 'Ã¡Å¾Å¸Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾ËœÃ¡Å¸â€šÃ¡Å¾Å¡ Ã¡Å¾Å¸Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾â‚¬Ã¡Å¾â‚¬Ã¡Å¾Â¼Ã¡Å¾Å¡ Ã¡Å¾Å¸Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾â‚¬Ã¡Å¾Â¶Ã¡Å¾Å¡Ã¡Å¾Â¸ Ã¡Å¾Å¸Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾â€¡Ã¡Å¾Â¼Ã¡Å¾Å¡ Ã¡Å¾Â¢Ã¡Å¾Â¶Ã¡Å¾ËœÃ¡Å¸â€°Ã¡Å¾Â»Ã¡Å¾â‚¬ Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â Ã¡Å¾Â»Ã¡Å¾â‚¬Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€˜Ã¡Å¾Â·Ã¡Å¸â€¡ Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾Â',
     subtitleEn: 'Traditional Khmer Samlor, Curries, Amok, Stews & Braised Dishes',
-    emoji: 'ðŸ²'
+    emoji: 'Ã°Å¸ÂÂ²'
   },
   {
     id: 'cha',
     order: 2,
-    nameKh: 'áž†áž¶ áž¢áž¶áŸ†áž„ áž“áž·áž„áž‰áž¶áŸ†',
-    shortNameKh: 'áž†áž¶',
+    nameKh: 'Ã¡Å¾â€ Ã¡Å¾Â¶ Ã¡Å¾Â¢Ã¡Å¾Â¶Ã¡Å¸â€ Ã¡Å¾â€ž Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾â€°Ã¡Å¾Â¶Ã¡Å¸â€ ',
+    shortNameKh: 'Ã¡Å¾â€ Ã¡Å¾Â¶',
     nameEn: 'Stir-Fry & Savory',
-    subtitleKh: 'áž˜áŸ’áž áž¼áž”áž†áž¶ áž¡áž»áž€áž¡áž¶áž€áŸ‹ áž†áž¶áž‚áŸ’ážšáž¿áž„ áž†áž¶áž€áŸ’ážáŸ… áž˜áž¸áž†áž¶ áž”áž¶áž™áž†áž¶ áž“áž·áž„áž˜áŸ’áž áž¼áž”áž¢áž¶áŸ†áž„/áž‰áž¶áŸ†',
+    subtitleKh: 'Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾Â Ã¡Å¾Â¼Ã¡Å¾â€Ã¡Å¾â€ Ã¡Å¾Â¶ Ã¡Å¾Â¡Ã¡Å¾Â»Ã¡Å¾â‚¬Ã¡Å¾Â¡Ã¡Å¾Â¶Ã¡Å¾â‚¬Ã¡Å¸â€¹ Ã¡Å¾â€ Ã¡Å¾Â¶Ã¡Å¾â€šÃ¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¿Ã¡Å¾â€ž Ã¡Å¾â€ Ã¡Å¾Â¶Ã¡Å¾â‚¬Ã¡Å¸â€™Ã¡Å¾ÂÃ¡Å¸â€¦ Ã¡Å¾ËœÃ¡Å¾Â¸Ã¡Å¾â€ Ã¡Å¾Â¶ Ã¡Å¾â€Ã¡Å¾Â¶Ã¡Å¾â„¢Ã¡Å¾â€ Ã¡Å¾Â¶ Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾Â Ã¡Å¾Â¼Ã¡Å¾â€Ã¡Å¾Â¢Ã¡Å¾Â¶Ã¡Å¸â€ Ã¡Å¾â€ž/Ã¡Å¾â€°Ã¡Å¾Â¶Ã¡Å¸â€ ',
     subtitleEn: 'Wok Stir-Fries, Lok Lak, Fried Noodles/Rice, Grilled & Salads',
-    emoji: 'ðŸ¥˜'
+    emoji: 'Ã°Å¸Â¥Ëœ'
   },
   {
     id: 'sngor',
     order: 3,
-    nameKh: 'ážŸáŸ’áž„áŸ„ážš ážŸáŸŠáž»áž” áž“áž·áž„áž”áž”ážš',
-    shortNameKh: 'ážŸáŸ’áž„áŸ„ážš',
+    nameKh: 'Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸â€žÃ¡Å¾Å¡ Ã¡Å¾Å¸Ã¡Å¸Å Ã¡Å¾Â»Ã¡Å¾â€ Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾â€Ã¡Å¾â€Ã¡Å¾Å¡',
+    shortNameKh: 'Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸â€žÃ¡Å¾Å¡',
     nameEn: 'Boiled Soups & Broths',
-    subtitleKh: 'ážŸáŸ’áž„áŸ„ážšáž‡áŸ’ážšáž€áŸ‹ ážŸáŸ’áž„áŸ„ážšáž˜áŸ’ážšáŸ‡ ážŸáŸ’áž„áŸ„ážšáž„áŸ‰áž¶áŸ†áž„áŸ‰áž¼ážœ ážŸáŸŠáž»áž” áž”áž”ážš áž“áž·áž„áž‚áž»áž™áž‘áž¶ážœáž‘áž¹áž€',
+    subtitleKh: 'Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸â€žÃ¡Å¾Å¡Ã¡Å¾â€¡Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾â‚¬Ã¡Å¸â€¹ Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸â€žÃ¡Å¾Å¡Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¸â€¡ Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸â€žÃ¡Å¾Å¡Ã¡Å¾â€žÃ¡Å¸â€°Ã¡Å¾Â¶Ã¡Å¸â€ Ã¡Å¾â€žÃ¡Å¸â€°Ã¡Å¾Â¼Ã¡Å¾Å“ Ã¡Å¾Å¸Ã¡Å¸Å Ã¡Å¾Â»Ã¡Å¾â€ Ã¡Å¾â€Ã¡Å¾â€Ã¡Å¾Å¡ Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾â€šÃ¡Å¾Â»Ã¡Å¾â„¢Ã¡Å¾â€˜Ã¡Å¾Â¶Ã¡Å¾Å“Ã¡Å¾â€˜Ã¡Å¾Â¹Ã¡Å¾â‚¬',
     subtitleEn: 'Clear Boiled Soups, Herbal Broths, Hotpots, Porridges & Noodle Soups',
-    emoji: 'ðŸ¥£'
+    emoji: 'Ã°Å¸Â¥Â£'
   },
   {
     id: 'bong_aem',
     order: 4,
-    nameKh: 'áž”áž„áŸ’áž¢áŸ‚áž˜ áž“áž·áž„áž“áŸ†ážáŸ’áž˜áŸ‚ážš',
-    shortNameKh: 'áž”áž„áŸ’áž¢áŸ‚áž˜',
+    nameKh: 'Ã¡Å¾â€Ã¡Å¾â€žÃ¡Å¸â€™Ã¡Å¾Â¢Ã¡Å¸â€šÃ¡Å¾Ëœ Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾â€œÃ¡Å¸â€ Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾ËœÃ¡Å¸â€šÃ¡Å¾Å¡',
+    shortNameKh: 'Ã¡Å¾â€Ã¡Å¾â€žÃ¡Å¸â€™Ã¡Å¾Â¢Ã¡Å¸â€šÃ¡Å¾Ëœ',
     nameEn: 'Khmer Desserts & Cakes',
-    subtitleKh: 'áž”áž„áŸ’áž¢áŸ‚áž˜ážáŸ’áž˜áŸ‚ážš ážŸáž„áŸ‹ážáŸ’áž™áž¶ áž…áŸáž€ážáŸ’áž‘áž·áŸ‡ áž“áŸ†áž”áŸ’ážšáž–áŸƒážŽáž¸ážáŸ’áž˜áŸ‚ážš áž“áž·áž„áž—áŸážŸáž‡áŸ’áž‡áŸˆáž•áŸ’áž¢áŸ‚áž˜',
+    subtitleKh: 'Ã¡Å¾â€Ã¡Å¾â€žÃ¡Å¸â€™Ã¡Å¾Â¢Ã¡Å¸â€šÃ¡Å¾ËœÃ¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾ËœÃ¡Å¸â€šÃ¡Å¾Å¡ Ã¡Å¾Å¸Ã¡Å¾â€žÃ¡Å¸â€¹Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â„¢Ã¡Å¾Â¶ Ã¡Å¾â€¦Ã¡Å¸ÂÃ¡Å¾â‚¬Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€˜Ã¡Å¾Â·Ã¡Å¸â€¡ Ã¡Å¾â€œÃ¡Å¸â€ Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾â€“Ã¡Å¸Æ’Ã¡Å¾Å½Ã¡Å¾Â¸Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾ËœÃ¡Å¸â€šÃ¡Å¾Å¡ Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾â€”Ã¡Å¸ÂÃ¡Å¾Å¸Ã¡Å¾â€¡Ã¡Å¸â€™Ã¡Å¾â€¡Ã¡Å¸Ë†Ã¡Å¾â€¢Ã¡Å¸â€™Ã¡Å¾Â¢Ã¡Å¸â€šÃ¡Å¾Ëœ',
     subtitleEn: 'Traditional Khmer Sweet Desserts, Custard, Pudding & Sweet Cakes',
-    emoji: 'ðŸ¨'
+    emoji: 'Ã°Å¸ÂÂ¨'
   }
 ];
 
@@ -518,19 +518,19 @@ export function classifyKhmerFoodPrimaryGroup(food: Pick<FoodItem, 'nameKh' | 'n
   const slug = food.categorySlug;
 
   // 1. Check explicit prefix in Khmer name first for 100% accuracy on named dishes
-  if (kh.startsWith('áž”áž„áŸ’áž¢áŸ‚áž˜') || kh.includes('ážŸáž„áŸ‹ážáŸ’áž™áž¶') || kh.includes('áž…áŸáž€ážáŸ’áž‘áž·áŸ‡') || kh.includes('áž‘áž¹áž€áž€áž€ážˆáž¼ážŸ') || kh.includes('áž…áž¶áž áž½áž™') || kh.includes('áž”áž¶áž‰áŸ‹ážŒáž»áž€') || kh.includes('áž”áž¶áž‰áŸ‹áž…áž¶áž“áž¿áž€') || kh.includes('ážáŸ…áž áŸŠáž¼áž‘áž¹áž€ážŸáŸ’áž€ážš')) {
+  if (kh.startsWith('Ã¡Å¾â€Ã¡Å¾â€žÃ¡Å¸â€™Ã¡Å¾Â¢Ã¡Å¸â€šÃ¡Å¾Ëœ') || kh.includes('Ã¡Å¾Å¸Ã¡Å¾â€žÃ¡Å¸â€¹Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â„¢Ã¡Å¾Â¶') || kh.includes('Ã¡Å¾â€¦Ã¡Å¸ÂÃ¡Å¾â‚¬Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€˜Ã¡Å¾Â·Ã¡Å¸â€¡') || kh.includes('Ã¡Å¾â€˜Ã¡Å¾Â¹Ã¡Å¾â‚¬Ã¡Å¾â‚¬Ã¡Å¾â‚¬Ã¡Å¾Ë†Ã¡Å¾Â¼Ã¡Å¾Å¸') || kh.includes('Ã¡Å¾â€¦Ã¡Å¾Â¶Ã¡Å¾Â Ã¡Å¾Â½Ã¡Å¾â„¢') || kh.includes('Ã¡Å¾â€Ã¡Å¾Â¶Ã¡Å¾â€°Ã¡Å¸â€¹Ã¡Å¾Å’Ã¡Å¾Â»Ã¡Å¾â‚¬') || kh.includes('Ã¡Å¾â€Ã¡Å¾Â¶Ã¡Å¾â€°Ã¡Å¸â€¹Ã¡Å¾â€¦Ã¡Å¾Â¶Ã¡Å¾â€œÃ¡Å¾Â¿Ã¡Å¾â‚¬') || kh.includes('Ã¡Å¾ÂÃ¡Å¸â€¦Ã¡Å¾Â Ã¡Å¸Å Ã¡Å¾Â¼Ã¡Å¾â€˜Ã¡Å¾Â¹Ã¡Å¾â‚¬Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾â‚¬Ã¡Å¾Å¡')) {
     return 'bong_aem';
   }
-  if (kh.startsWith('ážŸáŸ’áž„áŸ„ážš') || kh.startsWith('ážŸáŸŠáž»áž”') || kh.startsWith('áž”áž”ážš') || kh.includes('ážŸáŸ’áž„áŸ„ážš') || kh.includes('áž„áŸ‰áž¶áŸ†áž„áŸ‰áž¼ážœ') || kh.includes('áž†áŸ’áž“áž¶áŸ†áž„áž—áŸ’áž›áž¾áž„') || kh.includes('áž™áŸ‰áž¶ážœáž áž“')) {
-    // Exclude sweet dessert porridges like áž”áž„áŸ’áž¢áŸ‚áž˜áž”áž”ážš
-    if (!kh.includes('áž”áž„áŸ’áž¢áŸ‚áž˜') && slug !== 'dessert') {
+  if (kh.startsWith('Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸â€žÃ¡Å¾Å¡') || kh.startsWith('Ã¡Å¾Å¸Ã¡Å¸Å Ã¡Å¾Â»Ã¡Å¾â€') || kh.startsWith('Ã¡Å¾â€Ã¡Å¾â€Ã¡Å¾Å¡') || kh.includes('Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸â€žÃ¡Å¾Å¡') || kh.includes('Ã¡Å¾â€žÃ¡Å¸â€°Ã¡Å¾Â¶Ã¡Å¸â€ Ã¡Å¾â€žÃ¡Å¸â€°Ã¡Å¾Â¼Ã¡Å¾Å“') || kh.includes('Ã¡Å¾â€ Ã¡Å¸â€™Ã¡Å¾â€œÃ¡Å¾Â¶Ã¡Å¸â€ Ã¡Å¾â€žÃ¡Å¾â€”Ã¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾Â¾Ã¡Å¾â€ž') || kh.includes('Ã¡Å¾â„¢Ã¡Å¸â€°Ã¡Å¾Â¶Ã¡Å¾Å“Ã¡Å¾Â Ã¡Å¾â€œ')) {
+    // Exclude sweet dessert porridges like Ã¡Å¾â€Ã¡Å¾â€žÃ¡Å¸â€™Ã¡Å¾Â¢Ã¡Å¸â€šÃ¡Å¾ËœÃ¡Å¾â€Ã¡Å¾â€Ã¡Å¾Å¡
+    if (!kh.includes('Ã¡Å¾â€Ã¡Å¾â€žÃ¡Å¸â€™Ã¡Å¾Â¢Ã¡Å¸â€šÃ¡Å¾Ëœ') && slug !== 'dessert') {
       return 'sngor';
     }
   }
-  if (kh.startsWith('ážŸáž˜áŸ’áž›') || kh.includes('ážŸáž˜áŸ’áž›') || kh.includes('áž€áž¶ážšáž¸') || kh.includes('áž¢áž¶áž˜áŸ‰áž»áž€') || kh.includes('áž€áž€áž¼ážš') || kh.includes('áž˜áŸ’áž‡áž¼ážšáž‚áŸ’ážšáž¿áž„') || kh.includes('áž˜áŸ’áž‡áž¼ážšáž™áž½áž“') || kh.includes('áž”áŸ’ážšáž áž¾ážš') || kh.includes('áž”áŸ’ážšáž áž»áž€ážáŸ’áž‘áž·áŸ‡') || kh.includes('áž”áŸ’ážšáž áž»áž€áž‚áŸ’ážšáž¿áž„') || kh.includes('áž”áŸ’ážšáž áž»áž€áž…áž·áž‰áŸ’áž…áŸ’ážšáž¶áŸ†') || kh.includes('áž‘áž¹áž€áž‚áŸ’ážšáž¿áž„') || kh.includes('áž€áž¶áž–áž·áž•áž¶ážœ') || kh.includes('ážŽáž¶áŸ†áž™áŸ‰áž¶') || kh.startsWith('áž') || kh.includes('ážážŸáž¶áž…áŸ‹') || kh.includes('ážážáŸ’ážšáž¸') || kh.includes('ážáž‡áž¾áž„áž‡áŸ’ážšáž¼áž€') || kh.includes('áž•áž¶áž€áŸ‹áž¡áž¼ážœ')) {
+  if (kh.startsWith('Ã¡Å¾Å¸Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾â€º') || kh.includes('Ã¡Å¾Å¸Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾â€º') || kh.includes('Ã¡Å¾â‚¬Ã¡Å¾Â¶Ã¡Å¾Å¡Ã¡Å¾Â¸') || kh.includes('Ã¡Å¾Â¢Ã¡Å¾Â¶Ã¡Å¾ËœÃ¡Å¸â€°Ã¡Å¾Â»Ã¡Å¾â‚¬') || kh.includes('Ã¡Å¾â‚¬Ã¡Å¾â‚¬Ã¡Å¾Â¼Ã¡Å¾Å¡') || kh.includes('Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾â€¡Ã¡Å¾Â¼Ã¡Å¾Å¡Ã¡Å¾â€šÃ¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¿Ã¡Å¾â€ž') || kh.includes('Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾â€¡Ã¡Å¾Â¼Ã¡Å¾Å¡Ã¡Å¾â„¢Ã¡Å¾Â½Ã¡Å¾â€œ') || kh.includes('Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â Ã¡Å¾Â¾Ã¡Å¾Å¡') || kh.includes('Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â Ã¡Å¾Â»Ã¡Å¾â‚¬Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€˜Ã¡Å¾Â·Ã¡Å¸â€¡') || kh.includes('Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â Ã¡Å¾Â»Ã¡Å¾â‚¬Ã¡Å¾â€šÃ¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¿Ã¡Å¾â€ž') || kh.includes('Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â Ã¡Å¾Â»Ã¡Å¾â‚¬Ã¡Å¾â€¦Ã¡Å¾Â·Ã¡Å¾â€°Ã¡Å¸â€™Ã¡Å¾â€¦Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¶Ã¡Å¸â€ ') || kh.includes('Ã¡Å¾â€˜Ã¡Å¾Â¹Ã¡Å¾â‚¬Ã¡Å¾â€šÃ¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¿Ã¡Å¾â€ž') || kh.includes('Ã¡Å¾â‚¬Ã¡Å¾Â¶Ã¡Å¾â€“Ã¡Å¾Â·Ã¡Å¾â€¢Ã¡Å¾Â¶Ã¡Å¾Å“') || kh.includes('Ã¡Å¾Å½Ã¡Å¾Â¶Ã¡Å¸â€ Ã¡Å¾â„¢Ã¡Å¸â€°Ã¡Å¾Â¶') || kh.startsWith('Ã¡Å¾Â') || kh.includes('Ã¡Å¾ÂÃ¡Å¾Å¸Ã¡Å¾Â¶Ã¡Å¾â€¦Ã¡Å¸â€¹') || kh.includes('Ã¡Å¾ÂÃ¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¸') || kh.includes('Ã¡Å¾ÂÃ¡Å¾â€¡Ã¡Å¾Â¾Ã¡Å¾â€žÃ¡Å¾â€¡Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¼Ã¡Å¾â‚¬') || kh.includes('Ã¡Å¾â€¢Ã¡Å¾Â¶Ã¡Å¾â‚¬Ã¡Å¸â€¹Ã¡Å¾Â¡Ã¡Å¾Â¼Ã¡Å¾Å“')) {
     return 'samlor';
   }
-  if (kh.startsWith('áž†áž¶') || kh.includes('áž†áž¶') || kh.includes('áž¡áž»áž€áž¡áž¶áž€áŸ‹')) {
+  if (kh.startsWith('Ã¡Å¾â€ Ã¡Å¾Â¶') || kh.includes('Ã¡Å¾â€ Ã¡Å¾Â¶') || kh.includes('Ã¡Å¾Â¡Ã¡Å¾Â»Ã¡Å¾â‚¬Ã¡Å¾Â¡Ã¡Å¾Â¶Ã¡Å¾â‚¬Ã¡Å¸â€¹')) {
     return 'cha';
   }
 
@@ -539,8 +539,8 @@ export function classifyKhmerFoodPrimaryGroup(food: Pick<FoodItem, 'nameKh' | 'n
     return 'bong_aem';
   }
   if (slug === 'cake') {
-    // Savory street cakes like áž”áž¶áž‰áŸ‹áž†áŸ‚ážœ, áž“áŸ†áž”áŸ‰áŸáž„áž”áŸ‰áž¶ážáŸ, áž‚áž½áž„, ážŽáŸ‚áž˜ go to 'cha' (savory/pan-fried), while sweet cakes go to 'bong_aem'
-    if (kh.includes('áž”áž¶áž‰áŸ‹áž†áŸ‚ážœ') || kh.includes('áž”áž¶áž‰áŸ‹áž áž™') || kh.includes('áž“áŸ†áž”áŸ‰áŸáž„') || kh.includes('áž‚áž½áž„') || kh.includes('ážŽáŸ‚áž˜') || kh.includes('áž‚áž¼áž†áž¶áž™')) {
+    // Savory street cakes like Ã¡Å¾â€Ã¡Å¾Â¶Ã¡Å¾â€°Ã¡Å¸â€¹Ã¡Å¾â€ Ã¡Å¸â€šÃ¡Å¾Å“, Ã¡Å¾â€œÃ¡Å¸â€ Ã¡Å¾â€Ã¡Å¸â€°Ã¡Å¸ÂÃ¡Å¾â€žÃ¡Å¾â€Ã¡Å¸â€°Ã¡Å¾Â¶Ã¡Å¾ÂÃ¡Å¸Â, Ã¡Å¾â€šÃ¡Å¾Â½Ã¡Å¾â€ž, Ã¡Å¾Å½Ã¡Å¸â€šÃ¡Å¾Ëœ go to 'cha' (savory/pan-fried), while sweet cakes go to 'bong_aem'
+    if (kh.includes('Ã¡Å¾â€Ã¡Å¾Â¶Ã¡Å¾â€°Ã¡Å¸â€¹Ã¡Å¾â€ Ã¡Å¸â€šÃ¡Å¾Å“') || kh.includes('Ã¡Å¾â€Ã¡Å¾Â¶Ã¡Å¾â€°Ã¡Å¸â€¹Ã¡Å¾Â Ã¡Å¾â„¢') || kh.includes('Ã¡Å¾â€œÃ¡Å¸â€ Ã¡Å¾â€Ã¡Å¸â€°Ã¡Å¸ÂÃ¡Å¾â€ž') || kh.includes('Ã¡Å¾â€šÃ¡Å¾Â½Ã¡Å¾â€ž') || kh.includes('Ã¡Å¾Å½Ã¡Å¸â€šÃ¡Å¾Ëœ') || kh.includes('Ã¡Å¾â€šÃ¡Å¾Â¼Ã¡Å¾â€ Ã¡Å¾Â¶Ã¡Å¾â„¢')) {
       return 'cha';
     }
     return 'bong_aem';
@@ -548,10 +548,10 @@ export function classifyKhmerFoodPrimaryGroup(food: Pick<FoodItem, 'nameKh' | 'n
 
   // 3. Check Noodle dishes: noodle soups with broth go to 'sngor' or 'samlor', stir-fried noodles go to 'cha'
   if (slug === 'noodles') {
-    if (kh.includes('áž“áŸ†áž”áž‰áŸ’áž…áž»áž€')) {
+    if (kh.includes('Ã¡Å¾â€œÃ¡Å¸â€ Ã¡Å¾â€Ã¡Å¾â€°Ã¡Å¸â€™Ã¡Å¾â€¦Ã¡Å¾Â»Ã¡Å¾â‚¬')) {
       return 'samlor';
     }
-    if (kh.includes('áž†áž¶') || en.includes('fried') || en.includes('stir')) {
+    if (kh.includes('Ã¡Å¾â€ Ã¡Å¾Â¶') || en.includes('fried') || en.includes('stir')) {
       return 'cha';
     }
     return 'sngor';
@@ -559,7 +559,7 @@ export function classifyKhmerFoodPrimaryGroup(food: Pick<FoodItem, 'nameKh' | 'n
 
   // 4. Check Soup categorySlug: separate Samlor/Curry from Sngor/Clear Boiled Soup
   if (slug === 'soup') {
-    if (en.includes('curry') || en.includes('samlor') || en.includes('korko') || en.includes('machu') || en.includes('amok') || kh.includes('áž˜áŸ’áž‡áž¼ážš')) {
+    if (en.includes('curry') || en.includes('samlor') || en.includes('korko') || en.includes('machu') || en.includes('amok') || kh.includes('Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾â€¡Ã¡Å¾Â¼Ã¡Å¾Å¡')) {
       return 'samlor';
     }
     return 'sngor';
@@ -572,30 +572,30 @@ export function classifyKhmerFoodPrimaryGroup(food: Pick<FoodItem, 'nameKh' | 'n
 export function getFoodSubGroupSortKey(food: FoodItem, group: KhmerFoodPrimaryGroup): string {
   const kh = (food.nameKh || '').trim();
   if (group === 'samlor') {
-    if (kh.startsWith('ážŸáž˜áŸ’áž›')) return `1_${kh}`;
-    if (kh.includes('áž€áž¶ážšáž¸') || kh.includes('áž¢áž¶áž˜áŸ‰áž»áž€')) return `2_${kh}`;
-    if (kh.includes('áž”áŸ’ážšáž áž»áž€') || kh.includes('áž‘áž¹áž€áž‚áŸ’ážšáž¿áž„') || kh.includes('áž€áž¶áž–áž·')) return `3_${kh}`;
-    if (kh.startsWith('áž') || kh.includes('áž•áž¶áž€áŸ‹áž¡áž¼ážœ')) return `4_${kh}`;
+    if (kh.startsWith('Ã¡Å¾Å¸Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾â€º')) return `1_${kh}`;
+    if (kh.includes('Ã¡Å¾â‚¬Ã¡Å¾Â¶Ã¡Å¾Å¡Ã¡Å¾Â¸') || kh.includes('Ã¡Å¾Â¢Ã¡Å¾Â¶Ã¡Å¾ËœÃ¡Å¸â€°Ã¡Å¾Â»Ã¡Å¾â‚¬')) return `2_${kh}`;
+    if (kh.includes('Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â Ã¡Å¾Â»Ã¡Å¾â‚¬') || kh.includes('Ã¡Å¾â€˜Ã¡Å¾Â¹Ã¡Å¾â‚¬Ã¡Å¾â€šÃ¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¿Ã¡Å¾â€ž') || kh.includes('Ã¡Å¾â‚¬Ã¡Å¾Â¶Ã¡Å¾â€“Ã¡Å¾Â·')) return `3_${kh}`;
+    if (kh.startsWith('Ã¡Å¾Â') || kh.includes('Ã¡Å¾â€¢Ã¡Å¾Â¶Ã¡Å¾â‚¬Ã¡Å¸â€¹Ã¡Å¾Â¡Ã¡Å¾Â¼Ã¡Å¾Å“')) return `4_${kh}`;
     return `5_${kh}`;
   }
   if (group === 'cha') {
-    if (kh.startsWith('áž†áž¶')) return `1_${kh}`;
-    if (kh.includes('áž†áž¶') || kh.includes('áž¡áž»áž€áž¡áž¶áž€áŸ‹')) return `2_${kh}`;
-    if (kh.includes('áž¢áž¶áŸ†áž„') || kh.includes('ážŠáž»áž') || kh.includes('áž”áŸ†áž–áž„') || kh.includes('áž…áŸ€áž“')) return `3_${kh}`;
-    if (kh.includes('áž‰áž¶áŸ†') || kh.includes('áž—áŸ’áž›áž¶') || kh.includes('áž”áž»áž€')) return `4_${kh}`;
+    if (kh.startsWith('Ã¡Å¾â€ Ã¡Å¾Â¶')) return `1_${kh}`;
+    if (kh.includes('Ã¡Å¾â€ Ã¡Å¾Â¶') || kh.includes('Ã¡Å¾Â¡Ã¡Å¾Â»Ã¡Å¾â‚¬Ã¡Å¾Â¡Ã¡Å¾Â¶Ã¡Å¾â‚¬Ã¡Å¸â€¹')) return `2_${kh}`;
+    if (kh.includes('Ã¡Å¾Â¢Ã¡Å¾Â¶Ã¡Å¸â€ Ã¡Å¾â€ž') || kh.includes('Ã¡Å¾Å Ã¡Å¾Â»Ã¡Å¾Â') || kh.includes('Ã¡Å¾â€Ã¡Å¸â€ Ã¡Å¾â€“Ã¡Å¾â€ž') || kh.includes('Ã¡Å¾â€¦Ã¡Å¸â‚¬Ã¡Å¾â€œ')) return `3_${kh}`;
+    if (kh.includes('Ã¡Å¾â€°Ã¡Å¾Â¶Ã¡Å¸â€ ') || kh.includes('Ã¡Å¾â€”Ã¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾Â¶') || kh.includes('Ã¡Å¾â€Ã¡Å¾Â»Ã¡Å¾â‚¬')) return `4_${kh}`;
     return `5_${kh}`;
   }
   if (group === 'sngor') {
-    if (kh.startsWith('ážŸáŸ’áž„áŸ„ážš')) return `1_${kh}`;
-    if (kh.includes('ážŸáŸ’áž„áŸ„ážš')) return `2_${kh}`;
-    if (kh.startsWith('ážŸáŸŠáž»áž”') || kh.includes('áž†áŸ’áž“áž¶áŸ†áž„áž—áŸ’áž›áž¾áž„')) return `3_${kh}`;
-    if (kh.startsWith('áž”áž”ážš')) return `4_${kh}`;
+    if (kh.startsWith('Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸â€žÃ¡Å¾Å¡')) return `1_${kh}`;
+    if (kh.includes('Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸â€žÃ¡Å¾Å¡')) return `2_${kh}`;
+    if (kh.startsWith('Ã¡Å¾Å¸Ã¡Å¸Å Ã¡Å¾Â»Ã¡Å¾â€') || kh.includes('Ã¡Å¾â€ Ã¡Å¸â€™Ã¡Å¾â€œÃ¡Å¾Â¶Ã¡Å¸â€ Ã¡Å¾â€žÃ¡Å¾â€”Ã¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¾Â¾Ã¡Å¾â€ž')) return `3_${kh}`;
+    if (kh.startsWith('Ã¡Å¾â€Ã¡Å¾â€Ã¡Å¾Å¡')) return `4_${kh}`;
     return `5_${kh}`;
   }
   // bong_aem
-  if (kh.startsWith('áž”áž„áŸ’áž¢áŸ‚áž˜')) return `1_${kh}`;
-  if (kh.includes('ážŸáž„áŸ‹ážáŸ’áž™áž¶') || kh.includes('áž…áŸáž€ážáŸ’áž‘áž·áŸ‡') || kh.includes('áž”áž¶áž‰áŸ‹ážŒáž»áž€')) return `2_${kh}`;
-  if (kh.startsWith('áž“áŸ†')) return `3_${kh}`;
+  if (kh.startsWith('Ã¡Å¾â€Ã¡Å¾â€žÃ¡Å¸â€™Ã¡Å¾Â¢Ã¡Å¸â€šÃ¡Å¾Ëœ')) return `1_${kh}`;
+  if (kh.includes('Ã¡Å¾Å¸Ã¡Å¾â€žÃ¡Å¸â€¹Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â„¢Ã¡Å¾Â¶') || kh.includes('Ã¡Å¾â€¦Ã¡Å¸ÂÃ¡Å¾â‚¬Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€˜Ã¡Å¾Â·Ã¡Å¸â€¡') || kh.includes('Ã¡Å¾â€Ã¡Å¾Â¶Ã¡Å¾â€°Ã¡Å¸â€¹Ã¡Å¾Å’Ã¡Å¾Â»Ã¡Å¾â‚¬')) return `2_${kh}`;
+  if (kh.startsWith('Ã¡Å¾â€œÃ¡Å¸â€ ')) return `3_${kh}`;
   return `4_${kh}`;
 }
 
@@ -1462,7 +1462,7 @@ export const getVipRemainingDays = (user?: User | null): number => {
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 };
 
-// AI Trending Food Section Types (Strictly Food Places only: Street Food, CafÃ©s, Desserts, Famous & Unusual Dishes)
+// AI Trending Food Section Types (Strictly Food Places only: Street Food, CafÃƒÂ©s, Desserts, Famous & Unusual Dishes)
 export type TrendingFoodCategorySlug = 
   | 'all'
   | 'street_food' 
@@ -1589,7 +1589,7 @@ export interface TouristDestination {
   socialLikes?: string; // e.g. "185K Likes"
   socialHighlightKh?: string;
   socialHighlightEn?: string;
-  reviewerQuoteKh?: string; // e.g. "áž‘áŸážŸáž—áž¶áž–ážŸáŸ’áž¢áž¶ážážŠáž¼áž…áž‹áž¶áž“ážŸáž½áž‚áŸŒ áž–áŸáž›áž–áŸ’ážšáž¹áž€áž–áž–áž€áž áŸ„áŸ‡áž€áž¶ážáŸ‹áž‡áž¾áž„!"
+  reviewerQuoteKh?: string; // e.g. "Ã¡Å¾â€˜Ã¡Å¸ÂÃ¡Å¾Å¸Ã¡Å¾â€”Ã¡Å¾Â¶Ã¡Å¾â€“Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾Â¢Ã¡Å¾Â¶Ã¡Å¾ÂÃ¡Å¾Å Ã¡Å¾Â¼Ã¡Å¾â€¦Ã¡Å¾â€¹Ã¡Å¾Â¶Ã¡Å¾â€œÃ¡Å¾Å¸Ã¡Å¾Â½Ã¡Å¾â€šÃ¡Å¸Å’ Ã¡Å¾â€“Ã¡Å¸ÂÃ¡Å¾â€ºÃ¡Å¾â€“Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¹Ã¡Å¾â‚¬Ã¡Å¾â€“Ã¡Å¾â€“Ã¡Å¾â‚¬Ã¡Å¾Â Ã¡Å¸â€žÃ¡Å¸â€¡Ã¡Å¾â‚¬Ã¡Å¾Â¶Ã¡Å¾ÂÃ¡Å¸â€¹Ã¡Å¾â€¡Ã¡Å¾Â¾Ã¡Å¾â€ž!"
   reviewerQuoteEn?: string;
   reviewerName?: string;
   isCustomPhoto?: boolean;
@@ -1605,7 +1605,7 @@ export interface TouristDestination {
   locationVerifiedAt?: string;
 }
 
-// User Wishlist Item & Custom Lists (áž”áž‰áŸ’áž‡áž¸áž€áž“áŸ’áž›áŸ‚áž„ážŠáŸ‚áž›áž…áž„áŸ‹áž‘áŸ…)
+// User Wishlist Item & Custom Lists (Ã¡Å¾â€Ã¡Å¾â€°Ã¡Å¸â€™Ã¡Å¾â€¡Ã¡Å¾Â¸Ã¡Å¾â‚¬Ã¡Å¾â€œÃ¡Å¸â€™Ã¡Å¾â€ºÃ¡Å¸â€šÃ¡Å¾â€žÃ¡Å¾Å Ã¡Å¸â€šÃ¡Å¾â€ºÃ¡Å¾â€¦Ã¡Å¾â€žÃ¡Å¸â€¹Ã¡Å¾â€˜Ã¡Å¸â€¦)
 export interface WishlistItem {
   id: string; // matches FoodItem.id, Restaurant.id, or TouristDestination.id
   type: 'food' | 'restaurant' | 'destination';
@@ -1630,7 +1630,7 @@ export interface Wishlist {
   createdAt: string;
 }
 
-// AI Trip Planner (áž•áŸ‚áž“áž€áž¶ážšážŠáž¾ážšáž›áŸáž„ AI ážŠáŸ„áž™ážŸáŸ’ážœáŸáž™áž”áŸ’ážšážœážáŸ’ážáž·)
+// AI Trip Planner (Ã¡Å¾â€¢Ã¡Å¸â€šÃ¡Å¾â€œÃ¡Å¾â‚¬Ã¡Å¾Â¶Ã¡Å¾Å¡Ã¡Å¾Å Ã¡Å¾Â¾Ã¡Å¾Å¡Ã¡Å¾â€ºÃ¡Å¸ÂÃ¡Å¾â€ž AI Ã¡Å¾Å Ã¡Å¸â€žÃ¡Å¾â„¢Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾Å“Ã¡Å¸ÂÃ¡Å¾â„¢Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Å“Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾ÂÃ¡Å¾Â·)
 export interface TripPlanActivity {
   timePeriod: 'morning' | 'lunch' | 'afternoon' | 'dinner';
   titleKh: string;
@@ -1664,7 +1664,7 @@ export interface TripPlan {
   createdAt: string;
 }
 
-// Helpful Notifications (áž€áž¶ážšáž‡áž¼áž“ážŠáŸ†ážŽáž¹áž„ážŠáŸ‚áž›áž˜áž¶áž“áž”áŸ’ážšáž™áŸ„áž‡áž“áŸ)
+// Helpful Notifications (Ã¡Å¾â‚¬Ã¡Å¾Â¶Ã¡Å¾Å¡Ã¡Å¾â€¡Ã¡Å¾Â¼Ã¡Å¾â€œÃ¡Å¾Å Ã¡Å¸â€ Ã¡Å¾Å½Ã¡Å¾Â¹Ã¡Å¾â€žÃ¡Å¾Å Ã¡Å¸â€šÃ¡Å¾â€ºÃ¡Å¾ËœÃ¡Å¾Â¶Ã¡Å¾â€œÃ¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾â„¢Ã¡Å¸â€žÃ¡Å¾â€¡Ã¡Å¾â€œÃ¡Å¸Â)
 export interface AppNotification {
   id: string;
   titleKh: string;
@@ -1748,11 +1748,11 @@ export interface AppSettings {
   // Dynamic Admin-Configurable VIP Packages & Store Management Fees
   vipShortDurationDays?: number; // Default: 10 days
   vipShortPriceUsd?: number; // Default: $2.99
-  vipShortNameKh?: string; // Default: "áž€áž‰áŸ’áž…áž”áŸ‹ VIP 10 ážáŸ’áž„áŸƒ"
+  vipShortNameKh?: string; // Default: "Ã¡Å¾â‚¬Ã¡Å¾â€°Ã¡Å¸â€™Ã¡Å¾â€¦Ã¡Å¾â€Ã¡Å¸â€¹ VIP 10 Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸Æ’"
   vipShortNameEn?: string; // Default: "VIP 10 Days"
   vipLongDurationDays?: number; // Default: 90 days
   vipLongPriceUsd?: number; // Default: $4.99
-  vipLongNameKh?: string; // Default: "áž€áž‰áŸ’áž…áž”áŸ‹ VIP 90 ážáŸ’áž„áŸƒ"
+  vipLongNameKh?: string; // Default: "Ã¡Å¾â‚¬Ã¡Å¾â€°Ã¡Å¸â€™Ã¡Å¾â€¦Ã¡Å¾â€Ã¡Å¸â€¹ VIP 90 Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸Æ’"
   vipLongNameEn?: string; // Default: "VIP 90 Days"
   additionalStoreFeeUsd?: number; // Default: $10.00 per additional store beyond the 1st
   includedFreeStoresPerVip?: number; // Default: 1 store included with VIP
@@ -1765,7 +1765,7 @@ export interface AppSettings {
   settingsUpdatedBy?: string;
 }
 
-// Userâ€“Admin Two-Way Support & Payment Verification System
+// UserÃ¢â‚¬â€œAdmin Two-Way Support & Payment Verification System
 export type SupportTicketStatus = 'pending' | 'replied' | 'resolved';
 
 export interface SupportTicketMessage {
@@ -1872,10 +1872,10 @@ export const getDynamicVipPlans = (
   const longNameEnRaw = (s.vipLongNameEn || '').trim();
 
   const shortNameKh =
-    !shortNameKhRaw || /^VIP\s+\d+\s*(ážáŸ’áž„áŸƒ|\?+)$/i.test(shortNameKhRaw)
+    !shortNameKhRaw || /^VIP\s+\d+\s*(Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸Æ’|\?+)$/i.test(shortNameKhRaw)
       ? shortDays === 30
-        ? 'VIP áŸ¡ ážáŸ‚ (30 ážáŸ’áž„áŸƒ)'
-        : `VIP ${shortDays} ážáŸ’áž„áŸƒ`
+        ? 'VIP Ã¡Å¸Â¡ Ã¡Å¾ÂÃ¡Å¸â€š (30 Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸Æ’)'
+        : `VIP ${shortDays} Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸Æ’`
       : shortNameKhRaw;
   const shortNameEn =
     !shortNameEnRaw || /^VIP\s+\d+\s*Days?$/i.test(shortNameEnRaw)
@@ -1884,10 +1884,10 @@ export const getDynamicVipPlans = (
         : `VIP ${shortDays} Days`
       : shortNameEnRaw;
   const longNameKh =
-    !longNameKhRaw || /^VIP\s+\d+\s*(ážáŸ’áž„áŸƒ|\?+)$/i.test(longNameKhRaw)
+    !longNameKhRaw || /^VIP\s+\d+\s*(Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸Æ’|\?+)$/i.test(longNameKhRaw)
       ? longDays === 60
-        ? 'VIP áŸ¢ ážáŸ‚ (60 ážáŸ’áž„áŸƒ)'
-        : `VIP ${longDays} ážáŸ’áž„áŸƒ`
+        ? 'VIP Ã¡Å¸Â¢ Ã¡Å¾ÂÃ¡Å¸â€š (60 Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸Æ’)'
+        : `VIP ${longDays} Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸Æ’`
       : longNameKhRaw;
   const longNameEn =
     !longNameEnRaw || /^VIP\s+\d+\s*Days?$/i.test(longNameEnRaw)
@@ -1904,8 +1904,8 @@ export const getDynamicVipPlans = (
       priceUsd: shortPrice,
       durationDays: shortDays,
       labelEn: `${shortNameEn} ($${shortPrice.toFixed(2)} USD / ${shortDays} days)`,
-      labelKh: `${shortNameKh} ($${shortPrice.toFixed(2)} USD / ${shortDays} ážáŸ’áž„áŸƒ)`,
-      priceKhrDisplay: `${Math.round(shortPrice * 4100).toLocaleString()} ážšáŸ€áž›`,
+      labelKh: `${shortNameKh} ($${shortPrice.toFixed(2)} USD / ${shortDays} Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸Æ’)`,
+      priceKhrDisplay: `${Math.round(shortPrice * 4100).toLocaleString()} Ã¡Å¾Å¡Ã¡Å¸â‚¬Ã¡Å¾â€º`,
     },
     annual: {
       id: 'annual',
@@ -1914,8 +1914,8 @@ export const getDynamicVipPlans = (
       priceUsd: longPrice,
       durationDays: longDays,
       labelEn: `${longNameEn} ($${longPrice.toFixed(2)} USD / ${longDays} days)`,
-      labelKh: `${longNameKh} ($${longPrice.toFixed(2)} USD / ${longDays} ážáŸ’áž„áŸƒ)`,
-      priceKhrDisplay: `${Math.round(longPrice * 4100).toLocaleString()} ážšáŸ€áž›`,
+      labelKh: `${longNameKh} ($${longPrice.toFixed(2)} USD / ${longDays} Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾â€žÃ¡Å¸Æ’)`,
+      priceKhrDisplay: `${Math.round(longPrice * 4100).toLocaleString()} Ã¡Å¾Å¡Ã¡Å¸â‚¬Ã¡Å¾â€º`,
     },
   };
 };

@@ -180,12 +180,25 @@ export const FoodDetailModal: React.FC = () => {
       if (pick.cancelled) {
         return;
       }
-      if (pick.dataUrl) {
+      if (pick.dataUrl && selectedFood) {
+        const nowIso = new Date().toISOString();
+        const updated = {
+          ...selectedFood,
+          photoUrl: pick.dataUrl,
+          isCustomPhoto: true,
+          photoUpdatedAt: nowIso,
+          updatedAt: nowIso,
+          adminApprovedAt: nowIso,
+          imageAuditStatus: 'verified' as const,
+          imageAuditNote: 'រូបភាពជ្រើសរើសពីទូរស័ព្ទ (Admin Verified)',
+        };
         setEditPhotoUrl(pick.dataUrl);
+        updateFood(updated);
+        setSelectedFood(updated);
         showToast(
           language === 'km'
-            ? '✅ បានជ្រើសរើសរូបភាពពីទូរស័ព្ទរួចរាល់ — សូមចុច «រក្សាទុកការកែប្រែ»!'
-            : '✅ Photo selected from device — click "Save Changes" to apply!',
+            ? '✅ បានផ្លាស់ប្តូរ និងរក្សាទុករូបភាពពីទូរស័ព្ទរួចរាល់!'
+            : '✅ Photo from device saved permanently!',
           'success'
         );
         return;
@@ -205,12 +218,27 @@ export const FoodDetailModal: React.FC = () => {
     if (!file) return;
     setIsUploadingPhoto(true);
     try {
-      const dataUrl = await processAndCompressImageFile(file, 960, 0.82);
+      const dataUrl = await processAndCompressImageFile(file, 720, 0.76);
       setEditPhotoUrl(dataUrl);
+      if (selectedFood) {
+        const nowIso = new Date().toISOString();
+        const updated = {
+          ...selectedFood,
+          photoUrl: dataUrl,
+          isCustomPhoto: true,
+          photoUpdatedAt: nowIso,
+          updatedAt: nowIso,
+          adminApprovedAt: nowIso,
+          imageAuditStatus: 'verified' as const,
+          imageAuditNote: 'រូបភាពផ្ទុកឡើងដោយ Admin (Admin Verified)',
+        };
+        updateFood(updated);
+        setSelectedFood(updated);
+      }
       showToast(
         language === 'km'
-          ? '✅ បានផ្ទុករូបភាពរួចរាល់ — សូមចុច «រក្សាទុកការកែប្រែ» ខាងក្រោមដើម្បីរក្សាទុក!'
-          : '✅ Photo uploaded & ready — click "Save Changes" below to save!',
+          ? '✅ បានផ្លាស់ប្តូរ និងរក្សាទុករូបភាពថ្មីរួចរាល់!'
+          : '✅ New food photo uploaded & saved permanently!',
         'success'
       );
     } catch (err: any) {

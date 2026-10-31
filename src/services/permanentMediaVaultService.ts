@@ -107,25 +107,24 @@ export function isRejectedLegacyFoodOverridePhoto(
   if (!ov || typeof ov.photoUrl !== 'string' || !ov.photoUrl.trim()) {
     return true;
   }
+  // Never reject any custom base64, blob, or admin-revised food photo!
+  if (
+    ov.photoUrl.startsWith('data:image/') ||
+    ov.photoUrl.startsWith('blob:') ||
+    ov.isCustomPhoto === true ||
+    Number(ov.revision || 0) > 0 ||
+    Boolean(ov.adminApprovedAt)
+  ) {
+    return false;
+  }
   if (isLegacyAutoScrapedFoodPlaceholderUrl(ov.photoUrl)) {
     return true;
   }
-  if (
-    ov.photoUrl.includes('images.unsplash.com') ||
-    ov.photoUrl.includes('plus.unsplash.com') ||
-    ov.photoUrl.startsWith('/restaurants/')
-  ) {
+  if (ov.photoUrl.startsWith('/restaurants/')) {
     return true;
   }
   const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(foodId);
   if (seedFood && seedFood.photoUrl?.startsWith('/foods/')) {
-    const baselineMs = getSeedFoodPhotoBaselineMs(foodId);
-    const adminMs = ov.adminApprovedAt ? Date.parse(ov.adminApprovedAt) || 0 : 0;
-    const updMs = ov.updatedAt ? Date.parse(ov.updatedAt) || 0 : 0;
-    const effectiveMs = Math.max(adminMs, updMs);
-    if (effectiveMs <= baselineMs) {
-      return true;
-    }
     const cleanOvBase = ov.photoUrl.split('?')[0].trim();
     const cleanSeedBase = seedFood.photoUrl.split('?')[0].trim();
     if (cleanOvBase === cleanSeedBase && !ov.isCustomPhoto) {
@@ -928,7 +927,7 @@ export function saveLocalMediaOverrides(incomingBundle: AllMediaOverridesBundle)
     return trimmed;
   };
 
-  const foodCharBudget = getRemainingCharBudgetForKey(VAULT_KEYS.FOODS, 450_000);
+  const foodCharBudget = getRemainingCharBudgetForKey(VAULT_KEYS.FOODS, 1_850_000);
   const compactFoodsPrimary = trimFoodMapForLocalStorage(bundle.foods || {}, foodCharBudget);
   if (safeWriteJsonMap(VAULT_KEYS.FOODS, compactFoodsPrimary)) {
     persistedInLocalStorageSets.foods = new Set(

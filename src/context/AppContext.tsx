@@ -1531,7 +1531,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsUpgradeVipModalOpenRaw(false);
     pendingVipUpgradeAfterAuthRef.current = { active: true, renewMode: Boolean(renewMode) };
     setAuthModalInitialView({
-      mode: 'email',
+      mode: 'main',
       emailTab: 'login',
       requireEmailForVip: true,
     });
@@ -1539,9 +1539,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(
       tr(
         language,
-        '🔒 សូមចូលគណនីដោយប្រើអ៊ីមែល (Login with Email) ជាមុនសិន មុននឹងបន្តទៅទំព័រដំឡើង VIP និងបង្ហាញ ABA QR!',
-        '🔒 Please log in with your email account first before proceeding to the VIP payment page or viewing the ABA QR code!',
-        '🔒 请先使用电子邮箱账号登录，然后再进入 VIP 升级付款页面及查看 ABA 二维码！'
+        '🔒 សូមចូលគណនីដោយប្រើ Google ឬអ៊ីមែល ជាមុនសិន មុននឹងបន្តទៅទំព័រដំឡើង VIP និងបង្ហាញ ABA QR!',
+        '🔒 Please sign in with Google or your email account first before proceeding to the VIP payment page or viewing the ABA QR code!',
+        '🔒 请先使用 Google 或电子邮箱账号登录，然后再进入 VIP 升级付款页面及查看 ABA 二维码！'
       ),
       'warning'
     );
@@ -2152,12 +2152,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             f &&
             typeof f.photoUrl === 'string' &&
             f.photoUrl.startsWith('data:') &&
+            f.photoUrl.length > 90_000 &&
             isOverridePersistedInLocalStorage('foods', f.id)
           ) {
             return {
               ...f,
               photoUrl: seedFoodMap.get(f.id) || `/foods/${f.id}.jpg`,
-              isCustomPhoto: false,
+              isCustomPhoto: true,
               __compactedFromVault: true,
             };
           }
