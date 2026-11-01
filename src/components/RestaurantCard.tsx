@@ -47,15 +47,11 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
 
     const resolvedShopPhotoUrl = useMemo(() => {
       const candidate =
-        restaurant.photoUrl &&
-        !restaurant.photoUrl.startsWith('/restaurants/') &&
-        !restaurant.photoUrl.startsWith('/foods/')
+        restaurant.photoUrl && !restaurant.photoUrl.startsWith('/restaurants/')
           ? restaurant.photoUrl
-          : restaurant.profileImage &&
-            !restaurant.profileImage.startsWith('/restaurants/') &&
-            !restaurant.profileImage.startsWith('/foods/')
+          : restaurant.profileImage && !restaurant.profileImage.startsWith('/restaurants/')
           ? restaurant.profileImage
-          : '';
+          : '/Shop/culinary-placeholder.jpg';
       return resolveFoodPhotoUrl(candidate, restaurant.photoUpdatedAt);
     }, [restaurant.photoUrl, restaurant.profileImage, restaurant.photoUpdatedAt]);
 
@@ -72,7 +68,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
         onClick={handleCardClick}
         className="group rounded-2xl px-3 py-2.5 transition-all duration-150 cursor-pointer flex items-center gap-3 border active:scale-[0.99] bg-white dark:bg-slate-800/90 hover:bg-emerald-50/40 dark:hover:bg-slate-800 border-slate-200/90 dark:border-slate-700/80 shadow-2xs"
       >
-        {/* Left: Verified shop photo OR uniform default storefront icon for unverified shops */}
+        {/* Left: Real shop photo for all restaurants (or culinary placeholder if none) */}
         <ShopAvatar
           restaurant={{ ...restaurant, photoUrl: resolvedShopPhotoUrl }}
           alt={loc.name}

@@ -114,12 +114,8 @@ function main() {
   console.log('====================================================================');
 
   const restaurants = parseSeedRestaurants();
-  if (!Array.isArray(restaurants) || restaurants.length === 0) {
-    console.error('[FAIL] seedRestaurants.ts contains 0 restaurants!');
-    process.exit(1);
-  }
-  if (restaurants.length > 200) {
-    console.error(`[FAIL] seedRestaurants.ts has ${restaurants.length} entries (exceeds max target 200).`);
+  if (!Array.isArray(restaurants) || restaurants.length < 200) {
+    console.error(`[FAIL] seedRestaurants.ts contains ${restaurants?.length || 0} restaurants (expected >= 200)!`);
     process.exit(1);
   }
 
@@ -167,6 +163,12 @@ function main() {
     }
 
     // 2. Strict Verification Flags
+    if (r.isVerified !== true) {
+      errors.push(`${label} Expected isVerified === true, got ${r.isVerified}`);
+    }
+    if (r.paymentStatus !== 'verified') {
+      errors.push(`${label} Expected paymentStatus === 'verified', got '${r.paymentStatus}'`);
+    }
     if (r.locationNeedsReview === true) {
       errors.push(`${label} Unverified record still has locationNeedsReview: true`);
     }
@@ -174,6 +176,12 @@ function main() {
       errors.push(
         `${label} Expected locationVerificationStatus === 'verified', got '${r.locationVerificationStatus}'`
       );
+    }
+    if (!r.phone || typeof r.phone !== 'string' || r.phone.trim().length < 8) {
+      errors.push(`${label} Missing or invalid phone: "${r.phone}"`);
+    }
+    if (typeof r.rating !== 'number' || r.rating <= 0) {
+      errors.push(`${label} Missing or invalid rating: ${r.rating}`);
     }
 
     // 3. Strict Cambodia GPS Coordinates
@@ -222,7 +230,9 @@ function main() {
     // 6. Storefront Photo Integrity
     for (const imgField of ['photoUrl', 'profileImage']) {
       const u = r[imgField] || '';
-      if (typeof u === 'string' && u.length > 0) {
+      if (typeof u !== 'string' || u.trim().length === 0) {
+        errors.push(`${label} Empty ${imgField} (all 200 restaurants must have a real photo)`);
+      } else {
         if (u.startsWith('/foods/') || u.startsWith('/restaurants/')) {
           errors.push(`${label} Forbidden dish/broken path in ${imgField}: "${u}"`);
         }

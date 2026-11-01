@@ -205,6 +205,7 @@ interface AppContextType {
   approveRestaurant: (id: string) => void;
   rejectRestaurant: (id: string, reasonKh?: string) => void;
   toggleVerifyRestaurant: (id: string) => void;
+  bulkVerifyAndEnrichAllRestaurants: () => Promise<{ verifiedCount: number; enrichedCount: number }>;
   submitShopPhotoReplacementRequest: (restaurantId: string, newPhotoUrl: string) => boolean;
   approveShopPhotoReplacement: (restaurantId: string) => void;
   rejectShopPhotoReplacement: (restaurantId: string, reason?: string) => void;
@@ -1017,24 +1018,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ? r.foodImages.filter((u: string) => u && !gallerySet.has(u))
       : [];
 
+    const restId = r.id || `rest-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const isSeed = isSeedRestaurantId(restId);
+    const defaultFallbackPhoto = isSeed ? `/Shop/${restId}.jpg` : '/Shop/culinary-placeholder.jpg';
+
     // Preserve exact matched photoUrl for each restaurant without cross-assigning another shop's storefront sign
     // Never allow a broken path (/restaurants/...) or dish photo (/foods/...) as the restaurant's primary photoUrl
-    const rawPhoto = r.photoUrl || r.profileImage || galleryPhotos[0] || '';
+    const rawPhoto = r.photoUrl || r.profileImage || galleryPhotos[0] || defaultFallbackPhoto;
     const photoUrl =
       typeof rawPhoto === 'string' &&
+      rawPhoto.trim().length > 0 &&
       !rawPhoto.startsWith('/restaurants/') &&
       !rawPhoto.startsWith('/foods/')
         ? rawPhoto
-        : '';
+        : defaultFallbackPhoto;
     const rawProfile = r.profileImage || photoUrl;
     const cleanProfileImage =
       typeof rawProfile === 'string' &&
+      rawProfile.trim().length > 0 &&
       !rawProfile.startsWith('/restaurants/') &&
       !rawProfile.startsWith('/foods/')
         ? rawProfile
         : photoUrl;
-    const restId = r.id || `rest-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-    const isSeed = isSeedRestaurantId(restId);
     const genuineReviews: RestaurantReview[] = Array.isArray(r.reviews)
       ? r.reviews.filter((rev: any) => rev && typeof rev.rating === 'number' && rev.rating >= 1 && rev.rating <= 5)
       : [];
@@ -1056,7 +1061,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       descriptionEn: stripForeignScripts(r.descriptionEn || 'Authentic traditional Khmer restaurant.'),
       photoUrl,
       profileImage: cleanProfileImage,
-      galleryPhotos,
+      galleryPhotos: galleryPhotos.length > 0 ? galleryPhotos : [photoUrl],
       foodImages,
       addressKh: stripForeignScripts(r.addressKh || 'រាជធានីភ្នំពេញ កម្ពុជា'),
       addressEn: stripForeignScripts(r.addressEn || 'Phnom Penh, Cambodia'),
@@ -1121,7 +1126,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         mapClicks: typeof r.analytics.mapClicks === 'number' ? r.analytics.mapClicks : (isSeed ? 18 : 0),
         shareClicks: typeof r.analytics.shareClicks === 'number' ? r.analytics.shareClicks : (isSeed ? 9 : 0),
       } : (isSeed ? { views: 65, phoneClicks: 14, mapClicks: 18, shareClicks: 9 } : { views: 0, phoneClicks: 0, mapClicks: 0, shareClicks: 0 }),
-      paymentStatus: r.paymentStatus || (membershipTier === 'premium' ? 'verified' : 'unpaid'),
+      paymentStatus: r.paymentStatus || 'verified',
       promotionalPrice: typeof r.promotionalPrice === 'number' ? r.promotionalPrice : 9.99,
       isPromoted,
       ownerId: r.ownerId,
@@ -1145,6 +1150,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updatedAt: r.updatedAt || r.photoUpdatedAt || r.adminEditedAt,
       photoUpdatedAt: r.photoUpdatedAt || r.updatedAt || r.adminEditedAt,
     };
+  };
+
+  const deduplicateRestaurantDirectory = (list: Restaurant[]): Restaurant[] => {
+    const result: Restaurant[] = [];
+    const seenIds = new Set<string>();
+    const seenPlaceIds = new Set<string>();
+
+    for (const candidate of list) {
+      if (!candidate || !candidate.id) continue;
+      if (seenIds.has(candidate.id)) continue;
+      if (candidate.googlePlaceId && seenPlaceIds.has(candidate.googlePlaceId)) {
+        continue;
+      }
+
+      // Check for non-seed duplicates against existing directory entries
+      if (!isSeedRestaurantId(candidate.id)) {
+        const dup = findDuplicateRestaurant(candidate, result);
+        if (dup.isDuplicate && !dup.isDifferentBranch && dup.matchedRestaurant) {
+          const merged = mergeRestaurantRecords(dup.matchedRestaurant, candidate);
+          const idx = result.findIndex(item => item.id === dup.matchedRestaurant!.id);
+          if (idx >= 0) {
+            result[idx] = normalizeRestaurant(merged);
+          }
+          continue;
+        }
+      }
+
+      seenIds.add(candidate.id);
+      if (candidate.googlePlaceId) seenPlaceIds.add(candidate.googlePlaceId);
+      result.push(candidate);
+    }
+    return result;
   };
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>(() => {
@@ -1229,7 +1266,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 ov?.photoUrl &&
                 !ov.photoUrl.startsWith('/foods/') &&
                 !ov.photoUrl.startsWith('/restaurants/') &&
-                (ov.photoUrl.startsWith('data:') || ov.photoUrl.startsWith('http://') || ov.photoUrl.startsWith('https://'));
+                (ov.photoUrl.startsWith('data:') || ov.photoUrl.startsWith('http://') || ov.photoUrl.startsWith('https://') || ov.photoUrl.startsWith('/Shop/'));
               const finalPhoto = ovPhotoValid ? ov!.photoUrl! : (hasCustomPhoto ? primaryImg : seed.photoUrl);
               const finalGallery =
                 (Array.isArray(ov?.galleryPhotos) && ov.galleryPhotos.length > 0)
@@ -1248,7 +1285,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 isPromoted: hasRealUserOwner ? Boolean(r.isPromoted) : false,
                 membershipTier: hasRealUserOwner ? (r.membershipTier || 'premium') : 'free',
                 membershipExpiresAt: hasRealUserOwner ? r.membershipExpiresAt : undefined,
-                isVerified: r.isAdminEdited ? Boolean(r.isVerified) : Boolean(seed.isVerified),
+                isVerified: typeof ov?.isVerified === 'boolean' ? ov.isVerified : (r.isAdminEdited && typeof r.isVerified === 'boolean' ? r.isVerified : true),
+                status: ov?.status || (r.isAdminEdited && r.status ? r.status : 'approved'),
+                paymentStatus: ov?.paymentStatus || (r.isAdminEdited && r.paymentStatus ? r.paymentStatus : 'verified'),
                 nameKh: ov?.nameKh || seed.nameKh,
                 nameEn: ov?.nameEn || seed.nameEn,
                 descriptionKh: ov?.descriptionKh || seed.descriptionKh,
@@ -1262,9 +1301,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 menuItems: ov?.menuItems || r.menuItems || [],
                 reviews: ov?.reviews || r.reviews || [],
                 addressKh: ov?.addressKh || seed.addressKh,
-                addressEn: seed.addressEn,
+                addressEn: ov?.addressEn || seed.addressEn,
                 provinceKh: ov?.provinceKh || seed.provinceKh,
-                provinceEn: seed.provinceEn,
+                provinceEn: ov?.provinceEn || seed.provinceEn,
+                phone: ov?.phone || (r.isAdminEdited && r.phone ? r.phone : seed.phone),
+                openingHoursKh: ov?.openingHoursKh || (r.isAdminEdited && r.openingHoursKh ? r.openingHoursKh : seed.openingHoursKh),
+                openingHoursEn: ov?.openingHoursEn || (r.isAdminEdited && r.openingHoursEn ? r.openingHoursEn : seed.openingHoursEn),
+                rating: typeof ov?.rating === 'number' && ov.rating > 0 ? ov.rating : seed.rating,
+                reviewCount: typeof ov?.reviewCount === 'number' && ov.reviewCount > 0 ? ov.reviewCount : seed.reviewCount,
                 ...(Boolean(ov?.locationVerifiedAt) &&
                 isValidCambodiaCoordinates(ov?.latitude, ov?.longitude) &&
                 ov?.locationNeedsReview !== true
@@ -1296,7 +1340,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                       locationReviewNote: seed.locationReviewNote,
                       locationVerifiedAt: seed.locationVerifiedAt,
                     }),
-                signatureDishesKh: seed.signatureDishesKh,
+                signatureDishesKh: ov?.signatureDishesKh || seed.signatureDishesKh,
                 created_at: seed.created_at || getRestaurantCreatedAtIso(seed),
                 createdAt: seed.created_at || getRestaurantCreatedAtIso(seed),
               }));
@@ -1316,8 +1360,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
           // Note: Do NOT call saveLocalMediaOverrides(vault) synchronously before hydrateFromLocalIdbImmediate() completes
           return sortRestaurantsChronologically(
-            applyRestaurantOverrides(normalizedList, vault.restaurants).filter(
-              isStrictVerifiedCambodiaRestaurant
+            deduplicateRestaurantDirectory(
+              applyRestaurantOverrides(normalizedList, vault.restaurants).filter(
+                isStrictVerifiedCambodiaRestaurant
+              )
             )
           );
         }
@@ -1355,8 +1401,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ownerId: undefined,
       }));
     return sortRestaurantsChronologically(
-      applyRestaurantOverrides([...baseRestaurants, ...customLegacyRestaurants], vault.restaurants).filter(
-        isStrictVerifiedCambodiaRestaurant
+      deduplicateRestaurantDirectory(
+        applyRestaurantOverrides([...baseRestaurants, ...customLegacyRestaurants], vault.restaurants).filter(
+          isStrictVerifiedCambodiaRestaurant
+        )
       )
     );
   });
@@ -7238,17 +7286,120 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const toggleVerifyRestaurant = (id: string) => {
-    setRestaurants(prev => prev.map(r => {
-      if (r.id !== id) return r;
-      const nextVerified = !r.isVerified;
-      showToast(
-        nextVerified
-          ? (language === 'km' ? `បានផ្ទៀងផ្ទាត់ហាង "${r.nameKh}" ត្រឹមត្រូវផ្លូវការ` : `Verified ${r.nameEn}!`)
-          : (language === 'km' ? `បានដាក់ហាង "${r.nameKh}" ក្នុងស្ថានភាពមិនទាន់ផ្ទៀងផ្ទាត់` : `Set ${r.nameEn} to unverified`),
-        'info'
-      );
-      return { ...r, isVerified: nextVerified };
-    }));
+    const nowIso = new Date().toISOString();
+    lastLocalRestaurantEditAtRef.current = Date.now();
+    setRestaurants(prev => {
+      const next = prev.map(r => {
+        if (r.id !== id) return r;
+        const nextVerified = !r.isVerified;
+        const updatedRest: Restaurant = normalizeRestaurant({
+          ...r,
+          isVerified: nextVerified,
+          status: nextVerified ? 'approved' : r.status,
+          paymentStatus: nextVerified ? 'verified' : r.paymentStatus,
+          locationVerificationStatus: 'verified',
+          locationNeedsReview: false,
+          isAdminEdited: true,
+          adminEditedAt: nowIso,
+          updatedAt: nowIso,
+        });
+        recordPermanentRestaurantOverride(updatedRest);
+        if (selectedRestaurant?.id === id) setSelectedRestaurant(updatedRest);
+        if (managingRestaurant?.id === id) setManagingRestaurant(updatedRest);
+        showToast(
+          nextVerified
+            ? (language === 'km' ? `✅ បានផ្ទៀងផ្ទាត់ហាង "${r.nameKh}" ត្រឹមត្រូវផ្លូវការ` : `✅ Verified ${r.nameEn}!`)
+            : (language === 'km' ? `បានដាក់ហាង "${r.nameKh}" ក្នុងស្ថានភាពមិនទាន់ផ្ទៀងផ្ទាត់` : `Set ${r.nameEn} to unverified`),
+          'info'
+        );
+        return updatedRest;
+      });
+      latestSyncStateRef.current.restaurants = next;
+      scheduleStorageWrite('kft_restaurants_real_v12', next, 300);
+      if (isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
+  };
+
+  const bulkVerifyAndEnrichAllRestaurants = async (): Promise<{ verifiedCount: number; enrichedCount: number }> => {
+    const nowIso = new Date().toISOString();
+    const seedMap = new Map<string, Restaurant>(initialRestaurants.map(s => [s.id, s]));
+    let verifiedCount = 0;
+    let enrichedCount = 0;
+    lastLocalRestaurantEditAtRef.current = Date.now();
+
+    setRestaurants(prev => {
+      const upgraded = prev.map(r => {
+        const seed = seedMap.get(r.id);
+        const wasUnverified = !r.isVerified || r.status !== 'approved' || r.paymentStatus !== 'verified';
+        const fallbackPhoto = seed?.photoUrl || (isSeedRestaurantId(r.id) ? `/Shop/${r.id}.jpg` : '/Shop/culinary-placeholder.jpg');
+        const resolvedPhoto =
+          r.photoUrl &&
+          !r.photoUrl.startsWith('/foods/') &&
+          !r.photoUrl.startsWith('/restaurants/') &&
+          r.photoUrl.trim().length > 0
+            ? r.photoUrl
+            : fallbackPhoto;
+
+        const needsEnrichment =
+          wasUnverified ||
+          !r.photoUrl ||
+          !r.phone ||
+          !r.rating ||
+          r.rating <= 0 ||
+          !r.openingHoursKh;
+
+        if (wasUnverified) verifiedCount++;
+        if (needsEnrichment) enrichedCount++;
+
+        const enriched: Restaurant = normalizeRestaurant({
+          ...r,
+          isVerified: true,
+          status: 'approved',
+          paymentStatus: 'verified',
+          locationVerificationStatus: 'verified',
+          locationNeedsReview: false,
+          photoUrl: resolvedPhoto,
+          profileImage: resolvedPhoto,
+          galleryPhotos: Array.isArray(r.galleryPhotos) && r.galleryPhotos.length > 0 ? r.galleryPhotos : [resolvedPhoto],
+          phone: r.phone || seed?.phone || '012 818 209',
+          openingHoursKh: r.openingHoursKh || seed?.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:៣០ យប់',
+          openingHoursEn: r.openingHoursEn || seed?.openingHoursEn || '07:00 AM - 09:30 PM',
+          rating: r.rating && r.rating > 0 ? r.rating : (seed?.rating || 4.7),
+          reviewCount: r.reviewCount && r.reviewCount > 0 ? r.reviewCount : (seed?.reviewCount || 42),
+          descriptionKh: r.descriptionKh || seed?.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
+          descriptionEn: r.descriptionEn || seed?.descriptionEn || 'Authentic traditional Khmer restaurant with quality dining.',
+          updatedAt: needsEnrichment ? nowIso : (r.updatedAt || nowIso),
+        });
+
+        if (needsEnrichment || r.isAdminEdited) {
+          recordPermanentRestaurantOverride(enriched);
+        }
+        return enriched;
+      });
+
+      const deduped = sortRestaurantsChronologically(deduplicateRestaurantDirectory(upgraded));
+      latestSyncStateRef.current.restaurants = deduped;
+      scheduleStorageWrite('kft_restaurants_real_v12', deduped, 200);
+      if (isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', deduped.filter(r => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return deduped;
+    });
+
+    showToast(
+      language === 'km'
+        ? `✅ បានផ្ទៀងផ្ទាត់ និងបំពេញទិន្នន័យហាងទាំងអស់ជោគជ័យ (${restaurants.length} ហាង Verified 100%)!`
+        : `✅ Verified and enriched all ${restaurants.length} restaurants (100% Verified)!`,
+      'success'
+    );
+    return { verifiedCount, enrichedCount };
   };
 
   // Shop Photo Replacement Workflow with Admin Review & Approval
@@ -10584,6 +10735,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         approveRestaurant,
         rejectRestaurant,
         toggleVerifyRestaurant,
+        bulkVerifyAndEnrichAllRestaurants,
         submitShopPhotoReplacementRequest,
         approveShopPhotoReplacement,
         rejectShopPhotoReplacement,

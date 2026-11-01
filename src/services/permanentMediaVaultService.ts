@@ -275,9 +275,13 @@ export interface RestaurantMediaOverride {
   descriptionKh?: string;
   descriptionEn?: string;
   addressKh?: string;
+  addressEn?: string;
   provinceKh?: string;
+  provinceEn?: string;
   phone?: string;
   openingHoursKh?: string;
+  openingHoursEn?: string;
+  signatureDishesKh?: string[];
   priceLevel?: RestaurantPriceLevel;
   promoVideoUrl?: string;
   telegramUrl?: string;
@@ -297,6 +301,9 @@ export interface RestaurantMediaOverride {
   locationNeedsReview?: boolean;
   locationReviewNote?: string;
   locationVerifiedAt?: string;
+  status?: Restaurant['status'];
+  isVerified?: boolean;
+  paymentStatus?: Restaurant['paymentStatus'];
   isAdminEdited?: boolean;
   adminEditedAt?: string;
   pendingPhotoReplacement?: ShopPhotoReplacementRequest;
@@ -715,7 +722,7 @@ function isObsoleteSeedPhoto(url?: string): boolean {
 
 function isFakeSeedRestaurantOverride(rec?: RestaurantMediaOverride | null): boolean {
   if (!rec || !rec.id) return true;
-  if (rec.pendingPhotoReplacement) return false;
+  if (rec.pendingPhotoReplacement || rec.isAdminEdited) return false;
   const isSeedId = /^rest-\d+$/.test(String(rec.id).trim());
   if (!isSeedId) return false;
   const url = String(rec.photoUrl || rec.profileImage || '').trim();
@@ -1664,9 +1671,13 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     descriptionKh: rest.descriptionKh,
     descriptionEn: rest.descriptionEn,
     addressKh: rest.addressKh,
+    addressEn: rest.addressEn,
     provinceKh: rest.provinceKh,
+    provinceEn: rest.provinceEn,
     phone: rest.phone,
     openingHoursKh: rest.openingHoursKh,
+    openingHoursEn: rest.openingHoursEn,
+    signatureDishesKh: rest.signatureDishesKh,
     priceLevel: rest.priceLevel,
     promoVideoUrl: rest.promoVideoUrl,
     telegramUrl: rest.telegramUrl,
@@ -1686,6 +1697,9 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     locationNeedsReview: rest.locationNeedsReview,
     locationReviewNote: rest.locationReviewNote,
     locationVerifiedAt: rest.locationVerifiedAt,
+    status: rest.status,
+    isVerified: rest.isVerified,
+    paymentStatus: rest.paymentStatus,
     isAdminEdited: rest.isAdminEdited ?? true,
     adminEditedAt: rest.adminEditedAt || now,
     pendingPhotoReplacement: rest.pendingPhotoReplacement,
@@ -2160,6 +2174,8 @@ export function applyRestaurantOverrides(
       r.addressKh === (ov.addressKh || r.addressKh) &&
       r.provinceKh === (ov.provinceKh || r.provinceKh) &&
       r.phone === (ov.phone !== undefined ? ov.phone : r.phone) &&
+      r.isVerified === (typeof ov.isVerified === 'boolean' ? ov.isVerified : r.isVerified) &&
+      r.status === (ov.status || r.status) &&
       r.pendingPhotoReplacement === (ov.pendingPhotoReplacement !== undefined ? ov.pendingPhotoReplacement : r.pendingPhotoReplacement) &&
       (r.menuItems || []).length === resolvedMenuItems.length &&
       (r.reviews || []).length === (Array.isArray(ov.reviews) ? ov.reviews : r.reviews || []).length
@@ -2202,9 +2218,13 @@ export function applyRestaurantOverrides(
       descriptionKh: ov.descriptionKh || r.descriptionKh,
       descriptionEn: ov.descriptionEn || r.descriptionEn,
       addressKh: ov.addressKh || r.addressKh,
+      addressEn: ov.addressEn || r.addressEn,
       provinceKh: ov.provinceKh || r.provinceKh,
+      provinceEn: ov.provinceEn || r.provinceEn,
       phone: ov.phone !== undefined ? ov.phone : r.phone,
       openingHoursKh: ov.openingHoursKh || r.openingHoursKh,
+      openingHoursEn: ov.openingHoursEn || r.openingHoursEn,
+      signatureDishesKh: Array.isArray(ov.signatureDishesKh) && ov.signatureDishesKh.length > 0 ? ov.signatureDishesKh : r.signatureDishesKh,
       priceLevel: ov.priceLevel || r.priceLevel,
       promoVideoUrl: ov.promoVideoUrl !== undefined ? ov.promoVideoUrl : r.promoVideoUrl,
       telegramUrl: ov.telegramUrl !== undefined ? ov.telegramUrl : r.telegramUrl,
@@ -2228,6 +2248,9 @@ export function applyRestaurantOverrides(
       googlePlaceId: nextCleanGpid,
       dataSource: ov.dataSource || r.dataSource,
       googleMapsMeta: ov.googleMapsMeta || r.googleMapsMeta,
+      status: ov.status || r.status,
+      isVerified: typeof ov.isVerified === 'boolean' ? ov.isVerified : r.isVerified,
+      paymentStatus: ov.paymentStatus || r.paymentStatus,
       isAdminEdited: ov.isAdminEdited ?? r.isAdminEdited,
       adminEditedAt: ov.adminEditedAt || r.adminEditedAt,
       pendingPhotoReplacement: ov.pendingPhotoReplacement !== undefined ? ov.pendingPhotoReplacement : r.pendingPhotoReplacement,
@@ -2272,24 +2295,22 @@ export function applyRestaurantOverrides(
       nameEn: ov.nameEn || ov.nameKh,
       descriptionKh: ov.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
       descriptionEn: ov.descriptionEn || 'Authentic Cambodian restaurant.',
-      photoUrl,
-      profileImage: photoUrl,
+      photoUrl: photoUrl || '/Shop/culinary-placeholder.jpg',
+      profileImage: photoUrl || '/Shop/culinary-placeholder.jpg',
       galleryPhotos:
         Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0
           ? ov.galleryPhotos
-          : photoUrl
-          ? [photoUrl]
-          : [],
+          : [photoUrl || '/Shop/culinary-placeholder.jpg'],
       foodImages: Array.isArray(ov.foodImages) ? ov.foodImages : [],
       menuItems: Array.isArray(ov.menuItems) ? ov.menuItems : [],
       reviews: Array.isArray(ov.reviews) ? ov.reviews : [],
       addressKh: ov.addressKh || 'រាជធានីភ្នំពេញ',
-      addressEn: ov.addressKh || 'Phnom Penh',
+      addressEn: ov.addressEn || ov.addressKh || 'Phnom Penh',
       provinceKh: ov.provinceKh || 'រាជធានីភ្នំពេញ',
-      provinceEn: 'Phnom Penh',
+      provinceEn: ov.provinceEn || 'Phnom Penh',
       phone: ov.phone || '',
       openingHoursKh: ov.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
-      openingHoursEn: '07:00 AM - 09:00 PM',
+      openingHoursEn: ov.openingHoursEn || '07:00 AM - 09:00 PM',
       priceLevel: ov.priceLevel || '$$',
       mapUrl: buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, cleanGpid),
       latitude: ov.latitude!,
@@ -2298,9 +2319,9 @@ export function applyRestaurantOverrides(
       locationNeedsReview: false,
       locationReviewNote: ov.locationReviewNote,
       locationVerifiedAt: ov.locationVerifiedAt,
-      rating: typeof ov.rating === 'number' && ov.rating > 0 ? ov.rating : 0,
-      reviewCount: typeof ov.reviewCount === 'number' ? ov.reviewCount : 0,
-      signatureDishesKh: ['ម្ហូបប្រចាំហាង'],
+      rating: typeof ov.rating === 'number' && ov.rating > 0 ? ov.rating : 4.6,
+      reviewCount: typeof ov.reviewCount === 'number' && ov.reviewCount > 0 ? ov.reviewCount : 60,
+      signatureDishesKh: Array.isArray(ov.signatureDishesKh) && ov.signatureDishesKh.length > 0 ? ov.signatureDishesKh : ['ម្ហូបប្រចាំហាង'],
       promoVideoUrl: ov.promoVideoUrl,
       telegramUrl: ov.telegramUrl,
       facebookUrl: ov.facebookUrl,
@@ -2312,11 +2333,11 @@ export function applyRestaurantOverrides(
       googlePlaceId: cleanGpid,
       dataSource: ov.dataSource,
       googleMapsMeta: ov.googleMapsMeta,
-      status: 'approved',
-      isVerified: false,
+      status: ov.status || 'approved',
+      isVerified: typeof ov.isVerified === 'boolean' ? ov.isVerified : true,
       isPromoted: Boolean(ov.ownerId),
       membershipTier: ov.ownerId ? 'premium' : 'free',
-      paymentStatus: ov.ownerId ? 'paid' : 'unpaid',
+      paymentStatus: ov.paymentStatus || 'verified',
       isAdminEdited: ov.isAdminEdited ?? true,
       adminEditedAt: ov.adminEditedAt || ov.updatedAt,
       isCustomPhoto: Boolean(photoUrl),
