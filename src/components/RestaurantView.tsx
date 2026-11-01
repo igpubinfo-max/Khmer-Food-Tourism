@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
-import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isStrictVerifiedCambodiaRestaurant } from '../types';
+import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isStrictVerifiedCambodiaRestaurant, hasApprovedShopPhoto, isGpipRegisteredRestaurant } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { Store, Plus, Edit2, Shield, Settings, MapPin, Globe, RefreshCw, Search, X } from 'lucide-react';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
@@ -151,7 +151,21 @@ export const RestaurantView: React.FC = () => {
       ) {
         return false;
       }
+      if (r.status === 'rejected' && r.pendingPhotoReplacement?.source === 'google_places_replacement_shop') {
+        return false;
+      }
       if (r.status !== 'approved' && currentUser?.role !== 'admin' && currentUser?.id !== r.ownerId) {
+        return false;
+      }
+      // Public Shop List shows ONLY shops with an Admin-approved real photo.
+      // Shops without a verified photo are replaced by shops that have one (Admin still sees every shop;
+      // owner-registered shops and the user's own shops always stay visible).
+      if (
+        !isAdmin &&
+        !hasApprovedShopPhoto(r) &&
+        !isGpipRegisteredRestaurant(r) &&
+        (!currentUser?.id || currentUser.id !== r.ownerId)
+      ) {
         return false;
       }
       const idStr = String(r.id);
@@ -159,7 +173,7 @@ export const RestaurantView: React.FC = () => {
       seenIds.add(idStr);
       return true;
     });
-  }, [sessionShuffledRestaurants, currentUser?.role, currentUser?.id]);
+  }, [sessionShuffledRestaurants, currentUser?.role, currentUser?.id, isAdmin]);
 
   const filteredRestaurants = useMemo(() => {
     const cleanSelProv = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();

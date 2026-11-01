@@ -4,6 +4,8 @@ import {
   isAdminAccount,
   isGpipRegisteredRestaurant,
   resolveFoodPhotoUrl,
+  getRestaurantDirectGoogleMapsUrl,
+  openExternalUrlNativeSafe,
 } from '../types';
 import { useApp } from '../context/AppContext';
 import {
@@ -37,7 +39,6 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
     restaurant,
     language,
     isAdmin,
-    setSelectedRestaurant,
     openManageMyVipStore,
     deleteRestaurant,
     trackRestaurantView,
@@ -63,7 +64,8 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
 
     const handleCardClick = () => {
       trackRestaurantView(restaurant.id);
-      setSelectedRestaurant(restaurant);
+      // Open the shop's exact location directly in Google Maps (no intermediate in-app detail page)
+      openExternalUrlNativeSafe(getRestaurantDirectGoogleMapsUrl(restaurant));
     };
 
     return (
@@ -131,7 +133,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
 
           <span
             className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 flex items-center justify-center border border-emerald-200/70 dark:border-emerald-700/50"
-            title={tr(language, 'មើលព័ត៌មានលម្អិតក្នុងកម្មវិធី', 'View full shop details', '查看店铺详情')}
+            title={tr(language, 'បើកទីតាំងហាងក្នុង Google Maps', 'Open shop location in Google Maps', '在 Google 地图中打开店铺位置')}
           >
             <ChevronRight className="w-4 h-4" />
           </span>

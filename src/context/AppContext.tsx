@@ -17,7 +17,8 @@ import {
   isStrictVerifiedCambodiaRestaurant, SEED_FOOD_PHOTO_BASELINE_MS,
   sanitizeVerifiedShopPhotoUrl, isValidGoogleMapsUrl, extractCoordsFromGoogleMapsUrl,
   AuthModalInitialView, hasAuthenticatedEmailAccount, computeFastPhotoSignature,
-  APP_VERSION_NAME, APP_BUILD_CODE
+  APP_VERSION_NAME, APP_BUILD_CODE,
+  type ShopPhotoReplacementRequest,
 } from '../types';
 import {
   verifyAbaPaymentAndReceipt,
@@ -64,6 +65,7 @@ import {
   fetchPaymentProofFromCloudOnDemand,
   mergeAndPushTransactionsToCloud,
   mergeAndPushSupportTicketsToCloud,
+  uploadBase64ImageToSupabaseStorage,
 } from '../services/supabaseService';
 import { authenticateAdminWithBiometric, setSavedAdminUsername } from '../services/biometricService';
 import {
@@ -210,7 +212,11 @@ interface AppContextType {
   submitShopPhotoReplacementRequest: (restaurantId: string, newPhotoUrl: string) => boolean;
   approveShopPhotoReplacement: (restaurantId: string) => void;
   rejectShopPhotoReplacement: (restaurantId: string, reason?: string) => void;
-
+  /** Queue Google Places photo candidates (existing shops) and brand-new replacement shops for Admin review. */
+  queueShopPhotoCandidates: (
+    candidates: Array<{ restaurantId: string; request: ShopPhotoReplacementRequest }>,
+    newShops: Restaurant[]
+  ) => { queuedPhotos: number; addedShops: number };
   // Restaurant Menu Items (Max 20 for Active Premium) & Genuine Customer Reviews
   addRestaurantMenuItem: (restaurantId: string, item: Omit<RestaurantMenuItem, 'id' | 'createdAt' | 'restaurantId'>) => boolean;
   updateRestaurantMenuItem: (restaurantId: string, item: RestaurantMenuItem) => boolean;
@@ -7552,6 +7558,111 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
+  /**
+   * Best-effort: copy an Admin-approved Google Places photo into permanent Supabase Storage so the
+   * shop thumbnail never expires or depends on the Google API key. Keeps the Google URL if copying fails.
+   */
+  const makeShopPhotoPermanent = async (restaurantId: string, remoteUrl: string) => {
+    if (!isSupabaseConfigured() || !remoteUrl.startsWith('http')) return;
+    try {
+      const res = await fetch(remoteUrl);
+      if (!res.ok) return;
+      const blob = await res.blob();
+      if (!blob.type.startsWith('image/') || blob.size > 3_000_000) return;
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const fr = new FileReader();
+        fr.onload = () => resolve(String(fr.result || ''));
+        fr.onerror = () => reject(fr.error);
+        fr.readAsDataURL(blob);
+      });
+      const permanentUrl = await uploadBase64ImageToSupabaseStorage('restaurants', restaurantId, dataUrl);
+      if (!permanentUrl) return;
+      setRestaurants(prev => {
+        const target = prev.find(r => r.id === restaurantId);
+        if (!target || target.photoUrl !== remoteUrl) return prev;
+        const nowIso = new Date().toISOString();
+        const updated = normalizeRestaurant({
+          ...target,
+          photoUrl: permanentUrl,
+          profileImage: permanentUrl,
+          galleryPhotos: [permanentUrl],
+          photoUpdatedAt: nowIso,
+          updatedAt: nowIso,
+        });
+        recordPermanentRestaurantOverride(updated);
+        const next = prev.map(r => (r.id === restaurantId ? updated : r));
+        latestSyncStateRef.current.restaurants = next;
+        scheduleStorageWrite('kft_restaurants_real_v12', next, 300);
+        if (!isSeedRestaurantId(restaurantId)) {
+          try {
+            pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          } catch {}
+        }
+        return next;
+      });
+    } catch {
+      // Keep the approved Google Places URL — it still renders correctly.
+    }
+  };
+
+  /**
+   * Queue Google Places photo candidates for existing shops and add brand-new replacement shops.
+   * Nothing becomes visible to users until the Admin approves the photo (shops without an approved
+   * photo are hidden from the public Shop List).
+   */
+  const queueShopPhotoCandidates = (
+    candidates: Array<{ restaurantId: string; request: ShopPhotoReplacementRequest }>,
+    newShops: Restaurant[]
+  ): { queuedPhotos: number; addedShops: number } => {
+    const nowIso = new Date().toISOString();
+    const candMap = new Map(candidates.map(c => [c.restaurantId, c.request]));
+    const existingIds = new Set(restaurants.map(r => r.id));
+    const existingPlaceIds = new Set(
+      restaurants.map(r => r.googlePlaceId || r.googleMapsMeta?.placeId || '').filter(Boolean)
+    );
+
+    const updatedById = new Map<string, Restaurant>();
+    for (const r of restaurants) {
+      const req = candMap.get(r.id);
+      if (!req || r.pendingPhotoReplacement?.status === 'pending') continue;
+      updatedById.set(r.id, normalizeRestaurant({ ...r, pendingPhotoReplacement: req, updatedAt: nowIso }));
+    }
+    const added: Restaurant[] = [];
+    for (const shop of newShops) {
+      const placeId = shop.googlePlaceId || shop.googleMapsMeta?.placeId || '';
+      if (existingIds.has(shop.id) || (placeId && existingPlaceIds.has(placeId))) continue;
+      const normalized = normalizeRestaurant(shop);
+      added.push(normalized);
+      existingIds.add(normalized.id);
+      if (placeId) existingPlaceIds.add(placeId);
+    }
+    if (updatedById.size === 0 && added.length === 0) {
+      return { queuedPhotos: 0, addedShops: 0 };
+    }
+
+    lastLocalRestaurantEditAtRef.current = Date.now();
+    updatedById.forEach(rec => recordPermanentRestaurantOverride(rec));
+    added.forEach(rec => recordPermanentRestaurantOverride(rec));
+
+    setRestaurants(prev => {
+      const prevIds = new Set(prev.map(r => r.id));
+      const next = [
+        ...prev.map(r => updatedById.get(r.id) || r),
+        ...added.filter(r => !prevIds.has(r.id)),
+      ];
+      latestSyncStateRef.current.restaurants = next;
+      scheduleStorageWrite('kft_restaurants_real_v12', next, 300);
+      if (isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
+
+    return { queuedPhotos: updatedById.size, addedShops: added.length };
+  };
+
   const approveShopPhotoReplacement = (restaurantId: string) => {
     const targetRest = restaurants.find(r => r.id === restaurantId);
     if (!targetRest || !targetRest.pendingPhotoReplacement?.newPhotoUrl) return;
@@ -7559,9 +7670,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const nowIso = new Date().toISOString();
     const req = targetRest.pendingPhotoReplacement;
     const newPhoto = req.newPhotoUrl;
+    const isGooglePlacesSource =
+      req.source === 'google_places_match' || req.source === 'google_places_replacement_shop';
 
     const approvedRest: Restaurant = normalizeRestaurant({
       ...targetRest,
+      ...(req.source === 'google_places_replacement_shop'
+        ? { status: 'approved', isVerified: true, approvedAt: nowIso }
+        : {}),
       photoUrl: newPhoto,
       profileImage: newPhoto,
       galleryPhotos: [newPhoto],
@@ -7594,6 +7710,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
     if (selectedRestaurant?.id === restaurantId) setSelectedRestaurant(approvedRest);
     if (managingRestaurant?.id === restaurantId) setManagingRestaurant(approvedRest);
+
+    if (isGooglePlacesSource) {
+      void makeShopPhotoPermanent(restaurantId, approvedRest.photoUrl);
+      showToast(
+        language === 'km'
+          ? `✅ បានអនុម័តរូបភាព Google Maps សម្រាប់ «${targetRest.nameKh}» — ហាងនេះឥឡូវបង្ហាញក្នុងបញ្ជីហាង!`
+          : `✅ Approved Google Maps photo for "${targetRest.nameEn || targetRest.nameKh}" — now visible in the Shop List!`,
+        'success'
+      );
+      return;
+    }
 
     setNotifications(prev => [
       {
@@ -7633,8 +7760,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         : 'Photo does not meet shop image guidelines — original photo kept.');
 
     // Keep original approved photoUrl and profileImage untouched
+    const isGooglePlacesSource =
+      req.source === 'google_places_match' || req.source === 'google_places_replacement_shop';
     const rejectedRest: Restaurant = normalizeRestaurant({
       ...targetRest,
+      // A rejected Google replacement shop is removed from the directory (never shown to users)
+      ...(req.source === 'google_places_replacement_shop' ? { status: 'rejected', isVerified: false } : {}),
       pendingPhotoReplacement: {
         ...req,
         status: 'rejected',
@@ -7661,6 +7792,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
     if (selectedRestaurant?.id === restaurantId) setSelectedRestaurant(rejectedRest);
     if (managingRestaurant?.id === restaurantId) setManagingRestaurant(rejectedRest);
+
+    if (isGooglePlacesSource) {
+      showToast(
+        language === 'km'
+          ? `🚫 បានបដិសេធរូបភាព Google Maps សម្រាប់ «${targetRest.nameKh}» — មិនបង្ហាញជូនអ្នកប្រើប្រាស់ទេ។`
+          : `🚫 Rejected Google Maps photo for "${targetRest.nameEn || targetRest.nameKh}" — it will not be shown to users.`,
+        'info'
+      );
+      return;
+    }
 
     setNotifications(prev => [
       {
@@ -10751,6 +10892,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         submitShopPhotoReplacementRequest,
         approveShopPhotoReplacement,
         rejectShopPhotoReplacement,
+        queueShopPhotoCandidates,
         addRestaurantMenuItem,
         updateRestaurantMenuItem,
         deleteRestaurantMenuItem,

@@ -17,6 +17,7 @@ import {
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession, getOfficialOwnershipCertificate, verifyAppOwnershipAndDomainIntegrity } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
 import { ShopAvatar } from './icons/DefaultShopIcon';
+import { AdminShopPhotoFinderPanel } from './AdminShopPhotoFinderPanel';
 import { generateAuthenticRecipeByDishName } from '../utils/khmerRecipeGenerator';
 import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
 import { TouristImageModal } from './TouristImageModal';
@@ -285,9 +286,12 @@ export const AdminDashboard: React.FC = () => {
   const pendingPhotoReplacementRestaurants = restaurants.filter(
     r => r.pendingPhotoReplacement?.status === 'pending'
   );
-  const reviewedPhotoReplacementRestaurants = restaurants.filter(
-    r => r.pendingPhotoReplacement && r.pendingPhotoReplacement.status !== 'pending'
-  );
+  const reviewedPhotoReplacementRestaurants = restaurants
+    .filter(r => r.pendingPhotoReplacement && r.pendingPhotoReplacement.status !== 'pending')
+    .sort((a, b) =>
+      String(b.pendingPhotoReplacement?.reviewedAt || '').localeCompare(String(a.pendingPhotoReplacement?.reviewedAt || ''))
+    )
+    .slice(0, 12);
   const verifiedRestaurantsCount = restaurants.filter(r => r.isVerified).length;
   const pendingTxns = transactions.filter(
     t => t.status === 'pending_verification' || t.status === 'needs_more_info'
@@ -2410,6 +2414,9 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               )}
 
+              {/* Google Places Shop Photo Finder (auto-find real photos / replace photo-less shops) */}
+              <AdminShopPhotoFinderPanel />
+
               {/* Pending & Recently Reviewed Shop Photo Replacement Requests */}
               {(pendingPhotoReplacementRestaurants.length > 0 || reviewedPhotoReplacementRestaurants.length > 0) && (
                 <div
@@ -2507,13 +2514,31 @@ export const AdminDashboard: React.FC = () => {
                           <div className="grid grid-cols-2 gap-2.5">
                             <div className="p-2 rounded-xl bg-slate-50 dark:bg-stone-800/80 border border-slate-200 dark:border-stone-700">
                               <span className="block text-[10px] font-bold text-slate-600 dark:text-stone-300 font-khmer mb-1">
-                                {isKm ? '១. រូបភាពហាងកំពុងបង្ហាញ (Approved)' : '1. Active Approved Shop Photo'}
+                                {req.source === 'google_places_replacement_shop'
+                                  ? isKm
+                                    ? '១. ហាងគ្មានរូបភាពដែលត្រូវជំនួស'
+                                    : '1. Photo-less shop being replaced'
+                                  : isKm
+                                  ? '១. រូបភាពហាងកំពុងបង្ហាញ (Approved)'
+                                  : '1. Active Approved Shop Photo'}
                               </span>
-                              <img
-                                src={rest.photoUrl}
-                                alt="Current Approved"
-                                className="w-full h-24 object-cover rounded-lg border border-slate-200 dark:border-stone-700"
-                              />
+                              {req.source === 'google_places_replacement_shop' ? (
+                                <div className="w-full h-24 rounded-lg border border-slate-200 dark:border-stone-700 flex flex-col items-center justify-center gap-1 p-1 text-center">
+                                  <ShopAvatar
+                                    restaurant={{ id: req.replacesRestaurantId, photoUrl: '', nameKh: req.replacesRestaurantName || '', nameEn: '', isVerified: false }}
+                                    className="w-10 h-10 rounded-lg"
+                                  />
+                                  <span className="text-[10px] font-bold text-slate-700 dark:text-stone-200 font-khmer line-clamp-2">
+                                    {req.replacesRestaurantName || '—'}
+                                  </span>
+                                </div>
+                              ) : (
+                                <ShopAvatar
+                                  restaurant={rest}
+                                  alt="Current Approved"
+                                  className="w-full h-24 rounded-lg border border-slate-200 dark:border-stone-700"
+                                />
+                              )}
                             </div>
                             <div className="p-2 rounded-xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/70">
                               <span className="block text-[10px] font-bold text-amber-800 dark:text-amber-300 font-khmer mb-1">
@@ -2526,6 +2551,58 @@ export const AdminDashboard: React.FC = () => {
                               />
                             </div>
                           </div>
+
+                          {/* Google Places source & match evidence so Admin can verify the photo belongs to this shop */}
+                          {(req.source === 'google_places_match' || req.source === 'google_places_replacement_shop') && (
+                            <div className="p-2 rounded-lg bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800/60 text-[10px] font-khmer space-y-0.5 text-slate-700 dark:text-stone-200">
+                              <div className="font-bold text-sky-800 dark:text-sky-300">
+                                {req.source === 'google_places_match'
+                                  ? isKm
+                                    ? '🔍 រូបភាពពី Google Maps (ហាងដដែល)'
+                                    : '🔍 Google Maps photo (same shop match)'
+                                  : isKm
+                                  ? '🔄 ហាងថ្មីពី Google Maps (ជំនួសហាងគ្មានរូបភាព)'
+                                  : '🔄 New shop from Google Maps (replaces a photo-less shop)'}
+                              </div>
+                              {req.matchedPlaceName && (
+                                <div>
+                                  <span className="text-slate-400">{isKm ? 'ឈ្មោះលើ Google៖ ' : 'Google name: '}</span>
+                                  <span className="font-bold">{req.matchedPlaceName}</span>
+                                </div>
+                              )}
+                              {req.matchedPlaceAddress && (
+                                <div>
+                                  <span className="text-slate-400">{isKm ? 'អាសយដ្ឋាន៖ ' : 'Address: '}</span>
+                                  {req.matchedPlaceAddress}
+                                </div>
+                              )}
+                              <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                                {typeof req.matchScore === 'number' && req.source === 'google_places_match' && (
+                                  <span>
+                                    {isKm ? 'ឈ្មោះត្រូវគ្នា៖ ' : 'Name match: '}
+                                    <b>{req.matchScore}%</b>
+                                  </span>
+                                )}
+                                {typeof req.matchDistanceMeters === 'number' && (
+                                  <span>
+                                    {isKm ? 'ចម្ងាយពី GPS ហាង៖ ' : 'Distance from shop GPS: '}
+                                    <b>{req.matchDistanceMeters} m</b>
+                                  </span>
+                                )}
+                                {req.photoAttribution && <span className="text-slate-400">📷 {req.photoAttribution}</span>}
+                                {req.matchedGoogleMapsUrl && (
+                                  <a
+                                    href={req.matchedGoogleMapsUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sky-700 dark:text-sky-300 font-bold underline"
+                                  >
+                                    {isKm ? 'មើលលើ Google Maps' : 'Open in Google Maps'}
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          )}
 
                           {/* Audit timestamps & Admin Decision */}
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 text-[10px] font-khmer bg-slate-50 dark:bg-stone-800/60 p-2 rounded-lg border border-slate-200/70 dark:border-stone-700">

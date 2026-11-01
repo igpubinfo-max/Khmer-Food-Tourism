@@ -2411,7 +2411,7 @@ export async function verifyGooglePlacesApiStatus(): Promise<{
 /**
  * Map a raw Google Places API (New v1) place object into a complete GooglePlaceCachedItem (Requirements 5 & 8)
  */
-function mapRawGooglePlaceV1ToCachedItem(
+export function mapRawGooglePlaceV1ToCachedItem(
   p: any,
   apiKey: string,
   fallbackCategory?: GooglePlaceSearchCategory,

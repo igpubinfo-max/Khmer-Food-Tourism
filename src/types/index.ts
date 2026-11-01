@@ -1,7 +1,7 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1310;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1312;
 export const APP_RELEASE_DATE = '2026-11-01';
 
 /**
@@ -1050,6 +1050,22 @@ export interface ShopPhotoReplacementRequest {
   rejectionReason?: string;
   submittedByUserId?: string;
   submittedByName?: string;
+  reviewedBy?: string;
+  /** Where the candidate photo came from (owner upload vs automatic Google Places lookup). */
+  source?: 'owner_upload' | 'google_places_match' | 'google_places_replacement_shop';
+  /** Google Place that the candidate photo belongs to (for Admin verification). */
+  matchedGooglePlaceId?: string;
+  matchedPlaceName?: string;
+  matchedPlaceAddress?: string;
+  matchedGoogleMapsUrl?: string;
+  /** Distance between the shop's saved GPS and the matched Google Place (meters). */
+  matchDistanceMeters?: number;
+  /** 0–100 name-similarity confidence between the shop and the matched Google Place. */
+  matchScore?: number;
+  photoAttribution?: string;
+  /** For brand-new shops imported to replace a shop that has no verified photo. */
+  replacesRestaurantId?: string;
+  replacesRestaurantName?: string;
 }
 
 export interface Restaurant {
@@ -1552,6 +1568,37 @@ export const getRestaurantGoogleExternalUrl = (
   }
 
   return '';
+};
+
+/**
+ * True when the shop has an Admin-approved, verified shop photo (bundled verified seed photo,
+ * approved owner upload, or Admin-approved Google Places photo). Pending candidates do NOT count.
+ */
+export const hasApprovedShopPhoto = (
+  restaurant?: Pick<Restaurant, 'id' | 'photoUrl' | 'profileImage'> | null
+): boolean => {
+  if (!restaurant) return false;
+  return Boolean(
+    sanitizeRestaurantShopPhoto(restaurant.id, restaurant.photoUrl || restaurant.profileImage || '')
+  );
+};
+
+/**
+ * Direct Google Maps URL for a shop row tap: the exact verified pin/place when available,
+ * otherwise a Google Maps search for that exact shop name + province (never a random pin).
+ */
+export const getRestaurantDirectGoogleMapsUrl = (restaurant: Partial<Restaurant>): string => {
+  const verified = getRestaurantGoogleExternalUrl(restaurant, 'maps');
+  if (verified) return verified;
+  const name = (restaurant.nameEn || restaurant.nameKh || '').trim();
+  const province = (restaurant.provinceEn || restaurant.provinceKh || '').trim();
+  const query = [name, province, 'Cambodia'].filter(Boolean).join(' ');
+  const placeId = restaurant.googlePlaceId || restaurant.googleMapsMeta?.placeId;
+  let url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  if (isValidOfficialGooglePlaceId(placeId) && placeId!.trim().startsWith('ChIJ')) {
+    url += `&query_place_id=${encodeURIComponent(placeId!.trim())}`;
+  }
+  return url;
 };
 
 export const openRestaurantGoogleExternal = (
