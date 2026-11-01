@@ -585,17 +585,10 @@ export const HomeView: React.FC = () => {
                             (rest.ownerId === currentUser.id ||
                               (currentUser.legacyIds && rest.ownerId && currentUser.legacyIds.includes(rest.ownerId)) ||
                               (currentUser.email && rest.ownerEmail && currentUser.email.toLowerCase() === rest.ownerEmail.toLowerCase())));
-                        const isGpipRest = isGpipRegisteredRestaurant(rest);
                         return (
                           <div
                             key={`rest-${rest.id}`}
-                            onClick={() => {
-                              if (isGpipRest) {
-                                setSelectedRestaurant(rest);
-                              } else {
-                                openRestaurantGoogleExternal(rest, 'maps');
-                              }
-                            }}
+                            onClick={() => setSelectedRestaurant(rest)}
                             className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-600 flex items-center justify-between gap-3 cursor-pointer transition group"
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
@@ -606,20 +599,16 @@ export const HomeView: React.FC = () => {
                               />
                               <div className="min-w-0">
                                 <div className="flex items-center gap-1.5 flex-wrap">
-                                  {isGpipRest && (
-                                    <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 text-[10px] font-bold">
-                                      {tr(language, 'ហាងអាហារ', 'Restaurant', '餐厅')}
-                                    </span>
-                                  )}
+                                  <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 text-[10px] font-bold">
+                                    {tr(language, 'ហាងអាហារ', 'Restaurant', '餐厅')}
+                                  </span>
                                   <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
                                     {locR.name}
                                   </h4>
                                 </div>
-                                {isGpipRest && (
-                                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                                    {locR.address} {rest.phone ? `• ${rest.phone}` : ''} {distKm ? `• ${distKm} km` : ''}
-                                  </p>
-                                )}
+                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                  {locR.address} {rest.phone ? `• ${rest.phone}` : ''} {distKm ? `• ${distKm} km` : ''}
+                                </p>
                               </div>
                             </div>
                             <div className="flex items-center gap-1.5 shrink-0">

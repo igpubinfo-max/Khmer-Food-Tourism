@@ -253,11 +253,7 @@ export const GuideView: React.FC = () => {
   const openRestaurant = useCallback(
     (r: Restaurant) => {
       trackRestaurantView(r.id);
-      if (isGpipRegisteredRestaurant(r)) {
-        setSelectedRestaurant(r);
-      } else {
-        openRestaurantGoogleExternal(r, 'maps');
-      }
+      setSelectedRestaurant(r);
     },
     [trackRestaurantView, setSelectedRestaurant]
   );

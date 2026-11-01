@@ -26,6 +26,7 @@ import {
   GoogleMapsPlaceMetadata,
   ShopPhotoReplacementRequest,
   LocationVerificationStatus,
+  APP_BUILD_CODE,
   SEED_FOOD_PHOTO_BASELINE_ISO,
   SEED_FOOD_PHOTO_BASELINE_MS,
   isSeedRestaurantId,
@@ -139,6 +140,7 @@ export const VAULT_KEYS = {
   FOOD_REVISION_LEDGER: 'kft_food_revision_ledger_v1',
   PENDING_CLOUD_QUEUE: 'kft_pending_media_cloud_queue_v1',
   CLOUD_ROW_SEEN: 'kft_cloud_row_seen_v1',
+  LAST_SYNCED_BUILD: 'kft_media_vault_last_build_v1',
   RESTAURANTS: 'kft_permanent_restaurant_overrides_v1',
   DELETED_RESTAURANTS: 'kft_deleted_restaurants_v1',
   DESTINATIONS: 'kft_permanent_destination_overrides_v1',
@@ -166,6 +168,7 @@ export interface PendingMediaCloudQueueItem {
 export interface FoodMediaOverride {
   id: string;
   photoUrl: string;
+  cloudStorageUrl?: string;
   photoHash?: string;
   revision?: number;
   adminApprovedAt?: string;
@@ -1036,10 +1039,13 @@ export function mergeOverrideBundles(
         const timeA = getRecordEffectiveMs(itemA);
         const timeB = getRecordEffectiveMs(itemB);
 
-        // Strictly newer revision / updatedAt timestamp ALWAYS wins as the single source of truth.
-        // Never allow an older record, older backup, or older http:/data: URL to overwrite a newer approved image.
+        // Strictly prioritize the latest Admin-approved timestamp (`adminApprovedAt` / `updatedAt`) as the single source of truth,
+        // using `revision` to break same-second ties. This guarantees a fresh mobile Admin image replacement (even after an APK
+        // reinstall or cache clear where local revision starts at 1) NEVER gets overwritten by an older cached/cloud revision!
         let bWins: boolean;
-        if (revA > 0 && revB > 0 && revA !== revB) {
+        if (timeA > 0 && timeB > 0 && Math.abs(timeB - timeA) > 1000) {
+          bWins = timeB > timeA;
+        } else if (revA > 0 && revB > 0 && revA !== revB) {
           bWins = revB > revA;
         } else if (timeA > 0 && timeB > 0 && timeA !== timeB) {
           bWins = timeB > timeA;
@@ -1049,7 +1055,41 @@ export function mergeOverrideBundles(
           bWins = timeB >= timeA;
         }
 
-        out[id] = bWins ? { ...itemA, ...itemB } : { ...itemB, ...itemA };
+        const winner = bWins ? itemB : itemA;
+        const loser = bWins ? itemA : itemB;
+        const mergedRecord: any = { ...loser, ...winner };
+        // Preserve non-empty text/recipe fields from `loser` if omitted on `winner`
+        for (const field of [
+          'nameKh',
+          'nameEn',
+          'categorySlug',
+          'categoryKh',
+          'categoryEn',
+          'descriptionKh',
+          'descriptionEn',
+          'cookTime',
+          'servings',
+          'difficulty',
+        ]) {
+          if (!mergedRecord[field] && (loser as any)[field]) {
+            mergedRecord[field] = (loser as any)[field];
+          }
+        }
+        if (
+          (!Array.isArray(mergedRecord.ingredients) || mergedRecord.ingredients.length === 0) &&
+          Array.isArray((loser as any).ingredients) &&
+          (loser as any).ingredients.length > 0
+        ) {
+          mergedRecord.ingredients = (loser as any).ingredients;
+        }
+        if (
+          (!Array.isArray(mergedRecord.steps) || mergedRecord.steps.length === 0) &&
+          Array.isArray((loser as any).steps) &&
+          (loser as any).steps.length > 0
+        ) {
+          mergedRecord.steps = (loser as any).steps;
+        }
+        out[id] = mergedRecord as T;
       }
     }
     return out;
@@ -1139,25 +1179,110 @@ async function cleanupOutdatedLegacyMasterCloudEntry(
   } catch {}
 }
 
+const persistentMediaVaultSubscribers = new Set<(bundle: AllMediaOverridesBundle) => void>();
+
+export function subscribeMediaVaultUpdates(
+  listener: (bundle: AllMediaOverridesBundle) => void
+): () => void {
+  persistentMediaVaultSubscribers.add(listener);
+  return () => {
+    persistentMediaVaultSubscribers.delete(listener);
+  };
+}
+
+function notifyPersistentMediaVaultSubscribers(bundle: AllMediaOverridesBundle): void {
+  for (const fn of Array.from(persistentMediaVaultSubscribers)) {
+    try {
+      fn(bundle);
+    } catch {}
+  }
+}
+
 /**
  * Push a single record override to Supabase Storage (if base64 & bucket available) and its dedicated
  * Supabase KV key (`kft_ov_<type>_<id>`).
- * Uses atomic per-record upsert + persistent retry queue (`kft_pending_media_cloud_queue_v1`)
- * so replacements are permanently saved across restarts, offline periods, or temporary quota limits.
+ * Uses atomic per-record upsert + remote monotonic revision guard + persistent retry queue (`kft_pending_media_cloud_queue_v1`)
+ * so replacements are permanently saved across restarts, offline periods, app updates, or APK reinstalls.
  */
 async function syncSingleOverrideRecordToCloud(
   category: 'food' | 'rest' | 'dest' | 'trend',
   recordId: string,
   overridePayload: any,
-  _localBundle?: AllMediaOverridesBundle
+  _localBundle?: AllMediaOverridesBundle,
+  options?: { isLiveAdminSave?: boolean }
 ): Promise<boolean> {
-  const rev = Number(overridePayload?.revision || 1);
+  let rev = Number(overridePayload?.revision || 1);
   if (!isSupabaseConfigured()) return false;
   const perRecordKey = `${VAULT_KEYS.CLOUD_RECORD_PREFIX}${category}_${recordId}`;
 
   let payloadToPush = { ...overridePayload };
 
-  // 1. If image is inline base64, try uploading to Supabase Cloud Storage first for permanent CDN URL
+  // 0. For food & trending items, inspect existing cloud record first so:
+  //    a) An older queued offline item never overwrites a newer Admin-approved cloud image, AND
+  //    b) A fresh live Admin replacement (even from a newly installed mobile APK with empty local storage)
+  //       ALWAYS gets a strictly higher monotonic revision & timestamp than any previous cloud record!
+  if (category === 'food' || category === 'trend') {
+    try {
+      const remoteExisting = await pullCloudDocument<any>(perRecordKey, 6000);
+      if (remoteExisting && remoteExisting.id === recordId) {
+        const remoteMs = Math.max(
+          remoteExisting.adminApprovedAt ? Date.parse(remoteExisting.adminApprovedAt) || 0 : 0,
+          remoteExisting.updatedAt ? Date.parse(remoteExisting.updatedAt) || 0 : 0
+        );
+        const localMs = Math.max(
+          payloadToPush.adminApprovedAt ? Date.parse(payloadToPush.adminApprovedAt) || 0 : 0,
+          payloadToPush.updatedAt ? Date.parse(payloadToPush.updatedAt) || 0 : 0
+        );
+        const remoteRev = Number(remoteExisting.revision || 0);
+
+        if (!options?.isLiveAdminSave && remoteMs > localMs + 5000) {
+          // Remote cloud already has a strictly newer Admin-approved image than this queued background item — adopt remote!
+          dequeuePendingMediaCloudSync(category, recordId, rev);
+          const curBundle = loadLocalMediaOverrides();
+          if (category === 'food' && !isRejectedLegacyFoodOverridePhoto(recordId, remoteExisting)) {
+            const adoptedBundle = mergeOverrideBundles(curBundle, { foods: { [recordId]: remoteExisting } });
+            inMemoryMasterBundle = adoptedBundle;
+            await saveSingleRecordToIdb(`food:${recordId}`, adoptedBundle.foods[recordId]).catch(() => {});
+            saveLocalMediaOverrides(adoptedBundle);
+            notifyPersistentMediaVaultSubscribers(adoptedBundle);
+          }
+          return true;
+        }
+
+        // Monotonically advance revision & timestamp above remoteExisting so no older device cache can ever beat this save!
+        const nextMonotonicRev = Math.max(rev, remoteRev + 1);
+        const nextMonotonicIso = new Date(Math.max(Date.now(), localMs, remoteMs + 1000)).toISOString();
+        rev = nextMonotonicRev;
+        payloadToPush = {
+          ...remoteExisting,
+          ...payloadToPush,
+          revision: nextMonotonicRev,
+          adminApprovedAt: nextMonotonicIso,
+          updatedAt: nextMonotonicIso,
+        };
+        if (category === 'food') {
+          if (
+            (!Array.isArray(payloadToPush.ingredients) || payloadToPush.ingredients.length === 0) &&
+            Array.isArray(remoteExisting.ingredients) &&
+            remoteExisting.ingredients.length > 0
+          ) {
+            payloadToPush.ingredients = remoteExisting.ingredients;
+          }
+          if (
+            (!Array.isArray(payloadToPush.steps) || payloadToPush.steps.length === 0) &&
+            Array.isArray(remoteExisting.steps) &&
+            remoteExisting.steps.length > 0
+          ) {
+            payloadToPush.steps = remoteExisting.steps;
+          }
+        }
+      }
+    } catch {
+      // Proceed cleanly even if pre-flight read timed out
+    }
+  }
+
+  // 1. If image is inline base64, upload permanently to Supabase Cloud Storage (`food-media` bucket) first
   if (typeof payloadToPush.photoUrl === 'string' && payloadToPush.photoUrl.startsWith('data:image/')) {
     const folder =
       category === 'food'
@@ -1170,12 +1295,17 @@ async function syncSingleOverrideRecordToCloud(
     const uploadedPublicUrl = await uploadBase64ImageToSupabaseStorage(
       folder,
       recordId,
-      payloadToPush.photoUrl
+      payloadToPush.photoUrl,
+      20000,
+      rev
     );
     if (uploadedPublicUrl) {
+      const cloudHash = computeFastPhotoSignature(uploadedPublicUrl);
       payloadToPush = {
         ...payloadToPush,
         photoUrl: uploadedPublicUrl,
+        cloudStorageUrl: uploadedPublicUrl,
+        photoHash: cloudHash,
         ...(category === 'rest' ? { profileImage: uploadedPublicUrl } : {}),
       };
     }
@@ -1187,9 +1317,7 @@ async function syncSingleOverrideRecordToCloud(
       if (ok) {
         // Confirmed safely saved to cloud! Now update revision ledger, dequeue retry item, and clean outdated refs.
         dequeuePendingMediaCloudSync(category, recordId, rev);
-        const seen = loadSeenCloudRowTimestamps();
-        seen[perRecordKey] = payloadToPush.updatedAt || new Date().toISOString();
-        saveSeenCloudRowTimestamps(seen);
+        dequeuePendingMediaCloudSync(category, recordId, Number(overridePayload?.revision || 1));
 
         if (category === 'food') {
           const ledger = loadFoodRevisionLedger();
@@ -1209,24 +1337,24 @@ async function syncSingleOverrideRecordToCloud(
             };
             saveFoodRevisionLedger(ledger);
           }
-          // Only replace local base64 with cloud Storage URL AFTER confirming both Storage + KV save succeeded
-          // AND only if no newer revision was created by Admin while the upload was in flight!
+          // Only replace local base64 / revision with cloud Storage URL AFTER confirming both Storage + DB save succeeded
+          // AND only if no newer local revision was created by Admin while the upload was in flight!
           const latestBundle = loadLocalMediaOverrides();
-          if (
-            payloadToPush.photoUrl !== overridePayload.photoUrl &&
-            payloadToPush.photoUrl?.startsWith('https://') &&
-            Number(latestBundle.foods[recordId]?.revision || 0) === rev
-          ) {
+          const currentLocalRev = Number(latestBundle.foods[recordId]?.revision || 0);
+          const origRev = Number(overridePayload?.revision || 1);
+          if (currentLocalRev <= origRev || currentLocalRev <= rev) {
             const upgradedBundle: AllMediaOverridesBundle = {
               ...latestBundle,
               foods: {
                 ...latestBundle.foods,
                 [recordId]: payloadToPush,
               },
+              updatedAt: payloadToPush.updatedAt || new Date().toISOString(),
             };
             inMemoryMasterBundle = upgradedBundle;
             await saveSingleRecordToIdb(`food:${recordId}`, payloadToPush);
             saveLocalMediaOverrides(upgradedBundle);
+            notifyPersistentMediaVaultSubscribers(upgradedBundle);
           }
           cleanupOutdatedLegacyMasterCloudEntry('foods', recordId).catch(() => {});
         } else if (category === 'trend') {
@@ -1236,9 +1364,6 @@ async function syncSingleOverrideRecordToCloud(
       }
     } catch (err) {
       console.warn(`syncSingleOverrideRecordToCloud(${perRecordKey}) attempt ${attempt} warning:`, err);
-    }
-    if (isSupabaseEgressCooldownActive()) {
-      break;
     }
     if (attempt < 3) {
       await new Promise((r) => setTimeout(r, 1200 * attempt));
@@ -1292,15 +1417,22 @@ export async function flushPendingMediaCloudQueue(): Promise<number> {
  *   1. Authoritative Food Revision Ledger (`kft_food_revision_ledger_v1`)
  *   2. Atomic Per-Record IndexedDB (`food:<id>`) & Master Bundle (`master_bundle`)
  *   3. Quota-Safe LocalStorage (`VAULT_KEYS.FOODS`)
- *   4. Persistent Cloud Sync Queue + Supabase Storage & KV (`kft_ov_food_<id>`)
+ *   4. Persistent Cloud Sync Queue + Supabase Storage (`food-media/foods/...`) & KV (`kft_ov_food_<id>`)
+ *
+ * Preserves all existing Admin-edited food names, descriptions, categories, recipes (`ingredients`, `steps`),
+ * and prices when replacing only the food image.
  */
-export function recordPermanentFoodOverride(food: FoodItem): Promise<FoodMediaOverride> {
+export function saveAdminFoodOverridePermanently(
+  food: FoodItem,
+  options?: { awaitCloud?: boolean }
+): Promise<{ override: FoodMediaOverride; cloudSynced: boolean }> {
   const bundle = loadLocalMediaOverrides();
   const ledger = loadFoodRevisionLedger();
   const prevOv = bundle.foods[food.id];
   const prevLedger = ledger[food.id];
   const nextRevision = Math.max(Number(prevOv?.revision || 0), Number(prevLedger?.revision || 0)) + 1;
   const prevMs = Math.max(
+    prevOv?.adminApprovedAt ? Date.parse(prevOv.adminApprovedAt) || 0 : 0,
     prevOv?.updatedAt ? Date.parse(prevOv.updatedAt) || 0 : 0,
     prevLedger?.updatedAt ? Date.parse(prevLedger.updatedAt) || 0 : 0
   );
@@ -1309,30 +1441,49 @@ export function recordPermanentFoodOverride(food: FoodItem): Promise<FoodMediaOv
   const now = new Date(nowMs).toISOString();
   const photoHash = computeFastPhotoSignature(food.photoUrl);
 
+  const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(food.id);
+  const cleanPhotoBase = (food.photoUrl || '').split('?')[0].trim();
+  const cleanSeedBase = (seedFood?.photoUrl || `/foods/${food.id}.jpg`).split('?')[0].trim();
+  const isCustomPhoto = cleanPhotoBase !== cleanSeedBase || Boolean(food.isCustomPhoto);
+
+  const preservedIngredients =
+    Array.isArray(food.ingredients) && food.ingredients.length > 0
+      ? food.ingredients
+      : Array.isArray(prevOv?.ingredients) && prevOv.ingredients.length > 0
+      ? prevOv.ingredients
+      : undefined;
+  const preservedSteps =
+    Array.isArray(food.steps) && food.steps.length > 0
+      ? food.steps
+      : Array.isArray(prevOv?.steps) && prevOv.steps.length > 0
+      ? prevOv.steps
+      : undefined;
+
   const overrideRecord: FoodMediaOverride = {
     id: food.id,
     photoUrl: food.photoUrl,
+    cloudStorageUrl: food.photoUrl?.startsWith('https://') ? food.photoUrl : undefined,
     photoHash,
     revision: nextRevision,
     adminApprovedAt: now,
-    nameKh: food.nameKh,
-    nameEn: food.nameEn,
-    categorySlug: food.categorySlug,
-    categoryKh: food.categoryKh,
-    categoryEn: food.categoryEn,
-    descriptionKh: food.descriptionKh,
-    descriptionEn: food.descriptionEn,
-    cookTime: food.cookTime,
-    servings: food.servings,
-    calories: food.calories,
-    difficulty: food.difficulty,
-    ingredients: Array.isArray(food.ingredients) && food.ingredients.length > 0 ? food.ingredients : undefined,
-    steps: Array.isArray(food.steps) && food.steps.length > 0 ? food.steps : undefined,
-    priceRiel: food.priceRiel,
-    priceUsd: food.priceUsd,
-    imageAuditStatus: food.imageAuditStatus,
-    imageAuditNote: food.imageAuditNote,
-    isCustomPhoto: true,
+    nameKh: food.nameKh || prevOv?.nameKh,
+    nameEn: food.nameEn || prevOv?.nameEn,
+    categorySlug: food.categorySlug || prevOv?.categorySlug,
+    categoryKh: food.categoryKh || prevOv?.categoryKh,
+    categoryEn: food.categoryEn || prevOv?.categoryEn,
+    descriptionKh: food.descriptionKh || prevOv?.descriptionKh,
+    descriptionEn: food.descriptionEn || prevOv?.descriptionEn,
+    cookTime: food.cookTime || prevOv?.cookTime,
+    servings: food.servings || prevOv?.servings,
+    calories: typeof food.calories === 'number' ? food.calories : prevOv?.calories,
+    difficulty: food.difficulty || prevOv?.difficulty,
+    ingredients: preservedIngredients,
+    steps: preservedSteps,
+    priceRiel: typeof food.priceRiel === 'number' ? food.priceRiel : prevOv?.priceRiel,
+    priceUsd: typeof food.priceUsd === 'number' ? food.priceUsd : prevOv?.priceUsd,
+    imageAuditStatus: food.imageAuditStatus || prevOv?.imageAuditStatus || 'verified',
+    imageAuditNote: food.imageAuditNote || prevOv?.imageAuditNote,
+    isCustomPhoto,
     updatedAt: now,
   };
 
@@ -1361,13 +1512,24 @@ export function recordPermanentFoodOverride(food: FoodItem): Promise<FoodMediaOv
   inMemoryMasterBundle = nextBundle;
   saveLocalMediaOverrides(nextBundle);
 
-  // 4. Persist atomic per-record key to IndexedDB & push to Supabase Storage + KV in background
-  const idbPromise = saveSingleRecordToIdb(`food:${food.id}`, overrideRecord)
-    .then(() => overrideRecord)
-    .catch(() => overrideRecord);
+  // 4. Persist atomic per-record key to IndexedDB & push permanently to Supabase Cloud Storage + DB
+  const idbPromise = saveSingleRecordToIdb(`food:${food.id}`, overrideRecord).catch(() => {});
+  const cloudPromise = syncSingleOverrideRecordToCloud('food', food.id, overrideRecord, nextBundle, {
+    isLiveAdminSave: true,
+  }).catch(() => false);
 
-  syncSingleOverrideRecordToCloud('food', food.id, overrideRecord, nextBundle).catch(() => {});
-  return idbPromise;
+  if (options?.awaitCloud) {
+    return Promise.all([idbPromise, cloudPromise]).then(([, synced]) => {
+      const latestOv = loadLocalMediaOverrides().foods[food.id] || overrideRecord;
+      return { override: latestOv, cloudSynced: Boolean(synced) };
+    });
+  }
+
+  return idbPromise.then(() => ({ override: overrideRecord, cloudSynced: false }));
+}
+
+export function recordPermanentFoodOverride(food: FoodItem): Promise<FoodMediaOverride> {
+  return saveAdminFoodOverridePermanently(food, { awaitCloud: false }).then((res) => res.override);
 }
 
 /**
@@ -2420,7 +2582,19 @@ export async function hydrateAndSyncMediaOverrides(
         fn(bundle);
       } catch {}
     }
+    notifyPersistentMediaVaultSubscribers(bundle);
   };
+
+  // Detect fresh APK installation, app build upgrade, or cleared cache so we always force a full cloud verification
+  let isBuildUpgradeOrEmptyVault = false;
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const savedBuild = localStorage.getItem(VAULT_KEYS.LAST_SYNCED_BUILD);
+      if (savedBuild !== String(APP_BUILD_CODE)) {
+        isBuildUpgradeOrEmptyVault = true;
+      }
+    }
+  } catch {}
 
   if (mediaSyncInFlightPromise) {
     try {
@@ -2430,7 +2604,13 @@ export async function hydrateAndSyncMediaOverrides(
     }
   }
   const now = Date.now();
-  if (!isForced && lastMediaCloudSyncAtMs > 0 && now - lastMediaCloudSyncAtMs < MEDIA_CLOUD_SYNC_COOLDOWN_MS && inMemoryMasterBundle) {
+  if (
+    !isForced &&
+    !isBuildUpgradeOrEmptyVault &&
+    lastMediaCloudSyncAtMs > 0 &&
+    now - lastMediaCloudSyncAtMs < MEDIA_CLOUD_SYNC_COOLDOWN_MS &&
+    inMemoryMasterBundle
+  ) {
     if (onProgress) mediaSyncProgressListeners.delete(onProgress);
     return inMemoryMasterBundle;
   }
@@ -2438,6 +2618,9 @@ export async function hydrateAndSyncMediaOverrides(
   mediaSyncInFlightPromise = (async () => {
     let current = await hydrateFromLocalIdbImmediate();
     let hasRemoteChanges = false;
+    if (Object.keys(current.foods || {}).length === 0) {
+      isBuildUpgradeOrEmptyVault = true;
+    }
 
     // 1. Flush any pending unsynced local Admin overrides to Supabase Cloud FIRST
     // so newer local replacements are never overwritten by stale cloud state
@@ -2452,11 +2635,12 @@ export async function hydrateAndSyncMediaOverrides(
     if (isSupabaseConfigured() && !isSupabaseEgressCooldownActive()) {
       try {
         lastMediaCloudSyncAtMs = Date.now();
-        const manifest = await pullCloudKeysManifestByPrefix(VAULT_KEYS.CLOUD_RECORD_PREFIX, 10000);
+        const manifest = await pullCloudKeysManifestByPrefix(VAULT_KEYS.CLOUD_RECORD_PREFIX, 12000);
         const existingPerRecordKeys = new Set<string>();
         const remoteUpdatedAtMap = new Map<string, number>();
         const keysToFetch: string[] = [];
-        const seenRows = loadSeenCloudRowTimestamps();
+        // On APK update, reinstall, or cache clear, ignore stale seenRows so every cloud override is verified fresh
+        const seenRows = isBuildUpgradeOrEmptyVault ? {} : loadSeenCloudRowTimestamps();
         const pendingQueue = loadPendingMediaCloudQueue();
 
         if (Array.isArray(manifest) && manifest.length > 0) {
@@ -2464,13 +2648,11 @@ export async function hydrateAndSyncMediaOverrides(
             existingPerRecordKeys.add(item.key);
             const remoteMs = item.updated_at ? new Date(item.updated_at).getTime() : 0;
             remoteUpdatedAtMap.set(item.key, remoteMs);
-            let localUpdatedAt: string | undefined;
             let hasLocalPhoto = false;
             let seedUpdatedAtMs = 0;
             let hasUnsyncedLocalPending = false;
             if (item.key.startsWith('kft_ov_food_')) {
               const id = item.key.slice('kft_ov_food_'.length);
-              localUpdatedAt = current.foods[id]?.adminApprovedAt || current.foods[id]?.updatedAt;
               hasLocalPhoto = Boolean(current.foods[id]?.photoUrl && !isObsoleteSeedPhoto(current.foods[id]?.photoUrl));
               hasUnsyncedLocalPending = Boolean(pendingQueue[`food:${id}`]);
               seedUpdatedAtMs = 0;
@@ -2480,12 +2662,10 @@ export async function hydrateAndSyncMediaOverrides(
                 deleteCloudDocument(item.key).catch(() => {});
                 continue;
               }
-              localUpdatedAt = current.restaurants[id]?.updatedAt;
               hasLocalPhoto = Boolean(current.restaurants[id]?.photoUrl || current.restaurants[id]?.profileImage);
               hasUnsyncedLocalPending = Boolean(pendingQueue[`rest:${id}`]);
             } else if (item.key.startsWith('kft_ov_dest_')) {
               const id = item.key.slice('kft_ov_dest_'.length);
-              localUpdatedAt = current.destinations[id]?.updatedAt;
               hasLocalPhoto = Boolean(current.destinations[id]?.photoUrl && !isObsoleteSeedPhoto(current.destinations[id]?.photoUrl));
               hasUnsyncedLocalPending = Boolean(pendingQueue[`dest:${id}`]);
               const seedDest = IMMUTABLE_SEED_DEST_MAP.get(id);
@@ -2494,7 +2674,6 @@ export async function hydrateAndSyncMediaOverrides(
               }
             } else if (item.key.startsWith('kft_ov_trend_')) {
               const id = item.key.slice('kft_ov_trend_'.length);
-              localUpdatedAt = current.trendingFoods[id]?.adminApprovedAt || current.trendingFoods[id]?.updatedAt;
               hasLocalPhoto = Boolean(current.trendingFoods[id]?.photoUrl && !isObsoleteSeedPhoto(current.trendingFoods[id]?.photoUrl));
               hasUnsyncedLocalPending = Boolean(pendingQueue[`trend:${id}`]);
             }
@@ -2503,23 +2682,18 @@ export async function hydrateAndSyncMediaOverrides(
             if (hasUnsyncedLocalPending && hasLocalPhoto) {
               continue;
             }
-            // Skip downloading unchanged cloud rows we already fetched (0 bytes wasted egress!)
+            // Skip downloading unchanged cloud rows we already fetched & verified on this exact build (0 bytes wasted egress!)
             if (hasLocalPhoto && item.updated_at && seenRows[item.key] === item.updated_at) {
               continue;
             }
 
-            // Skip downloading cloud rows whose table timestamp is already older than the bundled seed baseline
+            // Skip downloading destination cloud rows whose table timestamp is older than the bundled destination seed baseline
             if (seedUpdatedAtMs > 0 && remoteMs > 0 && remoteMs <= seedUpdatedAtMs) {
               continue;
             }
 
-            const localMs = Math.max(
-              hasLocalPhoto && localUpdatedAt ? new Date(localUpdatedAt).getTime() || 0 : 0,
-              seedUpdatedAtMs
-            );
-            if (!hasLocalPhoto || localMs === 0 || remoteMs > localMs + 1000) {
-              keysToFetch.push(item.key);
-            }
+            // Always fetch any missing or updated cloud row (never skip changed cloud rows due to client/server clock skew!)
+            keysToFetch.push(item.key);
           }
         }
 
@@ -2613,6 +2787,7 @@ export async function hydrateAndSyncMediaOverrides(
                   saveSingleRecordToIdb(`trend:${tid}`, winner).catch(() => {});
                 }
               }
+              notifyListeners(current);
             }
           }
           if (seenChanged) {
@@ -2620,14 +2795,58 @@ export async function hydrateAndSyncMediaOverrides(
           }
         }
 
-        // Only pull legacy master bundle if manifest query succeeded (Array.isArray(manifest)) AND genuinely had 0 per-record keys
-        if (Array.isArray(manifest) && existingPerRecordKeys.size === 0) {
+        // On fresh install / build upgrade, also merge any historical overrides from legacy `kft_cloud_media_overrides_v1`
+        // that do NOT yet have a dedicated `kft_ov_*` per-record key (never letting legacy entries override per-record keys!)
+        if (Array.isArray(manifest) && (existingPerRecordKeys.size === 0 || isBuildUpgradeOrEmptyVault)) {
           const cloudBundle = await pullCloudDocument<AllMediaOverridesBundle>(VAULT_KEYS.CLOUD_DOC_KEY, 15000);
           if (cloudBundle) {
-            hasRemoteChanges = true;
-            current = mergeOverrideBundles(current, cloudBundle);
-            inMemoryMasterBundle = current;
+            const filteredLegacy: AllMediaOverridesBundle = {
+              foods: {},
+              restaurants: {},
+              destinations: {},
+              trendingFoods: {},
+              deletedRestaurants: cloudBundle.deletedRestaurants,
+              updatedAt: cloudBundle.updatedAt || new Date().toISOString(),
+            };
+            let anyLegacyMissingFromPerRecord = false;
+            for (const [fid, fOv] of Object.entries(cloudBundle.foods || {})) {
+              if (!existingPerRecordKeys.has(`kft_ov_food_${fid}`) && !pendingQueue[`food:${fid}`]) {
+                filteredLegacy.foods[fid] = fOv;
+                anyLegacyMissingFromPerRecord = true;
+              }
+            }
+            for (const [rid, rOv] of Object.entries(cloudBundle.restaurants || {})) {
+              if (!existingPerRecordKeys.has(`kft_ov_rest_${rid}`) && !pendingQueue[`rest:${rid}`]) {
+                filteredLegacy.restaurants[rid] = rOv;
+                anyLegacyMissingFromPerRecord = true;
+              }
+            }
+            for (const [did, dOv] of Object.entries(cloudBundle.destinations || {})) {
+              if (!existingPerRecordKeys.has(`kft_ov_dest_${did}`) && !pendingQueue[`dest:${did}`]) {
+                filteredLegacy.destinations[did] = dOv;
+                anyLegacyMissingFromPerRecord = true;
+              }
+            }
+            for (const [tid, tOv] of Object.entries(cloudBundle.trendingFoods || {})) {
+              if (!existingPerRecordKeys.has(`kft_ov_trend_${tid}`) && !pendingQueue[`trend:${tid}`]) {
+                filteredLegacy.trendingFoods[tid] = tOv;
+                anyLegacyMissingFromPerRecord = true;
+              }
+            }
+            if (anyLegacyMissingFromPerRecord || (cloudBundle.deletedRestaurants && Object.keys(cloudBundle.deletedRestaurants).length > 0)) {
+              hasRemoteChanges = true;
+              current = mergeOverrideBundles(current, filteredLegacy);
+              inMemoryMasterBundle = current;
+            }
           }
+        }
+
+        if (Array.isArray(manifest)) {
+          try {
+            if (typeof localStorage !== 'undefined') {
+              localStorage.setItem(VAULT_KEYS.LAST_SYNCED_BUILD, String(APP_BUILD_CODE));
+            }
+          } catch {}
         }
 
         // Automatically backfill any local admin overrides missing from Supabase (only when an admin session is active)

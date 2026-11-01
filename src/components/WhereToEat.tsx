@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Navigation, Store } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { isGpipRegisteredRestaurant, openRestaurantGoogleExternal, type FoodItem, type Restaurant } from '../types';
+import { type FoodItem, type Restaurant } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { getMatchingRestaurantsForDish } from '../utils/foodFilters';
@@ -36,18 +36,13 @@ export const WhereToEat: React.FC<Props> = ({ food }) => {
         <div className="space-y-2">
           {matches.map((r) => {
             const loc = getLocalizedRestaurant(r, language);
-            const isRegistered = isGpipRegisteredRestaurant(r);
             return (
               <button
                 key={r.id}
                 type="button"
                 onClick={() => {
-                  if (isRegistered) {
-                    setSelectedFood(null);
-                    setSelectedRestaurant(r);
-                  } else {
-                    openRestaurantGoogleExternal(r, 'maps');
-                  }
+                  setSelectedFood(null);
+                  setSelectedRestaurant(r);
                 }}
                 className="w-full min-h-[52px] flex items-center gap-3 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-emerald-500/60 text-left active:scale-[0.98] transition cursor-pointer"
               >

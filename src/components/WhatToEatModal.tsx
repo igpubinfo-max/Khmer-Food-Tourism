@@ -1474,7 +1474,6 @@ export const WhatToEatModal: React.FC = () => {
                               <div className="space-y-1.5">
                                 {msg.restaurants.map((r) => {
                                   const rLoc = getLocalizedRestaurant(r, language);
-                                  const isGpip = isGpipRegisteredRestaurant(r);
                                   return (
                                     <div
                                       key={r.id}
@@ -1483,12 +1482,8 @@ export const WhatToEatModal: React.FC = () => {
                                       <button
                                         type="button"
                                         onClick={() => {
-                                          if (isGpip) {
-                                            setSelectedRestaurant(r);
-                                            setIsWhatToEatModalOpen(false);
-                                          } else {
-                                            openRestaurantGoogleExternal(r, 'maps');
-                                          }
+                                          setSelectedRestaurant(r);
+                                          setIsWhatToEatModalOpen(false);
                                         }}
                                         className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
                                       >
@@ -1927,18 +1922,13 @@ export const WhatToEatModal: React.FC = () => {
                         </div>
                         {servingRestaurants.map((r) => {
                           const rLoc = getLocalizedRestaurant(r, language);
-                          const isGpipRest = isGpipRegisteredRestaurant(r);
                           return (
                             <button
                               key={r.id}
                               type="button"
                               onClick={() => {
-                                if (isGpipRest) {
-                                  setSelectedRestaurant(r);
-                                  setIsWhatToEatModalOpen(false);
-                                } else {
-                                  openRestaurantGoogleExternal(r, 'maps');
-                                }
+                                setSelectedRestaurant(r);
+                                setIsWhatToEatModalOpen(false);
                               }}
                               className="w-full flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-200 hover:text-emerald-600 py-1 cursor-pointer"
                             >

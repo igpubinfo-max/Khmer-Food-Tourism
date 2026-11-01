@@ -425,7 +425,8 @@ export async function pushCloudDocument(key: string, payload: any, timeoutMs = 1
   if (
     Date.now() < supabaseEgressCooldownUntilMs &&
     !key.startsWith('kft_user_') &&
-    !key.startsWith('kft_ov_food_') &&
+    !key.startsWith('kft_ov_') &&
+    key !== 'kft_cloud_media_overrides_v1' &&
     key !== 'kft_cloud_users_v2' &&
     key !== 'kft_cloud_transactions_v1' &&
     key !== 'kft_cloud_vip_backup_v1'
@@ -988,18 +989,18 @@ let lastStorageBucketCheckProjectUrl = '';
 /**
  * Attempt to upload a base64 `data:image/...` directly to Supabase Cloud Storage (`food-media` public bucket)
  * and return its permanent CDN public URL (`https://<project>.supabase.co/storage/v1/object/public/food-media/...`).
+ * Uses standard `Blob` binary payloads for 100% Android Capacitor WebView + mobile Safari/Chrome compatibility,
+ * immutable revisioned object paths so WebView/CDN cache never serves stale bytes, and automatic retry.
  * Returns `null` cleanly if Supabase Storage bucket is not provisioned or offline so KV fallback handles it seamlessly.
  */
 export async function uploadBase64ImageToSupabaseStorage(
   folder: 'foods' | 'restaurants' | 'destinations' | 'trending',
   recordId: string,
   dataUrl: string,
-  timeoutMs = 12000
+  timeoutMs = 20000,
+  revision?: number
 ): Promise<string | null> {
   if (!isSupabaseConfigured() || !dataUrl || !dataUrl.startsWith('data:image/')) {
-    return null;
-  }
-  if (Date.now() < supabaseEgressCooldownUntilMs) {
     return null;
   }
   const cfg = getCloudApiConfig();
@@ -1035,38 +1036,64 @@ export async function uploadBase64ImageToSupabaseStorage(
       return null;
     }
 
+    const blobBody: BodyInit =
+      typeof Blob !== 'undefined'
+        ? new Blob([bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer], {
+            type: mimeType,
+          })
+        : (bytes as unknown as BodyInit);
+
     const safeId = recordId.replace(/[^a-zA-Z0-9_-]/g, '_');
-    const objectPath = `${folder}/${safeId}_${Date.now()}.${ext}`;
+    const revTag = typeof revision === 'number' && revision > 0 ? `_rev${revision}` : '';
+    const randSuffix = Math.random().toString(36).slice(2, 6);
+    const objectPath = `${folder}/${safeId}${revTag}_${Date.now()}_${randSuffix}.${ext}`;
     const bucketName = 'food-media';
     const uploadUrl = `${cfg.supabaseUrl}/storage/v1/object/${bucketName}/${objectPath}`;
 
-    const res = await fetchWithTimeout(
-      uploadUrl,
-      {
-        method: 'POST',
-        headers: {
-          apikey: cfg.supabaseAnonKey,
-          Authorization: `Bearer ${cfg.supabaseAnonKey}`,
-          'Content-Type': mimeType,
-          'x-upsert': 'true',
-          'Cache-Control': '31536000',
-        },
-        body: bytes as unknown as BodyInit,
-      },
-      timeoutMs
-    );
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const res = await fetchWithTimeout(
+          uploadUrl,
+          {
+            method: 'POST',
+            headers: {
+              apikey: cfg.supabaseAnonKey,
+              Authorization: `Bearer ${cfg.supabaseAnonKey}`,
+              'Content-Type': mimeType,
+              'x-upsert': 'true',
+              'Cache-Control': '31536000',
+            },
+            body: blobBody,
+          },
+          timeoutMs
+        );
 
-    if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 180_000;
-      return null;
-    }
-    if (res.status === 400 || res.status === 404) {
-      storageBucketAvailabilityState = 'unavailable';
-      return null;
-    }
-    if (res.ok) {
-      storageBucketAvailabilityState = 'available';
-      return `${cfg.supabaseUrl}/storage/v1/object/public/${bucketName}/${objectPath}`;
+        if (res.ok) {
+          storageBucketAvailabilityState = 'available';
+          if (supabaseEgressCooldownUntilMs > 0) {
+            supabaseEgressCooldownUntilMs = 0;
+          }
+          return `${cfg.supabaseUrl}/storage/v1/object/public/${bucketName}/${objectPath}`;
+        }
+
+        if (res.status === 402) {
+          supabaseEgressCooldownUntilMs = Date.now() + 180_000;
+          return null;
+        }
+
+        if (res.status === 404 || res.status === 400) {
+          const errText = await res.text().catch(() => '');
+          if (/bucket not found/i.test(errText)) {
+            storageBucketAvailabilityState = 'unavailable';
+            return null;
+          }
+        }
+      } catch {
+        // Retry once on mobile network hiccup
+      }
+      if (attempt < 2) {
+        await new Promise((r) => setTimeout(r, 900));
+      }
     }
     return null;
   } catch {

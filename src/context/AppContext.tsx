@@ -71,6 +71,8 @@ import {
   flushPendingMediaCloudQueue,
   isOverridePersistedInLocalStorage,
   recordPermanentFoodOverride,
+  saveAdminFoodOverridePermanently,
+  subscribeMediaVaultUpdates,
   recordPermanentRestaurantOverride,
   removePermanentRestaurantOverride,
   loadDeletedRestaurantIdsMap,
@@ -168,7 +170,7 @@ interface AppContextType {
   
   // Food Actions
   addFood: (food: Omit<FoodItem, 'id' | 'rating' | 'reviewCount'>) => void;
-  updateFood: (food: FoodItem) => void;
+  updateFood: (food: FoodItem) => Promise<FoodItem>;
   deleteFood: (id: string) => void;
   
   // Restaurant Actions
@@ -755,11 +757,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const existingOverride = vault.foods[f.id];
             const ledgerEntry = foodLedger[f.id];
             const candidateEffectiveMs = Math.max(
+              f.adminApprovedAt ? Date.parse(f.adminApprovedAt) || 0 : 0,
               f.photoUpdatedAt ? Date.parse(f.photoUpdatedAt) || 0 : 0,
               f.adminEditedAt ? Date.parse(f.adminEditedAt) || 0 : 0,
               ledgerEntry?.updatedAt ? Date.parse(ledgerEntry.updatedAt) || 0 : 0,
-              Date.now()
+              f.isCustomPhoto || (typeof f.photoUrl === 'string' && f.photoUrl.startsWith('data:image/')) ? Date.now() : 0
             );
+            if (candidateEffectiveMs <= SEED_FOOD_PHOTO_BASELINE_MS) {
+              continue;
+            }
             const candidateHash = f.photoUrl ? computeFastPhotoSignature(f.photoUrl) : '';
             const isStaleVsLedger = Boolean(
               ledgerEntry &&
@@ -787,11 +793,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 (f.descriptionKh && f.descriptionKh !== seed.descriptionKh));
 
             if ((isPhotoModifiedFromSeed || isContentModifiedFromSeed) && !existingOverride) {
+              const effectiveIso = new Date(candidateEffectiveMs).toISOString();
               const candidateOv = {
                 id: f.id,
                 photoUrl: isPhotoModifiedFromSeed ? f.photoUrl : (ledgerEntry?.cloudUrl || seed.photoUrl),
                 photoHash: isPhotoModifiedFromSeed ? candidateHash : undefined,
-                revision: ledgerEntry?.revision || 1,
+                revision: ledgerEntry?.revision || 0,
+                adminApprovedAt: f.adminApprovedAt || effectiveIso,
                 nameKh: f.nameKh,
                 nameEn: f.nameEn,
                 categorySlug: f.categorySlug,
@@ -810,7 +818,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 imageAuditStatus: f.imageAuditStatus || 'verified',
                 imageAuditNote: f.imageAuditNote,
                 isCustomPhoto: Boolean(isPhotoModifiedFromSeed),
-                updatedAt: new Date(candidateEffectiveMs).toISOString(),
+                updatedAt: effectiveIso,
               };
               if (!isRejectedLegacyFoodOverridePhoto(f.id, candidateOv)) {
                 vault.foods[f.id] = candidateOv;
@@ -1752,17 +1760,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isTrendingFoodDetailModalOpen, setIsTrendingFoodDetailModalOpen] = useState<boolean>(false);
 
   // Single-level detail navigation stack wrappers so opening a shop/food/destination never leaves another detail modal open underneath.
-  // For unregistered shops (!isGpipRegisteredRestaurant), open Google Maps directly instead of showing in-app details.
+  // ALL shops (registered and unregistered) are openable inside the app by all users without VIP restrictions.
   const setSelectedRestaurant = (r: Restaurant | null | ((prev: Restaurant | null) => Restaurant | null)) => {
     if (typeof r === 'function') {
       setSelectedRestaurantRaw(r);
       return;
     }
     if (r !== null) {
-      if (!isGpipRegisteredRestaurant(r)) {
-        openRestaurantGoogleExternal(r, 'maps');
-        return;
-      }
       setSelectedFoodRaw(null);
       setSelectedDestinationRaw(null);
       setIsTrendingFoodDetailModalOpen(false);
@@ -3266,6 +3270,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 const next = applyFoodOverrides(prev, syncedMediaBundle.foods);
                 latestFoodsList = next;
                 if (next !== prev) {
+                  scheduleStorageWrite('kft_foods_200_v9', next, 400);
                   setSelectedFood(sel => (sel ? next.find(f => f.id === sel.id) || sel : null));
                 }
                 return next;
@@ -3347,6 +3352,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setFoods(prev => {
           const next = applyFoodOverrides(prev, bundle.foods);
           latestFoods = next;
+          if (next !== prev) {
+            scheduleStorageWrite('kft_foods_200_v9', next, 400);
+          }
           setSelectedFood(cur => (cur ? next.find(f => f.id === cur.id) || cur : null));
           return next;
         });
@@ -3373,6 +3381,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       }
     };
+
+    const unsubscribeMediaVault = subscribeMediaVaultUpdates(applyHydratedBundle);
 
     // 1. Immediately hydrate from local IndexedDB (<15ms, zero network wait), then immediately start progressive cloud media sync
     hydrateFromLocalIdbImmediate()
@@ -5643,31 +5653,92 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(language === 'km' ? 'បានបញ្ចូលមុខម្ហូបថ្មីដោយជោគជ័យ' : 'Food item added successfully!', 'success');
   };
 
-  const updateFood = (updated: FoodItem) => {
+  const updateFood = async (updated: FoodItem): Promise<FoodItem> => {
+    const existingFood = foods.find(f => f.id === updated.id);
+    const mergedBase: FoodItem = existingFood
+      ? {
+          ...existingFood,
+          ...updated,
+          ingredients:
+            Array.isArray(updated.ingredients) && updated.ingredients.length > 0
+              ? updated.ingredients
+              : existingFood.ingredients,
+          steps:
+            Array.isArray(updated.steps) && updated.steps.length > 0
+              ? updated.steps
+              : existingFood.steps,
+        }
+      : updated;
+
+    const defaultSeedUrl = (mergedBase.originalPhotoUrl || `/foods/${mergedBase.id}.jpg`).split('?')[0].trim();
+    const cleanNextUrl = (mergedBase.photoUrl || '').split('?')[0].trim();
+    const isCustomImg = cleanNextUrl !== defaultSeedUrl || Boolean(updated.isCustomPhoto);
+    const initialIso = new Date().toISOString();
+
     const draftUpdated: FoodItem = {
-      ...updated,
-      isCustomPhoto: true,
+      ...mergedBase,
+      isCustomPhoto: isCustomImg,
       isAdminEdited: true,
-      photoUpdatedAt: new Date().toISOString(),
+      photoUpdatedAt: initialIso,
+      adminApprovedAt: initialIso,
     };
-    recordPermanentFoodOverride(draftUpdated);
-    const vault = loadLocalMediaOverrides();
-    const authoritativeIso = vault.foods[updated.id]?.updatedAt || draftUpdated.photoUpdatedAt!;
+
+    // Start permanent save (synchronously commits local vault + revision ledger + cloud retry queue on frame 0,
+    // and asynchronously uploads image bytes to Supabase Cloud Storage + upserts `kft_ov_food_<id>` in Supabase DB)
+    const cloudSavePromise = saveAdminFoodOverridePermanently(draftUpdated, { awaitCloud: true });
+
+    const vaultImmediate = loadLocalMediaOverrides();
+    const authoritativeIso = vaultImmediate.foods[updated.id]?.updatedAt || initialIso;
     const customUpdated: FoodItem = {
       ...draftUpdated,
       photoUpdatedAt: authoritativeIso,
       adminEditedAt: authoritativeIso,
+      adminApprovedAt: vaultImmediate.foods[updated.id]?.adminApprovedAt || authoritativeIso,
     };
+
     setFoods(prev => {
-      const next = prev.map(f => f.id === customUpdated.id ? customUpdated : f);
+      const next = prev.map(f => (f.id === customUpdated.id ? customUpdated : f));
       scheduleStorageWrite('kft_foods_200_v9', next, 400);
       setTrendingFoods(prevTrending =>
-        applyTrendingFoodOverrides(prevTrending, vault.trendingFoods, vault.foods, next)
+        applyTrendingFoodOverrides(prevTrending, vaultImmediate.trendingFoods, vaultImmediate.foods, next)
       );
       return next;
     });
-    if (selectedFood?.id === customUpdated.id) setSelectedFood(customUpdated);
-    showToast(language === 'km' ? 'បានកែប្រែព័ត៌មានមុខម្ហូប និងរក្សាទុករូបភាពជាអចិន្ត្រៃយ៍រួចរាល់!' : 'Food item and photo permanently saved!', 'success');
+    setSelectedFood(cur => (cur?.id === customUpdated.id ? customUpdated : cur));
+
+    const { override: finalOv, cloudSynced } = await cloudSavePromise;
+    const finalUpdated: FoodItem = {
+      ...customUpdated,
+      photoUrl: finalOv.photoUrl || customUpdated.photoUrl,
+      photoUpdatedAt: finalOv.updatedAt || customUpdated.photoUpdatedAt,
+      adminEditedAt: finalOv.updatedAt || customUpdated.adminEditedAt,
+      adminApprovedAt: finalOv.adminApprovedAt || finalOv.updatedAt || customUpdated.adminApprovedAt,
+    };
+
+    if (finalUpdated.photoUrl !== customUpdated.photoUrl || finalUpdated.photoUpdatedAt !== customUpdated.photoUpdatedAt) {
+      const vaultAfter = loadLocalMediaOverrides();
+      setFoods(prev => {
+        const next = prev.map(f => (f.id === finalUpdated.id ? finalUpdated : f));
+        scheduleStorageWrite('kft_foods_200_v9', next, 400);
+        setTrendingFoods(prevTrending =>
+          applyTrendingFoodOverrides(prevTrending, vaultAfter.trendingFoods, vaultAfter.foods, next)
+        );
+        return next;
+      });
+      setSelectedFood(cur => (cur?.id === finalUpdated.id ? finalUpdated : cur));
+    }
+
+    showToast(
+      language === 'km'
+        ? cloudSynced
+          ? 'បានកែប្រែព័ត៌មានមុខម្ហូប និងរក្សាទុករូបភាពជាអចិន្ត្រៃយ៍លើ Cloud រួចរាល់!'
+          : 'បានរក្សាទុករូបភាពមុខម្ហូបជាអចិន្ត្រៃយ៍ (នឹងធ្វើសមកាលកម្មទៅ Cloud ដោយស្វ័យប្រវត្តិ)!'
+        : cloudSynced
+        ? 'Food item and photo permanently saved to Cloud!'
+        : 'Food photo permanently saved locally (queued for automatic Cloud sync)!',
+      'success'
+    );
+    return finalUpdated;
   };
 
   const deleteFood = (id: string) => {

@@ -780,20 +780,15 @@ export const DailyDiscoveriesModal: React.FC = () => {
                         <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
                           {matchedRests.slice(0, 2).map((rest) => {
                             const rLoc = getLocalizedRestaurant(rest, language);
-                            const isGpipRest = isGpipRegisteredRestaurant(rest);
                             return (
                               <button
                                 key={rest.id}
                                 type="button"
                                 data-testid={`dish-matched-rest-${food.id}-${rest.id}`}
                                 onClick={() => {
-                                  if (isGpipRest) {
-                                    setActiveTab('restaurants');
-                                    setSelectedRestaurant(rest);
-                                    setIsDailyDiscoveriesModalOpen(false);
-                                  } else {
-                                    openRestaurantGoogleExternal(rest, 'maps');
-                                  }
+                                  setActiveTab('restaurants');
+                                  setSelectedRestaurant(rest);
+                                  setIsDailyDiscoveriesModalOpen(false);
                                 }}
                                 className="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 hover:border-emerald-500 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1 transition cursor-pointer"
                               >

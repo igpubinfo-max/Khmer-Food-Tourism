@@ -186,12 +186,8 @@ export const WishlistsModal: React.FC = () => {
     } else if (item.type === 'restaurant') {
       const r = restaurants.find(x => x.id === item.id);
       if (r) {
-        if (isGpipRegisteredRestaurant(r)) {
-          setSelectedRestaurant(r);
-          setIsWishlistsModalOpen(false);
-        } else {
-          openRestaurantGoogleExternal(r, 'maps');
-        }
+        setSelectedRestaurant(r);
+        setIsWishlistsModalOpen(false);
         return;
       }
     } else if (item.type === 'destination') {

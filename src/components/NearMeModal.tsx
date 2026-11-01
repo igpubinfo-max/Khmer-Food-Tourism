@@ -796,37 +796,19 @@ export const NearMeModal: React.FC = () => {
             ) : (
               filteredNearbyRestaurants.map((r) => {
                 const rLoc = getLocalizedRestaurant(r, language);
-                const isGpipRest = isGpipRegisteredRestaurant(r);
                 const hasOfficialPhoto =
+                  Boolean(r.photoUrl) &&
                   !r.photoUrl?.startsWith('data:image/svg+xml') &&
                   (r.googleMapsMeta?.hasOfficialGooglePhoto !== false);
-
-                if (!isGpipRest) {
-                  return (
-                    <div
-                      key={r.id}
-                      onClick={() => openRestaurantGoogleExternal(r, 'maps')}
-                      className="px-3 py-2.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs hover:border-emerald-500 transition flex items-center gap-3 cursor-pointer active:scale-[0.99]"
-                    >
-                      <ShopAvatar
-                        restaurant={r}
-                        alt={rLoc.name}
-                        className="w-11 h-11 rounded-xl border border-slate-200/70 dark:border-slate-600"
-                      />
-                      <h4 className="flex-1 min-w-0 font-bold text-xs sm:text-sm text-[#0F172A] dark:text-white truncate font-khmer">
-                        {rLoc.name}
-                      </h4>
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-[#064E3B] dark:text-emerald-300 text-[11px] font-black shrink-0">
-                        📍 {formatDistanceLabel(r.distanceMeters)}
-                      </span>
-                    </div>
-                  );
-                }
 
                 return (
                   <div
                     key={r.id}
-                    className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs hover:border-emerald-500 transition space-y-2.5"
+                    onClick={() => {
+                      setSelectedRestaurant(r);
+                      setIsNearMeModalOpen(false);
+                    }}
+                    className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs hover:border-emerald-500 transition space-y-2.5 cursor-pointer"
                   >
                     <div className="flex gap-3">
                       <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-100 shrink-0">
@@ -845,7 +827,8 @@ export const NearMeModal: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-1">
                           <h4 
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setSelectedRestaurant(r);
                               setIsNearMeModalOpen(false);
                             }}
@@ -874,7 +857,7 @@ export const NearMeModal: React.FC = () => {
                     </div>
 
                     {/* Direct Directions & Details Action Buttons */}
-                    <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-700/60">
+                    <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-700/60" onClick={(e) => e.stopPropagation()}>
                       <button
                         type="button"
                         onClick={() => openRestaurantGoogleExternal(r, 'directions', baseCoords)}

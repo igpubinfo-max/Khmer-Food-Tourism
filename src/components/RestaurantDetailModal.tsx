@@ -11,7 +11,9 @@ import {
   getRestaurantGoogleExternalUrl,
   openRestaurantGoogleExternal,
   isPlaceLocationVerified,
+  resolveFoodPhotoUrl,
 } from '../types';
+import { DefaultShopIcon } from './icons/DefaultShopIcon';
 import { RestaurantImageModal } from './RestaurantImageModal';
 import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant, translateSignatureDish, translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
@@ -323,20 +325,41 @@ export const RestaurantDetailModal: React.FC = () => {
         {/* Scrollable Body */}
         <div className="overflow-y-auto flex-1 no-scrollbar pb-[calc(var(--kft-safe-bottom,0px)+24px)]">
           {/* Hero Image */}
-          <div className="relative h-60 sm:h-64 w-full bg-slate-800">
-            <img 
-              src={activePhoto || selectedRestaurant.photoUrl} 
-              alt={loc.name}
-              decoding="async"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                const target = e.currentTarget;
-                if (!target.dataset.fallback) {
-                  target.dataset.fallback = '1';
-                  target.src = '/welcome/places.webp';
-                }
-              }}
-            />
+          <div className="relative h-60 sm:h-64 w-full bg-gradient-to-br from-[#022c22] via-[#064E3B] to-emerald-800">
+            {(() => {
+              const rawHeroCandidate = (activePhoto || selectedRestaurant.photoUrl || selectedRestaurant.profileImage || '').trim();
+              const hasVerifiedHeroPhoto =
+                Boolean(rawHeroCandidate) &&
+                !rawHeroCandidate.startsWith('/restaurants/') &&
+                !rawHeroCandidate.startsWith('/foods/') &&
+                (Boolean(selectedRestaurant.isVerified) ||
+                  rawHeroCandidate.startsWith('data:image/') ||
+                  rawHeroCandidate.startsWith('https://') ||
+                  rawHeroCandidate.startsWith('http://') ||
+                  rawHeroCandidate.startsWith('/Shop/'));
+              if (hasVerifiedHeroPhoto) {
+                return (
+                  <img
+                    src={resolveFoodPhotoUrl(rawHeroCandidate, selectedRestaurant.photoUpdatedAt)}
+                    alt={loc.name}
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.dataset.fallback) {
+                        target.dataset.fallback = '1';
+                        target.src = '/welcome/places.webp';
+                      }
+                    }}
+                  />
+                );
+              }
+              return (
+                <div className="w-full h-full flex flex-col items-center justify-center pb-10">
+                  <DefaultShopIcon className="w-20 h-20 rounded-2xl shadow-lg border border-white/25" />
+                </div>
+              );
+            })()}
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
             
             <div className="absolute bottom-3.5 left-4 right-24 text-white">
@@ -551,6 +574,7 @@ export const RestaurantDetailModal: React.FC = () => {
             )}
 
             {/* Shop Profile Picture & Food Photos Gallery + Edit Photos Button */}
+            {(categorizedPhotos.length > 0 || isAdmin) && (
             <div className="space-y-2.5">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-[#0F172A] dark:text-white font-khmer flex items-center gap-1.5">
@@ -598,6 +622,7 @@ export const RestaurantDetailModal: React.FC = () => {
                 </div>
               )}
             </div>
+            )}
 
             {/* Address & Hours */}
             <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-2.5 text-xs font-khmer shadow-2xs">

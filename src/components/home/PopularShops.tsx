@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Star, MapPin } from 'lucide-react';
 import type { Language, Restaurant } from '../../types';
-import { isRestaurantPremiumActive, isGpipRegisteredRestaurant, openRestaurantGoogleExternal, isStrictVerifiedCambodiaRestaurant } from '../../types';
+import { isRestaurantPremiumActive, isGpipRegisteredRestaurant, isStrictVerifiedCambodiaRestaurant } from '../../types';
 import { tr } from '../../utils/i18n';
 import { getLocalizedRestaurant } from '../../utils/zhDynamicTranslator';
 import { SectionHeader } from './SectionHeader';
@@ -92,18 +92,11 @@ const PopularShopsInner: React.FC<Props> = ({ language, restaurants, onOpen, onS
           {visible.map((rest) => {
             const loc = getLocalizedRestaurant(rest, language);
             const featured = isRestaurantPremiumActive(rest);
-            const isRegistered = isGpipRegisteredRestaurant(rest);
             return (
               <button
                 key={rest.id}
                 type="button"
-                onClick={() => {
-                  if (isRegistered) {
-                    onOpen(rest);
-                  } else {
-                    openRestaurantGoogleExternal(rest, 'maps');
-                  }
-                }}
+                onClick={() => onOpen(rest)}
                 className="snap-start shrink-0 w-56 rounded-3xl overflow-hidden bg-white dark:bg-slate-800/70 border border-slate-200/80 dark:border-white/10 shadow-md text-left active:scale-[0.97] transition cursor-pointer"
               >
                 <span className="relative block h-32">
