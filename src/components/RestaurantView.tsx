@@ -442,9 +442,9 @@ export const RestaurantView: React.FC = () => {
                 {myExistingRest
                   ? tr(
                       language,
-                      `${myExistingRest.menuItems?.length || 0} មុខម្ហូប`,
-                      `${myExistingRest.menuItems?.length || 0} dishes`,
-                      `${myExistingRest.menuItems?.length || 0} 道菜品`
+                      myExistingRest.isVerified ? '✅ បានផ្ទៀងផ្ទាត់' : '⏳ រង់ចាំ Admin ពិនិត្យ',
+                      myExistingRest.isVerified ? '✅ Verified' : '⏳ Pending Admin Review',
+                      myExistingRest.isVerified ? '✅ 已认证' : '⏳ 待管理员审核'
                     )
                   : tr(language, 'ឥតគិតថ្លៃ ១ ហាងដំបូង', '1st Shop Free', '首店免费')}
               </span>
@@ -453,15 +453,15 @@ export const RestaurantView: React.FC = () => {
               {myExistingRest
                 ? tr(
                     language,
-                    `${myExistingRest.addressKh} • ចុចប៊ូតុងខាងក្រោមដើម្បីបន្ថែមមុខម្ហូប រូបភាព និងព័ត៌មានហាង "${myExistingRest.nameKh}"។`,
-                    `${myExistingRest.addressEn || myExistingRest.addressKh} • Tap below to manage menus, photos & store info.`,
-                    `${myExistingRest.addressEn || myExistingRest.addressKh} • 点击下方按钮管理菜单、图片与店铺信息。`
+                    `${myExistingRest.addressKh} • ចុចប៊ូតុងខាងក្រោមដើម្បីគ្រប់គ្រងព័ត៌មានហាង រូបភាពហាង ១ សន្លឹក និងលីង Google Maps របស់ "${myExistingRest.nameKh}"។`,
+                    `${myExistingRest.addressEn || myExistingRest.addressKh} • Tap below to manage store info, shop photo & Google Maps link.`,
+                    `${myExistingRest.addressEn || myExistingRest.addressKh} • 点击下方按钮管理店铺信息、店铺照片与 Google Maps 链接。`
                   )
                 : tr(
                     language,
-                    'ដាក់បង្ហាញមុខម្ហូប ទីតាំងផែនទី និងលេខទំនាក់ទំនងហាងរបស់អ្នក ដើម្បីឱ្យភ្ញៀវងាយស្រួលស្វែងរក។',
-                    'Share your menu, map location, and contact details so diners can easily find your restaurant.',
-                    '展示您的菜单、地图位置与联系方式，方便食客轻松找到您的餐厅。'
+                    'ដាក់បង្ហាញព័ត៌មានហាង រូបភាពហាង ១ សន្លឹក លីង Google Maps និងលេខទំនាក់ទំនងហាងរបស់អ្នក ដើម្បីឱ្យភ្ញៀវងាយស្រួលស្វែងរក។',
+                    'Share your store info, single shop photo, Google Maps link, and contact details so diners can easily find your restaurant.',
+                    '展示您的店铺信息、店铺照片、Google Maps 链接与联系方式，方便食客轻松找到您的餐厅。'
                   )}
             </p>
           </div>

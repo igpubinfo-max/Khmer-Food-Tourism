@@ -12,6 +12,7 @@ import {
   getRestaurantRatingSummary, isSeedRestaurantId, getRestaurantCreatedAtMs,
   getDynamicVipPlans, getDynamicVipBenefits,
   isValidCambodiaCoordinates, buildCanonicalGoogleMapsPinUrl,
+  isValidGoogleMapsUrl, extractCoordsFromGoogleMapsUrl,
   NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI, sanitizeRestaurantShopPhoto
 } from '../types';
 import { tr } from '../utils/i18n';
@@ -59,8 +60,8 @@ export const ManageMenuModal: React.FC = () => {
   const promoPrice = activePlan.priceUsd;
   const storeQuota = getCurrentUserStoreQuota();
 
-  // Main Tabs: menu, info, photos, analytics, membership
-  const [mainTab, setMainTab] = useState<'menu' | 'info' | 'photos' | 'analytics' | 'membership'>('menu');
+  // Main Tabs: info, photos, analytics, membership
+  const [mainTab, setMainTab] = useState<'menu' | 'info' | 'photos' | 'analytics' | 'membership'>('info');
 
   // Menu item form mode: list, add, edit
   const [menuMode, setMenuMode] = useState<'list' | 'add' | 'edit'>('list');
@@ -162,10 +163,10 @@ export const ManageMenuModal: React.FC = () => {
   useEffect(() => {
     if (isManageMenuModalOpen) {
       const requestedTab = (window as any).__kft_manage_initial_tab;
-      if (requestedTab === 'video') {
+      if (requestedTab === 'video' || requestedTab === 'menu') {
         setMainTab('info');
         (window as any).__kft_manage_initial_tab = undefined;
-      } else if (requestedTab && ['menu', 'info', 'photos', 'analytics', 'membership'].includes(requestedTab)) {
+      } else if (requestedTab && ['info', 'photos', 'analytics', 'membership'].includes(requestedTab)) {
         setMainTab(requestedTab);
         (window as any).__kft_manage_initial_tab = undefined;
       }
@@ -535,10 +536,22 @@ export const ManageMenuModal: React.FC = () => {
       return null;
     };
 
+    const trimmedMapUrl = storeMapUrl.trim();
+    if (trimmedMapUrl && !isValidGoogleMapsUrl(trimmedMapUrl)) {
+      setStatusBanner({
+        type: 'error',
+        text: isKm
+          ? '⚠️ សូមបញ្ចូលលីង Google Maps ឱ្យបានត្រឹមត្រូវ (ឧ. https://maps.app.goo.gl/... ឬ https://www.google.com/maps/...)'
+          : '⚠️ Please enter a valid Google Maps link (e.g., https://maps.app.goo.gl/... or https://www.google.com/maps/...)',
+      });
+      modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     let resolvedLat = Number(storeLatitude);
     let resolvedLng = Number(storeLongitude);
     if (!isValidCambodiaCoordinates(resolvedLat, resolvedLng)) {
-      const parsed = parseCoordsFromUrl(storeMapUrl.trim());
+      const parsed = parseCoordsFromUrl(trimmedMapUrl) || extractCoordsFromGoogleMapsUrl(trimmedMapUrl);
       if (parsed) {
         resolvedLat = parsed.lat;
         resolvedLng = parsed.lng;
@@ -547,9 +560,14 @@ export const ManageMenuModal: React.FC = () => {
     const hasVerifiedCoords = isValidCambodiaCoordinates(resolvedLat, resolvedLng);
     const finalLat = hasVerifiedCoords ? resolvedLat : 0;
     const finalLng = hasVerifiedCoords ? resolvedLng : 0;
-    const finalMapUrl = hasVerifiedCoords
-      ? buildCanonicalGoogleMapsPinUrl(finalLat, finalLng, managingRestaurant.googlePlaceId)
-      : '';
+    const finalMapUrl =
+      trimmedMapUrl && isValidGoogleMapsUrl(trimmedMapUrl)
+        ? trimmedMapUrl
+        : hasVerifiedCoords
+          ? buildCanonicalGoogleMapsPinUrl(finalLat, finalLng, managingRestaurant.googlePlaceId)
+          : '';
+    const mapUrlChanged = trimmedMapUrl !== (managingRestaurant.mapUrl || '').trim();
+    const isAdminEditing = Boolean(isAdmin);
 
     const finalCover = storeCoverPhoto.trim() || managingRestaurant.photoUrl;
     const finalGallery = Array.from(new Set([finalCover, ...storeGalleryPhotos])).filter(Boolean).slice(0, maxPhotoLimit);
@@ -566,12 +584,21 @@ export const ManageMenuModal: React.FC = () => {
       mapUrl: finalMapUrl,
       latitude: finalLat,
       longitude: finalLng,
-      locationVerificationStatus: hasVerifiedCoords ? 'verified' : 'needs_admin_review',
-      locationNeedsReview: !hasVerifiedCoords,
-      locationVerifiedAt: hasVerifiedCoords ? new Date().toISOString() : undefined,
-      locationReviewNote: hasVerifiedCoords
-        ? undefined
-        : 'Flagged for Admin location review — please verify exact GPS coordinates.',
+      locationVerificationStatus: isAdminEditing
+        ? (hasVerifiedCoords || Boolean(finalMapUrl) ? 'verified' : 'needs_admin_review')
+        : mapUrlChanged
+          ? 'needs_admin_review'
+          : (hasVerifiedCoords ? 'verified' : 'needs_admin_review'),
+      locationNeedsReview: isAdminEditing
+        ? (!hasVerifiedCoords && !finalMapUrl)
+        : (mapUrlChanged || !hasVerifiedCoords),
+      locationVerifiedAt: isAdminEditing && (hasVerifiedCoords || Boolean(finalMapUrl)) ? new Date().toISOString() : managingRestaurant.locationVerifiedAt,
+      locationReviewNote:
+        !isAdminEditing && mapUrlChanged
+          ? 'User updated Google Maps link — pending Admin location verification.'
+          : hasVerifiedCoords || Boolean(finalMapUrl)
+            ? undefined
+            : 'Flagged for Admin location review — please verify exact GPS coordinates.',
       photoUrl: finalCover,
       profileImage: finalCover,
       foodImages: Array.isArray(managingRestaurant.foodImages)
@@ -976,27 +1003,15 @@ export const ManageMenuModal: React.FC = () => {
                     ? currentRest.aiCategoryVerification.reasonKh
                     : currentRest.aiCategoryVerification.reasonEn
                   : isKm
-                    ? 'សូមបន្ថែមមុខម្ហូបពិសេស និងរូបភាពម្ហូបអាហារឱ្យបានច្បាស់លាស់ ដើម្បីឱ្យ Admin អនុម័តដាក់បង្ហាញជាសាធារណៈ។'
-                    : 'Please add clear prepared food menu items and photos for Admin approval.'}
+                    ? 'សូមបំពេញព័ត៌មានហាង រូបភាពហាង ១ សន្លឹក និងលីង Google Maps ឱ្យបានច្បាស់លាស់ ដើម្បីឱ្យ Admin ត្រួតពិនិត្យ និងអនុម័តដាក់បង្ហាញជាសាធារណៈ។'
+                    : 'Please provide clear store info, single shop photo, and Google Maps link for Admin approval.'}
               </p>
             </div>
           </div>
         )}
 
-        {/* Clearly Separated Management Sections */}
-        <div className="grid grid-cols-5 bg-slate-100 dark:bg-slate-800/80 p-1 border-b border-slate-200 dark:border-slate-700 text-center font-khmer gap-0.5">
-          <button
-            onClick={() => { setMainTab('menu'); setMenuMode('list'); setStatusBanner(null); }}
-            className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
-              mainTab === 'menu'
-                ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs ring-1 ring-emerald-500/40'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-            }`}
-          >
-            <UtensilsCrossed className="w-3.5 h-3.5" />
-            <span className="leading-tight">{isKm ? '១. មុខម្ហូប' : '1. Menu'}</span>
-          </button>
-
+        {/* Clearly Separated Management Sections (No Add Dish Menu Tab) */}
+        <div className="grid grid-cols-4 bg-slate-100 dark:bg-slate-800/80 p-1 border-b border-slate-200 dark:border-slate-700 text-center font-khmer gap-0.5">
           <button
             onClick={() => { setMainTab('info'); setStatusBanner(null); }}
             className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
@@ -1006,7 +1021,7 @@ export const ManageMenuModal: React.FC = () => {
             }`}
           >
             <Store className="w-3.5 h-3.5" />
-            <span className="leading-tight">{isKm ? '២. ព័ត៌មានហាង' : '2. Info'}</span>
+            <span className="leading-tight">{isKm ? '១. ព័ត៌មានហាង' : '1. Info'}</span>
           </button>
 
           <button
@@ -1018,7 +1033,7 @@ export const ManageMenuModal: React.FC = () => {
             }`}
           >
             <Camera className="w-3.5 h-3.5" />
-            <span className="leading-tight">{tr(language, '៣. រូបភាពហាង', '3. Photos', '3. 照片')}</span>
+            <span className="leading-tight">{tr(language, '២. រូបភាពហាង', '2. Photo', '2. 照片')}</span>
           </button>
 
           <button
@@ -1030,7 +1045,7 @@ export const ManageMenuModal: React.FC = () => {
             }`}
           >
             <BarChart3 className="w-3.5 h-3.5" />
-            <span className="leading-tight">{isKm ? '៤. ស្ថិតិ & ផ្កាយ' : '4. Stats'}</span>
+            <span className="leading-tight">{isKm ? '៣. ស្ថិតិ & ផ្កាយ' : '3. Stats'}</span>
           </button>
 
           <button
@@ -1042,7 +1057,7 @@ export const ManageMenuModal: React.FC = () => {
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span className="leading-tight">{isKm ? '៥. គម្រោង VIP' : '5. VIP'}</span>
+            <span className="leading-tight">{isKm ? '៤. គម្រោង VIP' : '4. VIP'}</span>
           </button>
         </div>
 
@@ -1081,11 +1096,8 @@ export const ManageMenuModal: React.FC = () => {
           </div>
 
           <div className="text-right">
-            <span className="text-xs font-bold text-[#064E3B] dark:text-emerald-400 font-mono">
-              {menuItems.length} / {maxMenuLimit}
-            </span>
-            <span className="text-[10px] text-slate-500 ml-1">
-              {tr(language, 'មុខម្ហូប', 'dishes', '道菜品')}
+            <span className="text-[10px] font-bold text-[#064E3B] dark:text-emerald-400">
+              {tr(language, '១ រូបភាពហាង • Google Maps', '1 Shop Photo • Google Maps', '1张店铺图 • Google Maps')}
             </span>
           </div>
         </div>
@@ -1539,37 +1551,51 @@ export const ManageMenuModal: React.FC = () => {
 
               <div>
                 <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                  {isKm ? '៩. តំណភ្ជាប់ផែនទី Google Maps URL' : '9. Google Maps URL'}
+                  {isKm ? '៩. លីង Google Maps (Google Maps Link)' : '9. Google Maps Link'}
                 </label>
-                <input
-                  type="text"
-                  value={storeMapUrl}
-                  placeholder="https://www.google.com/maps/search/?api=1&query=11.553152,104.928957"
-                  onChange={e => {
-                    const val = e.target.value;
-                    setStoreMapUrl(val);
-                    const decoded = (() => {
-                      try {
-                        return decodeURIComponent(val);
-                      } catch {
-                        return val;
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={storeMapUrl}
+                    placeholder="https://maps.app.goo.gl/... ឬ https://www.google.com/maps/..."
+                    onChange={e => {
+                      const val = e.target.value;
+                      setStoreMapUrl(val);
+                      const parsed = extractCoordsFromGoogleMapsUrl(val);
+                      if (parsed && isValidCambodiaCoordinates(parsed.lat, parsed.lng)) {
+                        setStoreLatitude(parsed.lat);
+                        setStoreLongitude(parsed.lng);
                       }
-                    })();
-                    const m =
-                      decoded.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) ||
-                      decoded.match(/@(-?\d+\.\d+),\s*(-?\d+\.\d+)/) ||
-                      decoded.match(/[?&](?:query|q|destination|ll)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
-                    if (m) {
-                      const parsedLat = Number(m[1]);
-                      const parsedLng = Number(m[2]);
-                      if (isValidCambodiaCoordinates(parsedLat, parsedLng)) {
-                        setStoreLatitude(parsedLat);
-                        setStoreLongitude(parsedLng);
-                      }
-                    }
-                  }}
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono text-[11px]"
-                />
+                    }}
+                    className="flex-1 px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white font-mono text-[11px]"
+                  />
+                  {storeMapUrl.trim() && isValidGoogleMapsUrl(storeMapUrl.trim()) && (
+                    <a
+                      href={storeMapUrl.trim()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1.5 shrink-0"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      {isKm ? 'បើកផែនទី' : 'Open Map'}
+                    </a>
+                  )}
+                </div>
+                {storeMapUrl.trim() && (
+                  <p
+                    className={`text-[11px] font-bold mt-1 ${
+                      isValidGoogleMapsUrl(storeMapUrl.trim()) ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+                    }`}
+                  >
+                    {isValidGoogleMapsUrl(storeMapUrl.trim())
+                      ? isKm
+                        ? '✅ លីង Google Maps ត្រឹមត្រូវ (ត្រូវឆ្លងកាត់ការត្រួតពិនិត្យពី Admin)'
+                        : '✅ Valid Google Maps link (Subject to Admin verification)'
+                      : isKm
+                        ? '⚠️ សូមបញ្ចូលលីង Google Maps ឱ្យបានត្រឹមត្រូវ (ឧ. https://maps.app.goo.gl/...)'
+                        : '⚠️ Please enter a valid Google Maps link'}
+                  </p>
+                )}
               </div>
 
               {/* VIP Feature: Food Video Reels (TikTok / Facebook / YouTube Video Link) */}
