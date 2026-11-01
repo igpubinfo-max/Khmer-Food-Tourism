@@ -1,4 +1,5 @@
 import type { FoodItem, Language } from '../types';
+import { getSpicyDishScore } from './khmerFoodSearch';
 
 /**
  * Dish tags derived ONLY from existing recipe data (calories, ingredients, cooking steps, category).
@@ -111,7 +112,7 @@ const cache = new Map<string, DishTagId[]>();
 
 /** All tags derived from the recipe (unordered priority applied). */
 export function getDishTagIds(food: FoodItem): DishTagId[] {
-  const key = `${food.id}|${food.calories ?? ''}|${food.ingredients?.length ?? 0}|${food.steps?.length ?? 0}`;
+  const key = `${food.id}|${food.nameKh || ''}|${food.categorySlug || ''}|${food.calories ?? ''}|${food.ingredients?.length ?? 0}|${food.steps?.length ?? 0}`;
   const hit = cache.get(key);
   if (hit) return hit;
 
@@ -129,24 +130,36 @@ export function getDishTagIds(food: FoodItem): DishTagId[] {
     .replace(/អង្ករលីង|សណ្តែកដីលីង|សណ្ដែកដីលីង|ល្ងលីង|ដូងលីង|គ្រាប់ស្វាយចន្ទីលីង|ម្ទេសឆ្អើរ|ត្រីឆ្អើរ|roasted\s+peanut\w*|toasted\s+peanut\w*|roasted\s+rice|toasted\s+rice|roasted\s+sesame|toasted\s+sesame|toasted\s+coconut|roasted\s+cashew\w*|toasted\s+cashew\w*|roasted\s+chili\w*|dried\s+chili\w*/gi, ' ');
 
   const tags = new Set<DishTagId>();
+  const isDrink = food.categorySlug === 'drink';
+  const isSavoryCake =
+    food.categorySlug === 'cake' &&
+    /បាញ់ឆែវ|បាញ់ហយ|នំប៉័ង|គួង|ណែម|គូឆាយ|កចាយ|អន្សមជ្រូក/i.test(food.nameKh || '');
+  const isSweetOrDrink =
+    isDrink ||
+    food.categorySlug === 'dessert' ||
+    (food.categorySlug === 'cake' && !isSavoryCake) ||
+    includesAny(nameText, TAG_KEYWORD_RULES.sweet);
 
   const isFried = includesAny(methodText, TAG_KEYWORD_RULES.fried);
-  if (typeof food.calories === 'number' && food.calories > 0 && food.calories <= 450 && !isFried) tags.add('light');
+  if (!isDrink && typeof food.calories === 'number' && food.calories > 0 && food.calories <= 450 && !isFried) {
+    tags.add('light');
+  }
 
   const isGrilled = food.categorySlug === 'grilled' || includesAny(methodText, TAG_KEYWORD_RULES.grilled);
-  if (isGrilled) tags.add('grilled');
-  if (includesAny(methodText, TAG_KEYWORD_RULES.steamedBoiled) || food.categorySlug === 'soup') tags.add('steamed_boiled');
+  if (isGrilled && !isDrink) tags.add('grilled');
+  if (!isDrink && (includesAny(methodText, TAG_KEYWORD_RULES.steamedBoiled) || food.categorySlug === 'soup')) {
+    tags.add('steamed_boiled');
+  }
   if (isFried) tags.add('fried');
 
   const stripNotMeat = (s: string) => TAG_KEYWORD_RULES.notMeat.reduce((acc, w) => acc.split(w).join(' '), s);
-  const isSweet = food.categorySlug === 'dessert' || food.categorySlug === 'cake' || includesAny(nameText, TAG_KEYWORD_RULES.sweet);
 
   const vegCount = ingNames.filter((n) => includesAny(n, TAG_KEYWORD_RULES.vegetables)).length;
-  const vegByName = !isSweet && (food.categorySlug === 'salad' || includesAny(nameText, TAG_KEYWORD_RULES.vegetableDishName));
-  if (vegCount >= 2 || vegByName) tags.add('vegetable_rich');
+  const vegByName = !isSweetOrDrink && (food.categorySlug === 'salad' || includesAny(nameText, TAG_KEYWORD_RULES.vegetableDishName));
+  if (!isSweetOrDrink && (vegCount >= 2 || vegByName)) tags.add('vegetable_rich');
 
-  // Main dishes only: desserts / sweet snacks never count as protein dishes
-  const hasMainProtein = !isSweet && ingNames.some(
+  // Main dishes only: desserts / drinks / sweet snacks never count as protein dishes
+  const hasMainProtein = !isSweetOrDrink && ingNames.some(
     (n) => {
       const s = stripNotMeat(n);
       return includesAny(s, TAG_KEYWORD_RULES.mainProtein) && !includesAny(s, TAG_KEYWORD_RULES.swappable);
@@ -161,7 +174,13 @@ export function getDishTagIds(food: FoodItem): DishTagId[] {
   });
   if (ingredients.length > 0 && !hasMeatIngredient) tags.add('vegetarian_friendly');
 
-  if (includesAny(ingText, TAG_KEYWORD_RULES.spicy)) tags.add('spicy');
+  const cleanSpicyIngText = ingText.replace(/ម្ទេសប្លោក|bell\s+pepper\w*|sweet\s+pepper\w*/gi, ' ');
+  if (!isSweetOrDrink && (getSpicyDishScore(food) > 0 || includesAny(cleanSpicyIngText, TAG_KEYWORD_RULES.spicy))) {
+    // Still double-check negation so mild dishes (e.g. "មិនហឹរខ្លាំង") are never tagged spicy
+    if (getSpicyDishScore(food) > 0) {
+      tags.add('spicy');
+    }
+  }
   if (includesAny(ingText, TAG_KEYWORD_RULES.fishSauce)) tags.add('fish_sauce_prahok');
 
   const ordered = DISPLAY_PRIORITY.filter((id) => tags.has(id));

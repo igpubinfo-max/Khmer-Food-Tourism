@@ -1994,6 +1994,8 @@ export interface SearchSocialResult extends OnlineDiscoveryFeedResult {
   fromBackendEdge: boolean;
 }
 
+import { parseKhmerFoodSearchQuery, stripNegatedSpicePhrases } from '../utils/khmerFoodSearch';
+
 const SUPABASE_BASE_URL = (import.meta as any)?.env?.VITE_SUPABASE_URL || 'https://ryvltobwuwuulazqjnza.supabase.co';
 const SUPABASE_ANON_KEY =
   (import.meta as any)?.env?.VITE_SUPABASE_ANON_KEY || 'sb_publishable_h5ufAaA0qAL3s-ebprATsw_8AApv71l';
@@ -2014,10 +2016,19 @@ export function matchesExpandedYouTubeQuery(
 ): boolean {
   const q = normalizeKhmerSearchText(rawQuery);
   if (!q) return true;
-  const hay = normalizeKhmerSearchText(
+  const parsed = parseKhmerFoodSearchQuery(rawQuery);
+  const wantsSpicy =
+    parsed.flavorIntents.includes('spicy') || parsed.flavorIntents.includes('sour_spicy');
+  let hay = normalizeKhmerSearchText(
     `${item.titleKh} ${item.titleEn} ${item.titleZh || ''} ${item.descriptionKh} ${item.descriptionEn} ${item.descriptionZh || ''} ${item.sourceName} ${item.authorHandle || ''} ${item.provinceKh} ${item.provinceEn} ${item.matchedFoodNameKh || ''} ${item.matchedFoodNameEn || ''}`
   );
+  if (wantsSpicy) {
+    hay = stripNegatedSpicePhrases(hay);
+  }
   if (includesKhmerSafeToken(hay, q)) return true;
+  if (parsed.coreQuery && parsed.coreQuery.length >= 2 && includesKhmerSafeToken(hay, parsed.coreQuery)) {
+    return true;
+  }
   const tokens = expandYouTubeSearchQueryTokens(rawQuery);
   return tokens.some((token) => token.length >= 2 && includesKhmerSafeToken(hay, token));
 }

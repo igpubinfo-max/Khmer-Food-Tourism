@@ -1733,22 +1733,32 @@ export const WhatToEatModal: React.FC = () => {
                 ref={comparePanelRef}
                 className="p-3 rounded-2xl bg-amber-50/90 dark:bg-slate-800/90 border border-amber-300 dark:border-amber-700/70 space-y-2.5 font-khmer"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="text-xs font-extrabold text-amber-950 dark:text-amber-300 flex items-center gap-1.5">
-                    <span>⚖️</span>
-                    <span>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="space-y-0.5 min-w-0">
+                    <div className="text-xs font-extrabold text-amber-950 dark:text-amber-300 flex items-center gap-1.5">
+                      <span>⚖️</span>
+                      <span>
+                        {tr(
+                          language,
+                          `ប្រៀបធៀបមុខម្ហូបដោយផ្ទាល់ (${comparedDishIds.length}/3)`,
+                          `Side-by-Side Dish Comparison (${comparedDishIds.length}/3)`,
+                          `菜品直观对比 (${comparedDishIds.length}/3)`
+                        )}
+                      </span>
+                    </div>
+                    <p className="text-[11px] font-semibold text-amber-800/95 dark:text-amber-200/90 pl-5 leading-snug">
                       {tr(
                         language,
-                        `ប្រៀបធៀបមុខម្ហូបដោយផ្ទាល់ (${comparedDishIds.length}/3)`,
-                        `Side-by-Side Dish Comparison (${comparedDishIds.length}/3)`,
-                        `菜品直观对比 (${comparedDishIds.length}/3)`
+                        'បីរសជាតិ បីជម្រើស តើមួយណាជាចំណង់ថ្ងៃនេះ?',
+                        'Three flavors, three choices — which one are you craving today?',
+                        '三种风味，三种选择，今天最想吃哪一道？'
                       )}
-                    </span>
+                    </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setComparedDishIds([])}
-                    className="px-2 py-0.5 rounded-lg bg-white dark:bg-slate-700 border border-amber-300 dark:border-slate-600 text-[10px] font-bold text-slate-700 dark:text-slate-200 hover:text-rose-600 cursor-pointer"
+                    className="px-2 py-0.5 rounded-lg bg-white dark:bg-slate-700 border border-amber-300 dark:border-slate-600 text-[10px] font-bold text-slate-700 dark:text-slate-200 hover:text-rose-600 cursor-pointer shrink-0"
                   >
                     {tr(language, 'សម្អាត', 'Clear', '清空')}
                   </button>

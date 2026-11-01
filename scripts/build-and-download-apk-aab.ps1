@@ -77,7 +77,7 @@ function Write-Banner($text) {
 
 function Get-LocalBuildInfo {
     $gradlePath = Join-Path $RepoRoot "android\app\build.gradle"
-    $content = Get-Content -LiteralPath $gradlePath -Raw
+    $content = [System.IO.File]::ReadAllText($gradlePath, [System.Text.Encoding]::UTF8)
     $vc = 1291
     $vn = "2.5.0"
     if ($content -match 'versionCode\s+(\d+)') {
@@ -128,8 +128,8 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
             }
 
             if ($release -and $release.assets) {
-                $apkAsset = $release.assets | Where-Object { $_.name -like "*.apk" } | Select-Object -First 1
-                $aabAsset = $release.assets | Where-Object { $_.name -like "*.aab" } | Select-Object -First 1
+                $apkAsset = $release.assets | Where-Object { $_.name -like "*.apk" } | Sort-Object -Property updated_at -Descending | Select-Object -First 1
+                $aabAsset = $release.assets | Where-Object { $_.name -like "*.aab" } | Sort-Object -Property updated_at -Descending | Select-Object -First 1
             }
 
             if ($apkAsset -and $aabAsset) {
@@ -152,8 +152,8 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
         throw "Could not find .apk and .aab assets on GitHub Release v$versionName."
     }
 
-    $apkOutName = "DiscoverCambodia-v$versionName-Build$displayBuildCode.apk"
-    $aabOutName = "DiscoverCambodia-v$versionName-PlayStore-Build$displayBuildCode.aab"
+    $apkOutName = "CambodiaFlavorsTourism-v$versionName-Build$displayBuildCode.apk"
+    $aabOutName = "CambodiaFlavorsTourism-v$versionName-PlayStore-Build$displayBuildCode.aab"
     $apkOutPath = Join-Path $OutDir $apkOutName
     $aabOutPath = Join-Path $OutDir $aabOutName
 
@@ -198,9 +198,9 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
         throw "Downloaded package size looks incomplete. Please check internet connection and retry."
     }
 
-    # Also keep root DiscoverCambodia-v2.5.0.apk updated so any copy in the root folder is also the newest version
+    # Also keep root CambodiaFlavorsTourism-v2.5.0.apk updated so any copy in the root folder is also the newest version
     try {
-        $rootApkPath = Join-Path $RepoRoot "DiscoverCambodia-v$versionName.apk"
+        $rootApkPath = Join-Path $RepoRoot "CambodiaFlavorsTourism-v$versionName.apk"
         Copy-Item -LiteralPath $apkOutPath -Destination $rootApkPath -Force
     } catch {}
 
@@ -384,14 +384,14 @@ if ($localVC -gt $remoteVC -and $localVC -gt (900 + $latestRunNumber + 1) -and -
 Write-Banner "STEP 1: UPDATING BUILD NUMBER TO $nextVC & VERIFYING CODE"
 
 $gradleFile = Join-Path $RepoRoot "android\app\build.gradle"
-$gradleText = Get-Content -LiteralPath $gradleFile -Raw
+$gradleText = [System.IO.File]::ReadAllText($gradleFile, [System.Text.Encoding]::UTF8)
 $gradleText = [regex]::Replace($gradleText, 'versionCode\s+\d+', "versionCode $nextVC")
 [System.IO.File]::WriteAllText($gradleFile, $gradleText, (New-Object System.Text.UTF8Encoding($false)))
 
 $typesFile = Join-Path $RepoRoot "src\types\index.ts"
 if (Test-Path $typesFile) {
     $todayIso = (Get-Date).ToString("yyyy-MM-dd")
-    $typesText = Get-Content -LiteralPath $typesFile -Raw
+    $typesText = [System.IO.File]::ReadAllText($typesFile, [System.Text.Encoding]::UTF8)
     $typesText = [regex]::Replace(
         $typesText,
         'export const APP_BUILD_CODE:\s*number\s*=[^;]+;',

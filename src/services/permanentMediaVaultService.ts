@@ -98,8 +98,14 @@ export function isDeprecatedStaleFoodMetadata(
   nameKh?: string,
   categorySlug?: string
 ): boolean {
-  if (nameKh && DEPRECATED_STALE_FOOD_NAMES_KH.has(nameKh.trim())) {
-    return true;
+  if (nameKh) {
+    const trimmed = nameKh.trim();
+    if (DEPRECATED_STALE_FOOD_NAMES_KH.has(trimmed)) {
+      return true;
+    }
+    if (trimmed.includes('កែងស') || /[\u0E00-\u0E7F\u0C80-\u0CFF]/.test(trimmed)) {
+      return true;
+    }
   }
   if (foodId === 'food-187' && categorySlug === 'dessert') {
     return true;

@@ -368,7 +368,7 @@ export const FoodView: React.FC = () => {
                       )}
                     </div>
                     <h3 className="font-moul text-sm sm:text-base text-white truncate">
-                      {tr(language, section.meta.nameKh.replace(/^[០-៩0-9]+.s*/, ''), section.meta.nameEn.replace(/^[0-9]+.s*/, ''), zhMeta?.titleZh || section.meta.nameEn)}
+                      {tr(language, section.meta.nameKh.replace(/^[០-៩0-9]+\.\s*/, ''), section.meta.nameEn.replace(/^[0-9]+\.\s*/, ''), zhMeta?.titleZh || section.meta.nameEn)}
                     </h3>
                   </div>
                   <span className="px-2.5 py-1 rounded-full bg-white/20 text-white text-xs font-bold shrink-0 border border-white/25">

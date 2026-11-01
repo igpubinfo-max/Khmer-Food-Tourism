@@ -1494,7 +1494,8 @@ export function expandMultilingualPlaceQuery(
 
   if (clean.length >= 2) {
     const strippedSub = clean
-      .replace(/^(ភោជនីយដ្ឋាន|ហាងអាហារ|ហាងកាហ្វេ|អាហារដ្ឋាន|រមណីយដ្ឋាន|តំបន់ទេសចរណ៍|ជំនោរ|ផ្ទះបាយ|ហាង)\s*/i, '')
+      .replace(/^(ភោជនីយដ្ឋាន|ហាងអាហារ|ហាងកាហ្វេ|អាហារដ្ឋាន|រមណីយដ្ឋាន|តំបន់ទេសចរណ៍|ជំនោរ|ផ្ទះបាយ|ហាង|ចង់ញ៉ាំ|មុខម្ហូប|ម្ហូប|អាហារ|រសជាតិ)\s*/i, '')
+      .replace(/^(រសជាតិ|មុខម្ហូប|ម្ហូប)\s*/i, '')
       .trim();
         const bilingualSynonyms: Array<[RegExp, string[]]> = [
       [/(pizza|ភីហ្សា|pizzeria|披萨)/i, ['pizza', 'ភីហ្សា', 'pizzeria']],
@@ -1534,6 +1535,8 @@ export function expandMultilingualPlaceQuery(
       [/(koh kong|កោះកុង|戈公)/i, ['koh kong', 'កោះកុង']],
       [/(halal|ហាឡាល់|ឥស្លាម)/i, ['halal', 'ហាឡាល់']],
       [/(vegan|vegetarian|បួស|ម្ហូបបួស)/i, ['vegetarian', 'vegan', 'ម្ហូបបួស']],
+      [/(ហឹរ|ហិរ|ម្ទេស|spicy|chili|辣)/i, ['ហឹរ', 'ម្ទេស', 'បុកល្ហុង', 'ភ្លា', 'spicy', 'chili']],
+      [/(ទឹកសណ្តែក|សណ្តែកសៀង|soy\s*milk|豆浆)/i, ['ទឹកសណ្តែក', 'សណ្តែកសៀង', 'soy milk']],
     ];
 
     const tokens = [clean];
