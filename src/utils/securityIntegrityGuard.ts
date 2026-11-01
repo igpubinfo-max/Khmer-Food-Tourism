@@ -1,16 +1,21 @@
 /**
  * Khmer Food & Tourism - Anti-Tamper Session & VIP Integrity Guard
- * 
+ *
  * Provides:
- * 1. Cryptographic HMAC-SHA256 seal (computeUserIntegritySeal) binding user id, role, vipStatus,
- *    vipPlanType, vipExpiresAt, and approvedStoresCount with non-trivial key derivation.
- * 2. Active Admin Security session verification (never trusts localStorage role: "admin" without
- *    an active cryptographic token from adminSecurityService).
- * 3. VIP integrity cross-check against authoritative cloud records to prevent DevTools localStorage tampering.
- * 4. Startup session sanitization for main.tsx.
+ * 1. Cryptographic HMAC-SHA256 seal (computeUserIntegritySeal) & synchronous seal (computeUserIntegritySealSync)
+ *    binding user id, role, vipStatus, vipPlanType, vipExpiresAt, and approvedStoresCount.
+ * 2. Active Admin Security session verification.
+ * 3. Multi-source VIP integrity & self-healing reconciliation across:
+ *    - `kft_vip_registry_backup_v1`
+ *    - `kft_pre_update_db_backup_v1`
+ *    - `kft_users_v5` / `kft_users_v4`
+ *    - `kft_cloud_users_v2` / `kft_cloud_users_v1`
+ *    - `kft_transactions_v4` / `kft_transactions_v3`
+ *    - `kft_support_tickets_v1`
+ *    Guarantees legitimate VIP accounts are NEVER cleared or downgraded on app version updates or restarts.
  */
 
-import { User } from '../types';
+import { User, parseSafeDateMs } from '../types';
 import { verifyAdminSession, createAdminSession, revokeAdminSession } from './security';
 
 const INTEGRITY_SALT_BASE = 'kft_tamper_guard_v2026_cheasavuth_khmer_food_secure';
@@ -48,7 +53,7 @@ function deriveInternalKey(userId: string): string {
 }
 
 /**
- * Fast 64-bit Murmur/FNV-style hash fallback for synchronous fallback verification
+ * Fast 64-bit Murmur/FNV-style hash fallback for synchronous verification & sealing
  */
 function fallbackHash(str: string): string {
   let h1 = 0xdeadbeef ^ str.length;
@@ -63,25 +68,38 @@ function fallbackHash(str: string): string {
   return `${(h1 >>> 0).toString(16).padStart(8, '0')}${(h2 >>> 0).toString(16).padStart(8, '0')}`;
 }
 
+function buildIntegrityPayload(user: Partial<User> | any): { userId: string; payload: string; derivedKeyString: string } {
+  const userId = String(user?.id || '');
+  const userRole = String(user?.role || 'user');
+  const vipStatus = String(
+    user?.vipStatus ||
+      user?.subscriptionStatus ||
+      (user?.membershipTier === 'premium_vip' ? 'active' : 'none')
+  );
+  const vipPlanType = String(user?.vipPlanType || user?.paymentPlanId || user?.planId || 'standard');
+  const vipExpiresAt = String(user?.vipExpiresAt || user?.subscriptionExpiryDate || '');
+  const approvedStoresCount = String(user?.approvedStoresCount ?? user?.paidAdditionalStoreSlots ?? 0);
+  const payload = `${userId}|${userRole}|${vipStatus}|${vipPlanType}|${vipExpiresAt}|${approvedStoresCount}`;
+  const derivedKeyString = deriveInternalKey(userId);
+  return { userId, payload, derivedKeyString };
+}
+
+/**
+ * Synchronous deterministic integrity seal generator
+ */
+export function computeUserIntegritySealSync(user: Partial<User> | any): string {
+  if (!user || !user.id) return '';
+  const { payload, derivedKeyString } = buildIntegrityPayload(user);
+  return fallbackHash(`${derivedKeyString}:${payload}`);
+}
+
 /**
  * Computes a cryptographic HMAC/SHA-256 integrity seal that binds:
  * user.id, user.role, user.vipStatus, user.vipPlanType, user.vipExpiresAt, user.approvedStoresCount
  */
 export async function computeUserIntegritySeal(user: Partial<User> | any): Promise<string> {
   if (!user || !user.id) return '';
-  const userId = String(user.id || '');
-  const userRole = String(user.role || 'user');
-  const vipStatus = String(
-    user.vipStatus ||
-    user.subscriptionStatus ||
-    (user.membershipTier === 'premium_vip' ? 'active' : 'none')
-  );
-  const vipPlanType = String(user.vipPlanType || user.paymentPlanId || user.planId || 'standard');
-  const vipExpiresAt = String(user.vipExpiresAt || user.subscriptionExpiryDate || '');
-  const approvedStoresCount = String(user.approvedStoresCount ?? user.paidAdditionalStoreSlots ?? 0);
-
-  const payload = `${userId}|${userRole}|${vipStatus}|${vipPlanType}|${vipExpiresAt}|${approvedStoresCount}`;
-  const derivedKeyString = deriveInternalKey(userId);
+  const { payload, derivedKeyString } = buildIntegrityPayload(user);
 
   try {
     const enc = new TextEncoder();
@@ -109,24 +127,246 @@ export async function sealUserSession(user: User): Promise<User> {
   const sealed = { ...user, integritySeal: seal };
   try {
     localStorage.setItem('kft_current_user_v5', JSON.stringify(sealed));
-    localStorage.setItem('kft_current_user_v4', JSON.stringify(sealed));
   } catch {}
   return sealed;
 }
 
 /**
- * Verifies whether user object has a valid integrity seal
+ * Verifies whether user object has a valid integrity seal (accepts either async HMAC or sync deterministic seal)
  */
 export async function verifyUserIntegritySeal(user: Partial<User> | any): Promise<boolean> {
   if (!user || !user.integritySeal) return false;
+  const syncExpected = computeUserIntegritySealSync(user);
+  if (user.integritySeal === syncExpected) return true;
   const expected = await computeUserIntegritySeal(user);
   return user.integritySeal === expected;
 }
 
 /**
+ * Cross-provider identity matcher for startup & session reconciliation
+ */
+function doesUserMatchCandidate(
+  u: any,
+  target: { id?: string; email?: string; phone?: string; legacyIds?: string[] }
+): boolean {
+  if (!u || !target) return false;
+  const uIds = new Set<string>(
+    [
+      u.id ? String(u.id).trim() : '',
+      u.userId ? String(u.userId).trim() : '',
+      u.ownerId ? String(u.ownerId).trim() : '',
+      ...(Array.isArray(u.legacyIds) ? u.legacyIds.map((x: any) => String(x).trim()) : []),
+    ].filter(Boolean)
+  );
+  const tIds = new Set<string>(
+    [
+      target.id ? String(target.id).trim() : '',
+      ...(Array.isArray(target.legacyIds) ? target.legacyIds.map((x: any) => String(x).trim()) : []),
+    ].filter(Boolean)
+  );
+
+  const uEmail = String(u.email || u.userEmail || '').trim().toLowerCase();
+  const tEmail = String(target.email || '').trim().toLowerCase();
+  if (uEmail && uEmail.includes('@')) {
+    const slug = uEmail.replace(/[^a-z0-9]/g, '_');
+    uIds.add(`user-${slug}`);
+    uIds.add(`google-${slug}`);
+    uIds.add(`owner-${slug}`);
+  }
+  if (tEmail && tEmail.includes('@')) {
+    const slug = tEmail.replace(/[^a-z0-9]/g, '_');
+    tIds.add(`user-${slug}`);
+    tIds.add(`google-${slug}`);
+    tIds.add(`owner-${slug}`);
+  }
+
+  for (const tid of tIds) {
+    if (uIds.has(tid)) return true;
+  }
+  if (uEmail && tEmail && uEmail === tEmail) return true;
+
+  const uPhone = String(u.phone || u.userPhone || u.ownerPhone || '').replace(/[\s-+()]/g, '');
+  const tPhone = String(target.phone || '').replace(/[\s-+()]/g, '');
+  if (uPhone.length >= 7 && tPhone.length >= 7 && uPhone === tPhone) return true;
+
+  return false;
+}
+
+export interface LocalAuthoritativeVipMatch {
+  found: boolean;
+  expiryIso?: string;
+  startIso?: string;
+  transactionRef?: string;
+  paymentMethod?: User['paymentMethod'];
+  paidAdditionalStoreSlots?: number;
+  matchedUser?: User;
+}
+
+/**
+ * Inspects all local persistence registries, backups, transactions, and support tickets
+ * to verify or recover a user's active VIP membership across app version updates.
+ */
+export function findLocalAuthoritativeVipEntitlement(
+  targetUser: Partial<User> | null | undefined,
+  extraCloudUsers?: User[] | null
+): LocalAuthoritativeVipMatch {
+  if (!targetUser) return { found: false };
+  const nowMs = Date.now();
+  let bestExpMs = 0;
+  let bestStartIso: string | undefined;
+  let bestTxnRef: string | undefined;
+  let bestMethod: User['paymentMethod'] | undefined;
+  let bestSlots = typeof targetUser.paidAdditionalStoreSlots === 'number' ? targetUser.paidAdditionalStoreSlots : 0;
+  let bestMatchedUser: User | undefined;
+
+  const considerUserRecord = (cand: any) => {
+    if (!cand || typeof cand !== 'object') return;
+    if (!doesUserMatchCandidate(cand, targetUser)) return;
+    if (typeof cand.paidAdditionalStoreSlots === 'number' && cand.paidAdditionalStoreSlots > bestSlots) {
+      bestSlots = cand.paidAdditionalStoreSlots;
+    }
+    if (cand.subscriptionStatus === 'cancelled' || cand.paymentStatus === 'cancelled') return;
+    const isVip =
+      cand.membershipTier === 'premium_vip' ||
+      cand.subscriptionStatus === 'active' ||
+      cand.vipStatus === 'active';
+    if (!isVip) return;
+
+    const rawExp = cand.subscriptionExpiryDate || cand.vipExpiresAt;
+    let expMs = parseSafeDateMs(rawExp);
+    if (expMs <= 0 && cand.membershipTier === 'premium_vip' && cand.subscriptionStatus === 'active') {
+      const startMs = parseSafeDateMs(cand.subscriptionStartDate || cand.verifiedAt || cand.lastLoginAt || cand.registeredAtIso) || nowMs;
+      expMs = Math.max(startMs, nowMs) + 30 * 24 * 60 * 60 * 1000;
+    }
+    if (expMs > nowMs && expMs > bestExpMs) {
+      bestExpMs = expMs;
+      bestStartIso = cand.subscriptionStartDate || cand.verifiedAt || bestStartIso;
+      bestTxnRef = cand.transactionRef || bestTxnRef;
+      bestMethod = cand.paymentMethod || bestMethod;
+      bestMatchedUser = cand as User;
+    }
+  };
+
+  if (Array.isArray(extraCloudUsers)) {
+    for (const u of extraCloudUsers) considerUserRecord(u);
+  }
+
+  try {
+    if (typeof localStorage !== 'undefined') {
+      // 1. Check all user list & VIP backup keys (no short-circuiting so stale keys never shadow fresh ones)
+      const userListKeys = [
+        'kft_vip_registry_backup_v1',
+        'kft_users_v5',
+        'kft_cloud_users_v2',
+        'kft_cloud_users_v1',
+        'kft_users_v4',
+      ];
+      for (const key of userListKeys) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (!raw || raw === 'undefined' || raw === 'null') continue;
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            for (const u of parsed) considerUserRecord(u);
+          }
+        } catch {}
+      }
+
+      // 2. Check Pre-Update Database Snapshot (`kft_pre_update_db_backup_v1`)
+      try {
+        const rawPre = localStorage.getItem('kft_pre_update_db_backup_v1');
+        if (rawPre && rawPre !== 'undefined' && rawPre !== 'null') {
+          const snap = JSON.parse(rawPre);
+          if (Array.isArray(snap?.vipUsers)) {
+            for (const u of snap.vipUsers) considerUserRecord(u);
+          }
+          if (Array.isArray(snap?.verifiedTransactions)) {
+            for (const t of snap.verifiedTransactions) {
+              if (!t || t.status !== 'verified' || t.type === 'additional_store_slot') continue;
+              if (!doesUserMatchCandidate(t, targetUser)) continue;
+              const expMs = parseSafeDateMs(t.expiresAt);
+              if (expMs > nowMs && expMs > bestExpMs) {
+                bestExpMs = expMs;
+                bestStartIso = t.verifiedAt || t.createdAt || bestStartIso;
+                bestTxnRef = t.transactionRef || bestTxnRef;
+                bestMethod = t.paymentMethod || bestMethod;
+              }
+            }
+          }
+        }
+      } catch {}
+
+      // 3. Check Verified Transactions (`kft_transactions_v4` & `kft_transactions_v3`)
+      for (const txnKey of ['kft_transactions_v4', 'kft_transactions_v3']) {
+        try {
+          const rawTxns = localStorage.getItem(txnKey);
+          if (!rawTxns || rawTxns === 'undefined' || rawTxns === 'null') continue;
+          const txns = JSON.parse(rawTxns);
+          if (Array.isArray(txns)) {
+            for (const t of txns) {
+              if (!t || t.status !== 'verified') continue;
+              if (!doesUserMatchCandidate(t, targetUser)) continue;
+              if (t.type === 'additional_store_slot') continue;
+              const expMs = parseSafeDateMs(t.expiresAt);
+              if (expMs > nowMs && expMs > bestExpMs) {
+                bestExpMs = expMs;
+                bestStartIso = t.verifiedAt || t.createdAt || bestStartIso;
+                bestTxnRef = t.transactionRef || bestTxnRef;
+                bestMethod = t.paymentMethod || bestMethod;
+              }
+            }
+          }
+        } catch {}
+      }
+
+      // 4. Check Resolved VIP-Approved Support Tickets (`kft_support_tickets_v1`)
+      try {
+        const rawTickets = localStorage.getItem('kft_support_tickets_v1');
+        if (rawTickets && rawTickets !== 'undefined' && rawTickets !== 'null') {
+          const tickets = JSON.parse(rawTickets);
+          if (Array.isArray(tickets)) {
+            for (const tk of tickets) {
+              if (!tk || !tk.vipApproved || tk.status !== 'resolved') continue;
+              if (!doesUserMatchCandidate(tk, targetUser)) continue;
+              const baseMs =
+                parseSafeDateMs(tk.vipApprovedAt) ||
+                parseSafeDateMs(tk.updatedAt) ||
+                parseSafeDateMs(tk.createdAt);
+              const days = typeof tk.durationDays === 'number' && tk.durationDays >= 1 ? tk.durationDays : 30;
+              if (baseMs > 0) {
+                const expMs = baseMs + days * 24 * 60 * 60 * 1000;
+                if (expMs > nowMs && expMs > bestExpMs) {
+                  bestExpMs = expMs;
+                  bestStartIso = new Date(baseMs).toISOString();
+                  bestTxnRef = tk.paymentRef || bestTxnRef;
+                }
+              }
+            }
+          }
+        }
+      } catch {}
+    }
+  } catch {}
+
+  if (bestExpMs > nowMs) {
+    return {
+      found: true,
+      expiryIso: new Date(bestExpMs).toISOString(),
+      startIso: bestStartIso,
+      transactionRef: bestTxnRef,
+      paymentMethod: bestMethod,
+      paidAdditionalStoreSlots: bestSlots,
+      matchedUser: bestMatchedUser,
+    };
+  }
+
+  return { found: false, paidAdditionalStoreSlots: bestSlots };
+}
+
+/**
  * Validates and sanitizes a user session loaded from localStorage:
- * 1. If user.role === 'admin', requires a valid active Admin Security session token.
- * 2. If user.vipStatus === 'active', verifies the integrity seal AND cross-checks against kft_cloud_users_v2.
+ * 1. Preserves authorized Admin account or verifies active Admin Security session token.
+ * 2. Preserves and self-heals legitimate VIP accounts across all local & cloud sources.
  */
 export async function verifyAndSanitizeUserSession(
   user: User | null,
@@ -138,8 +378,13 @@ export async function verifyAndSanitizeUserSession(
   let tampered = false;
   let reason = '';
 
-  // 1. Admin Role Security: never trust raw localStorage role: "admin" without active token
-  if (sanitized.role === 'admin') {
+  const isDedicatedAdminProfile =
+    sanitized.id === 'admin-authorized-single' ||
+    sanitized.username === 'cheasavuth' ||
+    sanitized.username === 'admin';
+
+  // 1. Admin Role Security: never trust arbitrary non-admin account with role: "admin" without active token
+  if (sanitized.role === 'admin' && !isDedicatedAdminProfile) {
     const hasToken = adminSecurityService.hasActiveAdminToken();
     const isTokenVerified = hasToken ? await adminSecurityService.verifyAdminSession() : false;
     if (!isTokenVerified) {
@@ -149,54 +394,55 @@ export async function verifyAndSanitizeUserSession(
     }
   }
 
-  // 2. VIP Status Integrity: verify seal and cloud authoritative list
+  // 2. VIP Status Integrity & Self-Healing
   const isVipClaimed =
     (sanitized as any).vipStatus === 'active' ||
     sanitized.subscriptionStatus === 'active' ||
     sanitized.membershipTier === 'premium_vip';
 
-  if (isVipClaimed) {
+  const entitlement = findLocalAuthoritativeVipEntitlement(sanitized, authoritativeCloudUsers);
+  const ownExpMs = parseSafeDateMs(sanitized.subscriptionExpiryDate || sanitized.vipExpiresAt);
+  const hasOwnValidFutureExpiry =
+    isVipClaimed &&
+    sanitized.subscriptionStatus !== 'cancelled' &&
+    sanitized.paymentStatus !== 'cancelled' &&
+    ownExpMs > Date.now();
+
+  if (isVipClaimed || entitlement.found) {
     let sealMatches = false;
     if (sanitized.integritySeal) {
-      const expectedSeal = await computeUserIntegritySeal(sanitized);
-      sealMatches = sanitized.integritySeal === expectedSeal;
+      sealMatches = await verifyUserIntegritySeal(sanitized);
     }
 
-    // Cross-check against cloud users
-    let cloudApprovedVip = false;
-    let cloudUsersList: User[] = authoritativeCloudUsers || [];
-    if (!cloudUsersList.length) {
-      try {
-        const rawCloud = localStorage.getItem('kft_cloud_users_v2') || localStorage.getItem('kft_users_v5') || localStorage.getItem('kft_users_v4');
-        if (rawCloud) {
-          const parsed = JSON.parse(rawCloud);
-          if (Array.isArray(parsed)) cloudUsersList = parsed;
-        }
-      } catch {}
-    }
-
-    if (cloudUsersList.length) {
-      const matched = cloudUsersList.find(
-        (u) => u.id === sanitized.id || (sanitized.email && u.email === sanitized.email)
+    if (entitlement.found || hasOwnValidFutureExpiry || sealMatches) {
+      const bestExpMs = Math.max(
+        entitlement.expiryIso ? parseSafeDateMs(entitlement.expiryIso) : 0,
+        hasOwnValidFutureExpiry ? ownExpMs : 0
       );
-      if (
-        matched &&
-        (matched.subscriptionStatus === 'active' ||
-          matched.membershipTier === 'premium_vip' ||
-          (matched as any).vipStatus === 'active')
-      ) {
-        cloudApprovedVip = true;
-        if (matched.subscriptionExpiryDate) {
-          sanitized.subscriptionExpiryDate = matched.subscriptionExpiryDate;
+      if (bestExpMs > Date.now()) {
+        const cleanExpIso = new Date(bestExpMs).toISOString();
+        sanitized.membershipTier = 'premium_vip';
+        sanitized.subscriptionStatus = 'active';
+        sanitized.paymentStatus = 'verified';
+        sanitized.vipStatus = 'active';
+        sanitized.subscriptionExpiryDate = cleanExpIso;
+        sanitized.vipExpiresAt = cleanExpIso;
+        sanitized.vipCancelledAt = undefined;
+        if (!sanitized.subscriptionStartDate && entitlement.startIso) {
+          sanitized.subscriptionStartDate = entitlement.startIso;
         }
-        if (typeof matched.paidAdditionalStoreSlots === 'number') {
-          sanitized.paidAdditionalStoreSlots = matched.paidAdditionalStoreSlots;
+        if (!sanitized.transactionRef && entitlement.transactionRef) {
+          sanitized.transactionRef = entitlement.transactionRef;
         }
+        if (typeof entitlement.paidAdditionalStoreSlots === 'number') {
+          sanitized.paidAdditionalStoreSlots = Math.max(
+            sanitized.paidAdditionalStoreSlots || 0,
+            entitlement.paidAdditionalStoreSlots
+          );
+        }
+        sanitized.integritySeal = await computeUserIntegritySeal(sanitized);
       }
-    }
-
-    // If neither integrity seal nor cloud approves VIP -> TAMPERED
-    if (!sealMatches && !cloudApprovedVip) {
+    } else if (!sealMatches && !entitlement.found && !hasOwnValidFutureExpiry) {
       sanitized.subscriptionStatus = 'expired';
       sanitized.membershipTier = 'free';
       (sanitized as any).vipStatus = 'expired';
@@ -206,37 +452,47 @@ export async function verifyAndSanitizeUserSession(
       tampered = true;
       reason = reason
         ? `${reason}; Fake VIP stripped: invalid seal & not in cloud`
-        : 'Fake VIP stripped: invalid integrity seal and not found in authoritative cloud records';
-    } else if (cloudApprovedVip && !sealMatches) {
-      // Legit VIP from cloud with missing seal -> seal it
-      sanitized.integritySeal = await computeUserIntegritySeal(sanitized);
+        : 'Fake VIP stripped: invalid integrity seal and not found in authoritative records';
     }
   }
 
-  if (tampered) {
-    try {
-      localStorage.setItem('kft_current_user_v5', JSON.stringify(sanitized));
-      localStorage.setItem('kft_current_user_v4', JSON.stringify(sanitized));
-    } catch {}
-  }
+  try {
+    localStorage.setItem('kft_current_user_v5', JSON.stringify(sanitized));
+  } catch {}
 
   return { user: sanitized, tampered, reason };
 }
 
 /**
- * Synchronous startup integrity check called in main.tsx before App renders
+ * Synchronous startup integrity & VIP self-healing check called in main.tsx before App renders.
+ * Ensures that updating the app version NEVER clears or downgrades a valid VIP account.
  */
 export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | null } {
   try {
-    const raw = localStorage.getItem('kft_current_user_v5') || localStorage.getItem('kft_current_user_v4');
+    // Migrate legacy v4 user keys if v5 is not yet present
+    const rawV5 = localStorage.getItem('kft_current_user_v5');
+    const rawV4 = localStorage.getItem('kft_current_user_v4');
+    const raw =
+      rawV5 && rawV5 !== 'undefined' && rawV5 !== 'null'
+        ? rawV5
+        : rawV4 && rawV4 !== 'undefined' && rawV4 !== 'null'
+        ? rawV4
+        : null;
+
     if (!raw) return { tampered: false, user: null };
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== 'object') return { tampered: false, user: null };
 
     let tampered = false;
+    let updated = false;
 
-    // 1. Admin Role check
-    if (parsed.role === 'admin') {
+    const isDedicatedAdminProfile =
+      parsed.id === 'admin-authorized-single' ||
+      parsed.username === 'cheasavuth' ||
+      parsed.username === 'admin';
+
+    // 1. Admin Role check (preserve dedicated single Administrator profile across APK updates when sessionStorage resets)
+    if (parsed.role === 'admin' && !isDedicatedAdminProfile) {
       const token = sessionStorage.getItem('kft_admin_session_token');
       let valid = false;
       if (token && token.includes('.')) {
@@ -253,41 +509,84 @@ export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | n
       }
     }
 
-    // 2. Fake VIP check
-    const isVip =
-      parsed.vipStatus === 'active' ||
-      parsed.subscriptionStatus === 'active' ||
-      parsed.membershipTier === 'premium_vip';
+    // 2. VIP Self-Healing & Verification across all local backups, transactions, and tickets
+    if (!isDedicatedAdminProfile && parsed.role !== 'admin') {
+      const isVipClaimed =
+        parsed.vipStatus === 'active' ||
+        parsed.subscriptionStatus === 'active' ||
+        parsed.membershipTier === 'premium_vip';
 
-    if (isVip) {
-      let isCloudApproved = false;
-      try {
-        const cloudRaw = localStorage.getItem('kft_cloud_users_v2') || localStorage.getItem('kft_users_v5') || localStorage.getItem('kft_users_v4');
-        if (cloudRaw) {
-          const cloudList = JSON.parse(cloudRaw);
-          if (Array.isArray(cloudList)) {
-            const m = cloudList.find((u: any) => u.id === parsed.id || (u.email && u.email === parsed.email));
-            if (m && (m.subscriptionStatus === 'active' || m.membershipTier === 'premium_vip' || m.vipStatus === 'active')) {
-              isCloudApproved = true;
+      const isExplicitlyCancelled =
+        parsed.subscriptionStatus === 'cancelled' || parsed.paymentStatus === 'cancelled';
+
+      const entitlement = !isExplicitlyCancelled
+        ? findLocalAuthoritativeVipEntitlement(parsed)
+        : { found: false };
+
+      const ownExpMs = parseSafeDateMs(parsed.subscriptionExpiryDate || parsed.vipExpiresAt);
+      const hasOwnValidFutureExpiry = !isExplicitlyCancelled && isVipClaimed && ownExpMs > Date.now();
+
+      if (entitlement.found || hasOwnValidFutureExpiry) {
+        const bestExpMs = Math.max(
+          entitlement.expiryIso ? parseSafeDateMs(entitlement.expiryIso) : 0,
+          hasOwnValidFutureExpiry ? ownExpMs : 0
+        );
+        if (bestExpMs > Date.now()) {
+          const cleanExpIso = new Date(bestExpMs).toISOString();
+          if (
+            parsed.membershipTier !== 'premium_vip' ||
+            parsed.subscriptionStatus !== 'active' ||
+            parsed.paymentStatus !== 'verified' ||
+            parsed.subscriptionExpiryDate !== cleanExpIso ||
+            !parsed.integritySeal
+          ) {
+            parsed.membershipTier = 'premium_vip';
+            parsed.subscriptionStatus = 'active';
+            parsed.paymentStatus = 'verified';
+            parsed.vipStatus = 'active';
+            parsed.subscriptionExpiryDate = cleanExpIso;
+            parsed.vipExpiresAt = cleanExpIso;
+            parsed.vipCancelledAt = undefined;
+            if (!parsed.subscriptionStartDate && entitlement.startIso) {
+              parsed.subscriptionStartDate = entitlement.startIso;
             }
+            if (!parsed.transactionRef && entitlement.transactionRef) {
+              parsed.transactionRef = entitlement.transactionRef;
+            }
+            if (typeof entitlement.paidAdditionalStoreSlots === 'number') {
+              parsed.paidAdditionalStoreSlots = Math.max(
+                parsed.paidAdditionalStoreSlots || 0,
+                entitlement.paidAdditionalStoreSlots
+              );
+            }
+            parsed.integritySeal = computeUserIntegritySealSync(parsed);
+            updated = true;
           }
         }
-      } catch {}
-
-      if (!isCloudApproved && !parsed.integritySeal) {
-        parsed.subscriptionStatus = 'expired';
-        parsed.membershipTier = 'free';
-        parsed.vipStatus = 'expired';
-        delete parsed.subscriptionExpiryDate;
-        parsed.paidAdditionalStoreSlots = 0;
-        parsed.approvedStoresCount = 0;
-        tampered = true;
+      } else if (isVipClaimed && !parsed.integritySeal) {
+        // Check if this is a legacy active VIP record where subscriptionExpiryDate was omitted
+        const startMs = parseSafeDateMs(
+          parsed.subscriptionStartDate || parsed.verifiedAt || parsed.lastLoginAt || parsed.registeredAtIso
+        );
+        const inferredExpMs = (startMs > 0 ? Math.max(startMs, Date.now()) : Date.now()) + 30 * 24 * 60 * 60 * 1000;
+        if (parsed.paymentStatus === 'verified' || (parsed.membershipTier === 'premium_vip' && parsed.subscriptionStatus === 'active')) {
+          const cleanExpIso = new Date(inferredExpMs).toISOString();
+          parsed.membershipTier = 'premium_vip';
+          parsed.subscriptionStatus = 'active';
+          parsed.paymentStatus = 'verified';
+          parsed.vipStatus = 'active';
+          parsed.subscriptionExpiryDate = cleanExpIso;
+          parsed.vipExpiresAt = cleanExpIso;
+          parsed.integritySeal = computeUserIntegritySealSync(parsed);
+          updated = true;
+        }
       }
     }
 
-    if (tampered) {
-      localStorage.setItem('kft_current_user_v5', JSON.stringify(parsed));
-      localStorage.setItem('kft_current_user_v4', JSON.stringify(parsed));
+    if (tampered || updated || !rawV5) {
+      try {
+        localStorage.setItem('kft_current_user_v5', JSON.stringify(parsed));
+      } catch {}
     }
 
     return { tampered, user: parsed };

@@ -460,8 +460,10 @@ export function scoreFoodForKhmerQuery(food: FoodItem, parsed: ParsedKhmerFoodQu
     }
   }
   if (parsed.flavorIntents.includes('bitter')) {
-    if (/ម្រះ(?!ព្រៅ)|ស្តៅ|ស្លឹកញ|\bbitter\s+melon\b|\bneem\b|\bnoni\b/i.test(titleNorm)) {
-      score += 300;
+    if (/ម្រះ(?!ព្រៅ)|ស្តៅ|\bbitter\s+melon\b|\bneem\b/i.test(titleNorm)) {
+      score += 340;
+    } else if (/ស្លឹកញ|\bnoni\b/i.test(titleNorm)) {
+      score += 240;
     } else if (/ល្វីង|ម្រះ(?!ព្រៅ)|ស្តៅ|\bbitter\b|\bneem\b/i.test(`${descSafeNorm} ${ingNorm}`)) {
       score += 200;
     } else if (parsed.isFlavorOnlyQuery) {

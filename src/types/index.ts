@@ -1,7 +1,7 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1302;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1304;
 export const APP_RELEASE_DATE = '2026-11-01';
 
 /**
@@ -1422,18 +1422,40 @@ export const isUserVipActive = (user?: User | null): boolean => {
     user.subscriptionStatus === 'cancelled' ||
     user.subscriptionStatus === 'expired' ||
     user.paymentStatus === 'cancelled' ||
-    user.paymentStatus === 'rejected'
+    (user.paymentStatus as string) === 'rejected'
   ) {
     return false;
   }
-  if (
-    user.subscriptionExpiryDate &&
-    (user.membershipTier === 'premium_vip' || user.subscriptionStatus === 'active') &&
-    (user.paymentStatus === 'verified' ||
-      (user.membershipTier === 'premium_vip' && user.subscriptionStatus === 'active'))
-  ) {
-    const expiryTime = parseSafeDateMs(user.subscriptionExpiryDate);
+  const hasVipTierOrActiveStatus =
+    user.membershipTier === 'premium_vip' ||
+    user.subscriptionStatus === 'active' ||
+    user.vipStatus === 'active';
+  const isVerifiedVipRecord =
+    user.paymentStatus === 'verified' ||
+    (user.membershipTier === 'premium_vip' &&
+      (user.subscriptionStatus === 'active' || user.vipStatus === 'active' || !user.subscriptionStatus));
+
+  if (!hasVipTierOrActiveStatus || !isVerifiedVipRecord) {
+    return false;
+  }
+
+  const rawExpiry = user.subscriptionExpiryDate || user.vipExpiresAt;
+  if (rawExpiry) {
+    const expiryTime = parseSafeDateMs(rawExpiry);
     if (expiryTime > Date.now()) {
+      return true;
+    }
+    if (expiryTime > 0 && expiryTime <= Date.now()) {
+      return false;
+    }
+  }
+
+  // Fallback for legacy/migrated active VIP records where expiry timestamp was omitted
+  if (user.membershipTier === 'premium_vip' && user.subscriptionStatus === 'active') {
+    const startMs = parseSafeDateMs(
+      user.subscriptionStartDate || user.verifiedAt || user.lastLoginAt || user.registeredAtIso
+    );
+    if (startMs <= 0 || startMs + 30 * 24 * 60 * 60 * 1000 > Date.now()) {
       return true;
     }
   }
@@ -1459,8 +1481,9 @@ export const getVipAccountState = (user?: User | null): VipAccountState => {
     return 'pending_vip';
   }
   // Check if expired
-  if (user.subscriptionExpiryDate) {
-    const expiryTime = parseSafeDateMs(user.subscriptionExpiryDate);
+  const rawExpiry = user.subscriptionExpiryDate || user.vipExpiresAt;
+  if (rawExpiry) {
+    const expiryTime = parseSafeDateMs(rawExpiry);
     if (expiryTime > 0 && expiryTime <= Date.now()) {
       return 'expired_vip';
     }
@@ -1474,8 +1497,12 @@ export const getVipAccountState = (user?: User | null): VipAccountState => {
 // Helper to calculate remaining days in VIP subscription (strictly for VIP users, 0 for Admin)
 export const getVipRemainingDays = (user?: User | null): number => {
   if (!user || isAdminAccount(user)) return 0;
-  if (!isUserVipActive(user) || !user?.subscriptionExpiryDate) return 0;
-  const diffMs = parseSafeDateMs(user.subscriptionExpiryDate) - Date.now();
+  if (!isUserVipActive(user)) return 0;
+  const rawExpiry = user.subscriptionExpiryDate || user.vipExpiresAt;
+  if (!rawExpiry) return 30;
+  const expMs = parseSafeDateMs(rawExpiry);
+  if (expMs <= 0) return 30;
+  const diffMs = expMs - Date.now();
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 };
 

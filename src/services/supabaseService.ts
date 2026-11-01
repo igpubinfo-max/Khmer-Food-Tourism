@@ -1205,8 +1205,9 @@ export function normalizeVipExpiryOnUser(u: User): User {
     u.username === 'admin' ||
     u.username === 'cheasavuth';
   if (isAdmin) return u;
-  if (u.subscriptionExpiryDate) {
-    const expMs = parseSafeDateMs(u.subscriptionExpiryDate);
+  const rawExp = u.subscriptionExpiryDate || (u as any).vipExpiresAt;
+  if (rawExp) {
+    const expMs = parseSafeDateMs(rawExp);
     if (expMs > 0 && expMs <= Date.now()) {
       if (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active') {
         return {
@@ -1221,22 +1222,54 @@ export function normalizeVipExpiryOnUser(u: User): User {
       u.subscriptionStatus !== 'expired' &&
       u.paymentStatus !== 'cancelled' &&
       u.paymentStatus !== 'rejected' &&
-      (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active')
+      (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active' || (u as any).vipStatus === 'active')
     ) {
+      const cleanExpIso = new Date(expMs).toISOString();
       if (
         u.membershipTier !== 'premium_vip' ||
         u.subscriptionStatus !== 'active' ||
-        u.paymentStatus !== 'verified'
+        u.paymentStatus !== 'verified' ||
+        u.subscriptionExpiryDate !== cleanExpIso ||
+        Boolean(u.vipCancelledAt)
       ) {
         return {
           ...u,
           membershipTier: 'premium_vip',
           subscriptionStatus: 'active',
           paymentStatus: 'verified',
+          subscriptionExpiryDate: cleanExpIso,
+          vipStatus: 'active',
+          vipExpiresAt: cleanExpIso,
+          vipCancelledAt: undefined,
         };
       }
     }
-  } else if (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active') {
+  } else if (
+    (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active' || (u as any).vipStatus === 'active') &&
+    u.subscriptionStatus !== 'cancelled' &&
+    u.subscriptionStatus !== 'expired' &&
+    u.paymentStatus !== 'cancelled' &&
+    u.paymentStatus !== 'rejected'
+  ) {
+    // Legacy active VIP record without explicit subscriptionExpiryDate: infer a 30-day window from start/verification date instead of stripping VIP
+    const baseMs =
+      parseSafeDateMs(u.subscriptionStartDate || u.verifiedAt || u.lastLoginAt || u.registeredAtIso || u.createdAt) ||
+      Date.now();
+    const inferredExpMs = baseMs + 30 * 24 * 60 * 60 * 1000;
+    if (inferredExpMs > Date.now()) {
+      const inferredIso = new Date(inferredExpMs).toISOString();
+      return {
+        ...u,
+        membershipTier: 'premium_vip',
+        subscriptionStatus: 'active',
+        paymentStatus: 'verified',
+        subscriptionStartDate: u.subscriptionStartDate || new Date(baseMs).toISOString(),
+        subscriptionExpiryDate: inferredIso,
+        vipStatus: 'active',
+        vipExpiresAt: inferredIso,
+        vipCancelledAt: undefined,
+      };
+    }
     return {
       ...u,
       membershipTier: 'free',
@@ -1366,35 +1399,52 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
   };
 
   const nowMs = Date.now();
-  const firstExpMs = parseValidMs(first.subscriptionExpiryDate);
-  const secondExpMs = parseValidMs(second.subscriptionExpiryDate);
+  const firstNorm = normalizeVipExpiryOnUser(first);
+  const secondNorm = normalizeVipExpiryOnUser(second);
+  const firstExpMs = parseValidMs(firstNorm.subscriptionExpiryDate || (firstNorm as any).vipExpiresAt);
+  const secondExpMs = parseValidMs(secondNorm.subscriptionExpiryDate || (secondNorm as any).vipExpiresAt);
 
   const isFirstValidVip =
-    (first.membershipTier === 'premium_vip' || first.subscriptionStatus === 'active') &&
-    first.subscriptionStatus !== 'cancelled' &&
-    first.subscriptionStatus !== 'expired' &&
-    first.paymentStatus !== 'cancelled' &&
-    first.paymentStatus !== 'rejected' &&
+    (firstNorm.membershipTier === 'premium_vip' || firstNorm.subscriptionStatus === 'active' || (firstNorm as any).vipStatus === 'active') &&
+    firstNorm.subscriptionStatus !== 'cancelled' &&
+    firstNorm.subscriptionStatus !== 'expired' &&
+    firstNorm.paymentStatus !== 'cancelled' &&
+    firstNorm.paymentStatus !== 'rejected' &&
     firstExpMs > nowMs;
   const isSecondValidVip =
-    (second.membershipTier === 'premium_vip' || second.subscriptionStatus === 'active') &&
-    second.subscriptionStatus !== 'cancelled' &&
-    second.subscriptionStatus !== 'expired' &&
-    second.paymentStatus !== 'cancelled' &&
-    second.paymentStatus !== 'rejected' &&
+    (secondNorm.membershipTier === 'premium_vip' || secondNorm.subscriptionStatus === 'active' || (secondNorm as any).vipStatus === 'active') &&
+    secondNorm.subscriptionStatus !== 'cancelled' &&
+    secondNorm.subscriptionStatus !== 'expired' &&
+    secondNorm.paymentStatus !== 'cancelled' &&
+    secondNorm.paymentStatus !== 'rejected' &&
     secondExpMs > nowMs;
 
+  const firstStartMs = parseValidMs(firstNorm.subscriptionStartDate);
+  const secondStartMs = parseValidMs(secondNorm.subscriptionStartDate);
+  const firstCancelMs = parseValidMs(first.vipCancelledAt);
+  const secondCancelMs = parseValidMs(second.vipCancelledAt);
+
+  // Only honor an explicit Admin cancellation if the cancelled record has a newer cancellation timestamp
+  // than the other record's VIP start date AND wasn't just a leftover `vipCancelledAt` field on an already re-upgraded record.
   const wasSecondCancelledAfterFirstStart =
     second.subscriptionStatus === 'cancelled' &&
-    second.vipCancelledAt &&
-    (!first.subscriptionStartDate ||
-      parseValidMs(second.vipCancelledAt) >= parseValidMs(first.subscriptionStartDate));
+    second.paymentStatus === 'cancelled' &&
+    secondCancelMs > 0 &&
+    second.vipCancelledAt !== first.vipCancelledAt &&
+    (!isFirstValidVip ||
+      (firstStartMs > 0 &&
+        secondCancelMs > firstStartMs &&
+        secondCancelMs > firstExpMs - 30 * 24 * 60 * 60 * 1000));
 
   const wasFirstCancelledAfterSecondStart =
     first.subscriptionStatus === 'cancelled' &&
-    first.vipCancelledAt &&
-    (!second.subscriptionStartDate ||
-      parseValidMs(first.vipCancelledAt) >= parseValidMs(second.subscriptionStartDate));
+    first.paymentStatus === 'cancelled' &&
+    firstCancelMs > 0 &&
+    first.vipCancelledAt !== second.vipCancelledAt &&
+    (!isSecondValidVip ||
+      (secondStartMs > 0 &&
+        firstCancelMs > secondStartMs &&
+        firstCancelMs > secondExpMs - 30 * 24 * 60 * 60 * 1000));
 
   if (wasSecondCancelledAfterFirstStart || wasFirstCancelledAfterSecondStart) {
     const cancelledRec = wasSecondCancelledAfterFirstStart ? second : first;
@@ -1403,19 +1453,24 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
       membershipTier: 'free',
       subscriptionStatus: 'cancelled',
       subscriptionExpiryDate: undefined,
+      vipExpiresAt: undefined,
+      vipStatus: 'expired',
       paymentStatus: 'cancelled',
       vipCancelledAt: cancelledRec.vipCancelledAt,
     });
   }
 
   if (isFirstValidVip && isSecondValidVip) {
-    const bestVip = firstExpMs >= secondExpMs ? first : second;
+    const bestVip = firstExpMs >= secondExpMs ? firstNorm : secondNorm;
     return normalizeVipExpiryOnUser({
       ...baseMerged,
       membershipTier: 'premium_vip',
       subscriptionStatus: 'active',
-      subscriptionStartDate: bestVip.subscriptionStartDate,
+      subscriptionStartDate: bestVip.subscriptionStartDate || secondNorm.subscriptionStartDate || firstNorm.subscriptionStartDate,
       subscriptionExpiryDate: bestVip.subscriptionExpiryDate,
+      vipStatus: 'active',
+      vipExpiresAt: bestVip.subscriptionExpiryDate,
+      vipCancelledAt: undefined,
       paymentStatus: 'verified',
       paymentMethod: bestVip.paymentMethod || second.paymentMethod || first.paymentMethod,
       transactionRef: bestVip.transactionRef || second.transactionRef || first.transactionRef,
@@ -1423,13 +1478,16 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
   }
 
   if (isFirstValidVip || isSecondValidVip) {
-    const activeVip = isFirstValidVip ? first : second;
+    const activeVip = isFirstValidVip ? firstNorm : secondNorm;
     return normalizeVipExpiryOnUser({
       ...baseMerged,
       membershipTier: 'premium_vip',
       subscriptionStatus: 'active',
-      subscriptionStartDate: activeVip.subscriptionStartDate,
+      subscriptionStartDate: activeVip.subscriptionStartDate || baseMerged.subscriptionStartDate,
       subscriptionExpiryDate: activeVip.subscriptionExpiryDate,
+      vipStatus: 'active',
+      vipExpiresAt: activeVip.subscriptionExpiryDate,
+      vipCancelledAt: undefined,
       paymentStatus: 'verified',
       paymentMethod: activeVip.paymentMethod || baseMerged.paymentMethod,
       transactionRef: activeVip.transactionRef || baseMerged.transactionRef,
@@ -1573,18 +1631,64 @@ export async function upsertSingleUserToCloud(
   if (!isSupabaseConfigured()) return [canonicalUser];
 
   try {
-    // 1. Pull any existing atomic per-user rows first so we NEVER overwrite an approved VIP user with a blank `free` login record
+    // 1. Pull any existing atomic per-user rows (and aggregate/VIP backup when updateAggregate is requested) FIRST
+    // so logging in on an updated device NEVER overwrites an Admin-approved VIP user with a blank `free` login record
     const candidateKeys = getCandidateAtomicUserKeys(canonicalUser);
-    const existingAtomicDocs =
-      candidateKeys.length > 0 ? await pullCloudDocumentsByKeys<User>(candidateKeys, 6000) : [];
+    const [existingAtomicDocs, cloudUsersV2, cloudVipBackup, cloudDeleted] = await Promise.all([
+      candidateKeys.length > 0 ? pullCloudDocumentsByKeys<User>(candidateKeys, 6000) : Promise.resolve([]),
+      updateAggregate ? pullCloudDocument<User[]>('kft_cloud_users_v2') : Promise.resolve(null),
+      updateAggregate ? pullCloudDocument<any>('kft_cloud_vip_backup_v1') : Promise.resolve(null),
+      updateAggregate ? pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1') : Promise.resolve(null),
+    ]);
 
-    if (existingAtomicDocs.length > 0) {
-      const mergedAtomic = deduplicateAndNormalizeUsers(
-        [...existingAtomicDocs.map(d => d.payload), canonicalUser],
-        deletedUsers
+    const allDeleted = [
+      ...deletedUsers,
+      ...(Array.isArray(cloudDeleted) ? cloudDeleted : []),
+    ];
+
+    const vipBackupUsers: User[] = [];
+    if (Array.isArray(cloudVipBackup)) {
+      for (const v of cloudVipBackup) {
+        if (v && typeof v === 'object') vipBackupUsers.push(v as User);
+      }
+    } else if (cloudVipBackup && typeof cloudVipBackup === 'object') {
+      for (const [key, val] of Object.entries(cloudVipBackup)) {
+        if (!val || typeof val !== 'object') continue;
+        const vObj = val as Partial<User>;
+        const emailFromKey = key.startsWith('email:') ? key.slice(6) : (vObj.email || '');
+        const idFromKey = key.startsWith('id:') ? key.slice(3) : (vObj.id || '');
+        if (!idFromKey && !emailFromKey) continue;
+        vipBackupUsers.push({
+          ...(vObj as User),
+          id: idFromKey || `google-${emailFromKey.replace(/[^a-z0-9]/g, '_')}`,
+          email: emailFromKey,
+          name: vObj.name || (emailFromKey ? emailFromKey.split('@')[0] : 'VIP Member'),
+          role: vObj.role || 'user',
+          avatar: vObj.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+          createdAt: vObj.createdAt || (vObj.subscriptionStartDate ? vObj.subscriptionStartDate.split('T')[0] : '2026-01-01'),
+        });
+      }
+    }
+
+    const matchingCloudUsers = [
+      ...existingAtomicDocs.map(d => d.payload),
+      ...(Array.isArray(cloudUsersV2) ? cloudUsersV2 : []),
+      ...vipBackupUsers,
+    ].filter(
+      u =>
+        u &&
+        (u.id === canonicalUser.id ||
+          (Array.isArray(u.legacyIds) && u.legacyIds.includes(canonicalUser.id)) ||
+          (canonicalUser.email && u.email && u.email.toLowerCase().trim() === canonicalUser.email.toLowerCase().trim()))
+    );
+
+    if (matchingCloudUsers.length > 0) {
+      const mergedSingle = deduplicateAndNormalizeUsers(
+        [...matchingCloudUsers, canonicalUser],
+        allDeleted
       );
-      if (mergedAtomic.length > 0) {
-        canonicalUser = mergedAtomic[0];
+      if (mergedSingle.length > 0) {
+        canonicalUser = mergedSingle[0];
       }
     }
 
@@ -1600,20 +1704,11 @@ export async function upsertSingleUserToCloud(
       return [canonicalUser];
     }
 
-    // 3. When explicitly updating the aggregate table, pull `kft_cloud_users_v2` + `kft_cloud_deleted_users_v1`
-    const [cloudUsersV2, cloudDeleted] = await Promise.all([
-      pullCloudDocument<User[]>('kft_cloud_users_v2'),
-      pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1'),
-    ]);
-
-    const allDeleted = [
-      ...deletedUsers,
-      ...(Array.isArray(cloudDeleted) ? cloudDeleted : []),
-    ];
-
+    // 3. Merge into aggregate `kft_cloud_users_v2`
     const merged = deduplicateAndNormalizeUsers(
       [
         ...(Array.isArray(cloudUsersV2) ? cloudUsersV2 : []),
+        ...vipBackupUsers,
         canonicalUser,
       ],
       allDeleted
@@ -1870,7 +1965,24 @@ export async function syncAllAppDataWithSupabase(localState: {
       });
     }
 
-    if (cloudVipBackup && typeof cloudVipBackup === 'object') {
+    if (Array.isArray(cloudVipBackup)) {
+      for (const val of cloudVipBackup) {
+        if (!val || typeof val !== 'object') continue;
+        const vObj = val as Partial<User>;
+        if (!vObj.id && !vObj.email) continue;
+        if (isActivityUserDeleted(vObj.id, vObj.email, vObj.phone)) continue;
+        recoveredUsersFromActivity.push({
+          ...(vObj as User),
+          id: vObj.id || `google-${(vObj.email || '').replace(/[^a-z0-9]/g, '_')}`,
+          name: vObj.name || (vObj.email ? vObj.email.split('@')[0] : 'VIP Member'),
+          email: (vObj.email || '').toLowerCase().trim(),
+          role: vObj.role || 'user',
+          avatar: vObj.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+          createdAt: vObj.createdAt || (vObj.subscriptionStartDate ? vObj.subscriptionStartDate.split('T')[0] : '2026-01-01'),
+          registeredAtIso: vObj.registeredAtIso || vObj.subscriptionStartDate || '2026-01-01T00:00:00.000Z',
+        });
+      }
+    } else if (cloudVipBackup && typeof cloudVipBackup === 'object') {
       for (const [key, val] of Object.entries(cloudVipBackup)) {
         if (!val || typeof val !== 'object') continue;
         const emailFromKey = key.startsWith('email:') ? key.slice(6) : (val.email || '');
@@ -1878,14 +1990,15 @@ export async function syncAllAppDataWithSupabase(localState: {
         if (!idFromKey && !emailFromKey) continue;
         if (isActivityUserDeleted(idFromKey, emailFromKey, val.phone)) continue;
         recoveredUsersFromActivity.push({
+          ...(val as User),
           id: idFromKey || `google-${emailFromKey.replace(/[^a-z0-9]/g, '_')}`,
           name: val.name || (emailFromKey ? emailFromKey.split('@')[0] : 'VIP Member'),
           email: emailFromKey,
           phone: val.phone,
           role: val.role || 'user',
-          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-          createdAt: val.subscriptionStartDate ? val.subscriptionStartDate.split('T')[0] : '2026-01-01',
-          registeredAtIso: val.subscriptionStartDate || '2026-01-01T00:00:00.000Z',
+          avatar: val.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+          createdAt: val.createdAt || (val.subscriptionStartDate ? val.subscriptionStartDate.split('T')[0] : '2026-01-01'),
+          registeredAtIso: val.registeredAtIso || val.subscriptionStartDate || '2026-01-01T00:00:00.000Z',
           membershipTier: val.membershipTier,
           subscriptionStatus: val.subscriptionStatus,
           subscriptionStartDate: val.subscriptionStartDate,
@@ -1898,6 +2011,34 @@ export async function syncAllAppDataWithSupabase(localState: {
         });
       }
     }
+
+    // Also include local `kft_vip_registry_backup_v1` and `kft_pre_update_db_backup_v1.vipUsers` so version updates never lose local VIP records
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const rawLocalVip = localStorage.getItem('kft_vip_registry_backup_v1');
+        if (rawLocalVip) {
+          const parsedLocalVip = JSON.parse(rawLocalVip);
+          if (Array.isArray(parsedLocalVip)) {
+            for (const v of parsedLocalVip) {
+              if (v && (v.id || v.email) && !isActivityUserDeleted(v.id, v.email, v.phone)) {
+                recoveredUsersFromActivity.push(v as User);
+              }
+            }
+          }
+        }
+        const rawPreUpdate = localStorage.getItem('kft_pre_update_db_backup_v1');
+        if (rawPreUpdate) {
+          const parsedPreUpdate = JSON.parse(rawPreUpdate);
+          if (Array.isArray(parsedPreUpdate?.vipUsers)) {
+            for (const v of parsedPreUpdate.vipUsers) {
+              if (v && (v.id || v.email) && !isActivityUserDeleted(v.id, v.email, v.phone)) {
+                recoveredUsersFromActivity.push(v as User);
+              }
+            }
+          }
+        }
+      }
+    } catch {}
 
     // 2. Deduplicate & Normalize Users across all sources (Cloud v2 + Cloud v1 + Atomic per-user rows + Local users + CurrentUser + Recovered activity)
     const mergedUsers = deduplicateAndNormalizeUsers(
@@ -1955,6 +2096,9 @@ export async function syncAllAppDataWithSupabase(localState: {
             subscriptionStatus: 'active',
             subscriptionStartDate: usr.subscriptionStartDate || bestTxn.verifiedAt || bestTxn.createdAt,
             subscriptionExpiryDate: bestTxn.expiresAt,
+            vipStatus: 'active',
+            vipExpiresAt: bestTxn.expiresAt,
+            vipCancelledAt: undefined,
             paymentStatus: 'verified',
             paymentMethod: (bestTxn.paymentMethod as any) || usr.paymentMethod || 'KHQR',
             transactionRef: bestTxn.transactionRef || usr.transactionRef,

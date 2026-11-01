@@ -15,7 +15,8 @@ import {
   parseSafeDateMs, isGpipRegisteredRestaurant, openRestaurantGoogleExternal,
   isValidCambodiaCoordinates, isValidOfficialGooglePlaceId, buildCanonicalGoogleMapsPinUrl,
   isStrictVerifiedCambodiaRestaurant, SEED_FOOD_PHOTO_BASELINE_MS,
-  AuthModalInitialView, hasAuthenticatedEmailAccount, computeFastPhotoSignature
+  AuthModalInitialView, hasAuthenticatedEmailAccount, computeFastPhotoSignature,
+  APP_VERSION_NAME, APP_BUILD_CODE
 } from '../types';
 import {
   verifyAbaPaymentAndReceipt,
@@ -99,6 +100,10 @@ import {
   findDuplicateDestinationForGooglePlace,
   mergeGoogleMapsPlaceWithExistingRestaurant,
 } from '../services/googlePlacesService';
+import {
+  computeUserIntegritySealSync,
+  findLocalAuthoritativeVipEntitlement,
+} from '../utils/securityIntegrityGuard';
 
 export type ActiveTab = 'home' | 'food' | 'restaurants' | 'tourism' | 'guide' | 'profile';
 
@@ -574,6 +579,82 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return false;
   };
 
+  const safeSetCriticalAccountStorage = (key: string, data: any): void => {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch {
+      try {
+        for (const expendableKey of [
+          'kft_foods_200_v9',
+          'kft_foods_200_v8',
+          'kft_destinations_real_v8',
+          'kft_destinations_real_v7',
+          'kft_google_places_smart_cache_v1',
+          'kft_foods_200_v10',
+          'kft_destinations_real_v9',
+        ]) {
+          localStorage.removeItem(expendableKey);
+        }
+        localStorage.setItem(key, JSON.stringify(data));
+      } catch (retryErr) {
+        console.warn(`Critical account write failed for ${key}:`, retryErr);
+      }
+    }
+  };
+
+  const mergeAndSaveVipRegistryBackup = (usersList: User[], deletedList: DeletedUserRecord[] = []): User[] => {
+    try {
+      const candidates: User[] = [];
+      for (const u of usersList) {
+        if (u && isUserVipActive(u) && !checkIsUserDeleted(u, deletedList)) {
+          candidates.push(u);
+        }
+      }
+      try {
+        const rawExisting = localStorage.getItem('kft_vip_registry_backup_v1');
+        if (rawExisting) {
+          const parsedExisting = JSON.parse(rawExisting);
+          if (Array.isArray(parsedExisting)) {
+            for (const v of parsedExisting) {
+              if (v && isUserVipActive(v) && !checkIsUserDeleted(v, deletedList)) {
+                candidates.push(v);
+              }
+            }
+          }
+        }
+      } catch {}
+      try {
+        const rawPreUpdate = localStorage.getItem('kft_pre_update_db_backup_v1');
+        if (rawPreUpdate) {
+          const parsedPre = JSON.parse(rawPreUpdate);
+          if (Array.isArray(parsedPre?.vipUsers)) {
+            for (const v of parsedPre.vipUsers) {
+              if (v && isUserVipActive(v) && !checkIsUserDeleted(v, deletedList)) {
+                candidates.push(v);
+              }
+            }
+          }
+        }
+      } catch {}
+      if (candidates.length === 0) return [];
+      const mergedVips = deduplicateAndNormalizeUsers(candidates, deletedList)
+        .filter(u => isUserVipActive(u))
+        .map(u => ({
+          ...u,
+          vipStatus: 'active' as const,
+          vipExpiresAt: u.subscriptionExpiryDate,
+          vipCancelledAt: undefined,
+          integritySeal: computeUserIntegritySealSync(u),
+        }));
+      if (mergedVips.length > 0) {
+        safeSetCriticalAccountStorage('kft_vip_registry_backup_v1', mergedVips);
+      }
+      return mergedVips;
+    } catch {
+      return [];
+    }
+  };
+
   // Local storage loaded states with fallbacks (Preserves VIP accounts & users across all future app updates)
   const [users, setUsers] = useState<User[]>(() => {
     try {
@@ -584,7 +665,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } catch {}
 
       let loadedUsers: User[] = [];
-      const saved = localStorage.getItem('kft_users_v5');
+      const saved = localStorage.getItem('kft_users_v5') || localStorage.getItem('kft_users_v4');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
@@ -594,9 +675,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
 
-      // Also include any active non-admin session stored in `kft_current_user_v5` so a logged-in user is never missing from `users`
+      // Also include any active non-admin session stored in `kft_current_user_v5` / `kft_current_user_v4` so a logged-in user is never missing from `users`
       try {
-        const savedCur = localStorage.getItem('kft_current_user_v5');
+        const savedCur = localStorage.getItem('kft_current_user_v5') || localStorage.getItem('kft_current_user_v4');
         if (savedCur && savedCur !== 'undefined' && savedCur !== 'null') {
           const parsedCur = JSON.parse(savedCur);
           if (
@@ -631,35 +712,83 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       let deduped = deduplicateAndNormalizeUsers(loadedUsers, localDeleted);
 
-      // Reconcile against any verified future VIP transactions in localStorage so approved VIP status survives app restarts cleanly
+      // Reconcile against any verified future VIP transactions OR VIP-approved support tickets in localStorage so approved VIP status survives app restarts & updates cleanly
       try {
         const rawTxns = localStorage.getItem('kft_transactions_v4') || localStorage.getItem('kft_transactions_v3');
-        if (rawTxns) {
-          const localTxns: RegistrationTransaction[] = JSON.parse(rawTxns);
-          if (Array.isArray(localTxns) && localTxns.length > 0) {
-            deduped = deduped.map(u => {
-              if (u.subscriptionStatus === 'cancelled' || u.paymentStatus === 'cancelled') return u;
-              const eligible = checkEligibleRestoration(u.id, u.email, localTxns, u.legacyIds, u.phone);
-              if (!eligible || !eligible.expiresAt) return u;
+        const localTxns: RegistrationTransaction[] = rawTxns ? JSON.parse(rawTxns) : [];
+        let preUpdateTxns: RegistrationTransaction[] = [];
+        try {
+          const rawPre = localStorage.getItem('kft_pre_update_db_backup_v1');
+          if (rawPre) {
+            const parsedPre = JSON.parse(rawPre);
+            if (Array.isArray(parsedPre?.verifiedTransactions)) {
+              preUpdateTxns = parsedPre.verifiedTransactions;
+            }
+          }
+        } catch {}
+        const combinedTxns = [
+          ...(Array.isArray(localTxns) ? localTxns : []),
+          ...(Array.isArray(preUpdateTxns) ? preUpdateTxns : []),
+        ];
+
+        deduped = deduped.map(u => {
+          if (u.subscriptionStatus === 'cancelled' && u.paymentStatus === 'cancelled') return u;
+          const authVip = findLocalAuthoritativeVipEntitlement(u, deduped);
+          if (authVip && authVip.expiryMs > Date.now()) {
+            const curExpMs = parseSafeDateMs(u.subscriptionExpiryDate || u.vipExpiresAt);
+            if (!isUserVipActive(u) || authVip.expiryMs > curExpMs || !u.integritySeal) {
+              const upgraded: User = {
+                ...u,
+                membershipTier: 'premium_vip',
+                subscriptionStatus: 'active',
+                paymentStatus: 'verified',
+                vipStatus: 'active',
+                subscriptionStartDate: u.subscriptionStartDate || authVip.startIso,
+                subscriptionExpiryDate: authVip.expiryIso,
+                vipExpiresAt: authVip.expiryIso,
+                vipCancelledAt: undefined,
+                paymentMethod: authVip.paymentMethod || u.paymentMethod || 'KHQR',
+                transactionRef: u.transactionRef || authVip.transactionRef,
+                paidAdditionalStoreSlots: Math.max(
+                  u.paidAdditionalStoreSlots || 0,
+                  authVip.paidAdditionalStoreSlots || 0
+                ),
+              };
+              upgraded.integritySeal = computeUserIntegritySealSync(upgraded);
+              return upgraded;
+            }
+          }
+          if (combinedTxns.length > 0) {
+            const eligible = checkEligibleRestoration(u.id, u.email, combinedTxns, u.legacyIds, u.phone);
+            if (eligible && eligible.expiresAt) {
               const eligExpMs = parseSafeDateMs(eligible.expiresAt);
-              const curExpMs = parseSafeDateMs(u.subscriptionExpiryDate);
+              const curExpMs = parseSafeDateMs(u.subscriptionExpiryDate || u.vipExpiresAt);
               if (eligExpMs > Date.now() && (!isUserVipActive(u) || eligExpMs > curExpMs)) {
-                return {
+                const expIso = new Date(eligExpMs).toISOString();
+                const upgraded: User = {
                   ...u,
                   membershipTier: 'premium_vip',
                   subscriptionStatus: 'active',
                   paymentStatus: 'verified',
-                  subscriptionStartDate: u.subscriptionStartDate || new Date(parseSafeDateMs(eligible.createdAt) || Date.now()).toISOString(),
-                  subscriptionExpiryDate: new Date(eligExpMs).toISOString(),
+                  vipStatus: 'active',
+                  subscriptionStartDate:
+                    u.subscriptionStartDate ||
+                    new Date(parseSafeDateMs(eligible.createdAt) || Date.now()).toISOString(),
+                  subscriptionExpiryDate: expIso,
+                  vipExpiresAt: expIso,
+                  vipCancelledAt: undefined,
                   transactionRef: u.transactionRef || eligible.transactionRef,
                 };
+                upgraded.integritySeal = computeUserIntegritySealSync(upgraded);
+                return upgraded;
               }
-              return u;
-            });
+            }
           }
-        }
+          return u;
+        });
       } catch {}
 
+      mergeAndSaveVipRegistryBackup(deduped, localDeleted);
       return deduped;
     } catch (e) {
       console.warn('Failed to parse kft_users_v5', e);
@@ -675,7 +804,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (rawDel) localDeleted = JSON.parse(rawDel) || [];
       } catch {}
 
-      const saved = localStorage.getItem('kft_current_user_v5');
+      const saved = localStorage.getItem('kft_current_user_v5') || localStorage.getItem('kft_current_user_v4');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object') {
@@ -695,15 +824,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             localStorage.removeItem('kft_current_user_v5');
             return null;
           }
-          const sanitizedCur = sanitizeUserSocialAccounts(parsed);
+          let sanitizedCur = sanitizeUserSocialAccounts(parsed);
           const matchedFromUsers = users.find(u => doesUserMatchTarget(u, sanitizedCur));
           if (matchedFromUsers) {
-            const merged = deduplicateAndNormalizeUsers([matchedFromUsers, sanitizedCur], localDeleted)[0] || matchedFromUsers;
-            try {
-              localStorage.setItem('kft_current_user_v5', JSON.stringify(merged));
-            } catch {}
-            return merged;
+            sanitizedCur =
+              deduplicateAndNormalizeUsers([matchedFromUsers, sanitizedCur], localDeleted)[0] || matchedFromUsers;
           }
+          const authVip = findLocalAuthoritativeVipEntitlement(sanitizedCur, users);
+          if (
+            authVip &&
+            authVip.expiryMs > Date.now() &&
+            !(sanitizedCur.subscriptionStatus === 'cancelled' && sanitizedCur.paymentStatus === 'cancelled')
+          ) {
+            sanitizedCur = {
+              ...sanitizedCur,
+              membershipTier: 'premium_vip',
+              subscriptionStatus: 'active',
+              paymentStatus: 'verified',
+              vipStatus: 'active',
+              subscriptionStartDate: sanitizedCur.subscriptionStartDate || authVip.startIso,
+              subscriptionExpiryDate: authVip.expiryIso,
+              vipExpiresAt: authVip.expiryIso,
+              vipCancelledAt: undefined,
+              paymentMethod: authVip.paymentMethod || sanitizedCur.paymentMethod || 'KHQR',
+              transactionRef: sanitizedCur.transactionRef || authVip.transactionRef,
+              paidAdditionalStoreSlots: Math.max(
+                sanitizedCur.paidAdditionalStoreSlots || 0,
+                authVip.paidAdditionalStoreSlots || 0
+              ),
+              isDisabled: false,
+            };
+            sanitizedCur.integritySeal = computeUserIntegritySealSync(sanitizedCur);
+          } else if (isUserVipActive(sanitizedCur) && !sanitizedCur.integritySeal) {
+            sanitizedCur = {
+              ...sanitizedCur,
+              integritySeal: computeUserIntegritySealSync(sanitizedCur),
+            };
+          }
+          safeSetCriticalAccountStorage('kft_current_user_v5', sanitizedCur);
           return sanitizedCur;
         }
       }
@@ -1277,9 +1435,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_destinations_real_v5');
       localStorage.removeItem('kft_destinations_real_v6');
       localStorage.removeItem('kft_destinations_real_v7');
-      if (savedV9Dest) {
-        localStorage.removeItem('kft_destinations_real_v8');
-      }
+      localStorage.removeItem('kft_destinations_real_v8');
 
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
@@ -2251,7 +2407,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const compacted = compactDataForBulkLocalStorage(key, data);
           localStorage.setItem(key, JSON.stringify(compacted));
         } catch (e) {
-          console.warn(`Storage sync failed for ${key}:`, e);
+          if (
+            key === 'kft_users_v5' ||
+            key === 'kft_current_user_v5' ||
+            key === 'kft_vip_registry_backup_v1' ||
+            key === 'kft_pre_update_db_backup_v1' ||
+            key === 'kft_transactions_v4'
+          ) {
+            safeSetCriticalAccountStorage(key, compactDataForBulkLocalStorage(key, data));
+          } else {
+            console.warn(`Storage sync failed for ${key}:`, e);
+          }
         }
       };
       if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
@@ -2267,58 +2433,71 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (isInitialMountRef.current.users) {
       isInitialMountRef.current.users = false;
+      mergeAndSaveVipRegistryBackup(users, deletedUsers);
       return;
     }
     scheduleStorageWrite('kft_users_v5', users, 600);
-    const activeVips = users.filter(
-      u => u.membershipTier === 'premium_vip' && u.subscriptionStatus === 'active' && u.subscriptionExpiryDate
-    );
-    if (activeVips.length > 0) {
-      scheduleStorageWrite('kft_vip_registry_backup_v1', activeVips, 800);
-    }
-  }, [users]);
+    mergeAndSaveVipRegistryBackup(users, deletedUsers);
+  }, [users, deletedUsers]);
 
-  // Automatic Pre-Update Database & VIP Snapshot Backup whenever App Version changes (runs at most once per session)
+  // Automatic Pre-Update Database & VIP Snapshot Backup whenever App Version or Build Code changes (runs at most once per session)
   const hasAttemptedVersionBackupRef = useRef(false);
   useEffect(() => {
     if (hasAttemptedVersionBackupRef.current) return;
     hasAttemptedVersionBackupRef.current = true;
     try {
-      const APP_VERSION = '2.5.0';
+      const CURRENT_VERSION_TAG = `${APP_VERSION_NAME}_${APP_BUILD_CODE}`;
       const lastBackedUpVersion = localStorage.getItem('kft_last_backed_up_version');
-      if (lastBackedUpVersion !== APP_VERSION) {
-        const activeVips = users.filter(
-          u => u.membershipTier === 'premium_vip' && u.subscriptionStatus === 'active'
+      if (lastBackedUpVersion !== CURRENT_VERSION_TAG) {
+        const mergedActiveVips = mergeAndSaveVipRegistryBackup(
+          [
+            ...users,
+            ...(currentUser && currentUser.role !== 'admin' ? [currentUser] : []),
+          ],
+          deletedUsers
         );
+
+        let existingVerifiedTxns: RegistrationTransaction[] = [];
+        try {
+          const rawExistingSnap = localStorage.getItem('kft_pre_update_db_backup_v1');
+          if (rawExistingSnap) {
+            const parsedSnap = JSON.parse(rawExistingSnap);
+            if (Array.isArray(parsedSnap?.verifiedTransactions)) {
+              existingVerifiedTxns = parsedSnap.verifiedTransactions;
+            }
+          }
+        } catch {}
+
+        const verifiedTxnMap = new Map<string, RegistrationTransaction>();
+        for (const t of [...existingVerifiedTxns, ...transactions.filter(tx => tx.status === 'verified')]) {
+          if (t && t.id) verifiedTxnMap.set(t.id, t);
+        }
+
         const backupSnapshot = {
           backedUpAt: new Date().toISOString(),
-          previousVersion: lastBackedUpVersion || 'pre-2.0.0',
-          targetVersion: APP_VERSION,
-          vipUsersCount: activeVips.length,
-          vipUsers: activeVips,
+          previousVersion: lastBackedUpVersion || 'pre-2.5.0',
+          targetVersion: CURRENT_VERSION_TAG,
+          vipUsersCount: mergedActiveVips.length,
+          vipUsers: mergedActiveVips,
           allUsersCount: users.length,
-          verifiedTransactions: transactions.filter(t => t.status === 'verified'),
+          verifiedTransactions: Array.from(verifiedTxnMap.values()),
         };
-        scheduleStorageWrite('kft_pre_update_db_backup_v1', backupSnapshot, 2500);
+        safeSetCriticalAccountStorage('kft_pre_update_db_backup_v1', backupSnapshot);
         try {
-          localStorage.setItem('kft_last_backed_up_version', APP_VERSION);
+          localStorage.setItem('kft_last_backed_up_version', CURRENT_VERSION_TAG);
         } catch {}
       }
     } catch (e) {
       console.warn('Pre-update database backup warning:', e);
     }
-  }, [users, transactions]);
+  }, [users, transactions, currentUser, deletedUsers]);
 
   const lastCurrentUserSyncSigRef = useRef<string>('');
 
   useEffect(() => {
     try {
       if (currentUser) {
-        try {
-          localStorage.setItem('kft_current_user_v5', JSON.stringify(currentUser));
-        } catch {
-          scheduleStorageWrite('kft_current_user_v5', currentUser, 200);
-        }
+        safeSetCriticalAccountStorage('kft_current_user_v5', currentUser);
         const userLang = localStorage.getItem(`kft_lang_user_${currentUser.id}`);
         if (userLang === 'km' || userLang === 'en' || userLang === 'zh') {
           setLanguageState(userLang);
@@ -2384,16 +2563,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser.username === 'admin' ||
       currentUser.username === 'cheasavuth';
     if (isAdmin) return;
-    if (currentUser.subscriptionStatus === 'cancelled' || currentUser.paymentStatus === 'cancelled') return;
+    if (currentUser.subscriptionStatus === 'cancelled' && currentUser.paymentStatus === 'cancelled') return;
 
     const nowMs = Date.now();
     const curActive = isUserVipActive(currentUser);
-    const curExpMs = parseSafeDateMs(currentUser.subscriptionExpiryDate);
+    const curExpMs = parseSafeDateMs(currentUser.subscriptionExpiryDate || currentUser.vipExpiresAt);
 
     // 1. Check matching user record in `users`
     const matchedInUsers = users.find(u => doesUserMatchTarget(u, currentUser));
     const userRecActive = matchedInUsers ? isUserVipActive(matchedInUsers) : false;
-    const userRecExpMs = matchedInUsers ? parseSafeDateMs(matchedInUsers.subscriptionExpiryDate) : 0;
+    const userRecExpMs = matchedInUsers
+      ? parseSafeDateMs(matchedInUsers.subscriptionExpiryDate || matchedInUsers.vipExpiresAt)
+      : 0;
 
     // 2. Check verified future VIP transactions
     const eligibleTxn = checkEligibleRestoration(
@@ -2433,16 +2614,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
+    // 4. Also check local VIP backup vaults (`kft_vip_registry_backup_v1`, `kft_pre_update_db_backup_v1`, etc.)
+    const localAuthVip = findLocalAuthoritativeVipEntitlement(currentUser, users);
+    const backupExpMs = localAuthVip && localAuthVip.expiryMs > nowMs ? localAuthVip.expiryMs : 0;
+
     const bestExpMs = Math.max(
       userRecActive && userRecExpMs > nowMs ? userRecExpMs : 0,
       txnExpMs > nowMs ? txnExpMs : 0,
-      ticketExpMs > nowMs ? ticketExpMs : 0
+      ticketExpMs > nowMs ? ticketExpMs : 0,
+      backupExpMs
     );
 
-    if (bestExpMs > nowMs && (!curActive || bestExpMs > curExpMs + 1000)) {
+    if (bestExpMs > nowMs && (!curActive || bestExpMs > curExpMs + 1000 || !currentUser.integritySeal)) {
       const nextStartIso =
         matchedInUsers?.subscriptionStartDate ||
         currentUser.subscriptionStartDate ||
+        localAuthVip?.startIso ||
         (eligibleTxn?.createdAt && parseSafeDateMs(eligibleTxn.createdAt) > 0
           ? new Date(parseSafeDateMs(eligibleTxn.createdAt)).toISOString()
           : ticketStartIso || new Date(nowMs).toISOString());
@@ -2454,24 +2641,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         membershipTier: 'premium_vip',
         subscriptionStatus: 'active',
         paymentStatus: 'verified',
+        vipStatus: 'active',
         subscriptionStartDate: nextStartIso,
         subscriptionExpiryDate: nextExpIso,
+        vipExpiresAt: nextExpIso,
+        vipCancelledAt: undefined,
         transactionRef:
           currentUser.transactionRef ||
           matchedInUsers?.transactionRef ||
           eligibleTxn?.transactionRef ||
+          localAuthVip?.transactionRef ||
           ticketRef,
         paidAdditionalStoreSlots: Math.max(
           currentUser.paidAdditionalStoreSlots || 0,
-          matchedInUsers?.paidAdditionalStoreSlots || 0
+          matchedInUsers?.paidAdditionalStoreSlots || 0,
+          localAuthVip?.paidAdditionalStoreSlots || 0
         ),
         isDisabled: false,
       };
+      upgradedCurrent.integritySeal = computeUserIntegritySealSync(upgradedCurrent);
       setCurrentUser(upgradedCurrent);
       latestSyncStateRef.current.currentUser = upgradedCurrent;
-      try {
-        localStorage.setItem('kft_current_user_v5', JSON.stringify(upgradedCurrent));
-      } catch {}
+      safeSetCriticalAccountStorage('kft_current_user_v5', upgradedCurrent);
+      mergeAndSaveVipRegistryBackup([upgradedCurrent, ...users], deletedUsers);
     } else if (
       matchedInUsers &&
       (matchedInUsers.paidAdditionalStoreSlots || 0) > (currentUser.paidAdditionalStoreSlots || 0)
@@ -2483,9 +2675,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
       setCurrentUser(syncedSlotsUser);
       latestSyncStateRef.current.currentUser = syncedSlotsUser;
-      try {
-        localStorage.setItem('kft_current_user_v5', JSON.stringify(syncedSlotsUser));
-      } catch {}
+      safeSetCriticalAccountStorage('kft_current_user_v5', syncedSlotsUser);
     }
   }, [users, transactions, supportTickets, currentUser?.id, currentUser?.email]);
 
@@ -2530,24 +2720,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const evaluateAccount = (u: User): { updatedUser: User; changed: boolean } => {
         if (!u || isAdminAccount(u)) return { updatedUser: u, changed: false };
 
-        const expiryStr = u.subscriptionExpiryDate;
+        const expiryStr = u.subscriptionExpiryDate || u.vipExpiresAt;
         const expiryMs = parseSafeDateMs(expiryStr);
         const hasValidFutureExpiry = expiryMs > nowMs;
 
-        // Before downgrading, check if a verified future VIP transaction exists for this account
-        if (!hasValidFutureExpiry && (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active')) {
-          if (u.subscriptionStatus !== 'cancelled' && u.paymentStatus !== 'cancelled') {
+        // Before downgrading, check if a verified future VIP transaction, support ticket, or VIP backup exists for this account
+        if (!hasValidFutureExpiry && (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active' || u.vipStatus === 'active')) {
+          if (!(u.subscriptionStatus === 'cancelled' && u.paymentStatus === 'cancelled')) {
+            const authVip = findLocalAuthoritativeVipEntitlement(u, users);
+            if (authVip && authVip.expiryMs > nowMs) {
+              const restored: User = {
+                ...u,
+                membershipTier: 'premium_vip',
+                subscriptionStatus: 'active',
+                paymentStatus: 'verified',
+                vipStatus: 'active',
+                subscriptionStartDate: u.subscriptionStartDate || authVip.startIso,
+                subscriptionExpiryDate: authVip.expiryIso,
+                vipExpiresAt: authVip.expiryIso,
+                vipCancelledAt: undefined,
+                transactionRef: u.transactionRef || authVip.transactionRef,
+              };
+              restored.integritySeal = computeUserIntegritySealSync(restored);
+              return {
+                updatedUser: restored,
+                changed: true,
+              };
+            }
             const eligible = checkEligibleRestoration(u.id, u.email, transactions, u.legacyIds, u.phone);
             const eligMs = eligible?.expiresAt ? parseSafeDateMs(eligible.expiresAt) : 0;
             if (eligMs > nowMs) {
+              const expIso = new Date(eligMs).toISOString();
+              const restored: User = {
+                ...u,
+                membershipTier: 'premium_vip',
+                subscriptionStatus: 'active',
+                paymentStatus: 'verified',
+                vipStatus: 'active',
+                subscriptionExpiryDate: expIso,
+                vipExpiresAt: expIso,
+                vipCancelledAt: undefined,
+              };
+              restored.integritySeal = computeUserIntegritySealSync(restored);
               return {
-                updatedUser: {
-                  ...u,
-                  membershipTier: 'premium_vip',
-                  subscriptionStatus: 'active',
-                  paymentStatus: 'verified',
-                  subscriptionExpiryDate: new Date(eligMs).toISOString(),
-                },
+                updatedUser: restored,
                 changed: true,
               };
             }
@@ -4172,6 +4388,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       membershipTier: 'premium_vip',
       subscriptionStartDate: cleanStartIso,
       subscriptionExpiryDate: cleanExpiryIso,
+      vipStatus: 'active',
+      vipExpiresAt: cleanExpiryIso,
+      vipCancelledAt: undefined,
       subscriptionStatus: 'active',
       paymentStatus: 'verified',
       paymentMethod: params.paymentMethod || existing?.paymentMethod || 'KHQR',
@@ -4179,6 +4398,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       lastActiveAt: nowIso,
       legacyIds: legacySet.size > 0 ? Array.from(legacySet) : undefined,
     };
+    approvedUser.integritySeal = computeUserIntegritySealSync(approvedUser);
 
     const nextUsers = deduplicateAndNormalizeUsers(
       [...liveUsers.filter(u => !doesUserMatchTarget(u, approvedUser)), approvedUser],
@@ -4187,13 +4407,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     latestSyncStateRef.current.users = nextUsers;
     setUsers(nextUsers);
 
-    const finalApproved = nextUsers.find(u => doesUserMatchTarget(u, approvedUser)) || approvedUser;
-    const activeVipBackup = nextUsers.filter(u => isUserVipActive(u));
+    const finalApprovedRaw = nextUsers.find(u => doesUserMatchTarget(u, approvedUser)) || approvedUser;
+    const finalApproved: User = {
+      ...finalApprovedRaw,
+      vipStatus: 'active',
+      vipExpiresAt: finalApprovedRaw.subscriptionExpiryDate || cleanExpiryIso,
+      vipCancelledAt: undefined,
+    };
+    finalApproved.integritySeal = computeUserIntegritySealSync(finalApproved);
 
-    try {
-      localStorage.setItem('kft_users_v5', JSON.stringify(nextUsers));
-      localStorage.setItem('kft_vip_registry_backup_v1', JSON.stringify(activeVipBackup));
-    } catch {}
+    safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+    const activeVipBackup = mergeAndSaveVipRegistryBackup(nextUsers, liveDeleted);
 
     const liveCur = latestSyncStateRef.current.currentUser || currentUser;
     if (
@@ -4208,15 +4432,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         membershipTier: 'premium_vip',
         subscriptionStartDate: finalApproved.subscriptionStartDate,
         subscriptionExpiryDate: finalApproved.subscriptionExpiryDate,
+        vipStatus: 'active',
+        vipExpiresAt: finalApproved.subscriptionExpiryDate,
+        vipCancelledAt: undefined,
         subscriptionStatus: 'active',
         paymentStatus: 'verified',
         isDisabled: false,
       };
+      updatedCurrent.integritySeal = computeUserIntegritySealSync(updatedCurrent);
       latestSyncStateRef.current.currentUser = updatedCurrent;
       setCurrentUser(updatedCurrent);
-      try {
-        localStorage.setItem('kft_current_user_v5', JSON.stringify(updatedCurrent));
-      } catch {}
+      safeSetCriticalAccountStorage('kft_current_user_v5', updatedCurrent);
     }
 
     // Upgrade any custom restaurants owned by this user
@@ -7964,7 +8190,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ...u,
           membershipTier: isUserVipActive(u) ? u.membershipTier : 'free',
           subscriptionStatus: isUserVipActive(u) ? u.subscriptionStatus : 'cancelled',
-          paymentStatus: 'failed'
+          paymentStatus: isUserVipActive(u) ? 'verified' : 'failed'
         };
       }));
 
@@ -7973,7 +8199,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ...prev,
           membershipTier: isUserVipActive(prev) ? prev.membershipTier : 'free',
           subscriptionStatus: isUserVipActive(prev) ? prev.subscriptionStatus : 'cancelled',
-          paymentStatus: 'failed'
+          paymentStatus: isUserVipActive(prev) ? 'verified' : 'failed'
         } : null);
       }
 
@@ -8058,7 +8284,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ...u,
             membershipTier: isUserVipActive(u) ? u.membershipTier : 'free',
             subscriptionStatus: isUserVipActive(u) ? u.subscriptionStatus : 'pending',
-            paymentStatus: 'needs_more_info',
+            paymentStatus: isUserVipActive(u) ? 'verified' : 'needs_more_info',
           };
         })
       );
@@ -8070,7 +8296,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 ...prev,
                 membershipTier: isUserVipActive(prev) ? prev.membershipTier : 'free',
                 subscriptionStatus: isUserVipActive(prev) ? prev.subscriptionStatus : 'pending',
-                paymentStatus: 'needs_more_info',
+                paymentStatus: isUserVipActive(prev) ? 'verified' : 'needs_more_info',
               }
             : null
         );
