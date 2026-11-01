@@ -41,6 +41,10 @@ import { initial100Destinations as SEED_DESTINATIONS } from '../data/seedDestina
 import { isRestaurantIdDeleted, loadDeletedRestaurantIdsMap } from './permanentMediaVaultService';
 import { stripForeignScripts } from '../utils/i18n';
 import {
+  parseKhmerFoodSearchQuery,
+  searchKhmerFoods,
+} from '../utils/khmerFoodSearch';
+import {
   getLocalizedFood,
   getLocalizedRestaurant,
   getLocalizedDestination,
@@ -171,6 +175,18 @@ export function normalizeKhmerSearchText(input?: string): string {
   return String(input)
     .replace(/[\u200B-\u200D\uFEFF]/g, '')
     .toLowerCase()
+    .replace(/ហិរ/g, 'ហឹរ')
+    .replace(/ស្រដែក/g, 'សណ្តែក')
+    .replace(/ណ្ដ/g, 'ណ្ត')
+    .replace(/ក្ដ/g, 'ក្ត')
+    .replace(/ផ្ដ/g, 'ផ្ត')
+    .replace(/ស្ដ/g, 'ស្ត')
+    .replace(/ម្ដ/g, 'ម្ត')
+    .replace(/ឆ្ដ/g, 'ឆ្ត')
+    .replace(/អម្ពិល/g, 'អំពិល')
+    .replace(/ប្ញស្សី|ឬស្សី/g, 'ឫស្សី')
+    .replace(/ក្រូចឆ្មារ/g, 'ក្រូចឆ្មា')
+    .replace(/នំបុ័ង/g, 'នំប៉័ង')
     .trim();
 }
 
@@ -4768,8 +4784,10 @@ export function performUnifiedCambodiaSearch(
     return { foods: [], restaurants: [], destinations: [], externalPlaces: [], totalCount: 0 };
   }
 
-  const tokens = expandMultilingualPlaceQuery(query, 'all').matchTokens;
-  const distinctiveTokens = extractDistinctiveQueryTokens(query);
+  const parsedFoodQuery = parseKhmerFoodSearchQuery(query);
+  const placeEffectiveQuery = parsedFoodQuery.coreQuery || q;
+  const tokens = expandMultilingualPlaceQuery(placeEffectiveQuery, 'all').matchTokens;
+  const distinctiveTokens = extractDistinctiveQueryTokens(placeEffectiveQuery);
   const rawProv =
     provinceFilter && provinceFilter !== 'all' && provinceFilter !== 'ទាំងអស់'
       ? provinceFilter
@@ -4793,17 +4811,18 @@ export function performUnifiedCambodiaSearch(
     return false;
   };
 
-  const matchedFoods = foods.filter((f) => {
-    const fZh = getLocalizedFood(f, 'zh');
-    if (cleanSelProv) {
-      const provText = `${f.nameKh} ${f.nameEn} ${fZh.name || ''} ${f.descriptionKh || ''} ${f.descriptionEn || ''} ${fZh.description || ''}`;
-      if (!matchesProvinceText(provText)) return false;
-    }
-    const hay = normalizeKhmerSearchText(
-      `${f.nameKh} ${f.nameEn} ${fZh.name || ''} ${f.descriptionKh || ''} ${f.descriptionEn || ''} ${fZh.description || ''} ${f.categoryKh || ''} ${f.categoryEn || ''} ${fZh.category || ''} ${(f.ingredients || []).map((i) => `${i.nameKh} ${i.nameEn}`).join(' ')}`
-    );
-    return includesKhmerSafeToken(hay, q) || tokens.some((tok) => tok.length >= 2 && includesKhmerSafeToken(hay, tok));
-  });
+  const provEligibleFoods = cleanSelProv
+    ? foods.filter((f) => {
+        const fZh = getLocalizedFood(f, 'zh');
+        const provText = `${f.nameKh} ${f.nameEn} ${fZh.name || ''} ${f.provinceKh || ''} ${f.provinceEn || ''} ${f.descriptionKh || ''} ${f.descriptionEn || ''} ${fZh.description || ''}`;
+        return matchesProvinceText(provText);
+      })
+    : foods;
+
+  const matchedFoods = searchKhmerFoods(provEligibleFoods, query);
+  const matchedSpicyOrFlavorDishNames = parsedFoodQuery.isFlavorOnlyQuery
+    ? matchedFoods.slice(0, 20).map((f) => normalizeKhmerSearchText(f.nameKh))
+    : [];
 
   const approvedAppRestaurants = restaurants.filter(
     (r) =>
@@ -4824,24 +4843,38 @@ export function performUnifiedCambodiaSearch(
     const hay = normalizeKhmerSearchText(
       `${r.nameKh || ''} ${r.nameEn || ''} ${rZh.name || ''} ${r.descriptionKh || ''} ${r.descriptionEn || ''} ${rZh.description || ''} ${r.addressKh || ''} ${r.addressEn || ''} ${rZh.address || ''} ${r.provinceKh || ''} ${r.provinceEn || ''} ${rZh.province || ''} ${(r.signatureDishesKh || []).join(' ')} ${(rZh.signatureDishes || []).join(' ')} ${(r.menuItems || []).map((m) => `${m.nameKh || ''} ${m.nameEn || ''}`).join(' ')}`
     );
-    return includesKhmerSafeToken(hay, q) || tokens.some((tok) => tok.length >= 2 && includesKhmerSafeToken(hay, tok));
+    if (parsedFoodQuery.isFlavorOnlyQuery) {
+      return (
+        includesKhmerSafeToken(hay, placeEffectiveQuery) ||
+        matchedSpicyOrFlavorDishNames.some((dn) => dn.length >= 3 && hay.includes(dn))
+      );
+    }
+    return (
+      includesKhmerSafeToken(hay, placeEffectiveQuery) ||
+      tokens.some((tok) => tok.length >= 2 && includesKhmerSafeToken(hay, tok))
+    );
   });
 
-  const localDestinations = destinations.filter((d) => {
-    const dZh = getLocalizedDestination(d, 'zh');
-    if (cleanSelProv && !matchesProvinceText(`${d.provinceKh || ''} ${d.provinceEn || ''} ${dZh.province || ''} ${d.addressKh || ''} ${d.addressEn || ''}`)) {
-      return false;
-    }
-    if (hasRadiusFilter) {
-      if (!isPlaceLocationVerified(d)) return false;
-      const dist = calculateHaversineMeters(userLat, userLng, d.latitude, d.longitude);
-      if (dist > radiusMeters!) return false;
-    }
-    const hay = normalizeKhmerSearchText(
-      `${d.nameKh || ''} ${d.nameEn || ''} ${dZh.name || ''} ${d.descriptionKh || ''} ${d.descriptionEn || ''} ${dZh.description || ''} ${d.addressKh || ''} ${d.addressEn || ''} ${dZh.address || ''} ${d.provinceKh || ''} ${d.provinceEn || ''} ${dZh.province || ''} ${d.categoryKh || ''} ${d.categoryEn || ''} ${dZh.category || ''}`
-    );
-    return includesKhmerSafeToken(hay, q) || tokens.some((tok) => tok.length >= 2 && includesKhmerSafeToken(hay, tok));
-  });
+  const localDestinations = parsedFoodQuery.isFlavorOnlyQuery
+    ? []
+    : destinations.filter((d) => {
+        const dZh = getLocalizedDestination(d, 'zh');
+        if (cleanSelProv && !matchesProvinceText(`${d.provinceKh || ''} ${d.provinceEn || ''} ${dZh.province || ''} ${d.addressKh || ''} ${d.addressEn || ''}`)) {
+          return false;
+        }
+        if (hasRadiusFilter) {
+          if (!isPlaceLocationVerified(d)) return false;
+          const dist = calculateHaversineMeters(userLat, userLng, d.latitude, d.longitude);
+          if (dist > radiusMeters!) return false;
+        }
+        const hay = normalizeKhmerSearchText(
+          `${d.nameKh || ''} ${d.nameEn || ''} ${dZh.name || ''} ${d.descriptionKh || ''} ${d.descriptionEn || ''} ${dZh.description || ''} ${d.addressKh || ''} ${d.addressEn || ''} ${dZh.address || ''} ${d.provinceKh || ''} ${d.provinceEn || ''} ${dZh.province || ''} ${d.categoryKh || ''} ${d.categoryEn || ''} ${dZh.category || ''}`
+        );
+        return (
+          includesKhmerSafeToken(hay, placeEffectiveQuery) ||
+          tokens.some((tok) => tok.length >= 2 && includesKhmerSafeToken(hay, tok))
+        );
+      });
 
   const seenRestIds = new Set(localRestaurants.map((r) => r.id));
   const seenDestIds = new Set(localDestinations.map((d) => d.id));

@@ -46,6 +46,12 @@ import { hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { getDishTagIds, type DishTagId } from '../utils/dishTags';
 import { getMatchingRestaurantsForDish } from '../utils/foodFilters';
 import {
+  getSpicyDishScore,
+  isSweetOrBeverageFood,
+  normalizeKhmerFoodText,
+  parseKhmerFoodSearchQuery,
+} from '../utils/khmerFoodSearch';
+import {
   getAiFoodAdvisorRecommendations,
   QUICK_CRAVING_CHIPS,
   isVegetarianQuery,
@@ -475,7 +481,8 @@ export const WhatToEatModal: React.FC = () => {
       return pairingRanked.map((r) => r.food);
     }
 
-    const qTrim = cravingQuery.trim().toLowerCase();
+    const qTrim = normalizeKhmerFoodText(cravingQuery);
+    const parsedCraving = parseKhmerFoodSearchQuery(cravingQuery);
     let basePool: FoodItem[];
 
     if (qTrim) {
@@ -483,12 +490,18 @@ export const WhatToEatModal: React.FC = () => {
       const advisorTop = aiCravingRecommendations?.dishes || [];
       const rawPool = advisorAll.length > 0 ? advisorAll : advisorTop;
 
-      // Strictly filter preset craving chips by dish title so every preset chip returns 100% relevant dishes
+      // Strictly filter preset craving chips & flavor intents so every craving returns 100% relevant dishes
       const filterByPresetCraving = (f: FoodItem): boolean => {
-        const kh = (f.nameKh || '').trim();
-        const title = `${kh} ${f.nameEn || ''}`.toLowerCase();
+        const kh = normalizeKhmerFoodText(f.nameKh);
+        const title = `${kh} ${(f.nameEn || '').toLowerCase()}`;
         const isDessertDish = matchesCategoryStrict(f, 'dessert');
 
+        if (
+          parsedCraving.flavorIntents.includes('spicy') &&
+          !parsedCraving.flavorIntents.includes('sour_spicy')
+        ) {
+          return !isSweetOrBeverageFood(f) && getSpicyDishScore(f) > 0;
+        }
         if (qTrim === 'បាយ' || qTrim === 'rice' || qTrim === '米饭') {
           return matchesCategoryStrict(f, 'rice');
         }
@@ -507,30 +520,36 @@ export const WhatToEatModal: React.FC = () => {
         if (qTrim === 'គ្រឿងសមុទ្រ' || qTrim === 'seafood' || qTrim === '海鲜') {
           return (
             !isDessertDish &&
-            /គ្រឿងសមុទ្រ|ក្តាម|ក្ដាម|បង្គា|បង្កង|មឹក|ងាវ|ខ្យង|ត្រីសមុទ្រ|\bseafood\b|\bcrab\b|\bprawn\b|\bshrimp\b|\bsquid\b|\bclam\b|\boyster\b/i.test(
+            /គ្រឿងសមុទ្រ|ក្តាម|បង្គា|បង្កង|មឹក|ងាវ|ខ្យង|ត្រីសមុទ្រ|\bseafood\b|\bcrab\b|\bprawn\b|\bshrimp\b|\bsquid\b|\bclam\b|\boyster\b/i.test(
               title
             )
           );
         }
         if (qTrim === 'សាច់អាំង' || qTrim === 'grilled' || qTrim === '烧烤') {
           return (
-            !isDessertDish &&
+            !isSweetOrBeverageFood(f) &&
             !/^ឆា|^សម្ល|^បបរ|^គុយទាវ|^នំបញ្ចុក|^ទឹក/i.test(kh) &&
             /អាំង|បំពង|ចៀន|ដុត|ងៀត|ក្រក|\bgrilled\b|\bfried\b|\bcrispy\b|\broast\b|\bbbq\b/i.test(title)
           );
         }
-        if (qTrim === 'ជូរហឹរ' || qTrim === 'spicy sour' || qTrim === '酸辣') {
+        if (
+          qTrim === 'ជូរហឹរ' ||
+          qTrim === 'spicy sour' ||
+          qTrim === '酸辣' ||
+          parsedCraving.flavorIntents.includes('sour_spicy')
+        ) {
           return (
-            !isDessertDish &&
-            !/^ទឹកសណ្តែក|^បង្អែម|^នំ|^បាយសាច់ជ្រូក/i.test(kh) &&
-            /ម្ជូរ|ញាំ|ភ្លា|បុក|តុំយ៉ាំ|កែងស้ม|ប្រហុក|ទឹកគ្រឿង|ម្រះព្រៅ|ឆាក្តៅ|\bsour\b|\bsalad\b|\bceviche\b|\btom\s*yum\b/i.test(
-              title
-            )
+            !isSweetOrBeverageFood(f) &&
+            !/^បាយសាច់ជ្រូក/i.test(kh) &&
+            (getSpicyDishScore(f) > 0 ||
+              /ម្ជូរ|ញាំ|ភ្លា|បុក|តុំយ៉ាំ|សម្លម្ជូរព្រៃ|ប្រហុក|ទឹកគ្រឿង|ម្រះព្រៅ|ឆាក្តៅ|\bsour\b|\bsalad\b|\bceviche\b|\btom\s*yum\b/i.test(
+                title
+              ))
           );
         }
         if (qTrim === 'អាហារសម្រន់' || qTrim === 'street food' || qTrim === '街头小吃') {
           return (
-            !isDessertDish &&
+            !isSweetOrBeverageFood(f) &&
             !/^សម្ល|^ស្ងោរ/i.test(kh) &&
             /នំប៉័ង|នំគ្រក់|បាញ់ឆែវ|ប្រហិត|លតឆា|មីឆា|គុយទាវឆា|គួង|ចាដូវ|ស្លាបមាន់|ពងទាកូន|ក្រឡាន|ចេកចៀន|ដំឡូង|បំពង|អាំង|\bstreet\b|\bsnack\b|\bpancake\b|\bspring\s*roll\b|\bbaguette\b/i.test(
               title
@@ -1056,7 +1075,7 @@ export const WhatToEatModal: React.FC = () => {
                         if (c.id !== 'all' && cravingQuery.trim()) {
                           const isPresetChip = QUICK_CRAVING_CHIPS.some(
                             (chip) =>
-                              chip.queryKh.toLowerCase() === cravingQuery.trim().toLowerCase() ||
+                              normalizeKhmerFoodText(chip.queryKh) === normalizeKhmerFoodText(cravingQuery) ||
                               chip.queryEn.toLowerCase() === cravingQuery.trim().toLowerCase() ||
                               chip.queryZh.toLowerCase() === cravingQuery.trim().toLowerCase()
                           );
@@ -1066,6 +1085,11 @@ export const WhatToEatModal: React.FC = () => {
                           if (isPresetChip || !hasStrictIntersection) {
                             setCravingQuery('');
                           }
+                        }
+                        if (chatMessages.length > 1) {
+                          setChatMessages([
+                            buildWelcomeAssistantMessage(language, foods.length, restaurants.length, destinations.length),
+                          ]);
                         }
                         setOpenGroup(null);
                       }}
@@ -1082,7 +1106,7 @@ export const WhatToEatModal: React.FC = () => {
                 {openGroup === 'craving' &&
                   QUICK_CRAVING_CHIPS.map((chip) => {
                     const chipQuery = language === 'km' ? chip.queryKh : language === 'zh' ? chip.queryZh : chip.queryEn;
-                    const isChipActive = cravingQuery.trim().toLowerCase() === chipQuery.trim().toLowerCase();
+                    const isChipActive = normalizeKhmerFoodText(cravingQuery) === normalizeKhmerFoodText(chipQuery);
                     return (
                       <button
                         key={chip.id}
@@ -1094,6 +1118,7 @@ export const WhatToEatModal: React.FC = () => {
                           // Clear categoryFilter when selecting a preset Craving chip so they never conflict (e.g. Dessert + Grilled)
                           setCategoryFilter('all');
                           setOpenGroup(null);
+                          sendConversationalMessage(chipQuery);
                         }}
                         className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition cursor-pointer ${
                           isChipActive
@@ -1118,6 +1143,11 @@ export const WhatToEatModal: React.FC = () => {
                         onClick={() => {
                           setVipDietFilter(opt.id);
                           setDrinkMode(false);
+                          if (chatMessages.length > 1) {
+                            setChatMessages([
+                              buildWelcomeAssistantMessage(language, foods.length, restaurants.length, destinations.length),
+                            ]);
+                          }
                           setOpenGroup(null);
                         }}
                         className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center gap-1.5 transition cursor-pointer ${

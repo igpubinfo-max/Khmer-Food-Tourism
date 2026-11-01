@@ -88,6 +88,8 @@ import {
   hydrateAndSyncMediaOverrides,
   isLegacyAutoScrapedFoodPlaceholderUrl,
   isRejectedLegacyFoodOverridePhoto,
+  isDeprecatedStaleFoodMetadata,
+  isGenuineCustomPhotoUrl,
 } from '../services/permanentMediaVaultService';
 import {
   GooglePlaceCachedItem,
@@ -722,17 +724,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const vault = loadLocalMediaOverrides();
     const foodLedger = loadFoodRevisionLedger();
     try {
-      const savedV9 = localStorage.getItem('kft_foods_200_v9');
+      const savedV10 = localStorage.getItem('kft_foods_200_v10');
       const savedLegacy =
+        localStorage.getItem('kft_foods_200_v9') ||
         localStorage.getItem('kft_foods_200_v8') ||
         localStorage.getItem('kft_foods_200_v7') ||
         localStorage.getItem('kft_foods_200_v6') ||
         localStorage.getItem('kft_foods_200_v5');
-      const saved = savedV9 || savedLegacy;
+      const saved = savedV10 || savedLegacy;
       localStorage.removeItem('kft_foods_200_v5');
       localStorage.removeItem('kft_foods_200_v6');
       localStorage.removeItem('kft_foods_200_v7');
       localStorage.removeItem('kft_foods_200_v8');
+      if (savedV10) {
+        localStorage.removeItem('kft_foods_200_v9');
+      }
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50) {
@@ -782,11 +788,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               typeof f.photoUrl === 'string' &&
               cleanCachedPhotoBase.length > 0 &&
               cleanCachedPhotoBase !== cleanSeedPhotoBase &&
-              (f.isCustomPhoto ||
-                f.photoUrl.startsWith('data:') ||
-                f.photoUrl.startsWith('http://') ||
-                f.photoUrl.startsWith('https://'));
+              isGenuineCustomPhotoUrl(f.photoUrl);
+            const hasDeprecatedMeta = isDeprecatedStaleFoodMetadata(f.id, f.nameKh, f.categorySlug);
             const isContentModifiedFromSeed =
+              !hasDeprecatedMeta &&
               Boolean(f.isAdminEdited) &&
               ((f.nameKh && f.nameKh !== seed.nameKh) ||
                 (f.nameEn && f.nameEn !== seed.nameEn) ||
@@ -803,19 +808,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 photoHash: isPhotoModifiedFromSeed ? candidateHash : undefined,
                 revision: isPhotoModifiedFromSeed ? (ledgerEntry?.revision || 0) : 0,
                 adminApprovedAt: f.adminApprovedAt || effectiveIso,
-                nameKh: f.nameKh,
-                nameEn: f.nameEn,
-                categorySlug: f.categorySlug,
-                categoryKh: f.categoryKh,
-                categoryEn: f.categoryEn,
-                descriptionKh: f.descriptionKh,
-                descriptionEn: f.descriptionEn,
+                nameKh: hasDeprecatedMeta ? seed.nameKh : f.nameKh,
+                nameEn: hasDeprecatedMeta ? seed.nameEn : f.nameEn,
+                categorySlug: hasDeprecatedMeta ? seed.categorySlug : f.categorySlug,
+                categoryKh: hasDeprecatedMeta ? seed.categoryKh : f.categoryKh,
+                categoryEn: hasDeprecatedMeta ? seed.categoryEn : f.categoryEn,
+                descriptionKh: hasDeprecatedMeta ? seed.descriptionKh : f.descriptionKh,
+                descriptionEn: hasDeprecatedMeta ? seed.descriptionEn : f.descriptionEn,
                 cookTime: f.cookTime,
                 servings: f.servings,
                 calories: f.calories,
                 difficulty: f.difficulty,
-                ingredients: f.ingredients,
-                steps: f.steps,
+                ingredients: hasDeprecatedMeta ? seed.ingredients : f.ingredients,
+                steps: hasDeprecatedMeta ? seed.steps : f.steps,
                 priceRiel: f.priceRiel,
                 priceUsd: f.priceUsd,
                 imageAuditStatus: f.imageAuditStatus || 'verified',
@@ -828,6 +833,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               }
             }
           }
+          localStorage.removeItem('kft_foods_200_v9');
           // Note: Do NOT call saveLocalMediaOverrides(vault) synchronously before hydrateFromLocalIdbImmediate() completes,
           // so we never clobber full IndexedDB data:image/ overrides with localStorage-stripped seed paths.
           const combined = customAddedFoods.length > 0 ? [...customAddedFoods, ...initialFoods] : initialFoods;
@@ -835,7 +841,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_foods_200_v9', e);
+      console.warn('Failed to parse kft_foods_200_v10', e);
     }
     return applyFoodOverrides(initialFoods, vault.foods);
   });
@@ -1261,7 +1267,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     try {
       const REMOVED_DUPLICATE_DEST_IDS = new Set(['dest-151', 'dest-171', 'dest-220', 'dest-262', 'dest-298']);
+      const savedV9Dest = localStorage.getItem('kft_destinations_real_v9');
       const saved =
+        savedV9Dest ||
         localStorage.getItem('kft_destinations_real_v8') ||
         localStorage.getItem('kft_destinations_real_v7') ||
         localStorage.getItem('kft_destinations_real_v6') ||
@@ -1269,6 +1277,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_destinations_real_v5');
       localStorage.removeItem('kft_destinations_real_v6');
       localStorage.removeItem('kft_destinations_real_v7');
+      if (savedV9Dest) {
+        localStorage.removeItem('kft_destinations_real_v8');
+      }
 
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
@@ -1309,16 +1320,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const ov = vault.destinations[d.id];
             if (ov && ov.photoUrl && !isBrokenLegacyDestPhoto(ov.photoUrl)) {
               const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() : 0;
+              const isOvBundledStaticDestPath = ov.photoUrl.startsWith('/destinations/');
               const useOvPhoto =
-                !isBundledStaticTempleSeed ||
-                ov.isCustomPhoto ||
-                ov.isAdminEdited ||
-                Number(ov.revision || 0) > 0 ||
-                Boolean(ov.adminApprovedAt) ||
-                ov.photoUrl.startsWith('data:image/') ||
-                ov.photoUrl.startsWith('/destinations/') ||
-                ovTime > seedTime + 1000 ||
-                seedTime === 0;
+                !isOvBundledStaticDestPath &&
+                (!isBundledStaticTempleSeed ||
+                  isGenuineCustomPhotoUrl(ov.photoUrl) ||
+                  ov.isCustomPhoto ||
+                  ov.isAdminEdited ||
+                  Number(ov.revision || 0) > 0 ||
+                  Boolean(ov.adminApprovedAt) ||
+                  ovTime > seedTime + 1000);
               const chosenPhoto = useOvPhoto ? ov.photoUrl : seed.photoUrl;
               const useCustomDestLoc = Boolean(ov.locationVerifiedAt || d.locationVerifiedAt);
               return {
@@ -1341,22 +1352,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 locationVerifiedAt: useCustomDestLoc ? (ov.locationVerifiedAt ?? d.locationVerifiedAt) : seed.locationVerifiedAt,
                 photoUrl: chosenPhoto,
                 galleryPhotos: [chosenPhoto],
-                isCustomPhoto: true,
-                photoUpdatedAt: ovTime >= seedTime ? ov.updatedAt : seed.photoUpdatedAt,
+                isCustomPhoto: useOvPhoto,
+                photoUpdatedAt: useOvPhoto && ovTime >= seedTime ? ov.updatedAt : seed.photoUpdatedAt,
               };
             }
 
-            // PRIORITY 2: Custom upload or Admin edit present in cached list
+            // PRIORITY 2: Genuine custom upload (data:/blob:/https:) present in cached list
             const isCompactedPlaceholder = (d as any).__compactedFromVault === true;
-            const isUserUpload = typeof d.photoUrl === 'string' && d.photoUrl.startsWith('data:');
+            const isCustomUploadedUrl = isGenuineCustomPhotoUrl(d.photoUrl);
             const cachedTime = d.photoUpdatedAt ? new Date(d.photoUpdatedAt).getTime() : 0;
             const hasCustomFlag = Boolean(d.isCustomPhoto || d.isAdminEdited);
             const isValidCustomPhoto =
               !isCompactedPlaceholder &&
-              (isUserUpload || hasCustomFlag) &&
-              (isUserUpload || !isBundledStaticTempleSeed || cachedTime > seedTime + 1000) &&
-              typeof d.photoUrl === 'string' &&
-              d.photoUrl.trim().length > 0 &&
+              isCustomUploadedUrl &&
+              (d.photoUrl.startsWith('data:') || hasCustomFlag) &&
+              (d.photoUrl.startsWith('data:') || !isBundledStaticTempleSeed || cachedTime > seedTime + 1000) &&
               !isBrokenLegacyDestPhoto(d.photoUrl) &&
               d.photoUrl !== seed.photoUrl;
 
@@ -1407,6 +1417,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             };
           });
 
+          localStorage.removeItem('kft_destinations_real_v8');
           // Note: Do NOT call saveLocalMediaOverrides(vault) synchronously before hydrateFromLocalIdbImmediate() completes,
           // so we never clobber full IndexedDB data:image/ overrides with localStorage-stripped seed paths.
 
@@ -1417,7 +1428,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     } catch (e) {
-      console.warn('Failed to parse kft_destinations_real_v8', e);
+      console.warn('Failed to parse kft_destinations_real_v9', e);
     }
     try {
       localStorage.removeItem('kft_destinations_google_v3');
@@ -1428,6 +1439,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_destinations_real_v5');
       localStorage.removeItem('kft_destinations_real_v6');
       localStorage.removeItem('kft_destinations_real_v7');
+      localStorage.removeItem('kft_destinations_real_v8');
     } catch {}
     return applyDestinationOverrides(initialDestinations, vault.destinations);
   });
@@ -2138,7 +2150,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const compactDataForBulkLocalStorage = (key: string, data: unknown): unknown => {
     if (!Array.isArray(data)) return data;
     try {
-      if (key === 'kft_destinations_real_v8') {
+      if (key === 'kft_destinations_real_v9') {
         if (!seedDestPhotoMapRef.current) {
           seedDestPhotoMapRef.current = new Map(initialDestinations.map(d => [d.id, d.photoUrl]));
         }
@@ -2161,7 +2173,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return d;
         });
       }
-      if (key === 'kft_foods_200_v9') {
+      if (key === 'kft_foods_200_v10') {
         if (!seedFoodPhotoMapRef.current) {
           seedFoodPhotoMapRef.current = new Map(initialFoods.map(f => [f.id, f.photoUrl]));
         }
@@ -2704,7 +2716,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     if (foods && foods.length > 0) {
-      scheduleStorageWrite('kft_foods_200_v9', foods, 1500);
+      scheduleStorageWrite('kft_foods_200_v10', foods, 1500);
     }
   }, [foods]);
 
@@ -2769,7 +2781,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     if (destinations && destinations.length > 0) {
-      scheduleStorageWrite('kft_destinations_real_v8', destinations, 1500);
+      scheduleStorageWrite('kft_destinations_real_v9', destinations, 1500);
     }
   }, [destinations]);
 
@@ -3293,7 +3305,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 const next = applyFoodOverrides(prev, syncedMediaBundle.foods);
                 latestFoodsList = next;
                 if (next !== prev) {
-                  scheduleStorageWrite('kft_foods_200_v9', next, 400);
+                  scheduleStorageWrite('kft_foods_200_v10', next, 400);
                   setSelectedFood(sel => (sel ? next.find(f => f.id === sel.id) || sel : null));
                 }
                 return next;
@@ -3376,7 +3388,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const next = applyFoodOverrides(prev, bundle.foods);
           latestFoods = next;
           if (next !== prev) {
-            scheduleStorageWrite('kft_foods_200_v9', next, 400);
+            scheduleStorageWrite('kft_foods_200_v10', next, 400);
           }
           setSelectedFood(cur => (cur ? next.find(f => f.id === cur.id) || cur : null));
           return next;
@@ -5670,7 +5682,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     recordPermanentFoodOverride(newFood);
     setFoods(prev => {
       const next = [newFood, ...prev];
-      scheduleStorageWrite('kft_foods_200_v9', next, 400);
+      scheduleStorageWrite('kft_foods_200_v10', next, 400);
       return next;
     });
     showToast(language === 'km' ? 'បានបញ្ចូលមុខម្ហូបថ្មីដោយជោគជ័យ' : 'Food item added successfully!', 'success');
@@ -5721,7 +5733,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setFoods(prev => {
       const next = prev.map(f => (f.id === customUpdated.id ? customUpdated : f));
-      scheduleStorageWrite('kft_foods_200_v9', next, 400);
+      scheduleStorageWrite('kft_foods_200_v10', next, 400);
       setTrendingFoods(prevTrending =>
         applyTrendingFoodOverrides(prevTrending, vaultImmediate.trendingFoods, vaultImmediate.foods, next)
       );
@@ -5742,7 +5754,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const vaultAfter = loadLocalMediaOverrides();
       setFoods(prev => {
         const next = prev.map(f => (f.id === finalUpdated.id ? finalUpdated : f));
-        scheduleStorageWrite('kft_foods_200_v9', next, 400);
+        scheduleStorageWrite('kft_foods_200_v10', next, 400);
         setTrendingFoods(prevTrending =>
           applyTrendingFoodOverrides(prevTrending, vaultAfter.trendingFoods, vaultAfter.foods, next)
         );
@@ -7363,7 +7375,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     recordPermanentDestinationOverride(newDest);
     setDestinations(prev => {
       const next = [newDest, ...prev];
-      scheduleStorageWrite('kft_destinations_real_v8', next, 400);
+      scheduleStorageWrite('kft_destinations_real_v9', next, 400);
       return next;
     });
     showToast(language === 'km' ? 'បានបញ្ចូលតំបន់ទេសចរណ៍ថ្មីដោយជោគជ័យ' : 'Destination added!', 'success');
@@ -7397,7 +7409,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setDestinations(prev => {
       const next = prev.map(d => d.id === customUpdated.id ? customUpdated : d);
-      scheduleStorageWrite('kft_destinations_real_v8', next, 400);
+      scheduleStorageWrite('kft_destinations_real_v9', next, 400);
       return next;
     });
     if (selectedDestination?.id === customUpdated.id) {
@@ -7453,7 +7465,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         recordPermanentDestinationOverride(refreshedDest);
         setDestinations(prev => {
           const next = prev.map(d => d.id === existingDest.id ? refreshedDest : d);
-          scheduleStorageWrite('kft_destinations_real_v8', next, 400);
+          scheduleStorageWrite('kft_destinations_real_v9', next, 400);
           return next;
         });
         showToast(
@@ -7481,7 +7493,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       recordPermanentDestinationOverride(finalDest);
       setDestinations(prev => {
         const next = [finalDest, ...prev];
-        scheduleStorageWrite('kft_destinations_real_v8', next, 400);
+        scheduleStorageWrite('kft_destinations_real_v9', next, 400);
         return next;
       });
       showToast(
@@ -9674,7 +9686,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         recordPermanentFoodOverride(syncedFood);
         setFoods(prevFoods => {
           const nextFoods = prevFoods.map(f => (f.id === syncedFood.id ? syncedFood : f));
-          scheduleStorageWrite('kft_foods_200_v9', nextFoods, 400);
+          scheduleStorageWrite('kft_foods_200_v10', nextFoods, 400);
           return nextFoods;
         });
         if (selectedFood?.id === syncedFood.id) {

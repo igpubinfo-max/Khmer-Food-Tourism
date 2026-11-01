@@ -29,6 +29,7 @@ import {
   APP_BUILD_CODE,
   SEED_FOOD_PHOTO_BASELINE_ISO,
   SEED_FOOD_PHOTO_BASELINE_MS,
+  EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS,
   isSeedRestaurantId,
   isValidCambodiaCoordinates,
   isValidOfficialGooglePlaceId,
@@ -73,6 +74,51 @@ const IMMUTABLE_SEED_REST_MAP = new Map<string, Restaurant>(
 export { SEED_FOOD_PHOTO_BASELINE_ISO, SEED_FOOD_PHOTO_BASELINE_MS };
 const BAKED_STATIC_FOOD_ASSETS_MS = SEED_FOOD_PHOTO_BASELINE_MS;
 
+export const DEPRECATED_STALE_FOOD_NAMES_KH = new Set<string>([
+  'បបរគ្រឿងសាច់ជ្រូកខ្មែរ',
+  'នំផ្លែអាយស្ករត្នោត',
+  'ក្រឡានប្ញស្សីថ្មគោលបាត់ដំបង',
+  'សម្លម្ជូរទំពាំងត្រីឆ្អើរ',
+  'ម៉ាំល្ហុងសាច់ជ្រូកបីជាន់',
+  'ព្រៃត្រីអណ្តែងទំពាំងត្រាំ',
+  'ខ ប្រហុកត្រីពោធិ៍',
+  'មីឆាគ្រឿងសមុទ្របែបខ្មែរ',
+  'នំបញ្ចុកទឹកត្រីផ្អែម',
+  'ខគោ នំប៉័ង',
+  'បាញ់កាញ់ទឹកខ្ទិះត្រីរ៉ស់',
+  'គួងបង្គាសាច់ជ្រូកលាយបង្គារទឹកជ្រលក់សណ្តែកដី',
+  'ចាដូវបំពងស្នូលត្រាវសាច់ជ្រូក',
+  'សាច់ជ្រូកចំហុយពងត្រី និងពងទាប្រៃ',
+  'បង្អែមល្ពៅសង់ខ្យាខ្ទិះដូង',
+  'នំផ្លែអាយស្ករត្នោតដូងកោស',
+]);
+
+export function isDeprecatedStaleFoodMetadata(
+  foodId: string,
+  nameKh?: string,
+  categorySlug?: string
+): boolean {
+  if (nameKh && DEPRECATED_STALE_FOOD_NAMES_KH.has(nameKh.trim())) {
+    return true;
+  }
+  if (foodId === 'food-187' && categorySlug === 'dessert') {
+    return true;
+  }
+  return false;
+}
+
+export function isGenuineCustomPhotoUrl(url?: string): boolean {
+  if (!url || typeof url !== 'string') return false;
+  const trimmed = url.trim();
+  if (!trimmed || isLegacyAutoScrapedFoodPlaceholderUrl(trimmed)) return false;
+  return (
+    trimmed.startsWith('data:image/') ||
+    trimmed.startsWith('blob:') ||
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://')
+  );
+}
+
 export function isLegacyAutoScrapedFoodPlaceholderUrl(url?: string): boolean {
   if (!url || typeof url !== 'string') return false;
   const lower = url.trim().toLowerCase();
@@ -87,18 +133,22 @@ export function isLegacyAutoScrapedFoodPlaceholderUrl(url?: string): boolean {
 }
 
 export function getSeedFoodPhotoBaselineMs(foodId: string): number {
+  const excelBakedIso = EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS[foodId];
+  const excelBakedMs = excelBakedIso ? Date.parse(excelBakedIso) || 0 : 0;
   const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(foodId);
   if (!seedFood || !seedFood.photoUrl?.startsWith('/foods/')) {
-    return 0;
+    return excelBakedMs;
   }
   const seedPhotoMs = seedFood.photoUpdatedAt ? Date.parse(seedFood.photoUpdatedAt) || 0 : 0;
-  return Math.max(SEED_FOOD_PHOTO_BASELINE_MS, seedPhotoMs);
+  return Math.max(SEED_FOOD_PHOTO_BASELINE_MS, seedPhotoMs, excelBakedMs);
 }
 
 export function isRejectedLegacyFoodOverridePhoto(
   foodId: string,
   ov?: {
     photoUrl?: string;
+    nameKh?: string;
+    categorySlug?: string;
     updatedAt?: string;
     adminApprovedAt?: string;
     revision?: number;
@@ -108,27 +158,37 @@ export function isRejectedLegacyFoodOverridePhoto(
   if (!ov || typeof ov.photoUrl !== 'string' || !ov.photoUrl.trim()) {
     return true;
   }
-  // Never reject any custom base64, blob, or admin-revised food photo!
-  if (
-    ov.photoUrl.startsWith('data:image/') ||
-    ov.photoUrl.startsWith('blob:') ||
-    ov.isCustomPhoto === true ||
-    Number(ov.revision || 0) > 0 ||
-    Boolean(ov.adminApprovedAt)
-  ) {
+  if (isLegacyAutoScrapedFoodPlaceholderUrl(ov.photoUrl) || ov.photoUrl.startsWith('/restaurants/')) {
+    return true;
+  }
+  // If this dish was freshly baked via the PC Excel Template at a newer timestamp than the override,
+  // reject the older override so the newly baked APK asset takes effect immediately!
+  const excelBakedIso = EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS[foodId];
+  if (excelBakedIso) {
+    const excelBakedMs = Date.parse(excelBakedIso) || 0;
+    const ovEffectiveMs = Math.max(
+      ov.adminApprovedAt ? Date.parse(ov.adminApprovedAt) || 0 : 0,
+      ov.updatedAt ? Date.parse(ov.updatedAt) || 0 : 0
+    );
+    if (excelBakedMs > 0 && ovEffectiveMs < excelBakedMs) {
+      return true;
+    }
+  }
+  // Never reject any genuine custom base64, blob, or cloud storage URL uploaded by Admin!
+  if (isGenuineCustomPhotoUrl(ov.photoUrl)) {
     return false;
   }
-  if (isLegacyAutoScrapedFoodPlaceholderUrl(ov.photoUrl)) {
-    return true;
-  }
-  if (ov.photoUrl.startsWith('/restaurants/')) {
-    return true;
-  }
   const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(foodId);
-  if (seedFood && seedFood.photoUrl?.startsWith('/foods/')) {
+  if (seedFood && ov.photoUrl.startsWith('/foods/')) {
+    if (isDeprecatedStaleFoodMetadata(foodId, ov.nameKh, ov.categorySlug)) {
+      return true;
+    }
     const cleanOvBase = ov.photoUrl.split('?')[0].trim();
-    const cleanSeedBase = seedFood.photoUrl.split('?')[0].trim();
-    if (cleanOvBase === cleanSeedBase && !ov.isCustomPhoto) {
+    const cleanSeedBase = (seedFood.photoUrl || '').split('?')[0].trim();
+    if (cleanOvBase !== cleanSeedBase) {
+      return true;
+    }
+    if (!ov.isCustomPhoto && Number(ov.revision || 0) <= 0 && !ov.adminApprovedAt) {
       return true;
     }
   }
@@ -794,11 +854,35 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
     } catch {}
   }
 
-  // Strip any obsolete broken seed URLs from destinations vault
+  // Strip any obsolete broken seed URLs or stale recycled static `/destinations/` paths from destinations vault
+  let evictedStaleDestFromDisk = false;
   for (const [id, destOv] of Object.entries(destinations)) {
-    if (destOv && isObsoleteSeedPhoto(destOv.photoUrl)) {
+    if (!destOv || isObsoleteSeedPhoto(destOv.photoUrl)) {
       delete destinations[id];
+      evictedStaleDestFromDisk = true;
+      continue;
     }
+    const seedDest = IMMUTABLE_SEED_DEST_MAP.get(id);
+    if (
+      seedDest &&
+      typeof destOv.photoUrl === 'string' &&
+      destOv.photoUrl.startsWith('/destinations/') &&
+      destOv.photoUrl.split('?')[0].trim() !== (seedDest.photoUrl || '').split('?')[0].trim()
+    ) {
+      if (!destOv.isAdminEdited) {
+        delete destinations[id];
+      } else {
+        destinations[id] = {
+          ...destOv,
+          photoUrl: seedDest.photoUrl,
+          galleryPhotos: [seedDest.photoUrl],
+        };
+      }
+      evictedStaleDestFromDisk = true;
+    }
+  }
+  if (evictedStaleDestFromDisk) {
+    safeWriteJsonMap(VAULT_KEYS.DESTINATIONS, destinations);
   }
 
   // Strip any accidental unedited seed restaurant entries or deleted restaurants from restaurants vault
@@ -1831,27 +1915,37 @@ export function applyFoodOverrides(
     const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(f.id);
     const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() : 0;
     const isPreBakeOverride = ovTime > 0 && ovTime <= BAKED_STATIC_FOOD_ASSETS_MS && !ov.isCustomPhoto;
+    const hasDeprecatedFoodMeta = Boolean(
+      seedFood && isDeprecatedStaleFoodMetadata(f.id, ov.nameKh, ov.categorySlug)
+    );
 
-    const nextPhotoUrl = ov.photoUrl;
-    const nextNameKh = ov.nameKh || f.nameKh;
-    const nextNameEn = ov.nameEn || f.nameEn;
-    const nextCategorySlug = ov.categorySlug || f.categorySlug;
-    const nextCategoryKh = ov.categoryKh || f.categoryKh;
-    const nextCategoryEn = ov.categoryEn || f.categoryEn;
+    const nextPhotoUrl =
+      seedFood && ov.photoUrl.startsWith('/foods/') && !isGenuineCustomPhotoUrl(ov.photoUrl)
+        ? seedFood.photoUrl
+        : ov.photoUrl;
+    const nextNameKh = hasDeprecatedFoodMeta && seedFood ? seedFood.nameKh : (ov.nameKh || f.nameKh);
+    const nextNameEn = hasDeprecatedFoodMeta && seedFood ? seedFood.nameEn : (ov.nameEn || f.nameEn);
+    const nextCategorySlug = hasDeprecatedFoodMeta && seedFood ? seedFood.categorySlug : (ov.categorySlug || f.categorySlug);
+    const nextCategoryKh = hasDeprecatedFoodMeta && seedFood ? seedFood.categoryKh : (ov.categoryKh || f.categoryKh);
+    const nextCategoryEn = hasDeprecatedFoodMeta && seedFood ? seedFood.categoryEn : (ov.categoryEn || f.categoryEn);
 
     const isSameDishNameAsSeed = Boolean(
       seedFood && (nextNameKh || '').trim() === (seedFood.nameKh || '').trim()
     );
 
     let nextDescriptionKh = stripLegacyFoodPhraseKh(
-      ov.descriptionKh
+      hasDeprecatedFoodMeta && seedFood?.descriptionKh
+        ? seedFood.descriptionKh
+        : ov.descriptionKh
         ? ov.descriptionKh
         : isSameDishNameAsSeed && isPreBakeOverride && seedFood?.descriptionKh
         ? seedFood.descriptionKh
         : cleanedBaseDescKh
     );
     let nextDescriptionEn =
-      ov.descriptionEn
+      hasDeprecatedFoodMeta && seedFood?.descriptionEn
+        ? seedFood.descriptionEn
+        : ov.descriptionEn
         ? ov.descriptionEn
         : isSameDishNameAsSeed && isPreBakeOverride && seedFood?.descriptionEn
         ? seedFood.descriptionEn
@@ -1863,7 +1957,9 @@ export function applyFoodOverrides(
     const nextDifficulty = ov.difficulty || f.difficulty;
 
     let nextIngredients =
-      Array.isArray(ov.ingredients) && ov.ingredients.length > 0 && !hasPlaceholderOrIncompleteRecipe(ov.ingredients, ov.steps)
+      hasDeprecatedFoodMeta && seedFood
+        ? seedFood.ingredients
+        : Array.isArray(ov.ingredients) && ov.ingredients.length > 0 && !hasPlaceholderOrIncompleteRecipe(ov.ingredients, ov.steps)
         ? ov.ingredients
         : isSameDishNameAsSeed && seedFood
         ? seedFood.ingredients
@@ -1872,7 +1968,9 @@ export function applyFoodOverrides(
         : f.ingredients;
 
     let nextSteps =
-      Array.isArray(ov.steps) && ov.steps.length > 0 && !hasPlaceholderOrIncompleteRecipe(ov.ingredients, ov.steps)
+      hasDeprecatedFoodMeta && seedFood
+        ? seedFood.steps
+        : Array.isArray(ov.steps) && ov.steps.length > 0 && !hasPlaceholderOrIncompleteRecipe(ov.ingredients, ov.steps)
         ? ov.steps
         : isSameDishNameAsSeed && seedFood
         ? seedFood.steps
@@ -2255,14 +2353,19 @@ export function applyDestinationOverrides(
     const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() : 0;
 
     const CLEAN_STATIC_MEDIA_CUTOFF_MS = new Date('2026-10-29T15:05:00.000Z').getTime();
+    const isOvStaticBundledDestPath =
+      Boolean(seedItem) &&
+      typeof ov.photoUrl === 'string' &&
+      ov.photoUrl.startsWith('/destinations/');
     const useOverridePhoto =
-      !isSeedBundledStaticPhoto ||
-      ov.isCustomPhoto ||
-      ov.isAdminEdited ||
-      Number(ov.revision || 0) > 0 ||
-      Boolean(ov.adminApprovedAt) ||
-      Boolean(ov.photoUrl && ov.photoUrl.startsWith('data:image/')) ||
-      (ovTime > Math.max(seedTime, CLEAN_STATIC_MEDIA_CUTOFF_MS) + 1000);
+      !isOvStaticBundledDestPath &&
+      (!isSeedBundledStaticPhoto ||
+        isGenuineCustomPhotoUrl(ov.photoUrl) ||
+        ov.isCustomPhoto ||
+        ov.isAdminEdited ||
+        Number(ov.revision || 0) > 0 ||
+        Boolean(ov.adminApprovedAt) ||
+        (ovTime > Math.max(seedTime, CLEAN_STATIC_MEDIA_CUTOFF_MS) + 1000));
 
     const effectivePhotoUrl = useOverridePhoto ? ov.photoUrl : seedPhotoUrl;
     const nextPhotoUpdatedAt = ovTime >= seedTime ? (ov.updatedAt || d.photoUpdatedAt) : (seedItem?.photoUpdatedAt || d.photoUpdatedAt);

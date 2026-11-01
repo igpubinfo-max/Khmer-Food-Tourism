@@ -1,6 +1,12 @@
 import type { FoodItem, Language } from '../types';
 import { tr } from '../utils/i18n';
 import {
+  isBeverageFood,
+  isSweetOrBeverageFood,
+  normalizeKhmerFoodText,
+  stripNegatedSpicePhrases,
+} from '../utils/khmerFoodSearch';
+import {
   rankDrinkPairingDishes,
   pairingReason,
   pairingKindsLabel,
@@ -142,9 +148,12 @@ const FEATURES: Array<{ re: RegExp; phrase: T3; nameOnly?: boolean }> = [
 
 export function describeDish(food: FoodItem, language: Language): string {
   const name = `${food.nameKh} ${food.nameEn}`;
-  const text = `${name} ${food.descriptionKh} ${food.descriptionEn}`;
+  const safeDesc = stripNegatedSpicePhrases(`${food.descriptionKh || ''} ${food.descriptionEn || ''}`);
+  const text = `${name} ${safeDesc}`;
+  const isSweetOrDrink = isSweetOrBeverageFood(food);
   const parts: string[] = [];
   for (const f of FEATURES) {
+    if (isSweetOrDrink && f.phrase[1] === 'spicy kick') continue;
     if (f.re.test(f.nameOnly ? name : text)) parts.push(tr(language, f.phrase[0], f.phrase[1], f.phrase[2]));
     if (parts.length >= 2) break;
   }
@@ -908,7 +917,9 @@ function buildDiscover(
   explicitSurprise: boolean,
   hour: number
 ): AiBrainInsight {
-  const safePool = foods.filter((f) => !ALWAYS_SAFE_RAW.test(`${f.nameKh} ${f.nameEn}`));
+  const nonDrinkFoods = foods.filter((f) => !isBeverageFood(f));
+  const baseCandidates = nonDrinkFoods.length > 0 ? nonDrinkFoods : foods;
+  const safePool = baseCandidates.filter((f) => !ALWAYS_SAFE_RAW.test(`${f.nameKh} ${f.nameEn}`));
   const byRating = [...safePool].sort((a, b) => (b.rating || 0) - (a.rating || 0));
 
   const slot =
@@ -1034,7 +1045,7 @@ export function buildAiBrainInsight(params: BrainParams): AiBrainInsight | null 
   const { foods, language, canUseVip, seed, directMatchCount, hasTitleMatch } = params;
   const raw = sanitizeCravingQuery(params.query);
   if (!raw || foods.length === 0) return null;
-  const q = raw.toLowerCase();
+  const q = normalizeKhmerFoodText(raw) || raw.toLowerCase();
 
   // 1. Strict Medical / Disease Scope Boundary Refusal (Always takes precedence!)
   if (isMedicalOrHealthQuery(raw)) {

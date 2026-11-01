@@ -48,9 +48,9 @@ export const CORE_100_DESC_ZH: Record<string, string> = {
   "food-39": "香气四溢的高棉红烧牛腩河粉，以八角、丁香、桂皮与香茅慢炖出软烂入味的牛腩与牛筋，汤浓味美。",
   "food-40": "深受欢迎的柬埔寨街头美食：爽滑黄鸡蛋面与鲜嫩牛肉片、空心菜、绿豆芽及甜酱油猛火快炒，顶部盖上一颗金黄溏心荷包蛋。",
   "food-41": "柬埔寨最经典的国民早餐烤肉饭：薄切猪肉用甜椰奶、蒜蓉与棕榈糖腌制后炭火烤香，盖在温热茉莉碎米饭上，配爽脆腌黄瓜白萝卜与清炖冬瓜汤。",
-  "food-42": "暖胃滋补的柬埔寨传统早餐肉粥：茉莉香米在浓郁猪骨高汤中熬至绵密丝滑，配以鲜嫩猪肉片、猪肝、猪血块、嫩姜丝、豆芽与炸蒜酥。",
+  "food-42": "鲜美醇厚的高棉五花肉猪杂汤粿条：慢火清炖猪骨高汤浇在滑嫩米河粉上，铺满软嫩五花肉片、猪血块、爽脆绿豆芽、烤花生碎、金黄炸蒜酥与香葱。",
   "food-43": "猛火快炒的黄金茉莉香米饭，裹满鲜甜饱满的手拆海蟹肉块、金黄炒蛋与翠绿葱花，粒粒分明、鲜香扑鼻。",
-  "food-44": "小巧玲珑的高棉传统爆浆糯米球：水磨糯米团包裹纯正高棉棕榈糖块，煮熟后咬开即流出香甜糖浆，外层裹满微咸的鲜刨嫩椰丝。",
+  "food-44": "冷热交融的高棉传统棕榈糖糯米汤圆配椰香冰淇淋：斑兰水磨糯米团裹满鲜刨嫩椰丝与温热棕榈糖浆，顶部配上一球醇厚椰奶冰淇淋并撒上炒香白芝麻。",
   "food-45": "备受喜爱的传统竹筒香糯米饭：新收香糯米混合黑豆、鲜榨椰浆与棕榈糖，装入天然青竹筒内用炭火慢烤，自带竹膜清香。",
   "food-46": "柬埔寨亡人节与传统新年最具代表性的节庆圆柱长粽：糯米层层包裹去皮绿豆仁与贡布胡椒腌制的五花肉条，用芭蕉叶紧扎后慢火水煮数小时。",
   "food-47": "经典的高棉传统甜点：将整颗小金瓜掏空去籽，注入由鸭蛋、浓椰浆与纯棕榈糖调制的蛋奶浆，慢火蒸至绵密丝滑。",
@@ -59,7 +59,7 @@ export const CORE_100_DESC_ZH: Record<string, string> = {
   "food-50": "极具人气的柬埔寨傍晚街头小食：刚出锅的热气蒸毛鸭蛋，搭配新鲜越南香菜（叻沙叶）、腌嫩姜，以及正宗贡布黑胡椒青柠椒盐。",
   "food-51": "地道的高棉乡村嫩罗望子叶酸鱼汤，精选鲜甜淡水小河鱼（Dieb Fish）与刚采摘的鲜嫩罗望子叶同煮，佐以香茅、南姜与水田香草，果酸自然清新。",
   "food-52": "质朴清香的高棉南瓜藤尖酸鱼汤，将剥去外筋的脆嫩南瓜藤尖与鲜河鱼块、罗望子酸汤、少许波罗福鱼酱及柠檬罗勒同煮，酸爽鲜甜。",
-  "food-53": "质朴甘美的高棉乡村笋汤，以手撕烟熏淡水鱼、焯水嫩竹笋丝、鲜罗望子与清甜红瓜叶慢煮而成。",
+  "food-53": "清爽鲜酸的高棉青柠香草鱿鱼蛤蜊汤：打花刀的新鲜海鱿鱼、肥美海蛤蜊与香茅、南姜、青柠叶及翠绿时蔬同煮，调入鲜青柠汁并撒上金黄红葱酥。",
   "food-54": "营养清甜的高棉草本鲜虾丝瓜汤，精选去壳留尾鲜海虾、嫩丝瓜片、香茅香料泥与辣木叶，汤鲜味美。",
   "food-55": "经典暖心的苦瓜酿肉清汤：鲜苦瓜切圈去瓤，酿入拌匀的猪肉末、粉丝与黑木耳馅，在清澈猪骨高汤中慢火炖至软嫩回甘。",
   "food-56": "极具稻乡风味的传统田鱼稻田蟹酸汤，以新鲜田鱼与捣碎过滤的稻田蟹鲜汤慢熬出蟹膏，配以切半田蟹、淡紫水葫芦花与罗望子酸汤，鲜美无比。",
@@ -86,7 +86,7 @@ export const CORE_100_DESC_ZH: Record<string, string> = {
   "food-77": "清脆多汁的黄瓜薄片与手撕烟熏河鱼肉、红葱头、鲜红辣椒及越南香菜同拌，淋上酸爽青柠鱼露汁。",
   "food-78": "马德望传统浓香花生鱼肉蘸酱拼盘：将水煮黑鱼肉捣烂，融入澄清空心波罗福高汤、细磨烤花生碎与酸罗望子汁，配香蕉花、睡莲茎等鲜蔬拼盘。",
   "food-79": "正宗高棉蕉叶炭烤波罗福鱼酱：将河鱼波罗福酱与五花肉末、大蒜、红葱及青柠叶细剁拌匀，用芭蕉叶折成方包在炭火上慢烤至香气四溢。",
-  "food-80": "传统高棉发酵鱼（Mam）风味沙拉：将脆爽青木瓜丝、白切五花肉薄片、嫩姜丝、蒜片与秘制发酵鱼肉拌匀，咸鲜酸甜、脆爽可口。",
+  "food-80": "酸辣脆爽的高棉脆皮烧肉青木瓜沙拉：爽脆青木瓜丝与长豆角、小番茄、烤花生在石臼中配青柠棕榈糖鱼露汁捣拌入味，顶部铺满金黄酥脆的烤五花肉块。",
   "food-81": "新鲜软滑的发酵米线，浇上由散养土鸡、红薯与紫茄慢炖的浓郁椰香红咖喱汤，配以香蕉花蕊、豆芽与长豆角等鲜脆配菜。",
   "food-82": "传奇的暹粒吴哥特色波罗福鱼汤米线：鲜发酵米线浇上融合了炭烤黑鱼肉泥、香茅南姜与烤花生碎的酸香微辣波罗福高汤，配时令野菜享用。",
   "food-83": "晶莹滑嫩的鲜蒸宽米皮卷，铺上香菇炒猪肉末、高棉甜香肠片、蛋皮丝、绿豆芽与金黄红葱酥，淋上酸甜蒜香鱼露汁。",
@@ -521,7 +521,21 @@ export const CORE_100_STEPS_ZH: Record<string, string> = {
   "Peel the outer fibrous skin off fresh water lily stems, snap into bite-sized segments, rinse, and drain dry.": "剥去新鲜睡莲嫩茎表层薄皮，折成适口寸段，洗净并彻底沥干水分。",
   "Heat oil in a hot wok and sauté crushed garlic, chilies, and minced prahok until fragrant.": "热锅下油，放入拍蒜、鲜辣椒与少许细剁波罗福鱼酱爆炒出香。",
   "Toss in the water lily stems over high heat and season quickly with oyster sauce, fish sauce, and palm sugar.": "转猛火倒入睡莲嫩茎，迅速调入蚝油、鱼露与少许棕榈糖翻炒入味。",
-  "Flash-fry for just 1 minute to keep the stems juicy and crunchy, toss with scallions, and serve immediately.": "全程大火快炒仅约1分钟以锁住莲梗清脆多汁的口感，撒入葱段翻匀立即装盘。"
+  "Flash-fry for just 1 minute to keep the stems juicy and crunchy, toss with scallions, and serve immediately.": "全程大火快炒仅约1分钟以锁住莲梗清脆多汁的口感，撒入葱段翻匀立即装盘。",
+  "Simmer pork bones gently while skimming foam to obtain a crystal-clear, sweet broth.": "将猪筒骨小火慢炖并撇净浮沫，熬出清澈甘甜的猪骨高汤。",
+  "Blanch rice noodles and bean sprouts into bowls, then arrange sliced pork belly and blood cubes on top.": "将米河粉与绿豆芽入沸水烫熟盛入碗中，铺上白切五花肉片与猪血块。",
+  "Ladle piping-hot broth over the noodles and finish with crispy garlic, crushed peanuts, scallions, and chili.": "浇入滚烫高汤，撒上金黄炸蒜酥、烤花生碎、葱花与辣椒即可享用。",
+  "Knead glutinous rice flour with pandan water, roll into balls, and boil until tender and floating.": "用斑兰汁将水磨糯米粉揉成光滑面团，搓成圆球入沸水煮至浮起熟透。",
+  "Simmer pure palm sugar with pandan leaf and a pinch of sea salt into an aromatic golden syrup.": "将纯正高棉棕榈糖加斑兰叶与少许海盐小火慢熬成浓香金黄糖浆。",
+  "Arrange warm dumplings in a bowl with palm sugar syrup and grated coconut, then top with coconut ice cream and toasted sesame.": "将温热糯米圆子盛入碗中，淋上棕榈糖浆与鲜刨椰丝，再配上一球椰香冰淇淋并撒上熟白芝麻。",
+  "Clean and score fresh squid in a crosshatch pattern, and purge clams clean.": "将新鲜鱿鱼洗净切十字花刀，海蛤蜊吐沙刷洗干净。",
+  "Bring water to a rolling boil with bruised lemongrass, galangal, and kaffir lime leaves.": "锅中清水烧沸，放入拍扁香茅、南姜与青柠叶熬出浓郁草本香气。",
+  "Add clams and scored squid briefly until clams open and squid curls tender, then toss in greens and season with fish sauce.": "下入蛤蜊与花刀鱿鱼快煮至蛤蜊开口、鱿鱼卷曲鲜嫩，放入绿叶时蔬并以鱼露调味。",
+  "Remove from heat, stir in fresh lime juice and chilies, and garnish with crispy fried shallots.": "关火后调入鲜榨青柠汁与鲜红辣椒，撒上金黄红葱酥趁热享用。",
+  "Shred green papaya into crisp strands, chill briefly and drain, and slice crispy roast pork belly into bite-sized pieces.": "将脆青木瓜刨丝冰镇沥干保持爽脆，脆皮烧五花肉切成适口厚块。",
+  "Pound garlic and red chilies in a mortar, then lightly bruise yardlong beans and cherry tomatoes.": "在石臼中捣碎大蒜与红辣椒，加入长豆角段与小番茄轻轻舂出汁水。",
+  "Dissolve palm sugar, fish sauce, and lime juice in the mortar, then toss in green papaya and roasted peanuts.": "调入棕榈糖、鱼露与鲜青柠汁化开，放入青木瓜丝与烤花生轻轻捣拌入味。",
+  "Plate the zesty papaya salad, crown with crispy golden pork belly chunks, and serve immediately.": "将酸辣木瓜沙拉装盘，顶部铺满金黄酥脆的烤五花肉块即刻享用。"
 };
 
 export const FOOD_51_100_NAME_ZH: Record<string, string> = {
@@ -580,10 +594,14 @@ export const FOOD_51_100_NAME_ZH: Record<string, string> = {
   "Sun-Dried Battambang Beef Jerky": "马德望日晒芝麻牛肉干",
   "Flattened New Rice with Fresh Young Coconut": "送水节鲜椰丝拌新舂扁米 (Ambok)",
   "Num Krok (Crispy Coconut Rice Pods with Chives)": "高棉铸铁锅椰浆葱花脆米饼 (Num Krok)",
-  "Crispy Deep-Fried Bananas with Palm Glaze": "高棉芝麻脆皮炸甜蕉"
+  "Crispy Deep-Fried Bananas with Palm Glaze": "高棉芝麻脆皮炸甜蕉",
+  "Clear Sour Squid & Clam Herbal Soup": "高棉青柠香草鱿鱼蛤蜊酸汤",
+  "Crispy Roast Pork Belly Green Papaya Salad (Bok Lhong)": "脆皮烧五花肉青木瓜沙拉 (Bok Lhong)"
 };
 
 export const FOOD_51_100_CAT_ZH: Record<string, string> = {
+  "Soup / Sour Squid & Clam Soup": "青柠香草鱿鱼蛤蜊酸汤",
+  "Salad / Crispy Pork Papaya Salad": "脆皮烧肉青木瓜沙拉",
   "Soup / Sour Stew": "传统高棉酸汤",
   "Soup / Herbal Broth": "高棉草本养生汤",
   "Soup / Clear Broth": "清炖鲜汤",

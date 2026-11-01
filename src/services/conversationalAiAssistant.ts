@@ -1,5 +1,6 @@
 import { isPlaceLocationVerified, type FoodItem, type Language, type Restaurant, type TouristDestination } from '../types';
 import { tr } from '../utils/i18n';
+import { normalizeKhmerFoodText } from '../utils/khmerFoodSearch';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { isMedicalOrHealthQuery, buildMedicalScopeNotice, describeDish, type BrainChip } from './aiFoodBrain';
 import { getAiFoodAdvisorRecommendations, isVegetarianQuery } from './aiFoodAdvisorService';
@@ -230,16 +231,16 @@ export function buildWelcomeAssistantMessage(language: Language, foodCount: numb
 }
 
 function findBestDishInQuery(query: string, foods: FoodItem[], fallbackDishes: FoodItem[]): FoodItem | null {
-  const clean = query
-    .replace(RECIPE_INTENT_RE, ' ')
-    .replace(RESTAURANT_INTENT_RE, ' ')
-    .replace(/[?？!！។«»"']/g, ' ')
-    .trim()
-    .toLowerCase();
+  const clean = normalizeKhmerFoodText(
+    query
+      .replace(RECIPE_INTENT_RE, ' ')
+      .replace(RESTAURANT_INTENT_RE, ' ')
+      .replace(/[?？!！។«»"']/g, ' ')
+  );
 
   if (clean.length >= 2) {
     for (const f of foods) {
-      const nKh = (f.nameKh || '').toLowerCase();
+      const nKh = normalizeKhmerFoodText(f.nameKh);
       const nEn = (f.nameEn || '').toLowerCase();
       const zhName = getLocalizedFood(f, 'zh').name.toLowerCase();
       if (

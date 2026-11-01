@@ -2,6 +2,13 @@ import { FoodItem, Language, Restaurant, isPlaceLocationVerified } from '../type
 import { getDishTagIds, DishTagId } from '../utils/dishTags';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { tr } from '../utils/i18n';
+import {
+  isBeverageFood,
+  isSweetOrBeverageFood,
+  normalizeKhmerFoodText,
+  parseKhmerFoodSearchQuery,
+  scoreFoodForKhmerQuery,
+} from '../utils/khmerFoodSearch';
 import { buildAiBrainInsight, buildMedicalScopeNotice, isMedicalOrHealthQuery, type AiBrainInsight } from './aiFoodBrain';
 
 export type AdvisorGoalId =
@@ -69,6 +76,15 @@ export const QUICK_CRAVING_CHIPS: QuickCravingChip[] = [
     labelZh: '🥩 烧烤煎炸',
   },
   {
+    id: 'spicy',
+    queryKh: 'ហឹរ',
+    queryEn: 'spicy',
+    queryZh: '香辣',
+    labelKh: '🌶️ ហឹរ',
+    labelEn: '🌶️ Spicy',
+    labelZh: '🌶️ 香辣风味',
+  },
+  {
     id: 'spicy_sour',
     queryKh: 'ជូរហឹរ',
     queryEn: 'spicy sour',
@@ -116,16 +132,7 @@ export const QUICK_CRAVING_CHIPS: QuickCravingChip[] = [
 ];
 
 function normalizeSearchText(input: string): string {
-  return (input || '')
-    .toLowerCase()
-    .replace(/[\u200B-\u200D\uFEFF]/g, '')
-    .replace(/ណ្ដ/g, 'ណ្ត')
-    .replace(/ក្ដ/g, 'ក្ត')
-    .replace(/ផ្ដ/g, 'ផ្ត')
-    .replace(/ស្ដ/g, 'ស្ត')
-    .replace(/[.,/#!$%^&*;:{}=\-_`~()?"'«»៖។]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return normalizeKhmerFoodText(input);
 }
 
 const MEAT_FISH_SEAFOOD_TITLE_RE =
@@ -265,9 +272,9 @@ const SEMANTIC_CRAVING_RULES: SemanticRule[] = [
   },
   {
     id: 'spicy_sour_salad',
-    triggerRegex: /ញាំ|ភ្លា|បុក|ហឹរ|ជូរ|ជូរហឹរ|ម្រេច|កapi|កាពិ|ប្រហុក|ទឹកគ្រឿង|salad|spicy|sour|zesty|chili|pepper|papaya|prahok|凉拌|沙拉|辣|酸|酸辣|青木瓜|胡椒|波罗福/i,
+    triggerRegex: /ញាំ|ភ្លា|បុក|ជូរហឹរ|ម្រេច|កាពិ|ប្រហុក|ទឹកគ្រឿង|salad|spicy\s*sour|zesty|papaya|prahok|凉拌|沙拉|酸辣|青木瓜|胡椒|波罗福/i,
     matchFood: (f, titleText, fullText) => {
-      if (f.categorySlug === 'dessert' || f.categorySlug === 'cake') return 0;
+      if (isSweetOrBeverageFood(f)) return 0;
       if (f.categorySlug === 'salad') return 195;
       if (/ញាំ|ភ្លា|បុក|ម្ជូរ|ហឹរ|ម្រេច|ក្តៅ|ប្រហុក|ទឹកគ្រឿង|salad|spicy|sour|pepper|prahok|papaya/i.test(titleText)) {
         return 185;
@@ -280,18 +287,19 @@ const SEMANTIC_CRAVING_RULES: SemanticRule[] = [
     id: 'streetfood_snack',
     triggerRegex: /អាហារសម្រន់|សម្រន់|street\s*food|snack|snacks|បាញ់ឆែវ|នំគ្រក់|ប្រហិត|លតឆា|នំប៉័ង|ពងទាកូន|សាច់ចង្កាក់|街头小吃|小吃/i,
     matchFood: (f, titleText) => {
-      if (/នំប៉័ង|លតឆា|ប្រហិត|សាច់ចង្កាក់|នំគ្រក់|បាញ់ឆែវ|ចេកចៀន|ដំឡូង|ពងទាកូន|ខ្យង|ងាវ|បុកល្ហុង|ស្លាបមាន់|ក្រឡាន|គុយទាវកាត់|មីឆា|នំកಚាយ|នំបញ្ចុក|អាំង|បំពង|ចៀន|street|snack|skewer|meatball|pancake|baguette|spring roll|fritter|fried/i.test(titleText)) {
+      if (isBeverageFood(f)) return 0;
+      if (/នំប៉័ង|លតឆា|ប្រហិត|សាច់ចង្កាក់|នំគ្រក់|បាញ់ឆែវ|ចេកចៀន|ដំឡូង|ពងទាកូន|ខ្យង|ងាវ|បុកល្ហុង|ស្លាបមាន់|ក្រឡាន|គុយទាវកាត់|មីឆា|នំកចាយ|នំបញ្ចុក|អាំង|បំពង|ចៀន|street|snack|skewer|meatball|pancake|baguette|spring roll|fritter|fried/i.test(titleText)) {
         return 200;
       }
-      if (f.categorySlug === 'grilled' || f.categorySlug === 'salad' || f.categorySlug === 'dessert') return 90;
+      if (f.categorySlug === 'streetfood' || f.categorySlug === 'grilled' || f.categorySlug === 'salad') return 90;
       return 0;
     },
   },
   {
     id: 'drink_pairing',
-    triggerRegex: /ម្ហូបអម|ក្លែម|ស្រាបៀរ|ភេសជ្ជៈ|beer\s*food|drink\s*pairing|bar\s*snack|下酒菜|啤酒/i,
+    triggerRegex: /ម្ហូបអម|ក្លែម|ស្រាបៀរ|beer\s*food|drink\s*pairing|bar\s*snack|下酒菜|啤酒/i,
     matchFood: (f, titleText, _fullText, tags) => {
-      if (f.categorySlug === 'dessert' || f.categorySlug === 'cake' || f.categorySlug === 'rice') return 0;
+      if (isSweetOrBeverageFood(f) || f.categorySlug === 'rice') return 0;
       if (/អាំង|បំពង|ចៀន|ភ្លា|ញាំ|បុក|ងាវ|ក្តាម|ក្ដាម|បង្គា|មឹក|ស្លាបមាន់|ឆ្អឹងជំនី|គោឡើងភ្នំ|សាច់គោ|ម្រេច|ប្រហុក|grilled|fried|crispy|wings|ribs|salad|ceviche|clam|crab|shrimp|squid|beef/i.test(titleText)) {
         return 210;
       }
@@ -404,16 +412,14 @@ export function getAiFoodAdvisorRecommendations(params: {
     };
   }
 
-  // Tokenize query into words (supporting Khmer, English, and Chinese substrings)
-  const tokens = cleanQuery
-    .split(/\s+/)
-    .map((t) => t.trim())
-    .filter((t) => t.length > 0);
+  const parsedQuery = parseKhmerFoodSearchQuery(query);
+  const effectiveCleanQuery = parsedQuery.coreQuery || cleanQuery;
 
   // Determine which semantic craving rules are triggered by the user's query
-  const activeRules = hasActiveQuery
-    ? SEMANTIC_CRAVING_RULES.filter((rule) => rule.triggerRegex.test(cleanQuery))
-    : [];
+  const activeRules =
+    hasActiveQuery && !parsedQuery.isFlavorOnlyQuery
+      ? SEMANTIC_CRAVING_RULES.filter((rule) => rule.triggerRegex.test(effectiveCleanQuery))
+      : [];
 
   const scoredFoods: Array<{ food: FoodItem; score: number }> = [];
 
@@ -434,42 +440,24 @@ export function getAiFoodAdvisorRecommendations(params: {
     const fullText = `${titleText} ${categoryText} ${ingredientText} ${descText}`;
 
     if (hasActiveQuery) {
-      let score = 0;
-
-      // 1. Direct query match in title (highest priority)
-      if (titleText === cleanQuery || titleText.startsWith(cleanQuery)) {
-        score += 290;
-        hasTitleMatch = true;
-      } else if (titleText.includes(cleanQuery)) {
-        score += 240;
-        hasTitleMatch = true;
+      const khmerScore = scoreFoodForKhmerQuery(food, parsedQuery);
+      if (khmerScore < 0) {
+        continue;
       }
 
-      // 2. Semantic craving rule match (e.g., បាយ / rice / 米饭 / សម្លក្តៅៗ / 海鲜)
-      for (const rule of activeRules) {
-        score += rule.matchFood(food, titleText, fullText, tags);
-      }
+      let score = khmerScore;
 
-      // 3. Token-by-token matching across title, category, ingredients, and description
-      let matchedTokens = 0;
-      for (const token of tokens) {
-        if (titleText.includes(token)) {
-          score += 120;
-          matchedTokens++;
-        } else if (ingredientText.includes(token)) {
-          score += 45;
-          matchedTokens++;
-        } else if (categoryText.includes(token) && activeRules.length === 0) {
-          score += 35;
-          matchedTokens++;
-        } else if (descText.includes(token) && activeRules.length === 0) {
-          score += 20;
-          matchedTokens++;
+      if (!parsedQuery.isFlavorOnlyQuery) {
+        if (
+          effectiveCleanQuery.length >= 2 &&
+          (titleText === effectiveCleanQuery || titleText.startsWith(effectiveCleanQuery) || titleText.includes(effectiveCleanQuery))
+        ) {
+          hasTitleMatch = true;
         }
-      }
-
-      if (tokens.length > 1 && matchedTokens === tokens.length) {
-        score += 60;
+        // Semantic craving rule match (e.g., បាយ / rice / 米饭 / សម្លក្តៅៗ / 海鲜)
+        for (const rule of activeRules) {
+          score += rule.matchFood(food, titleText, fullText, tags);
+        }
       }
 
       // Slight boost if dish also aligns with the selected goal
@@ -481,12 +469,12 @@ export function getAiFoodAdvisorRecommendations(params: {
         score = -999;
       }
 
-      if (score >= 40) {
+      if (score >= 55) {
         scoredFoods.push({ food, score });
       }
     } else {
-      // No text query: filter by the selected Daily Goal
-      if (matchesGoal(food, titleText, fullText, tags, goal)) {
+      // No text query: filter by the selected Daily Goal (exclude standalone beverages unless requested)
+      if (!isBeverageFood(food) && matchesGoal(food, titleText, fullText, tags, goal)) {
         const baseScore = 100 + (food.rating || 4.5) * 10;
         scoredFoods.push({ food, score: baseScore });
       }
@@ -526,8 +514,16 @@ export function getAiFoodAdvisorRecommendations(params: {
         : [];
 
   // If the user typed a query that matched dishes, return up to 6 top matches (rotated by seed when Refresh is clicked)
+  const preferBrainDishes =
+    Boolean(brain && brain.dishes.length > 0) &&
+    (scoredFoods.length === 0 ||
+      brain?.mode === 'drink' ||
+      brain?.mode === 'blocked' ||
+      brain?.mode === 'scope_notice' ||
+      parsedQuery.flavorIntents.length === 0);
+
   let topDishes: FoodItem[];
-  if (brain && brain.dishes.length > 0) {
+  if (preferBrainDishes && brain) {
     topDishes = brain.dishes.map((d) => d.food);
   } else if (scoredFoods.length > 0) {
     const limit = hasActiveQuery ? 6 : 4;
@@ -540,8 +536,11 @@ export function getAiFoodAdvisorRecommendations(params: {
       topDishes = [...topPool.slice(offset), ...topPool.slice(0, offset)].slice(0, limit);
     }
   } else {
-    // Fallback if query had zero exact matches: pick popular dishes rotated by seed
-    const fallbackPool = [...foods].sort((a, b) => {
+    // Fallback if query had zero exact matches: pick popular non-beverage dishes rotated by seed
+    const candidateFallback = parsedQuery.isDrinkExplicitlyRequested
+      ? foods
+      : foods.filter((f) => !isBeverageFood(f));
+    const fallbackPool = [...(candidateFallback.length > 0 ? candidateFallback : foods)].sort((a, b) => {
       const ha = (a.id.charCodeAt(a.id.length - 1) + seed * 7) % 13;
       const hb = (b.id.charCodeAt(b.id.length - 1) + seed * 7) % 13;
       return ha - hb || (b.rating || 0) - (a.rating || 0);
@@ -560,7 +559,7 @@ export function getAiFoodAdvisorRecommendations(params: {
       if (isVeg) {
         return /បួស|បន្លែ|តៅហ៊ូ|vegetarian|vegan|veggie|plant|素食|斋/i.test(hay);
       }
-      if (hasActiveQuery && hay.includes(cleanQuery)) return true;
+      if (hasActiveQuery && effectiveCleanQuery.length >= 2 && hay.includes(effectiveCleanQuery)) return true;
       return topDishes.some((d) =>
         (r.signatureDishesKh || []).some((sig) => {
           const normSig = normalizeSearchText(sig);

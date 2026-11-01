@@ -1,4 +1,9 @@
-import { FoodItem, SEED_FOOD_PHOTO_BASELINE_ISO, SEED_FOOD_PHOTO_BASELINE_MS } from '../types';
+import {
+  FoodItem,
+  SEED_FOOD_PHOTO_BASELINE_ISO,
+  SEED_FOOD_PHOTO_BASELINE_MS,
+  EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS,
+} from '../types';
 import { additional100Foods } from './seedAdditional100Foods';
 
 export const seedFoods: FoodItem[] = [
@@ -1465,13 +1470,13 @@ export const seedFoods: FoodItem[] = [
   },
   {
     id: 'food-42',
-    nameKh: 'បបរគ្រឿងសាច់ជ្រូកខ្មែរ',
-    nameEn: 'Khmer Rice Porridge with Pork & Offal (Babor Kroeung)',
-    categorySlug: 'rice',
-    categoryKh: 'អាហារពេលព្រឹក / បបរ',
-    categoryEn: 'Breakfast / Porridge',
-    descriptionKh: 'បបរគ្រឿងសាច់ជ្រូកខ្មែរ រម្ងាស់អង្ករជាមួយទឹកស៊ុបឆ្អឹងជ្រូកផ្អែមឆ្ងាញ់ អមដោយសាច់ជ្រូក ថ្លើម ក្រពះ ប្រហិតសាច់ ឈាមជ្រូក រោយខ្ទឹមបំពង សណ្តែកបណ្តុះ និងក្រូចឆ្មា។',
-    descriptionEn: 'Hearty Cambodian morning rice congee simmered with rich pork stock, served with tender pork slices, offal, crispy fried crullers, fresh bean sprouts, and lime.',
+    nameKh: 'គុយទាវគ្រឿងក្នុងសាច់ជ្រូកបីជាន់',
+    nameEn: 'Khmer Pork Belly & Offal Rice Noodle Soup',
+    categorySlug: 'noodles',
+    categoryKh: 'គុយទាវ & នំបញ្ចុក / គុយទាវគ្រឿងក្នុង',
+    categoryEn: 'Noodles / Pork & Offal Kuy Teav',
+    descriptionKh: 'គុយទាវគ្រឿងក្នុងសាច់ជ្រូកបីជាន់ ប្រើទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ថ្លាផ្អែមឈ្ងុយ ស្រោចលើសរសៃគុយទាវទន់ស្វិត សាច់ជ្រូកបីជាន់ ឈាមជ្រូក សណ្តែកបណ្តុះ សណ្តែកដីបុក ខ្ទឹមសបំពង និងម្ទេសឆា។',
+    descriptionEn: 'Aromatic Cambodian rice noodle soup in clear slow-simmered pork bone broth topped with tender sliced pork belly, blood cubes, crisp bean sprouts, crushed roasted peanuts, golden fried garlic, and scallions.',
     photoUrl: '/foods/food-42.jpg',
     imageAuditStatus: 'verified',
     imageAuditNote: 'រូបភាពដើមពិតប្រាកដពី Magnific',
@@ -1479,22 +1484,22 @@ export const seedFoods: FoodItem[] = [
     prepTime: '២០ នាទី',
     cookTime: '៤០ នាទី',
     servings: '២-៣ នាក់',
-    calories: 360,
+    calories: 390,
     difficulty: 'medium',
     priceRiel: 12000,
     priceUsd: 3.0,
     rating: 4.8,
     reviewCount: 172,
     ingredients: [
-      { nameKh: 'អង្ករខ្សាយលាយអង្ករដំណើបបន្តិច', nameEn: 'Jasmine rice with a touch of sticky rice', amount: '២០០ ក្រាម' },
-      { nameKh: 'ឆ្អឹងស៊ុបជ្រូក និងសាច់ជ្រូកចិញ្ច្រាំ', nameEn: 'Pork bones and minced pork', amount: '៤០០ ក្រាម' },
-      { nameKh: 'ឈាមជ្រូកស្ងោរ និងថ្លើមជ្រូក', nameEn: 'Cooked blood cubes and pork liver', amount: '១៥០ ក្រាម' },
-      { nameKh: 'ខ្ញីហាន់សរសៃ សណ្តែកបណ្តុះ ក្រូចឆ្មា', nameEn: 'Shredded ginger, bean sprouts, lime', amount: 'តាមចំណូលចិត្ត' },
+      { nameKh: 'សរសៃគុយទាវស្រស់ និងសណ្តែកបណ្តុះ', nameEn: 'Fresh rice noodles and crisp bean sprouts', amount: '៣៥០ ក្រាម' },
+      { nameKh: 'ឆ្អឹងស៊ុបជ្រូក និងសាច់ជ្រូកបីជាន់ស្ងោរហាន់បន្ទះ', nameEn: 'Pork soup bones and tender sliced pork belly', amount: '៤០០ ក្រាម' },
+      { nameKh: 'ឈាមជ្រូកស្ងោរ និងសណ្តែកដីលីងបុក', nameEn: 'Cooked pork blood cubes and crushed roasted peanuts', amount: '១៥០ ក្រាម' },
+      { nameKh: 'ខ្ទឹមសបំពង ស្លឹកខ្ទឹម គូឆាយ ក្រូចឆ្មា និងម្ទេស', nameEn: 'Crispy fried garlic, scallions, chives, lime, and chili flakes', amount: 'តាមចំណូលចិត្ត' },
     ],
     steps: [
-      { stepNumber: 1, instructionKh: 'រម្ងាស់ឆ្អឹងជ្រូកឱ្យចេញជាតិផ្អែម រួចបង់អង្ករចូលរម្ងាស់ឱ្យរីកទន់។', instructionEn: 'Simmer pork bone stock, add rice and cook until soft and velvety.' },
-      { stepNumber: 2, instructionKh: 'ដាក់សាច់ជ្រូកចិញ្ច្រាំ ថ្លើម និងឈាមជ្រូកចូលឱ្យឆ្អិន។', instructionEn: 'Add seasoned minced pork, liver slices, and blood cubes.' },
-      { stepNumber: 3, instructionKh: 'ដួសដាក់ចាន រោយខ្ញី ខ្ទឹមបំពង ស្លឹកខ្ទឹម ម្រេច និងច្របាច់ក្រូចឆ្មា។', instructionEn: 'Ladle into bowls, top with julienned ginger, crispy garlic, and lime.' },
+      { stepNumber: 1, instructionKh: 'រម្ងាស់ឆ្អឹងជ្រូកដោយភ្លើងតិចៗ និងដួសពពុះចេញរហូតបានទឹកស៊ុបថ្លាផ្អែមឆ្ងាញ់។', instructionEn: 'Simmer pork bones gently while skimming foam to obtain a crystal-clear, sweet broth.' },
+      { stepNumber: 2, instructionKh: 'ស្រុសសរសៃគុយទាវ និងសណ្តែកបណ្តុះក្នុងទឹកពុះដាក់ចានគោម រួចរៀបសាច់ជ្រូកបីជាន់ និងឈាមជ្រូកពីលើ។', instructionEn: 'Blanch rice noodles and bean sprouts into bowls, then arrange sliced pork belly and blood cubes on top.' },
+      { stepNumber: 3, instructionKh: 'ដួសទឹកស៊ុបក្តៅពុះស្រោចពីលើ រោយខ្ទឹមសបំពង សណ្តែកដីបុក ស្លឹកខ្ទឹម និងម្ទេសតាមចំណូលចិត្ត។', instructionEn: 'Ladle piping-hot broth over the noodles and finish with crispy garlic, crushed peanuts, scallions, and chili.' },
     ],
   },
   {
@@ -1537,13 +1542,13 @@ export const seedFoods: FoodItem[] = [
   // ==========================================
   {
     id: 'food-44',
-    nameKh: 'នំផ្លែអាយស្ករត្នោត',
-    nameEn: 'Num Phlae Ai (Palm Sugar Sticky Rice Dumplings)',
-    categorySlug: 'cake',
-    categoryKh: 'បង្អែមខ្មែរ / នំប្រពៃណី',
-    categoryEn: 'Desserts / Traditional Sweets',
-    descriptionKh: 'នំផ្លែអាយ ជានំខ្មែរបុរាណធ្វើពីម្សៅដំណើបមូលតូចៗ មានស្នូលស្ករត្នោតផ្អែមក្រអូបនៅខាងក្នុង។ ពេលទំពារ ស្ករត្នោតរលាយផ្ទុះក្នុងមាត់យ៉ាងឆ្ងាញ់ពិសា រោយជាមួយដូងកោសសរសៃស្រស់ៗ។',
-    descriptionEn: 'Delightful bite-sized glutinous rice balls filled with fragrant liquid palm sugar that bursts in your mouth, generously coated in freshly grated young coconut.',
+    nameKh: 'បង្អែមនំផ្លែអាយការ៉េមខ្ទិះដូងស្ករត្នោត',
+    nameEn: 'Warm Palm Sugar Rice Dumplings with Coconut Ice Cream',
+    categorySlug: 'dessert',
+    categoryKh: 'បង្អែមខ្មែរ / នំផ្លែអាយការ៉េមខ្ទិះដូង',
+    categoryEn: 'Dessert / Num Phlae Ai with Coconut Ice Cream',
+    descriptionKh: 'បង្អែមនំផ្លែអាយការ៉េមខ្ទិះដូងស្ករត្នោត រួមបញ្ចូលគ្រាប់នំម្សៅដំណើបទន់ស្វិតរោយដូងកោសស្រស់ក្នុងទឹកស្ករត្នោតក្រអូប អមដោយការ៉េមខ្ទិះដូងត្រជាក់រោយល្ងលីងពីលើ។',
+    descriptionEn: 'Tender glutinous rice dumplings coated in freshly grated young coconut and warm palm sugar syrup, crowned with a creamy scoop of coconut ice cream and toasted sesame seeds.',
     photoUrl: '/foods/food-44.jpg',
     imageAuditStatus: 'verified',
     imageAuditNote: 'រូបភាពដើមពិតប្រាកដពី Magnific',
@@ -1551,7 +1556,7 @@ export const seedFoods: FoodItem[] = [
     prepTime: '២០ នាទី',
     cookTime: '១០ នាទី',
     servings: '៤ នាក់',
-    calories: 210,
+    calories: 275,
     difficulty: 'easy',
     priceRiel: 6000,
     priceUsd: 1.5,
@@ -1559,25 +1564,25 @@ export const seedFoods: FoodItem[] = [
     reviewCount: 120,
     isFeatured: true,
     ingredients: [
-      { nameKh: 'ម្សៅដំណើប', nameEn: 'Glutinous rice flour', amount: '៣០០ ក្រាម' },
-      { nameKh: 'ស្ករត្នោតសុទ្ធកាត់ដុំតូចៗ', nameEn: 'Solid palm sugar cubed', amount: '១៥០ ក្រាម' },
-      { nameKh: 'ដូងកោសសរសៃស្រស់', nameEn: 'Freshly shredded coconut', amount: '១ ចាន' },
-      { nameKh: 'ទឹកស្លឹកតើយ', nameEn: 'Pandan leaf water', amount: '២០០ មីលីលីត្រ' },
+      { nameKh: 'ម្សៅដំណើប និងទឹកស្លឹកតយ', nameEn: 'Glutinous rice flour and pandan water', amount: '៣០០ ក្រាម' },
+      { nameKh: 'ទឹកស្ករត្នោតខ្មែរសុទ្ធរម្ងាស់ក្រអូប', nameEn: 'Pure Cambodian palm sugar syrup', amount: '១៥០ ក្រាម' },
+      { nameKh: 'ការ៉េមខ្ទិះដូងធម្មជាតិ', nameEn: 'Artisanal coconut milk ice cream', amount: '២ គ្រាប់' },
+      { nameKh: 'ដូងកោសសរសៃស្រស់ និងល្ងលីង', nameEn: 'Freshly shredded young coconut and toasted sesame', amount: '១ ចាន' },
     ],
     steps: [
-      { stepNumber: 1, instructionKh: 'ច្របល់ម្សៅដំណើបជាមួយទឹកស្លឹកតើយឱ្យបានដុំម្សៅទន់ស្មើល្អ។', instructionEn: 'Knead glutinous flour with pandan juice until smooth pliable dough forms.' },
-      { stepNumber: 2, instructionKh: 'ក្ដាប់ម្សៅរាងមូល សំប៉ែត ដាក់ដុំស្ករត្នោតចំកណ្តាល រួចមូលបិទឱ្យជិត។', instructionEn: 'Flatten dough, insert palm sugar cube, and roll into smooth sealed balls.' },
-      { stepNumber: 3, instructionKh: 'ស្ងោរក្នុងទឹកពុះ។ ពេលនំឆ្អិនអណ្ដែតឡើង ស្រង់យកមកប្រឡាក់ដូងកោស។', instructionEn: 'Boil until dumplings float to surface, drain, and roll in grated coconut.' },
+      { stepNumber: 1, instructionKh: 'ច្របល់ម្សៅដំណើបជាមួយទឹកស្លឹកតយឱ្យទន់ស្មើ រួចលុញជាគ្រាប់មូលល្មមស្ងោរក្នុងទឹកពុះរហូតអណ្តែតឆ្អិន។', instructionEn: 'Knead glutinous rice flour with pandan water, roll into balls, and boil until tender and floating.' },
+      { stepNumber: 2, instructionKh: 'រម្ងាស់ស្ករត្នោតជាមួយស្លឹកតយ និងអំបិលបន្តិចឱ្យឡើងទឹកស្ករក្រអូបឈ្ងុយ។', instructionEn: 'Simmer pure palm sugar with pandan leaf and a pinch of sea salt into an aromatic golden syrup.' },
+      { stepNumber: 3, instructionKh: 'រៀបគ្រាប់នំដាក់ចាន ស្រោចទឹកស្ករត្នោត រោយដូងកោស ដាក់ការ៉េមខ្ទិះដូងពីលើ និងរោយល្ងលីង។', instructionEn: 'Arrange warm dumplings in a bowl with palm sugar syrup and grated coconut, then top with coconut ice cream and toasted sesame.' },
     ],
   },
   {
     id: 'food-45',
-    nameKh: 'ក្រឡានប្ញស្សីថ្មគោលបាត់ដំបង',
+    nameKh: 'ក្រឡានឫស្សីថ្មគោលបាត់ដំបង',
     nameEn: 'Kralan (Sticky Rice in Bamboo Tubes)',
     categorySlug: 'cake',
     categoryKh: 'នំប្រពៃណី / បាត់ដំបង-ក្រចេះ',
     categoryEn: 'Snacks / Bamboo Sticky Rice',
-    descriptionKh: 'ក្រឡាន ជាអាហារប្រពៃណីខ្មែរដ៏ល្បីល្បាញនៅថ្មគោល និងក្រចេះ។ អង្ករដំណើបលាយជាមួយខ្ទិះដូងខាប់ សណ្តែកខ្មៅ និងស្ករត្នោត ញាត់ក្នុងបំពង់ឬស្សីស្រស់ រួចដុតលើរងើកភ្លើងរហូតឈ្ងុយ។',
+    descriptionKh: 'ក្រឡាន ជាអាហារប្រពៃណីខ្មែរដ៏ល្បីល្បាញនៅថ្មគោល និងក្រចេះ។ អង្ករដំណើបលាយជាមួយខ្ទិះដូងខាប់ សណ្តែកខ្មៅ និងស្ករត្នោត ញាត់ក្នុងបំពង់ឫស្សីស្រស់ រួចដុតលើរងើកភ្លើងរហូតឈ្ងុយ។',
     descriptionEn: 'Beloved traditional delicacy: fragrant sticky rice blended with black beans, grated coconut, and palm sugar, slowly roasted over embers inside natural bamboo tubes.',
     photoUrl: '/foods/food-45.jpg',
     imageAuditStatus: 'verified',
@@ -1597,11 +1602,11 @@ export const seedFoods: FoodItem[] = [
       { nameKh: 'អង្ករដំណើបថ្មី', nameEn: 'New-crop sticky rice', amount: '៥០០ ក្រាម' },
       { nameKh: 'ខ្ទិះដូងដើមខាប់', nameEn: 'Fresh coconut cream', amount: '៣០០ មីលីលីត្រ' },
       { nameKh: 'សណ្តែកខ្មៅស្ងោរឆ្អិន', nameEn: 'Cooked black beans', amount: '១០០ ក្រាម' },
-      { nameKh: 'បំពង់ឬស្សីក្រឡាន', nameEn: 'Fresh bamboo stalks', amount: '៣-៤ បំពង់' },
+      { nameKh: 'បំពង់ឫស្សីក្រឡាន', nameEn: 'Fresh bamboo stalks', amount: '៣-៤ បំពង់' },
     ],
     steps: [
       { stepNumber: 1, instructionKh: 'លាយអង្ករដំណើប សណ្តែកខ្មៅ ខ្ទិះដូង ស្ករត្នោត និងអំបិលបន្តិចចូលគ្នា។', instructionEn: 'Mix sticky rice, black beans, coconut cream, palm sugar, and a pinch of salt.' },
-      { stepNumber: 2, instructionKh: 'ញាត់ចូលក្នុងបំពង់ឬស្សី ញាត់ស្លឹកចេកបិទមាត់បំពង់។', instructionEn: 'Pack mixture into bamboo tubes and plug tops with banana leaves.' },
+      { stepNumber: 2, instructionKh: 'ញាត់ចូលក្នុងបំពង់ឫស្សី ញាត់ស្លឹកចេកបិទមាត់បំពង់។', instructionEn: 'Pack mixture into bamboo tubes and plug tops with banana leaves.' },
       { stepNumber: 3, instructionKh: 'ដុតលើរងើកភ្លើងធ្យូង ដោយបង្វិលចុះឡើងរហូតដល់អង្ករឆ្អិនឈ្ងុយ។', instructionEn: 'Roast horizontally over charcoal embers, turning frequently until cooked.' },
     ],
   },
@@ -1929,70 +1934,65 @@ export const AUTHENTIC_FOOD_RECIPES = {
     ]
   },
   "food-53": {
-    "nameKh": "សម្លម្ជូរទំពាំងត្រីឆ្អើរ",
-    "nameEn": "Bamboo Shoot & Smoked Fish Soup",
+    "nameKh": "សម្លស្ងោរជ្រក់មឹក និងងាវបន្លែបៃតង",
+    "nameEn": "Clear Sour Squid & Clam Herbal Soup",
     "cat": "soup",
-    "catKh": "ម្ហូបសម្ល / ម្ជូរ",
-    "catEn": "Soup / Sour Stew",
-    "descKh": "សម្លម្ជូរទំពាំងត្រីឆ្អើរ ជាសម្លប្រពៃណីខ្មែរជនបទដ៏ពេញនិយម មានក្លិនឈ្ងុយត្រីឆ្អើរជាប់ច្រមុះ អមដោយទំពាំងស្រស់ស្រួយផ្អែម និងស្លឹកបាសធម្មជាតិ។",
-    "descEn": "Rustic Cambodian country soup with fragrant smoked fish flakes, tender bamboo shoots, fresh tamarind, and sweet ivy gourd greens.",
+    "catKh": "ម្ហូបសម្ល / ស្ងោរជ្រក់គ្រឿងសមុទ្រ",
+    "catEn": "Soup / Sour Squid & Clam Soup",
+    "descKh": "សម្លស្ងោរជ្រក់មឹក និងងាវបន្លែបៃតង ជាសម្លខ្មែររសជាតិជូរស្រស់ស្រាយ ចម្អិនពីមឹកស្រស់ឆូតផ្កា ងាវសមុទ្រផ្អែម គល់ស្លឹកគ្រៃ ម្ទេសក្រហម បន្លែបៃតង និងរោយខ្ទឹមក្រហមបំពងឈ្ងុយ។",
+    "descEn": "Refreshing Cambodian clear sour seafood soup simmered with scored fresh squid, sweet clams, bruised lemongrass, leafy greens, fresh red chilies, and crispy fried shallots.",
     "prepTime": "១៥ នាទី",
-    "cookTime": "២៥ នាទី",
+    "cookTime": "២០ នាទី",
     "servings": "៣-៤ នាក់",
-    "calories": 195,
+    "calories": 210,
     "difficulty": "easy",
     "ingredients": [
       {
-        "nameKh": "ត្រីឆ្អើរបេះយកសាច់ធំៗ",
-        "nameEn": "Flaked smoked freshwater fish",
+        "nameKh": "មឹកស្រស់ឆូតក្រឡា និងងាវស្រស់លាងស្អាត",
+        "nameEn": "Fresh crosshatch-scored squid and cleaned clams",
+        "amount": "៣៥០ ក្រាម"
+      },
+      {
+        "nameKh": "គល់ស្លឹកគ្រៃដំ រំដេង និងស្លឹកក្រូចសើច",
+        "nameEn": "Bruised lemongrass, galangal, and kaffir lime leaves",
+        "amount": "១ ក្តាប់តូច"
+      },
+      {
+        "nameKh": "ស្ពៃតឿ ឬត្រកួនបៃតងខ្ចី",
+        "nameEn": "Tender bok choy and leafy greens",
         "amount": "២០០ ក្រាម"
       },
       {
-        "nameKh": "ទំពាំងស្រស់ហាន់សរសៃស្ងោរស្រុះ",
-        "nameEn": "Parboiled shredded bamboo shoots",
-        "amount": "២៥០ ក្រាម"
-      },
-      {
-        "nameKh": "ស្លឹកអំពិលខ្ចី ឬទឹកអំពិលទុំ",
-        "nameEn": "Young tamarind leaves or tamarind juice",
+        "nameKh": "ទឹកក្រូចឆ្មារស្រស់ ទឹកត្រី និងស្ករបន្តិច",
+        "nameEn": "Fresh lime juice, fish sauce, and a pinch of palm sugar",
         "amount": "២ ស្លាបព្រាបាយ"
       },
       {
-        "nameKh": "ស្លឹកបាសស្រស់",
-        "nameEn": "Fresh ivy gourd leaves",
-        "amount": "១ កន្ត្រកតូច"
-      },
-      {
-        "nameKh": "ទឹកត្រី និងអំបិល",
-        "nameEn": "Fish sauce and sea salt",
-        "amount": "១ ស្លាបព្រាបាយ"
-      },
-      {
-        "nameKh": "ម្ទេសដៃនាងហាន់",
-        "nameEn": "Fresh chili slices",
+        "nameKh": "ខ្ទឹមក្រហមបំពង ម្ទេសក្រហម និងជីរគ្រប់មុខ",
+        "nameEn": "Crispy fried shallots, fresh red chilies, and herbs",
         "amount": "តាមចំណូលចិត្ត"
       }
     ],
     "steps": [
       {
         "stepNumber": 1,
-        "instructionKh": "ស្ងោរទំពាំងបង្ហូរទឹកចោលមួយសារដើម្បីកាត់បន្ថយជាតិចត់។ បេះត្រីឆ្អើរជាដុំៗ។",
-        "instructionEn": "Boil bamboo shoots and drain to remove bitterness. Flake smoked fish."
+        "instructionKh": "លាងសម្អាតមឹកឆូតជាក្រឡាផ្កា និងត្រាំលាងងាវឱ្យអស់ដីខ្សាច់។",
+        "instructionEn": "Clean and score fresh squid in a crosshatch pattern, and purge clams clean."
       },
       {
         "stepNumber": 2,
-        "instructionKh": "ដាំទឹកឱ្យពុះ ដាក់ត្រីឆ្អើរ និងទំពាំងចូលរម្ងាស់ឱ្យទឹកស៊ុបចេញក្លិនឈ្ងុយ។",
-        "instructionEn": "Bring water to boil, add smoked fish and bamboo shoots, simmering to extract flavors."
+        "instructionKh": "ដាំទឹកឱ្យពុះជាមួយគល់ស្លឹកគ្រៃដំ រំដេង និងស្លឹកក្រូចសើចឱ្យចេញក្លិនក្រអូបឈ្ងុយ។",
+        "instructionEn": "Bring water to a rolling boil with bruised lemongrass, galangal, and kaffir lime leaves."
       },
       {
         "stepNumber": 3,
-        "instructionKh": "ថែមទឹកអំពិល ទឹកត្រី អំបិល និងស្ករត្នោតបន្តិច ភ្លក្សរសជាតិជូរស្រទន់។",
-        "instructionEn": "Season with tamarind, fish sauce, salt, and palm sugar for a balanced tang."
+        "instructionKh": "បង់ងាវ និងមឹកចូលស្រុសឱ្យឆ្អិនផុយស្រួយ រួចដាក់បន្លែបៃតង និងថែមទឹកត្រី អំបិល ស្ករបន្តិច។",
+        "instructionEn": "Add clams and scored squid briefly until clams open and squid curls tender, then toss in greens and season with fish sauce."
       },
       {
         "stepNumber": 4,
-        "instructionKh": "បង់ស្លឹកបាសចូលកូរត្រឡប់មួយភ្លែត រួចដួសទទួលទានជាមួយបាយ។",
-        "instructionEn": "Stir in ivy gourd leaves, remove from heat, and serve with rice."
+        "instructionKh": "បិទភ្លើង ច្របាច់ក្រូចឆ្មារ ដាក់ម្ទេសស្រស់ និងរោយខ្ទឹមក្រហមបំពងពីលើ រួចទទួលទានក្តៅៗ។",
+        "instructionEn": "Remove from heat, stir in fresh lime juice and chilies, and garnish with crispy fried shallots."
       }
     ]
   },
@@ -3660,65 +3660,65 @@ export const AUTHENTIC_FOOD_RECIPES = {
     ]
   },
   "food-80": {
-    "nameKh": "ម៉ាំល្ហុងសាច់ជ្រូកបីជាន់",
-    "nameEn": "Fermented Mudfish Papaya with Pork Belly",
+    "nameKh": "បុកល្ហុងសាច់ជ្រូកបីជាន់បំពងស្រួយ",
+    "nameEn": "Crispy Roast Pork Belly Green Papaya Salad (Bok Lhong)",
     "cat": "salad",
-    "catKh": "ម៉ាំ & ប្រហុក",
-    "catEn": "Salads & Dips",
-    "descKh": "ម៉ាំល្ហុងសាច់ជ្រូកបីជាន់ ប្រើម៉ាំត្រីរ៉ស់ខ្មែរផ្អាប់ជាមួយអង្ករលីង ច្របល់ជាមួយល្ហុងសាប់ស្រួយ សាច់ជ្រូកបីជាន់ស្ងោរហាន់ស្ដើង ខ្ញី ខ្ទឹមស និងម្ទេស រសជាតិដិតដល់ជូរប្រៃផ្អែមឈ្ងុយ។",
-    "descEn": "Traditional fermented fish delicacy mixed with crisp shredded green papaya, boiled pork belly slices, ginger strands, and garlic.",
+    "catKh": "ម្ហូបញាំ & បុកល្ហុង",
+    "catEn": "Salad / Crispy Pork Papaya Salad",
+    "descKh": "បុកល្ហុងសាច់ជ្រូកបីជាន់បំពងស្រួយ ប្រើល្ហុងខ្ចីសាប់ស្រួយបុកជាមួយសណ្តែកកួរ ប៉េងប៉ោះតូច ម្ទេសក្រហម ខ្ទឹមស ទឹកត្រី ស្ករត្នោត និងក្រូចឆ្មារ រៀបសាច់ជ្រូកបីជាន់បំពងស្បែកស្រួយ និងសណ្តែកដីលីងពីលើ។",
+    "descEn": "Fiery and refreshing Cambodian pounded green papaya salad tossed with cherry tomatoes, yardlong beans, roasted peanuts, and lime-palm sugar dressing, topped with golden crispy pork belly.",
     "prepTime": "២០ នាទី",
-    "cookTime": "១០ នាទី",
-    "servings": "៣-៤ នាក់",
-    "calories": 270,
+    "cookTime": "១៥ នាទី",
+    "servings": "២-៣ នាក់",
+    "calories": 340,
     "difficulty": "easy",
     "ingredients": [
       {
-        "nameKh": "ម៉ាំត្រីរ៉ស់ ឬត្រីផ្ទក់ខ្មែរ",
-        "nameEn": "Traditional fermented fish mam",
-        "amount": "១៥០ ក្រាម"
+        "nameKh": "សាច់ជ្រូកបីជាន់បំពង ឬខ្វៃស្បែកស្រួយហាន់ដុំ",
+        "nameEn": "Crispy roasted pork belly chunks",
+        "amount": "២០០ ក្រាម"
       },
       {
         "nameKh": "ល្ហុងខ្ចីសាប់សរសៃស្រួយ",
         "nameEn": "Crisp shredded green papaya",
-        "amount": "២០០ ក្រាម"
+        "amount": "២៥០ ក្រាម"
       },
       {
-        "nameKh": "សាច់ជ្រូកបីជាន់ស្ងោរហាន់ស្ដើង",
-        "nameEn": "Boiled sliced pork belly",
+        "nameKh": "សណ្តែកកួរកាត់ខ្លី ប៉េងប៉ោះតូច និងសណ្តែកដីលីង",
+        "nameEn": "Yardlong beans, cherry tomatoes, and roasted peanuts",
         "amount": "១៥០ ក្រាម"
       },
       {
-        "nameKh": "ខ្ញីខ្ចី ខ្ទឹមស និងម្ទេសហាន់សរសៃ",
-        "nameEn": "Ginger, garlic, and chili slivers",
+        "nameKh": "ខ្ទឹមស និងម្ទេសក្រហមស្រស់",
+        "nameEn": "Fresh garlic cloves and red bird-eye chilies",
         "amount": "២ ស្លាបព្រាបាយ"
       },
       {
-        "nameKh": "ស្ករត្នោត និងទឹកក្រូចឆ្មា",
-        "nameEn": "Palm sugar and lime juice",
-        "amount": "១ ស្លាបព្រាបាយ"
+        "nameKh": "ទឹកត្រី ស្ករត្នោត និងទឹកក្រូចឆ្មា",
+        "nameEn": "Fish sauce, palm sugar, and fresh lime juice",
+        "amount": "២ ស្លាបព្រាបាយ"
       }
     ],
     "steps": [
       {
         "stepNumber": 1,
-        "instructionKh": "ច្របាច់ល្ហុងសាប់ជាមួយអំបិលរួចលាងទឹកពូតឱ្យស្ងួតដើម្បីឱ្យសរសៃល្ហុងស្រួយ។",
-        "instructionEn": "Toss shredded papaya with salt, rinse, and squeeze dry for maximum crunch."
+        "instructionKh": "សាប់ល្ហុងខ្ចីជាសរសៃស្រួយ ត្រាំទឹកត្រជាក់មួយភ្លែតរួចសម្រស់ទឹកឱ្យស្ងួត និងហាន់សាច់ជ្រូកបីជាន់បំពងស្រួយជាដុំល្មម។",
+        "instructionEn": "Shred green papaya into crisp strands, chill briefly and drain, and slice crispy roast pork belly into bite-sized pieces."
       },
       {
         "stepNumber": 2,
-        "instructionKh": "ចិញ្ច្រាំម៉ាំត្រីឱ្យម៉ត់ លាយជាមួយស្ករត្នោត ខ្ញី ខ្ទឹមស និងម្ទេស។",
-        "instructionEn": "Mince mam and mix with palm sugar, ginger, garlic, and chilies."
+        "instructionKh": "បុកខ្ទឹមស និងម្ទេសក្រហមក្នុងត្បាល់ ដាក់សណ្តែកកួរ និងប៉េងប៉ោះបុកថ្នមៗឱ្យបែកទឹកឈ្ងុយ។",
+        "instructionEn": "Pound garlic and red chilies in a mortar, then lightly bruise yardlong beans and cherry tomatoes."
       },
       {
         "stepNumber": 3,
-        "instructionKh": "ច្របល់ម៉ាំជាមួយល្ហុងសាប់ និងសាច់ជ្រូកបីជាន់ឱ្យចូលជាតិសព្វល្អ។",
-        "instructionEn": "Toss seasoned mam with shredded papaya and pork belly slices."
+        "instructionKh": "ថែមស្ករត្នោត ទឹកត្រី និងទឹកក្រូចឆ្មារ កូរឱ្យរលាយសព្វ សឹមដាក់សរសៃល្ហុង និងសណ្តែកដីលីងចូលបុកច្របល់ថ្នមៗ។",
+        "instructionEn": "Dissolve palm sugar, fish sauce, and lime juice in the mortar, then toss in green papaya and roasted peanuts."
       },
       {
         "stepNumber": 4,
-        "instructionKh": "ផ្អាប់ទុកកន្លះម៉ោង រួចដួសទទួលទានជាមួយជីរនាងវង និងបាយក្ដៅៗ។",
-        "instructionEn": "Let sit for 30 minutes to meld flavors, then serve with holy basil and rice."
+        "instructionKh": "ដួសបុកល្ហុងដាក់ចាន រៀបសាច់ជ្រូកបីជាន់បំពងស្រួយពីលើ រួចទទួលទានភ្លាមៗ។",
+        "instructionEn": "Plate the zesty papaya salad, crown with crispy golden pork belly chunks, and serve immediately."
       }
     ]
   },
@@ -6505,9 +6505,10 @@ export const generateFull100Foods = (): FoodItem[] => {
     priceUsd: 0,
     isCustomPhoto: false,
     photoUpdatedAt:
-      f.photoUpdatedAt && Date.parse(f.photoUpdatedAt) >= SEED_FOOD_PHOTO_BASELINE_MS
+      EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS[f.id] ||
+      (f.photoUpdatedAt && Date.parse(f.photoUpdatedAt) >= SEED_FOOD_PHOTO_BASELINE_MS
         ? f.photoUpdatedAt
-        : SEED_FOOD_PHOTO_BASELINE_ISO,
+        : SEED_FOOD_PHOTO_BASELINE_ISO),
   }));
 };
 

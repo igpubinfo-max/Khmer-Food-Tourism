@@ -341,7 +341,7 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     "categorySlug": "dessert_snack",
     "categoryKh": "បង្អែម & អាហារសម្រន់",
     "categoryEn": "Desserts & Snacks",
-    "descriptionKh": "តូបបង្អែមបុរាណល្បីល្បាញជាង ៤០ ឆ្នាំ មានបង្អែមចេកខ្ទិះស្ករត្នោត រោយល្ងលីង និងគ្រាប់សาคូ ផ្អែមឈ្ងុយត្រជាក់ចិត្ត។",
+    "descriptionKh": "តូបបង្អែមបុរាណល្បីល្បាញជាង ៤០ ឆ្នាំ មានបង្អែមចេកខ្ទិះស្ករត្នោត រោយល្ងលីង និងគ្រាប់សាគូ ផ្អែមឈ្ងុយត្រជាក់ចិត្ត។",
     "descriptionEn": "Beloved 40-year dessert bar serving traditional Khmer warm banana in sweet coconut cream with toasted sesame.",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",

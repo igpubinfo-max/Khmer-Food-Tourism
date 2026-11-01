@@ -209,8 +209,8 @@
     },
     {
       "id": "food-42",
-      "nameKh": "បបរគ្រឿងសាច់ជ្រូកខ្មែរ",
-      "nameEn": "Khmer Rice Porridge with Pork & Offal (Babor Kroeung)"
+      "nameKh": "គុយទាវគ្រឿងក្នុងសាច់ជ្រូកបីជាន់",
+      "nameEn": "Khmer Pork Belly & Offal Rice Noodle Soup"
     },
     {
       "id": "food-43",
@@ -219,12 +219,12 @@
     },
     {
       "id": "food-44",
-      "nameKh": "នំផ្លែអាយស្ករត្នោត",
-      "nameEn": "Num Phlae Ai (Palm Sugar Sticky Rice Dumplings)"
+      "nameKh": "បង្អែមនំផ្លែអាយការ៉េមខ្ទិះដូងស្ករត្នោត",
+      "nameEn": "Warm Palm Sugar Rice Dumplings with Coconut Ice Cream"
     },
     {
       "id": "food-45",
-      "nameKh": "ក្រឡានប្ញស្សីថ្មគោលបាត់ដំបង",
+      "nameKh": "ក្រឡានឫស្សីថ្មគោលបាត់ដំបង",
       "nameEn": "Kralan (Sticky Rice in Bamboo Tubes)"
     },
     {
@@ -254,23 +254,23 @@
     },
     {
       "id": "food-51",
-      "nameKh": "គ្រឿងផ្សំចម្បងស្រស់ៗ",
-      "nameEn": "Fresh core ingredients"
+      "nameKh": "សម្លម្ជូរត្រួយអំពិលត្រីដៀប",
+      "nameEn": "Dieb Fish & Young Tamarind Leaf Sour Soup"
     },
     {
       "id": "food-52",
-      "nameKh": "គ្រឿងបុកស្លឹកគ្រៃ និងខ្ទឹមស",
-      "nameEn": "Lemongrass kroeung & garlic"
+      "nameKh": "សម្លម្ជូរទងល្ពៅ",
+      "nameEn": "Pumpkin Vine Shoot & Fish Sour Soup"
     },
     {
       "id": "food-53",
-      "nameKh": "ទឹកត្រី និងស្ករត្នោតខ្មែរ",
-      "nameEn": "Fish sauce and palm sugar"
+      "nameKh": "សម្លស្ងោរជ្រក់មឹក និងងាវបន្លែបៃតង",
+      "nameEn": "Clear Sour Squid & Clam Herbal Soup"
     },
     {
       "id": "food-54",
-      "nameKh": "ជីរគ្រប់មុខ និងម្ទេស",
-      "nameEn": "Fresh herbs and chilies"
+      "nameKh": "សម្លប្រហើរននោងបង្គាស្រស់",
+      "nameEn": "Luffa Gourd Fresh Shrimp Herbal Soup"
     }
   ],
   "restaurants": [

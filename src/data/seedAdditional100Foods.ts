@@ -106,14 +106,14 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Lemongrass, galangal, and cilantro',
   },
   {
-    nameKh: 'ព្រៃត្រីអណ្តែងទំពាំងត្រាំ',
+    nameKh: 'សម្លម្ជូរព្រៃត្រីអណ្តែងទំពាំងជ្រក់',
     nameEn: 'Spicy Forest Catfish & Pickled Bamboo Shoot Soup',
     cat: 'soup',
-    catKh: 'ម្ហូបសម្ល / សម្លព្រៃ',
+    catKh: 'ម្ហូបសម្ល / សម្លម្ជូរព្រៃ',
     catEn: 'Soup / Forest Pickled Bamboo',
     mainIngKh: 'ត្រីអណ្តែងស្រស់កាត់កង់ (៤៥០ ក្រាម)',
     mainIngEn: 'Fresh walking catfish steaks (450g)',
-    subIngKh: 'ទំពាំងត្រាំជូរស្រួយ គល់ស្លឹកគ្រៃ និងប្រហុកសាច់',
+    subIngKh: 'ទំពាំងជ្រក់ជូរស្រួយ គល់ស្លឹកគ្រៃ និងប្រហុកសាច់',
     subIngEn: 'Tangy pickled bamboo shoots, lemongrass, and prahok paste',
     herbKh: 'ម្រះព្រៅ ស្លឹកក្រូចសើច និងម្ទេសខ្មាំង',
     herbEn: 'Holy basil, kaffir lime leaves, and bird-eye chili',
@@ -630,7 +630,7 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Green onions and cilantro',
   },
   {
-    nameKh: 'ខ ប្រហុកត្រីពោធិ៍',
+    nameKh: 'ខប្រហុកត្រីពោធិ៍',
     nameEn: 'Braised Mekong Fish with Savory Prahok',
     cat: 'stirfry',
     catKh: 'ម្ហូបខ / ខប្រហុកត្រីពោធិ៍',
@@ -803,17 +803,17 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Morning glory, bean sprouts, culantro, and fried garlic',
   },
   {
-    nameKh: 'មីឆាគ្រឿងសមុទ្របែបខ្មែរ',
-    nameEn: 'Cambodian Wok-Fried Egg Noodles with Fresh Seafood',
-    cat: 'noodles',
-    catKh: 'គុយទាវ & នំបញ្ចុក / មីឆាគ្រឿងសមុទ្រ',
-    catEn: 'Noodles / Seafood Fried Noodles',
-    mainIngKh: 'មីលឿង បង្គា និងមឹកស្រស់ (៤៥០ ក្រាម)',
-    mainIngEn: 'Yellow egg noodles, prawns, and squid (450g)',
-    subIngKh: 'ស្ពៃតឿ ការ៉ុត និងទឹកប្រេងខ្យង',
-    subIngEn: 'Bok choy, carrots, and savory oyster sauce glaze',
-    herbKh: 'ស្លឹកខ្ទឹម ខ្ទឹមសបំពង និងក្រូចឆ្មារ',
-    herbEn: 'Scallions, crispy garlic, and fresh lime',
+    nameKh: 'ភ្លាគ្រឿងសមុទ្របង្គាមឹកសាច់ជ្រូកចិញ្ច្រាំ',
+    nameEn: 'Zesty Khmer Seafood & Minced Pork Herb Salad',
+    cat: 'salad',
+    catKh: 'ម្ហូបញាំ & ភ្លា / ភ្លាគ្រឿងសមុទ្រ',
+    catEn: 'Salad / Zesty Seafood & Pork Salad',
+    mainIngKh: 'បង្គាស្រស់ មឹកស្រស់ហាន់កង់ និងសាច់ជ្រូកចិញ្ច្រាំស្រុស (៤៥០ ក្រាម)',
+    mainIngEn: 'Poached fresh prawns, squid rings, and minced pork (450g)',
+    subIngKh: 'ប៉េងប៉ោះ ខ្ទឹមក្រហមហាន់ស្តើង ម្ទេសក្រហម និងទឹកក្រូចឆ្មារទឹកត្រី',
+    subIngEn: 'Tomato wedges, sliced red shallots, fresh red chilies, and lime-fish sauce dressing',
+    herbKh: 'ជីរវ៉ាន់ស៊ុយ ស្លឹកខ្ទឹម និងជីរអង្កាម',
+    herbEn: 'Cilantro, scallions, and fresh mint',
   },
   {
     nameKh: 'លតឆាសាច់គោពងទាចៀន',
@@ -855,17 +855,17 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Scallions, cilantro, and crispy garlic oil',
   },
   {
-    nameKh: 'នំបញ្ចុកទឹកត្រីផ្អែម',
-    nameEn: 'Khmer Rice Vermicelli with Sweet Garlic Fish Sauce & Grilled Catfish',
+    nameKh: 'ត្រីអណ្តែងអាំងនំបញ្ចុកទឹកត្រីផ្អែម',
+    nameEn: 'Charcoal-Grilled Catfish with Rice Vermicelli & Sweet Garlic Fish Sauce',
     cat: 'noodles',
-    catKh: 'គុយទាវ & នំបញ្ចុក / នំបញ្ចុកទឹកត្រីផ្អែម',
+    catKh: 'គុយទាវ & នំបញ្ចុក / ត្រីអាំងនំបញ្ចុកទឹកត្រីផ្អែម',
     catEn: 'Noodles / Sweet Fish Sauce Vermicelli',
-    mainIngKh: 'នំបញ្ចុកស្រស់ និងសាច់ត្រីអណ្តែងអាំង ឬសាច់ជ្រូកខ្វៃ (៤៥០ ក្រាម)',
-    mainIngEn: 'Fresh rice vermicelli and flaked charcoal-grilled catfish or roasted pork (450g)',
+    mainIngKh: 'ត្រីអណ្តែងអាំងភ្លើងធ្យូងទាំងមូល និងនំបញ្ចុកស្រស់ (៥០០ ក្រាម)',
+    mainIngEn: 'Whole charcoal-grilled catfish and fresh rice vermicelli (500g)',
     subIngKh: 'ទឹកត្រីផ្អែមខ្ទឹមសម្ទេសក្រូចឆ្មារ និងសណ្តែកដីបុក',
     subIngEn: 'Sweet-tangy garlic chili fish sauce and crushed roasted peanuts',
-    herbKh: 'សាឡាត់ ត្រសក់ សណ្តែកបណ្តុះ ជីរអង្កាម និងជីរនាងវង',
-    herbEn: 'Crisp lettuce, cucumber, bean sprouts, mint, and sweet basil',
+    herbKh: 'ត្រសក់ សណ្តែកកួរ ពោតបារាំង ស្ពៃក្តោប និងជីរនាងវង',
+    herbEn: 'Crisp cucumber, long beans, okra, shredded cabbage, and sweet basil',
   },
   {
     nameKh: 'មីសួរឆាក្តាមសេះកំពត',
@@ -881,10 +881,10 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Chinese celery and spring onions',
   },
   {
-    nameKh: 'ខគោ នំប៉័ង',
+    nameKh: 'ខគោនំប៉័ង',
     nameEn: 'Cambodian Spiced Beef Stew with Crispy Baguette (Khor Ko)',
-    cat: 'noodles',
-    catKh: 'អាហារពេលព្រឹក / ខគោនំប៉័ង',
+    cat: 'soup',
+    catKh: 'ម្ហូបសម្ល & ខ / ខគោនំប៉័ង',
     catEn: 'Breakfast Stew / Beef Khor Ko & Baguette',
     mainIngKh: 'សាច់គោជាប់សរសៃរម្ងាស់ផុយ និងនំប៉័ងអាំងស្រួយ (៥០០ ក្រាម)',
     mainIngEn: 'Tender braised beef brisket & tendon with crispy toasted baguette (500g)',
@@ -894,17 +894,17 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Sweet basil, culantro, crispy fried garlic, and lime wedges',
   },
   {
-    nameKh: 'បាញ់កាញ់ទឹកខ្ទិះត្រីរ៉ស់',
-    nameEn: 'Thick Tapioca Rice Noodles in Rich Fish Coconut Gravy (Banh Kanh)',
+    nameKh: 'បាញ់កាញ់ស៊ុបឆ្អឹងជ្រូក',
+    nameEn: 'Thick Tapioca Rice Noodle Soup with Pork Ribs & Blood Cubes (Banh Kanh)',
     cat: 'noodles',
-    catKh: 'គុយទាវ & នំបញ្ចុក / បាញ់កាញ់ខ្ទិះ',
-    catEn: 'Noodles / Coconut Banh Kanh',
-    mainIngKh: 'សរសៃបាញ់កាញ់ និងសាច់ត្រីរ៉ស់ (៤៥០ ក្រាម)',
-    mainIngEn: 'Thick tapioca rice noodles and snakehead fish (450g)',
-    subIngKh: 'ខ្ទិះដូងដើម និងគ្រឿងបុករមៀត',
-    subIngEn: 'Rich coconut cream and yellow turmeric kroeung',
-    herbKh: 'សណ្តែកបណ្តុះ ត្រសក់ និងជីរគ្រប់មុខ',
-    herbEn: 'Bean sprouts, shredded cucumber, and fresh herbs',
+    catKh: 'គុយទាវ & នំបញ្ចុក / បាញ់កាញ់ស៊ុប',
+    catEn: 'Noodles / Pork Broth Banh Kanh',
+    mainIngKh: 'សរសៃបាញ់កាញ់ ឆ្អឹងជំនីរជ្រូក និងឈាមជ្រូកស្ងោរ (៤៥០ ក្រាម)',
+    mainIngEn: 'Thick tapioca rice noodles, tender pork ribs, and pork blood cubes (450g)',
+    subIngKh: 'ទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ផ្អែមឈ្ងុយ និងខ្ទឹមសបំពង',
+    subIngEn: 'Rich slow-simmered pork bone broth and golden fried garlic',
+    herbKh: 'ស្លឹកខ្ទឹម ជីរវ៉ាន់ស៊ុយ សណ្តែកបណ្តុះ និងក្រូចឆ្មារ',
+    herbEn: 'Scallions, cilantro, bean sprouts, and fresh lime',
   },
 
   // ================= RICE & PORRIDGE (10 dishes: food-167 .. food-176) =================
@@ -1093,7 +1093,7 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Culantro and crushed roasted peanuts',
   },
   {
-    nameKh: 'គួងបង្គាសាច់ជ្រូកលាយបង្គារទឹកជ្រលក់សណ្តែកដី',
+    nameKh: 'គួងបង្គាសាច់ជ្រូកទឹកជ្រលក់សណ្តែកដី',
     nameEn: 'Fresh Cambodian Spring Rolls with Prawn, Pork & Peanut Sauce (Nime Chow)',
     cat: 'streetfood',
     catKh: 'អាហារសម្រន់ / គួងបង្គាស្រស់',
@@ -1106,17 +1106,17 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Lettuce, mint, sweet basil, and garlic chives',
   },
   {
-    nameKh: 'ចាដូវបំពងស្នូលត្រាវសាច់ជ្រូក',
-    nameEn: 'Crispy Fried Taro & Pork Imperial Spring Rolls (Chaornguv)',
+    nameKh: 'នំត្រាវបំពងស្នូលសាច់ជ្រូក',
+    nameEn: 'Crispy Fried Shredded Taro Puffs Stuffed with Minced Pork',
     cat: 'streetfood',
-    catKh: 'អាហារសម្រន់ / ចាដូវបំពង',
-    catEn: 'Street Food / Crispy Fried Spring Rolls',
-    mainIngKh: 'សាច់ជ្រូកចិញ្ច្រាំ ត្រាវឈូស មីសួរ និងផ្សិតត្រចៀកកណ្តុរ (៣៥០ ក្រាម)',
-    mainIngEn: 'Minced pork, shredded taro, glass noodles, and wood-ear mushroom (350g)',
-    subIngKh: 'សំបកចាដូវបំពងស្រួយ និងទឹកត្រីជូរផ្អែម',
-    subIngEn: 'Crispy golden spring roll pastry and sweet-sour fish sauce',
-    herbKh: 'សាឡាត់ និងជីរគ្រប់មុខ',
-    herbEn: 'Crisp lettuce and fresh garden herbs',
+    catKh: 'អាហារសម្រន់ / នំត្រាវបំពង',
+    catEn: 'Street Food / Crispy Fried Taro Puffs',
+    mainIngKh: 'ត្រាវឈូសសរសៃលាយម្សៅបំពងស្រួយ និងស្នូលសាច់ជ្រូកចិញ្ច្រាំ (៣៥០ ក្រាម)',
+    mainIngEn: 'Crispy shredded taro crust stuffed with seasoned minced pork (350g)',
+    subIngKh: 'ទឹកត្រីផ្អែមម្ទេសខ្ទឹមស និងជ្រក់ល្ហុងការ៉ុត',
+    subIngEn: 'Sweet-sour garlic chili fish sauce and pickled papaya-carrot',
+    herbKh: 'សាឡាត់ ត្រសក់ និងជីរគ្រប់មុខ',
+    herbEn: 'Crisp lettuce, cucumber slices, and fresh garden herbs',
   },
   {
     nameKh: 'នំកាឆាយបំពងទឹកត្រីផ្អែមម្ទេស',
@@ -1132,30 +1132,30 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Fresh green garlic chives',
   },
   {
-    nameKh: 'សាច់ជ្រូកចំហុយពងត្រី និងពងទាប្រៃ',
-    nameEn: 'Steamed Minced Pork with Fish Roe & Salted Duck Egg',
-    cat: 'streetfood',
-    catKh: 'ម្ហូបចំហុយ / សាច់ជ្រូកចំហុយពងត្រី',
-    catEn: 'Steamed Dish / Pork, Fish Roe & Salted Egg',
-    mainIngKh: 'សាច់ជ្រូកចិញ្ច្រាំ ពងត្រីស្រស់ និងពងទា ៣ គ្រាប់ (៤៥០ ក្រាម)',
-    mainIngEn: 'Minced pork, fresh fish roe, and 3 duck eggs (450g)',
-    subIngKh: 'ពងទាប្រៃ ២ គ្រាប់ មីសួរ ផ្សិតត្រចៀកកណ្តុរ និងខ្ទឹមសបំពង',
-    subIngEn: '2 salted duck eggs, glass noodles, wood-ear mushrooms, and fried garlic',
-    herbKh: 'ស្លឹកខ្ទឹម ជីរវ៉ាន់ស៊ុយ ម្ទេសហាន់ និងម្រេចកំពត',
-    herbEn: 'Scallions, cilantro, sliced red chili, and Kampot black pepper',
+    nameKh: 'ម៉ាំចំហុយសាច់ជ្រូកពងទាប្រៃអន្លក់បន្លែស្រស់',
+    nameEn: 'Steamed Minced Pork & Salted Duck Egg Custard with Fresh Crudités',
+    cat: 'salad',
+    catKh: 'ម៉ាំ & ប្រហុក / ម៉ាំចំហុយពងទាប្រៃ',
+    catEn: 'Dip & Salad / Steamed Pork & Salted Egg Custard',
+    mainIngKh: 'សាច់ជ្រូកចិញ្ច្រាំ ពងទា ៣ គ្រាប់ និងពងទាប្រៃ ២ គ្រាប់ (៤៥០ ក្រាម)',
+    mainIngEn: 'Minced pork, 3 duck eggs, and 2 salted duck eggs (450g)',
+    subIngKh: 'ខ្ទឹមស ខ្ទឹមក្រហម ស្ករត្នោត និងម្ទេសក្រហមស្រស់',
+    subIngEn: 'Garlic, shallots, palm sugar, and whole red chilies',
+    herbKh: 'ស្ពៃក្តោប ត្រសក់ ត្រប់ស្រួយ សណ្តែកកួរ និងជីរគ្រប់មុខ',
+    herbEn: 'Fresh cabbage, cucumber, crisp Thai eggplants, long beans, and herbs',
   },
 
   // ================= DESSERTS & TRADITIONAL CAKES (8 dishes: food-185 .. food-192) =================
   {
-    nameKh: 'បង្អែមល្ពៅសង់ខ្យាខ្ទិះដូង',
-    nameEn: 'Steamed Whole Pumpkin with Coconut Egg Custard (Sangkhya Lapov)',
+    nameKh: 'បង្អែមល្ពៅខ្ទិះដូងគ្រាប់សាគូ',
+    nameEn: 'Simmered Pumpkin & Sago Pearls in Sweet Coconut Cream',
     cat: 'dessert',
-    catKh: 'បង្អែមខ្មែរ / ល្ពៅសង់ខ្យា',
-    catEn: 'Dessert / Pumpkin Coconut Custard',
-    mainIngKh: 'ផ្លែល្ពៅខ្មែរសាច់ស្អិត ១ ផ្លែ និងពងទា ៥ គ្រាប់',
-    mainIngEn: '1 waxy Cambodian pumpkin and 5 duck eggs',
-    subIngKh: 'ខ្ទិះដូងដើមខាប់ និងស្ករត្នោតខ្មែរសុទ្ធ',
-    subIngEn: 'Rich first-press coconut cream and pure palm sugar',
+    catKh: 'បង្អែមខ្មែរ / បង្អែមល្ពៅគ្រាប់សាគូ',
+    catEn: 'Dessert / Pumpkin Sago Coconut Cream',
+    mainIngKh: 'ល្ពៅខ្មែរសាច់ស្អិតកាត់ដុំ និងគ្រាប់សាគូតូចៗ (៤០០ ក្រាម)',
+    mainIngEn: 'Waxy Cambodian pumpkin chunks and translucent sago pearls (400g)',
+    subIngKh: 'ខ្ទិះដូងដើមខាប់ ស្ករត្នោត និងអំបិលមួយចុងស្លាបព្រា',
+    subIngEn: 'Rich first-press coconut cream, palm sugar, and a pinch of sea salt',
     herbKh: 'ស្លឹកតយក្រអូប',
     herbEn: 'Fragrant pandan leaves',
   },
@@ -1175,7 +1175,7 @@ const RAW_100_NEW_DISHES: Array<{
   {
     nameKh: 'នំអន្សមជ្រូកចៀន',
     nameEn: 'Crispy Pan-Fried Sliced Sticky Rice Cake with Pork & Mung Bean (Num Ansom Chien)',
-    cat: 'dessert',
+    cat: 'cake',
     catKh: 'នំប្រពៃណីខ្មែរ / នំអន្សមជ្រូកចៀន',
     catEn: 'Traditional Cake / Crispy Pan-Fried Num Ansom',
     mainIngKh: 'នំអន្សមជ្រូកស្នូលសណ្តែកលឿង និងសាច់ជ្រូកបីជាន់កាត់ជាកង់ចៀនស្រួយ (៦០០ ក្រាម)',
@@ -1225,17 +1225,17 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Pandan leaf and crispy toasted mung beans',
   },
   {
-    nameKh: 'នំផ្លែអាយស្ករត្នោតដូងកោស',
-    nameEn: 'Sticky Rice Balls Bursting with Molten Palm Sugar & Fresh Coconut (Num Plae Ai)',
+    nameKh: 'បង្អែមចេកចំហុយដូងកោសស្ករត្នោតល្ងលីង',
+    nameEn: 'Steamed Sticky-Rice Banana Rolls with Grated Coconut, Palm Sugar & Sesame',
     cat: 'dessert',
-    catKh: 'នំប្រពៃណីខ្មែរ / នំផ្លែអាយ',
-    catEn: 'Traditional Cake / Num Plae Ai',
-    mainIngKh: 'ម្សៅអង្ករដំណើប និងស្ករត្នោតរឹងកាត់ដុំតូចៗ (៣០០ ក្រាម)',
-    mainIngEn: 'Glutinous rice flour balls with cube of pure palm sugar inside (300g)',
-    subIngKh: 'សាច់ដូងខ្ចីកោសសរសៃលាយអំបិលតិចៗរោយពីលើ',
-    subIngEn: 'Freshly grated young coconut with a hint of salt',
-    herbKh: 'ស្លឹកតយបុកយកទឹកលាយម្សៅ',
-    herbEn: 'Natural pandan leaf extract',
+    catKh: 'បង្អែមខ្មែរ / ចេកចំហុយដូងកោស',
+    catEn: 'Dessert / Steamed Banana with Coconut & Palm Sugar',
+    mainIngKh: 'ចេកណាំវ៉ាទុំរុំអង្ករដំណើបចំហុយឆ្អិនទន់ (៤០០ ក្រាម)',
+    mainIngEn: 'Ripe Nam Wah bananas wrapped in glutinous rice and steamed tender (400g)',
+    subIngKh: 'ទឹកស្ករត្នោតរម្ងាស់ខាប់ និងសាច់ដូងខ្ចីកោសសរសៃលាយអំបិលតិចៗ',
+    subIngEn: 'Caramelized palm sugar syrup and freshly grated young coconut',
+    herbKh: 'ល្ងសលីងឈ្ងុយ និងស្លឹកតយក្រអូប',
+    herbEn: 'Toasted white sesame seeds and pandan leaves',
   },
   {
     nameKh: 'បង្អែមត្រាវកូរខ្ទិះដូងដើម',
@@ -1433,14 +1433,23 @@ function buildSeasoningIngredient(
     return { nameKh: 'ទឹកក្រូចឆ្មារស្រស់បន្តិច និងទឹកស្ករតិចៗ', nameEn: 'Squeeze of fresh lime & light syrup', amount: 'តាមចំណូលចិត្ត' };
   }
 
-  if (item.cat === 'dessert') {
-    if (id === 'food-187') {
-      return {
-        nameKh: 'ទឹកត្រី ស្ករត្នោត អំបិល និងទឹកខ្មេះធ្វើជ្រក់ត្រសក់',
-        nameEn: 'Fish sauce, palm sugar, sea salt & vinegar for cucumber pickle',
-        amount: 'តាមចំណូលចិត្ត',
-      };
-    }
+  if (id === 'food-187') {
+    return {
+      nameKh: 'ទឹកត្រី ស្ករត្នោត អំបិល និងទឹកខ្មេះធ្វើជ្រក់ត្រសក់',
+      nameEn: 'Fish sauce, palm sugar, sea salt & vinegar for cucumber pickle',
+      amount: 'តាមចំណូលចិត្ត',
+    };
+  }
+
+  if (id === 'food-184') {
+    return {
+      nameKh: 'ខ្ទឹមស ស្ករត្នោត ទឹកត្រីបន្តិច និងម្រេចកំពត',
+      nameEn: 'Garlic, palm sugar, a touch of fish sauce & Kampot pepper',
+      amount: 'តាមចំណូលចិត្ត',
+    };
+  }
+
+  if (item.cat === 'dessert' || item.cat === 'cake') {
     return {
       nameKh: 'ស្ករត្នោតខ្មែរ អំបិលម៉ត់បន្តិច និងខ្ទិះដូងធម្មជាតិ',
       nameEn: 'Cambodian palm sugar, pinch of sea salt & fresh coconut cream',
@@ -1478,6 +1487,162 @@ function buildStepsForDish(
   mainIngEn: string
 ): Array<{ stepNumber: number; instructionKh: string; instructionEn: string }> {
   const { cat, nameKh, nameEn, subIngKh, herbKh, subIngEn, herbEn } = item;
+
+  // Khor Ko & Baguette (food-165, cat: 'soup')
+  if (id === 'food-165') {
+    return [
+      {
+        stepNumber: 1,
+        instructionKh: 'ហាន់សាច់គោជាប់សរសៃជាដុំល្មម ប្រឡាក់ជាមួយគ្រឿងខគោ ខ្ទឹមស ស្ករត្នោត និងទឹកត្រីទុក ២០ នាទី។',
+        instructionEn: 'Cut beef brisket and tendon into chunks and marinate with Khor Ko spice paste, garlic, palm sugar, and fish sauce for 20 minutes.',
+      },
+      {
+        stepNumber: 2,
+        instructionKh: 'ដាក់ឆ្នាំងឆាគល់ស្លឹកគ្រៃ ផ្កាចាន់ និងសាច់គោប្រឡាក់ឱ្យឈ្ងុយ រួចចាក់ទឹកស៊ុបរម្ងាស់ភ្លើងតិចៗរហូតដល់សាច់គោជិតផុយ។',
+        instructionEn: 'Sear the marinated beef with lemongrass and star anise, then add broth and simmer gently until nearly tender.',
+      },
+      {
+        stepNumber: 3,
+        instructionKh: 'បង់ការ៉ុត និងខ្ទឹមបារាំងចូល រម្ងាស់បន្តរហូតដល់ផុយសាច់ និងទឹកខគោឡើងក្រហមខាប់ឈ្ងុយ ហើយអាំងនំប៉័ងឱ្យស្រួយ។',
+        instructionEn: 'Add carrots and onions, simmer until the beef is melt-in-the-mouth tender in a rich red broth, and toast the baguette crisp.',
+      },
+      {
+        stepNumber: 4,
+        instructionKh: `ដួសខគោដាក់ចានគោម រោយ ${herbKh} រួចទទួលទានក្តៅៗផ្ទាប់ជាមួយនំប៉័ងអាំងស្រួយ។`,
+        instructionEn: `Ladle the spiced beef stew into bowls, garnish with ${herbEn}, and serve hot with crispy toasted baguette.`,
+      },
+    ];
+  }
+
+  // Banh Kanh Pork Rib & Blood Cube Soup (food-166)
+  if (id === 'food-166') {
+    return [
+      {
+        stepNumber: 1,
+        instructionKh: 'លាងឆ្អឹងជំនីរជ្រូក និងជើងជ្រូក ស្រុសទឹកក្តៅបំបាត់ក្លិន រួចដាក់រំងាស់ជាមួយខ្ទឹមសដុត និងឆៃប៉ូវផ្អែមរហូតដល់ផុយសាច់ និងទឹកស៊ុបថ្លាផ្អែមឈ្ងុយ។',
+        instructionEn: 'Blanch pork ribs and knuckle clean, then simmer gently with charred garlic and sweet radish until tender in a clear savory broth.',
+      },
+      {
+        stepNumber: 2,
+        instructionKh: 'ហាន់ឈាមជ្រូកឆ្អិនជាដុំល្មមដាក់ចូលក្នុងឆ្នាំងស៊ុប ផ្សំរសជាតិដោយទឹកត្រី អំបិល និងស្ករត្នោតបន្តិចឱ្យត្រូវមាត់។',
+        instructionEn: 'Add cubed cooked pork blood into the simmering pork broth and season delicately with fish sauce, sea salt, and a touch of palm sugar.',
+      },
+      {
+        stepNumber: 3,
+        instructionKh: 'ស្រុសសរសៃបាញ់កាញ់ និងសណ្តែកបណ្តុះក្នុងទឹកពុះឱ្យទន់ស្វិតល្មម រួចដួសដាក់ក្នុងចានគោម។',
+        instructionEn: 'Blanch the thick tapioca-rice Banh Kanh noodles and bean sprouts briefly in boiling water, then place into deep bowls.',
+      },
+      {
+        stepNumber: 4,
+        instructionKh: `ដួសឆ្អឹងជំនីរជ្រូក ឈាមជ្រូក និងទឹកស៊ុបក្តៅពុះស្រោចពីលើ រោយ ${herbKh} ម្រេចកំពត និងច្របាច់ក្រូចឆ្មារម្ទេសតាមចំណូលចិត្ត។`,
+        instructionEn: `Ladle tender pork ribs, blood cubes, and piping-hot broth over the noodles, top with ${herbEn} and Kampot pepper, and serve with lime and chili.`,
+      },
+    ];
+  }
+
+  // Crispy Fried Shredded Taro Puffs Stuffed with Minced Pork (food-182)
+  if (id === 'food-182') {
+    return [
+      {
+        stepNumber: 1,
+        instructionKh: 'ចំហុយត្រាវពាក់កណ្តាលកិនឱ្យម៉ត់ និងហាន់ត្រាវពាក់កណ្តាលទៀតជាសរសៃឆ្មារៗលាយជាមួយម្សៅឆាបន្តិច និងអំបិលឱ្យស្អិតល្មម។',
+        instructionEn: 'Steam half the taro and mash smooth, while shredding the remaining taro into fine lacy strands tossed lightly with starch and sea salt.',
+      },
+      {
+        stepNumber: 2,
+        instructionKh: 'ឆាសាច់ជ្រូកចិញ្ច្រាំជាមួយផ្សិតត្រចៀកកណ្តុរ មីសួរ ខ្ទឹមស ទឹកត្រី ស្ករត្នោត និងម្រេចកំពតឱ្យឆ្អិនឈ្ងុយទុកធ្វើស្នូល។',
+        instructionEn: 'Sauté minced pork with wood-ear mushrooms, glass noodles, garlic, fish sauce, palm sugar, and Kampot pepper into a savory filling.',
+      },
+      {
+        stepNumber: 3,
+        instructionKh: 'ដាក់ស្នូលសាច់ជ្រូកចំកណ្តាលត្រាវ លុញឱ្យមូលស្អាត រួចបំពងក្នុងប្រេងក្តៅល្មមរហូតដល់សរសៃត្រាវខាងក្រៅឡើងស្រួយពណ៌មាស។',
+        instructionEn: 'Enclose the pork filling inside the taro mixture, coat with shredded taro strands, and deep-fry until golden and lacy-crisp.',
+      },
+      {
+        stepNumber: 4,
+        instructionKh: `ស្រង់ដាក់លើក្រដាសជប់ប្រេង រួចរៀបដាក់ចានទទួលទានក្តៅៗជ្រលក់ជាមួយ ${subIngKh} និងផ្ទាប់ ${herbKh}។`,
+        instructionEn: `Drain briefly and serve hot and crispy with ${subIngEn} and ${herbEn}.`,
+      },
+    ];
+  }
+
+  // Steamed Minced Pork & Salted Duck Egg Custard with Fresh Crudités (food-184, cat: 'salad')
+  if (id === 'food-184') {
+    return [
+      {
+        stepNumber: 1,
+        instructionKh: 'ចិញ្ច្រាំសាច់ជ្រូកបីជាន់ជាមួយសាច់ម៉ាំត្រី (ឬប្រហុកសាច់តិចៗ) ខ្ទឹមស និងខ្ទឹមក្រហមឱ្យម៉ត់ចូលគ្នាល្អ។',
+        instructionEn: 'Finely mince marbled pork belly together with aromatic fermented fish (mham), garlic, and shallots.',
+      },
+      {
+        stepNumber: 2,
+        instructionKh: 'វាយពងទា និងសាច់សពងទាប្រៃចូលជាមួយសាច់ជ្រូកចិញ្ច្រាំ ផ្សំរសជាតិដោយស្ករត្នោតបន្តិច និងម្រេចកំពត កូរឱ្យសព្វល្អ។',
+        instructionEn: 'Fold duck eggs and diced salted egg whites into the minced pork mixture, seasoning with palm sugar and Kampot pepper.',
+      },
+      {
+        stepNumber: 3,
+        instructionKh: 'ដួសដាក់ចានគោម ដាក់ពងទាប្រៃក្រហមពីលើ រួចដាក់ចំហុយលើទឹកពុះប្រហែល ២៥-៣០ នាទីរហូតដល់ឆ្អិនណែនឈ្ងុយ។',
+        instructionEn: 'Transfer to a ceramic bowl, crown with golden salted egg yolks, and steam for 25-30 minutes until set and fragrant.',
+      },
+      {
+        stepNumber: 4,
+        instructionKh: `រោយស្លឹកខ្ទឹម និងម្ទេសស្រស់ពីលើ រួចលើកទទួលទានក្តៅៗផ្ទាប់ជាមួយអន្លក់បន្លែស្រស់ (${herbKh}) និងបាយស។`,
+        instructionEn: `Garnish with scallions and fresh chilies, and serve warm alongside crisp garden crudités (${herbEn}) and steamed rice.`,
+      },
+    ];
+  }
+
+  // Pan-Fried Savory Sticky Rice Cake (Num Ansom Chrouk Chien) (food-187, cat: 'cake')
+  if (id === 'food-187') {
+    return [
+      {
+        stepNumber: 1,
+        instructionKh: 'បកស្លឹកចេកចេញពីនំអន្សមជ្រូកដែលស្ងោរឆ្អិនល្អ រួចកាត់ជាកង់មូលៗកម្រាស់ល្មម (ប្រហែល ១.៥ សង់ទីម៉ែត្រ)។',
+        instructionEn: 'Unwrap the banana leaves from the cooked pork-and-mung-bean sticky rice cake (Num Ansom) and slice into even rounds.',
+      },
+      {
+        stepNumber: 2,
+        instructionKh: 'ដាក់ខ្ទះមិនជាប់លើភ្លើងមធ្យម លាបប្រេងឆាបន្តិច រួចតម្រៀបកង់នំអន្សមជ្រូកដាក់ចៀន។',
+        instructionEn: 'Heat a lightly oiled skillet over medium heat and arrange the Num Ansom slices in a single layer.',
+      },
+      {
+        stepNumber: 3,
+        instructionKh: 'ចៀនប្រែសងខាងរហូតដល់សំបកអង្ករដំណើបខាងក្រៅឡើងក្រហមមាសស្រួយឈ្ងុយ ឯស្នូលសណ្តែកលឿង និងសាច់ជ្រូកខាងក្នុងទន់ក្តៅឈ្ងុយម្រេចកំពត។',
+        instructionEn: 'Pan-fry both sides until the outer sticky rice crust turns golden and crispy while the mung bean and peppered pork center stays warm and soft.',
+      },
+      {
+        stepNumber: 4,
+        instructionKh: 'ស្រង់ដាក់ចានទទួលទានក្តៅៗផ្ទាប់ជាមួយជ្រក់ត្រសក់ ជ្រក់ល្ហុង ឬទឹកត្រីផ្អែមតាមចំណូលចិត្ត។',
+        instructionEn: 'Serve hot and crispy alongside tangy cucumber/papaya pickles or sweet fish sauce.',
+      },
+    ];
+  }
+
+  // Steamed Sticky-Rice Banana Rolls with Grated Coconut, Palm Sugar & Sesame (food-191)
+  if (id === 'food-191') {
+    return [
+      {
+        stepNumber: 1,
+        instructionKh: 'លាងត្រាំអង្ករដំណើបឱ្យទន់ ស្រង់សម្រស់ទឹក លាយជាមួយខ្ទិះដូងខាប់ និងអំបិលបន្តិច ហើយបកសំបកចេកណាំវ៉ាទុំល្មមទុកទាំងមូល។',
+        instructionEn: 'Soak glutinous rice until tender, toss with rich coconut cream and a pinch of sea salt, and peel ripe Namva bananas whole.',
+      },
+      {
+        stepNumber: 2,
+        instructionKh: 'រាយអង្ករដំណើបលើស្លឹកចេក ដាក់ចេកណាំវ៉ាចំកណ្តាល មូលខ្ចប់ឱ្យណែនស្អាត រួចដាក់ចំហុយប្រហែល ៤៥-៥០ នាទីរហូតដល់ឆ្អិនទន់ស្វិតក្រអូប។',
+        instructionEn: 'Spread seasoned sticky rice on banana leaves, enclose whole ripe bananas inside, roll tightly, and steam for 45-50 minutes until glossy and tender.',
+      },
+      {
+        stepNumber: 3,
+        instructionKh: 'រំងាស់ស្ករត្នោតខ្មែរជាមួយទឹកបន្តិច និងស្លឹកតយឱ្យខាប់ឈ្ងុយ ហើយលីងល្ងសឱ្យឡើងពណ៌មាសក្រអូប។',
+        instructionEn: 'Simmer Cambodian palm sugar with pandan leaf into a glossy amber syrup and toast sesame seeds until golden and fragrant.',
+      },
+      {
+        stepNumber: 4,
+        instructionKh: `បកស្លឹកចេក កាត់ចេកចំហុយជាកង់ៗ រៀបដាក់ចាន រោយដូងខ្ចីកោស ស្រោចទឹកស្ករត្នោត និងរោយ ${herbKh} ពីលើ រួចទទួលទាន។`,
+        instructionEn: `Unwrap and slice into neat rounds, top generously with freshly grated young coconut, warm palm sugar syrup, and ${herbEn}, and serve.`,
+      },
+    ];
+  }
 
   // ================= SOUP (food-101 .. food-116) =================
   if (cat === 'soup') {
