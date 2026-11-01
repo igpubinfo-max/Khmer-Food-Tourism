@@ -196,15 +196,16 @@ export async function shareQrImageNativeOrWeb(
 }
 
 /**
- * Ensures any native gallery Data URL larger than ~160 KB (e.g. uncompressed PNG screenshots)
- * is downscaled and compressed to an optimized JPEG Data URL so it never bloats localStorage or Supabase.
+ * Ensures any native gallery Data URL larger than ~40 KB (e.g. phone camera photos or PNG screenshots)
+ * is downscaled and compressed to an optimized WebP/JPEG Data URL (~30-45 KB) so 50+ photos fit in
+ * localStorage and hundreds fit effortlessly in IndexedDB without ever hitting quota limits.
  */
 async function compressDataUrlIfLarge(
   dataUrl: string,
-  maxDimension: number = 1000,
-  quality: number = 0.80
+  maxDimension: number = 760,
+  quality: number = 0.75
 ): Promise<string> {
-  if (!dataUrl || !dataUrl.startsWith('data:image/') || dataUrl.length <= 220000) {
+  if (!dataUrl || !dataUrl.startsWith('data:image/') || dataUrl.length <= 55000) {
     return dataUrl;
   }
   return new Promise((resolve) => {
@@ -233,6 +234,13 @@ async function compressDataUrlIfLarge(
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, w, h);
         ctx.drawImage(img, 0, 0, w, h);
+        try {
+          const webp = canvas.toDataURL('image/webp', quality);
+          if (webp.startsWith('data:image/webp') && webp.length < dataUrl.length) {
+            resolve(webp);
+            return;
+          }
+        } catch {}
         const compressed = canvas.toDataURL('image/jpeg', quality);
         resolve(compressed.length < dataUrl.length ? compressed : dataUrl);
       } catch {

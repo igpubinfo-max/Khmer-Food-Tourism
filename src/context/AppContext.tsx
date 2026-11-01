@@ -792,13 +792,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 (f.nameEn && f.nameEn !== seed.nameEn) ||
                 (f.descriptionKh && f.descriptionKh !== seed.descriptionKh));
 
-            if ((isPhotoModifiedFromSeed || isContentModifiedFromSeed) && !existingOverride) {
+            if (
+              (isPhotoModifiedFromSeed || (isContentModifiedFromSeed && !ledgerEntry)) &&
+              !existingOverride
+            ) {
               const effectiveIso = new Date(candidateEffectiveMs).toISOString();
               const candidateOv = {
                 id: f.id,
                 photoUrl: isPhotoModifiedFromSeed ? f.photoUrl : (ledgerEntry?.cloudUrl || seed.photoUrl),
                 photoHash: isPhotoModifiedFromSeed ? candidateHash : undefined,
-                revision: ledgerEntry?.revision || 0,
+                revision: isPhotoModifiedFromSeed ? (ledgerEntry?.revision || 0) : 0,
                 adminApprovedAt: f.adminApprovedAt || effectiveIso,
                 nameKh: f.nameKh,
                 nameEn: f.nameEn,
@@ -1147,9 +1150,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               normalizedList.push(normalizeRestaurant(seedRest));
             }
           }
-          if (vaultChanged) {
-            saveLocalMediaOverrides(vault);
-          }
+          // Note: Do NOT call saveLocalMediaOverrides(vault) synchronously before hydrateFromLocalIdbImmediate() completes
           return sortRestaurantsChronologically(
             applyRestaurantOverrides(normalizedList, vault.restaurants).filter(
               isStrictVerifiedCambodiaRestaurant
@@ -1310,6 +1311,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() : 0;
               const useOvPhoto =
                 !isBundledStaticTempleSeed ||
+                ov.isCustomPhoto ||
+                ov.isAdminEdited ||
+                Number(ov.revision || 0) > 0 ||
+                Boolean(ov.adminApprovedAt) ||
+                ov.photoUrl.startsWith('data:image/') ||
                 ov.photoUrl.startsWith('/destinations/') ||
                 ovTime > seedTime + 1000 ||
                 seedTime === 0;
@@ -1341,12 +1347,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
 
             // PRIORITY 2: Custom upload or Admin edit present in cached list
+            const isCompactedPlaceholder = (d as any).__compactedFromVault === true;
             const isUserUpload = typeof d.photoUrl === 'string' && d.photoUrl.startsWith('data:');
             const cachedTime = d.photoUpdatedAt ? new Date(d.photoUpdatedAt).getTime() : 0;
             const hasCustomFlag = Boolean(d.isCustomPhoto || d.isAdminEdited);
             const isValidCustomPhoto =
-              (isUserUpload || (!isBundledStaticTempleSeed && hasCustomFlag)) &&
-              (!isBundledStaticTempleSeed || cachedTime > seedTime + 1000) &&
+              !isCompactedPlaceholder &&
+              (isUserUpload || hasCustomFlag) &&
+              (isUserUpload || !isBundledStaticTempleSeed || cachedTime > seedTime + 1000) &&
               typeof d.photoUrl === 'string' &&
               d.photoUrl.trim().length > 0 &&
               !isBrokenLegacyDestPhoto(d.photoUrl) &&
@@ -1377,13 +1385,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return {
               ...seed,
               ...d,
-              nameKh: d.isAdminEdited && !isBundledStaticTempleSeed ? d.nameKh : seed.nameKh,
-              nameEn: d.isAdminEdited && !isBundledStaticTempleSeed ? d.nameEn : seed.nameEn,
-              descriptionKh: d.isAdminEdited && !isBundledStaticTempleSeed ? d.descriptionKh : seed.descriptionKh,
-              descriptionEn: d.isAdminEdited && !isBundledStaticTempleSeed ? d.descriptionEn : seed.descriptionEn,
-              provinceKh: d.isAdminEdited && !isBundledStaticTempleSeed ? d.provinceKh : seed.provinceKh,
-              provinceEn: d.isAdminEdited && !isBundledStaticTempleSeed ? d.provinceEn : seed.provinceEn,
-              addressKh: d.isAdminEdited && !isBundledStaticTempleSeed ? d.addressKh : seed.addressKh,
+              nameKh: d.isAdminEdited ? d.nameKh : seed.nameKh,
+              nameEn: d.isAdminEdited ? d.nameEn : seed.nameEn,
+              descriptionKh: d.isAdminEdited ? d.descriptionKh : seed.descriptionKh,
+              descriptionEn: d.isAdminEdited ? d.descriptionEn : seed.descriptionEn,
+              provinceKh: d.isAdminEdited ? d.provinceKh : seed.provinceKh,
+              provinceEn: d.isAdminEdited ? d.provinceEn : seed.provinceEn,
+              addressKh: d.isAdminEdited ? d.addressKh : seed.addressKh,
               addressEn: seed.addressEn,
               mapUrl: useCachedDestLoc ? d.mapUrl : seed.mapUrl,
               latitude: useCachedDestLoc ? d.latitude : seed.latitude,
@@ -1399,9 +1407,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             };
           });
 
-          if (vaultChanged) {
-            saveLocalMediaOverrides(vault);
-          }
+          // Note: Do NOT call saveLocalMediaOverrides(vault) synchronously before hydrateFromLocalIdbImmediate() completes,
+          // so we never clobber full IndexedDB data:image/ overrides with localStorage-stripped seed paths.
 
           const existingIds = new Set(upgraded.map((d: TouristDestination) => d.id));
           const missingFromInitial = initialDestinations.filter(d => !existingIds.has(d.id));
@@ -1779,7 +1786,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSelectedRestaurantRaw(r);
   };
 
-  const setSelectedFood = (f: FoodItem | null) => {
+  const setSelectedFood = (f: FoodItem | null | ((prev: FoodItem | null) => FoodItem | null)) => {
+    if (typeof f === 'function') {
+      setSelectedFoodRaw(f);
+      return;
+    }
     if (f !== null) {
       setSelectedRestaurantRaw(null);
       setSelectedDestinationRaw(null);
@@ -1793,7 +1804,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSelectedFoodRaw(f);
   };
 
-  const setSelectedDestination = (d: TouristDestination | null) => {
+  const setSelectedDestination = (
+    d: TouristDestination | null | ((prev: TouristDestination | null) => TouristDestination | null)
+  ) => {
+    if (typeof d === 'function') {
+      setSelectedDestinationRaw(d);
+      return;
+    }
     if (d !== null) {
       setSelectedFoodRaw(null);
       setSelectedRestaurantRaw(null);
@@ -2130,8 +2147,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (
             d &&
             typeof d.photoUrl === 'string' &&
-            d.photoUrl.startsWith('data:') &&
-            isOverridePersistedInLocalStorage('destinations', d.id)
+            d.photoUrl.startsWith('data:')
           ) {
             const fallbackUrl = seedDestMap.get(d.id) || '';
             return {
@@ -2139,6 +2155,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               photoUrl: fallbackUrl,
               galleryPhotos: fallbackUrl ? [fallbackUrl] : [],
               isCustomPhoto: true,
+              __compactedFromVault: true,
             };
           }
           return d;
@@ -2150,38 +2167,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         const seedFoodMap = seedFoodPhotoMapRef.current;
         return (data as FoodItem[]).map(f => {
-          if (
-            f &&
-            typeof f.photoUrl === 'string' &&
-            f.photoUrl.startsWith('data:') &&
-            f.photoUrl.length > 90_000 &&
-            isOverridePersistedInLocalStorage('foods', f.id)
-          ) {
+          if (!f) return f;
+          const isSeedDish = seedFoodMap.has(f.id);
+          const strippedRecipeProps =
+            isSeedDish && !f.isAdminEdited
+              ? { ingredients: undefined, steps: undefined }
+              : {};
+          if (typeof f.photoUrl === 'string' && f.photoUrl.startsWith('data:')) {
             return {
               ...f,
+              ...strippedRecipeProps,
               photoUrl: seedFoodMap.get(f.id) || `/foods/${f.id}.jpg`,
               isCustomPhoto: true,
               __compactedFromVault: true,
             };
           }
+          if (isSeedDish && !f.isAdminEdited) {
+            return {
+              ...f,
+              ...strippedRecipeProps,
+            };
+          }
           return f;
         });
       }
-      if (key === 'kft_restaurants_real_v12' || key === 'kft_restaurants_real_v12') {
+      if (key === 'kft_restaurants_real_v12') {
         if (!seedRestPhotoMapRef.current) {
           seedRestPhotoMapRef.current = new Map(initialRestaurants.map(r => [r.id, r.photoUrl]));
         }
         const seedRestMap = seedRestPhotoMapRef.current;
         return (data as Restaurant[]).map(r => {
           if (!r) return r;
-          const hasPersistedOverride = isOverridePersistedInLocalStorage('restaurants', r.id);
           const hasInlineDataUrl =
             (typeof r.photoUrl === 'string' && r.photoUrl.startsWith('data:')) ||
             (typeof r.profileImage === 'string' && r.profileImage.startsWith('data:')) ||
             (Array.isArray(r.galleryPhotos) && r.galleryPhotos.some(g => g.startsWith('data:'))) ||
             (Array.isArray(r.foodImages) && r.foodImages.some(g => g.startsWith('data:'))) ||
             (Array.isArray(r.menuItems) && r.menuItems.some(m => typeof m.photoUrl === 'string' && m.photoUrl.startsWith('data:')));
-          if (hasInlineDataUrl && hasPersistedOverride) {
+          if (hasInlineDataUrl) {
             const fallbackUrl = seedRestMap.get(r.id) || '';
             return {
               ...r,

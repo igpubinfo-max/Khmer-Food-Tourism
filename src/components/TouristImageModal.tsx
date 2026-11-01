@@ -4,6 +4,10 @@ import {
   X, Upload, Image as ImageIcon, Check, RefreshCw, 
   MapPin, Smartphone, Sparkles, CheckCircle2, AlertCircle
 } from 'lucide-react';
+import {
+  pickImageUsingNativeAndroidGallery,
+  isNativeAndroidOrIosPlatform,
+} from '../utils/androidMediaHelper';
 
 interface TouristImageModalProps {
   destination: TouristDestination | null;
@@ -16,9 +20,9 @@ interface TouristImageModalProps {
 // Client-side image compression & resizing for smooth mobile experience
 const compressImageFile = (
   file: File, 
-  maxWidth = 960, 
-  maxHeight = 640, 
-  quality = 0.80
+  maxWidth = 760, 
+  maxHeight = 520, 
+  quality = 0.75
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -65,9 +69,9 @@ const compressImageFile = (
 // Compress large Data URL strings directly (to avoid localStorage quota overflow)
 const compressDataUrl = (
   dataUrl: string,
-  maxWidth = 960,
-  maxHeight = 640,
-  quality = 0.80
+  maxWidth = 760,
+  maxHeight = 520,
+  quality = 0.75
 ): Promise<string> => {
   return new Promise((resolve) => {
     const img = new Image();
@@ -231,12 +235,64 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
         origSize: `${origMb} MB`,
         compSize: `${compKb} KB`,
       });
+      // Immediately persist the selected gallery photo so it is never lost if the user closes or presses Back
+      const nowIso = new Date().toISOString();
+      await Promise.resolve(
+        onSave({
+          ...destination,
+          photoUrl: compressedDataUrl,
+          galleryPhotos: [compressedDataUrl],
+          isCustomPhoto: true,
+          photoUpdatedAt: nowIso,
+          isAdminEdited: true,
+          adminEditedAt: nowIso,
+        })
+      );
     } catch (err: any) {
       setErrorMsg(err.message || (isKm ? 'បរាជ័យក្នុងការដំណើរការរូបភាព' : 'Error processing image'));
     } finally {
       setIsProcessing(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  const handleOpenDeviceGallery = async () => {
+    if (isNativeAndroidOrIosPlatform()) {
+      setErrorMsg('');
+      setIsProcessing(true);
+      try {
+        const pickedDataUrl = await pickImageUsingNativeAndroidGallery();
+        if (pickedDataUrl) {
+          const finalUrl =
+            pickedDataUrl.length > 55000 ? await compressDataUrl(pickedDataUrl) : pickedDataUrl;
+          const compKb = ((finalUrl.length * 0.75) / 1024).toFixed(0);
+          setPhotoUrl(finalUrl);
+          setUrlInput('');
+          setFileDetails({
+            origSize: 'Gallery',
+            compSize: `${compKb} KB`,
+          });
+          const nowIso = new Date().toISOString();
+          await Promise.resolve(
+            onSave({
+              ...destination,
+              photoUrl: finalUrl,
+              galleryPhotos: [finalUrl],
+              isCustomPhoto: true,
+              photoUpdatedAt: nowIso,
+              isAdminEdited: true,
+              adminEditedAt: nowIso,
+            })
+          );
+          return;
+        }
+      } catch {
+        // Fallback to standard file input
+      } finally {
+        setIsProcessing(false);
+      }
+    }
+    fileInputRef.current?.click();
   };
 
   // Immediate Live Preview as the user types or pastes into the URL / Base64 box
@@ -285,8 +341,8 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
 
     let finalPhotoUrl = check.normalizedUrl;
 
-    // If large Data URL (> 180KB), compress before storing to protect localStorage and speed up cloud sync
-    if (finalPhotoUrl.startsWith('data:image/') && finalPhotoUrl.length > 180 * 1024) {
+    // If Data URL (> 55KB), compress before storing to protect localStorage and speed up cloud sync
+    if (finalPhotoUrl.startsWith('data:image/') && finalPhotoUrl.length > 55 * 1024) {
       try {
         finalPhotoUrl = await compressDataUrl(finalPhotoUrl);
       } catch (compErr) {
@@ -447,7 +503,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
             <button
               type="button"
               disabled={isProcessing}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={handleOpenDeviceGallery}
               className="w-full py-3 px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-950/20 transition active:scale-[0.99] disabled:opacity-50 cursor-pointer"
             >
               <Upload className="w-4 h-4 text-emerald-300" />

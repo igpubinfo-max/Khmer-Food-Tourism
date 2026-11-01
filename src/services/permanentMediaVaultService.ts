@@ -241,6 +241,9 @@ export interface RestaurantMediaOverride {
 export interface DestinationMediaOverride {
   id: string;
   photoUrl: string;
+  photoHash?: string;
+  revision?: number;
+  adminApprovedAt?: string;
   galleryPhotos?: string[];
   nameKh?: string;
   nameEn?: string;
@@ -880,9 +883,9 @@ export function saveLocalMediaOverrides(incomingBundle: AllMediaOverridesBundle)
   }
 
   // Measure remaining UTF-16 character budget across ALL localStorage keys (~2 bytes per char, 5.0MB browser cap)
-  // so writing vault maps NEVER triggers QuotaExceededError even when other caches occupy 3.8MB+!
+  // so writing vault maps NEVER triggers QuotaExceededError and VAULT_KEYS.FOODS never starves VAULT_KEYS.DESTINATIONS!
   const SAFE_TOTAL_UTF16_CHARS = 2_350_000; // 4.70MB UTF-16, leaving 300KB safety margin for ledger & queue
-  const getRemainingCharBudgetForKey = (targetKey: string, capChars: number): number => {
+  const getRemainingCharBudgetForKey = (targetKey: string, capChars: number, reservedForLaterKeysChars: number = 0): number => {
     try {
       if (typeof localStorage === 'undefined') return 0;
       let otherChars = 0;
@@ -892,7 +895,10 @@ export function saveLocalMediaOverrides(incomingBundle: AllMediaOverridesBundle)
         const v = localStorage.getItem(k);
         otherChars += k.length + (v ? v.length : 0);
       }
-      const available = Math.max(0, SAFE_TOTAL_UTF16_CHARS - otherChars - targetKey.length - 2048);
+      const available = Math.max(
+        0,
+        SAFE_TOTAL_UTF16_CHARS - otherChars - reservedForLaterKeysChars - targetKey.length - 2048
+      );
       return Math.min(capChars, available);
     } catch {
       return Math.min(capChars, 250_000);
@@ -927,7 +933,12 @@ export function saveLocalMediaOverrides(incomingBundle: AllMediaOverridesBundle)
     return trimmed;
   };
 
-  const foodCharBudget = getRemainingCharBudgetForKey(VAULT_KEYS.FOODS, 1_850_000);
+  // Reserve guaranteed space for Destinations (Travel) & Restaurants so Foods never starves Travel to 0 bytes
+  const hasDestinations = Object.keys(bundle.destinations || {}).length > 0;
+  const hasRestaurants = Object.keys(bundle.restaurants || {}).length > 0;
+  const reservedForDestAndRest = (hasDestinations ? 420_000 : 0) + (hasRestaurants ? 180_000 : 0);
+
+  const foodCharBudget = getRemainingCharBudgetForKey(VAULT_KEYS.FOODS, 1_250_000, reservedForDestAndRest);
   const compactFoodsPrimary = trimFoodMapForLocalStorage(bundle.foods || {}, foodCharBudget);
   if (safeWriteJsonMap(VAULT_KEYS.FOODS, compactFoodsPrimary)) {
     persistedInLocalStorageSets.foods = new Set(
@@ -941,12 +952,14 @@ export function saveLocalMediaOverrides(incomingBundle: AllMediaOverridesBundle)
     persistedInLocalStorageSets.foods = new Set(Object.keys(urlsOnly));
   }
 
-  // Budget Destinations & Restaurants safely so they don't starve Foods in localStorage
-  const trimGenericMap = <T extends { updatedAt?: string; photoUrl?: string }>(
+  // Budget Destinations & Restaurants safely with revision-aware sorting
+  const trimGenericMap = <T extends { updatedAt?: string; revision?: number; photoUrl?: string }>(
     map: Record<string, T>,
     maxChars: number
   ): Record<string, T> => {
     const entries = Object.entries(map || {}).sort((a, b) => {
+      const rDiff = (Number(b[1]?.revision) || 0) - (Number(a[1]?.revision) || 0);
+      if (rDiff !== 0) return rDiff;
       const tA = a[1]?.updatedAt ? Date.parse(a[1].updatedAt) || 0 : 0;
       const tB = b[1]?.updatedAt ? Date.parse(b[1].updatedAt) || 0 : 0;
       return tB - tA;
@@ -965,6 +978,16 @@ export function saveLocalMediaOverrides(incomingBundle: AllMediaOverridesBundle)
     return out;
   };
 
+  const destCharBudget = getRemainingCharBudgetForKey(VAULT_KEYS.DESTINATIONS, 550_000, hasRestaurants ? 180_000 : 0);
+  const compactDests = trimGenericMap(bundle.destinations || {}, destCharBudget);
+  if (safeWriteJsonMap(VAULT_KEYS.DESTINATIONS, compactDests)) {
+    persistedInLocalStorageSets.destinations = new Set(
+      Object.entries(compactDests)
+        .filter(([, v]) => v && v.photoUrl && v.photoUrl.trim().length > 0)
+        .map(([k]) => k)
+    );
+  }
+
   const restCharBudget = getRemainingCharBudgetForKey(VAULT_KEYS.RESTAURANTS, 300_000);
   const compactRests = trimGenericMap(bundle.restaurants || {}, restCharBudget);
   if (safeWriteJsonMap(VAULT_KEYS.RESTAURANTS, compactRests)) {
@@ -976,16 +999,6 @@ export function saveLocalMediaOverrides(incomingBundle: AllMediaOverridesBundle)
   }
   if (bundle.deletedRestaurants && typeof bundle.deletedRestaurants === 'object') {
     safeWriteJsonMap(VAULT_KEYS.DELETED_RESTAURANTS, bundle.deletedRestaurants);
-  }
-
-  const destCharBudget = getRemainingCharBudgetForKey(VAULT_KEYS.DESTINATIONS, 380_000);
-  const compactDests = trimGenericMap(bundle.destinations || {}, destCharBudget);
-  if (safeWriteJsonMap(VAULT_KEYS.DESTINATIONS, compactDests)) {
-    persistedInLocalStorageSets.destinations = new Set(
-      Object.entries(compactDests)
-        .filter(([, v]) => v && v.photoUrl && v.photoUrl.trim().length > 0)
-        .map(([k]) => k)
-    );
   }
 
   const trendCharBudget = getRemainingCharBudgetForKey(VAULT_KEYS.TRENDING_FOODS, 180_000);
@@ -1664,14 +1677,23 @@ export function removePermanentRestaurantOverride(restaurantId: string, extraKey
  */
 export function recordPermanentDestinationOverride(dest: TouristDestination): void {
   const bundle = loadLocalMediaOverrides();
-  const now = new Date().toISOString();
-  // Avoid storing a duplicate copy of a 300KB base64 photoUrl inside galleryPhotos
+  const prevOv = bundle.destinations[dest.id];
+  const nextRevision = Math.max(Number(prevOv?.revision || 0) + 1, 1);
+  const prevMs = Math.max(
+    prevOv?.adminApprovedAt ? Date.parse(prevOv.adminApprovedAt) || 0 : 0,
+    prevOv?.updatedAt ? Date.parse(prevOv.updatedAt) || 0 : 0
+  );
+  const now = new Date(Math.max(Date.now(), prevMs + 1)).toISOString();
+  // Avoid storing a duplicate copy of a base64 photoUrl inside galleryPhotos
   const extraGallery = Array.isArray(dest.galleryPhotos)
     ? dest.galleryPhotos.filter((g) => g && g !== dest.photoUrl && !isObsoleteSeedPhoto(g))
     : undefined;
   const overrideRecord: DestinationMediaOverride = {
     id: dest.id,
     photoUrl: dest.photoUrl,
+    photoHash: computeFastPhotoSignature(dest.photoUrl),
+    revision: nextRevision,
+    adminApprovedAt: now,
     galleryPhotos: extraGallery && extraGallery.length > 0 ? extraGallery : undefined,
     nameKh: dest.nameKh,
     nameEn: dest.nameEn,
@@ -1699,9 +1721,11 @@ export function recordPermanentDestinationOverride(dest: TouristDestination): vo
   };
   bundle.destinations[dest.id] = overrideRecord;
   bundle.updatedAt = now;
+  inMemoryMasterBundle = bundle;
   saveSingleRecordToIdb(`dest:${dest.id}`, overrideRecord).catch(() => {});
-  enqueuePendingMediaCloudSync('dest', dest.id, 1, now);
+  enqueuePendingMediaCloudSync('dest', dest.id, nextRevision, now);
   saveLocalMediaOverrides(bundle);
+  notifyPersistentMediaVaultSubscribers(bundle);
   syncSingleOverrideRecordToCloud('dest', dest.id, overrideRecord, bundle).catch(() => {});
 }
 
@@ -2235,6 +2259,8 @@ export function applyDestinationOverrides(
       !isSeedBundledStaticPhoto ||
       ov.isCustomPhoto ||
       ov.isAdminEdited ||
+      Number(ov.revision || 0) > 0 ||
+      Boolean(ov.adminApprovedAt) ||
       Boolean(ov.photoUrl && ov.photoUrl.startsWith('data:image/')) ||
       (ovTime > Math.max(seedTime, CLEAN_STATIC_MEDIA_CUTOFF_MS) + 1000);
 
@@ -2547,6 +2573,7 @@ export async function hydrateFromLocalIdbImmediate(): Promise<AllMediaOverridesB
       inMemoryMasterBundle = current;
       // Refresh localStorage revision ledger & compact map if IndexedDB had newer replacements
       saveLocalMediaOverrides(current);
+      notifyPersistentMediaVaultSubscribers(current);
     }
   } catch {
     hasHydratedFromIdbOnce = true;
