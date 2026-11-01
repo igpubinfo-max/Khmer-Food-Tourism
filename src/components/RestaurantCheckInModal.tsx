@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
+import { NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI } from '../types';
 import { recordMeaningfulAction } from '../utils/engagement';
 import { 
   X, Camera, Image as ImageIcon, MapPin, CheckCircle2, 
@@ -235,7 +236,7 @@ export const RestaurantCheckInModal: React.FC = () => {
           phone: customShopPhone.trim() || 'មិនទាន់មានលេខទូរស័ព្ទ',
           latitude: lat,
           longitude: lng,
-          photoUrl: photoDataUrl || '/Shop/rest-1.jpg',
+          photoUrl: photoDataUrl || '',
           signatureDishesKh: dishName.trim() ? [dishName.trim()] : ['ម្ហូបខ្មែរប្រពៃណី'],
           isFeatured: false,
           membershipTier: 'free',
@@ -250,7 +251,7 @@ export const RestaurantCheckInModal: React.FC = () => {
         restaurantId: customRestId,
         restaurantNameKh: cleanName,
         restaurantNameEn: cleanName,
-        photoUrl: photoDataUrl || '/Shop/rest-1.jpg',
+        photoUrl: photoDataUrl || NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI,
         latitude: lat,
         longitude: lng,
         distanceMeters: 0,

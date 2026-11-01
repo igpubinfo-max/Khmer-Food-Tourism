@@ -30,6 +30,8 @@ import {
   isAdminAccount,
   isValidCambodiaCoordinates,
   buildCanonicalGoogleMapsPinUrl,
+  isValidGoogleMapsUrl,
+  extractCoordsFromGoogleMapsUrl,
 } from '../types';
 import {
   isNativeAndroidOrIosPlatform,
@@ -349,36 +351,42 @@ export const VipAddRestaurantModal: React.FC = () => {
 
     const finalNameKh = trimmedNameKh || trimmedNameEn;
     const finalNameEn = trimmedNameEn || trimmedNameKh;
-    const finalProfile = shopPhoto.trim() || '/Shop/rest-1.jpg';
-    const combinedGallery = [finalProfile];
+    const finalProfile = shopPhoto.trim() || '';
+    const combinedGallery = finalProfile ? [finalProfile] : [];
+
+    const trimmedMapUrl = shopMapUrl.trim();
+    if (trimmedMapUrl && !isValidGoogleMapsUrl(trimmedMapUrl)) {
+      showToast(
+        tr(
+          language,
+          '⚠️ សូមបញ្ចូលលីង Google Maps ឱ្យបានត្រឹមត្រូវ (ឧ. https://maps.app.goo.gl/... ឬ https://www.google.com/maps/...)',
+          '⚠️ Please enter a valid Google Maps link (e.g. https://maps.app.goo.gl/... or https://www.google.com/maps/...)',
+          '⚠️ 请输入有效的 Google 地图链接（如 https://maps.app.goo.gl/... 或 https://www.google.com/maps/...）'
+        ),
+        'warning'
+      );
+      return;
+    }
 
     let resolvedLat = shopLat;
     let resolvedLng = shopLng;
-    if ((resolvedLat === null || resolvedLng === null) && shopMapUrl.trim()) {
-      const decodedUrl = (() => {
-        try {
-          return decodeURIComponent(shopMapUrl.trim());
-        } catch {
-          return shopMapUrl.trim();
-        }
-      })();
-      const m =
-        decodedUrl.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) ||
-        decodedUrl.match(/@(-?\d+\.\d+),\s*(-?\d+\.\d+)/) ||
-        decodedUrl.match(/[?&](?:query|q|destination|ll)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
-      if (m) {
-        const pLat = Number(m[1]);
-        const pLng = Number(m[2]);
-        if (isValidCambodiaCoordinates(pLat, pLng)) {
-          resolvedLat = pLat;
-          resolvedLng = pLng;
-        }
+    if ((resolvedLat === null || resolvedLng === null) && trimmedMapUrl) {
+      const extracted = extractCoordsFromGoogleMapsUrl(trimmedMapUrl);
+      if (extracted) {
+        resolvedLat = extracted.latitude;
+        resolvedLng = extracted.longitude;
       }
     }
     const hasVerifiedCoords =
       resolvedLat !== null &&
       resolvedLng !== null &&
       isValidCambodiaCoordinates(resolvedLat, resolvedLng);
+    const hasValidMapLink = isValidGoogleMapsUrl(trimmedMapUrl);
+    const resolvedMapUrl = hasValidMapLink
+      ? trimmedMapUrl
+      : hasVerifiedCoords
+        ? buildCanonicalGoogleMapsPinUrl(resolvedLat!, resolvedLng!, importedGooglePlaceId)
+        : '';
 
     setIsSaving(true);
     try {
@@ -400,19 +408,19 @@ export const VipAddRestaurantModal: React.FC = () => {
         openingHoursKh: openingHoursKh.trim() || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
         openingHoursEn: '07:00 AM - 09:00 PM',
         priceLevel,
-        mapUrl: hasVerifiedCoords
-          ? buildCanonicalGoogleMapsPinUrl(resolvedLat!, resolvedLng!, importedGooglePlaceId)
-          : '',
+        mapUrl: resolvedMapUrl,
         latitude: hasVerifiedCoords ? resolvedLat! : 0,
         longitude: hasVerifiedCoords ? resolvedLng! : 0,
-        locationVerificationStatus: hasVerifiedCoords
-          ? ('verified' as const)
-          : ('needs_admin_review' as const),
-        locationNeedsReview: !hasVerifiedCoords,
-        locationVerifiedAt: hasVerifiedCoords ? new Date().toISOString() : undefined,
-        locationReviewNote: hasVerifiedCoords
-          ? undefined
-          : 'New shop registered without verified GPS coordinates — flagged for Admin location review.',
+        locationVerificationStatus:
+          isAdmin && (hasVerifiedCoords || hasValidMapLink)
+            ? ('verified' as const)
+            : ('needs_admin_review' as const),
+        locationNeedsReview: !(isAdmin && (hasVerifiedCoords || hasValidMapLink)),
+        locationVerifiedAt: isAdmin && (hasVerifiedCoords || hasValidMapLink) ? new Date().toISOString() : undefined,
+        locationReviewNote:
+          isAdmin && (hasVerifiedCoords || hasValidMapLink)
+            ? undefined
+            : 'New shop submitted — awaiting Admin verification of shop & Google Maps location.',
         signatureDishesKh: signatureDishesKh.length > 0 ? signatureDishesKh : ['ម្ហូបពិសេសប្រចាំហាង'],
         googlePlaceId: importedGooglePlaceId,
         dataSource: importedGooglePlaceId ? ('google_maps' as const) : ('vip_owner' as const),
@@ -447,7 +455,7 @@ export const VipAddRestaurantModal: React.FC = () => {
         setSubmittedPendingShop(created);
       } else {
         setIsVipAddRestaurantModalOpen(false);
-        (window as any).__kft_manage_initial_tab = 'menu';
+        (window as any).__kft_manage_initial_tab = 'info';
         setManagingRestaurant(created);
         setIsManageMenuModalOpen(true);
       }
@@ -706,13 +714,13 @@ export const VipAddRestaurantModal: React.FC = () => {
                   const shop = submittedPendingShop;
                   setSubmittedPendingShop(null);
                   setIsVipAddRestaurantModalOpen(false);
-                  (window as any).__kft_manage_initial_tab = 'menu';
+                  (window as any).__kft_manage_initial_tab = 'info';
                   setManagingRestaurant(shop);
                   setIsManageMenuModalOpen(true);
                 }}
                 className="w-full py-3 px-4 rounded-2xl bg-[#064E3B] hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition cursor-pointer"
               >
-                {tr(language, '🍽️ រៀបចំបញ្ជីមុខម្ហូបក្នុងហាងឥឡូវនេះ', '🍽️ Manage Shop Menu Now', '🍽️ 立即管理店铺菜单')}
+                {tr(language, '🏪 ពិនិត្យ និងកែប្រែព័ត៌មានហាងឥឡូវនេះ', '🏪 View & Edit Shop Info Now', '🏪 立即查看与编辑店铺信息')}
               </button>
               <button
                 type="button"
@@ -792,11 +800,17 @@ export const VipAddRestaurantModal: React.FC = () => {
                 className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 space-y-2.5"
               >
                 <div className="flex items-center gap-3">
-                  <img
-                    src={store.photoUrl}
-                    alt={store.nameKh}
-                    className="w-14 h-14 rounded-xl object-cover shrink-0 border border-emerald-500/40"
-                  />
+                  {store.photoUrl ? (
+                    <img
+                      src={store.photoUrl}
+                      alt={store.nameKh}
+                      className="w-14 h-14 rounded-xl object-cover shrink-0 border border-emerald-500/40"
+                    />
+                  ) : (
+                    <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-emerald-500/40">
+                      <DefaultShopIcon className="w-full h-full" />
+                    </div>
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
                       <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-mono text-[10px] font-bold">
@@ -809,8 +823,10 @@ export const VipAddRestaurantModal: React.FC = () => {
                     <p className="text-[11px] text-slate-500 truncate mt-0.5">
                       📍 {store.addressKh || store.provinceKh}
                     </p>
-                    <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 text-[10px] font-bold">
-                      🍽️ {store.menuItems?.length || 0} {tr(language, 'មុខម្ហូប', 'dishes', '道菜品')}
+                    <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
+                      {store.status === 'pending'
+                        ? tr(language, '⏳ រង់ចាំការអនុម័តពី Admin', '⏳ Pending Admin Review', '⏳ 等待管理员审核')
+                        : tr(language, '✅ បានអនុម័ត', '✅ Verified Shop', '✅ 已认证店铺')}
                     </span>
                   </div>
                 </div>
@@ -1474,6 +1490,61 @@ export const VipAddRestaurantModal: React.FC = () => {
                 placeholder={tr(language, 'ឧ. ជិតផ្សារថ្មី ឬ ផ្លូវលេខ ៦៣...', 'e.g. Near Central Market, St. 63...', '例如：中央市场附近...')}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-600 outline-none"
               />
+
+              {/* 6. Dedicated Google Maps Location Link Input Field */}
+              <div className="pt-1 space-y-1.5">
+                <label className="block font-bold text-slate-800 dark:text-slate-200">
+                  🗺️ {tr(language, '៦. លីងទីតាំង Google Maps (Google Maps Link)', '6. Google Maps Location Link', '6. Google 地图位置链接')}
+                </label>
+                <input
+                  type="url"
+                  value={shopMapUrl}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setShopMapUrl(val);
+                    const extracted = extractCoordsFromGoogleMapsUrl(val);
+                    if (extracted) {
+                      setShopLat(extracted.latitude);
+                      setShopLng(extracted.longitude);
+                    }
+                  }}
+                  placeholder="https://maps.app.goo.gl/... ឬ https://www.google.com/maps/..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-emerald-400/70 dark:border-emerald-600/60 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 outline-none"
+                />
+                {shopMapUrl.trim() ? (
+                  isValidGoogleMapsUrl(shopMapUrl) ? (
+                    <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                      <span>
+                        {tr(
+                          language,
+                          '✅ លីង Google Maps ត្រឹមត្រូវ (រង់ចាំ Admin ផ្ទៀងផ្ទាត់មុនបង្ហាញជាសាធារណៈ)',
+                          '✅ Valid Google Maps link (Pending Admin verification before public display)',
+                          '✅ 有效的 Google 地图链接（公开展示前需经管理员核实）'
+                        )}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="text-[10px] font-bold text-rose-600 dark:text-rose-400">
+                      {tr(
+                        language,
+                        '⚠️ ទម្រង់លីងមិនត្រឹមត្រូវ — សូមបញ្ចូលលីងពី Google Maps (ឧ. https://maps.app.goo.gl/...)',
+                        '⚠️ Invalid link format — please paste a Google Maps URL (e.g. https://maps.app.goo.gl/...)',
+                        '⚠️ 链接格式无效 — 请粘贴 Google 地图链接（如 https://maps.app.goo.gl/...）'
+                      )}
+                    </div>
+                  )
+                ) : (
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-snug">
+                    {tr(
+                      language,
+                      'ចម្លង (Copy) លីងទីតាំងហាងរបស់អ្នកពីកម្មវិធី Google Maps រួចបិទភ្ជាប់ (Paste) ទីនេះ ដើម្បីឱ្យភ្ញៀវចុចបើកផែនទីទៅកាន់ហាងផ្ទាល់។',
+                      'Copy your shop link from Google Maps and paste it here so customers can open your exact map location.',
+                      '从 Google 地图复制您的店铺链接并粘贴到此处，方便顾客直接打开导航前往。'
+                    )}
+                  </p>
+                )}
+              </div>
 
               {/* Check In / Set Shop Location Button */}
               <button

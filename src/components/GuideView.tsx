@@ -2,12 +2,14 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import type { FoodItem, Language, Restaurant, TouristDestination } from '../types';
 import {
+  NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI,
   getRestaurantRatingSummary,
   isAdminAccount,
   isGpipRegisteredRestaurant,
   isUserVipActive,
   openRestaurantGoogleExternal,
   resolveFoodPhotoUrl,
+  sanitizeRestaurantShopPhoto,
   sortRestaurantsWithVipRotation,
 } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
@@ -45,12 +47,10 @@ const rotateDaily = <T,>(list: T[], take: number): T[] => {
   return pool.slice(shift).concat(pool.slice(0, shift)).slice(0, take);
 };
 
-const restaurantPhoto = (r: Restaurant) =>
-  r.photoUrl && !r.photoUrl.startsWith('/restaurants/')
-    ? r.photoUrl
-    : r.profileImage && !r.profileImage.startsWith('/restaurants/')
-    ? r.profileImage
-    : '/Shop/rest-1.jpg';
+const restaurantPhoto = (r: Restaurant) => {
+  const clean = sanitizeRestaurantShopPhoto(r.id, r.photoUrl || r.profileImage || '');
+  return clean ? resolveFoodPhotoUrl(clean, r.photoUpdatedAt) : NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI;
+};
 
 const isDirectoryRestaurant = (r: Restaurant) =>
   Boolean(r && r.id) &&
@@ -411,7 +411,7 @@ export const GuideView: React.FC = () => {
         key={r.id}
         customMedia={
           <ShopAvatar
-            restaurant={{ ...r, photoUrl: restaurantPhoto(r) }}
+            restaurant={r}
             alt={loc.name}
             className="w-full h-full rounded-none border-0"
           />

@@ -11,7 +11,8 @@ import {
   VipPlanType, getVipAccountState, getVipRemainingDays,
   getRestaurantRatingSummary, isSeedRestaurantId, getRestaurantCreatedAtMs,
   getDynamicVipPlans, getDynamicVipBenefits,
-  isValidCambodiaCoordinates, buildCanonicalGoogleMapsPinUrl
+  isValidCambodiaCoordinates, buildCanonicalGoogleMapsPinUrl,
+  NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI, sanitizeRestaurantShopPhoto
 } from '../types';
 import { tr } from '../utils/i18n';
 import {
@@ -414,7 +415,8 @@ export const ManageMenuModal: React.FC = () => {
       return;
     }
 
-    const finalPhoto = currentRest.photoUrl || '/Shop/rest-1.jpg';
+    const finalPhoto =
+      sanitizeRestaurantShopPhoto(currentRest.id, currentRest.photoUrl) || NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI;
 
     setIsSavingDish(true);
     try {

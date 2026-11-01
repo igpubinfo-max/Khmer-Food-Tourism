@@ -484,7 +484,7 @@ export function getAiFoodAdvisorRecommendations(params: {
   // Sort by score descending, with deterministic seed rotation among similarly scored dishes
   scoredFoods.sort((a, b) => {
     const scoreDiff = b.score - a.score;
-    if (Math.abs(scoreDiff) > 15) return scoreDiff;
+    if (Math.abs(scoreDiff) > 40) return scoreDiff;
     const rotA = (a.food.id.charCodeAt(a.food.id.length - 1) * 7 + seed * 13) % 19;
     const rotB = (b.food.id.charCodeAt(b.food.id.length - 1) * 7 + seed * 13) % 19;
     if (rotA !== rotB) return rotA - rotB;
@@ -494,17 +494,19 @@ export function getAiFoodAdvisorRecommendations(params: {
   const totalMatchedCount = scoredFoods.length;
 
   // Smart AI brain: understands foreign dishes, moods, health notes, VIP drink-pairing and unknown cravings.
-  const brain = hasActiveQuery
-    ? buildAiBrainInsight({
-        foods,
-        query,
-        language,
-        canUseVip,
-        seed,
-        directMatchCount: totalMatchedCount,
-        hasTitleMatch,
-      })
-    : null;
+  // Never invoke foreign-dish/drink bridges when the user explicitly queried a flavor (e.g. `ហឹរ` / `ជូរហឹរ`)!
+  const brain =
+    hasActiveQuery && parsedQuery.flavorIntents.length === 0
+      ? buildAiBrainInsight({
+          foods,
+          query,
+          language,
+          canUseVip,
+          seed,
+          directMatchCount: totalMatchedCount,
+          hasTitleMatch,
+        })
+      : null;
 
   const allMatchedDishes: FoodItem[] =
     scoredFoods.length > 0
@@ -516,23 +518,23 @@ export function getAiFoodAdvisorRecommendations(params: {
   // If the user typed a query that matched dishes, return up to 6 top matches (rotated by seed when Refresh is clicked)
   const preferBrainDishes =
     Boolean(brain && brain.dishes.length > 0) &&
+    parsedQuery.flavorIntents.length === 0 &&
     (scoredFoods.length === 0 ||
       brain?.mode === 'drink' ||
       brain?.mode === 'blocked' ||
-      brain?.mode === 'scope_notice' ||
-      parsedQuery.flavorIntents.length === 0);
+      brain?.mode === 'scope_notice');
 
   let topDishes: FoodItem[];
   if (preferBrainDishes && brain) {
     topDishes = brain.dishes.map((d) => d.food);
   } else if (scoredFoods.length > 0) {
     const limit = hasActiveQuery ? 6 : 4;
-    if (scoredFoods.length <= limit || seed <= 1) {
+    if (scoredFoods.length <= limit) {
       topDishes = scoredFoods.slice(0, limit).map((item) => item.food);
     } else {
-      const poolSize = Math.min(scoredFoods.length, 15);
+      const poolSize = Math.min(scoredFoods.length, 24);
       const topPool = scoredFoods.slice(0, poolSize).map((item) => item.food);
-      const offset = ((seed - 1) * 2) % topPool.length;
+      const offset = ((Math.max(1, seed) - 1) * 3) % topPool.length;
       topDishes = [...topPool.slice(offset), ...topPool.slice(0, offset)].slice(0, limit);
     }
   } else {

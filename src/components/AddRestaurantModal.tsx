@@ -23,7 +23,16 @@ import {
   AlertCircle,
   Crown,
 } from 'lucide-react';
-import { RestaurantPriceLevel, getDynamicVipPlans, VipPlanType, isUserVipActive, getVipAccountState, GoogleMapsPlaceMetadata } from '../types';
+import {
+  RestaurantPriceLevel,
+  getDynamicVipPlans,
+  VipPlanType,
+  isUserVipActive,
+  getVipAccountState,
+  GoogleMapsPlaceMetadata,
+  isValidGoogleMapsUrl,
+  extractCoordsFromGoogleMapsUrl,
+} from '../types';
 import { tr } from '../utils/i18n';
 import { GoogleMapsShopImporterModal, ImportedGoogleShopData } from './GoogleMapsShopImporterModal';
 import { ShopMultiPhotoUploader } from './ShopMultiPhotoUploader';
@@ -88,9 +97,7 @@ export const AddRestaurantModal: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [openingHoursKh, setOpeningHoursKh] = useState('០៧:០០ ព្រឹក - ០៩:០០ យប់');
   const [priceLevel, setPriceLevel] = useState<RestaurantPriceLevel>('$$');
-  const [shopPhotos, setShopPhotos] = useState<string[]>([
-    'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80'
-  ]);
+  const [shopPhotos, setShopPhotos] = useState<string[]>([]);
   const [descriptionKh, setDescriptionKh] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleImportModalOpen, setIsGoogleImportModalOpen] = useState(false);
@@ -129,13 +136,20 @@ export const AddRestaurantModal: React.FC = () => {
       showToast(isKm ? 'សូមបញ្ចូលលេខទូរស័ព្ទទាក់ទង!' : 'Please enter contact phone number!', 'warning');
       return;
     }
+    if (shopMapUrl.trim() && !isValidGoogleMapsUrl(shopMapUrl.trim())) {
+      showToast(
+        isKm
+          ? '⚠️ សូមបញ្ចូលលីង Google Maps ឱ្យបានត្រឹមត្រូវ (ឧ. https://maps.app.goo.gl/...)'
+          : '⚠️ Please enter a valid Google Maps link (e.g. https://maps.app.goo.gl/...)',
+        'warning'
+      );
+      return;
+    }
 
     setIsSubmitting(true);
 
-    const finalProfile =
-      (shopPhotos[0] || '').trim() ||
-      'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80';
-    const combinedGallery = Array.from(new Set([finalProfile, ...shopPhotos]));
+    const finalProfile = (shopPhotos[0] || '').trim();
+    const combinedGallery = finalProfile ? [finalProfile] : [];
 
     const created = addRestaurant({
       nameKh: nameKh.trim() || 'ហាងអាហារខ្មែរ',
@@ -228,10 +242,8 @@ export const AddRestaurantModal: React.FC = () => {
       Date.now() + activePlan.durationDays * 24 * 60 * 60 * 1000
     ).toISOString();
 
-    const finalProfile =
-      (shopPhotos[0] || '').trim() ||
-      'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80';
-    const combinedGallery = Array.from(new Set([finalProfile, ...shopPhotos]));
+    const finalProfile = (shopPhotos[0] || '').trim();
+    const combinedGallery = finalProfile ? [finalProfile] : [];
 
     const created = addRestaurant({
       id: generatedRestId,
@@ -628,7 +640,7 @@ export const AddRestaurantModal: React.FC = () => {
                     </div>
                     <ul className="text-[10px] text-slate-600 dark:text-slate-300 space-y-1">
                       <li className="text-[#064E3B] dark:text-emerald-400 font-bold">
-                        ✓ {isKm ? 'បញ្ជីមុខម្ហូប និងការពិពណ៌នា' : 'Menu items & descriptions'}
+                        ✓ {isKm ? 'បង្ហាញហាងអាទិភាព និងលីង Google Maps' : 'Featured shop & Google Maps link'}
                       </li>
                       <li>✓ {isKm ? 'រូបតំណាងហាង ១ សន្លឹកគត់' : 'Single shop profile photo'}</li>
                       <li>✓ {isKm ? 'កែប្រែព័ត៌មានហាងដោយខ្លួនឯង' : 'Self-service editing'}</li>
@@ -856,6 +868,35 @@ export const AddRestaurantModal: React.FC = () => {
               </div>
             </div>
 
+            {/* Dedicated Google Maps Location Link */}
+            <div className="space-y-1.5">
+              <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                🗺️ {isKm ? 'លីងទីតាំង Google Maps (Google Maps Link)' : 'Google Maps Location Link'}
+              </label>
+              <input
+                type="url"
+                value={shopMapUrl}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setShopMapUrl(val);
+                  const extracted = extractCoordsFromGoogleMapsUrl(val);
+                  if (extracted) {
+                    setShopLat(extracted.latitude);
+                    setShopLng(extracted.longitude);
+                  }
+                }}
+                placeholder="https://maps.app.goo.gl/... ឬ https://www.google.com/maps/..."
+                className="w-full px-3 py-2 rounded-xl border border-emerald-400/70 dark:border-emerald-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669] outline-none"
+              />
+              {shopMapUrl.trim() && (
+                <div className={`text-[10px] font-bold ${isValidGoogleMapsUrl(shopMapUrl) ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                  {isValidGoogleMapsUrl(shopMapUrl)
+                    ? (isKm ? '✅ លីង Google Maps ត្រឹមត្រូវ' : '✅ Valid Google Maps link')
+                    : (isKm ? '⚠️ សូមបញ្ចូលលីងពី Google Maps (ឧ. https://maps.app.goo.gl/...)' : '⚠️ Please enter a valid Google Maps link')}
+                </div>
+              )}
+            </div>
+
             {/* Opening Hours */}
             <div>
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
@@ -885,14 +926,14 @@ export const AddRestaurantModal: React.FC = () => {
               />
             </div>
 
-            {/* Unified Multi-Photo Uploader (Preview, Reorder, Remove, and Set Cover) */}
+            {/* Single Shop Photo Uploader (Strictly 1 Shop Photo Only — No Food Item Upload) */}
             <ShopMultiPhotoUploader
               photos={shopPhotos}
               onChangePhotos={setShopPhotos}
               shopName={nameKh}
               isKm={isKm}
               onToast={showToast}
-              maxPhotos={20}
+              maxPhotos={1}
             />
 
             {/* Submit Actions */}

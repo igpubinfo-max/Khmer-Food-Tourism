@@ -328,10 +328,13 @@ export const WhatToEatModal: React.FC = () => {
     turnSeed: 1,
   });
 
-  // Current dish index and history of seen dish IDs to prevent repetition
+  // Current dish index and history of seen dish IDs to prevent repetition across unlimited clicks
   const [currentDishId, setCurrentDishId] = useState<string>('');
   const [comparedDishIds, setComparedDishIds] = useState<string[]>([]);
+  const [spinCount, setSpinCount] = useState<number>(0);
   const seenDishIdsRef = useRef<Set<string>>(new Set());
+  const seenChatDishIdsRef = useRef<Set<string>>(new Set());
+  const seenCompareDishIdsRef = useRef<Set<string>>(new Set());
   const comparePanelRef = useRef<HTMLDivElement>(null);
   useBodyScrollLock(isWhatToEatModalOpen);
 
@@ -422,11 +425,11 @@ export const WhatToEatModal: React.FC = () => {
       restaurants,
       query: cravingQuery,
       goal: 'any',
-      seed: 0,
+      seed: spinCount + 1,
       language,
       canUseVip,
     });
-  }, [foods, restaurants, cravingQuery, language, canUseVip]);
+  }, [foods, restaurants, cravingQuery, spinCount, language, canUseVip]);
 
   // Check if the latest conversation turn or current input is a medical/disease question
   const lastAssistantMsg = useMemo(() => {
@@ -636,17 +639,37 @@ export const WhatToEatModal: React.FC = () => {
     }
 
     const pool = unseenCandidates.length > 0 ? unseenCandidates : activeDishList;
-    const nextPick = hasStructuredFilter
-      ? pool[0]
-      : pool[Math.floor(Math.random() * pool.length)];
+    const nextPick = pool[Math.floor(Math.random() * pool.length)];
 
     seenDishIdsRef.current.add(nextPick.id);
     return nextPick;
   };
 
+  const pickFreshNonRepeatingDishes = (
+    count: number,
+    seenSet: Set<string>,
+    excludeIds: string[] = []
+  ): FoodItem[] => {
+    const source = activeDishList.length > 0 ? activeDishList : foods;
+    if (source.length === 0) return [];
+    const exclude = new Set(excludeIds);
+    let unseen = source.filter((f) => !exclude.has(f.id) && !seenSet.has(f.id));
+    if (unseen.length < Math.min(count, source.length)) {
+      seenSet.clear();
+      unseen = source.filter((f) => !exclude.has(f.id));
+    }
+    const pool = unseen.length > 0 ? unseen : source;
+    const shuffled = [...pool].sort(() => 0.5 - Math.random());
+    const chosen = shuffled.slice(0, count);
+    chosen.forEach((f) => seenSet.add(f.id));
+    return chosen;
+  };
+
   useEffect(() => {
     if (!isWhatToEatModalOpen) {
       seenDishIdsRef.current.clear();
+      seenChatDishIdsRef.current.clear();
+      seenCompareDishIdsRef.current.clear();
       return;
     }
     if (foods.length > 0 && !isMedicalRefusalActive) {
@@ -678,12 +701,11 @@ export const WhatToEatModal: React.FC = () => {
     if (isMedicalRefusalActive || activeDishList.length <= 1) return [];
     const pool = activeDishList.filter((f) => f.id !== currentDish?.id);
     if (pool.length === 0) return [];
-    if (hasStructuredFilter) {
-      return pool.slice(0, 4);
-    }
-    const shuffled = [...pool].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 2);
-  }, [activeDishList, currentDish?.id, hasStructuredFilter, isMedicalRefusalActive]);
+    const unseen = pool.filter((f) => !seenDishIdsRef.current.has(f.id));
+    const candidates = unseen.length >= 2 ? unseen : pool;
+    const shuffled = [...candidates].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, hasStructuredFilter ? 4 : 2);
+  }, [activeDishList, currentDish?.id, hasStructuredFilter, isMedicalRefusalActive, spinCount]);
 
   const servingRestaurants = useMemo(() => {
     if (!currentDish) return [];
@@ -767,6 +789,7 @@ export const WhatToEatModal: React.FC = () => {
       setIsSpinning(true);
       setTimeout(() => {
         setSetPage((p) => (p + 1) % setPageCount);
+        setSpinCount((c) => c + 1);
         setIsSpinning(false);
       }, 200);
       return;
@@ -775,8 +798,77 @@ export const WhatToEatModal: React.FC = () => {
     setTimeout(() => {
       const nextDish = pickRandomDish(currentDish?.id);
       if (nextDish) setCurrentDishId(nextDish.id);
+      setSpinCount((c) => c + 1);
+
+      // Also refresh any dish cards displayed in the active AI conversation message so the top card updates on every click!
+      setChatMessages((prev) => {
+        const lastIdx = [...prev].map((m) => m.role).lastIndexOf('assistant');
+        if (lastIdx === -1) return prev;
+        const targetMsg = prev[lastIdx];
+        if (!targetMsg.dishes || targetMsg.dishes.length === 0 || targetMsg.isScopeRefusal) {
+          return prev;
+        }
+        const currentMsgDishIds = targetMsg.dishes.map((d) => d.id);
+        const freshChatDishes = pickFreshNonRepeatingDishes(
+          Math.max(3, targetMsg.dishes.length),
+          seenChatDishIdsRef.current,
+          currentMsgDishIds
+        );
+        if (freshChatDishes.length === 0) return prev;
+        if (nextDish && !freshChatDishes.some((d) => d.id === nextDish.id)) {
+          freshChatDishes[0] = nextDish;
+        }
+        const freshSimilar = pickFreshNonRepeatingDishes(
+          4,
+          seenChatDishIdsRef.current,
+          freshChatDishes.map((d) => d.id)
+        );
+        const updatedMsg: AiAssistantMessage = {
+          ...targetMsg,
+          dishes: freshChatDishes,
+          similarDishes: freshSimilar.length > 0 ? freshSimilar : targetMsg.similarDishes,
+        };
+        const nextList = [...prev];
+        nextList[lastIdx] = updatedMsg;
+        return nextList;
+      });
+
+      // If the Side-by-Side Comparison panel is open, also rotate compared dishes to a fresh non-repeating set
+      setComparedDishIds((prev) => {
+        if (prev.length === 0) return prev;
+        const freshCompare = pickFreshNonRepeatingDishes(3, seenCompareDishIdsRef.current, prev);
+        return freshCompare.length >= 2 ? freshCompare.map((d) => d.id) : prev;
+      });
+
       setIsSpinning(false);
-    }, 240);
+    }, 220);
+  };
+
+  const handleCycleCompareDishes = (preferredPool?: FoodItem[]) => {
+    setIsSpinning(true);
+    setTimeout(() => {
+      const source = preferredPool && preferredPool.length >= 2 ? preferredPool : activeDishList.length >= 2 ? activeDishList : foods;
+      let unseen = source.filter(
+        (f) => !comparedDishIds.includes(f.id) && !seenCompareDishIdsRef.current.has(f.id)
+      );
+      if (unseen.length < 3) {
+        seenCompareDishIdsRef.current.clear();
+        unseen = source.filter((f) => !comparedDishIds.includes(f.id));
+      }
+      const pool = unseen.length >= 2 ? unseen : source;
+      const shuffled = [...pool].sort(() => 0.5 - Math.random());
+      const nextCompare = shuffled.slice(0, 3);
+      nextCompare.forEach((d) => seenCompareDishIdsRef.current.add(d.id));
+      setComparedDishIds(nextCompare.map((d) => d.id));
+      if (nextCompare[0]) {
+        setCurrentDishId(nextCompare[0].id);
+      }
+      setSpinCount((c) => c + 1);
+      setIsSpinning(false);
+      setTimeout(() => {
+        comparePanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 60);
+    }, 180);
   };
 
   const handleFindNearbyForDish = () => {
@@ -1246,7 +1338,7 @@ export const WhatToEatModal: React.FC = () => {
                                 {msg.dishes.length >= 2 && (
                                   <button
                                     type="button"
-                                    onClick={() => setComparedDishIds(msg.dishes!.slice(0, 3).map((d) => d.id))}
+                                    onClick={() => handleCycleCompareDishes( activeDishList.length >= 3 ? activeDishList : msg.dishes)}
                                     className="px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-[10px] font-extrabold text-amber-900 dark:text-amber-200 hover:bg-amber-200 transition cursor-pointer"
                                   >
                                     ⚖️ {tr(language, 'ប្រៀបធៀបទាំងអស់', 'Compare All', '一键对比')}
@@ -1848,15 +1940,8 @@ export const WhatToEatModal: React.FC = () => {
                   {matchingFoods.length >= 2 && (
                     <button
                       type="button"
-                      onClick={() =>
-                        setComparedDishIds(
-                          [currentDish, ...alternativeDishes.slice(0, 2)]
-                            .filter(Boolean)
-                            .slice(0, 3)
-                            .map((d) => d.id)
-                        )
-                      }
-                      className="px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-[10px] font-black shrink-0 shadow-2xs transition cursor-pointer"
+                      onClick={() => handleCycleCompareDishes()}
+                      className="px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-[10px] font-black shrink-0 shadow-2xs transition active:scale-95 cursor-pointer"
                     >
                       ⚖️ {tr(language, 'ប្រៀបធៀបម្ហូប', 'Compare Dishes', '对比菜品')}
                     </button>
@@ -2083,16 +2168,18 @@ export const WhatToEatModal: React.FC = () => {
         <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0">
           <button
             id="kft-wte-next-dish-btn"
+            type="button"
             onClick={handleShowAnother}
-            disabled={isSpinning}
             className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-500 text-stone-900 font-black text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98] font-khmer cursor-pointer"
           >
             <Shuffle className={`w-5 h-5 ${isSpinning ? 'animate-spin' : ''}`} />
             <span>
-              {showSets
-                ? tr(language, 'បង្ហាញឈុតម្ហូបផ្សេងទៀត', 'Show More Sets', '查看更多套餐')
-                : tr(language, 'បង្ហាញម្ហូបផ្សេងទៀត', 'Recommend Another Dish', '换一道推荐菜品')}
-                        </span>
+              {isSpinning
+                ? tr(language, 'កំពុងជ្រើសរើសម្ហូបថ្មី...', 'Generating New Dish...', '正在为您更换新推荐...')
+                : showSets
+                  ? tr(language, 'បង្ហាញឈុតម្ហូបផ្សេងទៀត', 'Show More Sets', '查看更多套餐')
+                  : tr(language, 'បង្ហាញម្ហូបផ្សេងទៀត', 'Recommend Another Dish', '换一道推荐菜品')}
+            </span>
           </button>
         </div>
       </div>

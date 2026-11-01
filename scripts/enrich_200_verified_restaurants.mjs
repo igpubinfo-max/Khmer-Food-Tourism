@@ -39,73 +39,24 @@ if (!fs.existsSync(TEMPLATES_DIR)) {
   fs.mkdirSync(TEMPLATES_DIR, { recursive: true });
 }
 
-// Curated pool of existing real restaurant/dining JPEGs already in public/Shop/ categorized by venue style
-const EXISTING_SHOP_PHOTOS_BY_STYLE = {
-  fine_dining: [
-    'rest-1.jpg',
-    'rest-2.jpg',
-    'rest-4.jpg',
-    'rest-5.jpg',
-    'rest-8.jpg',
-    'rest-9.jpg',
-    'rest-11.jpg',
-    'rest-12.jpg',
-    'rest-13.jpg',
-    'rest-14.jpg',
-    'rest-15.jpg',
-    'rest-16.jpg',
-  ],
-  cafe_bakery: [
-    'rest-3.jpg',
-    'rest-17.jpg',
-    'rest-18.jpg',
-    'rest-20.jpg',
-    'rest-21.jpg',
-    'rest-22.jpg',
-    'rest-23.jpg',
-    'rest-29.jpg',
-    'rest-33.jpg',
-    'rest-35.jpg',
-    'rest-41.jpg',
-    'rest-44.jpg',
-  ],
-  seafood_riverside: [
-    'rest-10.jpg',
-    'rest-19.jpg',
-    'rest-25.jpg',
-    'rest-26.jpg',
-    'rest-27.jpg',
-    'rest-30.jpg',
-    'rest-31.jpg',
-    'rest-32.jpg',
-    'rest-36.jpg',
-    'rest-37.jpg',
-    'rest-38.jpg',
-    'rest-45.jpg',
-    'rest-46.jpg',
-    'rest-chumnor-kbal-koh-main.jpg',
-    'rest-chumnor-kbal-koh-gallery-1.jpg',
-  ],
-  bbq_grill: [
-    'rest-6.jpg',
-    'rest-7.jpg',
-    'rest-24.jpg',
-    'rest-28.jpg',
-    'rest-34.jpg',
-    'rest-39.jpg',
-    'rest-40.jpg',
-    'rest-42.jpg',
-    'rest-43.jpg',
-    'rest-47.jpg',
-    'rest-48.jpg',
-    'rest-49.jpg',
-    'rest-50.jpg',
-    'rest-51.jpg',
-    'rest-52.jpg',
-    'rest-chumnor-kbal-koh-gallery-2.jpg',
-    'rest-chumnor-kbal-koh-menu-1.jpg',
-  ],
-};
+// Strictly verified 1-to-1 unique shop photos in public/Shop/ (zero cloned, shared, or scenery photos)
+const STRICTLY_VERIFIED_UNIQUE_SHOP_PHOTOS = new Set([
+  'rest-1',
+  'rest-2',
+  'rest-5',
+  'rest-7',
+  'rest-8',
+  'rest-9',
+  'rest-10',
+  'rest-11',
+  'rest-12',
+  'rest-13',
+  'rest-15',
+  'rest-18',
+  'rest-20',
+  'rest-21',
+  'rest-25',
+]);
 
 function classifyShopStyle(r) {
   const text = `${r.nameKh || ''} ${r.nameEn || ''} ${r.descriptionKh || ''} ${r.descriptionEn || ''}`.toLowerCase();
@@ -265,27 +216,32 @@ function enrichRatingAndReviews(r, index) {
   return { rating, reviewCount };
 }
 
-function ensureBundledShopPhoto(r, style, index) {
+function ensureBundledShopPhoto(r) {
+  if (!STRICTLY_VERIFIED_UNIQUE_SHOP_PHOTOS.has(r.id)) {
+    return '';
+  }
   const targetFile = `${r.id}.jpg`;
   const targetDiskPath = path.join(PUBLIC_SHOP_DIR, targetFile);
   if (fs.existsSync(targetDiskPath) && fs.statSync(targetDiskPath).size >= 4096) {
     return `/Shop/${targetFile}`;
   }
+  return '';
+}
 
-  const stylePool = EXISTING_SHOP_PHOTOS_BY_STYLE[style] || EXISTING_SHOP_PHOTOS_BY_STYLE.fine_dining;
-  const sourceFile = stylePool[index % stylePool.length];
-  const sourceDiskPath = path.join(PUBLIC_SHOP_DIR, sourceFile);
-  if (fs.existsSync(sourceDiskPath)) {
-    fs.copyFileSync(sourceDiskPath, targetDiskPath);
-    return `/Shop/${targetFile}`;
+function purgeClonedAndUnverifiedShopPhotos() {
+  if (!fs.existsSync(PUBLIC_SHOP_DIR)) return;
+  const files = fs.readdirSync(PUBLIC_SHOP_DIR);
+  let removed = 0;
+  for (const f of files) {
+    if (!f.toLowerCase().endsWith('.jpg')) continue;
+    const baseId = f.replace(/\.jpg$/i, '');
+    if (/^rest-chumnor-kbal-koh-[a-z0-9-]+$/i.test(baseId)) continue;
+    if (!STRICTLY_VERIFIED_UNIQUE_SHOP_PHOTOS.has(baseId)) {
+      fs.unlinkSync(path.join(PUBLIC_SHOP_DIR, f));
+      removed++;
+    }
   }
-
-  // Fallback to rest-1.jpg
-  const fallbackSource = path.join(PUBLIC_SHOP_DIR, 'rest-1.jpg');
-  if (fs.existsSync(fallbackSource)) {
-    fs.copyFileSync(fallbackSource, targetDiskPath);
-  }
-  return `/Shop/${targetFile}`;
+  console.log(`[Shop Photos Audit] Purged ${removed} cloned/unverified shop photos from public/Shop/.`);
 }
 
 async function generateShop200ExcelTemplate(restaurants) {
@@ -358,8 +314,8 @@ async function generateShop200ExcelTemplate(restaurants) {
     ];
     row.height = 72;
 
-    const diskPhotoPath = path.join(PUBLIC_SHOP_DIR, `${r.id}.jpg`);
-    if (fs.existsSync(diskPhotoPath)) {
+    const diskPhotoPath = r.photoUrl ? path.join(PUBLIC_SHOP_DIR, `${r.id}.jpg`) : '';
+    if (diskPhotoPath && fs.existsSync(diskPhotoPath)) {
       try {
         const imgId = wb.addImage({
           filename: diskPhotoPath,
@@ -387,16 +343,11 @@ async function main() {
   }
   const existing = JSON.parse(raw.slice(startIdx + 2, endIdx + 1));
 
-  // Create high-resolution culinary placeholder in public/Shop/culinary-placeholder.jpg
-  const placeholderPath = path.join(PUBLIC_SHOP_DIR, 'culinary-placeholder.jpg');
-  const refPhotoPath = path.join(PUBLIC_SHOP_DIR, 'rest-1.jpg');
-  if (!fs.existsSync(placeholderPath) && fs.existsSync(refPhotoPath)) {
-    fs.copyFileSync(refPhotoPath, placeholderPath);
-  }
+  purgeClonedAndUnverifiedShopPhotos();
 
   const enriched = existing.map((r, idx) => {
     const style = classifyShopStyle(r);
-    const localPhotoUrl = ensureBundledShopPhoto(r, style, idx);
+    const localPhotoUrl = ensureBundledShopPhoto(r);
     const { descriptionKh, descriptionEn } = enrichDescriptions(r, style);
     const phone = enrichPhone(r.phone, idx);
     const { openingHoursKh, openingHoursEn } = enrichOpeningHours(r, style);
@@ -418,7 +369,7 @@ async function main() {
       descriptionKh,
       descriptionEn,
       photoUrl: localPhotoUrl,
-      galleryPhotos: [localPhotoUrl],
+      galleryPhotos: localPhotoUrl ? [localPhotoUrl] : [],
       addressKh: String(r.addressKh || '').trim(),
       addressEn: String(r.addressEn || '').trim(),
       provinceKh: provDef.provinceKh,

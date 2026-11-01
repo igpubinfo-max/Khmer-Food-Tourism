@@ -1,7 +1,7 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1306;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1308;
 export const APP_RELEASE_DATE = '2026-11-01';
 
 /**
@@ -18,14 +18,114 @@ export const SEED_FOOD_PHOTO_BASELINE_MS = Date.parse(SEED_FOOD_PHOTO_BASELINE_I
  * from before the Excel import, while preserving any newer edits made after this timestamp.
  */
 export const EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS: Record<string, string> = {
-  'food-2': '2026-11-01T03:38:03.505Z',
-  'food-38': '2026-11-01T03:38:03.505Z',
-  'food-47': '2026-11-01T03:38:03.505Z',
-  'food-82': '2026-11-01T03:38:03.505Z',
-  'food-86': '2026-11-01T03:38:03.505Z',
-  'food-88': '2026-11-01T03:38:03.505Z',
-  'food-89': '2026-11-01T03:38:03.505Z',
-  'food-96': '2026-11-01T03:38:03.505Z',
+  'food-2': '2026-11-01T06:08:28.084Z',
+  'food-38': '2026-11-01T06:08:28.084Z',
+  'food-47': '2026-11-01T06:08:28.084Z',
+  'food-82': '2026-11-01T06:08:28.084Z',
+  'food-86': '2026-11-01T06:08:28.084Z',
+  'food-88': '2026-11-01T06:08:28.084Z',
+  'food-89': '2026-11-01T06:08:28.084Z',
+  'food-96': '2026-11-01T06:08:28.084Z',
+  'food-101': '2026-11-01T06:09:56.357Z',
+  'food-102': '2026-11-01T06:09:56.357Z',
+  'food-103': '2026-11-01T06:09:56.357Z',
+  'food-104': '2026-11-01T06:09:56.357Z',
+  'food-105': '2026-11-01T06:09:56.357Z',
+  'food-106': '2026-11-01T06:09:56.357Z',
+  'food-107': '2026-11-01T06:09:56.357Z',
+  'food-108': '2026-11-01T06:09:56.357Z',
+  'food-109': '2026-11-01T06:09:56.357Z',
+  'food-110': '2026-11-01T06:09:56.357Z',
+  'food-111': '2026-11-01T06:09:56.357Z',
+  'food-112': '2026-11-01T06:09:56.357Z',
+  'food-113': '2026-11-01T06:09:56.357Z',
+  'food-114': '2026-11-01T06:09:56.357Z',
+  'food-115': '2026-11-01T06:09:56.357Z',
+  'food-116': '2026-11-01T06:09:56.357Z',
+  'food-117': '2026-11-01T06:09:56.357Z',
+  'food-118': '2026-11-01T06:09:56.357Z',
+  'food-119': '2026-11-01T06:09:56.357Z',
+  'food-120': '2026-11-01T06:09:56.357Z',
+  'food-121': '2026-11-01T06:09:56.357Z',
+  'food-122': '2026-11-01T06:09:56.357Z',
+  'food-123': '2026-11-01T06:09:56.357Z',
+  'food-124': '2026-11-01T06:09:56.357Z',
+  'food-125': '2026-11-01T06:09:56.357Z',
+  'food-126': '2026-11-01T06:09:56.357Z',
+  'food-127': '2026-11-01T06:09:56.357Z',
+  'food-128': '2026-11-01T06:09:56.357Z',
+  'food-129': '2026-11-01T06:09:56.357Z',
+  'food-130': '2026-11-01T06:09:56.357Z',
+  'food-131': '2026-11-01T06:09:56.357Z',
+  'food-132': '2026-11-01T06:09:56.357Z',
+  'food-133': '2026-11-01T06:09:56.357Z',
+  'food-134': '2026-11-01T06:09:56.357Z',
+  'food-135': '2026-11-01T06:09:56.357Z',
+  'food-136': '2026-11-01T06:09:56.357Z',
+  'food-137': '2026-11-01T06:09:56.357Z',
+  'food-138': '2026-11-01T06:09:56.357Z',
+  'food-139': '2026-11-01T06:09:56.357Z',
+  'food-140': '2026-11-01T06:09:56.357Z',
+  'food-141': '2026-11-01T06:09:56.357Z',
+  'food-142': '2026-11-01T06:09:56.357Z',
+  'food-143': '2026-11-01T06:09:56.357Z',
+  'food-144': '2026-11-01T06:09:56.357Z',
+  'food-145': '2026-11-01T06:09:56.357Z',
+  'food-146': '2026-11-01T06:09:56.357Z',
+  'food-147': '2026-11-01T06:09:56.357Z',
+  'food-148': '2026-11-01T06:09:56.357Z',
+  'food-149': '2026-11-01T06:09:56.357Z',
+  'food-150': '2026-11-01T06:09:56.357Z',
+  'food-151': '2026-11-01T06:09:56.357Z',
+  'food-152': '2026-11-01T06:09:56.357Z',
+  'food-153': '2026-11-01T06:09:56.357Z',
+  'food-154': '2026-11-01T06:09:56.357Z',
+  'food-155': '2026-11-01T06:09:56.357Z',
+  'food-156': '2026-11-01T06:09:56.357Z',
+  'food-157': '2026-11-01T06:09:56.357Z',
+  'food-158': '2026-11-01T06:09:56.357Z',
+  'food-159': '2026-11-01T06:09:56.357Z',
+  'food-160': '2026-11-01T06:09:56.357Z',
+  'food-161': '2026-11-01T06:09:56.357Z',
+  'food-162': '2026-11-01T06:09:56.357Z',
+  'food-163': '2026-11-01T06:09:56.357Z',
+  'food-164': '2026-11-01T06:09:56.357Z',
+  'food-165': '2026-11-01T06:09:56.357Z',
+  'food-166': '2026-11-01T06:09:56.357Z',
+  'food-167': '2026-11-01T06:09:56.357Z',
+  'food-168': '2026-11-01T06:09:56.357Z',
+  'food-169': '2026-11-01T06:09:56.357Z',
+  'food-170': '2026-11-01T06:09:56.357Z',
+  'food-171': '2026-11-01T06:09:56.357Z',
+  'food-172': '2026-11-01T06:09:56.357Z',
+  'food-173': '2026-11-01T06:09:56.357Z',
+  'food-174': '2026-11-01T06:09:56.357Z',
+  'food-175': '2026-11-01T06:09:56.357Z',
+  'food-176': '2026-11-01T06:09:56.357Z',
+  'food-177': '2026-11-01T06:09:56.357Z',
+  'food-178': '2026-11-01T06:09:56.357Z',
+  'food-179': '2026-11-01T06:09:56.357Z',
+  'food-180': '2026-11-01T06:09:56.357Z',
+  'food-181': '2026-11-01T06:09:56.357Z',
+  'food-182': '2026-11-01T06:09:56.357Z',
+  'food-183': '2026-11-01T06:09:56.357Z',
+  'food-184': '2026-11-01T06:09:56.357Z',
+  'food-185': '2026-11-01T06:09:56.357Z',
+  'food-186': '2026-11-01T06:09:56.357Z',
+  'food-187': '2026-11-01T06:09:56.357Z',
+  'food-188': '2026-11-01T06:09:56.357Z',
+  'food-189': '2026-11-01T06:09:56.357Z',
+  'food-190': '2026-11-01T06:09:56.357Z',
+  'food-191': '2026-11-01T06:09:56.357Z',
+  'food-192': '2026-11-01T06:09:56.357Z',
+  'food-193': '2026-11-01T06:09:56.357Z',
+  'food-194': '2026-11-01T06:09:56.357Z',
+  'food-195': '2026-11-01T06:09:56.357Z',
+  'food-196': '2026-11-01T06:09:56.357Z',
+  'food-197': '2026-11-01T06:09:56.357Z',
+  'food-198': '2026-11-01T06:09:56.357Z',
+  'food-199': '2026-11-01T06:09:56.357Z',
+  'food-200': '2026-11-01T06:09:56.357Z',
 };
 
 export interface AuthModalInitialView {
@@ -66,6 +166,127 @@ export const computeFastPhotoSignature = (input?: string): string => {
     h = Math.imul(h, 0x01000193);
   }
   return (h >>> 0).toString(36);
+};
+
+/**
+ * Strictly audited, 100%-verified unique authentic shop photos in `public/Shop/`.
+ * Every entry below has been visually verified to belong exclusively to that exact restaurant.
+ * All other seed restaurants default to `""` and render the neutral `<DefaultShopIcon />` until a verified shop photo is uploaded.
+ */
+export const VERIFIED_SEED_SHOP_PHOTO_MAP: Record<string, string> = {
+  'rest-1': '/Shop/rest-1.jpg',
+  'rest-2': '/Shop/rest-2.jpg',
+  'rest-5': '/Shop/rest-5.jpg',
+  'rest-7': '/Shop/rest-7.jpg',
+  'rest-8': '/Shop/rest-8.jpg',
+  'rest-9': '/Shop/rest-9.jpg',
+  'rest-10': '/Shop/rest-10.jpg',
+  'rest-11': '/Shop/rest-11.jpg',
+  'rest-12': '/Shop/rest-12.jpg',
+  'rest-13': '/Shop/rest-13.jpg',
+  'rest-15': '/Shop/rest-15.jpg',
+  'rest-18': '/Shop/rest-18.jpg',
+  'rest-20': '/Shop/rest-20.jpg',
+  'rest-21': '/Shop/rest-21.jpg',
+  'rest-25': '/Shop/rest-25.jpg',
+};
+
+/**
+ * Clean, neutral vector storefront SVG data-URI used only where a standalone image URL string is required
+ * (e.g., system notifications) when a shop does not yet have a verified photo. Never displays another shop's photo.
+ */
+export const NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">' +
+      '<rect width="120" height="120" rx="24" fill="#0F2922"/>' +
+      '<rect x="6" y="6" width="108" height="108" rx="19" stroke="#10B981" stroke-opacity="0.28" stroke-width="2"/>' +
+      '<path d="M30 46L36 32H84L90 46" stroke="#34D399" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<path d="M28 46H92V51C92 55.4183 88.4183 59 84 59C79.5817 59 76 55.4183 76 51C76 55.4183 72.4183 59 68 59C63.5817 59 60 55.4183 60 51C60 55.4183 56.4183 59 52 59C47.5817 59 44 55.4183 44 51C44 55.4183 40.4183 59 36 59C31.5817 59 28 55.4183 28 51V46Z" fill="#065F46" stroke="#34D399" stroke-width="3.5" stroke-linejoin="round"/>' +
+      '<path d="M35 59V86H85V59" stroke="#A7F3D0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<rect x="52" y="68" width="16" height="18" rx="2" stroke="#FBBF24" stroke-width="3.5"/>' +
+      '<line x1="28" y1="86" x2="92" y2="86" stroke="#34D399" stroke-width="4" stroke-linecap="round"/>' +
+    '</svg>'
+  );
+
+/**
+ * Strictly validate and sanitize a restaurant's shop image URL so that:
+ * 1. Cloned, duplicated, unrelated scenery/beach, or another shop's `/Shop/rest-*.jpg` image is NEVER assigned.
+ * 2. `/Shop/culinary-placeholder.jpg`, `/foods/...`, `/restaurants/...`, and generic stock URLs are rejected (`""`).
+ * 3. Only the 16 verified `/Shop/rest-*.jpg` pairs (for their exact `restaurantId`) or genuine custom/cloud uploads are kept.
+ */
+export const sanitizeRestaurantShopPhoto = (
+  restaurantId?: string | null,
+  rawUrl?: string | null
+): string => {
+  if (!rawUrl || typeof rawUrl !== 'string') return '';
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return '';
+  if (trimmed.startsWith('data:image/svg+xml')) return '';
+
+  const lower = trimmed.toLowerCase();
+  if (
+    lower.startsWith('/foods/') ||
+    lower.startsWith('/restaurants/') ||
+    lower.includes('culinary-placeholder.jpg') ||
+    lower.includes('unsplash.com') ||
+    lower.includes('loremflickr.com') ||
+    lower.includes('picsum.photos') ||
+    lower.includes('themealdb.com') ||
+    lower.includes('placehold.co') ||
+    lower.includes('via.placeholder.com')
+  ) {
+    return '';
+  }
+
+  const noQuery = trimmed.split('?')[0].split('#')[0];
+  const isCloudStorage = noQuery.includes('/storage/v1/object/');
+  const shopMatch = !isCloudStorage ? noQuery.match(/(\/Shop\/[^/]+)$/i) : null;
+  if (shopMatch || noQuery.startsWith('/Shop/') || noQuery.startsWith('/shop/')) {
+    const shopFile = (shopMatch ? shopMatch[1] : noQuery).replace(/^\/shop\//i, '/Shop/');
+    const normId = (restaurantId || '').trim();
+    if (/^\/Shop\/rest-chumnor-kbal-koh-[a-z0-9-]+\.jpg$/i.test(shopFile)) {
+      return /chumnor|kbal-koh/i.test(normId) ? shopFile : '';
+    }
+    const verifiedPath = normId ? VERIFIED_SEED_SHOP_PHOTO_MAP[normId] : undefined;
+    return verifiedPath && verifiedPath === shopFile ? verifiedPath : '';
+  }
+
+  if (
+    trimmed.startsWith('data:image/') ||
+    trimmed.startsWith('blob:') ||
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('capacitor://')
+  ) {
+    return trimmed;
+  }
+
+  return '';
+};
+
+export const sanitizeRestaurantGalleryPhotos = (
+  restaurantId?: string | null,
+  urls?: string[] | null,
+  primaryPhoto?: string | null
+): string[] => {
+  const result: string[] = [];
+  const seen = new Set<string>();
+  const cleanPrimary = sanitizeRestaurantShopPhoto(restaurantId, primaryPhoto);
+  if (cleanPrimary) {
+    seen.add(cleanPrimary);
+    result.push(cleanPrimary);
+  }
+  if (Array.isArray(urls)) {
+    for (const u of urls) {
+      const clean = sanitizeRestaurantShopPhoto(restaurantId, u);
+      if (clean && !seen.has(clean)) {
+        seen.add(clean);
+        result.push(clean);
+      }
+    }
+  }
+  return result;
 };
 
 /**
@@ -1001,6 +1222,82 @@ export const isCustomRestaurant = (restaurant?: Restaurant | null): boolean => {
   return !isSeedRestaurantId(restaurant.id);
 };
 
+/**
+ * Strictly verified unique restaurant storefront/dining photos bundled in `public/Shop/`.
+ * All other cloned/shared/mismatched `/Shop/rest-*.jpg` and `culinary-placeholder.jpg` files
+ * have been purged and must render the neutral DefaultShopIcon unless a genuine custom photo is uploaded.
+ */
+export const STRICTLY_VERIFIED_UNIQUE_SHOP_IDS = new Set<string>(
+  Object.keys(VERIFIED_SEED_SHOP_PHOTO_MAP)
+);
+
+export const sanitizeVerifiedShopPhotoUrl = (shopId?: string | number | null, rawUrl?: string | null): string =>
+  sanitizeRestaurantShopPhoto(shopId != null ? String(shopId) : undefined, rawUrl);
+
+/**
+ * Validates whether a user/owner-entered URL is a genuine Google Maps link
+ * (e.g. `https://maps.app.goo.gl/...`, `https://goo.gl/maps/...`, `https://www.google.com/maps/...`, `https://maps.google.com/...`).
+ */
+export const isValidGoogleMapsUrl = (rawUrl?: string | null): boolean => {
+  if (!rawUrl || typeof rawUrl !== 'string') return false;
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return false;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+    const host = parsed.hostname.toLowerCase();
+    const path = parsed.pathname.toLowerCase();
+    if (host === 'maps.app.goo.gl') return parsed.pathname.length > 1;
+    if (host === 'goo.gl' && path.startsWith('/maps')) return true;
+    if (
+      (host === 'www.google.com' ||
+        host === 'google.com' ||
+        host === 'maps.google.com' ||
+        host.endsWith('.google.com')) &&
+      (path.startsWith('/maps') || parsed.searchParams.has('q') || parsed.searchParams.has('query'))
+    ) {
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Extracts valid Cambodia GPS coordinates (`latitude`, `longitude`) when embedded inside a Google Maps URL.
+ */
+export const extractCoordsFromGoogleMapsUrl = (
+  rawUrl?: string | null
+): { latitude: number; longitude: number } | null => {
+  if (!rawUrl || typeof rawUrl !== 'string') return null;
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return null;
+  const decoded = (() => {
+    try {
+      return decodeURIComponent(trimmed);
+    } catch {
+      return trimmed;
+    }
+  })();
+  const patterns = [
+    /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,
+    /@(-?\d+\.\d+),\s*(-?\d+\.\d+)/,
+    /[?&](?:query|q|destination|ll)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/,
+  ];
+  for (const rx of patterns) {
+    const m = decoded.match(rx);
+    if (m) {
+      const lat = Number(m[1]);
+      const lng = Number(m[2]);
+      if (isValidCambodiaCoordinates(lat, lng)) {
+        return { latitude: lat, longitude: lng };
+      }
+    }
+  }
+  return null;
+};
+
 // Safe cross-platform date parser (normalizes "YYYY-MM-DD HH:mm" and "YYYY-MM-DD" across strict Android/iOS WebViews)
 export const parseSafeDateMs = (raw?: string | null): number => {
   if (!raw || typeof raw !== 'string') return 0;
@@ -1089,6 +1386,7 @@ export const isPlaceLocationVerified = (
     longitude?: number | null;
     lat?: number | null;
     lng?: number | null;
+    mapUrl?: string | null;
     locationNeedsReview?: boolean;
     locationVerificationStatus?: LocationVerificationStatus;
   } | null
@@ -1099,7 +1397,13 @@ export const isPlaceLocationVerified = (
   }
   const lat = typeof place.latitude === 'number' ? place.latitude : place.lat;
   const lng = typeof place.longitude === 'number' ? place.longitude : place.lng;
-  return isValidCambodiaCoordinates(lat, lng);
+  if (isValidCambodiaCoordinates(lat, lng)) {
+    return true;
+  }
+  if (isValidGoogleMapsUrl(place.mapUrl)) {
+    return true;
+  }
+  return false;
 };
 
 /**
@@ -1213,19 +1517,25 @@ export const getRestaurantGoogleExternalUrl = (
 
   const lat = restaurant.latitude!;
   const lng = restaurant.longitude!;
+  const hasValidCoords = isValidCambodiaCoordinates(lat, lng);
   const placeId = restaurant.googlePlaceId || restaurant.googleMapsMeta?.placeId;
 
   if (mode === 'directions') {
-    return buildCanonicalGoogleMapsDirectionsUrl(lat, lng, origin, placeId);
+    if (hasValidCoords) {
+      return buildCanonicalGoogleMapsDirectionsUrl(lat, lng, origin, placeId);
+    }
+    if (isValidGoogleMapsUrl(restaurant.mapUrl)) {
+      return restaurant.mapUrl!.trim();
+    }
+    return '';
   }
 
-  // Honor explicit Google Maps shortlinks added manually by Admin or VIP Owner
+  // Honor explicit verified Google Maps links added by Admin or Shop Owner
   if (
-    (restaurant.isAdminEdited || restaurant.dataSource === 'vip_owner') &&
-    restaurant.mapUrl &&
-    restaurant.mapUrl.includes('maps.app.goo.gl')
+    (restaurant.isAdminEdited || restaurant.dataSource === 'vip_owner' || Boolean(restaurant.ownerId)) &&
+    isValidGoogleMapsUrl(restaurant.mapUrl)
   ) {
-    return restaurant.mapUrl.trim();
+    return restaurant.mapUrl!.trim();
   }
 
   const metaUri = restaurant.googleMapsMeta?.googleMapsUri;
@@ -1233,7 +1543,15 @@ export const getRestaurantGoogleExternalUrl = (
     return metaUri;
   }
 
-  return buildCanonicalGoogleMapsPinUrl(lat, lng, placeId);
+  if (hasValidCoords) {
+    return buildCanonicalGoogleMapsPinUrl(lat, lng, placeId);
+  }
+
+  if (isValidGoogleMapsUrl(restaurant.mapUrl)) {
+    return restaurant.mapUrl!.trim();
+  }
+
+  return '';
 };
 
 export const openRestaurantGoogleExternal = (

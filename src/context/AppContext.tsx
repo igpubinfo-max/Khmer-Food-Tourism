@@ -15,6 +15,7 @@ import {
   parseSafeDateMs, isGpipRegisteredRestaurant, openRestaurantGoogleExternal,
   isValidCambodiaCoordinates, isValidOfficialGooglePlaceId, buildCanonicalGoogleMapsPinUrl,
   isStrictVerifiedCambodiaRestaurant, SEED_FOOD_PHOTO_BASELINE_MS,
+  sanitizeVerifiedShopPhotoUrl, isValidGoogleMapsUrl, extractCoordsFromGoogleMapsUrl,
   AuthModalInitialView, hasAuthenticatedEmailAccount, computeFastPhotoSignature,
   APP_VERSION_NAME, APP_BUILD_CODE
 } from '../types';
@@ -1010,36 +1011,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const membershipTier = (r.membershipTier || (isPromoted ? 'premium' : 'free')) as MembershipTier;
     const membershipExpiresAt = r.membershipExpiresAt || (membershipTier === 'premium' ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() : undefined);
     
+    const restId = r.id || `rest-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const isSeed = isSeedRestaurantId(restId);
+
     const galleryPhotos: string[] = Array.isArray(r.galleryPhotos) && r.galleryPhotos.length > 0
-      ? r.galleryPhotos.filter(Boolean)
-      : [r.photoUrl || r.profileImage].filter(Boolean);
+      ? r.galleryPhotos
+          .map((u: string) => sanitizeVerifiedShopPhotoUrl(restId, u))
+          .filter(Boolean)
+      : [sanitizeVerifiedShopPhotoUrl(restId, r.photoUrl || r.profileImage)].filter(Boolean);
     const gallerySet = new Set(galleryPhotos);
     const foodImages: string[] = Array.isArray(r.foodImages)
       ? r.foodImages.filter((u: string) => u && !gallerySet.has(u))
       : [];
 
-    const restId = r.id || `rest-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-    const isSeed = isSeedRestaurantId(restId);
-    const defaultFallbackPhoto = isSeed ? `/Shop/${restId}.jpg` : '/Shop/culinary-placeholder.jpg';
-
-    // Preserve exact matched photoUrl for each restaurant without cross-assigning another shop's storefront sign
-    // Never allow a broken path (/restaurants/...) or dish photo (/foods/...) as the restaurant's primary photoUrl
-    const rawPhoto = r.photoUrl || r.profileImage || galleryPhotos[0] || defaultFallbackPhoto;
-    const photoUrl =
-      typeof rawPhoto === 'string' &&
-      rawPhoto.trim().length > 0 &&
-      !rawPhoto.startsWith('/restaurants/') &&
-      !rawPhoto.startsWith('/foods/')
-        ? rawPhoto
-        : defaultFallbackPhoto;
+    // Preserve ONLY verified unique shop photos or genuine custom uploads; otherwise empty string ('') so neutral DefaultShopIcon renders
+    const rawPhoto = r.photoUrl || r.profileImage || galleryPhotos[0] || '';
+    const photoUrl = sanitizeVerifiedShopPhotoUrl(restId, rawPhoto);
     const rawProfile = r.profileImage || photoUrl;
-    const cleanProfileImage =
-      typeof rawProfile === 'string' &&
-      rawProfile.trim().length > 0 &&
-      !rawProfile.startsWith('/restaurants/') &&
-      !rawProfile.startsWith('/foods/')
-        ? rawProfile
-        : photoUrl;
+    const cleanProfileImage = sanitizeVerifiedShopPhotoUrl(restId, rawProfile) || photoUrl;
     const genuineReviews: RestaurantReview[] = Array.isArray(r.reviews)
       ? r.reviews.filter((rev: any) => rev && typeof rev.rating === 'number' && rev.rating >= 1 && rev.rating <= 5)
       : [];
@@ -1061,7 +1050,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       descriptionEn: stripForeignScripts(r.descriptionEn || 'Authentic traditional Khmer restaurant.'),
       photoUrl,
       profileImage: cleanProfileImage,
-      galleryPhotos: galleryPhotos.length > 0 ? galleryPhotos : [photoUrl],
+      galleryPhotos: galleryPhotos.length > 0 ? galleryPhotos : photoUrl ? [photoUrl] : [],
       foodImages,
       addressKh: stripForeignScripts(r.addressKh || 'រាជធានីភ្នំពេញ កម្ពុជា'),
       addressEn: stripForeignScripts(r.addressEn || 'Phnom Penh, Cambodia'),
@@ -1079,15 +1068,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       priceLevel: r.priceLevel || '$$',
       ...(() => {
         const cleanGpid = isValidOfficialGooglePlaceId(r.googlePlaceId) ? r.googlePlaceId : undefined;
+        let lat = typeof r.latitude === 'number' ? r.latitude : 0;
+        let lng = typeof r.longitude === 'number' ? r.longitude : 0;
+        if (!isValidCambodiaCoordinates(lat, lng) && isValidGoogleMapsUrl(r.mapUrl)) {
+          const extracted = extractCoordsFromGoogleMapsUrl(r.mapUrl);
+          if (extracted) {
+            lat = extracted.latitude;
+            lng = extracted.longitude;
+          }
+        }
+        const hasValidCoords = isValidCambodiaCoordinates(lat, lng);
+        const hasValidUserMapUrl = isValidGoogleMapsUrl(r.mapUrl);
         const isFlagged =
           r.locationNeedsReview === true ||
           r.locationVerificationStatus === 'needs_admin_review' ||
-          !isValidCambodiaCoordinates(r.latitude, r.longitude);
+          (!hasValidCoords && !hasValidUserMapUrl);
         if (isFlagged) {
           return {
-            mapUrl: '',
-            latitude: 0,
-            longitude: 0,
+            mapUrl: hasValidUserMapUrl ? r.mapUrl.trim() : '',
+            latitude: hasValidCoords ? lat : 0,
+            longitude: hasValidCoords ? lng : 0,
             googlePlaceId: cleanGpid,
             locationVerificationStatus: 'needs_admin_review' as const,
             locationNeedsReview: true,
@@ -1097,10 +1097,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             locationVerifiedAt: undefined,
           };
         }
+        const preservedMapUrl =
+          hasValidUserMapUrl && (r.isAdminEdited || r.dataSource === 'vip_owner' || Boolean(r.ownerId) || !hasValidCoords)
+            ? r.mapUrl.trim()
+            : buildCanonicalGoogleMapsPinUrl(lat, lng, cleanGpid);
         return {
-          mapUrl: buildCanonicalGoogleMapsPinUrl(r.latitude, r.longitude, cleanGpid),
-          latitude: r.latitude,
-          longitude: r.longitude,
+          mapUrl: preservedMapUrl,
+          latitude: hasValidCoords ? lat : 0,
+          longitude: hasValidCoords ? lng : 0,
           googlePlaceId: cleanGpid,
           locationVerificationStatus: 'verified' as const,
           locationNeedsReview: false,
@@ -1195,6 +1199,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_restaurants_real_v7');
       localStorage.removeItem('kft_restaurants_real_v8');
       const saved =
+        localStorage.getItem('kft_restaurants_real_v13') ||
         localStorage.getItem('kft_restaurants_real_v12') ||
         localStorage.getItem('kft_restaurants_real_v11') ||
         localStorage.getItem('kft_restaurants_real_v10') ||
@@ -1202,6 +1207,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_restaurants_real_v9');
       localStorage.removeItem('kft_restaurants_real_v10');
       localStorage.removeItem('kft_restaurants_real_v11');
+      localStorage.removeItem('kft_restaurants_real_v12');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 40) {
@@ -1262,16 +1268,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               }
 
               const ov = vault.restaurants[r.id];
-              const ovPhotoValid =
-                ov?.photoUrl &&
-                !ov.photoUrl.startsWith('/foods/') &&
-                !ov.photoUrl.startsWith('/restaurants/') &&
-                (ov.photoUrl.startsWith('data:') || ov.photoUrl.startsWith('http://') || ov.photoUrl.startsWith('https://') || ov.photoUrl.startsWith('/Shop/'));
-              const finalPhoto = ovPhotoValid ? ov!.photoUrl! : (hasCustomPhoto ? primaryImg : seed.photoUrl);
-              const finalGallery =
+              const sanitizedOvPhoto = sanitizeVerifiedShopPhotoUrl(r.id, ov?.photoUrl || ov?.profileImage);
+              const finalPhoto = sanitizedOvPhoto || (hasCustomPhoto ? sanitizeVerifiedShopPhotoUrl(r.id, primaryImg) : sanitizeVerifiedShopPhotoUrl(r.id, seed.photoUrl));
+              const rawGalleryList =
                 (Array.isArray(ov?.galleryPhotos) && ov.galleryPhotos.length > 0)
                   ? ov.galleryPhotos
                   : (hasCustomGallery ? r.galleryPhotos : seed.galleryPhotos);
+              const finalGallery = Array.isArray(rawGalleryList)
+                ? rawGalleryList
+                    .map((u: string) => sanitizeVerifiedShopPhotoUrl(r.id, u))
+                    .filter(Boolean)
+                : finalPhoto
+                  ? [finalPhoto]
+                  : [];
 
               const hasRealUserOwner = Boolean(
                 (r.ownerId && String(r.ownerId).trim() !== '' && r.ownerId !== 'owner-1') ||
@@ -2990,7 +2999,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     if (restaurants && restaurants.length > 0) {
-      scheduleStorageWrite('kft_restaurants_real_v12', restaurants, 1200);
+      scheduleStorageWrite('kft_restaurants_real_v13', restaurants, 1200);
     }
   }, [restaurants]);
 
@@ -6174,7 +6183,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return null;
     }
 
-    const requestedProfileImg = restData.profileImage || restData.photoUrl || '/Shop/rest-1.jpg';
+    const requestedProfileImg = sanitizeVerifiedShopPhotoUrl(
+      targetToReplace?.id,
+      restData.profileImage || restData.photoUrl || ''
+    );
     const existingApprovedImg = targetToReplace?.profileImage || targetToReplace?.photoUrl || '';
     const isReplacingExistingShopPhoto = Boolean(
       !isAdmin &&
@@ -6424,7 +6436,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
-    const requestedImg = updated.profileImage || updated.photoUrl || original?.profileImage || original?.photoUrl || '/Shop/rest-1.jpg';
+    const requestedImg = sanitizeVerifiedShopPhotoUrl(
+      updated.id,
+      updated.profileImage || updated.photoUrl || original?.profileImage || original?.photoUrl || ''
+    );
     const existingApprovedImg = original?.profileImage || original?.photoUrl || requestedImg;
     const isPhotoChangedByOwner = Boolean(
       !isAdmin &&
@@ -7336,18 +7351,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const upgraded = prev.map(r => {
         const seed = seedMap.get(r.id);
         const wasUnverified = !r.isVerified || r.status !== 'approved' || r.paymentStatus !== 'verified';
-        const fallbackPhoto = seed?.photoUrl || (isSeedRestaurantId(r.id) ? `/Shop/${r.id}.jpg` : '/Shop/culinary-placeholder.jpg');
+        const fallbackPhoto = sanitizeVerifiedShopPhotoUrl(r.id, seed?.photoUrl || '');
         const resolvedPhoto =
-          r.photoUrl &&
-          !r.photoUrl.startsWith('/foods/') &&
-          !r.photoUrl.startsWith('/restaurants/') &&
-          r.photoUrl.trim().length > 0
-            ? r.photoUrl
-            : fallbackPhoto;
+          sanitizeVerifiedShopPhotoUrl(r.id, r.photoUrl || r.profileImage || '') || fallbackPhoto;
 
         const needsEnrichment =
           wasUnverified ||
-          !r.photoUrl ||
+          r.photoUrl !== resolvedPhoto ||
           !r.phone ||
           !r.rating ||
           r.rating <= 0 ||
@@ -7365,7 +7375,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           locationNeedsReview: false,
           photoUrl: resolvedPhoto,
           profileImage: resolvedPhoto,
-          galleryPhotos: Array.isArray(r.galleryPhotos) && r.galleryPhotos.length > 0 ? r.galleryPhotos : [resolvedPhoto],
+          galleryPhotos: Array.isArray(r.galleryPhotos) && r.galleryPhotos.length > 0
+            ? r.galleryPhotos.map(u => sanitizeVerifiedShopPhotoUrl(r.id, u)).filter(Boolean)
+            : (resolvedPhoto ? [resolvedPhoto] : []),
           phone: r.phone || seed?.phone || '012 818 209',
           openingHoursKh: r.openingHoursKh || seed?.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:៣០ យប់',
           openingHoursEn: r.openingHoursEn || seed?.openingHoursEn || '07:00 AM - 09:30 PM',

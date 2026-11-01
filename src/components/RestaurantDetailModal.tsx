@@ -11,9 +11,9 @@ import {
   getRestaurantGoogleExternalUrl,
   openRestaurantGoogleExternal,
   isPlaceLocationVerified,
-  resolveFoodPhotoUrl,
 } from '../types';
 import { RestaurantImageModal } from './RestaurantImageModal';
+import { ShopAvatar } from './icons/DefaultShopIcon';
 import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant, translateSignatureDish, translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
 import {
@@ -330,28 +330,25 @@ export const RestaurantDetailModal: React.FC = () => {
                 activePhoto ||
                 selectedRestaurant.photoUrl ||
                 selectedRestaurant.profileImage ||
-                '/Shop/culinary-placeholder.jpg'
+                ''
               ).trim();
               const cleanCandidate =
-                rawHeroCandidate && !rawHeroCandidate.startsWith('/restaurants/')
+                rawHeroCandidate &&
+                !rawHeroCandidate.startsWith('/restaurants/') &&
+                !rawHeroCandidate.startsWith('/foods/') &&
+                !rawHeroCandidate.includes('culinary-placeholder')
                   ? rawHeroCandidate
-                  : '/Shop/culinary-placeholder.jpg';
+                  : '';
               return (
-                <img
-                  src={resolveFoodPhotoUrl(cleanCandidate, selectedRestaurant.photoUpdatedAt)}
-                  alt={loc.name}
-                  decoding="async"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (!target.dataset.fallback) {
-                      target.dataset.fallback = '1';
-                      target.src = '/Shop/culinary-placeholder.jpg';
-                    } else if (target.dataset.fallback === '1') {
-                      target.dataset.fallback = '2';
-                      target.src = '/Shop/rest-1.jpg';
-                    }
+                <ShopAvatar
+                  restaurant={{
+                    ...selectedRestaurant,
+                    photoUrl: cleanCandidate,
+                    profileImage: cleanCandidate,
                   }}
+                  alt={loc.name}
+                  className="w-full h-full rounded-none border-0"
+                  imgClassName="w-full h-full object-cover"
                 />
               );
             })()}

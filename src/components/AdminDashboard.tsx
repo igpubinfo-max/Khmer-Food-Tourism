@@ -16,6 +16,7 @@ import {
 } from '../types';
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession, getOfficialOwnershipCertificate, verifyAppOwnershipAndDomainIntegrity } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
+import { ShopAvatar } from './icons/DefaultShopIcon';
 import { generateAuthenticRecipeByDishName } from '../utils/khmerRecipeGenerator';
 import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
 import { TouristImageModal } from './TouristImageModal';
@@ -2655,16 +2656,10 @@ export const AdminDashboard: React.FC = () => {
                       onClick={() => setSelectedRestaurant(rest)}
                       className="flex items-center gap-3 overflow-hidden cursor-pointer group"
                     >
-                      <img
-                        src={resolveFoodPhotoUrl(rest.photoUrl || rest.profileImage || '/Shop/culinary-placeholder.jpg', rest.photoUpdatedAt)}
+                      <ShopAvatar
+                        restaurant={rest}
                         alt={rest.nameKh}
-                        className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700"
-                        onError={(e) => {
-                          const target = e.currentTarget as HTMLImageElement;
-                          if (!target.src.endsWith('/Shop/culinary-placeholder.jpg')) {
-                            target.src = '/Shop/culinary-placeholder.jpg';
-                          }
-                        }}
+                        className="w-12 h-12 rounded-xl border border-slate-200 dark:border-slate-700"
                       />
                       <div className="overflow-hidden">
                         <div className="flex items-center gap-1.5 flex-wrap">

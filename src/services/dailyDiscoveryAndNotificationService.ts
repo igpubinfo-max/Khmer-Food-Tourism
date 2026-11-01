@@ -3,11 +3,13 @@ import {
   DailyDiscoveryCategory,
   DailyDiscoveryItem,
   FoodItem,
+  NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI,
   Restaurant,
   TouristDestination,
   isPlaceLocationVerified,
   getDestinationGoogleExternalUrl,
   getRestaurantGoogleExternalUrl,
+  sanitizeRestaurantShopPhoto,
 } from '../types';
 
 const SUPABASE_URL = 'https://ryvltobwuwuulazqjnza.supabase.co';
@@ -307,7 +309,7 @@ export function buildCuratedCambodiaDiscoveryItems(
       summaryEn:
         r.descriptionEn ||
         `${r.nameEn || r.nameKh} serves authentic signature dishes in ${r.provinceEn || r.provinceKh}. Open ${r.openingHoursEn || 'daily'}.`,
-      photoUrl: r.photoUrl || '/Shop/rest-1.jpg',
+      photoUrl: sanitizeRestaurantShopPhoto(r.id, r.photoUrl || r.profileImage) || NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI,
       provinceKh: r.provinceKh || 'រាជធានីភ្នំពេញ',
       provinceEn: r.provinceEn || 'Phnom Penh',
       addressKh: r.addressKh,
@@ -711,7 +713,7 @@ export function buildDynamicNotificationsList(
   const dest90 = destinations.find((d) => d.id === 'dest-90');
   const rest19 = restaurants.find((r) => r.id === 'rest-19') || restaurants[0];
   const rest1 = restaurants.find((r) => r.id === 'rest-1') || restaurants[1];
-  const rest4 = restaurants.find((r) => r.id === 'rest-4') || restaurants[2];
+  const rest12 = restaurants.find((r) => r.id === 'rest-12') || restaurants[2];
   const food1 = foods.find((f) => f.id === 'food-1') || foods[0];
   const food143 = foods.find((f) => f.id === 'food-143') || foods[1];
   const food149 = foods.find((f) => f.id === 'food-149') || foods[2];
@@ -731,7 +733,9 @@ export function buildDynamicNotificationsList(
       isRead: false,
       targetType: 'restaurant',
       targetId: rest19?.id || 'rest-19',
-      photoUrl: rest19?.photoUrl || '/Shop/rest-19.jpg',
+      photoUrl:
+        sanitizeRestaurantShopPhoto(rest19?.id || 'rest-19', rest19?.photoUrl) ||
+        NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI,
       provinceKh: 'ខេត្តកែប',
       provinceEn: 'Kep',
       sourceName: 'Verified Local Restaurant',
@@ -884,12 +888,13 @@ export function buildDynamicNotificationsList(
       timestampIso: getRelIso(18),
       isRead: true,
       targetType: 'restaurant',
-      targetId: rest4?.id || 'rest-4',
-      photoUrl: rest4?.photoUrl || '/Shop/rest-4.jpg',
+      targetId: rest12?.id || 'rest-12',
+      photoUrl:
+        sanitizeRestaurantShopPhoto(rest12?.id || 'rest-12', rest12?.photoUrl) || '/Shop/rest-12.jpg',
       provinceKh: 'ខេត្តសៀមរាប',
       provinceEn: 'Siem Reap',
       sourceName: 'Verified Restaurant Listing',
-      sourceUrl: rest4?.mapUrl || 'https://www.google.com/maps',
+      sourceUrl: rest12?.mapUrl || 'https://www.google.com/maps',
       latitude: 13.3558,
       longitude: 103.8569,
     },

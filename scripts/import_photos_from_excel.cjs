@@ -126,6 +126,14 @@ async function importPhotosFromSingleWorkbook(excelPath) {
     const ws = wb.worksheets[sIdx];
     const sheetNum = sIdx + 1;
     if (ws.name.toLowerCase().includes('instruction')) continue;
+    // Skip Food_101_to_200 sheet inside KhmerFoodTourism_Food_1_to_100_Photo_Template.xlsx
+    // because KhmerFoodTourism_Photo_Insert_Template.xlsx is the authoritative RichCell source for food-101..food-200
+    if (
+      path.basename(excelPath).includes('Food_1_to_100') &&
+      ws.name.includes('101')
+    ) {
+      continue;
+    }
 
     const rowMap = new Map();
     ws.eachRow((row, rowNumber) => {
@@ -272,6 +280,7 @@ async function run() {
 
   const candidates = [
     path.join(PROJECT_ROOT, 'templates/KhmerFoodTourism_Food_1_to_100_Photo_Template.xlsx'),
+    path.join(PROJECT_ROOT, 'templates/KhmerFoodTourism_Photo_Insert_Template.xlsx'),
     path.join(PROJECT_ROOT, 'templates/KhmerFoodTourism_Travel_Photo_Insert_Template.xlsx'),
   ];
 

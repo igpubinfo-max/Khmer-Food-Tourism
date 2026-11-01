@@ -92,10 +92,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Eleven One Kitchen BKK1",
     "descriptionKh": "ភោជនីយដ្ឋានដែលផ្តោតលើសុខភាព ប្រើប្រាស់គ្រឿងផ្សំសរីរាង្គក្នុងស្រុក និងគ្មានការប្រើប្រាស់ប្លាស្ទិក គាំទ្របរិស្ថានបៃតង។",
     "descriptionEn": "Eco-conscious Cambodian eatery serving wholesome local home cooking made with chemical-free produce.",
-    "photoUrl": "/Shop/rest-3.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-3.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ ២០ ផ្លូវ ៣៣៤ សង្កាត់បឹងកេងកងទី១ ខណ្ឌបឹងកេងកង រាជធានីភ្នំពេញ",
     "addressEn": "No. 20 Street 334, Sangkat Boeng Keng Kang 1 (BKK1), Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -121,7 +119,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-3.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -133,10 +131,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kravanh Authentic Khmer Restaurant",
     "descriptionKh": "ហាងអាហារខ្មែររសជាតិដើមបែបគ្រួសារខ្មែរអភិជន តុបតែងរចនាបថបែបបុរាណ ម្ហូបឆ្ងាញ់ប្រកបដោយអនាម័យខ្ពស់។",
     "descriptionEn": "Authentic traditional Khmer home recipes prepared with exquisite presentation and classic atmosphere.",
-    "photoUrl": "/Shop/rest-4.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-4.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ ១១២ មហាវិថីសម្តេចសុធារស សង្កាត់ចតុមុខ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
     "addressEn": "No. 112 Samdach Sothearos Blvd, Sangkat Chakto Mukh, Khan Daun Penh, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -162,7 +158,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-4.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -215,10 +211,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sovanna Restaurant & BBQ Phnom Penh",
     "descriptionKh": "ហាងសាច់អាំង និងម្ហូបក្លែមបែបខ្មែរដ៏ពេញនិយមបំផុត រសជាតិទឹកត្រីកោះកុង និងទឹកប្រហុកបុកល្បីល្បាញខ្លាំង។",
     "descriptionEn": "Legendary lively local barbecue spot serving charcoal-grilled beef, ribs, and fresh seafood with pungent dipping sauces.",
-    "photoUrl": "/Shop/rest-6.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-6.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ ២C ផ្លូវ ២១ សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន រាជធានីភ្នំពេញ",
     "addressEn": "No. 2C Street 21 (Abdul Carime St), Sangkat Tonle Bassac, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -244,7 +238,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-6.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -543,10 +537,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Marum Training Restaurant Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលយុវជនខ្មែរក្នុងផ្ទះឈើបុរាណសួនបៃតង មានម្ហូបតំបន់ច្នៃប្រឌិត និងរសជាតិខ្មែរពិតប្រាកដ។",
     "descriptionEn": "Lush garden training restaurant by TREE Alliance serving innovative tapas and traditional Khmer recipes.",
-    "photoUrl": "/Shop/rest-14.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-14.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ ៨A ភូមិស្លក្រាម សង្កាត់ស្លក្រាម ក្រុងសៀមរាប",
     "addressEn": "No. 8A Phum Slokram, Sangkat Slorkram, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
@@ -572,7 +564,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-14.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -625,10 +617,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Viroth's Restaurant Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានលំដាប់ខ្ពស់រចនាបថទសវត្សរ៍ទី ៦០ ក្នុងសួនផ្កា ម្ហូបខ្មែរឆ្ងាញ់ប្រកបដោយសោភ័ណភាពវិចិត្រ។",
     "descriptionEn": "Chic 1960s-inspired modernist venue surrounded by lotus ponds serving elevated Khmer traditional dishes.",
-    "photoUrl": "/Shop/rest-16.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-16.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ ២៤ តំបន់វត្តបូព៌ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប",
     "addressEn": "Street 24, Wat Bo Area, Sangkat Sala Kamreuk, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
@@ -654,7 +644,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-16.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -666,10 +656,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Spoons Cambodia Training Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលសិស្សក្រីក្រ សាងសង់ពីដើមឫស្សីប្រណីត បម្រើម្ហូបខ្មែរបែបច្នៃប្រឌិត និងម្ហូបតាមផ្លូវខ្មែរ។",
     "descriptionEn": "Architecturally stunning bamboo pavilion training venue serving exquisite modern twists on Cambodian street classics.",
-    "photoUrl": "/Shop/rest-17.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-17.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ភូមិវត្តដំណាក់ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប",
     "addressEn": "Wat Damnak / Sambatt Mean Chey, Sangkat Sala Kamreuk, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
@@ -695,7 +683,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-17.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -748,10 +736,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kimly Seafood Restaurant Crab Market Kep",
     "descriptionKh": "ហាងគ្រឿងសមុទ្រ និងក្តាមសេះដ៏ល្បីល្បាញបំផុតនៅផ្សារក្តាមខេត្តកែប។ ក្តាមសេះស្រស់ៗឆាម្រេចខ្ចីកំពត ជាប់មាត់សមុទ្រ។",
     "descriptionEn": "The legendary waterfront dining spot right on Kep Crab Market frying live sea crabs with green Kampot peppercorns.",
-    "photoUrl": "/Shop/rest-19.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-19.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវជាតិលេខ ៣៣A ផ្សារក្តាមកែប ភូមិថ្មី សង្កាត់ព្រៃធំ ក្រុងកែប",
     "addressEn": "National Road 33A, Crab Market Waterfront, Sangkat Prey Thom, Kep",
     "provinceKh": "ខេត្តកែប",
@@ -777,7 +763,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-19.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -871,10 +857,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Atelier Kampot French & Khmer",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងអគារបេតិកភណ្ឌបារាំងមាត់ព្រែកកំពត បង្កើតឡើងដោយកសិដ្ឋានម្រេចកំពត La Plantation បម្រើម្ហូបម្រេចកំពតពិតៗ។",
     "descriptionEn": "Heritage riverside bistro from the owners of La Plantation featuring authentic Kampot peppercorn gastronomy.",
-    "photoUrl": "/Shop/rest-22.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-22.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវមាត់ព្រែកលេខ ៧៣៥ តំបន់ផ្សារចាស់ សង្កាត់កំពង់កណ្តាល ក្រុងកំពត",
     "addressEn": "Street 735 (Riverside Road), Old Town, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -900,7 +884,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-22.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -912,10 +896,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "The Sailing Club Kep",
     "descriptionKh": "ភោជនីយដ្ឋាន និងបារមាត់សមុទ្រដ៏រ៉ូមែនទិកនៅខេត្តកែប ទស្សនាថ្ងៃលិចលើផែឈើបុរាណ ម្ហូបគ្រឿងសមុទ្រស្រស់ៗ។",
     "descriptionEn": "Iconic seaside lounge on a restored wooden pier at Knai Bang Chatt resort in Kep with sunset dining.",
-    "photoUrl": "/Shop/rest-23.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-23.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវមាត់សមុទ្រ ភូមិថ្មី សង្កាត់ព្រៃធំ ក្រុងកែប",
     "addressEn": "Phum Thmey Waterfront (Knai Bang Chatt / Plus Code F7RQ+VQ), Sangkat Prey Thom, Kep",
     "provinceKh": "ខេត្តកែប",
@@ -941,7 +923,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-23.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -994,10 +976,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Nary Kitchen & Cooking School",
     "descriptionKh": "ហាងបាយខ្មែរ និងថ្នាក់បង្រៀនធ្វើម្ហូបដ៏ល្បីនៅបាត់ដំបង បម្រើម្ហូបប្រពៃណីខ្មែរពិតៗ ធ្វើដោយទឹកដៃមេផ្ទះខ្មែរ។",
     "descriptionEn": "Popular family restaurant and cooking school teaching authentic traditional Khmer cooking methods.",
-    "photoUrl": "/Shop/rest-26.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-26.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ ៦៥០ ផ្លូវលេខ ១១១ ភូមិព្រែកមហាទេព សង្កាត់ស្វាយប៉ោ ក្រុងបាត់ដំបង",
     "addressEn": "No. 650 Street 111, Prek Mohatep Village, Sangkat Svay Pao, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
@@ -1023,7 +1003,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-26.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1035,10 +1015,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sandan Training Restaurant Sihanoukville",
     "descriptionKh": "ភោជនីយដ្ឋានបណ្តុះបណ្តាលវិជ្ជាជីវៈកុមារ និងយុវជនដោយ M'Lop Tapang ស្ថិតក្នុងសួនធម្មជាតិដ៏ស្រស់ស្អាត បម្រើគ្រឿងសមុទ្រ និងម្ហូបខ្មែរ។",
     "descriptionEn": "Social enterprise training restaurant by M'Lop Tapang with tropical garden dining and fresh coastal seafood.",
-    "photoUrl": "/Shop/rest-27.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-27.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ក្បែរឆ្នេរអូរឈើទាល សង្កាត់លេខ៤ ក្រុងព្រះសីហនុ",
     "addressEn": "Near Ochheuteal Beach, Sangkat Buon, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
@@ -1064,7 +1042,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-27.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1076,10 +1054,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Malis Restaurant Siem Reap Pokambor Riverside",
     "descriptionKh": "ភោជនីយដ្ឋានម្លិះសាខាផ្លូវការនៅមាត់ស្ទឹងសៀមរាប បម្រើម្ហូបខ្មែរប្រណិត អាម៉ុកត្រី ប្រហុកខ្ទិះ និងគុយទាវម្លិះក្នុងបរិយាកាសក្បាច់ខ្មែរ។",
     "descriptionEn": "Official Siem Reap riverside location of Malis on Pokambor Avenue serving refined Living Cambodian Cuisine in a traditional courtyard.",
-    "photoUrl": "/Shop/rest-42.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-42.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "មហាវិថីពោធិ៍កំបោរ មាត់ស្ទឹងសៀមរាប ក្រុងសៀមរាប",
     "addressEn": "Pokambor Avenue, Siem Reap Riverfront, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
@@ -1106,7 +1082,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-01-15",
-    "profileImage": "/Shop/rest-42.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1118,10 +1094,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kinyei Specialty Cafe & Bistro Battambang",
     "descriptionKh": "ហាងកាហ្វេលីងគ្រាប់កាហ្វេពិសេស និងភោជនីយដ្ឋានដ៏ល្បីនៅកណ្តាលក្រុងបាត់ដំបង បម្រើកាហ្វេអេសប្រេសសូ នំដុតស្រស់ៗ ណែមបាត់ដំបង និងអាហារសម្រន់បែបខ្មែរ-អឺរ៉ុប។",
     "descriptionEn": "Award-winning specialty coffee roastery and bistro in central Battambang serving artisan espresso, Battambang spring rolls, and fresh brunch dishes.",
-    "photoUrl": "/Shop/rest-43.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-43.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ ១.៥ សង្កាត់ស្វាយប៉ោ ក្រុងបាត់ដំបង",
     "addressEn": "Street 1.5, Sangkat Svay Pao, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
@@ -1148,7 +1122,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/Shop/rest-43.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1160,10 +1134,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "La Plantation Pepper Farm Bistro Kampot",
     "descriptionKh": "ភោជនីយដ្ឋាននៅចម្ការម្រេចកំពត ល្បីខាងម្ហូបសាច់គោឡុកឡាក់ម្រេចខ្ចីកំពត ការីមាន់ម្រេចក្រហម និងការទស្សនាចម្ការម្រេចធម្មជាតិ។",
     "descriptionEn": "Scenic organic pepper estate bistro in Kampot famous for Beef Lok Lak with fresh green Kampot peppercorns and red pepper curries.",
-    "photoUrl": "/Shop/rest-44.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-44.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ភូមិបុសញិញ ឃុំកូនសត្វ ស្រុកទឹកឈូ ខេត្តកំពត",
     "addressEn": "Bosjheng Village, Kon Sat Commune, Teuk Chhou District, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -1190,7 +1162,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/Shop/rest-44.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1202,10 +1174,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Khmer Kitchen Restaurant Old Market Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានដ៏ល្បីល្បាញនៅតំបន់ផ្សារចាស់ សៀមរាប បម្រើអាម៉ុកត្រី ការីក្រហមខ្មែរ និងឡុកឡាក់សាច់គោរសជាតិឆ្ងាញ់តម្លៃសមរម្យ។",
     "descriptionEn": "Iconic Siem Reap dining spot near the Old Market famous for its fragrant fish amok, Khmer red pumpkin curry, and beef lok lak.",
-    "photoUrl": "/Shop/rest-67.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-67.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "កែងផ្លូវលេខ ៩ តំបន់ផ្សារចាស់ សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប",
     "addressEn": "Corner of Street 9 & Alley West, Old Market (Psar Chas), Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
@@ -1232,7 +1202,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/Shop/rest-67.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1244,10 +1214,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Mahob Khmer Cuisine Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានក្នុងផ្ទះឈើបុរាណខ្មែរអមដោយសួនស្រះឈូក បម្រើម្ហូបខ្មែរប្រពៃណីច្នៃប្រឌិតយ៉ាងផ្ចិតផ្ចង់។",
     "descriptionEn": "Set in a traditional wooden house surrounded by lotus ponds, offering refined Cambodian gastronomy and garden dining.",
-    "photoUrl": "/Shop/rest-92.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-92.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ ១៣៧ ភូមិត្រាញ់ សង្កាត់ស្លក្រាម ក្រុងសៀមរាប",
     "addressEn": "No. 137 Traing Village, Sangkat Slorkram, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
@@ -1274,7 +1242,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/Shop/rest-92.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1286,10 +1254,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Led Zep Mountain View Cafe Kep",
     "descriptionKh": "ហាងកាហ្វេលើចង្កេះភ្នំឧទ្យានជាតិកែប គយគន់ទេសភាពសមុទ្រកែបពីលើភ្នំ ជាមួយកាហ្វេឈ្ងុយឆ្ងាញ់ និងនំដុត។",
     "descriptionEn": "Hillside cafe at the entrance of Kep National Park offering panoramic ocean views, specialty coffee, and homemade cakes.",
-    "photoUrl": "/Shop/rest-120.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-120.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវឡើងឧទ្យានជាតិកែប សង្កាត់កែប ក្រុងកែប",
     "addressEn": "Kep National Park Hillside Trail (Plus Code F7QW+WC5), Krong Kaeb, Kep",
     "provinceKh": "ខេត្តកែប",
@@ -1316,7 +1282,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/Shop/rest-120.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1328,10 +1294,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sister Srey Cafe & Bakery Siem Reap",
     "descriptionKh": "ហាងកាហ្វេដ៏ពេញនិយមនៅមាត់ស្ទឹងសៀមរាប បម្រើអាហារពេលព្រឹក កាហ្វេឆុងថ្មីៗ នំដុត និងភេសជ្ជៈផ្លែឈើស្រស់។",
     "descriptionEn": "Vibrant social enterprise cafe by the Old Market bridge offering specialty coffee, healthy breakfasts, and Khmer fusion bites.",
-    "photoUrl": "/Shop/rest-192.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-192.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ ២០០ មហាវិថីពោធិ៍កំបោរ ជិតស្ពានផ្សារចាស់ ក្រុងសៀមរាប",
     "addressEn": "No. 200 Pokambor Avenue, Old Market Bridge, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
@@ -1358,7 +1322,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/Shop/rest-192.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1370,10 +1334,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tonle Bassac II Khmer & International Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានដ៏ធំទូលាយល្បីល្បាញនៅភ្នំពេញ បម្រើម្ហូបខ្មែរប្រពៃណី គ្រឿងសមុទ្រអាំង និងបង្អែមខ្មែររាប់រយមុខ។",
     "descriptionEn": "Renowned grand dining hall in Phnom Penh offering an extensive spread of traditional Cambodian dishes, fresh seafood, and desserts.",
-    "photoUrl": "/Shop/rest-224.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-224.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ ៥៣៤ មហាវិថីព្រះមុនីវង្ស សង្កាត់ផ្សារដើមថ្កូវ ខណ្ឌចំការមន រាជធានីភ្នំពេញ",
     "addressEn": "No. 534 Preah Monivong Blvd, Sangkat Phsar Daeum Thkov, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -1400,7 +1362,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/Shop/rest-224.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1412,10 +1374,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "White Rose Restaurant Battambang",
     "descriptionKh": "ភោជនីយដ្ឋានចំណាស់ដ៏ល្បីល្បាញនៅកណ្តាលក្រុងបាត់ដំបង បម្រើម្ហូបខ្មែរគ្រប់មុខ ណែមបាត់ដំបង អាម៉ុក និងទឹកក្រឡុកផ្លែឈើ។",
     "descriptionEn": "Long-standing favorite in central Battambang serving authentic local Khmer dishes, Battambang spring rolls, and fruit shakes.",
-    "photoUrl": "/Shop/rest-225.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-225.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ ២ សង្កាត់ស្វាយប៉ោ ក្រុងបាត់ដំបង",
     "addressEn": "Street 2, Sangkat Svay Pao, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
@@ -1442,7 +1402,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/Shop/rest-225.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
@@ -1454,10 +1414,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Pizza 4P's Phnom Penh BKK1",
     "descriptionKh": "ភោជនីយដ្ឋានភីហ្សាដុតឡឈើ និងឈីសធ្វើដោយដៃដ៏ល្បីល្បាញនៅតំបន់បឹងកេងកងទី១ រាជធានីភ្នំពេញ។",
     "descriptionEn": "Acclaimed farm-to-table artisan wood-fired pizza and house-made cheese restaurant in Boeng Keng Kang 1, Phnom Penh.",
-    "photoUrl": "/Shop/rest-301.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-301.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ ២៩៤ សង្កាត់បឹងកេងកងទី១ ខណ្ឌបឹងកេងកង រាជធានីភ្នំពេញ",
     "addressEn": "Street 294, Sangkat Boeng Keng Kang 1, Khan Boeng Keng Kang, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -1482,7 +1440,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/Shop/rest-301.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -1494,10 +1452,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "The Pizza Company Sisowath Quay Riverside",
     "descriptionKh": "ភោជនីយដ្ឋានភីហ្សា និងអាហារគ្រួសារតាមបណ្តោយតីរវិថីព្រះស៊ីសុវត្ថិ មាត់ទន្លេចតុមុខ រាជធានីភ្នំពេញ។",
     "descriptionEn": "Popular riverside family restaurant serving signature pizzas, pasta, and appetizers along Sisowath Quay, Phnom Penh.",
-    "photoUrl": "/Shop/rest-302.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-302.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ ២៩៣ តីរវិថីព្រះស៊ីសុវត្ថិ សង្កាត់ផ្សារកណ្តាល ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
     "addressEn": "No. 293 Preah Sisowath Quay, Sangkat Phsar Kandal, Khan Daun Penh, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -1522,7 +1478,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/Shop/rest-302.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -1534,10 +1490,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BROWN Coffee and Bakery Roastery BKK1",
     "descriptionKh": "ហាងកាហ្វេឆុងថ្មីៗ និងនំប៉័ងដុតថ្មីលំដាប់ឈានមុខគេរបស់កម្ពុជា នៅកែងផ្លូវ ៥៧ និង ២៩៤ បឹងកេងកងទី១។",
     "descriptionEn": "Flagship Cambodian specialty coffee roastery and artisan bakery at Street 57 & Street 294 in BKK1, Phnom Penh.",
-    "photoUrl": "/Shop/rest-303.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-303.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "កែងផ្លូវលេខ ៥៧ និងផ្លូវលេខ ២៩៤ សង្កាត់បឹងកេងកងទី១ ខណ្ឌបឹងកេងកង រាជធានីភ្នំពេញ",
     "addressEn": "Corner of Street 57 & Street 294, Sangkat Boeng Keng Kang 1, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -1562,7 +1516,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/Shop/rest-303.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -1574,10 +1528,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Brooklyn Pizza & Bistro Siem Reap",
     "descriptionKh": "ភោជនីយដ្ឋានភីហ្សាបែបញូវយ៉ក និងប៊ីស្រ្តូដ៏ពេញនិយមនៅសង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប។",
     "descriptionEn": "Well-loved New York-style hand-tossed pizza and bistro dining in Svay Dangkum, Krong Siem Reap.",
-    "photoUrl": "/Shop/rest-304.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-304.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ ០៧ សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប",
     "addressEn": "Street 07, Sangkat Svay Dangkum, Krong Siem Reap, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
@@ -1602,7 +1554,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/Shop/rest-304.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -1614,10 +1566,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Manna Kitchen Vegetarian & Korean Restaurant Battambang",
     "descriptionKh": "ភោជនីយដ្ឋានម្ហូបបួសសុខភាព និងម្ហូបកូរ៉េ-ខ្មែរតម្លៃសមរម្យនៅភូមិរំចេក៤ សង្កាត់រតនៈ ក្រុងបាត់ដំបង។",
     "descriptionEn": "Popular vegetarian-friendly Korean and Khmer restaurant on Street 207 in Sangkat Rotanak, Krong Battambang.",
-    "photoUrl": "/Shop/rest-305.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-305.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ ២០៧ ភូមិរំចេក៤ សង្កាត់រតនៈ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង",
     "addressEn": "Street 207, Phum Rumcheck 4, Sangkat Rotanak, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
@@ -1642,7 +1592,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-02-01",
-    "profileImage": "/Shop/rest-305.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -1654,10 +1604,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Princella Flavors of Saffron",
     "descriptionKh": "ព្រីន៍សិលាហ្លាវូសេបថ្វម គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ #7AB, ផ្លូវ ១៤៧, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Princella Flavors of Saffron is a verified Cambodian and international restaurant at No. #7AB Street 147, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-306.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-306.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ #7AB, ផ្លូវ ១៤៧, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. #7AB Street 147, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -1683,7 +1631,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-306.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -1695,10 +1643,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Simple Things",
     "descriptionKh": "ភោជនីយដ្ឋាន Simple Things ជាហាងគុយទាវ និងអាហារពេលព្រឹកដ៏មានឱជារសនៅខេត្តកំពត។",
     "descriptionEn": "Simple Things is a verified noodle and local dining spot in Kampot, Cambodia.",
-    "photoUrl": "/Shop/rest-307.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-307.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 54, Old Market Street, ខេត្តកំពត",
     "addressEn": "No. 54 Old Market Street, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -1723,7 +1669,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-307.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -1735,10 +1681,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "La Pizza Battambang",
     "descriptionKh": "ភោជនីយដ្ឋាន La Pizza Battambang ជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរស្រស់ៗនៅខេត្តបាត់ដំបង។",
     "descriptionEn": "La Pizza Battambang is a verified seafood and local restaurant in Battambang, Cambodia.",
-    "photoUrl": "/Shop/rest-308.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-308.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 59, ផ្លូវលេខ 159D, Krong Battambang, ខេត្តបាត់ដំបង",
     "addressEn": "No. 59 Street 159D, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
@@ -1763,7 +1707,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-308.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -1775,10 +1719,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Banlung​ Reggae​ Bar​ and​ Restaurant​",
     "descriptionKh": "ភោជនីយដ្ឋាន Banlung​ Reggae​ Bar​ and​ Restaurant​ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តរតនគិរី (ផ្ទះលេខ 44.street​, ផ្លូវលេខ 44, Krong Banlung, ខេត្តរតនគិរី) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Banlung​ Reggae​ Bar​ and​ Restaurant​ is a verified Cambodian and international restaurant at No. 44.street​ Street 44, Krong Banlung, Ratanakiri in Ratanakiri, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-309.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-309.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 44.street​, ផ្លូវលេខ 44, Krong Banlung, ខេត្តរតនគិរី",
     "addressEn": "No. 44.street​ Street 44, Krong Banlung, Ratanakiri",
     "provinceKh": "ខេត្តរតនគិរី",
@@ -1804,7 +1746,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-309.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -1816,10 +1758,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Hang Neak Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋាន Hang Neak Restaurant ជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរស្រស់ៗនៅខេត្តកណ្តាល។",
     "descriptionEn": "Hang Neak Restaurant is a verified seafood and local restaurant in Kandal, Cambodia.",
-    "photoUrl": "/Shop/rest-310.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-310.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 843, ផ្លូវ ២១០, Krong Ta Khmao, ខេត្តកណ្តាល",
     "addressEn": "No. 843 Street 210, Krong Ta Khmao, Kandal",
     "provinceKh": "ខេត្តកណ្តាល",
@@ -1844,7 +1784,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-310.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -1856,10 +1796,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Chicken King",
     "descriptionKh": "ភោជនីយដ្ឋាន Chicken King គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តកែប (ផ្ទះលេខ 1, National Road 33A, Krong Kep, ខេត្តកែប) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
     "descriptionEn": "Chicken King is a verified seafood and Cambodian dining destination at No. 1 National Road 33A, Krong Kep, Kep in Kep, celebrated for fresh local ingredients and welcoming hospitality.",
-    "photoUrl": "/Shop/rest-311.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-311.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 1, National Road 33A, Krong Kep, ខេត្តកែប",
     "addressEn": "No. 1 National Road 33A, Krong Kep, Kep",
     "provinceKh": "ខេត្តកែប",
@@ -1885,7 +1823,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-311.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -1897,10 +1835,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Moustache et Nico",
     "descriptionKh": "ភោជនីយដ្ឋាន Moustache et Nico គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពង់ចាម (ផ្ទះលេខ 11, Pasteur, Krong Kampong Cham, ខេត្តកំពង់ចាម) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Moustache et Nico is a verified Cambodian and international restaurant at No. 11 Pasteur, Krong Kampong Cham, Kampong Cham in Kampong Cham, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-312.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-312.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 11, Pasteur, Krong Kampong Cham, ខេត្តកំពង់ចាម",
     "addressEn": "No. 11 Pasteur, Krong Kampong Cham, Kampong Cham",
     "provinceKh": "ខេត្តកំពង់ចាម",
@@ -1926,7 +1862,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-312.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -1938,10 +1874,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Gelano Italiano",
     "descriptionKh": "ភោជនីយដ្ឋាន Gelano Italiano គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តព្រះសីហនុ (phum 2, sangkat 2, Krong Preah Sihanouk, ខេត្តព្រះសីហនុ) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
     "descriptionEn": "Gelano Italiano is a verified seafood and Cambodian dining destination at phum 2, sangkat 2, Krong Preah Sihanouk, Preah Sihanouk in Preah Sihanouk, celebrated for fresh local ingredients and welcoming hospitality.",
-    "photoUrl": "/Shop/rest-313.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-313.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "phum 2, sangkat 2, Krong Preah Sihanouk, ខេត្តព្រះសីហនុ",
     "addressEn": "phum 2, sangkat 2, Krong Preah Sihanouk, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
@@ -1967,7 +1901,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-313.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -1979,10 +1913,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Monorom Pizza",
     "descriptionKh": "ភោជនីយដ្ឋាន Monorom Pizza គឺជាភោជនីយដ្ឋានអាហារជួបជុំគ្រួសារ និងសាច់អាំងដ៏ពេញនិយមនៅខេត្តមណ្ឌលគិរី (ផ្ទះលេខ 0716026521, 76, Krong Sen Monorom, ខេត្តមណ្ឌលគិរី) បម្រើម្ហូបចម្អិនថ្មីៗក្តៅៗ រសជាតិឆ្ងាញ់ និងសេវាកម្មរួសរាយរាក់ទាក់។",
     "descriptionEn": "Monorom Pizza is a popular verified grill and family restaurant at No. 0716026521 76, Krong Sen Monorom, Mondulkiri in Mondulkiri, offering freshly prepared specialties and a lively dining atmosphere.",
-    "photoUrl": "/Shop/rest-314.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-314.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 0716026521, 76, Krong Sen Monorom, ខេត្តមណ្ឌលគិរី",
     "addressEn": "No. 0716026521 76, Krong Sen Monorom, Mondulkiri",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
@@ -2008,7 +1940,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-314.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2020,10 +1952,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Touk Thnoat Cafe",
     "descriptionKh": "ហាងកាហ្វេ Touk Thnoat Cafe ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅខេត្តកោះកុង មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Touk Thnoat Cafe is a verified coffee shop and café located in Koh Kong, Cambodia.",
-    "photoUrl": "/Shop/rest-315.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-315.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Sala Krong street, Krong Khemarak Phoumin, ខេត្តកោះកុង",
     "addressEn": "Sala Krong street, Krong Khemarak Phoumin, Koh Kong",
     "provinceKh": "ខេត្តកោះកុង",
@@ -2048,7 +1978,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-315.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2060,10 +1990,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "LOTUS COFFEE",
     "descriptionKh": "ភោជនីយដ្ឋាន LOTUS COFFEE ជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរស្រស់ៗនៅខេត្តកំពង់ស្ពឺ។",
     "descriptionEn": "LOTUS COFFEE is a verified seafood and local restaurant in Kampong Speu, Cambodia.",
-    "photoUrl": "/Shop/rest-316.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-316.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវជាតិលេខ៤, Krong Chbar Mon, ខេត្តកំពង់ស្ពឺ",
     "addressEn": "4, Krong Chbar Mon, Kampong Speu",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
@@ -2088,7 +2016,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-316.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2100,10 +2028,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "TK Seafood",
     "descriptionKh": "ភោជនីយដ្ឋាន TK Seafood គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តតាកែវ (ផ្ទះលេខ 009, ផ្លូវជាតិលេខ​២, Krong Doun Kaev, ខេត្តតាកែវ) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
     "descriptionEn": "TK Seafood is a verified seafood and Cambodian dining destination at No. 009 ​2, Krong Doun Kaev, Takeo in Takeo, celebrated for fresh local ingredients and welcoming hospitality.",
-    "photoUrl": "/Shop/rest-317.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-317.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 009, ផ្លូវជាតិលេខ​២, Krong Doun Kaev, ខេត្តតាកែវ",
     "addressEn": "No. 009 ​2, Krong Doun Kaev, Takeo",
     "provinceKh": "ខេត្តតាកែវ",
@@ -2129,7 +2055,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-317.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2141,10 +2067,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sorya Guesthouse",
     "descriptionKh": "ភោជនីយដ្ឋាន Sorya Guesthouse គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តក្រចេះ (Rue N° 1, Krong Kratie, ខេត្តក្រចេះ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Sorya Guesthouse is a verified Cambodian and international restaurant at Rue N° 1, Krong Kratie, Kratie in Kratie, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-318.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-318.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Rue N° 1, Krong Kratie, ខេត្តក្រចេះ",
     "addressEn": "Rue N° 1, Krong Kratie, Kratie",
     "provinceKh": "ខេត្តក្រចេះ",
@@ -2170,7 +2094,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-318.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2182,10 +2106,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "The Third Place Coffee",
     "descriptionKh": "ហាងកាហ្វេ The Third Place Coffee ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅខេត្តកំពង់ធំ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "The Third Place Coffee is a verified coffee shop and café located in Kampong Thom, Cambodia.",
-    "photoUrl": "/Shop/rest-319.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-319.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "វិថី ប្រជាធិបតេយ្យ, Krong Stueng Saen, ខេត្តកំពង់ធំ",
     "addressEn": "Krong Stueng Saen, Kampong Thom",
     "provinceKh": "ខេត្តកំពង់ធំ",
@@ -2210,7 +2132,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-319.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2222,10 +2144,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "La Gosy",
     "descriptionKh": "ហាងកាហ្វេ La Gosy ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅខេត្តពោធិ៍សាត់ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "La Gosy is a verified coffee shop and café located in Pursat, Cambodia.",
-    "photoUrl": "/Shop/rest-320.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-320.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Pursat, ខេត្តពោធិ៍សាត់",
     "addressEn": "Krong Pursat, Pursat",
     "provinceKh": "ខេត្តពោធិ៍សាត់",
@@ -2250,7 +2170,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-320.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2262,10 +2182,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Fresh Pizza",
     "descriptionKh": "ហ្វ្រេស​ ភីហ្សា​ គឺជាភោជនីយដ្ឋានអាហារជួបជុំគ្រួសារ និងសាច់អាំងដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ #464, ផ្លូវលេខ 163, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបចម្អិនថ្មីៗក្តៅៗ រសជាតិឆ្ងាញ់ និងសេវាកម្មរួសរាយរាក់ទាក់។",
     "descriptionEn": "Fresh Pizza is a popular verified grill and family restaurant at No. #464 Street 163, Khan Chamkarmon, Phnom Penh in Phnom Penh, offering freshly prepared specialties and a lively dining atmosphere.",
-    "photoUrl": "/Shop/rest-321.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-321.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ #464, ផ្លូវលេខ 163, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. #464 Street 163, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -2291,7 +2209,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-321.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2303,10 +2221,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Chameleon Bistro & Cocktail Bar",
     "descriptionKh": "ភោជនីយដ្ឋាន Chameleon Bistro & Cocktail Bar គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅខេត្តកំពត (ផ្ទះលេខ 51, ផ្លូវលេខ 728, ខេត្តកំពត) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Chameleon Bistro & Cocktail Bar is a verified specialty cafe and dining spot located at No. 51 Street 728, Kampot in Kampot, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-322.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-322.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 51, ផ្លូវលេខ 728, ខេត្តកំពត",
     "addressEn": "No. 51 Street 728, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -2332,7 +2248,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-322.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2344,10 +2260,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Meow Meow Dim Sum",
     "descriptionKh": "ភោជនីយដ្ឋាន Meow Meow Dim Sum គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តបាត់ដំបង (ផ្លូវលេខ 2.5, Krong Battambang, ខេត្តបាត់ដំបង) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Meow Meow Dim Sum is a verified Cambodian and international restaurant at Street 2.5, Krong Battambang, Battambang in Battambang, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-323.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-323.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ 2.5, Krong Battambang, ខេត្តបាត់ដំបង",
     "addressEn": "Street 2.5, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
@@ -2373,7 +2287,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-323.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2385,10 +2299,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Seoul 7 Level Spicy Soup",
     "descriptionKh": "មីហិរ Seoul មីហិរ7យ៉ាង គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តរតនគិរី (ផ្ទះលេខ Eo. 009, ផ្លូវលេខ 62, Krong Banlung, ខេត្តរតនគិរី) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Seoul 7 Level Spicy Soup is a verified Cambodian and international restaurant at No. Eo. 009 Street 62, Krong Banlung, Ratanakiri in Ratanakiri, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-324.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-324.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ Eo. 009, ផ្លូវលេខ 62, Krong Banlung, ខេត្តរតនគិរី",
     "addressEn": "No. Eo. 009 Street 62, Krong Banlung, Ratanakiri",
     "provinceKh": "ខេត្តរតនគិរី",
@@ -2414,7 +2326,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-324.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2426,10 +2338,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Spring Café & Cocktail",
     "descriptionKh": "ភោជនីយដ្ឋាន Spring Café & Cocktail គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅខេត្តកណ្តាល (ផ្ទះលេខ #963, 210, Takhmao, ខេត្តកណ្តាល) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Spring Café & Cocktail is a verified specialty cafe and dining spot located at No. #963 210, Takhmao, Kandal in Kandal, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-325.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-325.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ #963, 210, Takhmao, ខេត្តកណ្តាល",
     "addressEn": "No. #963 210, Takhmao, Kandal",
     "provinceKh": "ខេត្តកណ្តាល",
@@ -2455,7 +2365,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-325.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2467,10 +2377,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sahie Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋាន Sahie Restaurant ជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរស្រស់ៗនៅខេត្តកែប។",
     "descriptionEn": "Sahie Restaurant is a verified seafood and local restaurant in Kep, Cambodia.",
-    "photoUrl": "/Shop/rest-326.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-326.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "National Road 33A, Krong Kep, ខេត្តកែប",
     "addressEn": "National Road 33A, Krong Kep, Kep",
     "provinceKh": "ខេត្តកែប",
@@ -2495,7 +2403,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-326.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2507,10 +2415,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "River Grass Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋាន River Grass Restaurant ជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរស្រស់ៗនៅខេត្តកំពង់ចាម។",
     "descriptionEn": "River Grass Restaurant is a verified seafood and local restaurant in Kampong Cham, Cambodia.",
-    "photoUrl": "/Shop/rest-327.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-327.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Bamboo Bridge, Krong Kampong Cham, ខេត្តកំពង់ចាម",
     "addressEn": "Bamboo Bridge, Krong Kampong Cham, Kampong Cham",
     "provinceKh": "ខេត្តកំពង់ចាម",
@@ -2535,7 +2441,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-327.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2547,10 +2453,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Water Buffello steak",
     "descriptionKh": "ម៉ាក់សុីនួនលក់សាច់គោ គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅខេត្តព្រះសីហនុ (Koh Rong street (110), Krong Preah Sihanouk, ខេត្តព្រះសីហនុ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Water Buffello steak is a verified specialty cafe and dining spot located at Koh Rong street (110), Krong Preah Sihanouk, Preah Sihanouk in Preah Sihanouk, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-328.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-328.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Koh Rong street (110), Krong Preah Sihanouk, ខេត្តព្រះសីហនុ",
     "addressEn": "Koh Rong street (110), Krong Preah Sihanouk, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
@@ -2576,7 +2480,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-328.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2588,10 +2492,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Bamboo Cafe",
     "descriptionKh": "ភោជនីយដ្ឋាន Bamboo Cafe គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅខេត្តមណ្ឌលគិរី (Bamboo Cafe, Krong Sen Monorom, ខេត្តមណ្ឌលគិរី) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Bamboo Cafe is a verified specialty cafe and dining spot located at Bamboo Cafe, Krong Sen Monorom, Mondulkiri in Mondulkiri, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-329.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-329.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Bamboo Cafe, Krong Sen Monorom, ខេត្តមណ្ឌលគិរី",
     "addressEn": "Bamboo Cafe, Krong Sen Monorom, Mondulkiri",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
@@ -2617,7 +2519,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-329.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2629,10 +2531,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "VR Coffee",
     "descriptionKh": "ហាងកាហ្វេ VR Coffee ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅខេត្តកោះកុង មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "VR Coffee is a verified coffee shop and café located in Koh Kong, Cambodia.",
-    "photoUrl": "/Shop/rest-330.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-330.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "National Road 48, Krong Khemarak Phoumin, ខេត្តកោះកុង",
     "addressEn": "National Road 48, Krong Khemarak Phoumin, Koh Kong",
     "provinceKh": "ខេត្តកោះកុង",
@@ -2657,7 +2557,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-330.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2669,10 +2569,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Chamka Nonong",
     "descriptionKh": "ភោជនីយដ្ឋាន Chamka Nonong គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពង់ស្ពឺ (ផ្លូវជាតិលេខ៤, Krong Chbar Mon, ខេត្តកំពង់ស្ពឺ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Chamka Nonong is a verified Cambodian and international restaurant at 4, Krong Chbar Mon, Kampong Speu in Kampong Speu, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-331.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-331.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវជាតិលេខ៤, Krong Chbar Mon, ខេត្តកំពង់ស្ពឺ",
     "addressEn": "4, Krong Chbar Mon, Kampong Speu",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
@@ -2698,7 +2596,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-331.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2710,10 +2608,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Che Yom Natural Lobsters",
     "descriptionKh": "ស្រីតា បង្កងធម្មជាតិខេត្តតាកែវ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តតាកែវ (9, Krong Doun Kaev, ខេត្តតាកែវ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Che Yom Natural Lobsters is a verified Cambodian and international restaurant at 9, Krong Doun Kaev, Takeo in Takeo, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-332.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-332.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "9, Krong Doun Kaev, ខេត្តតាកែវ",
     "addressEn": "9, Krong Doun Kaev, Takeo",
     "provinceKh": "ខេត្តតាកែវ",
@@ -2739,7 +2635,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-332.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2751,10 +2647,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Street Three Restaurant & Bar",
     "descriptionKh": "ភោជនីយដ្ឋាន Street Three Restaurant & Bar គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តក្រចេះ (Rue N° 3, Krong Kratie, ខេត្តក្រចេះ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Street Three Restaurant & Bar is a verified Cambodian and international restaurant at Rue N° 3, Krong Kratie, Kratie in Kratie, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-333.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-333.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Rue N° 3, Krong Kratie, ខេត្តក្រចេះ",
     "addressEn": "Rue N° 3, Krong Kratie, Kratie",
     "provinceKh": "ខេត្តក្រចេះ",
@@ -2780,7 +2674,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-333.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2792,10 +2686,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Prum Bayon",
     "descriptionKh": "ភោជនីយដ្ឋាន Prum Bayon គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពង់ធំ (Krong Stueng Saen, ខេត្តកំពង់ធំ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Prum Bayon is a verified Cambodian and international restaurant at Krong Stueng Saen, Kampong Thom in Kampong Thom, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-334.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-334.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Stueng Saen, ខេត្តកំពង់ធំ",
     "addressEn": "Krong Stueng Saen, Kampong Thom",
     "provinceKh": "ខេត្តកំពង់ធំ",
@@ -2821,7 +2713,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-334.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2833,10 +2725,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Zara Coffee",
     "descriptionKh": "ហាងកាហ្វេ Zara Coffee ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅខេត្តពោធិ៍សាត់ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Zara Coffee is a verified coffee shop and café located in Pursat, Cambodia.",
-    "photoUrl": "/Shop/rest-335.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-335.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Pursat, ខេត្តពោធិ៍សាត់",
     "addressEn": "Krong Pursat, Pursat",
     "provinceKh": "ខេត្តពោធិ៍សាត់",
@@ -2861,7 +2751,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-335.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2873,10 +2763,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Family BBQ Buffet",
     "descriptionKh": "ហ្វេមលីបាប៊ីឃ្យូ ជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរស្រស់ៗនៅរាជធានីភ្នំពេញ។",
     "descriptionEn": "Family BBQ Buffet is a verified seafood and local restaurant in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-336.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-336.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 973, ផ្លូវ ១០១, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 973 Street 101, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -2901,7 +2789,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-336.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2913,10 +2801,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Food Addiction",
     "descriptionKh": "ភោជនីយដ្ឋាន Food Addiction គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (ផ្ទះលេខ 5, N° 5 1 ouksaphea village, sangkat Kompong Kandal, kampot town, kampot province, Krong Kampot, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Food Addiction is a verified Cambodian and international restaurant at No. 5 N° 5 1 ouksaphea village, sangkat Kompong Kandal, kampot town, kampot province, Krong Kampot, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-337.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-337.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 5, N° 5 1 ouksaphea village, sangkat Kompong Kandal, kampot town, kampot province, Krong Kampot, ខេត្តកំពត",
     "addressEn": "No. 5 N° 5 1 ouksaphea village, sangkat Kompong Kandal, kampot town, kampot province, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -2942,7 +2828,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-337.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2954,10 +2840,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Nary Kitchen and cooking school",
     "descriptionKh": "ភោជនីយដ្ឋាន Nary Kitchen and cooking school គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តបាត់ដំបង (ផ្ទះលេខ 650, ផ្លូវលេខ 111, Krong Battambang, ខេត្តបាត់ដំបង) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Nary Kitchen and cooking school is a verified Cambodian and international restaurant at No. 650 Street 111, Krong Battambang, Battambang in Battambang, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-338.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-338.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 650, ផ្លូវលេខ 111, Krong Battambang, ខេត្តបាត់ដំបង",
     "addressEn": "No. 650 Street 111, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
@@ -2983,7 +2867,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-338.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -2995,10 +2879,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sona​Trekking​& Reggae​ Bar​ and​ Restaurant​",
     "descriptionKh": "ភោជនីយដ្ឋាន Sona​Trekking​& Reggae​ Bar​ and​ Restaurant​ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តរតនគិរី (ផ្លូវលេខ 21, Krong Banlung, ខេត្តរតនគិរី) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Sona​Trekking​& Reggae​ Bar​ and​ Restaurant​ is a verified Cambodian and international restaurant at Street 21, Krong Banlung, Ratanakiri in Ratanakiri, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-339.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-339.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ 21, Krong Banlung, ខេត្តរតនគិរី",
     "addressEn": "Street 21, Krong Banlung, Ratanakiri",
     "provinceKh": "ខេត្តរតនគិរី",
@@ -3024,7 +2906,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-339.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3036,10 +2918,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "2 Tnou",
     "descriptionKh": "ភោជនីយដ្ឋាន 2 Tnou គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកណ្តាល (206, Takhmao, ខេត្តកណ្តាល) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "2 Tnou is a verified Cambodian and international restaurant at 206, Takhmao, Kandal in Kandal, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-340.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-340.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "206, Takhmao, ខេត្តកណ្តាល",
     "addressEn": "206, Takhmao, Kandal",
     "provinceKh": "ខេត្តកណ្តាល",
@@ -3065,7 +2945,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-340.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3077,10 +2957,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "La Parenthèse",
     "descriptionKh": "ភោជនីយដ្ឋាន La Parenthèse គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តកែប (Krong Kep, ខេត្តកែប) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
     "descriptionEn": "La Parenthèse is a verified seafood and Cambodian dining destination at Krong Kep, Kep in Kep, celebrated for fresh local ingredients and welcoming hospitality.",
-    "photoUrl": "/Shop/rest-341.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-341.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Kep, ខេត្តកែប",
     "addressEn": "Krong Kep, Kep",
     "provinceKh": "ខេត្តកែប",
@@ -3106,7 +2984,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-341.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3118,10 +2996,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Te Kuch Chheu Sinh",
     "descriptionKh": "តែគុចឆឺសុីញ គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅខេត្តកំពង់ចាម (Krong Kampong Cham, ខេត្តកំពង់ចាម) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Te Kuch Chheu Sinh is a verified specialty cafe and dining spot located at Krong Kampong Cham, Kampong Cham in Kampong Cham, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-342.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-342.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Kampong Cham, ខេត្តកំពង់ចាម",
     "addressEn": "Krong Kampong Cham, Kampong Cham",
     "provinceKh": "ខេត្តកំពង់ចាម",
@@ -3147,7 +3023,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-342.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3159,10 +3035,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Oriental Chonji",
     "descriptionKh": "ភោជនីយដ្ឋាន Oriental Chonji គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តព្រះសីហនុ (Victory Hill, ខេត្តព្រះសីហនុ) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
     "descriptionEn": "Oriental Chonji is a verified seafood and Cambodian dining destination at Victory Hill, Preah Sihanouk in Preah Sihanouk, celebrated for fresh local ingredients and welcoming hospitality.",
-    "photoUrl": "/Shop/rest-343.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-343.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Victory Hill, ខេត្តព្រះសីហនុ",
     "addressEn": "Victory Hill, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
@@ -3188,7 +3062,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-343.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3200,10 +3074,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "coffee Buffalo Mondulkiri",
     "descriptionKh": "ហាងកាហ្វេ coffee Buffalo Mondulkiri ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅខេត្តមណ្ឌលគិរី មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "coffee Buffalo Mondulkiri is a verified coffee shop and café located in Mondulkiri, Cambodia.",
-    "photoUrl": "/Shop/rest-344.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-344.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "krong Senmonorom, Krong Sen Monorom, ខេត្តមណ្ឌលគិរី",
     "addressEn": "krong Senmonorom, Krong Sen Monorom, Mondulkiri",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
@@ -3228,7 +3100,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-344.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3240,10 +3112,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Pizza Aloha",
     "descriptionKh": "ភោជនីយដ្ឋាន Pizza Aloha គឺជាភោជនីយដ្ឋានអាហារជួបជុំគ្រួសារ និងសាច់អាំងដ៏ពេញនិយមនៅខេត្តកំពង់ស្ពឺ (101, Krong Chbar Mon, ខេត្តកំពង់ស្ពឺ) បម្រើម្ហូបចម្អិនថ្មីៗក្តៅៗ រសជាតិឆ្ងាញ់ និងសេវាកម្មរួសរាយរាក់ទាក់។",
     "descriptionEn": "Pizza Aloha is a popular verified grill and family restaurant at 101, Krong Chbar Mon, Kampong Speu in Kampong Speu, offering freshly prepared specialties and a lively dining atmosphere.",
-    "photoUrl": "/Shop/rest-346.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-346.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "101, Krong Chbar Mon, ខេត្តកំពង់ស្ពឺ",
     "addressEn": "101, Krong Chbar Mon, Kampong Speu",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
@@ -3269,7 +3139,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-346.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3281,10 +3151,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Stung Takeo",
     "descriptionKh": "ស្ទឹងតាកែវ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តតាកែវ (Krong Doun Kaev, ខេត្តតាកែវ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Stung Takeo is a verified Cambodian and international restaurant at Krong Doun Kaev, Takeo in Takeo, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-347.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-347.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Doun Kaev, ខេត្តតាកែវ",
     "addressEn": "Krong Doun Kaev, Takeo",
     "provinceKh": "ខេត្តតាកែវ",
@@ -3310,7 +3178,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-347.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3322,10 +3190,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "U-Hong II Guest House",
     "descriptionKh": "ភោជនីយដ្ឋាន U-Hong II Guest House គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តក្រចេះ (Krong Kratie, ខេត្តក្រចេះ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "U-Hong II Guest House is a verified Cambodian and international restaurant at Krong Kratie, Kratie in Kratie, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-348.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-348.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Kratie, ខេត្តក្រចេះ",
     "addressEn": "Krong Kratie, Kratie",
     "provinceKh": "ខេត្តក្រចេះ",
@@ -3351,7 +3217,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-348.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3363,10 +3229,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "DR RESTAURANT",
     "descriptionKh": "DR RESTAURANT (ភោជនីដ្ឋានដំរីជាន់ខ្លា) គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពង់ធំ (ផ្ទះលេខ 25, ផ្លូវជាតិលេខ៦, kompongthom, ខេត្តកំពង់ធំ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "DR RESTAURANT is a verified Cambodian and international restaurant at No. 25 6, kompongthom, Kampong Thom in Kampong Thom, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-349.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-349.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 25, ផ្លូវជាតិលេខ៦, kompongthom, ខេត្តកំពង់ធំ",
     "addressEn": "No. 25 6, kompongthom, Kampong Thom",
     "provinceKh": "ខេត្តកំពង់ធំ",
@@ -3392,7 +3256,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-349.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3404,10 +3268,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Café Amazon",
     "descriptionKh": "កាហ្វេ អាម៉ាហ្សូន (Café Amazon) - ពោធិ៍សាត់ ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅខេត្តពោធិ៍សាត់ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Café Amazon is a verified coffee shop and café located in Pursat, Cambodia.",
-    "photoUrl": "/Shop/rest-350.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-350.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Pursat, ខេត្តពោធិ៍សាត់",
     "addressEn": "Krong Pursat, Pursat",
     "provinceKh": "ខេត្តពោធិ៍សាត់",
@@ -3432,7 +3294,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-350.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3444,10 +3306,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "474 Bistro",
     "descriptionKh": "474 ប៊ីស្រ្តូ ជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរស្រស់ៗនៅរាជធានីភ្នំពេញ។",
     "descriptionEn": "474 Bistro is a verified seafood and local restaurant in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-351.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-351.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 792, ផ្លូវ ៤៧៤, រាជធានីភ្នំពេញ",
     "addressEn": "No. 792 Street 474, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -3472,7 +3332,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-351.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3484,10 +3344,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "La Fringale",
     "descriptionKh": "ភោជនីយដ្ឋាន La Fringale គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (ផ្ទះលេខ 17, ផ្លូវលេខ 730, Krong Kampot, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "La Fringale is a verified Cambodian and international restaurant at No. 17 Street 730, Krong Kampot, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-352.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-352.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 17, ផ្លូវលេខ 730, Krong Kampot, ខេត្តកំពត",
     "addressEn": "No. 17 Street 730, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -3513,7 +3371,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-352.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3525,10 +3383,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kinyei Café",
     "descriptionKh": "ហាងកាហ្វេ Kinyei Café ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅខេត្តបាត់ដំបង មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Kinyei Café is a verified coffee shop and café located in Battambang, Cambodia.",
-    "photoUrl": "/Shop/rest-353.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-353.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ 1.5, Krong Battambang, ខេត្តបាត់ដំបង",
     "addressEn": "Street 1.5, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
@@ -3553,7 +3409,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-353.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3565,10 +3421,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Big Luck 99",
     "descriptionKh": "ភោជនីយដ្ឋាន Big Luck 99 គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកណ្តាល (National Road No. 2, Takhmao, ខេត្តកណ្តាល) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Big Luck 99 is a verified Cambodian and international restaurant at National Road No. 2, Takhmao, Kandal in Kandal, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-355.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-355.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "National Road No. 2, Takhmao, ខេត្តកណ្តាល",
     "addressEn": "National Road No. 2, Takhmao, Kandal",
     "provinceKh": "ខេត្តកណ្តាល",
@@ -3594,7 +3448,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-355.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3606,10 +3460,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Captain Chim's II",
     "descriptionKh": "ភោជនីយដ្ឋាន Captain Chim's II គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តកែប (Krong Kep, ខេត្តកែប) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
     "descriptionEn": "Captain Chim's II is a verified seafood and Cambodian dining destination at Krong Kep, Kep in Kep, celebrated for fresh local ingredients and welcoming hospitality.",
-    "photoUrl": "/Shop/rest-356.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-356.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Kep, ខេត្តកែប",
     "addressEn": "Krong Kep, Kep",
     "provinceKh": "ខេត្តកែប",
@@ -3635,7 +3487,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-356.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3647,10 +3499,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Volcano",
     "descriptionKh": "ភោជនីយដ្ឋាន Volcano គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពង់ចាម (Krong Kampong Cham, ខេត្តកំពង់ចាម) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Volcano is a verified Cambodian and international restaurant at Krong Kampong Cham, Kampong Cham in Kampong Cham, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-357.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-357.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Kampong Cham, ខេត្តកំពង់ចាម",
     "addressEn": "Krong Kampong Cham, Kampong Cham",
     "provinceKh": "ខេត្តកំពង់ចាម",
@@ -3676,7 +3526,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-357.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3688,10 +3538,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "MerryBelle x DenBagus",
     "descriptionKh": "ភោជនីយដ្ឋាន MerryBelle x DenBagus គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តព្រះសីហនុ (ផ្ទះលេខ A-15 R1, ផ្លូវលេខ 815, ខេត្តព្រះសីហនុ) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
     "descriptionEn": "MerryBelle x DenBagus is a verified seafood and Cambodian dining destination at No. A-15 R1 Street 815, Preah Sihanouk in Preah Sihanouk, celebrated for fresh local ingredients and welcoming hospitality.",
-    "photoUrl": "/Shop/rest-358.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-358.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ A-15 R1, ផ្លូវលេខ 815, ខេត្តព្រះសីហនុ",
     "addressEn": "No. A-15 R1 Street 815, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
@@ -3717,7 +3565,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-358.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3729,10 +3577,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "The Hangout",
     "descriptionKh": "ភោជនីយដ្ឋាន The Hangout គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តមណ្ឌលគិរី (Krong Sen Monorom, ខេត្តមណ្ឌលគិរី) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "The Hangout is a verified Cambodian and international restaurant at Krong Sen Monorom, Mondulkiri in Mondulkiri, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-359.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-359.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Sen Monorom, ខេត្តមណ្ឌលគិរី",
     "addressEn": "Krong Sen Monorom, Mondulkiri",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
@@ -3758,7 +3604,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-359.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3770,10 +3616,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Pizza Bar 23",
     "descriptionKh": "ភោជនីយដ្ឋាន Pizza Bar 23 គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តកោះកុង (Krong Khemarak Phoumin, ខេត្តកោះកុង) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
     "descriptionEn": "Pizza Bar 23 is a verified seafood and Cambodian dining destination at Krong Khemarak Phoumin, Koh Kong in Koh Kong, celebrated for fresh local ingredients and welcoming hospitality.",
-    "photoUrl": "/Shop/rest-360.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-360.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Khemarak Phoumin, ខេត្តកោះកុង",
     "addressEn": "Krong Khemarak Phoumin, Koh Kong",
     "provinceKh": "ខេត្តកោះកុង",
@@ -3799,7 +3643,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-360.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3811,10 +3655,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Le Bistro de Fred",
     "descriptionKh": "ភោជនីយដ្ឋាន Le Bistro de Fred គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅខេត្តតាកែវ (Krong Doun Kaev, ខេត្តតាកែវ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Le Bistro de Fred is a verified specialty cafe and dining spot located at Krong Doun Kaev, Takeo in Takeo, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-362.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-362.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Doun Kaev, ខេត្តតាកែវ",
     "addressEn": "Krong Doun Kaev, Takeo",
     "provinceKh": "ខេត្តតាកែវ",
@@ -3840,7 +3682,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-362.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3852,10 +3694,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Khmer Barbecue",
     "descriptionKh": "ភោជនីយដ្ឋាន Khmer Barbecue គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តក្រចេះ (Krong Kratie, ខេត្តក្រចេះ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Khmer Barbecue is a verified Cambodian and international restaurant at Krong Kratie, Kratie in Kratie, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-363.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-363.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Kratie, ខេត្តក្រចេះ",
     "addressEn": "Krong Kratie, Kratie",
     "provinceKh": "ខេត្តក្រចេះ",
@@ -3881,7 +3721,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-363.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3893,10 +3733,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Arunras",
     "descriptionKh": "ភោជនីយដ្ឋានអរុណរះ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពង់ធំ (Krong Stueng Saen, ខេត្តកំពង់ធំ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Arunras is a verified Cambodian and international restaurant at Krong Stueng Saen, Kampong Thom in Kampong Thom, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-364.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-364.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Stueng Saen, ខេត្តកំពង់ធំ",
     "addressEn": "Krong Stueng Saen, Kampong Thom",
     "provinceKh": "ខេត្តកំពង់ធំ",
@@ -3922,7 +3760,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-364.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3934,10 +3772,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Coffee Culture",
     "descriptionKh": "ខាល់ឆើកាហ្វេ ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Coffee Culture is a verified coffee shop and café located in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-365.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-365.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 100, ផ្លូវ ៤៣០, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 100 Street 430, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -3962,7 +3798,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-365.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -3974,10 +3810,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Auberge du Soleil",
     "descriptionKh": "ភោជនីយដ្ឋាន Auberge du Soleil គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (ផ្ទះលេខ 23, Str 278, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Auberge du Soleil is a verified Cambodian and international restaurant at No. 23 Str 278, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-366.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-366.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 23, Str 278, ខេត្តកំពត",
     "addressEn": "No. 23 Str 278, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -4003,7 +3837,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-366.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4015,10 +3849,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Battambang Town Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋាន Battambang Town Restaurant គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តបាត់ដំបង (ផ្លូវលេខ 2, Krong Battambang, ខេត្តបាត់ដំបង) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Battambang Town Restaurant is a verified Cambodian and international restaurant at Street 2, Krong Battambang, Battambang in Battambang, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-367.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-367.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ 2, Krong Battambang, ខេត្តបាត់ដំបង",
     "addressEn": "Street 2, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
@@ -4044,7 +3876,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-367.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4056,10 +3888,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Noreay 999",
     "descriptionKh": "ភោជនីយដ្ឋាន Noreay 999 គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកណ្តាល (Krong Ta Khmao, ខេត្តកណ្តាល) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Noreay 999 is a verified Cambodian and international restaurant at Krong Ta Khmao, Kandal in Kandal, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-369.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-369.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Ta Khmao, ខេត្តកណ្តាល",
     "addressEn": "Krong Ta Khmao, Kandal",
     "provinceKh": "ខេត្តកណ្តាល",
@@ -4085,7 +3915,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-369.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4097,10 +3927,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kep Local Café",
     "descriptionKh": "ហាងកាហ្វេ Kep Local Café ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅខេត្តកែប មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Kep Local Café is a verified coffee shop and café located in Kep, Cambodia.",
-    "photoUrl": "/Shop/rest-370.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-370.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Kep, ខេត្តកែប",
     "addressEn": "Krong Kep, Kep",
     "provinceKh": "ខេត្តកែប",
@@ -4125,7 +3953,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-370.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4137,10 +3965,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Hao An",
     "descriptionKh": "ភោជនីយដ្ឋាន Hao An គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពង់ចាម (Krong Kampong Cham, ខេត្តកំពង់ចាម) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Hao An is a verified Cambodian and international restaurant at Krong Kampong Cham, Kampong Cham in Kampong Cham, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-371.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-371.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Kampong Cham, ខេត្តកំពង់ចាម",
     "addressEn": "Krong Kampong Cham, Kampong Cham",
     "provinceKh": "ខេត្តកំពង់ចាម",
@@ -4166,7 +3992,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-371.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4178,10 +4004,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Starfish Cafe & Bakery",
     "descriptionKh": "ហាងនំប៉័ង Starfish Cafe & Bakery ជាហាងនំប៉័ង និងនំដុតថ្មីៗប្រចាំថ្ងៃនៅខេត្តព្រះសីហនុ។",
     "descriptionEn": "Starfish Cafe & Bakery is a verified bakery and pastry shop in Preah Sihanouk, Cambodia.",
-    "photoUrl": "/Shop/rest-372.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-372.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 62/7, 7 Makara Street, Sihanoukville, ខេត្តព្រះសីហនុ",
     "addressEn": "No. 62/7 7 Makara Street, Sihanoukville, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
@@ -4206,7 +4030,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-372.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4218,10 +4042,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Lim Moha Leap III",
     "descriptionKh": "ភោជនីយដ្ឋាន Lim Moha Leap III គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តកោះកុង (Krong Khemarak Phoumin, ខេត្តកោះកុង) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
     "descriptionEn": "Lim Moha Leap III is a verified seafood and Cambodian dining destination at Krong Khemarak Phoumin, Koh Kong in Koh Kong, celebrated for fresh local ingredients and welcoming hospitality.",
-    "photoUrl": "/Shop/rest-374.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-374.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Khemarak Phoumin, ខេត្តកោះកុង",
     "addressEn": "Krong Khemarak Phoumin, Koh Kong",
     "provinceKh": "ខេត្តកោះកុង",
@@ -4247,7 +4069,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-374.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4259,10 +4081,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Bunna II",
     "descriptionKh": "ភោជនីយដ្ឋាន Bunna II គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពង់ស្ពឺ (Krong Chbar Mon, ខេត្តកំពង់ស្ពឺ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Bunna II is a verified Cambodian and international restaurant at Krong Chbar Mon, Kampong Speu in Kampong Speu, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-375.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-375.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Chbar Mon, ខេត្តកំពង់ស្ពឺ",
     "addressEn": "Krong Chbar Mon, Kampong Speu",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
@@ -4288,7 +4108,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-375.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4300,10 +4120,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Mlub Putrea Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋាន Mlub Putrea Restaurant ជាហាងគុយទាវ និងអាហារពេលព្រឹកដ៏មានឱជារសនៅខេត្តក្រចេះ។",
     "descriptionEn": "Mlub Putrea Restaurant is a verified noodle and local dining spot in Kratie, Cambodia.",
-    "photoUrl": "/Shop/rest-377.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-377.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Kratie, ខេត្តក្រចេះ",
     "addressEn": "Krong Kratie, Kratie",
     "provinceKh": "ខេត្តក្រចេះ",
@@ -4328,7 +4146,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-377.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4340,10 +4158,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Love Cafe & Pizza",
     "descriptionKh": "ភោជនីយដ្ឋាន Love Cafe & Pizza គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅខេត្តកំពង់ធំ (Krong Stueng Saen, ខេត្តកំពង់ធំ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Love Cafe & Pizza is a verified specialty cafe and dining spot located at Krong Stueng Saen, Kampong Thom in Kampong Thom, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-378.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-378.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Stueng Saen, ខេត្តកំពង់ធំ",
     "addressEn": "Krong Stueng Saen, Kampong Thom",
     "provinceKh": "ខេត្តកំពង់ធំ",
@@ -4369,7 +4185,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-378.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4381,10 +4197,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Lucy's Cone Pizza",
     "descriptionKh": "ភីហ្សាកោណលូស៊ី គឺជាភោជនីយដ្ឋានអាហារជួបជុំគ្រួសារ និងសាច់អាំងដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 408, មហាវិថី ម៉ៅសេទុង (២៤៥), Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបចម្អិនថ្មីៗក្តៅៗ រសជាតិឆ្ងាញ់ និងសេវាកម្មរួសរាយរាក់ទាក់។",
     "descriptionEn": "Lucy's Cone Pizza is a popular verified grill and family restaurant at No. 408 Boulevard (245), Khan Chamkarmon, Phnom Penh in Phnom Penh, offering freshly prepared specialties and a lively dining atmosphere.",
-    "photoUrl": "/Shop/rest-379.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-379.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 408, មហាវិថី ម៉ៅសេទុង (២៤៥), Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 408 Boulevard (245), Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -4410,7 +4224,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-379.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4422,10 +4236,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "The Loving Spoon",
     "descriptionKh": "ភោជនីយដ្ឋាន The Loving Spoon គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (ផ្ទះលេខ 11, ផ្លូវលេខ 276, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "The Loving Spoon is a verified Cambodian and international restaurant at No. 11 Street 276, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-380.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-380.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 11, ផ្លូវលេខ 276, ខេត្តកំពត",
     "addressEn": "No. 11 Street 276, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -4451,7 +4263,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-380.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4463,10 +4275,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Ahaa Boer Vegetarian restaurant",
     "descriptionKh": "ភោជនីយដ្ឋាន Ahaa Boer Vegetarian restaurant គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តបាត់ដំបង (ផ្លូវលេខ 102, Krong Battambang, ខេត្តបាត់ដំបង) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Ahaa Boer Vegetarian restaurant is a verified Cambodian and international restaurant at Street 102, Krong Battambang, Battambang in Battambang, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-381.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-381.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ 102, Krong Battambang, ខេត្តបាត់ដំបង",
     "addressEn": "Street 102, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
@@ -4492,7 +4302,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-381.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4504,10 +4314,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Ta Nam Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋាន Ta Nam Restaurant គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តរតនគិរី (Krong Banlung, ខេត្តរតនគិរី) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Ta Nam Restaurant is a verified Cambodian and international restaurant at Krong Banlung, Ratanakiri in Ratanakiri, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-382.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-382.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Banlung, ខេត្តរតនគិរី",
     "addressEn": "Krong Banlung, Ratanakiri",
     "provinceKh": "ខេត្តរតនគិរី",
@@ -4533,7 +4341,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-382.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4545,10 +4353,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Viva la pizza",
     "descriptionKh": "ភោជនីយដ្ឋាន Viva la pizza គឺជាភោជនីយដ្ឋានអាហារជួបជុំគ្រួសារ និងសាច់អាំងដ៏ពេញនិយមនៅខេត្តកំពង់ចាម (Krong Kampong Cham, ខេត្តកំពង់ចាម) បម្រើម្ហូបចម្អិនថ្មីៗក្តៅៗ រសជាតិឆ្ងាញ់ និងសេវាកម្មរួសរាយរាក់ទាក់។",
     "descriptionEn": "Viva la pizza is a popular verified grill and family restaurant at Krong Kampong Cham, Kampong Cham in Kampong Cham, offering freshly prepared specialties and a lively dining atmosphere.",
-    "photoUrl": "/Shop/rest-383.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-383.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Kampong Cham, ខេត្តកំពង់ចាម",
     "addressEn": "Krong Kampong Cham, Kampong Cham",
     "provinceKh": "ខេត្តកំពង់ចាម",
@@ -4574,7 +4380,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-383.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4586,10 +4392,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "M'lop Reussey",
     "descriptionKh": "ម្លប់ឬស្សី ជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរស្រស់ៗនៅខេត្តព្រះសីហនុ។",
     "descriptionEn": "M'lop Reussey is a verified seafood and local restaurant in Preah Sihanouk, Cambodia.",
-    "photoUrl": "/Shop/rest-384.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-384.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Preah Sihanouk, ខេត្តព្រះសីហនុ",
     "addressEn": "Krong Preah Sihanouk, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
@@ -4614,7 +4418,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-384.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4626,10 +4430,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Chumnor Thmey Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋាន Chumnor Thmey Restaurant គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តមណ្ឌលគិរី (Krong Sen Monorom, ខេត្តមណ្ឌលគិរី) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Chumnor Thmey Restaurant is a verified Cambodian and international restaurant at Krong Sen Monorom, Mondulkiri in Mondulkiri, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-385.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-385.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Sen Monorom, ខេត្តមណ្ឌលគិរី",
     "addressEn": "Krong Sen Monorom, Mondulkiri",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
@@ -4655,7 +4457,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-385.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4667,10 +4469,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Bay Chha Koh Kong",
     "descriptionKh": "ភោជនីយដ្ឋាន Bay Chha Koh Kong ជាហាងគុយទាវ និងអាហារពេលព្រឹកដ៏មានឱជារសនៅខេត្តកោះកុង។",
     "descriptionEn": "Bay Chha Koh Kong is a verified noodle and local dining spot in Koh Kong, Cambodia.",
-    "photoUrl": "/Shop/rest-386.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-386.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Khemarak Phoumin, ខេត្តកោះកុង",
     "addressEn": "Krong Khemarak Phoumin, Koh Kong",
     "provinceKh": "ខេត្តកោះកុង",
@@ -4695,7 +4495,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-386.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4707,10 +4507,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Angten Meas អង់តែន​មាស",
     "descriptionKh": "ភោជនីយដ្ឋាន Angten Meas អង់តែន​មាស គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅខេត្តកំពង់ស្ពឺ (Krong Chbar Mon, ខេត្តកំពង់ស្ពឺ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Angten Meas អង់តែន​មាស is a verified specialty cafe and dining spot located at Krong Chbar Mon, Kampong Speu in Kampong Speu, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-387.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-387.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Chbar Mon, ខេត្តកំពង់ស្ពឺ",
     "addressEn": "Krong Chbar Mon, Kampong Speu",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
@@ -4736,7 +4534,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-387.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4748,10 +4546,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Night Market",
     "descriptionKh": "ភោជនីយដ្ឋាន Night Market គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តក្រចេះ (Krong Kratie, ខេត្តក្រចេះ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Night Market is a verified Cambodian and international restaurant at Krong Kratie, Kratie in Kratie, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-388.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-388.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Kratie, ខេត្តក្រចេះ",
     "addressEn": "Krong Kratie, Kratie",
     "provinceKh": "ខេត្តក្រចេះ",
@@ -4777,7 +4573,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-388.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4789,10 +4585,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Stung Sen",
     "descriptionKh": "ភោជនីយដ្ឋាន Stung Sen គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពង់ធំ (Krong Stueng Saen, ខេត្តកំពង់ធំ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Stung Sen is a verified Cambodian and international restaurant at Krong Stueng Saen, Kampong Thom in Kampong Thom, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-389.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-389.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Stueng Saen, ខេត្តកំពង់ធំ",
     "addressEn": "Krong Stueng Saen, Kampong Thom",
     "provinceKh": "ខេត្តកំពង់ធំ",
@@ -4818,7 +4612,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-389.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4830,10 +4624,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Home Leash",
     "descriptionKh": "ភូមិគ្រឹះលៀស គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 77B, ផ្លូវ ៩៩, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Home Leash is a verified Cambodian and international restaurant at No. 77B Street 99, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-396.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-396.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 77B, ផ្លូវ ៩៩, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 77B Street 99, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -4859,7 +4651,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-396.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4871,10 +4663,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "ar_kun",
     "descriptionKh": "អរគុណ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ #53, ផ្លូវ ៤៥០, សង្កាត់ទួលទំពូងទី ១, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "ar_kun is a verified Cambodian and international restaurant at No. #53 Street 450, 1, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-397.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-397.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ #53, ផ្លូវ ៤៥០, សង្កាត់ទួលទំពូងទី ១, រាជធានីភ្នំពេញ",
     "addressEn": "No. #53 Street 450, 1, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -4900,7 +4690,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-397.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4912,10 +4702,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "MUSUSO Indian restaurant",
     "descriptionKh": "ភោជនីយដ្ឋានឥណ្ឌាម៉ូស៊ូសូ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 82, ផ្លូវ ៤៤៦, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "MUSUSO Indian restaurant is a verified Cambodian and international restaurant at No. 82 Street 446, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-398.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-398.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 82, ផ្លូវ ៤៤៦, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 82 Street 446, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -4941,7 +4729,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-398.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4953,10 +4741,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Babylon",
     "descriptionKh": "បាប៊ីឡុង គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 26, ផ្លូវ ៣៥០, សង្កាត់បឹងកេងកងទី ៣, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Babylon is a verified Cambodian and international restaurant at No. 26 Street 350, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-399.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-399.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 26, ផ្លូវ ៣៥០, សង្កាត់បឹងកេងកងទី ៣, រាជធានីភ្នំពេញ",
     "addressEn": "No. 26 Street 350, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -4982,7 +4768,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-399.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -4994,10 +4780,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Pteah Bay Chun Cheat Doeum (Indigenous Restaurant)",
     "descriptionKh": "ផ្ទះបាយជនជាតិដើម គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 68A, ផ្លូវ ៤៥៦, Khan Chamkarmon, រាជធានីភ្នំពេញ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Pteah Bay Chun Cheat Doeum (Indigenous Restaurant) is a verified specialty cafe and dining spot located at No. 68A Street 456, Khan Chamkarmon, Phnom Penh in Phnom Penh, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-400.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-400.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 68A, ផ្លូវ ៤៥៦, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 68A Street 456, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5023,7 +4807,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-400.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5035,10 +4819,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "1990s Cake",
     "descriptionKh": "១៩៩០ខេក ជាហាងនំប៉័ង និងនំដុតថ្មីៗប្រចាំថ្ងៃនៅរាជធានីភ្នំពេញ។",
     "descriptionEn": "1990s Cake is a verified bakery and pastry shop in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-401.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-401.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 183A, ផ្លូវ ១៦៣, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 183A Street 163, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5063,7 +4845,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-401.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5075,10 +4857,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Pizzeria Matteo",
     "descriptionKh": "ភីហ្សាម៉ាតេអូ គឺជាភោជនីយដ្ឋានអាហារជួបជុំគ្រួសារ និងសាច់អាំងដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 21, ផ្លូវលេខ 466, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបចម្អិនថ្មីៗក្តៅៗ រសជាតិឆ្ងាញ់ និងសេវាកម្មរួសរាយរាក់ទាក់។",
     "descriptionEn": "Pizzeria Matteo is a popular verified grill and family restaurant at No. 21 Street 466, Khan Chamkarmon, Phnom Penh in Phnom Penh, offering freshly prepared specialties and a lively dining atmosphere.",
-    "photoUrl": "/Shop/rest-402.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-402.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 21, ផ្លូវលេខ 466, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 21 Street 466, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5104,7 +4884,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-402.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5116,10 +4896,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Mang Miguel Kainan",
     "descriptionKh": "ម៉ាងមីហ្គែលគាណាន់ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ #44, ផ្លូវ ១៣៥, សង្កាត់ទួលទំពូងទី ១, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Mang Miguel Kainan is a verified Cambodian and international restaurant at No. #44 Street 135, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-403.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-403.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ #44, ផ្លូវ ១៣៥, សង្កាត់ទួលទំពូងទី ១, រាជធានីភ្នំពេញ",
     "addressEn": "No. #44 Street 135, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5145,7 +4923,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-403.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5157,10 +4935,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Nömpang Cambodia",
     "descriptionKh": "នំប៉័ង គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 89, ផ្លូវលេខ 163, Khan Chamkarmon, រាជធានីភ្នំពេញ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Nömpang Cambodia is a verified specialty cafe and dining spot located at No. 89 Street 163, Khan Chamkarmon, Phnom Penh in Phnom Penh, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-409.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-409.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 89, ផ្លូវលេខ 163, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 89 Street 163, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5186,7 +4962,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-409.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5198,10 +4974,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cafe 0071",
     "descriptionKh": "ហាងកាហ្វេ ​០០៧១ ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Cafe 0071 is a verified coffee shop and café located in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-410.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-410.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ #25, ផ្លូវ ៣២០, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. #25 Street 320, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5226,7 +5000,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-410.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5238,10 +5012,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Racer",
     "descriptionKh": "ហាងកាហ្វេ Racer ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Racer is a verified coffee shop and café located in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-417.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-417.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ #204, ផ្លូវ ១៥៥, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. #204 Street 155, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5266,7 +5038,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-417.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5278,10 +5050,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "cyclo",
     "descriptionKh": "ហាងកាហ្វេ cyclo ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "cyclo is a verified coffee shop and café located in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-418.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-418.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ #146, ផ្លូវ ១៦៣, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. #146 Street 163, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5306,7 +5076,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-418.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5318,10 +5088,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Rama Steakhouse",
     "descriptionKh": "ភោជនីយដ្ឋាន Rama Steakhouse គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 62, ផ្លូវ ១៣៥, Khan Chamkarmon, រាជធានីភ្នំពេញ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Rama Steakhouse is a verified specialty cafe and dining spot located at No. 62 Street 135, Khan Chamkarmon, Phnom Penh in Phnom Penh, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-420.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-420.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 62, ផ្លូវ ១៣៥, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 62 Street 135, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5347,7 +5115,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-420.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5359,10 +5127,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Greek Food Kampot",
     "descriptionKh": "ភោជនីយដ្ឋាន Greek Food Kampot គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (ផ្ទះលេខ 73, ផ្លូវលេខ 724, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Greek Food Kampot is a verified Cambodian and international restaurant at No. 73 Street 724, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-423.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-423.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 73, ផ្លូវលេខ 724, ខេត្តកំពត",
     "addressEn": "No. 73 Street 724, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -5388,7 +5154,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-423.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5400,10 +5166,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "LyVy Coffee & BBQ",
     "descriptionKh": "ភោជនីយដ្ឋាន LyVy Coffee & BBQ គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 36, ផ្លូវលេខ 334, Khan Chamkarmon, រាជធានីភ្នំពេញ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "LyVy Coffee & BBQ is a verified specialty cafe and dining spot located at No. 36 Street 334, Khan Chamkarmon, Phnom Penh in Phnom Penh, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-424.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-424.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 36, ផ្លូវលេខ 334, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 36 Street 334, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5429,7 +5193,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-424.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5441,10 +5205,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Teuk Sieng",
     "descriptionKh": "ទឹកសៀង គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 30, ផ្លូវ ៤៣២, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Teuk Sieng is a verified Cambodian and international restaurant at No. 30 Street 432, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-425.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-425.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 30, ផ្លូវ ៤៣២, រាជធានីភ្នំពេញ",
     "addressEn": "No. 30 Street 432, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5470,7 +5232,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-425.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5482,10 +5244,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Pinkchisk",
     "descriptionKh": "ភោជនីយដ្ឋាន Pinkchisk គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 111, ផ្លូវ ៤៧០, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Pinkchisk is a verified Cambodian and international restaurant at No. 111 Street 470, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-426.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-426.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 111, ផ្លូវ ៤៧០, រាជធានីភ្នំពេញ",
     "addressEn": "No. 111 Street 470, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5511,7 +5271,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-426.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5523,10 +5283,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "The Wine Bakery (24 Hours",
     "descriptionKh": "ភោជនីយដ្ឋាន The Wine Bakery (24 Hours គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 74, ផ្លូវ ៤៥៦, រាជធានីភ្នំពេញ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "The Wine Bakery (24 Hours is a verified specialty cafe and dining spot located at No. 74 Street 456, Phnom Penh in Phnom Penh, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-427.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-427.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 74, ផ្លូវ ៤៥៦, រាជធានីភ្នំពេញ",
     "addressEn": "No. 74 Street 456, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5552,7 +5310,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-427.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5564,10 +5322,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Aroma house",
     "descriptionKh": "ភោជនីយដ្ឋាន Aroma house គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (ផ្លូវលេខ 722, Krong Kampot, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Aroma house is a verified Cambodian and international restaurant at Street 722, Krong Kampot, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-428.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-428.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ 722, Krong Kampot, ខេត្តកំពត",
     "addressEn": "Street 722, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -5593,7 +5349,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-428.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5605,10 +5361,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Eggs and Coffee - pommoanan pomtierkon",
     "descriptionKh": "ភោជនីយដ្ឋាន Eggs and Coffee - pommoanan pomtierkon គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅខេត្តកំពត (ផ្លូវលេខ 720, Krong Kampot, ខេត្តកំពត) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Eggs and Coffee - pommoanan pomtierkon is a verified specialty cafe and dining spot located at Street 720, Krong Kampot, Kampot in Kampot, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-429.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-429.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ 720, Krong Kampot, ខេត្តកំពត",
     "addressEn": "Street 720, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -5634,7 +5388,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-429.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5646,10 +5400,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "The Java Cafe",
     "descriptionKh": "ហាងកាហ្វេ The Java Cafe ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅខេត្តកំពត មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "The Java Cafe is a verified coffee shop and café located in Kampot, Cambodia.",
-    "photoUrl": "/Shop/rest-430.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-430.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "National Road 33, Krong Kampot, ខេត្តកំពត",
     "addressEn": "National Road 33, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -5674,7 +5426,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-430.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5686,10 +5438,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "River View Restaurant & Bar",
     "descriptionKh": "ភោជនីយដ្ឋាន River View Restaurant & Bar គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តកំពត (National Road 3 (Kampong Bay Bridge), Krong Kampot, ខេត្តកំពត) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
     "descriptionEn": "River View Restaurant & Bar is a verified seafood and Cambodian dining destination at National Road 3 (Kampong Bay Bridge), Krong Kampot, Kampot in Kampot, celebrated for fresh local ingredients and welcoming hospitality.",
-    "photoUrl": "/Shop/rest-431.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-431.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "National Road 3 (Kampong Bay Bridge), Krong Kampot, ខេត្តកំពត",
     "addressEn": "National Road 3 (Kampong Bay Bridge), Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -5715,7 +5465,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-431.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5727,10 +5477,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Pilgrim",
     "descriptionKh": "ភោជនីយដ្ឋាន Pilgrim គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (ផ្ទះលេខ 42-44, ផ្លូវលេខ 726, Krong Kampot, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Pilgrim is a verified Cambodian and international restaurant at No. 42-44 Street 726, Krong Kampot, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-432.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-432.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 42-44, ផ្លូវលេខ 726, Krong Kampot, ខេត្តកំពត",
     "addressEn": "No. 42-44 Street 726, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -5756,7 +5504,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-432.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5768,10 +5516,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Haedoji",
     "descriptionKh": "ហេដូជី គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 456B, Preah Monivong Blvd (St: 93), រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Haedoji is a verified Cambodian and international restaurant at No. 456B Preah Monivong Blvd (St: 93), Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-446.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-446.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 456B, Preah Monivong Blvd (St: 93), រាជធានីភ្នំពេញ",
     "addressEn": "No. 456B Preah Monivong Blvd (St: 93), Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5797,7 +5543,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-446.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5809,10 +5555,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Inasal Nation",
     "descriptionKh": "ភោជនីយដ្ឋាន Inasal Nation គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្លូវលេខ 456, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Inasal Nation is a verified Cambodian and international restaurant at Street 456, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-447.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-447.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ 456, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "Street 456, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5838,7 +5582,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-447.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5850,10 +5594,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "3-Generation Khmer Noodle",
     "descriptionKh": "គុយទាវឆ្ងាញ់៣ជំនាន់ ជាហាងគុយទាវ និងអាហារពេលព្រឹកដ៏មានឱជារសនៅរាជធានីភ្នំពេញ។",
     "descriptionEn": "3-Generation Khmer Noodle is a verified noodle and local dining spot in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-448.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-448.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវ ១៧៥, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "Street 175, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5878,7 +5620,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-448.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5890,10 +5632,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sweet Lab",
     "descriptionKh": "ហាងនំប៉័ង Sweet Lab ជាហាងនំប៉័ង និងនំដុតថ្មីៗប្រចាំថ្ងៃនៅរាជធានីភ្នំពេញ។",
     "descriptionEn": "Sweet Lab is a verified bakery and pastry shop in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-449.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-449.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 250, ផ្លូវ ៤៦០, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 250 Street 460, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -5918,7 +5658,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-449.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5930,10 +5670,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Artisans by Atelier Kampot",
     "descriptionKh": "ភោជនីយដ្ឋាន Artisans by Atelier Kampot គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (ផ្លូវ ៧៣៥, Krong Kampot, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Artisans by Atelier Kampot is a verified Cambodian and international restaurant at Street 735, Krong Kampot, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-451.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-451.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវ ៧៣៥, Krong Kampot, ខេត្តកំពត",
     "addressEn": "Street 735, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -5959,7 +5697,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-451.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -5971,10 +5709,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "The Moon Cafe & Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋាន The Moon Cafe & Restaurant គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅខេត្តកំពត (ផ្ទះលេខ 20, ផ្លូវលេខ 726, Krong Kampot, ខេត្តកំពត) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "The Moon Cafe & Restaurant is a verified specialty cafe and dining spot located at No. 20 Street 726, Krong Kampot, Kampot in Kampot, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-452.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-452.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 20, ផ្លូវលេខ 726, Krong Kampot, ខេត្តកំពត",
     "addressEn": "No. 20 Street 726, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -6000,7 +5736,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-452.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6012,10 +5748,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Eleven One Kitchen TTP",
     "descriptionKh": "ភោជនីយដ្ឋាន Eleven One Kitchen TTP ជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរស្រស់ៗនៅរាជធានីភ្នំពេញ។",
     "descriptionEn": "Eleven One Kitchen TTP is a verified seafood and local restaurant in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-455.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-455.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 37, ផ្លូវលេខ 123, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 37 Street 123, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6040,7 +5774,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-455.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6052,10 +5786,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Hi Ba Ri",
     "descriptionKh": "ភោជនីយដ្ឋាន Hi Ba Ri គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 18A, ផ្លូវលេខ 350, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Hi Ba Ri is a verified Cambodian and international restaurant at No. 18A Street 350, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-456.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-456.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 18A, ផ្លូវលេខ 350, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 18A Street 350, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6081,7 +5813,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-456.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6093,10 +5825,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Century 9 Inspired Eatery",
     "descriptionKh": "ភោជនីយដ្ឋាន Century 9 Inspired Eatery គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ #59c, ផ្លូវលេខ 155, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Century 9 Inspired Eatery is a verified Cambodian and international restaurant at No. #59c Street 155, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-457.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-457.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ #59c, ផ្លូវលេខ 155, រាជធានីភ្នំពេញ",
     "addressEn": "No. #59c Street 155, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6122,7 +5852,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-457.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6134,10 +5864,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Open Arms Cafe",
     "descriptionKh": "កាហ្វេអូផើនអាម ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Open Arms Cafe is a verified coffee shop and café located in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-458.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-458.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ 155, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "Street 155, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6162,7 +5890,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-458.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6174,10 +5902,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Kungfu Kitchen",
     "descriptionKh": "ភោជនីយដ្ឋាន Kungfu Kitchen គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 54, ផ្លូវ ៤៥៤, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Kungfu Kitchen is a verified Cambodian and international restaurant at No. 54 Street 454, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-459.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-459.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 54, ផ្លូវ ៤៥៤, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 54 Street 454, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6203,7 +5929,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-459.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6215,10 +5941,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cakes & Craft",
     "descriptionKh": "ភោជនីយដ្ឋាន Cakes & Craft គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 9, ផ្លូវ ៤៦០, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Cakes & Craft is a verified Cambodian and international restaurant at No. 9 Street 460, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-460.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-460.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 9, ផ្លូវ ៤៦០, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 9 Street 460, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6244,7 +5968,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-460.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6256,10 +5980,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Bake and Bake Bakery",
     "descriptionKh": "ភោជនីយដ្ឋាន Bake and Bake Bakery គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 06b, 440, រាជធានីភ្នំពេញ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Bake and Bake Bakery is a verified specialty cafe and dining spot located at No. 06b 440, Phnom Penh in Phnom Penh, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-461.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-461.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 06b, 440, រាជធានីភ្នំពេញ",
     "addressEn": "No. 06b 440, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6285,7 +6007,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-461.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6297,10 +6019,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Toss It!",
     "descriptionKh": "ភោជនីយដ្ឋាន Toss It! គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 72, ផ្លូវ ១១៣, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Toss It! is a verified Cambodian and international restaurant at No. 72 Street 113, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-462.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-462.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 72, ផ្លូវ ១១៣, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 72 Street 113, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6326,7 +6046,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-462.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6338,10 +6058,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Milano Cafe",
     "descriptionKh": "ភោជនីយដ្ឋាន Milano Cafe គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅខេត្តកំពត (សង្កាត់កំពង់កណ្ដាល, Krong Kampot, ខេត្តកំពត) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Milano Cafe is a verified specialty cafe and dining spot located at Krong Kampot, Kampot in Kampot, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-463.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-463.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "សង្កាត់កំពង់កណ្ដាល, Krong Kampot, ខេត្តកំពត",
     "addressEn": "Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -6367,7 +6085,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-463.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6379,10 +6097,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Le Café Kampot",
     "descriptionKh": "ឡឺកាហ្វេកំពត ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅខេត្តកំពត មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Le Café Kampot is a verified coffee shop and café located in Kampot, Cambodia.",
-    "photoUrl": "/Shop/rest-464.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-464.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ 700, Krong Kampot, ខេត្តកំពត",
     "addressEn": "Street 700, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -6407,7 +6123,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-464.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6419,10 +6135,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "LPOW restaurant Moustache and Nico Kampot",
     "descriptionKh": "ភោជនីយដ្ឋាន LPOW restaurant Moustache and Nico Kampot គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (ផ្លូវលេខ 701, Krong Kampot, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "LPOW restaurant Moustache and Nico Kampot is a verified Cambodian and international restaurant at Street 701, Krong Kampot, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-465.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-465.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ 701, Krong Kampot, ខេត្តកំពត",
     "addressEn": "Street 701, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -6448,7 +6162,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-465.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6460,10 +6174,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Any",
     "descriptionKh": "អេននី ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Any is a verified coffee shop and café located in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-470.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-470.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ #5, ផ្លូវលេខ 484, រាជធានីភ្នំពេញ",
     "addressEn": "No. #5 Street 484, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6488,7 +6200,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-470.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6500,10 +6212,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Trattoria Bello",
     "descriptionKh": "ភោជនីយដ្ឋាន Trattoria Bello គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្លូវ ៤៦០, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Trattoria Bello is a verified Cambodian and international restaurant at Street 460, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-471.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-471.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវ ៤៦០, រាជធានីភ្នំពេញ",
     "addressEn": "Street 460, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6529,7 +6239,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-471.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6541,10 +6251,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Taste of the middle east restaurant 2",
     "descriptionKh": "ភោជនីយដ្ឋាន Taste of the middle east restaurant 2 គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្លូវ ៤៤៦, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Taste of the middle east restaurant 2 is a verified Cambodian and international restaurant at Street 446, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-472.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-472.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវ ៤៤៦, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "Street 446, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6570,7 +6278,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-472.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6582,10 +6290,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Unnie Vanda",
     "descriptionKh": "ភោជនីយដ្ឋាន Unnie Vanda គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 133D, ផ្លូវ ១៩៩ - Street 199, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Unnie Vanda is a verified Cambodian and international restaurant at No. 133D Street 199 - Street 199, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-473.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-473.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 133D, ផ្លូវ ១៩៩ - Street 199, រាជធានីភ្នំពេញ",
     "addressEn": "No. 133D Street 199 - Street 199, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6611,7 +6317,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-473.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6623,10 +6329,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Jenny's Corner",
     "descriptionKh": "ភោជនីយដ្ឋាន Jenny's Corner គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (ផ្លូវលេខ 729, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Jenny's Corner is a verified Cambodian and international restaurant at Street 729, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-475.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-475.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ 729, ខេត្តកំពត",
     "addressEn": "Street 729, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -6652,7 +6356,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-475.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6664,10 +6368,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BeksRoy The Reggae Bar",
     "descriptionKh": "ភោជនីយដ្ឋាន BeksRoy The Reggae Bar គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (ផ្ទះលេខ 1, ផ្លូវលេខ 730, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "BeksRoy The Reggae Bar is a verified Cambodian and international restaurant at No. 1 Street 730, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-476.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-476.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 1, ផ្លូវលេខ 730, ខេត្តកំពត",
     "addressEn": "No. 1 Street 730, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -6693,7 +6395,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-476.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6705,10 +6407,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Roots and Burgers",
     "descriptionKh": "ភោជនីយដ្ឋាន Roots and Burgers គឺជាភោជនីយដ្ឋានអាហារជួបជុំគ្រួសារ និងសាច់អាំងដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្លូវលេខ 454, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបចម្អិនថ្មីៗក្តៅៗ រសជាតិឆ្ងាញ់ និងសេវាកម្មរួសរាយរាក់ទាក់។",
     "descriptionEn": "Roots and Burgers is a popular verified grill and family restaurant at Street 454, Khan Chamkarmon, Phnom Penh in Phnom Penh, offering freshly prepared specialties and a lively dining atmosphere.",
-    "photoUrl": "/Shop/rest-484.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-484.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ 454, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "Street 454, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6734,7 +6434,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-484.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6746,10 +6446,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Banh Mi & Bros",
     "descriptionKh": "ភោជនីយដ្ឋាន Banh Mi & Bros គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 78, ផ្លូវ ៤៥០, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Banh Mi & Bros is a verified Cambodian and international restaurant at No. 78 Street 450, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-485.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-485.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 78, ផ្លូវ ៤៥០, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 78 Street 450, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6775,7 +6473,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-485.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6787,10 +6485,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Seoul Spicy Noodles",
     "descriptionKh": "មីហិរ ៧យ៉ាង Seoul ជាហាងគុយទាវ និងអាហារពេលព្រឹកដ៏មានឱជារសនៅរាជធានីភ្នំពេញ។",
     "descriptionEn": "Seoul Spicy Noodles is a verified noodle and local dining spot in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-486.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-486.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវ ៣៦០, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "Street 360, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6815,7 +6511,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-486.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6827,10 +6523,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Alamo Café",
     "descriptionKh": "ភោជនីយដ្ឋាន Alamo Café គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ #66, ផ្លូវ ១១៣, រាជធានីភ្នំពេញ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Alamo Café is a verified specialty cafe and dining spot located at No. #66 Street 113, Phnom Penh in Phnom Penh, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-487.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-487.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ #66, ផ្លូវ ១១៣, រាជធានីភ្នំពេញ",
     "addressEn": "No. #66 Street 113, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6856,7 +6550,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-487.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6868,10 +6562,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cafe Tarin",
     "descriptionKh": "កាហ្វេ តារិន ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Cafe Tarin is a verified coffee shop and café located in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-488.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-488.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 214, ផ្លូវ ៤៧៨, រាជធានីភ្នំពេញ",
     "addressEn": "No. 214 Street 478, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6896,7 +6588,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-488.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6908,10 +6600,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Piseth's Cali Burrito",
     "descriptionKh": "ភោជនីយដ្ឋាន Piseth's Cali Burrito គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្លូវ ៤៥៤, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Piseth's Cali Burrito is a verified Cambodian and international restaurant at Street 454, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-489.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-489.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវ ៤៥៤, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "Street 454, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6937,7 +6627,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-489.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6949,10 +6639,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Ministry of Cat",
     "descriptionKh": "ហាងកាហ្វេ Ministry of Cat ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Ministry of Cat is a verified coffee shop and café located in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-490.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-490.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 5, ផ្លូវ ៤៤២, រាជធានីភ្នំពេញ",
     "addressEn": "No. 5 Street 442, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -6977,7 +6665,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-490.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -6989,10 +6677,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Bay Area Tacos",
     "descriptionKh": "ភោជនីយដ្ឋាន Bay Area Tacos គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្លូវ ៤៥០, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Bay Area Tacos is a verified Cambodian and international restaurant at Street 450, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-491.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-491.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវ ៤៥០, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "Street 450, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -7018,7 +6704,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-491.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7030,10 +6716,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "RÉT Eatery",
     "descriptionKh": "ភោជនីយដ្ឋាន RÉT Eatery គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្លូវ ៤៤៦, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "RÉT Eatery is a verified Cambodian and international restaurant at Street 446, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-493.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-493.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវ ៤៤៦, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "Street 446, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -7059,7 +6743,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-493.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7071,10 +6755,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Wish Oun Nim",
     "descriptionKh": "ភោជនីយដ្ឋាន Wish Oun Nim គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (ផ្ទះលេខ 28E, group5, sovannsakor, kampongkorndal, kampot, cambodia., ផ្លូវលេខ 736, ផ្ទះលេខ 28E, ក្រុម5, ភូមិសុវណ្ណសាគរ, សង្កាតកំពង់កណ្តាល, ក្រុងកំពត, ខេត្តកំពត, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Wish Oun Nim is a verified Cambodian and international restaurant at No. 28E, group5, sovannsakor, kampongkorndal, kampot, cambodia. Street 736, 28E, 5, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-494.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-494.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 28E, group5, sovannsakor, kampongkorndal, kampot, cambodia., ផ្លូវលេខ 736, ផ្ទះលេខ 28E, ក្រុម5, ភូមិសុវណ្ណសាគរ, សង្កាតកំពង់កណ្តាល, ក្រុងកំពត, ខេត្តកំពត, ខេត្តកំពត",
     "addressEn": "No. 28E, group5, sovannsakor, kampongkorndal, kampot, cambodia. Street 736, 28E, 5, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -7100,7 +6782,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-494.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7112,10 +6794,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cidershack",
     "descriptionKh": "ភោជនីយដ្ឋាន Cidershack គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (Krong Kampot, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Cidershack is a verified Cambodian and international restaurant at Krong Kampot, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-495.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-495.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Kampot, ខេត្តកំពត",
     "addressEn": "Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -7141,7 +6821,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-495.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7153,10 +6833,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "The Hideout",
     "descriptionKh": "ភោជនីយដ្ឋាន The Hideout គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (Krong Kampot, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "The Hideout is a verified Cambodian and international restaurant at Krong Kampot, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-496.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-496.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Kampot, ខេត្តកំពត",
     "addressEn": "Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -7182,7 +6860,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-496.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7194,10 +6872,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "wake'n'bake",
     "descriptionKh": "ភោជនីយដ្ឋាន wake'n'bake គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (ផ្ទះលេខ 666, ផ្លូវលេខ ៧២៩, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "wake'n'bake is a verified Cambodian and international restaurant at No. 666 Street 729, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-497.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-497.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 666, ផ្លូវលេខ ៧២៩, ខេត្តកំពត",
     "addressEn": "No. 666 Street 729, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -7223,7 +6899,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-497.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7235,10 +6911,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Amazon Cafe Kampot",
     "descriptionKh": "ហាងកាហ្វេ Amazon Cafe Kampot ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅខេត្តកំពត មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Amazon Cafe Kampot is a verified coffee shop and café located in Kampot, Cambodia.",
-    "photoUrl": "/Shop/rest-498.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-498.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "National Road 33, Krong Kampot, ខេត្តកំពត",
     "addressEn": "National Road 33, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -7263,7 +6937,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-498.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7275,10 +6949,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Chamka Spei Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋាន Chamka Spei Restaurant គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តព្រះសីហនុ (7 Makara Street (200), Krong Preah Sihanouk, ខេត្តព្រះសីហនុ) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
     "descriptionEn": "Chamka Spei Restaurant is a verified seafood and Cambodian dining destination at 7 Makara Street (200), Krong Preah Sihanouk, Preah Sihanouk in Preah Sihanouk, celebrated for fresh local ingredients and welcoming hospitality.",
-    "photoUrl": "/Shop/rest-499.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-499.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "7 Makara Street (200), Krong Preah Sihanouk, ខេត្តព្រះសីហនុ",
     "addressEn": "7 Makara Street (200), Krong Preah Sihanouk, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
@@ -7304,7 +6976,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-499.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7316,10 +6988,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Del Mar Pastry & Coffee",
     "descriptionKh": "ហាងកាហ្វេ Del Mar Pastry & Coffee ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅខេត្តព្រះសីហនុ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Del Mar Pastry & Coffee is a verified coffee shop and café located in Preah Sihanouk, Cambodia.",
-    "photoUrl": "/Shop/rest-500.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-500.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 198, Ekareach Street, Krong Preah Sihanouk, ខេត្តព្រះសីហនុ",
     "addressEn": "No. 198 Ekareach Street, Krong Preah Sihanouk, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
@@ -7344,7 +7014,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-500.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7356,10 +7026,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Rainbow house",
     "descriptionKh": "ផ្ទះឥន្ទធនូ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តបាត់ដំបង (ផ្លូវលេខ 203, Krong Battambang, ខេត្តបាត់ដំបង) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Rainbow house is a verified Cambodian and international restaurant at Street 203, Krong Battambang, Battambang in Battambang, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-501.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-501.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ 203, Krong Battambang, ខេត្តបាត់ដំបង",
     "addressEn": "Street 203, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
@@ -7385,7 +7053,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-501.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7397,10 +7065,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Divine Pizza and Ribs",
     "descriptionKh": "ភោជនីយដ្ឋាន Divine Pizza and Ribs គឺជាភោជនីយដ្ឋានអាហារជួបជុំគ្រួសារ និងសាច់អាំងដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ House #96, ផ្លូវលេខ 454, រាជធានីភ្នំពេញ) បម្រើម្ហូបចម្អិនថ្មីៗក្តៅៗ រសជាតិឆ្ងាញ់ និងសេវាកម្មរួសរាយរាក់ទាក់។",
     "descriptionEn": "Divine Pizza and Ribs is a popular verified grill and family restaurant at No. House #96 Street 454, Phnom Penh in Phnom Penh, offering freshly prepared specialties and a lively dining atmosphere.",
-    "photoUrl": "/Shop/rest-503.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-503.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ House #96, ផ្លូវលេខ 454, រាជធានីភ្នំពេញ",
     "addressEn": "No. House #96 Street 454, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -7426,7 +7092,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-503.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7438,10 +7104,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Talk Coffee",
     "descriptionKh": "ថកកាហ្វេ ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Talk Coffee is a verified coffee shop and café located in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-504.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-504.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 35, ផ្លូវលេខ 199, រាជធានីភ្នំពេញ",
     "addressEn": "No. 35 Street 199, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -7466,7 +7130,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-504.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7478,10 +7142,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Cafe & Bakery Tokio",
     "descriptionKh": "ហាងកាហ្វេ Cafe & Bakery Tokio ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Cafe & Bakery Tokio is a verified coffee shop and café located in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-505.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-505.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 118, ផ្លូវលេខ 113/330, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 118 St. 113/330, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -7506,7 +7168,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-505.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7518,10 +7180,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Tous les Jours",
     "descriptionKh": "ហាងនំប៉័ង ទូលេហ្សួរ (Tous Les Jours) - ភ្នំពេញ ជាហាងនំប៉័ង និងនំដុតថ្មីៗប្រចាំថ្ងៃនៅរាជធានីភ្នំពេញ។",
     "descriptionEn": "Tous les Jours is a verified bakery and pastry shop in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-506.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-506.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវ ១៦៣, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "Street 163, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -7546,7 +7206,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-506.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7558,10 +7218,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Khmer-Thai Restaurant",
     "descriptionKh": "ភោជនីយដ្ឋាន ខ្មែរ.ថៃ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Khmer-Thai Restaurant is a verified Cambodian and international restaurant at Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-507.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-507.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -7587,7 +7245,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-507.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7599,10 +7257,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Max's Bar & Kitchen",
     "descriptionKh": "ភោជនីយដ្ឋាន Max's Bar & Kitchen គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (ផ្ទះលេខ 20, ផ្លូវលេខ 725, Krong Kampot, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Max's Bar & Kitchen is a verified Cambodian and international restaurant at No. 20 Street 725, Krong Kampot, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-508.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-508.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 20, ផ្លូវលេខ 725, Krong Kampot, ខេត្តកំពត",
     "addressEn": "No. 20 Street 725, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -7628,7 +7284,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-508.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7640,10 +7296,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Papa's",
     "descriptionKh": "ហាងកាហ្វេ Papa's ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅខេត្តកំពត មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Papa's is a verified coffee shop and café located in Kampot, Cambodia.",
-    "photoUrl": "/Shop/rest-509.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-509.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវលេខ 726, Krong Kampot, ខេត្តកំពត",
     "addressEn": "Street 726, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -7668,7 +7322,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-509.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7680,10 +7334,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Noodle soup pho",
     "descriptionKh": "ភោជនីយដ្ឋាន Noodle soup pho ជាហាងគុយទាវ និងអាហារពេលព្រឹកដ៏មានឱជារសនៅខេត្តកំពត។",
     "descriptionEn": "Noodle soup pho is a verified noodle and local dining spot in Kampot, Cambodia.",
-    "photoUrl": "/Shop/rest-510.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-510.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវជាតិលេខ៣, Krong Kampot, ខេត្តកំពត",
     "addressEn": "3, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -7708,7 +7360,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-510.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7720,10 +7372,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Salumiere",
     "descriptionKh": "ភោជនីយដ្ឋាន Salumiere គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តព្រះសីហនុ (113 Street, Krong Preah Sihanouk, ខេត្តព្រះសីហនុ) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
     "descriptionEn": "Salumiere is a verified seafood and Cambodian dining destination at 113 Street, Krong Preah Sihanouk, Preah Sihanouk in Preah Sihanouk, celebrated for fresh local ingredients and welcoming hospitality.",
-    "photoUrl": "/Shop/rest-511.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-511.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "113 Street, Krong Preah Sihanouk, ខេត្តព្រះសីហនុ",
     "addressEn": "113 Street, Krong Preah Sihanouk, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
@@ -7749,7 +7399,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-511.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7761,10 +7411,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Bengawan Solo",
     "descriptionKh": "បឺងកាវ៉ាន់សូឡូ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Bengawan Solo is a verified Cambodian and international restaurant at Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-514.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-514.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -7790,7 +7438,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-514.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7802,10 +7450,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Coffee Today",
     "descriptionKh": "ហាងកាហ្វេ Coffee Today ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ មានបរិយាកាសល្អ និងទីតាំងពិតប្រាកដលើផែនទី។",
     "descriptionEn": "Coffee Today is a verified coffee shop and café located in Phnom Penh, Cambodia.",
-    "photoUrl": "/Shop/rest-515.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-515.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវ ៤៣២, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "Street 432, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -7830,7 +7476,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-515.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7842,10 +7488,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Meatophum",
     "descriptionKh": "មាតុភូមិ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 88A, ផ្លូវ ៣៦០, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Meatophum is a verified Cambodian and international restaurant at No. 88A Street 360, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-517.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-517.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 88A, ផ្លូវ ៣៦០, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "No. 88A Street 360, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -7871,7 +7515,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-517.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7883,10 +7527,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Camping Cafe",
     "descriptionKh": "ភោជនីយដ្ឋាន Camping Cafe គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្លូវ ៣២០, Khan Chamkarmon, រាជធានីភ្នំពេញ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
     "descriptionEn": "Camping Cafe is a verified specialty cafe and dining spot located at Street 320, Khan Chamkarmon, Phnom Penh in Phnom Penh, serving freshly brewed coffee, artisan pastries, and all-day meals.",
-    "photoUrl": "/Shop/rest-518.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-518.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវ ៣២០, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "Street 320, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -7912,7 +7554,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-518.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7924,10 +7566,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Golden Pumpkin",
     "descriptionKh": "ភោជនីយដ្ឋាន Golden Pumpkin គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្លូវ ៤៥៤, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Golden Pumpkin is a verified Cambodian and international restaurant at Street 454, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-519.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-519.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "ផ្លូវ ៤៥៤, Khan Chamkarmon, រាជធានីភ្នំពេញ",
     "addressEn": "Street 454, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
@@ -7953,7 +7593,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-519.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -7965,10 +7605,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "BurgerShack",
     "descriptionKh": "ភោជនីយដ្ឋាន BurgerShack គឺជាភោជនីយដ្ឋានអាហារជួបជុំគ្រួសារ និងសាច់អាំងដ៏ពេញនិយមនៅខេត្តកំពត (Krong Kampot, ខេត្តកំពត) បម្រើម្ហូបចម្អិនថ្មីៗក្តៅៗ រសជាតិឆ្ងាញ់ និងសេវាកម្មរួសរាយរាក់ទាក់។",
     "descriptionEn": "BurgerShack is a popular verified grill and family restaurant at Krong Kampot, Kampot in Kampot, offering freshly prepared specialties and a lively dining atmosphere.",
-    "photoUrl": "/Shop/rest-520.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-520.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Kampot, ខេត្តកំពត",
     "addressEn": "Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -7994,7 +7632,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-520.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -8006,10 +7644,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Razorback Bar BQ",
     "descriptionKh": "ភោជនីយដ្ឋាន Razorback Bar BQ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (Krong Kampot, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Razorback Bar BQ is a verified Cambodian and international restaurant at Krong Kampot, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-521.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-521.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Kampot, ខេត្តកំពត",
     "addressEn": "Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -8035,7 +7671,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-521.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -8047,10 +7683,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "Sela organic kitchen",
     "descriptionKh": "ភោជនីយដ្ឋាន Sela organic kitchen គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តកំពត (Sky Street, ខេត្តកំពត) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Sela organic kitchen is a verified Cambodian and international restaurant at Sky Street, Kampot in Kampot, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-522.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-522.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Sky Street, ខេត្តកំពត",
     "addressEn": "Sky Street, Kampot",
     "provinceKh": "ខេត្តកំពត",
@@ -8076,7 +7710,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-522.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -8088,10 +7722,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "FROGGIES CRÊPES & TAPAS",
     "descriptionKh": "ភោជនីយដ្ឋាន FROGGIES CRÊPES & TAPAS គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តព្រះសីហនុ (Krong Preah Sihanouk, ខេត្តព្រះសីហនុ) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
     "descriptionEn": "FROGGIES CRÊPES & TAPAS is a verified seafood and Cambodian dining destination at Krong Preah Sihanouk, Preah Sihanouk in Preah Sihanouk, celebrated for fresh local ingredients and welcoming hospitality.",
-    "photoUrl": "/Shop/rest-523.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-523.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Preah Sihanouk, ខេត្តព្រះសីហនុ",
     "addressEn": "Krong Preah Sihanouk, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
@@ -8117,7 +7749,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-523.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
@@ -8129,10 +7761,8 @@ export const initial100Restaurants: Restaurant[] = [
     "nameEn": "About The World Home",
     "descriptionKh": "ភោជនីយដ្ឋាន About The World Home គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅខេត្តបាត់ដំបង (Krong Battambang, ខេត្តបាត់ដំបង) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "About The World Home is a verified Cambodian and international restaurant at Krong Battambang, Battambang in Battambang, known for authentic flavors, quality ingredients, and attentive service.",
-    "photoUrl": "/Shop/rest-524.jpg",
-    "galleryPhotos": [
-      "/Shop/rest-524.jpg"
-    ],
+    "photoUrl": "",
+    "galleryPhotos": [],
     "addressKh": "Krong Battambang, ខេត្តបាត់ដំបង",
     "addressEn": "Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
@@ -8158,7 +7788,7 @@ export const initial100Restaurants: Restaurant[] = [
     "promotionalPrice": 4.99,
     "isPromoted": false,
     "paymentDate": "2026-03-01",
-    "profileImage": "/Shop/rest-524.jpg",
+    "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T16:00:00.000Z"

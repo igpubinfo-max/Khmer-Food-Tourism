@@ -510,7 +510,7 @@ const BRAIN_ENTRIES: BrainEntry[] = [
     id: 'coffee_drink',
     emoji: '☕',
     mode: 'bridge',
-    test: /coffee|latte|espresso|\btea\b|juice|កាហ្វេ|តែ(?!រ)|ទឹកក្រូច|咖啡|奶茶|果汁/i,
+    test: /coffee|latte|espresso|\btea\b|juice|កាហ្វេ|តែ(?!(?:រ|ង|មិន|បើ|មួយ|ពីរ|បី|បួន|ប្រាំ|ប៉ុណ្ណោះ|ប៉ុន្មាន))|ទឹកក្រូច|咖啡|奶茶|果汁/i,
     headline: ['AI យល់ថាអ្នកចង់ញ៉ាំអ្វីជាមួយភេសជ្ជៈ ☕', 'AI thinks you want a bite to go with your drink ☕', 'AI 觉得您想要搭配饮品的小点 ☕'],
     explain: [
       'AI រកនំ និងអាហារសម្រន់ខ្មែរ ដែលស័ក្តិសមជាមួយកាហ្វេ ឬតែនាពេលព្រឹក និងរសៀល។',

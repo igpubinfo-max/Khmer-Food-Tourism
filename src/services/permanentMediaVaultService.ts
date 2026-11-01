@@ -35,6 +35,10 @@ import {
   isValidOfficialGooglePlaceId,
   isStrictVerifiedCambodiaRestaurant,
   buildCanonicalGoogleMapsPinUrl,
+  sanitizeVerifiedShopPhotoUrl,
+  sanitizeRestaurantShopPhoto,
+  sanitizeRestaurantGalleryPhotos,
+  isValidGoogleMapsUrl,
   computeFastPhotoSignature,
 } from '../types';
 import { initial100Destinations } from '../data/seedDestinations';
@@ -91,6 +95,51 @@ export const DEPRECATED_STALE_FOOD_NAMES_KH = new Set<string>([
   'សាច់ជ្រូកចំហុយពងត្រី និងពងទាប្រៃ',
   'បង្អែមល្ពៅសង់ខ្យាខ្ទិះដូង',
   'នំផ្លែអាយស្ករត្នោតដូងកោស',
+  'បាយសាច់ជ្រូកអាំង',
+  'ការីក្រហមសាច់ទាដំឡូងជ្វា',
+  'សម្លម្ជូរក្តាន់ត្រីអណ្តែង',
+  'សម្លកកូរត្នោតសាច់ជ្រូកបីជាន់',
+  'សម្លប្រហើរត្រីឆ្អើរស្លឹកម្រុំ',
+  'សម្លម្ជូរត្រកួនត្រីប្រាទន្លេមេគង្គ',
+  'សម្លខ្ទិះម្នាស់សាច់ជ្រូកបីជាន់',
+  'សម្លម្ជូរស្លឹកថ្នឹងសាច់មាន់ស្រែ',
+  'សម្លស្ងោរត្រឡាចសាច់ជ្រូកចិញ្ច្រាំ',
+  'ត្រីរ៉ស់ដុតអំបិលគល់ស្លឹកគ្រៃ',
+  'សាច់គោអាំងទឹកប្រហុកខ្ទិះ',
+  'ត្រីអណ្តែងអាំងទឹកត្រីអំពិលទុំ',
+  'ស្លាបមាន់អាំងរមៀតស្លឹកគ្រៃ',
+  'ត្រីងៀតអាំងទឹកត្រីអំពិលទុំ',
+  'ទាដុតម្រេចកំពត',
+  'ពោតបារាំង និងត្រប់អាំងទឹកប្រហុក',
+  'ឆាខ្ញីសាច់ទា',
+  'ឆាផ្កាខាត់ណាបង្គាស្រស់',
+  'ឆាគ្រឿងអន្ទង់ម្រះព្រៅហឹរ',
+  'ឆាបង្គាពោតបារាំងខ្ទឹមស',
+  'ឆាផ្សិតអំបោះសាច់ទ្រូងមាន់',
+  'ខត្រីពោធិ៍ទឹកដូងម្រេចកំពត',
+  'ញាំត្រយូងចេកសាច់មាន់ស្រែ',
+  'ញាំមីសួរគ្រឿងសមុទ្របង្គាមឹក',
+  'ភ្លាបង្គាស្រស់ម្រះខ្ចី',
+  'ញាំស្តៅត្រីឆ្អើរសាច់ជ្រូកបីជាន់',
+  'ញាំគល់ស្លឹកគ្រៃបង្គាសាច់ជ្រូកចិញ្ច្រាំ',
+  'ប្រហុកខ្ទិះសាច់ជ្រូកចិញ្ច្រាំបន្លែស្រស់',
+  'គុយទាវទូកសាច់គោប្រហិត',
+  'លតឆាបង្គាពងទាចៀន',
+  'មីគោកសាច់ជ្រូកសាស៊ីវគាវបំពង',
+  'នំបញ្ចុកទឹកប្រហុកត្រីឆ្អើរ',
+  'មីសួរអប់ក្តាមសេះម្រេចកំពត',
+  'បាញ់កាញ់ទឹកស៊ុបឆ្អឹងជ្រូកឈាមជ្រូក',
+  'បាយឆាក្តាមសេះពងទាប្រៃ',
+  'បាយសាច់ជ្រូកអាំងពងទាខជ្រក់ល្ហុង',
+  'បាយមាន់ស្ងោរទឹកត្រីខ្ញី',
+  'បាយឆាគ្រាប់ឈូកសាច់ក្រក',
+  'បាយដំណើបសាច់គោងៀតជ្រក់ល្ហុង',
+  'បាយអប់ឆ្នាំងដីគ្រឿងសមុទ្រម្រេចខ្ចី',
+  'ប្រហិតសាច់គោអាំងទឹកត្រីអំពិលទុំ',
+  'គួងបង្គាសាច់ជ្រូកទឹកជ្រលក់សណ្តែកដី',
+  'បង្អែមចេកខ្ទិះគ្រាប់សាគូ',
+  'បង្អែមត្រាវកូរខ្ទិះដូង',
+  'ទឹកក្រឡុកស្រកានាគក្រហមទឹកដោះគោស្រស់',
 ]);
 
 export function isDeprecatedStaleFoodMetadata(
@@ -1648,16 +1697,15 @@ export function recordPermanentFoodOverride(food: FoodItem): Promise<FoodMediaOv
 export function recordPermanentRestaurantOverride(rest: Restaurant): void {
   const bundle = loadLocalMediaOverrides();
   const now = new Date().toISOString();
-  const primaryPhoto = rest.profileImage || rest.photoUrl;
-  const dedupedGallery = Array.isArray(rest.galleryPhotos)
-    ? rest.galleryPhotos.filter((g) => g && g !== primaryPhoto)
-    : undefined;
-  const gallerySet = new Set([primaryPhoto, ...(dedupedGallery || [])].filter(Boolean));
+  const primaryPhoto = sanitizeRestaurantShopPhoto(rest.id, rest.profileImage || rest.photoUrl || '');
+  const cleanGallery = sanitizeRestaurantGalleryPhotos(rest.id, rest.galleryPhotos, primaryPhoto);
+  const dedupedGallery = cleanGallery.filter((g) => g && g !== primaryPhoto);
+  const gallerySet = new Set([primaryPhoto, ...dedupedGallery].filter(Boolean));
   const overrideRecord: RestaurantMediaOverride = {
     id: rest.id,
     photoUrl: primaryPhoto,
     profileImage: primaryPhoto,
-    galleryPhotos: dedupedGallery && dedupedGallery.length > 0 ? dedupedGallery : undefined,
+    galleryPhotos: dedupedGallery.length > 0 ? dedupedGallery : undefined,
     foodImages: Array.isArray(rest.foodImages)
       ? rest.foodImages.filter((g) => g && !gallerySet.has(g))
       : undefined,
@@ -1703,7 +1751,7 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     isAdminEdited: rest.isAdminEdited ?? true,
     adminEditedAt: rest.adminEditedAt || now,
     pendingPhotoReplacement: rest.pendingPhotoReplacement,
-    isCustomPhoto: true,
+    isCustomPhoto: Boolean(primaryPhoto),
     updatedAt: now,
   };
   bundle.restaurants[rest.id] = overrideRecord;
@@ -1934,6 +1982,8 @@ export function applyFoodOverrides(
     }
     const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(f.id);
     const ovTime = ov.updatedAt ? new Date(ov.updatedAt).getTime() : 0;
+    const TRILINGUAL_RECIPE_AUDIT_BASELINE_MS = Date.parse('2026-11-01T14:30:00.000Z');
+    const isPreAuditOverride = ovTime > 0 && ovTime < TRILINGUAL_RECIPE_AUDIT_BASELINE_MS;
     const isPreBakeOverride = ovTime > 0 && ovTime <= BAKED_STATIC_FOOD_ASSETS_MS && !ov.isCustomPhoto;
     const hasDeprecatedFoodMeta = Boolean(
       seedFood && isDeprecatedStaleFoodMetadata(f.id, ov.nameKh, ov.categorySlug)
@@ -1944,17 +1994,20 @@ export function applyFoodOverrides(
         ? seedFood.photoUrl
         : ov.photoUrl;
     const nextNameKh = hasDeprecatedFoodMeta && seedFood ? seedFood.nameKh : (ov.nameKh || f.nameKh);
-    const nextNameEn = hasDeprecatedFoodMeta && seedFood ? seedFood.nameEn : (ov.nameEn || f.nameEn);
-    const nextCategorySlug = hasDeprecatedFoodMeta && seedFood ? seedFood.categorySlug : (ov.categorySlug || f.categorySlug);
-    const nextCategoryKh = hasDeprecatedFoodMeta && seedFood ? seedFood.categoryKh : (ov.categoryKh || f.categoryKh);
-    const nextCategoryEn = hasDeprecatedFoodMeta && seedFood ? seedFood.categoryEn : (ov.categoryEn || f.categoryEn);
-
     const isSameDishNameAsSeed = Boolean(
       seedFood && (nextNameKh || '').trim() === (seedFood.nameKh || '').trim()
     );
+    const useAuditedSeedRecipeAndLocale = Boolean(
+      seedFood && (hasDeprecatedFoodMeta || (isSameDishNameAsSeed && isPreAuditOverride))
+    );
+
+    const nextNameEn = useAuditedSeedRecipeAndLocale && seedFood ? seedFood.nameEn : (ov.nameEn || f.nameEn);
+    const nextCategorySlug = useAuditedSeedRecipeAndLocale && seedFood ? seedFood.categorySlug : (ov.categorySlug || f.categorySlug);
+    const nextCategoryKh = useAuditedSeedRecipeAndLocale && seedFood ? seedFood.categoryKh : (ov.categoryKh || f.categoryKh);
+    const nextCategoryEn = useAuditedSeedRecipeAndLocale && seedFood ? seedFood.categoryEn : (ov.categoryEn || f.categoryEn);
 
     let nextDescriptionKh = stripLegacyFoodPhraseKh(
-      hasDeprecatedFoodMeta && seedFood?.descriptionKh
+      useAuditedSeedRecipeAndLocale && seedFood?.descriptionKh
         ? seedFood.descriptionKh
         : ov.descriptionKh
         ? ov.descriptionKh
@@ -1963,7 +2016,7 @@ export function applyFoodOverrides(
         : cleanedBaseDescKh
     );
     let nextDescriptionEn =
-      hasDeprecatedFoodMeta && seedFood?.descriptionEn
+      useAuditedSeedRecipeAndLocale && seedFood?.descriptionEn
         ? seedFood.descriptionEn
         : ov.descriptionEn
         ? ov.descriptionEn
@@ -1977,7 +2030,7 @@ export function applyFoodOverrides(
     const nextDifficulty = ov.difficulty || f.difficulty;
 
     let nextIngredients =
-      hasDeprecatedFoodMeta && seedFood
+      useAuditedSeedRecipeAndLocale && seedFood
         ? seedFood.ingredients
         : Array.isArray(ov.ingredients) && ov.ingredients.length > 0 && !hasPlaceholderOrIncompleteRecipe(ov.ingredients, ov.steps)
         ? ov.ingredients
@@ -1988,7 +2041,7 @@ export function applyFoodOverrides(
         : f.ingredients;
 
     let nextSteps =
-      hasDeprecatedFoodMeta && seedFood
+      useAuditedSeedRecipeAndLocale && seedFood
         ? seedFood.steps
         : Array.isArray(ov.steps) && ov.steps.length > 0 && !hasPlaceholderOrIncompleteRecipe(ov.ingredients, ov.steps)
         ? ov.steps
@@ -2109,12 +2162,30 @@ export function applyRestaurantOverrides(
     return true;
   });
   let anyChanged = filteredBase.length !== restaurants.length;
-  if (!overridesMap || Object.keys(overridesMap).length === 0) return anyChanged ? filteredBase : restaurants;
+  const safeOverrides = overridesMap || {};
   const seenIds = new Set<string>();
   const mapped = filteredBase.map((r) => {
     seenIds.add(r.id);
-    const ov = overridesMap[r.id];
-    if (!ov) return r;
+    const ov = safeOverrides[r.id];
+    if (!ov) {
+      const cleanBasePhoto = sanitizeRestaurantShopPhoto(r.id, r.photoUrl || r.profileImage || '');
+      const cleanBaseProfile = sanitizeRestaurantShopPhoto(r.id, r.profileImage) || cleanBasePhoto;
+      const cleanBaseGallery = sanitizeRestaurantGalleryPhotos(r.id, r.galleryPhotos, cleanBasePhoto);
+      if (
+        r.photoUrl !== cleanBasePhoto ||
+        r.profileImage !== cleanBaseProfile ||
+        (r.galleryPhotos || []).length !== cleanBaseGallery.length
+      ) {
+        anyChanged = true;
+        return {
+          ...r,
+          photoUrl: cleanBasePhoto,
+          profileImage: cleanBaseProfile,
+          galleryPhotos: cleanBaseGallery,
+        };
+      }
+      return r;
+    }
     const rTime = Math.max(
       r.updatedAt ? new Date(r.updatedAt).getTime() || 0 : 0,
       r.photoUpdatedAt ? new Date(r.photoUpdatedAt).getTime() || 0 : 0,
@@ -2132,8 +2203,9 @@ export function applyRestaurantOverrides(
         ? ovMenu
         : rMenu;
     const CLEAN_STATIC_MEDIA_CUTOFF_MS = new Date('2026-10-29T15:05:00.000Z').getTime();
+    const sanitizedBasePhoto = sanitizeVerifiedShopPhotoUrl(r.id, r.photoUrl);
     const hasCleanBundledShopPhoto =
-      typeof r.photoUrl === 'string' && r.photoUrl.startsWith('/Shop/');
+      typeof sanitizedBasePhoto === 'string' && sanitizedBasePhoto.startsWith('/Shop/');
     const useOverrideShopPhoto =
       !hasCleanBundledShopPhoto ||
       ov.isCustomPhoto ||
@@ -2141,24 +2213,14 @@ export function applyRestaurantOverrides(
       Boolean(ov.photoUrl && ov.photoUrl.startsWith('data:image/')) ||
       ovTime > CLEAN_STATIC_MEDIA_CUTOFF_MS;
     const candidateOvPhoto = ov.photoUrl || ov.profileImage || '';
-    const rawOvPhoto =
-      typeof candidateOvPhoto === 'string' &&
-      !candidateOvPhoto.startsWith('/foods/') &&
-      !candidateOvPhoto.startsWith('/restaurants/')
-        ? candidateOvPhoto
-        : '';
+    const rawOvPhoto = sanitizeVerifiedShopPhotoUrl(r.id, candidateOvPhoto);
     const photoUrl =
       useOverrideShopPhoto && rawOvPhoto
         ? rawOvPhoto
-        : r.photoUrl || rawOvPhoto;
+        : sanitizedBasePhoto || rawOvPhoto;
     const nextPhotoUpdatedAt = ovTime >= rTime ? (ov.updatedAt || r.photoUpdatedAt) : (r.photoUpdatedAt || ov.updatedAt);
     const nextUpdatedAt = ovTime >= rTime ? (ov.updatedAt || r.updatedAt) : (r.updatedAt || ov.updatedAt);
-    const candidateOvProfile =
-      typeof ov.profileImage === 'string' &&
-      !ov.profileImage.startsWith('/foods/') &&
-      !ov.profileImage.startsWith('/restaurants/')
-        ? ov.profileImage
-        : '';
+    const candidateOvProfile = sanitizeVerifiedShopPhotoUrl(r.id, ov.profileImage);
     const nextProfileImage =
       useOverrideShopPhoto && candidateOvProfile ? candidateOvProfile : photoUrl;
 
@@ -2197,9 +2259,9 @@ export function applyRestaurantOverrides(
       photoUrl,
       profileImage: nextProfileImage,
       galleryPhotos: useOverrideShopPhoto && Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0
-        ? Array.from(new Set([photoUrl, ...ov.galleryPhotos])).filter(Boolean)
+        ? Array.from(new Set([photoUrl, ...ov.galleryPhotos.map((u: string) => sanitizeVerifiedShopPhotoUrl(r.id, u))])).filter(Boolean)
         : (Array.isArray(r.galleryPhotos) && r.galleryPhotos.length > 0
-            ? Array.from(new Set([photoUrl, ...r.galleryPhotos])).filter(Boolean)
+            ? Array.from(new Set([photoUrl, ...r.galleryPhotos.map((u: string) => sanitizeVerifiedShopPhotoUrl(r.id, u))])).filter(Boolean)
             : [photoUrl].filter(Boolean)),
       foodImages: (() => {
         const gList = useOverrideShopPhoto && Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0
@@ -2236,7 +2298,10 @@ export function applyRestaurantOverrides(
       ownerEmail: ov.ownerEmail || r.ownerEmail,
       ...((Boolean(ov.locationVerifiedAt) || !isSeedRestaurantId(r.id)) && ovHasVerifiedCambodiaLoc
         ? {
-            mapUrl: buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, nextCleanGpid),
+            mapUrl:
+              isValidGoogleMapsUrl(ov.mapUrl) && (ov.isAdminEdited || ov.dataSource === 'vip_owner' || Boolean(ov.ownerId))
+                ? ov.mapUrl!.trim()
+                : buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, nextCleanGpid),
             latitude: ov.latitude!,
             longitude: ov.longitude!,
             locationVerificationStatus: 'verified' as const,
@@ -2244,7 +2309,9 @@ export function applyRestaurantOverrides(
             locationReviewNote: ov.locationReviewNote ?? r.locationReviewNote,
             locationVerifiedAt: ov.locationVerifiedAt ?? r.locationVerifiedAt,
           }
-        : {}),
+        : isValidGoogleMapsUrl(ov.mapUrl)
+          ? { mapUrl: ov.mapUrl!.trim() }
+          : {}),
       googlePlaceId: nextCleanGpid,
       dataSource: ov.dataSource || r.dataSource,
       googleMapsMeta: ov.googleMapsMeta || r.googleMapsMeta,
@@ -2262,7 +2329,7 @@ export function applyRestaurantOverrides(
 
   // Also append any custom VIP/Admin restaurants present in overridesMap that aren't in the list yet
   // ONLY if they are strictly location-verified in Cambodia and NOT purged seed placeholders!
-  for (const [ovId, ov] of Object.entries(overridesMap)) {
+  for (const [ovId, ov] of Object.entries(safeOverrides)) {
     if (seenIds.has(ovId) || !ov || !ov.nameKh) continue;
     if (isRestaurantIdDeleted(ovId, ov.updatedAt, deletedMap, ov.googlePlaceId)) continue;
     // Never resurrect purged unverified seed restaurant IDs unless owned by a real VIP user
@@ -2281,13 +2348,7 @@ export function applyRestaurantOverrides(
       continue;
     }
 
-    const rawPhoto = ov.photoUrl || ov.profileImage || '';
-    const photoUrl =
-      typeof rawPhoto === 'string' &&
-      !rawPhoto.startsWith('/foods/') &&
-      !rawPhoto.startsWith('/restaurants/')
-        ? rawPhoto
-        : '';
+    const photoUrl = sanitizeRestaurantShopPhoto(ovId, ov.photoUrl || ov.profileImage || '');
     const cleanGpid = isValidOfficialGooglePlaceId(ov.googlePlaceId) ? ov.googlePlaceId : undefined;
     const candidateRest: Restaurant = {
       id: ovId,
@@ -2295,12 +2356,9 @@ export function applyRestaurantOverrides(
       nameEn: ov.nameEn || ov.nameKh,
       descriptionKh: ov.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
       descriptionEn: ov.descriptionEn || 'Authentic Cambodian restaurant.',
-      photoUrl: photoUrl || '/Shop/culinary-placeholder.jpg',
-      profileImage: photoUrl || '/Shop/culinary-placeholder.jpg',
-      galleryPhotos:
-        Array.isArray(ov.galleryPhotos) && ov.galleryPhotos.length > 0
-          ? ov.galleryPhotos
-          : [photoUrl || '/Shop/culinary-placeholder.jpg'],
+      photoUrl,
+      profileImage: photoUrl,
+      galleryPhotos: sanitizeRestaurantGalleryPhotos(ovId, ov.galleryPhotos, photoUrl),
       foodImages: Array.isArray(ov.foodImages) ? ov.foodImages : [],
       menuItems: Array.isArray(ov.menuItems) ? ov.menuItems : [],
       reviews: Array.isArray(ov.reviews) ? ov.reviews : [],

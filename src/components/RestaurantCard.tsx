@@ -47,12 +47,18 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
 
     const resolvedShopPhotoUrl = useMemo(() => {
       const candidate =
-        restaurant.photoUrl && !restaurant.photoUrl.startsWith('/restaurants/')
+        restaurant.photoUrl &&
+        !restaurant.photoUrl.startsWith('/restaurants/') &&
+        !restaurant.photoUrl.startsWith('/foods/') &&
+        !restaurant.photoUrl.includes('culinary-placeholder')
           ? restaurant.photoUrl
-          : restaurant.profileImage && !restaurant.profileImage.startsWith('/restaurants/')
+          : restaurant.profileImage &&
+            !restaurant.profileImage.startsWith('/restaurants/') &&
+            !restaurant.profileImage.startsWith('/foods/') &&
+            !restaurant.profileImage.includes('culinary-placeholder')
           ? restaurant.profileImage
-          : '/Shop/culinary-placeholder.jpg';
-      return resolveFoodPhotoUrl(candidate, restaurant.photoUpdatedAt);
+          : '';
+      return candidate ? resolveFoodPhotoUrl(candidate, restaurant.photoUpdatedAt) : '';
     }, [restaurant.photoUrl, restaurant.profileImage, restaurant.photoUpdatedAt]);
 
     const handleCardClick = () => {

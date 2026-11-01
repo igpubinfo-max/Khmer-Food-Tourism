@@ -2,6 +2,7 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 import { Trash2, AlertTriangle, X } from 'lucide-react';
 import { tr } from '../utils/i18n';
+import { ShopAvatar } from './icons/DefaultShopIcon';
 
 export const DeleteShopConfirmModal: React.FC = () => {
   const {
@@ -56,13 +57,10 @@ export const DeleteShopConfirmModal: React.FC = () => {
 
         {/* Target Shop Preview */}
         <div className="my-3 p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center gap-2.5 text-left">
-          <img
-            src={pendingDeleteRestaurant.photoUrl || '/Shop/rest-1.jpg'}
+          <ShopAvatar
+            restaurant={pendingDeleteRestaurant}
             alt={shopName}
-            className="w-11 h-11 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = '/Shop/rest-1.jpg';
-            }}
+            className="w-11 h-11 rounded-xl border border-slate-200 dark:border-slate-700"
           />
           <div className="min-w-0 flex-1">
             <p className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">

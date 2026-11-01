@@ -659,7 +659,7 @@ export const seedFoods: FoodItem[] = [
     categorySlug: 'grilled',
     categoryKh: 'ម្ហូបអាំង / កំពូលម្ហូបខ្មែរ',
     categoryEn: 'Grilled / Signature',
-    descriptionKh: 'សាច់គោខ្មែរប្រឡាក់គ្រឿងអាំងលើរងើកភ្លើងធ្យូងឱ្យនៅឈាមតិចៗ (Medium rare) ហាន់ជាបន្ទះស្ដើង ទទួលទានជាមួយទឹកប្រហុកបុកម្ទេសក្រូចឆ្មា និងបន្លែអន្លក់ស្រស់ (ចេកខ្ចី ត្រប់ស្រួយ ម្នាស់ ត្រសក់)។',
+    descriptionKh: 'សាច់គោខ្មែរប្រឡាក់គ្រឿងអាំងលើរងើកភ្លើងធ្យូងឱ្យនៅឈាមតិចៗ (ឆ្អិនល្មមមានជាតិ) ហាន់ជាបន្ទះស្ដើង ទទួលទានជាមួយទឹកប្រហុកបុកម្ទេសក្រូចឆ្មា និងបន្លែអន្លក់ស្រស់ (ចេកខ្ចី ត្រប់ស្រួយ ម្នាស់ ត្រសក់)។',
     descriptionEn: 'Tender marinated beef seared over fragrant charcoal, served with the iconic fiery lime-prahok dipping sauce and crisp raw farm crudités.',
     photoUrl: '/foods/food-19.jpg',
     imageAuditStatus: 'verified',
@@ -1458,14 +1458,15 @@ export const seedFoods: FoodItem[] = [
     isFeatured: true,
     ingredients: [
       { nameKh: 'សាច់ជ្រូកហាន់ស្ដើង', nameEn: 'Thin sliced pork loin or shoulder', amount: '២០០ ក្រាម' },
+      { nameKh: 'ពងទាចៀន', nameEn: 'Crispy fried duck egg', amount: '១ គ្រាប់' },
       { nameKh: 'ខ្ទិះដូង ខ្ទឹមស ទឹកត្រី ស្ករត្នោត', nameEn: 'Coconut milk, garlic, fish sauce, palm sugar', amount: 'សម្រាប់ប្រឡាក់' },
       { nameKh: 'បាយសក្ដៅៗ', nameEn: 'Steamed fragrant jasmine rice', amount: '១ ចាន' },
       { nameKh: 'ជ្រក់ត្រសក់ និងរ៉ាឌី', nameEn: 'Pickled cucumber and daikon', amount: '១ ចានតូច' },
     ],
     steps: [
       { stepNumber: 1, instructionKh: 'ប្រឡាក់សាច់ជ្រូកជាមួយខ្ទិះដូង ខ្ទឹមស ទឹកស៊ីអ៊ីវ ស្ករត្នោត ២០ នាទី។', instructionEn: 'Marinate pork in coconut milk, garlic, soy, and palm sugar for 20 minutes.' },
-      { stepNumber: 2, instructionKh: 'អាំងលើរងើកភ្លើងធ្យូងរហូតដល់សាច់ឆ្អិនក្រហមឈ្ងុយ។', instructionEn: 'Grill over glowing coals until lightly caramelized and juicy.' },
-      { stepNumber: 3, instructionKh: 'រៀបដាក់លើបាយក្ដៅៗ ទទួលទានជាមួយជ្រក់ត្រសក់ និងទឹកស៊ុប។', instructionEn: 'Serve over hot jasmine rice with cucumber pickles and soup.' },
+      { stepNumber: 2, instructionKh: 'អាំងសាច់ជ្រូកលើរងើកភ្លើងធ្យូងរហូតដល់ឆ្អិនក្រហមឈ្ងុយ និងចៀនពងទាឱ្យស្រួយជាយពណ៌មាស។', instructionEn: 'Grill pork over glowing coals until caramelized and juicy, and fry a duck egg until crispy-edged.' },
+      { stepNumber: 3, instructionKh: 'រៀបសាច់ជ្រូកអាំង និងពងទាចៀនដាក់លើបាយក្ដៅៗ ទទួលទានជាមួយជ្រក់ត្រសក់ និងទឹកស៊ុប។', instructionEn: 'Arrange grilled pork and fried duck egg over hot jasmine rice with cucumber pickles and clear soup.' },
     ],
   },
   {
