@@ -432,10 +432,10 @@ export function getAiFoodAdvisorRecommendations(params: {
       `${food.categoryKh || ''} ${food.categorySlug || ''} ${zhLoc.category} ${food.provinceKh || ''} ${food.provinceEn || ''} ${zhLoc.province}`
     );
     const ingredientText = normalizeSearchText(
-      `${(food.ingredientsKh || []).join(' ')} ${(food.ingredientsEn || []).join(' ')} ${(zhLoc.ingredients || []).join(' ')}`
+      `${(food.ingredients || []).map((i) => `${i.nameKh || ''} ${i.nameEn || ''}`).join(' ')} ${(zhLoc.ingredients || []).join(' ')}`
     );
     const descText = normalizeSearchText(
-      `${food.descriptionKh || ''} ${food.descriptionEn || ''} ${zhLoc.description} ${food.tasteProfile || ''}`
+      `${food.descriptionKh || ''} ${food.descriptionEn || ''} ${zhLoc.description}`
     );
     const fullText = `${titleText} ${categoryText} ${ingredientText} ${descText}`;
 
@@ -617,7 +617,8 @@ function matchesGoal(
     );
   }
   if (goal === 'vip_light_cal') {
-    return tags.includes('light') || tags.includes('steamed_boiled') || (food.calories > 0 && food.calories <= 450);
+    const cal = food.calories ?? 0;
+    return tags.includes('light') || tags.includes('steamed_boiled') || (cal > 0 && cal <= 450);
   }
   if (goal === 'vip_high_protein') {
     return tags.includes('protein_rich') || tags.includes('grilled');

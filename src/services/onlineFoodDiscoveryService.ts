@@ -5,6 +5,7 @@ import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { normalizeKhmerSearchText, expandMultilingualPlaceQuery, includesKhmerSafeToken } from './googlePlacesService';
 
 export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v10_youtube_2026_verified_cache';
+const ONLINE_DISCOVERY_CUSTOM_URLS_KEY = 'kft_online_discovery_custom_urls_v1';
 const LEGACY_CACHE_KEYS = [
   'kft_v9_youtube_2026_verified_cache',
   'kft_v8_youtube_2026_verified_cache',

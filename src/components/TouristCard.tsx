@@ -31,8 +31,9 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(({
   const loc = useMemo(() => getLocalizedDestination(destination, language), [destination, language]);
   const resolvedDestPhotoUrl = useMemo(() => {
     const raw = destination.photoUrl || '/welcome/places.webp';
-    return raw.startsWith('/destinations/') && !raw.includes('?') ? `${raw}?v=20261030v1` : raw;
-  }, [destination.photoUrl]);
+    const ver = destination.photoUpdatedAt ? encodeURIComponent(destination.photoUpdatedAt) : '20261030v1';
+    return raw.startsWith('/destinations/') && !raw.includes('?') ? `${raw}?v=${ver}` : raw;
+  }, [destination.photoUrl, destination.photoUpdatedAt]);
 
   return (
     <div 

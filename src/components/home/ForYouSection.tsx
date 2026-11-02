@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Sunrise, Sun, Coffee, Moon } from 'lucide-react';
+import { Clock, Sunrise, Sun, Coffee, Moon, RefreshCw } from 'lucide-react';
 import type { FoodItem, Language } from '../../types';
 import { tr } from '../../utils/i18n';
 import { getLocalizedFood } from '../../utils/zhDynamicTranslator';
@@ -11,18 +11,65 @@ interface Props {
   language: Language;
   slot: MealSlot;
   foods: FoodItem[];
+  onSelectSlot?: (slot: MealSlot) => void;
+  onShuffle?: () => void;
   onOpenFood: (food: FoodItem) => void;
   onSeeAll: () => void;
 }
 
-const SLOT_META: Record<MealSlot, { icon: React.ElementType; km: string; en: string; zh: string }> = {
-  breakfast: { icon: Sunrise, km: 'ស័ក្តិសមសម្រាប់ពេលព្រឹក', en: 'Recommended for breakfast', zh: '早餐精选' },
-  lunch: { icon: Sun, km: 'ស័ក្តិសមសម្រាប់ពេលថ្ងៃត្រង់', en: 'Recommended for lunch', zh: '午餐精选' },
-  snack: { icon: Coffee, km: 'ស័ក្តិសមសម្រាប់ពេលរសៀល', en: 'Recommended for afternoon', zh: '下午茶精选' },
-  dinner: { icon: Moon, km: 'ស័ក្តិសមសម្រាប់ពេលល្ងាច', en: 'Recommended for dinner', zh: '晚餐精选' },
+const SLOT_META: Record<
+  MealSlot,
+  { icon: React.ElementType; km: string; en: string; zh: string; tabKm: string; tabEn: string; tabZh: string }
+> = {
+  breakfast: {
+    icon: Sunrise,
+    km: 'ស័ក្តិសមសម្រាប់ពេលព្រឹក',
+    en: 'Authentic Khmer Breakfast',
+    zh: '柬式早餐精选',
+    tabKm: 'ពេលព្រឹក',
+    tabEn: 'Breakfast',
+    tabZh: '早餐',
+  },
+  lunch: {
+    icon: Sun,
+    km: 'ស័ក្តិសមសម្រាប់ពេលថ្ងៃត្រង់',
+    en: 'Authentic Khmer Lunch',
+    zh: '柬式午餐精选',
+    tabKm: 'ថ្ងៃត្រង់',
+    tabEn: 'Lunch',
+    tabZh: '午餐',
+  },
+  snack: {
+    icon: Coffee,
+    km: 'ស័ក្តិសមសម្រាប់ពេលរសៀល',
+    en: 'Afternoon Snacks & Desserts',
+    zh: '下午茶与甜点',
+    tabKm: 'រសៀល',
+    tabEn: 'Snack',
+    tabZh: '下午茶',
+  },
+  dinner: {
+    icon: Moon,
+    km: 'ស័ក្តិសមសម្រាប់ពេលល្ងាច',
+    en: 'Authentic Khmer Dinner',
+    zh: '柬式晚餐精选',
+    tabKm: 'ពេលល្ងាច',
+    tabEn: 'Dinner',
+    tabZh: '晚餐',
+  },
 };
 
-const ForYouSectionInner: React.FC<Props> = ({ language, slot, foods, onOpenFood, onSeeAll }) => {
+const ALL_SLOTS: MealSlot[] = ['breakfast', 'lunch', 'snack', 'dinner'];
+
+const ForYouSectionInner: React.FC<Props> = ({
+  language,
+  slot,
+  foods,
+  onSelectSlot,
+  onShuffle,
+  onOpenFood,
+  onSeeAll,
+}) => {
   if (!foods.length) return null;
   const [hero, ...rest] = foods;
   const heroLoc = getLocalizedFood(hero, language);
@@ -35,10 +82,47 @@ const ForYouSectionInner: React.FC<Props> = ({ language, slot, foods, onOpenFood
       <SectionHeader
         icon={IconFoodPicks}
         title={tr(language, 'មុខម្ហូបប្រចាំពេល', 'Recommended Dishes', '时段精选美食')}
-        subtitle={tr(language, 'ជ្រើសរើសតាមពេលវេលាបច្ចុប្បន្ន', 'Curated for this time of day', '根据当前时段为您精选')}
+        subtitle={tr(language, 'តាមទម្លាប់ញ៉ាំអាហារខ្មែរពិតប្រាកដ', 'Authentic Cambodian meals by time of day', '地道高棉一日三餐与下午茶推荐')}
         actionLabel={tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
         onAction={onSeeAll}
       />
+
+      {onSelectSlot && (
+        <div className="flex items-center justify-between gap-1.5">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1">
+            {ALL_SLOTS.map((s) => {
+              const m = SLOT_META[s];
+              const Icon = m.icon;
+              const active = slot === s;
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => onSelectSlot(s)}
+                  className={`px-2.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center gap-1 transition cursor-pointer ${
+                    active
+                      ? 'bg-[#064E3B] text-amber-300 shadow-xs'
+                      : 'bg-white dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-white/10'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5 shrink-0" />
+                  <span>{tr(language, m.tabKm, m.tabEn, m.tabZh)}</span>
+                </button>
+              );
+            })}
+          </div>
+          {onShuffle && (
+            <button
+              type="button"
+              onClick={onShuffle}
+              title={tr(language, 'ប្តូរមុខម្ហូប', 'Refresh dishes', '换一批')}
+              className="p-2 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 shadow-xs shrink-0 active:scale-95 transition cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      )}
 
       <button
         type="button"

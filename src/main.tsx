@@ -41,6 +41,11 @@ try {
   if (localStorage.getItem('kft_destinations_real_v9')) {
     localStorage.removeItem('kft_destinations_real_v8');
   }
+  if (localStorage.getItem('kft_restaurants_real_v13')) {
+    localStorage.removeItem('kft_restaurants_real_v12');
+    localStorage.removeItem('kft_restaurants_real_v11');
+    localStorage.removeItem('kft_restaurants_real_v10');
+  }
 
   // Safely migrate legacy v4 user lists into v5 if v5 is missing
   const rawUsersV5 = localStorage.getItem('kft_users_v5');
@@ -76,9 +81,51 @@ try {
   const CURRENT_VER_BUILD = `${APP_VERSION_NAME}_${APP_BUILD_CODE}`;
   const installedVer = localStorage.getItem('kft_app_installed_ver');
   if (installedVer !== CURRENT_VER_BUILD) {
+    // Seal any active VIP accounts from currentUser / user lists into `kft_vip_registry_backup_v1` BEFORE evicting old caches
+    try {
+      const candidateVips: any[] = [];
+      for (const k of ['kft_vip_registry_backup_v1', 'kft_users_v5', 'kft_users_v4', 'kft_cloud_users_v2', 'kft_cloud_users_v1']) {
+        const rawList = localStorage.getItem(k);
+        if (rawList && rawList !== 'undefined' && rawList !== 'null') {
+          const arr = JSON.parse(rawList);
+          if (Array.isArray(arr)) candidateVips.push(...arr);
+        }
+      }
+      for (const ck of ['kft_current_user_v5', 'kft_current_user_v4']) {
+        const rawCur = localStorage.getItem(ck);
+        if (rawCur && rawCur !== 'undefined' && rawCur !== 'null') {
+          const curObj = JSON.parse(rawCur);
+          if (curObj && typeof curObj === 'object' && !Array.isArray(curObj)) candidateVips.push(curObj);
+        }
+      }
+      const nowMs = Date.now();
+      const byId = new Map<string, any>();
+      for (const u of candidateVips) {
+        if (!u || typeof u !== 'object' || u.role === 'admin') continue;
+        if (u.subscriptionStatus === 'cancelled' || u.paymentStatus === 'cancelled') continue;
+        const isVip = u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active' || u.vipStatus === 'active';
+        if (!isVip) continue;
+        const rawExp = u.subscriptionExpiryDate || u.vipExpiresAt;
+        const expMs = rawExp ? Date.parse(String(rawExp)) || 0 : 0;
+        if (expMs > nowMs && u.id) {
+          const prev = byId.get(u.id);
+          const prevExp = prev ? Date.parse(String(prev.subscriptionExpiryDate || prev.vipExpiresAt || '')) || 0 : 0;
+          if (!prev || expMs >= prevExp) {
+            byId.set(u.id, u);
+          }
+        }
+      }
+      if (byId.size > 0) {
+        localStorage.setItem('kft_vip_registry_backup_v1', JSON.stringify(Array.from(byId.values())));
+      }
+    } catch {}
+
     // Evict heavy expendable food/destination caches on build upgrade to guarantee ample space for account backups
     localStorage.removeItem('kft_foods_200_v9');
     localStorage.removeItem('kft_destinations_real_v8');
+    if (localStorage.getItem('kft_restaurants_real_v13')) {
+      localStorage.removeItem('kft_restaurants_real_v12');
+    }
     localStorage.setItem('kft_app_installed_ver', CURRENT_VER_BUILD);
   }
 } catch (e) {

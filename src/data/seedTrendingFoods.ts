@@ -108,7 +108,7 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     "matchedFoodId": "food-23",
     "fallbackFoodIds": [
       "food-23",
-      "food-121"
+      "food-136"
     ],
     "categorySlug": "street_food",
     "categoryKh": "អាហារតាមផ្លូវ",
@@ -474,7 +474,7 @@ export const initialTrendingFoods: TrendingFoodItem[] = [
     "fallbackFoodIds": [
       "food-25",
       "food-179",
-      "food-122"
+      "food-125"
     ],
     "categorySlug": "street_food",
     "categoryKh": "អាហារតាមផ្លូវ",

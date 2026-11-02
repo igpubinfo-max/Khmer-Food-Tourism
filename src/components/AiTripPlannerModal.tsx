@@ -157,6 +157,11 @@ export const AiTripPlannerModal: React.FC = () => {
     if (!advisorPrompt.trim()) {
       setAdvisorSeed((s) => s + 1);
     }
+    if (typeof window !== 'undefined') {
+      window.requestAnimationFrame(() => {
+        advisorResultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
   };
 
   if (!isAiTripPlannerModalOpen) return null;

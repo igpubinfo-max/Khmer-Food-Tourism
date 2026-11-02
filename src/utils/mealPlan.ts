@@ -1,5 +1,6 @@
 import type { FoodItem } from '../types';
 import { getDishTagIds } from './dishTags';
+import { isAuthenticCambodianDishForMealTime } from './cambodianMealHabits';
 
 /**
  * Daily 3-meal idea built ONLY from recipe data (calories + tags). In-memory, no storage keys.
@@ -11,11 +12,6 @@ export interface MealPlan {
   dinner: FoodItem | null;
   totalKcal: number;
 }
-
-const BREAKFAST_WORDS = [
-  'noodle', 'porridge', 'soup', 'congee', 'rice vermicelli',
-  'នំបញ្ចុក', 'កុយទាវ', 'បបរ', 'មី', 'សម្ល', 'ស៊ុប',
-];
 
 const isSweet = (f: FoodItem) => f.categorySlug === 'dessert' || f.categorySlug === 'cake';
 const kcal = (f: FoodItem) => (typeof f.calories === 'number' ? f.calories : 0);
@@ -47,24 +43,32 @@ export function buildMealPlan(foods: FoodItem[], seed: number, isVipAuthorized =
   const used = new Set<string>();
 
   const breakfastPool = (max: number) =>
-    mains.filter((f) => {
-      const name = `${f.nameEn || ''} ${f.nameKh || ''}`.toLowerCase();
-      return kcal(f) <= max && (f.categorySlug === 'soup' || BREAKFAST_WORDS.some((w) => name.includes(w)));
-    });
+    mains.filter((f) => kcal(f) <= max && isAuthenticCambodianDishForMealTime(f, 'breakfast'));
   const lunchPool = (max: number) =>
     mains.filter((f) => {
+      if (kcal(f) > max || !isAuthenticCambodianDishForMealTime(f, 'lunch')) return false;
       const tags = getDishTagIds(f);
-      return kcal(f) <= max && (tags.includes('vegetable_rich') || tags.includes('protein_rich'));
+      return tags.includes('vegetable_rich') || tags.includes('protein_rich') || f.categorySlug === 'soup';
     });
   const dinnerPool = (max: number) =>
     mains.filter((f) => {
+      if (kcal(f) > max || !isAuthenticCambodianDishForMealTime(f, 'dinner')) return false;
       const tags = getDishTagIds(f);
-      return kcal(f) <= max && (tags.includes('steamed_boiled') || tags.includes('grilled'));
+      return tags.includes('steamed_boiled') || tags.includes('grilled') || tags.includes('vegetable_rich');
     });
 
-  const dinner = pick(dinnerPool(350), seed + 2, used) || pick(dinnerPool(450), seed + 2, used) || pick(mains.filter((f) => kcal(f) <= 450), seed + 2, used);
-  const breakfast = pick(breakfastPool(400), seed, used) || pick(breakfastPool(500), seed, used) || pick(mains.filter((f) => kcal(f) <= 450), seed, used);
-  const lunch = pick(lunchPool(600), seed + 1, used) || pick(mains, seed + 1, used);
+  const breakfast =
+    pick(breakfastPool(420), seed, used) ||
+    pick(breakfastPool(550), seed, used) ||
+    pick(mains.filter((f) => isAuthenticCambodianDishForMealTime(f, 'breakfast')), seed, used);
+  const lunch =
+    pick(lunchPool(600), seed + 1, used) ||
+    pick(mains.filter((f) => isAuthenticCambodianDishForMealTime(f, 'lunch')), seed + 1, used) ||
+    pick(mains, seed + 1, used);
+  const dinner =
+    pick(dinnerPool(420), seed + 2, used) ||
+    pick(dinnerPool(550), seed + 2, used) ||
+    pick(mains.filter((f) => isAuthenticCambodianDishForMealTime(f, 'dinner')), seed + 2, used);
 
   return {
     breakfast,

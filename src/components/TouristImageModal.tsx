@@ -261,8 +261,9 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
       setErrorMsg('');
       setIsProcessing(true);
       try {
-        const pickedDataUrl = await pickImageUsingNativeAndroidGallery();
-        if (pickedDataUrl) {
+        const pickedRes = await pickImageUsingNativeAndroidGallery();
+        if (pickedRes && !pickedRes.cancelled && pickedRes.dataUrl) {
+          const pickedDataUrl = pickedRes.dataUrl;
           const finalUrl =
             pickedDataUrl.length > 55000 ? await compressDataUrl(pickedDataUrl) : pickedDataUrl;
           const compKb = ((finalUrl.length * 0.75) / 1024).toFixed(0);

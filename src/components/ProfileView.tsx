@@ -2,14 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { FoodCard } from './FoodCard';
 import { RestaurantCard } from './RestaurantCard';
-import { FoodPassportCard } from './FoodPassportCard';
 import { TouristCard } from './TouristCard';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 import { 
   User as UserIcon, Heart, Shield, Store, 
-  Globe, LogOut, RefreshCw, Download, Sparkles, UtensilsCrossed, ShieldCheck, CheckCircle2,
-  Bot, Bell, Compass, Calendar, Bookmark, Plus, MapPin, Trash2, Share2, Tag, Utensils, ChevronRight, ChevronLeft,
-  Edit2, Check, X as CloseIcon, Crown, Star, Zap, Award, Smartphone, Copy, ExternalLink, Clock, Lock, MessageSquare, Mail, Settings
+  Globe, LogOut, RefreshCw, Sparkles, ShieldCheck, CheckCircle2,
+  Bot, Bell, Compass, Bookmark, Plus, Trash2, ChevronRight,
+  Edit2, Check, X as CloseIcon, Crown, Zap, Award, Copy, Clock, MessageSquare, Mail, Settings
 } from 'lucide-react';
 import {
   isRestaurantPremiumActive, isUserVipActive, getVipAccountState, getVipRemainingDays,
@@ -79,30 +78,32 @@ export const ProfileView: React.FC = () => {
   const [tempName, setTempName] = useState('');
   const [showSupportDetails, setShowSupportDetails] = useState(false);
 
-  // Horizontal tabs scroll navigation state
-  const tabsContainerRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  // Discreet private 5-tap trigger on App Version footer for Admin access (no visible Admin button to users)
+  const adminVersionTapCountRef = useRef<number>(0);
+  const adminVersionTapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const checkTabsScroll = () => {
-    if (tabsContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = tabsContainerRef.current;
-      setCanScrollLeft(scrollLeft > 6);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 6);
+  const handleVersionFooterTap = () => {
+    if (isAdmin) return;
+    adminVersionTapCountRef.current += 1;
+    if (adminVersionTapTimerRef.current) {
+      clearTimeout(adminVersionTapTimerRef.current);
     }
-  };
-
-  const scrollTabs = (offset: number) => {
-    if (tabsContainerRef.current) {
-      tabsContainerRef.current.scrollBy({ left: offset, behavior: 'smooth' });
-      setTimeout(checkTabsScroll, 250);
+    if (adminVersionTapCountRef.current >= 5) {
+      adminVersionTapCountRef.current = 0;
+      setIsAdminLoginModalOpen(true);
+      return;
     }
+    adminVersionTapTimerRef.current = setTimeout(() => {
+      adminVersionTapCountRef.current = 0;
+    }, 3000);
   };
 
   useEffect(() => {
-    checkTabsScroll();
-    window.addEventListener('resize', checkTabsScroll);
-    return () => window.removeEventListener('resize', checkTabsScroll);
+    return () => {
+      if (adminVersionTapTimerRef.current) {
+        clearTimeout(adminVersionTapTimerRef.current);
+      }
+    };
   }, []);
 
   // Bookmarked items
@@ -591,19 +592,6 @@ export const ProfileView: React.FC = () => {
                           <span>✉️</span> <span className="truncate">{currentUser.email}</span>
                         </p>
                       )}
-                      {!isVip && getVipAccountState(currentUser) === 'expired_vip' && (
-                        <div className="mt-1.5 p-2 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-[11px] font-khmer flex items-center justify-between gap-2 text-rose-700 dark:text-rose-300">
-                          <span>
-                            ⚠️ {tr(language, `ផុតកំណត់ VIP (${currentUser.subscriptionExpiryDate?.split('T')[0] || ''}) — គណនីធម្មតា`, `VIP Expired (${currentUser.subscriptionExpiryDate?.split('T')[0] || 'Expired'}) — Normal Account`, `VIP 已过期（${currentUser.subscriptionExpiryDate?.split('T')[0] || ''}）— 普通账户`)}
-                          </span>
-                          <button
-                            onClick={() => openUpgradeVipModal(true)}
-                            className="px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 font-black text-[10px] shrink-0 cursor-pointer"
-                          >
-                            {tr(language, 'បន្ត VIP', 'Renew', '续费')}
-                          </button>
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
@@ -616,11 +604,11 @@ export const ProfileView: React.FC = () => {
                     logout();
                   }
                 }}
-                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 text-xs font-bold transition shadow-2xs cursor-pointer active:scale-95 shrink-0"
+                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 text-xs font-bold transition shadow-2xs cursor-pointer active:scale-95 shrink-0 whitespace-nowrap"
                 title={tr(language, 'ចាកចេញពីគណនី', 'Sign Out of Account', '退出登录')}
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden xs:inline">{tr(language, 'ចាកចេញ', 'Log Out', '退出')}</span>
+                <span>{tr(language, 'ចាកចេញ', 'Log Out', '退出')}</span>
               </button>
             </div>
 
@@ -629,8 +617,6 @@ export const ProfileView: React.FC = () => {
                 {currentUser.bio}
               </p>
             )}
-
-            {/* Admin shortcut under bio removed: single Admin entry is the Admin panel below */}
           </div>
         ) : (
           <div className="text-center py-4 space-y-3 font-khmer">
@@ -645,21 +631,13 @@ export const ProfileView: React.FC = () => {
                 {tr(language, 'ដើម្បីរក្សាទុកម្ហូប និងចុះបញ្ជីហាង', 'To save recipes & manage shops', '登录以收藏食谱并管理店铺')}
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+            <div className="flex items-center justify-center">
               <button
                 type="button"
                 onClick={() => setIsAuthModalOpen(true)}
                 className="w-full sm:w-auto px-8 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs sm:text-sm shadow-xs font-khmer transition cursor-pointer"
               >
                 {tr(language, 'ចូលគណនី / ចុះឈ្មោះ', 'Sign In / Register', '登录 / 注册')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsAdminLoginModalOpen(true)}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-emerald-50 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 font-khmer transition cursor-pointer"
-              >
-                <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>{tr(language, 'ច្រកចូលរដ្ឋបាល (Admin)', 'Admin Login', '管理员登录')}</span>
               </button>
             </div>
           </div>
@@ -989,28 +967,24 @@ export const ProfileView: React.FC = () => {
         </div>
       ) : currentUser?.subscriptionStatus === 'pending' ? (
         /* PENDING ADMIN CONFIRMATION CARD */
-        <div className="shrink-0 px-3 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-600/15 border border-amber-400/50 shadow-xs transition font-khmer">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2.5 rounded-2xl shrink-0 bg-amber-400 text-slate-900 shadow-sm">
-                <Clock className="w-5 h-5" />
+        <div className="shrink-0 p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-600/15 border border-amber-400/50 shadow-xs transition font-khmer">
+          <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5 flex-1 min-w-0 overflow-hidden">
+              <div className="p-2 rounded-xl shrink-0 bg-amber-400 text-slate-900 shadow-sm">
+                <Clock className="w-4 h-4" />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-slate-900 dark:text-white font-khmer">
-                    {tr(language, 'ស្ថានភាពសមាជិកភាព៖', 'Membership:', '会员状态：')}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
-                    {tr(language, '⏳ រង់ចាំការអនុម័តពីរដ្ឋបាល', '⏳ Pending Admin Approval', '⏳ 等待管理员审核')}
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-extrabold whitespace-nowrap bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
+                    {tr(language, '⏳ រង់ចាំការអនុម័ត VIP', '⏳ Pending VIP Review', '⏳ 等待管理员审核')}
                   </span>
                 </div>
-                
                 <p className="text-[11px] text-amber-700 dark:text-amber-400 mt-0.5 font-khmer truncate">
                   {tr(
                     language,
-                    'សំណើដំឡើង VIP ត្រូវបានបញ្ជូន។ រដ្ឋបាលកំពុងត្រួតពិនិត្យ និងអនុម័ត...',
-                    'VIP upgrade request submitted. Administrator is reviewing your payment...',
-                    'VIP 升级申请已提交，管理员正在审核您的付款...'
+                    'រដ្ឋបាលកំពុងពិនិត្យការទូទាត់របស់អ្នក...',
+                    'Admin is reviewing your VIP payment...',
+                    '管理员正在审核您的 VIP 付款...'
                   )}
                 </p>
               </div>
@@ -1018,36 +992,32 @@ export const ProfileView: React.FC = () => {
 
             <button
               onClick={() => openUpgradeVipModal(false)}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 active:scale-95 bg-amber-500 hover:bg-amber-600 text-white"
+              className="px-3 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 whitespace-nowrap active:scale-95 bg-amber-500 hover:bg-amber-600 text-white cursor-pointer"
             >
               {tr(language, 'មើលស្ថានភាព', 'View Status', '查看状态')}
             </button>
           </div>
         </div>
-      ) : currentUser?.subscriptionStatus === 'expired' ? (
+      ) : vipAccountState === 'expired_vip' || currentUser?.subscriptionStatus === 'expired' ? (
         /* EXPIRED VIP CARD */
-        <div className="shrink-0 px-3 py-2.5 rounded-2xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800 shadow-xs transition font-khmer">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2.5 rounded-2xl shrink-0 bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400">
-                <Crown className="w-5 h-5" />
+        <div className="shrink-0 p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800 shadow-xs transition font-khmer">
+          <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5 flex-1 min-w-0 overflow-hidden">
+              <div className="p-2 rounded-xl shrink-0 bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400">
+                <Crown className="w-4 h-4" />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-slate-900 dark:text-white font-khmer">
-                    {tr(language, 'ស្ថានភាពសមាជិកភាព៖', 'Membership:', '会员状态：')}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
-                    {tr(language, '❌ ផុតកំណត់', 'Expired', '已到期')}
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-extrabold whitespace-nowrap bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
+                    {tr(language, '❌ សមាជិកភាព VIP ផុតកំណត់', 'VIP Expired', 'VIP 已到期')}
                   </span>
                 </div>
-                
                 <p className="text-[11px] text-rose-600 dark:text-rose-400 mt-0.5 font-khmer truncate">
                   {tr(
                     language,
-                    'សមាជិកភាព VIP របស់អ្នកបានផុតកំណត់ហើយ។ សូមបន្តឡើងវិញដើម្បីទទួលអត្ថប្រយោជន៍។',
-                    'Your VIP membership has expired. Renew to regain all VIP benefits.',
-                    '您的 VIP 会员已到期，续费即可恢复全部专属权益。'
+                    'សូមបន្តឡើងវិញដើម្បីទទួលអត្ថប្រយោជន៍ VIP',
+                    'Renew anytime to restore VIP benefits',
+                    '续费即可恢复全部 VIP 专属权益'
                   )}
                 </p>
               </div>
@@ -1055,36 +1025,32 @@ export const ProfileView: React.FC = () => {
 
             <button
               onClick={() => openUpgradeVipModal(true)}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 active:scale-95 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white cursor-pointer"
+              className="px-3 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 whitespace-nowrap active:scale-95 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white cursor-pointer"
             >
               {tr(language, '🔄 បន្ត VIP', 'Renew VIP', '🔄 续费 VIP')}
             </button>
           </div>
         </div>
       ) : (
-        /* STANDARD FREE USER UPGRADE CARD */
-        <div className="shrink-0 px-3 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-950/20 via-slate-900/10 to-amber-950/20 border border-slate-200 dark:border-slate-700 shadow-xs transition font-khmer">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2.5 rounded-2xl shrink-0 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                <Crown className="w-5 h-5" />
+        /* STANDARD FREE USER UPGRADE CARD — Zero overlap on narrow phones */
+        <div className="shrink-0 p-3 rounded-2xl bg-gradient-to-r from-emerald-950/20 via-slate-900/10 to-amber-950/20 border border-slate-200 dark:border-slate-700 shadow-xs transition font-khmer">
+          <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5 flex-1 min-w-0 overflow-hidden">
+              <div className="p-2 rounded-xl shrink-0 bg-slate-100 dark:bg-slate-700 text-amber-500 dark:text-amber-400">
+                <Crown className="w-4 h-4" />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-slate-900 dark:text-white font-khmer">
-                    {tr(language, 'ស្ថានភាពសមាជិកភាព៖', 'Membership:', '会员状态：')}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                    {tr(language, 'គណនីឥតគិតថ្លៃ', 'Free User', '免费账户')}
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold whitespace-nowrap bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
+                    {tr(language, 'គណនីឥតគិតថ្លៃ', 'Free Account', '免费账户')}
                   </span>
                 </div>
-                
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-khmer truncate">
                   {tr(
                     language,
-                    `ដំឡើងទៅជា VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ ឬ $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ) ដើម្បីទទួលអត្ថប្រយោជន៍ពិសេសទាំង ${dynamicBenefits.length}!`,
-                    `Upgrade to VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d or $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d) to unlock all ${dynamicBenefits.length} benefits!`,
-                    `升级至 VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}天 或 $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}天) 解锁全部 ${dynamicBenefits.length} 项特权！`
+                    `$${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ`,
+                    `$${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d`,
+                    `$${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}天 • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}天`
                   )}
                 </p>
               </div>
@@ -1092,7 +1058,7 @@ export const ProfileView: React.FC = () => {
 
             <button
               onClick={() => openUpgradeVipModal(false)}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 active:scale-95 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-amber-500/20 cursor-pointer"
+              className="px-3.5 py-2 rounded-xl text-xs font-bold font-khmer shadow-xs transition shrink-0 whitespace-nowrap active:scale-95 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-amber-500/20 cursor-pointer"
             >
               {tr(language, '👑 ដំឡើង VIP', 'Upgrade VIP', '👑 升级 VIP')}
             </button>
@@ -1211,7 +1177,7 @@ export const ProfileView: React.FC = () => {
                   >
                     <div>
                       <span className="font-bold text-slate-800 dark:text-slate-200">
-                        {(txn.type as string) === 'additional_store_fee' || txn.type === 'additional_store'
+                        {(txn.type as string) === 'additional_store_fee' || (txn.type as string) === 'additional_store'
                           ? tr(
                               language,
                               `បន្ថែមហាងថ្មី ($${Number(txn.amountUsd || 0).toFixed(2)})`,
@@ -1600,8 +1566,10 @@ export const ProfileView: React.FC = () => {
       {/* Tab: Membership Page (Consumer Users Only) */}
       {!isAdmin && activeSubTab === 'membership' && (
         <div className="space-y-4 font-khmer">
-          {isVip && vipDashboard}
-          {/* Header Card */}
+          {isVip ? (
+            vipDashboard
+          ) : (
+          /* Header Card (shown for non-VIP users; active VIPs already see vipDashboard above) */
           <div className="p-4 rounded-3xl bg-gradient-to-br from-amber-500/20 via-emerald-500/10 to-teal-500/15 border-2 border-amber-400/50 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -1723,13 +1691,14 @@ export const ProfileView: React.FC = () => {
               <span>
                 {tr(
                   language,
-                  '💬 ទាក់ទងរដ្ឋបាល / បញ្ហាការបង់ប្រាក់ VIP (ផ្ញើសារ & វិក្កយបត្រ)',
+                  '💬 ទាក់ទងរដ្ឋបាល / បញ្ហាការបង់ប្រាក់ VIP',
                   '💬 Contact Admin / Payment Support',
-                  '💬 联系管理员 / VIP 付款支持（发送消息与收据）'
+                  '💬 联系管理员 / VIP 付款支持'
                 )}
               </span>
             </button>
           </div>
+          )}
 
           {/* Dynamic Benefits Check-list */}
           <div className="space-y-2">
@@ -1969,31 +1938,6 @@ export const ProfileView: React.FC = () => {
             </div>
           )}
 
-          {/* VIP Membership Management (Users only - Never shown to Admin) */}
-          {!isAdmin && (
-            <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
-              <div>
-                <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
-                  <Crown className="w-4 h-4 text-amber-500" />
-                  {isKm ? 'គ្រប់គ្រងសមាជិកភាព (VIP Membership)' : 'VIP Membership'}
-                </span>
-                <p className="text-[10px] text-slate-500 pl-6">
-                  {isVip 
-                    ? (isKm ? `ស្ថានភាព៖ Premium VIP (${remainingDays} ថ្ងៃទៀត)` : `Status: Premium VIP (${remainingDays} days left)`)
-                    : (isKm
-                        ? `ស្ថានភាព៖ គណនីឥតគិតថ្លៃ • $${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ`
-                        : `Status: Free User • $${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d`)}
-                </p>
-              </div>
-              <button
-                onClick={() => openUpgradeVipModal(Boolean(isVip))}
-                className="px-3 py-1 rounded-xl bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 font-bold border border-amber-300 hover:bg-amber-100 transition cursor-pointer"
-              >
-                {isVip ? (isKm ? 'គ្រប់គ្រង / បន្ត' : 'Manage / Renew') : (isKm ? 'ដំឡើង VIP' : 'Upgrade')}
-              </button>
-            </div>
-          )}
-
           {/* Language Switch */}
           <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
             <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
@@ -2111,7 +2055,7 @@ export const ProfileView: React.FC = () => {
           </div>
 
           {/* Reset App Data */}
-          <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
+          <div className="flex items-center justify-between py-2">
             <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
               <RefreshCw className="w-4 h-4 text-slate-500" />
               {tr(language, 'កំណត់ទិន្នន័យឡើងវិញ', 'Reset App Data', '重置应用数据')}
@@ -2122,78 +2066,25 @@ export const ProfileView: React.FC = () => {
                   resetAllData();
                 }
               }}
-              className="px-3 py-1 rounded-xl bg-rose-50 text-rose-600 font-bold hover:bg-rose-100"
+              className="px-3 py-1 rounded-xl bg-rose-50 text-rose-600 font-bold hover:bg-rose-100 cursor-pointer"
             >
               {isKm ? 'កំណត់ឡើងវិញ' : 'Reset'}
             </button>
           </div>
-
-          {/* Sign Out */}
-          {currentUser && (
-            <button
-              onClick={logout}
-              className="w-full py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-[#0F172A] dark:text-slate-200 font-bold flex items-center justify-center gap-1.5 transition"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>{isKm ? 'ចាកចេញពីគណនី' : 'Sign Out'}</span>
-            </button>
-          )}
-
-          {/* Admin Portal Access (Shown only when NOT logged in as Admin and NOT a VIP customer) */}
-          {!isVip && !isAdmin && (
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-700 text-center">
-              <button
-                type="button"
-                onClick={() => setIsAdminLoginModalOpen(true)}
-                className="w-full py-2.5 px-4 rounded-2xl bg-slate-100 hover:bg-emerald-50 dark:bg-slate-700/80 dark:hover:bg-emerald-950/50 text-slate-700 hover:text-[#064E3B] dark:text-slate-200 dark:hover:text-emerald-300 border border-slate-200 dark:border-slate-600 text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
-              >
-                <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>{tr(language, '🛡️ ច្រកចូលប្រព័ន្ធរដ្ឋបាល (Admin Login)', '🛡️ System Administration (Admin Login)', '🛡️ 系统管理中心（管理员登录）')}</span>
-              </button>
-            </div>
-          )}
         </div>
       )}
 
       </div>
-      {/* Global Bottom Account Actions & Log Out (Always accessible without navigating to Settings tab) */}
-      {currentUser && isAdmin && (
-        <div className="pt-4 border-t border-slate-200/90 dark:border-slate-700/80 space-y-3 font-khmer">
-          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-            <span>
-              {isKm ? `គណនីកំពុងប្រើប្រាស់៖ ${currentUser.name}` : `Signed in as: ${currentUser.name}`}
-            </span>
-            <span className="font-mono text-[10px] text-slate-400">
-              Cambodia Flavors & Tourism {APP_VERSION} (Build {APP_BUILD_CODE})
-            </span>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                if (window.confirm(isKm ? 'តើអ្នកពិតជាចង់ចាកចេញពីគណនីមែនទេ?' : 'Are you sure you want to log out?')) {
-                  logout();
-                }
-              }}
-              className="flex-1 py-2.5 px-4 rounded-2xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-xs"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>{tr(language, 'ចាកចេញពីគណនី', 'Sign Out', '退出登录')}</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setActiveSubTab('settings');
-                setTimeout(() => scrollTabs(400), 50);
-              }}
-              className="py-2.5 px-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-1 transition shadow-xs cursor-pointer"
-              title={isKm ? 'ទៅកាន់ការកំណត់' : 'Settings'}
-            >
-              <span>⚙️ {isKm ? 'ការកំណត់' : 'Settings'}</span>
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Clean App Version Footer (Discreet 5-tap within 3s opens Admin Login privately — zero visible Admin button to users) */}
+      <div className="pt-2 pb-1 text-center font-khmer">
+        <span
+          onClick={handleVersionFooterTap}
+          className="inline-block px-3 py-1 font-mono text-[10px] text-slate-400 dark:text-slate-500 select-none"
+        >
+          Cambodia Flavors & Tourism {APP_VERSION} • Build {APP_BUILD_CODE}
+        </span>
+      </div>
 
       {/* Privacy Policy Modal */}
       <PrivacyPolicyModal 

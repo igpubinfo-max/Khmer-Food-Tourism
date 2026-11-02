@@ -1,8 +1,87 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1312;
-export const APP_RELEASE_DATE = '2026-11-01';
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1314;
+export const APP_RELEASE_DATE = '2026-11-02';
+
+/**
+ * Audited duplicate food IDs removed from the Food Menu so every dish and photograph is 100% unique
+ * without shifting permanent `food-1..food-200` IDs or breaking `/foods/food-XXX.jpg` bindings.
+ * Any ID that has an explicit Admin custom override is automatically preserved by `deduplicateFoodItems`.
+ */
+export const REMOVED_DUPLICATE_FOOD_IDS: ReadonlySet<string> = new Set([
+  'food-9',
+  'food-12',
+  'food-20',
+  'food-21',
+  'food-22',
+  'food-30',
+  'food-31',
+  'food-33',
+  'food-35',
+  'food-43',
+  'food-46',
+  'food-51',
+  'food-55',
+  'food-56',
+  'food-57',
+  'food-69',
+  'food-71',
+  'food-75',
+  'food-79',
+  'food-92',
+  'food-96',
+  'food-99',
+  'food-110',
+  'food-111',
+  'food-121',
+  'food-122',
+  'food-126',
+  'food-153',
+  'food-168',
+  'food-169',
+  'food-170',
+  'food-184',
+  'food-186',
+]);
+
+export function deduplicateFoodItems<
+  T extends { id: string; nameKh?: string; isAdminEdited?: boolean; isCustomPhoto?: boolean }
+>(items: T[], foodOverrides?: Record<string, any> | null): T[] {
+  if (!Array.isArray(items) || items.length === 0) return [];
+  const seenIds = new Set<string>();
+  const seenNamesKh = new Set<string>();
+  const out: T[] = [];
+
+  for (const item of items) {
+    if (!item || !item.id) continue;
+    if (seenIds.has(item.id)) continue;
+
+    const ov = foodOverrides ? foodOverrides[item.id] : undefined;
+    const hasAdminCustomization = Boolean(
+      item.isAdminEdited ||
+        item.isCustomPhoto ||
+        ov?.isCustomPhoto ||
+        ov?.adminApprovedAt
+    );
+
+    if (!hasAdminCustomization && REMOVED_DUPLICATE_FOOD_IDS.has(item.id)) {
+      continue;
+    }
+
+    const normNameKh = String(item.nameKh || '')
+      .trim()
+      .replace(/\s+/g, '');
+    if (normNameKh && seenNamesKh.has(normNameKh) && !hasAdminCustomization) {
+      continue;
+    }
+
+    seenIds.add(item.id);
+    if (normNameKh) seenNamesKh.add(normNameKh);
+    out.push(item);
+  }
+  return out;
+}
 
 /**
  * Authoritative baseline timestamp for the verified bundled 200-dish food photo library (`public/foods/*.jpg`).
@@ -249,7 +328,17 @@ export const sanitizeRestaurantShopPhoto = (
       return /chumnor|kbal-koh/i.test(normId) ? shopFile : '';
     }
     const verifiedPath = normId ? VERIFIED_SEED_SHOP_PHOTO_MAP[normId] : undefined;
-    return verifiedPath && verifiedPath === shopFile ? verifiedPath : '';
+    if (verifiedPath && verifiedPath === shopFile) return verifiedPath;
+    // Allow dedicated per-shop `/Shop/<exact-restaurantId>.(jpg|jpeg|png|webp)` for rest-53+ or custom IDs (never legacy unverified rest-1..52)
+    const legacySeedMatch = normId.match(/^rest-(\d+)$/);
+    const legacyNum = legacySeedMatch ? Number(legacySeedMatch[1]) : 0;
+    if (normId && (legacyNum === 0 || legacyNum > 52)) {
+      const escapedId = normId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (new RegExp(`^/Shop/${escapedId}\\.(jpg|jpeg|png|webp)$`, 'i').test(shopFile)) {
+        return shopFile;
+      }
+    }
+    return '';
   }
 
   if (
@@ -2840,8 +2929,11 @@ export const getVipFeaturedRotationState = (
 };
 
 /**
- * Sort a list of restaurants so that currently featured VIP shops (from initial 1-day new-shop boost or fair round-robin rotation)
- * appear at the very top of the relevant listing, while preserving the order of all other restaurants.
+ * Sort a list of restaurants so that:
+ * 1. Currently featured VIP shops (from initial 1-day new-shop boost or fair round-robin rotation) appear first.
+ * 2. ALL shops WITH a verified / Admin-uploaded real photo (`hasApprovedShopPhoto(r)`) appear prominently right at the top
+ *    (with newly uploaded Admin/owner photos and active VIP shops prioritized first).
+ * 3. ALL shops WITHOUT photos remain 100% visible below them (verified Cambodia locations first), rendering DefaultShopIcon.
  */
 export const sortRestaurantsWithVipRotation = (
   restaurants: Restaurant[],
@@ -2853,9 +2945,6 @@ export const sortRestaurantsWithVipRotation = (
     return Array.isArray(restaurants) ? [...restaurants] : [];
   }
   const rotation = getVipFeaturedRotationState(restaurants, users, settings, nowMs);
-  if (rotation.currentlyFeatured.length === 0) {
-    return [...restaurants];
-  }
 
   const featuredOrderMap = new Map<string, number>();
   rotation.currentlyFeatured.forEach((item, idx) => {
@@ -2863,21 +2952,43 @@ export const sortRestaurantsWithVipRotation = (
   });
 
   const topFeatured: Restaurant[] = [];
-  const verifiedLocRestList: Restaurant[] = [];
-  const reviewLocRestList: Restaurant[] = [];
-  for (const r of restaurants) {
+  const withPhotoList: Array<{ r: Restaurant; idx: number; priority: number }> = [];
+  const verifiedLocNoPhotoList: Restaurant[] = [];
+  const reviewLocNoPhotoList: Restaurant[] = [];
+
+  restaurants.forEach((r, idx) => {
     if (featuredOrderMap.has(r.id)) {
       topFeatured.push(r);
-    } else if (isPlaceLocationVerified(r)) {
-      verifiedLocRestList.push(r);
-    } else {
-      reviewLocRestList.push(r);
+      return;
     }
-  }
+    if (hasApprovedShopPhoto(r)) {
+      const updatedMs = r.photoUpdatedAt ? Date.parse(r.photoUpdatedAt) || 0 : 0;
+      const customBoost = r.isCustomPhoto || updatedMs > 0 ? 1_000_000_000_000 + updatedMs : 0;
+      const vipBoost = isRestaurantPremiumActive(r) ? 500_000_000_000 : 0;
+      withPhotoList.push({ r, idx, priority: customBoost + vipBoost });
+    } else if (isPlaceLocationVerified(r)) {
+      verifiedLocNoPhotoList.push(r);
+    } else {
+      reviewLocNoPhotoList.push(r);
+    }
+  });
 
-  topFeatured.sort(
-    (a, b) => (featuredOrderMap.get(a.id) ?? 999) - (featuredOrderMap.get(b.id) ?? 999)
-  );
+  topFeatured.sort((a, b) => {
+    const aPhoto = hasApprovedShopPhoto(a) ? 0 : 1;
+    const bPhoto = hasApprovedShopPhoto(b) ? 0 : 1;
+    if (aPhoto !== bPhoto) return aPhoto - bPhoto;
+    return (featuredOrderMap.get(a.id) ?? 999) - (featuredOrderMap.get(b.id) ?? 999);
+  });
 
-  return [...topFeatured, ...verifiedLocRestList, ...reviewLocRestList];
+  withPhotoList.sort((a, b) => {
+    if (b.priority !== a.priority) return b.priority - a.priority;
+    return a.idx - b.idx;
+  });
+
+  return [
+    ...topFeatured,
+    ...withPhotoList.map((item) => item.r),
+    ...verifiedLocNoPhotoList,
+    ...reviewLocNoPhotoList,
+  ];
 };

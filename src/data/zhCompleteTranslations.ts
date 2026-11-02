@@ -6536,7 +6536,7 @@ export function translateRestaurantNameToZh(nameEn: string | undefined, nameKh: 
   if (EXACT_RESTAURANT_NAME_ZH_MAP[trimmed]) return EXACT_RESTAURANT_NAME_ZH_MAP[trimmed];
 
   // Check the 7 provincial templates
-  const templates = [
+  const templates: Array<[RegExp, string]> = [
     [/^Riverside Khmer Kitchen\s*\(/i, `${zhProv}河畔高棉风味餐厅`],
     [/^Central Market Morning Kuyteav & Rice House\s*\(/i, `${zhProv}中央市场早茶粿条与烤肉饭馆`],
     [/^Green Garden Traditional Khmer Restaurant\s*\(/i, `${zhProv}绿园传统高棉合家欢餐厅`],

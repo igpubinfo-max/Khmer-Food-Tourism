@@ -170,6 +170,9 @@ export async function searchOnlineFoodImages(params: {
   const category = params.categorySlug || 'soup';
   const candidates: OnlineFoodImageCandidate[] = [];
   const seenUrls = new Set<string>();
+  const existingSet = new Set(
+    (params.existingUrls || []).map((u) => (u || '').trim()).filter(Boolean)
+  );
 
   const addCandidate = (c: OnlineFoodImageCandidate) => {
     const cleanUrl = (c.url || '').trim();

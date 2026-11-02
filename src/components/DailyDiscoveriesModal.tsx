@@ -133,14 +133,14 @@ export const DailyDiscoveriesModal: React.FC = () => {
         if (vipTasteProfile === 'soup_kroeung' && cat !== 'soup' && cat !== 'salad') {
           return false;
         }
-        if (vipTasteProfile === 'grill_seafood' && cat !== 'grill' && cat !== 'stir-fry') {
+        if (vipTasteProfile === 'grill_seafood' && cat !== 'grilled' && cat !== 'stirfry' && cat !== 'specialty') {
           return false;
         }
         if (
           vipTasteProfile === 'street_dessert' &&
           cat !== 'dessert' &&
-          cat !== 'noodle' &&
-          cat !== 'drink'
+          cat !== 'streetfood' &&
+          cat !== 'noodles'
         ) {
           return false;
         }

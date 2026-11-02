@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
-import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isStrictVerifiedCambodiaRestaurant, hasApprovedShopPhoto, isGpipRegisteredRestaurant } from '../types';
+import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isStrictVerifiedCambodiaRestaurant } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { Store, Plus, Edit2, Shield, Settings, MapPin, Globe, RefreshCw, Search, X } from 'lucide-react';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
@@ -157,17 +157,8 @@ export const RestaurantView: React.FC = () => {
       if (r.status !== 'approved' && currentUser?.role !== 'admin' && currentUser?.id !== r.ownerId) {
         return false;
       }
-      // Public Shop List shows ONLY shops with an Admin-approved real photo.
-      // Shops without a verified photo are replaced by shops that have one (Admin still sees every shop;
-      // owner-registered shops and the user's own shops always stay visible).
-      if (
-        !isAdmin &&
-        !hasApprovedShopPhoto(r) &&
-        !isGpipRegisteredRestaurant(r) &&
-        (!currentUser?.id || currentUser.id !== r.ownerId)
-      ) {
-        return false;
-      }
+      // Keep ALL approved shops visible to all users (shops without photos render DefaultShopIcon;
+      // shops with verified/Admin-uploaded photos are automatically sorted to the top via sortRestaurantsWithVipRotation).
       const idStr = String(r.id);
       if (seenIds.has(idStr)) return false;
       seenIds.add(idStr);
@@ -435,146 +426,83 @@ export const RestaurantView: React.FC = () => {
             </button>
           </div>
         </div>
-      ) : (
-      /* Banner for Restaurant Owners (Regular & VIP Users) */
-      <div className="p-4 rounded-3xl bg-gradient-to-br from-amber-600 via-amber-700 to-[#064E3B] text-white shadow-lg border-2 border-amber-300/70 space-y-3 font-khmer">
-        <div className="flex items-start justify-between gap-2.5">
-          <div className="space-y-1 flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <Store className="w-4 h-4 text-amber-200 shrink-0" />
-              <span className="font-black text-xs sm:text-sm text-white">
-                {myExistingRest
-                  ? tr(
-                      language,
-                      `ហាងរបស់ខ្ញុំ៖ ${myExistingRest.nameKh}`,
-                      `My Store: ${myExistingRest.nameEn || myExistingRest.nameKh}`,
-                      `我的店铺：${myExistingRest.nameEn || myExistingRest.nameKh}`
-                    )
-                  : tr(language, 'ចុះបញ្ជីហាងរបស់អ្នក', 'Register Your Restaurant', '注册您的餐厅')}
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-amber-300 text-slate-950 text-[9px] font-black">
-                {myExistingRest
-                  ? tr(
-                      language,
-                      myExistingRest.isVerified ? '✅ បានផ្ទៀងផ្ទាត់' : '⏳ រង់ចាំ Admin ពិនិត្យ',
-                      myExistingRest.isVerified ? '✅ Verified' : '⏳ Pending Admin Review',
-                      myExistingRest.isVerified ? '✅ 已认证' : '⏳ 待管理员审核'
-                    )
-                  : tr(language, 'ឥតគិតថ្លៃ ១ ហាងដំបូង', '1st Shop Free', '首店免费')}
-              </span>
-            </div>
-            <p className="text-[11px] text-amber-50 leading-relaxed font-medium">
-              {myExistingRest
-                ? tr(
-                    language,
-                    `${myExistingRest.addressKh} • ចុចប៊ូតុងខាងក្រោមដើម្បីគ្រប់គ្រងព័ត៌មានហាង រូបភាពហាង ១ សន្លឹក និងលីង Google Maps របស់ "${myExistingRest.nameKh}"។`,
-                    `${myExistingRest.addressEn || myExistingRest.addressKh} • Tap below to manage store info, shop photo & Google Maps link.`,
-                    `${myExistingRest.addressEn || myExistingRest.addressKh} • 点击下方按钮管理店铺信息、店铺照片与 Google Maps 链接。`
-                  )
-                : tr(
-                    language,
-                    'ដាក់បង្ហាញព័ត៌មានហាង រូបភាពហាង ១ សន្លឹក លីង Google Maps និងលេខទំនាក់ទំនងហាងរបស់អ្នក ដើម្បីឱ្យភ្ញៀវងាយស្រួលស្វែងរក។',
-                    'Share your store info, single shop photo, Google Maps link, and contact details so diners can easily find your restaurant.',
-                    '展示您的店铺信息、店铺照片、Google Maps 链接与联系方式，方便食客轻松找到您的餐厅。'
-                  )}
-            </p>
+      ) : myExistingRest ? (
+      <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-600 via-amber-700 to-[#064E3B] text-white shadow-md border border-amber-300/60 space-y-2.5 font-khmer">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Store className="w-4 h-4 text-amber-200 shrink-0" />
+            <span className="font-black text-xs text-white truncate">
+              {tr(
+                language,
+                `ហាងខ្ញុំ៖ ${myExistingRest.nameKh}`,
+                `My Store: ${myExistingRest.nameEn || myExistingRest.nameKh}`,
+                `我的店铺：${myExistingRest.nameEn || myExistingRest.nameKh}`
+              )}
+            </span>
           </div>
+          <span className="px-2 py-0.5 rounded-full bg-amber-300 text-slate-950 text-[9px] font-black shrink-0">
+            {tr(
+              language,
+              myExistingRest.isVerified ? '✅ បានផ្ទៀងផ្ទាត់' : '⏳ រង់ចាំពិនិត្យ',
+              myExistingRest.isVerified ? '✅ Verified' : '⏳ Pending',
+              myExistingRest.isVerified ? '✅ 已认证' : '⏳ 待审核'
+            )}
+          </span>
         </div>
 
-        {/* Multi-Shop Selector Pill Bar (when user has multiple shops) */}
         {myOwnedRestaurants.length > 1 && (
-          <div className="p-2.5 rounded-2xl bg-black/25 border border-white/20 space-y-1.5">
-            <div className="text-[10px] font-bold text-amber-200 flex items-center justify-between">
-              <span>
-                {tr(
-                  language,
-                  `ជ្រើសរើសហាងដែលអ្នកចង់គ្រប់គ្រង (${myOwnedRestaurants.length} ហាង)៖`,
-                  `Select shop to manage (${myOwnedRestaurants.length}):`,
-                  `选择要管理的店铺（共 ${myOwnedRestaurants.length} 家）：`
-                )}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-              {myOwnedRestaurants.map((shop) => {
-                const isSelected = myExistingRest?.id === shop.id;
-                return (
-                  <button
-                    key={shop.id}
-                    type="button"
-                    onClick={() => {
-                      setActiveManagedShopId(shop.id);
-                      openManageMyVipStore(shop.id);
-                    }}
-                    className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 shrink-0 transition cursor-pointer ${
-                      isSelected
-                        ? 'bg-amber-300 text-slate-950 shadow-sm ring-2 ring-white'
-                        : 'bg-white/15 text-white hover:bg-white/25'
-                    }`}
-                  >
-                    <img src={shop.photoUrl} alt={shop.nameKh} className="w-4 h-4 rounded-full object-cover shrink-0" />
-                    <span className="truncate max-w-[130px]">{isKm ? shop.nameKh : shop.nameEn || shop.nameKh}</span>
-                  </button>
-                );
-              })}
-            </div>
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+            {myOwnedRestaurants.map((shop) => {
+              const isSelected = myExistingRest?.id === shop.id;
+              return (
+                <button
+                  key={shop.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveManagedShopId(shop.id);
+                    openManageMyVipStore(shop.id);
+                  }}
+                  className={`px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1.5 shrink-0 transition cursor-pointer ${
+                    isSelected
+                      ? 'bg-amber-300 text-slate-950 shadow-sm ring-1 ring-white'
+                      : 'bg-white/15 text-white hover:bg-white/25'
+                  }`}
+                >
+                  <Store className="w-3 h-3 shrink-0" />
+                  <span className="truncate max-w-[130px]">{isKm ? shop.nameKh : shop.nameEn || shop.nameKh}</span>
+                </button>
+              );
+            })}
           </div>
         )}
 
-        <div className="relative rounded-2xl">
-          <div className="relative flex flex-col sm:flex-row gap-2">
-            <button
-              onClick={() => {
-                if (!currentUser) {
-                  setIsAuthModalOpen(true);
-                  return;
-                }
-                if (myExistingRest) {
-                  openManageMyVipStore(myExistingRest.id);
-                } else {
-                  setIsVipAddRestaurantModalOpen(true);
-                }
-              }}
-              className="flex-1 py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 text-xs sm:text-sm font-black border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
-            >
-              <Store className="w-4 h-4 text-slate-950 shrink-0" />
-              <span className="truncate">
-                {myExistingRest
-                  ? tr(
-                      language,
-                      `គ្រប់គ្រងហាងរបស់ខ្ញុំ (${myExistingRest.nameKh})`,
-                      `Manage My Store (${myExistingRest.nameEn || myExistingRest.nameKh})`,
-                      `管理我的店铺 (${myExistingRest.nameEn || myExistingRest.nameKh})`
-                    )
-                  : tr(
-                      language,
-                      '+ ចុះបញ្ជីហាងរបស់អ្នក',
-                      '+ Register Your Restaurant',
-                      '+ 注册您的餐厅'
-                    )}
-              </span>
-            </button>
-
-            {myExistingRest && (
-              <button
-                type="button"
-                onClick={() => {
-                  (window as any).__kft_vip_store_initial_mode = { mode: 'create' };
-                  setIsVipAddRestaurantModalOpen(true);
-                }}
-                className="py-3 px-3.5 rounded-xl bg-emerald-900/90 hover:bg-emerald-800 text-amber-200 border border-amber-300/60 text-xs font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer shrink-0"
-              >
-                <Plus className="w-4 h-4" />
-                <span>
-                  {storeQuota.canAddWithoutNewPayment
-                    ? tr(language, 'បន្ថែមហាងថ្មី', 'Add Restaurant', '添加新餐厅')
-                    : tr(language, `បន្ថែមហាងថ្មី (+${storeQuota.additionalStoreFeeUsd.toFixed(2)})`, `Add Store (+${storeQuota.additionalStoreFeeUsd.toFixed(2)})`, `添加新店铺 (+${storeQuota.additionalStoreFeeUsd.toFixed(2)})`)}
-                </span>
-              </button>
-            )}
-          </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => openManageMyVipStore(myExistingRest.id)}
+            className="flex-1 py-2 px-3 rounded-xl bg-amber-300 hover:bg-amber-400 text-slate-950 text-xs font-black flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+          >
+            <Edit2 className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{tr(language, 'កែព័ត៌មានហាង', 'Edit Store', '编辑店铺')}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              (window as any).__kft_vip_store_initial_mode = { mode: 'create' };
+              setIsVipAddRestaurantModalOpen(true);
+            }}
+            className="py-2 px-3 rounded-xl bg-emerald-900/90 hover:bg-emerald-800 text-amber-200 border border-amber-300/60 text-xs font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>
+              {storeQuota.canAddWithoutNewPayment
+                ? tr(language, 'បន្ថែមហាង', 'Add Shop', '添加新店')
+                : tr(language, `+ហាង ($${storeQuota.additionalStoreFeeUsd.toFixed(0)})`, `+Shop ($${storeQuota.additionalStoreFeeUsd.toFixed(0)})`, `+新店 ($${storeQuota.additionalStoreFeeUsd.toFixed(0)})`)}
+            </span>
+          </button>
         </div>
       </div>
-      )}
+      ) : null}
 
       {/* Restaurant Category Filter Pills */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 font-khmer">

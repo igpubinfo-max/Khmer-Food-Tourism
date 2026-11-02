@@ -75,7 +75,7 @@ export const PaymentSupportModal: React.FC = () => {
 
   useEffect(() => {
     if (isSupportTicketModalOpen && currentUser) {
-      refreshAppSettingsFromServer(true);
+      refreshAppSettingsFromServer?.(true);
       if (supportModalPrefill?.planType) {
         setSelectedPlan(supportModalPrefill.planType);
       }
@@ -252,7 +252,7 @@ export const PaymentSupportModal: React.FC = () => {
       return;
     }
 
-    const latestSettings = await refreshAppSettingsFromServer(true);
+    const latestSettings = (await refreshAppSettingsFromServer?.(true)) || appSettings;
     const livePlans = getDynamicVipPlans(latestSettings);
     const livePlanCfg = livePlans[selectedPlan];
 

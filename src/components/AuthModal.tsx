@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  X, Mail, User, Store, Shield, Sparkles, Crown,
+  X, Mail, User, Store, Sparkles, Crown,
   ArrowRight, ShieldCheck, Loader2, LogOut, CheckCircle2
 } from 'lucide-react';
 import { UserRole, hasAuthenticatedEmailAccount } from '../types';
@@ -19,7 +19,6 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
     language, 
     currentUser, 
     isAdminLoginModalOpen,
-    setIsAdminLoginModalOpen,
     showToast 
   } = useApp();
 
@@ -187,7 +186,14 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
   // Handle Email Login
   const handleEmailLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!loginEmail.trim() || !hasAuthenticatedEmailAccount({ email: loginEmail })) {
+    const rawLogin = loginEmail.trim().toLowerCase();
+    const isPrivateAdminId =
+      rawLogin === 'admin' ||
+      rawLogin === 'cheasavuth' ||
+      rawLogin === 'chea savuth' ||
+      rawLogin === 'admin@khmerfoodtourism.com';
+
+    if (!rawLogin || (!isPrivateAdminId && !hasAuthenticatedEmailAccount({ email: loginEmail }))) {
       showToast(
         isKm
           ? 'សូមវាយបញ្ចូលអាសយដ្ឋានអ៊ីមែលរបស់អ្នកឱ្យបានត្រឹមត្រូវ (ឧ. name@gmail.com)'
@@ -201,7 +207,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
 
     setIsSubmitting(true);
     try {
-      const success = login(loginEmail.trim().toLowerCase());
+      const success = login(rawLogin);
       if (success) {
         showToast(isKm ? 'ចូលគណនីបានជោគជ័យ!' : 'Signed in successfully!', 'success');
       }
@@ -620,7 +626,10 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                     <div className="relative flex items-center">
                       <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" />
                       <input
-                        type="email"
+                        type="text"
+                        inputMode="email"
+                        autoCapitalize="none"
+                        autoCorrect="off"
                         required
                         value={loginEmail}
                         onChange={(e) => setLoginEmail(e.target.value)}
@@ -649,44 +658,24 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
             </div>
           )}
 
-          {/* Mandatory Exit Application Button if user refuses to create account */}
-          <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-center font-khmer space-y-1">
-            <button
-              type="button"
-              onClick={exitAppNow}
-              className="w-full py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-600 dark:text-rose-400 text-xs font-bold transition flex items-center justify-center gap-2 border border-rose-200 dark:border-rose-900/50 shadow-2xs"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>{language === 'km' ? 'ចាកចេញពីកម្មវិធី' : language === 'zh' ? '退出应用' : 'Exit Application'}</span>
-            </button>
-            <p className="text-[10px] text-slate-400">
-              {isKm 
-                ? 'សូមចូលគណនីដើម្បីរក្សាទុកចំណូលចិត្ត និងបន្តប្រើប្រាស់កម្មវិធី។' 
-                : 'Please sign in to save your preferences and continue exploring.'}
-            </p>
-          </div>
-
-          {/* Admin Login Portal Shortcut */}
-          <div className="pt-0.5 text-center font-khmer">
-            <button
-              type="button"
-              onClick={() => {
-                setIsAuthModalOpen(false);
-                setIsAdminLoginModalOpen(true);
-              }}
-              style={{
-                WebkitTapHighlightColor: 'transparent',
-                backgroundColor: 'transparent',
-                boxShadow: 'none',
-                outline: 'none',
-                border: 'none',
-              }}
-              className="text-[10px] text-slate-400 active:text-slate-400 focus:text-slate-400 bg-transparent active:bg-transparent focus:bg-transparent hover:bg-transparent shadow-none active:shadow-none focus:shadow-none outline-none focus:outline-none focus:ring-0 border-0 flex items-center justify-center gap-1 mx-auto select-none cursor-pointer"
-            >
-              <Shield className="w-3 h-3 shrink-0" />
-              <span>{language === 'km' ? 'ចូលគណនីអ្នកគ្រប់គ្រង' : language === 'zh' ? '管理员入口' : 'Administrator Login'}</span>
-            </button>
-          </div>
+          {/* Mandatory Exit Application Button only when AuthModal acts as mandatory startup gate */}
+          {isMandatoryGate && (
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-center font-khmer space-y-1">
+              <button
+                type="button"
+                onClick={exitAppNow}
+                className="w-full py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-600 dark:text-rose-400 text-xs font-bold transition flex items-center justify-center gap-2 border border-rose-200 dark:border-rose-900/50 shadow-2xs"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>{language === 'km' ? 'ចាកចេញពីកម្មវិធី' : language === 'zh' ? '退出应用' : 'Exit Application'}</span>
+              </button>
+              <p className="text-[10px] text-slate-400">
+                {isKm 
+                  ? 'សូមចូលគណនីដើម្បីរក្សាទុកចំណូលចិត្ត និងបន្តប្រើប្រាស់កម្មវិធី។' 
+                  : 'Please sign in to save your preferences and continue exploring.'}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

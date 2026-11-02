@@ -25,7 +25,8 @@ import { PopularDestinations } from './home/PopularDestinations';
 import { VipPerksCard } from './home/VipPerksCard';
 import { VipStatusNotice } from './home/VipStatusNotice';
 import { MyShopPanel } from './home/MyShopPanel';
-import { getMealSlot, getMealHint, MEAL_CATEGORIES, seededShuffle } from './home/homeUtils';
+import { getMealSlot, getMealHint, seededShuffle, type MealSlot } from './home/homeUtils';
+import { getAuthenticCambodianDishesForMealTime } from '../utils/cambodianMealHabits';
 import {
   ChevronRight, Utensils, Store, Compass,
   MapPin, ShieldCheck,
@@ -234,13 +235,28 @@ export const HomeView: React.FC = () => {
   }, [setSelectedTrendingFood, setIsTrendingFoodDetailModalOpen]);
 
   const mealSlot = useMemo(() => getMealSlot(), []);
+  const [selectedMealSlot, setSelectedMealSlot] = useState<MealSlot>(() => getMealSlot());
+  const [mealShuffleCount, setMealShuffleCount] = useState(0);
+
+  const handleSelectMealSlot = useCallback((slot: MealSlot) => {
+    setSelectedMealSlot(slot);
+    setMealShuffleCount(0);
+  }, []);
+
+  const handleShuffleMealDishes = useCallback(() => {
+    setMealShuffleCount((c) => c + 1);
+  }, []);
+
   const forYouFoods = useMemo(() => {
-    const withPhoto = foods.filter((f) => f && f.id && f.photoUrl);
-    const preferred = MEAL_CATEGORIES[mealSlot];
-    const matching = withPhoto.filter((f) => preferred.includes(f.categorySlug));
-    const pool = matching.length >= 3 ? matching : withPhoto;
-    return seededShuffle(pool, todaySeed * 4 + ['breakfast', 'lunch', 'snack', 'dinner'].indexOf(mealSlot)).slice(0, 3);
-  }, [foods, mealSlot, todaySeed]);
+    const authenticPool = getAuthenticCambodianDishesForMealTime(foods, selectedMealSlot);
+    if (authenticPool.length === 0) return [];
+    const slotIdx = ['breakfast', 'lunch', 'snack', 'dinner'].indexOf(selectedMealSlot);
+    const ordered = seededShuffle(authenticPool, todaySeed * 4 + slotIdx);
+    if (ordered.length <= 3) return ordered;
+    const offset = (mealShuffleCount * 3) % ordered.length;
+    const rotated = [...ordered.slice(offset), ...ordered.slice(0, offset)];
+    return rotated.slice(0, 3);
+  }, [foods, selectedMealSlot, todaySeed, mealShuffleCount]);
 
   const vipDaysLeft = isVip && currentUser ? getVipRemainingDays(currentUser) : 0;
   const vipNoticeKind: 'expiring' | 'expired' | null =
@@ -1104,8 +1120,10 @@ export const HomeView: React.FC = () => {
               {/* 2. Personalized picks for the current time of day */}
               <ForYouSection
                 language={language}
-                slot={mealSlot}
+                slot={selectedMealSlot}
                 foods={forYouFoods}
+                onSelectSlot={handleSelectMealSlot}
+                onShuffle={handleShuffleMealDishes}
                 onOpenFood={setSelectedFood}
                 onSeeAll={handleSeeAllFoods}
               />

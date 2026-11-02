@@ -71,6 +71,7 @@ import {
   pairingKindsLabel,
   type DrinkKindFilter,
 } from '../utils/drinkPairing';
+import { isAuthenticCambodianDishForMealTime } from '../utils/cambodianMealHabits';
 
 type MealSlotFilter = 'auto' | 'breakfast' | 'lunch' | 'afternoon' | 'dinner';
 type VipDietFilter = 'none' | 'light' | 'protein_rich' | 'steamed_boiled' | 'vegetable_rich';
@@ -222,34 +223,11 @@ function matchesCategoryStrict(food: FoodItem, categoryFilter: string): boolean 
 
 function matchesMealSlotStrict(
   food: FoodItem,
-  mealSlotFilter: MealSlotFilter,
+  _mealSlotFilter: MealSlotFilter,
   effectiveMealSlot: Exclude<MealSlotFilter, 'auto'>
 ): boolean {
-  if (mealSlotFilter === 'auto') return true;
-  const text = `${food.nameKh || ''} ${food.nameEn || ''} ${food.categorySlug || ''}`.toLowerCase();
-  if (effectiveMealSlot === 'breakfast') {
-    return (
-      food.categorySlug === 'noodles' ||
-      food.categorySlug === 'rice' ||
-      /គុយទាវ|នំបញ្ចុក|បបរ|បាយសាច់ជ្រូក|បាយមាន់|បាយឆា|មី|ហ្វឺ|លត|កាហ្វេ|នំប៉័ង|kuy\s*teav|banh\s*chok|porridge|congee|pork\s*rice|chicken\s*rice|noodle/i.test(
-        text
-      )
-    );
-  }
-  if (effectiveMealSlot === 'afternoon') {
-    return (
-      food.categorySlug === 'dessert' ||
-      food.categorySlug === 'salad' ||
-      food.categorySlug === 'grilled' ||
-      /បង្អែម|នំ|ភ្លា|ញាំ|បុក|អាំង|បំពង|ចៀន|លតឆា|មីឆា|ប្រហិត|ក្រឡាន|អន្សម|dessert|salad|grilled|street|snack/i.test(
-        text
-      )
-    );
-  }
-  if (effectiveMealSlot === 'lunch' || effectiveMealSlot === 'dinner') {
-    return food.categorySlug !== 'dessert' && food.categorySlug !== 'cake';
-  }
-  return true;
+  const slot = effectiveMealSlot === 'afternoon' ? 'snack' : effectiveMealSlot;
+  return isAuthenticCambodianDishForMealTime(food, slot);
 }
 
 function matchesDietStrict(food: FoodItem, vipDietFilter: VipDietFilter): boolean {
@@ -753,8 +731,12 @@ export const WhatToEatModal: React.FC = () => {
     }
 
     setTimeout(() => {
-      chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, 60);
+      if (scrollerRef.current) {
+        scrollerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
   };
 
   const handleCravingSubmit = (e?: React.FormEvent) => {
@@ -1068,6 +1050,483 @@ export const WhatToEatModal: React.FC = () => {
               </button>
             </form>
 
+            {/* AI Answer Display — Rendered DIRECTLY below the AI input bar so users read top-down naturally */}
+            {!drinkMode && chatMessages.length > 0 && (() => {
+              const hasActiveAnswer = chatMessages.length > 1;
+              const welcomeMsg = chatMessages[0];
+              const latestTurn = hasActiveAnswer ? chatMessages.slice(-2) : [];
+              const earlierTurns = chatMessages.length > 3 ? chatMessages.slice(1, -2) : [];
+
+              const renderMessageNode = (msg: AiAssistantMessage) => {
+                if (msg.role === 'user') {
+                  return (
+                    <div key={msg.id} className="flex justify-end">
+                      <div className="max-w-[85%] px-3 py-2 rounded-2xl rounded-tr-xs bg-[#064E3B] text-white text-xs font-bold leading-relaxed shadow-2xs">
+                        {msg.text}
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={msg.id} className="space-y-2">
+                    <div
+                      className={`p-3 rounded-2xl rounded-tl-xs border text-xs leading-relaxed whitespace-pre-line ${
+                        msg.isScopeRefusal
+                          ? 'bg-amber-50/90 dark:bg-slate-800 border-amber-300 dark:border-amber-600/60 text-slate-800 dark:text-slate-100 font-semibold'
+                          : 'bg-white dark:bg-slate-800 border-emerald-200/80 dark:border-slate-700 text-slate-800 dark:text-slate-100'
+                      }`}
+                    >
+                      {msg.text}
+
+                      {msg.vegetarianNote && (
+                        <div className="mt-2.5 p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-[11px] text-emerald-950 dark:text-emerald-200 leading-relaxed">
+                          {msg.vegetarianNote}
+                        </div>
+                      )}
+
+                      {msg.dishes && msg.dishes.length > 0 && !msg.recipePreview && (
+                        <div className="mt-2.5 pt-2.5 border-t border-slate-200 dark:border-slate-700 space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
+                              <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                              <span>
+                                {tr(
+                                  language,
+                                  'មុខម្ហូបណែនាំលម្អិតពី AI៖',
+                                  'AI Recommended Dishes:',
+                                  'AI 推荐菜品详情：'
+                                )}
+                              </span>
+                            </div>
+                            {msg.dishes.length >= 2 && (
+                              <button
+                                type="button"
+                                onClick={() => handleCycleCompareDishes(activeDishList.length >= 3 ? activeDishList : msg.dishes)}
+                                className="px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-[10px] font-extrabold text-amber-900 dark:text-amber-200 hover:bg-amber-200 transition cursor-pointer"
+                              >
+                                ⚖️ {tr(language, 'ប្រៀបធៀបទាំងអស់', 'Compare All', '一键对比')}
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="space-y-2">
+                            {msg.dishes.slice(0, 3).map((dish) => {
+                              const dLoc = getLocalizedFood(dish, language);
+                              const tasteProfile = describeDish(dish, language);
+                              const isCompared = comparedDishIds.includes(dish.id);
+                              const topIngs = (dish.ingredients || []).slice(0, 3).map((ing, idx) =>
+                                language === 'km'
+                                  ? ing.nameKh
+                                  : language === 'zh'
+                                    ? dLoc.ingredients?.[idx] || ing.nameEn || ing.nameKh
+                                    : ing.nameEn || ing.nameKh
+                              );
+                              const methodStep = (dish.steps || [])[0];
+                              const methodSummary = methodStep
+                                ? language === 'km'
+                                  ? methodStep.instructionKh
+                                  : language === 'zh'
+                                    ? dLoc.steps?.[0] || methodStep.instructionEn || methodStep.instructionKh
+                                    : methodStep.instructionEn || methodStep.instructionKh
+                                : '';
+
+                              return (
+                                <div
+                                  key={dish.id}
+                                  data-testid={`ai-chat-dish-card-${dish.id}`}
+                                  className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900/75 border border-slate-200/90 dark:border-slate-700 space-y-2"
+                                >
+                                  <div className="flex items-start gap-2.5">
+                                    <img
+                                      src={resolveFoodPhotoUrl(dish.photoUrl, dish.photoUpdatedAt)}
+                                      alt={dLoc.name}
+                                      loading="lazy"
+                                      decoding="async"
+                                      className="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-200 border border-slate-200 dark:border-slate-700"
+                                    />
+                                    <div className="min-w-0 flex-1 space-y-0.5">
+                                      <div className="flex items-center justify-between gap-1">
+                                        <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                                          {dLoc.name}
+                                        </span>
+                                        <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 shrink-0">
+                                          ⭐ {dish.rating}
+                                        </span>
+                                      </div>
+                                      <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
+                                        {dLoc.category} • ⏱️ {dLoc.cookTime} • {dish.calories || 280} kcal
+                                      </div>
+                                      <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100/80 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 text-[10px] font-bold">
+                                        <span>✨ {tr(language, 'រសជាតិ៖', 'Taste:', '风味：')} {tasteProfile}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug line-clamp-2">
+                                    {dLoc.description}
+                                  </p>
+
+                                  {topIngs.length > 0 && (
+                                    <div className="text-[10px] text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/90 px-2 py-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/70">
+                                      <span className="font-extrabold text-[#064E3B] dark:text-emerald-300">
+                                        🥗 {tr(language, 'គ្រឿងផ្សំ៖ ', 'Ingredients: ', '主要食材：')}
+                                      </span>
+                                      <span>{topIngs.join(' • ')}</span>
+                                    </div>
+                                  )}
+
+                                  {methodSummary && (
+                                    <div className="text-[10px] text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/90 px-2 py-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/70 line-clamp-2">
+                                      <span className="font-extrabold text-[#064E3B] dark:text-emerald-300">
+                                        👩‍🍳 {tr(language, 'របៀបចម្អិន៖ ', 'Cooking Method: ', '烹饪方法：')}
+                                      </span>
+                                      <span>{methodSummary}</span>
+                                    </div>
+                                  )}
+
+                                  <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setSelectedFood(dish);
+                                        setIsWhatToEatModalOpen(false);
+                                      }}
+                                      className="py-1.5 px-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer"
+                                    >
+                                      <ChefHat className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                                      <span className="truncate">{tr(language, 'មើលលម្អិតពេញ', 'Full Details', '查看完整详情')}</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleCompareDish(dish.id)}
+                                      className={`py-1.5 px-2.5 rounded-xl border text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer transition ${
+                                        isCompared
+                                          ? 'bg-amber-400 text-slate-950 border-amber-500'
+                                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600 hover:border-emerald-500'
+                                      }`}
+                                    >
+                                      <span>
+                                        {isCompared
+                                          ? `✓ ${tr(language, 'កំពុងប្រៀបធៀប', 'Comparing', '已加入对比')}`
+                                          : `⚖️ ${tr(language, 'ប្រៀបធៀប', 'Compare', '加入对比')}`}
+                                      </span>
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {msg.similarDishes && msg.similarDishes.length > 0 && (
+                        <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
+                          <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
+                            <Shuffle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span>
+                              {tr(
+                                language,
+                                'មុខម្ហូបស្រដៀងគ្នា៖',
+                                'Similar Dishes:',
+                                '相似菜品推荐：'
+                              )}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {msg.similarDishes.slice(0, 4).map((sim) => {
+                              const sLoc = getLocalizedFood(sim, language);
+                              return (
+                                <button
+                                  key={sim.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedFood(sim);
+                                    setIsWhatToEatModalOpen(false);
+                                  }}
+                                  className="p-1.5 rounded-xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 flex items-center gap-2 text-left transition cursor-pointer"
+                                >
+                                  <img
+                                    src={resolveFoodPhotoUrl(sim.photoUrl, sim.photoUpdatedAt)}
+                                    alt={sLoc.name}
+                                    loading="lazy"
+                                    decoding="async"
+                                    className="w-9 h-9 rounded-lg object-cover shrink-0 bg-slate-200"
+                                  />
+                                  <div className="min-w-0 flex-1">
+                                    <div className="text-[11px] font-bold text-slate-900 dark:text-white truncate">
+                                      {sLoc.name}
+                                    </div>
+                                    <div className="text-[9px] text-emerald-700 dark:text-emerald-400 font-semibold truncate">
+                                      ⭐ {sim.rating} • {sLoc.category}
+                                    </div>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {msg.recipePreview && (
+                        <div className="mt-2.5 pt-2.5 border-t border-slate-200 dark:border-slate-700 space-y-2">
+                          <div className="font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
+                            <ChefHat className="w-3.5 h-3.5 shrink-0" />
+                            <span>{tr(language, 'គ្រឿងផ្សំសំខាន់ៗ៖', 'Key Ingredients:', '主要食材：')}</span>
+                          </div>
+                          <ul className="grid grid-cols-1 gap-1 text-[11px] text-slate-700 dark:text-slate-300">
+                            {msg.recipePreview.ingredients.map((ing, idx) => (
+                              <li key={idx} className="flex items-center justify-between gap-2 bg-slate-50 dark:bg-slate-900/60 px-2 py-1 rounded-lg">
+                                <span className="font-bold">• {ing.name}</span>
+                                <span className="text-emerald-700 dark:text-emerald-400 font-semibold shrink-0">{ing.amount}</span>
+                              </li>
+                            ))}
+                          </ul>
+
+                          <div className="font-extrabold text-[#064E3B] dark:text-emerald-300 pt-1">
+                            {tr(language, 'របៀបធ្វើ៖', 'Cooking Steps:', '制作步骤：')}
+                          </div>
+                          <ol className="space-y-1 text-[11px] text-slate-700 dark:text-slate-300">
+                            {msg.recipePreview.steps.map((st) => (
+                              <li key={st.stepNumber} className="leading-snug">
+                                <span className="font-black text-emerald-700 dark:text-emerald-400 mr-1">{st.stepNumber}.</span>
+                                {st.instruction}
+                              </li>
+                            ))}
+                          </ol>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (msg.recipePreview?.food) {
+                                setSelectedFood(msg.recipePreview.food);
+                                setIsWhatToEatModalOpen(false);
+                              }
+                            }}
+                            className="w-full mt-1 py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                          >
+                            <ChefHat className="w-3.5 h-3.5 text-amber-300" />
+                            <span>{tr(language, 'បើកមើលរូបមន្តពេញលេញ', 'Open Full Recipe Card', '打开完整食谱详情')}</span>
+                          </button>
+                        </div>
+                      )}
+
+                      {msg.destinations && msg.destinations.length > 0 && (
+                        <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
+                          <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
+                            <Compass className="w-3.5 h-3.5 shrink-0" />
+                            <span>{tr(language, 'តំបន់ទេសចរណ៍ណែនាំ៖', 'Recommended Attractions:', '推荐旅游景点：')}</span>
+                          </div>
+                          <div className="grid grid-cols-1 gap-1.5">
+                            {msg.destinations.map((dest) => {
+                              const dLoc = getLocalizedDestination(dest, language);
+                              return (
+                                <button
+                                  key={dest.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedDestination(dest);
+                                    setIsWhatToEatModalOpen(false);
+                                  }}
+                                  className="w-full p-2 rounded-xl bg-emerald-50/70 dark:bg-slate-900/70 border border-emerald-200/80 dark:border-slate-700 hover:border-emerald-500 flex items-center gap-2.5 text-left transition cursor-pointer"
+                                >
+                                  <img
+                                    src={dest.photoUrl}
+                                    alt={dLoc.name}
+                                    loading="lazy"
+                                    decoding="async"
+                                    className="w-11 h-11 rounded-lg object-cover shrink-0 bg-slate-200"
+                                  />
+                                  <div className="min-w-0 flex-1">
+                                    <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">{dLoc.name}</div>
+                                    <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold truncate">
+                                      📍 {dLoc.province} • ⭐ {dest.rating}
+                                    </div>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {msg.restaurants && msg.restaurants.length > 0 && (
+                        <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
+                          <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
+                            <Store className="w-3.5 h-3.5 shrink-0" />
+                            <span>{tr(language, 'ភោជនីយដ្ឋានណែនាំ និងទីតាំង៖', 'Recommended Restaurants & Locations:', '推荐餐厅与位置导航：')}</span>
+                          </div>
+                          <div className="space-y-1.5">
+                            {msg.restaurants.map((r) => {
+                              const rLoc = getLocalizedRestaurant(r, language);
+                              return (
+                                <div
+                                  key={r.id}
+                                  className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 flex items-center gap-2"
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedRestaurant(r);
+                                      setIsWhatToEatModalOpen(false);
+                                    }}
+                                    className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
+                                  >
+                                    <ShopAvatar
+                                      restaurant={r}
+                                      alt={rLoc.name}
+                                      className="w-9 h-9 rounded-lg shrink-0"
+                                    />
+                                    <div className="min-w-0 flex-1">
+                                      <div className="text-xs font-bold text-slate-900 dark:text-white truncate">{rLoc.name}</div>
+                                      <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                                        📍 {rLoc.address || rLoc.province}
+                                      </div>
+                                    </div>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => openRestaurantGoogleExternal(r, 'maps')}
+                                    className="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold inline-flex items-center gap-1 shrink-0 cursor-pointer"
+                                  >
+                                    <Navigation className="w-3 h-3" />
+                                    <span>{tr(language, 'ផ្លូវទៅហាង', 'Maps', '导航')}</span>
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {msg.restaurantUnavailableNote && (
+                        <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
+                          <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                            {msg.restaurantUnavailableNote}
+                          </p>
+                          {msg.googleMapsSearchQuery && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                                  msg.googleMapsSearchQuery!
+                                )}`;
+                                window.open(url, '_blank', 'noopener,noreferrer');
+                              }}
+                              className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                            >
+                              <Navigation className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                              <span>
+                                {tr(
+                                  language,
+                                  'ស្វែងរកហាង និងទីតាំងផ្ទាល់លើ Google Maps',
+                                  'Find Restaurants & Navigate on Google Maps',
+                                  '在 Google 地图上搜索餐厅并导航'
+                                )}
+                              </span>
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {msg.followUpChips && msg.followUpChips.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {msg.followUpChips.map((chip) => (
+                          <button
+                            key={chip.id}
+                            type="button"
+                            onClick={() => {
+                              setCravingQuery(chip.query);
+                              sendConversationalMessage(chip.query);
+                            }}
+                            className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 border border-emerald-300/80 dark:border-slate-600 text-[11px] font-bold text-[#064E3B] dark:text-emerald-300 hover:bg-emerald-50 transition cursor-pointer active:scale-95"
+                          >
+                            {chip.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              };
+
+              if (!hasActiveAnswer) {
+                return (
+                  <div id="kft-wte-chat-thread" className="space-y-1.5">
+                    {welcomeMsg?.followUpChips && welcomeMsg.followUpChips.length > 0 && (
+                      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                        {welcomeMsg.followUpChips.map((chip) => (
+                          <button
+                            key={chip.id}
+                            type="button"
+                            onClick={() => {
+                              setCravingQuery(chip.query);
+                              sendConversationalMessage(chip.query);
+                            }}
+                            className="px-2.5 py-1 rounded-full bg-slate-50 dark:bg-slate-800 border border-emerald-200 dark:border-slate-700 text-[11px] font-bold text-[#064E3B] dark:text-emerald-300 whitespace-nowrap hover:bg-emerald-50 transition cursor-pointer active:scale-95"
+                          >
+                            {chip.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              return (
+                <div
+                  id="kft-wte-chat-thread"
+                  ref={chatEndRef}
+                  className="rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-emerald-200/80 dark:border-slate-700 p-3 space-y-2.5 font-khmer"
+                >
+                  <div className="flex items-center justify-between gap-2 pb-1 border-b border-slate-200/70 dark:border-slate-700">
+                    <div className="flex items-center gap-1.5 text-xs font-extrabold text-[#064E3B] dark:text-emerald-300">
+                      <Bot className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>
+                        {tr(
+                          language,
+                          'ចម្លើយពីជំនួយការ AI',
+                          'AI Assistant Answer',
+                          'AI 助手回答'
+                        )}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleResetChat}
+                      className="px-2 py-0.5 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-[10px] font-bold text-slate-600 dark:text-slate-300 inline-flex items-center gap-1 hover:text-emerald-600 cursor-pointer"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>{tr(language, 'សម្អាតចម្លើយ', 'Clear', '清空')}</span>
+                    </button>
+                  </div>
+
+                  {/* Latest Q&A turn appears directly below AI input bar (no nested scrollbar) */}
+                  <div className="space-y-2.5">
+                    {latestTurn.map((msg) => renderMessageNode(msg))}
+                  </div>
+
+                  {earlierTurns.length > 0 && (
+                    <details className="pt-1.5 border-t border-slate-200/70 dark:border-slate-700">
+                      <summary className="text-[11px] font-bold text-slate-500 dark:text-slate-400 cursor-pointer select-none">
+                        {tr(
+                          language,
+                          `មើលសំណួរ និងចម្លើយមុនៗ (${Math.ceil(earlierTurns.length / 2)})`,
+                          `Earlier answers (${Math.ceil(earlierTurns.length / 2)})`,
+                          `查看之前的回答 (${Math.ceil(earlierTurns.length / 2)})`
+                        )}
+                      </summary>
+                      <div className="mt-2 space-y-2.5">
+                        {earlierTurns.map((msg) => renderMessageNode(msg))}
+                      </div>
+                    </details>
+                  )}
+                </div>
+              );
+            })()}
+
             {/* ★ Special menu (VIP): ម្ហូបអមភេសជ្ជៈ — AI auto-curated Beverage Pairings */}
             <button
               type="button"
@@ -1260,440 +1719,6 @@ export const WhatToEatModal: React.FC = () => {
 
           {/* Content body */}
           <div ref={dishCardRef} className="p-4 space-y-3">
-            {/* Multi-Turn Conversational AI Assistant Thread */}
-            {!drinkMode && chatMessages.length > 0 && (
-              <div
-                id="kft-wte-chat-thread"
-                className="rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-emerald-200/80 dark:border-slate-700 p-3 space-y-2.5 font-khmer"
-              >
-                <div className="flex items-center justify-between gap-2 pb-1 border-b border-slate-200/70 dark:border-slate-700">
-                  <div className="flex items-center gap-1.5 text-xs font-extrabold text-[#064E3B] dark:text-emerald-300">
-                    <Bot className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>
-                      {tr(
-                        language,
-                        'សន្ទនាជាមួយជំនួយការ AI (ម្ហូប & ទេសចរណ៍)',
-                        'Conversational AI (Food & Tourism)',
-                        'AI 智能对话（美食与旅游）'
-                      )}
-                    </span>
-                  </div>
-                  {chatMessages.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={handleResetChat}
-                      className="px-2 py-0.5 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-[10px] font-bold text-slate-600 dark:text-slate-300 inline-flex items-center gap-1 hover:text-emerald-600 cursor-pointer"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                      <span>{tr(language, 'សន្ទនាថ្មី', 'Reset', '新对话')}</span>
-                    </button>
-                  )}
-                </div>
-
-                <div className="space-y-2.5 max-h-[30rem] overflow-y-auto pr-0.5">
-                  {chatMessages.map((msg) => {
-                    if (msg.role === 'user') {
-                      return (
-                        <div key={msg.id} className="flex justify-end">
-                          <div className="max-w-[85%] px-3 py-2 rounded-2xl rounded-tr-xs bg-[#064E3B] text-white text-xs font-bold leading-relaxed shadow-2xs">
-                            {msg.text}
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <div key={msg.id} className="space-y-2">
-                        <div
-                          className={`p-3 rounded-2xl rounded-tl-xs border text-xs leading-relaxed whitespace-pre-line ${
-                            msg.isScopeRefusal
-                              ? 'bg-amber-50/90 dark:bg-slate-800 border-amber-300 dark:border-amber-600/60 text-slate-800 dark:text-slate-100 font-semibold'
-                              : 'bg-white dark:bg-slate-800 border-emerald-200/80 dark:border-slate-700 text-slate-800 dark:text-slate-100'
-                          }`}
-                        >
-                          {msg.text}
-
-                          {/* Vegetarian / Plant-Based Culinary Guidance Banner */}
-                          {msg.vegetarianNote && (
-                            <div className="mt-2.5 p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-[11px] text-emerald-950 dark:text-emerald-200 leading-relaxed">
-                              {msg.vegetarianNote}
-                            </div>
-                          )}
-
-                          {/* Detailed Matching Dishes from Database (Photo, Description, Taste Profile, Ingredients, Cooking Method, Explore/Compare) */}
-                          {msg.dishes && msg.dishes.length > 0 && !msg.recipePreview && (
-                            <div className="mt-2.5 pt-2.5 border-t border-slate-200 dark:border-slate-700 space-y-2">
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
-                                  <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                                  <span>
-                                    {tr(
-                                      language,
-                                      'មុខម្ហូបណែនាំលម្អិតពីទិន្នន័យកម្មវិធី៖',
-                                      'Matching Dishes & Culinary Details:',
-                                      '数据库匹配菜品与详细风味做法：'
-                                    )}
-                                  </span>
-                                </div>
-                                {msg.dishes.length >= 2 && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleCycleCompareDishes( activeDishList.length >= 3 ? activeDishList : msg.dishes)}
-                                    className="px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-[10px] font-extrabold text-amber-900 dark:text-amber-200 hover:bg-amber-200 transition cursor-pointer"
-                                  >
-                                    ⚖️ {tr(language, 'ប្រៀបធៀបទាំងអស់', 'Compare All', '一键对比')}
-                                  </button>
-                                )}
-                              </div>
-
-                              <div className="space-y-2">
-                                {msg.dishes.slice(0, 3).map((dish) => {
-                                  const dLoc = getLocalizedFood(dish, language);
-                                  const tasteProfile = describeDish(dish, language);
-                                  const isCompared = comparedDishIds.includes(dish.id);
-                                  const topIngs = (dish.ingredients || []).slice(0, 3).map((ing, idx) =>
-                                    language === 'km'
-                                      ? ing.nameKh
-                                      : language === 'zh'
-                                        ? dLoc.ingredients?.[idx] || ing.nameEn || ing.nameKh
-                                        : ing.nameEn || ing.nameKh
-                                  );
-                                  const methodStep = (dish.steps || [])[0];
-                                  const methodSummary = methodStep
-                                    ? language === 'km'
-                                      ? methodStep.instructionKh
-                                      : language === 'zh'
-                                        ? dLoc.steps?.[0] || methodStep.instructionEn || methodStep.instructionKh
-                                        : methodStep.instructionEn || methodStep.instructionKh
-                                    : '';
-
-                                  return (
-                                    <div
-                                      key={dish.id}
-                                      data-testid={`ai-chat-dish-card-${dish.id}`}
-                                      className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900/75 border border-slate-200/90 dark:border-slate-700 space-y-2"
-                                    >
-                                      <div className="flex items-start gap-2.5">
-                                        <img
-                                          src={resolveFoodPhotoUrl(dish.photoUrl, dish.photoUpdatedAt)}
-                                          alt={dLoc.name}
-                                          loading="lazy"
-                                          className="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-200 border border-slate-200 dark:border-slate-700"
-                                        />
-                                        <div className="min-w-0 flex-1 space-y-0.5">
-                                          <div className="flex items-center justify-between gap-1">
-                                            <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
-                                              {dLoc.name}
-                                            </span>
-                                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 shrink-0">
-                                              ⭐ {dish.rating}
-                                            </span>
-                                          </div>
-                                          <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
-                                            {dLoc.category} • ⏱️ {dLoc.cookTime} • {dish.calories || 280} kcal
-                                          </div>
-                                          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100/80 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 text-[10px] font-bold">
-                                            <span>✨ {tr(language, 'រសជាតិ៖', 'Taste:', '风味：')} {tasteProfile}</span>
-                                          </div>
-                                        </div>
-                                      </div>
-
-                                      <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug line-clamp-2">
-                                        {dLoc.description}
-                                      </p>
-
-                                      {topIngs.length > 0 && (
-                                        <div className="text-[10px] text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/90 px-2 py-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/70">
-                                          <span className="font-extrabold text-[#064E3B] dark:text-emerald-300">
-                                            🥗 {tr(language, 'គ្រឿងផ្សំ៖ ', 'Ingredients: ', '主要食材：')}
-                                          </span>
-                                          <span>{topIngs.join(' • ')}</span>
-                                        </div>
-                                      )}
-
-                                      {methodSummary && (
-                                        <div className="text-[10px] text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/90 px-2 py-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/70 line-clamp-2">
-                                          <span className="font-extrabold text-[#064E3B] dark:text-emerald-300">
-                                            👩‍🍳 {tr(language, 'របៀបចម្អិន៖ ', 'Cooking Method: ', '烹饪方法：')}
-                                          </span>
-                                          <span>{methodSummary}</span>
-                                        </div>
-                                      )}
-
-                                      <div className="grid grid-cols-2 gap-1.5 pt-0.5">
-                                        <button
-                                          type="button"
-                                          onClick={() => {
-                                            setSelectedFood(dish);
-                                            setIsWhatToEatModalOpen(false);
-                                          }}
-                                          className="py-1.5 px-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer"
-                                        >
-                                          <ChefHat className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                                          <span className="truncate">{tr(language, 'មើលលម្អិតពេញ', 'Full Details', '查看完整详情')}</span>
-                                        </button>
-                                        <button
-                                          type="button"
-                                          onClick={() => toggleCompareDish(dish.id)}
-                                          className={`py-1.5 px-2.5 rounded-xl border text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer transition ${
-                                            isCompared
-                                              ? 'bg-amber-400 text-slate-950 border-amber-500'
-                                              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600 hover:border-emerald-500'
-                                          }`}
-                                        >
-                                          <span>
-                                            {isCompared
-                                              ? `✓ ${tr(language, 'កំពុងប្រៀបធៀប', 'Comparing', '已加入对比')}`
-                                              : `⚖️ ${tr(language, 'ប្រៀបធៀប', 'Compare', '加入对比')}`}
-                                          </span>
-                                        </button>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Similar Dishes & Alternative Recommendations */}
-                          {msg.similarDishes && msg.similarDishes.length > 0 && (
-                            <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
-                              <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
-                                <Shuffle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                <span>
-                                  {tr(
-                                    language,
-                                    'មុខម្ហូបស្រដៀងគ្នា និងជម្រើសជំនួស៖',
-                                    'Similar Dishes & Alternative Recommendations:',
-                                    '相似菜品与替代推荐：'
-                                  )}
-                                </span>
-                              </div>
-                              <div className="grid grid-cols-2 gap-1.5">
-                                {msg.similarDishes.slice(0, 4).map((sim) => {
-                                  const sLoc = getLocalizedFood(sim, language);
-                                  return (
-                                    <button
-                                      key={sim.id}
-                                      type="button"
-                                      onClick={() => {
-                                        setSelectedFood(sim);
-                                        setIsWhatToEatModalOpen(false);
-                                      }}
-                                      className="p-1.5 rounded-xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 flex items-center gap-2 text-left transition cursor-pointer"
-                                    >
-                                      <img
-                                        src={sim.photoUrl}
-                                        alt={sLoc.name}
-                                        loading="lazy"
-                                        className="w-9 h-9 rounded-lg object-cover shrink-0 bg-slate-200"
-                                      />
-                                      <div className="min-w-0 flex-1">
-                                        <div className="text-[11px] font-bold text-slate-900 dark:text-white truncate">
-                                          {sLoc.name}
-                                        </div>
-                                        <div className="text-[9px] text-emerald-700 dark:text-emerald-400 font-semibold truncate">
-                                          ⭐ {sim.rating} • {sLoc.category}
-                                        </div>
-                                      </div>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Inline Recipe Preview when user asks for ingredients / how to cook */}
-                          {msg.recipePreview && (
-                            <div className="mt-2.5 pt-2.5 border-t border-slate-200 dark:border-slate-700 space-y-2">
-                              <div className="font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
-                                <ChefHat className="w-3.5 h-3.5 shrink-0" />
-                                <span>{tr(language, 'គ្រឿងផ្សំសំខាន់ៗ៖', 'Key Ingredients:', '主要食材：')}</span>
-                              </div>
-                              <ul className="grid grid-cols-1 gap-1 text-[11px] text-slate-700 dark:text-slate-300">
-                                {msg.recipePreview.ingredients.map((ing, idx) => (
-                                  <li key={idx} className="flex items-center justify-between gap-2 bg-slate-50 dark:bg-slate-900/60 px-2 py-1 rounded-lg">
-                                    <span className="font-bold">• {ing.name}</span>
-                                    <span className="text-emerald-700 dark:text-emerald-400 font-semibold shrink-0">{ing.amount}</span>
-                                  </li>
-                                ))}
-                              </ul>
-
-                              <div className="font-extrabold text-[#064E3B] dark:text-emerald-300 pt-1">
-                                {tr(language, 'របៀបធ្វើ៖', 'Cooking Steps:', '制作步骤：')}
-                              </div>
-                              <ol className="space-y-1 text-[11px] text-slate-700 dark:text-slate-300">
-                                {msg.recipePreview.steps.map((st) => (
-                                  <li key={st.stepNumber} className="leading-snug">
-                                    <span className="font-black text-emerald-700 dark:text-emerald-400 mr-1">{st.stepNumber}.</span>
-                                    {st.instruction}
-                                  </li>
-                                ))}
-                              </ol>
-
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (msg.recipePreview?.food) {
-                                    setSelectedFood(msg.recipePreview.food);
-                                    setIsWhatToEatModalOpen(false);
-                                  }
-                                }}
-                                className="w-full mt-1 py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
-                              >
-                                <ChefHat className="w-3.5 h-3.5 text-amber-300" />
-                                <span>{tr(language, 'បើកមើលរូបមន្តពេញលេញ', 'Open Full Recipe Card', '打开完整食谱详情')}</span>
-                              </button>
-                            </div>
-                          )}
-
-                          {/* Inline Tourism Destination Cards when user asks about travel / provinces */}
-                          {msg.destinations && msg.destinations.length > 0 && (
-                            <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
-                              <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
-                                <Compass className="w-3.5 h-3.5 shrink-0" />
-                                <span>{tr(language, 'តំបន់ទេសចរណ៍ណែនាំ៖', 'Recommended Attractions:', '推荐旅游景点：')}</span>
-                              </div>
-                              <div className="grid grid-cols-1 gap-1.5">
-                                {msg.destinations.map((dest) => {
-                                  const dLoc = getLocalizedDestination(dest, language);
-                                  return (
-                                    <button
-                                      key={dest.id}
-                                      type="button"
-                                      onClick={() => {
-                                        setSelectedDestination(dest);
-                                        setIsWhatToEatModalOpen(false);
-                                      }}
-                                      className="w-full p-2 rounded-xl bg-emerald-50/70 dark:bg-slate-900/70 border border-emerald-200/80 dark:border-slate-700 hover:border-emerald-500 flex items-center gap-2.5 text-left transition cursor-pointer"
-                                    >
-                                      <img
-                                        src={dest.photoUrl}
-                                        alt={dLoc.name}
-                                        loading="lazy"
-                                        className="w-11 h-11 rounded-lg object-cover shrink-0 bg-slate-200"
-                                      />
-                                      <div className="min-w-0 flex-1">
-                                        <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">{dLoc.name}</div>
-                                        <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold truncate">
-                                          📍 {dLoc.province} • ⭐ {dest.rating}
-                                        </div>
-                                      </div>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Inline Restaurant Cards when user asks where to eat */}
-                          {msg.restaurants && msg.restaurants.length > 0 && (
-                            <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
-                              <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
-                                <Store className="w-3.5 h-3.5 shrink-0" />
-                                <span>{tr(language, 'ភោជនីយដ្ឋានណែនាំ និងទីតាំង៖', 'Recommended Restaurants & Locations:', '推荐餐厅与位置导航：')}</span>
-                              </div>
-                              <div className="space-y-1.5">
-                                {msg.restaurants.map((r) => {
-                                  const rLoc = getLocalizedRestaurant(r, language);
-                                  return (
-                                    <div
-                                      key={r.id}
-                                      className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 flex items-center gap-2"
-                                    >
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          setSelectedRestaurant(r);
-                                          setIsWhatToEatModalOpen(false);
-                                        }}
-                                        className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
-                                      >
-                                        <ShopAvatar
-                                          restaurant={r}
-                                          alt={rLoc.name}
-                                          className="w-9 h-9 rounded-lg shrink-0"
-                                        />
-                                        <div className="min-w-0 flex-1">
-                                          <div className="text-xs font-bold text-slate-900 dark:text-white truncate">{rLoc.name}</div>
-                                          <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                                            📍 {rLoc.address || rLoc.province}
-                                          </div>
-                                        </div>
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => openRestaurantGoogleExternal(r, 'maps')}
-                                        className="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold inline-flex items-center gap-1 shrink-0 cursor-pointer"
-                                      >
-                                        <Navigation className="w-3 h-3" />
-                                        <span>{tr(language, 'ផ្លូវទៅហាង', 'Maps', '导航')}</span>
-                                      </button>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Honest explanation + Google Maps Navigation when no partner shop explicitly lists the dish */}
-                          {msg.restaurantUnavailableNote && (
-                            <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
-                              <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                                {msg.restaurantUnavailableNote}
-                              </p>
-                              {msg.googleMapsSearchQuery && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                                      msg.googleMapsSearchQuery!
-                                    )}`;
-                                    window.open(url, '_blank', 'noopener,noreferrer');
-                                  }}
-                                  className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
-                                >
-                                  <Navigation className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                                  <span>
-                                    {tr(
-                                      language,
-                                      'ស្វែងរកហាង និងទីតាំងផ្ទាល់លើ Google Maps',
-                                      'Find Restaurants & Navigate on Google Maps',
-                                      '在 Google 地图上搜索餐厅并导航'
-                                    )}
-                                  </span>
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Follow-up conversational chips */}
-                        {msg.followUpChips && msg.followUpChips.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5">
-                            {msg.followUpChips.map((chip) => (
-                              <button
-                                key={chip.id}
-                                type="button"
-                                onClick={() => {
-                                  setCravingQuery(chip.query);
-                                  sendConversationalMessage(chip.query);
-                                }}
-                                className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 border border-emerald-300/80 dark:border-slate-600 text-[11px] font-bold text-[#064E3B] dark:text-emerald-300 hover:bg-emerald-50 transition cursor-pointer active:scale-95"
-                              >
-                                {chip.label}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                  <div ref={chatEndRef} />
-                </div>
-              </div>
-            )}
-
             {drinkMode && canUseVip && (
               <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/70 to-amber-50/70 dark:from-emerald-950/40 dark:via-slate-800 dark:to-amber-950/30 border border-emerald-300/70 dark:border-emerald-700/50 space-y-2.5 font-khmer">
                 <div className="flex items-start gap-2.5">
@@ -2141,7 +2166,7 @@ export const WhatToEatModal: React.FC = () => {
                         className="p-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 flex items-center gap-2 cursor-pointer hover:border-emerald-500 transition shadow-2xs group"
                       >
                         <img
-                          src={d.photoUrl}
+                          src={resolveFoodPhotoUrl(d.photoUrl, d.photoUpdatedAt)}
                           alt={dLoc.name}
                           loading="lazy"
                           decoding="async"

@@ -655,9 +655,12 @@ export async function verifyAbaPaymentAndReceipt(params: {
   // ============================================================================
   // CHECK 5: Deterministic Anti-Replay & Duplicate Transaction Check
   // ============================================================================
-  const dupLedger = resolvedTrxId
-    ? checkDuplicateTransaction(resolvedTrxId)
-    : { isDuplicate: false };
+  const isDupInLedger = resolvedTrxId
+    ? (() => {
+        const res = checkDuplicateTransaction(resolvedTrxId) as boolean | { isDuplicate?: boolean };
+        return typeof res === 'boolean' ? res : Boolean(res?.isDuplicate);
+      })()
+    : false;
   const dupInTxns = resolvedTrxId
     ? existingTransactions.some(
         t =>
@@ -669,7 +672,7 @@ export async function verifyAbaPaymentAndReceipt(params: {
 
   const dupReceiptImg = isReceiptFingerprintUsed(imgFingerprint, userId);
 
-  const antiReplayPassed = !dupLedger.isDuplicate && !dupInTxns && !dupReceiptImg.used;
+  const antiReplayPassed = !isDupInLedger && !dupInTxns && !dupReceiptImg.used;
 
   const antiReplayCheck: AbaVerificationCheckItem = {
     passed: antiReplayPassed,

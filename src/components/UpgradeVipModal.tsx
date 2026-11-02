@@ -151,7 +151,7 @@ export const UpgradeVipModal: React.FC = () => {
   // Synchronize UI when modal opens AND react live when Admin approves VIP in background
   useEffect(() => {
     if (!isUpgradeVipModalOpen) return;
-    refreshAppSettingsFromServer(true);
+    refreshAppSettingsFromServer?.(true);
     setErrorMessage('');
     if (!currentUser) {
       setPaymentState('AWAITING_PAYMENT');
@@ -531,7 +531,7 @@ export const UpgradeVipModal: React.FC = () => {
     setErrorMessage('');
 
     try {
-      const latestSettings = await refreshAppSettingsFromServer(true);
+      const latestSettings = (await refreshAppSettingsFromServer?.(true)) || appSettings;
       const livePlans = getDynamicVipPlans(latestSettings);
       const liveSelectedPlan = livePlans[selectedPlan.id];
 

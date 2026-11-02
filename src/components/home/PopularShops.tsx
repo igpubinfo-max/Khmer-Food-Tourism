@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Star, MapPin } from 'lucide-react';
 import type { Language, Restaurant } from '../../types';
-import { isRestaurantPremiumActive, isGpipRegisteredRestaurant, isStrictVerifiedCambodiaRestaurant } from '../../types';
+import { isRestaurantPremiumActive, isGpipRegisteredRestaurant, isStrictVerifiedCambodiaRestaurant, hasApprovedShopPhoto } from '../../types';
 import { tr } from '../../utils/i18n';
 import { getLocalizedRestaurant } from '../../utils/zhDynamicTranslator';
 import { SectionHeader } from './SectionHeader';
@@ -32,6 +32,8 @@ const PopularShopsInner: React.FC<Props> = ({ language, restaurants, onOpen, onS
       (r) => isStrictVerifiedCambodiaRestaurant(r) && (r.status === 'approved' || !r.status)
     );
     const score = (r: Restaurant) =>
+      (hasApprovedShopPhoto(r) ? 10000 : 0) +
+      (r.photoUpdatedAt ? 500 : 0) +
       (r.isVerified ? 2000 : 0) +
       (isGpipRegisteredRestaurant(r) ? 1000 : 0) +
       (r.rating || 0) * 20 +

@@ -3,6 +3,7 @@ import {
   SEED_FOOD_PHOTO_BASELINE_ISO,
   SEED_FOOD_PHOTO_BASELINE_MS,
   EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS,
+  deduplicateFoodItems,
 } from '../types';
 import { additional100Foods } from './seedAdditional100Foods';
 
@@ -6500,17 +6501,19 @@ export const generateFull100Foods = (): FoodItem[] => {
     }
   });
 
-  return [...fullList, ...additional100Foods].map((f) => ({
-    ...f,
-    priceRiel: 0,
-    priceUsd: 0,
-    isCustomPhoto: false,
-    photoUpdatedAt:
-      EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS[f.id] ||
-      (f.photoUpdatedAt && Date.parse(f.photoUpdatedAt) >= SEED_FOOD_PHOTO_BASELINE_MS
-        ? f.photoUpdatedAt
-        : SEED_FOOD_PHOTO_BASELINE_ISO),
-  }));
+  return deduplicateFoodItems(
+    [...fullList, ...additional100Foods].map((f) => ({
+      ...f,
+      priceRiel: 0,
+      priceUsd: 0,
+      isCustomPhoto: false,
+      photoUpdatedAt:
+        EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS[f.id] ||
+        (f.photoUpdatedAt && Date.parse(f.photoUpdatedAt) >= SEED_FOOD_PHOTO_BASELINE_MS
+          ? f.photoUpdatedAt
+          : SEED_FOOD_PHOTO_BASELINE_ISO),
+    }))
+  );
 };
 
 export const initial100Foods: FoodItem[] = generateFull100Foods();

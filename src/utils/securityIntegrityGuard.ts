@@ -194,6 +194,7 @@ function doesUserMatchCandidate(
 
 export interface LocalAuthoritativeVipMatch {
   found: boolean;
+  expiryMs: number;
   expiryIso?: string;
   startIso?: string;
   transactionRef?: string;
@@ -210,7 +211,7 @@ export function findLocalAuthoritativeVipEntitlement(
   targetUser: Partial<User> | null | undefined,
   extraCloudUsers?: User[] | null
 ): LocalAuthoritativeVipMatch {
-  if (!targetUser) return { found: false };
+  if (!targetUser) return { found: false, expiryMs: 0 };
   const nowMs = Date.now();
   let bestExpMs = 0;
   let bestStartIso: string | undefined;
@@ -253,6 +254,18 @@ export function findLocalAuthoritativeVipEntitlement(
 
   try {
     if (typeof localStorage !== 'undefined') {
+      // 0. Check active signed-in session keys (`kft_current_user_v5`, `kft_current_user_v4`)
+      for (const curKey of ['kft_current_user_v5', 'kft_current_user_v4']) {
+        try {
+          const rawCur = localStorage.getItem(curKey);
+          if (!rawCur || rawCur === 'undefined' || rawCur === 'null') continue;
+          const parsedCur = JSON.parse(rawCur);
+          if (parsedCur && typeof parsedCur === 'object' && !Array.isArray(parsedCur)) {
+            considerUserRecord(parsedCur);
+          }
+        } catch {}
+      }
+
       // 1. Check all user list & VIP backup keys (no short-circuiting so stale keys never shadow fresh ones)
       const userListKeys = [
         'kft_vip_registry_backup_v1',
@@ -351,6 +364,7 @@ export function findLocalAuthoritativeVipEntitlement(
   if (bestExpMs > nowMs) {
     return {
       found: true,
+      expiryMs: bestExpMs,
       expiryIso: new Date(bestExpMs).toISOString(),
       startIso: bestStartIso,
       transactionRef: bestTxnRef,
@@ -360,7 +374,7 @@ export function findLocalAuthoritativeVipEntitlement(
     };
   }
 
-  return { found: false, paidAdditionalStoreSlots: bestSlots };
+  return { found: false, expiryMs: 0, paidAdditionalStoreSlots: bestSlots };
 }
 
 /**
@@ -521,7 +535,7 @@ export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | n
 
       const entitlement = !isExplicitlyCancelled
         ? findLocalAuthoritativeVipEntitlement(parsed)
-        : { found: false };
+        : { found: false, expiryMs: 0 };
 
       const ownExpMs = parseSafeDateMs(parsed.subscriptionExpiryDate || parsed.vipExpiresAt);
       const hasOwnValidFutureExpiry = !isExplicitlyCancelled && isVipClaimed && ownExpMs > Date.now();
