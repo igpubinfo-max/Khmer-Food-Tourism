@@ -241,7 +241,8 @@ const SEMANTIC_CRAVING_RULES: SemanticRule[] = [
     triggerRegex: /គ្រឿងសមុទ្រ|ត្រី|ក្តាម|ក្ដាម|បង្គា|មឹក|ងាវ|ខ្យង|អយស្ទ័រ|seafood|fish|crab|shrimp|prawn|squid|calamari|oyster|shellfish|clam|海鲜|海鮮|鱼|螃蟹|蟹|虾|蝦|鱿鱼|蛤蜊|生蚝/i,
     matchFood: (f, titleText, fullText) => {
       if (f.categorySlug === 'dessert' || f.categorySlug === 'cake') return 0;
-      if (/គ្រឿងសមុទ្រ|ត្រី|ក្តាម|ក្ដាម|បង្គា|មឹក|ងាវ|ខ្យង|អយស្ទ័រ|seafood|fish|crab|shrimp|prawn|squid|calamari|oyster|clam/i.test(titleText)) {
+      const safeTitle = titleText.replace(/ទឹកត្រី|fish\s*sauce/gi, ' ');
+      if (/គ្រឿងសមុទ្រ|ត្រី|ក្តាម|ក្ដាម|បង្គា|មឹក|ងាវ|ខ្យង|អយស្ទ័រ|seafood|fish|crab|shrimp|prawn|squid|calamari|oyster|clam/i.test(safeTitle)) {
         return 200;
       }
       if (/គ្រឿងសមុទ្រ|ក្តាម|ក្ដាម|បង្គា|មឹក|ងាវ|seafood|crab|shrimp|prawn|squid|oyster/i.test(fullText)) {
@@ -315,7 +316,7 @@ const SEMANTIC_CRAVING_RULES: SemanticRule[] = [
     matchFood: (_f, titleText, _fullText, tags) => {
       let score = 0;
       if (tags.includes('steamed_boiled')) score += 80;
-      if (/ស្ងោរ|ចំហុយ|បបរ|សម្លប្រហើរ|steamed|boiled|porridge|clear soup/i.test(titleText)) score += 110;
+      if (/ស្ងោរ|ចំហុយ|សម្លប្រហើរ|steamed|boiled|clear soup/i.test(titleText)) score += 110;
       return score;
     },
   },
@@ -481,17 +482,29 @@ export function getAiFoodAdvisorRecommendations(params: {
     }
   }
 
-  // Sort by score descending, with deterministic seed rotation among similarly scored dishes
+  // Sort by score descending; when seed <= 1 (fresh query), preserve exact relevance ranking with zero random jitter
   scoredFoods.sort((a, b) => {
     const scoreDiff = b.score - a.score;
-    if (Math.abs(scoreDiff) > 40) return scoreDiff;
+    if (seed <= 1 || Math.abs(scoreDiff) > 25) {
+      if (scoreDiff !== 0) return scoreDiff;
+      return (b.food.rating || 0) - (a.food.rating || 0);
+    }
     const rotA = (a.food.id.charCodeAt(a.food.id.length - 1) * 7 + seed * 13) % 19;
     const rotB = (b.food.id.charCodeAt(b.food.id.length - 1) * 7 + seed * 13) % 19;
     if (rotA !== rotB) return rotA - rotB;
     return (b.food.rating || 0) - (a.food.rating || 0);
   });
 
-  const totalMatchedCount = scoredFoods.length;
+  // Strict Relevance Tier Filter: when a specific dish / multi-token phrase scored strongly (e.g. "ស្ងោរជ្រក់ត្រី" -> 1500+),
+  // never let loosely matched single-token dishes (e.g. "បបរត្រី" -> 600) pollute the top recommendations or rotate ahead!
+  const bestScore = scoredFoods[0]?.score || 0;
+  const primaryScoredFoods =
+    hasActiveQuery && bestScore >= 600
+      ? scoredFoods.filter((item) => item.score >= bestScore * 0.62)
+      : scoredFoods;
+  const effectiveScoredFoods = primaryScoredFoods.length > 0 ? primaryScoredFoods : scoredFoods;
+
+  const totalMatchedCount = effectiveScoredFoods.length;
 
   // Smart AI brain: understands foreign dishes, moods, health notes, VIP drink-pairing and unknown cravings.
   // Never invoke foreign-dish/drink bridges when the user explicitly queried a flavor (e.g. `ហឹរ` / `ជូរហឹរ`)!
@@ -509,17 +522,17 @@ export function getAiFoodAdvisorRecommendations(params: {
       : null;
 
   const allMatchedDishes: FoodItem[] =
-    scoredFoods.length > 0
-      ? scoredFoods.map((item) => item.food)
+    effectiveScoredFoods.length > 0
+      ? effectiveScoredFoods.map((item) => item.food)
       : brain && brain.dishes.length > 0
         ? brain.dishes.map((d) => d.food)
         : [];
 
-  // If the user typed a query that matched dishes, return up to 6 top matches (rotated by seed when Refresh is clicked)
+  // If the user typed a query that matched dishes, return up to 6 top matches (seed=1 ALWAYS starts at #1 best match!)
   const preferBrainDishes =
     Boolean(brain && brain.dishes.length > 0) &&
     parsedQuery.flavorIntents.length === 0 &&
-    (scoredFoods.length === 0 ||
+    (effectiveScoredFoods.length === 0 ||
       brain?.mode === 'drink' ||
       brain?.mode === 'blocked' ||
       brain?.mode === 'scope_notice');
@@ -527,15 +540,26 @@ export function getAiFoodAdvisorRecommendations(params: {
   let topDishes: FoodItem[];
   if (preferBrainDishes && brain) {
     topDishes = brain.dishes.map((d) => d.food);
-  } else if (scoredFoods.length > 0) {
+  } else if (effectiveScoredFoods.length > 0) {
     const limit = hasActiveQuery ? 6 : 4;
-    if (scoredFoods.length <= limit) {
-      topDishes = scoredFoods.slice(0, limit).map((item) => item.food);
+    if (seed <= 1 || effectiveScoredFoods.length <= limit) {
+      topDishes = effectiveScoredFoods.slice(0, limit).map((item) => item.food);
     } else {
-      const poolSize = Math.min(scoredFoods.length, 24);
-      const topPool = scoredFoods.slice(0, poolSize).map((item) => item.food);
-      const offset = ((Math.max(1, seed) - 1) * 3) % topPool.length;
+      const poolSize = Math.min(effectiveScoredFoods.length, 18);
+      const topPool = effectiveScoredFoods.slice(0, poolSize).map((item) => item.food);
+      const offset = ((Math.max(1, seed) - 1) * 2) % topPool.length;
       topDishes = [...topPool.slice(offset), ...topPool.slice(0, offset)].slice(0, limit);
+    }
+    // If primary tier had fewer than `limit` dishes (e.g. 1-2 exact matches), append next closest scored dishes AFTER them
+    if (hasActiveQuery && topDishes.length < Math.min(3, scoredFoods.length)) {
+      const topIds = new Set(topDishes.map((d) => d.id));
+      for (const item of scoredFoods) {
+        if (!topIds.has(item.food.id)) {
+          topIds.add(item.food.id);
+          topDishes.push(item.food);
+          if (topDishes.length >= 3) break;
+        }
+      }
     }
   } else {
     // Fallback if query had zero exact matches: pick popular non-beverage dishes rotated by seed

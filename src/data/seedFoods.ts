@@ -1401,8 +1401,8 @@ export const seedFoods: FoodItem[] = [
   },
   {
     id: 'food-40',
-    nameKh: 'មីឆាសាច់គោពងទាចៀន',
-    nameEn: 'Khmer Stir-Fried Noodles with Beef & Egg (Mee Cha)',
+    nameKh: 'មីឆាសាច់គោ',
+    nameEn: 'Khmer Stir-Fried Noodles with Beef (Mee Cha Sach Ko)',
     categorySlug: 'noodles',
     categoryKh: 'អាហារសម្រន់ / មីឆា',
     categoryEn: 'Street Food / Stir-Fried Noodles',
@@ -2003,70 +2003,70 @@ export const AUTHENTIC_FOOD_RECIPES = {
     ]
   },
   "food-54": {
-    "nameKh": "សម្លប្រហើរននោងបង្គាស្រស់",
-    "nameEn": "Luffa Gourd Fresh Shrimp Herbal Soup",
-    "cat": "soup",
-    "catKh": "ម្ហូបសម្ល / ប្រហើរ",
-    "catEn": "Soup / Herbal Broth",
-    "descKh": "សម្លប្រហើរននោងបង្គាស្រស់ ប្រើគ្រឿងបុកស្លឹកគ្រៃ រមៀត ខ្ទឹមស និងប្រហុកសាច់បន្តិច ចម្អិនជាមួយបង្គាស្រស់ផ្អែម និងននោងខ្ចី ជួយសម្រួលការរំលាយអាហារ និងមានសុខភាពល្អ។",
-    "descEn": "Nutritious Cambodian herbal clear soup featuring tender young luffa sponge gourd, sweet sea prawns, and crushed lemongrass kroeung.",
+    "nameKh": "សាច់ជ្រូកចិញ្ច្រាំ ត្រីប្រម៉ា",
+    "nameEn": "Steamed Minced Pork with Salted Fish (Sach Chrouk Trey Prama)",
+    "cat": "specialty",
+    "catKh": "ម្ហូបពិសេស / ត្រីប្រម៉ា",
+    "catEn": "Specialty / Steamed Salted Fish",
+    "descKh": "សាច់ជ្រូកចិញ្ច្រាំ ត្រីប្រម៉ា ជាមុខម្ហូបខ្មែរបុរាណដ៏ឈ្ងុយឆ្ងាញ់ ចម្អិនពីសាច់ជ្រូកបីជាន់ចិញ្ច្រាំលាយត្រីប្រម៉ាសាច់ណែន ពងទា ខ្ញីហាន់សរសៃ និងគល់ស្លឹកគ្រៃ ចំហុយក្តៅៗឈ្ងុយប្លែក ទទួលទានជាមួយបាយស និងបន្លែអន្លក់ស្រស់។",
+    "descEn": "Authentic Cambodian steamed minced pork belly blended with savory salted threadfin fish (Trey Prama), duck egg, julienned ginger, and lemongrass, served with steamed rice and fresh crisp crudités.",
     "prepTime": "១៥ នាទី",
-    "cookTime": "១៥ នាទី",
+    "cookTime": "២៥ នាទី",
     "servings": "៣-៤ នាក់",
-    "calories": 180,
-    "difficulty": "easy",
+    "calories": 320,
+    "difficulty": "medium",
     "ingredients": [
       {
-        "nameKh": "បង្គាស្រស់បកសំបកទុកកន្ទុយ",
-        "nameEn": "Fresh prawns, peeled with tails on",
-        "amount": "២៥០ ក្រាម"
+        "nameKh": "ត្រីប្រម៉ាសាច់សុទ្ធចិញ្ច្រាំម៉ត់",
+        "nameEn": "Finely minced salted threadfin fish (Trey Prama)",
+        "amount": "១៥០ ក្រាម"
       },
       {
-        "nameKh": "ននោងខ្ចីចិតសំបកកាត់ចំណិត",
-        "nameEn": "Peeled young luffa gourd slices",
-        "amount": "២ ផ្លែ"
+        "nameKh": "សាច់ជ្រូកបីជាន់ចិញ្ច្រាំ",
+        "nameEn": "Minced pork belly",
+        "amount": "៣០០ ក្រាម"
       },
       {
-        "nameKh": "គ្រឿងបុកប្រហើរ (ស្លឹកគ្រៃ រមៀត ខ្ទឹមស)",
-        "nameEn": "Proher lemongrass kroeung paste",
+        "nameKh": "ពងទាខ្មែរស្រស់",
+        "nameEn": "Fresh duck eggs",
+        "amount": "២ គ្រាប់"
+      },
+      {
+        "nameKh": "ខ្ញីខ្ចីហាន់សរសៃឆ្មារ និងខ្ទឹមសចិញ្ច្រាំ",
+        "nameEn": "Julienned young ginger and minced garlic",
         "amount": "២ ស្លាបព្រាបាយ"
       },
       {
-        "nameKh": "ប្រហុកសាច់ចិញ្ច្រាំ",
-        "nameEn": "Minced prahok",
-        "amount": "កន្លះស្លាបព្រាកាហ្វេ"
-      },
-      {
-        "nameKh": "ស្លឹកបាស និងស្លឹកម្រុំ",
-        "nameEn": "Moringa and ivy gourd leaves",
-        "amount": "១ ចាន"
-      },
-      {
-        "nameKh": "ទឹកត្រី និងអំបិល",
-        "nameEn": "Fish sauce and salt",
+        "nameKh": "ស្ករត្នោត ម្រេចកំពត និងប្រេងល្ងបន្តិច",
+        "nameEn": "Palm sugar, Kampot pepper, and sesame oil",
         "amount": "១ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "ម្ទេសដៃនាង និងបន្លែអន្លក់ស្រស់ (ត្រសក់ ត្រប់ស្រួយ ពពាយ)",
+        "nameEn": "Sliced red chilies and fresh seasonal crudités",
+        "amount": "១ ថាសតូច"
       }
     ],
     "steps": [
       {
         "stepNumber": 1,
-        "instructionKh": "រំលាយគ្រឿងបុក និងប្រហុកក្នុងទឹកពុះឱ្យចេញក្លិនឈ្ងុយប្រហើរ។",
-        "instructionEn": "Dissolve kroeung paste and prahok into boiling water until deeply aromatic."
+        "instructionKh": "លាងត្រីប្រម៉ាសម្រស់ទឹកឱ្យស្អាត រួចចិញ្ច្រាំឱ្យម៉ត់ជាមួយសាច់ជ្រូកបីជាន់ និងខ្ទឹមស។",
+        "instructionEn": "Rinse salted fish, drain well, and finely mince together with pork belly and garlic."
       },
       {
         "stepNumber": 2,
-        "instructionKh": "ដាក់បង្គាស្រស់ចូលឱ្យឆ្អិនឡើងពណ៌ក្រហមផ្អែម។",
-        "instructionEn": "Add fresh prawns and cook gently until pink and tender."
+        "instructionKh": "ដាក់ល្បាយសាច់ចូលចានគោមធន់កំដៅ វាយពងទាចូល បន្ថែមស្ករត្នោត ខ្ញីហាន់សរសៃ និងម្រេចកំពត កូរច្របល់ឱ្យចូលសាច់ស្មើសព្វល្អ។",
+        "instructionEn": "Transfer to a heatproof steaming bowl, beat in duck eggs, palm sugar, julienned ginger, and Kampot pepper; mix until well combined."
       },
       {
         "stepNumber": 3,
-        "instructionKh": "ដាក់ននោងចូលរម្ងាស់ ២ នាទី ថែមទឹកត្រី និងអំបិល។",
-        "instructionEn": "Add sliced luffa gourd, cook for 2 minutes, and season with fish sauce."
+        "instructionKh": "ដាក់ចំហុយក្នុងឡាំងសឹងទឹកពុះរយៈពេល ២០ នាទី រហូតដល់សាច់ឆ្អិនណែនឈ្ងុយ រួចរោយខ្ញី និងម្ទេសស្រស់ពីលើ ចំហុយ ៥ នាទីទៀត។",
+        "instructionEn": "Steam over boiling water for 20 minutes until firm and fragrant, garnish with extra ginger and chilies, and steam 5 more minutes."
       },
       {
         "stepNumber": 4,
-        "instructionKh": "បង់ស្លឹកបាស និងស្លឹកម្រុំលើកចុះភ្លាមៗ រសជាតិផ្អែមបន្លែធម្មជាតិ។",
-        "instructionEn": "Add moringa leaves, remove from heat immediately, and enjoy."
+        "instructionKh": "លើកចេញពីឡាំងសឹង ទទួលទានក្តៅៗជាមួយបាយស និងបន្លែអន្លក់ស្រស់គ្រប់មុខ។",
+        "instructionEn": "Serve piping hot with steamed jasmine rice and crisp fresh crudités."
       }
     ]
   },
@@ -3457,65 +3457,65 @@ export const AUTHENTIC_FOOD_RECIPES = {
     ]
   },
   "food-77": {
-    "nameKh": "ញាំត្រសក់ត្រីឆ្អើរ",
-    "nameEn": "Cucumber Salad with Smoked Fish",
+    "nameKh": "ញាំម្កាក់ត្រីឆ្អើរ",
+    "nameEn": "Ambarella Salad with Smoked Fish (Nhoam Mkak Trey Chh-oe)",
     "cat": "salad",
-    "catKh": "ញាំ & ភ្លា",
-    "catEn": "Salads & Dips",
-    "descKh": "ញាំត្រសក់ត្រីឆ្អើរ ត្រសក់ខ្ចីចិតចំណិតស្ដើងស្រួយ ច្របាច់ជាមួយសាច់ត្រីឆ្អើរឈ្ងុយ ខ្ទឹមក្រហម ម្ទេស និងទឹកត្រីក្រូចឆ្មាជូរអែម ជាម្ហូបស្រាលស្រស់ស្រាយ។",
-    "descEn": "Crunchy cucumber ribbons tossed with flaky smoked river fish, shallots, fresh chilies, and tangy lime fish sauce.",
+    "catKh": "ម្ហូបញាំ & ភ្លា / ញាំម្កាក់",
+    "catEn": "Salad / Ambarella Smoked Fish",
+    "descKh": "ញាំម្កាក់ត្រីឆ្អើរ ជាមុខម្ហូបញាំបែបស្រុកស្រែដ៏ពេញនិយម ដោយប្រើផ្លែម្កាក់ខ្ចីចិតសរសៃស្រួយជូរផ្អែម លាយជាមួយសាច់ត្រីឆ្អើរឈ្ងុយបេះគ្មានឆ្អឹង សណ្តែកដីលីងបុក និងទឹកត្រីកោះកុងជូរហឹរមុត។",
+    "descEn": "Refreshing Cambodian country salad featuring crisp tart-sweet julienned ambarella fruit tossed with flaky smoked river fish, toasted crushed peanuts, fresh herbs, and zesty lime-chili dressing.",
     "prepTime": "១៥ នាទី",
     "cookTime": "៥ នាទី",
     "servings": "២-៣ នាក់",
-    "calories": 160,
+    "calories": 170,
     "difficulty": "easy",
     "ingredients": [
       {
-        "nameKh": "ត្រសក់ខ្ចីចិតចំណិតស្ដើង",
-        "nameEn": "Thinly sliced crisp cucumbers",
+        "nameKh": "ផ្លែម្កាក់ខ្ចីចិតសំបកឈូសជាសរសៃ",
+        "nameEn": "Crisp young ambarella fruit, peeled and julienned",
         "amount": "៣ ផ្លែ"
       },
       {
-        "nameKh": "ត្រីឆ្អើរបេះសាច់សុទ្ធ",
-        "nameEn": "Flaked smoked fish",
-        "amount": "១៥០ ក្រាម"
+        "nameKh": "ត្រីឆ្អើរខ្មែរឈ្ងុយបេះយកសាច់សុទ្ធ",
+        "nameEn": "Deboned flaked Cambodian smoked river fish",
+        "amount": "២០០ ក្រាម"
       },
       {
-        "nameKh": "ខ្ទឹមក្រហម និងម្ទេសហាន់",
-        "nameEn": "Shallots and fresh red chilies",
-        "amount": "១ ស្លាបព្រាបាយ"
+        "nameKh": "ទឹកត្រីកោះកុង (ទឹកត្រី ទឹកក្រូចឆ្មារ ស្ករត្នោត ខ្ទឹមស និងម្ទេសបុក)",
+        "nameEn": "Zesty Koh Kong dressing (fish sauce, lime juice, palm sugar, garlic, and pounded chili)",
+        "amount": "៣ ស្លាបព្រាបាយ"
       },
       {
-        "nameKh": "ជីរពងទាកូន ឬជីរនាងវង",
-        "nameEn": "Vietnamese coriander or holy basil",
-        "amount": "១ ក្តាប់"
+        "nameKh": "ស្លឹកជីរគ្រប់មុខ (ជីរអង្កាម ជីររណារ ជីរនាងវង)",
+        "nameEn": "Fresh mixed Khmer herbs (mint, culantro, sweet basil)",
+        "amount": "១ ក្តាប់តូច"
       },
       {
-        "nameKh": "ទឹកត្រី ទឹកក្រូចឆ្មា ស្ករត្នោត",
-        "nameEn": "Fish sauce, lime juice, palm sugar",
+        "nameKh": "សណ្តែកដីលីងបុក និងខ្ទឹមក្រហមបំពងស្រួយ",
+        "nameEn": "Crushed roasted peanuts and crispy fried shallots",
         "amount": "២ ស្លាបព្រាបាយ"
       }
     ],
     "steps": [
       {
         "stepNumber": 1,
-        "instructionKh": "ចិតត្រសក់ជាចំណិតស្ដើង ច្របាច់អំបិលបន្តិចរួចលាងទឹកពូតឱ្យស្រួយ។",
-        "instructionEn": "Slice cucumbers, toss with a pinch of salt, rinse and squeeze to maximize crunch."
+        "instructionKh": "ចិតសំបកផ្លែម្កាក់ ឈូសជាសរសៃវែងៗ រួចត្រាំទឹកកកបន្តិចដើម្បីឱ្យស្រួយស្រស់ល្អ រួចស្រង់សម្រស់ទឹកឱ្យស្ងួត។",
+        "instructionEn": "Peel and julienne the ambarella, chill briefly in cold water for extra crunch, then drain thoroughly."
       },
       {
         "stepNumber": 2,
-        "instructionKh": "បេះត្រីឆ្អើរជាដុំតូចៗ លីងលើខ្ទះឱ្យឈ្ងុយបន្តិច។",
-        "instructionEn": "Flake smoked fish and gently toast in a dry pan until aromatic."
+        "instructionKh": "បេះសាច់ត្រីឆ្អើរជាដុំតូចៗល្មម និងរៀបចំស្លឹកជីរគ្រប់មុខហាន់រួចជាស្រេច។",
+        "instructionEn": "Flake the smoked fish into bite-sized pieces and prep fresh herbs."
       },
       {
         "stepNumber": 3,
-        "instructionKh": "លាយទឹកត្រី ទឹកក្រូចឆ្មា ស្ករត្នោត ខ្ទឹមក្រហម និងម្ទេសឱ្យចូលជាតិ។",
-        "instructionEn": "Mix lime juice, fish sauce, palm sugar, shallots, and chilies."
+        "instructionKh": "លាយទឹកញាំដោយកូរទឹកត្រី ស្ករត្នោត ទឹកក្រូចឆ្មារ ខ្ទឹមស និងម្ទេសបុកឱ្យរលាយចូលគ្នាជូរប្រៃផ្អែមហឹរ។",
+        "instructionEn": "Whisk fish sauce, palm sugar, lime juice, garlic, and chili until harmoniously balanced."
       },
       {
         "stepNumber": 4,
-        "instructionKh": "ច្របល់ត្រសក់ ត្រីឆ្អើរ ជីរ និងទឹកញាំចូលគ្នា ដួសទទួលទានភ្លាមៗ។",
-        "instructionEn": "Combine cucumbers, smoked fish, herbs, and dressing; serve immediately."
+        "instructionKh": "ដាក់ម្កាក់ និងសាច់ត្រីឆ្អើរចូលចានធំ ស្រោចទឹកញាំពីលើ ច្របល់ថ្នមៗ រួចបង់ស្លឹកជីរ ដួសដាក់ចាន និងរោយសណ្តែកដីលីងបុក ខ្ទឹមបំពងពីលើ។",
+        "instructionEn": "Toss ambarella and smoked fish gently with dressing and herbs; transfer to a platter and garnish with crushed peanuts and crispy shallots."
       }
     ]
   },
@@ -3651,65 +3651,70 @@ export const AUTHENTIC_FOOD_RECIPES = {
     ]
   },
   "food-80": {
-    "nameKh": "បុកល្ហុងសាច់ជ្រូកបីជាន់បំពងស្រួយ",
-    "nameEn": "Crispy Roast Pork Belly Green Papaya Salad (Bok Lhong)",
+    "nameKh": "បុកមីកញ្ចប់",
+    "nameEn": "Spicy Pounded Instant Noodles Salad (Bok Mee Kanchop)",
     "cat": "salad",
-    "catKh": "ម្ហូបញាំ & បុកល្ហុង",
-    "catEn": "Salad / Crispy Pork Papaya Salad",
-    "descKh": "បុកល្ហុងសាច់ជ្រូកបីជាន់បំពងស្រួយ ប្រើល្ហុងខ្ចីសាប់ស្រួយបុកជាមួយសណ្តែកកួរ ប៉េងប៉ោះតូច ម្ទេសក្រហម ខ្ទឹមស ទឹកត្រី ស្ករត្នោត និងក្រូចឆ្មារ រៀបសាច់ជ្រូកបីជាន់បំពងស្បែកស្រួយ និងសណ្តែកដីលីងពីលើ។",
-    "descEn": "Fiery and refreshing Cambodian pounded green papaya salad tossed with cherry tomatoes, yardlong beans, roasted peanuts, and lime-palm sugar dressing, topped with golden crispy pork belly.",
-    "prepTime": "២០ នាទី",
-    "cookTime": "១៥ នាទី",
-    "servings": "២-៣ នាក់",
-    "calories": 340,
+    "catKh": "ម្ហូបញាំ & បុក / បុកមីកញ្ចប់",
+    "catEn": "Salad / Pounded Instant Noodles",
+    "descKh": "បុកមីកញ្ចប់ អាហារសម្រន់បែបយុវវ័យដ៏ពេញនិយមបំផុត ចម្អិនដោយយកមីកញ្ចប់ស្រុះទន់ស្វិត បុកក្នុងត្បាល់ជាមួយក្តាមប្រៃ ប្រហិតសាច់ សណ្តែកគួរ ប៉េងប៉ោះ ទឹកប្រហុក ឬទឹកត្រីកោះកុង និងក្រូចឆ្មារ រសជាតិជូរហឹរមុតប្លែកមាត់។",
+    "descEn": "Wildly popular Cambodian street snack: springy instant noodles lightly blanched and gently pounded in a mortar with salted crab, meatballs, long beans, tomatoes, lime, and fiery tamarind-chili sauce.",
+    "prepTime": "១០ នាទី",
+    "cookTime": "៥ នាទី",
+    "servings": "១-២ នាក់",
+    "calories": 350,
     "difficulty": "easy",
     "ingredients": [
       {
-        "nameKh": "សាច់ជ្រូកបីជាន់បំពង ឬខ្វៃស្បែកស្រួយហាន់ដុំ",
-        "nameEn": "Crispy roasted pork belly chunks",
-        "amount": "២០០ ក្រាម"
+        "nameKh": "មីកញ្ចប់ស្រុះទឹកក្តៅល្មមទន់ស្វិត",
+        "nameEn": "Instant noodles lightly blanched until springy",
+        "amount": "២ កញ្ចប់"
       },
       {
-        "nameKh": "ល្ហុងខ្ចីសាប់សរសៃស្រួយ",
-        "nameEn": "Crisp shredded green papaya",
-        "amount": "២៥០ ក្រាម"
-      },
-      {
-        "nameKh": "សណ្តែកកួរកាត់ខ្លី ប៉េងប៉ោះតូច និងសណ្តែកដីលីង",
-        "nameEn": "Yardlong beans, cherry tomatoes, and roasted peanuts",
+        "nameKh": "ប្រហិតសាច់គោ ឬប្រហិតសាច់ជ្រូកស្រុះកាត់ចំណិត",
+        "nameEn": "Sliced blanched beef or pork meatballs",
         "amount": "១៥០ ក្រាម"
       },
       {
-        "nameKh": "ខ្ទឹមស និងម្ទេសក្រហមស្រស់",
-        "nameEn": "Fresh garlic cloves and red bird-eye chilies",
-        "amount": "២ ស្លាបព្រាបាយ"
+        "nameKh": "ក្តាមប្រៃបកស្នូក និងបង្គាក្រៀម",
+        "nameEn": "Cleaned salted field crab and dried shrimp",
+        "amount": "២ ក្បាល"
       },
       {
-        "nameKh": "ទឹកត្រី ស្ករត្នោត និងទឹកក្រូចឆ្មា",
-        "nameEn": "Fish sauce, palm sugar, and fresh lime juice",
+        "nameKh": "សណ្តែកគួរ ប៉េងប៉ោះទុំ និងម្ទេសខ្មាំងស្រស់",
+        "nameEn": "Yardlong beans, cherry tomatoes, and red bird-eye chilies",
+        "amount": "១ ចានតូច"
+      },
+      {
+        "nameKh": "ទឹកត្រី ស្ករត្នោត ទឹកអំពិលទុំ និងទឹកក្រូចឆ្មារស្រស់",
+        "nameEn": "Fish sauce, palm sugar, tamarind juice, and fresh lime juice",
+        "amount": "៣ ស្លាបព្រាបាយ"
+      },
+      {
+        "nameKh": "សណ្តែកដីលីងបុក និងជីររណារហាន់",
+        "nameEn": "Crushed roasted peanuts and chopped culantro",
         "amount": "២ ស្លាបព្រាបាយ"
       }
     ],
     "steps": [
       {
         "stepNumber": 1,
-        "instructionKh": "សាប់ល្ហុងខ្ចីជាសរសៃស្រួយ ត្រាំទឹកត្រជាក់មួយភ្លែតរួចសម្រស់ទឹកឱ្យស្ងួត និងហាន់សាច់ជ្រូកបីជាន់បំពងស្រួយជាដុំល្មម។",
-        "instructionEn": "Shred green papaya into crisp strands, chill briefly and drain, and slice crispy roast pork belly into bite-sized pieces."
+        "instructionKh": "ស្រុះមីកញ្ចប់ក្នុងទឹកក្តៅពុះត្រឹម ១-២ នាទីឱ្យទន់ស្វិតល្អ រួចស្រង់សម្រស់ទឹកឱ្យស្ងួត ត្រៀមទុក។",
+        "instructionEn": "Blanch instant noodles for 1-2 minutes until tender yet springy; drain thoroughly and set aside."
       },
       {
         "stepNumber": 2,
-        "instructionKh": "បុកខ្ទឹមស និងម្ទេសក្រហមក្នុងត្បាល់ ដាក់សណ្តែកកួរ និងប៉េងប៉ោះបុកថ្នមៗឱ្យបែកទឹកឈ្ងុយ។",
-        "instructionEn": "Pound garlic and red chilies in a mortar, then lightly bruise yardlong beans and cherry tomatoes."
+        "instructionKh": "ដាក់ខ្ទឹមស និងម្ទេសខ្មាំងចូលក្នុងត្បាល់បុកឱ្យបែក រួចដាក់សណ្តែកគួរ ក្តាមប្រៃ និងប៉េងប៉ោះចូលបុកថ្នមៗ។",
+        "instructionEn": "In a mortar, crush garlic and bird-eye chilies; add yardlong beans, salted crab, and tomato wedges; bruise gently."
       },
       {
         "stepNumber": 3,
-        "instructionKh": "ថែមស្ករត្នោត ទឹកត្រី និងទឹកក្រូចឆ្មារ កូរឱ្យរលាយសព្វ សឹមដាក់សរសៃល្ហុង និងសណ្តែកដីលីងចូលបុកច្របល់ថ្នមៗ។",
-        "instructionEn": "Dissolve palm sugar, fish sauce, and lime juice in the mortar, then toss in green papaya and roasted peanuts."
+        "instructionKh": "ផ្សំរសជាតិដោយទឹកត្រី ទឹកប្រហុក ទឹកអំពិលទុំ ស្ករត្នោត និងច្របាច់ទឹកក្រូចឆ្មារ កូរច្របល់ឱ្យរលាយរសជាតិជូរប្រៃផ្អែមហឹរខ្លាំង។",
+        "instructionEn": "Season with fish sauce, prahok, tamarind water, palm sugar, and lime juice; stir until punchy and harmonious."
       },
       {
         "stepNumber": 4,
-        "instructionKh": "ដួសបុកល្ហុងដាក់ចាន រៀបសាច់ជ្រូកបីជាន់បំពងស្រួយពីលើ រួចទទួលទានភ្លាមៗ។",
-        "instructionEn": "Plate the zesty papaya salad, crown with crispy golden pork belly chunks, and serve immediately."
+        "instructionKh": "ដាក់សរសៃមីកញ្ចប់ និងប្រហិតចូលក្នុងត្បាល់ ច្របល់កូរត្រឡប់ឱ្យចូលជាតិសព្វ ដួសដាក់ចាន រោយសណ្តែកដីបុកពីលើ ទទួលទានភ្លាមៗ។",
+        "instructionEn": "Add blanched noodles and meatballs into the mortar, toss well to coat with spicy sauce, plate, and top with roasted peanuts."
       }
     ]
   },
@@ -3971,65 +3976,65 @@ export const AUTHENTIC_FOOD_RECIPES = {
     ]
   },
   "food-85": {
-    "nameKh": "មីសួរស៊ុបប្រហិតសាច់ជ្រូក",
-    "nameEn": "Glass Noodle Clear Soup with Meatballs",
+    "nameKh": "មីសួរសាច់មាន់",
+    "nameEn": "Chicken Glass Noodle Soup (Mi Suor Sach Moan)",
     "cat": "noodles",
-    "catKh": "មី & គុយទាវ",
-    "catEn": "Noodles & Soup",
-    "descKh": "មីសួរស៊ុបប្រហិតសាច់ជ្រូក ទឹកស៊ុបឆ្អឹងជ្រូកថ្លាឈ្ងុយផ្អែម អមដោយប្រហិតសាច់ជ្រូកធ្វើដោយដៃទន់ស្វិត មីសួរទន់រលោង ផ្សិតត្រចៀកកណ្តុរ និងស្ពៃចង្កឹះ ជាអាហារសម្រាលពោះដ៏ពេញនិយម។",
-    "descEn": "Soothing clear broth with silky mung bean glass noodles, homemade bouncy pork meatballs, wood ear mushrooms, and fresh greens.",
+    "catKh": "មី & គុយទាវ / មីសួរ",
+    "catEn": "Noodles & Soup / Chicken Glass Noodle",
+    "descKh": "មីសួរសាច់មាន់ ទឹកស៊ុបមាន់ស្រែរម្ងាស់ថ្លាឈ្ងុយផ្អែមធម្មជាតិ មីសួរសណ្តែកបាយទន់រលោង អមដោយសាច់មាន់ស្រែហែកជាបន្ទះ ផ្សិតត្រចៀកកណ្តុរ ផ្កាចេក និងស្ពៃចង្កឹះ ស្រូបដោយខ្ទឹមបំពងឈ្ងុយ និងម្រេចកំពតម៉ត់។",
+    "descEn": "Comforting Khmer clear chicken glass noodle soup featuring naturally sweet free-range chicken broth, silky mung bean vermicelli, shredded chicken, wood ear mushrooms, and fragrant crispy fried garlic with Kampot pepper.",
     "prepTime": "១៥ នាទី",
-    "cookTime": "២០ នាទី",
+    "cookTime": "២៥ នាទី",
     "servings": "២-៣ នាក់",
-    "calories": 260,
+    "calories": 280,
     "difficulty": "easy",
     "ingredients": [
       {
-        "nameKh": "មីសួរត្រាំទឹកទន់",
+        "nameKh": "មីសួរសណ្តែកបាយត្រាំទឹកទន់",
         "nameEn": "Soaked mung bean glass noodles",
         "amount": "១៥០ ក្រាម"
       },
       {
-        "nameKh": "ប្រហិតសាច់ជ្រូកធ្វើដោយដៃ",
-        "nameEn": "Handmade seasoned pork meatballs",
-        "amount": "២០០ ក្រាម"
+        "nameKh": "សាច់មាន់ស្រែស្ងោរហែក",
+        "nameEn": "Shredded free-range poached chicken",
+        "amount": "២៥០ ក្រាម"
       },
       {
-        "nameKh": "ទឹកស៊ុបឆ្អឹងជ្រូកថ្លា",
-        "nameEn": "Clear pork bone broth",
-        "amount": "៨០០ មីលីលីត្រ"
+        "nameKh": "ទឹកស៊ុបឆ្អឹងមាន់រម្ងាស់ថ្លា",
+        "nameEn": "Clear simmered chicken bone broth",
+        "amount": "៩០០ មីលីលីត្រ"
       },
       {
-        "nameKh": "ស្ពៃចង្កឹះ និងផ្សិតត្រចៀកកណ្តុរ",
-        "nameEn": "Bok choy and wood ear mushrooms",
-        "amount": "១ ចាន"
+        "nameKh": "ផ្សិតត្រចៀកកណ្តុរ និងផ្កាចេកស្ងួត",
+        "nameEn": "Wood ear mushrooms and dried lily flowers",
+        "amount": "១ ចានតូច"
       },
       {
-        "nameKh": "ស្លឹកខ្ទឹម ខ្ទឹមបំពង ម្រេចកំពត",
-        "nameEn": "Scallions, crispy fried garlic, Kampot pepper",
-        "amount": "១ ស្លាបព្រាបាយ"
+        "nameKh": "ស្លឹកខ្ទឹម ជីរវ៉ាន់ស៊ុយ ខ្ទឹមបំពង ម្រេចកំពត",
+        "nameEn": "Scallions, cilantro, crispy fried garlic, Kampot white pepper",
+        "amount": "២ ស្លាបព្រាបាយ"
       }
     ],
     "steps": [
       {
         "stepNumber": 1,
-        "instructionKh": "ដាំទឹកស៊ុបឆ្អឹងជ្រូកឱ្យពុះ ដួសពពុះចេញឱ្យទឹកថ្លាឈ្ងុយ។",
-        "instructionEn": "Bring pork stock to a rolling boil and skim froth for a crystal-clear broth."
+        "instructionKh": "ដាំទឹកស៊ុបឆ្អឹងមាន់ជាមួយឫសជីរវ៉ាន់ស៊ុយ ខ្ទឹមស និងខ្ញីឱ្យពុះ ដួសពពុះចេញឱ្យថ្លាឈ្វេង។",
+        "instructionEn": "Simmer chicken bone broth with cilantro roots, crushed garlic, and ginger; skim broth for pristine clarity."
       },
       {
         "stepNumber": 2,
-        "instructionKh": "ចាប់ប្រហិតសាច់ជ្រូកមូលៗបង់ចូលក្នុងទឹកស៊ុបឱ្យឆ្អិនអណ្តែតឡើង។",
-        "instructionEn": "Drop handmade meatballs into boiling broth until they cook and float to the surface."
+        "instructionKh": "បង់ផ្សិតត្រចៀកកណ្តុរ និងផ្កាចេកចូលរម្ងាស់ឱ្យរីកទន់ រួចផ្សំរសជាតិទឹកត្រី អំបិល និងស្ករក្រាម។",
+        "instructionEn": "Add wood ear mushrooms and lily flowers, seasoning with pure fish sauce, sea salt, and rock sugar."
       },
       {
         "stepNumber": 3,
-        "instructionKh": "ដាក់មីសួរ និងស្ពៃចង្កឹះចូលស្រុះ ១ នាទី។",
-        "instructionEn": "Add softened glass noodles, mushrooms, and bok choy, simmering for 1 minute."
+        "instructionKh": "ដាក់មីសួរ និងសាច់មាន់ហែកចូលស្រុះក្នុងទឹកស៊ុបក្តៅប្រហែល ១ ទៅ ២ នាទីឱ្យសព្វជាតិ។",
+        "instructionEn": "Introduce softened glass noodles and shredded chicken into the simmering broth for 1 to 2 minutes."
       },
       {
         "stepNumber": 4,
-        "instructionKh": "ដួសដាក់ចាន រោយខ្ទឹមបំពង ស្លឹកខ្ទឹម និងម្រេចកំពត ទទួលទានក្តៅៗ។",
-        "instructionEn": "Ladle into bowls, top with fried garlic, scallions, and crushed pepper."
+        "instructionKh": "ដួសដាក់ចាន រោយខ្ទឹមបំពងប្រេងឈ្ងុយ ស្លឹកខ្ទឹម ជីរវ៉ាន់ស៊ុយ និងម្រេចកំពត ទទួលទានក្តៅៗជាមួយទឹកត្រីម្ទេស។",
+        "instructionEn": "Ladle into serving bowls, garnish lavishly with fried garlic oil, scallions, fresh cilantro, and crushed Kampot pepper."
       }
     ]
   },
@@ -5151,8 +5156,8 @@ export const generateFull100Foods = (): FoodItem[] => {
     "priceU": 4
   },
   {
-    "nameKh": "សម្លប្រហើរននោងបង្គាស្រស់",
-    "nameEn": "Luffa Gourd Fresh Shrimp Herbal Soup",
+    "nameKh": "សាច់ជ្រូកចិញ្ច្រាំ ត្រីប្រម៉ា",
+    "nameEn": "Steamed Minced Pork with Salted Fish",
     "cat": "soup",
     "priceR": 18000,
     "priceU": 4.5
@@ -5641,8 +5646,8 @@ export const generateFull100Foods = (): FoodItem[] => {
     "priceU": 4.5
   },
   {
-    "nameKh": "ញាំត្រសក់ត្រីឆ្អើរ",
-    "nameEn": "Cucumber Salad with Smoked Fish",
+    "nameKh": "ញាំម្កាក់ត្រីឆ្អើរ",
+    "nameEn": "Ambarella Salad with Smoked Fish",
     "cat": "salad",
     "priceR": 14000,
     "priceU": 3.5
@@ -5662,11 +5667,11 @@ export const generateFull100Foods = (): FoodItem[] => {
     "priceU": 3.5
   },
   {
-    "nameKh": "ម៉ាំល្ហុងសាច់ជ្រូកបីជាន់",
-    "nameEn": "Fermented Mudfish Papaya with Pork Belly",
+    "nameKh": "បុកមីកញ្ចប់",
+    "nameEn": "Spicy Pounded Instant Noodles Salad",
     "cat": "salad",
-    "priceR": 16000,
-    "priceU": 4
+    "priceR": 14000,
+    "priceU": 3.5
   },
   {
     "nameKh": "ផ្អកត្រីបំពងពងទា",
@@ -5809,8 +5814,8 @@ export const generateFull100Foods = (): FoodItem[] => {
     "priceU": 3
   },
   {
-    "nameKh": "មីសួរស៊ុបប្រហិតសាច់ជ្រូក",
-    "nameEn": "Glass Noodle Clear Soup with Meatballs",
+    "nameKh": "មីសួរសាច់មាន់",
+    "nameEn": "Chicken Glass Noodle Soup",
     "cat": "noodles",
     "priceR": 12000,
     "priceU": 3

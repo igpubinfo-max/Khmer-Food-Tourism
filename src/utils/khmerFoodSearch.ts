@@ -135,15 +135,39 @@ const SPICY_BODY_RE =
 export function normalizeKhmerFoodText(input?: string): string {
   if (!input) return '';
   return String(input)
+    .normalize('NFC')
     .replace(/[\u200B-\u200D\uFEFF]/g, '')
     .toLowerCase()
+    // Reorder decomposed Khmer vowel/diacritic & double-subscript sequences typed on mobile keyboards
+    .replace(/\u17C1\u17B6/g, '\u17C4') // េ + ា -> ោ
+    .replace(/\u17C1\u17B8/g, '\u17BE') // េ + ី -> ើ
+    .replace(/\u17C6\u17BB/g, '\u17BB\u17C6') // ំ + ុ -> ុំ
+    .replace(/\u17B6\u17C9/g, '\u17C9\u17B6') // ា + ៉ -> ៉ា
+    .replace(/\u17B6\u17CA/g, '\u17CA\u17B6') // ា + ៊ -> ៊ា
+    .replace(/\u17D2\u179A\u17D2([\u1780-\u1799\u179B-\u17A2])/g, '\u17D2$1\u17D2\u179A') // អង្រ្កង -> អង្ក្រង
+    // Normalize common Khmer culinary spelling variations
+    .replace(/សម្លរ/g, 'សម្ល')
+    .replace(/ស្ងោ(?!រ)/g, 'ស្ងោរ')
+    .replace(/ស្ងោរជ្រក(?!់)/g, 'ស្ងោរជ្រក់')
+    .replace(/ប្រហើ(?!រ)/g, 'ប្រហើរ')
+    .replace(/អាមុក/g, 'អាម៉ុក')
+    .replace(/គុយទៀវ/g, 'គុយទាវ')
+    .replace(/បាញ់ឆេវ/g, 'បាញ់ឆែវ')
+    .replace(/ឡុកឡាក(?!់)/g, 'ឡុកឡាក់')
+    .replace(/ការ៉ី/g, 'ការី')
+    .replace(/ម្ចូរ|ម្ជូ(?!រ)/g, 'ម្ជូរ')
+    .replace(/កកូ(?!រ)/g, 'កកូរ')
+    .replace(/ខ្ទឹះ/g, 'ខ្ទិះ')
     .replace(/ហិរ/g, 'ហឹរ')
+    .replace(/ត្រយ៉ូង/g, 'ត្រយូង')
     .replace(/ស្រដែក/g, 'សណ្តែក')
     .replace(/ណ្ដ/g, 'ណ្ត')
     .replace(/ក្ដ/g, 'ក្ត')
     .replace(/ផ្ដ/g, 'ផ្ត')
     .replace(/ស្ដ/g, 'ស្ត')
     .replace(/ម្ដ/g, 'ម្ត')
+    .replace(/ប្ដ/g, 'ប្ត')
+    .replace(/ឧត្ដ/g, 'ឧត្ត')
     .replace(/ឆ្ដ/g, 'ឆ្ត')
     .replace(/ង្ដ/g, 'ង្ត')
     .replace(/ន្ដ/g, 'ន្ត')
@@ -157,6 +181,7 @@ export function normalizeKhmerFoodText(input?: string): string {
     .replace(/កាពិក/g, 'កាពិ')
     .replace(/លៀស/g, 'លាស')
     .replace(/ស្រុស/g, 'ស្រុះ')
+    .replace(/ឆ្អឹងជំនី(?!រ)/g, 'ឆ្អឹងជំនីរ')
     .replace(/[.,/#!$%^&*;:{}=\-_`~()?"'«»៖។]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -178,17 +203,18 @@ export function stripNegatedSpicePhrases(text?: string): string {
 export function includesNormalizedKhmerToken(hay: string, token: string): boolean {
   const t = token.trim().toLowerCase();
   if (!t) return false;
-  let idx = hay.indexOf(t);
+  const effectiveHay = t === 'ត្រី' ? hay.replace(/ទឹកត្រី/g, ' ') : hay;
+  let idx = effectiveHay.indexOf(t);
   const isShortLatin = /^[a-z]{2,4}$/.test(t);
   while (idx !== -1) {
-    const prevCode = idx > 0 ? hay.charCodeAt(idx - 1) : 0;
+    const prevCode = idx > 0 ? effectiveHay.charCodeAt(idx - 1) : 0;
     const nextIdx = idx + t.length;
-    const prevIsLatin = idx > 0 && /[a-z0-9]/i.test(hay[idx - 1]);
-    const nextIsLatin = nextIdx < hay.length && /[a-z0-9]/i.test(hay[nextIdx]);
+    const prevIsLatin = idx > 0 && /[a-z0-9]/i.test(effectiveHay[idx - 1]);
+    const nextIsLatin = nextIdx < effectiveHay.length && /[a-z0-9]/i.test(effectiveHay[nextIdx]);
     if (prevCode !== 0x17d2 && (!isShortLatin || (!prevIsLatin && !nextIsLatin))) {
       return true;
     }
-    idx = hay.indexOf(t, idx + 1);
+    idx = effectiveHay.indexOf(t, idx + 1);
   }
   return false;
 }
@@ -264,12 +290,25 @@ const KNOWN_KHMER_FOOD_SUBTOKENS = [
   'គុយទាវ',
   'បុកល្ហុង',
   'បុកស្វាយ',
+  'ប្រហុកចំហុយ',
   'ប្រហុកខ្ទិះ',
+  'ប្រហុកដុត',
+  'ប្រហុកអាំង',
+  'ប្រហុកកប់',
+  'ប្រហុក',
+  'ផ្អកចំហុយ',
+  'ផ្អក',
+  'ម៉ាំចំហុយ',
+  'ម៉ាំ',
   'ទឹកគ្រឿង',
+  'កាពិផាវ',
+  'កាពិ',
   'ឆាម្រះព្រៅ',
   'ឆាខាត់ណា',
   'ឆាក្តៅ',
   'ស្ងោរជ្រក់',
+  'ចំហុយ',
+  'អប់',
   'ត្រីដុត',
   'មាន់ដុត',
   'ក្តាមឆាម្រេច',
@@ -280,6 +319,11 @@ const KNOWN_KHMER_FOOD_SUBTOKENS = [
   'ត្រីសណ្តាយ',
   'ត្រីរ៉ស់',
   'ត្រីអណ្តែង',
+  'ត្រីក្រាញ់',
+  'ត្រីឆ្ពិន',
+  'ត្រីប្រា',
+  'ត្រីឆ្លាំង',
+  'ត្រីកេះ',
   'ត្រីងៀត',
   'ត្រីឆ្អើរ',
   'ភ្លាបង្គា',
@@ -302,11 +346,25 @@ const KNOWN_KHMER_FOOD_SUBTOKENS = [
   'ខ្យង',
   'អន្ទង់',
   'កង្កែប',
+  'អង្ក្រង',
+  'ស្តៅ',
+  'ត្រួយអំពិល',
+  'ផ្កាស្នោ',
+  'កញ្ឆែត',
+  'ក្រអៅឈូក',
+  'ត្រយូងចេក',
+  'ស្លឹកម្រុំ',
+  'ស្លឹកញ',
   'ព្រលិត',
   'ខាត់ណា',
   'ត្រកួន',
   'អំពិលទុំ',
   'ង៉ាំង៉ូវ',
+  'អន្សម',
+  'នំគម',
+  'នំអាកោ',
+  'ក្រឡាន',
+  'សង់ខ្យាល្ពៅ',
   'ត្រី',
   'លត',
   'បាយឆា',

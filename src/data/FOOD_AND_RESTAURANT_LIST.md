@@ -48,7 +48,7 @@
 | 37 | `food-37` | **នំបញ្ចុកសម្លខ្មែរ** | Nom Banh Chok (Khmer Rice Noodle Curry) | អាហារប្រពៃណី / នំបញ្ចុក |
 | 38 | `food-38` | **មីកូឡាស្ទឹងត្រែង** | Mee Kola (Steamed Noodles with Dried Shrimp & Egg) | ម្ហូបតំបន់ / ស្ទឹងត្រែង-ប៉ៃលិន |
 | 39 | `food-39` | **គុយទាវខសាច់គោ** | Kuyteav Khor Ko (Braised Beef Stew Noodles) | គុយទាវ / ពិសេស |
-| 40 | `food-40` | **មីឆាសាច់គោពងទាចៀន** | Khmer Stir-Fried Noodles with Beef & Egg (Mee Cha) | អាហារសម្រន់ / មីឆា |
+| 40 | `food-40` | **មីឆាសាច់គោ** | Khmer Stir-Fried Noodles with Beef (Mee Cha Sach Ko) | គុយទាវ & មីឆា |
 | 41 | `food-41` | **បាយសាច់ជ្រូកអាំងពងទាចៀន** | Bai Sach Chrouk (Grilled Pork with Broken Rice) | អាហារពេលព្រឹក / បាយ |
 | 42 | `food-42` | **បបរគ្រឿងសាច់ជ្រូកខ្មែរ** | Khmer Rice Porridge with Pork & Offal (Babor Kroeung) | អាហារពេលព្រឹក / បបរ |
 | 43 | `food-43` | **បាយឆាក្តាមសៀមរាប** | Fried Rice with Fresh Crab Meat | ម្ហូបបាយ / ពិសេស |
@@ -62,7 +62,7 @@
 | 51 | `food-51` | **សម្លម្ជូរត្រីកែវរំដេង** | River Keo Fish Galangal Sour Soup | ម្ហូបសម្ល / ប្រពៃណី |
 | 52 | `food-52` | **សម្លម្ជូរល្ពៅសាច់ជ្រូក** | Pumpkin Pork Rib Sour Soup | ម្ហូបសម្ល / ប្រពៃណី |
 | 53 | `food-53` | **សម្លម្ជូរទំពាំងត្រីឆ្អើរ** | Bamboo Shoot & Smoked Fish Soup | ម្ហូបសម្ល / ប្រពៃណី |
-| 54 | `food-54` | **សម្លប្រហើរននោងបង្គាស្រស់** | Luffa Gourd Fresh Shrimp Herbal Soup | ម្ហូបសម្ល / ប្រពៃណី |
+| 54 | `food-54` | **សាច់ជ្រូកចិញ្ច្រាំ ត្រីប្រម៉ា** | Steamed Minced Pork with Salted Fish (Sach Chrouk Trey Prama) | ម្ហូបពិសេស / ចំហុយ |
 | 55 | `food-55` | **សម្លស្ងោរម្រះញាត់សាច់ជ្រូក** | Bitter Melon Stuffed with Pork Soup | ម្ហូបសម្ល / ប្រពៃណី |
 | 56 | `food-56` | **សម្លម្ជូរផ្កាកំប្លោកត្រីរ៉ស់** | Water Lily Flower Sour Soup with Fish | ម្ហូបសម្ល / ប្រពៃណី |
 | 57 | `food-57` | **សម្លការីទាស្រែចេកខ្ចី** | Country Duck Red Curry with Green Banana | ម្ហូបសម្ល / ប្រពៃណី |
@@ -85,15 +85,15 @@
 | 74 | `food-74` | **ឆាខ្ញីត្រីរ៉ស់រសជាតិដើម** | Snakehead Fish with Ginger & Black Beans | ម្ហូបឆា / ក្តៅៗ |
 | 75 | `food-75` | **ឆាក្តៅសាច់គោស្លឹកម្រះព្រៅ** | Spicy Holy Basil Beef Stir-Fry | ម្ហូបឆា / ក្តៅៗ |
 | 76 | `food-76` | **ញាំត្រយូងចេកសាច់មាន់ស្រែ** | Banana Blossom Salad with Free-Range Chicken | ញាំ & ភ្លាខ្មែរ |
-| 77 | `food-77` | **ញាំត្រសក់ត្រីឆ្អើរ** | Cucumber Salad with Smoked Fish | ញាំ & ភ្លាខ្មែរ |
+| 77 | `food-77` | **ញាំម្កាក់ត្រីឆ្អើរ** | Ambarella Salad with Smoked Fish (Nhoam Mkak Trey Chh-oe) | ញាំ & ភ្លាខ្មែរ |
 | 78 | `food-78` | **ទឹកគ្រឿងសណ្តែកដីបាត់ដំបង** | Battambang Peanut Fish Dip Platter | ញាំ & ភ្លាខ្មែរ |
 | 79 | `food-79` | **ប្រហុកកប់ស្លឹកចេកអាំង** | Charcoal Pit Prahok in Banana Leaf | ញាំ & ភ្លាខ្មែរ |
-| 80 | `food-80` | **ម៉ាំល្ហុងសាច់ជ្រូកបីជាន់** | Fermented Mudfish Papaya with Pork Belly | ញាំ & ភ្លាខ្មែរ |
+| 80 | `food-80` | **បុកមីកញ្ចប់** | Spicy Pounded Instant Noodles Salad (Bok Mee Kanchop) | ញាំ & បុកខ្មែរ |
 | 81 | `food-81` | **នំបញ្ចុកសម្លការីសាច់មាន់** | Nom Banh Chok with Red Chicken Curry | គុយទាវ & នំបញ្ចុក |
 | 82 | `food-82` | **នំបញ្ចុកទឹកប្រហុកសៀមរាប** | Siem Reap Spicy Prahok Rice Noodles | គុយទាវ & នំបញ្ចុក |
 | 83 | `food-83` | **គុយទាវកាត់ទន្លេបាសាក់** | Steamed Rice Noodle Rolls with Minced Pork | គុយទាវ & នំបញ្ចុក |
 | 84 | `food-84` | **គុយទាវឆាខ្មែរពងទាចៀន** | Stir-Fried Rice Noodles with Duck Egg | គុយទាវ & នំបញ្ចុក |
-| 85 | `food-85` | **មីសួរស៊ុបប្រហិតសាច់ជ្រូក** | Glass Noodle Clear Soup with Meatballs | គុយទាវ & នំបញ្ចុក |
+| 85 | `food-85` | **មីសួរសាច់មាន់** | Chicken Glass Noodle Soup (Mi Suor Sach Moan) | គុយទាវ & មីសួរ |
 | 86 | `food-86` | **បាយឆាឡុកឡាក់សាច់គោ** | Beef Lok Lak Fried Rice Platter | បាយ & អាហារពេលព្រឹក |
 | 87 | `food-87` | **បាយឆាម្រះព្រៅសាច់ជ្រូក** | Holy Basil Pork Fried Rice | បាយ & អាហារពេលព្រឹក |
 | 88 | `food-88` | **បបរមាន់ស្រែស្លឹកខ្ទឹម** | Free-Range Chicken Rice Porridge | បាយ & អាហារពេលព្រឹក |

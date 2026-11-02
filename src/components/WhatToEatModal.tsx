@@ -609,11 +609,16 @@ export const WhatToEatModal: React.FC = () => {
         ? [liveOutOfCatalogDish, ...list.filter((f) => f.id !== liveOutOfCatalogDish.id)]
         : list;
 
+    // Only enforce automatic clock-based mealtime filtering when no explicit search query is typed
+    // (or when the user explicitly selected a specific mealSlotFilter chip).
+    // Otherwise searching "ស្ងោរជ្រក់ត្រី" or "សម្លកកូរ" at 3:45 PM (afternoon snack slot) would discard soups!
+    const shouldEnforceMealSlot = !qTrim || mealSlotFilter !== 'auto';
+
     // 1. Strict 4-way intersection (Craving + Category + MealSlot + Diet)
     const strictAll = basePool.filter(
       (food) =>
         matchesCategoryStrict(food, categoryFilter) &&
-        matchesMealSlotStrict(food, mealSlotFilter, effectiveMealSlot) &&
+        (!shouldEnforceMealSlot || matchesMealSlotStrict(food, mealSlotFilter, effectiveMealSlot)) &&
         matchesDietStrict(food, vipDietFilter)
     );
     if (strictAll.length > 0) return withCustomLead(strictAll);
@@ -713,7 +718,9 @@ export const WhatToEatModal: React.FC = () => {
       return;
     }
     if (foods.length > 0 && !isMedicalRefusalActive) {
-      const initialPick = pickRandomDish(currentDishId || undefined);
+      const initialPick = cravingQuery.trim()
+        ? activeDishList[0] || pickRandomDish(currentDishId || undefined)
+        : pickRandomDish(currentDishId || undefined);
       if (initialPick) setCurrentDishId(initialPick.id);
     }
   }, [
@@ -1189,6 +1196,7 @@ export const WhatToEatModal: React.FC = () => {
                   onChange={(e) => {
                     setCravingQuery(e.target.value);
                     setCurrentDishId('');
+                    setSpinCount(0);
                     if (drinkMode) setDrinkMode(false);
                   }}
                   placeholder={tr(
@@ -1205,6 +1213,7 @@ export const WhatToEatModal: React.FC = () => {
                     onClick={() => {
                       setCravingQuery('');
                       setCurrentDishId('');
+                      setSpinCount(0);
                     }}
                     aria-label="Clear search"
                     className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"

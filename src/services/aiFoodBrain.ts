@@ -137,12 +137,15 @@ export function detectAllergens(food: FoodItem): AllergenId[] {
 }
 
 const FEATURES: Array<{ re: RegExp; phrase: T3; nameOnly?: boolean }> = [
+  { re: /ចំហុយ|អប់|អាម៉ុក|អាមុក|\bsteamed\b/i, phrase: ['ចំហុយក្តៅៗឈ្ងុយគ្រឿង', 'aromatic & freshly steamed', '清蒸鲜香'], nameOnly: true },
+  { re: /ប្រហុក|ផ្អក|ម៉ាំ|ទឹកគ្រឿង|កាពិ|\bprahok\b/i, phrase: ['រសជាតិខ្មែរឈ្ងុយមុត', 'rich savoury Khmer umami', '浓郁高棉风味'], nameOnly: true },
   { re: /បំពង|ចៀន|ស្រួយ|crispy|fried|crunch/i, phrase: ['ស្រួយក្រៀមៗ', 'crispy & crunchy', '外酥脆'], nameOnly: true },
   { re: /អាំង|ដុត|grill|bbq|roast|charcoal/i, phrase: ['អាំងលើធ្យូងឈ្ងុយ', 'charcoal-grilled aroma', '炭火香气'], nameOnly: true },
+  { re: /ឆា|ឡុកឡាក់|stir[\s-]*fry|wok/i, phrase: ['ឆាក្តៅឈ្ងុយខ្ទះ', 'fragrant wok-tossed', '锅气十足'], nameOnly: true },
   { re: /ម្ទេស|ហឹរ|chili|spicy/i, phrase: ['ហឹរមុត', 'spicy kick', '香辣'] },
   { re: /ជូរ|ក្រូចឆ្មា|អំពិល|sour|lime|tamarind/i, phrase: ['ជូរស្រស់ស្រាយ', 'bright & sour', '酸爽'] },
   { re: /ខ្ទិះ|coconut/i, phrase: ['ខ្ទិះដូងទន់ក្រអូប', 'creamy coconut', '椰香柔滑'] },
-  { re: /ក្តាម|ក្ដាម|បង្គា|មឹក|គ្រំ|crab|prawn|shrimp|squid/i, phrase: ['គ្រឿងសមុទ្រស្រស់ៗ', 'fresh seafood', '新鲜海味'], nameOnly: true },
+  { re: /ក្តាម|ក្ដាម|បង្គា|បង្កង|មឹក|ងាវ|លៀស|លាស|គ្រំ|crab|prawn|shrimp|squid|cockle|clam/i, phrase: ['គ្រឿងសមុទ្រស្រស់ៗ', 'fresh seafood', '新鲜海味'], nameOnly: true },
   { re: /សាច់គោ|សាច់ជ្រូក|សាច់មាន់|beef|pork|chicken|duck/i, phrase: ['សាច់ទន់ឈ្ងុយ', 'tender, juicy meat', '肉质鲜嫩'], nameOnly: true },
 ];
 
@@ -160,6 +163,8 @@ export function describeDish(food: FoodItem, language: Language): string {
   if (food.categorySlug === 'soup' && parts.length < 2) parts.push(tr(language, 'ទឹកស៊ុបក្តៅៗ', 'warm, comforting broth', '热乎乎的汤'));
   if (food.categorySlug === 'salad' && parts.length < 2) parts.push(tr(language, 'ញាំស្រស់ស្រាយ', 'fresh & zesty', '清新爽口'));
   if (food.categorySlug === 'dessert' && parts.length < 2) parts.push(tr(language, 'ផ្អែមស្រទន់', 'gently sweet', '甜而不腻'));
+  if (food.categorySlug === 'cake' && parts.length < 2) parts.push(tr(language, 'នំខ្មែរឈ្ងុយទន់ស្វិត', 'fragrant artisan pastry', '香甜软糯'));
+  if (food.categorySlug === 'drink' && parts.length < 2) parts.push(tr(language, 'ត្រជាក់ស្រស់ស្រាយ', 'chilled & refreshing', '冰爽解渴'));
   if (parts.length === 0) parts.push(tr(language, 'រសជាតិខ្មែរពិតៗ', 'authentic Khmer flavour', '地道高棉风味'));
   return parts.join(' • ');
 }
