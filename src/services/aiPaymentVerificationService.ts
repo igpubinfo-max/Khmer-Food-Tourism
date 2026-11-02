@@ -320,7 +320,14 @@ async function extractReceiptViaGeminiVision(
   "senderName": string or null (the "From" name on the receipt)
 }`;
 
-    const candidateModels = ['gemini-2.5-flash', 'gemini-flash-latest'];
+    const candidateModels = [
+      'gemini-3.5-flash-lite',
+      'gemini-flash-lite-latest',
+      'gemini-3.1-flash-lite',
+      'gemini-3.8-flash',
+      'gemini-2.5-flash',
+      'gemini-flash-latest',
+    ];
     let textOut = '';
     for (const modelName of candidateModels) {
       try {
