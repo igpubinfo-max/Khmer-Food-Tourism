@@ -395,6 +395,8 @@ export const FOOD_CATEGORY_ZH_MAP: Record<string, string> = {
   'Dessert / Pandan Rice Drop': '斑兰米漏粉配椰浆棕榈糖',
   'Seafood / Poached Blood Cockles': '白灼血蚶配酸辣蘸汁',
   'Stir-Fry / Chinese Kale & Beef': '芥兰炒滴泪嫩牛肉',
+  'Stir-Fry / Roasted Freshwater Shrimp': '香葱蒜椒爆炒脆河虾',
+  'Salad & Relish / Pounded Wood-Apple & Smoked Fish': '木苹果春烟熏鱼配鲜蔬',
   ...FOOD_51_100_CAT_ZH,
 };
 
@@ -408,6 +410,8 @@ export const EXACT_FOOD_NAME_ZH_MAP: Record<string, string> = {
   'Cambodian Pandan Rice Drop Dessert in Coconut Cream (Bang-Aem Lort Angkor)': '斑兰米漏粉椰浆甜品 (Bang-Aem Lort Angkor)',
   'Poached Blood Cockles with Spicy Dipping Sauce (Ngav Sros)': '白灼血蚶配酸辣海鲜蘸汁 (Ngav Sros)',
   'Wok-Seared Chinese Kale with Crying Tiger Beef (Cha Khatna Sach Ko Tuk Phnek)': '芥兰猛火炒滴泪牛肉 (Cha Khatna Sach Ko Tuk Phnek)',
+  'Cambodian Wok-Roasted Crispy River Shrimp with Scallions & Chili (Kampis Ling)': '香葱蒜椒爆炒脆河虾 (Kampis Ling)',
+  'Cambodian Pounded Wood-Apple & Smoked Fish Relish (Bok Krasang Trei Chhaeur)': '高棉木苹果春烟熏鱼配鲜蔬 (Bok Krasang Trei Chhaeur)',
   'Fish Amok with Noni Leaves': '诺丽叶椰香高棉阿莫克蒸鱼 (Fish Amok)',
   'Authentic Samlor Korko (Cambodian Mixed Stew)': '正宗高棉什锦蔬菜浓汤 (Samlor Korko)',
   'Ripe Palm Fruit Stew with Pork Belly (Samlor Kako Tnot)': '熟棕榈果炖五花肉浓汤 (Samlor Kako Tnot)',
@@ -855,8 +859,8 @@ const KHMER_CULINARY_MAP: Array<[string, string, string]> = [
   ['កាហ្វេទឹកដោះគោទឹកកក', 'Cambodian Iced Condensed Milk Coffee', '高棉炼乳冰咖啡'],
 ];
 
-const SORTED_EXTRA_KHMER_CULINARY_KEYS = Object.keys(EXTRA_KHMER_CULINARY_MAP).sort(
-  (a, b) => b.length - a.length
+const SORTED_EXTRA_KHMER_CULINARY_ENTRIES = [...EXTRA_KHMER_CULINARY_MAP].sort(
+  (a, b) => b[0].length - a[0].length
 );
 
 export function translateSignatureDish(dish: string, lang: Language): string {
@@ -865,9 +869,10 @@ export function translateSignatureDish(dish: string, lang: Language): string {
   if (!trimmed) return '';
 
   // 1. Exact match in EXTRA_KHMER_CULINARY_MAP
-  const extraExact = EXTRA_KHMER_CULINARY_MAP[trimmed];
-  if (extraExact) {
-    return lang === 'zh' ? extraExact.zh : extraExact.en;
+  for (const [kh, en, zh] of EXTRA_KHMER_CULINARY_MAP) {
+    if (trimmed === kh) {
+      return lang === 'zh' ? zh : en;
+    }
   }
 
   // 2. Exact match in KHMER_CULINARY_MAP
@@ -876,10 +881,9 @@ export function translateSignatureDish(dish: string, lang: Language): string {
   }
 
   // 3. Longest-first substring match in EXTRA_KHMER_CULINARY_MAP
-  for (const khKey of SORTED_EXTRA_KHMER_CULINARY_KEYS) {
-    if (trimmed.includes(khKey)) {
-      const entry = EXTRA_KHMER_CULINARY_MAP[khKey];
-      return lang === 'zh' ? entry.zh : entry.en;
+  for (const [kh, en, zh] of SORTED_EXTRA_KHMER_CULINARY_ENTRIES) {
+    if (trimmed.includes(kh)) {
+      return lang === 'zh' ? zh : en;
     }
   }
 
@@ -1948,7 +1952,7 @@ export function formatApproxPriceText(rawText: string | undefined, lang: Languag
 /**
  * Get localized fields for a FoodItem in KM, EN, or ZH
  */
-export function getLocalizedFood(food: FoodItem, lang: Language) {
+export function getLocalizedFood(food: FoodItem, lang: Language): ReturnType<typeof computeLocalizedFood> {
   if (!food || typeof food !== 'object') return computeLocalizedFood(food, lang);
   let byLang = localizedFoodWeakCache.get(food);
   if (byLang && byLang[lang]) return byLang[lang];
@@ -2042,6 +2046,7 @@ function computeLocalizedFood(food: FoodItem, lang: Language) {
       secondaryName: '',
       subtitle: '',
       category: sanitizeStrictLanguageText(food.categoryKh, 'km'),
+      province: sanitizeStrictLanguageText(food.provinceKh || '', 'km'),
       description: sanitizeStrictLanguageText(conciseKm, 'km'),
       prepTime: food.prepTime,
       cookTime: food.cookTime,
@@ -2069,6 +2074,7 @@ function computeLocalizedFood(food: FoodItem, lang: Language) {
       secondaryName: '',
       subtitle: '',
       category: sanitizeStrictLanguageText(food.categoryEn, 'en'),
+      province: sanitizeStrictLanguageText(food.provinceEn || '', 'en'),
       description: sanitizeStrictLanguageText(conciseEn, 'en'),
       prepTime: formatDurationByLang(food.prepTime, 'en'),
       cookTime: formatDurationByLang(food.cookTime, 'en'),
@@ -2119,8 +2125,6 @@ function computeLocalizedFood(food: FoodItem, lang: Language) {
         ? `${zhName}是一款经典高棉传统蕉叶糕点，精选${mainZh}依古法匠心制成。`
         : food.categorySlug === 'drink'
         ? `${zhName}是一款清爽怡人的柬埔寨特色饮品，精选${mainZh}调制而成。`
-        : food.categorySlug === 'cake'
-        ? `${zhName}是一款传承古法的高棉传统糕粽，精选${mainZh}匠心制作，软糯香醇。`
         : food.categorySlug === 'dessert'
         ? `${zhName}是一款备受喜爱的高棉传统甜品，精选${mainZh}匠心制作，香甜绵密。`
         : `${zhName}是一道风味地道的高棉佳肴，甄选${mainZh}精心烹制，鲜美可口。`
@@ -2144,6 +2148,7 @@ function computeLocalizedFood(food: FoodItem, lang: Language) {
     secondaryName: '',
     subtitle: '',
     category: zhCategory,
+    province: CAMBODIA_PROVINCE_ZH_MAP[food.provinceKh || ''] || CAMBODIA_PROVINCE_ZH_MAP[food.provinceEn || ''] || '',
     description: zhDesc,
     prepTime: formatDurationByLang(food.prepTime, 'zh'),
     cookTime: formatDurationByLang(food.cookTime, 'zh'),
@@ -2179,7 +2184,7 @@ const SOCIAL_HIGHLIGHT_ZH_MAP: Record<string, string> = {
 /**
  * Get localized fields for a TouristDestination in KM, EN, or ZH
  */
-export function getLocalizedDestination(dest: TouristDestination, lang: Language) {
+export function getLocalizedDestination(dest: TouristDestination, lang: Language): ReturnType<typeof computeLocalizedDestination> {
   if (!dest || typeof dest !== 'object') return computeLocalizedDestination(dest, lang);
   let byLang = localizedDestinationWeakCache.get(dest);
   if (byLang && byLang[lang]) return byLang[lang];
@@ -2275,7 +2280,7 @@ function computeLocalizedDestination(dest: TouristDestination, lang: Language) {
 /**
  * Get localized fields for a Restaurant in KM, EN, or ZH
  */
-export function getLocalizedRestaurant(rest: Restaurant, lang: Language) {
+export function getLocalizedRestaurant(rest: Restaurant, lang: Language): ReturnType<typeof computeLocalizedRestaurant> {
   if (!rest || typeof rest !== 'object') return computeLocalizedRestaurant(rest, lang);
   let byLang = localizedRestaurantWeakCache.get(rest);
   if (byLang && byLang[lang]) return byLang[lang];

@@ -11,12 +11,14 @@ export const Toast: React.FC = () => {
     success: <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />,
     info: <Info className="w-5 h-5 text-blue-600 shrink-0" />,
     warning: <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />,
+    error: <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />,
   };
 
   const bgStyles = {
     success: 'bg-white border-emerald-200 text-slate-800 shadow-lg',
     info: 'bg-white border-blue-200 text-slate-800 shadow-lg',
     warning: 'bg-white border-rose-200 text-rose-950 shadow-lg',
+    error: 'bg-white border-rose-200 text-rose-950 shadow-lg',
   };
 
   return (

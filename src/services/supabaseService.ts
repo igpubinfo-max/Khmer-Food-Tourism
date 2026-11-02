@@ -99,7 +99,7 @@ export function saveCloudApiConfig(partial: Partial<CloudApiConfig>): CloudApiCo
           : 'gemini_vision',
         backendProxyUrl: updated.aiVisionBackendUrl,
         apiKey: updated.geminiApiKey,
-        modelName: 'gemini-2.0-flash',
+        modelName: 'gemini-2.5-flash',
         timeoutMs: 10000,
       };
       localStorage.setItem('kft_ai_vision_config_v1', JSON.stringify(aiVisionCfg));
@@ -1045,8 +1045,8 @@ export async function uploadBase64ImageToSupabaseStorage(
       for (let i = 0; i < bin.length; i++) {
         bytes[i] = bin.charCodeAt(i);
       }
-    } else if (typeof Buffer !== 'undefined') {
-      bytes = new Uint8Array(Buffer.from(b64, 'base64'));
+    } else if (typeof (globalThis as any).Buffer !== 'undefined') {
+      bytes = new Uint8Array((globalThis as any).Buffer.from(b64, 'base64'));
     } else {
       return null;
     }
@@ -2153,8 +2153,8 @@ export async function syncAllAppDataWithSupabase(localState: {
       {
         const uniqueVerifiedRefs = new Set(verifiedAdditionalStoreTxns.map(t => t.id));
         const slotCount = uniqueVerifiedRefs.size;
-        const currentIds = Array.isArray(mergedUsers[i].additionalStorePaymentIds)
-          ? mergedUsers[i].additionalStorePaymentIds
+        const currentIds: string[] = Array.isArray(mergedUsers[i].additionalStorePaymentIds)
+          ? (mergedUsers[i].additionalStorePaymentIds as string[])
           : [];
         if (
           slotCount !== (mergedUsers[i].paidAdditionalStoreSlots || 0) ||

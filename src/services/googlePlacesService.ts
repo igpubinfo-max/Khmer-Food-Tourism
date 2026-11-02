@@ -77,6 +77,7 @@ export interface SmartCacheStats {
 export interface GooglePlaceCachedItem {
   placeId: string;
   googlePlaceId: string;
+  name?: string;
   nameKh: string;
   nameEn: string;
   nameZh?: string;
@@ -88,8 +89,10 @@ export interface GooglePlaceCachedItem {
   weekdayDescriptions?: string[];
   province: string;
   provinceKh?: string;
+  provinceEn?: string;
   address: string;
   addressKh?: string;
+  addressEn?: string;
   lat: number;
   lng: number;
   latitude?: number;
@@ -118,7 +121,7 @@ export interface GooglePlacesSearchRequest {
   province?: string;
   categoryFilter?: GooglePlaceSearchCategory;
   category?: GooglePlaceSearchCategory;
-  typeFilter?: 'restaurant' | 'tourism' | 'all';
+  typeFilter?: 'restaurant' | 'cafe' | 'tourism' | 'all';
   searchScope?: 'nationwide' | 'province' | 'nearby';
   lat?: number;
   lng?: number;
@@ -275,8 +278,8 @@ function isUnrelatedFallbackPhotoUrl(url?: string, placeId?: string): boolean {
   if (url.includes('Angkor_Wat.jpg') && placeId && !placeId.toLowerCase().includes('angkor')) return true;
   if (url === '/Shop/rest-1.jpg' && placeId !== 'gmap-pp-malis-restaurant') return true;
   if (url === '/Shop/rest-2.jpg' && placeId !== 'gmap-pp-romdeng') return true;
-  if (url === '/Shop/rest-4.jpg' && placeId !== 'gmap-pp-kravanh') return true;
-  if (url === '/Shop/rest-6.jpg' && placeId !== 'gmap-pp-sovanna-bbq') return true;
+  if (url.endsWith('rest-4.jpg') && placeId !== 'gmap-pp-kravanh') return true;
+  if (url.endsWith('rest-6.jpg') && placeId !== 'gmap-pp-sovanna-bbq') return true;
   if (url === '/Shop/rest-7.jpg' && placeId !== 'gmap-pp-one-more-restaurant') return true;
   return false;
 }
@@ -1577,7 +1580,7 @@ export function expandMultilingualPlaceQuery(
   };
   const cfg = catKeywords[categoryFilter] || catKeywords.all;
   return {
-    isCoffeeSearch: categoryFilter === 'cafe',
+    isCoffeeSearch: (categoryFilter as string) === 'cafe',
     isRestaurantSearch: ['restaurant', 'street_food', 'seafood', 'bakery'].includes(categoryFilter),
     isTourismSearch: ['tourism', 'temple', 'nature', 'beach', 'mountain', 'resort'].includes(categoryFilter),
     resolvedCategory: categoryFilter,
@@ -1907,7 +1910,7 @@ function searchAppVerifiedCambodiaDirectory(
   plan: ExpandedPlaceSearchPlan,
   provinceFilter: string,
   categoryFilter: GooglePlaceSearchCategory,
-  typeFilter?: 'restaurant' | 'tourism' | 'all',
+  typeFilter?: 'restaurant' | 'cafe' | 'tourism' | 'all',
   latVal?: number,
   lngVal?: number,
   radiusVal?: number
@@ -2415,7 +2418,7 @@ export function mapRawGooglePlaceV1ToCachedItem(
   p: any,
   apiKey: string,
   fallbackCategory?: GooglePlaceSearchCategory,
-  typeFilter?: 'restaurant' | 'tourism' | 'all',
+  typeFilter?: 'restaurant' | 'cafe' | 'tourism' | 'all',
   isCoffeeHint?: boolean
 ): GooglePlaceCachedItem | null {
   if (!p || p.businessStatus === 'CLOSED_PERMANENTLY') return null;
@@ -2884,7 +2887,7 @@ async function searchLiveCambodiaMultiSource(
             cachedAt: new Date().toISOString(),
           };
         })
-        .filter((x): x is GooglePlaceCachedItem => x !== null);
+        .filter((x: GooglePlaceCachedItem | null): x is GooglePlaceCachedItem => x !== null);
     } catch {
       return [];
     }
@@ -3043,7 +3046,7 @@ async function searchLiveCambodiaMultiSource(
             cachedAt: new Date().toISOString(),
           };
         })
-        .filter((x): x is GooglePlaceCachedItem => x !== null);
+        .filter((x: GooglePlaceCachedItem | null): x is GooglePlaceCachedItem => x !== null);
     } catch (err) {
       console.warn('[SearchEngine] ArcGIS query failed:', task.text, err);
       return [];
@@ -3177,7 +3180,7 @@ async function searchLiveCambodiaMultiSource(
             cachedAt: new Date().toISOString(),
           };
         })
-        .filter((x): x is GooglePlaceCachedItem => x !== null);
+        .filter((x: GooglePlaceCachedItem | null): x is GooglePlaceCachedItem => x !== null);
     } catch (err) {
       console.warn('[SearchEngine] Nominatim query failed:', task.q, err);
       return [];
@@ -4033,6 +4036,9 @@ export function convertGooglePlaceToDestination(
     beach: { kh: 'កោះ & ឆ្នេរសមុទ្រ', en: 'Islands & Beaches' },
     mountain: { kh: 'ភ្នំ & ឧទ្យានជាតិ', en: 'Mountains & Parks' },
     resort: { kh: 'វប្បធម៌ និងរមណីយដ្ឋាន', en: 'Culture & Resorts' },
+    ecotourism: { kh: 'អេកូទេសចរណ៍ & ធម្មជាតិ', en: 'Ecotourism & Nature' },
+    cultural: { kh: 'វប្បធម៌ & ប្រវត្តិសាស្ត្រ', en: 'Cultural & Heritage' },
+    waterfall: { kh: 'ទឹកធ្លាក់ & ធម្មជាតិ', en: 'Waterfalls & Nature' },
   };
   const label = categoryLabels[subCat] || categoryLabels.resort;
 
@@ -4380,7 +4386,7 @@ export async function searchNearbyPlacesWithin500m(
               cachedAt: new Date().toISOString(),
             };
           })
-          .filter((x): x is GooglePlaceCachedItem => x !== null);
+          .filter((x: GooglePlaceCachedItem | null): x is GooglePlaceCachedItem => x !== null);
       } catch {
         return [];
       }

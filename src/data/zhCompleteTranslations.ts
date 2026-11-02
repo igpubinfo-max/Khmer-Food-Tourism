@@ -862,6 +862,14 @@ export const EXACT_INGREDIENT_ZH_MAP: Record<string, string> = {
   "toasted sesame seeds": "炒香芝麻",
   "palm sugar and pinch of salt": "棕榈糖与少许海盐",
   "vegetable oil for deep-frying": "炸制用植物油",
+  "fresh tiny freshwater river shrimp, cleaned and drained (400g)": "洗净沥干的新鲜淡水小河虾（400克）",
+  "fresh tiny freshwater river shrimp, cleaned and drained": "洗净沥干的新鲜淡水小河虾",
+  "minced garlic, fine sea salt, a touch of palm sugar, and kampot black pepper": "蒜蓉、细海盐、少许高棉棕榈糖与贡布黑胡椒",
+  "whole scallion bulbs, cut green scallions, and sliced red chilies": "整颗香葱头、青葱段与红辣椒圈",
+  "scooped sour wood-apple pulp and flaked smoked river fish (350g)": "挖取的酸木苹果果肉与手撕烟熏河鱼肉（350克）",
+  "scooped sour wood-apple pulp and flaked smoked river fish": "挖取的酸木苹果果肉与手撕烟熏河鱼肉",
+  "cooked minced prahok, garlic, shallots, palm sugar, and fish sauce": "熟制细剁波罗福鱼酱、大蒜、红葱头、棕榈糖与鱼露",
+  "bird-eye chilies, crisp green eggplants, long beans, cucumber, and fresh herbs": "朝天椒、爽脆青圆茄、长豆角、黄瓜与时令生鲜香草",
   "sliced beef brisket (400g)": "鲜切牛腩片（400克）",
   "sliced beef brisket": "鲜切牛腩片",
   "lemongrass stalks, wood-apple, and fresh bamboo shoots": "香茅秆、木苹果与鲜竹笋",
@@ -1536,7 +1544,7 @@ export const EXACT_INGREDIENT_ZH_MAP: Record<string, string> = {
   "filtered water & tiny pinch of sea salt": "纯净过滤水与一小撮提味细海盐"
 };
 
-export const EXTRA_KHMER_CULINARY_MAP: Record<string, { en: string; zh: string }> = [
+export const EXTRA_KHMER_CULINARY_MAP: Array<[string, string, string]> = [
   [
     "ភ្លាសាច់គោក្រូចឆ្មា",
     "Lime-Cured Khmer Beef Ceviche (Pleah Sach Ko)",
@@ -6159,7 +6167,7 @@ const CONCEPT_LIST: Array<[string, string, string]> = [
 export function translateEntranceFeeToZh(rawFee: string | undefined): string {
   if (!rawFee) return '免费开放';
   const f = rawFee.trim();
-  const exactMap = {
+  const exactMap: Record<string, string> = {
     'Free for Cambodians ($10 foreigners)': '柬埔寨公民免费（外宾门票 $10）',
     'Free for Cambodians ($1 foreigners)': '柬埔寨公民免费（外宾门票 $1）',
     'Free for Cambodians ($2 foreigners)': '柬埔寨公民免费（外宾门票 $2）',

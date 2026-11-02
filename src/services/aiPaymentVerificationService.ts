@@ -320,41 +320,68 @@ async function extractReceiptViaGeminiVision(
   "senderName": string or null (the "From" name on the receipt)
 }`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(
-        apiKey
-      )}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { text: prompt },
+    const candidateModels = ['gemini-2.5-flash', 'gemini-flash-latest'];
+    let textOut = '';
+    for (const modelName of candidateModels) {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 8000);
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(
+            apiKey
+          )}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
+            body: JSON.stringify({
+              contents: [
                 {
-                  inline_data: {
-                    mime_type: mimeType,
-                    data: base64Data,
-                  },
+                  parts: [
+                    { text: prompt },
+                    {
+                      inline_data: {
+                        mime_type: mimeType,
+                        data: base64Data,
+                      },
+                    },
+                  ],
                 },
               ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.0,
-            responseMimeType: 'application/json',
-          },
-        }),
+              generationConfig: {
+                temperature: 0.0,
+                responseMimeType: 'application/json',
+              },
+            }),
+          }
+        );
+        clearTimeout(timer);
+        if (response.ok) {
+          const json = await response.json();
+          textOut = json?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (textOut) break;
+        }
+      } catch {
+        // try next model
       }
-    );
+    }
 
-    if (!response.ok) return null;
-    const json = await response.json();
-    const textOut = json?.candidates?.[0]?.content?.parts?.[0]?.text || '';
     if (!textOut) return null;
 
-    const parsed = JSON.parse(textOut);
+    let parsed: Record<string, any> | null = null;
+    try {
+      parsed = JSON.parse(textOut);
+    } catch {
+      const jsonMatch = textOut.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          parsed = JSON.parse(jsonMatch[0]);
+        } catch {
+          parsed = null;
+        }
+      }
+    }
+    if (!parsed || typeof parsed !== 'object') return null;
     return {
       isAbaReceipt: Boolean(parsed.isAbaReceipt),
       trxId: parsed.trxId ? String(parsed.trxId).trim() : undefined,

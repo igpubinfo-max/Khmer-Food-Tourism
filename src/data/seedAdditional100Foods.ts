@@ -80,17 +80,17 @@ const RAW_100_NEW_DISHES: Array<{
     herbEn: 'Culantro and crispy fried garlic',
   },
   {
-    nameKh: 'សម្លការីសាច់ទាដំឡូងជ្វា',
-    nameEn: 'Khmer Red Duck Curry with Sweet Potato',
-    cat: 'soup',
-    catKh: 'ម្ហូបសម្ល / ការីសាច់ទា',
-    catEn: 'Soup / Red Duck Curry',
-    mainIngKh: 'សាច់ទាស្រែហាន់ដុំល្មម (៥០០ ក្រាម)',
-    mainIngEn: 'Fresh country duck pieces (500g)',
-    subIngKh: 'ដំឡូងជ្វា ខ្ទិះដូងដើមខាប់ ទំពាំងបារាំង ឬសណ្តែកគួរ និងសណ្តែកដីលីង',
-    subIngEn: 'Sweet potatoes, rich coconut cream, long beans, and roasted peanuts',
-    herbKh: 'គ្រឿងការីក្រហមខ្មែរ គល់ស្លឹកគ្រៃ និងស្លឹកក្រូចសើច',
-    herbEn: 'Khmer red curry paste, lemongrass, and kaffir lime leaves',
+    nameKh: 'កំពិសលីង',
+    nameEn: 'Cambodian Wok-Roasted Crispy River Shrimp with Scallions & Chili (Kampis Ling)',
+    cat: 'stirfry',
+    catKh: 'ម្ហូបឆា & លីង / កំពិសលីង',
+    catEn: 'Stir-Fry / Roasted Freshwater Shrimp',
+    mainIngKh: 'កំពិសទន្លេស្រស់លាងស្អាត (៤០០ ក្រាម)',
+    mainIngEn: 'Fresh tiny freshwater river shrimp, cleaned and drained (400g)',
+    subIngKh: 'ខ្ទឹមសចិញ្ច្រាំ អំបិលម៉ត់ ស្ករត្នោតបន្តិច និងម្រេចកំពត',
+    subIngEn: 'Minced garlic, fine sea salt, a touch of palm sugar, and Kampot black pepper',
+    herbKh: 'គល់ខ្ទឹម ស្លឹកខ្ទឹមហាន់កំណាត់ និងម្ទេសក្រហមហាន់',
+    herbEn: 'Whole scallion bulbs, cut green scallions, and sliced red chilies',
   },
   {
     nameKh: 'សម្លឆ្អឹងជំនីរជ្រូកស្ងោរជ្រក់ផ្សិត',
@@ -1041,17 +1041,17 @@ const RAW_100_NEW_DISHES: Array<{
 
   // ================= STREET FOOD & SNACKS (8 dishes: food-177 .. food-184) =================
   {
-    nameKh: 'នំគ្រក់ខ្ទិះដូងស្លឹកខ្ទឹមទឹកត្រីផ្អែម',
-    nameEn: 'Crispy Coconut & Scallion Rice Pancakes (Num Krok)',
-    cat: 'streetfood',
-    catKh: 'អាហារសម្រន់ / នំគ្រក់ខ្មែរ',
-    catEn: 'Street Food / Num Krok',
-    mainIngKh: 'ម្សៅអង្ករកិនលាយខ្ទិះដូងដើមខាប់ (៣៥០ ក្រាម)',
-    mainIngEn: 'Stone-ground rice flour batter and thick coconut cream (350g)',
-    subIngKh: 'ស្លឹកខ្ទឹមហាន់ល្អិត និងទឹកត្រីផ្អែមជ្រក់ល្ហុង',
-    subIngEn: 'Chopped green scallions and sweet fish sauce with papaya pickle',
-    herbKh: 'ស្លឹកខ្ទឹមស្រស់ និងម្ទេសក្រហម',
-    herbEn: 'Fresh scallions and minced red chili',
+    nameKh: 'បុកក្រសាំងត្រីឆ្អើរ',
+    nameEn: 'Cambodian Pounded Wood-Apple & Smoked Fish Relish (Bok Krasang Trei Chhaeur)',
+    cat: 'salad',
+    catKh: 'ញាំ ភ្លា & បុក / បុកក្រសាំងត្រីឆ្អើរ',
+    catEn: 'Salad & Relish / Pounded Wood-Apple & Smoked Fish',
+    mainIngKh: 'ផ្លែក្រសាំងជ្រក់កោសយកសាច់ និងសាច់ត្រីឆ្អើរហែក (៣៥០ ក្រាម)',
+    mainIngEn: 'Scooped sour wood-apple pulp and flaked smoked river fish (350g)',
+    subIngKh: 'ប្រហុកចិញ្ច្រាំឆ្អិន ខ្ទឹមស ខ្ទឹមក្រហម ស្ករត្នោត និងទឹកត្រី',
+    subIngEn: 'Cooked minced prahok, garlic, shallots, palm sugar, and fish sauce',
+    herbKh: 'ម្ទេសខ្មាំង អន្លក់ត្រប់ស្រួយ សណ្តែកគួរ ត្រសក់ ត្រកួន និងជីរគ្រប់មុខ',
+    herbEn: 'Bird-eye chilies, crisp green eggplants, long beans, cucumber, and fresh herbs',
   },
   {
     nameKh: 'បាញ់ឆែវខ្មែរស្នូលបង្គាសាច់ជ្រូក',
@@ -1359,7 +1359,7 @@ const RAW_100_NEW_DISHES: Array<{
 ];
 
 const VERIFIED_CALORIES_101_200: Record<string, number> = {
-  'food-101': 285, 'food-102': 195, 'food-103': 230, 'food-104': 380,
+  'food-101': 285, 'food-102': 195, 'food-103': 230, 'food-104': 265,
   'food-105': 330, 'food-106': 245, 'food-107': 385, 'food-108': 255,
   'food-109': 265, 'food-110': 210, 'food-111': 250, 'food-112': 275,
   'food-113': 470, 'food-114': 185, 'food-115': 240, 'food-116': 215,
@@ -1378,7 +1378,7 @@ const VERIFIED_CALORIES_101_200: Record<string, number> = {
   'food-165': 475, 'food-166': 410, 'food-167': 485, 'food-168': 510,
   'food-169': 315, 'food-170': 265, 'food-171': 520, 'food-172': 460,
   'food-173': 495, 'food-174': 290, 'food-175': 430, 'food-176': 465,
-  'food-177': 295, 'food-178': 410, 'food-179': 175, 'food-180': 310,
+  'food-177': 225, 'food-178': 410, 'food-179': 175, 'food-180': 310,
   'food-181': 245, 'food-182': 340, 'food-183': 280, 'food-184': 345,
   'food-185': 325, 'food-186': 285, 'food-187': 430, 'food-188': 260,
   'food-189': 290, 'food-190': 365, 'food-191': 240, 'food-192': 310,
@@ -1403,6 +1403,8 @@ function extractMainIngredientAmount(mainIngKh: string, mainIngEn: string): {
   }
   return { cleanKh, cleanEn, amount: '១ ចំណែកធំ' };
 }
+
+type RawNewDish = (typeof RAW_100_NEW_DISHES)[number];
 
 function buildSeasoningIngredient(
   id: string,
@@ -1495,6 +1497,58 @@ function buildStepsForDish(
   mainIngEn: string
 ): Array<{ stepNumber: number; instructionKh: string; instructionEn: string }> {
   const { cat, nameKh, nameEn, subIngKh, herbKh, subIngEn, herbEn } = item;
+
+  // Cambodian Wok-Roasted Crispy River Shrimp - Kampis Ling (food-104)
+  if (id === 'food-104') {
+    return [
+      {
+        stepNumber: 1,
+        instructionKh: 'លាងសម្អាតកំពិសទន្លេស្រស់ច្រើនទឹកឱ្យអស់កម្ទេចស្លែ សម្រស់ទឹកឱ្យស្ងួតល្អ រួចហាន់គល់ខ្ទឹម ស្លឹកខ្ទឹម និងម្ទេសក្រហមទុកឱ្យរួចរាល់។',
+        instructionEn: 'Rinse fresh tiny river shrimp thoroughly in cold water, drain dry in a colander, and cut scallion bulbs, green scallion stalks, and red chilies.',
+      },
+      {
+        stepNumber: 2,
+        instructionKh: 'ដាក់ខ្ទះឱ្យក្តៅ ចាក់ប្រេងឆាបន្តិច បំពងខ្ទឹមសចិញ្ច្រាំឱ្យឈ្ងុយ រួចចាក់កំពិសទន្លេចូលលីងលើភ្លើងខ្លាំងឱ្យឡើងពណ៌ក្រហមមាសស្រួយឈ្ងុយ។',
+        instructionEn: 'Heat a wok with a splash of oil, sauté minced garlic until fragrant, and toss in the river shrimp over high heat until golden-pink and crispy.',
+      },
+      {
+        stepNumber: 3,
+        instructionKh: 'ផ្សំរសជាតិដោយអំបិលម៉ត់ ស្ករត្នោតបន្តិច ទឹកត្រីតិចៗ និងម្រេចកំពត លីងត្រឡប់ឱ្យស្ងួតទឹក និងចូលជាតិប្រៃផ្អែមឈ្ងុយ។',
+        instructionEn: 'Season with fine sea salt, a pinch of palm sugar, a dash of fish sauce, and Kampot black pepper, tossing until dry and glossy.',
+      },
+      {
+        stepNumber: 4,
+        instructionKh: 'ដាក់គល់ខ្ទឹម ស្លឹកខ្ទឹមហាន់កំណាត់ និងម្ទេសក្រហមចូលឆាត្រឡប់ ៣០ វិនាទី រួចដួសដាក់ចានទ្រាប់ស្លឹកចេកទទួលទានក្តៅៗជាមួយបាយស។',
+        instructionEn: 'Fold in the scallion bulbs, green scallions, and sliced red chilies for 30 seconds, then plate over banana leaf and serve hot with steamed rice.',
+      },
+    ];
+  }
+
+  // Cambodian Pounded Wood-Apple & Smoked Fish Relish - Bok Krasang Trei Chhaeur (food-177)
+  if (id === 'food-177') {
+    return [
+      {
+        stepNumber: 1,
+        instructionKh: 'ពុះផ្លែក្រសាំងជ្រក់កោសយកសាច់ខាងក្នុង និងបេះសាច់ត្រីឆ្អើរយកឆ្អឹងចេញឱ្យស្អាត ហើយលាងត្រប់ស្រួយ សណ្តែកគួរ ត្រសក់ ត្រកួន និងជីរគ្រប់មុខរៀបដាក់ថាស។',
+        instructionEn: 'Halve the sour wood-apples and scoop out the pulp, flake the smoked river fish free of bones, and arrange crisp green eggplants, long beans, cucumber, and herbs on a platter.',
+      },
+      {
+        stepNumber: 2,
+        instructionKh: 'ដាក់ខ្ទឹមស ខ្ទឹមក្រហម និងម្ទេសខ្មាំងចូលក្នុងត្បាល់បុកឱ្យបែកឈ្ងុយ រួចដាក់សាច់ត្រីឆ្អើរចូលបុកឱ្យឡើងសរសៃល្មម។',
+        instructionEn: 'Pound garlic, shallots, and bird-eye chilies in a stone mortar until aromatic, then add the flaked smoked fish and pound until fluffy.',
+      },
+      {
+        stepNumber: 3,
+        instructionKh: 'ដាក់សាច់ផ្លែក្រសាំង ប្រហុកចិញ្ច្រាំឆ្អិន ស្ករត្នោត និងទឹកត្រីចូល បុកច្របល់ថ្នមៗឱ្យចូលជាតិជូរប្រៃផ្អែមហឹរមុតឈ្ងុយក្លិនត្រីឆ្អើរ។',
+        instructionEn: 'Add the sour wood-apple pulp, cooked minced prahok, palm sugar, and fish sauce, pounding gently to meld the tangy, smoky, and spicy flavors.',
+      },
+      {
+        stepNumber: 4,
+        instructionKh: 'ដួសបុកក្រសាំងត្រីឆ្អើរដាក់ចាន តុបតែងដោយម្ទេសស្រស់ និងជីរនាងវង ទទួលទានផ្ទាប់ជាមួយអន្លក់បន្លែស្រស់គ្រប់មុខ។',
+        instructionEn: 'Mound the pounded wood-apple and smoked fish relish onto a serving plate, top with whole chilies and sweet basil, and enjoy with crisp fresh crudités.',
+      },
+    ];
+  }
 
   // Cambodian Field Crab Sour Soup - Samlor Machu Kdam Srae (food-106)
   if (id === 'food-106') {

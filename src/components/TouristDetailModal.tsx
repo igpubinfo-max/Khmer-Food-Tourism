@@ -314,6 +314,9 @@ export const TouristDetailModal: React.FC = () => {
                     key={editPhotoUrl || selectedDestination.photoUrl}
                     src={editPhotoUrl || selectedDestination.photoUrl}
                     alt="Preview"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = '/destinations/dest-1.jpg';
+                    }}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -513,6 +516,9 @@ export const TouristDetailModal: React.FC = () => {
               key={selectedDestination.photoUrl}
               src={selectedDestination.photoUrl} 
               alt={loc.name}
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/destinations/dest-1.jpg';
+              }}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />

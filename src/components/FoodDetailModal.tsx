@@ -546,7 +546,14 @@ export const FoodDetailModal: React.FC = () => {
                   title={isKm ? 'ចុចដើម្បីជ្រើសរើសរូបភាពពីកុំព្យូទ័រ ឬទូរស័ព្ទ' : 'Click to choose photo from PC or phone'}
                   className="relative aspect-16/10 rounded-xl overflow-hidden bg-slate-900 border border-amber-400/50 cursor-pointer group"
                 >
-                  <img src={resolveFoodPhotoUrl(editPhotoUrl || selectedFood.photoUrl, selectedFood.photoUpdatedAt)} alt="Preview" className="w-full h-full object-cover" />
+                  <img
+                    src={resolveFoodPhotoUrl(editPhotoUrl || selectedFood.photoUrl, selectedFood.photoUpdatedAt)}
+                    alt="Preview"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
+                    }}
+                    className="w-full h-full object-cover"
+                  />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                     <span className="px-3 py-1.5 rounded-full bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg">
                       <Upload className="w-3.5 h-3.5" />
@@ -943,6 +950,10 @@ export const FoodDetailModal: React.FC = () => {
             <img 
               src={resolveFoodPhotoUrl(selectedFood.photoUrl, selectedFood.photoUpdatedAt)} 
               alt={loc.name}
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
+              }}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />

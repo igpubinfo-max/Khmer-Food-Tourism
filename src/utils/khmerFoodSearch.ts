@@ -649,7 +649,7 @@ export function scoreFoodForKhmerQuery(food: FoodItem, parsed: ParsedKhmerFoodQu
       ...(food.ingredients || []).map((i) => `${i.nameKh || ''} ${i.nameEn || ''}`),
       ...(food.ingredientsKh || []),
       ...(food.ingredientsEn || []),
-      ...(zhLoc.ingredients || []),
+      ...(zhLoc.ingredients || []).map((i) => i.name),
     ].join(' ')
   );
   const descSafeNorm = stripNegatedSpicePhrases(

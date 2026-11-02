@@ -1,7 +1,7 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1321;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1322;
 export const APP_RELEASE_DATE = '2026-11-02';
 
 /**
@@ -94,126 +94,128 @@ export const SEED_FOOD_PHOTO_BASELINE_MS = Date.parse(SEED_FOOD_PHOTO_BASELINE_I
  * from before the Excel import, while preserving any newer edits made after this timestamp.
  */
 export const EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS: Record<string, string> = {
-  'food-2': '2026-11-02T05:55:46.690Z',
-  'food-38': '2026-11-02T05:55:46.690Z',
-  'food-47': '2026-11-02T05:55:46.690Z',
-  'food-82': '2026-11-02T05:55:46.690Z',
-  'food-86': '2026-11-02T05:55:46.690Z',
-  'food-88': '2026-11-02T05:55:46.690Z',
-  'food-89': '2026-11-02T05:55:46.690Z',
-  'food-96': '2026-11-02T05:55:46.690Z',
-  'food-101': '2026-11-01T06:09:56.357Z',
-  'food-102': '2026-11-01T06:09:56.357Z',
-  'food-103': '2026-11-01T06:09:56.357Z',
-  'food-104': '2026-11-01T06:09:56.357Z',
-  'food-105': '2026-11-01T06:09:56.357Z',
-  'food-106': '2026-11-01T06:09:56.357Z',
-  'food-107': '2026-11-01T06:09:56.357Z',
-  'food-108': '2026-11-01T06:09:56.357Z',
-  'food-109': '2026-11-01T06:09:56.357Z',
-  'food-110': '2026-11-01T06:09:56.357Z',
-  'food-111': '2026-11-01T06:09:56.357Z',
-  'food-112': '2026-11-01T06:09:56.357Z',
-  'food-113': '2026-11-01T06:09:56.357Z',
-  'food-114': '2026-11-01T06:09:56.357Z',
-  'food-115': '2026-11-01T06:09:56.357Z',
-  'food-116': '2026-11-01T06:09:56.357Z',
-  'food-117': '2026-11-01T06:09:56.357Z',
-  'food-118': '2026-11-01T06:09:56.357Z',
-  'food-119': '2026-11-01T06:09:56.357Z',
-  'food-120': '2026-11-01T06:09:56.357Z',
-  'food-121': '2026-11-01T06:09:56.357Z',
-  'food-122': '2026-11-01T06:09:56.357Z',
-  'food-123': '2026-11-01T06:09:56.357Z',
-  'food-124': '2026-11-01T06:09:56.357Z',
-  'food-125': '2026-11-01T06:09:56.357Z',
-  'food-126': '2026-11-01T06:09:56.357Z',
-  'food-127': '2026-11-01T06:09:56.357Z',
-  'food-128': '2026-11-01T06:09:56.357Z',
-  'food-129': '2026-11-01T06:09:56.357Z',
-  'food-130': '2026-11-01T06:09:56.357Z',
-  'food-131': '2026-11-01T06:09:56.357Z',
-  'food-132': '2026-11-01T06:09:56.357Z',
-  'food-133': '2026-11-01T06:09:56.357Z',
-  'food-134': '2026-11-01T06:09:56.357Z',
-  'food-135': '2026-11-01T06:09:56.357Z',
-  'food-136': '2026-11-01T06:09:56.357Z',
-  'food-137': '2026-11-01T06:09:56.357Z',
-  'food-138': '2026-11-01T06:09:56.357Z',
-  'food-139': '2026-11-01T06:09:56.357Z',
-  'food-140': '2026-11-01T06:09:56.357Z',
-  'food-141': '2026-11-01T06:09:56.357Z',
-  'food-142': '2026-11-01T06:09:56.357Z',
-  'food-143': '2026-11-01T06:09:56.357Z',
-  'food-144': '2026-11-01T06:09:56.357Z',
-  'food-145': '2026-11-01T06:09:56.357Z',
-  'food-146': '2026-11-01T06:09:56.357Z',
-  'food-147': '2026-11-01T06:09:56.357Z',
-  'food-148': '2026-11-01T06:09:56.357Z',
-  'food-149': '2026-11-01T06:09:56.357Z',
-  'food-150': '2026-11-01T06:09:56.357Z',
-  'food-151': '2026-11-01T06:09:56.357Z',
-  'food-152': '2026-11-01T06:09:56.357Z',
-  'food-153': '2026-11-01T06:09:56.357Z',
-  'food-154': '2026-11-01T06:09:56.357Z',
-  'food-155': '2026-11-01T06:09:56.357Z',
-  'food-156': '2026-11-01T06:09:56.357Z',
-  'food-157': '2026-11-01T06:09:56.357Z',
-  'food-158': '2026-11-01T06:09:56.357Z',
-  'food-159': '2026-11-01T06:09:56.357Z',
-  'food-160': '2026-11-01T06:09:56.357Z',
-  'food-161': '2026-11-01T06:09:56.357Z',
-  'food-162': '2026-11-01T06:09:56.357Z',
-  'food-163': '2026-11-01T06:09:56.357Z',
-  'food-164': '2026-11-01T06:09:56.357Z',
-  'food-165': '2026-11-01T06:09:56.357Z',
-  'food-166': '2026-11-01T06:09:56.357Z',
-  'food-167': '2026-11-01T06:09:56.357Z',
-  'food-168': '2026-11-01T06:09:56.357Z',
-  'food-169': '2026-11-01T06:09:56.357Z',
-  'food-170': '2026-11-01T06:09:56.357Z',
-  'food-171': '2026-11-01T06:09:56.357Z',
-  'food-172': '2026-11-01T06:09:56.357Z',
-  'food-173': '2026-11-01T06:09:56.357Z',
-  'food-174': '2026-11-01T06:09:56.357Z',
-  'food-175': '2026-11-01T06:09:56.357Z',
-  'food-176': '2026-11-01T06:09:56.357Z',
-  'food-177': '2026-11-01T06:09:56.357Z',
-  'food-178': '2026-11-01T06:09:56.357Z',
-  'food-179': '2026-11-01T06:09:56.357Z',
-  'food-180': '2026-11-01T06:09:56.357Z',
-  'food-181': '2026-11-01T06:09:56.357Z',
-  'food-182': '2026-11-01T06:09:56.357Z',
-  'food-183': '2026-11-01T06:09:56.357Z',
-  'food-184': '2026-11-01T06:09:56.357Z',
-  'food-185': '2026-11-01T06:09:56.357Z',
-  'food-186': '2026-11-01T06:09:56.357Z',
-  'food-187': '2026-11-01T06:09:56.357Z',
-  'food-188': '2026-11-01T06:09:56.357Z',
-  'food-189': '2026-11-01T06:09:56.357Z',
-  'food-190': '2026-11-01T06:09:56.357Z',
-  'food-191': '2026-11-01T06:09:56.357Z',
-  'food-192': '2026-11-01T06:09:56.357Z',
-  'food-193': '2026-11-01T06:09:56.357Z',
-  'food-194': '2026-11-01T06:09:56.357Z',
-  'food-195': '2026-11-01T06:09:56.357Z',
-  'food-196': '2026-11-01T06:09:56.357Z',
-  'food-197': '2026-11-01T06:09:56.357Z',
-  'food-198': '2026-11-01T06:09:56.357Z',
-  'food-199': '2026-11-01T06:09:56.357Z',
-  'food-200': '2026-11-01T06:09:56.357Z',
-  'food-6': '2026-11-02T05:55:46.690Z',
-  'food-9': '2026-11-02T05:55:46.690Z',
-  'food-16': '2026-11-02T05:55:46.690Z',
-  'food-17': '2026-11-02T05:55:46.690Z',
-  'food-18': '2026-11-02T05:55:46.690Z',
-  'food-35': '2026-11-02T05:55:46.690Z',
-  'food-36': '2026-11-02T05:55:46.690Z',
-  'food-44': '2026-11-02T05:55:46.690Z',
-  'food-57': '2026-11-02T05:55:46.690Z',
-  'food-66': '2026-11-02T05:55:46.690Z',
-  'food-68': '2026-11-02T05:55:46.690Z',
-  'food-70': '2026-11-02T05:55:46.690Z',
+  'food-2': '2026-11-02T08:17:53.791Z',
+  'food-38': '2026-11-02T08:17:53.791Z',
+  'food-47': '2026-11-02T08:17:53.791Z',
+  'food-82': '2026-11-02T08:17:53.791Z',
+  'food-86': '2026-11-02T08:17:53.791Z',
+  'food-88': '2026-11-02T08:17:53.791Z',
+  'food-89': '2026-11-02T08:17:53.791Z',
+  'food-96': '2026-11-02T08:17:53.791Z',
+  'food-101': '2026-11-02T08:18:45.549Z',
+  'food-102': '2026-11-02T08:18:45.549Z',
+  'food-103': '2026-11-02T08:18:45.549Z',
+  'food-104': '2026-11-02T08:18:45.549Z',
+  'food-105': '2026-11-02T08:18:45.549Z',
+  'food-106': '2026-11-02T08:18:45.549Z',
+  'food-107': '2026-11-02T08:18:45.549Z',
+  'food-108': '2026-11-02T08:18:45.549Z',
+  'food-109': '2026-11-02T08:18:45.549Z',
+  'food-110': '2026-11-02T08:18:45.549Z',
+  'food-111': '2026-11-02T08:18:45.549Z',
+  'food-112': '2026-11-02T08:18:45.549Z',
+  'food-113': '2026-11-02T08:18:45.549Z',
+  'food-114': '2026-11-02T08:18:45.549Z',
+  'food-115': '2026-11-02T08:18:45.549Z',
+  'food-116': '2026-11-02T08:18:45.549Z',
+  'food-117': '2026-11-02T08:18:45.549Z',
+  'food-118': '2026-11-02T08:18:45.549Z',
+  'food-119': '2026-11-02T08:18:45.549Z',
+  'food-120': '2026-11-02T08:18:45.549Z',
+  'food-121': '2026-11-02T08:18:45.549Z',
+  'food-122': '2026-11-02T08:18:45.549Z',
+  'food-123': '2026-11-02T08:18:45.549Z',
+  'food-124': '2026-11-02T08:18:45.549Z',
+  'food-125': '2026-11-02T08:18:45.549Z',
+  'food-126': '2026-11-02T08:18:45.549Z',
+  'food-127': '2026-11-02T08:18:45.549Z',
+  'food-128': '2026-11-02T08:18:45.549Z',
+  'food-129': '2026-11-02T08:18:45.549Z',
+  'food-130': '2026-11-02T08:18:45.549Z',
+  'food-131': '2026-11-02T08:18:45.549Z',
+  'food-132': '2026-11-02T08:18:45.549Z',
+  'food-133': '2026-11-02T08:18:45.549Z',
+  'food-134': '2026-11-02T08:18:45.549Z',
+  'food-135': '2026-11-02T08:18:45.549Z',
+  'food-136': '2026-11-02T08:18:45.549Z',
+  'food-137': '2026-11-02T08:18:45.549Z',
+  'food-138': '2026-11-02T08:18:45.549Z',
+  'food-139': '2026-11-02T08:18:45.549Z',
+  'food-140': '2026-11-02T08:18:45.549Z',
+  'food-141': '2026-11-02T08:18:45.549Z',
+  'food-142': '2026-11-02T08:18:45.549Z',
+  'food-143': '2026-11-02T08:18:45.549Z',
+  'food-144': '2026-11-02T08:18:45.549Z',
+  'food-145': '2026-11-02T08:18:45.549Z',
+  'food-146': '2026-11-02T08:18:45.549Z',
+  'food-147': '2026-11-02T08:18:45.549Z',
+  'food-148': '2026-11-02T08:18:45.549Z',
+  'food-149': '2026-11-02T08:18:45.549Z',
+  'food-150': '2026-11-02T08:18:45.549Z',
+  'food-151': '2026-11-02T08:18:45.549Z',
+  'food-152': '2026-11-02T08:18:45.549Z',
+  'food-153': '2026-11-02T08:18:45.549Z',
+  'food-154': '2026-11-02T08:18:45.549Z',
+  'food-155': '2026-11-02T08:18:45.549Z',
+  'food-156': '2026-11-02T08:18:45.549Z',
+  'food-157': '2026-11-02T08:18:45.549Z',
+  'food-158': '2026-11-02T08:18:45.549Z',
+  'food-159': '2026-11-02T08:18:45.549Z',
+  'food-160': '2026-11-02T08:18:45.549Z',
+  'food-161': '2026-11-02T08:18:45.549Z',
+  'food-162': '2026-11-02T08:18:45.549Z',
+  'food-163': '2026-11-02T08:18:45.549Z',
+  'food-164': '2026-11-02T08:18:45.549Z',
+  'food-165': '2026-11-02T08:18:45.549Z',
+  'food-166': '2026-11-02T08:18:45.549Z',
+  'food-167': '2026-11-02T08:18:45.549Z',
+  'food-168': '2026-11-02T08:18:45.549Z',
+  'food-169': '2026-11-02T08:18:45.549Z',
+  'food-170': '2026-11-02T08:18:45.549Z',
+  'food-171': '2026-11-02T08:18:45.549Z',
+  'food-172': '2026-11-02T08:18:45.549Z',
+  'food-173': '2026-11-02T08:18:45.549Z',
+  'food-174': '2026-11-02T08:18:45.549Z',
+  'food-175': '2026-11-02T08:18:45.549Z',
+  'food-176': '2026-11-02T08:18:45.549Z',
+  'food-177': '2026-11-02T08:18:45.549Z',
+  'food-178': '2026-11-02T08:18:45.549Z',
+  'food-179': '2026-11-02T08:18:45.549Z',
+  'food-180': '2026-11-02T08:18:45.549Z',
+  'food-181': '2026-11-02T08:18:45.549Z',
+  'food-182': '2026-11-02T08:18:45.549Z',
+  'food-183': '2026-11-02T08:18:45.549Z',
+  'food-184': '2026-11-02T08:18:45.549Z',
+  'food-185': '2026-11-02T08:18:45.549Z',
+  'food-186': '2026-11-02T08:18:45.549Z',
+  'food-187': '2026-11-02T08:18:45.549Z',
+  'food-188': '2026-11-02T08:18:45.549Z',
+  'food-189': '2026-11-02T08:18:45.549Z',
+  'food-190': '2026-11-02T08:18:45.549Z',
+  'food-191': '2026-11-02T08:18:45.549Z',
+  'food-192': '2026-11-02T08:18:45.549Z',
+  'food-193': '2026-11-02T08:18:45.549Z',
+  'food-194': '2026-11-02T08:18:45.549Z',
+  'food-195': '2026-11-02T08:18:45.549Z',
+  'food-196': '2026-11-02T08:18:45.549Z',
+  'food-197': '2026-11-02T08:18:45.549Z',
+  'food-198': '2026-11-02T08:18:45.549Z',
+  'food-199': '2026-11-02T08:18:45.549Z',
+  'food-200': '2026-11-02T08:18:45.549Z',
+  'food-6': '2026-11-02T08:17:53.791Z',
+  'food-9': '2026-11-02T08:17:53.791Z',
+  'food-16': '2026-11-02T08:17:53.791Z',
+  'food-17': '2026-11-02T08:17:53.791Z',
+  'food-18': '2026-11-02T08:17:53.791Z',
+  'food-35': '2026-11-02T08:17:53.791Z',
+  'food-36': '2026-11-02T08:17:53.791Z',
+  'food-44': '2026-11-02T08:17:53.791Z',
+  'food-57': '2026-11-02T08:17:53.791Z',
+  'food-66': '2026-11-02T08:17:53.791Z',
+  'food-68': '2026-11-02T08:17:53.791Z',
+  'food-70': '2026-11-02T08:17:53.791Z',
+  'food-27': '2026-11-02T08:17:53.791Z',
+  'food-100': '2026-11-02T08:17:53.791Z',
 };
 
 export interface AuthModalInitialView {
@@ -480,6 +482,8 @@ export interface GoogleMapsPlaceMetadata {
   originalName: string;
   formattedAddress: string;
   province: string;
+  provinceKh?: string;
+  placeCategory?: 'restaurant' | 'street_food' | 'cafe' | 'tourism';
   latitude: number;
   longitude: number;
   googleMapsUri: string;
@@ -563,11 +567,12 @@ export interface User {
   phone?: string;
   bio?: string;
   restaurantName?: string;
+  restaurantId?: string;
   passwordHash?: string;
   isVerified?: boolean;
   verifiedAt?: string;
-  authProvider?: 'google' | 'phone' | 'email';
-  linkedProviders?: ('google' | 'phone' | 'email')[];
+  authProvider?: 'google' | 'phone' | 'email' | 'apple';
+  linkedProviders?: ('google' | 'phone' | 'email' | 'apple')[];
   createdAt: string;
   registeredAtIso?: string;
   lastLoginAt?: string;
@@ -579,8 +584,17 @@ export interface User {
   membershipTier?: 'free' | 'premium_vip';
   subscriptionStartDate?: string;
   subscriptionExpiryDate?: string;
-  subscriptionStatus?: 'active' | 'expired' | 'pending' | 'cancelled';
-  paymentStatus?: 'verified' | 'pending_verification' | 'needs_more_info' | 'failed' | 'cancelled' | 'paid_pending_approval' | 'waiting_for_payment';
+  subscriptionStatus?: 'active' | 'expired' | 'pending' | 'cancelled' | 'none';
+  paymentStatus?:
+    | 'verified'
+    | 'pending_verification'
+    | 'needs_more_info'
+    | 'failed'
+    | 'cancelled'
+    | 'paid_pending_approval'
+    | 'waiting_for_payment'
+    | 'rejected'
+    | 'unpaid';
   paymentMethod?: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card' | 'Manual' | 'BankTransfer';
   transactionRef?: string;
   autoRenew?: boolean;
@@ -744,12 +758,16 @@ export interface Ingredient {
   amount: string;
 }
 
+export type FoodIngredient = Ingredient;
+
 export interface CookingStep {
   stepNumber: number;
   instructionKh: string;
   instructionEn: string;
   tipKh?: string;
 }
+
+export type FoodStep = CookingStep;
 
 export interface FoodItem {
   id: string;
@@ -769,7 +787,10 @@ export interface FoodItem {
   priceRiel: number;
   priceUsd: number;
   ingredients: Ingredient[];
+  ingredientsKh?: string[];
+  ingredientsEn?: string[];
   steps: CookingStep[];
+  tasteProfile?: string;
   rating: number;
   reviewCount: number;
   provinceKh?: string;
@@ -780,6 +801,8 @@ export interface FoodItem {
   originalPhotoUrl?: string;
   isCustomPhoto?: boolean;
   photoUpdatedAt?: string;
+  adminApprovedAt?: string;
+  updatedAt?: string;
   googlePlaceId?: string;
   dataSource?: 'seed' | 'admin' | 'google_maps';
   googleMapsMeta?: GoogleMapsPlaceMetadata;
@@ -789,6 +812,8 @@ export interface FoodItem {
   locationNeedsReview?: boolean;
   locationReviewNote?: string;
   locationVerifiedAt?: string;
+  cuisineType?: string;
+  priceRange?: string;
 }
 
 export type KhmerFoodPrimaryGroup = 'samlor' | 'cha' | 'sngor' | 'bong_aem';
@@ -1074,6 +1099,7 @@ export interface RegistrationTransaction {
   ownerId?: string;
   ownerName?: string;
   ownerPhone?: string;
+  phone?: string;
   userId?: string;
   userName?: string;
   userEmail?: string;
@@ -1083,6 +1109,7 @@ export interface RegistrationTransaction {
   currency?: 'USD' | 'KHR';
   durationDays?: number; // e.g. 10 or 90 days (configurable by Admin)
   membershipTier?: 'premium' | 'premium_vip';
+  paymentStatus?: string;
   status: 'pending_verification' | 'verified' | 'rejected' | 'needs_more_info' | 'failed' | 'cancelled';
   paymentMethod: 'KHQR' | 'Bakong' | 'BankTransfer' | 'Manual' | 'GooglePlayBilling' | 'Card';
   transactionRef: string;
@@ -1263,6 +1290,8 @@ export interface Restaurant {
   locationNeedsReview?: boolean;
   locationReviewNote?: string;
   locationVerifiedAt?: string;
+  cuisineType?: string;
+  priceRange?: string;
 }
 
 // Helper to resolve original created_at ISO timestamp for chronological sorting
@@ -1383,7 +1412,7 @@ export const isValidGoogleMapsUrl = (rawUrl?: string | null): boolean => {
  */
 export const extractCoordsFromGoogleMapsUrl = (
   rawUrl?: string | null
-): { latitude: number; longitude: number } | null => {
+): { latitude: number; longitude: number; lat: number; lng: number } | null => {
   if (!rawUrl || typeof rawUrl !== 'string') return null;
   const trimmed = rawUrl.trim();
   if (!trimmed) return null;
@@ -1405,7 +1434,7 @@ export const extractCoordsFromGoogleMapsUrl = (
       const lat = Number(m[1]);
       const lng = Number(m[2]);
       if (isValidCambodiaCoordinates(lat, lng)) {
-        return { latitude: lat, longitude: lng };
+        return { latitude: lat, longitude: lng, lat, lng };
       }
     }
   }
@@ -2041,12 +2070,16 @@ export interface TrendingFoodItem {
   locationNeedsReview?: boolean;
   locationReviewNote?: string;
   locationVerifiedAt?: string;
+  cuisineType?: string;
+  priceRange?: string;
+  locationKh?: string;
 }
 
 // AI Smart Check-in & Auto Add Restaurant Types
 export interface AiCheckInSubmission {
   id: string;
   userId: string;
+  submittedByUserId?: string;
   userName: string;
   restaurantNameKh: string;
   restaurantNameEn: string;
@@ -2072,13 +2105,22 @@ export interface AiCheckInSubmission {
   isFoodOnlyPhoto?: boolean;
 }
 
-export type DestinationCategorySlug = 'temple' | 'nature' | 'mountain' | 'beach' | 'resort';
+export type DestinationCategorySlug =
+  | 'temple'
+  | 'nature'
+  | 'mountain'
+  | 'beach'
+  | 'resort'
+  | 'ecotourism'
+  | 'cultural'
+  | 'waterfall';
 
 export interface TouristDestination {
   id: string;
   nameKh: string;
   nameEn: string;
   categorySlug: DestinationCategorySlug;
+  category?: string;
   categoryKh: string;
   categoryEn: string;
   descriptionKh: string;
@@ -2093,6 +2135,7 @@ export interface TouristDestination {
   entranceFeeEn: string;
   entryFeeKh?: string;
   entryFeeEn?: string;
+  openingHoursKh?: string;
   bestTimeToVisitKh: string;
   bestTimeToVisitEn: string;
   mapUrl: string;
@@ -2123,6 +2166,8 @@ export interface TouristDestination {
   locationNeedsReview?: boolean;
   locationReviewNote?: string;
   locationVerifiedAt?: string;
+  cuisineType?: string;
+  priceRange?: string;
 }
 
 // User Wishlist Item & Custom Lists (បញ្ជីកន្លែងដែលចង់ទៅ)
@@ -2194,7 +2239,9 @@ export interface AppNotification {
   messageEn: string;
   messageZh?: string;
   type: 'promo' | 'new_spot' | 'discount' | 'daily_dish' | 'event' | 'local_news' | 'system';
-  date: string;
+  date?: string;
+  createdAt?: string;
+  imageUrl?: string;
   timestampIso?: string;
   isRead: boolean;
   targetType?: 'restaurant' | 'destination' | 'food' | 'daily_discovery' | 'external';
@@ -2279,6 +2326,7 @@ export interface AppSettings {
   vipFeaturedRotationEnabled?: boolean; // Default: true (enable VIP shop featured top rotation)
   vipFeaturedDurationDays?: number; // Default: 1 day per featured slot
   vipFeaturedManualSchedule?: ManualFeaturedSlot[]; // Admin-scheduled Top Listing slots (shop + start date + duration)
+  manualFeaturedSchedule?: ManualFeaturedSlot[];
   vipBenefitsList?: VipBenefitItem[]; // Configurable VIP benefits list
   geminiApiKey?: string; // Live Gemini AI Assistant API Key synced via Cloud Settings
   googleMapsApiKey?: string; // Google Maps / Places API Key synced via Cloud Settings
@@ -2304,6 +2352,8 @@ export interface SupportTicket {
   id: string;
   userId: string;
   username: string;
+  userName?: string;
+  userRole?: string;
   userEmail?: string;
   userPhone?: string;
   paymentPlanId: 'quarterly' | 'annual' | 'additional_store';

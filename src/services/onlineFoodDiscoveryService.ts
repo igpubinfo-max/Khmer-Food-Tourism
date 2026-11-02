@@ -1759,7 +1759,7 @@ export async function fetchLiveYouTubeChannelUploads(
 
   liveRssInFlight = (async () => {
     const totalChannels = ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026.length;
-    const batchChannels: ActiveCambodiaYouTubeChannel[] = [];
+    const batchChannels: (typeof ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026)[number][] = [];
     for (let i = 0; i < Math.min(LIVE_RSS_BATCH_CHANNELS_COUNT, totalChannels); i++) {
       batchChannels.push(
         ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026[(rssChannelBatchCursor + i) % totalChannels]

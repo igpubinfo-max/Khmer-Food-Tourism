@@ -51,13 +51,13 @@ const KHMER_CULINARY_SEARCH_TERMS: Array<{ kh: string; wikiQuery: string }> = [
   { kh: 'សង់ខ្យាល្ពៅ', wikiQuery: 'Sankhya Lapov pumpkin custard Cambodia' },
   { kh: 'បង្អែម', wikiQuery: 'Cambodian coconut dessert Chek Ktiss' },
   { kh: 'នំអន្សម', wikiQuery: 'Num Ansom banana leaf sticky rice Cambodia' },
-  { kh: 'ងាវអាំង', wikiQuery: 'blood cockles' },
-  { kh: 'ងាវស្រុះ', wikiQuery: 'blood cockles' },
-  { kh: 'ងាវឆា', wikiQuery: 'blood cockles' },
-  { kh: 'ងាវ', wikiQuery: 'blood cockles' },
+  { kh: 'ងាវអាំង', wikiQuery: 'blood cockle food' },
+  { kh: 'ងាវស្រុះ', wikiQuery: 'blood cockle food' },
+  { kh: 'ងាវឆា', wikiQuery: 'blood cockle food' },
+  { kh: 'ងាវ', wikiQuery: 'blood cockle food' },
   { kh: 'លៀសហាល', wikiQuery: 'clams seafood dish' },
   { kh: 'លៀស', wikiQuery: 'clams seafood dish' },
-  { kh: 'ខ្យងអាំង', wikiQuery: 'grilled snails seafood' },
+  { kh: 'ខ្យងអាំង', wikiQuery: 'snails dish' },
   { kh: 'ខ្យង', wikiQuery: 'snails dish' },
   { kh: 'កង្កែប', wikiQuery: 'frog legs food' },
   { kh: 'មឹកអាំង', wikiQuery: 'grilled squid' },
@@ -259,7 +259,7 @@ export async function searchOnlineFoodImages(params: {
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 4500);
-    const wikiQuery = encodeURIComponent(wikiSearchTerm);
+    const wikiQuery = encodeURIComponent(`${wikiSearchTerm} filetype:bitmap`);
     const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrsearch=${wikiQuery}&gsrlimit=6&prop=imageinfo&iiprop=url&iiurlwidth=800&format=json&origin=*`;
     const res = await fetch(wikiUrl, { signal: controller.signal });
     clearTimeout(timer);
@@ -269,11 +269,13 @@ export async function searchOnlineFoodImages(params: {
       for (const p of pages as any[]) {
         const rawThumbUrl = p?.imageinfo?.[0]?.thumburl || p?.imageinfo?.[0]?.url;
         const thumbUrl = typeof rawThumbUrl === 'string' ? rawThumbUrl.split('?')[0] : '';
-        const rawTitle = String(p?.title || '')
+        const fullTitle = String(p?.title || '');
+        const rawTitle = fullTitle
           .replace(/^File:/i, '')
           .replace(/\.[^.]+$/, '');
         if (
           thumbUrl &&
+          !/\.(pdf|djvu|svg|tiff?|ogg|ogv|webm)$/i.test(fullTitle) &&
           /\.(jpe?g|png|webp)(?:$|\?)/i.test(rawThumbUrl) &&
           !/logo|icon|map|flag|diagram|MNHN|specimen|stamp|drawing/i.test(`${rawTitle} ${thumbUrl}`)
         ) {

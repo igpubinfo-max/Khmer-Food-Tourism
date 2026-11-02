@@ -63,6 +63,8 @@ import {
   generateConversationalAiResponse,
   askGeminiFoodTourismAssistant,
   fetchOnlineDishPhotoByQuery,
+  detectOutOfCatalogDishName,
+  createOutOfCatalogDishItem,
   resolveGeminiApiKey,
   type AiAssistantMessage,
   type AiConversationMemory,
@@ -315,6 +317,8 @@ export const WhatToEatModal: React.FC = () => {
   const [currentDishId, setCurrentDishId] = useState<string>('');
   const [comparedDishIds, setComparedDishIds] = useState<string[]>([]);
   const [spinCount, setSpinCount] = useState<number>(0);
+  const [onlinePhotoByDishId, setOnlinePhotoByDishId] = useState<Record<string, string>>({});
+  const [failedOnlineDishIds, setFailedOnlineDishIds] = useState<Record<string, boolean>>({});
   const seenDishIdsRef = useRef<Set<string>>(new Set());
   const seenChatDishIdsRef = useRef<Set<string>>(new Set());
   const seenCompareDishIdsRef = useRef<Set<string>>(new Set());
@@ -427,6 +431,49 @@ export const WhatToEatModal: React.FC = () => {
       aiCravingRecommendations?.brain?.mode === 'scope_notice' ||
       lastAssistantMsg?.isScopeRefusal
   );
+
+  // Live out-of-catalog dish detection for ANY dish not in the app — immediately active while typing even before tapping "សួរ AI"
+  const liveOutOfCatalogDish: FoodItem | null = useMemo(() => {
+    if (isMedicalRefusalActive || drinkMode || !cravingQuery.trim() || foods.length === 0) {
+      return null;
+    }
+    const detectedName = detectOutOfCatalogDishName(cravingQuery, foods);
+    if (!detectedName) return null;
+    const baseItem = createOutOfCatalogDishItem(detectedName, foods);
+    const fetchedUrl = onlinePhotoByDishId[baseItem.id];
+    if (fetchedUrl) {
+      return {
+        ...baseItem,
+        photoUrl: fetchedUrl,
+        originalPhotoUrl: fetchedUrl,
+      };
+    }
+    return baseItem;
+  }, [cravingQuery, foods, isMedicalRefusalActive, drinkMode, onlinePhotoByDishId]);
+
+  useEffect(() => {
+    if (!isWhatToEatModalOpen || !liveOutOfCatalogDish) return;
+    const targetId = liveOutOfCatalogDish.id;
+    if (onlinePhotoByDishId[targetId] || /^https?:\/\//i.test(liveOutOfCatalogDish.photoUrl || '')) {
+      return;
+    }
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      void fetchOnlineDishPhotoByQuery(liveOutOfCatalogDish.nameKh).then((onlineUrl) => {
+        if (cancelled) return;
+        if (!onlineUrl) {
+          setFailedOnlineDishIds((prev) => (prev[targetId] ? prev : { ...prev, [targetId]: true }));
+          return;
+        }
+        setFailedOnlineDishIds((prev) => (prev[targetId] ? { ...prev, [targetId]: false } : prev));
+        setOnlinePhotoByDishId((prev) => (prev[targetId] === onlineUrl ? prev : { ...prev, [targetId]: onlineUrl }));
+      });
+    }, 260);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [isWhatToEatModalOpen, liveOutOfCatalogDish?.id, liveOutOfCatalogDish?.nameKh, liveOutOfCatalogDish?.photoUrl, onlinePhotoByDishId]);
 
   // Per-dish "why" coming from the smart AI brain
   const brainInfoById = useMemo(() => {
@@ -557,6 +604,11 @@ export const WhatToEatModal: React.FC = () => {
       basePool = foods;
     }
 
+    const withCustomLead = (list: FoodItem[]): FoodItem[] =>
+      liveOutOfCatalogDish
+        ? [liveOutOfCatalogDish, ...list.filter((f) => f.id !== liveOutOfCatalogDish.id)]
+        : list;
+
     // 1. Strict 4-way intersection (Craving + Category + MealSlot + Diet)
     const strictAll = basePool.filter(
       (food) =>
@@ -564,7 +616,7 @@ export const WhatToEatModal: React.FC = () => {
         matchesMealSlotStrict(food, mealSlotFilter, effectiveMealSlot) &&
         matchesDietStrict(food, vipDietFilter)
     );
-    if (strictAll.length > 0) return strictAll;
+    if (strictAll.length > 0) return withCustomLead(strictAll);
 
     // 2. If MealSlot made a narrow Craving+Category+Diet combination empty, relax MealSlot while keeping Craving+Category+Diet strict
     const strictWithoutMealSlot = basePool.filter(
@@ -572,7 +624,7 @@ export const WhatToEatModal: React.FC = () => {
         matchesCategoryStrict(food, categoryFilter) &&
         matchesDietStrict(food, vipDietFilter)
     );
-    if (strictWithoutMealSlot.length > 0) return strictWithoutMealSlot;
+    if (strictWithoutMealSlot.length > 0) return withCustomLead(strictWithoutMealSlot);
 
     // 3. Keep Category + Diet strict across all foods if Craving conflicted
     const categoryAndDietOnly = foods.filter(
@@ -581,9 +633,9 @@ export const WhatToEatModal: React.FC = () => {
         matchesMealSlotStrict(food, mealSlotFilter, effectiveMealSlot) &&
         matchesDietStrict(food, vipDietFilter)
     );
-    if (categoryAndDietOnly.length > 0) return categoryAndDietOnly;
+    if (categoryAndDietOnly.length > 0) return withCustomLead(categoryAndDietOnly);
 
-    return basePool;
+    return withCustomLead(basePool);
   }, [
     foods,
     cravingQuery,
@@ -596,6 +648,7 @@ export const WhatToEatModal: React.FC = () => {
     canUseVip,
     pairingRanked,
     isMedicalRefusalActive,
+    liveOutOfCatalogDish,
   ]);
 
   // Active candidate list
@@ -655,6 +708,10 @@ export const WhatToEatModal: React.FC = () => {
       seenCompareDishIdsRef.current.clear();
       return;
     }
+    if (liveOutOfCatalogDish && !isMedicalRefusalActive) {
+      setCurrentDishId(liveOutOfCatalogDish.id);
+      return;
+    }
     if (foods.length > 0 && !isMedicalRefusalActive) {
       const initialPick = pickRandomDish(currentDishId || undefined);
       if (initialPick) setCurrentDishId(initialPick.id);
@@ -668,20 +725,42 @@ export const WhatToEatModal: React.FC = () => {
     drinkMode,
     drinkKind,
     isMedicalRefusalActive,
+    liveOutOfCatalogDish?.id,
   ]);
 
   const currentDish: FoodItem | null = useMemo(() => {
     if (isMedicalRefusalActive) return null;
+    const attachOnlinePhoto = (item: FoodItem | null): FoodItem | null => {
+      if (!item) return null;
+      const fetched = onlinePhotoByDishId[item.id];
+      if (fetched && item.photoUrl !== fetched) {
+        return { ...item, photoUrl: fetched, originalPhotoUrl: fetched };
+      }
+      return item;
+    };
     if (currentDishId) {
       for (let i = chatMessages.length - 1; i >= 0; i--) {
         const msg = chatMessages[i];
+        if (msg.recipePreview?.food?.id === currentDishId) {
+          return attachOnlinePhoto(msg.recipePreview.food);
+        }
         const foundInMsg = (msg.dishes || []).find((d) => d.id === currentDishId);
-        if (foundInMsg) return foundInMsg;
-        if (msg.recipePreview?.food?.id === currentDishId) return msg.recipePreview.food;
+        if (foundInMsg) return attachOnlinePhoto(foundInMsg);
+      }
+      if (liveOutOfCatalogDish && liveOutOfCatalogDish.id === currentDishId) {
+        return attachOnlinePhoto(liveOutOfCatalogDish);
       }
     }
-    return activeDishList.find((f) => f.id === currentDishId) || activeDishList[0] || foods[0] || null;
-  }, [activeDishList, currentDishId, foods, isMedicalRefusalActive, chatMessages]);
+    if (liveOutOfCatalogDish && !currentDishId) {
+      return attachOnlinePhoto(liveOutOfCatalogDish);
+    }
+    return attachOnlinePhoto(
+      (currentDishId ? activeDishList.find((f) => f.id === currentDishId) : null) ||
+        activeDishList[0] ||
+        foods[0] ||
+        null
+    );
+  }, [activeDishList, currentDishId, foods, isMedicalRefusalActive, chatMessages, liveOutOfCatalogDish, onlinePhotoByDishId]);
 
   const currentLoc = useMemo(
     () => (currentDish ? getLocalizedFood(currentDish, language) : null),
@@ -743,15 +822,19 @@ export const WhatToEatModal: React.FC = () => {
       setComparedDishIds(reply.compareDishes.slice(0, 3).map((d) => d.id));
     }
 
-    // If the user asked for an out-of-catalog dish (custom-recipe-*), fetch a real online photo for it!
+    // If the user asked for ANY out-of-catalog dish (custom-recipe-*), fetch a real online photo for it!
     const customFoodItem =
       reply.recipePreview?.food ||
       (reply.dishes || []).find((d) => String(d.id || '').startsWith('custom-recipe-'));
     if (customFoodItem && String(customFoodItem.id || '').startsWith('custom-recipe-')) {
-      void fetchOnlineDishPhotoByQuery(
-        `${customFoodItem.nameKh || ''} ${customFoodItem.nameEn || ''} ${clean}`.trim()
-      ).then((onlineUrl) => {
-        if (!onlineUrl) return;
+      setCurrentDishId(customFoodItem.id);
+      void fetchOnlineDishPhotoByQuery(customFoodItem.nameKh || clean).then((onlineUrl) => {
+        if (!onlineUrl) {
+          setFailedOnlineDishIds((prev) => ({ ...prev, [customFoodItem.id]: true }));
+          return;
+        }
+        setFailedOnlineDishIds((prev) => (prev[customFoodItem.id] ? { ...prev, [customFoodItem.id]: false } : prev));
+        setOnlinePhotoByDishId((prev) => ({ ...prev, [customFoodItem.id]: onlineUrl }));
         setChatMessages((prev) =>
           prev.map((m) => {
             if (m.id !== reply.id) return m;
@@ -794,10 +877,20 @@ export const WhatToEatModal: React.FC = () => {
         geminiApiKey: activeGeminiKey,
       })
         .then((geminiReply) => {
+          const gemCustom = geminiReply.recipePreview?.food;
+          if (
+            gemCustom &&
+            String(gemCustom.id || '').startsWith('custom-recipe-') &&
+            /^https?:\/\//i.test(gemCustom.photoUrl || '')
+          ) {
+            setOnlinePhotoByDishId((prev) => ({ ...prev, [gemCustom.id]: gemCustom.photoUrl }));
+          }
           setChatMessages((prev) =>
             prev.map((m) => (m.id === reply.id ? geminiReply : m))
           );
-          if (geminiReply.dishes && geminiReply.dishes.length > 0) {
+          if (geminiReply.recipePreview?.food) {
+            setCurrentDishId(geminiReply.recipePreview.food.id);
+          } else if (geminiReply.dishes && geminiReply.dishes.length > 0) {
             setCurrentDishId(geminiReply.dishes[0].id);
           }
         })
@@ -1095,6 +1188,7 @@ export const WhatToEatModal: React.FC = () => {
                   value={cravingQuery}
                   onChange={(e) => {
                     setCravingQuery(e.target.value);
+                    setCurrentDishId('');
                     if (drinkMode) setDrinkMode(false);
                   }}
                   placeholder={tr(
@@ -1108,7 +1202,10 @@ export const WhatToEatModal: React.FC = () => {
                 {cravingQuery && (
                   <button
                     type="button"
-                    onClick={() => setCravingQuery('')}
+                    onClick={() => {
+                      setCravingQuery('');
+                      setCurrentDishId('');
+                    }}
                     aria-label="Clear search"
                     className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                   >
@@ -1195,7 +1292,7 @@ export const WhatToEatModal: React.FC = () => {
                                 language === 'km'
                                   ? ing.nameKh
                                   : language === 'zh'
-                                    ? dLoc.ingredients?.[idx] || ing.nameEn || ing.nameKh
+                                    ? dLoc.ingredients?.[idx]?.name || ing.nameEn || ing.nameKh
                                     : ing.nameEn || ing.nameKh
                               );
                               const methodStep = (dish.steps || [])[0];
@@ -1203,7 +1300,7 @@ export const WhatToEatModal: React.FC = () => {
                                 ? language === 'km'
                                   ? methodStep.instructionKh
                                   : language === 'zh'
-                                    ? dLoc.steps?.[0] || methodStep.instructionEn || methodStep.instructionKh
+                                    ? dLoc.steps?.[0]?.instruction || methodStep.instructionEn || methodStep.instructionKh
                                     : methodStep.instructionEn || methodStep.instructionKh
                                 : '';
 
@@ -1217,8 +1314,12 @@ export const WhatToEatModal: React.FC = () => {
                                     <img
                                       src={resolveFoodPhotoUrl(dish.photoUrl, dish.photoUpdatedAt)}
                                       alt={dLoc.name}
+                                      referrerPolicy="no-referrer"
                                       loading="lazy"
                                       decoding="async"
+                                      onError={(e) => {
+                                        (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
+                                      }}
                                       className="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-200 border border-slate-200 dark:border-slate-700"
                                     />
                                     <div className="min-w-0 flex-1 space-y-0.5">
@@ -1296,96 +1397,200 @@ export const WhatToEatModal: React.FC = () => {
                         </div>
                       )}
 
-                      {msg.similarDishes && msg.similarDishes.length > 0 && (
-                        <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
-                          <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
-                            <Shuffle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                            <span>
-                              {tr(
-                                language,
-                                'មុខម្ហូបស្រដៀងគ្នា៖',
-                                'Similar Dishes:',
-                                '相似菜品推荐：'
-                              )}
-                            </span>
-                          </div>
-                          <div className="grid grid-cols-2 gap-1.5">
-                            {msg.similarDishes.slice(0, 4).map((sim) => {
-                              const sLoc = getLocalizedFood(sim, language);
-                              return (
-                                <button
-                                  key={sim.id}
-                                  type="button"
-                                  onClick={() => {
-                                    setSelectedFood(sim);
-                                    setIsWhatToEatModalOpen(false);
-                                  }}
-                                  className="p-1.5 rounded-xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 flex items-center gap-2 text-left transition cursor-pointer"
-                                >
-                                  <img
-                                    src={resolveFoodPhotoUrl(sim.photoUrl, sim.photoUpdatedAt)}
-                                    alt={sLoc.name}
-                                    loading="lazy"
-                                    decoding="async"
-                                    className="w-9 h-9 rounded-lg object-cover shrink-0 bg-slate-200"
-                                  />
-                                  <div className="min-w-0 flex-1">
-                                    <div className="text-[11px] font-bold text-slate-900 dark:text-white truncate">
-                                      {sLoc.name}
+                      {msg.recipePreview && (() => {
+                        const rawRpFood = msg.recipePreview.food;
+                        const liveRpPhoto = rawRpFood ? onlinePhotoByDishId[rawRpFood.id] : undefined;
+                        const rpFood =
+                          rawRpFood && liveRpPhoto && rawRpFood.photoUrl !== liveRpPhoto
+                            ? { ...rawRpFood, photoUrl: liveRpPhoto, originalPhotoUrl: liveRpPhoto }
+                            : rawRpFood;
+                        const rpLoc = rpFood ? getLocalizedFood(rpFood, language) : null;
+                        const rpTaste = rpFood ? describeDish(rpFood, language) : '';
+
+                        return (
+                          <div className="mt-2.5 pt-2.5 border-t border-slate-200 dark:border-slate-700 space-y-2.5">
+                            {rpFood && rpLoc && (
+                              <div
+                                data-testid={`ai-chat-recipe-hero-${rpFood.id}`}
+                                className="rounded-2xl overflow-hidden bg-slate-50 dark:bg-slate-900/80 border border-emerald-200/80 dark:border-slate-700 shadow-xs"
+                              >
+                                <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-200 dark:bg-slate-800">
+                                  {String(rpFood.id || '').startsWith('custom-recipe-') &&
+                                  !failedOnlineDishIds[rpFood.id] &&
+                                  !/^https?:\/\//i.test(rpFood.photoUrl || '') ? (
+                                    <div className="w-full h-full bg-gradient-to-br from-[#064E3B] via-[#047857] to-slate-900 flex flex-col items-center justify-center gap-2 text-emerald-100 p-4 text-center">
+                                      <Sparkles className="w-6 h-6 text-amber-300 animate-spin" />
+                                      <span className="text-[11px] font-bold">
+                                        {tr(
+                                          language,
+                                          `🌐 កំពុងទាញរូបភាព «${rpLoc.name}» ពី Open API...`,
+                                          `🌐 Fetching "${rpLoc.name}" photo from Open API...`,
+                                          `🌐 正在从 Open API 获取“${rpLoc.name}”图片...`
+                                        )}
+                                      </span>
                                     </div>
-                                    <div className="text-[9px] text-emerald-700 dark:text-emerald-400 font-semibold truncate">
-                                      ⭐ {sim.rating} • {sLoc.category}
+                                  ) : (
+                                    <img
+                                      src={resolveFoodPhotoUrl(rpFood.photoUrl, rpFood.photoUpdatedAt)}
+                                      alt={rpLoc.name}
+                                      referrerPolicy="no-referrer"
+                                      loading="eager"
+                                      decoding="async"
+                                      onError={(e) => {
+                                        (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
+                                      }}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  )}
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
+                                  <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
+                                    <span className="px-2 py-0.5 rounded-full bg-amber-400 text-stone-900 text-[10px] font-black shadow-2xs flex items-center gap-1">
+                                      <Sparkles className="w-3 h-3 fill-current text-amber-900" />
+                                      {tr(language, 'មុខម្ហូបទី ១', 'Top Dish', '首选菜品')}
+                                    </span>
+                                    <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold">
+                                      {rpLoc.category}
+                                    </span>
+                                  </div>
+                                  <span className="absolute bottom-2 right-2.5 z-10 bg-black/55 backdrop-blur-xs text-white/85 text-[8px] px-1.5 py-0.5 rounded border border-white/15 font-khmer select-none pointer-events-none">
+                                    {String(rpFood.id || '').startsWith('custom-recipe-') && /^https?:\/\//i.test(rpFood.photoUrl || '')
+                                      ? tr(language, '🌐 Open API', '🌐 Open API', '🌐 Open API')
+                                      : tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}
+                                  </span>
+                                  <div className="absolute bottom-2 left-3 right-20 text-white space-y-0.5">
+                                    <div className="text-sm font-extrabold leading-snug drop-shadow truncate">
+                                      {rpLoc.name}
+                                    </div>
+                                    <div className="text-[10px] font-bold text-emerald-200 flex items-center gap-1.5 flex-wrap">
+                                      <span>⭐ {rpFood.rating || 4.8}</span>
+                                      <span>•</span>
+                                      <span>⏱️ {rpLoc.cookTime}</span>
+                                      <span>•</span>
+                                      <span>{rpFood.calories || 280} kcal</span>
                                     </div>
                                   </div>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
+                                </div>
+                                <div className="p-2.5 space-y-1.5">
+                                  {rpTaste && (
+                                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100/85 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 text-[10px] font-bold">
+                                      <span>✨ {tr(language, 'រសជាតិ៖', 'Taste:', '风味：')} {rpTaste}</span>
+                                    </div>
+                                  )}
+                                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
+                                    {rpLoc.description}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
 
-                      {msg.recipePreview && (
-                        <div className="mt-2.5 pt-2.5 border-t border-slate-200 dark:border-slate-700 space-y-2">
-                          <div className="font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
-                            <ChefHat className="w-3.5 h-3.5 shrink-0" />
-                            <span>{tr(language, 'គ្រឿងផ្សំសំខាន់ៗ៖', 'Key Ingredients:', '主要食材：')}</span>
-                          </div>
-                          <ul className="grid grid-cols-1 gap-1 text-[11px] text-slate-700 dark:text-slate-300">
-                            {msg.recipePreview.ingredients.map((ing, idx) => (
-                              <li key={idx} className="flex items-center justify-between gap-2 bg-slate-50 dark:bg-slate-900/60 px-2 py-1 rounded-lg">
-                                <span className="font-bold">• {ing.name}</span>
-                                <span className="text-emerald-700 dark:text-emerald-400 font-semibold shrink-0">{ing.amount}</span>
-                              </li>
-                            ))}
-                          </ul>
+                            <div className="font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
+                              <ChefHat className="w-3.5 h-3.5 shrink-0" />
+                              <span>{tr(language, 'គ្រឿងផ្សំសំខាន់ៗ៖', 'Key Ingredients:', '主要食材：')}</span>
+                            </div>
+                            <ul className="grid grid-cols-1 gap-1 text-[11px] text-slate-700 dark:text-slate-300">
+                              {msg.recipePreview.ingredients.map((ing, idx) => (
+                                <li key={idx} className="flex items-center justify-between gap-2 bg-slate-50 dark:bg-slate-900/60 px-2 py-1 rounded-lg">
+                                  <span className="font-bold">• {ing.name}</span>
+                                  <span className="text-emerald-700 dark:text-emerald-400 font-semibold shrink-0">{ing.amount}</span>
+                                </li>
+                              ))}
+                            </ul>
 
-                          <div className="font-extrabold text-[#064E3B] dark:text-emerald-300 pt-1">
-                            {tr(language, 'របៀបធ្វើ៖', 'Cooking Steps:', '制作步骤：')}
-                          </div>
-                          <ol className="space-y-1 text-[11px] text-slate-700 dark:text-slate-300">
-                            {msg.recipePreview.steps.map((st) => (
-                              <li key={st.stepNumber} className="leading-snug">
-                                <span className="font-black text-emerald-700 dark:text-emerald-400 mr-1">{st.stepNumber}.</span>
-                                {st.instruction}
-                              </li>
-                            ))}
-                          </ol>
+                            <div className="font-extrabold text-[#064E3B] dark:text-emerald-300 pt-1">
+                              {tr(language, 'របៀបធ្វើ៖', 'Cooking Steps:', '制作步骤：')}
+                            </div>
+                            <ol className="space-y-1 text-[11px] text-slate-700 dark:text-slate-300">
+                              {msg.recipePreview.steps.map((st) => (
+                                <li key={st.stepNumber} className="leading-snug">
+                                  <span className="font-black text-emerald-700 dark:text-emerald-400 mr-1">{st.stepNumber}.</span>
+                                  {st.instruction}
+                                </li>
+                              ))}
+                            </ol>
 
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (msg.recipePreview?.food) {
-                                setSelectedFood(msg.recipePreview.food);
-                                setIsWhatToEatModalOpen(false);
-                              }
-                            }}
-                            className="w-full mt-1 py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
-                          >
-                            <ChefHat className="w-3.5 h-3.5 text-amber-300" />
-                            <span>{tr(language, 'បើកមើលរូបមន្តពេញលេញ', 'Open Full Recipe Card', '打开完整食谱详情')}</span>
-                          </button>
-                        </div>
-                      )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (rpFood) {
+                                  setSelectedFood(rpFood);
+                                  setIsWhatToEatModalOpen(false);
+                                }
+                              }}
+                              className="w-full mt-1 py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <ChefHat className="w-3.5 h-3.5 text-amber-300" />
+                              <span>{tr(language, 'បើកមើលរូបមន្តពេញលេញ', 'Open Full Recipe Card', '打开完整食谱详情')}</span>
+                            </button>
+                          </div>
+                        );
+                      })()}
+
+                      {(() => {
+                        const rpId = msg.recipePreview?.food?.id;
+                        const extraFromDishes = rpId
+                          ? (msg.dishes || []).filter((d) => d.id !== rpId)
+                          : [];
+                        const combinedSimilar: FoodItem[] = [];
+                        const seenSim = new Set<string>(rpId ? [rpId] : []);
+                        for (const item of [...extraFromDishes, ...(msg.similarDishes || [])]) {
+                          if (!seenSim.has(item.id)) {
+                            seenSim.add(item.id);
+                            combinedSimilar.push(item);
+                          }
+                        }
+                        if (combinedSimilar.length === 0) return null;
+                        return (
+                          <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
+                            <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
+                              <Shuffle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span>
+                                {tr(
+                                  language,
+                                  'មុខម្ហូបស្រដៀងគ្នា៖',
+                                  'Similar Dishes:',
+                                  '相似菜品推荐：'
+                                )}
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              {combinedSimilar.slice(0, 4).map((sim) => {
+                                const sLoc = getLocalizedFood(sim, language);
+                                return (
+                                  <button
+                                    key={sim.id}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedFood(sim);
+                                      setIsWhatToEatModalOpen(false);
+                                    }}
+                                    className="p-1.5 rounded-xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 flex items-center gap-2 text-left transition cursor-pointer"
+                                  >
+                                    <img
+                                      src={resolveFoodPhotoUrl(sim.photoUrl, sim.photoUpdatedAt)}
+                                      alt={sLoc.name}
+                                      referrerPolicy="no-referrer"
+                                      loading="lazy"
+                                      decoding="async"
+                                      onError={(e) => {
+                                        (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
+                                      }}
+                                      className="w-9 h-9 rounded-lg object-cover shrink-0 bg-slate-200"
+                                    />
+                                    <div className="min-w-0 flex-1">
+                                      <div className="text-[11px] font-bold text-slate-900 dark:text-white truncate">
+                                        {sLoc.name}
+                                      </div>
+                                      <div className="text-[9px] text-emerald-700 dark:text-emerald-400 font-semibold truncate">
+                                        ⭐ {sim.rating} • {sLoc.category}
+                                      </div>
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })()}
 
                       {msg.destinations && msg.destinations.length > 0 && (
                         <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
@@ -1411,6 +1616,9 @@ export const WhatToEatModal: React.FC = () => {
                                     alt={dLoc.name}
                                     loading="lazy"
                                     decoding="async"
+                                    onError={(e) => {
+                                      (e.currentTarget as HTMLImageElement).src = '/destinations/dest-1.jpg';
+                                    }}
                                     className="w-11 h-11 rounded-lg object-cover shrink-0 bg-slate-200"
                                   />
                                   <div className="min-w-0 flex-1">
@@ -1975,7 +2183,7 @@ export const WhatToEatModal: React.FC = () => {
                         language === 'km'
                           ? ing.nameKh
                           : language === 'zh'
-                            ? cLoc.ingredients?.[idx] || ing.nameEn || ing.nameKh
+                            ? cLoc.ingredients?.[idx]?.name || ing.nameEn || ing.nameKh
                             : ing.nameEn || ing.nameKh
                       )
                       .join(', ');
@@ -1986,7 +2194,14 @@ export const WhatToEatModal: React.FC = () => {
                       >
                         <div className="space-y-1">
                           <div className="relative aspect-16/10 rounded-lg overflow-hidden bg-slate-200">
-                            <img src={resolveFoodPhotoUrl(cDish.photoUrl, cDish.photoUpdatedAt)} alt={cLoc.name} className="w-full h-full object-cover" />
+                            <img
+                              src={resolveFoodPhotoUrl(cDish.photoUrl, cDish.photoUpdatedAt)}
+                              alt={cLoc.name}
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
+                              }}
+                              className="w-full h-full object-cover"
+                            />
                             <button
                               type="button"
                               onClick={() => toggleCompareDish(cDish.id)}
@@ -2053,14 +2268,34 @@ export const WhatToEatModal: React.FC = () => {
                   className="relative rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-md"
                 >
                   <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-                    <img
-                      src={resolveFoodPhotoUrl(currentDish.photoUrl, currentDish.photoUpdatedAt)}
-                      alt={currentLoc.name}
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                    {String(currentDish.id || '').startsWith('custom-recipe-') &&
+                    !failedOnlineDishIds[currentDish.id] &&
+                    !/^https?:\/\//i.test(currentDish.photoUrl || '') ? (
+                      <div className="w-full h-full bg-gradient-to-br from-[#064E3B] via-[#047857] to-slate-900 flex flex-col items-center justify-center gap-2.5 text-emerald-100 p-6 text-center">
+                        <Sparkles className="w-7 h-7 text-amber-300 animate-spin" />
+                        <span className="text-xs font-bold font-khmer">
+                          {tr(
+                            language,
+                            `🌐 កំពុងទាញរូបភាព «${currentLoc.name}» ពី Open API...`,
+                            `🌐 Fetching "${currentLoc.name}" photo from Open API...`,
+                            `🌐 正在从 Open API 获取“${currentLoc.name}”图片...`
+                          )}
+                        </span>
+                      </div>
+                    ) : (
+                      <img
+                        src={resolveFoodPhotoUrl(currentDish.photoUrl, currentDish.photoUpdatedAt)}
+                        alt={currentLoc.name}
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
+                        }}
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                        loading="eager"
+                        decoding="async"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
 
                     {/* Badge */}
                     <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
@@ -2075,7 +2310,9 @@ export const WhatToEatModal: React.FC = () => {
 
                     {/* Reference label */}
                     <span className="absolute bottom-2 right-2.5 z-10 bg-black/55 backdrop-blur-xs text-white/85 text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded border border-white/15 font-khmer select-none pointer-events-none">
-                      {tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}
+                      {String(currentDish.id || '').startsWith('custom-recipe-') && /^https?:\/\//i.test(currentDish.photoUrl || '')
+                        ? tr(language, '🌐 រូបភាព Open API', '🌐 Open API Photo', '🌐 Open API 图片')
+                        : tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}
                     </span>
 
                     {/* Title overlay */}
@@ -2243,6 +2480,9 @@ export const WhatToEatModal: React.FC = () => {
                           alt={dLoc.name}
                           loading="lazy"
                           decoding="async"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
+                          }}
                           className="w-10 h-10 rounded-xl object-cover shrink-0 group-hover:scale-105 transition-transform"
                         />
                         <div className="min-w-0">

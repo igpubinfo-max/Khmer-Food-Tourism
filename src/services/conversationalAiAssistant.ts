@@ -1,7 +1,12 @@
 import { isPlaceLocationVerified, type FoodItem, type Language, type Restaurant, type TouristDestination } from '../types';
 import { tr } from '../utils/i18n';
-import { normalizeKhmerFoodText, searchKhmerFoods } from '../utils/khmerFoodSearch';
+import { normalizeKhmerFoodText, parseKhmerFoodSearchQuery, searchKhmerFoods } from '../utils/khmerFoodSearch';
 import { generateAuthenticRecipeByDishName } from '../utils/khmerRecipeGenerator';
+import {
+  translateUniversalDishQuery,
+  getCachedUniversalDishPhoto,
+  fetchUniversalDishPhotoFromOpenApis,
+} from '../utils/universalDishOpenApi';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { isMedicalOrHealthQuery, buildMedicalScopeNotice, describeDish, type BrainChip } from './aiFoodBrain';
 import { getAiFoodAdvisorRecommendations, isVegetarianQuery } from './aiFoodAdvisorService';
@@ -82,7 +87,7 @@ const PROVINCE_PATTERNS: Array<{ kh: string; en: string; zh: string; re: RegExp 
 ];
 
 const RECIPE_INTENT_RE =
-  /រូបមន្ត|គ្រឿងផ្សំ|របៀបធ្វើ|របៀបចម្អិន|ធ្វើម៉េច|ធ្វើដូចម្តេច|ធ្វើបែបណា|ចម្អិនម៉េច|ចម្អិនដូចម្តេច|វិធីធ្វើ|វិធីចម្អិន|recipe|ingredient|how to cook|how to make|how do i make|cooking step|做法|食谱|菜谱|食材|配料|怎么做|如何制作/i;
+  /រូបមន្ត|គ្រឿងផ្សំ|របៀបធ្វើ|របៀបចម្អិន|(?:ធ្វើ|ចម្អិន|ស្ល|ឆា|អាំង|បំពង)\s*(?:ដូច)?(?:ម៉េច|ម្តេច|ម្ដេច|បែបណា|យ៉ាងម៉េច|យ៉ាងណា)(?:\s*ខ្លះ)?|វិធីធ្វើ|វិធីចម្អិន|ដាក់គ្រឿងអ្វីខ្លះ|ប្រើគ្រឿងផ្សំអ្វីខ្លះ|recipe|ingredient|how to cook|how to make|how do i make|cooking step|做法|食谱|菜谱|食材|配料|怎么做|如何制作/i;
 
 const RESTAURANT_INTENT_RE =
   /ហាងណា|ញ៉ាំនៅណា|ភោជនីយដ្ឋាន|ហាងអាហារ|រកហាង|ណែនាំហាង|ហាងលក់|where to eat|which restaurant|recommend.*restaurant|find.*shop|best place to eat|哪里吃|哪家餐厅|推荐餐厅|去哪吃|餐馆|饭店/i;
@@ -234,42 +239,102 @@ export function buildWelcomeAssistantMessage(language: Language, foodCount: numb
 }
 
 const BROAD_CATEGORY_OR_GENERIC_QUESTION_RE =
-  /^(?:ម្ហូប|អាហារ|បាយ|សម្ល|គុយទាវ|មី|ឆា|អាំង|ដុត|ចៀន|បំពង|ស្ងោរ|ចំហុយ|ញាំ|ភ្លា|បុក|បង្អែម|នំ|ភេសជ្ជៈ|គ្រឿងសមុទ្រ|សាច់គោ|សាច់ជ្រូក|សាច់មាន់|សាច់ទា|ត្រី|បន្លែ|សាច់អាំង|ម្ហូបអាំង|ម្ហូបឆា|ម្ហូបសម្ល|ម្ហូបខ្មែរ|អាហារសម្រន់|ម្ហូបតាមផ្លូវ|ញ៉ាំអី|ហូបអី|ពិសាអី|អីឆ្ងាញ់|ម្ហូបឆ្ងាញ់|ម្ហូបល្បី|ណែនាំម្ហូប|ម្ហូបបួស|អាហារបួស|food|foods|dish|dishes|soup|rice|noodles|salad|grilled|seafood|dessert|drink|meat|beef|pork|chicken|fish|street\s*food|khmer\s*food|what\s*to\s*eat|recommend.*)$/i;
+  /^(?:ម្ហូប|អាហារ|បាយ|សម្ល|សម្លក្តៅៗ|គុយទាវ|មី|ឆា|អាំង|ដុត|ចៀន|បំពង|ស្ងោរ|ចំហុយ|ញាំ|ភ្លា|បុក|បង្អែម|នំ|ភេសជ្ជៈ|គ្រឿងសមុទ្រ|សាច់គោ|សាច់ជ្រូក|សាច់មាន់|សាច់ទា|ត្រី|បន្លែ|សាច់អាំង|ម្ហូបអាំង|ម្ហូបឆា|ម្ហូបសម្ល|ម្ហូបខ្មែរ|ជូរហឹរ|ម្ហូបជូរហឹរ|ហឹរ|ផ្អែម|ប្រៃ|ជូរ|អាហារសម្រន់|ម្ហូបតាមផ្លូវ|អាហារពេលព្រឹក|អាហារថ្ងៃត្រង់|អាហារពេលល្ងាច|អាហារពេលយប់|ញ៉ាំអី|ហូបអី|ពិសាអី|អីឆ្ងាញ់|ម្ហូបឆ្ងាញ់|ម្ហូបល្បី|ណែនាំម្ហូប|ម្ហូបបួស|អាហារបួស|ម្ហូបអមភេសជ្ជៈ|food|foods|dish|dishes|soup|warm\s*soup|rice|noodles|kuy\s*teav|salad|grilled|seafood|dessert|drink|drinks|meat|beef|pork|chicken|fish|spicy|sour|spicy\s*sour|street\s*food|khmer\s*food|breakfast|lunch|dinner|what\s*to\s*eat|recommend.*|米饭|粿条面食|热汤|海鲜|烧烤|酸辣|街头小吃|甜品)$/i;
+
+function escapeRegexLiteral(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function isDishStrictlyInCatalog(rawCleanDish: string, foods: FoodItem[]): boolean {
+  const clean = normalizeKhmerFoodText(rawCleanDish);
+  const cleanLower = rawCleanDish.trim().toLowerCase();
+  if (clean.length < 2) return true;
+
+  const isAsciiWord = /^[a-z0-9\s'-]+$/i.test(cleanLower);
+  const asciiWordRe =
+    isAsciiWord && cleanLower.length >= 3
+      ? new RegExp(`\\b${escapeRegexLiteral(cleanLower)}\\b`, 'i')
+      : null;
+
+  for (const f of foods) {
+    const nKh = normalizeKhmerFoodText(f.nameKh);
+    const nEn = (f.nameEn || '').toLowerCase();
+    const zhName = getLocalizedFood(f, 'zh').name.toLowerCase();
+
+    // Catalog dish title equals or contains the entire user query (e.g. "អាម៉ុក" -> "អាម៉ុកត្រី")
+    if (nKh && !isAsciiWord && (nKh === clean || nKh.includes(clean))) {
+      return true;
+    }
+    if (asciiWordRe && nEn && (nEn === cleanLower || asciiWordRe.test(nEn))) {
+      return true;
+    }
+    if (/[\u4E00-\u9FFF]/.test(cleanLower) && zhName && (zhName === cleanLower || zhName.includes(cleanLower))) {
+      return true;
+    }
+  }
+
+  // Multi-token check: only consider in-catalog if ALL tokens AND the remaining tail of `clean` exist in the same catalog dish title
+  const parsed = parseKhmerFoodSearchQuery(clean);
+  const subTokens = parsed.tokens.filter((t) => t.length >= 2 && t !== clean);
+  const checkTokens = subTokens.length >= 2 ? subTokens : parsed.tokens.filter((t) => t.length >= 2);
+  if (checkTokens.length >= 2) {
+    const remainder = checkTokens.reduce((acc, tok) => acc.replace(tok, ' '), clean).replace(/\s+/g, '').trim();
+    if (remainder.length <= 1) {
+      for (const f of foods) {
+        const titleCombined = normalizeKhmerFoodText(`${f.nameKh} ${f.nameEn}`);
+        if (checkTokens.every((tok) => titleCombined.includes(tok))) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
 
 function findBestDishInQuery(query: string, foods: FoodItem[], fallbackDishes: FoodItem[]): FoodItem | null {
-  const clean = normalizeKhmerFoodText(
-    query
-      .replace(RECIPE_INTENT_RE, ' ')
-      .replace(RESTAURANT_INTENT_RE, ' ')
-      .replace(/^(?:សូម|សុំ|ជួយ|ប្រាប់|បង្ហាញ|ចង់ដឹង|ចង់ញ៉ាំ|ចង់ហូប|ពី|នៃ|សម្រាប់)\s*/gi, '')
-      .replace(/[?？!！។«»"']/g, ' ')
-  );
+  const rawStripped = query
+    .replace(new RegExp(RECIPE_INTENT_RE.source, 'gi'), ' ')
+    .replace(new RegExp(RESTAURANT_INTENT_RE.source, 'gi'), ' ')
+    .replace(/^(?:តើមាន|តើមុខម្ហូប|តើម្ហូប|តើ|សូម|សុំ|ជួយ|ប្រាប់|បង្ហាញ|ចង់ដឹង|ចង់ញ៉ាំ|ចង់ហូប|ពី|នៃ|សម្រាប់)\s*/gi, '')
+    .replace(/\s*(?:ខ្លះ|អ្វីខ្លះ|អត់|ទេ|ឬទេ|ដែរទេ|[?？!！។«»"'])+$/gi, ' ')
+    .replace(/[?？!！។«»"']/g, ' ')
+    .trim();
+  const clean = normalizeKhmerFoodText(rawStripped);
+  const cleanLower = rawStripped.toLowerCase();
+  const isAsciiWord = /^[a-z0-9\s'-]+$/i.test(cleanLower);
+  const asciiWordRe =
+    isAsciiWord && cleanLower.length >= 3
+      ? new RegExp(`\\b${escapeRegexLiteral(cleanLower)}\\b`, 'i')
+      : null;
 
   if (clean.length >= 2) {
-    // 1. Direct substring match in dish title
+    // 1. Exact or catalog-contains-query match
     for (const f of foods) {
       const nKh = normalizeKhmerFoodText(f.nameKh);
       const nEn = (f.nameEn || '').toLowerCase();
       const zhName = getLocalizedFood(f, 'zh').name.toLowerCase();
       if (
-        (nKh && (clean.includes(nKh) || nKh.includes(clean))) ||
-        (nEn && clean.length >= 3 && (clean.includes(nEn) || nEn.includes(clean))) ||
-        (zhName && (clean.includes(zhName) || zhName.includes(clean)))
+        (nKh && !isAsciiWord && (nKh === clean || nKh.includes(clean))) ||
+        (asciiWordRe && nEn && (nEn === cleanLower || asciiWordRe.test(nEn))) ||
+        (/[\u4E00-\u9FFF]/.test(cleanLower) && zhName && (zhName === cleanLower || zhName.includes(cleanLower)))
       ) {
         return f;
       }
     }
 
-    // 2. Multi-token title match: only treat as catalog dish if ALL distinct tokens of the query appear in the dish title!
-    // (Prevents "ងាវអាំង" from falsely matching "ត្រីងៀតអាំង" just because of "អាំង")
+    // 2. Multi-token title match when all query tokens and remainder belong to a catalog dish title
     const parsed = parseKhmerFoodSearchQuery(clean);
     const subTokens = parsed.tokens.filter((t) => t.length >= 2 && t !== clean);
     const checkTokens = subTokens.length >= 2 ? subTokens : parsed.tokens.filter((t) => t.length >= 2);
     if (checkTokens.length >= 2) {
-      for (const f of foods) {
-        const titleCombined = normalizeKhmerFoodText(`${f.nameKh} ${f.nameEn}`);
-        if (checkTokens.every((tok) => titleCombined.includes(tok))) {
-          return f;
+      const remainder = checkTokens.reduce((acc, tok) => acc.replace(tok, ' '), clean).replace(/\s+/g, '').trim();
+      if (remainder.length <= 1) {
+        for (const f of foods) {
+          const titleCombined = normalizeKhmerFoodText(`${f.nameKh} ${f.nameEn}`);
+          if (checkTokens.every((tok) => titleCombined.includes(tok))) {
+            return f;
+          }
         }
       }
     }
@@ -278,61 +343,77 @@ function findBestDishInQuery(query: string, foods: FoodItem[], fallbackDishes: F
   return fallbackDishes[0] || null;
 }
 
-function detectOutOfCatalogDishName(rawQuery: string, foods: FoodItem[]): string | null {
-  const cleanDish = rawQuery
-    .replace(RECIPE_INTENT_RE, ' ')
-    .replace(RESTAURANT_INTENT_RE, ' ')
-    .replace(/^(?:ចង់ញ៉ាំ|ចង់ហូប|សុំ|សូម|ណែនាំ|រក|មើល|មាន|តើមាន|សួរពី|ពី|នៃ|សម្រាប់)\s*/gi, '')
-    .replace(/\s*(?:អត់|ទេ|ឬទេ|ដែរទេ|មានអត់|ឆ្ងាញ់អត់|[?？!！។«»"'])+$/gi, '')
+export function detectOutOfCatalogDishName(rawQuery: string, foods: FoodItem[]): string | null {
+  const trimmedRaw = (rawQuery || '').trim();
+  if (!trimmedRaw) return null;
+  if (isMedicalOrHealthQuery(trimmedRaw)) return null;
+  if (MORE_FOLLOWUP_RE.test(trimmedRaw)) return null;
+  if (DRINK_PAIRING_INTENT_RE.test(trimmedRaw)) return null;
+  if (TOURISM_INTENT_RE.test(stripTourismHomonyms(trimmedRaw))) return null;
+  if (RESTAURANT_INTENT_RE.test(trimmedRaw) && !RECIPE_INTENT_RE.test(trimmedRaw)) return null;
+  if (/ប្រៀបធៀប|ខុសគ្នា|compare|comparison|\bvs\b|versus|对比|比较/i.test(trimmedRaw)) return null;
+
+  const cleanDish = trimmedRaw
+    .replace(new RegExp(RECIPE_INTENT_RE.source, 'gi'), ' ')
+    .replace(/^(?:តើមាន|តើមុខម្ហូប|តើម្ហូប|តើ|ចង់ញ៉ាំ|ចង់ហូប|ចង់ផឹក|ចង់ដឹង|សុំ|សូម|ជួយ|ប្រាប់|បង្ហាញ|ណែនាំ|រក|មើល|មាន|សួរពី|ពី|នៃ|សម្រាប់)\s*/gi, '')
+    .replace(/\s*(?:ខ្លះ|អ្វីខ្លះ|អត់|ទេ|ឬទេ|ដែរទេ|មានអត់|ឆ្ងាញ់អត់|[?？!！។«»"'])+$/gi, '')
     .replace(/\s+/g, ' ')
     .trim();
 
-  if (cleanDish.length < 2 || cleanDish.length > 36) return null;
+  if (cleanDish.length < 2 || cleanDish.length > 65) return null;
   if (BROAD_CATEGORY_OR_GENERIC_QUESTION_RE.test(cleanDish)) return null;
+  if (isVegetarianQuery(cleanDish)) return null;
   if (detectProvinceFromText(cleanDish)) return null;
 
   const parsed = parseKhmerFoodSearchQuery(cleanDish);
   if (
     parsed.isFlavorOnlyQuery ||
     parsed.isOccasionOnlyQuery ||
-    parsed.isDrinkExplicitlyRequested ||
     (parsed.excludedProteins && parsed.excludedProteins.length > 0) ||
-    parsed.occasionIntents.length > 0 ||
-    parsed.flavorIntents.length > 0
+    (parsed.occasionIntents && parsed.occasionIntents.length > 0)
   ) {
     return null;
   }
 
-  // If the dish exists in the catalog, return null so normal catalog matching handles it
-  const inCatalog = findBestDishInQuery(cleanDish, foods, []);
-  if (inCatalog) return null;
+  // If the dish genuinely exists in the 200-item catalog, let normal catalog matching handle it
+  if (isDishStrictlyInCatalog(cleanDish, foods)) {
+    return null;
+  }
 
   return cleanDish;
 }
 
-function createOutOfCatalogDishItem(cleanDishName: string, foods: FoodItem[]): FoodItem {
+export function createOutOfCatalogDishItem(cleanDishName: string, foods: FoodItem[]): FoodItem {
   const translated = translateKhmerDishToEnglishSearchQuery(cleanDishName);
   let catSlug: FoodItem['categorySlug'] = 'soup';
-  let catKh = 'ម្ហូបពិសេស';
-  let catEn = 'Specialty Dish';
+  let catKh = `ម្ហូបពិសេស / ${cleanDishName}`;
+  let catEn = `Specialty / ${translated.enName}`;
 
-  if (/អាំង|ដុត|បំពង|ចៀន|ខ្វៃ|ហាល|grilled|roast|bbq|fried/i.test(cleanDishName)) {
+  if (
+    /តែគុជ|តែក្រូច|តែបៃតង|ម៉ាត់ឆា|កាហ្វេ|ទឹកក្រឡុក|បង្អែម|នំខេក|ការ៉េម|ដូណាត់|វ៉ាហ្វល|ផេនខេក|ចាហួយ|បាយដំណើបស្វាយ|bubble\s*tea|boba|coffee|latte|matcha|smoothie|ice\s*cream|cake|donut|doughnut|waffle|pancake|dessert/i.test(
+      cleanDishName
+    )
+  ) {
+    catSlug = 'dessert';
+    catKh = `បង្អែម & ភេសជ្ជៈ / ${cleanDishName}`;
+    catEn = `Dessert & Drink / ${translated.enName}`;
+  } else if (/អាំង|ដុត|បំពង|ចៀន|ខ្វៃ|ហាល|ស្តេក|ភីហ្សា|ហាំបឺហ្គឺ|តាកូ|grilled|roast|bbq|fried|steak|pizza|burger|taco/i.test(cleanDishName)) {
     catSlug = 'grilled';
-    catKh = `ម្ហូបអាំង / ${cleanDishName}`;
-    catEn = `Grilled / ${translated.enName}`;
-  } else if (/ឆា|ឡុកឡាក់|stir[\s-]*fry|wok/i.test(cleanDishName)) {
+    catKh = `ម្ហូបអាំង & ចៀន / ${cleanDishName}`;
+    catEn = `Grilled & Crispy / ${translated.enName}`;
+  } else if (/ឆា|ឡុកឡាក់|តុកបុកគី|stir[\s-]*fry|wok|tteokbokki/i.test(cleanDishName)) {
     catSlug = 'stirfry';
     catKh = `ម្ហូបឆា / ${cleanDishName}`;
     catEn = `Stir-Fry / ${translated.enName}`;
-  } else if (/ញាំ|ភ្លា|បុក|ស្រុះ|salad/i.test(cleanDishName)) {
+  } else if (/ញាំ|ភ្លា|បុក|ស្រុះ|ជ្រក់|គីមឈី|សាស៊ីមី|ស៊ូស៊ី|សាឡាត់|salad|kimchi|sushi|sashimi/i.test(cleanDishName)) {
     catSlug = 'salad';
-    catKh = `ញាំ & គ្រឿងសមុទ្រ / ${cleanDishName}`;
-    catEn = `Salad & Seafood / ${translated.enName}`;
-  } else if (/មី|គុយទាវ|នំបញ្ចុក|លត|ផាត់ថៃ|ស្ប៉ាហ្គេទី|noodle|spaghetti|pasta|ramen/i.test(cleanDishName)) {
+    catKh = `ញាំ & ម្ហូបពិសេស / ${cleanDishName}`;
+    catEn = `Salad & Specialty / ${translated.enName}`;
+  } else if (/មី|គុយទាវ|នំបញ្ចុក|លត|ផាត់ថៃ|ស្ប៉ាហ្គេត?ទី|ផាស្តា|កាបូណារ៉ា|ឡាសាញ៉ា|រ៉ាមេន|ហ្វឺ|អ៊ូដុង|noodle|spaghetti|pasta|lasagna|ramen|pho|udon/i.test(cleanDishName)) {
     catSlug = 'noodles';
     catKh = `មី & គុយទាវ / ${cleanDishName}`;
-    catEn = `Noodles / ${translated.enName}`;
-  } else if (/បាយ|បបរ|rice|porridge/i.test(cleanDishName)) {
+    catEn = `Noodles & Pasta / ${translated.enName}`;
+  } else if (/បាយ|បបរ|ប៊ីប៊ីមបាប់|rice|porridge|bibimbap|biryani/i.test(cleanDishName)) {
     catSlug = 'rice';
     catKh = `បាយ & បបរ / ${cleanDishName}`;
     catEn = `Rice Dish / ${translated.enName}`;
@@ -340,7 +421,7 @@ function createOutOfCatalogDishItem(cleanDishName: string, foods: FoodItem[]): F
 
   const generated = generateAuthenticRecipeByDishName(cleanDishName, translated.enName, catSlug);
 
-  // Pick a close initial fallback dish sharing the primary ingredient (e.g. "ងាវស្រុះ" for "ងាវអាំង") before the live Open API photo resolves
+  // Pick a close initial fallback dish sharing the primary ingredient in case the device is completely offline
   const parsed = parseKhmerFoodSearchQuery(cleanDishName);
   const subjectToken = parsed.tokens.find(
     (t) => t.length >= 2 && t !== cleanDishName && !/^(?:អាំង|ដុត|ឆា|បំពង|ចៀន|ស្រុះ|ស្ងោរ|សម្ល|ស៊ុប|ញាំ|ភ្លា|បុក)$/.test(t)
@@ -351,14 +432,19 @@ function createOutOfCatalogDishItem(cleanDishName: string, foods: FoodItem[]): F
   const fallbackPhotoDish =
     ingredientMatchedDish || searchKhmerFoods(foods, cleanDishName)[0] || foods[0];
 
+  const cachedOnlinePhoto = getCachedOnlineDishPhoto(cleanDishName);
+  const slugKey = normalizeKhmerFoodText(cleanDishName).replace(/\s+/g, '-') || cleanDishName.toLowerCase().replace(/\s+/g, '-') || 'dish';
+
   return {
     ...fallbackPhotoDish,
-    id: `custom-recipe-${Date.now()}`,
+    id: `custom-recipe-${slugKey}`,
     nameKh: cleanDishName,
     nameEn: translated.enName,
     categorySlug: catSlug,
     categoryKh: catKh,
     categoryEn: catEn,
+    photoUrl: cachedOnlinePhoto || fallbackPhotoDish?.photoUrl || '',
+    originalPhotoUrl: cachedOnlinePhoto || fallbackPhotoDish?.originalPhotoUrl || fallbackPhotoDish?.photoUrl || '',
     descriptionKh: generated.descriptionKh,
     descriptionEn: generated.descriptionEn,
     ingredients: generated.ingredients,
@@ -467,9 +553,10 @@ export function generateConversationalAiResponse(params: {
   // 3. RECIPE / INGREDIENTS / COOKING STEPS INTENT (Multi-turn aware + supports any dish outside the 200-item catalog!)
   if (RECIPE_INTENT_RE.test(trimmed)) {
     const cleanRequestedDishName = trimmed
-      .replace(RECIPE_INTENT_RE, ' ')
-      .replace(/^(?:សូម|សុំ|ជួយ|ប្រាប់|បង្ហាញ|ចង់ដឹង|ពី|នៃ|សម្រាប់)\s*/gi, '')
-      .replace(/[?？!！។«»"']/g, '')
+      .replace(new RegExp(RECIPE_INTENT_RE.source, 'gi'), ' ')
+      .replace(/^(?:តើមាន|តើមុខម្ហូប|តើម្ហូប|តើ|សូម|សុំ|ជួយ|ប្រាប់|បង្ហាញ|ចង់ដឹង|ចង់ញ៉ាំ|ចង់ហូប|ពី|នៃ|សម្រាប់)\s*/gi, '')
+      .replace(/\s*(?:ខ្លះ|អ្វីខ្លះ|អត់|ទេ|ឬទេ|ដែរទេ|[?？!！។«»"'])+$/gi, '')
+      .replace(/\s+/g, ' ')
       .trim();
 
     const matchedInCatalog = findBestDishInQuery(trimmed, foods, []);
@@ -486,12 +573,12 @@ export function generateConversationalAiResponse(params: {
 
     const loc = getLocalizedFood(targetFood, language);
     const ingredients = (targetFood.ingredients || []).slice(0, 6).map((ing, idx) => ({
-      name: language === 'km' ? ing.nameKh : language === 'zh' ? (loc.ingredients?.[idx] || ing.nameEn || ing.nameKh) : (ing.nameEn || ing.nameKh),
+      name: language === 'km' ? ing.nameKh : language === 'zh' ? (loc.ingredients?.[idx]?.name || ing.nameEn || ing.nameKh) : (ing.nameEn || ing.nameKh),
       amount: ing.amount || '',
     }));
     const steps = (targetFood.steps || []).slice(0, 5).map((st, idx) => ({
       stepNumber: st.stepNumber || idx + 1,
-      instruction: language === 'km' ? st.instructionKh : language === 'zh' ? (loc.steps?.[idx] || st.instructionEn || st.instructionKh) : (st.instructionEn || st.instructionKh),
+      instruction: language === 'km' ? st.instructionKh : language === 'zh' ? (loc.steps?.[idx]?.instruction || st.instructionEn || st.instructionKh) : (st.instructionEn || st.instructionKh),
     }));
 
     const reply: AiAssistantMessage = {
@@ -811,7 +898,7 @@ export function generateConversationalAiResponse(params: {
           language === 'km'
             ? ing.nameKh
             : language === 'zh'
-            ? locCustom.ingredients?.[idx] || ing.nameEn || ing.nameKh
+            ? locCustom.ingredients?.[idx]?.name || ing.nameEn || ing.nameKh
             : ing.nameEn || ing.nameKh,
         amount: ing.amount || '',
       })),
@@ -821,7 +908,7 @@ export function generateConversationalAiResponse(params: {
           language === 'km'
             ? st.instructionKh
             : language === 'zh'
-            ? locCustom.steps?.[idx] || st.instructionEn || st.instructionKh
+            ? locCustom.steps?.[idx]?.instruction || st.instructionEn || st.instructionKh
             : st.instructionEn || st.instructionKh,
       })),
     };
@@ -1024,7 +1111,7 @@ async function getGeminiCandidateModels(key: string): Promise<string[]> {
             'gemini-pro-latest',
             `gemini-${GEMINI_V15}-flash`,
           ];
-          textModels.sort((a, b) => {
+          textModels.sort((a: string, b: string) => {
             const idxA = preferredOrder.indexOf(a);
             const idxB = preferredOrder.indexOf(b);
             if (idxA !== -1 && idxB !== -1) return idxA - idxB;
@@ -1111,171 +1198,29 @@ export async function testGeminiApiConnection(apiKey?: string): Promise<{ ok: bo
   return { ok: false, message: firstError || 'Connection failed' };
 }
 
-const KHMER_DISH_TO_ENGLISH_SEARCH_MAP: Array<{ re: RegExp; enName: string; wikiQuery: string; mealDbQuery?: string }> = [
-  { re: /ងាវអាំង/i, enName: 'Grilled Blood Cockles (Ngav Ang)', wikiQuery: 'blood cockles' },
-  { re: /ងាវឆា/i, enName: 'Stir-Fried Blood Cockles with Tamarind', wikiQuery: 'blood cockles' },
-  { re: /ងាវស្រុះ/i, enName: 'Blanched Blood Cockles', wikiQuery: 'blood cockles' },
-  { re: /ភ្លាងាវ|ញាំងាវ/i, enName: 'Spicy Blood Cockle Salad', wikiQuery: 'blood cockles' },
-  { re: /ងាវ/i, enName: 'Cambodian Blood Cockles', wikiQuery: 'blood cockles' },
-  { re: /លៀសហាល/i, enName: 'Sun-Dried Spiced Freshwater Clams (Lies Hal)', wikiQuery: 'clams seafood dish' },
-  { re: /លៀសឆា|លាសឆា/i, enName: 'Stir-Fried Freshwater Clams', wikiQuery: 'clams seafood dish' },
-  { re: /លៀស|លាស/i, enName: 'Freshwater Clams Dish', wikiQuery: 'clams seafood dish' },
-  { re: /គ្រំអាំង|គ្រំឆា|គ្រំ/i, enName: 'Grilled Mussels Seafood', wikiQuery: 'mussels seafood dish' },
-  { re: /អយស្ទ័រ/i, enName: 'Fresh Oysters with Spicy Sauce', wikiQuery: 'oysters seafood' },
-  { re: /ខ្យងអាំង|ខ្យងស្រែ|ខ្យងឆា|ខ្យង/i, enName: 'Grilled River Snails with Chili Salt', wikiQuery: 'snails dish' },
-  { re: /កង្កែបបោក|កង្កែបអាំង|កង្កែបឆា|កង្កែបបំពង|កង្កែប/i, enName: 'Cambodian Stuffed & Grilled Frog Legs', wikiQuery: 'frog legs food' },
-  { re: /អន្ទង់ឆា|អន្ទង់អាំង|អន្ទង់/i, enName: 'Cambodian Spicy Eel Stir-Fry', wikiQuery: 'eel dish Asian' },
-  { re: /បង្កងអាំង|បង្កង/i, enName: 'Grilled Giant River Prawns', wikiQuery: 'grilled river prawn' },
-  { re: /បង្គាអាំង|បង្គាឆា|បង្គាបំពង|បង្គា/i, enName: 'Grilled Prawns Seafood', wikiQuery: 'grilled shrimp prawns', mealDbQuery: 'Prawn' },
-  { re: /មឹកអាំង|មឹកឆា|មឹកបំពង|មឹក/i, enName: 'Grilled Squid with Koh Kong Sauce', wikiQuery: 'grilled squid' },
-  { re: /ក្តាមអាំង|ក្តាមឆា|ក្ដាមអាំង|ក្ដាមឆា|ក្តាម|ក្ដាម/i, enName: 'Cambodian Peppered Crab', wikiQuery: 'crab seafood dish' },
-  { re: /ផាត់ថៃ|pad\s*thai/i, enName: 'Pad Thai Stir-Fried Noodles', wikiQuery: 'Pad Thai', mealDbQuery: 'Pad Thai' },
-  { re: /តុំយ៉ាំ|tom\s*yum/i, enName: 'Tom Yum Spicy Seafood Soup', wikiQuery: 'Tom Yum soup', mealDbQuery: 'Tom Yum' },
-  { re: /ស៊ូស៊ី|sushi/i, enName: 'Assorted Sushi Platter', wikiQuery: 'Sushi platter', mealDbQuery: 'Sushi' },
-  { re: /ភីហ្សា|pizza/i, enName: 'Artisan Pizza', wikiQuery: 'Pizza Margherita', mealDbQuery: 'Pizza' },
-  { re: /ស្ប៉ាហ្គេទី|spaghetti/i, enName: 'Spaghetti Bolognese', wikiQuery: 'Spaghetti Bolognese', mealDbQuery: 'Spaghetti' },
-  { re: /ហាំបឺហ្គឺ|burger/i, enName: 'Beef Burger', wikiQuery: 'Hamburger food', mealDbQuery: 'Burger' },
-  { re: /មីហឹរ/i, enName: 'Spicy Ramen Noodle Soup', wikiQuery: 'spicy ramen noodles' },
-  { re: /គុយទាវទូក/i, enName: 'Boat Noodle Soup', wikiQuery: 'Thai boat noodles' },
-  { re: /គោដុត|សាច់គោអាំង/i, enName: 'Charcoal Grilled Beef', wikiQuery: 'grilled beef skewers', mealDbQuery: 'Beef' },
-  { re: /មាន់ដុត|មាន់អាំង/i, enName: 'Grilled Lemongrass Chicken', wikiQuery: 'roast chicken lemongrass', mealDbQuery: 'Roast Chicken' },
-  { re: /ទាដុត|ទាខ្វៃ/i, enName: 'Roasted Duck', wikiQuery: 'Peking roast duck', mealDbQuery: 'Duck' },
-  { re: /ជ្រូកខ្វៃ/i, enName: 'Crispy Roasted Pork Belly', wikiQuery: 'crispy roast pork belly' },
-];
-
 export function translateKhmerDishToEnglishSearchQuery(dishQuery: string): {
   enName: string;
   wikiQuery: string;
   mealDbQuery?: string;
 } {
-  const clean = (dishQuery || '').trim();
-  for (const item of KHMER_DISH_TO_ENGLISH_SEARCH_MAP) {
-    if (item.re.test(clean)) {
-      return {
-        enName: item.enName,
-        wikiQuery: item.wikiQuery,
-        mealDbQuery: item.mealDbQuery,
-      };
-    }
-  }
-
-  // Fallback compositional translation for Khmer cooking methods + ingredients
-  let methodEn = '';
-  if (/អាំង|ដុត/i.test(clean)) methodEn = 'Grilled';
-  else if (/ឆា/i.test(clean)) methodEn = 'Stir-Fried';
-  else if (/បំពង|ចៀន/i.test(clean)) methodEn = 'Crispy Fried';
-  else if (/សម្ល|ស៊ុប|ស្ងោរ/i.test(clean)) methodEn = 'Cambodian Soup';
-  else if (/ញាំ|ភ្លា|បុក/i.test(clean)) methodEn = 'Spicy Cambodian Salad';
-
-  let ingEn = '';
-  if (/ត្រី/i.test(clean)) ingEn = 'Fish';
-  else if (/សាច់គោ|គោ/i.test(clean)) ingEn = 'Beef';
-  else if (/សាច់ជ្រូក|ជ្រូក/i.test(clean)) ingEn = 'Pork';
-  else if (/សាច់មាន់|មាន់/i.test(clean)) ingEn = 'Chicken';
-  else if (/ទា/i.test(clean)) ingEn = 'Duck';
-  else if (/បន្លែ|ត្រកួន|ខាត់ណា/i.test(clean)) ingEn = 'Vegetables';
-  else if (/មី|គុយទាវ|នំបញ្ចុក/i.test(clean)) ingEn = 'Noodles';
-  else if (/បាយ/i.test(clean)) ingEn = 'Fried Rice';
-
-  const combined = `${methodEn} ${ingEn}`.trim();
-  if (combined) {
-    return {
-      enName: `${combined} (${clean})`,
-      wikiQuery: `${combined} Asian dish`,
-      mealDbQuery: ingEn || undefined,
-    };
-  }
-
-  const englishMatch = clean.match(/[A-Za-z][A-Za-z0-9\s-]{2,}/);
-  const extractedEn = (englishMatch ? englishMatch[0] : clean).trim();
+  const res = translateUniversalDishQuery(dishQuery);
   return {
-    enName: extractedEn || clean,
-    wikiQuery: /[A-Za-z]/.test(extractedEn) ? `${extractedEn} food dish` : 'Cambodian cuisine dish',
-    mealDbQuery: /[A-Za-z]/.test(extractedEn) ? extractedEn : undefined,
+    enName: res.enName,
+    wikiQuery: res.wikiQuery,
+    mealDbQuery: res.mealDbQuery,
   };
 }
 
-const onlineDishPhotoCache = new Map<string, string>();
+export function getCachedOnlineDishPhoto(dishQuery: string): string | null {
+  return getCachedUniversalDishPhoto(dishQuery);
+}
 
 /**
- * Fetches a real online photo of an out-of-catalog dish from TheMealDB, Wikipedia, or Wikimedia Commons.
+ * Fetches a real online photo for ANY out-of-catalog dish (Khmer, Asian, Western, desserts, drinks)
+ * from TheMealDB, Wikipedia PageImages, or Wikimedia Commons (with automatic native-script translation fallback).
  */
 export async function fetchOnlineDishPhotoByQuery(dishQuery: string): Promise<string | null> {
-  const clean = (dishQuery || '')
-    .replace(/\(.*?\)/g, ' ')
-    .replace(/[?？!！។«»"']/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  if (!clean) return null;
-
-  const cacheKey = clean.toLowerCase();
-  if (onlineDishPhotoCache.has(cacheKey)) {
-    return onlineDishPhotoCache.get(cacheKey)!;
-  }
-
-  const translated = translateKhmerDishToEnglishSearchQuery(clean);
-  const mealDbTerm = translated.mealDbQuery;
-
-  // 1. Try TheMealDB free API (great for international dishes like Spaghetti Bolognese, Tom Yum, Pad Thai, Pizza, etc.)
-  if (mealDbTerm && /[A-Za-z]/.test(mealDbTerm)) {
-    try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 3000);
-      const mealRes = await fetch(
-        `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(mealDbTerm)}`,
-        { signal: controller.signal }
-      );
-      clearTimeout(timer);
-      if (mealRes.ok) {
-        const mealData = await mealRes.json();
-        const thumb = mealData?.meals?.[0]?.strMealThumb;
-        if (thumb && typeof thumb === 'string') {
-          onlineDishPhotoCache.set(cacheKey, thumb);
-          return thumb;
-        }
-      }
-    } catch {
-      // Ignore and try Wikimedia Commons next
-    }
-  }
-
-  // 2. Try Wikimedia Commons search API (gsrnamespace=6 File namespace — works for Cambodian, Asian, and international dishes)
-  const wikiQueriesToTry = Array.from(
-    new Set([translated.wikiQuery, `${translated.wikiQuery} food`, 'Cambodian cuisine dish'])
-  );
-
-  for (const q of wikiQueriesToTry) {
-    try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 3500);
-      const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrsearch=${encodeURIComponent(
-        q
-      )}&gsrlimit=6&prop=imageinfo&iiprop=url&iiurlwidth=800&format=json&origin=*`;
-      const res = await fetch(wikiUrl, { signal: controller.signal });
-      clearTimeout(timer);
-      if (res.ok) {
-        const data = await res.json();
-        const pages = data?.query?.pages ? Object.values(data.query.pages) : [];
-        for (const p of pages as any[]) {
-          const rawThumbUrl = p?.imageinfo?.[0]?.thumburl || p?.imageinfo?.[0]?.url;
-          const cleanThumbUrl = typeof rawThumbUrl === 'string' ? rawThumbUrl.split('?')[0] : '';
-          const title = String(p?.title || '');
-          if (
-            cleanThumbUrl &&
-            /\.(jpe?g|png|webp)(?:$|\?)/i.test(rawThumbUrl) &&
-            !/logo|icon|map|flag|diagram|MNHN|specimen|stamp|drawing/i.test(`${title} ${cleanThumbUrl}`)
-          ) {
-            onlineDishPhotoCache.set(cacheKey, cleanThumbUrl);
-            return cleanThumbUrl;
-          }
-        }
-      }
-    } catch {
-      // Try next query candidate
-    }
-  }
-
-  return null;
+  return fetchUniversalDishPhotoFromOpenApis(dishQuery);
 }
 
 /**
@@ -1341,7 +1286,7 @@ export async function askGeminiFoodTourismAssistant(params: {
       en: f.nameEn,
       cat: f.categorySlug,
       prov: f.provinceKh,
-      taste: (f.tasteProfile || '').slice(0, 45),
+      taste: (f.categoryKh || '').slice(0, 45),
     }));
 
   const candidateShops = [
@@ -1367,7 +1312,7 @@ export async function askGeminiFoodTourismAssistant(params: {
     kh: t.nameKh,
     en: t.nameEn,
     prov: t.provinceKh,
-    cat: t.category,
+    cat: t.categorySlug,
   }));
 
   const langName = language === 'km' ? 'Khmer (ភាសាខ្មែរ)' : language === 'zh' ? 'Simplified Chinese (简体中文)' : 'English';
@@ -1471,7 +1416,7 @@ RULES:
               language === 'km'
                 ? ing.nameKh
                 : language === 'zh'
-                ? loc.ingredients?.[idx] || ing.nameEn || ing.nameKh
+                ? loc.ingredients?.[idx]?.name || ing.nameEn || ing.nameKh
                 : ing.nameEn || ing.nameKh,
             amount: ing.amount || '',
           })),
@@ -1481,7 +1426,7 @@ RULES:
               language === 'km'
                 ? st.instructionKh
                 : language === 'zh'
-                ? loc.steps?.[idx] || st.instructionEn || st.instructionKh
+                ? loc.steps?.[idx]?.instruction || st.instructionEn || st.instructionKh
                 : st.instructionEn || st.instructionKh,
           })),
         };
@@ -1493,9 +1438,14 @@ RULES:
         Array.isArray(parsed.customRecipe.steps) &&
         parsed.customRecipe.steps.length > 0
       ) {
-        const baseFood = finalDishes?.[0] || foods[0];
+        const initCustomFood =
+          initialReply.recipePreview?.food &&
+          String(initialReply.recipePreview.food.id || '').startsWith('custom-recipe-')
+            ? initialReply.recipePreview.food
+            : null;
+        const baseFood = initCustomFood || finalDishes?.[0] || foods[0];
         const onlinePhoto = await fetchOnlineDishPhotoByQuery(
-          parsed.customRecipe.englishSearchName || parsed.customRecipe.dishName || userInput
+          `${userInput} ${parsed.customRecipe.dishName || ''} ${parsed.customRecipe.englishSearchName || ''}`.trim()
         );
         const mappedIngredients = parsed.customRecipe.ingredients.slice(0, 8).map((ing) => ({
           nameKh: String(ing.name || ''),
@@ -1507,9 +1457,11 @@ RULES:
           instructionKh: String(st || ''),
           instructionEn: String(st || ''),
         }));
+        const slugKey =
+          normalizeKhmerFoodText(parsed.customRecipe.dishName || userInput).replace(/\s+/g, '-') || 'dish';
         const customFood: FoodItem = {
           ...baseFood,
-          id: `gemini-recipe-${Date.now()}`,
+          id: initCustomFood ? initCustomFood.id : `custom-recipe-${slugKey}`,
           nameKh: parsed.customRecipe.dishName,
           nameEn: parsed.customRecipe.englishSearchName || parsed.customRecipe.dishName,
           descriptionKh: parsed.customRecipe.description || baseFood.descriptionKh,
@@ -1519,7 +1471,10 @@ RULES:
           ingredients: mappedIngredients,
           steps: mappedSteps,
         };
-        finalDishes = [customFood, ...(finalDishes || []).slice(0, 2)];
+        finalDishes = [
+          customFood,
+          ...(finalDishes || []).filter((d) => d.id !== customFood.id).slice(0, 2),
+        ];
         finalRecipePreview = {
           food: customFood,
           ingredients: parsed.customRecipe.ingredients.slice(0, 8).map((ing) => ({

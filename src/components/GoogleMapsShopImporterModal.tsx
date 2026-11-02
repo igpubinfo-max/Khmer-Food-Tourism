@@ -65,6 +65,7 @@ interface GoogleMapsShopImporterModalProps {
   language: Language;
   initialQuery?: string;
   initialProvinceKh?: string;
+  defaultProvinceKh?: string;
 }
 
 const IMPORT_CATEGORIES: {

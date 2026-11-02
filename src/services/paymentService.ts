@@ -73,6 +73,8 @@ export interface PaymentVerificationRequest {
   paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card';
   transactionRef: string;
   amountUsd: number;
+  durationDays?: number;
+  planType?: string;
   nonce: string;
   timestamp: number;
   paymentToken?: string;

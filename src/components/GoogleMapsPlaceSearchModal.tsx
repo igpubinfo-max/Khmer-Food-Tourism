@@ -323,7 +323,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
 
   // Check duplicate status for each result
   const duplicateMap = useMemo(() => {
-    const map = new Map<string, { isDuplicate: boolean; existingNameKh?: string; existingId?: string; type: 'restaurant' | 'tourism' }>();
+    const map = new Map<string, { isDuplicate: boolean; existingNameKh?: string; existingId?: string; type: 'restaurant' | 'cafe' | 'street_food' | 'tourism' }>();
     for (const item of results) {
       if (item.category === 'tourism') {
         const dupDest = findDuplicateDestinationForGooglePlace(item, destinations);
@@ -412,9 +412,9 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
     setEditDraft({
       nameKh: place.nameKh,
       nameEn: place.nameEn,
-      category: place.category,
+      category: place.category === 'tourism' ? 'tourism' : 'restaurant',
       provinceKh: place.provinceKh || 'រាជធានីភ្នំពេញ',
-      addressKh: place.addressKh,
+      addressKh: place.addressKh || place.address || '',
       phone: place.phone || '',
       photoUrl: place.hasRealGooglePhoto ? place.photoUrl : '',
     });

@@ -145,7 +145,8 @@ export function findNearbyRestaurants(
   userLat: number,
   userLon: number,
   restaurants: Restaurant[],
-  maxRadiusMeters: number = 25000 // default 25km search window
+  maxRadiusMeters: number = 25000, // default 25km search window
+  thresholdMeters: number = VERIFIED_CHECKIN_MAX_DISTANCE_METERS
 ): NearbyRestaurantMatch[] {
   const matches: NearbyRestaurantMatch[] = [];
 
@@ -156,7 +157,7 @@ export function findNearbyRestaurants(
       matches.push({
         restaurant: r,
         distanceMeters: dist,
-        isWithinThreshold: dist <= VERIFIED_CHECKIN_MAX_DISTANCE_METERS
+        isWithinThreshold: dist <= thresholdMeters
       });
     }
   }

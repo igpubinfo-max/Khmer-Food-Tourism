@@ -257,7 +257,7 @@ export const AiTripPlannerModal: React.FC = () => {
   };
 
   const handleViewAllHealthyTag = (id: DishTagId) => {
-    if (!requestTagFilter(id, currentUser)) {
+    if (!requestTagFilter(id as any, currentUser)) {
       openUpgradeVipModal();
       return;
     }

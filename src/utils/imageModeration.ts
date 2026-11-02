@@ -5,7 +5,20 @@ export interface ShopImageModerationResult {
   valid: boolean;
   dataUrl?: string;
   errorMessage?: string;
+  reason?: string;
   category?: 'invalid_format' | 'inappropriate_nsfw' | 'political_offensive' | 'blank_or_unusable';
+}
+
+function buildInvalidModerationResult(
+  category: NonNullable<ShopImageModerationResult['category']>,
+  message: string
+): ShopImageModerationResult {
+  return {
+    valid: false,
+    category,
+    errorMessage: message,
+    reason: message,
+  };
 }
 
 const PROHIBITED_FILENAME_RE =
@@ -25,40 +38,37 @@ export async function validateAndModerateShopImage(
     if (typeof fileOrDataUrl !== 'string') {
       const file = fileOrDataUrl;
       if (!file.type || !/^image\/(jpeg|jpg|png|webp|heic|heif)$/i.test(file.type)) {
-        return {
-          valid: false,
-          category: 'invalid_format',
-          errorMessage: tr(
+        return buildInvalidModerationResult(
+          'invalid_format',
+          tr(
             language,
             'សូមជ្រើសរើសឯកសាររូបភាពហាងឱ្យបានត្រឹមត្រូវ (JPG, PNG ឬ WEBP)។',
             'Please select a valid shop image file (JPG, PNG, or WEBP).',
             '请选择有效的店铺图片文件（JPG、PNG 或 WEBP）。'
-          ),
-        };
+          )
+        );
       }
       if (file.name && PROHIBITED_FILENAME_RE.test(file.name)) {
-        return {
-          valid: false,
-          category: 'political_offensive',
-          errorMessage: tr(
+        return buildInvalidModerationResult(
+          'political_offensive',
+          tr(
             language,
             'រូបភាពនេះមិនត្រូវបានអនុញ្ញាតទេ៖ ហាមបង្ហោះរូបភាពអាសអាភាស នយោបាយ ហិង្សា ឬរូបភាពមិនទាក់ទងនឹងហាងអាហារ។',
             'Image rejected by moderation: Inappropriate, sexual, political, offensive, or unrelated images are strictly prohibited.',
             '图片未通过审核：严禁上传色情、政治、冒犯性或与餐厅无关的图片。'
-          ),
-        };
+          )
+        );
       }
       if (file.size > 15 * 1024 * 1024) {
-        return {
-          valid: false,
-          category: 'invalid_format',
-          errorMessage: tr(
+        return buildInvalidModerationResult(
+          'invalid_format',
+          tr(
             language,
             'ទំហំរូបភាពធំពេក (លើស 15MB)។ សូមជ្រើសរើសរូបភាពតំណាងហាងផ្សេង។',
             'Image file is too large (over 15MB). Please choose another shop photo.',
             '图片文件过大（超过 15MB），请选择其他店铺照片。'
-          ),
-        };
+          )
+        );
       }
       rawDataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -69,30 +79,28 @@ export async function validateAndModerateShopImage(
     } else {
       rawDataUrl = fileOrDataUrl.trim();
       if (PROHIBITED_FILENAME_RE.test(rawDataUrl.slice(0, 300))) {
-        return {
-          valid: false,
-          category: 'political_offensive',
-          errorMessage: tr(
+        return buildInvalidModerationResult(
+          'political_offensive',
+          tr(
             language,
             'រូបភាពនេះមិនត្រូវបានអនុញ្ញាតទេ៖ ហាមបង្ហោះរូបភាពអាសអាភាស នយោបាយ ឬមិនសមរម្យ។',
             'Image rejected by moderation: Inappropriate, sexual, political, or offensive content is prohibited.',
             '图片未通过审核：严禁上传色情、政治或不当内容。'
-          ),
-        };
+          )
+        );
       }
     }
 
     if (!rawDataUrl) {
-      return {
-        valid: false,
-        category: 'invalid_format',
-        errorMessage: tr(
+      return buildInvalidModerationResult(
+        'invalid_format',
+        tr(
           language,
           'មិនអាចអានរូបភាពបានទេ។ សូមសាកល្បងម្ដងទៀត។',
           'Could not read the selected image. Please try again.',
           '无法读取所选图片，请重试。'
-        ),
-      };
+        )
+      );
     }
 
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -107,16 +115,15 @@ export async function validateAndModerateShopImage(
     const origH = img.naturalHeight || img.height;
 
     if (origW < 80 || origH < 80) {
-      return {
-        valid: false,
-        category: 'invalid_format',
-        errorMessage: tr(
+      return buildInvalidModerationResult(
+        'invalid_format',
+        tr(
           language,
           'ទំហំរូបភាពតូចពេក។ សូមបង្ហោះរូបភាពតំណាងហាងដែលច្បាស់ល្អ។',
           'Image resolution is too small. Please upload a clear photo representing your shop.',
           '图片分辨率过低，请上传清晰的店铺照片。'
-        ),
-      };
+        )
+      );
     }
 
     const maxDim = 960;
@@ -182,29 +189,27 @@ export async function validateAndModerateShopImage(
         const skinRatio = skinPixels / totalPixels;
 
         if (variance < 6) {
-          return {
-            valid: false,
-            category: 'blank_or_unusable',
-            errorMessage: tr(
+          return buildInvalidModerationResult(
+            'blank_or_unusable',
+            tr(
               language,
               'រូបភាពទទេ ឬងងឹតពេក។ សូមថត ឬជ្រើសរើសរូបភាពតំណាងហាងឱ្យបានច្បាស់។',
               'The image appears blank or solid-colored. Please take or upload a clear photo of your shop.',
               '图片似乎为空白或纯色，请拍摄或上传清晰的店铺照片。'
-            ),
-          };
+            )
+          );
         }
 
         if (skinRatio > 0.62) {
-          return {
-            valid: false,
-            category: 'inappropriate_nsfw',
-            errorMessage: tr(
+          return buildInvalidModerationResult(
+            'inappropriate_nsfw',
+            tr(
               language,
               'ប្រព័ន្ធត្រួតពិនិត្យរូបភាព៖ ហាមបង្ហោះរូបភាពមិនសមរម្យ អាសអាភាស ឬរូបភាពដែលមិនមែនជារូបតំណាងហាង។ សូមប្រើរូបភាពមុខហាង ឬស្លាកយីហោហាងប៉ុណ្ណោះ។',
               'Image Moderation Alert: Inappropriate, sexual, or non-storefront personal photos are not allowed. Please upload a photo representing your shop only.',
               '图片审核提醒：禁止上传不当、色情或非店铺照片，请仅上传代表您店铺的门面或招牌照片。'
-            ),
-          };
+            )
+          );
         }
       }
     } catch {
@@ -217,15 +222,14 @@ export async function validateAndModerateShopImage(
       dataUrl: compressedDataUrl,
     };
   } catch {
-    return {
-      valid: false,
-      category: 'invalid_format',
-      errorMessage: tr(
+    return buildInvalidModerationResult(
+      'invalid_format',
+      tr(
         language,
         'មិនអាចផ្ទៀងផ្ទាត់រូបភាពបានទេ។ សូមជ្រើសរើសរូបភាពតំណាងហាងម្ដងទៀត។',
         'Failed to validate shop image. Please select a valid image file.',
         '无法验证店铺图片，请重新选择有效的图片文件。'
-      ),
-    };
+      )
+    );
   }
 }

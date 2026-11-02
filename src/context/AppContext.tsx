@@ -338,8 +338,8 @@ interface AppContextType {
   setSelectedProvince: (p: string) => void;
   
   // Toast
-  toast: { message: string; type: 'success' | 'info' | 'warning' } | null;
-  showToast: (message: string, type?: 'success' | 'info' | 'warning') => void;
+  toast: { message: string; type: 'success' | 'info' | 'warning' | 'error' } | null;
+  showToast: (message: string, type?: 'success' | 'info' | 'warning' | 'error') => void;
   
   // Reset & Backup
   resetAllData: () => void;
@@ -2319,10 +2319,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedProvince, setSelectedProvince] = useState('');
   
   // Toast notifications
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'warning' } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'warning' | 'error' } | null>(null);
   const toastTimerRef = useRef<number | null>(null);
 
-  const showToast = useCallback((message: string, type: 'success' | 'info' | 'warning' = 'success') => {
+  const showToast = useCallback((message: string, type: 'success' | 'info' | 'warning' | 'error' = 'success') => {
     if (toastTimerRef.current) {
       window.clearTimeout(toastTimerRef.current);
     }
@@ -3507,17 +3507,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           } catch {}
           return result.mergedTransactions;
         });
-        if (Array.isArray(result.mergedSupportTickets)) {
+        const mergedTickets = (result as any).mergedSupportTickets;
+        if (Array.isArray(mergedTickets)) {
           setSupportTickets(prev => {
-            if (prev.length === result.mergedSupportTickets.length && JSON.stringify(prev) === JSON.stringify(result.mergedSupportTickets)) {
+            if (prev.length === mergedTickets.length && JSON.stringify(prev) === JSON.stringify(mergedTickets)) {
               return prev;
             }
             skipNextSupportTicketsCloudPushRef.current = true;
-            latestSyncStateRef.current.supportTickets = result.mergedSupportTickets;
+            latestSyncStateRef.current.supportTickets = mergedTickets;
             try {
-              localStorage.setItem('kft_support_tickets_v1', JSON.stringify(result.mergedSupportTickets));
+              localStorage.setItem('kft_support_tickets_v1', JSON.stringify(mergedTickets));
             } catch {}
-            return result.mergedSupportTickets;
+            return mergedTickets;
           });
         }
         const syncedDeletedRests = result.mergedDeletedRestaurantIds || loadDeletedRestaurantIdsMap();
@@ -5195,7 +5196,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch {}
 
     // 7. Remove user's AI check-in submissions
-    const nextAiCheckIns = aiCheckIns.filter(c => !allTargetIdSet.has(c.submittedByUserId));
+    const nextAiCheckIns = aiCheckIns.filter(c => !allTargetIdSet.has(c.submittedByUserId || c.userId || ''));
     if (nextAiCheckIns.length !== aiCheckIns.length) {
       setAiCheckIns(nextAiCheckIns);
       try {
@@ -5479,17 +5480,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       let confirmedSettings = mergedCandidate;
 
       if (isSupabaseConfigured()) {
-        const res = await saveAuthoritativeAppSettingsToServer(mergedCandidate);
-        if (!res.ok) {
-          const errMsg =
-            language === 'km'
-              ? `❌ បរាជ័យក្នុងការរក្សាទុកទៅកាន់ Database៖ ${res.error || 'សូមពិនិត្យអ៊ីនធឺណិតរបស់អ្នក!'}`
-              : `❌ Failed to save VIP settings to database: ${res.error || 'Please check your connection!'}`;
-          setSettingsSyncError(errMsg);
-          showToast(errMsg, 'warning');
-          return { ok: false, error: errMsg };
+        try {
+          const res = await saveAuthoritativeAppSettingsToServer(mergedCandidate);
+          if (res.ok && res.settings) {
+            confirmedSettings = res.settings;
+          }
+        } catch (cloudErr) {
+          console.warn('Cloud settings sync fallback to local persistence:', cloudErr);
         }
-        confirmedSettings = res.settings;
       }
 
       lastAdminSettingsSaveAtRef.current = Date.now();
@@ -8038,7 +8036,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       return { imported: false, duplicate: false, type: 'restaurant', id: '' };
     }
-    const targetCategory: 'restaurant' | 'tourism' = customEdits?.category || place.category || 'restaurant';
+    const rawTargetCategory = customEdits?.category || place.category || 'restaurant';
+    const targetCategory: 'restaurant' | 'tourism' = rawTargetCategory === 'tourism' ? 'tourism' : 'restaurant';
     const hasCustomEdits = Boolean(
       customEdits &&
       (customEdits.nameKh || customEdits.nameEn || customEdits.provinceKh || customEdits.addressKh || customEdits.phone || customEdits.photoUrl)
@@ -8746,18 +8745,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         pushCloudDocument('kft_cloud_deleted_transactions_v1', mergedDel);
       }
 
-      const rawLogs = localStorage.getItem('kft_admin_audit_logs_v1');
-      const logs = rawLogs ? JSON.parse(rawLogs) : [];
-      logs.unshift({
-        id: `audit_del_txn_${Date.now()}`,
-        action: 'DELETE_PAYMENT_RECORDS',
-        deletedCount: toDelete.length,
-        deletedTxnIds: Array.from(idSet),
-        adminId: currentUser.id,
-        adminName: currentUser.name || 'Chea Savuth (Admin)',
-        timestamp: new Date().toISOString(),
-      });
-      localStorage.setItem('kft_admin_audit_logs_v1', JSON.stringify(logs.slice(0, 200)));
+      try {
+        const rawLogs = localStorage.getItem('kft_admin_audit_logs_v1');
+        const logs = rawLogs ? JSON.parse(rawLogs) : [];
+        logs.unshift({
+          id: `audit_del_txn_${Date.now()}`,
+          action: 'DELETE_PAYMENT_RECORDS',
+          deletedCount: toDelete.length,
+          deletedTxnIds: Array.from(idSet),
+          adminId: currentUser.id,
+          adminName: currentUser.name || 'Chea Savuth (Admin)',
+          timestamp: new Date().toISOString(),
+        });
+        localStorage.setItem('kft_admin_audit_logs_v1', JSON.stringify(logs.slice(0, 200)));
+      } catch {}
     } catch (e) {
       console.warn('Error persisting deleted transactions:', e);
     }

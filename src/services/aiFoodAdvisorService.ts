@@ -432,7 +432,7 @@ export function getAiFoodAdvisorRecommendations(params: {
       `${food.categoryKh || ''} ${food.categorySlug || ''} ${zhLoc.category} ${food.provinceKh || ''} ${food.provinceEn || ''} ${zhLoc.province}`
     );
     const ingredientText = normalizeSearchText(
-      `${(food.ingredients || []).map((i) => `${i.nameKh || ''} ${i.nameEn || ''}`).join(' ')} ${(zhLoc.ingredients || []).join(' ')}`
+      `${(food.ingredients || []).map((i) => `${i.nameKh || ''} ${i.nameEn || ''}`).join(' ')} ${(zhLoc.ingredients || []).map((i) => i.name).join(' ')}`
     );
     const descText = normalizeSearchText(
       `${food.descriptionKh || ''} ${food.descriptionEn || ''} ${zhLoc.description}`

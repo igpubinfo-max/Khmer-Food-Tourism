@@ -146,6 +146,8 @@ export const DEPRECATED_STALE_FOOD_NAMES_KH = new Set<string>([
   'បង្អែមនំផ្លែអាយការ៉េមខ្ទិះដូងស្ករត្នោត',
   'សម្លការីទាស្រែ',
   'ឆាត្រកួនប្រហុកខ្ទឹមស',
+  'សម្លការីសាច់ទាដំឡូងជ្វា',
+  'នំគ្រក់ខ្ទិះដូងស្លឹកខ្ទឹមទឹកត្រីផ្អែម',
 ]);
 
 export function isDeprecatedStaleFoodMetadata(
