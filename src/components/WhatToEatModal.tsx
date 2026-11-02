@@ -28,6 +28,7 @@ import {
   Zap,
   Soup,
   Salad,
+  Camera,
 } from 'lucide-react';
 import { FoodItem, isGpipRegisteredRestaurant, openRestaurantGoogleExternal, resolveFoodPhotoUrl } from '../types';
 import {
@@ -61,7 +62,6 @@ import { isMedicalOrHealthQuery, describeDish } from '../services/aiFoodBrain';
 import {
   buildWelcomeAssistantMessage,
   generateConversationalAiResponse,
-  askGeminiFoodTourismAssistant,
   fetchOnlineDishPhotoByQuery,
   detectOutOfCatalogDishName,
   createOutOfCatalogDishItem,
@@ -77,6 +77,16 @@ import {
   type DrinkKindFilter,
 } from '../utils/drinkPairing';
 import { isAuthenticCambodianDishForMealTime } from '../utils/cambodianMealHabits';
+import { RichAnswerText } from './RichAnswerText';
+import { prepareFoodImage, FoodImageError, type PreparedFoodImage } from '../utils/foodImageUpload';
+import {
+  askFoodAssistant,
+  buildAssistantFailureMessage,
+  toHistoryTurns,
+  type FoodAssistantFailure,
+} from '../services/foodAssistantLlm';
+import { fetchVerifiedDishPhotoByEnglishName } from '../utils/universalDishOpenApi';
+import { foodPhotoSrc, fallbackPhotoFor, hasRenderablePhoto, isGeneratedDishId } from '../utils/generatedDish';
 
 type MealSlotFilter = 'auto' | 'breakfast' | 'lunch' | 'afternoon' | 'dinner';
 type VipDietFilter = 'none' | 'light' | 'protein_rich' | 'steamed_boiled' | 'vegetable_rich';
@@ -286,6 +296,11 @@ export const WhatToEatModal: React.FC = () => {
 
   const canUseVip = hasSpecialAndHealthyFoodVipAccess(currentUser);
   const [isAiThinking, setIsAiThinking] = useState(false);
+  const [pendingImage, setPendingImage] = useState<PreparedFoodImage | null>(null);
+  const [isPreparingImage, setIsPreparingImage] = useState(false);
+  const [imageError, setImageError] = useState('');
+  const [forceBigCard, setForceBigCard] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Filters: Conversational Input, Category, Meal Time, Dietary / Health Style
   const [cravingQuery, setCravingQuery] = useState<string>('');
@@ -439,6 +454,16 @@ export const WhatToEatModal: React.FC = () => {
       aiCravingRecommendations?.brain?.mode === 'scope_notice' ||
       lastAssistantMsg?.isScopeRefusal
   );
+
+  // The big "recommended dish" card only appears when the latest turn has a verified dish to show.
+  // (Clarifications, refusals, fact answers and "no match" turns must never display a random dish.)
+  const suppressBigCard =
+    !forceBigCard &&
+    Boolean(
+      lastAssistantMsg &&
+        lastAssistantMsg.id !== 'ai-welcome' &&
+        (lastAssistantMsg.isPending || lastAssistantMsg.suppressDishCard || lastAssistantMsg.needsClarification)
+    );
 
   // Live out-of-catalog dish detection for ANY dish not in the app — immediately active while typing even before tapping "សួរ AI"
   const liveOutOfCatalogDish: FoodItem | null = useMemo(() => {
@@ -695,29 +720,30 @@ export const WhatToEatModal: React.FC = () => {
   ]);
 
   // Active candidate list
-  const activeDishList = isMedicalRefusalActive ? [] : matchingFoods.length > 0 ? matchingFoods : foods;
+  const activeDishList = isMedicalRefusalActive ? [] : matchingFoods.length > 0 ? matchingFoods : cravingQuery.trim() ? [] : foods;
 
   const hasStructuredFilter = Boolean(
     cravingQuery.trim() || categoryFilter !== 'all' || mealSlotFilter !== 'auto' || vipDietFilter !== 'none' || drinkMode
   );
 
   const pickRandomDish = (excludeId?: string): FoodItem => {
-    if (activeDishList.length === 0) return foods[0];
-    if (activeDishList.length === 1) {
-      seenDishIdsRef.current.add(activeDishList[0].id);
-      return activeDishList[0];
+    const rollPool = activeDishList.length > 0 ? activeDishList : foods;
+    if (rollPool.length === 0) return foods[0];
+    if (rollPool.length === 1) {
+      seenDishIdsRef.current.add(rollPool[0].id);
+      return rollPool[0];
     }
 
-    let unseenCandidates = activeDishList.filter(
+    let unseenCandidates = rollPool.filter(
       (f) => f.id !== excludeId && !seenDishIdsRef.current.has(f.id)
     );
 
     if (unseenCandidates.length === 0) {
       seenDishIdsRef.current.clear();
-      unseenCandidates = activeDishList.filter((f) => f.id !== excludeId);
+      unseenCandidates = rollPool.filter((f) => f.id !== excludeId);
     }
 
-    const pool = unseenCandidates.length > 0 ? unseenCandidates : activeDishList;
+    const pool = unseenCandidates.length > 0 ? unseenCandidates : rollPool;
     const nextPick = pool[Math.floor(Math.random() * pool.length)];
 
     seenDishIdsRef.current.add(nextPick.id);
@@ -801,11 +827,12 @@ export const WhatToEatModal: React.FC = () => {
     }
     return attachOnlinePhoto(
       (currentDishId ? activeDishList.find((f) => f.id === currentDishId) : null) ||
-        activeDishList[0] ||
-        foods[0] ||
+      (forceBigCard && currentDishId ? foods.find((f) => f.id === currentDishId) : null) ||
+      activeDishList[0] ||
+      (cravingQuery.trim() ? null : foods[0]) ||
         null
     );
-  }, [activeDishList, currentDishId, foods, isMedicalRefusalActive, chatMessages, liveOutOfCatalogDish, onlinePhotoByDishId]);
+  }, [activeDishList, currentDishId, foods, isMedicalRefusalActive, chatMessages, liveOutOfCatalogDish, onlinePhotoByDishId, cravingQuery, forceBigCard]);
 
   const currentLoc = useMemo(
     () => (currentDish ? getLocalizedFood(currentDish, language) : null),
@@ -829,29 +856,9 @@ export const WhatToEatModal: React.FC = () => {
 
   if (!isWhatToEatModalOpen) return null;
 
-  const sendConversationalMessage = (rawText: string) => {
-    const clean = rawText.trim();
-    if (!clean) return;
-
-    const userMsg: AiAssistantMessage = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      text: clean,
-      timestamp: new Date().toISOString(),
-    };
-
-    const { reply, nextMemory } = generateConversationalAiResponse({
-      userInput: clean,
-      language,
-      foods,
-      restaurants,
-      destinations,
-      canUseVip,
-      memory: chatMemory,
-    });
-
-    setChatMessages((prev) => [...prev.slice(-12), userMsg, reply]);
-    setChatMemory(nextMemory);
+  /** Everything that must happen after an assistant reply is shown (cards, photos, drink mode, memory). */
+  const applyReplyEffects = (reply: AiAssistantMessage, nextMemory: AiConversationMemory | null, cleanText: string) => {
+    if (nextMemory) setChatMemory(nextMemory);
 
     if (reply.triggerDrinkSets && canUseVip) {
       setDrinkMode(true);
@@ -867,83 +874,44 @@ export const WhatToEatModal: React.FC = () => {
       setComparedDishIds(reply.compareDishes.slice(0, 3).map((d) => d.id));
     }
 
-    // If the user asked for ANY out-of-catalog dish (custom-recipe-*), fetch a real online photo for it!
-    const customFoodItem =
-      reply.recipePreview?.food ||
-      (reply.dishes || []).find((d) => String(d.id || '').startsWith('custom-recipe-'));
-    if (customFoodItem && String(customFoodItem.id || '').startsWith('custom-recipe-')) {
-      setCurrentDishId(customFoodItem.id);
-      void fetchOnlineDishPhotoByQuery(customFoodItem.nameKh || clean).then((onlineUrl) => {
-        if (!onlineUrl) {
-          setFailedOnlineDishIds((prev) => ({ ...prev, [customFoodItem.id]: true }));
-          return;
-        }
-        setFailedOnlineDishIds((prev) => (prev[customFoodItem.id] ? { ...prev, [customFoodItem.id]: false } : prev));
-        setOnlinePhotoByDishId((prev) => ({ ...prev, [customFoodItem.id]: onlineUrl }));
-        setChatMessages((prev) =>
-          prev.map((m) => {
-            if (m.id !== reply.id) return m;
-            const baseItem =
-              m.recipePreview?.food ||
-              (m.dishes || []).find((d) => d.id === customFoodItem.id) ||
-              customFoodItem;
-            const updatedFood: FoodItem = {
-              ...baseItem,
-              photoUrl: onlineUrl,
-              originalPhotoUrl: onlineUrl,
-            };
-            return {
-              ...m,
-              dishes: (m.dishes || []).map((d) =>
-                d.id === customFoodItem.id ? updatedFood : d
-              ),
-              recipePreview: m.recipePreview
-                ? { ...m.recipePreview, food: updatedFood }
-                : m.recipePreview,
-            };
-          })
-        );
-      });
-    }
-
-    // If a Gemini API key is configured, refine the reply asynchronously with live Gemini AI
-    const activeGeminiKey = resolveGeminiApiKey(appSettings?.geminiApiKey);
-    if (activeGeminiKey && !reply.isScopeRefusal) {
-      setIsAiThinking(true);
-      void askGeminiFoodTourismAssistant({
-        userInput: clean,
-        language,
-        foods,
-        restaurants,
-        destinations,
-        canUseVip,
-        memory: chatMemory,
-        initialReply: reply,
-        geminiApiKey: activeGeminiKey,
-      })
-        .then((geminiReply) => {
-          const gemCustom = geminiReply.recipePreview?.food;
-          if (
-            gemCustom &&
-            String(gemCustom.id || '').startsWith('custom-recipe-') &&
-            /^https?:\/\//i.test(gemCustom.photoUrl || '')
-          ) {
-            setOnlinePhotoByDishId((prev) => ({ ...prev, [gemCustom.id]: gemCustom.photoUrl }));
+    // Dishes that are NOT in the verified catalog (rules-engine "custom-recipe-*" or AI "ai-dish-*"):
+    // look for a photo that is verified to show THIS dish. If none is found the card shows a neutral
+    // placeholder - never another dish's picture.
+    const generatedFood =
+      (reply.recipePreview?.food && isGeneratedDishId(reply.recipePreview.food.id) ? reply.recipePreview.food : null) ||
+      (reply.dishes || []).find((d) => isGeneratedDishId(d.id)) ||
+      null;
+    if (generatedFood) {
+      setCurrentDishId(generatedFood.id);
+      if (!hasRenderablePhoto(generatedFood.photoUrl)) {
+        const lookup = generatedFood.id.startsWith('ai-dish-')
+          ? fetchVerifiedDishPhotoByEnglishName(generatedFood.nameEn || '')
+          : fetchOnlineDishPhotoByQuery(generatedFood.nameKh || cleanText);
+        void lookup.then((onlineUrl) => {
+          if (!onlineUrl) {
+            setFailedOnlineDishIds((prev) => ({ ...prev, [generatedFood.id]: true }));
+            return;
           }
+          setFailedOnlineDishIds((prev) => (prev[generatedFood.id] ? { ...prev, [generatedFood.id]: false } : prev));
+          setOnlinePhotoByDishId((prev) => ({ ...prev, [generatedFood.id]: onlineUrl }));
           setChatMessages((prev) =>
-            prev.map((m) => (m.id === reply.id ? geminiReply : m))
+            prev.map((m) => {
+              if (m.id !== reply.id) return m;
+              const patch = (item: FoodItem): FoodItem =>
+                item.id === generatedFood.id ? { ...item, photoUrl: onlineUrl, originalPhotoUrl: onlineUrl } : item;
+              return {
+                ...m,
+                dishes: m.dishes ? m.dishes.map(patch) : m.dishes,
+                recipePreview: m.recipePreview ? { ...m.recipePreview, food: patch(m.recipePreview.food) } : m.recipePreview,
+              };
+            })
           );
-          if (geminiReply.recipePreview?.food) {
-            setCurrentDishId(geminiReply.recipePreview.food.id);
-          } else if (geminiReply.dishes && geminiReply.dishes.length > 0) {
-            setCurrentDishId(geminiReply.dishes[0].id);
-          }
-        })
-        .finally(() => {
-          setIsAiThinking(false);
         });
+      }
     }
+  };
 
+  const scrollChatToTop = () => {
     setTimeout(() => {
       if (scrollerRef.current) {
         scrollerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
@@ -953,14 +921,158 @@ export const WhatToEatModal: React.FC = () => {
     }, 50);
   };
 
+  const sendConversationalMessage = (rawText: string, image: PreparedFoodImage | null = null) => {
+    const clean = rawText.trim();
+    if (!clean && !image) return;
+    if (isAiThinking) return;
+    setForceBigCard(false);
+
+    const userMsg: AiAssistantMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      text: clean || tr(language, '📷 តើនេះជាម្ហូបអ្វី?', '📷 What dish is this?', '📷 这是什么菜？'),
+      timestamp: new Date().toISOString(),
+      imagePreviewUrl: image?.previewDataUrl,
+    };
+
+    const runRules = () =>
+      generateConversationalAiResponse({
+        userInput: clean,
+        language,
+        foods,
+        restaurants,
+        destinations,
+        canUseVip,
+        memory: chatMemory,
+      });
+
+    const geminiKey = resolveGeminiApiKey(appSettings?.geminiApiKey);
+
+    // A) A photo needs the live vision model. Without it we say so honestly instead of guessing a dish.
+    if (image && !geminiKey) {
+      const reply = buildAssistantFailureMessage('no_key', language, true);
+      setChatMessages((prev) => [...prev.slice(-12), userMsg, reply]);
+      scrollChatToTop();
+      return;
+    }
+
+    // B) No AI connection: offline rules engine (honest about what it cannot answer).
+    if (!geminiKey) {
+      const { reply, nextMemory } = runRules();
+      setChatMessages((prev) => [...prev.slice(-12), userMsg, reply]);
+      applyReplyEffects(reply, nextMemory, clean);
+      scrollChatToTop();
+      return;
+    }
+
+    // C) Live AI assistant (multi-turn, grounded on the verified catalog, vision-capable).
+    const pendingId = `pending-${Date.now()}`;
+    const pending: AiAssistantMessage = {
+      id: pendingId,
+      role: 'assistant',
+      text: '',
+      timestamp: new Date().toISOString(),
+      isPending: true,
+      suppressDishCard: true,
+    };
+    setChatMessages((prev) => [...prev.slice(-12), userMsg, pending]);
+    setIsAiThinking(true);
+    scrollChatToTop();
+
+    const replacePending = (reply: AiAssistantMessage) =>
+      setChatMessages((prev) => prev.map((m) => (m.id === pendingId ? reply : m)));
+
+    const handleFailure = (reason: FoodAssistantFailure) => {
+      if (image) {
+        replacePending(buildAssistantFailureMessage(reason, language, true));
+        return;
+      }
+      // Text question: fall back to the offline rules engine and say that the AI was unreachable.
+      const { reply, nextMemory } = runRules();
+      const offlineNote = tr(
+        language,
+        '⚠️ ចម្លើយនេះមកពីប្រព័ន្ធមូលដ្ឋាន ព្រោះ AI មិនអាចភ្ជាប់បាន។',
+        '⚠️ This answer comes from the built-in engine because the AI could not be reached.',
+        '⚠️ 由于无法连接 AI，此回答来自内置引擎。'
+      );
+      const withNote: AiAssistantMessage = { ...reply, text: `${reply.text}\n\n${offlineNote}` };
+      replacePending(withNote);
+      applyReplyEffects(withNote, nextMemory, clean);
+    };
+
+    void askFoodAssistant({
+      userText: clean,
+      uiLanguage: language,
+      foods,
+      restaurants,
+      history: toHistoryTurns(chatMessages),
+      memory: chatMemory,
+      image,
+      geminiApiKey: geminiKey,
+    })
+      .then((result) => {
+        if (!result.ok) {
+          handleFailure(result.reason);
+          return;
+        }
+        const reply = result.message;
+        replacePending(reply);
+        const catalogDishes = (reply.dishes || []).filter((d) => !isGeneratedDishId(d.id));
+        setChatMemory((prev) => ({
+          ...prev,
+          lastDishes: catalogDishes.length > 0 ? catalogDishes : prev.lastDishes,
+          lastRestaurants: reply.restaurants && reply.restaurants.length > 0 ? reply.restaurants : prev.lastRestaurants,
+          lastQuery: clean || prev.lastQuery,
+          turnSeed: (prev.turnSeed || 1) + 1,
+        }));
+        applyReplyEffects(reply, null, clean);
+      })
+      .catch(() => handleFailure('unavailable'))
+      .finally(() => setIsAiThinking(false));
+  };
+
+  const handleImagePicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setImageError('');
+    setIsPreparingImage(true);
+    try {
+      setPendingImage(await prepareFoodImage(file));
+    } catch (err) {
+      const code = err instanceof FoodImageError ? err.code : 'decode_failed';
+      setPendingImage(null);
+      setImageError(
+        code === 'not_image'
+          ? tr(language, 'សូមជ្រើសរើសឯកសាររូបភាព (JPG/PNG)។', 'Please choose an image file (JPG/PNG).', '请选择图片文件（JPG/PNG）。')
+          : code === 'too_large'
+            ? tr(language, 'រូបភាពធំពេក (អតិបរមា 25MB)។', 'The image is too large (max 25 MB).', '图片过大（最大 25MB）。')
+            : tr(
+                language,
+                'មិនអាចបើករូបភាពនេះបានទេ។ សូមសាកល្បងរូប JPG ឬ PNG ផ្សេង។',
+                'This image could not be opened. Please try another JPG or PNG.',
+                '无法打开该图片，请尝试其他 JPG 或 PNG 图片。'
+              )
+      );
+    } finally {
+      setIsPreparingImage(false);
+    }
+  };
+
   const handleCravingSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     cravingInputRef.current?.blur();
-    if (!cravingQuery.trim()) return;
-    sendConversationalMessage(cravingQuery);
+    if (!cravingQuery.trim() && !pendingImage) return;
+    const image = pendingImage;
+    setPendingImage(null);
+    setImageError('');
+    sendConversationalMessage(cravingQuery, image);
   };
 
   const handleResetChat = () => {
+    setPendingImage(null);
+    setImageError('');
+    setForceBigCard(false);
     setCravingQuery('');
     setCategoryFilter('all');
     setMealSlotFilter('auto');
@@ -981,6 +1093,7 @@ export const WhatToEatModal: React.FC = () => {
   };
 
   const handleShowAnother = () => {
+    setForceBigCard(true);
     if (showSets) {
       setIsSpinning(true);
       setTimeout(() => {
@@ -1196,7 +1309,7 @@ export const WhatToEatModal: React.FC = () => {
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-moul text-sm text-white truncate">
-                  {tr(language, 'ជំនួយការ AI មុខម្ហូប & ទេសចរណ៍', 'AI Food & Tourism Assistant', 'AI 美食与旅游对话助手')}
+                  {tr(language, 'ជំនួយការ AI ម្ហូបអាហារ', 'AI Food Assistant', 'AI 美食助手')}
                 </h3>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 text-[10px] font-extrabold shrink-0">
                   <CheckCircle2 className="w-3 h-3 text-emerald-300" />
@@ -1206,9 +1319,9 @@ export const WhatToEatModal: React.FC = () => {
               <p className="text-[11px] text-emerald-100 font-khmer truncate">
                 {tr(
                   language,
-                  `សន្ទនាឆ្លាតវៃពីម្ហូបខ្មែរ ${foods.length}+ មុខ • ហាង ${restaurants.length}+ • ទេសចរណ៍ ${destinations.length}+`,
-                  `Conversational AI for ${foods.length}+ dishes, ${restaurants.length}+ shops & ${destinations.length}+ sights`,
-                  `智能对话探索 ${foods.length}+ 道美食、${restaurants.length}+ 家餐厅与 ${destinations.length}+ 个景点`
+                  `សួរអ្វីក៏បានអំពីម្ហូប • ថតរូបម្ហូប • ម្ហូប ${foods.length}+ មុខ • ហាង ${restaurants.length}+`,
+                  `Ask anything about food • photo recognition • ${foods.length}+ dishes • ${restaurants.length}+ shops`,
+                  `美食问答 • 拍照识菜 • ${foods.length}+ 道菜 • ${restaurants.length}+ 家餐厅`
                 )}
               </p>
             </div>
@@ -1229,6 +1342,25 @@ export const WhatToEatModal: React.FC = () => {
           {/* Conversational AI Search / Chat Input Bar */}
           <div className="px-3.5 pt-3 pb-2.5 bg-white dark:bg-slate-900 border-b border-emerald-100/70 dark:border-slate-800 space-y-2.5 font-khmer">
             <form onSubmit={handleCravingSubmit} className="relative flex items-center gap-1.5">
+              <input
+                ref={fileInputRef}
+                id="kft-wte-photo-input"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImagePicked}
+              />
+              <button
+                id="kft-wte-photo-btn"
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isAiThinking || isPreparingImage}
+                aria-label={tr(language, 'ថតរូប ឬជ្រើសរើសរូបម្ហូប', 'Take or choose a food photo', '拍摄或选择美食照片')}
+                title={tr(language, 'ថតរូប ឬជ្រើសរើសរូបម្ហូប', 'Take or choose a food photo', '拍摄或选择美食照片')}
+                className="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center bg-amber-100 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60 transition active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Camera className="w-5 h-5" />
+              </button>
               <div className="relative flex-1 min-w-0">
                 <Search className="w-4 h-4 text-emerald-600 dark:text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
@@ -1245,9 +1377,9 @@ export const WhatToEatModal: React.FC = () => {
                   }}
                   placeholder={tr(
                     language,
-                    'ចង់ញ៉ាំអ្វីថ្ងៃនេះ? សួរអំពីម្ហូប រូបមន្ត ហាង ឬកន្លែងដើរលេង...',
-                    'What to eat today? Ask about food, recipes, shops or tourism...',
-                    '今天吃什么？询问高棉美食、食谱做法、餐厅或旅游景点...'
+                    'សួរអ្វីក៏បានអំពីម្ហូប ឬថតរូបម្ហូប...',
+                    'Ask anything about food, or send a food photo...',
+                    '询问任何美食问题，或发送美食照片...'
                   )}
                   className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
@@ -1276,6 +1408,28 @@ export const WhatToEatModal: React.FC = () => {
               </button>
             </form>
 
+            {(pendingImage || isPreparingImage || imageError) && (
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-amber-50 dark:bg-slate-800 border border-amber-200 dark:border-slate-700">
+                {pendingImage && (
+                  <>
+                    <img src={pendingImage.previewDataUrl} alt="" className="w-12 h-12 rounded-lg object-cover border border-amber-300 shrink-0" />
+                    <span className="text-[11px] font-bold text-amber-900 dark:text-amber-200 flex-1 min-w-0">
+                      {tr(language, '📷 រូបភាពរួចរាល់ — វាយសំណួរបន្ថែម (ជាជម្រើស) រួចចុច «សួរ AI»', '📷 Photo ready — add a question (optional), then tap “Ask AI”', '📷 照片已就绪 —（可选）补充问题后点击“发送”')}
+                    </span>
+                    <button type="button" onClick={() => setPendingImage(null)} aria-label="Remove photo" className="p-1 rounded-full text-slate-500 hover:text-rose-600 cursor-pointer shrink-0">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+                {isPreparingImage && (
+                  <span className="text-[11px] font-bold text-amber-900 dark:text-amber-200 animate-pulse">
+                    {tr(language, 'កំពុងរៀបចំរូបភាព...', 'Preparing photo...', '正在处理照片...')}
+                  </span>
+                )}
+                {imageError && <span className="text-[11px] font-bold text-rose-600 flex-1">{imageError}</span>}
+              </div>
+            )}
+
             {/* AI Answer Display — Rendered DIRECTLY below the AI input bar so users read top-down naturally */}
             {!drinkMode && chatMessages.length > 0 && (() => {
               const hasActiveAnswer = chatMessages.length > 1;
@@ -1287,8 +1441,11 @@ export const WhatToEatModal: React.FC = () => {
                 if (msg.role === 'user') {
                   return (
                     <div key={msg.id} className="flex justify-end">
-                      <div className="max-w-[85%] px-3 py-2 rounded-2xl rounded-tr-xs bg-[#064E3B] text-white text-xs font-bold leading-relaxed shadow-2xs">
-                        {msg.text}
+                      <div className="max-w-[85%] px-3 py-2 rounded-2xl rounded-tr-xs bg-[#064E3B] text-white text-xs font-bold leading-relaxed shadow-2xs space-y-1.5">
+                        {msg.imagePreviewUrl && (
+                          <img src={msg.imagePreviewUrl} alt="" className="w-40 max-w-full rounded-xl border border-white/30 object-cover" />
+                        )}
+                        <div>{msg.text}</div>
                       </div>
                     </div>
                   );
@@ -1300,10 +1457,72 @@ export const WhatToEatModal: React.FC = () => {
                       className={`p-3 rounded-2xl rounded-tl-xs border text-xs leading-relaxed whitespace-pre-line ${
                         msg.isScopeRefusal
                           ? 'bg-amber-50/90 dark:bg-slate-800 border-amber-300 dark:border-amber-600/60 text-slate-800 dark:text-slate-100 font-semibold'
-                          : 'bg-white dark:bg-slate-800 border-emerald-200/80 dark:border-slate-700 text-slate-800 dark:text-slate-100'
+                          : msg.needsClarification
+                            ? 'bg-sky-50/90 dark:bg-slate-800 border-sky-300 dark:border-sky-700/70 text-slate-800 dark:text-slate-100'
+                            : 'bg-white dark:bg-slate-800 border-emerald-200/80 dark:border-slate-700 text-slate-800 dark:text-slate-100'
                       }`}
                     >
-                      {msg.text}
+                      {msg.isPending ? (
+                        <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 font-bold">
+                          <span className="inline-flex gap-1" aria-hidden="true">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.3s]" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.15s]" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce" />
+                          </span>
+                          <span>{tr(language, 'កំពុងគិត និងវិភាគ...', 'Thinking...', '正在思考与分析...')}</span>
+                        </div>
+                      ) : (
+                        <RichAnswerText text={msg.text} />
+                      )}
+
+                      {msg.imageAnalysis && !msg.imageAnalysis.containsFood && (
+                        <div data-testid="ai-image-no-food" className="mt-2.5 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-[11px] font-bold text-amber-900 dark:text-amber-200">
+                          {tr(language, '📷 ខ្ញុំមិនឃើញម្ហូបអាហារនៅក្នុងរូបភាពនេះទេ។ សូមថតរូបម្ហូបឱ្យច្បាស់ជាងនេះ។', '📷 I can’t see any food in this photo. Please send a clearer picture of the dish.', '📷 这张照片里我没有看到食物，请拍一张更清晰的菜品照片。')}
+                        </div>
+                      )}
+
+                      {msg.imageAnalysis && msg.imageAnalysis.containsFood && (
+                        <div data-testid="ai-image-analysis" className="mt-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-1.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300">
+                              📷 {tr(language, 'ការវិភាគរូបភាព', 'Photo analysis', '图片分析')}
+                            </span>
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                                msg.imageAnalysis.identified
+                                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                                  : 'bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200'
+                              }`}
+                            >
+                              {msg.imageAnalysis.identified
+                                ? `${Math.round(msg.imageAnalysis.confidence * 100)}% ${tr(language, 'ប្រាកដ', 'confident', '把握')}`
+                                : tr(language, 'មិនទាន់ប្រាកដ', 'Not sure yet', '尚不确定')}
+                            </span>
+                          </div>
+                          {msg.imageAnalysis.dishName && (
+                            <div className="text-xs font-extrabold text-slate-900 dark:text-white">
+                              {msg.imageAnalysis.identified ? '🍽️ ' : '🤔 '}
+                              {msg.imageAnalysis.dishName}
+                              {msg.imageAnalysis.dishNameEn ? ` (${msg.imageAnalysis.dishNameEn})` : ''}
+                            </div>
+                          )}
+                          {msg.imageAnalysis.evidence && (
+                            <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">👁️ {msg.imageAnalysis.evidence}</p>
+                          )}
+                          {msg.imageAnalysis.visibleIngredients.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {msg.imageAnalysis.visibleIngredients.map((ing, k) => (
+                                <span key={k} className="px-1.5 py-0.5 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-semibold text-slate-700 dark:text-slate-200">
+                                  {ing}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {msg.imageAnalysis.cookingMethod && (
+                            <div className="text-[11px] text-slate-600 dark:text-slate-300">👩‍🍳 {msg.imageAnalysis.cookingMethod}</div>
+                          )}
+                        </div>
+                      )}
 
                       {msg.vegetarianNote && (
                         <div className="mt-2.5 p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-[11px] text-emerald-950 dark:text-emerald-200 leading-relaxed">
@@ -1365,13 +1584,13 @@ export const WhatToEatModal: React.FC = () => {
                                 >
                                   <div className="flex items-start gap-2.5">
                                     <img
-                                      src={resolveFoodPhotoUrl(dish.photoUrl, dish.photoUpdatedAt)}
+                                      src={foodPhotoSrc(dish)}
                                       alt={dLoc.name}
                                       referrerPolicy="no-referrer"
                                       loading="lazy"
                                       decoding="async"
                                       onError={(e) => {
-                                        (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
+                                        (e.currentTarget as HTMLImageElement).src = fallbackPhotoFor(dish.id);
                                       }}
                                       className="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-200 border border-slate-200 dark:border-slate-700"
                                     />
@@ -1380,16 +1599,20 @@ export const WhatToEatModal: React.FC = () => {
                                         <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
                                           {dLoc.name}
                                         </span>
+                                        {!isGeneratedDishId(dish.id) && (
                                         <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 shrink-0">
                                           ⭐ {dish.rating}
                                         </span>
+                                        )}
                                       </div>
                                       <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
-                                        {dLoc.category} • ⏱️ {dLoc.cookTime} • {dish.calories || 280} kcal
+                                        {isGeneratedDishId(dish.id) ? dLoc.category : `${dLoc.category} • ⏱️ ${dLoc.cookTime} • ${dish.calories || 280} kcal`}
                                       </div>
+                                      {!isGeneratedDishId(dish.id) && (
                                       <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100/80 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 text-[10px] font-bold">
                                         <span>✨ {tr(language, 'រសជាតិ៖', 'Taste:', '风味：')} {tasteProfile}</span>
                                       </div>
+                                      )}
                                     </div>
                                   </div>
 
@@ -1468,9 +1691,9 @@ export const WhatToEatModal: React.FC = () => {
                                 className="rounded-2xl overflow-hidden bg-slate-50 dark:bg-slate-900/80 border border-emerald-200/80 dark:border-slate-700 shadow-xs"
                               >
                                 <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-200 dark:bg-slate-800">
-                                  {String(rpFood.id || '').startsWith('custom-recipe-') &&
+                                  {isGeneratedDishId(rpFood.id) &&
                                   !failedOnlineDishIds[rpFood.id] &&
-                                  !/^https?:\/\//i.test(rpFood.photoUrl || '') ? (
+                                  !hasRenderablePhoto(rpFood.photoUrl) ? (
                                     <div className="w-full h-full bg-gradient-to-br from-[#064E3B] via-[#047857] to-slate-900 flex flex-col items-center justify-center gap-2 text-emerald-100 p-4 text-center">
                                       <Sparkles className="w-6 h-6 text-amber-300 animate-spin" />
                                       <span className="text-[11px] font-bold">
@@ -1484,13 +1707,13 @@ export const WhatToEatModal: React.FC = () => {
                                     </div>
                                   ) : (
                                     <img
-                                      src={resolveFoodPhotoUrl(rpFood.photoUrl, rpFood.photoUpdatedAt)}
+                                      src={foodPhotoSrc(rpFood)}
                                       alt={rpLoc.name}
                                       referrerPolicy="no-referrer"
                                       loading="eager"
                                       decoding="async"
                                       onError={(e) => {
-                                        (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
+                                        (e.currentTarget as HTMLImageElement).src = fallbackPhotoFor(rpFood.id);
                                       }}
                                       className="w-full h-full object-cover"
                                     />
@@ -1506,25 +1729,35 @@ export const WhatToEatModal: React.FC = () => {
                                     </span>
                                   </div>
                                   <span className="absolute bottom-2 right-2.5 z-10 bg-black/55 backdrop-blur-xs text-white/85 text-[8px] px-1.5 py-0.5 rounded border border-white/15 font-khmer select-none pointer-events-none">
-                                    {String(rpFood.id || '').startsWith('custom-recipe-') && /^https?:\/\//i.test(rpFood.photoUrl || '')
-                                      ? tr(language, '🌐 Open API', '🌐 Open API', '🌐 Open API')
-                                      : tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}
+                                    {isGeneratedDishId(rpFood.id) && /^data:/i.test(rpFood.photoUrl || '')
+                                      ? tr(language, '📷 រូបភាពរបស់អ្នក', '📷 Your photo', '📷 您的照片')
+                                      : isGeneratedDishId(rpFood.id) && /^https?:\/\//i.test(rpFood.photoUrl || '')
+                                        ? tr(language, '🌐 Open API', '🌐 Open API', '🌐 Open API')
+                                        : isGeneratedDishId(rpFood.id)
+                                          ? tr(language, 'គ្មានរូបភាពផ្ទៀងផ្ទាត់', 'No verified photo', '暂无已核实图片')
+                                          : tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}
                                   </span>
                                   <div className="absolute bottom-2 left-3 right-20 text-white space-y-0.5">
                                     <div className="text-sm font-extrabold leading-snug drop-shadow truncate">
                                       {rpLoc.name}
                                     </div>
                                     <div className="text-[10px] font-bold text-emerald-200 flex items-center gap-1.5 flex-wrap">
-                                      <span>⭐ {rpFood.rating || 4.8}</span>
-                                      <span>•</span>
-                                      <span>⏱️ {rpLoc.cookTime}</span>
-                                      <span>•</span>
-                                      <span>{rpFood.calories || 280} kcal</span>
+                                      {!isGeneratedDishId(rpFood.id) ? (
+                                        <>
+                                          <span>⭐ {rpFood.rating || 4.8}</span>
+                                          <span>•</span>
+                                          <span>⏱️ {rpLoc.cookTime}</span>
+                                          <span>•</span>
+                                          <span>{rpFood.calories || 280} kcal</span>
+                                        </>
+                                      ) : rpFood.cookTime ? (
+                                        <span>⏱️ {rpLoc.cookTime}</span>
+                                      ) : null}
                                     </div>
                                   </div>
                                 </div>
                                 <div className="p-2.5 space-y-1.5">
-                                  {rpTaste && (
+                                  {rpTaste && !isGeneratedDishId(rpFood.id) && (
                                     <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100/85 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 text-[10px] font-bold">
                                       <span>✨ {tr(language, 'រសជាតិ៖', 'Taste:', '风味：')} {rpTaste}</span>
                                     </div>
@@ -2312,7 +2545,7 @@ export const WhatToEatModal: React.FC = () => {
               </div>
             )}
 
-            {!showSets && !isMedicalRefusalActive && currentDish && currentLoc && (
+            {!showSets && !isMedicalRefusalActive && currentDish && currentLoc && !suppressBigCard && (
               <div
                 className={`space-y-2.5 transition-all duration-300 ${
                   isSpinning ? 'opacity-30 scale-95' : 'opacity-100 scale-100'
@@ -2340,9 +2573,9 @@ export const WhatToEatModal: React.FC = () => {
                   className="relative rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-md"
                 >
                   <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-                    {String(currentDish.id || '').startsWith('custom-recipe-') &&
+                    {isGeneratedDishId(currentDish.id) &&
                     !failedOnlineDishIds[currentDish.id] &&
-                    !/^https?:\/\//i.test(currentDish.photoUrl || '') ? (
+                    !hasRenderablePhoto(currentDish.photoUrl) ? (
                       <div className="w-full h-full bg-gradient-to-br from-[#064E3B] via-[#047857] to-slate-900 flex flex-col items-center justify-center gap-2.5 text-emerald-100 p-6 text-center">
                         <Sparkles className="w-7 h-7 text-amber-300 animate-spin" />
                         <span className="text-xs font-bold font-khmer">
@@ -2356,11 +2589,11 @@ export const WhatToEatModal: React.FC = () => {
                       </div>
                     ) : (
                       <img
-                        src={resolveFoodPhotoUrl(currentDish.photoUrl, currentDish.photoUpdatedAt)}
+                        src={foodPhotoSrc(currentDish)}
                         alt={currentLoc.name}
                         referrerPolicy="no-referrer"
                         onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
+                          (e.currentTarget as HTMLImageElement).src = fallbackPhotoFor(currentDish.id);
                         }}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                         loading="eager"
@@ -2382,9 +2615,13 @@ export const WhatToEatModal: React.FC = () => {
 
                     {/* Reference label */}
                     <span className="absolute bottom-2 right-2.5 z-10 bg-black/55 backdrop-blur-xs text-white/85 text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded border border-white/15 font-khmer select-none pointer-events-none">
-                      {String(currentDish.id || '').startsWith('custom-recipe-') && /^https?:\/\//i.test(currentDish.photoUrl || '')
-                        ? tr(language, '🌐 រូបភាព Open API', '🌐 Open API Photo', '🌐 Open API 图片')
-                        : tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}
+                      {isGeneratedDishId(currentDish.id) && /^data:/i.test(currentDish.photoUrl || '')
+                        ? tr(language, '📷 រូបភាពរបស់អ្នក', '📷 Your photo', '📷 您的照片')
+                        : isGeneratedDishId(currentDish.id) && /^https?:\/\//i.test(currentDish.photoUrl || '')
+                          ? tr(language, '🌐 រូបភាព Open API', '🌐 Open API Photo', '🌐 Open API 图片')
+                          : isGeneratedDishId(currentDish.id)
+                            ? tr(language, 'គ្មានរូបភាពផ្ទៀងផ្ទាត់', 'No verified photo', '暂无已核实图片')
+                            : tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}
                     </span>
 
                     {/* Title overlay */}
@@ -2402,10 +2639,12 @@ export const WhatToEatModal: React.FC = () => {
                   <div className="p-4 space-y-3 font-khmer">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-300">
+                        {!isGeneratedDishId(currentDish.id) && (
                         <div className="flex items-center gap-1">
                           <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                           <span className="font-bold">{currentDish.rating}</span>
                         </div>
+                        )}
                         <div className="flex items-center gap-1">
                           <Clock className="w-4 h-4 text-emerald-600" />
                           <span>{currentLoc.cookTime}</span>

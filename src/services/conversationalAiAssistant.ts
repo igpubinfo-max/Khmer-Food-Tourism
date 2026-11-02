@@ -3,6 +3,13 @@ import { tr } from '../utils/i18n';
 import { normalizeKhmerFoodText, parseKhmerFoodSearchQuery, searchKhmerFoods } from '../utils/khmerFoodSearch';
 import { generateAuthenticRecipeByDishName } from '../utils/khmerRecipeGenerator';
 import {
+  extractDishPhrase,
+  isQuestionOrCriteriaQuery,
+  isKnowledgeQuestion,
+  parseDietaryCriteria,
+  type DietaryCriteria,
+} from '../utils/foodQueryClassifier';
+import {
   translateUniversalDishQuery,
   getCachedUniversalDishPhoto,
   fetchUniversalDishPhotoFromOpenApis,
@@ -20,12 +27,31 @@ export type AiTurnIntent =
   | 'restaurant_recommend'
   | 'tourism_discovery'
   | 'beverage_pairing'
-  | 'medical_scope_refusal';
+  | 'medical_scope_refusal'
+  | 'general_food_qa'
+  | 'image_identification'
+  | 'clarification'
+  | 'off_topic';
 
 export interface AiRecipePreview {
   food: FoodItem;
   ingredients: Array<{ name: string; amount: string }>;
   steps: Array<{ stepNumber: number; instruction: string }>;
+}
+
+/** What the vision model actually saw in a user-uploaded photo (validated + confidence-gated in code). */
+export interface AiImageAnalysis {
+  containsFood: boolean;
+  /** Calibrated 0..1 confidence reported by the model. */
+  confidence: number;
+  dishName?: string;
+  dishNameEn?: string;
+  alternatives: Array<{ name: string; confidence: number }>;
+  visibleIngredients: string[];
+  cookingMethod?: string;
+  evidence?: string;
+  /** true only when confidence >= threshold and the model did not ask for clarification. */
+  identified: boolean;
 }
 
 export interface AiAssistantMessage {
@@ -47,6 +73,19 @@ export interface AiAssistantMessage {
   triggerDrinkSets?: boolean;
   isScopeRefusal?: boolean;
   isLiveGemini?: boolean;
+  /** User message: thumbnail of the photo the user sent. */
+  imagePreviewUrl?: string;
+  /** Assistant message: result of analysing the user's photo. */
+  imageAnalysis?: AiImageAnalysis;
+  /** The assistant is asking the user a question instead of guessing. */
+  needsClarification?: boolean;
+  /** Placeholder shown while the live AI is still answering. */
+  isPending?: boolean;
+  /** Where the answer came from. */
+  source?: 'llm' | 'rules' | 'notice';
+  /** Do not show the big "recommended dish" card for this turn (no verified dish to show). */
+  suppressDishCard?: boolean;
+  model?: string;
 }
 
 export interface AiConversationMemory {
@@ -64,7 +103,7 @@ const PROVINCE_PATTERNS: Array<{ kh: string; en: string; zh: string; re: RegExp 
   { kh: 'កំពត', en: 'Kampot', zh: '贡布', re: /កំពត|kampot|បូកគោ|bokor|贡布|波哥山/i },
   { kh: 'កែប', en: 'Kep', zh: '白马', re: /កែប|\bkep\b|កោះទន្សាយ|ផ្សារក្តាម|ផ្សារក្ដាម|白马省|白马海滩|螃蟹市场/i },
   { kh: 'ព្រះសីហនុ', en: 'Preah Sihanouk', zh: '西哈努克', re: /ព្រះសីហនុ|កំពង់សោម|sihanouk|កោះរ៉ុង|koh\s*rong|អូរឈើទាល|西哈努克|西港|高龙岛/i },
-  { kh: 'បាត់ដំបង', en: 'Battambang', zh: '马德望', re: /បាត់ដំបង|battambang|ភ្នំសំពៅ|ឡូរី|马德望/i },
+  { kh: 'បាត់ដំបង', en: 'Battambang', zh: '马德望', re: /បាត់ដំបង|battambang|ភ្នំសំពៅ|马德望/i },
   { kh: 'មណ្ឌលគិរី', en: 'Mondulkiri', zh: '蒙多基里', re: /មណ្ឌលគិរី|mondulkiri|ប៊ូស្រា|bousra|សែនមនោរម្យ|蒙多基里|布斯拉/i },
   { kh: 'រតនគិរី', en: 'Ratanakiri', zh: '拉达那基里', re: /រតនគិរី|ratanakiri|យក្សឡោម|yeak\s*laom|បានលុង|拉达那基里|野龙湖/i },
   { kh: 'កោះកុង', en: 'Koh Kong', zh: '国公省', re: /កោះកុង|koh\s*kong|តាតៃ|tatai|អារ៉ែង|ផាមក្រសោប|ពាមក្រសោប|国公省|塔泰/i },
@@ -97,8 +136,6 @@ const TOURISM_INTENT_RE =
 
 type TourismCategory = 'beach' | 'temple' | 'waterfall' | 'mountain';
 
-const COASTAL_PROVINCES_KH = ['ព្រះសីហនុ', 'កែប', 'កំពត', 'កោះកុង'];
-
 /**
  * Remove words that look like tourism keywords but are NOT tourism requests:
  * "ភ្នំពេញ" (contains ភ្នំ = mountain), "គ្រឿងសមុទ្រ" / "seafood" / "海鲜" (contains sea),
@@ -126,68 +163,7 @@ function detectTourismCategory(input: string): TourismCategory | null {
   return null;
 }
 
-function isCoastalProvince(provinceKh?: string): boolean {
-  const p = (provinceKh || '').replace(/^រាជធានី|^ខេត្ត/, '');
-  return COASTAL_PROVINCES_KH.some((c) => p.includes(c));
-}
-
-function destinationMatchesCategory(d: TouristDestination, cat: TourismCategory): boolean {
-  const names = stripTourismHomonyms(`${d.nameKh || ''} ${d.nameEn || ''}`);
-  const fullText = stripTourismHomonyms(`${names} ${d.descriptionKh || ''} ${d.descriptionEn || ''}`);
-  switch (cat) {
-    case 'beach':
-      return (
-        d.categorySlug === 'beach' ||
-        (isCoastalProvince(d.provinceKh) && /ឆ្នេរ|កោះ|សមុទ្រ|beach|island|bay|\bsea\b|coast/i.test(names))
-      );
-    case 'temple':
-      return d.categorySlug === 'temple' || /ប្រាសាទ|វត្ត|temple|pagoda/i.test(names);
-    case 'waterfall':
-      return /ទឹកធ្លាក់|ទឹកជ្រោះ|waterfall/i.test(names) || (/ទឹកធ្លាក់|ទឹកជ្រោះ|waterfall/i.test(fullText) && d.categorySlug === 'nature');
-    case 'mountain':
-      return d.categorySlug === 'mountain' || /ភ្នំ|mountain|national\s*park/i.test(names);
-    default:
-      return false;
-  }
-}
-
 /** Rank by featured + rating, then interleave provinces so results are diverse (not 4 places from one city). */
-function rankAndDiversifyDestinations(
-  list: TouristDestination[],
-  excludeIds: Set<string>,
-  limit: number
-): TouristDestination[] {
-  const sorted = [...list].sort(
-    (a, b) => Number(Boolean(b.isFeatured)) - Number(Boolean(a.isFeatured)) || (b.rating || 0) - (a.rating || 0)
-  );
-  const fresh = sorted.filter((d) => !excludeIds.has(d.id));
-  const pool = fresh.length >= limit ? fresh : sorted;
-  const byProvince = new Map<string, TouristDestination[]>();
-  for (const d of pool) {
-    const key = d.provinceKh || d.provinceEn || '';
-    if (!byProvince.has(key)) byProvince.set(key, []);
-    byProvince.get(key)!.push(d);
-  }
-  const out: TouristDestination[] = [];
-  const queues = Array.from(byProvince.values());
-  while (out.length < limit && queues.some((q) => q.length > 0)) {
-    for (const q of queues) {
-      const next = q.shift();
-      if (next) out.push(next);
-      if (out.length >= limit) break;
-    }
-  }
-  return out;
-}
-
-const TOURISM_CATEGORY_LABELS: Record<TourismCategory | 'all', { emoji: string; km: string; en: string; zh: string }> = {
-  beach: { emoji: '🏖️', km: 'ឆ្នេរសមុទ្រ និងកោះស្អាតៗ', en: 'beautiful beaches & islands', zh: '美丽海滩与海岛' },
-  temple: { emoji: '🛕', km: 'ប្រាសាទ និងវត្តអារាមល្បីៗ', en: 'famous temples & pagodas', zh: '著名寺庙与古迹' },
-  waterfall: { emoji: '💦', km: 'ទឹកធ្លាក់ស្អាតៗ', en: 'beautiful waterfalls', zh: '美丽瀑布' },
-  mountain: { emoji: '⛰️', km: 'ភ្នំ និងឧទ្យានជាតិ', en: 'mountains & national parks', zh: '山脉与国家公园' },
-  all: { emoji: '🏛️', km: 'តំបន់ទេសចរណ៍ល្បីៗ', en: 'top tourist attractions', zh: '热门旅游景点' },
-};
-
 const DRINK_PAIRING_INTENT_RE =
   /ម្ហូបអមភេសជ្ជៈ|ម្ហូបអមស្រាបៀរ|ក្លែម|ជុំតុ|ស្រាបៀរ|beverage pairing|drink pairing|beer food|bar food|下酒菜|佐餐|配啤酒/i;
 
@@ -201,7 +177,7 @@ export function detectProvinceFromText(input: string): { kh: string; en: string;
   return null;
 }
 
-export function buildWelcomeAssistantMessage(language: Language, foodCount: number, shopCount: number, destCount: number): AiAssistantMessage {
+export function buildWelcomeAssistantMessage(language: Language, foodCount: number, shopCount: number, _destCount?: number): AiAssistantMessage {
   return {
     id: 'ai-welcome',
     role: 'assistant',
@@ -209,9 +185,9 @@ export function buildWelcomeAssistantMessage(language: Language, foodCount: numb
     intent: 'welcome',
     text: tr(
       language,
-      `សួស្តី! 👋 ខ្ញុំជាជំនួយការសន្ទនា AI ផ្នែកមុខម្ហូប និងទេសចរណ៍កម្ពុជា។ អ្នកអាចសួរខ្ញុំជាភាសាខ្មែរ អង់គ្លេស ឬចិន អំពី៖\n• 🍲 ចង់ញ៉ាំអ្វីថ្ងៃនេះ? (មុខម្ហូបខ្មែរ ${foodCount}+ មុខ តាមរសជាតិ និងពេលវេលា)\n• 👩‍🍳 គ្រឿងផ្សំ និងរបៀបធ្វើម្ហូបនីមួយៗ\n• 🏪 ណែនាំភោជនីយដ្ឋាន (${shopCount}+ ហាង) និងម្ហូបអមភេសជ្ជៈ\n• 🏛️ កន្លែងដើរលេង និងតំបន់ទេសចរណ៍ (${destCount}+ កន្លែង ទូទាំង ២៥ ខេត្ត-រាជធានី)`,
-      `Hello! 👋 I am your Conversational AI Food & Tourism Assistant for Cambodia. Ask me anything in Khmer, English, or Chinese:\n• 🍲 What to eat today (${foodCount}+ Cambodian dishes by craving, flavor, or mealtime)\n• 👩‍🍳 Complete recipes, ingredients & step-by-step cooking methods\n• 🏪 Restaurant recommendations (${shopCount}+ shops) & VIP Beverage Pairings\n• 🏛️ Cambodia tourism & attractions (${destCount}+ destinations across all 25 provinces)`,
-      `您好！👋 我是您的柬埔寨美食与旅游对话式 AI 助手。您可以用高棉语、英语或中文向我提问：\n• 🍲 今天吃什么（${foodCount}+ 道高棉菜品，按口味与用餐时段智能推荐）\n• 👩‍🍳 完整食谱、食材配料与烹饪步骤\n• 🏪 餐厅推荐（${shopCount}+ 家店铺）与 VIP 佐餐搭配\n• 🏛️ 柬埔寨旅游景点推荐（覆盖全国 25 个省市 ${destCount}+ 个景点）`
+      `សួស្តី! 👋 ខ្ញុំជាជំនួយការ AI ឯកទេសលើ «ម្ហូបអាហារ» ប៉ុណ្ណោះ។ សួរខ្ញុំជាភាសាខ្មែរ អង់គ្លេស ឬចិនបាន៖\n• 📷 ថតរូបម្ហូប ដើម្បីឱ្យខ្ញុំប្រាប់ថាជាម្ហូបអ្វី\n• 🍲 ម្ហូបខ្មែរ និងអន្តរជាតិ (មាន ${foodCount}+ មុខក្នុងបញ្ជីផ្ទៀងផ្ទាត់)\n• 👩‍🍳 រូបមន្ត គ្រឿងផ្សំ វិធីចម្អិន និងអាហារូបត្ថម្ភប្រហាក់ប្រហែល\n• ⚖️ ប្រៀបធៀបម្ហូប ប្រវត្តិ វប្បធម៌ និងការផ្គូផ្គងភេសជ្ជៈ\n• 🧊 ការរក្សាទុក និងសុវត្ថិភាពអាហារ • 🏪 ហាងអាហារ (${shopCount}+ ហាង)`,
+      `Hello! 👋 I’m an AI assistant dedicated ONLY to food. Ask me in Khmer, English or Chinese:\n• 📷 Send a food photo and I’ll tell you what it is\n• 🍲 Cambodian & international dishes (${foodCount}+ verified menu items)\n• 👩‍🍳 Recipes, ingredients, cooking methods and approximate nutrition\n• ⚖️ Comparisons, history, culture and drink pairings\n• 🧊 Storage & food safety • 🏪 Restaurants (${shopCount}+ shops)`,
+      `您好！👋 我是只专注于「美食」的 AI 助手。可用高棉语、英语或中文提问：\n• 📷 发送美食照片，我来告诉您这是什么菜\n• 🍲 高棉与各国美食（已核实菜单 ${foodCount}+ 道）\n• 👩‍🍳 食谱、食材、烹饪方法与大致营养\n• ⚖️ 菜品对比、历史文化与饮品搭配\n• 🧊 食物保存与食品安全 • 🏪 餐厅推荐（${shopCount}+ 家）`
     ),
     followUpChips: [
       {
@@ -225,14 +201,14 @@ export function buildWelcomeAssistantMessage(language: Language, foodCount: numb
         query: tr(language, 'សុំគ្រឿងផ្សំ និងរបៀបធ្វើអាម៉ុកត្រី', 'Show me the ingredients and recipe for Fish Amok', '请告诉我阿莫克鱼的食材和做法'),
       },
       {
-        id: 'tourism_siemreap',
-        label: tr(language, '🏛️ កន្លែងដើរលេងសៀមរាប', '🏛️ Siem Reap Attractions', '🏛️ 暹粒必去景点'),
-        query: tr(language, 'ណែនាំកន្លែងដើរលេង និងម្ហូបឆ្ងាញ់នៅសៀមរាប', 'Recommend top tourist attractions and food in Siem Reap', '推荐暹粒好玩的旅游景点和特色美食'),
+        id: 'storage_soup',
+        label: tr(language, '🧊 រក្សាទុកម្ហូបសម្ល', '🧊 Storing leftover soup', '🧊 剩汤如何保存'),
+        query: tr(language, 'តើរក្សាទុកម្ហូបសម្លក្នុងទូទឹកកកបានប៉ុន្មានថ្ងៃ?', 'How long can leftover soup stay in the fridge?', '剩下的汤放冰箱能保存几天？'),
       },
       {
-        id: 'tourism_kampot',
-        label: tr(language, '🦀 ដើរលេងកំពត & កែប', '🦀 Kampot & Kep Guide', '🦀 贡布与白马旅游美食'),
-        query: tr(language, 'កន្លែងដើរលេង និងម្ហូបគ្រឿងសមុទ្រនៅកំពត', 'What to visit and eat in Kampot?', '去贡布旅游有什么好玩的地方和海鲜推荐？'),
+        id: 'compare_dishes',
+        label: tr(language, '⚖️ ប្រៀបធៀបម្ហូប', '⚖️ Compare dishes', '⚖️ 菜品对比'),
+        query: tr(language, 'ប្រៀបធៀបអាម៉ុក និងការីខ្មែរ', 'Compare amok and Khmer red curry', '对比阿莫克和高棉红咖喱'),
       },
     ],
   };
@@ -374,7 +350,10 @@ export function detectOutOfCatalogDishName(rawQuery: string, foods: FoodItem[]):
     .replace(/\s+/g, ' ')
     .trim();
 
-  if (cleanDish.length < 2 || cleanDish.length > 65) return null;
+  if (cleanDish.length < 2 || cleanDish.length > 48) return null;
+  // A sentence / question / constraint ("សម្លដែលមានជាតិស្ករតិច", "how long does amok keep?") is NOT a dish name.
+  // Treating it as one produced fake recipe cards with unrelated photos.
+  if (isQuestionOrCriteriaQuery(cleanDish) || parseDietaryCriteria(cleanDish)) return null;
   const normCleanDish = normalizeKhmerFoodText(cleanDish);
   if (
     BROAD_CATEGORY_OR_GENERIC_QUESTION_RE.test(cleanDish) ||
@@ -494,35 +473,114 @@ export function createOutOfCatalogDishItem(cleanDishName: string, foods: FoodIte
 
   const generated = generateAuthenticRecipeByDishName(cleanDishName, translated.enName, catSlug);
 
-  // Pick a close initial fallback dish sharing the primary ingredient in case the device is completely offline
-  const parsed = parseKhmerFoodSearchQuery(cleanDishName);
-  const subjectToken = parsed.tokens.find(
-    (t) => t.length >= 2 && t !== cleanDishName && !/^(?:អាំង|ដុត|ឆា|បំពង|ចៀន|ស្រុះ|ស្ងោរ|សម្ល|ស៊ុប|ញាំ|ភ្លា|បុក)$/.test(t)
-  );
-  const ingredientMatchedDish = subjectToken
-    ? foods.find((f) => f.nameKh.includes(subjectToken))
-    : undefined;
-  const fallbackPhotoDish =
-    ingredientMatchedDish || searchKhmerFoods(foods, cleanDishName)[0] || foods[0];
-
+  // IMPORTANT: this item is built from NEUTRAL defaults. It used to spread an unrelated catalog dish
+  // (photo, calories, rating, province...), which displayed a wrong picture and invented nutrition/ratings.
+  // The photo stays empty until a VERIFIED online photo is found (see universalDishOpenApi).
+  void foods;
   const cachedOnlinePhoto = getCachedOnlineDishPhoto(cleanDishName);
   const slugKey = normalizeKhmerFoodText(cleanDishName).replace(/\s+/g, '-') || cleanDishName.toLowerCase().replace(/\s+/g, '-') || 'dish';
 
   return {
-    ...fallbackPhotoDish,
     id: `custom-recipe-${slugKey}`,
     nameKh: cleanDishName,
     nameEn: translated.enName,
     categorySlug: catSlug,
     categoryKh: catKh,
     categoryEn: catEn,
-    photoUrl: cachedOnlinePhoto || fallbackPhotoDish?.photoUrl || '',
-    originalPhotoUrl: cachedOnlinePhoto || fallbackPhotoDish?.originalPhotoUrl || fallbackPhotoDish?.photoUrl || '',
     descriptionKh: generated.descriptionKh,
     descriptionEn: generated.descriptionEn,
+    photoUrl: cachedOnlinePhoto || '',
+    originalPhotoUrl: cachedOnlinePhoto || '',
+    prepTime: '',
+    cookTime: '',
+    servings: '',
+    difficulty: 'medium',
+    priceRiel: 0,
+    priceUsd: 0,
     ingredients: generated.ingredients,
     steps: generated.steps,
+    rating: 0,
+    reviewCount: 0,
   };
+}
+
+/** "សុំរូបមន្ត ប្រហុកចំហុយ" -> "ប្រហុកចំហុយ" : strips recipe-request words and polite particles. */
+function extractRequestedDishName(trimmed: string): string {
+  return trimmed
+    .replace(new RegExp(RECIPE_INTENT_RE.source, 'gi'), ' ')
+    .replace(/^(?:តើមាន|តើមុខម្ហូប|តើម្ហូប|តើ|សូម|សុំ|ជួយ|ប្រាប់|បង្ហាញ|ចង់ដឹង|ចង់ញ៉ាំ|ចង់ហូប|ណែនាំ|ពី|នៃ|សម្រាប់)\s*/gi, '')
+    .replace(/\s*(?:ខ្លះ|អ្វីខ្លះ|អត់|ទេ|ឬទេ|ដែរទេ|[?？!！។«»"'])+$/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const TEXT_OF_DISH_FOR_CRITERIA = (f: FoodItem): string =>
+  [
+    f.nameKh,
+    f.nameEn,
+    f.descriptionKh,
+    f.descriptionEn,
+    ...(f.ingredients || []).map((i) => `${i.nameKh} ${i.nameEn}`),
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+const SUGAR_IN_RECIPE_RE =
+  /ស្ករ|ទឹកឃ្មុំ|ទឹកដោះគោខាប់|\bsugar\b|palm\s*sugar|\bhoney\b|syrup|condensed\s*milk|糖|蜂蜜|炼乳/i;
+const OILY_RE = /ចៀន|បំពង|ខ្ទិះ|បីជាន់|\bfried\b|crispy|coconut\s*milk|pork\s*belly|deep|油炸|椰浆|五花/i;
+
+/**
+ * Filter the verified catalog by dietary / flavour criteria using ONLY recipe data
+ * (ingredient lists, calories). Describes recipe characteristics - never health advice.
+ */
+export function filterDishesByDietaryCriteria(foods: FoodItem[], criteria: DietaryCriteria): FoodItem[] {
+  const matchesCategory = (f: FoodItem): boolean => {
+    const hint = criteria.categoryHint;
+    if (!hint) return true;
+    const title = `${f.nameKh} ${f.nameEn}`;
+    switch (hint) {
+      case 'soup':
+        // Khmer "samlor" family only (the catalog category 'soup' also holds amok, braised dishes and noodle soups)
+        return /សម្ល|ស្ងោរ|ស៊ុប|ម្ជូរ|ប្រហើរ|កកូរ|ការី/.test(f.nameKh) && !/^បាយ|^គុយទាវ|^មី|^នំបញ្ចុក/.test(f.nameKh);
+      case 'noodles':
+        return f.categorySlug === 'noodles';
+      case 'rice':
+        return f.categorySlug === 'rice';
+      case 'salad':
+        return f.categorySlug === 'salad';
+      case 'grilled':
+        return f.categorySlug === 'grilled';
+      case 'stirfry':
+        return f.categorySlug === 'stirfry';
+      case 'dessert':
+        return f.categorySlug === 'dessert' || f.categorySlug === 'cake';
+      case 'drink':
+        return f.categorySlug === 'drink';
+      default:
+        return true;
+    }
+  };
+
+  let pool = foods.filter(matchesCategory);
+  const wantsSweet = criteria.categoryHint === 'dessert' || criteria.categoryHint === 'drink';
+  const strict = pool.filter((f) => {
+    const text = TEXT_OF_DISH_FOR_CRITERIA(f);
+    if (criteria.lowSugar && !wantsSweet) {
+      if (f.categorySlug === 'dessert' || f.categorySlug === 'cake' || f.categorySlug === 'drink') return false;
+      if (SUGAR_IN_RECIPE_RE.test((f.ingredients || []).map((i) => `${i.nameKh} ${i.nameEn}`).join(' '))) return false;
+    }
+    if (criteria.lowFat && OILY_RE.test(text)) return false;
+    if (criteria.lowCalorie && (f.calories || 9999) > 350) return false;
+    if (criteria.notSpicy && /ហឹរ|ម្ទេស|spicy|chili|chilli|辣/i.test(text)) return false;
+    return true;
+  });
+  if (strict.length > 0) pool = strict;
+  else return [];
+
+  return pool.sort((a, b) => {
+    if (criteria.lowCalorie) return (a.calories || 9999) - (b.calories || 9999);
+    return (b.rating || 0) - (a.rating || 0);
+  });
 }
 
 export function generateConversationalAiResponse(params: {
@@ -630,13 +688,12 @@ export function generateConversationalAiResponse(params: {
   }
 
   // 3. RECIPE / INGREDIENTS / COOKING STEPS INTENT (Multi-turn aware + supports any dish outside the 200-item catalog!)
-  if (RECIPE_INTENT_RE.test(trimmed)) {
-    const cleanRequestedDishName = trimmed
-      .replace(new RegExp(RECIPE_INTENT_RE.source, 'gi'), ' ')
-      .replace(/^(?:តើមាន|តើមុខម្ហូប|តើម្ហូប|តើ|សូម|សុំ|ជួយ|ប្រាប់|បង្ហាញ|ចង់ដឹង|ចង់ញ៉ាំ|ចង់ហូប|ពី|នៃ|សម្រាប់)\s*/gi, '')
-      .replace(/\s*(?:ខ្លះ|អ្វីខ្លះ|អត់|ទេ|ឬទេ|ដែរទេ|[?？!！។«»"'])+$/gi, '')
-      .replace(/\s+/g, ' ')
-      .trim();
+  // A sentence-like request ("ណែនាំសម្លដែលមានជាតិស្ករតិច") is NOT a dish name: it falls through to the criteria / discovery steps.
+  if (
+    RECIPE_INTENT_RE.test(trimmed) &&
+    (!isQuestionOrCriteriaQuery(extractRequestedDishName(trimmed)) || findBestDishInQuery(trimmed, foods, []))
+  ) {
+    const cleanRequestedDishName = extractRequestedDishName(trimmed);
 
     const matchedInCatalog = findBestDishInQuery(trimmed, foods, []);
     let targetFood: FoodItem;
@@ -702,8 +759,10 @@ export function generateConversationalAiResponse(params: {
     };
   }
 
-  // 4. TOURISM / TRAVEL / ATTRACTIONS INTENT (or Province Exploration)
-  // Test on homonym-stripped text so "ភ្នំពេញ" (ភ្នំ) or "គ្រឿងសមុទ្រ" (seafood) never trigger tourism by mistake.
+  // 4. TOURISM / TRAVEL REQUESTS - this assistant is FOOD-ONLY.
+  // Politely redirect (no attractions are recommended here) and, when a province is mentioned,
+  // offer that province's signature dishes instead.
+  // Test on homonym-stripped text so "ភ្នំពេញ" (ភ្នំ) or "គ្រឿងសមុទ្រ" (seafood) never trigger this by mistake.
   const tourismText = stripTourismHomonyms(trimmed);
   const hasFoodWords = /ញ៉ាំ|ម្ហូប|បាយ|សម្ល|គុយទាវ|eat|food|dish|吃|菜/i.test(trimmed);
   const tourismCategory = detectTourismCategory(trimmed);
@@ -712,114 +771,54 @@ export function generateConversationalAiResponse(params: {
     (tourismCategory === 'beach' && !hasFoodWords && !RESTAURANT_INTENT_RE.test(trimmed)) ||
     (detectedProv && !RESTAURANT_INTENT_RE.test(trimmed) && !hasFoodWords)
   ) {
-    const verifiedDestinations = destinations.filter((d) => isPlaceLocationVerified(d));
-    const destSource = verifiedDestinations.length > 0 ? verifiedDestinations : destinations;
     const normalize = (s?: string) => (s || '').replace(/ណ្ដ/g, 'ណ្ត');
-    const inProvince = (d: TouristDestination, prov: string) => Boolean(prov) && normalize(d.provinceKh).includes(prov);
-
-    // Province priority: explicit province in THIS message > remembered province (only if it fits the category)
-    const explicitProv = detectedProv ? normalize(detectedProv.kh) : '';
-    let normProv = explicitProv || normalize(memory.activeProvinceKh);
-    if (!explicitProv && tourismCategory === 'beach' && normProv && !isCoastalProvince(normProv)) {
-      // e.g. user talked about Phnom Penh earlier, now asks for the sea → search coastal provinces nationwide
-      normProv = '';
-    }
-
-    let matchedDests: TouristDestination[] = [];
-    if (tourismCategory) {
-      const categoryMatches = destSource.filter((d) => destinationMatchesCategory(d, tourismCategory));
-      matchedDests = normProv ? categoryMatches.filter((d) => inProvince(d, normProv)) : categoryMatches;
-      if (matchedDests.length === 0 && !explicitProv) {
-        // Remembered province has no such places → fall back to the whole country for this category
-        normProv = '';
-        matchedDests = categoryMatches;
-      }
-    }
-    if (matchedDests.length === 0) {
-      matchedDests = normProv ? destSource.filter((d) => inProvince(d, normProv)) : destSource;
-    }
-
-    const shownIds = new Set((memory.lastDestinations || []).map((d) => d.id));
-    const topDests = rankAndDiversifyDestinations(matchedDests, shownIds, 4);
-
-    const provFoods = (
-      normProv
-        ? foods.filter((f) => normalize(`${f.nameKh} ${f.nameEn} ${f.descriptionKh || ''} ${f.provinceKh || ''}`).includes(normProv))
-        : tourismCategory === 'beach'
-          ? foods.filter((f) => {
-              const n = `${f.nameKh} ${f.nameEn}`;
-              return /គ្រឿងសមុទ្រ|ក្តាមសេះ|ក្ដាមសេះ|ក្តាមថ្ម|បង្គា|មឹក|ងាវ|seafood|blue crab|squid|shrimp|prawn|clam/i.test(n) && !/ស្រែ|field|ទឹកសាប|freshwater/i.test(n);
-            })
-          : []
-    ).slice(0, 2);
-
-    const provKh = normProv ? (detectedProv?.kh || memory.activeProvinceKh) : '';
-    const provMatch = provKh ? PROVINCE_PATTERNS.find((p) => normalize(p.kh) === normalize(provKh)) : undefined;
-    const provLabel = provMatch
-      ? tr(language, provMatch.kh, provMatch.en, provMatch.zh)
-      : provKh || tr(language, 'កម្ពុជា', 'Cambodia', '柬埔寨');
-    const catLabel = TOURISM_CATEGORY_LABELS[tourismCategory || 'all'];
-
-    const followUpChips: BrainChip[] =
-      tourismCategory === 'beach' && !provKh
-        ? [
-            {
-              id: 'beach_kep',
-              label: tr(language, '🦀 ឆ្នេរកែប & ផ្សារក្ដាម', '🦀 Kep Beach & Crab Market', '🦀 白马海滩与螃蟹市场'),
-              query: tr(language, 'ចង់ទៅលេងសមុទ្រនៅកែប', 'Beaches to visit in Kep', '白马省有哪些海滩？'),
-            },
-            {
-              id: 'beach_sihanouk',
-              label: tr(language, '🏝️ កោះរ៉ុង & ព្រះសីហនុ', '🏝️ Koh Rong & Sihanoukville', '🏝️ 高龙岛与西港'),
-              query: tr(language, 'ឆ្នេរ និងកោះស្អាតៗនៅព្រះសីហនុ', 'Beaches and islands in Sihanoukville', '西哈努克省有哪些海滩和海岛？'),
-            },
-            {
-              id: 'beach_seafood',
-              label: tr(language, '🦐 ម្ហូបគ្រឿងសមុទ្រ', '🦐 Seafood Dishes', '🦐 海鲜美食'),
-              query: tr(language, 'ណែនាំម្ហូបគ្រឿងសមុទ្រឆ្ងាញ់ៗ', 'Recommend fresh seafood dishes', '推荐新鲜海鲜菜品'),
-            },
-          ]
-        : [
-            {
-              id: 'prov_food',
-              label: tr(language, `🍲 ម្ហូបល្បីនៅ${provLabel}`, `🍲 Food in ${provLabel}`, `🍲 ${provLabel}美食`),
-              query: tr(language, `ម្ហូបឆ្ងាញ់នៅ${provKh || 'សៀមរាប'}មានអ្វីខ្លះ?`, `What food to eat in ${provMatch?.en || 'Siem Reap'}?`, `${provMatch?.zh || '暹粒'}有什么特色美食？`),
-            },
-            {
-              id: 'prov_shops',
-              label: tr(language, `🏪 ហាងអាហារនៅ${provLabel}`, `🏪 Restaurants in ${provLabel}`, `🏪 ${provLabel}餐厅`),
-              query: tr(language, `ណែនាំភោជនីយដ្ឋាននៅ${provKh || 'ភ្នំពេញ'}`, `Recommend restaurants in ${provMatch?.en || 'Phnom Penh'}`, `推荐${provMatch?.zh || '金边'}的餐厅`),
-            },
-            {
-              id: 'more_tourism',
-              label: tr(language, '🏖️ ឆ្នេរសមុទ្រ & កោះ', '🏖️ Beaches & Islands', '🏖️ 海滩与海岛'),
-              query: tr(language, 'ណែនាំឆ្នេរសមុទ្រ និងកោះស្អាតៗនៅកម្ពុជា', 'Recommend beautiful beaches and islands in Cambodia', '推荐柬埔寨美丽的海滩和海岛'),
-            },
-          ];
+    const normProv = detectedProv ? normalize(detectedProv.kh) : '';
+    const provFoods = normProv
+      ? foods
+          .filter((f) => normalize(`${f.nameKh} ${f.nameEn} ${f.descriptionKh || ''} ${f.provinceKh || ''}`).includes(normProv))
+          .slice(0, 4)
+      : [];
+    const provLabel = detectedProv ? tr(language, detectedProv.kh, detectedProv.en, detectedProv.zh) : '';
 
     const reply: AiAssistantMessage = {
       id: `ai-${Date.now()}`,
       role: 'assistant',
       timestamp: new Date().toISOString(),
-      intent: 'tourism_discovery',
-      destinations: topDests,
-      dishes: provFoods,
+      intent: 'off_topic',
+      source: 'rules',
+      dishes: provFoods.length > 0 ? provFoods : undefined,
+      suppressDishCard: provFoods.length === 0,
       text: tr(
         language,
-        `${catLabel.emoji} នេះជា${catLabel.km}នៅ${provLabel} ដែល AI សូមណែនាំសម្រាប់ដំណើរកម្សាន្តរបស់អ្នក${provFoods.length > 0 ? ' រួមជាមួយមុខម្ហូបដែលគួរសាកល្បង៖' : '៖'}`,
-        `${catLabel.emoji} Here are ${catLabel.en} in ${provLabel} recommended for your trip${provFoods.length > 0 ? ', along with dishes worth trying:' : ':'}`,
-        `${catLabel.emoji} 以下是 AI 为您推荐的${provLabel}${catLabel.zh}${provFoods.length > 0 ? '，以及值得品尝的美食：' : '：'}`
+        `🍽️ ជំនួយការនេះឯកទេសតែលើម្ហូបអាហារប៉ុណ្ណោះ — សូមប្រើផ្ទាំង «ទេសចរណ៍» សម្រាប់កន្លែងដើរលេង។${
+          provFoods.length > 0 ? ` ខាងក្រោមជាម្ហូបល្បីៗនៅ${provLabel}៖` : ' ខ្ញុំអាចណែនាំម្ហូបតាមខេត្ត ឬហាងអាហារបាន។'
+        }`,
+        `🍽️ This assistant is food-only — please use the Tourism tab for places to visit.${
+          provFoods.length > 0 ? ` Here are signature dishes from ${provLabel}:` : ' I can recommend regional dishes or restaurants.'
+        }`,
+        `🍽️ 本助手只专注于美食——景点请使用“旅游”页面。${
+          provFoods.length > 0 ? `以下是${provLabel}的特色美食：` : '我可以为您推荐各地特色菜或餐厅。'
+        }`
       ),
-      followUpChips,
+      followUpChips: [
+        {
+          id: 'prov_food',
+          label: tr(language, '🍲 ម្ហូបល្បីតាមខេត្ត', '🍲 Regional dishes', '🍲 各地特色美食'),
+          query: tr(language, 'ម្ហូបឆ្ងាញ់នៅសៀមរាបមានអ្វីខ្លះ?', 'What food should I try in Siem Reap?', '暹粒有什么特色美食？'),
+        },
+        {
+          id: 'prov_shops',
+          label: tr(language, '🏪 ហាងអាហារ', '🏪 Restaurants', '🏪 餐厅推荐'),
+          query: tr(language, 'ណែនាំភោជនីយដ្ឋាននៅភ្នំពេញ', 'Recommend restaurants in Phnom Penh', '推荐金边的餐厅'),
+        },
+      ],
     };
-
     return {
       reply,
       nextMemory: {
         ...safeMemory,
-        lastDestinations: topDests,
         lastDishes: provFoods.length > 0 ? provFoods : safeMemory.lastDishes,
-        activeProvinceKh: provKh,
+        activeProvinceKh: detectedProv ? detectedProv.kh : safeMemory.activeProvinceKh,
         lastQuery: trimmed,
         turnSeed: nextSeed,
       },
@@ -897,6 +896,150 @@ export function generateConversationalAiResponse(params: {
         ...memory,
         lastRestaurants: topShops,
         activeProvinceKh: provKh,
+        lastQuery: trimmed,
+        turnSeed: nextSeed,
+      },
+    };
+  }
+
+  // 5b. DIETARY / FLAVOUR CRITERIA ("សម្លដែលមានជាតិស្ករតិច", "low-oil noodles", "not spicy soup")
+  // Filter the verified catalog by RECIPE DATA (ingredient list / calories) - never invent a dish and never give health advice.
+  const dietaryCriteria = !MORE_FOLLOWUP_RE.test(trimmed) ? parseDietaryCriteria(trimmed) : null;
+  if (dietaryCriteria) {
+    const matches = filterDishesByDietaryCriteria(foods, dietaryCriteria);
+    const top = matches.slice(0, 4);
+    const label = [
+      dietaryCriteria.lowSugar ? tr(language, 'គ្មានស្ករក្នុងគ្រឿងផ្សំ', 'no sugar in the ingredient list', '配料中不含糖') : '',
+      dietaryCriteria.lowCalorie ? tr(language, 'កាឡូរីទាប (≤ ៣៥០ kcal)', 'lower calories (≤ 350 kcal)', '较低热量（≤ 350 千卡）') : '',
+      dietaryCriteria.lowFat ? tr(language, 'មិនចៀន/មិនបំពង/គ្មានខ្ទិះ', 'not fried / no coconut milk', '非油炸、不含椰浆') : '',
+      dietaryCriteria.notSpicy ? tr(language, 'មិនហឹរ', 'not spicy', '不辣') : '',
+    ]
+      .filter(Boolean)
+      .join(' • ');
+    const note = tr(
+      language,
+      'ℹ️ ការជ្រើសរើសនេះផ្អែកលើបញ្ជីគ្រឿងផ្សំក្នុងរូបមន្តប៉ុណ្ណោះ (មិនមែនជាដំបូន្មានសុខភាពទេ) ហើយហាងនីមួយៗអាចដាក់ខុសគ្នា។',
+      'ℹ️ This filter only reads each recipe’s ingredient list (it is not health advice) and restaurants may cook differently.',
+      'ℹ️ 此筛选仅依据食谱配料表（并非健康建议），各餐厅做法可能不同。'
+    );
+    const reply: AiAssistantMessage = {
+      id: `ai-${Date.now()}`,
+      role: 'assistant',
+      timestamp: new Date().toISOString(),
+      intent: 'food_discovery',
+      source: 'rules',
+      dishes: top.length > 0 ? top : undefined,
+      similarDishes: matches.slice(4, 8),
+      suppressDishCard: top.length === 0,
+      text:
+        top.length > 0
+          ? `${tr(language, '✨ មុខម្ហូបដែលត្រូវនឹងលក្ខខណ្ឌ', '✨ Dishes matching your criteria', '✨ 符合您条件的菜品')} (${label}):\n\n${note}`
+          : `${tr(
+              language,
+              '🔎 ខ្ញុំរកមិនឃើញមុខម្ហូបក្នុងបញ្ជីដែលត្រូវនឹងលក្ខខណ្ឌទាំងអស់នេះទេ',
+              '🔎 I couldn’t find a dish in the verified menu that meets all of these criteria',
+              '🔎 在已核实的菜单中没有找到同时满足这些条件的菜品'
+            )} (${label}).\n\n${tr(
+              language,
+              'សូមសាកល្បងបន្ធូរលក្ខខណ្ឌមួយ ឬប្រាប់ខ្ញុំពីប្រភេទម្ហូបដែលអ្នកចង់បាន។',
+              'Try relaxing one criterion, or tell me which kind of dish you want.',
+              '可以放宽一个条件，或告诉我想吃哪一类菜。'
+            )}`,
+      followUpChips: [
+        {
+          id: 'crit_not_spicy',
+          label: tr(language, '🌿 មិនហឹរ', '🌿 Not spicy', '🌿 不辣'),
+          query: tr(language, 'សម្លដែលមិនហឹរ', 'Mild soups that are not spicy', '不辣的汤'),
+        },
+        {
+          id: 'crit_light',
+          label: tr(language, '🥗 កាឡូរីទាប', '🥗 Lower calories', '🥗 低热量'),
+          query: tr(language, 'ម្ហូបកាឡូរីទាប', 'Lower calorie dishes', '低热量的菜'),
+        },
+        {
+          id: 'crit_more',
+          label: tr(language, '🔄 ម្ហូបផ្សេងទៀត', '🔄 More dishes', '🔄 换一批'),
+          query: tr(language, 'ម្ហូបផ្សេងទៀត', 'more', '换一批'),
+        },
+      ],
+    };
+    return {
+      reply,
+      nextMemory: {
+        ...safeMemory,
+        lastDishes: top.length > 0 ? top : safeMemory.lastDishes,
+        activeProvinceKh,
+        lastQuery: trimmed,
+        turnSeed: nextSeed,
+      },
+    };
+  }
+
+  // 5c. FACT QUESTIONS (nutrition, storage, history, "why", substitutions...) need real reasoning.
+  // The offline engine must not answer them with an unrelated dish card - it answers only what it can
+  // PROVE from the verified catalog and is honest about the rest.
+  if (
+    isKnowledgeQuestion(trimmed) &&
+    !MORE_FOLLOWUP_RE.test(trimmed) &&
+    !/ប្រៀបធៀប|ខុសគ្នា|compare|comparison|\bvs\b|versus|对比|比较|区别/i.test(trimmed)
+  ) {
+    // The dish is somewhere INSIDE a sentence ("តើអាម៉ុកត្រីមានកាឡូរីប៉ុន្មាន?"): strip the question words, then match the catalog.
+    const phrase = normalizeKhmerFoodText(extractDishPhrase(trimmed));
+    const phraseMatch =
+      phrase.length >= 2
+        ? searchKhmerFoods(foods, phrase).find(
+            (f) => normalizeKhmerFoodText(f.nameKh).includes(phrase) || (f.nameEn || '').toLowerCase().includes(phrase.toLowerCase())
+          )
+        : undefined;
+    const subject = phraseMatch || findBestDishInQuery(trimmed, foods, safeMemory.lastDishes);
+    const asksNutrition = /កាឡូរី|អាហារូបត្ថម្ភ|calorie|kcal|nutrition|热量|卡路里|营养/i.test(trimmed);
+    const asksIngredients = /គ្រឿងផ្សំ|ingredient|配料|食材|ដាក់អ្វី/i.test(trimmed);
+    let factText = '';
+    if (subject && (asksNutrition || asksIngredients)) {
+      const loc = getLocalizedFood(subject, language);
+      const ings = (subject.ingredients || [])
+        .slice(0, 8)
+        .map((ing, idx) =>
+          language === 'km' ? ing.nameKh : language === 'zh' ? loc.ingredients?.[idx]?.name || ing.nameEn || ing.nameKh : ing.nameEn || ing.nameKh
+        )
+        .join(language === 'zh' ? '、' : ', ');
+      factText = tr(
+        language,
+        `📋 «${loc.name}»៖ ${subject.calories ? `កាឡូរីប្រហែល ${subject.calories} kcal ក្នុងមួយចាន (ប៉ាន់ស្មាន)។ ` : ''}គ្រឿងផ្សំសំខាន់ៗ៖ ${ings || 'មិនទាន់មានទិន្នន័យ'}។`,
+        `📋 "${loc.name}": ${subject.calories ? `about ${subject.calories} kcal per serving (approximate). ` : ''}Main ingredients: ${ings || 'not listed'}.`,
+        `📋 “${loc.name}”：${subject.calories ? `每份约 ${subject.calories} 千卡（估算）。` : ''}主要食材：${ings || '暂无数据'}。`
+      );
+    }
+    const reply: AiAssistantMessage = {
+      id: `ai-${Date.now()}`,
+      role: 'assistant',
+      timestamp: new Date().toISOString(),
+      intent: 'general_food_qa',
+      source: 'rules',
+      dishes: subject ? [subject] : undefined,
+      suppressDishCard: !subject,
+      text: `${factText ? `${factText}\n\n` : ''}${tr(
+        language,
+        '🤖 សំណួរនេះត្រូវការ AI ឆ្លាតវៃដើម្បីឆ្លើយឱ្យបានលម្អិត និងត្រឹមត្រូវ ប៉ុន្តែឥឡូវនេះ AI មិនទាន់តភ្ជាប់ទេ ដូច្នេះខ្ញុំមិនចង់ទាយចម្លើយឱ្យខុសទេ។ សូមព្យាយាមម្តងទៀតពេល AI តភ្ជាប់ ឬសួរអំពីមុខម្ហូបជាក់លាក់។',
+        '🤖 A detailed, accurate answer to this needs the live AI, which isn’t connected right now - and I would rather not guess. Please try again when the AI is online, or ask about a specific dish.',
+        '🤖 要给出详细且准确的回答需要在线 AI，目前未连接，我不想随意猜测。请在 AI 连接后重试，或询问具体菜品。'
+      )}`,
+      followUpChips: subject
+        ? [
+            {
+              id: 'fact_recipe',
+              label: tr(language, '👩‍🍳 របៀបធ្វើ', '👩‍🍳 Recipe', '👩‍🍳 做法'),
+              query: tr(language, `សុំរូបមន្ត ${subject.nameKh}`, `Show me the recipe for ${subject.nameEn}`, `请告诉我${getLocalizedFood(subject, language).name}的做法`),
+            },
+          ]
+        : undefined,
+    };
+    return {
+      reply,
+      nextMemory: {
+        ...safeMemory,
+        lastDishes: subject ? [subject] : safeMemory.lastDishes,
+        activeProvinceKh,
         lastQuery: trimmed,
         turnSeed: nextSeed,
       },
@@ -1011,6 +1154,57 @@ export function generateConversationalAiResponse(params: {
     }
   }
 
+  // Nothing in the verified menu matches AND it is not a broad request ("ម្ហូបឆ្ងាញ់") nor a nameable dish:
+  // say so and ask - never pad the answer with random "popular" dishes (they look like wrong answers).
+  const strippedForBroadCheck = normalizeKhmerFoodText(effectiveQuery.replace(/[?？!！។«»"']/g, ' ').trim());
+  const isBroadRequest = BROAD_CATEGORY_OR_GENERIC_QUESTION_RE.test(strippedForBroadCheck);
+  const hasNoRealMatch =
+    !isMoreFollowUp &&
+    !isVegQuery &&
+    !isCompareQuery &&
+    !detectedProv &&
+    !isBroadRequest &&
+    advisor.totalMatchedCount === 0 &&
+    !(advisor.brain && advisor.brain.dishes.length > 0);
+  if (hasNoRealMatch && !outOfCatalogDishName && !pinnedCatalogDish) {
+    const reply: AiAssistantMessage = {
+      id: `ai-${Date.now()}`,
+      role: 'assistant',
+      timestamp: new Date().toISOString(),
+      intent: 'clarification',
+      source: 'rules',
+      needsClarification: true,
+      suppressDishCard: true,
+      text: tr(
+        language,
+        `🔎 ខ្ញុំមិនទាន់ប្រាកដថា «${effectiveQuery}» ជាមុខម្ហូបអ្វីទេ ហើយមិនមានមុខម្ហូបត្រូវគ្នាក្នុងបញ្ជីទេ។ តើអ្នកចង់បានម្ហូបប្រភេទណា (សម្ល ឆា អាំង មី បាយ បង្អែម) ឬមានគ្រឿងផ្សំអ្វី? ប្រាប់ខ្ញុំបន្ថែម ខ្ញុំនឹងជួយរកឱ្យត្រូវ។`,
+        `🔎 I’m not sure what dish “${effectiveQuery}” is, and nothing in the menu matches it. What kind of dish do you want (soup, stir-fry, grill, noodles, rice, dessert) or which main ingredient? Tell me a bit more and I’ll find the right one.`,
+        `🔎 我不确定“${effectiveQuery}”是什么菜，菜单中也没有匹配项。您想吃哪一类（汤、炒菜、烧烤、面、饭、甜品）或主要食材是什么？告诉我更多信息，我来帮您找。`
+      ),
+      followUpChips: [
+        {
+          id: 'clar_soup',
+          label: tr(language, '🍲 សម្ល', '🍲 Soups', '🍲 汤类'),
+          query: tr(language, 'ណែនាំសម្លឆ្ងាញ់ៗ', 'Recommend tasty soups', '推荐好喝的汤'),
+        },
+        {
+          id: 'clar_grill',
+          label: tr(language, '🍖 សាច់អាំង', '🍖 Grilled', '🍖 烧烤'),
+          query: tr(language, 'ណែនាំម្ហូបសាច់អាំង', 'Recommend grilled dishes', '推荐烧烤类菜品'),
+        },
+        {
+          id: 'clar_noodle',
+          label: tr(language, '🍜 មី & គុយទាវ', '🍜 Noodles', '🍜 面粉类'),
+          query: tr(language, 'ណែនាំគុយទាវ និងមី', 'Recommend noodle dishes', '推荐面条粉类'),
+        },
+      ],
+    };
+    return {
+      reply,
+      nextMemory: { ...safeMemory, activeProvinceKh, lastQuery: effectiveQuery, turnSeed: nextSeed },
+    };
+  }
+
   const chosenIds = new Set(chosenDishes.map((d) => d.id));
   const similarDishes = (advisor.allMatchedDishes || [])
     .filter((d) => !chosenIds.has(d.id))
@@ -1029,9 +1223,9 @@ export function generateConversationalAiResponse(params: {
       .join(language === 'zh' ? '、' : ', ');
     conversationalText = tr(
       language,
-      `✨ សម្រាប់ «${outOfCatalogDishName}» នេះជារូបភាពមុខម្ហូប គ្រឿងផ្សំ និងរបៀបធ្វើលម្អិត${relatedNames ? ` រួមជាមួយមុខម្ហូបស្រដៀងគ្នា (${relatedNames})` : ''}៖`,
-      `✨ For "${firstDish.nameEn}", here is the dish photo, ingredients, and recipe${relatedNames ? ` along with similar dishes (${relatedNames})` : ''}:`,
-      `✨ 关于“${firstDish.nameEn}”，以下为您呈现菜品图片、食材配料与做法${relatedNames ? `以及类似推荐（${relatedNames}）` : ''}：`
+      `✨ សម្រាប់ «${outOfCatalogDishName}» នេះជារូបមន្តទូទៅ គ្រឿងផ្សំ និងរបៀបធ្វើ (អាចខុសគ្នាតាមតំបន់/ហាង)${relatedNames ? ` រួមជាមួយមុខម្ហូបស្រដៀងគ្នា (${relatedNames})` : ''}៖`,
+      `✨ For "${firstDish.nameEn}", here is a general guide to the ingredients and method (it varies by region and cook)${relatedNames ? `, plus similar dishes (${relatedNames})` : ''}:`,
+      `✨ 关于“${firstDish.nameEn}”，以下是食材与做法的通用参考（各地、各家做法会有差异）${relatedNames ? `，以及类似推荐（${relatedNames}）` : ''}：`
     );
   } else if (pinnedCatalogDish && chosenDishes.length > 0) {
     const orderedNames = chosenDishes
@@ -1186,7 +1380,7 @@ const DEFAULT_GEMINI_MODELS = [
  * Dynamically queries Google AI Studio for the active generateContent text models supported by this key,
  * falling back to the standard current Flash models.
  */
-async function getGeminiCandidateModels(key: string): Promise<string[]> {
+export async function getGeminiCandidateModels(key: string): Promise<string[]> {
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 4000);
@@ -1329,305 +1523,4 @@ export function getCachedOnlineDishPhoto(dishQuery: string): string | null {
  */
 export async function fetchOnlineDishPhotoByQuery(dishQuery: string): Promise<string | null> {
   return fetchUniversalDishPhotoFromOpenApis(dishQuery);
-}
-
-/**
- * Calls the live Google Gemini API grounded on the app's verified catalog of 200 Cambodian dishes,
- * 200+ restaurants, and 124+ tourist destinations to refine the assistant reply with natural, accurate AI reasoning.
- * Falls back gracefully to the deterministic reply if offline or if no API key is configured.
- */
-export async function askGeminiFoodTourismAssistant(params: {
-  userInput: string;
-  language: Language;
-  foods: FoodItem[];
-  restaurants: Restaurant[];
-  destinations: TouristDestination[];
-  canUseVip: boolean;
-  memory: AiConversationMemory;
-  initialReply: AiAssistantMessage;
-  geminiApiKey?: string;
-}): Promise<AiAssistantMessage> {
-  const {
-    userInput,
-    language,
-    foods,
-    restaurants,
-    destinations,
-    memory,
-    initialReply,
-    geminiApiKey,
-  } = params;
-
-  // Never override strict medical scope boundary refusals
-  if (initialReply.isScopeRefusal || initialReply.intent === 'medical_scope_refusal') {
-    return initialReply;
-  }
-
-  const key = resolveGeminiApiKey(geminiApiKey);
-  if (!key) {
-    return initialReply;
-  }
-
-  // Build a compact, grounded catalog of candidate dishes, restaurants, and tourist destinations
-  const candidateFoodMap = new Map<string, FoodItem>();
-  for (const d of initialReply.dishes || []) candidateFoodMap.set(d.id, d);
-  for (const d of initialReply.similarDishes || []) candidateFoodMap.set(d.id, d);
-  for (const d of searchKhmerFoods(foods, userInput).slice(0, 12)) candidateFoodMap.set(d.id, d);
-
-  const detectedProv = detectProvinceFromText(userInput);
-  if (detectedProv) {
-    const normProv = detectedProv.kh.replace(/ណ្ដ/g, 'ណ្ត');
-    for (const d of foods.filter((f) => (f.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត').includes(normProv)).slice(0, 10)) {
-      candidateFoodMap.set(d.id, d);
-    }
-  }
-  for (const d of foods.slice(0, 15)) {
-    if (candidateFoodMap.size >= 28) break;
-    candidateFoodMap.set(d.id, d);
-  }
-
-  const foodCatalog = Array.from(candidateFoodMap.values())
-    .slice(0, 28)
-    .map((f) => ({
-      id: f.id,
-      kh: f.nameKh,
-      en: f.nameEn,
-      cat: f.categorySlug,
-      prov: f.provinceKh,
-      taste: (f.categoryKh || '').slice(0, 45),
-    }));
-
-  const candidateShops = [
-    ...(initialReply.restaurants || []),
-    ...restaurants.filter((r) => isPlaceLocationVerified(r)).slice(0, 8),
-  ].slice(0, 10);
-
-  const shopCatalog = candidateShops.map((r) => ({
-    id: r.id,
-    kh: r.nameKh,
-    en: r.nameEn,
-    prov: r.provinceKh,
-    dishes: (r.signatureDishesKh || []).slice(0, 3),
-  }));
-
-  const candidateDests = [
-    ...(initialReply.destinations || []),
-    ...destinations.slice(0, 8),
-  ].slice(0, 10);
-
-  const destCatalog = candidateDests.map((t) => ({
-    id: t.id,
-    kh: t.nameKh,
-    en: t.nameEn,
-    prov: t.provinceKh,
-    cat: t.categorySlug,
-  }));
-
-  const langName = language === 'km' ? 'Khmer (ភាសាខ្មែរ)' : language === 'zh' ? 'Simplified Chinese (简体中文)' : 'English';
-
-  const systemInstruction = `You are the expert native-fluent Khmer AI Food & Tourism Assistant for "Cambodia Flavors & Tourism" (រសជាតិ និងទេសចរណ៍កម្ពុជា).
-You understand 100% of Khmer script, informal/phonetic Khmer spellings (e.g. សម្លរ/សម្ល, ស្ងោ/ស្ងោរ, អាមុក/អាម៉ុក, គុយទៀវ/គុយទាវ, ម្ចូរ/ម្ជូរ, អង្រ្កង/អង្ក្រង, ញ៉ាំ/ញាំ), regional Cambodian dialects, countryside dishes (ប្រហុកចំហុយ, ផ្អក, ម៉ាំ, ទឹកគ្រឿង, ញាំស្តៅ, នំបុរាណខ្មែរ), and international cuisine.
-Answer the user's question directly, accurately, and naturally in ${langName}.
-RULES:
-1. Keep "answerText" concise (1 to 2 natural, helpful sentences — never repetitive boilerplate) because visual Dish, Recipe, Restaurant, and Tourism cards are rendered immediately below your text.
-2. Select "recommendedFoodIds" (up to 4 IDs) from FOODS_CATALOG that match the user's request (respecting any province, flavor, mealtime, weather, or excluded meat like "no pork").
-3. If the user asks about a specific dish or asks how to cook / recipe / ingredients:
-   - If the exact dish is in FOODS_CATALOG, set "recipeFoodId" to its ID.
-   - If the dish is NOT in FOODS_CATALOG (e.g. ប្រហុកចំហុយ, ងាវអាំង, ឆាក្តៅអន្ទង់, នំអាកោត្នោត, Spaghetti Bolognese, Tom Yum, etc.), ALWAYS populate "customRecipe" with:
-     * "dishName" (in ${langName}),
-     * "englishSearchName" (accurate English culinary name for food-only photo search, e.g. "Prahok", "Grilled blood cockles", "Spaghetti Bolognese"),
-     * "description" (1 appetizing sentence in ${langName}),
-     * "ingredients" (array of { "name", "amount" } with authentic Khmer ingredients in ${langName}),
-     * "steps" (array of 4-5 clear, authentic cooking step strings in ${langName}).
-4. If the user asks about tourist places/travel, select "recommendedDestinationIds" (up to 4 IDs) from DESTINATIONS_CATALOG.
-5. Never give medical advice. Return valid JSON matching the schema.`;
-
-  const promptPayload = JSON.stringify({
-    userQuestion: userInput,
-    activeProvince: detectedProv?.kh || memory.activeProvinceKh || '',
-    FOODS_CATALOG: foodCatalog,
-    RESTAURANTS_CATALOG: shopCatalog,
-    DESTINATIONS_CATALOG: destCatalog,
-  });
-
-  const modelsToTry = [
-    ...DEFAULT_GEMINI_MODELS.slice(0, 2),
-    ...(await getGeminiCandidateModels(key)).filter((m) => !DEFAULT_GEMINI_MODELS.slice(0, 2).includes(m)),
-  ];
-
-  for (const model of modelsToTry) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 8500);
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: controller.signal,
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemInstruction }] },
-            contents: [{ role: 'user', parts: [{ text: promptPayload }] }],
-            generationConfig: {
-              temperature: 0.25,
-              maxOutputTokens: 750,
-              responseMimeType: 'application/json',
-            },
-          }),
-        }
-      );
-      clearTimeout(timer);
-
-      if (!response.ok) {
-        continue;
-      }
-
-      const data = await response.json();
-      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!rawText) continue;
-
-      const parsed = JSON.parse(rawText) as {
-        answerText?: string;
-        recommendedFoodIds?: string[];
-        recommendedRestaurantIds?: string[];
-        recommendedDestinationIds?: string[];
-        recipeFoodId?: string;
-        customRecipe?: {
-          dishName?: string;
-          englishSearchName?: string;
-          description?: string;
-          ingredients?: Array<{ name?: string; amount?: string }>;
-          steps?: string[];
-        };
-      };
-
-      if (!parsed.answerText || typeof parsed.answerText !== 'string') {
-        continue;
-      }
-
-      const foodById = new Map(foods.map((f) => [f.id, f]));
-      const geminiDishes = (parsed.recommendedFoodIds || [])
-        .map((id) => foodById.get(id))
-        .filter((f): f is FoodItem => Boolean(f))
-        .slice(0, 4);
-
-      let finalDishes =
-        geminiDishes.length > 0 ? geminiDishes : initialReply.dishes;
-
-      let finalRecipePreview = initialReply.recipePreview;
-      if (parsed.recipeFoodId && foodById.has(parsed.recipeFoodId)) {
-        const targetFood = foodById.get(parsed.recipeFoodId)!;
-        const loc = getLocalizedFood(targetFood, language);
-        finalRecipePreview = {
-          food: targetFood,
-          ingredients: (targetFood.ingredients || []).slice(0, 6).map((ing, idx) => ({
-            name:
-              language === 'km'
-                ? ing.nameKh
-                : language === 'zh'
-                ? loc.ingredients?.[idx]?.name || ing.nameEn || ing.nameKh
-                : ing.nameEn || ing.nameKh,
-            amount: ing.amount || '',
-          })),
-          steps: (targetFood.steps || []).slice(0, 5).map((st, idx) => ({
-            stepNumber: st.stepNumber || idx + 1,
-            instruction:
-              language === 'km'
-                ? st.instructionKh
-                : language === 'zh'
-                ? loc.steps?.[idx]?.instruction || st.instructionEn || st.instructionKh
-                : st.instructionEn || st.instructionKh,
-          })),
-        };
-      } else if (
-        parsed.customRecipe &&
-        parsed.customRecipe.dishName &&
-        Array.isArray(parsed.customRecipe.ingredients) &&
-        parsed.customRecipe.ingredients.length > 0 &&
-        Array.isArray(parsed.customRecipe.steps) &&
-        parsed.customRecipe.steps.length > 0
-      ) {
-        const initCustomFood =
-          initialReply.recipePreview?.food &&
-          String(initialReply.recipePreview.food.id || '').startsWith('custom-recipe-')
-            ? initialReply.recipePreview.food
-            : null;
-        const baseFood = initCustomFood || finalDishes?.[0] || foods[0];
-        const onlinePhoto = await fetchOnlineDishPhotoByQuery(
-          `${userInput} ${parsed.customRecipe.dishName || ''} ${parsed.customRecipe.englishSearchName || ''}`.trim()
-        );
-        const mappedIngredients = parsed.customRecipe.ingredients.slice(0, 8).map((ing) => ({
-          nameKh: String(ing.name || ''),
-          nameEn: String(ing.name || ''),
-          amount: String(ing.amount || ''),
-        }));
-        const mappedSteps = parsed.customRecipe.steps.slice(0, 6).map((st, idx) => ({
-          stepNumber: idx + 1,
-          instructionKh: String(st || ''),
-          instructionEn: String(st || ''),
-        }));
-        const slugKey =
-          normalizeKhmerFoodText(parsed.customRecipe.dishName || userInput).replace(/\s+/g, '-') || 'dish';
-        const customFood: FoodItem = {
-          ...baseFood,
-          id: initCustomFood ? initCustomFood.id : `custom-recipe-${slugKey}`,
-          nameKh: parsed.customRecipe.dishName,
-          nameEn: parsed.customRecipe.englishSearchName || parsed.customRecipe.dishName,
-          descriptionKh: parsed.customRecipe.description || baseFood.descriptionKh,
-          descriptionEn: parsed.customRecipe.description || baseFood.descriptionEn,
-          photoUrl: onlinePhoto || baseFood.photoUrl,
-          originalPhotoUrl: onlinePhoto || baseFood.originalPhotoUrl,
-          ingredients: mappedIngredients,
-          steps: mappedSteps,
-        };
-        finalDishes = [
-          customFood,
-          ...(finalDishes || []).filter((d) => d.id !== customFood.id).slice(0, 2),
-        ];
-        finalRecipePreview = {
-          food: customFood,
-          ingredients: parsed.customRecipe.ingredients.slice(0, 8).map((ing) => ({
-            name: String(ing.name || ''),
-            amount: String(ing.amount || ''),
-          })),
-          steps: parsed.customRecipe.steps.slice(0, 6).map((st, idx) => ({
-            stepNumber: idx + 1,
-            instruction: String(st || ''),
-          })),
-        };
-      } else if (
-        initialReply.recipePreview?.food &&
-        String(initialReply.recipePreview.food.id || '').startsWith('custom-recipe-')
-      ) {
-        // Preserve the out-of-catalog dish created in initialReply and attach its live Open API photo
-        const initCustom = initialReply.recipePreview.food;
-        const onlinePhoto = await fetchOnlineDishPhotoByQuery(
-          `${initCustom.nameKh || ''} ${initCustom.nameEn || ''} ${userInput}`.trim()
-        );
-        const enrichedCustom: FoodItem = onlinePhoto
-          ? { ...initCustom, photoUrl: onlinePhoto, originalPhotoUrl: onlinePhoto }
-          : initCustom;
-        finalDishes = [
-          enrichedCustom,
-          ...(finalDishes || []).filter((d) => d.id !== enrichedCustom.id).slice(0, 2),
-        ];
-        finalRecipePreview = {
-          ...initialReply.recipePreview,
-          food: enrichedCustom,
-        };
-      }
-
-      return {
-        ...initialReply,
-        text: parsed.answerText.trim(),
-        dishes: finalDishes,
-        recipePreview: finalRecipePreview,
-        isLiveGemini: true,
-      };
-    } catch {
-      clearTimeout(timer);
-    }
-  }
-
-  return initialReply;
 }

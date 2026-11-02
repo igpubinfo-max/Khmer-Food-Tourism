@@ -80,10 +80,72 @@ const UNSAFE_RE =
 export const MEDICAL_SCOPE_RE =
   /\b(diabet(?:es|ic)?|blood pressure|hypertens(?:ion|ive)|hypotens(?:ion|ive)|cholesterol|kidney(?: disease| stone)?|heart disease|cardiovascular|stroke|cancer|tumor|ulcer|gastritis|acid reflux|gerd|indigestion|constipat(?:ion|ed)|diarrh(?:ea|oea)|stomach\s*(?:ache|pain|problem|issue|ulcer|flu|bug)|belly\s*ache|abdominal pain|gout|arthrit(?:is|ic)|asthma|bronchitis|pneumonia|tuberculosis|hepatitis|cirrhosis|fatty liver|anemia|thyroid|migraine|headache|dizz(?:y|iness)|vertigo|insomnia|depress(?:ion|ed)|anxiety|allerg(?:y|ies|ic)|intoleran(?:ce|t)|celiac|lactose|hangover|\bsick\b|illness|disease|disorder|syndrome|symptom|infect(?:ion|ed)|\bflu\b|influenza|\bfever\b|\bcough(?:ing)?\b|sore throat|runny nose|vomiting|nausea|pregnan(?:t|cy)|breastfeed(?:ing)?|postpartum|medicat(?:ion|e)|medicine|\bpill(?:s)?\b|tablet|capsule|antibiotic|insulin|prescript(?:ion|ive)|dosage|\bcure(?:s|d|ing)?\b|\btreat(?:ment|ing|s)?\b|\bheal(?:ing|s)?\b|remed(?:y|ies)|recover(?:y|ing)? from|therapy|medical|doctor|physician|clinic|hospital|patient|diagnos(?:e|is|tic)|prevent(?:ion|ing)? disease|lower blood sugar|lower blood pressure|immune booster)\b|ជំងឺ|ទឹកនោមផ្អែម|លើសឈាម|សម្ពាធឈាម|ខ្លាញ់ក្នុងឈាម|កូឡេស្តេរ៉ុល|ឈឺក្រពះ|រលាកក្រពះ|ដំបៅក្រពះ|បញ្ហាក្រពះ|ឈឺពោះ|រាគ|ទល់លាមក|តម្រងនោម|ក្រលៀន|បេះដូង|ថ្លើម|សួត|មហារីក|សន្លាក់|រលាកសន្លាក់|ហឺត|គ្រុន|គ្រុនក្តៅ|ផ្តាសាយ|ក្អក|ឈឺបំពង់ក|ឈឺក្បាល|វិលមុខ|ក្អួត|ចង្អោរ|អាឡែរហ្ស៊ី|អាឡែស៊ី|ប្រកាន់|មានផ្ទៃពោះ|ស្ត្រីមានផ្ទៃពោះ|ចាញ់កូន|ក្រោយសម្រាល|ស្រវឹង|បន្សាបស្រវឹង|ឈឺថ្កាត់|រោគសញ្ញា|ថ្នាំពេទ្យ|លេបថ្នាំ|វេជ្ជបញ្ជា|ព្យាបាល|បំបាត់ជំងឺ|ការពារជំងឺ|ជាសះស្បើយ|ប៉ូវសុខភាព|វេជ្ជសាស្ត្រ|គ្រូពេទ្យ|វេជ្ជបណ្ឌិត|មន្ទីរពេទ្យ|គ្លីនិក|糖尿病|高血压|低血压|血压|胆固醇|高血脂|肾病|肾结石|心脏病|心血管|中风|癌症|肿瘤|胃痛|胃病|胃炎|胃溃疡|胃酸|消化不良|肚子痛|腹痛|腹泻|拉肚子|便秘|痛风|关节炎|哮喘|肺炎|肝炎|脂肪肝|贫血|偏头痛|头痛|头晕|失眠|过敏|宿醉|解酒|感冒|发烧|发热|咳嗽|喉咙痛|恶心|呕吐|生病|疾病|病症|症状|怀孕|孕妇|坐月子|吃药|药物|处方|胰岛素|抗生素|治疗|治愈|治病|偏方|食疗|养生治病|康复|恢复健康|医疗|医学|医生|大夫|医院|诊所/i;
 
+/** Cooking / dish context: organ words next to these are FOOD (e.g. "ឆាថ្លើមជ្រូក", "stir-fried pork liver"). */
+const COOKING_CONTEXT_RE =
+  /ឆា|ស្ល|ស្ងោរ|អាំង|ចៀន|បំពង|ញាំ|ម្ហូប|ឆ្ងាញ់|របៀបធ្វើ|រូបមន្ត|សាច់|ស៊ុប|recipe|cook|dish|soup|stir[\s-]*fr|fried|grilled|roast|braised|salad|curry|menu|restaurant|做法|食谱|炒|煮|烤|炸|汤|菜/i;
+
+/** Animal organ words that are ordinary ingredients in Khmer / Chinese cuisine. */
+const ORGAN_FOOD_RE =
+  /ថ្លើម|បេះដូង|សួត|ក្រលៀន|ពោះវៀន|\b(?:liver|kidneys?|hearts?|lungs?|tripe|gizzards?)\b|猪肝|猪腰|猪心|猪肺|猪肚|牛肝|牛肚|鸡肝|鸭肝|鸡心|鸡胗/gi;
+
+/** Words right BEFORE / AFTER an organ word that turn it into a health topic ("ឈឺថ្លើម", "fatty liver", "liver disease"). */
+const ORGAN_HEALTH_BEFORE_RE = /(?:ឈឺ|ជំងឺ|បញ្ហា|ព្យាបាល|ប៉ូវ|បំប៉ន|សុខភាព|ល្អ|fatty|healthy|detox|cleanse|weak|bad)\s*$/i;
+const ORGAN_HEALTH_AFTER_RE = /^\s*(?:disease|problem|pain|cancer|damage|health|failure|ជំងឺ|បញ្ហា|ឈឺ|សុខភាព)/i;
+
+const ANIMAL_BEFORE_ORGAN_RE =
+  /\b(?:pork|beef|chicken|duck|goat|lamb|calf|veal|ox|pig)\s+(?:liver|kidneys?|hearts?|lungs?|tripe|gizzards?)s?\b/gi;
+
+/** Allergy / intolerance wording used to ask which dishes or ingredients to AVOID is food selection, not medicine. */
+const ALLERGY_WORDS_RE =
+  /allerg(?:y|ies|ic|ens?)|intoleran(?:ce|t)|\blactose\b|\bceliac\b|\bgluten\b|អាឡែរហ្ស៊ី|អាឡែស៊ី|ប្រកាន់|过敏原?|乳糖|麸质|不耐受/gi;
+
+/** Nutrient fact words (not a disease): "how much cholesterol is in an egg?" is a nutrition question. */
+const NUTRIENT_FACT_WORDS_RE = /\bcholesterol\b|កូឡេស្តេរ៉ុល|ខ្លាញ់ក្នុងឈាម|胆固醇/gi;
+const NUTRIENT_QUESTION_CONTEXT_RE =
+  /how much|content|per\s*\d|amount|contain|compare|នៅក្នុង|មាន.{0,12}ប៉ុន្មាន|ប៉ុន្មាន|បរិមាណ|ប្រៀបធៀប|含量|多少|含有|对比|比较/i;
+
+/**
+ * Neutralise well-known false positives of the medical boundary so that genuine FOOD questions
+ * (organ dishes, "cured" meats, "sweet treats", allergen / cholesterol facts) are answered,
+ * while real disease / symptom / treatment questions are still refused.
+ */
+export function stripMedicalFalsePositives(clean: string): string {
+  let text = clean;
+  // "treat(s)" is overwhelmingly culinary ("a sweet treat"); "treatment/treating" stays medical.
+  text = text.replace(/\btreats?\b/gi, ' snack ');
+  // "salt-cured pork", "sun-cured fish", "cured ham"
+  text = text.replace(/\b(?:salt|sun|air|dry|smoke|smoked|home|house)?[-\s]?cured\b(?=\s+(?:meat|pork|fish|beef|ham|sausage|bacon|egg|duck|chicken|shrimp))/gi, ' dried ');
+  // Organ dishes: "pork liver" is always food; bare organ words are food only in a cooking context
+  // (and never when written as a health topic such as "ឈឺថ្លើម" / "fatty liver" / "liver disease").
+  // NOTE: no regex look-behind on purpose - older iOS WebViews throw a SyntaxError on it.
+  text = text.replace(ANIMAL_BEFORE_ORGAN_RE, ' offal ');
+  if (COOKING_CONTEXT_RE.test(text)) {
+    text = text.replace(ORGAN_FOOD_RE, (match: string, offset: number, whole: string) => {
+      const before = whole.slice(Math.max(0, offset - 10), offset);
+      const after = whole.slice(offset + match.length, offset + match.length + 12);
+      return ORGAN_HEALTH_BEFORE_RE.test(before) || ORGAN_HEALTH_AFTER_RE.test(after) ? match : ' offal ';
+    });
+  }
+  // Allergen / intolerance wording alone (no symptom, treatment, medicine, doctor words) is a dietary preference.
+  const withoutAllergy = text.replace(ALLERGY_WORDS_RE, ' dietary-restriction ');
+  if (withoutAllergy !== text && !MEDICAL_SCOPE_RE.test(withoutAllergy)) {
+    return withoutAllergy;
+  }
+  // Pure nutrient-fact question
+  if (NUTRIENT_QUESTION_CONTEXT_RE.test(text)) {
+    const withoutNutrient = text.replace(NUTRIENT_FACT_WORDS_RE, ' fat ');
+    if (withoutNutrient !== text && !MEDICAL_SCOPE_RE.test(withoutNutrient)) {
+      return withoutNutrient;
+    }
+  }
+  return text;
+}
+
 export function isMedicalOrHealthQuery(input: string): boolean {
   const clean = sanitizeCravingQuery(input);
   if (!clean) return false;
-  return MEDICAL_SCOPE_RE.test(clean);
+  if (!MEDICAL_SCOPE_RE.test(clean)) return false;
+  return MEDICAL_SCOPE_RE.test(stripMedicalFalsePositives(clean));
 }
 
 const ALLERGEN_LABEL: Record<AllergenId, T3> = {

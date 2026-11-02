@@ -8,6 +8,7 @@
  */
 
 import { normalizeKhmerFoodText } from './khmerFoodSearch';
+import { isQuestionOrCriteriaQuery } from './foodQueryClassifier';
 
 export interface UniversalDishTranslation {
   enName: string;
@@ -515,6 +516,53 @@ function isValidFoodImageUrl(rawUrl: unknown, pageTitle = ''): string | null {
   return cleanUrl;
 }
 
+const RELEVANCE_STOPWORDS = new Set([
+  'the', 'and', 'with', 'for', 'from', 'food', 'dish', 'dishes', 'cuisine', 'cambodian', 'khmer', 'cambodia',
+  'traditional', 'authentic', 'style', 'recipe', 'homemade', 'fresh', 'delicious', 'typical', 'local', 'popular',
+  'meal', 'photo', 'image', 'picture', 'cooked', 'served',
+]);
+
+/** Distinctive lower-case words of an English dish name ("Cambodian Steamed Fish Amok" -> steamed, fish, amok). */
+export function significantDishTokens(text: string): string[] {
+  return Array.from(
+    new Set(
+      (text || '')
+        .toLowerCase()
+        .replace(/\([^)]*\)/g, ' ')
+        .split(/[^a-z0-9]+/)
+        .filter((w) => w.length >= 3 && !RELEVANCE_STOPWORDS.has(w))
+        .map((w) => (w.endsWith('ies') ? `${w.slice(0, -3)}y` : w.endsWith('s') && !w.endsWith('ss') ? w.slice(0, -1) : w))
+    )
+  );
+}
+
+/** Words that turn a food name into a request / criteria sentence. */
+const NON_DISH_MODIFIERS = new Set(['low', 'less', 'high', 'more', 'without', 'free', 'healthy', 'healthier', 'best', 'good', 'better', 'cheap', 'quick', 'easy']);
+
+/** Words that name a *kind* of food, not a specific dish: a hit on them alone proves nothing. */
+const GENERIC_FOOD_TOKENS = new Set([
+  'fish', 'soup', 'rice', 'noodle', 'salad', 'curry', 'pork', 'beef', 'chicken', 'duck', 'egg', 'shrimp', 'prawn',
+  'crab', 'vegetable', 'stir', 'fried', 'grilled', 'steamed', 'boiled', 'roasted', 'sauce', 'stew', 'porridge',
+  'cake', 'dessert', 'sweet', 'spicy', 'sour', 'hot', 'low', 'high', 'less', 'more', 'mixed', 'fresh',
+]);
+
+/**
+ * A search hit is only used when its title / description really talks about the dish we asked for:
+ * every DISTINCTIVE word of the dish name (amok, bolognese, cockle...) must appear. If the name has only
+ * generic words ("fish soup") all of them must appear.
+ * Search engines always return *something* - without this check "low sugar soup" produced a photo of a pastry.
+ */
+export function isTitleRelevantToDish(queryEnglish: string, title: string, description = ''): boolean {
+  const wanted = significantDishTokens(queryEnglish);
+  if (wanted.length === 0) return false;
+  // "low sugar soup", "best healthy noodles"... describe a REQUEST, not a dish: no page can be a relevant photo for it.
+  if (wanted.some((t) => NON_DISH_MODIFIERS.has(t))) return false;
+  const haystack = `${title} ${description}`.toLowerCase();
+  const distinctive = wanted.filter((t) => !GENERIC_FOOD_TOKENS.has(t));
+  const mustHit = distinctive.length > 0 ? distinctive : wanted;
+  return mustHit.every((t) => haystack.includes(t));
+}
+
 function isSafeFoodWikiPage(title: string, description: string): boolean {
   const combined = `${title} ${description}`;
   if (NON_FOOD_WIKI_PAGE_RE.test(combined)) {
@@ -583,6 +631,13 @@ async function resolveViaNativeWikipediaAndOpenTranslate(
             const enLink = typeof p?.langlinks?.[0]?.['*'] === 'string' ? p.langlinks[0]['*'] : '';
             const desc = String(p?.description || '');
             if (!isSafeFoodWikiPage(`${title} ${enLink}`, desc)) continue;
+            // Full-text search is fuzzy: only trust a page whose TITLE is (almost) the phrase the user typed.
+            const compactTitle = normalizeKhmerFoodText(title) || title;
+            const titleMatches =
+              compactTitle === normalizedNative ||
+              compactTitle.includes(normalizedNative) ||
+              (compactTitle.length >= 3 && normalizedNative.includes(compactTitle) && compactTitle.length >= normalizedNative.length * 0.7);
+            if (!titleMatches) continue;
             const validImg = isValidFoodImageUrl(p?.thumbnail?.source, `${title} ${enLink}`);
             if (validImg || enLink) {
               return {
@@ -679,7 +734,11 @@ async function queryTheMealDb(term: string): Promise<string | null> {
   return null;
 }
 
-async function queryEnglishWikipediaPageImage(term: string, requireFoodSignal = false): Promise<string | null> {
+async function queryEnglishWikipediaPageImage(
+  term: string,
+  requireFoodSignal = false,
+  relevanceQuery?: string
+): Promise<string | null> {
   if (!term) return null;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 3000);
@@ -702,6 +761,9 @@ async function queryEnglishWikipediaPageImage(term: string, requireFoodSignal = 
         if (!isSafeFoodWikiPage(title, desc)) {
           continue;
         }
+        if (relevanceQuery && !isTitleRelevantToDish(relevanceQuery, title, desc)) {
+          continue;
+        }
         const valid = isValidFoodImageUrl(p?.thumbnail?.source, title);
         if (!valid) continue;
 
@@ -709,7 +771,7 @@ async function queryEnglishWikipediaPageImage(term: string, requireFoodSignal = 
         if (hasFoodSignal) {
           return valid;
         }
-        if (!requireFoodSignal && !fallbackNeutralImg) {
+        if (!requireFoodSignal && !relevanceQuery && !fallbackNeutralImg) {
           fallbackNeutralImg = valid;
         }
       }
@@ -721,7 +783,7 @@ async function queryEnglishWikipediaPageImage(term: string, requireFoodSignal = 
   return null;
 }
 
-async function queryWikimediaCommonsBitmap(term: string): Promise<string | null> {
+async function queryWikimediaCommonsBitmap(term: string, relevanceQuery?: string): Promise<string | null> {
   if (!term) return null;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 3200);
@@ -739,6 +801,7 @@ async function queryWikimediaCommonsBitmap(term: string): Promise<string | null>
       for (const p of pages) {
         const title = String(p?.title || '');
         if (NON_FOOD_WIKI_PAGE_RE.test(title)) continue;
+        if (relevanceQuery && !isTitleRelevantToDish(relevanceQuery, title.replace(/^File:/i, '').replace(/\.[a-z]{3,4}$/i, ''))) continue;
         const rawUrl = p?.imageinfo?.[0]?.thumburl || p?.imageinfo?.[0]?.url;
         const valid = isValidFoodImageUrl(rawUrl, title);
         if (valid) return valid;
@@ -758,6 +821,8 @@ export async function fetchUniversalDishPhotoFromOpenApis(dishQuery: string): Pr
   hydratePhotoCacheFromSession();
   const rawTrimmed = (dishQuery || '').replace(/[?？!！។«»"']/g, ' ').replace(/\s+/g, ' ').trim();
   if (!rawTrimmed) return null;
+  // A sentence / question / criteria phrase is not a dish: never go fishing for a "matching" photo.
+  if (isQuestionOrCriteriaQuery(rawTrimmed)) return null;
 
   const normKey = normalizeKhmerFoodText(rawTrimmed) || rawTrimmed.toLowerCase();
   const existingHit = getCachedUniversalDishPhoto(rawTrimmed);
@@ -792,12 +857,14 @@ export async function fetchUniversalDishPhotoFromOpenApis(dishQuery: string): Pr
 
     // Require explicit food/culinary Wikidata description when searching free-form translated queries
     const requireStrictFoodWiki = !translated.hasLexiconMatch;
+    // Free-form (non-curated) dishes must prove relevance: the hit's title has to mention the dish itself.
+    const relevanceQuery = !translated.hasLexiconMatch ? primarySearchTerm : undefined;
 
     // 1. Try TheMealDB + Curated Commons Dish Query + English Wikipedia Food-Verified Lead Image in parallel!
     const [mealDbPhoto, preferredCommonsPhoto, enWikiPhoto] = await Promise.all([
       mealDbTerm ? queryTheMealDb(mealDbTerm) : Promise.resolve(null),
-      preferredCommonsTerm ? queryWikimediaCommonsBitmap(preferredCommonsTerm) : Promise.resolve(null),
-      queryEnglishWikipediaPageImage(primarySearchTerm, requireStrictFoodWiki),
+      preferredCommonsTerm ? queryWikimediaCommonsBitmap(preferredCommonsTerm, relevanceQuery) : Promise.resolve(null),
+      queryEnglishWikipediaPageImage(primarySearchTerm, requireStrictFoodWiki, relevanceQuery),
     ]);
 
     const fastWinner = mealDbPhoto || preferredCommonsPhoto || enWikiPhoto;
@@ -831,19 +898,18 @@ export async function fetchUniversalDishPhotoFromOpenApis(dishQuery: string): Pr
           lastTwoWords,
           coreNoun.length >= 3 ? coreNoun : '',
           translated.fallbackWikiQuery || '',
-          tailNoun ? `${tailNoun} food` : '',
-          tailNoun,
+          ...(relevanceQuery ? [] : [tailNoun ? `${tailNoun} food` : '', tailNoun]),
         ].filter(Boolean)
       )
     );
 
     for (const q of candidates) {
-      const wikiFoodRetry = await queryEnglishWikipediaPageImage(q, true);
+      const wikiFoodRetry = await queryEnglishWikipediaPageImage(q, true, relevanceQuery);
       if (wikiFoodRetry) {
         persistPhotoCacheToSession(cacheKeysToSave, wikiFoodRetry);
         return wikiFoodRetry;
       }
-      const commonsHit = await queryWikimediaCommonsBitmap(q);
+      const commonsHit = await queryWikimediaCommonsBitmap(q, relevanceQuery);
       if (commonsHit) {
         persistPhotoCacheToSession(cacheKeysToSave, commonsHit);
         return commonsHit;
@@ -857,4 +923,57 @@ export async function fetchUniversalDishPhotoFromOpenApis(dishQuery: string): Pr
 
   inFlightPhotoRequests.set(normKey, task);
   return task;
+}
+
+/**
+ * Looks up a photo for a dish whose ENGLISH name is already known (e.g. named by the AI assistant).
+ * Returns a photo only when its title/description really mentions the dish - otherwise `null`
+ * (the UI then shows a neutral placeholder instead of a look-alike or unrelated picture).
+ */
+export async function fetchVerifiedDishPhotoByEnglishName(englishName: string): Promise<string | null> {
+  hydratePhotoCacheFromSession();
+  const name = (englishName || '').replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
+  if (name.length < 3 || significantDishTokens(name).length === 0) return null;
+  const cacheKey = `verified:${name.toLowerCase()}`;
+  const cached = memoryPhotoCache.get(cacheKey);
+  if (cached) return cached;
+  if (inFlightPhotoRequests.has(cacheKey)) return inFlightPhotoRequests.get(cacheKey)!;
+
+  const task = (async (): Promise<string | null> => {
+    const [mealDb, wiki, commons] = await Promise.all([
+      queryTheMealDbVerified(name),
+      queryEnglishWikipediaPageImage(name, true, name),
+      queryWikimediaCommonsBitmap(`${name} dish`, name),
+    ]);
+    const hit = mealDb || wiki || commons;
+    if (hit) persistPhotoCacheToSession([cacheKey], hit);
+    return hit || null;
+  })().finally(() => {
+    inFlightPhotoRequests.delete(cacheKey);
+  });
+  inFlightPhotoRequests.set(cacheKey, task);
+  return task;
+}
+
+/** TheMealDB search whose returned MEAL NAME must also match the dish asked for. */
+async function queryTheMealDbVerified(term: string): Promise<string | null> {
+  if (!term || !/[A-Za-z]/.test(term)) return null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 2800);
+  try {
+    const res = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(term)}`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    const data = await res.json();
+    for (const meal of (Array.isArray(data?.meals) ? data.meals : []) as any[]) {
+      if (isTitleRelevantToDish(term, String(meal?.strMeal || '')) && typeof meal?.strMealThumb === 'string') {
+        return meal.strMealThumb;
+      }
+    }
+  } catch {
+    clearTimeout(timer);
+  }
+  return null;
 }
