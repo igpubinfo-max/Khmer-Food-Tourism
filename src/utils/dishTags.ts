@@ -100,8 +100,8 @@ export const TAG_KEYWORD_RULES = {
   fishSauce: ['fish sauce', 'prahok', 'shrimp paste', 'fermented fish', 'ទឹកត្រី', 'ប្រហុក', 'កាពិ'],
   nonVegetarian: [
     'pork', 'beef', 'chicken', 'duck', 'fish', 'shrimp', 'prawn', 'crab', 'squid', 'frog', 'eel', 'liver',
-    'meat', 'clam', 'mussel', 'snail', 'oyster sauce', 'fish sauce', 'prahok', 'shrimp paste', 'bacon', 'sausage',
-    'សាច់', 'ត្រី', 'បង្គា', 'ក្តាម', 'មឹក', 'កង្កែប', 'ប្រហុក', 'កាពិ', 'ទឹកត្រី',
+    'meat', 'clam', 'mussel', 'snail', 'cockle', 'tripe', 'offal', 'pig', 'oyster sauce', 'fish sauce', 'prahok', 'shrimp paste', 'bacon', 'sausage',
+    'សាច់', 'ជ្រូក', 'គោ', 'មាន់', 'ទា', 'ត្រី', 'បង្គា', 'បង្កង', 'ក្តាម', 'ក្ដាម', 'មឹក', 'ងាវ', 'លៀស', 'គ្រំ', 'ខ្យង', 'កង្កែប', 'អន្ទង់', 'កំពិស', 'ផ្អក', 'ប្រហុក', 'កាពិ', 'ទឹកត្រី',
   ],
   spicy: ['chili', 'chilli', 'ម្ទេស'],
 } as const;
@@ -112,51 +112,116 @@ const cache = new Map<string, DishTagId[]>();
 
 /** All tags derived from the recipe (unordered priority applied). */
 export function getDishTagIds(food: FoodItem): DishTagId[] {
-  const key = `${food.id}|${food.nameKh || ''}|${food.categorySlug || ''}|${food.calories ?? ''}|${food.ingredients?.length ?? 0}|${food.steps?.length ?? 0}`;
+  const key = `v2|${food.id}|${food.nameKh || ''}|${food.nameEn || ''}|${food.categorySlug || ''}|${food.calories ?? ''}|${food.ingredients?.length ?? 0}|${food.steps?.length ?? 0}`;
   const hit = cache.get(key);
   if (hit) return hit;
 
   const ingredients = food.ingredients || [];
   const ingNames = ingredients.map((i) => `${(i.nameEn || '').toLowerCase()} ${i.nameKh || ''}`);
   const ingText = ingNames.join(' | ');
-  const stepsText = (food.steps || [])
-    .map((s) => `${s.instructionEn || ''} ${s.instructionKh || ''}`)
-    .join(' ')
-    .toLowerCase();
-  const nameText = `${food.nameEn || ''} ${food.nameKh || ''}`.toLowerCase();
-  // Stir-fry is a quick pan method: do not count it as "deep fried"; also ignore roasted peanuts/rice/sesame in salads
-  const methodText = `${nameText} ${stepsText}`
-    .replace(/stir-?\s?fr(y|ied)/g, '')
-    .replace(/អង្ករលីង|សណ្តែកដីលីង|សណ្ដែកដីលីង|ល្ងលីង|ដូងលីង|គ្រាប់ស្វាយចន្ទីលីង|ម្ទេសឆ្អើរ|ត្រីឆ្អើរ|roasted\s+peanut\w*|toasted\s+peanut\w*|roasted\s+rice|toasted\s+rice|roasted\s+sesame|toasted\s+sesame|toasted\s+coconut|roasted\s+cashew\w*|toasted\s+cashew\w*|roasted\s+chili\w*|dried\s+chili\w*/gi, ' ');
+
+  const titleKh = (food.nameKh || '').trim();
+  const titleEn = (food.nameEn || '').trim().toLowerCase();
+  const nameText = `${titleEn} ${titleKh}`.toLowerCase();
+  // Strip chive-cake words ("គូឆាយ" / "កាឆាយ") before checking Khmer stir-fry token "ឆា"
+  const titleKhForStirFry = titleKh.replace(/គូឆាយ|កាឆាយ|កចាយ/g, ' ');
 
   const tags = new Set<DishTagId>();
   const isDrink = food.categorySlug === 'drink';
   const isSavoryCake =
     food.categorySlug === 'cake' &&
-    /បាញ់ឆែវ|បាញ់ហយ|នំប៉័ង|គួង|ណែម|គូឆាយ|កចាយ|អន្សមជ្រូក/i.test(food.nameKh || '');
+    /បាញ់ឆែវ|បាញ់ហយ|នំប៉័ង|គួង|ណែម|គូឆាយ|កាឆាយ|កចាយ|អន្សមជ្រូក|អន្សមចៀន/i.test(titleKh);
   const isSweetOrDrink =
     isDrink ||
     food.categorySlug === 'dessert' ||
     (food.categorySlug === 'cake' && !isSavoryCake) ||
-    includesAny(nameText, TAG_KEYWORD_RULES.sweet);
+    includesAny(nameText, TAG_KEYWORD_RULES.sweet) ||
+    /បង្អែម|សង់ខ្យា|បាយដំណើបស្វាយ|បាយដំណើបធុរេន|បាយដំណើបសង់ខ្យា|អន្សមចេក|ចេកខ្ទិះ|ចេកចៀន/i.test(titleKh);
 
-  const isFried = includesAny(methodText, TAG_KEYWORD_RULES.fried);
-  if (!isDrink && typeof food.calories === 'number' && food.calories > 0 && food.calories <= 450 && !isFried) {
+  // Primary dish cooking-style classification from dish title & category (prevents incidental prep steps like "ដាំខ្ទះ" or "ស្ងោរពងទា" from misclassifying ឆា/ខ/ទឹកគ្រឿង)
+  const isDryTossedNoodle = /មីកូឡា|មីគោក/i.test(titleKh);
+  const isExplicitlySteamedOrBoiledTitle =
+    !isDryTossedNoodle &&
+    (/ចំហុយ|អាម៉ុក|ស្ងោរ|ស្រុះ|ពោះគោទឹកប្រហុក/i.test(titleKh) ||
+      /\bsteamed\b(?!\s+(?:jasmine\s+|white\s+|fragrant\s+)?rice\b)|\bpoached\b|\bamok\b/i.test(titleEn));
+
+  const isBraisedKhoDish =
+    !/ស្ងោរ|ចំហុយ/i.test(titleKh) &&
+    (/(?:^|\s|គុយទាវ|បាយ|មី)ខ(?:សាច់|ត្រី|ជើង|ពង|មាន់|ទា|ពោះ|ឆ្អឹង|បង្កង|គោ|ប្រហុក)/i.test(titleKh) ||
+      /\bkhor\b|\bcaramelized\b|\bbraised\s+(?:pork|beef|mekong\s+fish|duck|spiced\s+beef)/i.test(titleEn));
+
+  const isStirFriedDish =
+    !isBraisedKhoDish &&
+    (food.categorySlug === 'stirfry' ||
+      /ឆា|លីង|ឡុកឡាក់/i.test(titleKhForStirFry) ||
+      /\bstir[\s-]*fr|\bwok[\s-]*(?:fried|seared|fired|tossed|baked|roasted|braised)|\blok\s*lak\b|\bfried\s+rice\b|\bfried\s+(?:egg\s+|flat\s+rice\s+)?noodle/i.test(
+        titleEn
+      ));
+
+  const isFried =
+    /បំពង|ចៀន|បាញ់ឆែវ/i.test(titleKh) ||
+    /\bdeep[\s-]*fr|\bpan[\s-]*fr|\bcrispy\s+(?:fried|turmeric|deep|shredded)/i.test(titleEn);
+
+  const isGrilled =
+    !isSweetOrDrink &&
+    (!isFried || /អាំង|ដុត/i.test(titleKh)) &&
+    (food.categorySlug === 'grilled' ||
+      /អាំង|ដុត|សាច់ក្រក|គោងៀត|ងៀតគោ|ត្រីងៀត(?!ឆា)|លៀសហាល/i.test(titleKh) ||
+      /\bgrilled\b|\bcharcoal[\s-]*grilled\b|\bcharcoal[\s-]*roasted\b|\broasted\s+(?:herbal\s+chicken|chicken|pork|duck)\b|\bbbq\b|\bbarbecue\b/i.test(
+        titleEn
+      ));
+
+  const isRichCoconutCurry =
+    !/អាម៉ុក|\bamok\b/i.test(nameText) &&
+    (/ការី|ណាំយ៉ា|សម្លខ្ទិះ|ប្រហុកខ្ទិះ/i.test(titleKh) ||
+      /\bred\s+(?:chicken\s+|nam\s+ya\s+)?(?:coconut\s+)?curry\b|\bnam\s*ya\b|\bsamlor\s+ktis\b/i.test(titleEn));
+
+  const isColdSaladOrDipOrDryNoodle =
+    !isExplicitlySteamedOrBoiledTitle &&
+    (food.categorySlug === 'salad' ||
+      /^(?:ញាំ|ភ្លា|បុក|ទឹកគ្រឿង|ប្រហុក|កាពិ|ជ្រក់|គួង|នំប៉័ង)|ទឹកគ្រឿង|ប្រហុកខ្ទិះ|ទឹកប្រហុក|មីគោក|មីកូឡា/i.test(
+        titleKh
+      ));
+
+  const isClearBrothSoupOrCongee =
+    (food.categorySlug === 'soup' && !isBraisedKhoDish && !isRichCoconutCurry) ||
+    (/ស៊ុប|សម្លប្រហើរ|សម្លម្ជូរ|សម្លកកូរ|បបរ|គុយទាវ(?!ឆា|ខ)|មីសួរ(?!ឆា)|បាញ់កាញ់|ពងទាកូន|អន្សមជ្រូក/i.test(titleKh) &&
+      !isStirFriedDish &&
+      !isBraisedKhoDish &&
+      !isRichCoconutCurry &&
+      !isFried);
+
+  const isSteamedOrBoiled =
+    !isSweetOrDrink &&
+    !isStirFriedDish &&
+    !isBraisedKhoDish &&
+    !isFried &&
+    !isGrilled &&
+    !isRichCoconutCurry &&
+    !isColdSaladOrDipOrDryNoodle &&
+    (isExplicitlySteamedOrBoiledTitle || isClearBrothSoupOrCongee);
+
+  if (
+    !isSweetOrDrink &&
+    typeof food.calories === 'number' &&
+    food.calories > 0 &&
+    food.calories <= 450 &&
+    !isFried &&
+    !isBraisedKhoDish &&
+    !isRichCoconutCurry
+  ) {
     tags.add('light');
   }
 
-  const isGrilled = food.categorySlug === 'grilled' || includesAny(methodText, TAG_KEYWORD_RULES.grilled);
-  if (isGrilled && !isDrink) tags.add('grilled');
-  if (!isDrink && (includesAny(methodText, TAG_KEYWORD_RULES.steamedBoiled) || food.categorySlug === 'soup')) {
-    tags.add('steamed_boiled');
-  }
+  if (isGrilled) tags.add('grilled');
+  if (isSteamedOrBoiled) tags.add('steamed_boiled');
   if (isFried) tags.add('fried');
 
   const stripNotMeat = (s: string) => TAG_KEYWORD_RULES.notMeat.reduce((acc, w) => acc.split(w).join(' '), s);
 
   const vegCount = ingNames.filter((n) => includesAny(n, TAG_KEYWORD_RULES.vegetables)).length;
   const vegByName = !isSweetOrDrink && (food.categorySlug === 'salad' || includesAny(nameText, TAG_KEYWORD_RULES.vegetableDishName));
-  if (!isSweetOrDrink && (vegCount >= 2 || vegByName)) tags.add('vegetable_rich');
+  if (!isSweetOrDrink && !isFried && (vegCount >= 2 || vegByName)) tags.add('vegetable_rich');
 
   // Main dishes only: desserts / drinks / sweet snacks never count as protein dishes
   const hasMainProtein = !isSweetOrDrink && ingNames.some(
@@ -167,12 +232,19 @@ export function getDishTagIds(food: FoodItem): DishTagId[] {
   );
   if (hasMainProtein) tags.add('protein_rich');
 
-  // Plant-based, or only animal ingredient is a swappable condiment (fish sauce / prahok / paste)
-  const hasMeatIngredient = ingNames.some((n) => {
-    const s = stripNotMeat(n);
-    return includesAny(s, TAG_KEYWORD_RULES.nonVegetarian) && !includesAny(s, TAG_KEYWORD_RULES.swappable);
-  });
-  if (ingredients.length > 0 && !hasMeatIngredient) tags.add('vegetarian_friendly');
+  // Plant-based savory dishes/snacks, or only animal ingredient is a swappable condiment (fish sauce / prahok / paste)
+  const cleanTitleForVeg = stripNotMeat(nameText).replace(/ទឹកដោះគោ|ប្រេងខ្យង|oyster\s+sauce|condensed\s+milk/gi, ' ');
+  const hasMeatInTitle =
+    /សាច់|ជ្រូក|គោ(?!ល)|មាន់|ទា(?!ញ)|ត្រី|បង្គា|បង្កង|ក្តាម|ក្ដាម|មឹក|ងាវ|លៀស|គ្រំ|ខ្យង|កង្កែប|អន្ទង់|កំពិស|ផ្អក|ទឹកគ្រឿង|ប្រហុកខ្ទិះ|\bpork\b|\bbeef\b|\bchicken\b|\bduck\b|\bfish\b|\bprawn\b|\bshrimp\b|\bcrab\b|\bsquid\b|\bcockle\b|\bclam\b|\bsnail\b|\bfrog\b|\beel\b|\bpig\b/i.test(
+      cleanTitleForVeg
+    );
+  const hasMeatIngredient =
+    hasMeatInTitle ||
+    ingNames.some((n) => {
+      const s = stripNotMeat(n);
+      return includesAny(s, TAG_KEYWORD_RULES.nonVegetarian) && !includesAny(s, TAG_KEYWORD_RULES.swappable);
+    });
+  if (!isDrink && ingredients.length > 0 && !hasMeatIngredient) tags.add('vegetarian_friendly');
 
   const cleanSpicyIngText = ingText.replace(/ម្ទេសប្លោក|bell\s+pepper\w*|sweet\s+pepper\w*/gi, ' ');
   if (!isSweetOrDrink && (getSpicyDishScore(food) > 0 || includesAny(cleanSpicyIngText, TAG_KEYWORD_RULES.spicy))) {

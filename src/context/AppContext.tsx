@@ -19,6 +19,9 @@ import {
   AuthModalInitialView, hasAuthenticatedEmailAccount, computeFastPhotoSignature,
   APP_VERSION_NAME, APP_BUILD_CODE,
   deduplicateFoodItems,
+  resolveUserActualVipPlanDays,
+  sanitizeUserVipPlanAndExpiry,
+  isDeprecatedDemoSeedTransaction,
   type ShopPhotoReplacementRequest,
 } from '../types';
 import {
@@ -835,11 +838,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             localStorage.removeItem('kft_current_user_v5');
             return null;
           }
-          let sanitizedCur = sanitizeUserSocialAccounts(parsed);
+          let sanitizedCur = sanitizeUserVipPlanAndExpiry(sanitizeUserSocialAccounts(parsed));
           const matchedFromUsers = users.find(u => doesUserMatchTarget(u, sanitizedCur));
           if (matchedFromUsers) {
-            sanitizedCur =
-              deduplicateAndNormalizeUsers([matchedFromUsers, sanitizedCur], localDeleted)[0] || matchedFromUsers;
+            sanitizedCur = sanitizeUserVipPlanAndExpiry(
+              deduplicateAndNormalizeUsers([matchedFromUsers, sanitizedCur], localDeleted)[0] || matchedFromUsers
+            );
           }
           const authVip = findLocalAuthoritativeVipEntitlement(sanitizedCur, users);
           const authVipExpMs = authVip ? (authVip.expiryMs || parseSafeDateMs(authVip.expiryIso)) : 0;
@@ -1479,7 +1483,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem('kft_transactions_v4');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          const cleaned = parsed.filter(
+            (t: RegistrationTransaction) => t && t.id && !isDeprecatedDemoSeedTransaction(t)
+          );
+          if (cleaned.length !== parsed.length) {
+            try {
+              localStorage.setItem('kft_transactions_v4', JSON.stringify(cleaned));
+            } catch {}
+          }
+          return cleaned;
+        }
       }
     } catch (e) {
       console.warn('Failed to parse kft_transactions_v4', e);
@@ -1675,15 +1689,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [bookmarks, setBookmarks] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('kft_bookmarks_v4') || localStorage.getItem('kft_bookmarks_v3');
-      if (saved && saved !== 'undefined' && saved !== 'null') {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+      const savedV5 = localStorage.getItem('kft_bookmarks_v5');
+      if (savedV5 && savedV5 !== 'undefined' && savedV5 !== 'null') {
+        const parsedV5 = JSON.parse(savedV5);
+        if (Array.isArray(parsedV5)) return parsedV5;
       }
+      // One-time migration from legacy v4/v3: strip the old auto-populated ['food-1', 'dest-1'] defaults while preserving any real user-saved items
+      const legacySaved = localStorage.getItem('kft_bookmarks_v4') || localStorage.getItem('kft_bookmarks_v3');
+      localStorage.removeItem('kft_bookmarks_v4');
+      localStorage.removeItem('kft_bookmarks_v3');
+      if (legacySaved && legacySaved !== 'undefined' && legacySaved !== 'null') {
+        const parsedLegacy = JSON.parse(legacySaved);
+        if (Array.isArray(parsedLegacy)) {
+          const migrated = parsedLegacy.filter(
+            (id): id is string => typeof id === 'string' && id !== 'food-1' && id !== 'dest-1'
+          );
+          localStorage.setItem('kft_bookmarks_v5', JSON.stringify(migrated));
+          return migrated;
+        }
+      }
+      localStorage.setItem('kft_bookmarks_v5', '[]');
     } catch (e) {
       console.warn('Failed to parse kft_bookmarks', e);
     }
-    return ['food-1', 'dest-1'];
+    return [];
   });
 
   const [appSettings, setAppSettings] = useState<AppSettings>(() => {
@@ -2121,7 +2150,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     scheduleStorageWrite('kft_ai_checkins_v1', aiCheckIns, 1000);
   }, [aiCheckIns]);
 
-  // Personalized Wishlists
+  // Personalized Wishlists (start empty — never pre-fill fake auto-favorites)
   const defaultWishlistsTemplate: Wishlist[] = [
     {
       id: 'wl-default-1',
@@ -2130,19 +2159,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       nameEn: 'Restaurants to Try',
       emoji: '🍽️',
       isDefault: true,
-      items: [
-        {
-          id: 'rest-1',
-          type: 'restaurant',
-          nameKh: 'ភោជនីយដ្ឋាន ម៉ាលីស (Malis)',
-          nameEn: 'Malis Restaurant',
-          photoUrl: '/Shop/rest-1.jpg',
-          categoryKh: 'ម្ហូបខ្មែរបុរាណប្រណិត',
-          provinceKh: 'រាជធានីភ្នំពេញ',
-          rating: 4.9,
-          addedAt: '2026-10-21',
-        },
-      ],
+      items: [],
       createdAt: '2026-10-21',
     },
     {
@@ -2152,19 +2169,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       nameEn: 'Family Trip Spots',
       emoji: '👨‍👩‍👧‍👦',
       isDefault: true,
-      items: [
-        {
-          id: 'dest-9',
-          type: 'destination',
-          nameKh: 'ប្រាសាទអង្គរវត្ត (បេតិកភណ្ឌពិភពលោក)',
-          nameEn: 'Angkor Wat Temple',
-          photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Angkor_Wat.jpg/960px-Angkor_Wat.jpg',
-          categoryKh: 'ប្រាសាទបុរាណ / បេតិកភណ្ឌ',
-          provinceKh: 'ខេត្តសៀមរាប',
-          rating: 5.0,
-          addedAt: '2026-10-21',
-        },
-      ],
+      items: [],
       createdAt: '2026-10-21',
     },
     {
@@ -2174,30 +2179,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       nameEn: 'Sunday Hangouts',
       emoji: '☀️',
       isDefault: true,
-      items: [
-        {
-          id: 'dest-29',
-          type: 'destination',
-          nameKh: 'ឧទ្យានជាតិព្រះមុនីវង្សបូកគោ',
-          nameEn: 'Preah Monivong Bokor National Park',
-          photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Waterfall_Bokor_Hill_Station.jpg/960px-Waterfall_Bokor_Hill_Station.jpg',
-          categoryKh: 'ភ្នំ & ឧទ្យានជាតិ',
-          provinceKh: 'ខេត្តកំពត',
-          rating: 4.8,
-          addedAt: '2026-10-21',
-        },
-      ],
+      items: [],
       createdAt: '2026-10-21',
     },
   ];
 
   const [wishlists, setWishlists] = useState<Wishlist[]>(() => {
     try {
-      const storageKey = `kft_wishlists_v3_${currentUser?.id || 'guest'}`;
-      const saved = localStorage.getItem(storageKey);
-      if (saved && saved !== 'undefined' && saved !== 'null') {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      const uid = currentUser?.id || 'guest';
+      const v4Key = `kft_wishlists_v4_${uid}`;
+      const savedV4 = localStorage.getItem(v4Key);
+      if (savedV4 && savedV4 !== 'undefined' && savedV4 !== 'null') {
+        const parsedV4 = JSON.parse(savedV4);
+        if (Array.isArray(parsedV4) && parsedV4.length > 0) return parsedV4;
+      }
+      // Migrate from v3 while stripping the 3 legacy pre-seeded 2026-10-21 demo items (rest-1, dest-9, dest-29)
+      const v3Key = `kft_wishlists_v3_${uid}`;
+      const savedV3 = localStorage.getItem(v3Key);
+      localStorage.removeItem(v3Key);
+      if (savedV3 && savedV3 !== 'undefined' && savedV3 !== 'null') {
+        const parsedV3 = JSON.parse(savedV3);
+        if (Array.isArray(parsedV3) && parsedV3.length > 0) {
+          const legacyAutoIds = new Set(['rest-1', 'dest-9', 'dest-29']);
+          const migrated: Wishlist[] = parsedV3.map((w: Wishlist) => ({
+            ...w,
+            items: Array.isArray(w.items)
+              ? w.items.filter(
+                  (it) => !(it && it.addedAt === '2026-10-21' && legacyAutoIds.has(it.id))
+                )
+              : [],
+          }));
+          localStorage.setItem(v4Key, JSON.stringify(migrated));
+          return migrated;
+        }
       }
     } catch (e) {
       console.warn('Failed to parse wishlists', e);
@@ -2291,7 +2305,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isInitialAuxMountRef.current.wishlists = false;
       return;
     }
-    const storageKey = `kft_wishlists_v3_${currentUser?.id || 'guest'}`;
+    const storageKey = `kft_wishlists_v4_${currentUser?.id || 'guest'}`;
     scheduleStorageWrite(storageKey, wishlists, 800);
   }, [wishlists, currentUser]);
 
@@ -2821,8 +2835,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const newNotificationsToPush: AppNotification[] = [];
       const expiredUserIds = new Set<string>();
 
-      const evaluateAccount = (u: User): { updatedUser: User; changed: boolean } => {
-        if (!u || isAdminAccount(u)) return { updatedUser: u, changed: false };
+      const evaluateAccount = (rawAccount: User): { updatedUser: User; changed: boolean } => {
+        if (!rawAccount || isAdminAccount(rawAccount)) return { updatedUser: rawAccount, changed: false };
+
+        const u = sanitizeUserVipPlanAndExpiry(rawAccount);
+        const sanitizedChanged =
+          u.subscriptionExpiryDate !== rawAccount.subscriptionExpiryDate ||
+          u.vipPlanDays !== rawAccount.vipPlanDays;
 
         const expiryStr = u.subscriptionExpiryDate || u.vipExpiresAt;
         const expiryMs = parseSafeDateMs(expiryStr);
@@ -2951,7 +2970,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
         }
 
-        return { updatedUser: u, changed: false };
+        return {
+          updatedUser: sanitizedChanged ? { ...u, integritySeal: computeUserIntegritySealSync(u) } : u,
+          changed: sanitizedChanged,
+        };
       };
 
       // 1. Check currentUser first
@@ -3121,7 +3143,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (bookmarks) {
-        localStorage.setItem('kft_bookmarks_v4', JSON.stringify(bookmarks));
+        localStorage.setItem('kft_bookmarks_v5', JSON.stringify(bookmarks));
       }
     } catch (e) {
       console.warn('Storage sync failed for bookmarks:', e);
@@ -3500,16 +3522,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
           }
         }
+        const sanitizedMergedTxns = result.mergedTransactions.filter(
+          (t) => t && t.id && !isDeprecatedDemoSeedTransaction(t)
+        );
         setTransactions(prev => {
-          if (prev.length === result.mergedTransactions.length && JSON.stringify(prev) === JSON.stringify(result.mergedTransactions)) {
+          if (prev.length === sanitizedMergedTxns.length && JSON.stringify(prev) === JSON.stringify(sanitizedMergedTxns)) {
             return prev;
           }
           skipNextTransactionsCloudPushRef.current = true;
-          latestSyncStateRef.current.transactions = result.mergedTransactions;
+          latestSyncStateRef.current.transactions = sanitizedMergedTxns;
           try {
-            localStorage.setItem('kft_transactions_v4', JSON.stringify(result.mergedTransactions));
+            localStorage.setItem('kft_transactions_v4', JSON.stringify(sanitizedMergedTxns));
           } catch {}
-          return result.mergedTransactions;
+          return sanitizedMergedTxns;
         });
         const mergedTickets = (result as any).mergedSupportTickets;
         if (Array.isArray(mergedTickets)) {
@@ -4113,7 +4138,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!exists) recordMeaningfulAction('favorite');
       const updated = exists ? prev.filter(item => item !== id) : [...prev, id];
       try {
-        localStorage.setItem('kft_bookmarks_v4', JSON.stringify(updated));
+        localStorage.setItem('kft_bookmarks_v5', JSON.stringify(updated));
       } catch {}
       showToast(
         exists 
@@ -4465,6 +4490,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     targetPhone?: string;
     startDate: string;
     expiryDate: string;
+    durationDays?: number;
+    planType?: string;
     paymentMethod?: User['paymentMethod'];
     transactionRef?: string;
   }): User => {
@@ -4474,13 +4501,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const cleanEmail = (params.targetEmail || '').trim().toLowerCase();
     const cleanId = (params.targetId || '').trim();
 
-    const existing = liveUsers.find(u =>
+    const rawExisting = liveUsers.find(u =>
       doesUserMatchTarget(u, {
         id: cleanId || undefined,
         email: cleanEmail || undefined,
         phone: params.targetPhone,
       })
     );
+    const existing = rawExisting ? sanitizeUserVipPlanAndExpiry(rawExisting) : undefined;
 
     const resolvedEmail =
       existing?.email ||
@@ -4500,9 +4528,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (existing?.id && existing.id !== canonicalId) legacySet.add(existing.id);
 
     const startMs = parseSafeDateMs(params.startDate) || Date.now();
-    const expMs = parseSafeDateMs(params.expiryDate) || Date.now() + 30 * 24 * 60 * 60 * 1000;
+    const expMs = parseSafeDateMs(params.expiryDate) || Date.now() + (params.durationDays || 30) * 24 * 60 * 60 * 1000;
     const cleanStartIso = new Date(startMs).toISOString();
     const cleanExpiryIso = new Date(expMs).toISOString();
+    const resolvedPlanDays =
+      typeof params.durationDays === 'number' && params.durationDays >= 1
+        ? Math.round(params.durationDays)
+        : Math.max(1, Math.round((expMs - startMs) / (1000 * 60 * 60 * 24)));
+    const resolvedPlanType =
+      params.planType ||
+      (resolvedPlanDays <= 35 ? 'quarterly' : 'annual');
 
     const approvedUser: User = {
       ...(existing || {
@@ -4526,6 +4561,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       subscriptionStartDate: cleanStartIso,
       subscriptionExpiryDate: cleanExpiryIso,
       vipStatus: 'active',
+      vipPlanDays: resolvedPlanDays,
+      vipPlanType: resolvedPlanType,
       vipExpiresAt: cleanExpiryIso,
       vipCancelledAt: undefined,
       subscriptionStatus: 'active',
@@ -4548,7 +4585,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const finalApproved: User = {
       ...finalApprovedRaw,
       vipStatus: 'active',
-      vipExpiresAt: finalApprovedRaw.subscriptionExpiryDate || cleanExpiryIso,
+      vipPlanDays: resolvedPlanDays,
+      vipPlanType: resolvedPlanType,
+      subscriptionExpiryDate: cleanExpiryIso,
+      vipExpiresAt: cleanExpiryIso,
       vipCancelledAt: undefined,
     };
     finalApproved.integritySeal = computeUserIntegritySealSync(finalApproved);
@@ -4568,9 +4608,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ...finalApproved,
         membershipTier: 'premium_vip',
         subscriptionStartDate: finalApproved.subscriptionStartDate,
-        subscriptionExpiryDate: finalApproved.subscriptionExpiryDate,
+        subscriptionExpiryDate: cleanExpiryIso,
         vipStatus: 'active',
-        vipExpiresAt: finalApproved.subscriptionExpiryDate,
+        vipPlanDays: resolvedPlanDays,
+        vipPlanType: resolvedPlanType,
+        vipExpiresAt: cleanExpiryIso,
         vipCancelledAt: undefined,
         subscriptionStatus: 'active',
         paymentStatus: 'verified',
@@ -4658,6 +4700,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       appSettingsRef.current
     );
     const txnRef = `ADMIN-VIP-${validDays}D-${Date.now().toString(36).toUpperCase()}`;
+    const resolvedPlan = resolveAndValidateVipPlan({ durationDays: validDays }, appSettingsRef.current);
     const approved = persistApprovedVipUserAndCloud({
       targetId: targetUser.id,
       targetEmail: targetUser.email,
@@ -4665,11 +4708,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       targetPhone: targetUser.phone,
       startDate,
       expiryDate,
+      durationDays: validDays,
+      planType: resolvedPlan.id,
       paymentMethod: 'KHQR',
       transactionRef: txnRef,
     });
-
-    const resolvedPlan = resolveAndValidateVipPlan({ durationDays: validDays }, appSettingsRef.current);
     const adminTxn: RegistrationTransaction = {
       id: `TXN-VIP-ADM-${Date.now().toString(36).toUpperCase()}`,
       type: 'user_vip_upgrade',
@@ -5211,6 +5254,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // 8. Remove user's local wishlists & trip plans
     try {
       for (const tid of allTargetIds) {
+        localStorage.removeItem(`kft_wishlists_v4_${tid}`);
         localStorage.removeItem(`kft_wishlists_v3_${tid}`);
         localStorage.removeItem(`kft_wishlists_v2_${tid}`);
         localStorage.removeItem(`kft_wishlists_${tid}`);
@@ -8472,6 +8516,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         targetName: matchedTxn.userName || matchedTxn.ownerName,
         startDate: calcStart,
         expiryDate: calcExpiry,
+        durationDays,
+        planType: validatedPlan.id,
         paymentMethod: matchedTxn.paymentMethod,
         transactionRef: matchedTxn.transactionRef,
       });
@@ -9017,6 +9063,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         targetPhone: currentUser.phone,
         startDate: result.startDate,
         expiryDate: result.expiryDate,
+        durationDays: result.durationDays,
+        planType: resolvedPlan.id,
         paymentMethod,
         transactionRef: result.transactionRef,
       });
@@ -9398,6 +9446,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         targetPhone: currentUser.phone,
         startDate,
         expiryDate,
+        durationDays: validDays,
+        planType,
         paymentMethod: 'KHQR',
         transactionRef: effectiveTrxRef,
       });
@@ -9885,6 +9935,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         targetPhone: currentUser.phone,
         startDate,
         expiryDate,
+        durationDays: plan.durationDays,
+        planType: plan.id,
         paymentMethod: 'KHQR',
         transactionRef: autoRef,
       });
@@ -10153,6 +10205,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       targetName: ticket.username,
       startDate,
       expiryDate,
+      durationDays: finalDays,
+      planType: validatedPlan.id,
       paymentMethod: 'KHQR',
       transactionRef: ticket.paymentRef,
     });
@@ -10865,11 +10919,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Strictly preserve permanent Admin-approved media overrides, revision ledger, pending cloud queue,
     // user accounts, shops, and transactions — NEVER wipe the database or restore old food pictures!
     const vault = loadLocalMediaOverrides();
-    setBookmarks(['food-1', 'dest-1']);
+    setBookmarks([]);
     setSearchQuery('');
     setSelectedProvince('ទាំងអស់');
     try {
+      localStorage.setItem('kft_bookmarks_v5', '[]');
       localStorage.removeItem('kft_bookmarks_v4');
+      localStorage.removeItem('kft_bookmarks_v3');
       localStorage.removeItem('kft_trip_plans_v1');
     } catch {}
     setFoods(prev => applyFoodOverrides(prev.length > 0 ? prev : initialFoods, vault.foods));

@@ -21,7 +21,8 @@ import {
   Navigation,
   ChefHat,
   Search,
-  HeartPulse,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { TripPlan, isUserVipActive, isAdminAccount, openRestaurantGoogleExternal, resolveFoodPhotoUrl } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
@@ -106,10 +107,14 @@ export const AiTripPlannerModal: React.FC = () => {
 
   // Mode 1: AI Food & Craving Advisor State
   const [advisorGoal, setAdvisorGoal] = useState<AdvisorGoalId>('quick_daily');
+  const [expandedGoalId, setExpandedGoalId] = useState<AdvisorGoalId | null>(null);
   const [advisorPrompt, setAdvisorPrompt] = useState<string>('');
   const [advisorSeed, setAdvisorSeed] = useState<number>(1);
+  const [goalSeed, setGoalSeed] = useState<number>(1);
   const advisorInputRef = useRef<HTMLInputElement | null>(null);
   const advisorResultsRef = useRef<HTMLDivElement | null>(null);
+  const contentScrollRef = useRef<HTMLDivElement | null>(null);
+  const goalCardRefs = useRef<Partial<Record<AdvisorGoalId, HTMLDivElement | null>>>({});
 
   // Mode 3: AI Route & Trip Planner State
   const [selectedProvince, setSelectedProvince] = useState<string>('ខេត្តសៀមរាប');
@@ -136,7 +141,9 @@ export const AiTripPlannerModal: React.FC = () => {
     return { ...found, destCount, restCount };
   }, [selectedProvince, destinations, restaurants]);
 
-  // AI Food & Craving Advisor matched dishes & shops (multilingual semantic search across Khmer, English, Chinese)
+  const hasSearchPrompt = advisorPrompt.trim().length > 0;
+
+  // AI Food & Craving Advisor matched dishes & shops for typed/chip search queries
   const aiAdvisorResults = useMemo(
     () =>
       getAiFoodAdvisorRecommendations({
@@ -151,11 +158,45 @@ export const AiTripPlannerModal: React.FC = () => {
     [foods, restaurants, advisorPrompt, advisorGoal, advisorSeed, language, canUseVip]
   );
 
+  // Dedicated AI recommendations for the 5 Daily Dining Goal cards (strictly filtered by Goal, never hijacked by stale search text)
+  const goalAdvisorResults = useMemo(
+    () =>
+      getAiFoodAdvisorRecommendations({
+        foods,
+        restaurants,
+        query: '',
+        goal: expandedGoalId || advisorGoal,
+        seed: goalSeed,
+        language,
+        canUseVip,
+      }),
+    [foods, restaurants, expandedGoalId, advisorGoal, goalSeed, language, canUseVip]
+  );
+
+  const scrollGoalIntoView = (goalId: AdvisorGoalId) => {
+    if (typeof window === 'undefined') return;
+    window.requestAnimationFrame(() => {
+      const container = contentScrollRef.current;
+      const cardEl = goalCardRefs.current[goalId];
+      if (container && cardEl) {
+        const containerRect = container.getBoundingClientRect();
+        const cardRect = cardEl.getBoundingClientRect();
+        const targetTop = container.scrollTop + (cardRect.top - containerRect.top) - 10;
+        container.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+      }
+    });
+  };
+
   const handleAdvisorSearchSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     advisorInputRef.current?.blur();
     if (!advisorPrompt.trim()) {
-      setAdvisorSeed((s) => s + 1);
+      const targetGoal = expandedGoalId || advisorGoal || 'quick_daily';
+      setAdvisorGoal(targetGoal);
+      setExpandedGoalId(targetGoal);
+      setGoalSeed((s) => s + 1);
+      scrollGoalIntoView(targetGoal);
+      return;
     }
     if (typeof window !== 'undefined') {
       window.requestAnimationFrame(() => {
@@ -439,7 +480,10 @@ export const AiTripPlannerModal: React.FC = () => {
         </div>
 
         {/* Content Body */}
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] p-4 pb-8 space-y-4 font-khmer">
+        <div
+          ref={contentScrollRef}
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] p-4 pb-8 space-y-4 font-khmer"
+        >
           {/* =====================================================================
               TAB 1: AI DAILY FOOD & CRAVING ADVISOR (FREE PREVIEW + VIP ADVANCED)
           ===================================================================== */}
@@ -571,7 +615,8 @@ export const AiTripPlannerModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* AI Curated Dish Matches (Placed directly below search input so results appear immediately!) */}
+              {/* AI Search Results (Shown immediately below search input whenever user types a query or taps a Quick Craving Chip) */}
+              {hasSearchPrompt && (
               <div
                 ref={advisorResultsRef}
                 className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-emerald-500/30 dark:border-emerald-500/30 space-y-2.5"
@@ -717,69 +762,213 @@ export const AiTripPlannerModal: React.FC = () => {
                   </div>
                 )}
               </div>
+              )}
 
-              {/* Select Daily Goal (2 Free + 3 VIP) */}
+              {/* Select Daily Goal (2 Free + 3 VIP) — Clicking any button expands curated dishes & shops inline right beneath it! */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
                   {tr(language, 'ជ្រើសរើសគោលបំណងអាហារថ្ងៃនេះ៖', 'Select your dining goal today:', '选择今日用餐目标：')}
                 </label>
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   {advisorGoals.map((g) => {
                     const isLocked = g.vipOnly && !canUseVip;
-                    const isSelected = advisorGoal === g.id;
+                    const isExpanded = !isLocked && expandedGoalId === g.id;
                     return (
-                      <button
+                      <div
                         key={g.id}
-                        type="button"
-                        onClick={() => {
-                          if (isLocked) {
-                            showToast(
-                              tr(
-                                language,
-                                '👑 មុខងារវិភាគអាហារូបត្ថម្ភ AI កម្រិតខ្ពស់ គឺសម្រាប់សមាជិក VIP!',
-                                '👑 Advanced AI Nutrition & Group Dining modes are for VIP members!',
-                                '👑 高级 AI 营养分析与聚餐推荐仅限 VIP 会员！'
-                              ),
-                              'info'
-                            );
-                            openUpgradeVipModal();
-                            return;
-                          }
-                          setAdvisorGoal(g.id);
-                          setAdvisorSeed(1);
-                          if (typeof window !== 'undefined') {
-                            window.requestAnimationFrame(() => {
-                              advisorResultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                            });
-                          }
+                        ref={(el) => {
+                          goalCardRefs.current[g.id] = el;
                         }}
-                        className={`w-full p-2.5 rounded-2xl border text-left transition flex items-center justify-between gap-2 cursor-pointer ${
-                          isSelected
-                            ? 'bg-emerald-50/90 dark:bg-emerald-950/50 border-emerald-600 ring-1 ring-emerald-500/40'
+                        className={`rounded-2xl border transition overflow-hidden ${
+                          isExpanded
+                            ? 'bg-emerald-50/70 dark:bg-slate-800/90 border-emerald-500 ring-1 ring-emerald-500/40 shadow-sm'
                             : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-emerald-400'
                         }`}
                       >
-                        <div className="min-w-0">
-                          <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
-                            {tr(language, g.kh, g.en, g.zh)}
+                        <button
+                          type="button"
+                          aria-expanded={isExpanded}
+                          onClick={() => {
+                            if (isLocked) {
+                              showToast(
+                                tr(
+                                  language,
+                                  '👑 មុខងារណែនាំមុខម្ហូបពិសេស និងជួបជុំ AI គឺសម្រាប់សមាជិក VIP!',
+                                  '👑 Special Culinary & Group Dining AI modes are for VIP members!',
+                                  '👑 特色美食与聚餐 AI 推荐仅限 VIP 会员！'
+                                ),
+                                'info'
+                              );
+                              openUpgradeVipModal();
+                              return;
+                            }
+                            if (advisorPrompt) {
+                              setAdvisorPrompt('');
+                            }
+                            if (expandedGoalId === g.id) {
+                              setExpandedGoalId(null);
+                              return;
+                            }
+                            setAdvisorGoal(g.id);
+                            setExpandedGoalId(g.id);
+                            setGoalSeed(1);
+                            scrollGoalIntoView(g.id);
+                          }}
+                          className="w-full p-3 text-left flex items-center justify-between gap-2 cursor-pointer active:scale-[0.99] transition"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                              {tr(language, g.kh, g.en, g.zh)}
+                            </div>
+                            <div className="text-[10.5px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                              {tr(language, g.descKh, g.descEn, g.descZh)}
+                            </div>
                           </div>
-                          <div className="text-[10.5px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                            {tr(language, g.descKh, g.descEn, g.descZh)}
-                          </div>
-                        </div>
 
-                        {g.vipOnly ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-black shrink-0 border border-amber-400/40">
-                            {isLocked ? <Lock className="w-2.5 h-2.5" /> : <Crown className="w-2.5 h-2.5" />}
-                            <span>VIP</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold shrink-0">
-                            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
-                            <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}</span>
-                          </span>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {g.vipOnly ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-black border border-amber-400/40">
+                                {isLocked ? <Lock className="w-2.5 h-2.5" /> : <Crown className="w-2.5 h-2.5" />}
+                                <span>VIP</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold">
+                                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                                <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}</span>
+                              </span>
+                            )}
+                            {!isLocked && (
+                              isExpanded ? (
+                                <ChevronUp className="w-4 h-4 text-emerald-500 shrink-0" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                              )
+                            )}
+                          </div>
+                        </button>
+
+                        {isExpanded && (
+                          <div className="px-3 pb-3 pt-2 border-t border-emerald-500/25 bg-slate-50/90 dark:bg-slate-900/70 space-y-2.5">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <p className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-300 leading-snug">
+                                  {goalAdvisorResults.aiSummaryText}
+                                </p>
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                                  {tr(
+                                    language,
+                                    `រកឃើញ ${goalAdvisorResults.totalMatchedCount} មុខម្ហូបសមស្រប`,
+                                    `${goalAdvisorResults.totalMatchedCount} matching dishes`,
+                                    `共匹配 ${goalAdvisorResults.totalMatchedCount} 道菜品`
+                                  )}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setGoalSeed((s) => s + 1)}
+                                className="px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] font-black inline-flex items-center gap-1 shrink-0 cursor-pointer active:scale-95 transition"
+                              >
+                                <RefreshCw className="w-3 h-3" />
+                                <span>{tr(language, 'ប្តូរជម្រើសថ្មី', 'Refresh AI', '换一批')}</span>
+                              </button>
+                            </div>
+
+                            <div className="space-y-2">
+                              {goalAdvisorResults.dishes.map((dish) => {
+                                const loc = getLocalizedFood(dish, language);
+                                return (
+                                  <button
+                                    key={dish.id}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedFood(dish);
+                                      setIsAiTripPlannerModalOpen(false);
+                                    }}
+                                    className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 hover:border-emerald-500 flex items-center justify-between gap-2.5 cursor-pointer text-left transition shadow-2xs active:scale-[0.99]"
+                                  >
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                      <img
+                                        src={resolveFoodPhotoUrl(dish.photoUrl, dish.photoUpdatedAt)}
+                                        alt={loc.name}
+                                        loading="lazy"
+                                        decoding="async"
+                                        className="w-14 h-14 rounded-xl object-cover shrink-0 bg-slate-200"
+                                      />
+                                      <div className="min-w-0">
+                                        <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                                          {loc.name}
+                                        </div>
+                                        <div className="flex items-center gap-1.5 mt-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 flex-wrap">
+                                          <span>🔥 {dish.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}</span>
+                                          <span>•</span>
+                                          <span>⭐ {dish.rating}</span>
+                                          <span>•</span>
+                                          <span>{loc.category}</span>
+                                        </div>
+                                        <p className="text-[10.5px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                                          {loc.description}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <span className="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 text-[10px] font-bold shrink-0 flex items-center gap-1">
+                                      <ChefHat className="w-3 h-3" />
+                                      <span>{tr(language, 'រូបមន្ត', 'Recipe', '食谱')}</span>
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+
+                            {goalAdvisorResults.shops.length > 0 && (
+                              <div className="pt-2 border-t border-slate-200/80 dark:border-slate-700 space-y-1.5">
+                                <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                                  <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>
+                                    {tr(
+                                      language,
+                                      'ហាងអាហារណែនាំ និងការនាំផ្លូវ៖',
+                                      'Recommended Shops & Navigation:',
+                                      '推荐餐厅与路线导航：'
+                                    )}
+                                  </span>
+                                </div>
+                                {goalAdvisorResults.shops.map((shop) => {
+                                  const sLoc = getLocalizedRestaurant(shop, language);
+                                  return (
+                                    <div
+                                      key={shop.id}
+                                      className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-2"
+                                    >
+                                      <div
+                                        onClick={() => {
+                                          setSelectedRestaurant(shop);
+                                          setIsAiTripPlannerModalOpen(false);
+                                        }}
+                                        className="min-w-0 flex-1 cursor-pointer"
+                                      >
+                                        <div className="text-xs font-bold text-slate-900 dark:text-white truncate hover:text-emerald-600">
+                                          {sLoc.name}
+                                        </div>
+                                        <div className="text-[10px] text-slate-500 truncate">
+                                          📍 {sLoc.province} • ⭐ {shop.rating}
+                                        </div>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => openRestaurantGoogleExternal(shop, 'directions')}
+                                        className="px-2.5 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-[10px] font-bold inline-flex items-center gap-1 shrink-0 cursor-pointer"
+                                      >
+                                        <Navigation className="w-3 h-3 text-emerald-300" />
+                                        <span>{tr(language, 'នាំផ្លូវ', 'Navigate', '导航')}</span>
+                                      </button>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
                         )}
-                      </button>
+                      </div>
                     );
                   })}
                 </div>

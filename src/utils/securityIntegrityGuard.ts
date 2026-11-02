@@ -15,7 +15,13 @@
  *    Guarantees legitimate VIP accounts are NEVER cleared or downgraded on app version updates or restarts.
  */
 
-import { User, parseSafeDateMs, isPermanentVipEmail } from '../types';
+import {
+  User,
+  parseSafeDateMs,
+  isPermanentVipEmail,
+  resolveUserActualVipPlanDays,
+  sanitizeUserVipPlanAndExpiry,
+} from '../types';
 import { verifyAdminSession, createAdminSession, revokeAdminSession } from './security';
 
 const INTEGRITY_SALT_BASE = 'kft_tamper_guard_v2026_cheasavuth_khmer_food_secure';
@@ -213,18 +219,6 @@ export function findLocalAuthoritativeVipEntitlement(
 ): LocalAuthoritativeVipMatch {
   if (!targetUser) return { found: false, expiryMs: 0 };
   const nowMs = Date.now();
-  if (isPermanentVipEmail(targetUser.email)) {
-    const permExpMs = nowMs + 365 * 24 * 60 * 60 * 1000;
-    return {
-      found: true,
-      expiryMs: permExpMs,
-      expiryIso: new Date(permExpMs).toISOString(),
-      startIso: targetUser.subscriptionStartDate || '2026-01-01T00:00:00.000Z',
-      transactionRef: targetUser.transactionRef || 'VIP-PERMANENT-IGP2026D',
-      paymentMethod: targetUser.paymentMethod || 'KHQR',
-      paidAdditionalStoreSlots: Math.max(targetUser.paidAdditionalStoreSlots || 0, 2),
-    };
-  }
   let bestExpMs = 0;
   let bestStartIso: string | undefined;
   let bestTxnRef: string | undefined;
@@ -232,9 +226,10 @@ export function findLocalAuthoritativeVipEntitlement(
   let bestSlots = typeof targetUser.paidAdditionalStoreSlots === 'number' ? targetUser.paidAdditionalStoreSlots : 0;
   let bestMatchedUser: User | undefined;
 
-  const considerUserRecord = (cand: any) => {
-    if (!cand || typeof cand !== 'object') return;
-    if (!doesUserMatchCandidate(cand, targetUser)) return;
+  const considerUserRecord = (rawCand: any) => {
+    if (!rawCand || typeof rawCand !== 'object') return;
+    if (!doesUserMatchCandidate(rawCand, targetUser)) return;
+    const cand = sanitizeUserVipPlanAndExpiry(rawCand as User);
     if (typeof cand.paidAdditionalStoreSlots === 'number' && cand.paidAdditionalStoreSlots > bestSlots) {
       bestSlots = cand.paidAdditionalStoreSlots;
     }
@@ -247,9 +242,10 @@ export function findLocalAuthoritativeVipEntitlement(
 
     const rawExp = cand.subscriptionExpiryDate || cand.vipExpiresAt;
     let expMs = parseSafeDateMs(rawExp);
+    const planDays = resolveUserActualVipPlanDays(cand);
     if (expMs <= 0 && cand.membershipTier === 'premium_vip' && cand.subscriptionStatus === 'active') {
       const startMs = parseSafeDateMs(cand.subscriptionStartDate || cand.verifiedAt || cand.lastLoginAt || cand.registeredAtIso) || nowMs;
-      expMs = Math.max(startMs, nowMs) + 30 * 24 * 60 * 60 * 1000;
+      expMs = Math.max(startMs, nowMs) + planDays * 24 * 60 * 60 * 1000;
     }
     if (expMs > nowMs && expMs > bestExpMs) {
       bestExpMs = expMs;
@@ -386,6 +382,20 @@ export function findLocalAuthoritativeVipEntitlement(
     };
   }
 
+  if (isPermanentVipEmail(targetUser.email)) {
+    const planDays = resolveUserActualVipPlanDays(targetUser as User);
+    const permExpMs = nowMs + planDays * 24 * 60 * 60 * 1000;
+    return {
+      found: true,
+      expiryMs: permExpMs,
+      expiryIso: new Date(permExpMs).toISOString(),
+      startIso: targetUser.subscriptionStartDate || new Date(nowMs).toISOString(),
+      transactionRef: targetUser.transactionRef || `VIP-${planDays}D-IGP2026D`,
+      paymentMethod: targetUser.paymentMethod || 'KHQR',
+      paidAdditionalStoreSlots: Math.max(targetUser.paidAdditionalStoreSlots || 0, 2),
+    };
+  }
+
   return { found: false, expiryMs: 0, paidAdditionalStoreSlots: bestSlots };
 }
 
@@ -400,7 +410,7 @@ export async function verifyAndSanitizeUserSession(
 ): Promise<{ user: User | null; tampered: boolean; reason?: string }> {
   if (!user) return { user: null, tampered: false };
 
-  const sanitized: User = { ...user };
+  const sanitized: User = sanitizeUserVipPlanAndExpiry({ ...user });
   let tampered = false;
   let reason = '';
 
@@ -506,11 +516,14 @@ export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | n
         : null;
 
     if (!raw) return { tampered: false, user: null };
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object') return { tampered: false, user: null };
+    const rawParsed = JSON.parse(raw);
+    if (!rawParsed || typeof rawParsed !== 'object') return { tampered: false, user: null };
 
+    const parsed: any = sanitizeUserVipPlanAndExpiry(rawParsed as User);
     let tampered = false;
-    let updated = false;
+    let updated =
+      parsed.subscriptionExpiryDate !== rawParsed.subscriptionExpiryDate ||
+      parsed.vipPlanDays !== rawParsed.vipPlanDays;
 
     const isDedicatedAdminProfile =
       parsed.id === 'admin-authorized-single' ||

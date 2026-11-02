@@ -35,25 +35,32 @@ export function resolveAndValidateVipPlan(
   settings?: Partial<AppSettings> | null
 ): VipPlanConfig {
   const dynamicPlans = getDynamicVipPlans(settings);
+  if (typeof input?.durationDays === 'number' && input.durationDays >= 1) {
+    if (input.durationDays === dynamicPlans.quarterly.durationDays || input.durationDays === 30 || input.durationDays === 10) {
+      return {
+        ...dynamicPlans.quarterly,
+        durationDays: input.durationDays === 10 ? 10 : dynamicPlans.quarterly.durationDays,
+      };
+    }
+    if (input.durationDays === dynamicPlans.annual.durationDays || input.durationDays === 90) {
+      return dynamicPlans.annual;
+    }
+    if (input.durationDays === 365) {
+      return {
+        ...dynamicPlans.annual,
+        id: 'annual',
+        durationDays: 365,
+        priceUsd: typeof input.amountUsd === 'number' && input.amountUsd > 0 ? input.amountUsd : dynamicPlans.annual.priceUsd,
+        nameKh: 'កញ្ចប់ VIP 365 ថ្ងៃ',
+        nameEn: 'VIP 365 Days Plan',
+      };
+    }
+  }
   if (input?.planType === 'quarterly') {
     return dynamicPlans.quarterly;
   }
   if (input?.planType === 'annual') {
     return dynamicPlans.annual;
-  }
-  if (typeof input?.durationDays === 'number' && input.durationDays >= 1) {
-    if (input.durationDays === dynamicPlans.quarterly.durationDays) {
-      return dynamicPlans.quarterly;
-    }
-    if (input.durationDays === dynamicPlans.annual.durationDays) {
-      return dynamicPlans.annual;
-    }
-    if (input.durationDays === 10 || input.durationDays === 30) {
-      return dynamicPlans.quarterly;
-    }
-    if (input.durationDays === 90) {
-      return dynamicPlans.annual;
-    }
   }
   if (typeof input?.amountUsd === 'number') {
     if (Math.abs(input.amountUsd - dynamicPlans.quarterly.priceUsd) <= 0.05) {
@@ -158,17 +165,18 @@ export function calculateVipDates(
   settings?: Partial<AppSettings> | null
 ): { startDate: string; expiryDate: string; durationDays: number } {
   const dynamicPlans = getDynamicVipPlans(settings);
-  let validDuration = dynamicPlans.annual.durationDays;
+  let validDuration = dynamicPlans.quarterly.durationDays;
   if (typeof durationDays === 'number' && durationDays >= 1) {
     validDuration = Math.round(durationDays);
   }
   const now = new Date();
   let startTime = now.getTime();
   
-  // If user has an active subscription, extend from the existing expiry date (renewal)
+  // If user has a genuine non-inflated active subscription (<= 95 days remaining), extend from existing expiry
   if (existingExpiry) {
     const existingTime = parseSafeDateMs(existingExpiry);
-    if (existingTime > startTime) {
+    const remainingMs = existingTime - startTime;
+    if (remainingMs > 0 && remainingMs <= 95 * 24 * 60 * 60 * 1000) {
       startTime = existingTime;
     }
   }
@@ -246,9 +254,12 @@ export async function verifyPaymentOnBackend(
   );
 
   // 5. Calculate subscription period
-  const duration = isQuarterlyPrice
-    ? dynamicPlans.quarterly.durationDays
-    : dynamicPlans.annual.durationDays;
+  const duration =
+    typeof req.durationDays === 'number' && req.durationDays >= 1
+      ? Math.round(req.durationDays)
+      : isQuarterlyPrice
+      ? dynamicPlans.quarterly.durationDays
+      : dynamicPlans.annual.durationDays;
   const { startDate, expiryDate, durationDays } = calculateVipDates(undefined, duration, settings);
 
   // 6. Record to anti-duplicate ledger

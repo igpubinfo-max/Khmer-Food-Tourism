@@ -50,54 +50,5 @@ export const initialRestaurants: Restaurant[] = initial100Restaurants;
 // 100+ Authentic Tourist Destinations across 25 Cambodian Provinces
 export const initialDestinations: TouristDestination[] = initial100Destinations;
 
-export const initialTransactions: RegistrationTransaction[] = [
-  {
-    id: 'TXN-20261020-001',
-    restaurantId: 'rest-1',
-    restaurantNameKh: 'ភោជនីយដ្ឋាន ម្លិះ (Malis Restaurant)',
-    restaurantNameEn: 'Malis Restaurant Phnom Penh',
-    ownerId: 'owner-1',
-    ownerName: 'Luu Meng (លូ ម៉េង)',
-    ownerPhone: '015 814 888',
-    amountUsd: 4.99,
-    status: 'verified',
-    paymentMethod: 'KHQR',
-    transactionRef: 'KHQR-MB-9823419082',
-    createdAt: '2026-01-15 08:30',
-    verifiedAt: '2026-01-15 09:00',
-    verifiedBy: 'System Administrator',
-    notes: 'Verified via ABA Bank Bakong KHQR settlement.',
-  },
-  {
-    id: 'TXN-20261020-002',
-    restaurantId: 'rest-2',
-    restaurantNameKh: 'ភោជនីយដ្ឋាន រំដេង (Romdeng Restaurant)',
-    restaurantNameEn: 'Romdeng Restaurant Phnom Penh',
-    ownerId: 'owner-2',
-    ownerName: 'Friends International',
-    ownerPhone: '092 219 509',
-    amountUsd: 4.99,
-    status: 'verified',
-    paymentMethod: 'Bakong',
-    transactionRef: 'BAKONG-TRX-447192831',
-    createdAt: '2026-01-16 10:15',
-    verifiedAt: '2026-01-16 11:00',
-    verifiedBy: 'System Administrator',
-    notes: 'Bakong peer-to-peer verified.',
-  },
-  {
-    id: 'TXN-20261020-003',
-    restaurantId: 'rest-7',
-    restaurantNameKh: 'តូបនំបញ្ចុកទឹកសម្លខ្មែរ (ខេត្តកំពត 1)',
-    restaurantNameEn: 'Fresh Num Banh Chok Stall (Kampot #1)',
-    ownerId: 'owner-7',
-    ownerName: 'សុខ គីមលី',
-    ownerPhone: '098 765 432',
-    amountUsd: 4.99,
-    status: 'pending_verification',
-    paymentMethod: 'KHQR',
-    transactionRef: 'KHQR-ABA-5819203112',
-    createdAt: '2026-10-20 12:40',
-    notes: 'Awaiting admin verification against bank statement.',
-  },
-];
+// No fake/demo auto-registered transactions — only genuine user & shop transactions are stored
+export const initialTransactions: RegistrationTransaction[] = [];

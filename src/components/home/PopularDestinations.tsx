@@ -32,7 +32,7 @@ const PopularDestinationsInner: React.FC<Props> = ({ language, destinations, onO
     <section className="space-y-3">
       <SectionHeader
         icon={IconNavTourism}
-        title={tr(language, 'ស្វែងយល់ទឹកដីកម្ពុជា', 'Explore Cambodia', '探索柬埔寨')}
+        title={tr(language, 'សម្រស់កម្ពុជា', 'Explore Cambodia', '探索柬埔寨')}
         subtitle={tr(language, 'តំបន់ទេសចរណ៍ល្បីៗទូទាំង ២៥ រាជធានី-ខេត្ត', 'Top sights across all 25 provinces', '遍布柬埔寨 25 省市的精选景点')}
         actionLabel={tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
         onAction={onSeeAll}

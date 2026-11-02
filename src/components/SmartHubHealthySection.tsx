@@ -53,7 +53,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
     }
   };
 
-  // Matches per tag, best-rated first, photo-first so cards always look appetizing (computed only for verified VIP accounts)
+  // Matches per tag, best-rated & most representative first, photo-first so cards always look appetizing (computed only for verified VIP accounts)
   const byTag = useMemo(() => {
     const map: Record<string, FoodItem[]> = {};
     for (const id of HUB_TAGS) map[id] = [];
@@ -61,8 +61,32 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
     for (const f of foods) {
       for (const id of getDishTagIds(f)) if (map[id]) map[id].push(f);
     }
+    const getCategoryLeadScore = (tagId: DishTagId, item: FoodItem): number => {
+      const kh = item.nameKh || '';
+      const en = (item.nameEn || '').toLowerCase();
+      if (tagId === 'steamed_boiled') {
+        if (/ចំហុយ|ស្ងោរ|អាម៉ុក|ស្រុះ/.test(kh) || /\bsteamed\b(?!\s+(?:jasmine\s+)?rice\b)|\bpoached\b|\bamok\b/.test(en)) {
+          return 3;
+        }
+        if (/ស៊ុប|សម្លប្រហើរ|បបរ|គុយទាវ/.test(kh)) return 2;
+        return 1;
+      }
+      if (tagId === 'grilled') {
+        return /អាំង|ដុត/.test(kh) ? 2 : 1;
+      }
+      if (tagId === 'vegetarian_friendly') {
+        return item.categorySlug !== 'dessert' && item.categorySlug !== 'cake' ? 2 : 1;
+      }
+      return 1;
+    };
     for (const id of HUB_TAGS) {
-      map[id].sort((a, b) => Number(!!b.photoUrl) - Number(!!a.photoUrl) || (b.rating || 0) - (a.rating || 0) || (b.reviewCount || 0) - (a.reviewCount || 0));
+      map[id].sort(
+        (a, b) =>
+          Number(!!b.photoUrl) - Number(!!a.photoUrl) ||
+          getCategoryLeadScore(id, b) - getCategoryLeadScore(id, a) ||
+          (b.rating || 0) - (a.rating || 0) ||
+          (b.reviewCount || 0) - (a.reviewCount || 0)
+      );
     }
     return map;
   }, [foods, canUseVip]);

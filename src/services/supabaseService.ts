@@ -13,7 +13,20 @@
  * - If not configured yet, safely falls back to local device storage without errors.
  */
 
-import { User, Restaurant, TouristDestination, RegistrationTransaction, DeletedUserRecord, AppSettings, SupportTicket, isSeedRestaurantId, parseSafeDateMs } from '../types';
+import {
+  User,
+  Restaurant,
+  TouristDestination,
+  RegistrationTransaction,
+  DeletedUserRecord,
+  AppSettings,
+  SupportTicket,
+  isSeedRestaurantId,
+  parseSafeDateMs,
+  resolveUserActualVipPlanDays,
+  sanitizeUserVipPlanAndExpiry,
+  isDeprecatedDemoSeedTransaction,
+} from '../types';
 
 export interface CloudApiConfig {
   supabaseUrl: string;
@@ -337,15 +350,36 @@ export async function fetchPaymentProofFromCloudOnDemand(idOrVaultRef: string): 
 export async function mergeAndPushTransactionsToCloud(
   localTxns: RegistrationTransaction[]
 ): Promise<RegistrationTransaction[]> {
-  if (!isSupabaseConfigured()) return localTxns;
+  const cleanLocalTxns = (Array.isArray(localTxns) ? localTxns : []).filter(
+    (t) => t && t.id && !isDeprecatedDemoSeedTransaction(t)
+  );
+  if (!isSupabaseConfigured()) return cleanLocalTxns;
   try {
-    const cloudTxns = await pullCloudDocument<RegistrationTransaction[]>('kft_cloud_transactions_v1', 8000);
+    const [cloudTxns, cloudDeletedTxnIds] = await Promise.all([
+      pullCloudDocument<RegistrationTransaction[]>('kft_cloud_transactions_v1', 8000),
+      pullCloudDocument<string[]>('kft_cloud_deleted_transactions_v1', 8000),
+    ]);
+    let localDeletedTxnIds: string[] = [];
+    try {
+      const rawDel = localStorage.getItem('kft_deleted_transactions_v1');
+      if (rawDel) {
+        const parsedDel = JSON.parse(rawDel);
+        if (Array.isArray(parsedDel)) localDeletedTxnIds = parsedDel;
+      }
+    } catch {}
+    const deletedSet = new Set<string>([
+      ...localDeletedTxnIds,
+      ...(Array.isArray(cloudDeletedTxnIds) ? cloudDeletedTxnIds : []),
+    ]);
+
     const txnMap = new Map<string, RegistrationTransaction>();
     for (const ct of Array.isArray(cloudTxns) ? cloudTxns : []) {
-      if (ct && ct.id) txnMap.set(ct.id, ct);
+      if (ct && ct.id && !deletedSet.has(ct.id) && !isDeprecatedDemoSeedTransaction(ct)) {
+        txnMap.set(ct.id, ct);
+      }
     }
-    for (const lt of Array.isArray(localTxns) ? localTxns : []) {
-      if (!lt || !lt.id) continue;
+    for (const lt of cleanLocalTxns) {
+      if (!lt || !lt.id || deletedSet.has(lt.id) || isDeprecatedDemoSeedTransaction(lt)) continue;
       const existing = txnMap.get(lt.id);
       if (!existing) {
         txnMap.set(lt.id, lt);
@@ -366,8 +400,8 @@ export async function mergeAndPushTransactionsToCloud(
     await pushCloudDocument('kft_cloud_transactions_v1', merged);
     return merged;
   } catch {
-    await pushCloudDocument('kft_cloud_transactions_v1', localTxns);
-    return localTxns;
+    await pushCloudDocument('kft_cloud_transactions_v1', cleanLocalTxns);
+    return cleanLocalTxns;
   }
 }
 
@@ -1213,13 +1247,14 @@ export function getCandidateAtomicUserKeys(u?: Partial<User> | null): string[] {
   return Array.from(keys);
 }
 
-export function normalizeVipExpiryOnUser(u: User): User {
+export function normalizeVipExpiryOnUser(rawUser: User): User {
   const isAdmin =
-    u.role === 'admin' ||
-    u.id === 'admin-authorized-single' ||
-    u.username === 'admin' ||
-    u.username === 'cheasavuth';
-  if (isAdmin) return u;
+    rawUser.role === 'admin' ||
+    rawUser.id === 'admin-authorized-single' ||
+    rawUser.username === 'admin' ||
+    rawUser.username === 'cheasavuth';
+  if (isAdmin) return rawUser;
+  const u = sanitizeUserVipPlanAndExpiry(rawUser);
   const rawExp = u.subscriptionExpiryDate || (u as any).vipExpiresAt;
   if (rawExp) {
     const expMs = parseSafeDateMs(rawExp);
@@ -1240,11 +1275,13 @@ export function normalizeVipExpiryOnUser(u: User): User {
       (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active' || (u as any).vipStatus === 'active')
     ) {
       const cleanExpIso = new Date(expMs).toISOString();
+      const planDays = resolveUserActualVipPlanDays(u);
       if (
         u.membershipTier !== 'premium_vip' ||
         u.subscriptionStatus !== 'active' ||
         u.paymentStatus !== 'verified' ||
         u.subscriptionExpiryDate !== cleanExpIso ||
+        u.vipPlanDays !== planDays ||
         Boolean(u.vipCancelledAt)
       ) {
         return {
@@ -1254,6 +1291,7 @@ export function normalizeVipExpiryOnUser(u: User): User {
           paymentStatus: 'verified',
           subscriptionExpiryDate: cleanExpIso,
           vipStatus: 'active',
+          vipPlanDays: planDays,
           vipExpiresAt: cleanExpIso,
           vipCancelledAt: undefined,
         };
@@ -1266,11 +1304,12 @@ export function normalizeVipExpiryOnUser(u: User): User {
     u.paymentStatus !== 'cancelled' &&
     u.paymentStatus !== 'rejected'
   ) {
-    // Legacy active VIP record without explicit subscriptionExpiryDate: infer a 30-day window from start/verification date instead of stripping VIP
+    // Legacy active VIP record without explicit subscriptionExpiryDate: infer plan window from start/verification date instead of stripping VIP
     const baseMs =
       parseSafeDateMs(u.subscriptionStartDate || u.verifiedAt || u.lastLoginAt || u.registeredAtIso || u.createdAt) ||
       Date.now();
-    const inferredExpMs = baseMs + 30 * 24 * 60 * 60 * 1000;
+    const planDays = resolveUserActualVipPlanDays(u);
+    const inferredExpMs = baseMs + planDays * 24 * 60 * 60 * 1000;
     if (inferredExpMs > Date.now()) {
       const inferredIso = new Date(inferredExpMs).toISOString();
       return {
@@ -1281,6 +1320,7 @@ export function normalizeVipExpiryOnUser(u: User): User {
         subscriptionStartDate: u.subscriptionStartDate || new Date(baseMs).toISOString(),
         subscriptionExpiryDate: inferredIso,
         vipStatus: 'active',
+        vipPlanDays: planDays,
         vipExpiresAt: inferredIso,
         vipCancelledAt: undefined,
       };
@@ -1484,6 +1524,8 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
       subscriptionStartDate: bestVip.subscriptionStartDate || secondNorm.subscriptionStartDate || firstNorm.subscriptionStartDate,
       subscriptionExpiryDate: bestVip.subscriptionExpiryDate,
       vipStatus: 'active',
+      vipPlanDays: bestVip.vipPlanDays || secondNorm.vipPlanDays || firstNorm.vipPlanDays,
+      vipPlanType: bestVip.vipPlanType || secondNorm.vipPlanType || firstNorm.vipPlanType,
       vipExpiresAt: bestVip.subscriptionExpiryDate,
       vipCancelledAt: undefined,
       paymentStatus: 'verified',
@@ -1501,6 +1543,8 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
       subscriptionStartDate: activeVip.subscriptionStartDate || baseMerged.subscriptionStartDate,
       subscriptionExpiryDate: activeVip.subscriptionExpiryDate,
       vipStatus: 'active',
+      vipPlanDays: activeVip.vipPlanDays || baseMerged.vipPlanDays,
+      vipPlanType: activeVip.vipPlanType || baseMerged.vipPlanType,
       vipExpiresAt: activeVip.subscriptionExpiryDate,
       vipCancelledAt: undefined,
       paymentStatus: 'verified',
@@ -2184,8 +2228,13 @@ export async function syncAllAppDataWithSupabase(localState: {
     } catch {}
 
     const txnMap = new Map<string, RegistrationTransaction>();
+    let cloudHadDeprecatedSeedTxns = false;
     if (Array.isArray(cloudTxns)) {
       for (const t of cloudTxns) {
+        if (isDeprecatedDemoSeedTransaction(t)) {
+          cloudHadDeprecatedSeedTxns = true;
+          continue;
+        }
         if (
           t &&
           t.id &&
@@ -2197,7 +2246,15 @@ export async function syncAllAppDataWithSupabase(localState: {
       }
     }
     for (const t of localState.transactions) {
-      if (!t || !t.id || deletedTxnIdSet.has(t.id) || isActivityUserDeleted(t.userId || t.ownerId, t.userEmail, t.phone)) continue;
+      if (
+        !t ||
+        !t.id ||
+        isDeprecatedDemoSeedTransaction(t) ||
+        deletedTxnIdSet.has(t.id) ||
+        isActivityUserDeleted(t.userId || t.ownerId, t.userEmail, t.phone)
+      ) {
+        continue;
+      }
       const existing = txnMap.get(t.id);
       if (!existing) {
         txnMap.set(t.id, t);
@@ -2378,7 +2435,10 @@ export async function syncAllAppDataWithSupabase(localState: {
     if (isAdminDevice && safeJsonSig(mergedDeletedUsers) !== safeJsonSig(cloudDeletedUsers || [])) {
       pushPromises.push(pushCloudDocument('kft_cloud_deleted_users_v1', mergedDeletedUsers));
     }
-    if ((isAdminDevice || Boolean(localState.currentUser)) && safeJsonSig(mergedTransactions) !== safeJsonSig(cloudTxns || [])) {
+    if (
+      (isAdminDevice || Boolean(localState.currentUser) || cloudHadDeprecatedSeedTxns) &&
+      safeJsonSig(mergedTransactions) !== safeJsonSig(cloudTxns || [])
+    ) {
       pushPromises.push(pushCloudDocument('kft_cloud_transactions_v1', mergedTransactions));
     }
     const mergedDeletedTxnArr = Array.from(deletedTxnIdSet);

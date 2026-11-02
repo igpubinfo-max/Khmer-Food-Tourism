@@ -476,7 +476,25 @@ export function getAiFoodAdvisorRecommendations(params: {
     } else {
       // No text query: filter by the selected Daily Goal (exclude standalone beverages unless requested)
       if (!isBeverageFood(food) && matchesGoal(food, titleText, fullText, tags, goal)) {
-        const baseScore = 100 + (food.rating || 4.5) * 10;
+        let goalPriorityBonus = 0;
+        const rawKh = food.nameKh || '';
+        const rawEn = (food.nameEn || '').toLowerCase();
+        if (goal === 'quick_daily') {
+          if (/^(?:បាយ|គុយទាវ|មី|លត|បបរ|នំបញ្ចុក|នំប៉័ង)/.test(rawKh)) {
+            goalPriorityBonus = 20;
+          }
+        } else if (goal === 'vip_light_cal') {
+          if (/ចំហុយ|ស្ងោរ|អាម៉ុក|ស្រុះ/.test(rawKh) || /\bsteamed\b(?!\s+(?:jasmine\s+)?rice\b)|\bpoached\b/.test(rawEn)) {
+            goalPriorityBonus = 35;
+          } else if (/ស៊ុប|សម្លប្រហើរ|បបរ|គុយទាវ/.test(rawKh)) {
+            goalPriorityBonus = 18;
+          }
+        } else if (goal === 'vip_high_protein') {
+          if (/អាំង|ដុត/.test(rawKh) || food.categorySlug === 'grilled') {
+            goalPriorityBonus = 20;
+          }
+        }
+        const baseScore = 100 + goalPriorityBonus + (food.rating || 4.5) * 10;
         scoredFoods.push({ food, score: baseScore });
       }
     }
@@ -620,38 +638,51 @@ export function getAiFoodAdvisorRecommendations(params: {
 
 function matchesGoal(
   food: FoodItem,
-  titleText: string,
-  fullText: string,
+  _titleText: string,
+  _fullText: string,
   tags: DishTagId[],
   goal: AdvisorGoalId
 ): boolean {
+  if (food.categorySlug === 'dessert' || food.categorySlug === 'drink') {
+    return false;
+  }
+  const rawTitle = `${food.nameKh || ''} ${food.nameEn || ''}`;
   if (goal === 'quick_daily') {
     return (
       food.categorySlug === 'rice' ||
       food.categorySlug === 'noodles' ||
       food.categorySlug === 'stirfry' ||
-      /គុយទាវ|បាយ|មី|នំបញ្ចុក|ឆា|បបរ|noodle|rice|stirfry/i.test(titleText)
+      food.categorySlug === 'streetfood' ||
+      /គុយទាវ|បាយ|មី|លត|នំបញ្ចុក|នំប៉័ង|ឆា|បបរ|គួង|noodle|rice|stir[\s-]*fry|baguette/i.test(rawTitle)
     );
   }
   if (goal === 'khmer_comfort') {
     return (
       food.categorySlug === 'soup' ||
       food.categorySlug === 'specialty' ||
-      /សម្ល|អាម៉ុក|កកូរ|ម្ជូរ|ប្រហុក|ទឹកគ្រឿង|amok|samlor|soup/i.test(fullText)
+      /សម្ល|អាម៉ុក|កកូរ|ម្ជូរ|ប្រហុក|ទឹកគ្រឿង|នំបញ្ចុក|amok|samlor|teuk\s*kroeung/i.test(rawTitle)
     );
   }
   if (goal === 'vip_light_cal') {
-    const cal = food.calories ?? 0;
-    return tags.includes('light') || tags.includes('steamed_boiled') || (cal > 0 && cal <= 450);
+    // Strictly genuine steamed, boiled, poached & clear/herbal soup dishes — NEVER stir-fried (ឆា) or braised (ខ)
+    return tags.includes('steamed_boiled');
   }
   if (goal === 'vip_high_protein') {
-    return tags.includes('protein_rich') || tags.includes('grilled');
+    // Grilled meats, roasted fish & fresh seafood specialties
+    return (
+      tags.includes('grilled') ||
+      /អាំង|ដុត|គ្រឿងសមុទ្រ|ក្តាម|ក្ដាម|បង្គា|បង្កង|មឹក|ងាវ|គ្រំ|ខ្យង|\bgrilled\b|\broasted\b|\bseafood\b|\bcrab\b|\bprawn\b|\bshrimp\b|\bsquid\b|\bmussel\b|\bcockle\b/i.test(
+        rawTitle
+      )
+    );
   }
   if (goal === 'vip_group_feast') {
     return (
       food.categorySlug === 'grilled' ||
-      food.categorySlug === 'soup' ||
-      /ស៊ុប|អាំង|ត្រី|គ្រឿងសមុទ្រ|ឈុត|សម្ល|grilled|seafood|soup/i.test(titleText)
+      (food.categorySlug === 'soup' && !/បបរ/i.test(rawTitle)) ||
+      /ស៊ុប|អាំង|ដុត|ត្រី|គ្រឿងសមុទ្រ|ក្តាម|ក្ដាម|បង្គា|បង្កង|មឹក|ឈុត|សម្ល|ទឹកគ្រឿង|ប្រហុកខ្ទិះ|ឡុកឡាក់|ឆាបង្កង|\bgrilled\b|\bseafood\b|\bsoup\b|\bplatter\b/i.test(
+        rawTitle
+      )
     );
   }
   return true;

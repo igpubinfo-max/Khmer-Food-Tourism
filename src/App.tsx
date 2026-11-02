@@ -233,7 +233,6 @@ const MainScreen: React.FC = () => {
       {/* Creation & Action Modals — Conditionally Mounted (lazy-loaded chunks) */}
       <Suspense fallback={null}>
         {isSmartHubOpen && hasVipAccess && <SmartHubMenuModal onClose={() => setIsSmartHubOpen(false)} />}
-        {isAuthModalOpen && <AuthModal />}
         {isAddRestaurantModalOpen && <AddRestaurantModal />}
         {isAdminOpen && <AdminDashboard />}
         {isAdminLoginModalOpen && <AdminLoginModal />}
@@ -249,7 +248,6 @@ const MainScreen: React.FC = () => {
         {isNotificationsModalOpen && <NotificationsModal />}
         {isAiCheckInModalOpen && <AiCheckInModal />}
         {isRestaurantCheckInModalOpen && <RestaurantCheckInModal />}
-        {isUpgradeVipModalOpen && <UpgradeVipModal />}
         {isSupportTicketModalOpen && <PaymentSupportModal />}
         {isQrScannerModalOpen && <QrScannerModal />}
         {isVipAddRestaurantModalOpen && <VipAddRestaurantModal />}
@@ -260,6 +258,8 @@ const MainScreen: React.FC = () => {
         {selectedFood && <FoodDetailModal />}
         {selectedRestaurant && <RestaurantDetailModal />}
         {selectedDestination && <TouristDetailModal />}
+        {isUpgradeVipModalOpen && <UpgradeVipModal />}
+        {isAuthModalOpen && <AuthModal />}
       </Suspense>
       <DeleteShopConfirmModal />
 

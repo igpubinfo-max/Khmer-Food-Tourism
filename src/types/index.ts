@@ -1,7 +1,7 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1326;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1328;
 export const APP_RELEASE_DATE = '2026-11-02';
 
 /**
@@ -11,7 +11,6 @@ export const APP_RELEASE_DATE = '2026-11-02';
  */
 export const REMOVED_DUPLICATE_FOOD_IDS: ReadonlySet<string> = new Set([
   'food-12',
-  'food-20',
   'food-21',
   'food-22',
   'food-30',
@@ -94,136 +93,141 @@ export const SEED_FOOD_PHOTO_BASELINE_MS = Date.parse(SEED_FOOD_PHOTO_BASELINE_I
  * from before the Excel import, while preserving any newer edits made after this timestamp.
  */
 export const EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS: Record<string, string> = {
-  'food-2': '2026-11-02T11:17:15.474Z',
-  'food-38': '2026-11-02T11:17:15.474Z',
-  'food-47': '2026-11-02T11:17:15.474Z',
-  'food-82': '2026-11-02T11:17:15.474Z',
-  'food-86': '2026-11-02T11:17:15.474Z',
-  'food-88': '2026-11-02T11:17:15.474Z',
-  'food-89': '2026-11-02T11:17:15.474Z',
-  'food-96': '2026-11-02T11:17:15.474Z',
-  'food-101': '2026-11-02T11:18:19.130Z',
-  'food-102': '2026-11-02T11:18:19.130Z',
-  'food-103': '2026-11-02T11:18:19.130Z',
-  'food-104': '2026-11-02T11:18:19.130Z',
-  'food-105': '2026-11-02T11:18:19.130Z',
-  'food-106': '2026-11-02T11:18:19.130Z',
-  'food-107': '2026-11-02T11:18:19.130Z',
-  'food-108': '2026-11-02T11:18:19.130Z',
-  'food-109': '2026-11-02T11:18:19.130Z',
-  'food-110': '2026-11-02T11:18:19.130Z',
-  'food-111': '2026-11-02T11:18:19.130Z',
-  'food-112': '2026-11-02T11:18:19.130Z',
-  'food-113': '2026-11-02T11:18:19.130Z',
-  'food-114': '2026-11-02T11:18:19.130Z',
-  'food-115': '2026-11-02T11:18:19.130Z',
-  'food-116': '2026-11-02T11:18:19.130Z',
-  'food-117': '2026-11-02T11:18:19.130Z',
-  'food-118': '2026-11-02T11:18:19.130Z',
-  'food-119': '2026-11-02T11:18:19.130Z',
-  'food-120': '2026-11-02T11:18:19.130Z',
-  'food-121': '2026-11-02T11:18:19.130Z',
-  'food-122': '2026-11-02T11:18:19.130Z',
-  'food-123': '2026-11-02T11:18:19.130Z',
-  'food-124': '2026-11-02T11:18:19.130Z',
-  'food-125': '2026-11-02T11:18:19.130Z',
-  'food-126': '2026-11-02T11:18:19.130Z',
-  'food-127': '2026-11-02T11:18:19.130Z',
-  'food-128': '2026-11-02T11:18:19.130Z',
-  'food-129': '2026-11-02T11:18:19.130Z',
-  'food-130': '2026-11-02T11:18:19.130Z',
-  'food-131': '2026-11-02T11:18:19.130Z',
-  'food-132': '2026-11-02T11:18:19.130Z',
-  'food-133': '2026-11-02T11:18:19.130Z',
-  'food-134': '2026-11-02T11:18:19.130Z',
-  'food-135': '2026-11-02T11:18:19.130Z',
-  'food-136': '2026-11-02T11:18:19.130Z',
-  'food-137': '2026-11-02T11:18:19.130Z',
-  'food-138': '2026-11-02T11:18:19.130Z',
-  'food-139': '2026-11-02T11:18:19.130Z',
-  'food-140': '2026-11-02T11:18:19.130Z',
-  'food-141': '2026-11-02T11:18:19.130Z',
-  'food-142': '2026-11-02T11:18:19.130Z',
-  'food-143': '2026-11-02T11:18:19.130Z',
-  'food-144': '2026-11-02T11:18:19.130Z',
-  'food-145': '2026-11-02T11:18:19.130Z',
-  'food-146': '2026-11-02T11:18:19.130Z',
-  'food-147': '2026-11-02T11:18:19.130Z',
-  'food-148': '2026-11-02T11:18:19.130Z',
-  'food-149': '2026-11-02T11:18:19.130Z',
-  'food-150': '2026-11-02T11:18:19.130Z',
-  'food-151': '2026-11-02T11:18:19.130Z',
-  'food-152': '2026-11-02T11:18:19.130Z',
-  'food-153': '2026-11-02T11:18:19.130Z',
-  'food-154': '2026-11-02T11:18:19.130Z',
-  'food-155': '2026-11-02T11:18:19.130Z',
-  'food-156': '2026-11-02T11:18:19.130Z',
-  'food-157': '2026-11-02T11:18:19.130Z',
-  'food-158': '2026-11-02T11:18:19.130Z',
-  'food-159': '2026-11-02T11:18:19.130Z',
-  'food-160': '2026-11-02T11:18:19.130Z',
-  'food-161': '2026-11-02T11:18:19.130Z',
-  'food-162': '2026-11-02T11:18:19.130Z',
-  'food-163': '2026-11-02T11:18:19.130Z',
-  'food-164': '2026-11-02T11:18:19.130Z',
-  'food-165': '2026-11-02T11:18:19.130Z',
-  'food-166': '2026-11-02T11:18:19.130Z',
-  'food-167': '2026-11-02T11:18:19.130Z',
-  'food-168': '2026-11-02T11:18:19.130Z',
-  'food-169': '2026-11-02T11:18:19.130Z',
-  'food-170': '2026-11-02T11:18:19.130Z',
-  'food-171': '2026-11-02T11:18:19.130Z',
-  'food-172': '2026-11-02T11:18:19.130Z',
-  'food-173': '2026-11-02T11:18:19.130Z',
-  'food-174': '2026-11-02T11:18:19.130Z',
-  'food-175': '2026-11-02T11:18:19.130Z',
-  'food-176': '2026-11-02T11:18:19.130Z',
-  'food-177': '2026-11-02T11:18:19.130Z',
-  'food-178': '2026-11-02T11:18:19.130Z',
-  'food-179': '2026-11-02T11:18:19.130Z',
-  'food-180': '2026-11-02T11:18:19.130Z',
-  'food-181': '2026-11-02T11:18:19.130Z',
-  'food-182': '2026-11-02T11:18:19.130Z',
-  'food-183': '2026-11-02T11:18:19.130Z',
-  'food-184': '2026-11-02T11:18:19.130Z',
-  'food-185': '2026-11-02T11:18:19.130Z',
-  'food-186': '2026-11-02T11:18:19.130Z',
-  'food-187': '2026-11-02T11:18:19.130Z',
-  'food-188': '2026-11-02T11:18:19.130Z',
-  'food-189': '2026-11-02T11:18:19.130Z',
-  'food-190': '2026-11-02T11:18:19.130Z',
-  'food-191': '2026-11-02T11:18:19.130Z',
-  'food-192': '2026-11-02T11:18:19.130Z',
-  'food-193': '2026-11-02T11:18:19.130Z',
-  'food-194': '2026-11-02T11:18:19.130Z',
-  'food-195': '2026-11-02T11:18:19.130Z',
-  'food-196': '2026-11-02T11:18:19.130Z',
-  'food-197': '2026-11-02T11:18:19.130Z',
-  'food-198': '2026-11-02T11:18:19.130Z',
-  'food-199': '2026-11-02T11:18:19.130Z',
-  'food-200': '2026-11-02T11:18:19.130Z',
-  'food-6': '2026-11-02T11:17:15.474Z',
-  'food-9': '2026-11-02T11:17:15.474Z',
-  'food-16': '2026-11-02T11:17:15.474Z',
-  'food-17': '2026-11-02T11:17:15.474Z',
-  'food-18': '2026-11-02T11:17:15.474Z',
-  'food-35': '2026-11-02T11:17:15.474Z',
-  'food-36': '2026-11-02T11:17:15.474Z',
-  'food-44': '2026-11-02T11:17:15.474Z',
-  'food-57': '2026-11-02T11:17:15.474Z',
-  'food-66': '2026-11-02T11:17:15.474Z',
-  'food-68': '2026-11-02T11:17:15.474Z',
-  'food-70': '2026-11-02T11:17:15.474Z',
-  'food-27': '2026-11-02T11:17:15.474Z',
-  'food-100': '2026-11-02T11:17:15.474Z',
-  'food-40': '2026-11-02T11:17:15.474Z',
-  'food-54': '2026-11-02T11:17:15.474Z',
-  'food-77': '2026-11-02T11:17:15.474Z',
-  'food-80': '2026-11-02T11:17:15.474Z',
-  'food-85': '2026-11-02T11:17:15.474Z',
-  'food-87': '2026-11-02T11:17:15.474Z',
-  'food-29': '2026-11-02T11:17:15.474Z',
-  'food-72': '2026-11-02T11:17:15.474Z',
+  'food-2': '2026-11-02T12:21:08.335Z',
+  'food-38': '2026-11-02T12:21:08.335Z',
+  'food-47': '2026-11-02T12:21:08.335Z',
+  'food-82': '2026-11-02T12:21:08.335Z',
+  'food-86': '2026-11-02T12:21:08.335Z',
+  'food-88': '2026-11-02T12:21:08.335Z',
+  'food-89': '2026-11-02T12:21:08.335Z',
+  'food-96': '2026-11-02T12:21:08.335Z',
+  'food-101': '2026-11-02T12:22:18.838Z',
+  'food-102': '2026-11-02T12:22:18.838Z',
+  'food-103': '2026-11-02T12:22:18.838Z',
+  'food-104': '2026-11-02T12:22:18.838Z',
+  'food-105': '2026-11-02T12:22:18.838Z',
+  'food-106': '2026-11-02T12:22:18.838Z',
+  'food-107': '2026-11-02T12:22:18.838Z',
+  'food-108': '2026-11-02T12:22:18.838Z',
+  'food-109': '2026-11-02T12:22:18.838Z',
+  'food-110': '2026-11-02T12:22:18.838Z',
+  'food-111': '2026-11-02T12:22:18.838Z',
+  'food-112': '2026-11-02T12:22:18.838Z',
+  'food-113': '2026-11-02T12:22:18.838Z',
+  'food-114': '2026-11-02T12:22:18.838Z',
+  'food-115': '2026-11-02T12:22:18.838Z',
+  'food-116': '2026-11-02T12:22:18.838Z',
+  'food-117': '2026-11-02T12:22:18.838Z',
+  'food-118': '2026-11-02T12:22:18.838Z',
+  'food-119': '2026-11-02T12:22:18.838Z',
+  'food-120': '2026-11-02T12:22:18.838Z',
+  'food-121': '2026-11-02T12:22:18.838Z',
+  'food-122': '2026-11-02T12:22:18.838Z',
+  'food-123': '2026-11-02T12:22:18.838Z',
+  'food-124': '2026-11-02T12:22:18.838Z',
+  'food-125': '2026-11-02T12:22:18.838Z',
+  'food-126': '2026-11-02T12:22:18.838Z',
+  'food-127': '2026-11-02T12:22:18.838Z',
+  'food-128': '2026-11-02T12:22:18.838Z',
+  'food-129': '2026-11-02T12:22:18.838Z',
+  'food-130': '2026-11-02T12:22:18.838Z',
+  'food-131': '2026-11-02T12:22:18.838Z',
+  'food-132': '2026-11-02T12:22:18.838Z',
+  'food-133': '2026-11-02T12:22:18.838Z',
+  'food-134': '2026-11-02T12:22:18.838Z',
+  'food-135': '2026-11-02T12:22:18.838Z',
+  'food-136': '2026-11-02T12:22:18.838Z',
+  'food-137': '2026-11-02T12:22:18.838Z',
+  'food-138': '2026-11-02T12:22:18.838Z',
+  'food-139': '2026-11-02T12:22:18.838Z',
+  'food-140': '2026-11-02T12:22:18.838Z',
+  'food-141': '2026-11-02T12:22:18.838Z',
+  'food-142': '2026-11-02T12:22:18.838Z',
+  'food-143': '2026-11-02T12:22:18.838Z',
+  'food-144': '2026-11-02T12:22:18.838Z',
+  'food-145': '2026-11-02T12:22:18.838Z',
+  'food-146': '2026-11-02T12:22:18.838Z',
+  'food-147': '2026-11-02T12:22:18.838Z',
+  'food-148': '2026-11-02T12:22:18.838Z',
+  'food-149': '2026-11-02T12:22:18.838Z',
+  'food-150': '2026-11-02T12:22:18.838Z',
+  'food-151': '2026-11-02T12:22:18.838Z',
+  'food-152': '2026-11-02T12:22:18.838Z',
+  'food-153': '2026-11-02T12:22:18.838Z',
+  'food-154': '2026-11-02T12:22:18.838Z',
+  'food-155': '2026-11-02T12:22:18.838Z',
+  'food-156': '2026-11-02T12:22:18.838Z',
+  'food-157': '2026-11-02T12:22:18.838Z',
+  'food-158': '2026-11-02T12:22:18.838Z',
+  'food-159': '2026-11-02T12:22:18.838Z',
+  'food-160': '2026-11-02T12:22:18.838Z',
+  'food-161': '2026-11-02T12:22:18.838Z',
+  'food-162': '2026-11-02T12:22:18.838Z',
+  'food-163': '2026-11-02T12:22:18.838Z',
+  'food-164': '2026-11-02T12:22:18.838Z',
+  'food-165': '2026-11-02T12:22:18.838Z',
+  'food-166': '2026-11-02T12:22:18.838Z',
+  'food-167': '2026-11-02T12:22:18.838Z',
+  'food-168': '2026-11-02T12:22:18.838Z',
+  'food-169': '2026-11-02T12:22:18.838Z',
+  'food-170': '2026-11-02T12:22:18.838Z',
+  'food-171': '2026-11-02T12:22:18.838Z',
+  'food-172': '2026-11-02T12:22:18.838Z',
+  'food-173': '2026-11-02T12:22:18.838Z',
+  'food-174': '2026-11-02T12:22:18.838Z',
+  'food-175': '2026-11-02T12:22:18.838Z',
+  'food-176': '2026-11-02T12:22:18.838Z',
+  'food-177': '2026-11-02T12:22:18.838Z',
+  'food-178': '2026-11-02T12:22:18.838Z',
+  'food-179': '2026-11-02T12:22:18.838Z',
+  'food-180': '2026-11-02T12:22:18.838Z',
+  'food-181': '2026-11-02T12:22:18.838Z',
+  'food-182': '2026-11-02T12:22:18.838Z',
+  'food-183': '2026-11-02T12:22:18.838Z',
+  'food-184': '2026-11-02T12:22:18.838Z',
+  'food-185': '2026-11-02T12:22:18.838Z',
+  'food-186': '2026-11-02T12:22:18.838Z',
+  'food-187': '2026-11-02T12:22:18.838Z',
+  'food-188': '2026-11-02T12:22:18.838Z',
+  'food-189': '2026-11-02T12:22:18.838Z',
+  'food-190': '2026-11-02T12:22:18.838Z',
+  'food-191': '2026-11-02T12:22:18.838Z',
+  'food-192': '2026-11-02T12:22:18.838Z',
+  'food-193': '2026-11-02T12:22:18.838Z',
+  'food-194': '2026-11-02T12:22:18.838Z',
+  'food-195': '2026-11-02T12:22:18.838Z',
+  'food-196': '2026-11-02T12:22:18.838Z',
+  'food-197': '2026-11-02T12:22:18.838Z',
+  'food-198': '2026-11-02T12:22:18.838Z',
+  'food-199': '2026-11-02T12:22:18.838Z',
+  'food-200': '2026-11-02T12:22:18.838Z',
+  'food-6': '2026-11-02T12:21:08.335Z',
+  'food-9': '2026-11-02T12:21:08.335Z',
+  'food-16': '2026-11-02T12:21:08.335Z',
+  'food-17': '2026-11-02T12:21:08.335Z',
+  'food-18': '2026-11-02T12:21:08.335Z',
+  'food-35': '2026-11-02T12:21:08.335Z',
+  'food-36': '2026-11-02T12:21:08.335Z',
+  'food-44': '2026-11-02T12:21:08.335Z',
+  'food-57': '2026-11-02T12:21:08.335Z',
+  'food-66': '2026-11-02T12:21:08.335Z',
+  'food-68': '2026-11-02T12:21:08.335Z',
+  'food-70': '2026-11-02T12:21:08.335Z',
+  'food-27': '2026-11-02T12:21:08.335Z',
+  'food-100': '2026-11-02T12:21:08.335Z',
+  'food-40': '2026-11-02T12:21:08.335Z',
+  'food-54': '2026-11-02T12:21:08.335Z',
+  'food-77': '2026-11-02T12:21:08.335Z',
+  'food-80': '2026-11-02T12:21:08.335Z',
+  'food-85': '2026-11-02T12:21:08.335Z',
+  'food-87': '2026-11-02T12:21:08.335Z',
+  'food-29': '2026-11-02T12:21:08.335Z',
+  'food-72': '2026-11-02T12:21:08.335Z',
+  'food-13': '2026-11-02T12:21:08.335Z',
+  'food-20': '2026-11-02T12:21:08.335Z',
+  'food-42': '2026-11-02T12:21:08.335Z',
+  'food-63': '2026-11-02T12:21:08.335Z',
+  'food-65': '2026-11-02T12:21:08.335Z',
 };
 
 export interface AuthModalInitialView {
@@ -622,6 +626,7 @@ export interface User {
   integritySeal?: string;
   vipStatus?: 'active' | 'expired' | 'none';
   vipPlanType?: string;
+  vipPlanDays?: number;
   vipExpiresAt?: string;
   approvedStoresCount?: number;
 }
@@ -1135,6 +1140,38 @@ export interface RegistrationTransaction {
   notes?: string;
   aiVerificationReport?: AbaReceiptVerificationReport;
 }
+
+/**
+ * Legacy demo seed transactions ("TXN-20261020-001..003") that must NEVER auto-populate
+ * or resurrect from localStorage / Supabase Cloud on app installs or version upgrades.
+ */
+export const DEPRECATED_DEMO_SEED_TXN_IDS: ReadonlySet<string> = new Set([
+  'TXN-20261020-001',
+  'TXN-20261020-002',
+  'TXN-20261020-003',
+]);
+
+export const DEPRECATED_DEMO_SEED_TXN_REFS: ReadonlySet<string> = new Set([
+  'KHQR-MB-9823419082',
+  'BAKONG-TRX-447192831',
+  'KHQR-ABA-5819203112',
+]);
+
+export const isDeprecatedDemoSeedTransaction = (
+  txn?: Partial<RegistrationTransaction> | null
+): boolean => {
+  if (!txn || typeof txn !== 'object') return false;
+  if (typeof txn.id === 'string' && DEPRECATED_DEMO_SEED_TXN_IDS.has(txn.id.trim())) {
+    return true;
+  }
+  if (
+    typeof txn.transactionRef === 'string' &&
+    DEPRECATED_DEMO_SEED_TXN_REFS.has(txn.transactionRef.trim())
+  ) {
+    return true;
+  }
+  return false;
+};
 
 export type AiStoreCategoryDecision = 'approved' | 'pending_review' | 'rejected';
 
@@ -2006,17 +2043,144 @@ export const getVipAccountState = (user?: User | null): VipAccountState => {
   return 'regular_unpaid';
 };
 
+/**
+ * Infers the legitimate purchased VIP plan duration (30, 60, 90, or 365 days) for a user,
+ * repairing any legacy synthetic 365-day timestamp that was not explicitly purchased/granted as a 365-day plan.
+ */
+export const resolveUserActualVipPlanDays = (user?: User | null): number => {
+  if (!user) return 30;
+  // 1. Check explicit transactionRef tag (e.g. TXN-30D-..., VIP-90D-..., ADMIN-VIP-365D-...)
+  const ref = String(user.transactionRef || '').trim();
+  const refDaysMatch = ref.match(/(?:^|[-_])(10|30|60|90|180|365)D(?:[-_]|$)/i);
+  if (refDaysMatch) {
+    const parsed = Number(refDaysMatch[1]);
+    if (parsed >= 1) return parsed;
+  }
+  // 2. Check explicit vipPlanDays stored on the user record
+  if (typeof user.vipPlanDays === 'number' && Number.isFinite(user.vipPlanDays) && user.vipPlanDays >= 1) {
+    // Guard against legacy unverified 365-day stamp on permanent email or quarterly plan
+    if (user.vipPlanDays === 365 && (ref === 'VIP-PERMANENT-IGP2026D' || user.vipPlanType === 'quarterly')) {
+      return 30;
+    }
+    return user.vipPlanDays;
+  }
+  // 3. Check vipPlanType
+  if (user.vipPlanType === 'quarterly' || user.vipPlanType === '30d') {
+    return 30;
+  }
+  if (user.vipPlanType === '90d') {
+    return 90;
+  }
+  if (user.vipPlanType === '60d') {
+    return 60;
+  }
+  // 4. Inspect start -> expiry delta for non-synthetic durations (e.g. 30, 60, 90 days)
+  const startMs = parseSafeDateMs(user.subscriptionStartDate || user.verifiedAt);
+  const expMs = parseSafeDateMs(user.subscriptionExpiryDate || user.vipExpiresAt);
+  if (startMs > 0 && expMs > startMs) {
+    const spanDays = Math.round((expMs - startMs) / (1000 * 60 * 60 * 24));
+    if (spanDays >= 25 && spanDays <= 35) return 30;
+    if (spanDays >= 55 && spanDays <= 65) return 60;
+    if (spanDays >= 85 && spanDays <= 95) return 90;
+  }
+  return 30;
+};
+
+/**
+ * Sanitizes a User object's VIP expiry date if it was polluted by the legacy 365-day default bug
+ * when the user actually registered for a 30-day (or 90-day) VIP plan.
+ */
+export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
+  if (!user || isAdminAccount(user)) return user;
+  const rawExpiry = user.subscriptionExpiryDate || user.vipExpiresAt;
+  const expMs = parseSafeDateMs(rawExpiry);
+  const nowMs = Date.now();
+  const remainingDays = expMs > nowMs ? Math.ceil((expMs - nowMs) / (1000 * 60 * 60 * 24)) : 0;
+  const actualPlanDays = resolveUserActualVipPlanDays(user);
+
+  // Detect synthetic 365-day inflation: remainingDays > 95 when actualPlanDays <= 90
+  const hasSynthetic365Inflation =
+    remainingDays > 95 &&
+    actualPlanDays <= 90 &&
+    (user.vipPlanDays !== 365 ||
+      user.transactionRef === 'VIP-PERMANENT-IGP2026D' ||
+      user.vipPlanType === 'quarterly');
+
+  if (hasSynthetic365Inflation) {
+    const rawStartMs = parseSafeDateMs(user.subscriptionStartDate || user.verifiedAt);
+    const validStartMs =
+      rawStartMs > 0 && nowMs - rawStartMs < actualPlanDays * 24 * 60 * 60 * 1000 && rawStartMs <= nowMs
+        ? rawStartMs
+        : nowMs;
+    const correctedExpIso = new Date(validStartMs + actualPlanDays * 24 * 60 * 60 * 1000).toISOString();
+    const correctedStartIso = new Date(validStartMs).toISOString();
+    return {
+      ...user,
+      vipPlanDays: actualPlanDays,
+      vipPlanType: actualPlanDays <= 30 ? 'quarterly' : user.vipPlanType || 'annual',
+      subscriptionStartDate: correctedStartIso,
+      subscriptionExpiryDate: correctedExpIso,
+      vipExpiresAt: correctedExpIso,
+      transactionRef:
+        user.transactionRef === 'VIP-PERMANENT-IGP2026D'
+          ? `VIP-${actualPlanDays}D-IGP2026D`
+          : user.transactionRef,
+    };
+  }
+
+  // If permanent VIP email has expired or missing expiry, set to actualPlanDays (30 days default)
+  if (isPermanentVipEmail(user.email) && expMs <= nowMs) {
+    const correctedExpIso = new Date(nowMs + actualPlanDays * 24 * 60 * 60 * 1000).toISOString();
+    return {
+      ...user,
+      membershipTier: 'premium_vip',
+      subscriptionStatus: 'active',
+      vipStatus: 'active',
+      paymentStatus: 'verified',
+      vipPlanDays: actualPlanDays,
+      vipPlanType: actualPlanDays <= 30 ? 'quarterly' : 'annual',
+      subscriptionStartDate: user.subscriptionStartDate || new Date(nowMs).toISOString(),
+      subscriptionExpiryDate: correctedExpIso,
+      vipExpiresAt: correctedExpIso,
+    };
+  }
+
+  if (!user.vipPlanDays && isUserVipActive(user)) {
+    return {
+      ...user,
+      vipPlanDays: actualPlanDays,
+    };
+  }
+
+  return user;
+};
+
 // Helper to calculate remaining days in VIP subscription (strictly for VIP users, 0 for Admin)
 export const getVipRemainingDays = (user?: User | null): number => {
   if (!user || isAdminAccount(user)) return 0;
   if (!isUserVipActive(user)) return 0;
+  const planDays = resolveUserActualVipPlanDays(user);
   const rawExpiry = user.subscriptionExpiryDate || user.vipExpiresAt;
-  if (!rawExpiry) return isPermanentVipEmail(user.email) ? 365 : 30;
+  if (!rawExpiry) return planDays;
   const expMs = parseSafeDateMs(rawExpiry);
-  if (expMs <= 0) return isPermanentVipEmail(user.email) ? 365 : 30;
+  if (expMs <= 0) return planDays;
   const diffMs = expMs - Date.now();
-  if (diffMs <= 0 && isPermanentVipEmail(user.email)) return 365;
-  return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+  if (diffMs <= 0) {
+    return isPermanentVipEmail(user.email) ? planDays : 0;
+  }
+  const computedDays = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+  // Guard against displaying >95 days (e.g. 365 days) when the user's plan is a 30-day or 90-day package
+  if (computedDays > 95 && planDays <= 90) {
+    const startMs = parseSafeDateMs(user.subscriptionStartDate || user.verifiedAt);
+    if (startMs > 0 && startMs <= Date.now()) {
+      const trueExpMs = startMs + planDays * 24 * 60 * 60 * 1000;
+      if (trueExpMs > Date.now()) {
+        return Math.max(1, Math.ceil((trueExpMs - Date.now()) / (1000 * 60 * 60 * 24)));
+      }
+    }
+    return planDays;
+  }
+  return computedDays;
 };
 
 // AI Trending Food Section Types (Strictly Food Places only: Street Food, Cafés, Desserts, Famous & Unusual Dishes)
