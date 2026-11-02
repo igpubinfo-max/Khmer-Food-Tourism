@@ -29,6 +29,7 @@ import {
   type AiImageAnalysis,
   type AiTurnIntent,
 } from './conversationalAiAssistant';
+import { getCloudApiConfig } from './supabaseService';
 
 /* ------------------------------------------------------------------------------------------------ */
 /* Types                                                                                            */
@@ -724,24 +725,47 @@ export function interpretAssistantPayload(raw: unknown, ctx: InterpretContext): 
 /* Network layer                                                                                    */
 /* ------------------------------------------------------------------------------------------------ */
 
-type CallOutcome =
-  | { ok: true; text: string }
-  | { ok: false; kind: 'network' | 'timeout' | 'auth' | 'quota' | 'blocked' | 'bad_request' | 'not_found' | 'server' | 'bad_response'; status?: number; message?: string };
+type CallFailureKind =
+  | 'network'
+  | 'timeout'
+  | 'auth'
+  | 'quota'
+  | 'blocked'
+  | 'bad_request'
+  | 'not_found'
+  | 'server'
+  | 'bad_response'
+  /** The Supabase `food-ai` proxy is not deployed / not configured -> use the direct key instead. */
+  | 'proxy_unavailable';
 
-async function callGeminiOnce(key: string, model: string, body: unknown, timeoutMs: number): Promise<CallOutcome> {
+type CallOutcome = { ok: true; text: string } | { ok: false; kind: CallFailureKind; status?: number; message?: string };
+
+interface RawCall {
+  url: string;
+  headers: Record<string, string>;
+  payload: unknown;
+  timeoutMs: number;
+  viaProxy?: boolean;
+}
+
+async function callGeminiRaw(call: RawCall): Promise<CallOutcome> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const timer = setTimeout(() => controller.abort(), call.timeoutMs);
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify(body),
-      }
-    );
+    const response = await fetch(call.url, {
+      method: 'POST',
+      headers: call.headers,
+      signal: controller.signal,
+      body: JSON.stringify(call.payload),
+    });
     clearTimeout(timer);
+
+    if (call.viaProxy) {
+      // Our proxy stamps every answer with this header. No header (gateway 401/404) or 503 = proxy not usable.
+      const stamped = response.headers.get('x-food-ai-proxy') === '1';
+      if (!stamped || response.status === 503) return { ok: false, kind: 'proxy_unavailable', status: response.status };
+    }
+
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
       const message = String(err?.error?.message || `HTTP ${response.status}`);
@@ -779,6 +803,52 @@ async function callGeminiOnce(key: string, model: string, body: unknown, timeout
     if (err?.name === 'AbortError') return { ok: false, kind: 'timeout' };
     return { ok: false, kind: 'network', message: err?.message };
   }
+}
+
+/** Direct call with a key that lives on the device (fallback only). */
+function callGeminiOnce(key: string, model: string, body: unknown, timeoutMs: number): Promise<CallOutcome> {
+  return callGeminiRaw({
+    url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
+    headers: { 'Content-Type': 'application/json' },
+    payload: body,
+    timeoutMs,
+  });
+}
+
+/* ---- Supabase Edge Function proxy: the Gemini key stays server-side (secret GEMINI_API_KEY) ---- */
+const PROXY_RETRY_AFTER_MS = 10 * 60 * 1000;
+let proxyDownUntil = 0;
+
+/** Test hook: forget that the proxy was found unavailable. */
+export function resetFoodAiProxyState(): void {
+  proxyDownUntil = 0;
+}
+
+function hasProxyConfig(): boolean {
+  try {
+    const cfg = getCloudApiConfig();
+    return Boolean(cfg.supabaseUrl && cfg.supabaseAnonKey);
+  } catch {
+    return false;
+  }
+}
+
+async function callViaProxy(model: string, body: unknown, timeoutMs: number): Promise<CallOutcome> {
+  const cfg = getCloudApiConfig();
+  const out = await callGeminiRaw({
+    url: `${cfg.supabaseUrl}/functions/v1/food-ai`,
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: cfg.supabaseAnonKey,
+      Authorization: `Bearer ${cfg.supabaseAnonKey}`,
+    },
+    payload: { model, body },
+    timeoutMs,
+    viaProxy: true,
+  });
+  // The proxy host itself is unreachable -> let the direct path try.
+  if (!out.ok && out.kind === 'network') return { ok: false, kind: 'proxy_unavailable' };
+  return out;
 }
 
 /** Tolerant JSON extraction (code fences, leading prose, truncated tail). */
@@ -842,11 +912,21 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
   }
 
   const key = resolveGeminiApiKey(params.geminiApiKey);
-  if (!key && !params.transport) return { ok: false, reason: 'no_key' };
+  const proxyPossible = !params.transport && hasProxyConfig();
+  if (!key && !proxyPossible && !params.transport) return { ok: false, reason: 'no_key' };
 
+  // 1) Supabase proxy (key never leaves the server)  2) fallback: key stored in the app
   const transport =
     params.transport ||
-    ((model: string, body: unknown, timeoutMs: number) => callGeminiOnce(key, model, body, timeoutMs));
+    (async (model: string, body: unknown, timeoutMs: number): Promise<CallOutcome> => {
+      if (proxyPossible && Date.now() >= proxyDownUntil) {
+        const viaProxy = await callViaProxy(model, body, timeoutMs);
+        if (!(viaProxy.ok === false && viaProxy.kind === 'proxy_unavailable')) return viaProxy;
+        proxyDownUntil = Date.now() + PROXY_RETRY_AFTER_MS;
+      }
+      if (!key) return { ok: false, kind: 'auth', message: 'No Gemini API key available' };
+      return callGeminiOnce(key, model, body, timeoutMs);
+    });
 
   const replyLanguage = detectReplyLanguage(text, uiLanguage);
   const ctx: InterpretContext = {
@@ -927,7 +1007,7 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
     failure = res;
     if (res.stop) break;
     // Model list exhausted -> ask Google which models this key can use
-    if (i === models.length - 1 && !triedDiscovery && !params.transport && failure.fail === 'unavailable') {
+    if (i === models.length - 1 && !triedDiscovery && !params.transport && Boolean(key) && failure.fail === 'unavailable') {
       triedDiscovery = true;
       const discovered = (await getGeminiCandidateModels(key)).filter((m) => !models.includes(m));
       models.push(...discovered.slice(0, 3));

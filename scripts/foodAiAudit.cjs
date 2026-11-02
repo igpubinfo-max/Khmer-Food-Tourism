@@ -284,6 +284,81 @@ function section(t) {
       { id: 'a1', role: 'assistant', text: 'It is amok', timestamp: '', dishes: [amok] },
     ]);
     ok(turns.length === 2 && turns[0].hadImage === true && turns[1].dishNames[0] === amok.nameKh, 'welcome/pending dropped; photo + shown dishes remembered', turns);
+
+    /* ------------------------------------------------------------------ */
+    section('15. Edge-function request hardening (supabase/functions/food-ai/sanitize.ts)');
+    const san = await server.ssrLoadModule('/supabase/functions/food-ai/sanitize.ts');
+    const goodBody = llm.buildGeminiRequestBody({ userText: 'what is this?', uiLanguage: 'km', foods, restaurants: [], history, memory, image: img, model: 'gemini-2.5-flash' });
+    const sOk = san.sanitizeGeminiRequest({ model: 'gemini-2.5-flash', body: goodBody });
+    ok(sOk.ok === true, 'the exact request the app builds passes the proxy whitelist', sOk);
+    ok(sOk.ok && sOk.body.contents.at(-1).parts[0].inlineData.data === 'QUJD', 'image survives sanitising');
+    ok(sOk.ok && sOk.body.generationConfig.responseSchema && sOk.body.generationConfig.thinkingConfig.thinkingBudget === 1536, 'schema + thinking budget survive');
+    ok(!san.sanitizeGeminiRequest({ model: 'gemini-1.0-ultra', body: goodBody }).ok, 'unknown model rejected');
+    ok(!san.sanitizeGeminiRequest({ model: 'gemini-2.5-flash', body: { ...goodBody, tools: [{ googleSearch: {} }] } }).ok === false && !('tools' in san.sanitizeGeminiRequest({ model: 'gemini-2.5-flash', body: { ...goodBody, tools: [{ googleSearch: {} }], safetySettings: [], cachedContent: 'x' } }).body), 'tools / safetySettings / cachedContent are dropped (proxy is not an open relay)');
+    ok(!san.sanitizeGeminiRequest({ model: 'gemini-2.5-flash', body: { contents: [{ role: 'user', parts: [{ fileData: { fileUri: 'gs://x' } }] }] } }).ok, 'fileData parts rejected');
+    ok(!san.sanitizeGeminiRequest({ model: 'gemini-2.5-flash', body: { contents: [{ role: 'user', parts: [{ inlineData: { mimeType: 'application/pdf', data: 'QUJD' } }] }] } }).ok, 'non-image inlineData rejected');
+    ok(!san.sanitizeGeminiRequest({ model: 'gemini-2.5-flash', body: { contents: [{ role: 'system', parts: [{ text: 'x' }] }] } }).ok, 'bad role rejected');
+    const manyImgs = { contents: [{ role: 'user', parts: [1, 2, 3].map(() => ({ inlineData: { mimeType: 'image/jpeg', data: 'QUJD' } })) }] };
+    ok(!san.sanitizeGeminiRequest({ model: 'gemini-2.5-flash', body: manyImgs }).ok, 'more than 2 images rejected');
+    const huge = san.sanitizeGeminiRequest({ model: 'gemini-2.5-flash', body: { contents: [{ role: 'user', parts: [{ text: 'a'.repeat(160000) }] }] } });
+    ok(!huge.ok && huge.status === 413, 'oversized text -> 413');
+    const clamped = san.sanitizeGeminiRequest({ model: 'gemini-2.5-flash', body: { contents: [{ role: 'user', parts: [{ text: 'hi' }] }], generationConfig: { maxOutputTokens: 999999, temperature: 7, thinkingConfig: { thinkingBudget: 99999 }, responseMimeType: 'text/x-evil' } } });
+    ok(clamped.ok && clamped.body.generationConfig.maxOutputTokens === 8192 && clamped.body.generationConfig.temperature === 1 && clamped.body.generationConfig.thinkingConfig.thinkingBudget === 4096 && !('responseMimeType' in clamped.body.generationConfig), 'generationConfig values are clamped / whitelisted');
+    const lim = new san.SlidingWindowLimiter(3, 1000);
+    ok([0, 1, 2].every((i) => lim.allow('ip', 100 + i)) && lim.allow('ip', 200) === false && lim.allow('other', 200) && lim.allow('ip', 1200), 'rate limiter blocks the 4th call per window, per client, then recovers');
+
+    /* ------------------------------------------------------------------ */
+    section('16. Client transport: proxy first, direct key only as fallback (mocked fetch)');
+    const realFetch = globalThis.fetch;
+    const calledUrls = [];
+    const geminiOk = (obj) => ({ candidates: [{ content: { parts: [{ text: JSON.stringify(obj) }] }, finishReason: 'STOP' }] });
+    const mkResp = (status, data, proxy) => ({ ok: status >= 200 && status < 300, status, headers: { get: (k) => (proxy && k.toLowerCase() === 'x-food-ai-proxy' ? '1' : null) }, json: async () => data });
+    const payload = { domain: 'food', intent: 'general_food_qa', answer: 'Via proxy OK', needsClarification: false };
+    const t16 = { uiLanguage: 'en', foods, restaurants: [], history: [], memory, userText: 'hello', geminiApiKey: 'LOCALKEY' };
+    try {
+      // (a) proxy answers -> direct Google endpoint never contacted, key never sent
+      llm.resetFoodAiProxyState();
+      globalThis.fetch = async (url, init) => { calledUrls.push([String(url), init.headers && (init.headers.Authorization || '')]); return mkResp(200, geminiOk(payload), true); };
+      const pa = await llm.askFoodAssistant(t16);
+      ok(pa.ok && pa.message.text === 'Via proxy OK', 'proxy answer is used');
+      ok(calledUrls.length === 1 && /\/functions\/v1\/food-ai$/.test(calledUrls[0][0]), 'only the proxy was called', calledUrls.map((c) => c[0]));
+      ok(!JSON.stringify(calledUrls).includes('LOCALKEY') && !calledUrls.some((c) => /generativelanguage/.test(c[0])), 'device key is NOT sent anywhere when the proxy works');
+
+      // (b) proxy not deployed (gateway 404, no stamp) -> direct fallback, proxy skipped afterwards
+      llm.resetFoodAiProxyState();
+      calledUrls.length = 0;
+      globalThis.fetch = async (url) => { calledUrls.push([String(url)]); return /food-ai/.test(String(url)) ? mkResp(404, { message: 'Function not found' }, false) : mkResp(200, geminiOk(payload), false); };
+      const pb = await llm.askFoodAssistant(t16);
+      ok(pb.ok, 'falls back to the direct key when the proxy is not deployed');
+      ok(calledUrls.length === 2 && /food-ai/.test(calledUrls[0][0]) && /generativelanguage/.test(calledUrls[1][0]), 'order: proxy then direct', calledUrls.map((c) => c[0]));
+      calledUrls.length = 0;
+      await llm.askFoodAssistant(t16);
+      ok(calledUrls.length === 1 && /generativelanguage/.test(calledUrls[0][0]), 'proxy is skipped for a while after it was found unavailable');
+
+      // (c) proxy deployed but GEMINI_API_KEY secret missing (503 stamped) -> direct fallback
+      llm.resetFoodAiProxyState();
+      calledUrls.length = 0;
+      globalThis.fetch = async (url) => { calledUrls.push([String(url)]); return /food-ai/.test(String(url)) ? mkResp(503, { error: { status: 'FOOD_AI_NOT_CONFIGURED' } }, true) : mkResp(200, geminiOk(payload), false); };
+      const pc = await llm.askFoodAssistant(t16);
+      ok(pc.ok && calledUrls.length === 2, 'not-configured proxy (503) -> direct fallback');
+
+      // (d) proxy rate limit (429 stamped) must NOT be bypassed through the direct key
+      llm.resetFoodAiProxyState();
+      calledUrls.length = 0;
+      globalThis.fetch = async (url) => { calledUrls.push([String(url)]); return mkResp(429, { error: { message: 'Too many AI requests' } }, true); };
+      const pd = await llm.askFoodAssistant(t16);
+      ok(!pd.ok && pd.reason === 'quota' && !calledUrls.some((c) => /generativelanguage/.test(c[0])), 'proxy 429 -> quota, direct key not used to dodge the limit');
+
+      // (e) request sent to the proxy has the {model, body} envelope the edge function expects
+      llm.resetFoodAiProxyState();
+      let envelope = null;
+      globalThis.fetch = async (url, init) => { envelope = JSON.parse(init.body); return mkResp(200, geminiOk(payload), true); };
+      await llm.askFoodAssistant(t16);
+      ok(envelope && envelope.model === 'gemini-2.5-flash' && envelope.body && envelope.body.contents && san.sanitizeGeminiRequest(envelope).ok, 'envelope {model, body} is accepted by the proxy whitelist');
+    } finally {
+      globalThis.fetch = realFetch;
+      llm.resetFoodAiProxyState();
+    }
   } catch (e) {
     fail++;
     failures.push('EXCEPTION ' + e.message);
