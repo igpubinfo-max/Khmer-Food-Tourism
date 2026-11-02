@@ -62,6 +62,7 @@ import {
   buildWelcomeAssistantMessage,
   generateConversationalAiResponse,
   askGeminiFoodTourismAssistant,
+  fetchOnlineDishPhotoByQuery,
   resolveGeminiApiKey,
   type AiAssistantMessage,
   type AiConversationMemory,
@@ -732,6 +733,35 @@ export const WhatToEatModal: React.FC = () => {
 
     if (reply.compareDishes && reply.compareDishes.length >= 2) {
       setComparedDishIds(reply.compareDishes.slice(0, 3).map((d) => d.id));
+    }
+
+    // If the user asked for an out-of-catalog dish (custom-recipe-*), fetch a real online photo for it!
+    const customFoodItem = reply.recipePreview?.food;
+    if (customFoodItem && String(customFoodItem.id || '').startsWith('custom-recipe-')) {
+      void fetchOnlineDishPhotoByQuery(customFoodItem.nameEn || customFoodItem.nameKh || clean).then(
+        (onlineUrl) => {
+          if (!onlineUrl) return;
+          setChatMessages((prev) =>
+            prev.map((m) => {
+              if (m.id !== reply.id) return m;
+              const updatedFood: FoodItem = {
+                ...(m.recipePreview?.food || customFoodItem),
+                photoUrl: onlineUrl,
+                originalPhotoUrl: onlineUrl,
+              };
+              return {
+                ...m,
+                dishes: (m.dishes || []).map((d) =>
+                  d.id === customFoodItem.id ? updatedFood : d
+                ),
+                recipePreview: m.recipePreview
+                  ? { ...m.recipePreview, food: updatedFood }
+                  : m.recipePreview,
+              };
+            })
+          );
+        }
+      );
     }
 
     // If a Gemini API key is configured, refine the reply asynchronously with live Gemini AI

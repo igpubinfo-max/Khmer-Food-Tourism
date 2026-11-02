@@ -1,6 +1,7 @@
 import { isPlaceLocationVerified, type FoodItem, type Language, type Restaurant, type TouristDestination } from '../types';
 import { tr } from '../utils/i18n';
 import { normalizeKhmerFoodText, searchKhmerFoods } from '../utils/khmerFoodSearch';
+import { generateAuthenticRecipeByDishName } from '../utils/khmerRecipeGenerator';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { isMedicalOrHealthQuery, buildMedicalScopeNotice, describeDish, type BrainChip } from './aiFoodBrain';
 import { getAiFoodAdvisorRecommendations, isVegetarianQuery } from './aiFoodAdvisorService';
@@ -81,7 +82,7 @@ const PROVINCE_PATTERNS: Array<{ kh: string; en: string; zh: string; re: RegExp 
 ];
 
 const RECIPE_INTENT_RE =
-  /រូបមន្ត|គ្រឿងផ្សំ|របៀបធ្វើ|ធ្វើម៉េច|ចម្អិនម៉េច|វិធីធ្វើ|recipe|ingredient|how to cook|how to make|how do i make|cooking step|做法|食谱|菜谱|食材|配料|怎么做|如何制作/i;
+  /រូបមន្ត|គ្រឿងផ្សំ|របៀបធ្វើ|របៀបចម្អិន|ធ្វើម៉េច|ធ្វើដូចម្តេច|ធ្វើបែបណា|ចម្អិនម៉េច|ចម្អិនដូចម្តេច|វិធីធ្វើ|វិធីចម្អិន|recipe|ingredient|how to cook|how to make|how do i make|cooking step|做法|食谱|菜谱|食材|配料|怎么做|如何制作/i;
 
 const RESTAURANT_INTENT_RE =
   /ហាងណា|ញ៉ាំនៅណា|ភោជនីយដ្ឋាន|ហាងអាហារ|រកហាង|ណែនាំហាង|ហាងលក់|where to eat|which restaurant|recommend.*restaurant|find.*shop|best place to eat|哪里吃|哪家餐厅|推荐餐厅|去哪吃|餐馆|饭店/i;
@@ -382,9 +383,37 @@ export function generateConversationalAiResponse(params: {
     };
   }
 
-  // 3. RECIPE / INGREDIENTS / COOKING STEPS INTENT (Multi-turn aware!)
+  // 3. RECIPE / INGREDIENTS / COOKING STEPS INTENT (Multi-turn aware + supports any dish outside the 200-item catalog!)
   if (RECIPE_INTENT_RE.test(trimmed)) {
-    const targetFood = findBestDishInQuery(trimmed, foods, memory.lastDishes) || foods[0];
+    const cleanRequestedDishName = trimmed
+      .replace(RECIPE_INTENT_RE, ' ')
+      .replace(/^(?:សូម|សុំ|ជួយ|ប្រាប់|បង្ហាញ|ចង់ដឹង|ពី|នៃ|សម្រាប់)\s*/gi, '')
+      .replace(/[?？!！។«»"']/g, '')
+      .trim();
+
+    const matchedInCatalog = findBestDishInQuery(trimmed, foods, []);
+    let targetFood: FoodItem;
+
+    if (matchedInCatalog) {
+      targetFood = matchedInCatalog;
+    } else if (cleanRequestedDishName.length >= 2) {
+      // Dish is outside the 200-item catalog: dynamically generate authentic ingredients & cooking steps!
+      const generated = generateAuthenticRecipeByDishName(cleanRequestedDishName, cleanRequestedDishName, 'soup');
+      const fallbackPhotoDish = searchKhmerFoods(foods, cleanRequestedDishName)[0] || memory.lastDishes[0] || foods[0];
+      targetFood = {
+        ...fallbackPhotoDish,
+        id: `custom-recipe-${Date.now()}`,
+        nameKh: cleanRequestedDishName,
+        nameEn: cleanRequestedDishName,
+        descriptionKh: generated.descriptionKh,
+        descriptionEn: generated.descriptionEn,
+        ingredients: generated.ingredients,
+        steps: generated.steps,
+      };
+    } else {
+      targetFood = memory.lastDishes[0] || foods[0];
+    }
+
     const loc = getLocalizedFood(targetFood, language);
     const ingredients = (targetFood.ingredients || []).slice(0, 6).map((ing, idx) => ({
       name: language === 'km' ? ing.nameKh : language === 'zh' ? (loc.ingredients?.[idx] || ing.nameEn || ing.nameKh) : (ing.nameEn || ing.nameKh),
@@ -831,8 +860,78 @@ export function resolveGeminiApiKey(explicitKey?: string): string {
   return '';
 }
 
+const GEMINI_V25 = ['2', '5'].join('.');
+const GEMINI_V15 = ['1', '5'].join('.');
+
+const DEFAULT_GEMINI_MODELS = [
+  `gemini-${GEMINI_V25}-flash`,
+  'gemini-flash-latest',
+  `gemini-${GEMINI_V25}-flash-lite`,
+  `gemini-${GEMINI_V15}-flash`,
+];
+
+/**
+ * Dynamically queries Google AI Studio for the active generateContent text models supported by this key,
+ * falling back to the standard current Flash models.
+ */
+async function getGeminiCandidateModels(key: string): Promise<string[]> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`,
+      { signal: controller.signal }
+    );
+    clearTimeout(timer);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data?.models)) {
+        const textModels = data.models
+          .filter(
+            (m: any) =>
+              Array.isArray(m?.supportedGenerationMethods) &&
+              m.supportedGenerationMethods.includes('generateContent') &&
+              /gemini/i.test(m?.name || '') &&
+              !/tts|image|audio|live|vision|embedding|aqa|bisect|learnlm|2\.0|1\.0|robotics|computer-use|thinking-exp/i.test(
+                m?.name || ''
+              )
+          )
+          .map((m: any) => String(m.name || '').replace(/^models\//, ''));
+
+        if (textModels.length > 0) {
+          const preferredOrder = [
+            `gemini-${GEMINI_V25}-flash`,
+            'gemini-flash-latest',
+            `gemini-${GEMINI_V25}-flash-lite`,
+            `gemini-${GEMINI_V25}-pro`,
+            'gemini-pro-latest',
+            `gemini-${GEMINI_V15}-flash`,
+          ];
+          textModels.sort((a, b) => {
+            const idxA = preferredOrder.indexOf(a);
+            const idxB = preferredOrder.indexOf(b);
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            if (idxA !== -1) return -1;
+            if (idxB !== -1) return 1;
+            const aIsStableFlash = /flash/i.test(a) && !/preview|exp/i.test(a);
+            const bIsStableFlash = /flash/i.test(b) && !/preview|exp/i.test(b);
+            if (aIsStableFlash && !bIsStableFlash) return -1;
+            if (!aIsStableFlash && bIsStableFlash) return 1;
+            return b.localeCompare(a, undefined, { numeric: true });
+          });
+          return textModels.slice(0, 6);
+        }
+      }
+    }
+  } catch {
+    // Fall back to predefined list
+  }
+  return DEFAULT_GEMINI_MODELS;
+}
+
 /**
  * Tests whether a Gemini API key is valid and able to generate responses.
+ * Tries the primary Flash models immediately (single fast request < 1s) before querying the model catalog.
  */
 export async function testGeminiApiConnection(apiKey?: string): Promise<{ ok: boolean; model?: string; message: string }> {
   const key = resolveGeminiApiKey(apiKey);
@@ -843,33 +942,122 @@ export async function testGeminiApiConnection(apiKey?: string): Promise<{ ok: bo
     };
   }
 
-  const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash'];
-  let lastError = 'Connection failed';
+  let firstError = '';
 
-  for (const model of modelsToTry) {
+  const tryModel = async (model: string): Promise<{ ok: boolean; model?: string; error?: string }> => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
     try {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
           body: JSON.stringify({
-            contents: [{ role: 'user', parts: [{ text: 'Reply with OK in 2 words.' }] }],
-            generationConfig: { maxOutputTokens: 16, temperature: 0.1 },
+            contents: [{ role: 'user', parts: [{ text: 'Say OK' }] }],
           }),
         }
       );
+      clearTimeout(timer);
       if (response.ok) {
-        return { ok: true, model, message: `Connected to Google ${model} successfully!` };
+        return { ok: true, model };
       }
       const errData = await response.json().catch(() => ({}));
-      lastError = errData?.error?.message || `HTTP ${response.status}`;
+      return { ok: false, error: errData?.error?.message || `HTTP ${response.status}` };
     } catch (err: any) {
-      lastError = err?.message || 'Network error';
+      clearTimeout(timer);
+      return { ok: false, error: err?.name === 'AbortError' ? 'Request timed out' : err?.message || 'Network error' };
+    }
+  };
+
+  // 1. Fast path: test primary Flash aliases directly (1 network call)
+  for (const fastModel of DEFAULT_GEMINI_MODELS.slice(0, 2)) {
+    const res = await tryModel(fastModel);
+    if (res.ok) {
+      return { ok: true, model: fastModel, message: `Connected to Google ${fastModel} successfully!` };
+    }
+    if (res.error && !firstError) firstError = res.error;
+  }
+
+  // 2. Fallback path: discover active text models from v1beta/models
+  const discovered = await getGeminiCandidateModels(key);
+  for (const model of discovered) {
+    if (DEFAULT_GEMINI_MODELS.slice(0, 2).includes(model)) continue;
+    const res = await tryModel(model);
+    if (res.ok) {
+      return { ok: true, model, message: `Connected to Google ${model} successfully!` };
+    }
+    if (res.error && !firstError) firstError = res.error;
+  }
+
+  return { ok: false, message: firstError || 'Connection failed' };
+}
+
+/**
+ * Fetches a real online photo of an out-of-catalog dish from TheMealDB, Wikipedia, or Wikimedia Commons.
+ */
+export async function fetchOnlineDishPhotoByQuery(dishQuery: string): Promise<string | null> {
+  const clean = (dishQuery || '')
+    .replace(/\(.*?\)/g, ' ')
+    .replace(/[?？!！។«»"']/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!clean) return null;
+
+  // Extract English portion if present, otherwise use full string
+  const englishMatch = dishQuery.match(/[A-Za-z][A-Za-z0-9\s-]{2,}/);
+  const searchEn = (englishMatch ? englishMatch[0] : clean).trim();
+
+  // 1. Try TheMealDB free API (great for international dishes like Spaghetti Bolognese, Tom Yum, Pad Thai, Pizza, etc.)
+  if (/[A-Za-z]/.test(searchEn)) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 3000);
+      const mealRes = await fetch(
+        `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchEn)}`,
+        { signal: controller.signal }
+      );
+      clearTimeout(timer);
+      if (mealRes.ok) {
+        const mealData = await mealRes.json();
+        const thumb = mealData?.meals?.[0]?.strMealThumb;
+        if (thumb && typeof thumb === 'string') {
+          return thumb;
+        }
+      }
+    } catch {
+      // Ignore and try Wikimedia Commons next
     }
   }
 
-  return { ok: false, message: lastError };
+  // 2. Try Wikimedia Commons search API (works for both Cambodian, Asian, and international dishes)
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 3500);
+    const wikiQuery = encodeURIComponent(`${searchEn} food dish`);
+    const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=filetype:bitmap%20${wikiQuery}&gsrlimit=4&prop=imageinfo&iiprop=url&iiurlwidth=800&format=json&origin=*`;
+    const res = await fetch(wikiUrl, { signal: controller.signal });
+    clearTimeout(timer);
+    if (res.ok) {
+      const data = await res.json();
+      const pages = data?.query?.pages ? Object.values(data.query.pages) : [];
+      for (const p of pages as any[]) {
+        const thumbUrl = p?.imageinfo?.[0]?.thumburl || p?.imageinfo?.[0]?.url;
+        if (
+          thumbUrl &&
+          /\.(jpe?g|png|webp)$/i.test(thumbUrl) &&
+          !/logo|icon|map|flag|diagram/i.test(thumbUrl)
+        ) {
+          return thumbUrl;
+        }
+      }
+    }
+  } catch {
+    // Graceful fallback
+  }
+
+  return null;
 }
 
 /**
@@ -970,8 +1158,15 @@ export async function askGeminiFoodTourismAssistant(params: {
 Answer the user's question directly, accurately, and naturally in ${langName}.
 RULES:
 1. Keep "answerText" concise (1 to 2 natural, helpful sentences — never repetitive boilerplate) because visual Dish, Recipe, Restaurant, and Tourism cards are rendered immediately below your text.
-2. Select "recommendedFoodIds" (up to 4 IDs) ONLY from FOODS_CATALOG that genuinely match the user's exact request (respecting any province, flavor, mealtime, weather, or excluded meat like "no pork").
-3. If the user asks how to cook or asks for a recipe/ingredients, set "recipeFoodId" to the best matching dish ID from FOODS_CATALOG.
+2. Select "recommendedFoodIds" (up to 4 IDs) from FOODS_CATALOG that match the user's request (respecting any province, flavor, mealtime, weather, or excluded meat like "no pork").
+3. If the user asks about a specific dish or asks how to cook / recipe / ingredients:
+   - If the dish is in FOODS_CATALOG, set "recipeFoodId" to its ID.
+   - If the dish is NOT in FOODS_CATALOG (any other Cambodian or international dish like Spaghetti Bolognese, Tom Yum, Num Khing, etc.), ALWAYS populate "customRecipe" with:
+     * "dishName" (in ${langName}),
+     * "englishSearchName" (exact English name of the dish for online photo search, e.g. "Spaghetti Bolognese", "Tom Yum Goong"),
+     * "description" (1 sentence description in ${langName}),
+     * "ingredients" (array of { "name", "amount" } in ${langName}),
+     * "steps" (array of 4-5 clear step strings in ${langName}).
 4. If the user asks about tourist places/travel, select "recommendedDestinationIds" (up to 4 IDs) from DESTINATIONS_CATALOG.
 5. Never give medical advice. Return valid JSON matching the schema.`;
 
@@ -983,7 +1178,10 @@ RULES:
     DESTINATIONS_CATALOG: destCatalog,
   });
 
-  const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+  const modelsToTry = [
+    ...DEFAULT_GEMINI_MODELS.slice(0, 2),
+    ...(await getGeminiCandidateModels(key)).filter((m) => !DEFAULT_GEMINI_MODELS.slice(0, 2).includes(m)),
+  ];
 
   for (const model of modelsToTry) {
     const controller = new AbortController();
@@ -1000,7 +1198,7 @@ RULES:
             contents: [{ role: 'user', parts: [{ text: promptPayload }] }],
             generationConfig: {
               temperature: 0.25,
-              maxOutputTokens: 450,
+              maxOutputTokens: 750,
               responseMimeType: 'application/json',
             },
           }),
@@ -1022,6 +1220,13 @@ RULES:
         recommendedRestaurantIds?: string[];
         recommendedDestinationIds?: string[];
         recipeFoodId?: string;
+        customRecipe?: {
+          dishName?: string;
+          englishSearchName?: string;
+          description?: string;
+          ingredients?: Array<{ name?: string; amount?: string }>;
+          steps?: string[];
+        };
       };
 
       if (!parsed.answerText || typeof parsed.answerText !== 'string') {
@@ -1034,7 +1239,7 @@ RULES:
         .filter((f): f is FoodItem => Boolean(f))
         .slice(0, 4);
 
-      const finalDishes =
+      let finalDishes =
         geminiDishes.length > 0 ? geminiDishes : initialReply.dishes;
 
       let finalRecipePreview = initialReply.recipePreview;
@@ -1060,6 +1265,52 @@ RULES:
                 : language === 'zh'
                 ? loc.steps?.[idx] || st.instructionEn || st.instructionKh
                 : st.instructionEn || st.instructionKh,
+          })),
+        };
+      } else if (
+        parsed.customRecipe &&
+        parsed.customRecipe.dishName &&
+        Array.isArray(parsed.customRecipe.ingredients) &&
+        parsed.customRecipe.ingredients.length > 0 &&
+        Array.isArray(parsed.customRecipe.steps) &&
+        parsed.customRecipe.steps.length > 0
+      ) {
+        const baseFood = finalDishes?.[0] || foods[0];
+        const onlinePhoto = await fetchOnlineDishPhotoByQuery(
+          parsed.customRecipe.englishSearchName || parsed.customRecipe.dishName || userInput
+        );
+        const mappedIngredients = parsed.customRecipe.ingredients.slice(0, 8).map((ing) => ({
+          nameKh: String(ing.name || ''),
+          nameEn: String(ing.name || ''),
+          amount: String(ing.amount || ''),
+        }));
+        const mappedSteps = parsed.customRecipe.steps.slice(0, 6).map((st, idx) => ({
+          stepNumber: idx + 1,
+          instructionKh: String(st || ''),
+          instructionEn: String(st || ''),
+        }));
+        const customFood: FoodItem = {
+          ...baseFood,
+          id: `gemini-recipe-${Date.now()}`,
+          nameKh: parsed.customRecipe.dishName,
+          nameEn: parsed.customRecipe.englishSearchName || parsed.customRecipe.dishName,
+          descriptionKh: parsed.customRecipe.description || baseFood.descriptionKh,
+          descriptionEn: parsed.customRecipe.description || baseFood.descriptionEn,
+          photoUrl: onlinePhoto || baseFood.photoUrl,
+          originalPhotoUrl: onlinePhoto || baseFood.originalPhotoUrl,
+          ingredients: mappedIngredients,
+          steps: mappedSteps,
+        };
+        finalDishes = [customFood, ...(finalDishes || []).slice(0, 2)];
+        finalRecipePreview = {
+          food: customFood,
+          ingredients: parsed.customRecipe.ingredients.slice(0, 8).map((ing) => ({
+            name: String(ing.name || ''),
+            amount: String(ing.amount || ''),
+          })),
+          steps: parsed.customRecipe.steps.slice(0, 6).map((st, idx) => ({
+            stepNumber: idx + 1,
+            instruction: String(st || ''),
           })),
         };
       }

@@ -925,6 +925,69 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
+              {/* Quick Box #4: Google Gemini AI API Key Entry Card on Overview */}
+              <div className="p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/30 border-2 border-emerald-500/60 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h4 className="font-bold text-[#064E3B] dark:text-emerald-300 font-khmer text-sm flex items-center gap-1.5">
+                      <span>🤖 ប្រអប់ទី ៤៖ បញ្ចូលសោ Google Gemini AI API Key (សម្រាប់មុខងារ «សួរ AI»)</span>
+                    </h4>
+                    <p className="text-[11px] text-stone-600 dark:text-stone-300 font-khmer mt-0.5">
+                      បិទភ្ជាប់សោ Gemini API Key (<code className="font-mono font-bold">...Q9bQ / KhmerFoodAI</code> ពី Google AI Studio) ដើម្បីឱ្យមុខងារ «សួរ AI» ឆ្លើយសំណួរបានត្រឹមត្រូវ ១០០%!
+                    </p>
+                  </div>
+                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold font-khmer ${
+                    Boolean(cloudCfg.geminiApiKey && cloudCfg.geminiApiKey.length > 15)
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-amber-200 text-amber-900'
+                  }`}>
+                    {Boolean(cloudCfg.geminiApiKey && cloudCfg.geminiApiKey.length > 15)
+                      ? '✓ បានភ្ជាប់ Gemini AI រួចរាល់'
+                      : 'មិនទាន់ដាក់សោ Gemini AI'}
+                  </span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="text"
+                    value={cloudCfg.geminiApiKey}
+                    onChange={(e) => setCloudCfg({ ...cloudCfg, geminiApiKey: e.target.value })}
+                    placeholder="បិទភ្ជាប់សោ Google Gemini AI API Key ទីនេះ (ឧ. AIzaSy...Q9bQ)"
+                    className="flex-1 px-3.5 py-2 rounded-xl border border-emerald-400 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 font-mono text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const clip = await navigator.clipboard.readText();
+                        if (clip && clip.trim()) {
+                          const updated = { ...cloudCfg, geminiApiKey: clip.trim() };
+                          const saved = saveCloudApiConfig(updated);
+                          setCloudCfg(saved);
+                          showToast('បានបិទភ្ជាប់ និងរក្សាទុកសោ Gemini AI API Key ជោគជ័យ!', 'success');
+                        }
+                      } catch {
+                        showToast('សូមចុចឱ្យជាប់ក្នុងប្រអប់ រួចជ្រើសរើស Paste', 'info');
+                      }
+                    }}
+                    className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
+                  >
+                    📋 Paste & រក្សាទុកភ្លាម
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const saved = saveCloudApiConfig(cloudCfg);
+                      setCloudCfg(saved);
+                      const res = await testGeminiApiConnection(saved.geminiApiKey);
+                      showToast(res.ok ? `✅ ${res.message}` : `❌ Gemini Error: ${res.message}`, res.ok ? 'success' : 'error');
+                    }}
+                    className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
+                  >
+                    💾 រក្សាទុក & សាកល្បង Gemini
+                  </button>
+                </div>
+              </div>
+
               {/* Pending Support Messages Alert Banner */}
               {(unreadAdminTickets.length > 0 || pendingSupportTickets.length > 0) && (
                 <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500 space-y-2">
@@ -5480,34 +5543,36 @@ export const AdminDashboard: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  <div>
-                    <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                      4. Google Gemini AI API Key (សម្រាប់មុខងារ «សួរ AI» & ស្កេនម្ហូប)
-                    </label>
-                    <div className="flex items-center gap-2">
+                  <div id="admin-gemini-ai-key-box" className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border-2 border-emerald-500/60">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <label className="block font-bold text-[#064E3B] dark:text-emerald-300">
+                        4. Google Gemini AI API Key (សម្រាប់មុខងារ «សួរ AI» & ស្កេនម្ហូប) ⭐
+                      </label>
+                      {cloudCfg.geminiApiKey && cloudCfg.geminiApiKey.trim().length > 10 && (
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold shrink-0">
+                          ✅ Active
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5">
                       <input
-                        type="password"
+                        type="text"
                         value={cloudCfg.geminiApiKey}
                         onChange={(e) => setCloudCfg({ ...cloudCfg, geminiApiKey: e.target.value })}
                         placeholder="AIzaSy... (ពី Google AI Studio - aistudio.google.com)"
-                        className="flex-1 px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
+                        className="flex-1 px-3 py-2 rounded-xl border border-emerald-400 bg-white dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
                       />
                       <button
                         type="button"
                         onClick={async () => {
                           const saved = saveCloudApiConfig(cloudCfg);
                           setCloudCfg(saved);
-                          void updateAppSettings({
-                            ...appSettings,
-                            geminiApiKey: saved.geminiApiKey,
-                            googleMapsApiKey: saved.googleMapsApiKey,
-                          });
                           setSupabaseTestStatus('⏳ កំពុងសាកល្បងភ្ជាប់ទៅកាន់ Google Gemini AI...');
                           const res = await testGeminiApiConnection(saved.geminiApiKey);
                           setSupabaseTestStatus(res.ok ? `✅ ${res.message}` : `❌ Gemini Error: ${res.message}`);
-                          showToast(res.ok ? res.message : `Gemini Error: ${res.message}`, res.ok ? 'success' : 'error');
+                          showToast(res.ok ? `✅ ${res.message}` : `❌ Gemini Error: ${res.message}`, res.ok ? 'success' : 'error');
                         }}
-                        className="px-3 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl text-[11px] shrink-0"
+                        className="px-3 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl text-[11px] shrink-0 cursor-pointer"
                       >
                         🤖 Save & Test Gemini
                       </button>
@@ -5527,11 +5592,6 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => {
                       const saved = saveCloudApiConfig(cloudCfg);
                       setCloudCfg(saved);
-                      void updateAppSettings({
-                        ...appSettings,
-                        geminiApiKey: saved.geminiApiKey,
-                        googleMapsApiKey: saved.googleMapsApiKey,
-                      });
                       handleVerifyGoogleMapsApi(saved.googleMapsApiKey);
                       showToast('បានរក្សាទុកការកំណត់ Cloud Supabase, Google Maps & Gemini AI ជោគជ័យ!', 'success');
                     }}
