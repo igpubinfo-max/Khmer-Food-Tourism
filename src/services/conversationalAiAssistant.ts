@@ -1373,6 +1373,10 @@ const GEMINI_V25 = ['2', '5'].join('.');
 const GEMINI_V15 = ['1', '5'].join('.');
 
 const DEFAULT_GEMINI_MODELS = [
+  'gemini-3.5-flash-lite',
+  'gemini-flash-lite-latest',
+  'gemini-3.1-flash-lite',
+  'gemini-3.8-flash',
   `gemini-${GEMINI_V25}-flash`,
   'gemini-flash-latest',
   `gemini-${GEMINI_V25}-flash-lite`,
@@ -1401,7 +1405,7 @@ export async function getGeminiCandidateModels(key: string): Promise<string[]> {
               Array.isArray(m?.supportedGenerationMethods) &&
               m.supportedGenerationMethods.includes('generateContent') &&
               /gemini/i.test(m?.name || '') &&
-              !/tts|image|audio|live|vision|embedding|aqa|bisect|learnlm|2\.0|1\.0|robotics|computer-use|thinking-exp/i.test(
+              !/tts|image|audio|live|vision|embedding|aqa|bisect|learnlm|2\.0|1\.0|robotics|computer-use|thinking-exp|transcribe|customtools/i.test(
                 m?.name || ''
               )
           )
@@ -1409,6 +1413,10 @@ export async function getGeminiCandidateModels(key: string): Promise<string[]> {
 
         if (textModels.length > 0) {
           const preferredOrder = [
+            'gemini-3.5-flash-lite',
+            'gemini-flash-lite-latest',
+            'gemini-3.1-flash-lite',
+            'gemini-3.8-flash',
             `gemini-${GEMINI_V25}-flash`,
             'gemini-flash-latest',
             `gemini-${GEMINI_V25}-flash-lite`,

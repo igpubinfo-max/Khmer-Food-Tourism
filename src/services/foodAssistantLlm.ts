@@ -63,8 +63,16 @@ export const IMAGE_CONFIDENCE_THRESHOLD = 0.6;
 const MAX_HISTORY_MESSAGES = 10;
 const MAX_HISTORY_CHARS = 700;
 
-const TEXT_MODELS = ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite'];
-const ESCALATION_MODEL = 'gemini-2.5-pro';
+const TEXT_MODELS = [
+  'gemini-3.5-flash-lite',
+  'gemini-flash-lite-latest',
+  'gemini-3.1-flash-lite',
+  'gemini-3.8-flash',
+  'gemini-2.5-flash',
+  'gemini-flash-latest',
+  'gemini-2.5-flash-lite',
+];
+const ESCALATION_MODEL = 'gemini-3.8-flash';
 
 /* ------------------------------------------------------------------------------------------------ */
 /* Prompt                                                                                           */

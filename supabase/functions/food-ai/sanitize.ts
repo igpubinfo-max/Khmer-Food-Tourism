@@ -7,7 +7,19 @@
  * only the models, fields and sizes the food assistant really needs are forwarded.
  */
 
-export const ALLOWED_MODELS = ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'] as const;
+export const ALLOWED_MODELS = [
+  'gemini-3.5-flash-lite',
+  'gemini-flash-lite-latest',
+  'gemini-3.1-flash-lite',
+  'gemini-3.8-flash',
+  'gemini-3.7-flash',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash',
+  'gemini-2.5-flash',
+  'gemini-flash-latest',
+  'gemini-2.5-flash-lite',
+  'gemini-2.5-pro',
+] as const;
 
 export const MAX_REQUEST_BYTES = 6 * 1024 * 1024; // whole JSON request
 export const MAX_TOTAL_TEXT_CHARS = 150_000; // system prompt + history + question

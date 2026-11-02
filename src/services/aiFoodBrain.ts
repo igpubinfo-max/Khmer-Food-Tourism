@@ -198,37 +198,316 @@ export function detectAllergens(food: FoodItem): AllergenId[] {
   return out;
 }
 
-const FEATURES: Array<{ re: RegExp; phrase: T3; nameOnly?: boolean }> = [
-  { re: /ចំហុយ|អប់|អាម៉ុក|អាមុក|\bsteamed\b/i, phrase: ['ចំហុយក្តៅៗឈ្ងុយគ្រឿង', 'aromatic & freshly steamed', '清蒸鲜香'], nameOnly: true },
-  { re: /ប្រហុក|ផ្អក|ម៉ាំ|ទឹកគ្រឿង|កាពិ|\bprahok\b/i, phrase: ['រសជាតិខ្មែរឈ្ងុយមុត', 'rich savoury Khmer umami', '浓郁高棉风味'], nameOnly: true },
-  { re: /បំពង|ចៀន|ស្រួយ|crispy|fried|crunch/i, phrase: ['ស្រួយក្រៀមៗ', 'crispy & crunchy', '外酥脆'], nameOnly: true },
-  { re: /អាំង|ដុត|grill|bbq|roast|charcoal/i, phrase: ['អាំងលើធ្យូងឈ្ងុយ', 'charcoal-grilled aroma', '炭火香气'], nameOnly: true },
-  { re: /ឆា|ឡុកឡាក់|stir[\s-]*fry|wok/i, phrase: ['ឆាក្តៅឈ្ងុយខ្ទះ', 'fragrant wok-tossed', '锅气十足'], nameOnly: true },
-  { re: /ម្ទេស|ហឹរ|chili|spicy/i, phrase: ['ហឹរមុត', 'spicy kick', '香辣'] },
-  { re: /ជូរ|ក្រូចឆ្មា|អំពិល|sour|lime|tamarind/i, phrase: ['ជូរស្រស់ស្រាយ', 'bright & sour', '酸爽'] },
-  { re: /ខ្ទិះ|coconut/i, phrase: ['ខ្ទិះដូងទន់ក្រអូប', 'creamy coconut', '椰香柔滑'] },
-  { re: /ក្តាម|ក្ដាម|បង្គា|បង្កង|មឹក|ងាវ|លៀស|លាស|គ្រំ|crab|prawn|shrimp|squid|cockle|clam/i, phrase: ['គ្រឿងសមុទ្រស្រស់ៗ', 'fresh seafood', '新鲜海味'], nameOnly: true },
-  { re: /សាច់គោ|សាច់ជ្រូក|សាច់មាន់|beef|pork|chicken|duck/i, phrase: ['សាច់ទន់ឈ្ងុយ', 'tender, juicy meat', '肉质鲜嫩'], nameOnly: true },
-];
+// ---------------------------------------------------------------------------------------------
+// Authentic Khmer flavour profiling (used by dish comparison cards & the 3-dish comparison picker)
+//
+// The profile is decided from the dish TITLE + CATEGORY first (not from loose keywords hidden in the
+// description), so a stir-fry / fried-rice / "rice with fried egg" is never mislabelled as
+// "crispy & crunchy", a sour soup is never labelled "grilled", and so on.
+// ---------------------------------------------------------------------------------------------
+export type FlavorProfileId =
+  | 'deep_fried'
+  | 'grill_spicy'
+  | 'grill_sweet'
+  | 'grill'
+  | 'dried'
+  | 'salad_sour'
+  | 'ceviche'
+  | 'prahok_dip'
+  | 'fresh_roll'
+  | 'snack'
+  | 'boiled'
+  | 'steamed'
+  | 'sour_soup'
+  | 'sour_soup_spicy'
+  | 'clear_soup'
+  | 'herbal_soup'
+  | 'stew_soup'
+  | 'curry_coconut'
+  | 'braised'
+  | 'porridge'
+  | 'stirfry'
+  | 'fried_rice'
+  | 'noodle_soup'
+  | 'noodle_gravy'
+  | 'noodle_dry'
+  | 'rice_plain'
+  | 'dessert'
+  | 'dessert_coconut'
+  | 'sweet_fried'
+  | 'cake'
+  | 'drink'
+  | 'generic';
+
+/** dry = grilled / fried / salads / dips / snacks, soup = soups / stews / steamed / porridge, staple = rice / noodles / stir-fries */
+export type FlavorGroup = 'dry' | 'soup' | 'staple' | 'sweet';
+
+const FLAVOR_PROFILES: Record<FlavorProfileId, { group: FlavorGroup; phrase: T3 }> = {
+  deep_fried: { group: 'dry', phrase: ['បំពងស្រួយក្រៀមៗឈ្ងុយ', 'crispy & crunchy deep-fried', '外酥脆香'] },
+  grill_spicy: { group: 'dry', phrase: ['ប្រៃហឹរឈ្ងុយអាំង', 'salty-spicy smoky grill', '咸辣炭烤香'] },
+  grill_sweet: { group: 'dry', phrase: ['ផ្អែមប្រៃឈ្ងុយអាំង', 'sweet-savory glazed grill', '甜咸蜜汁烤香'] },
+  grill: { group: 'dry', phrase: ['ឈ្ងុយធ្យូងអាំង សាច់ទន់', 'charcoal-grilled aroma', '炭火香气'] },
+  dried: { group: 'dry', phrase: ['ប្រៃឈ្ងុយសាច់ត្រីងៀត', 'savory sun-dried flavour', '咸香风干'] },
+  salad_sour: { group: 'dry', phrase: ['ជូរហឹរស្រស់ស្រាយ', 'sour, spicy & fresh', '酸辣清爽'] },
+  ceviche: { group: 'dry', phrase: ['ជូរក្រូចឆ្មាស្រស់ ឈ្ងុយគ្រឿង', 'lime-cured, fresh & zesty', '青柠鲜爽'] },
+  prahok_dip: { group: 'dry', phrase: ['ឈ្ងុយគ្រឿងខ្មែរ ប្រហុកមុត', 'rich Khmer prahok umami', '浓郁高棉鱼酱风味'] },
+  fresh_roll: { group: 'dry', phrase: ['ស្រស់ស្រាយ ទឹកជ្រលក់សណ្តែកដីឈ្ងុយ', 'fresh roll with peanut dip', '鲜卷配花生蘸酱'] },
+  snack: { group: 'dry', phrase: ['ញ៉ាំលេងឈ្ងុយឆ្ងាញ់', 'tasty Khmer street snack', '街头小吃风味'] },
+  boiled: { group: 'soup', phrase: ['ស្ងោរទន់ ក្រអូបគ្រឿង', 'tender boiled, gently aromatic', '清煮软嫩'] },
+  steamed: { group: 'soup', phrase: ['ចំហុយទន់ក្រអូបគ្រឿង', 'soft steamed & herb-fragrant', '清蒸软嫩香'] },
+  sour_soup: { group: 'soup', phrase: ['ជូរស្រស់ស្រាយ ទឹកសម្លថ្លា', 'bright, sour & refreshing broth', '酸爽清汤'] },
+  sour_soup_spicy: { group: 'soup', phrase: ['ជូរហឹរស្រស់ស្រាយ', 'hot, sour & refreshing', '酸辣爽口'] },
+  clear_soup: { group: 'soup', phrase: ['ទឹកស៊ុបថ្លាស្រាលក្រពះ', 'clear, light & soothing broth', '清澈鲜甜汤底'] },
+  herbal_soup: { group: 'soup', phrase: ['ប្រហើរក្រអូបស្មៅ ស្រាលក្រពះ', 'light & aromatic herbal soup', '香草清汤'] },
+  stew_soup: { group: 'soup', phrase: ['សម្លគ្រឿងសាច់បន្លែ ក្រអូបស្រូវ', 'hearty aromatic Khmer stew', '浓香杂蔬炖汤'] },
+  curry_coconut: { group: 'soup', phrase: ['ឈ្ងុយខ្ទិះដូងស្រទន់', 'creamy, gently spiced coconut', '椰香柔滑'] },
+  braised: { group: 'soup', phrase: ['ផ្អែមប្រៃឈ្ងុយស្ករត្នោត', 'sweet-savory caramelized braise', '焦糖红烧甜咸香'] },
+  porridge: { group: 'soup', phrase: ['បបរក្តៅទន់ ស្រាលក្រពះ', 'warm, soft & easy on the stomach', '热乎软糯易消化'] },
+  stirfry: { group: 'staple', phrase: ['ប្រៃផ្អែមឈ្ងុយខ្ទះ', 'savory-sweet wok aroma', '咸甜锅气香'] },
+  fried_rice: { group: 'staple', phrase: ['បាយឆាក្តៅៗ ឈ្ងុយខ្ទះ', 'fragrant wok-fried rice', '锅气炒饭香'] },
+  noodle_soup: { group: 'staple', phrase: ['ទឹកស៊ុបក្តៅៗ ឈ្ងុយសាច់ទន់', 'hot savory broth & tender meat', '热汤鲜香'] },
+  noodle_gravy: { group: 'staple', phrase: ['ទឹកសម្លគ្រឿងឈ្ងុយ ញ៉ាំជាមួយបន្លែ', 'herbal gravy with fresh greens', '香草汤汁配鲜蔬'] },
+  noodle_dry: { group: 'staple', phrase: ['មីស្ងួតឈ្ងុយ ប្រៃផ្អែមស្រទន់', 'savory-sweet dry noodles', '咸甜拌面'] },
+  rice_plain: { group: 'staple', phrase: ['បាយក្តៅៗ ញ៉ាំជាមួយគ្រឿងឈ្ងុយ', 'warm rice with savory toppings', '热米饭配香浓配菜'] },
+  dessert: { group: 'sweet', phrase: ['ផ្អែមស្រទន់', 'gently sweet', '甜而不腻'] },
+  dessert_coconut: { group: 'sweet', phrase: ['ផ្អែមស្រទន់ ខ្ទិះដូងក្រអូប', 'sweet & creamy coconut', '椰香甜润'] },
+  sweet_fried: { group: 'sweet', phrase: ['ចៀនស្រួយ ផ្អែមស្ករត្នោត', 'crispy with palm-sugar glaze', '酥脆椰糖香'] },
+  cake: { group: 'sweet', phrase: ['នំខ្មែរឈ្ងុយទន់ស្វិត', 'fragrant, soft & chewy Khmer sweet', '香甜软糯'] },
+  drink: { group: 'sweet', phrase: ['ត្រជាក់ស្រស់ស្រាយ', 'chilled & refreshing', '冰爽解渴'] },
+  generic: { group: 'dry', phrase: ['រសជាតិខ្មែរពិតៗ', 'authentic Khmer flavour', '地道高棉风味'] },
+};
+
+const flavorProfileCache = new Map<string, FlavorProfileId>();
+
+export function classifyDishFlavor(food: FoodItem): FlavorProfileId {
+  const cacheKey = `${food.id}|${food.nameKh || ''}|${food.nameEn || ''}|${food.categorySlug || ''}`;
+  const cached = flavorProfileCache.get(cacheKey);
+  if (cached) return cached;
+
+  const result = computeDishFlavor(food);
+  if (flavorProfileCache.size > 3000) flavorProfileCache.clear();
+  flavorProfileCache.set(cacheKey, result);
+  return result;
+}
+
+function computeDishFlavor(food: FoodItem): FlavorProfileId {
+  const cat = food.categorySlug || '';
+  const khRaw = (food.nameKh || '').trim();
+  const enRaw = (food.nameEn || '').toLowerCase();
+  // A side "fried egg" topping or the chive-cake word "កាឆាយ" must never turn a dish into "fried" / "stir-fried"
+  const kh = khRaw.replace(/ពងទាចៀន|ពងចៀន|ស៊ុតចៀន/g, ' ').replace(/គូឆាយ|កាឆាយ|កចាយ/g, ' ');
+  const en = enRaw.replace(/(?:crispy\s+)?fried\s+egg/g, ' ');
+
+  const isSavoryCake = /បាញ់ឆែវ|នំប៉័ង|គួង|ណែម|គូឆាយ|កាឆាយ|កចាយ|អន្សមជ្រូក|អន្សមចៀន/.test(khRaw);
+
+  // 1. Drinks
+  if (cat === 'drink' || isBeverageFood(food)) return 'drink';
+
+  // 2. Sweets & cakes
+  const isSweet =
+    cat === 'dessert' || (cat === 'cake' && !isSavoryCake) || /បង្អែម|សង់ខ្យា|ចេកខ្ទិះ/.test(khRaw);
+  if (isSweet) {
+    if (/ចៀន|បំពង/.test(kh)) return 'sweet_fried';
+    if (/ខ្ទិះ|ដូង/.test(khRaw)) return 'dessert_coconut';
+    return cat === 'cake' ? 'cake' : 'dessert';
+  }
+
+  // 3. Fresh rolls
+  if (/គួង/.test(kh)) return 'fresh_roll';
+
+  // 4. Braised ("ខ") stews, e.g. ខសាច់ជ្រូកពងទា, គុយទាវខសាច់គោ, បាយខជើងជ្រូក
+  if (
+    /(?:^|\s)ខ(?:សាច់|ត្រី|ជើង|ពង|មាន់|ទា|ពោះ|ឆ្អឹង|បង្កង|គោ|ប្រហុក)|គុយទាវខ|បាយខ/.test(kh) ||
+    /\bkhor\b|caramelized\s+pork|braised\s+(?:pork|mekong|beef|spiced)/.test(en)
+  ) {
+    return 'braised';
+  }
+
+  // 5. Fried rice & porridge (porridge before stir-fry: "បបរ…ឆាឆៃប៉ូវ" is a porridge, not a stir-fry)
+  if (/បាយឆា/.test(kh) || /\bfried\s+rice\b/.test(en)) return 'fried_rice';
+  if (/បបរ/.test(kh) || /\bporridge\b|\bcongee\b/.test(en)) return 'porridge';
+
+  // 6. Stir-fries (ឆា, លីង, ឡុកឡាក់, wok dishes)
+  if (
+    cat === 'stirfry' ||
+    /ឆា|លីង|ឡុកឡាក់/.test(kh) ||
+    /stir[\s-]*fr|wok[\s-]*(?:fried|seared|fired|tossed|baked|roasted|braised)|\blok\s*lak\b|fried\s+(?:egg\s+|flat\s+rice\s+)?noodle/.test(en)
+  ) {
+    return 'stirfry';
+  }
+
+  // 6b. Noodles (checked before the fried/grilled keywords so "noodles with grilled catfish" stays a noodle dish)
+  if (cat === 'noodles' || /^(?:គុយទាវ|នំបញ្ចុក|មី|បាញ់កាញ់|ហ្វឺ)/.test(kh)) {
+    if (/មីកូឡា|មីគោក|គុយទាវកាត់/.test(kh)) return 'noodle_dry';
+    if (/នំបញ្ចុក/.test(kh)) return /ការី|ណាំយ៉ា/.test(kh) ? 'curry_coconut' : 'noodle_gravy';
+    return 'noodle_soup';
+  }
+
+  // 7. Genuinely deep / pan-fried & crispy dishes only
+  if (
+    /បំពង|បាញ់ឆែវ|នំគ្រក់|ចៀន/.test(kh) ||
+    /deep[\s-]*fr|crispy\s+(?:fried|turmeric|deep|shredded)|pan[\s-]*fried|fritter/.test(en)
+  ) {
+    return 'deep_fried';
+  }
+
+  // 8. Sun-dried / jerky (without a grilling method in the title)
+  if (/ងៀត|ហាល/.test(kh) && !/អាំង|ដុត/.test(kh)) return 'dried';
+
+  // 9. Grilled / roasted
+  if (
+    cat === 'grilled' ||
+    /អាំង|ដុត|សាច់ក្រក/.test(kh) ||
+    /\bgrilled\b|charcoal|roasted\s+(?:herbal\s+chicken|chicken|pork|duck)|\bbbq\b/.test(en)
+  ) {
+    if (/ទឹកឃ្មុំ|ស្ករត្នោត/.test(kh) && !/ម្ទេស/.test(kh)) return 'grill_sweet';
+    if (/ម្ទេស|អំបិល/.test(kh) || /chili|spicy/.test(en)) return 'grill_spicy';
+    return 'grill';
+  }
+
+  // 10. Coconut curries
+  if (/ការី|ណាំយ៉ា|សម្លខ្ទិះ/.test(kh) || /curry|samlor\s+ktis/.test(en)) return 'curry_coconut';
+
+  // 12. Steamed / amok / boiled
+  if (
+    /ចំហុយ|អាម៉ុក/.test(kh) ||
+    (/\bsteamed\b|\bamok\b/.test(en) && (cat as string) !== 'rice' && (cat as string) !== 'noodles')
+  ) {
+    return 'steamed';
+  }
+  if (
+    (/ស្ងោរ|ស្រុះ/.test(kh) && cat !== 'soup' && !/^(?:សម្ល|ស៊ុប)/.test(kh)) ||
+    /\bboiled\b|\bpoached\b/.test(en)
+  ) {
+    return 'boiled';
+  }
+
+  // 13. Salads, ceviches & dips
+  if (/^ភ្លា/.test(kh)) return 'ceviche';
+  if (/^(?:ញាំ|បុក)/.test(kh)) return 'salad_sour';
+  if (/ទឹកគ្រឿង|ប្រហុកខ្ទិះ|ទឹកប្រហុក|^ប្រហុក/.test(kh)) return 'prahok_dip';
+  if (cat === 'salad') return 'salad_sour';
+
+  // 14. Soups
+  if (cat === 'soup' || /^(?:សម្ល|ស៊ុប)/.test(kh)) {
+    if (/ម្ជូរ|ជ្រក់|ង៉ាំង៉ូវ/.test(kh)) {
+      const hot = /ម្ទេស|ហឹរ/.test(kh) || /hot\s*(?:&|and)\s*sour|spicy/.test(en);
+      return hot ? 'sour_soup_spicy' : 'sour_soup';
+    }
+    if (/ប្រហើរ/.test(kh) || /herbal/.test(en)) return 'herbal_soup';
+    if (/កកូរ/.test(kh)) return 'stew_soup';
+    return 'clear_soup';
+  }
+
+  // 15. Plain rice dishes, snacks & everything else
+  if (cat === 'rice') return 'rice_plain';
+  if (cat === 'streetfood' || cat === 'specialty' || cat === 'cake') return 'snack';
+  return 'generic';
+}
+
+export function getDishFlavorGroup(food: FoodItem): FlavorGroup {
+  return FLAVOR_PROFILES[classifyDishFlavor(food)].group;
+}
 
 export function describeDish(food: FoodItem, language: Language): string {
-  const name = `${food.nameKh} ${food.nameEn}`;
-  const safeDesc = stripNegatedSpicePhrases(`${food.descriptionKh || ''} ${food.descriptionEn || ''}`);
-  const text = `${name} ${safeDesc}`;
-  const isSweetOrDrink = isSweetOrBeverageFood(food);
-  const parts: string[] = [];
-  for (const f of FEATURES) {
-    if (isSweetOrDrink && f.phrase[1] === 'spicy kick') continue;
-    if (f.re.test(f.nameOnly ? name : text)) parts.push(tr(language, f.phrase[0], f.phrase[1], f.phrase[2]));
-    if (parts.length >= 2) break;
+  const profileId = classifyDishFlavor(food);
+  const profile = FLAVOR_PROFILES[profileId];
+  const parts: string[] = [tr(language, profile.phrase[0], profile.phrase[1], profile.phrase[2])];
+
+  // One optional secondary note (only for savory dishes) so the line stays short & accurate
+  if (profile.group !== 'sweet' && profileId !== 'generic') {
+    const titleText = `${food.nameKh || ''} ${(food.nameEn || '').toLowerCase()}`;
+    const alreadySpicy = /ហឹរ/.test(profile.phrase[0]);
+    if (profileId !== 'prahok_dip' && /ប្រហុក|ទឹកគ្រឿង|កាពិ|prahok/.test(titleText)) {
+      parts.push(tr(language, 'ឈ្ងុយប្រហុក', 'prahok umami', '发酵鱼酱香'));
+    } else if (!alreadySpicy && /ម្ទេស|ហឹរ|ម្រះព្រៅ|ឆាក្តៅ|spicy|chili|chilli|hot\s+basil/.test(titleText)) {
+      // Spicy note ONLY when the dish title itself says so (never from a stray chili in the ingredient list)
+      parts.push(tr(language, 'ហឹរមុត', 'spicy kick', '香辣'));
+    } else if (/ម្រេច|pepper/.test(titleText) && !/ម្ទេស/.test(titleText)) {
+      parts.push(tr(language, 'ក្រអូបម្រេចកំពត', 'fragrant Kampot pepper', '贡布胡椒香'));
+    } else if (profileId !== 'curry_coconut' && /ខ្ទិះ|coconut/.test(titleText)) {
+      parts.push(tr(language, 'ខ្ទិះដូងក្រអូប', 'creamy coconut', '椰香'));
+    }
   }
-  if (food.categorySlug === 'soup' && parts.length < 2) parts.push(tr(language, 'ទឹកស៊ុបក្តៅៗ', 'warm, comforting broth', '热乎乎的汤'));
-  if (food.categorySlug === 'salad' && parts.length < 2) parts.push(tr(language, 'ញាំស្រស់ស្រាយ', 'fresh & zesty', '清新爽口'));
-  if (food.categorySlug === 'dessert' && parts.length < 2) parts.push(tr(language, 'ផ្អែមស្រទន់', 'gently sweet', '甜而不腻'));
-  if (food.categorySlug === 'cake' && parts.length < 2) parts.push(tr(language, 'នំខ្មែរឈ្ងុយទន់ស្វិត', 'fragrant artisan pastry', '香甜软糯'));
-  if (food.categorySlug === 'drink' && parts.length < 2) parts.push(tr(language, 'ត្រជាក់ស្រស់ស្រាយ', 'chilled & refreshing', '冰爽解渴'));
-  if (parts.length === 0) parts.push(tr(language, 'រសជាតិខ្មែរពិតៗ', 'authentic Khmer flavour', '地道高棉风味'));
   return parts.join(' • ');
+}
+
+const shuffleCopy = <T,>(items: T[]): T[] => {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
+/**
+ * Picks dishes for the "Side-by-Side Dish Comparison" panel (up to `count`, normally 3).
+ *
+ * - General mode (no taste/category filter): never includes drinks or sweets, and picks one dish from each
+ *   of three genuinely different families (grilled / dry, soup / stew, rice / noodles / stir-fry) so the three
+ *   choices really taste different.
+ * - Strict mode (the user picked a craving / taste / category filter): the pool is already filtered, so every
+ *   dish stays inside it; we only prefer dishes with different flavour profiles and drop standalone drinks.
+ */
+export function pickDistinctFlavorDishes(
+  pool: FoodItem[],
+  count: number,
+  seenSet: Set<string>,
+  excludeIds: string[] = [],
+  opts: { strict?: boolean } = {}
+): FoodItem[] {
+  if (pool.length === 0 || count <= 0) return [];
+  const strict = Boolean(opts.strict);
+  const exclude = new Set(excludeIds);
+
+  let base = pool.filter((f) => !isBeverageFood(f));
+  if (base.length === 0) base = pool;
+  if (!strict) {
+    const savory = base.filter((f) => getDishFlavorGroup(f) !== 'sweet');
+    if (savory.length >= Math.min(count, base.length)) base = savory;
+  }
+
+  const collect = (useSeen: boolean) =>
+    base.filter((f) => !exclude.has(f.id) && (!useSeen || !seenSet.has(f.id)));
+  let candidates = collect(true);
+  if (candidates.length < Math.min(count, base.length)) {
+    seenSet.clear();
+    candidates = collect(false);
+  }
+  if (candidates.length === 0) candidates = base;
+
+  const chosen: FoodItem[] = [];
+  const usedProfiles = new Set<FlavorProfileId>();
+  const take = (f: FoodItem) => {
+    chosen.push(f);
+    usedProfiles.add(classifyDishFlavor(f));
+  };
+
+  if (!strict) {
+    const groups: FlavorGroup[] = shuffleCopy<FlavorGroup>(['dry', 'soup', 'staple']);
+    for (const group of groups) {
+      if (chosen.length >= count) break;
+      const inGroup = shuffleCopy(
+        candidates.filter((f) => getDishFlavorGroup(f) === group && !chosen.includes(f))
+      );
+      const pick = inGroup.find((f) => !usedProfiles.has(classifyDishFlavor(f))) || inGroup[0];
+      if (pick) take(pick);
+    }
+  }
+
+  const rest = shuffleCopy(candidates.filter((f) => !chosen.includes(f)));
+  for (const f of rest) {
+    if (chosen.length >= count) break;
+    if (!usedProfiles.has(classifyDishFlavor(f))) take(f);
+  }
+  for (const f of rest) {
+    if (chosen.length >= count) break;
+    if (!chosen.includes(f)) take(f);
+  }
+
+  chosen.forEach((f) => seenSet.add(f.id));
+  return chosen;
 }
 
 const CHIPS: Record<string, { label: T3; query: T3 }> = {

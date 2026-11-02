@@ -208,7 +208,7 @@ function section(t) {
     ok(t1.ok && t1.message.text.includes('3-4 days') && t1.message.isLiveGemini && t1.message.source === 'llm', 'success returns validated message');
     ok(!t1.message.dishes && t1.message.suppressDishCard, 'fact answer shows no random dish card');
     ok(t1.message.followUpChips && t1.message.followUpChips[0].query === 'Can I freeze it?', 'follow-up chips from model');
-    ok(calls.length === 1 && calls[0][0] === 'gemini-2.5-flash', 'single call to the primary model');
+    ok(calls.length === 1 && calls[0][0] === 'gemini-3.5-flash-lite', 'single call to the primary model');
 
     const lv = [];
     const t2 = await llm.askFoodAssistant({ ...base, userText: 'hello food', transport: async (m, b) => { lv.push(Boolean(b.generationConfig.responseSchema) + ':' + Boolean(b.generationConfig.thinkingConfig)); return lv.length < 3 ? { ok: false, kind: 'bad_request', status: 400, message: 'schema not supported' } : mk(okPayload); } });
@@ -235,9 +235,9 @@ function section(t) {
     const esc = [];
     const photoPayload = (conf, withAlt) => ({ domain: 'food', intent: 'identify_image', answer: 'Looks like a curry?', needsClarification: false,
       imageAnalysis: { containsFood: true, confidence: conf, dishNameLocal: 'Khmer red curry', alternatives: withAlt ? [{ name: 'Fish amok', confidence: 0.3 }] : [] } });
-    const t9 = await llm.askFoodAssistant({ ...base, userText: '', image: img, transport: async (m) => { esc.push(m); return mk(photoPayload(m === 'gemini-2.5-pro' ? 0.88 : 0.45, true)); } });
-    ok(esc.join(',') === 'gemini-2.5-flash,gemini-2.5-pro', 'uncertain photo is re-examined once by the stronger model', esc);
-    ok(t9.ok && t9.model === 'gemini-2.5-pro' && t9.message.imageAnalysis.identified === true, 'stronger model result adopted when it is more confident');
+    const t9 = await llm.askFoodAssistant({ ...base, userText: '', image: img, transport: async (m) => { esc.push(m); return mk(photoPayload(m === 'gemini-3.8-flash' ? 0.88 : 0.45, true)); } });
+    ok(esc.join(',') === 'gemini-3.5-flash-lite,gemini-3.8-flash', 'uncertain photo is re-examined once by the stronger model', esc);
+    ok(t9.ok && t9.model === 'gemini-3.8-flash' && t9.message.imageAnalysis.identified === true, 'stronger model result adopted when it is more confident');
     const esc2 = [];
     const t10 = await llm.askFoodAssistant({ ...base, userText: '', image: img, transport: async (m) => { esc2.push(m); return mk(photoPayload(0.3, true)); } });
     ok(t10.ok && t10.message.needsClarification === true && !t10.message.dishes, 'still uncertain after second opinion -> ASK the user, show nothing');
@@ -354,7 +354,7 @@ function section(t) {
       let envelope = null;
       globalThis.fetch = async (url, init) => { envelope = JSON.parse(init.body); return mkResp(200, geminiOk(payload), true); };
       await llm.askFoodAssistant(t16);
-      ok(envelope && envelope.model === 'gemini-2.5-flash' && envelope.body && envelope.body.contents && san.sanitizeGeminiRequest(envelope).ok, 'envelope {model, body} is accepted by the proxy whitelist');
+      ok(envelope && envelope.model === 'gemini-3.5-flash-lite' && envelope.body && envelope.body.contents && san.sanitizeGeminiRequest(envelope).ok, 'envelope {model, body} is accepted by the proxy whitelist');
     } finally {
       globalThis.fetch = realFetch;
       llm.resetFoodAiProxyState();

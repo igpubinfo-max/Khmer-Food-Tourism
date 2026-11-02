@@ -58,7 +58,7 @@ import {
   isVegetarianQuery,
   classifyVegetarianDish,
 } from '../services/aiFoodAdvisorService';
-import { isMedicalOrHealthQuery, describeDish } from '../services/aiFoodBrain';
+import { isMedicalOrHealthQuery, describeDish, pickDistinctFlavorDishes } from '../services/aiFoodBrain';
 import {
   buildWelcomeAssistantMessage,
   generateConversationalAiResponse,
@@ -370,14 +370,9 @@ export const WhatToEatModal: React.FC = () => {
       }
       if ((window as any).__kft_wte_open_compare_mode) {
         (window as any).__kft_wte_open_compare_mode = false;
-        let unseenCompare = foods.filter((f) => !seenCompareDishIdsRef.current.has(f.id));
-        if (unseenCompare.length < 3) {
-          seenCompareDishIdsRef.current.clear();
-          unseenCompare = [...foods];
-        }
-        const shuffledCompare = [...unseenCompare].sort(() => 0.5 - Math.random()).slice(0, 3);
-        shuffledCompare.forEach((f) => seenCompareDishIdsRef.current.add(f.id));
-        setComparedDishIds(shuffledCompare.map((f) => f.id));
+        // 3 genuinely different flavour families (grilled/dry, soup/stew, rice/noodle/stir-fry) — never drinks or sweets
+        const distinctCompare = pickDistinctFlavorDishes(foods, 3, seenCompareDishIdsRef.current);
+        setComparedDishIds(distinctCompare.map((f) => f.id));
         setTimeout(() => {
           comparePanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 120);
@@ -1156,7 +1151,13 @@ export const WhatToEatModal: React.FC = () => {
       // If the Side-by-Side Comparison panel is open, also rotate compared dishes to a fresh non-repeating set
       setComparedDishIds((prev) => {
         if (prev.length === 0) return prev;
-        const freshCompare = pickFreshNonRepeatingDishes(3, seenCompareDishIdsRef.current, prev);
+        const freshCompare = pickDistinctFlavorDishes(
+          activeDishList.length > 0 ? activeDishList : foods,
+          3,
+          seenCompareDishIdsRef.current,
+          prev,
+          { strict: hasStructuredFilter }
+        );
         return freshCompare.length >= 2 ? freshCompare.map((d) => d.id) : prev;
       });
 
@@ -1168,17 +1169,19 @@ export const WhatToEatModal: React.FC = () => {
     setIsSpinning(true);
     setTimeout(() => {
       const source = preferredPool && preferredPool.length >= 2 ? preferredPool : activeDishList.length >= 2 ? activeDishList : foods;
-      let unseen = source.filter(
-        (f) => !comparedDishIds.includes(f.id) && !seenCompareDishIdsRef.current.has(f.id)
+      // Strict when the user picked a taste / category filter (or the pool is a small curated AI list):
+      // every compared dish must stay inside that pool. Otherwise pick 3 genuinely different flavour families.
+      const strictPool = hasStructuredFilter || (preferredPool !== undefined && preferredPool !== activeDishList);
+      let nextCompare = pickDistinctFlavorDishes(
+        source,
+        3,
+        seenCompareDishIdsRef.current,
+        comparedDishIds,
+        { strict: strictPool }
       );
-      if (unseen.length < 3) {
-        seenCompareDishIdsRef.current.clear();
-        unseen = source.filter((f) => !comparedDishIds.includes(f.id));
+      if (nextCompare.length < 2) {
+        nextCompare = pickDistinctFlavorDishes(source, 3, seenCompareDishIdsRef.current, [], { strict: strictPool });
       }
-      const pool = unseen.length >= 2 ? unseen : source;
-      const shuffled = [...pool].sort(() => 0.5 - Math.random());
-      const nextCompare = shuffled.slice(0, 3);
-      nextCompare.forEach((d) => seenCompareDishIdsRef.current.add(d.id));
       setComparedDishIds(nextCompare.map((d) => d.id));
       if (nextCompare[0]) {
         setCurrentDishId(nextCompare[0].id);
@@ -2605,7 +2608,7 @@ export const WhatToEatModal: React.FC = () => {
                           <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
                             ⭐ {cDish.rating} • {cLoc.cookTime} • {cDish.calories || 280} kcal
                           </div>
-                          <div className="text-[10px] text-amber-800 dark:text-amber-300 font-semibold line-clamp-1">
+                          <div className="text-[10px] text-amber-800 dark:text-amber-300 font-semibold line-clamp-2 leading-snug break-words">
                             ✨ {cTaste}
                           </div>
                           {cIngs && (
