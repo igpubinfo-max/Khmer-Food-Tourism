@@ -1010,13 +1010,13 @@ export const seedFoods: FoodItem[] = [
   },
   {
     id: 'food-29',
-    nameKh: 'ឆាខ្ញីសាច់ជ្រូកខ្មែរ',
-    nameEn: 'Stir-Fried Pork with Ginger (Cha Knyei)',
+    nameKh: 'ឆាខ្ញីសាច់គោ',
+    nameEn: 'Stir-Fried Beef with Fresh Ginger (Cha Knyei Sach Ko)',
     categorySlug: 'stirfry',
     categoryKh: 'ម្ហូបឆា / ប្រពៃណី',
-    categoryEn: 'Stir-fry / Ginger',
-    descriptionKh: 'ឆាខ្ញីសាច់ជ្រូក ប្រើខ្ញីខ្ចីហាន់សរសៃច្រើនៗ ឆាជាមួយសាច់ជ្រូក និងសណ្តែកសៀងផ្អែម (ស៊ីអ៊ីវខាប់) ជួយសម្រួលរំលាយអាហារ និងមានក្លិនឈ្ងុយស្រួលពិសា។',
-    descriptionEn: 'Tender pork strips stir-fried with generous mountains of julienned young ginger, sweet fermented black beans, and scallions.',
+    categoryEn: 'Stir-fry / Ginger Beef',
+    descriptionKh: 'ឆាខ្ញីសាច់គោ ប្រើសាច់គោផុយហាន់ស្ដើងឆាជាមួយខ្ញីខ្ចីហាន់សរសៃច្រើនៗ ផ្សិតត្រចៀកកណ្តុរ និងសណ្តែកសៀងផ្អែម (ស៊ីអ៊ីវខាប់) ជួយសម្រួលរំលាយអាហារ និងមានក្លិនឈ្ងុយឆ្ងាញ់ពិសា។',
+    descriptionEn: 'Tender sliced beef stir-fried over high heat with generous julienned young ginger, wood-ear mushrooms, sweet fermented soybean sauce, and spring onions.',
     photoUrl: '/foods/food-29.jpg',
     imageAuditStatus: 'verified',
     imageAuditNote: 'រូបភាពដើមពិតប្រាកដពី Magnific',
@@ -1031,15 +1031,15 @@ export const seedFoods: FoodItem[] = [
     rating: 4.7,
     reviewCount: 92,
     ingredients: [
-      { nameKh: 'សាច់ជ្រូកហាន់ស្ដើង', nameEn: 'Pork loin sliced thinly', amount: '៣៥០ ក្រាម' },
+      { nameKh: 'សាច់គោផុយហាន់ស្ដើង', nameEn: 'Tender beef sliced thinly', amount: '៣៥០ ក្រាម' },
       { nameKh: 'ខ្ញីខ្ចីហាន់សរសៃតូចៗ', nameEn: 'Fresh young ginger shredded', amount: '១៥០ ក្រាម' },
-      { nameKh: 'សណ្តែកសៀងខាប់ (តៅហ៊ូ)', nameEn: 'Sweet fermented bean sauce', amount: '១ ស្លាបព្រាបាយ' },
-      { nameKh: 'ខ្ទឹមស និងស្លឹកខ្ទឹម', nameEn: 'Garlic and spring onions', amount: '២ ដើម' },
+      { nameKh: 'សណ្តែកសៀងខាប់ និងប្រេងខ្យង', nameEn: 'Sweet fermented bean sauce and oyster sauce', amount: '១ ស្លាបព្រាបាយកន្លះ' },
+      { nameKh: 'ខ្ទឹមស ម្ទេសដៃនាង និងស្លឹកខ្ទឹម', nameEn: 'Garlic, mild red chili, and spring onions', amount: '២ ដើម' },
     ],
     steps: [
-      { stepNumber: 1, instructionKh: 'បំពងខ្ទឹមសឱ្យឈ្ងុយ ដាក់សាច់ជ្រូកចូលឆាឱ្យឆ្អិន។', instructionEn: 'Sauté garlic, add pork slices and brown lightly.' },
-      { stepNumber: 2, instructionKh: 'ដាក់ខ្ញីហាន់សរសៃ និងសណ្តែកសៀងចូលឆាច្របល់លើភ្លើងខ្លាំង។', instructionEn: 'Add shredded ginger and fermented beans, toss vigorously.' },
-      { stepNumber: 3, instructionKh: 'បង់ស្លឹកខ្ទឹម ភ្លក្សរសជាតិ រួចដួសដាក់ចាន។', instructionEn: 'Garnish with spring onions and transfer to serving dish.' },
+      { stepNumber: 1, instructionKh: 'បំពងខ្ទឹមសឱ្យឈ្ងុយ ដាក់សាច់គោចូលឆាលើភ្លើងខ្លាំងឱ្យឆ្អិនទន់ល្មម។', instructionEn: 'Sauté garlic over high heat, add sliced beef and sear until tender.' },
+      { stepNumber: 2, instructionKh: 'ដាក់ខ្ញីហាន់សរសៃ សណ្តែកសៀង និងប្រេងខ្យងចូលឆាច្របល់លើភ្លើងខ្លាំង។', instructionEn: 'Add shredded young ginger, fermented bean sauce, and oyster sauce; toss vigorously.' },
+      { stepNumber: 3, instructionKh: 'បង់ស្លឹកខ្ទឹម និងម្ទេសហាន់ ភ្លក្សរសជាតិ រួចដួសដាក់ចានទទួលទានក្តៅៗ។', instructionEn: 'Toss in spring onions and sliced chilies, then plate and serve piping hot.' },
     ],
   },
   {
@@ -2822,12 +2822,12 @@ export const AUTHENTIC_FOOD_RECIPES = {
     ]
   },
   "food-67": {
-    "nameKh": "ឆាផ្កាខាត់ណាបង្គាស្រស់",
+    "nameKh": "ឆាផ្កាខាត់ណាបង្គា",
     "nameEn": "Stir-Fried Broccoli with Fresh Prawns",
     "cat": "stirfry",
     "catKh": "ម្ហូបឆា / គ្រឿងសមុទ្រ",
     "catEn": "Stir-Fried",
-    "descKh": "ឆាផ្កាខាត់ណាបង្គាស្រស់ ប្រើបង្គាសមុទ្រស្រស់សាច់ផ្អែម ឆាជាមួយផ្កាខាត់ណាស្រួយ ប្រេងខ្យង ខ្ទឹមស និងម្រេចកំពត ពណ៌ស្រស់ស្អាតនិងមានជីវជាតិខ្ពស់។",
+    "descKh": "ឆាផ្កាខាត់ណាបង្គា ប្រើបង្គាសមុទ្រស្រស់សាច់ផ្អែម ឆាជាមួយផ្កាខាត់ណាស្រួយ ប្រេងខ្យង ខ្ទឹមស និងម្រេចកំពត ពណ៌ស្រស់ស្អាតនិងមានជីវជាតិខ្ពស់។",
     "descEn": "Fresh succulent sea prawns stir-fried with crisp green broccoli florets in a savory garlic oyster sauce glaze.",
     "prepTime": "១៥ នាទី",
     "cookTime": "១០ នាទី",
@@ -3142,65 +3142,65 @@ export const AUTHENTIC_FOOD_RECIPES = {
     ]
   },
   "food-72": {
-    "nameKh": "ឆាសាច់គោម្រះព្រៅម្ទេសហឹរ",
-    "nameEn": "Fiery Holy Basil Beef Stir-Fry",
-    "cat": "stirfry",
-    "catKh": "ម្ហូបឆា / ឆាក្តៅ",
-    "catEn": "Stir-Fried",
-    "descKh": "ឆាសាច់គោម្រះព្រៅម្ទេសហឹរ សាច់គោផុយហាន់ស្ដើង ឆាលើភ្លើងខ្លាំងជាមួយខ្ទឹមស ម្ទេសបុក និងស្លឹកម្រះព្រៅស្រស់ ក្លិនឈ្ងុយឈួល រសជាតិហឹរដិតដល់ត្រូវចិត្តអ្នកចូលចិត្តហឹរ។",
-    "descEn": "Thin slices of tender beef flash-stir-fried with crushed garlic, bird’s eye chilies, fish sauce, and a generous heap of fresh holy basil.",
-    "prepTime": "១៥ នាទី",
+    "nameKh": "បាយឆាអំបិល",
+    "nameEn": "Cambodian Garlic Chili Salt Egg Fried Rice (Bay Cha Ambil)",
+    "cat": "rice",
+    "catKh": "ម្ហូបបាយ",
+    "catEn": "Rice Dishes",
+    "descKh": "បាយឆាអំបិល ជាបាយឆាប្រចាំគ្រួសារខ្មែរដ៏ឈ្ងុយឆ្ងាញ់ ប្រើបាយអង្ករផ្កាម្លិះឆាលើភ្លើងខ្លាំងជាមួយពងទា ខ្ទឹមសបំពង ម្ទេសស្រស់ហាន់ អំបិលគ្រួសលីង និងស្លឹកខ្ទឹម គ្រាប់បាយដាច់ល្អឈ្ងុយក្លិនខ្ទះ។",
+    "descEn": "Classic Cambodian homestyle wok-fried jasmine rice tossed with duck eggs, golden crispy garlic, coarse roasted sea salt, fresh bird's eye chilies, and scallions.",
+    "prepTime": "១០ នាទី",
     "cookTime": "៨ នាទី",
     "servings": "២-៣ នាក់",
-    "calories": 280,
+    "calories": 380,
     "difficulty": "easy",
     "ingredients": [
       {
-        "nameKh": "សាច់គោផុយហាន់ស្ដើង",
-        "nameEn": "Tender beef sliced thin",
-        "amount": "៣៥០ ក្រាម"
+        "nameKh": "បាយអង្ករផ្កាម្លិះទុកឱ្យត្រជាក់",
+        "nameEn": "Chilled cooked Cambodian jasmine rice",
+        "amount": "២ ចានធំ"
       },
       {
-        "nameKh": "ស្លឹកម្រះព្រៅស្រស់",
-        "nameEn": "Fresh holy basil leaves",
-        "amount": "១ ក្តាប់ធំ"
+        "nameKh": "ពងទាស្រស់",
+        "nameEn": "Fresh duck or chicken eggs",
+        "amount": "២ គ្រាប់"
       },
       {
-        "nameKh": "ខ្ទឹមស និងម្ទេសបកបុកម៉ត់",
-        "nameEn": "Pounded garlic and bird’s eye chilies",
+        "nameKh": "ខ្ទឹមសចិញ្ច្រាំ និងម្ទេសទុំហាន់",
+        "nameEn": "Minced garlic and sliced red bird’s eye chilies",
         "amount": "២ ស្លាបព្រាបាយ"
       },
       {
-        "nameKh": "ប្រេងខ្យង ទឹកត្រី ទឹកស៊ីអ៊ីវ",
-        "nameEn": "Oyster sauce, fish sauce, dark soy sauce",
-        "amount": "១ ស្លាបព្រាបាយកន្លះ"
+        "nameKh": "អំបិលម៉ត់ ឬអំបិលគ្រួសលីង និងម្រេចកំពត",
+        "nameEn": "Roasted sea salt and freshly ground Kampot pepper",
+        "amount": "១ ស្លាបព្រាកាហ្វេ"
       },
       {
-        "nameKh": "ស្ករត្នោត",
-        "nameEn": "Palm sugar",
-        "amount": "កន្លះស្លាបព្រាកាហ្វេ"
+        "nameKh": "ស្លឹកខ្ទឹមហាន់ និងត្រសក់ស្រស់ផ្ទាប់",
+        "nameEn": "Chopped spring onions and fresh cucumber slices",
+        "amount": "១ កូនចាន"
       }
     ],
     "steps": [
       {
         "stepNumber": 1,
-        "instructionKh": "បុកខ្ទឹមស និងម្ទេសជាមួយគ្នាឱ្យម៉ត់ល្មម។",
-        "instructionEn": "Pound garlic and fresh chilies in a mortar into a coarse paste."
+        "instructionKh": "ដាក់ប្រេងឆាក្នុងខ្ទះឱ្យក្តៅ បំពងខ្ទឹមសចិញ្ច្រាំឱ្យឡើងពណ៌មាសឈ្ងុយ។",
+        "instructionEn": "Heat oil in a wok and fry minced garlic until golden and fragrant."
       },
       {
         "stepNumber": 2,
-        "instructionKh": "ដាក់ប្រេងក្នុងខ្ទះឱ្យក្តៅ បំពងខ្ទឹមម្ទេសឱ្យឈ្ងុយឈួល។",
-        "instructionEn": "Heat oil in wok, fry garlic-chili paste until aromatic and sizzling."
+        "instructionKh": "គោះពងទាចូលកូរឱ្យបែកឆ្អិនល្មម រួចដាក់បាយអង្ករផ្កាម្លិះចូលឆាលើភ្លើងខ្លាំង។",
+        "instructionEn": "Crack in the eggs, scramble lightly, then toss in chilled jasmine rice over high flame."
       },
       {
         "stepNumber": 3,
-        "instructionKh": "ដាក់សាច់គោចូលឆាលើភ្លើងខ្លាំងយ៉ាងលឿន ថែមប្រេងខ្យង ទឹកត្រី ទឹកស៊ីអ៊ីវ និងស្ករត្នោត។",
-        "instructionEn": "Add sliced beef, tossing rapidly over intense heat with oyster sauce, fish sauce, and sugar."
+        "instructionKh": "រោយអំបិលលីង ម្ទេសហាន់ ម្រេចកំពត និងទឹកត្រីបន្តិច ឆាច្របល់ឱ្យគ្រាប់បាយលោតដាច់ពីគ្នាឈ្ងុយក្លិនខ្ទះ។",
+        "instructionEn": "Season with roasted sea salt, sliced chilies, Kampot pepper, and a touch of fish sauce, tossing until grains dance."
       },
       {
         "stepNumber": 4,
-        "instructionKh": "បង់ស្លឹកម្រះព្រៅចូលច្របល់ ៣០ វិនាទីរួចដួសដាក់ចាន ទទួលទានជាមួយបាយក្ដៅៗ។",
-        "instructionEn": "Throw in holy basil, stir for 30 seconds until wilted, plate and serve hot."
+        "instructionKh": "បង់ស្លឹកខ្ទឹមហាន់ រួចដួសដាក់ចានទទួលទានក្តៅៗផ្ទាប់ជាមួយត្រសក់ស្រស់។",
+        "instructionEn": "Fold in chopped scallions, plate up, and serve piping hot with crisp cucumber slices."
       }
     ]
   },
@@ -4102,65 +4102,65 @@ export const AUTHENTIC_FOOD_RECIPES = {
     ]
   },
   "food-87": {
-    "nameKh": "បាយឆាម្រះព្រៅសាច់ជ្រូក",
-    "nameEn": "Holy Basil Pork Fried Rice",
-    "cat": "rice",
-    "catKh": "ម្ហូបបាយ",
-    "catEn": "Rice Dishes",
-    "descKh": "បាយឆាម្រះព្រៅសាច់ជ្រូក ប្រើបាយអង្ករផ្កាម្លិះឆាជាមួយសាច់ជ្រូកចិញ្ច្រាំ ខ្ទឹមស ម្ទេសបុក និងស្លឹកម្រះព្រៅហឹរឈ្ងុយ ដាក់ពងទាចៀនក្រៀមពីលើ រសជាតិដិតដល់។",
-    "descEn": "Aromatic spicy fried rice with minced pork, pounded garlic and chilies, fragrant holy basil, crowned with a crispy sunny-side-up fried duck egg.",
-    "prepTime": "១៥ នាទី",
+    "nameKh": "ភ្លាក្តាមស្រែ",
+    "nameEn": "Cambodian Fresh Field Crab Salad (Pleah Kdam Srae)",
+    "cat": "salad",
+    "catKh": "ញាំ-ភ្លា-ប្រហុក",
+    "catEn": "Salads & Ceviche",
+    "descKh": "ភ្លាក្តាមស្រែ ជាមុខម្ហូបភ្លាបែបស្រុកស្រែដ៏ពេញនិយម ប្រើក្តាមស្រែស្រស់ៗលាងសម្អាតបកស្នូក ច្របល់ជាមួយទឹកក្រូចឆ្មារ ទឹកប្រហុកឆ្អិន គល់ស្លឹកគ្រៃហាន់ ខ្ទឹមក្រហម ខ្ទឹមស ម្ទេសដៃនាង និងជីរអង្កាម មានរសជាតិជូរហឹរប្រៃល្មមឆ្ងាញ់ប្លែកមាត់។",
+    "descEn": "Zesty Cambodian countryside salad of marinated rice-paddy crabs tossed with fresh lime juice, savory cooked prahok dressing, thinly sliced lemongrass, shallots, garlic, bird's eye chilies, and fresh mint.",
+    "prepTime": "២០ នាទី",
     "cookTime": "១០ នាទី",
-    "servings": "២ នាក់",
-    "calories": 420,
-    "difficulty": "easy",
+    "servings": "៣-៤ នាក់",
+    "calories": 230,
+    "difficulty": "medium",
     "ingredients": [
       {
-        "nameKh": "បាយកកអង្ករផ្កាម្លិះ",
-        "nameEn": "Chilled cooked jasmine rice",
-        "amount": "២ ចានធំ"
+        "nameKh": "ក្តាមស្រែប្រៃ ឬក្តាមស្រែស្រស់លាងស្អាតបកស្នូក",
+        "nameEn": "Cleaned marinated rice-paddy crabs, shells opened",
+        "amount": "៤០០ ក្រាម"
       },
       {
-        "nameKh": "សាច់ជ្រូកចិញ្ច្រាំ",
-        "nameEn": "Minced pork",
-        "amount": "១៥០ ក្រាម"
+        "nameKh": "គល់ស្លឹកគ្រៃ និងខ្ទឹមក្រហមហាន់ស្ដើងៗ",
+        "nameEn": "Thinly sliced lemongrass and shallots",
+        "amount": "១ កូនចាន"
       },
       {
-        "nameKh": "ស្លឹកម្រះព្រៅស្រស់",
-        "nameEn": "Fresh holy basil leaves",
-        "amount": "១ ក្តាប់"
+        "nameKh": "ទឹកក្រូចឆ្មារស្រស់ និងទឹកប្រហុកឆ្អិន",
+        "nameEn": "Fresh lime juice and boiled prahok dressing",
+        "amount": "៣ ស្លាបព្រាបាយ"
       },
       {
-        "nameKh": "ខ្ទឹមស និងម្ទេសបុក",
-        "nameEn": "Pounded garlic and red chilies",
-        "amount": "១ ស្លាបព្រាបាយ"
+        "nameKh": "ខ្ទឹមសចំណិត ម្ទេសស្រស់ និងស្ករត្នោត",
+        "nameEn": "Sliced garlic, fresh bird's eye chilies, and palm sugar",
+        "amount": "២ ស្លាបព្រាបាយ"
       },
       {
-        "nameKh": "ពងទាចៀនគែមស្រួយ",
-        "nameEn": "Crispy-edged fried duck eggs",
-        "amount": "២ គ្រាប់"
+        "nameKh": "ជីរអង្កាម ជីររណារ និងស្លឹកក្រូចសើចហាន់ឆ្មារ",
+        "nameEn": "Fresh mint, sawtooth herb, and julienned kaffir lime leaves",
+        "amount": "១ ក្តាប់ធំ"
       }
     ],
     "steps": [
       {
         "stepNumber": 1,
-        "instructionKh": "ឆាខ្ទឹមស និងម្ទេសបុកក្នុងប្រេងក្តៅឱ្យឈួលឈ្ងុយ។",
-        "instructionEn": "Fry garlic-chili paste in hot oil until intensely aromatic."
+        "instructionKh": "លាងសម្អាតក្តាមស្រែឱ្យស្អាត បកស្នូកចេញ កាត់ជាដុំល្មម រួចស្រុសទឹកក្តៅ ឬច្របាច់ទឹកក្រូចឆ្មារទុកឱ្យឆ្អិនសាច់ល្អ។",
+        "instructionEn": "Clean the field crabs thoroughly, remove top shells, halve, and cure in fresh lime juice or briefly blanch."
       },
       {
         "stepNumber": 2,
-        "instructionKh": "ដាក់សាច់ជ្រូកចិញ្ច្រាំចូលឆាឱ្យឆ្អិន ថែមទឹកត្រី និងស្ករត្នោត។",
-        "instructionEn": "Add minced pork, browning thoroughly with fish sauce and palm sugar."
+        "instructionKh": "លាយទឹកប្រហុកឆ្អិន ទឹកត្រី ស្ករត្នោត ទឹកក្រូចឆ្មារ ខ្ទឹមស និងម្ទេសហាន់ឱ្យចូលជាតិជូរប្រៃហឹរមុត។",
+        "instructionEn": "Whisk cooked prahok broth, fish sauce, palm sugar, lime juice, garlic, and chilies into a bold dressing."
       },
       {
         "stepNumber": 3,
-        "instructionKh": "ដាក់បាយកកចូលឆាច្របល់លើភ្លើងខ្លាំង រួចបង់ស្លឹកម្រះព្រៅចូល។",
-        "instructionEn": "Toss in cold jasmine rice, frying on high flame, then fold in holy basil."
+        "instructionKh": "ដាក់ក្តាមស្រែ គល់ស្លឹកគ្រៃហាន់ និងខ្ទឹមក្រហមចូលច្របល់ជាមួយទឹកជ្រលក់ឱ្យសព្វ។",
+        "instructionEn": "Toss the field crabs with sliced lemongrass and shallots in the zesty dressing."
       },
       {
         "stepNumber": 4,
-        "instructionKh": "ដួសដាក់ចាន ដាក់ពងទាចៀនក្រៀមពីលើ ទទួលទានក្តៅៗ។",
-        "instructionEn": "Plate up, crown with a crispy fried egg, and enjoy hot."
+        "instructionKh": "បង់ជីរអង្កាម ជីររណារ និងស្លឹកក្រូចសើច រួចដួសដាក់ចានទទួលទានភ្លាមៗ។",
+        "instructionEn": "Fold in fresh mint, sawtooth herb, and kaffir lime leaves, then plate and serve immediately."
       }
     ]
   },

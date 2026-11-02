@@ -148,6 +148,18 @@ export const DEPRECATED_STALE_FOOD_NAMES_KH = new Set<string>([
   'ឆាត្រកួនប្រហុកខ្ទឹមស',
   'សម្លការីសាច់ទាដំឡូងជ្វា',
   'នំគ្រក់ខ្ទិះដូងស្លឹកខ្ទឹមទឹកត្រីផ្អែម',
+  'មីឆាសាច់គោពងទាចៀន',
+  'សម្លប្រហើរននោងបង្គាស្រស់',
+  'ញាំត្រសក់ត្រីឆ្អើរ',
+  'បុកល្ហុងសាច់ជ្រូកបីជាន់បំពងស្រួយ',
+  'មីសួរស៊ុបប្រហិតសាច់ជ្រូក',
+  'ឆាគ្រឿងអន្ទង់',
+  'ឆាគ្រឿងអន្ទង់ស្លឹកម្រះព្រៅ',
+  'ឆាខ្ញីសាច់ជ្រូកខ្មែរ',
+  'ឆាសាច់គោម្រះព្រៅម្ទេសហឹរ',
+  'បាយឆាម្រះព្រៅសាច់ជ្រូក',
+  'ត្រីអណ្តែងអាំងទឹកត្រីអម្ពិលទុំ',
+  'ត្រីងៀតអាំងជ្រលក់ទឹកអម្ពិលទុំ',
 ]);
 
 export function isDeprecatedStaleFoodMetadata(
@@ -236,6 +248,9 @@ export function isRejectedLegacyFoodOverridePhoto(
     if (excelBakedMs > 0 && ovEffectiveMs < excelBakedMs) {
       return true;
     }
+  }
+  if (isDeprecatedStaleFoodMetadata(foodId, ov.nameKh, ov.categorySlug)) {
+    return true;
   }
   // Never reject any genuine custom base64, blob, or cloud storage URL uploaded by Admin!
   if (isGenuineCustomPhotoUrl(ov.photoUrl)) {

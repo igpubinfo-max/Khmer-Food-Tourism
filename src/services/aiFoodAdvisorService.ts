@@ -229,9 +229,9 @@ const SEMANTIC_CRAVING_RULES: SemanticRule[] = [
   },
   {
     id: 'soup_warm',
-    triggerRegex: /សម្ល|ស៊ុប|ម្ជូរ|កកូរ|ការី|ក្តៅ|ក្ដៅ|ហុត|ទឹកស៊ុប|អាម៉ុក|soup|warm|hot soup|curry|broth|stew|samlor|amok|汤|热汤|暖|咖喱|酸汤|阿莫克|火锅/i,
+    triggerRegex: /សម្ល|ស៊ុប|ម្ជូរ|កកូរ|ការី|ស្ងោរ|ជ្រក់|ប្រហើរ|ក្តៅ|ក្ដៅ|ហុត|ទឹកស៊ុប|អាម៉ុក|soup|warm|hot soup|curry|broth|stew|samlor|amok|汤|热汤|暖|咖喱|酸汤|阿莫克|火锅/i,
     matchFood: (f, titleText) => {
-      if (/សម្ល|ស៊ុប|ម្ជូរ|កកូរ|ការី|អាម៉ុក|បបរ|ស្ងោរ|soup|curry|samlor|amok|hotpot|broth/i.test(titleText)) return 195;
+      if (/សម្ល|ស៊ុប|ម្ជូរ|កកូរ|ការី|អាម៉ុក|បបរ|ស្ងោរ|ប្រហើរ|soup|curry|samlor|amok|hotpot|broth/i.test(titleText)) return 195;
       if (f.categorySlug === 'soup') return 165;
       return 0;
     },

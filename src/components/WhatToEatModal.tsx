@@ -301,6 +301,7 @@ export const WhatToEatModal: React.FC = () => {
   const [drinkMode, setDrinkMode] = useState(false);
   const [drinkKind, setDrinkKind] = useState<DrinkKindFilter>('all');
   const [setPage, setSetPage] = useState(0);
+  const [drinkShuffleSeed, setDrinkShuffleSeed] = useState<number>(() => Date.now());
 
   // Multi-turn Conversational AI State
   const [chatMessages, setChatMessages] = useState<AiAssistantMessage[]>([]);
@@ -322,6 +323,7 @@ export const WhatToEatModal: React.FC = () => {
   const seenDishIdsRef = useRef<Set<string>>(new Set());
   const seenChatDishIdsRef = useRef<Set<string>>(new Set());
   const seenCompareDishIdsRef = useRef<Set<string>>(new Set());
+  const seenPairingLeadIdsRef = useRef<Set<string>>(new Set());
   const comparePanelRef = useRef<HTMLDivElement>(null);
   useBodyScrollLock(isWhatToEatModalOpen);
 
@@ -348,8 +350,14 @@ export const WhatToEatModal: React.FC = () => {
       }
       if ((window as any).__kft_wte_open_compare_mode) {
         (window as any).__kft_wte_open_compare_mode = false;
-        const defaultCompare = foods.slice(0, 3).map((f) => f.id);
-        setComparedDishIds(defaultCompare);
+        let unseenCompare = foods.filter((f) => !seenCompareDishIdsRef.current.has(f.id));
+        if (unseenCompare.length < 3) {
+          seenCompareDishIdsRef.current.clear();
+          unseenCompare = [...foods];
+        }
+        const shuffledCompare = [...unseenCompare].sort(() => 0.5 - Math.random()).slice(0, 3);
+        shuffledCompare.forEach((f) => seenCompareDishIdsRef.current.add(f.id));
+        setComparedDishIds(shuffledCompare.map((f) => f.id));
         setTimeout(() => {
           comparePanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 120);
@@ -490,22 +498,52 @@ export const WhatToEatModal: React.FC = () => {
     [drinkMode, canUseVip, foods, drinkKind]
   );
 
-  // Beverage Pairings are presented as curated sets of exactly 4 dishes
+  // Beverage Pairings are presented as randomized sets of 4 different dishes every time
   const pairingSets = useMemo(() => {
-    const list = pairingRanked.map((r) => r.food);
+    const rawList = pairingRanked.map((r) => r.food);
+    if (rawList.length === 0) return [];
+
+    // Separate dishes not recently shown in the first visible sets so the top sets are always fresh
+    const unseen = rawList.filter((f) => !seenPairingLeadIdsRef.current.has(f.id));
+    const seen = rawList.filter((f) => seenPairingLeadIdsRef.current.has(f.id));
+    if (unseen.length < PAIRING_SET_SIZE * PAIRING_SETS_PER_PAGE) {
+      seenPairingLeadIdsRef.current.clear();
+    }
+
+    const fisherYatesShuffle = (arr: FoodItem[]): FoodItem[] => {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = copy[i];
+        copy[i] = copy[j];
+        copy[j] = tmp;
+      }
+      return copy;
+    };
+
+    const list =
+      unseen.length >= PAIRING_SET_SIZE * PAIRING_SETS_PER_PAGE
+        ? [...fisherYatesShuffle(unseen), ...fisherYatesShuffle(seen)]
+        : fisherYatesShuffle(rawList);
+
+    list.slice(0, PAIRING_SET_SIZE * PAIRING_SETS_PER_PAGE).forEach((f) => {
+      seenPairingLeadIdsRef.current.add(f.id);
+    });
+
     const sets: FoodItem[][] = [];
     for (let i = 0; i + PAIRING_SET_SIZE <= list.length; i += PAIRING_SET_SIZE) {
       sets.push(list.slice(i, i + PAIRING_SET_SIZE));
     }
     return sets;
-  }, [pairingRanked]);
+  }, [pairingRanked, drinkShuffleSeed]);
   const showSets = drinkMode && canUseVip && pairingSets.length > 0;
   const setPageCount = Math.max(1, Math.ceil(pairingSets.length / PAIRING_SETS_PER_PAGE));
   const visibleSets = pairingSets.slice(setPage * PAIRING_SETS_PER_PAGE, (setPage + 1) * PAIRING_SETS_PER_PAGE);
 
   useEffect(() => {
     setSetPage(0);
-  }, [drinkMode, drinkKind]);
+    setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
+  }, [drinkMode, drinkKind, isWhatToEatModalOpen]);
 
   // Filter candidate dishes strictly across all 4 filter groups: Craving, Category, Mealtime, and Dietary/Health
   const matchingFoods = useMemo(() => {
@@ -946,7 +984,13 @@ export const WhatToEatModal: React.FC = () => {
     if (showSets) {
       setIsSpinning(true);
       setTimeout(() => {
-        setSetPage((p) => (p + 1) % setPageCount);
+        setSetPage((p) => {
+          const nextPage = (p + 1) % setPageCount;
+          if (nextPage === 0) {
+            setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
+          }
+          return nextPage;
+        });
         setSpinCount((c) => c + 1);
         setIsSpinning(false);
       }, 200);
@@ -2066,7 +2110,10 @@ export const WhatToEatModal: React.FC = () => {
                     <button
                       key={k.id}
                       type="button"
-                      onClick={() => setDrinkKind(k.id)}
+                      onClick={() => {
+                        setDrinkKind(k.id);
+                        setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
+                      }}
                       className={`px-3 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 transition cursor-pointer ${
                         drinkKind === k.id
                           ? 'bg-[#064E3B] text-amber-300 border border-amber-400/60 shadow-xs'
@@ -2077,6 +2124,22 @@ export const WhatToEatModal: React.FC = () => {
                       <span>{tr(language, k.kh, k.en, k.zh)}</span>
                     </button>
                   ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSpinning(true);
+                      setTimeout(() => {
+                        setSetPage(0);
+                        setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
+                        setSpinCount((c) => c + 1);
+                        setIsSpinning(false);
+                      }, 180);
+                    }}
+                    className="px-3 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 border border-amber-500/60 shadow-xs transition active:scale-95 cursor-pointer"
+                  >
+                    <Shuffle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{tr(language, 'ចាប់ឈុតថ្មីចៃដន្យ', 'Randomize Sets', '随机生成新套餐')}</span>
+                  </button>
                 </div>
               </div>
             )}

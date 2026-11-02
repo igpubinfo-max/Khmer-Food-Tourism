@@ -95,6 +95,7 @@ import {
   isRejectedLegacyFoodOverridePhoto,
   isDeprecatedStaleFoodMetadata,
   isGenuineCustomPhotoUrl,
+  getSeedFoodPhotoBaselineMs,
 } from '../services/permanentMediaVaultService';
 import {
   GooglePlaceCachedItem,
@@ -931,14 +932,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
             const existingOverride = vault.foods[f.id];
             const ledgerEntry = foodLedger[f.id];
+            const seedBaselineMs = getSeedFoodPhotoBaselineMs(f.id);
             const candidateEffectiveMs = Math.max(
               f.adminApprovedAt ? Date.parse(f.adminApprovedAt) || 0 : 0,
               f.photoUpdatedAt ? Date.parse(f.photoUpdatedAt) || 0 : 0,
               f.adminEditedAt ? Date.parse(f.adminEditedAt) || 0 : 0,
               ledgerEntry?.updatedAt ? Date.parse(ledgerEntry.updatedAt) || 0 : 0,
-              f.isCustomPhoto || (typeof f.photoUrl === 'string' && f.photoUrl.startsWith('data:image/')) ? Date.now() : 0
+              typeof f.photoUrl === 'string' && f.photoUrl.startsWith('data:image/')
+                ? SEED_FOOD_PHOTO_BASELINE_MS + 1000
+                : 0
             );
-            if (candidateEffectiveMs <= SEED_FOOD_PHOTO_BASELINE_MS) {
+            if (candidateEffectiveMs <= seedBaselineMs) {
               continue;
             }
             const candidateHash = f.photoUrl ? computeFastPhotoSignature(f.photoUrl) : '';

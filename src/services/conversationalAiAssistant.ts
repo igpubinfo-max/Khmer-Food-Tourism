@@ -535,8 +535,14 @@ export function generateConversationalAiResponse(params: {
   memory: AiConversationMemory;
 }): { reply: AiAssistantMessage; nextMemory: AiConversationMemory } {
   const { userInput, language, foods, restaurants, destinations, canUseVip, memory } = params;
+  const safeMemory: AiConversationMemory = {
+    ...memory,
+    lastDishes: Array.isArray(memory?.lastDishes) ? memory.lastDishes : [],
+    lastDestinations: Array.isArray(memory?.lastDestinations) ? memory.lastDestinations : [],
+    turnSeed: memory?.turnSeed || 1,
+  };
   const trimmed = userInput.trim();
-  const nextSeed = (memory.turnSeed || 1) + 1;
+  const nextSeed = (safeMemory.turnSeed || 1) + 1;
 
   // 1. STRICT MEDICAL / HEALTH / DISEASE SCOPE BOUNDARY REFUSAL
   // Never diagnose, never recommend food for illnesses, never output medical disclaimers.
@@ -614,7 +620,7 @@ export function generateConversationalAiResponse(params: {
     return {
       reply,
       nextMemory: {
-        ...memory,
+        ...safeMemory,
         lastDishes: topDishes,
         activeProvinceKh,
         lastQuery: trimmed,
@@ -641,7 +647,7 @@ export function generateConversationalAiResponse(params: {
       // Dish is outside the 200-item catalog: dynamically generate authentic ingredients, cooking steps & category!
       targetFood = createOutOfCatalogDishItem(cleanRequestedDishName, foods);
     } else {
-      targetFood = memory.lastDishes[0] || foods[0];
+      targetFood = safeMemory.lastDishes[0] || foods[0];
     }
 
     const loc = getLocalizedFood(targetFood, language);
@@ -687,8 +693,8 @@ export function generateConversationalAiResponse(params: {
     return {
       reply,
       nextMemory: {
-        ...memory,
-        lastDishes: [targetFood, ...memory.lastDishes.filter((d) => d.id !== targetFood.id)].slice(0, 4),
+        ...safeMemory,
+        lastDishes: [targetFood, ...safeMemory.lastDishes.filter((d) => d.id !== targetFood.id)].slice(0, 4),
         activeProvinceKh,
         lastQuery: trimmed,
         turnSeed: nextSeed,
@@ -810,9 +816,9 @@ export function generateConversationalAiResponse(params: {
     return {
       reply,
       nextMemory: {
-        ...memory,
+        ...safeMemory,
         lastDestinations: topDests,
-        lastDishes: provFoods.length > 0 ? provFoods : memory.lastDishes,
+        lastDishes: provFoods.length > 0 ? provFoods : safeMemory.lastDishes,
         activeProvinceKh: provKh,
         lastQuery: trimmed,
         turnSeed: nextSeed,
@@ -822,7 +828,7 @@ export function generateConversationalAiResponse(params: {
 
   // 5. RESTAURANT RECOMMENDATION INTENT (Multi-turn aware!)
   if (RESTAURANT_INTENT_RE.test(trimmed)) {
-    const targetFood = findBestDishInQuery(trimmed, foods, memory.lastDishes);
+    const targetFood = findBestDishInQuery(trimmed, foods, safeMemory.lastDishes);
     const provKh = detectedProv?.kh || activeProvinceKh;
     const normProv = provKh.replace(/ណ្ដ/g, 'ណ្ត');
 
@@ -924,11 +930,11 @@ export function generateConversationalAiResponse(params: {
       text: `${advisor.brain.emoji} ${advisor.brain.headline}\n\n${advisor.brain.explanation}`,
       followUpChips: advisor.brain.followUps,
     };
-    return { reply, nextMemory: { ...memory, turnSeed: nextSeed } };
+    return { reply, nextMemory: { ...safeMemory, turnSeed: nextSeed } };
   }
 
   // Filter out dishes shown in the immediately preceding turn if user asked for "more"
-  const prevIds = new Set(isMoreFollowUp ? memory.lastDishes.map((d) => d.id) : []);
+  const prevIds = new Set(isMoreFollowUp ? safeMemory.lastDishes.map((d) => d.id) : []);
   let chosenDishes = advisor.dishes.filter((d) => !prevIds.has(d.id)).slice(0, 4);
 
   // If the user explicitly asked about food in a specific province (e.g. "ម្ហូបឆ្ងាញ់នៅសៀមរាបមានអ្វីខ្លះ?"),
