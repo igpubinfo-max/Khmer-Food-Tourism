@@ -17,7 +17,7 @@ import {
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { isMedicalOrHealthQuery, buildMedicalScopeNotice, describeDish, type BrainChip } from './aiFoodBrain';
 import { getAiFoodAdvisorRecommendations, isVegetarianQuery } from './aiFoodAdvisorService';
-import { getCloudApiConfig } from './supabaseService';
+import { getCloudApiConfig, DEFAULT_GOOGLE_MAPS_API_KEY } from './supabaseService';
 
 export type AiTurnIntent =
   | 'welcome'
@@ -86,6 +86,8 @@ export interface AiAssistantMessage {
   /** Do not show the big "recommended dish" card for this turn (no verified dish to show). */
   suppressDishCard?: boolean;
   model?: string;
+  /** Reason code when the live AI call could not complete (used to show inline key setup UI). */
+  failureReason?: 'no_key' | 'auth' | 'network' | 'timeout' | 'quota' | 'blocked' | 'bad_response' | 'unavailable';
 }
 
 export interface AiConversationMemory {
@@ -1350,19 +1352,20 @@ export function generateConversationalAiResponse(params: {
 
 /**
  * Resolves the active Gemini API key from explicit settings, cloud config, or Vite env.
+ * Never falls back to DEFAULT_GOOGLE_MAPS_API_KEY (which is restricted to Google Maps and rejected by Gemini).
  */
 export function resolveGeminiApiKey(explicitKey?: string): string {
-  const trimmedExplicit = (explicitKey || '').trim();
-  if (trimmedExplicit) return trimmedExplicit;
+  const isUsableGeminiKey = (k?: string): boolean => {
+    const trimmed = (k || '').trim();
+    return Boolean(trimmed && trimmed !== DEFAULT_GOOGLE_MAPS_API_KEY);
+  };
+  if (isUsableGeminiKey(explicitKey)) return (explicitKey || '').trim();
   const cloudCfg = getCloudApiConfig();
-  if (cloudCfg.geminiApiKey && cloudCfg.geminiApiKey.trim()) {
+  if (isUsableGeminiKey(cloudCfg.geminiApiKey)) {
     return cloudCfg.geminiApiKey.trim();
   }
   const envKey = ((import.meta as any).env?.VITE_GEMINI_API_KEY || '').trim();
-  if (envKey) return envKey;
-  if (cloudCfg.googleMapsApiKey && cloudCfg.googleMapsApiKey.trim()) {
-    return cloudCfg.googleMapsApiKey.trim();
-  }
+  if (isUsableGeminiKey(envKey)) return envKey;
   return '';
 }
 

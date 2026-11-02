@@ -726,6 +726,7 @@ export function interpretAssistantPayload(raw: unknown, ctx: InterpretContext): 
 /* ------------------------------------------------------------------------------------------------ */
 
 type CallFailureKind =
+  | 'no_key'
   | 'network'
   | 'timeout'
   | 'auth'
@@ -924,7 +925,7 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
         if (!(viaProxy.ok === false && viaProxy.kind === 'proxy_unavailable')) return viaProxy;
         proxyDownUntil = Date.now() + PROXY_RETRY_AFTER_MS;
       }
-      if (!key) return { ok: false, kind: 'auth', message: 'No Gemini API key available' };
+      if (!key) return { ok: false, kind: 'no_key', message: 'No Gemini API key available' };
       return callGeminiOnce(key, model, body, timeoutMs);
     });
 
@@ -970,6 +971,7 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
         lastFail = { fail: 'bad_response', detail: out.message };
         continue; // degrade optional fields (thinking / schema) and retry the same model
       }
+      if (out.kind === 'no_key') return { fail: 'no_key', detail: out.message, stop: true };
       if (out.kind === 'auth') return { fail: 'auth', detail: out.message, stop: true };
       if (out.kind === 'quota') return { fail: 'quota', detail: out.message };
       if (out.kind === 'blocked') return { fail: 'blocked', detail: out.message, stop: true };
@@ -1054,9 +1056,9 @@ export function buildAssistantFailureMessage(
     ),
     auth: tr(
       language,
-      '🔑 Gemini API Key មិនត្រឹមត្រូវ ឬផុតកំណត់។ សូមឱ្យអ្នកគ្រប់គ្រងពិនិត្យ Key។',
-      '🔑 The Gemini API key is invalid or expired. Please ask the admin to check the key.',
-      '🔑 Gemini API Key 无效或已过期，请联系管理员检查。'
+      '🔑 Gemini API Key មិនត្រឹមត្រូវ ឬផុតកំណត់។ សូមបង្កើតសោថ្មីពី Google AI Studio (aistudio.google.com/app/apikey) រួចបិទភ្ជាប់នៅខាងក្រោម ឬក្នុង Admin → ទិដ្ឋភាពទូទៅ → ប្រអប់ទី ៤។',
+      '🔑 The Gemini API key is invalid or expired. Create a new key in Google AI Studio (aistudio.google.com/app/apikey) and paste it below or in Admin → Overview → Box 4.',
+      '🔑 Gemini API Key 无效或已过期。请在 Google AI Studio (aistudio.google.com/app/apikey) 创建新密钥并粘贴到下方或后台“概览”第 4 框。'
     ),
     quota: tr(
       language,
@@ -1090,6 +1092,7 @@ export function buildAssistantFailureMessage(
     intent: 'clarification',
     source: 'notice',
     suppressDishCard: true,
+    failureReason: reason,
     text: `${reasonText[reason]}${imageNeedsAi}`,
     followUpChips: foodAssistantStarterChips(language),
   };

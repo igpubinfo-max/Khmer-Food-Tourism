@@ -66,9 +66,11 @@ import {
   detectOutOfCatalogDishName,
   createOutOfCatalogDishItem,
   resolveGeminiApiKey,
+  testGeminiApiConnection,
   type AiAssistantMessage,
   type AiConversationMemory,
 } from '../services/conversationalAiAssistant';
+import { saveCloudApiConfig } from '../services/supabaseService';
 import {
   rankDrinkPairingDishes,
   getDrinkPairing,
@@ -292,6 +294,7 @@ export const WhatToEatModal: React.FC = () => {
     openUpgradeVipModal,
     showToast,
     appSettings,
+    updateAppSettings,
   } = useApp();
 
   const canUseVip = hasSpecialAndHealthyFoodVipAccess(currentUser);
@@ -300,6 +303,8 @@ export const WhatToEatModal: React.FC = () => {
   const [isPreparingImage, setIsPreparingImage] = useState(false);
   const [imageError, setImageError] = useState('');
   const [forceBigCard, setForceBigCard] = useState(false);
+  const [inlineApiKeyInput, setInlineApiKeyInput] = useState('');
+  const [isTestingInlineKey, setIsTestingInlineKey] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Filters: Conversational Input, Category, Meal Time, Dietary / Health Style
@@ -1473,6 +1478,87 @@ export const WhatToEatModal: React.FC = () => {
                         </div>
                       ) : (
                         <RichAnswerText text={msg.text} />
+                      )}
+
+                      {(msg.failureReason === 'no_key' || msg.failureReason === 'auth') && (
+                        <div
+                          data-testid="ai-inline-key-setup"
+                          className="mt-2.5 p-2.5 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700/70 space-y-2"
+                        >
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <span className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300">
+                              🔑 {tr(language, 'បញ្ចូលសោ Gemini API Key ទីនេះ៖', 'Paste Gemini API Key here:', '在此粘贴 Gemini API Key：')}
+                            </span>
+                            <a
+                              href="https://aistudio.google.com/app/apikey"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white dark:bg-slate-800 border border-emerald-300 dark:border-emerald-700 text-[10px] font-extrabold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 transition"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              <span>{tr(language, 'យកសោឥតគិតថ្លៃ (Google AI Studio)', 'Get free key (Google AI Studio)', '免费获取密钥 (Google AI Studio)')}</span>
+                            </a>
+                          </div>
+                          <div className="flex flex-col sm:flex-row gap-1.5">
+                            <input
+                              type="text"
+                              value={inlineApiKeyInput}
+                              onChange={(e) => setInlineApiKeyInput(e.target.value)}
+                              placeholder="AIzaSy..."
+                              className="flex-1 px-2.5 py-1.5 rounded-lg border border-emerald-400 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-mono text-xs"
+                            />
+                            <div className="flex gap-1.5 shrink-0">
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    const clip = await navigator.clipboard.readText();
+                                    if (clip && clip.trim()) setInlineApiKeyInput(clip.trim());
+                                  } catch {
+                                    showToast(tr(language, 'សូមចុចឱ្យជាប់ក្នុងប្រអប់ រួចជ្រើសរើស Paste', 'Long-press the box and tap Paste', '请长按输入框并选择粘贴'), 'info');
+                                  }
+                                }}
+                                className="px-2.5 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold text-[11px] transition cursor-pointer"
+                              >
+                                📋 Paste
+                              </button>
+                              <button
+                                type="button"
+                                disabled={isTestingInlineKey || !inlineApiKeyInput.trim()}
+                                onClick={async () => {
+                                  const candidate = inlineApiKeyInput.trim();
+                                  if (!candidate) return;
+                                  setIsTestingInlineKey(true);
+                                  try {
+                                    saveCloudApiConfig({ geminiApiKey: candidate });
+                                    await updateAppSettings({ geminiApiKey: candidate });
+                                    const res = await testGeminiApiConnection(candidate);
+                                    if (res.ok) {
+                                      showToast(
+                                        tr(
+                                          language,
+                                          `✅ បានរក្សាទុក និងភ្ជាប់ Gemini AI ជោគជ័យ (${res.model})! សូមផ្ញើរូបភាព ឬសំណួរម្តងទៀត។`,
+                                          `✅ Saved & connected to Gemini AI (${res.model})! Please resend your photo or question.`,
+                                          `✅ 已保存并成功连接 Gemini AI (${res.model})！请重新发送图片或问题。`
+                                        ),
+                                        'success'
+                                      );
+                                    } else {
+                                      showToast(`❌ Gemini Key Error: ${res.message}`, 'error');
+                                    }
+                                  } finally {
+                                    setIsTestingInlineKey(false);
+                                  }
+                                }}
+                                className="px-3 py-1.5 rounded-lg bg-[#064E3B] hover:bg-[#047857] text-white font-extrabold text-[11px] transition cursor-pointer disabled:opacity-50"
+                              >
+                                {isTestingInlineKey
+                                  ? tr(language, 'កំពុងតេស្ត...', 'Testing...', '测试中...')
+                                  : tr(language, '✅ រក្សាទុក & តេស្ត', '✅ Save & Test', '✅ 保存并测试')}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       )}
 
                       {msg.imageAnalysis && !msg.imageAnalysis.containsFood && (
