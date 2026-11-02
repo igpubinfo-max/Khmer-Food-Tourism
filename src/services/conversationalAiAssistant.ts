@@ -1,9 +1,10 @@
 import { isPlaceLocationVerified, type FoodItem, type Language, type Restaurant, type TouristDestination } from '../types';
 import { tr } from '../utils/i18n';
-import { normalizeKhmerFoodText } from '../utils/khmerFoodSearch';
+import { normalizeKhmerFoodText, searchKhmerFoods } from '../utils/khmerFoodSearch';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { isMedicalOrHealthQuery, buildMedicalScopeNotice, describeDish, type BrainChip } from './aiFoodBrain';
 import { getAiFoodAdvisorRecommendations, isVegetarianQuery } from './aiFoodAdvisorService';
+import { getCloudApiConfig } from './supabaseService';
 
 export type AiTurnIntent =
   | 'welcome'
@@ -39,6 +40,7 @@ export interface AiAssistantMessage {
   followUpChips?: BrainChip[];
   triggerDrinkSets?: boolean;
   isScopeRefusal?: boolean;
+  isLiveGemini?: boolean;
 }
 
 export interface AiConversationMemory {
@@ -250,6 +252,10 @@ function findBestDishInQuery(query: string, foods: FoodItem[], fallbackDishes: F
       ) {
         return f;
       }
+    }
+    const khmerMatches = searchKhmerFoods(foods, clean);
+    if (khmerMatches.length > 0) {
+      return khmerMatches[0];
     }
     // Check common dish keywords
     if (/អាម៉ុក|amok|阿莫克/i.test(query)) {
@@ -665,6 +671,24 @@ export function generateConversationalAiResponse(params: {
   // Filter out dishes shown in the immediately preceding turn if user asked for "more"
   const prevIds = new Set(isMoreFollowUp ? memory.lastDishes.map((d) => d.id) : []);
   let chosenDishes = advisor.dishes.filter((d) => !prevIds.has(d.id)).slice(0, 4);
+
+  // If the user explicitly asked about food in a specific province (e.g. "ម្ហូបឆ្ងាញ់នៅសៀមរាបមានអ្វីខ្លះ?"),
+  // prioritize authentic dishes from that province!
+  if (detectedProv) {
+    const normTargetProv = detectedProv.kh.replace(/ណ្ដ/g, 'ណ្ត');
+    const provMatchedDishes = foods.filter((f) => {
+      const fProv = (f.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត');
+      return fProv.includes(normTargetProv) && !prevIds.has(f.id);
+    });
+    if (provMatchedDishes.length > 0) {
+      const merged = [
+        ...provMatchedDishes,
+        ...chosenDishes.filter((d) => !provMatchedDishes.some((p) => p.id === d.id)),
+      ];
+      chosenDishes = merged.slice(0, 4);
+    }
+  }
+
   if (chosenDishes.length === 0) {
     chosenDishes = advisor.dishes.slice(0, 4);
   }
@@ -683,23 +707,34 @@ export function generateConversationalAiResponse(params: {
   if (isVegQuery) {
     vegetarianNote = tr(
       language,
-      '💡 សម្គាល់ពីម្ហូបបួសក្នុងទិន្នន័យកម្មវិធី៖ មុខម្ហូបបន្លែឆាខ្មែរ (ដូចជា ឆាត្រកួន និងឆាផ្កាខាត់ណាបៃតង) អាចចម្អិន ឬកុម្ម៉ង់ជា «ម្ហូបបួសសុទ្ធ ១០០%» ដោយប្រើទឹកស៊ីអ៊ីវ ប្រេងខ្ចងផ្សិតបួស និងតៅហ៊ូ ជំនួសទឹកត្រី ឬប្រហុក។ ចំណែកអាហារសម្រន់ និងបង្អែមខ្មែរខាងក្រោម (ក្រឡាន នំគ្រក់ខ្ទិះដូង អំបុក ទឹកសណ្តែកសៀង នំល្ពៅចំហុយ) គឺផ្សំពីរុក្ខជាតិសុទ្ធ ១០០%។',
-      '💡 Vegetarian Culinary Note: Traditional Khmer vegetable stir-fries in our database (such as Morning Glory and Broccoli Stir-Fry) are easily prepared or ordered 100% vegetarian by using soy sauce, mushroom sauce, and tofu instead of oyster/fish sauce. Meanwhile, the traditional Khmer snacks and desserts below (Kralan bamboo sticky rice, Num Krok coconut pancakes, Ambok, hot soy milk, steamed pumpkin cake) are 100% plant-based.',
-      '💡 高棉素食贴士：数据库中的高棉时蔬热炒（如蒜蓉空心菜、清炒西兰花）在餐厅点餐或在家烹饪时，只需将鱼露/蚝油替换为酱油、素食香菇酱与豆腐，即可做成 100% 纯素菜品；下方的竹筒饭、椰浆葱花米饼、扁米、热豆浆及蒸南瓜糕等传统小吃与甜品均为 100% 纯植物食材制作。'
+      '💡 សម្គាល់ពីម្ហូបបួស៖ មុខម្ហូបបន្លែឆាខ្មែរខាងក្រោមអាចចម្អិនជាម្ហូបបួសសុទ្ធ ១០០% ដោយប្រើទឹកស៊ីអ៊ីវ និងតៅហ៊ូជំនួសទឹកត្រី។',
+      '💡 Vegetarian Note: Traditional Khmer vegetable stir-fries below can be prepared 100% vegetarian using soy sauce and tofu.',
+      '💡 素食贴士：下方的高棉时蔬热炒只需用酱油与豆腐替代鱼露，即可做成 100% 纯素菜肴。'
     );
-  } else if (advisor.brain) {
-    conversationalText = `${advisor.brain.headline}${advisor.brain.explanation ? `\n${advisor.brain.explanation}` : ''}`;
-  } else if (firstDish && firstLoc) {
-    const flavorDesc = describeDish(firstDish, language);
+  } else if (detectedProv && chosenDishes.length > 0) {
+    const provLabel = tr(language, detectedProv.kh, detectedProv.en, detectedProv.zh);
+    const dishNames = chosenDishes
+      .slice(0, 3)
+      .map((d) => getLocalizedFood(d, language).name)
+      .join(language === 'zh' ? '、' : ', ');
     conversationalText = tr(
       language,
-      `${advisor.aiSummaryText}\n✨ មុខម្ហូបលេចធ្លោ៖ «${firstLoc.name}» (${flavorDesc}) — អ្នកអាចមើលគ្រឿងផ្សំ របៀបធ្វើ ប្រៀបធៀបមុខម្ហូប ឬបើកមើលព័ត៌មានលម្អិតខាងក្រោម៖`,
-      `${advisor.aiSummaryText}\n✨ Featured Pick: "${firstLoc.name}" (${flavorDesc}) — explore ingredients, cooking methods, compare dishes side-by-side, or open full details below:`,
-      `${advisor.aiSummaryText}\n✨ 重点推荐：“${firstLoc.name}”（${flavorDesc}）——您可在下方直接查看食材配料、烹饪方法、对比菜品或打开完整食谱详情：`
+      `🍲 មុខម្ហូបល្បី និងពេញនិយមនៅ${provLabel} រួមមាន៖ ${dishNames} (ចុចលើមុខម្ហូបខាងក្រោមដើម្បីមើលគ្រឿងផ្សំ និងរបៀបធ្វើ)៖`,
+      `🍲 Signature dishes to try in ${provLabel} include: ${dishNames} (tap any dish below for ingredients and recipe):`,
+      `🍲 ${provLabel}必尝特色美食包括：${dishNames}（点击下方菜品查看食材与做法）：`
     );
+  } else if (advisor.brain) {
+    conversationalText = advisor.brain.headline;
   }
 
-  const matchedRestaurants = advisor.shops.slice(0, 3);
+  let matchedRestaurants = advisor.shops.slice(0, 3);
+  if (detectedProv && matchedRestaurants.length === 0) {
+    const normTargetProv = detectedProv.kh.replace(/ណ្ដ/g, 'ណ្ត');
+    matchedRestaurants = restaurants
+      .filter((r) => isPlaceLocationVerified(r) && (r.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត').includes(normTargetProv))
+      .slice(0, 3);
+  }
+
   let restaurantUnavailableNote: string | undefined;
   let googleMapsSearchQuery: string | undefined;
 
@@ -710,15 +745,15 @@ export function generateConversationalAiResponse(params: {
     restaurantUnavailableNote = isVegQuery
       ? tr(
           language,
-          '📌 ព័ត៌មានហាងអាហារ៖ បច្ចុប្បន្នក្នុងបញ្ជីហាងដៃគូរបស់កម្មវិធី មិនទាន់មានហាងអាហារបួសដាច់ដោយឡែកទេ ប៉ុន្តែភោជនីយដ្ឋានម្ហូបខ្មែរទូទៅអាចឆាបន្លែ និងតៅហ៊ូបួសតាមការកុម្ម៉ង់បាន ឬអ្នកអាចចុចប៊ូតុងខាងក្រោមដើម្បីស្វែងរក «ហាងម្ហូបបួស» ផ្ទាល់នៅលើ Google Maps៖',
-          '📌 Restaurant Availability Note: Our in-app directory currently does not list dedicated vegetarian-only partner shops, though most Khmer restaurants prepare vegetarian vegetable & tofu dishes upon request. Tap below to find dedicated Vegetarian Restaurants directly on Google Maps:',
-          '📌 餐厅数据说明：当前应用合作餐厅名录中暂未单独收录纯素食专营店，但大多数高棉餐厅均可按要求现炒全素时蔬与豆腐菜肴。您也可以点击下方按钮直接在 Google 地图中搜索附近的素食餐厅：'
+          '📌 ចុចប៊ូតុងខាងក្រោមដើម្បីស្វែងរក «ហាងម្ហូបបួស» ផ្ទាល់នៅលើ Google Maps៖',
+          '📌 Tap below to find dedicated Vegetarian Restaurants directly on Google Maps:',
+          '📌 点击下方按钮直接在 Google 地图中搜索附近的素食餐厅：'
         )
       : tr(
           language,
-          `📌 ព័ត៌មានហាងអាហារ៖ មិនទាន់មានហាងក្នុងបញ្ជីដែលដាក់ឈ្មោះមុខម្ហូប «${firstLoc?.name || effectiveQuery}» ជាម្ហូបប្រចាំហាងផ្ទាល់ទេ។ ចុចប៊ូតុងខាងក្រោមដើម្បីស្វែងរកហាងលក់មុខម្ហូបនេះនៅលើ Google Maps៖`,
-          `📌 Restaurant Availability Note: No shop in our directory explicitly lists "${firstLoc?.name || effectiveQuery}" as its signature dish yet. Tap below to search for restaurants serving it on Google Maps:`,
-          `📌 餐厅数据说明：名录中暂无店铺将“${firstLoc?.name || effectiveQuery}”列为招牌菜。点击下方按钮可在 Google 地图上搜索供应此菜品的餐厅：`
+          `📌 ចុចប៊ូតុងខាងក្រោមដើម្បីស្វែងរកហាងលក់ «${firstLoc?.name || effectiveQuery}» នៅលើ Google Maps៖`,
+          `📌 Tap below to search for restaurants serving "${firstLoc?.name || effectiveQuery}" on Google Maps:`,
+          `📌 点击下方按钮在 Google 地图上搜索供应“${firstLoc?.name || effectiveQuery}”的餐厅：`
         );
   }
 
@@ -776,4 +811,270 @@ export function generateConversationalAiResponse(params: {
       turnSeed: nextSeed,
     },
   };
+}
+
+/**
+ * Resolves the active Gemini API key from explicit settings, cloud config, or Vite env.
+ */
+export function resolveGeminiApiKey(explicitKey?: string): string {
+  const trimmedExplicit = (explicitKey || '').trim();
+  if (trimmedExplicit) return trimmedExplicit;
+  const cloudCfg = getCloudApiConfig();
+  if (cloudCfg.geminiApiKey && cloudCfg.geminiApiKey.trim()) {
+    return cloudCfg.geminiApiKey.trim();
+  }
+  const envKey = ((import.meta as any).env?.VITE_GEMINI_API_KEY || '').trim();
+  if (envKey) return envKey;
+  if (cloudCfg.googleMapsApiKey && cloudCfg.googleMapsApiKey.trim()) {
+    return cloudCfg.googleMapsApiKey.trim();
+  }
+  return '';
+}
+
+/**
+ * Tests whether a Gemini API key is valid and able to generate responses.
+ */
+export async function testGeminiApiConnection(apiKey?: string): Promise<{ ok: boolean; model?: string; message: string }> {
+  const key = resolveGeminiApiKey(apiKey);
+  if (!key) {
+    return {
+      ok: false,
+      message: 'No Gemini API Key configured. Paste your key from Google AI Studio (aistudio.google.com).',
+    };
+  }
+
+  const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+  let lastError = 'Connection failed';
+
+  for (const model of modelsToTry) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: 'Reply with OK in 2 words.' }] }],
+            generationConfig: { maxOutputTokens: 16, temperature: 0.1 },
+          }),
+        }
+      );
+      if (response.ok) {
+        return { ok: true, model, message: `Connected to Google ${model} successfully!` };
+      }
+      const errData = await response.json().catch(() => ({}));
+      lastError = errData?.error?.message || `HTTP ${response.status}`;
+    } catch (err: any) {
+      lastError = err?.message || 'Network error';
+    }
+  }
+
+  return { ok: false, message: lastError };
+}
+
+/**
+ * Calls the live Google Gemini API grounded on the app's verified catalog of 200 Cambodian dishes,
+ * 200+ restaurants, and 124+ tourist destinations to refine the assistant reply with natural, accurate AI reasoning.
+ * Falls back gracefully to the deterministic reply if offline or if no API key is configured.
+ */
+export async function askGeminiFoodTourismAssistant(params: {
+  userInput: string;
+  language: Language;
+  foods: FoodItem[];
+  restaurants: Restaurant[];
+  destinations: TouristDestination[];
+  canUseVip: boolean;
+  memory: AiConversationMemory;
+  initialReply: AiAssistantMessage;
+  geminiApiKey?: string;
+}): Promise<AiAssistantMessage> {
+  const {
+    userInput,
+    language,
+    foods,
+    restaurants,
+    destinations,
+    memory,
+    initialReply,
+    geminiApiKey,
+  } = params;
+
+  // Never override strict medical scope boundary refusals
+  if (initialReply.isScopeRefusal || initialReply.intent === 'medical_scope_refusal') {
+    return initialReply;
+  }
+
+  const key = resolveGeminiApiKey(geminiApiKey);
+  if (!key) {
+    return initialReply;
+  }
+
+  // Build a compact, grounded catalog of candidate dishes, restaurants, and tourist destinations
+  const candidateFoodMap = new Map<string, FoodItem>();
+  for (const d of initialReply.dishes || []) candidateFoodMap.set(d.id, d);
+  for (const d of initialReply.similarDishes || []) candidateFoodMap.set(d.id, d);
+  for (const d of searchKhmerFoods(foods, userInput).slice(0, 12)) candidateFoodMap.set(d.id, d);
+
+  const detectedProv = detectProvinceFromText(userInput);
+  if (detectedProv) {
+    const normProv = detectedProv.kh.replace(/ណ្ដ/g, 'ណ្ត');
+    for (const d of foods.filter((f) => (f.provinceKh || '').replace(/ណ្ដ/g, 'ណ្ត').includes(normProv)).slice(0, 10)) {
+      candidateFoodMap.set(d.id, d);
+    }
+  }
+  for (const d of foods.slice(0, 15)) {
+    if (candidateFoodMap.size >= 28) break;
+    candidateFoodMap.set(d.id, d);
+  }
+
+  const foodCatalog = Array.from(candidateFoodMap.values())
+    .slice(0, 28)
+    .map((f) => ({
+      id: f.id,
+      kh: f.nameKh,
+      en: f.nameEn,
+      cat: f.categorySlug,
+      prov: f.provinceKh,
+      taste: (f.tasteProfile || '').slice(0, 45),
+    }));
+
+  const candidateShops = [
+    ...(initialReply.restaurants || []),
+    ...restaurants.filter((r) => isPlaceLocationVerified(r)).slice(0, 8),
+  ].slice(0, 10);
+
+  const shopCatalog = candidateShops.map((r) => ({
+    id: r.id,
+    kh: r.nameKh,
+    en: r.nameEn,
+    prov: r.provinceKh,
+    dishes: (r.signatureDishesKh || []).slice(0, 3),
+  }));
+
+  const candidateDests = [
+    ...(initialReply.destinations || []),
+    ...destinations.slice(0, 8),
+  ].slice(0, 10);
+
+  const destCatalog = candidateDests.map((t) => ({
+    id: t.id,
+    kh: t.nameKh,
+    en: t.nameEn,
+    prov: t.provinceKh,
+    cat: t.category,
+  }));
+
+  const langName = language === 'km' ? 'Khmer (ភាសាខ្មែរ)' : language === 'zh' ? 'Simplified Chinese (简体中文)' : 'English';
+
+  const systemInstruction = `You are the expert AI Food & Tourism Assistant for "Cambodia Flavors & Tourism" (រសជាតិ និងទេសចរណ៍កម្ពុជា).
+Answer the user's question directly, accurately, and naturally in ${langName}.
+RULES:
+1. Keep "answerText" concise (1 to 2 natural, helpful sentences — never repetitive boilerplate) because visual Dish, Recipe, Restaurant, and Tourism cards are rendered immediately below your text.
+2. Select "recommendedFoodIds" (up to 4 IDs) ONLY from FOODS_CATALOG that genuinely match the user's exact request (respecting any province, flavor, mealtime, weather, or excluded meat like "no pork").
+3. If the user asks how to cook or asks for a recipe/ingredients, set "recipeFoodId" to the best matching dish ID from FOODS_CATALOG.
+4. If the user asks about tourist places/travel, select "recommendedDestinationIds" (up to 4 IDs) from DESTINATIONS_CATALOG.
+5. Never give medical advice. Return valid JSON matching the schema.`;
+
+  const promptPayload = JSON.stringify({
+    userQuestion: userInput,
+    activeProvince: detectedProv?.kh || memory.activeProvinceKh || '',
+    FOODS_CATALOG: foodCatalog,
+    RESTAURANTS_CATALOG: shopCatalog,
+    DESTINATIONS_CATALOG: destCatalog,
+  });
+
+  const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+
+  for (const model of modelsToTry) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8500);
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemInstruction }] },
+            contents: [{ role: 'user', parts: [{ text: promptPayload }] }],
+            generationConfig: {
+              temperature: 0.25,
+              maxOutputTokens: 450,
+              responseMimeType: 'application/json',
+            },
+          }),
+        }
+      );
+      clearTimeout(timer);
+
+      if (!response.ok) {
+        continue;
+      }
+
+      const data = await response.json();
+      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) continue;
+
+      const parsed = JSON.parse(rawText) as {
+        answerText?: string;
+        recommendedFoodIds?: string[];
+        recommendedRestaurantIds?: string[];
+        recommendedDestinationIds?: string[];
+        recipeFoodId?: string;
+      };
+
+      if (!parsed.answerText || typeof parsed.answerText !== 'string') {
+        continue;
+      }
+
+      const foodById = new Map(foods.map((f) => [f.id, f]));
+      const geminiDishes = (parsed.recommendedFoodIds || [])
+        .map((id) => foodById.get(id))
+        .filter((f): f is FoodItem => Boolean(f))
+        .slice(0, 4);
+
+      const finalDishes =
+        geminiDishes.length > 0 ? geminiDishes : initialReply.dishes;
+
+      let finalRecipePreview = initialReply.recipePreview;
+      if (parsed.recipeFoodId && foodById.has(parsed.recipeFoodId)) {
+        const targetFood = foodById.get(parsed.recipeFoodId)!;
+        const loc = getLocalizedFood(targetFood, language);
+        finalRecipePreview = {
+          food: targetFood,
+          ingredients: (targetFood.ingredients || []).slice(0, 6).map((ing, idx) => ({
+            name:
+              language === 'km'
+                ? ing.nameKh
+                : language === 'zh'
+                ? loc.ingredients?.[idx] || ing.nameEn || ing.nameKh
+                : ing.nameEn || ing.nameKh,
+            amount: ing.amount || '',
+          })),
+          steps: (targetFood.steps || []).slice(0, 5).map((st, idx) => ({
+            stepNumber: st.stepNumber || idx + 1,
+            instruction:
+              language === 'km'
+                ? st.instructionKh
+                : language === 'zh'
+                ? loc.steps?.[idx] || st.instructionEn || st.instructionKh
+                : st.instructionEn || st.instructionKh,
+          })),
+        };
+      }
+
+      return {
+        ...initialReply,
+        text: parsed.answerText.trim(),
+        dishes: finalDishes,
+        recipePreview: finalRecipePreview,
+        isLiveGemini: true,
+      };
+    } catch {
+      clearTimeout(timer);
+    }
+  }
+
+  return initialReply;
 }

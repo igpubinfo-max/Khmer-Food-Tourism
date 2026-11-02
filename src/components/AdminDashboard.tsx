@@ -37,6 +37,7 @@ import {
   setGoogleMapsDailyLimit,
   GooglePlacesApiDiagnosticReport,
 } from '../services/googlePlacesService';
+import { testGeminiApiConnection } from '../services/conversationalAiAssistant';
 
 export const AdminDashboard: React.FC = () => {
   const { 
@@ -5481,15 +5482,36 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                   <div>
                     <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                      4. Google Gemini AI Vision API Key (ស្កេនម្ហូប & រូបមន្ត)
+                      4. Google Gemini AI API Key (សម្រាប់មុខងារ «សួរ AI» & ស្កេនម្ហូប)
                     </label>
-                    <input
-                      type="password"
-                      value={cloudCfg.geminiApiKey}
-                      onChange={(e) => setCloudCfg({ ...cloudCfg, geminiApiKey: e.target.value })}
-                      placeholder="AIzaSy..."
-                      className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
-                    />
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="password"
+                        value={cloudCfg.geminiApiKey}
+                        onChange={(e) => setCloudCfg({ ...cloudCfg, geminiApiKey: e.target.value })}
+                        placeholder="AIzaSy... (ពី Google AI Studio - aistudio.google.com)"
+                        className="flex-1 px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
+                      />
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const saved = saveCloudApiConfig(cloudCfg);
+                          setCloudCfg(saved);
+                          void updateAppSettings({
+                            ...appSettings,
+                            geminiApiKey: saved.geminiApiKey,
+                            googleMapsApiKey: saved.googleMapsApiKey,
+                          });
+                          setSupabaseTestStatus('⏳ កំពុងសាកល្បងភ្ជាប់ទៅកាន់ Google Gemini AI...');
+                          const res = await testGeminiApiConnection(saved.geminiApiKey);
+                          setSupabaseTestStatus(res.ok ? `✅ ${res.message}` : `❌ Gemini Error: ${res.message}`);
+                          showToast(res.ok ? res.message : `Gemini Error: ${res.message}`, res.ok ? 'success' : 'error');
+                        }}
+                        className="px-3 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl text-[11px] shrink-0"
+                      >
+                        🤖 Save & Test Gemini
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -5505,8 +5527,13 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => {
                       const saved = saveCloudApiConfig(cloudCfg);
                       setCloudCfg(saved);
+                      void updateAppSettings({
+                        ...appSettings,
+                        geminiApiKey: saved.geminiApiKey,
+                        googleMapsApiKey: saved.googleMapsApiKey,
+                      });
                       handleVerifyGoogleMapsApi(saved.googleMapsApiKey);
-                      showToast('បានរក្សាទុកការកំណត់ Cloud Supabase & Google Maps Places API ជោគជ័យ!', 'success');
+                      showToast('បានរក្សាទុកការកំណត់ Cloud Supabase, Google Maps & Gemini AI ជោគជ័យ!', 'success');
                     }}
                     className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl shadow-xs transition active:scale-95"
                   >

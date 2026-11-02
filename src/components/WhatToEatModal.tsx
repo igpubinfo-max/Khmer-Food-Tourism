@@ -61,6 +61,8 @@ import { isMedicalOrHealthQuery, describeDish } from '../services/aiFoodBrain';
 import {
   buildWelcomeAssistantMessage,
   generateConversationalAiResponse,
+  askGeminiFoodTourismAssistant,
+  resolveGeminiApiKey,
   type AiAssistantMessage,
   type AiConversationMemory,
 } from '../services/conversationalAiAssistant';
@@ -276,9 +278,11 @@ export const WhatToEatModal: React.FC = () => {
     openAddToWishlist,
     openUpgradeVipModal,
     showToast,
+    appSettings,
   } = useApp();
 
   const canUseVip = hasSpecialAndHealthyFoodVipAccess(currentUser);
+  const [isAiThinking, setIsAiThinking] = useState(false);
 
   // Filters: Conversational Input, Category, Meal Time, Dietary / Health Style
   const [cravingQuery, setCravingQuery] = useState<string>('');
@@ -728,6 +732,34 @@ export const WhatToEatModal: React.FC = () => {
 
     if (reply.compareDishes && reply.compareDishes.length >= 2) {
       setComparedDishIds(reply.compareDishes.slice(0, 3).map((d) => d.id));
+    }
+
+    // If a Gemini API key is configured, refine the reply asynchronously with live Gemini AI
+    const activeGeminiKey = resolveGeminiApiKey(appSettings?.geminiApiKey);
+    if (activeGeminiKey && !reply.isScopeRefusal) {
+      setIsAiThinking(true);
+      void askGeminiFoodTourismAssistant({
+        userInput: clean,
+        language,
+        foods,
+        restaurants,
+        destinations,
+        canUseVip,
+        memory: chatMemory,
+        initialReply: reply,
+        geminiApiKey: activeGeminiKey,
+      })
+        .then((geminiReply) => {
+          setChatMessages((prev) =>
+            prev.map((m) => (m.id === reply.id ? geminiReply : m))
+          );
+          if (geminiReply.dishes && geminiReply.dishes.length > 0) {
+            setCurrentDishId(geminiReply.dishes[0].id);
+          }
+        })
+        .finally(() => {
+          setIsAiThinking(false);
+        });
     }
 
     setTimeout(() => {
@@ -1492,6 +1524,12 @@ export const WhatToEatModal: React.FC = () => {
                           'AI 助手回答'
                         )}
                       </span>
+                      {isAiThinking && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 animate-pulse">
+                          <Sparkles className="w-3 h-3 text-amber-500" />
+                          <span>{tr(language, 'Gemini កំពុងវិភាគ...', 'Gemini thinking...', 'Gemini 思考中...')}</span>
+                        </span>
+                      )}
                     </div>
                     <button
                       type="button"

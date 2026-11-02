@@ -24,6 +24,18 @@ export type KhmerCategoryIntent =
   | 'cake'
   | 'drink';
 
+export type KhmerOccasionIntent =
+  | 'breakfast'
+  | 'lunch'
+  | 'dinner'
+  | 'rainy'
+  | 'hot_weather'
+  | 'healthy'
+  | 'vegetarian'
+  | 'general_recommend';
+
+export type ExcludedProteinType = 'pork' | 'beef' | 'chicken' | 'seafood' | 'fish';
+
 export interface ParsedKhmerFoodQuery {
   rawQuery: string;
   normalizedQuery: string;
@@ -31,15 +43,36 @@ export interface ParsedKhmerFoodQuery {
   tokens: string[];
   flavorIntents: KhmerFlavorIntent[];
   categoryIntents: KhmerCategoryIntent[];
+  occasionIntents?: KhmerOccasionIntent[];
+  excludedProteins?: ExcludedProteinType[];
   isFlavorOnlyQuery: boolean;
+  isOccasionOnlyQuery?: boolean;
   isDrinkExplicitlyRequested: boolean;
 }
 
 const NEGATED_SPICE_RE =
   /មិន(?:សូវ)?ហឹរ(?:ខ្លាំង)?|អត់ហឹរ|គ្មានរសជាតិហឹរ|គ្មានម្ទេស|មិនដាក់ម្ទេស|អត់ម្ទេស|\bnot\s+(?:very\s+|too\s+)?spicy\b|\bnon[\s-]*spicy\b|\bmild(?:ly)?(?:\s+spiced)?\b|\bno\s+chili\b/gi;
 
+const NEGATED_PORK_RE =
+  /អត់(?:ដាក់|មាន|ញ៉ាំ|ហូប)?សាច់ជ្រូក|មិន(?:ដាក់|ញ៉ាំ|ហូប|ប្រើ)?សាច់ជ្រូក|គ្មានសាច់ជ្រូក|តមសាច់ជ្រូក|\bno\s+pork\b|\bpork[\s-]*free\b|\bwithout\s+pork\b|不吃猪肉|无猪肉|不要猪肉/gi;
+
+const NEGATED_BEEF_RE =
+  /អត់(?:ដាក់|មាន|ញ៉ាំ|ហូប)?សាច់គោ|មិន(?:ដាក់|ញ៉ាំ|ហូប|ប្រើ)?សាច់គោ|គ្មានសាច់គោ|តមសាច់គោ|\bno\s+beef\b|\bbeef[\s-]*free\b|\bwithout\s+beef\b|不吃牛肉|无牛肉|不要牛肉/gi;
+
+const NEGATED_CHICKEN_RE =
+  /អត់(?:ដាក់|មាន|ញ៉ាំ|ហូប)?សាច់មាន់|មិន(?:ដាក់|ញ៉ាំ|ហូប|ប្រើ)?សាច់មាន់|គ្មានសាច់មាន់|តមសាច់មាន់|\bno\s+chicken\b|\bwithout\s+chicken\b|不吃鸡肉|不要鸡肉/gi;
+
+const NEGATED_SEAFOOD_RE =
+  /អត់(?:ដាក់|មាន|ញ៉ាំ|ហូប)?គ្រឿងសមុទ្រ|មិន(?:ដាក់|ញ៉ាំ|ហូប)?គ្រឿងសមុទ្រ|គ្មានគ្រឿងសមុទ្រ|អាឡែស៊ីគ្រឿងសមុទ្រ|\bno\s+seafood\b|\bwithout\s+seafood\b|不吃海鲜|不要海鲜/gi;
+
 const LEADING_FRAMING_PREFIX_RE =
-  /^(?:ថ្ងៃនេះ|ពេលនេះ|សូម|សុំ|ជួយ|ណែនាំ|ស្វែងរក|ចង់រក|រកមើល|រក|ចង់ញ៉ាំ|ចង់ហូប|ចង់ពិសា|ញ៉ាំ|ហូប|ពិសា|មុខម្ហូប|ម្ហូបអាហារ|ម្ហូបខ្មែរ|ម្ហូប|អាហារខ្មែរ|អាហារ|ប្រភេទម្ហូប|ប្រភេទអាហារ|ប្រភេទ|បែប|ដែលមានរសជាតិ|ដែលមាន|មានរសជាតិ|មាន|រសជាតិ)\s*/u;
+  /^(?:ថ្ងៃនេះ|ពេលនេះ|ឥឡូវនេះ|សូម|សុំ|ជួយ|ប្រាប់|ណែនាំ|ស្វែងរក|ចង់រក|រកមើល|រក|ចង់ដឹង|ចង់ញ៉ាំ|ចង់ហូប|ចង់ពិសា|គួរញ៉ាំ|គួរហូប|ញ៉ាំ|ហូប|ពិសា|របៀបធ្វើ|វិធីធ្វើ|របៀបចម្អិន|រូបមន្តធ្វើ|រូបមន្ត|គ្រឿងផ្សំធ្វើ|គ្រឿងផ្សំ|មុខម្ហូប|ម្ហូបអាហារ|ម្ហូបខ្មែរ|ម្ហូបប្រចាំ|ម្ហូបល្បីៗ|ម្ហូបល្បី|ម្ហូបឆ្ងាញ់ៗ|ម្ហូបឆ្ងាញ់|ម្ហូប|អាហារខ្មែរ|អាហារ|ប្រភេទម្ហូប|ប្រភេទអាហារ|ប្រភេទ|បែប|ដែលមានរសជាតិ|ដែលមាន|មានរសជាតិ|មាន|រសជាតិ|ឆ្ងាញ់ៗ|ឆ្ងាញ់|ល្បីៗ|ល្បី|នៅខេត្ត|នៅរាជធានី|នៅក្រុង|នៅក្នុង|នៅឯ|នៅ)\s*/u;
+
+const TRAILING_FRAMING_SUFFIX_RE =
+  /\s*(?:មានអ្វីខ្លះ|មានអីខ្លះ|អ្វីខ្លះ|ណាខ្លះ|អីខ្លះ|ញ៉ាំអីល្អ|ហូបអីល្អ|ញ៉ាំអ្វីល្អ|ហូបអ្វីល្អ|គួរញ៉ាំអី|គួរហូបអី|ញ៉ាំអី|ហូបអី|ធ្វើម៉េចខ្លះ|ធ្វើម៉េច|ដោយរបៀបណា|ល្អទេ|មែនទេ|អត់ទេ|បានទេ|នៅណាខ្លះ|នៅឯណា|នៅណា|បន្តិចមើល|បន្តិច|ផងណា|ផងចាស|ផងបាទ|ផង|ណា៎|ចាស|បាទ|អីល្អ|ល្អ|អ្វី|អី)$/u;
+
+const MID_SENTENCE_CONNECTOR_RE =
+  /ឆ្ងាញ់ៗនៅខេត្ត|ឆ្ងាញ់នៅខេត្ត|ឆ្ងាញ់ៗនៅ|ឆ្ងាញ់នៅ|ល្បីៗនៅខេត្ត|ល្បីនៅខេត្ត|ល្បីៗនៅ|ល្បីនៅ|ប្រចាំខេត្ត|នៅក្នុងខេត្ត|នៅខេត្ត|នៅរាជធានី|នៅក្រុង|នៅជិត|នៅឯ/gu;
 
 const QUERY_STOPWORDS = new Set<string>([
   'រសជាតិ',
@@ -179,26 +212,115 @@ export function isSweetOrBeverageFood(food: FoodItem): boolean {
 }
 
 function peelLeadingFramingPrefixes(normalized: string): string {
-  let current = normalized.trim();
+  let current = normalized
+    .replace(MID_SENTENCE_CONNECTOR_RE, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
   let guard = 0;
-  while (guard < 8 && current.length > 0) {
+  while (guard < 10 && current.length > 0) {
     guard++;
-    const match = current.match(LEADING_FRAMING_PREFIX_RE);
-    if (!match || !match[0]) break;
-    const next = current
-      .slice(match[0].length)
-      .replace(/^ៗ+\s*/u, '')
-      .trim();
-    if (next.length < 2) break;
-    current = next;
+    const prev = current;
+    const leadMatch = current.match(LEADING_FRAMING_PREFIX_RE);
+    if (leadMatch && leadMatch[0]) {
+      const next = current
+        .slice(leadMatch[0].length)
+        .replace(/^ៗ+\s*/u, '')
+        .trim();
+      if (next.length >= 2) {
+        current = next;
+      }
+    }
+    const trailMatch = current.match(TRAILING_FRAMING_SUFFIX_RE);
+    if (trailMatch && trailMatch[0]) {
+      const next = current
+        .slice(0, current.length - trailMatch[0].length)
+        .replace(/ៗ+$/u, '')
+        .trim();
+      if (next.length >= 2) {
+        current = next;
+      }
+    }
+    if (current === prev) break;
   }
   return current.replace(/ៗ+$/u, '').trim() || normalized;
 }
 
+const KNOWN_KHMER_FOOD_SUBTOKENS = [
+  'សម្លម្ជូរគ្រឿង',
+  'សម្លម្ជូរព្រៃ',
+  'សម្លម្ជូរ',
+  'សម្លកកូរ',
+  'សម្លការី',
+  'សម្លប្រហើរ',
+  'សម្លប្រហុក',
+  'អាម៉ុកត្រី',
+  'អាម៉ុក',
+  'នំបញ្ចុក',
+  'បាយសាច់ជ្រូក',
+  'ឡុកឡាក់',
+  'គុយទាវ',
+  'បុកល្ហុង',
+  'បុកស្វាយ',
+  'ប្រហុកខ្ទិះ',
+  'ទឹកគ្រឿង',
+  'ឆាម្រះព្រៅ',
+  'ឆាក្តៅ',
+  'ស្ងោរជ្រក់',
+  'ត្រីដុត',
+  'មាន់ដុត',
+  'ក្តាមឆាម្រេច',
+  'ម្រេចកំពត',
+  'សាច់គោអាំង',
+  'សាច់ជ្រូក',
+  'សាច់គោ',
+  'សាច់មាន់',
+  'គ្រឿងសមុទ្រ',
+  'បង្គា',
+  'ក្តាម',
+  'មឹក',
+  'ត្រី',
+  'បាយឆា',
+  'បាយ',
+  'បបរ',
+  'សម្ល',
+  'ស៊ុប',
+  'ឆា',
+  'អាំង',
+  'ញាំ',
+  'ភ្លា',
+  'បង្អែម',
+  'ភេសជ្ជៈ',
+  'សៀមរាប',
+  'ភ្នំពេញ',
+  'បាត់ដំបង',
+  'កំពត',
+  'កែប',
+  'ព្រះសីហនុ',
+  'កំពង់ចាម',
+  'កំពង់ធំ',
+  'កំពង់ឆ្នាំង',
+  'កំពង់ស្ពឺ',
+  'កណ្តាល',
+  'តាកែវ',
+  'ព្រៃវែង',
+  'ស្វាយរៀង',
+  'ពោធិ៍សាត់',
+  'កោះកុង',
+  'ក្រចេះ',
+  'ស្ទឹងត្រែង',
+  'រតនគិរី',
+  'មណ្ឌលគិរី',
+  'ព្រះវិហារ',
+  'ឧត្តរមានជ័យ',
+  'បន្ទាយមានជ័យ',
+  'ប៉ៃលិន',
+  'ត្បូងឃ្មុំ',
+];
+
 /**
  * Parses a Khmer/English/Chinese food search query into normalized core keywords,
  * flavor intents (`spicy`, `sour_spicy`, `sour`, `sweet`, `bitter`, `salty`, `coconut`),
- * and food category intents.
+ * category intents, occasion intents, and excluded protein guardrails.
  */
 export function parseKhmerFoodSearchQuery(rawQuery?: string): ParsedKhmerFoodQuery {
   const normalizedQuery = normalizeKhmerFoodText(rawQuery);
@@ -210,19 +332,103 @@ export function parseKhmerFoodSearchQuery(rawQuery?: string): ParsedKhmerFoodQue
       tokens: [],
       flavorIntents: [],
       categoryIntents: [],
+      occasionIntents: [],
+      excludedProteins: [],
       isFlavorOnlyQuery: false,
+      isOccasionOnlyQuery: false,
       isDrinkExplicitlyRequested: false,
     };
   }
 
-  const coreQuery = peelLeadingFramingPrefixes(normalizedQuery);
+  // 1. Detect excluded proteins BEFORE stripping so "អត់សាច់ជ្រូក" excludes pork instead of matching pork!
+  const excludedProteins: ExcludedProteinType[] = [];
+  let sanitizedForPositiveSearch = normalizedQuery;
+
+  if (NEGATED_PORK_RE.test(sanitizedForPositiveSearch)) {
+    excludedProteins.push('pork');
+    sanitizedForPositiveSearch = sanitizedForPositiveSearch.replace(NEGATED_PORK_RE, ' ');
+  }
+  NEGATED_PORK_RE.lastIndex = 0;
+
+  if (NEGATED_BEEF_RE.test(sanitizedForPositiveSearch)) {
+    excludedProteins.push('beef');
+    sanitizedForPositiveSearch = sanitizedForPositiveSearch.replace(NEGATED_BEEF_RE, ' ');
+  }
+  NEGATED_BEEF_RE.lastIndex = 0;
+
+  if (NEGATED_CHICKEN_RE.test(sanitizedForPositiveSearch)) {
+    excludedProteins.push('chicken');
+    sanitizedForPositiveSearch = sanitizedForPositiveSearch.replace(NEGATED_CHICKEN_RE, ' ');
+  }
+  NEGATED_CHICKEN_RE.lastIndex = 0;
+
+  if (NEGATED_SEAFOOD_RE.test(sanitizedForPositiveSearch)) {
+    excludedProteins.push('seafood');
+    sanitizedForPositiveSearch = sanitizedForPositiveSearch.replace(NEGATED_SEAFOOD_RE, ' ');
+  }
+  NEGATED_SEAFOOD_RE.lastIndex = 0;
+
+  // 2. Detect mealtime / weather / occasion intents
+  const occasionIntents: KhmerOccasionIntent[] = [];
+  if (/ពេលព្រឹក|អាហារពេលព្រឹក|ព្រឹកនេះ|\bbreakfast\b|\bmorning\s+meal\b|早餐/i.test(normalizedQuery)) {
+    occasionIntents.push('breakfast');
+    sanitizedForPositiveSearch = sanitizedForPositiveSearch.replace(/ពេលព្រឹក|អាហារពេលព្រឹក|ព្រឹកនេះ|\bbreakfast\b|\bmorning\s+meal\b|早餐/gi, ' ');
+  }
+  if (/ថ្ងៃត្រង់|អាហារថ្ងៃត្រង់|ពេលថ្ងៃត្រង់|\blunch\b|午餐/i.test(normalizedQuery)) {
+    occasionIntents.push('lunch');
+    sanitizedForPositiveSearch = sanitizedForPositiveSearch.replace(/ថ្ងៃត្រង់|អាហារថ្ងៃត្រង់|ពេលថ្ងៃត្រង់|\blunch\b|午餐/gi, ' ');
+  }
+  if (/ពេលល្ងាច|ពេលយប់|អាហារពេលល្ងាច|អាហារពេលយប់|\bdinner\b|\bsupper\b|晚餐/i.test(normalizedQuery)) {
+    occasionIntents.push('dinner');
+    sanitizedForPositiveSearch = sanitizedForPositiveSearch.replace(/ពេលល្ងាច|ពេលយប់|អាហារពេលល្ងាច|អាហារពេលយប់|\bdinner\b|\bsupper\b|晚餐/gi, ' ');
+  }
+  if (/មេឃភ្លៀង|ពេលភ្លៀង|ខែវស្សា|មេឃត្រជាក់|អាកាសធាតុត្រជាក់|\brainy\b|\bcold\s+weather\b|下雨|雨天/i.test(normalizedQuery)) {
+    occasionIntents.push('rainy');
+    sanitizedForPositiveSearch = sanitizedForPositiveSearch.replace(/មេឃភ្លៀង|ពេលភ្លៀង|ខែវស្សា|មេឃត្រជាក់|អាកាសធាតុត្រជាក់|\brainy\b|\bcold\s+weather\b|下雨|雨天/gi, ' ');
+  }
+  if (/មេឃក្តៅ|អាកាសធាតុក្តៅ|ខែប្រាំង|\bhot\s+weather\b|\bsummer\b|天热/i.test(normalizedQuery)) {
+    occasionIntents.push('hot_weather');
+    sanitizedForPositiveSearch = sanitizedForPositiveSearch.replace(/មេឃក្តៅ|អាកាសធាតុក្តៅ|ខែប្រាំង|\bhot\s+weather\b|\bsummer\b|天热/gi, ' ');
+  }
+  if (/ម្ហូបបួស|អាហារបួស|\bvegetarian\b|\bvegan\b|素食/i.test(normalizedQuery)) {
+    occasionIntents.push('vegetarian');
+    if (!excludedProteins.includes('pork')) excludedProteins.push('pork');
+    if (!excludedProteins.includes('beef')) excludedProteins.push('beef');
+    if (!excludedProteins.includes('chicken')) excludedProteins.push('chicken');
+  }
+  if (/សុខភាព|អ្នកជំងឺ|ស្រកគីឡូ|គ្មានខ្លាញ់|\bhealthy\b|\bdiet\b|\blow\s+fat\b|健康|减肥/i.test(normalizedQuery)) {
+    occasionIntents.push('healthy');
+    sanitizedForPositiveSearch = sanitizedForPositiveSearch.replace(/សុខភាព|អ្នកជំងឺ|ស្រកគីឡូ|គ្មានខ្លាញ់|\bhealthy\b|\bdiet\b|\blow\s+fat\b|健康|减肥/gi, ' ');
+  }
+
+  sanitizedForPositiveSearch = sanitizedForPositiveSearch.replace(/\s+/g, ' ').trim();
+  const coreQuery = peelLeadingFramingPrefixes(sanitizedForPositiveSearch || normalizedQuery);
   const rawTokens = coreQuery
     .split(/\s+/)
     .map((tok) => peelLeadingFramingPrefixes(tok))
     .filter((tok) => tok.length > 0);
 
-  const meaningfulTokens = rawTokens.filter((tok) => !QUERY_STOPWORDS.has(tok));
+  // Extract embedded subtokens from continuous unspaced Khmer strings
+  for (const sub of KNOWN_KHMER_FOOD_SUBTOKENS) {
+    if (coreQuery.includes(sub) && !rawTokens.includes(sub)) {
+      rawTokens.push(sub);
+    }
+  }
+
+  const meaningfulTokens = rawTokens.filter(
+    (tok) => !QUERY_STOPWORDS.has(tok) && !/^(?:ញ៉ាំអី|ហូបអី|អីល្អ|មានអ្វីខ្លះ|អ្វីខ្លះ|ណាខ្លះ|អីខ្លះ|ថ្ងៃនេះ)$/.test(tok)
+  );
   const tokens = meaningfulTokens.length > 0 ? meaningfulTokens : rawTokens;
+
+  const isGeneralWhatToEatQuestion =
+    /ញ៉ាំអី|ហូបអី|ពិសាអី|មុខម្ហូបអី|ម្ហូបអ្វីខ្លះ|ម្ហូបឆ្ងាញ់|ម្ហូបល្បី|ណែនាំម្ហូប|\bwhat\s+to\s+eat\b|\bwhat\s+should\s+i\s+eat\b|\brecommend\b|吃什么|推荐/i.test(
+      normalizedQuery
+    ) &&
+    meaningfulTokens.length === 0;
+
+  if (isGeneralWhatToEatQuestion && occasionIntents.length === 0) {
+    occasionIntents.push('general_recommend');
+  }
 
   const joined = `${coreQuery} ${tokens.join(' ')}`.trim();
   const hasNegatedSpiceInQuery = /មិន(?:សូវ)?ហឹរ|អត់ហឹរ|គ្មានម្ទេស|\bnot\s+spicy\b|\bnon[\s-]*spicy\b|\bmild\b/i.test(
@@ -307,15 +513,23 @@ export function parseKhmerFoodSearchQuery(rawQuery?: string): ParsedKhmerFoodQue
     .trim();
 
   const isFlavorOnlyQuery = flavorIntents.length > 0 && strippedFlavorRemainder.length === 0;
+  const isOccasionOnlyQuery =
+    (occasionIntents.length > 0 || excludedProteins.length > 0) &&
+    meaningfulTokens.length === 0 &&
+    flavorIntents.length === 0 &&
+    categoryIntents.length === 0;
 
   return {
     rawQuery: rawQuery || '',
     normalizedQuery,
-    coreQuery,
-    tokens,
+    coreQuery: isOccasionOnlyQuery ? '' : coreQuery,
+    tokens: isOccasionOnlyQuery ? [] : tokens,
     flavorIntents,
     categoryIntents,
+    occasionIntents,
+    excludedProteins,
     isFlavorOnlyQuery,
+    isOccasionOnlyQuery,
     isDrinkExplicitlyRequested,
   };
 }
@@ -395,6 +609,52 @@ export function scoreFoodForKhmerQuery(food: FoodItem, parsed: ParsedKhmerFoodQu
   const wantsSpicy =
     parsed.flavorIntents.includes('spicy') || parsed.flavorIntents.includes('sour_spicy');
 
+  // Strict guardrail 0: Excluded proteins (e.g. "អត់សាច់ជ្រូក" / "no pork", "អត់សាច់គោ" / "no beef")
+  if (parsed.excludedProteins && parsed.excludedProteins.length > 0) {
+    const combinedFoodText = `${titleNorm} ${ingNorm}`;
+    if (
+      parsed.excludedProteins.includes('pork') &&
+      /សាច់ជ្រូក|ជើងជ្រូក|ឆ្អឹងជំនីរជ្រូក|ពោះជ្រូក|ស្លឹកត្រចៀកជ្រូក|ខ្លាញ់ជ្រូក|\bpork\b|\bbacon\b|\blard\b|猪肉|猪蹄|排骨/i.test(
+        combinedFoodText
+      )
+    ) {
+      return -1000;
+    }
+    if (
+      parsed.excludedProteins.includes('beef') &&
+      /សាច់គោ|ពោះគោ|កន្ទុយគោ|ឆ្អឹងគោ|\bbeef\b|\boxtail\b|牛肉|牛肚/i.test(combinedFoodText)
+    ) {
+      return -1000;
+    }
+    if (
+      parsed.excludedProteins.includes('chicken') &&
+      /សាច់មាន់|មាន់ដុត|មាន់ស្ងោរ|ជើងមាន់|ស្លាបមាន់|\bchicken\b|鸡肉|烤鸡/i.test(combinedFoodText)
+    ) {
+      return -1000;
+    }
+    if (
+      parsed.excludedProteins.includes('seafood') &&
+      /បង្គា|ក្តាម|មឹក|ងាវ|លៀស|គ្រឿងសមុទ្រ|\bshrimp\b|\bprawn\b|\bcrab\b|\bsquid\b|\bclam\b|\bseafood\b|海鲜|虾|蟹|鱿鱼/i.test(
+        combinedFoodText
+      )
+    ) {
+      return -1000;
+    }
+  }
+
+  // Strict guardrail for pure "បាយ" / "rice" queries: do not return curries/soups that merely mention "បាយស" in description
+  if (
+    parsed.categoryIntents.includes('rice') &&
+    (parsed.coreQuery === 'បាយ' || parsed.coreQuery === 'rice' || parsed.coreQuery === '米饭')
+  ) {
+    const isGenuineRiceDish =
+      food.categorySlug === 'rice' ||
+      /^(?:បាយ|បបរ|ក្រឡាន)|\bfried\s+rice\b|\brice\b|\bporridge\b|\bcongee\b/i.test(titleNorm);
+    if (!isGenuineRiceDish) {
+      return -500;
+    }
+  }
+
   // Strict guardrail 1: Spicy queries NEVER return beverages, soy milk, desserts, or cakes!
   if (wantsSpicy) {
     if (isSweetOrBeverageFood(food)) return -1000;
@@ -426,6 +686,64 @@ export function scoreFoodForKhmerQuery(food: FoodItem, parsed: ParsedKhmerFoodQu
   }
 
   let score = 0;
+
+  // Occasion / mealtime / weather / dietary intent scoring
+  if (parsed.occasionIntents && parsed.occasionIntents.length > 0) {
+    for (const occ of parsed.occasionIntents) {
+      if (occ === 'breakfast') {
+        if (/បាយសាច់ជ្រូក|គុយទាវ|នំបញ្ចុក|បបរ|មីគោក|មីទឹក|បាញ់កាញ់|លតឆា|កាហ្វេ/i.test(titleNorm)) {
+          score += 295;
+        } else if (food.categorySlug === 'noodles' || food.categorySlug === 'rice') {
+          score += 210;
+        }
+      } else if (occ === 'lunch') {
+        if (/សម្លម្ជូរ|សម្លកកូរ|អាម៉ុក|ប្រហុកខ្ទិះ|ទឹកគ្រឿង|ឡុកឡាក់|បាយឆា|ឆាម្រះព្រៅ|ត្រីដុត/i.test(titleNorm)) {
+          score += 285;
+        } else if (food.categorySlug === 'soup' || food.categorySlug === 'stirfry' || food.categorySlug === 'salad') {
+          score += 210;
+        }
+      } else if (occ === 'dinner') {
+        if (/សម្ល|ស៊ុប|ស្ងោរជ្រក់|ត្រីដុត|មាន់ដុត|សាច់គោអាំង|ឡុកឡាក់|អាម៉ុក|ក្តាមឆាម្រេច/i.test(titleNorm)) {
+          score += 285;
+        } else if (food.categorySlug === 'soup' || food.categorySlug === 'grilled' || food.categorySlug === 'stirfry') {
+          score += 210;
+        }
+      } else if (occ === 'rainy') {
+        if (/សម្លម្ជូរ|សម្លកកូរ|ស៊ុប|បបរ|ស្ងោរជ្រក់|គុយទាវ|តុំយ៉ាំ|សម្លប្រហុក|សម្លការី/i.test(titleNorm)) {
+          score += 305;
+        } else if (food.categorySlug === 'soup') {
+          score += 245;
+        }
+      } else if (occ === 'hot_weather') {
+        if (/ញាំ|ភ្លា|បុកល្ហុង|បុកស្វាយ|ស្ងោរជ្រក់|ទឹកគ្រឿង|បង្អែម|ទឹកដូង|ទឹកអំពៅ|តែក្រូចឆ្មា/i.test(titleNorm)) {
+          score += 290;
+        } else if (food.categorySlug === 'salad' || food.categorySlug === 'dessert' || food.categorySlug === 'drink') {
+          score += 225;
+        }
+      } else if (occ === 'healthy') {
+        if (/ទឹកគ្រឿង|សម្លប្រហើរ|សម្លកកូរ|ស្ងោរជ្រក់|ញាំ|ចំហុយ|ត្រីដុត|បបរ/i.test(titleNorm)) {
+          score += 285;
+        }
+      } else if (occ === 'vegetarian') {
+        if (!/សាច់ជ្រូក|សាច់គោ|សាច់មាន់|ត្រី|បង្គា|ក្តាម|មឹក|ប្រហុក|ផ្អក/i.test(`${titleNorm} ${ingNorm}`)) {
+          score += 280;
+        }
+      } else if (occ === 'general_recommend') {
+        if (/អាម៉ុកត្រី|សម្លកកូរ|នំបញ្ចុក|បាយសាច់ជ្រូក|ឡុកឡាក់|សម្លម្ជូរគ្រឿង|គុយទាវ|ប្រហុកខ្ទិះ|ទឹកគ្រឿង|ក្តាមឆាម្រេច/i.test(titleNorm)) {
+          score += 290;
+        } else if (!isSweetOrBeverageFood(food) && (food.rating || 0) >= 4.8) {
+          score += 210;
+        }
+      }
+    }
+  }
+
+  // If the user only specified an excluded protein (e.g. "ម្ហូបអត់សាច់ជ្រូក"), reward savory non-excluded dishes
+  if (parsed.excludedProteins && parsed.excludedProteins.length > 0 && parsed.isOccasionOnlyQuery) {
+    if (!isSweetOrBeverageFood(food)) {
+      score += 220;
+    }
+  }
 
   // Flavor intent scoring
   if (parsed.flavorIntents.includes('spicy')) {

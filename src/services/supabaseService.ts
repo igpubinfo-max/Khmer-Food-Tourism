@@ -651,12 +651,27 @@ export function normalizeAuthoritativeAppSettings(
       ? `VIP ${longDays} Days`
       : longNameEnRaw;
 
+  const resolvedGeminiKey = (merged.geminiApiKey || '').trim() || getCloudApiConfig().geminiApiKey || '';
+  const resolvedMapsKey = (merged.googleMapsApiKey || '').trim() || getCloudApiConfig().googleMapsApiKey || '';
+  if ((merged.geminiApiKey && merged.geminiApiKey.trim()) || (merged.googleMapsApiKey && merged.googleMapsApiKey.trim())) {
+    try {
+      saveCloudApiConfig({
+        ...(merged.geminiApiKey && merged.geminiApiKey.trim() ? { geminiApiKey: merged.geminiApiKey.trim() } : {}),
+        ...(merged.googleMapsApiKey && merged.googleMapsApiKey.trim() ? { googleMapsApiKey: merged.googleMapsApiKey.trim() } : {}),
+      });
+    } catch {
+      // ignore storage errors
+    }
+  }
+
   return {
     ...merged,
     apkDownloadUrl: '',
     playStoreUrl: merged.playStoreUrl || 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism',
     settingsVersion: Math.max(25, ver),
     supportAccountName: merged.supportAccountName || 'CHEA KIMSENG',
+    geminiApiKey: resolvedGeminiKey,
+    googleMapsApiKey: resolvedMapsKey,
     vipShortDurationDays: shortDays,
     vipShortPriceUsd: shortPrice,
     vipShortNameKh: shortNameKh,

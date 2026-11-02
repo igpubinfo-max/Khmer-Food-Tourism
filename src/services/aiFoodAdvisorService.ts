@@ -659,16 +659,16 @@ function buildAiSummaryText(params: {
         .join(language === 'zh' ? '、' : ', ');
       return tr(
         language,
-        `✨ ការណែនាំមុខម្ហូបពិសេសពី AI សម្រាប់ «${query}»៖\nរួមមាន ${previewNames} និងមុខម្ហូបដែលត្រូវនឹងចំណង់ចំណូលចិត្តរបស់អ្នក ជាមួយគ្រឿងផ្សំ របៀបចម្អិន និងហាងអាហារណែនាំ៖`,
-        `✨ AI Personalized Food Recommendations for "${query}":\nFeaturing ${previewNames} — complete with taste profiles, ingredients, cooking methods, and places to eat:`,
-        `✨ AI 为您定制的“${query}”美食推荐：\n精选 ${previewNames} 等契合您口味的佳肴，包含风味特色、食材做法及推荐餐厅：`
+        `✨ សម្រាប់ «${query}» ខ្ញុំសូមណែនាំ៖ ${previewNames} (ចុចលើមុខម្ហូបខាងក្រោមដើម្បីមើលគ្រឿងផ្សំ របៀបធ្វើ និងហាងអាហារ)៖`,
+        `✨ Top picks for "${query}": ${previewNames} (tap any dish below for ingredients, recipe steps, and restaurants):`,
+        `✨ 为您推荐“${query}”精选佳肴：${previewNames}（点击下方菜品查看食材、做法与推荐餐厅）：`
       );
     }
     return tr(
       language,
-      `🤖 មិនមានឈ្មោះម្ហូប «${query}» ផ្ទាល់នៅក្នុងទិន្នន័យទេ តែនេះជាមុខម្ហូបខ្មែរដែលមានរសជាតិស្រដៀងគ្នា ដែល AI សូមណែនាំជំនួស៖`,
-      `🤖 "${query}" is not listed directly in our database — here are the closest authentic Cambodian dishes recommended by AI:`,
-      `🤖 数据库中暂无直接名为“${query}”的菜品，以下是 AI 为您推荐的风味最相近的正宗高棉美食：`
+      `✨ នេះជាមុខម្ហូបខ្មែរពេញនិយមដែលជំនួយការ AI សូមណែនាំសម្រាប់ «${query}»៖`,
+      `✨ Here are popular authentic Cambodian dishes recommended by AI for "${query}":`,
+      `✨ 以下是 AI 为“${query}”推荐的人气正宗高棉美食：`
     );
   }
 

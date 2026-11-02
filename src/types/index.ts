@@ -1,7 +1,7 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1314;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1316;
 export const APP_RELEASE_DATE = '2026-11-02';
 
 /**
@@ -2258,6 +2258,8 @@ export interface AppSettings {
   vipFeaturedDurationDays?: number; // Default: 1 day per featured slot
   vipFeaturedManualSchedule?: ManualFeaturedSlot[]; // Admin-scheduled Top Listing slots (shop + start date + duration)
   vipBenefitsList?: VipBenefitItem[]; // Configurable VIP benefits list
+  geminiApiKey?: string; // Live Gemini AI Assistant API Key synced via Cloud Settings
+  googleMapsApiKey?: string; // Google Maps / Places API Key synced via Cloud Settings
   settingsVersion?: number; // Monotonically increasing server configuration version
   settingsUpdatedAt?: string;
   settingsUpdatedBy?: string;
