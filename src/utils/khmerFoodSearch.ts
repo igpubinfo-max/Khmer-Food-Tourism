@@ -155,6 +155,8 @@ export function normalizeKhmerFoodText(input?: string): string {
     .replace(/ស្លឹកតើយ/g, 'ស្លឹកតយ')
     .replace(/នំបុ័ង/g, 'នំប៉័ង')
     .replace(/កាពិក/g, 'កាពិ')
+    .replace(/លៀស/g, 'លាស')
+    .replace(/ស្រុស/g, 'ស្រុះ')
     .replace(/[.,/#!$%^&*;:{}=\-_`~()?"'«»៖។]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -248,6 +250,7 @@ function peelLeadingFramingPrefixes(normalized: string): string {
 const KNOWN_KHMER_FOOD_SUBTOKENS = [
   'សម្លម្ជូរគ្រឿង',
   'សម្លម្ជូរព្រៃ',
+  'សម្លម្ជូរព្រលិត',
   'សម្លម្ជូរ',
   'សម្លកកូរ',
   'សម្លការី',
@@ -264,6 +267,7 @@ const KNOWN_KHMER_FOOD_SUBTOKENS = [
   'ប្រហុកខ្ទិះ',
   'ទឹកគ្រឿង',
   'ឆាម្រះព្រៅ',
+  'ឆាខាត់ណា',
   'ឆាក្តៅ',
   'ស្ងោរជ្រក់',
   'ត្រីដុត',
@@ -271,14 +275,40 @@ const KNOWN_KHMER_FOOD_SUBTOKENS = [
   'ក្តាមឆាម្រេច',
   'ម្រេចកំពត',
   'សាច់គោអាំង',
+  'ទឹកភ្នែក',
+  'ត្រីកញ្ចុះ',
+  'ត្រីសណ្តាយ',
+  'ត្រីរ៉ស់',
+  'ត្រីអណ្តែង',
+  'ត្រីងៀត',
+  'ត្រីឆ្អើរ',
+  'ភ្លាបង្គា',
+  'លតអង្ករ',
+  'លតឆា',
+  'លាសឆា',
+  'ងាវស្រុះ',
+  'ងាវឆា',
+  'ងាវអាំង',
   'សាច់ជ្រូក',
   'សាច់គោ',
   'សាច់មាន់',
+  'សាច់ទា',
   'គ្រឿងសមុទ្រ',
   'បង្គា',
   'ក្តាម',
   'មឹក',
+  'ងាវ',
+  'លាស',
+  'ខ្យង',
+  'អន្ទង់',
+  'កង្កែប',
+  'ព្រលិត',
+  'ខាត់ណា',
+  'ត្រកួន',
+  'អំពិលទុំ',
+  'ង៉ាំង៉ូវ',
   'ត្រី',
+  'លត',
   'បាយឆា',
   'បាយ',
   'បបរ',
@@ -286,6 +316,7 @@ const KNOWN_KHMER_FOOD_SUBTOKENS = [
   'ស៊ុប',
   'ឆា',
   'អាំង',
+  'ស្រុះ',
   'ញាំ',
   'ភ្លា',
   'បង្អែម',
@@ -316,6 +347,25 @@ const KNOWN_KHMER_FOOD_SUBTOKENS = [
   'ប៉ៃលិន',
   'ត្បូងឃ្មុំ',
 ];
+
+const GENERIC_COOKING_METHOD_TOKENS = new Set<string>([
+  'សម្ល',
+  'ស៊ុប',
+  'ស្ងោរ',
+  'ឆា',
+  'អាំង',
+  'ដុត',
+  'បំពង',
+  'ចៀន',
+  'ស្រុះ',
+  'ញាំ',
+  'ភ្លា',
+  'បុក',
+  'soup',
+  'grilled',
+  'fried',
+  'salad',
+]);
 
 /**
  * Parses a Khmer/English/Chinese food search query into normalized core keywords,
@@ -857,17 +907,27 @@ export function scoreFoodForKhmerQuery(food: FoodItem, parsed: ParsedKhmerFoodQu
       }
     }
 
+    const activeNonStopTokens = parsed.tokens.filter((t) => t.length >= 2 && !QUERY_STOPWORDS.has(t));
+    const hasSpecificSubjectToken = activeNonStopTokens.some(
+      (t) => t !== parsed.coreQuery && !GENERIC_COOKING_METHOD_TOKENS.has(t)
+    );
+
     let matchedTokenCount = 0;
+    let matchedSpecificSubjectInTitle = false;
     for (const tok of parsed.tokens) {
       if (tok.length < 2 || QUERY_STOPWORDS.has(tok)) continue;
+      const isGenericMethod = GENERIC_COOKING_METHOD_TOKENS.has(tok);
+      const titleWeight = isGenericMethod && hasSpecificSubjectToken ? 45 : 220;
+
       if (includesNormalizedKhmerToken(titleNorm, tok)) {
-        score += 135;
+        score += titleWeight;
         matchedTokenCount++;
+        if (!isGenericMethod) matchedSpecificSubjectInTitle = true;
       } else if (includesNormalizedKhmerToken(provNorm, tok)) {
         score += 90;
         matchedTokenCount++;
       } else if (includesNormalizedKhmerToken(ingNorm, tok)) {
-        score += 55;
+        score += isGenericMethod ? 20 : 95;
         matchedTokenCount++;
       } else if (includesNormalizedKhmerToken(catNorm, tok) && parsed.flavorIntents.length === 0) {
         score += 45;
@@ -878,7 +938,13 @@ export function scoreFoodForKhmerQuery(food: FoodItem, parsed: ParsedKhmerFoodQu
       }
     }
 
-    const activeNonStopTokens = parsed.tokens.filter((t) => t.length >= 2 && !QUERY_STOPWORDS.has(t));
+    // If the user asked for a specific ingredient + cooking method (e.g. "ងាវអាំង"),
+    // ensure dishes containing the specific ingredient in their title ("ងាវស្រុះ", "ងាវឆាអំពិលទុំ")
+    // always outrank unrelated dishes that only share the cooking method ("ត្រីងៀតអាំង")!
+    if (hasSpecificSubjectToken && matchedSpecificSubjectInTitle) {
+      score += 260;
+    }
+
     if (activeNonStopTokens.length > 1) {
       if (matchedTokenCount === activeNonStopTokens.length) {
         score += 85;

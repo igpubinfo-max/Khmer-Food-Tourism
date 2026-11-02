@@ -389,6 +389,12 @@ export const FOOD_CATEGORY_ZH_MAP: Record<string, string> = {
   'Rice / Braised Pork Leg Rice': '高棉棕榈糖红烧猪蹄卤蛋饭',
   'Street Food / Steamed Pong Tea Kon': '贡布青柠黑胡椒清蒸毛蛋',
   'Dessert / Assorted Khmer Desserts': '高棉传统什锦甜品糕点拼盘',
+  'Soup / Water Lily & Catfish': '睡莲嫩茎黄颡鱼酸汤',
+  'Stir-Fry / Clams with Tamarind': '罗望子九层塔炒河蚬',
+  'Salad / Fresh Prawn Ceviche': '高棉青柠生腌鲜虾沙拉',
+  'Dessert / Pandan Rice Drop': '斑兰米漏粉配椰浆棕榈糖',
+  'Seafood / Poached Blood Cockles': '白灼血蚶配酸辣蘸汁',
+  'Stir-Fry / Chinese Kale & Beef': '芥兰炒滴泪嫩牛肉',
   ...FOOD_51_100_CAT_ZH,
 };
 
@@ -396,6 +402,12 @@ export const FOOD_CATEGORY_ZH_MAP: Record<string, string> = {
  * Exact Dish Name translations for the 100 Core Dishes + 100 Additional Dishes
  */
 export const EXACT_FOOD_NAME_ZH_MAP: Record<string, string> = {
+  'Water Lily Stem Sour Soup with Mystus Catfish (Samlor Machu Prolit Trei Kanchos)': '睡莲嫩茎黄颡鱼酸汤 (Samlor Machu Prolit Trei Kanchos)',
+  'Stir-Fried Freshwater Clams with Tamarind & Basil (Leas Cha Ampil Tum)': '罗望子九层塔爆炒河蚬 (Leas Cha Ampil Tum)',
+  'Cambodian Fresh Prawn Lime Ceviche (Pleah Bangkea Sros)': '高棉青柠生腌鲜虾沙拉 (Pleah Bangkea Sros)',
+  'Cambodian Pandan Rice Drop Dessert in Coconut Cream (Bang-Aem Lort Angkor)': '斑兰米漏粉椰浆甜品 (Bang-Aem Lort Angkor)',
+  'Poached Blood Cockles with Spicy Dipping Sauce (Ngav Sros)': '白灼血蚶配酸辣海鲜蘸汁 (Ngav Sros)',
+  'Wok-Seared Chinese Kale with Crying Tiger Beef (Cha Khatna Sach Ko Tuk Phnek)': '芥兰猛火炒滴泪牛肉 (Cha Khatna Sach Ko Tuk Phnek)',
   'Fish Amok with Noni Leaves': '诺丽叶椰香高棉阿莫克蒸鱼 (Fish Amok)',
   'Authentic Samlor Korko (Cambodian Mixed Stew)': '正宗高棉什锦蔬菜浓汤 (Samlor Korko)',
   'Ripe Palm Fruit Stew with Pork Belly (Samlor Kako Tnot)': '熟棕榈果炖五花肉浓汤 (Samlor Kako Tnot)',

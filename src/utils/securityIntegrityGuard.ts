@@ -15,7 +15,7 @@
  *    Guarantees legitimate VIP accounts are NEVER cleared or downgraded on app version updates or restarts.
  */
 
-import { User, parseSafeDateMs } from '../types';
+import { User, parseSafeDateMs, isPermanentVipEmail } from '../types';
 import { verifyAdminSession, createAdminSession, revokeAdminSession } from './security';
 
 const INTEGRITY_SALT_BASE = 'kft_tamper_guard_v2026_cheasavuth_khmer_food_secure';
@@ -213,6 +213,18 @@ export function findLocalAuthoritativeVipEntitlement(
 ): LocalAuthoritativeVipMatch {
   if (!targetUser) return { found: false, expiryMs: 0 };
   const nowMs = Date.now();
+  if (isPermanentVipEmail(targetUser.email)) {
+    const permExpMs = nowMs + 365 * 24 * 60 * 60 * 1000;
+    return {
+      found: true,
+      expiryMs: permExpMs,
+      expiryIso: new Date(permExpMs).toISOString(),
+      startIso: targetUser.subscriptionStartDate || '2026-01-01T00:00:00.000Z',
+      transactionRef: targetUser.transactionRef || 'VIP-PERMANENT-IGP2026D',
+      paymentMethod: targetUser.paymentMethod || 'KHQR',
+      paidAdditionalStoreSlots: Math.max(targetUser.paidAdditionalStoreSlots || 0, 2),
+    };
+  }
   let bestExpMs = 0;
   let bestStartIso: string | undefined;
   let bestTxnRef: string | undefined;

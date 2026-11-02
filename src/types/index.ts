@@ -10,7 +10,6 @@ export const APP_RELEASE_DATE = '2026-11-02';
  * Any ID that has an explicit Admin custom override is automatically preserved by `deduplicateFoodItems`.
  */
 export const REMOVED_DUPLICATE_FOOD_IDS: ReadonlySet<string> = new Set([
-  'food-9',
   'food-12',
   'food-20',
   'food-21',
@@ -18,13 +17,11 @@ export const REMOVED_DUPLICATE_FOOD_IDS: ReadonlySet<string> = new Set([
   'food-30',
   'food-31',
   'food-33',
-  'food-35',
   'food-43',
   'food-46',
   'food-51',
   'food-55',
   'food-56',
-  'food-57',
   'food-69',
   'food-71',
   'food-75',
@@ -97,14 +94,14 @@ export const SEED_FOOD_PHOTO_BASELINE_MS = Date.parse(SEED_FOOD_PHOTO_BASELINE_I
  * from before the Excel import, while preserving any newer edits made after this timestamp.
  */
 export const EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS: Record<string, string> = {
-  'food-2': '2026-11-01T06:08:28.084Z',
-  'food-38': '2026-11-01T06:08:28.084Z',
-  'food-47': '2026-11-01T06:08:28.084Z',
-  'food-82': '2026-11-01T06:08:28.084Z',
-  'food-86': '2026-11-01T06:08:28.084Z',
-  'food-88': '2026-11-01T06:08:28.084Z',
-  'food-89': '2026-11-01T06:08:28.084Z',
-  'food-96': '2026-11-01T06:08:28.084Z',
+  'food-2': '2026-11-02T05:55:46.690Z',
+  'food-38': '2026-11-02T05:55:46.690Z',
+  'food-47': '2026-11-02T05:55:46.690Z',
+  'food-82': '2026-11-02T05:55:46.690Z',
+  'food-86': '2026-11-02T05:55:46.690Z',
+  'food-88': '2026-11-02T05:55:46.690Z',
+  'food-89': '2026-11-02T05:55:46.690Z',
+  'food-96': '2026-11-02T05:55:46.690Z',
   'food-101': '2026-11-01T06:09:56.357Z',
   'food-102': '2026-11-01T06:09:56.357Z',
   'food-103': '2026-11-01T06:09:56.357Z',
@@ -205,6 +202,18 @@ export const EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS: Record<string, string> = {
   'food-198': '2026-11-01T06:09:56.357Z',
   'food-199': '2026-11-01T06:09:56.357Z',
   'food-200': '2026-11-01T06:09:56.357Z',
+  'food-6': '2026-11-02T05:55:46.690Z',
+  'food-9': '2026-11-02T05:55:46.690Z',
+  'food-16': '2026-11-02T05:55:46.690Z',
+  'food-17': '2026-11-02T05:55:46.690Z',
+  'food-18': '2026-11-02T05:55:46.690Z',
+  'food-35': '2026-11-02T05:55:46.690Z',
+  'food-36': '2026-11-02T05:55:46.690Z',
+  'food-44': '2026-11-02T05:55:46.690Z',
+  'food-57': '2026-11-02T05:55:46.690Z',
+  'food-66': '2026-11-02T05:55:46.690Z',
+  'food-68': '2026-11-02T05:55:46.690Z',
+  'food-70': '2026-11-02T05:55:46.690Z',
 };
 
 export interface AuthModalInitialView {
@@ -1862,12 +1871,24 @@ export const isAdminAccount = (user?: User | null): boolean => {
   );
 };
 
+export const PERMANENT_VIP_EMAILS = new Set<string>([
+  'igp2026d@gmail.com',
+]);
+
+export const isPermanentVipEmail = (email?: string | null): boolean => {
+  if (!email) return false;
+  return PERMANENT_VIP_EMAILS.has(String(email).trim().toLowerCase());
+};
+
 // Helper to determine if a user has an active, admin-approved Premium VIP subscription (strictly for VIP customers, NOT Admin)
 export const isUserVipActive = (user?: User | null): boolean => {
   if (!user) return false;
   // Administrators use administrative privileges and are strictly separated from consumer VIP accounts
   if (isAdminAccount(user)) {
     return false;
+  }
+  if (isPermanentVipEmail(user.email)) {
+    return true;
   }
   if (user.isDisabled) {
     return false;
@@ -1953,10 +1974,11 @@ export const getVipRemainingDays = (user?: User | null): number => {
   if (!user || isAdminAccount(user)) return 0;
   if (!isUserVipActive(user)) return 0;
   const rawExpiry = user.subscriptionExpiryDate || user.vipExpiresAt;
-  if (!rawExpiry) return 30;
+  if (!rawExpiry) return isPermanentVipEmail(user.email) ? 365 : 30;
   const expMs = parseSafeDateMs(rawExpiry);
-  if (expMs <= 0) return 30;
+  if (expMs <= 0) return isPermanentVipEmail(user.email) ? 365 : 30;
   const diffMs = expMs - Date.now();
+  if (diffMs <= 0 && isPermanentVipEmail(user.email)) return 365;
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 };
 
