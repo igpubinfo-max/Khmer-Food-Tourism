@@ -2365,6 +2365,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     supportTickets: true,
   });
 
+  // Thermal & Battery Preservation: Track native app foreground/background lifecycle state
+  const isAppActiveRef = useRef(true);
+  useEffect(() => {
+    let stateListenerHandle: { remove: () => void } | null = null;
+    try {
+      CapApp.addListener('appStateChange', ({ isActive }) => {
+        isAppActiveRef.current = isActive;
+      }).then(h => {
+        stateListenerHandle = h;
+      }).catch(() => {});
+    } catch {}
+
+    const handleDocVisibility = () => {
+      isAppActiveRef.current = typeof document === 'undefined' ? true : !document.hidden;
+    };
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleDocVisibility);
+    }
+
+    return () => {
+      if (stateListenerHandle?.remove) {
+        stateListenerHandle.remove();
+      }
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleDocVisibility);
+      }
+    };
+  }, []);
+
   // Compact bulk arrays before writing to localStorage so base64 photos already confirmed persisted in VAULT_KEYS
   // are never duplicated a second time in kft_destinations_real_v8 / kft_restaurants_real_v9 / kft_foods_200_v8.
   // Never strip a `data:` photo unless `isOverridePersistedInLocalStorage` confirms the override is safely on disk in localStorage.
@@ -2992,7 +3021,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     enforceVipExpirationsAndReminders();
 
     const intervalId = window.setInterval(() => {
-      if (typeof document === 'undefined' || !document.hidden) {
+      if (isAppActiveRef.current && (typeof document === 'undefined' || !document.hidden)) {
         enforceVipExpirationsAndReminders();
       }
     }, 600000);
@@ -3294,7 +3323,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     window.addEventListener('storage', handleStorageEvent);
 
     const pollInterval = setInterval(() => {
-      if (typeof document === 'undefined' || !document.hidden) {
+      if (isAppActiveRef.current && (typeof document === 'undefined' || !document.hidden)) {
         refreshAppSettingsFromServer(true);
       }
     }, 600000);
@@ -3753,7 +3782,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }, 600);
       periodicSyncInterval = setInterval(() => {
-        if (typeof document === 'undefined' || !document.hidden) {
+        if (isAppActiveRef.current && (typeof document === 'undefined' || !document.hidden)) {
           triggerCloudSyncNow(false);
         }
       }, 600000);

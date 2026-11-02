@@ -672,8 +672,16 @@ export const WhatToEatModal: React.FC = () => {
 
   const currentDish: FoodItem | null = useMemo(() => {
     if (isMedicalRefusalActive) return null;
+    if (currentDishId) {
+      for (let i = chatMessages.length - 1; i >= 0; i--) {
+        const msg = chatMessages[i];
+        const foundInMsg = (msg.dishes || []).find((d) => d.id === currentDishId);
+        if (foundInMsg) return foundInMsg;
+        if (msg.recipePreview?.food?.id === currentDishId) return msg.recipePreview.food;
+      }
+    }
     return activeDishList.find((f) => f.id === currentDishId) || activeDishList[0] || foods[0] || null;
-  }, [activeDishList, currentDishId, foods, isMedicalRefusalActive]);
+  }, [activeDishList, currentDishId, foods, isMedicalRefusalActive, chatMessages]);
 
   const currentLoc = useMemo(
     () => (currentDish ? getLocalizedFood(currentDish, language) : null),
@@ -736,32 +744,38 @@ export const WhatToEatModal: React.FC = () => {
     }
 
     // If the user asked for an out-of-catalog dish (custom-recipe-*), fetch a real online photo for it!
-    const customFoodItem = reply.recipePreview?.food;
+    const customFoodItem =
+      reply.recipePreview?.food ||
+      (reply.dishes || []).find((d) => String(d.id || '').startsWith('custom-recipe-'));
     if (customFoodItem && String(customFoodItem.id || '').startsWith('custom-recipe-')) {
-      void fetchOnlineDishPhotoByQuery(customFoodItem.nameEn || customFoodItem.nameKh || clean).then(
-        (onlineUrl) => {
-          if (!onlineUrl) return;
-          setChatMessages((prev) =>
-            prev.map((m) => {
-              if (m.id !== reply.id) return m;
-              const updatedFood: FoodItem = {
-                ...(m.recipePreview?.food || customFoodItem),
-                photoUrl: onlineUrl,
-                originalPhotoUrl: onlineUrl,
-              };
-              return {
-                ...m,
-                dishes: (m.dishes || []).map((d) =>
-                  d.id === customFoodItem.id ? updatedFood : d
-                ),
-                recipePreview: m.recipePreview
-                  ? { ...m.recipePreview, food: updatedFood }
-                  : m.recipePreview,
-              };
-            })
-          );
-        }
-      );
+      void fetchOnlineDishPhotoByQuery(
+        `${customFoodItem.nameKh || ''} ${customFoodItem.nameEn || ''} ${clean}`.trim()
+      ).then((onlineUrl) => {
+        if (!onlineUrl) return;
+        setChatMessages((prev) =>
+          prev.map((m) => {
+            if (m.id !== reply.id) return m;
+            const baseItem =
+              m.recipePreview?.food ||
+              (m.dishes || []).find((d) => d.id === customFoodItem.id) ||
+              customFoodItem;
+            const updatedFood: FoodItem = {
+              ...baseItem,
+              photoUrl: onlineUrl,
+              originalPhotoUrl: onlineUrl,
+            };
+            return {
+              ...m,
+              dishes: (m.dishes || []).map((d) =>
+                d.id === customFoodItem.id ? updatedFood : d
+              ),
+              recipePreview: m.recipePreview
+                ? { ...m.recipePreview, food: updatedFood }
+                : m.recipePreview,
+            };
+          })
+        );
+      });
     }
 
     // If a Gemini API key is configured, refine the reply asynchronously with live Gemini AI
@@ -2017,7 +2031,7 @@ export const WhatToEatModal: React.FC = () => {
                   isSpinning ? 'opacity-30 scale-95' : 'opacity-100 scale-100'
                 }`}
               >
-                {/* AI Filter Match Summary Banner (Personalized Culinary Header + Quick Compare) */}
+                {/* AI Filter Match Summary Banner (Personalized Culinary Header - Clean, No Duplicate Compare Button) */}
                 <div
                   id="kft-wte-ai-match-banner"
                   className="p-3 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-300/70 dark:border-emerald-700/60 flex items-center justify-between gap-2 text-xs font-extrabold text-[#064E3B] dark:text-emerald-200 leading-relaxed font-khmer"
@@ -2030,15 +2044,6 @@ export const WhatToEatModal: React.FC = () => {
                       `✨ AI 为您精选的“${activeCriteriaLabel}”招牌美食：`
                     )}
                   </span>
-                  {matchingFoods.length >= 2 && (
-                    <button
-                      type="button"
-                      onClick={() => handleCycleCompareDishes()}
-                      className="px-2.5 py-1 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-[10px] font-black shrink-0 shadow-2xs transition active:scale-95 cursor-pointer"
-                    >
-                      ⚖️ {tr(language, 'ប្រៀបធៀបម្ហូប', 'Compare Dishes', '对比菜品')}
-                    </button>
-                  )}
                 </div>
 
                 {/* Highlight Recommended Dish Card */}

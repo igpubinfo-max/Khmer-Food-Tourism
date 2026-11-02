@@ -17,8 +17,13 @@ interface Props {
 const PopularDestinationsInner: React.FC<Props> = ({ language, destinations, onOpen, onSeeAll }) => {
   const top = useMemo(() => {
     const valid = destinations.filter((d) => d && d.id && d.photoUrl);
-    const score = (d: TouristDestination) => (d.isFeatured ? 10 : 0) + (d.rating || 0) * 2 + Math.min(d.reviewCount || 0, 300) * 0.01;
-    return valid.sort((a, b) => score(b) - score(a)).slice(0, 8);
+    // Precompute destination ranking score in O(N) to reduce CPU cycles during sort
+    const scored = valid.map((d) => ({
+      d,
+      s: (d.isFeatured ? 10 : 0) + (d.rating || 0) * 2 + Math.min(d.reviewCount || 0, 300) * 0.01,
+    }));
+    scored.sort((a, b) => b.s - a.s);
+    return scored.slice(0, 8).map((item) => item.d);
   }, [destinations]);
 
   if (!top.length) return null;

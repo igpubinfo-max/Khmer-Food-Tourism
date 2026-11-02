@@ -260,14 +260,8 @@ export const NearMeModal: React.FC = () => {
 
       navigator.geolocation.getCurrentPosition(
         onSuccess,
-        () => {
-          navigator.geolocation.getCurrentPosition(
-            onSuccess,
-            onFinalFallback,
-            { enableHighAccuracy: false, timeout: 3500, maximumAge: 300000 }
-          );
-        },
-        { enableHighAccuracy: true, timeout: 3500, maximumAge: 120000 }
+        onFinalFallback,
+        { enableHighAccuracy: false, timeout: 4000, maximumAge: 180000 }
       );
     } else {
       const fallback = savedGps || defaultCenter;

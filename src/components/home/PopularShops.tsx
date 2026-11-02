@@ -31,15 +31,20 @@ const PopularShopsInner: React.FC<Props> = ({ language, restaurants, onOpen, onS
     const approved = restaurants.filter(
       (r) => isStrictVerifiedCambodiaRestaurant(r) && (r.status === 'approved' || !r.status)
     );
-    const score = (r: Restaurant) =>
-      (hasApprovedShopPhoto(r) ? 10000 : 0) +
-      (r.photoUpdatedAt ? 500 : 0) +
-      (r.isVerified ? 2000 : 0) +
-      (isGpipRegisteredRestaurant(r) ? 1000 : 0) +
-      (r.rating || 0) * 20 +
-      Math.min(r.reviewCount || 0, 200) * 0.15 +
-      (isRestaurantPremiumActive(r) ? 6 : 0);
-    return approved.sort((a, b) => score(b) - score(a));
+    // Precompute ranking score once in O(N) to prevent CPU spikes in sort comparisons
+    const scored = approved.map((r) => {
+      const s =
+        (hasApprovedShopPhoto(r) ? 10000 : 0) +
+        (r.photoUpdatedAt ? 500 : 0) +
+        (r.isVerified ? 2000 : 0) +
+        (isGpipRegisteredRestaurant(r) ? 1000 : 0) +
+        (r.rating || 0) * 20 +
+        Math.min(r.reviewCount || 0, 200) * 0.15 +
+        (isRestaurantPremiumActive(r) ? 6 : 0);
+      return { r, s };
+    });
+    scored.sort((a, b) => b.s - a.s);
+    return scored.map((item) => item.r);
   }, [restaurants]);
 
   const visible = useMemo(() => {

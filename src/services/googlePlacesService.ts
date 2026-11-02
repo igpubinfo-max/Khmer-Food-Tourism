@@ -5001,24 +5001,34 @@ export function calculateDistanceMeters(
   return calculateHaversineMeters(lat1, lng1, lat2, lng2);
 }
 
-export async function getCurrentDeviceLocation(): Promise<{ lat: number; lng: number } | null> {
+// In-memory cache for recent device GPS (prevents repetitive mobile GPS chip wakeups & thermal throttling)
+let cachedDeviceGps: { lat: number; lng: number; timestamp: number } | null = null;
+
+export async function getCurrentDeviceLocation(forceFresh = false): Promise<{ lat: number; lng: number } | null> {
+  const now = Date.now();
+  if (!forceFresh && cachedDeviceGps && now - cachedDeviceGps.timestamp < 120000) {
+    return { lat: cachedDeviceGps.lat, lng: cachedDeviceGps.lng };
+  }
   if (typeof navigator === 'undefined' || !navigator.geolocation) {
-    return null;
+    return cachedDeviceGps ? { lat: cachedDeviceGps.lat, lng: cachedDeviceGps.lng } : null;
   }
   return new Promise((resolve) => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        resolve({
+        const coords = {
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
-        });
+          timestamp: Date.now(),
+        };
+        cachedDeviceGps = coords;
+        resolve({ lat: coords.lat, lng: coords.lng });
       },
       () => {
-        resolve(null);
+        resolve(cachedDeviceGps ? { lat: cachedDeviceGps.lat, lng: cachedDeviceGps.lng } : null);
       },
       {
         enableHighAccuracy: false,
-        timeout: 8000,
+        timeout: 5000,
         maximumAge: 120000,
       }
     );

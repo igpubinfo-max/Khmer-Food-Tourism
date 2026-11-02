@@ -91,10 +91,17 @@ export async function compressImage(file: File, maxWidth = 1200, maxHeight = 120
   });
 }
 
+// In-memory GPS cache to eliminate repeated satellite chip activation & battery drain
+let cachedAiCheckInGps: { location: LocationCoordinates; timestamp: number } | null = null;
+
 /**
- * Capture Device GPS Location with graceful fallback
+ * Capture Device GPS Location with graceful fallback (Thermal & Battery Optimized)
  */
 export async function captureCurrentLocation(): Promise<LocationCoordinates> {
+  if (cachedAiCheckInGps && Date.now() - cachedAiCheckInGps.timestamp < 120000) {
+    return cachedAiCheckInGps.location;
+  }
+
   return new Promise((resolve) => {
     if (!navigator.geolocation) {
       // Default to central Phnom Penh if geolocation unavailable
@@ -104,11 +111,13 @@ export async function captureCurrentLocation(): Promise<LocationCoordinates> {
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        resolve({
+        const loc: LocationCoordinates = {
           latitude: Number(pos.coords.latitude.toFixed(5)),
           longitude: Number(pos.coords.longitude.toFixed(5)),
-          accuracyMeters: Math.round(pos.coords.accuracy || 10),
-        });
+          accuracyMeters: Math.round(pos.coords.accuracy || 15),
+        };
+        cachedAiCheckInGps = { location: loc, timestamp: Date.now() };
+        resolve(loc);
       },
       (err) => {
         console.warn('Geolocation warning / permission denied:', err.message);
@@ -116,9 +125,9 @@ export async function captureCurrentLocation(): Promise<LocationCoordinates> {
         resolve({ latitude: 11.5564, longitude: 104.9282, accuracyMeters: 100 });
       },
       {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000,
+        enableHighAccuracy: false, // Low-power cellular/Wi-Fi positioning (no GPS chip overheating)
+        timeout: 5000,
+        maximumAge: 120000,
       }
     );
   });

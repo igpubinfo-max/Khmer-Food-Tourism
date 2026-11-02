@@ -70,8 +70,16 @@ export function isCoordinateInsideCambodia(lat: number, lon: number): boolean {
   return lat >= 9.5 && lat <= 15.0 && lon >= 102.0 && lon <= 108.0;
 }
 
-// Acquire device GPS location with error handling and privacy
-export async function getCurrentDeviceLocation(): Promise<GpsLocationResult> {
+// In-memory cache for check-in GPS to avoid re-triggering satellite chip repeatedly
+let cachedCheckInGps: { result: GpsLocationResult; timestamp: number } | null = null;
+
+// Acquire device GPS location with error handling, privacy & thermal caching
+export async function getCurrentDeviceLocation(forceFresh = false): Promise<GpsLocationResult> {
+  const now = Date.now();
+  if (!forceFresh && cachedCheckInGps && (now - cachedCheckInGps.timestamp < 90000)) {
+    return cachedCheckInGps.result;
+  }
+
   return new Promise((resolve) => {
     if (!navigator.geolocation) {
       resolve({
@@ -93,7 +101,7 @@ export async function getCurrentDeviceLocation(): Promise<GpsLocationResult> {
         const inside = isCoordinateInsideCambodia(lat, lon);
         const sufficient = accuracy <= MIN_REQUIRED_GPS_ACCURACY_METERS;
 
-        resolve({
+        const res: GpsLocationResult = {
           latitude: lat,
           longitude: lon,
           accuracyMeters: Math.round(accuracy),
@@ -104,9 +112,15 @@ export async function getCurrentDeviceLocation(): Promise<GpsLocationResult> {
             : !sufficient 
               ? 'កម្រិតសុក្រិត្យភាព GPS ទាបពេក សូមព្យាយាមម្តងទៀត' 
               : undefined
-        });
+        };
+        cachedCheckInGps = { result: res, timestamp: Date.now() };
+        resolve(res);
       },
       (error) => {
+        if (cachedCheckInGps) {
+          resolve(cachedCheckInGps.result);
+          return;
+        }
         // Fallback to central Phnom Penh if permission denied, but flag error
         resolve({
           latitude: 11.5564,
@@ -118,9 +132,9 @@ export async function getCurrentDeviceLocation(): Promise<GpsLocationResult> {
         });
       },
       {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 30000
+        enableHighAccuracy: false,
+        timeout: 6000,
+        maximumAge: 90000
       }
     );
   });

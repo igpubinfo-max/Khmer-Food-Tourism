@@ -48,8 +48,17 @@ export const RestaurantView: React.FC = () => {
   const [priceFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [shopSearchQuery, setShopSearchQuery] = useState<string>('');
+  const [debouncedShopSearchQuery, setDebouncedShopSearchQuery] = useState<string>('');
   const [visibleCount, setVisibleCount] = useState<number>(RESTAURANT_BATCH_SIZE);
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
+
+  // Debounce search query to prevent thermal CPU throttling and frame drops while typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedShopSearchQuery(shopSearchQuery);
+    }, 180);
+    return () => clearTimeout(timer);
+  }, [shopSearchQuery]);
 
   const isKm = language === 'km';
 
@@ -168,8 +177,8 @@ export const RestaurantView: React.FC = () => {
 
   const filteredRestaurants = useMemo(() => {
     const cleanSelProv = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
-    const normQuery = normalizeKhmerSearchText(shopSearchQuery);
-    const rawQueryLower = shopSearchQuery.trim().toLowerCase();
+    const normQuery = normalizeKhmerSearchText(debouncedShopSearchQuery);
+    const rawQueryLower = debouncedShopSearchQuery.trim().toLowerCase();
 
     return validDirectoryRestaurants.filter((r) => {
       if (cleanSelProv && !r.provinceKh.replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) {
@@ -191,7 +200,7 @@ export const RestaurantView: React.FC = () => {
       }
       return true;
     });
-  }, [validDirectoryRestaurants, selectedProvince, priceFilter, categoryFilter, shopSearchQuery]);
+  }, [validDirectoryRestaurants, selectedProvince, priceFilter, categoryFilter, debouncedShopSearchQuery]);
 
   const sortedRestaurants = useMemo(
     () => sortRestaurantsWithVipRotation(filteredRestaurants, users, appSettings),
