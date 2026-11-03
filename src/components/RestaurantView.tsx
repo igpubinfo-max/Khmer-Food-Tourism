@@ -50,7 +50,15 @@ export const RestaurantView: React.FC = () => {
   const [shopSearchQuery, setShopSearchQuery] = useState<string>('');
   const [debouncedShopSearchQuery, setDebouncedShopSearchQuery] = useState<string>('');
   const [visibleCount, setVisibleCount] = useState<number>(RESTAURANT_BATCH_SIZE);
+  const [nowTickMs, setNowTickMs] = useState<number>(() => Date.now());
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNowTickMs(Date.now());
+    }, 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Debounce search query to prevent thermal CPU throttling and frame drops while typing
   useEffect(() => {
@@ -203,8 +211,8 @@ export const RestaurantView: React.FC = () => {
   }, [validDirectoryRestaurants, selectedProvince, priceFilter, categoryFilter, debouncedShopSearchQuery]);
 
   const sortedRestaurants = useMemo(
-    () => sortRestaurantsWithVipRotation(filteredRestaurants, users, appSettings),
-    [filteredRestaurants, users, appSettings]
+    () => sortRestaurantsWithVipRotation(filteredRestaurants, users, appSettings, nowTickMs),
+    [filteredRestaurants, users, appSettings, nowTickMs]
   );
 
   const displayedRestaurants = useMemo(

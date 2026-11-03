@@ -6644,12 +6644,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const foodImgs: string[] = [];
 
     const isPendingPayment = !isAdmin && restData.paymentStatus === 'pending_verification';
-    const isPendingManualReview = !isAdmin && !targetToReplace;
-    const finalStatus: 'approved' | 'pending' | 'rejected' = isPendingManualReview
-      ? 'pending'
-      : (targetToReplace?.status || 'approved');
-    const finalIsVerified = !isPendingManualReview && (targetToReplace ? Boolean(targetToReplace.isVerified) : true);
-    const finalIsPromoted = !isPendingManualReview && (isAdmin || isApprovedVip);
+    const isPendingManualReview = !isAdmin && !isApprovedVip && !targetToReplace;
+    const finalStatus: 'approved' | 'pending' | 'rejected' =
+      isPendingPayment || isPendingManualReview
+        ? 'pending'
+        : 'approved';
+    const finalIsVerified = !isPendingManualReview && !isPendingPayment && (targetToReplace ? Boolean(targetToReplace.isVerified) : true);
+    const finalIsPromoted = !isPendingManualReview && !isPendingPayment && (isAdmin || isApprovedVip);
 
     const nowIso = new Date().toISOString();
     const expiryIso =
@@ -6698,7 +6699,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       storeSlotNumber: slotNumber,
       replacedFromRestaurantId: targetToReplace ? targetToReplace.id : undefined,
       replacedAt: targetToReplace ? nowIso : undefined,
-      approvedAt: finalStatus === 'approved' ? (targetToReplace?.approvedAt || nowIso) : undefined,
+      approvedAt: finalStatus === 'approved' ? nowIso : undefined,
       featuredFromAt: finalStatus === 'approved' ? nowIso : undefined,
       featuredUntilAt: finalStatus === 'approved' ? featuredUntilIso : undefined,
       created_at: targetToReplace?.created_at || targetToReplace?.createdAt || restData.created_at || restData.createdAt || nowIso,
@@ -6951,6 +6952,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       photoUpdatedAt: editNowIso,
       isAdminEdited: true,
       adminEditedAt: editNowIso,
+      approvedAt: original?.approvedAt ?? updated.approvedAt,
+      featuredFromAt: original?.featuredFromAt ?? updated.featuredFromAt,
+      featuredUntilAt: original?.featuredUntilAt ?? updated.featuredUntilAt,
       created_at: preservedCreatedAt,
       createdAt: preservedCreatedAt,
     } : {
@@ -6977,6 +6981,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       facebookUrl: updated.facebookUrl !== undefined ? updated.facebookUrl : original?.facebookUrl,
       websiteUrl: updated.websiteUrl !== undefined ? updated.websiteUrl : original?.websiteUrl,
       businessCategory: updated.businessCategory !== undefined ? updated.businessCategory : original?.businessCategory,
+      approvedAt: original?.approvedAt,
+      featuredFromAt: original?.featuredFromAt,
+      featuredUntilAt: original?.featuredUntilAt,
       created_at: preservedCreatedAt,
       createdAt: preservedCreatedAt,
     });
@@ -7584,7 +7591,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           status: 'approved',
           isVerified: true,
           isPromoted: r.membershipTier === 'premium' ? true : Boolean(r.isPromoted),
-          approvedAt: r.approvedAt || nowIso,
+          approvedAt: nowIso,
           featuredFromAt: nowIso,
           featuredUntilAt: featuredUntilIso,
           updatedAt: nowIso,

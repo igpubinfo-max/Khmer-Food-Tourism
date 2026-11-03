@@ -2960,6 +2960,8 @@ export interface VipFeaturedRotationConfig {
   durationMs: number;
 }
 
+export const NEW_VIP_SHOP_PIN_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 export const getVipFeaturedRotationConfig = (
   settings?: Partial<AppSettings> | null
 ): VipFeaturedRotationConfig => {
@@ -2973,20 +2975,23 @@ export const getVipFeaturedRotationConfig = (
   return {
     enabled,
     durationDays,
-    durationMs: durationDays * 24 * 60 * 60 * 1000,
+    durationMs: NEW_VIP_SHOP_PIN_DURATION_MS,
   };
 };
 
 export const getRestaurantApprovedAtMs = (r?: Partial<Restaurant> | null): number => {
   if (!r) return 0;
-  const raw = r.approvedAt || r.featuredFromAt || r.created_at || r.createdAt;
-  if (raw && typeof raw === 'string') {
-    const parsed = Date.parse(raw);
-    if (!Number.isNaN(parsed)) {
-      return parsed;
+  const candidates = [r.featuredFromAt, r.replacedAt, r.approvedAt, r.created_at, r.createdAt];
+  let latestMs = 0;
+  for (const raw of candidates) {
+    if (raw && typeof raw === 'string') {
+      const parsed = Date.parse(raw);
+      if (!Number.isNaN(parsed) && parsed > latestMs) {
+        latestMs = parsed;
+      }
     }
   }
-  return getRestaurantCreatedAtMs(r);
+  return latestMs || getRestaurantCreatedAtMs(r);
 };
 
 export const isRestaurantEligibleForVipRotation = (
@@ -3140,16 +3145,16 @@ export const getVipFeaturedRotationState = (
   const currentlyFeatured: VipFeaturedShopSlotInfo[] = [];
   const currentlyFeaturedIds = new Set<string>(manualFeatured.map((m) => m.restaurant.id));
 
-  // 1. Check for newly added approved VIP shops within their initial `durationDays` top-listing window
+  // 1. Check for newly added VIP shops within their 24-hour top-pinning window
   for (let i = 0; i < eligibleQueue.length; i++) {
     const shop = eligibleQueue[i];
     if (currentlyFeaturedIds.has(shop.id)) continue;
     const approvedMs = getRestaurantApprovedAtMs(shop);
     const explicitUntilMs = shop.featuredUntilAt ? Date.parse(shop.featuredUntilAt) : Number.NaN;
-    // Always compute dynamic window from approvedMs + config.durationMs so Admin duration changes take effect immediately
+    // Pin newly added VIP shops at the top for 24 hours from when they were added/approved
     const boostEndMs =
       approvedMs > 0
-        ? approvedMs + config.durationMs
+        ? approvedMs + NEW_VIP_SHOP_PIN_DURATION_MS
         : !Number.isNaN(explicitUntilMs)
         ? explicitUntilMs
         : 0;
@@ -3169,28 +3174,13 @@ export const getVipFeaturedRotationState = (
     }
   }
 
-  // Sort newly added shops so the most recently registered approved shop is first
+  // Sort newly added VIP shops so the most recently added shop is pinned at the very top
   currentlyFeatured.sort(
     (a, b) => getRestaurantApprovedAtMs(b.restaurant) - getRestaurantApprovedAtMs(a.restaurant)
   );
 
-  // 2. Fair Round-Robin Rotation in Registration/Approval Order
-  const rotatingQueueIndex = currentSlotIndex % eligibleQueue.length;
-  const rotatingShop = eligibleQueue[rotatingQueueIndex];
-  if (rotatingShop && !currentlyFeaturedIds.has(rotatingShop.id)) {
-    const remMs = Math.max(0, slotEndMs - nowMs);
-    currentlyFeatured.push({
-      restaurant: rotatingShop,
-      reason: 'rotation_slot',
-      slotStartIso,
-      slotEndIso,
-      remainingMs: remMs,
-      remainingHours: Math.max(1, Math.ceil(remMs / (1000 * 60 * 60))),
-      queueIndex: rotatingQueueIndex,
-    });
-    currentlyFeaturedIds.add(rotatingShop.id);
-  }
-
+  // After the 24-hour window expires, shops are NOT re-added to currentlyFeatured so they return to the normal listing order.
+  const rotatingQueueIndex = eligibleQueue.length > 0 ? currentSlotIndex % eligibleQueue.length : 0;
   const nextRotatingShop =
     eligibleQueue.length > 1
       ? eligibleQueue[(rotatingQueueIndex + 1) % eligibleQueue.length]
@@ -3211,10 +3201,9 @@ export const getVipFeaturedRotationState = (
 
 /**
  * Sort a list of restaurants so that:
- * 1. Currently featured VIP shops (from initial 1-day new-shop boost or fair round-robin rotation) appear first.
- * 2. ALL shops WITH a verified / Admin-uploaded real photo (`hasApprovedShopPhoto(r)`) appear prominently right at the top
- *    (with newly uploaded Admin/owner photos and active VIP shops prioritized first).
- * 3. ALL shops WITHOUT photos remain 100% visible below them (verified Cambodia locations first), rendering DefaultShopIcon.
+ * 1. Newly added VIP shops within their 24-hour top-pinning window (or active Admin manual schedule) appear pinned at the very top.
+ * 2. Once the 24-hour window expires, VIP shops return to the normal listing order alongside all other shops.
+ * 3. Shops WITH a verified / approved photo appear in their normal listing order above shops without photos.
  */
 export const sortRestaurantsWithVipRotation = (
   restaurants: Restaurant[],
@@ -3233,7 +3222,7 @@ export const sortRestaurantsWithVipRotation = (
   });
 
   const topFeatured: Restaurant[] = [];
-  const withPhotoList: Array<{ r: Restaurant; idx: number; priority: number }> = [];
+  const withPhotoList: Array<{ r: Restaurant; idx: number }> = [];
   const verifiedLocNoPhotoList: Restaurant[] = [];
   const reviewLocNoPhotoList: Restaurant[] = [];
 
@@ -3243,10 +3232,7 @@ export const sortRestaurantsWithVipRotation = (
       return;
     }
     if (hasApprovedShopPhoto(r)) {
-      const updatedMs = r.photoUpdatedAt ? Date.parse(r.photoUpdatedAt) || 0 : 0;
-      const customBoost = r.isCustomPhoto || updatedMs > 0 ? 1_000_000_000_000 + updatedMs : 0;
-      const vipBoost = isRestaurantPremiumActive(r) ? 500_000_000_000 : 0;
-      withPhotoList.push({ r, idx, priority: customBoost + vipBoost });
+      withPhotoList.push({ r, idx });
     } else if (isPlaceLocationVerified(r)) {
       verifiedLocNoPhotoList.push(r);
     } else {
@@ -3254,17 +3240,11 @@ export const sortRestaurantsWithVipRotation = (
     }
   });
 
-  topFeatured.sort((a, b) => {
-    const aPhoto = hasApprovedShopPhoto(a) ? 0 : 1;
-    const bPhoto = hasApprovedShopPhoto(b) ? 0 : 1;
-    if (aPhoto !== bPhoto) return aPhoto - bPhoto;
-    return (featuredOrderMap.get(a.id) ?? 999) - (featuredOrderMap.get(b.id) ?? 999);
-  });
+  topFeatured.sort(
+    (a, b) => (featuredOrderMap.get(a.id) ?? 999) - (featuredOrderMap.get(b.id) ?? 999)
+  );
 
-  withPhotoList.sort((a, b) => {
-    if (b.priority !== a.priority) return b.priority - a.priority;
-    return a.idx - b.idx;
-  });
+  withPhotoList.sort((a, b) => a.idx - b.idx);
 
   return [
     ...topFeatured,
