@@ -247,6 +247,18 @@ function section(t) {
 
     const failMsg = llm.buildAssistantFailureMessage('no_key', 'km', true);
     ok(failMsg.suppressDishCard && /មិនទាយ|ទាយ/.test(failMsg.text), 'photo + no AI -> honest "I will not guess" message');
+    const userFailMsg = llm.buildAssistantFailureMessage('no_key', 'km', true, { isAdmin: false });
+    ok(
+      userFailMsg.failureReason === 'unavailable' &&
+        !/Gemini API Key|Admin/i.test(userFailMsg.text),
+      'non-Admin user never sees Gemini API Key / Admin Box 4 notice'
+    );
+    const userAuthMsg = llm.buildAssistantFailureMessage('auth', 'en', true, { isAdmin: false });
+    ok(
+      userAuthMsg.failureReason === 'unavailable' &&
+        !/Gemini API Key|Google AI Studio/i.test(userAuthMsg.text),
+      'non-Admin user never sees auth key replacement prompt'
+    );
 
     /* ------------------------------------------------------------------ */
     section('12. Photo lookup relevance (Open API)');

@@ -1033,8 +1033,37 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
 export function buildAssistantFailureMessage(
   reason: FoodAssistantFailure,
   language: Language,
-  hasImage: boolean
+  hasImage: boolean,
+  options?: { isAdmin?: boolean }
 ): AiAssistantMessage {
+  const isAdmin = options?.isAdmin ?? true;
+  if (!isAdmin && (reason === 'no_key' || reason === 'auth')) {
+    const publicText = hasImage
+      ? tr(
+          language,
+          '📷 បច្ចុប្បន្នប្រព័ន្ធស្គាល់រូបភាពម្ហូបមិនទាន់អាចភ្ជាប់បានបណ្តោះអាសន្ន។ សូមវាយឈ្មោះម្ហូបជាអក្សរ ឬព្យាយាមម្តងទៀតបន្តិចទៀត។',
+          '📷 Food photo recognition is temporarily unavailable right now. Please type the dish name or try again shortly.',
+          '📷 美食照片识别服务暂时无法连接，请直接输入菜名或稍后重试。'
+        )
+      : tr(
+          language,
+          '⚠️ សេវាឆ្លើយតបកំពុងរវល់បណ្តោះអាសន្ន។ សូមព្យាយាមម្តងទៀតបន្តិចទៀត។',
+          '⚠️ The assistant is temporarily busy. Please try again shortly.',
+          '⚠️ 助手服务暂时繁忙，请稍后重试。'
+        );
+    return {
+      id: `ai-${Date.now()}`,
+      role: 'assistant',
+      timestamp: new Date().toISOString(),
+      intent: 'clarification',
+      source: 'notice',
+      suppressDishCard: true,
+      failureReason: 'unavailable',
+      text: publicText,
+      followUpChips: foodAssistantStarterChips(language),
+    };
+  }
+
   const imageNeedsAi = hasImage
     ? tr(
         language,

@@ -220,6 +220,7 @@ export const AdminDashboard: React.FC = () => {
     setVipBenefitsDraft(getDynamicVipBenefits(s));
     setVipFeaturedRotationEnabledInput(rotCfg.enabled);
     setVipFeaturedDurationDaysInput(String(rotCfg.durationDays));
+    setCloudCfg(getCloudApiConfig());
   };
 
   // Reset dirty flag and pull latest settings when Admin Dashboard opens
@@ -968,7 +969,11 @@ export const AdminDashboard: React.FC = () => {
                           const updated = { ...cloudCfg, googleMapsApiKey: clip.trim() };
                           const saved = saveCloudApiConfig(updated);
                           setCloudCfg(saved);
-                          showToast('បានបិទភ្ជាប់ និងរក្សាទុកសោ Google Maps Places API ជោគជ័យ!', 'success');
+                          void updateAppSettings({
+                            googleMapsApiKey: saved.googleMapsApiKey,
+                            geminiApiKey: saved.geminiApiKey,
+                          });
+                          showToast('បានបិទភ្ជាប់ និងរក្សាទុកសោ Google Maps Places API ទៅលើ Cloud ជោគជ័យ!', 'success');
                         }
                       } catch {
                         showToast('សូមចុចឱ្យជាប់ក្នុងប្រអប់ រួចជ្រើសរើស Paste', 'info');
@@ -983,8 +988,12 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => {
                       const saved = saveCloudApiConfig(cloudCfg);
                       setCloudCfg(saved);
+                      void updateAppSettings({
+                        googleMapsApiKey: saved.googleMapsApiKey,
+                        geminiApiKey: saved.geminiApiKey,
+                      });
                       handleVerifyGoogleMapsApi(saved.googleMapsApiKey);
-                      showToast('បានរក្សាទុកសោ Google Maps Places API Key ក្នុងប្រអប់ទី ៣ ជោគជ័យ!', 'success');
+                      showToast('បានរក្សាទុកសោ Google Maps Places API Key លើ Cloud ជោគជ័យ!', 'success');
                     }}
                     className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
                   >
@@ -1046,7 +1055,11 @@ export const AdminDashboard: React.FC = () => {
                           const updated = { ...cloudCfg, geminiApiKey: clip.trim() };
                           const saved = saveCloudApiConfig(updated);
                           setCloudCfg(saved);
-                          showToast('បានបិទភ្ជាប់ និងរក្សាទុកសោ Gemini AI API Key ជោគជ័យ!', 'success');
+                          await updateAppSettings({
+                            geminiApiKey: saved.geminiApiKey,
+                            googleMapsApiKey: saved.googleMapsApiKey,
+                          });
+                          showToast('បានបិទភ្ជាប់ និងរក្សាទុកសោ Gemini AI API Key លើ Cloud ជោគជ័យ!', 'success');
                         }
                       } catch {
                         showToast('សូមចុចឱ្យជាប់ក្នុងប្រអប់ រួចជ្រើសរើស Paste', 'info');
@@ -1061,6 +1074,10 @@ export const AdminDashboard: React.FC = () => {
                     onClick={async () => {
                       const saved = saveCloudApiConfig(cloudCfg);
                       setCloudCfg(saved);
+                      await updateAppSettings({
+                        geminiApiKey: saved.geminiApiKey,
+                        googleMapsApiKey: saved.googleMapsApiKey,
+                      });
                       const res = await testGeminiApiConnection(saved.geminiApiKey);
                       showToast(res.ok ? `✅ ${res.message}` : `❌ Gemini Error: ${res.message}`, res.ok ? 'success' : 'error');
                     }}
@@ -5713,8 +5730,12 @@ export const AdminDashboard: React.FC = () => {
                         onClick={() => {
                           const saved = saveCloudApiConfig(cloudCfg);
                           setCloudCfg(saved);
+                          void updateAppSettings({
+                            googleMapsApiKey: saved.googleMapsApiKey,
+                            geminiApiKey: saved.geminiApiKey,
+                          });
                           handleVerifyGoogleMapsApi(saved.googleMapsApiKey);
-                          showToast('បានរក្សាទុកសោ Google Maps Places API Key ជោគជ័យ!', 'success');
+                          showToast('បានរក្សាទុកសោ Google Maps Places API Key លើ Cloud ជោគជ័យ!', 'success');
                         }}
                         className="px-3 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl text-[11px] shrink-0"
                       >
@@ -5750,6 +5771,10 @@ export const AdminDashboard: React.FC = () => {
                         onClick={async () => {
                           const saved = saveCloudApiConfig(cloudCfg);
                           setCloudCfg(saved);
+                          await updateAppSettings({
+                            geminiApiKey: saved.geminiApiKey,
+                            googleMapsApiKey: saved.googleMapsApiKey,
+                          });
                           setSupabaseTestStatus('⏳ កំពុងសាកល្បងភ្ជាប់ទៅកាន់ Google Gemini AI...');
                           const res = await testGeminiApiConnection(saved.geminiApiKey);
                           setGeminiTestOk(res.ok);
@@ -5776,8 +5801,12 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => {
                       const saved = saveCloudApiConfig(cloudCfg);
                       setCloudCfg(saved);
+                      void updateAppSettings({
+                        geminiApiKey: saved.geminiApiKey,
+                        googleMapsApiKey: saved.googleMapsApiKey,
+                      });
                       handleVerifyGoogleMapsApi(saved.googleMapsApiKey);
-                      showToast('បានរក្សាទុកការកំណត់ Cloud Supabase, Google Maps & Gemini AI ជោគជ័យ!', 'success');
+                      showToast('បានរក្សាទុកការកំណត់ Cloud Supabase, Google Maps & Gemini AI លើ Cloud ជោគជ័យ!', 'success');
                     }}
                     className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl shadow-xs transition active:scale-95"
                   >

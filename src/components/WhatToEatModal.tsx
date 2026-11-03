@@ -295,8 +295,15 @@ export const WhatToEatModal: React.FC = () => {
     showToast,
     appSettings,
     updateAppSettings,
+    refreshAppSettingsFromServer,
   } = useApp();
 
+  const isAdmin = Boolean(
+    currentUser?.role === 'admin' ||
+      currentUser?.id === 'admin-authorized-single' ||
+      currentUser?.username === 'admin' ||
+      currentUser?.username === 'cheasavuth'
+  );
   const canUseVip = hasSpecialAndHealthyFoodVipAccess(currentUser);
   const [isAiThinking, setIsAiThinking] = useState(false);
   const [pendingImage, setPendingImage] = useState<PreparedFoodImage | null>(null);
@@ -921,7 +928,7 @@ export const WhatToEatModal: React.FC = () => {
     }, 50);
   };
 
-  const sendConversationalMessage = (rawText: string, image: PreparedFoodImage | null = null) => {
+  const sendConversationalMessage = async (rawText: string, image: PreparedFoodImage | null = null) => {
     const clean = rawText.trim();
     if (!clean && !image) return;
     if (isAiThinking) return;
@@ -946,11 +953,21 @@ export const WhatToEatModal: React.FC = () => {
         memory: chatMemory,
       });
 
-    const geminiKey = resolveGeminiApiKey(appSettings?.geminiApiKey);
+    let geminiKey = resolveGeminiApiKey(appSettings?.geminiApiKey);
+    if (!geminiKey && refreshAppSettingsFromServer) {
+      try {
+        const latest = await refreshAppSettingsFromServer(false);
+        if (latest?.geminiApiKey) {
+          geminiKey = resolveGeminiApiKey(latest.geminiApiKey);
+        }
+      } catch {
+        // ignore network error during background settings refresh
+      }
+    }
 
     // A) A photo needs the live vision model. Without it we say so honestly instead of guessing a dish.
     if (image && !geminiKey) {
-      const reply = buildAssistantFailureMessage('no_key', language, true);
+      const reply = buildAssistantFailureMessage('no_key', language, true, { isAdmin });
       setChatMessages((prev) => [...prev.slice(-12), userMsg, reply]);
       scrollChatToTop();
       return;
@@ -984,7 +1001,7 @@ export const WhatToEatModal: React.FC = () => {
 
     const handleFailure = (reason: FoodAssistantFailure) => {
       if (image) {
-        replacePending(buildAssistantFailureMessage(reason, language, true));
+        replacePending(buildAssistantFailureMessage(reason, language, true, { isAdmin }));
         return;
       }
       // Text question: fall back to the offline rules engine and say that the AI was unreachable.
@@ -1483,7 +1500,7 @@ export const WhatToEatModal: React.FC = () => {
                         <RichAnswerText text={msg.text} />
                       )}
 
-                      {(msg.failureReason === 'no_key' || msg.failureReason === 'auth') && (
+                      {isAdmin && (msg.failureReason === 'no_key' || msg.failureReason === 'auth') && (
                         <div
                           data-testid="ai-inline-key-setup"
                           className="mt-2.5 p-2.5 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700/70 space-y-2"

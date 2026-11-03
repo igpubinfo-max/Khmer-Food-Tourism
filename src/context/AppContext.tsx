@@ -49,6 +49,7 @@ import {
   getAdminAvatarUrl,
   saveAdminAvatar,
   cacheUserAvatar,
+  getCachedUserAvatar,
   isPlaceholderOrInvalidAvatarUrl,
 } from '../utils/avatarHelper';
 import { translateTextToChinese, useChineseDomTranslation, stripForeignScripts, tr } from '../utils/i18n';
@@ -61,6 +62,8 @@ import {
 import { App as CapApp } from '@capacitor/app';
 import {
   isSupabaseConfigured,
+  getCloudApiConfig,
+  saveCloudApiConfig,
   syncAllAppDataWithSupabase,
   pushCloudDocument,
   deleteCloudDocument,
@@ -95,6 +98,9 @@ import {
   saveDeletedRestaurantIdsMap,
   isRestaurantIdDeleted,
   recordPermanentDestinationOverride,
+  removePermanentDestinationOverride,
+  loadDeletedDestinationIdsMap,
+  isDestinationIdDeleted,
   recordPermanentTrendingFoodOverride,
   applyFoodOverrides,
   applyRestaurantOverrides,
@@ -725,13 +731,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const rawPreUpdate = localStorage.getItem('kft_pre_update_db_backup_v1');
         if (rawPreUpdate) {
           const snap = JSON.parse(rawPreUpdate);
+          if (Array.isArray(snap?.allUsers)) {
+            loadedUsers.push(...snap.allUsers.filter((u: User) => u && !checkIsUserDeleted(u, localDeleted)));
+          }
           if (Array.isArray(snap?.vipUsers)) {
             loadedUsers.push(...snap.vipUsers.filter((v: User) => v && !checkIsUserDeleted(v, localDeleted)));
           }
         }
       } catch {}
 
-      let deduped = deduplicateAndNormalizeUsers(loadedUsers, localDeleted);
+      let deduped = deduplicateAndNormalizeUsers(loadedUsers, localDeleted).map(u => {
+        if (isPlaceholderOrInvalidAvatarUrl(u.avatar)) {
+          const cachedAv =
+            getCachedUserAvatar(u.id) ||
+            (u.email ? getCachedUserAvatar(u.email) : null) ||
+            (u.name ? getCachedUserAvatar(`name:${u.name}`) : null);
+          if (cachedAv) {
+            return { ...u, avatar: cachedAv };
+          }
+        }
+        return u;
+      });
 
       // Reconcile against any verified future VIP transactions OR VIP-approved support tickets in localStorage so approved VIP status survives app restarts & updates cleanly
       try {
@@ -852,6 +872,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             sanitizedCur = sanitizeUserVipPlanAndExpiry(
               deduplicateAndNormalizeUsers([matchedFromUsers, sanitizedCur], localDeleted)[0] || matchedFromUsers
             );
+          }
+          if (isPlaceholderOrInvalidAvatarUrl(sanitizedCur.avatar)) {
+            const cachedCurAv =
+              getCachedUserAvatar(sanitizedCur.id) ||
+              (sanitizedCur.email ? getCachedUserAvatar(sanitizedCur.email) : null) ||
+              (sanitizedCur.name ? getCachedUserAvatar(`name:${sanitizedCur.name}`) : null);
+            if (cachedCurAv) {
+              sanitizedCur = { ...sanitizedCur, avatar: cachedCurAv };
+            }
           }
           const authVip = findLocalAuthoritativeVipEntitlement(sanitizedCur, users);
           const authVipExpMs = authVip ? (authVip.expiryMs || parseSafeDateMs(authVip.expiryIso)) : 0;
@@ -1019,17 +1048,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               }
             }
           }
-          localStorage.removeItem('kft_foods_200_v9');
           // Note: Do NOT call saveLocalMediaOverrides(vault) synchronously before hydrateFromLocalIdbImmediate() completes,
           // so we never clobber full IndexedDB data:image/ overrides with localStorage-stripped seed paths.
           const combined = customAddedFoods.length > 0 ? [...customAddedFoods, ...initialFoods] : initialFoods;
-          return deduplicateFoodItems(applyFoodOverrides(combined, vault.foods), vault.foods);
+          return deduplicateFoodItems(applyFoodOverrides(combined, vault.foods, deletedFoodsMap), vault.foods);
         }
       }
     } catch (e) {
       console.warn('Failed to parse kft_foods_200_v10', e);
     }
-    return deduplicateFoodItems(applyFoodOverrides(initialFoods, vault.foods), vault.foods);
+    return deduplicateFoodItems(
+      applyFoodOverrides(initialFoods, vault.foods, vault.deletedFoods || loadDeletedFoodIdsMap()),
+      vault.foods
+    );
   });
 
   const normalizeRestaurant = (r: any): Restaurant => {
@@ -1389,6 +1420,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               }
             }
           }
+          // Also recover any VIP-owned / Admin-edited custom shops from pre-update snapshot backup
+          try {
+            const rawPreSnap = localStorage.getItem('kft_pre_update_db_backup_v1');
+            if (rawPreSnap) {
+              const parsedPreSnap = JSON.parse(rawPreSnap);
+              if (Array.isArray(parsedPreSnap?.customRestaurants)) {
+                for (const cr of parsedPreSnap.customRestaurants) {
+                  if (
+                    cr &&
+                    cr.id &&
+                    !seenIds.has(cr.id) &&
+                    !isRestaurantIdDeleted(cr.id, cr.updatedAt, deletedRestsMap, cr.googlePlaceId)
+                  ) {
+                    const normCr = normalizeRestaurant(cr);
+                    if (isStrictVerifiedCambodiaRestaurant(normCr)) {
+                      seenIds.add(normCr.id);
+                      normalizedList.push(normCr);
+                    }
+                  }
+                }
+              }
+            }
+          } catch {}
           // Ensure any newly added seed restaurants are also merged in (unless explicitly deleted by Admin)
           for (const seedRest of initialRestaurants) {
             if (!seenIds.has(seedRest.id) && !isRestaurantIdDeleted(seedRest.id, undefined, deletedRestsMap, seedRest.googlePlaceId)) {
@@ -1399,7 +1453,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           // Note: Do NOT call saveLocalMediaOverrides(vault) synchronously before hydrateFromLocalIdbImmediate() completes
           return sortRestaurantsChronologically(
             deduplicateRestaurantDirectory(
-              applyRestaurantOverrides(normalizedList, vault.restaurants).filter(
+              applyRestaurantOverrides(normalizedList, vault.restaurants, deletedRestsMap).filter(
                 isStrictVerifiedCambodiaRestaurant
               )
             )
@@ -1410,7 +1464,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('Failed to parse kft_restaurants_real_v12', e);
     }
 
-    // Preserve any user-created custom restaurants from previous storage key
+    // Preserve any user-created custom restaurants from previous storage key or pre-update snapshot backup
     let customLegacyRestaurants: Restaurant[] = [];
     try {
       const oldSaved = localStorage.getItem('kft_restaurants_google_v3') || localStorage.getItem('kft_restaurants_membership_v2');
@@ -1421,6 +1475,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             .filter((r: any) => r && r.id && !isSeedRestaurantId(String(r.id)))
             .map(normalizeRestaurant)
             .filter(isStrictVerifiedCambodiaRestaurant);
+        }
+      }
+      const rawPreSnap = localStorage.getItem('kft_pre_update_db_backup_v1');
+      if (rawPreSnap) {
+        const parsedPreSnap = JSON.parse(rawPreSnap);
+        if (Array.isArray(parsedPreSnap?.customRestaurants)) {
+          const existingLegacyIds = new Set(customLegacyRestaurants.map(x => x.id));
+          for (const cr of parsedPreSnap.customRestaurants) {
+            if (
+              cr &&
+              cr.id &&
+              !existingLegacyIds.has(cr.id) &&
+              !isRestaurantIdDeleted(cr.id, cr.updatedAt, deletedRestsMap, cr.googlePlaceId)
+            ) {
+              const normCr = normalizeRestaurant(cr);
+              if (isStrictVerifiedCambodiaRestaurant(normCr)) {
+                existingLegacyIds.add(normCr.id);
+                customLegacyRestaurants.push(normCr);
+              }
+            }
+          }
         }
       }
       localStorage.removeItem('kft_restaurants_google_v3');
@@ -1440,7 +1515,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }));
     return sortRestaurantsChronologically(
       deduplicateRestaurantDirectory(
-        applyRestaurantOverrides([...baseRestaurants, ...customLegacyRestaurants], vault.restaurants).filter(
+        applyRestaurantOverrides([...baseRestaurants, ...customLegacyRestaurants], vault.restaurants, deletedRestsMap).filter(
           isStrictVerifiedCambodiaRestaurant
         )
       )
@@ -1531,7 +1606,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_destinations_real_v5');
       localStorage.removeItem('kft_destinations_real_v6');
       localStorage.removeItem('kft_destinations_real_v7');
-      localStorage.removeItem('kft_destinations_real_v8');
+      if (savedV9Dest) {
+        localStorage.removeItem('kft_destinations_real_v8');
+      }
 
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
@@ -1673,10 +1750,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           // Note: Do NOT call saveLocalMediaOverrides(vault) synchronously before hydrateFromLocalIdbImmediate() completes,
           // so we never clobber full IndexedDB data:image/ overrides with localStorage-stripped seed paths.
 
+          const deletedDestsMap = vault.deletedDestinations || loadDeletedDestinationIdsMap();
           const existingIds = new Set(upgraded.map((d: TouristDestination) => d.id));
-          const missingFromInitial = initialDestinations.filter(d => !existingIds.has(d.id));
+          const missingFromInitial = initialDestinations.filter(
+            d => !existingIds.has(d.id) && !isDestinationIdDeleted(d.id, undefined, deletedDestsMap, d.googlePlaceId)
+          );
           const combined = missingFromInitial.length > 0 ? [...upgraded, ...missingFromInitial] : upgraded;
-          return applyDestinationOverrides(combined, vault.destinations);
+          return applyDestinationOverrides(combined, vault.destinations, deletedDestsMap);
         }
       }
     } catch (e) {
@@ -1693,7 +1773,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_destinations_real_v7');
       localStorage.removeItem('kft_destinations_real_v8');
     } catch {}
-    return applyDestinationOverrides(initialDestinations, vault.destinations);
+    return applyDestinationOverrides(
+      initialDestinations,
+      vault.destinations,
+      vault.deletedDestinations || loadDeletedDestinationIdsMap()
+    );
   });
 
   const [bookmarks, setBookmarks] = useState<string[]>(() => {
@@ -2428,7 +2512,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const seedFoodPhotoMapRef = useRef<Map<string, string> | null>(null);
   const seedRestPhotoMapRef = useRef<Map<string, string> | null>(null);
 
-  const compactDataForBulkLocalStorage = (key: string, data: unknown): unknown => {
+  const compactDataForBulkLocalStorage = (
+    key: string,
+    data: unknown,
+    forceAggressiveStrip = false
+  ): unknown => {
     if (!Array.isArray(data)) return data;
     try {
       if (key === 'kft_destinations_real_v9') {
@@ -2440,7 +2528,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (
             d &&
             typeof d.photoUrl === 'string' &&
-            d.photoUrl.startsWith('data:')
+            d.photoUrl.startsWith('data:') &&
+            (forceAggressiveStrip || isOverridePersistedInLocalStorage('destinations', d.id))
           ) {
             const fallbackUrl = seedDestMap.get(d.id) || '';
             return {
@@ -2466,7 +2555,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             isSeedDish && !f.isAdminEdited
               ? { ingredients: undefined, steps: undefined }
               : {};
-          if (typeof f.photoUrl === 'string' && f.photoUrl.startsWith('data:')) {
+          if (
+            typeof f.photoUrl === 'string' &&
+            f.photoUrl.startsWith('data:') &&
+            (forceAggressiveStrip || isOverridePersistedInLocalStorage('foods', f.id))
+          ) {
             return {
               ...f,
               ...strippedRecipeProps,
@@ -2497,7 +2590,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             (Array.isArray(r.galleryPhotos) && r.galleryPhotos.some(g => g.startsWith('data:'))) ||
             (Array.isArray(r.foodImages) && r.foodImages.some(g => g.startsWith('data:'))) ||
             (Array.isArray(r.menuItems) && r.menuItems.some(m => typeof m.photoUrl === 'string' && m.photoUrl.startsWith('data:')));
-          if (hasInlineDataUrl) {
+          if (hasInlineDataUrl && (forceAggressiveStrip || isOverridePersistedInLocalStorage('restaurants', r.id))) {
             const fallbackUrl = seedRestMap.get(r.id) || '';
             return {
               ...r,
@@ -2529,7 +2622,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       delete storageWriteTimersRef.current[key];
       const performWrite = () => {
         try {
-          const compacted = compactDataForBulkLocalStorage(key, data);
+          const compacted = compactDataForBulkLocalStorage(key, data, false);
           localStorage.setItem(key, JSON.stringify(compacted));
         } catch (e) {
           if (
@@ -2539,7 +2632,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             key === 'kft_pre_update_db_backup_v1' ||
             key === 'kft_transactions_v4'
           ) {
-            safeSetCriticalAccountStorage(key, compactDataForBulkLocalStorage(key, data));
+            safeSetCriticalAccountStorage(key, compactDataForBulkLocalStorage(key, data, true));
+          } else if (
+            key === 'kft_destinations_real_v9' ||
+            key === 'kft_foods_200_v10' ||
+            key === 'kft_restaurants_real_v13'
+          ) {
+            // Quota fallback: IndexedDB holds 100% of full data: photos, so retry stripping inline data: URLs from bulk cache
+            try {
+              const aggressivelyCompacted = compactDataForBulkLocalStorage(key, data, true);
+              localStorage.setItem(key, JSON.stringify(aggressivelyCompacted));
+            } catch (retryErr) {
+              console.warn(`Storage sync quota fallback warning for ${key}:`, retryErr);
+            }
           } else {
             console.warn(`Storage sync failed for ${key}:`, e);
           }
@@ -2568,12 +2673,77 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Automatic Pre-Update Database & VIP Snapshot Backup whenever App Version or Build Code changes (runs at most once per session)
   const hasAttemptedVersionBackupRef = useRef(false);
   useEffect(() => {
-    if (hasAttemptedVersionBackupRef.current) return;
-    hasAttemptedVersionBackupRef.current = true;
     try {
       const CURRENT_VERSION_TAG = `${APP_VERSION_NAME}_${APP_BUILD_CODE}`;
       const lastBackedUpVersion = localStorage.getItem('kft_last_backed_up_version');
-      if (lastBackedUpVersion !== CURRENT_VERSION_TAG) {
+      let existingVerifiedTxns: RegistrationTransaction[] = [];
+      let existingAllUsers: User[] = [];
+      let existingGeminiKey = '';
+      let existingMapsKey = '';
+      try {
+        const rawExistingSnap = localStorage.getItem('kft_pre_update_db_backup_v1');
+        if (rawExistingSnap) {
+          const parsedSnap = JSON.parse(rawExistingSnap);
+          if (Array.isArray(parsedSnap?.verifiedTransactions)) {
+            existingVerifiedTxns = parsedSnap.verifiedTransactions;
+          }
+          if (Array.isArray(parsedSnap?.allUsers)) {
+            existingAllUsers = parsedSnap.allUsers;
+          }
+          if (typeof parsedSnap?.geminiApiKey === 'string') {
+            existingGeminiKey = parsedSnap.geminiApiKey.trim();
+          }
+          if (typeof parsedSnap?.googleMapsApiKey === 'string') {
+            existingMapsKey = parsedSnap.googleMapsApiKey.trim();
+          }
+        }
+      } catch {}
+
+      const currentCloudCfg = getCloudApiConfig();
+      const effectiveGeminiKey =
+        (currentCloudCfg.geminiApiKey || '').trim() ||
+        (appSettings.geminiApiKey || '').trim() ||
+        existingGeminiKey;
+      const effectiveMapsKey =
+        (currentCloudCfg.googleMapsApiKey || '').trim() ||
+        (appSettings.googleMapsApiKey || '').trim() ||
+        existingMapsKey;
+
+      // Restore Gemini or Google Maps API keys from backup/settings if local config was cleared during update
+      if (
+        (effectiveGeminiKey && !currentCloudCfg.geminiApiKey) ||
+        (effectiveMapsKey && !currentCloudCfg.googleMapsApiKey)
+      ) {
+        saveCloudApiConfig({
+          ...(effectiveGeminiKey ? { geminiApiKey: effectiveGeminiKey } : {}),
+          ...(effectiveMapsKey ? { googleMapsApiKey: effectiveMapsKey } : {}),
+        });
+      }
+
+      // If Admin already saved a Gemini API Key locally on this device before Cloud sync existed, push it to Cloud Settings automatically
+      if (
+        effectiveGeminiKey &&
+        !(appSettings.geminiApiKey || '').trim() &&
+        isCurrentUserAdmin() &&
+        isSupabaseConfigured()
+      ) {
+        const updatedSettings: AppSettings = {
+          ...appSettings,
+          geminiApiKey: effectiveGeminiKey,
+          googleMapsApiKey: effectiveMapsKey || appSettings.googleMapsApiKey,
+        };
+        setAppSettings(updatedSettings);
+        saveAuthoritativeAppSettingsToServer(updatedSettings).catch(() => {});
+      }
+
+      const shouldWriteBackup =
+        !hasAttemptedVersionBackupRef.current ||
+        lastBackedUpVersion !== CURRENT_VERSION_TAG ||
+        users.length > existingAllUsers.length ||
+        (Boolean(effectiveGeminiKey) && effectiveGeminiKey !== existingGeminiKey);
+
+      if (shouldWriteBackup) {
+        hasAttemptedVersionBackupRef.current = true;
         const mergedActiveVips = mergeAndSaveVipRegistryBackup(
           [
             ...users,
@@ -2582,21 +2752,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           deletedUsers
         );
 
-        let existingVerifiedTxns: RegistrationTransaction[] = [];
-        try {
-          const rawExistingSnap = localStorage.getItem('kft_pre_update_db_backup_v1');
-          if (rawExistingSnap) {
-            const parsedSnap = JSON.parse(rawExistingSnap);
-            if (Array.isArray(parsedSnap?.verifiedTransactions)) {
-              existingVerifiedTxns = parsedSnap.verifiedTransactions;
-            }
-          }
-        } catch {}
+        const mergedAllUsers = deduplicateAndNormalizeUsers(
+          [
+            ...existingAllUsers,
+            ...users,
+            ...(currentUser && currentUser.role !== 'admin' ? [currentUser] : []),
+          ].filter(u => u && !checkIsUserDeleted(u, deletedUsers)),
+          deletedUsers
+        );
 
         const verifiedTxnMap = new Map<string, RegistrationTransaction>();
         for (const t of [...existingVerifiedTxns, ...transactions.filter(tx => tx.status === 'verified')]) {
           if (t && t.id) verifiedTxnMap.set(t.id, t);
         }
+
+        const customVipShops = restaurants.filter(
+          r => r && ((r.ownerId && r.ownerId !== 'owner-1') || r.dataSource === 'vip_owner' || r.isAdminEdited)
+        );
 
         const backupSnapshot = {
           backedUpAt: new Date().toISOString(),
@@ -2604,8 +2776,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           targetVersion: CURRENT_VERSION_TAG,
           vipUsersCount: mergedActiveVips.length,
           vipUsers: mergedActiveVips,
-          allUsersCount: users.length,
+          allUsersCount: mergedAllUsers.length,
+          allUsers: mergedAllUsers,
+          customRestaurantsCount: customVipShops.length,
+          customRestaurants: customVipShops,
           verifiedTransactions: Array.from(verifiedTxnMap.values()),
+          geminiApiKey: effectiveGeminiKey || undefined,
+          googleMapsApiKey: effectiveMapsKey || undefined,
         };
         safeSetCriticalAccountStorage('kft_pre_update_db_backup_v1', backupSnapshot);
         try {
@@ -2615,7 +2792,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.warn('Pre-update database backup warning:', e);
     }
-  }, [users, transactions, currentUser, deletedUsers]);
+  }, [users, restaurants, transactions, currentUser, deletedUsers, appSettings.geminiApiKey, appSettings.googleMapsApiKey]);
 
   const lastCurrentUserSyncSigRef = useRef<string>('');
   const hasCompletedInitialCloudSyncRef = useRef<boolean>(!isSupabaseConfigured());
@@ -2637,7 +2814,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           currentUser.username === 'admin' ||
           currentUser.username === 'cheasavuth';
         if (!isAdmin && !checkIsUserDeleted(currentUser)) {
-          const sig = `${currentUser.id}|${currentUser.email}|${currentUser.phone || ''}|${currentUser.name}|${currentUser.membershipTier || ''}|${currentUser.subscriptionStatus || ''}|${currentUser.subscriptionExpiryDate || ''}|${currentUser.paymentStatus || ''}|${currentUser.paidAdditionalStoreSlots || 0}|${Boolean(currentUser.isDisabled)}`;
+          const avSig = currentUser.avatar ? `${currentUser.avatar.length}:${currentUser.avatar.slice(-24)}` : '';
+          const sig = `${currentUser.id}|${currentUser.email}|${currentUser.phone || ''}|${currentUser.name}|${avSig}|${currentUser.membershipTier || ''}|${currentUser.subscriptionStatus || ''}|${currentUser.subscriptionExpiryDate || ''}|${currentUser.paymentStatus || ''}|${currentUser.paidAdditionalStoreSlots || 0}|${Boolean(currentUser.isDisabled)}`;
           if (lastCurrentUserSyncSigRef.current !== sig) {
             const isFirstMountSync = lastCurrentUserSyncSigRef.current === '';
             lastCurrentUserSyncSigRef.current = sig;
@@ -2649,7 +2827,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 existing.subscriptionStatus === currentUser.subscriptionStatus &&
                 existing.subscriptionExpiryDate === currentUser.subscriptionExpiryDate &&
                 existing.paymentStatus === currentUser.paymentStatus &&
-                existing.name === currentUser.name
+                existing.name === currentUser.name &&
+                existing.avatar === currentUser.avatar &&
+                existing.phone === currentUser.phone &&
+                (existing.paidAdditionalStoreSlots || 0) === (currentUser.paidAdditionalStoreSlots || 0)
               ) {
                 return prev;
               }
@@ -2990,9 +3171,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const res = evaluateAccount(currentUser);
         if (res.changed) {
           setCurrentUser(res.updatedUser);
-          try {
-            localStorage.setItem('kft_current_user_v5', JSON.stringify(res.updatedUser));
-          } catch {}
+          safeSetCriticalAccountStorage('kft_current_user_v5', res.updatedUser);
         }
       }
 
@@ -3007,9 +3186,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         if (anyUserChanged) {
           setUsers(nextUsers);
-          try {
-            localStorage.setItem('kft_users_v5', JSON.stringify(nextUsers));
-          } catch {}
+          safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
         }
       }
 
@@ -3682,21 +3859,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 return next;
               });
             }
-            if (Object.keys(syncedMediaBundle.restaurants).length > 0) {
+            if (
+              Object.keys(syncedMediaBundle.restaurants).length > 0 ||
+              (syncedMediaBundle.deletedRestaurants && Object.keys(syncedMediaBundle.deletedRestaurants).length > 0)
+            ) {
               setRestaurants(prev => {
-                const next = applyRestaurantOverrides(prev, syncedMediaBundle.restaurants);
+                const next = applyRestaurantOverrides(
+                  prev,
+                  syncedMediaBundle.restaurants,
+                  syncedMediaBundle.deletedRestaurants || loadDeletedRestaurantIdsMap()
+                );
                 if (next !== prev) {
-                  setSelectedRestaurantRaw(sel => (sel ? next.find(r => r.id === sel.id) || sel : null));
-                  setManagingRestaurantState(cur => (cur ? next.find(r => r.id === cur.id) || cur : null));
+                  scheduleStorageWrite('kft_restaurants_real_v13', next, 400);
+                  setSelectedRestaurantRaw(sel => (sel ? next.find(r => r.id === sel.id) || null : null));
+                  setManagingRestaurantState(cur => (cur ? next.find(r => r.id === cur.id) || null : null));
                 }
                 return next;
               });
             }
-            if (Object.keys(syncedMediaBundle.destinations).length > 0) {
+            if (
+              Object.keys(syncedMediaBundle.destinations).length > 0 ||
+              (syncedMediaBundle.deletedDestinations && Object.keys(syncedMediaBundle.deletedDestinations).length > 0)
+            ) {
               setDestinations(prev => {
-                const next = applyDestinationOverrides(prev, syncedMediaBundle.destinations);
+                const next = applyDestinationOverrides(
+                  prev,
+                  syncedMediaBundle.destinations,
+                  syncedMediaBundle.deletedDestinations || loadDeletedDestinationIdsMap()
+                );
                 if (next !== prev) {
-                  setSelectedDestination(sel => (sel ? next.find(d => d.id === sel.id) || sel : null));
+                  scheduleStorageWrite('kft_destinations_real_v9', next, 400);
+                  setSelectedDestination(sel => (sel ? next.find(d => d.id === sel.id) || null : null));
                 }
                 return next;
               });
@@ -3779,10 +3972,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return next;
         });
       }
-      if (Object.keys(bundle.destinations).length > 0) {
+      if (
+        Object.keys(bundle.destinations).length > 0 ||
+        (bundle.deletedDestinations && Object.keys(bundle.deletedDestinations).length > 0)
+      ) {
         setDestinations(prev => {
-          const next = applyDestinationOverrides(prev, bundle.destinations);
-          setSelectedDestination(cur => (cur ? next.find(d => d.id === cur.id) || cur : null));
+          const next = applyDestinationOverrides(
+            prev,
+            bundle.destinations,
+            bundle.deletedDestinations || loadDeletedDestinationIdsMap()
+          );
+          if (next !== prev) {
+            scheduleStorageWrite('kft_destinations_real_v9', next, 400);
+          }
+          setSelectedDestination(cur => (cur ? next.find(d => d.id === cur.id) || null : null));
           return next;
         });
       }
@@ -4177,9 +4380,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
    * Supabase cloud records so Admin-approved VIP status is unlocked right away on any device.
    */
   const syncLoggedInUserFromCloud = (userObj: User) => {
-    try {
-      localStorage.setItem('kft_current_user_v5', JSON.stringify(userObj));
-    } catch {}
+    safeSetCriticalAccountStorage('kft_current_user_v5', userObj);
     if (!isSupabaseConfigured()) return;
     upsertSingleUserToCloud(userObj, latestSyncStateRef.current.deletedUsers || deletedUsers, true)
       .then(cloudMerged => {
@@ -4190,22 +4391,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               latestSyncStateRef.current.deletedUsers || deletedUsers
             );
             latestSyncStateRef.current.users = next;
-            try {
-              localStorage.setItem('kft_users_v5', JSON.stringify(next));
-              const activeVips = next.filter(u => isUserVipActive(u));
-              if (activeVips.length > 0) {
-                localStorage.setItem('kft_vip_registry_backup_v1', JSON.stringify(activeVips));
-              }
-            } catch {}
+            safeSetCriticalAccountStorage('kft_users_v5', next);
+            const activeVips = next.filter(u => isUserVipActive(u));
+            if (activeVips.length > 0) {
+              safeSetCriticalAccountStorage('kft_vip_registry_backup_v1', activeVips);
+            }
             const liveCur = latestSyncStateRef.current.currentUser;
             if (liveCur && doesUserMatchTarget(liveCur, userObj)) {
               const matchedMe = next.find(u => doesUserMatchTarget(u, userObj));
               if (matchedMe && JSON.stringify(matchedMe) !== JSON.stringify(liveCur)) {
                 setCurrentUser(matchedMe);
                 latestSyncStateRef.current.currentUser = matchedMe;
-                try {
-                  localStorage.setItem('kft_current_user_v5', JSON.stringify(matchedMe));
-                } catch {}
+                safeSetCriticalAccountStorage('kft_current_user_v5', matchedMe);
               }
             }
             return next;
@@ -4294,9 +4491,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           deletedUsers
         );
         latestSyncStateRef.current.users = next;
-        try {
-          localStorage.setItem('kft_users_v5', JSON.stringify(next));
-        } catch {}
+        safeSetCriticalAccountStorage('kft_users_v5', next);
         return next;
       });
       setCurrentUser(updatedExisting);
@@ -4324,7 +4519,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       linkedProviders: [isPhone ? 'phone' : 'email'],
       isVerified: true,
       verifiedAt: nowIso,
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit&crop=q=80',
       createdAt: nowIso.split('T')[0],
       registeredAtIso: nowIso,
       lastLoginAt: nowIso,
@@ -4333,9 +4528,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUsers(prev => {
       const next = deduplicateAndNormalizeUsers([...prev, candidateUser], deletedUsers);
       latestSyncStateRef.current.users = next;
-      try {
-        localStorage.setItem('kft_users_v5', JSON.stringify(next));
-      } catch {}
+      safeSetCriticalAccountStorage('kft_users_v5', next);
       return next;
     });
     setCurrentUser(candidateUser);
@@ -5183,6 +5376,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           localStorage.setItem('kft_vip_registry_backup_v1', JSON.stringify(filteredVip));
         }
       }
+      const rawPreUpdate = localStorage.getItem('kft_pre_update_db_backup_v1');
+      if (rawPreUpdate) {
+        const parsedPre = JSON.parse(rawPreUpdate);
+        if (parsedPre && typeof parsedPre === 'object') {
+          if (Array.isArray(parsedPre.allUsers)) {
+            parsedPre.allUsers = parsedPre.allUsers.filter(
+              (u: User) => u && !allTargetIdSet.has(u.id) && !checkIsUserDeleted(u, nextDeletedUsers)
+            );
+            parsedPre.allUsersCount = parsedPre.allUsers.length;
+          }
+          if (Array.isArray(parsedPre.vipUsers)) {
+            parsedPre.vipUsers = parsedPre.vipUsers.filter(
+              (v: User) => v && !allTargetIdSet.has(v.id) && !checkIsUserDeleted(v, nextDeletedUsers)
+            );
+            parsedPre.vipUsersCount = parsedPre.vipUsers.length;
+          }
+          localStorage.setItem('kft_pre_update_db_backup_v1', JSON.stringify(parsedPre));
+        }
+      }
     } catch {}
 
     // 3. Remove user's custom restaurants (never touch built-in seed restaurants rest-1..250)
@@ -5923,13 +6135,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deletedUsers
       );
       latestSyncStateRef.current.users = next;
+      safeSetCriticalAccountStorage('kft_users_v5', next);
       return next;
     });
-    try {
-      localStorage.setItem('kft_current_user_v5', JSON.stringify(updated));
-    } catch (e) {
-      console.warn('Storage save error:', e);
-    }
+    safeSetCriticalAccountStorage('kft_current_user_v5', updated);
     if (isSupabaseConfigured() && updated.role !== 'admin') {
       upsertSingleUserToCloud(updated, deletedUsers).catch(() => {});
     }
@@ -8286,9 +8495,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteDestination = (id: string) => {
-    setDestinations(prev => prev.filter(d => d.id !== id));
+    if (!isCurrentUserAdmin()) {
+      showToast(
+        language === 'km'
+          ? '⛔ គ្មានសិទ្ធិអនុញ្ញាត៖ មានតែ Administrator ប៉ុណ្ណោះដែលអាចលុបតំបន់ទេសចរណ៍បាន!'
+          : '⛔ Unauthorized: Only Administrator can delete tourist destinations!',
+        'warning'
+      );
+      return;
+    }
+    const target = destinations.find(d => d.id === id);
+    const extraKeys: string[] = [];
+    if (target?.googlePlaceId) {
+      extraKeys.push(`gplace:${target.googlePlaceId}`, target.googlePlaceId);
+    }
+    removePermanentDestinationOverride(id, extraKeys);
+    setDestinations(prev => {
+      const next = prev.filter(d => d.id !== id);
+      scheduleStorageWrite('kft_destinations_real_v9', next, 400);
+      return next;
+    });
+    setBookmarks(prev => {
+      if (!prev.includes(id)) return prev;
+      const next = prev.filter(b => b !== id);
+      scheduleStorageWrite('kft_bookmarks_v5', next, 400);
+      return next;
+    });
     if (selectedDestination?.id === id) setSelectedDestination(null);
-    showToast(language === 'km' ? 'បានលុបតំបន់ទេសចរណ៍' : 'Destination deleted', 'info');
+    showToast(language === 'km' ? 'បានលុបតំបន់ទេសចរណ៍ជាអចិន្ត្រៃយ៍' : 'Destination permanently deleted', 'info');
   };
 
   // Transactions & $4.99 Registration Payment
@@ -10982,9 +11216,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem('kft_bookmarks_v3');
       localStorage.removeItem('kft_trip_plans_v1');
     } catch {}
-    setFoods(prev => applyFoodOverrides(prev.length > 0 ? prev : initialFoods, vault.foods));
-    setRestaurants(prev => applyRestaurantOverrides(prev, vault.restaurants, vault.deletedRestaurants || loadDeletedRestaurantIdsMap()));
-    setDestinations(prev => applyDestinationOverrides(prev.length > 0 ? prev : initialDestinations, vault.destinations));
+    setFoods(prev =>
+      applyFoodOverrides(
+        prev.length > 0 ? prev : initialFoods,
+        vault.foods,
+        vault.deletedFoods || loadDeletedFoodIdsMap()
+      )
+    );
+    setRestaurants(prev =>
+      applyRestaurantOverrides(
+        prev,
+        vault.restaurants,
+        vault.deletedRestaurants || loadDeletedRestaurantIdsMap()
+      )
+    );
+    setDestinations(prev =>
+      applyDestinationOverrides(
+        prev.length > 0 ? prev : initialDestinations,
+        vault.destinations,
+        vault.deletedDestinations || loadDeletedDestinationIdsMap()
+      )
+    );
     showToast(
       language === 'km'
         ? 'បានកំណត់ចំណូលចិត្តស្វែងរកឡើងវិញ (រក្សាទុកទិន្នន័យ និងរូបភាពចុងក្រោយទាំងអស់)'
