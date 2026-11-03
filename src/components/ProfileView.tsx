@@ -8,7 +8,7 @@ import {
   User as UserIcon, Heart, Shield, Store, 
   Globe, LogOut, RefreshCw, Sparkles, ShieldCheck, CheckCircle2,
   Bot, Bell, Compass, Bookmark, Plus, Trash2, ChevronRight,
-  Edit2, Check, X as CloseIcon, Crown, Zap, Award, Copy, Clock, MessageSquare, Mail, Settings
+  Edit2, Check, X as CloseIcon, Crown, Zap, Award, Copy, Clock, MessageSquare, Mail, Settings, Camera
 } from 'lucide-react';
 import {
   isRestaurantPremiumActive, isUserVipActive, getVipAccountState, getVipRemainingDays,
@@ -16,7 +16,7 @@ import {
   isAdminAccount, getVipFeaturedRotationConfig, getVipFeaturedRotationState
 } from '../types';
 import { tr } from '../utils/i18n';
-import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
+import { resolveUserAvatarUrl, handleAvatarImageError, fileToAvatarDataUrl } from '../utils/avatarHelper';
 
 export const ProfileView: React.FC = () => {
   const { 
@@ -77,6 +77,26 @@ export const ProfileView: React.FC = () => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState('');
   const [showSupportDetails, setShowSupportDetails] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [isSavingAvatar, setIsSavingAvatar] = useState(false);
+
+  const handleAvatarPicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !currentUser) return;
+    setIsSavingAvatar(true);
+    try {
+      const dataUrl = await fileToAvatarDataUrl(file);
+      updateCurrentUserProfile(currentUser.name, dataUrl);
+    } catch {
+      showToast(
+        tr(language, 'មិនអាចប្រើរូបភាពនេះបានទេ សូមជ្រើសរើសរូបភាពផ្សេង', 'Could not use this photo, please pick another one', '无法使用这张照片，请换一张'),
+        'warning'
+      );
+    } finally {
+      setIsSavingAvatar(false);
+    }
+  };
 
   // Discreet private 5-tap trigger on App Version footer for Admin access (no visible Admin button to users)
   const adminVersionTapCountRef = useRef<number>(0);
@@ -247,7 +267,7 @@ export const ProfileView: React.FC = () => {
                 <span className="text-base">📸</span>
                 <div className="min-w-0 flex-1">
                   <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'រូបថត HD ឥតកំណត់' : 'Unlimited HD Photos'}</div>
-                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ ចុចបន្ថែមរូបថត & ម្ហូប ២០មុខ' : '✓ Tap to upload HD photos'}</div>
+                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ ចុចបន្ថែមរូបថតហាង HD' : '✓ Tap to upload HD photos'}</div>
                 </div>
               </button>
 
@@ -485,20 +505,39 @@ export const ProfileView: React.FC = () => {
           <div className="space-y-2">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3 flex-1 min-w-0">
-                <img 
-                  src={resolveUserAvatarUrl(currentUser)} 
-                  alt={currentUser.name} 
-                  referrerPolicy="no-referrer"
-                  onError={(e) => handleAvatarImageError(e, currentUser)}
-                  className={`w-14 h-14 bg-emerald-950 ${
-    isAdmin 
-      ? 'rounded-full ring-4 ring-emerald-400/40 border-2 border-[#059669]' 
-      : isVip 
-      ? 'rounded-2xl ring-4 ring-amber-400/50 border-2 border-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)] bg-white' 
-      : 'rounded-2xl ring-4 ring-emerald-500/20 border-2 border-[#059669]'
-  } object-cover shadow-md shrink-0`}
-                />
-                <div className="flex-1 min-w-0">
+                <div className="relative shrink-0">
+                  <img 
+                    src={resolveUserAvatarUrl(currentUser)} 
+                    alt={currentUser.name} 
+                    referrerPolicy="no-referrer"
+                    decoding="async"
+                    onError={(e) => handleAvatarImageError(e, currentUser)}
+                    className={`w-14 h-14 bg-emerald-950 ${
+      isAdmin 
+        ? 'rounded-full ring-4 ring-emerald-400/40 border-2 border-[#059669]' 
+        : isVip 
+        ? 'rounded-2xl ring-4 ring-amber-400/50 border-2 border-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)] bg-white' 
+        : 'rounded-2xl ring-4 ring-emerald-500/20 border-2 border-[#059669]'
+    } object-cover shadow-md`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    disabled={isSavingAvatar}
+                    aria-label={tr(language, 'ប្តូររូបភាពប្រូហ្វាល់', 'Change profile photo', '更换头像')}
+                    title={tr(language, 'ប្តូររូបភាពប្រូហ្វាល់', 'Change profile photo', '更换头像')}
+                    className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white border-2 border-white dark:border-slate-800 shadow-sm flex items-center justify-center cursor-pointer active:scale-90 transition disabled:opacity-60"
+                  >
+                    <Camera className="w-3 h-3" />
+                  </button>
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarPicked}
+                  />
+                </div>                <div className="flex-1 min-w-0">
                   {/* Large Prominent Account Name & Quick Edit */}
                   {isEditingName ? (
                     <div className="flex items-center gap-1.5 mt-0.5">
@@ -2055,20 +2094,36 @@ export const ProfileView: React.FC = () => {
           </div>
 
           {/* Reset App Data */}
-          <div className="flex items-center justify-between py-2">
-            <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
-              <RefreshCw className="w-4 h-4 text-slate-500" />
-              {tr(language, 'កំណត់ទិន្នន័យឡើងវិញ', 'Reset App Data', '重置应用数据')}
-            </span>
+          <div className="flex items-center justify-between gap-3 py-2">
+            <div className="min-w-0 flex-1">
+              <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
+                <RefreshCw className="w-4 h-4 text-slate-500 shrink-0" />
+                {tr(language, 'កំណត់ទិន្នន័យឡើងវិញ', 'Reset App Data', '重置应用数据')}
+              </span>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 pl-6 mt-0.5 leading-relaxed">
+                {tr(
+                  language,
+                  'សម្អាតបញ្ជីចំណូលចិត្ត (❤️) ផែនការដើរលេង និងតម្រងស្វែងរកលើទូរស័ព្ទ (មិនប៉ះពាល់គណនី VIP ឬទិន្នន័យម្ហូបឡើយ)',
+                  'Clears saved favorites (❤️), trip plans & search filters on this device (keeps your VIP account & app data safe)',
+                  '清除本机收藏列表 (❤️)、行程计划与搜索筛选（不影响 VIP 账户及应用数据）'
+                )}
+              </p>
+            </div>
             <button
               onClick={() => {
-                if (window.confirm(isKm ? 'តើអ្នកពិតជាចង់កំណត់ទិន្នន័យទាំងអស់ឡើងវិញមែនទេ?' : 'Reset all data to defaults?')) {
+                const confirmMsg = tr(
+                  language,
+                  'តើអ្នកចង់កំណត់ទិន្នន័យលើទូរស័ព្ទឡើងវិញមែនទេ?\n\n• សម្អាតបញ្ជីចំណូលចិត្ត (❤️) ឱ្យទៅជា 0\n• សម្អាតផែនការដើរលេងបណ្ដោះអាសន្ន\n• កំណត់ពាក្យស្វែងរក និងតម្រងខេត្តទៅ «ទាំងអស់»\n\n(គណនី VIP និងទិន្នន័យម្ហូបអាហារទាំងអស់ត្រូវបានរក្សាទុកដដែល)',
+                  'Reset local app preferences?\n\n• Clear saved Favorites (❤️)\n• Clear temporary saved trip plans\n• Reset search & province filter to All\n\n(Your VIP account and food/tourism data remain safe)',
+                  '确定重置本机偏好设置吗？\n\n• 清空收藏列表 (❤️)\n• 清空临时保存的行程计划\n• 重置搜索词与省份筛选为“全部”\n\n（您的 VIP 账户及所有美食旅游数据将完整保留）'
+                );
+                if (window.confirm(confirmMsg)) {
                   resetAllData();
                 }
               }}
-              className="px-3 py-1 rounded-xl bg-rose-50 text-rose-600 font-bold hover:bg-rose-100 cursor-pointer"
+              className="px-3 py-1 rounded-xl bg-rose-50 text-rose-600 font-bold hover:bg-rose-100 cursor-pointer shrink-0"
             >
-              {isKm ? 'កំណត់ឡើងវិញ' : 'Reset'}
+              {tr(language, 'កំណត់ឡើងវិញ', 'Reset', '重置')}
             </button>
           </div>
         </div>

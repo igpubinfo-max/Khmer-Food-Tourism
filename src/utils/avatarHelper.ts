@@ -11,11 +11,17 @@ export function getFallbackAvatarDataUri(name?: string, role?: string): string {
   let initials = 'KH';
   if (cleanName) {
     const parts = cleanName.split(/\s+/).filter(Boolean);
-    if (parts.length >= 2) {
-      initials = (Array.from(parts[0])[0] + Array.from(parts[parts.length - 1])[0]).toUpperCase();
-    } else if (parts.length === 1) {
-      initials = Array.from(parts[0]).slice(0, 2).join('').toUpperCase();
+    const hasKhmer = /[\u1780-\u17FF]/.test(cleanName);
+    // Khmer syllables are multi-codepoint clusters: take ONE whole cluster so vowel signs / coeng are never cut off.
+    const take = (word: string, count: number) => splitGraphemes(word).slice(0, count).join('');
+    if (hasKhmer) {
+      initials = take(parts[0], 1);
+    } else if (parts.length >= 2) {
+      initials = (take(parts[0], 1) + take(parts[parts.length - 1], 1)).toUpperCase();
+    } else {
+      initials = take(parts[0], 2).toUpperCase();
     }
+    if (!initials) initials = 'KH';
   } else if (role === 'admin') {
     initials = 'AD';
   }
@@ -39,7 +45,110 @@ export function getFallbackAvatarDataUri(name?: string, role?: string): string {
     <text x="60" y="68" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Battambang', sans-serif" font-weight="800" font-size="38" letter-spacing="1">${escapeXml(initials)}</text>
   </svg>`;
 
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+/** Splits text into user-perceived characters (Khmer clusters, emoji, combining marks stay together). */
+function splitGraphemes(text: string): string[] {
+  try {
+    const Seg = (Intl as unknown as { Segmenter?: new (l?: string, o?: { granularity: string }) => { segment(s: string): Iterable<{ segment: string }> } }).Segmenter;
+    if (Seg) {
+      return Array.from(new Seg(undefined, { granularity: 'grapheme' }).segment(text), (s) => s.segment);
+    }
+  } catch {
+    // fall through to manual clustering
+  }
+  const out: string[] = [];
+  let prevWasCoeng = false;
+  for (const ch of Array.from(text)) {
+    const isMark = /\p{M}/u.test(ch);
+    if (out.length > 0 && (isMark || prevWasCoeng)) {
+      out[out.length - 1] += ch;
+    } else {
+      out.push(ch);
+    }
+    prevWasCoeng = ch === '\u17D2';
+  }
+  return out;
+}
+
+const ADMIN_AVATAR_STORAGE_KEY = 'kft_admin_avatar_v1';
+export const DEFAULT_ADMIN_AVATAR_PATH = 'images/admin_profile.png';
+
+/** Resolves a bundled public asset (e.g. `images/x.png` or `/images/x.png`) for web, GitHub Pages sub-paths and the Android WebView. */
+export function resolvePublicAssetUrl(path: string): string {
+  const clean = String(path || '').replace(/^\.?\//, '');
+  let base = './';
+  try {
+    base = (import.meta as unknown as { env?: { BASE_URL?: string } }).env?.BASE_URL || './';
+  } catch {
+    base = './';
+  }
+  if (!base.endsWith('/')) base += '/';
+  return `${base}${clean}`;
+}
+
+/** Admin portrait: a photo the admin uploaded on this device, otherwise the bundled official photo. */
+export function getAdminAvatarUrl(): string {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem(ADMIN_AVATAR_STORAGE_KEY);
+      if (saved && saved.startsWith('data:image/')) return saved;
+    } catch {
+      // ignore
+    }
+  }
+  return resolvePublicAssetUrl(DEFAULT_ADMIN_AVATAR_PATH);
+}
+
+export function saveAdminAvatar(dataUrl: string): void {
+  if (typeof window === 'undefined' || !dataUrl.startsWith('data:image/')) return;
+  try {
+    localStorage.setItem(ADMIN_AVATAR_STORAGE_KEY, dataUrl);
+  } catch {
+    // ignore quota errors
+  }
+}
+
+/**
+ * Turns a picked photo into a small square JPEG data URL (center-cropped).
+ * Data URLs survive app restarts, offline use, cloud sync and Android WebView (unlike blob: URLs).
+ */
+export function fileToAvatarDataUrl(file: File, size = 192, quality = 0.82): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith('image/')) {
+      reject(new Error('not_an_image'));
+      return;
+    }
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const side = Math.min(img.naturalWidth, img.naturalHeight);
+        if (!side) throw new Error('empty_image');
+        const sx = (img.naturalWidth - side) / 2;
+        const sy = (img.naturalHeight - side) / 2;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('no_canvas');
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, size, size);
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      } catch (err) {
+        reject(err);
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('image_decode_failed'));
+    };
+    img.src = objectUrl;
+  });
 }
 
 function escapeXml(str: string): string {
@@ -93,6 +202,7 @@ export function isPlaceholderOrInvalidAvatarUrl(url?: string | null): boolean {
     !trimmed.startsWith('http://') &&
     !trimmed.startsWith('https://') &&
     !trimmed.startsWith('blob:') &&
+    !trimmed.startsWith('./') &&
     !trimmed.startsWith('/')
   ) {
     return true;
@@ -112,6 +222,12 @@ export function normalizeAvatarUrl(rawUrl?: string | null): string | null {
   // Normalize Google profile image URLs (e.g. =s96-c -> =s256-c)
   if (trimmed.includes('googleusercontent.com')) {
     return trimmed.replace(/=s\d+(-c)?$/, '=s256-c');
+  }
+  // blob: URLs die on reload — never treat them as a persistent avatar
+  if (trimmed.startsWith('blob:')) return null;
+  // Bundled assets (e.g. /images/admin_profile.png) must respect the app base path (GitHub Pages / Android WebView)
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//')) {
+    return resolvePublicAssetUrl(trimmed);
   }
   return trimmed;
 }
@@ -153,6 +269,11 @@ export function resolveUserAvatarUrl(
     return getFallbackAvatarDataUri('Guest', 'user');
   }
 
+  if (user.role === 'admin') {
+    return typeof user.avatar === 'string' && user.avatar.startsWith('data:image/')
+      ? user.avatar
+      : getAdminAvatarUrl();
+  }
   const normalizedDirect = normalizeAvatarUrl(user.avatar);
   if (normalizedDirect) {
     if (user.id) cacheUserAvatar(user.id, normalizedDirect);

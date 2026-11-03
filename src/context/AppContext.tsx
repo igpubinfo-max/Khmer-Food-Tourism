@@ -45,6 +45,12 @@ import {
 } from '../data/seedData';
 import { hashPassword, verifyPassword } from '../utils/crypto';
 import { recordMeaningfulAction } from '../utils/engagement';
+import {
+  getAdminAvatarUrl,
+  saveAdminAvatar,
+  cacheUserAvatar,
+  isPlaceholderOrInvalidAvatarUrl,
+} from '../utils/avatarHelper';
 import { translateTextToChinese, useChineseDomTranslation, stripForeignScripts, tr } from '../utils/i18n';
 import { 
   hashPasswordPBKDF2, verifyPasswordPBKDF2, 
@@ -827,7 +833,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return {
               ...parsed,
               role: 'admin',
-              avatar: '/images/admin_profile.png',
+              avatar: getAdminAvatarUrl(),
               membershipTier: undefined,
               subscriptionStatus: undefined,
               paymentStatus: undefined,
@@ -4392,7 +4398,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       username: 'cheasavuth',
       email: 'admin@khmerfoodtourism.com',
       role: 'admin',
-      avatar: '/images/admin_profile.png',
+      avatar: getAdminAvatarUrl(),
       bio: 'ប្រព័ន្ធគ្រប់គ្រងរដ្ឋបាលផ្លូវការ (System Administrator)',
       createdAt: '2026-01-01',
     };
@@ -4448,7 +4454,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         username: 'cheasavuth',
         email: 'admin@khmerfoodtourism.com',
         role: 'admin',
-        avatar: '/images/admin_profile.png',
+        avatar: getAdminAvatarUrl(),
         bio: 'ប្រព័ន្ធគ្រប់គ្រងរដ្ឋបាលផ្លូវការ (System Administrator)',
         createdAt: '2026-01-01',
       };
@@ -5395,11 +5401,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const newHash = await hashPasswordPBKDF2(newPassword);
-    setAppSettings(prev => ({
-      ...prev,
+    // Keep the live ref, local storage and cloud copy in sync so the new hash can never be overwritten by a stale
+    // ref (next settings save) or an older cloud snapshot (background merge).
+    const nowIso = new Date().toISOString();
+    const nextSettings: AppSettings = {
+      ...appSettingsRef.current,
       adminPasswordHash: newHash,
       isAdminInitialized: true,
-    }));
+      settingsVersion: Math.max(25, Number(appSettingsRef.current.settingsVersion || 25)) + 1,
+      settingsUpdatedAt: nowIso,
+      settingsUpdatedBy: currentUser?.name || 'Admin',
+    };
+    appSettingsRef.current = nextSettings;
+    lastAdminSettingsSaveAtRef.current = Date.now();
+    setAppSettings(nextSettings);
+    try {
+      localStorage.setItem('kft_settings_v5', JSON.stringify(nextSettings));
+    } catch {}
+    if (isSupabaseConfigured()) {
+      saveAuthoritativeAppSettingsToServer(nextSettings).catch(() => {});
+    }
     recordSecurityAudit('ADMIN_CREDENTIALS_UPDATE', 'SUCCESS', 'AdminPortal', 'Admin password updated with PBKDF2');
     showToast(language === 'km' ? 'បានផ្លាស់ប្តូរពាក្យសម្ងាត់រដ្ឋបាលដោយសុវត្ថិភាព (PBKDF2)!' : 'Admin password updated securely (PBKDF2)!', 'success');
     return true;
@@ -5526,12 +5547,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     try {
       let confirmedSettings = mergedCandidate;
+      let cloudSaved = false;
+      const cloudConfigured = isSupabaseConfigured();
 
-      if (isSupabaseConfigured()) {
+      if (cloudConfigured) {
         try {
           const res = await saveAuthoritativeAppSettingsToServer(mergedCandidate);
           if (res.ok && res.settings) {
             confirmedSettings = res.settings;
+            cloudSaved = true;
           }
         } catch (cloudErr) {
           console.warn('Cloud settings sync fallback to local persistence:', cloudErr);
@@ -5564,11 +5588,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         'AppSettings',
         `Admin updated centralized app settings (v${confirmedSettings.settingsVersion}) at ${confirmedSettings.settingsUpdatedAt}: Short=${confirmedSettings.vipShortPriceUsd}/${confirmedSettings.vipShortDurationDays}d, Long=${confirmedSettings.vipLongPriceUsd}/${confirmedSettings.vipLongDurationDays}d, ExtraStore=${confirmedSettings.additionalStoreFeeUsd}`
       );
+      const touchedPlanFields = Object.keys(sanitized).some((k) =>
+        /^(vipShort|vipLong|additionalStoreFee|promotional)/.test(k)
+      );
+      const savedWhere = cloudSaved
+        ? language === 'km' ? 'ទៅកាន់ Database' : 'to the database'
+        : cloudConfigured
+          ? language === 'km' ? 'លើឧបករណ៍នេះ (Cloud មិនទាន់ភ្ជាប់)' : 'on this device (cloud unreachable)'
+          : language === 'km' ? 'លើឧបករណ៍នេះ' : 'on this device';
+      const planSummary = touchedPlanFields
+        ? ` ${confirmedSettings.vipShortDurationDays}${language === 'km' ? ' ថ្ងៃ' : 'd'} ($${confirmedSettings.vipShortPriceUsd?.toFixed(2)}) & ${confirmedSettings.vipLongDurationDays}${language === 'km' ? ' ថ្ងៃ' : 'd'} ($${confirmedSettings.vipLongPriceUsd?.toFixed(2)})`
+        : '';
       showToast(
         language === 'km'
-          ? `✅ បានរក្សាទុកទៅកាន់ Database ជោគជ័យ៖ ${confirmedSettings.vipShortDurationDays} ថ្ងៃ (${confirmedSettings.vipShortPriceUsd?.toFixed(2)}) & ${confirmedSettings.vipLongDurationDays} ថ្ងៃ (${confirmedSettings.vipLongPriceUsd?.toFixed(2)})!`
-          : `✅ Confirmed saved to Database: ${confirmedSettings.vipShortDurationDays}d (${confirmedSettings.vipShortPriceUsd?.toFixed(2)}) & ${confirmedSettings.vipLongDurationDays}d (${confirmedSettings.vipLongPriceUsd?.toFixed(2)})!`,
-        'success'
+          ? `${cloudSaved || !cloudConfigured ? '✅' : '⚠️'} បានរក្សាទុកការកំណត់ ${savedWhere} ជោគជ័យ!${planSummary}`
+          : `${cloudSaved || !cloudConfigured ? '✅' : '⚠️'} Settings saved ${savedWhere}.${planSummary}`,
+        cloudSaved || !cloudConfigured ? 'success' : 'warning'
       );
       return { ok: true, settings: confirmedSettings };
     } finally {
@@ -5758,7 +5793,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         id: canonicalGoogleId,
         name: profile.name || existing.name,
         email: cleanEmail || existing.email,
-        avatar: profile.avatar || existing.avatar,
+        avatar:
+          existing.avatar && existing.avatar.startsWith('data:image/') && !existing.avatar.startsWith('data:image/svg')
+            ? existing.avatar
+            : !isPlaceholderOrInvalidAvatarUrl(profile.avatar)
+              ? (profile.avatar as string)
+              : !isPlaceholderOrInvalidAvatarUrl(existing.avatar)
+                ? existing.avatar
+                : profile.avatar || existing.avatar,
         authProvider: 'google',
         linkedProviders: Array.from(new Set([...(existing.linkedProviders || []), 'google'])),
         isVerified: true,
@@ -5837,7 +5879,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateCurrentUserProfile = (newName: string, newAvatar?: string) => {
     if (!currentUser) return;
-    const cleanName = newName.trim();
+    const cleanName = newName.trim() || (newAvatar ? currentUser.name : '');
     if (!cleanName) return;
 
     const updated: User = {
@@ -5846,6 +5888,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       avatar: newAvatar || currentUser.avatar,
       lastActiveAt: new Date().toISOString(),
     };
+
+    if (newAvatar) {
+      if (updated.role === 'admin') {
+        saveAdminAvatar(newAvatar);
+      } else {
+        cacheUserAvatar(updated.id, newAvatar);
+        if (updated.email) cacheUserAvatar(updated.email, newAvatar);
+        cacheUserAvatar(`name:${updated.name}`, newAvatar);
+      }
+    }
 
     setCurrentUser(updated);
     latestSyncStateRef.current.currentUser = updated;
@@ -5865,7 +5917,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (isSupabaseConfigured() && updated.role !== 'admin') {
       upsertSingleUserToCloud(updated, deletedUsers).catch(() => {});
     }
-    showToast(language === 'km' ? 'បានកែប្រែឈ្មោះជោគជ័យ!' : 'Name updated successfully!', 'success');
+    showToast(
+      newAvatar
+        ? language === 'km' ? 'បានប្តូររូបភាពប្រូហ្វាល់ជោគជ័យ!' : language === 'zh' ? '头像已更新！' : 'Profile photo updated!'
+        : language === 'km' ? 'បានកែប្រែឈ្មោះជោគជ័យ!' : 'Name updated successfully!',
+      'success'
+    );
   };
 
   // Social Account Linking (TikTok & Facebook) — Honest Profile Linking without false OAuth verification claims

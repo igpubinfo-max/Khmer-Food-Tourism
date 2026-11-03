@@ -18,6 +18,7 @@ import {
   setAdminPinHash
 } from '../services/supabaseService';
 import { tr } from '../utils/i18n';
+import { getAdminAvatarUrl, getFallbackAvatarDataUri } from '../utils/avatarHelper';
 
 const PIN_LOCKOUT_STORAGE_KEY = 'kft_admin_pin_lockout_v1';
 const MAX_PIN_FAILED_ATTEMPTS = 5;
@@ -802,8 +803,10 @@ export const AdminLoginModal: React.FC = () => {
                       {/* Admin Photo & Verified Identity */}
                       <div className="relative">
                         <img
-                          src="/images/admin_profile.png"
+                          src={getAdminAvatarUrl()}
                           alt="Chea Savuth Admin"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = getFallbackAvatarDataUri('Admin', 'admin'); }}
                           className="w-36 h-36 sm:w-44 sm:h-44 rounded-full object-cover border-4 border-emerald-400 shadow-2xl ring-4 ring-emerald-500/30"
                         />
                         <div className="absolute -bottom-1 -right-1 p-1.5 bg-emerald-600 rounded-full border-2 border-white text-white shadow-md">

@@ -1574,7 +1574,7 @@ export const WhatToEatModal: React.FC = () => {
                         <div data-testid="ai-image-analysis" className="mt-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-1.5">
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300">
-                              📷 {tr(language, 'ការវិភាគរូបភាព', 'Photo analysis', '图片分析')}
+                              📷 {tr(language, 'ម្ហូបក្នុងរូបភាព', 'Dish in photo', '照片中的菜品')}
                             </span>
                             <span
                               className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
@@ -1584,7 +1584,7 @@ export const WhatToEatModal: React.FC = () => {
                               }`}
                             >
                               {msg.imageAnalysis.identified
-                                ? `${Math.round(msg.imageAnalysis.confidence * 100)}% ${tr(language, 'ប្រាកដ', 'confident', '把握')}`
+                                ? `✓ ${tr(language, 'ស្គាល់ហើយ', 'Recognized', '已识别')}`
                                 : tr(language, 'មិនទាន់ប្រាកដ', 'Not sure yet', '尚不确定')}
                             </span>
                           </div>
@@ -1627,9 +1627,9 @@ export const WhatToEatModal: React.FC = () => {
                               <span>
                                 {tr(
                                   language,
-                                  'មុខម្ហូបណែនាំលម្អិតពី AI៖',
-                                  'AI Recommended Dishes:',
-                                  'AI 推荐菜品详情：'
+                                  'មុខម្ហូបណែនាំ៖',
+                                  'Recommended Dishes:',
+                                  '推荐菜品：'
                                 )}
                               </span>
                             </div>
@@ -1679,7 +1679,7 @@ export const WhatToEatModal: React.FC = () => {
                                       loading="lazy"
                                       decoding="async"
                                       onError={(e) => {
-                                        (e.currentTarget as HTMLImageElement).src = fallbackPhotoFor(dish.id);
+                                        const imgEl = e.currentTarget as HTMLImageElement; if (imgEl.dataset.fb === (imgEl.getAttribute('src') || '')) return; imgEl.src = fallbackPhotoFor(dish.id); imgEl.dataset.fb = imgEl.getAttribute('src') || '';
                                       }}
                                       className="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-200 border border-slate-200 dark:border-slate-700"
                                     />
@@ -1784,14 +1784,9 @@ export const WhatToEatModal: React.FC = () => {
                                   !failedOnlineDishIds[rpFood.id] &&
                                   !hasRenderablePhoto(rpFood.photoUrl) ? (
                                     <div className="w-full h-full bg-gradient-to-br from-[#064E3B] via-[#047857] to-slate-900 flex flex-col items-center justify-center gap-2 text-emerald-100 p-4 text-center">
-                                      <Sparkles className="w-6 h-6 text-amber-300 animate-spin" />
+                                      <ChefHat className="w-7 h-7 text-amber-300" />
                                       <span className="text-[11px] font-bold">
-                                        {tr(
-                                          language,
-                                          `🌐 កំពុងទាញរូបភាព «${rpLoc.name}» ពី Open API...`,
-                                          `🌐 Fetching "${rpLoc.name}" photo from Open API...`,
-                                          `🌐 正在从 Open API 获取“${rpLoc.name}”图片...`
-                                        )}
+                                        {tr(language, 'កំពុងរៀបចំរូបភាព...', 'Preparing photo...', '正在准备图片...')}
                                       </span>
                                     </div>
                                   ) : (
@@ -1802,7 +1797,7 @@ export const WhatToEatModal: React.FC = () => {
                                       loading="eager"
                                       decoding="async"
                                       onError={(e) => {
-                                        (e.currentTarget as HTMLImageElement).src = fallbackPhotoFor(rpFood.id);
+                                        const imgEl = e.currentTarget as HTMLImageElement; if (imgEl.dataset.fb === (imgEl.getAttribute('src') || '')) return; imgEl.src = fallbackPhotoFor(rpFood.id); imgEl.dataset.fb = imgEl.getAttribute('src') || '';
                                       }}
                                       className="w-full h-full object-cover"
                                     />
@@ -1821,7 +1816,7 @@ export const WhatToEatModal: React.FC = () => {
                                     {isGeneratedDishId(rpFood.id) && /^data:/i.test(rpFood.photoUrl || '')
                                       ? tr(language, '📷 រូបភាពរបស់អ្នក', '📷 Your photo', '📷 您的照片')
                                       : isGeneratedDishId(rpFood.id) && /^https?:\/\//i.test(rpFood.photoUrl || '')
-                                        ? tr(language, '🌐 Open API', '🌐 Open API', '🌐 Open API')
+                                        ? tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')
                                         : isGeneratedDishId(rpFood.id)
                                           ? tr(language, 'គ្មានរូបភាពផ្ទៀងផ្ទាត់', 'No verified photo', '暂无已核实图片')
                                           : tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}
@@ -1947,7 +1942,7 @@ export const WhatToEatModal: React.FC = () => {
                                       loading="lazy"
                                       decoding="async"
                                       onError={(e) => {
-                                        (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
+                                        const imgEl = e.currentTarget as HTMLImageElement; if (imgEl.dataset.fb === (imgEl.getAttribute('src') || '')) return; imgEl.src = '/foods/food-1.jpg'; imgEl.dataset.fb = imgEl.getAttribute('src') || '';
                                       }}
                                       className="w-9 h-9 rounded-lg object-cover shrink-0 bg-slate-200"
                                     />
@@ -1992,7 +1987,7 @@ export const WhatToEatModal: React.FC = () => {
                                     loading="lazy"
                                     decoding="async"
                                     onError={(e) => {
-                                      (e.currentTarget as HTMLImageElement).src = '/destinations/dest-1.jpg';
+                                      const imgEl = e.currentTarget as HTMLImageElement; if (imgEl.dataset.fb === (imgEl.getAttribute('src') || '')) return; imgEl.src = '/destinations/dest-1.jpg'; imgEl.dataset.fb = imgEl.getAttribute('src') || '';
                                     }}
                                     className="w-11 h-11 rounded-lg object-cover shrink-0 bg-slate-200"
                                   />
@@ -2146,17 +2141,11 @@ export const WhatToEatModal: React.FC = () => {
                       <span>
                         {tr(
                           language,
-                          'ចម្លើយពីជំនួយការ AI',
-                          'AI Assistant Answer',
-                          'AI 助手回答'
+                          'ចម្លើយ',
+                          'Answer',
+                          '回答'
                         )}
                       </span>
-                      {isAiThinking && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 animate-pulse">
-                          <Sparkles className="w-3 h-3 text-amber-500" />
-                          <span>{tr(language, 'Gemini កំពុងវិភាគ...', 'Gemini thinking...', 'Gemini 思考中...')}</span>
-                        </span>
-                      )}
                     </div>
                     <button
                       type="button"
@@ -2592,7 +2581,7 @@ export const WhatToEatModal: React.FC = () => {
                               src={resolveFoodPhotoUrl(cDish.photoUrl, cDish.photoUpdatedAt)}
                               alt={cLoc.name}
                               onError={(e) => {
-                                (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
+                                const imgEl = e.currentTarget as HTMLImageElement; if (imgEl.dataset.fb === (imgEl.getAttribute('src') || '')) return; imgEl.src = '/foods/food-1.jpg'; imgEl.dataset.fb = imgEl.getAttribute('src') || '';
                               }}
                               className="w-full h-full object-cover"
                             />
@@ -2648,9 +2637,9 @@ export const WhatToEatModal: React.FC = () => {
                   <span>
                     {tr(
                       language,
-                      `✨ ការណែនាំមុខម្ហូបពិសេសពី AI សម្រាប់ «${activeCriteriaLabel}»៖`,
-                      `✨ AI Personalized Recommendation for “${activeCriteriaLabel}”:`,
-                      `✨ AI 为您精选的“${activeCriteriaLabel}”招牌美食：`
+                      `ការណែនាំមុខម្ហូបសម្រាប់ «${activeCriteriaLabel}»៖`,
+                      `Dish picks for “${activeCriteriaLabel}”:`,
+                      `为您精选的“${activeCriteriaLabel}”美食：`
                     )}
                   </span>
                 </div>
@@ -2666,14 +2655,9 @@ export const WhatToEatModal: React.FC = () => {
                     !failedOnlineDishIds[currentDish.id] &&
                     !hasRenderablePhoto(currentDish.photoUrl) ? (
                       <div className="w-full h-full bg-gradient-to-br from-[#064E3B] via-[#047857] to-slate-900 flex flex-col items-center justify-center gap-2.5 text-emerald-100 p-6 text-center">
-                        <Sparkles className="w-7 h-7 text-amber-300 animate-spin" />
+                        <ChefHat className="w-8 h-8 text-amber-300" />
                         <span className="text-xs font-bold font-khmer">
-                          {tr(
-                            language,
-                            `🌐 កំពុងទាញរូបភាព «${currentLoc.name}» ពី Open API...`,
-                            `🌐 Fetching "${currentLoc.name}" photo from Open API...`,
-                            `🌐 正在从 Open API 获取“${currentLoc.name}”图片...`
-                          )}
+                          {tr(language, 'កំពុងរៀបចំរូបភាព...', 'Preparing photo...', '正在准备图片...')}
                         </span>
                       </div>
                     ) : (
@@ -2682,7 +2666,7 @@ export const WhatToEatModal: React.FC = () => {
                         alt={currentLoc.name}
                         referrerPolicy="no-referrer"
                         onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = fallbackPhotoFor(currentDish.id);
+                          const imgEl = e.currentTarget as HTMLImageElement; if (imgEl.dataset.fb === (imgEl.getAttribute('src') || '')) return; imgEl.src = fallbackPhotoFor(currentDish.id); imgEl.dataset.fb = imgEl.getAttribute('src') || '';
                         }}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                         loading="eager"
@@ -2707,7 +2691,7 @@ export const WhatToEatModal: React.FC = () => {
                       {isGeneratedDishId(currentDish.id) && /^data:/i.test(currentDish.photoUrl || '')
                         ? tr(language, '📷 រូបភាពរបស់អ្នក', '📷 Your photo', '📷 您的照片')
                         : isGeneratedDishId(currentDish.id) && /^https?:\/\//i.test(currentDish.photoUrl || '')
-                          ? tr(language, '🌐 រូបភាព Open API', '🌐 Open API Photo', '🌐 Open API 图片')
+                          ? tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')
                           : isGeneratedDishId(currentDish.id)
                             ? tr(language, 'គ្មានរូបភាពផ្ទៀងផ្ទាត់', 'No verified photo', '暂无已核实图片')
                             : tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}
@@ -2881,7 +2865,7 @@ export const WhatToEatModal: React.FC = () => {
                           loading="lazy"
                           decoding="async"
                           onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
+                            const imgEl = e.currentTarget as HTMLImageElement; if (imgEl.dataset.fb === (imgEl.getAttribute('src') || '')) return; imgEl.src = '/foods/food-1.jpg'; imgEl.dataset.fb = imgEl.getAttribute('src') || '';
                           }}
                           className="w-10 h-10 rounded-xl object-cover shrink-0 group-hover:scale-105 transition-transform"
                         />

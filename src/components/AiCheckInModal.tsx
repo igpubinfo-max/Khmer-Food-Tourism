@@ -199,9 +199,6 @@ export const AiCheckInModal: React.FC = () => {
                 <h3 className="font-moul text-xs sm:text-sm text-white">
                   {isKm ? 'ឆែកអ៊ីន & បន្ថែមហាងដោយ AI' : 'AI Food Check-in'}
                 </h3>
-                <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-stone-900 text-[9px] font-black shadow-xs">
-                  Smart AI ✨
-                </span>
                 <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-black shadow-xs">
                   Admin Only 🛡️
                 </span>

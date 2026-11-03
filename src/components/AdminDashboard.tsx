@@ -177,6 +177,7 @@ export const AdminDashboard: React.FC = () => {
   const [activeSettingsSection, setActiveSettingsSection] = useState<'all' | 'featured_rotation' | 'vip_pricing' | 'payment_khqr' | 'distribution' | 'cloud_system' | 'security'>('all');
 
   const isVipFormDirtyRef = useRef<boolean>(false);
+  const isSupportFormDirtyRef = useRef<boolean>(false);
   const [isSavingVipSettings, setIsSavingVipSettings] = useState<boolean>(false);
   const [vipSaveFeedback, setVipSaveFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -212,6 +213,7 @@ export const AdminDashboard: React.FC = () => {
   useEffect(() => {
     if (isAdminOpen) {
       isVipFormDirtyRef.current = false;
+      isSupportFormDirtyRef.current = false;
       setVipSaveFeedback(null);
       hydrateVipFormFromSettings(appSettings);
       if (refreshAppSettingsFromServer) {
@@ -226,7 +228,7 @@ export const AdminDashboard: React.FC = () => {
 
   // Keep Admin settings form synchronized ONLY when the Admin is NOT actively editing the form
   useEffect(() => {
-    if (isVipFormDirtyRef.current || isSavingVipSettings) {
+    if (isVipFormDirtyRef.current || isSupportFormDirtyRef.current || isSavingVipSettings) {
       return;
     }
     hydrateVipFormFromSettings(appSettings);
@@ -245,6 +247,7 @@ export const AdminDashboard: React.FC = () => {
   // Supabase Free Tier + Google Maps Places API + Smart Cache configuration state
   const [cloudCfg, setCloudCfg] = useState(() => getCloudApiConfig());
   const [supabaseTestStatus, setSupabaseTestStatus] = useState<string>('');
+  const [geminiTestOk, setGeminiTestOk] = useState<boolean | null>(null);
   const [isSyncingCloud, setIsSyncingCloud] = useState(false);
   const [isSavingNewFood, setIsSavingNewFood] = useState(false);
   const [googleMapsDiag, setGoogleMapsDiag] = useState<any>(() => getLastGooglePlacesApiDiagnosis());
@@ -543,8 +546,75 @@ export const AdminDashboard: React.FC = () => {
       showToast(isKm ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោច ៨ តួអក្សរ!' : 'Password must be at least 8 characters!', 'warning');
       return;
     }
-    await setAdminPassword(newAdminPass);
-    setNewAdminPass('');
+    try {
+      const ok = await setAdminPassword(newAdminPass);
+      if (ok) setNewAdminPass('');
+    } catch (err) {
+      console.warn('Admin password update failed:', err);
+      showToast(isKm ? 'ផ្លាស់ប្តូរពាក្យសម្ងាត់មិនបានសម្រេច សូមព្យាយាមម្តងទៀត!' : 'Could not update the password. Please try again!', 'error');
+    }
+  };
+
+  /** Saves only a subset of settings (so unrelated VIP drafts are never validated or overwritten). */
+  const saveSettingsSubset = async (partial: Parameters<typeof updateAppSettings>[0]) => {
+    if (isSavingVipSettings) return null;
+    setIsSavingVipSettings(true);
+    try {
+      return await updateAppSettings(partial);
+    } finally {
+      setIsSavingVipSettings(false);
+    }
+  };
+
+  const handleSavePlayStore = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const url = playStoreUrl.trim();
+    if (!/^https:\/\//i.test(url)) {
+      showToast(isKm ? '⚠️ តំណភ្ជាប់ត្រូវចាប់ផ្តើមដោយ https://' : '⚠️ The link must start with https://', 'warning');
+      return;
+    }
+    const res = await saveSettingsSubset({ apkDownloadUrl: '', playStoreUrl: url, appStoreUrl: appStoreUrl.trim() });
+    if (res?.ok && res.settings) {
+      isSupportFormDirtyRef.current = false;
+      setPlayStoreUrl(res.settings.playStoreUrl);
+    }
+  };
+
+  const handleSaveSupportKhqr = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!bankName.trim() || !accountName.trim()) {
+      showToast(isKm ? '⚠️ សូមបំពេញឈ្មោះធនាគារ និងឈ្មោះម្ចាស់គណនី!' : '⚠️ Please fill in the bank name and account name!', 'warning');
+      return;
+    }
+    const res = await saveSettingsSubset({
+      supportQrImageUrl: supportQrUrl.trim(),
+      supportBankName: bankName.trim(),
+      supportAccountName: accountName.trim(),
+      supportMessageKh,
+    });
+    if (res?.ok && res.settings) {
+      isSupportFormDirtyRef.current = false;
+      setSupportQrUrl(res.settings.supportQrImageUrl);
+      setBankName(res.settings.supportBankName);
+      setAccountName(res.settings.supportAccountName);
+    }
+  };
+
+  const handleSaveRotation = async () => {
+    const days = parseInt(vipFeaturedDurationDaysInput.trim(), 10);
+    if (!Number.isFinite(days) || days < 1 || days > 365) {
+      showToast(isKm ? '⚠️ សូមបញ្ចូលរយៈពេលបង្វិលបង្ហាញហាង VIP ឱ្យបានត្រឹមត្រូវ (១ ដល់ ៣៦៥ ថ្ងៃ)!' : '⚠️ Please enter a valid VIP Featured Duration (1 to 365 days)!', 'warning');
+      return;
+    }
+    const res = await saveSettingsSubset({
+      vipFeaturedRotationEnabled: vipFeaturedRotationEnabledInput,
+      vipFeaturedDurationDays: days,
+    });
+    if (res?.ok && res.settings) {
+      const cfg = getVipFeaturedRotationConfig(res.settings);
+      setVipFeaturedRotationEnabledInput(cfg.enabled);
+      setVipFeaturedDurationDaysInput(String(cfg.durationDays));
+    }
   };
 
   const handleRevokeSessions = () => {
@@ -646,7 +716,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Tab Navigation — All Menu Items Displayed Directly on Screen Without Swiping */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1.5 px-3 py-2.5 bg-stone-100/90 dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 shrink-0 text-[11px] font-khmer">
+        <div className="grid grid-cols-2 min-[460px]:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1.5 px-3 py-2.5 bg-stone-100/90 dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 shrink-0 text-[11px] font-khmer">
           <button
             type="button"
             onClick={() => setActiveTab('stats')}
@@ -657,7 +727,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Shield className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">{isKm ? 'ទិដ្ឋភាពរួម' : 'Overview'}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{isKm ? 'ទិដ្ឋភាពរួម' : 'Overview'}</span>
           </button>
 
           <button
@@ -670,9 +740,9 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-            <span className="truncate">{isKm ? `សារជំនួយ (${supportTickets.length})` : `Support (${supportTickets.length})`}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `សារជំនួយ (${supportTickets.length})` : `Support (${supportTickets.length})`}</span>
             {(unreadAdminTickets.length > 0 || pendingSupportTickets.length > 0) && (
-              <span className="px-1.5 py-0.2 bg-rose-600 text-white rounded-full text-[9px] font-bold animate-pulse shrink-0">
+              <span className="px-1.5 py-0.2 bg-rose-600 text-white rounded-full text-[9px] font-bold shrink-0">
                 {unreadAdminTickets.length || pendingSupportTickets.length}
               </span>
             )}
@@ -688,7 +758,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <CreditCard className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">{isKm ? `ការទូទាត់ (${transactions.length})` : `VIP Pay (${transactions.length})`}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `ការទូទាត់ (${transactions.length})` : `VIP Pay (${transactions.length})`}</span>
             {pendingTxns.length > 0 && (
               <span className="px-1.5 py-0.2 bg-red-600 text-white rounded-full text-[9px] font-bold shrink-0">
                 {pendingTxns.length}
@@ -706,7 +776,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Utensils className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">{isKm ? `មុខម្ហូប (${foods.length})` : `Foods (${foods.length})`}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `មុខម្ហូប (${foods.length})` : `Foods (${foods.length})`}</span>
           </button>
 
           <button
@@ -719,7 +789,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-            <span className="truncate">{isKm ? 'សវនកម្មរូបភាព' : 'Image Audit'}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{isKm ? 'សវនកម្មរូបភាព' : 'Image Audit'}</span>
             {flaggedFoods.length > 0 && (
               <span className="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[9px] font-bold shrink-0">
                 {flaggedFoods.length}
@@ -737,7 +807,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Store className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">{isKm ? `ហាងអាហារ (${restaurants.length})` : `Shops (${restaurants.length})`}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `ហាងអាហារ (${restaurants.length})` : `Shops (${restaurants.length})`}</span>
             {(pendingRestaurants.length + pendingPhotoReplacementRestaurants.length) > 0 && (
               <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[9px] font-bold shrink-0">
                 {pendingRestaurants.length + pendingPhotoReplacementRestaurants.length}
@@ -755,7 +825,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Camera className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-            <span className="truncate">{isKm ? `ឆែកអ៊ីន AI (${aiCheckIns.length})` : `AI Check-in (${aiCheckIns.length})`}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `ឆែកអ៊ីនហាង (${aiCheckIns.length})` : `Check-ins (${aiCheckIns.length})`}</span>
             {aiCheckIns.filter(c => c.status === 'pending').length > 0 && (
               <span className="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[9px] font-bold shrink-0">
                 {aiCheckIns.filter(c => c.status === 'pending').length}
@@ -773,7 +843,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Compass className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">{isKm ? `ទេសចរណ៍ (${destinations.length})` : `Tourism (${destinations.length})`}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `ទេសចរណ៍ (${destinations.length})` : `Tourism (${destinations.length})`}</span>
           </button>
 
           <button
@@ -786,7 +856,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Users className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">{isKm ? `អ្នកប្រើ (${users.length})` : `Users (${users.length})`}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `អ្នកប្រើ (${users.length})` : `Users (${users.length})`}</span>
           </button>
 
           <button
@@ -799,7 +869,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <ShieldAlert className="w-3.5 h-3.5 text-red-500 shrink-0" />
-            <span className="truncate">{isKm ? 'សន្តិសុខ & Logs' : 'Security'}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{isKm ? 'សន្តិសុខ & Logs' : 'Security'}</span>
           </button>
 
           <button
@@ -812,7 +882,7 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Settings className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">{isKm ? 'ការកំណត់' : 'Settings'}</span>
+            <span className="min-w-0 break-words text-center leading-tight">{isKm ? 'ការកំណត់' : 'Settings'}</span>
           </button>
         </div>
 
@@ -4542,7 +4612,7 @@ export const AdminDashboard: React.FC = () => {
                           </span>
                           <button
                             type="button"
-                            onClick={handleSaveSettings}
+                            onClick={handleSaveRotation}
                             disabled={isSavingVipSettings}
                             className="px-4 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] disabled:opacity-60 text-white font-bold text-xs shadow-2xs transition cursor-pointer shrink-0"
                           >
@@ -5150,7 +5220,7 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <form onSubmit={handleSaveSettings} className="space-y-3 font-khmer">
+                <form onSubmit={handleSavePlayStore} className="space-y-3 font-khmer">
                   <div>
                     <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
                       {isKm ? 'តំណភ្ជាប់ផ្លូវការ Google Play Store' : 'Official Google Play Store URL'}
@@ -5158,7 +5228,7 @@ export const AdminDashboard: React.FC = () => {
                     <input
                       type="text"
                       value={playStoreUrl}
-                      onChange={e => setPlayStoreUrl(e.target.value)}
+                      onChange={e => { isSupportFormDirtyRef.current = true; setPlayStoreUrl(e.target.value); }}
                       className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-xs"
                     />
                   </div>
@@ -5208,7 +5278,7 @@ export const AdminDashboard: React.FC = () => {
                       <input
                         type="text"
                         value={supportQrUrl}
-                        onChange={e => setSupportQrUrl(e.target.value)}
+                        onChange={e => { isSupportFormDirtyRef.current = true; setSupportQrUrl(e.target.value); }}
                         className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-xs"
                       />
                     </div>
@@ -5221,7 +5291,7 @@ export const AdminDashboard: React.FC = () => {
                         <input
                           type="text"
                           value={bankName}
-                          onChange={e => setBankName(e.target.value)}
+                          onChange={e => { isSupportFormDirtyRef.current = true; setBankName(e.target.value); }}
                           className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100"
                         />
                       </div>
@@ -5232,15 +5302,17 @@ export const AdminDashboard: React.FC = () => {
                         <input
                           type="text"
                           value={accountName}
-                          onChange={e => setAccountName(e.target.value)}
+                          onChange={e => { isSupportFormDirtyRef.current = true; setAccountName(e.target.value); }}
                           className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100"
                         />
                       </div>
                     </div>
 
                     <button
-                      onClick={handleSaveSettings}
-                      className="px-5 py-2.5 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl shadow-md transition-all font-khmer text-xs active:scale-95"
+                      type="button"
+                      onClick={handleSaveSupportKhqr}
+                      disabled={isSavingVipSettings}
+                      className="px-5 py-2.5 bg-[#064E3B] hover:bg-[#047857] disabled:opacity-60 text-white font-bold rounded-xl shadow-md transition-all font-khmer text-xs active:scale-95"
                     >
                       {isKm ? 'រក្សាទុកព័ត៌មាន KHQR' : 'Save KHQR Configuration'}
                     </button>
@@ -5549,8 +5621,12 @@ export const AdminDashboard: React.FC = () => {
                         4. Google Gemini AI API Key (សម្រាប់មុខងារ «សួរ AI» & ស្កេនម្ហូប) ⭐
                       </label>
                       {cloudCfg.geminiApiKey && cloudCfg.geminiApiKey.trim().length > 10 && (
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold shrink-0">
-                          ✅ Active
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-white text-[10px] font-extrabold shrink-0 ${
+                            geminiTestOk === false ? 'bg-amber-600' : 'bg-emerald-600'
+                          }`}
+                        >
+                          {geminiTestOk === true ? '✅ Connected' : geminiTestOk === false ? '⚠️ Check key' : '💾 Saved'}
                         </span>
                       )}
                     </div>
@@ -5569,6 +5645,7 @@ export const AdminDashboard: React.FC = () => {
                           setCloudCfg(saved);
                           setSupabaseTestStatus('⏳ កំពុងសាកល្បងភ្ជាប់ទៅកាន់ Google Gemini AI...');
                           const res = await testGeminiApiConnection(saved.geminiApiKey);
+                          setGeminiTestOk(res.ok);
                           setSupabaseTestStatus(res.ok ? `✅ ${res.message}` : `❌ Gemini Error: ${res.message}`);
                           showToast(res.ok ? `✅ ${res.message}` : `❌ Gemini Error: ${res.message}`, res.ok ? 'success' : 'error');
                         }}

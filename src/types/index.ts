@@ -671,12 +671,12 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   },
   {
     id: 2,
-    titleKh: 'រូបថតច្រើនសន្លឹក និងមុខម្ហូបរហូតដល់ ២០ មុខ',
-    titleEn: 'More Food Photos & Menu Items',
-    descriptionKh: 'បង្ហោះមុខម្ហូបក្នុងបញ្ជីបានរហូតដល់ ២០ មុខ ព្រមទាំងរូបថត Gallery ច្រើនសន្លឹក',
-    descriptionEn: 'Add up to 20 menu items (free accounts limited to 5) with high-res photo gallery.',
-    iconName: 'UtensilsCrossed',
-    category: 'profile'
+    titleKh: 'ម្ហូបសុខភាព និងគំនិតអាហារ ៣ ពេល',
+    titleEn: 'Healthy Dish Filters & 3-Meal Ideas',
+    descriptionKh: 'ច្រោះម្ហូបតាមស្លាកសុខភាព (តិចស្ករ ប្រូតេអ៊ីនខ្ពស់ ម្ហូបបួស...) និងទទួលបានគំនិតម្ហូប ៣ ពេលជារៀងរាល់ថ្ងៃ',
+    descriptionEn: 'Filter dishes by healthy tags (low sugar, high protein, vegetarian…) and get daily 3-meal ideas.',
+    iconName: 'Leaf',
+    category: 'reach'
   },
   {
     id: 3,
@@ -716,11 +716,11 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   },
   {
     id: 7,
-    titleKh: 'ប៊ូតុងទំនាក់ទំនងរហ័ស',
-    titleEn: 'Quick Contact Buttons',
-    descriptionKh: 'ប៊ូតុងទាក់ទងរហ័ស ហៅទូរស័ព្ទ (Call), Telegram និង Facebook ដោយផ្ទាល់លើកាតហាង',
-    descriptionEn: 'One-tap direct contact buttons for Phone Call, Telegram chat, and Facebook page.',
-    iconName: 'Zap',
+    titleKh: 'ផែនការដំណើរកម្សាន្ត និងដំណើរម្ហូប ១ ថ្ងៃ',
+    titleEn: 'Trip Planner & 1-Day Food Trips',
+    descriptionKh: 'រៀបចំផែនការដើរលេង និងប្រើដំណើរម្ហូប ១ ថ្ងៃរួចជាស្រេច ជាមួយផែនទី និងការរក្សាទុកផែនការ',
+    descriptionEn: 'Plan your trips and use ready-made 1-day food itineraries with maps and saved plans.',
+    iconName: 'Route',
     category: 'reach'
   },
   {
@@ -734,11 +734,11 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   },
   {
     id: 9,
-    titleKh: 'តំណភ្ជាប់ចែករំលែកទំព័រហាង',
-    titleEn: 'Shareable Restaurant Profile Link',
-    descriptionKh: 'តំណភ្ជាប់ Deep Link ផ្ទាល់ខ្លួន ចម្លង និងចែករំលែកទៅបណ្តាញសង្គម Telegram និង Facebook',
-    descriptionEn: 'Direct custom deep-link to share your profile across Telegram, Facebook, and WhatsApp.',
-    iconName: 'Share2',
+    titleKh: 'ស្វែងរកទីតាំងលើ Google Maps និងកំណត់ត្រាម្ហូបបានភ្លក់',
+    titleEn: 'Google Maps Place Search & Food Passport',
+    descriptionKh: 'ស្វែងរកហាង ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ទូទាំងកម្ពុជា ព្រមទាំងកត់ត្រាម្ហូបដែលបានភ្លក់ក្នុងកំណត់ត្រាផ្ទាល់ខ្លួន',
+    descriptionEn: 'Search restaurants and attractions across Cambodia and keep a personal passport of the dishes you tried.',
+    iconName: 'MapPinned',
     category: 'reach'
   },
   {
@@ -2672,14 +2672,25 @@ export const getDynamicVipBenefits = (
 ): VipBenefitItem[] => {
   const s = settings || getStoredAppSettingsFallback();
   if (Array.isArray(s.vipBenefitsList) && s.vipBenefitsList.length > 0) {
-    return s.vipBenefitsList.map((b, idx) => ({
-      ...b,
-      id: b.id || idx + 1,
-      descriptionKh: b.descriptionKh || b.descKh || '',
-      descriptionEn: b.descriptionEn || b.descEn || '',
-      descKh: b.descKh || b.descriptionKh || '',
-      descEn: b.descEn || b.descriptionEn || '',
-    }));
+    // Benefits saved by older versions may still advertise removed/unverified perks — swap them for the current ones.
+    const LEGACY_TITLES_EN: Record<string, number> = {
+      'More Food Photos & Menu Items': 2,
+      'Quick Contact Buttons': 7,
+      'Shareable Restaurant Profile Link': 9,
+    };
+    const currentById = new Map<number, VipBenefitItem>(TEN_VIP_BENEFITS.map((b) => [b.id, b]));
+    return s.vipBenefitsList.map((raw, idx) => {
+      const legacyId = LEGACY_TITLES_EN[(raw.titleEn || '').trim()];
+      const b = legacyId ? currentById.get(legacyId) || raw : raw;
+      return {
+        ...b,
+        id: b.id || idx + 1,
+        descriptionKh: b.descriptionKh || b.descKh || '',
+        descriptionEn: b.descriptionEn || b.descEn || '',
+        descKh: b.descKh || b.descriptionKh || '',
+        descEn: b.descEn || b.descriptionEn || '',
+      };
+    });
   }
   return TEN_VIP_BENEFITS.map((b) => ({
     ...b,
