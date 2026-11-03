@@ -25,6 +25,8 @@ import {
   getCambodiaHolidaysForYear, getMealSlotForHour, getSeasonForMonth, monthLabel, pickTri,
 } from '../data/guideContent';
 import type { MealSlotId, TipCategory } from '../data/guideContent';
+import { resolveFestivalFoods } from '../data/festivalFoods';
+import { FestivalDishRow } from './home/FestivalFoodSection';
 
 type GuideTab = 'foryou' | 'provinces' | 'calendar' | 'tips';
 
@@ -944,6 +946,13 @@ export const GuideView: React.FC = () => {
                       🍽️ <span className="font-bold">{tr(language, 'ម្ហូបប្រចាំពិធី៖', 'Festival Foods:', '节日美食：')}</span> {pickTri(f.foods, lang)}
                     </p>
                   </div>
+                  {/* Tappable real dishes from the catalog (only for festivals that have a curated collection) */}
+                  <FestivalDishRow
+                    language={language}
+                    dishes={resolveFestivalFoods(f.id, foods)}
+                    onOpenFood={setSelectedFood}
+                    variant="chip"
+                  />
                 </li>
               ))}
             </ol>

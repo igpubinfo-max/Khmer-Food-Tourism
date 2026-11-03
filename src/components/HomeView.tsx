@@ -21,6 +21,7 @@ import { IconNavFood, IconNavShop, IconNavTourism, IconMapRoute } from './icons/
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { ForYouSection } from './home/ForYouSection';
 import { DailyHabitCard } from './home/DailyHabitCard';
+import { FestivalFoodSection } from './home/FestivalFoodSection';
 import { PopularShops } from './home/PopularShops';
 import { PopularDestinations } from './home/PopularDestinations';
 import { VipPerksCard } from './home/VipPerksCard';
@@ -1131,6 +1132,9 @@ export const HomeView: React.FC = () => {
                 onOpenFood={setSelectedFood}
                 onSeeAll={handleSeeAllFoods}
               />
+
+              {/* 2b. Traditional festival dishes (only while a festival is ongoing / about to start) */}
+              <FestivalFoodSection onOpenFood={setSelectedFood} />
 
               {/* 3. Trending foods */}
               {randomTrending.length > 0 ? (
