@@ -10,11 +10,13 @@
     "preview": "vite preview",
     "ios:sync": "npm run build && npx cap sync ios",
     "test:food-ai": "node scripts/foodAiAudit.cjs",
-    "test:habit": "node scripts/dailyHabitAudit.cjs"
+    "test:habit": "node scripts/dailyHabitAudit.cjs",
+    "test:reminders": "node scripts/mealReminderAudit.cjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.0.0",
     "@capacitor/core": "^8.5.3",
+    "@capacitor/local-notifications": "^8.3.1",
     "@types/qrcode": "^1.5.6",
     "bakong-khqr": "^1.0.20",
     "clsx": "^2.1.1",

@@ -115,9 +115,9 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
             <p className="text-[11px] text-slate-600 dark:text-slate-400 pl-5 whitespace-pre-line">
               {tr(
                 language,
-                '• កាមេរ៉ា និងរូបភាព៖ ប្រើសម្រាប់តែពេលម្ចាស់ហាងថតរូបម្ហូប ឬជ្រើសរើសរូបភាពវិក្កយបត្រដើម្បីបង្ហោះចូលក្នុងប្រព័ន្ធប៉ុណ្ណោះ។\n• ទីតាំង៖ ប្រើដើម្បីបង្ហាញភោជនីយដ្ឋាន និងគោលដៅទេសចរណ៍នៅជិតអ្នក។ យើងមិនតាមដានទីតាំងរបស់អ្នកនៅពេលបិទកម្មវិធីឡើយ។',
-                '• Camera & Storage: Used exclusively when voluntarily uploading restaurant photos or receipt previews.\n• Location: Used only for discovering nearby restaurants and attractions.',
-                '• 相机与相册：仅在您主动上传餐厅照片或付款凭证截图时使用。\n• 位置信息：仅用于查找附近的餐厅与旅游景点，关闭应用后不会后台追踪您的位置。'
+                '• កាមេរ៉ា និងរូបភាព៖ ប្រើសម្រាប់តែពេលម្ចាស់ហាងថតរូបម្ហូប ឬជ្រើសរើសរូបភាពវិក្កយបត្រដើម្បីបង្ហោះចូលក្នុងប្រព័ន្ធប៉ុណ្ណោះ។\n• ទីតាំង៖ ប្រើដើម្បីបង្ហាញភោជនីយដ្ឋាន និងគោលដៅទេសចរណ៍នៅជិតអ្នក។ យើងមិនតាមដានទីតាំងរបស់អ្នកនៅពេលបិទកម្មវិធីឡើយ។\n• ការជូនដំណឹង៖ ប្រើសម្រាប់តែការរំលឹកម្ហូបតាមម៉ោងញ៉ាំដែលអ្នកបានបើកដោយខ្លួនឯងប៉ុណ្ណោះ។ ការរំលឹកត្រូវបានបង្កើតក្នុងទូរស័ព្ទរបស់អ្នក ហើយអ្នកអាចបិទបានគ្រប់ពេល។',
+                '• Camera & Storage: Used exclusively when voluntarily uploading restaurant photos or receipt previews.\n• Location: Used only for discovering nearby restaurants and attractions.\n• Notifications: Used only for the meal-time reminders you choose to turn on. They are created on your device and can be turned off at any time.',
+                '• 相机与相册：仅在您主动上传餐厅照片或付款凭证截图时使用。\n• 位置信息：仅用于查找附近的餐厅与旅游景点，关闭应用后不会后台追踪您的位置。\n• 通知：仅用于您主动开启的用餐时间提醒。提醒在您的设备本地生成，可随时关闭。'
               )}
             </p>
           </div>

@@ -16,6 +16,7 @@ import {
 } from '../../utils/dailyHabit';
 import { shareText } from '../../utils/shareApp';
 import { PassportStampButton } from '../PassportStampButton';
+import { MealReminderPanel } from './MealReminderPanel';
 import { FALLBACK_IMG, resolveHomePhoto, headingFont } from './homeUtils';
 
 interface Props {
@@ -200,6 +201,9 @@ const DailyHabitCardInner: React.FC<Props> = ({ onOpenFood }) => {
           <Share2 className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Opt-in meal-time reminders (native app only) */}
+      <MealReminderPanel />
     </section>
   );
 };

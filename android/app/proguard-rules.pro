@@ -19,3 +19,7 @@
 -keepattributes Signature
 -keepattributes Exceptions
 -keepattributes SourceFile,LineNumberTable
+
+# Capacitor Local Notifications (meal-time reminders): alarm receivers + plugin classes are looked up reflectively
+-keep class com.capacitorjs.plugins.localnotifications.** { *; }
+-dontwarn com.capacitorjs.plugins.localnotifications.**

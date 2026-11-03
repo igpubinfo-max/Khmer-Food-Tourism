@@ -39,6 +39,7 @@ const RestaurantCheckInModal = lazy(() => import('./components/RestaurantCheckIn
 const GoogleMapsPlaceSearchModal = lazy(() => import('./components/GoogleMapsPlaceSearchModal').then((m) => ({ default: m.GoogleMapsPlaceSearchModal })));
 import { Toast } from './components/Toast';
 import { RatePrompt } from './components/RatePrompt';
+import { MealReminderBootstrap } from './components/MealReminderBootstrap';
 import { OfflineBanner } from './components/OfflineBanner';
 import { AppUpdateBanner } from './components/AppUpdateBanner';
 import { SMART_HUB_EVENT } from './utils/smartHub';
@@ -272,6 +273,9 @@ const MainScreen: React.FC = () => {
 
       {/* One-time gentle rating prompt (after 5th meaningful action) */}
       <RatePrompt />
+
+      {/* Daily meal-time reminders (native app only; renders nothing) */}
+      <MealReminderBootstrap />
     </div>
   );
 };
