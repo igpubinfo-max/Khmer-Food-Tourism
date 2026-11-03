@@ -1,7 +1,7 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1351;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1359;
 export const APP_RELEASE_DATE = '2026-11-03';
 
 /**
@@ -2695,6 +2695,33 @@ export const getDynamicVipBenefits = (
   settings?: Partial<AppSettings> | null
 ): VipBenefitItem[] => {
   const s = settings || getStoredAppSettingsFallback();
+  const rawRotDays = Number(s.vipFeaturedDurationDays);
+  const rotDays =
+    Number.isFinite(rawRotDays) && rawRotDays >= 1
+      ? Math.min(365, Math.round(rawRotDays))
+      : DEFAULT_VIP_FEATURED_DURATION_DAYS;
+
+  const applyDynamicRotationDaysToBenefit5 = (item: VipBenefitItem): VipBenefitItem => {
+    if (item.id !== 5 || rotDays === 1) return item;
+    const isDefaultTitleKh = item.titleKh === 'បង្ហាញហាងថ្មីនៅលើគេបង្អស់រយៈពេល ២៤ ម៉ោង';
+    const isDefaultTitleEn = item.titleEn === '24-Hour Top-of-List Pinning for New Shops';
+    return {
+      ...item,
+      titleKh: isDefaultTitleKh
+        ? `បង្ហាញហាងថ្មីនៅលើគេបង្អស់រយៈពេល ${rotDays} ថ្ងៃ (${rotDays * 24} ម៉ោង)`
+        : item.titleKh,
+      titleEn: isDefaultTitleEn
+        ? `${rotDays}-Day (${rotDays * 24}h) Top-of-List Pinning for New Shops`
+        : item.titleEn,
+      descriptionKh: isDefaultTitleKh
+        ? `ហាងថ្មីដែលបន្ថែមដោយសមាជិក VIP នឹងត្រូវដាក់បង្ហាញនៅលើគេបង្អស់នៃបញ្ជីហាងដោយស្វ័យប្រវត្តិរយៈពេល ${rotDays} ថ្ងៃ (${rotDays * 24} ម៉ោង) ដើម្បីទទួលបានការមើលឃើញខ្ពស់បំផុត`
+        : item.descriptionKh,
+      descriptionEn: isDefaultTitleEn
+        ? `New shops added by VIP users stay pinned at the top of the shop list for ${rotDays} days (${rotDays * 24} hours) for maximum visibility.`
+        : item.descriptionEn,
+    };
+  };
+
   if (Array.isArray(s.vipBenefitsList) && s.vipBenefitsList.length > 0) {
     // Benefits saved by older versions may still advertise removed/unverified perks — swap them for the current ones.
     const LEGACY_TITLES_EN: Record<string, number> = {
@@ -2706,7 +2733,7 @@ export const getDynamicVipBenefits = (
     const currentById = new Map<number, VipBenefitItem>(TEN_VIP_BENEFITS.map((b) => [b.id, b]));
     return s.vipBenefitsList.map((raw, idx) => {
       const legacyId = LEGACY_TITLES_EN[(raw.titleEn || '').trim()];
-      const b = legacyId ? currentById.get(legacyId) || raw : raw;
+      const b = applyDynamicRotationDaysToBenefit5(legacyId ? currentById.get(legacyId) || raw : raw);
       return {
         ...b,
         id: b.id || idx + 1,
@@ -2717,11 +2744,14 @@ export const getDynamicVipBenefits = (
       };
     });
   }
-  return TEN_VIP_BENEFITS.map((b) => ({
-    ...b,
-    descKh: b.descriptionKh,
-    descEn: b.descriptionEn,
-  }));
+  return TEN_VIP_BENEFITS.map((raw) => {
+    const b = applyDynamicRotationDaysToBenefit5(raw);
+    return {
+      ...b,
+      descKh: b.descriptionKh,
+      descEn: b.descriptionEn,
+    };
+  });
 };
 
 /**
@@ -2976,7 +3006,7 @@ export const getVipFeaturedRotationConfig = (
   return {
     enabled,
     durationDays,
-    durationMs: NEW_VIP_SHOP_PIN_DURATION_MS,
+    durationMs: durationDays * NEW_VIP_SHOP_PIN_DURATION_MS,
   };
 };
 
@@ -3152,10 +3182,13 @@ export const getVipFeaturedRotationState = (
     if (currentlyFeaturedIds.has(shop.id)) continue;
     const approvedMs = getRestaurantApprovedAtMs(shop);
     const explicitUntilMs = shop.featuredUntilAt ? Date.parse(shop.featuredUntilAt) : Number.NaN;
-    // Pin newly added VIP shops at the top for 24 hours from when they were added/approved
+    // Pin newly added VIP shops at the top for the configured duration (`config.durationMs`, default 24 hours / 1 day) from when they were added/approved
     const boostEndMs =
       approvedMs > 0
-        ? approvedMs + NEW_VIP_SHOP_PIN_DURATION_MS
+        ? Math.max(
+            approvedMs + config.durationMs,
+            !Number.isNaN(explicitUntilMs) ? explicitUntilMs : 0
+          )
         : !Number.isNaN(explicitUntilMs)
         ? explicitUntilMs
         : 0;
