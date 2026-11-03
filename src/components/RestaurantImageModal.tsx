@@ -311,7 +311,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold font-moul leading-tight">
-                {isKm ? 'កែប្រែរូបតំណាងហាង & រូបភាពមុខម្ហូប' : 'Edit Shop Profile & Food Photos'}
+                {isKm ? 'កែប្រែរូបភាពតំណាងហាង' : 'Edit Shop Photos'}
               </h2>
               <p className="text-[11px] text-emerald-100 line-clamp-1">
                 {isKm ? restaurant.nameKh : restaurant.nameEn}
@@ -476,103 +476,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
             </div>
           )}
 
-          {/* 2. Food Photos (Multiple Images) Section */}
-          <div className="p-3.5 rounded-2xl bg-amber-50/50 dark:bg-slate-800/70 border border-amber-300 dark:border-amber-700/50 space-y-2.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-                <Utensils className="w-4 h-4 text-amber-600" />
-                <span>
-                  {isKm
-                    ? `២. រូបភាពមុខម្ហូបប្រចាំហាង (Food Photos - ${foodPhotos.length} សន្លឹក)`
-                    : `2. Food Photos (${foodPhotos.length})`}
-                </span>
-              </span>
-              <span className="text-[10px] text-amber-700 dark:text-amber-300 font-bold">
-                {isKm ? 'ច្រើនសន្លឹក' : 'Multiple'}
-              </span>
-            </div>
-
-            <input
-              type="file"
-              ref={foodFileInputRef}
-              onChange={handleFoodFilesChange}
-              accept="image/jpeg,image/jpg,image/png,image/webp"
-              multiple
-              className="hidden"
-            />
-            <input
-              type="file"
-              ref={foodCameraInputRef}
-              onChange={handleFoodFilesChange}
-              accept="image/jpeg,image/jpg,image/png"
-              capture="environment"
-              className="hidden"
-            />
-
-            {foodPhotos.length > 0 ? (
-              <div className="grid grid-cols-3 gap-2">
-                {foodPhotos.map((imgUrl, i) => (
-                  <div
-                    key={i}
-                    className="relative group aspect-square rounded-xl overflow-hidden border border-amber-400 bg-slate-900"
-                  >
-                    <img
-                      src={imgUrl}
-                      alt={`Food ${i + 1}`}
-                      onClick={() => setPhotoUrl(imgUrl)}
-                      className="w-full h-full object-cover cursor-pointer"
-                    />
-                    <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/75 text-white text-[9px] font-bold">
-                      {isKm ? `ម្ហូបទី ${i + 1}` : `Food ${i + 1}`}
-                    </span>
-                    <div className="absolute inset-x-0 bottom-0 p-1 bg-black/75 flex items-center justify-between gap-1">
-                      <button
-                        type="button"
-                        onClick={() => handleReplaceFoodPhoto(i)}
-                        className="px-1.5 py-0.5 rounded bg-white/90 text-slate-900 font-bold text-[9px] cursor-pointer"
-                      >
-                        {isKm ? 'ប្តូរ' : 'Replace'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveFoodPhoto(i)}
-                        className="px-1.5 py-0.5 rounded bg-rose-600 text-white font-bold text-[9px] cursor-pointer"
-                      >
-                        <Trash2 className="w-2.5 h-2.5 inline" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-[11px] text-slate-500 text-center py-2">
-                {isKm
-                  ? 'មិនទាន់មានរូបភាពមុខម្ហូបបន្ថែមនៅឡើយទេ។'
-                  : 'No additional food photos uploaded yet.'}
-              </p>
-            )}
-
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => foodFileInputRef.current?.click()}
-                className="py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <Upload className="w-3.5 h-3.5" />
-                <span>{isKm ? 'បន្ថែមរូបម្ហូបពី Gallery' : 'Add Food Photos'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => foodCameraInputRef.current?.click()}
-                className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <Camera className="w-3.5 h-3.5" />
-                <span>{isKm ? 'ថតរូបម្ហូប (Camera)' : 'Camera Food Photo'}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Option 3: Direct Image URL */}
+          {/* Direct Image URL */}
           <div className="space-y-1.5">
             <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
               {isKm ? 'ឬ បញ្ចូលតំណភ្ជាប់រូបភាព (Image URL)' : 'Or Paste Image URL'}

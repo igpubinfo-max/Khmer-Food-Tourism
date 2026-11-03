@@ -65,12 +65,12 @@ export const MyShopPanel: React.FC<Props> = ({ language, shops, usedStores, tota
                 <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
                   {language === 'km' ? shop.nameKh : shop.nameEn || shop.nameKh}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                   {tr(
                     language,
-                    `${shop.menuItems?.length || 0} / 20 មុខម្ហូបក្នុងម៉ឺនុយ`,
-                    `${shop.menuItems?.length || 0} / 20 menu items`,
-                    `菜单 ${shop.menuItems?.length || 0} / 20 项`
+                    `📍 ${shop.provinceKh || 'កម្ពុជា'} • 👁️ ${shop.analytics?.views ?? 0} ចូលមើល`,
+                    `📍 ${shop.provinceEn || shop.provinceKh || 'Cambodia'} • 👁️ ${shop.analytics?.views ?? 0} views`,
+                    `📍 ${shop.provinceEn || shop.provinceKh || '柬埔寨'} • 👁️ ${shop.analytics?.views ?? 0} 浏览`
                   )}
                 </p>
               </div>

@@ -1,19 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  X, UtensilsCrossed, Plus, Trash2, Edit2, Sparkles, 
+  X, Trash2, Sparkles, 
   AlertCircle, CheckCircle2, Image, DollarSign, Calendar, Clock,
   Store, BarChart3, ShieldCheck, Share2, Phone, MapPin, ExternalLink,
   MessageCircle, Copy, Check, HelpCircle, ArrowRight, Camera, Upload, Lock, ShieldAlert, Star, Mail
 } from 'lucide-react';
 import { 
-  RestaurantMenuItem, RestaurantPriceLevel, isRestaurantPremiumActive, isUserVipActive, 
+  RestaurantPriceLevel, isRestaurantPremiumActive, isUserVipActive, 
   VipPlanType, getVipAccountState, getVipRemainingDays,
   getRestaurantRatingSummary, isSeedRestaurantId, getRestaurantCreatedAtMs,
   getDynamicVipPlans, getDynamicVipBenefits,
   isValidCambodiaCoordinates, buildCanonicalGoogleMapsPinUrl,
   isValidGoogleMapsUrl, extractCoordsFromGoogleMapsUrl,
-  NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI, sanitizeRestaurantShopPhoto
 } from '../types';
 import { tr } from '../utils/i18n';
 import {
@@ -34,9 +33,6 @@ export const ManageMenuModal: React.FC = () => {
     currentUser,
     appSettings,
     getCurrentUserStoreQuota,
-    addRestaurantMenuItem,
-    updateRestaurantMenuItem,
-    deleteRestaurantMenuItem,
     updateRestaurant,
     deleteRestaurant,
     submitShopPhotoReplacementRequest,
@@ -61,23 +57,9 @@ export const ManageMenuModal: React.FC = () => {
   const storeQuota = getCurrentUserStoreQuota();
 
   // Main Tabs: info, photos, analytics, membership
-  const [mainTab, setMainTab] = useState<'menu' | 'info' | 'photos' | 'analytics' | 'membership'>('info');
-
-  // Menu item form mode: list, add, edit
-  const [menuMode, setMenuMode] = useState<'list' | 'add' | 'edit'>('list');
-  const [editingItemId, setEditingItemId] = useState<string | null>(null);
-  const [confirmDeleteMenuItemId, setConfirmDeleteMenuItemId] = useState<string | null>(null);
+  const [mainTab, setMainTab] = useState<'info' | 'photos' | 'analytics' | 'membership'>('info');
   const [statusBanner, setStatusBanner] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  // Menu item fields (Name & Description Only — No Individual Dish Photo Uploads)
-  const [nameKh, setNameKh] = useState('');
-  const [nameEn, setNameEn] = useState('');
-  const [dishPhotoUrl, setDishPhotoUrl] = useState('');
-  const [descriptionKh, setDescriptionKh] = useState('');
-
   const modalBodyRef = useRef<HTMLDivElement>(null);
-  const nameKhInputRef = useRef<HTMLInputElement>(null);
-  const [isSavingDish, setIsSavingDish] = useState(false);
 
   // Single Shop Photo Replacement State
   const shopPhotoFileRef = useRef<HTMLInputElement>(null);
@@ -152,9 +134,6 @@ export const ManageMenuModal: React.FC = () => {
       setStoreTelegramUrl(fresh.telegramUrl || '');
       setStoreFacebookUrl(fresh.facebookUrl || '');
       setConfirmDeleteStore(false);
-      setConfirmDeleteMenuItemId(null);
-      setMenuMode('list');
-      setEditingItemId(null);
       setStatusBanner(null);
     }
   }, [managingRestaurant?.id]);
@@ -213,14 +192,8 @@ export const ManageMenuModal: React.FC = () => {
       )
     : getOwnedRestaurantsForUser(currentUser);
 
-  const currentRestMenu = Array.isArray(currentRest.menuItems) ? currentRest.menuItems : [];
-  const managingRestMenu = Array.isArray(managingRestaurant.menuItems) ? managingRestaurant.menuItems : [];
-  const menuItems = currentRestMenu.length >= managingRestMenu.length ? currentRestMenu : managingRestMenu;
   const isPremiumActive = isRestaurantPremiumActive(currentRest) || isApprovedVip || isAdmin;
   const isExpired = vipState === 'expired_vip' || (currentRest.membershipTier === 'premium' && !isPremiumActive);
-  const isFree = !isPremiumActive && !isExpired;
-  const maxMenuLimit = isPremiumActive ? 20 : 5;
-  const maxPhotoLimit = isPremiumActive ? 30 : 3;
   const vipRemainingDays = getVipRemainingDays(currentUser);
   const vipExpiryRaw = currentUser?.subscriptionExpiryDate || currentRest.membershipExpiresAt || currentRest.subscriptionExpiresAt;
   const formattedVipExpiry = vipExpiryRaw
@@ -242,15 +215,6 @@ export const ManageMenuModal: React.FC = () => {
 
   const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'https://khmerfoodtourism.com';
   const shareableUrl = `${origin}/?restaurant=${managingRestaurant.id}`;
-
-  const resetMenuForm = () => {
-    setNameKh('');
-    setNameEn('');
-    setDishPhotoUrl('');
-    setDescriptionKh('');
-    setEditingItemId(null);
-    setMenuMode('list');
-  };
 
   // Single Shop Photo Picker & Moderation Handlers
   const handlePickSingleShopPhotoFromGallery = async () => {
@@ -349,156 +313,6 @@ export const ManageMenuModal: React.FC = () => {
     }
   };
 
-  const handleStartAdd = () => {
-    if (menuItems.length >= maxMenuLimit) {
-      if (!isPremiumActive) {
-        showToast(
-          tr(
-            language,
-            `គម្រោងឥតគិតថ្លៃអាចបន្ថែមមុខម្ហូបបាន ${maxMenuLimit} មុខ។ សូមដំឡើងទៅគម្រោង VIP ដើម្បីបន្ថែមរហូតដល់ ២០ មុខ!`,
-            `Free Plan allows up to ${maxMenuLimit} dishes. Upgrade to VIP to add up to 20 dishes!`,
-            `免费计划最多可添加 ${maxMenuLimit} 道菜品。升级 VIP 可添加多达 20 道菜品！`
-          ),
-          'warning'
-        );
-        setMainTab('membership');
-      } else {
-        showToast(
-          tr(
-            language,
-            'សមាជិកភាព Premium VIP អនុញ្ញាតឱ្យបន្ថែមមុខម្ហូបអតិបរមាត្រឹម ២០ មុខប៉ុណ្ណោះ!',
-            'Premium VIP membership allows a maximum of 20 food menu items!',
-            'VIP 会员最多可添加 20 道菜品！'
-          ),
-          'warning'
-        );
-      }
-      return;
-    }
-    resetMenuForm();
-    setStatusBanner(null);
-    setMenuMode('add');
-    setTimeout(() => {
-      modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-      nameKhInputRef.current?.focus();
-    }, 60);
-  };
-
-  const handleStartEdit = (item: RestaurantMenuItem) => {
-    setEditingItemId(item.id);
-    setNameKh(item.nameKh);
-    setNameEn(item.nameEn || '');
-    setDishPhotoUrl(item.photoUrl);
-    setDescriptionKh(item.descriptionKh || '');
-    setStatusBanner(null);
-    setMenuMode('edit');
-    setTimeout(() => {
-      modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 60);
-  };
-
-  const handleMenuSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isSavingDish) return;
-
-    const finalNameKh = nameKh.trim() || nameEn.trim();
-    if (!finalNameKh) {
-      const errMsg = tr(
-        language,
-        '⚠️ សូមបញ្ចូលឈ្មោះមុខម្ហូប (ជាភាសាខ្មែរ ឬ អង់គ្លេស) ជាមុនសិន!',
-        '⚠️ Please enter the dish name before saving!',
-        '⚠️ 保存前请输入菜品名称！'
-      );
-      setStatusBanner({ type: 'error', text: errMsg });
-      showToast(errMsg, 'error');
-      modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-      setTimeout(() => nameKhInputRef.current?.focus(), 100);
-      return;
-    }
-
-    const finalPhoto =
-      sanitizeRestaurantShopPhoto(currentRest.id, currentRest.photoUrl) || NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI;
-
-    setIsSavingDish(true);
-    try {
-      if (menuMode === 'add') {
-        const ok = addRestaurantMenuItem(managingRestaurant.id, {
-          nameKh: finalNameKh,
-          nameEn: nameEn.trim() || finalNameKh,
-          priceUsd: 0,
-          priceRiel: 0,
-          photoUrl: finalPhoto,
-          descriptionKh: descriptionKh.trim(),
-        });
-        if (ok) {
-          resetMenuForm();
-          setStatusBanner({
-            type: 'success',
-            text: tr(
-              language,
-              `✅ បានរក្សាទុកមុខម្ហូប "${finalNameKh}" ចូលក្នុងហាង "${managingRestaurant.nameKh}" ដោយជោគជ័យ!`,
-              `✅ Saved "${finalNameKh}" to "${managingRestaurant.nameEn || managingRestaurant.nameKh}" successfully!`,
-              `✅ 已成功将 "${finalNameKh}" 保存至店铺菜单！`
-            ),
-          });
-          modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-          setStatusBanner({
-            type: 'error',
-            text: tr(
-              language,
-              '⚠️ មិនអាចរក្សាទុកមុខម្ហូបបានទេ សូមពិនិត្យព័ត៌មានម្តងទៀត។',
-              '⚠️ Could not save dish. Please check the form details and try again.',
-              '⚠️ 无法保存菜品，请检查输入信息后重试。'
-            ),
-          });
-          modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-      } else if (menuMode === 'edit' && editingItemId) {
-        const existing = menuItems.find(m => m.id === editingItemId);
-        if (!existing) {
-          setIsSavingDish(false);
-          return;
-        }
-        const ok = updateRestaurantMenuItem(managingRestaurant.id, {
-          ...existing,
-          nameKh: finalNameKh,
-          nameEn: nameEn.trim() || finalNameKh,
-          priceUsd: 0,
-          priceRiel: 0,
-          photoUrl: finalPhoto,
-          descriptionKh: descriptionKh.trim(),
-        });
-        if (ok) {
-          resetMenuForm();
-          setStatusBanner({
-            type: 'success',
-            text: tr(
-              language,
-              `✅ បានរក្សាទុកការកែប្រែមុខម្ហូប "${finalNameKh}" ដោយជោគជ័យ!`,
-              `✅ Updated dish "${finalNameKh}" successfully!`,
-              `✅ 已成功更新菜品 "${finalNameKh}"！`
-            ),
-          });
-          modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-          setStatusBanner({
-            type: 'error',
-            text: tr(
-              language,
-              '⚠️ មិនអាចរក្សាទុកការកែប្រែបានទេ សូមពិនិត្យព័ត៌មានម្តងទៀត។',
-              '⚠️ Failed to save changes. Please verify your input.',
-              '⚠️ 无法保存修改，请检查输入信息。'
-            ),
-          });
-          modalBodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-      }
-    } finally {
-      setIsSavingDish(false);
-    }
-  };
-
   const handleSaveStoreInfo = (e: React.FormEvent) => {
     e.preventDefault();
     if (!storeNameKh.trim() && !storeNameEn.trim()) {
@@ -570,7 +384,7 @@ export const ManageMenuModal: React.FC = () => {
     const isAdminEditing = Boolean(isAdmin);
 
     const finalCover = storeCoverPhoto.trim() || managingRestaurant.photoUrl;
-    const finalGallery = Array.from(new Set([finalCover, ...storeGalleryPhotos])).filter(Boolean).slice(0, maxPhotoLimit);
+    const finalGallery = [finalCover].filter(Boolean);
     updateRestaurant({
       ...managingRestaurant,
       nameKh: storeNameKh.trim() || storeNameEn.trim(),
@@ -601,9 +415,7 @@ export const ManageMenuModal: React.FC = () => {
             : 'Flagged for Admin location review — please verify exact GPS coordinates.',
       photoUrl: finalCover,
       profileImage: finalCover,
-      foodImages: Array.isArray(managingRestaurant.foodImages)
-        ? managingRestaurant.foodImages.filter((u) => u && !finalGallery.includes(u))
-        : [],
+      foodImages: [],
       galleryPhotos: finalGallery,
       promoVideoUrl: isPremiumActive ? (storePromoVideoUrl.trim() || undefined) : managingRestaurant.promoVideoUrl,
       telegramUrl: storeTelegramUrl.trim() || undefined,
@@ -625,14 +437,12 @@ export const ManageMenuModal: React.FC = () => {
 
   const handleSavePhotosOnly = () => {
     const finalCover = storeCoverPhoto.trim() || storeGalleryPhotos[0] || managingRestaurant.photoUrl;
-    const cappedGallery = Array.from(new Set([finalCover, ...storeGalleryPhotos])).filter(Boolean).slice(0, maxPhotoLimit);
+    const cappedGallery = [finalCover].filter(Boolean);
     updateRestaurant({
       ...managingRestaurant,
       photoUrl: finalCover,
       profileImage: finalCover,
-      foodImages: Array.isArray(managingRestaurant.foodImages)
-        ? managingRestaurant.foodImages.filter((u) => u && !cappedGallery.includes(u))
-        : [],
+      foodImages: [],
       galleryPhotos: cappedGallery,
       updatedAt: new Date().toISOString(),
     });
@@ -835,8 +645,8 @@ export const ManageMenuModal: React.FC = () => {
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 max-w-xs mx-auto leading-relaxed">
                   {isKm
-                    ? 'លោកអ្នកត្រូវចូលគណនីដែលមានសិទ្ធិ VIP ដើម្បីគ្រប់គ្រងហាង និងមុខម្ហូប។'
-                    : 'Please sign in to your approved VIP account to manage your restaurant and menu.'}
+                    ? 'លោកអ្នកត្រូវចូលគណនីដែលមានសិទ្ធិ VIP ដើម្បីគ្រប់គ្រងព័ត៌មានហាងរបស់អ្នក។'
+                    : 'Please sign in to your approved VIP account to manage your restaurant.'}
                 </p>
                 <div className="pt-2">
                   <button
@@ -864,7 +674,7 @@ export const ManageMenuModal: React.FC = () => {
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
                   {isKm
-                    ? 'ការស្នើសុំសមាជិកភាព VIP របស់អ្នកត្រូវបានកត់ត្រា និងកំពុងស្ថិតក្នុងការពិនិត្យផ្ទៀងផ្ទាត់ដោយ Administrator។ មុខងារគ្រប់គ្រងហាង និងបន្ថែមមុខម្ហូបនឹងបើកដំណើរការភ្លាមៗក្រោយពេលទទួលបានការអនុម័ត!'
+                    ? 'ការស្នើសុំសមាជិកភាព VIP របស់អ្នកត្រូវបានកត់ត្រា និងកំពុងស្ថិតក្នុងការពិនិត្យផ្ទៀងផ្ទាត់ដោយ Administrator។ មុខងារគ្រប់គ្រងហាងនឹងបើកដំណើរការភ្លាមៗក្រោយពេលទទួលបានការអនុម័ត!'
                     : 'Your VIP subscription request is currently pending Admin verification. Restaurant management will unlock immediately upon approval!'}
                 </p>
                 <div className="pt-2">
@@ -890,8 +700,8 @@ export const ManageMenuModal: React.FC = () => {
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
                   {isKm
-                    ? `សមាជិកភាព VIP របស់លោកអ្នកបានផុតកំណត់កាលបរិច្ឆេទហើយ។ សូមបន្តកញ្ចប់ VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} ថ្ងៃ) ដើម្បីបន្តគ្រប់គ្រងហាង និងមុខម្ហូប។`
-                    : `Your VIP membership has expired. Please renew your VIP membership ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} days or $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} days) to continue managing your restaurant and menu items.`}
+                    ? `សមាជិកភាព VIP របស់លោកអ្នកបានផុតកំណត់កាលបរិច្ឆេទហើយ។ សូមបន្តកញ្ចប់ VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} ថ្ងៃ) ដើម្បីបន្តគ្រប់គ្រងហាង VIP របស់អ្នក។`
+                    : `Your VIP membership has expired. Please renew your VIP membership ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} days or $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} days) to continue managing your VIP restaurant.`}
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
                   <button
@@ -946,8 +756,8 @@ export const ManageMenuModal: React.FC = () => {
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto leading-relaxed">
                   {isKm
-                    ? `ផ្ទាំងគ្រប់គ្រងម្ចាស់ហាង និងការបន្ថែមមុខម្ហូប គឺអនុញ្ញាតជូនតែសមាជិក VIP ដែលបានបង់ប្រាក់ និងទទួលបានការអនុម័តពី Admin ប៉ុណ្ណោះ។ សូមដំឡើងទៅកញ្ចប់ VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} ថ្ងៃ) ដើម្បីទទួលបានអត្ថប្រយោជន៍ទាំង ${dynamicBenefits.length}!`
-                    : `Owner management is reserved exclusively for admin-approved VIP subscribers. Upgrade to VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} days or $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} days) to manage your restaurant and menu items!`}
+                    ? `ផ្ទាំងគ្រប់គ្រងម្ចាស់ហាង VIP គឺអនុញ្ញាតជូនតែសមាជិក VIP ដែលបានបង់ប្រាក់ និងទទួលបានការអនុម័តពី Admin ប៉ុណ្ណោះ។ សូមដំឡើងទៅកញ្ចប់ VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} ថ្ងៃ ឬ $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} ថ្ងៃ) ដើម្បីទទួលបានអត្ថប្រយោជន៍ទាំង ${dynamicBenefits.length}!`
+                    : `Owner management is reserved exclusively for admin-approved VIP subscribers. Upgrade to VIP ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.quarterly.durationDays} days or $${dynamicPlansMap.annual.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} days) to manage your VIP restaurant!`}
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
                   <button
@@ -1125,244 +935,7 @@ export const ManageMenuModal: React.FC = () => {
         {/* Body Content */}
         <div ref={modalBodyRef} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 no-scrollbar text-xs">
 
-          {/* TAB 1: MENU ITEMS */}
-          {mainTab === 'menu' && (
-            <div>
-              {menuMode === 'list' && (
-                <div className="space-y-3 font-khmer">
-                  {/* Friendly Khmer Step-by-Step Guide */}
-                  <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-3">
-                    <div className="space-y-0.5">
-                      <h3 className="font-bold text-[#064E3B] dark:text-emerald-300 text-xs">
-                        {isKm ? '📋 គ្រប់គ្រងមុខម្ហូបក្នុងហាងរបស់អ្នក' : '📋 Manage Your Store Menu'}
-                      </h3>
-                      <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                        {isKm
-                          ? 'ចុច "+ បន្ថែមមុខម្ហូបថ្មី" ដើម្បីដាក់រូបម្ហូប ឬចុច "កែប្រែ / លុប" លើមុខម្ហូបនីមួយៗ។'
-                          : 'Tap "+ Add New Dish" to add dishes with photos, or Edit / Delete existing items.'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {menuItems.length < maxMenuLimit ? (
-                    <button
-                      type="button"
-                      onClick={handleStartAdd}
-                      className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#065F46] text-white font-bold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
-                    >
-                      <Plus className="w-4 h-4 text-amber-300" />
-                      <span>{tr(language, '+ បន្ថែមមុខម្ហូបថ្មី (Add New Dish)', '+ Add New Dish', '+ 添加新菜品')}</span>
-                    </button>
-                  ) : !isPremiumActive ? (
-                    <button
-                      type="button"
-                      onClick={() => setMainTab('membership')}
-                      className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-xs shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      <span>
-                        {tr(
-                          language,
-                          '👑 ពេញកំណត់គម្រោងឥតគិតថ្លៃ (៥ មុខ) — ដំឡើង VIP ដើម្បីបន្ថែមដល់ ២០ មុខ!',
-                          '👑 Free limit reached (5 dishes) — Upgrade to VIP for up to 20 dishes!',
-                          '👑 已达免费上限（5道）— 升级 VIP 可添加多达 20 道菜品！'
-                        )}
-                      </span>
-                    </button>
-                  ) : null}
-
-                  {menuItems.length === 0 ? (
-                    <div className="py-8 px-4 text-center bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 space-y-2.5 font-khmer">
-                      <UtensilsCrossed className="w-10 h-10 mx-auto text-emerald-600/60" />
-                      <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                        {tr(language, 'ហាងនេះមិនទាន់មានមុខម្ហូបនៅឡើយទេ', 'No menu items added to this shop yet', '此店铺尚未添加菜品')}
-                      </p>
-                      <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
-                        {tr(
-                          language,
-                          'បន្ថែមមុខម្ហូបឆ្ងាញ់ៗរបស់ហាងអ្នក ជាមួយរូបភាព ដើម្បីទាក់ទាញអតិថិជន!',
-                          'Add your signature dishes with photos so customers can see your menu!',
-                          '添加招牌菜品与照片，吸引更多顾客！'
-                        )}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={handleStartAdd}
-                        className="px-5 py-2.5 rounded-xl bg-[#064E3B] text-white font-bold text-xs hover:bg-[#047857] transition active:scale-95 cursor-pointer"
-                      >
-                        {tr(language, '+ បន្ថែមមុខម្ហូបដំបូងឥឡូវនេះ', '+ Add First Dish Now', '+ 立即添加第一道菜品')}
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-2.5">
-                      {menuItems.map((item, index) => (
-                        <div 
-                          key={item.id}
-                          className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-2.5 shadow-xs"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-700 text-[#064E3B] dark:text-emerald-300 text-xs font-extrabold flex items-center justify-center shrink-0">
-                              #{index + 1}
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-bold text-[#0F172A] dark:text-white font-khmer text-xs sm:text-sm truncate">
-                                {item.nameKh}
-                              </h4>
-                              {item.nameEn && (
-                                <p className="text-[10px] text-slate-500 truncate">{item.nameEn}</p>
-                              )}
-                              {item.descriptionKh && (
-                                <p className="text-[10px] text-slate-500 font-khmer line-clamp-2 mt-0.5">{item.descriptionKh}</p>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Clear Labeled Action Buttons + Safe Delete Confirmation */}
-                          {confirmDeleteMenuItemId === item.id ? (
-                            <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 flex items-center justify-between gap-2">
-                              <span className="text-[11px] font-bold text-red-700 dark:text-red-300">
-                                {isKm ? `តើអ្នកពិតជាចង់លុប "${item.nameKh}" មែនទេ?` : `Delete "${item.nameKh}"?`}
-                              </span>
-                              <div className="flex items-center gap-1.5 shrink-0">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    deleteRestaurantMenuItem(managingRestaurant.id, item.id);
-                                    setConfirmDeleteMenuItemId(null);
-                                    setStatusBanner({
-                                      type: 'success',
-                                      text: isKm ? `🗑️ បានលុបមុខម្ហូប "${item.nameKh}" រួចរាល់!` : `🗑️ Deleted "${item.nameKh}"!`,
-                                    });
-                                  }}
-                                  className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] cursor-pointer"
-                                >
-                                  {isKm ? 'បាទ/ចាស លុប' : 'Yes, Delete'}
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setConfirmDeleteMenuItemId(null)}
-                                  className="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px] cursor-pointer"
-                                >
-                                  {isKm ? 'បោះបង់' : 'Cancel'}
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-slate-700/60">
-                              <button
-                                type="button"
-                                onClick={() => handleStartEdit(item)}
-                                className="py-1.5 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-[#064E3B] dark:text-emerald-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition disabled:opacity-40 cursor-pointer"
-                              >
-                                <Edit2 className="w-3.5 h-3.5" />
-                                <span>{isKm ? '✏️ កែប្រែមុខម្ហូប' : '✏️ Edit Dish'}</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setConfirmDeleteMenuItemId(item.id)}
-                                className="py-1.5 px-3 rounded-xl bg-red-50 dark:bg-red-950/30 hover:bg-red-100 text-red-600 dark:text-red-400 font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                <span>{isKm ? '🗑️ លុបមុខម្ហូប' : '🗑️ Delete Dish'}</span>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Menu Add / Edit Form */}
-              {(menuMode === 'add' || menuMode === 'edit') && (
-                <form onSubmit={handleMenuSubmit} noValidate className="space-y-3 font-khmer">
-                  <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 flex items-center justify-between gap-2">
-                    <h3 className="font-bold text-xs sm:text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
-                      <UtensilsCrossed className="w-4 h-4" />
-                      <span>
-                        {menuMode === 'add'
-                          ? (isKm ? '➕ បន្ថែមមុខម្ហូបថ្មី' : '➕ Add New Dish')
-                          : (isKm ? '✏️ កែប្រែមុខម្ហូប' : '✏️ Edit Dish')}
-                      </span>
-                    </h3>
-                    <button
-                      type="button"
-                      onClick={resetMenuForm}
-                      className="px-3 py-1 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-100 cursor-pointer"
-                    >
-                      {isKm ? 'បោះបង់ (Cancel)' : 'Cancel'}
-                    </button>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                      {isKm ? '១. ឈ្មោះមុខម្ហូប (ជាភាសាខ្មែរ) *' : '1. Dish Name (Khmer) *'}
-                    </label>
-                    <input
-                      ref={nameKhInputRef}
-                      type="text"
-                      value={nameKh}
-                      onChange={e => setNameKh(e.target.value)}
-                      placeholder="ឧ. ត្រីដុតអំបិលម្ទេស ឬ សម្លកកូរ"
-                      className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                      {isKm ? '២. ឈ្មោះមុខម្ហូប (ជាភាសាអង់គ្លេស - មិនបង្ខំ)' : '2. Dish Name (English - Optional)'}
-                    </label>
-                    <input
-                      type="text"
-                      value={nameEn}
-                      onChange={e => setNameEn(e.target.value)}
-                      placeholder="e.g. Grilled Fish with Chili Salt"
-                      className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                      {isKm ? '៣. ការពិពណ៌នាអំពីមុខម្ហូប (មិនបង្ខំ)' : '3. Short Dish Description (Optional)'}
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={descriptionKh}
-                      onChange={e => setDescriptionKh(e.target.value)}
-                      placeholder="រៀបរាប់ពីរសជាតិ គ្រឿងផ្សំ និងរបៀបទទួលទាន..."
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs resize-none focus:ring-2 focus:ring-emerald-500/30 focus:border-[#059669] outline-none text-[#0F172A] dark:text-white"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 pt-2">
-                    <button
-                      type="button"
-                      onClick={resetMenuForm}
-                      className="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold cursor-pointer"
-                    >
-                      {isKm ? 'បោះបង់ (Cancel)' : 'Cancel'}
-                    </button>
-
-                    <button
-                      type="submit"
-                      disabled={isSavingDish}
-                      className="py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] disabled:opacity-60 text-white font-bold shadow-xs transition active:scale-95 cursor-pointer"
-                    >
-                      {isSavingDish
-                        ? tr(language, '⏳ កំពុងរក្សាទុក...', '⏳ Saving...', '⏳ 正在保存...')
-                        : menuMode === 'add'
-                        ? tr(language, '💾 រក្សាទុកមុខម្ហូប', '💾 Save Dish', '💾 保存菜品')
-                        : tr(language, '💾 រក្សាទុកការកែប្រែ', '💾 Update Dish', '💾 保存修改')}
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-          )}
-
-          {/* TAB 2: STORE INFORMATION & PRICES */}
+          {/* TAB 1: STORE INFORMATION */}
           {mainTab === 'info' && (
             <form onSubmit={handleSaveStoreInfo} noValidate className="space-y-3 font-khmer">
               <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 space-y-2">
@@ -1603,7 +1176,7 @@ export const ManageMenuModal: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-xs text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
                     <span>🎥</span>
-                    <span>{isKm ? 'វីដេអូម្ហូប Food Video Reels (TikTok / Facebook / YouTube)' : 'Food Video Reels (TikTok / FB / YouTube)'}</span>
+                    <span>{isKm ? 'វីដេអូផ្សព្វផ្សាយហាង Video Reels (TikTok / Facebook / YouTube)' : 'Store Video Reels (TikTok / FB / YouTube)'}</span>
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-black text-[9px]">
                     VIP UNLOCKED
@@ -2216,11 +1789,7 @@ export const ManageMenuModal: React.FC = () => {
                     </li>
                     <li className="flex items-start gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>{tr(language, 'បន្ថែម និងកែប្រែមុខម្ហូបបានរហូតដល់ ៥ មុខ', 'Add & edit up to 5 food menu items', '可添加和编辑最多 5 道菜品')}</span>
-                    </li>
-                    <li className="flex items-start gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>{tr(language, 'បង្ហោះរូបភាពហាងមូលដ្ឋានបាន ៣ សន្លឹក', 'Upload up to 3 storefront/food photos', '可上传最多 3 张店铺/菜品照片')}</span>
+                      <span>{tr(language, 'រូបភាពមុខហាងផ្លូវការ ១ សន្លឹកគត់', '1 official storefront photo', '1 张官方店铺门面照片')}</span>
                     </li>
                     <li className="flex items-start gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
@@ -2247,11 +1816,11 @@ export const ManageMenuModal: React.FC = () => {
                     </li>
                     <li className="flex items-start gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                      <span>{tr(language, 'បន្ថែមមុខម្ហូប និងរូបភាពបានរហូតដល់ ២០ មុខ', 'Add & edit up to 20 menu items with AI photo search', '可添加多达 20 道菜品及高清图片')}</span>
+                      <span>{tr(language, 'ភ្ជាប់វីដេអូផ្សព្វផ្សាយហាង (TikTok / Facebook / YouTube)', 'Store Promotional Video Reels (TikTok / FB / YouTube)', '绑定店铺宣传短视频 (TikTok / FB / YouTube)')}</span>
                     </li>
                     <li className="flex items-start gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                      <span>{tr(language, 'រូបភាព Gallery រហូតដល់ ៣០ សន្លឹក + វីដេអូបង្ហាញមុខម្ហូប (TikTok/FB)', 'Up to 30 gallery photos + Food Video Reels (TikTok/FB)', '多达 30 张相册照片 + 菜品短视频链接 (TikTok/FB)')}</span>
+                      <span>{tr(language, 'ម្ហូបសុខភាព អាហារ ៣ ពេល និងផែនការដំណើរកម្សាន្ត ១ ថ្ងៃ', 'Healthy dish filters, 3-meal ideas & 1-day trip planner', '健康菜品筛选、三餐灵感与一日游规划')}</span>
                     </li>
                     <li className="flex items-start gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
@@ -2310,9 +1879,9 @@ export const ManageMenuModal: React.FC = () => {
                 <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
                   {tr(
                     language,
-                    `ការទូទាត់តែមួយលើក $${activePlan.priceUsd.toFixed(2)} សម្រាប់រយៈពេល ${activePlan.durationDays} ថ្ងៃពេញ • រួមបញ្ចូលហាងទី ១ ឥតគិតថ្លៃ ($0) • បន្ថែមហាងបន្ទាប់ +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD / ហាង។ ទិន្នន័យហាង និងមុខម្ហូបរបស់អ្នកត្រូវបានរក្សាទុកជានិច្ច មិនបាត់បង់ឡើយ។`,
-                    `One-time payment of $${activePlan.priceUsd.toFixed(2)} for ${activePlan.durationDays} days • Includes 1st Store Free ($0) • Additional stores +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD / store. Your existing shop data and menu items are always preserved.`,
-                    `一次性支付 $${activePlan.priceUsd.toFixed(2)} 即可享受 ${activePlan.durationDays} 天 VIP 权益 • 首店免费 ($0) • 新增分店 +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD/店。您的所有店铺数据与菜品永久保留。`
+                    `ការទូទាត់តែមួយលើក $${activePlan.priceUsd.toFixed(2)} សម្រាប់រយៈពេល ${activePlan.durationDays} ថ្ងៃពេញ • រួមបញ្ចូលហាងទី ១ ឥតគិតថ្លៃ ($0) • បន្ថែមហាងបន្ទាប់ +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD / ហាង។ ទិន្នន័យហាងរបស់អ្នកត្រូវបានរក្សាទុកជានិច្ច មិនបាត់បង់ឡើយ។`,
+                    `One-time payment of $${activePlan.priceUsd.toFixed(2)} for ${activePlan.durationDays} days • Includes 1st Store Free ($0) • Additional stores +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD / store. Your existing shop data is always preserved.`,
+                    `一次性支付 $${activePlan.priceUsd.toFixed(2)} 即可享受 ${activePlan.durationDays} 天 VIP 权益 • 首店免费 ($0) • 新增分店 +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD/店。您的所有店铺数据永久保留。`
                   )}
                 </p>
 
@@ -2396,7 +1965,7 @@ export const ManageMenuModal: React.FC = () => {
                 </span>
                 <p className="text-[11px] text-slate-600 dark:text-slate-300">
                   {isKm 
-                    ? 'មានចម្ងល់ ឬត្រូវការជំនួយក្នុងការរៀបចំហាង និងមុខម្ហូប? ទាក់ទងផ្ទាល់មកកាន់ក្រុមការងាររដ្ឋបាល៖' 
+                    ? 'មានចម្ងល់ ឬត្រូវការជំនួយក្នុងការរៀបចំហាងរបស់អ្នក? ទាក់ទងផ្ទាល់មកកាន់ក្រុមការងាររដ្ឋបាល៖' 
                     : 'Need priority assistance with your restaurant setup? Contact our VIP team directly:'}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-2">

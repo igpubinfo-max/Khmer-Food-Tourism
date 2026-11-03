@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, MapPin, Phone, Star, Clock, ExternalLink, 
-  Send, Share2, UtensilsCrossed, Sparkles, CheckCircle2, AlertCircle, Copy, Camera, Bookmark,
+  Send, Share2, Sparkles, CheckCircle2, AlertCircle, Copy, Camera, Bookmark,
   BarChart3, Video, Crown, Edit2, MessageSquare, Trash2
 } from 'lucide-react';
 import {
@@ -15,7 +15,7 @@ import {
 import { RestaurantImageModal } from './RestaurantImageModal';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { tr } from '../utils/i18n';
-import { getLocalizedRestaurant, translateSignatureDish, translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
+import { getLocalizedRestaurant, translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
 import {
   sanitizeDialablePhone,
   formatDisplayPhone,
@@ -153,28 +153,12 @@ export const RestaurantDetailModal: React.FC = () => {
       ...(selectedRestaurant.galleryPhotos || []),
     ])
   ).filter((u): u is string => Boolean(u));
-  const shopPhotoSet = new Set(shopPhotosList);
 
-  const foodPhotosList = Array.from(
-    new Set(
-      (selectedRestaurant.foodImages || []).filter(
-        (u): u is string => Boolean(u && !shopPhotoSet.has(u))
-      )
-    )
-  );
-
-  const categorizedPhotos = [
-    ...shopPhotosList.map((url) => ({
-      url,
-      category: 'shop' as const,
-      foodIndex: 0,
-    })),
-    ...foodPhotosList.map((url, idx) => ({
-      url,
-      category: 'food' as const,
-      foodIndex: idx + 1,
-    })),
-  ];
+  const categorizedPhotos = shopPhotosList.map((url) => ({
+    url,
+    category: 'shop' as const,
+    foodIndex: 0,
+  }));
 
   const allPhotos = categorizedPhotos.map((item) => item.url);
 
@@ -393,9 +377,9 @@ export const RestaurantDetailModal: React.FC = () => {
                   <div className="text-[10px] text-slate-600 dark:text-slate-300">
                     {tr(
                       language,
-                      `មុខម្ហូប៖ ${(selectedRestaurant.menuItems || []).length}/20 មុខ | រូបភាពហាង & ម្ហូប៖ ${allPhotos.length} សន្លឹក`,
-                      `Menu: ${(selectedRestaurant.menuItems || []).length}/20 | Photos: ${allPhotos.length}`,
-                      `菜单：${(selectedRestaurant.menuItems || []).length}/20 道 | 照片：${allPhotos.length} 张`
+                      `📍 ${loc.province} • រូបភាពហាង៖ ${allPhotos.length} សន្លឹក`,
+                      `📍 ${loc.province} • Photos: ${allPhotos.length}`,
+                      `📍 ${loc.province} • 照片：${allPhotos.length} 张`
                     )}
                   </div>
                 </div>
@@ -408,8 +392,8 @@ export const RestaurantDetailModal: React.FC = () => {
                     }}
                     className="px-3 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
                   >
-                    <UtensilsCrossed className="w-3.5 h-3.5 text-emerald-200" />
-                    <span>{tr(language, 'កែប្រែហាង & មុខម្ហូប', 'Edit Store & Menu', '编辑店铺与菜单')}</span>
+                    <Edit2 className="w-3.5 h-3.5 text-emerald-200" />
+                    <span>{tr(language, 'កែប្រែព័ត៌មានហាង', 'Edit Store', '编辑店铺')}</span>
                   </button>
                   <button
                     type="button"
@@ -432,9 +416,9 @@ export const RestaurantDetailModal: React.FC = () => {
                   <div className="text-[10px] text-slate-600 dark:text-slate-300">
                     {tr(
                       language,
-                      'សូមបន្ត ឬដំឡើងសមាជិកភាព VIP ដើម្បីកែប្រែហាង និងគ្រប់គ្រងមុខម្ហូប',
+                      'សូមបន្ត ឬដំឡើងសមាជិកភាព VIP ដើម្បីកែប្រែព័ត៌មានហាងរបស់អ្នក',
                       'Please renew or upgrade VIP to manage this restaurant.',
-                      '请续费或升级 VIP 会员以编辑店铺及管理菜单。'
+                      '请续费或升级 VIP 会员以管理此店铺。'
                     )}
                   </div>
                 </div>
@@ -517,13 +501,13 @@ export const RestaurantDetailModal: React.FC = () => {
               </div>
             </div>
 
-            {/* VIP Food Video Reels Section (Benefit 5) */}
+            {/* VIP Store Video Reels Section (Benefit 5) */}
             {(selectedRestaurant.promoVideoUrl || canEditShop) && (
               <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-teal-500/10 border border-amber-400/50 space-y-2 text-xs font-khmer">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5">
                     <Video className="w-4 h-4 text-amber-500" />
-                    <span>{tr(language, 'វីដេអូបង្ហាញមុខម្ហូបក្នុងហាង (Food Video Reels)', 'Food Video Reels', '本店特色菜品短视频 (Video Reels)')}</span>
+                    <span>{tr(language, 'វីដេអូផ្សព្វផ្សាយហាង (Video Reels)', 'Store Video Reels', '店铺短视频 (Video Reels)')}</span>
                   </span>
                   {canEditShop && (
                     <button
@@ -549,7 +533,7 @@ export const RestaurantDetailModal: React.FC = () => {
                     className="w-full py-2.5 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition"
                   >
                     <Video className="w-4 h-4 text-amber-300" />
-                    <span>{tr(language, '▶️ ទស្សនាវីដេអូបង្ហាញមុខម្ហូបហាងនេះ', '▶️ Watch Store Food Video Reel', '▶️ 观看店铺美食短视频')}</span>
+                    <span>{tr(language, '▶️ ទស្សនាវីដេអូបង្ហាញពីហាងនេះ', '▶️ Watch Store Video Reel', '▶️ 观看店铺短视频')}</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 ) : (
@@ -557,15 +541,15 @@ export const RestaurantDetailModal: React.FC = () => {
                     {tr(
                       language,
                       'ម្ចាស់ហាងអាចដាក់តំណវីដេអូ TikTok / Facebook Reels / YouTube Shorts ដើម្បីទាក់ទាញអតិថិជន។',
-                      'Add a TikTok, Facebook Reel, or YouTube Short link to showcase your dishes.',
-                      '店主可添加 TikTok、Facebook Reels 或 YouTube Shorts 短视频链接来展示特色菜品。'
+                      'Add a TikTok, Facebook Reel, or YouTube Short link to showcase your restaurant.',
+                      '店主可添加 TikTok、Facebook Reels 或 YouTube Shorts 短视频链接来展示店铺。'
                     )}
                   </p>
                 )}
               </div>
             )}
 
-            {/* Shop Profile Picture & Food Photos Gallery + Edit Photos Button */}
+            {/* Shop Profile Photos + Edit Photos Button */}
             {(categorizedPhotos.length > 0 || isAdmin) && (
             <div className="space-y-2.5">
               <div className="flex items-center justify-between text-xs">
@@ -574,9 +558,9 @@ export const RestaurantDetailModal: React.FC = () => {
                   <span>
                     {tr(
                       language,
-                      `រូបតំណាងហាង & រូបភាពមុខម្ហូប (${allPhotos.length} សន្លឹក)`,
-                      `Shop Profile & Food Photos (${allPhotos.length})`,
-                      `店铺形象与菜品相册（${allPhotos.length} 张）`
+                      `រូបភាពហាង (${allPhotos.length} សន្លឹក)`,
+                      `Shop Photos (${allPhotos.length})`,
+                      `店铺照片（${allPhotos.length} 张）`
                     )}
                   </span>
                 </span>
@@ -587,7 +571,7 @@ export const RestaurantDetailModal: React.FC = () => {
                     className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#059669] hover:brightness-110 text-white font-khmer font-bold text-xs shadow-xs transition active:scale-95 cursor-pointer"
                   >
                     <Camera className="w-3.5 h-3.5 text-emerald-200" />
-                    <span>{tr(language, 'កែរូបហាង & រូបម្ហូប (Admin)', 'Edit Shop & Food Photos (Admin)', '编辑店铺与菜品照片（管理员）')}</span>
+                    <span>{tr(language, 'កែរូបភាពហាង (Admin)', 'Edit Shop Photos (Admin)', '编辑店铺照片（管理员）')}</span>
                   </button>
                 )}
               </div>
@@ -605,9 +589,7 @@ export const RestaurantDetailModal: React.FC = () => {
                     >
                       <img src={item.url} alt="gallery" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                       <span className="absolute bottom-0 inset-x-0 bg-black/65 text-white text-[8px] font-khmer py-0.5 text-center">
-                        {item.category === 'shop'
-                          ? tr(language, 'រូបហាង', 'Shop', '店铺封面')
-                          : tr(language, `ម្ហូបទី ${item.foodIndex}`, `Food ${item.foodIndex}`, `菜品 ${item.foodIndex}`)}
+                        {tr(language, 'រូបហាង', 'Shop', '店铺封面')}
                       </span>
                     </button>
                   ))}
@@ -684,108 +666,6 @@ export const RestaurantDetailModal: React.FC = () => {
                 </div>
               )}
             </div>
-
-            {/* Restaurant Food Menu Items */}
-            {selectedRestaurant.menuItems && selectedRestaurant.menuItems.length > 0 ? (
-              <div className="space-y-3 font-khmer">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-[#0F172A] dark:text-white text-sm flex items-center gap-1.5">
-                    <UtensilsCrossed className="w-4 h-4 text-[#059669]" />
-                    <span>
-                      {tr(
-                        language,
-                        `មុខម្ហូបពិសេសក្នុងហាង (${selectedRestaurant.menuItems.length} មុខ)`,
-                        `Restaurant Food Menu (${selectedRestaurant.menuItems.length})`,
-                        `餐厅特色菜单（${selectedRestaurant.menuItems.length} 道菜）`
-                      )}
-                    </span>
-                  </h3>
-                  {canEditShop && (
-                    <button
-                      onClick={() => {
-                        setManagingRestaurant(selectedRestaurant);
-                        setIsManageMenuModalOpen(true);
-                      }}
-                      className="text-[#064E3B] dark:text-emerald-400 font-bold text-xs hover:underline"
-                    >
-                      {tr(language, '+ កែប្រែ / បន្ថែម', '+ Edit / Add', '+ 编辑 / 添加')}
-                    </button>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 gap-2.5">
-                  {selectedRestaurant.menuItems.map((item, i) => {
-                    const itemDisplayName =
-                      language === 'km'
-                        ? item.nameKh
-                        : language === 'zh'
-                        ? translateSignatureDish(item.nameKh || item.nameEn || '', 'zh')
-                        : item.nameEn || translateSignatureDish(item.nameKh || '', 'en');
-                    const itemDesc =
-                      language === 'km'
-                        ? item.descriptionKh
-                        : item.descriptionKh
-                        ? translateSignatureDish(item.descriptionKh, language)
-                        : '';
-                    return (
-                      <div 
-                        key={item.id || i}
-                        className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center gap-3"
-                      >
-                        <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200 dark:border-slate-700">
-                          <img src={item.photoUrl} alt={itemDisplayName} className="w-full h-full object-cover" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-[#0F172A] dark:text-white text-sm truncate">
-                            {itemDisplayName}
-                          </h4>
-                          {itemDesc && (
-                            <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 mt-0.5">
-                              {itemDesc}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
-              /* Fallback Signature Dishes */
-              <div className="font-khmer">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold text-[#0F172A] dark:text-white text-sm flex items-center gap-1.5">
-                    <UtensilsCrossed className="w-4 h-4 text-[#059669]" />
-                    <span>{tr(language, 'មុខម្ហូបប្រចាំហាង', 'Signature Menus', '本店招牌特色菜')}</span>
-                  </h3>
-                  {canEditShop && (
-                    <button
-                      onClick={() => {
-                        setManagingRestaurant(selectedRestaurant);
-                        setIsManageMenuModalOpen(true);
-                      }}
-                      className="text-[#064E3B] dark:text-emerald-400 font-bold text-xs hover:underline"
-                    >
-                      {tr(language, '+ គ្រប់គ្រងមុខម្ហូប', '+ Manage Menu', '+ 管理菜单')}
-                    </button>
-                  )}
-                </div>
-                
-                <div className="grid grid-cols-1 gap-2">
-                  {loc.signatureDishes.map((dish, i) => (
-                    <div 
-                      key={i}
-                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm text-slate-800 dark:text-slate-200"
-                    >
-                      <span className="w-5 h-5 rounded-full bg-[#064E3B] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
-                        {i + 1}
-                      </span>
-                      <span className="font-medium">{dish}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Description */}
             <div className="font-khmer">

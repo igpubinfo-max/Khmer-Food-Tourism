@@ -281,6 +281,7 @@ export function isRejectedLegacyFoodOverridePhoto(
 
 export const VAULT_KEYS = {
   FOODS: 'kft_permanent_food_overrides_v1',
+  DELETED_FOODS: 'kft_deleted_foods_v1',
   FOOD_REVISION_LEDGER: 'kft_food_revision_ledger_v1',
   PENDING_CLOUD_QUEUE: 'kft_pending_media_cloud_queue_v1',
   CLOUD_ROW_SEEN: 'kft_cloud_row_seen_v1',
@@ -438,6 +439,7 @@ export interface TrendingFoodMediaOverride {
 
 export interface AllMediaOverridesBundle {
   foods: Record<string, FoodMediaOverride>;
+  deletedFoods?: Record<string, string>;
   restaurants: Record<string, RestaurantMediaOverride>;
   deletedRestaurants?: Record<string, string>;
   destinations: Record<string, DestinationMediaOverride>;
@@ -446,6 +448,14 @@ export interface AllMediaOverridesBundle {
 }
 
 const IDB_NAME = 'kft_permanent_media_vault_idb_v1';
+
+export function loadDeletedFoodIdsMap(): Record<string, string> {
+  return safeReadJsonMap<string>(VAULT_KEYS.DELETED_FOODS);
+}
+
+export function saveDeletedFoodIdsMap(map: Record<string, string>): void {
+  safeWriteJsonMap(VAULT_KEYS.DELETED_FOODS, map);
+}
 
 export function loadDeletedRestaurantIdsMap(): Record<string, string> {
   return safeReadJsonMap<string>(VAULT_KEYS.DELETED_RESTAURANTS);
@@ -859,6 +869,7 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
     return inMemoryMasterBundle;
   }
   const foods = safeReadJsonMap<FoodMediaOverride>(VAULT_KEYS.FOODS);
+  const deletedFoods = safeReadJsonMap<string>(VAULT_KEYS.DELETED_FOODS);
   const ledger = loadFoodRevisionLedger();
   const restaurants = safeReadJsonMap<RestaurantMediaOverride>(VAULT_KEYS.RESTAURANTS);
   const deletedRestaurants = safeReadJsonMap<string>(VAULT_KEYS.DELETED_RESTAURANTS);
@@ -983,8 +994,15 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
     }
   }
 
+  for (const fid of Object.keys(deletedFoods)) {
+    if (foods[fid]) {
+      delete foods[fid];
+    }
+  }
+
   const fromDisk: AllMediaOverridesBundle = {
     foods,
+    deletedFoods,
     restaurants,
     deletedRestaurants,
     destinations,
@@ -1172,6 +1190,9 @@ export function saveLocalMediaOverrides(incomingBundle: AllMediaOverridesBundle)
         .map(([k]) => k)
     );
   }
+  if (bundle.deletedFoods && typeof bundle.deletedFoods === 'object') {
+    safeWriteJsonMap(VAULT_KEYS.DELETED_FOODS, bundle.deletedFoods);
+  }
   if (bundle.deletedRestaurants && typeof bundle.deletedRestaurants === 'object') {
     safeWriteJsonMap(VAULT_KEYS.DELETED_RESTAURANTS, bundle.deletedRestaurants);
   }
@@ -1325,15 +1346,29 @@ export function mergeOverrideBundles(
     }
   }
 
+  const mergedDeletedFoods: Record<string, string> = {
+    ...(base.deletedFoods || {}),
+  };
+  if (incoming.deletedFoods && typeof incoming.deletedFoods === 'object') {
+    for (const [delId, delIso] of Object.entries(incoming.deletedFoods)) {
+      if (!delId || !delIso) continue;
+      const curIso = mergedDeletedFoods[delId];
+      if (!curIso || (new Date(delIso).getTime() || 0) >= (new Date(curIso).getTime() || 0)) {
+        mergedDeletedFoods[delId] = delIso;
+      }
+    }
+  }
+
   const mergedFoods = mergeMaps(base.foods, incoming.foods || {});
   for (const [fid, fOv] of Object.entries(mergedFoods)) {
-    if (isRejectedLegacyFoodOverridePhoto(fid, fOv)) {
+    if (isRejectedLegacyFoodOverridePhoto(fid, fOv) || mergedDeletedFoods[fid]) {
       delete mergedFoods[fid];
     }
   }
 
   return {
     foods: mergedFoods,
+    deletedFoods: mergedDeletedFoods,
     restaurants: mergedRestaurants,
     deletedRestaurants: mergedDeletedRestaurants,
     destinations: mergeMaps(base.destinations, incoming.destinations || {}),
@@ -1689,12 +1724,18 @@ export function saveAdminFoodOverridePermanently(
   enqueuePendingMediaCloudSync('food', food.id, nextRevision, now);
 
   // 3. Update authoritative in-memory master bundle & synchronous localStorage immediately for zero-flicker UI
+  const nextDeletedFoods = { ...(bundle.deletedFoods || loadDeletedFoodIdsMap()) };
+  if (nextDeletedFoods[food.id]) {
+    delete nextDeletedFoods[food.id];
+    saveDeletedFoodIdsMap(nextDeletedFoods);
+  }
   const nextBundle: AllMediaOverridesBundle = {
     ...bundle,
     foods: {
       ...bundle.foods,
       [food.id]: overrideRecord,
     },
+    deletedFoods: nextDeletedFoods,
     updatedAt: now,
   };
   inMemoryMasterBundle = nextBundle;
@@ -1718,6 +1759,36 @@ export function saveAdminFoodOverridePermanently(
 
 export function recordPermanentFoodOverride(food: FoodItem): Promise<FoodMediaOverride> {
   return saveAdminFoodOverridePermanently(food, { awaitCloud: false }).then((res) => res.override);
+}
+
+/**
+ * Remove an Admin-deleted food item from the permanent override vault and record a permanent deletion tombstone.
+ */
+export function removePermanentFoodOverride(foodId: string): void {
+  if (!foodId) return;
+  const bundle = loadLocalMediaOverrides();
+  const now = new Date().toISOString();
+  const nextDeletedFoods: Record<string, string> = {
+    ...(bundle.deletedFoods || loadDeletedFoodIdsMap()),
+    [foodId]: now,
+  };
+  saveDeletedFoodIdsMap(nextDeletedFoods);
+  const nextFoods = { ...bundle.foods };
+  delete nextFoods[foodId];
+  const ledger = loadFoodRevisionLedger();
+  if (ledger[foodId]) {
+    delete ledger[foodId];
+    saveFoodRevisionLedger(ledger);
+  }
+  const nextBundle: AllMediaOverridesBundle = {
+    ...bundle,
+    foods: nextFoods,
+    deletedFoods: nextDeletedFoods,
+    updatedAt: now,
+  };
+  inMemoryMasterBundle = nextBundle;
+  saveLocalMediaOverrides(nextBundle);
+  deleteCloudDocument(`${VAULT_KEYS.CLOUD_RECORD_PREFIX}food_${foodId}`).catch(() => {});
 }
 
 /**
@@ -1979,11 +2050,77 @@ export function stripLegacyFoodPhraseKh(text?: string): string {
 
 export function applyFoodOverrides(
   foods: FoodItem[],
-  overridesMap: Record<string, FoodMediaOverride> = loadLocalMediaOverrides().foods
+  overridesMap: Record<string, FoodMediaOverride> = loadLocalMediaOverrides().foods,
+  explicitDeletedMap?: Record<string, string>
 ): FoodItem[] {
   const safeOverrides = overridesMap || {};
-  let anyChanged = false;
-  const mapped = foods.map((f) => {
+  const deletedFoodsMap =
+    explicitDeletedMap || loadLocalMediaOverrides().deletedFoods || loadDeletedFoodIdsMap();
+  const hasDeletedFoods = Object.keys(deletedFoodsMap).length > 0;
+  const filteredBaseFoods = hasDeletedFoods
+    ? foods.filter((f) => f && f.id && !deletedFoodsMap[f.id])
+    : foods;
+
+  // Also synthesize any Admin-inserted custom foods in safeOverrides that are not yet in filteredBaseFoods
+  const existingFoodIds = new Set(filteredBaseFoods.map((f) => f.id));
+  const synthesizedAdminFoods: FoodItem[] = [];
+  for (const [ovId, ov] of Object.entries(safeOverrides)) {
+    if (
+      !ov ||
+      !ovId ||
+      existingFoodIds.has(ovId) ||
+      deletedFoodsMap[ovId] ||
+      IMMUTABLE_SEED_FOOD_MAP.has(ovId) ||
+      !ov.nameKh ||
+      !ov.photoUrl ||
+      isRejectedLegacyFoodOverridePhoto(ovId, ov)
+    ) {
+      continue;
+    }
+    const gen = generateAuthenticRecipeByDishName(
+      ov.nameKh,
+      ov.nameEn || ov.nameKh,
+      ov.categorySlug || 'specialty',
+      ov.descriptionKh || ''
+    );
+    synthesizedAdminFoods.push({
+      id: ovId,
+      nameKh: ov.nameKh,
+      nameEn: ov.nameEn || ov.nameKh,
+      categorySlug: ov.categorySlug || 'specialty',
+      categoryKh: ov.categoryKh || 'ម្ហូបខ្មែរ',
+      categoryEn: ov.categoryEn || 'Cambodian Dish',
+      descriptionKh: ov.descriptionKh || gen.descriptionKh,
+      descriptionEn: ov.descriptionEn || gen.descriptionEn,
+      photoUrl: ov.photoUrl,
+      prepTime: '១៥ នាទី',
+      cookTime: ov.cookTime || '៣០ នាទី',
+      servings: ov.servings || '២-៣ នាក់',
+      calories: ov.calories,
+      difficulty: ov.difficulty || 'medium',
+      priceRiel: typeof ov.priceRiel === 'number' ? ov.priceRiel : 0,
+      priceUsd: typeof ov.priceUsd === 'number' ? ov.priceUsd : 0,
+      rating: 5.0,
+      reviewCount: 1,
+      ingredients:
+        Array.isArray(ov.ingredients) && ov.ingredients.length > 0 ? ov.ingredients : gen.ingredients,
+      steps: Array.isArray(ov.steps) && ov.steps.length > 0 ? ov.steps : gen.steps,
+      imageAuditStatus: ov.imageAuditStatus || 'verified',
+      imageAuditNote: ov.imageAuditNote,
+      isCustomPhoto: true,
+      isAdminEdited: true,
+      photoUpdatedAt: ov.updatedAt,
+      adminApprovedAt: ov.adminApprovedAt || ov.updatedAt,
+    });
+    existingFoodIds.add(ovId);
+  }
+
+  const baseList =
+    synthesizedAdminFoods.length > 0
+      ? [...synthesizedAdminFoods, ...filteredBaseFoods]
+      : filteredBaseFoods;
+  let anyChanged = baseList.length !== foods.length || synthesizedAdminFoods.length > 0;
+  const mapped = baseList.map((f) => {
     const cleanedBaseDescKh = stripLegacyFoodPhraseKh(f.descriptionKh);
     const ov = safeOverrides[f.id];
     if (!ov || !ov.photoUrl || isRejectedLegacyFoodOverridePhoto(f.id, ov)) {

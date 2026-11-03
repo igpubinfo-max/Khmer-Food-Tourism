@@ -8,7 +8,7 @@ import {
   classifyKhmerFoodPrimaryGroup,
   organizeAndDeduplicateFoods,
 } from '../types';
-import { Utensils, Lock, Crown, MapPin, Soup, Sparkles } from 'lucide-react';
+import { Utensils, Lock, Crown, MapPin, Soup, Sparkles, Plus } from 'lucide-react';
 import { DISH_PROVINCES, detectDishProvince } from '../utils/foodFilters';
 import { TAG_FILTERS, matchesTagFilter, TagFilterId, DishTagId } from '../utils/dishTags';
 import { TAG_FILTER_EVENT, consumePendingTagFilter, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
@@ -18,7 +18,13 @@ import { DishTagIcon, IconDishCategory, IconGrillFlame, IconHealthyLeaf, IconKhm
 const PAGE_BATCH_SIZE = 20;
 
 export const FoodView: React.FC = () => {
-  const { foods, language, currentUser, openUpgradeVipModal, showToast } = useApp();
+  const { foods, language, currentUser, openUpgradeVipModal, showToast, setIsAdminOpen } = useApp();
+  const isAdmin = Boolean(
+    currentUser?.role === 'admin' ||
+      currentUser?.id === 'admin-authorized-single' ||
+      currentUser?.username === 'admin' ||
+      currentUser?.username === 'cheasavuth'
+  );
   const canUseVip = hasSpecialAndHealthyFoodVipAccess(currentUser);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [visibleCount, setVisibleCount] = useState<number>(PAGE_BATCH_SIZE);
@@ -167,8 +173,8 @@ export const FoodView: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-6">
-      {/* Header bar (Search removed — kept on Home Screen only) */}
-      <div className="flex items-center justify-between">
+      {/* Header bar (Search removed — kept on Home Screen only; Insert Food strictly visible to Admin only) */}
+      <div className="flex items-center justify-between gap-2">
         <div>
           <h2 className="font-moul text-base sm:text-lg text-[#0F172A] dark:text-white flex items-center gap-2">
             <Utensils className="w-5 h-5 text-[#059669]" />
@@ -185,6 +191,21 @@ export const FoodView: React.FC = () => {
             )}
           </p>
         </div>
+
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={() => {
+              (window as any).__kft_admin_tab = 'food';
+              (window as any).__kft_admin_open_add_food = true;
+              setIsAdminOpen(true);
+            }}
+            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold font-khmer shadow-xs transition active:scale-95 cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5 text-emerald-200" />
+            <span>{tr(language, 'បញ្ចូលមុខម្ហូប', 'Add Dish', '添加菜品')}</span>
+          </button>
+        )}
       </div>
 
       {/* Ordered Primary Category Pills: ទាំងអស់ | ១. សម្ល | ២. ឆា | ៣. ស្ងោរ | ៤. បង្អែម */}

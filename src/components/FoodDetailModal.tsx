@@ -26,16 +26,22 @@ import {
 
 export const FoodDetailModal: React.FC = () => {
   const { 
-    selectedFood, setSelectedFood, updateFood, language, 
+    selectedFood, setSelectedFood, updateFood, deleteFood, language, 
     isBookmarked, toggleBookmark, showToast, openAddToWishlist,
     currentUser
   } = useApp();
-  const isAdmin = currentUser?.role === 'admin';
+  const isAdmin = Boolean(
+    currentUser?.role === 'admin' ||
+      currentUser?.id === 'admin-authorized-single' ||
+      currentUser?.username === 'admin' ||
+      currentUser?.username === 'cheasavuth'
+  );
   const [checkedIngredients, setCheckedIngredients] = useState<Record<number, boolean>>({});
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isSearchingOnline, setIsSearchingOnline] = useState(false);
   const [onlineCandidates, setOnlineCandidates] = useState<OnlineFoodImageCandidate[]>([]);
   const [isEditingAdminFood, setIsEditingAdminFood] = useState(false);
+  const [confirmAdminDelete, setConfirmAdminDelete] = useState(false);
 
   // Admin editable fields
   const [editNameKh, setEditNameKh] = useState('');
@@ -90,6 +96,7 @@ export const FoodDetailModal: React.FC = () => {
     }
     setOnlineCandidates([]);
     setIsSearchingOnline(false);
+    setConfirmAdminDelete(false);
 
     if ((window as any).__kft_open_food_edit && isAdmin) {
       setIsEditingAdminFood(true);
@@ -457,17 +464,43 @@ export const FoodDetailModal: React.FC = () => {
           </button>
 
           <div className="flex items-center gap-2 pointer-events-auto">
-            {/* Admin Edit Food Button */}
+            {/* Admin Edit & Delete Food Buttons (Strictly Admin-only) */}
             {isAdmin && (
-              <button
-                type="button"
-                onClick={() => setIsEditingAdminFood(!isEditingAdminFood)}
-                className="py-1.5 px-3 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5 border border-white/60"
-                title={tr(language, 'កែប្រែព័ត៌មាន និងរូបភាព', 'Edit Details & Photos (Admin)', '编辑详情与图片（管理员）')}
-              >
-                <Edit2 className="w-3.5 h-3.5" />
-                <span className="font-khmer">{isEditingAdminFood ? tr(language, 'មើលធម្មតា', 'View', '查看') : tr(language, 'កែប្រែ', 'Edit', '编辑')}</span>
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingAdminFood(!isEditingAdminFood)}
+                  className="py-1.5 px-3 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5 border border-white/60"
+                  title={tr(language, 'កែប្រែព័ត៌មាន និងរូបភាព', 'Edit Details & Photos (Admin)', '编辑详情与图片（管理员）')}
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                  <span className="font-khmer">{isEditingAdminFood ? tr(language, 'មើលធម្មតា', 'View', '查看') : tr(language, 'កែប្រែ', 'Edit', '编辑')}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirmAdminDelete) {
+                      deleteFood(selectedFood.id);
+                      setConfirmAdminDelete(false);
+                    } else {
+                      setConfirmAdminDelete(true);
+                    }
+                  }}
+                  className={`py-1.5 px-3 rounded-full font-black text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5 border border-white/60 ${
+                    confirmAdminDelete
+                      ? 'bg-rose-600 hover:bg-rose-700 text-white'
+                      : 'bg-rose-500/90 hover:bg-rose-600 text-white'
+                  }`}
+                  title={tr(language, 'លុបមុខម្ហូប (Admin)', 'Delete Dish (Admin)', '删除菜品（管理员）')}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="font-khmer">
+                    {confirmAdminDelete
+                      ? tr(language, 'បញ្ជាក់លុប?', 'Confirm?', '确认删除?')
+                      : tr(language, 'លុប', 'Delete', '删除')}
+                  </span>
+                </button>
+              </>
             )}
 
             {/* Audio Reader */}

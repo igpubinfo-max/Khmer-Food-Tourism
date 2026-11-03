@@ -88,9 +88,9 @@ export const DeleteShopConfirmModal: React.FC = () => {
           <p className="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
             {tr(
               language,
-              'ទិន្នន័យហាង មុខម្ហូប និងរូបភាពនៃហាងនេះនឹងត្រូវលុបចេញជាអចិន្ត្រៃយ៍ពីប្រព័ន្ធ និងគ្រប់ឧបករណ៍ទាំងអស់ ហើយមិនអាចស្តារឡើងវិញបានទេ។',
-              'This shop, its menu items, and photos will be permanently removed across all sessions and devices and cannot be undone.',
-              '该店铺及其菜品和照片将从所有设备和会话中永久移除，且无法恢复。'
+              'ទិន្នន័យព័ត៌មានហាង ទីតាំងផែនទី និងរូបភាពនៃហាងនេះនឹងត្រូវលុបចេញជាអចិន្ត្រៃយ៍ពីប្រព័ន្ធ និងគ្រប់ឧបករណ៍ទាំងអស់ ហើយមិនអាចស្តារឡើងវិញបានទេ។',
+              'This shop, its location, and storefront photo will be permanently removed across all sessions and devices and cannot be undone.',
+              '该店铺资料、位置和门店照片将从所有设备和会话中永久移除，且无法恢复。'
             )}
           </p>
         </div>

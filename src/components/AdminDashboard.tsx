@@ -20,6 +20,11 @@ import { ShopAvatar } from './icons/DefaultShopIcon';
 import { AdminShopPhotoFinderPanel } from './AdminShopPhotoFinderPanel';
 import { generateAuthenticRecipeByDishName } from '../utils/khmerRecipeGenerator';
 import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
+import {
+  isNativeAndroidOrIosPlatform,
+  pickImageUsingNativeAndroidGallery,
+  processAndCompressImageFile,
+} from '../utils/androidMediaHelper';
 import { TouristImageModal } from './TouristImageModal';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 import {
@@ -63,6 +68,11 @@ export const AdminDashboard: React.FC = () => {
     if ((window as any).__kft_admin_tab) {
       setActiveTab((window as any).__kft_admin_tab);
       delete (window as any).__kft_admin_tab;
+    }
+    if ((window as any).__kft_admin_open_add_food) {
+      setActiveTab('food');
+      setShowAddFoodForm(true);
+      delete (window as any).__kft_admin_open_add_food;
     }
     if ((window as any).__kft_admin_settings_section) {
       setActiveSettingsSection((window as any).__kft_admin_settings_section);
@@ -120,7 +130,10 @@ export const AdminDashboard: React.FC = () => {
   const [newFoodDescKh, setNewFoodDescKh] = useState('');
   const [showAddFoodForm, setShowAddFoodForm] = useState(false);
   const [isSearchingNewFoodPhoto, setIsSearchingNewFoodPhoto] = useState(false);
+  const [isUploadingNewFoodPhoto, setIsUploadingNewFoodPhoto] = useState(false);
   const [newFoodPhotoCandidates, setNewFoodPhotoCandidates] = useState<OnlineFoodImageCandidate[]>([]);
+  const [confirmDeleteFoodId, setConfirmDeleteFoodId] = useState<string | null>(null);
+  const newFoodFileInputRef = useRef<HTMLInputElement>(null);
 
   // Form states for Destination
   const [newDestNameKh, setNewDestNameKh] = useState('');
@@ -2286,65 +2299,143 @@ export const AdminDashboard: React.FC = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <label className="block font-medium">រូបភាព (Photo URL)</label>
-                      <button
-                        type="button"
-                        disabled={isSearchingNewFoodPhoto}
-                        onClick={async () => {
-                          if (!newFoodNameKh.trim() && !newFoodNameEn.trim()) {
-                            showToast(
-                              isKm
-                                ? 'សូមវាយបញ្ចូលឈ្មោះមុខម្ហូបជាមុនសិន មុនពេលស្វែងរករូបភាព Online'
-                                : 'Please enter the dish name first before searching online photos',
-                              'error'
-                            );
-                            return;
-                          }
-                          setIsSearchingNewFoodPhoto(true);
-                          try {
-                            const results = await searchOnlineFoodImages({
-                              nameKh: newFoodNameKh,
-                              nameEn: newFoodNameEn,
-                              categorySlug: newFoodCategory,
-                              existingUrls: foods.map(f => f.photoUrl),
-                            });
-                            setNewFoodPhotoCandidates(results);
-                            if (results.length > 0) {
-                              setNewFoodPhotoUrl(results[0].url);
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <label className="block font-medium">
+                        {isKm ? 'រូបភាពមុខម្ហូប (Photo)' : 'Dish Photo'}
+                      </label>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <input
+                          ref={newFoodFileInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = '';
+                            if (!file) return;
+                            setIsUploadingNewFoodPhoto(true);
+                            try {
+                              const dataUrl = await processAndCompressImageFile(file, 720, 0.76);
+                              setNewFoodPhotoUrl(dataUrl);
                               showToast(
-                                isKm
-                                  ? `រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${results.length} សន្លឹក!`
-                                  : `Found ${results.length} matching online food photos!`,
+                                isKm ? '✅ បានជ្រើសរើសរូបភាពមុខម្ហូបរួចរាល់!' : '✅ Dish photo selected!',
                                 'success'
                               );
+                            } catch {
+                              showToast(
+                                isKm ? 'មិនអាចអានរូបភាពបានទេ' : 'Failed to process photo',
+                                'error'
+                              );
+                            } finally {
+                              setIsUploadingNewFoodPhoto(false);
                             }
-                          } catch {
-                            showToast(
-                              isKm ? 'មិនអាចស្វែងរករូបភាពពី Online បានទេ' : 'Failed to search online food photos',
-                              'error'
-                            );
-                          } finally {
-                            setIsSearchingNewFoodPhoto(false);
-                          }
-                        }}
-                        className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition active:scale-95 disabled:opacity-60 cursor-pointer"
-                      >
-                        <Sparkles className={`w-3.5 h-3.5 text-amber-300 ${isSearchingNewFoodPhoto ? 'animate-spin' : ''}`} />
-                        <span>
-                          {isSearchingNewFoodPhoto
-                            ? (isKm ? 'កំពុងស្វែងរក...' : 'Searching...')
-                            : (isKm ? '🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ' : '🤖 Auto-Search Online Photo')}
-                        </span>
-                      </button>
+                          }}
+                        />
+                        <button
+                          type="button"
+                          disabled={isUploadingNewFoodPhoto}
+                          onClick={async () => {
+                            if (!isNativeAndroidOrIosPlatform()) {
+                              newFoodFileInputRef.current?.click();
+                              return;
+                            }
+                            setIsUploadingNewFoodPhoto(true);
+                            try {
+                              const pick = await pickImageUsingNativeAndroidGallery();
+                              if (pick.cancelled) return;
+                              if (pick.dataUrl) {
+                                setNewFoodPhotoUrl(pick.dataUrl);
+                                showToast(
+                                  isKm ? '✅ បានជ្រើសរើសរូបភាពមុខម្ហូបរួចរាល់!' : '✅ Dish photo selected!',
+                                  'success'
+                                );
+                                return;
+                              }
+                              newFoodFileInputRef.current?.click();
+                            } catch {
+                              newFoodFileInputRef.current?.click();
+                            } finally {
+                              setIsUploadingNewFoodPhoto(false);
+                            }
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition active:scale-95 disabled:opacity-60 cursor-pointer"
+                        >
+                          <Upload className="w-3.5 h-3.5 text-emerald-300" />
+                          <span>
+                            {isUploadingNewFoodPhoto
+                              ? (isKm ? 'កំពុងផ្ទុក...' : 'Uploading...')
+                              : (isKm ? 'ជ្រើសរូបពីទូរស័ព្ទ/កុំព្យូទ័រ' : 'Upload Photo')}
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={isSearchingNewFoodPhoto}
+                          onClick={async () => {
+                            if (!newFoodNameKh.trim() && !newFoodNameEn.trim()) {
+                              showToast(
+                                isKm
+                                  ? 'សូមវាយបញ្ចូលឈ្មោះមុខម្ហូបជាមុនសិន មុនពេលស្វែងរករូបភាព Online'
+                                  : 'Please enter the dish name first before searching online photos',
+                                'error'
+                              );
+                              return;
+                            }
+                            setIsSearchingNewFoodPhoto(true);
+                            try {
+                              const results = await searchOnlineFoodImages({
+                                nameKh: newFoodNameKh,
+                                nameEn: newFoodNameEn,
+                                categorySlug: newFoodCategory,
+                                existingUrls: foods.map(f => f.photoUrl),
+                              });
+                              setNewFoodPhotoCandidates(results);
+                              if (results.length > 0) {
+                                setNewFoodPhotoUrl(results[0].url);
+                                showToast(
+                                  isKm
+                                    ? `រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${results.length} សន្លឹក!`
+                                    : `Found ${results.length} matching online food photos!`,
+                                  'success'
+                                );
+                              }
+                            } catch {
+                              showToast(
+                                isKm ? 'មិនអាចស្វែងរករូបភាពពី Online បានទេ' : 'Failed to search online food photos',
+                                'error'
+                              );
+                            } finally {
+                              setIsSearchingNewFoodPhoto(false);
+                            }
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition active:scale-95 disabled:opacity-60 cursor-pointer"
+                        >
+                          <Search className={`w-3.5 h-3.5 text-amber-300 ${isSearchingNewFoodPhoto ? 'animate-spin' : ''}`} />
+                          <span>
+                            {isSearchingNewFoodPhoto
+                              ? (isKm ? 'កំពុងស្វែងរក...' : 'Searching...')
+                              : (isKm ? 'ស្វែងរករូបភាព Online' : 'Search Online Photo')}
+                          </span>
+                        </button>
+                      </div>
                     </div>
 
-                    <input
-                      type="text"
-                      value={newFoodPhotoUrl}
-                      onChange={(e) => setNewFoodPhotoUrl(e.target.value)}
-                      className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
-                    />
+                    <div className="flex items-center gap-2.5">
+                      {newFoodPhotoUrl && (
+                        <img
+                          src={newFoodPhotoUrl}
+                          alt="preview"
+                          className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-300 dark:border-slate-600"
+                        />
+                      )}
+                      <input
+                        type="text"
+                        value={newFoodPhotoUrl}
+                        onChange={(e) => setNewFoodPhotoUrl(e.target.value)}
+                        placeholder="https://... ឬរូបភាពពីទូរស័ព្ទ"
+                        className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
+                      />
+                    </div>
 
                     {newFoodPhotoCandidates.length > 0 && (
                       <div className="space-y-1.5 pt-1">
@@ -2420,10 +2511,26 @@ export const AdminDashboard: React.FC = () => {
                       </button>
 
                       <button
-                        onClick={() => deleteFood(food.id)}
-                        className="p-2 text-stone-400 hover:text-rose-600 rounded-lg shrink-0"
+                        type="button"
+                        onClick={() => {
+                          if (confirmDeleteFoodId === food.id) {
+                            deleteFood(food.id);
+                            setConfirmDeleteFoodId(null);
+                          } else {
+                            setConfirmDeleteFoodId(food.id);
+                          }
+                        }}
+                        className={`px-2 py-1.5 rounded-xl font-bold text-[11px] font-khmer flex items-center gap-1 transition shrink-0 ${
+                          confirmDeleteFoodId === food.id
+                            ? 'bg-rose-600 text-white shadow-xs'
+                            : 'text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30'
+                        }`}
+                        title={isKm ? 'លុបមុខម្ហូប' : 'Delete food item'}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
+                        {confirmDeleteFoodId === food.id && (
+                          <span>{isKm ? 'បញ្ជាក់លុប?' : 'Confirm?'}</span>
+                        )}
                       </button>
                     </div>
                   </div>

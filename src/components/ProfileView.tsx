@@ -17,6 +17,7 @@ import {
 } from '../types';
 import { tr } from '../utils/i18n';
 import { resolveUserAvatarUrl, handleAvatarImageError, fileToAvatarDataUrl } from '../utils/avatarHelper';
+import { requestManualUpdateCheck } from '../services/appUpdateService';
 
 export const ProfileView: React.FC = () => {
   const { 
@@ -251,7 +252,7 @@ export const ProfileView: React.FC = () => {
                 onClick={() => {
                   setSelectedVipPowerPanel('photos');
                   if (myRestaurants[0]) {
-                    (window as any).__kft_manage_initial_tab = 'info';
+                    (window as any).__kft_manage_initial_tab = 'photos';
                     setManagingRestaurant(myRestaurants[0]);
                     setIsManageMenuModalOpen(true);
                   } else {
@@ -266,8 +267,8 @@ export const ProfileView: React.FC = () => {
               >
                 <span className="text-base">📸</span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'រូបថត HD ឥតកំណត់' : 'Unlimited HD Photos'}</div>
-                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ ចុចបន្ថែមរូបថតហាង HD' : '✓ Tap to upload HD photos'}</div>
+                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'រូបថតហាងផ្លូវការ HD' : 'Official HD Shop Photo'}</div>
+                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ ចុចកែប្រែរូបតំណាងហាង' : '✓ Tap to update shop photo'}</div>
                 </div>
               </button>
 
@@ -289,7 +290,7 @@ export const ProfileView: React.FC = () => {
               >
                 <span className="text-base">🎥</span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'Food Video Reels' : 'Video Promotion'}</div>
+                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'វីដេអូផ្សព្វផ្សាយហាង' : 'Video Promotion'}</div>
                   <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ ចុចភ្ជាប់វីដេអូ TikTok & FB' : '✓ Tap to manage Reels'}</div>
                 </div>
               </button>
@@ -460,8 +461,8 @@ export const ProfileView: React.FC = () => {
                 </div>
                 <p className="text-[11px] text-amber-50/95 leading-relaxed font-medium">
                   {isKm
-                    ? 'គ្រប់គ្រងមុខម្ហូប រូបភាព ទីតាំងផែនទី និងព័ត៌មានទំនាក់ទំនងហាងរបស់អ្នក។'
-                    : 'Manage your menu, photos, map location, and contact details so diners can easily find your restaurant.'}
+                    ? 'គ្រប់គ្រងរូបភាពហាង ទីតាំងផែនទី និងព័ត៌មានទំនាក់ទំនងហាងរបស់អ្នក។'
+                    : 'Manage your shop photo, map location, and contact details so diners can easily find your restaurant.'}
                 </p>
                 {myRestaurants[0] ? (
                   <button
@@ -1449,8 +1450,8 @@ export const ProfileView: React.FC = () => {
                 </h4>
                 <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed max-w-md mx-auto bg-amber-100/70 dark:bg-amber-950/40 border border-amber-300/60 dark:border-amber-500/40 rounded-2xl p-3 font-medium">
                   {isKm
-                    ? 'គ្រប់គ្រងមុខម្ហូប រូបភាព ទីតាំងផែនទី និងព័ត៌មានទំនាក់ទំនងហាងរបស់អ្នក។'
-                    : 'Manage your menu, photos, map location, and contact details so diners can easily find your restaurant.'}
+                    ? 'គ្រប់គ្រងរូបភាពហាង ទីតាំងផែនទី និងព័ត៌មានទំនាក់ទំនងហាងរបស់អ្នក។'
+                    : 'Manage your shop photo, map location, and contact details so diners can easily find your restaurant.'}
                 </p>
               </div>
               <button
@@ -1507,7 +1508,6 @@ export const ProfileView: React.FC = () => {
               const isPremium = isRestaurantPremiumActive(restaurant) || isVip || currentUser?.role === 'admin';
               const isExpired = restaurant.membershipTier === 'premium' && !isPremium;
               const isFree = !isPremium && !isExpired;
-              const items = restaurant.menuItems || [];
 
               return (
                 <div key={restaurant.id} className="p-4 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-3.5">
@@ -1543,7 +1543,7 @@ export const ProfileView: React.FC = () => {
                       </div>
 
                       <div className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-400 font-mono">
-                        {items.length} / 20 {isKm ? 'មុខម្ហូប' : 'items'}
+                        👁️ {restaurant.analytics?.views ?? 0} {isKm ? 'ចូលមើល' : 'views'}
                       </div>
                     </div>
 
@@ -1558,16 +1558,16 @@ export const ProfileView: React.FC = () => {
                     {isFree && (
                       <p className="text-[10px] text-slate-500">
                         {isKm 
-                          ? `គណនីឥតគិតថ្លៃមិនអាចបន្ថែមមុខម្ហូបបានទេ។ ដំឡើងទៅកញ្ចប់ VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} ថ្ងៃ ឬ $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} ថ្ងៃ) ដើម្បីបន្ថែមម្ហូប!` 
-                          : `Free listing cannot add food items. Upgrade to VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} days or $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} days) to add food items!`}
+                          ? `ដំឡើងទៅកញ្ចប់ VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} ថ្ងៃ ឬ $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} ថ្ងៃ) ដើម្បីទទួលបានស្លាកសញ្ញា 👑 VIP និងអាទិភាពបង្ហាញលើគេ!` 
+                          : `Upgrade to VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} days or $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} days) for the 👑 VIP badge and priority placement!`}
                       </p>
                     )}
 
                     {isExpired && (
                       <p className="text-[10px] text-red-600">
                         {isKm 
-                          ? `សមាជិកភាព VIP បានផុតកំណត់ហើយ។ ទិន្នន័យមុខម្ហូបទាំងអស់ត្រូវបានរក្សាទុកដដែល។ សូមបន្តសមាជិកភាព VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} ថ្ងៃ ឬ $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} ថ្ងៃ)។` 
-                          : `VIP expired. All food items are retained. Renew VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} days or $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} days).`}
+                          ? `សមាជិកភាព VIP បានផុតកំណត់ហើយ។ ទិន្នន័យហាងទាំងអស់ត្រូវបានរក្សាទុកដដែល។ សូមបន្តសមាជិកភាព VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} ថ្ងៃ ឬ $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} ថ្ងៃ)។` 
+                          : `VIP expired. All store details are retained. Renew VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} days or $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} days).`}
                       </p>
                     )}
 
@@ -1581,7 +1581,7 @@ export const ProfileView: React.FC = () => {
                         className="flex-1 py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs flex items-center justify-center gap-1.5 transition active:scale-95"
                       >
                         <Edit2 className="w-3.5 h-3.5 text-emerald-200" />
-                        <span>{isKm ? `កែប្រែហាង & មុខម្ហូប (${items.length}/20)` : `Edit Store & Menu (${items.length}/20)`}</span>
+                        <span>{isKm ? 'កែប្រែព័ត៌មានហាង & រូបភាព' : 'Edit Store & Photo'}</span>
                       </button>
 
                       <button
@@ -2090,6 +2090,30 @@ export const ProfileView: React.FC = () => {
               className="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-700 text-[#0F172A] dark:text-slate-200 font-bold hover:bg-slate-200 transition border border-slate-200 dark:border-slate-600"
             >
               {isKm ? 'មើល' : 'View'}
+            </button>
+          </div>
+
+          {/* Check for App Updates */}
+          <div className="flex items-center justify-between gap-3 py-2 border-b border-slate-100 dark:border-slate-700">
+            <div className="min-w-0 flex-1">
+              <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#059669] shrink-0" />
+                {tr(language, 'ពិនិត្យកំណែអាប់ដេតកម្មវិធី', 'Check for App Updates', '检查应用更新')}
+              </span>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 pl-6 mt-0.5 leading-relaxed">
+                {tr(
+                  language,
+                  `កំណែបច្ចុប្បន្ន៖ ${APP_VERSION} • Build ${APP_BUILD_CODE} (ជូនដំណឹងស្វ័យប្រវត្តិពេលមានកំណែថ្មី)`,
+                  `Current: ${APP_VERSION} • Build ${APP_BUILD_CODE} (auto-alerts when a new update is ready)`,
+                  `当前版本：${APP_VERSION} • Build ${APP_BUILD_CODE}（有新版本时自动提醒更新）`
+                )}
+              </p>
+            </div>
+            <button
+              onClick={() => requestManualUpdateCheck()}
+              className="px-3 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-300 font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition border border-emerald-200 dark:border-emerald-800 cursor-pointer shrink-0"
+            >
+              {tr(language, 'ពិនិត្យ', 'Check', '检查')}
             </button>
           </div>
 

@@ -85,6 +85,8 @@ import {
   flushPendingMediaCloudQueue,
   isOverridePersistedInLocalStorage,
   recordPermanentFoodOverride,
+  removePermanentFoodOverride,
+  loadDeletedFoodIdsMap,
   saveAdminFoodOverridePermanently,
   subscribeMediaVaultUpdates,
   recordPermanentRestaurantOverride,
@@ -923,9 +925,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 50) {
           const initialMap = new Map(initialFoods.map(f => [f.id, f]));
+          const deletedFoodsMap = vault.deletedFoods || loadDeletedFoodIdsMap();
           const customAddedFoods: FoodItem[] = [];
           for (const f of parsed as FoodItem[]) {
-            if (!f || !f.id) continue;
+            if (!f || !f.id || deletedFoodsMap[f.id]) continue;
             const seed = initialMap.get(f.id);
             if (!seed) {
               customAddedFoods.push(f);
@@ -3658,16 +3661,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         try {
           const applySyncedBundle = (syncedMediaBundle: ReturnType<typeof loadLocalMediaOverrides>) => {
             let latestFoodsList = foods;
-            if (Object.keys(syncedMediaBundle.foods).length > 0) {
+            if (
+              Object.keys(syncedMediaBundle.foods).length > 0 ||
+              (syncedMediaBundle.deletedFoods && Object.keys(syncedMediaBundle.deletedFoods).length > 0)
+            ) {
               setFoods(prev => {
                 const next = deduplicateFoodItems(
-                  applyFoodOverrides(prev, syncedMediaBundle.foods),
+                  applyFoodOverrides(
+                    prev,
+                    syncedMediaBundle.foods,
+                    syncedMediaBundle.deletedFoods || loadDeletedFoodIdsMap()
+                  ),
                   syncedMediaBundle.foods
                 );
                 latestFoodsList = next;
                 if (next !== prev) {
                   scheduleStorageWrite('kft_foods_200_v10', next, 400);
-                  setSelectedFood(sel => (sel ? next.find(f => f.id === sel.id) || sel : null));
+                  setSelectedFood(sel => (sel ? next.find(f => f.id === sel.id) || null : null));
                 }
                 return next;
               });
@@ -3745,14 +3755,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const applyHydratedBundle = (bundle: ReturnType<typeof loadLocalMediaOverrides>) => {
       let latestFoods = foods;
-      if (Object.keys(bundle.foods).length > 0) {
+      if (
+        Object.keys(bundle.foods).length > 0 ||
+        (bundle.deletedFoods && Object.keys(bundle.deletedFoods).length > 0)
+      ) {
         setFoods(prev => {
-          const next = deduplicateFoodItems(applyFoodOverrides(prev, bundle.foods), bundle.foods);
+          const next = deduplicateFoodItems(
+            applyFoodOverrides(prev, bundle.foods, bundle.deletedFoods || loadDeletedFoodIdsMap()),
+            bundle.foods
+          );
           latestFoods = next;
           if (next !== prev) {
             scheduleStorageWrite('kft_foods_200_v10', next, 400);
           }
-          setSelectedFood(cur => (cur ? next.find(f => f.id === cur.id) || cur : null));
+          setSelectedFood(cur => (cur ? next.find(f => f.id === cur.id) || null : null));
           return next;
         });
       }
@@ -6129,8 +6145,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(language === 'km' ? 'បានកែប្រែសិទ្ធិអ្នកប្រើប្រាស់' : 'Updated user role', 'success');
   };
 
-  // Food CRUD
+  const isCurrentUserAdmin = (): boolean =>
+    Boolean(
+      currentUser?.role === 'admin' ||
+        currentUser?.id === 'admin-authorized-single' ||
+        currentUser?.username === 'admin' ||
+        currentUser?.username === 'cheasavuth'
+    );
+
+  // Food CRUD (Strictly Admin-Only: General Users and VIP Users cannot insert, edit, or delete food items)
   const addFood = (foodData: Omit<FoodItem, 'id' | 'rating' | 'reviewCount'>) => {
+    if (!isCurrentUserAdmin()) {
+      showToast(
+        language === 'km'
+          ? '🔒 មានតែ Admin ប៉ុណ្ណោះដែលអាចបញ្ចូលមុខម្ហូបបាន!'
+          : language === 'zh'
+          ? '🔒 仅限管理员添加菜品！'
+          : '🔒 Only Admin can insert food items!',
+        'warning'
+      );
+      return;
+    }
     const nowIso = new Date().toISOString();
     const newFood: FoodItem = {
       ...foodData,
@@ -6138,7 +6173,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       rating: 5.0,
       reviewCount: 1,
       isCustomPhoto: true,
+      isAdminEdited: true,
       photoUpdatedAt: nowIso,
+      adminApprovedAt: nowIso,
     };
     recordPermanentFoodOverride(newFood);
     setFoods(prev => {
@@ -6150,6 +6187,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateFood = async (updated: FoodItem): Promise<FoodItem> => {
+    if (!isCurrentUserAdmin()) {
+      showToast(
+        language === 'km'
+          ? '🔒 មានតែ Admin ប៉ុណ្ណោះដែលអាចកែប្រែមុខម្ហូបបាន!'
+          : language === 'zh'
+          ? '🔒 仅限管理员编辑菜品！'
+          : '🔒 Only Admin can edit food items!',
+        'warning'
+      );
+      return updated;
+    }
     const existingFood = foods.find(f => f.id === updated.id);
     const mergedBase: FoodItem = existingFood
       ? {
@@ -6238,9 +6286,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteFood = (id: string) => {
-    setFoods(prev => prev.filter(f => f.id !== id));
+    if (!isCurrentUserAdmin()) {
+      showToast(
+        language === 'km'
+          ? '🔒 មានតែ Admin ប៉ុណ្ណោះដែលអាចលុបមុខម្ហូបបាន!'
+          : language === 'zh'
+          ? '🔒 仅限管理员删除菜品！'
+          : '🔒 Only Admin can delete food items!',
+        'warning'
+      );
+      return;
+    }
+    removePermanentFoodOverride(id);
+    setFoods(prev => {
+      const next = prev.filter(f => f.id !== id);
+      scheduleStorageWrite('kft_foods_200_v10', next, 400);
+      return next;
+    });
     if (selectedFood?.id === id) setSelectedFood(null);
-    showToast(language === 'km' ? 'បានលុបមុខម្ហូប' : 'Food item deleted', 'info');
+    showToast(language === 'km' ? 'បានលុបមុខម្ហូបជាអចិន្ត្រៃយ៍' : 'Food item deleted permanently', 'info');
   };
 
   const getCurrentUserStoreQuota = (targetUser: User | null = currentUser): UserStoreQuotaSummary => {
@@ -6428,7 +6492,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       membershipTier: (isAdmin || isApprovedVip) ? 'premium' : 'free',
       membershipExpiresAt: (isAdmin || isApprovedVip) ? expiryIso : undefined,
       paymentStatus: isPendingPayment ? 'pending_verification' : (isAdmin || isApprovedVip) ? 'verified' : undefined,
-      menuItems: (restData.menuItems || []).slice(0, (isAdmin || isApprovedVip) ? 20 : 5),
+      menuItems: [],
       storeSlotNumber: slotNumber,
       replacedFromRestaurantId: targetToReplace ? targetToReplace.id : undefined,
       replacedAt: targetToReplace ? nowIso : undefined,
@@ -6766,64 +6830,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Restaurant Food Menu Items (Up to 20 items for Active VIP)
+  // Restaurant Food Menu Items (Strictly disabled for General Users & VIP Users; Admin-only)
   const addRestaurantMenuItem = (
     restaurantId: string, 
     itemData: Omit<RestaurantMenuItem, 'id' | 'createdAt' | 'restaurantId'>
   ): boolean => {
+    if (!isCurrentUserAdmin()) {
+      showToast(
+        language === 'km'
+          ? '🔒 មានតែ Admin ប៉ុណ្ណោះដែលអាចបញ្ចូលមុខម្ហូបបាន!'
+          : language === 'zh'
+          ? '🔒 仅限管理员添加菜品！'
+          : '🔒 Only Admin can insert food items!',
+        'warning'
+      );
+      return false;
+    }
     const targetRest = restaurants.find(r => r.id === restaurantId);
     if (!targetRest) {
       showToast(language === 'km' ? 'រកមិនឃើញហាងអាហារទេ!' : 'Restaurant not found!', 'warning');
       return false;
     }
 
-    const isAdmin = 
-      currentUser?.role === 'admin' || 
-      currentUser?.id === 'admin-authorized-single' || 
-      currentUser?.username === 'admin' || 
-      currentUser?.username === 'cheasavuth';
-
-    const isOwner = Boolean(
-      currentUser &&
-        (targetRest.ownerId === currentUser.id ||
-          (currentUser.email &&
-            targetRest.ownerEmail &&
-            targetRest.ownerEmail.trim().toLowerCase() === currentUser.email.trim().toLowerCase()))
-    );
-    const isApprovedVip = isUserVipActive(currentUser) || isRestaurantPremiumActive(targetRest);
-
-    if (!isAdmin && !isOwner) {
-      showToast(
-        language === 'km'
-          ? '🔒 សិទ្ធិត្រូវបានបដិសេធ! មានតែម្ចាស់ហាងផ្ទាល់ ឬ Admin ប៉ុណ្ណោះដែលអាចបន្ថែមមុខម្ហូបបាន។'
-          : language === 'zh'
-          ? '🔒 无权操作！仅限店主或管理员添加菜品。'
-          : '🔒 Unauthorized! Only the shop owner or Admin can add food items.',
-        'warning'
-      );
-      return false;
-    }
-
     const currentItems = targetRest.menuItems || [];
-    const maxAllowedItems = isAdmin || isApprovedVip ? 20 : 5;
-    if (currentItems.length >= maxAllowedItems) {
-      showToast(
-        isAdmin || isApprovedVip
-          ? language === 'km'
-            ? 'សមាជិកភាព Premium VIP អនុញ្ញាតឱ្យបន្ថែមមុខម្ហូបអតិបរមាត្រឹម ២០ មុខប៉ុណ្ណោះ!'
-            : language === 'zh'
-            ? 'VIP 会员最多可添加 20 道菜品！'
-            : 'Premium VIP membership allows a maximum of 20 food menu items!'
-          : language === 'km'
-          ? 'គម្រោងឥតគិតថ្លៃ (Free Plan) អាចបន្ថែមមុខម្ហូបបាន ៥ មុខ។ សូមដំឡើងទៅគម្រោង VIP ដើម្បីបន្ថែមរហូតដល់ ២០ មុខ!'
-          : language === 'zh'
-          ? '免费计划最多可添加 5 道菜品。升级 VIP 可添加多达 20 道菜品！'
-          : 'Free Plan allows up to 5 menu items. Upgrade to VIP to add up to 20 menu items!',
-        'warning'
-      );
-      return false;
-    }
-
     const newItem: RestaurantMenuItem = {
       ...itemData,
       id: `menu-${Date.now()}`,
@@ -6835,8 +6864,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const nowIso = new Date().toISOString();
     const updatedRest: Restaurant = {
       ...targetRest,
-      membershipTier: (isAdmin || isApprovedVip ? 'premium' : (targetRest.membershipTier || 'free')) as MembershipTier,
-      isPromoted: isAdmin || isApprovedVip ? true : Boolean(targetRest.isPromoted),
       menuItems: updatedMenuItems,
       updatedAt: nowIso,
       photoUpdatedAt: nowIso,
@@ -6867,44 +6894,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     showToast(
       language === 'km'
-        ? `✅ បានរក្សាទុកមុខម្ហូប "${newItem.nameKh}" ដោយជោគជ័យ (${updatedMenuItems.length}/${maxAllowedItems})!`
+        ? `✅ បានរក្សាទុកមុខម្ហូប "${newItem.nameKh}" ដោយជោគជ័យ!`
         : language === 'zh'
-        ? `✅ 已成功保存菜品 "${newItem.nameKh}" (${updatedMenuItems.length}/${maxAllowedItems})！`
-        : `✅ Saved menu item "${newItem.nameKh}" (${updatedMenuItems.length}/${maxAllowedItems})!`,
+        ? `✅ 已成功保存菜品 "${newItem.nameKh}"！`
+        : `✅ Saved menu item "${newItem.nameKh}"!`,
       'success'
     );
     return true;
   };
 
   const updateRestaurantMenuItem = (restaurantId: string, updatedItem: RestaurantMenuItem): boolean => {
-    const targetRest = restaurants.find(r => r.id === restaurantId);
-    if (!targetRest) return false;
-
-    const isAdmin = 
-      currentUser?.role === 'admin' || 
-      currentUser?.id === 'admin-authorized-single' || 
-      currentUser?.username === 'admin' || 
-      currentUser?.username === 'cheasavuth';
-
-    const isOwner = Boolean(
-      currentUser &&
-        (targetRest.ownerId === currentUser.id ||
-          (currentUser.email &&
-            targetRest.ownerEmail &&
-            targetRest.ownerEmail.trim().toLowerCase() === currentUser.email.trim().toLowerCase()))
-    );
-
-    if (!isAdmin && !isOwner) {
+    if (!isCurrentUserAdmin()) {
       showToast(
         language === 'km'
-          ? '🔒 គ្មានសិទ្ធិកែប្រែមុខម្ហូបទេ! មានតែម្ចាស់ហាងផ្ទាល់ ឬ Admin ប៉ុណ្ណោះដែលអាចកែប្រែបាន។'
+          ? '🔒 មានតែ Admin ប៉ុណ្ណោះដែលអាចកែប្រែមុខម្ហូបបាន!'
           : language === 'zh'
-          ? '🔒 无权修改菜品！仅限店主或管理员操作。'
-          : '🔒 Unauthorized! Only the shop owner or Admin can edit food items.',
+          ? '🔒 仅限管理员编辑菜品！'
+          : '🔒 Only Admin can edit food items!',
         'warning'
       );
       return false;
     }
+    const targetRest = restaurants.find(r => r.id === restaurantId);
+    if (!targetRest) return false;
 
     const nowIso = new Date().toISOString();
     const updatedMenuItems = (targetRest.menuItems || []).map(item => 
@@ -6944,34 +6956,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteRestaurantMenuItem = (restaurantId: string, menuItemId: string): boolean => {
-    const targetRest = restaurants.find(r => r.id === restaurantId);
-    if (!targetRest) return false;
-
-    const isAdmin = 
-      currentUser?.role === 'admin' || 
-      currentUser?.id === 'admin-authorized-single' || 
-      currentUser?.username === 'admin' || 
-      currentUser?.username === 'cheasavuth';
-
-    const isOwner = Boolean(
-      currentUser &&
-        (targetRest.ownerId === currentUser.id ||
-          (currentUser.email &&
-            targetRest.ownerEmail &&
-            targetRest.ownerEmail.trim().toLowerCase() === currentUser.email.trim().toLowerCase()))
-    );
-
-    if (!isAdmin && !isOwner) {
+    if (!isCurrentUserAdmin()) {
       showToast(
         language === 'km'
-          ? '🔒 គ្មានសិទ្ធិលុបមុខម្ហូបទេ! មានតែម្ចាស់ហាងផ្ទាល់ ឬ Admin ប៉ុណ្ណោះ។'
+          ? '🔒 មានតែ Admin ប៉ុណ្ណោះដែលអាចលុបមុខម្ហូបបាន!'
           : language === 'zh'
-          ? '🔒 无权删除菜品！仅限店主或管理员操作。'
-          : '🔒 Unauthorized!',
+          ? '🔒 仅限管理员删除菜品！'
+          : '🔒 Only Admin can delete food items!',
         'warning'
       );
       return false;
     }
+    const targetRest = restaurants.find(r => r.id === restaurantId);
+    if (!targetRest) return false;
 
     const nowIso = new Date().toISOString();
     const updatedMenuItems = (targetRest.menuItems || []).filter(item => item.id !== menuItemId);
