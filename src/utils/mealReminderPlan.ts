@@ -154,7 +154,9 @@ export function planMealReminders(input: PlanInput): PlannedReminder[] {
       usedToday.add(dish.id);
       previousDishBySlot.set(slot, dish.id);
 
-      if (at.getTime() <= now.getTime() + 60_000) return; // already (almost) due: skip, never fire instantly
+      // Skip only times that are already past (a few seconds of margin so we never schedule "in the past").
+      // A reminder the user just set for the next minute MUST still be scheduled - they are testing it.
+      if (at.getTime() <= now.getTime() + 5_000) return;
 
       const loc = getLocalizedFood(dish, language);
       out.push({
@@ -172,4 +174,38 @@ export function planMealReminders(input: PlanInput): PlannedReminder[] {
 
 export function isReminderId(id: number): boolean {
   return id >= REMINDER_ID_BASE && id < REMINDER_ID_BASE + REMINDER_ID_RANGE;
+}
+
+/** Reserved id for the "send a test reminder now" button (inside the owned range, never part of the weekly plan). */
+export const TEST_REMINDER_ID = REMINDER_ID_BASE + 999;
+
+/** Same meal windows as the Home screen (breakfast 05-10, lunch 10-14, snack 14-17, otherwise dinner). */
+export function reminderSlotForHour(hour: number): ReminderSlot {
+  if (hour >= 5 && hour < 10) return 'breakfast';
+  if (hour >= 10 && hour < 14) return 'lunch';
+  if (hour >= 14 && hour < 17) return 'snack';
+  return 'dinner';
+}
+
+export interface TestReminder {
+  slot: ReminderSlot;
+  foodId: string;
+  title: string;
+  body: string;
+}
+
+/** A sample reminder for the current meal time, so the user can verify permission / icon / tap-to-open on the spot. */
+export function buildTestReminder(foods: FoodItem[], language: Language, now: Date = new Date()): TestReminder | null {
+  const slot = reminderSlotForHour(now.getHours());
+  const catalog = foods.filter((f) => f && f.id && !isGeneratedDishId(f.id));
+  const pool = getAuthenticCambodianDishesForMealTime(catalog, slot);
+  if (pool.length === 0) return null;
+  const dish = pool[fnv1a(`kft-reminder-test:${dayKeyOf(now)}:${slot}`) % pool.length];
+  const loc = getLocalizedFood(dish, language);
+  return {
+    slot,
+    foodId: dish.id,
+    title: reminderTitle(slot, language),
+    body: reminderBody(loc.name || dish.nameKh, loc.category || '', language),
+  };
 }

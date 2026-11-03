@@ -5,10 +5,13 @@ import {
   DEFAULT_REMINDER_SETTINGS,
   REMINDER_ID_BASE,
   REMINDER_ID_RANGE,
+  TEST_REMINDER_ID,
+  buildTestReminder,
   isReminderId,
   planMealReminders,
   sanitizeReminderSettings,
   type MealReminderSettings,
+  type ReminderSlot,
 } from '../utils/mealReminderPlan';
 
 /**
@@ -17,16 +20,20 @@ import {
  *
  * Rules that keep this feature respectful:
  *  - the OS permission is asked only when the user turns reminders on (never at launch),
- *  - reminders are inexact (battery friendly) and never open the system "Alarms & reminders" screen,
+ *  - reminders fire exactly on time when the user has allowed "Alarms & reminders" (opt-in button),
+ *    otherwise they are inexact (battery friendly) and we NEVER open that system screen on our own,
  *  - a rolling 7-day plan is rebuilt on each app open, so inactive users stop receiving reminders.
  */
 export const MEAL_REMINDER_SETTINGS_KEY = 'kft_v3_meal_reminders';
 export const MEAL_REMINDER_CHANGED_EVENT = 'kft:meal-reminders-changed';
+/** Fired after the pending reminders were rebuilt, so the UI can refresh "next reminder". */
+export const MEAL_REMINDER_RESCHEDULED_EVENT = 'kft:meal-reminders-rescheduled';
 export const MEAL_REMINDER_CHANNEL_ID = 'meal-reminders';
 const SMALL_ICON = 'ic_stat_meal';
 const ICON_COLOR = '#064E3B';
 
 export type ReminderPermission = 'granted' | 'denied' | 'prompt' | 'unsupported';
+export type ExactAlarmState = 'granted' | 'denied' | 'unsupported';
 
 export function isReminderSupported(): boolean {
   try {
@@ -78,6 +85,27 @@ async function requestReminderPermission(): Promise<ReminderPermission> {
   }
 }
 
+/** Android 12+ "Alarms & reminders" state. iOS / older Android / web -> 'unsupported' (nothing to ask the user). */
+export async function getExactAlarmState(): Promise<ExactAlarmState> {
+  if (!isReminderSupported() || Capacitor.getPlatform() !== 'android') return 'unsupported';
+  try {
+    const { exact_alarm } = await LocalNotifications.checkExactNotificationSetting();
+    return exact_alarm === 'granted' ? 'granted' : 'denied';
+  } catch {
+    return 'unsupported';
+  }
+}
+
+/** Opens the system "Alarms & reminders" screen (only ever called from an explicit tap by the user). */
+export async function openExactAlarmSettings(): Promise<void> {
+  if (!isReminderSupported()) return;
+  try {
+    await LocalNotifications.changeExactNotificationSetting();
+  } catch {
+    // setting screen not available on this device
+  }
+}
+
 async function ensureChannel(): Promise<void> {
   if (Capacitor.getPlatform() !== 'android') return;
   try {
@@ -112,6 +140,12 @@ function enqueue<T>(job: () => Promise<T>): Promise<T> {
   return run;
 }
 
+function announceRescheduled(count: number) {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(MEAL_REMINDER_RESCHEDULED_EVENT, { detail: { count } }));
+  }
+}
+
 /**
  * Rebuild the pending reminders from the saved settings. Returns how many were scheduled.
  * Safe to call at any time (no-op on web, when disabled, or when the OS permission is not granted).
@@ -123,33 +157,41 @@ export function rescheduleMealReminders(
 ): Promise<number> {
   return enqueue(async () => {
     if (!isReminderSupported()) return 0;
-    const settings = getReminderSettings();
-    await cancelOwnedReminders();
-    if (!settings.enabled) return 0;
-    if ((await getReminderPermission()) !== 'granted') return 0;
-
-    const plan = planMealReminders({ settings, foods, language, now });
-    if (plan.length === 0) return 0;
-    await ensureChannel();
+    let scheduled = 0;
     try {
-      await LocalNotifications.schedule({
-        notifications: plan.map((p) => ({
-          id: p.id,
-          title: p.title,
-          body: p.body,
-          channelId: MEAL_REMINDER_CHANNEL_ID,
-          smallIcon: SMALL_ICON,
-          iconColor: ICON_COLOR,
-          autoCancel: true,
-          // Inexact on purpose: no SCHEDULE_EXACT_ALARM prompt, better battery, a few minutes of drift is fine for meals.
-          isExactNotification: false,
-          schedule: { at: p.at, allowWhileIdle: true },
-          extra: { foodId: p.foodId, slot: p.slot },
-        })),
-      });
-      return plan.length;
-    } catch {
-      return 0;
+      const settings = getReminderSettings();
+      await cancelOwnedReminders();
+      if (!settings.enabled) return 0;
+      if ((await getReminderPermission()) !== 'granted') return 0;
+
+      const plan = planMealReminders({ settings, foods, language, now });
+      if (plan.length === 0) return 0;
+      await ensureChannel();
+      // Exact only when the user already allowed it: never triggers the system "Alarms & reminders" screen by itself.
+      const exact = (await getExactAlarmState()) === 'granted';
+      try {
+        await LocalNotifications.schedule({
+          notifications: plan.map((p) => ({
+            id: p.id,
+            title: p.title,
+            body: p.body,
+            channelId: MEAL_REMINDER_CHANNEL_ID,
+            smallIcon: SMALL_ICON,
+            iconColor: ICON_COLOR,
+            autoCancel: true,
+            isExactNotification: exact,
+            isExactMandatory: false,
+            schedule: { at: p.at, allowWhileIdle: true },
+            extra: { foodId: p.foodId, slot: p.slot },
+          })),
+        });
+        scheduled = plan.length;
+      } catch {
+        scheduled = 0;
+      }
+      return scheduled;
+    } finally {
+      announceRescheduled(scheduled);
     }
   });
 }
@@ -172,7 +214,66 @@ export async function enableMealReminders(foods: FoodItem[], language: Language)
 
 export async function disableMealReminders(): Promise<void> {
   saveReminderSettings({ ...getReminderSettings(), enabled: false });
-  await enqueue(() => cancelOwnedReminders());
+  await enqueue(async () => {
+    await cancelOwnedReminders();
+    announceRescheduled(0);
+  });
+}
+
+export interface NextReminder {
+  at: Date;
+  slot?: ReminderSlot;
+}
+
+/** The earliest reminder that is REALLY scheduled in the OS (truth, not a guess). null when nothing is pending. */
+export async function getNextScheduledReminder(): Promise<NextReminder | null> {
+  if (!isReminderSupported()) return null;
+  try {
+    const { notifications } = await LocalNotifications.getPending();
+    let best: NextReminder | null = null;
+    for (const n of notifications) {
+      if (!isReminderId(n.id) || n.id === TEST_REMINDER_ID) continue;
+      const rawAt = (n.schedule as { at?: Date | string } | undefined)?.at;
+      const at = rawAt ? new Date(rawAt) : null;
+      if (!at || Number.isNaN(at.getTime())) continue;
+      if (!best || at.getTime() < best.at.getTime()) {
+        const slot = (n as { extra?: { slot?: ReminderSlot } }).extra?.slot;
+        best = { at, slot };
+      }
+    }
+    return best;
+  } catch {
+    return null;
+  }
+}
+
+/** Show a sample reminder immediately (no schedule) to verify permission, icon, channel and tap-to-open. */
+export async function sendTestReminder(foods: FoodItem[], language: Language): Promise<boolean> {
+  if (!isReminderSupported()) return false;
+  if ((await getReminderPermission()) !== 'granted') return false;
+  const sample = buildTestReminder(foods, language);
+  if (!sample) return false;
+  await ensureChannel();
+  try {
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          id: TEST_REMINDER_ID,
+          title: sample.title,
+          body: sample.body,
+          channelId: MEAL_REMINDER_CHANNEL_ID,
+          smallIcon: SMALL_ICON,
+          iconColor: ICON_COLOR,
+          autoCancel: true,
+          isExactNotification: false,
+          extra: { foodId: sample.foodId, slot: sample.slot },
+        },
+      ],
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** Calls `handler` with the dish id when the user taps a reminder. Returns an unsubscribe function. */

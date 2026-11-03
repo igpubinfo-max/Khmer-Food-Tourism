@@ -109,7 +109,7 @@ const FeatureGridImpl: React.FC<Props> = ({
 
   return (
     <section aria-label={tr(language, 'សេវាកម្មឆ្លាតវៃប្រចាំថ្ងៃ', 'Daily Smart Services', '日常智能服务')}>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-1.5">
         {items.map((it) => {
           const Icon = it.icon;
           const isVipCard = it.badgeType === 'vip';
@@ -119,15 +119,15 @@ const FeatureGridImpl: React.FC<Props> = ({
               id={`kft-feature-${it.id}-btn`}
               type="button"
               onClick={it.onClick}
-              className={`group relative rounded-2xl py-2.5 px-1.5 flex flex-col items-center justify-center gap-1 transition active:scale-[0.97] cursor-pointer shadow-xs ${
+              className={`group rounded-xl pt-1 pb-1.5 px-1 flex flex-col items-center justify-center gap-0.5 transition active:scale-[0.97] cursor-pointer shadow-xs ${
                 isVipCard
                   ? 'bg-gradient-to-b from-slate-800/95 to-amber-950/35 border border-amber-400/45 hover:border-amber-400/75'
                   : 'bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-white/10 hover:border-emerald-500/40'
               }`}
             >
-              {/* Compact top-right Free / VIP indicator pill */}
+              {/* Compact Free / VIP indicator pill: in the normal flow (top-right) so it can never overlap the icon */}
               <span
-                className={`absolute top-1.5 right-1.5 inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded-full text-[8px] font-extrabold leading-none ${
+                className={`self-end inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded-full text-[8px] font-extrabold leading-none ${
                   isVipCard
                     ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
                     : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border border-emerald-500/25'
@@ -139,13 +139,13 @@ const FeatureGridImpl: React.FC<Props> = ({
 
               {/* Clean centered handcrafted icon */}
               <span
-                className={`w-9 h-9 rounded-xl ${it.iconContainerClass} flex items-center justify-center shrink-0 mt-1 transition-transform group-hover:scale-105`}
+                className={`w-8 h-8 rounded-lg ${it.iconContainerClass} flex items-center justify-center shrink-0 transition-transform group-hover:scale-105`}
               >
-                <Icon className="w-[19px] h-[19px]" />
+                <Icon className="w-[17px] h-[17px]" />
               </span>
 
               {/* Crisp 1-line Khmer label with sufficient vertical line-height so subscripts never clip */}
-              <span className="text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-100 leading-normal text-center truncate w-full px-0.5 pt-0.5">
+              <span className="text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-100 leading-normal text-center truncate w-full px-0.5">
                 {it.label}
               </span>
             </button>

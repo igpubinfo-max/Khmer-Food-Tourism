@@ -629,6 +629,9 @@ export interface User {
   vipPlanDays?: number;
   vipExpiresAt?: string;
   approvedStoresCount?: number;
+
+  // One-time "taste 30 dishes -> 30 days VIP" reward. Set when granted; its presence means the reward can NEVER be granted again.
+  foodCheckInRewardAt?: string;
 }
 
 export interface ConnectedSocialAccount {

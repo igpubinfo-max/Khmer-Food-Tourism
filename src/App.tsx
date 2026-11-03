@@ -40,6 +40,7 @@ const GoogleMapsPlaceSearchModal = lazy(() => import('./components/GoogleMapsPla
 import { Toast } from './components/Toast';
 import { RatePrompt } from './components/RatePrompt';
 import { MealReminderBootstrap } from './components/MealReminderBootstrap';
+import { FoodCheckInRewardBootstrap } from './components/FoodCheckInRewardBootstrap';
 import { OfflineBanner } from './components/OfflineBanner';
 import { AppUpdateBanner } from './components/AppUpdateBanner';
 import { SMART_HUB_EVENT } from './utils/smartHub';
@@ -276,6 +277,9 @@ const MainScreen: React.FC = () => {
 
       {/* Daily meal-time reminders (native app only; renders nothing) */}
       <MealReminderBootstrap />
+
+      {/* "Taste 30 dishes -> 30 days VIP" reward tracking (renders nothing) */}
+      <FoodCheckInRewardBootstrap />
     </div>
   );
 };

@@ -5,13 +5,18 @@ import { tr } from '../utils/i18n';
 import { togglePassportStamp, useFoodPassport, getPassportLevel, levelTitle } from '../utils/foodPassport';
 import { recordMeaningfulAction } from '../utils/engagement';
 import { touchDailyStreak } from '../utils/dailyHabit';
+import {
+  FOOD_CHECKIN_DAILY_CAP,
+  FOOD_CHECKIN_REWARD_TARGET,
+  reportFoodStamped,
+} from '../utils/foodCheckInReward';
 
 interface Props {
   foodId: string;
   language: Language;
   showToast?: (msg: string, type?: 'success' | 'info' | 'warning') => void;
-  /** compact = icon-only chip for cards; full = labelled button for detail screens */
-  variant?: 'compact' | 'full';
+  /** compact = icon-only chip for cards; full = labelled button for detail screens; inline = slim labelled button for compact cards */
+  variant?: 'compact' | 'full' | 'inline';
 }
 
 /** "I tried it" stamp button for the Cambodian Food Passport. */
@@ -22,34 +27,64 @@ export const PassportStampButton: React.FC<Props> = ({ foodId, language, showToa
   const onClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     const nowStamped = togglePassportStamp(foodId);
-    if (nowStamped) {
-      recordMeaningfulAction('favorite');
-      touchDailyStreak();
-      // Celebrate crossing into a new level (cheap: depends on the count only).
-      const before = getPassportLevel(count).level;
-      const after = getPassportLevel(count + 1).level;
-      if (after.min !== before.min) {
-        showToast?.(
-          tr(
+    if (!nowStamped) return;
+    recordMeaningfulAction('favorite');
+    touchDailyStreak();
+
+    // Food check-in reward ("taste 30 dishes -> 30 days VIP"): the shell answers synchronously with what really happened.
+    const outcome = reportFoodStamped(foodId);
+    // The 30th dish: the grant shows its own celebration, so no regular toast here.
+    if (outcome.kind === 'reached') return;
+
+    // Celebrate crossing into a new level (cheap: depends on the count only).
+    const before = getPassportLevel(count).level;
+    const after = getPassportLevel(count + 1).level;
+    const base =
+      after.min !== before.min
+        ? tr(
             language,
             `🎉 ឡើងកម្រិតថ្មី៖ ${after.emoji} ${levelTitle(after, language)}!`,
             `🎉 New level unlocked: ${after.emoji} ${levelTitle(after, language)}!`,
             `🎉 升级啦：${after.emoji} ${levelTitle(after, language)}！`
-          ),
-          'success'
-        );
-        return;
-      }
-      showToast?.(
-        tr(language, '🧭 បានបន្ថែមទៅ រសជាតិ និងទេសចរណ៍កម្ពុជា!', '🧭 Added to Cambodia Flavors & Tourism!', '🧭 已加入柬埔寨风味与旅游！'),
-        'success'
-      );
+          )
+        : tr(language, '🧭 បានបន្ថែមទៅ រសជាតិ និងទេសចរណ៍កម្ពុជា!', '🧭 Added to Cambodia Flavors & Tourism!', '🧭 已加入柬埔寨风味与旅游！');
+
+    let suffix = '';
+    if (outcome.kind === 'counted') {
+      suffix = ` • 🎁 ${outcome.progress}/${FOOD_CHECKIN_REWARD_TARGET}`;
+    } else if (outcome.kind === 'daily_cap') {
+      suffix = ` • ${tr(
+        language,
+        `ថ្ងៃនេះរាប់គ្រប់ ${FOOD_CHECKIN_DAILY_CAP} មុខហើយ — ត្រឡប់មកថ្ងៃស្អែក`,
+        `today's ${FOOD_CHECKIN_DAILY_CAP} check-ins are done — come back tomorrow`,
+        `今天已计满 ${FOOD_CHECKIN_DAILY_CAP} 道，明天再来`
+      )}`;
     }
+    showToast?.(base + suffix, 'success');
   };
 
   const label = stamped
     ? tr(language, 'បានភ្លក់ហើយ', 'Tried it', '已品尝')
     : tr(language, 'ខ្ញុំបានភ្លក់', 'I tried it', '我吃过了');
+
+  if (variant === 'inline') {
+    // Slim labelled button used inside compact cards (36px tall, still a comfortable touch target).
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-pressed={stamped}
+        className={`min-h-[36px] px-2.5 rounded-xl text-xs font-bold flex items-center gap-1 shrink-0 transition active:scale-95 cursor-pointer border-2 ${
+          stamped
+            ? 'bg-emerald-600 text-white border-emerald-600'
+            : 'bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 border-emerald-500'
+        }`}
+      >
+        <BadgeCheck className="w-3.5 h-3.5" />
+        <span className="whitespace-nowrap">{label}</span>
+      </button>
+    );
+  }
 
   if (variant === 'full') {
     return (

@@ -12,7 +12,8 @@
     "test:food-ai": "node scripts/foodAiAudit.cjs",
     "test:habit": "node scripts/dailyHabitAudit.cjs",
     "test:reminders": "node scripts/mealReminderAudit.cjs",
-    "test:festival": "node scripts/festivalFoodAudit.cjs"
+    "test:festival": "node scripts/festivalFoodAudit.cjs",
+    "test:reward": "node scripts/foodCheckInRewardAudit.cjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.0.0",

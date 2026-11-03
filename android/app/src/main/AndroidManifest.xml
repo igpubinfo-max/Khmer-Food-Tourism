@@ -81,8 +81,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
-    <!-- Daily meal-time reminders (Capacitor Local Notifications). Reminders are scheduled as INEXACT alarms, so the
-         exact-alarm permission that the plugin declares is removed (no "Alarms & reminders" prompt, no Play declaration). -->
+    <!-- Daily meal-time reminders (Capacitor Local Notifications).
+         SCHEDULE_EXACT_ALARM (declared by the plugin, merged automatically) lets the user opt in to reminders that fire exactly
+         on the chosen minute via the in-app "On-time" button. The app never opens that system screen by itself. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" tools:node="remove" />
 </manifest>

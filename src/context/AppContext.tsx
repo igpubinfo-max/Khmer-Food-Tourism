@@ -39,6 +39,7 @@ import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { buildDynamicNotificationsList } from '../services/dailyDiscoveryAndNotificationService';
 import { findDuplicateRestaurant, mergeRestaurantRecords } from '../utils/duplicateDetector';
 import { recordSubmissionTimestamp, checkSubmissionRateLimit } from '../services/aiCheckInService';
+import { FOOD_CHECKIN_REWARD_TARGET, FOOD_CHECKIN_REWARD_VIP_DAYS, computeRewardVipWindow } from '../utils/foodCheckInReward';
 import { 
   initialUsers, initialFoods, initialRestaurants, 
   initialDestinations, initialAppSettings, initialTransactions 
@@ -146,6 +147,8 @@ interface AppContextType {
   updateUserRole: (userId: string, newRole: UserRole) => void;
   updateCurrentUserProfile: (newName: string, newAvatar?: string) => void;
   adminGrantUserVip: (userIdOrEmail: string, durationDays?: number) => Promise<{ success: boolean }>;
+  /** One-time reward for the signed-in user after 30 distinct dishes tried (see utils/foodCheckInReward). Idempotent. */
+  grantFoodCheckInReward: () => Promise<{ success: boolean; alreadyGranted?: boolean }>;
   cancelUserVip: (userId: string) => Promise<{ success: boolean }>;
   restoreUserAccess: (userIdOrEmail: string) => Promise<{ success: boolean; restoredUser?: User; error?: string }>;
   disableUserAccount: (userId: string) => Promise<{ success: boolean }>;
@@ -4710,6 +4713,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     planType?: string;
     paymentMethod?: User['paymentMethod'];
     transactionRef?: string;
+    /** Extra account fields to store atomically with the VIP record (e.g. the one-time reward flag). */
+    extraFields?: Partial<User>;
   }): User => {
     const liveUsers = latestSyncStateRef.current.users || users;
     const liveDeleted = latestSyncStateRef.current.deletedUsers || deletedUsers;
@@ -4787,6 +4792,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       transactionRef: params.transactionRef || existing?.transactionRef,
       lastActiveAt: nowIso,
       legacyIds: legacySet.size > 0 ? Array.from(legacySet) : undefined,
+      ...(params.extraFields || {}),
     };
     approvedUser.integritySeal = computeUserIntegritySealSync(approvedUser);
 
@@ -4969,6 +4975,115 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       language === 'km'
         ? `👑 បានបើកដំណើរការ VIP (${validDays} ថ្ងៃ) ជូន "${approved.name}" ដោយជោគជ័យ!`
         : `👑 Activated VIP (${validDays} days) for "${approved.name}" successfully!`,
+      'success'
+    );
+    return { success: true };
+  };
+
+  /**
+   * One-time reward: 30 distinct dishes tried -> 30 days of VIP, stacked on top of any VIP time the user still has.
+   * Idempotent by design - three independent guards must ALL be clear before anything is granted:
+   *   1. the account flag `foodCheckInRewardAt` (synced to the cloud, survives reinstall / other devices),
+   *   2. a deterministic reward transaction reference (`REWARD-FOODCHECKIN30-<userId>`),
+   *   3. the caller's local ledger (checked by the caller before it asks for the grant).
+   * It never reduces existing paid VIP time and never touches Admin accounts.
+   */
+  const grantFoodCheckInReward = async (): Promise<{ success: boolean; alreadyGranted?: boolean }> => {
+    const liveCur = latestSyncStateRef.current.currentUser || currentUser;
+    if (!liveCur || isAdminAccount(liveCur) || liveCur.isDisabled) return { success: false };
+
+    const liveUsers = latestSyncStateRef.current.users || users;
+    const record = liveUsers.find(u => doesUserMatchTarget(u, liveCur)) || liveCur;
+    const rewardRef = `REWARD-FOODCHECKIN${FOOD_CHECKIN_REWARD_TARGET}-${record.id}`;
+    const liveTxns = latestSyncStateRef.current.transactions || transactions;
+    if (
+      record.foodCheckInRewardAt ||
+      liveCur.foodCheckInRewardAt ||
+      liveTxns.some(t => t.transactionRef === rewardRef)
+    ) {
+      return { success: false, alreadyGranted: true };
+    }
+
+    const rewardDays = FOOD_CHECKIN_REWARD_VIP_DAYS;
+    const nowIso = new Date().toISOString();
+    // Pure, unit-tested date math: stacks on remaining VIP time, never shortens it.
+    const { wasVipActive, startDate, expiryDate, durationDays } = computeRewardVipWindow(record, new Date(), rewardDays);
+    const planType = wasVipActive
+      ? record.vipPlanType || resolveAndValidateVipPlan({ durationDays }, appSettingsRef.current).id
+      : resolveAndValidateVipPlan({ durationDays: rewardDays }, appSettingsRef.current).id;
+
+    const approved = persistApprovedVipUserAndCloud({
+      targetId: record.id,
+      targetEmail: record.email,
+      targetName: record.name,
+      targetPhone: record.phone,
+      startDate,
+      expiryDate,
+      durationDays,
+      planType,
+      paymentMethod: wasVipActive ? undefined : 'Manual',
+      // A paying member keeps their original payment reference; only brand-new VIPs get the reward reference.
+      transactionRef: wasVipActive ? undefined : rewardRef,
+      extraFields: { foodCheckInRewardAt: nowIso },
+    });
+
+    const rewardTxn: RegistrationTransaction = {
+      id: `TXN-REWARD-${Date.now().toString(36).toUpperCase()}`,
+      type: 'user_vip_upgrade',
+      userId: approved.id,
+      userName: approved.name,
+      userEmail: approved.email,
+      ownerId: approved.id,
+      ownerName: approved.name,
+      planType: resolveAndValidateVipPlan({ durationDays: rewardDays }, appSettingsRef.current).id,
+      amountUsd: 0,
+      currency: 'USD',
+      durationDays: rewardDays,
+      membershipTier: 'premium_vip',
+      status: 'verified',
+      paymentMethod: 'Manual',
+      transactionRef: rewardRef,
+      createdAt: nowIso,
+      expiresAt: approved.subscriptionExpiryDate || expiryDate,
+      verifiedAt: nowIso,
+      verifiedBy: `System (Reward: ${FOOD_CHECKIN_REWARD_TARGET} food check-ins)`,
+      notes: `Reward: ${FOOD_CHECKIN_REWARD_TARGET} distinct dishes tried -> ${rewardDays} days VIP${wasVipActive ? ' (added to existing VIP time)' : ''}`,
+    };
+    setTransactions(prev => {
+      const nextTxns = [rewardTxn, ...prev];
+      latestSyncStateRef.current.transactions = nextTxns;
+      return nextTxns;
+    });
+
+    setNotifications(prev => [
+      {
+        id: `notif-food-reward-${approved.id}`,
+        titleKh: `🎁 អបអរសាទរ! ទទួលបាន VIP ${rewardDays} ថ្ងៃ`,
+        titleEn: `🎁 Congratulations! You earned ${rewardDays} days of VIP`,
+        titleZh: `🎁 恭喜！您获得 ${rewardDays} 天 VIP`,
+        messageKh: `អ្នកបានភ្លក់ម្ហូប ${FOOD_CHECKIN_REWARD_TARGET} មុខផ្សេងគ្នា។ VIP របស់អ្នកមានសុពលភាពដល់ ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}។`,
+        messageEn: `You tried ${FOOD_CHECKIN_REWARD_TARGET} different dishes. Your VIP is valid until ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}.`,
+        messageZh: `您已品尝 ${FOOD_CHECKIN_REWARD_TARGET} 道不同的菜品。VIP 有效期至 ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}。`,
+        type: 'system',
+        isRead: false,
+        createdAt: nowIso,
+      },
+      ...prev,
+    ]);
+
+    recordSecurityAudit(
+      'FOOD_CHECKIN_REWARD_GRANTED',
+      'SUCCESS',
+      'FoodPassport',
+      `Granted ${rewardDays}-day VIP reward to ${approved.name} (${approved.id}) after ${FOOD_CHECKIN_REWARD_TARGET} distinct dishes; VIP until ${approved.subscriptionExpiryDate}${wasVipActive ? ' (stacked on existing VIP)' : ''}`
+    );
+
+    showToast(
+      language === 'km'
+        ? `🎉 អបអរសាទរ! អ្នកបានភ្លក់ម្ហូប ${FOOD_CHECKIN_REWARD_TARGET} មុខ — ទទួលបាន VIP ${rewardDays} ថ្ងៃ!`
+        : language === 'zh'
+          ? `🎉 恭喜！您已品尝 ${FOOD_CHECKIN_REWARD_TARGET} 道菜 — 获得 ${rewardDays} 天 VIP！`
+          : `🎉 Congratulations! You tried ${FOOD_CHECKIN_REWARD_TARGET} dishes — enjoy ${rewardDays} days of VIP!`,
       'success'
     );
     return { success: true };
@@ -11260,6 +11375,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateUserRole,
         updateCurrentUserProfile,
         adminGrantUserVip,
+        grantFoodCheckInReward,
         cancelUserVip,
         restoreUserAccess,
         disableUserAccount,

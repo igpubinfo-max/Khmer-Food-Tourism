@@ -87,10 +87,10 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
   const displayName = currentUser?.name || userName;
 
   return (
-    <section className="space-y-2.5">
+    <section className="space-y-2">
       {currentUser ? (
         isAdmin ? (
-          <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-[#022c22] via-[#064E3B] to-slate-900 text-white border border-emerald-400/50 shadow-md relative overflow-hidden flex items-center justify-between gap-3">
+          <div className="p-3 rounded-2xl bg-gradient-to-r from-[#022c22] via-[#064E3B] to-slate-900 text-white border border-emerald-400/50 shadow-md relative overflow-hidden flex items-center justify-between gap-3">
             <div
               onClick={onOpenAdminPanel || onExploreProfile}
               className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
@@ -102,7 +102,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
                   decoding="async"
                   referrerPolicy="no-referrer"
                   onError={(e) => handleAvatarImageError(e, currentUser)}
-                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border-2 border-emerald-400 shadow-sm bg-emerald-950"
+                  className="w-11 h-11 rounded-xl object-cover border-2 border-emerald-400 shadow-sm bg-emerald-950"
                 />
                 <div className="absolute -bottom-1 -right-1 p-1 bg-emerald-500 text-white rounded-full shadow-xs border border-slate-900">
                   <Shield className="w-3 h-3" />
@@ -159,7 +159,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
                 decoding="async"
                 referrerPolicy="no-referrer"
                 onError={(e) => handleAvatarImageError(e, currentUser)}
-                className={`w-12 h-12 rounded-2xl object-cover bg-emerald-950 shadow-md ${
+                className={`w-10 h-10 rounded-xl object-cover bg-emerald-950 shadow-md ${
                   isVip ? 'border-2 border-amber-400' : 'border-2 border-emerald-500/40'
                 }`}
               />
@@ -194,7 +194,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
         )
       ) : (
         <div className="flex items-center gap-3">
-          <span className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-300">
+          <span className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-300">
             <UserIcon className="w-6 h-6" />
           </span>
           <div className="min-w-0 flex-1 pt-0.5">
@@ -216,14 +216,16 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
         </div>
       )}
 
-      <div className="mt-1 pt-2">
-        <h2 className={`${headingFont(language)} text-[15px] sm:text-lg leading-relaxed pt-1.5 pb-1 text-[#064E3B] dark:text-emerald-200 break-words`}>
+      {/* On short screens (< 760px tall) the tagline + meal hint (already shown in the app header) yield their space so the
+          six feature buttons stay on the first screen. They are fully visible on every taller screen. */}
+      <div className={`pt-0.5 ${isAdmin ? '' : '[@media(max-height:759px)]:hidden'}`}>
+        <h2 className={`${headingFont(language)} text-[15px] sm:text-lg leading-relaxed pt-0.5 pb-0.5 text-[#064E3B] dark:text-emerald-200 break-words`}>
           {isAdmin
             ? tr(language, 'ស្វែងរក និងគ្រប់គ្រងទិន្នន័យក្នុងប្រព័ន្ធ', 'Search & Manage Directory', '搜索并管理系统数据')
             : tr(language, 'ស្វែងយល់អាហារ • ទីតាំង • បទពិសោធន៍', 'Discover Food • Places • Experiences', '探索美食 • 景点 • 体验')}
         </h2>
         {!isAdmin && hint && (
-          <p className="text-xs leading-relaxed pt-0.5 pb-0.5 text-slate-500 dark:text-slate-400 mt-0.5 truncate">{hint}</p>
+          <p className="text-xs leading-relaxed pt-0.5 pb-0.5 text-slate-500 dark:text-slate-400 truncate">{hint}</p>
         )}
       </div>
 
@@ -240,7 +242,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
             '搜索美食、餐厅或旅游景点...'
           )}
           aria-label={tr(language, 'ស្វែងរក', 'Search', '搜索')}
-          className="w-full min-h-[48px] pl-12 pr-12 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 text-base shadow-md focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 font-khmer transition"
+          className="w-full min-h-[44px] pl-12 pr-12 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 text-base shadow-md focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 font-khmer transition"
         />
         {localQuery && (
           <button

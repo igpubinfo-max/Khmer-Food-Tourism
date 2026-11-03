@@ -305,7 +305,7 @@ export const HomeView: React.FC = () => {
   const handleExploreAllTrending = useCallback(() => setIsTrendingSocialModalOpen(true), [setIsTrendingSocialModalOpen]);
 
   return (
-    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-6 font-khmer">
+    <div className="max-w-md mx-auto px-4 py-2 space-y-2.5 pb-6 font-khmer">
       {/* 1. Greeting + User Profile Card + debounced search bar */}
       <HomeGreetingSearch
         language={language}

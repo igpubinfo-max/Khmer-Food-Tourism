@@ -1,16 +1,23 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { organizeAndDeduplicateFoods } from '../../types';
 import { tr } from '../../utils/i18n';
 import {
   MEAL_REMINDER_CHANGED_EVENT,
+  MEAL_REMINDER_RESCHEDULED_EVENT,
   disableMealReminders,
   enableMealReminders,
+  getExactAlarmState,
+  getNextScheduledReminder,
   getReminderPermission,
   getReminderSettings,
   isReminderSupported,
+  openExactAlarmSettings,
   saveReminderSettings,
+  sendTestReminder,
+  type ExactAlarmState,
+  type NextReminder,
   type ReminderPermission,
 } from '../../services/mealReminderService';
 import {
@@ -27,8 +34,10 @@ const SLOT_META: Record<ReminderSlot, { emoji: string; km: string; en: string; z
   dinner: { emoji: '🍲', km: 'ពេលល្ងាច', en: 'Dinner', zh: '晚餐' },
 };
 
+const pad2 = (n: number) => String(n).padStart(2, '0');
+
 /**
- * Opt-in panel for daily meal-time reminders (native app only; renders nothing on the web).
+ * Opt-in panel for regular meal-time reminders (native app only; renders nothing on the web).
  * The OS permission is requested only when the user taps "Turn on" — never at launch.
  */
 const MealReminderPanelInner: React.FC = () => {
@@ -37,20 +46,40 @@ const MealReminderPanelInner: React.FC = () => {
   const catalog = useMemo(() => organizeAndDeduplicateFoods(foods), [foods]);
   const [settings, setSettings] = useState<MealReminderSettings>(() => getReminderSettings());
   const [permission, setPermission] = useState<ReminderPermission>(() => (getReminderSettings().enabled ? 'granted' : 'prompt'));
+  const [exactState, setExactState] = useState<ExactAlarmState>('unsupported');
+  const [next, setNext] = useState<NextReminder | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  const refreshStatus = useCallback(async () => {
+    const [p, e, n] = await Promise.all([getReminderPermission(), getExactAlarmState(), getNextScheduledReminder()]);
+    setPermission(p);
+    setExactState(e);
+    setNext(n);
+  }, []);
 
   useEffect(() => {
     if (!supported) return;
     let alive = true;
-    void getReminderPermission().then((p) => alive && setPermission(p));
-    const refresh = () => setSettings(getReminderSettings());
-    window.addEventListener(MEAL_REMINDER_CHANGED_EVENT, refresh);
+    const safeRefresh = () => {
+      if (alive) void refreshStatus();
+    };
+    safeRefresh();
+    const onSettings = () => setSettings(getReminderSettings());
+    window.addEventListener(MEAL_REMINDER_CHANGED_EVENT, onSettings);
+    window.addEventListener(MEAL_REMINDER_RESCHEDULED_EVENT, safeRefresh);
+    // The user may come back from the system settings screen (exact alarms / notifications) -> re-check.
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') safeRefresh();
+    };
+    document.addEventListener('visibilitychange', onVisible);
     return () => {
       alive = false;
-      window.removeEventListener(MEAL_REMINDER_CHANGED_EVENT, refresh);
+      window.removeEventListener(MEAL_REMINDER_CHANGED_EVENT, onSettings);
+      window.removeEventListener(MEAL_REMINDER_RESCHEDULED_EVENT, safeRefresh);
+      document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [supported]);
+  }, [supported, refreshStatus]);
 
   if (!supported) return null;
 
@@ -62,17 +91,12 @@ const MealReminderPanelInner: React.FC = () => {
     setBusy(true);
     try {
       const res = await enableMealReminders(catalog, language);
-      setPermission(await getReminderPermission());
+      await refreshStatus();
       if (res.ok) {
         setSettings(getReminderSettings());
         setExpanded(true);
         showToast(
-          tr(
-            language,
-            '🔔 បានបើកការរំលឹកម្ហូបតាមម៉ោងញ៉ាំ!',
-            '🔔 Meal reminders are on!',
-            '🔔 已开启用餐提醒！'
-          ),
+          tr(language, '🔔 បានបើកការរំលឹកទទួលទានអាហារទៀងទាត់!', '🔔 Regular meal reminders are on!', '🔔 已开启规律用餐提醒！'),
           'success'
         );
       } else {
@@ -98,24 +122,59 @@ const MealReminderPanelInner: React.FC = () => {
       await disableMealReminders();
       setSettings(getReminderSettings());
       setExpanded(false);
-      showToast(tr(language, 'បានបិទការរំលឹកម្ហូប', 'Meal reminders turned off', '已关闭用餐提醒'), 'info');
+      showToast(tr(language, 'បានបិទការរំលឹកទទួលទានអាហារ', 'Meal reminders turned off', '已关闭用餐提醒'), 'info');
     } finally {
       setBusy(false);
     }
   };
 
+  const onTest = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const ok = await sendTestReminder(catalog, language);
+      showToast(
+        ok
+          ? tr(language, '🔔 បានផ្ញើការរំលឹកសាកល្បង — សូមពិនិត្យរបារជូនដំណឹង', '🔔 Test reminder sent — check your notification shade', '🔔 已发送测试提醒，请查看通知栏')
+          : tr(language, 'មិនអាចផ្ញើការរំលឹកសាកល្បងបានទេ សូមពិនិត្យការអនុញ្ញាតជូនដំណឹង', 'Could not send the test reminder — check notification permission', '无法发送测试提醒，请检查通知权限'),
+        ok ? 'success' : 'warning'
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onExactAlarm = async () => {
+    // The system screen opens; when the user returns, the app-resume handler rebuilds the plan (now exact) and this
+    // panel refreshes its status automatically.
+    await openExactAlarmSettings();
+  };
+
   const updateSlot = (slot: ReminderSlot, patch: Partial<{ on: boolean; time: string }>) => {
     if (patch.time !== undefined && !isValidReminderTime(patch.time)) return;
-    const next: MealReminderSettings = {
+    const nextSettings: MealReminderSettings = {
       ...settings,
       slots: { ...settings.slots, [slot]: { ...settings.slots[slot], ...patch } },
     };
-    setSettings(saveReminderSettings(next));
+    setSettings(saveReminderSettings(nextSettings));
   };
 
   const slotName = (s: ReminderSlot) => {
     const m = SLOT_META[s];
     return tr(language, m.km, m.en, m.zh);
+  };
+
+  const describeNext = (n: NextReminder): string => {
+    const now = new Date();
+    const startOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const dayDiff = Math.round((startOf(n.at) - startOf(now)) / 86_400_000);
+    const day =
+      dayDiff <= 0
+        ? tr(language, 'ថ្ងៃនេះ', 'today', '今天')
+        : dayDiff === 1
+          ? tr(language, 'ថ្ងៃស្អែក', 'tomorrow', '明天')
+          : `${pad2(n.at.getDate())}/${pad2(n.at.getMonth() + 1)}`;
+    return `${day} ${pad2(n.at.getHours())}:${pad2(n.at.getMinutes())}${n.slot ? ` • ${slotName(n.slot)}` : ''}`;
   };
 
   if (!active) {
@@ -125,62 +184,45 @@ const MealReminderPanelInner: React.FC = () => {
         onClick={() => void onEnable()}
         disabled={busy}
         data-testid="meal-reminder-enable"
-        className="w-full flex items-center gap-3 rounded-2xl bg-emerald-600/10 hover:bg-emerald-600/15 dark:bg-emerald-400/10 border border-emerald-500/40 px-3 py-2.5 text-left active:scale-[0.98] transition cursor-pointer disabled:opacity-60"
+        className="w-full min-h-[36px] flex items-center gap-2 rounded-xl bg-emerald-600/10 hover:bg-emerald-600/15 dark:bg-emerald-400/10 border border-emerald-500/40 px-2.5 py-1 text-left active:scale-[0.98] transition cursor-pointer disabled:opacity-60"
       >
-        <span className="text-xl shrink-0" aria-hidden="true">🔔</span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[13px] font-extrabold text-[#064E3B] dark:text-emerald-200 leading-snug">
-            {tr(language, 'រំលឹកម្ហូបតាមម៉ោងញ៉ាំរបស់ខ្មែរ', 'Khmer meal-time reminders', '高棉用餐时间提醒')}
-          </span>
-          <span className="block text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
-            {permission === 'denied' && settings.enabled
-              ? tr(
-                  language,
-                  'ការជូនដំណឹងត្រូវបានបិទក្នុង Settings ទូរស័ព្ទ — ចុចដើម្បីព្យាយាមម្តងទៀត',
-                  'Notifications are blocked in phone Settings — tap to retry',
-                  '手机设置中通知已被关闭 — 点击重试'
-                )
-              : tr(
-                  language,
-                  'ទទួលបានការណែនាំម្ហូបពេលព្រឹក ថ្ងៃត្រង់ ល្ងាច • បិទបានគ្រប់ពេល',
-                  'A dish idea at breakfast, lunch and dinner • turn off anytime',
-                  '早、中、晚推荐一道美食 • 随时可关闭'
-                )}
-          </span>
+        <span className="text-base shrink-0" aria-hidden="true">🔔</span>
+        <span className="min-w-0 flex-1 truncate text-[12.5px] font-extrabold text-[#064E3B] dark:text-emerald-200 leading-snug">
+          {permission === 'denied' && settings.enabled
+            ? tr(language, 'ការជូនដំណឹងត្រូវបានបិទក្នុង Settings — ចុចព្យាយាមម្តងទៀត', 'Notifications blocked in Settings — tap to retry', '通知已被关闭 — 点击重试')
+            : tr(language, 'ការរំលឹកទទួលទានអាហារទៀងទាត់', 'Regular meal reminders', '规律用餐提醒')}
         </span>
-        <span className="shrink-0 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold">
+        <span className="shrink-0 px-3 py-0.5 rounded-lg bg-emerald-600 text-white text-xs font-bold">
           {busy ? '…' : tr(language, 'បើក', 'Turn on', '开启')}
         </span>
       </button>
     );
   }
 
-  const summary = REMINDER_SLOTS.filter((s) => settings.slots[s].on)
-    .map((s) => `${slotName(s)} ${settings.slots[s].time}`)
-    .join(' • ');
+  const timesSummary = REMINDER_SLOTS.filter((s) => settings.slots[s].on)
+    .map((s) => settings.slots[s].time)
+    .join(' · ');
 
   return (
-    <div data-testid="meal-reminder-panel" className="rounded-2xl border border-emerald-500/40 bg-emerald-600/10 dark:bg-emerald-400/10">
+    <div data-testid="meal-reminder-panel" className="rounded-xl border border-emerald-500/40 bg-emerald-600/10 dark:bg-emerald-400/10">
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
-        className="w-full flex items-center gap-3 px-3 py-2.5 text-left cursor-pointer"
+        className="w-full min-h-[36px] flex items-center gap-2 px-2.5 py-1 text-left cursor-pointer"
       >
-        <span className="text-xl shrink-0" aria-hidden="true">🔔</span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[13px] font-extrabold text-[#064E3B] dark:text-emerald-200 leading-snug">
-            {tr(language, 'ការរំលឹកម្ហូបកំពុងដំណើរការ', 'Meal reminders are on', '用餐提醒已开启')}
-          </span>
-          <span className="block text-[11px] text-slate-600 dark:text-slate-300 truncate">
-            {summary || tr(language, 'មិនទាន់ជ្រើសរើសពេលណាទេ', 'No meals selected', '尚未选择用餐时段')}
-          </span>
+        <span className="text-base shrink-0" aria-hidden="true">🔔</span>
+        <span className="min-w-0 flex-1 truncate text-[12.5px] font-extrabold text-[#064E3B] dark:text-emerald-200 leading-snug">
+          {tr(language, 'ការរំលឹកទទួលទានអាហារទៀងទាត់', 'Regular meal reminders', '规律用餐提醒')}
+        </span>
+        <span className="shrink-0 text-[11px] font-mono font-bold text-slate-600 dark:text-slate-300">
+          {timesSummary || tr(language, 'មិនទាន់ជ្រើស', 'None', '未选择')}
         </span>
         <ChevronDown className={`w-4 h-4 text-emerald-700 dark:text-emerald-300 shrink-0 transition ${expanded ? 'rotate-180' : ''}`} />
       </button>
 
       {expanded && (
-        <div className="px-3 pb-3 space-y-2">
+        <div className="px-2.5 pb-2.5 space-y-2">
           {REMINDER_SLOTS.map((slot) => {
             const cfg = settings.slots[slot];
             return (
@@ -209,14 +251,55 @@ const MealReminderPanelInner: React.FC = () => {
               </div>
             );
           })}
-          <button
-            type="button"
-            onClick={() => void onDisable()}
-            disabled={busy}
-            className="w-full min-h-[40px] rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700/60 transition cursor-pointer disabled:opacity-60"
-          >
-            {tr(language, 'បិទការរំលឹកទាំងអស់', 'Turn off all reminders', '关闭全部提醒')}
-          </button>
+
+          {/* Truth from the OS: when is the next reminder REALLY scheduled? */}
+          <p data-testid="meal-reminder-next" className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+            ⏰{' '}
+            {next
+              ? tr(language, `ការរំលឹកបន្ទាប់៖ ${describeNext(next)}`, `Next reminder: ${describeNext(next)}`, `下一次提醒：${describeNext(next)}`)
+              : tr(language, 'មិនទាន់មានការរំលឹកដែលបានកំណត់ទេ', 'No reminder is scheduled yet', '尚无已安排的提醒')}
+          </p>
+
+          {exactState === 'denied' && (
+            <p className="text-[10.5px] leading-snug text-amber-800 dark:text-amber-200 bg-amber-100/70 dark:bg-amber-400/10 rounded-lg px-2 py-1">
+              {tr(
+                language,
+                'ទូរស័ព្ទអាចពន្យារការរំលឹកខ្លះៗ (ប៉ុន្មាននាទី)។ ចុច «ទៀងម៉ោង» ដើម្បីអនុញ្ញាតឱ្យរោទ៍ត្រង់នាទីដែលបានកំណត់។',
+                'Your phone may delay reminders by a few minutes. Tap “On-time” to let them ring on the exact minute.',
+                '手机可能会将提醒延迟几分钟。点击“准时”即可让提醒在设定的分钟准时响起。'
+              )}
+            </p>
+          )}
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => void onTest()}
+              disabled={busy}
+              data-testid="meal-reminder-test"
+              className="flex-1 min-w-[120px] min-h-[40px] rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-60"
+            >
+              🔔 {tr(language, 'សាកល្បងឥឡូវនេះ', 'Test now', '立即测试')}
+            </button>
+            {exactState === 'denied' && (
+              <button
+                type="button"
+                onClick={() => void onExactAlarm()}
+                data-testid="meal-reminder-exact"
+                className="flex-1 min-w-[120px] min-h-[40px] rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold transition cursor-pointer"
+              >
+                ⏱ {tr(language, 'ទៀងម៉ោង', 'On-time', '准时')}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => void onDisable()}
+              disabled={busy}
+              className="flex-1 min-w-[120px] min-h-[40px] rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700/60 transition cursor-pointer disabled:opacity-60"
+            >
+              {tr(language, 'បិទការរំលឹកទាំងអស់', 'Turn off all', '全部关闭')}
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -65,8 +65,16 @@ function section(t) {
     ok(maxAt < new Date(2026, 10, 10, 23, 59).getTime(), 'window is 7 days');
     const plan2 = P.planMealReminders({ settings: on(), foods, language: 'km', now: NOW });
     ok(JSON.stringify(plan.map((p) => [p.id, p.at.getTime(), p.foodId])) === JSON.stringify(plan2.map((p) => [p.id, p.at.getTime(), p.foodId])), 'deterministic for the same inputs');
-    const almostDue = P.planMealReminders({ settings: on(), foods, language: 'km', now: new Date(2026, 10, 3, 11, 29, 30) });
-    ok(!almostDue.some((p) => p.slot === 'lunch' && p.at.getDate() === 3), 'a reminder due within a minute is skipped, never fired instantly');
+    // Regression: the user sets 12:13 while it is 12:12:20 (or even 12:12:59) and expects it to ring - it must be scheduled.
+    const nextMinute = on();
+    nextMinute.slots.lunch.time = '12:13';
+    const planNext = (h, m, s) => P.planMealReminders({ settings: nextMinute, foods, language: 'km', now: new Date(2026, 10, 3, h, m, s) });
+    ok(planNext(12, 12, 20).some((p) => p.slot === 'lunch' && p.at.getDate() === 3 && p.at.getHours() === 12 && p.at.getMinutes() === 13), '12:13 set at 12:12:20 -> scheduled for today (was wrongly skipped before)');
+    ok(planNext(12, 12, 50).some((p) => p.slot === 'lunch' && p.at.getDate() === 3), '12:13 set at 12:12:50 (10s away) -> still scheduled today');
+    ok(!planNext(12, 13, 0).some((p) => p.slot === 'lunch' && p.at.getDate() === 3), '12:13 set at 12:13:00 -> today is gone, next one is tomorrow');
+    ok(planNext(12, 13, 0).some((p) => p.slot === 'lunch' && p.at.getDate() === 4), '...and tomorrow 12:13 is scheduled');
+    const nearly = planNext(12, 12, 56);
+    ok(!nearly.some((p) => p.slot === 'lunch' && p.at.getDate() === 3), 'due within 5 seconds -> skipped (never "in the past")');
 
     section('3. Switches');
     ok(P.planMealReminders({ settings: on({ enabled: false }), foods, language: 'km', now: NOW }).length === 0, 'master switch off -> nothing');
@@ -118,6 +126,14 @@ function section(t) {
     const ny = P.planMealReminders({ settings: on(), foods, language: 'en', now: new Date(2026, 11, 31, 20, 0) });
     ok(ny[0].at.getFullYear() === 2027 && ny[0].at.getMonth() === 0 && ny[0].at.getDate() === 1, 'year rollover works');
     ok(P.planMealReminders({ settings: on(), foods, language: 'km', now: NOW, windowDays: 99 }).length <= 14 * 3, 'window is capped at 14 days');
+    section('7. Test reminder + slot windows');
+    ok(P.reminderSlotForHour(7) === 'breakfast' && P.reminderSlotForHour(12) === 'lunch' && P.reminderSlotForHour(15) === 'snack' && P.reminderSlotForHour(19) === 'dinner' && P.reminderSlotForHour(2) === 'dinner', 'slot windows match the Home screen (05-10, 10-14, 14-17, else dinner)');
+    const t = P.buildTestReminder(foods, 'km', new Date(2026, 10, 3, 12, 13));
+    ok(!!t && t.slot === 'lunch' && /[\u1780-\u17FF]/.test(t.body) && !!byId.get(t.foodId), 'test reminder at 12:13 is a real lunch dish in Khmer');
+    ok(H.scoreCambodianDishForMealTime(byId.get(t.foodId), 'lunch') > 0, 'test dish is authentic for that meal');
+    ok(P.buildTestReminder([], 'en') === null, 'empty catalog -> null (no crash)');
+    ok(P.isReminderId(P.TEST_REMINDER_ID), 'test id is inside the owned range (tap opens the dish)');
+    ok(!plan.some((p) => p.id === P.TEST_REMINDER_ID) && Math.max(...planSnack.map((p) => p.id)) < P.TEST_REMINDER_ID, 'weekly plan ids never collide with the test id');
   } finally {
     await server.close();
   }

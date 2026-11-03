@@ -1451,6 +1451,11 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
         ...(Array.isArray(second.additionalStorePaymentIds) ? second.additionalStorePaymentIds : []),
       ])
     ),
+    // One-time food check-in reward flag must survive every merge (keep the earliest grant time if both sides have it).
+    foodCheckInRewardAt:
+      [first.foodCheckInRewardAt, second.foodCheckInRewardAt]
+        .filter((v): v is string => typeof v === 'string' && v.length > 0)
+        .sort()[0] || undefined,
   };
 
   const nowMs = Date.now();
