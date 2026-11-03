@@ -2,8 +2,9 @@ import React from 'react';
 import { BadgeCheck } from 'lucide-react';
 import type { Language } from '../types';
 import { tr } from '../utils/i18n';
-import { togglePassportStamp, useFoodPassport } from '../utils/foodPassport';
+import { togglePassportStamp, useFoodPassport, getPassportLevel, levelTitle } from '../utils/foodPassport';
 import { recordMeaningfulAction } from '../utils/engagement';
+import { touchDailyStreak } from '../utils/dailyHabit';
 
 interface Props {
   foodId: string;
@@ -15,7 +16,7 @@ interface Props {
 
 /** "I tried it" stamp button for the Cambodian Food Passport. */
 export const PassportStampButton: React.FC<Props> = ({ foodId, language, showToast, variant = 'compact' }) => {
-  const { has } = useFoodPassport();
+  const { has, count } = useFoodPassport();
   const stamped = has(foodId);
 
   const onClick = (e: React.MouseEvent) => {
@@ -23,6 +24,22 @@ export const PassportStampButton: React.FC<Props> = ({ foodId, language, showToa
     const nowStamped = togglePassportStamp(foodId);
     if (nowStamped) {
       recordMeaningfulAction('favorite');
+      touchDailyStreak();
+      // Celebrate crossing into a new level (cheap: depends on the count only).
+      const before = getPassportLevel(count).level;
+      const after = getPassportLevel(count + 1).level;
+      if (after.min !== before.min) {
+        showToast?.(
+          tr(
+            language,
+            `🎉 ឡើងកម្រិតថ្មី៖ ${after.emoji} ${levelTitle(after, language)}!`,
+            `🎉 New level unlocked: ${after.emoji} ${levelTitle(after, language)}!`,
+            `🎉 升级啦：${after.emoji} ${levelTitle(after, language)}！`
+          ),
+          'success'
+        );
+        return;
+      }
       showToast?.(
         tr(language, '🧭 បានបន្ថែមទៅ រសជាតិ និងទេសចរណ៍កម្ពុជា!', '🧭 Added to Cambodia Flavors & Tourism!', '🧭 已加入柬埔寨风味与旅游！'),
         'success'

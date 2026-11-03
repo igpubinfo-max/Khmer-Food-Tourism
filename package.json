@@ -9,7 +9,8 @@
     "lint": "oxlint src",
     "preview": "vite preview",
     "ios:sync": "npm run build && npx cap sync ios",
-    "test:food-ai": "node scripts/foodAiAudit.cjs"
+    "test:food-ai": "node scripts/foodAiAudit.cjs",
+    "test:habit": "node scripts/dailyHabitAudit.cjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.0.0",

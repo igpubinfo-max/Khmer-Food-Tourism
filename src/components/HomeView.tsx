@@ -20,6 +20,7 @@ import { FeatureGrid } from './home/FeatureGrid';
 import { IconNavFood, IconNavShop, IconNavTourism, IconMapRoute } from './icons/HandcraftedIcons';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { ForYouSection } from './home/ForYouSection';
+import { DailyHabitCard } from './home/DailyHabitCard';
 import { PopularShops } from './home/PopularShops';
 import { PopularDestinations } from './home/PopularDestinations';
 import { VipPerksCard } from './home/VipPerksCard';
@@ -1104,6 +1105,9 @@ export const HomeView: React.FC = () => {
                   onRenew={() => openUpgradeVipModal(true)}
                 />
               )}
+
+              {/* 0. Daily habit: visit streak, Today's Dish and the closest reward */}
+              <DailyHabitCard onOpenFood={setSelectedFood} />
 
               {/* 1. Six Smart Daily Services (5 Free + 1 VIP Smart AI Assistant) */}
               <FeatureGrid
