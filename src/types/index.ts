@@ -698,10 +698,10 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
   },
   {
     id: 5,
-    titleKh: 'ទីតាំងផ្សព្វផ្សាយលើទំព័រដើម',
-    titleEn: 'Additional Promotional Placement',
-    descriptionKh: 'ទទួលបានការផ្សព្វផ្សាយលើគេក្នុងទំព័រដើម Home Screen និងបញ្ជី Top Recommended',
-    descriptionEn: 'Prime featured spot on the home page carousel and top recommendations section.',
+    titleKh: 'បង្ហាញហាងថ្មីនៅលើគេបង្អស់រយៈពេល ២៤ ម៉ោង',
+    titleEn: '24-Hour Top-of-List Pinning for New Shops',
+    descriptionKh: 'ហាងថ្មីដែលបន្ថែមដោយសមាជិក VIP នឹងត្រូវដាក់បង្ហាញនៅលើគេបង្អស់នៃបញ្ជីហាងដោយស្វ័យប្រវត្តិរយៈពេល ២៤ ម៉ោង ដើម្បីទទួលបានការមើលឃើញខ្ពស់បំផុត',
+    descriptionEn: 'New shops added by VIP users stay pinned at the top of the shop list for 24 hours for maximum visibility.',
     iconName: 'Flame',
     category: 'promotion'
   },
@@ -2699,6 +2699,7 @@ export const getDynamicVipBenefits = (
     // Benefits saved by older versions may still advertise removed/unverified perks — swap them for the current ones.
     const LEGACY_TITLES_EN: Record<string, number> = {
       'More Food Photos & Menu Items': 2,
+      'Additional Promotional Placement': 5,
       'Quick Contact Buttons': 7,
       'Shareable Restaurant Profile Link': 9,
     };
