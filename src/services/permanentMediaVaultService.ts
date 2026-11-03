@@ -185,6 +185,13 @@ export function isDeprecatedStaleFoodMetadata(
   if (foodId === 'food-187' && categorySlug === 'dessert') {
     return true;
   }
+  const numId = foodId.startsWith('food-') ? parseInt(foodId.slice(5), 10) : 0;
+  if (numId >= 201 && numId <= 230) {
+    const seed = IMMUTABLE_SEED_FOOD_MAP.get(foodId);
+    if (seed && nameKh && nameKh.trim() !== seed.nameKh.trim()) {
+      return true;
+    }
+  }
   return false;
 }
 

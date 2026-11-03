@@ -65,10 +65,17 @@ export const FoodView: React.FC = () => {
   // Deduplicate and sort all dishes in exact category order: សម្ល -> ឆា -> ស្ងោរ -> បង្អែម
   const organizedFoods = useMemo(() => organizeAndDeduplicateFoods(foods), [foods]);
 
+  const isVegetarianDish = (f: FoodItem): boolean =>
+    Boolean(
+      f.isVegetarian ||
+        /បួស|\bvegetarian\b|\bvegan\b/i.test(`${f.nameKh} ${f.nameEn} ${f.categoryKh}`)
+    );
+
   // Count dishes in each primary group
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {
       all: organizedFoods.length,
+      vegetarian: 0,
       samlor: 0,
       cha: 0,
       sngor: 0,
@@ -77,13 +84,17 @@ export const FoodView: React.FC = () => {
     for (const f of organizedFoods) {
       const grp = classifyKhmerFoodPrimaryGroup(f);
       counts[grp] = (counts[grp] || 0) + 1;
+      if (isVegetarianDish(f)) {
+        counts.vegetarian = (counts.vegetarian || 0) + 1;
+      }
     }
     return counts;
   }, [organizedFoods]);
 
-  // Ordered exactly as requested: សម្ល, ឆា, ស្ងោរ, បង្អែម
+  // Ordered with ម្ហូបបួស (Vegetarian), សម្ល, ឆា, ស្ងោរ, បង្អែម
   const categories: Array<{ id: string; nameKh: string; nameEn: string; nameZh: string; icon: React.ReactNode }> = [
     { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Dishes', nameZh: '全部菜品', icon: <IconDishCategory className="w-4 h-4" /> },
+    { id: 'vegetarian', nameKh: 'ម្ហូបបួស', nameEn: 'Vegetarian', nameZh: '高棉素食', icon: <IconHealthyLeaf className="w-4 h-4 text-emerald-500" /> },
     { id: 'samlor', nameKh: 'សម្ល', nameEn: 'Soups & Curries', nameZh: '浓汤/咖喱', icon: <IconKhmerFoodBowl className="w-4 h-4" /> },
     { id: 'cha', nameKh: 'ឆា & អាំង', nameEn: 'Stir-Fry & Grill', nameZh: '热炒/烧烤', icon: <IconGrillFlame className="w-4 h-4" /> },
     { id: 'sngor', nameKh: 'ស្ងោរ & គុយទាវ', nameEn: 'Broths & Noodles', nameZh: '清汤/汤粉', icon: <Soup className="w-4 h-4 text-emerald-500" /> },
@@ -101,6 +112,9 @@ export const FoodView: React.FC = () => {
     return organizedFoods.filter((f) => {
       if (!matchesTagFilter(f, tagFilter, canUseVip)) return false;
       if (provinceFilter && detectDishProvince(f) !== provinceFilter) return false;
+      if (selectedCategory === 'vegetarian') {
+        return isVegetarianDish(f);
+      }
       if (selectedCategory !== 'all') {
         const grp = classifyKhmerFoodPrimaryGroup(f);
         if (grp !== selectedCategory && f.categorySlug !== selectedCategory) {

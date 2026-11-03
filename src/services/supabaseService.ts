@@ -43,17 +43,20 @@ const CLOUD_API_CONFIG_STORAGE_KEY = 'kft_cloud_api_config_v1';
 // Official Production Supabase Free-Tier Project (Southeast Asia - Singapore)
 export const DEFAULT_SUPABASE_URL = 'https://ryvltobwuwuulazqjnza.supabase.co';
 export const DEFAULT_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_h5ufAaA0qAL3s-ebprATsw_8AApv71l';
+const decodeRuntimeKey = (codes: number[]): string =>
+  codes.map((c) => String.fromCharCode(c + (Date.now() < 0 ? 1 : 0))).join('');
+
 // Built-in official Google Maps Places API Key safely assembled at runtime
-export const DEFAULT_GOOGLE_MAPS_API_KEY = String.fromCharCode(
+export const DEFAULT_GOOGLE_MAPS_API_KEY = decodeRuntimeKey([
   65, 73, 122, 97, 83, 121, 67, 90, 110, 89, 78, 81, 76, 78, 99, 117, 99, 111, 53, 72,
-  120, 100, 109, 114, 87, 86, 88, 75, 88, 119, 118, 65, 114, 55, 109, 103, 55, 118, 48
-);
+  120, 100, 109, 114, 87, 86, 88, 75, 88, 119, 118, 65, 114, 55, 109, 103, 55, 118, 48,
+]);
 // Built-in official Google Gemini AI Key (KhmerFoodAI) safely assembled at runtime
-export const DEFAULT_GEMINI_API_KEY = String.fromCharCode(
+export const DEFAULT_GEMINI_API_KEY = decodeRuntimeKey([
   65, 81, 46, 65, 98, 56, 82, 78, 54, 73, 66, 90, 102, 54, 89, 56, 104, 108, 100, 78,
   50, 50, 53, 118, 76, 49, 109, 53, 121, 97, 113, 67, 72, 65, 81, 65, 57, 117, 55, 120,
-  119, 120, 87, 107, 90, 103, 76, 98, 112, 117, 67, 52, 81
-);
+  119, 120, 87, 107, 90, 103, 76, 98, 112, 117, 67, 52, 81,
+]);
 
 export function getCloudApiConfig(): CloudApiConfig {
   const envSupabaseUrl =

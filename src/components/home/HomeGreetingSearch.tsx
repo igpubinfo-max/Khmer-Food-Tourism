@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, User as UserIcon, Crown, Shield, ChevronRight, LogIn } from 'lucide-react';
+import React from 'react';
+import { User as UserIcon, Crown, Shield, ChevronRight, LogIn } from 'lucide-react';
 import type { Language, User } from '../../types';
 import { getVipRemainingDays } from '../../types';
 import { tr } from '../../utils/i18n';
@@ -17,13 +17,12 @@ interface Props {
   onOpenAdminPanel?: () => void;
   /** Short personalized line under the headline (e.g. a time-of-day food suggestion). */
   hint?: string;
-  query: string;
-  onChange: (value: string) => void;
+  query?: string;
+  onChange?: (value: string) => void;
 }
 
 /**
- * Clean welcome header: a friendly greeting row (avatar, name, small status chip),
- * a clear headline, and one large debounced search bar.
+ * Clean welcome header: a friendly greeting row (avatar, name, small status chip).
  */
 const HomeGreetingSearchInner: React.FC<Props> = ({
   language,
@@ -33,43 +32,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
   onSignIn,
   onExploreProfile,
   onOpenAdminPanel,
-  hint,
-  query,
-  onChange,
 }) => {
-  const [localQuery, setLocalQuery] = useState(query);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
-
-  useEffect(() => {
-    setLocalQuery(query);
-  }, [query]);
-
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, []);
-
-  const handleInputChange = (val: string) => {
-    setLocalQuery(val);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!val.trim()) {
-      onChangeRef.current('');
-      return;
-    }
-    debounceRef.current = setTimeout(() => {
-      onChangeRef.current(val);
-    }, 220);
-  };
-
-  const handleClear = () => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    setLocalQuery('');
-    onChangeRef.current('');
-  };
-
   const hour = new Date().getHours();
   const greeting =
     hour < 11
@@ -87,7 +50,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
   const displayName = currentUser?.name || userName;
 
   return (
-    <section className="space-y-2">
+    <section>
       {currentUser ? (
         isAdmin ? (
           <div className="p-3 rounded-2xl bg-gradient-to-r from-[#022c22] via-[#064E3B] to-slate-900 text-white border border-emerald-400/50 shadow-md relative overflow-hidden flex items-center justify-between gap-3">
@@ -215,47 +178,6 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
           )}
         </div>
       )}
-
-      {/* On short screens (< 760px tall) the tagline + meal hint (already shown in the app header) yield their space so the
-          six feature buttons stay on the first screen. They are fully visible on every taller screen. */}
-      <div className={`pt-0.5 ${isAdmin ? '' : '[@media(max-height:759px)]:hidden'}`}>
-        <h2 className={`${headingFont(language)} text-[15px] sm:text-lg leading-relaxed pt-0.5 pb-0.5 text-[#064E3B] dark:text-emerald-200 break-words`}>
-          {isAdmin
-            ? tr(language, 'ស្វែងរក និងគ្រប់គ្រងទិន្នន័យក្នុងប្រព័ន្ធ', 'Search & Manage Directory', '搜索并管理系统数据')
-            : tr(language, 'ស្វែងយល់អាហារ • ទីតាំង • បទពិសោធន៍', 'Discover Food • Places • Experiences', '探索美食 • 景点 • 体验')}
-        </h2>
-        {!isAdmin && hint && (
-          <p className="text-xs leading-relaxed pt-0.5 pb-0.5 text-slate-500 dark:text-slate-400 truncate">{hint}</p>
-        )}
-      </div>
-
-      <div className="relative flex items-center">
-        <Search className="w-5 h-5 text-emerald-600 dark:text-emerald-400 absolute left-4 pointer-events-none" />
-        <input
-          type="text"
-          value={localQuery}
-          onChange={(e) => handleInputChange(e.target.value)}
-          placeholder={tr(
-            language,
-            'ស្វែងរកម្ហូប ហាងអាហារ ឬតំបន់ទេសចរណ៍...',
-            'Search dishes, restaurants, or destinations...',
-            '搜索美食、餐厅或旅游景点...'
-          )}
-          aria-label={tr(language, 'ស្វែងរក', 'Search', '搜索')}
-          className="w-full min-h-[44px] pl-12 pr-12 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 text-base shadow-md focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 font-khmer transition"
-        />
-        {localQuery && (
-          <button
-            type="button"
-            onClick={handleClear}
-            className="absolute right-1.5 w-11 h-11 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-white transition"
-            title={tr(language, 'សម្អាតការស្វែងរក', 'Clear search', '清除搜索')}
-            aria-label={tr(language, 'សម្អាតការស្វែងរក', 'Clear search', '清除搜索')}
-          >
-            <X className="w-5 h-5" />
-          </button>
-        )}
-      </div>
     </section>
   );
 };

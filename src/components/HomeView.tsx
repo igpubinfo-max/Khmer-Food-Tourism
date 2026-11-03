@@ -1107,9 +1107,6 @@ export const HomeView: React.FC = () => {
                 />
               )}
 
-              {/* 0. Daily habit: visit streak, Today's Dish and the closest reward */}
-              <DailyHabitCard onOpenFood={setSelectedFood} />
-
               {/* 1. Six Smart Daily Services (5 Free + 1 VIP Smart AI Assistant) */}
               <FeatureGrid
                 language={language}
@@ -1190,7 +1187,10 @@ export const HomeView: React.FC = () => {
                 ))}
               </div>
 
-              {/* 7. VIP members manage their shop; everyone else sees one calm benefits card */}
+              {/* 7. VIP Reward section (30 successful check-ins reward) directly above My Shop / VIP Perks */}
+              <DailyHabitCard onOpenFood={setSelectedFood} />
+
+              {/* 8. VIP members manage their shop; everyone else sees one calm benefits card */}
               {isVip ? (
                 <MyShopPanel
                   language={language}
