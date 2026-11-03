@@ -669,7 +669,7 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
     titleEn: 'Enhanced Restaurant Profile',
     descriptionKh: 'កែប្រែទម្រង់ហាងជាមួយ Theme មាស និងផ្លាកសញ្ញាបញ្ជាក់ផ្លូវការ Iconic VIP',
     descriptionEn: 'Customized golden theme, verified iconic badge, and custom branding for your restaurant.',
-    iconName: 'Sparkles',
+    iconName: 'Award',
     category: 'profile'
   },
   {
@@ -705,7 +705,7 @@ export const TEN_VIP_BENEFITS: VipBenefitItem[] = [
     titleEn: '24-Hour Top-of-List Pinning for New Shops',
     descriptionKh: 'ហាងថ្មីដែលបន្ថែមដោយសមាជិក VIP នឹងត្រូវដាក់បង្ហាញនៅលើគេបង្អស់នៃបញ្ជីហាងដោយស្វ័យប្រវត្តិរយៈពេល ២៤ ម៉ោង ដើម្បីទទួលបានការមើលឃើញខ្ពស់បំផុត',
     descriptionEn: 'New shops added by VIP users stay pinned at the top of the shop list for 24 hours for maximum visibility.',
-    iconName: 'Flame',
+    iconName: 'Store',
     category: 'promotion'
   },
   {

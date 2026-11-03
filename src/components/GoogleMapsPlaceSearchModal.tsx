@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, MapPin, Star, ExternalLink, X, CheckCircle, AlertTriangle,
   Globe, RefreshCw, PlusCircle, Edit3, Check, ChevronLeft, ChevronRight,
-  Navigation, ShieldCheck, Database, Sparkles, SlidersHorizontal, Phone, Image as ImageIcon, ArrowUp
+  Navigation, ShieldCheck, Database, SlidersHorizontal, Phone, Image as ImageIcon, ArrowUp
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { isUserVipActive } from '../types';

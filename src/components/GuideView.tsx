@@ -17,7 +17,7 @@ import { getLocalizedDestination, getLocalizedFood, getLocalizedRestaurant, toCo
 import { copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import {
-  BookOpen, Sparkles, MapPinned, CalendarDays, Lightbulb, Heart, Star, Store, Compass, Utensils,
+  BookOpen, Award, MapPinned, CalendarDays, Lightbulb, Heart, Star, Store, Compass, Utensils,
   ChevronRight, Copy, Lock, CheckCircle2, Route, Navigation, Maximize2, X, PhoneCall, ShieldAlert, Clock,
 } from 'lucide-react';
 import {
@@ -440,7 +440,7 @@ export const GuideView: React.FC = () => {
   };
 
   const tabs: Array<{ id: GuideTab; icon: React.ReactNode; label: string }> = [
-    { id: 'foryou', icon: <Sparkles className="w-4 h-4" />, label: tr(language, 'សម្រាប់អ្នក', 'For You', '为你推荐') },
+    { id: 'foryou', icon: <Award className="w-4 h-4" />, label: tr(language, 'សម្រាប់អ្នក', 'For You', '为你推荐') },
     { id: 'provinces', icon: <MapPinned className="w-4 h-4" />, label: tr(language, 'ខេត្ត', 'Provinces', '省份') },
     { id: 'calendar', icon: <CalendarDays className="w-4 h-4" />, label: tr(language, 'ប្រតិទិន', 'Calendar', '日历') },
     { id: 'tips', icon: <Lightbulb className="w-4 h-4" />, label: tr(language, 'គន្លឹះ', 'Tips', '实用') },
@@ -643,7 +643,7 @@ export const GuideView: React.FC = () => {
           {dishRecs.items.length > 0 && (
             <section className="space-y-2.5">
               <SectionTitle
-                icon={<Sparkles className="w-4 h-4" />}
+                icon={<Award className="w-4 h-4" />}
                 title={tr(language, 'ម្ហូបដែលអ្នកប្រហែលចូលចិត្ត', 'Dishes you may love', '你可能喜欢的菜品')}
                 subtitle={
                   dishRecs.personalized

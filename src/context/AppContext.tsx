@@ -39,7 +39,18 @@ import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { buildDynamicNotificationsList } from '../services/dailyDiscoveryAndNotificationService';
 import { findDuplicateRestaurant, mergeRestaurantRecords } from '../utils/duplicateDetector';
 import { recordSubmissionTimestamp, checkSubmissionRateLimit } from '../services/aiCheckInService';
-import { FOOD_CHECKIN_REWARD_TARGET, FOOD_CHECKIN_REWARD_VIP_DAYS, computeRewardVipWindow } from '../utils/foodCheckInReward';
+import {
+  FOOD_CHECKIN_CLOUD_CLAIMS_KEY,
+  FOOD_CHECKIN_REWARD_TARGET,
+  FOOD_CHECKIN_REWARD_VIP_DAYS,
+  computeRewardVipWindow,
+  findExistingRewardClaimAt,
+  getVerifiedServerNowMs,
+  normalizeRewardEmail,
+  recordFoodCheckInRewardClaim,
+  syncVerifiedServerClock,
+  type RewardClaimRegistry,
+} from '../utils/foodCheckInReward';
 import { 
   initialUsers, initialFoods, initialRestaurants, 
   initialDestinations, initialAppSettings, initialTransactions 
@@ -67,6 +78,7 @@ import {
   saveCloudApiConfig,
   syncAllAppDataWithSupabase,
   pushCloudDocument,
+  pullCloudDocument,
   deleteCloudDocument,
   fetchAuthoritativeAppSettingsFromServer,
   saveAuthoritativeAppSettingsToServer,
@@ -4981,11 +4993,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   /**
-   * One-time reward: 30 distinct dishes tried -> 30 days of VIP, stacked on top of any VIP time the user still has.
-   * Idempotent by design - three independent guards must ALL be clear before anything is granted:
-   *   1. the account flag `foodCheckInRewardAt` (synced to the cloud, survives reinstall / other devices),
-   *   2. a deterministic reward transaction reference (`REWARD-FOODCHECKIN30-<userId>`),
-   *   3. the caller's local ledger (checked by the caller before it asks for the grant).
+   * One-time reward: 30 distinct dishes tried across 30 verified server days -> 30 days of VIP,
+   * stacked on top of any VIP time the user still has.
+   * Idempotent by design — enforces:
+   *   1. Authoritative internet server time (never trusts `new Date()` device clock),
+   *   2. One-time reward lock across local storage and Supabase Cloud by both User ID and Email,
+   *   3. Deterministic reward transaction reference (`REWARD-FOODCHECKIN30-<userId>`).
    * It never reduces existing paid VIP time and never touches Admin accounts.
    */
   const grantFoodCheckInReward = async (): Promise<{ success: boolean; alreadyGranted?: boolean }> => {
@@ -4994,20 +5007,73 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const liveUsers = latestSyncStateRef.current.users || users;
     const record = liveUsers.find(u => doesUserMatchTarget(u, liveCur)) || liveCur;
+    const normEmail = normalizeRewardEmail(record.email || liveCur.email);
     const rewardRef = `REWARD-FOODCHECKIN${FOOD_CHECKIN_REWARD_TARGET}-${record.id}`;
+    const rewardEmailRef = normEmail ? `REWARD-FOODCHECKIN${FOOD_CHECKIN_REWARD_TARGET}-EMAIL-${normEmail}` : '';
     const liveTxns = latestSyncStateRef.current.transactions || transactions;
+
+    let cloudRegistry: RewardClaimRegistry | null = null;
+    if (isSupabaseConfigured()) {
+      cloudRegistry = await pullCloudDocument<RewardClaimRegistry>(FOOD_CHECKIN_CLOUD_CLAIMS_KEY, 6000);
+    }
+
+    const anyUserWithSameIdentityRewarded = liveUsers.some(u => {
+      if (!u || !u.foodCheckInRewardAt) return false;
+      if (doesUserMatchTarget(u, record)) return true;
+      return Boolean(normEmail && normalizeRewardEmail(u.email) === normEmail);
+    });
+
+    const existingClaimAt = findExistingRewardClaimAt(
+      {
+        userId: record.id,
+        legacyIds: record.legacyIds || liveCur.legacyIds || [],
+        email: normEmail,
+        foodCheckInRewardAt: record.foodCheckInRewardAt || liveCur.foodCheckInRewardAt,
+      },
+      cloudRegistry
+    );
+
     if (
-      record.foodCheckInRewardAt ||
-      liveCur.foodCheckInRewardAt ||
-      liveTxns.some(t => t.transactionRef === rewardRef)
+      existingClaimAt ||
+      anyUserWithSameIdentityRewarded ||
+      liveTxns.some(
+        t =>
+          t.transactionRef === rewardRef ||
+          (rewardEmailRef && t.transactionRef === rewardEmailRef) ||
+          (normEmail &&
+            normalizeRewardEmail(t.userEmail) === normEmail &&
+            typeof t.transactionRef === 'string' &&
+            t.transactionRef.startsWith(`REWARD-FOODCHECKIN${FOOD_CHECKIN_REWARD_TARGET}-`))
+      )
     ) {
+      const lockIso = existingClaimAt || record.foodCheckInRewardAt || liveCur.foodCheckInRewardAt || 'granted';
+      const syncedClaims = recordFoodCheckInRewardClaim(
+        {
+          userId: record.id,
+          legacyIds: record.legacyIds || liveCur.legacyIds || [],
+          email: normEmail,
+          foodCheckInRewardAt: lockIso,
+        },
+        lockIso,
+        cloudRegistry
+      );
+      if (isSupabaseConfigured()) {
+        pushCloudDocument(FOOD_CHECKIN_CLOUD_CLAIMS_KEY, syncedClaims).catch(() => {});
+      }
       return { success: false, alreadyGranted: true };
     }
 
+    // Strictly verify true server time before calculating VIP start/expiry dates.
+    const verifiedServerMs = getVerifiedServerNowMs() || (await syncVerifiedServerClock());
+    if (!verifiedServerMs) {
+      return { success: false };
+    }
+
     const rewardDays = FOOD_CHECKIN_REWARD_VIP_DAYS;
-    const nowIso = new Date().toISOString();
+    const serverNow = new Date(verifiedServerMs);
+    const nowIso = serverNow.toISOString();
     // Pure, unit-tested date math: stacks on remaining VIP time, never shortens it.
-    const { wasVipActive, startDate, expiryDate, durationDays } = computeRewardVipWindow(record, new Date(), rewardDays);
+    const { wasVipActive, startDate, expiryDate, durationDays } = computeRewardVipWindow(record, serverNow, rewardDays);
     const planType = wasVipActive
       ? record.vipPlanType || resolveAndValidateVipPlan({ durationDays }, appSettingsRef.current).id
       : resolveAndValidateVipPlan({ durationDays: rewardDays }, appSettingsRef.current).id;
@@ -5027,8 +5093,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       extraFields: { foodCheckInRewardAt: nowIso },
     });
 
+    const updatedClaims = recordFoodCheckInRewardClaim(
+      {
+        userId: approved.id,
+        legacyIds: approved.legacyIds || record.legacyIds || [],
+        email: approved.email || normEmail,
+        foodCheckInRewardAt: nowIso,
+      },
+      nowIso,
+      cloudRegistry
+    );
+    if (isSupabaseConfigured()) {
+      pushCloudDocument(FOOD_CHECKIN_CLOUD_CLAIMS_KEY, updatedClaims).catch(() => {});
+    }
+
     const rewardTxn: RegistrationTransaction = {
-      id: `TXN-REWARD-${Date.now().toString(36).toUpperCase()}`,
+      id: `TXN-REWARD-${verifiedServerMs.toString(36).toUpperCase()}`,
       type: 'user_vip_upgrade',
       userId: approved.id,
       userName: approved.name,
@@ -5058,10 +5138,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setNotifications(prev => [
       {
         id: `notif-food-reward-${approved.id}`,
-        titleKh: `🎁 អបអរសាទរ! ទទួលបាន VIP ${rewardDays} ថ្ងៃ`,
-        titleEn: `🎁 Congratulations! You earned ${rewardDays} days of VIP`,
-        titleZh: `🎁 恭喜！您获得 ${rewardDays} 天 VIP`,
-        messageKh: `អ្នកបានភ្លក់ម្ហូប ${FOOD_CHECKIN_REWARD_TARGET} មុខផ្សេងគ្នា។ VIP របស់អ្នកមានសុពលភាពដល់ ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}។`,
+        titleKh: `អបអរសាទរ! ទទួលបានសមាជិក VIP ${rewardDays} ថ្ងៃ`,
+        titleEn: `Congratulations! You earned ${rewardDays} days of VIP`,
+        titleZh: `恭喜！您获得 ${rewardDays} 天 VIP`,
+        messageKh: `អ្នកបានភ្លក់ម្ហូប ${FOOD_CHECKIN_REWARD_TARGET} មុខផ្សេងគ្នា។ សមាជិក VIP របស់អ្នកមានសុពលភាពដល់ ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}។`,
         messageEn: `You tried ${FOOD_CHECKIN_REWARD_TARGET} different dishes. Your VIP is valid until ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}.`,
         messageZh: `您已品尝 ${FOOD_CHECKIN_REWARD_TARGET} 道不同的菜品。VIP 有效期至 ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}。`,
         type: 'system',
@@ -5075,15 +5155,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       'FOOD_CHECKIN_REWARD_GRANTED',
       'SUCCESS',
       'FoodPassport',
-      `Granted ${rewardDays}-day VIP reward to ${approved.name} (${approved.id}) after ${FOOD_CHECKIN_REWARD_TARGET} distinct dishes; VIP until ${approved.subscriptionExpiryDate}${wasVipActive ? ' (stacked on existing VIP)' : ''}`
+      `Granted ${rewardDays}-day VIP reward to ${approved.name} (${approved.id}, ${normEmail}) after ${FOOD_CHECKIN_REWARD_TARGET} distinct dishes; VIP until ${approved.subscriptionExpiryDate}${wasVipActive ? ' (stacked on existing VIP)' : ''}`
     );
 
     showToast(
       language === 'km'
-        ? `🎉 អបអរសាទរ! អ្នកបានភ្លក់ម្ហូប ${FOOD_CHECKIN_REWARD_TARGET} មុខ — ទទួលបាន VIP ${rewardDays} ថ្ងៃ!`
+        ? `អបអរសាទរ! អ្នកបានភ្លក់ម្ហូបគ្រប់ ${FOOD_CHECKIN_REWARD_TARGET} ដង — ទទួលបានសមាជិក VIP ${rewardDays} ថ្ងៃដោយស្វ័យប្រវត្តិ!`
         : language === 'zh'
-          ? `🎉 恭喜！您已品尝 ${FOOD_CHECKIN_REWARD_TARGET} 道菜 — 获得 ${rewardDays} 天 VIP！`
-          : `🎉 Congratulations! You tried ${FOOD_CHECKIN_REWARD_TARGET} dishes — enjoy ${rewardDays} days of VIP!`,
+          ? `恭喜！您已品尝满 ${FOOD_CHECKIN_REWARD_TARGET} 次 — 已自动升级 ${rewardDays} 天 VIP 会员！`
+          : `Congratulations! You completed ${FOOD_CHECKIN_REWARD_TARGET} food check-ins — upgraded to VIP for ${rewardDays} days!`,
       'success'
     );
     return { success: true };

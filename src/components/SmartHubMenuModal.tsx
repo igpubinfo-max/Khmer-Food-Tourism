@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  X, Compass, Navigation, Heart, BadgeCheck, Wifi, WifiOff, Route, ChevronDown, Lock, Flame, CheckCircle2,
+  X, Compass, Navigation, Heart, BadgeCheck, Wifi, WifiOff, Route, ChevronDown, Lock, Utensils, CheckCircle2,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { isAdminAccount, isUserVipActive, organizeAndDeduplicateFoods } from '../types';
@@ -229,7 +229,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
                 setIsTrendingSocialModalOpen(true);
               }}
             >
-              <span className={`${iconBox} bg-rose-100 text-rose-600`}><Flame className="w-5 h-5" /></span>
+              <span className={`${iconBox} bg-emerald-100 text-emerald-700`}><Utensils className="w-5 h-5" /></span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-bold text-slate-900 dark:text-white">
                   {tr(language, 'ម្ហូបខ្មែរកំពុងពេញនិយម (YouTube)', 'Trending Khmer Food (YouTube)', '热门高棉美食（YouTube）')}

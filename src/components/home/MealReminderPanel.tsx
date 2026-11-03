@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { Bell, ChevronDown } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { organizeAndDeduplicateFoods } from '../../types';
 import { tr } from '../../utils/i18n';
@@ -27,11 +27,11 @@ import {
   type ReminderSlot,
 } from '../../utils/mealReminderPlan';
 
-const SLOT_META: Record<ReminderSlot, { emoji: string; km: string; en: string; zh: string }> = {
-  breakfast: { emoji: '🍜', km: 'ពេលព្រឹក', en: 'Breakfast', zh: '早餐' },
-  lunch: { emoji: '🍛', km: 'ថ្ងៃត្រង់', en: 'Lunch', zh: '午餐' },
-  snack: { emoji: '🍮', km: 'រសៀល', en: 'Snack', zh: '下午茶' },
-  dinner: { emoji: '🍲', km: 'ពេលល្ងាច', en: 'Dinner', zh: '晚餐' },
+const SLOT_META: Record<ReminderSlot, { km: string; en: string; zh: string }> = {
+  breakfast: { km: 'ពេលព្រឹក', en: 'Breakfast', zh: '早餐' },
+  lunch: { km: 'ថ្ងៃត្រង់', en: 'Lunch', zh: '午餐' },
+  snack: { km: 'រសៀល', en: 'Snack', zh: '下午茶' },
+  dinner: { km: 'ពេលល្ងាច', en: 'Dinner', zh: '晚餐' },
 };
 
 const pad2 = (n: number) => String(n).padStart(2, '0');
@@ -96,7 +96,7 @@ const MealReminderPanelInner: React.FC = () => {
         setSettings(getReminderSettings());
         setExpanded(true);
         showToast(
-          tr(language, '🔔 បានបើកការរំលឹកទទួលទានអាហារទៀងទាត់!', '🔔 Regular meal reminders are on!', '🔔 已开启规律用餐提醒！'),
+          tr(language, 'បានបើកការរំលឹកទទួលទានអាហារទៀងទាត់', 'Regular meal reminders are on', '已开启规律用餐提醒'),
           'success'
         );
       } else {
@@ -135,7 +135,7 @@ const MealReminderPanelInner: React.FC = () => {
       const ok = await sendTestReminder(catalog, language);
       showToast(
         ok
-          ? tr(language, '🔔 បានផ្ញើការរំលឹកសាកល្បង — សូមពិនិត្យរបារជូនដំណឹង', '🔔 Test reminder sent — check your notification shade', '🔔 已发送测试提醒，请查看通知栏')
+          ? tr(language, 'បានផ្ញើការរំលឹកសាកល្បង — សូមពិនិត្យរបារជូនដំណឹង', 'Test reminder sent — check your notification shade', '已发送测试提醒，请查看通知栏')
           : tr(language, 'មិនអាចផ្ញើការរំលឹកសាកល្បងបានទេ សូមពិនិត្យការអនុញ្ញាតជូនដំណឹង', 'Could not send the test reminder — check notification permission', '无法发送测试提醒，请检查通知权限'),
         ok ? 'success' : 'warning'
       );
@@ -145,8 +145,6 @@ const MealReminderPanelInner: React.FC = () => {
   };
 
   const onExactAlarm = async () => {
-    // The system screen opens; when the user returns, the app-resume handler rebuilds the plan (now exact) and this
-    // panel refreshes its status automatically.
     await openExactAlarmSettings();
   };
 
@@ -184,9 +182,9 @@ const MealReminderPanelInner: React.FC = () => {
         onClick={() => void onEnable()}
         disabled={busy}
         data-testid="meal-reminder-enable"
-        className="w-full min-h-[36px] flex items-center gap-2 rounded-xl bg-emerald-600/10 hover:bg-emerald-600/15 dark:bg-emerald-400/10 border border-emerald-500/40 px-2.5 py-1 text-left active:scale-[0.98] transition cursor-pointer disabled:opacity-60"
+        className="w-full min-h-[36px] flex items-center gap-2 rounded-xl bg-emerald-50/80 hover:bg-emerald-100/70 dark:bg-slate-900/50 border border-emerald-500/40 px-2.5 py-1 text-left active:scale-[0.98] transition cursor-pointer disabled:opacity-60"
       >
-        <span className="text-base shrink-0" aria-hidden="true">🔔</span>
+        <Bell className="w-4 h-4 text-[#064E3B] dark:text-emerald-300 shrink-0" strokeWidth={1.75} />
         <span className="min-w-0 flex-1 truncate text-[12.5px] font-extrabold text-[#064E3B] dark:text-emerald-200 leading-snug">
           {permission === 'denied' && settings.enabled
             ? tr(language, 'ការជូនដំណឹងត្រូវបានបិទក្នុង Settings — ចុចព្យាយាមម្តងទៀត', 'Notifications blocked in Settings — tap to retry', '通知已被关闭 — 点击重试')
@@ -204,21 +202,21 @@ const MealReminderPanelInner: React.FC = () => {
     .join(' · ');
 
   return (
-    <div data-testid="meal-reminder-panel" className="rounded-xl border border-emerald-500/40 bg-emerald-600/10 dark:bg-emerald-400/10">
+    <div data-testid="meal-reminder-panel" className="rounded-xl border border-emerald-500/40 bg-emerald-50/70 dark:bg-slate-900/50">
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
         className="w-full min-h-[36px] flex items-center gap-2 px-2.5 py-1 text-left cursor-pointer"
       >
-        <span className="text-base shrink-0" aria-hidden="true">🔔</span>
+        <Bell className="w-4 h-4 text-[#064E3B] dark:text-emerald-300 shrink-0" strokeWidth={1.75} />
         <span className="min-w-0 flex-1 truncate text-[12.5px] font-extrabold text-[#064E3B] dark:text-emerald-200 leading-snug">
           {tr(language, 'ការរំលឹកទទួលទានអាហារទៀងទាត់', 'Regular meal reminders', '规律用餐提醒')}
         </span>
         <span className="shrink-0 text-[11px] font-mono font-bold text-slate-600 dark:text-slate-300">
           {timesSummary || tr(language, 'មិនទាន់ជ្រើស', 'None', '未选择')}
         </span>
-        <ChevronDown className={`w-4 h-4 text-emerald-700 dark:text-emerald-300 shrink-0 transition ${expanded ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 text-emerald-700 dark:text-emerald-300 shrink-0 transition ${expanded ? 'rotate-180' : ''}`} strokeWidth={1.75} />
       </button>
 
       {expanded && (
@@ -238,7 +236,7 @@ const MealReminderPanelInner: React.FC = () => {
                   <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${cfg.on ? 'translate-x-5' : ''}`} />
                 </button>
                 <span className="flex-1 min-w-0 text-[13px] font-bold text-slate-800 dark:text-slate-100 truncate">
-                  <span aria-hidden="true">{SLOT_META[slot].emoji}</span> {slotName(slot)}
+                  {slotName(slot)}
                 </span>
                 <input
                   type="time"
@@ -254,7 +252,6 @@ const MealReminderPanelInner: React.FC = () => {
 
           {/* Truth from the OS: when is the next reminder REALLY scheduled? */}
           <p data-testid="meal-reminder-next" className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
-            ⏰{' '}
             {next
               ? tr(language, `ការរំលឹកបន្ទាប់៖ ${describeNext(next)}`, `Next reminder: ${describeNext(next)}`, `下一次提醒：${describeNext(next)}`)
               : tr(language, 'មិនទាន់មានការរំលឹកដែលបានកំណត់ទេ', 'No reminder is scheduled yet', '尚无已安排的提醒')}
@@ -279,7 +276,7 @@ const MealReminderPanelInner: React.FC = () => {
               data-testid="meal-reminder-test"
               className="flex-1 min-w-[120px] min-h-[40px] rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-60"
             >
-              🔔 {tr(language, 'សាកល្បងឥឡូវនេះ', 'Test now', '立即测试')}
+              {tr(language, 'សាកល្បងឥឡូវនេះ', 'Test now', '立即测试')}
             </button>
             {exactState === 'denied' && (
               <button
@@ -288,7 +285,7 @@ const MealReminderPanelInner: React.FC = () => {
                 data-testid="meal-reminder-exact"
                 className="flex-1 min-w-[120px] min-h-[40px] rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold transition cursor-pointer"
               >
-                ⏱ {tr(language, 'ទៀងម៉ោង', 'On-time', '准时')}
+                {tr(language, 'ទៀងម៉ោង', 'On-time', '准时')}
               </button>
             )}
             <button

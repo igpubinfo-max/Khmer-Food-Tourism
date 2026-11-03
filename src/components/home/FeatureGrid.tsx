@@ -1,5 +1,4 @@
 import React from 'react';
-import { Crown } from 'lucide-react';
 import type { Language } from '../../types';
 import { tr } from '../../utils/i18n';
 import {
@@ -32,6 +31,9 @@ interface FeatureItem {
   onClick: () => void;
 }
 
+const FLAT_ICON_CONTAINER =
+  'bg-emerald-50 text-[#064E3B] dark:bg-slate-700/80 dark:text-emerald-300 border border-emerald-200/80 dark:border-slate-600';
+
 const FeatureGridImpl: React.FC<Props> = ({
   language,
   isVip,
@@ -49,8 +51,7 @@ const FeatureGridImpl: React.FC<Props> = ({
       icon: IconNearbyFood,
       badgeType: 'free',
       badgeLabel: tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费'),
-      iconContainerClass:
-        'bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300 ring-1 ring-emerald-500/30',
+      iconContainerClass: FLAT_ICON_CONTAINER,
       onClick: onNearbyFoodSearch,
     },
     {
@@ -59,8 +60,7 @@ const FeatureGridImpl: React.FC<Props> = ({
       icon: IconCravingSpark,
       badgeType: 'free',
       badgeLabel: tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费'),
-      iconContainerClass:
-        'bg-teal-500/15 text-teal-600 dark:bg-teal-500/20 dark:text-teal-300 ring-1 ring-teal-500/30',
+      iconContainerClass: FLAT_ICON_CONTAINER,
       onClick: onNearbyPlaces,
     },
     {
@@ -69,8 +69,7 @@ const FeatureGridImpl: React.FC<Props> = ({
       icon: IconFoodPicks,
       badgeType: 'free',
       badgeLabel: tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费'),
-      iconContainerClass:
-        'bg-amber-500/15 text-amber-600 dark:bg-amber-500/20 dark:text-amber-300 ring-1 ring-amber-500/30',
+      iconContainerClass: FLAT_ICON_CONTAINER,
       onClick: onFoodRecommendations,
     },
     {
@@ -79,8 +78,7 @@ const FeatureGridImpl: React.FC<Props> = ({
       icon: IconProvinceFood,
       badgeType: 'free',
       badgeLabel: tr(language, '២៥ ខេត្ត', '25 Prov', '25省市'),
-      iconContainerClass:
-        'bg-orange-500/15 text-orange-600 dark:bg-orange-500/20 dark:text-orange-300 ring-1 ring-orange-500/30',
+      iconContainerClass: FLAT_ICON_CONTAINER,
       onClick: onDailyFoodDiscovery,
     },
     {
@@ -89,8 +87,7 @@ const FeatureGridImpl: React.FC<Props> = ({
       icon: IconMapRoute,
       badgeType: 'free',
       badgeLabel: tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费'),
-      iconContainerClass:
-        'bg-sky-500/15 text-sky-600 dark:bg-sky-500/20 dark:text-sky-300 ring-1 ring-sky-500/30',
+      iconContainerClass: FLAT_ICON_CONTAINER,
       onClick: onMapNavigation,
     },
     {
@@ -102,7 +99,7 @@ const FeatureGridImpl: React.FC<Props> = ({
         ? tr(language, 'VIP បើករួច', 'VIP Active', 'VIP已激活')
         : tr(language, 'ឥតគិតថ្លៃ + VIP', 'FREE + VIP', '免费+VIP'),
       iconContainerClass:
-        'bg-amber-400/20 text-amber-600 dark:bg-amber-400/25 dark:text-amber-300 ring-1 ring-amber-400/45',
+        'bg-amber-400/15 text-amber-300 border border-amber-400/35',
       onClick: onSmartAiAssistant,
     },
   ];
@@ -121,31 +118,34 @@ const FeatureGridImpl: React.FC<Props> = ({
               onClick={it.onClick}
               className={`group rounded-xl pt-1 pb-1.5 px-1 flex flex-col items-center justify-center gap-0.5 transition active:scale-[0.97] cursor-pointer shadow-xs ${
                 isVipCard
-                  ? 'bg-gradient-to-b from-slate-800/95 to-amber-950/35 border border-amber-400/45 hover:border-amber-400/75'
+                  ? 'bg-[#064E3B] border border-amber-400/45 hover:border-amber-400/75'
                   : 'bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-white/10 hover:border-emerald-500/40'
               }`}
             >
-              {/* Compact Free / VIP indicator pill: in the normal flow (top-right) so it can never overlap the icon */}
+              {/* Compact Free / VIP text pill */}
               <span
-                className={`self-end inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded-full text-[8px] font-extrabold leading-none ${
+                className={`self-end inline-flex items-center px-1.5 py-[1px] rounded-full text-[8px] font-extrabold leading-none ${
                   isVipCard
-                    ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
-                    : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border border-emerald-500/25'
+                    ? 'bg-amber-400/20 text-amber-200 border border-amber-400/40'
+                    : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25'
                 }`}
               >
-                {isVipCard && <Crown className="w-2 h-2 text-amber-300 shrink-0" />}
                 <span>{it.badgeLabel}</span>
               </span>
 
-              {/* Clean centered handcrafted icon */}
+              {/* Clean centered icon */}
               <span
                 className={`w-8 h-8 rounded-lg ${it.iconContainerClass} flex items-center justify-center shrink-0 transition-transform group-hover:scale-105`}
               >
-                <Icon className="w-[17px] h-[17px]" />
+                <Icon className="w-4 h-4" />
               </span>
 
-              {/* Crisp 1-line Khmer label with sufficient vertical line-height so subscripts never clip */}
-              <span className="text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-100 leading-normal text-center truncate w-full px-0.5">
+              {/* Crisp 1-line Khmer label */}
+              <span
+                className={`text-[11px] sm:text-xs font-bold leading-normal text-center truncate w-full px-0.5 ${
+                  isVipCard ? 'text-white' : 'text-slate-800 dark:text-slate-100'
+                }`}
+              >
                 {it.label}
               </span>
             </button>

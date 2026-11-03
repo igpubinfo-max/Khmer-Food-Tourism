@@ -3,7 +3,6 @@ import { useApp } from '../context/AppContext';
 import {
   X,
   Compass,
-  Sparkles,
   ChefHat,
   Store,
   Star,
@@ -484,7 +483,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                   : 'bg-white dark:bg-slate-700/90 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-600 hover:border-emerald-500/50'
               }`}
             >
-              <Sparkles className="w-3 h-3 text-amber-400" />
+              <MapPin className="w-3.5 h-3.5 text-emerald-500" />
               <span>{tr(language, 'ទាំង ២៥ ខេត្ត-ក្រុង', 'All 25 Provinces', '全部 25 省市')}</span>
               <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono bg-emerald-500/20 text-current">
                 {verifiedDishes.length}

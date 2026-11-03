@@ -511,17 +511,17 @@ export function pickDistinctFlavorDishes(
 }
 
 const CHIPS: Record<string, { label: T3; query: T3 }> = {
-  spicy: { label: ['🌶️ ជូរហឹរ', '🌶️ Spicy & Sour', '🌶️ 酸辣风味'], query: ['ជូរហឹរ', 'spicy sour', '酸辣'] },
-  soup: { label: ['🍲 សម្លក្តៅៗ', '🍲 Warm Soup', '🍲 热汤'], query: ['សម្លក្តៅៗ', 'warm soup', '热汤'] },
-  grilled: { label: ['🥩 សាច់អាំង', '🥩 Grilled', '🥩 烧烤'], query: ['សាច់អាំង', 'grilled', '烧烤'] },
-  seafood: { label: ['🦀 គ្រឿងសមុទ្រ', '🦀 Seafood', '🦀 海鲜'], query: ['គ្រឿងសមុទ្រ', 'seafood', '海鲜'] },
-  sweet: { label: ['🍨 បង្អែមខ្មែរ', '🍨 Khmer Dessert', '🍨 高棉甜品'], query: ['បង្អែម', 'dessert', '甜品'] },
-  noodles: { label: ['🍜 គុយទាវ & មី', '🍜 Noodles', '🍜 粉面'], query: ['គុយទាវ', 'noodles', '粿条面食'] },
-  rice: { label: ['🍚 បាយ', '🍚 Rice Dishes', '🍚 米饭'], query: ['បាយ', 'rice', '米饭'] },
-  tourism: { label: ['🏛️ កន្លែងដើរលេងសៀមរាប', '🏛️ Siem Reap Places', '🏛️ 暹粒景点'], query: ['កន្លែងដើរលេងសៀមរាប', 'Siem Reap attractions', '暹粒旅游景点'] },
-  drink: { label: ['🍻 ម្ហូបអមភេសជ្ជៈ (VIP)', '🍻 Beverage Pairings (VIP)', '🍻 佐餐搭配 (VIP)'], query: ['ម្ហូបអមភេសជ្ជៈ', 'beverage pairing food', '佐餐美食'] },
-  surprise: { label: ['🎁 ភ្ញាក់ផ្អើលខ្ញុំ', '🎁 Surprise Me', '🎁 给我惊喜'], query: ['ភ្ញាក់ផ្អើល', 'surprise me', '惊喜'] },
-  cheap: { label: ['💸 ម្ហូបតាមផ្លូវឆ្ងាញ់ៗ', '💸 Street Food', '💸 街头小吃'], query: ['អាហារសម្រន់', 'street food', '街头小吃'] },
+  spicy: { label: ['ជូរហឹរ', 'Spicy & Sour', '酸辣风味'], query: ['ជូរហឹរ', 'spicy sour', '酸辣'] },
+  soup: { label: ['សម្លក្តៅៗ', 'Warm Soup', '热汤'], query: ['សម្លក្តៅៗ', 'warm soup', '热汤'] },
+  grilled: { label: ['សាច់អាំង', 'Grilled', '烧烤'], query: ['សាច់អាំង', 'grilled', '烧烤'] },
+  seafood: { label: ['គ្រឿងសមុទ្រ', 'Seafood', '海鲜'], query: ['គ្រឿងសមុទ្រ', 'seafood', '海鲜'] },
+  sweet: { label: ['បង្អែមខ្មែរ', 'Khmer Dessert', '高棉甜品'], query: ['បង្អែម', 'dessert', '甜品'] },
+  noodles: { label: ['គុយទាវ & មី', 'Noodles', '粉面'], query: ['គុយទាវ', 'noodles', '粿条面食'] },
+  rice: { label: ['បាយ', 'Rice Dishes', '米饭'], query: ['បាយ', 'rice', '米饭'] },
+  tourism: { label: ['កន្លែងដើរលេងសៀមរាប', 'Siem Reap Places', '暹粒景点'], query: ['កន្លែងដើរលេងសៀមរាប', 'Siem Reap attractions', '暹粒旅游景点'] },
+  drink: { label: ['ម្ហូបអមភេសជ្ជៈ (VIP)', 'Beverage Pairings (VIP)', '佐餐搭配 (VIP)'], query: ['ម្ហូបអមភេសជ្ជៈ', 'beverage pairing food', '佐餐美食'] },
+  surprise: { label: ['ភ្ញាក់ផ្អើលខ្ញុំ', 'Surprise Me', '给我惊喜'], query: ['ភ្ញាក់ផ្អើល', 'surprise me', '惊喜'] },
+  cheap: { label: ['ម្ហូបតាមផ្លូវឆ្ងាញ់ៗ', 'Street Food', '街头小吃'], query: ['អាហារសម្រន់', 'street food', '街头小吃'] },
 };
 
 export function chipsFor(ids: string[], language: Language): BrainChip[] {
@@ -1102,10 +1102,10 @@ const BRAIN_ENTRIES: BrainEntry[] = [
   },
   {
     id: 'surprise_me',
-    emoji: '🎁',
+    emoji: '',
     mode: 'discover',
     test: /surprise|random|anything|whatever|any dish|ភ្ញាក់ផ្អើល|អ្វីក៏បាន|ឆ្ងាញ់ណាក៏បាន|惊喜|随便|随机/i,
-    headline: ['🎁 AI ភ្ញាក់ផ្អើលអ្នកហើយ!', '🎁 AI has a surprise for you!', '🎁 AI 为您准备了惊喜！'],
+    headline: ['AI ភ្ញាក់ផ្អើលអ្នកហើយ!', 'AI has a surprise for you!', 'AI 为您准备了惊喜！'],
     explain: ['', '', ''],
     like: ['', '', ''],
     tips: [],
@@ -1301,36 +1301,36 @@ function buildDiscover(
   )[0];
 
   const dishes: BrainDish[] = [];
-  if (timePick) dishes.push(toBrainDish(timePick, `⏰ ${slot.label} • ${describeDish(timePick, language)}`));
+  if (timePick) dishes.push(toBrainDish(timePick, `${slot.label} • ${describeDish(timePick, language)}`));
   if (gem)
     dishes.push(
       toBrainDish(
         gem,
-        `💎 ${tr(language, 'ម្ហូបលាក់កំបាំង', 'Hidden gem', '隐藏好味')} ⭐ ${gem.rating} • ${describeDish(gem, language)}`
+        `${tr(language, 'ម្ហូបលាក់កំបាំង', 'Hidden gem', '隐藏好味')} • ${gem.rating} • ${describeDish(gem, language)}`
       )
     );
   if (crowdPick)
     dishes.push(
       toBrainDish(
         crowdPick,
-        `🔥 ${tr(language, 'ពេញនិយមបំផុត', 'Crowd favourite', '人气之选')} ⭐ ${crowdPick.rating} • ${describeDish(crowdPick, language)}`
+        `${tr(language, 'ពេញនិយមបំផុត', 'Crowd favourite', '人气之选')} • ${crowdPick.rating} • ${describeDish(crowdPick, language)}`
       )
     );
   if (wild)
     dishes.push(
       toBrainDish(
         wild,
-        `🎲 ${tr(language, 'ជម្រើសផ្សងព្រេង', 'Adventurous pick', '大胆尝鲜')} • ${describeDish(wild, language)}`
+        `${tr(language, 'ជម្រើសផ្សងព្រេង', 'Adventurous pick', '大胆尝鲜')} • ${describeDish(wild, language)}`
       )
     );
 
   const headline = explicitSurprise
-    ? tr(language, '🎁 AI ភ្ញាក់ផ្អើលអ្នកហើយ!', '🎁 AI has a surprise for you!', '🎁 AI 为您准备了惊喜！')
+    ? tr(language, 'AI ភ្ញាក់ផ្អើលអ្នកហើយ!', 'AI has a surprise for you!', 'AI 为您准备了惊喜！')
     : tr(
         language,
-        `✨ AI ណែនាំមុខម្ហូបខ្មែរសម្រាប់ «${query}»`,
-        `✨ AI Culinary Picks for “${query}”`,
-        `✨ AI 为“${query}”精选的高棉美食`
+        `AI ណែនាំមុខម្ហូបខ្មែរសម្រាប់ «${query}»`,
+        `AI Culinary Picks for “${query}”`,
+        `AI 为“${query}”精选的高棉美食`
       );
   const explanation = explicitSurprise
     ? tr(
@@ -1349,18 +1349,18 @@ function buildDiscover(
   return {
     mode: 'discover',
     entryId: explicitSurprise ? 'surprise_me' : 'discover',
-    emoji: explicitSurprise ? '🎁' : '✨',
+    emoji: '',
     headline,
     explanation,
     dishes,
     surprise: gem
       ? {
-          title: tr(language, '💎 ម្ហូបលាក់កំបាំងប្រចាំថ្ងៃ', '💎 Hidden gem of the day', '💎 今日隐藏好味'),
+          title: tr(language, 'ម្ហូបលាក់កំបាំងប្រចាំថ្ងៃ', 'Hidden gem of the day', '今日隐藏好味'),
           text: tr(
             language,
-            `AI រកឃើញ «${gem.nameKh}» ពិន្ទុ ⭐ ${gem.rating} តែមានមតិតែ ${gem.reviewCount} — សាកល្បងមុនគេ!`,
-            `AI found “${gem.nameEn}” rated ⭐ ${gem.rating} with only ${gem.reviewCount} reviews — try it before everyone else!`,
-            `AI 发现“${gem.nameEn}”评分 ⭐ ${gem.rating}，评价仅 ${gem.reviewCount} 条——抢先尝鲜！`
+            `AI រកឃើញ «${gem.nameKh}» ពិន្ទុ ${gem.rating} តែមានមតិតែ ${gem.reviewCount} — សាកល្បងមុនគេ!`,
+            `AI found “${gem.nameEn}” rated ${gem.rating} with only ${gem.reviewCount} reviews — try it before everyone else!`,
+            `AI 发现“${gem.nameEn}”评分 ${gem.rating}，评价仅 ${gem.reviewCount} 条——抢先尝鲜！`
           ),
         }
       : undefined,

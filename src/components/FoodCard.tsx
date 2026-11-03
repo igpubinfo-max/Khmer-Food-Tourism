@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { FoodItem, resolveFoodPhotoUrl } from '../types';
 import { useApp } from '../context/AppContext';
-import { Star, Heart, Flame, Edit2 } from 'lucide-react';
+import { Star, Heart, Utensils, Edit2 } from 'lucide-react';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { getDisplayTags, tagLabel } from '../utils/dishTags';
@@ -158,7 +158,7 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
             </div>
             {typeof food.calories === 'number' && food.calories > 0 && (
               <span className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-orange-600 dark:text-orange-400">
-                <Flame className="w-4 h-4" />
+                <Utensils className="w-4 h-4" />
                 {food.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}
               </span>
             )}

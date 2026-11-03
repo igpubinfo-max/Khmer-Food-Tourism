@@ -486,17 +486,17 @@ export function foodAssistantStarterChips(language: Language): BrainChip[] {
   return [
     {
       id: 'q_tonight',
-      label: tr(language, '🍽️ ថ្ងៃនេះគួរញ៉ាំអ្វី?', '🍽️ What should I eat today?', '🍽️ 今天吃什么？'),
+      label: tr(language, 'ថ្ងៃនេះគួរញ៉ាំអ្វី?', 'What should I eat today?', '今天吃什么？'),
       query: tr(language, 'ថ្ងៃនេះគួរញ៉ាំអ្វីល្អ?', 'What should I eat today?', '今天吃什么好？'),
     },
     {
       id: 'q_amok',
-      label: tr(language, '👩‍🍳 របៀបធ្វើអាម៉ុក', '👩‍🍳 How to make amok', '👩‍🍳 阿莫克做法'),
+      label: tr(language, 'របៀបធ្វើអាម៉ុក', 'How to make amok', '阿莫克做法'),
       query: tr(language, 'សុំរូបមន្តអាម៉ុកត្រីលម្អិត', 'Give me a detailed fish amok recipe', '请给我详细的阿莫克鱼食谱'),
     },
     {
       id: 'q_storage',
-      label: tr(language, '🧊 រក្សាទុកម្ហូប', '🧊 Storing leftovers', '🧊 剩菜保存'),
+      label: tr(language, 'រក្សាទុកម្ហូប', 'Storing leftovers', '剩菜保存'),
       query: tr(language, 'តើរក្សាទុកម្ហូបសម្លក្នុងទូទឹកកកបានប៉ុន្មានថ្ងៃ?', 'How long can leftover soup stay in the fridge?', '剩下的汤放冰箱能保存几天？'),
     },
   ];
@@ -526,7 +526,7 @@ export function interpretAssistantPayload(raw: unknown, ctx: InterpretContext): 
       intent: 'medical_scope_refusal',
       isScopeRefusal: true,
       suppressDishCard: true,
-      text: `${notice.emoji} ${notice.headline}\n\n${notice.explanation}`,
+      text: `${notice.headline}\n\n${notice.explanation}`,
       followUpChips: notice.followUps,
     };
   }
@@ -538,9 +538,9 @@ export function interpretAssistantPayload(raw: unknown, ctx: InterpretContext): 
       suppressDishCard: true,
       text: tr(
         language,
-        '🚫 សូមអភ័យទោស ខ្ញុំមិនអាចជួយលើសំណើនេះបានទេ។ សូមសួរអំពីម្ហូបអាហារសុវត្ថិភាពវិញ។',
-        '🚫 Sorry, I can’t help with that request. Please ask me about safe, legal food instead.',
-        '🚫 抱歉，我无法协助此请求。请改问与安全、合法美食相关的问题。'
+        'សូមអភ័យទោស ខ្ញុំមិនអាចជួយលើសំណើនេះបានទេ។ សូមសួរអំពីម្ហូបអាហារសុវត្ថិភាពវិញ។',
+        'Sorry, I can’t help with that request. Please ask me about safe, legal food instead.',
+        '抱歉，我无法协助此请求。请改问与安全、合法美食相关的问题。'
       ),
       followUpChips: foodAssistantStarterChips(language),
     };
@@ -555,9 +555,9 @@ export function interpretAssistantPayload(raw: unknown, ctx: InterpretContext): 
         answerRaw ||
         tr(
           language,
-          '🍽️ ខ្ញុំជាជំនួយការឯកទេសតែផ្នែកម្ហូបអាហារប៉ុណ្ណោះ។ សូមសួរអំពីម្ហូប រូបមន្ត គ្រឿងផ្សំ ឬការរក្សាទុកអាហារ។',
-          '🍽️ I’m a food-only assistant. Ask me about dishes, recipes, ingredients, pairings or food storage.',
-          '🍽️ 我是专注于美食的助手。欢迎询问菜品、食谱、食材、搭配或食物保存。'
+          'ខ្ញុំជាជំនួយការឯកទេសតែផ្នែកម្ហូបអាហារប៉ុណ្ណោះ។ សូមសួរអំពីម្ហូប រូបមន្ត គ្រឿងផ្សំ ឬការរក្សាទុកអាហារ។',
+          'I’m a food-only assistant. Ask me about dishes, recipes, ingredients, pairings or food storage.',
+          '我是专注于美食的助手。欢迎询问菜品、食谱、食材、搭配或食物保存。'
         ),
       followUpChips: foodAssistantStarterChips(language),
     };
@@ -711,7 +711,7 @@ export function interpretAssistantPayload(raw: unknown, ctx: InterpretContext): 
     for (const [i, alt] of imageAnalysis.alternatives.entries()) {
       chips.push({
         id: `alt_${i}`,
-        label: `✅ ${alt.name}`.slice(0, 48),
+        label: alt.name.slice(0, 48),
         query: tr(
           language,
           `ម្ហូបក្នុងរូបភាពគឺ «${alt.name}» សូមប្រាប់ព័ត៌មានលម្អិត`,
@@ -722,7 +722,7 @@ export function interpretAssistantPayload(raw: unknown, ctx: InterpretContext): 
     }
   }
   for (const [i, f] of strList(p.followUps, 4, 90).entries()) {
-    chips.push({ id: `fu_${i}`, label: `💬 ${f}`.slice(0, 64), query: f });
+    chips.push({ id: `fu_${i}`, label: f.slice(0, 64), query: f });
   }
 
   const intentMap: Record<string, AiTurnIntent> = {
@@ -959,7 +959,7 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
         isScopeRefusal: true,
         suppressDishCard: true,
         source: 'notice',
-        text: `${notice.emoji} ${notice.headline}\n\n${notice.explanation}`,
+        text: `${notice.headline}\n\n${notice.explanation}`,
         followUpChips: notice.followUps,
       },
     };
@@ -1089,15 +1089,15 @@ export function buildAssistantFailureMessage(
     const publicText = hasImage
       ? tr(
           language,
-          '📷 បច្ចុប្បន្នប្រព័ន្ធស្គាល់រូបភាពម្ហូបមិនទាន់អាចភ្ជាប់បានបណ្តោះអាសន្ន។ សូមវាយឈ្មោះម្ហូបជាអក្សរ ឬព្យាយាមម្តងទៀតបន្តិចទៀត។',
-          '📷 Food photo recognition is temporarily unavailable right now. Please type the dish name or try again shortly.',
-          '📷 美食照片识别服务暂时无法连接，请直接输入菜名或稍后重试。'
+          'បច្ចុប្បន្នប្រព័ន្ធស្គាល់រូបភាពម្ហូបមិនទាន់អាចភ្ជាប់បានបណ្តោះអាសន្ន។ សូមវាយឈ្មោះម្ហូបជាអក្សរ ឬព្យាយាមម្តងទៀតបន្តិចទៀត។',
+          'Food photo recognition is temporarily unavailable right now. Please type the dish name or try again shortly.',
+          '美食照片识别服务暂时无法连接，请直接输入菜名或稍后重试。'
         )
       : tr(
           language,
-          '⚠️ សេវាឆ្លើយតបកំពុងរវល់បណ្តោះអាសន្ន។ សូមព្យាយាមម្តងទៀតបន្តិចទៀត។',
-          '⚠️ The assistant is temporarily busy. Please try again shortly.',
-          '⚠️ 助手服务暂时繁忙，请稍后重试。'
+          'សេវាឆ្លើយតបកំពុងរវល់បណ្តោះអាសន្ន។ សូមព្យាយាមម្តងទៀតបន្តិចទៀត។',
+          'The assistant is temporarily busy. Please try again shortly.',
+          '助手服务暂时繁忙，请稍后重试。'
         );
     return {
       id: `ai-${Date.now()}`,
@@ -1115,59 +1115,59 @@ export function buildAssistantFailureMessage(
   const imageNeedsAi = hasImage
     ? tr(
         language,
-        '\n\n📷 ការស្គាល់រូបភាពម្ហូបត្រូវការ AI ដែលភ្ជាប់បាន។ ខ្ញុំនឹងមិនទាយឈ្មោះម្ហូបខុសៗទេ។ សូមវាយឈ្មោះម្ហូបជាអក្សរ ឬព្យាយាមម្តងទៀត។',
-        '\n\n📷 Recognising a food photo needs the AI connection. I will not guess a dish name. Please type the dish name or try again.',
-        '\n\n📷 识别美食照片需要 AI 连接。我不会随意猜测菜名。请直接输入菜名或稍后重试。'
+        '\n\nការស្គាល់រូបភាពម្ហូបត្រូវការ AI ដែលភ្ជាប់បាន។ ខ្ញុំនឹងមិនទាយឈ្មោះម្ហូបខុសៗទេ។ សូមវាយឈ្មោះម្ហូបជាអក្សរ ឬព្យាយាមម្តងទៀត។',
+        '\n\nRecognising a food photo needs the AI connection. I will not guess a dish name. Please type the dish name or try again.',
+        '\n\n识别美食照片需要 AI 连接。我不会随意猜测菜名。请直接输入菜名或稍后重试。'
       )
     : '';
   const reasonText: Record<FoodAssistantFailure, string> = {
     no_key: tr(
       language,
-      '⚙️ ជំនួយការ AI មិនទាន់បានតភ្ជាប់ទេ (មិនទាន់មាន Gemini API Key)។ សូមឱ្យអ្នកគ្រប់គ្រងបិទភ្ជាប់សោក្នុង Admin → ទិដ្ឋភាពទូទៅ → ប្រអប់ទី ៤ (Gemini AI API Key)។',
-      '⚙️ The AI assistant is not connected yet (no Gemini API key). Ask the admin to paste it in Admin → Overview → Box 4 (Gemini AI API Key).',
-      '⚙️ AI 助手尚未连接（未配置 Gemini API Key）。请联系管理员在后台“概览”第 4 个框（Gemini AI API Key）中填写。'
+      'ជំនួយការ AI មិនទាន់បានតភ្ជាប់ទេ (មិនទាន់មាន Gemini API Key)។ សូមឱ្យអ្នកគ្រប់គ្រងបិទភ្ជាប់សោក្នុង Admin → ទិដ្ឋភាពទូទៅ → ប្រអប់ទី ៤ (Gemini AI API Key)។',
+      'The AI assistant is not connected yet (no Gemini API key). Ask the admin to paste it in Admin → Overview → Box 4 (Gemini AI API Key).',
+      'AI 助手尚未连接（未配置 Gemini API Key）。请联系管理员在后台“概览”第 4 个框（Gemini AI API Key）中填写。'
     ),
     network: tr(
       language,
-      '📡 មិនអាចភ្ជាប់អ៊ីនធឺណិតទៅ AI បានទេ។ សូមពិនិត្យអ៊ីនធឺណិត រួចព្យាយាមម្តងទៀត។',
-      '📡 Couldn’t reach the AI service. Please check your internet connection and try again.',
-      '📡 无法连接 AI 服务，请检查网络后重试。'
+      'មិនអាចភ្ជាប់អ៊ីនធឺណិតទៅ AI បានទេ។ សូមពិនិត្យអ៊ីនធឺណិត រួចព្យាយាមម្តងទៀត។',
+      'Couldn’t reach the AI service. Please check your internet connection and try again.',
+      '无法连接 AI 服务，请检查网络后重试。'
     ),
     timeout: tr(
       language,
-      '⏳ AI ឆ្លើយយឺតពេក។ សូមព្យាយាមម្តងទៀត។',
-      '⏳ The AI took too long to answer. Please try again.',
-      '⏳ AI 响应超时，请重试。'
+      'AI ឆ្លើយយឺតពេក។ សូមព្យាយាមម្តងទៀត។',
+      'The AI took too long to answer. Please try again.',
+      'AI 响应超时，请重试。'
     ),
     auth: tr(
       language,
-      '🔑 Gemini API Key មិនត្រឹមត្រូវ ឬផុតកំណត់។ សូមបង្កើតសោថ្មីពី Google AI Studio (aistudio.google.com/app/apikey) រួចបិទភ្ជាប់នៅខាងក្រោម ឬក្នុង Admin → ទិដ្ឋភាពទូទៅ → ប្រអប់ទី ៤។',
-      '🔑 The Gemini API key is invalid or expired. Create a new key in Google AI Studio (aistudio.google.com/app/apikey) and paste it below or in Admin → Overview → Box 4.',
-      '🔑 Gemini API Key 无效或已过期。请在 Google AI Studio (aistudio.google.com/app/apikey) 创建新密钥并粘贴到下方或后台“概览”第 4 框。'
+      'Gemini API Key មិនត្រឹមត្រូវ ឬផុតកំណត់។ សូមបង្កើតសោថ្មីពី Google AI Studio (aistudio.google.com/app/apikey) រួចបិទភ្ជាប់នៅខាងក្រោម ឬក្នុង Admin → ទិដ្ឋភាពទូទៅ → ប្រអប់ទី ៤។',
+      'The Gemini API key is invalid or expired. Create a new key in Google AI Studio (aistudio.google.com/app/apikey) and paste it below or in Admin → Overview → Box 4.',
+      'Gemini API Key 无效或已过期。请在 Google AI Studio (aistudio.google.com/app/apikey) 创建新密钥并粘贴到下方或后台“概览”第 4 框。'
     ),
     quota: tr(
       language,
-      '📊 ដែនកំណត់ប្រើប្រាស់ AI ថ្ងៃនេះពេញហើយ។ សូមព្យាយាមម្តងទៀតបន្តិចក្រោយ។',
-      '📊 The AI usage limit has been reached for now. Please try again in a little while.',
-      '📊 AI 使用额度暂时已满，请稍后再试。'
+      'ដែនកំណត់ប្រើប្រាស់ AI ថ្ងៃនេះពេញហើយ។ សូមព្យាយាមម្តងទៀតបន្តិចក្រោយ។',
+      'The AI usage limit has been reached for now. Please try again in a little while.',
+      'AI 使用额度暂时已满，请稍后再试。'
     ),
     blocked: tr(
       language,
-      '🚫 AI មិនអាចវិភាគមាតិកានេះបានទេ។ សូមសាកល្បងរូបភាព ឬសំណួរផ្សេង។',
-      '🚫 The AI could not process this content. Please try a different photo or question.',
-      '🚫 AI 无法处理该内容，请换一张图片或换个问题。'
+      'AI មិនអាចវិភាគមាតិកានេះបានទេ។ សូមសាកល្បងរូបភាព ឬសំណួរផ្សេង។',
+      'The AI could not process this content. Please try a different photo or question.',
+      'AI 无法处理该内容，请换一张图片或换个问题。'
     ),
     bad_response: tr(
       language,
-      '⚠️ AI ឆ្លើយមិនបានត្រឹមត្រូវ។ សូមព្យាយាមម្តងទៀត។',
-      '⚠️ The AI returned an unusable answer. Please try again.',
-      '⚠️ AI 返回的结果无法使用，请重试。'
+      'AI ឆ្លើយមិនបានត្រឹមត្រូវ។ សូមព្យាយាមម្តងទៀត។',
+      'The AI returned an unusable answer. Please try again.',
+      'AI 返回的结果无法使用，请重试。'
     ),
     unavailable: tr(
       language,
-      '⚠️ សេវា AI មិនអាចប្រើបានបណ្តោះអាសន្ន។ សូមព្យាយាមម្តងទៀត។',
-      '⚠️ The AI service is temporarily unavailable. Please try again.',
-      '⚠️ AI 服务暂时不可用，请稍后重试。'
+      'សេវា AI មិនអាចប្រើបានបណ្តោះអាសន្ន។ សូមព្យាយាមម្តងទៀត។',
+      'The AI service is temporarily unavailable. Please try again.',
+      'AI 服务暂时不可用，请稍后重试。'
     ),
   };
   return {

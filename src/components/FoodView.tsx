@@ -8,7 +8,7 @@ import {
   classifyKhmerFoodPrimaryGroup,
   organizeAndDeduplicateFoods,
 } from '../types';
-import { Utensils, Lock, Crown, MapPin, Soup, Sparkles, Plus } from 'lucide-react';
+import { Utensils, Lock, Crown, MapPin, Soup, Award, Plus } from 'lucide-react';
 import { DISH_PROVINCES, detectDishProvince } from '../utils/foodFilters';
 import { TAG_FILTERS, matchesTagFilter, TagFilterId, DishTagId } from '../utils/dishTags';
 import { TAG_FILTER_EVENT, consumePendingTagFilter, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
@@ -87,7 +87,7 @@ export const FoodView: React.FC = () => {
     { id: 'samlor', nameKh: 'សម្ល', nameEn: 'Soups & Curries', nameZh: '浓汤/咖喱', icon: <IconKhmerFoodBowl className="w-4 h-4" /> },
     { id: 'cha', nameKh: 'ឆា & អាំង', nameEn: 'Stir-Fry & Grill', nameZh: '热炒/烧烤', icon: <IconGrillFlame className="w-4 h-4" /> },
     { id: 'sngor', nameKh: 'ស្ងោរ & គុយទាវ', nameEn: 'Broths & Noodles', nameZh: '清汤/汤粉', icon: <Soup className="w-4 h-4 text-emerald-500" /> },
-    { id: 'bong_aem', nameKh: 'បង្អែម', nameEn: 'Desserts', nameZh: '高棉甜品', icon: <Sparkles className="w-4 h-4 text-amber-500" /> },
+    { id: 'bong_aem', nameKh: 'បង្អែម', nameEn: 'Desserts', nameZh: '高棉甜品', icon: <Award className="w-4 h-4 text-amber-500" /> },
   ];
 
   const sectionZhMeta: Record<KhmerFoodPrimaryGroup, { titleZh: string; subtitleZh: string }> = {
@@ -385,7 +385,7 @@ export const FoodView: React.FC = () => {
                       ) : section.meta.id === 'sngor' ? (
                         <Soup className="w-5 h-5 text-emerald-200" />
                       ) : (
-                        <Sparkles className="w-5 h-5 text-amber-300" />
+                        <Award className="w-5 h-5 text-amber-300" />
                       )}
                     </div>
                     <h3 className="font-moul text-sm sm:text-base text-white truncate">

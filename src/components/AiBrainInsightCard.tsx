@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChefHat, Crown, Lock, ShieldAlert, Sparkles } from 'lucide-react';
+import { Award, ChefHat, Crown, Lock, ShieldAlert } from 'lucide-react';
 import { resolveFoodPhotoUrl, type FoodItem, type Language } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
@@ -166,7 +166,7 @@ export const AiBrainInsightCard: React.FC<Props> = ({
       {insight.surprise && (
         <div className="p-3 rounded-xl bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 dark:from-amber-950/40 dark:via-slate-800 dark:to-amber-950/30 border border-amber-300/70 dark:border-amber-700/50">
           <div className="text-xs font-extrabold text-amber-800 dark:text-amber-300 mb-0.5 flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 shrink-0 text-amber-600" />
+            <Award className="w-3.5 h-3.5 shrink-0 text-amber-600" />
             <span>{insight.surprise.title}</span>
           </div>
           <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">{insight.surprise.text}</p>

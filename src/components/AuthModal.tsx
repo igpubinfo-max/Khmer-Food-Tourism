@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  X, Mail, User, Store, Sparkles, Crown,
+  X, Mail, User, Store, Utensils, Crown,
   ArrowRight, ShieldCheck, Loader2, LogOut, CheckCircle2
 } from 'lucide-react';
 import { UserRole, hasAuthenticatedEmailAccount } from '../types';
@@ -223,7 +223,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
         {/* Top Header Banner */}
         <div className="relative p-5 pb-4 bg-gradient-to-br from-[#064E3B] via-[#047857] to-[#022C22] text-white text-center">
           <div className="w-12 h-12 mx-auto rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mb-2 shadow-inner">
-            <Sparkles className="w-6 h-6 text-emerald-300" />
+            <Utensils className="w-6 h-6 text-emerald-300" />
           </div>
           <h2 className="text-lg font-bold font-moul tracking-wide drop-shadow-sm">
             {language === 'km' ? 'រសជាតិ និងទេសចរណ៍កម្ពុជា' : language === 'zh' ? '柬埔寨风味与旅游' : 'Cambodia Flavors & Tourism'}

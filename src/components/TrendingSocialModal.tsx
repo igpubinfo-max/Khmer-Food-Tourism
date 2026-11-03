@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import {
-  X, Flame, ExternalLink, Navigation, Phone, Share2, Calendar,
+  X, Utensils, ExternalLink, Navigation, Phone, Share2, Calendar,
   UtensilsCrossed, RefreshCw, ChefHat, CheckCircle2, Play,
   Search, AlertCircle, RotateCcw, ChevronRight, Loader2
 } from 'lucide-react';
@@ -609,10 +609,10 @@ export const TrendingSocialModal: React.FC = () => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-3.5 bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 text-white flex items-center justify-between shrink-0 border-b border-rose-500/30">
+        <div className="p-3.5 bg-[#064E3B] text-white flex items-center justify-between shrink-0 border-b border-emerald-700/60">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white shadow-md shrink-0">
-              <Flame className="w-5 h-5 fill-current" />
+            <div className="w-10 h-10 rounded-2xl bg-emerald-800/80 border border-emerald-500/30 flex items-center justify-center text-emerald-100 shadow-xs shrink-0">
+              <Utensils className="w-5 h-5" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">

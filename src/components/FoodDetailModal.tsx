@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  X, Heart, Clock, Users, Flame, ChefHat, 
-  CheckCircle2, Circle, Volume2, Sparkles, Bookmark, Globe, Check,
+  X, Heart, Clock, Users, Utensils, ChefHat, 
+  CheckCircle2, Circle, Volume2, Search, Bookmark, Globe, Check,
   Edit2, Save, Upload, Camera, ArrowLeft, Plus, Trash2
 } from 'lucide-react';
 import {
@@ -1036,17 +1036,17 @@ export const FoodDetailModal: React.FC = () => {
                   type="button"
                   disabled={isSearchingOnline}
                   onClick={handleSearchOnlinePhoto}
-                  className="w-full py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-[#064E3B] to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition active:scale-98 disabled:opacity-60 cursor-pointer font-khmer"
+                  className="w-full py-2.5 px-3.5 rounded-xl bg-[#064E3B] hover:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition active:scale-98 disabled:opacity-60 cursor-pointer font-khmer"
                 >
-                  <Sparkles className={`w-4 h-4 text-amber-300 shrink-0 ${isSearchingOnline ? 'animate-spin' : ''}`} />
+                  <Search className={`w-4 h-4 text-emerald-200 shrink-0 ${isSearchingOnline ? 'animate-spin' : ''}`} />
                   <span>
                     {isSearchingOnline
                       ? tr(language, 'កំពុងស្វែងរករូបភាពម្ហូប...', 'Searching online food photos...', '正在在线搜索菜品照片...')
                       : tr(
                           language,
-                          '🤖 ស្វែងរករូបភាពម្ហូបដោយស្វ័យប្រវត្តិ (ឥតគិតថ្លៃ $0)',
-                          '🤖 Auto-Search Matching Food Photos Online (Free $0)',
-                          '🤖 自动在线搜索匹配菜品照片（免费 $0）'
+                          'ស្វែងរករូបភាពម្ហូបដោយស្វ័យប្រវត្តិ (ឥតគិតថ្លៃ $0)',
+                          'Auto-Search Matching Food Photos Online (Free $0)',
+                          '自动在线搜索匹配菜品照片（免费 $0）'
                         )}
                   </span>
                 </button>
@@ -1056,9 +1056,9 @@ export const FoodDetailModal: React.FC = () => {
                     <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 block font-khmer">
                       {tr(
                         language,
-                        `✨ រកឃើញរូបភាពម្ហូបចំនួន ${onlineCandidates.length} សន្លឹក (ចុចជ្រើសរើស)៖`,
-                        `✨ Found ${onlineCandidates.length} matching online photos (tap to select):`,
-                        `✨ 已找到 ${onlineCandidates.length} 张匹配照片（点击选择）：`
+                        `រកឃើញរូបភាពម្ហូបចំនួន ${onlineCandidates.length} សន្លឹក (ចុចជ្រើសរើស)៖`,
+                        `Found ${onlineCandidates.length} matching online photos (tap to select):`,
+                        `已找到 ${onlineCandidates.length} 张匹配照片（点击选择）：`
                       )}
                     </span>
                     <div className="grid grid-cols-3 gap-2">
@@ -1112,7 +1112,7 @@ export const FoodDetailModal: React.FC = () => {
               </div>
 
               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700">
-                <Flame className="w-4 h-4 mx-auto text-orange-500 mb-1" />
+                <Utensils className="w-4 h-4 mx-auto text-orange-500 mb-1" />
                 <p className="text-[11px] text-slate-400">{tr(language, 'ថាមពល', 'Energy', '热量')}</p>
                 <p className="text-xs sm:text-sm font-bold text-[#0F172A] dark:text-slate-200">
                   {selectedFood.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}
@@ -1131,7 +1131,6 @@ export const FoodDetailModal: React.FC = () => {
             {/* Description */}
             <div>
               <h3 className="font-bold text-[#0F172A] dark:text-white text-base mb-2 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-[#059669]" />
                 {tr(language, 'អំពីមុខម្ហូបនេះ', 'About this Dish', '关于这道菜')}
               </h3>
               <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200/90 dark:border-slate-800">

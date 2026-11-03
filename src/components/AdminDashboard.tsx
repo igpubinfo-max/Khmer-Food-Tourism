@@ -5,7 +5,7 @@ import {
   Users, Plus, Trash2, Edit2, CheckCircle2, AlertTriangle, Settings, 
   QrCode, Heart, KeyRound, Lock, ExternalLink, CreditCard,
   ShieldCheck, ShieldAlert, Clock, RefreshCw, FileText, Check, Ban,
-  Sparkles, Image as ImageIcon, Search, Camera, Upload
+  Image as ImageIcon, Search, Camera, Upload
 } from 'lucide-react';
 import {
   FoodCategorySlug, DestinationCategorySlug, UserRole, User, RegistrationTransaction, FoodItem, TouristDestination, isSeedRestaurantId,
@@ -533,7 +533,7 @@ export const AdminDashboard: React.FC = () => {
           descriptionEn: (b.descriptionEn || b.descEn || '').trim(),
           descKh: (b.descKh || b.descriptionKh || '').trim(),
           descEn: (b.descEn || b.descriptionEn || '').trim(),
-          iconName: b.iconName || 'Sparkles',
+          iconName: b.iconName || 'ShieldCheck',
           category: b.category || 'promotion',
         })),
       });
@@ -810,7 +810,7 @@ export const AdminDashboard: React.FC = () => {
                 : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
             <span className="min-w-0 break-words text-center leading-tight">{isKm ? 'សវនកម្មរូបភាព' : 'Image Audit'}</span>
             {flaggedFoods.length > 0 && (
               <span className="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[9px] font-bold shrink-0">
@@ -944,7 +944,7 @@ export const AdminDashboard: React.FC = () => {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h4 className="font-bold text-[#064E3B] dark:text-emerald-300 font-khmer text-sm flex items-center gap-1.5">
-                      <span>🗺️ ប្រអប់ទី ៣៖ បញ្ចូលសោ Google Maps Places API Key ($200/ខែ Free Credit)</span>
+                      <span>ប្រអប់ទី ៣៖ បញ្ចូលសោ Google Maps Places API Key ($200/ខែ Free Credit)</span>
                     </h4>
                     <p className="text-[11px] text-stone-600 dark:text-stone-300 font-khmer mt-0.5">
                       បិទភ្ជាប់សោ Google Maps Places API Key (ផ្តើមដោយ <code className="font-mono font-bold">AIzaSy...</code>) ដើម្បីទាញយកហាង កាហ្វេ និងកន្លែងទេសចរណ៍ថ្មីៗទូទាំងកម្ពុជាដោយស្វ័យប្រវត្តិ + Smart Cache!
@@ -989,7 +989,7 @@ export const AdminDashboard: React.FC = () => {
                     }}
                     className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
                   >
-                    📋 Paste & រក្សាទុកភ្លាម
+                    Paste & រក្សាទុកភ្លាម
                   </button>
                   <button
                     type="button"
@@ -1005,7 +1005,7 @@ export const AdminDashboard: React.FC = () => {
                     }}
                     className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
                   >
-                    💾 រក្សាទុកសោ (Save Key)
+                    រក្សាទុកសោ (Save Key)
                   </button>
                   <button
                     type="button"
@@ -1013,14 +1013,14 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => handleVerifyGoogleMapsApi(cloudCfg.googleMapsApiKey)}
                     className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
                   >
-                    {isVerifyingGoogleMaps ? '⏳ កំពុងពិនិត្យ...' : '🔍 ពិនិត្យស្ថានភាព API'}
+                    {isVerifyingGoogleMaps ? 'កំពុងពិនិត្យ...' : 'ពិនិត្យស្ថានភាព API'}
                   </button>
                   <button
                     type="button"
                     onClick={() => openGoogleMapsSearchModal('all')}
-                    className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0 shadow-sm"
+                    className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0 shadow-sm"
                   >
-                    🗺️ ស្វែងរក & នាំចូលពី Google Maps
+                    ស្វែងរក & នាំចូលពី Google Maps
                   </button>
                 </div>
               </div>
@@ -1030,7 +1030,7 @@ export const AdminDashboard: React.FC = () => {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h4 className="font-bold text-[#064E3B] dark:text-emerald-300 font-khmer text-sm flex items-center gap-1.5">
-                      <span>🤖 ប្រអប់ទី ៤៖ បញ្ចូលសោ Google Gemini AI API Key (សម្រាប់មុខងារ «សួរ AI»)</span>
+                      <span>ប្រអប់ទី ៤៖ បញ្ចូលសោ Google Gemini AI API Key (សម្រាប់មុខងារ «សួរ AI»)</span>
                     </h4>
                     <p className="text-[11px] text-stone-600 dark:text-stone-300 font-khmer mt-0.5">
                       បិទភ្ជាប់សោ Gemini API Key (<code className="font-mono font-bold">...Q9bQ / KhmerFoodAI</code> ពី Google AI Studio) ដើម្បីឱ្យមុខងារ «សួរ AI» ឆ្លើយសំណួរបានត្រឹមត្រូវ ១០០%!
@@ -1075,7 +1075,7 @@ export const AdminDashboard: React.FC = () => {
                     }}
                     className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
                   >
-                    📋 Paste & រក្សាទុកភ្លាម
+                    Paste & រក្សាទុកភ្លាម
                   </button>
                   <button
                     type="button"
@@ -1087,11 +1087,11 @@ export const AdminDashboard: React.FC = () => {
                         googleMapsApiKey: saved.googleMapsApiKey,
                       });
                       const res = await testGeminiApiConnection(saved.geminiApiKey);
-                      showToast(res.ok ? `✅ ${res.message}` : `❌ Gemini Error: ${res.message}`, res.ok ? 'success' : 'error');
+                      showToast(res.ok ? res.message : `Gemini Error: ${res.message}`, res.ok ? 'success' : 'error');
                     }}
                     className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
                   >
-                    💾 រក្សាទុក & សាកល្បង Gemini
+                    រក្សាទុក & សាកល្បង Gemini
                   </button>
                 </div>
               </div>
@@ -4028,8 +4028,8 @@ export const AdminDashboard: React.FC = () => {
                           <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-50 to-emerald-50 dark:from-amber-950/40 dark:to-emerald-950/30 border-2 border-emerald-400 dark:border-emerald-600/80 space-y-2">
                             <div>
                               <h4 className="font-bold text-xs text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
-                                <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
-                                <span>👑 បើកដំណើរការ / អនុម័ត VIP ជូនគណនីនេះភ្លាមៗ (Grant / Activate VIP)</span>
+                                <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />
+                                <span>បើកដំណើរការ / អនុម័ត VIP ជូនគណនីនេះភ្លាមៗ (Grant / Activate VIP)</span>
                               </h4>
                               <p className="text-[11px] text-emerald-800/90 dark:text-emerald-300/90 mt-0.5 leading-relaxed">
                                 {isKm
@@ -4081,7 +4081,7 @@ export const AdminDashboard: React.FC = () => {
                                 }}
                                 className="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-extrabold text-xs shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                               >
-                                <Sparkles className="w-4 h-4 shrink-0" />
+                                <CheckCircle2 className="w-4 h-4 shrink-0" />
                                 <span>
                                   {isKm
                                     ? `បើក VIP (${appSettings?.vipLongDurationDays || 60} ថ្ងៃ)`
@@ -4547,13 +4547,13 @@ export const AdminDashboard: React.FC = () => {
                 {/* Organized Settings Category Filter Pills */}
                 <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
                   {([
-                    { id: 'all', labelKh: '📋 ទាំងអស់', labelEn: '📋 All Categories' },
-                    { id: 'featured_rotation', labelKh: '🔄 បង្វិលហាង VIP មុខគេ', labelEn: '🔄 VIP Featured Rotation' },
-                    { id: 'vip_pricing', labelKh: '👑 កញ្ចប់ VIP & តម្លៃហាង', labelEn: '👑 VIP & Store Pricing' },
-                    { id: 'payment_khqr', labelKh: '💳 ការទូទាត់ KHQR', labelEn: '💳 Payment & KHQR' },
-                    { id: 'distribution', labelKh: '📲 តំណភ្ជាប់កម្មវិធី', labelEn: '📲 App Links' },
-                    { id: 'cloud_system', labelKh: '☁️ ប្រព័ន្ធ Cloud & API', labelEn: '☁️ Cloud & APIs' },
-                    { id: 'security', labelKh: '🔐 សុវត្ថិភាពរដ្ឋបាល', labelEn: '🔐 Admin Security' },
+                    { id: 'all', labelKh: 'ទាំងអស់', labelEn: 'All Categories' },
+                    { id: 'featured_rotation', labelKh: 'បង្វិលហាង VIP មុខគេ', labelEn: 'VIP Featured Rotation' },
+                    { id: 'vip_pricing', labelKh: 'កញ្ចប់ VIP & តម្លៃហាង', labelEn: 'VIP & Store Pricing' },
+                    { id: 'payment_khqr', labelKh: 'ការទូទាត់ KHQR', labelEn: 'Payment & KHQR' },
+                    { id: 'distribution', labelKh: 'តំណភ្ជាប់កម្មវិធី', labelEn: 'App Links' },
+                    { id: 'cloud_system', labelKh: 'ប្រព័ន្ធ Cloud & API', labelEn: 'Cloud & APIs' },
+                    { id: 'security', labelKh: 'សុវត្ថិភាពរដ្ឋបាល', labelEn: 'Admin Security' },
                   ] as const).map(cat => (
                     <button
                       key={cat.id}
@@ -4950,14 +4950,14 @@ export const AdminDashboard: React.FC = () => {
               <div className="bg-white dark:bg-stone-800 p-5 rounded-2xl border border-slate-200/90 dark:border-stone-700 shadow-xs space-y-5 font-khmer">
                 <div className="flex items-start justify-between gap-3 pb-3 border-b border-stone-200 dark:border-stone-700 flex-wrap">
                   <div className="flex items-center gap-2.5">
-                    <div className="p-2.5 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 shadow-sm">
-                      <Sparkles className="w-5 h-5" />
+                    <div className="p-2.5 rounded-2xl bg-amber-400 text-slate-950 shadow-sm">
+                      <ShieldCheck className="w-5 h-5" />
                     </div>
                     <div>
                       <h4 className="font-moul text-stone-900 dark:text-stone-100 text-sm">
                         {isKm
-                          ? '👑 ការកំណត់កញ្ចប់សមាជិកភាព VIP និងតម្លៃបន្ថែមហាង (Global Sync)'
-                          : '👑 Admin VIP Packages, Durations, Benefits & Store Fee Management'}
+                          ? 'ការកំណត់កញ្ចប់សមាជិកភាព VIP និងតម្លៃបន្ថែមហាង (Global Sync)'
+                          : 'Admin VIP Packages, Durations, Benefits & Store Fee Management'}
                       </h4>
                       <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
                         {isKm
@@ -5499,7 +5499,6 @@ export const AdminDashboard: React.FC = () => {
                 <div className="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-700">
                   <div>
                     <h4 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
-                      <span>☁️</span>
                       <span>ប្រព័ន្ធ Cloud Supabase (Free Tier) & Google Maps Places API + Smart Cache</span>
                     </h4>
                     <p className="text-[11px] text-stone-500 mt-0.5">
@@ -5548,7 +5547,7 @@ export const AdminDashboard: React.FC = () => {
                             return;
                           }
                           setGoogleMapsDailyLimit(parsed);
-                          showToast(`✅ បានកំណត់កូតា Google Maps API ប្រចាំថ្ងៃត្រឹម ${parsed} ដង/ថ្ងៃ`, 'success');
+                          showToast(`បានកំណត់កូតា Google Maps API ប្រចាំថ្ងៃត្រឹម ${parsed} ដង/ថ្ងៃ`, 'success');
                         }}
                         className="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold cursor-pointer"
                       >
@@ -5563,7 +5562,7 @@ export const AdminDashboard: React.FC = () => {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-extrabold text-slate-900 dark:text-stone-100">
-                        🛡️ របាយការណ៍ស្ថានភាព Google Maps API & Error Details (បង្ហាញតែក្នុង Admin Settings ប៉ុណ្ណោះ)
+                        របាយការណ៍ស្ថានភាព Google Maps API & Error Details (បង្ហាញតែក្នុង Admin Settings ប៉ុណ្ណោះ)
                       </span>
                       {googleMapsDiag && (
                         <span
@@ -5587,13 +5586,13 @@ export const AdminDashboard: React.FC = () => {
                       <span>
                         {isVerifyingGoogleMaps
                           ? 'កំពុងផ្ទៀងផ្ទាត់ផ្ទាល់ជាមួយ Google Cloud...'
-                          : '🔍 ផ្ទៀងផ្ទាត់ស្ថានភាព API, Billing & Restrictions ឥឡូវនេះ'}
+                          : 'ផ្ទៀងផ្ទាត់ស្ថានភាព API, Billing & Restrictions ឥឡូវនេះ'}
                       </span>
                     </button>
                   </div>
 
                   <p className="text-[11px] text-slate-600 dark:text-stone-400">
-                    🔒 <strong>សុវត្ថិភាពអេក្រង់អ្នកប្រើប្រាស់ (User Screen Protection)៖</strong> សារព្រមានបច្ចេកទេស និងកំហុស API ទាំងអស់ត្រូវបានដកចេញពីអេក្រង់ User/VIP ទាំងស្រុង។ នៅពេល Google Places API (New) មិនទាន់បើក ឬជាប់ Billing ប្រព័ន្ធស្វែងរកហាង និងតំបន់ទេសចរណ៍កម្ពុជា (Multi-Source Cambodia Search + Smart Cache) ដំណើរការជំនួសដោយស្វ័យប្រវត្តិ 100% ដោយមិនបង្ហាញ Error ដល់អ្នកប្រើប្រាស់ឡើយ។
+                    <strong>សុវត្ថិភាពអេក្រង់អ្នកប្រើប្រាស់ (User Screen Protection)៖</strong> សារព្រមានបច្ចេកទេស និងកំហុស API ទាំងអស់ត្រូវបានដកចេញពីអេក្រង់ User/VIP ទាំងស្រុង។ នៅពេល Google Places API (New) មិនទាន់បើក ឬជាប់ Billing ប្រព័ន្ធស្វែងរកហាង និងតំបន់ទេសចរណ៍កម្ពុជា (Multi-Source Cambodia Search + Smart Cache) ដំណើរការជំនួសដោយស្វ័យប្រវត្តិ 100% ដោយមិនបង្ហាញ Error ដល់អ្នកប្រើប្រាស់ឡើយ។
                   </p>
 
                   {googleMapsDiag ? (
@@ -5602,7 +5601,7 @@ export const AdminDashboard: React.FC = () => {
                         <div className={`p-2.5 rounded-xl border ${googleMapsDiag.placesApiNewEnabled ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-amber-50 border-amber-300 text-amber-950'}`}>
                           <div className="font-bold flex items-center justify-between">
                             <span>1. Places API (New)</span>
-                            <span>{googleMapsDiag.placesApiNewEnabled ? '✅ Enabled' : '⚠️ Disabled'}</span>
+                            <span>{googleMapsDiag.placesApiNewEnabled ? 'Enabled' : 'Disabled'}</span>
                           </div>
                           <div className="text-[10px] mt-1 opacity-85">
                             Project #{googleMapsDiag.projectId || '834153814844'}
@@ -5623,7 +5622,7 @@ export const AdminDashboard: React.FC = () => {
                         <div className={`p-2.5 rounded-xl border ${googleMapsDiag.billingEnabled ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-amber-50 border-amber-300 text-amber-950'}`}>
                           <div className="font-bold flex items-center justify-between">
                             <span>2. Cloud Billing</span>
-                            <span>{googleMapsDiag.billingEnabled ? '✅ Active' : '⚠️ Check Billing'}</span>
+                            <span>{googleMapsDiag.billingEnabled ? 'Active' : 'Check Billing'}</span>
                           </div>
                           <div className="text-[10px] mt-1 opacity-85">
                             {googleMapsDiag.billingEnabled ? 'គណនី Billing ដំណើរការធម្មតា' : 'ត្រូវភ្ជាប់ Billing ដើម្បីទទួល $200/ខែ Free'}
@@ -5644,7 +5643,7 @@ export const AdminDashboard: React.FC = () => {
                         <div className={`p-2.5 rounded-xl border ${googleMapsDiag.keyRestrictionsOk ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-red-50 border-red-300 text-red-950'}`}>
                           <div className="font-bold flex items-center justify-between">
                             <span>3. API Key Restrictions</span>
-                            <span>{googleMapsDiag.keyRestrictionsOk ? '✅ Valid' : '❌ Restricted/Invalid'}</span>
+                            <span>{googleMapsDiag.keyRestrictionsOk ? 'Valid' : 'Restricted/Invalid'}</span>
                           </div>
                           <div className="text-[10px] mt-1 font-mono opacity-85">
                             Key: {googleMapsDiag.keyMasked || 'AIzaSy...'}
@@ -5665,7 +5664,7 @@ export const AdminDashboard: React.FC = () => {
                         <div className="p-2.5 rounded-xl border bg-emerald-50 border-emerald-300 text-emerald-950">
                           <div className="font-bold flex items-center justify-between">
                             <span>4. ប្រព័ន្ធស្វែងរកកម្ពុជា</span>
-                            <span>✅ Active 100%</span>
+                            <span>Active 100%</span>
                           </div>
                           <div className="text-[10px] mt-1 opacity-85">
                             Smart Cache + Multi-Source Cambodia ដំណើរការដោយគ្មាន Error
@@ -5679,7 +5678,7 @@ export const AdminDashboard: React.FC = () => {
                           : 'bg-amber-50/90 border-amber-300 text-amber-950'
                       }`}>
                         <div className="font-bold mb-0.5">
-                          📋 សេចក្តីលម្អិតបច្ចេកទេស (Admin Diagnostic Message):
+                          សេចក្តីលម្អិតបច្ចេកទេស (Admin Diagnostic Message):
                         </div>
                         <div>{isKm ? googleMapsDiag.messageKh : googleMapsDiag.messageEn}</div>
                         {googleMapsDiag.rawDetail && googleMapsDiag.status !== 'OK' && (
@@ -5691,7 +5690,7 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   ) : (
                     <div className="text-[11px] text-stone-500">
-                      ចុចប៊ូតុង <strong>«🔍 ផ្ទៀងផ្ទាត់ស្ថានភាព API, Billing & Restrictions ឥឡូវនេះ»</strong> ដើម្បីពិនិត្យសោ Google Maps API ផ្ទាល់។
+                      ចុចប៊ូតុង <strong>«ផ្ទៀងផ្ទាត់ស្ថានភាព API, Billing & Restrictions ឥឡូវនេះ»</strong> ដើម្បីពិនិត្យសោ Google Maps API ផ្ទាល់។
                     </div>
                   )}
                 </div>
@@ -5724,11 +5723,11 @@ export const AdminDashboard: React.FC = () => {
                   <div id="admin-google-maps-key-box" className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border-2 border-emerald-500/60 overflow-hidden">
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <label className="block font-bold text-[#064E3B] dark:text-emerald-300">
-                        3. Google Maps Places API Key ($200/ខែ Free Credit) ⭐
+                        3. Google Maps Places API Key ($200/ខែ Free Credit)
                       </label>
                       {cloudCfg.googleMapsApiKey && cloudCfg.googleMapsApiKey.trim().length > 15 && (
                         <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold shrink-0">
-                          ✅ Connected
+                          Connected
                         </span>
                       )}
                     </div>
@@ -5754,14 +5753,14 @@ export const AdminDashboard: React.FC = () => {
                         }}
                         className="px-3 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl text-[11px] shrink-0"
                       >
-                        💾 Save & Verify
+                        Save & Verify
                       </button>
                     </div>
                   </div>
                   <div id="admin-gemini-ai-key-box" className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border-2 border-emerald-500/60 overflow-hidden">
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <label className="block font-bold text-[#064E3B] dark:text-emerald-300">
-                        4. Google Gemini AI API Key (សម្រាប់មុខងារ «សួរ AI» & ស្កេនម្ហូប) ⭐
+                        4. Google Gemini AI API Key (សម្រាប់មុខងារ «សួរ AI» & ស្កេនម្ហូប)
                       </label>
                       {cloudCfg.geminiApiKey && cloudCfg.geminiApiKey.trim().length > 10 && (
                         <span
@@ -5769,7 +5768,7 @@ export const AdminDashboard: React.FC = () => {
                             geminiTestOk === false ? 'bg-amber-600' : 'bg-emerald-600'
                           }`}
                         >
-                          {geminiTestOk === true ? '✅ Connected' : geminiTestOk === false ? '⚠️ Check key' : '💾 Saved'}
+                          {geminiTestOk === true ? 'Connected' : geminiTestOk === false ? 'Check key' : 'Saved'}
                         </span>
                       )}
                     </div>
@@ -5790,15 +5789,15 @@ export const AdminDashboard: React.FC = () => {
                             geminiApiKey: saved.geminiApiKey,
                             googleMapsApiKey: saved.googleMapsApiKey,
                           });
-                          setSupabaseTestStatus('⏳ កំពុងសាកល្បងភ្ជាប់ទៅកាន់ Google Gemini AI...');
+                          setSupabaseTestStatus('កំពុងសាកល្បងភ្ជាប់ទៅកាន់ Google Gemini AI...');
                           const res = await testGeminiApiConnection(saved.geminiApiKey);
                           setGeminiTestOk(res.ok);
-                          setSupabaseTestStatus(res.ok ? `✅ ${res.message}` : `❌ Gemini Error: ${res.message}`);
-                          showToast(res.ok ? `✅ ${res.message}` : `❌ Gemini Error: ${res.message}`, res.ok ? 'success' : 'error');
+                          setSupabaseTestStatus(res.ok ? res.message : `Gemini Error: ${res.message}`);
+                          showToast(res.ok ? res.message : `Gemini Error: ${res.message}`, res.ok ? 'success' : 'error');
                         }}
                         className="px-3 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl text-[11px] shrink-0 cursor-pointer"
                       >
-                        🤖 Save & Test Gemini
+                        Save & Test Gemini
                       </button>
                     </div>
                   </div>
@@ -5825,7 +5824,7 @@ export const AdminDashboard: React.FC = () => {
                     }}
                     className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl shadow-xs transition active:scale-95"
                   >
-                    💾 រក្សាទុកការកំណត់ Cloud & API
+                    រក្សាទុកការកំណត់ Cloud & API
                   </button>
 
                   <button
@@ -5838,7 +5837,7 @@ export const AdminDashboard: React.FC = () => {
                     }}
                     className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs transition active:scale-95"
                   >
-                    🔌 សាកល្បងភ្ជាប់ Supabase
+                    សាកល្បងភ្ជាប់ Supabase
                   </button>
 
                   <button
@@ -5871,7 +5870,7 @@ export const AdminDashboard: React.FC = () => {
                     }}
                     className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl shadow-xs transition active:scale-95"
                   >
-                    🔄 {isSyncingCloud ? 'កំពុង Sync...' : 'Sync ទិន្នន័យជាមួយ Cloud ឥឡូវនេះ'}
+                    {isSyncingCloud ? 'កំពុង Sync...' : 'Sync ទិន្នន័យជាមួយ Cloud ឥឡូវនេះ'}
                   </button>
 
                   {supabaseTestStatus?.includes('SQL Editor') && (
@@ -5883,7 +5882,7 @@ export const AdminDashboard: React.FC = () => {
                       }}
                       className="px-3 py-2 bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 text-stone-800 dark:text-stone-200 font-bold rounded-xl transition"
                     >
-                      📋 ចម្លងកូដ SQL បង្កើតតារាង Supabase
+                      ចម្លងកូដ SQL បង្កើតតារាង Supabase
                     </button>
                   )}
                 </div>
@@ -5897,10 +5896,10 @@ export const AdminDashboard: React.FC = () => {
           {activeTab === 'image_audit' && (
             <div className="space-y-6">
               {/* Header & Description */}
-              <div className="bg-gradient-to-r bg-[#064E3B] text-white p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+              <div className="bg-[#064E3B] text-white p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="p-3 bg-white/10 text-emerald-200 rounded-2xl border border-slate-200 dark:border-slate-700">
-                    <Sparkles className="w-6 h-6" />
+                    <ShieldCheck className="w-6 h-6" />
                   </div>
                   <div>
                     <h3 className="font-moul text-base text-white">

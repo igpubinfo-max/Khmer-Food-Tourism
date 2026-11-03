@@ -187,29 +187,29 @@ export function buildWelcomeAssistantMessage(language: Language, foodCount: numb
     intent: 'welcome',
     text: tr(
       language,
-      `សួស្តី! 👋 ខ្ញុំជាជំនួយការ AI ឯកទេសលើ «ម្ហូបអាហារ» ប៉ុណ្ណោះ។ សួរខ្ញុំជាភាសាខ្មែរ អង់គ្លេស ឬចិនបាន៖\n• 📷 ថតរូបម្ហូប ដើម្បីឱ្យខ្ញុំប្រាប់ថាជាម្ហូបអ្វី\n• 🍲 ម្ហូបខ្មែរ និងអន្តរជាតិ (មាន ${foodCount}+ មុខក្នុងបញ្ជីផ្ទៀងផ្ទាត់)\n• 👩‍🍳 រូបមន្ត គ្រឿងផ្សំ វិធីចម្អិន និងអាហារូបត្ថម្ភប្រហាក់ប្រហែល\n• ⚖️ ប្រៀបធៀបម្ហូប ប្រវត្តិ វប្បធម៌ និងការផ្គូផ្គងភេសជ្ជៈ\n• 🧊 ការរក្សាទុក និងសុវត្ថិភាពអាហារ • 🏪 ហាងអាហារ (${shopCount}+ ហាង)`,
-      `Hello! 👋 I’m an AI assistant dedicated ONLY to food. Ask me in Khmer, English or Chinese:\n• 📷 Send a food photo and I’ll tell you what it is\n• 🍲 Cambodian & international dishes (${foodCount}+ verified menu items)\n• 👩‍🍳 Recipes, ingredients, cooking methods and approximate nutrition\n• ⚖️ Comparisons, history, culture and drink pairings\n• 🧊 Storage & food safety • 🏪 Restaurants (${shopCount}+ shops)`,
-      `您好！👋 我是只专注于「美食」的 AI 助手。可用高棉语、英语或中文提问：\n• 📷 发送美食照片，我来告诉您这是什么菜\n• 🍲 高棉与各国美食（已核实菜单 ${foodCount}+ 道）\n• 👩‍🍳 食谱、食材、烹饪方法与大致营养\n• ⚖️ 菜品对比、历史文化与饮品搭配\n• 🧊 食物保存与食品安全 • 🏪 餐厅推荐（${shopCount}+ 家）`
+      `សួស្តី! ខ្ញុំជាជំនួយការ AI ឯកទេសលើ «ម្ហូបអាហារ» ប៉ុណ្ណោះ។ សួរខ្ញុំជាភាសាខ្មែរ អង់គ្លេស ឬចិនបាន៖\n• ថតរូបម្ហូប ដើម្បីឱ្យខ្ញុំប្រាប់ថាជាម្ហូបអ្វី\n• ម្ហូបខ្មែរ និងអន្តរជាតិ (មាន ${foodCount}+ មុខក្នុងបញ្ជីផ្ទៀងផ្ទាត់)\n• រូបមន្ត គ្រឿងផ្សំ វិធីចម្អិន និងអាហារូបត្ថម្ភប្រហាក់ប្រហែល\n• ប្រៀបធៀបម្ហូប ប្រវត្តិ វប្បធម៌ និងការផ្គូផ្គងភេសជ្ជៈ\n• ការរក្សាទុក និងសុវត្ថិភាពអាហារ • ហាងអាហារ (${shopCount}+ ហាង)`,
+      `Hello! I’m an AI assistant dedicated ONLY to food. Ask me in Khmer, English or Chinese:\n• Send a food photo and I’ll tell you what it is\n• Cambodian & international dishes (${foodCount}+ verified menu items)\n• Recipes, ingredients, cooking methods and approximate nutrition\n• Comparisons, history, culture and drink pairings\n• Storage & food safety • Restaurants (${shopCount}+ shops)`,
+      `您好！我是只专注于「美食」的 AI 助手。可用高棉语、英语或中文提问：\n• 发送美食照片，我来告诉您这是什么菜\n• 高棉与各国美食（已核实菜单 ${foodCount}+ 道）\n• 食谱、食材、烹饪方法与大致营养\n• 菜品对比、历史文化与饮品搭配\n• 食物保存与食品安全 • 餐厅推荐（${shopCount}+ 家）`
     ),
     followUpChips: [
       {
         id: 'craving_sour_spicy',
-        label: tr(language, '🌶️ ចង់ញ៉ាំម្ហូបជូរហឹរ', '🌶️ Craving Spicy & Sour', '🌶️ 想吃酸辣开胃菜'),
+        label: tr(language, 'ចង់ញ៉ាំម្ហូបជូរហឹរ', 'Craving Spicy & Sour', '想吃酸辣开胃菜'),
         query: tr(language, 'ថ្ងៃនេះចង់ញ៉ាំម្ហូបជូរហឹរ មានអ្វីខ្លះ?', 'What spicy and sour Cambodian dishes do you recommend today?', '今天想吃酸辣的高棉菜，有什么推荐？'),
       },
       {
         id: 'recipe_amok',
-        label: tr(language, '👩‍🍳 របៀបធ្វើអាម៉ុកត្រី', '👩‍🍳 Fish Amok Recipe', '👩‍🍳 阿莫克鱼食谱做法'),
+        label: tr(language, 'របៀបធ្វើអាម៉ុកត្រី', 'Fish Amok Recipe', '阿莫克鱼食谱做法'),
         query: tr(language, 'សុំគ្រឿងផ្សំ និងរបៀបធ្វើអាម៉ុកត្រី', 'Show me the ingredients and recipe for Fish Amok', '请告诉我阿莫克鱼的食材和做法'),
       },
       {
         id: 'storage_soup',
-        label: tr(language, '🧊 រក្សាទុកម្ហូបសម្ល', '🧊 Storing leftover soup', '🧊 剩汤如何保存'),
+        label: tr(language, 'រក្សាទុកម្ហូបសម្ល', 'Storing leftover soup', '剩汤如何保存'),
         query: tr(language, 'តើរក្សាទុកម្ហូបសម្លក្នុងទូទឹកកកបានប៉ុន្មានថ្ងៃ?', 'How long can leftover soup stay in the fridge?', '剩下的汤放冰箱能保存几天？'),
       },
       {
         id: 'compare_dishes',
-        label: tr(language, '⚖️ ប្រៀបធៀបម្ហូប', '⚖️ Compare dishes', '⚖️ 菜品对比'),
+        label: tr(language, 'ប្រៀបធៀបម្ហូប', 'Compare dishes', '菜品对比'),
         query: tr(language, 'ប្រៀបធៀបអាម៉ុក និងការីខ្មែរ', 'Compare amok and Khmer red curry', '对比阿莫克和高棉红咖喱'),
       },
     ],
@@ -614,7 +614,7 @@ export function generateConversationalAiResponse(params: {
       timestamp: new Date().toISOString(),
       intent: 'medical_scope_refusal',
       isScopeRefusal: true,
-      text: `${scopeNotice.emoji} ${scopeNotice.headline}\n\n${scopeNotice.explanation}`,
+      text: `${scopeNotice.headline}\n\n${scopeNotice.explanation}`,
       followUpChips: scopeNotice.followUps,
     };
     return {
@@ -649,30 +649,30 @@ export function generateConversationalAiResponse(params: {
       text: canUseVip
         ? tr(
             language,
-            '🍻 នេះជាមុខម្ហូបអមភេសជ្ជៈ និងម្ហូបញ៉ាំជុំតុដ៏ឈ្ងុយឆ្ងាញ់ (សាច់អាំង ចៀនស្រួយ និងញាំជូរហឹរ) ដែល AI បានរៀបជាឈុត ៤ មុខសម្រាប់អ្នក៖',
-            '🍻 Here are AI-curated savory Beverage Pairing dishes (charcoal-grilled meats, crispy bites, and zesty salads) arranged in sets of 4:',
-            '🍻 以下是 AI 为您精选的佐餐与围桌聚会美食（炭火烧烤、酥脆小食与酸辣凉拌），按每套 4 道菜为您呈现：'
+            'នេះជាមុខម្ហូបអមភេសជ្ជៈ និងម្ហូបញ៉ាំជុំតុដ៏ឈ្ងុយឆ្ងាញ់ (សាច់អាំង ចៀនស្រួយ និងញាំជូរហឹរ) ដែល AI បានរៀបជាឈុត ៤ មុខសម្រាប់អ្នក៖',
+            'Here are AI-curated savory Beverage Pairing dishes (charcoal-grilled meats, crispy bites, and zesty salads) arranged in sets of 4:',
+            '以下是 AI 为您精选的佐餐与围桌聚会美食（炭火烧烤、酥脆小食与酸辣凉拌），按每套 4 道菜为您呈现：'
           )
         : tr(
             language,
-            '🍻 មុខម្ហូបអមភេសជ្ជៈ (ឈុត ៤ មុខ) គឺជាមុខងារពិសេសសម្រាប់សមាជិក VIP។ នេះជាមុខម្ហូបអាំង និងញាំពេញនិយមមួយចំនួនដែលអ្នកអាចមើលជាមុន៖',
-            '🍻 Curated 4-dish Beverage Pairing sets are a VIP feature. Here is a preview of popular grilled and zesty sharing dishes:',
-            '🍻 精选 4 道菜佐餐搭配套餐为 VIP 专属功能。以下为您预览几道人气烧烤与凉拌菜：'
+            'មុខម្ហូបអមភេសជ្ជៈ (ឈុត ៤ មុខ) គឺជាមុខងារពិសេសសម្រាប់សមាជិក VIP។ នេះជាមុខម្ហូបអាំង និងញាំពេញនិយមមួយចំនួនដែលអ្នកអាចមើលជាមុន៖',
+            'Curated 4-dish Beverage Pairing sets are a VIP feature. Here is a preview of popular grilled and zesty sharing dishes:',
+            '精选 4 道菜佐餐搭配套餐为 VIP 专属功能。以下为您预览几道人气烧烤与凉拌菜：'
           ),
       followUpChips: [
         {
           id: 'grill_more',
-          label: tr(language, '🥩 សាច់អាំងពិសេស', '🥩 Grilled Specialties', '🥩 特色烧烤'),
+          label: tr(language, 'សាច់អាំងពិសេស', 'Grilled Specialties', '特色烧烤'),
           query: tr(language, 'ណែនាំម្ហូបសាច់អាំងឆ្ងាញ់ៗ', 'Recommend grilled meat dishes', '推荐美味的烤肉菜品'),
         },
         {
           id: 'seafood_more',
-          label: tr(language, '🦀 គ្រឿងសមុទ្រ', '🦀 Fresh Seafood', '🦀 新鲜海鲜'),
+          label: tr(language, 'គ្រឿងសមុទ្រ', 'Fresh Seafood', '新鲜海鲜'),
           query: tr(language, 'ណែនាំម្ហូបគ្រឿងសមុទ្រឆ្ងាញ់ៗ', 'Recommend fresh seafood dishes', '推荐新鲜海鲜菜品'),
         },
         {
           id: 'find_shop',
-          label: tr(language, '🏪 ហាងលក់ម្ហូបទាំងនេះ', '🏪 Where to Eat This', '🏪 推荐品尝餐厅'),
+          label: tr(language, 'ហាងលក់ម្ហូបទាំងនេះ', 'Where to Eat This', '推荐品尝餐厅'),
           query: tr(language, 'មានហាងណាលក់ម្ហូបនេះឆ្ងាញ់?', 'Which restaurants serve these dishes?', '有哪些餐厅做这道菜好吃？'),
         },
       ],
@@ -732,19 +732,19 @@ export function generateConversationalAiResponse(params: {
       },
       text: tr(
         language,
-        `👩‍🍳 នេះជាគ្រឿងផ្សំ និងរបៀបធ្វើ «${loc.name}» (${loc.cookTime} • សម្រាប់ ${targetFood.servings || '២-៤ នាក់'})៖`,
-        `👩‍🍳 Here are the ingredients and step-by-step recipe for "${loc.name}" (${loc.cookTime}):`,
-        `👩‍🍳 以下是“${loc.name}”的食材配料与烹饪步骤（${loc.cookTime}）：`
+        `នេះជាគ្រឿងផ្សំ និងរបៀបធ្វើ «${loc.name}» (${loc.cookTime} • សម្រាប់ ${targetFood.servings || '២-៤ នាក់'})៖`,
+        `Here are the ingredients and step-by-step recipe for "${loc.name}" (${loc.cookTime}):`,
+        `以下是“${loc.name}”的食材配料与烹饪步骤（${loc.cookTime}）：`
       ),
       followUpChips: [
         {
           id: 'where_to_eat_dish',
-          label: tr(language, '🏪 រកហាងលក់ម្ហូបនេះ', '🏪 Restaurants Serving This', '🏪 哪家餐厅有这道菜'),
+          label: tr(language, 'រកហាងលក់ម្ហូបនេះ', 'Restaurants Serving This', '哪家餐厅有这道菜'),
           query: tr(language, `មានហាងណាលក់ ${targetFood.nameKh}?`, `Which restaurants serve ${targetFood.nameEn}?`, `哪家餐厅有卖${loc.name}？`),
         },
         {
           id: 'similar_dishes',
-          label: tr(language, '🍲 ម្ហូបស្រដៀងគ្នា', '🍲 Similar Dishes', '🍲 类似菜品推荐'),
+          label: tr(language, 'ម្ហូបស្រដៀងគ្នា', 'Similar Dishes', '类似菜品推荐'),
           query: tr(language, `ណែនាំម្ហូបស្រដៀង ${targetFood.nameKh}`, `Recommend dishes similar to ${targetFood.nameEn}`, `推荐与${loc.name}类似的菜品`),
         },
       ],
@@ -792,25 +792,25 @@ export function generateConversationalAiResponse(params: {
       suppressDishCard: provFoods.length === 0,
       text: tr(
         language,
-        `🍽️ ជំនួយការនេះឯកទេសតែលើម្ហូបអាហារប៉ុណ្ណោះ — សូមប្រើផ្ទាំង «ទេសចរណ៍» សម្រាប់កន្លែងដើរលេង។${
+        `ជំនួយការនេះឯកទេសតែលើម្ហូបអាហារប៉ុណ្ណោះ — សូមប្រើផ្ទាំង «ទេសចរណ៍» សម្រាប់កន្លែងដើរលេង។${
           provFoods.length > 0 ? ` ខាងក្រោមជាម្ហូបល្បីៗនៅ${provLabel}៖` : ' ខ្ញុំអាចណែនាំម្ហូបតាមខេត្ត ឬហាងអាហារបាន។'
         }`,
-        `🍽️ This assistant is food-only — please use the Tourism tab for places to visit.${
+        `This assistant is food-only — please use the Tourism tab for places to visit.${
           provFoods.length > 0 ? ` Here are signature dishes from ${provLabel}:` : ' I can recommend regional dishes or restaurants.'
         }`,
-        `🍽️ 本助手只专注于美食——景点请使用“旅游”页面。${
+        `本助手只专注于美食——景点请使用“旅游”页面。${
           provFoods.length > 0 ? `以下是${provLabel}的特色美食：` : '我可以为您推荐各地特色菜或餐厅。'
         }`
       ),
       followUpChips: [
         {
           id: 'prov_food',
-          label: tr(language, '🍲 ម្ហូបល្បីតាមខេត្ត', '🍲 Regional dishes', '🍲 各地特色美食'),
+          label: tr(language, 'ម្ហូបល្បីតាមខេត្ត', 'Regional dishes', '各地特色美食'),
           query: tr(language, 'ម្ហូបឆ្ងាញ់នៅសៀមរាបមានអ្វីខ្លះ?', 'What food should I try in Siem Reap?', '暹粒有什么特色美食？'),
         },
         {
           id: 'prov_shops',
-          label: tr(language, '🏪 ហាងអាហារ', '🏪 Restaurants', '🏪 餐厅推荐'),
+          label: tr(language, 'ហាងអាហារ', 'Restaurants', '餐厅推荐'),
           query: tr(language, 'ណែនាំភោជនីយដ្ឋាននៅភ្នំពេញ', 'Recommend restaurants in Phnom Penh', '推荐金边的餐厅'),
         },
       ],
@@ -870,23 +870,23 @@ export function generateConversationalAiResponse(params: {
       dishes: targetFood ? [targetFood] : undefined,
       text: tr(
         language,
-        `🏪 នេះជាភោជនីយដ្ឋាន និងហាងអាហារល្បីៗ${provLabel}${dishLoc ? ` សម្រាប់ «${dishLoc.name}»` : ''} (ចុចលើហាងដៃគូដើម្បីមើលម៉ឺនុយ ឬបើកទីតាំង Google Maps ផ្ទាល់)៖`,
-        `🏪 Here are recommended restaurants ${provLabel}${dishLoc ? ` for "${dishLoc.name}"` : ''} (tap a partner shop for full details or open unregistered shops in Google Maps):`,
-        `🏪 以下是为您推荐的${provLabel}${dishLoc ? `品尝“${dishLoc.name}”的` : ''}热门餐厅（点击合作餐厅查看详情，或直接打开 Google 地图导航）：`
+        `នេះជាភោជនីយដ្ឋាន និងហាងអាហារល្បីៗ${provLabel}${dishLoc ? ` សម្រាប់ «${dishLoc.name}»` : ''} (ចុចលើហាងដៃគូដើម្បីមើលម៉ឺនុយ ឬបើកទីតាំង Google Maps ផ្ទាល់)៖`,
+        `Here are recommended restaurants ${provLabel}${dishLoc ? ` for "${dishLoc.name}"` : ''} (tap a partner shop for full details or open unregistered shops in Google Maps):`,
+        `以下是为您推荐的${provLabel}${dishLoc ? `品尝“${dishLoc.name}”的` : ''}热门餐厅（点击合作餐厅查看详情，或直接打开 Google 地图导航）：`
       ),
       followUpChips: [
         ...(targetFood
           ? [
               {
                 id: 'recipe_of_last',
-                label: tr(language, `👩‍🍳 របៀបធ្វើ ${dishLoc?.name.slice(0, 14)}`, '👩‍🍳 View Recipe', '👩‍🍳 查看食谱做法'),
+                label: tr(language, `របៀបធ្វើ ${dishLoc?.name.slice(0, 14)}`, 'View Recipe', '查看食谱做法'),
                 query: tr(language, `សុំរបៀបធ្វើ ${targetFood.nameKh}`, `How to cook ${targetFood.nameEn}?`, `${dishLoc?.name}怎么做？`),
               },
             ]
           : []),
         {
           id: 'tourism_nearby',
-          label: tr(language, '🏛️ កន្លែងដើរលេងក្បែរនោះ', '🏛️ Nearby Attractions', '🏛️ 周边旅游景点'),
+          label: tr(language, 'កន្លែងដើរលេងក្បែរនោះ', 'Nearby Attractions', '周边旅游景点'),
           query: tr(language, `កន្លែងដើរលេងនៅ${provKh || 'ភ្នំពេញ'}`, `Tourist attractions in ${detectedProv?.en || 'Phnom Penh'}`, `${detectedProv?.zh || '金边'}有哪些旅游景点？`),
         },
       ],
@@ -920,9 +920,9 @@ export function generateConversationalAiResponse(params: {
       .join(' • ');
     const note = tr(
       language,
-      'ℹ️ ការជ្រើសរើសនេះផ្អែកលើបញ្ជីគ្រឿងផ្សំក្នុងរូបមន្តប៉ុណ្ណោះ (មិនមែនជាដំបូន្មានសុខភាពទេ) ហើយហាងនីមួយៗអាចដាក់ខុសគ្នា។',
-      'ℹ️ This filter only reads each recipe’s ingredient list (it is not health advice) and restaurants may cook differently.',
-      'ℹ️ 此筛选仅依据食谱配料表（并非健康建议），各餐厅做法可能不同。'
+      'ការជ្រើសរើសនេះផ្អែកលើបញ្ជីគ្រឿងផ្សំក្នុងរូបមន្តប៉ុណ្ណោះ (មិនមែនជាដំបូន្មានសុខភាពទេ) ហើយហាងនីមួយៗអាចដាក់ខុសគ្នា។',
+      'This filter only reads each recipe’s ingredient list (it is not health advice) and restaurants may cook differently.',
+      '此筛选仅依据食谱配料表（并非健康建议），各餐厅做法可能不同。'
     );
     const reply: AiAssistantMessage = {
       id: `ai-${Date.now()}`,
@@ -935,12 +935,12 @@ export function generateConversationalAiResponse(params: {
       suppressDishCard: top.length === 0,
       text:
         top.length > 0
-          ? `${tr(language, '✨ មុខម្ហូបដែលត្រូវនឹងលក្ខខណ្ឌ', '✨ Dishes matching your criteria', '✨ 符合您条件的菜品')} (${label}):\n\n${note}`
+          ? `${tr(language, 'មុខម្ហូបដែលត្រូវនឹងលក្ខខណ្ឌ', 'Dishes matching your criteria', '符合您条件的菜品')} (${label}):\n\n${note}`
           : `${tr(
               language,
-              '🔎 ខ្ញុំរកមិនឃើញមុខម្ហូបក្នុងបញ្ជីដែលត្រូវនឹងលក្ខខណ្ឌទាំងអស់នេះទេ',
-              '🔎 I couldn’t find a dish in the verified menu that meets all of these criteria',
-              '🔎 在已核实的菜单中没有找到同时满足这些条件的菜品'
+              'ខ្ញុំរកមិនឃើញមុខម្ហូបក្នុងបញ្ជីដែលត្រូវនឹងលក្ខខណ្ឌទាំងអស់នេះទេ',
+              'I couldn’t find a dish in the verified menu that meets all of these criteria',
+              '在已核实的菜单中没有找到同时满足这些条件的菜品'
             )} (${label}).\n\n${tr(
               language,
               'សូមសាកល្បងបន្ធូរលក្ខខណ្ឌមួយ ឬប្រាប់ខ្ញុំពីប្រភេទម្ហូបដែលអ្នកចង់បាន។',
@@ -950,17 +950,17 @@ export function generateConversationalAiResponse(params: {
       followUpChips: [
         {
           id: 'crit_not_spicy',
-          label: tr(language, '🌿 មិនហឹរ', '🌿 Not spicy', '🌿 不辣'),
+          label: tr(language, 'មិនហឹរ', 'Not spicy', '不辣'),
           query: tr(language, 'សម្លដែលមិនហឹរ', 'Mild soups that are not spicy', '不辣的汤'),
         },
         {
           id: 'crit_light',
-          label: tr(language, '🥗 កាឡូរីទាប', '🥗 Lower calories', '🥗 低热量'),
+          label: tr(language, 'កាឡូរីទាប', 'Lower calories', '低热量'),
           query: tr(language, 'ម្ហូបកាឡូរីទាប', 'Lower calorie dishes', '低热量的菜'),
         },
         {
           id: 'crit_more',
-          label: tr(language, '🔄 ម្ហូបផ្សេងទៀត', '🔄 More dishes', '🔄 换一批'),
+          label: tr(language, 'ម្ហូបផ្សេងទៀត', 'More dishes', '换一批'),
           query: tr(language, 'ម្ហូបផ្សេងទៀត', 'more', '换一批'),
         },
       ],
@@ -1007,9 +1007,9 @@ export function generateConversationalAiResponse(params: {
         .join(language === 'zh' ? '、' : ', ');
       factText = tr(
         language,
-        `📋 «${loc.name}»៖ ${subject.calories ? `កាឡូរីប្រហែល ${subject.calories} kcal ក្នុងមួយចាន (ប៉ាន់ស្មាន)។ ` : ''}គ្រឿងផ្សំសំខាន់ៗ៖ ${ings || 'មិនទាន់មានទិន្នន័យ'}។`,
-        `📋 "${loc.name}": ${subject.calories ? `about ${subject.calories} kcal per serving (approximate). ` : ''}Main ingredients: ${ings || 'not listed'}.`,
-        `📋 “${loc.name}”：${subject.calories ? `每份约 ${subject.calories} 千卡（估算）。` : ''}主要食材：${ings || '暂无数据'}。`
+        `«${loc.name}»៖ ${subject.calories ? `កាឡូរីប្រហែល ${subject.calories} kcal ក្នុងមួយចាន (ប៉ាន់ស្មាន)។ ` : ''}គ្រឿងផ្សំសំខាន់ៗ៖ ${ings || 'មិនទាន់មានទិន្នន័យ'}។`,
+        `"${loc.name}": ${subject.calories ? `about ${subject.calories} kcal per serving (approximate). ` : ''}Main ingredients: ${ings || 'not listed'}.`,
+        `“${loc.name}”：${subject.calories ? `每份约 ${subject.calories} 千卡（估算）。` : ''}主要食材：${ings || '暂无数据'}。`
       );
     }
     const reply: AiAssistantMessage = {
@@ -1022,15 +1022,15 @@ export function generateConversationalAiResponse(params: {
       suppressDishCard: !subject,
       text: `${factText ? `${factText}\n\n` : ''}${tr(
         language,
-        '🤖 សំណួរនេះត្រូវការ AI ឆ្លាតវៃដើម្បីឆ្លើយឱ្យបានលម្អិត និងត្រឹមត្រូវ ប៉ុន្តែឥឡូវនេះ AI មិនទាន់តភ្ជាប់ទេ ដូច្នេះខ្ញុំមិនចង់ទាយចម្លើយឱ្យខុសទេ។ សូមព្យាយាមម្តងទៀតពេល AI តភ្ជាប់ ឬសួរអំពីមុខម្ហូបជាក់លាក់។',
-        '🤖 A detailed, accurate answer to this needs the live AI, which isn’t connected right now - and I would rather not guess. Please try again when the AI is online, or ask about a specific dish.',
-        '🤖 要给出详细且准确的回答需要在线 AI，目前未连接，我不想随意猜测。请在 AI 连接后重试，或询问具体菜品。'
+        'សំណួរនេះត្រូវការ AI ឆ្លាតវៃដើម្បីឆ្លើយឱ្យបានលម្អិត និងត្រឹមត្រូវ ប៉ុន្តែឥឡូវនេះ AI មិនទាន់តភ្ជាប់ទេ ដូច្នេះខ្ញុំមិនចង់ទាយចម្លើយឱ្យខុសទេ។ សូមព្យាយាមម្តងទៀតពេល AI តភ្ជាប់ ឬសួរអំពីមុខម្ហូបជាក់លាក់។',
+        'A detailed, accurate answer to this needs the live AI, which isn’t connected right now - and I would rather not guess. Please try again when the AI is online, or ask about a specific dish.',
+        '要给出详细且准确的回答需要在线 AI，目前未连接，我不想随意猜测。请在 AI 连接后重试，或询问具体菜品。'
       )}`,
       followUpChips: subject
         ? [
             {
               id: 'fact_recipe',
-              label: tr(language, '👩‍🍳 របៀបធ្វើ', '👩‍🍳 Recipe', '👩‍🍳 做法'),
+              label: tr(language, 'របៀបធ្វើ', 'Recipe', '做法'),
               query: tr(language, `សុំរូបមន្ត ${subject.nameKh}`, `Show me the recipe for ${subject.nameEn}`, `请告诉我${getLocalizedFood(subject, language).name}的做法`),
             },
           ]
@@ -1072,7 +1072,7 @@ export function generateConversationalAiResponse(params: {
       timestamp: new Date().toISOString(),
       intent: 'medical_scope_refusal',
       isScopeRefusal: true,
-      text: `${advisor.brain.emoji} ${advisor.brain.headline}\n\n${advisor.brain.explanation}`,
+      text: `${advisor.brain.headline}\n\n${advisor.brain.explanation}`,
       followUpChips: advisor.brain.followUps,
     };
     return { reply, nextMemory: { ...safeMemory, turnSeed: nextSeed } };
@@ -1179,24 +1179,24 @@ export function generateConversationalAiResponse(params: {
       suppressDishCard: true,
       text: tr(
         language,
-        `🔎 ខ្ញុំមិនទាន់ប្រាកដថា «${effectiveQuery}» ជាមុខម្ហូបអ្វីទេ ហើយមិនមានមុខម្ហូបត្រូវគ្នាក្នុងបញ្ជីទេ។ តើអ្នកចង់បានម្ហូបប្រភេទណា (សម្ល ឆា អាំង មី បាយ បង្អែម) ឬមានគ្រឿងផ្សំអ្វី? ប្រាប់ខ្ញុំបន្ថែម ខ្ញុំនឹងជួយរកឱ្យត្រូវ។`,
-        `🔎 I’m not sure what dish “${effectiveQuery}” is, and nothing in the menu matches it. What kind of dish do you want (soup, stir-fry, grill, noodles, rice, dessert) or which main ingredient? Tell me a bit more and I’ll find the right one.`,
-        `🔎 我不确定“${effectiveQuery}”是什么菜，菜单中也没有匹配项。您想吃哪一类（汤、炒菜、烧烤、面、饭、甜品）或主要食材是什么？告诉我更多信息，我来帮您找。`
+        `ខ្ញុំមិនទាន់ប្រាកដថា «${effectiveQuery}» ជាមុខម្ហូបអ្វីទេ ហើយមិនមានមុខម្ហូបត្រូវគ្នាក្នុងបញ្ជីទេ។ តើអ្នកចង់បានម្ហូបប្រភេទណា (សម្ល ឆា អាំង មី បាយ បង្អែម) ឬមានគ្រឿងផ្សំអ្វី? ប្រាប់ខ្ញុំបន្ថែម ខ្ញុំនឹងជួយរកឱ្យត្រូវ។`,
+        `I’m not sure what dish “${effectiveQuery}” is, and nothing in the menu matches it. What kind of dish do you want (soup, stir-fry, grill, noodles, rice, dessert) or which main ingredient? Tell me a bit more and I’ll find the right one.`,
+        `我不确定“${effectiveQuery}”是什么菜，菜单中也没有匹配项。您想吃哪一类（汤、炒菜、烧烤、面、饭、甜品）或主要食材是什么？告诉我更多信息，我来帮您找。`
       ),
       followUpChips: [
         {
           id: 'clar_soup',
-          label: tr(language, '🍲 សម្ល', '🍲 Soups', '🍲 汤类'),
+          label: tr(language, 'សម្ល', 'Soups', '汤类'),
           query: tr(language, 'ណែនាំសម្លឆ្ងាញ់ៗ', 'Recommend tasty soups', '推荐好喝的汤'),
         },
         {
           id: 'clar_grill',
-          label: tr(language, '🍖 សាច់អាំង', '🍖 Grilled', '🍖 烧烤'),
+          label: tr(language, 'សាច់អាំង', 'Grilled', '烧烤'),
           query: tr(language, 'ណែនាំម្ហូបសាច់អាំង', 'Recommend grilled dishes', '推荐烧烤类菜品'),
         },
         {
           id: 'clar_noodle',
-          label: tr(language, '🍜 មី & គុយទាវ', '🍜 Noodles', '🍜 面粉类'),
+          label: tr(language, 'មី & គុយទាវ', 'Noodles', '面粉类'),
           query: tr(language, 'ណែនាំគុយទាវ និងមី', 'Recommend noodle dishes', '推荐面条粉类'),
         },
       ],
@@ -1225,9 +1225,9 @@ export function generateConversationalAiResponse(params: {
       .join(language === 'zh' ? '、' : ', ');
     conversationalText = tr(
       language,
-      `✨ សម្រាប់ «${outOfCatalogDishName}» នេះជារូបមន្តទូទៅ គ្រឿងផ្សំ និងរបៀបធ្វើ (អាចខុសគ្នាតាមតំបន់/ហាង)${relatedNames ? ` រួមជាមួយមុខម្ហូបស្រដៀងគ្នា (${relatedNames})` : ''}៖`,
-      `✨ For "${firstDish.nameEn}", here is a general guide to the ingredients and method (it varies by region and cook)${relatedNames ? `, plus similar dishes (${relatedNames})` : ''}:`,
-      `✨ 关于“${firstDish.nameEn}”，以下是食材与做法的通用参考（各地、各家做法会有差异）${relatedNames ? `，以及类似推荐（${relatedNames}）` : ''}：`
+      `សម្រាប់ «${outOfCatalogDishName}» នេះជារូបមន្តទូទៅ គ្រឿងផ្សំ និងរបៀបធ្វើ (អាចខុសគ្នាតាមតំបន់/ហាង)${relatedNames ? ` រួមជាមួយមុខម្ហូបស្រដៀងគ្នា (${relatedNames})` : ''}៖`,
+      `For "${firstDish.nameEn}", here is a general guide to the ingredients and method (it varies by region and cook)${relatedNames ? `, plus similar dishes (${relatedNames})` : ''}:`,
+      `关于“${firstDish.nameEn}”，以下是食材与做法的通用参考（各地、各家做法会有差异）${relatedNames ? `，以及类似推荐（${relatedNames}）` : ''}：`
     );
   } else if (pinnedCatalogDish && chosenDishes.length > 0) {
     const orderedNames = chosenDishes
@@ -1236,16 +1236,16 @@ export function generateConversationalAiResponse(params: {
       .join(language === 'zh' ? '、' : ', ');
     conversationalText = tr(
       language,
-      `✨ សម្រាប់ «${effectiveQuery}» ខ្ញុំសូមណែនាំ៖ ${orderedNames} (ចុចលើមុខម្ហូបខាងក្រោមដើម្បីមើលគ្រឿងផ្សំ របៀបធ្វើ និងហាងអាហារ)៖`,
-      `✨ For "${effectiveQuery}", here is our top match: ${orderedNames} (tap below for full recipe & restaurants):`,
-      `✨ 关于“${effectiveQuery}”，为您优先推荐：${orderedNames}（点击下方查看完整食材做法与餐厅）：`
+      `សម្រាប់ «${effectiveQuery}» ខ្ញុំសូមណែនាំ៖ ${orderedNames} (ចុចលើមុខម្ហូបខាងក្រោមដើម្បីមើលគ្រឿងផ្សំ របៀបធ្វើ និងហាងអាហារ)៖`,
+      `For "${effectiveQuery}", here is our top match: ${orderedNames} (tap below for full recipe & restaurants):`,
+      `关于“${effectiveQuery}”，为您优先推荐：${orderedNames}（点击下方查看完整食材做法与餐厅）：`
     );
   } else if (isVegQuery) {
     vegetarianNote = tr(
       language,
-      '💡 សម្គាល់ពីម្ហូបបួស៖ មុខម្ហូបបន្លែឆាខ្មែរខាងក្រោមអាចចម្អិនជាម្ហូបបួសសុទ្ធ ១០០% ដោយប្រើទឹកស៊ីអ៊ីវ និងតៅហ៊ូជំនួសទឹកត្រី។',
-      '💡 Vegetarian Note: Traditional Khmer vegetable stir-fries below can be prepared 100% vegetarian using soy sauce and tofu.',
-      '💡 素食贴士：下方的高棉时蔬热炒只需用酱油与豆腐替代鱼露，即可做成 100% 纯素菜肴。'
+      'សម្គាល់ពីម្ហូបបួស៖ មុខម្ហូបបន្លែឆាខ្មែរខាងក្រោមអាចចម្អិនជាម្ហូបបួសសុទ្ធ ១០០% ដោយប្រើទឹកស៊ីអ៊ីវ និងតៅហ៊ូជំនួសទឹកត្រី។',
+      'Vegetarian Note: Traditional Khmer vegetable stir-fries below can be prepared 100% vegetarian using soy sauce and tofu.',
+      '素食贴士：下方的高棉时蔬热炒只需用酱油与豆腐替代鱼露，即可做成 100% 纯素菜肴。'
     );
   } else if (detectedProv && chosenDishes.length > 0) {
     const provLabel = tr(language, detectedProv.kh, detectedProv.en, detectedProv.zh);
@@ -1255,9 +1255,9 @@ export function generateConversationalAiResponse(params: {
       .join(language === 'zh' ? '、' : ', ');
     conversationalText = tr(
       language,
-      `🍲 មុខម្ហូបល្បី និងពេញនិយមនៅ${provLabel} រួមមាន៖ ${dishNames} (ចុចលើមុខម្ហូបខាងក្រោមដើម្បីមើលគ្រឿងផ្សំ និងរបៀបធ្វើ)៖`,
-      `🍲 Signature dishes to try in ${provLabel} include: ${dishNames} (tap any dish below for ingredients and recipe):`,
-      `🍲 ${provLabel}必尝特色美食包括：${dishNames}（点击下方菜品查看食材与做法）：`
+      `មុខម្ហូបល្បី និងពេញនិយមនៅ${provLabel} រួមមាន៖ ${dishNames} (ចុចលើមុខម្ហូបខាងក្រោមដើម្បីមើលគ្រឿងផ្សំ និងរបៀបធ្វើ)៖`,
+      `Signature dishes to try in ${provLabel} include: ${dishNames} (tap any dish below for ingredients and recipe):`,
+      `${provLabel}必尝特色美食包括：${dishNames}（点击下方菜品查看食材与做法）：`
     );
   } else if (advisor.brain) {
     conversationalText = advisor.brain.headline;
@@ -1281,15 +1281,15 @@ export function generateConversationalAiResponse(params: {
     restaurantUnavailableNote = isVegQuery
       ? tr(
           language,
-          '📌 ចុចប៊ូតុងខាងក្រោមដើម្បីស្វែងរក «ហាងម្ហូបបួស» ផ្ទាល់នៅលើ Google Maps៖',
-          '📌 Tap below to find dedicated Vegetarian Restaurants directly on Google Maps:',
-          '📌 点击下方按钮直接在 Google 地图中搜索附近的素食餐厅：'
+          'ចុចប៊ូតុងខាងក្រោមដើម្បីស្វែងរក «ហាងម្ហូបបួស» ផ្ទាល់នៅលើ Google Maps៖',
+          'Tap below to find dedicated Vegetarian Restaurants directly on Google Maps:',
+          '点击下方按钮直接在 Google 地图中搜索附近的素食餐厅：'
         )
       : tr(
           language,
-          `📌 ចុចប៊ូតុងខាងក្រោមដើម្បីស្វែងរកហាងលក់ «${firstLoc?.name || effectiveQuery}» នៅលើ Google Maps៖`,
-          `📌 Tap below to search for restaurants serving "${firstLoc?.name || effectiveQuery}" on Google Maps:`,
-          `📌 点击下方按钮在 Google 地图上搜索供应“${firstLoc?.name || effectiveQuery}”的餐厅：`
+          `ចុចប៊ូតុងខាងក្រោមដើម្បីស្វែងរកហាងលក់ «${firstLoc?.name || effectiveQuery}» នៅលើ Google Maps៖`,
+          `Tap below to search for restaurants serving "${firstLoc?.name || effectiveQuery}" on Google Maps:`,
+          `点击下方按钮在 Google 地图上搜索供应“${firstLoc?.name || effectiveQuery}”的餐厅：`
         );
   }
 
@@ -1298,24 +1298,24 @@ export function generateConversationalAiResponse(params: {
       ? [
           {
             id: 'ask_recipe',
-            label: tr(language, `👩‍🍳 របៀបធ្វើ ${firstLoc.name.slice(0, 12)}`, `👩‍🍳 Recipe: ${firstLoc.name.slice(0, 14)}`, `👩‍🍳 ${firstLoc.name.slice(0, 8)}做法`),
+            label: tr(language, `របៀបធ្វើ ${firstLoc.name.slice(0, 12)}`, `Recipe: ${firstLoc.name.slice(0, 14)}`, `${firstLoc.name.slice(0, 8)}做法`),
             query: tr(language, `សុំគ្រឿងផ្សំ និងរបៀបធ្វើ ${firstDish.nameKh}`, `Show me the recipe and ingredients for ${firstDish.nameEn}`, `请告诉我${firstLoc.name}的食材和做法`),
           },
           {
             id: 'ask_compare',
-            label: tr(language, '⚖️ ប្រៀបធៀបមុខម្ហូបទាំងនេះ', '⚖️ Compare These Dishes', '⚖️ 对比推荐菜品'),
+            label: tr(language, 'ប្រៀបធៀបមុខម្ហូបទាំងនេះ', 'Compare These Dishes', '对比推荐菜品'),
             query: tr(language, `ប្រៀបធៀប ${ effectiveQuery }`, `compare ${effectiveQuery}`, `对比${effectiveQuery}`),
           },
         ]
       : []),
     {
       id: 'ask_more',
-      label: tr(language, '🔄 មុខម្ហូបផ្សេងទៀត', '🔄 More Dishes', '🔄 换一批菜品'),
+      label: tr(language, 'មុខម្ហូបផ្សេងទៀត', 'More Dishes', '换一批菜品'),
       query: tr(language, 'ម្ហូបផ្សេងទៀត', 'more', '换一批'),
     },
     {
       id: 'ask_tourism',
-      label: tr(language, '🏛️ កន្លែងដើរលេងកម្ពុជា', '🏛️ Cambodia Tourism', '🏛️ 柬埔寨景点'),
+      label: tr(language, 'កន្លែងដើរលេងកម្ពុជា', 'Cambodia Tourism', '柬埔寨景点'),
       query: tr(language, 'ណែនាំកន្លែងដើរលេងល្បីៗនៅកម្ពុជា', 'Recommend top tourist places to visit in Cambodia', '推荐柬埔寨必去旅游景点'),
     },
   ];

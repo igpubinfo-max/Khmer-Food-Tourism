@@ -35,99 +35,99 @@ export const QUICK_CRAVING_CHIPS: QuickCravingChip[] = [
     queryKh: 'បាយ',
     queryEn: 'rice',
     queryZh: '米饭',
-    labelKh: '🍚 បាយ',
-    labelEn: '🍚 Rice',
-    labelZh: '🍚 米饭/炒饭',
+    labelKh: 'បាយ',
+    labelEn: 'Rice',
+    labelZh: '米饭/炒饭',
   },
   {
     id: 'noodles',
     queryKh: 'គុយទាវ',
     queryEn: 'noodles',
     queryZh: '粿条面食',
-    labelKh: '🍜 គុយទាវ & មី',
-    labelEn: '🍜 Noodles',
-    labelZh: '🍜 粿条与粉面',
+    labelKh: 'គុយទាវ & មី',
+    labelEn: 'Noodles',
+    labelZh: '粿条与粉面',
   },
   {
     id: 'soup',
     queryKh: 'សម្លក្តៅៗ',
     queryEn: 'warm soup',
     queryZh: '热汤',
-    labelKh: '🍲 សម្លក្តៅៗ',
-    labelEn: '🍲 Warm Soup',
-    labelZh: '🍲 暖心热汤',
+    labelKh: 'សម្លក្តៅៗ',
+    labelEn: 'Warm Soup',
+    labelZh: '暖心热汤',
   },
   {
     id: 'seafood',
     queryKh: 'គ្រឿងសមុទ្រ',
     queryEn: 'seafood',
     queryZh: '海鲜',
-    labelKh: '🦀 គ្រឿងសមុទ្រ',
-    labelEn: '🦀 Seafood',
-    labelZh: '🦀 海鲜河鲜',
+    labelKh: 'គ្រឿងសមុទ្រ',
+    labelEn: 'Seafood',
+    labelZh: '海鲜河鲜',
   },
   {
     id: 'grilled',
     queryKh: 'សាច់អាំង',
     queryEn: 'grilled',
     queryZh: '烧烤',
-    labelKh: '🥩 សាច់អាំង & បំពង',
-    labelEn: '🥩 Grilled & Crispy',
-    labelZh: '🥩 烧烤煎炸',
+    labelKh: 'សាច់អាំង & បំពង',
+    labelEn: 'Grilled & Crispy',
+    labelZh: '烧烤煎炸',
   },
   {
     id: 'spicy',
     queryKh: 'ហឹរ',
     queryEn: 'spicy',
     queryZh: '香辣',
-    labelKh: '🌶️ ហឹរ',
-    labelEn: '🌶️ Spicy',
-    labelZh: '🌶️ 香辣风味',
+    labelKh: 'ហឹរ',
+    labelEn: 'Spicy',
+    labelZh: '香辣风味',
   },
   {
     id: 'spicy_sour',
     queryKh: 'ជូរហឹរ',
     queryEn: 'spicy sour',
     queryZh: '酸辣',
-    labelKh: '🌶️ ជូរហឹរ',
-    labelEn: '🌶️ Spicy & Sour',
-    labelZh: '🌶️ 开胃酸辣',
+    labelKh: 'ជូរហឹរ',
+    labelEn: 'Spicy & Sour',
+    labelZh: '开胃酸辣',
   },
   {
     id: 'streetfood',
     queryKh: 'អាហារសម្រន់',
     queryEn: 'street food',
     queryZh: '街头小吃',
-    labelKh: '🍢 អាហារសម្រន់',
-    labelEn: '🍢 Street Food',
-    labelZh: '🍢 街头小吃',
+    labelKh: 'អាហារសម្រន់',
+    labelEn: 'Street Food',
+    labelZh: '街头小吃',
   },
   {
     id: 'dessert',
     queryKh: 'បង្អែម',
     queryEn: 'dessert',
     queryZh: '甜品',
-    labelKh: '🍨 បង្អែមខ្មែរ',
-    labelEn: '🍨 Sweet Dessert',
-    labelZh: '🍨 传统甜品',
+    labelKh: 'បង្អែមខ្មែរ',
+    labelEn: 'Sweet Dessert',
+    labelZh: '传统甜品',
   },
   {
     id: 'vegetarian',
     queryKh: 'ម្ហូបបួស',
     queryEn: 'vegetarian',
     queryZh: '素食',
-    labelKh: '🥬 ម្ហូបបួស & បន្លែ',
-    labelEn: '🥬 Vegetarian & Veggie',
-    labelZh: '🥬 素食与蔬菜',
+    labelKh: 'ម្ហូបបួស & បន្លែ',
+    labelEn: 'Vegetarian & Veggie',
+    labelZh: '素食与蔬菜',
   },
   {
     id: 'drink_pairing',
     queryKh: 'ម្ហូបអមស្រាបៀរ',
     queryEn: 'beer food',
     queryZh: '下酒菜',
-    labelKh: '🍻 ម្ហូបអមភេសជ្ជៈ 👑',
-    labelEn: '🍻 Drink Pairing 👑',
-    labelZh: '🍻 下酒菜 👑',
+    labelKh: 'ម្ហូបអមភេសជ្ជៈ (VIP)',
+    labelEn: 'Drink Pairing (VIP)',
+    labelZh: '下酒菜 (VIP)',
   },
 ];
 
@@ -702,9 +702,9 @@ function buildAiSummaryText(params: {
     if (isVegetarianQuery(query)) {
       return tr(
         language,
-        `🥬 ការណែនាំម្ហូបបួស និងអាហាររុក្ខជាតិពី AI សម្រាប់ «${query}»៖\nយើងបានជ្រើសរើសមុខម្ហូបបន្លែស្រស់ អាហារសម្រន់ និងបង្អែមខ្មែរគ្មានសាច់ រួមទាំងគ្រឿងផ្សំ របៀបធ្វើ និងរសជាតិលម្អិតខាងក្រោម៖`,
-        `🥬 AI Vegetarian & Plant-Based Culinary Guide for "${query}":\nHere are curated meat-free Cambodian vegetable dishes, traditional plant-based snacks, and desserts with full ingredients, cooking methods, and taste profiles:`,
-        `🥬 AI 为您定制的“${query}”高棉素食与植物性美食指南：\n已为您精选无肉时蔬热炒、传统植物性小吃与高棉甜品，并附上详细食材、烹饪方法与风味解析：`
+        `ការណែនាំម្ហូបបួស និងអាហាររុក្ខជាតិពី AI សម្រាប់ «${query}»៖\nយើងបានជ្រើសរើសមុខម្ហូបបន្លែស្រស់ អាហារសម្រន់ និងបង្អែមខ្មែរគ្មានសាច់ រួមទាំងគ្រឿងផ្សំ របៀបធ្វើ និងរសជាតិលម្អិតខាងក្រោម៖`,
+        `AI Vegetarian & Plant-Based Culinary Guide for "${query}":\nHere are curated meat-free Cambodian vegetable dishes, traditional plant-based snacks, and desserts with full ingredients, cooking methods, and taste profiles:`,
+        `AI 为您定制的“${query}”高棉素食与植物性美食指南：\n已为您精选无肉时蔬热炒、传统植物性小吃与高棉甜品，并附上详细食材、烹饪方法与风味解析：`
       );
     }
     if (totalMatchedCount > 0) {
@@ -714,44 +714,44 @@ function buildAiSummaryText(params: {
         .join(language === 'zh' ? '、' : ', ');
       return tr(
         language,
-        `✨ សម្រាប់ «${query}» ខ្ញុំសូមណែនាំ៖ ${previewNames} (ចុចលើមុខម្ហូបខាងក្រោមដើម្បីមើលគ្រឿងផ្សំ របៀបធ្វើ និងហាងអាហារ)៖`,
-        `✨ Top picks for "${query}": ${previewNames} (tap any dish below for ingredients, recipe steps, and restaurants):`,
-        `✨ 为您推荐“${query}”精选佳肴：${previewNames}（点击下方菜品查看食材、做法与推荐餐厅）：`
+        `សម្រាប់ «${query}» ខ្ញុំសូមណែនាំ៖ ${previewNames} (ចុចលើមុខម្ហូបខាងក្រោមដើម្បីមើលគ្រឿងផ្សំ របៀបធ្វើ និងហាងអាហារ)៖`,
+        `Top picks for "${query}": ${previewNames} (tap any dish below for ingredients, recipe steps, and restaurants):`,
+        `为您推荐“${query}”精选佳肴：${previewNames}（点击下方菜品查看食材、做法与推荐餐厅）：`
       );
     }
     return tr(
       language,
-      `✨ នេះជាមុខម្ហូបខ្មែរពេញនិយមដែលជំនួយការ AI សូមណែនាំសម្រាប់ «${query}»៖`,
-      `✨ Here are popular authentic Cambodian dishes recommended by AI for "${query}":`,
-      `✨ 以下是 AI 为“${query}”推荐的人气正宗高棉美食：`
+      `នេះជាមុខម្ហូបខ្មែរពេញនិយមដែលជំនួយការ AI សូមណែនាំសម្រាប់ «${query}»៖`,
+      `Here are popular authentic Cambodian dishes recommended by AI for "${query}":`,
+      `以下是 AI 为“${query}”推荐的人气正宗高棉美食：`
     );
   }
 
   const goalDescriptions: Record<Exclude<AdvisorGoalId, 'any'>, [string, string, string]> = {
     quick_daily: [
-      '🤖 ណែនាំអាហាររហ័ស ឆ្ងាញ់ និងងាយស្រួលញ៉ាំប្រចាំថ្ងៃ៖',
-      '🤖 Recommended quick & tasty everyday meals:',
-      '🤖 为您推荐快捷美味的日常餐点：',
+      'ណែនាំអាហាររហ័ស ឆ្ងាញ់ និងងាយស្រួលញ៉ាំប្រចាំថ្ងៃ៖',
+      'Recommended quick & tasty everyday meals:',
+      '为您推荐快捷美味的日常餐点：',
     ],
     khmer_comfort: [
-      '🤖 ណែនាំសម្លខ្មែរ អាម៉ុក និងម្ហូបប្រពៃណីពេញនិយម៖',
-      '🤖 Recommended authentic Cambodian comfort dishes:',
-      '🤖 为您推荐正宗高棉家常汤品与传统名菜：',
+      'ណែនាំសម្លខ្មែរ អាម៉ុក និងម្ហូបប្រពៃណីពេញនិយម៖',
+      'Recommended authentic Cambodian comfort dishes:',
+      '为您推荐正宗高棉家常汤品与传统名菜：',
     ],
     vip_light_cal: [
-      '🤖 ណែនាំម្ហូបចំហុយ ស្ងោរ និងសម្លប្រហើររសជាតិដើម៖',
-      '🤖 Recommended steamed, boiled & delicate broth dishes:',
-      '🤖 为您推荐清蒸、水煮与鲜美清汤美食：',
+      'ណែនាំម្ហូបចំហុយ ស្ងោរ និងសម្លប្រហើររសជាតិដើម៖',
+      'Recommended steamed, boiled & delicate broth dishes:',
+      '为您推荐清蒸、水煮与鲜美清汤美食：',
     ],
     vip_high_protein: [
-      '🤖 ណែនាំមុខម្ហូបសាច់អាំង ត្រី និងគ្រឿងសមុទ្រពិសេស៖',
-      '🤖 Recommended grilled meats, fish & seafood specialties:',
-      '🤖 为您推荐炭火烤肉、鲜鱼与海鲜特色菜：',
+      'ណែនាំមុខម្ហូបសាច់អាំង ត្រី និងគ្រឿងសមុទ្រពិសេស៖',
+      'Recommended grilled meats, fish & seafood specialties:',
+      '为您推荐炭火烤肉、鲜鱼与海鲜特色菜：',
     ],
     vip_group_feast: [
-      '🤖 ណែនាំមុខម្ហូបឈុតធំ សម្រាប់ជួបជុំគ្រួសារ និងមិត្តភក្តិ៖',
-      '🤖 Recommended shareable dishes for family & friends:',
-      '🤖 为您推荐适合家庭与朋友聚餐分享的招牌菜：',
+      'ណែនាំមុខម្ហូបឈុតធំ សម្រាប់ជួបជុំគ្រួសារ និងមិត្តភក្តិ៖',
+      'Recommended shareable dishes for family & friends:',
+      '为您推荐适合家庭与朋友聚餐分享的招牌菜：',
     ],
   };
 

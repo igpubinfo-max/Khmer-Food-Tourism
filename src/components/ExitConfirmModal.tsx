@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { LogOut, Check, Sparkles } from 'lucide-react';
+import { LogOut, Check } from 'lucide-react';
 import { tr } from '../utils/i18n';
 
 export const ExitConfirmModal: React.FC = () => {
@@ -41,7 +41,6 @@ export const ExitConfirmModal: React.FC = () => {
             onClick={() => setIsExitModalOpen(false)}
             className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-khmer text-xs font-semibold transition-all active:scale-[0.98] border border-slate-200 dark:border-slate-700 cursor-pointer"
           >
-            <Sparkles className="w-4 h-4 text-[#059669]" />
             <span>{tr(language, 'បន្តប្រើប្រាស់', 'Stay', '继续浏览')}</span>
           </button>
 

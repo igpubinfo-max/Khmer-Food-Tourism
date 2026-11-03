@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   X,
-  Sparkles,
+  Award,
   Shuffle,
   MapPin,
   Star,
@@ -19,13 +19,12 @@ import {
   Navigation,
   Search,
   Send,
-  Bot,
   Compass,
   Store,
   RotateCcw,
   ExternalLink,
   Leaf,
-  Zap,
+  Utensils,
   Soup,
   Salad,
   Camera,
@@ -98,7 +97,7 @@ const MEAL_SLOTS: Array<{ id: MealSlotFilter; kh: string; en: string; zh: string
   { id: 'auto', kh: 'ពេលនេះ', en: 'Right Now', zh: '当前时段', icon: Clock },
   { id: 'breakfast', kh: 'ពេលព្រឹក', en: 'Breakfast', zh: '早餐', icon: Coffee },
   { id: 'lunch', kh: 'ថ្ងៃត្រង់', en: 'Lunch', zh: '午餐', icon: Sun },
-  { id: 'afternoon', kh: 'រសៀល', en: 'Snack', zh: '下午茶', icon: Sparkles },
+  { id: 'afternoon', kh: 'រសៀល', en: 'Snack', zh: '下午茶', icon: Utensils },
   { id: 'dinner', kh: 'ពេលល្ងាច', en: 'Dinner', zh: '晚餐', icon: Moon },
 ];
 
@@ -133,7 +132,7 @@ const HEALTH_OPTIONS: Array<{
     shortKh: 'ធម្មតា',
     shortEn: 'Standard',
     shortZh: '常规',
-    icon: Sparkles,
+    icon: Utensils,
   },
   {
     id: 'light',
@@ -155,7 +154,7 @@ const HEALTH_OPTIONS: Array<{
     shortKh: 'ប្រូតេអ៊ីនខ្ពស់',
     shortEn: 'Protein',
     shortZh: '高蛋白',
-    icon: Zap,
+    icon: Award,
   },
   {
     id: 'steamed_boiled',
@@ -412,7 +411,7 @@ export const WhatToEatModal: React.FC = () => {
         labelKh: 'អាហារសម្រន់ & បង្អែម',
         labelEn: 'Afternoon Treats',
         labelZh: '下午茶与甜点推荐',
-        icon: Sparkles,
+        icon: Utensils,
       };
     } else if (hour >= 17 && hour < 22) {
       return {
@@ -937,7 +936,7 @@ export const WhatToEatModal: React.FC = () => {
     const userMsg: AiAssistantMessage = {
       id: `user-${Date.now()}`,
       role: 'user',
-      text: clean || tr(language, '📷 តើនេះជាម្ហូបអ្វី?', '📷 What dish is this?', '📷 这是什么菜？'),
+      text: clean || tr(language, 'តើនេះជាម្ហូបអ្វី?', 'What dish is this?', '这是什么菜？'),
       timestamp: new Date().toISOString(),
       imagePreviewUrl: image?.previewDataUrl,
     };
@@ -1008,9 +1007,9 @@ export const WhatToEatModal: React.FC = () => {
       const { reply, nextMemory } = runRules();
       const offlineNote = tr(
         language,
-        '⚠️ ចម្លើយនេះមកពីប្រព័ន្ធមូលដ្ឋាន ព្រោះ AI មិនអាចភ្ជាប់បាន។',
-        '⚠️ This answer comes from the built-in engine because the AI could not be reached.',
-        '⚠️ 由于无法连接 AI，此回答来自内置引擎。'
+        'ចម្លើយនេះមកពីប្រព័ន្ធមូលដ្ឋាន ព្រោះ AI មិនអាចភ្ជាប់បាន។',
+        'This answer comes from the built-in engine because the AI could not be reached.',
+        '由于无法连接 AI，此回答来自内置引擎。'
       );
       const withNote: AiAssistantMessage = { ...reply, text: `${reply.text}\n\n${offlineNote}` };
       replacePending(withNote);
@@ -1439,7 +1438,7 @@ export const WhatToEatModal: React.FC = () => {
                   <>
                     <img src={pendingImage.previewDataUrl} alt="" className="w-12 h-12 rounded-lg object-cover border border-amber-300 shrink-0" />
                     <span className="text-[11px] font-bold text-amber-900 dark:text-amber-200 flex-1 min-w-0">
-                      {tr(language, '📷 រូបភាពរួចរាល់ — វាយសំណួរបន្ថែម (ជាជម្រើស) រួចចុច «សួរ AI»', '📷 Photo ready — add a question (optional), then tap “Ask AI”', '📷 照片已就绪 —（可选）补充问题后点击“发送”')}
+                      {tr(language, 'រូបភាពរួចរាល់ — វាយសំណួរបន្ថែម (ជាជម្រើស) រួចចុច «សួរ AI»', 'Photo ready — add a question (optional), then tap “Ask AI”', '照片已就绪 —（可选）补充问题后点击“发送”')}
                     </span>
                     <button type="button" onClick={() => setPendingImage(null)} aria-label="Remove photo" className="p-1 rounded-full text-slate-500 hover:text-rose-600 cursor-pointer shrink-0">
                       <X className="w-4 h-4" />
@@ -1507,7 +1506,7 @@ export const WhatToEatModal: React.FC = () => {
                         >
                           <div className="flex items-center justify-between gap-2 flex-wrap">
                             <span className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300">
-                              🔑 {tr(language, 'បញ្ចូលសោ Gemini API Key ទីនេះ៖', 'Paste Gemini API Key here:', '在此粘贴 Gemini API Key：')}
+                              {tr(language, 'បញ្ចូលសោ Gemini API Key ទីនេះ៖', 'Paste Gemini API Key here:', '在此粘贴 Gemini API Key：')}
                             </span>
                             <a
                               href="https://aistudio.google.com/app/apikey"
@@ -1540,7 +1539,7 @@ export const WhatToEatModal: React.FC = () => {
                                 }}
                                 className="px-2.5 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold text-[11px] transition cursor-pointer"
                               >
-                                📋 Paste
+                                Paste
                               </button>
                               <button
                                 type="button"
@@ -1557,14 +1556,14 @@ export const WhatToEatModal: React.FC = () => {
                                       showToast(
                                         tr(
                                           language,
-                                          `✅ បានរក្សាទុក និងភ្ជាប់ Gemini AI ជោគជ័យ (${res.model})! សូមផ្ញើរូបភាព ឬសំណួរម្តងទៀត។`,
-                                          `✅ Saved & connected to Gemini AI (${res.model})! Please resend your photo or question.`,
-                                          `✅ 已保存并成功连接 Gemini AI (${res.model})！请重新发送图片或问题。`
+                                          `បានរក្សាទុក និងភ្ជាប់ Gemini AI ជោគជ័យ (${res.model})! សូមផ្ញើរូបភាព ឬសំណួរម្តងទៀត។`,
+                                          `Saved & connected to Gemini AI (${res.model})! Please resend your photo or question.`,
+                                          `已保存并成功连接 Gemini AI (${res.model})！请重新发送图片或问题。`
                                         ),
                                         'success'
                                       );
                                     } else {
-                                      showToast(`❌ Gemini Key Error: ${res.message}`, 'error');
+                                      showToast(`Gemini Key Error: ${res.message}`, 'error');
                                     }
                                   } finally {
                                     setIsTestingInlineKey(false);
@@ -1574,7 +1573,7 @@ export const WhatToEatModal: React.FC = () => {
                               >
                                 {isTestingInlineKey
                                   ? tr(language, 'កំពុងតេស្ត...', 'Testing...', '测试中...')
-                                  : tr(language, '✅ រក្សាទុក & តេស្ត', '✅ Save & Test', '✅ 保存并测试')}
+                                  : tr(language, 'រក្សាទុក & តេស្ត', 'Save & Test', '保存并测试')}
                               </button>
                             </div>
                           </div>
@@ -1583,7 +1582,7 @@ export const WhatToEatModal: React.FC = () => {
 
                       {msg.imageAnalysis && !msg.imageAnalysis.containsFood && (
                         <div data-testid="ai-image-no-food" className="mt-2.5 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-[11px] font-bold text-amber-900 dark:text-amber-200">
-                          {tr(language, '📷 ខ្ញុំមិនឃើញម្ហូបអាហារនៅក្នុងរូបភាពនេះទេ។ សូមថតរូបម្ហូបឱ្យច្បាស់ជាងនេះ។', '📷 I can’t see any food in this photo. Please send a clearer picture of the dish.', '📷 这张照片里我没有看到食物，请拍一张更清晰的菜品照片。')}
+                          {tr(language, 'ខ្ញុំមិនឃើញម្ហូបអាហារនៅក្នុងរូបភាពនេះទេ។ សូមថតរូបម្ហូបឱ្យច្បាស់ជាងនេះ។', 'I can’t see any food in this photo. Please send a clearer picture of the dish.', '这张照片里我没有看到食物，请拍一张更清晰的菜品照片。')}
                         </div>
                       )}
 
@@ -1591,7 +1590,7 @@ export const WhatToEatModal: React.FC = () => {
                         <div data-testid="ai-image-analysis" className="mt-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-1.5">
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300">
-                              📷 {tr(language, 'ម្ហូបក្នុងរូបភាព', 'Dish in photo', '照片中的菜品')}
+                              {tr(language, 'ម្ហូបក្នុងរូបភាព', 'Dish in photo', '照片中的菜品')}
                             </span>
                             <span
                               className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
@@ -1607,13 +1606,12 @@ export const WhatToEatModal: React.FC = () => {
                           </div>
                           {msg.imageAnalysis.dishName && (
                             <div className="text-xs font-extrabold text-slate-900 dark:text-white">
-                              {msg.imageAnalysis.identified ? '🍽️ ' : '🤔 '}
                               {msg.imageAnalysis.dishName}
                               {msg.imageAnalysis.dishNameEn ? ` (${msg.imageAnalysis.dishNameEn})` : ''}
                             </div>
                           )}
                           {msg.imageAnalysis.evidence && (
-                            <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">👁️ {msg.imageAnalysis.evidence}</p>
+                            <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">{msg.imageAnalysis.evidence}</p>
                           )}
                           {msg.imageAnalysis.visibleIngredients.length > 0 && (
                             <div className="flex flex-wrap gap-1">
@@ -1625,7 +1623,7 @@ export const WhatToEatModal: React.FC = () => {
                             </div>
                           )}
                           {msg.imageAnalysis.cookingMethod && (
-                            <div className="text-[11px] text-slate-600 dark:text-slate-300">👩‍🍳 {msg.imageAnalysis.cookingMethod}</div>
+                            <div className="text-[11px] text-slate-600 dark:text-slate-300">{msg.imageAnalysis.cookingMethod}</div>
                           )}
                         </div>
                       )}
@@ -1640,7 +1638,7 @@ export const WhatToEatModal: React.FC = () => {
                         <div className="mt-2.5 pt-2.5 border-t border-slate-200 dark:border-slate-700 space-y-2">
                           <div className="flex items-center justify-between gap-2">
                             <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
-                              <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                              <Utensils className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                               <span>
                                 {tr(
                                   language,
@@ -1656,7 +1654,7 @@ export const WhatToEatModal: React.FC = () => {
                                 onClick={() => handleCycleCompareDishes(activeDishList.length >= 3 ? activeDishList : msg.dishes)}
                                 className="px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-[10px] font-extrabold text-amber-900 dark:text-amber-200 hover:bg-amber-200 transition cursor-pointer"
                               >
-                                ⚖️ {tr(language, 'ប្រៀបធៀបទាំងអស់', 'Compare All', '一键对比')}
+                                {tr(language, 'ប្រៀបធៀបទាំងអស់', 'Compare All', '一键对比')}
                               </button>
                             )}
                           </div>
@@ -1707,16 +1705,16 @@ export const WhatToEatModal: React.FC = () => {
                                         </span>
                                         {!isGeneratedDishId(dish.id) && (
                                         <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 shrink-0">
-                                          ⭐ {dish.rating}
+                                          {dish.rating}
                                         </span>
                                         )}
                                       </div>
                                       <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
-                                        {isGeneratedDishId(dish.id) ? dLoc.category : `${dLoc.category} • ⏱️ ${dLoc.cookTime} • ${dish.calories || 280} kcal`}
+                                        {isGeneratedDishId(dish.id) ? dLoc.category : `${dLoc.category} • ${dLoc.cookTime} • ${dish.calories || 280} kcal`}
                                       </div>
                                       {!isGeneratedDishId(dish.id) && (
                                       <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100/80 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 text-[10px] font-bold">
-                                        <span>✨ {tr(language, 'រសជាតិ៖', 'Taste:', '风味：')} {tasteProfile}</span>
+                                        <span>{tr(language, 'រសជាតិ៖', 'Taste:', '风味：')} {tasteProfile}</span>
                                       </div>
                                       )}
                                     </div>
@@ -1729,7 +1727,7 @@ export const WhatToEatModal: React.FC = () => {
                                   {topIngs.length > 0 && (
                                     <div className="text-[10px] text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/90 px-2 py-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/70">
                                       <span className="font-extrabold text-[#064E3B] dark:text-emerald-300">
-                                        🥗 {tr(language, 'គ្រឿងផ្សំ៖ ', 'Ingredients: ', '主要食材：')}
+                                        {tr(language, 'គ្រឿងផ្សំ៖ ', 'Ingredients: ', '主要食材：')}
                                       </span>
                                       <span>{topIngs.join(' • ')}</span>
                                     </div>
@@ -1738,7 +1736,7 @@ export const WhatToEatModal: React.FC = () => {
                                   {methodSummary && (
                                     <div className="text-[10px] text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/90 px-2 py-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/70 line-clamp-2">
                                       <span className="font-extrabold text-[#064E3B] dark:text-emerald-300">
-                                        👩‍🍳 {tr(language, 'របៀបចម្អិន៖ ', 'Cooking Method: ', '烹饪方法：')}
+                                        {tr(language, 'របៀបចម្អិន៖ ', 'Cooking Method: ', '烹饪方法：')}
                                       </span>
                                       <span>{methodSummary}</span>
                                     </div>
@@ -1768,7 +1766,7 @@ export const WhatToEatModal: React.FC = () => {
                                       <span>
                                         {isCompared
                                           ? `✓ ${tr(language, 'កំពុងប្រៀបធៀប', 'Comparing', '已加入对比')}`
-                                          : `⚖️ ${tr(language, 'ប្រៀបធៀប', 'Compare', '加入对比')}`}
+                                          : tr(language, 'ប្រៀបធៀប', 'Compare', '加入对比')}
                                       </span>
                                     </button>
                                   </div>
@@ -1822,7 +1820,7 @@ export const WhatToEatModal: React.FC = () => {
                                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
                                   <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
                                     <span className="px-2 py-0.5 rounded-full bg-amber-400 text-stone-900 text-[10px] font-black shadow-2xs flex items-center gap-1">
-                                      <Sparkles className="w-3 h-3 fill-current text-amber-900" />
+                                      <Award className="w-3 h-3 text-amber-900" />
                                       {tr(language, 'មុខម្ហូបទី ១', 'Top Dish', '首选菜品')}
                                     </span>
                                     <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold">
@@ -1831,7 +1829,7 @@ export const WhatToEatModal: React.FC = () => {
                                   </div>
                                   <span className="absolute bottom-2 right-2.5 z-10 bg-black/55 backdrop-blur-xs text-white/85 text-[8px] px-1.5 py-0.5 rounded border border-white/15 font-khmer select-none pointer-events-none">
                                     {isGeneratedDishId(rpFood.id) && /^data:/i.test(rpFood.photoUrl || '')
-                                      ? tr(language, '📷 រូបភាពរបស់អ្នក', '📷 Your photo', '📷 您的照片')
+                                      ? tr(language, 'រូបភាពរបស់អ្នក', 'Your photo', '您的照片')
                                       : isGeneratedDishId(rpFood.id) && /^https?:\/\//i.test(rpFood.photoUrl || '')
                                         ? tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')
                                         : isGeneratedDishId(rpFood.id)
@@ -1845,14 +1843,14 @@ export const WhatToEatModal: React.FC = () => {
                                     <div className="text-[10px] font-bold text-emerald-200 flex items-center gap-1.5 flex-wrap">
                                       {!isGeneratedDishId(rpFood.id) ? (
                                         <>
-                                          <span>⭐ {rpFood.rating || 4.8}</span>
+                                          <span>{rpFood.rating || 4.8}</span>
                                           <span>•</span>
-                                          <span>⏱️ {rpLoc.cookTime}</span>
+                                          <span>{rpLoc.cookTime}</span>
                                           <span>•</span>
                                           <span>{rpFood.calories || 280} kcal</span>
                                         </>
                                       ) : rpFood.cookTime ? (
-                                        <span>⏱️ {rpLoc.cookTime}</span>
+                                        <span>{rpLoc.cookTime}</span>
                                       ) : null}
                                     </div>
                                   </div>
@@ -1860,7 +1858,7 @@ export const WhatToEatModal: React.FC = () => {
                                 <div className="p-2.5 space-y-1.5">
                                   {rpTaste && !isGeneratedDishId(rpFood.id) && (
                                     <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100/85 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 text-[10px] font-bold">
-                                      <span>✨ {tr(language, 'រសជាតិ៖', 'Taste:', '风味：')} {rpTaste}</span>
+                                      <span>{tr(language, 'រសជាតិ៖', 'Taste:', '风味：')} {rpTaste}</span>
                                     </div>
                                   )}
                                   <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
@@ -1968,7 +1966,7 @@ export const WhatToEatModal: React.FC = () => {
                                         {sLoc.name}
                                       </div>
                                       <div className="text-[9px] text-emerald-700 dark:text-emerald-400 font-semibold truncate">
-                                        ⭐ {sim.rating} • {sLoc.category}
+                                        {sim.rating} • {sLoc.category}
                                       </div>
                                     </div>
                                   </button>
@@ -2011,7 +2009,7 @@ export const WhatToEatModal: React.FC = () => {
                                   <div className="min-w-0 flex-1">
                                     <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">{dLoc.name}</div>
                                     <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold truncate">
-                                      📍 {dLoc.province} • ⭐ {dest.rating}
+                                      {dLoc.province} • {dest.rating}
                                     </div>
                                   </div>
                                 </button>
@@ -2051,7 +2049,7 @@ export const WhatToEatModal: React.FC = () => {
                                     <div className="min-w-0 flex-1">
                                       <div className="text-xs font-bold text-slate-900 dark:text-white truncate">{rLoc.name}</div>
                                       <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                                        📍 {rLoc.address || rLoc.province}
+                                        {rLoc.address || rLoc.province}
                                       </div>
                                     </div>
                                   </button>
@@ -2154,7 +2152,7 @@ export const WhatToEatModal: React.FC = () => {
                 >
                   <div className="flex items-center justify-between gap-2 pb-1 border-b border-slate-200/70 dark:border-slate-700">
                     <div className="flex items-center gap-1.5 text-xs font-extrabold text-[#064E3B] dark:text-emerald-300">
-                      <Bot className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.75} />
                       <span>
                         {tr(
                           language,
@@ -2543,7 +2541,6 @@ export const WhatToEatModal: React.FC = () => {
                 <div className="flex items-start justify-between gap-2">
                   <div className="space-y-0.5 min-w-0">
                     <div className="text-xs font-extrabold text-amber-950 dark:text-amber-300 flex items-center gap-1.5">
-                      <span>⚖️</span>
                       <span>
                         {tr(
                           language,
@@ -2553,7 +2550,7 @@ export const WhatToEatModal: React.FC = () => {
                         )}
                       </span>
                     </div>
-                    <p className="text-[11px] font-semibold text-amber-800/95 dark:text-amber-200/90 pl-5 leading-snug">
+                    <p className="text-[11px] font-semibold text-amber-800/95 dark:text-amber-200/90 leading-snug">
                       {tr(
                         language,
                         'បីរសជាតិ បីជម្រើស តើមួយណាជាចំណង់ថ្ងៃនេះ?',
@@ -2612,14 +2609,14 @@ export const WhatToEatModal: React.FC = () => {
                           </div>
                           <div className="font-extrabold text-slate-900 dark:text-white line-clamp-1">{cLoc.name}</div>
                           <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
-                            ⭐ {cDish.rating} • {cLoc.cookTime} • {cDish.calories || 280} kcal
+                            {cDish.rating} • {cLoc.cookTime} • {cDish.calories || 280} kcal
                           </div>
                           <div className="text-[10px] text-amber-800 dark:text-amber-300 font-semibold line-clamp-2 leading-snug break-words">
-                            ✨ {cTaste}
+                            {cTaste}
                           </div>
                           {cIngs && (
                             <div className="text-[10px] text-slate-600 dark:text-slate-400 line-clamp-2">
-                              🥗 {cIngs}
+                              {cIngs}
                             </div>
                           )}
                         </div>
@@ -2695,7 +2692,7 @@ export const WhatToEatModal: React.FC = () => {
                     {/* Badge */}
                     <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
                       <span className="px-2.5 py-1 rounded-full bg-amber-400 text-stone-900 text-xs font-black shadow-xs flex items-center gap-1 font-khmer">
-                        <Sparkles className="w-3.5 h-3.5 fill-current text-amber-900" />
+                        <Award className="w-3.5 h-3.5 text-amber-900" />
                         {tr(language, 'ម្ហូបណែនាំសម្រាប់អ្នក', 'Recommended Dish', '为您推荐')}
                       </span>
                       <span className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-xs text-white text-[11px] font-bold">
@@ -2706,7 +2703,7 @@ export const WhatToEatModal: React.FC = () => {
                     {/* Reference label */}
                     <span className="absolute bottom-2 right-2.5 z-10 bg-black/55 backdrop-blur-xs text-white/85 text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded border border-white/15 font-khmer select-none pointer-events-none">
                       {isGeneratedDishId(currentDish.id) && /^data:/i.test(currentDish.photoUrl || '')
-                        ? tr(language, '📷 រូបភាពរបស់អ្នក', '📷 Your photo', '📷 您的照片')
+                        ? tr(language, 'រូបភាពរបស់អ្នក', 'Your photo', '您的照片')
                         : isGeneratedDishId(currentDish.id) && /^https?:\/\//i.test(currentDish.photoUrl || '')
                           ? tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')
                           : isGeneratedDishId(currentDish.id)
@@ -2859,7 +2856,7 @@ export const WhatToEatModal: React.FC = () => {
             {!showSets && !isMedicalRefusalActive && alternativeDishes.length > 0 && (
               <div className="space-y-2 font-khmer">
                 <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <Utensils className="w-3.5 h-3.5 text-emerald-600" />
                   <span>
                     {tr(language, 'មុខម្ហូបគួរសាកល្បងផ្សេងទៀត៖', 'More dishes you might enjoy:', '其他推荐菜品：')}
                   </span>
@@ -2891,7 +2888,7 @@ export const WhatToEatModal: React.FC = () => {
                             {dLoc.name}
                           </div>
                           <div className="text-[11px] text-emerald-600 font-bold truncate">
-                            ⭐ {d.rating} • {dLoc.category}
+                            {d.rating} • {dLoc.category}
                           </div>
                         </div>
                       </div>

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { TouristDestination } from '../types';
 import { 
   X, Upload, Image as ImageIcon, Check, RefreshCw, 
-  MapPin, Smartphone, Sparkles, CheckCircle2, AlertCircle
+  MapPin, Smartphone, CheckCircle2, AlertCircle
 } from 'lucide-react';
 import {
   pickImageUsingNativeAndroidGallery,
@@ -381,7 +381,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
         <div className="px-5 py-4 border-b border-[#047857] flex items-center justify-between bg-[#064E3B] text-white">
           <div className="flex items-center gap-2.5">
             <div className="p-2 bg-white/10 text-emerald-300 rounded-xl border border-white/20">
-              <Sparkles className="w-4 h-4" />
+              <ImageIcon className="w-4 h-4" />
             </div>
             <div>
               <h3 className="font-moul text-sm text-white">

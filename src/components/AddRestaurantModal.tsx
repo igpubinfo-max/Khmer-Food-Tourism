@@ -11,7 +11,7 @@ import {
   ArrowLeft,
   ShieldCheck,
   CheckCircle2,
-  Sparkles,
+  Award,
   CreditCard,
   Camera,
   Upload,
@@ -953,7 +953,7 @@ export const AddRestaurantModal: React.FC = () => {
                   disabled={isSubmitting}
                   className="w-full py-3.5 rounded-2xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-md shadow-emerald-950/20 transition active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  <Sparkles className="w-4 h-4 text-emerald-300" />
+                  <Award className="w-4 h-4 text-emerald-300" />
                   <span>
                     {isKm
                       ? `បន្តទៅបង់ប្រាក់សមាជិកភាព VIP ($${activePlan.priceUsd.toFixed(2)} សម្រាប់ ${activePlan.durationDays} ថ្ងៃ)`
@@ -970,11 +970,11 @@ export const AddRestaurantModal: React.FC = () => {
         {!existingOwnedRestaurant && step === 2 && (
           <form onSubmit={handleFinalSubmit} className="p-5 space-y-4 overflow-y-auto no-scrollbar flex-1 text-xs font-khmer">
             {/* Plan Price Header Box */}
-            <div className="bg-gradient-to-br from-emerald-50 via-white to-emerald-50 dark:from-slate-800 dark:to-emerald-950/40 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-800 text-center relative overflow-hidden">
+            <div className="bg-emerald-50/70 dark:bg-slate-800 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-800 text-center relative overflow-hidden">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#064E3B] text-white text-[10px] font-bold rounded-full mb-2 shadow-xs">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
+                <Award className="w-3.5 h-3.5 text-emerald-300" />
                 <span>
-                  ⭐ {isKm ? `សមាជិកភាព ${activePlan.nameKh}` : `${activePlan.nameEn} Membership`}
+                  {isKm ? `សមាជិកភាព ${activePlan.nameKh}` : `${activePlan.nameEn} Membership`}
                 </span>
               </div>
               <div className="flex items-center justify-center gap-3">

@@ -463,7 +463,8 @@ export async function pushCloudDocument(key: string, payload: any, timeoutMs = 1
     key !== 'kft_cloud_media_overrides_v1' &&
     key !== 'kft_cloud_users_v2' &&
     key !== 'kft_cloud_transactions_v1' &&
-    key !== 'kft_cloud_vip_backup_v1'
+    key !== 'kft_cloud_vip_backup_v1' &&
+    key !== 'kft_cloud_food_checkin_reward_claims_v1'
   ) {
     return false;
   }

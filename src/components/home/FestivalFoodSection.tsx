@@ -84,7 +84,7 @@ const FestivalFoodSectionInner: React.FC<{ onOpenFood: (food: FoodItem) => void 
   return (
     <section className="space-y-3" data-testid="festival-food-section">
       <SectionHeader
-        title={`${festival.emoji} ${title}`}
+        title={title}
         subtitle={`${pickTri(festival.countdownBadge, language)} • ${tr(
           language,
           'ម្ហូបប្រពៃណីសម្រាប់គ្រួសារ',

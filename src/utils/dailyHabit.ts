@@ -166,14 +166,14 @@ export function buildPassportShareText(
   opts: { count: number; total: number; levelTitle: string; streak: number }
 ): string {
   const { count, total, levelTitle, streak } = opts;
-  const streakKm = streak > 1 ? ` • 🔥 ${streak} ថ្ងៃជាប់ៗគ្នា` : '';
-  const streakEn = streak > 1 ? ` • 🔥 ${streak}-day streak` : '';
-  const streakZh = streak > 1 ? ` • 🔥 连续 ${streak} 天` : '';
+  const streakKm = streak > 1 ? ` • ${streak} ថ្ងៃជាប់ៗគ្នា` : '';
+  const streakEn = streak > 1 ? ` • ${streak}-day streak` : '';
+  const streakZh = streak > 1 ? ` • 连续 ${streak} 天` : '';
   if (lang === 'km') {
-    return `🧭 ខ្ញុំបានភ្លក់ម្ហូបខ្មែរ ${count}/${total} មុខ ហើយ! កម្រិត៖ ${levelTitle}${streakKm}\nមកសាកល្បងជាមួយខ្ញុំក្នុង «រសជាតិ និងទេសចរណ៍កម្ពុជា»។`;
+    return `ខ្ញុំបានភ្លក់ម្ហូបខ្មែរ ${count}/${total} មុខ ហើយ! កម្រិត៖ ${levelTitle}${streakKm}\nមកសាកល្បងជាមួយខ្ញុំក្នុង «រសជាតិ និងទេសចរណ៍កម្ពុជា»។`;
   }
   if (lang === 'zh') {
-    return `🧭 我已品尝 ${count}/${total} 道高棉美食！等级：${levelTitle}${streakZh}\n来「柬埔寨风味与旅游」和我一起探索吧。`;
+    return `我已品尝 ${count}/${total} 道高棉美食！等级：${levelTitle}${streakZh}\n来「柬埔寨风味与旅游」和我一起探索吧。`;
   }
-  return `🧭 I've tasted ${count}/${total} Khmer dishes! Level: ${levelTitle}${streakEn}\nJoin me on "Cambodia Flavors & Tourism".`;
+  return `I've tasted ${count}/${total} Khmer dishes! Level: ${levelTitle}${streakEn}\nJoin me on "Cambodia Flavors & Tourism".`;
 }

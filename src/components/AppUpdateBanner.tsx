@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
-import { Download, RefreshCw, Sparkles, X } from 'lucide-react';
+import { Download, RefreshCw, ShieldCheck, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { tr } from '../utils/i18n';
 import {
@@ -188,7 +188,7 @@ export const AppUpdateBanner: React.FC = () => {
       >
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-300/50 flex items-center justify-center shrink-0 mt-0.5">
-            <Sparkles className="w-5 h-5 text-amber-300" />
+            <ShieldCheck className="w-5 h-5 text-amber-300" />
           </div>
 
           <div className="min-w-0 flex-1">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, ShieldAlert, Lock, User as UserIcon, Eye, EyeOff, 
-  KeyRound, CheckCircle2, ShieldCheck, AlertCircle, Clock, Fingerprint, Sparkles, Delete, Key
+  KeyRound, CheckCircle2, ShieldCheck, AlertCircle, Clock, Fingerprint, Delete, Key
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { checkAdminLoginAllowed } from '../utils/security';

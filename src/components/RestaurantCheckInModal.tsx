@@ -4,7 +4,7 @@ import { NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI } from '../types';
 import { recordMeaningfulAction } from '../utils/engagement';
 import { 
   X, Camera, Image as ImageIcon, MapPin, CheckCircle2, 
-  AlertCircle, Star, Sparkles, Navigation, Send, Store, ShieldCheck, PlusCircle, Search
+  AlertCircle, Star, Navigation, Send, Store, ShieldCheck, PlusCircle, Search
 } from 'lucide-react';
 import { 
   getCurrentDeviceLocation, 

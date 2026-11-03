@@ -1,5 +1,5 @@
 import React from 'react';
-import { BadgeCheck } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import type { Language } from '../types';
 import { tr } from '../utils/i18n';
 import { togglePassportStamp, useFoodPassport, getPassportLevel, levelTitle } from '../utils/foodPassport';
@@ -43,21 +43,21 @@ export const PassportStampButton: React.FC<Props> = ({ foodId, language, showToa
       after.min !== before.min
         ? tr(
             language,
-            `🎉 ឡើងកម្រិតថ្មី៖ ${after.emoji} ${levelTitle(after, language)}!`,
-            `🎉 New level unlocked: ${after.emoji} ${levelTitle(after, language)}!`,
-            `🎉 升级啦：${after.emoji} ${levelTitle(after, language)}！`
+            `ឡើងកម្រិតថ្មី៖ ${levelTitle(after, language)}`,
+            `New level unlocked: ${levelTitle(after, language)}`,
+            `已升级：${levelTitle(after, language)}`
           )
-        : tr(language, '🧭 បានបន្ថែមទៅ រសជាតិ និងទេសចរណ៍កម្ពុជា!', '🧭 Added to Cambodia Flavors & Tourism!', '🧭 已加入柬埔寨风味与旅游！');
+        : tr(language, 'បានបន្ថែមទៅ រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Added to Cambodia Flavors & Tourism', '已加入柬埔寨风味与旅游');
 
     let suffix = '';
     if (outcome.kind === 'counted') {
-      suffix = ` • 🎁 ${outcome.progress}/${FOOD_CHECKIN_REWARD_TARGET}`;
+      suffix = ` • VIP ${outcome.progress}/${FOOD_CHECKIN_REWARD_TARGET}`;
     } else if (outcome.kind === 'daily_cap') {
       suffix = ` • ${tr(
         language,
-        `ថ្ងៃនេះរាប់គ្រប់ ${FOOD_CHECKIN_DAILY_CAP} មុខហើយ — ត្រឡប់មកថ្ងៃស្អែក`,
-        `today's ${FOOD_CHECKIN_DAILY_CAP} check-ins are done — come back tomorrow`,
-        `今天已计满 ${FOOD_CHECKIN_DAILY_CAP} 道，明天再来`
+        `ពិន្ទុរង្វាន់ថ្ងៃនេះគ្រប់ ${FOOD_CHECKIN_DAILY_CAP} ដងហើយ — សូមបន្តនៅថ្ងៃស្អែក`,
+        `Today's ${FOOD_CHECKIN_DAILY_CAP} reward check-in is complete — continue tomorrow`,
+        `今日 ${FOOD_CHECKIN_DAILY_CAP} 次奖励打卡已完成 — 请明天继续`
       )}`;
     }
     showToast?.(base + suffix, 'success');
@@ -74,13 +74,13 @@ export const PassportStampButton: React.FC<Props> = ({ foodId, language, showToa
         type="button"
         onClick={onClick}
         aria-pressed={stamped}
-        className={`min-h-[36px] px-2.5 rounded-xl text-xs font-bold flex items-center gap-1 shrink-0 transition active:scale-95 cursor-pointer border-2 ${
+        className={`min-h-[36px] px-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 transition active:scale-95 cursor-pointer border ${
           stamped
             ? 'bg-emerald-600 text-white border-emerald-600'
             : 'bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 border-emerald-500'
         }`}
       >
-        <BadgeCheck className="w-3.5 h-3.5" />
+        <CheckCircle2 className="w-4 h-4 shrink-0" strokeWidth={1.75} />
         <span className="whitespace-nowrap">{label}</span>
       </button>
     );
@@ -92,13 +92,13 @@ export const PassportStampButton: React.FC<Props> = ({ foodId, language, showToa
         type="button"
         onClick={onClick}
         aria-pressed={stamped}
-        className={`min-h-[44px] px-4 rounded-xl text-sm font-bold flex items-center gap-1.5 transition active:scale-95 cursor-pointer border-2 ${
+        className={`min-h-[44px] px-4 rounded-xl text-sm font-bold flex items-center gap-1.5 transition active:scale-95 cursor-pointer border ${
           stamped
             ? 'bg-emerald-600 text-white border-emerald-600'
             : 'bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 border-emerald-500'
         }`}
       >
-        <BadgeCheck className="w-4 h-4" />
+        <CheckCircle2 className="w-4 h-4 shrink-0" strokeWidth={1.75} />
         <span>{label}</span>
       </button>
     );
@@ -117,7 +117,7 @@ export const PassportStampButton: React.FC<Props> = ({ foodId, language, showToa
           : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300'
       }`}
     >
-      <BadgeCheck className="w-4 h-4" />
+      <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} />
     </button>
   );
 };

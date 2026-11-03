@@ -6,9 +6,9 @@ import { TouristCard } from './TouristCard';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 import { 
   User as UserIcon, Heart, Shield, Store, 
-  Globe, LogOut, RefreshCw, Sparkles, ShieldCheck, CheckCircle2,
-  Bot, Bell, Compass, Bookmark, Plus, Trash2, ChevronRight,
-  Edit2, Check, X as CloseIcon, Crown, Zap, Award, Copy, Clock, MessageSquare, Mail, Settings, Camera
+  Globe, LogOut, RefreshCw, ShieldCheck, CheckCircle2,
+  Bell, Compass, Bookmark, Plus, Trash2, ChevronRight,
+  Edit2, Check, X as CloseIcon, Crown, Award, Copy, Clock, MessageSquare, Mail, Settings, Camera
 } from 'lucide-react';
 import {
   isRestaurantPremiumActive, isUserVipActive, getVipAccountState, getVipRemainingDays,
@@ -167,7 +167,7 @@ export const ProfileView: React.FC = () => {
               onClick={() => openUpgradeVipModal(true)}
               className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition shrink-0 active:scale-95 cursor-pointer"
             >
-              {isKm ? '🔄 បន្ត VIP' : 'Renew VIP'}
+              {isKm ? 'បន្ត VIP' : 'Renew VIP'}
             </button>
           </div>
 
@@ -175,7 +175,7 @@ export const ProfileView: React.FC = () => {
           <div className="p-3 bg-white/80 dark:bg-slate-800/80 rounded-2xl border border-amber-400/40 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-black text-amber-800 dark:text-amber-300 flex items-center gap-1">
-                <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                <Award className="w-3.5 h-3.5 text-amber-500" />
                 <span>{tr(language, 'អត្ថប្រយោជន៍គណនី VIP', 'VIP Member Benefits', 'VIP 会员专属权益')}</span>
               </span>
               <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">
@@ -390,7 +390,6 @@ export const ProfileView: React.FC = () => {
                       >
                         <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
                         <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក' : '+ Register Your VIP Restaurant'}</span>
-                        <Sparkles className="w-3.5 h-3.5 text-amber-900 shrink-0" />
                       </button>
                     </div>
                   )}
@@ -488,7 +487,6 @@ export const ProfileView: React.FC = () => {
                     >
                       <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
                       <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
-                      <Sparkles className="w-3.5 h-3.5 text-amber-900 shrink-0" />
                     </button>
                   </div>
                 )}
@@ -1527,9 +1525,9 @@ export const ProfileView: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         {isPremium ? (
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-[#064E3B] to-[#059669] text-white flex items-center gap-1 font-khmer shadow-xs">
-                            <Sparkles className="w-3 h-3 text-emerald-200" />
-                            <span>⭐ {isKm ? 'សមាជិកភាព VIP Premium (សកម្ម)' : 'Premium VIP Active'}</span>
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#064E3B] text-white flex items-center gap-1 font-khmer shadow-xs">
+                            <ShieldCheck className="w-3 h-3 text-emerald-200" />
+                            <span>{isKm ? 'សមាជិកភាព VIP Premium (សកម្ម)' : 'Premium VIP Active'}</span>
                           </span>
                         ) : isExpired ? (
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700">
@@ -1742,7 +1740,7 @@ export const ProfileView: React.FC = () => {
           {/* Dynamic Benefits Check-list */}
           <div className="space-y-2">
             <h5 className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-amber-500" />
+              <Award className="w-4 h-4 text-amber-500" />
               <span>
                 {tr(
                   language,
@@ -1843,14 +1841,14 @@ export const ProfileView: React.FC = () => {
               onClick={() => setIsAiTripPlannerModalOpen(true)}
               className="flex items-center gap-1 px-3 py-1.5 bg-[#064E3B] text-white rounded-xl text-xs font-bold shadow-xs hover:bg-[#047857] transition"
             >
-              <Bot className="w-3.5 h-3.5" />
+              <Compass className="w-3.5 h-3.5" />
               <span>{isKm ? '+ បង្កើតថ្មី' : '+ New Plan'}</span>
             </button>
           </div>
 
           {tripPlans.length === 0 ? (
             <div className="text-center py-8 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 p-6 space-y-3 shadow-xs">
-              <Bot className="w-10 h-10 mx-auto text-[#059669]" />
+              <Compass className="w-10 h-10 mx-auto text-[#059669]" />
               <div>
                 <h4 className="font-bold text-xs text-[#0F172A] dark:text-white">
                   {isKm ? 'មិនទាន់មានផែនការដើរលេងនៅឡើយទេ' : 'No saved trip plans yet'}
@@ -1863,7 +1861,7 @@ export const ProfileView: React.FC = () => {
                 onClick={() => setIsAiTripPlannerModalOpen(true)}
                 className="px-4 py-2 rounded-xl bg-[#064E3B] text-white font-bold text-xs shadow-xs hover:bg-[#047857] transition"
               >
-                {isKm ? '🤖 បង្កើតផែនការដើរលេងឥឡូវនេះ' : 'Generate AI Plan'}
+                {isKm ? 'បង្កើតផែនការដើរលេងឥឡូវនេះ' : 'Generate AI Plan'}
               </button>
             </div>
           ) : (
@@ -2097,7 +2095,7 @@ export const ProfileView: React.FC = () => {
           <div className="flex items-center justify-between gap-3 py-2 border-b border-slate-100 dark:border-slate-700">
             <div className="min-w-0 flex-1">
               <span className="font-medium text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#059669] shrink-0" />
+                <RefreshCw className="w-4 h-4 text-[#059669] shrink-0" />
                 {tr(language, 'ពិនិត្យកំណែអាប់ដេតកម្មវិធី', 'Check for App Updates', '检查应用更新')}
               </span>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 pl-6 mt-0.5 leading-relaxed">

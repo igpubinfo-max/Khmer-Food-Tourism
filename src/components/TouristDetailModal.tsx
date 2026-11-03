@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Heart, MapPin, Calendar, ExternalLink, 
-  Send, Share2, Sparkles, Compass, Camera, Bookmark, Edit2, Save
+  Send, Share2, Compass, Camera, Bookmark, Edit2, Save
 } from 'lucide-react';
 import { TouristImageModal } from './TouristImageModal';
 import {
@@ -625,7 +625,6 @@ export const TouristDetailModal: React.FC = () => {
             {/* Description */}
             <div>
               <h3 className="font-bold text-[#0F172A] dark:text-white text-base mb-1.5 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-[#059669]" />
                 {tr(language, 'អំពីកន្លែងនេះ', 'About this Place', '景点简介')}
               </h3>
               <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-700">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  X, Crown, Sparkles, AlertCircle, RefreshCw, 
+  X, Crown, AlertCircle, RefreshCw, 
   ShieldCheck, Star, Clock,
   QrCode, ExternalLink, CheckCircle2,
   Download, Copy, Check, ArrowRight, ShieldAlert, BadgeCheck, Share2,

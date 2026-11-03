@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  X, Camera, Image as ImageIcon, MapPin, Sparkles, CheckCircle2, 
+  X, Camera, Image as ImageIcon, MapPin, ShieldCheck, CheckCircle2, 
   AlertCircle, RefreshCw, Send, Store, Utensils, Phone, Info 
 } from 'lucide-react';
 import { 
@@ -251,7 +251,7 @@ export const AiCheckInModal: React.FC = () => {
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-slate-700 dark:text-emerald-200 space-y-2">
                 <h4 className="font-bold text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-emerald-500" />
+                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
                   <span>{isKm ? 'ដំណើរការឆែកអ៊ីន ៣ ជំហានងាយៗ' : '3 Simple Check-in Steps'}</span>
                 </h4>
                 <p className="text-[11px] leading-relaxed">
@@ -328,7 +328,7 @@ export const AiCheckInModal: React.FC = () => {
               <div className="relative">
                 <div className="w-20 h-20 rounded-full border-4 border-emerald-500/30 border-t-emerald-500 animate-spin" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Sparkles className="w-8 h-8 text-emerald-500 animate-pulse" />
+                  <ShieldCheck className="w-8 h-8 text-emerald-500 animate-pulse" />
                 </div>
               </div>
               <div className="space-y-1">

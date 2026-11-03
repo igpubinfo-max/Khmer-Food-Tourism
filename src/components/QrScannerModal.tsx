@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Camera, Image, QrCode, CheckCircle2, AlertTriangle, 
-  ExternalLink, Copy, RefreshCw, Zap, ShieldCheck, HelpCircle
+  ExternalLink, Copy, RefreshCw, Award, ShieldCheck, HelpCircle
 } from 'lucide-react';
 import jsQR from 'jsqr';
 import { Capacitor } from '@capacitor/core';
@@ -468,7 +468,7 @@ export const QrScannerModal: React.FC = () => {
                         }}
                         className="w-full py-2 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition"
                       >
-                        <Zap className="w-4 h-4 fill-current" />
+                        <Award className="w-4 h-4" />
                         <span>{isKm ? 'ដំឡើងគណនី Premium VIP' : 'Upgrade to Premium VIP'}</span>
                       </button>
                     )}

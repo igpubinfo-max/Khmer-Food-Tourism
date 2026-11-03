@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FoodItem, resolveFoodPhotoUrl } from '../types';
 import { 
   X, Upload, Image as ImageIcon, Check, RefreshCw, 
-  AlertTriangle, CheckCircle2, Eye, Sliders, Smartphone, Sparkles, Search, Globe 
+  AlertTriangle, CheckCircle2, Eye, Sliders, Smartphone, Search, Globe 
 } from 'lucide-react';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 import { normalizeAndValidateImage } from './TouristImageModal';
@@ -427,13 +427,13 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
               type="button"
               disabled={isSearchingOnline}
               onClick={handleSearchOnlineImages}
-              className="w-full py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold flex items-center justify-center gap-2 shadow-sm transition active:scale-98 disabled:opacity-60 cursor-pointer"
+              className="w-full py-2.5 px-3.5 rounded-xl bg-[#064E3B] hover:bg-emerald-800 text-white font-bold flex items-center justify-center gap-2 shadow-xs transition active:scale-98 disabled:opacity-60 cursor-pointer"
             >
-              <Sparkles className={`w-4 h-4 text-amber-300 ${isSearchingOnline ? 'animate-spin' : ''}`} />
+              <Search className={`w-4 h-4 text-emerald-200 ${isSearchingOnline ? 'animate-spin' : ''}`} />
               <span>
                 {isSearchingOnline
                   ? (isKm ? 'កំពុងស្វែងរករូបភាពម្ហូបពី Online...' : 'Searching online food photos...')
-                  : (isKm ? '🤖 ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ' : '🤖 Auto-Search Matching Food Photos Online')}
+                  : (isKm ? 'ស្វែងរករូបភាពម្ហូបពី Online ដោយស្វ័យប្រវត្តិ' : 'Auto-Search Matching Food Photos Online')}
               </span>
             </button>
 
@@ -441,8 +441,8 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
               <div className="space-y-1.5 pt-1">
                 <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 block">
                   {isKm
-                    ? `✨ រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${onlineCandidates.length} សន្លឹក (ចុចជ្រើសរើស)៖`
-                    : `✨ Found ${onlineCandidates.length} matching online photos (tap to select):`}
+                    ? `រកឃើញរូបភាពម្ហូបពី Online ចំនួន ${onlineCandidates.length} សន្លឹក (ចុចជ្រើសរើស)៖`
+                    : `Found ${onlineCandidates.length} matching online photos (tap to select):`}
                 </span>
                 <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1">
                   {onlineCandidates.map((cand, idx) => {

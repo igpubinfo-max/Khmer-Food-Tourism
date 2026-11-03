@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, MapPin, Phone, Star, Clock, ExternalLink, 
-  Send, Share2, Sparkles, CheckCircle2, AlertCircle, Copy, Camera, Bookmark,
+  Send, Share2, CheckCircle2, AlertCircle, Copy, Camera, Bookmark,
   BarChart3, Video, Crown, Edit2, MessageSquare, Trash2
 } from 'lucide-react';
 import {
@@ -670,7 +670,6 @@ export const RestaurantDetailModal: React.FC = () => {
             {/* Description */}
             <div className="font-khmer">
               <h3 className="font-bold text-[#0F172A] dark:text-white text-base mb-1.5 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-[#059669]" />
                 <span>{tr(language, 'អំពីភោជនីយដ្ឋាន', 'About the Restaurant', '关于本店')}</span>
               </h3>
               <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-700">

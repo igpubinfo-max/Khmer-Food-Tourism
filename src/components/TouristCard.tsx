@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { TouristDestination } from '../types';
 import { useApp } from '../context/AppContext';
-import { MapPin, Star, Heart, Edit2, Flame } from 'lucide-react';
+import { MapPin, Star, Heart, Edit2, Compass } from 'lucide-react';
 import { tr } from '../utils/i18n';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 
@@ -64,8 +64,8 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(({
             {loc.province}
           </span>
           {destination.isTrendingSocial && (
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-indigo-600 text-white border border-white/30 shadow-xs flex items-center gap-1 font-khmer">
-              <Flame className="w-3 h-3 shrink-0" />
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-900/90 text-white border border-white/25 shadow-xs flex items-center gap-1 font-khmer">
+              <Compass className="w-3 h-3 shrink-0 text-amber-400" />
               <span>
                 {destination.socialViews
                   ? language === 'km'

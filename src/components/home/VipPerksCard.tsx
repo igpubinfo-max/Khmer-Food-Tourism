@@ -1,5 +1,5 @@
 import React from 'react';
-import { Crown, Store, Wand2, BarChart3, ChevronRight } from 'lucide-react';
+import { Award, Store, SlidersHorizontal, BarChart3, ChevronRight } from 'lucide-react';
 import type { Language } from '../../types';
 import { tr } from '../../utils/i18n';
 import { headingFont } from './homeUtils';
@@ -12,7 +12,7 @@ interface Props {
 const VipPerksCardInner: React.FC<Props> = ({ language, onLearnMore }) => {
   const perks = [
     {
-      Icon: Wand2,
+      Icon: SlidersHorizontal,
       title: tr(language, 'ជំនួយការឆ្លាតវៃ AI & ម៉ឺនុយសុខភាព', 'Advanced AI Assistant & Healthy Menu', '高级 AI 助手与健康营养菜单'),
       desc: tr(
         language,
@@ -34,10 +34,10 @@ const VipPerksCardInner: React.FC<Props> = ({ language, onLearnMore }) => {
   ];
 
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#022c22] via-[#064E3B] to-[#0b1f1a] border border-amber-300/25 p-5 text-white shadow-lg">
+    <section className="relative overflow-hidden rounded-3xl bg-[#064E3B] border border-emerald-700/60 p-5 text-white shadow-sm">
       <div className="relative flex items-center gap-2.5">
-        <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-200 to-amber-500 text-slate-950 flex items-center justify-center shadow">
-          <Crown className="w-5 h-5" />
+        <span className="w-9 h-9 rounded-xl bg-emerald-900/90 border border-amber-300/35 text-amber-300 flex items-center justify-center shrink-0">
+          <Award className="w-5 h-5" strokeWidth={1.75} />
         </span>
         <div className="min-w-0">
           <h3 className={`${headingFont(language)} text-[15px] leading-snug text-amber-100`}>
@@ -58,7 +58,7 @@ const VipPerksCardInner: React.FC<Props> = ({ language, onLearnMore }) => {
         {perks.map(({ Icon, title, desc }) => (
           <li key={title} className="flex items-start gap-3">
             <span className="w-9 h-9 rounded-xl bg-white/10 border border-white/10 text-amber-300 flex items-center justify-center shrink-0">
-              <Icon className="w-4 h-4" />
+              <Icon className="w-4 h-4" strokeWidth={1.75} />
             </span>
             <span className="min-w-0">
               <span className="block text-[13px] font-bold text-white leading-snug">{title}</span>
@@ -74,7 +74,7 @@ const VipPerksCardInner: React.FC<Props> = ({ language, onLearnMore }) => {
         className="relative mt-5 w-full min-h-[46px] rounded-2xl bg-white/10 hover:bg-white/15 border border-amber-300/50 text-amber-100 text-sm font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition cursor-pointer"
       >
         <span>{tr(language, 'មើលព័ត៌មានលម្អិត VIP', 'Explore VIP membership', '了解 VIP 会员详情')}</span>
-        <ChevronRight className="w-4 h-4" />
+        <ChevronRight className="w-4 h-4" strokeWidth={1.75} />
       </button>
     </section>
   );

@@ -83,10 +83,10 @@ const pad2 = (n: number) => String(n).padStart(2, '0');
 const dayKeyOf = (d: Date) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 
 const TITLES: Record<ReminderSlot, [string, string, string]> = {
-  breakfast: ['🍜 អាហារពេលព្រឹកនេះ ញ៉ាំអ្វីល្អ?', '🍜 Breakfast idea for today', '🍜 今天的早餐推荐'],
-  lunch: ['🍛 ម៉ោងបាយថ្ងៃត្រង់ហើយ!', "🍛 It's lunchtime!", '🍛 午餐时间到了！'],
-  snack: ['🍮 ម៉ោងញ៉ាំស្រាលៗពេលរសៀល', '🍮 Afternoon snack time', '🍮 下午茶时间'],
-  dinner: ['🍲 អាហារពេលល្ងាចនេះ ញ៉ាំអ្វីល្អ?', '🍲 Dinner idea for tonight', '🍲 今晚的晚餐推荐'],
+  breakfast: ['អាហារពេលព្រឹកនេះ ញ៉ាំអ្វីល្អ?', 'Breakfast idea for today', '今天的早餐推荐'],
+  lunch: ['ម៉ោងបាយថ្ងៃត្រង់ហើយ!', "It's lunchtime!", '午餐时间到了！'],
+  snack: ['ម៉ោងញ៉ាំស្រាលៗពេលរសៀល', 'Afternoon snack time', '下午茶时间'],
+  dinner: ['អាហារពេលល្ងាចនេះ ញ៉ាំអ្វីល្អ?', 'Dinner idea for tonight', '今晚的晚餐推荐'],
 };
 
 export function reminderTitle(slot: ReminderSlot, lang: Language): string {

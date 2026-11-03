@@ -124,11 +124,11 @@ export interface PassportLevel {
 }
 
 export const PASSPORT_LEVELS: PassportLevel[] = [
-  { min: 0, emoji: '🍽️', titleKh: 'អ្នកចាប់ផ្តើមភ្លក់ម្ហូប', titleEn: 'Flavor Starter', titleZh: '风味初学者' },
-  { min: 5, emoji: '🥢', titleKh: 'អ្នកភ្លក់ម្ហូប', titleEn: 'Curious Taster', titleZh: '好奇尝鲜者' },
-  { min: 15, emoji: '🍜', titleKh: 'អ្នកស្វែងរកម្ហូប', titleEn: 'Flavor Explorer', titleZh: '风味探索家' },
-  { min: 30, emoji: '🔥', titleKh: 'អ្នកជំនាញម្ហូបខ្មែរ', titleEn: 'Khmer Food Pro', titleZh: '高棉美食达人' },
-  { min: 60, emoji: '👑', titleKh: 'ម្ចាស់ម្ហូបខ្មែរ', titleEn: 'Khmer Food Master', titleZh: '高棉美食大师' },
+  { min: 0, emoji: '', titleKh: 'អ្នកចាប់ផ្តើមភ្លក់ម្ហូប', titleEn: 'Flavor Starter', titleZh: '风味初学者' },
+  { min: 5, emoji: '', titleKh: 'អ្នកភ្លក់ម្ហូប', titleEn: 'Curious Taster', titleZh: '好奇尝鲜者' },
+  { min: 15, emoji: '', titleKh: 'អ្នកស្វែងរកម្ហូប', titleEn: 'Flavor Explorer', titleZh: '风味探索家' },
+  { min: 30, emoji: '', titleKh: 'អ្នកជំនាញម្ហូបខ្មែរ', titleEn: 'Khmer Food Pro', titleZh: '高棉美食达人' },
+  { min: 60, emoji: '', titleKh: 'ម្ចាស់ម្ហូបខ្មែរ', titleEn: 'Khmer Food Master', titleZh: '高棉美食大师' },
 ];
 
 export function getPassportLevel(count: number): { level: PassportLevel; next: PassportLevel | null } {
@@ -150,10 +150,10 @@ export interface PassportBadge {
 }
 
 const CATEGORY_BADGES: Array<{ slug: string; emoji: string; titleKh: string; titleEn: string; titleZh: string }> = [
-  { slug: 'soup', emoji: '🍲', titleKh: 'អ្នកស្វែងរកសម្ល', titleEn: 'Soup Explorer', titleZh: '汤品探索者' },
-  { slug: 'noodles', emoji: '🍜', titleKh: 'អ្នកប្រមាញ់មី/គុយទាវ', titleEn: 'Noodle Hunter', titleZh: '面条猎人' },
-  { slug: 'grilled', emoji: '🔥', titleKh: 'អ្នកស្រលាញ់ម្ហូបអាំង', titleEn: 'Grill Master', titleZh: '烧烤达人' },
-  { slug: 'dessert', emoji: '🍮', titleKh: 'អ្នកស្រលាញ់បង្អែម', titleEn: 'Sweet Tooth', titleZh: '甜品爱好者' },
+  { slug: 'soup', emoji: '', titleKh: 'អ្នកស្វែងរកសម្ល', titleEn: 'Soup Explorer', titleZh: '汤品探索者' },
+  { slug: 'noodles', emoji: '', titleKh: 'អ្នកប្រមាញ់មី/គុយទាវ', titleEn: 'Noodle Hunter', titleZh: '面条猎人' },
+  { slug: 'grilled', emoji: '', titleKh: 'អ្នកស្រលាញ់ម្ហូបអាំង', titleEn: 'Grill Master', titleZh: '烧烤达人' },
+  { slug: 'dessert', emoji: '', titleKh: 'អ្នកស្រលាញ់បង្អែម', titleEn: 'Sweet Tooth', titleZh: '甜品爱好者' },
 ];
 
 /** A badge unlocks after tasting 3 dishes of a category (or all of it if it has fewer than 3). */
@@ -185,7 +185,7 @@ export function getPassportBadges(foods: FoodItem[], stamps: PassportStamp[]): P
     const need = Math.min(2, cur.total);
     badges.push({
       id: `prov-${p.id}`,
-      emoji: '📍',
+      emoji: '',
       titleKh: `${p.kh} អ្នកស្វែងរក`,
       titleEn: `${p.en} Explorer`,
       titleZh: `${p.zh}美食探索者`,

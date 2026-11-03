@@ -4,8 +4,7 @@ import { SmartHubHealthySection } from './SmartHubHealthySection';
 import { useApp } from '../context/AppContext';
 import {
   X,
-  Sparkles,
-  Bot,
+  Award,
   Calendar,
   DollarSign,
   Users,
@@ -493,7 +492,7 @@ export const AiTripPlannerModal: React.FC = () => {
               <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-white to-amber-50 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800 border border-emerald-200/80 dark:border-slate-700 flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <div className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <Award className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                     <span>
                       {tr(
                         language,
@@ -577,7 +576,7 @@ export const AiTripPlannerModal: React.FC = () => {
                     type="submit"
                     className="px-3.5 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-extrabold inline-flex items-center gap-1.5 shrink-0 shadow-xs active:scale-95 transition cursor-pointer"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                    <Search className="w-3.5 h-3.5 text-amber-300" />
                     <span>{tr(language, 'ស្វែងរក', 'Ask AI', 'AI 推荐')}</span>
                   </button>
                 </form>
@@ -624,7 +623,7 @@ export const AiTripPlannerModal: React.FC = () => {
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <h4 className="text-xs font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
-                      <Bot className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                       <span>
                         {tr(
                           language,
@@ -999,7 +998,7 @@ export const AiTripPlannerModal: React.FC = () => {
               {isGenerating ? (
                 <div className="py-16 text-center space-y-4">
                   <div className="w-16 h-16 rounded-3xl bg-emerald-100 dark:bg-emerald-950/60 text-[#064E3B] dark:text-emerald-400 flex items-center justify-center mx-auto border border-emerald-200 dark:border-emerald-800 shadow-sm animate-bounce">
-                    <Bot className="w-8 h-8" />
+                    <Compass className="w-8 h-8" />
                   </div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-sm text-[#0F172A] dark:text-white animate-pulse">
@@ -1199,9 +1198,9 @@ export const AiTripPlannerModal: React.FC = () => {
                   {/* Submit Generate Button */}
                   <button
                     onClick={handleGenerate}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-500 text-stone-900 font-black text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer"
+                    className="w-full py-3.5 px-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-stone-900 font-black text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer"
                   >
-                    <Sparkles className="w-5 h-5 fill-current" />
+                    <Compass className="w-5 h-5" />
                     <span>{tr(language, 'បង្កើតផែនការដើរលេង AI', 'Generate AI Route Plan', '生成 AI 行程方案')}</span>
                   </button>
                 </div>

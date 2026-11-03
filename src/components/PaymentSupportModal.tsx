@@ -12,7 +12,7 @@ import {
   User as UserIcon,
   ShieldCheck,
   FileText,
-  Sparkles,
+  Award,
   AlertTriangle,
   XCircle,
   Loader2,
@@ -540,7 +540,7 @@ export const PaymentSupportModal: React.FC = () => {
                       <span className="text-xs font-extrabold text-gray-900">
                         {tr(language, dynamicPlans.annual.nameKh, dynamicPlans.annual.nameEn, `${dynamicPlans.annual.durationDays}天 VIP 套餐`)}
                       </span>
-                      <Sparkles className="w-4 h-4 text-orange-500" />
+                      <Award className="w-4 h-4 text-orange-500" />
                     </div>
                     <div className="text-lg font-black text-orange-600 mt-1">
                       ${dynamicPlans.annual.priceUsd.toFixed(2)}{' '}

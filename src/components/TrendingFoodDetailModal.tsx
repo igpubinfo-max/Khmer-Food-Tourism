@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, MapPin, Phone, ExternalLink,
-  Calendar, Sparkles, Navigation, Bookmark, MessageSquareQuote, Play, Utensils, ChefHat
+  Calendar, Navigation, Bookmark, MessageSquareQuote, Play, Utensils, ChefHat
 } from 'lucide-react';
 import { tr, translateProvince } from '../utils/i18n';
 import { openTrendingFoodGoogleExternal, resolveFoodPhotoUrl } from '../types';
@@ -301,7 +301,6 @@ export const TrendingFoodDetailModal: React.FC = () => {
           {/* Description */}
           <div className="space-y-1">
             <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 text-sm">
-              <Sparkles className="w-4 h-4 text-emerald-500" />
               <span>{tr(language, 'អំពីមុខម្ហូបនេះ', 'About This Dish', '菜品介绍')}</span>
             </h4>
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs sm:text-sm">

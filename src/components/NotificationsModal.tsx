@@ -5,7 +5,6 @@ import {
   Bell,
   BellOff,
   Tag,
-  Sparkles,
   CheckCheck,
   Trash2,
   ArrowRight,
@@ -195,7 +194,7 @@ export const NotificationsModal: React.FC = () => {
       };
     }
     return {
-      icon: <Sparkles className="w-3.5 h-3.5" />,
+      icon: <Bell className="w-3.5 h-3.5" />,
       bgClass:
         'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border border-slate-300/70 dark:border-slate-700',
       label: tr(language, 'ប្រព័ន្ធ', 'System', '系统通知'),
