@@ -230,6 +230,12 @@ export const AdminDashboard: React.FC = () => {
       isSupportFormDirtyRef.current = false;
       setVipSaveFeedback(null);
       hydrateVipFormFromSettings(appSettings);
+      const latestLocalCfg = getCloudApiConfig();
+      if (latestLocalCfg.geminiApiKey && latestLocalCfg.geminiApiKey.trim().length > 10) {
+        testGeminiApiConnection(latestLocalCfg.geminiApiKey).then((res) => {
+          setGeminiTestOk(res.ok);
+        });
+      }
       if (refreshAppSettingsFromServer) {
         refreshAppSettingsFromServer(false).then(latest => {
           if (latest && !isVipFormDirtyRef.current) {
@@ -5713,17 +5719,24 @@ export const AdminDashboard: React.FC = () => {
                       className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
                     />
                   </div>
-                  <div id="admin-google-maps-key-box" className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border-2 border-emerald-500/60">
-                    <label className="block font-bold mb-1 text-[#064E3B] dark:text-emerald-300">
-                      3. Google Maps Places API Key ($200/ខែ Free Credit) ⭐
-                    </label>
-                    <div className="flex gap-1.5">
+                  <div id="admin-google-maps-key-box" className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border-2 border-emerald-500/60 overflow-hidden">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <label className="block font-bold text-[#064E3B] dark:text-emerald-300">
+                        3. Google Maps Places API Key ($200/ខែ Free Credit) ⭐
+                      </label>
+                      {cloudCfg.googleMapsApiKey && cloudCfg.googleMapsApiKey.trim().length > 15 && (
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold shrink-0">
+                          ✅ Connected
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5">
                       <input
                         type="text"
                         value={cloudCfg.googleMapsApiKey}
                         onChange={(e) => setCloudCfg({ ...cloudCfg, googleMapsApiKey: e.target.value })}
                         placeholder="AIzaSy..."
-                        className="flex-1 px-3 py-2 rounded-xl border border-emerald-400 bg-white dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
+                        className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-emerald-400 bg-white dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
                       />
                       <button
                         type="button"
@@ -5743,7 +5756,7 @@ export const AdminDashboard: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  <div id="admin-gemini-ai-key-box" className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border-2 border-emerald-500/60">
+                  <div id="admin-gemini-ai-key-box" className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border-2 border-emerald-500/60 overflow-hidden">
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <label className="block font-bold text-[#064E3B] dark:text-emerald-300">
                         4. Google Gemini AI API Key (សម្រាប់មុខងារ «សួរ AI» & ស្កេនម្ហូប) ⭐
@@ -5763,8 +5776,8 @@ export const AdminDashboard: React.FC = () => {
                         type="text"
                         value={cloudCfg.geminiApiKey}
                         onChange={(e) => setCloudCfg({ ...cloudCfg, geminiApiKey: e.target.value })}
-                        placeholder="AIzaSy... (ពី Google AI Studio - aistudio.google.com)"
-                        className="flex-1 px-3 py-2 rounded-xl border border-emerald-400 bg-white dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
+                        placeholder="AIzaSy... ឬ AQ.Ab8RN6... (Google AI Studio / Vertex AI)"
+                        className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-emerald-400 bg-white dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono text-[11px]"
                       />
                       <button
                         type="button"

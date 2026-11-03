@@ -331,12 +331,14 @@ async function extractReceiptViaGeminiVision(
     let textOut = '';
     for (const modelName of candidateModels) {
       try {
+        const cleanKey = encodeURIComponent(apiKey.trim());
+        const endpointUrl = apiKey.trim().startsWith('AQ.')
+          ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${modelName}:generateContent?key=${cleanKey}`
+          : `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${cleanKey}`;
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 8000);
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(
-            apiKey
-          )}`,
+          endpointUrl,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

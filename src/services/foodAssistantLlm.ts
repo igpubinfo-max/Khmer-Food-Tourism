@@ -22,7 +22,9 @@ import { getMatchingRestaurantsForDish } from '../utils/foodFilters';
 import { detectReplyLanguage, type ReplyLanguage } from '../utils/foodQueryClassifier';
 import { buildMedicalScopeNotice, isMedicalOrHealthQuery, type BrainChip } from './aiFoodBrain';
 import {
+  buildGeminiGenerateContentUrls,
   getGeminiCandidateModels,
+  isVertexExpressApiKey,
   resolveGeminiApiKey,
   type AiAssistantMessage,
   type AiConversationMemory,
@@ -814,14 +816,26 @@ async function callGeminiRaw(call: RawCall): Promise<CallOutcome> {
   }
 }
 
-/** Direct call with a key that lives on the device (fallback only). */
-function callGeminiOnce(key: string, model: string, body: unknown, timeoutMs: number): Promise<CallOutcome> {
-  return callGeminiRaw({
-    url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
+/** Direct call with a key that lives on the device (supports both AI Studio AIzaSy... and Vertex Express AQ... keys). */
+async function callGeminiOnce(key: string, model: string, body: unknown, timeoutMs: number): Promise<CallOutcome> {
+  const urls = buildGeminiGenerateContentUrls(key, model);
+  const primary = await callGeminiRaw({
+    url: urls[0],
     headers: { 'Content-Type': 'application/json' },
     payload: body,
     timeoutMs,
   });
+  if (primary.ok) return primary;
+  if (isVertexExpressApiKey(key) && urls[1] && (primary.kind === 'auth' || primary.kind === 'not_found')) {
+    const secondary = await callGeminiRaw({
+      url: urls[1],
+      headers: { 'Content-Type': 'application/json' },
+      payload: body,
+      timeoutMs,
+    });
+    if (secondary.ok) return secondary;
+  }
+  return primary;
 }
 
 /* ---- Supabase Edge Function proxy: the Gemini key stays server-side (secret GEMINI_API_KEY) ---- */
@@ -991,7 +1005,9 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
     return lastFail;
   };
 
-  const models = [...TEXT_MODELS];
+  const models = isVertexExpressApiKey(key)
+    ? ['gemini-2.5-flash', 'gemini-2.5-flash-lite', ...TEXT_MODELS.filter((m) => m !== 'gemini-2.5-flash' && m !== 'gemini-2.5-flash-lite')]
+    : [...TEXT_MODELS];
   let failure: { fail: FoodAssistantFailure; detail?: string } = { fail: 'unavailable' };
   let triedDiscovery = false;
   for (let i = 0; i < models.length; i++) {

@@ -1369,6 +1369,19 @@ export function resolveGeminiApiKey(explicitKey?: string): string {
   return '';
 }
 
+export function isVertexExpressApiKey(key?: string): boolean {
+  return Boolean(key && key.trim().startsWith('AQ.'));
+}
+
+export function buildGeminiGenerateContentUrls(key: string, model: string): string[] {
+  const cleanKey = encodeURIComponent(key.trim());
+  const aiStudioUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${cleanKey}`;
+  const vertexExpressUrl = `https://aiplatform.googleapis.com/v1/publishers/google/models/${model}:generateContent?key=${cleanKey}`;
+  return isVertexExpressApiKey(key)
+    ? [vertexExpressUrl, aiStudioUrl]
+    : [aiStudioUrl, vertexExpressUrl];
+}
+
 const GEMINI_V25 = ['2', '5'].join('.');
 const GEMINI_V15 = ['1', '5'].join('.');
 
@@ -1383,11 +1396,22 @@ const DEFAULT_GEMINI_MODELS = [
   `gemini-${GEMINI_V15}-flash`,
 ];
 
+const VERTEX_EXPRESS_GEMINI_MODELS = [
+  `gemini-${GEMINI_V25}-flash`,
+  `gemini-${GEMINI_V25}-flash-lite`,
+  'gemini-3.5-flash-lite',
+  'gemini-3.8-flash',
+  `gemini-${GEMINI_V15}-flash`,
+];
+
 /**
  * Dynamically queries Google AI Studio for the active generateContent text models supported by this key,
  * falling back to the standard current Flash models.
  */
 export async function getGeminiCandidateModels(key: string): Promise<string[]> {
+  if (isVertexExpressApiKey(key)) {
+    return VERTEX_EXPRESS_GEMINI_MODELS;
+  }
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 4000);
@@ -1462,34 +1486,40 @@ export async function testGeminiApiConnection(apiKey?: string): Promise<{ ok: bo
   let firstError = '';
 
   const tryModel = async (model: string): Promise<{ ok: boolean; model?: string; error?: string }> => {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 5000);
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
-        {
+    const urls = buildGeminiGenerateContentUrls(key, model);
+    let lastErr = '';
+    for (const url of urls) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
+      try {
+        const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           signal: controller.signal,
           body: JSON.stringify({
             contents: [{ role: 'user', parts: [{ text: 'Say OK' }] }],
           }),
+        });
+        clearTimeout(timer);
+        if (response.ok) {
+          return { ok: true, model };
         }
-      );
-      clearTimeout(timer);
-      if (response.ok) {
-        return { ok: true, model };
+        const errData = await response.json().catch(() => ({}));
+        lastErr = errData?.error?.message || `HTTP ${response.status}`;
+      } catch (err: any) {
+        clearTimeout(timer);
+        lastErr = err?.name === 'AbortError' ? 'Request timed out' : err?.message || 'Network error';
       }
-      const errData = await response.json().catch(() => ({}));
-      return { ok: false, error: errData?.error?.message || `HTTP ${response.status}` };
-    } catch (err: any) {
-      clearTimeout(timer);
-      return { ok: false, error: err?.name === 'AbortError' ? 'Request timed out' : err?.message || 'Network error' };
     }
+    return { ok: false, error: lastErr || 'Connection failed' };
   };
 
-  // 1. Fast path: test primary Flash aliases directly (1 network call)
-  for (const fastModel of DEFAULT_GEMINI_MODELS.slice(0, 2)) {
+  const fastModels = isVertexExpressApiKey(key)
+    ? VERTEX_EXPRESS_GEMINI_MODELS.slice(0, 2)
+    : DEFAULT_GEMINI_MODELS.slice(0, 2);
+
+  // 1. Fast path: test primary Flash aliases directly
+  for (const fastModel of fastModels) {
     const res = await tryModel(fastModel);
     if (res.ok) {
       return { ok: true, model: fastModel, message: `Connected to Google ${fastModel} successfully!` };
@@ -1500,7 +1530,7 @@ export async function testGeminiApiConnection(apiKey?: string): Promise<{ ok: bo
   // 2. Fallback path: discover active text models from v1beta/models
   const discovered = await getGeminiCandidateModels(key);
   for (const model of discovered) {
-    if (DEFAULT_GEMINI_MODELS.slice(0, 2).includes(model)) continue;
+    if (fastModels.includes(model)) continue;
     const res = await tryModel(model);
     if (res.ok) {
       return { ok: true, model, message: `Connected to Google ${model} successfully!` };
