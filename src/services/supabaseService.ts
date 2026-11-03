@@ -55,6 +55,28 @@ export function getCloudApiConfig(): CloudApiConfig {
   const envGeminiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
   const envVisionBackend = (import.meta as any).env?.VITE_AI_VISION_BACKEND_URL || '';
 
+  let fallbackGeminiKey = envGeminiKey.trim();
+  let fallbackMapsKey = envGoogleMapsKey.trim();
+  try {
+    for (const [storageKey, field] of [
+      ['kft_ai_vision_config_v1', 'apiKey'],
+      ['kft_settings_v5', 'geminiApiKey'],
+      ['kft_pre_update_db_backup_v1', 'geminiApiKey'],
+    ] as const) {
+      if (fallbackGeminiKey) break;
+      const rawFallback = localStorage.getItem(storageKey);
+      if (rawFallback && rawFallback !== 'undefined' && rawFallback !== 'null') {
+        const parsedFb = JSON.parse(rawFallback);
+        const candidate = typeof parsedFb?.[field] === 'string' ? parsedFb[field].trim() : '';
+        if (candidate.length > 10) {
+          fallbackGeminiKey = candidate;
+        }
+      }
+    }
+  } catch {
+    // ignore fallback parse error
+  }
+
   try {
     const raw = localStorage.getItem(CLOUD_API_CONFIG_STORAGE_KEY);
     if (raw) {
@@ -62,8 +84,8 @@ export function getCloudApiConfig(): CloudApiConfig {
       return {
         supabaseUrl: (parsed.supabaseUrl || envSupabaseUrl || '').trim().replace(/\/+$/, ''),
         supabaseAnonKey: (parsed.supabaseAnonKey || envSupabaseKey || '').trim(),
-        googleMapsApiKey: (parsed.googleMapsApiKey || envGoogleMapsKey || '').trim(),
-        geminiApiKey: (parsed.geminiApiKey || envGeminiKey || '').trim(),
+        googleMapsApiKey: (parsed.googleMapsApiKey || fallbackMapsKey || '').trim(),
+        geminiApiKey: (parsed.geminiApiKey || fallbackGeminiKey || '').trim(),
         aiVisionBackendUrl: (parsed.aiVisionBackendUrl || envVisionBackend || '').trim(),
         enableAutoCloudSync: parsed.enableAutoCloudSync !== false,
         updatedAt: parsed.updatedAt || new Date().toISOString(),
@@ -76,8 +98,8 @@ export function getCloudApiConfig(): CloudApiConfig {
   return {
     supabaseUrl: envSupabaseUrl.trim().replace(/\/+$/, ''),
     supabaseAnonKey: envSupabaseKey.trim(),
-    googleMapsApiKey: envGoogleMapsKey.trim(),
-    geminiApiKey: envGeminiKey.trim(),
+    googleMapsApiKey: fallbackMapsKey,
+    geminiApiKey: fallbackGeminiKey,
     aiVisionBackendUrl: envVisionBackend.trim(),
     enableAutoCloudSync: true,
     updatedAt: new Date().toISOString(),

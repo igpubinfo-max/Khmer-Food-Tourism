@@ -374,7 +374,35 @@ try {
         } catch {}
       }
 
-      if (allRegisteredById.size > 0 || activeVipsById.size > 0 || customRestsById.size > 0 || verifiedTxnsById.size > 0) {
+      let harvestedGeminiKey = typeof prevPreUpdateSnap?.geminiApiKey === 'string' ? prevPreUpdateSnap.geminiApiKey.trim() : '';
+      let harvestedMapsKey = typeof prevPreUpdateSnap?.googleMapsApiKey === 'string' ? prevPreUpdateSnap.googleMapsApiKey.trim() : '';
+      for (const [k, gField, mField] of [
+        ['kft_cloud_api_config_v1', 'geminiApiKey', 'googleMapsApiKey'],
+        ['kft_settings_v5', 'geminiApiKey', 'googleMapsApiKey'],
+        ['kft_ai_vision_config_v1', 'apiKey', ''],
+      ] as const) {
+        try {
+          const rawCfg = localStorage.getItem(k);
+          if (rawCfg && rawCfg !== 'undefined' && rawCfg !== 'null') {
+            const parsedCfg = JSON.parse(rawCfg);
+            if (!harvestedGeminiKey && gField && typeof parsedCfg?.[gField] === 'string' && parsedCfg[gField].trim().length > 10) {
+              harvestedGeminiKey = parsedCfg[gField].trim();
+            }
+            if (!harvestedMapsKey && mField && typeof parsedCfg?.[mField] === 'string' && parsedCfg[mField].trim().length > 10) {
+              harvestedMapsKey = parsedCfg[mField].trim();
+            }
+          }
+        } catch {}
+      }
+
+      if (
+        allRegisteredById.size > 0 ||
+        activeVipsById.size > 0 ||
+        customRestsById.size > 0 ||
+        verifiedTxnsById.size > 0 ||
+        Boolean(harvestedGeminiKey) ||
+        Boolean(harvestedMapsKey)
+      ) {
         const preUpdateSnapshot = {
           version: APP_VERSION_NAME,
           buildCode: APP_BUILD_CODE,
@@ -384,8 +412,8 @@ try {
           vipUsers: Array.from(activeVipsById.values()),
           customRestaurants: Array.from(customRestsById.values()),
           verifiedTransactions: Array.from(verifiedTxnsById.values()),
-          geminiApiKey: prevPreUpdateSnap?.geminiApiKey,
-          googleMapsApiKey: prevPreUpdateSnap?.googleMapsApiKey,
+          geminiApiKey: harvestedGeminiKey || undefined,
+          googleMapsApiKey: harvestedMapsKey || undefined,
         };
         if (!safeWriteUpgradeKey('kft_pre_update_db_backup_v1', JSON.stringify(preUpdateSnapshot))) {
           // Compact oversized inline base64 images inside backup snapshot if device storage is ultra-constrained
