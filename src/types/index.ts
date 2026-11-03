@@ -1,7 +1,7 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1347;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1351;
 export const APP_RELEASE_DATE = '2026-11-03';
 
 /**

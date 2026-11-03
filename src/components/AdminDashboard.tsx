@@ -33,6 +33,8 @@ import {
   testSupabaseConnection,
   isGoogleMapsConfigured,
   isSupabaseConfigured,
+  isSupabaseEgressCooldownActive,
+  resetSupabaseEgressCooldown,
   SUPABASE_SETUP_SQL,
 } from '../services/supabaseService';
 import {
@@ -5844,9 +5846,22 @@ export const AdminDashboard: React.FC = () => {
                     disabled={isSyncingCloud}
                     onClick={async () => {
                       if (!triggerCloudSyncNow) return;
+                      const saved = saveCloudApiConfig(cloudCfg);
+                      setCloudCfg(saved);
+                      resetSupabaseEgressCooldown();
                       setIsSyncingCloud(true);
-                      const ok = await triggerCloudSyncNow();
+                      const ok = await triggerCloudSyncNow(true);
                       setIsSyncingCloud(false);
+                      if (isSupabaseEgressCooldownActive()) {
+                        setSupabaseTestStatus(
+                          'គម្រោង Supabase Free Tier បានដល់កម្រិតទិន្នន័យទាញយកប្រចាំខែបណ្តោះអាសន្ន (HTTP 402 Egress Quota)។ ទិន្នន័យទាំងអស់ត្រូវបានរក្សាទុកក្នុងម៉ាស៊ីន និង IndexedDB ដោយសុវត្ថិភាព ១០០% ហើយនឹង Sync ឡើង Cloud ស្វ័យប្រវត្តិពេលកូតាបើកឡើងវិញ។'
+                        );
+                        showToast(
+                          'ទិន្នន័យរក្សាទុកក្នុងទូរស័ព្ទជោគជ័យ ១០០% (Supabase Free Tier ពេញកូតាទាញយកប្រចាំខែបណ្តោះអាសន្ន)',
+                          'info'
+                        );
+                        return;
+                      }
                       showToast(
                         ok
                           ? 'បានធ្វើសមកាលកម្មទិន្នន័យ (Sync) ជាមួយ Supabase Cloud ជោគជ័យ!'
@@ -5859,16 +5874,18 @@ export const AdminDashboard: React.FC = () => {
                     🔄 {isSyncingCloud ? 'កំពុង Sync...' : 'Sync ទិន្នន័យជាមួយ Cloud ឥឡូវនេះ'}
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard?.writeText(SUPABASE_SETUP_SQL);
-                      showToast('បានចម្លងកូដ SQL សម្រាប់ដាក់ក្នុង Supabase SQL Editor!', 'info');
-                    }}
-                    className="px-3 py-2 bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 text-stone-800 dark:text-stone-200 font-bold rounded-xl transition"
-                  >
-                    📋 ចម្លងកូដ SQL បង្កើតតារាង Supabase
-                  </button>
+                  {supabaseTestStatus?.includes('SQL Editor') && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard?.writeText(SUPABASE_SETUP_SQL);
+                        showToast('បានចម្លងកូដ SQL សម្រាប់ដាក់ក្នុង Supabase SQL Editor!', 'info');
+                      }}
+                      className="px-3 py-2 bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 text-stone-800 dark:text-stone-200 font-bold rounded-xl transition"
+                    >
+                      📋 ចម្លងកូដ SQL បង្កើតតារាង Supabase
+                    </button>
+                  )}
                 </div>
               </div>
               )}

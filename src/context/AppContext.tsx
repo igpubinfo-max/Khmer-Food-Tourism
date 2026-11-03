@@ -3584,6 +3584,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (cloudSyncInFlightRef.current) {
       if (force) {
         pendingForcedSyncRef.current = true;
+        return true;
       }
       return false;
     }
