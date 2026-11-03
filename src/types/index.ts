@@ -1,8 +1,8 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1332;
-export const APP_RELEASE_DATE = '2026-11-02';
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1343;
+export const APP_RELEASE_DATE = '2026-11-03';
 
 /**
  * Audited duplicate food IDs removed from the Food Menu so every dish and photograph is 100% unique
@@ -2505,6 +2505,12 @@ export interface AppSettings {
   settingsVersion?: number; // Monotonically increasing server configuration version
   settingsUpdatedAt?: string;
   settingsUpdatedBy?: string;
+  // Live In-App Auto-Update Alert Metadata (optional cloud override in addition to version.json & Google Play In-App Update)
+  latestAppBuildCode?: number;
+  latestAppVersion?: string;
+  updateReleaseNotesKh?: string;
+  updateReleaseNotesEn?: string;
+  forceAppUpdate?: boolean;
 }
 
 // User–Admin Two-Way Support & Payment Verification System

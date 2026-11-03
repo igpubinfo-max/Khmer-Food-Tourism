@@ -10,6 +10,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(NativeGoogleAuthPlugin.class);
         registerPlugin(NativeAbaLauncherPlugin.class);
         registerPlugin(NativeBiometricAuthPlugin.class);
+        registerPlugin(NativeAppUpdatePlugin.class);
         super.onCreate(savedInstanceState);
     }
 

@@ -40,6 +40,7 @@ const GoogleMapsPlaceSearchModal = lazy(() => import('./components/GoogleMapsPla
 import { Toast } from './components/Toast';
 import { RatePrompt } from './components/RatePrompt';
 import { OfflineBanner } from './components/OfflineBanner';
+import { AppUpdateBanner } from './components/AppUpdateBanner';
 import { SMART_HUB_EVENT } from './utils/smartHub';
 import { useBodyScrollLock } from './utils/useBodyScrollLock';
 
@@ -265,6 +266,9 @@ const MainScreen: React.FC = () => {
 
       {/* Notifications */}
       {toast && <Toast />}
+
+      {/* Live In-App Auto-Update Alert (detects new releases while user is using app) */}
+      <AppUpdateBanner />
 
       {/* One-time gentle rating prompt (after 5th meaningful action) */}
       <RatePrompt />

@@ -12,6 +12,8 @@
     @com.getcapacitor.PluginMethod public *;
 }
 -dontwarn com.getcapacitor.**
+-keep class com.google.android.play.core.** { *; }
+-dontwarn com.google.android.play.core.**
 -keepattributes JavascriptInterface
 -keepattributes *Annotation*
 -keepattributes Signature

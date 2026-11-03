@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import fs from 'node:fs'
@@ -16,6 +16,57 @@ function readAndroidVersionCode(): number {
   return 114;
 }
 
+function readPackageVersionName(): string {
+  try {
+    const pkgPath = path.resolve(process.cwd(), 'package.json');
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+    if (pkg && typeof pkg.version === 'string' && pkg.version.trim()) {
+      return pkg.version.trim();
+    }
+  } catch {}
+  return '2.5.0';
+}
+
+function kftVersionManifestPlugin(): Plugin {
+  const buildManifestJson = () => {
+    const versionName = readPackageVersionName();
+    const buildCode = readAndroidVersionCode();
+    return JSON.stringify(
+      {
+        version: `v${versionName}`,
+        versionName,
+        buildCode,
+        releasedAt: new Date().toISOString(),
+        playStoreUrl: 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism',
+      },
+      null,
+      2
+    );
+  };
+
+  return {
+    name: 'kft-version-manifest',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url && req.url.split('?')[0] === '/version.json') {
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+          res.end(buildManifestJson());
+          return;
+        }
+        next();
+      });
+    },
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'version.json',
+        source: buildManifestJson(),
+      });
+    },
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   base: './',
@@ -25,6 +76,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    kftVersionManifestPlugin(),
   ],
   build: {
     sourcemap: false,
