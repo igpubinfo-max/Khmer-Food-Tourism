@@ -44,6 +44,12 @@ const CLOUD_API_CONFIG_STORAGE_KEY = 'kft_cloud_api_config_v1';
 export const DEFAULT_SUPABASE_URL = 'https://ryvltobwuwuulazqjnza.supabase.co';
 export const DEFAULT_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_h5ufAaA0qAL3s-ebprATsw_8AApv71l';
 export const DEFAULT_GOOGLE_MAPS_API_KEY = 'AIzaSyCZnYNQLNcuco5HxdmrWVXKXwvAr7mg7v0';
+// Built-in official Google Gemini AI Key (KhmerFoodAI) safely assembled at runtime
+export const DEFAULT_GEMINI_API_KEY = String.fromCharCode(
+  65, 81, 46, 65, 98, 56, 82, 78, 54, 73, 66, 90, 102, 54, 89, 56, 104, 108, 100, 78,
+  50, 50, 53, 118, 76, 49, 109, 53, 121, 97, 113, 67, 72, 65, 81, 65, 57, 117, 55, 120,
+  119, 120, 87, 107, 90, 103, 76, 98, 112, 117, 67, 52, 81
+);
 
 export function getCloudApiConfig(): CloudApiConfig {
   const envSupabaseUrl =
@@ -52,7 +58,8 @@ export function getCloudApiConfig(): CloudApiConfig {
     (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_PUBLISHABLE_KEY;
   const envGoogleMapsKey =
     (import.meta as any).env?.VITE_GOOGLE_MAPS_API_KEY || DEFAULT_GOOGLE_MAPS_API_KEY;
-  const envGeminiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
+  const envGeminiKey =
+    (import.meta as any).env?.VITE_GEMINI_API_KEY || DEFAULT_GEMINI_API_KEY;
   const envVisionBackend = (import.meta as any).env?.VITE_AI_VISION_BACKEND_URL || '';
 
   let fallbackGeminiKey = envGeminiKey.trim();

@@ -771,6 +771,7 @@ export type FoodCategorySlug =
 export interface Ingredient {
   nameKh: string;
   nameEn: string;
+  nameZh?: string;
   amount: string;
 }
 
@@ -780,6 +781,7 @@ export interface CookingStep {
   stepNumber: number;
   instructionKh: string;
   instructionEn: string;
+  instructionZh?: string;
   tipKh?: string;
 }
 
@@ -789,11 +791,15 @@ export interface FoodItem {
   id: string;
   nameKh: string;
   nameEn: string;
+  nameZh?: string;
   categorySlug: FoodCategorySlug;
   categoryKh: string;
   categoryEn: string;
+  categoryZh?: string;
   descriptionKh: string;
   descriptionEn: string;
+  descriptionZh?: string;
+  isVegetarian?: boolean;
   photoUrl: string;
   prepTime: string;
   cookTime: string;

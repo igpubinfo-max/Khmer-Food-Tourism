@@ -80,22 +80,29 @@ const DailyHabitCardInner: React.FC<Props> = ({ onOpenFood }) => {
   const current = streak?.current ?? 1;
   const longest = streak?.longest ?? 1;
 
+  const rewardLabel = tr(
+    language,
+    'រង្វាន់ Free VIP ៣០ថ្ងៃ',
+    'Free 30-Day VIP Reward',
+    '30 天免费 VIP 奖励'
+  );
+
   const goalText = (() => {
     if (rewardActive) {
       if (isGuest) {
         return tr(
           language,
-          `ចូលគណនី ហើយភ្លក់ម្ហូប ${FOOD_CHECKIN_REWARD_TARGET} ដង (១ ដង/ថ្ងៃ) ដើម្បីទទួលបាន VIP ${FOOD_CHECKIN_REWARD_VIP_DAYS} ថ្ងៃ`,
-          `Sign in and try ${FOOD_CHECKIN_REWARD_TARGET} dishes (1 per day) to earn ${FOOD_CHECKIN_REWARD_VIP_DAYS} days of VIP`,
-          `登录并品尝 ${FOOD_CHECKIN_REWARD_TARGET} 道菜（每天 1 次），即可获得 ${FOOD_CHECKIN_REWARD_VIP_DAYS} 天 VIP`
+          `៖ ចូលគណនី ហើយភ្លក់ម្ហូប ${FOOD_CHECKIN_REWARD_TARGET} ដង (១ ដង/ថ្ងៃ)`,
+          `: Sign in and try ${FOOD_CHECKIN_REWARD_TARGET} dishes (1 per day)`,
+          `：登录并品尝 ${FOOD_CHECKIN_REWARD_TARGET} 道菜（每天 1 次）`
         );
       }
       const capReached = reward.todayCount >= reward.dailyCap;
       return tr(
         language,
-        `រង្វាន់ VIP ${FOOD_CHECKIN_REWARD_VIP_DAYS} ថ្ងៃ៖ ភ្លក់ ${reward.progress}/${reward.target} ដង • ${capReached ? 'ថ្ងៃនេះបានរាប់រួចហើយ' : `ថ្ងៃនេះ ${reward.todayCount}/${reward.dailyCap}`}`,
-        `${FOOD_CHECKIN_REWARD_VIP_DAYS}-day VIP reward: ${reward.progress}/${reward.target} dishes • ${capReached ? 'today recorded' : `today ${reward.todayCount}/${reward.dailyCap}`}`,
-        `${FOOD_CHECKIN_REWARD_VIP_DAYS} 天 VIP 奖励：${reward.progress}/${reward.target} 次 • ${capReached ? '今日已计' : `今日 ${reward.todayCount}/${reward.dailyCap}`}`
+        `៖ ភ្លក់ ${reward.progress}/${reward.target} ដង • ${capReached ? 'ថ្ងៃនេះបានរាប់រួចហើយ' : `ថ្ងៃនេះ ${reward.todayCount}/${reward.dailyCap}`}`,
+        `: ${reward.progress}/${reward.target} dishes • ${capReached ? 'today recorded' : `today ${reward.todayCount}/${reward.dailyCap}`}`,
+        `：${reward.progress}/${reward.target} 次 • ${capReached ? '今日已计' : `今日 ${reward.todayCount}/${reward.dailyCap}`}`
       );
     }
     if (goal.kind === 'badge') {
@@ -136,9 +143,9 @@ const DailyHabitCardInner: React.FC<Props> = ({ onOpenFood }) => {
     showToast(
       tr(
         language,
-        `ភ្លក់ម្ហូបខុសៗគ្នា ${FOOD_CHECKIN_REWARD_TARGET} ដង (រាប់ ${FOOD_CHECKIN_DAILY_CAP} ដង/ថ្ងៃ តាមម៉ោង Server ពិតប្រាកដ) ដើម្បីទទួលបាន VIP ${FOOD_CHECKIN_REWARD_VIP_DAYS} ថ្ងៃ — ផ្តល់ជូនតែ ១ ដងគត់ក្នុង ១ គណនី`,
-        `Try ${FOOD_CHECKIN_REWARD_TARGET} different dishes (${FOOD_CHECKIN_DAILY_CAP} count per server day) to earn ${FOOD_CHECKIN_REWARD_VIP_DAYS} days of VIP — one time per account`,
-        `品尝 ${FOOD_CHECKIN_REWARD_TARGET} 道不同的菜（按服务器时间每天计 ${FOOD_CHECKIN_DAILY_CAP} 次）即可获得 ${FOOD_CHECKIN_REWARD_VIP_DAYS} 天 VIP — 每个账号仅限一次`
+        `ភ្លក់ម្ហូបខុសៗគ្នា ${FOOD_CHECKIN_REWARD_TARGET} ដង (រាប់ ${FOOD_CHECKIN_DAILY_CAP} ដង/ថ្ងៃ តាមម៉ោង Server ពិតប្រាកដ) ដើម្បីទទួលបាន រង្វាន់ Free VIP ៣០ថ្ងៃ — ផ្តល់ជូនតែ ១ ដងគត់ក្នុង ១ គណនី`,
+        `Try ${FOOD_CHECKIN_REWARD_TARGET} different dishes (${FOOD_CHECKIN_DAILY_CAP} count per server day) to earn Free 30-Day VIP Reward — one time per account`,
+        `品尝 ${FOOD_CHECKIN_REWARD_TARGET} 道不同的菜（按服务器时间每天计 ${FOOD_CHECKIN_DAILY_CAP} 次）即可获得 30 天免费 VIP 奖励 — 每个账号仅限一次`
       ),
       'info'
     );
@@ -240,7 +247,16 @@ const DailyHabitCardInner: React.FC<Props> = ({ onOpenFood }) => {
         onClick={rewardActive ? onGoalTap : undefined}
         className={rewardActive ? 'cursor-pointer' : undefined}
       >
-        <p className="text-[11.5px] font-bold text-slate-700 dark:text-slate-200 leading-snug truncate">{goalText}</p>
+        <p className="text-[11.5px] font-bold text-slate-700 dark:text-slate-200 leading-snug truncate">
+          {rewardActive ? (
+            <>
+              <span className="text-orange-500 dark:text-orange-400 font-extrabold">{rewardLabel}</span>
+              <span>{goalText}</span>
+            </>
+          ) : (
+            goalText
+          )}
+        </p>
         <div
           className="mt-1 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden"
           role="progressbar"

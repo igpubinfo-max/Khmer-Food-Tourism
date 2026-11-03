@@ -115,8 +115,8 @@ export const FoodCheckInRewardBootstrap: React.FC = () => {
             latest.current.showToast(
               tr(
                 latest.current.language,
-                'សូមភ្ជាប់អ៊ីនធឺណិត ដើម្បីផ្ទៀងផ្ទាត់ម៉ោង Server សម្រាប់រាប់ពិន្ទុរង្វាន់ VIP (១ ថ្ងៃ រាប់បាន ១ ដង)',
-                'Connect to the internet to verify server time for VIP reward points (1 per day)',
+                'សូមភ្ជាប់អ៊ីនធឺណិត ដើម្បីផ្ទៀងផ្ទាត់ម៉ោង Server សម្រាប់រាប់ពិន្ទុរង្វាន់ Free VIP ៣០ថ្ងៃ (១ ថ្ងៃ រាប់បាន ១ ដង)',
+                'Connect to the internet to verify server time for Free 30-Day VIP points (1 per day)',
                 '请连接网络以验证服务器时间并累计 VIP 奖励积分（每天限 1 次）'
               ),
               'warning'
@@ -134,8 +134,8 @@ export const FoodCheckInRewardBootstrap: React.FC = () => {
             latest.current.showToast(
               tr(
                 latest.current.language,
-                `បានកត់ត្រាពិន្ទុរង្វាន់ VIP៖ ${retry.outcome.progress}/${FOOD_CHECKIN_REWARD_TARGET} (ថ្ងៃនេះ ${retry.outcome.todayCount}/${FOOD_CHECKIN_DAILY_CAP})`,
-                `VIP reward progress recorded: ${retry.outcome.progress}/${FOOD_CHECKIN_REWARD_TARGET} (today ${retry.outcome.todayCount}/${FOOD_CHECKIN_DAILY_CAP})`,
+                `បានកត់ត្រាពិន្ទុរង្វាន់ Free VIP ៣០ថ្ងៃ៖ ${retry.outcome.progress}/${FOOD_CHECKIN_REWARD_TARGET} (ថ្ងៃនេះ ${retry.outcome.todayCount}/${FOOD_CHECKIN_DAILY_CAP})`,
+                `Free 30-Day VIP progress recorded: ${retry.outcome.progress}/${FOOD_CHECKIN_REWARD_TARGET} (today ${retry.outcome.todayCount}/${FOOD_CHECKIN_DAILY_CAP})`,
                 `已记录 VIP 奖励进度：${retry.outcome.progress}/${FOOD_CHECKIN_REWARD_TARGET}（今日 ${retry.outcome.todayCount}/${FOOD_CHECKIN_DAILY_CAP}）`
               ),
               'success'
