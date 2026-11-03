@@ -1,5 +1,7 @@
-import { useEffect } from 'react';
+import React from 'react';
 import { Language } from '../types';
+
+const { useEffect } = React;
 import {
   EXACT_FOOD_NAME_ZH_MAP,
   FOOD_CATEGORY_ZH_MAP,

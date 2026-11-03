@@ -1829,8 +1829,8 @@ export async function syncAllAppDataWithSupabase(localState: {
         localState.deletedUsers || []
       ),
       mergedDeletedUsers: localState.deletedUsers || [],
-      mergedTransactions: localState.transactions,
-      mergedCustomRestaurants: localState.customRestaurants,
+      mergedTransactions: Array.isArray(localState.transactions) ? localState.transactions : [],
+      mergedCustomRestaurants: Array.isArray(localState.customRestaurants) ? localState.customRestaurants : [],
       mergedPaymentProofsVault: localState.paymentProofsVault,
       mergedAppSettings: localState.appSettings,
     };
@@ -2088,6 +2088,13 @@ export async function syncAllAppDataWithSupabase(localState: {
         const rawPreUpdate = localStorage.getItem('kft_pre_update_db_backup_v1');
         if (rawPreUpdate) {
           const parsedPreUpdate = JSON.parse(rawPreUpdate);
+          if (Array.isArray(parsedPreUpdate?.allUsers)) {
+            for (const u of parsedPreUpdate.allUsers) {
+              if (u && (u.id || u.email) && !isActivityUserDeleted(u.id, u.email, u.phone)) {
+                recoveredUsersFromActivity.push(u as User);
+              }
+            }
+          }
           if (Array.isArray(parsedPreUpdate?.vipUsers)) {
             for (const v of parsedPreUpdate.vipUsers) {
               if (v && (v.id || v.email) && !isActivityUserDeleted(v.id, v.email, v.phone)) {
@@ -2340,7 +2347,25 @@ export async function syncAllAppDataWithSupabase(localState: {
       }
     }
 
-    for (const r of localState.customRestaurants) {
+    let preUpdateCustomRests: Restaurant[] = [];
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const rawPreUpdate = localStorage.getItem('kft_pre_update_db_backup_v1');
+        if (rawPreUpdate) {
+          const parsedPreUpdate = JSON.parse(rawPreUpdate);
+          if (Array.isArray(parsedPreUpdate?.customRestaurants)) {
+            preUpdateCustomRests = parsedPreUpdate.customRestaurants;
+          }
+        }
+      }
+    } catch {}
+
+    const candidateLocalCustomRests: Restaurant[] = [
+      ...preUpdateCustomRests,
+      ...(Array.isArray(localState.customRestaurants) ? localState.customRestaurants : []),
+    ];
+
+    for (const r of candidateLocalCustomRests) {
       if (
         r &&
         r.id &&
@@ -2498,8 +2523,8 @@ export async function syncAllAppDataWithSupabase(localState: {
         localState.deletedUsers || []
       ),
       mergedDeletedUsers: localState.deletedUsers || [],
-      mergedTransactions: localState.transactions,
-      mergedCustomRestaurants: localState.customRestaurants,
+      mergedTransactions: Array.isArray(localState.transactions) ? localState.transactions : [],
+      mergedCustomRestaurants: Array.isArray(localState.customRestaurants) ? localState.customRestaurants : [],
       mergedPaymentProofsVault: localState.paymentProofsVault,
       mergedAppSettings: localState.appSettings,
     };

@@ -5904,9 +5904,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           deletedUsers
         );
         latestSyncStateRef.current.users = next;
-        try {
-          localStorage.setItem('kft_users_v5', JSON.stringify(next));
-        } catch {}
+        safeSetCriticalAccountStorage('kft_users_v5', next);
         return next;
       });
       setCurrentUser(updatedExisting);
@@ -5944,9 +5942,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUsers(prev => {
       const next = deduplicateAndNormalizeUsers([...prev, newUser], deletedUsers);
       latestSyncStateRef.current.users = next;
-      try {
-        localStorage.setItem('kft_users_v5', JSON.stringify(next));
-      } catch {}
+      safeSetCriticalAccountStorage('kft_users_v5', next);
       return next;
     });
     setCurrentUser(newUser);
@@ -6044,9 +6040,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           deletedUsers
         );
         latestSyncStateRef.current.users = next;
-        try {
-          localStorage.setItem('kft_users_v5', JSON.stringify(next));
-        } catch {}
+        safeSetCriticalAccountStorage('kft_users_v5', next);
         return next;
       });
       setCurrentUser(updated);
@@ -6082,9 +6076,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUsers(prev => {
       const next = deduplicateAndNormalizeUsers([...prev, newUser], deletedUsers);
       latestSyncStateRef.current.users = next;
-      try {
-        localStorage.setItem('kft_users_v5', JSON.stringify(next));
-      } catch {}
+      safeSetCriticalAccountStorage('kft_users_v5', next);
       return next;
     });
     setCurrentUser(newUser);
@@ -8646,8 +8638,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             };
           });
           latestSyncStateRef.current.users = nextUsers;
+          safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
           try {
-            localStorage.setItem('kft_users_v5', JSON.stringify(nextUsers));
             const updatedTarget = nextUsers.find(u => doesUserMatchTarget(u, targetRef));
             if (updatedTarget && isSupabaseConfigured()) {
               const atomicKeys = getCandidateAtomicUserKeys(updatedTarget);
@@ -8673,9 +8665,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               additionalStorePaymentIds: nextIds,
             };
             latestSyncStateRef.current.currentUser = updatedCurrent;
-            try {
-              localStorage.setItem('kft_current_user_v5', JSON.stringify(updatedCurrent));
-            } catch {}
+            safeSetCriticalAccountStorage('kft_current_user_v5', updatedCurrent);
             return updatedCurrent;
           });
         }

@@ -242,16 +242,15 @@ export function isRejectedLegacyFoodOverridePhoto(
   if (isLegacyAutoScrapedFoodPlaceholderUrl(ov.photoUrl) || ov.photoUrl.startsWith('/restaurants/')) {
     return true;
   }
-  // If this dish was freshly baked via the PC Excel Template at a newer timestamp than the override,
-  // reject the older override so the newly baked APK asset takes effect immediately!
-  const excelBakedIso = EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS[foodId];
-  if (excelBakedIso) {
-    const excelBakedMs = Date.parse(excelBakedIso) || 0;
+  // Reject any stale pre-baseline cached/cloud override (older than SEED_FOOD_PHOTO_BASELINE_MS, seed photoUpdatedAt,
+  // or PC Excel Template bake timestamp) so outdated food pictures can NEVER resurrect!
+  const baselineMs = getSeedFoodPhotoBaselineMs(foodId);
+  if (baselineMs > 0) {
     const ovEffectiveMs = Math.max(
       ov.adminApprovedAt ? Date.parse(ov.adminApprovedAt) || 0 : 0,
       ov.updatedAt ? Date.parse(ov.updatedAt) || 0 : 0
     );
-    if (excelBakedMs > 0 && ovEffectiveMs < excelBakedMs) {
+    if (ovEffectiveMs <= 0 || ovEffectiveMs < baselineMs) {
       return true;
     }
   }
@@ -289,10 +288,12 @@ export const VAULT_KEYS = {
   RESTAURANTS: 'kft_permanent_restaurant_overrides_v1',
   DELETED_RESTAURANTS: 'kft_deleted_restaurants_v1',
   DESTINATIONS: 'kft_permanent_destination_overrides_v1',
+  DELETED_DESTINATIONS: 'kft_deleted_destinations_v1',
   DESTINATIONS_LEGACY: 'kft_destination_photo_overrides_v1',
   TRENDING_FOODS: 'kft_permanent_trending_food_overrides_v1',
   CLOUD_DOC_KEY: 'kft_cloud_media_overrides_v1',
   CLOUD_RECORD_PREFIX: 'kft_ov_',
+  TOMBSTONES_CLOUD_KEY: 'kft_ov_tombstones_v1',
 } as const;
 
 export interface FoodRevisionLedgerEntry {
@@ -443,6 +444,7 @@ export interface AllMediaOverridesBundle {
   restaurants: Record<string, RestaurantMediaOverride>;
   deletedRestaurants?: Record<string, string>;
   destinations: Record<string, DestinationMediaOverride>;
+  deletedDestinations?: Record<string, string>;
   trendingFoods: Record<string, TrendingFoodMediaOverride>;
   updatedAt: string;
 }
@@ -465,6 +467,14 @@ export function saveDeletedRestaurantIdsMap(map: Record<string, string>): void {
   safeWriteJsonMap(VAULT_KEYS.DELETED_RESTAURANTS, map);
 }
 
+export function loadDeletedDestinationIdsMap(): Record<string, string> {
+  return safeReadJsonMap<string>(VAULT_KEYS.DELETED_DESTINATIONS);
+}
+
+export function saveDeletedDestinationIdsMap(map: Record<string, string>): void {
+  safeWriteJsonMap(VAULT_KEYS.DELETED_DESTINATIONS, map);
+}
+
 export function isRestaurantIdDeleted(
   restaurantId: string,
   _itemTimestampIso?: string,
@@ -476,9 +486,22 @@ export function isRestaurantIdDeleted(
   if (googlePlaceId && (deletedMap[`gplace:${googlePlaceId}`] || deletedMap[googlePlaceId])) return true;
   return false;
 }
+
+export function isDestinationIdDeleted(
+  destId: string,
+  _itemTimestampIso?: string,
+  deletedMap: Record<string, string> = loadDeletedDestinationIdsMap(),
+  googlePlaceId?: string
+): boolean {
+  if (!deletedMap) return false;
+  if (destId && deletedMap[destId]) return true;
+  if (googlePlaceId && (deletedMap[`gplace:${googlePlaceId}`] || deletedMap[googlePlaceId])) return true;
+  return false;
+}
 const IDB_STORE = 'media_overrides';
 const IDB_BUNDLE_KEY = 'master_bundle';
 const IDB_PENDING_QUEUE_KEY = 'pending_cloud_queue';
+const IDB_TOMBSTONES_KEY = 'tombstones:v1';
 
 let hasHydratedFromIdbOnce = false;
 
@@ -610,42 +633,90 @@ function readRawAllEntriesFromIdb(db: IDBDatabase): Promise<Record<string, any>>
 }
 
 function assembleBundleFromIdbEntries(entries: Record<string, any>): AllMediaOverridesBundle | null {
+  const rawTombstones = entries[IDB_TOMBSTONES_KEY];
+  const idbDeletedFoods: Record<string, string> = {
+    ...(rawTombstones && typeof rawTombstones.deletedFoods === 'object' ? rawTombstones.deletedFoods : {}),
+    ...loadDeletedFoodIdsMap(),
+  };
+  const idbDeletedRestaurants: Record<string, string> = {
+    ...(rawTombstones && typeof rawTombstones.deletedRestaurants === 'object' ? rawTombstones.deletedRestaurants : {}),
+    ...loadDeletedRestaurantIdsMap(),
+  };
+  const idbDeletedDestinations: Record<string, string> = {
+    ...(rawTombstones && typeof rawTombstones.deletedDestinations === 'object' ? rawTombstones.deletedDestinations : {}),
+    ...loadDeletedDestinationIdsMap(),
+  };
+  const hasAnyTombstones =
+    Object.keys(idbDeletedFoods).length > 0 ||
+    Object.keys(idbDeletedRestaurants).length > 0 ||
+    Object.keys(idbDeletedDestinations).length > 0;
+
   const rawMaster = (entries[IDB_BUNDLE_KEY] as AllMediaOverridesBundle | undefined) || null;
   let master: AllMediaOverridesBundle | null = null;
   if (rawMaster && typeof rawMaster === 'object') {
     const cleanMasterFoods: Record<string, FoodMediaOverride> = {};
     for (const [fid, fOv] of Object.entries(rawMaster.foods || {})) {
-      if (fOv && !isRejectedLegacyFoodOverridePhoto(fid, fOv)) {
+      if (fOv && !idbDeletedFoods[fid] && !isRejectedLegacyFoodOverridePhoto(fid, fOv)) {
         cleanMasterFoods[fid] = fOv;
+      }
+    }
+    const cleanMasterRests: Record<string, RestaurantMediaOverride> = {};
+    for (const [rid, rOv] of Object.entries(rawMaster.restaurants || {})) {
+      if (rOv && !isRestaurantIdDeleted(rid, rOv.updatedAt, idbDeletedRestaurants, rOv.googlePlaceId)) {
+        cleanMasterRests[rid] = rOv;
+      }
+    }
+    const cleanMasterDests: Record<string, DestinationMediaOverride> = {};
+    for (const [did, dOv] of Object.entries(rawMaster.destinations || {})) {
+      if (dOv && !isDestinationIdDeleted(did, dOv.updatedAt, idbDeletedDestinations, dOv.googlePlaceId)) {
+        cleanMasterDests[did] = dOv;
       }
     }
     master = {
       ...rawMaster,
       foods: cleanMasterFoods,
+      deletedFoods: { ...(rawMaster.deletedFoods || {}), ...idbDeletedFoods },
+      restaurants: cleanMasterRests,
+      deletedRestaurants: { ...(rawMaster.deletedRestaurants || {}), ...idbDeletedRestaurants },
+      destinations: cleanMasterDests,
+      deletedDestinations: { ...(rawMaster.deletedDestinations || {}), ...idbDeletedDestinations },
     };
   }
   const atomicOverlay: AllMediaOverridesBundle = {
     foods: {},
+    deletedFoods: idbDeletedFoods,
     restaurants: {},
+    deletedRestaurants: idbDeletedRestaurants,
     destinations: {},
+    deletedDestinations: idbDeletedDestinations,
     trendingFoods: {},
     updatedAt: new Date(0).toISOString(),
   };
-  let hasAtomic = false;
+  let hasAtomic = hasAnyTombstones;
   for (const [k, val] of Object.entries(entries)) {
     if (!val || typeof val !== 'object') continue;
     if (k.startsWith('food:') && val.id) {
-      if (isRejectedLegacyFoodOverridePhoto(val.id, val as FoodMediaOverride)) {
+      if (idbDeletedFoods[val.id] || isRejectedLegacyFoodOverridePhoto(val.id, val as FoodMediaOverride)) {
         deleteSingleRecordFromIdb(k).catch(() => {});
         continue;
       }
       atomicOverlay.foods[val.id] = val as FoodMediaOverride;
       hasAtomic = true;
     } else if (k.startsWith('rest:') && val.id) {
-      atomicOverlay.restaurants[val.id] = val as RestaurantMediaOverride;
+      const rVal = val as RestaurantMediaOverride;
+      if (isRestaurantIdDeleted(rVal.id, rVal.updatedAt, idbDeletedRestaurants, rVal.googlePlaceId)) {
+        deleteSingleRecordFromIdb(k).catch(() => {});
+        continue;
+      }
+      atomicOverlay.restaurants[val.id] = rVal;
       hasAtomic = true;
     } else if (k.startsWith('dest:') && val.id) {
-      atomicOverlay.destinations[val.id] = val as DestinationMediaOverride;
+      const dVal = val as DestinationMediaOverride;
+      if (isDestinationIdDeleted(dVal.id, dVal.updatedAt, idbDeletedDestinations, dVal.googlePlaceId)) {
+        deleteSingleRecordFromIdb(k).catch(() => {});
+        continue;
+      }
+      atomicOverlay.destinations[val.id] = dVal;
       hasAtomic = true;
     } else if (k.startsWith('trend:') && val.id) {
       if (isLegacyAutoScrapedFoodPlaceholderUrl((val as TrendingFoodMediaOverride).photoUrl)) {
@@ -683,6 +754,16 @@ export async function saveBundleToIdb(bundle: AllMediaOverridesBundle): Promise<
       const tx = db.transaction(IDB_STORE, 'readwrite');
       const store = tx.objectStore(IDB_STORE);
       store.put(safeBundleToWrite, IDB_BUNDLE_KEY);
+      store.put(
+        {
+          id: 'tombstones_v1',
+          deletedFoods: safeBundleToWrite.deletedFoods || {},
+          deletedRestaurants: safeBundleToWrite.deletedRestaurants || {},
+          deletedDestinations: safeBundleToWrite.deletedDestinations || {},
+          updatedAt: safeBundleToWrite.updatedAt || new Date().toISOString(),
+        },
+        IDB_TOMBSTONES_KEY
+      );
       tx.oncomplete = () => {
         db.close();
         resolve();
@@ -874,6 +955,7 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
   const restaurants = safeReadJsonMap<RestaurantMediaOverride>(VAULT_KEYS.RESTAURANTS);
   const deletedRestaurants = safeReadJsonMap<string>(VAULT_KEYS.DELETED_RESTAURANTS);
   const destinations = safeReadJsonMap<DestinationMediaOverride>(VAULT_KEYS.DESTINATIONS);
+  const deletedDestinations = safeReadJsonMap<string>(VAULT_KEYS.DELETED_DESTINATIONS);
   const legacyDest = safeReadJsonMap<{ photoUrl: string; updatedAt?: string }>(VAULT_KEYS.DESTINATIONS_LEGACY);
   const trendingFoods = safeReadJsonMap<TrendingFoodMediaOverride>(VAULT_KEYS.TRENDING_FOODS);
 
@@ -999,6 +1081,11 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
       delete foods[fid];
     }
   }
+  for (const [did, destOv] of Object.entries(destinations)) {
+    if (isDestinationIdDeleted(did, destOv?.updatedAt, deletedDestinations, destOv?.googlePlaceId)) {
+      delete destinations[did];
+    }
+  }
 
   const fromDisk: AllMediaOverridesBundle = {
     foods,
@@ -1006,6 +1093,7 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
     restaurants,
     deletedRestaurants,
     destinations,
+    deletedDestinations,
     trendingFoods,
     updatedAt: new Date().toISOString(),
   };
@@ -1196,6 +1284,9 @@ export function saveLocalMediaOverrides(incomingBundle: AllMediaOverridesBundle)
   if (bundle.deletedRestaurants && typeof bundle.deletedRestaurants === 'object') {
     safeWriteJsonMap(VAULT_KEYS.DELETED_RESTAURANTS, bundle.deletedRestaurants);
   }
+  if (bundle.deletedDestinations && typeof bundle.deletedDestinations === 'object') {
+    safeWriteJsonMap(VAULT_KEYS.DELETED_DESTINATIONS, bundle.deletedDestinations);
+  }
 
   const trendCharBudget = getRemainingCharBudgetForKey(VAULT_KEYS.TRENDING_FOODS, 180_000);
   const compactTrending = trimGenericMap(bundle.trendingFoods || {}, trendCharBudget);
@@ -1366,12 +1457,33 @@ export function mergeOverrideBundles(
     }
   }
 
+  const mergedDeletedDestinations: Record<string, string> = {
+    ...(base.deletedDestinations || {}),
+  };
+  if (incoming.deletedDestinations && typeof incoming.deletedDestinations === 'object') {
+    for (const [delId, delIso] of Object.entries(incoming.deletedDestinations)) {
+      if (!delId || !delIso) continue;
+      const curIso = mergedDeletedDestinations[delId];
+      if (!curIso || (new Date(delIso).getTime() || 0) >= (new Date(curIso).getTime() || 0)) {
+        mergedDeletedDestinations[delId] = delIso;
+      }
+    }
+  }
+
+  const mergedDestinations = mergeMaps(base.destinations, incoming.destinations || {});
+  for (const [did, destOv] of Object.entries(mergedDestinations)) {
+    if (isDestinationIdDeleted(did, destOv?.updatedAt, mergedDeletedDestinations, destOv?.googlePlaceId)) {
+      delete mergedDestinations[did];
+    }
+  }
+
   return {
     foods: mergedFoods,
     deletedFoods: mergedDeletedFoods,
     restaurants: mergedRestaurants,
     deletedRestaurants: mergedDeletedRestaurants,
-    destinations: mergeMaps(base.destinations, incoming.destinations || {}),
+    destinations: mergedDestinations,
+    deletedDestinations: mergedDeletedDestinations,
     trendingFoods: mergeMaps(base.trendingFoods, incoming.trendingFoods || {}),
     updatedAt: new Date().toISOString(),
   };
@@ -1761,8 +1873,24 @@ export function recordPermanentFoodOverride(food: FoodItem): Promise<FoodMediaOv
   return saveAdminFoodOverridePermanently(food, { awaitCloud: false }).then((res) => res.override);
 }
 
+async function syncTombstonesToCloud(bundle: AllMediaOverridesBundle): Promise<void> {
+  const payload = {
+    id: 'tombstones_v1',
+    deletedFoods: bundle.deletedFoods || loadDeletedFoodIdsMap(),
+    deletedRestaurants: bundle.deletedRestaurants || loadDeletedRestaurantIdsMap(),
+    deletedDestinations: bundle.deletedDestinations || loadDeletedDestinationIdsMap(),
+    updatedAt: bundle.updatedAt || new Date().toISOString(),
+  };
+  await saveSingleRecordToIdb(IDB_TOMBSTONES_KEY, payload).catch(() => {});
+  if (!isSupabaseConfigured() || isSupabaseEgressCooldownActive()) return;
+  try {
+    await pushCloudDocument(VAULT_KEYS.TOMBSTONES_CLOUD_KEY, payload, 12000);
+  } catch {}
+}
+
 /**
- * Remove an Admin-deleted food item from the permanent override vault and record a permanent deletion tombstone.
+ * Remove an Admin-deleted food item from the permanent override vault and record a permanent deletion tombstone
+ * across localStorage, IndexedDB, and Supabase Cloud so deleted items NEVER resurrect after app updates or cloud sync.
  */
 export function removePermanentFoodOverride(foodId: string): void {
   if (!foodId) return;
@@ -1780,6 +1908,8 @@ export function removePermanentFoodOverride(foodId: string): void {
     delete ledger[foodId];
     saveFoodRevisionLedger(ledger);
   }
+  dequeuePendingMediaCloudSync('food', foodId, Number.MAX_SAFE_INTEGER);
+  deleteSingleRecordFromIdb(`food:${foodId}`).catch(() => {});
   const nextBundle: AllMediaOverridesBundle = {
     ...bundle,
     foods: nextFoods,
@@ -1788,7 +1918,11 @@ export function removePermanentFoodOverride(foodId: string): void {
   };
   inMemoryMasterBundle = nextBundle;
   saveLocalMediaOverrides(nextBundle);
-  deleteCloudDocument(`${VAULT_KEYS.CLOUD_RECORD_PREFIX}food_${foodId}`).catch(() => {});
+  notifyPersistentMediaVaultSubscribers(nextBundle);
+  Promise.allSettled([
+    deleteCloudDocument(`${VAULT_KEYS.CLOUD_RECORD_PREFIX}food_${foodId}`),
+    syncTombstonesToCloud(nextBundle),
+  ]).catch(() => {});
 }
 
 /**
@@ -1886,33 +2020,47 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
  * Remove a deleted restaurant from the permanent override vault and record a permanent deletion tombstone.
  */
 export function removePermanentRestaurantOverride(restaurantId: string, extraKeys: string[] = []): void {
+  if (!restaurantId) return;
   const bundle = loadLocalMediaOverrides();
   const now = new Date().toISOString();
-  if (!bundle.deletedRestaurants) {
-    bundle.deletedRestaurants = loadDeletedRestaurantIdsMap();
-  }
-  bundle.deletedRestaurants[restaurantId] = now;
+  const nextDeletedRestaurants: Record<string, string> = {
+    ...(bundle.deletedRestaurants || loadDeletedRestaurantIdsMap()),
+    [restaurantId]: now,
+  };
   const existingOv = bundle.restaurants[restaurantId];
   if (existingOv?.googlePlaceId) {
-    bundle.deletedRestaurants[`gplace:${existingOv.googlePlaceId}`] = now;
-    bundle.deletedRestaurants[existingOv.googlePlaceId] = now;
+    nextDeletedRestaurants[`gplace:${existingOv.googlePlaceId}`] = now;
+    nextDeletedRestaurants[existingOv.googlePlaceId] = now;
   }
+  const nextRestaurants = { ...bundle.restaurants };
+  delete nextRestaurants[restaurantId];
+  dequeuePendingMediaCloudSync('rest', restaurantId, Number.MAX_SAFE_INTEGER);
+  deleteSingleRecordFromIdb(`rest:${restaurantId}`).catch(() => {});
   for (const extraKey of extraKeys) {
     if (extraKey) {
-      bundle.deletedRestaurants[extraKey] = now;
-      if (bundle.restaurants[extraKey]) {
-        delete bundle.restaurants[extraKey];
+      nextDeletedRestaurants[extraKey] = now;
+      if (nextRestaurants[extraKey]) {
+        delete nextRestaurants[extraKey];
+      }
+      if (!extraKey.startsWith('gplace:')) {
+        dequeuePendingMediaCloudSync('rest', extraKey, Number.MAX_SAFE_INTEGER);
+        deleteSingleRecordFromIdb(`rest:${extraKey}`).catch(() => {});
       }
     }
   }
-  saveDeletedRestaurantIdsMap(bundle.deletedRestaurants);
-  if (bundle.restaurants[restaurantId]) {
-    delete bundle.restaurants[restaurantId];
-  }
-  bundle.updatedAt = now;
-  saveLocalMediaOverrides(bundle);
+  saveDeletedRestaurantIdsMap(nextDeletedRestaurants);
+  const nextBundle: AllMediaOverridesBundle = {
+    ...bundle,
+    restaurants: nextRestaurants,
+    deletedRestaurants: nextDeletedRestaurants,
+    updatedAt: now,
+  };
+  inMemoryMasterBundle = nextBundle;
+  saveLocalMediaOverrides(nextBundle);
+  notifyPersistentMediaVaultSubscribers(nextBundle);
   const deletePromises: Promise<any>[] = [
     deleteCloudDocument(`${VAULT_KEYS.CLOUD_RECORD_PREFIX}rest_${restaurantId}`),
+    syncTombstonesToCloud(nextBundle),
   ];
   for (const extraKey of extraKeys) {
     if (extraKey && !extraKey.startsWith('gplace:')) {
@@ -1920,7 +2068,7 @@ export function removePermanentRestaurantOverride(restaurantId: string, extraKey
     }
   }
   Promise.allSettled(deletePromises).finally(() => {
-    pushMediaOverridesToCloud(bundle).catch(() => {});
+    pushMediaOverridesToCloud(nextBundle).catch(() => {});
   });
 }
 
@@ -1971,25 +2119,96 @@ export function recordPermanentDestinationOverride(dest: TouristDestination): vo
     isCustomPhoto: true,
     updatedAt: now,
   };
-  bundle.destinations[dest.id] = overrideRecord;
-  bundle.updatedAt = now;
-  inMemoryMasterBundle = bundle;
+  const nextDeletedDestinations = { ...(bundle.deletedDestinations || loadDeletedDestinationIdsMap()) };
+  let destTombChanged = false;
+  if (nextDeletedDestinations[dest.id]) {
+    delete nextDeletedDestinations[dest.id];
+    destTombChanged = true;
+  }
+  if (dest.googlePlaceId) {
+    if (nextDeletedDestinations[`gplace:${dest.googlePlaceId}`]) {
+      delete nextDeletedDestinations[`gplace:${dest.googlePlaceId}`];
+      destTombChanged = true;
+    }
+    if (nextDeletedDestinations[dest.googlePlaceId]) {
+      delete nextDeletedDestinations[dest.googlePlaceId];
+      destTombChanged = true;
+    }
+  }
+  if (destTombChanged) {
+    saveDeletedDestinationIdsMap(nextDeletedDestinations);
+  }
+  const nextBundle: AllMediaOverridesBundle = {
+    ...bundle,
+    destinations: {
+      ...bundle.destinations,
+      [dest.id]: overrideRecord,
+    },
+    deletedDestinations: nextDeletedDestinations,
+    updatedAt: now,
+  };
+  inMemoryMasterBundle = nextBundle;
   saveSingleRecordToIdb(`dest:${dest.id}`, overrideRecord).catch(() => {});
+  if (destTombChanged) {
+    syncTombstonesToCloud(nextBundle).catch(() => {});
+  }
   enqueuePendingMediaCloudSync('dest', dest.id, nextRevision, now);
-  saveLocalMediaOverrides(bundle);
-  notifyPersistentMediaVaultSubscribers(bundle);
-  syncSingleOverrideRecordToCloud('dest', dest.id, overrideRecord, bundle).catch(() => {});
+  saveLocalMediaOverrides(nextBundle);
+  notifyPersistentMediaVaultSubscribers(nextBundle);
+  syncSingleOverrideRecordToCloud('dest', dest.id, overrideRecord, nextBundle).catch(() => {});
 }
 
-export function removePermanentDestinationOverride(destId: string): void {
+export function removePermanentDestinationOverride(destId: string, extraKeys: string[] = []): void {
+  if (!destId) return;
   const bundle = loadLocalMediaOverrides();
-  if (bundle.destinations[destId]) {
-    delete bundle.destinations[destId];
-    bundle.updatedAt = new Date().toISOString();
-    saveLocalMediaOverrides(bundle);
-    deleteCloudDocument(`${VAULT_KEYS.CLOUD_RECORD_PREFIX}dest_${destId}`).catch(() => {});
-    pushMediaOverridesToCloud(bundle).catch(() => {});
+  const now = new Date().toISOString();
+  const nextDeletedDestinations: Record<string, string> = {
+    ...(bundle.deletedDestinations || loadDeletedDestinationIdsMap()),
+    [destId]: now,
+  };
+  const existingOv = bundle.destinations[destId];
+  if (existingOv?.googlePlaceId) {
+    nextDeletedDestinations[`gplace:${existingOv.googlePlaceId}`] = now;
+    nextDeletedDestinations[existingOv.googlePlaceId] = now;
   }
+  const nextDestinations = { ...bundle.destinations };
+  delete nextDestinations[destId];
+  dequeuePendingMediaCloudSync('dest', destId, Number.MAX_SAFE_INTEGER);
+  deleteSingleRecordFromIdb(`dest:${destId}`).catch(() => {});
+  for (const extraKey of extraKeys) {
+    if (extraKey) {
+      nextDeletedDestinations[extraKey] = now;
+      if (nextDestinations[extraKey]) {
+        delete nextDestinations[extraKey];
+      }
+      if (!extraKey.startsWith('gplace:')) {
+        dequeuePendingMediaCloudSync('dest', extraKey, Number.MAX_SAFE_INTEGER);
+        deleteSingleRecordFromIdb(`dest:${extraKey}`).catch(() => {});
+      }
+    }
+  }
+  saveDeletedDestinationIdsMap(nextDeletedDestinations);
+  const nextBundle: AllMediaOverridesBundle = {
+    ...bundle,
+    destinations: nextDestinations,
+    deletedDestinations: nextDeletedDestinations,
+    updatedAt: now,
+  };
+  inMemoryMasterBundle = nextBundle;
+  saveLocalMediaOverrides(nextBundle);
+  notifyPersistentMediaVaultSubscribers(nextBundle);
+  const deletePromises: Promise<any>[] = [
+    deleteCloudDocument(`${VAULT_KEYS.CLOUD_RECORD_PREFIX}dest_${destId}`),
+    syncTombstonesToCloud(nextBundle),
+  ];
+  for (const extraKey of extraKeys) {
+    if (extraKey && !extraKey.startsWith('gplace:')) {
+      deletePromises.push(deleteCloudDocument(`${VAULT_KEYS.CLOUD_RECORD_PREFIX}dest_${extraKey}`));
+    }
+  }
+  Promise.allSettled(deletePromises).finally(() => {
+    pushMediaOverridesToCloud(nextBundle).catch(() => {});
+  });
 }
 
 /**
@@ -2506,11 +2725,16 @@ export function applyRestaurantOverrides(
     ) {
       continue;
     }
-    const hasValidOvCoords =
-      isValidCambodiaCoordinates(ov.latitude, ov.longitude) &&
+    const hasValidCoords = isValidCambodiaCoordinates(ov.latitude, ov.longitude);
+    const hasVerifiedOvCoords =
+      hasValidCoords &&
       ov.locationNeedsReview !== true &&
       ov.locationVerificationStatus !== 'needs_admin_review';
-    if (!hasValidOvCoords) {
+    const isRegisteredVipOrAdminShop =
+      Boolean(ov.ownerId && ov.ownerId !== 'owner-1') ||
+      ov.dataSource === 'vip_owner' ||
+      Boolean(ov.isAdminEdited);
+    if (!hasVerifiedOvCoords && !isRegisteredVipOrAdminShop) {
       continue;
     }
 
@@ -2536,11 +2760,15 @@ export function applyRestaurantOverrides(
       openingHoursKh: ov.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
       openingHoursEn: ov.openingHoursEn || '07:00 AM - 09:00 PM',
       priceLevel: ov.priceLevel || '$$',
-      mapUrl: buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, cleanGpid),
-      latitude: ov.latitude!,
-      longitude: ov.longitude!,
-      locationVerificationStatus: 'verified',
-      locationNeedsReview: false,
+      mapUrl: hasValidCoords
+        ? buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, cleanGpid)
+        : (ov.mapUrl || ''),
+      latitude: hasValidCoords ? ov.latitude! : (typeof ov.latitude === 'number' ? ov.latitude : 0),
+      longitude: hasValidCoords ? ov.longitude! : (typeof ov.longitude === 'number' ? ov.longitude : 0),
+      locationVerificationStatus: hasVerifiedOvCoords
+        ? 'verified'
+        : (ov.locationVerificationStatus || 'needs_admin_review'),
+      locationNeedsReview: !hasVerifiedOvCoords,
       locationReviewNote: ov.locationReviewNote,
       locationVerifiedAt: ov.locationVerifiedAt,
       rating: typeof ov.rating === 'number' && ov.rating > 0 ? ov.rating : 4.6,
@@ -2586,14 +2814,27 @@ export function applyRestaurantOverrides(
  */
 export function applyDestinationOverrides(
   destinations: TouristDestination[],
-  overridesMap: Record<string, DestinationMediaOverride> = loadLocalMediaOverrides().destinations
+  overridesMap: Record<string, DestinationMediaOverride> = loadLocalMediaOverrides().destinations,
+  explicitDeletedMap?: Record<string, string>
 ): TouristDestination[] {
-  if (!overridesMap || Object.keys(overridesMap).length === 0) return destinations;
+  const deletedMap =
+    explicitDeletedMap || loadLocalMediaOverrides().deletedDestinations || loadDeletedDestinationIdsMap();
+  const hasDeleted = Object.keys(deletedMap).length > 0;
+  const safeOverrides = overridesMap || {};
+  const hasOverrides = Object.keys(safeOverrides).length > 0;
+  if (!hasOverrides && !hasDeleted) return destinations;
+
+  const filteredBase = hasDeleted
+    ? destinations.filter(
+        (d) => d && d.id && !isDestinationIdDeleted(d.id, undefined, deletedMap, d.googlePlaceId)
+      )
+    : destinations;
+
   const seenIds = new Set<string>();
-  let anyChanged = false;
-  const mapped = destinations.map((d) => {
+  let anyChanged = filteredBase.length !== destinations.length;
+  const mapped = filteredBase.map((d) => {
     seenIds.add(d.id);
-    const ov = overridesMap[d.id];
+    const ov = safeOverrides[d.id];
     if (!ov || !ov.photoUrl || isObsoleteSeedPhoto(ov.photoUrl)) return d;
 
     const seedItem = IMMUTABLE_SEED_DEST_MAP.get(d.id);
@@ -2675,8 +2916,15 @@ export function applyDestinationOverrides(
   });
 
   // Also append any custom/imported destinations present in overridesMap that aren't in the array yet
-  for (const [ovId, ov] of Object.entries(overridesMap)) {
-    if (!seenIds.has(ovId) && ov && ov.photoUrl && !isObsoleteSeedPhoto(ov.photoUrl) && ov.nameKh) {
+  for (const [ovId, ov] of Object.entries(safeOverrides)) {
+    if (
+      !seenIds.has(ovId) &&
+      ov &&
+      !isDestinationIdDeleted(ovId, ov.updatedAt, deletedMap, ov.googlePlaceId) &&
+      ov.photoUrl &&
+      !isObsoleteSeedPhoto(ov.photoUrl) &&
+      ov.nameKh
+    ) {
       anyChanged = true;
       seenIds.add(ovId);
       const hasValidOvCoords = isValidCambodiaCoordinates(ov.latitude, ov.longitude) && !ov.locationNeedsReview;
@@ -3032,8 +3280,17 @@ export async function hydrateAndSyncMediaOverrides(
             let hasLocalPhoto = false;
             let seedUpdatedAtMs = 0;
             let hasUnsyncedLocalPending = false;
-            if (item.key.startsWith('kft_ov_food_')) {
+            if (item.key === VAULT_KEYS.TOMBSTONES_CLOUD_KEY) {
+              if (isBuildUpgradeOrEmptyVault || !item.updated_at || seenRows[item.key] !== item.updated_at) {
+                keysToFetch.unshift(item.key);
+              }
+              continue;
+            } else if (item.key.startsWith('kft_ov_food_')) {
               const id = item.key.slice('kft_ov_food_'.length);
+              if (current.deletedFoods?.[id]) {
+                deleteCloudDocument(item.key).catch(() => {});
+                continue;
+              }
               hasLocalPhoto = Boolean(current.foods[id]?.photoUrl && !isObsoleteSeedPhoto(current.foods[id]?.photoUrl));
               hasUnsyncedLocalPending = Boolean(pendingQueue[`food:${id}`]);
               seedUpdatedAtMs = 0;
@@ -3047,6 +3304,10 @@ export async function hydrateAndSyncMediaOverrides(
               hasUnsyncedLocalPending = Boolean(pendingQueue[`rest:${id}`]);
             } else if (item.key.startsWith('kft_ov_dest_')) {
               const id = item.key.slice('kft_ov_dest_'.length);
+              if (current.deletedDestinations?.[id] || isDestinationIdDeleted(id, undefined, current.deletedDestinations)) {
+                deleteCloudDocument(item.key).catch(() => {});
+                continue;
+              }
               hasLocalPhoto = Boolean(current.destinations[id]?.photoUrl && !isObsoleteSeedPhoto(current.destinations[id]?.photoUrl));
               hasUnsyncedLocalPending = Boolean(pendingQueue[`dest:${id}`]);
               const seedDest = IMMUTABLE_SEED_DEST_MAP.get(id);
@@ -3100,7 +3361,36 @@ export async function hydrateAndSyncMediaOverrides(
 
             for (const row of rows) {
               const payload = row.payload;
-              if (!payload || !payload.id) continue;
+              if (!payload || typeof payload !== 'object') continue;
+              if (row.key === VAULT_KEYS.TOMBSTONES_CLOUD_KEY) {
+                if (row.updated_at) {
+                  seenRows[row.key] = row.updated_at;
+                  seenChanged = true;
+                }
+                if (payload.deletedFoods && typeof payload.deletedFoods === 'object') {
+                  batchBundle.deletedFoods = { ...(batchBundle.deletedFoods || {}), ...payload.deletedFoods };
+                  batchChanged = true;
+                  hasRemoteChanges = true;
+                }
+                if (payload.deletedRestaurants && typeof payload.deletedRestaurants === 'object') {
+                  batchBundle.deletedRestaurants = {
+                    ...(batchBundle.deletedRestaurants || {}),
+                    ...payload.deletedRestaurants,
+                  };
+                  batchChanged = true;
+                  hasRemoteChanges = true;
+                }
+                if (payload.deletedDestinations && typeof payload.deletedDestinations === 'object') {
+                  batchBundle.deletedDestinations = {
+                    ...(batchBundle.deletedDestinations || {}),
+                    ...payload.deletedDestinations,
+                  };
+                  batchChanged = true;
+                  hasRemoteChanges = true;
+                }
+                continue;
+              }
+              if (!payload.id) continue;
               // Record seen row timestamp WITHOUT inflating payload.updatedAt!
               if (row.updated_at) {
                 seenRows[row.key] = row.updated_at;
@@ -3183,27 +3473,44 @@ export async function hydrateAndSyncMediaOverrides(
           if (cloudBundle) {
             const filteredLegacy: AllMediaOverridesBundle = {
               foods: {},
+              deletedFoods: cloudBundle.deletedFoods,
               restaurants: {},
-              destinations: {},
-              trendingFoods: {},
               deletedRestaurants: cloudBundle.deletedRestaurants,
+              destinations: {},
+              deletedDestinations: cloudBundle.deletedDestinations,
+              trendingFoods: {},
               updatedAt: cloudBundle.updatedAt || new Date().toISOString(),
             };
             let anyLegacyMissingFromPerRecord = false;
             for (const [fid, fOv] of Object.entries(cloudBundle.foods || {})) {
-              if (!existingPerRecordKeys.has(`kft_ov_food_${fid}`) && !pendingQueue[`food:${fid}`]) {
+              if (
+                !current.deletedFoods?.[fid] &&
+                !cloudBundle.deletedFoods?.[fid] &&
+                !existingPerRecordKeys.has(`kft_ov_food_${fid}`) &&
+                !pendingQueue[`food:${fid}`]
+              ) {
                 filteredLegacy.foods[fid] = fOv;
                 anyLegacyMissingFromPerRecord = true;
               }
             }
             for (const [rid, rOv] of Object.entries(cloudBundle.restaurants || {})) {
-              if (!existingPerRecordKeys.has(`kft_ov_rest_${rid}`) && !pendingQueue[`rest:${rid}`]) {
+              if (
+                !isRestaurantIdDeleted(rid, rOv?.updatedAt, current.deletedRestaurants, rOv?.googlePlaceId) &&
+                !isRestaurantIdDeleted(rid, rOv?.updatedAt, cloudBundle.deletedRestaurants, rOv?.googlePlaceId) &&
+                !existingPerRecordKeys.has(`kft_ov_rest_${rid}`) &&
+                !pendingQueue[`rest:${rid}`]
+              ) {
                 filteredLegacy.restaurants[rid] = rOv;
                 anyLegacyMissingFromPerRecord = true;
               }
             }
             for (const [did, dOv] of Object.entries(cloudBundle.destinations || {})) {
-              if (!existingPerRecordKeys.has(`kft_ov_dest_${did}`) && !pendingQueue[`dest:${did}`]) {
+              if (
+                !isDestinationIdDeleted(did, dOv?.updatedAt, current.deletedDestinations, dOv?.googlePlaceId) &&
+                !isDestinationIdDeleted(did, dOv?.updatedAt, cloudBundle.deletedDestinations, dOv?.googlePlaceId) &&
+                !existingPerRecordKeys.has(`kft_ov_dest_${did}`) &&
+                !pendingQueue[`dest:${did}`]
+              ) {
                 filteredLegacy.destinations[did] = dOv;
                 anyLegacyMissingFromPerRecord = true;
               }
@@ -3214,7 +3521,11 @@ export async function hydrateAndSyncMediaOverrides(
                 anyLegacyMissingFromPerRecord = true;
               }
             }
-            if (anyLegacyMissingFromPerRecord || (cloudBundle.deletedRestaurants && Object.keys(cloudBundle.deletedRestaurants).length > 0)) {
+            const hasCloudTombstones =
+              Boolean(cloudBundle.deletedFoods && Object.keys(cloudBundle.deletedFoods).length > 0) ||
+              Boolean(cloudBundle.deletedRestaurants && Object.keys(cloudBundle.deletedRestaurants).length > 0) ||
+              Boolean(cloudBundle.deletedDestinations && Object.keys(cloudBundle.deletedDestinations).length > 0);
+            if (anyLegacyMissingFromPerRecord || hasCloudTombstones) {
               hasRemoteChanges = true;
               current = mergeOverrideBundles(current, filteredLegacy);
               inMemoryMasterBundle = current;

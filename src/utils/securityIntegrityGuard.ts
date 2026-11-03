@@ -607,13 +607,16 @@ export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | n
         const startMs = parseSafeDateMs(
           parsed.subscriptionStartDate || parsed.verifiedAt || parsed.lastLoginAt || parsed.registeredAtIso
         );
-        const inferredExpMs = (startMs > 0 ? Math.max(startMs, Date.now()) : Date.now()) + 30 * 24 * 60 * 60 * 1000;
+        const planDays = resolveUserActualVipPlanDays(parsed);
+        const inferredExpMs =
+          (startMs > 0 ? Math.max(startMs, Date.now()) : Date.now()) + planDays * 24 * 60 * 60 * 1000;
         if (parsed.paymentStatus === 'verified' || (parsed.membershipTier === 'premium_vip' && parsed.subscriptionStatus === 'active')) {
           const cleanExpIso = new Date(inferredExpMs).toISOString();
           parsed.membershipTier = 'premium_vip';
           parsed.subscriptionStatus = 'active';
           parsed.paymentStatus = 'verified';
           parsed.vipStatus = 'active';
+          parsed.vipPlanDays = planDays;
           parsed.subscriptionExpiryDate = cleanExpIso;
           parsed.vipExpiresAt = cleanExpIso;
           parsed.integritySeal = computeUserIntegritySealSync(parsed);
@@ -623,9 +626,25 @@ export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | n
     }
 
     if (tampered || updated || !rawV5) {
+      const serialized = JSON.stringify(parsed);
       try {
-        localStorage.setItem('kft_current_user_v5', JSON.stringify(parsed));
-      } catch {}
+        localStorage.setItem('kft_current_user_v5', serialized);
+      } catch {
+        // Quota recovery: evict expendable caches so active logged-in session is NEVER lost
+        try {
+          for (const expendableKey of [
+            'kft_google_places_smart_cache_v1',
+            'kft_foods_200_v9',
+            'kft_destinations_real_v8',
+            'kft_restaurants_real_v12',
+            'kft_foods_200_v10',
+            'kft_destinations_real_v9',
+          ]) {
+            localStorage.removeItem(expendableKey);
+          }
+          localStorage.setItem('kft_current_user_v5', serialized);
+        } catch {}
+      }
     }
 
     return { tampered, user: parsed };

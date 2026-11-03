@@ -1,7 +1,7 @@
 export const APP_VERSION = 'v2.5.0';
 export const APP_VERSION_NAME = '2.5.0';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1343;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1347;
 export const APP_RELEASE_DATE = '2026-11-03';
 
 /**
@@ -2074,7 +2074,10 @@ export const resolveUserActualVipPlanDays = (user?: User | null): number => {
   if (user.vipPlanType === '60d') {
     return 60;
   }
-  // 4. Inspect start -> expiry delta for non-synthetic durations (e.g. 30, 60, 90 days)
+  if (user.vipPlanType === '365d') {
+    return 365;
+  }
+  // 4. Inspect start -> expiry delta for non-synthetic durations (30, 60, 90, 180, or verified 365-day annual)
   const startMs = parseSafeDateMs(user.subscriptionStartDate || user.verifiedAt);
   const expMs = parseSafeDateMs(user.subscriptionExpiryDate || user.vipExpiresAt);
   if (startMs > 0 && expMs > startMs) {
@@ -2082,13 +2085,24 @@ export const resolveUserActualVipPlanDays = (user?: User | null): number => {
     if (spanDays >= 25 && spanDays <= 35) return 30;
     if (spanDays >= 55 && spanDays <= 65) return 60;
     if (spanDays >= 85 && spanDays <= 95) return 90;
+    if (spanDays >= 175 && spanDays <= 185) return 180;
+    if (
+      spanDays >= 350 &&
+      spanDays <= 375 &&
+      user.vipPlanType === 'annual' &&
+      Boolean(ref) &&
+      ref !== 'VIP-PERMANENT-IGP2026D'
+    ) {
+      return 365;
+    }
   }
   return 30;
 };
 
 /**
  * Sanitizes a User object's VIP expiry date if it was polluted by the legacy 365-day default bug
- * when the user actually registered for a 30-day (or 90-day) VIP plan.
+ * when the user actually registered for a 30-day (or 90-day) VIP plan, while strictly preserving
+ * legitimate 365-day annual memberships and stacked early VIP renewals (e.g. 60d+60d or 90d+90d).
  */
 export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
   if (!user || isAdminAccount(user)) return user;
@@ -2097,17 +2111,21 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
   const nowMs = Date.now();
   const remainingDays = expMs > nowMs ? Math.ceil((expMs - nowMs) / (1000 * 60 * 60 * 24)) : 0;
   const actualPlanDays = resolveUserActualVipPlanDays(user);
+  const rawStartMs = parseSafeDateMs(user.subscriptionStartDate || user.verifiedAt);
+  const spanDays =
+    rawStartMs > 0 && expMs > rawStartMs ? Math.round((expMs - rawStartMs) / (1000 * 60 * 60 * 24)) : 0;
+  const ref = String(user.transactionRef || '').trim();
 
-  // Detect synthetic 365-day inflation: remainingDays > 95 when actualPlanDays <= 90
+  // Detect genuine legacy synthetic 365-day inflation without touching stacked renewals (e.g. 115d or 170d) or legitimate 365d plans
   const hasSynthetic365Inflation =
-    remainingDays > 95 &&
     actualPlanDays <= 90 &&
-    (user.vipPlanDays !== 365 ||
-      user.transactionRef === 'VIP-PERMANENT-IGP2026D' ||
-      user.vipPlanType === 'quarterly');
+    ((ref === 'VIP-PERMANENT-IGP2026D' && remainingDays > 95) ||
+      (remainingDays > 300 && user.vipPlanDays !== 365) ||
+      (spanDays >= 350 &&
+        !/(?:^|[-_])(180|365)D(?:[-_]|$)/i.test(ref) &&
+        (user.vipPlanType === 'quarterly' || user.vipPlanType === '30d' || !user.vipPlanDays)));
 
   if (hasSynthetic365Inflation) {
-    const rawStartMs = parseSafeDateMs(user.subscriptionStartDate || user.verifiedAt);
     const validStartMs =
       rawStartMs > 0 && nowMs - rawStartMs < actualPlanDays * 24 * 60 * 60 * 1000 && rawStartMs <= nowMs
         ? rawStartMs

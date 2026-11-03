@@ -33,7 +33,6 @@ import {
   extractYouTubeVideoId,
   markYouTubeVideoUnavailable,
   getReplacementCambodianVideo,
-  fetchPublicOEmbedMetadata,
   matchesExpandedYouTubeQuery,
   advanceVideoRotationCycle,
   getCurrentVideoRotationCycle,
@@ -65,7 +64,7 @@ export const TrendingSocialModal: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
   useEffect(() => {
-    if (!debouncedSearchQuery.trim()) {
+    if (!searchQuery.trim()) {
       setDebouncedSearchQuery('');
       return;
     }
@@ -300,7 +299,7 @@ export const TrendingSocialModal: React.FC = () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [isTrendingSocialModalOpen, searchQuery, provinceFilter]);
+  }, [isTrendingSocialModalOpen, debouncedSearchQuery, provinceFilter]);
 
   // Unified Home Screen Search across Foods, Drinks, Restaurants, Tourist Attractions + Smart Cache
   const homeSearchResults = useMemo(() => {
