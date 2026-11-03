@@ -550,13 +550,13 @@ async function main() {
   }
 
   // =========================================================================
-  // PART C: Complete 200-Dish Food Database & `public/foods/` Asset Audit
+  // PART C: Complete 200+ Dish Food Database & `public/foods/` Asset Audit
   // =========================================================================
   {
     const { initial200Foods, SEED_FOOD_PHOTO_BASELINE_MS } = app;
     assert.ok(
-      initial200Foods.length >= 170 && initial200Foods.length <= 200,
-      `Expected 170..200 verified seed foods, found ${initial200Foods.length}`
+      initial200Foods.length >= 170 && initial200Foods.length <= 235,
+      `Expected 170..235 verified seed foods, found ${initial200Foods.length}`
     );
 
     const seenIds = new Set();

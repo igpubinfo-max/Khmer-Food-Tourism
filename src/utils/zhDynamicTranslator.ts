@@ -404,6 +404,37 @@ export const FOOD_CATEGORY_ZH_MAP: Record<string, string> = {
  * Exact Dish Name translations for the 100 Core Dishes + 100 Additional Dishes
  */
 export const EXACT_FOOD_NAME_ZH_MAP: Record<string, string> = {
+  // 30 Authentic Cambodian Vegetarian Dishes (food-201 .. food-230)
+  'Vegetarian Mushroom & Tofu Steamed Amok': '纯素蘑菇豆腐蒸阿莫克',
+  'Vegetarian Cambodian Korko Mixed Vegetable Stew': '纯素高棉什锦蔬菜浓汤',
+  'Vegetarian Lemongrass Sour Soup with Tofu & Water Spinach': '纯素香茅酸汤配豆腐空心菜',
+  'Vegetarian Fresh Bamboo Shoot Soup with Yanang Leaves': '纯素鲜竹笋黑叶鲜草清汤',
+  'Vegetarian Khmer Red Coconut Curry with Sweet Potatoes': '纯素高棉红薯椰香红咖喱',
+  'Vegetarian Proher Herbal Soup with Pumpkin & Winter Melon': '纯素南瓜冬瓜高棉草本香清汤',
+  'Vegetarian Sour Lime & Straw Mushroom Clear Broth': '纯素青柠香草草菇酸汤',
+  'Vegetarian Water Lily Stem Tamarind Sour Soup': '纯素睡莲嫩茎罗望子酸汤',
+  'Vegetarian Sweet & Sour Tamarind Soup with Pineapple & Tomato': '纯素菠萝番茄罗望子甜酸汤',
+  'Vegetarian Lemongrass Kroeung Stir-Fried Yardlong Beans & Tofu': '纯素黄香茅炒长豆角煎豆腐',
+  'Vegetarian Young Ginger Stir-Fry with Wood Ear Mushrooms & Tofu': '纯素鲜嫩生姜炒黑木耳豆腐',
+  'Vegetarian Spicy Holy Basil Stir-Fry with Enoki & King Oyster Mushrooms': '纯素九层塔金针菇杏鲍菇辣炒',
+  'Vegetarian Stir-Fried Green Cabbage with Tofu Skin Sheets': '纯素原味腐竹爆炒爽脆卷心菜',
+  'Vegetarian Wok-Fried Glass Noodles with Shiitake Mushrooms': '纯素香菇时蔬大火炒粉丝',
+  'Vegetarian Sweet & Sour Crispy Eggplant & Pineapple Stir-Fry': '纯素菠萝脆茄糖醋爆炒',
+  'Vegetarian Stir-Fried Broccoli & Cauliflower with Fried Tofu': '纯素西兰花花椰菜炒金黄豆腐',
+  'Vegetarian Banana Blossom Salad with Roasted Peanuts & Lime': '纯素青柠碎花生香蕉花沙拉',
+  'Vegetarian Green Mango Herb Salad with Crispy Tofu': '纯素青芒果丝香草拌脆豆腐沙拉',
+  'Vegetarian Pomelo Salad with Toasted Coconut & Mint': '纯素烤椰丝薄荷柚子鲜沙拉',
+  'Vegetarian Royal Peanut Herb Dip with Crisp Garden Crudités': '纯素高棉花生香草浓蘸酱配生鲜时蔬',
+  'Vegetarian Nom Banh Chok Fresh Rice Noodles with Red Coconut Curry': '纯素高棉鲜米线配红薯椰香红咖喱',
+  'Vegetarian Nom Banh Chok Fresh Rice Noodles with Herbal Broth': '纯素高棉鲜米线配香茅青草本素汤',
+  'Vegetarian Cambodian Herbed Rice Congee with Straw Mushrooms': '纯素高棉香草草菇暖胃素米粥',
+  'Vegetarian Fresh Rice Paper Spring Rolls with Rich Peanut Dip': '纯素高棉生卷配浓郁花生蘸酱',
+  'Vegetarian Crispy Fried Taro & Vegetable Spring Rolls': '纯素香脆炸香芋时蔬春卷',
+  'Vegetarian Charcoal-Grilled Tofu Skewers with Chili Salt': '纯素炭火椒盐香茅烤豆腐串',
+  'Vegetarian Smoky Grilled Eggplant with Fragrant Scallion Oil': '纯素炭烤紫茄子配香葱熟油',
+  'Vegetarian Steamed Sticky Rice Cylinders with Sweet Banana & Mung Bean': '纯素香蕉绿豆馅芭蕉叶长糯米粽',
+  'Vegetarian Steamed Koh Kong Coconut Layer Cake': '纯素传统国公椰丝清蒸九层米糕',
+  'Vegetarian Sweet Banana in Rich Toddy Palm Coconut Cream': '纯素棕榈糖浓椰浆炖芭蕉西米甜汤',
   'Water Lily Stem Sour Soup with Mystus Catfish (Samlor Machu Prolit Trei Kanchos)': '睡莲嫩茎黄颡鱼酸汤 (Samlor Machu Prolit Trei Kanchos)',
   'Stir-Fried Freshwater Clams with Tamarind & Basil (Leas Cha Ampil Tum)': '罗望子九层塔爆炒河蚬 (Leas Cha Ampil Tum)',
   'Cambodian Fresh Prawn Lime Ceviche (Pleah Bangkea Sros)': '高棉青柠生腌鲜虾沙拉 (Pleah Bangkea Sros)',
@@ -2094,15 +2125,15 @@ function computeLocalizedFood(food: FoodItem, lang: Language) {
   }
 
   // Simplified Chinese ('zh')
-  const rawZhName = EXACT_FOOD_NAME_ZH_MAP[food.nameEn] || translateDynamicTextToZh(food.nameEn);
+  const rawZhName = food.nameZh || EXACT_FOOD_NAME_ZH_MAP[food.nameEn] || translateDynamicTextToZh(food.nameEn);
   const zhName = sanitizeStrictLanguageText(rawZhName, 'zh');
-  const rawZhCategory = FOOD_CATEGORY_ZH_MAP[food.categoryEn] || translateDynamicTextToZh(food.categoryEn);
+  const rawZhCategory = food.categoryZh || FOOD_CATEGORY_ZH_MAP[food.categoryEn] || translateDynamicTextToZh(food.categoryEn);
   const zhCategory = sanitizeStrictLanguageText(rawZhCategory, 'zh');
   const diffZh = formatDifficultyByLang(food.difficulty, 'zh');
 
   const zhIngredients = (food.ingredients || []).map((ing: Ingredient) => {
     const lowerKey = (ing.nameEn || '').trim().toLowerCase();
-    const rawZhIngName = EXACT_INGREDIENT_ZH_MAP[lowerKey] || translateDynamicTextToZh(ing.nameEn);
+    const rawZhIngName = ing.nameZh || EXACT_INGREDIENT_ZH_MAP[lowerKey] || translateDynamicTextToZh(ing.nameEn);
     const zhIngName = sanitizeStrictLanguageText(rawZhIngName, 'zh');
     return {
       name: zhIngName,
@@ -2115,6 +2146,7 @@ function computeLocalizedFood(food: FoodItem, lang: Language) {
   const herbZh = zhIngredients[2]?.name || '高棉香草';
 
   const rawZhDesc =
+    food.descriptionZh ||
     CORE_100_DESC_ZH[food.id] ||
     (zhIngredients.length >= 1
       ? food.id === 'food-173'
@@ -2132,10 +2164,17 @@ function computeLocalizedFood(food: FoodItem, lang: Language) {
   const zhDesc = sanitizeStrictLanguageText(toConciseSummary(rawZhDesc, 'zh'), 'zh');
 
   const rawSteps = food.steps || [];
+  const hasDirectZhSteps = rawSteps.length > 0 && rawSteps.every((st) => Boolean(st.instructionZh));
   const allStepsInCoreMap =
     rawSteps.length > 0 && rawSteps.every((st) => Boolean(CORE_100_STEPS_ZH[(st.instructionEn || '').trim()]));
 
-  const zhSteps = allStepsInCoreMap
+  const zhSteps = hasDirectZhSteps
+    ? rawSteps.map((st: CookingStep) => ({
+        stepNumber: st.stepNumber,
+        instruction: sanitizeStrictLanguageText(st.instructionZh!, 'zh'),
+        tip: st.tipKh ? sanitizeStrictLanguageText(translateSignatureDish(st.tipKh, 'zh'), 'zh') : '',
+      }))
+    : allStepsInCoreMap
     ? rawSteps.map((st: CookingStep) => ({
         stepNumber: st.stepNumber,
         instruction: sanitizeStrictLanguageText(CORE_100_STEPS_ZH[(st.instructionEn || '').trim()], 'zh'),
