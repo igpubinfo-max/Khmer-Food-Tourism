@@ -24,7 +24,9 @@ import { buildMedicalScopeNotice, isMedicalOrHealthQuery, type BrainChip } from 
 import {
   buildGeminiGenerateContentUrls,
   getGeminiCandidateModels,
+  getWorkingGeminiRoute,
   isVertexExpressApiKey,
+  recordWorkingGeminiRoute,
   resolveGeminiApiKey,
   type AiAssistantMessage,
   type AiConversationMemory,
@@ -308,8 +310,8 @@ export interface BuildRequestParams {
   memory?: AiConversationMemory | null;
   image?: FoodImageInput | null;
   model: string;
-  /** progressive degradation when a model rejects optional fields: 0 = schema+thinking, 1 = schema, 2 = JSON mime only */
-  level?: 0 | 1 | 2;
+  /** progressive degradation when a model rejects optional fields: 0 = schema+thinking, 1 = schema, 2 = JSON mime only, 3 = plain contents-only */
+  level?: 0 | 1 | 2 | 3;
   now?: Date;
 }
 
@@ -387,6 +389,25 @@ export function buildGeminiRequestBody(params: BuildRequestParams): Record<strin
   }
   finalParts.push({ text: dynamicBlock });
 
+  const sysPromptText = buildFoodAssistantSystemPrompt(buildCatalogIndex(foods));
+
+  if (level === 3) {
+    const plainParts: Array<Record<string, unknown>> = [];
+    if (hasImage && image) {
+      plainParts.push({ inlineData: { mimeType: image.mimeType || 'image/jpeg', data: image.base64 } });
+    }
+    plainParts.push({
+      text: `${sysPromptText}\n\n${dynamicBlock}\n\nRespond ONLY with a single valid JSON object matching the instructions above.`,
+    });
+    return {
+      contents: normalizeContents(history, plainParts),
+      generationConfig: {
+        temperature: hasImage ? 0.2 : 0.35,
+        maxOutputTokens: 4096,
+      },
+    };
+  }
+
   const generationConfig: Record<string, unknown> = {
     temperature: hasImage ? 0.2 : 0.35,
     topP: 0.9,
@@ -399,7 +420,7 @@ export function buildGeminiRequestBody(params: BuildRequestParams): Record<strin
   }
 
   return {
-    systemInstruction: { parts: [{ text: buildFoodAssistantSystemPrompt(buildCatalogIndex(foods)) }] },
+    systemInstruction: { role: 'user', parts: [{ text: sysPromptText }] },
     contents: normalizeContents(history, finalParts),
     generationConfig,
   };
@@ -825,15 +846,25 @@ async function callGeminiOnce(key: string, model: string, body: unknown, timeout
     payload: body,
     timeoutMs,
   });
-  if (primary.ok) return primary;
-  if (isVertexExpressApiKey(key) && urls[1] && (primary.kind === 'auth' || primary.kind === 'not_found')) {
+  if (primary.ok) {
+    recordWorkingGeminiRoute(urls[0], model);
+    return primary;
+  }
+  if (urls[1] && primary.kind !== 'blocked' && primary.kind !== 'quota') {
     const secondary = await callGeminiRaw({
       url: urls[1],
       headers: { 'Content-Type': 'application/json' },
       payload: body,
       timeoutMs,
     });
-    if (secondary.ok) return secondary;
+    if (secondary.ok) {
+      recordWorkingGeminiRoute(urls[1], model);
+      return secondary;
+    }
+    // Prefer a non-auth failure so a rejected endpoint does not mask a model/schema mismatch on the real endpoint
+    if (primary.kind === 'auth' && secondary.kind !== 'auth') {
+      return secondary;
+    }
   }
   return primary;
 }
@@ -968,7 +999,7 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
     model: string
   ): Promise<{ message: AiAssistantMessage } | { fail: FoodAssistantFailure; detail?: string; stop?: boolean }> => {
     let lastFail: { fail: FoodAssistantFailure; detail?: string } = { fail: 'unavailable' };
-    for (const level of [0, 1, 2] as const) {
+    for (const level of [0, 1, 2, 3] as const) {
       if (Date.now() > deadline) return { fail: 'timeout', stop: true };
       const body = buildGeminiRequestBody({
         userText: text,
@@ -991,7 +1022,7 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
       }
       if (out.kind === 'bad_request') {
         lastFail = { fail: 'bad_response', detail: out.message };
-        continue; // degrade optional fields (thinking / schema) and retry the same model
+        continue; // degrade optional fields (thinking / schema / systemInstruction) and retry the same model
       }
       if (out.kind === 'no_key') return { fail: 'no_key', detail: out.message, stop: true };
       if (out.kind === 'auth') return { fail: 'auth', detail: out.message, stop: true };
@@ -1005,8 +1036,9 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
     return lastFail;
   };
 
-  const models = isVertexExpressApiKey(key)
-    ? ['gemini-2.5-flash', 'gemini-2.5-flash-lite', ...TEXT_MODELS.filter((m) => m !== 'gemini-2.5-flash' && m !== 'gemini-2.5-flash-lite')]
+  const savedWorkingModel = getWorkingGeminiRoute().model;
+  const models = savedWorkingModel
+    ? [savedWorkingModel, ...TEXT_MODELS.filter((m) => m !== savedWorkingModel)]
     : [...TEXT_MODELS];
   let failure: { fail: FoodAssistantFailure; detail?: string } = { fail: 'unavailable' };
   let triedDiscovery = false;

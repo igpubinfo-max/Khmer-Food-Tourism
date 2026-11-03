@@ -1373,10 +1373,41 @@ export function isVertexExpressApiKey(key?: string): boolean {
   return Boolean(key && key.trim().startsWith('AQ.'));
 }
 
+const WORKING_GEMINI_ROUTE_KEY = 'kft_working_gemini_route_v1';
+
+export function recordWorkingGeminiRoute(url: string, model: string): void {
+  try {
+    const endpoint = url.includes('aiplatform.googleapis.com') ? 'vertex' : 'aistudio';
+    localStorage.setItem(WORKING_GEMINI_ROUTE_KEY, JSON.stringify({ endpoint, model, ts: Date.now() }));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+export function getWorkingGeminiRoute(): { endpoint?: 'vertex' | 'aistudio'; model?: string } {
+  try {
+    const raw = localStorage.getItem(WORKING_GEMINI_ROUTE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') return parsed;
+    }
+  } catch {
+    // ignore
+  }
+  return {};
+}
+
 export function buildGeminiGenerateContentUrls(key: string, model: string): string[] {
   const cleanKey = encodeURIComponent(key.trim());
   const aiStudioUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${cleanKey}`;
   const vertexExpressUrl = `https://aiplatform.googleapis.com/v1/publishers/google/models/${model}:generateContent?key=${cleanKey}`;
+  const savedRoute = getWorkingGeminiRoute();
+  if (savedRoute.endpoint === 'aistudio') {
+    return [aiStudioUrl, vertexExpressUrl];
+  }
+  if (savedRoute.endpoint === 'vertex') {
+    return [vertexExpressUrl, aiStudioUrl];
+  }
   return isVertexExpressApiKey(key)
     ? [vertexExpressUrl, aiStudioUrl]
     : [aiStudioUrl, vertexExpressUrl];
@@ -1397,10 +1428,12 @@ const DEFAULT_GEMINI_MODELS = [
 ];
 
 const VERTEX_EXPRESS_GEMINI_MODELS = [
-  `gemini-${GEMINI_V25}-flash`,
-  `gemini-${GEMINI_V25}-flash-lite`,
   'gemini-3.5-flash-lite',
   'gemini-3.8-flash',
+  'gemini-3.1-flash-lite',
+  'gemini-flash-lite-latest',
+  `gemini-${GEMINI_V25}-flash`,
+  `gemini-${GEMINI_V25}-flash-lite`,
   `gemini-${GEMINI_V15}-flash`,
 ];
 
@@ -1502,6 +1535,7 @@ export async function testGeminiApiConnection(apiKey?: string): Promise<{ ok: bo
         });
         clearTimeout(timer);
         if (response.ok) {
+          recordWorkingGeminiRoute(url, model);
           return { ok: true, model };
         }
         const errData = await response.json().catch(() => ({}));
