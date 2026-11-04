@@ -274,12 +274,17 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
           </div>
 
           {/* Bottom meta */}
-          <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 dark:border-slate-700/60 text-xs sm:text-sm">
+          <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 dark:border-slate-700/60 text-xs sm:text-sm font-khmer">
             <div className="flex items-center gap-1 text-slate-700 dark:text-slate-200 font-bold">
               <Star className="w-4 h-4 fill-current text-amber-500" />
               <span>{destination.rating ?? 4.8}</span>
               <span className="text-slate-400 text-xs">({destination.reviewCount ?? 0})</span>
             </div>
+            {destination.priceRange && (
+              <span className="px-2 py-0.5 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold text-xs border border-amber-200/70 dark:border-amber-800/70">
+                💵 {destination.priceRange}
+              </span>
+            )}
           </div>
         </div>
       </div>

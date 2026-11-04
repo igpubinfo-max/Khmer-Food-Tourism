@@ -49,11 +49,13 @@ export const TouristDetailModal: React.FC = () => {
   const [editDescriptionKh, setEditDescriptionKh] = useState('');
   const [editDescriptionEn, setEditDescriptionEn] = useState('');
   const [editHighlightsText, setEditHighlightsText] = useState('');
+  const [activeHeroPhoto, setActiveHeroPhoto] = useState('');
 
   const isAdmin = currentUser?.role === 'admin';
 
   useEffect(() => {
     if (selectedDestination) {
+      setActiveHeroPhoto(selectedDestination.photoUrl || '');
       setEditNameKh(selectedDestination.nameKh || '');
       setEditNameEn(selectedDestination.nameEn || '');
       setEditCategoryKh(selectedDestination.categoryKh || '');
@@ -512,11 +514,11 @@ export const TouristDetailModal: React.FC = () => {
           ) : (
           <>
           {/* Hero Image or Clean Destination Icon Banner */}
-          {selectedDestination.photoUrl && selectedDestination.photoUrl.trim() ? (
+          {(activeHeroPhoto || selectedDestination.photoUrl || '').trim() ? (
             <div className="relative h-64 sm:h-72 w-full bg-slate-800">
               <img 
-                key={selectedDestination.photoUrl}
-                src={selectedDestination.photoUrl} 
+                key={activeHeroPhoto || selectedDestination.photoUrl}
+                src={activeHeroPhoto || selectedDestination.photoUrl} 
                 alt={loc.name}
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).style.display = 'none';
@@ -557,6 +559,45 @@ export const TouristDetailModal: React.FC = () => {
           )}
 
           <div className="p-4 sm:p-6 space-y-5">
+            {/* Interactive Room / Place Photo Gallery Strip */}
+            {selectedDestination.galleryPhotos && selectedDestination.galleryPhotos.length > 1 && (
+              <div className="space-y-1.5">
+                <p className="text-xs font-bold text-slate-600 dark:text-slate-300 font-khmer">
+                  📸{' '}
+                  {tr(
+                    language,
+                    `រូបភាពបន្ទប់ និងបរិវេណ (${selectedDestination.galleryPhotos.length} សន្លឹក — ចុចមើលរូបនីមួយៗ)`,
+                    `Room & Property Photos (${selectedDestination.galleryPhotos.length} photos — tap to preview)`,
+                    `客房与酒店实拍图（共 ${selectedDestination.galleryPhotos.length} 张，点击切换）`
+                  )}
+                </p>
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                  {selectedDestination.galleryPhotos.map((gUrl, gIdx) => {
+                    const isSelected = (activeHeroPhoto || selectedDestination.photoUrl) === gUrl;
+                    return (
+                      <button
+                        key={`${gUrl}-${gIdx}`}
+                        type="button"
+                        onClick={() => setActiveHeroPhoto(gUrl)}
+                        className={`relative w-16 h-12 rounded-xl overflow-hidden shrink-0 border-2 transition cursor-pointer ${
+                          isSelected
+                            ? 'border-emerald-500 ring-2 ring-emerald-500/30 scale-105'
+                            : 'border-slate-200 dark:border-slate-700 opacity-80 hover:opacity-100'
+                        }`}
+                      >
+                        <img
+                          src={gUrl}
+                          alt={`${loc.name} ${gIdx + 1}`}
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Admin-only Location Review Notice if flagged */}
             {isAdmin && !isPlaceLocationVerified(selectedDestination) && (
               <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-xs font-khmer text-amber-900 dark:text-amber-200">
@@ -572,6 +613,25 @@ export const TouristDetailModal: React.FC = () => {
 
             {/* Direct Google Maps & Navigation Action Buttons */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {selectedDestination.bookingUrl && (
+                <a
+                  href={selectedDestination.bookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="sm:col-span-2 w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-[#064E3B] via-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white text-xs sm:text-sm font-bold shadow-md transition active:scale-98 cursor-pointer font-khmer border border-emerald-400/30"
+                >
+                  <span>🏨</span>
+                  <span>
+                    {tr(
+                      language,
+                      `មើលបន្ទប់ និងកក់ផ្ទាល់លើ KhmerRooms${selectedDestination.priceRange ? ` (${selectedDestination.priceRange})` : ''}`,
+                      `View Rooms & Book on KhmerRooms${selectedDestination.priceRange ? ` (${selectedDestination.priceRange})` : ''}`,
+                      `在 KhmerRooms 查看房型并预订${selectedDestination.priceRange ? ` (${selectedDestination.priceRange})` : ''}`
+                    )}
+                  </span>
+                  <ExternalLink className="w-3.5 h-3.5 opacity-85 shrink-0" />
+                </a>
+              )}
               {selectedDestination.phone && (
                 <a
                   href={`tel:${selectedDestination.phone.replace(/\s+/g, '')}`}
