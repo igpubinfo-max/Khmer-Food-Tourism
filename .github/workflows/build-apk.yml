@@ -52,7 +52,7 @@ jobs:
 
       - name: 6. Deploy Web App to GitHub Pages (gh-pages)
         uses: peaceiris/actions-gh-pages@v4
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test-ui-apk'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
@@ -121,7 +121,7 @@ jobs:
 
       - name: 10. Publish GitHub Release with Signed APK & Play Store AAB
         uses: softprops/action-gh-release@v2
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test-ui-apk'
         with:
           tag_name: v2.5.4
           name: "Cambodia Flavors & Tourism v2.5.4"

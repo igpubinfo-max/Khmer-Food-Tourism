@@ -24,9 +24,10 @@ if %ERRORLEVEL% neq 0 (
 )
 
 echo.
-echo Step 2: Syncing local 'main' branch and pushing to GitHub (test-ui-apk and main)...
+echo Step 2: Syncing local 'main' & 'test-ui-apk' branches and pushing to GitHub...
 "%GIT_EXE%" branch -f main HEAD 2>nul
-"%GIT_EXE%" push -u origin test-ui-apk --force-with-lease
+"%GIT_EXE%" branch -f test-ui-apk HEAD 2>nul
+"%GIT_EXE%" push -u origin HEAD:test-ui-apk --force-with-lease
 "%GIT_EXE%" push origin HEAD:main --force-with-lease
 
 echo.
@@ -37,8 +38,8 @@ if %ERRORLEVEL% equ 0 (
     echo 2. iOS IPA is building and uploading to Apple App Store Connect!
     echo 3. Live Website (GitHub Pages) is updating automatically!
     echo.
-    echo Direct APK Download Link (updates when build finishes in ~2 mins):
-    echo https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/download/v2.3.1/KhmerFoodTourism-v2.3.1.apk
+    echo Latest Releases Page (APK + AAB):
+    echo https://github.com/igpubinfo-max/Khmer-Food-Tourism/releases/latest
     echo.
     echo GitHub Actions Build Status Page:
     echo https://github.com/igpubinfo-max/Khmer-Food-Tourism/actions/workflows/build-apk.yml

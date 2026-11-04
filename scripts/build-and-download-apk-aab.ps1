@@ -241,7 +241,7 @@ function Wait-ForGitHubWorkflow([string]$targetSha, [datetime]$notBeforeUtc) {
         $elapsedStr = "{0:mm\:ss}" -f $sw.Elapsed
         try {
             $cb = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
-            $resp = Get-GitHubJson "https://api.github.com/repos/$OwnerRepo/actions/workflows/$WorkflowFile/runs?branch=main&per_page=8&cb=$cb"
+            $resp = Get-GitHubJson "https://api.github.com/repos/$OwnerRepo/actions/workflows/$WorkflowFile/runs?per_page=10&cb=$cb"
             $runs = @($resp.workflow_runs | Where-Object { $_.head_sha -eq $targetSha })
             if ($runs.Count -gt 0) {
                 $matchedRun = $runs | Sort-Object -Property run_number -Descending | Select-Object -First 1
@@ -287,26 +287,33 @@ $localVC = $info.VersionCode
 Write-Host "  Project Folder : $RepoRoot" -ForegroundColor Gray
 Write-Host "  App Version    : v$versionName (Local Build Code: $localVC)" -ForegroundColor White
 
-# Fetch origin/main quietly so we can compare accurately
+# Fetch origin/main and origin/test-ui-apk quietly so we can compare accurately
 Write-Host "  Checking Git & Cloud Build status..." -ForegroundColor Cyan
-$null = Invoke-GitQuiet @("fetch", "origin", "main", "--quiet")
+$null = Invoke-GitQuiet @("fetch", "origin", "main", "test-ui-apk", "--quiet")
 
 $headSha = (Invoke-GitQuiet @("rev-parse", "HEAD")).Output
 $remoteMainSha = (Invoke-GitQuiet @("rev-parse", "origin/main")).Output
+$remoteTestSha = (Invoke-GitQuiet @("rev-parse", "origin/test-ui-apk")).Output
+
+# Ensure local and remote test-ui-apk stay synced with HEAD if already on main
+if ($headSha -and $remoteTestSha -and ($headSha -ne $remoteTestSha)) {
+    $null = Invoke-GitQuiet @("branch", "-f", "test-ui-apk", "HEAD")
+    $null = Invoke-GitQuiet @("push", "-u", "origin", "HEAD:test-ui-apk", "--force-with-lease")
+}
 
 # Check uncommitted app changes (ignore this helper script itself when deciding if app code changed)
 $statusRes = Invoke-GitQuiet @("status", "--porcelain")
 $rawStatus = @($statusRes.Output -split "`r?`n" | Where-Object { $_ })
-$helperIgnoreRegex = '^.. (Build_APK_and_AAB\.bat|scripts/build-and-download-apk-aab\.ps1|\.gitignore)$'
+$helperIgnoreRegex = '^.. (Build_APK_and_AAB\.bat|Push_Test_Branch\.bat|Push_To_GitHub\.bat|scripts/build-and-download-apk-aab\.ps1|\.gitignore)$'
 $appDirtyLines = @($rawStatus | Where-Object { $_ -and ($_ -notmatch $helperIgnoreRegex) })
 
 $hasAppChanges = ($appDirtyLines.Count -gt 0) -or ($headSha -ne $remoteMainSha)
 
-# Query latest GitHub Actions run on main
+# Query latest GitHub Actions run across branches
 $latestRunNumber = 391
 $matchingHeadRun = $null
 try {
-    $runsResp = Get-GitHubJson "https://api.github.com/repos/$OwnerRepo/actions/workflows/$WorkflowFile/runs?branch=main&per_page=8"
+    $runsResp = Get-GitHubJson "https://api.github.com/repos/$OwnerRepo/actions/workflows/$WorkflowFile/runs?per_page=10"
     if ($runsResp.workflow_runs -and $runsResp.workflow_runs.Count -gt 0) {
         $latestRunNumber = [int]($runsResp.workflow_runs[0].run_number)
         $matchingHeadRun = $runsResp.workflow_runs | Where-Object { $_.head_sha -eq $headSha } | Select-Object -First 1
@@ -436,17 +443,19 @@ if ($commitRes.ExitCode -ne 0) {
 
 $newSha = (Invoke-GitQuiet @("rev-parse", "HEAD")).Output
 $null = Invoke-GitQuiet @("branch", "-f", "main", "HEAD")
+$null = Invoke-GitQuiet @("branch", "-f", "test-ui-apk", "HEAD")
 
-Write-Host "  Pushing commit $($newSha.Substring(0,7)) to origin/main..." -ForegroundColor Cyan
+Write-Host "  Pushing commit $($newSha.Substring(0,7)) to origin/main & origin/test-ui-apk..." -ForegroundColor Cyan
 $pushMainRes = Invoke-GitQuiet @("push", "origin", "HEAD:main", "--force-with-lease")
-if ($pushMainRes.ExitCode -ne 0) {
-    throw "Git push to origin/main failed: $($pushMainRes.Output)"
+$pushTestRes = Invoke-GitQuiet @("push", "-u", "origin", "HEAD:test-ui-apk", "--force-with-lease")
+if ($pushMainRes.ExitCode -ne 0 -and $pushTestRes.ExitCode -ne 0) {
+    throw "Git push to origin failed: $($pushMainRes.Output)"
 }
 
 # Keep current workspace branch synced quietly without ever throwing on git stderr output
 $currentBranch = (Invoke-GitQuiet @("branch", "--show-current")).Output
-if ($currentBranch -and $currentBranch -ne "main") {
-    $null = Invoke-GitQuiet @("push", "-u", "origin", $currentBranch, "--force-with-lease")
+if ($currentBranch -and $currentBranch -ne "main" -and $currentBranch -ne "test-ui-apk") {
+    $null = Invoke-GitQuiet @("push", "-u", "origin", "HEAD:$currentBranch", "--force-with-lease")
 }
 
 $completedRun = Wait-ForGitHubWorkflow -targetSha $newSha -notBeforeUtc $buildStartTimeUtc
