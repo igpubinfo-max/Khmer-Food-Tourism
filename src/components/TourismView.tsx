@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { TouristCard } from './TouristCard';
-import { Compass } from 'lucide-react';
+import { Compass, MapPin } from 'lucide-react';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
+import { DISH_PROVINCES } from '../utils/foodFilters';
 import { tr } from '../utils/i18n';
 
-const TOURISM_BATCH_SIZE = 20;
+const TOURISM_BATCH_SIZE = 24;
 
 export const TourismView: React.FC = () => {
   const {
     destinations,
     language,
     selectedProvince,
+    setSelectedProvince,
   } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [visibleCount, setVisibleCount] = useState<number>(TOURISM_BATCH_SIZE);
@@ -31,35 +33,56 @@ export const TourismView: React.FC = () => {
     { id: 'cultural', nameKh: 'វប្បធម៌ & ប្រវត្តិសាស្ត្រ', nameEn: 'Cultural & History', nameZh: '文化与历史遗址' },
   ];
 
-  const verifiedDestinationsWithPhotos = useMemo(
-    () => destinations.filter((d) => Boolean(d && d.photoUrl && d.photoUrl.trim())),
-    [destinations]
-  );
+  // Build 25 Provinces & Capital City dropdown options with live attraction counts
+  const provinceOptions = useMemo(() => {
+    return DISH_PROVINCES.map((p) => {
+      const cleanKey = p.kh.replace(/^រាជធានី|^ខេត្ត/g, '').trim();
+      const count = destinations.filter((d) =>
+        (d.provinceKh || '').replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanKey)
+      ).length;
+      return {
+        ...p,
+        value: p.kh,
+        count,
+      };
+    });
+  }, [destinations]);
 
-  const sessionShuffledDestinations = useMemo(
-    () => shuffleForCurrentSession(verifiedDestinationsWithPhotos),
-    [verifiedDestinationsWithPhotos]
-  );
+  // Separate HD-photo destinations (shuffled first) and compact icon-row destinations (shuffled second)
+  const orderedSessionDestinations = useMemo(() => {
+    const withPhoto = destinations.filter((d) => Boolean(d && d.photoUrl && d.photoUrl.trim()));
+    const withoutPhoto = destinations.filter((d) => Boolean(d && (!d.photoUrl || !d.photoUrl.trim())));
+    return [
+      ...shuffleForCurrentSession(withPhoto),
+      ...shuffleForCurrentSession(withoutPhoto),
+    ];
+  }, [destinations]);
 
   const filteredDestinations = useMemo(() => {
     const cleanSelProv = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
-    return sessionShuffledDestinations.filter((d) => {
+    return orderedSessionDestinations.filter((d) => {
       if (selectedCategory === 'trending_social') {
         if (!d.isTrendingSocial) return false;
       } else if (selectedCategory !== 'all' && d.categorySlug !== selectedCategory) {
         return false;
       }
-      if (cleanSelProv && !d.provinceKh.replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) {
+      if (cleanSelProv && !(d.provinceKh || '').replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) {
         return false;
       }
       return true;
     });
-  }, [sessionShuffledDestinations, selectedCategory, selectedProvince]);
+  }, [orderedSessionDestinations, selectedCategory, selectedProvince]);
 
   const displayedDestinations = useMemo(
     () => filteredDestinations.slice(0, visibleCount),
     [filteredDestinations, visibleCount]
   );
+
+  const hasActiveFilters = selectedCategory !== 'all' || Boolean(selectedProvince);
+  const resetAllFilters = () => {
+    setSelectedCategory('all');
+    setSelectedProvince('');
+  };
 
   useEffect(() => {
     const node = loadMoreTriggerRef.current;
@@ -80,7 +103,7 @@ export const TourismView: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-6">
-      {/* Title Bar (Search removed — kept on Home Screen only) */}
+      {/* Title Bar */}
       <div className="flex items-center justify-between gap-2">
         <div>
           <h2 className="font-moul text-sm sm:text-base text-[#0F172A] dark:text-white flex items-center gap-2">
@@ -108,6 +131,52 @@ export const TourismView: React.FC = () => {
             </button>
           );
         })}
+      </div>
+
+      {/* 25 Provinces & Capital City Dropdown Filter */}
+      <div className="grid grid-cols-1 gap-2 font-khmer">
+        <label className="block">
+          <span className="flex items-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
+            <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>
+              {tr(
+                language,
+                'ជ្រើសរើសរាជធានី-ខេត្ត (២៥ ខេត្ត/ក្រុង)',
+                'Select Province / Capital (25 Provinces)',
+                '选择省份/直辖市（柬埔寨 25 省市）'
+              )}
+            </span>
+          </span>
+          <select
+            value={selectedProvince}
+            onChange={(e) => setSelectedProvince(e.target.value)}
+            className="w-full min-h-[44px] px-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-900 dark:text-white cursor-pointer"
+          >
+            <option value="">
+              {tr(
+                language,
+                `គ្រប់រាជធានី-ខេត្តទាំង ២៥ (${destinations.length})`,
+                `All 25 Provinces & Capital (${destinations.length})`,
+                `全部 25 个省市 (${destinations.length})`
+              )}
+            </option>
+            {provinceOptions.map((p) => (
+              <option key={p.id} value={p.value}>
+                {tr(language, p.fullKh, p.en, p.zh)} ({p.count})
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={resetAllFilters}
+            className="min-h-[42px] rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold active:scale-[0.98] transition cursor-pointer"
+          >
+            ↺ {tr(language, 'កំណត់តម្រងឡើងវិញ', 'Reset filters', '重置筛选')}
+          </button>
+        )}
       </div>
 
       {/* Destination List */}

@@ -5,6 +5,7 @@ import {
   Send, Share2, Compass, Camera, Bookmark, Edit2, Save
 } from 'lucide-react';
 import { TouristImageModal } from './TouristImageModal';
+import { DefaultDestinationIcon } from './TouristCard';
 import {
   TouristDestination,
   getDestinationGoogleExternalUrl,
@@ -510,33 +511,50 @@ export const TouristDetailModal: React.FC = () => {
             </form>
           ) : (
           <>
-          {/* Hero Image */}
-          <div className="relative h-64 sm:h-72 w-full bg-slate-800">
-            <img 
-              key={selectedDestination.photoUrl}
-              src={selectedDestination.photoUrl} 
-              alt={loc.name}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = '/destinations/dest-1.jpg';
-              }}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
-            
-            <div className="absolute bottom-3.5 left-4 right-24 text-white">
-              <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-[#064E3B] text-emerald-100 border border-emerald-400/40 shadow mb-2 inline-block">
-                {loc.category}
-              </span>
-              <h2 className="text-xl sm:text-2xl font-extrabold font-moul leading-snug drop-shadow text-white">
-                {loc.name}
-              </h2>
-            </div>
+          {/* Hero Image or Clean Destination Icon Banner */}
+          {selectedDestination.photoUrl && selectedDestination.photoUrl.trim() ? (
+            <div className="relative h-64 sm:h-72 w-full bg-slate-800">
+              <img 
+                key={selectedDestination.photoUrl}
+                src={selectedDestination.photoUrl} 
+                alt={loc.name}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = 'none';
+                }}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+              
+              <div className="absolute bottom-3.5 left-4 right-24 text-white">
+                <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-[#064E3B] text-emerald-100 border border-emerald-400/40 shadow mb-2 inline-block">
+                  {loc.category}
+                </span>
+                <h2 className="text-xl sm:text-2xl font-extrabold font-moul leading-snug drop-shadow text-white">
+                  {loc.name}
+                </h2>
+              </div>
 
-            {/* Reference Image Label (រូបភាពយោង) */}
-            <div className="absolute bottom-2.5 right-3 z-10 px-1.5 py-0.5 rounded bg-black/55 backdrop-blur-xs text-[8px] sm:text-[9px] text-white/85 font-khmer border border-white/15 select-none pointer-events-none shadow-2xs">
-              <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
+              {/* Reference Image Label (រូបភាពយោង) */}
+              <div className="absolute bottom-2.5 right-3 z-10 px-1.5 py-0.5 rounded bg-black/55 backdrop-blur-xs text-[8px] sm:text-[9px] text-white/85 font-khmer border border-white/15 select-none pointer-events-none shadow-2xs">
+                <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="relative pt-16 pb-5 px-4 sm:px-6 bg-gradient-to-br from-[#064E3B] via-[#093228] to-slate-900 border-b border-emerald-500/30 flex items-center gap-3.5">
+              <DefaultDestinationIcon
+                categorySlug={selectedDestination.categorySlug}
+                className="w-14 h-14 rounded-2xl border border-emerald-400/40 shadow-md"
+              />
+              <div className="min-w-0 flex-1 text-white">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 mb-1.5 inline-block font-khmer">
+                  {loc.category}
+                </span>
+                <h2 className="text-lg sm:text-xl font-extrabold font-moul leading-snug text-white">
+                  {loc.name}
+                </h2>
+              </div>
+            </div>
+          )}
 
           <div className="p-4 sm:p-6 space-y-5">
             {/* Admin-only Location Review Notice if flagged */}
