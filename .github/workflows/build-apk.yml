@@ -2,11 +2,11 @@ name: Build Android APK & Play Store AAB
 
 on:
   push:
-    branches: [ main, master, test-ui-apk ]
+    branches: [ main, master ]
   workflow_dispatch:
 
 concurrency:
-  group: build-android-apk-${{ github.ref }}
+  group: build-android-apk
   cancel-in-progress: true
 
 permissions:

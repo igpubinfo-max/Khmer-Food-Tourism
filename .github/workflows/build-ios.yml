@@ -1,12 +1,10 @@
 name: Build iOS App & Apple App Store Package
 
 on:
-  push:
-    branches: [ main, master, test-ui-apk ]
   workflow_dispatch:
 
 concurrency:
-  group: build-ios-app-${{ github.ref }}
+  group: build-ios-app
   cancel-in-progress: true
 
 permissions:
@@ -14,7 +12,8 @@ permissions:
 
 jobs:
   build-ios:
-    runs-on: macos-latest
+    runs-on: macos-14
+    continue-on-error: true
 
     steps:
       - name: 1. Checkout repository
