@@ -76,17 +76,17 @@ const DailyHabitCardInner: React.FC<Props> = () => {
       if (isGuest) {
         return tr(
           language,
-          `៖ 0/${FOOD_CHECKIN_REWARD_TARGET} (ចូលគណនី)`,
-          `: 0/${FOOD_CHECKIN_REWARD_TARGET} (Sign in)`,
-          `：0/${FOOD_CHECKIN_REWARD_TARGET}（请登录）`
+          `៖ 0/${FOOD_CHECKIN_REWARD_TARGET} គ្រាន់តែចុចបានភ្លក់ (ចូលគណនី)`,
+          `: 0/${FOOD_CHECKIN_REWARD_TARGET} គ្រាន់តែចុចបានភ្លក់ (Sign in)`,
+          `：0/${FOOD_CHECKIN_REWARD_TARGET} គ្រាន់តែចុចបានភ្លក់（请登录）`
         );
       }
       const capReached = reward.todayCount >= reward.dailyCap;
       return tr(
         language,
-        `៖ ${reward.progress}/${reward.target} ដង${capReached ? ' • ថ្ងៃនេះរួចរាល់' : ''}`,
-        `: ${reward.progress}/${reward.target}${capReached ? ' • today done' : ''}`,
-        `：${reward.progress}/${reward.target}${capReached ? ' • 今日已计' : ''}`
+        `៖ ${reward.progress}/${reward.target} គ្រាន់តែចុចបានភ្លក់${capReached ? ' • ថ្ងៃនេះរួចរាល់' : ''}`,
+        `: ${reward.progress}/${reward.target} គ្រាន់តែចុចបានភ្លក់${capReached ? ' • today done' : ''}`,
+        `：${reward.progress}/${reward.target} គ្រាន់តែចុចបានភ្លក់${capReached ? ' • 今日已计' : ''}`
       );
     }
     if (goal.kind === 'badge') {
