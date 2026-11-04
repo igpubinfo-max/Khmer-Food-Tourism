@@ -1,7 +1,7 @@
-export const APP_VERSION = 'v2.5.5';
-export const APP_VERSION_NAME = '2.5.5';
+export const APP_VERSION = 'v2.5.6';
+export const APP_VERSION_NAME = '2.5.6';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1402;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1403;
 export const APP_RELEASE_DATE = '2026-11-04';
 
 /**
@@ -1074,7 +1074,18 @@ export function organizeAndDeduplicateFoods(items: FoodItem[]): FoodItem[] {
     bong_aem: 4
   };
 
+  const isVeg = (f: FoodItem): boolean =>
+    Boolean(
+      f.isVegetarian ||
+        /បួស|\bvegetarian\b|\bvegan\b/i.test(`${f.nameKh} ${f.nameEn} ${f.categoryKh}`)
+    );
+
   const sorted = Array.from(byId.values()).sort((a, b) => {
+    const va = isVeg(a) ? 1 : 0;
+    const vb = isVeg(b) ? 1 : 0;
+    if (va !== vb) {
+      return va - vb;
+    }
     const ga = classifyKhmerFoodPrimaryGroup(a);
     const gb = classifyKhmerFoodPrimaryGroup(b);
     if (groupOrder[ga] !== groupOrder[gb]) {

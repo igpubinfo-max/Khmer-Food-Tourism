@@ -94,7 +94,7 @@ export const FoodView: React.FC = () => {
   // Ordered with ម្ហូបបួស (Vegetarian), សម្ល, ឆា, ស្ងោរ, បង្អែម
   const categories: Array<{ id: string; nameKh: string; nameEn: string; nameZh: string; icon: React.ReactNode }> = [
     { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Dishes', nameZh: '全部菜品', icon: <IconDishCategory className="w-4 h-4" /> },
-    { id: 'vegetarian', nameKh: 'ឆា អាំង ញ៉ាំ', nameEn: 'Vegetarian', nameZh: '高棉素食', icon: <IconHealthyLeaf className="w-4 h-4 text-emerald-500" /> },
+    { id: 'vegetarian', nameKh: 'ម្ហូបបួស', nameEn: 'Vegetarian', nameZh: '高棉素食', icon: <IconHealthyLeaf className="w-4 h-4 text-emerald-500" /> },
     { id: 'samlor', nameKh: 'សម្ល', nameEn: 'Soups & Curries', nameZh: '浓汤/咖喱', icon: <IconKhmerFoodBowl className="w-4 h-4" /> },
     { id: 'cha', nameKh: 'ឆា & អាំង', nameEn: 'Stir-Fry & Grill', nameZh: '热炒/烧烤', icon: <IconGrillFlame className="w-4 h-4" /> },
     { id: 'sngor', nameKh: 'ស្ងោរ & គុយទាវ', nameEn: 'Broths & Noodles', nameZh: '清汤/汤粉', icon: <Soup className="w-4 h-4 text-emerald-500" /> },
@@ -116,6 +116,7 @@ export const FoodView: React.FC = () => {
         return isVegetarianDish(f);
       }
       if (selectedCategory !== 'all') {
+        if (isVegetarianDish(f)) return false;
         const grp = classifyKhmerFoodPrimaryGroup(f);
         if (grp !== selectedCategory && f.categorySlug !== selectedCategory) {
           return false;
@@ -164,8 +165,9 @@ export const FoodView: React.FC = () => {
     [filteredFoods, visibleCount]
   );
 
-  // Group displayedFoods by primary category in exact order: សម្ល, ឆា, ស្ងោរ, បង្អែម
+  // Group displayedFoods by primary category in exact order: ម្ហូបបួស, សម្ល, ឆា, ស្ងោរ, បង្អែម
   const groupedDisplayedSections = useMemo(() => {
+    const vegetarianItems: FoodItem[] = [];
     const map: Record<KhmerFoodPrimaryGroup, FoodItem[]> = {
       samlor: [],
       cha: [],
@@ -173,16 +175,48 @@ export const FoodView: React.FC = () => {
       bong_aem: [],
     };
     for (const f of displayedFoods) {
-      const grp = classifyKhmerFoodPrimaryGroup(f);
-      map[grp].push(f);
+      if (isVegetarianDish(f)) {
+        vegetarianItems.push(f);
+      } else {
+        const grp = classifyKhmerFoodPrimaryGroup(f);
+        map[grp].push(f);
+      }
     }
-    return KHMER_FOOD_PRIMARY_CATEGORIES
-      .map((meta) => ({
-        meta,
-        items: map[meta.id],
-        totalInCategory: categoryCounts[meta.id] || 0,
-      }))
-      .filter((sec) => sec.items.length > 0);
+    const sections: Array<{
+      meta: { id: string; nameKh: string; nameEn: string; titleZh: string };
+      items: FoodItem[];
+      totalInCategory: number;
+    }> = [];
+
+    for (const meta of KHMER_FOOD_PRIMARY_CATEGORIES) {
+      if (map[meta.id].length > 0) {
+        sections.push({
+          meta: {
+            id: meta.id,
+            nameKh: meta.nameKh,
+            nameEn: meta.nameEn,
+            titleZh: sectionZhMeta[meta.id]?.titleZh || meta.nameEn,
+          },
+          items: map[meta.id],
+          totalInCategory: categoryCounts[meta.id] || 0,
+        });
+      }
+    }
+
+    if (vegetarianItems.length > 0) {
+      sections.push({
+        meta: {
+          id: 'vegetarian',
+          nameKh: 'ម្ហូបបួស',
+          nameEn: 'Vegetarian Dishes',
+          titleZh: '高棉传统素食',
+        },
+        items: vegetarianItems,
+        totalInCategory: categoryCounts.vegetarian || vegetarianItems.length,
+      });
+    }
+
+    return sections;
   }, [displayedFoods, categoryCounts]);
 
   return (
@@ -367,14 +401,15 @@ export const FoodView: React.FC = () => {
       ) : (
         <div className="space-y-6">
           {groupedDisplayedSections.map((section) => {
-            const zhMeta = sectionZhMeta[section.meta.id];
             return (
               <div key={section.meta.id} className="space-y-3">
                 {/* Category Section Banner Header */}
                 <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-gradient-to-r from-[#064E3B] via-[#047857] to-emerald-700 text-white shadow-sm border border-emerald-400/30 font-khmer">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0 border border-white/20">
-                      {section.meta.id === 'samlor' ? (
+                      {section.meta.id === 'vegetarian' ? (
+                        <IconHealthyLeaf className="w-5 h-5 text-emerald-200" />
+                      ) : section.meta.id === 'samlor' ? (
                         <IconKhmerFoodBowl className="w-5 h-5" />
                       ) : section.meta.id === 'cha' ? (
                         <IconGrillFlame className="w-5 h-5" />
@@ -385,7 +420,7 @@ export const FoodView: React.FC = () => {
                       )}
                     </div>
                     <h3 className="font-moul text-sm sm:text-base text-white truncate">
-                      {tr(language, section.meta.nameKh.replace(/^[០-៩0-9]+\.\s*/, ''), section.meta.nameEn.replace(/^[0-9]+\.\s*/, ''), zhMeta?.titleZh || section.meta.nameEn)}
+                      {tr(language, section.meta.nameKh.replace(/^[០-៩0-9]+\.\s*/, ''), section.meta.nameEn.replace(/^[0-9]+\.\s*/, ''), section.meta.titleZh || section.meta.nameEn)}
                     </h3>
                   </div>
                 </div>
