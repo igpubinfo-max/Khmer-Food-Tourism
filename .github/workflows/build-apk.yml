@@ -50,19 +50,11 @@ jobs:
           npm run build
           cp dist/index.html dist/404.html
 
-      - name: 6. Deploy Web App to GitHub Pages (gh-pages)
-        uses: peaceiris/actions-gh-pages@v4
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test-ui-apk'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          keep_files: false
-
-      - name: 7. Copy Web Assets directly into Android
+      - name: 6. Copy Web Assets directly into Android
         run: |
           rm -rf android/app/src/main/assets/public && mkdir -p android/app/src/main/assets/public && cp -rf dist/* android/app/src/main/assets/public/
 
-      - name: 8. Build & V1+V2+V3 Sign Single Direct-Install APK & Play Store AAB
+      - name: 7. Build & V1+V2+V3 Sign Single Direct-Install APK & Play Store AAB
         run: |
           if [ ! -f android/app/khmerfood-upload-key.jks ]; then
             keytool -genkeypair -v -noprompt \
@@ -111,7 +103,7 @@ jobs:
 
           ls -la release_out/
 
-      - name: 9. Upload Android Packages Artifact (Single APK + Play Store AAB)
+      - name: 8. Upload Android Packages Artifact (Single APK + Play Store AAB)
         uses: actions/upload-artifact@v4
         with:
           name: Cambodia-Flavors-Tourism-Release-Packages
@@ -119,22 +111,31 @@ jobs:
             release_out/CambodiaFlavorsTourism-v2.5.0.apk
             release_out/CambodiaFlavorsTourism-v2.5.0-PlayStore.aab
 
-      - name: 10. Publish GitHub Release with Signed APK & Play Store AAB
+      - name: 9. Publish GitHub Release with Signed APK & Play Store AAB
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test-ui-apk'
         with:
-          tag_name: v2.5.4
-          name: "Cambodia Flavors & Tourism v2.5.4"
+          tag_name: v2.5.7
+          name: "Cambodia Flavors & Tourism v2.5.7"
           make_latest: true
           body: |
-            ### 🇰🇭 Cambodia Flavors & Tourism v2.5.4
+            ### 🇰🇭 Cambodia Flavors & Tourism v2.5.7
             **រសជាតិ និងទេសចរណ៍កម្ពុជា • 柬埔寨风味与旅游**
 
-            **Official Release v2.5.4:**
-            - 📲 **CambodiaFlavorsTourism-v2.5.4.apk:** Official Android APK with Reordered Home Screen Sections & Clean Live Database Statistics (1-Tap Direct Install, V1+V2+V3 signed).
-            - 📦 **CambodiaFlavorsTourism-v2.5.4-PlayStore.aab:** Signed Android App Bundle for Google Play Console.
+            **Official Release v2.5.7:**
+            - 📲 **CambodiaFlavorsTourism-v2.5.7.apk:** Official Android APK with shop persistence & Unique Grill recovery (1-Tap Direct Install, V1+V2+V3 signed).
+            - 📦 **CambodiaFlavorsTourism-v2.5.7-PlayStore.aab:** Signed Android App Bundle for Google Play Console.
           draft: false
           prerelease: false
           files: |
             release_out/CambodiaFlavorsTourism-v2.5.0.apk
             release_out/CambodiaFlavorsTourism-v2.5.0-PlayStore.aab
+
+      - name: 10. Deploy Web App to GitHub Pages (gh-pages)
+        uses: peaceiris/actions-gh-pages@v4
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test-ui-apk'
+        continue-on-error: true
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          keep_files: false
