@@ -5,6 +5,7 @@ import {
   Bell,
   QrCode,
   MoreVertical,
+  ShieldCheck,
 } from 'lucide-react';
 import { IconSmartAssistant } from './icons/HandcraftedIcons';
 import { openSmartHub } from '../utils/smartHub';
@@ -183,6 +184,20 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
                   >
                     <Heart className="w-4 h-4 text-rose-400 fill-rose-400" />
                     <span>{tr(language, 'គាំទ្រការអភិវឌ្ឍកម្មវិធី', 'Support App', '支持应用开发')}</span>
+                  </button>
+
+                  <div className="my-1 border-t border-white/10" />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      window.dispatchEvent(new CustomEvent('kft:open-privacy-policy'));
+                    }}
+                    className="w-full px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-white/10 transition cursor-pointer text-left font-semibold text-emerald-300"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <span>{tr(language, 'គោលការណ៍ឯកជនភាព (Privacy)', 'Privacy Policy', '隐私政策 (Privacy)')}</span>
                   </button>
                 </div>
               </>

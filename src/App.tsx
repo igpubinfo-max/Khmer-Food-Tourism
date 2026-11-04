@@ -22,6 +22,7 @@ import { AdminLoginModal } from './components/AdminLoginModal';
 const SupportModal = lazy(() => import('./components/SupportModal').then((m) => ({ default: m.SupportModal })));
 import { ExitConfirmModal } from './components/ExitConfirmModal';
 import { DeleteShopConfirmModal } from './components/DeleteShopConfirmModal';
+import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
 const WhatToEatModal = lazy(() => import('./components/WhatToEatModal').then((m) => ({ default: m.WhatToEatModal })));
 const NearMeModal = lazy(() => import('./components/NearMeModal').then((m) => ({ default: m.NearMeModal })));
 const DailyDiscoveriesModal = lazy(() => import('./components/DailyDiscoveriesModal').then((m) => ({ default: m.DailyDiscoveriesModal })));
@@ -107,7 +108,14 @@ const MainScreen: React.FC = () => {
 
   // Smart Menu (opened from the Header button or the Home banner via a window event)
   const [isSmartHubOpen, setIsSmartHubOpen] = useState(false);
+  const [isGlobalPrivacyOpen, setIsGlobalPrivacyOpen] = useState(false);
   const hasVipAccess = true;
+
+  useEffect(() => {
+    const openPrivacy = () => setIsGlobalPrivacyOpen(true);
+    window.addEventListener('kft:open-privacy-policy', openPrivacy);
+    return () => window.removeEventListener('kft:open-privacy-policy', openPrivacy);
+  }, []);
   useEffect(() => {
     (window as any).__kft_is_smart_hub_open = Boolean(isSmartHubOpen && hasVipAccess);
     return () => {
@@ -156,7 +164,8 @@ const MainScreen: React.FC = () => {
     isSupportTicketModalOpen ||
     isQrScannerModalOpen ||
     isVipAddRestaurantModalOpen ||
-    isGoogleMapsSearchModalOpen
+    isGoogleMapsSearchModalOpen ||
+    isGlobalPrivacyOpen
   );
   useBodyScrollLock(isAnyModalOpen);
 
@@ -265,6 +274,10 @@ const MainScreen: React.FC = () => {
         {isAuthModalOpen && <AuthModal />}
       </Suspense>
       <DeleteShopConfirmModal />
+      <PrivacyPolicyModal
+        isOpen={isGlobalPrivacyOpen}
+        onClose={() => setIsGlobalPrivacyOpen(false)}
+      />
 
       {/* Notifications */}
       {toast && <Toast />}

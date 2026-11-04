@@ -115,16 +115,16 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test-ui-apk'
         with:
-          tag_name: v2.5.8
-          name: "Cambodia Flavors & Tourism v2.5.8"
+          tag_name: v2.5.9
+          name: "Cambodia Flavors & Tourism v2.5.9"
           make_latest: true
           body: |
-            ### 🇰🇭 Cambodia Flavors & Tourism v2.5.8
+            ### 🇰🇭 Cambodia Flavors & Tourism v2.5.9
             **រសជាតិ និងទេសចរណ៍កម្ពុជា • 柬埔寨风味与旅游**
 
-            **Official Release v2.5.8:**
-            - 📲 **CambodiaFlavorsTourism-v2.5.8.apk:** Official Android APK with Multi-Source Shop Photo Finder fallback & 1-Click Approve All (1-Tap Direct Install, V1+V2+V3 signed).
-            - 📦 **CambodiaFlavorsTourism-v2.5.8-PlayStore.aab:** Signed Android App Bundle for Google Play Console.
+            **Official Release v2.5.9:**
+            - 📲 **CambodiaFlavorsTourism-v2.5.9.apk:** Official Android APK with upgraded Privacy Policy (Who's who, Purpose, Collection & Storage, Use) & 1-Tap Header Menu access (V1+V2+V3 signed).
+            - 📦 **CambodiaFlavorsTourism-v2.5.9-PlayStore.aab:** Signed Android App Bundle for Google Play Console.
           draft: false
           prerelease: false
           files: |

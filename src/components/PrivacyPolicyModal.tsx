@@ -1,6 +1,7 @@
 import React from 'react';
-import { X, ShieldCheck, Lock, Trash2, Globe, Mail, CheckCircle2 } from 'lucide-react';
+import { X, ShieldCheck, Lock, Trash2, Globe, Mail, CheckCircle2, ArrowLeft, FileText, Smartphone, Users } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { APP_VERSION_NAME, APP_BUILD_CODE } from '../types';
 import { tr } from '../utils/i18n';
 
 interface PrivacyPolicyModalProps {
@@ -9,7 +10,7 @@ interface PrivacyPolicyModalProps {
 }
 
 export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose }) => {
-  const { language, currentUser, logout, showToast } = useApp();
+  const { language, setLanguage, currentUser, logout, showToast } = useApp();
 
   if (!isOpen) return null;
 
@@ -39,140 +40,320 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div 
-        className="relative w-full max-w-lg max-h-[90vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800"
-        onClick={e => e.stopPropagation()}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-6 bg-black/80 backdrop-blur-sm animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full h-full sm:h-auto sm:max-w-lg sm:max-h-[92vh] bg-white dark:bg-slate-900 sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden border-0 sm:border border-slate-200 dark:border-slate-800"
+        style={{
+          paddingTop: 'var(--kft-safe-top, 0px)',
+          paddingBottom: 'var(--kft-safe-bottom, 0px)',
+        }}
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 bg-[#064E3B] text-white shrink-0 border-b border-[#047857]">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-emerald-500/20 text-emerald-200 rounded-xl border border-emerald-400/30">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-moul text-sm text-white">
-                {tr(language, 'គោលការណ៍ឯកជនភាព & សុវត្ថិភាព', 'Privacy Policy & Data Safety', '隐私政策与数据安全')}
+        {/* Top App Bar (Cambodia Tour style green bar with Back arrow + Title + Language Switcher) */}
+        <div className="flex items-center justify-between px-4 py-3.5 bg-[#064E3B] text-white shrink-0 border-b border-[#047857] shadow-sm">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition cursor-pointer shrink-0"
+              aria-label="Back"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div className="min-w-0">
+              <h3 className="font-moul text-xs sm:text-sm text-white truncate">
+                {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨风味与旅游')}
               </h3>
-              <p className="text-[10px] text-emerald-200 font-khmer">
+              <p className="text-[10px] text-emerald-200 font-khmer truncate">
                 {tr(
                   language,
-                  'រសជាតិ និងទេសចរណ៍កម្ពុជា • អនុលោមតាមស្តង់ដារសុវត្ថិភាព',
-                  'Cambodia Flavors & Tourism • Google Play Compliant',
-                  '柬埔寨风味与旅游 • 符合 Google Play 规范'
+                  'គោលការណ៍ឯកជនភាពផ្លូវការ • Privacy Policy',
+                  'Official Privacy Policy & Data Safety',
+                  '官方隐私政策与数据安全声明'
                 )}
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Quick Language Switcher inside Privacy Policy */}
+            <button
+              type="button"
+              onClick={() => setLanguage(language === 'km' ? 'en' : language === 'en' ? 'zh' : 'km')}
+              className="px-2.5 py-1 rounded-xl bg-white/15 hover:bg-white/25 text-[10px] font-extrabold tracking-wide border border-white/25 transition cursor-pointer"
+            >
+              <span className={language === 'km' ? 'text-amber-300' : 'text-white/75'}>ខ្មែរ</span>
+              <span className="text-white/40 mx-0.5">/</span>
+              <span className={language === 'en' ? 'text-amber-300' : 'text-white/75'}>EN</span>
+              <span className="text-white/40 mx-0.5">/</span>
+              <span className={language === 'zh' ? 'text-amber-300' : 'text-white/75'}>中文</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
+              aria-label="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Content Body */}
-        <div className="flex-1 overflow-y-auto p-5 text-xs space-y-4 font-khmer text-slate-700 dark:text-slate-300 leading-relaxed">
-          {/* Summary Banner */}
+        <div className="flex-1 overflow-y-auto p-5 text-xs space-y-5 font-khmer text-slate-800 dark:text-slate-200 leading-relaxed">
+          {/* Brand Logo + Version Header (Matches "CAMBODIA Ver. 4.0 — Privacy Policy" layout) */}
+          <div className="flex items-end gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+            <div className="flex flex-col items-center shrink-0">
+              <span className="text-[11px] font-black tracking-wider text-[#059669] dark:text-emerald-400 uppercase mb-1">
+                CAMBODIA
+              </span>
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-700 p-[2px] shadow-md">
+                <img
+                  src="/icon-192.png?v=2.5.4"
+                  alt="Cambodia Flavors & Tourism"
+                  className="w-full h-full rounded-[14px] object-cover bg-[#064E3B]"
+                  onError={(e) => {
+                    const img = e.currentTarget as HTMLImageElement;
+                    if (!img.dataset.fallback) {
+                      img.dataset.fallback = '1';
+                      img.src = '/welcome-app-icon.png';
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1 min-w-0 flex-1">
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-[#064E3B] dark:text-emerald-300 font-bold text-[11px]">
+                <span>Ver. {APP_VERSION_NAME}</span>
+                <span className="text-emerald-400">•</span>
+                <span>Build {APP_BUILD_CODE}</span>
+              </div>
+              <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
+                {tr(language, 'គោលការណ៍ឯកជនភាព (Privacy Policy)', 'Privacy Policy', '隐私政策 (Privacy Policy)')}
+              </h2>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                {tr(
+                  language,
+                  'រសជាតិ និងទេសចរណ៍កម្ពុជា • Cambodia Flavors & Tourism',
+                  'Cambodia Flavors & Tourism • Official Mobile & Web Application',
+                  '柬埔寨风味与旅游 • 官方移动与网页应用'
+                )}
+              </p>
+            </div>
+          </div>
+
+          {/* 1. Who's Who */}
+          <div className="space-y-1.5">
+            <h4 className="font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5 text-[13px]">
+              <Users className="w-4 h-4 text-[#059669] shrink-0" />
+              <span>{tr(language, '១. និយមន័យ (Who’s who)', 'Who’s who', '1. 适用对象 (Who’s who)')}</span>
+            </h4>
+            <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+              {tr(
+                language,
+                'នៅក្នុងគោលការណ៍ឯកជនភាពនេះ៖',
+                'In this Privacy Policy:',
+                '在本隐私政策中：'
+              )}
+            </p>
+            <ul className="space-y-1.5 pl-4 text-xs text-slate-700 dark:text-slate-300 list-disc">
+              <li>
+                {tr(
+                  language,
+                  '«អ្នក» (you) សំដៅលើអ្នក ដែលជាអ្នកប្រើប្រាស់ ឬម្ចាស់ហាងអាហារនៅលើគេហទំព័រ ឬកម្មវិធីទូរស័ព្ទនេះ។',
+                  '“you” means you, the user or shop owner of the website or phone App.',
+                  '“您” (you) 指使用本网站或手机应用程序的个人用户或餐厅商家。'
+                )}
+              </li>
+              <li>
+                {tr(
+                  language,
+                  '«យើង» «របស់យើង» និង «យើងខ្ញុំ» (we, our, us) សំដៅលើកម្មវិធី «រសជាតិ និងទេសចរណ៍កម្ពុជា» (Cambodia Flavors & Tourism) និងក្រុមការងារគ្រប់គ្រងប្រព័ន្ធផ្លូវការ។',
+                  '“we”, “our” and “us” means Cambodia Flavors & Tourism (រសជាតិ និងទេសចរណ៍កម្ពុជា) and its official platform administration.',
+                  '“我们” (we, our, us) 指“柬埔寨风味与旅游” (Cambodia Flavors & Tourism) 及其官方平台管理团队。'
+                )}
+              </li>
+            </ul>
+          </div>
+
+          {/* 2. Purpose */}
+          <div className="space-y-1.5">
+            <h4 className="font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5 text-[13px]">
+              <FileText className="w-4 h-4 text-[#059669] shrink-0" />
+              <span>{tr(language, '២. គោលបំណង (Purpose)', 'Purpose', '2. 政策目的 (Purpose)')}</span>
+            </h4>
+            <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+              {tr(
+                language,
+                'ដើម្បីផ្តល់ជូននូវសេវាកម្មស្វែងរកមុខម្ហូប ភោជនីយដ្ឋាន និងតំបន់ទេសចរណ៍ប្រកបដោយស្តង់ដារខ្ពស់បំផុត យើងអាចស្នើសុំឱ្យអ្នកផ្តល់ព័ត៌មានទំនាក់ទំនងផ្ទាល់ខ្លួន ឬព័ត៌មានហាង។ យើងជឿជាក់ថាវាមានសារៈសំខាន់ណាស់ដែលអ្នកត្រូវដឹងពីរបៀបដែលយើងថែរក្សាព័ត៌មានទាំងនោះ។ គោលការណ៍នេះពន្យល់ពីរបៀប និងមូលហេតុដែលយើងប្រមូលព័ត៌មានពីអ្នក របៀបដែលយើងរក្សាទុក និងពេលណាដែលយើងបង្ហាញព័ត៌មានហាងជាសាធារណៈជូនអ្នកប្រើប្រាស់ដទៃ។',
+                'To deliver the highest standard of service, we will ask you to provide us personal contact information when registering an account or listing a shop. At all our products, we believe it is important that you know how we treat that information. This policy outlines how and why we collect information from you, how we store it, and when we might disclose information to other people.',
+                '为了向您提供高标准的美食与旅游指南服务，在您注册账号或登记店铺时，我们会请您提供个人联系信息。我们认为让您了解我们如何处理这些信息至关重要。本政策阐述了我们如何及为何收集您的信息、如何存储信息以及在何种情况下向他人展示相关信息。'
+              )}
+            </p>
+          </div>
+
+          {/* 3. Collection and Storage */}
+          <div className="space-y-1.5">
+            <h4 className="font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5 text-[13px]">
+              <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0" />
+              <span>
+                {tr(
+                  language,
+                  '៣. ការប្រមូល និងការរក្សាទុកទិន្នន័យ (Collection and storage)',
+                  'Collection and storage',
+                  '3. 信息收集与存储 (Collection and storage)'
+                )}
+              </span>
+            </h4>
+            <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+              {tr(
+                language,
+                'យើងនឹងប្រមូលព័ត៌មានអំពីអ្នក នៅពេលអ្នកចូលប្រើប្រាស់គេហទំព័រ និងកម្មវិធីទូរស័ព្ទរបស់យើង ឬបំពេញទម្រង់ចុះឈ្មោះគណនី និងទម្រង់បន្ថែមហាង (ឧទាហរណ៍៖ ឈ្មោះ លេខទូរស័ព្ទទំនាក់ទំនង អ៊ីមែល និងរូបភាពហាង/រូបតំណាង)។ យើងក៏ប្រមូលព័ត៌មាននៅពេលអ្នកប្រើប្រាស់មុខងារក្នុងកម្មវិធីផងដែរ (ដូចជា សារជំនួយ ព័ត៌មានទីតាំង GPS កាលបរិច្ឆេទ និងពេលវេលា)។ ប្រសិនបើអ្នកជ្រើសរើសមិនផ្តល់ព័ត៌មាននៅពេលយើងស្នើសុំ សេវាកម្ម ឬមុខងារមួយចំនួន (ដូចជាការរកហាងជិតអ្នក ឬការចុះបញ្ជីហាង) អាចនឹងមិនដំណើរការពេញលេញឡើយ។',
+                'We will collect information about you when you visit our website and mobile application sites, or complete application forms (for instance, your contact number(s), email, profile photo, and shop details). We will also collect information about you when you use website and application(s) (such as support messages, location information, date, time). If you choose not to provide information when we ask for it, certain services and/or features may not work properly or we may not be able to provide you with certain personalized services.',
+                '当您访问我们的网站和移动应用程序、填写注册或店铺申请表单（例如您的联系电话、电子邮箱、头像及店铺信息）时，我们会收集您的相关信息。当您使用网站和应用程序功能（如客服消息、GPS位置信息、日期和时间）时，我们也会收集相关信息。如果您选择不提供相关信息，部分个性化服务或功能可能无法正常运行。'
+              )}
+            </p>
+          </div>
+
+          {/* 4. Use */}
+          <div className="space-y-1.5">
+            <h4 className="font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5 text-[13px]">
+              <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0" />
+              <span>{tr(language, '៤. ការប្រើប្រាស់ព័ត៌មាន (Use)', 'Use', '4. 信息使用 (Use)')}</span>
+            </h4>
+            <p className="text-xs text-slate-700 dark:text-slate-300">
+              {tr(
+                language,
+                'យើងរក្សាទុក និងប្រើប្រាស់ព័ត៌មានដែលយើងប្រមូលបានសម្រាប់គោលបំណងមួយចំនួន រួមមាន៖',
+                'We hold and use the information we collect for a number of purposes, including:',
+                '我们保存并使用所收集的信息用于以下目的：'
+              )}
+            </p>
+            <ul className="space-y-1.5 pl-4 text-xs text-slate-700 dark:text-slate-300 list-disc">
+              <li>
+                {tr(
+                  language,
+                  'ផ្តល់ជូនអ្នកនូវសេវាកម្មដែលអ្នកស្នើសុំ (ការស្វែងរកមុខម្ហូប ហាងអាហារ ការនាំផ្លូវលើផែនទី និងតំបន់ទេសចរណ៍)។',
+                  'Providing you with service(s) you request;',
+                  '向您提供您所请求的服务（美食检索、餐厅导航、旅游景点指南等）；'
+                )}
+              </li>
+              <li>
+                {tr(
+                  language,
+                  'ត្រួតពិនិត្យការអនុលោមតាមលក្ខខណ្ឌនៃការប្រើប្រាស់កម្មវិធី រួមទាំងគោលការណ៍ប្រើប្រាស់ដោយស្មោះត្រង់ (Fair Use Policy) និងការផ្ទៀងផ្ទាត់ហាងពិត។',
+                  'Monitoring compliance with the terms and conditions of application you use, including our Fair Use Policy;',
+                  '监督您所使用应用程序的条款与条件遵守情况，包括我们的公平使用政策（Fair Use Policy）与真实店铺审核规范；'
+                )}
+              </li>
+              <li>
+                {tr(
+                  language,
+                  'ផ្តល់ជូនអ្នកនូវព័ត៌មានអំពីមុខងារថ្មីៗ ឬកំណែអាប់ដេតនៃកម្មវិធី។',
+                  'Providing you with information on new application updates and features;',
+                  '向您提供有关新应用功能及版本更新的信息；'
+                )}
+              </li>
+              <li>
+                {tr(
+                  language,
+                  'ឆ្លើយតប និងតាមដានរាល់សំណួរ បណ្តឹង ឬសំណើនានាដែលអ្នកបានដាក់ស្នើ (ដូចជាសំណើបន្ថែមហាង ឬសមាជិកភាព VIP)។',
+                  'Responding and following up on any queries, complaints or requests you might have made;',
+                  '回复并跟进您提出的任何咨询、投诉或申请（如新店入驻或 VIP 会员申请）；'
+                )}
+              </li>
+              <li>
+                {tr(
+                  language,
+                  'អនុលោមតាមសំណើផ្លូវច្បាប់ ឬស្ថាប័នមានសមត្ថកិច្ច ពាក់ព័ន្ធនឹងការការពារការក្លែងបន្លំ ការរក្សាសុវត្ថិភាពប្រព័ន្ធ ឬនីតិវិធីច្បាប់។',
+                  'Complying with legal, governmental or regulatory agencies’ requests in connection with crime or fraud prevention or detection, or legal proceedings.',
+                  '遵守法律法规或监管机构关于防范欺诈、网络安全及法律程序的要求。'
+                )}
+              </li>
+            </ul>
+          </div>
+
+          {/* 5. Device Permissions */}
+          <div className="space-y-1.5">
+            <h4 className="font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5 text-[13px]">
+              <Smartphone className="w-4 h-4 text-[#059669] shrink-0" />
+              <span>
+                {tr(
+                  language,
+                  '៥. សិទ្ធិប្រើប្រាស់ទូរស័ព្ទ (Device Permissions)',
+                  'Device Permissions',
+                  '5. 设备权限说明 (Device Permissions)'
+                )}
+              </span>
+            </h4>
+            <ul className="space-y-1.5 pl-4 text-xs text-slate-700 dark:text-slate-300 list-disc">
+              <li>
+                {tr(
+                  language,
+                  'កាមេរ៉ា និងរូបភាព (Camera & Photos)៖ ប្រើសម្រាប់តែពេលអ្នកជ្រើសរើសរូបតំណាង (Profile) ថតរូបហាង/មុខម្ហូប ស្កេន QR ឬបង្ហោះរូបវិក្កយបត្រប៉ុណ្ណោះ។',
+                  'Camera & Photos: Used only when you voluntarily upload a profile photo, shop/food photos, scan a QR code, or attach a payment receipt.',
+                  '相机与相册：仅在您主动上传头像、店铺/菜品照片、扫描二维码或上传付款凭证时使用。'
+                )}
+              </li>
+              <li>
+                {tr(
+                  language,
+                  'ទីតាំង GPS (Location)៖ ប្រើដើម្បីបង្ហាញភោជនីយដ្ឋាន និងគោលដៅទេសចរណ៍នៅជិតអ្នក និងជ្រើសរើសទីតាំងហាងលើផែនទី។ យើងមិនតាមដានទីតាំងរបស់អ្នកនៅពេលបិទកម្មវិធីឡើយ។',
+                  'Location (GPS): Used only while the app is open to discover nearby restaurants/attractions and pin shop locations on the map. No background tracking.',
+                  '位置信息 (GPS)：仅在应用打开时用于查找附近餐厅/景点及地图选点，绝不在后台追踪您的位置。'
+                )}
+              </li>
+            </ul>
+          </div>
+
+          {/* Privacy Commitment Banner */}
           <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 flex items-start gap-2.5">
             <Lock className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
             <div className="text-[11px] text-[#064E3B] dark:text-emerald-200">
               <span className="font-bold">
-                {tr(language, 'ការសន្យាសុវត្ថិភាពទិន្នន័យ៖', 'Our Privacy Commitment:', '我们的隐私安全承诺：')}
+                {tr(language, 'ការសន្យាសុវត្ថិភាពទិន្នន័យ៖', 'Data Protection Commitment:', '数据安全承诺：')}
               </span>{' '}
               {tr(
                 language,
-                'កម្មវិធីយើងខ្ញុំមិនលក់ មិនចែកចាយ ឬជួញដូរទិន្នន័យឯកជនរបស់អ្នកប្រើប្រាស់ទៅឱ្យតតិយជនឡើយ។ រាល់ការតភ្ជាប់ប្រើប្រាស់បច្ចេកវិទ្យាការពារការអ៊ិនគ្រីបកម្រិតខ្ពស់។',
-                'We do not sell, trade, or distribute your private data. All network communications are encrypted via HTTPS/TLS.',
-                '我们绝不出售、交易或分发您的私人数据。所有网络通信均采用 HTTPS/TLS 加密保护。'
+                'កម្មវិធីយើងខ្ញុំមិនលក់ មិនចែកចាយ ឬជួញដូរទិន្នន័យឯកជនរបស់អ្នកប្រើប្រាស់ទៅឱ្យតតិយជនឡើយ។ រាល់ការតភ្ជាប់ប្រើប្រាស់បច្ចេកវិទ្យាការពារការអ៊ិនគ្រីប HTTPS/TLS កម្រិតខ្ពស់។',
+                'We never sell, rent, or trade your personal information to third parties. All network traffic is encrypted via HTTPS/TLS.',
+                '我们绝不向第三方出售、出租或交易您的个人数据。所有网络通信均采用 HTTPS/TLS 加密保护。'
               )}
             </div>
           </div>
 
-          {/* Section 1 */}
-          <div className="space-y-1.5">
-            <h4 className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5 text-xs">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" />
-              <span>{tr(language, '១. ព័ត៌មានដែលយើងប្រមូល', '1. Information We Collect', '1. 我们收集的信息')}</span>
-            </h4>
-            <p className="text-[11px] text-slate-600 dark:text-slate-400 pl-5 whitespace-pre-line">
-              {tr(
-                language,
-                '• ព័ត៌មានគណនី៖ ឈ្មោះ អ៊ីមែល តួនាទីអ្នកប្រើប្រាស់ និងរូបតំណាង។\n• ព័ត៌មានភោជនីយដ្ឋាន៖ ឈ្មោះហាង អាសយដ្ឋាន លេខទូរស័ព្ទទំនាក់ទំនង រូបភាពមុខម្ហូប និងម៉ោងបើកលក់ (ដែលម្ចាស់ហាងស្ម័គ្រចិត្តចុះបញ្ជី)។\n• ចំណូលចិត្ត៖ មុខម្ហូប និងកន្លែងទេសចរណ៍ដែលអ្នកប្រើប្រាស់បានរក្សាទុក។',
-                '• Account Data: Name, email, role, and avatar.\n• Restaurant Data: Shop name, public address, phone, menu photos, and operating hours submitted voluntarily by owners.\n• User Preferences: Saved favorite dishes and destinations.',
-                '• 账号数据：姓名、电子邮箱、用户角色及头像。\n• 餐厅数据：商家自愿提交的店铺名称、公开地址、联系电话、菜品图片与营业时间。\n• 用户偏好：收藏的菜品与旅游景点。'
-              )}
-            </p>
-          </div>
-
-          {/* Section 2 */}
-          <div className="space-y-1.5">
-            <h4 className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5 text-xs">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" />
-              <span>{tr(language, '២. ការប្រើប្រាស់សិទ្ធិទូរស័ព្ទ', '2. Device Permissions', '2. 设备权限使用说明')}</span>
-            </h4>
-            <p className="text-[11px] text-slate-600 dark:text-slate-400 pl-5 whitespace-pre-line">
-              {tr(
-                language,
-                '• កាមេរ៉ា និងរូបភាព៖ ប្រើសម្រាប់តែពេលម្ចាស់ហាងថតរូបម្ហូប ឬជ្រើសរើសរូបភាពវិក្កយបត្រដើម្បីបង្ហោះចូលក្នុងប្រព័ន្ធប៉ុណ្ណោះ។\n• ទីតាំង៖ ប្រើដើម្បីបង្ហាញភោជនីយដ្ឋាន និងគោលដៅទេសចរណ៍នៅជិតអ្នក។ យើងមិនតាមដានទីតាំងរបស់អ្នកនៅពេលបិទកម្មវិធីឡើយ។\n• ការជូនដំណឹង៖ ប្រើសម្រាប់តែការរំលឹកម្ហូបតាមម៉ោងញ៉ាំដែលអ្នកបានបើកដោយខ្លួនឯងប៉ុណ្ណោះ។ ការរំលឹកត្រូវបានបង្កើតក្នុងទូរស័ព្ទរបស់អ្នក ហើយអ្នកអាចបិទបានគ្រប់ពេល។',
-                '• Camera & Storage: Used exclusively when voluntarily uploading restaurant photos or receipt previews.\n• Location: Used only for discovering nearby restaurants and attractions.\n• Notifications: Used only for the meal-time reminders you choose to turn on. They are created on your device and can be turned off at any time.',
-                '• 相机与相册：仅在您主动上传餐厅照片或付款凭证截图时使用。\n• 位置信息：仅用于查找附近的餐厅与旅游景点，关闭应用后不会后台追踪您的位置。\n• 通知：仅用于您主动开启的用餐时间提醒。提醒在您的设备本地生成，可随时关闭。'
-              )}
-            </p>
-          </div>
-
-          {/* Section 3 */}
-          <div className="space-y-1.5">
-            <h4 className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5 text-xs">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" />
-              <span>{tr(language, '៣. សុវត្ថិភាព និងការរក្សាទុកទិន្នន័យ', '3. Security & Storage', '3. 数据安全与存储')}</span>
-            </h4>
-            <p className="text-[11px] text-slate-600 dark:text-slate-400 pl-5 whitespace-pre-line">
-              {tr(
-                language,
-                '• ពាក្យសម្ងាត់ត្រូវបានការពារដោយបច្ចេកវិទ្យាអ៊ិនគ្រីបកម្រិតខ្ពស់។\n• ការពារការវាយលុកដោយចាក់សោបណ្តោះអាសន្នក្រោយវាយខុសច្រើនដង។\n• រាល់ការបញ្ជូនទិន្នន័យត្រូវបានការពារដោយសុវត្ថិភាព។',
-                '• Passwords are protected via PBKDF2-HMAC-SHA256 (100,000 rounds).\n• Brute-force defense with 15-minute lockouts.\n• Cleartext HTTP strictly disabled via Android Network Security Config.',
-                '• 密码采用 PBKDF2-HMAC-SHA256（100,000 次迭代）加密保护。\n• 防暴力破解保护机制。\n• 全程启用 HTTPS 安全传输配置。'
-              )}
-            </p>
-          </div>
-
-          {/* Section 4 */}
-          <div className="space-y-1.5">
-            <h4 className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5 text-xs">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" />
-              <span>{tr(language, '៤. សមាជិកភាព VIP និងការផ្សព្វផ្សាយហាង', '4. VIP Membership & Store Listings', '4. VIP 会员与店铺登记')}</span>
-            </h4>
-            <p className="text-[11px] text-slate-600 dark:text-slate-400 pl-5">
-              {tr(
-                language,
-                'ការភ្ជាប់សមាជិកភាព VIP និងការចុះបញ្ជីហាងត្រូវបានផ្ទៀងផ្ទាត់យ៉ាងត្រឹមត្រូវ។ យើងមិនរក្សាទុកលេខកាតឥណទាន ឬព័ត៌មានសម្ងាត់ធនាគាររបស់អ្នកនៅក្នុងកម្មវិធីឡើយ។',
-                'VIP membership and merchant listings are verified securely. No credit card numbers or private banking credentials are stored on the device.',
-                'VIP 会员与商家入驻均经过安全核验。应用内不会存储任何信用卡号或银行敏感凭据。'
-              )}
-            </p>
-          </div>
-
-          {/* Section 5: Account & Data Deletion */}
+          {/* 6. Account & Data Deletion */}
           <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 space-y-2">
             <div className="flex items-center gap-2 text-rose-800 dark:text-rose-300 font-bold text-xs">
               <Trash2 className="w-4 h-4 text-rose-600 shrink-0" />
-              <span>{tr(language, '៥. សិទ្ធិលុបគណនី និងទិន្នន័យ', '5. Account & Data Deletion', '5. 账号与数据删除权利')}</span>
+              <span>
+                {tr(
+                  language,
+                  '៦. សិទ្ធិលុបគណនី និងទិន្នន័យ (Account & Data Deletion)',
+                  'Account & Data Deletion',
+                  '6. 账号与数据删除权利 (Account Deletion)'
+                )}
+              </span>
             </div>
             <p className="text-[11px] text-rose-900 dark:text-rose-200 leading-relaxed">
               {tr(
                 language,
-                'អ្នកប្រើប្រាស់មានសិទ្ធិលុបគណនី និងទិន្នន័យផ្ទាល់ខ្លួនរបស់ខ្លួនចេញពីប្រព័ន្ធបានគ្រប់ពេលវេលា។',
+                'អនុលោមតាមគោលការណ៍ Google Play និង Apple App Store អ្នកប្រើប្រាស់មានសិទ្ធិលុបគណនី និងទិន្នន័យផ្ទាល់ខ្លួនរបស់ខ្លួនចេញពីប្រព័ន្ធបានគ្រប់ពេលវេលា។',
                 'In accordance with Google Play and Apple App Store policies, you can permanently delete your account and personal data at any time.',
-                '根据应用商店隐私政策，您可以随时永久删除您的账号和个人数据。'
+                '根据 Google Play 与 Apple App Store 政策，您可以随时永久删除您的账号和个人数据。'
               )}
             </p>
 
             {currentUser && (
               <button
+                type="button"
                 onClick={handleDeleteAccount}
-                className="w-full py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-xs"
+                className="w-full py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>
@@ -183,13 +364,14 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
           </div>
 
           {/* Developer Contact */}
-          <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px] space-y-1 text-slate-500">
-            <p className="font-bold text-[#0F172A] dark:text-white">
-              {tr(language, 'ទំនាក់ទំនងអ្នកអភិវឌ្ឍន៍៖', 'Developer & Support Contact:', '开发者与客服联系方式：')}
+          <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px] space-y-1 text-slate-500 dark:text-slate-400">
+            <p className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#059669]" />
+              <span>{tr(language, 'ទំនាក់ទំនងផ្លូវការ៖', 'Official Support & Contact:', '官方支持与联系方式：')}</span>
             </p>
             <p className="flex items-center gap-1.5">
               <Mail className="w-3.5 h-3.5 text-[#059669]" />
-              <span>support@khmerfoodtourism.com</span>
+              <span>igpub.info@gmail.com • support@khmerfoodtourism.com</span>
             </p>
             <p className="flex items-center gap-1.5">
               <Globe className="w-3.5 h-3.5 text-[#059669]" />
@@ -199,12 +381,16 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-800 flex justify-end shrink-0">
+        <div className="px-5 py-3 bg-slate-50 dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
+          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            Cambodia Flavors &amp; Tourism • Ver. {APP_VERSION_NAME}
+          </span>
           <button
+            type="button"
             onClick={onClose}
-            className="px-5 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl text-xs font-khmer transition shadow-xs"
+            className="px-5 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl text-xs font-khmer transition shadow-xs cursor-pointer"
           >
-            {tr(language, 'យល់ព្រម និងបិទ', 'Close', '同意并关闭')}
+            {tr(language, 'យល់ព្រម និងបិទ', 'Agree & Close', '同意并关闭')}
           </button>
         </div>
       </div>
