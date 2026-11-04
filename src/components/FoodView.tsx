@@ -94,7 +94,7 @@ export const FoodView: React.FC = () => {
   // Ordered with ម្ហូបបួស (Vegetarian), សម្ល, ឆា, ស្ងោរ, បង្អែម
   const categories: Array<{ id: string; nameKh: string; nameEn: string; nameZh: string; icon: React.ReactNode }> = [
     { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Dishes', nameZh: '全部菜品', icon: <IconDishCategory className="w-4 h-4" /> },
-    { id: 'vegetarian', nameKh: 'ម្ហូបបួស', nameEn: 'Vegetarian', nameZh: '高棉素食', icon: <IconHealthyLeaf className="w-4 h-4 text-emerald-500" /> },
+    { id: 'vegetarian', nameKh: 'ឆា អាំង ញ៉ាំ', nameEn: 'Vegetarian', nameZh: '高棉素食', icon: <IconHealthyLeaf className="w-4 h-4 text-emerald-500" /> },
     { id: 'samlor', nameKh: 'សម្ល', nameEn: 'Soups & Curries', nameZh: '浓汤/咖喱', icon: <IconKhmerFoodBowl className="w-4 h-4" /> },
     { id: 'cha', nameKh: 'ឆា & អាំង', nameEn: 'Stir-Fry & Grill', nameZh: '热炒/烧烤', icon: <IconGrillFlame className="w-4 h-4" /> },
     { id: 'sngor', nameKh: 'ស្ងោរ & គុយទាវ', nameEn: 'Broths & Noodles', nameZh: '清汤/汤粉', icon: <Soup className="w-4 h-4 text-emerald-500" /> },
