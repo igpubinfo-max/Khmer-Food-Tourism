@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Heart, MapPin, Calendar, ExternalLink, 
-  Send, Share2, Compass, Camera, Bookmark, Edit2, Save
+  Send, Share2, Compass, Camera, Bookmark, Edit2, Save, Phone
 } from 'lucide-react';
 import { TouristImageModal } from './TouristImageModal';
 import { DefaultDestinationIcon } from './TouristCard';
@@ -572,6 +572,22 @@ export const TouristDetailModal: React.FC = () => {
 
             {/* Direct Google Maps & Navigation Action Buttons */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {selectedDestination.phone && (
+                <a
+                  href={`tel:${selectedDestination.phone.replace(/\s+/g, '')}`}
+                  className="sm:col-span-2 w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 hover:from-amber-700 hover:to-orange-700 text-white text-xs sm:text-sm font-bold shadow-md transition active:scale-98 cursor-pointer font-khmer"
+                >
+                  <Phone className="w-4 h-4 shrink-0" />
+                  <span>
+                    {tr(
+                      language,
+                      `ហៅទូរស័ព្ទកក់បន្ទប់ / ទំនាក់ទំនង (${selectedDestination.phone})`,
+                      `Call to Book / Contact (${selectedDestination.phone})`,
+                      `致电预订 / 联系电话 (${selectedDestination.phone})`
+                    )}
+                  </span>
+                </a>
+              )}
               <button
                 type="button"
                 onClick={() => openDestinationGoogleExternal(selectedDestination, 'maps')}

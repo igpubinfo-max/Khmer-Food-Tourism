@@ -25,6 +25,7 @@ export const TourismView: React.FC = () => {
 
   const categories = [
     { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All', nameZh: '全部景点' },
+    { id: 'hotel', nameKh: '🏨 សណ្ឋាគារ & ផ្ទះសំណាក់', nameEn: '🏨 Hotels & Stays', nameZh: '🏨 酒店与客栈' },
     { id: 'trending_social', nameKh: 'កំពុងពេញនិយម', nameEn: 'Popular Now', nameZh: '热门打卡' },
     { id: 'temple', nameKh: 'ប្រាសាទបុរាណ', nameEn: 'Temples', nameZh: '古迹与寺庙' },
     { id: 'nature', nameKh: 'ធម្មជាតិ & ទឹកធ្លាក់', nameEn: 'Nature & Falls', nameZh: '自然生态与瀑布' },
@@ -33,11 +34,22 @@ export const TourismView: React.FC = () => {
     { id: 'cultural', nameKh: 'វប្បធម៌ & ប្រវត្តិសាស្ត្រ', nameEn: 'Cultural & History', nameZh: '文化与历史遗址' },
   ];
 
-  // Build 25 Provinces & Capital City dropdown options with live attraction counts
+  // Filter destinations by category first so province dropdown counts reflect the selected category
+  const categoryMatchedDestinations = useMemo(() => {
+    return destinations.filter((d) => {
+      if (!d) return false;
+      if (selectedCategory === 'trending_social') return Boolean(d.isTrendingSocial);
+      if (selectedCategory === 'hotel') return d.categorySlug === 'hotel' || d.categorySlug === 'resort';
+      if (selectedCategory !== 'all') return d.categorySlug === selectedCategory;
+      return true;
+    });
+  }, [destinations, selectedCategory]);
+
+  // Build 25 Provinces & Capital City dropdown options with live attraction/hotel counts
   const provinceOptions = useMemo(() => {
     return DISH_PROVINCES.map((p) => {
       const cleanKey = p.kh.replace(/^រាជធានី|^ខេត្ត/g, '').trim();
-      const count = destinations.filter((d) =>
+      const count = categoryMatchedDestinations.filter((d) =>
         (d.provinceKh || '').replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanKey)
       ).length;
       return {
@@ -46,7 +58,7 @@ export const TourismView: React.FC = () => {
         count,
       };
     });
-  }, [destinations]);
+  }, [categoryMatchedDestinations]);
 
   // Separate HD-photo destinations (shuffled first) and compact icon-row destinations (shuffled second)
   const orderedSessionDestinations = useMemo(() => {
@@ -63,6 +75,8 @@ export const TourismView: React.FC = () => {
     return orderedSessionDestinations.filter((d) => {
       if (selectedCategory === 'trending_social') {
         if (!d.isTrendingSocial) return false;
+      } else if (selectedCategory === 'hotel') {
+        if (d.categorySlug !== 'hotel' && d.categorySlug !== 'resort') return false;
       } else if (selectedCategory !== 'all' && d.categorySlug !== selectedCategory) {
         return false;
       }
@@ -155,9 +169,9 @@ export const TourismView: React.FC = () => {
             <option value="">
               {tr(
                 language,
-                `គ្រប់រាជធានី-ខេត្តទាំង ២៥ (${destinations.length})`,
-                `All 25 Provinces & Capital (${destinations.length})`,
-                `全部 25 个省市 (${destinations.length})`
+                `គ្រប់រាជធានី-ខេត្តទាំង ២៥ (${categoryMatchedDestinations.length})`,
+                `All 25 Provinces & Capital (${categoryMatchedDestinations.length})`,
+                `全部 25 个省市 (${categoryMatchedDestinations.length})`
               )}
             </option>
             {provinceOptions.map((p) => (

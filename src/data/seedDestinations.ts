@@ -1,5 +1,6 @@
 import { TouristDestination } from '../types';
 import { racCambodiaTourDestinations } from './seedRacCambodiaTourDestinations';
+import { seedHotels100 } from './seedHotels100';
 
 const baseSeedDestinations: TouristDestination[] = [
   {
@@ -11405,4 +11406,5 @@ const baseSeedDestinations: TouristDestination[] = [
 export const initial100Destinations: TouristDestination[] = [
   ...baseSeedDestinations,
   ...racCambodiaTourDestinations,
+  ...seedHotels100,
 ];

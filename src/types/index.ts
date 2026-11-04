@@ -1,7 +1,7 @@
-export const APP_VERSION = 'v2.6.1';
-export const APP_VERSION_NAME = '2.6.1';
+export const APP_VERSION = 'v2.6.2';
+export const APP_VERSION_NAME = '2.6.2';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1416;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1418;
 export const APP_RELEASE_DATE = '2026-11-04';
 
 /**
@@ -2431,7 +2431,8 @@ export type DestinationCategorySlug =
   | 'resort'
   | 'ecotourism'
   | 'cultural'
-  | 'waterfall';
+  | 'waterfall'
+  | 'hotel';
 
 export interface TouristDestination {
   id: string;
@@ -2449,6 +2450,7 @@ export interface TouristDestination {
   provinceEn: string;
   addressKh: string;
   addressEn: string;
+  phone?: string;
   entranceFeeKh: string;
   entranceFeeEn: string;
   entryFeeKh?: string;

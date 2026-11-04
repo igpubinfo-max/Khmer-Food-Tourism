@@ -4039,6 +4039,7 @@ export function convertGooglePlaceToDestination(
     ecotourism: { kh: 'អេកូទេសចរណ៍ & ធម្មជាតិ', en: 'Ecotourism & Nature' },
     cultural: { kh: 'វប្បធម៌ & ប្រវត្តិសាស្ត្រ', en: 'Cultural & Heritage' },
     waterfall: { kh: 'ទឹកធ្លាក់ & ធម្មជាតិ', en: 'Waterfalls & Nature' },
+    hotel: { kh: 'សណ្ឋាគារ & ផ្ទះសំណាក់', en: 'Hotel & Guesthouse' },
   };
   const label = categoryLabels[subCat] || categoryLabels.resort;
 

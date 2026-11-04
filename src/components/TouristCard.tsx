@@ -11,6 +11,8 @@ import {
   Trees,
   Waves,
   Mountain,
+  BedDouble,
+  Phone,
   ChevronRight,
 } from 'lucide-react';
 import { tr } from '../utils/i18n';
@@ -35,8 +37,11 @@ export const DefaultDestinationIcon: React.FC<{ categorySlug?: string; className
   categorySlug,
   className = 'w-12 h-12 rounded-xl',
 }) => {
+  const isHotel = categorySlug === 'hotel' || categorySlug === 'resort';
   const IconComp =
-    categorySlug === 'temple' || categorySlug === 'cultural'
+    isHotel
+      ? BedDouble
+      : categorySlug === 'temple' || categorySlug === 'cultural'
       ? Landmark
       : categorySlug === 'nature'
       ? Trees
@@ -49,9 +54,13 @@ export const DefaultDestinationIcon: React.FC<{ categorySlug?: string; className
   return (
     <div
       data-dest-avatar="default-dest-icon"
-      className={`relative overflow-hidden bg-gradient-to-br from-emerald-950 via-[#093228] to-slate-900 border border-emerald-500/30 shadow-2xs shrink-0 select-none flex items-center justify-center ${className}`}
+      className={`relative overflow-hidden ${
+        isHotel
+          ? 'bg-gradient-to-br from-amber-950 via-[#3b2508] to-slate-900 border border-amber-500/35'
+          : 'bg-gradient-to-br from-emerald-950 via-[#093228] to-slate-900 border border-emerald-500/30'
+      } shadow-2xs shrink-0 select-none flex items-center justify-center ${className}`}
     >
-      <IconComp className="w-6 h-6 text-emerald-300 drop-shadow-xs" />
+      <IconComp className={`w-6 h-6 ${isHotel ? 'text-amber-300' : 'text-emerald-300'} drop-shadow-xs`} />
     </div>
   );
 };
@@ -104,6 +113,12 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
                 <span className="inline-flex items-center gap-0.5 text-slate-500 dark:text-slate-400 truncate min-w-0">
                   <MapPin className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span className="truncate">{loc.province}</span>
+                </span>
+              )}
+              {destination.phone && (
+                <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300 font-semibold shrink-0">
+                  <Phone className="w-2.5 h-2.5 shrink-0" />
+                  <span>{destination.phone}</span>
                 </span>
               )}
               {loc.category && (
