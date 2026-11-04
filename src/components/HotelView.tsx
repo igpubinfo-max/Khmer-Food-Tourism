@@ -7,7 +7,8 @@ import {
   openDestinationGoogleExternal,
 } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
-import { BedDouble, Edit2, Settings, MapPin, Heart, Lock } from 'lucide-react';
+import { BedDouble, Edit2, Settings, MapPin, Heart, Lock, Camera, Star, Trash2, Download } from 'lucide-react';
+import { TouristImageModal } from './TouristImageModal';
 import {
   ListingSearchPanel,
   ListingSearchInput,
@@ -32,6 +33,8 @@ export const HotelView: React.FC = () => {
     selectedProvince,
     setSelectedProvince,
     setSelectedDestination,
+    updateDestination,
+    deleteDestination,
     isBookmarked,
     toggleBookmark,
     setIsVipAddRestaurantModalOpen,
@@ -66,6 +69,7 @@ export const HotelView: React.FC = () => {
   const [hotelSearchQuery, setHotelSearchQuery] = useState<string>('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
   const [visibleCount, setVisibleCount] = useState<number>(HOTEL_BATCH_SIZE);
+  const [hotelForImageEdit, setHotelForImageEdit] = useState<TouristDestination | null>(null);
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -139,12 +143,13 @@ export const HotelView: React.FC = () => {
     return 'hotel_stay';
   };
 
-  // Only hotels added by a VIP owner are showcased as large cards. All other hotels use the compact row layout.
+  // Only hotels added by a VIP owner (or explicitly promoted by Admin) are showcased as large cards. All other hotels use the compact row layout.
   const vipHotelIds = useMemo(
     () => new Set(vipAddedHotelDestinations.map((d) => d.id)),
     [vipAddedHotelDestinations]
   );
-  const isVerifiedBigHotel = (h: TouristDestination): boolean => vipHotelIds.has(h.id);
+  const isVerifiedBigHotel = (h: TouristDestination): boolean =>
+    vipHotelIds.has(h.id) || Boolean(h.isAdminEdited && h.isFeatured);
 
   const hotelCategories = [
     { id: 'all', nameKh: 'គ្រប់ប្រភេទសណ្ឋាគារ', nameEn: 'All Hotels & Stays', nameZh: '全部酒店与客栈' },
@@ -368,24 +373,52 @@ export const HotelView: React.FC = () => {
         }
       >
         {isAdmin ? (
-          <button
-            type="button"
-            onClick={() => {
-              (window as any).__kft_admin_tab = 'tourism';
-              setIsAdminOpen(true);
-            }}
-            className="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <Settings className="w-4 h-4 text-amber-300 shrink-0" strokeWidth={1.75} />
-            <span className="truncate">
-              {tr(
-                language,
-                `គ្រប់គ្រងសណ្ឋាគារទាំងអស់ (${allHotels.length})`,
-                `Manage All Hotels (${allHotels.length})`,
-                `管理全部酒店 (${allHotels.length})`
-              )}
-            </span>
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                (window as any).__kft_admin_tab = 'hotels';
+                setIsAdminOpen(true);
+              }}
+              className="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Settings className="w-4 h-4 text-amber-300 shrink-0" strokeWidth={1.75} />
+              <span className="truncate">
+                {tr(
+                  language,
+                  `គ្រប់គ្រងសណ្ឋាគារទាំងអស់ (${allHotels.length})`,
+                  `Manage All Hotels (${allHotels.length})`,
+                  `管理全部酒店 (${allHotels.length})`
+                )}
+              </span>
+            </button>
+            <a
+              href="/templates/KhmerFoodTourism_Hotel_Photo_Insert_Template.xlsx"
+              download="KhmerFoodTourism_Hotel_Photo_Insert_Template.xlsx"
+              onClick={() =>
+                showToast(
+                  tr(
+                    language,
+                    'កំពុងទាញយកគំរូ Excel សម្រាប់ដាក់រូបភាពសណ្ឋាគារ...',
+                    'Downloading Hotel Photo Excel Template...',
+                    '正在下载酒店图片 Excel 模板...'
+                  ),
+                  'success'
+                )
+              }
+              className="w-full py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Download className="w-4 h-4 shrink-0" strokeWidth={1.75} />
+              <span className="truncate">
+                {tr(
+                  language,
+                  'ទាញយកគំរូ Excel ដាក់រូបសណ្ឋាគារ (.xlsx)',
+                  'Download Excel Photo Template (.xlsx)',
+                  '下载酒店图片 Excel 模板 (.xlsx)'
+                )}
+              </span>
+            </a>
+          </div>
         ) : myExistingHotel ? (
           <div className="pt-3 border-t border-white/15 flex items-center justify-between gap-2">
             <span className="min-w-0 flex-1 text-[11px] font-bold text-amber-200 truncate">
@@ -416,22 +449,87 @@ export const HotelView: React.FC = () => {
           <>
             {displayedHotels.map((hotel) => {
               const loc = getLocalizedDestination(hotel, language);
+              const isBig = isVerifiedBigHotel(hotel);
+              const isVipRecord = vipHotelIds.has(hotel.id);
+
               const adminEditButton = isAdmin ? (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    (window as any).__kft_open_dest_edit = true;
-                    setSelectedDestination(hotel);
-                  }}
-                  className="p-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 transition-colors active:scale-95 cursor-pointer"
-                  title={tr(language, 'កែប្រែសណ្ឋាគារ', 'Edit Hotel', '编辑酒店')}
-                >
-                  <Edit2 className="w-4 h-4" strokeWidth={1.75} />
-                </button>
+                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                  {!isVipRecord && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setHotelForImageEdit(hotel);
+                        }}
+                        className="p-1.5 rounded-lg bg-[#064E3B] hover:bg-emerald-800 text-white transition-colors active:scale-95 cursor-pointer"
+                        title={tr(language, 'ប្តូររូបភាពសណ្ឋាគារ', 'Upload / Change Hotel Photo', '更换酒店图片')}
+                      >
+                        <Camera className="w-4 h-4" strokeWidth={1.75} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const nextFeatured = !(hotel.isAdminEdited && hotel.isFeatured);
+                          updateDestination({
+                            ...hotel,
+                            isFeatured: nextFeatured,
+                            isAdminEdited: true,
+                          });
+                          showToast(
+                            nextFeatured
+                              ? tr(language, `បានដាក់ «${hotel.nameKh}» ជាកាតធំ (Featured)`, `Set "${hotel.nameEn}" as Large Card`, `已设为大卡片`)
+                              : tr(language, `បានប្តូរ «${hotel.nameKh}» ជាជួរតូចធម្មតា`, `Set "${hotel.nameEn}" as Compact Row`, `已恢复为小行显示`),
+                            'success'
+                          );
+                        }}
+                        className={`p-1.5 rounded-lg transition-colors active:scale-95 cursor-pointer ${
+                          hotel.isAdminEdited && hotel.isFeatured
+                            ? 'bg-amber-400 text-slate-950'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-amber-100'
+                        }`}
+                        title={tr(language, 'ប្តូរទំហំកាតធំ / ជួរតូច', 'Toggle Large Card / Compact Row', '切换大卡片/小行')}
+                      >
+                        <Star className={`w-4 h-4 ${hotel.isAdminEdited && hotel.isFeatured ? 'fill-current' : ''}`} strokeWidth={1.75} />
+                      </button>
+                    </>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isVipRecord) {
+                        openManageMyVipStore(hotel.id);
+                      } else {
+                        (window as any).__kft_open_dest_edit = true;
+                        setSelectedDestination(hotel);
+                      }
+                    }}
+                    className="p-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 transition-colors active:scale-95 cursor-pointer"
+                    title={tr(language, 'កែប្រែព័ត៌មាន & ទីតាំង GPS', 'Edit Info & GPS', '编辑信息与定位')}
+                  >
+                    <Edit2 className="w-4 h-4" strokeWidth={1.75} />
+                  </button>
+                  {!isVipRecord && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm(tr(language, `តើអ្នកពិតជាចង់លុបសណ្ឋាគារ «${hotel.nameKh}» មែនទេ?`, `Delete hotel "${hotel.nameEn}"?`, `确定删除酒店“${hotel.nameEn}”吗？`))) {
+                          deleteDestination(hotel.id);
+                        }
+                      }}
+                      className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 transition-colors active:scale-95 cursor-pointer"
+                      title={tr(language, 'លុបសណ្ឋាគារ', 'Delete Hotel', '删除酒店')}
+                    >
+                      <Trash2 className="w-4 h-4" strokeWidth={1.75} />
+                    </button>
+                  )}
+                </div>
               ) : null;
 
-              if (isVerifiedBigHotel(hotel)) {
+              if (isBig) {
                 const bookmarked = isBookmarked(hotel.id);
                 return (
                   <ListingFeaturedCard
@@ -522,6 +620,30 @@ export const HotelView: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Direct Hotel Photo Upload Modal for Admin */}
+      <TouristImageModal
+        destination={hotelForImageEdit}
+        isOpen={Boolean(hotelForImageEdit)}
+        onClose={() => setHotelForImageEdit(null)}
+        onSave={(updatedHotel) => {
+          updateDestination({
+            ...updatedHotel,
+            isAdminEdited: true,
+          });
+          setHotelForImageEdit(null);
+          showToast(
+            tr(
+              language,
+              `បានរក្សាទុករូបភាពសណ្ឋាគារ «${updatedHotel.nameKh}» ជោគជ័យ!`,
+              `Saved hotel photo for "${updatedHotel.nameEn}"!`,
+              `已保存酒店“${updatedHotel.nameEn}”的图片！`
+            ),
+            'success'
+          );
+        }}
+        isKm={language === 'km'}
+      />
     </div>
   );
 };

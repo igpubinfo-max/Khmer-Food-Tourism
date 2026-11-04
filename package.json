@@ -1,7 +1,7 @@
 {
   "name": "khmerfoodtourism",
   "private": true,
-  "version": "2.6.7",
+  "version": "2.6.8",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,7 +13,9 @@
     "test:habit": "node scripts/dailyHabitAudit.cjs",
     "test:reminders": "node scripts/mealReminderAudit.cjs",
     "test:festival": "node scripts/festivalFoodAudit.cjs",
-    "test:reward": "node scripts/foodCheckInRewardAudit.cjs"
+    "test:reward": "node scripts/foodCheckInRewardAudit.cjs",
+    "hotel:excel:export": "node scripts/export_hotel_excel.cjs",
+    "hotel:excel:import": "node scripts/import_hotel_excel.cjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.0.0",

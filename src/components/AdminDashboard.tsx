@@ -5,7 +5,7 @@ import {
   Users, Plus, Trash2, Edit2, CheckCircle2, AlertTriangle, Settings, 
   QrCode, Heart, KeyRound, Lock, ExternalLink, CreditCard,
   ShieldCheck, ShieldAlert, Clock, RefreshCw, FileText, Check, Ban,
-  Image as ImageIcon, Search, Camera, Upload
+  Image as ImageIcon, Search, Camera, Upload, BedDouble
 } from 'lucide-react';
 import {
   FoodCategorySlug, DestinationCategorySlug, UserRole, User, RegistrationTransaction, FoodItem, TouristDestination, isSeedRestaurantId,
@@ -18,6 +18,7 @@ import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession, getOffici
 import { FoodImageModal } from './FoodImageModal';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { AdminShopPhotoFinderPanel } from './AdminShopPhotoFinderPanel';
+import { AdminHotelManagerPanel } from './AdminHotelManagerPanel';
 import { generateAuthenticRecipeByDishName } from '../utils/khmerRecipeGenerator';
 import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
 import {
@@ -62,7 +63,7 @@ export const AdminDashboard: React.FC = () => {
     openGoogleMapsSearchModal, openManageMyVipStore, setSelectedRestaurant, setSelectedDestination, setIsVipAddRestaurantModalOpen
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'stats' | 'support_tickets' | 'food' | 'restaurants' | 'destinations' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>(() => {
+  const [activeTab, setActiveTab] = useState<'stats' | 'support_tickets' | 'food' | 'restaurants' | 'hotels' | 'destinations' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>(() => {
     return (window as any).__kft_admin_tab || 'stats';
   });
 
@@ -853,6 +854,23 @@ export const AdminDashboard: React.FC = () => {
                 {aiCheckIns.filter(c => c.status === 'pending').length}
               </span>
             )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('hotels')}
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl font-bold border transition cursor-pointer ${
+              activeTab === 'hotels'
+                ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
+            }`}
+          >
+            <BedDouble className="w-3.5 h-3.5 shrink-0" />
+            <span className="min-w-0 break-words text-center leading-tight">
+              {isKm
+                ? `សណ្ឋាគារ (${destinations.filter((d) => d && d.categorySlug === 'hotel').length})`
+                : `Hotels (${destinations.filter((d) => d && d.categorySlug === 'hotel').length})`}
+            </span>
           </button>
 
           <button
@@ -3102,6 +3120,17 @@ export const AdminDashboard: React.FC = () => {
               )}
             </div>
           )}
+          {activeTab === 'hotels' && (
+            <AdminHotelManagerPanel
+              onOpenImageModal={(hotel) => setSelectedDestForImageEdit(hotel)}
+              onOpenGpsEditor={(hotel) => {
+                (window as any).__kft_open_dest_edit = true;
+                setIsAdminOpen(false);
+                setSelectedDestination(hotel);
+              }}
+            />
+          )}
+
           {activeTab === 'destinations' && (
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-stone-200 dark:border-stone-700">
