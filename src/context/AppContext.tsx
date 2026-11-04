@@ -2707,8 +2707,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         const seedDestMap = seedDestPhotoMapRef.current;
         return (data as TouristDestination[]).map(d => {
+          if (!d) return d;
+          const isSeedDest = seedDestMap.has(d.id);
+          const strippedStaticDesc =
+            isSeedDest && !d.isAdminEdited
+              ? { descriptionKh: undefined, descriptionEn: undefined, highlightsKh: undefined }
+              : {};
           if (
-            d &&
             typeof d.photoUrl === 'string' &&
             d.photoUrl.startsWith('data:') &&
             (forceAggressiveStrip || isOverridePersistedInLocalStorage('destinations', d.id))
@@ -2716,13 +2721,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const fallbackUrl = seedDestMap.get(d.id) || '';
             return {
               ...d,
+              ...strippedStaticDesc,
               photoUrl: fallbackUrl,
               galleryPhotos: fallbackUrl ? [fallbackUrl] : [],
               isCustomPhoto: true,
               __compactedFromVault: true,
             };
           }
-          return d;
+          return isSeedDest && !d.isAdminEdited ? { ...d, ...strippedStaticDesc } : d;
         });
       }
       if (key === 'kft_foods_200_v10') {

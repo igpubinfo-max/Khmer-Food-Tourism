@@ -28,6 +28,7 @@ export const TourismView: React.FC = () => {
     { id: 'nature', nameKh: 'ធម្មជាតិ & ទឹកធ្លាក់', nameEn: 'Nature & Falls', nameZh: '自然生态与瀑布' },
     { id: 'beach', nameKh: 'កោះ & ឆ្នេរសមុទ្រ', nameEn: 'Islands & Beaches', nameZh: '海岛与海滩' },
     { id: 'mountain', nameKh: 'ភ្នំ & ឧទ្យានជាតិ', nameEn: 'Mountains', nameZh: '高山与国家公园' },
+    { id: 'cultural', nameKh: 'វប្បធម៌ & ប្រវត្តិសាស្ត្រ', nameEn: 'Cultural & History', nameZh: '文化与历史遗址' },
   ];
 
   const sessionShuffledDestinations = useMemo(

@@ -1,6 +1,7 @@
 import { TouristDestination } from '../types';
+import { racCambodiaTourDestinations } from './seedRacCambodiaTourDestinations';
 
-export const initial100Destinations: TouristDestination[] = [
+const baseSeedDestinations: TouristDestination[] = [
   {
     "id": "dest-1",
     "nameKh": "ព្រះបរមរាជវាំង និងវត្តព្រះកែវមរកត",
@@ -11399,4 +11400,9 @@ export const initial100Destinations: TouristDestination[] = [
     "locationNeedsReview": false,
     "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
   }
+];
+
+export const initial100Destinations: TouristDestination[] = [
+  ...baseSeedDestinations,
+  ...racCambodiaTourDestinations,
 ];
