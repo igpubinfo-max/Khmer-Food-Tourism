@@ -32,6 +32,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
   onSignIn,
   onExploreProfile,
   onOpenAdminPanel,
+  hint,
 }) => {
   const hour = new Date().getHours();
   const greeting =
@@ -50,7 +51,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
   const displayName = currentUser?.name || userName;
 
   return (
-    <section>
+    <section className="space-y-2">
       {currentUser ? (
         isAdmin ? (
           <div className="p-3 rounded-2xl bg-gradient-to-r from-[#022c22] via-[#064E3B] to-slate-900 text-white border border-emerald-400/50 shadow-md relative overflow-hidden flex items-center justify-between gap-3">
@@ -178,6 +179,16 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
           )}
         </div>
       )}
+
+      {/* 1. Existing Khmer text section (headline + personalized meal-time subtitle) */}
+      <div className="pt-0.5">
+        <h2 className={`${headingFont(language)} text-[15px] sm:text-lg leading-relaxed pt-0.5 pb-0.5 text-[#064E3B] dark:text-emerald-200 break-words`}>
+          {tr(language, 'ស្វែងយល់អាហារ • ទីតាំង • បទពិសោធន៍', 'Discover Food • Places • Experiences', '探索美食 • 景点 • 体验')}
+        </h2>
+        {hint && (
+          <p className="text-xs leading-relaxed pt-0.5 pb-0.5 text-slate-500 dark:text-slate-400 truncate">{hint}</p>
+        )}
+      </div>
     </section>
   );
 };

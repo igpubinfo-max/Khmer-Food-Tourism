@@ -31,10 +31,10 @@ import { getMealSlot, getMealHint, seededShuffle, type MealSlot } from './home/h
 import { getAuthenticCambodianDishesForMealTime } from '../utils/cambodianMealHabits';
 import {
   ChevronRight, Utensils, Store, Compass,
-  MapPin, ShieldCheck,
+  MapPin,
   ExternalLink, Search, RefreshCw,
   Plus, Edit2, X, Trash2, Globe, Loader2,
-  Users, CreditCard, Settings, MessageSquare, Shield, Clock
+  Users, CreditCard, Settings, MessageSquare, Shield
 } from 'lucide-react';
 
 export const HomeView: React.FC = () => {
@@ -783,7 +783,6 @@ export const HomeView: React.FC = () => {
       {!searchResults && (
         isAdmin ? (
           (() => {
-            const activeVipUsersCount = users.filter(u => isUserVipActive(u)).length;
             const pendingTxnsCount = transactions.filter(
               t => t.status === 'pending_verification' || t.status === 'needs_more_info'
             ).length;
@@ -792,7 +791,6 @@ export const HomeView: React.FC = () => {
             const pendingTicketsCount = supportTickets.filter(
               t => String(t.status || '').toLowerCase() === 'pending' || t.unreadByAdmin
             ).length;
-            const totalPendingApprovals = pendingTxnsCount + pendingShopsCount + pendingTicketsCount;
             const rotCfg = getVipFeaturedRotationConfig(appSettings);
 
             const openAdminTab = (tab: string, settingsSection?: string) => {
@@ -804,23 +802,73 @@ export const HomeView: React.FC = () => {
             };
 
             return (
-              <div className="space-y-4 animate-in fade-in">
-                {/* 1. System Statistics Card */}
+              <div className="space-y-2.5 animate-in fade-in">
+                {/* 2. Free 30 Days membership section */}
+                <DailyHabitCard onOpenFood={setSelectedFood} />
+
+                {/* 3. The 6 main navigation buttons */}
+                <FeatureGrid
+                  language={language}
+                  isVip={canUseVipActions}
+                  onNearbyFoodSearch={handleNearbyFoodSearch}
+                  onNearbyPlaces={handleNearbyPlaces}
+                  onFoodRecommendations={handleFoodRecommendations}
+                  onDailyFoodDiscovery={handleDailyFoodDiscovery}
+                  onMapNavigation={handleMapNavigation}
+                  onSmartAiAssistant={handleSmartAiAssistant}
+                />
+
+                {/* Clean, simple statistics showing only Total Shops, Total Food, Total Travel */}
+                <div
+                  data-testid="home-statistics-section"
+                  className="grid grid-cols-3 divide-x divide-slate-200 dark:divide-white/10 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden"
+                >
+                  {[
+                    {
+                      n: restaurants.length,
+                      label: tr(language, 'ហាងអាហារសរុប', 'Total Shops', '餐厅总数'),
+                      Icon: IconNavShop,
+                      onClick: () => openAdminTab('restaurants'),
+                    },
+                    {
+                      n: foods.length,
+                      label: tr(language, 'មុខម្ហូបសរុប', 'Total Food', '美食总数'),
+                      Icon: IconNavFood,
+                      onClick: () => openAdminTab('food'),
+                    },
+                    {
+                      n: destinations.length,
+                      label: tr(language, 'តំបន់ទេសចរណ៍សរុប', 'Total Travel', '景点总数'),
+                      Icon: IconNavTourism,
+                      onClick: () => openAdminTab('destinations'),
+                    },
+                  ].map((s) => (
+                    <button
+                      key={s.label}
+                      type="button"
+                      onClick={s.onClick}
+                      className="py-3 px-2 flex flex-col items-center justify-center gap-1 text-center hover:bg-slate-50 dark:hover:bg-white/5 active:scale-95 transition cursor-pointer"
+                    >
+                      <span className="w-8 h-8 rounded-xl bg-emerald-50 text-[#064E3B] dark:bg-slate-700/80 dark:text-emerald-300 border border-emerald-200/80 dark:border-slate-600 flex items-center justify-center shrink-0">
+                        <s.Icon className="w-4 h-4" />
+                      </span>
+                      <span className="block text-xl sm:text-2xl font-black font-mono text-[#064E3B] dark:text-amber-300 leading-tight">
+                        {s.n}
+                      </span>
+                      <span className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 leading-tight">
+                        {s.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* 2. Admin Management Menus Grid */}
                 <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-[#064E3B] text-emerald-300 flex items-center justify-center shadow-2xs">
-                        <ShieldCheck className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h3 className="font-moul text-xs sm:text-sm text-slate-900 dark:text-white">
-                          {tr(language, 'ទិដ្ឋភាពទូទៅនៃប្រព័ន្ធ', 'System Overview', '系统运行概览')}
-                        </h3>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                          {tr(language, 'ស្ថិតិទិន្នន័យ និងសំណើរង់ចាំអនុម័ត', 'Directory statistics & pending approvals', '名录统计与待审批事项')}
-                        </p>
-                      </div>
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-moul text-xs sm:text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      <span>{tr(language, 'ម៉ឺនុយគ្រប់គ្រងរដ្ឋបាល', 'Admin Management', '系统管理菜单')}</span>
+                    </h3>
                     {triggerCloudSyncNow && (
                       <button
                         type="button"
@@ -837,108 +885,6 @@ export const HomeView: React.FC = () => {
                         <span>{tr(language, 'Sync ទិន្នន័យ', 'Sync Cloud', '云端同步')}</span>
                       </button>
                     )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => openAdminTab('users')}
-                      className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50/70 dark:bg-slate-900/60 dark:hover:bg-slate-700/60 border border-slate-200/80 dark:border-slate-700 text-left transition cursor-pointer group"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-[#064E3B] dark:text-emerald-300 flex items-center justify-center">
-                          <Users className="w-4 h-4" />
-                        </span>
-                        <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 text-[10px] font-extrabold">
-                          {activeVipUsersCount} VIP
-                        </span>
-                      </div>
-                      <div className="text-lg font-black font-mono text-slate-900 dark:text-white mt-1.5">
-                        {users.length}
-                      </div>
-                      <div className="text-[11px] font-bold text-slate-600 dark:text-slate-300 group-hover:text-[#064E3B] dark:group-hover:text-emerald-300">
-                        {tr(language, 'អ្នកប្រើប្រាស់សរុប', 'Registered Users', '注册用户总数')}
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => openAdminTab('transactions')}
-                      className="p-3 rounded-2xl bg-slate-50 hover:bg-amber-50/70 dark:bg-slate-900/60 dark:hover:bg-slate-700/60 border border-slate-200/80 dark:border-slate-700 text-left transition cursor-pointer group"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 flex items-center justify-center">
-                          <Clock className="w-4 h-4" />
-                        </span>
-                        {totalPendingApprovals > 0 ? (
-                          <span className="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-black">
-                            {tr(language, `${totalPendingApprovals} រង់ចាំ`, `${totalPendingApprovals} Pending`, `${totalPendingApprovals} 待处理`)}
-                          </span>
-                        ) : (
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
-                            {tr(language, 'រួចរាល់', 'All Clear', '已处理')}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-lg font-black font-mono text-slate-900 dark:text-white mt-1.5">
-                        {pendingTxnsCount}
-                      </div>
-                      <div className="text-[11px] font-bold text-slate-600 dark:text-slate-300 group-hover:text-amber-700 dark:group-hover:text-amber-300">
-                        {tr(language, 'វិក្កយបត្ររង់ចាំអនុម័ត', 'Pending Receipts', '待审付款凭证')}
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => openAdminTab('restaurants')}
-                      className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50/70 dark:bg-slate-900/60 dark:hover:bg-slate-700/60 border border-slate-200/80 dark:border-slate-700 text-left transition cursor-pointer group"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="w-7 h-7 rounded-lg bg-teal-100 dark:bg-teal-950/80 text-teal-800 dark:text-teal-300 flex items-center justify-center">
-                          <Store className="w-4 h-4" />
-                        </span>
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
-                          {verifiedShopsCount} {tr(language, 'ផ្លូវការ', 'Verified', '已认证')}
-                        </span>
-                      </div>
-                      <div className="text-lg font-black font-mono text-slate-900 dark:text-white mt-1.5">
-                        {restaurants.length}
-                      </div>
-                      <div className="text-[11px] font-bold text-slate-600 dark:text-slate-300 group-hover:text-[#064E3B] dark:group-hover:text-emerald-300">
-                        {tr(language, 'ហាងអាហារសរុបក្នុងបញ្ជី', 'Total Directory Shops', '名录餐厅总数')}
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => openAdminTab('food')}
-                      className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50/70 dark:bg-slate-900/60 dark:hover:bg-slate-700/60 border border-slate-200/80 dark:border-slate-700 text-left transition cursor-pointer group"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 flex items-center justify-center">
-                          <Utensils className="w-4 h-4" />
-                        </span>
-                        <span className="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300 text-[10px] font-bold">
-                          {destinations.length} {tr(language, 'ទេសចរណ៍', 'Sights', '景点')}
-                        </span>
-                      </div>
-                      <div className="text-lg font-black font-mono text-slate-900 dark:text-white mt-1.5">
-                        {foods.length}
-                      </div>
-                      <div className="text-[11px] font-bold text-slate-600 dark:text-slate-300 group-hover:text-indigo-700 dark:group-hover:text-indigo-300">
-                        {tr(language, 'មុខម្ហូប & រូបមន្តសរុប', 'Dishes & Recipes', '美食与食谱总数')}
-                      </div>
-                    </button>
-                  </div>
-                </div>
-
-                {/* 2. Admin Management Menus Grid */}
-                <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-moul text-xs sm:text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-2">
-                      <Settings className="w-4 h-4" />
-                      <span>{tr(language, 'ម៉ឺនុយគ្រប់គ្រងរដ្ឋបាល', 'Admin Management', '系统管理菜单')}</span>
-                    </h3>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -1107,7 +1053,10 @@ export const HomeView: React.FC = () => {
                 />
               )}
 
-              {/* 1. Six Smart Daily Services (5 Free + 1 VIP Smart AI Assistant) */}
+              {/* 2. Free 30 Days membership section */}
+              <DailyHabitCard onOpenFood={setSelectedFood} />
+
+              {/* 3. The 6 main navigation buttons */}
               <FeatureGrid
                 language={language}
                 isVip={canUseVipActions}
@@ -1119,7 +1068,7 @@ export const HomeView: React.FC = () => {
                 onSmartAiAssistant={handleSmartAiAssistant}
               />
 
-              {/* 2. Personalized picks for the current time of day */}
+              {/* 4. Personalized picks for the current time of day */}
               <ForYouSection
                 language={language}
                 slot={selectedMealSlot}
@@ -1130,10 +1079,10 @@ export const HomeView: React.FC = () => {
                 onSeeAll={handleSeeAllFoods}
               />
 
-              {/* 2b. Traditional festival dishes (only while a festival is ongoing / about to start) */}
+              {/* 4b. Traditional festival dishes (only while a festival is ongoing / about to start) */}
               <FestivalFoodSection onOpenFood={setSelectedFood} />
 
-              {/* 3. Trending foods */}
+              {/* 5. Trending foods */}
               {randomTrending.length > 0 ? (
                 <TrendingFoodsRow
                   language={language}
@@ -1152,7 +1101,7 @@ export const HomeView: React.FC = () => {
                 />
               )}
 
-              {/* 4. Popular places (with quick province chips) */}
+              {/* 6. Popular places (with quick province chips) */}
               <PopularShops
                 language={language}
                 restaurants={restaurants}
@@ -1160,7 +1109,7 @@ export const HomeView: React.FC = () => {
                 onSeeAll={handleSeeAllRestaurants}
               />
 
-              {/* 5. Explore Cambodia */}
+              {/* 7. Explore Cambodia */}
               <PopularDestinations
                 language={language}
                 destinations={destinations}
@@ -1168,29 +1117,51 @@ export const HomeView: React.FC = () => {
                 onSeeAll={handleSeeAllTourism}
               />
 
-              {/* 6. Cambodia at a glance */}
-              <div className="grid grid-cols-3 divide-x divide-slate-200 dark:divide-white/10 rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden">
+              {/* 8. Clean, simple statistics showing only Total Shops, Total Food, Total Travel */}
+              <div
+                data-testid="home-statistics-section"
+                className="grid grid-cols-3 divide-x divide-slate-200 dark:divide-white/10 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden"
+              >
                 {[
-                  { n: foods.length, label: txt('មុខម្ហូប', 'Dishes', '美食'), tab: 'food' },
-                  { n: restaurants.length, label: txt('ហាងអាហារ', 'Restaurants', '餐厅'), tab: 'restaurants' },
-                  { n: destinations.length, label: txt('តំបន់ទេសចរណ៍', 'Destinations', '景点'), tab: 'tourism' },
+                  {
+                    n: restaurants.length,
+                    label: tr(language, 'ហាងអាហារសរុប', 'Total Shops', '餐厅总数'),
+                    Icon: IconNavShop,
+                    tab: 'restaurants',
+                  },
+                  {
+                    n: foods.length,
+                    label: tr(language, 'មុខម្ហូបសរុប', 'Total Food', '美食总数'),
+                    Icon: IconNavFood,
+                    tab: 'food',
+                  },
+                  {
+                    n: destinations.length,
+                    label: tr(language, 'តំបន់ទេសចរណ៍សរុប', 'Total Travel', '景点总数'),
+                    Icon: IconNavTourism,
+                    tab: 'tourism',
+                  },
                 ].map((s) => (
                   <button
                     key={s.tab}
                     type="button"
                     onClick={() => setActiveTab(s.tab as any)}
-                    className="py-3.5 text-center hover:bg-slate-50 dark:hover:bg-white/5 active:scale-95 transition cursor-pointer"
+                    className="py-3 px-2 flex flex-col items-center justify-center gap-1 text-center hover:bg-slate-50 dark:hover:bg-white/5 active:scale-95 transition cursor-pointer"
                   >
-                    <span className="block text-lg font-black font-mono text-[#064E3B] dark:text-amber-300 leading-tight">{s.n}+</span>
-                    <span className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-0.5">{s.label}</span>
+                    <span className="w-8 h-8 rounded-xl bg-emerald-50 text-[#064E3B] dark:bg-slate-700/80 dark:text-emerald-300 border border-emerald-200/80 dark:border-slate-600 flex items-center justify-center shrink-0">
+                      <s.Icon className="w-4 h-4" />
+                    </span>
+                    <span className="block text-xl sm:text-2xl font-black font-mono text-[#064E3B] dark:text-amber-300 leading-tight">
+                      {s.n}
+                    </span>
+                    <span className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 leading-tight">
+                      {s.label}
+                    </span>
                   </button>
                 ))}
               </div>
 
-              {/* 7. VIP Reward section (30 successful check-ins reward) directly above My Shop / VIP Perks */}
-              <DailyHabitCard onOpenFood={setSelectedFood} />
-
-              {/* 8. VIP members manage their shop; everyone else sees one calm benefits card */}
+              {/* 9. VIP members manage their shop; everyone else sees one calm benefits card */}
               {isVip ? (
                 <MyShopPanel
                   language={language}

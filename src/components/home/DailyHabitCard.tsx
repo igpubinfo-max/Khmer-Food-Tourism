@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { Award } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { organizeAndDeduplicateFoods, isAdminAccount, type FoodItem } from '../../types';
+import { organizeAndDeduplicateFoods, type FoodItem } from '../../types';
 import { tr } from '../../utils/i18n';
 import { useFoodPassport, levelTitle, badgeTitle } from '../../utils/foodPassport';
 import {
@@ -43,7 +43,7 @@ const DailyHabitCardInner: React.FC<Props> = () => {
     currentUser?.email
   );
   const isGuest = !currentUser;
-  const rewardActive = !isAdminAccount(currentUser) && !reward.granted;
+  const rewardActive = !reward.granted;
 
   // Silently record today's visit once per mount (idempotent per calendar day).
   useEffect(() => {

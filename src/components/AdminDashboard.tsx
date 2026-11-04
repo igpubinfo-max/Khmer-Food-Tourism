@@ -723,8 +723,8 @@ export const AdminDashboard: React.FC = () => {
               </div>
               <p className="text-xs text-emerald-200 font-khmer">
                 {isKm 
-                  ? 'គ្រប់គ្រងមុខម្ហូប (200) ហាងអាហារ (200+) ទេសចរណ៍ (300) ការទូទាត់ VIP និងសន្តិសុខ' 
-                  : 'Manage foods (200), restaurants (200+), destinations (300), VIP transactions, and security'}
+                  ? `គ្រប់គ្រងហាងអាហារ (${restaurants.length}) មុខម្ហូប (${foods.length}) ទេសចរណ៍ (${destinations.length}) ការទូទាត់ VIP និងសន្តិសុខ` 
+                  : `Manage shops (${restaurants.length}), foods (${foods.length}), travel (${destinations.length}), VIP transactions, and security`}
               </p>
             </div>
           </div>
@@ -913,187 +913,44 @@ export const AdminDashboard: React.FC = () => {
           {/* STATS OVERVIEW TAB */}
           {activeTab === 'stats' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-slate-200 dark:border-slate-700 dark:border-stone-700 shadow-xs">
-                  <span className="text-stone-400 font-khmer text-xs">{isKm ? 'មុខម្ហូបខ្មែរសរុប' : 'Total Khmer Dishes'}</span>
-                  <p className="text-2xl font-bold text-[#064E3B] dark:text-emerald-400 font-mono mt-2">{foods.length}</p>
-                  <span className="text-[10px] text-[#059669] font-bold">✓ 200+ Disconnected Prices</span>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-slate-200 dark:border-slate-700 dark:border-stone-700 shadow-xs">
-                  <span className="text-stone-400 font-khmer text-xs">{isKm ? 'ហាងអាហារសរុប' : 'Total Restaurants'}</span>
-                  <p className="text-2xl font-bold text-[#059669] font-mono mt-2">{restaurants.length}</p>
-                  <span className="text-[10px] text-stone-500 font-khmer">{verifiedRestaurantsCount} {isKm ? 'ហាងផ្ទៀងផ្ទាត់ផ្លូវការ' : 'Verified Stores'}</span>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-slate-200 dark:border-slate-700 dark:border-stone-700 shadow-xs">
-                  <span className="text-stone-400 font-khmer text-xs">{isKm ? 'ប្រតិបត្តិការ VIP' : 'VIP Transactions'}</span>
-                  <p className="text-2xl font-bold text-[#064E3B] dark:text-emerald-400 font-mono mt-2">{transactions.length}</p>
-                  <span className="text-[10px] text-[#059669] font-bold font-khmer">{pendingTxns.length} {isKm ? 'រង់ចាំផ្ទៀងផ្ទាត់' : 'Pending Approval'}</span>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-white dark:bg-stone-800 border border-slate-200 dark:border-slate-700 dark:border-stone-700 shadow-xs">
-                  <span className="text-stone-400 font-khmer text-xs">{isKm ? 'តំបន់ទេសចរណ៍' : 'Tourist Destinations'}</span>
-                  <p className="text-2xl font-bold text-[#0F172A] dark:text-stone-100 font-mono mt-2">{destinations.length}</p>
-                  <span className="text-[10px] text-[#059669] font-bold font-khmer">{isKm ? '២៥ ខេត្តក្រុង' : '25 Provinces'}</span>
-                </div>
-              </div>
-
-              {/* Quick Box #3: Google Maps Places API Key Entry Card on Overview */}
-              <div className="p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/30 border-2 border-emerald-500/60 space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <h4 className="font-bold text-[#064E3B] dark:text-emerald-300 font-khmer text-sm flex items-center gap-1.5">
-                      <span>ប្រអប់ទី ៣៖ បញ្ចូលសោ Google Maps Places API Key ($200/ខែ Free Credit)</span>
-                    </h4>
-                    <p className="text-[11px] text-stone-600 dark:text-stone-300 font-khmer mt-0.5">
-                      បិទភ្ជាប់សោ Google Maps Places API Key (ផ្តើមដោយ <code className="font-mono font-bold">AIzaSy...</code>) ដើម្បីទាញយកហាង កាហ្វេ និងកន្លែងទេសចរណ៍ថ្មីៗទូទាំងកម្ពុជាដោយស្វ័យប្រវត្តិ + Smart Cache!
-                    </p>
-                  </div>
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold font-khmer ${
-                    Boolean(cloudCfg.googleMapsApiKey && cloudCfg.googleMapsApiKey.length > 15) || isGoogleMapsConfigured()
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-amber-200 text-amber-900'
-                  }`}>
-                    {Boolean(cloudCfg.googleMapsApiKey && cloudCfg.googleMapsApiKey.length > 15) || isGoogleMapsConfigured()
-                      ? '✓ បានភ្ជាប់ Google Maps រួចរាល់'
-                      : 'មិនទាន់ដាក់សោ Google Maps'}
-                  </span>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    type="text"
-                    value={cloudCfg.googleMapsApiKey}
-                    onChange={(e) => setCloudCfg({ ...cloudCfg, googleMapsApiKey: e.target.value })}
-                    placeholder="បិទភ្ជាប់សោ Google Maps Places API Key ទីនេះ (ឧ. AIzaSy...)"
-                    className="flex-1 px-3.5 py-2 rounded-xl border border-emerald-400 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 font-mono text-xs"
-                  />
+              <div className="grid grid-cols-3 divide-x divide-slate-200 dark:divide-stone-700 rounded-2xl bg-white dark:bg-stone-800 border border-slate-200/80 dark:border-stone-700 shadow-xs overflow-hidden">
+                {[
+                  {
+                    n: restaurants.length,
+                    label: isKm ? 'ហាងអាហារសរុប' : 'Total Shops',
+                    Icon: Store,
+                    tab: 'restaurants' as const,
+                  },
+                  {
+                    n: foods.length,
+                    label: isKm ? 'មុខម្ហូបសរុប' : 'Total Food',
+                    Icon: Utensils,
+                    tab: 'food' as const,
+                  },
+                  {
+                    n: destinations.length,
+                    label: isKm ? 'តំបន់ទេសចរណ៍សរុប' : 'Total Travel',
+                    Icon: Compass,
+                    tab: 'destinations' as const,
+                  },
+                ].map((s) => (
                   <button
+                    key={s.tab}
                     type="button"
-                    onClick={async () => {
-                      try {
-                        const clip = await navigator.clipboard.readText();
-                        if (clip && clip.trim()) {
-                          const updated = { ...cloudCfg, googleMapsApiKey: clip.trim() };
-                          const saved = saveCloudApiConfig(updated);
-                          setCloudCfg(saved);
-                          void updateAppSettings({
-                            googleMapsApiKey: saved.googleMapsApiKey,
-                            geminiApiKey: saved.geminiApiKey,
-                          });
-                          showToast('បានបិទភ្ជាប់ និងរក្សាទុកសោ Google Maps Places API ទៅលើ Cloud ជោគជ័យ!', 'success');
-                        }
-                      } catch {
-                        showToast('សូមចុចឱ្យជាប់ក្នុងប្រអប់ រួចជ្រើសរើស Paste', 'info');
-                      }
-                    }}
-                    className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
+                    onClick={() => setActiveTab(s.tab)}
+                    className="py-4 px-2 flex flex-col items-center justify-center gap-1.5 text-center hover:bg-slate-50 dark:hover:bg-stone-700/50 active:scale-95 transition cursor-pointer"
                   >
-                    Paste & រក្សាទុកភ្លាម
+                    <span className="w-9 h-9 rounded-xl bg-emerald-50 text-[#064E3B] dark:bg-stone-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-stone-600 flex items-center justify-center shrink-0">
+                      <s.Icon className="w-4 h-4" />
+                    </span>
+                    <span className="block text-2xl font-black font-mono text-[#064E3B] dark:text-amber-300 leading-tight">
+                      {s.n}
+                    </span>
+                    <span className="block text-xs font-bold text-slate-600 dark:text-stone-300 font-khmer leading-tight">
+                      {s.label}
+                    </span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const saved = saveCloudApiConfig(cloudCfg);
-                      setCloudCfg(saved);
-                      void updateAppSettings({
-                        googleMapsApiKey: saved.googleMapsApiKey,
-                        geminiApiKey: saved.geminiApiKey,
-                      });
-                      handleVerifyGoogleMapsApi(saved.googleMapsApiKey);
-                      showToast('បានរក្សាទុកសោ Google Maps Places API Key លើ Cloud ជោគជ័យ!', 'success');
-                    }}
-                    className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
-                  >
-                    រក្សាទុកសោ (Save Key)
-                  </button>
-                  <button
-                    type="button"
-                    disabled={isVerifyingGoogleMaps}
-                    onClick={() => handleVerifyGoogleMapsApi(cloudCfg.googleMapsApiKey)}
-                    className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
-                  >
-                    {isVerifyingGoogleMaps ? 'កំពុងពិនិត្យ...' : 'ពិនិត្យស្ថានភាព API'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openGoogleMapsSearchModal('all')}
-                    className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0 shadow-sm"
-                  >
-                    ស្វែងរក & នាំចូលពី Google Maps
-                  </button>
-                </div>
-              </div>
-
-              {/* Quick Box #4: Google Gemini AI API Key Entry Card on Overview */}
-              <div className="p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/30 border-2 border-emerald-500/60 space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <h4 className="font-bold text-[#064E3B] dark:text-emerald-300 font-khmer text-sm flex items-center gap-1.5">
-                      <span>ប្រអប់ទី ៤៖ បញ្ចូលសោ Google Gemini AI API Key (សម្រាប់មុខងារ «សួរ AI»)</span>
-                    </h4>
-                    <p className="text-[11px] text-stone-600 dark:text-stone-300 font-khmer mt-0.5">
-                      បិទភ្ជាប់សោ Gemini API Key (<code className="font-mono font-bold">...Q9bQ / KhmerFoodAI</code> ពី Google AI Studio) ដើម្បីឱ្យមុខងារ «សួរ AI» ឆ្លើយសំណួរបានត្រឹមត្រូវ ១០០%!
-                    </p>
-                  </div>
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold font-khmer ${
-                    Boolean(cloudCfg.geminiApiKey && cloudCfg.geminiApiKey.length > 15)
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-amber-200 text-amber-900'
-                  }`}>
-                    {Boolean(cloudCfg.geminiApiKey && cloudCfg.geminiApiKey.length > 15)
-                      ? '✓ បានភ្ជាប់ Gemini AI រួចរាល់'
-                      : 'មិនទាន់ដាក់សោ Gemini AI'}
-                  </span>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    type="text"
-                    value={cloudCfg.geminiApiKey}
-                    onChange={(e) => setCloudCfg({ ...cloudCfg, geminiApiKey: e.target.value })}
-                    placeholder="បិទភ្ជាប់សោ Google Gemini AI API Key ទីនេះ (ឧ. AIzaSy...Q9bQ)"
-                    className="flex-1 px-3.5 py-2 rounded-xl border border-emerald-400 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 font-mono text-xs"
-                  />
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      try {
-                        const clip = await navigator.clipboard.readText();
-                        if (clip && clip.trim()) {
-                          const updated = { ...cloudCfg, geminiApiKey: clip.trim() };
-                          const saved = saveCloudApiConfig(updated);
-                          setCloudCfg(saved);
-                          await updateAppSettings({
-                            geminiApiKey: saved.geminiApiKey,
-                            googleMapsApiKey: saved.googleMapsApiKey,
-                          });
-                          showToast('បានបិទភ្ជាប់ និងរក្សាទុកសោ Gemini AI API Key លើ Cloud ជោគជ័យ!', 'success');
-                        }
-                      } catch {
-                        showToast('សូមចុចឱ្យជាប់ក្នុងប្រអប់ រួចជ្រើសរើស Paste', 'info');
-                      }
-                    }}
-                    className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
-                  >
-                    Paste & រក្សាទុកភ្លាម
-                  </button>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      const saved = saveCloudApiConfig(cloudCfg);
-                      setCloudCfg(saved);
-                      await updateAppSettings({
-                        geminiApiKey: saved.geminiApiKey,
-                        googleMapsApiKey: saved.googleMapsApiKey,
-                      });
-                      const res = await testGeminiApiConnection(saved.geminiApiKey);
-                      showToast(res.ok ? res.message : `Gemini Error: ${res.message}`, res.ok ? 'success' : 'error');
-                    }}
-                    className="px-4 py-2 bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs rounded-xl transition cursor-pointer shrink-0"
-                  >
-                    រក្សាទុក & សាកល្បង Gemini
-                  </button>
-                </div>
+                ))}
               </div>
 
               {/* Pending Support Messages Alert Banner */}

@@ -18,6 +18,7 @@ import {
 import { tr } from '../utils/i18n';
 import { resolveUserAvatarUrl, handleAvatarImageError, fileToAvatarDataUrl } from '../utils/avatarHelper';
 import { requestManualUpdateCheck } from '../services/appUpdateService';
+import { IconNavFood, IconNavShop, IconNavTourism } from './icons/HandcraftedIcons';
 
 export const ProfileView: React.FC = () => {
   const { 
@@ -721,65 +722,48 @@ export const ProfileView: React.FC = () => {
               </button>
             </div>
 
-            {/* Key Administrative Metrics */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => { (window as any).__kft_admin_tab = 'users'; setIsAdminOpen(true); }}
-                className="p-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition cursor-pointer"
-              >
-                <div className="text-[10px] text-emerald-200 font-bold uppercase tracking-wider">
-                  {tr(language, 'អ្នកប្រើប្រាស់', 'Users & VIP', '用户与 VIP')}
-                </div>
-                <div className="text-lg font-black text-white font-mono mt-0.5">{users.length}</div>
-                <div className="text-[10px] text-amber-300 font-bold mt-0.5">
-                  {users.filter(u => isUserVipActive(u)).length} {tr(language, 'គណនី VIP សកម្ម', 'Active VIPs', '活跃 VIP')}
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => { (window as any).__kft_admin_tab = 'restaurants'; setIsAdminOpen(true); }}
-                className="p-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition cursor-pointer"
-              >
-                <div className="text-[10px] text-emerald-200 font-bold uppercase tracking-wider">
-                  {tr(language, 'គ្រប់គ្រងហាង', 'Shops', '店铺管理')}
-                </div>
-                <div className="text-lg font-black text-white font-mono mt-0.5">{restaurants.length}</div>
-                <div className="text-[10px] text-emerald-300 font-bold mt-0.5">
-                  {rotationState.eligibleQueue.length} {tr(language, 'ហាង VIP ក្នុងប្រព័ន្ធបង្វិល', 'In VIP Rotation', '参与轮播')}
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => { (window as any).__kft_admin_tab = 'payments'; setIsAdminOpen(true); }}
-                className="p-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition cursor-pointer"
-              >
-                <div className="text-[10px] text-emerald-200 font-bold uppercase tracking-wider">
-                  {tr(language, 'ការទូទាត់ & សំបុត្រ', 'Approvals', '付款与工单')}
-                </div>
-                <div className="text-lg font-black text-white font-mono mt-0.5">
-                  {transactions.filter(t => t.status === 'pending_verification').length + supportTickets.filter(t => t.status === 'pending' || t.unreadByAdmin).length}
-                </div>
-                <div className="text-[10px] text-amber-200 font-bold mt-0.5">
-                  {tr(language, 'រង់ចាំពិនិត្យ', 'Pending Review', '待审核')}
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => { (window as any).__kft_admin_tab = 'food'; setIsAdminOpen(true); }}
-                className="p-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-left transition cursor-pointer"
-              >
-                <div className="text-[10px] text-emerald-200 font-bold uppercase tracking-wider">
-                  {tr(language, 'មាតិកាប្រព័ន្ធ', 'Catalog', '系统内容')}
-                </div>
-                <div className="text-lg font-black text-white font-mono mt-0.5">{foods.length + destinations.length}</div>
-                <div className="text-[10px] text-emerald-200 font-bold mt-0.5">
-                  {foods.length} {tr(language, 'ម្ហូប', 'Dishes', '菜品')} • {destinations.length} {tr(language, 'ទេសចរណ៍', 'Places', '景点')}
-                </div>
-              </button>
+            {/* Clean 3-Total Statistics: Total Shops, Total Food, Total Travel */}
+            <div className="grid grid-cols-3 divide-x divide-white/15 rounded-2xl bg-white/10 border border-white/15 overflow-hidden pt-1">
+              {[
+                {
+                  n: restaurants.length,
+                  label: tr(language, 'ហាងអាហារសរុប', 'Total Shops', '餐厅总数'),
+                  Icon: IconNavShop,
+                  tab: 'restaurants',
+                },
+                {
+                  n: foods.length,
+                  label: tr(language, 'មុខម្ហូបសរុប', 'Total Food', '美食总数'),
+                  Icon: IconNavFood,
+                  tab: 'food',
+                },
+                {
+                  n: destinations.length,
+                  label: tr(language, 'តំបន់ទេសចរណ៍សរុប', 'Total Travel', '景点总数'),
+                  Icon: IconNavTourism,
+                  tab: 'destinations',
+                },
+              ].map((s) => (
+                <button
+                  key={s.tab}
+                  type="button"
+                  onClick={() => {
+                    (window as any).__kft_admin_tab = s.tab;
+                    setIsAdminOpen(true);
+                  }}
+                  className="py-3 px-2 flex flex-col items-center justify-center gap-1 text-center hover:bg-white/10 active:scale-95 transition cursor-pointer"
+                >
+                  <span className="w-8 h-8 rounded-xl bg-white/15 text-amber-300 border border-white/20 flex items-center justify-center shrink-0">
+                    <s.Icon className="w-4 h-4" />
+                  </span>
+                  <span className="block text-xl font-black text-white font-mono leading-tight">
+                    {s.n}
+                  </span>
+                  <span className="block text-[11px] font-bold text-emerald-100 leading-tight">
+                    {s.label}
+                  </span>
+                </button>
+              ))}
             </div>
           </div>
 
