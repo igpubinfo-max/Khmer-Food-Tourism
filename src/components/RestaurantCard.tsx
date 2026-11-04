@@ -34,6 +34,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
     restaurant,
     language,
     isAdmin,
+    setSelectedRestaurant,
     openManageMyVipStore,
     deleteRestaurant,
     trackRestaurantView,
@@ -49,15 +50,19 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
 
     const handleCardClick = () => {
       trackRestaurantView(restaurant.id);
-      // Open the shop's exact location directly in Google Maps (no intermediate in-app detail page)
+      setSelectedRestaurant(restaurant);
+    };
+
+    const handleOpenMapClick = () => {
+      trackRestaurantView(restaurant.id);
       openExternalUrlNativeSafe(getRestaurantDirectGoogleMapsUrl(restaurant));
     };
 
-    const openMapTitle = tr(
+    const viewDetailsTitle = tr(
       language,
-      'បើកទីតាំងហាងក្នុង Google Maps',
-      'Open shop location in Google Maps',
-      '在 Google 地图中打开店铺位置'
+      'មើលព័ត៌មានលម្អិត',
+      'View details',
+      '查看详情'
     );
 
     const adminActions = isAdmin ? (
@@ -106,7 +111,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
           phone={restaurant.phone}
           badgeLabel={tr(language, 'ហាង VIP', 'VIP Shop', 'VIP 店铺')}
           onOpen={handleCardClick}
-          onOpenMap={handleCardClick}
+          onOpenMap={handleOpenMapClick}
           topRightActions={adminActions}
         />
       );
@@ -124,8 +129,9 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
         }
         title={loc.name}
         province={loc.province}
+        chips={restaurant.priceLevel ? [{ text: restaurant.priceLevel, tone: 'amber' }] : undefined}
         onClick={handleCardClick}
-        actionTitle={openMapTitle}
+        actionTitle={viewDetailsTitle}
         trailingActions={
           adminActions ? (
             <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  X, MapPin, Phone, Star, Clock, ExternalLink, 
+  X, MapPin, Phone, Star, Clock, ExternalLink, Compass,
   Send, Share2, CheckCircle2, AlertCircle, Copy, Camera, Bookmark,
   BarChart3, Video, Crown, Edit2, MessageSquare, Trash2
 } from 'lucide-react';
@@ -308,62 +308,327 @@ export const RestaurantDetailModal: React.FC = () => {
 
         {/* Scrollable Body */}
         <div className="overflow-y-auto flex-1 no-scrollbar pb-[calc(var(--kft-safe-bottom,0px)+24px)]">
-          {/* Hero Image */}
-          <div className="relative h-60 sm:h-64 w-full bg-gradient-to-br from-[#022c22] via-[#064E3B] to-emerald-800">
-            {(() => {
-              const rawHeroCandidate = (
-                activePhoto ||
-                selectedRestaurant.photoUrl ||
-                selectedRestaurant.profileImage ||
-                ''
-              ).trim();
-              const cleanCandidate = sanitizeRestaurantShopPhoto(
-                selectedRestaurant.id,
-                rawHeroCandidate
-              );
+          {/* Hero Image or Clean Shop Icon Banner (matching Hotel Detail Modal) */}
+          {(() => {
+            const rawHeroCandidate = (
+              activePhoto ||
+              selectedRestaurant.photoUrl ||
+              selectedRestaurant.profileImage ||
+              ''
+            ).trim();
+            const cleanCandidate = sanitizeRestaurantShopPhoto(
+              selectedRestaurant.id,
+              rawHeroCandidate
+            );
+
+            if (cleanCandidate) {
               return (
+                <div className="relative h-64 sm:h-72 w-full bg-slate-800">
+                  <ShopAvatar
+                    restaurant={{
+                      ...selectedRestaurant,
+                      photoUrl: cleanCandidate,
+                      profileImage: cleanCandidate,
+                    }}
+                    alt={loc.name}
+                    className="w-full h-full rounded-none border-0"
+                    imgClassName="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+
+                  <div className="absolute bottom-3.5 left-4 right-24 text-white">
+                    <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+                      <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-[#064E3B] text-emerald-100 border border-emerald-400/40 shadow font-khmer">
+                        {loc.province}
+                      </span>
+                      {ratingSummary.hasReviews && (
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-slate-950 shadow flex items-center gap-1 font-khmer">
+                          <Star className="w-3 h-3 fill-current text-slate-950" />
+                          <span>{ratingSummary.averageRating.toFixed(1)} ({ratingSummary.reviewCount})</span>
+                        </span>
+                      )}
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-extrabold font-moul leading-snug drop-shadow text-white">
+                      {loc.name}
+                    </h2>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div className="relative pt-16 pb-5 px-4 sm:px-6 bg-gradient-to-br from-[#064E3B] via-[#093228] to-slate-900 border-b border-emerald-500/30 flex items-center gap-3.5">
                 <ShopAvatar
                   restaurant={{
                     ...selectedRestaurant,
-                    photoUrl: cleanCandidate,
-                    profileImage: cleanCandidate,
+                    photoUrl: '',
+                    profileImage: '',
                   }}
                   alt={loc.name}
-                  className="w-full h-full rounded-none border-0"
-                  imgClassName="w-full h-full object-cover"
+                  className="w-14 h-14 rounded-2xl border border-emerald-400/40 shadow-md shrink-0"
                 />
-              );
-            })()}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-            
-            <div className="absolute bottom-3.5 left-4 right-24 text-white">
-              <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#064E3B]/90 text-emerald-100 border border-emerald-400/30 shadow-xs font-khmer">
-                  {loc.province}
-                </span>
-
-                {ratingSummary.hasReviews ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-slate-950 shadow-xs flex items-center gap-1 font-khmer">
-                    <Star className="w-3 h-3 fill-current text-slate-950" />
-                    <span>{ratingSummary.averageRating.toFixed(1)} ({ratingSummary.reviewCount})</span>
-                  </span>
-                ) : (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/80 text-slate-200 border border-white/20 shadow-xs flex items-center gap-1 font-khmer">
-                    <Star className="w-3 h-3 text-slate-300" />
-                    <span>{tr(language, 'មិនទាន់មានការវាយតម្លៃ', 'No ratings yet', '暂无评分')}</span>
-                  </span>
-                )}
-
-
+                <div className="min-w-0 flex-1 text-white">
+                  <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 inline-block font-khmer">
+                      {loc.province}
+                    </span>
+                    {ratingSummary.hasReviews && (
+                      <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500 text-slate-950 flex items-center gap-1 font-khmer">
+                        <Star className="w-3 h-3 fill-current text-slate-950" />
+                        <span>{ratingSummary.averageRating.toFixed(1)} ({ratingSummary.reviewCount})</span>
+                      </span>
+                    )}
+                    {selectedRestaurant.priceLevel && (
+                      <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-200 border border-amber-400/30 font-mono">
+                        {selectedRestaurant.priceLevel}
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-extrabold font-moul leading-snug text-white">
+                    {loc.name}
+                  </h2>
+                </div>
               </div>
-
-              <h2 className="text-lg sm:text-xl font-extrabold font-moul leading-snug drop-shadow text-white">
-                {loc.name}
-              </h2>
-            </div>
-          </div>
+            );
+          })()}
 
           <div className="p-4 sm:p-6 space-y-5">
+            {/* Direct Google Maps, Directions & Call Action Buttons (matching Hotel Detail Modal) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {(selectedRestaurant.websiteUrl || selectedRestaurant.googleMapsMeta?.websiteUri) && (
+                <a
+                  href={selectedRestaurant.websiteUrl || selectedRestaurant.googleMapsMeta?.websiteUri}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="sm:col-span-2 w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-[#064E3B] via-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white text-xs sm:text-sm font-bold shadow-md transition active:scale-98 cursor-pointer font-khmer border border-emerald-400/30"
+                >
+                  <span>🏪</span>
+                  <span>
+                    {tr(
+                      language,
+                      'គេហទំព័រផ្លូវការរបស់ហាង (Official Website)',
+                      'Official Shop Website',
+                      '店铺官方网站'
+                    )}
+                  </span>
+                  <ExternalLink className="w-3.5 h-3.5 opacity-85 shrink-0" />
+                </a>
+              )}
+
+              <button
+                type="button"
+                onClick={handleCallRestaurant}
+                className="sm:col-span-2 w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 hover:from-amber-700 hover:to-orange-700 text-white text-xs sm:text-sm font-bold shadow-md transition active:scale-98 cursor-pointer font-khmer"
+              >
+                <Phone className="w-4 h-4 shrink-0" />
+                <span>
+                  {displayPhone
+                    ? tr(
+                        language,
+                        `ហៅទូរស័ព្ទទំនាក់ទំនង (${displayPhone})`,
+                        `Call to Order / Contact (${displayPhone})`,
+                        `致电联系 / 订餐 (${displayPhone})`
+                      )
+                    : tr(
+                        language,
+                        'ហៅទូរស័ព្ទទំនាក់ទំនងហាង',
+                        'Call / Contact Shop',
+                        '致电联系店铺'
+                      )}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (openRestaurantGoogleExternal(selectedRestaurant, 'maps')) {
+                    trackRestaurantMap(selectedRestaurant.id);
+                  }
+                }}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md transition active:scale-98 cursor-pointer font-khmer"
+              >
+                <MapPin className="w-4 h-4 shrink-0" />
+                <span>{tr(language, 'បើកមើលលើ Google Maps', 'Open in Google Maps', '在 Google 地图中查看')}</span>
+                <ExternalLink className="w-3.5 h-3.5 opacity-80 shrink-0" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (openRestaurantGoogleExternal(selectedRestaurant, 'directions')) {
+                    trackRestaurantMap(selectedRestaurant.id);
+                  }
+                }}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white text-xs font-bold shadow-md transition active:scale-98 cursor-pointer font-khmer"
+              >
+                <Compass className="w-4 h-4 shrink-0" />
+                <span>{tr(language, 'នាំផ្លូវទៅកាន់ទីតាំង', 'Navigate / Directions', '开始路线导航')}</span>
+              </button>
+            </div>
+
+            {/* Quick Info Card: Opening Hours & Price Level (matching Hotel Detail Modal) */}
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-1 font-khmer">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-[#064E3B] dark:text-emerald-400 font-bold text-xs">
+                  <Clock className="w-4 h-4 text-[#059669]" />
+                  <span>{tr(language, 'ម៉ោងបើកដំណើរការ', 'Opening Hours', '营业时间')}</span>
+                </div>
+                {selectedRestaurant.priceLevel && (
+                  <span className="px-2 py-0.5 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[11px] font-bold border border-amber-200/70 dark:border-amber-800/60">
+                    {tr(language, `កម្រិតតម្លៃ៖ ${selectedRestaurant.priceLevel}`, `Price: ${selectedRestaurant.priceLevel}`, `价位：${selectedRestaurant.priceLevel}`)}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-700 dark:text-slate-200 font-medium leading-relaxed">
+                {loc.openingHours}
+              </p>
+            </div>
+
+            {/* Location Address Card (matching Hotel Detail Modal) */}
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 flex items-start gap-2.5 text-xs font-khmer">
+              <MapPin className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-[#0F172A] dark:text-white">
+                  {tr(language, 'ទីតាំងភូមិសាស្ត្រ / អាសយដ្ឋាន', 'Location Address', '详细地址')}
+                </p>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                  {loc.address}
+                </p>
+                {displayPhone && (
+                  <p className="mt-1 text-emerald-700 dark:text-emerald-400 font-mono font-bold">
+                    📞 {displayPhone}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Description (matching Hotel Detail Modal) */}
+            <div className="font-khmer">
+              <h3 className="font-bold text-[#0F172A] dark:text-white text-base mb-1.5 flex items-center gap-1.5">
+                <span>{tr(language, 'អំពីហាងនេះ', 'About this Place', '店铺简介')}</span>
+              </h3>
+              <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-700">
+                {loc.description}
+              </p>
+            </div>
+
+            {/* Signature Dishes / Highlights List (matching Hotel Detail Modal) */}
+            {loc.signatureDishes && loc.signatureDishes.length > 0 && (
+              <div className="font-khmer">
+                <h3 className="font-bold text-[#0F172A] dark:text-white text-base mb-2">
+                  {tr(language, 'ចំណុចលេចធ្លោ និងមុខម្ហូបពិសេស', 'Signature Dishes & Highlights', '招牌特色推荐')}
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {loc.signatureDishes.map((dish, i) => (
+                    <div
+                      key={i}
+                      className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm flex items-center gap-2"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-[#10B981] shrink-0" />
+                      <span className="font-medium text-[#0F172A] dark:text-slate-200">{dish}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Shop Profile Photos + Edit Photos Button */}
+            {(categorizedPhotos.length > 1 || isAdmin) && (
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-[#0F172A] dark:text-white font-khmer flex items-center gap-1.5">
+                    <Camera className="w-4 h-4 text-[#059669]" />
+                    <span>
+                      {tr(
+                        language,
+                        `រូបភាពហាង (${allPhotos.length} សន្លឹក)`,
+                        `Shop Photos (${allPhotos.length})`,
+                        `店铺照片（${allPhotos.length} 张）`
+                      )}
+                    </span>
+                  </span>
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={handleOpenPhotoEditor}
+                      className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#059669] hover:brightness-110 text-white font-khmer font-bold text-xs shadow-xs transition active:scale-95 cursor-pointer"
+                    >
+                      <Camera className="w-3.5 h-3.5 text-emerald-200" />
+                      <span>{tr(language, 'កែរូបភាពហាង (Admin)', 'Edit Shop Photos (Admin)', '编辑店铺照片（管理员）')}</span>
+                    </button>
+                  )}
+                </div>
+                {categorizedPhotos.length > 1 && (
+                  <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                    {categorizedPhotos.map((item, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setActivePhoto(item.url)}
+                        className={`relative w-24 h-18 rounded-xl overflow-hidden shrink-0 border-2 transition ${
+                          (activePhoto || shopProfilePic) === item.url
+                            ? 'border-[#064E3B] ring-2 ring-[#059669]'
+                            : 'border-slate-200 dark:border-slate-700 opacity-80 hover:opacity-100'
+                        }`}
+                      >
+                        <img src={item.url} alt="gallery" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                        <span className="absolute bottom-0 inset-x-0 bg-black/65 text-white text-[8px] font-khmer py-0.5 text-center">
+                          {tr(language, 'រូបហាង', 'Shop', '店铺封面')}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* VIP Store Video Reels Section (Benefit 5) */}
+            {(selectedRestaurant.promoVideoUrl || canEditShop) && (
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-teal-500/10 border border-amber-400/50 space-y-2 text-xs font-khmer">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5">
+                    <Video className="w-4 h-4 text-amber-500" />
+                    <span>{tr(language, 'វីដេអូផ្សព្វផ្សាយហាង (Video Reels)', 'Store Video Reels', '店铺短视频 (Video Reels)')}</span>
+                  </span>
+                  {canEditShop && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        (window as any).__kft_manage_initial_tab = 'video';
+                        setManagingRestaurant(selectedRestaurant);
+                        setIsManageMenuModalOpen(true);
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-[10px] transition cursor-pointer"
+                    >
+                      {selectedRestaurant.promoVideoUrl
+                        ? tr(language, '✏️ កែវីដេអូ', '✏️ Edit Video', '✏️ 编辑视频')
+                        : tr(language, '+ ដាក់វីដេអូ Reels', '+ Add Video Reel', '+ 添加短视频')}
+                    </button>
+                  )}
+                </div>
+                {selectedRestaurant.promoVideoUrl ? (
+                  <a
+                    href={selectedRestaurant.promoVideoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2.5 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition"
+                  >
+                    <Video className="w-4 h-4 text-amber-300" />
+                    <span>{tr(language, '▶️ ទស្សនាវីដេអូបង្ហាញពីហាងនេះ', '▶️ Watch Store Video Reel', '▶️ 观看店铺短视频')}</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                ) : (
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {tr(
+                      language,
+                      'ម្ចាស់ហាងអាចដាក់តំណវីដេអូ TikTok / Facebook Reels / YouTube Shorts ដើម្បីទាក់ទាញអតិថិជន។',
+                      'Add a TikTok, Facebook Reel, or YouTube Short link to showcase your restaurant.',
+                      '店主可添加 TikTok、Facebook Reels 或 YouTube Shorts 短视频链接来展示店铺。'
+                    )}
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Owner / Admin Management Control Bar */}
             {canEditShop ? (
               <div className="p-3.5 bg-emerald-50 dark:bg-slate-800 rounded-2xl border-2 border-emerald-500/60 flex items-center justify-between font-khmer">
@@ -445,235 +710,36 @@ export const RestaurantDetailModal: React.FC = () => {
               </div>
             )}
 
-            {/* Quick action bar: Maps and Call */}
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (openRestaurantGoogleExternal(selectedRestaurant, 'maps')) {
-                    trackRestaurantMap(selectedRestaurant.id);
-                  }
-                }}
-                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow transition active:scale-95 font-khmer cursor-pointer"
-              >
-                <MapPin className="w-4 h-4 shrink-0" />
-                <span className="truncate">{tr(language, 'ផែនទី', 'Maps', '地图导航')}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleCallRestaurant}
-                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95 font-mono"
-              >
-                <Phone className="w-4 h-4 shrink-0" />
-                <span className="truncate">{tr(language, 'ហៅ', 'Call', '致电')}</span>
-              </button>
-            </div>
-
-            {/* Restaurant Profile View & Click Analytics (Benefit 8) */}
-            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700 space-y-2 text-xs font-khmer">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5">
-                  <BarChart3 className="w-4 h-4 text-emerald-600" />
-                  <span>{tr(language, 'ស្ថិតិអ្នកចូលទស្សនា & ចុចមើល', 'Profile & Contact Analytics', '店铺浏览与互动统计')}</span>
-                </span>
-                <span className="text-[10px] text-emerald-600 font-bold">● {tr(language, 'តាមដានផ្ទាល់', 'Live Tracked', '实时统计')}</span>
-              </div>
-              <div className="grid grid-cols-4 gap-2 text-center">
-                <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
-                  <div className="text-slate-400 text-[10px]">{tr(language, 'អ្នកមើល', 'Views', '浏览量')}</div>
-                  <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.views || 1240}</div>
-                </div>
-                <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
-                  <div className="text-slate-400 text-[10px]">{tr(language, 'ចុច Call', 'Calls', '拨打次数')}</div>
-                  <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.phoneClicks || 180}</div>
-                </div>
-                <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
-                  <div className="text-slate-400 text-[10px]">{tr(language, 'ចុច Map', 'Maps', '导航次数')}</div>
-                  <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.mapClicks || 340}</div>
-                </div>
-                <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
-                  <div className="text-slate-400 text-[10px]">{tr(language, 'ចែករំលែក', 'Shares', '分享次数')}</div>
-                  <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.shareClicks || 95}</div>
-                </div>
-              </div>
-            </div>
-
-            {/* VIP Store Video Reels Section (Benefit 5) */}
-            {(selectedRestaurant.promoVideoUrl || canEditShop) && (
-              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-teal-500/10 border border-amber-400/50 space-y-2 text-xs font-khmer">
+            {/* Restaurant Profile View & Click Analytics (shown for Owner/Admin) */}
+            {canEditShop && (
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700 space-y-2 text-xs font-khmer">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5">
-                    <Video className="w-4 h-4 text-amber-500" />
-                    <span>{tr(language, 'វីដេអូផ្សព្វផ្សាយហាង (Video Reels)', 'Store Video Reels', '店铺短视频 (Video Reels)')}</span>
+                    <BarChart3 className="w-4 h-4 text-emerald-600" />
+                    <span>{tr(language, 'ស្ថិតិអ្នកចូលទស្សនា & ចុចមើល', 'Profile & Contact Analytics', '店铺浏览与互动统计')}</span>
                   </span>
-                  {canEditShop && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        (window as any).__kft_manage_initial_tab = 'video';
-                        setManagingRestaurant(selectedRestaurant);
-                        setIsManageMenuModalOpen(true);
-                      }}
-                      className="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-[10px] transition cursor-pointer"
-                    >
-                      {selectedRestaurant.promoVideoUrl
-                        ? tr(language, '✏️ កែវីដេអូ', '✏️ Edit Video', '✏️ 编辑视频')
-                        : tr(language, '+ ដាក់វីដេអូ Reels', '+ Add Video Reel', '+ 添加短视频')}
-                    </button>
-                  )}
+                  <span className="text-[10px] text-emerald-600 font-bold">● {tr(language, 'តាមដានផ្ទាល់', 'Live Tracked', '实时统计')}</span>
                 </div>
-                {selectedRestaurant.promoVideoUrl ? (
-                  <a
-                    href={selectedRestaurant.promoVideoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-2.5 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition"
-                  >
-                    <Video className="w-4 h-4 text-amber-300" />
-                    <span>{tr(language, '▶️ ទស្សនាវីដេអូបង្ហាញពីហាងនេះ', '▶️ Watch Store Video Reel', '▶️ 观看店铺短视频')}</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                ) : (
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {tr(
-                      language,
-                      'ម្ចាស់ហាងអាចដាក់តំណវីដេអូ TikTok / Facebook Reels / YouTube Shorts ដើម្បីទាក់ទាញអតិថិជន។',
-                      'Add a TikTok, Facebook Reel, or YouTube Short link to showcase your restaurant.',
-                      '店主可添加 TikTok、Facebook Reels 或 YouTube Shorts 短视频链接来展示店铺。'
-                    )}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Shop Profile Photos + Edit Photos Button */}
-            {(categorizedPhotos.length > 0 || isAdmin) && (
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-[#0F172A] dark:text-white font-khmer flex items-center gap-1.5">
-                  <Camera className="w-4 h-4 text-[#059669]" />
-                  <span>
-                    {tr(
-                      language,
-                      `រូបភាពហាង (${allPhotos.length} សន្លឹក)`,
-                      `Shop Photos (${allPhotos.length})`,
-                      `店铺照片（${allPhotos.length} 张）`
-                    )}
-                  </span>
-                </span>
-                {isAdmin && (
-                  <button
-                    type="button"
-                    onClick={handleOpenPhotoEditor}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#059669] hover:brightness-110 text-white font-khmer font-bold text-xs shadow-xs transition active:scale-95 cursor-pointer"
-                  >
-                    <Camera className="w-3.5 h-3.5 text-emerald-200" />
-                    <span>{tr(language, 'កែរូបភាពហាង (Admin)', 'Edit Shop Photos (Admin)', '编辑店铺照片（管理员）')}</span>
-                  </button>
-                )}
-              </div>
-              {categorizedPhotos.length > 0 && (
-                <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-                  {categorizedPhotos.map((item, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setActivePhoto(item.url)}
-                      className={`relative w-24 h-18 rounded-xl overflow-hidden shrink-0 border-2 transition ${
-                        (activePhoto || shopProfilePic) === item.url
-                          ? 'border-[#064E3B] ring-2 ring-[#059669]'
-                          : 'border-slate-200 dark:border-slate-700 opacity-80 hover:opacity-100'
-                      }`}
-                    >
-                      <img src={item.url} alt="gallery" loading="lazy" decoding="async" className="w-full h-full object-cover" />
-                      <span className="absolute bottom-0 inset-x-0 bg-black/65 text-white text-[8px] font-khmer py-0.5 text-center">
-                        {tr(language, 'រូបហាង', 'Shop', '店铺封面')}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            )}
-
-            {/* Address & Hours */}
-            <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-2.5 text-xs font-khmer shadow-2xs">
-              <div className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-[#0F172A] dark:text-white">
-                    {tr(language, 'អាសយដ្ឋាន', 'Address', '详细地址')}
-                  </p>
-                  <p className="text-slate-600 dark:text-slate-400">
-                    {loc.address}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
-                <Phone className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
-                <div className="flex-1 flex items-center justify-between gap-2">
-                  <div>
-                    <p className="font-semibold text-[#0F172A] dark:text-white">
-                      {tr(language, 'លេខទូរស័ព្ទទំនាក់ទំនង', 'Phone Number', '联系电话')}
-                    </p>
-                    <p className="text-slate-600 dark:text-slate-400 font-mono">
-                      {displayPhone || tr(language, 'មិនមានលេខទូរស័ព្ទលើផែនទី', 'Not listed on map', '地图上未标注电话')}
-                    </p>
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="text-slate-400 text-[10px]">{tr(language, 'អ្នកមើល', 'Views', '浏览量')}</div>
+                    <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.views || 1240}</div>
                   </div>
-                  {displayPhone && (
-                    <button
-                      type="button"
-                      onClick={handleCallRestaurant}
-                      className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold shadow-2xs transition"
-                    >
-                      📞 {displayPhone}
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
-                <Clock className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-[#0F172A] dark:text-white">
-                    {tr(language, 'ម៉ោងបើកដំណើរការ', 'Opening Hours', '营业时间')}
-                  </p>
-                  <p className="text-slate-600 dark:text-slate-400">
-                    {loc.openingHours}
-                  </p>
-                </div>
-              </div>
-
-              {(selectedRestaurant.websiteUrl || selectedRestaurant.googleMapsMeta?.websiteUri) && (
-                <div className="flex items-start gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
-                  <ExternalLink className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-[#0F172A] dark:text-white">
-                      {tr(language, 'គេហទំព័រផ្លូវការ (Website)', 'Official Website', '官方网站')}
-                    </p>
-                    <a
-                      href={selectedRestaurant.websiteUrl || selectedRestaurant.googleMapsMeta?.websiteUri}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-emerald-700 dark:text-emerald-400 hover:underline font-mono text-[11px] break-all block"
-                    >
-                      {selectedRestaurant.websiteUrl || selectedRestaurant.googleMapsMeta?.websiteUri}
-                    </a>
+                  <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="text-slate-400 text-[10px]">{tr(language, 'ចុច Call', 'Calls', '拨打次数')}</div>
+                    <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.phoneClicks || 180}</div>
+                  </div>
+                  <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="text-slate-400 text-[10px]">{tr(language, 'ចុច Map', 'Maps', '导航次数')}</div>
+                    <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.mapClicks || 340}</div>
+                  </div>
+                  <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="text-slate-400 text-[10px]">{tr(language, 'ចែករំលែក', 'Shares', '分享次数')}</div>
+                    <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.shareClicks || 95}</div>
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* Description */}
-            <div className="font-khmer">
-              <h3 className="font-bold text-[#0F172A] dark:text-white text-base mb-1.5 flex items-center gap-1.5">
-                <span>{tr(language, 'អំពីភោជនីយដ្ឋាន', 'About the Restaurant', '关于本店')}</span>
-              </h3>
-              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-700">
-                {loc.description}
-              </p>
-            </div>
+              </div>
+            )}
 
             {/* Genuine Customer Reviews & Rating Section (Strictly Separate from VIP Status) */}
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/90 dark:border-slate-700 space-y-3.5 font-khmer">
