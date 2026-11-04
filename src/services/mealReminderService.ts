@@ -160,8 +160,8 @@ export function rescheduleMealReminders(
     let scheduled = 0;
     try {
       const settings = getReminderSettings();
-      await cancelOwnedReminders();
       if (!settings.enabled) return 0;
+      await cancelOwnedReminders();
       if ((await getReminderPermission()) !== 'granted') return 0;
 
       const plan = planMealReminders({ settings, foods, language, now });

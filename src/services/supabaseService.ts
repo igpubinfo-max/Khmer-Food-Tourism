@@ -58,7 +58,20 @@ export const DEFAULT_GEMINI_API_KEY = decodeRuntimeKey([
   119, 120, 87, 107, 90, 103, 76, 98, 112, 117, 67, 52, 81,
 ]);
 
+let cachedCloudApiConfig: CloudApiConfig | null = null;
+let cachedCloudApiRawStr: string | null | undefined = undefined;
+
 export function getCloudApiConfig(): CloudApiConfig {
+  let rawConfigStr: string | null = null;
+  try {
+    rawConfigStr = typeof localStorage !== 'undefined' ? localStorage.getItem(CLOUD_API_CONFIG_STORAGE_KEY) : null;
+    if (cachedCloudApiConfig && rawConfigStr === cachedCloudApiRawStr) {
+      return cachedCloudApiConfig;
+    }
+  } catch {
+    if (cachedCloudApiConfig) return cachedCloudApiConfig;
+  }
+
   const envSupabaseUrl =
     (import.meta as any).env?.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
   const envSupabaseKey =
@@ -92,10 +105,9 @@ export function getCloudApiConfig(): CloudApiConfig {
   }
 
   try {
-    const raw = localStorage.getItem(CLOUD_API_CONFIG_STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return {
+    if (rawConfigStr) {
+      const parsed = JSON.parse(rawConfigStr);
+      const resolved: CloudApiConfig = {
         supabaseUrl: (parsed.supabaseUrl || envSupabaseUrl || '').trim().replace(/\/+$/, ''),
         supabaseAnonKey: (parsed.supabaseAnonKey || envSupabaseKey || '').trim(),
         googleMapsApiKey: (parsed.googleMapsApiKey || fallbackMapsKey || '').trim(),
@@ -104,12 +116,15 @@ export function getCloudApiConfig(): CloudApiConfig {
         enableAutoCloudSync: parsed.enableAutoCloudSync !== false,
         updatedAt: parsed.updatedAt || new Date().toISOString(),
       };
+      cachedCloudApiRawStr = rawConfigStr;
+      cachedCloudApiConfig = resolved;
+      return resolved;
     }
   } catch {
     // ignore storage parse error
   }
 
-  return {
+  const fallbackConfig: CloudApiConfig = {
     supabaseUrl: envSupabaseUrl.trim().replace(/\/+$/, ''),
     supabaseAnonKey: envSupabaseKey.trim(),
     googleMapsApiKey: fallbackMapsKey,
@@ -118,6 +133,9 @@ export function getCloudApiConfig(): CloudApiConfig {
     enableAutoCloudSync: true,
     updatedAt: new Date().toISOString(),
   };
+  cachedCloudApiRawStr = rawConfigStr;
+  cachedCloudApiConfig = fallbackConfig;
+  return fallbackConfig;
 }
 
 export function saveCloudApiConfig(partial: Partial<CloudApiConfig>): CloudApiConfig {
@@ -134,8 +152,11 @@ export function saveCloudApiConfig(partial: Partial<CloudApiConfig>): CloudApiCo
   };
 
   try {
-    localStorage.setItem(CLOUD_API_CONFIG_STORAGE_KEY, JSON.stringify(updated));
-    if (partial.googleMapsApiKey !== undefined) {
+    const serialized = JSON.stringify(updated);
+    localStorage.setItem(CLOUD_API_CONFIG_STORAGE_KEY, serialized);
+    cachedCloudApiRawStr = serialized;
+    cachedCloudApiConfig = updated;
+    if (partial.googleMapsApiKey !== undefined && partial.googleMapsApiKey !== current.googleMapsApiKey) {
       localStorage.removeItem('kft_google_places_api_diag_v1');
     }
     // Also keep AI Vision config in sync so aiFoodService.ts picks up Gemini key automatically
@@ -252,7 +273,7 @@ export async function testSupabaseConnection(): Promise<{
     }
 
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 180_000;
+      supabaseEgressCooldownUntilMs = Date.now() + 600_000;
       return {
         ok: false,
         messageKh:
@@ -490,20 +511,9 @@ export async function mergeAndPushSupportTicketsToCloud(
  */
 export async function pushCloudDocument(key: string, payload: any, timeoutMs = 12000): Promise<boolean> {
   if (!isSupabaseConfigured()) return false;
+  if (Date.now() < supabaseEgressCooldownUntilMs) return false;
   const cfg = getCloudApiConfig();
   if (!cfg.enableAutoCloudSync) return false;
-  if (
-    Date.now() < supabaseEgressCooldownUntilMs &&
-    !key.startsWith('kft_user_') &&
-    !key.startsWith('kft_ov_') &&
-    key !== 'kft_cloud_media_overrides_v1' &&
-    key !== 'kft_cloud_users_v2' &&
-    key !== 'kft_cloud_transactions_v1' &&
-    key !== 'kft_cloud_vip_backup_v1' &&
-    key !== 'kft_cloud_food_checkin_reward_claims_v1'
-  ) {
-    return false;
-  }
 
   let effectivePayload = payload;
   if (key === 'kft_cloud_transactions_v1' && Array.isArray(payload)) {
@@ -523,7 +533,7 @@ export async function pushCloudDocument(key: string, payload: any, timeoutMs = 1
       }),
     }, timeoutMs);
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 180_000;
+      supabaseEgressCooldownUntilMs = Date.now() + 600_000;
       return false;
     }
     if (res.ok && supabaseEgressCooldownUntilMs > 0) {
@@ -542,6 +552,7 @@ export async function pushCloudDocument(key: string, payload: any, timeoutMs = 1
  */
 export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Promise<T | null> {
   if (!isSupabaseConfigured()) return null;
+  if (Date.now() < supabaseEgressCooldownUntilMs) return null;
   const cfg = getCloudApiConfig();
 
   try {
@@ -555,7 +566,7 @@ export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Prom
       timeoutMs
     );
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 180_000;
+      supabaseEgressCooldownUntilMs = Date.now() + 600_000;
       return null;
     }
     if (!res.ok) return null;
@@ -722,13 +733,19 @@ export function normalizeAuthoritativeAppSettings(
       ? `VIP ${longDays} Days`
       : longNameEnRaw;
 
-  const resolvedGeminiKey = (merged.geminiApiKey || '').trim() || getCloudApiConfig().geminiApiKey || '';
-  const resolvedMapsKey = (merged.googleMapsApiKey || '').trim() || getCloudApiConfig().googleMapsApiKey || '';
-  if ((merged.geminiApiKey && merged.geminiApiKey.trim()) || (merged.googleMapsApiKey && merged.googleMapsApiKey.trim())) {
+  const currentCfg = getCloudApiConfig();
+  const mergedGemini = (merged.geminiApiKey || '').trim();
+  const mergedMaps = (merged.googleMapsApiKey || '').trim();
+  const resolvedGeminiKey = mergedGemini || currentCfg.geminiApiKey || '';
+  const resolvedMapsKey = mergedMaps || currentCfg.googleMapsApiKey || '';
+  if (
+    (mergedGemini && mergedGemini !== currentCfg.geminiApiKey) ||
+    (mergedMaps && mergedMaps !== currentCfg.googleMapsApiKey)
+  ) {
     try {
       saveCloudApiConfig({
-        ...(merged.geminiApiKey && merged.geminiApiKey.trim() ? { geminiApiKey: merged.geminiApiKey.trim() } : {}),
-        ...(merged.googleMapsApiKey && merged.googleMapsApiKey.trim() ? { googleMapsApiKey: merged.googleMapsApiKey.trim() } : {}),
+        ...(mergedGemini ? { geminiApiKey: mergedGemini } : {}),
+        ...(mergedMaps ? { googleMapsApiKey: mergedMaps } : {}),
       });
     } catch {
       // ignore storage errors
@@ -774,7 +791,7 @@ export async function fetchAuthoritativeAppSettingsFromServer(
   updatedAt?: string;
   error?: string;
 }> {
-  if (!isSupabaseConfigured()) {
+  if (!isSupabaseConfigured() || isSupabaseEgressCooldownActive()) {
     return {
       ok: true,
       settings: fallback ? normalizeAuthoritativeAppSettings(fallback) : null,
@@ -956,6 +973,7 @@ export async function pullCloudDocumentsByPrefix<T = any>(
   timeoutMs = 12000
 ): Promise<Array<{ key: string; payload: T; updated_at?: string }>> {
   if (!isSupabaseConfigured()) return [];
+  if (Date.now() < supabaseEgressCooldownUntilMs) return [];
   const cfg = getCloudApiConfig();
 
   try {
@@ -967,6 +985,10 @@ export async function pullCloudDocumentsByPrefix<T = any>(
       },
       timeoutMs
     );
+    if (res.status === 402) {
+      supabaseEgressCooldownUntilMs = Date.now() + 600_000;
+      return [];
+    }
     if (!res.ok) return [];
     const rows = await res.json();
     if (Array.isArray(rows)) {
@@ -1002,7 +1024,7 @@ export async function pullCloudKeysManifestByPrefix(
       timeoutMs
     );
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 180_000;
+      supabaseEgressCooldownUntilMs = Date.now() + 600_000;
       return null;
     }
     if (!res.ok) return null;
@@ -1047,7 +1069,7 @@ export async function pullCloudDocumentsByKeys<T = any>(
       timeoutMs
     );
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 180_000;
+      supabaseEgressCooldownUntilMs = Date.now() + 600_000;
       return [];
     }
     if (res.ok) {
@@ -1089,6 +1111,7 @@ export async function uploadBase64ImageToSupabaseStorage(
   if (!isSupabaseConfigured() || !dataUrl || !dataUrl.startsWith('data:image/')) {
     return null;
   }
+  if (Date.now() < supabaseEgressCooldownUntilMs) return null;
   const cfg = getCloudApiConfig();
   if (!cfg.enableAutoCloudSync) return null;
 
@@ -1163,7 +1186,7 @@ export async function uploadBase64ImageToSupabaseStorage(
         }
 
         if (res.status === 402) {
-          supabaseEgressCooldownUntilMs = Date.now() + 180_000;
+          supabaseEgressCooldownUntilMs = Date.now() + 600_000;
           return null;
         }
 
@@ -1192,6 +1215,7 @@ export async function uploadBase64ImageToSupabaseStorage(
  */
 export async function deleteCloudDocument(key: string, timeoutMs = 8000): Promise<boolean> {
   if (!isSupabaseConfigured()) return false;
+  if (Date.now() < supabaseEgressCooldownUntilMs) return false;
   const cfg = getCloudApiConfig();
   if (!cfg.enableAutoCloudSync) return false;
 
@@ -1729,7 +1753,7 @@ export async function upsertSingleUserToCloud(
   if (canonicalList.length === 0) return [];
   let canonicalUser = canonicalList[0];
 
-  if (!isSupabaseConfigured()) return [canonicalUser];
+  if (!isSupabaseConfigured() || isSupabaseEgressCooldownActive()) return [canonicalUser];
 
   try {
     // 1. Pull any existing atomic per-user rows (and aggregate/VIP backup when updateAggregate is requested) FIRST
@@ -1741,6 +1765,10 @@ export async function upsertSingleUserToCloud(
       updateAggregate ? pullCloudDocument<any>('kft_cloud_vip_backup_v1') : Promise.resolve(null),
       updateAggregate ? pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1') : Promise.resolve(null),
     ]);
+
+    if (isSupabaseEgressCooldownActive()) {
+      return [canonicalUser];
+    }
 
     const allDeleted = [
       ...deletedUsers,
@@ -1863,19 +1891,21 @@ export async function syncAllAppDataWithSupabase(localState: {
   mergedPaymentProofsVault: Record<string, any>;
   mergedAppSettings?: AppSettings;
 }> {
-  if (!isSupabaseConfigured()) {
-    return {
-      synced: false,
-      mergedUsers: deduplicateAndNormalizeUsers(
-        [...(localState.users || []), localState.currentUser || undefined],
-        localState.deletedUsers || []
-      ),
-      mergedDeletedUsers: localState.deletedUsers || [],
-      mergedTransactions: Array.isArray(localState.transactions) ? localState.transactions : [],
-      mergedCustomRestaurants: Array.isArray(localState.customRestaurants) ? localState.customRestaurants : [],
-      mergedPaymentProofsVault: localState.paymentProofsVault,
-      mergedAppSettings: localState.appSettings,
-    };
+  const buildOfflineFallbackResult = () => ({
+    synced: false,
+    mergedUsers: deduplicateAndNormalizeUsers(
+      [...(localState.users || []), localState.currentUser || undefined],
+      localState.deletedUsers || []
+    ),
+    mergedDeletedUsers: localState.deletedUsers || [],
+    mergedTransactions: Array.isArray(localState.transactions) ? localState.transactions : [],
+    mergedCustomRestaurants: Array.isArray(localState.customRestaurants) ? localState.customRestaurants : [],
+    mergedPaymentProofsVault: localState.paymentProofsVault,
+    mergedAppSettings: localState.appSettings,
+  });
+
+  if (!isSupabaseConfigured() || isSupabaseEgressCooldownActive()) {
+    return buildOfflineFallbackResult();
   }
 
   try {
@@ -1928,6 +1958,10 @@ export async function syncAllAppDataWithSupabase(localState: {
         : Promise.resolve(null),
       pullCloudDocument<AppSettings>('kft_cloud_admin_vip_pricing_v2'),
     ]);
+
+    if (isSupabaseEgressCooldownActive()) {
+      return buildOfflineFallbackResult();
+    }
     const cloudUsers = cloudUsersV2 ? null : await pullCloudDocument<User[]>('kft_cloud_users_v1');
     const cloudSettingsV1 = cloudSettingsV2 ? null : await pullCloudDocument<AppSettings>('kft_cloud_app_settings_v1');
     const cloudSettings = cloudSettingsV2 || cloudSettingsV1;

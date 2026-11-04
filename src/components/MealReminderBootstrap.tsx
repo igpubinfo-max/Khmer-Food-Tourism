@@ -24,21 +24,26 @@ export const MealReminderBootstrap: React.FC = () => {
   const pendingFoodId = useRef<string | null>(null);
 
   // (Re)schedule: debounced so startup work is never delayed and bursts collapse into one run.
+  const lastScheduledAtRef = useRef(0);
   useEffect(() => {
     if (!isReminderSupported() || catalog.length === 0) return;
-    const run = () => void rescheduleMealReminders(latest.current.catalog, latest.current.language);
-    const timer = setTimeout(run, 2500);
+    const run = (force = false) => {
+      if (!force && Date.now() - lastScheduledAtRef.current < 30 * 60 * 1000) return;
+      lastScheduledAtRef.current = Date.now();
+      void rescheduleMealReminders(latest.current.catalog, latest.current.language);
+    };
+    const timer = setTimeout(() => run(true), 2500);
 
     let removeAppListener: (() => void) | null = null;
     void CapacitorApp.addListener('appStateChange', ({ isActive }) => {
-      if (isActive) run();
+      if (isActive) run(false);
     })
       .then((h) => {
         removeAppListener = () => void h.remove();
       })
       .catch(() => undefined);
 
-    const onSettingsChanged = () => run();
+    const onSettingsChanged = () => run(true);
     window.addEventListener(MEAL_REMINDER_CHANGED_EVENT, onSettingsChanged);
 
     return () => {

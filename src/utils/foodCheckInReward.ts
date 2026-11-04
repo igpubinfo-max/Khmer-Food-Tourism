@@ -589,13 +589,37 @@ export function useFoodCheckInProgress(
   const [state, setState] = useState<FoodCheckInProgress>(read);
   const legacyKey = legacyIds.join('|');
   useEffect(() => {
-    const refresh = () => setState(read());
+    const refresh = () => {
+      setState((prev) => {
+        const next = read();
+        if (
+          prev.progress === next.progress &&
+          prev.target === next.target &&
+          prev.todayCount === next.todayCount &&
+          prev.dailyCap === next.dailyCap &&
+          prev.granted === next.granted &&
+          prev.serverTimeVerified === next.serverTimeVerified
+        ) {
+          return prev;
+        }
+        return next;
+      });
+    };
+    const onStorage = (e: StorageEvent) => {
+      if (
+        !e.key ||
+        e.key.startsWith(FOOD_CHECKIN_LEDGER_KEY) ||
+        e.key === FOOD_CHECKIN_CLAIMS_KEY
+      ) {
+        refresh();
+      }
+    };
     refresh();
     window.addEventListener(FOOD_CHECKIN_CHANGED_EVENT, refresh);
-    window.addEventListener('storage', refresh);
+    window.addEventListener('storage', onStorage);
     return () => {
       window.removeEventListener(FOOD_CHECKIN_CHANGED_EVENT, refresh);
-      window.removeEventListener('storage', refresh);
+      window.removeEventListener('storage', onStorage);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, legacyKey, rewardGrantedAt, userEmail]);

@@ -1,8 +1,8 @@
-export const APP_VERSION = 'v2.5.1';
-export const APP_VERSION_NAME = '2.5.1';
+export const APP_VERSION = 'v2.5.2';
+export const APP_VERSION_NAME = '2.5.2';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1380;
-export const APP_RELEASE_DATE = '2026-11-03';
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1381;
+export const APP_RELEASE_DATE = '2026-11-04';
 
 /**
  * Audited duplicate food IDs removed from the Food Menu so every dish and photograph is 100% unique
@@ -44,14 +44,21 @@ export const REMOVED_DUPLICATE_FOOD_IDS: ReadonlySet<string> = new Set([
 export function deduplicateFoodItems<
   T extends { id: string; nameKh?: string; isAdminEdited?: boolean; isCustomPhoto?: boolean }
 >(items: T[], foodOverrides?: Record<string, any> | null): T[] {
-  if (!Array.isArray(items) || items.length === 0) return [];
+  if (!Array.isArray(items) || items.length === 0) return Array.isArray(items) ? items : [];
   const seenIds = new Set<string>();
   const seenNamesKh = new Set<string>();
   const out: T[] = [];
+  let anySkipped = false;
 
   for (const item of items) {
-    if (!item || !item.id) continue;
-    if (seenIds.has(item.id)) continue;
+    if (!item || !item.id) {
+      anySkipped = true;
+      continue;
+    }
+    if (seenIds.has(item.id)) {
+      anySkipped = true;
+      continue;
+    }
 
     const ov = foodOverrides ? foodOverrides[item.id] : undefined;
     const hasAdminCustomization = Boolean(
@@ -62,6 +69,7 @@ export function deduplicateFoodItems<
     );
 
     if (!hasAdminCustomization && REMOVED_DUPLICATE_FOOD_IDS.has(item.id)) {
+      anySkipped = true;
       continue;
     }
 
@@ -69,6 +77,7 @@ export function deduplicateFoodItems<
       .trim()
       .replace(/\s+/g, '');
     if (normNameKh && seenNamesKh.has(normNameKh) && !hasAdminCustomization) {
+      anySkipped = true;
       continue;
     }
 
@@ -76,7 +85,7 @@ export function deduplicateFoodItems<
     if (normNameKh) seenNamesKh.add(normNameKh);
     out.push(item);
   }
-  return out;
+  return anySkipped ? out : items;
 }
 
 /**

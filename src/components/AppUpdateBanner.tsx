@@ -14,7 +14,8 @@ import {
   type AppUpdateStatus,
 } from '../services/appUpdateService';
 
-const POLL_INTERVAL_MS = 2 * 60 * 1000; // Check every 2 minutes while user is using the app
+const POLL_INTERVAL_MS = 30 * 60 * 1000; // Check every 30 minutes while user is using the app
+const MIN_AUTO_CHECK_COOLDOWN_MS = 5 * 60 * 1000; // 5-minute cooldown between automatic background checks
 
 export const AppUpdateBanner: React.FC = () => {
   const { language, appSettings, showToast } = useApp();
@@ -23,10 +24,14 @@ export const AppUpdateBanner: React.FC = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [downloadProgressPct, setDownloadProgressPct] = useState<number | null>(null);
   const checkingRef = useRef(false);
+  const lastAutoCheckAtRef = useRef(0);
 
   const runCheck = useCallback(
     async (isManual = false) => {
       if (checkingRef.current) return;
+      if (!isManual && Date.now() - lastAutoCheckAtRef.current < MIN_AUTO_CHECK_COOLDOWN_MS) {
+        return;
+      }
       if (typeof navigator !== 'undefined' && navigator.onLine === false) {
         if (isManual) {
           showToast(
@@ -43,6 +48,9 @@ export const AppUpdateBanner: React.FC = () => {
       }
 
       checkingRef.current = true;
+      if (!isManual) {
+        lastAutoCheckAtRef.current = Date.now();
+      }
       try {
         const status = await checkLiveAppUpdate(appSettings);
         setUpdateStatus(status);

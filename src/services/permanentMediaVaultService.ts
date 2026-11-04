@@ -1171,21 +1171,42 @@ export function saveLocalMediaOverrides(incomingBundle: AllMediaOverridesBundle)
   }
 
   // Measure remaining UTF-16 character budget across ALL localStorage keys (~2 bytes per char, 5.0MB browser cap)
-  // so writing vault maps NEVER triggers QuotaExceededError and VAULT_KEYS.FOODS never starves VAULT_KEYS.DESTINATIONS!
+  // in a single pass so writing vault maps NEVER triggers QuotaExceededError or 4x full localStorage scans!
   const SAFE_TOTAL_UTF16_CHARS = 2_350_000; // 4.70MB UTF-16, leaving 300KB safety margin for ledger & queue
+  const managedVaultKeys = new Set<string>([
+    VAULT_KEYS.FOODS,
+    VAULT_KEYS.DESTINATIONS,
+    VAULT_KEYS.RESTAURANTS,
+    VAULT_KEYS.TRENDING_FOODS,
+  ]);
+  let baseNonVaultChars = 0;
+  try {
+    if (typeof localStorage !== 'undefined') {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k || managedVaultKeys.has(k)) continue;
+        const v = localStorage.getItem(k);
+        baseNonVaultChars += k.length + (v ? v.length : 0);
+      }
+    }
+  } catch {
+    baseNonVaultChars = 1_500_000;
+  }
+  let writtenVaultCharsSoFar = 0;
+  const recordWrittenKeySize = (key: string) => {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const v = localStorage.getItem(key);
+        writtenVaultCharsSoFar += key.length + (v ? v.length : 0);
+      }
+    } catch {}
+  };
   const getRemainingCharBudgetForKey = (targetKey: string, capChars: number, reservedForLaterKeysChars: number = 0): number => {
     try {
       if (typeof localStorage === 'undefined') return 0;
-      let otherChars = 0;
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (!k || k === targetKey) continue;
-        const v = localStorage.getItem(k);
-        otherChars += k.length + (v ? v.length : 0);
-      }
       const available = Math.max(
         0,
-        SAFE_TOTAL_UTF16_CHARS - otherChars - reservedForLaterKeysChars - targetKey.length - 2048
+        SAFE_TOTAL_UTF16_CHARS - baseNonVaultChars - writtenVaultCharsSoFar - reservedForLaterKeysChars - targetKey.length - 2048
       );
       return Math.min(capChars, available);
     } catch {
@@ -1239,6 +1260,7 @@ export function saveLocalMediaOverrides(incomingBundle: AllMediaOverridesBundle)
     safeWriteJsonMap(VAULT_KEYS.FOODS, urlsOnly);
     persistedInLocalStorageSets.foods = new Set(Object.keys(urlsOnly));
   }
+  recordWrittenKeySize(VAULT_KEYS.FOODS);
 
   // Budget Destinations & Restaurants safely with revision-aware sorting
   const trimGenericMap = <T extends { updatedAt?: string; revision?: number; photoUrl?: string }>(
@@ -1275,6 +1297,7 @@ export function saveLocalMediaOverrides(incomingBundle: AllMediaOverridesBundle)
         .map(([k]) => k)
     );
   }
+  recordWrittenKeySize(VAULT_KEYS.DESTINATIONS);
 
   const restCharBudget = getRemainingCharBudgetForKey(VAULT_KEYS.RESTAURANTS, 300_000);
   const compactRests = trimGenericMap(bundle.restaurants || {}, restCharBudget);
@@ -1285,6 +1308,7 @@ export function saveLocalMediaOverrides(incomingBundle: AllMediaOverridesBundle)
         .map(([k]) => k)
     );
   }
+  recordWrittenKeySize(VAULT_KEYS.RESTAURANTS);
   if (bundle.deletedFoods && typeof bundle.deletedFoods === 'object') {
     safeWriteJsonMap(VAULT_KEYS.DELETED_FOODS, bundle.deletedFoods);
   }
@@ -1654,6 +1678,7 @@ async function syncSingleOverrideRecordToCloud(
   }
 
   for (let attempt = 1; attempt <= 3; attempt++) {
+    if (isSupabaseEgressCooldownActive()) break;
     try {
       const ok = await pushCloudDocument(perRecordKey, payloadToPush, 20000);
       if (ok) {
@@ -3165,6 +3190,45 @@ if (typeof window !== 'undefined' && typeof window.addEventListener === 'functio
   });
 }
 
+function didOverrideBundleRecordsChange(
+  prev: AllMediaOverridesBundle,
+  next: AllMediaOverridesBundle
+): boolean {
+  const compareMap = (a: Record<string, any> = {}, b: Record<string, any> = {}): boolean => {
+    const aKeys = Object.keys(a);
+    const bKeys = Object.keys(b);
+    if (aKeys.length !== bKeys.length) return true;
+    for (const k of bKeys) {
+      const av = a[k];
+      const bv = b[k];
+      if (av === bv) continue;
+      if (!av || !bv) return true;
+      if (typeof av === 'string' || typeof bv === 'string') {
+        if (av !== bv) return true;
+        continue;
+      }
+      if (
+        av.revision !== bv.revision ||
+        av.updatedAt !== bv.updatedAt ||
+        av.photoUrl !== bv.photoUrl ||
+        av.photoHash !== bv.photoHash
+      ) {
+        return true;
+      }
+    }
+    return false;
+  };
+  return (
+    compareMap(prev.foods, next.foods) ||
+    compareMap(prev.restaurants, next.restaurants) ||
+    compareMap(prev.destinations, next.destinations) ||
+    compareMap(prev.trendingFoods, next.trendingFoods) ||
+    compareMap(prev.deletedFoods, next.deletedFoods) ||
+    compareMap(prev.deletedRestaurants, next.deletedRestaurants) ||
+    compareMap(prev.deletedDestinations, next.deletedDestinations)
+  );
+}
+
 /**
  * Fast local-only hydration from `localStorage` + `IndexedDB` (<15ms, zero network wait).
  * Called immediately on startup so custom photos stored in IndexedDB render before any network request.
@@ -3173,16 +3237,19 @@ export async function hydrateFromLocalIdbImmediate(): Promise<AllMediaOverridesB
   if (inMemoryMasterBundle && hasHydratedFromIdbOnce) {
     return inMemoryMasterBundle;
   }
-  let current = loadLocalMediaOverrides();
+  const beforeIdb = loadLocalMediaOverrides();
+  let current = beforeIdb;
   try {
     const idbBundle = await loadBundleFromIdb();
     hasHydratedFromIdbOnce = true;
     if (idbBundle) {
-      current = mergeOverrideBundles(current, idbBundle);
+      current = mergeOverrideBundles(beforeIdb, idbBundle);
       inMemoryMasterBundle = current;
-      // Refresh localStorage revision ledger & compact map if IndexedDB had newer replacements
-      saveLocalMediaOverrides(current);
-      notifyPersistentMediaVaultSubscribers(current);
+      // Only rewrite localStorage + IndexedDB if IndexedDB actually contained newer or additional records
+      if (didOverrideBundleRecordsChange(beforeIdb, current)) {
+        saveLocalMediaOverrides(current);
+        notifyPersistentMediaVaultSubscribers(current);
+      }
     }
   } catch {
     hasHydratedFromIdbOnce = true;
@@ -3202,23 +3269,27 @@ const mediaSyncProgressListeners = new Set<(bundle: AllMediaOverridesBundle) => 
  *      via lightweight manifest delta check (`kft_cloud_row_seen_v1`) + strict revision/timestamp ordering
  */
 export async function hydrateAndSyncMediaOverrides(
-  forceCloud: boolean | { force?: boolean } = false,
+  forceCloud: boolean | { force?: boolean; resetCooldown?: boolean } = false,
   onProgress?: (bundle: AllMediaOverridesBundle) => void
 ): Promise<AllMediaOverridesBundle> {
   const isForced = typeof forceCloud === 'object' ? Boolean(forceCloud?.force) : Boolean(forceCloud);
-  if (isForced) {
+  const shouldResetCooldown = typeof forceCloud === 'object' && Boolean(forceCloud?.resetCooldown);
+  if (shouldResetCooldown) {
     resetSupabaseEgressCooldown();
   }
   if (onProgress) {
     mediaSyncProgressListeners.add(onProgress);
   }
   const notifyListeners = (bundle: AllMediaOverridesBundle) => {
-    for (const fn of Array.from(mediaSyncProgressListeners)) {
+    const uniqueListeners = new Set<(b: AllMediaOverridesBundle) => void>([
+      ...Array.from(mediaSyncProgressListeners),
+      ...Array.from(persistentMediaVaultSubscribers),
+    ]);
+    for (const fn of uniqueListeners) {
       try {
         fn(bundle);
       } catch {}
     }
-    notifyPersistentMediaVaultSubscribers(bundle);
   };
 
   // Detect fresh APK installation, app build upgrade, or cleared cache so we always force a full cloud verification

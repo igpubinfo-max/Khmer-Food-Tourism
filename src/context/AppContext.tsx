@@ -74,6 +74,7 @@ import {
 import { App as CapApp } from '@capacitor/app';
 import {
   isSupabaseConfigured,
+  isSupabaseEgressCooldownActive,
   getCloudApiConfig,
   saveCloudApiConfig,
   syncAllAppDataWithSupabase,
@@ -3594,6 +3595,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const triggerCloudSyncNow = async (force: boolean = false): Promise<boolean> => {
     if (!isSupabaseConfigured()) return false;
+    if (isSupabaseEgressCooldownActive() && !(force && isAdminOpen)) return false;
     if (!force && typeof document !== 'undefined' && document.hidden) return false;
     const now = Date.now();
     if (cloudSyncInFlightRef.current) {
@@ -3976,15 +3978,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           latestFoods = next;
           if (next !== prev) {
             scheduleStorageWrite('kft_foods_200_v10', next, 400);
+            setSelectedFood(cur => (cur ? next.find(f => f.id === cur.id) || null : null));
           }
-          setSelectedFood(cur => (cur ? next.find(f => f.id === cur.id) || null : null));
           return next;
         });
       }
       if (Object.keys(bundle.restaurants).length > 0 || (bundle.deletedRestaurants && Object.keys(bundle.deletedRestaurants).length > 0)) {
         setRestaurants(prev => {
           const next = applyRestaurantOverrides(prev, bundle.restaurants, bundle.deletedRestaurants || loadDeletedRestaurantIdsMap());
-          setSelectedRestaurantRaw(cur => (cur ? next.find(r => r.id === cur.id) || null : null));
+          if (next !== prev) {
+            setSelectedRestaurantRaw(cur => (cur ? next.find(r => r.id === cur.id) || null : null));
+          }
           return next;
         });
       }
@@ -4000,15 +4004,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           );
           if (next !== prev) {
             scheduleStorageWrite('kft_destinations_real_v9', next, 400);
+            setSelectedDestination(cur => (cur ? next.find(d => d.id === cur.id) || null : null));
           }
-          setSelectedDestination(cur => (cur ? next.find(d => d.id === cur.id) || null : null));
           return next;
         });
       }
       if (Object.keys(bundle.trendingFoods).length > 0 || Object.keys(bundle.foods).length > 0) {
         setTrendingFoods(prev => {
           const next = applyTrendingFoodOverrides(prev, bundle.trendingFoods, bundle.foods, latestFoods);
-          setSelectedTrendingFood(cur => (cur ? next.find(t => t.id === cur.id) || cur : null));
+          if (next !== prev) {
+            setSelectedTrendingFood(cur => (cur ? next.find(t => t.id === cur.id) || cur : null));
+          }
           return next;
         });
       }
@@ -4020,11 +4026,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     hydrateFromLocalIdbImmediate()
       .then((idbBundle) => {
         applyHydratedBundle(idbBundle);
-        if (isSupabaseConfigured()) {
+        if (isSupabaseConfigured() && !isSupabaseEgressCooldownActive()) {
           lastMediaVaultCloudSyncAtRef.current = Date.now();
-          hydrateAndSyncMediaOverrides(true, applyHydratedBundle)
-            .then(applyHydratedBundle)
-            .catch(() => {});
+          hydrateAndSyncMediaOverrides(true).catch(() => {});
         }
       })
       .catch(() => {});
@@ -4091,6 +4095,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch {}
 
     return () => {
+      unsubscribeMediaVault();
       if (syncTimer) clearTimeout(syncTimer);
       if (periodicSyncInterval) clearInterval(periodicSyncInterval);
       if (typeof document !== 'undefined') {
