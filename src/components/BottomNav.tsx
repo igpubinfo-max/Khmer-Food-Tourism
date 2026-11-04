@@ -5,6 +5,7 @@ import {
   IconNavHome,
   IconNavFood,
   IconNavShop,
+  IconNavHotel,
   IconNavTourism,
   IconNavGuide,
   IconNavProfile,
@@ -23,6 +24,7 @@ export const BottomNav: React.FC = () => {
     { id: 'home', labelKh: 'ទំព័រដើម', labelEn: 'Home', labelZh: '首页', icon: IconNavHome },
     { id: 'food', labelKh: 'មុខម្ហូប', labelEn: 'Food', labelZh: '美食', icon: IconNavFood },
     { id: 'restaurants', labelKh: 'ហាងអាហារ', labelEn: 'Shop', labelZh: '餐厅', icon: IconNavShop },
+    { id: 'hotels', labelKh: 'សណ្ឋាគារ', labelEn: 'Hotel', labelZh: '酒店', icon: IconNavHotel },
     { id: 'tourism', labelKh: 'ទេសចរណ៍', labelEn: 'Tourism', labelZh: '景点', icon: IconNavTourism },
     { id: 'guide', labelKh: 'មគ្គុទ្ទេសក៍', labelEn: 'Guide', labelZh: '指南', icon: IconNavGuide },
     { id: 'profile', labelKh: 'គណនី', labelEn: 'Profile', labelZh: '我的', icon: IconNavProfile },
@@ -37,7 +39,7 @@ export const BottomNav: React.FC = () => {
       {/* Subtle luxury gold hairline highlight across top edge */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/55 to-transparent" />
 
-      <div className="max-w-md mx-auto grid grid-cols-6 gap-1 px-1.5 py-1.5">
+      <div className="max-w-md mx-auto grid grid-cols-7 gap-0.5 px-1 py-1.5">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;

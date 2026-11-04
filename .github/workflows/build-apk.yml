@@ -115,16 +115,16 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test-ui-apk'
         with:
-          tag_name: v2.6.6
-          name: "Cambodia Flavors & Tourism v2.6.6"
+          tag_name: v2.6.7
+          name: "Cambodia Flavors & Tourism v2.6.7"
           make_latest: true
           body: |
-            ### 🇰🇭 Cambodia Flavors & Tourism v2.6.6
+            ### 🇰🇭 Cambodia Flavors & Tourism v2.6.7
             **រសជាតិ និងទេសចរណ៍កម្ពុជា • 柬埔寨风味与旅游**
 
-            **Official Release v2.6.6:**
-            - 📲 **CambodiaFlavorsTourism-v2.6.6.apk:** Fixed Hotel category filter so tapping `🏨 សណ្ឋាគារ & ផ្ទះសំណាក់` displays only the 145 Hotels, Resorts, Villas & Guesthouses (excluding tourist attractions with `resort` slug).
-            - 📦 **CambodiaFlavorsTourism-v2.6.6-PlayStore.aab:** Signed Android App Bundle for Google Play Console.
+            **Official Release v2.6.7:**
+            - 📲 **CambodiaFlavorsTourism-v2.6.7.apk:** Added dedicated `សណ្ឋាគារ` (Hotel) menu designed like the Shop menu, with Big Verified Showcase Cards at the top and a 1-slot shared VIP rule (VIP users can add 1 Shop OR 1 Hotel).
+            - 📦 **CambodiaFlavorsTourism-v2.6.7-PlayStore.aab:** Signed Android App Bundle for Google Play Console.
           draft: false
           prerelease: false
           files: |

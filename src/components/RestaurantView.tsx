@@ -29,6 +29,7 @@ export const RestaurantView: React.FC = () => {
     setIsAdminOpen,
     setIsRestaurantCheckInModalOpen,
     openGoogleMapsSearchModal,
+    showToast,
   } = useApp();
 
   const isAdmin = isAdminAccount(currentUser);
@@ -161,6 +162,9 @@ export const RestaurantView: React.FC = () => {
   const validDirectoryRestaurants = useMemo(() => {
     const seenIds = new Set<string>();
     return sessionShuffledRestaurants.filter((r) => {
+      if (r.businessType === 'hotel') {
+        return false;
+      }
       if (!isStrictVerifiedCambodiaRestaurant(r)) {
         return false;
       }
@@ -389,7 +393,31 @@ export const RestaurantView: React.FC = () => {
               setIsAuthModalOpen(true);
               return;
             }
-            (window as any).__kft_vip_store_initial_mode = { mode: 'create' };
+            if (!isAdmin && myExistingRest && myExistingRest.businessType === 'hotel') {
+              showToast(
+                tr(
+                  language,
+                  `🔒 គណនី VIP អាចបង្កើតហាងអាហារ ឬសណ្ឋាគារបានតែ ១ ប៉ុណ្ណោះ! អ្នកបានបង្កើតសណ្ឋាគារ «${myExistingRest.nameKh}» រួចហើយ ដូច្នេះមិនអាចបន្ថែមហាងអាហារទៀតបានទេ។`,
+                  `🔒 VIP accounts can add 1 listing only (Shop OR Hotel). You already added Hotel "${myExistingRest.nameEn || myExistingRest.nameKh}", so you cannot add a Shop.`,
+                  `🔒 VIP 账号仅可添加 1 家（餐厅或酒店二选一）。您已添加酒店“${myExistingRest.nameEn || myExistingRest.nameKh}”，无法再添加餐厅。`
+                ),
+                'warning'
+              );
+              return;
+            }
+            if (!isAdmin && myExistingRest && storeQuota.remainingAvailableSlots <= 0) {
+              showToast(
+                tr(
+                  language,
+                  `🔒 គណនី VIP អាចបង្កើតហាងបានតែ ១ ប៉ុណ្ណោះ! អ្នកបានបង្កើតហាង «${myExistingRest.nameKh}» រួចហើយ (អាចចុច «កែប្រែហាងខ្ញុំ» ដើម្បីកែព័ត៌មាន)។`,
+                  `🔒 VIP accounts can add 1 listing only! You already added "${myExistingRest.nameEn || myExistingRest.nameKh}" (tap "Edit My Shop" below to update it).`,
+                  `🔒 VIP 账号仅可添加 1 家店铺！您已添加“${myExistingRest.nameEn || myExistingRest.nameKh}”（可点击下方编辑）。`
+                ),
+                'warning'
+              );
+              return;
+            }
+            (window as any).__kft_vip_store_initial_mode = { mode: 'create', businessType: 'restaurant' };
             setIsVipAddRestaurantModalOpen(true);
           }}
           className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-md"

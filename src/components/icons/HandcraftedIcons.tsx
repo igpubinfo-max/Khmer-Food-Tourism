@@ -160,6 +160,19 @@ export const IconNavShop: React.FC<IconProps> = ({ className = 'w-5 h-5', ...pro
   </svg>
 );
 
+/** Bottom Nav 3.5: Hotel / Stays — Boutique hotel facade & luxury suite bed */
+export const IconNavHotel: React.FC<IconProps> = ({ className = 'w-5 h-5', ...props }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.85} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+    <path d="M4 20V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14" fill="currentColor" fillOpacity={0.14} />
+    <path d="M2.5 20h19" />
+    <path d="M8 8h2" />
+    <path d="M14 8h2" />
+    <path d="M8 12h2" />
+    <path d="M14 12h2" />
+    <path d="M9.5 20v-4a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v4" />
+  </svg>
+);
+
 /** Bottom Nav 4: Tourism — Angkor lotus towers & horizon */
 export const IconNavTourism: React.FC<IconProps> = ({ className = 'w-5 h-5', ...props }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.85} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>

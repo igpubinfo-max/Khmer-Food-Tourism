@@ -375,6 +375,7 @@ export interface RestaurantMediaOverride {
   facebookUrl?: string;
   websiteUrl?: string;
   businessCategory?: string;
+  businessType?: 'restaurant' | 'hotel';
   ownerId?: string;
   ownerName?: string;
   ownerEmail?: string;
@@ -2016,6 +2017,7 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     facebookUrl: rest.facebookUrl,
     websiteUrl: rest.websiteUrl,
     businessCategory: rest.businessCategory,
+    businessType: rest.businessType,
     ownerId: rest.ownerId,
     ownerName: rest.ownerName,
     ownerEmail: rest.ownerEmail,
@@ -2741,6 +2743,7 @@ export function applyRestaurantOverrides(
       facebookUrl: ov.facebookUrl !== undefined ? ov.facebookUrl : r.facebookUrl,
       websiteUrl: ov.websiteUrl !== undefined ? ov.websiteUrl : r.websiteUrl,
       businessCategory: ov.businessCategory !== undefined ? ov.businessCategory : r.businessCategory,
+      businessType: ov.businessType !== undefined ? ov.businessType : r.businessType,
       ownerId: ov.ownerId || r.ownerId,
       ownerName: ov.ownerName || r.ownerName,
       ownerEmail: ov.ownerEmail || r.ownerEmail,
@@ -2847,6 +2850,7 @@ export function applyRestaurantOverrides(
       facebookUrl: ov.facebookUrl,
       websiteUrl: ov.websiteUrl,
       businessCategory: ov.businessCategory,
+      businessType: ov.businessType,
       ownerId: ov.ownerId,
       ownerName: ov.ownerName,
       ownerEmail: ov.ownerEmail,

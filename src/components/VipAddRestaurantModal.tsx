@@ -119,6 +119,37 @@ const SHOP_CATEGORIES = [
   },
 ];
 
+const HOTEL_CATEGORIES = [
+  {
+    id: 'hotel',
+    labelKh: '🏨 សណ្ឋាគារ & កន្លែងស្នាក់នៅ',
+    labelEn: '🏨 Hotel & Stay',
+    labelZh: '🏨 酒店与住宿',
+    defaultDishKh: 'បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ និង Wi-Fi',
+  },
+  {
+    id: 'resort',
+    labelKh: '🌴 រីសត & សណ្ឋាគារប្រណីត',
+    labelEn: '🌴 Resort & Luxury Hotel',
+    labelZh: '🌴 度假村与豪华酒店',
+    defaultDishKh: 'រីសតមានអាងហែលទឹក និងសួនធម្មជាតិ',
+  },
+  {
+    id: 'boutique_villa',
+    labelKh: '🏡 ប៊ូទិក & វីឡា',
+    labelEn: '🏡 Boutique Hotel & Villa',
+    labelZh: '🏡 精品酒店与别墅',
+    defaultDishKh: 'វីឡា និងប៊ូទិកប្រណីត',
+  },
+  {
+    id: 'guesthouse',
+    labelKh: '🛏️ ផ្ទះសំណាក់ & បឹងហ្គាឡូ',
+    labelEn: '🛏️ Guesthouse & Bungalow',
+    labelZh: '🛏️ 客栈与木屋',
+    defaultDishKh: 'ផ្ទះសំណាក់ស្អាត តម្លៃសមរម្យ',
+  },
+];
+
 export const VipAddRestaurantModal: React.FC = () => {
   const {
     isVipAddRestaurantModalOpen,
@@ -157,10 +188,11 @@ export const VipAddRestaurantModal: React.FC = () => {
   const requiresAdditionalPayment = !isAdmin && !replacingStoreId && quota.remainingAvailableSlots <= 0;
 
   // 7 Core Form Fields requested by User:
-  // 1. Shop Name
+  // 1. Shop / Hotel Name
+  const [businessType, setBusinessType] = useState<'restaurant' | 'hotel'>('restaurant');
   const [nameKh, setNameKh] = useState('');
   const [nameEn, setNameEn] = useState('');
-  // 2. Shop Category
+  // 2. Shop / Hotel Category
   const [businessCategory, setBusinessCategory] = useState<string>('restaurant');
   // 3. Phone Number
   const [phone, setPhone] = useState(currentUser?.phone || '');
@@ -208,15 +240,16 @@ export const VipAddRestaurantModal: React.FC = () => {
     [replacingStoreId, ownedRestaurants]
   );
 
+  const activeCategoryList = businessType === 'hotel' ? HOTEL_CATEGORIES : SHOP_CATEGORIES;
   const selectedCategoryObj = useMemo(
-    () => SHOP_CATEGORIES.find((c) => c.id === businessCategory) || SHOP_CATEGORIES[0],
-    [businessCategory]
+    () => activeCategoryList.find((c) => c.id === businessCategory) || activeCategoryList[0],
+    [activeCategoryList, businessCategory]
   );
 
   const resetFormFields = () => {
     setNameKh('');
     setNameEn('');
-    setBusinessCategory('restaurant');
+    setBusinessCategory(businessType === 'hotel' ? 'hotel' : 'restaurant');
     setAddressKh('');
     setShopLat(null);
     setShopLng(null);
@@ -231,10 +264,12 @@ export const VipAddRestaurantModal: React.FC = () => {
     setImportedGooglePlaceId(undefined);
     setImportedGoogleMeta(undefined);
     setWebsiteUrl('');
-    setSignatureDishesKh(['ម្ហូបខ្មែរប្រចាំហាង']);
+    setSignatureDishesKh([businessType === 'hotel' ? 'បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ និង Wi-Fi' : 'ម្ហូបខ្មែរប្រចាំហាង']);
   };
 
   const beginReplaceStore = (store: (typeof ownedRestaurants)[0]) => {
+    const bType = store.businessType === 'hotel' ? 'hotel' : 'restaurant';
+    setBusinessType(bType);
     setReplacingStoreId(store.id);
     setNameKh(store.nameKh || '');
     setNameEn(store.nameEn || '');
@@ -296,6 +331,10 @@ export const VipAddRestaurantModal: React.FC = () => {
     const initialReq = (window as any).__kft_vip_store_initial_mode;
     if (initialReq) {
       delete (window as any).__kft_vip_store_initial_mode;
+      const reqType = initialReq.businessType === 'hotel' ? 'hotel' : 'restaurant';
+      setBusinessType(reqType);
+      setBusinessCategory(reqType === 'hotel' ? 'hotel' : 'restaurant');
+      setSignatureDishesKh([reqType === 'hotel' ? 'បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ និង Wi-Fi' : 'ម្ហូបខ្មែរប្រចាំហាង']);
       if (initialReq.mode === 'replace' && initialReq.storeId) {
         const found = ownedRestaurants.find((s) => s.id === initialReq.storeId) || ownedRestaurants[0];
         if (found) {
@@ -306,6 +345,9 @@ export const VipAddRestaurantModal: React.FC = () => {
         setActiveTab('my_stores');
         return;
       }
+    } else {
+      setBusinessType('restaurant');
+      setBusinessCategory('restaurant');
     }
     setReplacingStoreId(null);
     setSubmittedPendingShop(null);
@@ -537,7 +579,10 @@ export const VipAddRestaurantModal: React.FC = () => {
             }
           : undefined,
         websiteUrl: websiteUrl.trim() || undefined,
-        businessCategory: businessCategory.trim() || 'restaurant',
+        businessType,
+        businessCategory: businessCategory.trim() || (businessType === 'hotel' ? 'hotel' : 'restaurant'),
+        categoryKh: selectedCategoryObj.labelKh.replace(/^[^\s]+\s/, ''),
+        categoryEn: selectedCategoryObj.labelEn.replace(/^[^\s]+\s/, ''),
         isFeatured: true,
         isVerified: true,
         isAdminEdited: isAdmin ? true : undefined,
@@ -689,9 +734,11 @@ export const VipAddRestaurantModal: React.FC = () => {
             <div className="min-w-0">
               <h3 className="font-moul text-sm text-white truncate">
                 {targetReplacingStore
-                  ? tr(language, '🔄 កែប្តូរព័ត៌មានហាងថ្មី ($0)', '🔄 Replace with New Shop ($0)', '🔄 更换为新店铺 ($0)')
+                  ? tr(language, '🔄 កែប្តូរព័ត៌មានថ្មី ($0)', '🔄 Replace Listing ($0)', '🔄 更换信息 ($0)')
                   : isPreviewStep
-                  ? tr(language, '👁️ មើលជាមុន និងដាក់ស្នើហាង', '👁️ Preview & Submit Shop', '👁️ 预览并提交店铺')
+                  ? tr(language, '👁️ មើលជាមុន និងដាក់ស្នើ', '👁️ Preview & Submit', '👁️ 预览并提交')
+                  : businessType === 'hotel'
+                  ? tr(language, '🏨 បន្ថែមសណ្ឋាគារ / ផ្ទះសំណាក់ថ្មី', '🏨 Add New Hotel / Stay', '🏨 添加新酒店/客栈')
                   : tr(language, '➕ បន្ថែមហាងថ្មី (Add New Shop)', '➕ Add New Shop', '➕ 添加新店铺')}
               </h3>
               <p className="text-[11px] text-emerald-100 font-khmer truncate">
@@ -1417,18 +1464,20 @@ export const VipAddRestaurantModal: React.FC = () => {
               </div>
             ) : null}
 
-            {/* FIELD 1: Shop Name (ឈ្មោះហាង) */}
+            {/* FIELD 1: Shop / Hotel Name */}
             <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
               <div>
                 <label className="block font-bold text-slate-900 dark:text-white mb-1">
-                  {tr(language, '១. ឈ្មោះហាង (Shop Name) *', '1. Shop Name *', '1. 店铺名称 *')}
+                  {businessType === 'hotel'
+                    ? tr(language, '១. ឈ្មោះសណ្ឋាគារ / ផ្ទះសំណាក់ (Hotel Name) *', '1. Hotel / Stay Name *', '1. 酒店/客栈名称 *')
+                    : tr(language, '១. ឈ្មោះហាង (Shop Name) *', '1. Shop Name *', '1. 店铺名称 *')}
                 </label>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-1.5">
                   {tr(
                     language,
-                    'វាយបញ្ចូលឈ្មោះហាងជាភាសាខ្មែរ ឬអង់គ្លេសឱ្យបានច្បាស់លាស់។',
-                    'Enter your shop name in Khmer or English.',
-                    '请输入清晰的柬文或英文店铺名称。'
+                    'វាយបញ្ចូលឈ្មោះជាភាសាខ្មែរ ឬអង់គ្លេសឱ្យបានច្បាស់លាស់។',
+                    'Enter the name in Khmer or English.',
+                    '请输入清晰的柬文或英文名称。'
                   )}
                 </p>
                 <input
@@ -1436,36 +1485,42 @@ export const VipAddRestaurantModal: React.FC = () => {
                   required
                   value={nameKh}
                   onChange={(e) => setNameKh(e.target.value)}
-                  placeholder={tr(language, 'ឧ. ភោជនីយដ្ឋាន ម្លិះ ឬ ហាងកាហ្វេភ្នំពេញ', 'e.g. Malis Restaurant or Café', '例如：茉莉餐厅')}
+                  placeholder={
+                    businessType === 'hotel'
+                      ? tr(language, 'ឧ. សណ្ឋាគារ សុខា ឬ ផ្ទះសំណាក់ មេគង្គ', 'e.g. Sokha Hotel or Mekong Guesthouse', '例如：索卡酒店')
+                      : tr(language, 'ឧ. ភោជនីយដ្ឋាន ម្លិះ ឬ ហាងកាហ្វេភ្នំពេញ', 'e.g. Malis Restaurant or Café', '例如：茉莉餐厅')
+                  }
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 outline-none"
                 />
               </div>
 
               <div>
                 <label className="block font-bold text-slate-600 dark:text-slate-400 mb-1 text-[11px]">
-                  {tr(language, 'ឈ្មោះហាងជាអក្សរឡាតាំង / អង់គ្លេស (មិនបាច់ដាក់ក៏បាន)', 'English Shop Name (Optional)', '英文店铺名称（选填）')}
+                  {tr(language, 'ឈ្មោះជាអក្សរឡាតាំង / អង់គ្លេស (មិនបាច់ដាក់ក៏បាន)', 'English Name (Optional)', '英文名称（选填）')}
                 </label>
                 <input
                   type="text"
                   value={nameEn}
                   onChange={(e) => setNameEn(e.target.value)}
-                  placeholder="e.g. Malis Restaurant"
+                  placeholder={businessType === 'hotel' ? 'e.g. Angkor Boutique Hotel' : 'e.g. Malis Restaurant'}
                   className="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-white text-xs focus:border-emerald-600 outline-none"
                 />
               </div>
             </div>
 
-            {/* FIELD 2: Shop Category (ប្រភេទហាង) */}
+            {/* FIELD 2: Category */}
             <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
               <label className="block font-bold text-slate-900 dark:text-white">
-                {tr(language, '២. ប្រភេទហាង (Shop Category) *', '2. Shop Category *', '2. 店铺类别 *')}
+                {businessType === 'hotel'
+                  ? tr(language, '២. ប្រភេទកន្លែងស្នាក់នៅ (Hotel Category) *', '2. Accommodation Category *', '2. 住宿类别 *')
+                  : tr(language, '២. ប្រភេទហាង (Shop Category) *', '2. Shop Category *', '2. 店铺类别 *')}
               </label>
               <p className="text-[10px] text-slate-500 dark:text-slate-400">
                 {tr(
                   language,
-                  'ជ្រើសរើសប្រភេទហាងរបស់អ្នក ដើម្បីឱ្យអតិថិជនងាយស្រួលស្វែងរកតាមផ្នែក។',
-                  'Select your shop category so customers can easily find your shop.',
-                  '选择您的店铺类别，方便顾客按分类查找。'
+                  'ជ្រើសរើសប្រភេទដើម្បីឱ្យភ្ញៀវងាយស្រួលស្វែងរកតាមផ្នែក។',
+                  'Select your category so guests can easily find you.',
+                  '选择类别，方便客人按分类查找。'
                 )}
               </p>
               <select
@@ -1473,14 +1528,14 @@ export const VipAddRestaurantModal: React.FC = () => {
                 onChange={(e) => {
                   const nextCat = e.target.value;
                   setBusinessCategory(nextCat);
-                  const found = SHOP_CATEGORIES.find((c) => c.id === nextCat);
+                  const found = activeCategoryList.find((c) => c.id === nextCat);
                   if (found) {
                     setSignatureDishesKh([found.defaultDishKh]);
                   }
                 }}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:border-emerald-600 outline-none"
               >
-                {SHOP_CATEGORIES.map((cat) => (
+                {activeCategoryList.map((cat) => (
                   <option key={cat.id} value={cat.id}>
                     {language === 'km' ? cat.labelKh : language === 'zh' ? cat.labelZh : cat.labelEn}
                   </option>

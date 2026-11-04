@@ -25,7 +25,6 @@ export const TourismView: React.FC = () => {
 
   const categories = [
     { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All', nameZh: '全部景点' },
-    { id: 'hotel', nameKh: '🏨 សណ្ឋាគារ & ផ្ទះសំណាក់', nameEn: '🏨 Hotels & Stays', nameZh: '🏨 酒店与客栈' },
     { id: 'trending_social', nameKh: 'កំពុងពេញនិយម', nameEn: 'Popular Now', nameZh: '热门打卡' },
     { id: 'temple', nameKh: 'ប្រាសាទបុរាណ', nameEn: 'Temples', nameZh: '古迹与寺庙' },
     { id: 'nature', nameKh: 'ធម្មជាតិ & ទឹកធ្លាក់', nameEn: 'Nature & Falls', nameZh: '自然生态与瀑布' },
@@ -34,19 +33,23 @@ export const TourismView: React.FC = () => {
     { id: 'cultural', nameKh: 'វប្បធម៌ & ប្រវត្តិសាស្ត្រ', nameEn: 'Cultural & History', nameZh: '文化与历史遗址' },
   ];
 
+  // Exclude hotels (categorySlug === 'hotel') since Hotels have their own dedicated BottomNav menu tab
+  const scenicDestinationsOnly = useMemo(
+    () => destinations.filter((d) => Boolean(d && d.categorySlug !== 'hotel')),
+    [destinations]
+  );
+
   // Filter destinations by category first so province dropdown counts reflect the selected category
   const categoryMatchedDestinations = useMemo(() => {
-    return destinations.filter((d) => {
-      if (!d) return false;
+    return scenicDestinationsOnly.filter((d) => {
       if (selectedCategory === 'trending_social') return Boolean(d.isTrendingSocial);
-      if (selectedCategory === 'hotel') return d.categorySlug === 'hotel';
       if (selectedCategory === 'cultural') return d.categorySlug === 'cultural' || d.categorySlug === 'resort';
       if (selectedCategory !== 'all') return d.categorySlug === selectedCategory;
       return true;
     });
-  }, [destinations, selectedCategory]);
+  }, [scenicDestinationsOnly, selectedCategory]);
 
-  // Build 25 Provinces & Capital City dropdown options with live attraction/hotel counts
+  // Build 25 Provinces & Capital City dropdown options with live attraction counts
   const provinceOptions = useMemo(() => {
     return DISH_PROVINCES.map((p) => {
       const cleanKey = p.kh.replace(/^រាជធានី|^ខេត្ត/g, '').trim();
@@ -63,21 +66,19 @@ export const TourismView: React.FC = () => {
 
   // Separate HD-photo destinations (shuffled first) and compact icon-row destinations (shuffled second)
   const orderedSessionDestinations = useMemo(() => {
-    const withPhoto = destinations.filter((d) => Boolean(d && d.photoUrl && d.photoUrl.trim()));
-    const withoutPhoto = destinations.filter((d) => Boolean(d && (!d.photoUrl || !d.photoUrl.trim())));
+    const withPhoto = scenicDestinationsOnly.filter((d) => Boolean(d.photoUrl && d.photoUrl.trim()));
+    const withoutPhoto = scenicDestinationsOnly.filter((d) => Boolean(!d.photoUrl || !d.photoUrl.trim()));
     return [
       ...shuffleForCurrentSession(withPhoto),
       ...shuffleForCurrentSession(withoutPhoto),
     ];
-  }, [destinations]);
+  }, [scenicDestinationsOnly]);
 
   const filteredDestinations = useMemo(() => {
     const cleanSelProv = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
     return orderedSessionDestinations.filter((d) => {
       if (selectedCategory === 'trending_social') {
         if (!d.isTrendingSocial) return false;
-      } else if (selectedCategory === 'hotel') {
-        if (d.categorySlug !== 'hotel') return false;
       } else if (selectedCategory === 'cultural') {
         if (d.categorySlug !== 'cultural' && d.categorySlug !== 'resort') return false;
       } else if (selectedCategory !== 'all' && d.categorySlug !== selectedCategory) {

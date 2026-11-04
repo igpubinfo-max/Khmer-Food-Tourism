@@ -6,6 +6,7 @@ import { BottomNav } from './components/BottomNav';
 import { HomeView } from './components/HomeView';
 const FoodView = lazy(() => import('./components/FoodView').then((m) => ({ default: m.FoodView })));
 const RestaurantView = lazy(() => import('./components/RestaurantView').then((m) => ({ default: m.RestaurantView })));
+const HotelView = lazy(() => import('./components/HotelView').then((m) => ({ default: m.HotelView })));
 const TourismView = lazy(() => import('./components/TourismView').then((m) => ({ default: m.TourismView })));
 const GuideView = lazy(() => import('./components/GuideView').then((m) => ({ default: m.GuideView })));
 const ProfileView = lazy(() => import('./components/ProfileView').then((m) => ({ default: m.ProfileView })));
@@ -231,6 +232,7 @@ const MainScreen: React.FC = () => {
           {activeTab === 'home' && <HomeView />}
           {activeTab === 'food' && <FoodView />}
           {activeTab === 'restaurants' && <RestaurantView />}
+          {activeTab === 'hotels' && <HotelView />}
           {activeTab === 'tourism' && <TourismView />}
           {activeTab === 'guide' && <GuideView />}
           {activeTab === 'profile' && <ProfileView />}

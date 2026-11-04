@@ -141,7 +141,7 @@ import {
   findLocalAuthoritativeVipEntitlement,
 } from '../utils/securityIntegrityGuard';
 
-export type ActiveTab = 'home' | 'food' | 'restaurants' | 'tourism' | 'guide' | 'profile';
+export type ActiveTab = 'home' | 'food' | 'restaurants' | 'hotels' | 'tourism' | 'guide' | 'profile';
 
 interface AppContextType {
   language: Language;
@@ -1264,6 +1264,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       facebookUrl: r.facebookUrl,
       websiteUrl: r.websiteUrl,
       businessCategory: r.businessCategory,
+      businessType: r.businessType === 'hotel' ? 'hotel' : r.businessType === 'restaurant' ? 'restaurant' : undefined,
       dataSource: r.dataSource,
       googleMapsMeta: r.googleMapsMeta,
       isAdminEdited: Boolean(r.isAdminEdited),
@@ -4620,7 +4621,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (restId) {
           const found = restaurants.find(r => r.id === restId);
           if (found) {
-            setActiveTab('restaurants');
+            setActiveTab(found.businessType === 'hotel' ? 'hotels' : 'restaurants');
             setSelectedRestaurant(found);
           }
         } else if (foodId) {
@@ -4632,7 +4633,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         } else if (destId) {
           const found = destinations.find(d => d.id === destId);
           if (found) {
-            setActiveTab('tourism');
+            setActiveTab(found.categorySlug === 'hotel' ? 'hotels' : 'tourism');
             setSelectedDestination(found);
           }
         }
