@@ -364,7 +364,7 @@ export const MAX_IMAGE_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
  * Validates and compresses a File (JPG, JPEG, PNG, WebP) up to 20MB into a clean JPEG/WebP Data URL.
  * Supports both (file, maxDimension, quality) and legacy 4-arg (file, maxWidth, maxHeight, quality).
  */
-export function processAndCompressImageFile(
+export async function processAndCompressImageFile(
   file: File,
   maxDimension: number = 1000,
   quality: number = 0.82,
@@ -377,25 +377,53 @@ export function processAndCompressImageFile(
         ? quality
         : 0.85;
 
+  if (!file) {
+    throw new Error('មិនមានឯកសាររូបភាពត្រូវបានជ្រើសរើសទេ។');
+  }
+
+  const validMime = /^image\/(jpeg|jpg|png|webp|heic|heif)$/i.test(file.type) ||
+    /\.(jpe?g|png|webp|heic)$/i.test(file.name || '');
+  if (!validMime && file.type && !file.type.startsWith('image/')) {
+    throw new Error('សូមជ្រើសរើសប្រភេទរូបភាពដែលត្រឹមត្រូវ (JPG, JPEG, WebP ឬ PNG)។');
+  }
+
+  const maxBytes = 20 * 1024 * 1024; // 20 MB
+  if (file.size > maxBytes) {
+    throw new Error('ទំហំរូបភាពធំពេក (លើសពី 20MB)។ សូមជ្រើសរើសរូបភាពតូចជាងនេះ។');
+  }
+
+  // 1. Try modern createImageBitmap with auto EXIF orientation
+  if (typeof createImageBitmap === 'function') {
+    try {
+      const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+      let width = bmp.width;
+      let height = bmp.height;
+      if (width > maxDimension || height > maxDimension) {
+        if (width >= height) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        } else {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, width);
+      canvas.height = Math.max(1, height);
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+        return canvas.toDataURL('image/jpeg', effectiveQuality);
+      }
+    } catch {
+      // Fallback below
+    }
+  }
+
+  // 2. Fallback via FileReader
   return new Promise((resolve, reject) => {
-    if (!file) {
-      reject(new Error('មិនមានឯកសាររូបភាពត្រូវបានជ្រើសរើសទេ។'));
-      return;
-    }
-
-    const validMime = /^image\/(jpeg|jpg|png|webp|heic|heif)$/i.test(file.type) ||
-      /\.(jpe?g|png|webp|heic)$/i.test(file.name || '');
-    if (!validMime && file.type && !file.type.startsWith('image/')) {
-      reject(new Error('សូមជ្រើសរើសប្រភេទរូបភាពដែលត្រឹមត្រូវ (JPG, JPEG, WebP ឬ PNG)។'));
-      return;
-    }
-
-    const maxBytes = 20 * 1024 * 1024; // 20 MB
-    if (file.size > maxBytes) {
-      reject(new Error('ទំហំរូបភាពធំពេក (លើសពី 20MB)។ សូមជ្រើសរើសរូបភាពតូចជាងនេះ។'));
-      return;
-    }
-
     const reader = new FileReader();
     reader.onerror = () => reject(new Error('មិនអាចអានឯកសាររូបភាពពី Gallery បានទេ។'));
     reader.onload = (ev) => {
@@ -407,7 +435,6 @@ export function processAndCompressImageFile(
 
       const img = new Image();
       img.onerror = () => {
-        // Fallback to raw data URL if Image decode fails
         resolve(rawDataUrl);
       };
       img.onload = () => {

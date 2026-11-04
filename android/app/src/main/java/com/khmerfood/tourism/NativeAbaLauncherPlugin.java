@@ -11,6 +11,9 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
+import java.io.ByteArrayInputStream;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -342,6 +345,65 @@ public class NativeAbaLauncherPlugin extends Plugin {
      * Helper method to convert an image Uri into an optimized Base64 data URL.
      * Uses inSampleSize scaling to prevent OutOfMemoryError when reading high-resolution camera photos.
      */
+    /**
+     * Reads EXIF orientation from raw image bytes and rotates/flips the Bitmap upright.
+     * Prevents sideways camera photos taken on mobile devices.
+     */
+    private Bitmap applyExifOrientation(byte[] rawBytes, Bitmap bitmap) {
+        if (rawBytes == null || rawBytes.length == 0 || bitmap == null) {
+            return bitmap;
+        }
+        try {
+            int orientation = ExifInterface.ORIENTATION_NORMAL;
+            try (ByteArrayInputStream bais = new ByteArrayInputStream(rawBytes)) {
+                ExifInterface exif = new ExifInterface(bais);
+                orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            } catch (Throwable ignored) {
+            }
+
+            if (orientation == ExifInterface.ORIENTATION_NORMAL || orientation == ExifInterface.ORIENTATION_UNDEFINED) {
+                return bitmap;
+            }
+
+            Matrix matrix = new Matrix();
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
+                    matrix.postScale(-1f, 1f);
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    matrix.postRotate(180f);
+                    break;
+                case ExifInterface.ORIENTATION_FLIP_VERTICAL:
+                    matrix.postScale(1f, -1f);
+                    break;
+                case ExifInterface.ORIENTATION_TRANSPOSE:
+                    matrix.postRotate(90f);
+                    matrix.postScale(-1f, 1f);
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    matrix.postRotate(90f);
+                    break;
+                case ExifInterface.ORIENTATION_TRANSVERSE:
+                    matrix.postRotate(270f);
+                    matrix.postScale(-1f, 1f);
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    matrix.postRotate(270f);
+                    break;
+                default:
+                    return bitmap;
+            }
+
+            Bitmap rotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+            if (rotated != bitmap) {
+                bitmap.recycle();
+            }
+            return rotated;
+        } catch (Throwable t) {
+            return bitmap;
+        }
+    }
+
     private String processUriToDataUrl(Context context, Uri uri, int maxDim) {
         ContentResolver resolver = context.getContentResolver();
         try {
@@ -378,7 +440,8 @@ public class NativeAbaLauncherPlugin extends Plugin {
                 }
                 opts.inJustDecodeBounds = false;
                 opts.inSampleSize = sampleSize;
-                bitmap = BitmapFactory.decodeByteArray(rawBytes, 0, rawBytes.length, opts);
+                Bitmap decoded = BitmapFactory.decodeByteArray(rawBytes, 0, rawBytes.length, opts);
+                bitmap = applyExifOrientation(rawBytes, decoded);
             }
             if (bitmap == null) return null;
 
@@ -400,7 +463,7 @@ public class NativeAbaLauncherPlugin extends Plugin {
             }
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 82, baos);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, baos);
             bitmap.recycle();
 
             String base64 = Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP);

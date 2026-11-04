@@ -8,7 +8,7 @@ import {
   User as UserIcon, Heart, Shield, Store, 
   Globe, LogOut, RefreshCw, ShieldCheck, CheckCircle2,
   Bell, Compass, Bookmark, Plus, Trash2, ChevronRight,
-  Edit2, Check, X as CloseIcon, Crown, Award, Copy, Clock, MessageSquare, Mail, Settings, Camera
+  Edit2, Check, X as CloseIcon, Crown, Award, Copy, Clock, MessageSquare, Mail, Settings, Camera, RotateCw, RotateCcw
 } from 'lucide-react';
 import {
   isRestaurantPremiumActive, isUserVipActive, getVipAccountState, getVipRemainingDays,
@@ -16,7 +16,8 @@ import {
   isAdminAccount, getVipFeaturedRotationConfig, getVipFeaturedRotationState
 } from '../types';
 import { tr } from '../utils/i18n';
-import { resolveUserAvatarUrl, handleAvatarImageError, fileToAvatarDataUrl } from '../utils/avatarHelper';
+import { resolveUserAvatarUrl, handleAvatarImageError, fileToAvatarDataUrl, isCustomUploadedAvatarDataUrl, rotateDataUrl } from '../utils/avatarHelper';
+import { AvatarEditorModal } from './AvatarEditorModal';
 import {
   isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
@@ -85,20 +86,44 @@ export const ProfileView: React.FC = () => {
   const [showSupportDetails, setShowSupportDetails] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [isSavingAvatar, setIsSavingAvatar] = useState(false);
+  const [isAvatarEditorOpen, setIsAvatarEditorOpen] = useState(false);
+  const [avatarEditorSourceUrl, setAvatarEditorSourceUrl] = useState<string>('');
+  const [isAvatarActionSheetOpen, setIsAvatarActionSheetOpen] = useState(false);
+
+  const hasCustomAvatar = Boolean(
+    currentUser && isCustomUploadedAvatarDataUrl(currentUser.avatar)
+  );
+
+  const handleAvatarClick = () => {
+    if (!currentUser || isSavingAvatar) return;
+    if (hasCustomAvatar) {
+      setIsAvatarActionSheetOpen(true);
+    } else {
+      handleTriggerAvatarPicker();
+    }
+  };
+
+  const handleOpenCurrentAvatarEditor = () => {
+    if (!currentUser?.avatar) return;
+    setIsAvatarActionSheetOpen(false);
+    setAvatarEditorSourceUrl(currentUser.avatar);
+    setIsAvatarEditorOpen(true);
+  };
 
   const handleTriggerAvatarPicker = async () => {
+    setIsAvatarActionSheetOpen(false);
     if (!currentUser || isSavingAvatar) return;
     if (isNativeAndroidOrIosPlatform()) {
       setIsSavingAvatar(true);
       try {
-        const nativePick = await pickImageUsingNativeAndroidGallery(800, 0.85);
+        const nativePick = await pickImageUsingNativeAndroidGallery(1080, 0.88);
         if (nativePick?.cancelled) {
           setIsSavingAvatar(false);
           return;
         }
         if (nativePick?.dataUrl) {
-          const dataUrl = await fileToAvatarDataUrl(nativePick.dataUrl);
-          updateCurrentUserProfile(currentUser.name, dataUrl);
+          setAvatarEditorSourceUrl(nativePick.dataUrl);
+          setIsAvatarEditorOpen(true);
           setIsSavingAvatar(false);
           return;
         }
@@ -119,8 +144,15 @@ export const ProfileView: React.FC = () => {
     }
     setIsSavingAvatar(true);
     try {
-      const dataUrl = await fileToAvatarDataUrl(file);
-      updateCurrentUserProfile(currentUser.name, dataUrl);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const raw = typeof reader.result === 'string' ? reader.result : '';
+        if (raw) {
+          setAvatarEditorSourceUrl(raw);
+          setIsAvatarEditorOpen(true);
+        }
+      };
+      reader.readAsDataURL(file);
     } catch {
       showToast(
         tr(language, 'មិនអាចប្រើរូបភាពនេះបានទេ សូមជ្រើសរើសរូបភាពផ្សេង', 'Could not use this photo, please pick another one', '无法使用这张照片，请换一张'),
@@ -130,6 +162,25 @@ export const ProfileView: React.FC = () => {
       inputEl.value = '';
       setIsSavingAvatar(false);
     }
+  };
+
+  const handleSaveAvatarFromEditor = (finalDataUrl: string) => {
+    if (!currentUser || !finalDataUrl) return;
+    updateCurrentUserProfile(currentUser.name, finalDataUrl);
+    showToast(
+      tr(language, 'បានរក្សាទុករូបភាពប្រូហ្វាល់ត្រង់ស្អាតជោគជ័យ!', 'Profile photo saved upright successfully!', '头像已成功正向保存！'),
+      'success'
+    );
+  };
+
+  const handleResetToDefaultAvatar = () => {
+    if (!currentUser) return;
+    setIsAvatarActionSheetOpen(false);
+    updateCurrentUserProfile(currentUser.name, '');
+    showToast(
+      tr(language, 'បានកំណត់រូបភាពប្រូហ្វាល់ដើមឡើងវិញ', 'Profile photo reset to default', '头像已恢复为默认'),
+      'info'
+    );
   };
 
   // Discreet private 5-tap trigger on App Version footer for Admin access (no visible Admin button to users)
@@ -543,7 +594,7 @@ export const ProfileView: React.FC = () => {
                     alt={currentUser.name} 
                     referrerPolicy="no-referrer"
                     decoding="async"
-                    onClick={handleTriggerAvatarPicker}
+                    onClick={handleAvatarClick}
                     onError={(e) => handleAvatarImageError(e, currentUser)}
                     className={`w-14 h-14 bg-emerald-950 cursor-pointer ${
       isAdmin 
@@ -551,11 +602,11 @@ export const ProfileView: React.FC = () => {
         : isVip 
         ? 'rounded-2xl ring-4 ring-amber-400/50 border-2 border-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)] bg-white' 
         : 'rounded-2xl ring-4 ring-emerald-500/20 border-2 border-[#059669]'
-    } object-cover shadow-md`}
+    } object-cover shadow-md active:scale-95 transition`}
                   />
                   <button
                     type="button"
-                    onClick={handleTriggerAvatarPicker}
+                    onClick={handleAvatarClick}
                     disabled={isSavingAvatar}
                     aria-label={tr(language, 'ប្តូររូបភាពប្រូហ្វាល់', 'Change profile photo', '更换头像')}
                     title={tr(language, 'ប្តូររូបភាពប្រូហ្វាល់', 'Change profile photo', '更换头像')}
@@ -563,6 +614,22 @@ export const ProfileView: React.FC = () => {
                   >
                     <Camera className="w-3 h-3" />
                   </button>
+
+                  {hasCustomAvatar && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenCurrentAvatarEditor();
+                      }}
+                      aria-label={tr(language, 'បង្វិលរូបភាព 90°', 'Rotate photo 90°', '旋转照片 90°')}
+                      title={tr(language, 'បង្វិលរូបភាព 90°', 'Rotate photo 90°', '旋转照片 90°')}
+                      className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 border-2 border-white dark:border-slate-800 shadow-sm flex items-center justify-center cursor-pointer active:scale-90 transition"
+                    >
+                      <RotateCw className="w-3 h-3" />
+                    </button>
+                  )}
+
                   <input
                     ref={avatarInputRef}
                     type="file"
@@ -2179,6 +2246,89 @@ export const ProfileView: React.FC = () => {
           Cambodia Flavors & Tourism {APP_VERSION} • Build {APP_BUILD_CODE}
         </span>
       </div>
+
+      {/* Avatar Action Sheet Modal */}
+      {isAvatarActionSheetOpen && currentUser && (
+        <div
+          className="fixed inset-0 z-[115] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-fade-in font-khmer select-none"
+          onClick={() => setIsAvatarActionSheetOpen(false)}
+        >
+          <div
+            className="w-full sm:max-w-xs bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-3 animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center pb-2 border-b border-slate-100 dark:border-slate-800">
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                {tr(language, 'ជម្រើសរូបភាពប្រូហ្វាល់', 'Profile Photo Options', '头像选项')}
+              </h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                {tr(language, 'ជ្រើសរើសសកម្មភាពសម្រាប់រូបភាពរបស់អ្នក', 'Choose an action for your avatar', '请选择头像操作')}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={handleOpenCurrentAvatarEditor}
+                className="w-full py-2.5 px-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-400/40 font-bold text-xs flex items-center gap-2.5 transition cursor-pointer"
+              >
+                <RotateCw className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <span className="flex-1 text-left">
+                  {tr(language, '🔄 បង្វិល 90° & កែតម្រង់រូបនេះ', 'Rotate 90° & Adjust Photo', '旋转 90° 并调整当前头像')}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleTriggerAvatarPicker}
+                className="w-full py-2.5 px-3 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-400/40 font-bold text-xs flex items-center gap-2.5 transition cursor-pointer"
+              >
+                <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span className="flex-1 text-left">
+                  {tr(language, '📷 ជ្រើសរូបថ្មីពី Gallery', 'Choose New Photo from Gallery', '从相册选择新头像')}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResetToDefaultAvatar}
+                className="w-full py-2.5 px-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-400/30 font-bold text-xs flex items-center gap-2.5 transition cursor-pointer"
+              >
+                <Trash2 className="w-4 h-4 text-rose-500 shrink-0" />
+                <span className="flex-1 text-left">
+                  {tr(language, '🗑️ ប្រើរូបតំណាងដើម (Reset)', 'Use Default Avatar', '恢复默认头像')}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsAvatarActionSheetOpen(false)}
+                className="w-full py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 font-bold text-xs text-center transition cursor-pointer mt-1"
+              >
+                {tr(language, 'បោះបង់', 'Cancel', '取消')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Avatar Crop & Rotate Modal */}
+      <AvatarEditorModal
+        isOpen={isAvatarEditorOpen}
+        onClose={() => {
+          setIsAvatarEditorOpen(false);
+          setAvatarEditorSourceUrl('');
+        }}
+        initialImageUrl={avatarEditorSourceUrl}
+        onSave={handleSaveAvatarFromEditor}
+        onPickNewImage={() => {
+          setIsAvatarEditorOpen(false);
+          setTimeout(() => handleTriggerAvatarPicker(), 150);
+        }}
+        language={language}
+        isVip={isVip}
+        isAdmin={isAdmin}
+      />
 
       {/* Privacy Policy Modal */}
       <PrivacyPolicyModal 
