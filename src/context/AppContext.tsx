@@ -1796,7 +1796,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 100 && !String(parsed[0]?.photoUrl || '').includes('1569683795645')) {
           const initialMap = new Map(initialDestinations.map(d => [d.id, d]));
-          const filteredParsed = parsed.filter((d: TouristDestination) => d && d.id && !REMOVED_DUPLICATE_DEST_IDS.has(d.id));
+          const filteredParsed = parsed.filter(
+            (d: TouristDestination) =>
+              d &&
+              d.id &&
+              !REMOVED_DUPLICATE_DEST_IDS.has(d.id) &&
+              !d.id.startsWith('kr-hotel-') &&
+              !(d.id.startsWith('hotel-') && !d.isAdminEdited && !vault.destinations[d.id])
+          );
           const upgraded = filteredParsed.map((d: TouristDestination) => {
             const seed = initialMap.get(d.id);
             if (!seed) {

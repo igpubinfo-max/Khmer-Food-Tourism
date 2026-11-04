@@ -7,8 +7,8 @@ android {
         applicationId project.hasProperty("customAppId") ? project.property("customAppId") : "com.khmerfood.tourism"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1422
-        versionName "2.6.4"
+        versionCode 1424
+        versionName "2.6.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             debugSymbolLevel 'FULL'

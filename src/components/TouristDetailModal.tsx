@@ -624,9 +624,9 @@ export const TouristDetailModal: React.FC = () => {
                   <span>
                     {tr(
                       language,
-                      `មើលបន្ទប់ និងកក់ផ្ទាល់លើ KhmerRooms${selectedDestination.priceRange ? ` (${selectedDestination.priceRange})` : ''}`,
-                      `View Rooms & Book on KhmerRooms${selectedDestination.priceRange ? ` (${selectedDestination.priceRange})` : ''}`,
-                      `在 KhmerRooms 查看房型并预订${selectedDestination.priceRange ? ` (${selectedDestination.priceRange})` : ''}`
+                      `គេហទំព័រសណ្ឋាគារ / កក់បន្ទប់${selectedDestination.priceRange ? ` (${selectedDestination.priceRange})` : ''}`,
+                      `Official Website / Book Room${selectedDestination.priceRange ? ` (${selectedDestination.priceRange})` : ''}`,
+                      `酒店官网 / 预订房间${selectedDestination.priceRange ? ` (${selectedDestination.priceRange})` : ''}`
                     )}
                   </span>
                   <ExternalLink className="w-3.5 h-3.5 opacity-85 shrink-0" />
