@@ -39,7 +39,8 @@ export const TourismView: React.FC = () => {
     return destinations.filter((d) => {
       if (!d) return false;
       if (selectedCategory === 'trending_social') return Boolean(d.isTrendingSocial);
-      if (selectedCategory === 'hotel') return d.categorySlug === 'hotel' || d.categorySlug === 'resort';
+      if (selectedCategory === 'hotel') return d.categorySlug === 'hotel';
+      if (selectedCategory === 'cultural') return d.categorySlug === 'cultural' || d.categorySlug === 'resort';
       if (selectedCategory !== 'all') return d.categorySlug === selectedCategory;
       return true;
     });
@@ -76,7 +77,9 @@ export const TourismView: React.FC = () => {
       if (selectedCategory === 'trending_social') {
         if (!d.isTrendingSocial) return false;
       } else if (selectedCategory === 'hotel') {
-        if (d.categorySlug !== 'hotel' && d.categorySlug !== 'resort') return false;
+        if (d.categorySlug !== 'hotel') return false;
+      } else if (selectedCategory === 'cultural') {
+        if (d.categorySlug !== 'cultural' && d.categorySlug !== 'resort') return false;
       } else if (selectedCategory !== 'all' && d.categorySlug !== selectedCategory) {
         return false;
       }

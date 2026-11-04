@@ -37,7 +37,7 @@ export const DefaultDestinationIcon: React.FC<{ categorySlug?: string; className
   categorySlug,
   className = 'w-12 h-12 rounded-xl',
 }) => {
-  const isHotel = categorySlug === 'hotel' || categorySlug === 'resort';
+  const isHotel = categorySlug === 'hotel';
   const IconComp =
     isHotel
       ? BedDouble
