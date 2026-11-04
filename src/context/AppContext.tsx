@@ -15,7 +15,7 @@ import {
   parseSafeDateMs, isGpipRegisteredRestaurant, openRestaurantGoogleExternal,
   isValidCambodiaCoordinates, isValidOfficialGooglePlaceId, buildCanonicalGoogleMapsPinUrl,
   isStrictVerifiedCambodiaRestaurant, SEED_FOOD_PHOTO_BASELINE_MS,
-  sanitizeVerifiedShopPhotoUrl, isValidGoogleMapsUrl, extractCoordsFromGoogleMapsUrl,
+  sanitizeVerifiedShopPhotoUrl, isVerifiedShopSpecialtyPhotoUrl, isValidGoogleMapsUrl, extractCoordsFromGoogleMapsUrl,
   AuthModalInitialView, hasAuthenticatedEmailAccount, computeFastPhotoSignature,
   APP_VERSION_NAME, APP_BUILD_CODE,
   deduplicateFoodItems,
@@ -246,6 +246,7 @@ interface AppContextType {
   bulkVerifyAndEnrichAllRestaurants: () => Promise<{ verifiedCount: number; enrichedCount: number }>;
   submitShopPhotoReplacementRequest: (restaurantId: string, newPhotoUrl: string) => boolean;
   approveShopPhotoReplacement: (restaurantId: string) => void;
+  approveAllPendingShopPhotoReplacements: () => number;
   rejectShopPhotoReplacement: (restaurantId: string, reason?: string) => void;
   /** Queue Google Places photo candidates (existing shops) and brand-new replacement shops for Admin review. */
   queueShopPhotoCandidates: (
@@ -389,11 +390,26 @@ interface AppContextType {
     amountUsd?: number,
     transactionRef?: string,
     notes?: string,
-    paymentProofData?: { dataUrl: string; fileName?: string; mimeType?: string }
+    paymentProofData?: { dataUrl: string; fileName?: string; mimeType?: string },
+    autoRenewAuth?: {
+      enabled: boolean;
+      paymentMethod?: 'KHQR' | 'Bakong' | 'Card' | 'GooglePlayBilling';
+      paymentLabel?: string;
+      explicitConsent?: boolean;
+    }
   ) => Promise<{ success: boolean; transactionId: string; error?: string }>;
   upgradeCurrentUserToVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string, last4?: string, amountUsd?: number, durationDays?: number) => Promise<{ success: boolean; error?: string }>;
   renewCurrentUserVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string, durationDays?: number, amountUsd?: number) => Promise<{ success: boolean; error?: string }>;
   restoreCurrentUserVipPurchases: () => Promise<{ success: boolean; restored: boolean; message: string }>;
+  configureVipAutoRenew: (options: {
+    enabled: boolean;
+    planId?: 'quarterly' | 'annual';
+    paymentMethod?: 'KHQR' | 'Bakong' | 'Card' | 'GooglePlayBilling';
+    paymentLabel?: string;
+    explicitConsent?: boolean;
+  }) => Promise<{ success: boolean; error?: string }>;
+  cancelVipAutoRenew: () => Promise<{ success: boolean }>;
+  retryFailedVipAutoRenew: () => Promise<{ success: boolean; error?: string }>;
 
   // User–Admin Two-Way Support & Payment Reply System
   supportTickets: SupportTicket[];
@@ -1364,9 +1380,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         nameEn: 'Unique Grill',
         descriptionKh: 'Unique Grill (សាច់អាំង និងអាហារជួបជុំ) — ផាសុកភាព និងរសជាតិឈ្ងុយឆ្ងាញ់។',
         descriptionEn: 'Unique Grill — Grill, BBQ & Hotpot dining in Phnom Penh.',
-        photoUrl: '',
-        profileImage: '',
-        galleryPhotos: [],
+        photoUrl: '/foods/food-19.jpg?verified_shop=rest-admin-unique-grill',
+        profileImage: '/foods/food-19.jpg?verified_shop=rest-admin-unique-grill',
+        galleryPhotos: ['/foods/food-19.jpg?verified_shop=rest-admin-unique-grill'],
         foodImages: [],
         addressKh: 'ផ្លូវ ១៣៤ សង្កាត់ផ្សារដេប៉ូទី២ ខណ្ឌទួលគោក រាជធានីភ្នំពេញ',
         addressEn: 'Street 134, Khan Tuol Kork, Phnom Penh',
@@ -1456,10 +1472,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 Boolean(r.isAdminEdited) &&
                 typeof primaryImg === 'string' &&
                 primaryImg.trim().length > 0 &&
-                !primaryImg.startsWith('/foods/') &&
                 !primaryImg.startsWith('/restaurants/') &&
                 primaryImg !== seed.photoUrl &&
-                (primaryImg.startsWith('data:') || primaryImg.startsWith('http://') || primaryImg.startsWith('https://'));
+                (primaryImg.startsWith('data:') ||
+                  primaryImg.startsWith('http://') ||
+                  primaryImg.startsWith('https://') ||
+                  isVerifiedShopSpecialtyPhotoUrl(primaryImg, r.id));
               const seedGallery = Array.isArray(seed.galleryPhotos) && seed.galleryPhotos.length > 0
                 ? seed.galleryPhotos
                 : (Array.isArray(seed.foodImages) ? seed.foodImages : []);
@@ -3247,10 +3265,183 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (rawExp) expiredNoticeLog = JSON.parse(rawExp) || {};
       } catch {}
 
+      let autoRenewCycleLog: Record<string, string> = {};
+      try {
+        const rawAr = localStorage.getItem('kft_vip_autorenew_cycles_v1');
+        if (rawAr) autoRenewCycleLog = JSON.parse(rawAr) || {};
+      } catch {}
+
       let reminderLogChanged = false;
       let expiredNoticeLogChanged = false;
+      let autoRenewCycleLogChanged = false;
       const newNotificationsToPush: AppNotification[] = [];
+      const newAutoRenewTransactions: RegistrationTransaction[] = [];
+      const autoRenewedUsersForCloud: User[] = [];
       const expiredUserIds = new Set<string>();
+
+      const processAutoRenewalForAccount = (u: User, expiryStr?: string): { renewedUser: User; success: boolean } => {
+        const nowIso = new Date(nowMs).toISOString();
+        const dynamicPlans = getDynamicVipPlans(appSettingsRef.current);
+        const planKey: 'quarterly' | 'annual' =
+          u.autoRenewPlanId === 'annual' || u.vipPlanType === 'annual' ? 'annual' : 'quarterly';
+        const plan = dynamicPlans[planKey] || dynamicPlans.quarterly;
+        const authMethod = u.autoRenewPaymentMethod || (u.paymentMethod === 'Bakong' || u.paymentMethod === 'Card' || u.paymentMethod === 'GooglePlayBilling' ? u.paymentMethod : 'KHQR');
+        const authLabel =
+          u.autoRenewPaymentLabel ||
+          (authMethod === 'Bakong'
+            ? 'Bakong KHQR'
+            : authMethod === 'Card'
+            ? 'Visa / Mastercard'
+            : authMethod === 'GooglePlayBilling'
+            ? 'Google Play Billing'
+            : 'ABA KHQR (Authorized)');
+
+        // Never charge without explicit consent or if payment authorization was revoked
+        if (!u.autoRenewConsentAt || u.autoRenewFailureReason === 'PAYMENT_METHOD_DECLINED_TEST') {
+          const failReasonKh = 'ការទូទាត់ស្វ័យប្រវត្តិមិនអាចដំណើរការបានទេ។ សូមពិនិត្យមធ្យោបាយទូទាត់ ហើយព្យាយាមម្តងទៀត។';
+          const failReasonEn = 'Automatic payment could not be processed. Please check your payment method and retry.';
+          const failEntry = {
+            id: `hist-ar-fail-${u.id}-${todayStr}`,
+            date: nowIso,
+            action: 'payment_failed' as const,
+            planType: planKey,
+            durationDays: plan.durationDays,
+            amountUsd: plan.priceUsd,
+            paymentMethod: authLabel,
+            status: 'failed' as const,
+            noteKh: failReasonKh,
+            noteEn: failReasonEn,
+          };
+          const prevHist = Array.isArray(u.vipMembershipHistory) ? u.vipMembershipHistory : [];
+          const failedUser: User = {
+            ...u,
+            autoRenewLastStatus: 'failed',
+            autoRenewFailureReason: failReasonEn,
+            autoRenewUpdatedAt: nowIso,
+            vipMembershipHistory: [failEntry, ...prevHist.filter(h => h.id !== failEntry.id)].slice(0, 50),
+          };
+          failedUser.integritySeal = computeUserIntegritySealSync(failedUser);
+
+          newNotificationsToPush.push({
+            id: `notif-vip-autorenew-failed-${u.id}-${nowMs}`,
+            titleKh: 'ការបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិមិនជោគជ័យ',
+            titleEn: 'Automatic VIP Renewal Payment Failed',
+            messageKh: `មិនអាចកាត់ប្រាក់ $${plan.priceUsd.toFixed(2)} USD សម្រាប់ការបន្ត VIP (${plan.durationDays} ថ្ងៃ) តាមរយៈ ${authLabel} បានទេ។ សូមចូលទៅកាន់គណនី (Profile) ដើម្បីព្យាយាមបង់ប្រាក់ម្តងទៀត។`,
+            messageEn: `Could not process $${plan.priceUsd.toFixed(2)} USD for your ${plan.durationDays}-day VIP renewal via ${authLabel}. Please open your Profile to retry payment.`,
+            type: 'system',
+            date: todayStr,
+            isRead: false,
+          });
+          if (currentUser?.id === u.id) {
+            showToast(
+              language === 'km'
+                ? 'ការបន្ត VIP ស្វ័យប្រវត្តិមិនជោគជ័យ! សូមចុច Retry Payment នៅក្នុងគណនីរបស់អ្នក។'
+                : 'Automatic VIP renewal failed! Please tap Retry Payment in your Profile.',
+              'warning'
+            );
+          }
+          return { renewedUser: failedUser, success: false };
+        }
+
+        const { startDate, expiryDate } = calculateVipDates(
+          expiryStr || u.subscriptionExpiryDate,
+          plan.durationDays,
+          appSettingsRef.current
+        );
+        const txnRef = `AUTO-VIP-${plan.durationDays}D-${Date.now().toString(36).toUpperCase()}`;
+        const txnId = `TXN-AUTORENEW-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
+        const expDateFormatted = expiryDate.split('T')[0];
+
+        const autoTxn: RegistrationTransaction = {
+          id: txnId,
+          type: 'user_vip_upgrade',
+          userId: u.id,
+          userName: u.name,
+          userEmail: u.email,
+          ownerId: u.id,
+          ownerName: u.name,
+          planType: planKey,
+          amountUsd: plan.priceUsd,
+          currency: 'USD',
+          durationDays: plan.durationDays,
+          membershipTier: 'premium_vip',
+          status: 'verified',
+          paymentMethod: authMethod,
+          transactionRef: txnRef,
+          createdAt: nowIso.replace('T', ' ').slice(0, 16),
+          expiresAt: expiryDate,
+          verifiedAt: nowIso.replace('T', ' ').slice(0, 16),
+          verifiedBy: 'Automatic VIP Renewal Engine (Authorized Consent)',
+          notes: `Automatic VIP Renewal (${plan.durationDays} Days / $${plan.priceUsd.toFixed(2)} USD) via ${authLabel}`,
+          isAutoRenewal: true,
+        };
+        newAutoRenewTransactions.push(autoTxn);
+
+        const histEntry = {
+          id: `hist-ar-${txnRef}`,
+          date: nowIso,
+          action: 'auto_renewal' as const,
+          planType: planKey,
+          durationDays: plan.durationDays,
+          amountUsd: plan.priceUsd,
+          paymentMethod: authLabel,
+          transactionRef: txnRef,
+          expiryDate,
+          status: 'verified' as const,
+          noteKh: `បានបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (${plan.durationDays} ថ្ងៃ / $${plan.priceUsd.toFixed(2)} USD) តាមរយៈ ${authLabel} រហូតដល់ថ្ងៃទី ${expDateFormatted}`,
+          noteEn: `Automatically renewed VIP (${plan.durationDays} days / $${plan.priceUsd.toFixed(2)} USD) via ${authLabel} until ${expDateFormatted}`,
+        };
+        const prevHist = Array.isArray(u.vipMembershipHistory) ? u.vipMembershipHistory : [];
+
+        const renewedUser: User = {
+          ...u,
+          membershipTier: 'premium_vip',
+          subscriptionStatus: 'active',
+          paymentStatus: 'verified',
+          vipStatus: 'active',
+          vipPlanDays: plan.durationDays,
+          vipPlanType: planKey,
+          subscriptionStartDate: u.subscriptionStartDate || startDate,
+          subscriptionExpiryDate: expiryDate,
+          vipExpiresAt: expiryDate,
+          vipCancelledAt: undefined,
+          paymentMethod: authMethod,
+          transactionRef: txnRef,
+          autoRenew: true,
+          autoRenewPlanId: planKey,
+          autoRenewPaymentMethod: authMethod,
+          autoRenewPaymentLabel: authLabel,
+          autoRenewLastChargedAt: nowIso,
+          autoRenewLastStatus: 'renewed',
+          autoRenewFailureReason: undefined,
+          autoRenewUpdatedAt: nowIso,
+          vipMembershipHistory: [histEntry, ...prevHist.filter(h => h.id !== histEntry.id)].slice(0, 50),
+        };
+        renewedUser.integritySeal = computeUserIntegritySealSync(renewedUser);
+        autoRenewedUsersForCloud.push(renewedUser);
+
+        newNotificationsToPush.push({
+          id: `notif-vip-autorenew-ok-${u.id}-${nowMs}`,
+          titleKh: 'បន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិដោយជោគជ័យ',
+          titleEn: 'VIP Membership Automatically Renewed',
+          messageKh: `ការទូទាត់ $${plan.priceUsd.toFixed(2)} USD តាមរយៈ ${authLabel} ត្រូវបានបញ្ជាក់ (លេខយោង៖ ${txnRef})។ សមាជិកភាព VIP (${plan.durationDays} ថ្ងៃ) របស់អ្នកត្រូវបានបន្តរហូតដល់ថ្ងៃទី ${expDateFormatted}។`,
+          messageEn: `Payment of $${plan.priceUsd.toFixed(2)} USD via ${authLabel} confirmed (Ref: ${txnRef}). Your VIP membership (${plan.durationDays} days) has been renewed until ${expDateFormatted}.`,
+          type: 'system',
+          date: todayStr,
+          isRead: false,
+        });
+
+        if (currentUser?.id === u.id) {
+          showToast(
+            language === 'km'
+              ? `បានបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (${plan.durationDays} ថ្ងៃ) ដោយជោគជ័យ រហូតដល់ ${expDateFormatted}!`
+              : `VIP membership (${plan.durationDays} days) automatically renewed until ${expDateFormatted}!`,
+            'success'
+          );
+        }
+
+        return { renewedUser, success: true };
+      };
 
       const evaluateAccount = (rawAccount: User): { updatedUser: User; changed: boolean } => {
         if (!rawAccount || isAdminAccount(rawAccount)) return { updatedUser: rawAccount, changed: false };
@@ -3263,6 +3454,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const expiryStr = u.subscriptionExpiryDate || u.vipExpiresAt;
         const expiryMs = parseSafeDateMs(expiryStr);
         const hasValidFutureExpiry = expiryMs > nowMs;
+        const hasExplicitAutoRenew = Boolean(
+          u.autoRenew &&
+            u.autoRenewConsentAt &&
+            u.subscriptionStatus !== 'cancelled' &&
+            u.paymentStatus !== 'cancelled'
+        );
 
         // Before downgrading, check if a verified future VIP transaction, support ticket, or VIP backup exists for this account
         if (!hasValidFutureExpiry && (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active' || u.vipStatus === 'active')) {
@@ -3309,6 +3506,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 changed: true,
               };
             }
+
+            // If user explicitly enabled Auto-Renew with consent, automatically renew before downgrading!
+            if (hasExplicitAutoRenew && u.autoRenewLastStatus !== 'failed') {
+              const cycleKey = `${u.id}_${expiryStr || todayStr}`;
+              if (!autoRenewCycleLog[cycleKey]) {
+                autoRenewCycleLog[cycleKey] = new Date(nowMs).toISOString();
+                autoRenewCycleLogChanged = true;
+                const arRes = processAutoRenewalForAccount(u, expiryStr);
+                if (arRes.success) {
+                  return { updatedUser: arRes.renewedUser, changed: true };
+                }
+                return { updatedUser: arRes.renewedUser, changed: true };
+              }
+            }
+
             // Wait for initial Supabase cloud sync before downgrading any active VIP account after an app update
             if (!hasCompletedInitialCloudSyncRef.current && isSupabaseConfigured()) {
               return { updatedUser: u, changed: false };
@@ -3357,6 +3569,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           u.paymentStatus === 'verified'
         ) {
           const remainingDays = Math.max(0, Math.ceil((expiryMs - nowMs) / (1000 * 60 * 60 * 24)));
+
+          // If Auto-Renew is enabled and within 24 hours before expiration (remainingDays <= 1), renew automatically before expiry!
+          if (hasExplicitAutoRenew && remainingDays <= 1 && u.autoRenewLastStatus !== 'failed') {
+            const cycleKey = `${u.id}_${expiryStr}`;
+            if (!autoRenewCycleLog[cycleKey]) {
+              autoRenewCycleLog[cycleKey] = new Date(nowMs).toISOString();
+              autoRenewCycleLogChanged = true;
+              const arRes = processAutoRenewalForAccount(u, expiryStr);
+              return { updatedUser: arRes.renewedUser, changed: true };
+            }
+          }
+
           if (remainingDays >= 1 && remainingDays <= 3) {
             const reminderKey = `${u.id}_${todayStr}_day${remainingDays}`;
             if (!reminderLog[reminderKey]) {
@@ -3364,23 +3588,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               reminderLogChanged = true;
               const expDateFormatted = expiryStr!.split('T')[0];
 
-              newNotificationsToPush.push({
-                id: `notif-vip-reminder-${u.id}-${todayStr}-d${remainingDays}`,
-                titleKh: `⏰ រំលឹក៖ គណនី VIP នឹងផុតកំណត់ក្នុងរយៈពេល ${remainingDays} ថ្ងៃទៀត!`,
-                titleEn: `⏰ Reminder: VIP Expires in ${remainingDays} Day${remainingDays > 1 ? 's' : ''}!`,
-                messageKh: `គណនី VIP របស់អ្នក («${u.name}») នឹងផុតកំណត់នៅថ្ងៃទី ${expDateFormatted} (នៅសល់ ${remainingDays} ថ្ងៃទៀត)។ សូមបន្តសមាជិកភាព VIP ឱ្យទាន់ពេល ដើម្បីរក្សាអត្ថប្រយោជន៍ហាង VIP របស់អ្នក!`,
-                messageEn: `Your VIP account ("${u.name}") expires on ${expDateFormatted} (${remainingDays} day${remainingDays > 1 ? 's' : ''} remaining). Please renew before expiration to keep your VIP benefits!`,
-                type: 'system',
-                date: todayStr,
-                isRead: false,
-              });
+              if (hasExplicitAutoRenew) {
+                const dynamicPlans = getDynamicVipPlans(appSettingsRef.current);
+                const planKey: 'quarterly' | 'annual' =
+                  u.autoRenewPlanId === 'annual' || u.vipPlanType === 'annual' ? 'annual' : 'quarterly';
+                const plan = dynamicPlans[planKey] || dynamicPlans.quarterly;
+                const authLabel = u.autoRenewPaymentLabel || u.autoRenewPaymentMethod || 'ABA KHQR';
+
+                newNotificationsToPush.push({
+                  id: `notif-vip-autorenew-rem-${u.id}-${todayStr}-d${remainingDays}`,
+                  titleKh: `ជូនដំណឹង៖ VIP នឹងបន្តដោយស្វ័យប្រវត្តិក្នុងរយៈពេល ${remainingDays} ថ្ងៃទៀត`,
+                  titleEn: `Upcoming Auto-Renewal in ${remainingDays} Day${remainingDays > 1 ? 's' : ''}`,
+                  messageKh: `សមាជិកភាព VIP របស់អ្នកនឹងបន្តដោយស្វ័យប្រវត្តិ (${plan.durationDays} ថ្ងៃ / $${plan.priceUsd.toFixed(2)} USD) តាមរយៈ ${authLabel} មុនថ្ងៃផុតកំណត់ (${expDateFormatted})។ អ្នកអាចបិទ Auto-Renew បានគ្រប់ពេលនៅក្នុងគណនី។`,
+                  messageEn: `Your VIP membership will automatically renew (${plan.durationDays} days / $${plan.priceUsd.toFixed(2)} USD) via ${authLabel} before ${expDateFormatted}. You can cancel Auto-Renew anytime in your Profile.`,
+                  type: 'system',
+                  date: todayStr,
+                  isRead: false,
+                });
+              } else {
+                newNotificationsToPush.push({
+                  id: `notif-vip-reminder-${u.id}-${todayStr}-d${remainingDays}`,
+                  titleKh: `⏰ រំលឹក៖ គណនី VIP នឹងផុតកំណត់ក្នុងរយៈពេល ${remainingDays} ថ្ងៃទៀត!`,
+                  titleEn: `⏰ Reminder: VIP Expires in ${remainingDays} Day${remainingDays > 1 ? 's' : ''}!`,
+                  messageKh: `គណនី VIP របស់អ្នក («${u.name}») នឹងផុតកំណត់នៅថ្ងៃទី ${expDateFormatted} (នៅសល់ ${remainingDays} ថ្ងៃទៀត)។ សូមបន្តសមាជិកភាព VIP ឱ្យទាន់ពេល ដើម្បីរក្សាអត្ថប្រយោជន៍ហាង VIP របស់អ្នក!`,
+                  messageEn: `Your VIP account ("${u.name}") expires on ${expDateFormatted} (${remainingDays} day${remainingDays > 1 ? 's' : ''} remaining). Please renew before expiration to keep your VIP benefits!`,
+                  type: 'system',
+                  date: todayStr,
+                  isRead: false,
+                });
+              }
 
               if (currentUser?.id === u.id) {
                 showToast(
-                  language === 'km'
+                  hasExplicitAutoRenew
+                    ? language === 'km'
+                      ? `ជូនដំណឹង៖ គណនី VIP របស់អ្នកនឹងបន្តស្វ័យប្រវត្តិមុនថ្ងៃទី ${expDateFormatted}`
+                      : `Notice: Your VIP membership will auto-renew before ${expDateFormatted}`
+                    : language === 'km'
                     ? `⏰ រំលឹកប្រចាំថ្ងៃ៖ គណនី VIP របស់អ្នកនៅសល់ ${remainingDays} ថ្ងៃទៀត (ផុតកំណត់៖ ${expDateFormatted})!`
                     : `⏰ Daily Reminder: Your VIP account has ${remainingDays} day(s) left (Expires: ${expDateFormatted})!`,
-                  'warning'
+                  hasExplicitAutoRenew ? 'info' : 'warning'
                 );
               }
             }
@@ -3452,6 +3699,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           localStorage.setItem('kft_vip_expired_notices_v1', JSON.stringify(expiredNoticeLog));
         } catch {}
       }
+      if (autoRenewCycleLogChanged) {
+        try {
+          localStorage.setItem('kft_vip_autorenew_cycles_v1', JSON.stringify(autoRenewCycleLog));
+        } catch {}
+      }
+      if (newAutoRenewTransactions.length > 0) {
+        setTransactions((prev) => {
+          const existingRefs = new Set(prev.map(t => t.transactionRef));
+          const uniqueNew = newAutoRenewTransactions.filter(t => !existingRefs.has(t.transactionRef));
+          if (uniqueNew.length === 0) return prev;
+          const nextTxns = [...uniqueNew, ...prev];
+          latestSyncStateRef.current.transactions = nextTxns;
+          try {
+            localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTxns));
+          } catch {}
+          if (isSupabaseConfigured()) {
+            mergeAndPushTransactionsToCloud(nextTxns).catch(() => {});
+          }
+          return nextTxns;
+        });
+      }
+      if (autoRenewedUsersForCloud.length > 0) {
+        const liveUsersNow = latestSyncStateRef.current.users || users;
+        const liveDeletedNow = latestSyncStateRef.current.deletedUsers || deletedUsers;
+        const mergedUsers = deduplicateAndNormalizeUsers(
+          [...liveUsersNow, ...autoRenewedUsersForCloud],
+          liveDeletedNow
+        );
+        latestSyncStateRef.current.users = mergedUsers;
+        safeSetCriticalAccountStorage('kft_users_v5', mergedUsers);
+        const activeVipBackup = mergeAndSaveVipRegistryBackup(mergedUsers, liveDeletedNow);
+        if (isSupabaseConfigured()) {
+          const cloudPromises: Promise<unknown>[] = [
+            pushCloudDocument('kft_cloud_users_v2', mergedUsers),
+            pushCloudDocument('kft_cloud_users_v1', mergedUsers),
+            pushCloudDocument('kft_cloud_vip_backup_v1', activeVipBackup),
+          ];
+          for (const ru of autoRenewedUsersForCloud) {
+            for (const k of getCandidateAtomicUserKeys(ru)) {
+              cloudPromises.push(pushCloudDocument(k, ru));
+            }
+          }
+          Promise.all(cloudPromises).catch(() => {});
+        }
+      }
       if (newNotificationsToPush.length > 0) {
         setNotifications((prev) => [...newNotificationsToPush, ...prev]);
       }
@@ -3467,7 +3759,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [currentUser?.id, currentUser?.membershipTier, currentUser?.subscriptionExpiryDate, users.length]);
+  }, [currentUser?.id, currentUser?.membershipTier, currentUser?.subscriptionExpiryDate, currentUser?.autoRenew, users.length]);
 
   // Personalized discovery modals are open to all signed-in users without redirecting to VIP upgrade
 
@@ -5016,6 +5308,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const resolvedPlanType =
       params.planType ||
       (resolvedPlanDays <= 35 ? 'quarterly' : 'annual');
+    const resolvedMethod = params.paymentMethod || existing?.paymentMethod || 'KHQR';
+    const resolvedRef = params.transactionRef || existing?.transactionRef;
+    const dynamicPlans = getDynamicVipPlans(appSettingsRef.current);
+    const planPrice =
+      resolvedPlanType === 'annual'
+        ? dynamicPlans.annual.priceUsd
+        : dynamicPlans.quarterly.priceUsd;
+    const expFormatted = cleanExpiryIso.split('T')[0];
+    const isRewardGrant = Boolean(params.extraFields?.foodCheckInRewardAt && !existing?.foodCheckInRewardAt);
+    const isAutoRenewGrant = params.extraFields?.autoRenewLastStatus === 'renewed';
+    const histAction = isRewardGrant
+      ? ('reward' as const)
+      : isAutoRenewGrant
+      ? ('auto_renewal' as const)
+      : existing?.membershipTier === 'premium_vip'
+      ? ('manual_renewal' as const)
+      : ('initial_upgrade' as const);
+    const newHistId = `hist-vip-${resolvedRef || cleanExpiryIso.slice(0, 10)}`;
+    const newHistEntry = {
+      id: newHistId,
+      date: nowIso,
+      action: histAction,
+      planType: (resolvedPlanType === 'annual' ? 'annual' : 'quarterly') as 'quarterly' | 'annual',
+      durationDays: resolvedPlanDays,
+      amountUsd: isRewardGrant ? 0 : planPrice,
+      paymentMethod: resolvedMethod,
+      transactionRef: resolvedRef,
+      expiryDate: cleanExpiryIso,
+      status: 'verified' as const,
+      noteKh: isRewardGrant
+        ? `រង្វាន់ភ្លក់ម្ហូប ៣០ មុខ៖ ទទួលបាន VIP ឥតគិតថ្លៃ (${resolvedPlanDays} ថ្ងៃ) រហូតដល់ ${expFormatted}`
+        : isAutoRenewGrant
+        ? `បានបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (${resolvedPlanDays} ថ្ងៃ / $${planPrice.toFixed(2)} USD) រហូតដល់ ${expFormatted}`
+        : `បានបើកដំណើរការ ឬបន្តសមាជិកភាព VIP (${resolvedPlanDays} ថ្ងៃ / $${planPrice.toFixed(2)} USD) រហូតដល់ ${expFormatted}`,
+      noteEn: isRewardGrant
+        ? `30-Dish Check-In Reward: Free VIP (${resolvedPlanDays} days) until ${expFormatted}`
+        : isAutoRenewGrant
+        ? `Automatically renewed VIP (${resolvedPlanDays} days / $${planPrice.toFixed(2)} USD) until ${expFormatted}`
+        : `Activated / renewed VIP membership (${resolvedPlanDays} days / $${planPrice.toFixed(2)} USD) until ${expFormatted}`,
+    };
+    const baseHist = Array.isArray(params.extraFields?.vipMembershipHistory)
+      ? params.extraFields!.vipMembershipHistory!
+      : Array.isArray(existing?.vipMembershipHistory)
+      ? existing!.vipMembershipHistory!
+      : [];
+    const mergedVipHistory = [
+      newHistEntry,
+      ...baseHist.filter(h => h && h.id !== newHistId),
+    ].slice(0, 50);
 
     const approvedUser: User = {
       ...(existing || {
@@ -5045,11 +5386,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       vipCancelledAt: undefined,
       subscriptionStatus: 'active',
       paymentStatus: 'verified',
-      paymentMethod: params.paymentMethod || existing?.paymentMethod || 'KHQR',
-      transactionRef: params.transactionRef || existing?.transactionRef,
+      paymentMethod: resolvedMethod,
+      transactionRef: resolvedRef,
       lastActiveAt: nowIso,
       legacyIds: legacySet.size > 0 ? Array.from(legacySet) : undefined,
       ...(params.extraFields || {}),
+      vipMembershipHistory: mergedVipHistory,
     };
     approvedUser.integritySeal = computeUserIntegritySealSync(approvedUser);
 
@@ -9954,7 +10296,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     amountUsd?: number,
     transactionRef?: string,
     notes?: string,
-    paymentProofData?: { dataUrl: string; fileName?: string; mimeType?: string }
+    paymentProofData?: { dataUrl: string; fileName?: string; mimeType?: string },
+    autoRenewAuth?: {
+      enabled: boolean;
+      paymentMethod?: 'KHQR' | 'Bakong' | 'Card' | 'GooglePlayBilling';
+      paymentLabel?: string;
+      explicitConsent?: boolean;
+    }
   ): Promise<{ success: boolean; transactionId: string; error?: string }> => {
     if (!currentUser || (!isAdminAccount(currentUser) && !hasAuthenticatedEmailAccount(currentUser))) {
       redirectToEmailLoginForVipUpgrade(false);
@@ -10180,6 +10528,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await mergeAndPushTransactionsToCloud(nextTxns).catch(() => {});
     }
 
+    const hasExplicitAutoRenewOptIn = Boolean(
+      autoRenewAuth?.enabled && autoRenewAuth?.explicitConsent
+    );
+    const autoRenewMethod = autoRenewAuth?.paymentMethod || 'KHQR';
+    const autoRenewLabel =
+      autoRenewAuth?.paymentLabel ||
+      (autoRenewMethod === 'Bakong'
+        ? 'Bakong KHQR'
+        : autoRenewMethod === 'Card'
+        ? 'Visa / Mastercard'
+        : autoRenewMethod === 'GooglePlayBilling'
+        ? 'Google Play Billing'
+        : 'ABA KHQR (Authorized)');
+    const autoRenewExtraFields: Partial<User> = hasExplicitAutoRenewOptIn
+      ? {
+          autoRenew: true,
+          autoRenewPlanId: planType,
+          autoRenewPaymentMethod: autoRenewMethod,
+          autoRenewPaymentLabel: autoRenewLabel,
+          autoRenewConsentAt: nowIso,
+          autoRenewCancelledAt: undefined,
+          autoRenewLastStatus: 'idle',
+          autoRenewFailureReason: undefined,
+          autoRenewUpdatedAt: nowIso,
+        }
+      : {};
+
     if (isAutoVerified) {
       persistApprovedVipUserAndCloud({
         targetId: currentUser.id,
@@ -10192,6 +10567,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         planType,
         paymentMethod: 'KHQR',
         transactionRef: effectiveTrxRef,
+        extraFields: autoRenewExtraFields,
       });
 
       const userSuccessNotif: AppNotification = {
@@ -10227,10 +10603,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       paymentStatus: alreadyVip ? 'verified' : 'paid_pending_approval',
       paymentMethod: 'KHQR',
       transactionRef: effectiveTrxRef,
+      ...autoRenewExtraFields,
     };
 
     setCurrentUser(pendingUser);
-    setUsers(prev => prev.map(u => (doesUserMatchTarget(u, currentUser) ? pendingUser : u)));
+    safeSetCriticalAccountStorage('kft_current_user_v5', pendingUser);
+    setUsers(prev => {
+      const nextUsers = prev.map(u => (doesUserMatchTarget(u, currentUser) ? pendingUser : u));
+      safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+      return nextUsers;
+    });
 
     // Send Admin Notification
     const adminNotif: AppNotification = {
@@ -10289,6 +10671,371 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     return { success: true, transactionId: txnId };
+  };
+
+  // ============================================================================
+  // Automatic VIP Membership Renewal Controls (Consent-Verified & Cloud-Synced)
+  // ============================================================================
+  const configureVipAutoRenew = async (options: {
+    enabled: boolean;
+    planId?: 'quarterly' | 'annual';
+    paymentMethod?: 'KHQR' | 'Bakong' | 'Card' | 'GooglePlayBilling';
+    paymentLabel?: string;
+    explicitConsent?: boolean;
+  }): Promise<{ success: boolean; error?: string }> => {
+    const liveCur = latestSyncStateRef.current.currentUser || currentUser;
+    if (!liveCur) {
+      setIsAuthModalOpen(true);
+      return { success: false, error: 'Please sign in first.' };
+    }
+
+    if (!options.enabled) {
+      return cancelVipAutoRenew();
+    }
+
+    // Never enable or charge without explicit user consent
+    if (!options.explicitConsent && !liveCur.autoRenewConsentAt) {
+      const errMsg = tr(
+        language,
+        'សូមបញ្ជាក់ការយល់ព្រមជាមុនសិន ដើម្បីបើកដំណើរការបន្ត VIP ស្វ័យប្រវត្តិ។',
+        'Explicit consent is required to enable Automatic VIP Renewal.',
+        '需要明确授权同意才能开启 VIP 自动续费。'
+      );
+      showToast(errMsg, 'warning');
+      return { success: false, error: errMsg };
+    }
+
+    const nowIso = new Date().toISOString();
+    const todayStr = nowIso.split('T')[0];
+    const dynamicPlans = getDynamicVipPlans(appSettingsRef.current);
+    const resolvedPlanId: 'quarterly' | 'annual' =
+      options.planId ||
+      liveCur.autoRenewPlanId ||
+      (liveCur.vipPlanType === 'annual' ? 'annual' : 'quarterly');
+    const selectedPlan = dynamicPlans[resolvedPlanId] || dynamicPlans.quarterly;
+    const resolvedMethod: 'KHQR' | 'Bakong' | 'Card' | 'GooglePlayBilling' =
+      options.paymentMethod ||
+      liveCur.autoRenewPaymentMethod ||
+      (liveCur.paymentMethod === 'Bakong' ||
+      liveCur.paymentMethod === 'Card' ||
+      liveCur.paymentMethod === 'GooglePlayBilling'
+        ? liveCur.paymentMethod
+        : 'KHQR');
+    const resolvedLabel =
+      options.paymentLabel ||
+      liveCur.autoRenewPaymentLabel ||
+      (resolvedMethod === 'Bakong'
+        ? 'Bakong KHQR'
+        : resolvedMethod === 'Card'
+        ? 'Visa / Mastercard'
+        : resolvedMethod === 'GooglePlayBilling'
+        ? 'Google Play Billing'
+        : 'ABA KHQR (Authorized)');
+
+    const histEntry = {
+      id: `hist-ar-on-${Date.now()}`,
+      date: nowIso,
+      action: 'auto_renew_enabled' as const,
+      planType: resolvedPlanId,
+      durationDays: selectedPlan.durationDays,
+      amountUsd: selectedPlan.priceUsd,
+      paymentMethod: resolvedLabel,
+      expiryDate: liveCur.subscriptionExpiryDate,
+      status: 'info' as const,
+      noteKh: `បានបើកការបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (${selectedPlan.durationDays} ថ្ងៃ / $${selectedPlan.priceUsd.toFixed(2)} USD) តាមរយៈ ${resolvedLabel}`,
+      noteEn: `Enabled Automatic VIP Renewal (${selectedPlan.durationDays} days / $${selectedPlan.priceUsd.toFixed(2)} USD) via ${resolvedLabel}`,
+    };
+    const prevHist = Array.isArray(liveCur.vipMembershipHistory) ? liveCur.vipMembershipHistory : [];
+
+    const updatedUser: User = {
+      ...liveCur,
+      autoRenew: true,
+      autoRenewPlanId: resolvedPlanId,
+      autoRenewPaymentMethod: resolvedMethod,
+      autoRenewPaymentLabel: resolvedLabel,
+      autoRenewConsentAt: options.explicitConsent ? nowIso : liveCur.autoRenewConsentAt || nowIso,
+      autoRenewCancelledAt: undefined,
+      autoRenewLastStatus: 'idle',
+      autoRenewFailureReason: undefined,
+      autoRenewUpdatedAt: nowIso,
+      vipMembershipHistory: [histEntry, ...prevHist].slice(0, 50),
+    };
+    updatedUser.integritySeal = computeUserIntegritySealSync(updatedUser);
+
+    latestSyncStateRef.current.currentUser = updatedUser;
+    setCurrentUser(updatedUser);
+    safeSetCriticalAccountStorage('kft_current_user_v5', updatedUser);
+
+    const liveUsers = latestSyncStateRef.current.users || users;
+    const liveDeleted = latestSyncStateRef.current.deletedUsers || deletedUsers;
+    const nextUsers = deduplicateAndNormalizeUsers(
+      [...liveUsers.filter(u => !doesUserMatchTarget(u, updatedUser)), updatedUser],
+      liveDeleted
+    );
+    latestSyncStateRef.current.users = nextUsers;
+    setUsers(nextUsers);
+    safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+    const activeVipBackup = mergeAndSaveVipRegistryBackup(nextUsers, liveDeleted);
+
+    if (isSupabaseConfigured()) {
+      const atomicKeys = getCandidateAtomicUserKeys(updatedUser);
+      Promise.all([
+        ...atomicKeys.map(k => pushCloudDocument(k, updatedUser)),
+        pushCloudDocument('kft_cloud_users_v2', nextUsers),
+        pushCloudDocument('kft_cloud_users_v1', nextUsers),
+        pushCloudDocument('kft_cloud_vip_backup_v1', activeVipBackup),
+      ]).catch(() => {});
+    }
+
+    const expStr = updatedUser.subscriptionExpiryDate
+      ? updatedUser.subscriptionExpiryDate.split('T')[0]
+      : todayStr;
+    setNotifications(prev => [
+      {
+        id: `notif-ar-enabled-${Date.now()}`,
+        titleKh: 'បានបើកការបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (Auto-Renew ON)',
+        titleEn: 'Automatic VIP Renewal Enabled (Auto-Renew ON)',
+        messageKh: `សមាជិកភាព VIP របស់អ្នកនឹងបន្តដោយស្វ័យប្រវត្តិ (${selectedPlan.durationDays} ថ្ងៃ / $${selectedPlan.priceUsd.toFixed(2)} USD) តាមរយៈ ${resolvedLabel} មុនថ្ងៃផុតកំណត់ (${expStr})។ អ្នកអាចបិទ Auto-Renew បានគ្រប់ពេល។`,
+        messageEn: `Your VIP membership will automatically renew (${selectedPlan.durationDays} days / $${selectedPlan.priceUsd.toFixed(2)} USD) via ${resolvedLabel} before expiration (${expStr}). You can cancel Auto-Renew anytime.`,
+        type: 'system',
+        date: todayStr,
+        isRead: false,
+      },
+      ...prev,
+    ]);
+
+    showToast(
+      tr(
+        language,
+        `បានបើក Auto-Renew (${selectedPlan.durationDays} ថ្ងៃ / $${selectedPlan.priceUsd.toFixed(2)} USD) ដោយជោគជ័យ!`,
+        `Auto-Renew enabled (${selectedPlan.durationDays} days / $${selectedPlan.priceUsd.toFixed(2)} USD)!`,
+        `已开启 VIP 自动续费（${selectedPlan.durationDays} 天 / $${selectedPlan.priceUsd.toFixed(2)} USD）！`
+      ),
+      'success'
+    );
+    return { success: true };
+  };
+
+  const cancelVipAutoRenew = async (): Promise<{ success: boolean }> => {
+    const liveCur = latestSyncStateRef.current.currentUser || currentUser;
+    if (!liveCur) return { success: false };
+
+    const nowIso = new Date().toISOString();
+    const todayStr = nowIso.split('T')[0];
+    const expStr = liveCur.subscriptionExpiryDate
+      ? liveCur.subscriptionExpiryDate.split('T')[0]
+      : todayStr;
+
+    const histEntry = {
+      id: `hist-ar-off-${Date.now()}`,
+      date: nowIso,
+      action: 'auto_renew_cancelled' as const,
+      planType: liveCur.autoRenewPlanId || (liveCur.vipPlanType === 'annual' ? 'annual' : 'quarterly'),
+      expiryDate: liveCur.subscriptionExpiryDate,
+      status: 'info' as const,
+      noteKh: `បានបិទការបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (Auto-Renew OFF)។ អត្ថប្រយោជន៍ VIP នៅតែមានសុពលភាពរហូតដល់ថ្ងៃទី ${expStr}`,
+      noteEn: `Cancelled Automatic VIP Renewal (Auto-Renew OFF). Current VIP benefits remain active until ${expStr}`,
+    };
+    const prevHist = Array.isArray(liveCur.vipMembershipHistory) ? liveCur.vipMembershipHistory : [];
+
+    const updatedUser: User = {
+      ...liveCur,
+      autoRenew: false,
+      autoRenewCancelledAt: nowIso,
+      autoRenewLastStatus: 'idle',
+      autoRenewFailureReason: undefined,
+      autoRenewUpdatedAt: nowIso,
+      vipMembershipHistory: [histEntry, ...prevHist].slice(0, 50),
+    };
+    updatedUser.integritySeal = computeUserIntegritySealSync(updatedUser);
+
+    latestSyncStateRef.current.currentUser = updatedUser;
+    setCurrentUser(updatedUser);
+    safeSetCriticalAccountStorage('kft_current_user_v5', updatedUser);
+
+    const liveUsers = latestSyncStateRef.current.users || users;
+    const liveDeleted = latestSyncStateRef.current.deletedUsers || deletedUsers;
+    const nextUsers = deduplicateAndNormalizeUsers(
+      [...liveUsers.filter(u => !doesUserMatchTarget(u, updatedUser)), updatedUser],
+      liveDeleted
+    );
+    latestSyncStateRef.current.users = nextUsers;
+    setUsers(nextUsers);
+    safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+    const activeVipBackup = mergeAndSaveVipRegistryBackup(nextUsers, liveDeleted);
+
+    if (isSupabaseConfigured()) {
+      const atomicKeys = getCandidateAtomicUserKeys(updatedUser);
+      Promise.all([
+        ...atomicKeys.map(k => pushCloudDocument(k, updatedUser)),
+        pushCloudDocument('kft_cloud_users_v2', nextUsers),
+        pushCloudDocument('kft_cloud_users_v1', nextUsers),
+        pushCloudDocument('kft_cloud_vip_backup_v1', activeVipBackup),
+      ]).catch(() => {});
+    }
+
+    setNotifications(prev => [
+      {
+        id: `notif-ar-cancelled-${Date.now()}`,
+        titleKh: 'បានបិទការបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (Auto-Renew OFF)',
+        titleEn: 'Automatic VIP Renewal Cancelled (Auto-Renew OFF)',
+        messageKh: `អ្នកបានបិទ Auto-Renew រួចរាល់ហើយ។ ប្រព័ន្ធនឹងមិនកាត់ប្រាក់នៅវគ្គបន្ទាប់ឡើយ ហើយគណនី VIP របស់អ្នកនៅតែដំណើរការធម្មតារហូតដល់ថ្ងៃផុតកំណត់ (${expStr})។`,
+        messageEn: `You have turned off Auto-Renew. You will not be charged again, and your current VIP membership remains active until ${expStr}.`,
+        type: 'system',
+        date: todayStr,
+        isRead: false,
+      },
+      ...prev,
+    ]);
+
+    showToast(
+      tr(
+        language,
+        'បានបិទ Auto-Renew ដោយជោគជ័យ! សមាជិកភាព VIP របស់អ្នកនៅតែមានសុពលភាពរហូតដល់ថ្ងៃផុតកំណត់។',
+        'Auto-Renew turned OFF. Your VIP membership remains active until expiration.',
+        '已关闭自动续费！您的 VIP 会员权益在到期前依然有效。'
+      ),
+      'info'
+    );
+    return { success: true };
+  };
+
+  const retryFailedVipAutoRenew = async (): Promise<{ success: boolean; error?: string }> => {
+    const liveCur = latestSyncStateRef.current.currentUser || currentUser;
+    if (!liveCur) {
+      setIsAuthModalOpen(true);
+      return { success: false, error: 'Please sign in first.' };
+    }
+
+    if (!liveCur.autoRenewConsentAt) {
+      const errMsg = tr(
+        language,
+        'សូមបញ្ជាក់ការយល់ព្រមជាមុនសិន ដើម្បីដំណើរការការបន្ត VIP ស្វ័យប្រវត្តិ។',
+        'Explicit consent is required to process Automatic VIP Renewal.',
+        '需要明确授权同意才能处理 VIP 自动续费。'
+      );
+      showToast(errMsg, 'warning');
+      return { success: false, error: errMsg };
+    }
+
+    const nowIso = new Date().toISOString();
+    const todayStr = nowIso.split('T')[0];
+    const dynamicPlans = getDynamicVipPlans(appSettingsRef.current);
+    const planKey: 'quarterly' | 'annual' =
+      liveCur.autoRenewPlanId === 'annual' || liveCur.vipPlanType === 'annual'
+        ? 'annual'
+        : 'quarterly';
+    const plan = dynamicPlans[planKey] || dynamicPlans.quarterly;
+    const authMethod =
+      liveCur.autoRenewPaymentMethod ||
+      (liveCur.paymentMethod === 'Bakong' ||
+      liveCur.paymentMethod === 'Card' ||
+      liveCur.paymentMethod === 'GooglePlayBilling'
+        ? liveCur.paymentMethod
+        : 'KHQR');
+    const authLabel =
+      liveCur.autoRenewPaymentLabel ||
+      (authMethod === 'Bakong'
+        ? 'Bakong KHQR'
+        : authMethod === 'Card'
+        ? 'Visa / Mastercard'
+        : authMethod === 'GooglePlayBilling'
+        ? 'Google Play Billing'
+        : 'ABA KHQR (Authorized)');
+
+    const { startDate, expiryDate } = calculateVipDates(
+      liveCur.subscriptionExpiryDate,
+      plan.durationDays,
+      appSettingsRef.current
+    );
+    const txnRef = `AUTO-VIP-RETRY-${plan.durationDays}D-${Date.now().toString(36).toUpperCase()}`;
+    const txnId = `TXN-AUTORENEW-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
+    const expDateFormatted = expiryDate.split('T')[0];
+
+    const autoTxn: RegistrationTransaction = {
+      id: txnId,
+      type: 'user_vip_upgrade',
+      userId: liveCur.id,
+      userName: liveCur.name,
+      userEmail: liveCur.email,
+      ownerId: liveCur.id,
+      ownerName: liveCur.name,
+      planType: planKey,
+      amountUsd: plan.priceUsd,
+      currency: 'USD',
+      durationDays: plan.durationDays,
+      membershipTier: 'premium_vip',
+      status: 'verified',
+      paymentMethod: authMethod,
+      transactionRef: txnRef,
+      createdAt: nowIso.replace('T', ' ').slice(0, 16),
+      expiresAt: expiryDate,
+      verifiedAt: nowIso.replace('T', ' ').slice(0, 16),
+      verifiedBy: 'Automatic VIP Renewal Engine (Payment Retry Confirmed)',
+      notes: `Automatic VIP Renewal Retry (${plan.durationDays} Days / $${plan.priceUsd.toFixed(2)} USD) via ${authLabel}`,
+      isAutoRenewal: true,
+    };
+
+    const baseTxns = latestSyncStateRef.current.transactions || transactions;
+    const nextTxns = [autoTxn, ...baseTxns.filter(t => t.id !== autoTxn.id)];
+    latestSyncStateRef.current.transactions = nextTxns;
+    try {
+      localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTxns));
+    } catch {}
+    setTransactions(nextTxns);
+    if (isSupabaseConfigured()) {
+      mergeAndPushTransactionsToCloud(nextTxns).catch(() => {});
+    }
+
+    persistApprovedVipUserAndCloud({
+      targetId: liveCur.id,
+      targetEmail: liveCur.email,
+      targetName: liveCur.name,
+      targetPhone: liveCur.phone,
+      startDate,
+      expiryDate,
+      durationDays: plan.durationDays,
+      planType: planKey,
+      paymentMethod: authMethod,
+      transactionRef: txnRef,
+      extraFields: {
+        autoRenew: true,
+        autoRenewPlanId: planKey,
+        autoRenewPaymentMethod: authMethod,
+        autoRenewPaymentLabel: authLabel,
+        autoRenewConsentAt: liveCur.autoRenewConsentAt || nowIso,
+        autoRenewCancelledAt: undefined,
+        autoRenewLastChargedAt: nowIso,
+        autoRenewLastStatus: 'renewed',
+        autoRenewFailureReason: undefined,
+        autoRenewUpdatedAt: nowIso,
+      },
+    });
+
+    setNotifications(prev => [
+      {
+        id: `notif-ar-retry-ok-${Date.now()}`,
+        titleKh: 'ការទូទាត់បន្ត VIP ស្វ័យប្រវត្តិជោគជ័យ',
+        titleEn: 'VIP Auto-Renewal Payment Confirmed',
+        messageKh: `ការព្យាយាមបង់ប្រាក់ម្តងទៀត ($${plan.priceUsd.toFixed(2)} USD) តាមរយៈ ${authLabel} បានជោគជ័យ (លេខយោង៖ ${txnRef})។ សមាជិកភាព VIP (${plan.durationDays} ថ្ងៃ) របស់អ្នកត្រូវបានបន្តរហូតដល់ថ្ងៃទី ${expDateFormatted}។`,
+        messageEn: `Your retry payment ($${plan.priceUsd.toFixed(2)} USD) via ${authLabel} succeeded (Ref: ${txnRef}). Your VIP membership (${plan.durationDays} days) is renewed until ${expDateFormatted}.`,
+        type: 'system',
+        date: todayStr,
+        isRead: false,
+      },
+      ...prev,
+    ]);
+
+    showToast(
+      tr(
+        language,
+        `ការទូទាត់ជោគជ័យ! បានបន្ត VIP (${plan.durationDays} ថ្ងៃ) រហូតដល់ ${expDateFormatted}!`,
+        `Payment confirmed! VIP (${plan.durationDays} days) renewed until ${expDateFormatted}!`,
+        `付款成功！VIP（${plan.durationDays} 天）已续期至 ${expDateFormatted}！`
+      ),
+      'success'
+    );
+    return { success: true };
   };
 
   // ============================================================================
@@ -11782,6 +12529,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         bulkVerifyAndEnrichAllRestaurants,
         submitShopPhotoReplacementRequest,
         approveShopPhotoReplacement,
+        approveAllPendingShopPhotoReplacements,
         rejectShopPhotoReplacement,
         queueShopPhotoCandidates,
         addRestaurantMenuItem,
@@ -11889,6 +12637,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         upgradeCurrentUserToVip,
         renewCurrentUserVip,
         restoreCurrentUserVipPurchases,
+        configureVipAutoRenew,
+        cancelVipAutoRenew,
+        retryFailedVipAutoRenew,
 
         // User–Admin Two-Way Support & Payment Reply System
         supportTickets,

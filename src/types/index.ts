@@ -1,7 +1,7 @@
-export const APP_VERSION = 'v2.5.7';
-export const APP_VERSION_NAME = '2.5.7';
+export const APP_VERSION = 'v2.5.8';
+export const APP_VERSION_NAME = '2.5.8';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1408;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1410;
 export const APP_RELEASE_DATE = '2026-11-04';
 
 /**
@@ -351,10 +351,26 @@ export const NEUTRAL_DEFAULT_SHOP_ICON_DATA_URI =
   );
 
 /**
+ * Validates an Admin-approved or matched shop specialty photo binding `/foods/food-<N>.jpg?verified_shop=<restaurantId>`.
+ * Rejects bare `/foods/...` URLs and prevents cross-shop photo reuse if `restaurantId` is specified.
+ */
+export const isVerifiedShopSpecialtyPhotoUrl = (
+  url?: string | null,
+  restaurantId?: string | null
+): boolean => {
+  if (!url || typeof url !== 'string') return false;
+  const trimmed = url.trim();
+  const m = trimmed.match(/^\/foods\/food-\d+\.(?:jpg|jpeg|png|webp)\?verified_shop=([A-Za-z0-9_.-]+)$/i);
+  if (!m) return false;
+  if (restaurantId && m[1] !== String(restaurantId).trim()) return false;
+  return true;
+};
+
+/**
  * Strictly validate and sanitize a restaurant's shop image URL so that:
  * 1. Cloned, duplicated, unrelated scenery/beach, or another shop's `/Shop/rest-*.jpg` image is NEVER assigned.
- * 2. `/Shop/culinary-placeholder.jpg`, `/foods/...`, `/restaurants/...`, and generic stock URLs are rejected (`""`).
- * 3. Only the 16 verified `/Shop/rest-*.jpg` pairs (for their exact `restaurantId`) or genuine custom/cloud uploads are kept.
+ * 2. Bare `/Shop/culinary-placeholder.jpg`, `/foods/...`, `/restaurants/...`, and generic stock URLs are rejected (`""`).
+ * 3. Only the verified `/Shop/rest-*.jpg` pairs, Admin-approved specialty photos (`?verified_shop=<id>`), or genuine custom/cloud uploads are kept.
  */
 export const sanitizeRestaurantShopPhoto = (
   restaurantId?: string | null,
@@ -364,6 +380,10 @@ export const sanitizeRestaurantShopPhoto = (
   const trimmed = rawUrl.trim();
   if (!trimmed) return '';
   if (trimmed.startsWith('data:image/svg+xml')) return '';
+
+  if (isVerifiedShopSpecialtyPhotoUrl(trimmed, restaurantId)) {
+    return trimmed;
+  }
 
   const lower = trimmed.toLowerCase();
   if (
@@ -649,6 +669,16 @@ export interface User {
   paymentMethod?: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card' | 'Manual' | 'BankTransfer';
   transactionRef?: string;
   autoRenew?: boolean;
+  autoRenewPlanId?: 'quarterly' | 'annual';
+  autoRenewPaymentMethod?: 'KHQR' | 'Bakong' | 'Card' | 'GooglePlayBilling';
+  autoRenewPaymentLabel?: string;
+  autoRenewConsentAt?: string;
+  autoRenewCancelledAt?: string;
+  autoRenewLastChargedAt?: string;
+  autoRenewLastStatus?: 'idle' | 'renewed' | 'failed';
+  autoRenewFailureReason?: string;
+  autoRenewUpdatedAt?: string;
+  vipMembershipHistory?: VipMembershipHistoryEntry[];
   vipCancelledAt?: string;
   isDisabled?: boolean;
   disabledAt?: string;
@@ -671,6 +701,28 @@ export interface User {
 
   // One-time "taste 30 dishes -> 30 days VIP" reward. Set when granted; its presence means the reward can NEVER be granted again.
   foodCheckInRewardAt?: string;
+}
+
+export interface VipMembershipHistoryEntry {
+  id: string;
+  date: string;
+  action:
+    | 'initial_upgrade'
+    | 'auto_renewal'
+    | 'manual_renewal'
+    | 'auto_renew_enabled'
+    | 'auto_renew_cancelled'
+    | 'payment_failed'
+    | 'reward';
+  planType?: 'quarterly' | 'annual';
+  durationDays?: number;
+  amountUsd?: number;
+  paymentMethod?: string;
+  transactionRef?: string;
+  expiryDate?: string;
+  status: 'verified' | 'pending' | 'failed' | 'info';
+  noteKh: string;
+  noteEn: string;
 }
 
 export interface ConnectedSocialAccount {
@@ -1205,6 +1257,7 @@ export interface RegistrationTransaction {
   verifiedAt?: string;
   verifiedBy?: string;
   notes?: string;
+  isAutoRenewal?: boolean;
   aiVerificationReport?: AbaReceiptVerificationReport;
 }
 

@@ -478,6 +478,35 @@ export async function verifyAndSanitizeUserSession(
             entitlement.paidAdditionalStoreSlots
           );
         }
+        if (entitlement.matchedUser) {
+          const mu = entitlement.matchedUser;
+          const ownArMs = parseSafeDateMs(sanitized.autoRenewUpdatedAt || sanitized.autoRenewConsentAt);
+          const matchArMs = parseSafeDateMs(mu.autoRenewUpdatedAt || mu.autoRenewConsentAt);
+          if (matchArMs > ownArMs || (sanitized.autoRenew === undefined && mu.autoRenew !== undefined)) {
+            sanitized.autoRenew = Boolean(mu.autoRenew && mu.autoRenewConsentAt);
+            sanitized.autoRenewPlanId = mu.autoRenewPlanId || sanitized.autoRenewPlanId;
+            sanitized.autoRenewPaymentMethod = mu.autoRenewPaymentMethod || sanitized.autoRenewPaymentMethod;
+            sanitized.autoRenewPaymentLabel = mu.autoRenewPaymentLabel || sanitized.autoRenewPaymentLabel;
+            sanitized.autoRenewConsentAt = mu.autoRenewConsentAt || sanitized.autoRenewConsentAt;
+            sanitized.autoRenewCancelledAt = mu.autoRenewCancelledAt;
+            sanitized.autoRenewLastChargedAt = mu.autoRenewLastChargedAt || sanitized.autoRenewLastChargedAt;
+            sanitized.autoRenewLastStatus = mu.autoRenewLastStatus;
+            sanitized.autoRenewFailureReason = mu.autoRenewFailureReason;
+            sanitized.autoRenewUpdatedAt = mu.autoRenewUpdatedAt || sanitized.autoRenewUpdatedAt;
+          }
+          if (Array.isArray(mu.vipMembershipHistory) && mu.vipMembershipHistory.length > 0) {
+            const histMap = new Map<string, any>();
+            for (const h of [
+              ...(Array.isArray(sanitized.vipMembershipHistory) ? sanitized.vipMembershipHistory : []),
+              ...mu.vipMembershipHistory,
+            ]) {
+              if (h && h.id) histMap.set(h.id, h);
+            }
+            sanitized.vipMembershipHistory = Array.from(histMap.values())
+              .sort((a, b) => parseSafeDateMs(b.date) - parseSafeDateMs(a.date))
+              .slice(0, 50);
+          }
+        }
         sanitized.integritySeal = await computeUserIntegritySeal(sanitized);
       }
     } else if (!sealMatches && !entitlement.found && !hasOwnValidFutureExpiry) {
@@ -599,6 +628,35 @@ export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | n
                 parsed.paidAdditionalStoreSlots || 0,
                 entitlement.paidAdditionalStoreSlots
               );
+            }
+            if (entitlement.matchedUser) {
+              const mu = entitlement.matchedUser;
+              const ownArMs = parseSafeDateMs(parsed.autoRenewUpdatedAt || parsed.autoRenewConsentAt);
+              const matchArMs = parseSafeDateMs(mu.autoRenewUpdatedAt || mu.autoRenewConsentAt);
+              if (matchArMs > ownArMs || (parsed.autoRenew === undefined && mu.autoRenew !== undefined)) {
+                parsed.autoRenew = Boolean(mu.autoRenew && mu.autoRenewConsentAt);
+                parsed.autoRenewPlanId = mu.autoRenewPlanId || parsed.autoRenewPlanId;
+                parsed.autoRenewPaymentMethod = mu.autoRenewPaymentMethod || parsed.autoRenewPaymentMethod;
+                parsed.autoRenewPaymentLabel = mu.autoRenewPaymentLabel || parsed.autoRenewPaymentLabel;
+                parsed.autoRenewConsentAt = mu.autoRenewConsentAt || parsed.autoRenewConsentAt;
+                parsed.autoRenewCancelledAt = mu.autoRenewCancelledAt;
+                parsed.autoRenewLastChargedAt = mu.autoRenewLastChargedAt || parsed.autoRenewLastChargedAt;
+                parsed.autoRenewLastStatus = mu.autoRenewLastStatus;
+                parsed.autoRenewFailureReason = mu.autoRenewFailureReason;
+                parsed.autoRenewUpdatedAt = mu.autoRenewUpdatedAt || parsed.autoRenewUpdatedAt;
+              }
+              if (Array.isArray(mu.vipMembershipHistory) && mu.vipMembershipHistory.length > 0) {
+                const histMap = new Map<string, any>();
+                for (const h of [
+                  ...(Array.isArray(parsed.vipMembershipHistory) ? parsed.vipMembershipHistory : []),
+                  ...mu.vipMembershipHistory,
+                ]) {
+                  if (h && h.id) histMap.set(h.id, h);
+                }
+                parsed.vipMembershipHistory = Array.from(histMap.values())
+                  .sort((a, b) => parseSafeDateMs(b.date) - parseSafeDateMs(a.date))
+                  .slice(0, 50);
+              }
             }
             parsed.integritySeal = computeUserIntegritySealSync(parsed);
             updated = true;

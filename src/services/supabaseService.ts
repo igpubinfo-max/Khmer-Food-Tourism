@@ -1523,6 +1523,67 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
       [first.foodCheckInRewardAt, second.foodCheckInRewardAt]
         .filter((v): v is string => typeof v === 'string' && v.length > 0)
         .sort()[0] || undefined,
+    ...(() => {
+      const firstArMs = Math.max(
+        parseValidMs(first.autoRenewUpdatedAt),
+        parseValidMs(first.autoRenewCancelledAt),
+        parseValidMs(first.autoRenewConsentAt),
+        parseValidMs(first.autoRenewLastChargedAt)
+      );
+      const secondArMs = Math.max(
+        parseValidMs(second.autoRenewUpdatedAt),
+        parseValidMs(second.autoRenewCancelledAt),
+        parseValidMs(second.autoRenewConsentAt),
+        parseValidMs(second.autoRenewLastChargedAt)
+      );
+      const arSource =
+        secondArMs > firstArMs
+          ? second
+          : firstArMs > secondArMs
+          ? first
+          : typeof second.autoRenew === 'boolean'
+          ? second
+          : first;
+
+      const historyMap = new Map<string, NonNullable<User['vipMembershipHistory']>[number]>();
+      for (const h of [
+        ...(Array.isArray(first.vipMembershipHistory) ? first.vipMembershipHistory : []),
+        ...(Array.isArray(second.vipMembershipHistory) ? second.vipMembershipHistory : []),
+      ]) {
+        if (h && typeof h === 'object' && h.id) {
+          historyMap.set(h.id, h);
+        }
+      }
+      const mergedHistory = Array.from(historyMap.values())
+        .sort((a, b) => parseValidMs(b.date) - parseValidMs(a.date))
+        .slice(0, 50);
+
+      return {
+        autoRenew: Boolean(arSource.autoRenew && arSource.autoRenewConsentAt),
+        autoRenewPlanId: arSource.autoRenewPlanId || second.autoRenewPlanId || first.autoRenewPlanId,
+        autoRenewPaymentMethod:
+          arSource.autoRenewPaymentMethod ||
+          second.autoRenewPaymentMethod ||
+          first.autoRenewPaymentMethod,
+        autoRenewPaymentLabel:
+          arSource.autoRenewPaymentLabel ||
+          second.autoRenewPaymentLabel ||
+          first.autoRenewPaymentLabel,
+        autoRenewConsentAt: arSource.autoRenewConsentAt || second.autoRenewConsentAt || first.autoRenewConsentAt,
+        autoRenewCancelledAt: arSource.autoRenewCancelledAt,
+        autoRenewLastChargedAt:
+          parseValidMs(second.autoRenewLastChargedAt) >= parseValidMs(first.autoRenewLastChargedAt)
+            ? second.autoRenewLastChargedAt || first.autoRenewLastChargedAt
+            : first.autoRenewLastChargedAt || second.autoRenewLastChargedAt,
+        autoRenewLastStatus: arSource.autoRenewLastStatus,
+        autoRenewFailureReason: arSource.autoRenewFailureReason,
+        autoRenewUpdatedAt:
+          secondArMs >= firstArMs
+            ? second.autoRenewUpdatedAt || first.autoRenewUpdatedAt
+            : first.autoRenewUpdatedAt || second.autoRenewUpdatedAt,
+        vipMembershipHistory: mergedHistory.length > 0 ? mergedHistory : undefined,
+      };
+    })(),
   };
 
   const nowMs = Date.now();
