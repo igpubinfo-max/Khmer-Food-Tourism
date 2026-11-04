@@ -1,7 +1,7 @@
-export const APP_VERSION = 'v2.5.6';
-export const APP_VERSION_NAME = '2.5.6';
+export const APP_VERSION = 'v2.5.7';
+export const APP_VERSION_NAME = '2.5.7';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1403;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1404;
 export const APP_RELEASE_DATE = '2026-11-04';
 
 /**
@@ -1580,11 +1580,15 @@ export const isGpipRegisteredRestaurant = (restaurant?: Partial<Restaurant> | nu
     Boolean(restaurant.ownerId && restaurant.ownerId !== 'owner-1' && !restaurant.ownerId.startsWith('seed-')) ||
     Boolean(restaurant.ownerEmail && restaurant.ownerEmail.trim().length > 0);
 
-  if (restaurant.dataSource === 'vip_owner') return true;
+  if (restaurant.dataSource === 'vip_owner' || restaurant.isAdminEdited) return true;
   if (restaurant.replacedFromRestaurantId && hasRealOwner) return true;
 
   if (isSeedRestaurantId(rId)) {
     return hasRealOwner;
+  }
+
+  if (rId.startsWith('rest-vip-') || Boolean(restaurant.ownerId)) {
+    return true;
   }
 
   if (
@@ -1676,8 +1680,12 @@ export const isStrictVerifiedCambodiaRestaurant = (
   const nameKh = (restaurant.nameKh || '').trim();
   const nameEn = (restaurant.nameEn || '').trim();
   if (!nameKh && !nameEn) return false;
-  // Always display registered / user-submitted / admin-approved shops even if GPS is still pending review
-  if (isGpipRegisteredRestaurant(restaurant) || restaurant.isAdminEdited) {
+  // Always display any non-seed custom/user-added/admin-added/imported restaurant or registered/admin-edited shop
+  if (
+    !isSeedRestaurantId(restaurant.id) ||
+    isGpipRegisteredRestaurant(restaurant) ||
+    restaurant.isAdminEdited
+  ) {
     return true;
   }
   if (
@@ -3132,7 +3140,13 @@ export const isRestaurantEligibleForVipRotation = (
   }
 
   if (isRestaurantPremiumActive(restaurant)) return true;
-  if (restaurant.membershipTier === 'premium' || restaurant.dataSource === 'vip_owner' || restaurant.isFeatured) {
+  if (
+    restaurant.membershipTier === 'premium' ||
+    restaurant.dataSource === 'vip_owner' ||
+    restaurant.isFeatured ||
+    restaurant.isAdminEdited ||
+    !isSeedRestaurantId(restaurant.id)
+  ) {
     if (restaurant.membershipExpiresAt) {
       const exp = Date.parse(restaurant.membershipExpiresAt);
       if (!Number.isNaN(exp) && exp <= Date.now()) {
@@ -3323,6 +3337,7 @@ export const sortRestaurantsWithVipRotation = (
   });
 
   const topFeatured: Restaurant[] = [];
+  const customAddedShops: Restaurant[] = [];
   const withPhotoList: Array<{ r: Restaurant; idx: number }> = [];
   const verifiedLocNoPhotoList: Restaurant[] = [];
   const reviewLocNoPhotoList: Restaurant[] = [];
@@ -3330,6 +3345,12 @@ export const sortRestaurantsWithVipRotation = (
   restaurants.forEach((r, idx) => {
     if (featuredOrderMap.has(r.id)) {
       topFeatured.push(r);
+      return;
+    }
+    // Custom non-seed shops added by Admin or VIP users always stay near the top (sorted newest first)
+    // so they are never buried below 200+ built-in seed restaurants even when they don't have a photo yet.
+    if (!isSeedRestaurantId(r.id)) {
+      customAddedShops.push(r);
       return;
     }
     if (hasApprovedShopPhoto(r)) {
@@ -3345,10 +3366,15 @@ export const sortRestaurantsWithVipRotation = (
     (a, b) => (featuredOrderMap.get(a.id) ?? 999) - (featuredOrderMap.get(b.id) ?? 999)
   );
 
+  customAddedShops.sort(
+    (a, b) => getRestaurantApprovedAtMs(b) - getRestaurantApprovedAtMs(a)
+  );
+
   withPhotoList.sort((a, b) => a.idx - b.idx);
 
   return [
     ...topFeatured,
+    ...customAddedShops,
     ...withPhotoList.map((item) => item.r),
     ...verifiedLocNoPhotoList,
     ...reviewLocNoPhotoList,

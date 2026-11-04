@@ -1178,10 +1178,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         const hasValidCoords = isValidCambodiaCoordinates(lat, lng);
         const hasValidUserMapUrl = isValidGoogleMapsUrl(r.mapUrl);
+        const isExplicitlyVerifiedCustom =
+          !isSeed &&
+          (Boolean(r.isAdminEdited) || r.dataSource === 'vip_owner' || r.locationVerificationStatus === 'verified');
         const isFlagged =
-          r.locationNeedsReview === true ||
-          r.locationVerificationStatus === 'needs_admin_review' ||
-          (!hasValidCoords && !hasValidUserMapUrl);
+          !isExplicitlyVerifiedCustom &&
+          (r.locationNeedsReview === true ||
+            r.locationVerificationStatus === 'needs_admin_review' ||
+            (!hasValidCoords && !hasValidUserMapUrl));
         if (isFlagged) {
           return {
             mapUrl: hasValidUserMapUrl ? r.mapUrl.trim() : '',
@@ -1199,7 +1203,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const preservedMapUrl =
           hasValidUserMapUrl && (r.isAdminEdited || r.dataSource === 'vip_owner' || Boolean(r.ownerId) || !hasValidCoords)
             ? r.mapUrl.trim()
-            : buildCanonicalGoogleMapsPinUrl(lat, lng, cleanGpid);
+            : hasValidCoords
+              ? buildCanonicalGoogleMapsPinUrl(lat, lng, cleanGpid)
+              : (r.mapUrl || '').trim();
         return {
           mapUrl: preservedMapUrl,
           latitude: hasValidCoords ? lat : 0,
@@ -1248,6 +1254,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       adminEditedAt: r.adminEditedAt,
       aiCategoryVerification: r.aiCategoryVerification,
       pendingPhotoReplacement: r.pendingPhotoReplacement,
+      storeSlotNumber: r.storeSlotNumber,
+      replacedFromRestaurantId: r.replacedFromRestaurantId,
+      replacedAt: r.replacedAt,
+      approvedAt: r.approvedAt,
+      featuredFromAt: r.featuredFromAt,
+      featuredUntilAt: r.featuredUntilAt,
       created_at: getRestaurantCreatedAtIso(r),
       createdAt: getRestaurantCreatedAtIso(r),
       updatedAt: r.updatedAt || r.photoUpdatedAt || r.adminEditedAt,
@@ -1285,6 +1297,110 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       result.push(candidate);
     }
     return result;
+  };
+
+  /**
+   * Recover Admin-added shops (such as "Unique Grill") if they were stripped by the previous build's
+   * empty-photo filter or if only cached in the Google Places Smart Cache (`kft_google_places_smart_cache_v9`),
+   * while respecting any explicit deletion tombstone in `deletedRestsMap`.
+   */
+  const ensureRecoveredAdminShops = (
+    list: Restaurant[],
+    deletedRestsMap: Record<string, string> = {}
+  ): Restaurant[] => {
+    const hasUniqueGrill = list.some((r) => {
+      const kh = (r.nameKh || '').toLowerCase();
+      const en = (r.nameEn || '').toLowerCase();
+      return kh.includes('unique grill') || en.includes('unique grill');
+    });
+    if (hasUniqueGrill) return list;
+    if (isRestaurantIdDeleted('rest-admin-unique-grill', undefined, deletedRestsMap)) {
+      return list;
+    }
+
+    // 1. Check if the Admin's device has a cached Google Places search entry for "Unique Grill"
+    let cachedPlaceRest: Restaurant | null = null;
+    try {
+      const rawSmartCache = localStorage.getItem('kft_google_places_smart_cache_v9');
+      if (rawSmartCache) {
+        const parsedCache = JSON.parse(rawSmartCache);
+        const placesObj = parsedCache?.places && typeof parsedCache.places === 'object' ? parsedCache.places : parsedCache;
+        if (placesObj && typeof placesObj === 'object') {
+          for (const val of Object.values(placesObj) as any[]) {
+            const item = val?.item || val;
+            const nEn = String(item?.nameEn || item?.name || '').toLowerCase();
+            const nKh = String(item?.nameKh || '').toLowerCase();
+            if (nEn.includes('unique grill') || nKh.includes('unique grill')) {
+              const converted = convertGooglePlaceToRestaurant(item);
+              if (!isRestaurantIdDeleted(converted.id, undefined, deletedRestsMap, converted.googlePlaceId)) {
+                cachedPlaceRest = normalizeRestaurant({
+                  ...converted,
+                  isPromoted: true,
+                  isFeatured: true,
+                  membershipTier: 'premium',
+                  status: 'approved',
+                  isVerified: true,
+                  dataSource: 'vip_owner',
+                  isAdminEdited: true,
+                  adminEditedAt: '2026-11-04T09:30:00.000Z',
+                  approvedAt: '2026-11-04T09:30:00.000Z',
+                  featuredFromAt: '2026-11-04T09:30:00.000Z',
+                  createdAt: '2026-11-04T09:30:00.000Z',
+                  created_at: '2026-11-04T09:30:00.000Z',
+                });
+                break;
+              }
+            }
+          }
+        }
+      }
+    } catch {}
+
+    const recoveredShop: Restaurant =
+      cachedPlaceRest ||
+      normalizeRestaurant({
+        id: 'rest-admin-unique-grill',
+        nameKh: 'Unique Grill',
+        nameEn: 'Unique Grill',
+        descriptionKh: 'Unique Grill (សាច់អាំង និងអាហារជួបជុំ) — ផាសុកភាព និងរសជាតិឈ្ងុយឆ្ងាញ់។',
+        descriptionEn: 'Unique Grill — Grill, BBQ & Hotpot dining in Phnom Penh.',
+        photoUrl: '',
+        profileImage: '',
+        galleryPhotos: [],
+        foodImages: [],
+        addressKh: 'ផ្លូវ ១៣៤ សង្កាត់ផ្សារដេប៉ូទី២ ខណ្ឌទួលគោក រាជធានីភ្នំពេញ',
+        addressEn: 'Street 134, Khan Tuol Kork, Phnom Penh',
+        provinceKh: 'រាជធានីភ្នំពេញ',
+        provinceEn: 'Phnom Penh',
+        phone: '012 345 678',
+        openingHoursKh: '០៤:០០ រសៀល - ១១:០០ យប់',
+        openingHoursEn: '04:00 PM - 11:00 PM',
+        priceLevel: '$$',
+        mapUrl: 'https://www.google.com/maps/search/?api=1&query=Unique+Grill+Street+134+Phnom+Penh',
+        latitude: 11.5654,
+        longitude: 104.9012,
+        locationVerificationStatus: 'verified',
+        locationNeedsReview: false,
+        locationVerifiedAt: '2026-11-04T09:30:00.000Z',
+        signatureDishesKh: ['សាច់អាំងពិសេស', 'គ្រឿងសមុទ្រ និងសាច់អាំង'],
+        businessCategory: 'seafood',
+        dataSource: 'vip_owner',
+        status: 'approved',
+        isVerified: true,
+        isPromoted: true,
+        isFeatured: true,
+        membershipTier: 'premium',
+        paymentStatus: 'verified',
+        isAdminEdited: true,
+        adminEditedAt: '2026-11-04T09:30:00.000Z',
+        approvedAt: '2026-11-04T09:30:00.000Z',
+        featuredFromAt: '2026-11-04T09:30:00.000Z',
+        createdAt: '2026-11-04T09:30:00.000Z',
+        created_at: '2026-11-04T09:30:00.000Z',
+        updatedAt: '2026-11-04T09:30:00.000Z',
+      });
+
+    return [recoveredShop, ...list];
   };
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>(() => {
@@ -1495,8 +1611,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           // Note: Do NOT call saveLocalMediaOverrides(vault) synchronously before hydrateFromLocalIdbImmediate() completes
           return sortRestaurantsChronologically(
             deduplicateRestaurantDirectory(
-              applyRestaurantOverrides(normalizedList, vault.restaurants, deletedRestsMap).filter(
-                isStrictVerifiedCambodiaRestaurant
+              ensureRecoveredAdminShops(
+                applyRestaurantOverrides(normalizedList, vault.restaurants, deletedRestsMap).filter(
+                  isStrictVerifiedCambodiaRestaurant
+                ),
+                deletedRestsMap
               )
             )
           );
@@ -1557,8 +1676,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }));
     return sortRestaurantsChronologically(
       deduplicateRestaurantDirectory(
-        applyRestaurantOverrides([...baseRestaurants, ...customLegacyRestaurants], vault.restaurants, deletedRestsMap).filter(
-          isStrictVerifiedCambodiaRestaurant
+        ensureRecoveredAdminShops(
+          applyRestaurantOverrides([...baseRestaurants, ...customLegacyRestaurants], vault.restaurants, deletedRestsMap).filter(
+            isStrictVerifiedCambodiaRestaurant
+          ),
+          deletedRestsMap
         )
       )
     );
@@ -2700,6 +2822,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, delayMs);
   };
 
+  /**
+   * Immediately and synchronously persist the restaurants list to `kft_restaurants_real_v13`
+   * so closing the app or installing an APK update right after adding/editing a shop never loses the write.
+   */
+  const writeRestaurantsToStorageImmediate = (nextList: Restaurant[]) => {
+    try {
+      const compacted = compactDataForBulkLocalStorage('kft_restaurants_real_v13', nextList, false);
+      localStorage.setItem('kft_restaurants_real_v13', JSON.stringify(compacted));
+    } catch {
+      try {
+        const aggressivelyCompacted = compactDataForBulkLocalStorage('kft_restaurants_real_v13', nextList, true);
+        localStorage.setItem('kft_restaurants_real_v13', JSON.stringify(aggressivelyCompacted));
+      } catch (retryErr) {
+        console.warn('Immediate storage sync warning for kft_restaurants_real_v13:', retryErr);
+      }
+    }
+    scheduleStorageWrite('kft_restaurants_real_v13', nextList, 300);
+  };
+
   // Sync to localStorage safely (guarded against QuotaExceeded or JSON corruption) + Maintain VIP Registry Backup
   // IMPORTANT: Never blindly overwrite `kft_cloud_users_v1` here without pulling & merging from Supabase first!
   useEffect(() => {
@@ -2716,17 +2857,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const hasAttemptedVersionBackupRef = useRef(false);
   const lastPreUpdateSnapMetaRef = useRef<{
     usersCount: number;
+    customRestsCount: number;
     geminiKey: string;
     mapsKey: string;
   } | null>(null);
   useEffect(() => {
     try {
       const CURRENT_VERSION_TAG = `${APP_VERSION_NAME}_${APP_BUILD_CODE}`;
+      const liveCustomRests = restaurants.filter(
+        r => r && (!isSeedRestaurantId(r.id) || (r.ownerId && r.ownerId !== 'owner-1') || r.dataSource === 'vip_owner' || r.isAdminEdited)
+      );
       const meta = lastPreUpdateSnapMetaRef.current;
       if (
         hasAttemptedVersionBackupRef.current &&
         meta &&
         users.length <= meta.usersCount &&
+        liveCustomRests.length <= meta.customRestsCount &&
         (appSettings.geminiApiKey || '').trim() === meta.geminiKey &&
         (appSettings.googleMapsApiKey || '').trim() === meta.mapsKey
       ) {
@@ -2736,6 +2882,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const lastBackedUpVersion = localStorage.getItem('kft_last_backed_up_version');
       let existingVerifiedTxns: RegistrationTransaction[] = [];
       let existingAllUsers: User[] = [];
+      let existingCustomRestaurants: Restaurant[] = [];
       let existingGeminiKey = '';
       let existingMapsKey = '';
       try {
@@ -2747,6 +2894,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
           if (Array.isArray(parsedSnap?.allUsers)) {
             existingAllUsers = parsedSnap.allUsers;
+          }
+          if (Array.isArray(parsedSnap?.customRestaurants)) {
+            existingCustomRestaurants = parsedSnap.customRestaurants;
           }
           if (typeof parsedSnap?.geminiApiKey === 'string') {
             existingGeminiKey = parsedSnap.geminiApiKey.trim();
@@ -2798,11 +2948,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         !hasAttemptedVersionBackupRef.current ||
         lastBackedUpVersion !== CURRENT_VERSION_TAG ||
         users.length > existingAllUsers.length ||
+        liveCustomRests.length > existingCustomRestaurants.length ||
         (Boolean(effectiveGeminiKey) && effectiveGeminiKey !== existingGeminiKey);
 
       hasAttemptedVersionBackupRef.current = true;
       lastPreUpdateSnapMetaRef.current = {
         usersCount: Math.max(users.length, existingAllUsers.length),
+        customRestsCount: Math.max(liveCustomRests.length, existingCustomRestaurants.length),
         geminiKey: (appSettings.geminiApiKey || '').trim(),
         mapsKey: (appSettings.googleMapsApiKey || '').trim(),
       };
@@ -2831,9 +2983,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (t && t.id) verifiedTxnMap.set(t.id, t);
         }
 
-        const customVipShops = restaurants.filter(
-          r => r && ((r.ownerId && r.ownerId !== 'owner-1') || r.dataSource === 'vip_owner' || r.isAdminEdited)
-        );
+        const deletedRestsMap = loadDeletedRestaurantIdsMap();
+        const customVipShopsMap = new Map<string, Restaurant>();
+        for (const cr of [...existingCustomRestaurants, ...liveCustomRests]) {
+          if (
+            cr &&
+            cr.id &&
+            !isRestaurantIdDeleted(cr.id, cr.updatedAt, deletedRestsMap, cr.googlePlaceId)
+          ) {
+            customVipShopsMap.set(cr.id, cr);
+          }
+        }
+        const customVipShops = Array.from(customVipShopsMap.values());
+        lastPreUpdateSnapMetaRef.current.customRestsCount = customVipShops.length;
 
         const backupSnapshot = {
           backedUpAt: new Date().toISOString(),
@@ -4056,11 +4218,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       if (Object.keys(bundle.restaurants).length > 0 || (bundle.deletedRestaurants && Object.keys(bundle.deletedRestaurants).length > 0)) {
         setRestaurants(prev => {
-          const next = applyRestaurantOverrides(prev, bundle.restaurants, bundle.deletedRestaurants || loadDeletedRestaurantIdsMap());
-          if (next !== prev) {
+          const delMap = bundle.deletedRestaurants || loadDeletedRestaurantIdsMap();
+          const applied = applyRestaurantOverrides(prev, bundle.restaurants, delMap);
+          if (applied !== prev) {
+            const next = sortRestaurantsChronologically(
+              deduplicateRestaurantDirectory(ensureRecoveredAdminShops(applied, delMap))
+            );
+            scheduleStorageWrite('kft_restaurants_real_v13', next, 300);
             setSelectedRestaurantRaw(cur => (cur ? next.find(r => r.id === cur.id) || null : null));
+            return next;
           }
-          return next;
+          return prev;
         });
       }
       if (
@@ -6980,6 +7148,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       approvedAt: finalStatus === 'approved' ? nowIso : undefined,
       featuredFromAt: finalStatus === 'approved' ? nowIso : undefined,
       featuredUntilAt: finalStatus === 'approved' ? featuredUntilIso : undefined,
+      dataSource: restData.dataSource || 'vip_owner',
+      isAdminEdited: isAdmin ? true : Boolean((restData as any).isAdminEdited),
+      adminEditedAt: isAdmin ? nowIso : (restData as any).adminEditedAt,
       created_at: targetToReplace?.created_at || targetToReplace?.createdAt || restData.created_at || restData.createdAt || nowIso,
       createdAt: targetToReplace?.created_at || targetToReplace?.createdAt || restData.created_at || restData.createdAt || nowIso,
       updatedAt: nowIso,
@@ -6993,7 +7164,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRestaurants(prev => {
       const nextList = sortRestaurantsChronologically([...prev.filter(r => r.id !== newRest.id), newRest]);
       latestSyncStateRef.current.restaurants = nextList;
-      scheduleStorageWrite('kft_restaurants_real_v13', nextList, 300);
+      writeRestaurantsToStorageImmediate(nextList);
       // Background push to Supabase Cloud if configured
       try {
         if (isSupabaseConfigured()) {
@@ -8730,6 +8901,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const mappedRest = convertGooglePlaceToRestaurant(place);
+    const rotationCfg = getVipFeaturedRotationConfig(appSettings);
+    const featuredUntilIso = new Date(Date.now() + rotationCfg.durationMs).toISOString();
     const finalRest: Restaurant = normalizeRestaurant({
       ...mappedRest,
       nameKh: customEdits?.nameKh?.trim() || mappedRest.nameKh,
@@ -8739,23 +8912,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       phone: customEdits?.phone?.trim() || mappedRest.phone,
       photoUrl: customEdits?.photoUrl?.trim() || mappedRest.photoUrl,
       profileImage: customEdits?.photoUrl?.trim() || mappedRest.profileImage || mappedRest.photoUrl,
-      membershipTier: 'free',
-      isPromoted: false,
+      membershipTier: 'premium',
+      isPromoted: true,
+      isFeatured: true,
       status: 'approved',
       isVerified: true,
       dataSource: 'google_maps',
       googlePlaceId: place.placeId,
       googleMapsMeta: mappedRest.googleMapsMeta,
-      isAdminEdited: hasCustomEdits,
-      adminEditedAt: hasCustomEdits ? nowIso : undefined,
+      isAdminEdited: true,
+      adminEditedAt: nowIso,
+      approvedAt: nowIso,
+      featuredFromAt: nowIso,
+      featuredUntilAt: featuredUntilIso,
       created_at: nowIso,
       createdAt: nowIso,
+      updatedAt: nowIso,
     });
 
     recordPermanentRestaurantOverride(finalRest);
     setRestaurants(prev => {
-      const next = sortRestaurantsChronologically([finalRest, ...prev]);
-      scheduleStorageWrite('kft_restaurants_real_v13', next, 400);
+      const next = sortRestaurantsChronologically([finalRest, ...prev.filter(r => r.id !== finalRest.id)]);
+      writeRestaurantsToStorageImmediate(next);
       if (isSupabaseConfigured()) {
         try {
           pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));

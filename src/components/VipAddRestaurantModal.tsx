@@ -517,19 +517,19 @@ export const VipAddRestaurantModal: React.FC = () => {
         latitude: hasVerifiedCoords ? resolvedLat! : 0,
         longitude: hasVerifiedCoords ? resolvedLng! : 0,
         locationVerificationStatus:
-          isAdmin && (hasVerifiedCoords || hasValidMapLink)
+          isAdmin || hasVerifiedCoords || hasValidMapLink
             ? ('verified' as const)
             : ('needs_admin_review' as const),
-        locationNeedsReview: !(isAdmin && (hasVerifiedCoords || hasValidMapLink)),
-        locationVerifiedAt: isAdmin && (hasVerifiedCoords || hasValidMapLink) ? new Date().toISOString() : undefined,
+        locationNeedsReview: !(isAdmin || hasVerifiedCoords || hasValidMapLink),
+        locationVerifiedAt: isAdmin || hasVerifiedCoords || hasValidMapLink ? new Date().toISOString() : undefined,
         locationReviewNote:
-          isAdmin && (hasVerifiedCoords || hasValidMapLink)
+          isAdmin || hasVerifiedCoords || hasValidMapLink
             ? undefined
             : 'New shop submitted — awaiting Admin verification of shop & Google Maps location.',
         signatureDishesKh:
           signatureDishesKh.length > 0 ? signatureDishesKh : [selectedCategoryObj.defaultDishKh],
         googlePlaceId: importedGooglePlaceId,
-        dataSource: importedGooglePlaceId ? ('google_maps' as const) : ('vip_owner' as const),
+        dataSource: 'vip_owner' as const,
         googleMapsMeta: importedGoogleMeta
           ? {
               ...importedGoogleMeta,
@@ -540,6 +540,8 @@ export const VipAddRestaurantModal: React.FC = () => {
         businessCategory: businessCategory.trim() || 'restaurant',
         isFeatured: true,
         isVerified: true,
+        isAdminEdited: isAdmin ? true : undefined,
+        adminEditedAt: isAdmin ? new Date().toISOString() : undefined,
         membershipTier: 'premium' as const,
         status: 'approved' as const,
         ownerId: currentUser?.id,

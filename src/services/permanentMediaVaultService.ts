@@ -378,6 +378,7 @@ export interface RestaurantMediaOverride {
   ownerId?: string;
   ownerName?: string;
   ownerEmail?: string;
+  ownerPhone?: string;
   mapUrl?: string;
   latitude?: number;
   longitude?: number;
@@ -390,6 +391,16 @@ export interface RestaurantMediaOverride {
   locationVerifiedAt?: string;
   status?: Restaurant['status'];
   isVerified?: boolean;
+  isPromoted?: boolean;
+  isFeatured?: boolean;
+  membershipTier?: Restaurant['membershipTier'];
+  membershipExpiresAt?: string;
+  storeSlotNumber?: number;
+  approvedAt?: string;
+  featuredFromAt?: string;
+  featuredUntilAt?: string;
+  createdAt?: string;
+  created_at?: string;
   paymentStatus?: Restaurant['paymentStatus'];
   isAdminEdited?: boolean;
   adminEditedAt?: string;
@@ -1348,17 +1359,24 @@ export function mergeOverrideBundles(
     }
   >(
     a: Record<string, T> = {},
-    b: Record<string, T> = {}
+    b: Record<string, T> = {},
+    allowEmptyPhoto: boolean = false
   ): Record<string, T> => {
+    const isRejectedPhoto = (url?: string): boolean => {
+      if (!url || !url.trim()) {
+        return !allowEmptyPhoto;
+      }
+      return isObsoleteSeedPhoto(url) || isLegacyAutoScrapedFoodPlaceholderUrl(url);
+    };
     const out: Record<string, T> = {};
     for (const [id, itemA] of Object.entries(a)) {
-      if (!itemA || isObsoleteSeedPhoto(itemA.photoUrl) || isLegacyAutoScrapedFoodPlaceholderUrl(itemA.photoUrl)) {
+      if (!itemA || isRejectedPhoto(itemA.photoUrl)) {
         continue;
       }
       out[id] = itemA;
     }
     for (const [id, itemB] of Object.entries(b)) {
-      if (!itemB || isObsoleteSeedPhoto(itemB.photoUrl) || isLegacyAutoScrapedFoodPlaceholderUrl(itemB.photoUrl)) {
+      if (!itemB || isRejectedPhoto(itemB.photoUrl)) {
         continue;
       }
       const itemA = out[id];
@@ -1439,7 +1457,7 @@ export function mergeOverrideBundles(
     }
   }
 
-  const mergedRestaurants = mergeMaps(base.restaurants, incoming.restaurants || {});
+  const mergedRestaurants = mergeMaps(base.restaurants, incoming.restaurants || {}, true);
   for (const id of Object.keys(mergedRestaurants)) {
     const a = base.restaurants?.[id];
     const b = incoming.restaurants?.[id];
@@ -2001,6 +2019,7 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     ownerId: rest.ownerId,
     ownerName: rest.ownerName,
     ownerEmail: rest.ownerEmail,
+    ownerPhone: rest.ownerPhone,
     mapUrl: rest.mapUrl,
     latitude: rest.latitude,
     longitude: rest.longitude,
@@ -2013,8 +2032,18 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     locationVerifiedAt: rest.locationVerifiedAt,
     status: rest.status,
     isVerified: rest.isVerified,
+    isPromoted: rest.isPromoted,
+    isFeatured: rest.isFeatured,
+    membershipTier: rest.membershipTier,
+    membershipExpiresAt: rest.membershipExpiresAt,
+    storeSlotNumber: rest.storeSlotNumber,
+    approvedAt: rest.approvedAt,
+    featuredFromAt: rest.featuredFromAt,
+    featuredUntilAt: rest.featuredUntilAt,
+    createdAt: rest.createdAt || rest.created_at,
+    created_at: rest.created_at || rest.createdAt,
     paymentStatus: rest.paymentStatus,
-    isAdminEdited: rest.isAdminEdited ?? true,
+    isAdminEdited: true,
     adminEditedAt: rest.adminEditedAt || now,
     pendingPhotoReplacement: rest.pendingPhotoReplacement,
     isCustomPhoto: Boolean(primaryPhoto),
@@ -2042,9 +2071,11 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     }
   }
   bundle.updatedAt = now;
+  inMemoryMasterBundle = bundle;
   saveSingleRecordToIdb(`rest:${rest.id}`, overrideRecord).catch(() => {});
   enqueuePendingMediaCloudSync('rest', rest.id, 1, now);
   saveLocalMediaOverrides(bundle);
+  notifyPersistentMediaVaultSubscribers(bundle);
   syncSingleOverrideRecordToCloud('rest', rest.id, overrideRecord, bundle).catch(() => {});
 }
 
@@ -2745,9 +2776,8 @@ export function applyRestaurantOverrides(
   });
 
   // Also append any custom VIP/Admin restaurants present in overridesMap that aren't in the list yet
-  // ONLY if they are strictly location-verified in Cambodia and NOT purged seed placeholders!
   for (const [ovId, ov] of Object.entries(safeOverrides)) {
-    if (seenIds.has(ovId) || !ov || !ov.nameKh) continue;
+    if (seenIds.has(ovId) || !ov || (!ov.nameKh && !ov.nameEn)) continue;
     if (isRestaurantIdDeleted(ovId, ov.updatedAt, deletedMap, ov.googlePlaceId)) continue;
     // Never resurrect purged unverified seed restaurant IDs unless owned by a real VIP user
     if (
@@ -2763,6 +2793,7 @@ export function applyRestaurantOverrides(
       ov.locationNeedsReview !== true &&
       ov.locationVerificationStatus !== 'needs_admin_review';
     const isRegisteredVipOrAdminShop =
+      !isSeedRestaurantId(ovId) ||
       Boolean(ov.ownerId && ov.ownerId !== 'owner-1') ||
       ov.dataSource === 'vip_owner' ||
       Boolean(ov.isAdminEdited);
@@ -2772,10 +2803,11 @@ export function applyRestaurantOverrides(
 
     const photoUrl = sanitizeRestaurantShopPhoto(ovId, ov.photoUrl || ov.profileImage || '');
     const cleanGpid = isValidOfficialGooglePlaceId(ov.googlePlaceId) ? ov.googlePlaceId : undefined;
+    const resolvedCreatedAt = ov.createdAt || ov.created_at || ov.adminEditedAt || ov.updatedAt || new Date().toISOString();
     const candidateRest: Restaurant = {
       id: ovId,
-      nameKh: ov.nameKh,
-      nameEn: ov.nameEn || ov.nameKh,
+      nameKh: ov.nameKh || ov.nameEn || 'ភោជនីយដ្ឋានខ្មែរ',
+      nameEn: ov.nameEn || ov.nameKh || 'Khmer Restaurant',
       descriptionKh: ov.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
       descriptionEn: ov.descriptionEn || 'Authentic Cambodian restaurant.',
       photoUrl,
@@ -2792,19 +2824,23 @@ export function applyRestaurantOverrides(
       openingHoursKh: ov.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
       openingHoursEn: ov.openingHoursEn || '07:00 AM - 09:00 PM',
       priceLevel: ov.priceLevel || '$$',
-      mapUrl: hasValidCoords
-        ? buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, cleanGpid)
-        : (ov.mapUrl || ''),
+      mapUrl:
+        isValidGoogleMapsUrl(ov.mapUrl) && (ov.isAdminEdited || ov.dataSource === 'vip_owner' || Boolean(ov.ownerId) || !hasValidCoords)
+          ? ov.mapUrl!.trim()
+          : hasValidCoords
+            ? buildCanonicalGoogleMapsPinUrl(ov.latitude!, ov.longitude!, cleanGpid)
+            : (ov.mapUrl || ''),
       latitude: hasValidCoords ? ov.latitude! : (typeof ov.latitude === 'number' ? ov.latitude : 0),
       longitude: hasValidCoords ? ov.longitude! : (typeof ov.longitude === 'number' ? ov.longitude : 0),
-      locationVerificationStatus: hasVerifiedOvCoords
-        ? 'verified'
-        : (ov.locationVerificationStatus || 'needs_admin_review'),
-      locationNeedsReview: !hasVerifiedOvCoords,
+      locationVerificationStatus:
+        hasVerifiedOvCoords || ov.locationVerificationStatus === 'verified'
+          ? 'verified'
+          : (ov.locationVerificationStatus || 'needs_admin_review'),
+      locationNeedsReview: !(hasVerifiedOvCoords || ov.locationVerificationStatus === 'verified'),
       locationReviewNote: ov.locationReviewNote,
       locationVerifiedAt: ov.locationVerifiedAt,
-      rating: typeof ov.rating === 'number' && ov.rating > 0 ? ov.rating : 4.6,
-      reviewCount: typeof ov.reviewCount === 'number' && ov.reviewCount > 0 ? ov.reviewCount : 60,
+      rating: typeof ov.rating === 'number' ? ov.rating : 0,
+      reviewCount: typeof ov.reviewCount === 'number' ? ov.reviewCount : 0,
       signatureDishesKh: Array.isArray(ov.signatureDishesKh) && ov.signatureDishesKh.length > 0 ? ov.signatureDishesKh : ['ម្ហូបប្រចាំហាង'],
       promoVideoUrl: ov.promoVideoUrl,
       telegramUrl: ov.telegramUrl,
@@ -2814,19 +2850,28 @@ export function applyRestaurantOverrides(
       ownerId: ov.ownerId,
       ownerName: ov.ownerName,
       ownerEmail: ov.ownerEmail,
+      ownerPhone: ov.ownerPhone,
       googlePlaceId: cleanGpid,
-      dataSource: ov.dataSource,
+      dataSource: ov.dataSource || 'vip_owner',
       googleMapsMeta: ov.googleMapsMeta,
       status: ov.status || 'approved',
       isVerified: typeof ov.isVerified === 'boolean' ? ov.isVerified : true,
-      isPromoted: Boolean(ov.ownerId),
-      membershipTier: ov.ownerId ? 'premium' : 'free',
+      isPromoted: typeof ov.isPromoted === 'boolean' ? ov.isPromoted : true,
+      isFeatured: typeof ov.isFeatured === 'boolean' ? ov.isFeatured : true,
+      membershipTier: ov.membershipTier || 'premium',
+      membershipExpiresAt: ov.membershipExpiresAt,
+      storeSlotNumber: ov.storeSlotNumber,
+      approvedAt: ov.approvedAt || resolvedCreatedAt,
+      featuredFromAt: ov.featuredFromAt || resolvedCreatedAt,
+      featuredUntilAt: ov.featuredUntilAt,
       paymentStatus: ov.paymentStatus || 'verified',
-      isAdminEdited: ov.isAdminEdited ?? true,
+      isAdminEdited: true,
       adminEditedAt: ov.adminEditedAt || ov.updatedAt,
       isCustomPhoto: Boolean(photoUrl),
       photoUpdatedAt: ov.updatedAt,
-      createdAt: ov.adminEditedAt || ov.updatedAt || new Date().toISOString(),
+      created_at: resolvedCreatedAt,
+      createdAt: resolvedCreatedAt,
+      updatedAt: ov.updatedAt,
     };
     if (isStrictVerifiedCambodiaRestaurant(candidateRest)) {
       anyChanged = true;
