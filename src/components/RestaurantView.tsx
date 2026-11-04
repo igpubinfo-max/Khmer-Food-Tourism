@@ -261,14 +261,6 @@ export const RestaurantView: React.FC = () => {
             <Store className="w-4 h-4 text-[#064E3B] dark:text-emerald-400 shrink-0" />
             <span>{tr(language, 'បញ្ជីភោជនីយដ្ឋាន & ហាងអាហារ', 'Restaurant Directory', '餐厅与美食店铺名录')}</span>
           </h2>
-          <p className="text-[11px] text-slate-500 font-khmer mt-0.5">
-            {tr(
-              language,
-              `បង្ហាញ ${filteredRestaurants.length} / ${totalDirectoryCount} ហាង`,
-              `Showing ${filteredRestaurants.length} of ${totalDirectoryCount} shops`,
-              `显示 ${filteredRestaurants.length} / ${totalDirectoryCount} 家店铺`
-            )}
-          </p>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">

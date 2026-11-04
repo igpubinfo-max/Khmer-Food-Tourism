@@ -818,49 +818,6 @@ export const HomeView: React.FC = () => {
                   onSmartAiAssistant={handleSmartAiAssistant}
                 />
 
-                {/* Clean, simple statistics showing only Total Shops, Total Food, Total Travel */}
-                <div
-                  data-testid="home-statistics-section"
-                  className="grid grid-cols-3 divide-x divide-slate-200 dark:divide-white/10 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden"
-                >
-                  {[
-                    {
-                      n: restaurants.length,
-                      label: tr(language, 'ហាងអាហារសរុប', 'Total Shops', '餐厅总数'),
-                      Icon: IconNavShop,
-                      onClick: () => openAdminTab('restaurants'),
-                    },
-                    {
-                      n: foods.length,
-                      label: tr(language, 'មុខម្ហូបសរុប', 'Total Food', '美食总数'),
-                      Icon: IconNavFood,
-                      onClick: () => openAdminTab('food'),
-                    },
-                    {
-                      n: destinations.length,
-                      label: tr(language, 'តំបន់ទេសចរណ៍សរុប', 'Total Travel', '景点总数'),
-                      Icon: IconNavTourism,
-                      onClick: () => openAdminTab('destinations'),
-                    },
-                  ].map((s) => (
-                    <button
-                      key={s.label}
-                      type="button"
-                      onClick={s.onClick}
-                      className="py-3 px-2 flex flex-col items-center justify-center gap-1 text-center hover:bg-slate-50 dark:hover:bg-white/5 active:scale-95 transition cursor-pointer"
-                    >
-                      <span className="w-8 h-8 rounded-xl bg-emerald-50 text-[#064E3B] dark:bg-slate-700/80 dark:text-emerald-300 border border-emerald-200/80 dark:border-slate-600 flex items-center justify-center shrink-0">
-                        <s.Icon className="w-4 h-4" />
-                      </span>
-                      <span className="block text-xl sm:text-2xl font-black font-mono text-[#064E3B] dark:text-amber-300 leading-tight">
-                        {s.n}
-                      </span>
-                      <span className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 leading-tight">
-                        {s.label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
 
                 {/* 2. Admin Management Menus Grid */}
                 <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-3">
@@ -1117,49 +1074,6 @@ export const HomeView: React.FC = () => {
                 onSeeAll={handleSeeAllTourism}
               />
 
-              {/* 8. Clean, simple statistics showing only Total Shops, Total Food, Total Travel */}
-              <div
-                data-testid="home-statistics-section"
-                className="grid grid-cols-3 divide-x divide-slate-200 dark:divide-white/10 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden"
-              >
-                {[
-                  {
-                    n: restaurants.length,
-                    label: tr(language, 'ហាងអាហារសរុប', 'Total Shops', '餐厅总数'),
-                    Icon: IconNavShop,
-                    tab: 'restaurants',
-                  },
-                  {
-                    n: foods.length,
-                    label: tr(language, 'មុខម្ហូបសរុប', 'Total Food', '美食总数'),
-                    Icon: IconNavFood,
-                    tab: 'food',
-                  },
-                  {
-                    n: destinations.length,
-                    label: tr(language, 'តំបន់ទេសចរណ៍សរុប', 'Total Travel', '景点总数'),
-                    Icon: IconNavTourism,
-                    tab: 'tourism',
-                  },
-                ].map((s) => (
-                  <button
-                    key={s.tab}
-                    type="button"
-                    onClick={() => setActiveTab(s.tab as any)}
-                    className="py-3 px-2 flex flex-col items-center justify-center gap-1 text-center hover:bg-slate-50 dark:hover:bg-white/5 active:scale-95 transition cursor-pointer"
-                  >
-                    <span className="w-8 h-8 rounded-xl bg-emerald-50 text-[#064E3B] dark:bg-slate-700/80 dark:text-emerald-300 border border-emerald-200/80 dark:border-slate-600 flex items-center justify-center shrink-0">
-                      <s.Icon className="w-4 h-4" />
-                    </span>
-                    <span className="block text-xl sm:text-2xl font-black font-mono text-[#064E3B] dark:text-amber-300 leading-tight">
-                      {s.n}
-                    </span>
-                    <span className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 leading-tight">
-                      {s.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
 
               {/* 9. VIP members manage their shop; everyone else sees one calm benefits card */}
               {isVip ? (

@@ -81,14 +81,6 @@ export const TourismView: React.FC = () => {
             <Compass className="w-4 h-4 text-[#059669]" />
             <span>{tr(language, 'តំបន់ទេសចរណ៍ស្រស់ត្រកាល', 'Scenic Destinations', '柬埔寨著名旅游景点')}</span>
           </h2>
-          <p className="text-[11px] text-slate-500 font-khmer">
-            {tr(
-              language,
-              `មានទីតាំងទេសចរណ៍ចំនួន ${filteredDestinations.length} កន្លែង`,
-              `Showing ${filteredDestinations.length} travel spots`,
-              `当前显示 ${filteredDestinations.length} 个旅游景点`
-            )}
-          </p>
         </div>
       </div>
 

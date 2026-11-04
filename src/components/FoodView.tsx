@@ -196,14 +196,6 @@ export const FoodView: React.FC = () => {
               {tr(language, 'មុខម្ហូបខ្មែរ និងរូបមន្តចម្អិន', 'Cambodian Dishes & Recipes', '柬埔寨传统美食与食谱')}
             </span>
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-khmer mt-0.5">
-            {tr(
-              language,
-              `បង្ហាញ ${filteredFoods.length} នៃ ${foods.length} មុខម្ហូប`,
-              `Showing ${filteredFoods.length} of ${foods.length} dishes`,
-              `显示 ${filteredFoods.length} / ${foods.length} 道菜品`
-            )}
-          </p>
         </div>
 
         {isAdmin && (
