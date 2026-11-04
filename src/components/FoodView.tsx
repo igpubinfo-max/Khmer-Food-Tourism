@@ -229,26 +229,27 @@ export const FoodView: React.FC = () => {
             {organizedFoods.length} {tr(language, 'មុខម្ហូប', 'dishes', '道菜品')}
           </span>
         </div>
-        <div className="grid grid-cols-5 gap-1.5">
+        <div className="flex items-stretch gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-0.5">
           {categories.map((cat) => {
             const active = selectedCategory === cat.id;
             const count = categoryCounts[cat.id] ?? 0;
             return (
               <button
                 key={cat.id}
+                type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`flex flex-col items-center justify-center py-2.5 px-1 rounded-xl text-center transition-all duration-150 cursor-pointer border ${
+                className={`flex-1 min-w-[48px] shrink-0 sm:shrink flex flex-col items-center justify-between py-2 px-0.5 rounded-xl text-center transition-all duration-150 cursor-pointer border ${
                   active
                     ? 'bg-gradient-to-b from-[#064E3B] to-[#047857] text-white font-black border-amber-400 shadow-sm scale-[1.02]'
                     : 'bg-slate-50 dark:bg-slate-900/60 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700 hover:bg-emerald-50/60'
                 }`}
               >
-                <span className="mb-1 flex items-center justify-center">{cat.icon}</span>
-                <span className="text-[11px] sm:text-xs font-bold leading-tight truncate w-full">
+                <span className="mb-1 flex items-center justify-center shrink-0">{cat.icon}</span>
+                <span className="text-[10px] sm:text-[11px] font-bold leading-tight truncate w-full px-0.5">
                   {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
                 </span>
                 <span
-                  className={`mt-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                  className={`mt-1 px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold leading-none ${
                     active ? 'bg-amber-400 text-slate-950' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                   }`}
                 >
