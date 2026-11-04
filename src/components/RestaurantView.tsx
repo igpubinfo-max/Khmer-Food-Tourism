@@ -55,8 +55,10 @@ export const RestaurantView: React.FC = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setNowTickMs(Date.now());
-    }, 60 * 1000);
+      if (typeof document === 'undefined' || !document.hidden) {
+        setNowTickMs(Date.now());
+      }
+    }, 10 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 

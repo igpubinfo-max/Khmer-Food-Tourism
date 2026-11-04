@@ -209,6 +209,28 @@ export interface LocalAuthoritativeVipMatch {
   matchedUser?: User;
 }
 
+const parsedStorageCache = new Map<string, { raw: string; parsed: any }>();
+
+function getCachedParsedLocalStorage(key: string): any {
+  try {
+    if (typeof localStorage === 'undefined') return null;
+    const raw = localStorage.getItem(key);
+    if (!raw || raw === 'undefined' || raw === 'null') {
+      parsedStorageCache.delete(key);
+      return null;
+    }
+    const cached = parsedStorageCache.get(key);
+    if (cached && cached.raw === raw) {
+      return cached.parsed;
+    }
+    const parsed = JSON.parse(raw);
+    parsedStorageCache.set(key, { raw, parsed });
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Inspects all local persistence registries, backups, transactions, and support tickets
  * to verify or recover a user's active VIP membership across app version updates.
@@ -264,14 +286,10 @@ export function findLocalAuthoritativeVipEntitlement(
     if (typeof localStorage !== 'undefined') {
       // 0. Check active signed-in session keys (`kft_current_user_v5`, `kft_current_user_v4`)
       for (const curKey of ['kft_current_user_v5', 'kft_current_user_v4']) {
-        try {
-          const rawCur = localStorage.getItem(curKey);
-          if (!rawCur || rawCur === 'undefined' || rawCur === 'null') continue;
-          const parsedCur = JSON.parse(rawCur);
-          if (parsedCur && typeof parsedCur === 'object' && !Array.isArray(parsedCur)) {
-            considerUserRecord(parsedCur);
-          }
-        } catch {}
+        const parsedCur = getCachedParsedLocalStorage(curKey);
+        if (parsedCur && typeof parsedCur === 'object' && !Array.isArray(parsedCur)) {
+          considerUserRecord(parsedCur);
+        }
       }
 
       // 1. Check all user list & VIP backup keys (no short-circuiting so stale keys never shadow fresh ones)
@@ -283,89 +301,73 @@ export function findLocalAuthoritativeVipEntitlement(
         'kft_users_v4',
       ];
       for (const key of userListKeys) {
-        try {
-          const raw = localStorage.getItem(key);
-          if (!raw || raw === 'undefined' || raw === 'null') continue;
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) {
-            for (const u of parsed) considerUserRecord(u);
-          }
-        } catch {}
+        const parsed = getCachedParsedLocalStorage(key);
+        if (Array.isArray(parsed)) {
+          for (const u of parsed) considerUserRecord(u);
+        }
       }
 
       // 2. Check Pre-Update Database Snapshot (`kft_pre_update_db_backup_v1`)
-      try {
-        const rawPre = localStorage.getItem('kft_pre_update_db_backup_v1');
-        if (rawPre && rawPre !== 'undefined' && rawPre !== 'null') {
-          const snap = JSON.parse(rawPre);
-          if (Array.isArray(snap?.vipUsers)) {
-            for (const u of snap.vipUsers) considerUserRecord(u);
-          }
-          if (Array.isArray(snap?.verifiedTransactions)) {
-            for (const t of snap.verifiedTransactions) {
-              if (!t || t.status !== 'verified' || t.type === 'additional_store_slot') continue;
-              if (!doesUserMatchCandidate(t, targetUser)) continue;
-              const expMs = parseSafeDateMs(t.expiresAt);
-              if (expMs > nowMs && expMs > bestExpMs) {
-                bestExpMs = expMs;
-                bestStartIso = t.verifiedAt || t.createdAt || bestStartIso;
-                bestTxnRef = t.transactionRef || bestTxnRef;
-                bestMethod = t.paymentMethod || bestMethod;
-              }
+      const snap = getCachedParsedLocalStorage('kft_pre_update_db_backup_v1');
+      if (snap && typeof snap === 'object') {
+        if (Array.isArray(snap?.vipUsers)) {
+          for (const u of snap.vipUsers) considerUserRecord(u);
+        }
+        if (Array.isArray(snap?.verifiedTransactions)) {
+          for (const t of snap.verifiedTransactions) {
+            if (!t || t.status !== 'verified' || t.type === 'additional_store_slot') continue;
+            if (!doesUserMatchCandidate(t, targetUser)) continue;
+            const expMs = parseSafeDateMs(t.expiresAt);
+            if (expMs > nowMs && expMs > bestExpMs) {
+              bestExpMs = expMs;
+              bestStartIso = t.verifiedAt || t.createdAt || bestStartIso;
+              bestTxnRef = t.transactionRef || bestTxnRef;
+              bestMethod = t.paymentMethod || bestMethod;
             }
           }
         }
-      } catch {}
+      }
 
       // 3. Check Verified Transactions (`kft_transactions_v4` & `kft_transactions_v3`)
       for (const txnKey of ['kft_transactions_v4', 'kft_transactions_v3']) {
-        try {
-          const rawTxns = localStorage.getItem(txnKey);
-          if (!rawTxns || rawTxns === 'undefined' || rawTxns === 'null') continue;
-          const txns = JSON.parse(rawTxns);
-          if (Array.isArray(txns)) {
-            for (const t of txns) {
-              if (!t || t.status !== 'verified') continue;
-              if (!doesUserMatchCandidate(t, targetUser)) continue;
-              if (t.type === 'additional_store_slot') continue;
-              const expMs = parseSafeDateMs(t.expiresAt);
-              if (expMs > nowMs && expMs > bestExpMs) {
-                bestExpMs = expMs;
-                bestStartIso = t.verifiedAt || t.createdAt || bestStartIso;
-                bestTxnRef = t.transactionRef || bestTxnRef;
-                bestMethod = t.paymentMethod || bestMethod;
-              }
-            }
-          }
-        } catch {}
-      }
-
-      // 4. Check Resolved VIP-Approved Support Tickets (`kft_support_tickets_v1`)
-      try {
-        const rawTickets = localStorage.getItem('kft_support_tickets_v1');
-        if (rawTickets && rawTickets !== 'undefined' && rawTickets !== 'null') {
-          const tickets = JSON.parse(rawTickets);
-          if (Array.isArray(tickets)) {
-            for (const tk of tickets) {
-              if (!tk || !tk.vipApproved || tk.status !== 'resolved') continue;
-              if (!doesUserMatchCandidate(tk, targetUser)) continue;
-              const baseMs =
-                parseSafeDateMs(tk.vipApprovedAt) ||
-                parseSafeDateMs(tk.updatedAt) ||
-                parseSafeDateMs(tk.createdAt);
-              const days = typeof tk.durationDays === 'number' && tk.durationDays >= 1 ? tk.durationDays : 30;
-              if (baseMs > 0) {
-                const expMs = baseMs + days * 24 * 60 * 60 * 1000;
-                if (expMs > nowMs && expMs > bestExpMs) {
-                  bestExpMs = expMs;
-                  bestStartIso = new Date(baseMs).toISOString();
-                  bestTxnRef = tk.paymentRef || bestTxnRef;
-                }
-              }
+        const txns = getCachedParsedLocalStorage(txnKey);
+        if (Array.isArray(txns)) {
+          for (const t of txns) {
+            if (!t || t.status !== 'verified') continue;
+            if (!doesUserMatchCandidate(t, targetUser)) continue;
+            if (t.type === 'additional_store_slot') continue;
+            const expMs = parseSafeDateMs(t.expiresAt);
+            if (expMs > nowMs && expMs > bestExpMs) {
+              bestExpMs = expMs;
+              bestStartIso = t.verifiedAt || t.createdAt || bestStartIso;
+              bestTxnRef = t.transactionRef || bestTxnRef;
+              bestMethod = t.paymentMethod || bestMethod;
             }
           }
         }
-      } catch {}
+      }
+
+      // 4. Check Resolved VIP-Approved Support Tickets (`kft_support_tickets_v1`)
+      const tickets = getCachedParsedLocalStorage('kft_support_tickets_v1');
+      if (Array.isArray(tickets)) {
+        for (const tk of tickets) {
+          if (!tk || !tk.vipApproved || tk.status !== 'resolved') continue;
+          if (!doesUserMatchCandidate(tk, targetUser)) continue;
+          const baseMs =
+            parseSafeDateMs(tk.vipApprovedAt) ||
+            parseSafeDateMs(tk.updatedAt) ||
+            parseSafeDateMs(tk.createdAt);
+          const days = typeof tk.durationDays === 'number' && tk.durationDays >= 1 ? tk.durationDays : 30;
+          if (baseMs > 0) {
+            const expMs = baseMs + days * 24 * 60 * 60 * 1000;
+            if (expMs > nowMs && expMs > bestExpMs) {
+              bestExpMs = expMs;
+              bestStartIso = new Date(baseMs).toISOString();
+              bestTxnRef = tk.paymentRef || bestTxnRef;
+            }
+          }
+        }
+      }
     }
   } catch {}
 

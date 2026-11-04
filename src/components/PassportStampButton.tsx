@@ -2,7 +2,7 @@ import React from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import type { Language } from '../types';
 import { tr } from '../utils/i18n';
-import { togglePassportStamp, useFoodPassport, getPassportLevel, levelTitle } from '../utils/foodPassport';
+import { togglePassportStamp, useIsFoodStamped, getPassportStamps, getPassportLevel, levelTitle } from '../utils/foodPassport';
 import { recordMeaningfulAction } from '../utils/engagement';
 import { touchDailyStreak } from '../utils/dailyHabit';
 import {
@@ -20,12 +20,12 @@ interface Props {
 }
 
 /** "I tried it" stamp button for the Cambodian Food Passport. */
-export const PassportStampButton: React.FC<Props> = ({ foodId, language, showToast, variant = 'compact' }) => {
-  const { has, count } = useFoodPassport();
-  const stamped = has(foodId);
+const PassportStampButtonInner: React.FC<Props> = ({ foodId, language, showToast, variant = 'compact' }) => {
+  const stamped = useIsFoodStamped(foodId);
 
   const onClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    const countBefore = getPassportStamps().length;
     const nowStamped = togglePassportStamp(foodId);
     if (!nowStamped) return;
     recordMeaningfulAction('favorite');
@@ -37,8 +37,8 @@ export const PassportStampButton: React.FC<Props> = ({ foodId, language, showToa
     if (outcome.kind === 'reached') return;
 
     // Celebrate crossing into a new level (cheap: depends on the count only).
-    const before = getPassportLevel(count).level;
-    const after = getPassportLevel(count + 1).level;
+    const before = getPassportLevel(countBefore).level;
+    const after = getPassportLevel(countBefore + 1).level;
     const base =
       after.min !== before.min
         ? tr(
@@ -121,3 +121,5 @@ export const PassportStampButton: React.FC<Props> = ({ foodId, language, showToa
     </button>
   );
 };
+
+export const PassportStampButton = React.memo(PassportStampButtonInner);

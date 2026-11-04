@@ -54,8 +54,15 @@ const DailyHabitCardInner: React.FC<Props> = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const allFoods = useMemo(() => organizeAndDeduplicateFoods(foods), [foods]);
-  const goal = useMemo(() => getNextGoal(allFoods, stamps), [allFoods, stamps]);
+  // Only compute passport badge/level goal when the 30-day reward bar is not the active headline
+  const allFoods = useMemo(
+    () => (rewardActive ? [] : organizeAndDeduplicateFoods(foods)),
+    [rewardActive, foods]
+  );
+  const goal = useMemo(
+    () => (rewardActive ? ({ kind: 'complete' } as const) : getNextGoal(allFoods, stamps)),
+    [rewardActive, allFoods, stamps]
+  );
 
   const rewardLabel = tr(
     language,

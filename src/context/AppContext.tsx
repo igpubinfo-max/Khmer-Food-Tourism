@@ -645,6 +645,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const cachedVipBackupListRef = useRef<User[] | null>(null);
+  const lastWrittenVipBackupSigRef = useRef<string>('');
+
   const mergeAndSaveVipRegistryBackup = (usersList: User[], deletedList: DeletedUserRecord[] = []): User[] => {
     try {
       const candidates: User[] = [];
@@ -653,32 +656,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           candidates.push(u);
         }
       }
-      try {
-        const rawExisting = localStorage.getItem('kft_vip_registry_backup_v1');
-        if (rawExisting) {
-          const parsedExisting = JSON.parse(rawExisting);
-          if (Array.isArray(parsedExisting)) {
-            for (const v of parsedExisting) {
-              if (v && isUserVipActive(v) && !checkIsUserDeleted(v, deletedList)) {
-                candidates.push(v);
+      if (cachedVipBackupListRef.current === null) {
+        const diskVips: User[] = [];
+        try {
+          const rawExisting = localStorage.getItem('kft_vip_registry_backup_v1');
+          if (rawExisting) {
+            const parsedExisting = JSON.parse(rawExisting);
+            if (Array.isArray(parsedExisting)) {
+              for (const v of parsedExisting) {
+                if (v && isUserVipActive(v)) diskVips.push(v);
               }
             }
           }
-        }
-      } catch {}
-      try {
-        const rawPreUpdate = localStorage.getItem('kft_pre_update_db_backup_v1');
-        if (rawPreUpdate) {
-          const parsedPre = JSON.parse(rawPreUpdate);
-          if (Array.isArray(parsedPre?.vipUsers)) {
-            for (const v of parsedPre.vipUsers) {
-              if (v && isUserVipActive(v) && !checkIsUserDeleted(v, deletedList)) {
-                candidates.push(v);
+        } catch {}
+        try {
+          const rawPreUpdate = localStorage.getItem('kft_pre_update_db_backup_v1');
+          if (rawPreUpdate) {
+            const parsedPre = JSON.parse(rawPreUpdate);
+            if (Array.isArray(parsedPre?.vipUsers)) {
+              for (const v of parsedPre.vipUsers) {
+                if (v && isUserVipActive(v)) diskVips.push(v);
               }
             }
           }
+        } catch {}
+        cachedVipBackupListRef.current = diskVips;
+      }
+      for (const v of cachedVipBackupListRef.current) {
+        if (v && isUserVipActive(v) && !checkIsUserDeleted(v, deletedList)) {
+          candidates.push(v);
         }
-      } catch {}
+      }
       if (candidates.length === 0) return [];
       const mergedVips = deduplicateAndNormalizeUsers(candidates, deletedList)
         .filter(u => isUserVipActive(u))
@@ -689,8 +697,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           vipCancelledAt: undefined,
           integritySeal: computeUserIntegritySealSync(u),
         }));
+      cachedVipBackupListRef.current = mergedVips;
       if (mergedVips.length > 0) {
-        safeSetCriticalAccountStorage('kft_vip_registry_backup_v1', mergedVips);
+        const sig = mergedVips
+          .map(u => `${u.id}:${u.subscriptionExpiryDate || ''}:${u.paidAdditionalStoreSlots || 0}`)
+          .join('|');
+        if (sig !== lastWrittenVipBackupSigRef.current) {
+          lastWrittenVipBackupSigRef.current = sig;
+          safeSetCriticalAccountStorage('kft_vip_registry_backup_v1', mergedVips);
+        }
       }
       return mergedVips;
     } catch {
@@ -2688,9 +2703,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Automatic Pre-Update Database & VIP Snapshot Backup whenever App Version or Build Code changes (runs at most once per session)
   const hasAttemptedVersionBackupRef = useRef(false);
+  const lastPreUpdateSnapMetaRef = useRef<{
+    usersCount: number;
+    geminiKey: string;
+    mapsKey: string;
+  } | null>(null);
   useEffect(() => {
     try {
       const CURRENT_VERSION_TAG = `${APP_VERSION_NAME}_${APP_BUILD_CODE}`;
+      const meta = lastPreUpdateSnapMetaRef.current;
+      if (
+        hasAttemptedVersionBackupRef.current &&
+        meta &&
+        users.length <= meta.usersCount &&
+        (appSettings.geminiApiKey || '').trim() === meta.geminiKey &&
+        (appSettings.googleMapsApiKey || '').trim() === meta.mapsKey
+      ) {
+        return;
+      }
+
       const lastBackedUpVersion = localStorage.getItem('kft_last_backed_up_version');
       let existingVerifiedTxns: RegistrationTransaction[] = [];
       let existingAllUsers: User[] = [];
@@ -2758,8 +2789,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         users.length > existingAllUsers.length ||
         (Boolean(effectiveGeminiKey) && effectiveGeminiKey !== existingGeminiKey);
 
+      hasAttemptedVersionBackupRef.current = true;
+      lastPreUpdateSnapMetaRef.current = {
+        usersCount: Math.max(users.length, existingAllUsers.length),
+        geminiKey: (appSettings.geminiApiKey || '').trim(),
+        mapsKey: (appSettings.googleMapsApiKey || '').trim(),
+      };
+
       if (shouldWriteBackup) {
-        hasAttemptedVersionBackupRef.current = true;
         const mergedActiveVips = mergeAndSaveVipRegistryBackup(
           [
             ...users,
@@ -2776,6 +2813,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ].filter(u => u && !checkIsUserDeleted(u, deletedUsers)),
           deletedUsers
         );
+        lastPreUpdateSnapMetaRef.current.usersCount = mergedAllUsers.length;
 
         const verifiedTxnMap = new Map<string, RegistrationTransaction>();
         for (const t of [...existingVerifiedTxns, ...transactions.filter(tx => tx.status === 'verified')]) {
@@ -3527,7 +3565,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         try {
           const parsed = JSON.parse(e.newValue);
           if (parsed && typeof parsed === 'object') {
-            setAppSettings(prev => normalizeAuthoritativeAppSettings(parsed, prev));
+            setAppSettings(prev => {
+              const next = normalizeAuthoritativeAppSettings(parsed, prev);
+              return areAppSettingsEqual(prev, next) ? prev : next;
+            });
           }
         } catch {}
       }
@@ -3539,8 +3580,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         bc = new BroadcastChannel('kft_vip_settings_sync_channel');
         bc.onmessage = (ev) => {
           if (ev?.data?.type === 'VIP_SETTINGS_UPDATED' && ev.data.settings) {
-            setAppSettings(prev => normalizeAuthoritativeAppSettings(ev.data.settings, prev));
-            setSettingsSyncError(null);
+            setAppSettings(prev => {
+              const next = normalizeAuthoritativeAppSettings(ev.data.settings, prev);
+              return areAppSettingsEqual(prev, next) ? prev : next;
+            });
+            setSettingsSyncError(prev => (prev === null ? prev : null));
           }
         };
       }
@@ -4023,12 +4067,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const unsubscribeMediaVault = subscribeMediaVaultUpdates(applyHydratedBundle);
 
     // 1. Immediately hydrate from local IndexedDB (<15ms, zero network wait), then immediately start progressive cloud media sync
+    lastMediaVaultCloudSyncAtRef.current = Date.now();
     hydrateFromLocalIdbImmediate()
       .then((idbBundle) => {
         applyHydratedBundle(idbBundle);
         if (isSupabaseConfigured() && !isSupabaseEgressCooldownActive()) {
           lastMediaVaultCloudSyncAtRef.current = Date.now();
-          hydrateAndSyncMediaOverrides(true).catch(() => {});
+          hydrateAndSyncMediaOverrides(false).catch(() => {});
         }
       })
       .catch(() => {});

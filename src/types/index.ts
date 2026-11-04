@@ -1,7 +1,7 @@
-export const APP_VERSION = 'v2.5.2';
-export const APP_VERSION_NAME = '2.5.2';
+export const APP_VERSION = 'v2.5.3';
+export const APP_VERSION_NAME = '2.5.3';
 declare const __KFT_BUILD_CODE__: number | undefined;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1381;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1382;
 export const APP_RELEASE_DATE = '2026-11-04';
 
 /**
@@ -1034,7 +1034,13 @@ export function getFoodSubGroupSortKey(food: FoodItem, group: KhmerFoodPrimaryGr
   return `4_${kh}`;
 }
 
+const organizedFoodsCache = new WeakMap<FoodItem[], FoodItem[]>();
+
 export function organizeAndDeduplicateFoods(items: FoodItem[]): FoodItem[] {
+  if (!Array.isArray(items) || items.length === 0) return [];
+  const cached = organizedFoodsCache.get(items);
+  if (cached) return cached;
+
   const byId = new Map<string, FoodItem>();
   const byNormName = new Map<string, FoodItem>();
 
@@ -1068,7 +1074,7 @@ export function organizeAndDeduplicateFoods(items: FoodItem[]): FoodItem[] {
     bong_aem: 4
   };
 
-  return Array.from(byId.values()).sort((a, b) => {
+  const sorted = Array.from(byId.values()).sort((a, b) => {
     const ga = classifyKhmerFoodPrimaryGroup(a);
     const gb = classifyKhmerFoodPrimaryGroup(b);
     if (groupOrder[ga] !== groupOrder[gb]) {
@@ -1078,6 +1084,8 @@ export function organizeAndDeduplicateFoods(items: FoodItem[]): FoodItem[] {
     const kb = getFoodSubGroupSortKey(b, gb);
     return ka.localeCompare(kb, 'km');
   });
+  organizedFoodsCache.set(items, sorted);
+  return sorted;
 }
 
 export type RestaurantPriceLevel = '$' | '$$' | '$$$' | '$$$$';

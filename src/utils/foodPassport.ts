@@ -114,6 +114,27 @@ export function useFoodPassport() {
   return { stamps, has, count: stamps.length };
 }
 
+/**
+ * Lightweight per-dish hook for FoodCard buttons: only triggers a re-render on the
+ * specific card whose stamped boolean actually changed (instead of re-rendering all 200+ cards).
+ */
+export function useIsFoodStamped(foodId: string): boolean {
+  const [stamped, setStamped] = useState<boolean>(() => isStamped(foodId));
+  useEffect(() => {
+    ensureStorageListener();
+    const refresh = () => {
+      const next = isStamped(foodId);
+      setStamped((prev) => (prev === next ? prev : next));
+    };
+    refresh();
+    passportSubscribers.add(refresh);
+    return () => {
+      passportSubscribers.delete(refresh);
+    };
+  }, [foodId]);
+  return stamped;
+}
+
 // ---------------- Levels & badges ----------------
 export interface PassportLevel {
   min: number;
