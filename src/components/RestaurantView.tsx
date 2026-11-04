@@ -3,7 +3,13 @@ import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
 import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isStrictVerifiedCambodiaRestaurant } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
-import { Store, Plus, Edit2, Shield, Settings, MapPin, Globe, RefreshCw, Search, X } from 'lucide-react';
+import { Store, Edit2, Settings, MapPin, Search } from 'lucide-react';
+import {
+  ListingSearchPanel,
+  ListingSearchInput,
+  ListingPills,
+  ListingAddPanel,
+} from './listing/ListingUI';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
 import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
@@ -256,188 +262,123 @@ export const RestaurantView: React.FC = () => {
 
   const rotCfg = getVipFeaturedRotationConfig(appSettings);
 
+  const handleAddShopClick = () => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    if (!isAdmin && myExistingRest && myExistingRest.businessType === 'hotel') {
+      showToast(
+        tr(
+          language,
+          `គណនី VIP អាចបង្កើតហាងអាហារ ឬសណ្ឋាគារបានតែ ១ ប៉ុណ្ណោះ! អ្នកបានបង្កើតសណ្ឋាគារ «${myExistingRest.nameKh}» រួចហើយ ដូច្នេះមិនអាចបន្ថែមហាងអាហារទៀតបានទេ។`,
+          `VIP accounts can add 1 listing only (Shop OR Hotel). You already added Hotel "${myExistingRest.nameEn || myExistingRest.nameKh}", so you cannot add a Shop.`,
+          `VIP 账号仅可添加 1 家（餐厅或酒店二选一）。您已添加酒店“${myExistingRest.nameEn || myExistingRest.nameKh}”，无法再添加餐厅。`
+        ),
+        'warning'
+      );
+      return;
+    }
+    if (!isAdmin && myExistingRest && storeQuota.remainingAvailableSlots <= 0) {
+      showToast(
+        tr(
+          language,
+          `គណនី VIP អាចបង្កើតហាងបានតែ ១ ប៉ុណ្ណោះ! អ្នកបានបង្កើតហាង «${myExistingRest.nameKh}» រួចហើយ (អាចចុច «កែប្រែហាងខ្ញុំ» ដើម្បីកែព័ត៌មាន)។`,
+          `VIP accounts can add 1 listing only! You already added "${myExistingRest.nameEn || myExistingRest.nameKh}" (tap "Edit My Shop" below to update it).`,
+          `VIP 账号仅可添加 1 家店铺！您已添加“${myExistingRest.nameEn || myExistingRest.nameKh}”（可点击下方编辑）。`
+        ),
+        'warning'
+      );
+      return;
+    }
+    (window as any).__kft_vip_store_initial_mode = { mode: 'create', businessType: 'restaurant' };
+    setIsVipAddRestaurantModalOpen(true);
+  };
+
+  const cleanSelectedProvince = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
+
   return (
     <div className="max-w-md mx-auto px-4 py-3 space-y-3 pb-6">
       {/* =====================================================================
-          SECTION 1: SEARCH SHOPS (ស្វែងរកហាង) — Clearly Labeled Section
+          SECTION 1: SEARCH SHOPS
           ===================================================================== */}
-      <div className="p-3.5 rounded-3xl bg-white dark:bg-slate-900 border border-emerald-500/30 dark:border-slate-800 shadow-xs space-y-2.5 font-khmer">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="p-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-950/70 text-[#064E3B] dark:text-emerald-400 shrink-0">
-              <Search className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <h2 className="font-moul text-xs sm:text-sm text-[#0F172A] dark:text-white truncate">
-                {tr(language, '🔍 ស្វែងរកហាង (Search Shops)', '🔍 Search Shops', '🔍 搜索店铺')}
-              </h2>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                {tr(
-                  language,
-                  'វាយឈ្មោះហាង ជ្រើសរើសប្រភេទហាង ឬខេត្ត-រាជធានីខាងក្រោម',
-                  'Search by shop name, category, or province below',
-                  '按店铺名称、类别或省份搜索'
-                )}
-              </p>
-            </div>
-          </div>
-
+      <ListingSearchPanel
+        icon={Search}
+        title={tr(language, 'ស្វែងរកហាង (Search Shops)', 'Search Shops', '搜索店铺')}
+        subtitle={tr(
+          language,
+          'វាយឈ្មោះហាង ជ្រើសរើសប្រភេទហាង ឬខេត្ត-រាជធានីខាងក្រោម',
+          'Search by shop name, category, or province below',
+          '按店铺名称、类别或省份搜索'
+        )}
+        headerAction={
           <button
             type="button"
             onClick={() => openGoogleMapsSearchModal('restaurant')}
-            className="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700 text-[#064E3B] dark:text-emerald-300 text-[11px] font-bold flex items-center gap-1 shrink-0 transition cursor-pointer"
+            className="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 border border-emerald-300/80 dark:border-emerald-700 text-emerald-900 dark:text-emerald-300 text-[11px] font-bold flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
           >
-            <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <MapPin className="w-4 h-4 shrink-0" strokeWidth={1.75} />
             <span>{tr(language, 'ស្វែងរកលើផែនទី', 'Find on Map', '地图查找')}</span>
           </button>
-        </div>
-
-        {/* Shop Search Input */}
-        <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <input
-            type="text"
-            value={shopSearchQuery}
-            onChange={(e) => setShopSearchQuery(e.target.value)}
-            placeholder={tr(
-              language,
-              'វាយឈ្មោះហាង មុខម្ហូប ឬខេត្ត-ក្រុង...',
-              'Search shop name, dish, or province...',
-              '输入店铺名称、菜品或省份...'
-            )}
-            className="w-full pl-9 pr-8 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm text-[#0F172A] dark:text-white placeholder:text-slate-400 font-khmer focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-          />
-          {shopSearchQuery && (
-            <button
-              type="button"
-              onClick={() => setShopSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-              title={tr(language, 'សម្អាត', 'Clear', '清除')}
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+        }
+      >
+        <ListingSearchInput
+          value={shopSearchQuery}
+          onChange={setShopSearchQuery}
+          placeholder={tr(
+            language,
+            'វាយឈ្មោះហាង មុខម្ហូប ឬខេត្ត-ក្រុង...',
+            'Search shop name, dish, or province...',
+            '输入店铺名称、菜品或省份...'
           )}
-        </div>
+          clearLabel={tr(language, 'សម្អាត', 'Clear', '清除')}
+        />
 
-        {/* Restaurant Category Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
-          {restaurantCategories.map((cat) => {
-            const active = categoryFilter === cat.id;
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setCategoryFilter(cat.id)}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                  active
-                    ? 'bg-emerald-700 text-white shadow-xs ring-1 ring-emerald-400/50'
-                    : 'bg-emerald-50/80 dark:bg-slate-800 text-emerald-900 dark:text-emerald-200 border border-emerald-200/80 dark:border-slate-700 hover:bg-emerald-100/70'
-                }`}
-              >
-                {language === 'km' ? cat.nameKh : language === 'zh' ? cat.nameZh : cat.nameEn}
-              </button>
-            );
-          })}
-        </div>
+        <ListingPills
+          items={restaurantCategories.map((cat) => ({
+            id: cat.id,
+            label: language === 'km' ? cat.nameKh : language === 'zh' ? cat.nameZh : cat.nameEn,
+          }))}
+          activeId={categoryFilter}
+          onSelect={setCategoryFilter}
+        />
 
-        {/* Province Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
-          {provinces.map((p) => {
-            const cleanSel = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
-            const active = cleanSel === p.id || (!cleanSel && p.id === '');
-            return (
-              <button
-                key={p.id || 'all'}
-                onClick={() => setSelectedProvince(p.id)}
-                className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
-                  active
-                    ? 'bg-[#064E3B] text-white font-bold shadow-xs'
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/90 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
-                }`}
-              >
-                {language === 'km' ? p.nameKh : language === 'zh' ? translateProvince(p.nameEn, 'zh') : p.nameEn}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+        <ListingPills
+          items={provinces.map((p) => ({
+            id: p.id,
+            label: language === 'km' ? p.nameKh : language === 'zh' ? translateProvince(p.nameEn, 'zh') : p.nameEn,
+          }))}
+          activeId={cleanSelectedProvince}
+          onSelect={setSelectedProvince}
+        />
+      </ListingSearchPanel>
 
       {/* =====================================================================
-          SECTION 2: ADD NEW SHOP (បន្ថែមហាងថ្មី) — Clearly Labeled Section
+          SECTION 2: ADD NEW SHOP (VIP listings are showcased as large cards)
           ===================================================================== */}
-      <div className="p-3.5 rounded-3xl bg-gradient-to-br from-[#022c22] via-[#064E3B] to-emerald-900 text-white shadow-md border border-emerald-500/40 space-y-2.5 font-khmer">
-        <div className="flex items-start justify-between gap-2.5">
-          <div className="space-y-0.5 min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <Store className="w-4 h-4 text-amber-300 shrink-0" />
-              <span className="font-moul text-xs sm:text-sm text-white">
-                {tr(language, '➕ បន្ថែមហាងថ្មី (Add New Shop)', '➕ Add New Shop', '➕ 添加新店铺')}
-              </span>
-            </div>
-            <p className="text-[11px] text-emerald-100/90 leading-relaxed">
-              {tr(
-                language,
-                'ចុចប៊ូតុង «+ បន្ថែមហាងថ្មី» ខាងក្រោម ដើម្បីបំពេញឈ្មោះហាង ប្រភេទហាង លេខទូរស័ព្ទ រូបភាព និងជ្រើសរើសទីតាំងលើផែនទី Google Maps។',
-                'Tap "+ Add New Shop" below to enter shop details, select location on Google Maps, preview, and submit.',
-                '点击下方“+ 添加新店铺”填写店铺信息、在 Google 地图上选择位置并预览提交。'
-              )}
-            </p>
-          </div>
-        </div>
-
-        {/* Prominent + Add New Shop Button */}
-        <button
-          type="button"
-          onClick={() => {
-            if (!currentUser) {
-              setIsAuthModalOpen(true);
-              return;
-            }
-            if (!isAdmin && myExistingRest && myExistingRest.businessType === 'hotel') {
-              showToast(
-                tr(
-                  language,
-                  `🔒 គណនី VIP អាចបង្កើតហាងអាហារ ឬសណ្ឋាគារបានតែ ១ ប៉ុណ្ណោះ! អ្នកបានបង្កើតសណ្ឋាគារ «${myExistingRest.nameKh}» រួចហើយ ដូច្នេះមិនអាចបន្ថែមហាងអាហារទៀតបានទេ។`,
-                  `🔒 VIP accounts can add 1 listing only (Shop OR Hotel). You already added Hotel "${myExistingRest.nameEn || myExistingRest.nameKh}", so you cannot add a Shop.`,
-                  `🔒 VIP 账号仅可添加 1 家（餐厅或酒店二选一）。您已添加酒店“${myExistingRest.nameEn || myExistingRest.nameKh}”，无法再添加餐厅。`
-                ),
-                'warning'
-              );
-              return;
-            }
-            if (!isAdmin && myExistingRest && storeQuota.remainingAvailableSlots <= 0) {
-              showToast(
-                tr(
-                  language,
-                  `🔒 គណនី VIP អាចបង្កើតហាងបានតែ ១ ប៉ុណ្ណោះ! អ្នកបានបង្កើតហាង «${myExistingRest.nameKh}» រួចហើយ (អាចចុច «កែប្រែហាងខ្ញុំ» ដើម្បីកែព័ត៌មាន)។`,
-                  `🔒 VIP accounts can add 1 listing only! You already added "${myExistingRest.nameEn || myExistingRest.nameKh}" (tap "Edit My Shop" below to update it).`,
-                  `🔒 VIP 账号仅可添加 1 家店铺！您已添加“${myExistingRest.nameEn || myExistingRest.nameKh}”（可点击下方编辑）。`
-                ),
-                'warning'
-              );
-              return;
-            }
-            (window as any).__kft_vip_store_initial_mode = { mode: 'create', businessType: 'restaurant' };
-            setIsVipAddRestaurantModalOpen(true);
-          }}
-          className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-md"
-        >
-          <Plus className="w-4 h-4 stroke-[3] shrink-0" />
-          <span>{tr(language, '+ បន្ថែមហាងថ្មី (+ Add New Shop)', '+ Add New Shop', '+ 添加新店铺')}</span>
-        </button>
-
-        {/* Secondary Management Controls for Admin or Existing Shop Owners */}
+      <ListingAddPanel
+        icon={Store}
+        title={tr(language, 'បន្ថែមហាងថ្មី (Add New Shop)', 'Add New Shop', '添加新店铺')}
+        description={tr(
+          language,
+          'ហាងដែលបន្ថែមដោយគណនី VIP នឹងបង្ហាញជាកាតធំ។ បំពេញឈ្មោះហាង ប្រភេទហាង លេខទូរស័ព្ទ រូបភាព និងជ្រើសរើសទីតាំងលើផែនទី Google Maps។',
+          'Shops added by a VIP account are showcased as large cards. Enter shop details, choose the location on Google Maps, then submit.',
+          'VIP 账号添加的店铺将以大卡片展示。填写店铺信息并在 Google 地图上选择位置后提交。'
+        )}
+        actionLabel={tr(language, 'បន្ថែមហាងថ្មី (Add New Shop)', 'Add New Shop', '添加新店铺')}
+        onAction={handleAddShopClick}
+      >
         {isAdmin ? (
-          <div className="grid grid-cols-2 gap-2 pt-0.5">
+          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => {
                 (window as any).__kft_admin_tab = 'restaurants';
                 setIsAdminOpen(true);
               }}
-              className="py-2 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 text-[11px] font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
+              className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
-              <Settings className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+              <Settings className="w-4 h-4 text-amber-300 shrink-0" strokeWidth={1.75} />
               <span className="truncate">
                 {tr(language, `គ្រប់គ្រងហាង (${totalDirectoryCount})`, `Manage Shops (${totalDirectoryCount})`, `管理店铺 (${totalDirectoryCount})`)}
               </span>
@@ -445,35 +386,33 @@ export const RestaurantView: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsRestaurantCheckInModalOpen(true)}
-              className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-emerald-100 border border-white/15 text-[11px] font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
+              className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-emerald-50 border border-white/15 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
-              <MapPin className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
+              <MapPin className="w-4 h-4 text-emerald-300 shrink-0" strokeWidth={1.75} />
               <span className="truncate">{tr(language, 'ឆែកអ៊ីន & បញ្ជាក់ GPS', 'GPS Check-In', 'GPS 实地核验')}</span>
             </button>
           </div>
         ) : myExistingRest ? (
-          <div className="pt-1 border-t border-white/15 flex items-center justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <span className="text-[11px] font-bold text-amber-200 truncate block">
-                {tr(
-                  language,
-                  `ហាងរបស់ខ្ញុំ៖ ${myExistingRest.nameKh}`,
-                  `My Shop: ${myExistingRest.nameEn || myExistingRest.nameKh}`,
-                  `我的店铺：${myExistingRest.nameEn || myExistingRest.nameKh}`
-                )}
-              </span>
-            </div>
+          <div className="pt-3 border-t border-white/15 flex items-center justify-between gap-2">
+            <span className="min-w-0 flex-1 text-[11px] font-bold text-amber-200 truncate">
+              {tr(
+                language,
+                `ហាងរបស់ខ្ញុំ៖ ${myExistingRest.nameKh}`,
+                `My Shop: ${myExistingRest.nameEn || myExistingRest.nameKh}`,
+                `我的店铺：${myExistingRest.nameEn || myExistingRest.nameKh}`
+              )}
+            </span>
             <button
               type="button"
               onClick={() => openManageMyVipStore(myExistingRest.id)}
-              className="py-1.5 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/25 text-[11px] font-bold flex items-center gap-1.5 shrink-0 transition cursor-pointer"
+              className="py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/25 text-[11px] font-bold flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
             >
-              <Edit2 className="w-3 h-3 text-amber-300" />
+              <Edit2 className="w-4 h-4 text-amber-300" strokeWidth={1.75} />
               <span>{tr(language, 'កែប្រែហាងខ្ញុំ', 'Edit My Shop', '编辑我的店铺')}</span>
             </button>
           </div>
         ) : null}
-      </div>
+      </ListingAddPanel>
 
       {/* Restaurant Cards List */}
       <div className="space-y-2">
@@ -501,7 +440,7 @@ export const RestaurantView: React.FC = () => {
           </>
         ) : (
           <div className="py-12 text-center text-slate-400 space-y-2 font-khmer">
-            <Store className="w-10 h-10 mx-auto text-slate-300" />
+            <Store className="w-10 h-10 mx-auto text-slate-300" strokeWidth={1.75} />
             <p className="text-xs">
               {tr(language, 'រកមិនឃើញហាងអាហារក្នុងផ្នែកនេះទេ', 'No restaurants matched your filters', '未找到符合筛选条件的餐厅')}
             </p>

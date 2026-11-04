@@ -123,7 +123,7 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
               )}
               {destination.priceRange && (
                 <span className="px-1.5 py-0.2 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[10px] font-bold border border-amber-200/70 dark:border-amber-800/70 shrink-0">
-                  💵 {destination.priceRange}
+                  {destination.priceRange}
                 </span>
               )}
               {loc.category && (
@@ -287,7 +287,7 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
             </div>
             {destination.priceRange && (
               <span className="px-2 py-0.5 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold text-xs border border-amber-200/70 dark:border-amber-800/70">
-                💵 {destination.priceRange}
+                {destination.priceRange}
               </span>
             )}
           </div>
