@@ -259,7 +259,7 @@ public class NativeAbaLauncherPlugin extends Plugin {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("image/*");
             intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/jpeg", "image/png", "image/webp"});
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivityForResult(call, Intent.createChooser(intent, "Select Image"), "handleGalleryPickResult");
         } catch (Exception e) {
             call.reject("Could not launch gallery picker: " + e.getMessage());
@@ -345,31 +345,40 @@ public class NativeAbaLauncherPlugin extends Plugin {
     private String processUriToDataUrl(Context context, Uri uri, int maxDim) {
         ContentResolver resolver = context.getContentResolver();
         try {
-            BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inJustDecodeBounds = true;
+            byte[] rawBytes = null;
             try (InputStream is = resolver.openInputStream(uri)) {
                 if (is != null) {
-                    BitmapFactory.decodeStream(is, null, opts);
+                    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                    byte[] chunk = new byte[16384];
+                    int nRead;
+                    int totalRead = 0;
+                    int maxBytes = 25 * 1024 * 1024;
+                    while ((nRead = is.read(chunk, 0, chunk.length)) != -1) {
+                        buffer.write(chunk, 0, nRead);
+                        totalRead += nRead;
+                        if (totalRead > maxBytes) break;
+                    }
+                    rawBytes = buffer.toByteArray();
                 }
-            }
-            if (opts.outWidth <= 0 || opts.outHeight <= 0) {
-                return null;
+            } catch (Exception ignored) {
             }
 
-            int origW = opts.outWidth;
-            int origH = opts.outHeight;
-            int sampleSize = 1;
-            while ((origW / sampleSize) > (maxDim * 1.5) || (origH / sampleSize) > (maxDim * 1.5)) {
-                sampleSize *= 2;
-            }
-
-            opts.inJustDecodeBounds = false;
-            opts.inSampleSize = sampleSize;
-
-            Bitmap bitmap;
-            try (InputStream is = resolver.openInputStream(uri)) {
-                if (is == null) return null;
-                bitmap = BitmapFactory.decodeStream(is, null, opts);
+            Bitmap bitmap = null;
+            if (rawBytes != null && rawBytes.length > 0) {
+                BitmapFactory.Options opts = new BitmapFactory.Options();
+                opts.inJustDecodeBounds = true;
+                BitmapFactory.decodeByteArray(rawBytes, 0, rawBytes.length, opts);
+                int origW = opts.outWidth;
+                int origH = opts.outHeight;
+                int sampleSize = 1;
+                if (origW > 0 && origH > 0) {
+                    while ((origW / sampleSize) > (maxDim * 1.5) || (origH / sampleSize) > (maxDim * 1.5)) {
+                        sampleSize *= 2;
+                    }
+                }
+                opts.inJustDecodeBounds = false;
+                opts.inSampleSize = sampleSize;
+                bitmap = BitmapFactory.decodeByteArray(rawBytes, 0, rawBytes.length, opts);
             }
             if (bitmap == null) return null;
 
@@ -412,7 +421,7 @@ public class NativeAbaLauncherPlugin extends Plugin {
             intent.setType("image/*");
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-            intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/jpeg", "image/png", "image/webp"});
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivityForResult(call, Intent.createChooser(intent, "Select Photos (Multiple)"), "handleMultipleGalleryPickResult");
         } catch (Exception e) {
             call.reject("Could not launch multi-gallery picker: " + e.getMessage());

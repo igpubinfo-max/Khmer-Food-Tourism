@@ -1463,6 +1463,17 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
       ? 'owner'
       : 'user';
 
+  const isCustomDataAvatar = (av?: string) =>
+    Boolean(av && av.startsWith('data:image/') && !av.startsWith('data:image/svg'));
+  const isValidNonStockAvatar = (av?: string) =>
+    Boolean(
+      av &&
+        !av.includes('photo-1535713875002') &&
+        !av.includes('photo-1534528741775') &&
+        !av.includes('photo-1507003211169') &&
+        !av.includes('photo-1517841905240')
+    );
+
   const baseMerged: User = {
     ...first,
     ...second,
@@ -1474,20 +1485,15 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
     email: (second.email || first.email || '').trim().toLowerCase(),
     phone: second.phone || first.phone || undefined,
     role: mergedRole,
-    avatar:
-      second.avatar &&
-      !second.avatar.includes('photo-1535713875002') &&
-      !second.avatar.includes('photo-1534528741775') &&
-      !second.avatar.includes('photo-1507003211169') &&
-      !second.avatar.includes('photo-1517841905240')
-        ? second.avatar
-        : first.avatar &&
-            !first.avatar.includes('photo-1535713875002') &&
-            !first.avatar.includes('photo-1534528741775') &&
-            !first.avatar.includes('photo-1507003211169') &&
-            !first.avatar.includes('photo-1517841905240')
-          ? first.avatar
-          : second.avatar || first.avatar || '',
+    avatar: isCustomDataAvatar(second.avatar)
+      ? second.avatar!
+      : isCustomDataAvatar(first.avatar)
+        ? first.avatar!
+        : isValidNonStockAvatar(second.avatar)
+          ? second.avatar!
+          : isValidNonStockAvatar(first.avatar)
+            ? first.avatar!
+            : second.avatar || first.avatar || '',
     restaurantId: second.restaurantId || first.restaurantId,
     authProvider:
       first.authProvider === 'google' || second.authProvider === 'google'
@@ -2182,15 +2188,15 @@ export async function syncAllAppDataWithSupabase(localState: {
       }
     } catch {}
 
-    // 2. Deduplicate & Normalize Users across all sources (Cloud v2 + Cloud v1 + Atomic per-user rows + Local users + CurrentUser + Recovered activity)
+    // 2. Deduplicate & Normalize Users across all sources (Recovered activity first, then Cloud, then Local users & CurrentUser last so live profile edits win)
     const mergedUsers = deduplicateAndNormalizeUsers(
       [
-        ...(Array.isArray(cloudUsersV2) ? cloudUsersV2 : []),
+        ...recoveredUsersFromActivity,
         ...(Array.isArray(cloudUsers) ? cloudUsers : []),
+        ...(Array.isArray(cloudUsersV2) ? cloudUsersV2 : []),
         ...atomicUserDocs.map(doc => doc.payload),
         ...(Array.isArray(localState.users) ? localState.users : []),
         localState.currentUser && localState.currentUser.role !== 'admin' ? localState.currentUser : undefined,
-        ...recoveredUsersFromActivity,
       ],
       mergedDeletedUsers
     );

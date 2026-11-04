@@ -110,44 +110,149 @@ export function saveAdminAvatar(dataUrl: string): void {
   }
 }
 
+export function isCustomUploadedAvatarDataUrl(url?: string | null): boolean {
+  return Boolean(
+    url &&
+      typeof url === 'string' &&
+      url.startsWith('data:image/') &&
+      !url.startsWith('data:image/svg')
+  );
+}
+
 /**
- * Turns a picked photo into a small square JPEG data URL (center-cropped).
- * Data URLs survive app restarts, offline use, cloud sync and Android WebView (unlike blob: URLs).
+ * Turns a picked photo File/Blob or Data URL into a crisp square JPEG data URL (center-cropped).
+ * Uses FileReader (instead of blob: URLs) so Android WebView content:// URIs and Gallery picks never fail.
  */
-export function fileToAvatarDataUrl(file: File, size = 192, quality = 0.82): Promise<string> {
+export function fileToAvatarDataUrl(
+  fileOrDataUrl: File | Blob | string,
+  size = 256,
+  quality = 0.85
+): Promise<string> {
+  const cropDataUrlToSquare = (rawDataUrl: string): Promise<string> =>
+    new Promise((resolve, reject) => {
+      if (!rawDataUrl || !rawDataUrl.startsWith('data:')) {
+        reject(new Error('invalid_data_url'));
+        return;
+      }
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const w = img.naturalWidth || img.width;
+          const h = img.naturalHeight || img.height;
+          const side = Math.min(w, h);
+          if (!side) {
+            if (rawDataUrl.startsWith('data:image/')) {
+              resolve(rawDataUrl);
+              return;
+            }
+            throw new Error('empty_image');
+          }
+          const sx = Math.max(0, (w - side) / 2);
+          const sy = Math.max(0, (h - side) / 2);
+          const canvas = document.createElement('canvas');
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(rawDataUrl);
+            return;
+          }
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(0, 0, size, size);
+          ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+          const jpegUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(jpegUrl && jpegUrl.startsWith('data:image/') ? jpegUrl : rawDataUrl);
+        } catch {
+          if (rawDataUrl.startsWith('data:image/')) {
+            resolve(rawDataUrl);
+          } else {
+            reject(new Error('crop_failed'));
+          }
+        }
+      };
+      img.onerror = () => {
+        if (rawDataUrl.startsWith('data:image/jpeg') || rawDataUrl.startsWith('data:image/png') || rawDataUrl.startsWith('data:image/webp')) {
+          resolve(rawDataUrl);
+        } else {
+          reject(new Error('image_decode_failed'));
+        }
+      };
+      img.src = rawDataUrl;
+    });
+
+  if (typeof fileOrDataUrl === 'string') {
+    return cropDataUrlToSquare(fileOrDataUrl);
+  }
+
   return new Promise((resolve, reject) => {
-    if (!file || !file.type.startsWith('image/')) {
+    if (!fileOrDataUrl) {
       reject(new Error('not_an_image'));
       return;
     }
-    const objectUrl = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
+    const fileName = (fileOrDataUrl as File).name || '';
+    const fileType = fileOrDataUrl.type || '';
+    // On Android WebView, content:// URIs often have an empty file.type or application/octet-stream
+    if (
+      fileType &&
+      !fileType.startsWith('image/') &&
+      fileType !== 'application/octet-stream' &&
+      !/\.(jpe?g|png|webp|gif|bmp|heic|heif|avif)$/i.test(fileName)
+    ) {
+      reject(new Error('not_an_image'));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : '';
+      if (!result) {
+        reject(new Error('empty_file_reader'));
+        return;
+      }
+      // Normalize data:application/octet-stream;base64,... from Android content providers into data:image/jpeg;base64,...
+      const normalizedDataUrl = result.startsWith('data:image/')
+        ? result
+        : result.replace(/^data:[^;]+;base64,/, 'data:image/jpeg;base64,');
+      cropDataUrlToSquare(normalizedDataUrl).then(resolve).catch(reject);
+    };
+    reader.onerror = () => {
+      // Secondary fallback via URL.createObjectURL if FileReader fails
       try {
-        const side = Math.min(img.naturalWidth, img.naturalHeight);
-        if (!side) throw new Error('empty_image');
-        const sx = (img.naturalWidth - side) / 2;
-        const sy = (img.naturalHeight - side) / 2;
-        const canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) throw new Error('no_canvas');
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(0, 0, size, size);
-        ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
-        resolve(canvas.toDataURL('image/jpeg', quality));
+        const objectUrl = URL.createObjectURL(fileOrDataUrl);
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const w = img.naturalWidth || img.width;
+            const h = img.naturalHeight || img.height;
+            const side = Math.min(w, h);
+            if (!side) throw new Error('empty_image');
+            const sx = (w - side) / 2;
+            const sy = (h - side) / 2;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error('no_canvas');
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, size, size);
+            ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          } catch (err) {
+            reject(err);
+          } finally {
+            URL.revokeObjectURL(objectUrl);
+          }
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error('image_decode_failed'));
+        };
+        img.src = objectUrl;
       } catch (err) {
         reject(err);
-      } finally {
-        URL.revokeObjectURL(objectUrl);
       }
     };
-    img.onerror = () => {
-      URL.revokeObjectURL(objectUrl);
-      reject(new Error('image_decode_failed'));
-    };
-    img.src = objectUrl;
+    reader.readAsDataURL(fileOrDataUrl);
   });
 }
 
@@ -234,8 +339,13 @@ export function normalizeAvatarUrl(rawUrl?: string | null): string | null {
 
 /**
  * Persists a user's valid avatar URL in localStorage so it never disappears across sessions or cloud merges.
+ * Custom uploaded `data:image/` photos are never overwritten by external/stock URLs unless forceOverwrite is true.
  */
-export function cacheUserAvatar(keyId?: string | null, avatarUrl?: string | null): void {
+export function cacheUserAvatar(
+  keyId?: string | null,
+  avatarUrl?: string | null,
+  forceOverwrite = false
+): void {
   if (!keyId) return;
   const normalized = normalizeAvatarUrl(avatarUrl);
   if (!normalized) return;
@@ -244,7 +354,15 @@ export function cacheUserAvatar(keyId?: string | null, avatarUrl?: string | null
 
   const map = readAvatarCacheMap();
   const cleanKey = keyId.trim().toLowerCase();
-  if (map[cleanKey] !== normalized) {
+  const existing = map[cleanKey];
+  if (
+    !forceOverwrite &&
+    isCustomUploadedAvatarDataUrl(existing) &&
+    !isCustomUploadedAvatarDataUrl(normalized)
+  ) {
+    return;
+  }
+  if (existing !== normalized) {
     map[cleanKey] = normalized;
     writeAvatarCacheMap(map);
   }
@@ -258,9 +376,10 @@ export function getCachedUserAvatar(keyId?: string | null): string | null {
 
 /**
  * Resolves the best possible avatar URL for a user:
- * 1. Valid direct avatar on the user object (cached immediately for future sessions)
- * 2. Previously cached valid avatar for this user ID or email/name
- * 3. Instant deterministic SVG data-URI fallback with the user's initials
+ * 1. Direct custom uploaded `data:image/` avatar on the user object (cached immediately)
+ * 2. Previously cached custom uploaded `data:image/` avatar for this user ID, email, or name
+ * 3. Valid external avatar URL on the user object or in cache
+ * 4. Instant deterministic SVG data-URI fallback with the user's initials
  */
 export function resolveUserAvatarUrl(
   user?: { id?: string; email?: string; name?: string; avatar?: string; role?: string } | null
@@ -270,11 +389,28 @@ export function resolveUserAvatarUrl(
   }
 
   if (user.role === 'admin') {
-    return typeof user.avatar === 'string' && user.avatar.startsWith('data:image/')
+    return typeof user.avatar === 'string' && isCustomUploadedAvatarDataUrl(user.avatar)
       ? user.avatar
       : getAdminAvatarUrl();
   }
+
   const normalizedDirect = normalizeAvatarUrl(user.avatar);
+  if (isCustomUploadedAvatarDataUrl(normalizedDirect)) {
+    if (user.id) cacheUserAvatar(user.id, normalizedDirect, true);
+    if (user.email) cacheUserAvatar(user.email, normalizedDirect, true);
+    if (user.name) cacheUserAvatar(`name:${user.name}`, normalizedDirect, true);
+    return normalizedDirect!;
+  }
+
+  const cachedById = getCachedUserAvatar(user.id);
+  if (isCustomUploadedAvatarDataUrl(cachedById)) return cachedById!;
+
+  const cachedByEmail = getCachedUserAvatar(user.email);
+  if (isCustomUploadedAvatarDataUrl(cachedByEmail)) return cachedByEmail!;
+
+  const cachedByName = user.name ? getCachedUserAvatar(`name:${user.name}`) : null;
+  if (isCustomUploadedAvatarDataUrl(cachedByName)) return cachedByName!;
+
   if (normalizedDirect) {
     if (user.id) cacheUserAvatar(user.id, normalizedDirect);
     if (user.email) cacheUserAvatar(user.email, normalizedDirect);
@@ -282,13 +418,8 @@ export function resolveUserAvatarUrl(
     return normalizedDirect;
   }
 
-  const cachedById = getCachedUserAvatar(user.id);
   if (cachedById) return cachedById;
-
-  const cachedByEmail = getCachedUserAvatar(user.email);
   if (cachedByEmail) return cachedByEmail;
-
-  const cachedByName = user.name ? getCachedUserAvatar(`name:${user.name}`) : null;
   if (cachedByName) return cachedByName;
 
   return getFallbackAvatarDataUri(user.name, user.role);

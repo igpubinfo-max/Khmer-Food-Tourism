@@ -13,30 +13,4 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(NativeAppUpdatePlugin.class);
         super.onCreate(savedInstanceState);
     }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        try {
-            if (this.bridge != null && this.bridge.getWebView() != null) {
-                WebView webView = this.bridge.getWebView();
-                webView.onPause();
-                webView.pauseTimers();
-            }
-        } catch (Exception ignored) {
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        try {
-            if (this.bridge != null && this.bridge.getWebView() != null) {
-                WebView webView = this.bridge.getWebView();
-                webView.onResume();
-                webView.resumeTimers();
-            }
-        } catch (Exception ignored) {
-        }
-    }
 }

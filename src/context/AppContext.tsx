@@ -651,11 +651,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const mergeAndSaveVipRegistryBackup = (usersList: User[], deletedList: DeletedUserRecord[] = []): User[] => {
     try {
       const candidates: User[] = [];
-      for (const u of usersList) {
-        if (u && isUserVipActive(u) && !checkIsUserDeleted(u, deletedList)) {
-          candidates.push(u);
-        }
-      }
       if (cachedVipBackupListRef.current === null) {
         const diskVips: User[] = [];
         try {
@@ -682,9 +677,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         } catch {}
         cachedVipBackupListRef.current = diskVips;
       }
+      // Put cached backup records first, then live usersList second so newly updated avatars/names on usersList win
       for (const v of cachedVipBackupListRef.current) {
         if (v && isUserVipActive(v) && !checkIsUserDeleted(v, deletedList)) {
           candidates.push(v);
+        }
+      }
+      for (const u of usersList) {
+        if (u && isUserVipActive(u) && !checkIsUserDeleted(u, deletedList)) {
+          candidates.push(u);
         }
       }
       if (candidates.length === 0) return [];
@@ -700,7 +701,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       cachedVipBackupListRef.current = mergedVips;
       if (mergedVips.length > 0) {
         const sig = mergedVips
-          .map(u => `${u.id}:${u.subscriptionExpiryDate || ''}:${u.paidAdditionalStoreSlots || 0}`)
+          .map(
+            u =>
+              `${u.id}:${u.name || ''}:${u.avatar ? u.avatar.length + ':' + u.avatar.slice(-16) : ''}:${u.subscriptionExpiryDate || ''}:${u.paidAdditionalStoreSlots || 0}`
+          )
           .join('|');
         if (sig !== lastWrittenVipBackupSigRef.current) {
           lastWrittenVipBackupSigRef.current = sig;
@@ -722,18 +726,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (rawDel) localDeleted = JSON.parse(rawDel) || [];
       } catch {}
 
-      let loadedUsers: User[] = [];
+      const loadedUsers: User[] = [];
+      // 1. Load backup vaults first so live `kft_users_v5` and `kft_current_user_v5` take precedence for profile edits (avatar, name)
+      try {
+        const rawPreUpdate = localStorage.getItem('kft_pre_update_db_backup_v1');
+        if (rawPreUpdate) {
+          const snap = JSON.parse(rawPreUpdate);
+          if (Array.isArray(snap?.allUsers)) {
+            loadedUsers.push(...snap.allUsers.filter((u: User) => u && !checkIsUserDeleted(u, localDeleted)));
+          }
+          if (Array.isArray(snap?.vipUsers)) {
+            loadedUsers.push(...snap.vipUsers.filter((v: User) => v && !checkIsUserDeleted(v, localDeleted)));
+          }
+        }
+        const rawVipBackup = localStorage.getItem('kft_vip_registry_backup_v1');
+        if (rawVipBackup) {
+          const vipList: User[] = JSON.parse(rawVipBackup);
+          if (Array.isArray(vipList)) {
+            loadedUsers.push(...vipList.filter(v => v && !checkIsUserDeleted(v, localDeleted)));
+          }
+        }
+      } catch {}
+
+      // 2. Load primary `kft_users_v5`
       const saved = localStorage.getItem('kft_users_v5') || localStorage.getItem('kft_users_v4');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          loadedUsers = parsed
-            .filter((u: User) => !checkIsUserDeleted(u, localDeleted))
-            .map(sanitizeUserSocialAccounts);
+          loadedUsers.push(
+            ...parsed
+              .filter((u: User) => !checkIsUserDeleted(u, localDeleted))
+              .map(sanitizeUserSocialAccounts)
+          );
         }
       }
 
-      // Also include any active non-admin session stored in `kft_current_user_v5` / `kft_current_user_v4` so a logged-in user is never missing from `users`
+      // 3. Load active non-admin session stored in `kft_current_user_v5` / `kft_current_user_v4` last so current session edits always win
       try {
         const savedCur = localStorage.getItem('kft_current_user_v5') || localStorage.getItem('kft_current_user_v4');
         if (savedCur && savedCur !== 'undefined' && savedCur !== 'null') {
@@ -750,36 +778,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       } catch {}
 
-      // Reconcile with local VIP Registry Backup (`kft_vip_registry_backup_v1`) & Pre-Update Backup (`kft_pre_update_db_backup_v1`)
-      try {
-        const rawVipBackup = localStorage.getItem('kft_vip_registry_backup_v1');
-        if (rawVipBackup) {
-          const vipList: User[] = JSON.parse(rawVipBackup);
-          if (Array.isArray(vipList)) {
-            loadedUsers.push(...vipList.filter(v => v && !checkIsUserDeleted(v, localDeleted)));
-          }
-        }
-        const rawPreUpdate = localStorage.getItem('kft_pre_update_db_backup_v1');
-        if (rawPreUpdate) {
-          const snap = JSON.parse(rawPreUpdate);
-          if (Array.isArray(snap?.allUsers)) {
-            loadedUsers.push(...snap.allUsers.filter((u: User) => u && !checkIsUserDeleted(u, localDeleted)));
-          }
-          if (Array.isArray(snap?.vipUsers)) {
-            loadedUsers.push(...snap.vipUsers.filter((v: User) => v && !checkIsUserDeleted(v, localDeleted)));
-          }
-        }
-      } catch {}
-
       let deduped = deduplicateAndNormalizeUsers(loadedUsers, localDeleted).map(u => {
-        if (isPlaceholderOrInvalidAvatarUrl(u.avatar)) {
-          const cachedAv =
-            getCachedUserAvatar(u.id) ||
-            (u.email ? getCachedUserAvatar(u.email) : null) ||
-            (u.name ? getCachedUserAvatar(`name:${u.name}`) : null);
-          if (cachedAv) {
-            return { ...u, avatar: cachedAv };
-          }
+        const cachedAv =
+          getCachedUserAvatar(u.id) ||
+          (u.email ? getCachedUserAvatar(u.email) : null) ||
+          (u.name ? getCachedUserAvatar(`name:${u.name}`) : null);
+        if (
+          cachedAv &&
+          ((cachedAv.startsWith('data:image/') && !cachedAv.startsWith('data:image/svg')) ||
+            isPlaceholderOrInvalidAvatarUrl(u.avatar))
+        ) {
+          return { ...u, avatar: cachedAv };
         }
         return u;
       });
@@ -904,14 +913,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               deduplicateAndNormalizeUsers([matchedFromUsers, sanitizedCur], localDeleted)[0] || matchedFromUsers
             );
           }
-          if (isPlaceholderOrInvalidAvatarUrl(sanitizedCur.avatar)) {
-            const cachedCurAv =
-              getCachedUserAvatar(sanitizedCur.id) ||
-              (sanitizedCur.email ? getCachedUserAvatar(sanitizedCur.email) : null) ||
-              (sanitizedCur.name ? getCachedUserAvatar(`name:${sanitizedCur.name}`) : null);
-            if (cachedCurAv) {
-              sanitizedCur = { ...sanitizedCur, avatar: cachedCurAv };
-            }
+          const cachedCurAv =
+            getCachedUserAvatar(sanitizedCur.id) ||
+            (sanitizedCur.email ? getCachedUserAvatar(sanitizedCur.email) : null) ||
+            (sanitizedCur.name ? getCachedUserAvatar(`name:${sanitizedCur.name}`) : null);
+          if (
+            cachedCurAv &&
+            ((cachedCurAv.startsWith('data:image/') && !cachedCurAv.startsWith('data:image/svg')) ||
+              isPlaceholderOrInvalidAvatarUrl(sanitizedCur.avatar))
+          ) {
+            sanitizedCur = { ...sanitizedCur, avatar: cachedCurAv };
           }
           const authVip = findLocalAuthoritativeVipEntitlement(sanitizedCur, users);
           const authVipExpMs = authVip ? (authVip.expiryMs || parseSafeDateMs(authVip.expiryIso)) : 0;
@@ -3760,13 +3771,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             );
           } else if (!isAdminAccount) {
             const matchedCurrent = result.mergedUsers.find(u => doesUserMatchTarget(u, liveCurrentUser));
-            if (matchedCurrent && JSON.stringify(matchedCurrent) !== JSON.stringify(liveCurrentUser)) {
-              lastCurrentUserSyncSigRef.current = `${matchedCurrent.id}|${matchedCurrent.email}|${matchedCurrent.phone || ''}|${matchedCurrent.name}|${matchedCurrent.membershipTier || ''}|${matchedCurrent.subscriptionStatus || ''}|${matchedCurrent.subscriptionExpiryDate || ''}|${matchedCurrent.paymentStatus || ''}|${matchedCurrent.paidAdditionalStoreSlots || 0}|${Boolean(matchedCurrent.isDisabled)}`;
-              setCurrentUser(matchedCurrent);
-              latestSyncStateRef.current.currentUser = matchedCurrent;
-              try {
-                localStorage.setItem('kft_current_user_v5', JSON.stringify(matchedCurrent));
-              } catch {}
+            if (matchedCurrent) {
+              const liveHasCustomDataAvatar =
+                typeof liveCurrentUser.avatar === 'string' &&
+                liveCurrentUser.avatar.startsWith('data:image/') &&
+                !liveCurrentUser.avatar.startsWith('data:image/svg');
+              const matchedHasCustomDataAvatar =
+                typeof matchedCurrent.avatar === 'string' &&
+                matchedCurrent.avatar.startsWith('data:image/') &&
+                !matchedCurrent.avatar.startsWith('data:image/svg');
+              const preservedCurrent: User =
+                liveHasCustomDataAvatar && !matchedHasCustomDataAvatar
+                  ? { ...matchedCurrent, avatar: liveCurrentUser.avatar }
+                  : matchedCurrent;
+
+              if (JSON.stringify(preservedCurrent) !== JSON.stringify(liveCurrentUser)) {
+                const avSig = preservedCurrent.avatar ? `${preservedCurrent.avatar.length}:${preservedCurrent.avatar.slice(-24)}` : '';
+                lastCurrentUserSyncSigRef.current = `${preservedCurrent.id}|${preservedCurrent.email}|${preservedCurrent.phone || ''}|${preservedCurrent.name}|${avSig}|${preservedCurrent.membershipTier || ''}|${preservedCurrent.subscriptionStatus || ''}|${preservedCurrent.subscriptionExpiryDate || ''}|${preservedCurrent.paymentStatus || ''}|${preservedCurrent.paidAdditionalStoreSlots || 0}|${Boolean(preservedCurrent.isDisabled)}`;
+                setCurrentUser(preservedCurrent);
+                latestSyncStateRef.current.currentUser = preservedCurrent;
+                try {
+                  localStorage.setItem('kft_current_user_v5', JSON.stringify(preservedCurrent));
+                } catch {}
+              }
             }
           }
         }
@@ -6359,9 +6386,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (updated.role === 'admin') {
         saveAdminAvatar(newAvatar);
       } else {
-        cacheUserAvatar(updated.id, newAvatar);
-        if (updated.email) cacheUserAvatar(updated.email, newAvatar);
-        cacheUserAvatar(`name:${updated.name}`, newAvatar);
+        cacheUserAvatar(updated.id, newAvatar, true);
+        const canonId = getCanonicalUserId(updated);
+        if (canonId) cacheUserAvatar(canonId, newAvatar, true);
+        if (updated.email) cacheUserAvatar(updated.email, newAvatar, true);
+        cacheUserAvatar(`name:${updated.name}`, newAvatar, true);
       }
     }
 
@@ -6369,16 +6398,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     latestSyncStateRef.current.currentUser = updated;
     setUsers(prev => {
       const next = deduplicateAndNormalizeUsers(
-        prev.map(u => (u.id === currentUser.id ? updated : u)),
+        [
+          ...prev.map(u => (doesUserMatchTarget(u, currentUser) ? updated : u)),
+          updated,
+        ],
         deletedUsers
       );
       latestSyncStateRef.current.users = next;
       safeSetCriticalAccountStorage('kft_users_v5', next);
+      mergeAndSaveVipRegistryBackup(next, deletedUsers);
       return next;
     });
     safeSetCriticalAccountStorage('kft_current_user_v5', updated);
     if (isSupabaseConfigured() && updated.role !== 'admin') {
-      upsertSingleUserToCloud(updated, deletedUsers).catch(() => {});
+      upsertSingleUserToCloud(updated, deletedUsers, true).catch(() => {});
     }
     showToast(
       newAvatar

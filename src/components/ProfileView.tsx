@@ -17,6 +17,10 @@ import {
 } from '../types';
 import { tr } from '../utils/i18n';
 import { resolveUserAvatarUrl, handleAvatarImageError, fileToAvatarDataUrl } from '../utils/avatarHelper';
+import {
+  isNativeAndroidOrIosPlatform,
+  pickImageUsingNativeAndroidGallery,
+} from '../utils/androidMediaHelper';
 import { requestManualUpdateCheck } from '../services/appUpdateService';
 import { IconNavFood, IconNavShop, IconNavTourism } from './icons/HandcraftedIcons';
 
@@ -82,10 +86,37 @@ export const ProfileView: React.FC = () => {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [isSavingAvatar, setIsSavingAvatar] = useState(false);
 
+  const handleTriggerAvatarPicker = async () => {
+    if (!currentUser || isSavingAvatar) return;
+    if (isNativeAndroidOrIosPlatform()) {
+      setIsSavingAvatar(true);
+      try {
+        const nativePick = await pickImageUsingNativeAndroidGallery(800, 0.85);
+        if (nativePick?.cancelled) {
+          setIsSavingAvatar(false);
+          return;
+        }
+        if (nativePick?.dataUrl) {
+          const dataUrl = await fileToAvatarDataUrl(nativePick.dataUrl);
+          updateCurrentUserProfile(currentUser.name, dataUrl);
+          setIsSavingAvatar(false);
+          return;
+        }
+      } catch {
+        // Fallback to standard file input below if native picker fails
+      }
+      setIsSavingAvatar(false);
+    }
+    avatarInputRef.current?.click();
+  };
+
   const handleAvatarPicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file || !currentUser) return;
+    const inputEl = e.target;
+    const file = inputEl.files?.[0];
+    if (!file || !currentUser) {
+      inputEl.value = '';
+      return;
+    }
     setIsSavingAvatar(true);
     try {
       const dataUrl = await fileToAvatarDataUrl(file);
@@ -96,6 +127,7 @@ export const ProfileView: React.FC = () => {
         'warning'
       );
     } finally {
+      inputEl.value = '';
       setIsSavingAvatar(false);
     }
   };
@@ -511,8 +543,9 @@ export const ProfileView: React.FC = () => {
                     alt={currentUser.name} 
                     referrerPolicy="no-referrer"
                     decoding="async"
+                    onClick={handleTriggerAvatarPicker}
                     onError={(e) => handleAvatarImageError(e, currentUser)}
-                    className={`w-14 h-14 bg-emerald-950 ${
+                    className={`w-14 h-14 bg-emerald-950 cursor-pointer ${
       isAdmin 
         ? 'rounded-full ring-4 ring-emerald-400/40 border-2 border-[#059669]' 
         : isVip 
@@ -522,7 +555,7 @@ export const ProfileView: React.FC = () => {
                   />
                   <button
                     type="button"
-                    onClick={() => avatarInputRef.current?.click()}
+                    onClick={handleTriggerAvatarPicker}
                     disabled={isSavingAvatar}
                     aria-label={tr(language, 'ប្តូររូបភាពប្រូហ្វាល់', 'Change profile photo', '更换头像')}
                     title={tr(language, 'ប្តូររូបភាពប្រូហ្វាល់', 'Change profile photo', '更换头像')}
