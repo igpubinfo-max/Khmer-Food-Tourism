@@ -151,7 +151,7 @@ export const AdminDashboard: React.FC = () => {
   const [selectedDestForImageEdit, setSelectedDestForImageEdit] = useState<TouristDestination | null>(null);
   const [destSearchQuery, setDestSearchQuery] = useState('');
   const [destProvinceFilter, setDestProvinceFilter] = useState('all');
-  const [destLocationFilter, setDestLocationFilter] = useState<'all' | 'verified_gps' | 'needs_gps_review'>('all');
+  const [destLocationFilter, setDestLocationFilter] = useState<'all' | 'with_photo' | 'no_photo' | 'verified_gps' | 'needs_gps_review'>('all');
   const [adminRestSearchQuery, setAdminRestSearchQuery] = useState('');
   const [adminRestLocationFilter, setAdminRestLocationFilter] = useState<'all' | 'verified_gps' | 'needs_gps_review'>('all');
 
@@ -3212,9 +3212,11 @@ export const AdminDashboard: React.FC = () => {
                 </form>
               )}
 
-              {/* Destination GPS Verification Filter Pills */}
+              {/* Destination Photo & GPS Verification Filter Pills */}
               <div className="flex items-center gap-1.5 flex-wrap font-khmer">
                 {(() => {
+                  const withPhotoCount = destinations.filter((d) => Boolean(d.photoUrl && d.photoUrl.trim())).length;
+                  const noPhotoCount = destinations.length - withPhotoCount;
                   const verifiedDestCount = destinations.filter((d) => isPlaceLocationVerified(d)).length;
                   const reviewDestCount = destinations.length - verifiedDestCount;
                   return (
@@ -3229,6 +3231,28 @@ export const AdminDashboard: React.FC = () => {
                         }`}
                       >
                         {isKm ? `តំបន់ទាំងអស់ (${destinations.length})` : `All Attractions (${destinations.length})`}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDestLocationFilter('with_photo')}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
+                          destLocationFilter === 'with_photo'
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                        }`}
+                      >
+                        {isKm ? `🖼️ មានរូបច្បាស់ (បង្ហាញ ${withPhotoCount})` : `🖼️ With HD Photo (${withPhotoCount})`}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDestLocationFilter('no_photo')}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
+                          destLocationFilter === 'no_photo'
+                            ? 'bg-rose-600 text-white shadow-xs'
+                            : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
+                        }`}
+                      >
+                        {isKm ? `📷 រង់ចាំដាក់រូបច្បាស់ (លាក់ ${noPhotoCount})` : `📷 Waiting for Photo (${noPhotoCount})`}
                       </button>
                       <button
                         type="button"
@@ -3261,6 +3285,9 @@ export const AdminDashboard: React.FC = () => {
               <div className="space-y-2.5 max-h-[58vh] overflow-y-auto no-scrollbar">
                 {destinations
                   .filter(d => {
+                    const hasPhoto = Boolean(d.photoUrl && d.photoUrl.trim());
+                    if (destLocationFilter === 'with_photo' && !hasPhoto) return false;
+                    if (destLocationFilter === 'no_photo' && hasPhoto) return false;
                     const gpsOk = isPlaceLocationVerified(d);
                     if (destLocationFilter === 'verified_gps' && !gpsOk) return false;
                     if (destLocationFilter === 'needs_gps_review' && gpsOk) return false;

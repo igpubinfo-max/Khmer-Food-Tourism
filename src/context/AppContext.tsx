@@ -1862,7 +1862,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 locationReviewNote: useCustomDestLoc ? (ov.locationReviewNote ?? d.locationReviewNote) : seed.locationReviewNote,
                 locationVerifiedAt: useCustomDestLoc ? (ov.locationVerifiedAt ?? d.locationVerifiedAt) : seed.locationVerifiedAt,
                 photoUrl: chosenPhoto,
-                galleryPhotos: [chosenPhoto],
+                galleryPhotos: chosenPhoto ? [chosenPhoto] : [],
                 isCustomPhoto: useOvPhoto,
                 photoUpdatedAt: useOvPhoto && ovTime >= seedTime ? ov.updatedAt : seed.photoUpdatedAt,
               };
@@ -1922,7 +1922,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               locationReviewNote: useCachedDestLoc ? d.locationReviewNote : seed.locationReviewNote,
               locationVerifiedAt: useCachedDestLoc ? d.locationVerifiedAt : seed.locationVerifiedAt,
               photoUrl: effectivePhoto,
-              galleryPhotos: [effectivePhoto],
+              galleryPhotos: effectivePhoto ? [effectivePhoto] : [],
               isCustomPhoto: isValidCustomPhoto || Boolean(seed.isCustomPhoto),
               photoUpdatedAt: isValidCustomPhoto ? d.photoUpdatedAt : seed.photoUpdatedAt,
             };

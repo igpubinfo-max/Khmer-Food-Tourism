@@ -99,9 +99,13 @@ export const HomeView: React.FC = () => {
     () => (hasActiveSearch ? sortRestaurantsWithVipRotation(shuffleForCurrentSession(verifiedHomeRestaurants), users, appSettings) : []),
     [hasActiveSearch, verifiedHomeRestaurants, users, appSettings]
   );
+  const verifiedHomeDestinations = useMemo(
+    () => destinations.filter((d) => Boolean(d && d.photoUrl && d.photoUrl.trim())),
+    [destinations]
+  );
   const sessionShuffledDestinations = useMemo(
-    () => (hasActiveSearch ? shuffleForCurrentSession(destinations) : []),
-    [hasActiveSearch, destinations]
+    () => (hasActiveSearch ? shuffleForCurrentSession(verifiedHomeDestinations) : []),
+    [hasActiveSearch, verifiedHomeDestinations]
   );
 
   // Live Google Maps & Smart Cache Search on Home Screen
