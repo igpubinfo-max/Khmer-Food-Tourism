@@ -59,7 +59,7 @@ export const AdminDashboard: React.FC = () => {
     aiCheckIns, approveAiCheckIn, rejectAiCheckIn, mergeAiCheckIn,
     setIsAiCheckInModalOpen, triggerCloudSyncNow, isSyncingUsers, lastUsersSyncedAt, syncUsersNow,
     supportTickets, replyToSupportTicket, updateSupportTicketStatus, approveVipFromSupportTicket, markSupportTicketRead,
-    openGoogleMapsSearchModal, openManageMyVipStore, setSelectedRestaurant, setSelectedDestination
+    openGoogleMapsSearchModal, openManageMyVipStore, setSelectedRestaurant, setSelectedDestination, setIsVipAddRestaurantModalOpen
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'stats' | 'support_tickets' | 'food' | 'restaurants' | 'destinations' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>(() => {
@@ -2424,36 +2424,41 @@ export const AdminDashboard: React.FC = () => {
           {/* RESTAURANTS TAB */}
           {activeTab === 'restaurants' && (
             <div className="space-y-4">
+              {/* SECTION 1: ADD NEW SHOP & DIRECTORY STATUS (បន្ថែមហាងថ្មី) */}
               <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950/90 via-[#064E3B] to-teal-900 text-white border border-emerald-700/60 shadow-sm space-y-2.5">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div>
                     <h3 className="font-bold text-white font-khmer text-sm flex items-center gap-2">
-                      <span>🏪 {isKm ? `គ្រប់គ្រងហាងអាហារ (សរុប ${restaurants.length} ហាង)` : `Manage Restaurants (${restaurants.length} shops)`}</span>
+                      <span>➕ {isKm ? `បន្ថែមហាងថ្មី & គ្រប់គ្រងហាង (សរុប ${restaurants.length} ហាង)` : `Add New Shop & Manage (${restaurants.length} shops)`}</span>
                       <span className="px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-200 text-[10px] font-bold">
                         ✅ Verified: {restaurants.filter(r => r.isVerified).length}/{restaurants.length}
                       </span>
                     </h3>
                     <p className="text-[10px] text-emerald-100/80 font-khmer mt-0.5">
                       {isKm
-                        ? `ហាងមានរូបភាពពិតប្រាកដ ${restaurants.filter(r => Boolean(r.photoUrl || r.profileImage)).length}/${restaurants.length} • ទិន្នន័យ GPS កម្ពុជាផ្លូវការ 100%`
-                        : `Real photos: ${restaurants.filter(r => Boolean(r.photoUrl || r.profileImage)).length}/${restaurants.length} • 100% Verified Cambodia GPS`}
+                        ? `ចុចប៊ូតុង «+ បន្ថែមហាងថ្មី» ដើម្បីបំពេញព័ត៌មានហាង ជ្រើសរើសទីតាំងលើផែនទី Google Maps និងដាក់ស្នើ • ហាងមានរូបភាព ${restaurants.filter(r => Boolean(r.photoUrl || r.profileImage)).length}/${restaurants.length}`
+                        : `Tap "+ Add New Shop" to enter shop details, select location on Google Maps, and submit`}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <button
                       type="button"
-                      onClick={() => bulkVerifyAndEnrichAllRestaurants()}
-                      className="px-3.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-khmer font-black text-xs shadow-sm transition cursor-pointer flex items-center gap-1.5"
+                      onClick={() => {
+                        (window as any).__kft_vip_store_initial_mode = { mode: 'create' };
+                        setIsVipAddRestaurantModalOpen(true);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 text-slate-950 font-khmer font-black text-xs shadow-md transition cursor-pointer flex items-center gap-1.5"
                     >
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>{isKm ? 'ផ្ទៀងផ្ទាត់ & បំពេញទិន្នន័យទាំងអស់ (1-Click Verify All)' : '1-Click Verify & Enrich All'}</span>
+                      <Plus className="w-4 h-4 stroke-[3]" />
+                      <span>{isKm ? '+ បន្ថែមហាងថ្មី (+ Add New Shop)' : '+ Add New Shop'}</span>
                     </button>
                     <button
                       type="button"
-                      onClick={() => openGoogleMapsSearchModal('restaurant')}
-                      className="px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-white font-khmer font-bold text-xs shadow-sm transition cursor-pointer"
+                      onClick={() => bulkVerifyAndEnrichAllRestaurants()}
+                      className="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-white font-khmer font-bold text-xs shadow-sm transition cursor-pointer flex items-center gap-1.5"
                     >
-                      🗺️ {isKm ? 'ស្វែងរក & នាំចូលហាងពី Google Maps' : 'Import Shops from Google Maps'}
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
+                      <span>{isKm ? 'ផ្ទៀងផ្ទាត់ទិន្នន័យទាំងអស់ (1-Click Verify All)' : '1-Click Verify All'}</span>
                     </button>
                   </div>
                 </div>
@@ -2759,74 +2764,98 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               )}
 
-              {/* Admin GPS Location Verification Filter Pills */}
-              <div className="flex items-center gap-1.5 flex-wrap font-khmer">
-                {(() => {
-                  const verifiedCount = restaurants.filter((r) => isPlaceLocationVerified(r)).length;
-                  const reviewCount = restaurants.length - verifiedCount;
-                  return (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => setAdminRestLocationFilter('all')}
-                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
-                          adminRestLocationFilter === 'all'
-                            ? 'bg-[#064E3B] text-white shadow-xs'
-                            : 'bg-white dark:bg-stone-800 text-slate-700 dark:text-stone-300 border border-slate-200 dark:border-stone-700'
-                        }`}
-                      >
-                        {isKm ? `ហាងទាំងអស់ (${restaurants.length})` : `All Shops (${restaurants.length})`}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAdminRestLocationFilter('verified_gps')}
-                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
-                          adminRestLocationFilter === 'verified_gps'
-                            ? 'bg-emerald-600 text-white shadow-xs'
-                            : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-                        }`}
-                      >
-                        {isKm ? `✅ ទីតាំង GPS ត្រឹមត្រូវ (${verifiedCount})` : `✅ Verified GPS (${verifiedCount})`}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAdminRestLocationFilter('needs_gps_review')}
-                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
-                          adminRestLocationFilter === 'needs_gps_review'
-                            ? 'bg-amber-500 text-slate-950 shadow-xs'
-                            : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700'
-                        }`}
-                      >
-                        {isKm ? `📍 ត្រូវផ្ទៀងផ្ទាត់ GPS (${reviewCount})` : `📍 Needs GPS Review (${reviewCount})`}
-                      </button>
-                    </>
-                  );
-                })()}
-              </div>
-
-              {/* Admin Search Input for Shops */}
-              <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <input
-                  type="text"
-                  value={adminRestSearchQuery}
-                  onChange={(e) => setAdminRestSearchQuery(e.target.value)}
-                  placeholder={
-                    isKm
-                      ? 'ស្វែងរកហាងតាមឈ្មោះ លេខទូរស័ព្ទ ខេត្ត ម្ចាស់ហាង ឬ ID...'
-                      : 'Search shops by name, phone, province, owner, or ID...'
-                  }
-                  className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-white dark:bg-stone-800 border border-slate-200 dark:border-stone-700 text-xs font-khmer text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-                {adminRestSearchQuery && (
+              {/* SECTION 2: SEARCH SHOPS (ស្វែងរកហាងក្នុងប្រព័ន្ធ) */}
+              <div className="p-3.5 rounded-2xl bg-white dark:bg-stone-800/90 border border-slate-200 dark:border-stone-700 space-y-2.5 font-khmer">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <Search className="w-4 h-4 text-emerald-600" />
+                      <span>{isKm ? '🔍 ស្វែងរកហាង (Search Shops)' : '🔍 Search Shops'}</span>
+                    </h4>
+                    <p className="text-[10px] text-slate-500 dark:text-stone-400">
+                      {isKm
+                        ? 'ស្វែងរកហាងតាមឈ្មោះ លេខទូរស័ព្ទ ខេត្ត-រាជធានី ឬស្ថានភាពទីតាំង GPS'
+                        : 'Search shops by name, phone, province, or GPS verification status'}
+                    </p>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setAdminRestSearchQuery('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-stone-700 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    onClick={() => openGoogleMapsSearchModal('restaurant')}
+                    className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold flex items-center gap-1.5 transition cursor-pointer"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <span>📍 {isKm ? 'ស្វែងរកទីតាំងលើផែនទី Google Maps' : 'Locate on Google Maps'}</span>
                   </button>
-                )}
+                </div>
+
+                {/* Admin GPS Location Verification Filter Pills */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {(() => {
+                    const verifiedCount = restaurants.filter((r) => isPlaceLocationVerified(r)).length;
+                    const reviewCount = restaurants.length - verifiedCount;
+                    return (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setAdminRestLocationFilter('all')}
+                          className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
+                            adminRestLocationFilter === 'all'
+                              ? 'bg-[#064E3B] text-white shadow-xs'
+                              : 'bg-slate-50 dark:bg-stone-900 text-slate-700 dark:text-stone-300 border border-slate-200 dark:border-stone-700'
+                          }`}
+                        >
+                          {isKm ? `ហាងទាំងអស់ (${restaurants.length})` : `All Shops (${restaurants.length})`}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAdminRestLocationFilter('verified_gps')}
+                          className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
+                            adminRestLocationFilter === 'verified_gps'
+                              ? 'bg-emerald-600 text-white shadow-xs'
+                              : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                          }`}
+                        >
+                          {isKm ? `✅ ទីតាំង GPS ត្រឹមត្រូវ (${verifiedCount})` : `✅ Verified GPS (${verifiedCount})`}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAdminRestLocationFilter('needs_gps_review')}
+                          className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
+                            adminRestLocationFilter === 'needs_gps_review'
+                              ? 'bg-amber-500 text-slate-950 shadow-xs'
+                              : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700'
+                          }`}
+                        >
+                          {isKm ? `📍 ត្រូវផ្ទៀងផ្ទាត់ GPS (${reviewCount})` : `📍 Needs GPS Review (${reviewCount})`}
+                        </button>
+                      </>
+                    );
+                  })()}
+                </div>
+
+                {/* Admin Search Input for Shops */}
+                <div className="relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={adminRestSearchQuery}
+                    onChange={(e) => setAdminRestSearchQuery(e.target.value)}
+                    placeholder={
+                      isKm
+                        ? 'ស្វែងរកហាងតាមឈ្មោះ លេខទូរស័ព្ទ ខេត្ត ម្ចាស់ហាង ឬ ID...'
+                        : 'Search shops by name, phone, province, owner, or ID...'
+                    }
+                    className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-slate-50 dark:bg-stone-900 border border-slate-200 dark:border-stone-700 text-xs font-khmer text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                  {adminRestSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setAdminRestSearchQuery('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-stone-700 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">

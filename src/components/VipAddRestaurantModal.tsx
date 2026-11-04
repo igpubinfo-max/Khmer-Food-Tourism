@@ -21,6 +21,9 @@ import {
   Crown,
   CreditCard,
   Clock,
+  Eye,
+  ExternalLink,
+  Navigation,
 } from 'lucide-react';
 import {
   RestaurantPriceLevel,
@@ -42,8 +45,6 @@ import { validateAndModerateShopImage } from '../utils/imageModeration';
 import { DefaultShopIcon } from './icons/DefaultShopIcon';
 import { tr } from '../utils/i18n';
 import { ShopLocationCheckInPickerModal, ShopCheckInLocationResult } from './ShopLocationCheckInPickerModal';
-import { GoogleMapsShopImporterModal, ImportedGoogleShopData } from './GoogleMapsShopImporterModal';
-import { resolveProvinceGeoConfig } from '../services/googlePlacesService';
 
 const PROVINCES = [
   { nameKh: 'រាជធានីភ្នំពេញ', nameEn: 'Phnom Penh' },
@@ -73,6 +74,51 @@ const PROVINCES = [
   { nameKh: 'ខេត្តត្បូងឃ្មុំ', nameEn: 'Tboung Khmum' },
 ];
 
+const SHOP_CATEGORIES = [
+  {
+    id: 'restaurant',
+    labelKh: '🍽️ ភោជនីយដ្ឋាន & អាហារខ្មែរ',
+    labelEn: '🍽️ Khmer Restaurant',
+    labelZh: '🍽️ 柬式餐厅',
+    defaultDishKh: 'ម្ហូបខ្មែរប្រចាំហាង',
+  },
+  {
+    id: 'cafe',
+    labelKh: '☕ ហាងកាហ្វេ & ភេសជ្ជៈ',
+    labelEn: '☕ Café & Drinks',
+    labelZh: '☕ 咖啡与饮品',
+    defaultDishKh: 'កាហ្វេ និងភេសជ្ជៈ',
+  },
+  {
+    id: 'street_food',
+    labelKh: '🍜 គុយទាវ អាហារព្រឹក & អាហារតាមផ្លូវ',
+    labelEn: '🍜 Noodles & Breakfast',
+    labelZh: '🍜 粿条与早餐小吃',
+    defaultDishKh: 'គុយទាវ និងអាហារព្រឹក',
+  },
+  {
+    id: 'seafood',
+    labelKh: '🦐 គ្រឿងសមុទ្រ សាច់អាំង & ស៊ុប',
+    labelEn: '🦐 Seafood, BBQ & Hotpot',
+    labelZh: '🦐 海鲜烧烤与火锅',
+    defaultDishKh: 'គ្រឿងសមុទ្រ និងសាច់អាំង',
+  },
+  {
+    id: 'bakery',
+    labelKh: '🥐 ហាងនំប៉័ង & បង្អែម',
+    labelEn: '🥐 Bakery & Desserts',
+    labelZh: '🥐 烘焙与甜品',
+    defaultDishKh: 'នំប៉័ង និងបង្អែម',
+  },
+  {
+    id: 'vegetarian',
+    labelKh: '🥗 ឆា អាំង ញ៉ាំ & អាហារសុខភាព',
+    labelEn: '🥗 Stir-Fry, Grill & Salad',
+    labelZh: '🥗 炒烤凉拌与健康美食',
+    defaultDishKh: 'ឆា អាំង ញ៉ាំ',
+  },
+];
+
 export const VipAddRestaurantModal: React.FC = () => {
   const {
     isVipAddRestaurantModalOpen,
@@ -97,8 +143,9 @@ export const VipAddRestaurantModal: React.FC = () => {
   const isKm = language === 'km';
   const isAdmin = isAdminAccount(currentUser);
 
-  // Simple 2-Tab Navigation: 'create_form' (Default!) or 'my_stores' or 'pay_additional_slot'
+  // Navigation Tabs: 'create_form' (Default!) or 'my_stores' or 'pay_additional_slot'
   const [activeTab, setActiveTab] = useState<'create_form' | 'my_stores' | 'pay_additional_slot'>('create_form');
+  const [isPreviewStep, setIsPreviewStep] = useState(false);
   const [replacingStoreId, setReplacingStoreId] = useState<string | null>(null);
   const [confirmDeleteStoreId, setConfirmDeleteStoreId] = useState<string | null>(null);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
@@ -109,28 +156,36 @@ export const VipAddRestaurantModal: React.FC = () => {
   const ownedRestaurants = getOwnedRestaurantsForUser(currentUser);
   const requiresAdditionalPayment = !isAdmin && !replacingStoreId && quota.remainingAvailableSlots <= 0;
 
-  // Essential Form Fields
+  // 7 Core Form Fields requested by User:
+  // 1. Shop Name
   const [nameKh, setNameKh] = useState('');
   const [nameEn, setNameEn] = useState('');
+  // 2. Shop Category
+  const [businessCategory, setBusinessCategory] = useState<string>('restaurant');
+  // 3. Phone Number
+  const [phone, setPhone] = useState(currentUser?.phone || '');
+  // 4. Address / Province
   const [provinceKh, setProvinceKh] = useState('រាជធានីភ្នំពេញ');
   const [provinceEn, setProvinceEn] = useState('Phnom Penh');
   const [addressKh, setAddressKh] = useState('');
+  // 5. Google Maps Link
+  const [shopMapUrl, setShopMapUrl] = useState<string>('');
+  // 6. GPS Location
   const [shopLat, setShopLat] = useState<number | null>(null);
   const [shopLng, setShopLng] = useState<number | null>(null);
-  const [shopMapUrl, setShopMapUrl] = useState<string>('');
+  const [gpsInputText, setGpsInputText] = useState<string>('');
+  // 7. Shop Photos
+  const [shopPhoto, setShopPhoto] = useState<string>('');
+
   const [isCheckInPickerOpen, setIsCheckInPickerOpen] = useState(false);
-  const [phone, setPhone] = useState(currentUser?.phone || '');
   const [openingHoursKh, setOpeningHoursKh] = useState('០៧:០០ ព្រឹក - ០៩:០០ យប់');
   const [priceLevel, setPriceLevel] = useState<RestaurantPriceLevel>('$');
-  const [shopPhoto, setShopPhoto] = useState<string>('');
   const [moderationWarning, setModerationWarning] = useState<string | null>(null);
   const [descriptionKh, setDescriptionKh] = useState('');
-  const [isGoogleImportModalOpen, setIsGoogleImportModalOpen] = useState(false);
   const [importedGooglePlaceId, setImportedGooglePlaceId] = useState<string | undefined>(undefined);
   const [importedGoogleMeta, setImportedGoogleMeta] = useState<GoogleMapsPlaceMetadata | undefined>(undefined);
-  const [businessCategory, setBusinessCategory] = useState<string>('');
   const [websiteUrl, setWebsiteUrl] = useState<string>('');
-  const [signatureDishesKh, setSignatureDishesKh] = useState<string[]>(['ម្ហូបពិសេសប្រចាំហាង']);
+  const [signatureDishesKh, setSignatureDishesKh] = useState<string[]>(['ម្ហូបខ្មែរប្រចាំហាង']);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [submittedPendingShop, setSubmittedPendingShop] = useState<any | null>(null);
@@ -138,7 +193,7 @@ export const VipAddRestaurantModal: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Additional Store Payment Checkout State ($10 per extra store when free quota is used)
+  // Additional Store Payment Checkout State
   const [slotTrxRef, setSlotTrxRef] = useState('');
   const [slotProofData, setSlotProofData] = useState<{
     dataUrl: string;
@@ -153,23 +208,30 @@ export const VipAddRestaurantModal: React.FC = () => {
     [replacingStoreId, ownedRestaurants]
   );
 
+  const selectedCategoryObj = useMemo(
+    () => SHOP_CATEGORIES.find((c) => c.id === businessCategory) || SHOP_CATEGORIES[0],
+    [businessCategory]
+  );
+
   const resetFormFields = () => {
     setNameKh('');
     setNameEn('');
+    setBusinessCategory('restaurant');
     setAddressKh('');
     setShopLat(null);
     setShopLng(null);
+    setGpsInputText('');
     setShopMapUrl('');
     setDescriptionKh('');
     setShopPhoto('');
     setModerationWarning(null);
     setReplacingStoreId(null);
     setShowMoreOptions(false);
+    setIsPreviewStep(false);
     setImportedGooglePlaceId(undefined);
     setImportedGoogleMeta(undefined);
-    setBusinessCategory('');
     setWebsiteUrl('');
-    setSignatureDishesKh(['ម្ហូបពិសេសប្រចាំហាង']);
+    setSignatureDishesKh(['ម្ហូបខ្មែរប្រចាំហាង']);
   };
 
   const beginReplaceStore = (store: (typeof ownedRestaurants)[0]) => {
@@ -179,8 +241,11 @@ export const VipAddRestaurantModal: React.FC = () => {
     setProvinceKh(store.provinceKh || 'រាជធានីភ្នំពេញ');
     setProvinceEn(store.provinceEn || 'Phnom Penh');
     setAddressKh(store.addressKh || '');
-    setShopLat(typeof store.latitude === 'number' ? store.latitude : null);
-    setShopLng(typeof store.longitude === 'number' ? store.longitude : null);
+    const latVal = typeof store.latitude === 'number' && store.latitude !== 0 ? store.latitude : null;
+    const lngVal = typeof store.longitude === 'number' && store.longitude !== 0 ? store.longitude : null;
+    setShopLat(latVal);
+    setShopLng(lngVal);
+    setGpsInputText(latVal !== null && lngVal !== null ? `${latVal.toFixed(6)}, ${lngVal.toFixed(6)}` : '');
     setShopMapUrl(store.mapUrl || '');
     setPhone(store.phone || currentUser?.phone || '');
     setOpeningHoursKh(store.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់');
@@ -189,16 +254,45 @@ export const VipAddRestaurantModal: React.FC = () => {
     setDescriptionKh(store.descriptionKh || '');
     setImportedGooglePlaceId(store.googlePlaceId);
     setImportedGoogleMeta(store.googleMapsMeta);
-    setBusinessCategory(store.businessCategory || '');
+    setBusinessCategory(store.businessCategory || 'restaurant');
     setWebsiteUrl(store.websiteUrl || store.googleMapsMeta?.websiteUri || '');
-    setSignatureDishesKh(Array.isArray(store.signatureDishesKh) && store.signatureDishesKh.length > 0 ? store.signatureDishesKh : ['ម្ហូបពិសេសប្រចាំហាង']);
+    setSignatureDishesKh(
+      Array.isArray(store.signatureDishesKh) && store.signatureDishesKh.length > 0
+        ? store.signatureDishesKh
+        : ['ម្ហូបខ្មែរប្រចាំហាង']
+    );
+    setIsPreviewStep(false);
     setActiveTab('create_form');
   };
 
-  // When modal opens, always start cleanly on the Create Form (or Replace Mode if requested)
+  // When modal opens, check for initial mode or prefilled location from Google Maps Search
   useEffect(() => {
     if (!isVipAddRestaurantModalOpen) return;
     setPhone((prev) => prev || currentUser?.phone || '');
+
+    const prefillLoc = (window as any).__kft_prefill_shop_location;
+    if (prefillLoc) {
+      delete (window as any).__kft_prefill_shop_location;
+      if (typeof prefillLoc.latitude === 'number' && typeof prefillLoc.longitude === 'number') {
+        setShopLat(Number(prefillLoc.latitude.toFixed(6)));
+        setShopLng(Number(prefillLoc.longitude.toFixed(6)));
+        setGpsInputText(`${prefillLoc.latitude.toFixed(6)}, ${prefillLoc.longitude.toFixed(6)}`);
+      }
+      if (prefillLoc.mapUrl) setShopMapUrl(prefillLoc.mapUrl);
+      if (prefillLoc.addressKh) setAddressKh(prefillLoc.addressKh);
+      if (prefillLoc.provinceKh) {
+        const matched = PROVINCES.find(
+          (p) =>
+            p.nameKh === prefillLoc.provinceKh ||
+            p.nameKh.replace(/^ខេត្ត|^រាជធានី/g, '') === prefillLoc.provinceKh.replace(/^ខេត្ត|^រាជធានី/g, '')
+        );
+        if (matched) {
+          setProvinceKh(matched.nameKh);
+          setProvinceEn(matched.nameEn);
+        }
+      }
+    }
+
     const initialReq = (window as any).__kft_vip_store_initial_mode;
     if (initialReq) {
       delete (window as any).__kft_vip_store_initial_mode;
@@ -215,12 +309,13 @@ export const VipAddRestaurantModal: React.FC = () => {
     }
     setReplacingStoreId(null);
     setSubmittedPendingShop(null);
+    setIsPreviewStep(false);
     setActiveTab('create_form');
   }, [isVipAddRestaurantModalOpen]);
 
   if (!isVipAddRestaurantModalOpen) return null;
 
-  // Pick ONE Shop Photo from Gallery with Image Moderation & Validation
+  // Pick Shop Photo from Gallery with Image Moderation & Validation
   const handlePickFromGallery = async () => {
     setModerationWarning(null);
     if (!isNativeAndroidOrIosPlatform()) {
@@ -244,7 +339,7 @@ export const VipAddRestaurantModal: React.FC = () => {
         }
         setShopPhoto(modRes.dataUrl);
         showToast(
-          tr(language, '✅ បានជ្រើសរូបភាពតំណាងហាង ១ សន្លឹកជោគជ័យ!', '✅ Single shop photo selected & verified!', '✅ 店铺代表照片已选择并通过验证！'),
+          tr(language, '✅ បានជ្រើសរូបភាពហាងជោគជ័យ!', '✅ Shop photo selected!', '✅ 店铺照片已选择！'),
           'success'
         );
         setIsUploadingPhoto(false);
@@ -270,7 +365,7 @@ export const VipAddRestaurantModal: React.FC = () => {
       }
       setShopPhoto(modRes.dataUrl);
       showToast(
-        tr(language, '✅ បានជ្រើសរូបភាពតំណាងហាង ១ សន្លឹកជោគជ័យ!', '✅ Single shop photo selected & verified!', '✅ 店铺代表照片已选择并通过验证！'),
+        tr(language, '✅ បានជ្រើសរូបភាពហាងជោគជ័យ!', '✅ Shop photo selected!', '✅ 店铺照片已选择！'),
         'success'
       );
     } catch {
@@ -295,7 +390,7 @@ export const VipAddRestaurantModal: React.FC = () => {
       }
       setShopPhoto(modRes.dataUrl);
       showToast(
-        tr(language, '✅ បានថតរូបតំណាងហាងជោគជ័យ!', '✅ Shop photo captured & verified!', '✅ 拍照并通过验证成功！'),
+        tr(language, '✅ បានថតរូបហាងជោគជ័យ!', '✅ Shop photo captured!', '✅ 拍照成功！'),
         'success'
       );
     } catch {
@@ -305,10 +400,25 @@ export const VipAddRestaurantModal: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isSaving) return;
+  const handleGpsInputChange = (val: string) => {
+    setGpsInputText(val);
+    const match = val.trim().match(/(-?\d+\.\d+)\s*[,/\s]\s*(-?\d+\.\d+)/);
+    if (match) {
+      const pLat = parseFloat(match[1]);
+      const pLng = parseFloat(match[2]);
+      if (Number.isFinite(pLat) && Number.isFinite(pLng)) {
+        setShopLat(Number(pLat.toFixed(6)));
+        setShopLng(Number(pLng.toFixed(6)));
+        if (!shopMapUrl.trim()) {
+          setShopMapUrl(`https://www.google.com/maps/search/?api=1&query=${pLat.toFixed(6)},${pLng.toFixed(6)}`);
+        }
+      }
+    }
+  };
 
+  // Validate form and open Preview screen before submitting
+  const handleProceedToPreview = (e: React.FormEvent) => {
+    e.preventDefault();
     const trimmedNameKh = nameKh.trim();
     const trimmedNameEn = nameEn.trim();
     if (!trimmedNameKh && !trimmedNameEn) {
@@ -319,32 +429,40 @@ export const VipAddRestaurantModal: React.FC = () => {
       return;
     }
 
-    // Prevent duplicate shop entries by checking existing records using Google Place ID
-    if (importedGooglePlaceId) {
-      const existingDup = restaurants.find(
-        (r) =>
-          r.id !== replacingStoreId &&
-          (r.googlePlaceId === importedGooglePlaceId ||
-            r.googleMapsMeta?.placeId === importedGooglePlaceId ||
-            r.id === `gplace-${importedGooglePlaceId}`)
+    if (!phone.trim()) {
+      showToast(
+        tr(language, '⚠️ សូមបញ្ចូលលេខទូរស័ព្ទទំនាក់ទំនងហាង!', '⚠️ Please enter your shop phone number!', '⚠️ 请输入店铺联系电话！'),
+        'warning'
       );
-      if (existingDup) {
-        showToast(
-          tr(
-            language,
-            `⚠️ ហាង «${existingDup.nameKh || existingDup.nameEn}» មានក្នុងប្រព័ន្ធរួចហើយ (Google Place ID ដូចគ្នា)! សូមជ្រើសរើសហាងផ្សេង។`,
-            `⚠️ "${existingDup.nameEn || existingDup.nameKh}" is already registered with this Google Place ID!`,
-            `⚠️ 店铺“${existingDup.nameEn || existingDup.nameKh}”已在系统中注册（相同的 Google Place ID）！`
-          ),
-          'warning'
-        );
-        return;
-      }
+      return;
     }
 
-    // If non-Admin user has already used their free store quota and is NOT replacing an existing store,
-    // prompt them to either replace their existing store for $0 or unlock an extra store slot.
+    const trimmedMapUrl = shopMapUrl.trim();
+    if (trimmedMapUrl && !isValidGoogleMapsUrl(trimmedMapUrl)) {
+      showToast(
+        tr(
+          language,
+          '⚠️ សូមបញ្ចូលតំណភ្ជាប់ Google Maps ឱ្យបានត្រឹមត្រូវ ឬចុចប៊ូតុងជ្រើសរើសទីតាំងលើផែនទី!',
+          '⚠️ Please enter a valid Google Maps link or use the Select Location on Google Maps button!',
+          '⚠️ 请输入有效的 Google 地图链接，或点击在地图上选择位置按钮！'
+        ),
+        'warning'
+      );
+      return;
+    }
+
+    setIsPreviewStep(true);
+  };
+
+  const handleConfirmSubmit = () => {
+    if (isSaving) return;
+
+    const trimmedNameKh = nameKh.trim();
+    const trimmedNameEn = nameEn.trim();
+    if (!trimmedNameKh && !trimmedNameEn) return;
+
     if (!isAdmin && !replacingStoreId && quota.remainingAvailableSlots <= 0) {
+      setIsPreviewStep(false);
       setActiveTab('pay_additional_slot');
       return;
     }
@@ -353,20 +471,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     const finalNameEn = trimmedNameEn || trimmedNameKh;
     const finalProfile = shopPhoto.trim() || '';
     const combinedGallery = finalProfile ? [finalProfile] : [];
-
     const trimmedMapUrl = shopMapUrl.trim();
-    if (trimmedMapUrl && !isValidGoogleMapsUrl(trimmedMapUrl)) {
-      showToast(
-        tr(
-          language,
-          '⚠️ សូមបញ្ចូលលីង Google Maps ឱ្យបានត្រឹមត្រូវ (ឧ. https://maps.app.goo.gl/... ឬ https://www.google.com/maps/...)',
-          '⚠️ Please enter a valid Google Maps link (e.g. https://maps.app.goo.gl/... or https://www.google.com/maps/...)',
-          '⚠️ 请输入有效的 Google 地图链接（如 https://maps.app.goo.gl/... 或 https://www.google.com/maps/...）'
-        ),
-        'warning'
-      );
-      return;
-    }
 
     let resolvedLat = shopLat;
     let resolvedLng = shopLng;
@@ -394,8 +499,8 @@ export const VipAddRestaurantModal: React.FC = () => {
         nameKh: finalNameKh,
         nameEn: finalNameEn,
         descriptionKh:
-          descriptionKh.trim() || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
-        descriptionEn: `${finalNameEn} authentic restaurant.`,
+          descriptionKh.trim() || `${finalNameKh} (${selectedCategoryObj.labelKh.replace(/^[^\s]+\s/, '')}) — ផាសុកភាព និងរសជាតិឈ្ងុយឆ្ងាញ់។`,
+        descriptionEn: `${finalNameEn} (${selectedCategoryObj.labelEn.replace(/^[^\s]+\s/, '')}).`,
         photoUrl: finalProfile,
         profileImage: finalProfile,
         foodImages: [],
@@ -421,7 +526,8 @@ export const VipAddRestaurantModal: React.FC = () => {
           isAdmin && (hasVerifiedCoords || hasValidMapLink)
             ? undefined
             : 'New shop submitted — awaiting Admin verification of shop & Google Maps location.',
-        signatureDishesKh: signatureDishesKh.length > 0 ? signatureDishesKh : ['ម្ហូបពិសេសប្រចាំហាង'],
+        signatureDishesKh:
+          signatureDishesKh.length > 0 ? signatureDishesKh : [selectedCategoryObj.defaultDishKh],
         googlePlaceId: importedGooglePlaceId,
         dataSource: importedGooglePlaceId ? ('google_maps' as const) : ('vip_owner' as const),
         googleMapsMeta: importedGoogleMeta
@@ -431,7 +537,7 @@ export const VipAddRestaurantModal: React.FC = () => {
             }
           : undefined,
         websiteUrl: websiteUrl.trim() || undefined,
-        businessCategory: businessCategory.trim() || undefined,
+        businessCategory: businessCategory.trim() || 'restaurant',
         isFeatured: true,
         isVerified: true,
         membershipTier: 'premium' as const,
@@ -555,7 +661,7 @@ export const VipAddRestaurantModal: React.FC = () => {
         className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-emerald-500/30 my-auto max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Hidden File Inputs (Single Shop Photo Only — No Multi-Photo or Food Photo Upload) */}
+        {/* Hidden File Inputs */}
         <input
           ref={fileInputRef}
           type="file"
@@ -572,7 +678,7 @@ export const VipAddRestaurantModal: React.FC = () => {
           className="hidden"
         />
 
-        {/* Compact, Clear Header */}
+        {/* Header */}
         <div className="px-4 py-3.5 bg-gradient-to-r from-[#064E3B] to-emerald-800 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="p-2 rounded-xl bg-amber-400 text-slate-950 shadow-xs shrink-0">
@@ -581,36 +687,24 @@ export const VipAddRestaurantModal: React.FC = () => {
             <div className="min-w-0">
               <h3 className="font-moul text-sm text-white truncate">
                 {targetReplacingStore
-                  ? tr(language, '🔄 ប្តូរដាក់ហាងថ្មី ($0)', '🔄 Replace with New Shop ($0)', '🔄 更换为新店铺 ($0)')
-                  : requiresAdditionalPayment
-                  ? tr(
-                      language,
-                      `🏪 បន្ថែមហាងទី ${quota.nextStoreSlotNumber} (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
-                      `🏪 Add Shop #${quota.nextStoreSlotNumber} (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
-                      `🏪 添加第 ${quota.nextStoreSlotNumber} 家店铺 (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`
-                    )
-                  : tr(language, '🏪 បង្កើត និងបន្ថែមហាងថ្មី', '🏪 Create & Add New Shop', '🏪 创建与添加新店铺')}
+                  ? tr(language, '🔄 កែប្តូរព័ត៌មានហាងថ្មី ($0)', '🔄 Replace with New Shop ($0)', '🔄 更换为新店铺 ($0)')
+                  : isPreviewStep
+                  ? tr(language, '👁️ មើលជាមុន និងដាក់ស្នើហាង', '👁️ Preview & Submit Shop', '👁️ 预览并提交店铺')
+                  : tr(language, '➕ បន្ថែមហាងថ្មី (Add New Shop)', '➕ Add New Shop', '➕ 添加新店铺')}
               </h3>
               <p className="text-[11px] text-emerald-100 font-khmer truncate">
-                {targetReplacingStore
+                {isPreviewStep
                   ? tr(
                       language,
-                      `កំពុងប្តូរជំនួសហាង «${targetReplacingStore.nameKh}»`,
-                      `Replacing "${targetReplacingStore.nameEn || targetReplacingStore.nameKh}"`,
-                      `正在替换“${targetReplacingStore.nameEn || targetReplacingStore.nameKh}”`
-                    )
-                  : requiresAdditionalPayment
-                  ? tr(
-                      language,
-                      `ហាងទី ១ ឥតគិតថ្លៃ • ហាងបន្ថែមតម្រូវឱ្យបង់ប្រាក់ +${quota.additionalStoreFeeUsd.toFixed(2)} USD / ១ ហាង`,
-                      `1st shop included with VIP • Each extra shop requires +${quota.additionalStoreFeeUsd.toFixed(2)} USD`,
-                      `首店包含在 VIP 中 • 每增加一家店铺需支付 +${quota.additionalStoreFeeUsd.toFixed(2)} USD`
+                      'ជំហានទី ៣៖ ពិនិត្យព័ត៌មានហាងមុនពេលបញ្ជូនទៅផ្ទៀងផ្ទាត់',
+                      'Step 3: Review your shop details before submitting',
+                      '第 3 步：提交审核前检查店铺信息'
                     )
                   : tr(
                       language,
-                      'បំពេញតែព័ត៌មានសំខាន់ៗ រួចចុចបង្កើតភ្លាម!',
-                      'Fill in basic info and tap Create immediately!',
-                      '仅需填写基本信息，即可立即创建店铺！'
+                      'បំពេញព័ត៌មានហាង ជ្រើសរើសទីតាំងលើ Google Maps រួចដាក់ស្នើ',
+                      'Enter shop info, select location on Google Maps & submit',
+                      '填写店铺信息，在 Google 地图上选择位置并提交'
                     )}
               </p>
             </div>
@@ -629,7 +723,7 @@ export const VipAddRestaurantModal: React.FC = () => {
         </div>
 
         {/* Simple 2-Tab Bar if User Already Has Stores */}
-        {currentUser && ownedRestaurants.length > 0 && (
+        {currentUser && ownedRestaurants.length > 0 && !isPreviewStep && (
           <div className="px-4 pt-2.5 pb-1 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 flex gap-2 font-khmer text-xs shrink-0">
             <button
               type="button"
@@ -647,14 +741,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               <span>
                 {targetReplacingStore
                   ? tr(language, 'កែប្តូរហាងថ្មី ($0)', 'Replace Shop ($0)', '更换新店 ($0)')
-                  : quota.canAddWithoutNewPayment
-                  ? tr(language, 'បង្កើតហាងថ្មី ($0)', 'Create New Shop ($0)', '创建新店铺 ($0)')
-                  : tr(
-                      language,
-                      `បន្ថែមហាងថ្មី (+${quota.additionalStoreFeeUsd.toFixed(2)})`,
-                      `Add New Shop (+${quota.additionalStoreFeeUsd.toFixed(2)})`,
-                      `添加新店 (+${quota.additionalStoreFeeUsd.toFixed(2)})`
-                    )}
+                  : tr(language, '+ បន្ថែមហាងថ្មី', '+ Add New Shop', '+ 添加新店铺')}
               </span>
             </button>
 
@@ -680,7 +767,7 @@ export const VipAddRestaurantModal: React.FC = () => {
           </div>
         )}
 
-        {/* Submission Confirmation Alert Dialog (Pending Admin Approval) */}
+        {/* Submission Confirmation Alert Dialog */}
         {submittedPendingShop ? (
           <div className="p-6 text-center space-y-4 font-khmer animate-fade-in">
             <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 border-2 border-amber-400 text-amber-600 dark:text-amber-300 flex items-center justify-center mx-auto shadow-md">
@@ -693,7 +780,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               <h4 className="font-moul text-base text-slate-900 dark:text-white pt-1">
                 {tr(
                   language,
-                  '✅ បានទទួលសំណើបង្កើតហាងរបស់អ្នកជោគជ័យ!',
+                  '✅ បានទទួលសំណើបន្ថែមហាងរបស់អ្នកជោគជ័យ!',
                   '✅ Shop Submission Received!',
                   '✅ 您的店铺申请已成功提交！'
                 )}
@@ -701,9 +788,9 @@ export const VipAddRestaurantModal: React.FC = () => {
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 {tr(
                   language,
-                  `ហាង «${submittedPendingShop.nameKh || submittedPendingShop.nameEn}» ត្រូវបានបញ្ជូនទៅកាន់រដ្ឋបាល (Admin) ដើម្បីត្រួតពិនិត្យ និងអនុម័ត (Approve) ឬបដិសេធ (Reject)។ បន្ទាប់ពី Admin អនុម័ត ហាងរបស់អ្នកនឹងបង្ហាញជាសាធារណៈភ្លាមៗ!`,
-                  `Your shop "${submittedPendingShop.nameEn || submittedPendingShop.nameKh}" has been submitted. The Administrator will review and approve or reject your listing shortly.`,
-                  `您的店铺“${submittedPendingShop.nameEn || submittedPendingShop.nameKh}”已提交，管理员审核批准后将立即公开展示！`
+                  `ហាង «${submittedPendingShop.nameKh || submittedPendingShop.nameEn}» ត្រូវបានបញ្ជូនទៅកាន់រដ្ឋបាល (Admin) ដើម្បីត្រួតពិនិត្យ និងផ្ទៀងផ្ទាត់ទីតាំង។ បន្ទាប់ពីផ្ទៀងផ្ទាត់រួចរាល់ ហាងរបស់អ្នកនឹងបង្ហាញជាផ្លូវការ!`,
+                  `Your shop "${submittedPendingShop.nameEn || submittedPendingShop.nameKh}" has been sent for verification.`,
+                  `您的店铺“${submittedPendingShop.nameEn || submittedPendingShop.nameKh}”已提交管理员核验！`
                 )}
               </p>
             </div>
@@ -745,9 +832,9 @@ export const VipAddRestaurantModal: React.FC = () => {
             <p className="text-xs text-slate-600 dark:text-slate-300">
               {tr(
                 language,
-                'សូមចូលគណនីរបស់អ្នកដើម្បីបង្កើត និងគ្រប់គ្រងហាងអាហារ។',
-                'Please sign in to create and manage your restaurant.',
-                '请先登录以创建和管理您的餐厅。'
+                'សូមចូលគណនីរបស់អ្នកដើម្បីបន្ថែមហាងថ្មី និងគ្រប់គ្រងហាងអាហារ។',
+                'Please sign in to add and manage your shop.',
+                '请先登录以添加和管理您的餐厅。'
               )}
             </p>
             <button
@@ -773,7 +860,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               {tr(
                 language,
                 `កញ្ចប់ VIP រួមបញ្ចូលសិទ្ធិបង្កើតហាងទី ១ ដោយឥតគិតថ្លៃ ($0)។ សូមដំឡើង ឬបន្តសមាជិកភាព VIP (${dynamicPlans.quarterly.priceUsd.toFixed(2)} / ${dynamicPlans.quarterly.durationDays} ថ្ងៃ ឬ ${dynamicPlans.annual.priceUsd.toFixed(2)} / ${dynamicPlans.annual.durationDays} ថ្ងៃ) ជាមុនសិន!`,
-                `Your 1st shop is included with an active VIP subscription ($0). Please upgrade or renew VIP (${dynamicPlans.quarterly.priceUsd.toFixed(2)} or ${dynamicPlans.annual.priceUsd.toFixed(2)}) first!`,
+                `Your 1st shop is included with an active VIP subscription ($0). Please upgrade or renew VIP first!`,
                 `VIP 会员免费包含第 1 家店铺 ($0)。请先开通或续费 VIP 套餐！`
               )}
             </p>
@@ -791,7 +878,7 @@ export const VipAddRestaurantModal: React.FC = () => {
           </div>
         ) : activeTab === 'my_stores' ? (
           /* ============================================================================
-             COMPACT MY STORES LIST (Edit, Replace for $0, or Delete)
+             MY STORES LIST
              ============================================================================ */
           <div className="p-4 space-y-3 overflow-y-auto flex-1 font-khmer text-xs">
             {ownedRestaurants.map((store, idx) => (
@@ -909,7 +996,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               <PlusCircle className="w-4 h-4" />
               <span>
                 {quota.canAddWithoutNewPayment
-                  ? tr(language, '+ បង្កើតហាងថ្មីមួយទៀត ($0)', '+ Create Another Shop ($0)', '+ 再创建一家新店铺 ($0)')
+                  ? tr(language, '+ បន្ថែមហាងថ្មីមួយទៀត ($0)', '+ Add Another Shop ($0)', '+ 再添加一家新店铺 ($0)')
                   : tr(
                       language,
                       `+ បន្ថែមហាងទី ${quota.nextStoreSlotNumber} (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
@@ -921,7 +1008,7 @@ export const VipAddRestaurantModal: React.FC = () => {
           </div>
         ) : activeTab === 'pay_additional_slot' ? (
           /* ============================================================================
-             EXTRA STORE SLOT CHECKOUT (Only if non-Admin user wants >1 simultaneous store)
+             EXTRA STORE SLOT CHECKOUT
              ============================================================================ */
           <form
             onSubmit={handleSubmitAdditionalStorePayment}
@@ -958,36 +1045,12 @@ export const VipAddRestaurantModal: React.FC = () => {
               <p className="text-[11px] text-slate-700 dark:text-slate-200 leading-relaxed">
                 {tr(
                   language,
-                  `ហាងទី ១ ត្រូវបានរួមបញ្ចូលក្នុងកញ្ចប់ VIP រួចហើយ ($0)។ រាល់ការបន្ថែមហាងទី ២ ឬហាងបន្តបន្ទាប់ តម្រូវឱ្យបង់ប្រាក់បន្ថែម ${quota.additionalStoreFeeUsd.toFixed(2)} USD ក្នុង ១ ហាង ហើយហាងបន្ថែមនឹងត្រូវបើកដំណើរការក្រោយពេលការទូទាត់ត្រូវបានផ្ទៀងផ្ទាត់ និងអនុម័ត។`,
-                  `Your 1st shop is covered by your VIP subscription ($0). Each additional shop requires a separate ${quota.additionalStoreFeeUsd.toFixed(2)} USD payment and will be activated once payment is verified and approved.`,
-                  `您的第 1 家店铺已包含在 VIP 订阅中 ($0)。每增加一家额外店铺需单独支付 ${quota.additionalStoreFeeUsd.toFixed(2)} USD，付款经核实批准后即可激活。`
+                  `ហាងទី ១ ត្រូវបានរួមបញ្ចូលក្នុងកញ្ចប់ VIP រួចហើយ ($0)។ រាល់ការបន្ថែមហាងទី ២ ឬហាងបន្តបន្ទាប់ តម្រូវឱ្យបង់ប្រាក់បន្ថែម ${quota.additionalStoreFeeUsd.toFixed(2)} USD ក្នុង ១ ហាង។`,
+                  `Your 1st shop is covered by your VIP subscription ($0). Each additional shop requires a separate ${quota.additionalStoreFeeUsd.toFixed(2)} USD payment.`,
+                  `您的第 1 家店铺已包含在 VIP 订阅中 ($0)。每增加一家额外店铺需单独支付 ${quota.additionalStoreFeeUsd.toFixed(2)} USD。`
                 )}
               </p>
             </div>
-
-            {quota.pendingAdditionalStoreTransaction && (
-              <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/50 border border-blue-400/70 space-y-1">
-                <div className="font-bold text-blue-900 dark:text-blue-200 flex items-center gap-1.5 text-xs">
-                  <Clock className="w-4 h-4 text-blue-600 shrink-0" />
-                  <span>
-                    {tr(
-                      language,
-                      '⏳ សំណើទូទាត់បន្ថែមហាងកំពុងរង់ចាំការផ្ទៀងផ្ទាត់',
-                      '⏳ Additional Shop Payment Pending Verification',
-                      '⏳ 额外店铺付款正在等待审核'
-                    )}
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                  {tr(
-                    language,
-                    `លេខសម្គាល់៖ ${quota.pendingAdditionalStoreTransaction.id} • ហាងបន្ថែមនឹងអាចបង្កើត និងបើកដំណើរការភ្លាមៗក្រោយពេល Admin ផ្ទៀងផ្ទាត់ និងអនុម័តការទូទាត់។`,
-                    `Ref: ${quota.pendingAdditionalStoreTransaction.id} • Your extra shop slot will unlock as soon as payment is verified and approved.`,
-                    `单号：${quota.pendingAdditionalStoreTransaction.id} • 付款审核通过后将立即解锁额外店铺名额。`
-                  )}
-                </p>
-              </div>
-            )}
 
             {ownedRestaurants[0] && (
               <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-400 space-y-2">
@@ -1030,7 +1093,6 @@ export const VipAddRestaurantModal: React.FC = () => {
                     );
                   } catch {}
                 }}
-                title={tr(language, 'ចុចលើរូប QR ដើម្បីរក្សាទុកក្នុង Gallery / Photos', 'Tap QR to save original image to Gallery/Photos', '点击二维码保存原图到相册')}
                 className="w-60 sm:w-68 max-w-full mx-auto rounded-2xl overflow-hidden border-2 border-amber-400 shadow-sm bg-white cursor-pointer active:scale-[0.985] transition block p-0"
               >
                 <img
@@ -1046,14 +1108,6 @@ export const VipAddRestaurantModal: React.FC = () => {
                 <div className="text-sm font-black text-emerald-700 dark:text-emerald-400 font-mono">
                   ${quota.additionalStoreFeeUsd.toFixed(2)} USD
                 </div>
-                <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
-                  {tr(
-                    language,
-                    'ស្កេនបង់ប្រាក់ រួចភ្ជាប់រូបវិក្កយបត្រខាងក្រោមដើម្បីបើកហាងបន្ថែមថ្មី។',
-                    'Scan to pay, then attach your receipt below to unlock an extra shop.',
-                    '扫码支付后在下方上传收据，即可开启额外新店铺。'
-                  )}
-                </p>
               </div>
             </div>
 
@@ -1098,18 +1152,223 @@ export const VipAddRestaurantModal: React.FC = () => {
               </span>
             </button>
           </form>
+        ) : isPreviewStep ? (
+          /* ============================================================================
+             STEP 3: PREVIEW AND SUBMIT SCREEN (មើលជាមុន និងដាក់ស្នើហាង)
+             ============================================================================ */
+          <div className="p-4 space-y-4 overflow-y-auto flex-1 font-khmer text-xs animate-fade-in">
+            {/* Step Explanation Banner */}
+            <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-500/50 space-y-1">
+              <div className="font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5 text-xs">
+                <Eye className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>
+                  {tr(
+                    language,
+                    'ជំហានទី ៣៖ ពិនិត្យមើលព័ត៌មានហាងជាមុន (Preview)',
+                    'Step 3: Preview Your Shop Details',
+                    '第 3 步：预览您的店铺信息'
+                  )}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                {tr(
+                  language,
+                  'សូមពិនិត្យមើលព័ត៌មានហាង ទីតាំង GPS និងតំណភ្ជាប់ Google Maps ខាងក្រោមឱ្យបានត្រឹមត្រូវ មុនពេលចុច «✅ បញ្ជាក់ និងដាក់ស្នើហាង» ដើម្បីបញ្ជូនទៅផ្ទៀងផ្ទាត់។',
+                  'Please review your shop details, GPS coordinates, and Google Maps link below before submitting for verification.',
+                  '请核对下方的店铺名称、照片、GPS 坐标与 Google 地图链接，确认无误后点击提交审核。'
+                )}
+              </p>
+            </div>
+
+            {/* Visual Shop Preview Card */}
+            <div className="rounded-2xl overflow-hidden border-2 border-emerald-500/50 bg-white dark:bg-slate-800 shadow-md">
+              <div className="relative h-40 bg-slate-900">
+                {coverPhoto ? (
+                  <img src={coverPhoto} alt={nameKh || nameEn} className="w-full h-full object-cover" />
+                ) : (
+                  <DefaultShopIcon className="w-full h-full" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold">
+                    {isKm ? selectedCategoryObj.labelKh : selectedCategoryObj.labelEn}
+                  </span>
+                </div>
+                <div className="absolute bottom-2.5 left-3 right-3 text-white">
+                  <h4 className="font-bold text-sm sm:text-base truncate">{nameKh || nameEn}</h4>
+                  {nameEn && nameKh && (
+                    <p className="text-[11px] text-emerald-200 truncate">{nameEn}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Detailed Checklist of the 7 Fields */}
+              <div className="p-3.5 space-y-2.5 divide-y divide-slate-200 dark:divide-slate-700 text-xs">
+                <div className="flex justify-between gap-2 pt-0.5">
+                  <span className="text-slate-500 dark:text-slate-400 shrink-0">
+                    {tr(language, '១. ឈ្មោះហាង៖', '1. Shop Name:', '1. 店铺名称：')}
+                  </span>
+                  <span className="font-bold text-slate-900 dark:text-white text-right">
+                    {nameKh || nameEn}
+                  </span>
+                </div>
+
+                <div className="flex justify-between gap-2 pt-2">
+                  <span className="text-slate-500 dark:text-slate-400 shrink-0">
+                    {tr(language, '២. ប្រភេទហាង៖', '2. Shop Category:', '2. 店铺类别：')}
+                  </span>
+                  <span className="font-bold text-emerald-700 dark:text-emerald-300 text-right">
+                    {isKm ? selectedCategoryObj.labelKh : selectedCategoryObj.labelEn}
+                  </span>
+                </div>
+
+                <div className="flex justify-between gap-2 pt-2">
+                  <span className="text-slate-500 dark:text-slate-400 shrink-0">
+                    {tr(language, '៣. លេខទូរស័ព្ទ៖', '3. Phone Number:', '3. 联系电话：')}
+                  </span>
+                  <span className="font-bold font-mono text-slate-900 dark:text-white text-right">
+                    {phone}
+                  </span>
+                </div>
+
+                <div className="flex justify-between gap-2 pt-2">
+                  <span className="text-slate-500 dark:text-slate-400 shrink-0">
+                    {tr(language, '៤. អាសយដ្ឋាន / ខេត្ត៖', '4. Address / Province:', '4. 地址 / 省份：')}
+                  </span>
+                  <span className="font-bold text-slate-900 dark:text-white text-right">
+                    {addressKh ? `${addressKh}, ${provinceKh}` : provinceKh}
+                  </span>
+                </div>
+
+                <div className="flex justify-between gap-2 pt-2">
+                  <span className="text-slate-500 dark:text-slate-400 shrink-0">
+                    {tr(language, '៥. ទីតាំង GPS៖', '5. GPS Location:', '5. GPS 坐标：')}
+                  </span>
+                  <span className="font-bold font-mono text-emerald-700 dark:text-emerald-300 text-right">
+                    {shopLat !== null && shopLng !== null
+                      ? `${shopLat.toFixed(6)}, ${shopLng.toFixed(6)}`
+                      : tr(language, 'មិនទាន់កំណត់ម្ជុល GPS', 'Not pinned yet', '未标记 GPS')}
+                  </span>
+                </div>
+
+                <div className="pt-2 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 dark:text-slate-400">
+                      {tr(language, '៦. តំណភ្ជាប់ Google Maps៖', '6. Google Maps Link:', '6. Google 地图链接：')}
+                    </span>
+                    {(shopMapUrl || (shopLat !== null && shopLng !== null)) && (
+                      <a
+                        href={
+                          shopMapUrl.trim() ||
+                          `https://www.google.com/maps/search/?api=1&query=${shopLat},${shopLng}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 underline"
+                      >
+                        <span>{tr(language, 'សាកល្បងបើកផែនទី', 'Test Map Link', '测试打开地图')}</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900 font-mono text-[10px] text-slate-600 dark:text-slate-300 break-all">
+                    {shopMapUrl.trim() ||
+                      (shopLat !== null && shopLng !== null
+                        ? `https://www.google.com/maps/search/?api=1&query=${shopLat.toFixed(6)},${shopLng.toFixed(6)}`
+                        : tr(language, 'មិនទាន់មានលីង Google Maps', 'No Google Maps link provided', '暂无链接'))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons: Edit vs Confirm & Submit */}
+            <div className="grid grid-cols-2 gap-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() => setIsPreviewStep(false)}
+                className="py-3 px-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>{tr(language, '✏️ កែប្រែព័ត៌មាន', '✏️ Edit Details', '✏️ 返回修改')}</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={handleConfirmSubmit}
+                className="py-3 px-3 rounded-2xl bg-gradient-to-r from-[#064E3B] via-emerald-700 to-[#047857] hover:from-emerald-800 text-white font-black text-xs shadow-lg flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer disabled:opacity-50"
+              >
+                <CheckCircle2 className="w-4 h-4 text-amber-300 shrink-0" />
+                <span>
+                  {isSaving
+                    ? tr(language, '⏳ កំពុងដាក់ស្នើ...', '⏳ Submitting...', '⏳ 正在提交...')
+                    : tr(language, '✅ បញ្ជាក់ និងដាក់ស្នើហាង', '✅ Confirm & Submit', '✅ 确认并提交')}
+                </span>
+              </button>
+            </div>
+          </div>
         ) : (
           /* ============================================================================
-             ULTRA-SIMPLE, COMPACT CREATE / ADD SHOP FORM (Default Screen!)
+             SIMPLE, CLEAR ADD NEW SHOP FORM (3-STEP KHMER GUIDE + 7 FIELDS)
              ============================================================================ */
           <form
-            onSubmit={handleSubmit}
+            onSubmit={handleProceedToPreview}
             noValidate
             className="p-4 space-y-3.5 overflow-y-auto flex-1 font-khmer text-xs"
           >
-            {/* Store Quota & Additional Shop Fee Notice (Displayed upfront before confirming!) */}
+            {/* 3-Step Khmer Guide Banner */}
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/50 dark:to-slate-800 border border-emerald-400/50 space-y-1.5">
+              <div className="font-bold text-emerald-950 dark:text-emerald-200 text-xs flex items-center gap-1.5">
+                <span>📋</span>
+                <span>
+                  {tr(
+                    language,
+                    'ការណែនាំ ៣ ជំហានងាយៗក្នុងការបន្ថែមហាងថ្មី៖',
+                    '3 Simple Steps to Add a New Shop:',
+                    '添加新店铺的 3 个简单步骤：'
+                  )}
+                </span>
+              </div>
+              <div className="text-[11px] text-slate-700 dark:text-slate-300 space-y-1 leading-relaxed">
+                <div>
+                  <b className="text-emerald-800 dark:text-emerald-300">
+                    {tr(language, 'ជំហានទី ១៖', 'Step 1:', '第 1 步：')}
+                  </b>{' '}
+                  {tr(
+                    language,
+                    'បំពេញឈ្មោះហាង ប្រភេទហាង លេខទូរស័ព្ទ អាសយដ្ឋាន/ខេត្ត និងរូបភាពហាង។',
+                    'Enter shop name, category, phone, address/province, and shop photo.',
+                    '填写店铺名称、类别、电话、地址/省份及店铺照片。'
+                  )}
+                </div>
+                <div>
+                  <b className="text-emerald-800 dark:text-emerald-300">
+                    {tr(language, 'ជំហានទី ២៖', 'Step 2:', '第 2 步：')}
+                  </b>{' '}
+                  {tr(
+                    language,
+                    'ចុចប៊ូតុង «📍 ជ្រើសរើសទីតាំងលើផែនទី Google Maps» ដើម្បីទាញយកកូអរដោនេ GPS និងលីងផែនទីដោយស្វ័យប្រវត្តិ។',
+                    'Tap "Select Location on Google Maps" to auto-retrieve GPS coordinates & Maps link.',
+                    '点击“在 Google 地图上选择位置”自动获取 GPS 坐标和地图链接。'
+                  )}
+                </div>
+                <div>
+                  <b className="text-emerald-800 dark:text-emerald-300">
+                    {tr(language, 'ជំហានទី ៣៖', 'Step 3:', '第 3 步：')}
+                  </b>{' '}
+                  {tr(
+                    language,
+                    'ចុច «👁️ មើលជាមុន និងដាក់ស្នើហាង» ដើម្បីពិនិត្យម្ដងទៀត មុនបញ្ជូនទៅផ្ទៀងផ្ទាត់។',
+                    'Tap "Preview & Submit" to review before sending for verification.',
+                    '点击“预览并提交”核对信息后提交审核。'
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Store Quota & Additional Shop Fee Notice */}
             {requiresAdditionalPayment ? (
-              <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border-2 border-amber-400 space-y-2 shadow-2xs">
+              <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border-2 border-amber-400 space-y-2 shadow-2xs">
                 <div className="flex items-center justify-between gap-2">
                   <div className="font-bold text-amber-900 dark:text-amber-200 text-xs flex items-center gap-1.5">
                     <CreditCard className="w-4 h-4 text-amber-600 shrink-0" />
@@ -1117,8 +1376,8 @@ export const VipAddRestaurantModal: React.FC = () => {
                       {tr(
                         language,
                         `បន្ថែមហាងទី ${quota.nextStoreSlotNumber} (ហាងបន្ថែម)`,
-                        `Adding Shop #${quota.nextStoreSlotNumber} (Additional Shop)`,
-                        `添加第 ${quota.nextStoreSlotNumber} 家店铺（额外店铺）`
+                        `Adding Shop #${quota.nextStoreSlotNumber}`,
+                        `添加第 ${quota.nextStoreSlotNumber} 家店铺`
                       )}
                     </span>
                   </div>
@@ -1126,15 +1385,7 @@ export const VipAddRestaurantModal: React.FC = () => {
                     +${quota.additionalStoreFeeUsd.toFixed(2)} USD
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-700 dark:text-slate-200 leading-relaxed">
-                  {tr(
-                    language,
-                    `ហាងទី ១ ត្រូវបានរួមបញ្ចូលក្នុងកញ្ចប់ VIP រួចហើយ (${quota.usedStoresCount}/${quota.totalAllowedStores} ហាង)។ ការបន្ថែមហាងទី ${quota.nextStoreSlotNumber} តម្រូវឱ្យបង់ប្រាក់បន្ថែម ${quota.additionalStoreFeeUsd.toFixed(2)} USD ហើយហាងនឹងបើកដំណើរការក្រោយពេលការទូទាត់ត្រូវបានផ្ទៀងផ្ទាត់ និងអនុម័ត។`,
-                    `Your 1st shop is covered by your VIP subscription (${quota.usedStoresCount}/${quota.totalAllowedStores} used). Adding Shop #${quota.nextStoreSlotNumber} requires an additional ${quota.additionalStoreFeeUsd.toFixed(2)} USD fee and will be activated after payment verification.`,
-                    `第 1 家店铺已包含在 VIP 套餐中（已用 ${quota.usedStoresCount}/${quota.totalAllowedStores}）。添加第 ${quota.nextStoreSlotNumber} 家店铺需额外支付 ${quota.additionalStoreFeeUsd.toFixed(2)} USD，付款审核通过后激活。`
-                  )}
-                </p>
-                <div className="flex flex-wrap gap-2 pt-0.5">
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => setActiveTab('pay_additional_slot')}
@@ -1144,9 +1395,9 @@ export const VipAddRestaurantModal: React.FC = () => {
                     <span>
                       {tr(
                         language,
-                        `បង់ប្រាក់បន្ថែមហាងឥឡូវនេះ (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
-                        `Pay Extra Shop Fee Now (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
-                        `立即支付额外店铺费 (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`
+                        `បង់ប្រាក់បន្ថែមហាង (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
+                        `Pay Extra Shop Fee (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
+                        `支付额外店铺费 (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`
                       )}
                     </span>
                   </button>
@@ -1162,133 +1413,278 @@ export const VipAddRestaurantModal: React.FC = () => {
                   )}
                 </div>
               </div>
-            ) : !isAdmin ? (
-              <div className="px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-400/50 flex items-center justify-between text-[11px]">
-                <span className="font-bold text-emerald-900 dark:text-emerald-200">
-                  {targetReplacingStore
-                    ? tr(language, '🔄 កែប្តូរជំនួសហាងដែលមានស្រាប់', '🔄 Replacing Existing Shop', '🔄 更换现有店铺')
-                    : quota.usedStoresCount === 0
-                    ? tr(language, '🎁 ហាងទី ១ រួមបញ្ចូលក្នុងកញ្ចប់ VIP', '🎁 1st Shop Included with VIP', '🎁 首店包含在 VIP 套餐中')
-                    : tr(
-                        language,
-                        `✅ កូតាហាងបន្ថែមដែលបានផ្ទៀងផ្ទាត់ (${quota.usedStoresCount + 1}/${quota.totalAllowedStores})`,
-                        `✅ Verified Store Slot (${quota.usedStoresCount + 1}/${quota.totalAllowedStores})`,
-                        `✅ 已核实额外店铺名额 (${quota.usedStoresCount + 1}/${quota.totalAllowedStores})`
-                      )}
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-mono font-bold text-[10px]">
-                  $0.00
-                </span>
-              </div>
             ) : null}
-            {/* Option: Manual Entry vs. Import from Google Maps */}
-            <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-amber-50 dark:from-emerald-950/50 dark:via-slate-800 dark:to-slate-800 border border-emerald-400/50 dark:border-emerald-500/40 space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-1.5">
-                    <span>🗺️</span>
+
+            {/* FIELD 1: Shop Name (ឈ្មោះហាង) */}
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div>
+                <label className="block font-bold text-slate-900 dark:text-white mb-1">
+                  {tr(language, '១. ឈ្មោះហាង (Shop Name) *', '1. Shop Name *', '1. 店铺名称 *')}
+                </label>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-1.5">
+                  {tr(
+                    language,
+                    'វាយបញ្ចូលឈ្មោះហាងជាភាសាខ្មែរ ឬអង់គ្លេសឱ្យបានច្បាស់លាស់។',
+                    'Enter your shop name in Khmer or English.',
+                    '请输入清晰的柬文或英文店铺名称。'
+                  )}
+                </p>
+                <input
+                  type="text"
+                  required
+                  value={nameKh}
+                  onChange={(e) => setNameKh(e.target.value)}
+                  placeholder={tr(language, 'ឧ. ភោជនីយដ្ឋាន ម្លិះ ឬ ហាងកាហ្វេភ្នំពេញ', 'e.g. Malis Restaurant or Café', '例如：茉莉餐厅')}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-600 dark:text-slate-400 mb-1 text-[11px]">
+                  {tr(language, 'ឈ្មោះហាងជាអក្សរឡាតាំង / អង់គ្លេស (មិនបាច់ដាក់ក៏បាន)', 'English Shop Name (Optional)', '英文店铺名称（选填）')}
+                </label>
+                <input
+                  type="text"
+                  value={nameEn}
+                  onChange={(e) => setNameEn(e.target.value)}
+                  placeholder="e.g. Malis Restaurant"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-white text-xs focus:border-emerald-600 outline-none"
+                />
+              </div>
+            </div>
+
+            {/* FIELD 2: Shop Category (ប្រភេទហាង) */}
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+              <label className="block font-bold text-slate-900 dark:text-white">
+                {tr(language, '២. ប្រភេទហាង (Shop Category) *', '2. Shop Category *', '2. 店铺类别 *')}
+              </label>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                {tr(
+                  language,
+                  'ជ្រើសរើសប្រភេទហាងរបស់អ្នក ដើម្បីឱ្យអតិថិជនងាយស្រួលស្វែងរកតាមផ្នែក។',
+                  'Select your shop category so customers can easily find your shop.',
+                  '选择您的店铺类别，方便顾客按分类查找。'
+                )}
+              </p>
+              <select
+                value={businessCategory}
+                onChange={(e) => {
+                  const nextCat = e.target.value;
+                  setBusinessCategory(nextCat);
+                  const found = SHOP_CATEGORIES.find((c) => c.id === nextCat);
+                  if (found) {
+                    setSignatureDishesKh([found.defaultDishKh]);
+                  }
+                }}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:border-emerald-600 outline-none"
+              >
+                {SHOP_CATEGORIES.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {language === 'km' ? cat.labelKh : language === 'zh' ? cat.labelZh : cat.labelEn}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* FIELD 3: Phone Number (លេខទូរស័ព្ទ) */}
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1.5">
+              <label className="block font-bold text-slate-900 dark:text-white">
+                <Phone className="w-3.5 h-3.5 inline mr-1 text-emerald-600" />
+                {tr(language, '៣. លេខទូរស័ព្ទហាង (Phone Number) *', '3. Phone Number *', '3. 联系电话 *')}
+              </label>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                {tr(
+                  language,
+                  'បញ្ចូលលេខទូរស័ព្ទសម្រាប់ភ្ញៀវទាក់ទងមកកាន់ហាងផ្ទាល់។',
+                  'Enter contact phone number for customers.',
+                  '输入供顾客联系的电话号码。'
+                )}
+              </p>
+              <input
+                type="tel"
+                required
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="012 345 678"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-emerald-600 outline-none"
+              />
+            </div>
+
+            {/* FIELD 4: Address / Province (អាសយដ្ឋាន / ខេត្ត-រាជធានី) */}
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
+              <div>
+                <label className="block font-bold text-slate-900 dark:text-white mb-1">
+                  <MapPin className="w-3.5 h-3.5 inline mr-1 text-emerald-600" />
+                  {tr(language, '៤. ខេត្ត / រាជធានី និងអាសយដ្ឋាន (Address / Province) *', '4. Province & Address *', '4. 省份与详细地址 *')}
+                </label>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-1.5">
+                  {tr(
+                    language,
+                    'ជ្រើសរើសខេត្ត/រាជធានី និងបញ្ចូលអាសយដ្ឋានហាង (ឬវានឹងបំពេញស្វ័យប្រវត្តិពេលអ្នករើសទីតាំងលើផែនទីខាងក្រោម)។',
+                    'Select province and enter address (or auto-fill by selecting location on Google Maps below).',
+                    '选择省份并输入地址（也可通过下方在 Google 地图上选择位置自动填充）。'
+                  )}
+                </p>
+                <select
+                  value={provinceKh}
+                  onChange={(e) => {
+                    const found = PROVINCES.find((p) => p.nameKh === e.target.value);
+                    setProvinceKh(e.target.value);
+                    if (found) setProvinceEn(found.nameEn);
+                  }}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium focus:border-emerald-600 outline-none"
+                >
+                  {PROVINCES.map((p) => (
+                    <option key={p.nameKh} value={p.nameKh}>
+                      {isKm ? p.nameKh : p.nameEn}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[11px]">
+                  {tr(language, 'អាសយដ្ឋានហាង (ផ្លូវ ភូមិ សង្កាត់ ឬទីតាំងសម្គាល់)', 'Street / Sangkat / Landmark Address', '街道 / 分区 / 地标地址')}
+                </label>
+                <input
+                  type="text"
+                  value={addressKh}
+                  onChange={(e) => setAddressKh(e.target.value)}
+                  placeholder={tr(language, 'ឧ. ផ្លូវលេខ ៦៣ សង្កាត់បឹងកេងកង១ (ជិតផ្សារថ្មី)...', 'e.g. St. 63, Boeung Keng Kang 1...', '例如：63号路，万景岗1分区...')}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-600 outline-none"
+                />
+              </div>
+            </div>
+
+            {/* FIELDS 5 & 6: Select Location on Google Maps + Google Maps Link + GPS Location */}
+            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/80 to-amber-50/60 dark:from-emerald-950/60 dark:via-slate-800 dark:to-slate-800 border-2 border-emerald-500/60 space-y-3">
+              <div className="space-y-1">
+                <div className="font-bold text-emerald-950 dark:text-emerald-200 text-xs flex items-center gap-1.5">
+                  <span>📍</span>
+                  <span>
+                    {tr(
+                      language,
+                      '៥ & ៦. ជ្រើសរើសទីតាំងលើផែនទី Google Maps (GPS & លីងផែនទី)',
+                      '5 & 6. Select Location on Google Maps (GPS & Maps Link)',
+                      '5 & 6. 在 Google 地图上选择位置（GPS 与地图链接）'
+                    )}
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {tr(
+                    language,
+                    'ចុចប៊ូតុងពណ៌បៃតងខាងក្រោម ដើម្បីបើកផែនទី Google Maps និងជ្រើសរើសទីតាំងហាងរបស់អ្នក។ ពេលជ្រើសរើសរួច ប្រព័ន្ធនឹងត្រឡប់មកវិញ ហើយបំពេញកូអរដោនេ GPS និងតំណភ្ជាប់ Google Maps ដោយស្វ័យប្រវត្តិ!',
+                    'Tap the button below to open Google Maps and select your shop location. Returning will automatically fill in GPS coordinates and the Google Maps link!',
+                    '点击下方按钮打开 Google 地图并选择店铺准确位置，返回后将自动填写 GPS 坐标和地图链接！'
+                  )}
+                </p>
+              </div>
+
+              {/* Prominent Select Location on Google Maps Button */}
+              <button
+                type="button"
+                onClick={() => setIsCheckInPickerOpen(true)}
+                className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#064E3B] via-emerald-600 to-teal-700 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xs flex items-center justify-center gap-2 shadow-md border border-emerald-300/40 transition active:scale-98 cursor-pointer"
+              >
+                <MapPin className="w-4 h-4 text-amber-300 shrink-0" />
+                <span>
+                  {tr(
+                    language,
+                    '📍 ជ្រើសរើសទីតាំងលើផែនទី Google Maps',
+                    '📍 Select Location on Google Maps',
+                    '📍 在 Google 地图上选择位置'
+                  )}
+                </span>
+              </button>
+
+              {/* Auto-filled / Editable GPS Location Field */}
+              <div className="space-y-1">
+                <label className="block font-bold text-slate-800 dark:text-slate-200 text-[11px]">
+                  <Navigation className="w-3 h-3 inline mr-1 text-emerald-600" />
+                  {tr(language, 'ទីតាំងកូអរដោនេ GPS (Latitude, Longitude)៖', 'GPS Location (Latitude, Longitude):', 'GPS 坐标（纬度, 经度）：')}
+                </label>
+                <div className="flex gap-1.5">
+                  <input
+                    type="text"
+                    value={
+                      gpsInputText ||
+                      (shopLat !== null && shopLng !== null ? `${shopLat.toFixed(6)}, ${shopLng.toFixed(6)}` : '')
+                    }
+                    onChange={(e) => handleGpsInputChange(e.target.value)}
+                    placeholder={tr(
+                      language,
+                      'បំពេញស្វ័យប្រវត្តិពេលរើសលើផែនទី (ឧ. 11.556400, 104.928200)',
+                      'Auto-filled from map (e.g. 11.556400, 104.928200)',
+                      '从地图选择后自动填充（如 11.556400, 104.928200）'
+                    )}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-emerald-300 font-mono text-xs focus:border-emerald-600 outline-none"
+                  />
+                </div>
+                {shopLat !== null && shopLng !== null && (
+                  <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                     <span>
                       {tr(
                         language,
-                        'ទាញយកទិន្នន័យហាងពី Google Maps',
-                        'Import Shop from Google Maps',
-                        '从 Google 地图导入店铺信息'
+                        `✅ បានភ្ជាប់កូអរដោនេ GPS រួចរាល់ (${shopLat.toFixed(5)}, ${shopLng.toFixed(5)})`,
+                        `✅ GPS coordinates ready (${shopLat.toFixed(5)}, ${shopLng.toFixed(5)})`,
+                        `✅ 已获取 GPS 坐标 (${shopLat.toFixed(5)}, ${shopLng.toFixed(5)})`
                       )}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-600 dark:text-slate-300 mt-0.5">
-                    {tr(
-                      language,
-                      'ស្វែងរកហាងរបស់អ្នកនៅលើ Google Maps ដើម្បីបំពេញឈ្មោះ អាសយដ្ឋាន លេខទូរស័ព្ទ និងរូបភាពដោយស្វ័យប្រវត្តិ ឬបំពេញដោយដៃខាងក្រោម។',
-                      'Search your shop on Google Maps to auto-fill name, address, GPS, phone & photos, or enter manually below.',
-                      '在 Google 地图上搜索您的店铺以自动填写名称、地址、GPS、电话和照片，或在下方手动填写。'
-                    )}
-                  </p>
-                </div>
+                )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsGoogleImportModalOpen(true)}
-                  className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#064E3B] to-emerald-700 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
-                >
-                  <span>🔍</span>
-                  <span>
-                    {tr(
-                      language,
-                      'Import ពី Google Maps',
-                      'Import from Google Maps',
-                      '从 Google 地图导入'
-                    )}
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (importedGooglePlaceId) {
-                      setImportedGooglePlaceId(undefined);
-                      setImportedGoogleMeta(undefined);
-                      showToast(
-                        tr(
-                          language,
-                          '✏️ បានប្តូរទៅការបំពេញដោយដៃ',
-                          '✏️ Switched to Manual Entry',
-                          '✏️ 已切换为手动输入'
-                        ),
-                        'info'
-                      );
+              {/* Auto-filled / Editable Google Maps Link Field */}
+              <div className="space-y-1">
+                <label className="block font-bold text-slate-800 dark:text-slate-200 text-[11px]">
+                  🗺️ {tr(language, 'តំណភ្ជាប់ផែនទី Google Maps (Google Maps Link)៖', 'Google Maps Link:', 'Google 地图链接：')}
+                </label>
+                <input
+                  type="url"
+                  value={shopMapUrl}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setShopMapUrl(val);
+                    const extracted = extractCoordsFromGoogleMapsUrl(val);
+                    if (extracted) {
+                      setShopLat(Number(extracted.latitude.toFixed(6)));
+                      setShopLng(Number(extracted.longitude.toFixed(6)));
+                      setGpsInputText(`${extracted.latitude.toFixed(6)}, ${extracted.longitude.toFixed(6)}`);
                     }
                   }}
-                  className={`py-2.5 px-3 rounded-xl font-bold text-[11px] flex items-center justify-center gap-1.5 border transition cursor-pointer ${
-                    !importedGooglePlaceId
-                      ? 'bg-amber-400/90 text-slate-950 border-amber-500 shadow-2xs'
-                      : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <span>✏️</span>
-                  <span>
-                    {tr(
-                      language,
-                      'បំពេញដោយដៃ (Manual)',
-                      'Manual Entry',
-                      '手动填写 (Manual)'
-                    )}
-                  </span>
-                </button>
-              </div>
-
-              {importedGooglePlaceId && (
-                <div className="p-2.5 rounded-xl bg-emerald-600/15 dark:bg-emerald-950/70 border border-emerald-500/40 flex items-center justify-between gap-2 text-[11px]">
-                  <div className="min-w-0 flex-1">
-                    <div className="font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span className="truncate">
+                  placeholder="https://www.google.com/maps/search/?api=1&query=... ឬ https://maps.app.goo.gl/..."
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-xs focus:border-emerald-600 outline-none"
+                />
+                {shopMapUrl.trim() && (
+                  <div
+                    className={`text-[10px] font-bold flex items-center gap-1 ${
+                      isValidGoogleMapsUrl(shopMapUrl)
+                        ? 'text-emerald-700 dark:text-emerald-300'
+                        : 'text-rose-600 dark:text-rose-400'
+                    }`}
+                  >
+                    {isValidGoogleMapsUrl(shopMapUrl) ? (
+                      <>
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                        <span>{tr(language, '✅ តំណភ្ជាប់ Google Maps ត្រឹមត្រូវ', '✅ Valid Google Maps link', '✅ 有效的 Google 地图链接')}</span>
+                      </>
+                    ) : (
+                      <span>
                         {tr(
                           language,
-                          'បានទាញយកពី Google Maps (អាចកែប្រែបានមុនរក្សាទុក)',
-                          'Imported from Google Maps (Review & edit below)',
-                          '已从 Google 地图导入（保存前可修改）'
+                          '⚠️ សូមបញ្ចូលលីងពី Google Maps ឬចុចប៊ូតុងជ្រើសរើសទីតាំងខាងលើ',
+                          '⚠️ Please enter a valid Google Maps URL or use the button above',
+                          '⚠️ 请输入有效的 Google 地图链接或使用上方按钮'
                         )}
                       </span>
-                    </div>
-                    <div className="text-[10px] text-slate-600 dark:text-slate-400 font-mono truncate mt-0.5">
-                      Place ID: {importedGooglePlaceId}
-                    </div>
+                    )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsGoogleImportModalOpen(true)}
-                    className="px-2.5 py-1 rounded-lg bg-[#064E3B] hover:bg-emerald-700 text-white font-bold text-[10px] shrink-0 cursor-pointer"
-                  >
-                    {tr(language, 'ប្តូរហាង', 'Change', '更换')}
-                  </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
-            {/* 1. Single Shop Photo Section (Strictly 1 Shop Storefront Photo — No Food/Menu Photos) */}
+            {/* FIELD 7: Shop Photos (រូបភាពហាង) */}
             <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2.5">
               <div className="flex items-center gap-3">
                 <div className="relative w-20 h-20 rounded-2xl overflow-hidden border-2 border-emerald-500 shrink-0 bg-slate-200 dark:bg-slate-700 shadow-xs">
@@ -1303,27 +1699,20 @@ export const VipAddRestaurantModal: React.FC = () => {
                     <DefaultShopIcon className="w-full h-full" />
                   )}
                   <span className="absolute bottom-0 inset-x-0 bg-black/70 text-white text-[9px] text-center py-0.5 font-bold">
-                    {tr(language, '១ រូបហាង', '1 Shop Photo', '1 张店铺照')}
+                    {tr(language, 'រូបភាពហាង', 'Shop Photo', '店铺照片')}
                   </span>
                 </div>
 
                 <div className="flex-1 space-y-1.5">
-                  <div className="flex items-center justify-between gap-1">
-                    <div className="font-bold text-slate-800 dark:text-slate-100 text-xs">
-                      {targetReplacingStore
-                        ? tr(language, '១. ប្តូររូបភាពតំណាងហាង (១ សន្លឹកគត់)', '1. Replace Single Shop Photo', '1. 更换单张店铺照片')
-                        : tr(language, '១. រូបភាពតំណាងហាង (១ សន្លឹកគត់)', '1. Single Shop Photo Only', '1. 店铺代表照片（仅限1张）')}
-                    </div>
-                    <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 font-bold text-[9px]">
-                      1/1
-                    </span>
+                  <div className="font-bold text-slate-900 dark:text-white text-xs">
+                    {tr(language, '៧. រូបភាពហាង (Shop Photos)', '7. Shop Photos', '7. 店铺照片')}
                   </div>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-snug">
                     {tr(
                       language,
-                      'អនុញ្ញាតតែរូបភាពមុខហាង ១ សន្លឹកប៉ុណ្ណោះ (មិនមានការបញ្ចូលរូបមុខម្ហូបនីមួយៗទេ)។',
-                      'Only 1 photo representing the shop is allowed (no individual food/menu photos).',
-                      '仅允许上传 1 张代表店铺的照片（不支持单道菜品照片上传）。'
+                      'ជ្រើសរើសរូបភាពមុខហាងពីទូរស័ព្ទ ឬថតរូបហាងផ្ទាល់ ដើម្បីបង្ហាញជូនអតិថិជន។',
+                      'Select a storefront photo from your phone gallery or take a photo.',
+                      '从手机相册选择门面照片或直接拍照上传。'
                     )}
                   </p>
                   <div className="grid grid-cols-2 gap-1.5">
@@ -1338,8 +1727,8 @@ export const VipAddRestaurantModal: React.FC = () => {
                         {isUploadingPhoto
                           ? tr(language, 'កំពុងពិនិត្យ...', 'Checking...', '审核中...')
                           : coverPhoto
-                          ? tr(language, 'ប្តូររូបពីទូរស័ព្ទ', 'Replace Photo', '更换照片')
-                          : tr(language, 'រើសពីទូរស័ព្ទ', 'Gallery', '相册选图')}
+                          ? tr(language, 'ប្តូររូបហាង', 'Change Photo', '更换照片')
+                          : tr(language, 'រើសរូបពីទូរស័ព្ទ', 'Choose Photo', '相册选图')}
                       </span>
                     </button>
 
@@ -1361,224 +1750,9 @@ export const VipAddRestaurantModal: React.FC = () => {
                   {moderationWarning}
                 </div>
               )}
-
-              {/* If replacing an existing shop photo, show Pending Admin Approval workflow notice */}
-              {targetReplacingStore && !isAdmin && (
-                <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-400/70 space-y-1 text-[10px]">
-                  <div className="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                    <span>
-                      {tr(
-                        language,
-                        'ការប្តូររូបភាពហាងតម្រូវឱ្យមានការអនុម័តពី Admin (Pending Admin Approval)',
-                        'Replacing an existing shop photo requires Admin Approval',
-                        '更换现有店铺照片需经管理员审核批准'
-                      )}
-                    </span>
-                  </div>
-                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                    {tr(
-                      language,
-                      'រូបភាពដែលបានអនុម័តចាស់នឹងនៅតែបង្ហាញជាធម្មតា រហូតដល់ Admin ពិនិត្យ និងអនុម័តរូបភាពថ្មីរបស់អ្នក។',
-                      'Your existing approved photo remains visible until Admin approves the new replacement photo.',
-                      '在管理员批准新照片之前，现有的已批准照片将继续正常显示。'
-                    )}
-                  </p>
-                  {targetReplacingStore.pendingPhotoReplacement && (
-                    <div className="pt-1 border-t border-amber-300/60 dark:border-amber-800/60 flex flex-wrap items-center gap-2 text-[9.5px] font-semibold">
-                      <span className="px-1.5 py-0.5 rounded bg-amber-200/80 dark:bg-amber-900 text-amber-950 dark:text-amber-200">
-                        {targetReplacingStore.pendingPhotoReplacement.status === 'pending'
-                          ? tr(language, '⏳ កំពុងរង់ចាំការអនុម័តពី Admin', '⏳ Pending Admin Approval', '⏳ 等待管理员批准')
-                          : targetReplacingStore.pendingPhotoReplacement.status === 'approved'
-                          ? tr(language, '✅ បានអនុម័តដោយ Admin', '✅ Approved by Admin', '✅ 管理员已批准')
-                          : tr(language, '🚫 ត្រូវបានបដិសេធដោយ Admin', '🚫 Rejected by Admin', '🚫 管理员已拒绝')}
-                      </span>
-                      <span className="text-slate-500">
-                        {tr(language, 'ថ្ងៃដាក់ស្នើ៖', 'Submitted:', '提交时间：')}{' '}
-                        {targetReplacingStore.pendingPhotoReplacement.submittedAt.replace('T', ' ').slice(0, 16)}
-                      </span>
-                      {targetReplacingStore.pendingPhotoReplacement.reviewedAt && (
-                        <span className="text-slate-500">
-                          • {tr(language, 'ថ្ងៃពិនិត្យ៖', 'Reviewed:', '审核时间：')}{' '}
-                          {targetReplacingStore.pendingPhotoReplacement.reviewedAt.replace('T', ' ').slice(0, 16)}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
 
-            {/* 2. Shop Name (Khmer Required, English Optional) */}
-            <div className="space-y-2.5">
-              <div>
-                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
-                  {tr(language, '២. ឈ្មោះហាង (ភាសាខ្មែរ) *', '2. Shop Name (Khmer) *', '2. 店铺名称（柬文）*')}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={nameKh}
-                  onChange={(e) => setNameKh(e.target.value)}
-                  placeholder={tr(language, 'ឧ. ភោជនីយដ្ឋាន ម្លិះ ឬ មិចកាហ្វេរ', 'e.g. Malis Restaurant or Café', '例如：茉莉餐厅')}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-600 dark:text-slate-400 mb-1 text-[11px]">
-                  {tr(language, 'ឈ្មោះជាអក្សរឡាតាំង / អង់គ្លេស (មិនបាច់ដាក់ក៏បាន)', 'English Name (Optional)', '英文名称（选填）')}
-                </label>
-                <input
-                  type="text"
-                  value={nameEn}
-                  onChange={(e) => setNameEn(e.target.value)}
-                  placeholder="e.g. Malis Restaurant"
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white text-xs focus:border-emerald-600 outline-none"
-                />
-              </div>
-            </div>
-
-            {/* 3. Province & Phone Number */}
-            <div className="grid grid-cols-2 gap-2.5">
-              <div>
-                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
-                  <MapPin className="w-3.5 h-3.5 inline mr-1 text-emerald-600" />
-                  {tr(language, '៣. ខេត្ត / រាជធានី', '3. Province / City', '3. 省份 / 城市')}
-                </label>
-                <select
-                  value={provinceKh}
-                  onChange={(e) => {
-                    const found = PROVINCES.find((p) => p.nameKh === e.target.value);
-                    setProvinceKh(e.target.value);
-                    if (found) setProvinceEn(found.nameEn);
-                  }}
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium focus:border-emerald-600 outline-none"
-                >
-                  {PROVINCES.map((p) => (
-                    <option key={p.nameKh} value={p.nameKh}>
-                      {isKm ? p.nameKh : p.nameEn}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
-                  <Phone className="w-3.5 h-3.5 inline mr-1 text-emerald-600" />
-                  {tr(language, '៤. លេខទូរស័ព្ទហាង', '4. Phone Number', '4. 联系电话')}
-                </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="012 345 678"
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-emerald-600 outline-none"
-                />
-              </div>
-            </div>
-
-            {/* 4. Short Address / Location + Check In Button */}
-            <div className="space-y-2">
-              <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
-                {tr(language, '៥. ទីតាំង ឬអាសយដ្ឋានខ្លីៗ (មិនបាច់ដាក់ក៏បាន)', '5. Short Address / Location (Optional)', '5. 简短地址或位置（选填）')}
-              </label>
-              <input
-                type="text"
-                value={addressKh}
-                onChange={(e) => setAddressKh(e.target.value)}
-                placeholder={tr(language, 'ឧ. ជិតផ្សារថ្មី ឬ ផ្លូវលេខ ៦៣...', 'e.g. Near Central Market, St. 63...', '例如：中央市场附近...')}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-600 outline-none"
-              />
-
-              {/* 6. Dedicated Google Maps Location Link Input Field */}
-              <div className="pt-1 space-y-1.5">
-                <label className="block font-bold text-slate-800 dark:text-slate-200">
-                  🗺️ {tr(language, '៦. លីងទីតាំង Google Maps (Google Maps Link)', '6. Google Maps Location Link', '6. Google 地图位置链接')}
-                </label>
-                <input
-                  type="url"
-                  value={shopMapUrl}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setShopMapUrl(val);
-                    const extracted = extractCoordsFromGoogleMapsUrl(val);
-                    if (extracted) {
-                      setShopLat(extracted.latitude);
-                      setShopLng(extracted.longitude);
-                    }
-                  }}
-                  placeholder="https://maps.app.goo.gl/... ឬ https://www.google.com/maps/..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-emerald-400/70 dark:border-emerald-600/60 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 outline-none"
-                />
-                {shopMapUrl.trim() ? (
-                  isValidGoogleMapsUrl(shopMapUrl) ? (
-                    <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                      <span>
-                        {tr(
-                          language,
-                          '✅ លីង Google Maps ត្រឹមត្រូវ (រង់ចាំ Admin ផ្ទៀងផ្ទាត់មុនបង្ហាញជាសាធារណៈ)',
-                          '✅ Valid Google Maps link (Pending Admin verification before public display)',
-                          '✅ 有效的 Google 地图链接（公开展示前需经管理员核实）'
-                        )}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="text-[10px] font-bold text-rose-600 dark:text-rose-400">
-                      {tr(
-                        language,
-                        '⚠️ ទម្រង់លីងមិនត្រឹមត្រូវ — សូមបញ្ចូលលីងពី Google Maps (ឧ. https://maps.app.goo.gl/...)',
-                        '⚠️ Invalid link format — please paste a Google Maps URL (e.g. https://maps.app.goo.gl/...)',
-                        '⚠️ 链接格式无效 — 请粘贴 Google 地图链接（如 https://maps.app.goo.gl/...）'
-                      )}
-                    </div>
-                  )
-                ) : (
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-snug">
-                    {tr(
-                      language,
-                      'ចម្លង (Copy) លីងទីតាំងហាងរបស់អ្នកពីកម្មវិធី Google Maps រួចបិទភ្ជាប់ (Paste) ទីនេះ ដើម្បីឱ្យភ្ញៀវចុចបើកផែនទីទៅកាន់ហាងផ្ទាល់។',
-                      'Copy your shop link from Google Maps and paste it here so customers can open your exact map location.',
-                      '从 Google 地图复制您的店铺链接并粘贴到此处，方便顾客直接打开导航前往。'
-                    )}
-                  </p>
-                )}
-              </div>
-
-              {/* Check In / Set Shop Location Button */}
-              <button
-                type="button"
-                onClick={() => setIsCheckInPickerOpen(true)}
-                className="w-full py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600/90 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm border border-emerald-400/30 transition cursor-pointer"
-              >
-                <span>📍 កំណត់ទីតាំងហាង (Check In)</span>
-              </button>
-
-              {/* Selected GPS Coordinates & Map Preview Badge */}
-              {shopLat !== null && shopLng !== null && (
-                <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/40 flex items-center justify-between gap-2 text-[11px]">
-                  <div className="min-w-0 flex-1">
-                    <div className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                      <span>{tr(language, 'បានកំណត់ទីតាំង GPS រួចរាល់', 'GPS Location Pinned', '已标记 GPS 位置')}</span>
-                    </div>
-                    <div className="font-mono text-[10px] text-slate-600 dark:text-slate-400 truncate mt-0.5">
-                      GPS: {shopLat.toFixed(6)}, {shopLng.toFixed(6)}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsCheckInPickerOpen(true)}
-                    className="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-[10px] shrink-0 cursor-pointer"
-                  >
-                    {tr(language, 'កែទីតាំង', 'Adjust Pin', '调整位置')}
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Optional Collapsible Extra Info (Opening Hours & Description) */}
+            {/* Optional Extra Info (Opening Hours & Description) */}
             <div>
               <button
                 type="button"
@@ -1610,32 +1784,6 @@ export const VipAddRestaurantModal: React.FC = () => {
                       className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
                     />
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div>
-                      <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[11px]">
-                        {tr(language, 'ប្រភេទអាជីវកម្ម / ហាង', 'Business Category', '营业类别')}
-                      </label>
-                      <input
-                        type="text"
-                        value={businessCategory}
-                        onChange={(e) => setBusinessCategory(e.target.value)}
-                        placeholder={tr(language, 'ឧ. restaurant, cafe, bakery...', 'e.g. restaurant, cafe, bakery...', '例如：restaurant, cafe...')}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[11px]">
-                        {tr(language, 'គេហទំព័រ / Facebook Page (Website)', 'Website / Page URL', '网站 / 主页链接')}
-                      </label>
-                      <input
-                        type="url"
-                        value={websiteUrl}
-                        onChange={(e) => setWebsiteUrl(e.target.value)}
-                        placeholder="https://..."
-                        className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono"
-                      />
-                    </div>
-                  </div>
                   <div>
                     <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[11px]">
                       {tr(language, 'ការពិពណ៌នាអំពីហាង', 'Shop Description', '店铺简介')}
@@ -1652,60 +1800,27 @@ export const VipAddRestaurantModal: React.FC = () => {
               )}
             </div>
 
-            {/* Submit Button */}
-            <div className="pt-1 space-y-2">
-              {requiresAdditionalPayment && (
-                <div className="px-3 py-2 rounded-xl bg-amber-100/80 dark:bg-amber-950/60 border border-amber-400/70 flex items-center justify-between text-[11px] font-bold text-amber-950 dark:text-amber-200">
-                  <span>
-                    {tr(
-                      language,
-                      `តម្លៃបន្ថែមហាងទី ${quota.nextStoreSlotNumber}៖`,
-                      `Additional Shop #${quota.nextStoreSlotNumber} Fee:`,
-                      `第 ${quota.nextStoreSlotNumber} 家店铺费用：`
-                    )}
-                  </span>
-                  <span className="font-mono font-black text-emerald-700 dark:text-emerald-300">
-                    +${quota.additionalStoreFeeUsd.toFixed(2)} USD
-                  </span>
-                </div>
-              )}
+            {/* Preview & Submit Button */}
+            <div className="pt-1">
               <button
                 type="submit"
                 disabled={isSaving || isUploadingPhoto}
-                className={`w-full py-3.5 px-4 rounded-2xl disabled:opacity-60 font-extrabold text-sm shadow-lg flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer ${
-                  requiresAdditionalPayment
-                    ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 text-slate-950'
-                    : 'bg-gradient-to-r from-[#064E3B] via-emerald-700 to-[#047857] hover:from-emerald-800 hover:to-emerald-700 text-white'
-                }`}
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#064E3B] via-emerald-700 to-[#047857] hover:from-emerald-800 hover:to-emerald-700 disabled:opacity-60 text-white font-extrabold text-sm shadow-lg flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
               >
-                {requiresAdditionalPayment ? (
-                  <CreditCard className="w-5 h-5 text-slate-950 shrink-0" />
-                ) : (
-                  <CheckCircle2 className="w-5 h-5 text-amber-300 shrink-0" />
-                )}
+                <Eye className="w-5 h-5 text-amber-300 shrink-0" />
                 <span>
-                  {isSaving
-                    ? tr(language, '⏳ កំពុងរក្សាទុកហាង...', '⏳ Saving Shop...', '⏳ 正在保存店铺...')
-                    : targetReplacingStore
-                    ? tr(language, '🔄 រក្សាទុកការប្តូរហាងថ្មីឥឡូវនេះ ($0)', '🔄 Save & Replace Shop Now ($0)', '🔄 立即保存并更换店铺 ($0)')
-                    : requiresAdditionalPayment
-                    ? tr(
-                        language,
-                        `💳 បន្តទៅបង់ប្រាក់ +${quota.additionalStoreFeeUsd.toFixed(2)} USD ដើម្បីបន្ថែមហាងទី ${quota.nextStoreSlotNumber}`,
-                        `💳 Pay +${quota.additionalStoreFeeUsd.toFixed(2)} USD to Add Shop #${quota.nextStoreSlotNumber}`,
-                        `💳 支付 +${quota.additionalStoreFeeUsd.toFixed(2)} USD 添加第 ${quota.nextStoreSlotNumber} 家店铺`
-                      )
-                    : tr(
-                        language,
-                        '✅ ចុះបញ្ជីហាងឥឡូវនេះ',
-                        '✅ Register Shop Now',
-                        '✅ 立即注册店铺'
-                      )}
+                  {tr(
+                    language,
+                    '👁️ មើលជាមុន និងដាក់ស្នើហាង (Preview & Submit)',
+                    '👁️ Preview & Submit Shop',
+                    '👁️ 预览并提交店铺'
+                  )}
                 </span>
               </button>
             </div>
           </form>
         )}
+
         <ShopLocationCheckInPickerModal
           isOpen={isCheckInPickerOpen}
           onClose={() => setIsCheckInPickerOpen(false)}
@@ -1718,6 +1833,7 @@ export const VipAddRestaurantModal: React.FC = () => {
           onConfirmLocation={(loc: ShopCheckInLocationResult) => {
             setShopLat(loc.latitude);
             setShopLng(loc.longitude);
+            setGpsInputText(`${loc.latitude.toFixed(6)}, ${loc.longitude.toFixed(6)}`);
             setShopMapUrl(loc.mapUrl);
             if (loc.formattedAddressKh) {
               setAddressKh(loc.formattedAddressKh);
@@ -1734,68 +1850,9 @@ export const VipAddRestaurantModal: React.FC = () => {
             showToast(
               tr(
                 language,
-                '📍 បានកំណត់ទីតាំងហាង (Check In) ដោយជោគជ័យ!',
-                '📍 Shop location pinned successfully!',
-                '📍 店铺位置已成功标记！'
-              ),
-              'success'
-            );
-          }}
-        />
-        <GoogleMapsShopImporterModal
-          isOpen={isGoogleImportModalOpen}
-          onClose={() => setIsGoogleImportModalOpen(false)}
-          language={language}
-          existingRestaurants={restaurants}
-          defaultProvinceKh={provinceKh}
-          onSelectShop={(shop: ImportedGoogleShopData) => {
-            setNameKh(shop.nameKh || shop.nameEn);
-            setNameEn(shop.nameEn || shop.nameKh);
-            const matchedProv = PROVINCES.find(
-              (p) =>
-                p.nameKh === shop.provinceKh ||
-                p.nameKh.replace(/^ខេត្ត|^រាជធានី/g, '') === shop.provinceKh.replace(/^ខេត្ត|^រាជធានី/g, '')
-            );
-            if (matchedProv) {
-              setProvinceKh(matchedProv.nameKh);
-              setProvinceEn(matchedProv.nameEn);
-            } else {
-              setProvinceKh(shop.provinceKh);
-              setProvinceEn(shop.provinceEn);
-            }
-            setAddressKh(shop.addressKh || shop.addressEn);
-            setShopLat(shop.latitude);
-            setShopLng(shop.longitude);
-            setShopMapUrl(shop.mapUrl);
-            if (shop.phone) {
-              setPhone(shop.phone);
-            }
-            if (shop.openingHoursKh) {
-              setOpeningHoursKh(shop.openingHoursKh);
-            }
-            if (shop.priceLevel) {
-              setPriceLevel(shop.priceLevel);
-            }
-            if (Array.isArray(shop.photoUrls) && shop.photoUrls.length > 0 && shop.photoUrls[0]) {
-              setShopPhoto(shop.photoUrls[0]);
-            }
-            if (shop.descriptionKh) {
-              setDescriptionKh(shop.descriptionKh);
-            }
-            setBusinessCategory(shop.businessCategory || '');
-            setWebsiteUrl(shop.websiteUrl || '');
-            if (Array.isArray(shop.signatureDishesKh) && shop.signatureDishesKh.length > 0) {
-              setSignatureDishesKh(shop.signatureDishesKh);
-            }
-            setImportedGooglePlaceId(shop.googlePlaceId);
-            setImportedGoogleMeta(shop.googleMapsMeta);
-            setShowMoreOptions(true);
-            showToast(
-              tr(
-                language,
-                `✅ បានទាញយកទិន្នន័យហាង «${shop.nameKh || shop.nameEn}» ពី Google Maps រួចរាល់! សូមពិនិត្យ និងកែប្រែតាមតម្រូវការ។`,
-                `✅ Imported "${shop.nameEn || shop.nameKh}" from Google Maps! Review and edit before saving.`,
-                `✅ 已从 Google 地图导入“${shop.nameEn || shop.nameKh}”！保存前可检查并修改。`
+                '✅ បានជ្រើសរើសទីតាំង និងបំពេញកូអរដោនេ GPS + លីង Google Maps ដោយស្វ័យប្រវត្តិ!',
+                '✅ Location selected! Automatically filled GPS coordinates & Google Maps link!',
+                '✅ 已选择位置！自动填充了 GPS 坐标和 Google 地图链接！'
               ),
               'success'
             );

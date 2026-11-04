@@ -93,6 +93,8 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
     importGooglePlaceToApp,
     setSelectedRestaurant,
     setSelectedDestination,
+    setIsVipAddRestaurantModalOpen,
+    setIsAuthModalOpen,
     showToast,
   } = useApp();
 
@@ -547,294 +549,201 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
               </div>
             </div>
           )}
-          {/* Search & Filter Controls */}
-          <div ref={searchFormTopRef} className="p-3.5 sm:p-5 bg-slate-50 border-b border-slate-200 space-y-2.5 sm:space-y-3">
-            {/* Search Scope Selector Bar (Nationwide / By Province / Nearby GPS) */}
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[11px] font-extrabold text-slate-600 mr-1">
-                  {tr(language, 'វិសាលភាពស្វែងរក៖', 'Search Scope:', '搜索范围：')}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchScope('nationwide');
-                    setProvince('ទាំងអស់');
-                    setGpsLocation(null);
-                    if (query.trim()) {
-                      executeSearch({ scope: 'nationwide', prov: 'ទាំងអស់', loc: null });
-                    }
-                  }}
-                  className={`text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1 ${
-                    searchScope === 'nationwide' && province === 'ទាំងអស់' && !gpsLocation
-                      ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
-                      : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-400'
-                  }`}
-                >
-                  <span>🇰🇭</span>
-                  <span>{tr(language, 'ទូទាំងប្រទេសកម្ពុជា (២៥ ខេត្ត/ក្រុង)', 'Nationwide Cambodia', '全柬埔寨（25省市）')}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchScope('province');
-                    setGpsLocation(null);
-                    const nextProv = province === 'ទាំងអស់' ? 'រាជធានីភ្នំពេញ' : province;
-                    setProvince(nextProv);
-                    if (query.trim()) {
-                      executeSearch({ scope: 'province', prov: nextProv, loc: null });
-                    }
-                  }}
-                  className={`text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1 ${
-                    (searchScope === 'province' || province !== 'ទាំងអស់') && !gpsLocation
-                      ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
-                      : 'bg-white text-slate-700 border-slate-300 hover:border-emerald-400'
-                  }`}
-                >
-                  <span>🏙️</span>
-                  <span>{tr(language, 'តាមខេត្ត/ក្រុង', 'By Province / City', '按省份/城市')}</span>
-                </button>
+          {/* Search & Add Shop Clearly Separated Sections */}
+          <div ref={searchFormTopRef} className="p-3.5 sm:p-5 bg-slate-50 border-b border-slate-200 space-y-3 font-khmer">
+            {/* SECTION 1: SEARCH SHOPS ON GOOGLE MAPS */}
+            <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-2.5">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div>
+                  <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                    <Search className="w-4 h-4 text-emerald-600" />
+                    <span>{tr(language, '១. 🔍 ស្វែងរកទីតាំងហាងលើផែនទី Google Maps', '1. 🔍 Search & Locate Shops on Google Maps', '1. 🔍 在 Google 地图上搜索与定位店铺')}</span>
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    {tr(
+                      language,
+                      'វាយឈ្មោះហាង ជ្រើសរើសប្រភេទហាង ឬខេត្ត-រាជធានី ដើម្បីស្វែងរកទីតាំងពិតប្រាកដនៅលើផែនទី Google Maps។',
+                      'Enter shop name, select category or province to locate shops on Google Maps.',
+                      '输入店铺名称、选择类别或省份，在 Google 地图上查找准确位置。'
+                    )}
+                  </p>
+                </div>
 
                 <button
                   type="button"
                   onClick={handleUseMyGpsLocation}
                   disabled={gpsLoading || isLoading}
-                  className={`text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1 ${
+                  className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
                     gpsLocation || searchScope === 'nearby'
                       ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                      : 'bg-white text-slate-700 border-slate-300 hover:border-blue-400'
+                      : 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
                   }`}
                 >
                   <Navigation className={`w-3.5 h-3.5 ${gpsLoading ? 'animate-ping' : ''}`} />
-                  <span>{tr(language, 'ជិតខ្ញុំ (GPS Nearby)', 'Nearby Me (GPS)', '我附近 (GPS)')}</span>
+                  <span>{tr(language, '🎯 ហាងជិតខ្ញុំ (GPS)', '🎯 Near Me (GPS)', '🎯 我附近 (GPS)')}</span>
                 </button>
               </div>
 
-              {gpsLocation && (
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] font-bold text-slate-600">
-                    {tr(language, 'រង្វង់ GPS៖', 'Radius:', '半径：')}
-                  </span>
-                  {[5, 15, 30, 50].map(km => (
+              <form
+                onSubmit={e => {
+                  e.preventDefault();
+                  executeSearch();
+                }}
+                className="grid grid-cols-2 sm:grid-cols-12 gap-2"
+              >
+                {/* Keyword Input */}
+                <div className="col-span-2 sm:col-span-5 relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={query}
+                    onChange={e => setQuery(e.target.value)}
+                    placeholder={tr(
+                      language,
+                      'វាយឈ្មោះហាង (ឧ. បាយមាន់, ហាងកាហ្វេ, ភោជនីយដ្ឋាន)...',
+                      'Search shop, café, restaurant, or attraction...',
+                      '输入店铺、咖啡馆或餐厅名称...'
+                    )}
+                    className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+                  />
+                  {query && (
                     <button
-                      key={km}
                       type="button"
-                      onClick={() => {
-                        setGpsRadiusKm(km);
-                        executeSearch({ loc: gpsLocation, radiusKm: km, scope: 'nearby' });
-                      }}
-                      className={`px-2 py-0.5 rounded-lg text-[11px] font-bold border cursor-pointer ${
-                        gpsRadiusKm === km
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'bg-white text-slate-600 border-slate-300 hover:bg-blue-50'
-                      }`}
+                      onClick={() => setQuery('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                     >
-                      {km}km
+                      <X className="w-4 h-4" />
                     </button>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* 1-Tap Daily Quick Navigation Presets (FREE) */}
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-              <span className="text-[11px] font-extrabold text-slate-500 shrink-0">
-                {tr(language, 'ស្វែងរករហ័ស៖', 'Quick Find:', '快捷导航：')}
-              </span>
-              {[
-                { q: 'អាហារខ្មែរ Khmer Restaurant', kh: '🍲 អាហារខ្មែរ', en: '🍲 Khmer Food', zh: '🍲 柬式餐厅', cat: 'restaurant' as const },
-                { q: 'គុយទាវ Noodles Breakfast', kh: '🍜 គុយទាវ/អាហារព្រឹក', en: '🍜 Noodles', zh: '🍜 粿条/早餐', cat: 'restaurant' as const },
-                { q: 'Coffee Cafe ហាងកាហ្វេ', kh: '☕ ហាងកាហ្វេ', en: '☕ Coffee & Café', zh: '☕ 咖啡馆', cat: 'restaurant' as const },
-                { q: 'Seafood BBQ គ្រឿងសមុទ្រ សាច់អាំង', kh: '🦐 គ្រឿងសមុទ្រ/សាច់អាំង', en: '🦐 Seafood & BBQ', zh: '🦐 海鲜与烧烤', cat: 'restaurant' as const },
-                { q: 'Tourist Attraction រមណីយដ្ឋាន', kh: '🏞️ រមណីយដ្ឋាន', en: '🏞️ Attractions', zh: '🏞️ 热门景点', cat: 'tourism' as const },
-              ].map((preset) => (
-                <button
-                  key={preset.q}
-                  type="button"
-                  onClick={() => {
-                    setQuery(preset.q);
-                    setCategory(preset.cat);
-                    executeSearch({ q: preset.q, cat: preset.cat });
-                  }}
-                  className="px-2.5 py-1 rounded-full bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-400 text-[11px] font-bold whitespace-nowrap transition cursor-pointer shadow-2xs"
-                >
-                  {tr(language, preset.kh, preset.en, preset.zh)}
-                </button>
-              ))}
-            </div>
-
-            <form
-              onSubmit={e => {
-                e.preventDefault();
-                executeSearch();
-              }}
-              className="grid grid-cols-2 sm:grid-cols-12 gap-2"
-            >
-              {/* Keyword Input */}
-              <div className="col-span-2 sm:col-span-5 relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={query}
-                  onChange={e => setQuery(e.target.value)}
-                  placeholder={tr(
-                    language,
-                    'វាយឈ្មោះហាង (ឧ. បាយមាន់, coffee, ហាងកាហ្វេ, ភោជនីយដ្ឋាន)...',
-                    'Search coffee, café, restaurant, or tourist attraction...',
-                    '输入咖啡馆、餐厅或景点名称（如 coffee, café）...'
-                  )}
-                  className="w-full pl-10 pr-8 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
-                />
-                {query && (
-                  <button
-                    type="button"
-                    onClick={() => setQuery('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                {/* Category Selector */}
+                <div className="col-span-1 sm:col-span-3">
+                  <select
+                    value={category}
+                    onChange={e => {
+                      const nextCat = e.target.value as GooglePlaceSearchCategory;
+                      setCategory(nextCat);
+                      if (query.trim()) {
+                        executeSearch({ cat: nextCat });
+                      }
+                    }}
+                    className="w-full px-2.5 sm:px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
+                    {SEARCH_CATEGORIES.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.emoji} {tr(language, c.labelKh, c.labelEn, c.labelZh)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              {/* Category Selector (Side-by-side with Province on Mobile) */}
-              <div className="col-span-1 sm:col-span-3">
-                <select
-                  value={category}
-                  onChange={e => {
-                    const nextCat = e.target.value as GooglePlaceSearchCategory;
-                    setCategory(nextCat);
-                    if (query.trim()) {
-                      executeSearch({ cat: nextCat });
-                    }
-                  }}
-                  className="w-full px-2.5 sm:px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  {SEARCH_CATEGORIES.map(c => (
-                    <option key={c.id} value={c.id}>
-                      {c.emoji} {tr(language, c.labelKh, c.labelEn, c.labelZh)}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                {/* Province Selector */}
+                <div className="col-span-1 sm:col-span-2">
+                  <select
+                    value={province}
+                    onChange={e => {
+                      const nextProv = e.target.value;
+                      setProvince(nextProv);
+                      setSearchScope(nextProv === 'ទាំងអស់' ? 'nationwide' : 'province');
+                      if (query.trim()) {
+                        executeSearch({
+                          prov: nextProv,
+                          scope: nextProv === 'ទាំងអស់' ? 'nationwide' : 'province',
+                        });
+                      }
+                    }}
+                    className="w-full px-2.5 sm:px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    {CAMBODIA_PROVINCES.map(prov => (
+                      <option key={prov} value={prov}>
+                        📍{' '}
+                        {prov === 'ទាំងអស់'
+                          ? tr(language, 'គ្រប់ខេត្ត/ក្រុង', 'All Provinces', '全部省份/城市')
+                          : translateProvinceName(prov, prov, language)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              {/* Province Selector (Side-by-side with Category on Mobile) */}
-              <div className="col-span-1 sm:col-span-2">
-                <select
-                  value={province}
-                  onChange={e => {
-                    const nextProv = e.target.value;
-                    setProvince(nextProv);
-                    setSearchScope(nextProv === 'ទាំងអស់' ? 'nationwide' : 'province');
-                    if (query.trim()) {
-                      executeSearch({
-                        prov: nextProv,
-                        scope: nextProv === 'ទាំងអស់' ? 'nationwide' : 'province',
-                      });
-                    }
-                  }}
-                  className="w-full px-2.5 sm:px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  {CAMBODIA_PROVINCES.map(prov => (
-                    <option key={prov} value={prov}>
-                      📍{' '}
-                      {prov === 'ទាំងអស់'
-                        ? tr(language, 'គ្រប់ខេត្ត/ក្រុង', 'All Provinces', '全部省份/城市')
-                        : translateProvinceName(prov, prov, language)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Search Submit Button */}
-              <div className="col-span-2 sm:col-span-2 flex gap-1.5">
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-sm py-2.5 px-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  {isLoading ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Search className="w-4 h-4" />
-                  )}
-                  <span>{tr(language, 'ស្វែងរក', 'Search', '搜索')}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleUseMyGpsLocation}
-                  disabled={gpsLoading || isLoading}
-                  title={tr(language, 'ស្វែងរកទីតាំងជិតខ្ញុំ (GPS)', 'Search Near Me (GPS)', '搜索我附近的位置 (GPS)')}
-                  className={`px-3 py-2.5 rounded-xl border text-xs font-bold flex items-center justify-center transition-all cursor-pointer ${
-                    gpsLocation
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                      : 'bg-white text-slate-700 border-slate-300 hover:bg-blue-50 hover:border-blue-300'
-                  }`}
-                >
-                  <Navigation className={`w-4 h-4 ${gpsLoading ? 'animate-ping' : ''}`} />
-                </button>
-              </div>
-            </form>
-
-            {/* Quick Search Presets (Single Horizontal Scroll Row on Mobile, Wrap on Desktop) */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 overflow-x-auto sm:flex-wrap no-scrollbar py-0.5 max-w-full">
-                <span className="text-[11px] font-bold text-slate-500 mr-1 shrink-0">
-                  {tr(language, 'ស្វែងរករហ័ស៖', 'Quick Search:', '快捷搜索：')}
-                </span>
-                {QUICK_SEARCH_PRESETS.map((preset, idx) => (
+                {/* Search Submit Button */}
+                <div className="col-span-2 sm:col-span-2 flex gap-1.5">
                   <button
-                    key={idx}
+                    type="submit"
+                    disabled={isLoading}
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-sm py-2.5 px-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    {isLoading ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Search className="w-4 h-4" />
+                    )}
+                    <span>{tr(language, 'ស្វែងរក', 'Search', '搜索')}</span>
+                  </button>
+                </div>
+              </form>
+
+              {/* Single Clean Quick Search Row */}
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
+                <span className="text-[11px] font-bold text-slate-500 shrink-0">
+                  {tr(language, 'ប្រភេទរហ័ស៖', 'Quick Categories:', '快捷分类：')}
+                </span>
+                {[
+                  { q: 'អាហារខ្មែរ Khmer Restaurant', kh: '🍲 អាហារខ្មែរ', en: '🍲 Khmer Food', zh: '🍲 柬式餐厅', cat: 'restaurant' as const },
+                  { q: 'គុយទាវ Noodles Breakfast', kh: '🍜 គុយទាវ/អាហារព្រឹក', en: '🍜 Noodles', zh: '🍜 粿条/早餐', cat: 'restaurant' as const },
+                  { q: 'Coffee Cafe ហាងកាហ្វេ', kh: '☕ ហាងកាហ្វេ', en: '☕ Coffee & Café', zh: '☕ 咖啡馆', cat: 'restaurant' as const },
+                  { q: 'Seafood BBQ គ្រឿងសមុទ្រ សាច់អាំង', kh: '🦐 គ្រឿងសមុទ្រ/សាច់អាំង', en: '🦐 Seafood & BBQ', zh: '🦐 海鲜与烧烤', cat: 'restaurant' as const },
+                  { q: 'Tourist Attraction រមណីយដ្ឋាន', kh: '🏞️ រមណីយដ្ឋាន', en: '🏞️ Attractions', zh: '🏞️ 热门景点', cat: 'tourism' as const },
+                ].map((preset) => (
+                  <button
+                    key={preset.q}
                     type="button"
                     onClick={() => {
-                      setQuery(preset.query);
-                      setCategory(preset.category);
-                      setProvince(preset.province);
-                      setSearchScope(preset.province === 'ទាំងអស់' ? 'nationwide' : 'province');
-                      executeSearch({
-                        q: preset.query,
-                        cat: preset.category,
-                        prov: preset.province,
-                        scope: preset.province === 'ទាំងអស់' ? 'nationwide' : 'province',
-                      });
+                      setQuery(preset.q);
+                      setCategory(preset.cat);
+                      executeSearch({ q: preset.q, cat: preset.cat });
                     }}
-                    className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 text-slate-700 transition-colors cursor-pointer shrink-0"
+                    className="px-2.5 py-1 rounded-full bg-slate-50 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-400 text-[11px] font-bold whitespace-nowrap transition cursor-pointer"
                   >
-                    {tr(language, preset.labelKh, preset.labelEn, preset.labelZh)}
+                    {tr(language, preset.kh, preset.en, preset.zh)}
                   </button>
                 ))}
               </div>
-
-              {gpsLocation && (
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-bold shrink-0">
-                  <Navigation className="w-3 h-3" />
-                  <span>
-                    GPS: {Number(gpsLocation.lat ?? 11.5564).toFixed(3)}, {Number(gpsLocation.lng ?? 104.9282).toFixed(3)} ({gpsRadiusKm}km)
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setGpsLocation(null);
-                      setSearchScope(province === 'ទាំងអស់' ? 'nationwide' : 'province');
-                    }}
-                    className="ml-1 hover:text-red-600"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              )}
             </div>
 
-            {/* Powered by Google Maps Bar (Technical API details hidden from User screen) */}
-            <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-200/80 text-[10px] sm:text-[11px] text-slate-600 flex-wrap">
-              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                <span className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-full">
-                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                  Powered by Google Maps
-                </span>
+            {/* SECTION 2: ADD NEW SHOP (បន្ថែមហាងថ្មី) */}
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#064E3B] via-emerald-800 to-teal-900 text-white border border-emerald-600/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-xs">
+              <div className="space-y-0.5">
+                <div className="text-xs sm:text-sm font-extrabold flex items-center gap-1.5">
+                  <span>➕</span>
+                  <span>{tr(language, '២. បន្ថែមហាងថ្មីចូលក្នុងកម្មវិធី (Add New Shop)', '2. Add New Shop to App', '2. 添加新店铺到应用')}</span>
+                </div>
+                <p className="text-[11px] text-emerald-100/90 leading-snug">
+                  {tr(
+                    language,
+                    'Google Maps គឺសម្រាប់ស្វែងរក និងជ្រើសរើសទីតាំងហាង។ ដើម្បីបញ្ចូលព័ត៌មានហាងថ្មី សូមចុចប៊ូតុង «+ បន្ថែមហាងថ្មី»៖',
+                    'Google Maps is for locating shops. To enter new shop details, tap "+ Add New Shop":',
+                    'Google 地图用于查找和选择位置。如需填写新店铺信息，请点击“+ 添加新店铺”：'
+                  )}
+                </p>
               </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsGoogleMapsSearchModalOpen(false);
+                  if (!currentUser) {
+                    setIsAuthModalOpen(true);
+                    return;
+                  }
+                  (window as any).__kft_vip_store_initial_mode = { mode: 'create' };
+                  setIsVipAddRestaurantModalOpen(true);
+                }}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 text-slate-950 font-black text-xs shadow-md flex items-center justify-center gap-1.5 shrink-0 transition active:scale-95 cursor-pointer"
+              >
+                <PlusCircle className="w-4 h-4 shrink-0" />
+                <span>{tr(language, '+ បន្ថែមហាងថ្មី (+ Add New Shop)', '+ Add New Shop', '+ 添加新店铺')}</span>
+              </button>
             </div>
           </div>
 
@@ -1311,39 +1220,37 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                             )}
                           </div>
 
-                          {canManagePlaces && (
-                            <div className="flex items-center gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => startEditingBeforeImport(place)}
-                                title={tr(language, 'ពិនិត្យ និងកែសម្រួលមុននាំចូល', 'Review & Edit Before Import', '导入前编辑')}
-                                className="p-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 cursor-pointer"
-                              >
-                                <Edit3 className="w-3.5 h-3.5" />
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => importGooglePlaceToApp(place)}
-                                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                                  isDup
-                                    ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800'
-                                    : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
-                                }`}
-                              >
-                                {isDup ? (
-                                  <>
-                                    <RefreshCw className="w-3.5 h-3.5" />
-                                    <span>{tr(language, 'ធ្វើបច្ចុប្បន្នភាព Meta', 'Sync Meta', '同步元数据')}</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <PlusCircle className="w-3.5 h-3.5" />
-                                    <span>{tr(language, 'នាំចូលកម្មវិធី', 'Import to App', '导入应用')}</span>
-                                  </>
+                          {!isDup && place.category !== 'tourism' && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                (window as any).__kft_prefill_shop_location = {
+                                  latitude: safeLat,
+                                  longitude: safeLng,
+                                  mapUrl: placeMapsHref,
+                                  addressKh: place.addressKh || place.address || '',
+                                  provinceKh: place.provinceKh || 'រាជធានីភ្នំពេញ',
+                                };
+                                setIsGoogleMapsSearchModalOpen(false);
+                                if (!currentUser) {
+                                  setIsAuthModalOpen(true);
+                                  return;
+                                }
+                                (window as any).__kft_vip_store_initial_mode = { mode: 'create' };
+                                setIsVipAddRestaurantModalOpen(true);
+                              }}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm transition-all cursor-pointer"
+                            >
+                              <MapPin className="w-3.5 h-3.5" />
+                              <span>
+                                {tr(
+                                  language,
+                                  '📍 ជ្រើសរើសទីតាំងនេះសម្រាប់បន្ថែមហាង',
+                                  '📍 Select Location for Add Shop',
+                                  '📍 选择此位置用于添加店铺'
                                 )}
-                              </button>
-                            </div>
+                              </span>
+                            </button>
                           )}
                         </div>
                       </div>
