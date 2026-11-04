@@ -8916,6 +8916,69 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
+  const approveAllPendingShopPhotoReplacements = (): number => {
+    const pendingList = restaurants.filter(
+      r => r.pendingPhotoReplacement?.status === 'pending' && r.pendingPhotoReplacement.newPhotoUrl
+    );
+    if (pendingList.length === 0) return 0;
+
+    const nowIso = new Date().toISOString();
+    const reviewer = currentUser?.name || 'Administrator';
+    const updatedMap = new Map<string, Restaurant>();
+
+    for (const targetRest of pendingList) {
+      const req = targetRest.pendingPhotoReplacement!;
+      const newPhoto = req.newPhotoUrl;
+      const approvedRest: Restaurant = normalizeRestaurant({
+        ...targetRest,
+        ...(req.source === 'google_places_replacement_shop'
+          ? { status: 'approved', isVerified: true, approvedAt: nowIso }
+          : {}),
+        photoUrl: newPhoto,
+        profileImage: newPhoto,
+        galleryPhotos: [newPhoto],
+        foodImages: [],
+        pendingPhotoReplacement: {
+          ...req,
+          status: 'approved',
+          adminDecision: 'approved',
+          reviewedAt: nowIso,
+          reviewedBy: reviewer,
+        },
+        updatedAt: nowIso,
+        photoUpdatedAt: nowIso,
+        isAdminEdited: true,
+        adminEditedAt: nowIso,
+      });
+      updatedMap.set(targetRest.id, approvedRest);
+      recordPermanentRestaurantOverride(approvedRest);
+      if (req.source === 'google_places_match' || req.source === 'google_places_replacement_shop') {
+        void makeShopPhotoPermanent(targetRest.id, approvedRest.photoUrl);
+      }
+    }
+
+    lastLocalRestaurantEditAtRef.current = Date.now();
+    setRestaurants(prev => {
+      const next = prev.map(r => updatedMap.get(r.id) || r);
+      latestSyncStateRef.current.restaurants = next;
+      scheduleStorageWrite('kft_restaurants_real_v13', next, 300);
+      if (isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
+
+    showToast(
+      language === 'km'
+        ? `✅ បានអនុម័តរូបភាពហាងទាំង ${updatedMap.size} ដោយជោគជ័យ — ហាងទាំងនោះឥឡូវបង្ហាញក្នុងបញ្ជីហាងអាហារ!`
+        : `✅ Approved all ${updatedMap.size} shop photos — those shops are now visible in the Shop List!`,
+      'success'
+    );
+    return updatedMap.size;
+  };
+
   const rejectShopPhotoReplacement = (restaurantId: string, reason?: string) => {
     const targetRest = restaurants.find(r => r.id === restaurantId);
     if (!targetRest || !targetRest.pendingPhotoReplacement) return;

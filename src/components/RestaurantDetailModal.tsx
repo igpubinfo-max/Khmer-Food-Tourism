@@ -11,6 +11,7 @@ import {
   getRestaurantGoogleExternalUrl,
   openRestaurantGoogleExternal,
   isPlaceLocationVerified,
+  sanitizeRestaurantShopPhoto,
 } from '../types';
 import { RestaurantImageModal } from './RestaurantImageModal';
 import { ShopAvatar } from './icons/DefaultShopIcon';
@@ -316,13 +317,10 @@ export const RestaurantDetailModal: React.FC = () => {
                 selectedRestaurant.profileImage ||
                 ''
               ).trim();
-              const cleanCandidate =
-                rawHeroCandidate &&
-                !rawHeroCandidate.startsWith('/restaurants/') &&
-                !rawHeroCandidate.startsWith('/foods/') &&
-                !rawHeroCandidate.includes('culinary-placeholder')
-                  ? rawHeroCandidate
-                  : '';
+              const cleanCandidate = sanitizeRestaurantShopPhoto(
+                selectedRestaurant.id,
+                rawHeroCandidate
+              );
               return (
                 <ShopAvatar
                   restaurant={{

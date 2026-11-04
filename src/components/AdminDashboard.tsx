@@ -51,7 +51,7 @@ export const AdminDashboard: React.FC = () => {
     isAdminOpen, setIsAdminOpen, language,
     foods, addFood, updateFood, deleteFood,
     restaurants, deleteRestaurant, approveRestaurant, rejectRestaurant, toggleVerifyRestaurant, bulkVerifyAndEnrichAllRestaurants,
-    approveShopPhotoReplacement, rejectShopPhotoReplacement,
+    approveShopPhotoReplacement, approveAllPendingShopPhotoReplacements, rejectShopPhotoReplacement,
     destinations, addDestination, updateDestination, deleteDestination,
     users, deletedUsers, updateUserRole, adminGrantUserVip, cancelUserVip, restoreUserAccess, disableUserAccount, deleteUserAccount, clearAllRegisteredUsers,
     transactions, verifyTransaction, rejectTransaction, requestMorePaymentInfo, deleteTransactions, getAuthorizedPaymentProof,
@@ -2551,7 +2551,7 @@ export const AdminDashboard: React.FC = () => {
                   id="kft-admin-photo-replacement-queue"
                   className="p-4 rounded-2xl bg-amber-50/90 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-700/60 space-y-3"
                 >
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <ImageIcon className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                       <h4 className="font-bold text-amber-900 dark:text-amber-300 font-khmer text-xs sm:text-sm">
@@ -2560,9 +2560,26 @@ export const AdminDashboard: React.FC = () => {
                           : `📸 Shop Photo Replacement Requests (${pendingPhotoReplacementRestaurants.length} Pending Approval)`}
                       </h4>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full bg-amber-200/80 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 text-[10px] font-bold font-khmer">
-                      {isKm ? 'រក្សារូបភាពចាស់រហូតដល់អនុម័ត' : 'Keeps Approved Photo Until Verified'}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {pendingPhotoReplacementRestaurants.length > 0 && (
+                        <button
+                          type="button"
+                          id="kft-admin-approve-all-photo-queue-btn"
+                          onClick={() => approveAllPendingShopPhotoReplacements()}
+                          className="px-3 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold font-khmer flex items-center gap-1 shadow-xs transition cursor-pointer"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>
+                            {isKm
+                              ? `អនុម័តរូបភាពទាំងអស់ (${pendingPhotoReplacementRestaurants.length})`
+                              : `Approve All (${pendingPhotoReplacementRestaurants.length})`}
+                          </span>
+                        </button>
+                      )}
+                      <span className="px-2 py-0.5 rounded-full bg-amber-200/80 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 text-[10px] font-bold font-khmer">
+                        {isKm ? 'រក្សារូបភាពចាស់រហូតដល់អនុម័ត' : 'Keeps Approved Photo Until Verified'}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="space-y-2.5">
@@ -2673,7 +2690,7 @@ export const AdminDashboard: React.FC = () => {
                                 {isKm ? '២. រូបភាពហាងថ្មីដែលស្នើប្តូរ (Submitted)' : '2. Submitted Replacement Photo'}
                               </span>
                               <img
-                                src={req.newPhotoUrl}
+                                src={resolveFoodPhotoUrl(req.newPhotoUrl)}
                                 alt="Submitted Replacement"
                                 className="w-full h-24 object-cover rounded-lg border border-amber-300 dark:border-amber-600"
                               />

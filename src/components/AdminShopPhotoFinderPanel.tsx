@@ -1,23 +1,27 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { Camera, RefreshCw, Search, StopCircle, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Camera, RefreshCw, Search, StopCircle, CheckCircle2, Check } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { hasApprovedShopPhoto, isGpipRegisteredRestaurant } from '../types';
-import { isGoogleMapsConfigured } from '../services/supabaseService';
 import {
   findReplacementShopsWithPhotos,
   findVerifiedPhotosForShops,
   getShopsMissingVerifiedPhoto,
-  ShopPhotoFinderConfigError,
   ShopPhotoFinderProgress,
 } from '../services/shopPhotoFinderService';
 
 /**
- * Admin tool: automatically finds REAL shop photos on Google Places for shops that have no verified photo,
- * or replaces those shops with new real shops that do have photos. Every result is queued for Admin approval
- * in the "Shop Photo Replacement Requests" list below — nothing is published automatically.
+ * Admin tool: automatically finds REAL shop photos on Google Places / Cambodia Verified Directory
+ * for shops that have no verified photo, or replaces those shops with new real shops that have photos.
+ * Every result is queued for Admin approval in the "Shop Photo Replacement Requests" list below.
  */
 export const AdminShopPhotoFinderPanel: React.FC = () => {
-  const { restaurants, language, showToast, queueShopPhotoCandidates } = useApp();
+  const {
+    restaurants,
+    language,
+    showToast,
+    queueShopPhotoCandidates,
+    approveAllPendingShopPhotoReplacements,
+  } = useApp();
   const isKm = language === 'km';
 
   const [batchSize, setBatchSize] = useState<number>(25);
@@ -43,17 +47,9 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
     };
   }, [restaurants]);
 
-  const apiReady = isGoogleMapsConfigured();
-
   const handleError = (err: any) => {
     const msg = err?.message || String(err);
-    setErrorText(
-      err instanceof ShopPhotoFinderConfigError
-        ? isKm
-          ? `⚠️ សូមដាក់ Google Maps API Key (Places API New) ក្នុង Admin → ការកំណត់ ជាមុនសិន។ (${msg})`
-          : `⚠️ Please configure the Google Maps API key (Places API New) in Admin → Settings first. (${msg})`
-        : msg
-    );
+    setErrorText(msg);
   };
 
   const runFindExactPhotos = async () => {
@@ -70,7 +66,8 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
       const { candidates, noMatch, errors } = await findVerifiedPhotosForShops(
         targets,
         setProgress,
-        () => cancelRef.current
+        () => cancelRef.current,
+        restaurants
       );
       const { queuedPhotos } = queueShopPhotoCandidates(candidates, []);
       setSummary(
@@ -134,17 +131,34 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
       id="kft-admin-shop-photo-finder"
       className="p-4 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/30 border-2 border-emerald-300 dark:border-emerald-700/60 space-y-3 font-khmer"
     >
-      <div className="flex items-center gap-2">
-        <Camera className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-        <h4 className="font-bold text-emerald-900 dark:text-emerald-300 text-xs sm:text-sm">
-          {isKm ? '📸 ស្វែងរករូបភាពហាងពិតពី Google Maps' : '📸 Google Places Shop Photo Finder'}
-        </h4>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Camera className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+          <h4 className="font-bold text-emerald-900 dark:text-emerald-300 text-xs sm:text-sm">
+            {isKm ? '📸 ស្វែងរករូបភាពហាងពិតពី Google Maps & Cambodia Directory' : '📸 Google Places & Cambodia Shop Photo Finder'}
+          </h4>
+        </div>
+        {stats.pending > 0 && (
+          <button
+            type="button"
+            id="kft-admin-approve-all-shop-photos-top"
+            onClick={() => approveAllPendingShopPhotoReplacements()}
+            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs transition cursor-pointer"
+          >
+            <Check className="w-3.5 h-3.5" />
+            <span>
+              {isKm
+                ? `អនុម័តរូបភាពទាំងអស់ (${stats.pending})`
+                : `Approve All (${stats.pending})`}
+            </span>
+          </button>
+        )}
       </div>
 
       <p className="text-[11px] text-slate-600 dark:text-stone-300 leading-relaxed">
         {isKm
-          ? 'ហាងដែលគ្មានរូបភាពត្រឹមត្រូវ មិនបង្ហាញក្នុងបញ្ជីហាងសាធារណៈទេ។ ប្រើឧបករណ៍ខាងក្រោមដើម្បីស្វែងរករូបភាពពិតរបស់ហាងដដែល (ឈ្មោះ + GPS ត្រូវគ្នា) ឬជំនួសដោយហាងថ្មីដែលមានរូបភាពពិត។ រូបភាពទាំងអស់ត្រូវរង់ចាំ Admin អនុម័តជាមុនសិន។'
-          : 'Shops without a verified photo are hidden from the public Shop List. Use these tools to find the REAL photo of the same shop (name + GPS must match), or replace it with a new real shop that has a photo. Every photo waits for Admin approval before it is published.'}
+          ? 'ប្រើឧបករណ៍ខាងក្រោមដើម្បីស្វែងរករូបភាពពិត និងម្ហូបប្រចាំហាងរបស់ហាងដដែល ឬជំនួសដោយហាងថ្មីដែលមានរូបភាពពិត។ រូបភាពទាំងអស់ត្រូវរង់ចាំ Admin អនុម័តជាមុនសិន។'
+          : 'Use these tools to find verified photos & signature dish photos for existing shops, or replace photo-less shops with new verified shops. Every photo waits for Admin approval before publishing.'}
       </p>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
@@ -167,7 +181,7 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
             onChange={(e) => setBatchSize(Number(e.target.value))}
             className="w-full bg-transparent text-sm font-black text-slate-800 dark:text-white text-center cursor-pointer"
           >
-            {[10, 25, 50, 100].map((n) => (
+            {[10, 25, 50, 100, 200].map((n) => (
               <option key={n} value={n}>
                 {n}
               </option>
@@ -177,22 +191,11 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
         </div>
       </div>
 
-      {!apiReady && (
-        <div className="p-2.5 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200 text-[11px] flex items-start gap-1.5">
-          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-          <span>
-            {isKm
-              ? 'មិនទាន់មាន Google Maps API Key។ សូមបញ្ចូលក្នុង Admin → ការកំណត់ → Cloud & Google Maps (Places API New)។'
-              : 'Google Maps API key is not set. Add it in Admin → Settings → Cloud & Google Maps (Places API New).'}
-          </span>
-        </div>
-      )}
-
       <div className="flex flex-col sm:flex-row gap-2">
         <button
           type="button"
           id="kft-admin-find-exact-shop-photos"
-          disabled={Boolean(running) || !apiReady || stats.missingForMatch === 0}
+          disabled={Boolean(running) || stats.missingForMatch === 0}
           onClick={runFindExactPhotos}
           className="flex-1 px-3 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white text-[11px] font-bold flex items-center justify-center gap-1.5 transition cursor-pointer disabled:cursor-not-allowed"
         >
@@ -206,7 +209,7 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
         <button
           type="button"
           id="kft-admin-replace-photoless-shops"
-          disabled={Boolean(running) || !apiReady || stats.missingForReplace === 0}
+          disabled={Boolean(running) || stats.missingForReplace === 0}
           onClick={runReplaceShops}
           className="flex-1 px-3 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 text-[11px] font-bold flex items-center justify-center gap-1.5 transition cursor-pointer disabled:cursor-not-allowed"
         >
@@ -243,15 +246,31 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
       )}
 
       {summary && (
-        <div className="p-2.5 rounded-xl bg-white dark:bg-stone-900 border border-emerald-200 dark:border-emerald-800/60 text-[11px] text-slate-700 dark:text-stone-200 flex items-start gap-1.5">
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-          <span>
-            {summary}
-            {stats.pending > 0 &&
-              (isKm
-                ? ' — សូមពិនិត្យ និងអនុម័តរូបភាពនៅក្នុងបញ្ជី «សំណើប្តូររូបភាពហាងថ្មី» ខាងក្រោម។'
-                : ' — Review and approve them in the "Shop Photo Replacement Requests" list below.')}
-          </span>
+        <div className="p-2.5 rounded-xl bg-white dark:bg-stone-900 border border-emerald-200 dark:border-emerald-800/60 text-[11px] text-slate-700 dark:text-stone-200 flex items-start justify-between gap-2 flex-wrap">
+          <div className="flex items-start gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+            <span>
+              {summary}
+              {stats.pending > 0 &&
+                (isKm
+                  ? ' — សូមពិនិត្យ និងអនុម័តរូបភាពនៅក្នុងបញ្ជី «សំណើប្តូររូបភាពហាងថ្មី» ខាងក្រោម ឬចុច «អនុម័តរូបភាពទាំងអស់»។'
+                  : ' — Review and approve them in the "Shop Photo Replacement Requests" list below or click "Approve All".')}
+            </span>
+          </div>
+          {stats.pending > 0 && (
+            <button
+              type="button"
+              onClick={() => approveAllPendingShopPhotoReplacements()}
+              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs transition cursor-pointer shrink-0"
+            >
+              <Check className="w-3.5 h-3.5" />
+              <span>
+                {isKm
+                  ? `✅ អនុម័តរូបភាពទាំងអស់ (${stats.pending})`
+                  : `✅ Approve All (${stats.pending})`}
+              </span>
+            </button>
+          )}
         </div>
       )}
 

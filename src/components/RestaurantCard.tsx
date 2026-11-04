@@ -3,7 +3,7 @@ import {
   Restaurant,
   isAdminAccount,
   isGpipRegisteredRestaurant,
-  resolveFoodPhotoUrl,
+  sanitizeRestaurantShopPhoto,
   getRestaurantDirectGoogleMapsUrl,
   openExternalUrlNativeSafe,
 } from '../types';
@@ -47,20 +47,11 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
     const isGpipRegistered = useMemo(() => isGpipRegisteredRestaurant(restaurant), [restaurant]);
 
     const resolvedShopPhotoUrl = useMemo(() => {
-      const candidate =
-        restaurant.photoUrl &&
-        !restaurant.photoUrl.startsWith('/restaurants/') &&
-        !restaurant.photoUrl.startsWith('/foods/') &&
-        !restaurant.photoUrl.includes('culinary-placeholder')
-          ? restaurant.photoUrl
-          : restaurant.profileImage &&
-            !restaurant.profileImage.startsWith('/restaurants/') &&
-            !restaurant.profileImage.startsWith('/foods/') &&
-            !restaurant.profileImage.includes('culinary-placeholder')
-          ? restaurant.profileImage
-          : '';
-      return candidate ? resolveFoodPhotoUrl(candidate, restaurant.photoUpdatedAt) : '';
-    }, [restaurant.photoUrl, restaurant.profileImage, restaurant.photoUpdatedAt]);
+      return sanitizeRestaurantShopPhoto(
+        restaurant.id,
+        restaurant.photoUrl || restaurant.profileImage || ''
+      );
+    }, [restaurant.id, restaurant.photoUrl, restaurant.profileImage]);
 
     const handleCardClick = () => {
       trackRestaurantView(restaurant.id);
