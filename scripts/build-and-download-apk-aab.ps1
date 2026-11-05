@@ -198,12 +198,15 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
         throw "Downloaded package size looks incomplete. Please check internet connection and retry."
     }
 
-    # Also keep root and Desktop updated with latest APK
+    # Also keep root, Desktop, and Downloads updated with latest APK
     try {
         $rootApkPath = Join-Path $RepoRoot "CambodiaFlavorsTourism-v$versionName.apk"
         Copy-Item -LiteralPath $apkOutPath -Destination $rootApkPath -Force
         if (Test-Path "$env:USERPROFILE\Desktop") {
             Copy-Item -LiteralPath $apkOutPath -Destination (Join-Path "$env:USERPROFILE\Desktop" "CambodiaFlavorsTourism-v$versionName.apk") -Force
+        }
+        if (Test-Path "$env:USERPROFILE\Downloads") {
+            Copy-Item -LiteralPath $apkOutPath -Destination (Join-Path "$env:USERPROFILE\Downloads" "CambodiaFlavorsTourism-v$versionName.apk") -Force
         }
     } catch {}
 
