@@ -3329,47 +3329,105 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ? 'Visa / Mastercard'
             : authMethod === 'GooglePlayBilling'
             ? 'Google Play Billing'
-            : 'ABA KHQR (Authorized)');
+            : 'ABA KHQR');
 
-        // Stop automatic renewal if explicitly cancelled by user or if payment method failed
-        if (
-          u.autoRenew === false ||
-          Boolean(u.autoRenewCancelledAt) ||
-          u.autoRenewFailureReason === 'PAYMENT_METHOD_DECLINED_TEST'
-        ) {
-          if (u.autoRenew === false || Boolean(u.autoRenewCancelledAt)) {
-            return { renewedUser: u, success: false };
-          }
-          const failReasonKh = 'ការទូទាត់ស្វ័យប្រវត្តិមិនអាចដំណើរការបានទេ។ សូមពិនិត្យមធ្យោបាយទូទាត់ ហើយព្យាយាមម្តងទៀត។';
-          const failReasonEn = 'Automatic payment could not be processed. Please check your payment method and retry.';
+        // Stop automatic renewal if explicitly cancelled by user
+        if (u.autoRenew === false || Boolean(u.autoRenewCancelledAt)) {
+          return { renewedUser: u, success: false };
+        }
+
+        // Strict Verification Rule (Requirements 3, 4, 5, 8):
+        // Never extend subscriptionExpiryDate unless a confirmed, verified payment transaction exists
+        // for the new cycle that has not already been applied in vipMembershipHistory.
+        const prevHist = Array.isArray(u.vipMembershipHistory) ? u.vipMembershipHistory : [];
+        const appliedRefs = new Set(
+          prevHist
+            .filter(h => h && h.status === 'verified' && h.transactionRef)
+            .map(h => String(h.transactionRef).trim().toUpperCase())
+        );
+        if (u.transactionRef) {
+          appliedRefs.add(String(u.transactionRef).trim().toUpperCase());
+        }
+
+        const confirmedNewCycleTxn = transactions.find(t => {
+          if (!t || t.type !== 'user_vip_upgrade' || t.status !== 'verified') return false;
+          if (!doesUserMatchTarget({ id: t.userId || t.ownerId, email: t.userEmail }, u)) return false;
+          const refKey = String(t.transactionRef || t.id || '').trim().toUpperCase();
+          if (!refKey || appliedRefs.has(refKey)) return false;
+          const txnExpMs = t.expiresAt ? parseSafeDateMs(t.expiresAt) : 0;
+          const txnCreatedMs = parseSafeDateMs(t.verifiedAt || t.createdAt);
+          const prevExpMs = parseSafeDateMs(expiryStr || u.subscriptionExpiryDate);
+          return txnExpMs > nowMs || (txnCreatedMs > 0 && prevExpMs > 0 && txnCreatedMs >= prevExpMs - 7 * 24 * 60 * 60 * 1000);
+        });
+
+        if (!confirmedNewCycleTxn) {
+          // No confirmed payment from payment provider / KHQR verification for the new cycle:
+          // Do NOT extend subscriptionExpiryDate. Transition to "Payment Not Yet Confirmed / Awaiting Payment"
+          // and notify the user to renew manually.
+          const expFormatted = (expiryStr || u.subscriptionExpiryDate || todayStr).split('T')[0];
+          const failTxnRef = `AR-WAIT-${plan.durationDays}D-${expFormatted.replace(/-/g, '')}`;
+          const failTxnId = `TXN-AR-FAILED-${u.id}-${expFormatted.replace(/-/g, '')}`;
+          const failReasonKh = 'ការបង់ប្រាក់បន្តសុពលភាពមិនទាន់ជោគជ័យ / រង់ចាំការបង់ប្រាក់ (មិនទាន់មានកំណត់ត្រាបង់ប្រាក់ជោគជ័យសម្រាប់វគ្គថ្មី — សូមចុចបង់ប្រាក់បន្តដោយដៃ)';
+          const failReasonEn = 'Automatic renewal payment not confirmed / Awaiting payment (No confirmed payment received for the new cycle — please renew manually)';
+
+          const failTxn: RegistrationTransaction = {
+            id: failTxnId,
+            type: 'user_vip_upgrade',
+            userId: u.id,
+            userName: u.name,
+            userEmail: u.email,
+            ownerId: u.id,
+            ownerName: u.name,
+            planType: planKey,
+            amountUsd: plan.priceUsd,
+            currency: 'USD',
+            durationDays: plan.durationDays,
+            membershipTier: 'premium_vip',
+            status: 'failed',
+            paymentStatus: 'failed',
+            paymentMethod: authMethod,
+            transactionRef: failTxnRef,
+            createdAt: nowIso.replace('T', ' ').slice(0, 16),
+            notes: `${failReasonKh} | ${failReasonEn}`,
+            isAutoRenewal: true,
+          };
+          newAutoRenewTransactions.push(failTxn);
+
           const failEntry = {
-            id: `hist-ar-fail-${u.id}-${todayStr}`,
+            id: `hist-ar-fail-${u.id}-${expFormatted}`,
             date: nowIso,
             action: 'payment_failed' as const,
             planType: planKey,
             durationDays: plan.durationDays,
             amountUsd: plan.priceUsd,
             paymentMethod: authLabel,
+            transactionRef: failTxnRef,
+            expiryDate: expiryStr || u.subscriptionExpiryDate,
             status: 'failed' as const,
             noteKh: failReasonKh,
             noteEn: failReasonEn,
           };
-          const prevHist = Array.isArray(u.vipMembershipHistory) ? u.vipMembershipHistory : [];
+
           const failedUser: User = {
             ...u,
+            membershipTier: 'free',
+            subscriptionStatus: 'expired',
+            vipStatus: 'expired',
+            paymentStatus: 'waiting_for_payment',
             autoRenewLastStatus: 'failed',
-            autoRenewFailureReason: failReasonEn,
+            autoRenewFailureReason: failReasonKh,
             autoRenewUpdatedAt: nowIso,
             vipMembershipHistory: [failEntry, ...prevHist.filter(h => h.id !== failEntry.id)].slice(0, 50),
           };
           failedUser.integritySeal = computeUserIntegritySealSync(failedUser);
+          autoRenewedUsersForCloud.push(failedUser);
 
           newNotificationsToPush.push({
-            id: `notif-vip-autorenew-failed-${u.id}-${nowMs}`,
-            titleKh: 'ការបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិមិនជោគជ័យ',
-            titleEn: 'Automatic VIP Renewal Payment Failed',
-            messageKh: `មិនអាចកាត់ប្រាក់ $${plan.priceUsd.toFixed(2)} USD សម្រាប់ការបន្ត VIP (${plan.durationDays} ថ្ងៃ) តាមរយៈ ${authLabel} បានទេ។ សូមចូលទៅកាន់គណនី (Profile) ដើម្បីព្យាយាមបង់ប្រាក់ម្តងទៀត។`,
-            messageEn: `Could not process $${plan.priceUsd.toFixed(2)} USD for your ${plan.durationDays}-day VIP renewal via ${authLabel}. Please open your Profile to retry payment.`,
+            id: `notif-vip-autorenew-failed-${u.id}-${expFormatted}`,
+            titleKh: '⚠️ ការបង់ប្រាក់បន្តសុពលភាពមិនទាន់ជោគជ័យ / រង់ចាំការបង់ប្រាក់',
+            titleEn: '⚠️ Automatic VIP Renewal Pending Payment / Not Confirmed',
+            messageKh: `សមាជិកភាព VIP របស់អ្នកបានដល់ថ្ងៃផុតកំណត់ (${expFormatted}) ហើយមិនទាន់មានកំណត់ត្រាបង់ប្រាក់ជោគជ័យ ($${plan.priceUsd.toFixed(2)} USD / ${plan.durationDays} ថ្ងៃ) សម្រាប់វគ្គថ្មីទេ។ សូមចូលទៅកាន់ផ្ទាំង «សមាជិកភាព (Membership)» ដើម្បីចុចបង់ប្រាក់បន្តដោយដៃ (Manual Renew)។`,
+            messageEn: `Your VIP membership reached its expiration date (${expFormatted}) without a confirmed renewal payment ($${plan.priceUsd.toFixed(2)} USD / ${plan.durationDays} days). Please open the Membership section to renew manually.`,
             type: 'system',
             date: todayStr,
             isRead: false,
@@ -3377,63 +3435,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (currentUser?.id === u.id) {
             showToast(
               language === 'km'
-                ? 'ការបន្ត VIP ស្វ័យប្រវត្តិមិនជោគជ័យ! សូមចុច Retry Payment នៅក្នុងគណនីរបស់អ្នក។'
-                : 'Automatic VIP renewal failed! Please tap Retry Payment in your Profile.',
+                ? '⚠️ ការបង់ប្រាក់បន្តសុពលភាព VIP មិនទាន់ជោគជ័យ / រង់ចាំការបង់ប្រាក់! សូមចុចបង់ប្រាក់បន្តដោយដៃនៅក្នុងផ្ទាំង សមាជិកភាព (Membership)។'
+                : '⚠️ Automatic VIP renewal payment not confirmed! Please renew manually in the Membership section.',
               'warning'
             );
           }
           return { renewedUser: failedUser, success: false };
         }
 
+        const verifiedDays =
+          typeof confirmedNewCycleTxn.durationDays === 'number' && confirmedNewCycleTxn.durationDays >= 1
+            ? confirmedNewCycleTxn.durationDays
+            : plan.durationDays;
+        const verifiedAmount =
+          typeof confirmedNewCycleTxn.amountUsd === 'number' && confirmedNewCycleTxn.amountUsd > 0
+            ? confirmedNewCycleTxn.amountUsd
+            : plan.priceUsd;
         const { startDate, expiryDate } = calculateVipDates(
           expiryStr || u.subscriptionExpiryDate,
-          plan.durationDays,
+          verifiedDays,
           appSettingsRef.current
         );
-        const txnRef = `AUTO-VIP-${plan.durationDays}D-${Date.now().toString(36).toUpperCase()}`;
-        const txnId = `TXN-AUTORENEW-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
-        const expDateFormatted = expiryDate.split('T')[0];
-
-        const autoTxn: RegistrationTransaction = {
-          id: txnId,
-          type: 'user_vip_upgrade',
-          userId: u.id,
-          userName: u.name,
-          userEmail: u.email,
-          ownerId: u.id,
-          ownerName: u.name,
-          planType: planKey,
-          amountUsd: plan.priceUsd,
-          currency: 'USD',
-          durationDays: plan.durationDays,
-          membershipTier: 'premium_vip',
-          status: 'verified',
-          paymentMethod: authMethod,
-          transactionRef: txnRef,
-          createdAt: nowIso.replace('T', ' ').slice(0, 16),
-          expiresAt: expiryDate,
-          verifiedAt: nowIso.replace('T', ' ').slice(0, 16),
-          verifiedBy: 'Automatic VIP Renewal Engine (Authorized Consent)',
-          notes: `Automatic VIP Renewal (${plan.durationDays} Days / $${plan.priceUsd.toFixed(2)} USD) via ${authLabel}`,
-          isAutoRenewal: true,
-        };
-        newAutoRenewTransactions.push(autoTxn);
+        const finalExpiryDate =
+          confirmedNewCycleTxn.expiresAt && parseSafeDateMs(confirmedNewCycleTxn.expiresAt) > nowMs
+            ? new Date(parseSafeDateMs(confirmedNewCycleTxn.expiresAt)).toISOString()
+            : expiryDate;
+        const txnRef = confirmedNewCycleTxn.transactionRef || confirmedNewCycleTxn.id;
+        const expDateFormatted = finalExpiryDate.split('T')[0];
 
         const histEntry = {
           id: `hist-ar-${txnRef}`,
           date: nowIso,
           action: 'auto_renewal' as const,
           planType: planKey,
-          durationDays: plan.durationDays,
-          amountUsd: plan.priceUsd,
+          durationDays: verifiedDays,
+          amountUsd: verifiedAmount,
           paymentMethod: authLabel,
           transactionRef: txnRef,
-          expiryDate,
+          expiryDate: finalExpiryDate,
           status: 'verified' as const,
-          noteKh: `បានបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (${plan.durationDays} ថ្ងៃ / $${plan.priceUsd.toFixed(2)} USD) តាមរយៈ ${authLabel} រហូតដល់ថ្ងៃទី ${expDateFormatted}`,
-          noteEn: `Automatically renewed VIP (${plan.durationDays} days / $${plan.priceUsd.toFixed(2)} USD) via ${authLabel} until ${expDateFormatted}`,
+          noteKh: `បានបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (${verifiedDays} ថ្ងៃ / $${verifiedAmount.toFixed(2)} USD) តាមរយៈ ${authLabel} រហូតដល់ថ្ងៃទី ${expDateFormatted}`,
+          noteEn: `Automatically renewed VIP (${verifiedDays} days / $${verifiedAmount.toFixed(2)} USD) via ${authLabel} until ${expDateFormatted}`,
         };
-        const prevHist = Array.isArray(u.vipMembershipHistory) ? u.vipMembershipHistory : [];
 
         const renewedUser: User = {
           ...u,
@@ -3441,11 +3484,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           subscriptionStatus: 'active',
           paymentStatus: 'verified',
           vipStatus: 'active',
-          vipPlanDays: plan.durationDays,
+          vipPlanDays: verifiedDays,
           vipPlanType: planKey,
           subscriptionStartDate: u.subscriptionStartDate || startDate,
-          subscriptionExpiryDate: expiryDate,
-          vipExpiresAt: expiryDate,
+          subscriptionExpiryDate: finalExpiryDate,
+          vipExpiresAt: finalExpiryDate,
           vipCancelledAt: undefined,
           paymentMethod: authMethod,
           transactionRef: txnRef,
@@ -3466,8 +3509,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           id: `notif-vip-autorenew-ok-${u.id}-${nowMs}`,
           titleKh: 'បន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិដោយជោគជ័យ',
           titleEn: 'VIP Membership Automatically Renewed',
-          messageKh: `ការទូទាត់ $${plan.priceUsd.toFixed(2)} USD តាមរយៈ ${authLabel} ត្រូវបានបញ្ជាក់ (លេខយោង៖ ${txnRef})។ សមាជិកភាព VIP (${plan.durationDays} ថ្ងៃ) របស់អ្នកត្រូវបានបន្តរហូតដល់ថ្ងៃទី ${expDateFormatted}។`,
-          messageEn: `Payment of $${plan.priceUsd.toFixed(2)} USD via ${authLabel} confirmed (Ref: ${txnRef}). Your VIP membership (${plan.durationDays} days) has been renewed until ${expDateFormatted}.`,
+          messageKh: `ការទូទាត់ $${verifiedAmount.toFixed(2)} USD តាមរយៈ ${authLabel} ត្រូវបានបញ្ជាក់ (លេខយោង៖ ${txnRef})។ សមាជិកភាព VIP (${verifiedDays} ថ្ងៃ) របស់អ្នកត្រូវបានបន្តរហូតដល់ថ្ងៃទី ${expDateFormatted}។`,
+          messageEn: `Payment of $${verifiedAmount.toFixed(2)} USD via ${authLabel} confirmed (Ref: ${txnRef}). Your VIP membership (${verifiedDays} days) has been renewed until ${expDateFormatted}.`,
           type: 'system',
           date: todayStr,
           isRead: false,
@@ -3476,8 +3519,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (currentUser?.id === u.id) {
           showToast(
             language === 'km'
-              ? `បានបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (${plan.durationDays} ថ្ងៃ) ដោយជោគជ័យ រហូតដល់ ${expDateFormatted}!`
-              : `VIP membership (${plan.durationDays} days) automatically renewed until ${expDateFormatted}!`,
+              ? `បានបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (${verifiedDays} ថ្ងៃ) ដោយជោគជ័យ រហូតដល់ ${expDateFormatted}!`
+              : `VIP membership (${verifiedDays} days) automatically renewed until ${expDateFormatted}!`,
             'success'
           );
         }
@@ -3549,23 +3592,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               };
             }
 
-            // If user explicitly enabled Auto-Renew with consent, automatically renew before downgrading!
+            // Wait for initial Supabase cloud sync before downgrading any active VIP account after an app update
+            if (!hasCompletedInitialCloudSyncRef.current && isSupabaseConfigured()) {
+              return { updatedUser: u, changed: false };
+            }
+
+            // When subscription expires and Auto-Renewal is ON, verify if confirmed payment exists for the new cycle.
+            // If no confirmed payment exists, transition to "Payment Not Confirmed / Awaiting Manual Renewal" without extending expiry!
             if (hasExplicitAutoRenew && u.autoRenewLastStatus !== 'failed') {
               const cycleKey = `${u.id}_${expiryStr || todayStr}`;
               if (!autoRenewCycleLog[cycleKey]) {
                 autoRenewCycleLog[cycleKey] = new Date(nowMs).toISOString();
                 autoRenewCycleLogChanged = true;
                 const arRes = processAutoRenewalForAccount(u, expiryStr);
-                if (arRes.success) {
-                  return { updatedUser: arRes.renewedUser, changed: true };
+                if (!arRes.success) {
+                  expiredUserIds.add(u.id);
                 }
                 return { updatedUser: arRes.renewedUser, changed: true };
               }
-            }
-
-            // Wait for initial Supabase cloud sync before downgrading any active VIP account after an app update
-            if (!hasCompletedInitialCloudSyncRef.current && isSupabaseConfigured()) {
-              return { updatedUser: u, changed: false };
             }
           }
           expiredUserIds.add(u.id);
@@ -3573,6 +3617,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ...u,
             membershipTier: 'free',
             subscriptionStatus: 'expired',
+            vipStatus: 'expired',
           };
 
           const expCycleKey = `${u.id}_${expiryStr || 'no_date'}`;
@@ -3584,8 +3629,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               id: `notif-vip-expired-${u.id}-${nowMs}`,
               titleKh: '⚠️ គណនី VIP របស់អ្នកបានផុតកំណត់ហើយ',
               titleEn: '⚠️ Your VIP Account Has Expired',
-              messageKh: `សមាជិកភាព VIP នៃគណនី «${u.name}» បានផុតកំណត់នៅថ្ងៃទី ${expFormatted} ហើយត្រូវបានប្តូរមកជាគណនីធម្មតា (Normal Account) ដោយស្វ័យប្រវត្តិ។ សូមបន្តកញ្ចប់ VIP ដើម្បីទទួលបានអត្ថប្រយោជន៍ VIP ឡើងវិញ!`,
-              messageEn: `VIP membership for "${u.name}" expired on ${expFormatted} and has been automatically downgraded to a Normal Account. Renew VIP anytime to restore benefits!`,
+              messageKh: `សមាជិកភាព VIP នៃគណនី «${u.name}» បានផុតកំណត់នៅថ្ងៃទី ${expFormatted} ហើយត្រូវបានប្តូរមកជាគណនីធម្មតា (Normal Account) ដោយស្វ័យប្រវត្តិ។ សូមចូលទៅកាន់ផ្ទាំង សមាជិកភាព (Membership) ដើម្បីបង់ប្រាក់បន្តដោយដៃ!`,
+              messageEn: `VIP membership for "${u.name}" expired on ${expFormatted} and has been automatically downgraded to a Normal Account. Open the Membership section to renew manually!`,
               type: 'system',
               date: todayStr,
               isRead: false,
@@ -3593,8 +3638,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             if (currentUser?.id === u.id) {
               showToast(
                 language === 'km'
-                  ? `⚠️ គណនី VIP របស់អ្នកបានផុតកំណត់ (${expFormatted}) ហើយត្រូវបានប្តូរមកជាគណនីធម្មតា!`
-                  : `⚠️ Your VIP membership expired (${expFormatted}) and was downgraded to a normal account!`,
+                  ? `⚠️ គណនី VIP របស់អ្នកបានផុតកំណត់ (${expFormatted})! សូមបង់ប្រាក់បន្តនៅក្នុងផ្ទាំង សមាជិកភាព។`
+                  : `⚠️ Your VIP membership expired (${expFormatted})! Please renew in the Membership section.`,
                 'warning'
               );
             }
@@ -3603,7 +3648,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return { updatedUser: downgraded, changed: true };
         }
 
-        // Case 2: Account is an active VIP -> Check if within the last 3 days (3, 2, or 1 days remaining)
+        // Case 2: Account is an active VIP -> Send a single pre-expiry reminder if within 3 days of expiration (never extend without confirmed payment)
         if (
           hasValidFutureExpiry &&
           u.membershipTier === 'premium_vip' &&
@@ -3611,15 +3656,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           u.paymentStatus === 'verified'
         ) {
           const remainingDays = Math.max(0, Math.ceil((expiryMs - nowMs) / (1000 * 60 * 60 * 24)));
-
-          // If Auto-Renew is active and within 24 hours before expiration (remainingDays <= 1), renew automatically before expiry without prompting!
-          if (hasExplicitAutoRenew && remainingDays <= 1 && u.autoRenewLastStatus !== 'failed') {
-            const cycleKey = `${u.id}_${expiryStr}`;
-            if (!autoRenewCycleLog[cycleKey]) {
-              autoRenewCycleLog[cycleKey] = new Date(nowMs).toISOString();
-              autoRenewCycleLogChanged = true;
-              const arRes = processAutoRenewalForAccount(u, expiryStr);
-              return { updatedUser: arRes.renewedUser, changed: true };
+          if (remainingDays <= 3 && remainingDays >= 1) {
+            const remKey = `${u.id}_${expiryStr}_${remainingDays}`;
+            if (!reminderLog[remKey]) {
+              reminderLog[remKey] = todayStr;
+              reminderLogChanged = true;
             }
           }
         }
@@ -5290,7 +5331,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const startMs = parseSafeDateMs(params.startDate) || Date.now();
     const expMs = parseSafeDateMs(params.expiryDate) || Date.now() + (params.durationDays || 30) * 24 * 60 * 60 * 1000;
     const cleanStartIso = new Date(startMs).toISOString();
-    const cleanExpiryIso = new Date(expMs).toISOString();
+    const resolvedMethod = params.paymentMethod || existing?.paymentMethod || 'KHQR';
+    const resolvedRef = params.transactionRef || existing?.transactionRef;
+
+    // Idempotency Guard (Requirement 8):
+    // If the exact same transactionRef was already verified & applied in existing.vipMembershipHistory,
+    // preserve its already-applied expiryDate so duplicate calls or syncs never double-extend VIP expiration!
+    const existingHistList = Array.isArray(existing?.vipMembershipHistory) ? existing!.vipMembershipHistory! : [];
+    const alreadyAppliedHist = resolvedRef
+      ? existingHistList.find(
+          h =>
+            h &&
+            h.status === 'verified' &&
+            h.transactionRef &&
+            String(h.transactionRef).trim().toUpperCase() === String(resolvedRef).trim().toUpperCase() &&
+            h.expiryDate
+        )
+      : undefined;
+    const cleanExpiryIso =
+      alreadyAppliedHist?.expiryDate && parseSafeDateMs(alreadyAppliedHist.expiryDate) > 0
+        ? new Date(parseSafeDateMs(alreadyAppliedHist.expiryDate)).toISOString()
+        : new Date(expMs).toISOString();
+
     const resolvedPlanDays =
       typeof params.durationDays === 'number' && params.durationDays >= 1
         ? Math.round(params.durationDays)
@@ -5298,8 +5360,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const resolvedPlanType =
       params.planType ||
       (resolvedPlanDays <= 35 ? 'quarterly' : 'annual');
-    const resolvedMethod = params.paymentMethod || existing?.paymentMethod || 'KHQR';
-    const resolvedRef = params.transactionRef || existing?.transactionRef;
     const dynamicPlans = getDynamicVipPlans(appSettingsRef.current);
     const planPrice =
       resolvedPlanType === 'annual'
@@ -10360,23 +10420,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     if (targetUserId) {
-      setUsers(prev => prev.map(u => {
-        if (u.id !== targetUserId) return u;
-        return {
-          ...u,
-          membershipTier: isUserVipActive(u) ? u.membershipTier : 'free',
-          subscriptionStatus: isUserVipActive(u) ? u.subscriptionStatus : 'cancelled',
-          paymentStatus: isUserVipActive(u) ? 'verified' : 'failed'
-        };
-      }));
+      const nowIso = new Date().toISOString();
+      const rejectHistEntry = {
+        id: `hist-reject-${txnId}`,
+        date: nowIso,
+        action: 'payment_failed' as const,
+        planType: (matchedTxn.planType === 'annual' ? 'annual' : 'quarterly') as 'quarterly' | 'annual',
+        durationDays: matchedTxn.durationDays || 30,
+        amountUsd: matchedTxn.amountUsd,
+        paymentMethod: matchedTxn.paymentMethod || 'KHQR',
+        transactionRef: matchedTxn.transactionRef || txnId,
+        status: 'failed' as const,
+        noteKh: `ការទូទាត់មិនត្រូវបានអនុម័ត៖ ${rejectionReason}`,
+        noteEn: `Payment verification failed: ${rejectionReason}`,
+      };
+
+      setUsers(prev => {
+        const nextUsers: User[] = prev.map(u => {
+          if (u.id !== targetUserId) return u;
+          const prevHist = Array.isArray(u.vipMembershipHistory) ? u.vipMembershipHistory : [];
+          return {
+            ...u,
+            membershipTier: isUserVipActive(u) ? u.membershipTier : 'free',
+            subscriptionStatus: isUserVipActive(u) ? u.subscriptionStatus : 'cancelled',
+            paymentStatus: (isUserVipActive(u) ? 'verified' : 'failed') as User['paymentStatus'],
+            vipMembershipHistory: [rejectHistEntry, ...prevHist.filter(h => h.id !== rejectHistEntry.id)].slice(0, 50),
+          };
+        });
+        safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+        return nextUsers;
+      });
 
       if (currentUser?.id === targetUserId) {
-        setCurrentUser(prev => prev ? {
-          ...prev,
-          membershipTier: isUserVipActive(prev) ? prev.membershipTier : 'free',
-          subscriptionStatus: isUserVipActive(prev) ? prev.subscriptionStatus : 'cancelled',
-          paymentStatus: isUserVipActive(prev) ? 'verified' : 'failed'
-        } : null);
+        setCurrentUser(prev => {
+          if (!prev) return null;
+          const prevHist = Array.isArray(prev.vipMembershipHistory) ? prev.vipMembershipHistory : [];
+          const updatedCur: User = {
+            ...prev,
+            membershipTier: isUserVipActive(prev) ? prev.membershipTier : 'free',
+            subscriptionStatus: isUserVipActive(prev) ? prev.subscriptionStatus : 'cancelled',
+            paymentStatus: isUserVipActive(prev) ? 'verified' : 'failed',
+            vipMembershipHistory: [rejectHistEntry, ...prevHist.filter(h => h.id !== rejectHistEntry.id)].slice(0, 50),
+          };
+          safeSetCriticalAccountStorage('kft_current_user_v5', updatedCur);
+          return updatedCur;
+        });
       }
 
       const rejectNotif: AppNotification = {
@@ -11567,133 +11655,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, error: 'Please sign in first.' };
     }
 
-    if (!liveCur.autoRenewConsentAt) {
-      const errMsg = tr(
-        language,
-        'សូមបញ្ជាក់ការយល់ព្រមជាមុនសិន ដើម្បីដំណើរការការបន្ត VIP ស្វ័យប្រវត្តិ។',
-        'Explicit consent is required to process Automatic VIP Renewal.',
-        '需要明确授权同意才能处理 VIP 自动续费。'
-      );
-      showToast(errMsg, 'warning');
-      return { success: false, error: errMsg };
-    }
-
-    const nowIso = new Date().toISOString();
-    const todayStr = nowIso.split('T')[0];
-    const dynamicPlans = getDynamicVipPlans(appSettingsRef.current);
-    const planKey: 'quarterly' | 'annual' =
-      liveCur.autoRenewPlanId === 'annual' || liveCur.vipPlanType === 'annual'
-        ? 'annual'
-        : 'quarterly';
-    const plan = dynamicPlans[planKey] || dynamicPlans.quarterly;
-    const authMethod =
-      liveCur.autoRenewPaymentMethod ||
-      (liveCur.paymentMethod === 'Bakong' ||
-      liveCur.paymentMethod === 'Card' ||
-      liveCur.paymentMethod === 'GooglePlayBilling'
-        ? liveCur.paymentMethod
-        : 'KHQR');
-    const authLabel =
-      liveCur.autoRenewPaymentLabel ||
-      (authMethod === 'Bakong'
-        ? 'Bakong KHQR'
-        : authMethod === 'Card'
-        ? 'Visa / Mastercard'
-        : authMethod === 'GooglePlayBilling'
-        ? 'Google Play Billing'
-        : 'ABA KHQR (Authorized)');
-
-    const { startDate, expiryDate } = calculateVipDates(
-      liveCur.subscriptionExpiryDate,
-      plan.durationDays,
-      appSettingsRef.current
-    );
-    const txnRef = `AUTO-VIP-RETRY-${plan.durationDays}D-${Date.now().toString(36).toUpperCase()}`;
-    const txnId = `TXN-AUTORENEW-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
-    const expDateFormatted = expiryDate.split('T')[0];
-
-    const autoTxn: RegistrationTransaction = {
-      id: txnId,
-      type: 'user_vip_upgrade',
-      userId: liveCur.id,
-      userName: liveCur.name,
-      userEmail: liveCur.email,
-      ownerId: liveCur.id,
-      ownerName: liveCur.name,
-      planType: planKey,
-      amountUsd: plan.priceUsd,
-      currency: 'USD',
-      durationDays: plan.durationDays,
-      membershipTier: 'premium_vip',
-      status: 'verified',
-      paymentMethod: authMethod,
-      transactionRef: txnRef,
-      createdAt: nowIso.replace('T', ' ').slice(0, 16),
-      expiresAt: expiryDate,
-      verifiedAt: nowIso.replace('T', ' ').slice(0, 16),
-      verifiedBy: 'Automatic VIP Renewal Engine (Payment Retry Confirmed)',
-      notes: `Automatic VIP Renewal Retry (${plan.durationDays} Days / $${plan.priceUsd.toFixed(2)} USD) via ${authLabel}`,
-      isAutoRenewal: true,
-    };
-
-    const baseTxns = latestSyncStateRef.current.transactions || transactions;
-    const nextTxns = [autoTxn, ...baseTxns.filter(t => t.id !== autoTxn.id)];
-    latestSyncStateRef.current.transactions = nextTxns;
-    try {
-      localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTxns));
-    } catch {}
-    setTransactions(nextTxns);
-    if (isSupabaseConfigured()) {
-      mergeAndPushTransactionsToCloud(nextTxns).catch(() => {});
-    }
-
-    persistApprovedVipUserAndCloud({
-      targetId: liveCur.id,
-      targetEmail: liveCur.email,
-      targetName: liveCur.name,
-      targetPhone: liveCur.phone,
-      startDate,
-      expiryDate,
-      durationDays: plan.durationDays,
-      planType: planKey,
-      paymentMethod: authMethod,
-      transactionRef: txnRef,
-      extraFields: {
-        autoRenew: true,
-        autoRenewPlanId: planKey,
-        autoRenewPaymentMethod: authMethod,
-        autoRenewPaymentLabel: authLabel,
-        autoRenewConsentAt: liveCur.autoRenewConsentAt || nowIso,
-        autoRenewCancelledAt: undefined,
-        autoRenewLastChargedAt: nowIso,
-        autoRenewLastStatus: 'renewed',
-        autoRenewFailureReason: undefined,
-        autoRenewUpdatedAt: nowIso,
-      },
-    });
-
-    setNotifications(prev => [
-      {
-        id: `notif-ar-retry-ok-${Date.now()}`,
-        titleKh: 'ការទូទាត់បន្ត VIP ស្វ័យប្រវត្តិជោគជ័យ',
-        titleEn: 'VIP Auto-Renewal Payment Confirmed',
-        messageKh: `ការព្យាយាមបង់ប្រាក់ម្តងទៀត ($${plan.priceUsd.toFixed(2)} USD) តាមរយៈ ${authLabel} បានជោគជ័យ (លេខយោង៖ ${txnRef})។ សមាជិកភាព VIP (${plan.durationDays} ថ្ងៃ) របស់អ្នកត្រូវបានបន្តរហូតដល់ថ្ងៃទី ${expDateFormatted}។`,
-        messageEn: `Your retry payment ($${plan.priceUsd.toFixed(2)} USD) via ${authLabel} succeeded (Ref: ${txnRef}). Your VIP membership (${plan.durationDays} days) is renewed until ${expDateFormatted}.`,
-        type: 'system',
-        date: todayStr,
-        isRead: false,
-      },
-      ...prev,
-    ]);
-
+    // Strict KHQR-Safe Rule (Requirements 4, 5, 8):
+    // Never fabricate a verified payment or extend subscriptionExpiryDate without a confirmed payment!
+    // Open the KHQR Manual Renewal Modal so the user can scan KHQR and submit a verified payment.
+    openUpgradeVipModal(true);
     showToast(
       tr(
         language,
-        `ការទូទាត់ជោគជ័យ! បានបន្ត VIP (${plan.durationDays} ថ្ងៃ) រហូតដល់ ${expDateFormatted}!`,
-        `Payment confirmed! VIP (${plan.durationDays} days) renewed until ${expDateFormatted}!`,
-        `付款成功！VIP（${plan.durationDays} 天）已续期至 ${expDateFormatted}！`
+        'សូមស្កេន KHQR និងបញ្ជាក់ការបង់ប្រាក់ ដើម្បីបន្តសុពលភាពសមាជិកភាព VIP របស់អ្នក។',
+        'Please scan KHQR and confirm your payment to renew your VIP membership.',
+        '请扫描 KHQR 并确认付款以续期您的 VIP 会员资格。'
       ),
-      'success'
+      'info'
     );
     return { success: true };
   };

@@ -713,7 +713,7 @@ export const UpgradeVipModal: React.FC = () => {
                 )}
               </div>
 
-              {/* Automatic VIP Renewal & Billing Dates Card for Active VIP Members */}
+              {/* Automatic VIP Renewal Toggle, Cancel Subscription & Billing Dates Card for Active VIP Members */}
               <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-left space-y-2.5">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
@@ -723,7 +723,7 @@ export const UpgradeVipModal: React.FC = () => {
                     <div className="min-w-0">
                       <div className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
                         <span className="truncate">
-                          {tr(language, 'ការបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ', 'Automatic VIP Renewal', 'VIP 自动续费')}
+                          {tr(language, 'កុងតាក់បន្តសុពលភាពស្វ័យប្រវត្តិ', 'Auto-Renewal Toggle', '自动续费开关')}
                         </span>
                         <span
                           className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase shrink-0 ${
@@ -733,12 +733,48 @@ export const UpgradeVipModal: React.FC = () => {
                           }`}
                         >
                           {currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
-                            ? tr(language, 'សកម្ម (ON)', 'ACTIVE', '已开启')
-                            : tr(language, 'បានបោះបង់ (OFF)', 'CANCELLED', '已取消')}
+                            ? tr(language, 'បើក (ON)', 'ON', '开启 (ON)')
+                            : tr(language, 'បិទ (OFF)', 'OFF', '关闭 (OFF)')}
                         </span>
                       </div>
                     </div>
                   </div>
+
+                  {/* Interactive ON/OFF Toggle Switch */}
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={Boolean(currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt)}
+                    onClick={() => {
+                      if (currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt) {
+                        cancelVipAutoRenew();
+                      } else {
+                        configureVipAutoRenew({
+                          enabled: true,
+                          planId:
+                            currentUser?.autoRenewPlanId === 'annual' || currentUser?.vipPlanType === 'annual'
+                              ? 'annual'
+                              : 'quarterly',
+                          paymentMethod: 'KHQR',
+                          paymentLabel: 'ABA KHQR',
+                          explicitConsent: true,
+                        });
+                      }
+                    }}
+                    className={`relative inline-flex h-7 w-13 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
+                        ? 'bg-emerald-500'
+                        : 'bg-slate-300 dark:bg-slate-600'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                        currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
+                          ? 'translate-x-6'
+                          : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
                 </div>
 
                 {/* Next Billing Date & Membership Expiration Date */}
@@ -753,7 +789,7 @@ export const UpgradeVipModal: React.FC = () => {
                   </div>
                   <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
                     <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                      {tr(language, 'ថ្ងៃកាត់ប្រាក់បន្ទាប់', 'Next Billing Date', '下次扣款日期')}
+                      {tr(language, 'ថ្ងៃបង់ប្រាក់បន្ទាប់', 'Next Billing Date', '下次续费日期')}
                     </div>
                     <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 mt-0.5 font-mono">
                       {currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
@@ -773,15 +809,15 @@ export const UpgradeVipModal: React.FC = () => {
                     }}
                     className="w-full py-2.5 px-3.5 rounded-xl bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/60 dark:hover:bg-rose-900/80 text-rose-700 dark:text-rose-300 text-xs font-extrabold transition cursor-pointer"
                   >
-                    {tr(language, 'បោះបង់ការបន្តស្វ័យប្រវត្តិ (Cancel Auto-Renewal)', 'Cancel Auto-Renewal', '取消自动续费')}
+                    {tr(language, 'បោះបង់ការជាវ (Cancel Subscription)', 'Cancel Subscription', '取消订阅 (Cancel Subscription)')}
                   </button>
                 ) : (
                   <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
                     {tr(
                       language,
-                      `✅ ការបន្តស្វ័យប្រវត្តិត្រូវបានបោះបង់។ មិនមានការកាត់ប្រាក់បន្ថែមទៀតទេ ហើយគណនី VIP នៅតែមានសុពលភាពរហូតដល់ថ្ងៃទី ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}។`,
-                      `✅ Auto-renewal is cancelled. No further payments will be charged, and your VIP membership remains active until ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}.`,
-                      `✅ 自动续费已取消，不会再产生任何扣款。您的 VIP 权益将有效至 ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}。`
+                      `✅ ការបន្តស្វ័យប្រវត្តិត្រូវបានបិទ (OFF)។ មិនមានការកាត់ប្រាក់បន្ថែមទៀតទេ ហើយគណនី VIP នៅតែមានសុពលភាពរហូតដល់ថ្ងៃទី ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}។`,
+                      `✅ Auto-renewal is OFF. No further payments will be charged, and your VIP membership remains active until ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}.`,
+                      `✅ 自动续费已关闭，不会再产生任何扣款。您的 VIP 权益将有效至 ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}。`
                     )}
                   </div>
                 )}

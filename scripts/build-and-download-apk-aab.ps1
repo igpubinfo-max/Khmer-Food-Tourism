@@ -112,69 +112,29 @@ function ConvertTo-UtcDateTime($val) {
 }
 
 function Invoke-FastAssetDownload([string]$url, [string]$outPath, [long]$expectedSize) {
-    $tempOutPath = "$outPath.$PID.tmp"
-    $cleanUrl = $url -replace '\?.*$', ''
-
-    if ((Test-Path $CurlExe) -and ($expectedSize -gt 4MB)) {
-        $parts = 16
-        $chunkSize = [long][Math]::Ceiling($expectedSize / [double]$parts)
-        $partDir = Join-Path $env:TEMP ("kft_dl_" + [Guid]::NewGuid().ToString("N").Substring(0, 8))
-        New-Item -ItemType Directory -Path $partDir -Force | Out-Null
-        try {
-            $curlArgs = @("--parallel", "--parallel-max", "16", "--progress-bar")
-            for ($i = 0; $i -lt $parts; $i++) {
-                $start = [long]($i * $chunkSize)
-                $end = [long][Math]::Min($expectedSize - 1, (($i + 1) * $chunkSize) - 1)
-                $partFile = Join-Path $partDir ("part_{0:D2}.bin" -f $i)
-                if ($i -gt 0) { $curlArgs += "--next" }
-                $curlArgs += @(
-                    "-L", "--fail", "--retry", "4", "--retry-delay", "1",
-                    "--connect-timeout", "20", "--speed-limit", "5120", "--speed-time", "20",
-                    "-H", "Cache-Control: no-cache",
-                    "-r", "$start-$end",
-                    "-o", $partFile,
-                    $cleanUrl
-                )
-            }
-
-            & $CurlExe @curlArgs
-            if ($LASTEXITCODE -eq 0) {
-                $partFiles = @(Get-ChildItem -LiteralPath $partDir -Filter "part_*.bin" | Sort-Object Name)
-                $totalDownloaded = [long](($partFiles | Measure-Object -Property Length -Sum).Sum)
-                if (($partFiles.Count -eq $parts) -and ($totalDownloaded -eq $expectedSize)) {
-                    $outStream = [System.IO.File]::Open($tempOutPath, [System.IO.FileMode]::Create, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
-                    try {
-                        $buf = New-Object byte[] (1024 * 1024)
-                        foreach ($pf in $partFiles) {
-                            $inStream = [System.IO.File]::OpenRead($pf.FullName)
-                            try {
-                                while (($read = $inStream.Read($buf, 0, $buf.Length)) -gt 0) {
-                                    $outStream.Write($buf, 0, $read)
-                                }
-                            } finally {
-                                $inStream.Close()
-                            }
-                        }
-                    } finally {
-                        $outStream.Close()
-                    }
-                    Move-Item -LiteralPath $tempOutPath -Destination $outPath -Force
-                    return
-                }
-            }
-            Write-Host "  Parallel turbo download interrupted, switching to standard stream..." -ForegroundColor Yellow
-        } catch {
-            Write-Host "  Switching to standard download stream..." -ForegroundColor Yellow
-        } finally {
-            Remove-Item -LiteralPath $partDir -Recurse -Force -ErrorAction SilentlyContinue
+    if ((Test-Path -LiteralPath $outPath) -and ($expectedSize -gt 0)) {
+        $existingLen = (Get-Item -LiteralPath $outPath).Length
+        if ($existingLen -eq $expectedSize) {
+            $mb = [Math]::Round($existingLen / 1MB, 2)
+            Write-Host "  Already downloaded and verified complete ($mb MB)." -ForegroundColor Cyan
+            return
         }
     }
 
+    $tempOutPath = "$outPath.part"
+    $cleanUrl = $url -replace '\?.*$', ''
+    $cb = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+    $downloadUrl = "${cleanUrl}?cb=$cb"
+
     if (Test-Path $CurlExe) {
-        & $CurlExe -L --http1.1 --fail --retry 5 --retry-delay 2 --connect-timeout 20 --progress-bar -H "Cache-Control: no-cache" -o $tempOutPath $cleanUrl
-        if ($LASTEXITCODE -ne 0) { throw "curl failed downloading asset from $cleanUrl" }
+        & $CurlExe -C - -L --http1.1 --fail --retry 5 --retry-delay 2 --connect-timeout 20 --progress-bar -H "Cache-Control: no-cache" -o $tempOutPath $downloadUrl
+        if ($LASTEXITCODE -ne 0) {
+            Remove-Item -LiteralPath $tempOutPath -Force -ErrorAction SilentlyContinue
+            & $CurlExe -L --http1.1 --fail --retry 5 --retry-delay 2 --connect-timeout 20 --progress-bar -H "Cache-Control: no-cache" -o $tempOutPath $downloadUrl
+            if ($LASTEXITCODE -ne 0) { throw "curl failed downloading asset from $cleanUrl" }
+        }
     } else {
-        Invoke-WebRequest -Uri $cleanUrl -OutFile $tempOutPath -UseBasicParsing
+        Invoke-WebRequest -Uri $downloadUrl -OutFile $tempOutPath -UseBasicParsing
     }
     Move-Item -LiteralPath $tempOutPath -Destination $outPath -Force
 }
@@ -264,6 +224,12 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
         }
         if (Test-Path "$env:USERPROFILE\Downloads") {
             Copy-Item -LiteralPath $apkOutPath -Destination (Join-Path "$env:USERPROFILE\Downloads" "CambodiaFlavorsTourism-v$versionName.apk") -Force
+            $dlReleaseDir = Join-Path "$env:USERPROFILE\Downloads" "Release_APK_AAB"
+            if (-not (Test-Path $dlReleaseDir)) {
+                New-Item -ItemType Directory -Path $dlReleaseDir -Force | Out-Null
+            }
+            Copy-Item -LiteralPath $apkOutPath -Destination (Join-Path $dlReleaseDir $apkOutName) -Force
+            Copy-Item -LiteralPath $aabOutPath -Destination (Join-Path $dlReleaseDir $aabOutName) -Force
         }
     } catch {}
 
