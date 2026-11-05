@@ -320,8 +320,6 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
     return () => window.removeEventListener('focus', handleWindowReturn);
   }, [isOpen, applyParsedLocationInput]);
 
-  if (!isOpen) return null;
-
   const handlePasteFromClipboard = async () => {
     try {
       if (navigator.clipboard && navigator.clipboard.readText) {
@@ -485,6 +483,8 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, isOpen]);
+
+  if (!isOpen) return null;
 
   const handleSelectCandidate = (c: SearchCandidate) => {
     setLat(c.lat);
