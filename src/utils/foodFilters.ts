@@ -1200,8 +1200,10 @@ export function matchShopToProductQuery(
   const isTraditionalKhmerCakeOrSweet =
     matchedProductGroups.some((g) => g.intent === 'dessert') ||
     /អន្សម|នំគម|នំកាឆាយ|នំត្រាវ|នំគ្រក់|បាញ់ឆែវ|ចេកខ្ទិះ|ចេកចៀន|បង្អែម|សង់ខ្យា|ក្រឡាន/i.test(combinedSearchText);
+  const isKhorKoDish = /ខគោ/i.test(combinedSearchText);
   const isSearchingBakery =
     !isTraditionalKhmerCakeOrSweet &&
+    !isKhorKoDish &&
     (matchedProductGroups.some((g) => g.intent === 'bakery_bread') ||
       /នំប៉័ង|នំខេក|នំដុត|ក្រូសង់|\b(?:bakery|bread|pastry|banh\s*mi|croissant|n[oö]mpang)\b/i.test(combinedSearchText));
   const isSearchingCoffee = matchedProductGroups.some((g) => g.intent === 'coffee_drink') ||

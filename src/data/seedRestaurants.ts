@@ -449,7 +449,10 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "អាម៉ុកត្រីស្ករត្នោត",
       "សាច់ជ្រូកបំពងគ្រឿង",
-      "បង្អែមចេកខ្ទិះ"
+      "បង្អែមចេកខ្ទិះ",
+      "ខសាច់ជ្រូកពងទា",
+      "ខជើងជ្រូកពងទាស្ករត្នោត",
+      "លតឆាសាច់គោពងទាចៀន"
     ],
     "status": "approved",
     "isVerified": true,
