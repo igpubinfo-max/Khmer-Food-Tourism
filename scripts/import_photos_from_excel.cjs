@@ -31,7 +31,7 @@ function convertAndOptimizeToJpg(rawBuffer, targetJpgPath) {
       $img = [System.Drawing.Image]::FromFile($inPath)
       $w = $img.Width
       $h = $img.Height
-      $maxDim = 1000
+      $maxDim = 720
       if ($w -gt $maxDim -or $h -gt $maxDim) {
         if ($w -gt $h) {
           $h = [int][math]::Round(($h * $maxDim) / $w)
@@ -52,7 +52,7 @@ function convertAndOptimizeToJpg(rawBuffer, targetJpgPath) {
       $img.Dispose()
       $codec = [System.Drawing.Imaging.ImageCodecInfo]::GetImageEncoders() | Where-Object { $_.MimeType -eq 'image/jpeg' }
       $ep = New-Object System.Drawing.Imaging.EncoderParameters(1)
-      $ep.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter([System.Drawing.Imaging.Encoder]::Quality, [long]86)
+      $ep.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter([System.Drawing.Imaging.Encoder]::Quality, [long]72)
       $bmp.Save($outPath, $codec, $ep)
       $bmp.Dispose()
       $g.Dispose()

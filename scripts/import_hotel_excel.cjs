@@ -75,7 +75,7 @@ function saveAndOptimizeHotelPhoto(rawBuffer, id) {
       $img = [System.Drawing.Image]::FromFile($inPath)
       $w = $img.Width
       $h = $img.Height
-      $maxDim = 800
+      $maxDim = 720
       if ($w -gt $maxDim -or $h -gt $maxDim) {
         if ($w -gt $h) {
           $h = [int][math]::Round(($h * $maxDim) / $w)
@@ -90,11 +90,12 @@ function saveAndOptimizeHotelPhoto(rawBuffer, id) {
       $g.Clear([System.Drawing.Color]::White)
       $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
       $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
+      $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
       $g.DrawImage($img, 0, 0, $w, $h)
       $img.Dispose()
       $codec = [System.Drawing.Imaging.ImageCodecInfo]::GetImageEncoders() | Where-Object { $_.MimeType -eq 'image/jpeg' }
       $ep = New-Object System.Drawing.Imaging.EncoderParameters(1)
-      $ep.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter([System.Drawing.Imaging.Encoder]::Quality, [long]80)
+      $ep.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter([System.Drawing.Imaging.Encoder]::Quality, [long]72)
       $bmp.Save($outPath, $codec, $ep)
       $bmp.Dispose()
       $g.Dispose()
