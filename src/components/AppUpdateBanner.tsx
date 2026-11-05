@@ -1,6 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { App as CapacitorApp } from '@capacitor/app';
-import { Capacitor } from '@capacitor/core';
 import { Download, RefreshCw, ShieldCheck, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { tr } from '../utils/i18n';
@@ -14,7 +12,6 @@ import {
   type AppUpdateStatus,
 } from '../services/appUpdateService';
 
-const POLL_INTERVAL_MS = 30 * 60 * 1000; // Check every 30 minutes while user is using the app
 const MIN_AUTO_CHECK_COOLDOWN_MS = 5 * 60 * 1000; // 5-minute cooldown between automatic background checks
 
 export const AppUpdateBanner: React.FC = () => {
@@ -56,8 +53,15 @@ export const AppUpdateBanner: React.FC = () => {
         setUpdateStatus(status);
 
         if (status.hasUpdate) {
-          if (isManual || status.forceUpdate || status.updateDownloaded || !isUpdateSnoozed(status.latestBuildCode)) {
+          if (
+            isManual ||
+            status.forceUpdate ||
+            status.updateDownloaded ||
+            !isUpdateSnoozed(status.latestBuildCode, status.latestVersion)
+          ) {
             setVisible(true);
+          } else {
+            setVisible(false);
           }
         } else {
           setVisible(false);
@@ -82,55 +86,22 @@ export const AppUpdateBanner: React.FC = () => {
     [appSettings, language, showToast]
   );
 
-  // Initial check + periodic polling while user is using the app + resume/visibility/online triggers
+  // Initial check once on app startup + manual check trigger (avoid annoying repeated checks on every tab/focus switch)
   useEffect(() => {
     const initialTimer = window.setTimeout(() => {
       runCheck(false);
     }, 3500);
 
-    const intervalId = window.setInterval(() => {
-      if (typeof document === 'undefined' || document.visibilityState === 'visible') {
-        runCheck(false);
-      }
-    }, POLL_INTERVAL_MS);
-
-    const onVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        runCheck(false);
-      }
-    };
-    const onOnline = () => runCheck(false);
     const onManualEvent = (evt: Event) => {
       const custom = evt as CustomEvent<{ manual?: boolean }>;
       runCheck(Boolean(custom?.detail?.manual ?? true));
     };
 
-    document.addEventListener('visibilitychange', onVisibility);
-    window.addEventListener('online', onOnline);
     window.addEventListener(CHECK_APP_UPDATE_EVENT, onManualEvent as EventListener);
-
-    let appStateCleanup: (() => void) | null = null;
-    if (Capacitor.isNativePlatform()) {
-      CapacitorApp.addListener('appStateChange', ({ isActive }) => {
-        if (isActive) {
-          runCheck(false);
-        }
-      })
-        .then((handle) => {
-          appStateCleanup = () => {
-            handle.remove().catch(() => {});
-          };
-        })
-        .catch(() => {});
-    }
 
     return () => {
       window.clearTimeout(initialTimer);
-      window.clearInterval(intervalId);
-      document.removeEventListener('visibilitychange', onVisibility);
-      window.removeEventListener('online', onOnline);
       window.removeEventListener(CHECK_APP_UPDATE_EVENT, onManualEvent as EventListener);
-      if (appStateCleanup) appStateCleanup();
     };
   }, [runCheck]);
 
@@ -159,8 +130,10 @@ export const AppUpdateBanner: React.FC = () => {
   const handleUpdateNow = async () => {
     if (isUpdating) return;
     setIsUpdating(true);
+    snoozeUpdateAlert(updateStatus.latestBuildCode, updateStatus.latestVersion);
+    setVisible(false);
     try {
-      await triggerAutoAppUpdate(updateStatus.latestBuildCode, appSettings);
+      await triggerAutoAppUpdate(updateStatus.latestBuildCode, appSettings, updateStatus.latestVersion);
     } finally {
       window.setTimeout(() => {
         setIsUpdating(false);
@@ -170,7 +143,7 @@ export const AppUpdateBanner: React.FC = () => {
 
   const handleSnooze = () => {
     if (updateStatus.forceUpdate) return;
-    snoozeUpdateAlert(updateStatus.latestBuildCode);
+    snoozeUpdateAlert(updateStatus.latestBuildCode, updateStatus.latestVersion);
     setVisible(false);
   };
 

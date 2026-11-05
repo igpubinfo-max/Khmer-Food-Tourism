@@ -44,7 +44,7 @@ const NativeAppUpdate = registerPlugin<NativeAppUpdateBridge>('NativeAppUpdate')
 const OFFICIAL_PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism';
 const REMOTE_MANIFEST_URL = 'https://igpubinfo-max.github.io/Khmer-Food-Tourism/version.json';
 const SNOOZE_STORAGE_KEY = 'kft_snoozed_app_update_v1';
-const SNOOZE_DURATION_MS = 4 * 60 * 60 * 1000; // 4 hours
+const SNOOZE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours so the banner never nags repeatedly
 
 export const CHECK_APP_UPDATE_EVENT = 'kft:check-app-update';
 
@@ -171,7 +171,11 @@ export async function checkLiveAppUpdate(appSettings?: Partial<AppSettings> | nu
   // 1. Check Cloud AppSettings (Admin-published version metadata)
   const cloudBuild = Number(appSettings?.latestAppBuildCode || 0);
   const cloudVer = appSettings?.latestAppVersion?.trim();
-  if (cloudBuild > latestBuildCode || (cloudVer && compareSemver(cloudVer, APP_VERSION_NAME) > 0)) {
+  const isCloudNewer =
+    cloudBuild > 0
+      ? cloudBuild > latestBuildCode
+      : Boolean(cloudVer && compareSemver(cloudVer, APP_VERSION_NAME) > 0);
+  if (isCloudNewer) {
     hasUpdate = true;
     source = 'cloud_settings';
     if (cloudBuild > latestBuildCode) latestBuildCode = cloudBuild;
@@ -182,7 +186,11 @@ export async function checkLiveAppUpdate(appSettings?: Partial<AppSettings> | nu
   if (manifest) {
     const remoteBuild = Number(manifest.buildCode || 0);
     const remoteVerRaw = (manifest.versionName || manifest.version || '').trim();
-    if (remoteBuild > latestBuildCode || (remoteVerRaw && compareSemver(remoteVerRaw, APP_VERSION_NAME) > 0)) {
+    const isRemoteNewer =
+      remoteBuild > 0
+        ? remoteBuild > latestBuildCode
+        : Boolean(remoteVerRaw && compareSemver(remoteVerRaw, APP_VERSION_NAME) > 0);
+    if (isRemoteNewer) {
       hasUpdate = true;
       source = 'remote_manifest';
       if (remoteBuild > latestBuildCode) latestBuildCode = remoteBuild;
@@ -247,8 +255,12 @@ export async function subscribeToInstallState(
  */
 export async function triggerAutoAppUpdate(
   latestBuildCode?: number,
-  appSettings?: Partial<AppSettings> | null
+  appSettings?: Partial<AppSettings> | null,
+  latestVersion?: string
 ): Promise<void> {
+  // Always snooze this build/version when user clicks Update Now so it never loops or nags repeatedly
+  snoozeUpdateAlert(latestBuildCode || APP_BUILD_CODE, latestVersion);
+
   const platform = Capacitor.getPlatform();
   const playStoreUrl = appSettings?.playStoreUrl || OFFICIAL_PLAY_STORE_URL;
 
@@ -301,25 +313,31 @@ export async function triggerAutoAppUpdate(
   }
 }
 
-export function isUpdateSnoozed(buildCode: number): boolean {
-  if (!buildCode || buildCode <= APP_BUILD_CODE) return false;
+export function isUpdateSnoozed(buildCode: number, latestVersion?: string): boolean {
   try {
     const raw = localStorage.getItem(SNOOZE_STORAGE_KEY);
     if (!raw) return false;
-    const parsed = JSON.parse(raw) as { buildCode?: number; untilMs?: number };
-    if (parsed && parsed.buildCode === buildCode && Number(parsed.untilMs || 0) > Date.now()) {
+    const parsed = JSON.parse(raw) as { buildCode?: number; latestVersion?: string; untilMs?: number };
+    if (!parsed || Number(parsed.untilMs || 0) <= Date.now()) {
+      return false;
+    }
+    if (buildCode && parsed.buildCode && parsed.buildCode >= buildCode) {
+      return true;
+    }
+    if (latestVersion && parsed.latestVersion && parsed.latestVersion === latestVersion) {
       return true;
     }
   } catch {}
   return false;
 }
 
-export function snoozeUpdateAlert(buildCode: number): void {
+export function snoozeUpdateAlert(buildCode: number, latestVersion?: string): void {
   try {
     localStorage.setItem(
       SNOOZE_STORAGE_KEY,
       JSON.stringify({
         buildCode,
+        latestVersion: latestVersion || '',
         untilMs: Date.now() + SNOOZE_DURATION_MS,
       })
     );

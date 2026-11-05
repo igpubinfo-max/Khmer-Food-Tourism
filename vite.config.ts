@@ -72,6 +72,7 @@ export default defineConfig({
   base: './',
   define: {
     __KFT_BUILD_CODE__: JSON.stringify(readAndroidVersionCode()),
+    __KFT_VERSION_NAME__: JSON.stringify(readPackageVersionName()),
   },
   plugins: [
     react(),
