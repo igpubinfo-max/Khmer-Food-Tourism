@@ -170,6 +170,12 @@ jobs:
           cd ..
 
           # 3. Write release-info.json so PC downloader verifies files
+          export BUILD_APK BUILD_AAB VERSION_NAME FINAL_VC APK_NAME AAB_NAME
+          export APK_SHA="${APK_SHA:-}"
+          export APK_SIZE="${APK_SIZE:-0}"
+          export AAB_SHA="${AAB_SHA:-}"
+          export AAB_SIZE="${AAB_SIZE:-0}"
+
           node -e '
             const fs = require("fs");
             const bApk = process.env.BUILD_APK === "true";

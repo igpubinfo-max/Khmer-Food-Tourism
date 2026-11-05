@@ -302,18 +302,19 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
 
             if ($release -and $release.assets) {
                 $info = Get-ReleaseInfoJson $release
-                if ($info) {
-                    if ($needApk -and $info.apk) {
+                if ($needApk) {
+                    if ($info -and $info.apk -and $info.apk.name) {
                         $apkAsset = $release.assets | Where-Object { $_.name -eq $info.apk.name } | Select-Object -First 1
                     }
-                    if ($needAab -and $info.aab) {
-                        $aabAsset = $release.assets | Where-Object { $_.name -eq $info.aab.name } | Select-Object -First 1
-                    }
-                } else {
-                    if ($needApk) {
+                    if (-not $apkAsset) {
                         $apkAsset = $release.assets | Where-Object { $_.name -like "*.apk" } | Sort-Object -Property updated_at -Descending | Select-Object -First 1
                     }
-                    if ($needAab) {
+                }
+                if ($needAab) {
+                    if ($info -and $info.aab -and $info.aab.name) {
+                        $aabAsset = $release.assets | Where-Object { $_.name -eq $info.aab.name } | Select-Object -First 1
+                    }
+                    if (-not $aabAsset) {
                         $aabAsset = $release.assets | Where-Object { $_.name -like "*.aab" } | Sort-Object -Property updated_at -Descending | Select-Object -First 1
                     }
                 }
