@@ -5,6 +5,7 @@ import {
   Restaurant,
   isAdminAccount,
   openDestinationGoogleExternal,
+  openExternalUrlNativeSafe,
 } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { BedDouble, Edit2, Settings, MapPin, Heart, Lock, Camera, Star, Trash2, Download } from 'lucide-react';
@@ -18,7 +19,7 @@ import {
   ListingFeaturedCard,
   ListingThumb,
 } from './listing/ListingUI';
-import { normalizeKhmerSearchText } from '../services/googlePlacesService';
+import { rankBySearchRelevance, destinationSearchFields } from '../utils/searchEngine';
 import { DISH_PROVINCES } from '../utils/foodFilters';
 import { tr } from '../utils/i18n';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
@@ -195,10 +196,8 @@ export const HotelView: React.FC = () => {
 
   const filteredHotels = useMemo(() => {
     const cleanSelProv = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
-    const normQuery = normalizeKhmerSearchText(debouncedSearchQuery);
-    const rawQueryLower = debouncedSearchQuery.trim().toLowerCase();
 
-    return orderedHotels.filter((h) => {
+    const scoped = orderedHotels.filter((h) => {
       if (categoryFilter === 'verified_big' && !isVerifiedBigHotel(h)) return false;
       if (categoryFilter !== 'all' && categoryFilter !== 'verified_big' && classifyHotelSubCategory(h) !== categoryFilter) {
         return false;
@@ -206,15 +205,22 @@ export const HotelView: React.FC = () => {
       if (cleanSelProv && !(h.provinceKh || '').replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) {
         return false;
       }
-      if (normQuery || rawQueryLower) {
-        const hayRaw = `${h.nameKh || ''} ${h.nameEn || ''} ${h.provinceKh || ''} ${h.provinceEn || ''} ${h.addressKh || ''} ${h.addressEn || ''} ${h.phone || ''}`.toLowerCase();
-        const hayNorm = normalizeKhmerSearchText(hayRaw);
-        if (!hayRaw.includes(rawQueryLower) && (!normQuery || !hayNorm.includes(normQuery))) {
-          return false;
-        }
-      }
       return true;
     });
+
+    if (!debouncedSearchQuery.trim()) return scoped;
+
+    // Relevance-ranked search: exact name → prefix → all words → typo-tolerant match → category/address,
+    // Khmer + English + Chinese names, with unrelated hotels removed. Ties: rating, then name (deterministic).
+    return rankBySearchRelevance(
+      scoped,
+      debouncedSearchQuery,
+      (h) => destinationSearchFields(h, [getLocalizedDestination(h, 'zh').name, classifyHotelSubCategory(h)]),
+      {
+        bucketSize: 100,
+        tieBreak: (a, b) => (b.rating || 0) - (a.rating || 0) || (a.nameEn || a.nameKh || '').localeCompare(b.nameEn || b.nameKh || ''),
+      }
+    );
   }, [orderedHotels, categoryFilter, selectedProvince, debouncedSearchQuery]);
 
   const displayedHotels = useMemo(
@@ -623,8 +629,29 @@ export const HotelView: React.FC = () => {
           <div className="py-12 text-center text-slate-400 space-y-2 font-khmer">
             <BedDouble className="w-10 h-10 mx-auto text-slate-300" strokeWidth={1.75} />
             <p className="text-xs">
-              {tr(language, 'រកមិនឃើញសណ្ឋាគារក្នុងផ្នែកនេះទេ', 'No hotels matched your filters', '未找到符合筛选条件的酒店')}
+              {debouncedSearchQuery.trim()
+                ? tr(
+                    language,
+                    `រកមិនឃើញសណ្ឋាគារដែលត្រូវនឹង «${debouncedSearchQuery.trim()}» ក្នុងកម្មវិធីទេ`,
+                    `No hotels in the app match "${debouncedSearchQuery.trim()}"`,
+                    `应用内未找到与“${debouncedSearchQuery.trim()}”匹配的酒店`
+                  )
+                : tr(language, 'រកមិនឃើញសណ្ឋាគារក្នុងផ្នែកនេះទេ', 'No hotels matched your filters', '未找到符合筛选条件的酒店')}
             </p>
+            {debouncedSearchQuery.trim() && (
+              <button
+                type="button"
+                onClick={() =>
+                  openExternalUrlNativeSafe(
+                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${debouncedSearchQuery.trim()} Cambodia`)}`
+                  )
+                }
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-emerald-900 dark:text-emerald-400 cursor-pointer"
+              >
+                <MapPin className="w-3.5 h-3.5" />
+                {tr(language, 'ស្វែងរកនៅលើ Google Maps', 'Search on Google Maps', '在 Google 地图中搜索')}
+              </button>
+            )}
           </div>
         )}
       </div>

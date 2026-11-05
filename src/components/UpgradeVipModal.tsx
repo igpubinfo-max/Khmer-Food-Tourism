@@ -258,9 +258,9 @@ export const UpgradeVipModal: React.FC = () => {
           showToast(
             tr(
               language,
-              '✅ បានជ្រើសរើសរូបភាពវិក្កយបត្រពីបណ្ណាល័យរូបភាពរួចរាល់!',
-              '✅ Selected payment receipt from Gallery!',
-              '✅ 已从相册选择付款凭证截图！'
+              '✅ បានជ្រើសរើសរូបភាពវិក្កយបត្រពី រូបភាពរបស់ខ្ញុំ រួចរាល់!',
+              '✅ Selected payment receipt from រូបភាពរបស់ខ្ញុំ!',
+              '✅ 已从 រូបភាពរបស់ខ្ញុំ 选择付款凭证截图！'
             ),
             'success'
           );
@@ -300,8 +300,8 @@ export const UpgradeVipModal: React.FC = () => {
       const result = await savePngDataUrlToGallery(qrCodeDataUrl, fileName);
       showToast(
         result.duplicate
-          ? tr(language, '✅ រូបភាព ABA QR ច្បាប់ដើមត្រូវបានរក្សាទុករួចហើយនៅក្នុង Gallery / Photos!', '✅ Original ABA QR image is already saved in your Gallery/Photos!', '✅ 原始 ABA 二维码图片已保存在相册中！')
-          : tr(language, '✅ បានទាញយក និងរក្សាទុករូបភាព ABA QR ច្បាប់ដើមទៅក្នុង Gallery / Photos រួចរាល់!', '✅ Saved original ABA QR image directly to Gallery/Photos!', '✅ 原始 ABA 二维码已保存到手机相册！'),
+          ? tr(language, '✅ រូបភាព ABA QR ច្បាប់ដើមត្រូវបានរក្សាទុករួចហើយនៅក្នុង រូបភាពរបស់ខ្ញុំ!', '✅ Original ABA QR image is already saved in រូបភាពរបស់ខ្ញុំ!', '✅ 原始 ABA 二维码图片已保存在 រូបភាពរបស់ខ្ញុំ 中！')
+          : tr(language, '✅ បានទាញយក និងរក្សាទុករូបភាព ABA QR ច្បាប់ដើមទៅក្នុង រូបភាពរបស់ខ្ញុំ រួចរាល់!', '✅ Saved original ABA QR image directly to រូបភាពរបស់ខ្ញុំ!', '✅ 原始 ABA 二维码已保存到 រូបភាពរបស់ខ្ញុំ！'),
         'success'
       );
     } catch (err: any) {
@@ -874,7 +874,7 @@ export const UpgradeVipModal: React.FC = () => {
                     className="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
                   >
                     <Upload className="w-4 h-4" />
-                    <span>{tr(language, 'អាប់ឡូតវិក្កយបត្រ', 'Upload Receipt', '上传付款凭证')}</span>
+                    <span>{tr(language, 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ')}</span>
                   </button>
                   <button
                     type="button"
@@ -1180,7 +1180,7 @@ export const UpgradeVipModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleSaveQrImage}
-                    title={tr(language, 'ចុចលើរូប QR ដើម្បីរក្សាទុកទៅក្នុង Gallery / Photos', 'Tap QR code to save original image to Gallery/Photos', '点击二维码保存原图到手机相册')}
+                    title={tr(language, 'ចុចលើរូប QR ដើម្បីរក្សាទុកទៅក្នុង រូបភាពរបស់ខ្ញុំ', 'Tap QR code to save original image to រូបភាពរបស់ខ្ញុំ', '点击二维码保存原图到 រូបភាពរបស់ខ្ញុំ')}
                     className="w-[42%] max-w-[162px] p-1.5 bg-white rounded-2xl shadow-sm border-2 border-emerald-500/40 hover:border-emerald-500 flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition"
                   >
                     <img
@@ -1287,8 +1287,8 @@ export const UpgradeVipModal: React.FC = () => {
                     <Upload className="w-4 h-4 shrink-0" />
                     <span className="truncate">
                       {paymentProofDraft
-                        ? tr(language, 'ប្តូរវិក្កយបត្រ', 'Replace', '更换凭证')
-                        : tr(language, 'អាប់ឡូតវិក្កយបត្រ', 'Upload Receipt', '上传凭证')}
+                        ? tr(language, 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ')
+                        : tr(language, 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ')}
                     </span>
                   </button>
 

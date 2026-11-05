@@ -1857,8 +1857,8 @@ export const VipAddRestaurantModal: React.FC = () => {
                     const res = await savePngDataUrlToGallery('/images/aba_khqr_official_kimseng.png', 'ABA-KHQR-KIMSENG-CHEA-095245959.png');
                     showToast(
                       res.duplicate
-                        ? tr(language, '✅ រូបភាព ABA QR ច្បាប់ដើមមាននៅក្នុង Gallery រួចហើយ!', '✅ Original ABA QR image is already in your Gallery!', '✅ 原始 ABA 二维码图片已在相册中！')
-                        : tr(language, '✅ បានរក្សាទុករូបភាព ABA QR ច្បាប់ដើមទៅក្នុង Gallery / Photos រួចរាល់!', '✅ Saved original ABA QR image to Gallery/Photos!', '✅ 原始 ABA 二维码已保存到手机相册！'),
+                        ? tr(language, '✅ រូបភាព ABA QR ច្បាប់ដើមមាននៅក្នុង រូបភាពរបស់ខ្ញុំ រួចហើយ!', '✅ Original ABA QR image is already in រូបភាពរបស់ខ្ញុំ!', '✅ 原始 ABA 二维码图片已在 រូបភាពរបស់ខ្ញុំ 中！')
+                        : tr(language, '✅ បានរក្សាទុករូបភាព ABA QR ច្បាប់ដើមទៅក្នុង រូបភាពរបស់ខ្ញុំ រួចរាល់!', '✅ Saved original ABA QR image to រូបភាពរបស់ខ្ញុំ!', '✅ 原始 ABA 二维码已保存到 រូបភាពរបស់ខ្ញុំ！'),
                       'success'
                     );
                   } catch {}
@@ -1897,7 +1897,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               <span>
                 {slotProofData?.fileName
                   ? `✓ ${slotProofData.fileName}`
-                  : tr(language, '📸 ជ្រើសរូបវិក្កយបត្រ ABA ពីទូរស័ព្ទ', '📸 Upload ABA Receipt Screenshot', '📸 上传 ABA 付款收据截图')}
+                  : tr(language, '📸 ជ្រើសរូបវិក្កយបត្រ ABA ពី រូបភាពរបស់ខ្ញុំ', '📸 រូបភាពរបស់ខ្ញុំ (ABA Receipt)', '📸 រូបភាពរបស់ខ្ញុំ (ABA 付款收据)')}
               </span>
             </button>
 
@@ -2963,7 +2963,7 @@ export const VipAddRestaurantModal: React.FC = () => {
                         className="min-h-[44px] py-2 px-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs transition cursor-pointer disabled:opacity-50"
                       >
                         <ImageIcon className="w-3.5 h-3.5 shrink-0" />
-                        <span>{tr(language, 'វិចិត្រសាល', 'Gallery', '相册')}</span>
+                        <span>{tr(language, 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ')}</span>
                       </button>
                       <button
                         type="button"

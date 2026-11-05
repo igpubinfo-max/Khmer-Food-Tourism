@@ -88,7 +88,7 @@ export async function savePngDataUrlToGallery(
     return {
       saved: true,
       duplicate: true,
-      message: 'រូបភាព QR នេះត្រូវបានរក្សាទុករួចហើយនៅក្នុង Gallery / Photos!'
+      message: 'រូបភាព QR នេះត្រូវបានរក្សាទុករួចហើយនៅក្នុង រូបភាពរបស់ខ្ញុំ!'
     };
   }
 
@@ -109,8 +109,8 @@ export async function savePngDataUrlToGallery(
           saved: true,
           duplicate: isDup,
           message: isDup
-            ? 'រូបភាព QR ត្រូវបានរក្សាទុករួចហើយនៅក្នុង Gallery / Photos!'
-            : `បានរក្សាទុករូបភាព QR ទៅក្នុង Gallery / Photos រួចរាល់ (${result.fileName || sanitizedName})!`
+            ? 'រូបភាព QR ត្រូវបានរក្សាទុករួចហើយនៅក្នុង រូបភាពរបស់ខ្ញុំ!'
+            : `បានរក្សាទុករូបភាព QR ទៅក្នុង រូបភាពរបស់ខ្ញុំ រួចរាល់ (${result.fileName || sanitizedName})!`
         };
       }
     } catch (nativeErr) {
@@ -425,7 +425,7 @@ export async function processAndCompressImageFile(
   // 2. Fallback via FileReader
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onerror = () => reject(new Error('មិនអាចអានឯកសាររូបភាពពី Gallery បានទេ។'));
+    reader.onerror = () => reject(new Error('មិនអាចអានឯកសាររូបភាពពី រូបភាពរបស់ខ្ញុំ បានទេ។'));
     reader.onload = (ev) => {
       const rawDataUrl = ev.target?.result as string;
       if (!rawDataUrl) {

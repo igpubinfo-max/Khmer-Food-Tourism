@@ -36,6 +36,15 @@ import {
   pullCloudDocument,
   pushCloudDocument,
 } from './supabaseService';
+import {
+  SEARCH_STOPWORDS,
+  analyzeSearchQuery,
+  scoreSearchRecord,
+  matchWordInText,
+  restaurantSearchFields,
+  destinationSearchFields,
+  type SearchableFields,
+} from '../utils/searchEngine';
 import { initial100Restaurants as SEED_RESTAURANTS } from '../data/seedRestaurants';
 import { initial100Destinations as SEED_DESTINATIONS } from '../data/seedDestinations';
 import { isRestaurantIdDeleted, loadDeletedRestaurantIdsMap } from './permanentMediaVaultService';
@@ -1890,8 +1899,8 @@ export function extractDistinctiveQueryTokens(rawQuery: string): string[] {
 
   const rawParts = clean
     .split(/[\s\-_(),./|•·&+]+/)
-    .map((p) => p.trim().toLowerCase())
-    .filter((p) => p.length >= 2 && !GENERIC_CATEGORY_OR_LOCATION_WORDS.has(p));
+    .map((p) => p.trim().toLowerCase().replace(/['’`]/g, ''))
+    .filter((p) => p.length >= 2 && !GENERIC_CATEGORY_OR_LOCATION_WORDS.has(p) && !SEARCH_STOPWORDS.has(p));
 
   const out = new Set<string>(rawParts);
   for (const [rx, aliases] of BILINGUAL_BRAND_TRANSLITERATIONS) {
@@ -1911,19 +1920,23 @@ export function doesPlaceMatchDistinctiveQuery(
   distinctiveTokens: string[]
 ): boolean {
   if (!distinctiveTokens || distinctiveTokens.length === 0) return true;
-  const nameHay = normalizeKhmerSearchText(
-    `${place.nameKh || ''} ${place.nameEn || ''} ${place.nameZh || ''}`
-  ).replace(/[éèêë]/g, 'e');
-  const compactName = normalizePlaceNameForComparison(`${place.nameKh || ''} ${place.nameEn || ''}`);
+  const nameHay = `${place.nameKh || ''} ${place.nameEn || ''} ${place.nameZh || ''}`;
 
-  return distinctiveTokens.some((tok) => {
-    const t = tok.toLowerCase().trim();
-    if (!t) return false;
-    if (includesKhmerSafeToken(nameHay, t)) return true;
-    const compactTok = t.replace(/[\s\-_().,/\\|]+/g, '');
-    if (compactTok.length >= 3 && compactName.includes(compactTok)) return true;
-    return false;
-  });
+  // Group transliteration aliases of the same brand (e.g. manna / ម៉ាន់ណា / 玛娜) so that EVERY distinctive
+  // word of the query must match (exactly or with a small typo) — "The Square Kampot" never matches "The Loving Spoon".
+  const remaining = new Set(distinctiveTokens.map((t) => t.toLowerCase().trim()).filter(Boolean));
+  const groups: string[][] = [];
+  for (const [, aliases] of BILINGUAL_BRAND_TRANSLITERATIONS) {
+    const lowered = aliases.map((a) => a.toLowerCase());
+    const present = lowered.filter((a) => remaining.has(a));
+    if (present.length > 0) {
+      groups.push(present);
+      present.forEach((a) => remaining.delete(a));
+    }
+  }
+  remaining.forEach((t) => groups.push([t]));
+
+  return groups.every((group) => group.some((tok) => matchWordInText(tok, nameHay, true) >= 0.55));
 }
 
 /**
@@ -3285,6 +3298,29 @@ async function searchLiveCambodiaMultiSource(
 /**
  * Advanced Google Maps Search supporting Name, Category, Province, Location (GPS), Nationwide Scope, Pagination, and Rate Limiting
  */
+/** Searchable fields of a Google / cached place for the shared relevance engine. */
+export function buildPlaceSearchFields(it: GooglePlaceCachedItem): SearchableFields {
+  const categoryWords =
+    it.category === 'cafe'
+      ? 'cafe coffee'
+      : it.category === 'tourism'
+      ? 'tourism attraction'
+      : it.category === 'street_food'
+      ? 'street food restaurant'
+      : 'restaurant food';
+  return {
+    names: [it.nameKh, it.nameEn, it.nameZh, it.name],
+    categories: [
+      categoryWords,
+      it.subCategorySlug,
+      it.primaryTypeDisplayName,
+      ...(Array.isArray(it.types) ? it.types.map((t) => String(t).replace(/_/g, ' ')) : []),
+    ],
+    locations: [it.province, it.provinceKh, it.provinceEn, it.address, it.addressKh, it.addressEn],
+    texts: [it.editorialSummary],
+  };
+}
+
 export async function searchGoogleMapsPlacesAdvanced(
   req: GooglePlacesSearchRequest
 ): Promise<GooglePlacesSearchResponse> {
@@ -3318,6 +3354,23 @@ export async function searchGoogleMapsPlacesAdvanced(
       .join(' ')
   )}`;
 
+  const queryAnalysis = cleanQuery.length >= 2 ? analyzeSearchQuery(cleanQuery) : null;
+  const isNameQuery = Boolean(queryAnalysis && queryAnalysis.distinctive.length > 0);
+  const queryHasKhmerOrCjk = /[\u1780-\u17FF\u3400-\u9FFF]/.test(cleanQuery);
+
+  /** Relevance score of a place for the current query (0 = unrelated). Google's own ranking gets a small bonus. */
+  const scorePlaceForQuery = (it: GooglePlaceCachedItem, googleRank: number): number => {
+    if (!queryAnalysis) return 1;
+    const detail = scoreSearchRecord(queryAnalysis, buildPlaceSearchFields(it));
+    if (it.source === 'google_maps_api' && googleRank >= 0) {
+      if (detail.score > 0) return detail.score + Math.max(0, 120 - googleRank * 15);
+      // Cross-script result (Khmer/Chinese query → Latin-only display name): trust Google's top-3 only.
+      const nameHasQueryScript = /[\u1780-\u17FF\u3400-\u9FFF]/.test(`${it.nameKh} ${it.nameEn} ${it.nameZh || ''}`);
+      if (queryHasKhmerOrCjk && !nameHasQueryScript && googleRank < 3 && !detail.provinceMismatch) return 210;
+    }
+    return detail.score;
+  };
+
   const buildResponse = (
     items: GooglePlaceCachedItem[],
     fromSmartCache: boolean,
@@ -3332,24 +3385,45 @@ export async function searchGoogleMapsPlacesAdvanced(
       errorMessageKh?: string;
       errorMessageEn?: string;
       errorMessageZh?: string;
+      googleRankById?: Map<string, number>;
     }
   ): GooglePlacesSearchResponse => {
-    const deduped = deduplicateGooglePlacesList(items);
+    let deduped = deduplicateGooglePlacesList(items);
 
-    // If GPS location is active, sort by distance; otherwise sort exact name matches & rated items first
-    if (hasLocationCoords) {
+    if (isNameQuery) {
+      // Specific business / place name typed → keep ONLY genuinely matching places, best match first
+      // (exact name → prefix → all words → typo match), then distance (GPS) and rating as tie-breakers.
+      const scored = deduped
+        .map((it, idx) => ({ it, idx, score: scorePlaceForQuery(it, opts?.googleRankById?.get(it.placeId) ?? -1) }))
+        .filter((x) => x.score >= 200);
+      scored.sort((a, b) => {
+        const ba = Math.floor(a.score / 100);
+        const bb = Math.floor(b.score / 100);
+        if (bb !== ba) return bb - ba;
+        if (hasLocationCoords) {
+          const d =
+            calculateHaversineMeters(latVal, lngVal, a.it.lat, a.it.lng) -
+            calculateHaversineMeters(latVal, lngVal, b.it.lat, b.it.lng);
+          if (Math.abs(d) > 1) return d;
+        }
+        if (b.score !== a.score) return b.score - a.score;
+        return (b.it.rating || 0) - (a.it.rating || 0) || a.idx - b.idx;
+      });
+      deduped = scored.map((x) => x.it);
+    } else if (hasLocationCoords) {
+      // Category / nearby search → nearest first
       deduped.sort(
         (a, b) =>
           calculateHaversineMeters(latVal, lngVal, a.lat, a.lng) -
           calculateHaversineMeters(latVal, lngVal, b.lat, b.lng)
       );
-    } else if (distinctiveTokens.length > 0) {
-      deduped.sort((a, b) => {
-        const aExact = normalizePlaceNameForComparison(a.nameEn) === normalizePlaceNameForComparison(cleanQuery) ? 1 : 0;
-        const bExact = normalizePlaceNameForComparison(b.nameEn) === normalizePlaceNameForComparison(cleanQuery) ? 1 : 0;
-        if (aExact !== bExact) return bExact - aExact;
-        return (b.rating || 0) - (a.rating || 0);
-      });
+    } else if (queryAnalysis && (queryAnalysis.provinces.length > 0 || queryAnalysis.categoryGroups.length > 0)) {
+      // Category / province keyword ("hotel kampot") → drop places in another province, rank matches first
+      const scored = deduped
+        .map((it, idx) => ({ it, idx, detail: scoreSearchRecord(queryAnalysis, buildPlaceSearchFields(it)) }))
+        .filter((x) => !x.detail.provinceMismatch);
+      scored.sort((a, b) => b.detail.score - a.detail.score || (b.it.rating || 0) - (a.it.rating || 0) || a.idx - b.idx);
+      deduped = scored.map((x) => x.it);
     }
 
     const normalizedItems = deduped.map((it) => {
@@ -3389,6 +3463,12 @@ export async function searchGoogleMapsPlacesAdvanced(
       fromCache: fromSmartCache,
       providerUsed,
       apiStatus: opts?.apiStatus ?? lastGooglePlacesApiDiagnosis?.status,
+      apiWarningKh: opts?.apiWarningKh,
+      apiWarningEn: opts?.apiWarningEn,
+      apiWarningZh: opts?.apiWarningZh,
+      errorMessageKh: opts?.errorMessageKh,
+      errorMessageEn: opts?.errorMessageEn,
+      errorMessageZh: opts?.errorMessageZh,
       rateLimitReached: opts?.rateLimitReached,
       directGoogleMapsSearchUrl,
       attributionText: fromSmartCache ? 'Powered by Google Maps • Smart Cache' : 'Powered by Google Maps',
@@ -3887,9 +3967,15 @@ export async function searchGoogleMapsPlacesAdvanced(
         : [...newCachedItems, ...supplementedItems, ...initialCombinedCache]
     );
 
+    const googleRankById = new Map<string, number>();
+    newCachedItems.forEach((it, idx) => {
+      if (!googleRankById.has(it.placeId)) googleRankById.set(it.placeId, idx);
+    });
+
     const out = buildResponse(finalResults, false, 'google_maps_api', {
       nextPageToken,
       apiStatus: 'OK',
+      googleRankById,
     });
     searchQueryMemoryCache.set(memKey, out);
     return out;
@@ -4855,6 +4941,10 @@ export function performUnifiedCambodiaSearch(
   const placeEffectiveQuery = parsedFoodQuery.coreQuery || q;
   const tokens = expandMultilingualPlaceQuery(placeEffectiveQuery, 'all').matchTokens;
   const distinctiveTokens = extractDistinctiveQueryTokens(placeEffectiveQuery);
+  // Shared relevance engine: when the query contains a specific name ("The Square Kampot Hotel"),
+  // every distinctive word must match — loose synonym/province token matches are not enough.
+  const unifiedQa = analyzeSearchQuery(query);
+  const isNamedQuery = unifiedQa.distinctive.length > 0 && !parsedFoodQuery.isFlavorOnlyQuery;
   const rawProv =
     provinceFilter && provinceFilter !== 'all' && provinceFilter !== 'ទាំងអស់'
       ? provinceFilter
@@ -4912,6 +5002,11 @@ export function performUnifiedCambodiaSearch(
     const hay = normalizeKhmerSearchText(
       `${r.nameKh || ''} ${r.nameEn || ''} ${rZh.name || ''} ${r.descriptionKh || ''} ${r.descriptionEn || ''} ${rZh.description || ''} ${r.addressKh || ''} ${r.addressEn || ''} ${rZh.address || ''} ${r.provinceKh || ''} ${r.provinceEn || ''} ${rZh.province || ''} ${(r.signatureDishesKh || []).join(' ')} ${(rZh.signatureDishes || []).join(' ')} ${(r.menuItems || []).map((m) => `${m.nameKh || ''} ${m.nameEn || ''}`).join(' ')}`
     );
+    const restFields = restaurantSearchFields(r, [rZh.name]);
+    if (isNamedQuery) {
+      const nameDetail = scoreSearchRecord(unifiedQa, restFields);
+      if (nameDetail.matchedInName && nameDetail.score >= 200) return true;
+    }
     if (parsedFoodQuery.isFlavorOnlyQuery) {
       if (classifyShopBusinessKind(r) === 'bakery_bread') return false;
       return (
@@ -4926,6 +5021,9 @@ export function performUnifiedCambodiaSearch(
     // Only allow fallback token matching if the shop wasn't rejected for product/category mismatch
     if (matchedFoods.length > 0) {
       return false;
+    }
+    if (isNamedQuery) {
+      return scoreSearchRecord(unifiedQa, restFields).score >= 200;
     }
     return (
       includesKhmerSafeToken(hay, placeEffectiveQuery) ||
@@ -4948,6 +5046,9 @@ export function performUnifiedCambodiaSearch(
         const hay = normalizeKhmerSearchText(
           `${d.nameKh || ''} ${d.nameEn || ''} ${dZh.name || ''} ${d.descriptionKh || ''} ${d.descriptionEn || ''} ${dZh.description || ''} ${d.addressKh || ''} ${d.addressEn || ''} ${dZh.address || ''} ${d.provinceKh || ''} ${d.provinceEn || ''} ${dZh.province || ''} ${d.categoryKh || ''} ${d.categoryEn || ''} ${dZh.category || ''}`
         );
+        if (isNamedQuery) {
+          return scoreSearchRecord(unifiedQa, destinationSearchFields(d, [dZh.name])).score >= 200;
+        }
         return (
           includesKhmerSafeToken(hay, placeEffectiveQuery) ||
           tokens.some((tok) => tok.length >= 2 && includesKhmerSafeToken(hay, tok))
@@ -5005,6 +5106,9 @@ export function performUnifiedCambodiaSearch(
     if (hasRadiusFilter) {
       const dist = calculateHaversineMeters(userLat, userLng, place.lat, place.lng);
       if (dist > radiusMeters!) continue;
+    }
+    if (isNamedQuery && scoreSearchRecord(unifiedQa, buildPlaceSearchFields(place)).score < 200) {
+      continue;
     }
 
     if (place.category === 'tourism') {
@@ -5064,17 +5168,28 @@ export function performUnifiedCambodiaSearch(
     );
   }
 
+  // Rank by relevance (exact name → partial → typo → category/address), keeping the previous order
+  // (VIP / distance) as a deterministic tie-breaker within the same relevance tier.
+  const rankStable = <T,>(list: T[], fieldsOf: (x: T) => SearchableFields): T[] =>
+    list
+      .map((item, idx) => ({ item, idx, tier: Math.floor(scoreSearchRecord(unifiedQa, fieldsOf(item)).score / 100) }))
+      .sort((a, b) => b.tier - a.tier || a.idx - b.idx)
+      .map((x) => x.item);
+  const rankedRestaurants = rankStable(mergedRestaurants, (r) => restaurantSearchFields(r, [getLocalizedRestaurant(r, 'zh').name]));
+  const rankedDestinations = rankStable(mergedDestinations, (d) => destinationSearchFields(d, [getLocalizedDestination(d, 'zh').name]));
+  const rankedExternal = rankStable(externalPlaces, buildPlaceSearchFields);
+
   const totalCount =
     matchedFoods.length +
-    mergedRestaurants.length +
-    mergedDestinations.length +
-    externalPlaces.length;
+    rankedRestaurants.length +
+    rankedDestinations.length +
+    rankedExternal.length;
 
   return {
     foods: matchedFoods,
-    restaurants: mergedRestaurants,
-    destinations: mergedDestinations,
-    externalPlaces,
+    restaurants: rankedRestaurants,
+    destinations: rankedDestinations,
+    externalPlaces: rankedExternal,
     totalCount,
   };
 }

@@ -576,7 +576,7 @@ export const FoodDetailModal: React.FC = () => {
                 </label>
                 <div
                   onClick={handlePickDevicePhoto}
-                  title={isKm ? 'ចុចដើម្បីជ្រើសរើសរូបភាពពីកុំព្យូទ័រ ឬទូរស័ព្ទ' : 'Click to choose photo from PC or phone'}
+                  title={'រូបភាពរបស់ខ្ញុំ'}
                   className="relative aspect-16/10 rounded-xl overflow-hidden bg-slate-900 border border-amber-400/50 cursor-pointer group"
                 >
                   <img
@@ -590,7 +590,7 @@ export const FoodDetailModal: React.FC = () => {
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                     <span className="px-3 py-1.5 rounded-full bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg">
                       <Upload className="w-3.5 h-3.5" />
-                      {isKm ? 'ចុចជ្រើសរើសរូបភាពពី PC / ទូរស័ព្ទ' : 'Click to upload photo'}
+                      {'រូបភាពរបស់ខ្ញុំ'}
                     </span>
                   </div>
                 </div>
@@ -618,7 +618,7 @@ export const FoodDetailModal: React.FC = () => {
                     className="py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Camera className="w-3.5 h-3.5" />
-                    <span>{isKm ? 'ជ្រើសរូបពីទូរស័ព្ទ / PC' : 'Choose from PC / Device'}</span>
+                    <span>{'រូបភាពរបស់ខ្ញុំ'}</span>
                   </button>
                 </div>
                 {editPhotoUrl && editPhotoUrl !== selectedFood.photoUrl && (

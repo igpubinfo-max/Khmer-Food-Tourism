@@ -52,6 +52,7 @@ import {
   GooglePlacesApiDiagnosticReport,
 } from '../services/googlePlacesService';
 import { testGeminiApiConnection } from '../services/conversationalAiAssistant';
+import { matchesSearchQuery, restaurantSearchFields, destinationSearchFields } from '../utils/searchEngine';
 
 export const AdminDashboard: React.FC = () => {
   const { 
@@ -2390,7 +2391,7 @@ export const AdminDashboard: React.FC = () => {
                           <span>
                             {isUploadingNewFoodPhoto
                               ? (isKm ? 'កំពុងផ្ទុក...' : 'Uploading...')
-                              : (isKm ? 'ជ្រើសរូបពីទូរស័ព្ទ/កុំព្យូទ័រ' : 'Upload Photo')}
+                              : 'រូបភាពរបស់ខ្ញុំ'}
                           </span>
                         </button>
 
@@ -2458,7 +2459,7 @@ export const AdminDashboard: React.FC = () => {
                         type="text"
                         value={newFoodPhotoUrl}
                         onChange={(e) => setNewFoodPhotoUrl(e.target.value)}
-                        placeholder="https://... ឬរូបភាពពីទូរស័ព្ទ"
+                        placeholder="https://... ឬ រូបភាពរបស់ខ្ញុំ"
                         className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
                       />
                     </div>
@@ -2530,7 +2531,7 @@ export const AdminDashboard: React.FC = () => {
                         type="button"
                         onClick={() => setSelectedFoodForImageEdit(food)}
                         className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#064E3B] dark:bg-emerald-950/40 dark:text-emerald-400 font-bold text-[11px] font-khmer flex items-center gap-1 transition shadow-2xs border border-slate-200 dark:border-slate-700"
-                        title={isKm ? 'ផ្លាស់ប្តូររូបភាពពីទូរស័ព្ទ/កុំព្យូទ័រ' : 'Change photo from phone or computer'}
+                        title={'រូបភាពរបស់ខ្ញុំ'}
                       >
                         <Camera className="w-3.5 h-3.5 text-[#059669]" />
                         <span>{isKm ? 'កែរូបថត' : 'Photo'}</span>
@@ -3117,6 +3118,7 @@ export const AdminDashboard: React.FC = () => {
                     const q = adminRestSearchQuery.trim().toLowerCase();
                     if (!q) return true;
                     return (
+                      matchesSearchQuery(adminRestSearchQuery, restaurantSearchFields(rest)) ||
                       (rest.nameKh || '').toLowerCase().includes(q) ||
                       (rest.nameEn || '').toLowerCase().includes(q) ||
                       (rest.phone || '').toLowerCase().includes(q) ||
@@ -3627,6 +3629,7 @@ export const AdminDashboard: React.FC = () => {
                     if (destLocationFilter === 'needs_gps_review' && gpsOk) return false;
                     const q = destSearchQuery.toLowerCase().trim();
                     const matchesSearch = !q || 
+                      matchesSearchQuery(destSearchQuery, destinationSearchFields(d)) ||
                       d.nameKh.toLowerCase().includes(q) ||
                       d.nameEn.toLowerCase().includes(q) ||
                       d.provinceKh.toLowerCase().includes(q) ||

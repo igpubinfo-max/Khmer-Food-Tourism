@@ -457,7 +457,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
                 className="py-2.5 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white flex items-center justify-center gap-1.5 font-bold text-xs transition cursor-pointer"
               >
                 <Upload className="w-4 h-4" />
-                <span>{isKm ? 'បន្ថែមរូបហាងពី Gallery' : 'Add Shop Photos'}</span>
+                <span>{'រូបភាពរបស់ខ្ញុំ'}</span>
               </button>
               <button
                 type="button"

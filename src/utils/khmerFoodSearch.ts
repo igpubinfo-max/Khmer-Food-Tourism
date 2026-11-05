@@ -1,5 +1,6 @@
 import { FoodItem } from '../types';
 import { getLocalizedFood } from './zhDynamicTranslator';
+import { analyzeSearchQuery, scoreSearchRecord } from './searchEngine';
 
 export type KhmerFlavorIntent =
   | 'spicy'
@@ -1030,8 +1031,16 @@ export function searchKhmerFoods(foods: FoodItem[], rawQuery: string): FoodItem[
   if (!parsed.normalizedQuery) return [];
 
   const scored: Array<{ food: FoodItem; score: number }> = [];
+  const nameQa = parsed.isFlavorOnlyQuery ? null : analyzeSearchQuery(rawQuery);
   for (const food of foods) {
-    const score = scoreFoodForKhmerQuery(food, parsed);
+    let score = scoreFoodForKhmerQuery(food, parsed);
+    if (score < 55 && score >= 0 && nameQa && nameQa.distinctive.length > 0) {
+      // Typo-tolerant / partial dish-name fallback (e.g. "amock" → "Amok", "nom banh chok" → "Num Banh Chok")
+      const detail = scoreSearchRecord(nameQa, { names: [food.nameKh, food.nameEn, food.nameZh] });
+      if (detail.matchedInName && detail.score >= 500) {
+        score = 56 + Math.round(detail.score / 20);
+      }
+    }
     if (score >= 55) {
       scored.push({ food, score });
     }

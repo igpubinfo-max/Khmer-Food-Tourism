@@ -170,9 +170,9 @@ export const PaymentSupportModal: React.FC = () => {
           showToast(
             tr(
               language,
-              '✅ បានជ្រើសរើសរូបភាពវិក្កយបត្រពីបណ្ណាល័យរូបភាពរួចរាល់!',
-              '✅ Selected receipt image from Gallery!',
-              '✅ 已从相册选择付款凭证截图！'
+              '✅ បានជ្រើសរើសរូបភាពវិក្កយបត្រពី រូបភាពរបស់ខ្ញុំ រួចរាល់!',
+              '✅ Selected receipt image from រូបភាពរបស់ខ្ញុំ!',
+              '✅ 已从 រូបភាពរបស់ខ្ញុំ 选择付款凭证截图！'
             ),
             'success'
           );
@@ -691,9 +691,9 @@ export const PaymentSupportModal: React.FC = () => {
                         ? tr(language, 'កំពុងអានរូបភាព...', 'Loading image...', '正在读取图片...')
                         : tr(
                             language,
-                            '📸 ចុចជ្រើសរើសរូបភាពវិក្កយបត្របង់ប្រាក់ពីបណ្ណាល័យរូបភាព',
-                            '📸 Select ABA Payment Receipt from Gallery / Photos',
-                            '📸 从相册选择 ABA 付款凭证截图'
+                            '📸 រូបភាពរបស់ខ្ញុំ (ជ្រើសរើសរូបភាពវិក្កយបត្របង់ប្រាក់)',
+                            '📸 រូបភាពរបស់ខ្ញុំ (ABA Payment Receipt)',
+                            '📸 រូបភាពរបស់ខ្ញុំ (ABA 付款凭证)'
                           )}
                     </span>
                     <span className="text-[11px] text-gray-500">

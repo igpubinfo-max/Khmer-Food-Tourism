@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isGpipRegisteredRestaurant, openRestaurantGoogleExternal, resolveFoodPhotoUrl, isStrictVerifiedCambodiaRestaurant } from '../types';
 import {
   normalizeKhmerSearchText,
-  searchCambodiaPlacesWithSmartCache,
+  searchGoogleMapsPlacesAdvanced,
   performUnifiedCambodiaSearch,
   GooglePlaceCachedItem,
   openExternalPlaceInGoogleMaps,
@@ -121,25 +121,37 @@ export const HomeView: React.FC = () => {
     let cancelled = false;
     setIsHomeSearchingOnline(true);
     const timer = setTimeout(async () => {
-      const res = await searchCambodiaPlacesWithSmartCache(
-        q,
-        selectedProvince || 'ទាំងអស់',
-        'all'
-      );
+      let places: typeof homeSmartCachePlaces = [];
+      try {
+        const useGpsRadius = searchRadiusMeters > 0 && Boolean(userGpsLocation);
+        const res = await searchGoogleMapsPlacesAdvanced({
+          query: q,
+          provinceFilter: useGpsRadius ? '' : selectedProvince || 'ទាំងអស់',
+          typeFilter: 'all',
+          searchScope: useGpsRadius ? 'nearby' : undefined,
+          lat: useGpsRadius ? userGpsLocation!.lat : undefined,
+          lng: useGpsRadius ? userGpsLocation!.lng : undefined,
+          radiusMeters: useGpsRadius ? searchRadiusMeters : undefined,
+          language,
+        });
+        places = res.results;
+      } catch {
+        places = [];
+      }
       if (!cancelled) {
-        setHomeSmartCachePlaces(res.results);
+        setHomeSmartCachePlaces(places);
         setHomeCacheSourceLabel(
           tr(language, 'ផែនទី Google Maps កម្ពុជា', 'Google Maps Cambodia', '柬埔寨 Google 地图')
         );
         setIsHomeSearchingOnline(false);
       }
-    }, 500);
+    }, 450);
 
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [globalSearchQuery, selectedProvince, language]);
+  }, [globalSearchQuery, selectedProvince, language, searchRadiusMeters, userGpsLocation]);
 
   // Reset pagination when search query or filters change
   useEffect(() => {

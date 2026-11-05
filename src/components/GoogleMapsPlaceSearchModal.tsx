@@ -153,6 +153,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
   // Refs for smooth Android scrolling & automatic keyboard dismissal
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const searchRequestSeqRef = useRef<number>(0);
   const resultsAnchorRef = useRef<HTMLDivElement | null>(null);
   const searchFormTopRef = useRef<HTMLDivElement | null>(null);
 
@@ -232,6 +233,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
       setErrorMsg(undefined);
     }
 
+    const requestId = ++searchRequestSeqRef.current;
     try {
       const response = await searchGoogleMapsPlacesAdvanced({
         query: activeQuery,
@@ -250,6 +252,8 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
         forceLiveApi: overrideParams?.forceLive,
       });
 
+      // Ignore stale responses so a slower earlier search never overwrites the latest keyword's results
+      if (requestId !== searchRequestSeqRef.current) return;
       const foundPlaces = response.places || response.results || [];
 
       if (isAppend) {
@@ -280,8 +284,10 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
       // Never expose technical API errors to users
       setErrorMsg(undefined);
     } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
+      if (requestId === searchRequestSeqRef.current) {
+        setIsLoading(false);
+        setIsLoadingMore(false);
+      }
     }
   };
 

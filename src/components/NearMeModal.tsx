@@ -33,6 +33,7 @@ import {
   verifyShopDataForDisplay,
 } from '../utils/foodFilters';
 import { normalizeKhmerFoodText } from '../utils/khmerFoodSearch';
+import { matchesSearchQuery, destinationSearchFields, analyzeSearchQuery, scoreSearchRecord, restaurantSearchFields } from '../utils/searchEngine';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 
 // Haversine formula for distance between 2 GPS coordinates in meters
@@ -471,10 +472,22 @@ export const NearMeModal: React.FC = () => {
         }
       > = [];
 
+      const nameQa = analyzeSearchQuery(rawQuery);
       for (const r of candidates) {
         if (!passesQuickFilter(r)) continue;
         const matchRes = matchShopToProductQuery(r, rawQuery, activeTargetFood);
-        if (!matchRes.matches) continue;
+        if (!matchRes.matches) {
+          // Shop-name search (exact / partial / typo-tolerant, Khmer + English + Chinese names)
+          const nameDetail = scoreSearchRecord(nameQa, restaurantSearchFields(r, [getLocalizedRestaurant(r, 'zh').name]));
+          if (!(nameDetail.matchedInName && nameDetail.score >= 200)) continue;
+          results.push({
+            ...r,
+            matchedInventoryItems: (r.signatureDishesKh || []).slice(0, 2),
+            _matchScore: Math.round(nameDetail.score / 4),
+            _isExactProductMatch: nameDetail.exactName,
+          });
+          continue;
+        }
         results.push({
           ...r,
           matchedInventoryItems:
@@ -538,7 +551,11 @@ export const NearMeModal: React.FC = () => {
       if (quickFilterId === 'culture' && !/វត្ត|ប្រាសាទ|សារមន្ទីរ|វប្បធម៌|ប្រវត្តិ|temple|pagoda|museum|palace|heritage|វាំង|寺|庙|宫|博物馆|古迹/.test(haystack)) return false;
       if (quickFilterId === 'nature' && !/ធម្មជាតិ|សួន|ទន្លេ|ភ្នំ|បឹង|ឆ្នេរ|park|river|nature|garden|beach|mountain|自然|公园|河|山|海滩/.test(haystack)) return false;
       if (quickFilterId === 'leisure' && !/ផ្សារ|កម្សាន្ត|ដើរលេង|រមណីយដ្ឋាន|market|mall|walk|night|plaza|市场|夜市|步道|广场/.test(haystack)) return false;
-      if (q && !haystack.includes(q)) return false;
+      if (q && !matchesSearchQuery(nearbyQuery, {
+        ...destinationSearchFields(d, [zhLoc.name]),
+        categories: [d.categoryKh, d.categoryEn, zhLoc.category, d.categorySlug],
+        texts: [d.descriptionKh, d.descriptionEn, zhLoc.description, zhLoc.address],
+      })) return false;
       return true;
     });
   }, [nearbyDestinations, nearbyQuery, quickFilterId]);

@@ -171,9 +171,7 @@ export const ShopMultiPhotoUploader: React.FC<ShopMultiPhotoUploaderProps> = ({
                   ? isKm
                     ? 'ប្តូររូបហាង'
                     : 'Replace Photo'
-                  : isKm
-                  ? 'រើសពីទូរស័ព្ទ'
-                  : 'Gallery'}
+                  : 'រូបភាពរបស់ខ្ញុំ'}
               </span>
             </button>
 

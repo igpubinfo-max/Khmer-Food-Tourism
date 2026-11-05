@@ -270,7 +270,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
           setPhotoUrl(finalUrl);
           setUrlInput('');
           setFileDetails({
-            origSize: 'Gallery',
+            origSize: 'រូបភាពរបស់ខ្ញុំ',
             compSize: `${compKb} KB`,
           });
           const nowIso = new Date().toISOString();
@@ -488,7 +488,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-[#0F172A] dark:text-emerald-300 font-khmer flex items-center gap-1.5">
                 <Smartphone className="w-4 h-4 text-[#059669]" />
-                <span>{isKm ? 'វិធីទី១៖ ជ្រើសរើសរូបពីទូរស័ព្ទ / កុំព្យូទ័រ' : 'Option 1: Choose from Phone / Computer'}</span>
+                <span>{isKm ? 'វិធីទី១៖ ជ្រើសរើសពី រូបភាពរបស់ខ្ញុំ' : 'Option 1: រូបភាពរបស់ខ្ញុំ'}</span>
               </span>
               <span className="text-[10px] text-slate-500 font-khmer font-bold">JPG, PNG, WebP</span>
             </div>
@@ -508,7 +508,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
               className="w-full py-3 px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-khmer font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-950/20 transition active:scale-[0.99] disabled:opacity-50 cursor-pointer"
             >
               <Upload className="w-4 h-4 text-emerald-300" />
-              <span>{isKm ? 'ជ្រើសរើសរូបភាពពីវិចិត្រសាល (Gallery / File)' : 'Select Image from Device Gallery'}</span>
+              <span>{'រូបភាពរបស់ខ្ញុំ'}</span>
             </button>
             <p className="text-[10px] text-slate-500 font-khmer text-center">
               {isKm 

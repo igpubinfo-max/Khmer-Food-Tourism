@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   X,
   MapPin,
@@ -14,12 +14,14 @@ import {
 } from 'lucide-react';
 import {
   CAMBODIA_PROVINCE_GEO_LIST,
+  calculateHaversineMeters,
   inferCambodiaProvinceFromAddressOrGps,
   resolveProvinceGeoConfig,
   searchGoogleMapsPlacesAdvanced,
 } from '../services/googlePlacesService';
+import { rankBySearchRelevance, normalizeSearchText } from '../utils/searchEngine';
 import { getCurrentDeviceLocation } from '../services/restaurantCheckInService';
-import { extractCoordsFromGoogleMapsUrl, isValidGoogleMapsUrl } from '../types';
+import { extractCoordsFromGoogleMapsUrl, isValidGoogleMapsUrl, openExternalUrlNativeSafe } from '../types';
 
 export interface ShopCheckInLocationResult {
   latitude: number;
@@ -46,11 +48,13 @@ interface ShopLocationCheckInPickerModalProps {
 
 interface SearchCandidate {
   name: string;
+  altName?: string;
   address: string;
   lat: number;
   lng: number;
   provinceKh: string;
   mapUrl?: string;
+  category?: string;
 }
 
 export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerModalProps> = ({
@@ -85,6 +89,8 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSearchingPlace, setIsSearchingPlace] = useState<boolean>(false);
   const [searchResults, setSearchResults] = useState<SearchCandidate[]>([]);
+  const [searchStatus, setSearchStatus] = useState<'idle' | 'loading' | 'done' | 'empty'>('idle');
+  const searchRequestIdRef = useRef<number>(0);
   const [manualCoordInput, setManualCoordInput] = useState<string>('');
   const [mapLoadError, setMapLoadError] = useState<boolean>(false);
   const [pasteNotice, setPasteNotice] = useState<string>('');
@@ -338,89 +344,147 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
     );
   };
 
-  const handleSearchPlace = async (e?: React.FormEvent) => {
+  const handleSearchPlace = async (e?: React.FormEvent, opts?: { silent?: boolean }) => {
     if (e) e.preventDefault();
     const q = searchQuery.trim();
     if (!q) return;
 
-    // First check if user pasted a Google Maps link or lat,lng coordinates
-    const wasParsed = await applyParsedLocationInput(q);
-    if (wasParsed) {
-      setSearchResults([]);
-      return;
+    // First check if user pasted a Google Maps link or lat,lng coordinates (only on explicit submit)
+    if (!opts?.silent) {
+      const wasParsed = await applyParsedLocationInput(q);
+      if (wasParsed) {
+        setSearchResults([]);
+        setSearchStatus('idle');
+        return;
+      }
     }
 
+    const requestId = ++searchRequestIdRef.current;
     setIsSearchingPlace(true);
+    setSearchStatus('loading');
     const list: SearchCandidate[] = [];
 
-    try {
-      // 1. Search Google Maps Places service first for real shops & landmarks in Cambodia
-      const gRes = await searchGoogleMapsPlacesAdvanced({
-        query: q,
-        category: 'all',
-        typeFilter: 'all',
-        province: '',
-        searchScope: 'nationwide',
-        pageSize: 6,
-        language,
-      });
-      const gPlaces = gRes.places || gRes.results || [];
-      for (const p of gPlaces) {
-        if (Number.isFinite(p.lat) && Number.isFinite(p.lng)) {
-          const prov = p.provinceKh || inferCambodiaProvinceFromAddressOrGps(p.addressKh || p.address || '', p.lat, p.lng);
-          list.push({
-            name: p.nameKh || p.nameEn,
-            address: p.addressKh || p.address || '',
-            lat: Number(p.lat.toFixed(6)),
-            lng: Number(p.lng.toFixed(6)),
-            provinceKh: prov === 'ភ្នំពេញ' ? 'រាជធានីភ្នំពេញ' : prov,
-            mapUrl: p.googleMapsUrl,
-          });
+    // 1. Google Maps Places (live API when enabled) + verified Cambodia directory + smart cache,
+    //    already relevance-filtered by the shared search engine (exact → partial → typo-tolerant).
+    const googleTask = searchGoogleMapsPlacesAdvanced({
+      query: q,
+      category: 'all',
+      typeFilter: 'all',
+      province: '',
+      searchScope: 'nationwide',
+      pageSize: 10,
+      language,
+    })
+      .then((gRes) => {
+        for (const p of gRes.places || gRes.results || []) {
+          if (Number.isFinite(p.lat) && Number.isFinite(p.lng)) {
+            const prov = p.provinceKh || inferCambodiaProvinceFromAddressOrGps(p.addressKh || p.address || '', p.lat, p.lng);
+            list.push({
+              name: p.nameKh || p.nameEn,
+              altName: p.nameEn && p.nameEn !== p.nameKh ? p.nameEn : undefined,
+              address: p.addressKh || p.address || '',
+              lat: Number(p.lat.toFixed(6)),
+              lng: Number(p.lng.toFixed(6)),
+              provinceKh: prov === 'ភ្នំពេញ' ? 'រាជធានីភ្នំពេញ' : prov,
+              mapUrl: p.googleMapsUrl,
+              category: [p.category, p.primaryTypeDisplayName, ...(p.types || [])].filter(Boolean).join(' '),
+            });
+          }
         }
-      }
-    } catch {
-      // Continue to ArcGIS fallback
-    }
+      })
+      .catch(() => undefined);
 
-    try {
-      // 2. Also query ArcGIS World Geocoder for streets, sangkats, villages
-      const params = new URLSearchParams({
-        f: 'json',
-        countryCode: 'KHM',
-        maxLocations: '8',
-        SingleLine: q,
-        location: `${lng},${lat}`,
-        outFields: 'PlaceName,Place_addr,City,Region',
-      });
-      const res = await fetch(
-        `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?${params.toString()}`
-      );
-      if (res.ok) {
+    // 2. ArcGIS World Geocoder for streets, sangkats, villages and landmarks (biased to the current pin)
+    const arcTask = (async () => {
+      try {
+        const params = new URLSearchParams({
+          f: 'json',
+          countryCode: 'KHM',
+          maxLocations: '10',
+          SingleLine: q,
+          location: `${lng},${lat}`,
+          outFields: 'PlaceName,Place_addr,City,Region,Type',
+        });
+        const controller = new AbortController();
+        const tId = setTimeout(() => controller.abort(), 7000);
+        const res = await fetch(
+          `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?${params.toString()}`,
+          { signal: controller.signal }
+        );
+        clearTimeout(tId);
+        if (!res.ok) return;
         const data = await res.json();
         const candidates = Array.isArray(data?.candidates) ? data.candidates : [];
         for (const c of candidates) {
           const cLat = Number(c?.location?.y);
           const cLng = Number(c?.location?.x);
           if (!Number.isFinite(cLat) || !Number.isFinite(cLng)) continue;
-          const name = String(c?.attributes?.PlaceName || c?.address?.split(',')[0] || q).trim();
+          if (Number(c?.score || 0) < 80) continue; // weak geocoder guesses are never shown
+          const name = String(c?.attributes?.PlaceName || c?.address?.split(',')[0] || '').trim();
+          if (!name) continue;
           const addr = String(c?.attributes?.Place_addr || c?.address || name).trim();
-          const prov = inferCambodiaProvinceFromAddressOrGps(addr, cLat, cLng);
+          const prov = inferCambodiaProvinceFromAddressOrGps(`${addr} ${c?.attributes?.Region || ''}`, cLat, cLng);
           list.push({
             name,
             address: addr,
             lat: Number(cLat.toFixed(6)),
             lng: Number(cLng.toFixed(6)),
             provinceKh: prov === 'ភ្នំពេញ' ? 'រាជធានីភ្នំពេញ' : prov,
+            category: String(c?.attributes?.Type || ''),
           });
         }
+      } catch {
+        // Ignore network error
       }
-    } catch {
-      // Ignore network error
+    })();
+
+    await Promise.all([googleTask, arcTask]);
+    if (requestId !== searchRequestIdRef.current) return; // a newer search is already running
+
+    // 3. Relevance filter + rank (unrelated places removed), nearest to the current pin as tie-breaker,
+    //    and duplicates (same name within ~80 m) merged.
+    const ranked = rankBySearchRelevance(
+      list,
+      q,
+      (c) => ({ names: [c.name, c.altName], categories: [c.category], locations: [c.address, c.provinceKh] }),
+      {
+        bucketSize: 100,
+        tieBreak: (a, b) =>
+          calculateHaversineMeters(lat, lng, a.lat, a.lng) - calculateHaversineMeters(lat, lng, b.lat, b.lng),
+      }
+    );
+    const deduped: SearchCandidate[] = [];
+    for (const c of ranked) {
+      const key = normalizeSearchText(c.name);
+      if (deduped.some((d) => normalizeSearchText(d.name) === key && calculateHaversineMeters(d.lat, d.lng, c.lat, c.lng) < 80)) {
+        continue;
+      }
+      deduped.push(c);
+      if (deduped.length >= 12) break;
     }
 
-    setSearchResults(list);
+    setSearchResults(deduped);
+    setSearchStatus(deduped.length > 0 ? 'done' : 'empty');
     setIsSearchingPlace(false);
   };
+
+  // Autocomplete: search automatically while typing (debounced), ignoring pasted links / coordinates.
+  useEffect(() => {
+    if (!isOpen) return;
+    const q = searchQuery.trim();
+    if (q.length < 3 || /^https?:\/\//i.test(q) || /^-?\d{1,3}\.\d+\s*,\s*-?\d{1,3}\.\d+$/.test(q)) {
+      if (!q) {
+        setSearchResults([]);
+        setSearchStatus('idle');
+      }
+      return;
+    }
+    const timer = setTimeout(() => {
+      handleSearchPlace(undefined, { silent: true });
+    }, 550);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, isOpen]);
 
   const handleSelectCandidate = (c: SearchCandidate) => {
     setLat(c.lat);
@@ -439,6 +503,7 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
         : `✅ Selected location "${c.name}" (GPS: ${c.lat.toFixed(5)}, ${c.lng.toFixed(5)})`
     );
     setSearchResults([]);
+    setSearchStatus('idle');
   };
 
   const nudgePin = (dLat: number, dLng: number) => {
@@ -662,6 +727,33 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
             </div>
 
             {/* Search Dropdown Results */}
+            {searchStatus === 'loading' && searchResults.length === 0 && (
+              <div className="mt-1.5 px-3.5 py-3 bg-slate-800 border border-slate-700 rounded-2xl flex items-center gap-2 text-xs text-slate-300">
+                <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                <span>{isKm ? `កំពុងស្វែងរក «${searchQuery.trim()}»...` : `Searching "${searchQuery.trim()}"...`}</span>
+              </div>
+            )}
+            {searchStatus === 'empty' && searchResults.length === 0 && searchQuery.trim() && (
+              <div className="mt-1.5 p-3.5 bg-slate-800 border border-amber-500/30 rounded-2xl space-y-2">
+                <p className="text-xs text-amber-200">
+                  {isKm
+                    ? `រកមិនឃើញទីតាំងដែលត្រូវនឹង «${searchQuery.trim()}» ទេ។ សូមពិនិត្យអក្ខរាវិរុទ្ធ ឬបើក Google Maps ដើម្បីចម្លងលីងទីតាំងហាង រួចបិទភ្ជាប់នៅទីនេះ។`
+                    : `No verified place matches "${searchQuery.trim()}". Check the spelling, or open Google Maps, copy the shop's link and paste it here.`}
+                </p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    openExternalUrlNativeSafe(
+                      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${searchQuery.trim()} Cambodia`)}`
+                    )
+                  }
+                  className="px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 font-bold text-[11px] flex items-center gap-1.5 cursor-pointer"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  {isKm ? `ស្វែងរក «${searchQuery.trim()}» លើ Google Maps` : `Search "${searchQuery.trim()}" on Google Maps`}
+                </button>
+              </div>
+            )}
             {searchResults.length > 0 && (
               <div className="mt-1.5 bg-slate-800 border border-emerald-500/40 rounded-2xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-700/70">
                 {searchResults.map((c, idx) => (
@@ -673,7 +765,10 @@ export const ShopLocationCheckInPickerModal: React.FC<ShopLocationCheckInPickerM
                   >
                     <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-bold text-white truncate">{c.name}</div>
+                      <div className="text-xs font-bold text-white truncate">
+                        {c.name}
+                        {c.altName && c.altName !== c.name ? ` (${c.altName})` : ''}
+                      </div>
                       <div className="text-[11px] text-slate-400 truncate">{c.address}</div>
                     </div>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold shrink-0">

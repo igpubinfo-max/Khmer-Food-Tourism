@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
-import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isStrictVerifiedCambodiaRestaurant } from '../types';
+import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isStrictVerifiedCambodiaRestaurant, openExternalUrlNativeSafe } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { Store, Edit2, Settings, MapPin, Search } from 'lucide-react';
 import {
@@ -11,6 +11,7 @@ import {
   ListingAddPanel,
 } from './listing/ListingUI';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
+import { analyzeSearchQuery, scoreSearchRecord, restaurantSearchFields } from '../utils/searchEngine';
 import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { matchShopToProductQuery, verifyShopDataForDisplay } from '../utils/foodFilters';
@@ -201,6 +202,7 @@ export const RestaurantView: React.FC = () => {
     const rawQuery = debouncedShopSearchQuery.trim();
     const normQuery = normalizeKhmerSearchText(rawQuery);
     const rawQueryLower = rawQuery.toLowerCase();
+    const queryAnalysis = rawQuery ? analyzeSearchQuery(rawQuery) : null;
 
     return validDirectoryRestaurants.filter((r) => {
       if (!verifyShopDataForDisplay(r)) {
@@ -216,6 +218,17 @@ export const RestaurantView: React.FC = () => {
         return false;
       }
       if (rawQuery) {
+        // 1. Shop name match (exact / partial / typo-tolerant, Khmer + English + Chinese names)
+        if (queryAnalysis) {
+          const nameDetail = scoreSearchRecord(
+            queryAnalysis,
+            restaurantSearchFields(r, [getLocalizedRestaurant(r, 'zh').name])
+          );
+          if (nameDetail.matchedInName && nameDetail.score >= 200) {
+            return true;
+          }
+        }
+        // 2. Product / dish match (menu, signature dishes, shop category)
         const productMatch = matchShopToProductQuery(r, rawQuery);
         if (productMatch.matches) {
           return true;
@@ -233,10 +246,22 @@ export const RestaurantView: React.FC = () => {
     });
   }, [validDirectoryRestaurants, selectedProvince, priceFilter, categoryFilter, debouncedShopSearchQuery]);
 
-  const sortedRestaurants = useMemo(
-    () => sortRestaurantsWithVipRotation(filteredRestaurants, users, appSettings, nowTickMs),
-    [filteredRestaurants, users, appSettings, nowTickMs]
-  );
+  const sortedRestaurants = useMemo(() => {
+    const vipSorted = sortRestaurantsWithVipRotation(filteredRestaurants, users, appSettings, nowTickMs);
+    const q = debouncedShopSearchQuery.trim();
+    if (!q) return vipSorted;
+    // While searching, the most relevant shops come first (exact name → partial → typo → dish/category),
+    // keeping the VIP rotation order only as a tie-breaker inside the same relevance tier.
+    const qa = analyzeSearchQuery(q);
+    return vipSorted
+      .map((r, idx) => ({
+        r,
+        idx,
+        score: scoreSearchRecord(qa, restaurantSearchFields(r, [getLocalizedRestaurant(r, 'zh').name])).score,
+      }))
+      .sort((a, b) => Math.floor(b.score / 100) - Math.floor(a.score / 100) || a.idx - b.idx)
+      .map((x) => x.r);
+  }, [filteredRestaurants, users, appSettings, nowTickMs, debouncedShopSearchQuery]);
 
   const displayedRestaurants = useMemo(
     () => sortedRestaurants.slice(0, visibleCount),
@@ -453,8 +478,29 @@ export const RestaurantView: React.FC = () => {
           <div className="py-12 text-center text-slate-400 space-y-2 font-khmer">
             <Store className="w-10 h-10 mx-auto text-slate-300" strokeWidth={1.75} />
             <p className="text-xs">
-              {tr(language, 'រកមិនឃើញហាងអាហារក្នុងផ្នែកនេះទេ', 'No restaurants matched your filters', '未找到符合筛选条件的餐厅')}
+              {debouncedShopSearchQuery.trim()
+                ? tr(
+                    language,
+                    `រកមិនឃើញហាងដែលត្រូវនឹង «${debouncedShopSearchQuery.trim()}» ក្នុងកម្មវិធីទេ`,
+                    `No shops in the app match "${debouncedShopSearchQuery.trim()}"`,
+                    `应用内未找到与“${debouncedShopSearchQuery.trim()}”匹配的店铺`
+                  )
+                : tr(language, 'រកមិនឃើញហាងអាហារក្នុងផ្នែកនេះទេ', 'No restaurants matched your filters', '未找到符合筛选条件的餐厅')}
             </p>
+            {debouncedShopSearchQuery.trim() && (
+              <button
+                type="button"
+                onClick={() =>
+                  openExternalUrlNativeSafe(
+                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${debouncedShopSearchQuery.trim()} Cambodia`)}`
+                  )
+                }
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-[#064E3B] dark:text-emerald-400 cursor-pointer"
+              >
+                <MapPin className="w-3.5 h-3.5" />
+                {tr(language, 'ស្វែងរកនៅលើ Google Maps', 'Search on Google Maps', '在 Google 地图中搜索')}
+              </button>
+            )}
           </div>
         )}
       </div>
