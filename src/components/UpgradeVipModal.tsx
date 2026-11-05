@@ -137,9 +137,9 @@ export const UpgradeVipModal: React.FC = () => {
   const proofGalleryInputRef = useRef<HTMLInputElement | null>(null);
   const proofCameraInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Automatic VIP Renewal Authorization State (Explicit Consent Required — OFF by default)
-  const [autoRenewOptIn, setAutoRenewOptIn] = useState<boolean>(false);
-  const [autoRenewConsentChecked, setAutoRenewConsentChecked] = useState<boolean>(false);
+  // Automatic VIP Renewal Authorization State (ON by default with clear user consent)
+  const [autoRenewOptIn, setAutoRenewOptIn] = useState<boolean>(true);
+  const [autoRenewConsentChecked, setAutoRenewConsentChecked] = useState<boolean>(true);
   const [autoRenewMethodChoice, setAutoRenewMethodChoice] = useState<'KHQR' | 'Bakong' | 'Card'>('KHQR');
   const [autoRenewPlanChoice, setAutoRenewPlanChoice] = useState<'quarterly' | 'annual'>('quarterly');
   const [showApprovedAutoRenewConfirm, setShowApprovedAutoRenewConfirm] = useState<boolean>(false);
@@ -569,10 +569,10 @@ export const UpgradeVipModal: React.FC = () => {
         `VIP Upgrade Request (${liveSelectedPlan.durationDays} Days / $${liveSelectedPlan.priceUsd.toFixed(2)} USD) via ABA KHQR — Pending Admin Verification`,
         paymentProofDraft || undefined,
         {
-          enabled: true,
+          enabled: autoRenewOptIn,
           paymentMethod: 'KHQR',
           paymentLabel: 'ABA KHQR (095 245 959)',
-          explicitConsent: true,
+          explicitConsent: autoRenewOptIn,
         }
       );
 
@@ -1303,18 +1303,39 @@ export const UpgradeVipModal: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Automatic VIP Renewal Notice (Enabled Automatically, Cancel Anytime in Profile) */}
-                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700/80 flex items-center gap-2">
-                  <RefreshCw className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" strokeWidth={1.75} />
-                  <div className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
-                    {tr(
-                      language,
-                      `ការបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ ($${selectedPlan.priceUsd.toFixed(2)} / ${selectedPlan.days} ថ្ងៃ) ត្រូវបានបើកដោយស្វ័យប្រវត្តិ។ អ្នកអាចបោះបង់ (Cancel Auto-Renewal) បានគ្រប់ពេលនៅក្នុងគណនី។`,
-                      `Automatic VIP renewal ($${selectedPlan.priceUsd.toFixed(2)} / ${selectedPlan.days} days) is enabled automatically. You can cancel auto-renewal anytime in your Profile.`,
-                      `已自动开启 VIP 到期续费（$${selectedPlan.priceUsd.toFixed(2)} / ${selectedPlan.days} 天）。您可随时在个人中心取消自动续费。`
-                    )}
+                {/* Automatic VIP Renewal Consent (ON by Default with Clear User Consent, Cancel Anytime) */}
+                <label className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-slate-900/70 border border-emerald-400/50 dark:border-emerald-700/60 flex items-start gap-2.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={autoRenewOptIn}
+                    onChange={(e) => {
+                      setAutoRenewOptIn(e.target.checked);
+                      setAutoRenewConsentChecked(e.target.checked);
+                    }}
+                    className="mt-0.5 w-4 h-4 rounded accent-emerald-600 shrink-0 cursor-pointer"
+                  />
+                  <div className="flex-1 min-w-0 text-[11px] text-slate-700 dark:text-slate-200 leading-snug">
+                    <div className="font-extrabold text-emerald-800 dark:text-emerald-300 flex items-center gap-1">
+                      <RefreshCw className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" strokeWidth={2} />
+                      <span>
+                        {tr(
+                          language,
+                          `បើកការបន្ត VIP ស្វ័យប្រវត្តិ (ON ជាលំនាំដើម — $${selectedPlan.priceUsd.toFixed(2)} / ${selectedPlan.days} ថ្ងៃ)`,
+                          `Auto-Renew VIP ON by Default ($${selectedPlan.priceUsd.toFixed(2)} / ${selectedPlan.days} days)`,
+                          `默认开启 VIP 自动续费（$${selectedPlan.priceUsd.toFixed(2)} / ${selectedPlan.days} 天）`
+                        )}
+                      </span>
+                    </div>
+                    <p className="text-[10.5px] text-slate-600 dark:text-slate-400 mt-0.5">
+                      {tr(
+                        language,
+                        'ប្រព័ន្ធនឹងផ្ញើសាររំលឹកមុនផុតកំណត់ ៣ ថ្ងៃ ហើយបន្តសុពលភាពតែពេលការបង់ប្រាក់ជោគជ័យប៉ុណ្ណោះ។ អ្នកអាចបិទ (Turn OFF) បានគ្រប់ពេលនៅក្នុងផ្ទាំង សមាជិកភាព។',
+                        'We send a reminder 3 days before expiry and renew only upon confirmed payment. You can turn OFF Auto-Renewal anytime in the Membership tab.',
+                        '到期前 3 天将发送提醒，仅在确认付款成功后续期。您可随时在“会员”页面关闭自动续费。'
+                      )}
+                    </p>
                   </div>
-                </div>
+                </label>
 
                 <button
                   onClick={handleSubmitPaymentForAdminApproval}

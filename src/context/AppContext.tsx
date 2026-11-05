@@ -3648,7 +3648,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return { updatedUser: downgraded, changed: true };
         }
 
-        // Case 2: Account is an active VIP -> Send a single pre-expiry reminder if within 3 days of expiration (never extend without confirmed payment)
+        // Case 2: Account is an active VIP -> Send a pre-expiry reminder notification 3 days before expiration (never extend without confirmed payment)
         if (
           hasValidFutureExpiry &&
           u.membershipTier === 'premium_vip' &&
@@ -3661,6 +3661,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             if (!reminderLog[remKey]) {
               reminderLog[remKey] = todayStr;
               reminderLogChanged = true;
+              const expFormatted = expiryStr ? expiryStr.split('T')[0] : todayStr;
+              const isAutoRenewOn = u.autoRenew !== false;
+              newNotificationsToPush.push({
+                id: `notif_vip_reminder_${u.id}_${remainingDays}d_${Date.now()}`,
+                titleKh: `⏰ រំលឹក៖ គណនី VIP របស់អ្នកនឹងផុតកំណត់ក្នុងរយៈពេល ${remainingDays} ថ្ងៃទៀត`,
+                titleEn: `⏰ Reminder: Your VIP Membership Expires in ${remainingDays} Day(s)`,
+                messageKh: isAutoRenewOn
+                  ? `សមាជិកភាព VIP របស់អ្នកនឹងដល់ថ្ងៃបន្តសុពលភាពនៅថ្ងៃទី ${expFormatted} (នៅសល់ ${remainingDays} ថ្ងៃ)។ មុខងារបន្តស្វ័យប្រវត្តិ (Auto-Renewal) កំពុងបើក (ON)។ អ្នកអាចបិទ (Turn OFF) បានគ្រប់ពេលនៅក្នុងផ្ទាំង សមាជិកភាព (Membership)។`
+                  : `សមាជិកភាព VIP របស់អ្នកនឹងផុតកំណត់នៅថ្ងៃទី ${expFormatted} (នៅសល់ ${remainingDays} ថ្ងៃ)។ សូមចូលទៅកាន់ផ្ទាំង សមាជិកភាព (Membership) ដើម្បីបន្តសុពលភាព។`,
+                messageEn: isAutoRenewOn
+                  ? `Your VIP membership renews on ${expFormatted} (${remainingDays} day(s) left). Auto-Renewal is currently ON. You can turn OFF Auto-Renewal anytime in the Membership tab.`
+                  : `Your VIP membership expires on ${expFormatted} (${remainingDays} day(s) left). Open the Membership tab to renew your VIP access.`,
+                type: 'system',
+                date: todayStr,
+                isRead: false,
+              });
+              if (currentUser?.id === u.id) {
+                showToast(
+                  language === 'km'
+                    ? `⏰ រំលឹក៖ គណនី VIP របស់អ្នកនៅសល់ ${remainingDays} ថ្ងៃទៀត (${expFormatted})។ អ្នកអាចគ្រប់គ្រង Auto-Renewal នៅក្នុងផ្ទាំង សមាជិកភាព។`
+                    : `⏰ Reminder: Your VIP membership has ${remainingDays} day(s) left (${expFormatted}). Manage Auto-Renewal in the Membership tab.`,
+                  'info'
+                );
+              }
             }
           }
         }

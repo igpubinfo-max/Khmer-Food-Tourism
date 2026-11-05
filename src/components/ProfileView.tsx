@@ -570,70 +570,30 @@ export const ProfileView: React.FC = () => {
                     : 'Manage your shop photo, map location, and contact details so diners can easily find your restaurant.'}
                 </p>
                 {myRestaurants[0] ? (
-                  <div className="space-y-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        (window as any).__kft_manage_initial_tab = 'info';
-                        setManagingRestaurant(myRestaurants[0]);
-                        setIsManageMenuModalOpen(true);
-                      }}
-                      className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-600 text-slate-950 font-black text-xs shadow-md border-2 border-white/70 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
-                    >
-                      <Store className="w-4 h-4 shrink-0" />
-                      <span>{isKm ? '✏️ គ្រប់គ្រងហាង VIP របស់អ្នក (1/1 ហាង)' : '✏️ Manage Your VIP Store (1/1)'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        (window as any).__kft_vip_add_mode = 'upgrade_existing';
-                        setIsVipAddRestaurantModalOpen(true);
-                      }}
-                      className="w-full py-2.5 px-3.5 rounded-xl bg-white/15 hover:bg-white/25 text-amber-200 font-extrabold text-[11px] border border-amber-300/40 flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
-                    >
-                      <span>⬆️</span>
-                      <span>
-                        {tr(
-                          language,
-                          'ដំឡើងហាង ឬសណ្ឋាគារដែលមានស្រាប់ (Upgrade Existing Shop / Hotel)',
-                          'Upgrade Existing Shop / Hotel',
-                          '升级现有店铺 / 酒店'
-                        )}
-                      </span>
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      (window as any).__kft_manage_initial_tab = 'info';
+                      setManagingRestaurant(myRestaurants[0]);
+                      setIsManageMenuModalOpen(true);
+                    }}
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-600 text-slate-950 font-black text-xs shadow-md border-2 border-white/70 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
+                  >
+                    <Store className="w-4 h-4 shrink-0" />
+                    <span>{isKm ? '✏️ គ្រប់គ្រងហាង VIP របស់អ្នក (1/1 ហាង)' : '✏️ Manage Your VIP Store (1/1)'}</span>
+                  </button>
                 ) : (
-                  <div className="space-y-2">
-                    <div className="relative p-1 rounded-2xl group">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          (window as any).__kft_vip_add_mode = 'add_new';
-                          setIsVipAddRestaurantModalOpen(true);
-                        }}
-                        className="relative w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 font-black text-xs sm:text-sm border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
-                      >
-                        <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
-                        <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
-                      </button>
-                    </div>
+                  <div className="relative p-1 rounded-2xl group">
                     <button
                       type="button"
                       onClick={() => {
-                        (window as any).__kft_vip_add_mode = 'upgrade_existing';
+                        (window as any).__kft_vip_add_mode = 'add_new';
                         setIsVipAddRestaurantModalOpen(true);
                       }}
-                      className="w-full py-2.5 px-3.5 rounded-xl bg-white/15 hover:bg-white/25 text-amber-200 font-extrabold text-xs border border-amber-300/40 flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                      className="relative w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 font-black text-xs sm:text-sm border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
                     >
-                      <span>⬆️</span>
-                      <span>
-                        {tr(
-                          language,
-                          'ដំឡើងហាង ឬសណ្ឋាគារដែលមានស្រាប់ (Upgrade Existing Shop / Hotel)',
-                          'Upgrade Existing Shop / Hotel',
-                          '升级现有店铺 / 酒店'
-                        )}
-                      </span>
+                      <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
+                      <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
                     </button>
                   </div>
                 )}

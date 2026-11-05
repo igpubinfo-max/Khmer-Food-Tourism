@@ -379,78 +379,50 @@ export const RestaurantView: React.FC = () => {
         actionLabel={tr(language, 'បន្ថែមហាងថ្មី (Add New Shop)', 'Add New Shop', '添加新店铺')}
         onAction={handleAddShopClick}
       >
-        <div className="space-y-2">
-          <button
-            type="button"
-            onClick={() => {
-              if (!currentUser) {
-                setIsAuthModalOpen(true);
-                return;
-              }
-              (window as any).__kft_vip_store_initial_mode = {
-                mode: 'upgrade_existing',
-                businessType: 'restaurant',
-              };
-              setIsVipAddRestaurantModalOpen(true);
-            }}
-            className="w-full py-2.5 px-3.5 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 text-amber-200 border border-amber-300/40 text-xs font-extrabold flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-98"
-          >
-            <span>⬆️</span>
-            <span>
+        {isAdmin ? (
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                (window as any).__kft_admin_tab = 'restaurants';
+                setIsAdminOpen(true);
+              }}
+              className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Settings className="w-4 h-4 text-amber-300 shrink-0" strokeWidth={1.75} />
+              <span className="truncate">
+                {tr(language, `គ្រប់គ្រងហាង (${totalDirectoryCount})`, `Manage Shops (${totalDirectoryCount})`, `管理店铺 (${totalDirectoryCount})`)}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsRestaurantCheckInModalOpen(true)}
+              className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-emerald-50 border border-white/15 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <MapPin className="w-4 h-4 text-emerald-300 shrink-0" strokeWidth={1.75} />
+              <span className="truncate">{tr(language, 'ឆែកអ៊ីន & បញ្ជាក់ GPS', 'GPS Check-In', 'GPS 实地核验')}</span>
+            </button>
+          </div>
+        ) : myExistingRest ? (
+          <div className="pt-2.5 border-t border-white/15 flex items-center justify-between gap-2">
+            <span className="min-w-0 flex-1 text-[11px] font-bold text-amber-200 truncate">
               {tr(
                 language,
-                'ដំឡើងហាង/សណ្ឋាគារដែលមានស្រាប់ (Upgrade Existing Shop / Hotel)',
-                'Upgrade Existing Shop / Hotel',
-                '升级现有店铺 / 酒店'
+                `ហាងរបស់ខ្ញុំ៖ ${myExistingRest.nameKh}`,
+                `My Shop: ${myExistingRest.nameEn || myExistingRest.nameKh}`,
+                `我的店铺：${myExistingRest.nameEn || myExistingRest.nameKh}`
               )}
             </span>
-          </button>
-
-          {isAdmin ? (
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  (window as any).__kft_admin_tab = 'restaurants';
-                  setIsAdminOpen(true);
-                }}
-                className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <Settings className="w-4 h-4 text-amber-300 shrink-0" strokeWidth={1.75} />
-                <span className="truncate">
-                  {tr(language, `គ្រប់គ្រងហាង (${totalDirectoryCount})`, `Manage Shops (${totalDirectoryCount})`, `管理店铺 (${totalDirectoryCount})`)}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsRestaurantCheckInModalOpen(true)}
-                className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-emerald-50 border border-white/15 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <MapPin className="w-4 h-4 text-emerald-300 shrink-0" strokeWidth={1.75} />
-                <span className="truncate">{tr(language, 'ឆែកអ៊ីន & បញ្ជាក់ GPS', 'GPS Check-In', 'GPS 实地核验')}</span>
-              </button>
-            </div>
-          ) : myExistingRest ? (
-            <div className="pt-2.5 border-t border-white/15 flex items-center justify-between gap-2">
-              <span className="min-w-0 flex-1 text-[11px] font-bold text-amber-200 truncate">
-                {tr(
-                  language,
-                  `ហាងរបស់ខ្ញុំ៖ ${myExistingRest.nameKh}`,
-                  `My Shop: ${myExistingRest.nameEn || myExistingRest.nameKh}`,
-                  `我的店铺：${myExistingRest.nameEn || myExistingRest.nameKh}`
-                )}
-              </span>
-              <button
-                type="button"
-                onClick={() => openManageMyVipStore(myExistingRest.id)}
-                className="py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/25 text-[11px] font-bold flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
-              >
-                <Edit2 className="w-4 h-4 text-amber-300" strokeWidth={1.75} />
-                <span>{tr(language, 'កែប្រែហាងខ្ញុំ', 'Edit My Shop', '编辑我的店铺')}</span>
-              </button>
-            </div>
-          ) : null}
-        </div>
+            <button
+              type="button"
+              onClick={() => openManageMyVipStore(myExistingRest.id)}
+              className="py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/25 text-[11px] font-bold flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
+            >
+              <Edit2 className="w-4 h-4 text-amber-300" strokeWidth={1.75} />
+              <span>{tr(language, 'កែប្រែហាងខ្ញុំ', 'Edit My Shop', '编辑我的店铺')}</span>
+            </button>
+          </div>
+        ) : null}
       </ListingAddPanel>
 
       {/* Restaurant Cards List */}

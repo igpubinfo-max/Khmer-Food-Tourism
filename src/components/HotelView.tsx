@@ -372,101 +372,73 @@ export const HotelView: React.FC = () => {
           ) : undefined
         }
       >
-        <div className="space-y-2">
-          <button
-            type="button"
-            onClick={() => {
-              if (!currentUser) {
-                setIsAuthModalOpen(true);
-                return;
-              }
-              (window as any).__kft_vip_store_initial_mode = {
-                mode: 'upgrade_existing',
-                businessType: 'hotel',
-              };
-              setIsVipAddRestaurantModalOpen(true);
-            }}
-            className="w-full py-2.5 px-3.5 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 text-amber-200 border border-amber-300/40 text-xs font-extrabold flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-98"
-          >
-            <span>⬆️</span>
-            <span>
-              {tr(
-                language,
-                'ដំឡើងហាង/សណ្ឋាគារដែលមានស្រាប់ (Upgrade Existing Shop / Hotel)',
-                'Upgrade Existing Shop / Hotel',
-                '升级现有店铺 / 酒店'
-              )}
-            </span>
-          </button>
-
-          {isAdmin ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  (window as any).__kft_admin_tab = 'hotels';
-                  setIsAdminOpen(true);
-                }}
-                className="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <Settings className="w-4 h-4 text-amber-300 shrink-0" strokeWidth={1.75} />
-                <span className="truncate">
-                  {tr(
-                    language,
-                    'គ្រប់គ្រងសណ្ឋាគារទាំងអស់',
-                    'Manage All Hotels',
-                    '管理全部酒店'
-                  )}
-                </span>
-              </button>
-              <a
-                href="/templates/KhmerFoodTourism_Hotel_Photo_Insert_Template.xlsx"
-                download="KhmerFoodTourism_Hotel_Photo_Insert_Template.xlsx"
-                onClick={() =>
-                  showToast(
-                    tr(
-                      language,
-                      'កំពុងទាញយកគំរូ Excel សម្រាប់ដាក់រូបភាពសណ្ឋាគារ...',
-                      'Downloading Hotel Photo Excel Template...',
-                      '正在下载酒店图片 Excel 模板...'
-                    ),
-                    'success'
-                  )
-                }
-                className="w-full py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <Download className="w-4 h-4 shrink-0" strokeWidth={1.75} />
-                <span className="truncate">
-                  {tr(
-                    language,
-                    'ទាញយកគំរូ Excel ដាក់រូបសណ្ឋាគារ (.xlsx)',
-                    'Download Excel Photo Template (.xlsx)',
-                    '下载酒店图片 Excel 模板 (.xlsx)'
-                  )}
-                </span>
-              </a>
-            </div>
-          ) : myExistingHotel ? (
-            <div className="pt-2.5 border-t border-white/15 flex items-center justify-between gap-2">
-              <span className="min-w-0 flex-1 text-[11px] font-bold text-amber-200 truncate">
+        {isAdmin ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                (window as any).__kft_admin_tab = 'hotels';
+                setIsAdminOpen(true);
+              }}
+              className="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Settings className="w-4 h-4 text-amber-300 shrink-0" strokeWidth={1.75} />
+              <span className="truncate">
                 {tr(
                   language,
-                  `សណ្ឋាគាររបស់ខ្ញុំ៖ ${myExistingHotel.nameKh}`,
-                  `My Hotel: ${myExistingHotel.nameEn || myExistingHotel.nameKh}`,
-                  `我的酒店：${myExistingHotel.nameEn || myExistingHotel.nameKh}`
+                  'គ្រប់គ្រងសណ្ឋាគារទាំងអស់',
+                  'Manage All Hotels',
+                  '管理全部酒店'
                 )}
               </span>
-              <button
-                type="button"
-                onClick={() => openManageMyVipStore(myExistingHotel.id)}
-                className="py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/25 text-[11px] font-bold flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
-              >
-                <Edit2 className="w-4 h-4 text-amber-300" strokeWidth={1.75} />
-                <span>{tr(language, 'កែប្រែសណ្ឋាគារខ្ញុំ', 'Edit My Hotel', '编辑我的酒店')}</span>
-              </button>
-            </div>
-          ) : null}
-        </div>
+            </button>
+            <a
+              href="/templates/KhmerFoodTourism_Hotel_Photo_Insert_Template.xlsx"
+              download="KhmerFoodTourism_Hotel_Photo_Insert_Template.xlsx"
+              onClick={() =>
+                showToast(
+                  tr(
+                    language,
+                    'កំពុងទាញយកគំរូ Excel សម្រាប់ដាក់រូបភាពសណ្ឋាគារ...',
+                    'Downloading Hotel Photo Excel Template...',
+                    '正在下载酒店图片 Excel 模板...'
+                  ),
+                  'success'
+                )
+              }
+              className="w-full py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Download className="w-4 h-4 shrink-0" strokeWidth={1.75} />
+              <span className="truncate">
+                {tr(
+                  language,
+                  'ទាញយកគំរូ Excel ដាក់រូបសណ្ឋាគារ (.xlsx)',
+                  'Download Excel Photo Template (.xlsx)',
+                  '下载酒店图片 Excel 模板 (.xlsx)'
+                )}
+              </span>
+            </a>
+          </div>
+        ) : myExistingHotel ? (
+          <div className="pt-2.5 border-t border-white/15 flex items-center justify-between gap-2">
+            <span className="min-w-0 flex-1 text-[11px] font-bold text-amber-200 truncate">
+              {tr(
+                language,
+                `សណ្ឋាគាររបស់ខ្ញុំ៖ ${myExistingHotel.nameKh}`,
+                `My Hotel: ${myExistingHotel.nameEn || myExistingHotel.nameKh}`,
+                `我的酒店：${myExistingHotel.nameEn || myExistingHotel.nameKh}`
+              )}
+            </span>
+            <button
+              type="button"
+              onClick={() => openManageMyVipStore(myExistingHotel.id)}
+              className="py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/25 text-[11px] font-bold flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
+            >
+              <Edit2 className="w-4 h-4 text-amber-300" strokeWidth={1.75} />
+              <span>{tr(language, 'កែប្រែសណ្ឋាគារខ្ញុំ', 'Edit My Hotel', '编辑我的酒店')}</span>
+            </button>
+          </div>
+        ) : null}
       </ListingAddPanel>
 
       {/* =====================================================================

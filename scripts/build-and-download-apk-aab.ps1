@@ -2,7 +2,8 @@ param(
     [switch]$DownloadOnly,
     [switch]$ForceNewBuild,
     [switch]$NoOpenExplorer,
-    [switch]$ApkOnly
+    [switch]$ApkOnly,
+    [switch]$AabOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -341,8 +342,9 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
 
     # Move any older APK/AAB files out of Release_APK_AAB into Old_Builds so only the newest build is visible
     try {
+        $targetExtensions = if ($ApkOnly) { @('.apk') } elseif ($AabOnly) { @('.aab') } else { @('.apk', '.aab') }
         $oldPackages = Get-ChildItem -LiteralPath $OutDir -File | Where-Object {
-            ($_.Extension -in @('.apk', '.aab')) -and ($_.Name -notin @($apkOutName, $aabOutName))
+            ($_.Extension -in $targetExtensions) -and ($_.Name -notin @($apkOutName, $aabOutName))
         }
         if ($oldPackages) {
             if (-not (Test-Path $ArchiveDir)) {
@@ -358,9 +360,15 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
 
     $apkMb = [Math]::Round($apkAsset.size / 1MB, 1)
     $aabMb = [Math]::Round($aabAsset.size / 1MB, 1)
-    Write-Host ""
-    Write-Host "  [1/2] Downloading Direct-Install Android APK ($apkOutName, $apkMb MB)..." -ForegroundColor Green
-    Invoke-FastAssetDownload -url $apkAsset.browser_download_url -outPath $apkOutPath -expectedSize ([long]$apkAsset.size) -expectedSha $apkSha
+
+    if ($AabOnly) {
+        Write-Host ""
+        Write-Host "  [1/2] Skipping Direct-Install APK (-AabOnly)." -ForegroundColor DarkGray
+    } else {
+        Write-Host ""
+        Write-Host "  [1/2] Downloading Direct-Install Android APK ($apkOutName, $apkMb MB)..." -ForegroundColor Green
+        Invoke-FastAssetDownload -url $apkAsset.browser_download_url -outPath $apkOutPath -expectedSize ([long]$apkAsset.size) -expectedSha $apkSha
+    }
 
     if ($ApkOnly) {
         Write-Host ""
@@ -371,52 +379,68 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
         Invoke-FastAssetDownload -url $aabAsset.browser_download_url -outPath $aabOutPath -expectedSize ([long]$aabAsset.size) -expectedSha $aabSha
     }
 
-    $apkFile = Get-Item -LiteralPath $apkOutPath
-    $aabFile = if (Test-Path -LiteralPath $aabOutPath) { Get-Item -LiteralPath $aabOutPath } else { $null }
-    if ($apkFile.Length -ne [long]$apkAsset.size -or ($aabFile -and $aabFile.Length -ne [long]$aabAsset.size)) {
+    $apkFile = if ((-not $AabOnly) -and (Test-Path -LiteralPath $apkOutPath)) { Get-Item -LiteralPath $apkOutPath } else { $null }
+    $aabFile = if ((-not $ApkOnly) -and (Test-Path -LiteralPath $aabOutPath)) { Get-Item -LiteralPath $aabOutPath } else { $null }
+    if ((($null -ne $apkFile) -and ($apkFile.Length -ne [long]$apkAsset.size)) -or (($null -ne $aabFile) -and ($aabFile.Length -ne [long]$aabAsset.size))) {
         throw "Downloaded package size does not match the cloud build. Please run the builder again (it will resume)."
     }
 
-    # Also keep root, Desktop, and Downloads updated with latest APK
+    # Also keep root, Desktop, and Downloads updated with latest APK / AAB
     try {
-        $rootApkPath = Join-Path $RepoRoot "CambodiaFlavorsTourism-v$versionName.apk"
-        Copy-Item -LiteralPath $apkOutPath -Destination $rootApkPath -Force
-        if (Test-Path "$env:USERPROFILE\Desktop") {
-            Copy-Item -LiteralPath $apkOutPath -Destination (Join-Path "$env:USERPROFILE\Desktop" "CambodiaFlavorsTourism-v$versionName.apk") -Force
+        if ($apkFile) {
+            $rootApkPath = Join-Path $RepoRoot "CambodiaFlavorsTourism-v$versionName.apk"
+            Copy-Item -LiteralPath $apkOutPath -Destination $rootApkPath -Force
+            if (Test-Path "$env:USERPROFILE\Desktop") {
+                Copy-Item -LiteralPath $apkOutPath -Destination (Join-Path "$env:USERPROFILE\Desktop" "CambodiaFlavorsTourism-v$versionName.apk") -Force
+            }
+        }
+        if ($aabFile -and (Test-Path "$env:USERPROFILE\Desktop")) {
+            Copy-Item -LiteralPath $aabOutPath -Destination (Join-Path "$env:USERPROFILE\Desktop" "CambodiaFlavorsTourism-v$versionName-PlayStore.aab") -Force
         }
         if (Test-Path "$env:USERPROFILE\Downloads") {
-            Copy-Item -LiteralPath $apkOutPath -Destination (Join-Path "$env:USERPROFILE\Downloads" "CambodiaFlavorsTourism-v$versionName.apk") -Force
+            if ($apkFile) {
+                Copy-Item -LiteralPath $apkOutPath -Destination (Join-Path "$env:USERPROFILE\Downloads" "CambodiaFlavorsTourism-v$versionName.apk") -Force
+            }
             $dlReleaseDir = Join-Path "$env:USERPROFILE\Downloads" "Release_APK_AAB"
             if (-not (Test-Path $dlReleaseDir)) {
                 New-Item -ItemType Directory -Path $dlReleaseDir -Force | Out-Null
             }
-            Copy-Item -LiteralPath $apkOutPath -Destination (Join-Path $dlReleaseDir $apkOutName) -Force
+            if ($apkFile) { Copy-Item -LiteralPath $apkOutPath -Destination (Join-Path $dlReleaseDir $apkOutName) -Force }
             if ($aabFile) { Copy-Item -LiteralPath $aabOutPath -Destination (Join-Path $dlReleaseDir $aabOutName) -Force }
         }
     } catch {}
 
-    $apkSizeMb = [Math]::Round($apkFile.Length / 1MB, 2)
+    $apkSizeMb = if ($apkFile) { [Math]::Round($apkFile.Length / 1MB, 2) } else { 0 }
     $aabSizeMb = if ($aabFile) { [Math]::Round($aabFile.Length / 1MB, 2) } else { 0 }
 
     Write-Host ""
     Write-Host "======================================================================" -ForegroundColor Green
-    Write-Host "  SUCCESS! YOUR LATEST APK & PLAY STORE AAB ARE READY!" -ForegroundColor Green
+    if ($ApkOnly) {
+        Write-Host "  SUCCESS! YOUR LATEST ANDROID APK IS READY!" -ForegroundColor Green
+    } elseif ($AabOnly) {
+        Write-Host "  SUCCESS! YOUR LATEST PLAY STORE AAB IS READY!" -ForegroundColor Green
+    } else {
+        Write-Host "  SUCCESS! YOUR LATEST APK & PLAY STORE AAB ARE READY!" -ForegroundColor Green
+    }
     Write-Host "======================================================================" -ForegroundColor Green
     Write-Host "  Version      : v$versionName  (Build $displayBuildCode)" -ForegroundColor White
     Write-Host "  Folder       : $OutDir" -ForegroundColor Cyan
-    Write-Host ""
-    Write-Host "  1. Direct Phone Install (.APK)  [$apkSizeMb MB]:" -ForegroundColor Yellow
-    Write-Host "     $apkOutPath" -ForegroundColor White
-    Write-Host ""
+    if ($apkFile) {
+        Write-Host ""
+        Write-Host "  Direct Phone Install (.APK)  [$apkSizeMb MB]:" -ForegroundColor Yellow
+        Write-Host "     $apkOutPath" -ForegroundColor White
+    }
     if ($aabFile) {
-        Write-Host "  2. Google Play Console (.AAB)   [$aabSizeMb MB]:" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "  Google Play Console (.AAB)   [$aabSizeMb MB]:" -ForegroundColor Yellow
         Write-Host "     $aabOutPath" -ForegroundColor White
     }
     Write-Host "======================================================================" -ForegroundColor Green
 
     if (-not $NoOpenExplorer) {
         try {
-            Start-Process explorer.exe -ArgumentList "/select,`"$apkOutPath`""
+            $selectTarget = if ($AabOnly -and $aabFile) { $aabOutPath } else { $apkOutPath }
+            Start-Process explorer.exe -ArgumentList "/select,`"$selectTarget`""
         } catch {}
     }
 }
@@ -491,7 +515,7 @@ $remoteTestSha = (Invoke-GitQuiet @("rev-parse", "origin/test-ui-apk")).Output
 # Check uncommitted app changes (ignore this helper script itself when deciding if app code changed)
 $statusRes = Invoke-GitQuiet @("status", "--porcelain")
 $rawStatus = @($statusRes.Output -split "`r?`n" | Where-Object { $_ })
-$helperIgnoreRegex = '^.. "?(Build_APK_and_AAB\.bat|Build_APK_Only\.bat|Build APK & Play Store AAB\.bat|Build APK and Play Store AAB\.bat|Push_Test_Branch\.bat|Push_To_GitHub\.bat|scripts/build-and-download-apk-aab\.ps1|\.gitignore|\.gitattributes)"?$'
+$helperIgnoreRegex = '^.. "?(1\. Create APK\.bat|2\. Create AAB\.bat|Create APK\.bat|Create AAB\.bat|Build_APK_and_AAB\.bat|Build_APK_Only\.bat|Build APK & Play Store AAB\.bat|Build APK and Play Store AAB\.bat|Push_Test_Branch\.bat|Push_To_GitHub\.bat|scripts/build-and-download-apk-aab\.ps1|\.gitignore|\.gitattributes)"?$'
 $appDirtyLines = @($rawStatus | Where-Object { $_ -and ($_ -notmatch $helperIgnoreRegex) })
 
 $hasAppChanges = ($appDirtyLines.Count -gt 0) -or ($headSha -ne $remoteMainSha)

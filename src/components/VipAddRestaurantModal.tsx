@@ -1244,6 +1244,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               type="button"
               onClick={() => {
                 resetFormFields();
+                setFormMode('add_new');
                 setActiveTab('create_form');
               }}
               className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-xs shadow-sm flex items-center justify-center gap-2 transition cursor-pointer"
@@ -1258,6 +1259,26 @@ export const VipAddRestaurantModal: React.FC = () => {
                       `+ Add Shop #${quota.nextStoreSlotNumber} (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
                       `+ 添加第 ${quota.nextStoreSlotNumber} 家店铺 (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`
                     )}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                resetFormFields();
+                setFormMode('upgrade_existing');
+                setActiveTab('create_form');
+              }}
+              className="w-full py-2.5 px-3.5 rounded-2xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-700/60 font-extrabold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+            >
+              <span>⬆️</span>
+              <span>
+                {tr(
+                  language,
+                  'ដំឡើងហាង/សណ្ឋាគារដែលមានស្រាប់ (Upgrade Existing Shop / Hotel)',
+                  'Upgrade Existing Shop / Hotel',
+                  '升级现有店铺 / 酒店'
+                )}
               </span>
             </button>
           </div>
