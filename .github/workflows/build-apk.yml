@@ -31,9 +31,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: 4. Install Dependencies
-        run: npm install
+        run: npm ci || npm install
 
       - name: 5. Sync Version & Build Web Bundle
         run: |
@@ -59,30 +60,31 @@ jobs:
 
       - name: 7. Build & V1+V2+V3 Sign Single Direct-Install APK & Play Store AAB
         run: |
+          set -euo pipefail
           if [ ! -f android/app/khmerfood-upload-key.jks ]; then
-            keytool -genkeypair -v -noprompt \
-              -keystore android/app/khmerfood-upload-key.jks \
-              -alias khmerfood-upload \
-              -keyalg RSA -keysize 2048 -validity 10000 \
-              -storepass 'KhmerFood2026PlayStore' \
-              -keypass 'KhmerFood2026PlayStore' \
-              -dname "CN=Savuth Chea, OU=Khmer Food and Tourism, O=Khmer Food and Tourism, L=Phnom Penh, ST=Phnom Penh, C=KH"
+            echo "::error::Signing keystore android/app/khmerfood-upload-key.jks is missing. Refusing to build with a new random key (installed apps could not be updated)."
+            exit 1
           fi
-          FINAL_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle || echo 1257)
+          FINAL_VC=$(grep -oP 'versionCode\s+\K[0-9]+' android/app/build.gradle)
+          APK_NAME="CambodiaFlavorsTourism-v${VERSION_NAME}.apk"
+          AAB_NAME="CambodiaFlavorsTourism-v${VERSION_NAME}-PlayStore.aab"
+          echo "APK_NAME=$APK_NAME" >> $GITHUB_ENV
+          echo "AAB_NAME=$AAB_NAME" >> $GITHUB_ENV
           echo "Building Android APK & Play Store AAB with versionCode $FINAL_VC"
           BUILD_TOOLS_DIR=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
           ZIPALIGN="$BUILD_TOOLS_DIR/zipalign"
           APKSIGNER="$BUILD_TOOLS_DIR/apksigner"
+          AAPT="$BUILD_TOOLS_DIR/aapt"
           echo "Using build-tools: $BUILD_TOOLS_DIR"
 
-          mkdir -p release_out
+          rm -rf release_out && mkdir -p release_out
 
           cd android
           chmod +x ./gradlew
           # 1. Build Play Store AAB with official Play Store package ID (com.khmerfood.tourism)
           ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
           REL_AAB=$(find app/build/outputs/bundle/release -name "*.aab" | head -n 1)
-          cp "$REL_AAB" ../release_out/CambodiaFlavorsTourism-v2.5.0-PlayStore.aab
+          cp "$REL_AAB" "../release_out/$AAB_NAME"
 
           # 2. Build SINGLE APK with conflict-free package ID (com.khmerfood.tourism.direct)
           # Guarantees 1-tap installation on Samsung Android 15 without Play Store signature conflicts
@@ -98,12 +100,47 @@ jobs:
             --v2-signing-enabled true \
             --v3-signing-enabled true \
             --v4-signing-enabled false \
-            --out ../release_out/CambodiaFlavorsTourism-v2.5.0.apk \
+            --out "../release_out/$APK_NAME" \
             ../release_out/aligned-official.apk
           rm -f ../release_out/aligned-official.apk
-          "$APKSIGNER" verify --verbose ../release_out/CambodiaFlavorsTourism-v2.5.0.apk
           cd ..
 
+          # 3. Verify APK signature, installability metadata and that it contains THIS build's version
+          "$APKSIGNER" verify --verbose "release_out/$APK_NAME"
+          "$AAPT" dump badging "release_out/$APK_NAME" > release_out/badging.txt
+          BADGING=$(sed -n '1p' release_out/badging.txt)
+          rm -f release_out/badging.txt
+          echo "APK badging: $BADGING"
+          APK_VC=$(echo "$BADGING" | grep -oP "versionCode='\K[0-9]+")
+          APK_VN=$(echo "$BADGING" | grep -oP "versionName='\K[^']+")
+          if [ "$APK_VC" != "$FINAL_VC" ] || [ "$APK_VN" != "$VERSION_NAME" ]; then
+            echo "::error::APK version mismatch (got $APK_VN/$APK_VC, expected $VERSION_NAME/$FINAL_VC)"
+            exit 1
+          fi
+          # Verify the AAB is a valid, signed zip bundle
+          unzip -tq "release_out/$AAB_NAME"
+          jarsigner -verify "release_out/$AAB_NAME" > release_out/aab-verify.txt 2>&1 || true
+          cat release_out/aab-verify.txt
+          grep -q "jar verified" release_out/aab-verify.txt || { echo "::error::AAB is not signed"; exit 1; }
+          rm -f release_out/aab-verify.txt
+
+          # 4. Write release-info.json (version + SHA256) so the PC downloader can verify files
+          APK_SHA=$(sha256sum "release_out/$APK_NAME" | cut -d' ' -f1)
+          AAB_SHA=$(sha256sum "release_out/$AAB_NAME" | cut -d' ' -f1)
+          APK_SIZE=$(stat -c%s "release_out/$APK_NAME")
+          AAB_SIZE=$(stat -c%s "release_out/$AAB_NAME")
+          cat > release_out/release-info.json <<EOF
+          {
+            "versionName": "$VERSION_NAME",
+            "versionCode": $FINAL_VC,
+            "commit": "$GITHUB_SHA",
+            "runNumber": ${{ github.run_number }},
+            "builtAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "apk": { "name": "$APK_NAME", "size": $APK_SIZE, "sha256": "$APK_SHA", "packageId": "com.khmerfood.tourism.direct" },
+            "aab": { "name": "$AAB_NAME", "size": $AAB_SIZE, "sha256": "$AAB_SHA", "packageId": "com.khmerfood.tourism" }
+          }
+          EOF
+          cat release_out/release-info.json
           ls -la release_out/
 
       - name: 8. Upload Android Packages Artifact (Single APK + Play Store AAB)
@@ -111,8 +148,9 @@ jobs:
         with:
           name: Cambodia-Flavors-Tourism-Release-Packages
           path: |
-            release_out/CambodiaFlavorsTourism-v2.5.0.apk
-            release_out/CambodiaFlavorsTourism-v2.5.0-PlayStore.aab
+            release_out/${{ env.APK_NAME }}
+            release_out/${{ env.AAB_NAME }}
+            release_out/release-info.json
 
       - name: 9. Publish GitHub Release with Signed APK & Play Store AAB
         uses: softprops/action-gh-release@v2
@@ -126,13 +164,15 @@ jobs:
             **រសជាតិ និងទេសចរណ៍កម្ពុជា • 柬埔寨风味与旅游**
 
             **Official Release v${{ env.VERSION_NAME }} (Build ${{ env.FINAL_VC }}):**
-            - 📱 **CambodiaFlavorsTourism-v${{ env.VERSION_NAME }}:** Signed Direct-Install APK for Android.
-            - 📦 **CambodiaFlavorsTourism-v${{ env.VERSION_NAME }}-PlayStore.aab:** Signed Android App Bundle for Google Play Console.
+            - 📱 **${{ env.APK_NAME }}:** Signed Direct-Install APK for Android.
+            - 📦 **${{ env.AAB_NAME }}:** Signed Android App Bundle for Google Play Console.
+            - 🧾 **release-info.json:** Version code + SHA256 checksums.
           draft: false
           prerelease: false
           files: |
-            release_out/CambodiaFlavorsTourism-v2.5.0.apk
-            release_out/CambodiaFlavorsTourism-v2.5.0-PlayStore.aab
+            release_out/${{ env.APK_NAME }}
+            release_out/${{ env.AAB_NAME }}
+            release_out/release-info.json
 
       - name: 10. Deploy Web App to GitHub Pages (gh-pages)
         uses: peaceiris/actions-gh-pages@v4

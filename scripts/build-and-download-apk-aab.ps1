@@ -1,7 +1,8 @@
 param(
     [switch]$DownloadOnly,
     [switch]$ForceNewBuild,
-    [switch]$NoOpenExplorer
+    [switch]$NoOpenExplorer,
+    [switch]$ApkOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -111,43 +112,176 @@ function ConvertTo-UtcDateTime($val) {
     ).ToUniversalTime()
 }
 
-function Invoke-FastAssetDownload([string]$url, [string]$outPath, [long]$expectedSize) {
-    if ((Test-Path -LiteralPath $outPath) -and ($expectedSize -gt 0)) {
-        $existingLen = (Get-Item -LiteralPath $outPath).Length
-        if ($existingLen -eq $expectedSize) {
-            $mb = [Math]::Round($existingLen / 1MB, 2)
-            Write-Host "  Already downloaded and verified complete ($mb MB)." -ForegroundColor Cyan
-            return
-        }
-    }
-
-    $tempOutPath = "$outPath.part"
-    $cleanUrl = $url -replace '\?.*$', ''
-    $cb = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
-    $downloadUrl = "${cleanUrl}?cb=$cb"
-
-    if (Test-Path $CurlExe) {
-        & $CurlExe -C - -L --http1.1 --fail --retry 5 --retry-delay 2 --connect-timeout 20 --progress-bar -H "Cache-Control: no-cache" -o $tempOutPath $downloadUrl
-        if ($LASTEXITCODE -ne 0) {
-            Remove-Item -LiteralPath $tempOutPath -Force -ErrorAction SilentlyContinue
-            & $CurlExe -L --http1.1 --fail --retry 5 --retry-delay 2 --connect-timeout 20 --progress-bar -H "Cache-Control: no-cache" -o $tempOutPath $downloadUrl
-            if ($LASTEXITCODE -ne 0) { throw "curl failed downloading asset from $cleanUrl" }
-        }
-    } else {
-        Invoke-WebRequest -Uri $downloadUrl -OutFile $tempOutPath -UseBasicParsing
-    }
-    Move-Item -LiteralPath $tempOutPath -Destination $outPath -Force
+function Get-FileSha256([string]$path) {
+    return (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
 }
 
-function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, [datetime]$minAssetTimeUtc) {
+function Resolve-CdnUrl([string]$cleanUrl) {
+    $direct = ""
+    try {
+        $direct = (& $CurlExe -sI -o NUL --connect-timeout 20 --max-time 40 -w "%{redirect_url}" $cleanUrl 2>$null)
+        if ($direct) { $direct = $direct.Trim() }
+    } catch {}
+    if (-not $direct -or ($direct -notmatch '^https://')) { return $cleanUrl }
+    return $direct
+}
+
+# Resumable, parallel, self-healing downloader.
+# - Splits the file into N ranges downloaded in parallel (much faster on slow links to GitHub CDN).
+# - Every range is saved in a persistent .partial folder, so a cancelled / dropped download RESUMES next time.
+# - Stalled connections (< 2 KB/s for 25s) are dropped and retried automatically.
+# - Final file is verified against the SHA256 published by the cloud build (release-info.json).
+function Invoke-FastAssetDownload([string]$url, [string]$outPath, [long]$expectedSize, [string]$expectedSha = "") {
+    if ((Test-Path -LiteralPath $outPath) -and ($expectedSize -gt 0)) {
+        $existing = Get-Item -LiteralPath $outPath
+        if ($existing.Length -eq $expectedSize) {
+            if (-not $expectedSha -or (Get-FileSha256 $outPath) -eq $expectedSha) {
+                $mb = [Math]::Round($existing.Length / 1MB, 2)
+                Write-Host "  Already downloaded and verified ($mb MB)." -ForegroundColor Cyan
+                return
+            }
+        }
+        Remove-Item -LiteralPath $outPath -Force -ErrorAction SilentlyContinue
+    }
+
+    $cleanUrl = $url -replace '\?.*$', ''
+    $key = if ($expectedSha) { $expectedSha.Substring(0, 16) } else { "{0}_{1}" -f ([IO.Path]::GetFileName($outPath)), $expectedSize }
+    $partDir = Join-Path $OutDir (".partial\" + $key)
+    New-Item -ItemType Directory -Path $partDir -Force | Out-Null
+
+    # Many small ranges (24) with 12 running at once keeps all connections busy until the very end
+    $parts = if ($expectedSize -gt 8MB) { 24 } elseif ($expectedSize -gt 1MB) { 4 } else { 1 }
+    $maxParallel = [Math]::Min(12, $parts)
+    $chunkSize = [long][Math]::Ceiling($expectedSize / [double]$parts)
+    $ranges = @()
+    for ($i = 0; $i -lt $parts; $i++) {
+        $start = [long]($i * $chunkSize)
+        $end = [long][Math]::Min($expectedSize - 1, (($i + 1) * $chunkSize) - 1)
+        $ranges += [pscustomobject]@{ Index = $i; Start = $start; End = $end; Len = ($end - $start + 1); File = (Join-Path $partDir ("part_{0:D2}.bin" -f $i)) }
+    }
+
+    $maxAttempts = 40
+    for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+        $have = [long]0
+        $pending = @()
+        foreach ($r in $ranges) {
+            $len = if (Test-Path -LiteralPath $r.File) { (Get-Item -LiteralPath $r.File).Length } else { 0 }
+            if ($len -gt $r.Len) { Remove-Item -LiteralPath $r.File -Force; $len = 0 }
+            $have += $len
+            if ($len -lt $r.Len) { $pending += $r }
+        }
+        $pct = [Math]::Round(($have * 100.0) / $expectedSize, 1)
+        if ($pending.Count -eq 0) { break }
+
+        Write-Host ("  Progress: {0:N1} / {1:N1} MB ({2}%)  - pass {3}, {4} connection(s)..." -f ($have / 1MB), ($expectedSize / 1MB), $pct, $attempt, $pending.Count) -ForegroundColor DarkCyan
+
+        $cdnUrl = Resolve-CdnUrl $cleanUrl
+        $curlArgs = @("--parallel", "--parallel-max", "$maxParallel", "--progress-bar")
+        $first = $true
+        foreach ($r in $pending) {
+            $len = if (Test-Path -LiteralPath $r.File) { (Get-Item -LiteralPath $r.File).Length } else { 0 }
+            $chunkFile = "$($r.File).chunk"
+            Remove-Item -LiteralPath $chunkFile -Force -ErrorAction SilentlyContinue
+            if (-not $first) { $curlArgs += "--next" }
+            $first = $false
+            $curlArgs += @(
+                "-L", "--fail", "--http1.1",
+                "--connect-timeout", "20",
+                "--speed-limit", "2048", "--speed-time", "25",
+                "-r", ("{0}-{1}" -f ($r.Start + $len), $r.End),
+                "-o", $chunkFile,
+                $cdnUrl
+            )
+        }
+
+        $prevEAP = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        & $CurlExe @curlArgs
+        $ErrorActionPreference = $prevEAP
+
+        # Append whatever bytes arrived (a valid prefix of each range) so progress is never lost
+        foreach ($r in $pending) {
+            $chunkFile = "$($r.File).chunk"
+            if (-not (Test-Path -LiteralPath $chunkFile)) { continue }
+            $len = if (Test-Path -LiteralPath $r.File) { (Get-Item -LiteralPath $r.File).Length } else { 0 }
+            $need = $r.Len - $len
+            $chunkLen = (Get-Item -LiteralPath $chunkFile).Length
+            if ($chunkLen -gt 0 -and $need -gt 0) {
+                $take = [long][Math]::Min($chunkLen, $need)
+                $outStream = [System.IO.File]::Open($r.File, [System.IO.FileMode]::Append, [System.IO.FileAccess]::Write)
+                $inStream = [System.IO.File]::OpenRead($chunkFile)
+                try {
+                    $buf = New-Object byte[] (1024 * 1024)
+                    $left = $take
+                    while ($left -gt 0) {
+                        $read = $inStream.Read($buf, 0, [int][Math]::Min($buf.Length, $left))
+                        if ($read -le 0) { break }
+                        $outStream.Write($buf, 0, $read)
+                        $left -= $read
+                    }
+                } finally {
+                    $inStream.Close(); $outStream.Close()
+                }
+            }
+            Remove-Item -LiteralPath $chunkFile -Force -ErrorAction SilentlyContinue
+        }
+        if ($attempt -lt $maxAttempts) { Start-Sleep -Seconds 1 }
+    }
+
+    foreach ($r in $ranges) {
+        if (-not (Test-Path -LiteralPath $r.File) -or (Get-Item -LiteralPath $r.File).Length -ne $r.Len) {
+            throw "Download incomplete after $maxAttempts passes. Your progress is saved - just run the builder again to RESUME."
+        }
+    }
+
+    $tempOutPath = "$outPath.merge"
+    $outStream = [System.IO.File]::Open($tempOutPath, [System.IO.FileMode]::Create, [System.IO.FileAccess]::Write)
+    try {
+        $buf = New-Object byte[] (1024 * 1024)
+        foreach ($r in $ranges) {
+            $inStream = [System.IO.File]::OpenRead($r.File)
+            try {
+                while (($read = $inStream.Read($buf, 0, $buf.Length)) -gt 0) { $outStream.Write($buf, 0, $read) }
+            } finally { $inStream.Close() }
+        }
+    } finally { $outStream.Close() }
+
+    if ($expectedSha) {
+        $actualSha = Get-FileSha256 $tempOutPath
+        if ($actualSha -ne $expectedSha) {
+            Remove-Item -LiteralPath $tempOutPath -Force -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath $partDir -Recurse -Force -ErrorAction SilentlyContinue
+            throw "SHA256 mismatch for $([IO.Path]::GetFileName($outPath)) (corrupted download). Please run the builder again."
+        }
+        Write-Host "  SHA256 verified: $($actualSha.Substring(0,16))..." -ForegroundColor Green
+    }
+    Move-Item -LiteralPath $tempOutPath -Destination $outPath -Force
+    Remove-Item -LiteralPath $partDir -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+function Get-ReleaseInfoJson($release) {
+    $infoAsset = $release.assets | Where-Object { $_.name -eq "release-info.json" } | Select-Object -First 1
+    if (-not $infoAsset) { return $null }
+    try {
+        $tmp = Join-Path $env:TEMP ("kft_release_info_{0}.json" -f $PID)
+        & $CurlExe -sL --fail --connect-timeout 20 --max-time 120 --retry 5 -o $tmp $infoAsset.browser_download_url
+        if ($LASTEXITCODE -ne 0) { return $null }
+        $json = Get-Content -LiteralPath $tmp -Raw | ConvertFrom-Json
+        Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue
+        return $json
+    } catch { return $null }
+}
+
+function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, [datetime]$minAssetTimeUtc, [int]$minVersionCode = 0) {
     Write-Banner "STEP 4: DOWNLOADING SIGNED APK & PLAY STORE AAB TO YOUR PC"
 
     $release = $null
     $apkAsset = $null
     $aabAsset = $null
+    $info = $null
     $effectiveMinTimeUtc = $minAssetTimeUtc.AddMinutes(-5)
 
-    for ($attempt = 1; $attempt -le 10; $attempt++) {
+    for ($attempt = 1; $attempt -le 15; $attempt++) {
         try {
             $cb = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
             try {
@@ -157,28 +291,47 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
             }
 
             if ($release -and $release.assets) {
-                $apkAsset = $release.assets | Where-Object { $_.name -like "*.apk" } | Sort-Object -Property updated_at -Descending | Select-Object -First 1
-                $aabAsset = $release.assets | Where-Object { $_.name -like "*.aab" } | Sort-Object -Property updated_at -Descending | Select-Object -First 1
+                $info = Get-ReleaseInfoJson $release
+                if ($info) {
+                    $apkAsset = $release.assets | Where-Object { $_.name -eq $info.apk.name } | Select-Object -First 1
+                    $aabAsset = $release.assets | Where-Object { $_.name -eq $info.aab.name } | Select-Object -First 1
+                } else {
+                    $apkAsset = $release.assets | Where-Object { $_.name -like "*.apk" } | Sort-Object -Property updated_at -Descending | Select-Object -First 1
+                    $aabAsset = $release.assets | Where-Object { $_.name -like "*.aab" } | Sort-Object -Property updated_at -Descending | Select-Object -First 1
+                }
             }
 
             if ($apkAsset -and $aabAsset) {
-                $apkUpdated = ConvertTo-UtcDateTime $apkAsset.updated_at
-                $aabUpdated = ConvertTo-UtcDateTime $aabAsset.updated_at
-                if (($apkUpdated -ge $effectiveMinTimeUtc) -and ($aabUpdated -ge $effectiveMinTimeUtc)) {
-                    break
+                $fresh = $true
+                if ($info -and $minVersionCode -gt 0 -and [int]$info.versionCode -lt $minVersionCode) { $fresh = $false }
+                if (-not $info) {
+                    $apkUpdated = ConvertTo-UtcDateTime $apkAsset.updated_at
+                    $aabUpdated = ConvertTo-UtcDateTime $aabAsset.updated_at
+                    if (($apkUpdated -lt $effectiveMinTimeUtc) -or ($aabUpdated -lt $effectiveMinTimeUtc)) { $fresh = $false }
                 }
-                Write-Host "  Waiting for fresh release assets to finish uploading (attempt $attempt/10)..." -ForegroundColor Yellow
+                if ($fresh) { break }
+                Write-Host "  Waiting for fresh release assets to finish uploading (attempt $attempt/15)..." -ForegroundColor Yellow
             }
         } catch {
-            Write-Host "  Waiting for GitHub Release CDN sync (attempt $attempt/10)..." -ForegroundColor Yellow
+            Write-Host "  Waiting for GitHub Release CDN sync (attempt $attempt/15)..." -ForegroundColor Yellow
         }
-        if ($attempt -lt 10) {
+        if ($attempt -lt 15) {
             Start-Sleep -Seconds 4
         }
     }
 
     if (-not $apkAsset -or -not $aabAsset) {
         throw "Could not find .apk and .aab assets on GitHub Release v$versionName."
+    }
+
+    $apkSha = ""
+    $aabSha = ""
+    if ($info) {
+        $displayBuildCode = [int]$info.versionCode
+        $versionName = [string]$info.versionName
+        $apkSha = ([string]$info.apk.sha256).ToLowerInvariant()
+        $aabSha = ([string]$info.aab.sha256).ToLowerInvariant()
+        Write-Host "  Cloud build verified: v$versionName  versionCode $displayBuildCode  (commit $(([string]$info.commit).Substring(0,7)))" -ForegroundColor Green
     }
 
     $apkOutName = "CambodiaFlavorsTourism-v$versionName-Build$displayBuildCode.apk"
@@ -199,20 +352,29 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
                 Move-Item -LiteralPath $oldFile.FullName -Destination (Join-Path $ArchiveDir $oldFile.Name) -Force
             }
         }
+        # Remove stale leftovers from the old downloader
+        Get-ChildItem -LiteralPath $OutDir -File -Filter "*.part" -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
     } catch {}
 
+    $apkMb = [Math]::Round($apkAsset.size / 1MB, 1)
+    $aabMb = [Math]::Round($aabAsset.size / 1MB, 1)
     Write-Host ""
-    Write-Host "  [1/2] Downloading Direct-Install Android APK ($apkOutName) [16x Turbo]..." -ForegroundColor Green
-    Invoke-FastAssetDownload -url $apkAsset.browser_download_url -outPath $apkOutPath -expectedSize ([long]$apkAsset.size)
+    Write-Host "  [1/2] Downloading Direct-Install Android APK ($apkOutName, $apkMb MB)..." -ForegroundColor Green
+    Invoke-FastAssetDownload -url $apkAsset.browser_download_url -outPath $apkOutPath -expectedSize ([long]$apkAsset.size) -expectedSha $apkSha
 
-    Write-Host ""
-    Write-Host "  [2/2] Downloading Google Play Store Bundle ($aabOutName) [16x Turbo]..." -ForegroundColor Green
-    Invoke-FastAssetDownload -url $aabAsset.browser_download_url -outPath $aabOutPath -expectedSize ([long]$aabAsset.size)
+    if ($ApkOnly) {
+        Write-Host ""
+        Write-Host "  [2/2] Skipping Play Store AAB (-ApkOnly)." -ForegroundColor DarkGray
+    } else {
+        Write-Host ""
+        Write-Host "  [2/2] Downloading Google Play Store Bundle ($aabOutName, $aabMb MB)..." -ForegroundColor Green
+        Invoke-FastAssetDownload -url $aabAsset.browser_download_url -outPath $aabOutPath -expectedSize ([long]$aabAsset.size) -expectedSha $aabSha
+    }
 
     $apkFile = Get-Item -LiteralPath $apkOutPath
-    $aabFile = Get-Item -LiteralPath $aabOutPath
-    if ($apkFile.Length -lt 5MB -or $aabFile.Length -lt 5MB) {
-        throw "Downloaded package size looks incomplete. Please check internet connection and retry."
+    $aabFile = if (Test-Path -LiteralPath $aabOutPath) { Get-Item -LiteralPath $aabOutPath } else { $null }
+    if ($apkFile.Length -ne [long]$apkAsset.size -or ($aabFile -and $aabFile.Length -ne [long]$aabAsset.size)) {
+        throw "Downloaded package size does not match the cloud build. Please run the builder again (it will resume)."
     }
 
     # Also keep root, Desktop, and Downloads updated with latest APK
@@ -229,12 +391,12 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
                 New-Item -ItemType Directory -Path $dlReleaseDir -Force | Out-Null
             }
             Copy-Item -LiteralPath $apkOutPath -Destination (Join-Path $dlReleaseDir $apkOutName) -Force
-            Copy-Item -LiteralPath $aabOutPath -Destination (Join-Path $dlReleaseDir $aabOutName) -Force
+            if ($aabFile) { Copy-Item -LiteralPath $aabOutPath -Destination (Join-Path $dlReleaseDir $aabOutName) -Force }
         }
     } catch {}
 
     $apkSizeMb = [Math]::Round($apkFile.Length / 1MB, 2)
-    $aabSizeMb = [Math]::Round($aabFile.Length / 1MB, 2)
+    $aabSizeMb = if ($aabFile) { [Math]::Round($aabFile.Length / 1MB, 2) } else { 0 }
 
     Write-Host ""
     Write-Host "======================================================================" -ForegroundColor Green
@@ -246,8 +408,10 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
     Write-Host "  1. Direct Phone Install (.APK)  [$apkSizeMb MB]:" -ForegroundColor Yellow
     Write-Host "     $apkOutPath" -ForegroundColor White
     Write-Host ""
-    Write-Host "  2. Google Play Console (.AAB)   [$aabSizeMb MB]:" -ForegroundColor Yellow
-    Write-Host "     $aabOutPath" -ForegroundColor White
+    if ($aabFile) {
+        Write-Host "  2. Google Play Console (.AAB)   [$aabSizeMb MB]:" -ForegroundColor Yellow
+        Write-Host "     $aabOutPath" -ForegroundColor White
+    }
     Write-Host "======================================================================" -ForegroundColor Green
 
     if (-not $NoOpenExplorer) {
@@ -327,7 +491,7 @@ $remoteTestSha = (Invoke-GitQuiet @("rev-parse", "origin/test-ui-apk")).Output
 # Check uncommitted app changes (ignore this helper script itself when deciding if app code changed)
 $statusRes = Invoke-GitQuiet @("status", "--porcelain")
 $rawStatus = @($statusRes.Output -split "`r?`n" | Where-Object { $_ })
-$helperIgnoreRegex = '^.. "?(Build_APK_and_AAB\.bat|Build APK & Play Store AAB\.bat|Build APK and Play Store AAB\.bat|Push_Test_Branch\.bat|Push_To_GitHub\.bat|scripts/build-and-download-apk-aab\.ps1|\.gitignore|\.gitattributes)"?$'
+$helperIgnoreRegex = '^.. "?(Build_APK_and_AAB\.bat|Build_APK_Only\.bat|Build APK & Play Store AAB\.bat|Build APK and Play Store AAB\.bat|Push_Test_Branch\.bat|Push_To_GitHub\.bat|scripts/build-and-download-apk-aab\.ps1|\.gitignore|\.gitattributes)"?$'
 $appDirtyLines = @($rawStatus | Where-Object { $_ -and ($_ -notmatch $helperIgnoreRegex) })
 
 $hasAppChanges = ($appDirtyLines.Count -gt 0) -or ($headSha -ne $remoteMainSha)
@@ -362,7 +526,7 @@ if (-not $hasAppChanges -and -not $ForceNewBuild) {
         Write-Host "  A cloud build for your latest code ($($headSha.Substring(0,7))) is ALREADY running!" -ForegroundColor Green
         $doneRun = Wait-ForGitHubWorkflow -targetSha $headSha -notBeforeUtc ([datetime]::UtcNow.AddHours(-1))
         $effVC = [Math]::Max($localVC, 900 + [int]$doneRun.run_number)
-        Download-ReleasePackages -versionName $versionName -displayBuildCode $effVC -minAssetTimeUtc ([datetime]::UtcNow.AddHours(-2))
+        Download-ReleasePackages -versionName $versionName -displayBuildCode $effVC -minAssetTimeUtc ([datetime]::UtcNow.AddHours(-2)) -minVersionCode $localVC
         exit 0
     }
 
@@ -490,5 +654,5 @@ if ($currentBranch -and $currentBranch -ne "main" -and $currentBranch -ne "test-
 $completedRun = Wait-ForGitHubWorkflow -targetSha $newSha -notBeforeUtc $buildStartTimeUtc
 $finalBuildCode = [Math]::Max($nextVC, 900 + [int]$completedRun.run_number)
 
-Download-ReleasePackages -versionName $versionName -displayBuildCode $finalBuildCode -minAssetTimeUtc $buildStartTimeUtc
+Download-ReleasePackages -versionName $versionName -displayBuildCode $finalBuildCode -minAssetTimeUtc $buildStartTimeUtc -minVersionCode $nextVC
 exit 0
