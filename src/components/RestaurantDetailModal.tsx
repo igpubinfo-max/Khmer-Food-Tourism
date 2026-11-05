@@ -21,6 +21,7 @@ import {
   sanitizeDialablePhone,
   formatDisplayPhone,
   resolveRestaurantPhoneOnDemand,
+  resolveCoordinateVerifiedGooglePlace,
 } from '../services/googlePlacesService';
 import {
   shareRichContent,
@@ -56,6 +57,7 @@ export const RestaurantDetailModal: React.FC = () => {
 
   useEffect(() => {
     if (selectedRestaurant) {
+      resolveCoordinateVerifiedGooglePlace(selectedRestaurant).catch(() => {});
       setActivePhoto(selectedRestaurant.photoUrl);
       trackRestaurantView(selectedRestaurant.id);
       if (!sanitizeDialablePhone(selectedRestaurant.phone)) {

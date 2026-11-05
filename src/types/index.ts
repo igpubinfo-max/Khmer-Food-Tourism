@@ -5,8 +5,8 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1463;
-export const APP_RELEASE_DATE = '2026-11-05';
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1464;
+export const APP_RELEASE_DATE = '2026-11-06';
 
 /**
  * Audited duplicate food IDs removed from the Food Menu so every dish and photograph is 100% unique
@@ -2065,6 +2065,89 @@ export const isStrictVerifiedCambodiaRestaurant = (
   return true;
 };
 
+export interface VerifiedGooglePlaceCoordEntry {
+  placeId: string;
+  officialName?: string;
+  lat: number;
+  lng: number;
+  googleMapsUri?: string;
+  updatedAt: string;
+}
+
+const COORD_VERIFIED_GPLACES_STORAGE_KEY = 'kft_coord_verified_gplaces_v1';
+let inMemoryCoordVerifiedGplaces: Record<string, VerifiedGooglePlaceCoordEntry> | null = null;
+
+const computeSimpleMetersBetween = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const R = 6371000;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+const loadCoordVerifiedGplacesMap = (): Record<string, VerifiedGooglePlaceCoordEntry> => {
+  if (inMemoryCoordVerifiedGplaces) return inMemoryCoordVerifiedGplaces;
+  if (typeof window === 'undefined') {
+    inMemoryCoordVerifiedGplaces = {};
+    return inMemoryCoordVerifiedGplaces;
+  }
+  try {
+    const raw = localStorage.getItem(COORD_VERIFIED_GPLACES_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        inMemoryCoordVerifiedGplaces = parsed;
+        return inMemoryCoordVerifiedGplaces!;
+      }
+    }
+  } catch {}
+  inMemoryCoordVerifiedGplaces = {};
+  return inMemoryCoordVerifiedGplaces;
+};
+
+export const getCachedVerifiedPlaceForCoords = (
+  idOrKey?: string | null,
+  targetLat?: number | null,
+  targetLng?: number | null
+): VerifiedGooglePlaceCoordEntry | null => {
+  if (!isValidCambodiaCoordinates(targetLat, targetLng)) return null;
+  const map = loadCoordVerifiedGplacesMap();
+  const coordKey = `coord:${Number(targetLat!.toFixed(4))},${Number(targetLng!.toFixed(4))}`;
+  const entry = (idOrKey && map[idOrKey]) || map[coordKey];
+  if (!entry || !isValidOfficialGooglePlaceId(entry.placeId)) return null;
+  if (!isValidCambodiaCoordinates(entry.lat, entry.lng)) return null;
+  // Strict coordinate guard: resolved place must be within 3.5 km of the verified coordinates
+  if (computeSimpleMetersBetween(targetLat!, targetLng!, entry.lat, entry.lng) > 3500) {
+    return null;
+  }
+  return entry;
+};
+
+export const saveCachedVerifiedPlaceForCoords = (
+  idOrKey: string | undefined | null,
+  targetLat: number,
+  targetLng: number,
+  entry: VerifiedGooglePlaceCoordEntry
+): void => {
+  if (!isValidCambodiaCoordinates(targetLat, targetLng)) return;
+  if (!isValidOfficialGooglePlaceId(entry.placeId)) return;
+  if (computeSimpleMetersBetween(targetLat, targetLng, entry.lat, entry.lng) > 3500) return;
+  const map = loadCoordVerifiedGplacesMap();
+  const coordKey = `coord:${Number(targetLat.toFixed(4))},${Number(targetLng.toFixed(4))}`;
+  map[coordKey] = entry;
+  if (idOrKey) {
+    map[idOrKey] = entry;
+  }
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(COORD_VERIFIED_GPLACES_STORAGE_KEY, JSON.stringify(map));
+    } catch {}
+  }
+};
+
 export const buildCanonicalGoogleMapsPinUrl = (
   lat: number,
   lng: number,
@@ -2075,14 +2158,11 @@ export const buildCanonicalGoogleMapsPinUrl = (
   const lngFixed = Number(lng.toFixed(6));
   if (isValidOfficialGooglePlaceId(googlePlaceId)) {
     const cleanId = googlePlaceId!.trim();
-    if (cleanId.startsWith('0x')) {
-      return `https://www.google.com/maps?q=${latFixed},${lngFixed}&ftid=${encodeURIComponent(cleanId)}`;
-    }
     const q = placeNameQuery?.trim() ? encodeURIComponent(placeNameQuery.trim()) : `${latFixed},${lngFixed}`;
+    if (cleanId.startsWith('0x')) {
+      return `https://www.google.com/maps?q=${q}&ftid=${encodeURIComponent(cleanId)}`;
+    }
     return `https://www.google.com/maps/search/?api=1&query=${q}&query_place_id=${encodeURIComponent(cleanId)}`;
-  }
-  if (placeNameQuery && placeNameQuery.trim().length > 2) {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeNameQuery.trim())}`;
   }
   return `https://www.google.com/maps/search/?api=1&query=${latFixed},${lngFixed}`;
 };
@@ -2098,7 +2178,7 @@ export const buildCanonicalGoogleMapsDirectionsUrl = (
   const lngFixed = Number(lng.toFixed(6));
   const hasOfficialPlaceId = isValidOfficialGooglePlaceId(googlePlaceId) && googlePlaceId!.trim().startsWith('ChIJ');
   const destParam =
-    !hasOfficialPlaceId && placeNameQuery && placeNameQuery.trim().length > 2
+    hasOfficialPlaceId && placeNameQuery && placeNameQuery.trim().length > 2
       ? encodeURIComponent(placeNameQuery.trim())
       : `${latFixed},${lngFixed}`;
   let url = `https://www.google.com/maps/dir/?api=1&destination=${destParam}`;
@@ -2154,9 +2234,15 @@ export const getRestaurantGoogleExternalUrl = (
   const lat = restaurant.latitude!;
   const lng = restaurant.longitude!;
   const hasValidCoords = isValidCambodiaCoordinates(lat, lng);
-  const placeId = restaurant.googlePlaceId || restaurant.googleMapsMeta?.placeId;
-  const placeNameForMaps = [restaurant.nameEn || restaurant.nameKh, restaurant.provinceEn || restaurant.provinceKh, 'Cambodia']
-    .map(s => (s || '').trim())
+  const cachedVerified = hasValidCoords ? getCachedVerifiedPlaceForCoords(restaurant.id, lat, lng) : null;
+  const rawPlaceId = restaurant.googlePlaceId || restaurant.googleMapsMeta?.placeId;
+  const placeId = isValidOfficialGooglePlaceId(rawPlaceId) ? rawPlaceId : cachedVerified?.placeId;
+  const placeNameForMaps = [
+    cachedVerified?.officialName || restaurant.nameKh || restaurant.nameEn,
+    restaurant.provinceEn || restaurant.provinceKh,
+    'Cambodia',
+  ]
+    .map((s) => (s || '').trim())
     .filter(Boolean)
     .join(', ');
 
@@ -2170,15 +2256,19 @@ export const getRestaurantGoogleExternalUrl = (
     return '';
   }
 
-  // Honor explicit verified Google Maps links added by Admin or Shop Owner
+  // Honor explicit verified Google Maps links added by Admin or Shop Owner (unless it's only a raw coordinate query and we have a verified Place ID)
+  const isRawCoordOnlyUrl = Boolean(
+    restaurant.mapUrl && /[?&]query=-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/i.test(restaurant.mapUrl.trim())
+  );
   if (
     (restaurant.isAdminEdited || restaurant.dataSource === 'vip_owner' || Boolean(restaurant.ownerId)) &&
-    isValidGoogleMapsUrl(restaurant.mapUrl)
+    isValidGoogleMapsUrl(restaurant.mapUrl) &&
+    (!isRawCoordOnlyUrl || !isValidOfficialGooglePlaceId(placeId))
   ) {
     return restaurant.mapUrl!.trim();
   }
 
-  const metaUri = restaurant.googleMapsMeta?.googleMapsUri;
+  const metaUri = restaurant.googleMapsMeta?.googleMapsUri || cachedVerified?.googleMapsUri;
   if (metaUri && metaUri.startsWith('http') && isValidOfficialGooglePlaceId(placeId)) {
     return metaUri;
   }
@@ -2249,18 +2339,27 @@ export const getDestinationGoogleExternalUrl = (
   }
   const lat = destination.latitude!;
   const lng = destination.longitude!;
-  const placeId = destination.googlePlaceId || destination.googleMapsMeta?.placeId;
+  const hasValidCoords = isValidCambodiaCoordinates(lat, lng);
+  const cachedVerified = hasValidCoords ? getCachedVerifiedPlaceForCoords(destination.id, lat, lng) : null;
+  const rawPlaceId = destination.googlePlaceId || destination.googleMapsMeta?.placeId;
+  const placeId = isValidOfficialGooglePlaceId(rawPlaceId) ? rawPlaceId : cachedVerified?.placeId;
   const placeNameForMaps = [
-    destination.nameEn || destination.nameKh,
-    destination.addressEn || destination.provinceEn || destination.provinceKh,
+    cachedVerified?.officialName || destination.nameKh || destination.nameEn,
+    destination.provinceEn || destination.provinceKh,
     'Cambodia',
   ]
-    .map(s => (s || '').trim())
+    .map((s) => (s || '').trim())
     .filter(Boolean)
     .join(', ');
 
   if (mode === 'directions') {
-    return buildCanonicalGoogleMapsDirectionsUrl(lat, lng, origin, placeId, placeNameForMaps);
+    if (hasValidCoords) {
+      return buildCanonicalGoogleMapsDirectionsUrl(lat, lng, origin, placeId, placeNameForMaps);
+    }
+    if (isValidGoogleMapsUrl(destination.mapUrl)) {
+      return destination.mapUrl!.trim();
+    }
+    return '';
   }
 
   if (
@@ -2271,7 +2370,15 @@ export const getDestinationGoogleExternalUrl = (
     return destination.mapUrl.trim();
   }
 
-  return buildCanonicalGoogleMapsPinUrl(lat, lng, placeId, placeNameForMaps);
+  if (hasValidCoords) {
+    return buildCanonicalGoogleMapsPinUrl(lat, lng, placeId, placeNameForMaps);
+  }
+
+  if (isValidGoogleMapsUrl(destination.mapUrl)) {
+    return destination.mapUrl!.trim();
+  }
+
+  return '';
 };
 
 export const openDestinationGoogleExternal = (
@@ -2298,10 +2405,22 @@ export const getTrendingFoodGoogleExternalUrl = (
   }
   const lat = item.latitude!;
   const lng = item.longitude!;
-  if (mode === 'directions') {
-    return buildCanonicalGoogleMapsDirectionsUrl(lat, lng, origin);
+  if (!isValidCambodiaCoordinates(lat, lng)) {
+    return '';
   }
-  return buildCanonicalGoogleMapsPinUrl(lat, lng);
+  const cachedVerified = getCachedVerifiedPlaceForCoords(item.id, lat, lng);
+  const placeNameForMaps = [
+    cachedVerified?.officialName || item.restaurantNameKh || item.restaurantNameEn,
+    item.locationKh,
+    'Cambodia',
+  ]
+    .map((s) => (s || '').trim())
+    .filter(Boolean)
+    .join(', ');
+  if (mode === 'directions') {
+    return buildCanonicalGoogleMapsDirectionsUrl(lat, lng, origin, cachedVerified?.placeId, placeNameForMaps);
+  }
+  return buildCanonicalGoogleMapsPinUrl(lat, lng, cachedVerified?.placeId, placeNameForMaps);
 };
 
 export const openTrendingFoodGoogleExternal = (

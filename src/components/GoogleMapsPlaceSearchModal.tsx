@@ -5,7 +5,11 @@ import {
   Navigation, ShieldCheck, Database, SlidersHorizontal, Phone, Image as ImageIcon, ArrowUp
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { isUserVipActive } from '../types';
+import {
+  isUserVipActive,
+  isValidCambodiaCoordinates,
+  buildCanonicalGoogleMapsPinUrl,
+} from '../types';
 import { tr, translateProvinceName } from '../utils/i18n';
 import { translateDynamicTextToZh } from '../utils/zhDynamicTranslator';
 import {
@@ -915,14 +919,18 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   const isDup = Boolean(dupInfo?.isDuplicate);
                   const isSelected = selectedPlaceIds.has(place.placeId);
                   const isEditingThis = editingPlaceId === place.placeId;
-                  const safeLat = Number(place.latitude ?? place.lat ?? 11.5564);
-                  const safeLng = Number(place.longitude ?? place.lng ?? 104.9282);
+                  const rawLat = Number(place.latitude ?? place.lat);
+                  const rawLng = Number(place.longitude ?? place.lng);
+                  const hasValidPlaceCoords = isValidCambodiaCoordinates(rawLat, rawLng);
+                  const safeLat = hasValidPlaceCoords ? rawLat : 11.5564;
+                  const safeLng = hasValidPlaceCoords ? rawLng : 104.9282;
                   const safeRating = Number(place.rating ?? 0);
                   const safeRatingCount = Number(place.userRatingCount ?? place.reviewCount ?? 0);
-                  const placeMapsHref =
-                    place.googleMapsUrl ||
-                    (place as any).mapUrl ||
-                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.nameKh || place.nameEn || 'Cambodia')}`;
+                  const placeMapsHref = hasValidPlaceCoords
+                    ? buildCanonicalGoogleMapsPinUrl(safeLat, safeLng, place.googlePlaceId, place.nameKh || place.nameEn)
+                    : place.googleMapsUrl ||
+                      (place as any).mapUrl ||
+                      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.nameKh || place.nameEn || 'Cambodia')}`;
                   const displayTitle =
                     language === 'km'
                       ? place.nameKh || place.nameEn

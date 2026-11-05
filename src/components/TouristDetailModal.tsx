@@ -16,6 +16,7 @@ import {
 } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
+import { resolveCoordinateVerifiedGooglePlace } from '../services/googlePlacesService';
 import {
   formatRichShareText,
   copyTextNativeOrWeb,
@@ -55,6 +56,7 @@ export const TouristDetailModal: React.FC = () => {
 
   useEffect(() => {
     if (selectedDestination) {
+      resolveCoordinateVerifiedGooglePlace(selectedDestination).catch(() => {});
       setActiveHeroPhoto(selectedDestination.photoUrl || '');
       setEditNameKh(selectedDestination.nameKh || '');
       setEditNameEn(selectedDestination.nameEn || '');

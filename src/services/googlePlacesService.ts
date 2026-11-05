@@ -20,10 +20,13 @@ import {
   DestinationCategorySlug,
   RestaurantPriceLevel,
   GoogleMapsPlaceMetadata,
+  VerifiedGooglePlaceCoordEntry,
   isValidCambodiaCoordinates,
   isValidOfficialGooglePlaceId,
   isPlaceLocationVerified,
   isStrictVerifiedCambodiaRestaurant,
+  getCachedVerifiedPlaceForCoords,
+  saveCachedVerifiedPlaceForCoords,
   buildCanonicalGoogleMapsPinUrl,
   buildCanonicalGoogleMapsDirectionsUrl,
   openExternalUrlNativeSafe,
@@ -989,8 +992,12 @@ function buildLocalSmartCache(raw: string | null): GooglePlaceCachedItem[] {
           const cleanGpid = isValidOfficialGooglePlaceId(item.googlePlaceId) ? item.googlePlaceId : '';
           const hasValidCoords = isValidCambodiaCoordinates(item.lat, item.lng);
           if (!hasValidCoords && !cleanGpid) continue;
+          const placeNameQuery = [item.nameEn || item.nameKh, item.address || item.province, 'Cambodia']
+            .map((s: any) => String(s || '').trim())
+            .filter(Boolean)
+            .join(', ');
           const cleanMapsUrl = hasValidCoords
-            ? buildCanonicalGoogleMapsPinUrl(item.lat, item.lng, cleanGpid || undefined)
+            ? buildCanonicalGoogleMapsPinUrl(item.lat, item.lng, cleanGpid || undefined, placeNameQuery)
             : item.googleMapsUrl;
           mergedMap.set(item.placeId, {
             ...item,
@@ -1250,6 +1257,10 @@ export function buildExternalGoogleMapsUrl(
   place: {
     nameKh?: string;
     nameEn?: string;
+    address?: string;
+    addressKh?: string;
+    province?: string;
+    provinceKh?: string;
     lat?: number;
     lng?: number;
     googlePlaceId?: string;
@@ -1262,12 +1273,20 @@ export function buildExternalGoogleMapsUrl(
     ? place.googlePlaceId!.trim()
     : undefined;
   const hasCoords = isValidCambodiaCoordinates(place.lat, place.lng);
+  const placeNameQuery = [
+    place.nameEn || place.nameKh,
+    place.address || place.province || place.provinceKh,
+    'Cambodia',
+  ]
+    .map(s => (s || '').trim())
+    .filter(Boolean)
+    .join(', ');
 
   if (hasCoords) {
     if (mode === 'directions') {
-      return buildCanonicalGoogleMapsDirectionsUrl(place.lat!, place.lng!, origin, validPlaceId);
+      return buildCanonicalGoogleMapsDirectionsUrl(place.lat!, place.lng!, origin, validPlaceId, placeNameQuery);
     }
-    return buildCanonicalGoogleMapsPinUrl(place.lat!, place.lng!, validPlaceId);
+    return buildCanonicalGoogleMapsPinUrl(place.lat!, place.lng!, validPlaceId, placeNameQuery);
   }
 
   if (validPlaceId && mode !== 'directions') {
@@ -2197,7 +2216,12 @@ function searchAppVerifiedCambodiaDirectory(
         photoUrls: r.galleryPhotos && r.galleryPhotos.length > 0 ? r.galleryPhotos : [r.photoUrl],
         hasOfficialGooglePhoto: true,
         hasRealGooglePhoto: true,
-        googleMapsUrl: buildCanonicalGoogleMapsPinUrl(r.latitude, r.longitude, cleanGpid || undefined),
+        googleMapsUrl: buildCanonicalGoogleMapsPinUrl(
+          r.latitude,
+          r.longitude,
+          cleanGpid || undefined,
+          [r.nameEn || r.nameKh, r.provinceEn || r.provinceKh || prov, 'Cambodia'].filter(Boolean).join(', ')
+        ),
         source: 'cambodia_extended_directory',
         cachedAt: new Date().toISOString(),
       });
@@ -2266,7 +2290,12 @@ function searchAppVerifiedCambodiaDirectory(
         photoUrls: d.galleryPhotos && d.galleryPhotos.length > 0 ? d.galleryPhotos : [photoUrl],
         hasOfficialGooglePhoto: Boolean(d.photoUrl),
         hasRealGooglePhoto: Boolean(d.photoUrl),
-        googleMapsUrl: buildCanonicalGoogleMapsPinUrl(d.latitude, d.longitude, cleanGpid || undefined),
+        googleMapsUrl: buildCanonicalGoogleMapsPinUrl(
+          d.latitude,
+          d.longitude,
+          cleanGpid || undefined,
+          [d.nameEn || d.nameKh, d.addressEn || d.provinceEn || d.provinceKh || prov, 'Cambodia'].filter(Boolean).join(', ')
+        ),
         source: 'cambodia_extended_directory',
         cachedAt: new Date().toISOString(),
       });
@@ -3000,7 +3029,7 @@ async function fetchFreeGoogleMapsTbmPlaces(
         continue;
       }
 
-      const rawPlaceId = String(it[78] || '').trim();
+      const rawPlaceId = String(it[78] || it[10] || '').trim();
       const validGpid = isValidOfficialGooglePlaceId(rawPlaceId) ? rawPlaceId : '';
       const placeId = validGpid
         ? `gmap-${validGpid}`
@@ -3066,7 +3095,7 @@ async function fetchFreeGoogleMapsTbmPlaces(
         photoUrls: hasOfficialPhoto ? rawImgs : [primaryPhoto],
         hasOfficialGooglePhoto: hasOfficialPhoto,
         hasRealGooglePhoto: hasOfficialPhoto,
-        googleMapsUrl: buildCanonicalGoogleMapsPinUrl(lat, lng, validGpid || undefined),
+        googleMapsUrl: buildCanonicalGoogleMapsPinUrl(lat, lng, validGpid || undefined, nameKh || nameEn),
         types: typeList,
         source: 'google_maps_api',
         cachedAt: new Date().toISOString(),
@@ -3077,6 +3106,119 @@ async function fetchFreeGoogleMapsTbmPlaces(
   } catch {
     return [];
   }
+}
+
+const inFlightCoordPlaceResolvers = new Map<string, Promise<VerifiedGooglePlaceCoordEntry | null>>();
+
+/**
+ * Resolves and caches the official Google Maps Place ID (`ChIJ...` or `0x...`) and Place Name
+ * for a destination or restaurant, strictly verified to be within 3.5 km of its verified GPS coordinates.
+ */
+export async function resolveCoordinateVerifiedGooglePlace(item: {
+  id?: string;
+  nameKh?: string;
+  nameEn?: string;
+  provinceKh?: string;
+  provinceEn?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  lat?: number | null;
+  lng?: number | null;
+  googlePlaceId?: string | null;
+}): Promise<VerifiedGooglePlaceCoordEntry | null> {
+  const lat = typeof item.latitude === 'number' ? item.latitude : item.lat;
+  const lng = typeof item.longitude === 'number' ? item.longitude : item.lng;
+  if (!isValidCambodiaCoordinates(lat, lng)) return null;
+
+  if (isValidOfficialGooglePlaceId(item.googlePlaceId)) {
+    const existingEntry: VerifiedGooglePlaceCoordEntry = {
+      placeId: item.googlePlaceId!.trim(),
+      officialName: (item.nameKh || item.nameEn || '').trim(),
+      lat: lat!,
+      lng: lng!,
+      updatedAt: new Date().toISOString(),
+    };
+    saveCachedVerifiedPlaceForCoords(item.id, lat!, lng!, existingEntry);
+    return existingEntry;
+  }
+
+  const cached = getCachedVerifiedPlaceForCoords(item.id, lat, lng);
+  if (cached) return cached;
+
+  const lockKey = item.id || `coord:${lat!.toFixed(4)},${lng!.toFixed(4)}`;
+  const active = inFlightCoordPlaceResolvers.get(lockKey);
+  if (active) return active;
+
+  const task = (async (): Promise<VerifiedGooglePlaceCoordEntry | null> => {
+    try {
+      const localCache = getLocalSmartCache();
+      let bestCandidate: GooglePlaceCachedItem | null = null;
+      let bestDist = 3500;
+      const targetNormKh = normalizePlaceNameForComparison(item.nameKh);
+      const targetNormEn = normalizePlaceNameForComparison(item.nameEn);
+
+      for (const c of localCache) {
+        if (!isValidOfficialGooglePlaceId(c.googlePlaceId)) continue;
+        const d = calculateHaversineMeters(lat!, lng!, c.lat, c.lng);
+        if (d > 2500) continue;
+        const cNormKh = normalizePlaceNameForComparison(c.nameKh);
+        const cNormEn = normalizePlaceNameForComparison(c.nameEn);
+        const nameMatch =
+          (targetNormKh && (cNormKh.includes(targetNormKh) || targetNormKh.includes(cNormKh))) ||
+          (targetNormEn && (cNormEn.includes(targetNormEn) || targetNormEn.includes(cNormEn))) ||
+          d <= 250;
+        if (nameMatch && d < bestDist) {
+          bestDist = d;
+          bestCandidate = c;
+        }
+      }
+
+      if (!bestCandidate) {
+        const provGeo = resolveProvinceGeoConfig(item.provinceKh || item.provinceEn);
+        const queries = Array.from(
+          new Set(
+            [
+              item.nameKh ? `${item.nameKh} ${item.provinceKh || item.provinceEn || ''}`.trim() : '',
+              item.nameEn ? `${item.nameEn} ${item.provinceEn || item.provinceKh || ''}`.trim() : '',
+            ].filter((q) => q.length >= 3)
+          )
+        );
+        for (const q of queries) {
+          const tbmItems = await fetchFreeGoogleMapsTbmPlaces(q, provGeo, 'all', []);
+          for (const c of tbmItems) {
+            if (!isValidOfficialGooglePlaceId(c.googlePlaceId)) continue;
+            const d = calculateHaversineMeters(lat!, lng!, c.lat, c.lng);
+            if (d <= 3500 && d < bestDist) {
+              bestDist = d;
+              bestCandidate = c;
+            }
+          }
+          if (bestCandidate && bestDist <= 1200) break;
+        }
+      }
+
+      if (bestCandidate && isValidOfficialGooglePlaceId(bestCandidate.googlePlaceId)) {
+        const resolvedEntry: VerifiedGooglePlaceCoordEntry = {
+          placeId: bestCandidate.googlePlaceId!.trim(),
+          officialName: (bestCandidate.nameKh || bestCandidate.nameEn || item.nameKh || item.nameEn || '').trim(),
+          lat: bestCandidate.lat,
+          lng: bestCandidate.lng,
+          googleMapsUri: bestCandidate.googleMapsUrl,
+          updatedAt: new Date().toISOString(),
+        };
+        saveCachedVerifiedPlaceForCoords(item.id, lat!, lng!, resolvedEntry);
+        return resolvedEntry;
+      }
+      return null;
+    } catch {
+      return null;
+    } finally {
+      inFlightCoordPlaceResolvers.delete(lockKey);
+    }
+  })();
+
+  inFlightCoordPlaceResolvers.set(lockKey, task);
+  return task;
 }
 
 /**
@@ -3350,9 +3492,7 @@ async function searchLiveCambodiaMultiSource(
             photoUrls: [svgPhoto],
             hasOfficialGooglePhoto: false,
             hasRealGooglePhoto: false,
-            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              `${displayName} ${lat},${lng}`
-            )}`,
+            googleMapsUrl: buildCanonicalGoogleMapsPinUrl(lat, lng),
             types: [osmKey, osmVal].filter(Boolean),
             source: 'smart_cache_cloud',
             cachedAt: new Date().toISOString(),
@@ -3509,9 +3649,7 @@ async function searchLiveCambodiaMultiSource(
             photoUrls: [svgPhoto],
             hasOfficialGooglePhoto: false,
             hasRealGooglePhoto: false,
-            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              `${displayName} ${lat},${lng}`
-            )}`,
+            googleMapsUrl: buildCanonicalGoogleMapsPinUrl(lat, lng),
             types: [placeType].filter(Boolean),
             source: 'smart_cache_cloud',
             cachedAt: new Date().toISOString(),
@@ -3561,8 +3699,9 @@ async function searchLiveCambodiaMultiSource(
           return true;
         })
         .map((item: any, itemIdx: number): GooglePlaceCachedItem | null => {
-          const lat = Number(item.lat || 11.5564);
-          const lng = Number(item.lon || 104.9282);
+          const lat = Number(item.lat);
+          const lng = Number(item.lon);
+          if (!isValidCambodiaCoordinates(lat, lng)) return null;
           const rawName = String(
             item.namedetails?.['name:km'] ||
               item.namedetails?.name ||
@@ -3643,9 +3782,7 @@ async function searchLiveCambodiaMultiSource(
             photoUrls: [svgPhoto],
             hasOfficialGooglePhoto: false,
             hasRealGooglePhoto: false,
-            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              `${rawName} ${lat},${lng}`
-            )}`,
+            googleMapsUrl: buildCanonicalGoogleMapsPinUrl(lat, lng),
             types: [itemClass, itemType].filter(Boolean),
             source: 'smart_cache_cloud',
             cachedAt: new Date().toISOString(),
@@ -3853,9 +3990,15 @@ export async function searchGoogleMapsPlacesAdvanced(
       deduped = scored.map((x) => x.it);
     }
 
-    const normalizedItems = deduped.map((it) => {
-      const safeLat = Number.isFinite(Number(it.lat)) ? Number(it.lat) : Number.isFinite(Number(it.latitude)) ? Number(it.latitude) : 11.5564;
-      const safeLng = Number.isFinite(Number(it.lng)) ? Number(it.lng) : Number.isFinite(Number(it.longitude)) ? Number(it.longitude) : 104.9282;
+    const normalizedItems = deduped
+      .filter((it) => {
+        const cLat = Number.isFinite(Number(it.lat)) ? Number(it.lat) : Number(it.latitude);
+        const cLng = Number.isFinite(Number(it.lng)) ? Number(it.lng) : Number(it.longitude);
+        return isValidCambodiaCoordinates(cLat, cLng);
+      })
+      .map((it) => {
+      const safeLat = Number.isFinite(Number(it.lat)) ? Number(it.lat) : Number(it.latitude);
+      const safeLng = Number.isFinite(Number(it.lng)) ? Number(it.lng) : Number(it.longitude);
       const safeRating = Number.isFinite(Number(it.rating)) ? Number(it.rating) : 0;
       const safeCount = Number.isFinite(Number(it.reviewCount)) ? Number(it.reviewCount) : Number.isFinite(Number(it.userRatingCount)) ? Number(it.userRatingCount) : 0;
       const resolvedProv = stripForeignScripts(it.provinceKh || it.province || inferCambodiaProvinceFromAddressOrGps(it.address, safeLat, safeLng));
@@ -5150,9 +5293,7 @@ export async function searchNearbyPlacesWithin500m(
             photoUrls: [svgPhoto],
             hasOfficialGooglePhoto: false,
             hasRealGooglePhoto: false,
-            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              `${rawNameEn || rawNameKh} ${pLat},${pLng}`
-            )}`,
+            googleMapsUrl: buildCanonicalGoogleMapsPinUrl(pLat, pLng),
             types: [cls, itemType].filter(Boolean),
             source: 'smart_cache_cloud',
             cachedAt: new Date().toISOString(),
@@ -5250,9 +5391,7 @@ export async function searchNearbyPlacesWithin500m(
             photoUrls: [svgPhoto],
             hasOfficialGooglePhoto: false,
             hasRealGooglePhoto: false,
-            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              `${displayName} ${pLat},${pLng}`
-            )}`,
+            googleMapsUrl: buildCanonicalGoogleMapsPinUrl(pLat, pLng),
             types: [placeType].filter(Boolean),
             source: 'smart_cache_cloud',
             cachedAt: new Date().toISOString(),
