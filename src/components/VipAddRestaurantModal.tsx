@@ -156,6 +156,8 @@ export const VipAddRestaurantModal: React.FC = () => {
     setIsVipAddRestaurantModalOpen,
     addRestaurant,
     replaceExistingRestaurant,
+    findDuplicateOrExistingListings,
+    submitExistingListingUpgradeRequest,
     submitAdditionalStorePaymentRequest,
     getCurrentUserStoreQuota,
     deleteRestaurant,
@@ -176,6 +178,10 @@ export const VipAddRestaurantModal: React.FC = () => {
 
   // Navigation Tabs: 'create_form' (Default!) or 'my_stores' or 'pay_additional_slot'
   const [activeTab, setActiveTab] = useState<'create_form' | 'my_stores' | 'pay_additional_slot'>('create_form');
+  const [formMode, setFormMode] = useState<'add_new' | 'upgrade_existing'>('add_new');
+  const [upgradingExistingStoreId, setUpgradingExistingStoreId] = useState<string | null>(null);
+  const [existingSearchQuery, setExistingSearchQuery] = useState<string>('');
+  const [existingProvinceFilter, setExistingProvinceFilter] = useState<string>('ALL');
   const [isPreviewStep, setIsPreviewStep] = useState(false);
   const [replacingStoreId, setReplacingStoreId] = useState<string | null>(null);
   const [confirmDeleteStoreId, setConfirmDeleteStoreId] = useState<string | null>(null);
@@ -185,7 +191,8 @@ export const VipAddRestaurantModal: React.FC = () => {
   const dynamicPlans = getDynamicVipPlans(appSettings);
   const quota = getCurrentUserStoreQuota(currentUser);
   const ownedRestaurants = getOwnedRestaurantsForUser(currentUser);
-  const requiresAdditionalPayment = !isAdmin && !replacingStoreId && quota.remainingAvailableSlots <= 0;
+  const requiresAdditionalPayment =
+    !isAdmin && !replacingStoreId && !upgradingExistingStoreId && formMode === 'add_new' && quota.remainingAvailableSlots <= 0;
 
   // 7 Core Form Fields requested by User:
   // 1. Shop / Hotel Name
@@ -240,6 +247,68 @@ export const VipAddRestaurantModal: React.FC = () => {
     [replacingStoreId, ownedRestaurants]
   );
 
+  const targetUpgradingExistingStore = useMemo(
+    () => (upgradingExistingStoreId ? restaurants.find((r) => r.id === upgradingExistingStoreId) || null : null),
+    [upgradingExistingStoreId, restaurants]
+  );
+
+  // Live duplicate detection when user is in 'add_new' mode
+  const detectedDuplicates = useMemo(() => {
+    if (formMode !== 'add_new' || replacingStoreId || upgradingExistingStoreId) return [];
+    if (nameKh.trim().length < 2 && nameEn.trim().length < 2 && phone.trim().length < 8) return [];
+    return findDuplicateOrExistingListings({
+      nameKh: nameKh.trim(),
+      nameEn: nameEn.trim(),
+      phone: phone.trim(),
+      mapUrl: shopMapUrl.trim(),
+      googlePlaceId: importedGooglePlaceId,
+      latitude: shopLat,
+      longitude: shopLng,
+      provinceKh,
+      businessType,
+    });
+  }, [
+    formMode,
+    replacingStoreId,
+    upgradingExistingStoreId,
+    nameKh,
+    nameEn,
+    phone,
+    shopMapUrl,
+    importedGooglePlaceId,
+    shopLat,
+    shopLng,
+    provinceKh,
+    businessType,
+    findDuplicateOrExistingListings,
+  ]);
+
+  // Searchable list of existing shops/hotels for the 'upgrade_existing' selector
+  const searchableExistingListings = useMemo(() => {
+    const q = existingSearchQuery.trim().toLowerCase();
+    return restaurants
+      .filter((r) => {
+        if (!r || r.status === 'rejected') return false;
+        const rType = r.businessType === 'hotel' ? 'hotel' : 'restaurant';
+        if (rType !== businessType) return false;
+        if (existingProvinceFilter !== 'ALL' && r.provinceKh !== existingProvinceFilter) return false;
+        if (!q) return true;
+        const nKh = (r.nameKh || '').toLowerCase();
+        const nEn = (r.nameEn || '').toLowerCase();
+        const addr = (r.addressKh || '').toLowerCase();
+        const ph = (r.phone || '').replace(/[\s\-+]/g, '');
+        const qClean = q.replace(/[\s\-+]/g, '');
+        return (
+          nKh.includes(q) ||
+          nEn.includes(q) ||
+          addr.includes(q) ||
+          (qClean.length >= 3 && ph.includes(qClean)) ||
+          (Array.isArray(r.signatureDishesKh) && r.signatureDishesKh.some((d) => d.toLowerCase().includes(q)))
+        );
+      })
+      .slice(0, 30);
+  }, [restaurants, businessType, existingProvinceFilter, existingSearchQuery]);
+
   const activeCategoryList = businessType === 'hotel' ? HOTEL_CATEGORIES : SHOP_CATEGORIES;
   const selectedCategoryObj = useMemo(
     () => activeCategoryList.find((c) => c.id === businessCategory) || activeCategoryList[0],
@@ -259,12 +328,51 @@ export const VipAddRestaurantModal: React.FC = () => {
     setShopPhoto('');
     setModerationWarning(null);
     setReplacingStoreId(null);
+    setUpgradingExistingStoreId(null);
+    setExistingSearchQuery('');
     setShowMoreOptions(false);
     setIsPreviewStep(false);
     setImportedGooglePlaceId(undefined);
     setImportedGoogleMeta(undefined);
     setWebsiteUrl('');
     setSignatureDishesKh([businessType === 'hotel' ? 'បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ និង Wi-Fi' : 'ម្ហូបខ្មែរប្រចាំហាង']);
+  };
+
+  const beginUpgradeExistingStore = (store: (typeof restaurants)[0]) => {
+    const bType = store.businessType === 'hotel' ? 'hotel' : 'restaurant';
+    setBusinessType(bType);
+    setFormMode('upgrade_existing');
+    setUpgradingExistingStoreId(store.id);
+    setReplacingStoreId(null);
+    setNameKh(store.nameKh || '');
+    setNameEn(store.nameEn || '');
+    setProvinceKh(store.provinceKh || 'រាជធានីភ្នំពេញ');
+    setProvinceEn(store.provinceEn || 'Phnom Penh');
+    setAddressKh(store.addressKh || '');
+    const latVal = typeof store.latitude === 'number' && store.latitude !== 0 ? store.latitude : null;
+    const lngVal = typeof store.longitude === 'number' && store.longitude !== 0 ? store.longitude : null;
+    setShopLat(latVal);
+    setShopLng(lngVal);
+    setGpsInputText(latVal !== null && lngVal !== null ? `${latVal.toFixed(6)}, ${lngVal.toFixed(6)}` : '');
+    setShopMapUrl(store.mapUrl || '');
+    setPhone(store.phone || currentUser?.phone || '');
+    setOpeningHoursKh(store.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់');
+    setPriceLevel(store.priceLevel || '$');
+    setShopPhoto(store.profileImage || store.photoUrl || '');
+    setModerationWarning(null);
+    setDescriptionKh(store.descriptionKh || '');
+    setImportedGooglePlaceId(store.googlePlaceId);
+    setImportedGoogleMeta(store.googleMapsMeta);
+    setBusinessCategory(store.businessCategory || (bType === 'hotel' ? 'hotel' : 'restaurant'));
+    setWebsiteUrl(store.websiteUrl || store.googleMapsMeta?.websiteUri || '');
+    setSignatureDishesKh(
+      Array.isArray(store.signatureDishesKh) && store.signatureDishesKh.length > 0
+        ? store.signatureDishesKh
+        : [bType === 'hotel' ? 'បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ និង Wi-Fi' : 'ម្ហូបខ្មែរប្រចាំហាង']
+    );
+    setShowMoreOptions(true);
+    setIsPreviewStep(false);
+    setActiveTab('create_form');
   };
 
   const beginReplaceStore = (store: (typeof ownedRestaurants)[0]) => {
@@ -328,6 +436,11 @@ export const VipAddRestaurantModal: React.FC = () => {
       }
     }
 
+    const legacyAddMode = (window as any).__kft_vip_add_mode;
+    if (legacyAddMode) {
+      delete (window as any).__kft_vip_add_mode;
+    }
+
     const initialReq = (window as any).__kft_vip_store_initial_mode;
     if (initialReq) {
       delete (window as any).__kft_vip_store_initial_mode;
@@ -335,7 +448,22 @@ export const VipAddRestaurantModal: React.FC = () => {
       setBusinessType(reqType);
       setBusinessCategory(reqType === 'hotel' ? 'hotel' : 'restaurant');
       setSignatureDishesKh([reqType === 'hotel' ? 'បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ និង Wi-Fi' : 'ម្ហូបខ្មែរប្រចាំហាង']);
-      if (initialReq.mode === 'replace' && initialReq.storeId) {
+      if (initialReq.mode === 'upgrade_existing') {
+        setFormMode('upgrade_existing');
+        if (initialReq.storeId) {
+          const foundExisting = restaurants.find((s) => s.id === initialReq.storeId);
+          if (foundExisting) {
+            beginUpgradeExistingStore(foundExisting);
+            return;
+          }
+        }
+        setUpgradingExistingStoreId(null);
+        setReplacingStoreId(null);
+        setSubmittedPendingShop(null);
+        setIsPreviewStep(false);
+        setActiveTab('create_form');
+        return;
+      } else if (initialReq.mode === 'replace' && initialReq.storeId) {
         const found = ownedRestaurants.find((s) => s.id === initialReq.storeId) || ownedRestaurants[0];
         if (found) {
           beginReplaceStore(found);
@@ -345,10 +473,17 @@ export const VipAddRestaurantModal: React.FC = () => {
         setActiveTab('my_stores');
         return;
       }
+      setFormMode('add_new');
+    } else if (legacyAddMode === 'upgrade_existing') {
+      setFormMode('upgrade_existing');
+      setBusinessType('restaurant');
+      setBusinessCategory('restaurant');
     } else {
+      setFormMode('add_new');
       setBusinessType('restaurant');
       setBusinessCategory('restaurant');
     }
+    setUpgradingExistingStoreId(null);
     setReplacingStoreId(null);
     setSubmittedPendingShop(null);
     setIsPreviewStep(false);
@@ -493,6 +628,29 @@ export const VipAddRestaurantModal: React.FC = () => {
       return;
     }
 
+    // If user is trying to add a new listing that matches an existing listing, prompt them to select & upgrade it instead of creating a duplicate
+    if (formMode === 'add_new' && !replacingStoreId && !upgradingExistingStoreId && detectedDuplicates.length > 0) {
+      const exactMatch = detectedDuplicates.find((d) => {
+        const nKhA = trimmedNameKh.toLowerCase();
+        const nKhB = (d.nameKh || '').trim().toLowerCase();
+        const nEnA = trimmedNameEn.toLowerCase();
+        const nEnB = (d.nameEn || '').trim().toLowerCase();
+        return (nKhA.length >= 3 && nKhA === nKhB) || (nEnA.length >= 3 && nEnA === nEnB);
+      });
+      if (exactMatch) {
+        showToast(
+          tr(
+            language,
+            `⚠️ «${exactMatch.nameKh || exactMatch.nameEn}» មានក្នុងប្រព័ន្ធរួចហើយ! សូមចុចប៊ូតុង «⬆️ ជ្រើសរើស និងដំឡើង» ខាងក្រោមដើម្បីស្នើកែប្រែព័ត៌មានជំនួសការបង្កើតស្ទួន។`,
+            `⚠️ "${exactMatch.nameEn || exactMatch.nameKh}" already exists! Please select the existing listing below to submit an upgrade request instead of creating a duplicate.`,
+            `⚠️ “${exactMatch.nameEn || exactMatch.nameKh}” 已存在！请选择下方现有列表提交升级申请，避免重复创建。`
+          ),
+          'warning'
+        );
+        return;
+      }
+    }
+
     setIsPreviewStep(true);
   };
 
@@ -503,7 +661,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     const trimmedNameEn = nameEn.trim();
     if (!trimmedNameKh && !trimmedNameEn) return;
 
-    if (!isAdmin && !replacingStoreId && quota.remainingAvailableSlots <= 0) {
+    if (!isAdmin && !replacingStoreId && !upgradingExistingStoreId && quota.remainingAvailableSlots <= 0) {
       setIsPreviewStep(false);
       setActiveTab('pay_additional_slot');
       return;
@@ -537,6 +695,54 @@ export const VipAddRestaurantModal: React.FC = () => {
 
     setIsSaving(true);
     try {
+      if (upgradingExistingStoreId) {
+        const upgraded = submitExistingListingUpgradeRequest(upgradingExistingStoreId, {
+          businessType,
+          nameKh: finalNameKh,
+          nameEn: finalNameEn,
+          descriptionKh:
+            descriptionKh.trim() ||
+            `${finalNameKh} (${selectedCategoryObj.labelKh.replace(/^[^\s]+\s/, '')}) — ផាសុកភាព និងសេវាកម្មល្អ។`,
+          descriptionEn: `${finalNameEn} (${selectedCategoryObj.labelEn.replace(/^[^\s]+\s/, '')}).`,
+          photoUrl: finalProfile || undefined,
+          profileImage: finalProfile || undefined,
+          galleryPhotos: combinedGallery.length > 0 ? combinedGallery : undefined,
+          phone: phone.trim() || currentUser?.phone || '',
+          addressKh: addressKh.trim() || provinceKh,
+          addressEn: addressKh.trim() || `${provinceEn}, Cambodia`,
+          provinceKh,
+          provinceEn,
+          openingHoursKh: openingHoursKh.trim() || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
+          openingHoursEn: '07:00 AM - 09:00 PM',
+          priceLevel,
+          mapUrl: resolvedMapUrl || undefined,
+          latitude: hasVerifiedCoords ? resolvedLat! : undefined,
+          longitude: hasVerifiedCoords ? resolvedLng! : undefined,
+          businessCategory: businessCategory.trim() || (businessType === 'hotel' ? 'hotel' : 'restaurant'),
+          categoryKh: selectedCategoryObj.labelKh.replace(/^[^\s]+\s/, ''),
+          categoryEn: selectedCategoryObj.labelEn.replace(/^[^\s]+\s/, ''),
+          websiteUrl: websiteUrl.trim() || undefined,
+          signatureDishesKh:
+            signatureDishesKh.length > 0 ? signatureDishesKh : [selectedCategoryObj.defaultDishKh],
+        });
+
+        if (!upgraded) {
+          setIsSaving(false);
+          return;
+        }
+
+        resetFormFields();
+        if (!isAdmin) {
+          setSubmittedPendingShop(upgraded);
+        } else {
+          setIsVipAddRestaurantModalOpen(false);
+          (window as any).__kft_manage_initial_tab = 'info';
+          setManagingRestaurant(upgraded);
+          setIsManageMenuModalOpen(true);
+        }
+        return;
+      }
+
       const newRestData = {
         nameKh: finalNameKh,
         nameEn: finalNameEn,
@@ -1365,6 +1571,229 @@ export const VipAddRestaurantModal: React.FC = () => {
             noValidate
             className="p-4 space-y-3.5 overflow-y-auto flex-1 font-khmer text-xs"
           >
+            {/* Mode Switcher: Add New vs Upgrade Existing Shop / Hotel */}
+            <div className="p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 grid grid-cols-2 gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setFormMode('add_new');
+                  setUpgradingExistingStoreId(null);
+                }}
+                className={`py-2.5 px-2.5 rounded-xl font-extrabold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                  formMode === 'add_new' && !upgradingExistingStoreId
+                    ? 'bg-[#064E3B] text-white shadow-xs'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-700/50'
+                }`}
+              >
+                <PlusCircle className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">
+                  {tr(language, 'បន្ថែមថ្មី (Add New)', 'Add New Listing', '添加新列表')}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setFormMode('upgrade_existing');
+                  setReplacingStoreId(null);
+                }}
+                className={`py-2.5 px-2.5 rounded-xl font-extrabold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                  formMode === 'upgrade_existing' || Boolean(upgradingExistingStoreId)
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-xs'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-700/50'
+                }`}
+              >
+                <span>⬆️</span>
+                <span className="truncate">
+                  {tr(
+                    language,
+                    'ដំឡើងដែលមានស្រាប់ (Upgrade Existing)',
+                    'Upgrade Existing Shop / Hotel',
+                    '升级现有店铺/酒店'
+                  )}
+                </span>
+              </button>
+            </div>
+
+            {/* Business Type Switcher: Shop / Restaurant vs Hotel / Stay */}
+            {!upgradingExistingStoreId && !replacingStoreId && (
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBusinessType('restaurant');
+                    setBusinessCategory('restaurant');
+                    setSignatureDishesKh(['ម្ហូបខ្មែរប្រចាំហាង']);
+                  }}
+                  className={`py-2 px-3 rounded-xl border text-[11px] font-bold transition cursor-pointer ${
+                    businessType === 'restaurant'
+                      ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200'
+                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                  }`}
+                >
+                  🍽️ {tr(language, 'ហាងអាហារ (Shop / Restaurant)', 'Shop / Restaurant', '餐饮店铺')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBusinessType('hotel');
+                    setBusinessCategory('hotel');
+                    setSignatureDishesKh(['បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ និង Wi-Fi']);
+                  }}
+                  className={`py-2 px-3 rounded-xl border text-[11px] font-bold transition cursor-pointer ${
+                    businessType === 'hotel'
+                      ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200'
+                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                  }`}
+                >
+                  🏨 {tr(language, 'សណ្ឋាគារ / ផ្ទះសំណាក់ (Hotel)', 'Hotel / Stay', '酒店 / 住宿')}
+                </button>
+              </div>
+            )}
+
+            {/* Existing Listing Selector when in 'upgrade_existing' mode and no listing selected yet */}
+            {formMode === 'upgrade_existing' && !upgradingExistingStoreId ? (
+              <div className="p-3.5 rounded-2xl bg-amber-50/70 dark:bg-slate-800/90 border-2 border-amber-400/70 space-y-3">
+                <div className="space-y-1">
+                  <div className="font-extrabold text-amber-950 dark:text-amber-200 text-xs flex items-center gap-1.5">
+                    <span>⬆️</span>
+                    <span>
+                      {tr(
+                        language,
+                        'ជ្រើសរើសហាង ឬសណ្ឋាគារដែលមានស្រាប់ដើម្បីដំឡើង និងកែប្រែព័ត៌មាន',
+                        'Select an Existing Shop or Hotel to Upgrade',
+                        '选择现有店铺或酒店进行升级与修改'
+                      )}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                    {tr(
+                      language,
+                      'ស្វែងរកហាង ឬសណ្ឋាគាររបស់អ្នកដែលមានក្នុងប្រព័ន្ធរួចហើយ រួចចុច «ជ្រើសរើស» ដើម្បីបន្ថែម ឬកែប្រែរូបភាព ការពិពណ៌នា លេខទូរស័ព្ទ និងទីតាំង (តម្រូវឱ្យមានការអនុម័តពី Admin មុនផ្សព្វផ្សាយ)។',
+                      'Search for your existing shop or hotel below and tap Select to update photos, descriptions, contact details, and business info (requires Admin approval before publishing).',
+                      '搜索现有店铺或酒店并点击选择，即可更新照片、简介、联系方式及位置（需管理员审核批准后发布）。'
+                    )}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={existingSearchQuery}
+                    onChange={(e) => setExistingSearchQuery(e.target.value)}
+                    placeholder={tr(
+                      language,
+                      '🔍 ស្វែងរកតាមឈ្មោះ លេខទូរស័ព្ទ ឬអាសយដ្ឋាន...',
+                      '🔍 Search by name, phone, or address...',
+                      '🔍 按名称、电话或地址搜索...'
+                    )}
+                    className="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500"
+                  />
+                  <select
+                    value={existingProvinceFilter}
+                    onChange={(e) => setExistingProvinceFilter(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-bold outline-none"
+                  >
+                    <option value="ALL">
+                      {tr(language, 'គ្រប់រាជធានី-ខេត្តទាំង ២៥', 'All 25 Provinces', '全部 25 个省市')}
+                    </option>
+                    {PROVINCES.map((p) => (
+                      <option key={p.nameKh} value={p.nameKh}>
+                        {isKm ? p.nameKh : p.nameEn}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
+                  {searchableExistingListings.length === 0 ? (
+                    <div className="p-4 text-center text-slate-500 dark:text-slate-400 text-xs">
+                      {tr(
+                        language,
+                        'រកមិនឃើញហាង/សណ្ឋាគារដែលត្រូវនឹងពាក្យស្វែងរកទេ។',
+                        'No matching existing shops or hotels found.',
+                        '未找到匹配的现有店铺或酒店。'
+                      )}
+                    </div>
+                  ) : (
+                    searchableExistingListings.map((item) => (
+                      <div
+                        key={item.id}
+                        className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2.5 hover:border-amber-400 transition"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          {item.photoUrl ? (
+                            <img
+                              src={item.photoUrl}
+                              alt={item.nameKh}
+                              className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700">
+                              <DefaultShopIcon className="w-full h-full" />
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <div className="font-bold text-slate-900 dark:text-white text-xs truncate">
+                              {item.nameKh || item.nameEn}
+                            </div>
+                            {item.nameEn && item.nameKh && (
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                                {item.nameEn}
+                              </div>
+                            )}
+                            <div className="text-[10px] text-emerald-700 dark:text-emerald-400 truncate">
+                              📍 {item.provinceKh} {item.phone ? `• 📞 ${item.phone}` : ''}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => beginUpgradeExistingStore(item)}
+                          className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-slate-950 font-black text-[11px] shrink-0 shadow-2xs transition active:scale-95 cursor-pointer"
+                        >
+                          {tr(language, '⬆️ ជ្រើសរើស', '⬆️ Select', '⬆️ 选择')}
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            ) : null}
+
+            {/* Active Existing Listing Upgrade Banner */}
+            {targetUpgradingExistingStore && (
+              <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border-2 border-amber-400 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-black uppercase text-amber-700 dark:text-amber-300">
+                      ⬆️ {tr(language, 'កំពុងស្នើដំឡើងហាង/សណ្ឋាគារដែលមានស្រាប់', 'Upgrading Existing Listing', '正在升级现有列表')}
+                    </div>
+                    <div className="font-extrabold text-xs text-slate-900 dark:text-white truncate">
+                      {targetUpgradingExistingStore.nameKh || targetUpgradingExistingStore.nameEn}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUpgradingExistingStoreId(null);
+                      setFormMode('upgrade_existing');
+                    }}
+                    className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-amber-400 text-amber-800 dark:text-amber-200 font-bold text-[10px] shrink-0 cursor-pointer"
+                  >
+                    {tr(language, '🔄 ប្តូរជ្រើសរើស', '🔄 Change', '🔄 更换选择')}
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-snug">
+                  {tr(
+                    language,
+                    'អ្នកអាចបន្ថែម ឬកែប្រែរូបភាព ការពិពណ៌នា លេខទូរស័ព្ទ អាសយដ្ឋាន និងផែនទីខាងក្រោម។ រាល់ការកែប្រែនឹងត្រូវដាក់ជូន Admin អនុម័តមុនពេលផ្សព្វផ្សាយ។',
+                    'Add or update photos, descriptions, contact details, and location below. Changes require Admin approval before publishing.',
+                    '在下方添加或更新照片、简介、联系方式及位置。修改内容需经管理员批准后发布。'
+                  )}
+                </p>
+              </div>
+            )}
+
             {/* 3-Step Khmer Guide Banner */}
             <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/50 dark:to-slate-800 border border-emerald-400/50 space-y-1.5">
               <div className="font-bold text-emerald-950 dark:text-emerald-200 text-xs flex items-center gap-1.5">
@@ -1506,6 +1935,68 @@ export const VipAddRestaurantModal: React.FC = () => {
                   className="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-white text-xs focus:border-emerald-600 outline-none"
                 />
               </div>
+
+              {/* Live Duplicate Detection Alert & 1-Tap Select to Upgrade Existing Listing */}
+              {detectedDuplicates.length > 0 && (
+                <div className="mt-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/60 border-2 border-amber-400 space-y-2 animate-fade-in">
+                  <div className="font-extrabold text-amber-900 dark:text-amber-200 text-[11px] flex items-center gap-1.5">
+                    <span>⚠️</span>
+                    <span>
+                      {tr(
+                        language,
+                        'រកឃើញហាង/សណ្ឋាគារដែលមានក្នុងប្រព័ន្ធរួចហើយ! (Duplicate Detected)',
+                        'Existing Shop / Hotel Detected in Database!',
+                        '检测到系统中已存在相同店铺/酒店！'
+                      )}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-700 dark:text-slate-300 leading-snug">
+                    {tr(
+                      language,
+                      'ដើម្បីបង្ការការបង្កើតស្ទួន សូមជ្រើសរើសហាង/សណ្ឋាគារដែលមានស្រាប់ខាងក្រោម ហើយដាក់ស្នើដំឡើង និងកែប្រែព័ត៌មាន (Upgrade Request)៖',
+                      'To prevent duplicate listings, select the existing listing below and submit an upgrade request with your updated photos, description, and contact info:',
+                      '为防止重复创建，请选择下方现有列表并提交升级与信息修改申请：'
+                    )}
+                  </p>
+                  <div className="space-y-1.5">
+                    {detectedDuplicates.slice(0, 3).map((dup) => (
+                      <div
+                        key={dup.id}
+                        className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 flex items-center justify-between gap-2"
+                      >
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          {dup.photoUrl ? (
+                            <img
+                              src={dup.photoUrl}
+                              alt={dup.nameKh}
+                              className="w-10 h-10 rounded-lg object-cover shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
+                              <DefaultShopIcon className="w-full h-full" />
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <div className="font-bold text-slate-900 dark:text-white text-xs truncate">
+                              {dup.nameKh || dup.nameEn}
+                            </div>
+                            <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                              📍 {dup.provinceKh} {dup.phone ? `• 📞 ${dup.phone}` : ''}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => beginUpgradeExistingStore(dup)}
+                          className="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-slate-950 font-black text-[10px] shrink-0 shadow-2xs cursor-pointer"
+                        >
+                          {tr(language, '⬆️ ជ្រើសរើស និងដំឡើង', '⬆️ Select & Upgrade', '⬆️ 选择并升级')}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* FIELD 2: Category */}

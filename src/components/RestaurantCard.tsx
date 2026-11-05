@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   Restaurant,
   isAdminAccount,
@@ -12,8 +12,6 @@ import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { ListingRow, ListingFeaturedCard, isVipOwnerListing } from './listing/ListingUI';
-import { fetchVerifiedShopPhotoFromGoogleMaps } from '../services/shopGooglePhotoService';
-import { recordPermanentRestaurantOverride } from '../services/permanentMediaVaultService';
 
 import type { Language } from '../types';
 
@@ -43,40 +41,14 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
     deleteRestaurant,
     trackRestaurantView,
   }) => {
-    const [autoFetchedPhoto, setAutoFetchedPhoto] = useState<string>('');
     const loc = useMemo(() => getLocalizedRestaurant(restaurant, language), [restaurant, language]);
 
     const resolvedShopPhotoUrl = useMemo(() => {
       return sanitizeRestaurantShopPhoto(
         restaurant.id,
-        restaurant.photoUrl || restaurant.profileImage || autoFetchedPhoto || ''
+        restaurant.photoUrl || restaurant.profileImage || ''
       );
-    }, [restaurant.id, restaurant.photoUrl, restaurant.profileImage, autoFetchedPhoto]);
-
-    const isVipFeatured = isVipOwnerListing(restaurant);
-
-    useEffect(() => {
-      if (!isVipFeatured || resolvedShopPhotoUrl) return;
-      let cancelled = false;
-      fetchVerifiedShopPhotoFromGoogleMaps(restaurant, allRestaurants)
-        .then((match) => {
-          if (cancelled || !match || !match.photoUrl) return;
-          setAutoFetchedPhoto(match.photoUrl);
-          const nowIso = new Date().toISOString();
-          recordPermanentRestaurantOverride({
-            ...restaurant,
-            photoUrl: match.photoUrl,
-            profileImage: match.photoUrl,
-            galleryPhotos: match.galleryPhotos.length > 0 ? match.galleryPhotos : [match.photoUrl],
-            photoUpdatedAt: nowIso,
-            updatedAt: nowIso,
-          });
-        })
-        .catch(() => {});
-      return () => {
-        cancelled = true;
-      };
-    }, [isVipFeatured, resolvedShopPhotoUrl, restaurant, allRestaurants]);
+    }, [restaurant.id, restaurant.photoUrl, restaurant.profileImage]);
 
     const handleCardClick = () => {
       trackRestaurantView(restaurant.id);

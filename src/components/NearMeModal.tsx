@@ -16,6 +16,7 @@ import {
   buildPlaceSpecificNoPhotoSvg,
 } from '../services/googlePlacesService';
 import {
+  FoodItem,
   Restaurant,
   TouristDestination,
   isGpipRegisteredRestaurant,
@@ -26,6 +27,12 @@ import {
 } from '../types';
 import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
+import {
+  classifyShopBusinessKind,
+  matchShopToProductQuery,
+  verifyShopDataForDisplay,
+} from '../utils/foodFilters';
+import { normalizeKhmerFoodText } from '../utils/khmerFoodSearch';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 
 // Haversine formula for distance between 2 GPS coordinates in meters
@@ -118,6 +125,7 @@ export const NearMeModal: React.FC = () => {
     return init === 'destinations' ? 'destinations' : 'restaurants';
   });
   const [nearbyQuery, setNearbyQuery] = useState<string>('');
+  const [targetFood, setTargetFood] = useState<FoodItem | null>(null);
   const [quickFilterId, setQuickFilterId] = useState<string>('all');
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(() => readSavedUserGps());
 
@@ -139,6 +147,13 @@ export const NearMeModal: React.FC = () => {
       if (initTab === 'restaurants' || initTab === 'destinations') {
         setActiveType(initTab);
         (window as any).__kft_near_me_initial_tab = undefined;
+      }
+      const initFood = (window as any).__kft_near_me_initial_food;
+      if (initFood && typeof initFood === 'object') {
+        setTargetFood(initFood as FoodItem);
+        (window as any).__kft_near_me_initial_food = undefined;
+      } else {
+        setTargetFood(null);
       }
       const initQuery = (window as any).__kft_near_me_initial_query;
       if (typeof initQuery === 'string') {
@@ -303,30 +318,34 @@ export const NearMeModal: React.FC = () => {
     fetchLiveNearby500m(baseCoords, true, newRadius);
   };
 
-  // Merge & deduplicate Supabase restaurants + Google Maps/Live nearby places, strictly within selectedRadiusMeters, sorted nearest first
-  const nearbyRestaurants = useMemo(() => {
+  // Merge & deduplicate verified Supabase restaurants + Google Maps/Live nearby places within user's location
+  const allVerifiedCityRestaurants = useMemo(() => {
     const mergedMap = new Map<string, Restaurant>();
+    const maxCitySearchRadius = Math.max(selectedRadiusMeters, 15000);
 
-    // 1. Add existing verified-location in-app restaurants strictly within selectedRadiusMeters
+    // 1. Add existing verified-location in-app restaurants within user's city/location area
     for (const r of restaurants) {
-      if (!isStrictVerifiedCambodiaRestaurant(r)) continue;
+      if (!verifyShopDataForDisplay(r)) continue;
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, r.latitude, r.longitude);
-      if (dist <= selectedRadiusMeters) {
+      if (dist <= maxCitySearchRadius) {
         mergedMap.set(r.id, r);
       }
     }
 
-    // 2. Merge live Google Places / Cambodia Street GPS places strictly within selectedRadiusMeters
+    // 2. Merge live Google Places / Cambodia Street GPS places within user's city/location area
     for (const gp of liveNearbyRestaurants) {
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, gp.lat, gp.lng);
-      if (dist > selectedRadiusMeters) continue;
+      if (dist > maxCitySearchRadius) continue;
 
       const existingMatch = findDuplicateRestaurantForGooglePlace(gp, Array.from(mergedMap.values()));
       if (existingMatch) {
-        mergedMap.set(existingMatch.id, mergeGoogleMapsPlaceWithExistingRestaurant(existingMatch, gp));
+        const merged = mergeGoogleMapsPlaceWithExistingRestaurant(existingMatch, gp);
+        if (verifyShopDataForDisplay(merged)) {
+          mergedMap.set(existingMatch.id, merged);
+        }
       } else {
         const converted = convertGooglePlaceToRestaurant(gp);
-        if (isStrictVerifiedCambodiaRestaurant(converted)) {
+        if (verifyShopDataForDisplay(converted)) {
           mergedMap.set(converted.id, converted);
         }
       }
@@ -337,9 +356,13 @@ export const NearMeModal: React.FC = () => {
         const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, r.latitude, r.longitude);
         return { ...r, distanceMeters: dist };
       })
-      .filter(r => Number.isFinite(r.distanceMeters) && r.distanceMeters <= selectedRadiusMeters)
+      .filter(r => Number.isFinite(r.distanceMeters) && r.distanceMeters <= maxCitySearchRadius)
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
   }, [restaurants, liveNearbyRestaurants, baseCoords, selectedRadiusMeters]);
+
+  const nearbyRestaurants = useMemo(() => {
+    return allVerifiedCityRestaurants.filter(r => r.distanceMeters <= selectedRadiusMeters);
+  }, [allVerifiedCityRestaurants, selectedRadiusMeters]);
 
   // Merge & deduplicate Supabase destinations + Google Maps/Live nearby attractions, strictly within selectedRadiusMeters, sorted nearest first
   const nearbyDestinations = useMemo(() => {
@@ -374,38 +397,119 @@ export const NearMeModal: React.FC = () => {
   }, [destinations, liveNearbyAttractions, baseCoords, selectedRadiusMeters]);
 
   const filteredNearbyRestaurants = useMemo(() => {
-    const q = nearbyQuery.trim().toLowerCase();
-    return nearbyRestaurants.filter((r) => {
+    const rawQuery = nearbyQuery.trim();
+    const passesQuickFilter = (r: Restaurant): boolean => {
+      if (quickFilterId === 'all') return true;
       const zhLoc = getLocalizedRestaurant(r, 'zh');
-      const haystack = [
-        r.nameKh,
-        r.nameEn,
-        zhLoc.name,
-        r.addressKh,
-        r.addressEn,
-        zhLoc.address,
-        r.provinceKh,
-        r.provinceEn,
-        zhLoc.province,
-        r.categoryKh,
-        r.categoryEn,
-        ...(r.signatureDishesKh || []),
-        ...(r.signatureDishesEn || []),
-        ...(zhLoc.signatureDishes || []),
-        ...((r.menuItems || []).map((m) => `${m.nameKh} ${m.nameEn || ''}`)),
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
+      const shopKind = classifyShopBusinessKind(r);
+      const haystack = normalizeKhmerFoodText(
+        [
+          r.nameKh,
+          r.nameEn,
+          zhLoc.name,
+          r.categoryKh,
+          r.categoryEn,
+          ...(r.signatureDishesKh || []),
+          ...(r.signatureDishesEn || []),
+          ...(zhLoc.signatureDishes || []),
+          ...((r.menuItems || []).map((m) => `${m.nameKh} ${m.nameEn || ''}`)),
+        ]
+          .filter(Boolean)
+          .join(' ')
+      );
 
-      if (quickFilterId === 'noodles' && !/គុយទាវ|មី|នំបញ្ចុក|noodle|soup|ស៊ុប|面|粉|粿条|汤/.test(haystack)) return false;
-      if (quickFilterId === 'rice_khmer' && !/បាយ|ម្ហូបខ្មែរ|សម្ល|អាម៉ុក|khmer|rice|restaurant|ភោជនីយដ្ឋាន|អាហារដ្ឋាន|饭|高棉|餐厅/.test(haystack)) return false;
-      if (quickFilterId === 'coffee' && !/កាហ្វេ|តែ|ភេសជ្ជៈ|coffee|cafe|café|tea|bakery|咖啡|茶|烘焙/.test(haystack)) return false;
-      if (quickFilterId === 'bbq_seafood' && !/សាច់អាំង|គ្រឿងសមុទ្រ|ស៊ុប|bbq|seafood|grill|hotpot|buffet|烧烤|海鲜|火锅/.test(haystack)) return false;
-      if (q && !haystack.includes(q)) return false;
+      if (quickFilterId === 'noodles') {
+        if (shopKind === 'bakery_bread' || shopKind === 'coffee_drink' || shopKind === 'pizza_western') return false;
+        return /គុយទាវ|មី|មីសួរ|នំបញ្ចុក|លតឆា|noodle|soup|ស៊ុប|面|粉|粿条|粉丝|汤/.test(haystack);
+      }
+      if (quickFilterId === 'rice_khmer') {
+        if (shopKind === 'bakery_bread' || shopKind === 'coffee_drink' || shopKind === 'pizza_western') return false;
+        return /បាយ|ម្ហូបខ្មែរ|សម្ល|អាម៉ុក|ឡុកឡាក់|khmer|rice|restaurant|ភោជនីយដ្ឋាន|អាហារដ្ឋាន|饭|高棉|餐厅/.test(haystack);
+      }
+      if (quickFilterId === 'coffee') {
+        return /កាហ្វេ|តែ|ភេសជ្ជៈ|នំប៉័ង|នំខេក|coffee|cafe|café|tea|bakery|咖啡|茶|烘焙/.test(haystack);
+      }
+      if (quickFilterId === 'bbq_seafood') {
+        if (shopKind === 'bakery_bread' || shopKind === 'coffee_drink') return false;
+        return /សាច់អាំង|គ្រឿងសមុទ្រ|ស៊ុប|ក្តាម|បង្គា|មឹក|bbq|seafood|grill|hotpot|buffet|烧烤|海鲜|火锅/.test(haystack);
+      }
       return true;
-    });
-  }, [nearbyRestaurants, nearbyQuery, quickFilterId]);
+    };
+
+    // Case 1: No search query — show verified restaurants within selectedRadiusMeters
+    if (!rawQuery) {
+      return nearbyRestaurants
+        .filter((r) => {
+          if (!passesQuickFilter(r)) return false;
+          // Exclude pure bread/bakery shops from general default food browsing unless Coffee/Bakery chip is selected
+          if (quickFilterId !== 'coffee' && classifyShopBusinessKind(r) === 'bakery_bread') {
+            return false;
+          }
+          return true;
+        })
+        .map((r) => ({
+          ...r,
+          matchedInventoryItems: (r.signatureDishesKh || []).slice(0, 2),
+        }));
+    }
+
+    // Case 2: Specific product/shop query (e.g., "មីសួ", "មីសួរសាច់មាន់", "គុយទាវ", etc.)
+    // Strictly match against product names, categories, keywords, and shop inventory, and reject unrelated shops (such as bread shops).
+    const activeTargetFood =
+      targetFood &&
+      normalizeKhmerFoodText(rawQuery).includes(normalizeKhmerFoodText(targetFood.nameKh))
+        ? targetFood
+        : null;
+
+    const evaluateCandidates = (candidates: Array<Restaurant & { distanceMeters: number }>) => {
+      const results: Array<
+        Restaurant & {
+          distanceMeters: number;
+          matchedInventoryItems: string[];
+          _matchScore: number;
+          _isExactProductMatch: boolean;
+        }
+      > = [];
+
+      for (const r of candidates) {
+        if (!passesQuickFilter(r)) continue;
+        const matchRes = matchShopToProductQuery(r, rawQuery, activeTargetFood);
+        if (!matchRes.matches) continue;
+        results.push({
+          ...r,
+          matchedInventoryItems:
+            matchRes.matchedInventoryItems.length > 0
+              ? matchRes.matchedInventoryItems
+              : (r.signatureDishesKh || []).slice(0, 2),
+          _matchScore: matchRes.score,
+          _isExactProductMatch: matchRes.isExactProductMatch,
+        });
+      }
+
+      return results.sort((a, b) => {
+        if (a._isExactProductMatch !== b._isExactProductMatch) {
+          return a._isExactProductMatch ? -1 : 1;
+        }
+        const aWithinSelected = a.distanceMeters <= selectedRadiusMeters;
+        const bWithinSelected = b.distanceMeters <= selectedRadiusMeters;
+        if (aWithinSelected !== bWithinSelected) {
+          return aWithinSelected ? -1 : 1;
+        }
+        if (Math.abs(a._matchScore - b._matchScore) > 35) {
+          return b._matchScore - a._matchScore;
+        }
+        return a.distanceMeters - b.distanceMeters;
+      });
+    };
+
+    const strictRadiusMatches = evaluateCandidates(nearbyRestaurants);
+    if (strictRadiusMatches.length >= 3) {
+      return strictRadiusMatches;
+    }
+
+    // If fewer than 3 shops within the tight radius sell this specific product, include verified shops in the user's city/location that genuinely sell it
+    return evaluateCandidates(allVerifiedCityRestaurants);
+  }, [nearbyRestaurants, allVerifiedCityRestaurants, nearbyQuery, targetFood, quickFilterId, selectedRadiusMeters]);
 
   const filteredNearbyDestinations = useMemo(() => {
     const q = nearbyQuery.trim().toLowerCase();
@@ -680,7 +784,10 @@ export const NearMeModal: React.FC = () => {
             {nearbyQuery && (
               <button
                 type="button"
-                onClick={() => setNearbyQuery('')}
+                onClick={() => {
+                  setNearbyQuery('');
+                  setTargetFood(null);
+                }}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
@@ -847,6 +954,14 @@ export const NearMeModal: React.FC = () => {
                         <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-1">
                           {cleanCardAddress(rLoc.address, translateProvince(r.provinceKh || rLoc.province, language))}
                         </p>
+
+                        {r.matchedInventoryItems && r.matchedInventoryItems.length > 0 && (
+                          <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 truncate max-w-full">
+                            <span className="truncate">
+                              🍜 {tr(language, 'មានលក់៖', 'Sells:', '在售：')} {r.matchedInventoryItems.join(', ')}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 

@@ -1896,30 +1896,46 @@ export const ManageMenuModal: React.FC = () => {
                       )}
                     </span>
                   </div>
+                ) : isPremiumActive ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-2.5 rounded-xl bg-white/10 border border-white/20">
+                      <div className="text-[10px] font-bold text-emerald-100">
+                        {tr(language, 'ថ្ងៃផុតកំណត់សមាជិកភាព', 'Membership Expiration Date', '会员到期日')}
+                      </div>
+                      <div className="text-xs font-black text-amber-300 mt-0.5 font-mono">
+                        {currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}
+                      </div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-white/10 border border-white/20">
+                      <div className="text-[10px] font-bold text-emerald-100">
+                        {tr(language, 'ថ្ងៃកាត់ប្រាក់បន្ទាប់', 'Next Billing Date', '下次扣款日期')}
+                      </div>
+                      <div className="text-xs font-black text-emerald-200 mt-0.5 font-mono">
+                        {currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
+                          ? currentUser?.subscriptionExpiryDate
+                            ? currentUser.subscriptionExpiryDate.split('T')[0]
+                            : '—'
+                          : tr(language, 'គ្មានការកាត់ប្រាក់បន្ថែម', 'No Further Charges', '不再扣款')}
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <button
                     type="button"
                     onClick={() => {
                       handleCloseModal();
-                      openUpgradeVipModal(isPremiumActive || isExpired);
+                      openUpgradeVipModal(false);
                     }}
                     className="w-full py-3 px-4 rounded-2xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer"
                   >
                     <Award className="w-4 h-4" />
                     <span>
-                      {isPremiumActive
-                        ? tr(
-                            language,
-                            `បន្តសុពលភាពគម្រោង VIP បន្ថែម ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} ថ្ងៃ)`,
-                            `Renew / Extend VIP Plan ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} Days)`,
-                            `续费 / 延长 VIP 套餐 ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} 天)`
-                          )
-                        : tr(
-                            language,
-                            `ដំឡើងទៅគម្រោង ${activePlan.nameKh} ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} ថ្ងៃ)`,
-                            `Upgrade to ${activePlan.nameEn} ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} Days)`,
-                            `升级至 ${activePlan.nameEn} ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} 天)`
-                          )}
+                      {tr(
+                        language,
+                        `ដំឡើងទៅគម្រោង ${activePlan.nameKh} ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} ថ្ងៃ)`,
+                        `Upgrade to ${activePlan.nameEn} ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} Days)`,
+                        `升级至 ${activePlan.nameEn} ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} 天)`
+                      )}
                     </span>
                   </button>
                 )}

@@ -606,10 +606,15 @@ export async function fetchVerifiedAttractionPhotoFromGoogleMaps(
       destination.id
     );
 
-    // Check persistent cache first
+    // Check persistent cache first (ignore paid places.googleapis.com URLs so 10,000+ users incur $0 Google API cost)
     const cache = loadAttractionPhotoCache();
     const cached = cache[destination.id];
-    if (cached && cached.photoUrl && !isRejectedImageTitleOrUrl(cached.photoUrl)) {
+    if (
+      cached &&
+      cached.photoUrl &&
+      !cached.photoUrl.includes('places.googleapis.com') &&
+      !isRejectedImageTitleOrUrl(cached.photoUrl)
+    ) {
       const fp = normalizePhotoFingerprint(cached.photoUrl);
       if (fp && !usedFingerprints.has(fp)) {
         return {
@@ -624,21 +629,7 @@ export async function fetchVerifiedAttractionPhotoFromGoogleMaps(
       }
     }
 
-    // 1. Primary: Google Maps (Google Places API v1) matched by Name + GPS
-    const googleMatch = await queryGooglePlacesPhotoForAttraction(destination, usedFingerprints);
-    if (googleMatch) {
-      cache[destination.id] = {
-        photoUrl: googleMatch.photoUrl,
-        googlePlaceId: googleMatch.googlePlaceId,
-        matchedName: googleMatch.matchedName,
-        source: googleMatch.source,
-        updatedAt: new Date().toISOString(),
-      };
-      saveAttractionPhotoCache(cache);
-      return googleMatch;
-    }
-
-    // 2. Fallback: Coordinate- & Name-verified Wikipedia / Wikimedia Geosearch
+    // Coordinate- & Name-verified Wikipedia / Wikimedia Commons Geosearch (100% Free $0 & Creative Commons licensed)
     const wikiMatch = await queryCoordinateVerifiedWikimediaPhoto(destination, usedFingerprints);
     if (wikiMatch) {
       cache[destination.id] = {
@@ -651,7 +642,7 @@ export async function fetchVerifiedAttractionPhotoFromGoogleMaps(
       return wikiMatch;
     }
 
-    // 3. No confident match found -> return null so UI uses DefaultDestinationIcon
+    // No confident free match found -> return null so UI uses DefaultDestinationIcon ($0 API cost)
     return null;
   })();
 

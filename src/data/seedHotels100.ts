@@ -16,10 +16,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ខ្មែរ ឡច ប៊ូទិក (Khmer Lodge Boutique Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Sala Kamreuk Street, Krong Siem Reap, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $25+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Khmer Lodge Boutique Hotel is a verified accommodation located at Sala Kamreuk Street, Krong Siem Reap, Siem Reap. Estimated room rate: $25+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-1.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-1.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Sala Kamreuk Street, Krong Siem Reap, ខេត្តសៀមរាប",
@@ -56,10 +54,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ដឹ ប្រ៊ីជ ក្លឹប ភ្នំពេញ (The Bridge Club) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Ground Floor, The Bridge SOHO, National Assembly Street, រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $33.94+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "The Bridge Club is a verified accommodation located at Ground Floor, The Bridge SOHO, National Assembly Street, Phnom Penh. Estimated room rate: $33.94+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-2.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-2.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "Ground Floor, The Bridge SOHO, National Assembly Street, រាជធានីភ្នំពេញ",
@@ -96,10 +92,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ផាឡេស ព្រះសីហនុ (Palace Hotel Sihanoukville) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ St. 2 thnou, Phum 04, Sangkat 04, Krong Preah Sihanouk, Preah Sihanouk Province, Cambodia, ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $98+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Palace Hotel is a verified accommodation located at St. 2 thnou, Phum 04, Sangkat 04, Krong Preah Sihanouk, Preah Sihanouk Province, Cambodia, Preah Sihanouk. Estimated room rate: $98+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-3.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-3.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "St. 2 thnou, Phum 04, Sangkat 04, Krong Preah Sihanouk, Preah Sihanouk Province, Cambodia, ខេត្តព្រះសីហនុ",
@@ -136,10 +130,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "ផ្ទះស្នាក់ លីតថល ម៉ូណា ភ្នំពេញ (Little Mona Phnom Penh) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ 26Z-E2 Street 240, Phnom Penh 120208, រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $30+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Little Mona Phnom Penh is a verified accommodation located at 26Z-E2 Street 240, Phnom Penh 120208, Phnom Penh. Estimated room rate: $30+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-4.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-4.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "26Z-E2 Street 240, Phnom Penh 120208, រាជធានីភ្នំពេញ",
@@ -176,10 +168,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ អង្គរ ថេមផូរ៉ា ប៊ូទិក (Angkor Tempora Boutique) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Thmor Meas Road Sala Komroeuk Village, Sala Komroeuk Commune,, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $30+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Angkor Tempora Boutique is a verified accommodation located at Thmor Meas Road Sala Komroeuk Village, Sala Komroeuk Commune,, Siem Reap. Estimated room rate: $30+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-5.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-5.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Thmor Meas Road Sala Komroeuk Village, Sala Komroeuk Commune,, ខេត្តសៀមរាប",
@@ -216,10 +206,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ហូមវូដ សៀមរាប (Homewood Hotel Siem Reap) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Street 27 Wat Bo Road, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $28.13+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Homewood Hotel Siem Reap is a verified accommodation located at Street 27 Wat Bo Road, Siem Reap. Estimated room rate: $28.13+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-6.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-6.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Street 27 Wat Bo Road, ខេត្តសៀមរាប",
@@ -256,10 +244,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "បាលី វីឡា កំពត (Bali Villa Kampot Private Pool) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Tadeb village, sangkat andoung khmer, krong kampot, ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $100+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Bali Villa Kampot (Bungalow & Villa Private Pool) is a verified accommodation located at Tadeb village, sangkat andoung khmer, krong kampot, Kampot. Estimated room rate: $100+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-7.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-7.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "Tadeb village, sangkat andoung khmer, krong kampot, ខេត្តកំពត",
@@ -296,10 +282,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "ឌីវីអ វីឡា ហូមស្ទេ សៀមរាប (DVR Villa Homestay) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Phum Kasekam SroNge district, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $150+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "DVR Villa Homestay is a verified accommodation located at Phum Kasekam SroNge district, Siem Reap. Estimated room rate: $150+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-8.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-8.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Phum Kasekam SroNge district, ខេត្តសៀមរាប",
@@ -336,10 +320,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "អិលធី អង្គរ ហូមស្ទេ (LT Angkor Homestay) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Olive St, Krong Siem Reap 17252, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $23+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "LT Angkor Homestay is a verified accommodation located at Olive St, Krong Siem Reap 17252, Siem Reap. Estimated room rate: $23+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-9.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-9.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Olive St, Krong Siem Reap 17252, ខេត្តសៀមរាប",
@@ -376,10 +358,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ សោម៉ាទេពី ប៊ូទិក (Somatepy Boutique Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Kruos Village, Svay Dankum, Kruos, Siem Reap, Cambodia, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $35+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Somatepy Boutique Hotel is a verified accommodation located at Kruos Village, Svay Dankum, Kruos, Siem Reap, Cambodia, Siem Reap. Estimated room rate: $35+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-10.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-10.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Kruos Village, Svay Dankum, Kruos, Siem Reap, Cambodia, ខេត្តសៀមរាប",
@@ -416,10 +396,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "ផ្ទះសំណាក់ ប៊ូ ផានិត សៀមរាប (Bou Phanith Stay) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Bou Phanith Villa, 2-136 Steung Thmei, Krong Siem Reap 17252, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $15+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Bou Phanith is a verified accommodation located at Bou Phanith Villa, 2-136 Steung Thmei, Krong Siem Reap 17252, Siem Reap. Estimated room rate: $15+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-11.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-11.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Bou Phanith Villa, 2-136 Steung Thmei, Krong Siem Reap 17252, ខេត្តសៀមរាប",
@@ -456,10 +434,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "វីឡា ឡា ប៉ាល់មេរ៉េ សៀមរាប (La Palmeraie Villa) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Phnum Thboal village, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $220+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "La Palmeraie Villa is a verified accommodation located at Phnum Thboal village, Siem Reap. Estimated room rate: $220+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-12.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-12.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Phnum Thboal village, ខេត្តសៀមរាប",
@@ -496,10 +472,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "សណ្ឋាគារ ក្រវ៉ាន់ ប៊ូទិក វីឡា (Kravan Siem Reap Boutique Villa) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Near 9RFV+CG8, Krous Village Rd, Krong Siem Reap, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $20+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Kravan Siem Reap Boutique Villa Hotel is a verified accommodation located at Near 9RFV+CG8, Krous Village Rd, Krong Siem Reap, Siem Reap. Estimated room rate: $20+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-13.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-13.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Near 9RFV+CG8, Krous Village Rd, Krong Siem Reap, ខេត្តសៀមរាប",
@@ -536,10 +510,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត បាណាណា សៀមរាប (Banana Resort Siem Reap) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ junglung village, sombai road, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $115+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Banana Resort is a verified accommodation located at junglung village, sombai road, Siem Reap. Estimated room rate: $115+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-14.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-14.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "junglung village, sombai road, ខេត្តសៀមរាប",
@@ -576,10 +548,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ដឹ ព្រីវីលេជ ប៊ូទិក (The Privilege Boutique) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Street 22, Krong siem reap, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $33+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "The Privilege Boutique is a verified accommodation located at Street 22, Krong siem reap, Siem Reap. Estimated room rate: $33+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-15.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-15.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Street 22, Krong siem reap, ខេត្តសៀមរាប",
@@ -616,10 +586,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "ផ្ទះស្នាក់ ហ្វ្រេនហៅស៍ ភ្នំពេញ (Friend House Phnom Penh) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ 82E1 St 244, Phnom Penh, រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $25+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Friend House AirBnB is a verified accommodation located at 82E1 St 244, Phnom Penh, Phnom Penh. Estimated room rate: $25+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-16.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-16.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "82E1 St 244, Phnom Penh, រាជធានីភ្នំពេញ",
@@ -655,10 +623,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ រីជិនស៊ី អង្គរ (Regency Angkor Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Charles De Gaulle (Main Road To Temple), ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $45+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Regency Angkor Hotel is a verified accommodation located at Charles De Gaulle (Main Road To Temple), Siem Reap. Estimated room rate: $45+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-17.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-17.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Charles De Gaulle (Main Road To Temple), ខេត្តសៀមរាប",
@@ -695,10 +661,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "សុខ វីឡា សៀមរាប (SOK VILLA by Angkor Stays) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ 26 Sombai Ln, Krong Siem Reap, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $579+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "SOK VILLA by Angkor Stays is a verified accommodation located at 26 Sombai Ln, Krong Siem Reap, Siem Reap. Estimated room rate: $579+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-18.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-18.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "26 Sombai Ln, Krong Siem Reap, ខេត្តសៀមរាប",
@@ -735,10 +699,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ អិលធី អர்பិន ប៊ូទិក (LT Urban Boutique) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Sok San Rd, Krong Siem Reap, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $23+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "LT URBAN BOUTIQUE is a verified accommodation located at Sok San Rd, Krong Siem Reap, Siem Reap. Estimated room rate: $23+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-19.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-19.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Sok San Rd, Krong Siem Reap, ខេត្តសៀមរាប",
@@ -775,10 +737,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "ផ្ទះស្នាក់ កសិដ្ឋាន ហៃវិន (Haiven Farm Homestay) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ N67 khunriem banteaysrie, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $10+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Haiven farm home stay is a verified accommodation located at N67 khunriem banteaysrie, Siem Reap. Estimated room rate: $10+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-20.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-20.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "N67 khunriem banteaysrie, ខេត្តសៀមរាប",
@@ -815,10 +775,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "ណូនី ទ្រី ហូស្តេល សៀមរាប (Noni Tree Hostel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Downtown, Wat Bo Rd, Krong Siem Reap 171204, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $22+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Noni Tree Hostel is a verified accommodation located at Downtown, Wat Bo Rd, Krong Siem Reap 171204, Siem Reap. Estimated room rate: $22+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-21.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-21.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Downtown, Wat Bo Rd, Krong Siem Reap 171204, ខេត្តសៀមរាប",
@@ -855,10 +813,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ វ៉ុន ម៉ាជេស្ទីក ព្រះសីហនុ (Won Majestic Hotel Cambodia) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Phum 4, Sangkat 4, 2 Thnou St Krong Preah Sihanouk, Cambodia,, ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $95+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Won Majestic Hotel Cambodia is a verified accommodation located at Phum 4, Sangkat 4, 2 Thnou St Krong Preah Sihanouk, Cambodia,, Preah Sihanouk. Estimated room rate: $95+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-22.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-22.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "Phum 4, Sangkat 4, 2 Thnou St Krong Preah Sihanouk, Cambodia,, ខេត្តព្រះសីហនុ",
@@ -895,10 +851,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត អានាន់តារ៉ា អង្គរ (Anantara Angkor Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ National Road no. 6, Khum Svay Dangkom, Siem Reap, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $200+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Anantara Angkor Resort is a verified accommodation located at National Road no. 6, Khum Svay Dangkom, Siem Reap, Siem Reap. Estimated room rate: $200+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-23.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-23.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "National Road no. 6, Khum Svay Dangkom, Siem Reap, ខេត្តសៀមរាប",
@@ -935,10 +889,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "ណារី វីឡា សៀមរាប (Nary Villa Siem Reap) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ No.0762 Road20, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $15+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Nary Villa is a verified accommodation located at No.0762 Road20, Siem Reap. Estimated room rate: $15+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-24.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-24.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "No.0762 Road20, ខេត្តសៀមរាប",
@@ -975,10 +927,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "វីឡា វត្តពោធិ៍ សៀមរាប (Wat Po House by Angkor Stays) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ River Road, 146, Krong Siem Reap 17251, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $429+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "WAT PO HOUSE by Angkor Stays is a verified accommodation located at River Road, 146, Krong Siem Reap 17251, Siem Reap. Estimated room rate: $429+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-25.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-25.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "River Road, 146, Krong Siem Reap 17251, ខេត្តសៀមរាប",
@@ -1015,10 +965,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "អេមរ៉លជេម ព្រីមៀម រ៉េស៊ីដិន ភ្នំពេញ (Emeraldgems Residence) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ #172, street 19z, Phum.9 Royal Palace & National museum Area, Cheyenne Chumneas, Doun Penh, Phnom Penh, រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $25+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Emeraldgems Premium Residence is a verified accommodation located at #172, street 19z, Phum.9 Royal Palace & National museum Area, Cheyenne Chumneas, Doun Penh, Phnom Penh, Phnom Penh. Estimated room rate: $25+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-26.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-26.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "#172, street 19z, Phum.9 Royal Palace & National museum Area, Cheyenne Chumneas, Doun Penh, Phnom Penh, រាជធានីភ្នំពេញ",
@@ -1055,10 +1003,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ និងអាផាតមិន អិលខេ ព្រះសីហនុ (LK Apartment & Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Phum 3, Sangkat Bei, ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $23+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "LK Apartment and Hotel is a verified accommodation located at Phum 3, Sangkat Bei, Preah Sihanouk. Estimated room rate: $23+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-27.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-27.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "Phum 3, Sangkat Bei, ខេត្តព្រះសីហនុ",
@@ -1095,10 +1041,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "វីឡា ឡា ប៉ាល់មេរ៉េ ដង្គរ (La Palmeraie d'Angkor) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Phum Thnoal Village, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $300+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "La Palmeraie d'Angkor is a verified accommodation located at Phum Thnoal Village, Siem Reap. Estimated room rate: $300+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-28.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-28.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Phum Thnoal Village, ខេត្តសៀមរាប",
@@ -1135,10 +1079,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ក្លូវើ មុនីវង្ស ភ្នំពេញ (Clover Hotel Monivong) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Orussey Market Area, 419 Preah Monivong Blvd (93), Phnom Penh 12257, រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $76+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Clover Hotel Monivong is a verified accommodation located at Orussey Market Area, 419 Preah Monivong Blvd (93), Phnom Penh 12257, Phnom Penh. Estimated room rate: $76+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-29.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-29.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "Orussey Market Area, 419 Preah Monivong Blvd (93), Phnom Penh 12257, រាជធានីភ្នំពេញ",
@@ -1175,10 +1117,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ មេគង្គ អង្គរ ផាឡេស (Mekong Angkor Palace Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ 021 Sivutha Blvd, Krong Siem Reap 17252, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $26.02+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Mekong Angkor Palace Hotel is a verified accommodation located at 021 Sivutha Blvd, Krong Siem Reap 17252, Siem Reap. Estimated room rate: $26.02+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-30.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-30.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "021 Sivutha Blvd, Krong Siem Reap 17252, ខេត្តសៀមរាប",
@@ -1215,10 +1155,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "វីឡា វត្តដំណាក់ សៀមរាប (Wat Damnak House by Angkor Stays) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Wat Damnak road 141 Krong Siem Reap Siem Reap, 17254, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $429+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "WAT DAMNAK HOUSE by Angkor Stays is a verified accommodation located at Wat Damnak road 141 Krong Siem Reap Siem Reap, 17254, Siem Reap. Estimated room rate: $429+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-31.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-31.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Wat Damnak road 141 Krong Siem Reap Siem Reap, 17254, ខេត្តសៀមរាប",
@@ -1255,10 +1193,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ហៃវិន អង្គរ (HaiVen Angkor) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Suemreao, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $20+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "HaiVen Angkor is a verified accommodation located at Suemreao, Siem Reap. Estimated room rate: $20+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-32.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-32.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Suemreao, ខេត្តសៀមរាប",
@@ -1295,10 +1231,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "៨៥៥ វីឡា សៀមរាប (855 Villa Siem Reap) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Funny ln , Svaydong kum krong Siem Reap,, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $149+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "855 Villa Siem Reap is a verified accommodation located at Funny ln , Svaydong kum krong Siem Reap,, Siem Reap. Estimated room rate: $149+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-33.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-33.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Funny ln , Svaydong kum krong Siem Reap,, ខេត្តសៀមរាប",
@@ -1334,10 +1268,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ អង្គរ រិទ្ធី ប៊ូទិក (Angkor Rithy Boutique) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ 9VC4-8X Krong Siem Reap, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $269+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Angkor Rithy boutique is a verified accommodation located at 9VC4-8X Krong Siem Reap, Siem Reap. Estimated room rate: $269+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-34.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-34.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "9VC4-8X Krong Siem Reap, ខេត្តសៀមរាប",
@@ -1374,10 +1306,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ដឹ ហ្វាយ សេនស៍ ប៊ូទិក (The Five Senses Boutique Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ House NA, Street Riverside, East Street, Wat Damnak Village, Sangkat Sala Kamroeuk, Siem Reap Province, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $20+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "The Five Senses Boutique Hotel is a verified accommodation located at House NA, Street Riverside, East Street, Wat Damnak Village, Sangkat Sala Kamroeuk, Siem Reap Province, Siem Reap. Estimated room rate: $20+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-35.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-35.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "House NA, Street Riverside, East Street, Wat Damnak Village, Sangkat Sala Kamroeuk, Siem Reap Province, ខេត្តសៀមរាប",
@@ -1414,10 +1344,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "ផ្ទះស្នាក់ អាខេក ហៅស៍ សៀមរាប (Archaic House) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ BBU Road, Vihear Chen, Svay Dankum (100m from Old market roundabout), Siem Reap city, Kingdom of Cambodia, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $15+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Archaic House is a verified accommodation located at BBU Road, Vihear Chen, Svay Dankum (100m from Old market roundabout), Siem Reap city, Kingdom of Cambodia, Siem Reap. Estimated room rate: $15+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-36.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-36.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "BBU Road, Vihear Chen, Svay Dankum (100m from Old market roundabout), Siem Reap city, Kingdom of Cambodia, ខេត្តសៀមរាប",
@@ -1454,10 +1382,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "វីឡា វត្តបូព៌ សៀមរាប (Wat Bo House by Angkor Stays) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ City, Street 20, Wat Bo Village, Krong Siem Reap, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $479+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "WAT BO HOUSE by Angkor Stays is a verified accommodation located at City, Street 20, Wat Bo Village, Krong Siem Reap, Siem Reap. Estimated room rate: $479+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-37.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-37.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "City, Street 20, Wat Bo Village, Krong Siem Reap, ខេត្តសៀមរាប",
@@ -1494,10 +1420,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ អេហ្វ អិល ជី ភ្នំពេញ (F L G Hotel Phnom Penh) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ No. 29, Street 334, Beoung keng kang 1 (BKK1), Beoung Keng Kang, Phnom Penh, រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $90+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "F L G HOTEL is a verified accommodation located at No. 29, Street 334, Beoung keng kang 1 (BKK1), Beoung Keng Kang, Phnom Penh, Phnom Penh. Estimated room rate: $90+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-38.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-38.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "No. 29, Street 334, Beoung keng kang 1 (BKK1), Beoung Keng Kang, Phnom Penh, រាជធានីភ្នំពេញ",
@@ -1534,10 +1458,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "សូលីតាំង ដំណាក់ វីឡា សៀមរាប (Solitaire Damnak Villa) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Wat Damnak Road, Krong Siem Reap, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $40+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Solitaire Damnak Villa is a verified accommodation located at Wat Damnak Road, Krong Siem Reap, Siem Reap. Estimated room rate: $40+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-39.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-39.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Wat Damnak Road, Krong Siem Reap, ខេត្តសៀមរាប",
@@ -1574,10 +1496,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "វេលា អាផាតមិន និងស្វីត សៀមរាប (Velea Serviced Apartments & Suites) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Rose Apple Road, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $89+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Velea Serviced Apartments & Suites is a verified accommodation located at Rose Apple Road, Siem Reap. Estimated room rate: $89+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-40.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-40.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Rose Apple Road, ខេត្តសៀមរាប",
@@ -1614,10 +1534,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "បាហ៊ូ វីឡា សៀមរាប (Baahu Villa Siem Reap) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ BBU Road, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $25+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Baahu Villa is a verified accommodation located at BBU Road, Siem Reap. Estimated room rate: $25+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-41.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-41.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "BBU Road, ខេត្តសៀមរាប",
@@ -1654,10 +1572,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ គោព្រៃ សៀមរាប (Kouprey Hotel Siem Reap) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Top Town Road, Krous Village, Svay Dangkum, Siem Reap, Cambodia, Top Town Road, Krous Village, Svay, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $25+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Kouprey Hotel is a verified accommodation located at Top Town Road, Krous Village, Svay Dangkum, Siem Reap, Cambodia, Top Town Road, Krous Village, Svay, Siem Reap. Estimated room rate: $25+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-42.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-42.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Top Town Road, Krous Village, Svay Dangkum, Siem Reap, Cambodia, Top Town Road, Krous Village, Svay, ខេត្តសៀមរាប",
@@ -1694,10 +1610,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត អិមប្រេស អង្គរ និងស្ប៉ា (Empress Angkor Resort & Spa) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ #888, national road 6, Siem Reap city, Siem Reap Province, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $90+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Empress Angkor Resort & Spa is a verified accommodation located at #888, national road 6, Siem Reap city, Siem Reap Province, Siem Reap. Estimated room rate: $90+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-43.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-43.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "#888, national road 6, Siem Reap city, Siem Reap Province, ខេត្តសៀមរាប",
@@ -1734,10 +1648,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ អប្សរា ហ្គ្រីនលែន ប៊ូទិក (Apsara Greenland Boutique Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ 82 Palm Street, Sala Kamroeuk, Krong Siem Reap, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $30+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Apsara Greenland Boutique Hotel is a verified accommodation located at 82 Palm Street, Sala Kamroeuk, Krong Siem Reap, Siem Reap. Estimated room rate: $30+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-44.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-44.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "82 Palm Street, Sala Kamroeuk, Krong Siem Reap, ខេត្តសៀមរាប",
@@ -1774,10 +1686,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique Villa & Stay",
         "descriptionKh": "សោម៉ា រ៉េស៊ីដិន វីឡា សៀមរាប (Soma Residence Villa) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ Siem Reap, ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $20+ / យប់។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Soma Residence Villa is a verified accommodation located at Siem Reap, Siem Reap. Estimated room rate: $20+ / យប់. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-45.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-45.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "Siem Reap, ខេត្តសៀមរាប",
@@ -1814,10 +1724,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ រ៉ាហ្វល ឡឺរ៉ូយ៉ាល់ ភ្នំពេញ ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មហាវិថីដូនពេញ (ផ្លូវ ៩២) ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$$ • ទំនាក់ទំនង៖ 023 981 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Raffles Hotel Le Royal Phnom Penh is a verified accommodation located at 92 Rukhak Vithei Daun Penh, Sangkat Wat Phnom, Phnom Penh. Estimated room rate: $$$$ • Contact: 023 981 888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-46.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-46.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "មហាវិថីដូនពេញ (ផ្លូវ ៩២) ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
@@ -1853,10 +1761,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ វឌ្ឍនៈ កាពីតាល់ (Rosewood Phnom Penh) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ អគារ Vattanac Capital Tower មហាវិថីព្រះមុនីវង្ស រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$$ • ទំនាក់ទំនង៖ 023 936 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Rosewood Phnom Penh Hotel is a verified accommodation located at Vattanac Capital Tower, 66 Monivong Blvd, Phnom Penh. Estimated room rate: $$$$ • Contact: 023 936 888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-47.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-47.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "អគារ Vattanac Capital Tower មហាវិថីព្រះមុនីវង្ស រាជធានីភ្នំពេញ",
@@ -1892,10 +1798,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ សូហ្វីតែល ភ្នំពេញ ភូគីត្រា ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មហាវិថីសុធារស សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$$ • ទំនាក់ទំនង៖ 023 999 200។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sofitel Phnom Penh Phokeethra is a verified accommodation located at 26 Old August Site, Sothearos Blvd, Tonle Bassac, Phnom Penh. Estimated room rate: $$$$ • Contact: 023 999 200. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-48.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-48.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "មហាវិថីសុធារស សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន រាជធានីភ្នំពេញ",
@@ -1931,10 +1835,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ សាន់ អែន មូន អឺប៊ិន (SUN & MOON Urban Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ១៣៦ សង្កាត់ផ្សារកណ្តាលទី១ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 023 961 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "SUN & MOON, Urban Hotel Phnom Penh is a verified accommodation located at No. 68 Street 136, Phsar Kandal 1, Daun Penh, Phnom Penh. Estimated room rate: $$$ • Contact: 023 961 888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-49.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-49.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "ផ្លូវលេខ ១៣៦ សង្កាត់ផ្សារកណ្តាលទី១ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
@@ -1970,10 +1872,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ផ្លេស ហ្គាដិន អ៊ីន (Palace Gate Hotel & Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ២៤០ ក្បែរព្រះបរមរាជវាំង ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 023 900 011។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Palace Gate Hotel & Resort Phnom Penh is a verified accommodation located at No. 44B Sothearos Blvd, Near Royal Palace, Phnom Penh. Estimated room rate: $$$ • Contact: 023 900 011. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-50.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-50.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "ផ្លូវលេខ ២៤០ ក្បែរព្រះបរមរាជវាំង ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
@@ -2009,10 +1909,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ អូកវូដ ព្រីមៀ ភ្នំពេញ (Oakwood Premier) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មជ្ឈមណ្ឌល One Park បឹងកក់ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 023 928 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Oakwood Premier Phnom Penh is a verified accommodation located at One Park, Jakarta Street, Sangkat Srah Chak, Phnom Penh. Estimated room rate: $$$ • Contact: 023 928 888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-51.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-51.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "មជ្ឈមណ្ឌល One Park បឹងកក់ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
@@ -2048,10 +1946,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ហ៊ីយ៉ាត់ រីជិនស៊ី ភ្នំពេញ (Hyatt Regency) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ១៧៨ សង្កាត់ជ័យជំនះ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$$ • ទំនាក់ទំនង៖ 023 600 1234។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Hyatt Regency Phnom Penh is a verified accommodation located at No. 55 Street 178, Sangkat Chey Chumneas, Phnom Penh. Estimated room rate: $$$$ • Contact: 023 600 1234. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-52.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-52.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "ផ្លូវលេខ ១៧៨ សង្កាត់ជ័យជំនះ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
@@ -2087,10 +1983,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ រ៉ាហ្វល ហ្គ្រែន អូតែល ដឺអង្គរ ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មហាវិថី ហ្សាល ដឺហ្គោល ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$$ • ទំនាក់ទំនង៖ 063 963 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Raffles Grand Hotel d'Angkor Siem Reap is a verified accommodation located at 1 Vithei Charles de Gaulle, Khum Svay Dangkum, Siem Reap. Estimated room rate: $$$$ • Contact: 063 963 888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-53.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-53.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "មហាវិថី ហ្សាល ដឺហ្គោល ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -2126,10 +2020,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ សូហ្វីតែល អង្គរ ភូគីត្រា ហ្គោល & ស្ប៉ា ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មហាវិថី ហ្សាល ដឺហ្គោល ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$$ • ទំនាក់ទំនង៖ 063 964 600។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sofitel Angkor Phokeethra Golf & Spa Resort is a verified accommodation located at Vithei Charles de Gaulle, Khum Svay Dangkum, Siem Reap. Estimated room rate: $$$$ • Contact: 063 964 600. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-54.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-54.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "មហាវិថី ហ្សាល ដឺហ្គោល ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -2165,10 +2057,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ផាក ហ៊ីយ៉ាត់ សៀមរាប (Park Hyatt Siem Reap) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវស៊ីវត្ថា សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$$ • ទំនាក់ទំនង៖ 063 211 234។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Park Hyatt Siem Reap is a verified accommodation located at Sivutha Boulevard, Siem Reap. Estimated room rate: $$$$ • Contact: 063 211 234. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-55.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-55.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវស៊ីវត្ថា សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -2204,10 +2094,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ស៊ីនតា មុនី អង្គរ (Shinta Mani Angkor) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវអ៊ុំឃុន កែងផ្លូវ ១៤ ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$$ • ទំនាក់ទំនង៖ 063 964 123។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Shinta Mani Angkor & Bensley Collection Pool Villas is a verified accommodation located at Junction of Oum Khun and 14th Street, Siem Reap. Estimated room rate: $$$$ • Contact: 063 964 123. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-56.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-56.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវអ៊ុំឃុន កែងផ្លូវ ១៤ ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -2243,10 +2131,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ វីរតន៍ (Viroth's Hotel Siem Reap) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ២៤ ភូមិវត្តបូព៌ ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 063 761 720។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Viroth's Hotel Siem Reap is a verified accommodation located at Street 24, Wat Bo Village, Siem Reap. Estimated room rate: $$$ • Contact: 063 761 720. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-57.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-57.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវលេខ ២៤ ភូមិវត្តបូព៌ ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -2282,10 +2168,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ចាន់រី ទ្រី រីសត (Jaya House River Park) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវមាត់ស្ទឹងសៀមរាប ភូមិត្រពាំងសេះ ក្រុងសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$$ • ទំនាក់ទំនង៖ 063 962 555។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Jaya House River Park Siem Reap is a verified accommodation located at River Road, Treang Village, Siem Reap. Estimated room rate: $$$$ • Contact: 063 962 555. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-58.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-58.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវមាត់ស្ទឹងសៀមរាប ភូមិត្រពាំងសេះ ក្រុងសៀមរាប",
@@ -2321,10 +2205,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ បុរី អង្គរ រីសត & ស្ប៉ា (Borei Angkor Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៦ ភូមិបន្ទាយចាស់ ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 063 964 406។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Borei Angkor Resort & Spa Siem Reap is a verified accommodation located at National Road 6, Banteay Chas, Siem Reap. Estimated room rate: $$$ • Contact: 063 964 406. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-59.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-59.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវជាតិលេខ ៦ ភូមិបន្ទាយចាស់ ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -2360,10 +2242,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ សុខា បീச் រីសត ព្រះសីហនុ (Sokha Beach Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរសុខា សង្កាត់លេខ ៤ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$$ • ទំនាក់ទំនង៖ 034 935 999។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sokha Beach Resort Sihanoukville is a verified accommodation located at Street 2 Thnou, Sangkat 4, Sihanoukville. Estimated room rate: $$$$ • Contact: 034 935 999. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-60.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-60.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរសុខា សង្កាត់លេខ ៤ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ",
@@ -2399,10 +2279,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ អ៊ីនឌីផេនដិនស៍ (Independence Hotel by Dara) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរឯករាជ្យ ផ្លូវ ២ ធ្នូ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 034 934 300។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Independence Hotel Resort & Spa Sihanoukville is a verified accommodation located at Street 2 Thnou, Independence Beach, Sihanoukville. Estimated room rate: $$$ • Contact: 034 934 300. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-61.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-61.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរឯករាជ្យ ផ្លូវ ២ ធ្នូ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ",
@@ -2438,10 +2316,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត សុង សា ប្រាយវេត អាយឡែន (Song Saa Private Island) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ កោះបង-កោះប្អូន ប្រជុំកោះរ៉ុង ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$$ • ទំនាក់ទំនង៖ 023 686 0360។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Song Saa Private Island Resort Koh Rong is a verified accommodation located at Koh Ouen Private Island, Koh Rong Archipelago, Preah Sihanouk. Estimated room rate: $$$$ • Contact: 023 686 0360. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-62.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-62.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "កោះបង-កោះប្អូន ប្រជុំកោះរ៉ុង ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ",
@@ -2477,10 +2353,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត ដឹ រ៉ូយ៉ាល់ ស៊ែន កោះរ៉ុង (The Royal Sands Koh Rong) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរឡុងសិត កោះរ៉ុង ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$$ • ទំនាក់ទំនង៖ 012 969 688។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "The Royal Sands Koh Rong Resort is a verified accommodation located at Long RBeach, Koh Rong Island, Preah Sihanouk. Estimated room rate: $$$$ • Contact: 012 969 688. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-63.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-63.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរឡុងសិត កោះរ៉ុង ខេត្តព្រះសីហនុ",
@@ -2516,10 +2390,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត ឡុង សិត កោះរ៉ុង (Long Set Resort Koh Rong) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរឡុងសិត (4K Beach) កោះរ៉ុង ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 081 999 406។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Long Set Resort Koh Rong is a verified accommodation located at 4K Long Set Beach, Koh Rong, Preah Sihanouk. Estimated room rate: $$$ • Contact: 081 999 406. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-64.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-64.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរឡុងសិត (4K Beach) កោះរ៉ុង ខេត្តព្រះសីហនុ",
@@ -2555,10 +2427,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត ម៉ាហ្វីយ៉ា កោះរ៉ុងសន្លឹម (Moonlight Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរសារ៉ាសេន (Saracen Bay) កោះរ៉ុងសន្លឹម ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 016 551 516។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Moonlight Resort Koh Rong Samloem is a verified accommodation located at Saracen Bay, Koh Rong Samloem, Preah Sihanouk. Estimated room rate: $$$ • Contact: 016 551 516. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-65.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-65.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរសារ៉ាសេន (Saracen Bay) កោះរ៉ុងសន្លឹម ខេត្តព្រះសីហនុ",
@@ -2594,10 +2464,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ណូវ៉ូតែល ព្រះសីហនុ (Novotel Sihanoukville Holiday Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរឯករាជ្យ សង្កាត់លេខ ៣ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 034 936 666។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Novotel Sihanoukville Holiday Resort is a verified accommodation located at 2 Thnou Street, Independence Beach, Sihanoukville. Estimated room rate: $$$ • Contact: 034 936 666. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-66.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-66.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរឯករាជ្យ សង្កាត់លេខ ៣ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ",
@@ -2633,10 +2501,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត អេមប៊ឺរ កំពត (Amber Kampot Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ តាមបណ្តោយមាត់ព្រែកកំពត ក្រុងកំពត ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$$ • ទំនាក់ទំនង៖ 096 668 8800។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Amber Kampot Luxury Resort is a verified accommodation located at Prek Kampong Bay Riverfront, Kampot. Estimated room rate: $$$$ • Contact: 096 668 8800. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-67.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-67.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "តាមបណ្តោយមាត់ព្រែកកំពត ក្រុងកំពត ខេត្តកំពត",
@@ -2672,10 +2538,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ បូកគោ ឋានសួគ៌ សុខា (Thansur Sokha Hotel Bokor) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ លើកំពូលភ្នំបូកគោ ឧទ្យានជាតិព្រះមុនីវង្សបូកគោ ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 033 683 8888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Thansur Sokha Hotel Bokor Mountain is a verified accommodation located at Bokor Mountain National Park, Kampot. Estimated room rate: $$$ • Contact: 033 683 8888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-68.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-68.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "លើកំពូលភ្នំបូកគោ ឧទ្យានជាតិព្រះមុនីវង្សបូកគោ ខេត្តកំពត",
@@ -2711,10 +2575,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត កាស្ថល បេ (Castle Bayview Resort & Spa) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិកំពង់គ្រែង តាមដងព្រែកកំពត ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 016 558 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Castle Bayview Resort & Spa Kampot is a verified accommodation located at Kampong Kreng Village, River Road, Kampot. Estimated room rate: $$$ • Contact: 016 558 888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-69.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-69.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "ភូមិកំពង់គ្រែង តាមដងព្រែកកំពត ខេត្តកំពត",
@@ -2750,10 +2612,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត រីវើរ ទ្រី វីឡា (RiverTree Villa & Resort Kampot) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឃុំម៉ាក់ប្រាង្គ តាមបណ្តោយមាត់ព្រែកកំពត ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 015 738 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "RiverTree Villa & Resort Kampot is a verified accommodation located at Makprang Commune, River Road, Kampot. Estimated room rate: $$$ • Contact: 015 738 888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-70.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-70.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "ឃុំម៉ាក់ប្រាង្គ តាមបណ្តោយមាត់ព្រែកកំពត ខេត្តកំពត",
@@ -2789,10 +2649,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ដឹ កូឡឹម (The Columns Boutique Hotel Kampot) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ៧៣៥ តំបន់ផ្សារចាស់ មាត់ព្រែកកំពត ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 033 932 632។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "The Columns Boutique Hotel Kampot is a verified accommodation located at No. 37 Street 735, Old Market Area, Kampot. Estimated room rate: $$ • Contact: 033 932 632. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-71.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-71.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "ផ្លូវលេខ ៧៣៥ តំបន់ផ្សារចាស់ មាត់ព្រែកកំពត ខេត្តកំពត",
@@ -2828,10 +2686,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "បឹងហ្គាឡូ ណាតាយ៉ា រ៉ោនហៅស៍ (Nataya Roundhouse Coral Bay Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឃុំព្រែកអំពិល ស្រុកទឹកឈូ ផ្លូវទៅភ្នំបូកគោ ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 012 444 495។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Nataya Roundhouse Coral Bay Resort Kampot is a verified accommodation located at Prek Ampil, Tuek Chhou District, Kampot. Estimated room rate: $$$ • Contact: 012 444 495. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-72.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-72.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "ឃុំព្រែកអំពិល ស្រុកទឹកឈូ ផ្លូវទៅភ្នំបូកគោ ខេត្តកំពត",
@@ -2867,10 +2723,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "បឹងហ្គាឡូ ឡេ ប៊ូទិក កំពត (Sabay Beach Kampot) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មាត់ព្រែកកំពត ឃុំកំពង់គ្រែង ក្រុងកំពត ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 088 856 6604។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sabay Beach Boutique Eco-Resort Kampot is a verified accommodation located at Kampong Kreng, Prek Kampot Riverfront, Kampot. Estimated room rate: $$ • Contact: 088 856 6604. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-73.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-73.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "មាត់ព្រែកកំពត ឃុំកំពង់គ្រែង ក្រុងកំពត ខេត្តកំពត",
@@ -2906,10 +2760,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត ណៃ បាយ លីប (Knai Bang Chatt by Kep West) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវមាត់សមុទ្រ ជិតផ្សារក្តាម ក្រុងកែប ខេត្តកែប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$$ • ទំនាក់ទំនង៖ 078 888 552។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Knai Bang Chatt Resort Kep is a verified accommodation located at Phum Thmey, Sangkat Prey Thom, Kep. Estimated room rate: $$$$ • Contact: 078 888 552. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-74.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-74.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកែប",
         "provinceEn": "Kep",
         "addressKh": "ផ្លូវមាត់សមុទ្រ ជិតផ្សារក្តាម ក្រុងកែប ខេត្តកែប",
@@ -2945,10 +2797,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត វីរ៉ាន់ដា ធម្មជាតិកែប (Veranda Natural Resort Kep) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ជើងភ្នំឧទ្យានជាតិកែប ក្រុងកែប ខេត្តកែប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 012 888 619។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Veranda Natural Resort Kep is a verified accommodation located at Kep National Park Hillside, Kep. Estimated room rate: $$$ • Contact: 012 888 619. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-75.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-75.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកែប",
         "provinceEn": "Kep",
         "addressKh": "ជើងភ្នំឧទ្យានជាតិកែប ក្រុងកែប ខេត្តកែប",
@@ -2984,10 +2834,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត សាមាណា កែប (Samanea Beach Resort & Spa Kep) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវមាត់សមុទ្រ ឃុំអង្កោល ក្រុងកែប ខេត្តកែប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 077 777 968។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Samanea Beach Resort & Spa Kep is a verified accommodation located at Coastal Road, Sangkat Ou Krasar, Kep. Estimated room rate: $$$ • Contact: 077 777 968. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-76.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-76.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកែប",
         "provinceEn": "Kep",
         "addressKh": "ផ្លូវមាត់សមុទ្រ ឃុំអង្កោល ក្រុងកែប ខេត្តកែប",
@@ -3023,10 +2871,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ រ៉ុក រ៉ូយ៉ាល់ កែប (Rock Royal Hotel & Resort Kep) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរកែប សង្កាត់ព្រៃធំ ក្រុងកែប ខេត្តកែប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 069 909 555។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Rock Royal Hotel & Resort Kep is a verified accommodation located at Prey Thom, Kep Beachfront, Kep. Estimated room rate: $$ • Contact: 069 909 555. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-77.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-77.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកែប",
         "provinceEn": "Kep",
         "addressKh": "ឆ្នេរកែប សង្កាត់ព្រៃធំ ក្រុងកែប ខេត្តកែប",
@@ -3062,10 +2908,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "បឹងហ្គាឡូ កែប បាយ (Kep Bay Hotel & Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ជិតឆ្នេរកែប និងផ្សារក្តាម ក្រុងកែប ខេត្តកែប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 012 918 468។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Kep Bay Hotel & Resort is a verified accommodation located at Near Kep Beach & Crab Market, Kep. Estimated room rate: $$ • Contact: 012 918 468. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-78.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-78.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកែប",
         "provinceEn": "Kep",
         "addressKh": "ជិតឆ្នេរកែប និងផ្សារក្តាម ក្រុងកែប ខេត្តកែប",
@@ -3101,10 +2945,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "ផ្ទះសំណាក់ ប៊ូទិក តារា កែប (Tara Lodge Kep) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវទៅឧទ្យានជាតិកែប ក្រុងកែប ខេត្តកែប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 092 805 645។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Tara Lodge Boutique Guesthouse Kep is a verified accommodation located at Kep National Park Road, Kep. Estimated room rate: $ • Contact: 092 805 645. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-79.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-79.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកែប",
         "provinceEn": "Kep",
         "addressKh": "ផ្លូវទៅឧទ្យានជាតិកែប ក្រុងកែប ខេត្តកែប",
@@ -3140,10 +2982,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ មេសុង វត្តគរ (Maisons Wat Kor Battambang) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិវត្តគរ សង្កាត់វត្តគរ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 053 953 008។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Maisons Wat Kor Boutique Hotel Battambang is a verified accommodation located at Wat Kor Cultural Village, Battambang. Estimated room rate: $$$ • Contact: 053 953 008. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-80.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-80.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តបាត់ដំបង",
         "provinceEn": "Battambang",
         "addressKh": "ភូមិវត្តគរ សង្កាត់វត្តគរ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង",
@@ -3179,10 +3019,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ បាត់ដំបង រីសត (Battambang Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិវត្តគរ សង្កាត់វត្តគរ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 077 536 962។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Battambang Resort is a verified accommodation located at Wat Kor Village, Battambang. Estimated room rate: $$$ • Contact: 077 536 962. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-81.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-81.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តបាត់ដំបង",
         "provinceEn": "Battambang",
         "addressKh": "ភូមិវត្តគរ សង្កាត់វត្តគរ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង",
@@ -3218,10 +3056,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ប្រេហ្ស៊ីដង់ បាត់ដំបង (Classy Hotel & Spa Battambang) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ១៥៩D ភូមិព្រែកមហាទេព ក្រុងបាត់ដំបង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 053 952 555។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Classy Hotel & Spa Battambang is a verified accommodation located at Street 159D, Prek Mohatep, Battambang. Estimated room rate: $$ • Contact: 053 952 555. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-82.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-82.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តបាត់ដំបង",
         "provinceEn": "Battambang",
         "addressKh": "ផ្លូវលេខ ១៥៩D ភូមិព្រែកមហាទេព ក្រុងបាត់ដំបង",
@@ -3257,10 +3093,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ស្ទឹងសង្កែ (Steung Sangke Hotel Battambang) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៥ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 053 953 456។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Steung Sangke Hotel Battambang is a verified accommodation located at National Road 5, Battambang Town. Estimated room rate: $$ • Contact: 053 953 456. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-83.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-83.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តបាត់ដំបង",
         "provinceEn": "Battambang",
         "addressKh": "ផ្លូវជាតិលេខ ៥ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង",
@@ -3296,10 +3130,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ バン ប៊ូ បាត់ដំបង (Bambu Hotel Battambang) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ២.៥ សង្កាត់ស្វាយប៉ោ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 053 953 900។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Bambu Hotel Battambang is a verified accommodation located at Street 2.5, Svay Por, Battambang. Estimated room rate: $$$ • Contact: 053 953 900. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-84.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-84.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តបាត់ដំបង",
         "provinceEn": "Battambang",
         "addressKh": "ផ្លូវលេខ ២.៥ សង្កាត់ស្វាយប៉ោ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង",
@@ -3335,10 +3167,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "ផ្ទះសំណាក់ សេងហួត បាត់ដំបង (Seng Hout Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ១ ជិតផ្សារណាត់ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 053 952 029។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Seng Hout Hotel Battambang is a verified accommodation located at Street 1, Near Psar Nat Central Market, Battambang. Estimated room rate: $ • Contact: 053 952 029. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-85.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-85.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តបាត់ដំបង",
         "provinceEn": "Battambang",
         "addressKh": "ផ្លូវលេខ ១ ជិតផ្សារណាត់ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង",
@@ -3374,10 +3204,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត មេឃា មណ្ឌលគិរី (Mayura Hill Resort Sen Monorom) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិដើមស្រល់ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 097 752 2229។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Mayura Hill Resort Mondulkiri is a verified accommodation located at Doem Sral Village, Sen Monorom, Mondulkiri. Estimated room rate: $$$ • Contact: 097 752 2229. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-86.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-86.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តមណ្ឌលគិរី",
         "provinceEn": "Mondulkiri",
         "addressKh": "ភូមិដើមស្រល់ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
@@ -3413,10 +3241,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត ខ្នងភ្នំ មណ្ឌលគិរី (KNN Resort Mondulkiri) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិចំការតែ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 097 889 8888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "KNN Resort Mondulkiri is a verified accommodation located at Chamkar Tea Village, Sen Monorom, Mondulkiri. Estimated room rate: $$$ • Contact: 097 889 8888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-87.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-87.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តមណ្ឌលគិរី",
         "provinceEn": "Mondulkiri",
         "addressKh": "ភូមិចំការតែ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
@@ -3452,10 +3278,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត ភ្នំពេជ្រ មណ្ឌលគិរី (Pidoma Resort Mondulkiri) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 088 737 3777។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Pidoma Resort by EHM Mondulkiri is a verified accommodation located at Sen Monorom Town, Mondulkiri. Estimated room rate: $$$ • Contact: 088 737 3777. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-88.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-88.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តមណ្ឌលគិរី",
         "provinceEn": "Mondulkiri",
         "addressKh": "ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
@@ -3491,10 +3315,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "បឹងហ្គាឡូ ណេតឆឺរ ឡច មណ្ឌលគិរី (Nature Lodge Mondulkiri) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 097 821 0400។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Nature Lodge Eco-Bungalows Mondulkiri is a verified accommodation located at Sen Monorom Hilltop, Mondulkiri. Estimated room rate: $$ • Contact: 097 821 0400. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-89.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-89.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តមណ្ឌលគិរី",
         "provinceEn": "Mondulkiri",
         "addressKh": "ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
@@ -3530,10 +3352,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "ផ្ទះសំណាក់ ពេជ្រគិរី មណ្ឌលគិរី (Pich Kiri Guesthouse) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៧៦ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 097 222 3344។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Pich Kiri Motel & Guesthouse Mondulkiri is a verified accommodation located at National Road 76, Sen Monorom, Mondulkiri. Estimated room rate: $ • Contact: 097 222 3344. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-90.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-90.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តមណ្ឌលគិរី",
         "provinceEn": "Mondulkiri",
         "addressKh": "ផ្លូវជាតិលេខ ៧៦ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
@@ -3569,10 +3389,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "សណ្ឋាគារ ទែរ រ៉ូស រតនគិរី (Terres Rouges Lodge Banlung) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មាត់បឹងកន្សែង ក្រុងបានលុង ខេត្តរតនគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 075 974 051។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Terres Rouges Lodge Ratanakiri is a verified accommodation located at Boeung Kanseng Lakeside, Banlung, Ratanakiri. Estimated room rate: $$$ • Contact: 075 974 051. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-91.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-91.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តរតនគិរី",
         "provinceEn": "Ratanakiri",
         "addressKh": "មាត់បឹងកន្សែង ក្រុងបានលុង ខេត្តរតនគិរី",
@@ -3608,10 +3426,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត យក្សឡោម ហ៊ីល (Yeak Loam Hotel & Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ជិតបឹងយក្សឡោម ក្រុងបានលុង ខេត្តរតនគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 075 974 222។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Yeak Loam Hotel & Resort Banlung is a verified accommodation located at Near Yeak Loam Volcanic Lake, Banlung, Ratanakiri. Estimated room rate: $$ • Contact: 075 974 222. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-92.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-92.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តរតនគិរី",
         "provinceEn": "Ratanakiri",
         "addressKh": "ជិតបឹងយក្សឡោម ក្រុងបានលុង ខេត្តរតនគិរី",
@@ -3647,10 +3463,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ រតនៈ សិង្ហ (Ratanak Singha Hotel Banlung) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៧៨ ក្រុងបានលុង ខេត្តរតនគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 097 678 9999។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Ratanak Singha Hotel Ratanakiri is a verified accommodation located at National Road 78, Banlung, Ratanakiri. Estimated room rate: $$ • Contact: 097 678 9999. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-93.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-93.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តរតនគិរី",
         "provinceEn": "Ratanakiri",
         "addressKh": "ផ្លូវជាតិលេខ ៧៨ ក្រុងបានលុង ខេត្តរតនគិរី",
@@ -3686,10 +3500,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "ផ្ទះសំណាក់ បឹងកន្សែង រតនគិរី (Boeung Kanseng Guesthouse) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មាត់បឹងកន្សែង ក្រុងបានលុង ខេត្តរតនគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 012 456 781។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Boeung Kanseng Lakeside Guesthouse is a verified accommodation located at Boeung Kanseng Lake, Banlung, Ratanakiri. Estimated room rate: $ • Contact: 012 456 781. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-94.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-94.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តរតនគិរី",
         "provinceEn": "Ratanakiri",
         "addressKh": "មាត់បឹងកន្សែង ក្រុងបានលុង ខេត្តរតនគិរី",
@@ -3725,10 +3537,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត កាវ៉ាន់ តាតៃ (4 Rivers Floating Lodge Tatai) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ដងព្រែកតាតៃ ឃុំតាតៃ ស្រុកកោះកុង ខេត្តកោះកុង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$$ • ទំនាក់ទំនង៖ 097 643 4032។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "4 Rivers Floating Lodge Tatai Koh Kong is a verified accommodation located at Tatai River, Koh Kong Province. Estimated room rate: $$$$ • Contact: 097 643 4032. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-95.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-95.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកោះកុង",
         "provinceEn": "Koh Kong",
         "addressKh": "ដងព្រែកតាតៃ ឃុំតាតៃ ស្រុកកោះកុង ខេត្តកោះកុង",
@@ -3764,10 +3574,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត កោះអណ្តែត អេកូរីសត (Koh Andet Eco Resort Tatai) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឃុំតាតៃ ស្រុកកោះកុង ខេត្តកោះកុង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 016 811 224។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Koh Andet Eco Resort Tatai is a verified accommodation located at Tatai Commune, Koh Kong. Estimated room rate: $$ • Contact: 016 811 224. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-96.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-96.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកោះកុង",
         "provinceEn": "Koh Kong",
         "addressKh": "ឃុំតាតៃ ស្រុកកោះកុង ខេត្តកោះកុង",
@@ -3803,10 +3611,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ អេផិច កោះកុង (Apex Koh Kong Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មាត់ព្រែកកោះប៉ោ ក្រុងខេមរភូមិន្ទ ខេត្តកោះកុង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 035 936 111។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Apex Koh Kong Hotel is a verified accommodation located at Riverfront Road, Khemarak Phoumin, Koh Kong. Estimated room rate: $$ • Contact: 035 936 111. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-97.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-97.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកោះកុង",
         "provinceEn": "Koh Kong",
         "addressKh": "មាត់ព្រែកកោះប៉ោ ក្រុងខេមរភូមិន្ទ ខេត្តកោះកុង",
@@ -3842,10 +3648,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត តារាសាគរ កោះកុង (Dara Sakor Seaview Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ តំបន់ឆ្នេរតារាសាគរ ស្រុកគិរីសាគរ ខេត្តកោះកុង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 035 936 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Dara Sakor Seaview Resort Koh Kong is a verified accommodation located at Dara Sakor Coastal Zone, Botum Sakor, Koh Kong. Estimated room rate: $$$ • Contact: 035 936 888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-98.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-98.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកោះកុង",
         "provinceEn": "Koh Kong",
         "addressKh": "តំបន់ឆ្នេរតារាសាគរ ស្រុកគិរីសាគរ ខេត្តកោះកុង",
@@ -3881,10 +3685,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "សណ្ឋាគារ អេមរ៉ល កោះកុង (Apex Koh Kong Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មាត់ព្រែកកោះប៉ោ ក្រុងខេមរភូមិន្ទ ខេត្តកោះកុង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 035 936 789។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Apex Koh Kong Hotel & Guesthouse is a verified accommodation located at Kah Bpow Riverfront, Khemarak Phoumin, Koh Kong. Estimated room rate: $ • Contact: 035 936 789. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-99.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-99.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកោះកុង",
         "provinceEn": "Koh Kong",
         "addressKh": "មាត់ព្រែកកោះប៉ោ ក្រុងខេមរភូមិន្ទ ខេត្តកោះកុង",
@@ -3920,10 +3722,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ឡឺមេគង្គ កំពង់ចាម (LBN Asian Hotel Kampong Cham) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវមាត់ទន្លេមេគង្គ ក្រុងកំពង់ចាម ខេត្តកំពង់ចាម។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 042 941 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "LBN Asian Hotel Kampong Cham is a verified accommodation located at Mekong Riverfront Blvd, Kampong Cham. Estimated room rate: $$ • Contact: 042 941 888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-100.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-100.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ចាម",
         "provinceEn": "Kampong Cham",
         "addressKh": "ផ្លូវមាត់ទន្លេមេគង្គ ក្រុងកំពង់ចាម ខេត្តកំពង់ចាម",
@@ -3959,10 +3759,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ភ្នំប្រុស កំពង់ចាម (Phnom Pros Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ តាមបណ្តោយមាត់ទន្លេមេគង្គ ក្រុងកំពង់ចាម ខេត្តកំពង់ចាម។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 042 941 312។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Phnom Pros Riverfront Hotel Kampong Cham is a verified accommodation located at Riverfront Road, Kampong Cham Town. Estimated room rate: $ • Contact: 042 941 312. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-101.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-101.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ចាម",
         "provinceEn": "Kampong Cham",
         "addressKh": "តាមបណ្តោយមាត់ទន្លេមេគង្គ ក្រុងកំពង់ចាម ខេត្តកំពង់ចាម",
@@ -3998,10 +3796,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ មិត្តភាព កំពង់ចាម (Mittapheap Hotel Kampong Cham) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវព្រះមុនីវង្ស ក្រុងកំពង់ចាម ខេត្តកំពង់ចាម។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 042 941 555។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Mittapheap Hotel Kampong Cham is a verified accommodation located at Monivong Street, Kampong Cham. Estimated room rate: $ • Contact: 042 941 555. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-102.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-102.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ចាម",
         "provinceEn": "Kampong Cham",
         "addressKh": "ផ្លូវព្រះមុនីវង្ស ក្រុងកំពង់ចាម ខេត្តកំពង់ចាម",
@@ -4037,10 +3833,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត ហាន់ជ័យ ប៊ែមប៊ូ (Hanchey Bamboo Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភ្នំហាន់ជ័យ ស្រុកកំពង់សៀម ខេត្តកំពង់ចាម។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 096 861 5212។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Hanchey Bamboo Eco-Resort Kampong Cham is a verified accommodation located at Phnom Hanchey Hilltop, Kampong Siem, Kampong Cham. Estimated room rate: $$$ • Contact: 096 861 5212. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-103.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-103.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ចាម",
         "provinceEn": "Kampong Cham",
         "addressKh": "ភ្នំហាន់ជ័យ ស្រុកកំពង់សៀម ខេត្តកំពង់ចាម",
@@ -4076,10 +3870,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត រាជសីហ៍ មេគង្គ កោះទ្រង់ (Rajabori Villas Resort Koh Trong) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ កោះទ្រង់ ទល់មុខក្រុងក្រចេះ ខេត្តក្រចេះ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 012 898 126។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Rajabori Villas Resort Koh Trong Kratie is a verified accommodation located at Koh Trong Island, Kratie. Estimated room rate: $$$ • Contact: 012 898 126. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-104.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-104.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តក្រចេះ",
         "provinceEn": "Kratie",
         "addressKh": "កោះទ្រង់ ទល់មុខក្រុងក្រចេះ ខេត្តក្រចេះ",
@@ -4115,10 +3907,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ សូរិយា ក្រចេះ (Sorya Kayaking & Riverfront Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវមាត់ទន្លេមេគង្គ ក្រុងក្រចេះ ខេត្តក្រចេះ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 072 971 555។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Mekong Dolphin Hotel Kratie is a verified accommodation located at Preah Sihanouk Riverfront Road, Kratie. Estimated room rate: $$ • Contact: 072 971 555. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-105.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-105.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តក្រចេះ",
         "provinceEn": "Kratie",
         "addressKh": "ផ្លូវមាត់ទន្លេមេគង្គ ក្រុងក្រចេះ ខេត្តក្រចេះ",
@@ -4154,10 +3944,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ រីវើរ ដូលហ្វីន ក្រចេះ (River Dolphin Hotel Kratie) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៧ ក្រុងក្រចេះ ខេត្តក្រចេះ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 072 210 168។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "River Dolphin Hotel Kratie is a verified accommodation located at National Road 7, Kratie Town. Estimated room rate: $$ • Contact: 072 210 168. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-106.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-106.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តក្រចេះ",
         "provinceEn": "Kratie",
         "addressKh": "ផ្លូវជាតិលេខ ៧ ក្រុងក្រចេះ ខេត្តក្រចេះ",
@@ -4193,10 +3981,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "ផ្ទះសំណាក់ សន្តិភាព ក្រចេះ (Santepheap Guesthouse Kratie) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវមាត់ទន្លេ ក្រុងក្រចេះ ខេត្តក្រចេះ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 012 960 455។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Santepheap Riverfront Guesthouse Kratie is a verified accommodation located at Riverfront Road, Kratie. Estimated room rate: $ • Contact: 012 960 455. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-107.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-107.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តក្រចេះ",
         "provinceEn": "Kratie",
         "addressKh": "ផ្លូវមាត់ទន្លេ ក្រុងក្រចេះ ខេត្តក្រចេះ",
@@ -4232,10 +4018,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ វត្តភ្នំ សំបុក ក្រចេះ (Mekong Dolphin Hotel Kratie) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវមាត់ទន្លេមេគង្គ ក្រុងក្រចេះ ខេត្តក្រចេះ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 072 971 666។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Mekong Dolphin Hotel Kratie is a verified accommodation located at Mekong Riverfront Rd, Kratie Town. Estimated room rate: $$ • Contact: 072 971 666. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-108.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-108.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តក្រចេះ",
         "provinceEn": "Kratie",
         "addressKh": "ផ្លូវមាត់ទន្លេមេគង្គ ក្រុងក្រចេះ ខេត្តក្រចេះ",
@@ -4271,10 +4055,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ មាស សម្បត្តិ ស្ទឹងត្រែង (Mekong Bird Resort Stung Treng) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ តាមបណ្តោយមាត់ទន្លេមេគង្គ ក្រុងស្ទឹងត្រែង ខេត្តស្ទឹងត្រែង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 012 630 156។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Mekong Bird Eco-Resort Stung Treng is a verified accommodation located at Mekong Riverbank, Stung Treng. Estimated room rate: $$ • Contact: 012 630 156. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-109.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-109.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តស្ទឹងត្រែង",
         "provinceEn": "Stung Treng",
         "addressKh": "តាមបណ្តោយមាត់ទន្លេមេគង្គ ក្រុងស្ទឹងត្រែង ខេត្តស្ទឹងត្រែង",
@@ -4310,10 +4092,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ អូរពងមាន់ ស្ទឹងត្រែង (Savet Hotel Stung Treng) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ កណ្តាលក្រុងស្ទឹងត្រែង ខេត្តស្ទឹងត្រែង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 074 973 777។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Savet Hotel Stung Treng is a verified accommodation located at Stung Treng Town Center. Estimated room rate: $$ • Contact: 074 973 777. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-110.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-110.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តស្ទឹងត្រែង",
         "provinceEn": "Stung Treng",
         "addressKh": "កណ្តាលក្រុងស្ទឹងត្រែង ខេត្តស្ទឹងត្រែង",
@@ -4349,10 +4129,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "ផ្ទះសំណាក់ សេកុង ស្ទឹងត្រែង (Sekong River Guesthouse) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវមាត់ទន្លេសេកុង ក្រុងស្ទឹងត្រែង ខេត្តស្ទឹងត្រែង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 097 445 6677។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sekong River Guesthouse Stung Treng is a verified accommodation located at Sekong Riverfront, Stung Treng. Estimated room rate: $ • Contact: 097 445 6677. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-111.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-111.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តស្ទឹងត្រែង",
         "provinceEn": "Stung Treng",
         "addressKh": "ផ្លូវមាត់ទន្លេសេកុង ក្រុងស្ទឹងត្រែង ខេត្តស្ទឹងត្រែង",
@@ -4388,10 +4166,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត គោព្រៃ ព្រះវិហារ (Koh Ker Jungle Lodge) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ជិតរមណីយដ្ឋានប្រាសាទកោះកេរ ស្រុកគូលែន ខេត្តព្រះវិហារ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 097 888 1234។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Koh Ker Temple Resort & Hotel Preah Vihear is a verified accommodation located at Near Koh Ker World Heritage Site, Kulen, Preah Vihear. Estimated room rate: $$ • Contact: 097 888 1234. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-112.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-112.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះវិហារ",
         "provinceEn": "Preah Vihear",
         "addressKh": "ជិតរមណីយដ្ឋានប្រាសាទកោះកេរ ស្រុកគូលែន ខេត្តព្រះវិហារ",
@@ -4427,10 +4203,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ព្រះវិហារ ប៊ូទិក (Preah Vihear Boutique Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឃុំស្រអែម ស្រុកជាំក្សាន្ត ផ្លូវឡើងប្រាសាទព្រះវិហារ ខេត្តព្រះវិហារ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 097 962 8888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Preah Vihear Boutique Hotel Sra Em is a verified accommodation located at Sra Em Roundabout, Choam Khsant, Preah Vihear. Estimated room rate: $$ • Contact: 097 962 8888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-113.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-113.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះវិហារ",
         "provinceEn": "Preah Vihear",
         "addressKh": "ឃុំស្រអែម ស្រុកជាំក្សាន្ត ផ្លូវឡើងប្រាសាទព្រះវិហារ ខេត្តព្រះវិហារ",
@@ -4466,10 +4240,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ រស្មី ព្រះវិហារ (Raksmey Preah Vihear Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ក្រុងព្រះវិហារ (ត្បែងមានជ័យ) ខេត្តព្រះវិហារ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 064 965 111។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Raksmey Preah Vihear Hotel Tbeng Meanchey is a verified accommodation located at Preah Vihear City (Tbeng Meanchey). Estimated room rate: $ • Contact: 064 965 111. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-114.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-114.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះវិហារ",
         "provinceEn": "Preah Vihear",
         "addressKh": "ក្រុងព្រះវិហារ (ត្បែងមានជ័យ) ខេត្តព្រះវិហារ",
@@ -4505,10 +4277,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ សំបូរព្រៃគុក រីសត (Glorious Hotel & Spa Kampong Thom) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៦ ក្រុងស្ទឹងសែន ខេត្តកំពង់ធំ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 062 961 777។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Glorious Hotel & Spa Kampong Thom is a verified accommodation located at National Road 6, Steung Sen, Kampong Thom. Estimated room rate: $$ • Contact: 062 961 777. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-115.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-115.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ធំ",
         "provinceEn": "Kampong Thom",
         "addressKh": "ផ្លូវជាតិលេខ ៦ ក្រុងស្ទឹងសែន ខេត្តកំពង់ធំ",
@@ -4544,10 +4314,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ស្ទឹងសែន រ៉ូយ៉ាល់ (Kampong Thom Royal Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៦ កណ្តាលក្រុងស្ទឹងសែន ខេត្តកំពង់ធំ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 062 210 222។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Kampong Thom Royal Hotel is a verified accommodation located at National Road 6, Kampong Thom Town. Estimated room rate: $$ • Contact: 062 210 222. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-116.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-116.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ធំ",
         "provinceEn": "Kampong Thom",
         "addressKh": "ផ្លូវជាតិលេខ ៦ កណ្តាលក្រុងស្ទឹងសែន ខេត្តកំពង់ធំ",
@@ -4583,10 +4351,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "ផ្ទះសំណាក់ អរុណរះ កំពង់ធំ (Arunras Hotel Kampong Thom) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ជិតស្ពានស្ទឹងសែន ក្រុងស្ទឹងសែន ខេត្តកំពង់ធំ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 012 962 456។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Arunras Hotel & Guesthouse Kampong Thom is a verified accommodation located at Near Steung Sen Bridge, Kampong Thom. Estimated room rate: $ • Contact: 012 962 456. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-117.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-117.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ធំ",
         "provinceEn": "Kampong Thom",
         "addressKh": "ជិតស្ពានស្ទឹងសែន ក្រុងស្ទឹងសែន ខេត្តកំពង់ធំ",
@@ -4622,10 +4388,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត ភ្នំ១៥០០ វាលវែង (Hidden Leaf Resort Veal Veng) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ តំបន់ភ្នំ ១៥០០ ស្រុកវាលវែង ខេត្តពោធិ៍សាត់។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 097 555 1500។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Phnom 1500 Cloud Resort Veal Veng Pursat is a verified accommodation located at Phnom 1500 Mountain Pass, Veal Veng, Pursat. Estimated room rate: $$$ • Contact: 097 555 1500. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-118.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-118.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តពោធិ៍សាត់",
         "provinceEn": "Pursat",
         "addressKh": "តំបន់ភ្នំ ១៥០០ ស្រុកវាលវែង ខេត្តពោធិ៍សាត់",
@@ -4661,10 +4425,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ KM ពោធិ៍សាត់ (KM Hotel Pursat) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មាត់ស្ទឹងពោធិ៍សាត់ ក្រុងពោធិ៍សាត់ ខេត្តពោធិ៍សាត់។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 052 951 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "KM Hotel Pursat Riverfront is a verified accommodation located at Pursat Riverfront, Pursat Town. Estimated room rate: $$ • Contact: 052 951 888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-119.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-119.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តពោធិ៍សាត់",
         "provinceEn": "Pursat",
         "addressKh": "មាត់ស្ទឹងពោធិ៍សាត់ ក្រុងពោធិ៍សាត់ ខេត្តពោធិ៍សាត់",
@@ -4700,10 +4462,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ សំពៅមាស ពោធិ៍សាត់ (Sampov Meas Hotel Pursat) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៥ ក្រុងពោធិ៍សាត់ ខេត្តពោធិ៍សាត់។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 052 951 456។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sampov Meas Hotel Pursat is a verified accommodation located at National Road 5, Pursat Town. Estimated room rate: $ • Contact: 052 951 456. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-120.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-120.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តពោធិ៍សាត់",
         "provinceEn": "Pursat",
         "addressKh": "ផ្លូវជាតិលេខ ៥ ក្រុងពោធិ៍សាត់ ខេត្តពោធិ៍សាត់",
@@ -4739,10 +4499,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "សណ្ឋាគារ ដូនកែវ តាកែវ (Daunkeo Guesthouse & Hotel Takeo) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មាត់បឹងតាកែវ ក្រុងដូនកែវ ខេត្តតាកែវ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 032 931 234។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Daunkeo Lakeside Hotel Takeo is a verified accommodation located at Takeo Lakeside, Doun Kaev, Takeo. Estimated room rate: $ • Contact: 032 931 234. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-121.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-121.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តតាកែវ",
         "provinceEn": "Takeo",
         "addressKh": "មាត់បឹងតាកែវ ក្រុងដូនកែវ ខេត្តតាកែវ",
@@ -4778,10 +4536,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "ផ្ទះសំណាក់ អាលីស វីឡា តាកែវ (Alice Villa Hotel Takeo) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ២ ក្រុងដូនកែវ ខេត្តតាកែវ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 012 789 452។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Alice Villa Boutique Hotel Takeo is a verified accommodation located at National Road 2, Doun Kaev, Takeo. Estimated room rate: $$ • Contact: 012 789 452. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-122.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-122.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តតាកែវ",
         "provinceEn": "Takeo",
         "addressKh": "ផ្លូវជាតិលេខ ២ ក្រុងដូនកែវ ខេត្តតាកែវ",
@@ -4817,10 +4573,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត ភ្នំជីសូរ តាកែវ (Phnom Chisor Eco-Lodge) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ជិតរមណីយដ្ឋានភ្នំជីសូរ ស្រុកសំរោង ខេត្តតាកែវ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 016 332 445។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Phnom Chisor Countryside Lodge Takeo is a verified accommodation located at Near Phnom Chisor Temple, Samraong, Takeo. Estimated room rate: $ • Contact: 016 332 445. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-123.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-123.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តតាកែវ",
         "provinceEn": "Takeo",
         "addressKh": "ជិតរមណីយដ្ឋានភ្នំជីសូរ ស្រុកសំរោង ខេត្តតាកែវ",
@@ -4856,10 +4610,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ សុវណ្ណភូមិ កំពង់ឆ្នាំង (Sovannphum Hotel Kampong Chhnang) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៥ ក្រុងកំពង់ឆ្នាំង ខេត្តកំពង់ឆ្នាំង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 026 988 777។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sovannphum Hotel Kampong Chhnang is a verified accommodation located at National Road 5, Kampong Chhnang Town. Estimated room rate: $$ • Contact: 026 988 777. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-124.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-124.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
         "provinceEn": "Kampong Chhnang",
         "addressKh": "ផ្លូវជាតិលេខ ៥ ក្រុងកំពង់ឆ្នាំង ខេត្តកំពង់ឆ្នាំង",
@@ -4895,10 +4647,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត ភូមិឆ្នាំង (Garden Guesthouse Kampong Chhnang) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ក្រុងកំពង់ឆ្នាំង ខេត្តកំពង់ឆ្នាំង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 012 877 654។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Garden Guesthouse & Bungalows Kampong Chhnang is a verified accommodation located at Kampong Chhnang Town Center. Estimated room rate: $ • Contact: 012 877 654. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-125.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-125.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
         "provinceEn": "Kampong Chhnang",
         "addressKh": "ក្រុងកំពង់ឆ្នាំង ខេត្តកំពង់ឆ្នាំង",
@@ -4934,10 +4684,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ រស្មី សុខា កំពង់ឆ្នាំង (Raksmey Sokha Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ជិតផ្សារលើ ក្រុងកំពង់ឆ្នាំង ខេត្តកំពង់ឆ្នាំង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 026 988 123។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Raksmey Sokha Hotel Kampong Chhnang is a verified accommodation located at Near Phsar Leu Market, Kampong Chhnang. Estimated room rate: $ • Contact: 026 988 123. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-126.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-126.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
         "provinceEn": "Kampong Chhnang",
         "addressKh": "ជិតផ្សារលើ ក្រុងកំពង់ឆ្នាំង ខេត្តកំពង់ឆ្នាំង",
@@ -4973,10 +4721,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត វីគិរីរម្យ ផាញ រីសត (vKirirom Pine Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ លើកំពូលភ្នំគិរីរម្យ ឧទ្យានជាតិព្រះសុរាម្រិតកុសុមៈគិរីរម្យ ខេត្តកំពង់ស្ពឺ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 078 777 284។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "vKirirom Pine Resort Kampong Speu is a verified accommodation located at Kirirom National Park Mountain Top, Phnom Sruoch, Kampong Speu. Estimated room rate: $$$ • Contact: 078 777 284. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-127.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-127.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ស្ពឺ",
         "provinceEn": "Kampong Speu",
         "addressKh": "លើកំពូលភ្នំគិរីរម្យ ឧទ្យានជាតិព្រះសុរាម្រិតកុសុមៈគិរីរម្យ ខេត្តកំពង់ស្ពឺ",
@@ -5012,10 +4758,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត រមណីយដ្ឋាន ភ្នំគិរីរម្យ (Kirirom Hillside Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ជើងភ្នំគិរីរម្យ ស្រុកភ្នំស្រួច ខេត្តកំពង់ស្ពឺ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 012 914 256។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Kirirom Hillside Resort Kampong Speu is a verified accommodation located at Chambok / Kirirom Foothills, Phnom Sruoch, Kampong Speu. Estimated room rate: $$$ • Contact: 012 914 256. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-128.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-128.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ស្ពឺ",
         "provinceEn": "Kampong Speu",
         "addressKh": "ជើងភ្នំគិរីរម្យ ស្រុកភ្នំស្រួច ខេត្តកំពង់ស្ពឺ",
@@ -5051,10 +4795,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត អូរម្លូ (Omphlu Eco-Resort Kampong Speu) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ សហគមន៍អេកូទេសចរណ៍ចំបក់ ស្រុកភ្នំស្រួច ខេត្តកំពង់ស្ពឺ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 017 456 890។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Chambok Community Eco-Lodge Kampong Speu is a verified accommodation located at Chambok Ecotourism Site, Kampong Speu. Estimated room rate: $ • Contact: 017 456 890. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-129.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-129.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ស្ពឺ",
         "provinceEn": "Kampong Speu",
         "addressKh": "សហគមន៍អេកូទេសចរណ៍ចំបក់ ស្រុកភ្នំស្រួច ខេត្តកំពង់ស្ពឺ",
@@ -5090,10 +4832,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ច្បារមន កំពង់ស្ពឺ (Chbar Mon Hotel Kampong Speu) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៤ ក្រុងច្បារមន ខេត្តកំពង់ស្ពឺ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 025 987 222។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Chbar Mon Hotel Kampong Speu is a verified accommodation located at National Road 4, Chbar Mon, Kampong Speu. Estimated room rate: $ • Contact: 025 987 222. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-130.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-130.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ស្ពឺ",
         "provinceEn": "Kampong Speu",
         "addressKh": "ផ្លូវជាតិលេខ ៤ ក្រុងច្បារមន ខេត្តកំពង់ស្ពឺ",
@@ -5129,10 +4869,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត កោះដាច់ ប៊ូទិក (Koh Dach Beach Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ កោះដាច់ ស្រុកមុខកំពូល ខេត្តកណ្តាល។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 012 765 890។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Koh Dach Silk Island Boutique Resort Kandal is a verified accommodation located at Koh Dach Silk Island, Mukh Kampul, Kandal. Estimated room rate: $$ • Contact: 012 765 890. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-131.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-131.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកណ្តាល",
         "provinceEn": "Kandal",
         "addressKh": "កោះដាច់ ស្រុកមុខកំពូល ខេត្តកណ្តាល",
@@ -5168,10 +4906,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ តាខ្មៅ ហ្គាដិន (Takhmao Good Health Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ២១ ក្រុងតាខ្មៅ ខេត្តកណ្តាល។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 024 982 333។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Takhmao Riverside Hotel Kandal is a verified accommodation located at National Road 21, Takhmao City, Kandal. Estimated room rate: $$ • Contact: 024 982 333. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-132.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-132.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកណ្តាល",
         "provinceEn": "Kandal",
         "addressKh": "ផ្លូវជាតិលេខ ២១ ក្រុងតាខ្មៅ ខេត្តកណ្តាល",
@@ -5207,10 +4943,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត ភ្នំព្រះរាជទ្រព្យ អេកូ (Oudong Eco-Resort Kandal) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ជិតភ្នំឧត្តុង្គ (ភ្នំព្រះរាជទ្រព្យ) ស្រុកពញាឮ ខេត្តកណ្តាល។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 016 889 234។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Oudong Countryside Lodge Kandal is a verified accommodation located at Near Oudong Mountain, Ponhea Lueu, Kandal. Estimated room rate: $$ • Contact: 016 889 234. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-133.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-133.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកណ្តាល",
         "provinceEn": "Kandal",
         "addressKh": "ជិតភ្នំឧត្តុង្គ (ភ្នំព្រះរាជទ្រព្យ) ស្រុកពញាឮ ខេត្តកណ្តាល",
@@ -5246,10 +4980,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ មិត្តភាព ព្រៃវែង (Mittapheap Hotel Prey Veng) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ក្រុងព្រៃវែង ខេត្តព្រៃវែង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 043 944 555។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Mittapheap Hotel Prey Veng is a verified accommodation located at Prey Veng Town Center, Prey Veng. Estimated room rate: $ • Contact: 043 944 555. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-134.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-134.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រៃវែង",
         "provinceEn": "Prey Veng",
         "addressKh": "ក្រុងព្រៃវែង ខេត្តព្រៃវែង",
@@ -5285,10 +5017,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ អ្នកលឿង រីវើរវ្យូ (Neak Loeung Riverview Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ជិតស្ពានត្សឹបាសា (អ្នកលឿង) ស្រុកពាមរក៍ ខេត្តព្រៃវែង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 043 688 999។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Neak Loeung Tsubasa Bridge Hotel Prey Veng is a verified accommodation located at Near Tsubasa Bridge, Neak Loeung, Prey Veng. Estimated room rate: $$ • Contact: 043 688 999. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-135.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-135.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រៃវែង",
         "provinceEn": "Prey Veng",
         "addressKh": "ជិតស្ពានត្សឹបាសា (អ្នកលឿង) ស្រុកពាមរក៍ ខេត្តព្រៃវែង",
@@ -5324,10 +5054,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ វ៉ៃគោ ស្វាយរៀង (Waiko Hotel Svay Rieng) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ១ មាត់ទន្លេវ៉ៃគោ ក្រុងស្វាយរៀង ខេត្តស្វាយរៀង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 044 945 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Waiko Hotel Svay Rieng is a verified accommodation located at National Road 1, Waiko Riverfront, Svay Rieng. Estimated room rate: $$ • Contact: 044 945 888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-136.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-136.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តស្វាយរៀង",
         "provinceEn": "Svay Rieng",
         "addressKh": "ផ្លូវជាតិលេខ ១ មាត់ទន្លេវ៉ៃគោ ក្រុងស្វាយរៀង ខេត្តស្វាយរៀង",
@@ -5363,10 +5091,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "ផ្ទះសំណាក់ សុខសាន្ត ស្វាយរៀង (Soksan Guesthouse Svay Rieng) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ក្រុងស្វាយរៀង ខេត្តស្វាយរៀង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 044 945 234។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Soksan Hotel & Guesthouse Svay Rieng is a verified accommodation located at Svay Rieng Town, Svay Rieng. Estimated room rate: $ • Contact: 044 945 234. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-137.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-137.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តស្វាយរៀង",
         "provinceEn": "Svay Rieng",
         "addressKh": "ក្រុងស្វាយរៀង ខេត្តស្វាយរៀង",
@@ -5402,10 +5128,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ព្រះច័ន្ទ បន្ទាយមានជ័យ (Preah Chan Hotel Sisophon) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៥ ក្រុងសិរីសោភ័ណ ខេត្តបន្ទាយមានជ័យ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 054 958 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Preah Chan Hotel Banteay Meanchey is a verified accommodation located at National Road 5, Serei Saophoan (Sisophon), Banteay Meanchey. Estimated room rate: $$ • Contact: 054 958 888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-138.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-138.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
         "provinceEn": "Banteay Meanchey",
         "addressKh": "ផ្លូវជាតិលេខ ៥ ក្រុងសិរីសោភ័ណ ខេត្តបន្ទាយមានជ័យ",
@@ -5441,10 +5165,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ហូលីដេ ប៉ោយប៉ែត (Holiday Palace Hotel Poipet) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៥ ក្រុងប៉ោយប៉ែត ខេត្តបន្ទាយមានជ័យ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 054 967 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Holiday Poipet Hotel Banteay Meanchey is a verified accommodation located at National Road 5, Poipet City, Banteay Meanchey. Estimated room rate: $$$ • Contact: 054 967 888. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-139.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-139.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
         "provinceEn": "Banteay Meanchey",
         "addressKh": "ផ្លូវជាតិលេខ ៥ ក្រុងប៉ោយប៉ែត ខេត្តបន្ទាយមានជ័យ",
@@ -5480,10 +5202,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ សំរោង ឧត្តរមានជ័យ (Samraong Garden Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ក្រុងសំរោង ខេត្តឧត្តរមានជ័យ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 065 966 222។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Samraong Garden Hotel Oddar Meanchey is a verified accommodation located at Samraong City, Oddar Meanchey. Estimated room rate: $ • Contact: 065 966 222. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-140.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-140.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តឧត្តរមានជ័យ",
         "provinceEn": "Oddar Meanchey",
         "addressKh": "ក្រុងសំរោង ខេត្តឧត្តរមានជ័យ",
@@ -5519,10 +5239,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "សណ្ឋាគារ អន្លង់វែង (Anlong Veng Lakeside Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ស្រុកអន្លង់វែង ខេត្តឧត្តរមានជ័យ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 097 456 8899។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Anlong Veng Lakeside Guesthouse is a verified accommodation located at Anlong Veng District, Oddar Meanchey. Estimated room rate: $ • Contact: 097 456 8899. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-141.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-141.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តឧត្តរមានជ័យ",
         "provinceEn": "Oddar Meanchey",
         "addressKh": "ស្រុកអន្លង់វែង ខេត្តឧត្តរមានជ័យ",
@@ -5558,10 +5276,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Resort",
         "descriptionKh": "រីសត ម៉េម៉ូរីយ៉ា ផាឡេស ប៉ៃលិន (Memoria Palace & Resort Pailin) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ជើងភ្នំយ៉ាត ក្រុងប៉ៃលិន ខេត្តប៉ៃលិន។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$$ • ទំនាក់ទំនង៖ 095 838 788។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Memoria Palace & Resort Pailin is a verified accommodation located at Near Phnom Yat, Pailin City, Pailin. Estimated room rate: $$$ • Contact: 095 838 788. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-142.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-142.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តប៉ៃលិន",
         "provinceEn": "Pailin",
         "addressKh": "ជើងភ្នំយ៉ាត ក្រុងប៉ៃលិន ខេត្តប៉ៃលិន",
@@ -5597,10 +5313,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "សណ្ឋាគារ ពេជ្រ ប៉ៃលិន (Pailin Ruby Hotel & Guesthouse) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៥៧ ក្រុងប៉ៃលិន ខេត្តប៉ៃលិន។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 055 957 123។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Pailin Ruby Hotel & Guesthouse is a verified accommodation located at National Road 57, Pailin City. Estimated room rate: $ • Contact: 055 957 123. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-143.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-143.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តប៉ៃលិន",
         "provinceEn": "Pailin",
         "addressKh": "ផ្លូវជាតិលេខ ៥៧ ក្រុងប៉ៃលិន ខេត្តប៉ៃលិន",
@@ -5636,10 +5350,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ សួង ហ្គាដិន ត្បូងឃ្មុំ (Suong Garden Hotel Tboung Khmum) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៧ ក្រុងសួង ខេត្តត្បូងឃ្មុំ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $$ • ទំនាក់ទំនង៖ 042 688 7777។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Suong Garden Hotel Tboung Khmum is a verified accommodation located at National Road 7, Suong City, Tboung Khmum. Estimated room rate: $$ • Contact: 042 688 7777. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-144.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-144.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តត្បូងឃ្មុំ",
         "provinceEn": "Tboung Khmum",
         "addressKh": "ផ្លូវជាតិលេខ ៧ ក្រុងសួង ខេត្តត្បូងឃ្មុំ",
@@ -5675,10 +5387,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "ផ្ទះសំណាក់ ហ្លួងព្រះស្តេចកន ត្បូងឃ្មុំ (Ponhea Krek Guesthouse) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៧ ជិតបុរីរដ្ឋបាលខេត្តត្បូងឃ្មុំ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $ • ទំនាក់ទំនង៖ 012 567 432។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Tboung Khmum Provincial Guesthouse is a verified accommodation located at National Road 7, Tboung Khmum. Estimated room rate: $ • Contact: 012 567 432. Conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-145.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-145.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តត្បូងឃ្មុំ",
         "provinceEn": "Tboung Khmum",
         "addressKh": "ផ្លូវជាតិលេខ ៧ ជិតបុរីរដ្ឋបាលខេត្តត្បូងឃ្មុំ",
@@ -5714,10 +5424,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ តារា អ៊ែរផត (Dara Airport City Hotel & Spa) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មហាវិថីសហព័ន្ធរុស្ស៊ី សង្កាត់ទឹកថ្លា ខណ្ឌសែនសុខ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $55+ / យប់ • ទំនាក់ទំនង៖ 023 999 338។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Dara Airport City Hotel & Spa is a verified accommodation located at Russian Federation Blvd, Teuk Thla, Sen Sok, Phnom Penh. Estimated room rate: $55+ / night • Contact: 023 999 338. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-146.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-146.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "មហាវិថីសហព័ន្ធរុស្ស៊ី សង្កាត់ទឹកថ្លា ខណ្ឌសែនសុខ រាជធានីភ្នំពេញ",
@@ -5754,10 +5462,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ប៉ាលេស ហ្គាដិន (Palace Gate Hotel & Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ អគារលេខ ៤៤ ផ្លូវសុធារស ក្បែរព្រះបរមរាជវាំង ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $85+ / យប់ • ទំនាក់ទំនង៖ 023 900 011។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Palace Gate Hotel & Resort is a verified accommodation located at No. 44 Sothearos Blvd, Near Royal Palace, Daun Penh, Phnom Penh. Estimated room rate: $85+ / night • Contact: 023 900 011. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-147.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-147.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "អគារលេខ ៤៤ ផ្លូវសុធារស ក្បែរព្រះបរមរាជវាំង ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
@@ -5794,10 +5500,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ អង្គរ វីឡេជ (Angkor Village Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវវត្តបូព៌ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $70+ / យប់ • ទំនាក់ទំនង៖ 063 963 561។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Angkor Village Hotel is a verified accommodation located at Wat Bo Road, Sala Kamreuk, Krong Siem Reap. Estimated room rate: $70+ / night • Contact: 063 963 561. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-148.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-148.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវវត្តបូព៌ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -5834,10 +5538,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ឡូតូស ប្លង់ (Lotus Blanc Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៦ សង្កាត់គោកចក ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $60+ / យប់ • ទំនាក់ទំនង៖ 063 965 555។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Lotus Blanc Resort is a verified accommodation located at National Road 6, Kouk Chak, Krong Siem Reap. Estimated room rate: $60+ / night • Contact: 063 965 555. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-149.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-149.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវជាតិលេខ ៦ សង្កាត់គោកចក ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -5874,10 +5576,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "រមណីយដ្ឋាន កំពត ស្វីត ប៊ូទិក (Kampot Sweet Boutique) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិទ្វីខាងជើង សង្កាត់អណ្តូងខ្មែរ ក្រុងកំពត ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $35+ / យប់ • ទំនាក់ទំនង៖ 033 655 5888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Kampot Sweet Boutique is a verified accommodation located at Tvi Khang Cheung, Andoung Khmer, Krong Kampot. Estimated room rate: $35+ / night • Contact: 033 655 5888. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-150.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-150.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "ភូមិទ្វីខាងជើង សង្កាត់អណ្តូងខ្មែរ ក្រុងកំពត ខេត្តកំពត",
@@ -5914,10 +5614,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ សាន់ & មូន រីវើសាយ (Sun & Moon, Riverside Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មហាវិថីព្រះនរោត្តម កែងផ្លូវមាត់ទន្លេបាសាក់ សង្កាត់ទន្លេបាសាក់ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $78+ / យប់ • ទំនាក់ទំនង៖ 023 866 668។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sun & Moon, Riverside Hotel is a verified accommodation located at Norodom Blvd, Tonle Bassac Waterfront, Chamkarmon, Phnom Penh. Estimated room rate: $78+ / night • Contact: 023 866 668. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-151.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-151.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "មហាវិថីព្រះនរោត្តម កែងផ្លូវមាត់ទន្លេបាសាក់ សង្កាត់ទន្លេបាសាក់ រាជធានីភ្នំពេញ",
@@ -5954,10 +5652,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ផេនីនស៊ូឡា ភ្នំពេញ (The Peninsula Phnom Penh) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវកែវចិន្តា សង្កាត់ជ្រោយចង្វារ ខណ្ឌជ្រោយចង្វារ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $68+ / យប់ • ទំនាក់ទំនង៖ 023 901 668។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "The Peninsula Phnom Penh is a verified accommodation located at Keo Chenda Street, Chroy Changvar, Phnom Penh. Estimated room rate: $68+ / night • Contact: 023 901 668. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-152.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-152.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "ផ្លូវកែវចិន្តា សង្កាត់ជ្រោយចង្វារ ខណ្ឌជ្រោយចង្វារ រាជធានីភ្នំពេញ",
@@ -5994,10 +5690,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ វី ភ្នំពេញ (V Hotel Phnom Penh) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ អគារលេខ ៣៣ ផ្លូវ ១១៤ សង្កាត់មនោរម្យ ខណ្ឌ ៧មករា រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $38+ / យប់ • ទំនាក់ទំនង៖ 023 998 855។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "V Hotel Phnom Penh is a verified accommodation located at No. 33 Street 114, Monorom, 7 Makara, Phnom Penh. Estimated room rate: $38+ / night • Contact: 023 998 855. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-153.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-153.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "អគារលេខ ៣៣ ផ្លូវ ១១៤ សង្កាត់មនោរម្យ ខណ្ឌ ៧មករា រាជធានីភ្នំពេញ",
@@ -6034,10 +5728,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ ឡា ក្រូនិក ភ្នំពេញ (la Chronique Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវ ១៣៥ សង្កាត់ទួលទំពូងទី១ ខណ្ឌចំការមន រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $49+ / យប់ • ទំនាក់ទំនង៖ 023 900 588។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "la Chronique Hotel is a verified accommodation located at Street 135, Tuol Tompoung 1 (Russian Market), Chamkarmon, Phnom Penh. Estimated room rate: $49+ / night • Contact: 023 900 588. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-154.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-154.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "ផ្លូវ ១៣៥ សង្កាត់ទួលទំពូងទី១ ខណ្ឌចំការមន រាជធានីភ្នំពេញ",
@@ -6074,10 +5766,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ ប៉ាវីលីយ៉ុង ភ្នំពេញ (The Pavilion Boutique Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ អគារលេខ ២២៧ ផ្លូវ ១៩ ជិតព្រះបរមរាជវាំង ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $58+ / យប់ • ទំនាក់ទំនង៖ 023 222 280។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "The Pavilion Boutique Hotel is a verified accommodation located at No. 227 Street 19, Chey Chumneas, Daun Penh, Phnom Penh. Estimated room rate: $58+ / night • Contact: 023 222 280. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-155.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-155.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "អគារលេខ ២២៧ ផ្លូវ ១៩ ជិតព្រះបរមរាជវាំង ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
@@ -6114,10 +5804,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ស៊ីតាឌីន ហ្វ្លេតអាយរ៉ុន ភ្នំពេញ (Citadines Flatiron Phnom Penh) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវ ១០២ មជ្ឈមណ្ឌលភ្នំពេញ (PPCC) សង្កាត់ស្រះចក ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $72+ / យប់ • ទំនាក់ទំនង៖ 023 901 999។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Citadines Flatiron Phnom Penh is a verified accommodation located at Street 102, Phnom Penh City Center, Srah Chak, Daun Penh, Phnom Penh. Estimated room rate: $72+ / night • Contact: 023 901 999. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-156.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-156.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "ផ្លូវ ១០២ មជ្ឈមណ្ឌលភ្នំពេញ (PPCC) សង្កាត់ស្រះចក ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
@@ -6154,10 +5842,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "ផ្ទះសំណាក់ ប្រាយ ឡូតឹស ភ្នំពេញ (Bright Lotus Guesthouse) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ អគារលេខ ២២ ផ្លូវ ១៧៨ ជិតសារមន្ទីរជាតិ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $22+ / យប់ • ទំនាក់ទំនង៖ 023 990 448។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Bright Lotus Guesthouse is a verified accommodation located at No. 22 Street 178, Near National Museum, Daun Penh, Phnom Penh. Estimated room rate: $22+ / night • Contact: 023 990 448. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-157.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-157.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "អគារលេខ ២២ ផ្លូវ ១៧៨ ជិតសារមន្ទីរជាតិ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
@@ -6194,10 +5880,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ឌឹ ស្នូបែល ទួលទំពូង (The Snowbell Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវ ៤៤៦ សង្កាត់ទួលទំពូងទី១ ខណ្ឌចំការមន រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $42+ / យប់ • ទំនាក់ទំនង៖ 023 900 711។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "The Snowbell Hotel is a verified accommodation located at Street 446, Tuol Tompoung 1, Chamkarmon, Phnom Penh. Estimated room rate: $42+ / night • Contact: 023 900 711. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-158.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-158.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "ផ្លូវ ៤៤៦ សង្កាត់ទួលទំពូងទី១ ខណ្ឌចំការមន រាជធានីភ្នំពេញ",
@@ -6234,10 +5918,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ អាគ័រីយ៉ូស ភ្នំពេញ (Aquarius Hotel and Urban Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ អគារលេខ ៥ ផ្លូវ ២៤០ សង្កាត់ចតុមុខ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $52+ / យប់ • ទំនាក់ទំនង៖ 023 972 088។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Aquarius Hotel and Urban Resort is a verified accommodation located at No. 5 Street 240, Chaktomuk, Daun Penh, Phnom Penh. Estimated room rate: $52+ / night • Contact: 023 972 088. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-159.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-159.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "អគារលេខ ៥ ផ្លូវ ២៤០ សង្កាត់ចតុមុខ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
@@ -6274,10 +5956,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ អមតៈ បឹងកេងកង (BKK1 Boutique Residence Phnom Penh) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវ ២៨៨ សង្កាត់បឹងកេងកងទី១ ខណ្ឌបឹងកេងកង រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $46+ / យប់ • ទំនាក់ទំនង៖ 023 986 412។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "BKK1 Boutique Residence Phnom Penh is a verified accommodation located at Street 288, Boeung Keng Kang 1, Phnom Penh. Estimated room rate: $46+ / night • Contact: 023 986 412. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-160.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-160.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "ផ្លូវ ២៨៨ សង្កាត់បឹងកេងកងទី១ ខណ្ឌបឹងកេងកង រាជធានីភ្នំពេញ",
@@ -6314,10 +5994,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ខូរ៉ល អង្គរ រីសត (Courtyard by Marriott Siem Reap Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៦ ភូមិចុងកៅស៊ូ សង្កាត់ស្លក្រាម ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $82+ / យប់ • ទំនាក់ទំនង៖ 063 968 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Courtyard by Marriott Siem Reap Resort is a verified accommodation located at No. 0609 National Road 6, Chong Kao Sou, Slor Kram, Siem Reap. Estimated room rate: $82+ / night • Contact: 063 968 888. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-161.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-161.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវជាតិលេខ ៦ ភូមិចុងកៅស៊ូ សង្កាត់ស្លក្រាម ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -6354,10 +6032,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ឌឹ អឺប៊ិន សៀមរាប (The Urban Hotel Siem Reap) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវសុខសាន្ត សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $32+ / យប់ • ទំនាក់ទំនង៖ 063 966 444។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "The Urban Hotel Siem Reap is a verified accommodation located at Sok San Road, Svay Dangkum, Krong Siem Reap. Estimated room rate: $32+ / night • Contact: 063 966 444. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-162.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-162.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវសុខសាន្ត សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -6394,10 +6070,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ មេម៉ូរី ប៊ូទិក សៀមរាប (Memoire Siem Reap Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៦ សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $45+ / យប់ • ទំនាក់ទំនង៖ 063 768 777។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Memoire Siem Reap Hotel is a verified accommodation located at National Road 6, Svay Dangkum, Krong Siem Reap. Estimated room rate: $45+ / night • Contact: 063 768 777. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-163.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-163.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវជាតិលេខ ៦ សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -6434,10 +6108,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ សាបារ៉ា អង្គរ រីសត (Sabara Angkor Resort & Spa) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវវប្បធម៌ ភូមិគ្រួស សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $48+ / យប់ • ទំនាក់ទំនង៖ 063 967 555។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sabara Angkor Resort & Spa is a verified accommodation located at Cultural Road, Kruos Village, Svay Dangkum, Siem Reap. Estimated room rate: $48+ / night • Contact: 063 967 555. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-164.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-164.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវវប្បធម៌ ភូមិគ្រួស សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -6474,10 +6146,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ ខេមបូឌាណា វីឡា សៀមរាប (Khmer Mansion Residence) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវសុខសាន្ត ភូមិស្ទឹងថ្មី សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $42+ / យប់ • ទំនាក់ទំនង៖ 063 963 628។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Khmer Mansion Residence is a verified accommodation located at Sok San Road, Steung Thmei, Svay Dangkum, Siem Reap. Estimated room rate: $42+ / night • Contact: 063 963 628. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-165.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-165.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវសុខសាន្ត ភូមិស្ទឹងថ្មី សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -6514,10 +6184,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "ផ្ទះសំណាក់ បាបែល សៀមរាប (Babel Siem Reap Guesthouse) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិវត្តបូព៌ ផ្លូវ ២០ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $24+ / យប់ • ទំនាក់ទំនង៖ 078 858 369។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Babel Siem Reap Guesthouse is a verified accommodation located at Wat Bo Road, Street 20, Sala Kamreuk, Siem Reap. Estimated room rate: $24+ / night • Contact: 078 858 369. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-166.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-166.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ភូមិវត្តបូព៌ ផ្លូវ ២០ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -6554,10 +6222,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ណាវូតូ ឌ្រីម រីសត (Navutu Dreams Resort & Wellness Retreat) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវនាវូតូ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $75+ / យប់ • ទំនាក់ទំនង៖ 063 964 864។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Navutu Dreams Resort & Wellness Retreat is a verified accommodation located at Navutu Road, Sala Kamreuk, Krong Siem Reap. Estimated room rate: $75+ / night • Contact: 063 964 864. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-167.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-167.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវនាវូតូ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -6594,10 +6260,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ ហ្គោលឌិន ថេមផល រីស៊ីដិន (Golden Temple Residence) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវសុខសាន្ត ជិតផ្សាររាត្រី សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $68+ / យប់ • ទំនាក់ទំនង៖ 063 966 889។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Golden Temple Residence is a verified accommodation located at Sok San Road, Near Night Market, Svay Dangkum, Siem Reap. Estimated room rate: $68+ / night • Contact: 063 966 889. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-168.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-168.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវសុខសាន្ត ជិតផ្សាររាត្រី សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -6634,10 +6298,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ណូរីយ៉ា រីសត ឆ្នេរអូរត្រេះ (Naia Resort Sihanoukville) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរអូរត្រេះ ២ សង្កាត់លេខ ៤ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $62+ / យប់ • ទំនាក់ទំនង៖ 034 934 700។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Naia Resort Sihanoukville is a verified accommodation located at Otres Beach 2, Sangkat 4, Krong Preah Sihanouk. Estimated room rate: $62+ / night • Contact: 034 934 700. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-169.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-169.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរអូរត្រេះ ២ សង្កាត់លេខ ៤ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ",
@@ -6674,10 +6336,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត ឌឹ ស៊ីកគ្រីត ហ្គាដិន កោះរ៉ុងសន្លឹម (The Secret Garden Koh Rong Sanloem) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរសារ៉ាសេន (Saracen Bay) កោះរ៉ុងសន្លឹម ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $92+ / យប់ • ទំនាក់ទំនង៖ 092 332 455។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "The Secret Garden Koh Rong Sanloem is a verified accommodation located at Saracen Bay, Koh Rong Sanloem, Preah Sihanouk. Estimated room rate: $92+ / night • Contact: 092 332 455. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-170.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-170.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរសារ៉ាសេន (Saracen Bay) កោះរ៉ុងសន្លឹម ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ",
@@ -6714,10 +6374,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "រីសត សូល ប៊ីច កោះរ៉ុងសន្លឹម (Sol Beach Resort Koh Rong Sanloem) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរសារ៉ាសេន កោះរ៉ុងសន្លឹម ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $75+ / យប់ • ទំនាក់ទំនង៖ 081 666 567។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sol Beach Resort Koh Rong Sanloem is a verified accommodation located at Saracen Bay Beach, Koh Rong Sanloem, Preah Sihanouk. Estimated room rate: $75+ / night • Contact: 081 666 567. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-171.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-171.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរសារ៉ាសេន កោះរ៉ុងសន្លឹម ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ",
@@ -6754,10 +6412,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ឆ្នេរឯករាជ្យ ប៊ូទិក ព្រះសីហនុ (Ekareach Seaview Residence) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ វិថី ២ ធ្នូ សង្កាត់លេខ ៤ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $45+ / យប់ • ទំនាក់ទំនង៖ 034 935 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Ekareach Seaview Residence is a verified accommodation located at 2 Ekareach Street, Sangkat 4, Krong Preah Sihanouk. Estimated room rate: $45+ / night • Contact: 034 935 888. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-172.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-172.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "វិថី ២ ធ្នូ សង្កាត់លេខ ៤ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ",
@@ -6794,10 +6450,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "រីសត ភូមិឆ្នេរមាស រាម (Ream Beach Eco Bungalows) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេររាម ឃុំរាម ស្រុកព្រៃនប់ ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $28+ / យប់ • ទំនាក់ទំនង៖ 012 884 312។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Ream Beach Eco Bungalows is a verified accommodation located at Ream Beach, Prey Nob District, Preah Sihanouk. Estimated room rate: $28+ / night • Contact: 012 884 312. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-173.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-173.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេររាម ឃុំរាម ស្រុកព្រៃនប់ ខេត្តព្រះសីហនុ",
@@ -6834,10 +6488,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត អេមប៊ើរ កំពត (Amber Kampot Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិអណ្តូងខ្មែរ សង្កាត់អណ្តូងខ្មែរ ក្រុងកំពត ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $110+ / យប់ • ទំនាក់ទំនង៖ 088 866 8885។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Amber Kampot Resort is a verified accommodation located at Andoung Khmer, Krong Kampot, Kampot. Estimated room rate: $110+ / night • Contact: 088 866 8885. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-174.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-174.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "ភូមិអណ្តូងខ្មែរ សង្កាត់អណ្តូងខ្មែរ ក្រុងកំពត ខេត្តកំពត",
@@ -6874,10 +6526,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត ខាសល បេ កំពត (Castle Bayview Resort & Spa) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវមាត់ព្រែកកំពត សង្កាត់អណ្តូងខ្មែរ ក្រុងកំពត ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $72+ / យប់ • ទំនាក់ទំនង៖ 033 932 999។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Castle Bayview Resort & Spa is a verified accommodation located at Riverside Road, Andoung Khmer, Krong Kampot. Estimated room rate: $72+ / night • Contact: 033 932 999. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-175.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-175.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "ផ្លូវមាត់ព្រែកកំពត សង្កាត់អណ្តូងខ្មែរ ក្រុងកំពត ខេត្តកំពត",
@@ -6914,10 +6564,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "វីឡា រីវើធ្រី កំពត (RiverTree Villa & Resort Kampot) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឃុំម៉ាក់ប្រាង្គ ស្រុកទឹកឈូ តាមបណ្តោយព្រែកកំពត ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $55+ / យប់ • ទំនាក់ទំនង៖ 016 551 778។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "RiverTree Villa & Resort Kampot is a verified accommodation located at Makprang Commune, Teuk Chhou District, Kampot Riverfront. Estimated room rate: $55+ / night • Contact: 016 551 778. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-176.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-176.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "ឃុំម៉ាក់ប្រាង្គ ស្រុកទឹកឈូ តាមបណ្តោយព្រែកកំពត ខេត្តកំពត",
@@ -6954,10 +6602,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "ផ្ទះសំណាក់ បូកគោ ម៉ោនធេន វីយូ (Bokor Mountain View Lodge) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវឡើងភ្នំបូកគោ សង្កាត់ត្រើយកោះ ក្រុងកំពត ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $20+ / យប់ • ទំនាក់ទំនង៖ 012 773 819។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Bokor Mountain View Lodge is a verified accommodation located at Bokor Road, Traeuy Kaoh, Krong Kampot. Estimated room rate: $20+ / night • Contact: 012 773 819. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-177.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-177.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "ផ្លូវឡើងភ្នំបូកគោ សង្កាត់ត្រើយកោះ ក្រុងកំពត ខេត្តកំពត",
@@ -6994,10 +6640,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត ពាមស្នេហ៍ មាត់ព្រែកកំពត (Peam Snea Resort Kampot) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិខ្សាច់ សង្កាត់អណ្តូងខ្មែរ ក្រុងកំពត ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $58+ / យប់ • ទំនាក់ទំនង៖ 096 822 7788។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Peam Snea Resort Kampot is a verified accommodation located at Khsach Village, Andoung Khmer, Krong Kampot. Estimated room rate: $58+ / night • Contact: 096 822 7788. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-178.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-178.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "ភូមិខ្សាច់ សង្កាត់អណ្តូងខ្មែរ ក្រុងកំពត ខេត្តកំពត",
@@ -7034,10 +6678,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត សាមណា វីឡា កែប (Samanea Beach Resort & Spa Kep) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៣៣អា សង្កាត់កែប ក្រុងកែប ខេត្តកែប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $95+ / យប់ • ទំនាក់ទំនង៖ 077 655 586។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Samanea Beach Resort & Spa Kep is a verified accommodation located at National Road 33A, Sangkat Kep, Krong Kep. Estimated room rate: $95+ / night • Contact: 077 655 586. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-179.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-179.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកែប",
         "provinceEn": "Kep",
         "addressKh": "ផ្លូវជាតិលេខ ៣៣អា សង្កាត់កែប ក្រុងកែប ខេត្តកែប",
@@ -7074,10 +6716,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "ប៊ូទិក រ៉ាវីយ៉ា វីឡា កែប (RaVorn Villa Boutique Kep) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ជិតផ្សារក្តាម សង្កាត់កែប ក្រុងកែប ខេត្តកែប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $45+ / យប់ • ទំនាក់ទំនង៖ 012 918 422។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "RaVorn Villa Boutique Kep is a verified accommodation located at Near Crab Market, Sangkat Kep, Krong Kep. Estimated room rate: $45+ / night • Contact: 012 918 422. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-180.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-180.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកែប",
         "provinceEn": "Kep",
         "addressKh": "ជិតផ្សារក្តាម សង្កាត់កែប ក្រុងកែប ខេត្តកែប",
@@ -7114,10 +6754,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ កែប បេ រីសត (Kep Bay Hotel & Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវមាត់សមុទ្រកែប សង្កាត់ព្រៃធំ ក្រុងកែប ខេត្តកែប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $38+ / យប់ • ទំនាក់ទំនង៖ 036 933 666។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Kep Bay Hotel & Resort is a verified accommodation located at Kep Beach Road, Prey Thom, Krong Kep. Estimated room rate: $38+ / night • Contact: 036 933 666. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-181.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-181.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកែប",
         "provinceEn": "Kep",
         "addressKh": "ផ្លូវមាត់សមុទ្រកែប សង្កាត់ព្រៃធំ ក្រុងកែប ខេត្តកែប",
@@ -7154,10 +6792,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ មេសង់ វត្តគរ បាត់ដំបង (Maisons Wat Kor Boutique Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិវត្តគរ សង្កាត់វត្តគរ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $48+ / យប់ • ទំនាក់ទំនង៖ 053 953 277។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Maisons Wat Kor Boutique Hotel is a verified accommodation located at Wat Kor Cultural Village, Krong Battambang. Estimated room rate: $48+ / night • Contact: 053 953 277. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-182.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-182.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តបាត់ដំបង",
         "provinceEn": "Battambang",
         "addressKh": "ភូមិវត្តគរ សង្កាត់វត្តគរ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង",
@@ -7194,10 +6830,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ស្ទឹងសង្កែ បាត់ដំបង (Stung Sangke Hotel Battambang) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៥ សង្កាត់ព្រែកព្រះស្តេច ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $25+ / យប់ • ទំនាក់ទំនង៖ 053 953 456។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Stung Sangke Hotel Battambang is a verified accommodation located at National Road 5, Prek Preah Sdach, Krong Battambang. Estimated room rate: $25+ / night • Contact: 053 953 456. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-183.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-183.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តបាត់ដំបង",
         "provinceEn": "Battambang",
         "addressKh": "ផ្លូវជាតិលេខ ៥ សង្កាត់ព្រែកព្រះស្តេច ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង",
@@ -7234,10 +6868,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "វីឡា ឌឹ សេនធ្យូរី បាត់ដំបង (The Sanctuary Villa Battambang) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិកម្មករ សង្កាត់ស្វាយប៉ោ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $36+ / យប់ • ទំនាក់ទំនង៖ 053 733 555។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "The Sanctuary Villa Battambang is a verified accommodation located at Kamakor Village, Svay Por, Krong Battambang. Estimated room rate: $36+ / night • Contact: 053 733 555. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-184.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-184.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តបាត់ដំបង",
         "provinceEn": "Battambang",
         "addressKh": "ភូមិកម្មករ សង្កាត់ស្វាយប៉ោ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង",
@@ -7274,10 +6906,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ កោះកុង បេ (Koh Kong Bay Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវមាត់ព្រែកកោះប៉ោ សង្កាត់ស្មាច់មានជ័យ ក្រុងខេមរភូមិន្ទ ខេត្តកោះកុង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $32+ / យប់ • ទំនាក់ទំនង៖ 035 936 111។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Koh Kong Bay Hotel is a verified accommodation located at Riverfront Road, Smach Mean Chey, Khemarak Phoumin, Koh Kong. Estimated room rate: $32+ / night • Contact: 035 936 111. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-185.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-185.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកោះកុង",
         "provinceEn": "Koh Kong",
         "addressKh": "ផ្លូវមាត់ព្រែកកោះប៉ោ សង្កាត់ស្មាច់មានជ័យ ក្រុងខេមរភូមិន្ទ ខេត្តកោះកុង",
@@ -7314,10 +6944,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត តារាសាគរ ឆ្នេរវែង (Dara Sakor Seaview Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ តំបន់ឆ្នេរតារាសាគរ ស្រុកគិរីសាគរ ខេត្តកោះកុង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $68+ / យប់ • ទំនាក់ទំនង៖ 012 668 912។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Dara Sakor Seaview Resort is a verified accommodation located at Dara Sakor Coastal Zone, Kiri Sakor District, Koh Kong. Estimated room rate: $68+ / night • Contact: 012 668 912. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-186.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-186.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកោះកុង",
         "provinceEn": "Koh Kong",
         "addressKh": "តំបន់ឆ្នេរតារាសាគរ ស្រុកគិរីសាគរ ខេត្តកោះកុង",
@@ -7354,10 +6982,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត ភីឌីតា មណ្ឌលគិរី (Pidoma Resort Mondulkiri) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិកណ្តាល សង្កាត់ស្ពានមានជ័យ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $70+ / យប់ • ទំនាក់ទំនង៖ 088 998 8168។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Pidoma Resort Mondulkiri is a verified accommodation located at Kandal Village, Spean Mean Chey, Sen Monorom, Mondulkiri. Estimated room rate: $70+ / night • Contact: 088 998 8168. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-187.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-187.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តមណ្ឌលគិរី",
         "provinceEn": "Mondulkiri",
         "addressKh": "ភូមិកណ្តាល សង្កាត់ស្ពានមានជ័យ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
@@ -7394,10 +7020,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "បឹងហ្គាឡូ ណេតឆឺ ឡច មណ្ឌលគិរី (Nature Lodge Mondulkiri) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិចំការតែ សង្កាត់ស្ពានមានជ័យ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $25+ / យប់ • ទំនាក់ទំនង៖ 097 820 3868។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Nature Lodge Mondulkiri is a verified accommodation located at Chamkar Tea Village, Spean Mean Chey, Sen Monorom, Mondulkiri. Estimated room rate: $25+ / night • Contact: 097 820 3868. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-188.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-188.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តមណ្ឌលគិរី",
         "provinceEn": "Mondulkiri",
         "addressKh": "ភូមិចំការតែ សង្កាត់ស្ពានមានជ័យ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
@@ -7434,10 +7058,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ យក្សឡោម ហ៊ីល ឡច (Yeak Loam Hotel & Spa) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ជិតបឹងកន្សែង សង្កាត់បឹងកន្សែង ក្រុងបានលុង ខេត្តរតនគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $35+ / យប់ • ទំនាក់ទំនង៖ 075 974 222។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Yeak Loam Hotel & Spa is a verified accommodation located at Boeung Kansaeng, Krong Banlung, Ratanakiri. Estimated room rate: $35+ / night • Contact: 075 974 222. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-189.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-189.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តរតនគិរី",
         "provinceEn": "Ratanakiri",
         "addressKh": "ជិតបឹងកន្សែង សង្កាត់បឹងកន្សែង ក្រុងបានលុង ខេត្តរតនគិរី",
@@ -7474,10 +7096,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "បឹងហ្គាឡូ បឹងយក្សឡោម អេកូ (Banlung Balcony Lodge) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវទៅបឹងយក្សឡោម សង្កាត់ឡាបានសៀក ក្រុងបានលុង ខេត្តរតនគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $22+ / យប់ • ទំនាក់ទំនង៖ 012 954 611។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Banlung Balcony Lodge is a verified accommodation located at Yeak Laom Road, Labansiek, Krong Banlung, Ratanakiri. Estimated room rate: $22+ / night • Contact: 012 954 611. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-190.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-190.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តរតនគិរី",
         "provinceEn": "Ratanakiri",
         "addressKh": "ផ្លូវទៅបឹងយក្សឡោម សង្កាត់ឡាបានសៀក ក្រុងបានលុង ខេត្តរតនគិរី",
@@ -7514,10 +7134,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ភ្នំប្រុស កំពង់ចាម (Phnom Pros Hotel Kampong Cham) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៧ សង្កាត់កំពង់ចាម ក្រុងកំពង់ចាម ខេត្តកំពង់ចាម។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $20+ / យប់ • ទំនាក់ទំនង៖ 042 941 388។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Phnom Pros Hotel Kampong Cham is a verified accommodation located at National Road 7, Krong Kampong Cham. Estimated room rate: $20+ / night • Contact: 042 941 388. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-191.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-191.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ចាម",
         "provinceEn": "Kampong Cham",
         "addressKh": "ផ្លូវជាតិលេខ ៧ សង្កាត់កំពង់ចាម ក្រុងកំពង់ចាម ខេត្តកំពង់ចាម",
@@ -7554,10 +7172,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "រីសត រាជបូរី កោះទ្រង់ ក្រចេះ (Rajabori Villas Resort Koh Trong) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិក្បាលកោះ សង្កាត់កោះទ្រង់ ក្រុងក្រចេះ ខេត្តក្រចេះ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $45+ / យប់ • ទំនាក់ទំនង៖ 012 894 128។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Rajabori Villas Resort Koh Trong is a verified accommodation located at Koh Trong Island, Krong Kratie, Kratie. Estimated room rate: $45+ / night • Contact: 012 894 128. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-192.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-192.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តក្រចេះ",
         "provinceEn": "Kratie",
         "addressKh": "ភូមិក្បាលកោះ សង្កាត់កោះទ្រង់ ក្រុងក្រចេះ ខេត្តក្រចេះ",
@@ -7594,10 +7210,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ សូរិយា មាត់ទន្លេក្រចេះ (Mekong Dolphin View Hotel Kratie) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ៣ មាត់ទន្លេមេគង្គ សង្កាត់ក្រចេះ ក្រុងក្រចេះ ខេត្តក្រចេះ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $25+ / យប់ • ទំនាក់ទំនង៖ 072 971 588។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Mekong Dolphin View Hotel Kratie is a verified accommodation located at Street 3, Mekong Riverfront, Krong Kratie. Estimated room rate: $25+ / night • Contact: 072 971 588. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-193.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-193.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តក្រចេះ",
         "provinceEn": "Kratie",
         "addressKh": "ផ្លូវលេខ ៣ មាត់ទន្លេមេគង្គ សង្កាត់ក្រចេះ ក្រុងក្រចេះ ខេត្តក្រចេះ",
@@ -7634,10 +7248,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ សំបូរ វីឡេជ កំពង់ធំ (Sambor Village Hotel Kampong Thom) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិកំពង់ក្របៅ សង្កាត់កំពង់ក្របៅ ក្រុងស្ទឹងសែន ខេត្តកំពង់ធំ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $38+ / យប់ • ទំនាក់ទំនង៖ 062 961 489។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sambor Village Hotel Kampong Thom is a verified accommodation located at Kampong Krabau, Krong Stueng Saen, Kampong Thom. Estimated room rate: $38+ / night • Contact: 062 961 489. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-194.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-194.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ធំ",
         "provinceEn": "Kampong Thom",
         "addressKh": "ភូមិកំពង់ក្របៅ សង្កាត់កំពង់ក្របៅ ក្រុងស្ទឹងសែន ខេត្តកំពង់ធំ",
@@ -7674,10 +7286,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ អរុណរះ ស្ទឹងសែន (Arunras Hotel Kampong Thom) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៦ សង្កាត់ដំរីជាន់ខ្លា ក្រុងស្ទឹងសែន ខេត្តកំពង់ធំ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $20+ / យប់ • ទំនាក់ទំនង៖ 062 961 245។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Arunras Hotel Kampong Thom is a verified accommodation located at National Road 6, Damrei Choan Khla, Krong Stueng Saen, Kampong Thom. Estimated room rate: $20+ / night • Contact: 062 961 245. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-195.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-195.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ធំ",
         "provinceEn": "Kampong Thom",
         "addressKh": "ផ្លូវជាតិលេខ ៦ សង្កាត់ដំរីជាន់ខ្លា ក្រុងស្ទឹងសែន ខេត្តកំពង់ធំ",
@@ -7714,10 +7324,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ គិរីរម្យ ព្រះវិហារ (Preah Vihear Jaya Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវកោះកេរ សង្កាត់កំពង់ប្រណាក ក្រុងព្រះវិហារ ខេត្តព្រះវិហារ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $25+ / យប់ • ទំនាក់ទំនង៖ 064 965 333។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Preah Vihear Jaya Hotel is a verified accommodation located at Koh Ker Road, Kampong Pranak, Krong Preah Vihear. Estimated room rate: $25+ / night • Contact: 064 965 333. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-196.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-196.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះវិហារ",
         "provinceEn": "Preah Vihear",
         "addressKh": "ផ្លូវកោះកេរ សង្កាត់កំពង់ប្រណាក ក្រុងព្រះវិហារ ខេត្តព្រះវិហារ",
@@ -7754,10 +7362,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ពេជ្រ ពោធិ៍សាត់ (Pursat Riverside Hotel & Spa) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវមាត់ស្ទឹងពោធិ៍សាត់ សង្កាត់ផ្ទះព្រៃ ក្រុងពោធិ៍សាត់ ខេត្តពោធិ៍សាត់។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $26+ / យប់ • ទំនាក់ទំនង៖ 052 951 677។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Pursat Riverside Hotel & Spa is a verified accommodation located at Pursat Riverfront Road, Phteah Prey, Krong Pursat. Estimated room rate: $26+ / night • Contact: 052 951 677. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-197.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-197.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តពោធិ៍សាត់",
         "provinceEn": "Pursat",
         "addressKh": "ផ្លូវមាត់ស្ទឹងពោធិ៍សាត់ សង្កាត់ផ្ទះព្រៃ ក្រុងពោធិ៍សាត់ ខេត្តពោធិ៍សាត់",
@@ -7794,10 +7400,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ព្រះច័ន្ទ សិរីសោភ័ណ (Preah Chan Hotel Sisophon) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៦ សង្កាត់ព្រះពន្លា ក្រុងសិរីសោភ័ណ ខេត្តបន្ទាយមានជ័យ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $22+ / យប់ • ទំនាក់ទំនង៖ 054 958 899។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Preah Chan Hotel Sisophon is a verified accommodation located at National Road 6, Preah Ponlea, Krong Serei Saophoan, Banteay Meanchey. Estimated room rate: $22+ / night • Contact: 054 958 899. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-198.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-198.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
         "provinceEn": "Banteay Meanchey",
         "addressKh": "ផ្លូវជាតិលេខ ៦ សង្កាត់ព្រះពន្លា ក្រុងសិរីសោភ័ណ ខេត្តបន្ទាយមានជ័យ",
@@ -7834,10 +7438,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ សុវណ្ណភូមិ កំពង់ឆ្នាំង (Sovannaphum Hotel Kampong Chhnang) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៥ សង្កាត់ប្អេរ ក្រុងកំពង់ឆ្នាំង ខេត្តកំពង់ឆ្នាំង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $20+ / យប់ • ទំនាក់ទំនង៖ 026 988 712។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sovannaphum Hotel Kampong Chhnang is a verified accommodation located at National Road 5, Sangkat B'er, Krong Kampong Chhnang. Estimated room rate: $20+ / night • Contact: 026 988 712. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-199.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-199.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
         "provinceEn": "Kampong Chhnang",
         "addressKh": "ផ្លូវជាតិលេខ ៥ សង្កាត់ប្អេរ ក្រុងកំពង់ឆ្នាំង ខេត្តកំពង់ឆ្នាំង",
@@ -7874,10 +7476,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត វីគីរីរម្យ ផាញ (vKirirom Pine Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឧទ្យានជាតិព្រះសុរាម្រិតកុសុមៈគិរីរម្យ ស្រុកភ្នំស្រួច ខេត្តកំពង់ស្ពឺ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $55+ / យប់ • ទំនាក់ទំនង៖ 078 777 284។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "vKirirom Pine Resort is a verified accommodation located at Preah Suramarit-Kossamak Kirirom National Park, Phnom Sruoch, Kampong Speu. Estimated room rate: $55+ / night • Contact: 078 777 284. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-200.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-200.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ស្ពឺ",
         "provinceEn": "Kampong Speu",
         "addressKh": "ឧទ្យានជាតិព្រះសុរាម្រិតកុសុមៈគិរីរម្យ ស្រុកភ្នំស្រួច ខេត្តកំពង់ស្ពឺ",
@@ -7914,10 +7514,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ មេគង្គ អ្នកលឿង ព្រៃវែង (Neak Loeung Bridge Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ១ ជិតស្ពានត្សឹបាសា ស្រុកពាមរក៍ ខេត្តព្រៃវែង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $20+ / យប់ • ទំនាក់ទំនង៖ 043 944 512។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Neak Loeung Bridge Hotel is a verified accommodation located at National Road 1, Near Tsubasa Bridge, Peam Ro, Prey Veng. Estimated room rate: $20+ / night • Contact: 043 944 512. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-201.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-201.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រៃវែង",
         "provinceEn": "Prey Veng",
         "addressKh": "ផ្លូវជាតិលេខ ១ ជិតស្ពានត្សឹបាសា ស្រុកពាមរក៍ ខេត្តព្រៃវែង",
@@ -7954,10 +7552,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត មេម៉ូរីយ៉ា ផាលេស ប៉ៃលិន (Memoria Palace & Resort Pailin) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិអូរតាពុកក្រោម សង្កាត់ទួលល្វា ក្រុងប៉ៃលិន ខេត្តប៉ៃលិន។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $45+ / យប់ • ទំនាក់ទំនង៖ 055 956 688។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Memoria Palace & Resort Pailin is a verified accommodation located at Ou Ta Puk Kraom, Tuol Lvea, Krong Pailin. Estimated room rate: $45+ / night • Contact: 055 956 688. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-202.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-202.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តប៉ៃលិន",
         "provinceEn": "Pailin",
         "addressKh": "ភូមិអូរតាពុកក្រោម សង្កាត់ទួលល្វា ក្រុងប៉ៃលិន ខេត្តប៉ៃលិន",
@@ -7994,10 +7590,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ សំរោង ឧត្តរមានជ័យ (Samraong Grand Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៦៨ សង្កាត់សំរោង ក្រុងសំរោង ខេត្តឧត្តរមានជ័យ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $22+ / យប់ • ទំនាក់ទំនង៖ 065 966 422។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Samraong Grand Hotel is a verified accommodation located at National Road 68, Krong Samraong, Oddar Meanchey. Estimated room rate: $22+ / night • Contact: 065 966 422. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-203.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-203.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តឧត្តរមានជ័យ",
         "provinceEn": "Oddar Meanchey",
         "addressKh": "ផ្លូវជាតិលេខ ៦៨ សង្កាត់សំរោង ក្រុងសំរោង ខេត្តឧត្តរមានជ័យ",
@@ -8034,10 +7628,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "រីសត សួនធម្មជាតិ តាខ្មៅ ខេត្តកណ្តាល (Bassac River Eco Resort Kandal) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ២១ មាត់ទន្លេបាសាក់ ក្រុងតាខ្មៅ ខេត្តកណ្តាល។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $35+ / យប់ • ទំនាក់ទំនង៖ 024 982 555។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Bassac River Eco Resort Kandal is a verified accommodation located at National Road 21, Bassac Riverfront, Krong Ta Khmau, Kandal. Estimated room rate: $35+ / night • Contact: 024 982 555. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-204.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-204.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកណ្តាល",
         "provinceEn": "Kandal",
         "addressKh": "ផ្លូវជាតិលេខ ២១ មាត់ទន្លេបាសាក់ ក្រុងតាខ្មៅ ខេត្តកណ្តាល",
@@ -8074,10 +7666,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ សួង ស៊ីធី ត្បូងឃ្មុំ (Suong City Grand Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៧ សង្កាត់សួង ក្រុងសួង ខេត្តត្បូងឃ្មុំ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $22+ / យប់ • ទំនាក់ទំនង៖ 042 948 999។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Suong City Grand Hotel is a verified accommodation located at National Road 7, Sangkat Suong, Krong Suong, Tboung Khmum. Estimated room rate: $22+ / night • Contact: 042 948 999. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-205.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-205.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តត្បូងឃ្មុំ",
         "provinceEn": "Tboung Khmum",
         "addressKh": "ផ្លូវជាតិលេខ ៧ សង្កាត់សួង ក្រុងសួង ខេត្តត្បូងឃ្មុំ",
@@ -8114,10 +7704,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ហៃយ៉ាត់ រីជិនស៊ី ភ្នំពេញ (Hyatt Regency Phnom Penh) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ១៧៨ សង្កាត់ជ័យជំនះ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $185+ / យប់ • ទំនាក់ទំនង៖ 023 600 1234។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Hyatt Regency Phnom Penh is a verified accommodation located at Street 178, Sangkat Chey Chumneas, Khan Daun Penh, Phnom Penh. Estimated room rate: $185+ / night • Contact: 023 600 1234. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-206.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-206.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "ផ្លូវលេខ ១៧៨ សង្កាត់ជ័យជំនះ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
@@ -8154,10 +7742,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ វឌ្ឍនៈ កាពីតាល់ ភ្នំពេញ (Rosewood Phnom Penh) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ អគារ Vattanac Capital មហាវិថីព្រះមុនីវង្ស ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $260+ / យប់ • ទំនាក់ទំនង៖ 023 936 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Rosewood Phnom Penh is a verified accommodation located at Vattanac Capital Tower, Monivong Blvd, Khan Daun Penh, Phnom Penh. Estimated room rate: $260+ / night • Contact: 023 936 888. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-207.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-207.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "អគារ Vattanac Capital មហាវិថីព្រះមុនីវង្ស ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
@@ -8194,10 +7780,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ អូកវូដ ព្រីមៀ ភ្នំពេញ (Oakwood Premier Phnom Penh) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មជ្ឈមណ្ឌលភ្នំពេញ (Phnom Penh City Center) សង្កាត់ស្រះចក ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $110+ / យប់ • ទំនាក់ទំនង៖ 023 900 999។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Oakwood Premier Phnom Penh is a verified accommodation located at One Park, Phnom Penh City Center, Sangkat Srah Chak, Khan Daun Penh, Phnom Penh. Estimated room rate: $110+ / night • Contact: 023 900 999. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-208.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-208.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "មជ្ឈមណ្ឌលភ្នំពេញ (Phnom Penh City Center) សង្កាត់ស្រះចក ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ",
@@ -8234,10 +7818,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ សាំងហ្គ្រីឡា ភ្នំពេញ (Shangri-La Phnom Penh) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវរដ្ឋសភា សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $195+ / យប់ • ទំនាក់ទំនង៖ 023 919 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Shangri-La Phnom Penh is a verified accommodation located at National Assembly Street, Sangkat Tonle Bassac, Khan Chamkarmon, Phnom Penh. Estimated room rate: $195+ / night • Contact: 023 919 888. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-209.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-209.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "ផ្លូវរដ្ឋសភា សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន រាជធានីភ្នំពេញ",
@@ -8274,10 +7856,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ណូវ៉ូតែល ភ្នំពេញ បឹងកេងកង ១ (Novotel Phnom Penh BKK 1) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ៥១ (ប៉ាស្ទ័រ) សង្កាត់បឹងកេងកងទី១ ខណ្ឌបឹងកេងកង រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $95+ / យប់ • ទំនាក់ទំនង៖ 023 928 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Novotel Phnom Penh BKK 1 is a verified accommodation located at Street 51 (Pasteur), Sangkat Boeung Keng Kang 1, Phnom Penh. Estimated room rate: $95+ / night • Contact: 023 928 888. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-210.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-210.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "ផ្លូវលេខ ៥១ (ប៉ាស្ទ័រ) សង្កាត់បឹងកេងកងទី១ ខណ្ឌបឹងកេងកង រាជធានីភ្នំពេញ",
@@ -8314,10 +7894,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ទ្រីប បាយ វីនហាម ភ្នំពេញ (TRYP by Wyndham Phnom Penh) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ២៨២ សង្កាត់បឹងកេងកងទី១ ខណ្ឌបឹងកេងកង រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $65+ / យប់ • ទំនាក់ទំនង៖ 023 231 555។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "TRYP by Wyndham Phnom Penh is a verified accommodation located at Street 282, Sangkat Boeung Keng Kang 1, Phnom Penh. Estimated room rate: $65+ / night • Contact: 023 231 555. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-211.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-211.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "ផ្លូវលេខ ២៨២ សង្កាត់បឹងកេងកងទី១ ខណ្ឌបឹងកេងកង រាជធានីភ្នំពេញ",
@@ -8354,10 +7932,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ ប៉េនីនស៊ូឡា ភ្នំពេញ (The Peninsula Phnom Penh) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវកែវចិន្តា សង្កាត់ជ្រោយចង្វារ ខណ្ឌជ្រោយចង្វារ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $78+ / យប់ • ទំនាក់ទំនង៖ 023 900 808។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "The Peninsula Phnom Penh is a verified accommodation located at Keo Chenda Street, Sangkat Chroy Changvar, Phnom Penh. Estimated room rate: $78+ / night • Contact: 023 900 808. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-212.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-212.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "ផ្លូវកែវចិន្តា សង្កាត់ជ្រោយចង្វារ ខណ្ឌជ្រោយចង្វារ រាជធានីភ្នំពេញ",
@@ -8394,10 +7970,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ សាន់ អែន មូន រីវើសាយ ភ្នំពេញ (SUN & MOON, Riverside Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មហាវិថីព្រះនរោត្តម សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $92+ / យប់ • ទំនាក់ទំនង៖ 023 860 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "SUN & MOON, Riverside Hotel is a verified accommodation located at Waterfront, Norodom Blvd, Sangkat Tonle Bassac, Phnom Penh. Estimated room rate: $92+ / night • Contact: 023 860 888. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-213.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-213.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "មហាវិថីព្រះនរោត្តម សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន រាជធានីភ្នំពេញ",
@@ -8434,10 +8008,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ សុខា ភ្នំពេញ រេស៊ីដង់ (Sokha Phnom Penh Hotel & Residence) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវកែវចិន្តា ជ្រោយចង្វារ ខណ្ឌជ្រោយចង្វារ រាជធានីភ្នំពេញ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $105+ / យប់ • ទំនាក់ទំនង៖ 023 685 8888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sokha Phnom Penh Hotel & Residence is a verified accommodation located at Street Keo Chenda, Sangkat Chroy Changvar, Phnom Penh. Estimated room rate: $105+ / night • Contact: 023 685 8888. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-214.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-214.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "រាជធានីភ្នំពេញ",
         "provinceEn": "Phnom Penh",
         "addressKh": "ផ្លូវកែវចិន្តា ជ្រោយចង្វារ ខណ្ឌជ្រោយចង្វារ រាជធានីភ្នំពេញ",
@@ -8474,10 +8046,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ សូហ្វីតែល អង្គរ ភូគីត្រា (Sofitel Angkor Phokeethra Golf & Spa Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មហាវិថី ឆាលស៍ ដឺ ហ្គោល សង្កាត់ស្លក្រាម ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $175+ / យប់ • ទំនាក់ទំនង៖ 063 964 600។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sofitel Angkor Phokeethra Golf & Spa Resort is a verified accommodation located at Vithei Charles de Gaulle, Khum Svay Dangkum, Krong Siem Reap. Estimated room rate: $175+ / night • Contact: 063 964 600. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-215.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-215.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "មហាវិថី ឆាលស៍ ដឺ ហ្គោល សង្កាត់ស្លក្រាម ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -8514,10 +8084,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ផាក ហៃយ៉ាត់ សៀមរាប (Park Hyatt Siem Reap) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវស៊ីវុត្ថា សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $220+ / យប់ • ទំនាក់ទំនង៖ 063 211 234។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Park Hyatt Siem Reap is a verified accommodation located at Sivutha Boulevard, Sangkat Svay Dangkum, Krong Siem Reap. Estimated room rate: $220+ / night • Contact: 063 211 234. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-216.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-216.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវស៊ីវុត្ថា សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -8554,10 +8122,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត អនន្តរា អង្គរ សៀមរាប (Anantara Angkor Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៦ សង្កាត់ទឹកវិល ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $190+ / យប់ • ទំនាក់ទំនង៖ 063 966 788។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Anantara Angkor Resort is a verified accommodation located at National Road 6, Khum Sra Ngae, Krong Siem Reap. Estimated room rate: $190+ / night • Contact: 063 966 788. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-217.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-217.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវជាតិលេខ ៦ សង្កាត់ទឹកវិល ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -8594,10 +8160,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ខូរធ្យាត បាយ ម៉ារីអត សៀមរាប (Courtyard by Marriott Siem Reap Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៦ ភូមិចុងកៅស៊ូ សង្កាត់ស្លក្រាម ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $95+ / យប់ • ទំនាក់ទំនង៖ 063 968 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Courtyard by Marriott Siem Reap Resort is a verified accommodation located at National Road 6, Chong Kao Sou, Sangkat Slor Kram, Krong Siem Reap. Estimated room rate: $95+ / night • Contact: 063 968 888. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-218.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-218.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវជាតិលេខ ៦ ភូមិចុងកៅស៊ូ សង្កាត់ស្លក្រាម ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -8634,10 +8198,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ហ្សានណាឌូ អង្គរ រីសត សៀមរាប (Zannier Hotels Phum Baitang) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិស្វាយដង្គំ សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $320+ / យប់ • ទំនាក់ទំនង៖ 063 961 111។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Zannier Hotels Phum Baitang is a verified accommodation located at SangKat Svay Dangkum, Krong Siem Reap, Siem Reap. Estimated room rate: $320+ / night • Contact: 063 961 111. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-219.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-219.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ភូមិស្វាយដង្គំ សង្កាត់ស្វាយដង្គំ ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -8674,10 +8236,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ វីរ៉ូត ប៊ូទិក សៀមរាប (Viroth's Hotel Siem Reap) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ២៤ ភូមិវត្តបូព៌ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $125+ / យប់ • ទំនាក់ទំនង៖ 063 761 720។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Viroth's Hotel Siem Reap is a verified accommodation located at Street 24, Wat Bo Village, Sangkat Sala Kamreuk, Krong Siem Reap. Estimated room rate: $125+ / night • Contact: 063 761 720. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-220.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-220.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវលេខ ២៤ ភូមិវត្តបូព៌ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -8714,10 +8274,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ ត្រី សាលា សៀមរាប (Treeline Urban Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវអាចារ្យស្វា មាត់ស្ទឹងសៀមរាប សង្កាត់សាលាកំរើក ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $130+ / យប់ • ទំនាក់ទំនង៖ 063 961 234។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Treeline Urban Resort is a verified accommodation located at Achar Sva Street, Riverside, Sangkat Sala Kamreuk, Krong Siem Reap. Estimated room rate: $130+ / night • Contact: 063 961 234. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-221.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-221.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវអាចារ្យស្វា មាត់ស្ទឹងសៀមរាប សង្កាត់សាលាកំរើក ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -8754,10 +8312,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "សណ្ឋាគារ លូប ឌី សៀមរាប (Lub d Cambodia Siem Reap) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ៧ មករា ភូមិវត្តបូព៌ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $28+ / យប់ • ទំនាក់ទំនង៖ 063 964 500។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Lub d Cambodia Siem Reap is a verified accommodation located at 7 Makara Street, Wat Bo Village, Sangkat Sala Kamreuk, Krong Siem Reap. Estimated room rate: $28+ / night • Contact: 063 964 500. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-222.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-222.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវលេខ ៧ មករា ភូមិវត្តបូព៌ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -8794,10 +8350,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ អង្គរ វីឡេជ រីសត (Angkor Village Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ២៦ ភូមិវត្តបូព៌ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប ខេត្តសៀមរាប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $115+ / យប់ • ទំនាក់ទំនង៖ 063 963 561។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Angkor Village Hotel is a verified accommodation located at Street 26, Wat Bo Village, Sangkat Sala Kamreuk, Krong Siem Reap. Estimated room rate: $115+ / night • Contact: 063 963 561. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-223.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-223.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តសៀមរាប",
         "provinceEn": "Siem Reap",
         "addressKh": "ផ្លូវលេខ ២៦ ភូមិវត្តបូព៌ សង្កាត់សាលាកំរើក ក្រុងសៀមរាប ខេត្តសៀមរាប",
@@ -8834,10 +8388,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត សុង សា ប្រាយវេត អាយឡែន កោះរ៉ុង (Song Saa Private Island) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ប្រជុំកោះរ៉ុង ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $450+ / យប់ • ទំនាក់ទំនង៖ 023 686 0336។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Song Saa Private Island is a verified accommodation located at Koh Rong Archipelago, Krong Koh Rong, Preah Sihanouk. Estimated room rate: $450+ / night • Contact: 023 686 0336. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-224.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-224.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ប្រជុំកោះរ៉ុង ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ",
@@ -8874,10 +8426,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត ដឺ រ៉ូយ៉ាល់ សែន កោះរ៉ុង (The Royal Sands Koh Rong) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរឡុងសិត ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $240+ / យប់ • ទំនាក់ទំនង៖ 081 888 933។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "The Royal Sands Koh Rong is a verified accommodation located at Long Set Beach, Krong Koh Rong, Preah Sihanouk. Estimated room rate: $240+ / night • Contact: 081 888 933. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-225.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-225.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរឡុងសិត ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ",
@@ -8914,10 +8464,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ហួងសាន អន្តរជាតិ ព្រះសីហនុ (Howard Johnson Plaza by Wyndham Blue Bay Sihanoukville) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរឯករាជ្យ សង្កាត់លេខ ៣ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $95+ / យប់ • ទំនាក់ទំនង៖ 034 935 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Howard Johnson Plaza by Wyndham Blue Bay Sihanoukville is a verified accommodation located at Independence Beach, Sangkat 3, Krong Preah Sihanouk. Estimated room rate: $95+ / night • Contact: 034 935 888. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-226.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-226.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរឯករាជ្យ សង្កាត់លេខ ៣ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ",
@@ -8954,10 +8502,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "សណ្ឋាគារ ណូវ៉ូតែល ព្រះសីហនុ ហូលីដេ រីសត (Novotel Sihanoukville Holiday Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរឯករាជ្យ សង្កាត់លេខ ៣ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $105+ / យប់ • ទំនាក់ទំនង៖ 034 919 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Novotel Sihanoukville Holiday Resort is a verified accommodation located at 2 Independence Beach, Sangkat 3, Krong Preah Sihanouk. Estimated room rate: $105+ / night • Contact: 034 919 888. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-227.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-227.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរឯករាជ្យ សង្កាត់លេខ ៣ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ",
@@ -8994,10 +8540,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "រីសត ឡា ផាសស្យុង កោះរ៉ុងសន្លឹម (La Passion by Achariyak Koh Rong Sanloem) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរសារ៉ាសេន កោះរ៉ុងសន្លឹម ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $75+ / យប់ • ទំនាក់ទំនង៖ 069 722 788។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "La Passion by Achariyak Koh Rong Sanloem is a verified accommodation located at Saracen Bay, Koh Rong Sanloem, Krong Koh Rong, Preah Sihanouk. Estimated room rate: $75+ / night • Contact: 069 722 788. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-228.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-228.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរសារ៉ាសេន កោះរ៉ុងសន្លឹម ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ",
@@ -9034,10 +8578,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "រីសត ម៉ាហ្វីយ៉ា កោះរ៉ុង (Mafiya Resort Koh Rong) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរកោះតូច ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $68+ / យប់ • ទំនាក់ទំនង៖ 096 811 2233។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Mafiya Resort Koh Rong is a verified accommodation located at Koh Touch Beach, Krong Koh Rong, Preah Sihanouk. Estimated room rate: $68+ / night • Contact: 096 811 2233. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-229.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-229.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរកោះតូច ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ",
@@ -9074,10 +8616,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "រីសត សូល ប៊ិច កោះរ៉ុងសន្លឹម (Sol Beach Resort Koh Rong Sanloem) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរសារ៉ាសេន កោះរ៉ុងសន្លឹម ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $85+ / យប់ • ទំនាក់ទំនង៖ 087 654 222។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sol Beach Resort Koh Rong Sanloem is a verified accommodation located at Saracen Bay Beach, Koh Rong Sanloem, Preah Sihanouk. Estimated room rate: $85+ / night • Contact: 087 654 222. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-230.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-230.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរសារ៉ាសេន កោះរ៉ុងសន្លឹម ក្រុងកោះរ៉ុង ខេត្តព្រះសីហនុ",
@@ -9114,10 +8654,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត អំបិល កំពត (Amber Kampot Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មាត់ព្រែកកំពត សង្កាត់អណ្តូងខ្មែរ ក្រុងកំពត ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $135+ / យប់ • ទំនាក់ទំនង៖ 016 998 855។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Amber Kampot Resort is a verified accommodation located at Kampot Riverfront, Sangkat Andoung Khmer, Krong Kampot. Estimated room rate: $135+ / night • Contact: 016 998 855. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-231.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-231.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "មាត់ព្រែកកំពត សង្កាត់អណ្តូងខ្មែរ ក្រុងកំពត ខេត្តកំពត",
@@ -9154,10 +8692,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ កំពត ឌីយ៉ាម៉ង់ រីវើ (Kampot Diamond Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវមាត់ព្រែក សង្កាត់កំពង់កណ្តាល ក្រុងកំពត ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $32+ / យប់ • ទំនាក់ទំនង៖ 033 932 555។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Kampot Diamond Hotel is a verified accommodation located at Riverside Road, Sangkat Kampong Kandal, Krong Kampot. Estimated room rate: $32+ / night • Contact: 033 932 555. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-232.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-232.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "ផ្លូវមាត់ព្រែក សង្កាត់កំពង់កណ្តាល ក្រុងកំពត ខេត្តកំពត",
@@ -9194,10 +8730,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត ម៉ុងតាញ៉ា បូកគោ កំពត (Le Bokor Palace) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឧទ្យានជាតិព្រះមុនីវង្សបូកគោ ក្រុងបូកគោ ខេត្តកំពត។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $150+ / យប់ • ទំនាក់ទំនង៖ 033 683 9999។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Le Bokor Palace is a verified accommodation located at Preah Monivong Bokor National Park, Krong Bokor, Kampot. Estimated room rate: $150+ / night • Contact: 033 683 9999. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-233.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-233.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពត",
         "provinceEn": "Kampot",
         "addressKh": "ឧទ្យានជាតិព្រះមុនីវង្សបូកគោ ក្រុងបូកគោ ខេត្តកំពត",
@@ -9234,10 +8768,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត សាម៉ាណា កែប (Samanea Beach Resort & Spa Kep) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ៣៣A សង្កាត់កែប ក្រុងកែប ខេត្តកែប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $110+ / យប់ • ទំនាក់ទំនង៖ 017 885 068។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Samanea Beach Resort & Spa Kep is a verified accommodation located at National Road 33A, Sangkat Kep, Krong Kep, Kep. Estimated room rate: $110+ / night • Contact: 017 885 068. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-234.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-234.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកែប",
         "provinceEn": "Kep",
         "addressKh": "ផ្លូវលេខ ៣៣A សង្កាត់កែប ក្រុងកែប ខេត្តកែប",
@@ -9274,10 +8806,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត ត្រៃ បេ ម៉ារីណា កែប (Try Palace Resort Kep) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវឆ្នេរកែប សង្កាត់ព្រៃធំ ក្រុងកែប ខេត្តកែប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $95+ / យប់ • ទំនាក់ទំនង៖ 097 959 6999។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Try Palace Resort Kep is a verified accommodation located at Kep Beach Road, Sangkat Prey Thom, Krong Kep, Kep. Estimated room rate: $95+ / night • Contact: 097 959 6999. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-235.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-235.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកែប",
         "provinceEn": "Kep",
         "addressKh": "ផ្លូវឆ្នេរកែប សង្កាត់ព្រៃធំ ក្រុងកែប ខេត្តកែប",
@@ -9314,10 +8844,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "ប៊ូទិក រីសត រាជសីហ៍ កែប (Raingsey Bungalow Kep) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ជិតផ្សារក្តាម សង្កាត់កែប ក្រុងកែប ខេត្តកែប។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $52+ / យប់ • ទំនាក់ទំនង៖ 012 852 168។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Raingsey Bungalow Kep is a verified accommodation located at Near Crab Market, Sangkat Kep, Krong Kep, Kep. Estimated room rate: $52+ / night • Contact: 012 852 168. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-236.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-236.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកែប",
         "provinceEn": "Kep",
         "addressKh": "ជិតផ្សារក្តាម សង្កាត់កែប ក្រុងកែប ខេត្តកែប",
@@ -9354,10 +8882,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ បាត់ដំបង រីសត (Battambang Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភូមិកគោ ឃុំជ្រៃ ស្រុកថ្មគោល ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $65+ / យប់ • ទំនាក់ទំនង៖ 012 434 092។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Battambang Resort is a verified accommodation located at Koko Village, Chrey Commune, Krong Battambang, Battambang. Estimated room rate: $65+ / night • Contact: 012 434 092. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-237.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-237.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តបាត់ដំបង",
         "provinceEn": "Battambang",
         "addressKh": "ភូមិកគោ ឃុំជ្រៃ ស្រុកថ្មគោល ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង",
@@ -9394,10 +8920,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ប្រាសាទ បាណន់ បាត់ដំបង (Banan Hotel Battambang) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវលេខ ២០៧ សង្កាត់រតនៈ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $28+ / យប់ • ទំនាក់ទំនង៖ 053 953 333។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Banan Hotel Battambang is a verified accommodation located at Street 207, Sangkat Rottanak, Krong Battambang, Battambang. Estimated room rate: $28+ / night • Contact: 053 953 333. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-238.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-238.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តបាត់ដំបង",
         "provinceEn": "Battambang",
         "addressKh": "ផ្លូវលេខ ២០៧ សង្កាត់រតនៈ ក្រុងបាត់ដំបង ខេត្តបាត់ដំបង",
@@ -9434,10 +8958,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ រស្មី សុខា កំពង់ចាម (Reaksmey Sokha Hotel Kampong Cham) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវមាត់ទន្លេមេគង្គ សង្កាត់វាលវង់ ក្រុងកំពង់ចាម ខេត្តកំពង់ចាម។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $26+ / យប់ • ទំនាក់ទំនង៖ 042 941 666។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Reaksmey Sokha Hotel Kampong Cham is a verified accommodation located at Mekong Riverfront, Sangkat Veal Vong, Krong Kampong Cham. Estimated room rate: $26+ / night • Contact: 042 941 666. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-239.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-239.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ចាម",
         "provinceEn": "Kampong Cham",
         "addressKh": "ផ្លូវមាត់ទន្លេមេគង្គ សង្កាត់វាលវង់ ក្រុងកំពង់ចាម ខេត្តកំពង់ចាម",
@@ -9474,10 +8996,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ សំបូរព្រៃគុក កំពង់ធំ (Sambor Village Hotel Kampong Thom) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មាត់ស្ទឹងសែន សង្កាត់កំពង់ធំ ក្រុងស្ទឹងសែន ខេត្តកំពង់ធំ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $48+ / យប់ • ទំនាក់ទំនង៖ 062 961 489។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Sambor Village Hotel Kampong Thom is a verified accommodation located at Stung Sen Riverbank, Krong Stueng Saen, Kampong Thom. Estimated room rate: $48+ / night • Contact: 062 961 489. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-240.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-240.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ធំ",
         "provinceEn": "Kampong Thom",
         "addressKh": "មាត់ស្ទឹងសែន សង្កាត់កំពង់ធំ ក្រុងស្ទឹងសែន ខេត្តកំពង់ធំ",
@@ -9514,10 +9034,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ នាគព័ន្ធ កំពង់ឆ្នាំង (Neak Poan Hotel Kampong Chhnang) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៥ សង្កាត់ប្អេរ ក្រុងកំពង់ឆ្នាំង ខេត្តកំពង់ឆ្នាំង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $22+ / យប់ • ទំនាក់ទំនង៖ 026 988 555។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Neak Poan Hotel Kampong Chhnang is a verified accommodation located at National Road 5, Sangkat B'er, Krong Kampong Chhnang. Estimated room rate: $22+ / night • Contact: 026 988 555. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-241.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-241.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ឆ្នាំង",
         "provinceEn": "Kampong Chhnang",
         "addressKh": "ផ្លូវជាតិលេខ ៥ សង្កាត់ប្អេរ ក្រុងកំពង់ឆ្នាំង ខេត្តកំពង់ឆ្នាំង",
@@ -9554,10 +9072,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត វីគីរីរម្យ កំពង់ស្ពឺ (vKirirom Pine Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឧទ្យានជាតិគិរីរម្យ ឃុំចំបក់ ស្រុកភ្នំស្រួច ខេត្តកំពង់ស្ពឺ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $55+ / យប់ • ទំនាក់ទំនង៖ 078 777 284។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "vKirirom Pine Resort is a verified accommodation located at Preah Suramarit-Kossamak Kirirom National Park, Phnom Sruoch, Kampong Speu. Estimated room rate: $55+ / night • Contact: 078 777 284. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-242.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-242.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកំពង់ស្ពឺ",
         "provinceEn": "Kampong Speu",
         "addressKh": "ឧទ្យានជាតិគិរីរម្យ ឃុំចំបក់ ស្រុកភ្នំស្រួច ខេត្តកំពង់ស្ពឺ",
@@ -9594,10 +9110,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ពោធិ៍សាត់ រីវើសាយ (Pursat Riverside Hotel & Spa) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មាត់ស្ទឹងពោធិ៍សាត់ សង្កាត់ផ្ទះព្រៃ ក្រុងពោធិ៍សាត់ ខេត្តពោធិ៍សាត់។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $28+ / យប់ • ទំនាក់ទំនង៖ 052 951 777។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Pursat Riverside Hotel & Spa is a verified accommodation located at Pursat Riverbank, Sangkat Phteah Prey, Krong Pursat, Pursat. Estimated room rate: $28+ / night • Contact: 052 951 777. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-243.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-243.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តពោធិ៍សាត់",
         "provinceEn": "Pursat",
         "addressKh": "មាត់ស្ទឹងពោធិ៍សាត់ សង្កាត់ផ្ទះព្រៃ ក្រុងពោធិ៍សាត់ ខេត្តពោធិ៍សាត់",
@@ -9634,10 +9148,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "រីសត ភ្នំ១៥០០ វាលវែង ពោធិ៍សាត់ (Phnom 1500 Cloud Eco Lodge) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៥៥ ភ្នំ ១៥០០ ឃុំថ្មដា ស្រុកវាលវែង ខេត្តពោធិ៍សាត់។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $35+ / យប់ • ទំនាក់ទំនង៖ 097 445 6688។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Phnom 1500 Cloud Eco Lodge is a verified accommodation located at National Road 55, Phnom 1500, Veal Veaeng District, Pursat. Estimated room rate: $35+ / night • Contact: 097 445 6688. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-244.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-244.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តពោធិ៍សាត់",
         "provinceEn": "Pursat",
         "addressKh": "ផ្លូវជាតិលេខ ៥៥ ភ្នំ ១៥០០ ឃុំថ្មដា ស្រុកវាលវែង ខេត្តពោធិ៍សាត់",
@@ -9674,10 +9186,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "រីសត កោះអណ្តែត អេកូ តាតៃ កោះកុង (Koh Andet Eco Resort Tatai) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មាត់ព្រែកតាតៃ ឃុំតាតៃ ស្រុកកោះកុង ខេត្តកោះកុង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $58+ / យប់ • ទំនាក់ទំនង៖ 097 755 9669។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Koh Andet Eco Resort Tatai is a verified accommodation located at Tatai River, Tatai Commune, Koh Kong District, Koh Kong. Estimated room rate: $58+ / night • Contact: 097 755 9669. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-245.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-245.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកោះកុង",
         "provinceEn": "Koh Kong",
         "addressKh": "មាត់ព្រែកតាតៃ ឃុំតាតៃ ស្រុកកោះកុង ខេត្តកោះកុង",
@@ -9714,10 +9224,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Luxury Hotel & Resort",
         "descriptionKh": "រីសត ភីនណាខល មណ្ឌលគិរី (Pinnacle Mondulkiri Resort) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ភ្នំដោះក្រមុំ សង្កាត់សុខដុម ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $65+ / យប់ • ទំនាក់ទំនង៖ 097 889 9111។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Pinnacle Mondulkiri Resort is a verified accommodation located at Sangkat Sokh Dom, Krong Sen Monorom, Mondulkiri. Estimated room rate: $65+ / night • Contact: 097 889 9111. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-246.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-246.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តមណ្ឌលគិរី",
         "provinceEn": "Mondulkiri",
         "addressKh": "ភ្នំដោះក្រមុំ សង្កាត់សុខដុម ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
@@ -9754,10 +9262,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "រីសត ខេមបូឌាណា ភ្នំសែនមនោរម្យ មណ្ឌលគិរី (Route 76 Hill Resort Mondulkiri) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៧៦ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $45+ / យប់ • ទំនាក់ទំនង៖ 088 665 7788។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Route 76 Hill Resort Mondulkiri is a verified accommodation located at National Road 76, Krong Sen Monorom, Mondulkiri. Estimated room rate: $45+ / night • Contact: 088 665 7788. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-247.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-247.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តមណ្ឌលគិរី",
         "provinceEn": "Mondulkiri",
         "addressKh": "ផ្លូវជាតិលេខ ៧៦ ក្រុងសែនមនោរម្យ ខេត្តមណ្ឌលគិរី",
@@ -9794,10 +9300,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "រីសត បឹងយក្សឡោម ឡច រតនគិរី (Yeak Loam Lake Eco Lodge) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ សង្កាត់យក្សឡោម ក្រុងបានលុង ខេត្តរតនគិរី។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $42+ / យប់ • ទំនាក់ទំនង៖ 075 974 288។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Yeak Loam Lake Eco Lodge is a verified accommodation located at Sangkat Yeak Laom, Krong Banlung, Ratanakiri. Estimated room rate: $42+ / night • Contact: 075 974 288. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-248.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-248.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តរតនគិរី",
         "provinceEn": "Ratanakiri",
         "addressKh": "សង្កាត់យក្សឡោម ក្រុងបានលុង ខេត្តរតនគិរី",
@@ -9834,10 +9338,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ សូរិយា កោះទ្រង់ ក្រចេះ (Rajabori Villas Resort Koh Trong) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ សង្កាត់កោះទ្រង់ ក្រុងក្រចេះ ខេត្តក្រចេះ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $48+ / យប់ • ទំនាក់ទំនង៖ 012 936 601។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Rajabori Villas Resort Koh Trong is a verified accommodation located at Koh Trong Island, Krong Kratie, Kratie. Estimated room rate: $48+ / night • Contact: 012 936 601. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-249.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-249.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តក្រចេះ",
         "provinceEn": "Kratie",
         "addressKh": "សង្កាត់កោះទ្រង់ ក្រុងក្រចេះ ខេត្តក្រចេះ",
@@ -9874,10 +9376,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Guesthouse & Lodge",
         "descriptionKh": "សណ្ឋាគារ ទន្លេមេគង្គ ស្ទឹងត្រែង (Mekong Bird Resort Stung Treng) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មាត់ទន្លេមេគង្គ សង្កាត់សាមគ្គី ក្រុងស្ទឹងត្រែង ខេត្តស្ទឹងត្រែង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $28+ / យប់ • ទំនាក់ទំនង៖ 074 973 666។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Mekong Bird Resort Stung Treng is a verified accommodation located at Mekong Riverbank, Sangkat Sameakki, Krong Stung Treng. Estimated room rate: $28+ / night • Contact: 074 973 666. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-250.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-250.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តស្ទឹងត្រែង",
         "provinceEn": "Stung Treng",
         "addressKh": "មាត់ទន្លេមេគង្គ សង្កាត់សាមគ្គី ក្រុងស្ទឹងត្រែង ខេត្តស្ទឹងត្រែង",
@@ -9914,10 +9414,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ ព្រះវិហារ ប៊ូទិក (Preah Vihear Boutique Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៦២ សង្កាត់កំពង់ប្រណាក ក្រុងព្រះវិហារ ខេត្តព្រះវិហារ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $32+ / យប់ • ទំនាក់ទំនង៖ 064 965 333។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Preah Vihear Boutique Hotel is a verified accommodation located at National Road 62, Sangkat Kampong Pranak, Krong Preah Vihear. Estimated room rate: $32+ / night • Contact: 064 965 333. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-251.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-251.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះវិហារ",
         "provinceEn": "Preah Vihear",
         "addressKh": "ផ្លូវជាតិលេខ ៦២ សង្កាត់កំពង់ប្រណាក ក្រុងព្រះវិហារ ខេត្តព្រះវិហារ",
@@ -9954,10 +9452,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ប៉ោយប៉ែត ផាឡេស បន្ទាយមានជ័យ (Poipet Palace Hotel Banteay Meanchey) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៥ សង្កាត់ប៉ោយប៉ែត ក្រុងប៉ោយប៉ែត ខេត្តបន្ទាយមានជ័យ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $35+ / យប់ • ទំនាក់ទំនង៖ 054 967 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Poipet Palace Hotel Banteay Meanchey is a verified accommodation located at National Road 5, Sangkat Poipet, Krong Poipet, Banteay Meanchey. Estimated room rate: $35+ / night • Contact: 054 967 888. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-252.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-252.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តបន្ទាយមានជ័យ",
         "provinceEn": "Banteay Meanchey",
         "addressKh": "ផ្លូវជាតិលេខ ៥ សង្កាត់ប៉ោយប៉ែត ក្រុងប៉ោយប៉ែត ខេត្តបន្ទាយមានជ័យ",
@@ -9994,10 +9490,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "រីសត ភ្នំយ៉ាត ប៉ៃលិន (Phnom Yat Hill Resort Pailin) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ជើងភ្នំយ៉ាត សង្កាត់ប៉ៃលិន ក្រុងប៉ៃលិន ខេត្តប៉ៃលិន។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $38+ / យប់ • ទំនាក់ទំនង៖ 055 956 777។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Phnom Yat Hill Resort Pailin is a verified accommodation located at Phnom Yat Road, Sangkat Pailin, Krong Pailin, Pailin. Estimated room rate: $38+ / night • Contact: 055 956 777. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-253.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-253.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តប៉ៃលិន",
         "provinceEn": "Pailin",
         "addressKh": "ជើងភ្នំយ៉ាត សង្កាត់ប៉ៃលិន ក្រុងប៉ៃលិន ខេត្តប៉ៃលិន",
@@ -10034,10 +9528,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ អន្លង់វែង ឧត្តរមានជ័យ (Anlong Veng Peace Hotel) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៦៧ ស្រុកអន្លង់វែង ខេត្តឧត្តរមានជ័យ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $20+ / យប់ • ទំនាក់ទំនង៖ 065 966 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Anlong Veng Peace Hotel is a verified accommodation located at National Road 67, Anlong Veng District, Oddar Meanchey. Estimated room rate: $20+ / night • Contact: 065 966 888. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-254.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-254.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តឧត្តរមានជ័យ",
         "provinceEn": "Oddar Meanchey",
         "addressKh": "ផ្លូវជាតិលេខ ៦៧ ស្រុកអន្លង់វែង ខេត្តឧត្តរមានជ័យ",
@@ -10074,10 +9566,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ ដូនកែវ រីវើ តាកែវ (Doun Kaev Lake View Hotel Takeo) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មាត់បឹងតាកែវ សង្កាត់រកាក្នុង ក្រុងដូនកែវ ខេត្តតាកែវ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $24+ / យប់ • ទំនាក់ទំនង៖ 032 931 666។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Doun Kaev Lake View Hotel Takeo is a verified accommodation located at Takeo Lakeside, Sangkat Roka Knong, Krong Doun Kaev, Takeo. Estimated room rate: $24+ / night • Contact: 032 931 666. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-255.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-255.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តតាកែវ",
         "provinceEn": "Takeo",
         "addressKh": "មាត់បឹងតាកែវ សង្កាត់រកាក្នុង ក្រុងដូនកែវ ខេត្តតាកែវ",
@@ -10114,10 +9604,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ អ្នកលឿង ស្ពានត្សឹបាសា ព្រៃវែង (Tsubasa Bridge Hotel Prey Veng) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ១ ក្បែរស្ពានអ្នកលឿង ស្រុកពាមរក៍ ខេត្តព្រៃវែង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $22+ / យប់ • ទំនាក់ទំនង៖ 043 944 888។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Tsubasa Bridge Hotel Prey Veng is a verified accommodation located at National Road 1, Near Tsubasa Bridge, Peam Ro, Prey Veng. Estimated room rate: $22+ / night • Contact: 043 944 888. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-256.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-256.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រៃវែង",
         "provinceEn": "Prey Veng",
         "addressKh": "ផ្លូវជាតិលេខ ១ ក្បែរស្ពានអ្នកលឿង ស្រុកពាមរក៍ ខេត្តព្រៃវែង",
@@ -10154,10 +9642,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ វ៉ៃគោ រីវើ ស្វាយរៀង (Waiko River Hotel Svay Rieng) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មាត់ទន្លេវ៉ៃគោ សង្កាត់ស្វាយរៀង ក្រុងស្វាយរៀង ខេត្តស្វាយរៀង។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $25+ / យប់ • ទំនាក់ទំនង៖ 044 945 999។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Waiko River Hotel Svay Rieng is a verified accommodation located at Waiko Riverfront, Sangkat Svay Rieng, Krong Svay Rieng. Estimated room rate: $25+ / night • Contact: 044 945 999. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-257.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-257.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តស្វាយរៀង",
         "provinceEn": "Svay Rieng",
         "addressKh": "មាត់ទន្លេវ៉ៃគោ សង្កាត់ស្វាយរៀង ក្រុងស្វាយរៀង ខេត្តស្វាយរៀង",
@@ -10194,10 +9680,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "សណ្ឋាគារ អរិយក្សត្រ មាត់ទន្លេ ខេត្តកណ្តាល (Arey Ksat Mekong Resort Kandal) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ មាត់ទន្លេមេគង្គ ក្រុងអរិយក្សត្រ ខេត្តកណ្តាល។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $42+ / យប់ • ទំនាក់ទំនង៖ 024 983 777។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Arey Ksat Mekong Resort Kandal is a verified accommodation located at Mekong Riverfront, Krong Arey Ksat, Kandal. Estimated room rate: $42+ / night • Contact: 024 983 777. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-258.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-258.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តកណ្តាល",
         "provinceEn": "Kandal",
         "addressKh": "មាត់ទន្លេមេគង្គ ក្រុងអរិយក្សត្រ ខេត្តកណ្តាល",
@@ -10234,10 +9718,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Hotel & Stay",
         "descriptionKh": "សណ្ឋាគារ មេមត់ ហ្គ្រែន ត្បូងឃ្មុំ (Memot Grand Hotel Tboung Khmum) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ផ្លូវជាតិលេខ ៧ ទីរួមស្រុកមេមត់ ខេត្តត្បូងឃ្មុំ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $20+ / យប់ • ទំនាក់ទំនង៖ 042 949 777។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Memot Grand Hotel Tboung Khmum is a verified accommodation located at National Road 7, Memot District, Tboung Khmum. Estimated room rate: $20+ / night • Contact: 042 949 777. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-259.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-259.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តត្បូងឃ្មុំ",
         "provinceEn": "Tboung Khmum",
         "addressKh": "ផ្លូវជាតិលេខ ៧ ទីរួមស្រុកមេមត់ ខេត្តត្បូងឃ្មុំ",
@@ -10274,10 +9756,8 @@ export const seedHotels100: TouristDestination[] = [
         "categoryEn": "Boutique & Villa",
         "descriptionKh": "រីសត ឆ្នេរអូរឈើទាល ព្រះសីហនុ (Otres Beach Boutique Resort Sihanoukville) ជាកន្លែងស្នាក់នៅដែលមានទីតាំងនៅ ឆ្នេរអូរត្រេះ សង្កាត់លេខ ៤ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ។ តម្លៃបន្ទប់ប៉ាន់ស្មាន៖ $65+ / យប់ • ទំនាក់ទំនង៖ 034 934 999។ មានបន្ទប់ស្អាត ផាសុកភាព និងងាយស្រួលធ្វើដំណើរទៅកាន់តំបន់ទេសចរណ៍ និងភោជនីយដ្ឋានជិតៗ។",
         "descriptionEn": "Otres Beach Boutique Resort Sihanoukville is a verified accommodation located at Otres Beach, Sangkat 4, Krong Preah Sihanouk, Preah Sihanouk. Estimated room rate: $65+ / night • Contact: 034 934 999. Clean, comfortable rooms conveniently situated near local attractions and dining spots.",
-        "photoUrl": "/destinations/hotel-260.jpg",
-        "galleryPhotos": [
-            "/destinations/hotel-260.jpg"
-        ],
+        "photoUrl": "",
+        "galleryPhotos": [],
         "provinceKh": "ខេត្តព្រះសីហនុ",
         "provinceEn": "Preah Sihanouk",
         "addressKh": "ឆ្នេរអូរត្រេះ សង្កាត់លេខ ៤ ក្រុងព្រះសីហនុ ខេត្តព្រះសីហនុ",

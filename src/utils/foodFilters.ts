@@ -1,4 +1,12 @@
-import { isPlaceLocationVerified, type FoodItem, type Language, type Restaurant } from '../types';
+import {
+  isPlaceLocationVerified,
+  isStrictVerifiedCambodiaRestaurant,
+  type FoodItem,
+  type Language,
+  type Restaurant,
+} from '../types';
+import { includesKhmerToken, normalizeKhmerFoodText } from './khmerFoodSearch';
+import { getLocalizedRestaurant } from './zhDynamicTranslator';
 
 export interface ProvinceFilterOption {
   id: string;
@@ -830,130 +838,550 @@ export function getDishSpecificWhereToFind(
   return baseWhere;
 }
 
+export type ShopBusinessKind =
+  | 'bakery_bread'
+  | 'coffee_drink'
+  | 'pizza_western'
+  | 'noodle_soup_restaurant'
+  | 'khmer_restaurant';
+
+const PRIMARY_PRODUCT_GROUPS: ReadonlyArray<{
+  id: string;
+  tokens: readonly string[];
+  intent: 'savory_food' | 'bakery_bread' | 'coffee_drink' | 'pizza_western' | 'dessert';
+}> = [
+  {
+    id: 'mi_suor',
+    tokens: ['មីសួរ', 'មីសួ', 'glass noodle', 'mi suor', 'mee suor', 'mung bean noodle', '粉丝', '冬粉'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'mee_kola',
+    tokens: ['មីកូឡា', 'mee kola', 'mi kola', '歌拉面', '歌拉米粉'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'kuy_teav_tuk',
+    tokens: ['គុយទាវទូក', 'boat noodle', '船面', '船粉'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'kuy_teav_khor',
+    tokens: ['គុយទាវខ', 'មីខគោ', 'kuyteav khor', 'braised beef noodle', '红烧牛肉粉'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'kuy_teav',
+    tokens: ['គុយទាវ', 'kuy teav', 'kuyteav', 'rice noodle soup', 'pho', 'ហ្វឺ', '粿条', '河粉'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'num_banh_chok',
+    tokens: ['នំបញ្ចុក', 'num banh chok', 'nom banh chok', 'khmer noodle', '高棉米粉'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'lort_cha',
+    tokens: ['លតឆា', 'lort cha', 'short pin noodle', '炒银针粉'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'banh_kanh',
+    tokens: ['បាញ់កាញ់', 'បាញ់សុង', 'banh kanh', 'banh sung'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'mee_cha',
+    tokens: ['មីឆា', 'mee cha', 'mi cha', 'fried noodle', 'stir-fried noodle', '炒面'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'mee_kok',
+    tokens: ['មីគោក', 'មីទាញ', 'dry noodle', 'wonton noodle', '干拌面', '云吞面'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'mee_soup',
+    tokens: ['មីស៊ុប', 'មីហឹរ', 'spicy noodle', 'noodle soup', '汤面', '辣面'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'borbor',
+    tokens: ['បបរគ្រឿង', 'បបរសាមចូក', 'បបរមាន់', 'បបរត្រី', 'បបរស', 'បបរ', 'porridge', 'congee', 'borbor', '粥'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'amok',
+    tokens: ['អាម៉ុក', 'ហហ្មុក', 'amok', '阿莫克'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'samlor_korko',
+    tokens: ['សម្លកកូរ', 'កកូរ', 'samlor korko', 'korko'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'samlor_machu',
+    tokens: ['សម្លម្ជូរ', 'ម្ជូរគ្រឿង', 'ម្ជូរព្រៃ', 'ស្ងោរជ្រក់', 'ង៉ាំង៉ូវ', 'samlor machu', 'sour soup', 'ngam ngov', '酸汤'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'sngor_mrah',
+    tokens: ['ស្ងោរម្រះ', 'ស៊ុបម្រះ', 'ម្រះញាត់', 'bitter melon soup', '苦瓜汤'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'samlor_kari',
+    tokens: ['សម្លការី', 'ការី', 'curry', 'kari', '咖喱'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'prahok',
+    tokens: ['ប្រហុកខ្ទិះ', 'ប្រហុកដុត', 'ប្រហុកចំហុយ', 'ទឹកគ្រឿង', 'ម៉ាំល្ហុង', 'prahok', 'teuk kroeung'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'lok_lak',
+    tokens: ['ឡុកឡាក់', 'lok lak', 'luc lac', '摇滚牛肉', '禄拉克'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'bai_sach_chrouk',
+    tokens: ['បាយសាច់ជ្រូក', 'bai sach chrouk', 'pork rice', '烤猪肉饭'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'bai_cha',
+    tokens: ['បាយឆា', 'បាយក្តាំង', 'បាយមាន់', 'fried rice', 'chicken rice', '炒饭', '鸡饭'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'banh_chao',
+    tokens: ['បាញ់ឆែវ', 'នំគ្រក់', 'ណែមឆៅ', 'ណែមបាត់ដំបង', 'banh chao', 'num krok', 'spring roll', '煎饼'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'bok_lhong',
+    tokens: ['បុកល្ហុង', 'បុកមី', 'បុកកាពិ', 'បុកស្វាយ', 'bok lhong', 'papaya salad', '木瓜沙拉'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'pleah_nhoam',
+    tokens: ['ភ្លាសាច់គោ', 'ភ្លាក្តាម', 'ភ្លាត្រី', 'ភ្លា', 'ញាំមីសួរ', 'ញាំស្វាយ', 'ញាំផ្កាចេក', 'ញាំមឹក', 'ញាំ', 'ceviche', 'pleah', 'nhoam'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'crab_seafood',
+    tokens: ['ក្តាមឆាម្រេច', 'ក្តាមសេះ', 'បង្កងអាំង', 'បង្គាអាំង', 'មឹកអាំង', 'គ្រឿងសមុទ្រ', 'kampot crab', 'seafood', '海鲜', '螃蟹'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'bbq_grilled',
+    tokens: ['សាច់គោអាំង', 'គោឡើងភ្នំ', 'មាន់ដុត', 'ត្រីដុត', 'សាច់អាំង', 'ស៊ុបគោ', 'bbq', 'grilled beef', 'roast chicken', '烧烤', '烤肉'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'khmer_dessert',
+    tokens: ['បង្អែម', 'ចេកខ្ទិះ', 'សង់ខ្យា', 'ក្រឡាន', 'អន្សម', 'នំគម', 'នំកង', 'នំអាកោ', 'លតអង្ករ', 'kralan', 'sangkhya', 'ansom'],
+    intent: 'dessert',
+  },
+  {
+    id: 'bakery_bread',
+    tokens: ['នំប៉័ង', 'ហាងនំប៉័ង', 'នំខេក', 'ហាងនំខេក', 'នំក្រូសង់', 'នំដុត', 'bakery', 'bread', 'banh mi', 'nömpang', 'croissant', 'pastry', 'cake', '面包', '蛋糕', '烘焙'],
+    intent: 'bakery_bread',
+  },
+  {
+    id: 'coffee_drink',
+    tokens: ['ហាងកាហ្វេ', 'កាហ្វេ', 'តែគុជ', 'តែបៃតង', 'ទឹកអំពៅ', 'ទឹកសណ្តែក', 'coffee', 'cafe', 'café', 'espresso', 'latte', 'milk tea', 'boba', '咖啡', '奶茶'],
+    intent: 'coffee_drink',
+  },
+  {
+    id: 'pizza_western',
+    tokens: ['ភីហ្សា', 'ប៉ាស្តា', 'បឺហ្គឺ', 'ស្តេក', 'pizza', 'pizzeria', 'pasta', 'burger', 'steakhouse', 'burrito', 'tacos', '披萨', '汉堡'],
+    intent: 'pizza_western',
+  },
+];
+
+/**
+ * Classifies a restaurant/shop into its true primary business kind based on name, category, and inventory.
+ * Ensures bread shops (`ហាងនំប៉័ង` / `Bakery` / `Cake`) and coffee-only shops are never confused with Khmer meal restaurants.
+ */
+export function classifyShopBusinessKind(r: Restaurant): ShopBusinessKind {
+  const nameText = normalizeKhmerFoodText(`${r.nameKh || ''} ${r.nameEn || ''} ${r.businessCategory || ''} ${r.categoryKh || ''} ${r.categoryEn || ''}`);
+  const invText = normalizeKhmerFoodText(
+    `${(r.signatureDishesKh || []).join(' ')} ${(r.signatureDishesEn || []).join(' ')} ${((r.menuItems || []).map((m) => `${m.nameKh || ''} ${m.nameEn || ''}`)).join(' ')}`
+  );
+
+  // 1. Explicit bread / bakery / cake / pastry shops
+  const isBakeryName =
+    /ហាងនំប៉័ង|ហាងនំខេក|១៩៩០ខេក|នំប៉័ង|បឺងកាវ៉ាន់សូឡូ|\b(?:bakery|bread|pastry|cakes?\s*(?:&|and)?\s*craft|1990s\s*cake|sweet\s*lab|tous\s*les\s*jours|banh\s*mi|n[oö]mpang|bengawan\s*solo|starfish\s*cafe\s*&\s*bakery|bake\s*and\s*bake|the\s*wine\s*bakery)\b/i.test(
+      `${r.nameKh || ''} ${r.nameEn || ''} ${nameText}`
+    );
+  const hasSavoryMealInInventory =
+    /គុយទាវ|មីសួរ|មីស៊ុប|មីឆា|នំបញ្ចុក|បបរ|អាម៉ុក|សម្ល|ឡុកឡាក់|ប្រហុក|បាយឆា|បាយសាច់ជ្រូក|សាច់គោអាំង|គ្រឿងសមុទ្រ|មាន់ដុត|ត្រីដុត/i.test(
+      invText
+    );
+  if (isBakeryName && !hasSavoryMealInInventory) {
+    return 'bakery_bread';
+  }
+
+  // 2. Explicit Pizza / Burger / Western specialty shops
+  if (
+    /ភីហ្សា|\b(?:pizza|pizzeria|burger|burrito|tacos|trattoria|gelano|cr[eê]pes)\b/i.test(`${r.nameKh || ''} ${r.nameEn || ''}`) &&
+    !/គុយទាវ|មីសួរ|នំបញ្ចុក|អាម៉ុក|សម្លកកូរ/i.test(invText)
+  ) {
+    return 'pizza_western';
+  }
+
+  // 3. Pure Coffee / Drink / Cafe shops (that do not serve full Khmer noodle/soup/rice meals)
+  const isCafeName =
+    /ហាងកាហ្វេ|កាហ្វេ|តែគុជ|\b(?:coffee|cafe|café|roastery|tea\s*house|espresso)\b/i.test(`${r.nameKh || ''} ${r.nameEn || ''}`);
+  if (isCafeName && !hasSavoryMealInInventory && !/ភោជនីយដ្ឋាន|អាហារដ្ឋាន|bistro|kitchen|restaurant/i.test(`${r.nameKh || ''} ${r.nameEn || ''}`)) {
+    return 'coffee_drink';
+  }
+
+  // 4. Noodle & Soup shops
+  if (/គុយទាវ|មីសួរ|មីស៊ុប|មីឆា|មីគោក|មីកូឡា|នំបញ្ចុក|បបរ|លតឆា|\b(?:noodle|pho|kuy\s*teav)\b/i.test(`${nameText} ${invText}`)) {
+    return 'noodle_soup_restaurant';
+  }
+
+  return 'khmer_restaurant';
+}
+
+/**
+ * Verifies that a shop record has valid, trustworthy Cambodia business data before displaying it in search results.
+ */
+export function verifyShopDataForDisplay(r: Restaurant | null | undefined): boolean {
+  if (!r || !r.id) return false;
+  if (r.businessType === 'hotel') return false;
+  if (r.status && r.status !== 'approved') return false;
+  if (r.aiCategoryVerification?.detectedType && r.aiCategoryVerification.detectedType !== 'restaurant') {
+    return false;
+  }
+  if (!isStrictVerifiedCambodiaRestaurant(r)) return false;
+  if (!isPlaceLocationVerified(r)) return false;
+  const cleanName = `${r.nameKh || ''} ${r.nameEn || ''}`.trim();
+  if (cleanName.length < 2) return false;
+  // Reject non-restaurant institutions (banks, schools, hospitals, pagodas, administrative offices)
+  if (/\b(?:bank|atm|hospital|clinic|pharmacy|school|university|police|ministry|pagoda|wat\s+phnom)\b|ធនាគារ|មន្ទីរពេទ្យ|សាលារៀន|ប៉ុស្តិ៍ប៉ូលីស/i.test(cleanName)) {
+    return false;
+  }
+  return true;
+}
+
+export interface ProductShopMatchResult {
+  matches: boolean;
+  score: number;
+  matchedInventoryItems: string[];
+  isExactProductMatch: boolean;
+  shopKind: ShopBusinessKind;
+}
+
+/**
+ * Strictly matches a shop against a user's product/dish/keyword search query (`rawQuery`) or `targetFood`:
+ * 1. Verifies shop data via `verifyShopDataForDisplay`.
+ * 2. Classifies the shop's business kind (`classifyShopBusinessKind`) and blocks unrelated businesses
+ *    (e.g., NEVER returns bread shops `ហាងនំប៉័ង` / `Bakery` or coffee-only shops when searching for `មីសួ` or savory dishes).
+ * 3. Matches product names, categories, keywords, and shop inventory (`signatureDishesKh`, `signatureDishesEn`, `menuItems`).
+ */
+export function matchShopToProductQuery(
+  r: Restaurant,
+  rawQuery: string,
+  targetFood?: FoodItem | null
+): ProductShopMatchResult {
+  const shopKind = classifyShopBusinessKind(r);
+  if (!verifyShopDataForDisplay(r)) {
+    return { matches: false, score: 0, matchedInventoryItems: [], isExactProductMatch: false, shopKind };
+  }
+
+  const normQuery = normalizeKhmerFoodText(rawQuery);
+  const normFoodNameKh = targetFood ? normalizeKhmerFoodText(targetFood.nameKh) : '';
+  const normFoodNameEn = targetFood ? normalizeKhmerFoodText(targetFood.nameEn) : '';
+  const combinedSearchText = `${normQuery} ${normFoodNameKh} ${normFoodNameEn}`.trim();
+
+  if (!combinedSearchText) {
+    // When no query is typed, still exclude pure bread/cake bakeries from default nearby meal results
+    if (shopKind === 'bakery_bread') {
+      return { matches: false, score: 0, matchedInventoryItems: [], isExactProductMatch: false, shopKind };
+    }
+    return { matches: true, score: r.isVerified ? 50 : 25, matchedInventoryItems: [], isExactProductMatch: false, shopKind };
+  }
+
+  // Detect which primary product group(s) the user is searching for
+  const matchedProductGroups = PRIMARY_PRODUCT_GROUPS.filter((grp) =>
+    grp.tokens.some((tok) => {
+      const normTok = normalizeKhmerFoodText(tok);
+      return normTok.length >= 2 && (includesKhmerToken(combinedSearchText, normTok) || combinedSearchText.includes(normTok));
+    })
+  );
+
+  // If both a specific dish group (e.g. `mi_suor` or `pleah_nhoam`) and a broader group matched, keep all matched groups
+  // but identify the most specific primary group (first in PRIMARY_PRODUCT_GROUPS order, e.g. `mi_suor` before `crab_seafood`).
+  const primaryGroup = matchedProductGroups[0] || null;
+
+  const isSearchingBakery = matchedProductGroups.some((g) => g.intent === 'bakery_bread') ||
+    /នំប៉័ង|នំខេក|នំដុត|ក្រូសង់|bakery|bread|cake|pastry|banh\s*mi|croissant|n[oö]mpang/i.test(combinedSearchText);
+  const isSearchingCoffee = matchedProductGroups.some((g) => g.intent === 'coffee_drink') ||
+    /កាហ្វេ|តែគុជ|តែបៃតង|ភេសជ្ជៈ|coffee|cafe|café|latte|espresso|tea|boba/i.test(combinedSearchText);
+  const isSearchingPizzaWestern = matchedProductGroups.some((g) => g.intent === 'pizza_western') ||
+    /ភីហ្សា|ប៉ាស្តា|បឺហ្គឺ|ស្តេក|pizza|pasta|burger|steak|burrito|taco/i.test(combinedSearchText);
+
+  // STRICT BUSINESS TYPE GUARD:
+  // Never return bread shops / bakeries when the user is searching for noodles, soups, rice, or any non-bakery product!
+  if (!isSearchingBakery && shopKind === 'bakery_bread') {
+    return { matches: false, score: 0, matchedInventoryItems: [], isExactProductMatch: false, shopKind };
+  }
+  // Never return pure coffee/drink shops when the user is searching for a savory meal/noodle/soup product!
+  if (!isSearchingCoffee && !isSearchingBakery && shopKind === 'coffee_drink') {
+    return { matches: false, score: 0, matchedInventoryItems: [], isExactProductMatch: false, shopKind };
+  }
+  // Never return pizza/western fast-food shops when the user is searching for a traditional Khmer / noodle / soup dish!
+  if (!isSearchingPizzaWestern && shopKind === 'pizza_western' && primaryGroup && primaryGroup.intent === 'savory_food') {
+    return { matches: false, score: 0, matchedInventoryItems: [], isExactProductMatch: false, shopKind };
+  }
+
+  const zhLoc = getLocalizedRestaurant(r, 'zh');
+  const inventoryItemsRaw: string[] = [
+    ...(r.signatureDishesKh || []),
+    ...(r.signatureDishesEn || []),
+    ...(zhLoc.signatureDishes || []),
+    ...((r.menuItems || []).map((m) => m.nameKh || m.nameEn || '').filter(Boolean)),
+  ];
+
+  const normShopName = normalizeKhmerFoodText(`${r.nameKh || ''} ${r.nameEn || ''} ${zhLoc.name || ''}`);
+  const normCategory = normalizeKhmerFoodText(`${r.categoryKh || ''} ${r.categoryEn || ''} ${r.cuisineType || ''} ${r.businessCategory || ''}`);
+  const normDescription = normalizeKhmerFoodText(`${r.descriptionKh || ''} ${r.descriptionEn || ''}`);
+  const normInventoryList = inventoryItemsRaw.map((item) => ({
+    raw: item,
+    norm: normalizeKhmerFoodText(item),
+  }));
+
+  let score = 0;
+  let isExactProductMatch = false;
+  const matchedInventoryItems: string[] = [];
+  const addMatchedItem = (rawItem: string) => {
+    const clean = rawItem.trim();
+    if (clean && !matchedInventoryItems.includes(clean)) {
+      matchedInventoryItems.push(clean);
+    }
+  };
+
+  // 1. Check direct match of full query or targetFood name in Shop Inventory (`signatureDishesKh` / `menuItems`)
+  for (const inv of normInventoryList) {
+    if (!inv.norm) continue;
+    if (normQuery.length >= 2 && (includesKhmerToken(inv.norm, normQuery) || inv.norm.includes(normQuery) || normQuery.includes(inv.norm))) {
+      score += 160;
+      isExactProductMatch = true;
+      addMatchedItem(inv.raw);
+    } else if (
+      normFoodNameKh.length >= 3 &&
+      (includesKhmerToken(inv.norm, normFoodNameKh) || inv.norm.includes(normFoodNameKh) || normFoodNameKh.includes(inv.norm))
+    ) {
+      score += 150;
+      isExactProductMatch = true;
+      addMatchedItem(inv.raw);
+    }
+  }
+
+  // 2. Check Primary Product Group tokens (e.g. `មីសួរ` / `មីសួ` / `glass noodle`) against Shop Inventory & Shop Name
+  if (primaryGroup) {
+    let matchedPrimaryGroupInShop = false;
+    for (const tok of primaryGroup.tokens) {
+      const normTok = normalizeKhmerFoodText(tok);
+      if (!normTok) continue;
+      for (const inv of normInventoryList) {
+        if (includesKhmerToken(inv.norm, normTok) || inv.norm.includes(normTok)) {
+          score += 130;
+          matchedPrimaryGroupInShop = true;
+          isExactProductMatch = true;
+          addMatchedItem(inv.raw);
+        }
+      }
+      if (includesKhmerToken(normShopName, normTok) || normShopName.includes(normTok)) {
+        score += 115;
+        matchedPrimaryGroupInShop = true;
+        isExactProductMatch = true;
+      } else if (includesKhmerToken(normCategory, normTok) || includesKhmerToken(normDescription, normTok)) {
+        score += 75;
+        matchedPrimaryGroupInShop = true;
+      }
+    }
+
+    // CRITICAL: When the user searched for a specific primary product (such as `មីសួ` / `មីសួរ`, `គុយទាវ`, `នំបញ្ចុក`, `អាម៉ុក`, `បបរ`, etc.),
+    // the shop MUST actually sell or specialize in that primary product! Never return a shop that only matched a secondary word like `សាច់មាន់`.
+    if (!matchedPrimaryGroupInShop) {
+      return { matches: false, score: 0, matchedInventoryItems: [], isExactProductMatch: false, shopKind };
+    }
+  }
+
+  // 3. Direct shop name or category match (when user searches by shop name or general keyword)
+  if (normQuery.length >= 2) {
+    if (includesKhmerToken(normShopName, normQuery) || normShopName.includes(normQuery)) {
+      score += 140;
+      isExactProductMatch = true;
+    } else if (includesKhmerToken(normCategory, normQuery)) {
+      score += 70;
+    } else if (!primaryGroup && includesKhmerToken(normDescription, normQuery)) {
+      score += 45;
+    }
+  }
+
+  // 4. Secondary sub-tokens from `KHMER_DISH_SUBTOKENS` (only when no primaryGroup was violated)
+  const activeSubtokens = KHMER_DISH_SUBTOKENS.filter((tok) => {
+    const nt = normalizeKhmerFoodText(tok);
+    return combinedSearchText.includes(nt);
+  });
+  for (const tok of activeSubtokens) {
+    const nt = normalizeKhmerFoodText(tok);
+    for (const inv of normInventoryList) {
+      if (includesKhmerToken(inv.norm, nt)) {
+        score += 28;
+        if (!primaryGroup) {
+          addMatchedItem(inv.raw);
+        }
+      }
+    }
+    if (includesKhmerToken(normShopName, nt)) {
+      score += 20;
+    }
+  }
+
+  // Require a genuine product/inventory/name match (score > 0) before adding verification bonus
+  if (score <= 0) {
+    return { matches: false, score: 0, matchedInventoryItems: [], isExactProductMatch: false, shopKind };
+  }
+
+  if (r.isVerified) {
+    score += 30;
+  }
+  score += Math.min(15, (r.rating || 4.5) * 3);
+
+  return {
+    matches: true,
+    score,
+    matchedInventoryItems: matchedInventoryItems.slice(0, 3),
+    isExactProductMatch,
+    shopKind,
+  };
+}
+
+function haversineDistanceMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  if (!Number.isFinite(lat1) || !Number.isFinite(lon1) || !Number.isFinite(lat2) || !Number.isFinite(lon2)) {
+    return Infinity;
+  }
+  const R = 6371000;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+}
+
 export function getMatchingRestaurantsForProvinceDish(
   food: FoodItem,
   prov: ProvinceFilterOption,
   restaurants: Restaurant[],
-  rotationSeed = 0
+  rotationSeed = 0,
+  userCoords?: { lat: number; lng: number } | null,
+  preferredProvinceKh?: string
 ): Restaurant[] {
-  const approvedAll = restaurants.filter((r) => r && r.id && (r.status === 'approved' || !r.status));
-  const verifiedLocations = approvedAll.filter((r) => isPlaceLocationVerified(r));
-  const approved = verifiedLocations.length > 0 ? verifiedLocations : approvedAll;
-  const cleanKh = prov.kh.trim();
-  const inProvince = approved.filter(
-    (r) =>
-      (r.provinceKh && r.provinceKh.includes(cleanKh)) ||
-      (r.provinceEn && r.provinceEn.toLowerCase().includes(prov.en.toLowerCase()))
-  );
-
-  const foodNameText = `${food.nameKh || ''} ${food.nameEn || ''}`.toLowerCase();
-  const foodFullText = `${foodNameText} ${food.categoryKh || ''} ${food.categorySlug || ''} ${food.descriptionKh || ''}`.toLowerCase();
-
-  // Extract matching Khmer sub-tokens from the dish name
-  const activeSubtokens = KHMER_DISH_SUBTOKENS.filter((tok) => foodNameText.includes(tok));
-  const englishWords = (food.nameEn || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .split(/\s+/)
-    .filter((w) => w.length >= 4 && !['with', 'khmer', 'cambodian', 'style', 'fresh', 'traditional'].includes(w));
-
+  const verifiedPool = restaurants.filter((r) => verifyShopDataForDisplay(r));
   const dishHash = computeDishHash(food, rotationSeed);
-  const candidatePool = inProvince.length > 0 ? inProvince : approved;
 
-  const scored = candidatePool.map((r, idx) => {
-    const sigList = r.signatureDishesKh || [];
-    const sigText = sigList.join(' ').toLowerCase();
-    const restText = `${r.nameKh || ''} ${r.nameEn || ''} ${sigText} ${r.descriptionKh || ''} ${r.descriptionEn || ''} ${r.cuisineType || ''}`.toLowerCase();
+  const cleanTargetProv = (preferredProvinceKh || prov.kh || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
 
-    let matchScore = 0;
+  // Score every verified shop against the dish using strict product & inventory verification
+  const matchingScored = verifiedPool
+    .map((r, idx) => {
+      const match = matchShopToProductQuery(r, food.nameKh, food);
+      if (!match.matches || match.score <= 0) return null;
 
-    // 1. Exact or near-exact signature dish match
-    if (
-      sigList.some((sig) => {
-        const s = sig.trim().toLowerCase();
-        const fn = (food.nameKh || '').trim().toLowerCase();
-        return s.length >= 3 && fn.length >= 3 && (s.includes(fn) || fn.includes(s));
-      })
-    ) {
-      matchScore += 95;
-    }
+      const distMeters =
+        userCoords && Number.isFinite(userCoords.lat) && Number.isFinite(userCoords.lng)
+          ? haversineDistanceMeters(userCoords.lat, userCoords.lng, r.latitude, r.longitude)
+          : Infinity;
 
-    // 2. Khmer culinary sub-token matches in signature dishes or restaurant name/description
-    for (const tok of activeSubtokens) {
-      if (sigText.includes(tok)) {
-        matchScore += 32;
-      } else if (restText.includes(tok)) {
-        matchScore += 18;
+      const inUserOrTargetProvince =
+        cleanTargetProv.length > 0 &&
+        Boolean(
+          (r.provinceKh && r.provinceKh.replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanTargetProv)) ||
+            (r.provinceEn && r.provinceEn.toLowerCase().includes(prov.en.toLowerCase()))
+        );
+
+      const inDishHomeProvince = Boolean(
+        (r.provinceKh && r.provinceKh.includes(prov.kh.trim())) ||
+          (r.provinceEn && r.provinceEn.toLowerCase().includes(prov.en.toLowerCase()))
+      );
+
+      let locationBonus = 0;
+      if (distMeters <= 5000) {
+        locationBonus += 90 - Math.min(40, distMeters / 150);
+      } else if (distMeters <= 15000) {
+        locationBonus += 55 - Math.min(25, distMeters / 600);
       }
-    }
-
-    // 3. English keyword matches
-    for (const ew of englishWords) {
-      if (restText.includes(ew)) {
-        matchScore += 14;
+      if (inUserOrTargetProvince) {
+        locationBonus += 45;
+      } else if (inDishHomeProvince) {
+        locationBonus += 30;
       }
+
+      const rotTieBreaker = ((dishHash + (idx + 1) * 37) % 19) * 0.6;
+
+      return {
+        r,
+        isVerified: Boolean(r.isVerified),
+        isExactProductMatch: match.isExactProductMatch,
+        distMeters,
+        score: match.score + locationBonus + rotTieBreaker,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+
+  matchingScored.sort((a, b) => {
+    if (a.isExactProductMatch !== b.isExactProductMatch) {
+      return a.isExactProductMatch ? -1 : 1;
     }
-
-    // 4. Category / culinary style affinity
-    if (food.categorySlug === 'grilled' || /អាំង|ដុត|bbq|grill/i.test(foodNameText)) {
-      if (/អាំង|ដុត|bbq|grill|មឹក|បង្កង|សាច់គោអាំង/i.test(restText)) matchScore += 28;
-    } else if (food.categorySlug === 'dessert' || /បង្អែម|ចេកខ្ទិះ|ត្នោត|សង់ខ្យា|dessert|sweet/i.test(foodNameText)) {
-      if (/បង្អែម|ចេកខ្ទិះ|ត្នោត|នំ|dessert|sweet|កាហ្វេ/i.test(restText)) matchScore += 32;
-    } else if (food.categorySlug === 'salad' || /ភ្លា|ញាំ|បុក|ទឹកគ្រឿង|ប្រហុក/i.test(foodNameText)) {
-      if (/ភ្លា|ញាំ|បុក|ប្រហុក|ទឹកគ្រឿង|salad|tapas/i.test(restText)) matchScore += 28;
-    } else if (food.categorySlug === 'noodles' || /គុយទាវ|នំបញ្ចុក|មី|លត/i.test(foodNameText)) {
-      if (/គុយទាវ|នំបញ្ចុក|មី|លត|ព្រឹក|noodle/i.test(restText)) matchScore += 28;
-    } else if (food.categorySlug === 'rice' || /^បាយ|ឡុកឡាក់|ឆា/i.test(foodNameText)) {
-      if (/បាយ|ឡុកឡាក់|ឆា|lok\s*lak|rice/i.test(restText)) matchScore += 26;
-    } else if (food.categorySlug === 'soup' || /សម្ល|អាម៉ុក|កកូរ|ម្ជូរ|ការី/i.test(foodFullText)) {
-      if (/សម្ល|អាម៉ុក|កកូរ|ម្ជូរ|ការី|ស៊ុប/i.test(restText)) matchScore += 24;
-    }
-
-    // 5. Strongly prioritize verified restaurants
-    if (r.isVerified) {
-      matchScore += 40;
-    }
-
-    // 6. Deterministic dish-specific tie-breaker so different dishes in the same province rotate across verified shops
-    const rotTieBreaker = ((dishHash + (idx + 1) * 37) % 23) * 0.9;
-
-    return {
-      r,
-      isVerified: Boolean(r.isVerified),
-      score: matchScore + rotTieBreaker + (r.rating || 4.5) * 0.3,
-    };
-  });
-
-  scored.sort((a, b) => {
     if (a.isVerified !== b.isVerified) return a.isVerified ? -1 : 1;
     return b.score - a.score;
   });
 
-  // Deduplicate by restaurant ID and nameKh
   const seenNames = new Set<string>();
   const unique: Restaurant[] = [];
-  for (const item of scored) {
+  for (const item of matchingScored) {
     const key = (item.r.nameKh || item.r.id).trim();
     if (!seenNames.has(key)) {
       seenNames.add(key);
       unique.push(item.r);
     }
-    if (unique.length >= 3) break;
+    if (unique.length >= 4) break;
   }
 
   return unique;
 }
 
 /**
- * Finds the best-matching verified restaurants for any dish across its home province or nationwide.
+ * Finds the best-matching verified restaurants that actually sell `food`, prioritizing the user's current location/province.
  */
 export function getMatchingRestaurantsForDish(
   food: FoodItem,
   restaurants: Restaurant[],
   limit = 3,
-  rotationSeed = 0
+  rotationSeed = 0,
+  userCoords?: { lat: number; lng: number } | null,
+  preferredProvinceKh?: string
 ): Restaurant[] {
   const provId = detectDishProvince(food);
   const prov = getProvinceOptionById(provId);
-  return getMatchingRestaurantsForProvinceDish(food, prov, restaurants, rotationSeed).slice(0, limit);
+  return getMatchingRestaurantsForProvinceDish(
+    food,
+    prov,
+    restaurants,
+    rotationSeed,
+    userCoords,
+    preferredProvinceKh
+  ).slice(0, limit);
 }

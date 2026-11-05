@@ -562,27 +562,18 @@ export const UpgradeVipModal: React.FC = () => {
       const livePlans = getDynamicVipPlans(latestSettings);
       const liveSelectedPlan = livePlans[selectedPlan.id];
 
-      const paymentMethodLabel =
-        autoRenewMethodChoice === 'Bakong'
-          ? 'Bakong KHQR'
-          : autoRenewMethodChoice === 'Card'
-          ? 'Visa / Mastercard'
-          : 'ABA KHQR (095 245 959)';
-
       const reqResult = await submitVipUpgradeRequest(
         liveSelectedPlan.durationDays,
         liveSelectedPlan.priceUsd,
         customTxnRef,
         `VIP Upgrade Request (${liveSelectedPlan.durationDays} Days / $${liveSelectedPlan.priceUsd.toFixed(2)} USD) via ABA KHQR — Pending Admin Verification`,
         paymentProofDraft || undefined,
-        autoRenewOptIn && autoRenewConsentChecked
-          ? {
-              enabled: true,
-              paymentMethod: autoRenewMethodChoice,
-              paymentLabel: paymentMethodLabel,
-              explicitConsent: true,
-            }
-          : undefined
+        {
+          enabled: true,
+          paymentMethod: 'KHQR',
+          paymentLabel: 'ABA KHQR (095 245 959)',
+          explicitConsent: true,
+        }
       );
 
       setIsSubmittingRequest(false);
@@ -722,7 +713,7 @@ export const UpgradeVipModal: React.FC = () => {
                 )}
               </div>
 
-              {/* Automatic VIP Renewal Management Card for Active VIP Members */}
+              {/* Automatic VIP Renewal & Billing Dates Card for Active VIP Members */}
               <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-left space-y-2.5">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
@@ -732,201 +723,71 @@ export const UpgradeVipModal: React.FC = () => {
                     <div className="min-w-0">
                       <div className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
                         <span className="truncate">
-                          {tr(language, 'បន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ', 'Automatic VIP Renewal', 'VIP 自动续费')}
+                          {tr(language, 'ការបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ', 'Automatic VIP Renewal', 'VIP 自动续费')}
                         </span>
                         <span
                           className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase shrink-0 ${
-                            currentUser?.autoRenew && currentUser?.autoRenewConsentAt
+                            currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
                               ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300'
-                              : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                              : 'bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300'
                           }`}
                         >
-                          {currentUser?.autoRenew && currentUser?.autoRenewConsentAt ? 'ON' : 'OFF'}
+                          {currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
+                            ? tr(language, 'សកម្ម (ON)', 'ACTIVE', '已开启')
+                            : tr(language, 'បានបោះបង់ (OFF)', 'CANCELLED', '已取消')}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
-                        {currentUser?.autoRenew && currentUser?.autoRenewConsentAt
-                          ? tr(
-                              language,
-                              `បន្តស្វ័យប្រវត្តិមុនថ្ងៃផុតកំណត់ (${currentUser?.subscriptionExpiryDate?.split('T')[0] || '—'}) តាម ${currentUser?.autoRenewPaymentLabel || 'ABA KHQR'}`,
-                              `Auto-renews before ${currentUser?.subscriptionExpiryDate?.split('T')[0] || '—'} via ${currentUser?.autoRenewPaymentLabel || 'ABA KHQR'}`,
-                              `到期前（${currentUser?.subscriptionExpiryDate?.split('T')[0] || '—'}）通过 ${currentUser?.autoRenewPaymentLabel || 'ABA KHQR'} 自动续费`
-                            )
-                          : tr(
-                              language,
-                              'បើកដើម្បីបន្តសមាជិកភាព VIP ដោយស្វ័យប្រវត្តិមុនថ្ងៃផុតកំណត់។ អាចបិទវិញបានគ្រប់ពេល។',
-                              'Enable to automatically renew VIP before expiration. Cancel anytime.',
-                              '开启后将在到期前自动续费 VIP，可随时取消。'
-                            )}
-                      </p>
                     </div>
                   </div>
-
-                  {currentUser?.autoRenew && currentUser?.autoRenewConsentAt ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        cancelVipAutoRenew();
-                        setShowApprovedAutoRenewConfirm(false);
-                      }}
-                      className="px-3 py-1.5 rounded-xl bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/60 dark:hover:bg-rose-900/70 text-rose-700 dark:text-rose-300 text-xs font-extrabold transition shrink-0 cursor-pointer"
-                    >
-                      {tr(language, 'បិទ (Cancel)', 'Turn OFF', '关闭')}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setShowApprovedAutoRenewConfirm(v => !v)}
-                      className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition shrink-0 cursor-pointer"
-                    >
-                      {tr(language, 'បើក Auto-Renew', 'Enable ON', '开启')}
-                    </button>
-                  )}
                 </div>
 
-                {currentUser?.autoRenewLastStatus === 'failed' && (
-                  <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 text-xs text-rose-700 dark:text-rose-300 font-semibold">
-                      <AlertCircle className="w-4 h-4 shrink-0" strokeWidth={1.75} />
-                      <span>
-                        {tr(
-                          language,
-                          'ការទូទាត់ស្វ័យប្រវត្តិមិនជោគជ័យ។ សូមព្យាយាមបង់ប្រាក់ម្តងទៀត។',
-                          'Automatic renewal payment failed. Please retry payment.',
-                          '自动续费扣款失败，请重试付款。'
-                        )}
-                      </span>
+                {/* Next Billing Date & Membership Expiration Date */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                    <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                      {tr(language, 'ថ្ងៃផុតកំណត់សមាជិកភាព', 'Membership Expiration Date', '会员到期日')}
                     </div>
-                    <button
-                      type="button"
-                      disabled={isRetryingAutoRenew}
-                      onClick={async () => {
-                        setIsRetryingAutoRenew(true);
-                        await retryFailedVipAutoRenew();
-                        setIsRetryingAutoRenew(false);
-                      }}
-                      className="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold shrink-0 cursor-pointer disabled:opacity-50"
-                    >
-                      {isRetryingAutoRenew
-                        ? tr(language, 'កំពុងដំណើរការ...', 'Retrying...', '重试中...')
-                        : tr(language, 'ព្យាយាមម្តងទៀត', 'Retry Payment', '重试付款')}
-                    </button>
+                    <div className="text-xs font-black text-slate-900 dark:text-white mt-0.5 font-mono">
+                      {currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}
+                    </div>
                   </div>
-                )}
-
-                {showApprovedAutoRenewConfirm && !(currentUser?.autoRenew && currentUser?.autoRenewConsentAt) && (
-                  <div className="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-2.5 animate-fade-in">
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {dynamicPlansList.map(p => (
-                        <button
-                          key={p.id}
-                          type="button"
-                          onClick={() => setAutoRenewPlanChoice(p.id)}
-                          className={`p-2 rounded-xl border text-left transition cursor-pointer ${
-                            autoRenewPlanChoice === p.id
-                              ? 'border-emerald-600 bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
-                              : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300'
-                          }`}
-                        >
-                          <div className="text-[11px] font-extrabold">
-                            {p.days} {tr(language, 'ថ្ងៃ', 'Days', '天')}
-                          </div>
-                          <div className="text-xs font-black text-emerald-600 dark:text-emerald-400">
-                            ${p.priceUsd.toFixed(2)} USD
-                          </div>
-                        </button>
-                      ))}
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                    <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                      {tr(language, 'ថ្ងៃកាត់ប្រាក់បន្ទាប់', 'Next Billing Date', '下次扣款日期')}
                     </div>
-
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {(
-                        [
-                          { id: 'KHQR', label: 'ABA KHQR' },
-                          { id: 'Bakong', label: 'Bakong' },
-                          { id: 'Card', label: 'Visa / Card' },
-                        ] as const
-                      ).map(m => (
-                        <button
-                          key={m.id}
-                          type="button"
-                          onClick={() => setAutoRenewMethodChoice(m.id)}
-                          className={`py-1.5 px-2 rounded-lg border text-[11px] font-bold transition cursor-pointer ${
-                            autoRenewMethodChoice === m.id
-                              ? 'border-emerald-600 bg-emerald-600 text-white'
-                              : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300'
-                          }`}
-                        >
-                          {m.label}
-                        </button>
-                      ))}
+                    <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 mt-0.5 font-mono">
+                      {currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
+                        ? currentUser?.subscriptionExpiryDate
+                          ? currentUser.subscriptionExpiryDate.split('T')[0]
+                          : '—'
+                        : tr(language, 'គ្មានការកាត់ប្រាក់បន្ថែម', 'No Further Charges', '不再扣款')}
                     </div>
+                  </div>
+                </div>
 
-                    <label className="flex items-start gap-2 text-[11px] text-slate-700 dark:text-slate-300 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={approvedConsentChecked}
-                        onChange={e => setApprovedConsentChecked(e.target.checked)}
-                        className="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                      />
-                      <span>
-                        {tr(
-                          language,
-                          'ខ្ញុំយល់ព្រមឱ្យកាត់ប្រាក់បន្តសមាជិកភាព VIP ដោយស្វ័យប្រវត្តិមុនថ្ងៃផុតកំណត់តាមមធ្យោបាយទូទាត់ដែលបានជ្រើសរើស។ អាចបិទវិញបានគ្រប់ពេល។',
-                          'I authorize automatic VIP renewal charges before expiration using the selected payment method. I can cancel anytime.',
-                          '我授权在到期前使用所选付款方式自动扣款续费 VIP，可随时取消。'
-                        )}
-                      </span>
-                    </label>
-
-                    <button
-                      type="button"
-                      disabled={!approvedConsentChecked}
-                      onClick={async () => {
-                        const label =
-                          autoRenewMethodChoice === 'Bakong'
-                            ? 'Bakong KHQR'
-                            : autoRenewMethodChoice === 'Card'
-                            ? 'Visa / Mastercard'
-                            : 'ABA KHQR (095 245 959)';
-                        const res = await configureVipAutoRenew({
-                          enabled: true,
-                          planId: autoRenewPlanChoice,
-                          paymentMethod: autoRenewMethodChoice,
-                          paymentLabel: label,
-                          explicitConsent: true,
-                        });
-                        if (res.success) {
-                          setShowApprovedAutoRenewConfirm(false);
-                        }
-                      }}
-                      className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition cursor-pointer disabled:opacity-50"
-                    >
-                      {tr(language, 'បញ្ជាក់ការបើក Auto-Renew', 'Confirm & Enable Auto-Renew', '确认开启自动续费')}
-                    </button>
+                {currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      cancelVipAutoRenew();
+                    }}
+                    className="w-full py-2.5 px-3.5 rounded-xl bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/60 dark:hover:bg-rose-900/80 text-rose-700 dark:text-rose-300 text-xs font-extrabold transition cursor-pointer"
+                  >
+                    {tr(language, 'បោះបង់ការបន្តស្វ័យប្រវត្តិ (Cancel Auto-Renewal)', 'Cancel Auto-Renewal', '取消自动续费')}
+                  </button>
+                ) : (
+                  <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                    {tr(
+                      language,
+                      `✅ ការបន្តស្វ័យប្រវត្តិត្រូវបានបោះបង់។ មិនមានការកាត់ប្រាក់បន្ថែមទៀតទេ ហើយគណនី VIP នៅតែមានសុពលភាពរហូតដល់ថ្ងៃទី ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}។`,
+                      `✅ Auto-renewal is cancelled. No further payments will be charged, and your VIP membership remains active until ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}.`,
+                      `✅ 自动续费已取消，不会再产生任何扣款。您的 VIP 权益将有效至 ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}。`
+                    )}
                   </div>
                 )}
               </div>
 
               <div className="space-y-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsVipRenewMode(true);
-                    setPaymentState('AWAITING_PAYMENT');
-                  }}
-                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  <span>
-                    {tr(
-                      language,
-                      `🔄 បន្តសុពលភាព VIP ($${dynamicPlansList[0].priceUsd.toFixed(2)} / ${dynamicPlansList[0].days} ថ្ងៃ)`,
-                      `🔄 Renew VIP ($${dynamicPlansList[0].priceUsd.toFixed(2)} / ${dynamicPlansList[0].days} Days)`,
-                      `🔄 续费 VIP 会员 ($${dynamicPlansList[0].priceUsd.toFixed(2)} / ${dynamicPlansList[0].days} 天)`
-                    )}
-                  </span>
-                </button>
-
                 <button
                   onClick={handleClose}
                   className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
@@ -1406,62 +1267,17 @@ export const UpgradeVipModal: React.FC = () => {
                   </button>
                 </div>
 
-                {/* One-Time Payment Authorization for Automatic VIP Renewal (Explicit Consent Required) */}
-                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700/80 space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <RefreshCw className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" strokeWidth={1.75} />
-                      <div className="min-w-0">
-                        <div className="text-xs font-extrabold text-slate-800 dark:text-slate-100 truncate">
-                          {tr(language, 'បន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (Auto-Renew)', 'Automatic VIP Renewal (Auto-Renew)', 'VIP 自动续费 (Auto-Renew)')}
-                        </div>
-                        <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                          {tr(
-                            language,
-                            `បន្តស្វ័យប្រវត្តិ $${selectedPlan.priceUsd.toFixed(2)} / ${selectedPlan.days} ថ្ងៃ មុនផុតកំណត់ • បិទបានគ្រប់ពេល`,
-                            `Auto-renew $${selectedPlan.priceUsd.toFixed(2)} / ${selectedPlan.days} days before expiry • Cancel anytime`,
-                            `到期前自动续费 $${selectedPlan.priceUsd.toFixed(2)} / ${selectedPlan.days} 天 • 可随时取消`
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={autoRenewOptIn}
-                      onClick={() => {
-                        const next = !autoRenewOptIn;
-                        setAutoRenewOptIn(next);
-                        if (!next) setAutoRenewConsentChecked(false);
-                      }}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition shrink-0 cursor-pointer ${
-                        autoRenewOptIn
-                          ? 'bg-emerald-600 text-white'
-                          : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-                      }`}
-                    >
-                      {autoRenewOptIn ? 'ON' : 'OFF'}
-                    </button>
+                {/* Automatic VIP Renewal Notice (Enabled Automatically, Cancel Anytime in Profile) */}
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700/80 flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" strokeWidth={1.75} />
+                  <div className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
+                    {tr(
+                      language,
+                      `ការបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ ($${selectedPlan.priceUsd.toFixed(2)} / ${selectedPlan.days} ថ្ងៃ) ត្រូវបានបើកដោយស្វ័យប្រវត្តិ។ អ្នកអាចបោះបង់ (Cancel Auto-Renewal) បានគ្រប់ពេលនៅក្នុងគណនី។`,
+                      `Automatic VIP renewal ($${selectedPlan.priceUsd.toFixed(2)} / ${selectedPlan.days} days) is enabled automatically. You can cancel auto-renewal anytime in your Profile.`,
+                      `已自动开启 VIP 到期续费（$${selectedPlan.priceUsd.toFixed(2)} / ${selectedPlan.days} 天）。您可随时在个人中心取消自动续费。`
+                    )}
                   </div>
-
-                  {autoRenewOptIn && (
-                    <label className="flex items-start gap-2 pt-1.5 border-t border-slate-200/80 dark:border-slate-700/60 text-[11px] text-slate-700 dark:text-slate-300 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={autoRenewConsentChecked}
-                        onChange={e => setAutoRenewConsentChecked(e.target.checked)}
-                        className="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                      />
-                      <span>
-                        {tr(
-                          language,
-                          `ខ្ញុំយល់ព្រមអនុញ្ញាតឱ្យបន្តសមាជិកភាព VIP ($${selectedPlan.priceUsd.toFixed(2)} USD / ${selectedPlan.days} ថ្ងៃ) ដោយស្វ័យប្រវត្តិមុនថ្ងៃផុតកំណត់តាមរយៈ ABA KHQR។ ខ្ញុំអាចបិទ Auto-Renew វិញបានគ្រប់ពេល។`,
-                          `I explicitly authorize automatic VIP renewal ($${selectedPlan.priceUsd.toFixed(2)} USD / ${selectedPlan.days} days) before expiration using my saved payment method. I can cancel anytime.`,
-                          `我明确授权在到期前使用已保存的付款方式自动续费 VIP（$${selectedPlan.priceUsd.toFixed(2)} USD / ${selectedPlan.days} 天），我可随时取消。`
-                        )}
-                      </span>
-                    </label>
-                  )}
                 </div>
 
                 <button

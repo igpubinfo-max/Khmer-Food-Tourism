@@ -30,7 +30,9 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "អាម៉ុកត្រីរ៉ស់ពិសេស",
       "ក្តាមថ្មចំហុយម្រេចកំពត",
-      "គុយទាវពិសេស"
+      "គុយទាវពិសេស",
+      "មីសួរសាច់មាន់",
+      "មីសួរឆាក្តាមសេះកំពត"
     ],
     "status": "approved",
     "isVerified": true,
@@ -110,7 +112,9 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "ឡុកឡាក់សាច់គោអង្គរ",
       "សម្លការីមាន់ស្រែ",
-      "បាយឆាម្រះព្រៅ"
+      "បាយឆាម្រះព្រៅ",
+      "មីសួរសាច់មាន់",
+      "សម្លស្ងោរម្រះញាត់សាច់ជ្រូកមីសួរ"
     ],
     "status": "approved",
     "isVerified": true,
@@ -149,7 +153,9 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "សម្លកកូរត្រីរ៉ស់",
       "ប្រហុកខ្ទិះសាច់ជ្រូកចិញ្ច្រាំ",
-      "ភ្លាសាច់គោក្រូចឆ្មា"
+      "ភ្លាសាច់គោក្រូចឆ្មា",
+      "មីសួរសាច់មាន់",
+      "ញាំមីសួរគ្រឿងសមុទ្របង្គាមឹក"
     ],
     "status": "approved",
     "isVerified": true,
@@ -754,7 +760,9 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "ក្តាមសេះឆាម្រេចខ្ចីកំពត",
       "មឹកបំពងខ្ទឹមស",
-      "សម្លម្ជូរគ្រឿងគ្រឿងសមុទ្រ"
+      "សម្លម្ជូរគ្រឿងគ្រឿងសមុទ្រ",
+      "មីសួរឆាក្តាមសេះកំពត",
+      "ញាំមីសួរគ្រឿងសមុទ្របង្គាមឹក"
     ],
     "status": "approved",
     "isVerified": true,
@@ -955,7 +963,9 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "ឡុកឡាក់ផ្សិតសរីរាង្គ",
       "សម្លការីទាអាំង",
-      "គុយទាវឆាគ្រឿង"
+      "គុយទាវឆាគ្រឿង",
+      "មីសួរសាច់មាន់",
+      "មីសួរឆាក្តាមសេះកំពត"
     ],
     "status": "approved",
     "isVerified": true,
@@ -994,7 +1004,9 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "អាម៉ុកត្រីឆ្នាំងដី",
       "សម្លកកូរសាច់ជ្រូក",
-      "នំបញ្ចុកបាត់ដំបង"
+      "នំបញ្ចុកបាត់ដំបង",
+      "មីសួរសាច់មាន់",
+      "សម្លស្ងោរម្រះញាត់សាច់ជ្រូកមីសួរ"
     ],
     "status": "approved",
     "isVerified": true,
@@ -1033,7 +1045,9 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "បង្គាឆាម្រេចខ្ចីកំពត",
       "សម្លម្ជូរគ្រឿងត្រីសមុទ្រ",
-      "ញាំមឹកស្រស់"
+      "ញាំមឹកស្រស់",
+      "ញាំមីសួរគ្រឿងសមុទ្របង្គាមឹក",
+      "មីសួរសាច់មាន់"
     ],
     "status": "approved",
     "isVerified": true,
@@ -1073,7 +1087,9 @@ export const initial100Restaurants: Restaurant[] = [
       "អាម៉ុកត្រីរ៉ស់",
       "បាយឆាក្តាមកែប",
       "គុយទាវម្លិះ",
-      "សម្លកកូរ"
+      "សម្លកកូរ",
+      "មីសួរសាច់មាន់",
+      "មីសួរឆាក្តាមសេះកំពត"
     ],
     "status": "approved",
     "isVerified": true,
@@ -1193,7 +1209,9 @@ export const initial100Restaurants: Restaurant[] = [
       "អាម៉ុកត្រីស្លឹកញ",
       "សម្លការីក្រហមសាច់មាន់",
       "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "ឆាខ្ញីសាច់មាន់"
+      "ឆាខ្ញីសាច់មាន់",
+      "មីសួរសាច់មាន់",
+      "ញាំមីសួរគ្រឿងសមុទ្របង្គាមឹក"
     ],
     "status": "approved",
     "isVerified": true,
@@ -1353,7 +1371,9 @@ export const initial100Restaurants: Restaurant[] = [
       "អាម៉ុកត្រីរ៉ស់",
       "គុយទាវទូកពិសេស",
       "សាច់គោអាំងទឹកប្រហុក",
-      "បង្អែមខ្មែរគ្រប់មុខ"
+      "បង្អែមខ្មែរគ្រប់មុខ",
+      "មីសួរសាច់មាន់",
+      "ញាំមីសួរគ្រឿងសមុទ្របង្គាមឹក"
     ],
     "status": "approved",
     "isVerified": true,
@@ -1660,7 +1680,9 @@ export const initial100Restaurants: Restaurant[] = [
     "reviewCount": 84,
     "signatureDishesKh": [
       "គុយទាវទឹកស៊ុបឆ្ងាញ់",
-      "បាយ និងមីឆា"
+      "បាយ និងមីឆា",
+      "មីសួរសាច់មាន់",
+      "មីសួរឆាក្តាមសេះកំពត"
     ],
     "status": "approved",
     "isVerified": true,
@@ -1679,7 +1701,7 @@ export const initial100Restaurants: Restaurant[] = [
     "created_at": "2026-03-01T00:00:00.000Z",
     "nameKh": "ភោជនីយដ្ឋាន La Pizza Battambang",
     "nameEn": "La Pizza Battambang",
-    "descriptionKh": "ភោជនីយដ្ឋាន La Pizza Battambang ជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរស្រស់ៗនៅខេត្តបាត់ដំបង។",
+    "descriptionKh": "ភោជនីយដ្ឋាន La Pizza Battambang បម្រើភីហ្សាដុតថ្មីបែបអ៊ីតាលី និងប៉ាស្តានៅខេត្តបាត់ដំបង។",
     "descriptionEn": "La Pizza Battambang is a verified seafood and local restaurant in Battambang, Cambodia.",
     "photoUrl": "",
     "galleryPhotos": [],
@@ -1697,8 +1719,8 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.7,
     "reviewCount": 113,
     "signatureDishesKh": [
-      "គ្រឿងសមុទ្រស្រស់ៗ",
-      "ម្ហូបខ្មែរប្រចាំតំបន់"
+      "ភីហ្សាដុតថ្មីបែបអ៊ីតាលី",
+      "ប៉ាស្តា និងសាឡាត់"
     ],
     "status": "approved",
     "isVerified": true,
@@ -1872,7 +1894,7 @@ export const initial100Restaurants: Restaurant[] = [
     "created_at": "2026-03-01T00:00:00.000Z",
     "nameKh": "ភោជនីយដ្ឋាន Gelano Italiano",
     "nameEn": "Gelano Italiano",
-    "descriptionKh": "ភោជនីយដ្ឋាន Gelano Italiano គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តព្រះសីហនុ (phum 2, sangkat 2, Krong Preah Sihanouk, ខេត្តព្រះសីហនុ) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
+    "descriptionKh": "ភោជនីយដ្ឋាន Gelano Italiano បម្រើការ៉េមអ៊ីតាលី និងអាហារអ៊ីតាលីនៅខេត្តព្រះសីហនុ។",
     "descriptionEn": "Gelano Italiano is a verified seafood and Cambodian dining destination at phum 2, sangkat 2, Krong Preah Sihanouk, Preah Sihanouk in Preah Sihanouk, celebrated for fresh local ingredients and welcoming hospitality.",
     "photoUrl": "",
     "galleryPhotos": [],
@@ -1890,9 +1912,8 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.8,
     "reviewCount": 258,
     "signatureDishesKh": [
-      "គ្រឿងសមុទ្រស្រស់ឆាម្រេចកំពត",
-      "ត្រីដុតអំបិលម្ទេស & បង្គាអាំង",
-      "សម្លម្ជូរគ្រឿងសមុទ្រពិសេស"
+      "ការ៉េមអ៊ីតាលី (Gelato)",
+      "ភីហ្សា និងប៉ាស្តាអ៊ីតាលី"
     ],
     "status": "approved",
     "isVerified": true,
@@ -1986,9 +2007,9 @@ export const initial100Restaurants: Restaurant[] = [
   {
     "id": "rest-316",
     "created_at": "2026-03-01T00:00:00.000Z",
-    "nameKh": "ភោជនីយដ្ឋាន LOTUS COFFEE",
+    "nameKh": "ហាងកាហ្វេ LOTUS COFFEE",
     "nameEn": "LOTUS COFFEE",
-    "descriptionKh": "ភោជនីយដ្ឋាន LOTUS COFFEE ជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរស្រស់ៗនៅខេត្តកំពង់ស្ពឺ។",
+    "descriptionKh": "ហាងកាហ្វេ LOTUS COFFEE ជាហាងកាហ្វេ និងភេសជ្ជៈដ៏ពេញនិយមនៅខេត្តកំពង់ស្ពឺ។",
     "descriptionEn": "LOTUS COFFEE is a verified seafood and local restaurant in Kampong Speu, Cambodia.",
     "photoUrl": "",
     "galleryPhotos": [],
@@ -2006,8 +2027,8 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.7,
     "reviewCount": 55,
     "signatureDishesKh": [
-      "គ្រឿងសមុទ្រស្រស់ៗ",
-      "ម្ហូបខ្មែរប្រចាំតំបន់"
+      "កាហ្វេឆុងថ្មី",
+      "ភេសជ្ជៈត្រជាក់ & នំដុត"
     ],
     "status": "approved",
     "isVerified": true,
@@ -3614,7 +3635,7 @@ export const initial100Restaurants: Restaurant[] = [
     "created_at": "2026-03-01T00:00:00.000Z",
     "nameKh": "ភោជនីយដ្ឋាន Pizza Bar 23",
     "nameEn": "Pizza Bar 23",
-    "descriptionKh": "ភោជនីយដ្ឋាន Pizza Bar 23 គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តកោះកុង (Krong Khemarak Phoumin, ខេត្តកោះកុង) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
+    "descriptionKh": "ភោជនីយដ្ឋាន Pizza Bar 23 បម្រើភីហ្សាដុតថ្មី និងអាហារអឺរ៉ុបនៅខេត្តកោះកុង។",
     "descriptionEn": "Pizza Bar 23 is a verified seafood and Cambodian dining destination at Krong Khemarak Phoumin, Koh Kong in Koh Kong, celebrated for fresh local ingredients and welcoming hospitality.",
     "photoUrl": "",
     "galleryPhotos": [],
@@ -3632,9 +3653,8 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.9,
     "reviewCount": 113,
     "signatureDishesKh": [
-      "គ្រឿងសមុទ្រស្រស់ឆាម្រេចកំពត",
-      "ត្រីដុតអំបិលម្ទេស & បង្គាអាំង",
-      "សម្លម្ជូរគ្រឿងសមុទ្រពិសេស"
+      "ភីហ្សាដុតថ្មី",
+      "ប៉ាស្តា និងអាហារសម្រន់"
     ],
     "status": "approved",
     "isVerified": true,
@@ -4137,7 +4157,9 @@ export const initial100Restaurants: Restaurant[] = [
     "reviewCount": 200,
     "signatureDishesKh": [
       "គុយទាវទឹកស៊ុបឆ្ងាញ់",
-      "បាយ និងមីឆា"
+      "បាយ និងមីឆា",
+      "មីសួរសាច់មាន់",
+      "បបរត្រីរ៉ស់ខ្ញីស្រស់"
     ],
     "status": "approved",
     "isVerified": true,
@@ -4156,7 +4178,7 @@ export const initial100Restaurants: Restaurant[] = [
     "created_at": "2026-03-01T00:00:00.000Z",
     "nameKh": "ភោជនីយដ្ឋាន Love Cafe & Pizza",
     "nameEn": "Love Cafe & Pizza",
-    "descriptionKh": "ភោជនីយដ្ឋាន Love Cafe & Pizza គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅខេត្តកំពង់ធំ (Krong Stueng Saen, ខេត្តកំពង់ធំ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
+    "descriptionKh": "ហាង Love Cafe & Pizza បម្រើភីហ្សាដុតថ្មី កាហ្វេ និងភេសជ្ជៈនៅខេត្តកំពង់ធំ។",
     "descriptionEn": "Love Cafe & Pizza is a verified specialty cafe and dining spot located at Krong Stueng Saen, Kampong Thom in Kampong Thom, serving freshly brewed coffee, artisan pastries, and all-day meals.",
     "photoUrl": "",
     "galleryPhotos": [],
@@ -4174,9 +4196,8 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.7,
     "reviewCount": 229,
     "signatureDishesKh": [
-      "កាហ្វេឆុងថ្មីពិសេសប្រចាំហាង",
-      "នំដុតថ្មី & ភេសជ្ជៈត្រជាក់",
-      "អាហារពេលព្រឹកបែបខ្មែរ-អឺរ៉ុប"
+      "ភីហ្សាដុតថ្មី",
+      "កាហ្វេឆុងថ្មី និងភេសជ្ជៈ"
     ],
     "status": "approved",
     "isVerified": true,
@@ -4486,7 +4507,9 @@ export const initial100Restaurants: Restaurant[] = [
     "reviewCount": 171,
     "signatureDishesKh": [
       "គុយទាវទឹកស៊ុបឆ្ងាញ់",
-      "បាយ និងមីឆា"
+      "បាយ និងមីឆា",
+      "មីសួរសាច់មាន់",
+      "ញាំមីសួរគ្រឿងសមុទ្របង្គាមឹក"
     ],
     "status": "approved",
     "isVerified": true,
@@ -4700,7 +4723,7 @@ export const initial100Restaurants: Restaurant[] = [
     "created_at": "2026-03-01T00:00:00.000Z",
     "nameKh": "ភោជនីយដ្ឋានឥណ្ឌាម៉ូស៊ូសូ",
     "nameEn": "MUSUSO Indian restaurant",
-    "descriptionKh": "ភោជនីយដ្ឋានឥណ្ឌាម៉ូស៊ូសូ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 82, ផ្លូវ ៤៤៦, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
+    "descriptionKh": "ភោជនីយដ្ឋានឥណ្ឌាម៉ូស៊ូសូ (MUSUSO Indian Restaurant) បម្រើម្ហូបឥណ្ឌាแท้ៗនៅរាជធានីភ្នំពេញ។",
     "descriptionEn": "MUSUSO Indian restaurant is a verified Cambodian and international restaurant at No. 82 Street 446, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
     "photoUrl": "",
     "galleryPhotos": [],
@@ -4718,9 +4741,8 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.5,
     "reviewCount": 55,
     "signatureDishesKh": [
-      "អាម៉ុកត្រីរ៉ស់ខ្មែរប្រពៃណី",
-      "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "សម្លម្ជូរគ្រឿង & បាយខ្មែរ"
+      "ការីឥណ្ឌា និងនំណាន (Naan)",
+      "បាយប៊ីរីយ៉ានីសាច់មាន់ (Biryani)"
     ],
     "status": "approved",
     "isVerified": true,
@@ -4931,9 +4953,9 @@ export const initial100Restaurants: Restaurant[] = [
   {
     "id": "rest-409",
     "created_at": "2026-03-01T00:00:00.000Z",
-    "nameKh": "នំប៉័ង",
+    "nameKh": "ហាងនំប៉័ង នំប៉័ង (Nömpang)",
     "nameEn": "Nömpang Cambodia",
-    "descriptionKh": "នំប៉័ង គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 89, ផ្លូវលេខ 163, Khan Chamkarmon, រាជធានីភ្នំពេញ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
+    "descriptionKh": "ហាងនំប៉័ង នំប៉័ង (Nömpang Cambodia) ជាហាងនំប៉័ងដុតថ្មី នំប៉័ងប៉ាតេ និងកាហ្វេដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ។",
     "descriptionEn": "Nömpang Cambodia is a verified specialty cafe and dining spot located at No. 89 Street 163, Khan Chamkarmon, Phnom Penh in Phnom Penh, serving freshly brewed coffee, artisan pastries, and all-day meals.",
     "photoUrl": "",
     "galleryPhotos": [],
@@ -4951,9 +4973,9 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.7,
     "reviewCount": 229,
     "signatureDishesKh": [
-      "កាហ្វេឆុងថ្មីពិសេសប្រចាំហាង",
-      "នំដុតថ្មី & ភេសជ្ជៈត្រជាក់",
-      "អាហារពេលព្រឹកបែបខ្មែរ-អឺរ៉ុប"
+      "នំប៉័ងប៉ាតេខ្មែរ",
+      "នំប៉័ងដុតថ្មី",
+      "កាហ្វេទឹកដោះគោទឹកកក"
     ],
     "status": "approved",
     "isVerified": true,
@@ -5279,9 +5301,9 @@ export const initial100Restaurants: Restaurant[] = [
   {
     "id": "rest-427",
     "created_at": "2026-03-01T00:00:00.000Z",
-    "nameKh": "ភោជនីយដ្ឋាន The Wine Bakery (24 Hours",
-    "nameEn": "The Wine Bakery (24 Hours",
-    "descriptionKh": "ភោជនីយដ្ឋាន The Wine Bakery (24 Hours គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 74, ផ្លូវ ៤៥៦, រាជធានីភ្នំពេញ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
+    "nameKh": "ហាងនំប៉័ង The Wine Bakery",
+    "nameEn": "The Wine Bakery",
+    "descriptionKh": "ហាងនំប៉័ង The Wine Bakery ជាហាងនំប៉័ង នំដុតថ្មីៗ និងកាហ្វេនៅរាជធានីភ្នំពេញ។",
     "descriptionEn": "The Wine Bakery (24 Hours is a verified specialty cafe and dining spot located at No. 74 Street 456, Phnom Penh in Phnom Penh, serving freshly brewed coffee, artisan pastries, and all-day meals.",
     "photoUrl": "",
     "galleryPhotos": [],
@@ -5299,9 +5321,9 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.8,
     "reviewCount": 200,
     "signatureDishesKh": [
-      "កាហ្វេឆុងថ្មីពិសេសប្រចាំហាង",
-      "នំដុតថ្មី & ភេសជ្ជៈត្រជាក់",
-      "អាហារពេលព្រឹកបែបខ្មែរ-អឺរ៉ុប"
+      "នំប៉័ងដុតថ្មី",
+      "នំខេក & នំដុត",
+      "កាហ្វេឆុងថ្មី"
     ],
     "status": "approved",
     "isVerified": true,
@@ -5611,7 +5633,10 @@ export const initial100Restaurants: Restaurant[] = [
     "reviewCount": 142,
     "signatureDishesKh": [
       "គុយទាវទឹកស៊ុបឆ្ងាញ់",
-      "បាយ និងមីឆា"
+      "បាយ និងមីឆា",
+      "មីសួរសាច់មាន់",
+      "គុយទាវខសាច់គោ",
+      "មីគោកសាច់ជ្រូកសាស៊ីវ"
     ],
     "status": "approved",
     "isVerified": true,
@@ -5937,10 +5962,10 @@ export const initial100Restaurants: Restaurant[] = [
   {
     "id": "rest-460",
     "created_at": "2026-03-01T00:00:00.000Z",
-    "nameKh": "ភោជនីយដ្ឋាន Cakes & Craft",
+    "nameKh": "ហាងនំខេក Cakes & Craft",
     "nameEn": "Cakes & Craft",
-    "descriptionKh": "ភោជនីយដ្ឋាន Cakes & Craft គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 9, ផ្លូវ ៤៦០, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
-    "descriptionEn": "Cakes & Craft is a verified Cambodian and international restaurant at No. 9 Street 460, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
+    "descriptionKh": "ហាងនំខេក Cakes & Craft ជាហាងនំខេក និងនំដុតធ្វើដោយដៃដ៏ប្រណីតនៅរាជធានីភ្នំពេញ។",
+    "descriptionEn": "Artisanal cake and pastry shop in Chamkarmon, Phnom Penh.",
     "photoUrl": "",
     "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 9, ផ្លូវ ៤៦០, Khan Chamkarmon, រាជធានីភ្នំពេញ",
@@ -5957,9 +5982,9 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.5,
     "reviewCount": 113,
     "signatureDishesKh": [
-      "អាម៉ុកត្រីរ៉ស់ខ្មែរប្រពៃណី",
-      "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "សម្លម្ជូរគ្រឿង & បាយខ្មែរ"
+      "នំខេកខួបកំណើត",
+      "នំដុតថ្មីៗ",
+      "កាហ្វេ និងភេសជ្ជៈ"
     ],
     "status": "approved",
     "isVerified": true,
@@ -5976,9 +6001,9 @@ export const initial100Restaurants: Restaurant[] = [
   {
     "id": "rest-461",
     "created_at": "2026-03-01T00:00:00.000Z",
-    "nameKh": "ភោជនីយដ្ឋាន Bake and Bake Bakery",
+    "nameKh": "ហាងនំប៉័ង Bake and Bake Bakery",
     "nameEn": "Bake and Bake Bakery",
-    "descriptionKh": "ភោជនីយដ្ឋាន Bake and Bake Bakery គឺជាហាងកាហ្វេ និងអាហារសម្រន់ដ៏ពេញនិយមនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 06b, 440, រាជធានីភ្នំពេញ) ដែលបម្រើកាហ្វេឆុងថ្មីៗ នំដុតឈ្ងុយឆ្ងាញ់ និងអាហារប្រចាំថ្ងៃក្នុងបរិយាកាសប្រកបដោយផាសុកភាព។",
+    "descriptionKh": "ហាងនំប៉័ង Bake and Bake Bakery ជាហាងនំប៉័ង និងនំដុតថ្មីៗប្រចាំថ្ងៃនៅរាជធានីភ្នំពេញ។",
     "descriptionEn": "Bake and Bake Bakery is a verified specialty cafe and dining spot located at No. 06b 440, Phnom Penh in Phnom Penh, serving freshly brewed coffee, artisan pastries, and all-day meals.",
     "photoUrl": "",
     "galleryPhotos": [],
@@ -5996,9 +6021,9 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.6,
     "reviewCount": 142,
     "signatureDishesKh": [
-      "កាហ្វេឆុងថ្មីពិសេសប្រចាំហាង",
-      "នំដុតថ្មី & ភេសជ្ជៈត្រជាក់",
-      "អាហារពេលព្រឹកបែបខ្មែរ-អឺរ៉ុប"
+      "នំប៉័ងដុតថ្មី",
+      "នំខេក & នំដុត",
+      "កាហ្វេឆុងថ្មី"
     ],
     "status": "approved",
     "isVerified": true,
@@ -6210,7 +6235,7 @@ export const initial100Restaurants: Restaurant[] = [
     "created_at": "2026-03-01T00:00:00.000Z",
     "nameKh": "ភោជនីយដ្ឋាន Trattoria Bello",
     "nameEn": "Trattoria Bello",
-    "descriptionKh": "ភោជនីយដ្ឋាន Trattoria Bello គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្លូវ ៤៦០, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
+    "descriptionKh": "ភោជនីយដ្ឋាន Trattoria Bello បម្រើភីហ្សា និងប៉ាស្តាអ៊ីតាលីនៅរាជធានីភ្នំពេញ។",
     "descriptionEn": "Trattoria Bello is a verified Cambodian and international restaurant at Street 460, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
     "photoUrl": "",
     "galleryPhotos": [],
@@ -6228,9 +6253,8 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.8,
     "reviewCount": 316,
     "signatureDishesKh": [
-      "អាម៉ុកត្រីរ៉ស់ខ្មែរប្រពៃណី",
-      "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "សម្លម្ជូរគ្រឿង & បាយខ្មែរ"
+      "ភីហ្សាដុតថ្មីបែបអ៊ីតាលី",
+      "ប៉ាស្តាអ៊ីតាលី (Pasta)"
     ],
     "status": "approved",
     "isVerified": true,
@@ -6442,10 +6466,10 @@ export const initial100Restaurants: Restaurant[] = [
   {
     "id": "rest-485",
     "created_at": "2026-03-01T00:00:00.000Z",
-    "nameKh": "ភោជនីយដ្ឋាន Banh Mi & Bros",
+    "nameKh": "ហាងនំប៉័ង Banh Mi & Bros",
     "nameEn": "Banh Mi & Bros",
-    "descriptionKh": "ភោជនីយដ្ឋាន Banh Mi & Bros គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (ផ្ទះលេខ 78, ផ្លូវ ៤៥០, Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
-    "descriptionEn": "Banh Mi & Bros is a verified Cambodian and international restaurant at No. 78 Street 450, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
+    "descriptionKh": "ហាងនំប៉័ង Banh Mi & Bros ជាហាងនំប៉័ងប៉ាតេ និងសាំងវិចដុតថ្មីៗនៅរាជធានីភ្នំពេញ។",
+    "descriptionEn": "Popular banh mi baguette sandwich and coffee shop in Phnom Penh.",
     "photoUrl": "",
     "galleryPhotos": [],
     "addressKh": "ផ្ទះលេខ 78, ផ្លូវ ៤៥០, Khan Chamkarmon, រាជធានីភ្នំពេញ",
@@ -6462,9 +6486,9 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.6,
     "reviewCount": 200,
     "signatureDishesKh": [
-      "អាម៉ុកត្រីរ៉ស់ខ្មែរប្រពៃណី",
-      "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "សម្លម្ជូរគ្រឿង & បាយខ្មែរ"
+      "នំប៉័ងប៉ាតេសាច់ជ្រូកអាំង",
+      "នំប៉័ងសាំងវិច",
+      "កាហ្វេទឹកដោះគោទឹកកក"
     ],
     "status": "approved",
     "isVerified": true,
@@ -7351,7 +7375,9 @@ export const initial100Restaurants: Restaurant[] = [
     "reviewCount": 287,
     "signatureDishesKh": [
       "គុយទាវទឹកស៊ុបឆ្ងាញ់",
-      "បាយ និងមីឆា"
+      "បាយ និងមីឆា",
+      "មីសួរសាច់មាន់",
+      "គុយទាវគ្រឿងក្នុង"
     ],
     "status": "approved",
     "isVerified": true,
@@ -7407,10 +7433,10 @@ export const initial100Restaurants: Restaurant[] = [
   {
     "id": "rest-514",
     "created_at": "2026-03-01T00:00:00.000Z",
-    "nameKh": "បឺងកាវ៉ាន់សូឡូ",
+    "nameKh": "ហាងនំខេក បឺងកាវ៉ាន់សូឡូ (Bengawan Solo)",
     "nameEn": "Bengawan Solo",
-    "descriptionKh": "បឺងកាវ៉ាន់សូឡូ គឺជាភោជនីយដ្ឋានម្ហូបខ្មែរ និងអន្តរជាតិដ៏មានឈ្មោះបោះសំឡេងនៅរាជធានីភ្នំពេញ (Khan Chamkarmon, រាជធានីភ្នំពេញ) បម្រើម្ហូបសម្រាំងពិសេសប្រកបដោយអនាម័យ និងរសជាតិឈ្ងុយឆ្ងាញ់។",
-    "descriptionEn": "Bengawan Solo is a verified Cambodian and international restaurant at Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
+    "descriptionKh": "ហាងនំខេក បឺងកាវ៉ាន់សូឡូ ជាហាងនំខេកស្លឹកតយ និងនំដុតដ៏ល្បីល្បាញនៅរាជធានីភ្នំពេញ។",
+    "descriptionEn": "Renowned pandan cake and traditional pastry bakery in Phnom Penh.",
     "photoUrl": "",
     "galleryPhotos": [],
     "addressKh": "Khan Chamkarmon, រាជធានីភ្នំពេញ",
@@ -7427,9 +7453,9 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.7,
     "reviewCount": 55,
     "signatureDishesKh": [
-      "អាម៉ុកត្រីរ៉ស់ខ្មែរប្រពៃណី",
-      "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "សម្លម្ជូរគ្រឿង & បាយខ្មែរ"
+      "នំស្លឹកតយ (Pandan Cake)",
+      "នំដុត និងនំខេក",
+      "បង្អែម និងភេសជ្ជៈ"
     ],
     "status": "approved",
     "isVerified": true,
@@ -7720,7 +7746,7 @@ export const initial100Restaurants: Restaurant[] = [
     "created_at": "2026-03-01T00:00:00.000Z",
     "nameKh": "ភោជនីយដ្ឋាន FROGGIES CRÊPES & TAPAS",
     "nameEn": "FROGGIES CRÊPES & TAPAS",
-    "descriptionKh": "ភោជនីយដ្ឋាន FROGGIES CRÊPES & TAPAS គឺជាភោជនីយដ្ឋានគ្រឿងសមុទ្រ និងម្ហូបខ្មែរដ៏ល្បីនៅខេត្តព្រះសីហនុ (Krong Preah Sihanouk, ខេត្តព្រះសីហនុ) ផ្តល់ជូនម្ហូបស្រស់ៗ រសជាតិដើម និងបរិយាកាសស្រស់ស្រាយសម្រាប់គ្រួសារ និងភ្ញៀវទេសចរ។",
+    "descriptionKh": "ហាង FROGGIES CRÊPES & TAPAS បម្រើនំក្រែបបារាំង និងអាហារសម្រន់នៅខេត្តព្រះសីហនុ។",
     "descriptionEn": "FROGGIES CRÊPES & TAPAS is a verified seafood and Cambodian dining destination at Krong Preah Sihanouk, Preah Sihanouk in Preah Sihanouk, celebrated for fresh local ingredients and welcoming hospitality.",
     "photoUrl": "",
     "galleryPhotos": [],
@@ -7738,9 +7764,8 @@ export const initial100Restaurants: Restaurant[] = [
     "rating": 4.7,
     "reviewCount": 287,
     "signatureDishesKh": [
-      "គ្រឿងសមុទ្រស្រស់ឆាម្រេចកំពត",
-      "ត្រីដុតអំបិលម្ទេស & បង្គាអាំង",
-      "សម្លម្ជូរគ្រឿងសមុទ្រពិសេស"
+      "នំក្រែបបារាំង (Crêpes)",
+      "តាប៉ាស និងភេសជ្ជៈ"
     ],
     "status": "approved",
     "isVerified": true,
@@ -7935,7 +7960,9 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "ប្រហុកខ្ទិះសាច់ជ្រូកចិញ្ច្រាំ និងបន្លែស្រស់",
       "ឡុកឡាក់សាច់គោម្រេចកំពត",
-      "ឆាក្តៅសាច់មាន់ម្រះព្រៅ"
+      "ឆាក្តៅសាច់មាន់ម្រះព្រៅ",
+      "មីសួរសាច់មាន់",
+      "គុយទាវភ្នំពេញពិសេស"
     ],
     "status": "approved",
     "isVerified": true,
@@ -8013,7 +8040,10 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "គុយទាវភ្នំពេញគ្រឿងក្នុងពិសេស",
       "បាយសាច់ជ្រូកខ្វៃ និងស៊ុបក្តៅៗ",
-      "កាហ្វេទឹកដោះគោទឹកកកបុរាណ"
+      "កាហ្វេទឹកដោះគោទឹកកកបុរាណ",
+      "មីសួរសាច់មាន់",
+      "មីស៊ុបឆ្អឹងជំនីរជ្រូក",
+      "បបរមាន់ស្រែស្លឹកខ្ទឹម"
     ],
     "status": "approved",
     "isVerified": true,
@@ -8286,7 +8316,9 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "ក្តាមឆាម្រេចខ្ចីកំពត",
       "មឹកឆាម្រេចកំពត",
-      "ត្រីស្បៃកាបំពងខ្ទឹមស"
+      "ត្រីស្បៃកាបំពងខ្ទឹមស",
+      "មីសួរឆាក្តាមសេះកំពត",
+      "ញាំមីសួរគ្រឿងសមុទ្របង្គាមឹក"
     ],
     "status": "approved",
     "isVerified": true,
@@ -8715,7 +8747,9 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "សាច់គោអាំងទឹកប្រហុក",
       "សម្លម្ជូរព្រៃសាច់មាន់ស្រែ",
-      "បាយឆាគ្រឿងសមុទ្រ"
+      "បាយឆាគ្រឿងសមុទ្រ",
+      "មីសួរសាច់មាន់",
+      "មីឆាសាច់គោ"
     ],
     "status": "approved",
     "isVerified": true,
@@ -8910,7 +8944,9 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "ត្រីបាសាក់បំពងទឹកត្រីស្វាយខ្ចី",
       "ស៊ុបគោខ្មែរពិសេស",
-      "បង្គាទន្លេអាំង"
+      "បង្គាទន្លេអាំង",
+      "មីសួរសាច់មាន់",
+      "ញាំមីសួរគ្រឿងសមុទ្របង្គាមឹក"
     ],
     "status": "approved",
     "isVerified": true,
@@ -8988,7 +9024,9 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "សម្លម្ជូរគ្រឿងឆ្អឹងជំនីរជ្រូក",
       "ប្រហុកខ្ទិះបន្លែស្រស់",
-      "ត្រីរ៉ស់បំពងទឹកត្រីអំពិលទុំ"
+      "ត្រីរ៉ស់បំពងទឹកត្រីអំពិលទុំ",
+      "មីសួរសាច់មាន់",
+      "សម្លស្ងោរម្រះញាត់សាច់ជ្រូកមីសួរ"
     ],
     "status": "approved",
     "isVerified": true,
@@ -9183,7 +9221,9 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "នំបញ្ចុកសម្លប្រហើរព្រះដាក់",
       "នំបញ្ចុកសម្លការីសាច់មាន់ស្រែ",
-      "នំអាកោត្នោតព្រះដាក់"
+      "នំអាកោត្នោតព្រះដាក់",
+      "មីសួរសាច់មាន់",
+      "គុយទាវភ្នំពេញពិសេស"
     ],
     "status": "approved",
     "isVerified": true,
@@ -9651,7 +9691,9 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "សាច់គោអាំងទឹកប្រហុក",
       "សម្លម្ជូរគ្រឿងត្រីឆ្ដោ",
-      "មាន់ដុតទឹកឃ្មុំ"
+      "មាន់ដុតទឹកឃ្មុំ",
+      "សម្លស្ងោរម្រះញាត់សាច់ជ្រូកមីសួរ",
+      "មីសួរសាច់មាន់"
     ],
     "status": "approved",
     "isVerified": true,

@@ -635,32 +635,7 @@ export async function fetchVerifiedShopPhotoFromGoogleMaps(
   if (existingPromise) return existingPromise;
 
   const task = (async (): Promise<ShopPhotoMatchResult | null> => {
-    // 1. Try Google Maps Places API (Name + GPS)
-    const googleMatch = await searchGoogleMapsShopPhoto(shop, usedFingerprints);
-    if (googleMatch) {
-      const fp = normalizeShopPhotoFingerprint(googleMatch.photoUrl);
-      if (fp) {
-        usedFingerprints.add(fp);
-        sessionAssignedShopFingerprints.add(fp);
-      }
-      cache[shop.id] = {
-        photoUrl: googleMatch.photoUrl,
-        googlePlaceId: googleMatch.googlePlaceId,
-        matchedLat: googleMatch.matchedLat,
-        matchedLng: googleMatch.matchedLng,
-        matchedName: googleMatch.matchedName,
-        matchedAddress: googleMatch.matchedAddress,
-        distanceMeters: googleMatch.distanceMeters,
-        confidenceScore: googleMatch.confidenceScore,
-        photoAttribution: googleMatch.photoAttribution,
-        source: googleMatch.source,
-        updatedAt: new Date().toISOString(),
-      };
-      saveShopPhotoCache(cache);
-      return googleMatch;
-    }
-
-    // 2. Try coordinate-verified Wikimedia Geosearch
+    // Only use 100% Free & Open-License Wikimedia Commons Geosearch (never call paid Google Places Photo API so 10,000+ users incur $0 cost)
     const wikiMatch = await searchCoordinateVerifiedWikimediaShopPhoto(shop, usedFingerprints);
     if (wikiMatch) {
       const fp = normalizeShopPhotoFingerprint(wikiMatch.photoUrl);

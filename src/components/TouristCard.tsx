@@ -17,8 +17,6 @@ import {
 } from 'lucide-react';
 import { tr } from '../utils/i18n';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
-import { fetchVerifiedAttractionPhotoFromGoogleMaps } from '../services/touristAttractionPhotoService';
-import { recordPermanentDestinationOverride } from '../services/permanentMediaVaultService';
 
 import type { Language } from '../types';
 
@@ -71,7 +69,6 @@ export const DefaultDestinationIcon: React.FC<{ categorySlug?: string; className
 const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
   ({
     destination,
-    allDestinations,
     language,
     bookmarked,
     isAdmin,
@@ -79,54 +76,20 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
     toggleBookmark,
   }) => {
     const [imgError, setImgError] = useState(false);
-    const [autoFetchedPhotoUrl, setAutoFetchedPhotoUrl] = useState<string>('');
     const cardRef = useRef<HTMLDivElement | null>(null);
     const loc = useMemo(() => getLocalizedDestination(destination, language), [destination, language]);
 
-    const rawPhoto = (destination.photoUrl || autoFetchedPhotoUrl || '').trim();
-    const isRealPhoto = Boolean(rawPhoto) && !rawPhoto.startsWith('data:image/svg');
+    const rawPhoto = (destination.photoUrl || '').trim();
+    const isRealPhoto =
+      Boolean(rawPhoto) &&
+      !rawPhoto.startsWith('data:image/svg') &&
+      !rawPhoto.includes('places.googleapis.com');
     const hasClearPhoto = isRealPhoto && !imgError;
 
     // Reset imgError when photoUrl changes
     useEffect(() => {
       setImgError(false);
-    }, [destination.photoUrl, autoFetchedPhotoUrl]);
-
-    // Automatic background photo retrieval when a photo-less attraction enters the viewport
-    useEffect(() => {
-      if (isRealPhoto || destination.categorySlug === 'hotel') return;
-      const node = cardRef.current;
-      if (!node || typeof IntersectionObserver === 'undefined') return;
-
-      let cancelled = false;
-      const observer = new IntersectionObserver(
-        (entries) => {
-          const entry = entries[0];
-          if (!entry || !entry.isIntersecting) return;
-          observer.disconnect();
-          fetchVerifiedAttractionPhotoFromGoogleMaps(destination, allDestinations)
-            .then((match) => {
-              if (cancelled || !match || !match.photoUrl) return;
-              setAutoFetchedPhotoUrl(match.photoUrl);
-              const nowIso = new Date().toISOString();
-              recordPermanentDestinationOverride({
-                ...destination,
-                photoUrl: match.photoUrl,
-                galleryPhotos: match.galleryPhotos.length > 0 ? match.galleryPhotos : [match.photoUrl],
-                isCustomPhoto: true,
-                photoUpdatedAt: nowIso,
-              });
-            })
-            .catch(() => {});
-        },
-        { rootMargin: '180px' }
-      );
-      observer.observe(node);
-      return () => {
-        cancelled = true;
-        observer.disconnect();
-      };
-    }, [destination, allDestinations, isRealPhoto]);
+    }, [destination.photoUrl]);
 
     const resolvedDestPhotoUrl = useMemo(() => {
       if (!isRealPhoto) return '';

@@ -23,6 +23,7 @@ import {
   sanitizeUserVipPlanAndExpiry,
   isDeprecatedDemoSeedTransaction,
   type ShopPhotoReplacementRequest,
+  type PendingListingUpgradeRequest,
 } from '../types';
 import {
   verifyAbaPaymentAndReceipt,
@@ -137,7 +138,6 @@ import {
   mergeGoogleMapsPlaceWithExistingRestaurant,
 } from '../services/googlePlacesService';
 import { fetchVerifiedAttractionPhotoFromGoogleMaps } from '../services/touristAttractionPhotoService';
-import { fetchVerifiedShopPhotoFromGoogleMaps } from '../services/shopGooglePhotoService';
 import {
   computeUserIntegritySealSync,
   findLocalAuthoritativeVipEntitlement,
@@ -255,6 +255,25 @@ interface AppContextType {
     candidates: Array<{ restaurantId: string; request: ShopPhotoReplacementRequest }>,
     newShops: Restaurant[]
   ) => { queuedPhotos: number; addedShops: number };
+  // Duplicate Detection & Upgrade Existing Shop / Hotel Workflow (VIP User -> Admin Approval)
+  findDuplicateOrExistingListings: (candidate: {
+    nameKh?: string;
+    nameEn?: string;
+    phone?: string;
+    mapUrl?: string;
+    googlePlaceId?: string;
+    latitude?: number | null;
+    longitude?: number | null;
+    provinceKh?: string;
+    businessType?: 'restaurant' | 'hotel';
+    excludeId?: string;
+  }) => Restaurant[];
+  submitExistingListingUpgradeRequest: (
+    targetRestaurantId: string,
+    proposedChanges: PendingListingUpgradeRequest['proposedChanges']
+  ) => Restaurant | null;
+  approveListingUpgradeRequest: (restaurantId: string) => void;
+  rejectListingUpgradeRequest: (restaurantId: string, reason?: string) => void;
   // Restaurant Menu Items (Max 20 for Active Premium) & Genuine Customer Reviews
   addRestaurantMenuItem: (restaurantId: string, item: Omit<RestaurantMenuItem, 'id' | 'createdAt' | 'restaurantId'>) => boolean;
   updateRestaurantMenuItem: (restaurantId: string, item: RestaurantMenuItem) => boolean;
@@ -3312,8 +3331,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ? 'Google Play Billing'
             : 'ABA KHQR (Authorized)');
 
-        // Never charge without explicit consent or if payment authorization was revoked
-        if (!u.autoRenewConsentAt || u.autoRenewFailureReason === 'PAYMENT_METHOD_DECLINED_TEST') {
+        // Stop automatic renewal if explicitly cancelled by user or if payment method failed
+        if (
+          u.autoRenew === false ||
+          Boolean(u.autoRenewCancelledAt) ||
+          u.autoRenewFailureReason === 'PAYMENT_METHOD_DECLINED_TEST'
+        ) {
+          if (u.autoRenew === false || Boolean(u.autoRenewCancelledAt)) {
+            return { renewedUser: u, success: false };
+          }
           const failReasonKh = 'ការទូទាត់ស្វ័យប្រវត្តិមិនអាចដំណើរការបានទេ។ សូមពិនិត្យមធ្យោបាយទូទាត់ ហើយព្យាយាមម្តងទៀត។';
           const failReasonEn = 'Automatic payment could not be processed. Please check your payment method and retry.';
           const failEntry = {
@@ -3471,8 +3497,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const expiryMs = parseSafeDateMs(expiryStr);
         const hasValidFutureExpiry = expiryMs > nowMs;
         const hasExplicitAutoRenew = Boolean(
-          u.autoRenew &&
-            u.autoRenewConsentAt &&
+          u.autoRenew !== false &&
+            !u.autoRenewCancelledAt &&
             u.subscriptionStatus !== 'cancelled' &&
             u.paymentStatus !== 'cancelled'
         );
@@ -3586,7 +3612,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ) {
           const remainingDays = Math.max(0, Math.ceil((expiryMs - nowMs) / (1000 * 60 * 60 * 24)));
 
-          // If Auto-Renew is enabled and within 24 hours before expiration (remainingDays <= 1), renew automatically before expiry!
+          // If Auto-Renew is active and within 24 hours before expiration (remainingDays <= 1), renew automatically before expiry without prompting!
           if (hasExplicitAutoRenew && remainingDays <= 1 && u.autoRenewLastStatus !== 'failed') {
             const cycleKey = `${u.id}_${expiryStr}`;
             if (!autoRenewCycleLog[cycleKey]) {
@@ -3594,58 +3620,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               autoRenewCycleLogChanged = true;
               const arRes = processAutoRenewalForAccount(u, expiryStr);
               return { updatedUser: arRes.renewedUser, changed: true };
-            }
-          }
-
-          if (remainingDays >= 1 && remainingDays <= 3) {
-            const reminderKey = `${u.id}_${todayStr}_day${remainingDays}`;
-            if (!reminderLog[reminderKey]) {
-              reminderLog[reminderKey] = new Date(nowMs).toISOString();
-              reminderLogChanged = true;
-              const expDateFormatted = expiryStr!.split('T')[0];
-
-              if (hasExplicitAutoRenew) {
-                const dynamicPlans = getDynamicVipPlans(appSettingsRef.current);
-                const planKey: 'quarterly' | 'annual' =
-                  u.autoRenewPlanId === 'annual' || u.vipPlanType === 'annual' ? 'annual' : 'quarterly';
-                const plan = dynamicPlans[planKey] || dynamicPlans.quarterly;
-                const authLabel = u.autoRenewPaymentLabel || u.autoRenewPaymentMethod || 'ABA KHQR';
-
-                newNotificationsToPush.push({
-                  id: `notif-vip-autorenew-rem-${u.id}-${todayStr}-d${remainingDays}`,
-                  titleKh: `ជូនដំណឹង៖ VIP នឹងបន្តដោយស្វ័យប្រវត្តិក្នុងរយៈពេល ${remainingDays} ថ្ងៃទៀត`,
-                  titleEn: `Upcoming Auto-Renewal in ${remainingDays} Day${remainingDays > 1 ? 's' : ''}`,
-                  messageKh: `សមាជិកភាព VIP របស់អ្នកនឹងបន្តដោយស្វ័យប្រវត្តិ (${plan.durationDays} ថ្ងៃ / $${plan.priceUsd.toFixed(2)} USD) តាមរយៈ ${authLabel} មុនថ្ងៃផុតកំណត់ (${expDateFormatted})។ អ្នកអាចបិទ Auto-Renew បានគ្រប់ពេលនៅក្នុងគណនី។`,
-                  messageEn: `Your VIP membership will automatically renew (${plan.durationDays} days / $${plan.priceUsd.toFixed(2)} USD) via ${authLabel} before ${expDateFormatted}. You can cancel Auto-Renew anytime in your Profile.`,
-                  type: 'system',
-                  date: todayStr,
-                  isRead: false,
-                });
-              } else {
-                newNotificationsToPush.push({
-                  id: `notif-vip-reminder-${u.id}-${todayStr}-d${remainingDays}`,
-                  titleKh: `⏰ រំលឹក៖ គណនី VIP នឹងផុតកំណត់ក្នុងរយៈពេល ${remainingDays} ថ្ងៃទៀត!`,
-                  titleEn: `⏰ Reminder: VIP Expires in ${remainingDays} Day${remainingDays > 1 ? 's' : ''}!`,
-                  messageKh: `គណនី VIP របស់អ្នក («${u.name}») នឹងផុតកំណត់នៅថ្ងៃទី ${expDateFormatted} (នៅសល់ ${remainingDays} ថ្ងៃទៀត)។ សូមបន្តសមាជិកភាព VIP ឱ្យទាន់ពេល ដើម្បីរក្សាអត្ថប្រយោជន៍ហាង VIP របស់អ្នក!`,
-                  messageEn: `Your VIP account ("${u.name}") expires on ${expDateFormatted} (${remainingDays} day${remainingDays > 1 ? 's' : ''} remaining). Please renew before expiration to keep your VIP benefits!`,
-                  type: 'system',
-                  date: todayStr,
-                  isRead: false,
-                });
-              }
-
-              if (currentUser?.id === u.id) {
-                showToast(
-                  hasExplicitAutoRenew
-                    ? language === 'km'
-                      ? `ជូនដំណឹង៖ គណនី VIP របស់អ្នកនឹងបន្តស្វ័យប្រវត្តិមុនថ្ងៃទី ${expDateFormatted}`
-                      : `Notice: Your VIP membership will auto-renew before ${expDateFormatted}`
-                    : language === 'km'
-                    ? `⏰ រំលឹកប្រចាំថ្ងៃ៖ គណនី VIP របស់អ្នកនៅសល់ ${remainingDays} ថ្ងៃទៀត (ផុតកំណត់៖ ${expDateFormatted})!`
-                    : `⏰ Daily Reminder: Your VIP account has ${remainingDays} day(s) left (Expires: ${expDateFormatted})!`,
-                  hasExplicitAutoRenew ? 'info' : 'warning'
-                );
-              }
             }
           }
         }
@@ -5404,6 +5378,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       paymentStatus: 'verified',
       paymentMethod: resolvedMethod,
       transactionRef: resolvedRef,
+      autoRenew:
+        params.extraFields?.autoRenew !== undefined
+          ? params.extraFields.autoRenew
+          : existing?.autoRenew === false && existing?.autoRenewCancelledAt
+          ? false
+          : true,
+      autoRenewPlanId:
+        params.extraFields?.autoRenewPlanId ||
+        (resolvedPlanType === 'annual' ? 'annual' : 'quarterly'),
+      autoRenewPaymentMethod:
+        params.extraFields?.autoRenewPaymentMethod ||
+        (resolvedMethod === 'Bakong' || resolvedMethod === 'Card' || resolvedMethod === 'GooglePlayBilling'
+          ? resolvedMethod
+          : 'KHQR'),
+      autoRenewPaymentLabel:
+        params.extraFields?.autoRenewPaymentLabel ||
+        existing?.autoRenewPaymentLabel ||
+        'ABA KHQR (Authorized)',
+      autoRenewConsentAt:
+        params.extraFields?.autoRenewConsentAt ||
+        existing?.autoRenewConsentAt ||
+        nowIso,
+      autoRenewCancelledAt:
+        params.extraFields?.autoRenew === false
+          ? params.extraFields?.autoRenewCancelledAt || existing?.autoRenewCancelledAt || nowIso
+          : existing?.autoRenew === false && existing?.autoRenewCancelledAt && params.extraFields?.autoRenew === undefined
+          ? existing.autoRenewCancelledAt
+          : undefined,
+      autoRenewLastStatus: params.extraFields?.autoRenewLastStatus || existing?.autoRenewLastStatus || 'idle',
+      autoRenewFailureReason: undefined,
+      autoRenewUpdatedAt: nowIso,
       lastActiveAt: nowIso,
       legacyIds: legacySet.size > 0 ? Array.from(legacySet) : undefined,
       ...(params.extraFields || {}),
@@ -7317,6 +7322,115 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return getUserStoreQuotaSummary(targetUser, restaurants, transactions, appSettings);
   };
 
+  // Helper: Normalize shop/hotel name for duplicate detection
+  const normalizeListingNameForDuplicateCheck = (raw?: string): string => {
+    if (!raw) return '';
+    return raw
+      .toLowerCase()
+      .replace(/[\u200B-\u200D\uFEFF]/g, '')
+      .replace(/^(ភោជនីយដ្ឋាន|ហាងអាហារ|ហាងបាយ|ហាងកាហ្វេ|ហាងមី|ហាងគុយទាវ|ហាង|សណ្ឋាគារ|រីសត|ផ្ទះសំណាក់|បឹងហ្គាឡូ|restaurant|hotel|resort|guesthouse|cafe|shop)\s+/gi, '')
+      .replace(/[\s\-_.,()[\]'"«»៖។!@#$%^&*+/\\|]+/g, ' ')
+      .trim();
+  };
+
+  // Detect duplicate or existing shops/hotels in the database by name, phone, Google Place ID, or GPS proximity
+  const findDuplicateOrExistingListings = (candidate: {
+    nameKh?: string;
+    nameEn?: string;
+    phone?: string;
+    mapUrl?: string;
+    googlePlaceId?: string;
+    latitude?: number | null;
+    longitude?: number | null;
+    provinceKh?: string;
+    businessType?: 'restaurant' | 'hotel';
+    excludeId?: string;
+  }): Restaurant[] => {
+    const normKh = normalizeListingNameForDuplicateCheck(candidate.nameKh);
+    const normEn = normalizeListingNameForDuplicateCheck(candidate.nameEn);
+    const rawKh = (candidate.nameKh || '').trim().toLowerCase();
+    const rawEn = (candidate.nameEn || '').trim().toLowerCase();
+    const cleanPhone = (candidate.phone || '').replace(/[\s\-+()]/g, '');
+    const candPlaceId = (candidate.googlePlaceId || '').trim();
+    const candLat = typeof candidate.latitude === 'number' && !Number.isNaN(candidate.latitude) ? candidate.latitude : null;
+    const candLng = typeof candidate.longitude === 'number' && !Number.isNaN(candidate.longitude) ? candidate.longitude : null;
+    const hasValidCandCoords = candLat !== null && candLng !== null && isValidCambodiaCoordinates(candLat, candLng);
+
+    if (normKh.length < 2 && normEn.length < 2 && cleanPhone.length < 7 && !candPlaceId && !hasValidCandCoords) {
+      return [];
+    }
+
+    const scored: Array<{ rest: Restaurant; score: number }> = [];
+
+    for (const r of restaurants) {
+      if (!r || r.status === 'rejected') continue;
+      if (candidate.excludeId && r.id === candidate.excludeId) continue;
+
+      let score = 0;
+      const rPlaceId = (r.googlePlaceId || r.googleMapsMeta?.placeId || '').trim();
+      if (candPlaceId && rPlaceId && candPlaceId === rPlaceId) {
+        score += 100;
+      }
+
+      const rNormKh = normalizeListingNameForDuplicateCheck(r.nameKh);
+      const rNormEn = normalizeListingNameForDuplicateCheck(r.nameEn);
+      const rRawKh = (r.nameKh || '').trim().toLowerCase();
+      const rRawEn = (r.nameEn || '').trim().toLowerCase();
+
+      const exactKh =
+        (rawKh.length >= 3 && rRawKh === rawKh) ||
+        (normKh.length >= 3 && rNormKh === normKh);
+      const exactEn =
+        (rawEn.length >= 3 && rRawEn === rawEn) ||
+        (normEn.length >= 3 && rNormEn === normEn);
+
+      if (exactKh || exactEn) {
+        score += 85;
+        if (!candidate.provinceKh || !r.provinceKh || r.provinceKh === candidate.provinceKh) {
+          score += 15;
+        }
+      } else {
+        const subKh =
+          normKh.length >= 4 &&
+          rNormKh.length >= 4 &&
+          (rNormKh.includes(normKh) || normKh.includes(rNormKh));
+        const subEn =
+          normEn.length >= 4 &&
+          rNormEn.length >= 4 &&
+          (rNormEn.includes(normEn) || normEn.includes(rNormEn));
+        if (subKh || subEn) {
+          score += 55;
+          if (candidate.provinceKh && r.provinceKh === candidate.provinceKh) {
+            score += 15;
+          }
+        }
+      }
+
+      const rPhone = (r.phone || '').replace(/[\s\-+()]/g, '');
+      if (cleanPhone.length >= 8 && rPhone.length >= 8 && (rPhone === cleanPhone || rPhone.endsWith(cleanPhone.slice(-8)))) {
+        score += 65;
+      }
+
+      if (hasValidCandCoords && isValidCambodiaCoordinates(r.latitude, r.longitude)) {
+        const dLat = Math.abs(r.latitude - candLat!);
+        const dLng = Math.abs(r.longitude - candLng!);
+        // Within ~90m and has any name/phone overlap or exact coordinates
+        if (dLat < 0.0008 && dLng < 0.0008) {
+          if (score > 0 || (dLat < 0.0002 && dLng < 0.0002)) {
+            score += 50;
+          }
+        }
+      }
+
+      if (score >= 60) {
+        scored.push({ rest: r, score });
+      }
+    }
+
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, 8).map((item) => item.rest);
+  };
+
   // Restaurant CRUD (Supports Free 1st VIP Store, Free Replace of Existing Store, and Paid $10 Additional Stores)
   const addRestaurant = (
     restData: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { id?: string; status?: 'approved' | 'pending' | 'rejected' },
@@ -7362,30 +7476,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const quota = getUserStoreQuotaSummary(currentUser, restaurants, transactions, appSettings);
     const replaceTargetId = options?.replaceRestaurantId?.trim();
 
-    // Prevent duplicate shop entries by checking existing records using Google Place ID
+    // Prevent duplicate shop/hotel entries by checking existing records by Google Place ID, Name, Phone, and GPS
     const candidatePlaceId = (restData.googlePlaceId || restData.googleMapsMeta?.placeId || '').trim();
-    if (candidatePlaceId) {
-      const existingByPlaceId = restaurants.find(
-        r =>
-          r.id !== replaceTargetId &&
-          (r.googlePlaceId === candidatePlaceId ||
-            r.googleMapsMeta?.placeId === candidatePlaceId ||
-            r.id === `gplace-${candidatePlaceId}`)
-      );
-      if (existingByPlaceId) {
+    if (!replaceTargetId) {
+      const detectedDuplicates = findDuplicateOrExistingListings({
+        nameKh: restData.nameKh,
+        nameEn: restData.nameEn,
+        phone: restData.phone,
+        mapUrl: restData.mapUrl,
+        googlePlaceId: candidatePlaceId,
+        latitude: restData.latitude,
+        longitude: restData.longitude,
+        provinceKh: restData.provinceKh,
+        businessType: restData.businessType,
+      });
+      const exactMatch = detectedDuplicates.find((existing) => {
+        const exPlaceId = (existing.googlePlaceId || existing.googleMapsMeta?.placeId || '').trim();
+        if (candidatePlaceId && exPlaceId && candidatePlaceId === exPlaceId) return true;
+        const nKhA = normalizeListingNameForDuplicateCheck(restData.nameKh);
+        const nKhB = normalizeListingNameForDuplicateCheck(existing.nameKh);
+        const nEnA = normalizeListingNameForDuplicateCheck(restData.nameEn);
+        const nEnB = normalizeListingNameForDuplicateCheck(existing.nameEn);
+        const sameName =
+          (nKhA.length >= 3 && nKhA === nKhB) ||
+          (nEnA.length >= 3 && nEnA === nEnB);
+        const sameProvince = !restData.provinceKh || !existing.provinceKh || restData.provinceKh === existing.provinceKh;
+        return sameName && sameProvince;
+      });
+      if (exactMatch) {
         showToast(
           language === 'km'
-            ? `⚠️ ហាង «${existingByPlaceId.nameKh || existingByPlaceId.nameEn}» មានក្នុងប្រព័ន្ធរួចហើយ (Google Place ID ដូចគ្នា)!`
-            : language === 'zh'
-            ? `⚠️ 店铺“${existingByPlaceId.nameEn || existingByPlaceId.nameKh}”已存在（相同的 Google Place ID）！`
-            : `⚠️ "${existingByPlaceId.nameEn || existingByPlaceId.nameKh}" is already registered with this Google Place ID!`,
+            ? `⚠️ «${exactMatch.nameKh || exactMatch.nameEn}» មានក្នុងប្រព័ន្ធរួចហើយ! សូមជ្រើសរើសហាង/សណ្ឋាគារដែលមានស្រាប់នេះ ហើយដាក់ស្នើដំឡើង (Upgrade Existing Shop / Hotel) ជំនួសការបង្កើតស្ទួន។`
+            : `⚠️ "${exactMatch.nameEn || exactMatch.nameKh}" already exists! Please select the existing listing and submit an Upgrade Request instead of creating a duplicate.`,
           'warning'
         );
         return null;
       }
     }
     const targetToReplace = replaceTargetId
-      ? restaurants.find(r => r.id === replaceTargetId && !isSeedRestaurantId(r.id))
+      ? restaurants.find(r => r.id === replaceTargetId)
       : undefined;
 
     if (replaceTargetId) {
@@ -7448,7 +7577,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const foodImgs: string[] = [];
 
     const isPendingPayment = !isAdmin && restData.paymentStatus === 'pending_verification';
-    const isPendingManualReview = !isAdmin && !isApprovedVip && !targetToReplace;
+    const isPendingManualReview = !isAdmin && !targetToReplace;
     const finalStatus: 'approved' | 'pending' | 'rejected' =
       isPendingPayment || isPendingManualReview
         ? 'pending'
@@ -7537,55 +7666,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSelectedRestaurant(newRest);
     }
 
-    // Automatically retrieve corresponding shop photo from Google Maps by Name + GPS if no photo was provided
-    if (!profileImg) {
-      fetchVerifiedShopPhotoFromGoogleMaps(newRest, restaurants)
-        .then((match) => {
-          if (!match || !match.photoUrl) return;
-          const updatedAtIso = new Date().toISOString();
-          setRestaurants((prev) => {
-            const target = prev.find((r) => r.id === newRest.id);
-            if (!target || target.photoUrl) return prev;
-            const resolvedLat = isValidCambodiaCoordinates(target.latitude, target.longitude)
-              ? target.latitude
-              : match.matchedLat && isValidCambodiaCoordinates(match.matchedLat, match.matchedLng || 0)
-              ? match.matchedLat
-              : target.latitude;
-            const resolvedLng = isValidCambodiaCoordinates(target.latitude, target.longitude)
-              ? target.longitude
-              : match.matchedLng && isValidCambodiaCoordinates(match.matchedLat || 0, match.matchedLng)
-              ? match.matchedLng
-              : target.longitude;
-            const resolvedGpid =
-              target.googlePlaceId ||
-              (isValidOfficialGooglePlaceId(match.matchedPlaceId) ? match.matchedPlaceId : undefined);
-            const coordsNowValid = isValidCambodiaCoordinates(resolvedLat, resolvedLng);
-
-            const enrichedRest: Restaurant = normalizeRestaurant({
-              ...target,
-              photoUrl: match.photoUrl,
-              profileImage: match.photoUrl,
-              galleryPhotos: match.galleryPhotos.length > 0 ? match.galleryPhotos : [match.photoUrl],
-              latitude: coordsNowValid ? resolvedLat : target.latitude,
-              longitude: coordsNowValid ? resolvedLng : target.longitude,
-              googlePlaceId: resolvedGpid,
-              mapUrl: coordsNowValid ? buildCanonicalGoogleMapsPinUrl(resolvedLat, resolvedLng, resolvedGpid) : target.mapUrl,
-              locationVerificationStatus: coordsNowValid ? 'verified' : target.locationVerificationStatus,
-              locationNeedsReview: !coordsNowValid,
-              locationVerifiedAt: coordsNowValid ? updatedAtIso : target.locationVerifiedAt,
-              photoUpdatedAt: updatedAtIso,
-              updatedAt: updatedAtIso,
-            });
-            recordPermanentRestaurantOverride(enrichedRest);
-            const nextList = prev.map((r) => (r.id === newRest.id ? enrichedRest : r));
-            latestSyncStateRef.current.restaurants = nextList;
-            writeRestaurantsToStorageImmediate(nextList);
-            return nextList;
-          });
-        })
-        .catch(() => {});
-    }
-
     if (isPendingManualReview) {
       showToast(
         language === 'km'
@@ -7629,8 +7709,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const userEmailLower = (targetUser.email || '').trim().toLowerCase();
     const userPhoneClean = (targetUser.phone || '').replace(/[\s-+]/g, '');
     const matched = restaurants.filter(r => {
+      if (
+        r.pendingUpgradeRequest?.status === 'pending' &&
+        r.pendingUpgradeRequest.submittedByUserId &&
+        userIdSet.has(r.pendingUpgradeRequest.submittedByUserId)
+      ) {
+        return true;
+      }
       // Never match seed demo shop rest-19 ('owner-1') unless the user's id is literally 'owner-1'
-      if (isSeedRestaurantId(r.id) && r.ownerId !== targetUser.id) return false;
+      if (isSeedRestaurantId(r.id) && (!r.ownerId || r.ownerId === 'owner-1') && r.ownerId !== targetUser.id) return false;
       if (r.ownerId && userIdSet.has(r.ownerId)) return true;
       if (userEmailLower && r.ownerEmail && r.ownerEmail.trim().toLowerCase() === userEmailLower) return true;
       if (
@@ -8793,11 +8880,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   /**
-   * Best-effort: copy an Admin-approved Google Places photo into permanent Supabase Storage so the
-   * shop thumbnail never expires or depends on the Google API key. Keeps the Google URL if copying fails.
+   * Copy an Admin-approved non-Google-Maps photo into permanent Supabase Storage.
+   * Never downloads or re-hosts Google Maps (`places.googleapis.com` / `googleusercontent.com`) images
+   * to comply 100% with Google Maps Platform Terms of Service.
    */
   const makeShopPhotoPermanent = async (restaurantId: string, remoteUrl: string) => {
-    if (!isSupabaseConfigured() || !remoteUrl.startsWith('http')) return;
+    if (
+      !isSupabaseConfigured() ||
+      !remoteUrl.startsWith('http') ||
+      remoteUrl.includes('places.googleapis.com') ||
+      remoteUrl.includes('googleusercontent.com')
+    ) {
+      return;
+    }
     try {
       const res = await fetch(remoteUrl);
       if (!res.ok) return;
@@ -9121,6 +9216,368 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       language === 'km'
         ? `🚫 បានបដិសេធរូបភាពថ្មី និងរក្សារូបភាពដើមរបស់ហាង «${targetRest.nameKh}» ដដែល!`
         : `🚫 Rejected replacement photo and kept original photo for "${targetRest.nameEn || targetRest.nameKh}"!`,
+      'info'
+    );
+  };
+
+  // ============================================================================
+  // Upgrade Existing Shop / Hotel Workflow (VIP User -> Admin Review -> Publish)
+  // ============================================================================
+  const submitExistingListingUpgradeRequest = (
+    targetRestaurantId: string,
+    proposedChanges: PendingListingUpgradeRequest['proposedChanges']
+  ): Restaurant | null => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return null;
+    }
+
+    const isAdmin =
+      currentUser.role === 'admin' ||
+      currentUser.id === 'admin-authorized-single' ||
+      currentUser.username === 'admin' ||
+      currentUser.username === 'cheasavuth';
+    const isApprovedVip = isUserVipActive(currentUser);
+
+    if (!isAdmin && !isApprovedVip) {
+      showToast(
+        language === 'km'
+          ? '🔒 មានតែសមាជិក VIP សកម្មប៉ុណ្ណោះដែលអាចស្នើដំឡើង និងកែប្រែហាង/សណ្ឋាគារដែលមានស្រាប់បាន!'
+          : '🔒 Only active VIP members can submit an upgrade request for an existing shop or hotel!',
+        'warning'
+      );
+      openUpgradeVipModal();
+      return null;
+    }
+
+    const targetRest = restaurants.find((r) => r.id === targetRestaurantId);
+    if (!targetRest) {
+      showToast(
+        language === 'km'
+          ? '⚠️ រកមិនឃើញហាង ឬសណ្ឋាគារដែលអ្នកបានជ្រើសរើសទេ!'
+          : '⚠️ Could not find the selected shop or hotel!',
+        'warning'
+      );
+      return null;
+    }
+
+    const nowIso = new Date().toISOString();
+    const todayStr = nowIso.split('T')[0];
+    const cleanProposedPhoto = proposedChanges.photoUrl || proposedChanges.profileImage || '';
+    const sanitizedPhoto = cleanProposedPhoto
+      ? sanitizeVerifiedShopPhotoUrl(targetRest.id, cleanProposedPhoto) || cleanProposedPhoto
+      : undefined;
+
+    // If Admin submits directly, apply & publish immediately
+    if (isAdmin) {
+      const nextPhoto = sanitizedPhoto || targetRest.photoUrl;
+      const updatedAdminRest: Restaurant = normalizeRestaurant({
+        ...targetRest,
+        ...proposedChanges,
+        photoUrl: nextPhoto,
+        profileImage: sanitizedPhoto || targetRest.profileImage || nextPhoto,
+        galleryPhotos:
+          Array.isArray(proposedChanges.galleryPhotos) && proposedChanges.galleryPhotos.length > 0
+            ? proposedChanges.galleryPhotos
+            : [nextPhoto].filter(Boolean),
+        status: 'approved',
+        isVerified: true,
+        isPromoted: true,
+        membershipTier: 'premium',
+        pendingUpgradeRequest: undefined,
+        isAdminEdited: true,
+        adminEditedAt: nowIso,
+        updatedAt: nowIso,
+      });
+      lastLocalRestaurantEditAtRef.current = Date.now();
+      recordPermanentRestaurantOverride(updatedAdminRest);
+      setRestaurants((prev) => {
+        const next = prev.map((r) => (r.id === targetRest.id ? updatedAdminRest : r));
+        latestSyncStateRef.current.restaurants = next;
+        writeRestaurantsToStorageImmediate(next);
+        if (isSupabaseConfigured()) {
+          try {
+            pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id)));
+          } catch {}
+        }
+        return next;
+      });
+      if (selectedRestaurant?.id === targetRest.id) setSelectedRestaurant(updatedAdminRest);
+      if (managingRestaurant?.id === targetRest.id) setManagingRestaurant(updatedAdminRest);
+      showToast(
+        language === 'km'
+          ? `✅ បានដំឡើង និងផ្សព្វផ្សាយព័ត៌មានថ្មីសម្រាប់ «${updatedAdminRest.nameKh}» រួចរាល់!`
+          : `✅ Upgraded and published changes for "${updatedAdminRest.nameEn || updatedAdminRest.nameKh}"!`,
+        'success'
+      );
+      return updatedAdminRest;
+    }
+
+    // VIP User: Store proposed changes in `pendingUpgradeRequest` awaiting Admin approval before publishing
+    const upgradeReq: PendingListingUpgradeRequest = {
+      id: `upg-req-${targetRest.id}-${Date.now()}`,
+      status: 'pending',
+      submittedAt: nowIso,
+      submittedByUserId: currentUser.id,
+      submittedByName: currentUser.name,
+      submittedByEmail: currentUser.email,
+      submittedByPhone: proposedChanges.phone || currentUser.phone,
+      proposedChanges: {
+        ...proposedChanges,
+        photoUrl: sanitizedPhoto || proposedChanges.photoUrl,
+        profileImage: sanitizedPhoto || proposedChanges.profileImage,
+      },
+    };
+
+    const updatedRestWithPendingUpgrade: Restaurant = normalizeRestaurant({
+      ...targetRest,
+      pendingUpgradeRequest: upgradeReq,
+      updatedAt: nowIso,
+    });
+
+    lastLocalRestaurantEditAtRef.current = Date.now();
+    recordPermanentRestaurantOverride(updatedRestWithPendingUpgrade);
+    setActiveManagedShopId(updatedRestWithPendingUpgrade.id);
+    setManagingRestaurantState(updatedRestWithPendingUpgrade);
+
+    setRestaurants((prev) => {
+      const next = prev.map((r) => (r.id === targetRest.id ? updatedRestWithPendingUpgrade : r));
+      latestSyncStateRef.current.restaurants = next;
+      writeRestaurantsToStorageImmediate(next);
+      if (isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
+
+    if (selectedRestaurant?.id === targetRest.id) {
+      setSelectedRestaurant(updatedRestWithPendingUpgrade);
+    }
+
+    const listingLabel = targetRest.nameKh || targetRest.nameEn;
+    setNotifications((prev) => [
+      {
+        id: `notif-admin-upgrade-req-${targetRest.id}-${Date.now()}`,
+        titleKh: `⬆️ សំណើដំឡើងហាង/សណ្ឋាគារដែលមានស្រាប់៖ ${listingLabel}`,
+        titleEn: `⬆️ Existing Listing Upgrade Request: ${targetRest.nameEn || targetRest.nameKh}`,
+        messageKh: `សមាជិក VIP «${currentUser.name}» បានដាក់សំណើដំឡើង និងកែប្រែព័ត៌មានសម្រាប់ «${listingLabel}»។ សូមរដ្ឋបាល (Admin) ពិនិត្យ និងអនុម័តមុនពេលផ្សព្វផ្សាយ។`,
+        messageEn: `VIP member "${currentUser.name}" submitted an upgrade request for "${targetRest.nameEn || targetRest.nameKh}". Please review and approve in Admin Dashboard before publishing.`,
+        type: 'system',
+        targetId: targetRest.id,
+        targetType: 'restaurant',
+        date: todayStr,
+        isRead: false,
+        createdAt: nowIso,
+      },
+      ...prev,
+    ]);
+
+    showToast(
+      language === 'km'
+        ? `✅ សំណើដំឡើង «${listingLabel}» ត្រូវបានបញ្ជូនជោគជ័យ! រង់ចាំការអនុម័តពីរដ្ឋបាល (Admin) មុនពេលផ្សព្វផ្សាយជាសាធារណៈ។`
+        : `✅ Upgrade request for "${targetRest.nameEn || targetRest.nameKh}" submitted! Changes will be published after Admin approval.`,
+      'success'
+    );
+    return updatedRestWithPendingUpgrade;
+  };
+
+  const approveListingUpgradeRequest = (restaurantId: string) => {
+    const targetRest = restaurants.find((r) => r.id === restaurantId);
+    if (!targetRest || !targetRest.pendingUpgradeRequest) return;
+
+    const req = targetRest.pendingUpgradeRequest;
+    const ch = req.proposedChanges || {};
+    const nowIso = new Date().toISOString();
+    const todayStr = nowIso.split('T')[0];
+    const rotationCfg = getVipFeaturedRotationConfig(appSettings);
+    const featuredUntilIso = new Date(Date.now() + rotationCfg.durationMs).toISOString();
+    const expiryIso =
+      targetRest.membershipExpiresAt ||
+      new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
+
+    const nextPhoto =
+      (ch.photoUrl && sanitizeVerifiedShopPhotoUrl(targetRest.id, ch.photoUrl)) ||
+      ch.photoUrl ||
+      targetRest.photoUrl;
+    const nextProfile =
+      (ch.profileImage && sanitizeVerifiedShopPhotoUrl(targetRest.id, ch.profileImage)) ||
+      ch.profileImage ||
+      nextPhoto ||
+      targetRest.profileImage;
+    const nextGallery =
+      Array.isArray(ch.galleryPhotos) && ch.galleryPhotos.length > 0
+        ? Array.from(new Set([nextPhoto, ...ch.galleryPhotos])).filter(Boolean)
+        : Array.from(new Set([nextPhoto, ...(targetRest.galleryPhotos || [])])).filter(Boolean);
+
+    const hasProposedCoords =
+      typeof ch.latitude === 'number' &&
+      typeof ch.longitude === 'number' &&
+      isValidCambodiaCoordinates(ch.latitude, ch.longitude);
+
+    const approvedRest: Restaurant = normalizeRestaurant({
+      ...targetRest,
+      businessType: ch.businessType || targetRest.businessType,
+      nameKh: ch.nameKh?.trim() || targetRest.nameKh,
+      nameEn: ch.nameEn?.trim() || targetRest.nameEn,
+      descriptionKh: ch.descriptionKh?.trim() || targetRest.descriptionKh,
+      descriptionEn: ch.descriptionEn?.trim() || targetRest.descriptionEn,
+      photoUrl: nextPhoto,
+      profileImage: nextProfile,
+      galleryPhotos: nextGallery,
+      phone: ch.phone !== undefined ? ch.phone.trim() : targetRest.phone,
+      addressKh: ch.addressKh?.trim() || targetRest.addressKh,
+      addressEn: ch.addressEn?.trim() || targetRest.addressEn,
+      provinceKh: ch.provinceKh?.trim() || targetRest.provinceKh,
+      provinceEn: ch.provinceEn?.trim() || targetRest.provinceEn,
+      openingHoursKh: ch.openingHoursKh?.trim() || targetRest.openingHoursKh,
+      openingHoursEn: ch.openingHoursEn?.trim() || targetRest.openingHoursEn,
+      priceLevel: ch.priceLevel || targetRest.priceLevel,
+      mapUrl: ch.mapUrl?.trim() || targetRest.mapUrl,
+      latitude: hasProposedCoords ? ch.latitude! : targetRest.latitude,
+      longitude: hasProposedCoords ? ch.longitude! : targetRest.longitude,
+      businessCategory: ch.businessCategory || targetRest.businessCategory,
+      categoryKh: ch.categoryKh || targetRest.categoryKh,
+      categoryEn: ch.categoryEn || targetRest.categoryEn,
+      websiteUrl: ch.websiteUrl !== undefined ? ch.websiteUrl : targetRest.websiteUrl,
+      facebookUrl: ch.facebookUrl !== undefined ? ch.facebookUrl : targetRest.facebookUrl,
+      telegramUrl: ch.telegramUrl !== undefined ? ch.telegramUrl : targetRest.telegramUrl,
+      promoVideoUrl: ch.promoVideoUrl !== undefined ? ch.promoVideoUrl : targetRest.promoVideoUrl,
+      signatureDishesKh:
+        Array.isArray(ch.signatureDishesKh) && ch.signatureDishesKh.length > 0
+          ? ch.signatureDishesKh
+          : targetRest.signatureDishesKh,
+      ownerId: req.submittedByUserId || targetRest.ownerId,
+      ownerName: req.submittedByName || targetRest.ownerName,
+      ownerEmail: req.submittedByEmail || targetRest.ownerEmail,
+      ownerPhone: req.submittedByPhone || ch.phone || targetRest.ownerPhone,
+      status: 'approved',
+      isVerified: true,
+      isPromoted: true,
+      membershipTier: 'premium',
+      membershipExpiresAt: expiryIso,
+      paymentStatus: 'verified',
+      approvedAt: nowIso,
+      featuredFromAt: nowIso,
+      featuredUntilAt: featuredUntilIso,
+      dataSource: 'vip_owner',
+      isAdminEdited: true,
+      adminEditedAt: nowIso,
+      photoUpdatedAt: nowIso,
+      updatedAt: nowIso,
+      pendingUpgradeRequest: {
+        ...req,
+        status: 'approved',
+        reviewedAt: nowIso,
+        reviewedBy: currentUser?.name || 'Administrator',
+      },
+    });
+
+    lastLocalRestaurantEditAtRef.current = Date.now();
+    recordPermanentRestaurantOverride(approvedRest);
+    setRestaurants((prev) => {
+      const next = prev.map((r) => (r.id === restaurantId ? approvedRest : r));
+      latestSyncStateRef.current.restaurants = next;
+      writeRestaurantsToStorageImmediate(next);
+      if (isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
+    if (selectedRestaurant?.id === restaurantId) setSelectedRestaurant(approvedRest);
+    if (managingRestaurant?.id === restaurantId) setManagingRestaurant(approvedRest);
+
+    setNotifications((prev) => [
+      {
+        id: `notif-upgrade-approved-${restaurantId}-${Date.now()}`,
+        titleKh: `✅ សំណើដំឡើងហាង/សណ្ឋាគារត្រូវបានអនុម័ត៖ ${approvedRest.nameKh}`,
+        titleEn: `✅ Listing Upgrade Approved: ${approvedRest.nameEn || approvedRest.nameKh}`,
+        messageKh: `រដ្ឋបាល (Admin) បានអនុម័តសំណើដំឡើង និងកែប្រែព័ត៌មានសម្រាប់ «${approvedRest.nameKh}» រួចរាល់! ព័ត៌មានថ្មីត្រូវបានដាក់បង្ហាញជាសាធារណៈ។`,
+        messageEn: `Admin approved your upgrade request for "${approvedRest.nameEn || approvedRest.nameKh}". Your updated photos, description, and contact info are now live!`,
+        type: 'system',
+        targetId: restaurantId,
+        targetType: 'restaurant',
+        imageUrl: approvedRest.photoUrl,
+        date: todayStr,
+        isRead: false,
+        createdAt: nowIso,
+      },
+      ...prev,
+    ]);
+
+    showToast(
+      language === 'km'
+        ? `✅ បានអនុម័តការដំឡើង និងផ្សព្វផ្សាយព័ត៌មានថ្មីសម្រាប់ «${approvedRest.nameKh}» ជោគជ័យ!`
+        : `✅ Approved and published upgrade for "${approvedRest.nameEn || approvedRest.nameKh}"!`,
+      'success'
+    );
+  };
+
+  const rejectListingUpgradeRequest = (restaurantId: string, reason?: string) => {
+    const targetRest = restaurants.find((r) => r.id === restaurantId);
+    if (!targetRest || !targetRest.pendingUpgradeRequest) return;
+
+    const nowIso = new Date().toISOString();
+    const todayStr = nowIso.split('T')[0];
+    const req = targetRest.pendingUpgradeRequest;
+    const rejectionNote =
+      reason?.trim() ||
+      (language === 'km'
+        ? 'ព័ត៌មានដែលស្នើកែប្រែមិនគ្រប់គ្រាន់ ឬមិនត្រឹមត្រូវតាមគោលការណ៍ — រក្សាព័ត៌មានដើមដដែល។'
+        : 'Submitted changes did not meet verification requirements — original listing preserved.');
+
+    const rejectedRest: Restaurant = normalizeRestaurant({
+      ...targetRest,
+      pendingUpgradeRequest: {
+        ...req,
+        status: 'rejected',
+        reviewedAt: nowIso,
+        reviewedBy: currentUser?.name || 'Administrator',
+        rejectionReason: rejectionNote,
+      },
+      updatedAt: nowIso,
+    });
+
+    lastLocalRestaurantEditAtRef.current = Date.now();
+    recordPermanentRestaurantOverride(rejectedRest);
+    setRestaurants((prev) => {
+      const next = prev.map((r) => (r.id === restaurantId ? rejectedRest : r));
+      latestSyncStateRef.current.restaurants = next;
+      writeRestaurantsToStorageImmediate(next);
+      if (isSupabaseConfigured()) {
+        try {
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id)));
+        } catch {}
+      }
+      return next;
+    });
+    if (selectedRestaurant?.id === restaurantId) setSelectedRestaurant(rejectedRest);
+    if (managingRestaurant?.id === restaurantId) setManagingRestaurant(rejectedRest);
+
+    setNotifications((prev) => [
+      {
+        id: `notif-upgrade-rejected-${restaurantId}-${Date.now()}`,
+        titleKh: `🚫 សំណើដំឡើងហាង/សណ្ឋាគារត្រូវបានបដិសេធ៖ ${targetRest.nameKh}`,
+        titleEn: `🚫 Listing Upgrade Rejected: ${targetRest.nameEn || targetRest.nameKh}`,
+        messageKh: `សំណើដំឡើងសម្រាប់ «${targetRest.nameKh}» ត្រូវបានបដិសេធដោយ Admin (${rejectionNote})។`,
+        messageEn: `Your upgrade request for "${targetRest.nameEn || targetRest.nameKh}" was rejected by Admin (${rejectionNote}).`,
+        type: 'system',
+        targetId: restaurantId,
+        targetType: 'restaurant',
+        date: todayStr,
+        isRead: false,
+        createdAt: nowIso,
+      },
+      ...prev,
+    ]);
+
+    showToast(
+      language === 'km'
+        ? `🚫 បានបដិសេធសំណើដំឡើងសម្រាប់ «${targetRest.nameKh}» — រក្សាព័ត៌មានដើមដដែល។`
+        : `🚫 Rejected upgrade request for "${targetRest.nameEn || targetRest.nameKh}" — original listing preserved.`,
       'info'
     );
   };
@@ -9501,32 +9958,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         : `✅ Imported "${finalRest.nameEn}" from Google Maps into the app directory!`,
       'success'
     );
-
-    // Automatically retrieve verified shop photo from Google Maps if imported place lacked a real photo
-    if (!hasRealRestImportPhoto) {
-      fetchVerifiedShopPhotoFromGoogleMaps(finalRest, restaurants)
-        .then((match) => {
-          if (!match || !match.photoUrl) return;
-          const updatedAtIso = new Date().toISOString();
-          setRestaurants((prev) => {
-            const target = prev.find((r) => r.id === finalRest.id);
-            if (!target) return prev;
-            const enrichedRest: Restaurant = normalizeRestaurant({
-              ...target,
-              photoUrl: match.photoUrl,
-              profileImage: match.photoUrl,
-              galleryPhotos: match.galleryPhotos.length > 0 ? match.galleryPhotos : [match.photoUrl],
-              photoUpdatedAt: updatedAtIso,
-              updatedAt: updatedAtIso,
-            });
-            recordPermanentRestaurantOverride(enrichedRest);
-            const next = prev.map((r) => (r.id === finalRest.id ? enrichedRest : r));
-            writeRestaurantsToStorageImmediate(next);
-            return next;
-          });
-        })
-        .catch(() => {});
-    }
 
     return { imported: true, duplicate: false, type: 'restaurant', id: finalRest.id, item: finalRest };
   };
@@ -10767,9 +11198,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await mergeAndPushTransactionsToCloud(nextTxns).catch(() => {});
     }
 
-    const hasExplicitAutoRenewOptIn = Boolean(
-      autoRenewAuth?.enabled && autoRenewAuth?.explicitConsent
-    );
+    const hasExplicitAutoRenewOptIn = autoRenewAuth?.enabled !== false;
     const autoRenewMethod = autoRenewAuth?.paymentMethod || 'KHQR';
     const autoRenewLabel =
       autoRenewAuth?.paymentLabel ||
@@ -10792,7 +11221,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           autoRenewFailureReason: undefined,
           autoRenewUpdatedAt: nowIso,
         }
-      : {};
+      : {
+          autoRenew: false,
+          autoRenewCancelledAt: nowIso,
+          autoRenewUpdatedAt: nowIso,
+        };
 
     if (isAutoVerified) {
       persistApprovedVipUserAndCloud({
@@ -10930,18 +11363,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (!options.enabled) {
       return cancelVipAutoRenew();
-    }
-
-    // Never enable or charge without explicit user consent
-    if (!options.explicitConsent && !liveCur.autoRenewConsentAt) {
-      const errMsg = tr(
-        language,
-        'សូមបញ្ជាក់ការយល់ព្រមជាមុនសិន ដើម្បីបើកដំណើរការបន្ត VIP ស្វ័យប្រវត្តិ។',
-        'Explicit consent is required to enable Automatic VIP Renewal.',
-        '需要明确授权同意才能开启 VIP 自动续费。'
-      );
-      showToast(errMsg, 'warning');
-      return { success: false, error: errMsg };
     }
 
     const nowIso = new Date().toISOString();
@@ -12771,6 +13192,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         approveAllPendingShopPhotoReplacements,
         rejectShopPhotoReplacement,
         queueShopPhotoCandidates,
+        findDuplicateOrExistingListings,
+        submitExistingListingUpgradeRequest,
+        approveListingUpgradeRequest,
+        rejectListingUpgradeRequest,
         addRestaurantMenuItem,
         updateRestaurantMenuItem,
         deleteRestaurantMenuItem,

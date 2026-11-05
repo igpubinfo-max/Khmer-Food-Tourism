@@ -59,6 +59,7 @@ export const AdminDashboard: React.FC = () => {
     foods, addFood, updateFood, deleteFood,
     restaurants, deleteRestaurant, approveRestaurant, rejectRestaurant, toggleVerifyRestaurant, bulkVerifyAndEnrichAllRestaurants,
     approveShopPhotoReplacement, approveAllPendingShopPhotoReplacements, rejectShopPhotoReplacement,
+    approveListingUpgradeRequest, rejectListingUpgradeRequest,
     destinations, addDestination, updateDestination, deleteDestination,
     users, deletedUsers, updateUserRole, adminGrantUserVip, cancelUserVip, restoreUserAccess, disableUserAccount, deleteUserAccount, clearAllRegisteredUsers,
     transactions, verifyTransaction, rejectTransaction, requestMorePaymentInfo, deleteTransactions, getAuthorizedPaymentProof,
@@ -2681,6 +2682,95 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Pending Existing Shop / Hotel Upgrade Requests from VIP Users */}
+              {restaurants.some((r) => r.pendingUpgradeRequest?.status === 'pending') && (
+                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <h4 className="font-bold text-amber-950 dark:text-amber-200 font-khmer text-xs sm:text-sm flex items-center gap-1.5">
+                      <span>
+                        ⬆️{' '}
+                        {isKm
+                          ? `សំណើដំឡើង និងកែប្រែហាង/សណ្ឋាគារដែលមានស្រាប់ពីសមាជិក VIP (${
+                              restaurants.filter((r) => r.pendingUpgradeRequest?.status === 'pending').length
+                            })`
+                          : `Pending Existing Shop / Hotel Upgrade Requests (${
+                              restaurants.filter((r) => r.pendingUpgradeRequest?.status === 'pending').length
+                            })`}
+                      </span>
+                    </h4>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px]">
+                      ADMIN APPROVAL REQUIRED
+                    </span>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {restaurants
+                      .filter((r) => r.pendingUpgradeRequest?.status === 'pending')
+                      .map((rest) => {
+                        const upg = rest.pendingUpgradeRequest!;
+                        const ch = upg.proposedChanges || {};
+                        return (
+                          <div
+                            key={`upg-${rest.id}`}
+                            className="p-3.5 rounded-xl bg-white dark:bg-stone-800 border border-amber-300 dark:border-amber-700 space-y-2.5"
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                              <div className="flex items-start gap-3 min-w-0">
+                                <img
+                                  src={ch.photoUrl || rest.photoUrl}
+                                  alt={ch.nameKh || rest.nameKh}
+                                  className="w-14 h-14 rounded-xl object-cover shrink-0 border-2 border-amber-400"
+                                />
+                                <div className="min-w-0 space-y-0.5 font-khmer">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <h5 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
+                                      {ch.nameKh || rest.nameKh} ({ch.nameEn || rest.nameEn})
+                                    </h5>
+                                    <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-[9px] font-bold">
+                                      {isKm ? 'សំណើដំឡើងហាងដែលមានស្រាប់' : 'Existing Listing Upgrade'}
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] text-slate-600 dark:text-slate-300">
+                                    👤 VIP: <b>{upg.submittedByName}</b>{' '}
+                                    {upg.submittedByPhone ? `• 📞 ${upg.submittedByPhone}` : ''} • 📍{' '}
+                                    {ch.provinceKh || rest.provinceKh}
+                                  </p>
+                                  {ch.descriptionKh && (
+                                    <p className="text-[11px] text-slate-700 dark:text-slate-200 line-clamp-2">
+                                      📝 {ch.descriptionKh}
+                                    </p>
+                                  )}
+                                  <p className="text-[10px] text-emerald-700 dark:text-emerald-400">
+                                    📞 {ch.phone || rest.phone} • 🕒 {ch.openingHoursKh || rest.openingHoursKh} • 📍{' '}
+                                    {ch.addressKh || rest.addressKh}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 shrink-0 self-end sm:self-center font-khmer">
+                                <button
+                                  type="button"
+                                  onClick={() => approveListingUpgradeRequest(rest.id)}
+                                  className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-xs transition cursor-pointer"
+                                >
+                                  {isKm ? '✅ អនុម័ត និងផ្សព្វផ្សាយ (Approve)' : '✅ Approve & Publish'}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => rejectListingUpgradeRequest(rest.id)}
+                                  className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shadow-xs transition cursor-pointer"
+                                >
+                                  {isKm ? '🚫 បដិសេធ (Reject)' : '🚫 Reject'}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                   </div>
                 </div>
               )}

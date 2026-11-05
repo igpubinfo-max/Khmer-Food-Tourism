@@ -393,6 +393,7 @@ export const sanitizeRestaurantShopPhoto = (
   if (
     lower.startsWith('/foods/') ||
     lower.startsWith('/restaurants/') ||
+    lower.includes('places.googleapis.com') ||
     lower.includes('culinary-placeholder.jpg') ||
     lower.includes('unsplash.com') ||
     lower.includes('loremflickr.com') ||
@@ -1362,6 +1363,48 @@ export interface ShopPhotoReplacementRequest {
   replacesRestaurantName?: string;
 }
 
+export interface PendingListingUpgradeRequest {
+  id: string;
+  status: 'pending' | 'approved' | 'rejected';
+  submittedAt: string;
+  submittedByUserId: string;
+  submittedByName: string;
+  submittedByEmail?: string;
+  submittedByPhone?: string;
+  proposedChanges: {
+    businessType?: 'restaurant' | 'hotel';
+    nameKh?: string;
+    nameEn?: string;
+    descriptionKh?: string;
+    descriptionEn?: string;
+    photoUrl?: string;
+    profileImage?: string;
+    galleryPhotos?: string[];
+    phone?: string;
+    addressKh?: string;
+    addressEn?: string;
+    provinceKh?: string;
+    provinceEn?: string;
+    openingHoursKh?: string;
+    openingHoursEn?: string;
+    priceLevel?: RestaurantPriceLevel;
+    mapUrl?: string;
+    latitude?: number;
+    longitude?: number;
+    businessCategory?: string;
+    categoryKh?: string;
+    categoryEn?: string;
+    websiteUrl?: string;
+    facebookUrl?: string;
+    telegramUrl?: string;
+    promoVideoUrl?: string;
+    signatureDishesKh?: string[];
+  };
+  reviewedAt?: string;
+  reviewedBy?: string;
+  rejectionReason?: string;
+}
+
 export interface Restaurant {
   id: string;
   businessType?: 'restaurant' | 'hotel';
@@ -1454,6 +1497,9 @@ export interface Restaurant {
 
   // Shop Photo Replacement Workflow (Pending Admin Review & Approval)
   pendingPhotoReplacement?: ShopPhotoReplacementRequest;
+
+  // Existing Listing Upgrade Request Workflow (Pending Admin Review & Approval)
+  pendingUpgradeRequest?: PendingListingUpgradeRequest;
 
   // GPS & Google Maps Location Audit & Verification Status
   locationVerificationStatus?: LocationVerificationStatus;
@@ -2985,7 +3031,15 @@ export const getUserStoreQuotaSummary = (
 
   const ownedStores = Array.isArray(restaurants)
     ? restaurants.filter((r) => {
-        if (!r || isSeedRestaurantId(r.id)) return false;
+        if (!r) return false;
+        if (
+          r.pendingUpgradeRequest?.status === 'pending' &&
+          r.pendingUpgradeRequest.submittedByUserId &&
+          userIdSet.has(r.pendingUpgradeRequest.submittedByUserId)
+        ) {
+          return true;
+        }
+        if (isSeedRestaurantId(r.id) && (!r.ownerId || r.ownerId === 'owner-1')) return false;
         if (r.ownerId && userIdSet.has(r.ownerId)) return true;
         if (userEmailLower && r.ownerEmail && r.ownerEmail.toLowerCase().trim() === userEmailLower) {
           return true;

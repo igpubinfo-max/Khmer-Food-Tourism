@@ -25,6 +25,7 @@ import {
   RestaurantPriceLevel,
   GoogleMapsPlaceMetadata,
   ShopPhotoReplacementRequest,
+  PendingListingUpgradeRequest,
   LocationVerificationStatus,
   APP_BUILD_CODE,
   SEED_FOOD_PHOTO_BASELINE_ISO,
@@ -406,6 +407,7 @@ export interface RestaurantMediaOverride {
   isAdminEdited?: boolean;
   adminEditedAt?: string;
   pendingPhotoReplacement?: ShopPhotoReplacementRequest;
+  pendingUpgradeRequest?: PendingListingUpgradeRequest;
   isCustomPhoto: boolean;
   updatedAt: string;
 }
@@ -439,6 +441,7 @@ export interface DestinationMediaOverride {
   isAdminEdited?: boolean;
   adminEditedAt?: string;
   pendingPhotoReplacement?: ShopPhotoReplacementRequest;
+  pendingUpgradeRequest?: PendingListingUpgradeRequest;
   isCustomPhoto: boolean;
   updatedAt: string;
 }
@@ -2048,6 +2051,7 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     isAdminEdited: true,
     adminEditedAt: rest.adminEditedAt || now,
     pendingPhotoReplacement: rest.pendingPhotoReplacement,
+    pendingUpgradeRequest: rest.pendingUpgradeRequest,
     isCustomPhoto: Boolean(primaryPhoto),
     updatedAt: now,
   };
@@ -2689,6 +2693,7 @@ export function applyRestaurantOverrides(
       r.isVerified === (typeof ov.isVerified === 'boolean' ? ov.isVerified : r.isVerified) &&
       r.status === (ov.status || r.status) &&
       r.pendingPhotoReplacement === (ov.pendingPhotoReplacement !== undefined ? ov.pendingPhotoReplacement : r.pendingPhotoReplacement) &&
+      r.pendingUpgradeRequest === (ov.pendingUpgradeRequest !== undefined ? ov.pendingUpgradeRequest : r.pendingUpgradeRequest) &&
       (r.menuItems || []).length === resolvedMenuItems.length &&
       (r.reviews || []).length === (Array.isArray(ov.reviews) ? ov.reviews : r.reviews || []).length
     ) {
@@ -2772,6 +2777,7 @@ export function applyRestaurantOverrides(
       isAdminEdited: ov.isAdminEdited ?? r.isAdminEdited,
       adminEditedAt: ov.adminEditedAt || r.adminEditedAt,
       pendingPhotoReplacement: ov.pendingPhotoReplacement !== undefined ? ov.pendingPhotoReplacement : r.pendingPhotoReplacement,
+      pendingUpgradeRequest: ov.pendingUpgradeRequest !== undefined ? ov.pendingUpgradeRequest : r.pendingUpgradeRequest,
       isCustomPhoto: Boolean(photoUrl),
       photoUpdatedAt: nextPhotoUpdatedAt,
       updatedAt: nextUpdatedAt,

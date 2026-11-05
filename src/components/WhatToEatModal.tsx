@@ -1217,7 +1217,8 @@ export const WhatToEatModal: React.FC = () => {
     )}`;
     if (servingRestaurants.length > 0) {
       (window as any).__kft_near_me_initial_tab = 'restaurants';
-      (window as any).__kft_near_me_initial_query = '';
+      (window as any).__kft_near_me_initial_query = currentDish.nameKh;
+      (window as any).__kft_near_me_initial_food = currentDish;
       setIsWhatToEatModalOpen(false);
       setIsNearMeModalOpen(true);
     } else {

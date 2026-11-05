@@ -265,16 +265,6 @@ export const HomeView: React.FC = () => {
     return rotated.slice(0, 3);
   }, [foods, selectedMealSlot, todaySeed, mealShuffleCount]);
 
-  const vipDaysLeft = isVip && currentUser ? getVipRemainingDays(currentUser) : 0;
-  const vipNoticeKind: 'expiring' | 'expired' | null =
-    currentUser && !isAdmin
-      ? isVip && vipDaysLeft <= 3
-        ? 'expiring'
-        : !isVip && getVipAccountState(currentUser) === 'expired_vip'
-        ? 'expired'
-        : null
-      : null;
-
   const handleSignIn = useCallback(() => setIsAuthModalOpen(true), [setIsAuthModalOpen]);
   const handleExploreProfile = useCallback(() => setActiveTab('profile'), [setActiveTab]);
   const handleUpgradeVip = useCallback(() => openUpgradeVipModal(), [openUpgradeVipModal]);
@@ -1006,15 +996,6 @@ export const HomeView: React.FC = () => {
             <HomeSkeleton />
           ) : (
             <>
-              {vipNoticeKind && (
-                <VipStatusNotice
-                  language={language}
-                  kind={vipNoticeKind}
-                  daysLeft={vipDaysLeft}
-                  onRenew={() => openUpgradeVipModal(true)}
-                />
-              )}
-
               {/* 2. Free 30 Days membership section */}
               <DailyHabitCard onOpenFood={setSelectedFood} />
 

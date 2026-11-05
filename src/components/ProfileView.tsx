@@ -269,19 +269,12 @@ export const ProfileView: React.FC = () => {
                   <Clock className="w-3.5 h-3.5" />
                   <span>
                     {isKm 
-                      ? `សុពលភាពសល់ ${remainingDays} ថ្ងៃ (ដល់ថ្ងៃ ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''})` 
+                      ? `ថ្ងៃផុតកំណត់៖ ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (សល់ ${remainingDays} ថ្ងៃ)` 
                       : `Expires: ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (${remainingDays} days left)`}
                   </span>
                 </p>
               </div>
             </div>
-
-            <button
-              onClick={() => openUpgradeVipModal(true)}
-              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition shrink-0 active:scale-95 cursor-pointer"
-            >
-              {isKm ? 'បន្ត VIP' : 'Renew VIP'}
-            </button>
           </div>
 
           {/* Super Potential Privileges Showcase */}
@@ -577,37 +570,78 @@ export const ProfileView: React.FC = () => {
                     : 'Manage your shop photo, map location, and contact details so diners can easily find your restaurant.'}
                 </p>
                 {myRestaurants[0] ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      (window as any).__kft_manage_initial_tab = 'info';
-                      setManagingRestaurant(myRestaurants[0]);
-                      setIsManageMenuModalOpen(true);
-                    }}
-                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-600 text-slate-950 font-black text-xs shadow-md border-2 border-white/70 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
-                  >
-                    <Store className="w-4 h-4 shrink-0" />
-                    <span>{isKm ? '✏️ គ្រប់គ្រងហាង VIP របស់អ្នក (1/1 ហាង)' : '✏️ Manage Your VIP Store (1/1)'}</span>
-                  </button>
-                ) : (
-                  <div className="relative p-1 rounded-2xl group">
-                    {/* Softly blinking glowing lights around border */}
-
+                  <div className="space-y-2">
                     <button
                       type="button"
-                      onClick={() => setIsVipAddRestaurantModalOpen(true)}
-                      className="relative w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 font-black text-xs sm:text-sm border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
+                      onClick={() => {
+                        (window as any).__kft_manage_initial_tab = 'info';
+                        setManagingRestaurant(myRestaurants[0]);
+                        setIsManageMenuModalOpen(true);
+                      }}
+                      className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-600 text-slate-950 font-black text-xs shadow-md border-2 border-white/70 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
                     >
-                      <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
-                      <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
+                      <Store className="w-4 h-4 shrink-0" />
+                      <span>{isKm ? '✏️ គ្រប់គ្រងហាង VIP របស់អ្នក (1/1 ហាង)' : '✏️ Manage Your VIP Store (1/1)'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        (window as any).__kft_vip_add_mode = 'upgrade_existing';
+                        setIsVipAddRestaurantModalOpen(true);
+                      }}
+                      className="w-full py-2.5 px-3.5 rounded-xl bg-white/15 hover:bg-white/25 text-amber-200 font-extrabold text-[11px] border border-amber-300/40 flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                    >
+                      <span>⬆️</span>
+                      <span>
+                        {tr(
+                          language,
+                          'ដំឡើងហាង ឬសណ្ឋាគារដែលមានស្រាប់ (Upgrade Existing Shop / Hotel)',
+                          'Upgrade Existing Shop / Hotel',
+                          '升级现有店铺 / 酒店'
+                        )}
+                      </span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="relative p-1 rounded-2xl group">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          (window as any).__kft_vip_add_mode = 'add_new';
+                          setIsVipAddRestaurantModalOpen(true);
+                        }}
+                        className="relative w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 font-black text-xs sm:text-sm border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
+                      >
+                        <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
+                        <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        (window as any).__kft_vip_add_mode = 'upgrade_existing';
+                        setIsVipAddRestaurantModalOpen(true);
+                      }}
+                      className="w-full py-2.5 px-3.5 rounded-xl bg-white/15 hover:bg-white/25 text-amber-200 font-extrabold text-xs border border-amber-300/40 flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                    >
+                      <span>⬆️</span>
+                      <span>
+                        {tr(
+                          language,
+                          'ដំឡើងហាង ឬសណ្ឋាគារដែលមានស្រាប់ (Upgrade Existing Shop / Hotel)',
+                          'Upgrade Existing Shop / Hotel',
+                          '升级现有店铺 / 酒店'
+                        )}
+                      </span>
                     </button>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Automatic VIP Renewal Quick Control Bar */}
-            <div className="mt-2 p-3 rounded-2xl bg-slate-900/85 border border-white/15 text-white space-y-2">
+            {/* Automatic VIP Renewal & Billing Dates Control (Single Cancel Auto-Renewal Button) */}
+            <div className="mt-2 p-3.5 rounded-2xl bg-slate-900/90 border border-white/15 text-white space-y-2.5">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <div className="w-7 h-7 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center shrink-0">
@@ -616,175 +650,66 @@ export const ProfileView: React.FC = () => {
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs font-extrabold text-white truncate">
-                        {tr(language, 'បន្ត VIP ស្វ័យប្រវត្តិ (Auto-Renew)', 'VIP Auto-Renew', 'VIP 自动续费')}
+                        {tr(language, 'ការបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ', 'Automatic VIP Renewal', 'VIP 自动续费')}
                       </span>
                       <span
                         className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase shrink-0 ${
-                          currentUser?.autoRenew && currentUser?.autoRenewConsentAt
+                          currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
                             ? 'bg-emerald-500 text-slate-950'
-                            : 'bg-slate-700 text-slate-300'
+                            : 'bg-rose-500/30 text-rose-200 border border-rose-400/40'
                         }`}
                       >
-                        {currentUser?.autoRenew && currentUser?.autoRenewConsentAt ? 'ON' : 'OFF'}
+                        {currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
+                          ? tr(language, 'សកម្ម (ON)', 'ACTIVE', '已开启')
+                          : tr(language, 'បានបោះបង់ (OFF)', 'CANCELLED', '已取消')}
                       </span>
                     </div>
-                    <p className="text-[10px] text-slate-300 truncate">
-                      {currentUser?.autoRenew && currentUser?.autoRenewConsentAt
-                        ? tr(
-                            language,
-                            `បន្តស្វ័យប្រវត្តិមុនថ្ងៃទី ${currentUser?.subscriptionExpiryDate?.split('T')[0] || '—'} • ${currentUser?.autoRenewPaymentLabel || 'ABA KHQR'}`,
-                            `Renews before ${currentUser?.subscriptionExpiryDate?.split('T')[0] || '—'} • ${currentUser?.autoRenewPaymentLabel || 'ABA KHQR'}`,
-                            `于 ${currentUser?.subscriptionExpiryDate?.split('T')[0] || '—'} 前自动续费 • ${currentUser?.autoRenewPaymentLabel || 'ABA KHQR'}`
-                          )
-                        : tr(
-                            language,
-                            'បើកដើម្បីបន្តសមាជិកភាពស្វ័យប្រវត្តិ • អាចបិទវិញបានគ្រប់ពេល',
-                            'Enable automatic renewal before expiry • Cancel anytime',
-                            '开启到期自动续费 • 可随时取消'
-                          )}
-                    </p>
                   </div>
                 </div>
-
-                {currentUser?.autoRenew && currentUser?.autoRenewConsentAt ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      cancelVipAutoRenew();
-                      setShowProfileAutoRenewSetup(false);
-                    }}
-                    className="px-2.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/40 text-rose-200 text-[11px] font-extrabold transition shrink-0 cursor-pointer"
-                  >
-                    {tr(language, 'បិទ (OFF)', 'Turn OFF', '关闭')}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setShowProfileAutoRenewSetup(v => !v)}
-                    className="px-2.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[11px] font-extrabold transition shrink-0 cursor-pointer"
-                  >
-                    {tr(language, 'បើក (ON)', 'Turn ON', '开启')}
-                  </button>
-                )}
               </div>
 
-              {currentUser?.autoRenewLastStatus === 'failed' && (
-                <div className="p-2 rounded-xl bg-rose-950/70 border border-rose-400/50 flex items-center justify-between gap-2">
-                  <span className="text-[11px] text-rose-200 font-semibold">
-                    {tr(
-                      language,
-                      'ការកាត់ប្រាក់ស្វ័យប្រវត្តិមិនជោគជ័យ។ សូមព្យាយាមម្តងទៀត។',
-                      'Auto-renewal payment failed. Please retry payment.',
-                      '自动续费扣款失败，请重试。'
-                    )}
-                  </span>
-                  <button
-                    type="button"
-                    disabled={isRetryingProfileAutoRenew}
-                    onClick={async () => {
-                      setIsRetryingProfileAutoRenew(true);
-                      await retryFailedVipAutoRenew();
-                      setIsRetryingProfileAutoRenew(false);
-                    }}
-                    className="px-2.5 py-1 rounded-lg bg-rose-500 hover:bg-rose-400 text-white text-[10px] font-extrabold shrink-0 cursor-pointer disabled:opacity-50"
-                  >
-                    {isRetryingProfileAutoRenew
-                      ? tr(language, 'កំពុងដំណើរការ...', 'Retrying...', '重试中...')
-                      : tr(language, 'ព្យាយាមម្តងទៀត', 'Retry Payment', '重试付款')}
-                  </button>
+              {/* Next Billing Date & Membership Expiration Date */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
+                  <div className="text-[10px] font-bold text-slate-300">
+                    {tr(language, 'ថ្ងៃផុតកំណត់សមាជិកភាព', 'Membership Expiration Date', '会员到期日')}
+                  </div>
+                  <div className="text-xs font-black text-amber-300 mt-0.5 font-mono">
+                    {currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}
+                  </div>
                 </div>
-              )}
-
-              {showProfileAutoRenewSetup && !(currentUser?.autoRenew && currentUser?.autoRenewConsentAt) && (
-                <div className="pt-2 border-t border-white/15 space-y-2 animate-fade-in">
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {[
-                      { id: 'quarterly' as const, days: shortPlan.durationDays, price: shortPlan.priceUsd },
-                      { id: 'annual' as const, days: longPlan.durationDays, price: longPlan.priceUsd },
-                    ].map(p => (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => setProfileAutoRenewPlan(p.id)}
-                        className={`p-2 rounded-xl border text-left transition cursor-pointer ${
-                          profileAutoRenewPlan === p.id
-                            ? 'border-emerald-400 bg-emerald-950/70 text-white'
-                            : 'border-white/15 bg-white/5 text-slate-300'
-                        }`}
-                      >
-                        <div className="text-[11px] font-extrabold">
-                          {p.days} {tr(language, 'ថ្ងៃ', 'Days', '天')}
-                        </div>
-                        <div className="text-xs font-black text-emerald-300">${p.price.toFixed(2)} USD</div>
-                      </button>
-                    ))}
+                <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
+                  <div className="text-[10px] font-bold text-slate-300">
+                    {tr(language, 'ថ្ងៃកាត់ប្រាក់បន្ទាប់', 'Next Billing Date', '下次扣款日期')}
                   </div>
-
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {(
-                      [
-                        { id: 'KHQR', label: 'ABA KHQR' },
-                        { id: 'Bakong', label: 'Bakong' },
-                        { id: 'Card', label: 'Visa / Card' },
-                      ] as const
-                    ).map(m => (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => setProfileAutoRenewMethod(m.id)}
-                        className={`py-1.5 px-2 rounded-lg border text-[11px] font-bold transition cursor-pointer ${
-                          profileAutoRenewMethod === m.id
-                            ? 'border-emerald-400 bg-emerald-500 text-slate-950'
-                            : 'border-white/15 bg-white/5 text-slate-200'
-                        }`}
-                      >
-                        {m.label}
-                      </button>
-                    ))}
+                  <div className="text-xs font-black text-emerald-300 mt-0.5 font-mono">
+                    {currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
+                      ? currentUser?.subscriptionExpiryDate
+                        ? currentUser.subscriptionExpiryDate.split('T')[0]
+                        : '—'
+                      : tr(language, 'គ្មានការកាត់ប្រាក់បន្ថែម', 'No Further Charges', '不再扣款')}
                   </div>
+                </div>
+              </div>
 
-                  <label className="flex items-start gap-2 text-[11px] text-slate-200 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={profileAutoRenewConsent}
-                      onChange={e => setProfileAutoRenewConsent(e.target.checked)}
-                      className="mt-0.5 rounded border-white/30 text-emerald-500 focus:ring-emerald-400"
-                    />
-                    <span>
-                      {tr(
-                        language,
-                        'ខ្ញុំយល់ព្រមអនុញ្ញាតឱ្យបន្តសមាជិកភាព VIP ដោយស្វ័យប្រវត្តិមុនថ្ងៃផុតកំណត់តាមមធ្យោបាយទូទាត់នេះ។ ខ្ញុំអាចបិទវិញបានគ្រប់ពេល។',
-                        'I explicitly authorize automatic VIP renewal before expiration using this payment method. I can cancel anytime.',
-                        '我明确授权在到期前使用此付款方式自动续费 VIP，我可随时取消。'
-                      )}
-                    </span>
-                  </label>
-
-                  <button
-                    type="button"
-                    disabled={!profileAutoRenewConsent}
-                    onClick={async () => {
-                      const label =
-                        profileAutoRenewMethod === 'Bakong'
-                          ? 'Bakong KHQR'
-                          : profileAutoRenewMethod === 'Card'
-                          ? 'Visa / Mastercard'
-                          : 'ABA KHQR (095 245 959)';
-                      const res = await configureVipAutoRenew({
-                        enabled: true,
-                        planId: profileAutoRenewPlan,
-                        paymentMethod: profileAutoRenewMethod,
-                        paymentLabel: label,
-                        explicitConsent: true,
-                      });
-                      if (res.success) {
-                        setShowProfileAutoRenewSetup(false);
-                      }
-                    }}
-                    className="w-full py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold transition cursor-pointer disabled:opacity-50"
-                  >
-                    {tr(language, 'បញ្ជាក់ និងបើក Auto-Renew', 'Confirm & Enable Auto-Renew', '确认开启自动续费')}
-                  </button>
+              {currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    cancelVipAutoRenew();
+                  }}
+                  className="w-full py-2.5 px-3.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/50 text-rose-200 text-xs font-extrabold transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                >
+                  <span>{tr(language, 'បោះបង់ការបន្តស្វ័យប្រវត្តិ (Cancel Auto-Renewal)', 'Cancel Auto-Renewal', '取消自动续费')}</span>
+                </button>
+              ) : (
+                <div className="p-2.5 rounded-xl bg-slate-800/90 border border-slate-600/60 text-[11px] text-slate-200 leading-relaxed">
+                  {tr(
+                    language,
+                    `✅ ការបន្តស្វ័យប្រវត្តិត្រូវបានបោះបង់។ មិនមានការកាត់ប្រាក់បន្ថែមទៀតទេ ហើយគណនី VIP របស់អ្នកនៅតែមានសុពលភាពរហូតដល់ថ្ងៃទី ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}។`,
+                    `✅ Auto-renewal is cancelled. No further payments will be charged, and your VIP membership remains active until ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}.`,
+                    `✅ 自动续费已取消，不会再产生任何扣款。您的 VIP 权益将持续有效至 ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}。`
+                  )}
                 </div>
               )}
             </div>
@@ -1286,18 +1211,17 @@ export const ProfileView: React.FC = () => {
                 <Clock className="w-3 h-3 shrink-0" />
                 <span className="truncate">
                   {isKm
-                    ? `នៅសល់ ${remainingDays} ថ្ងៃ • ដល់ ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''}`
-                    : `${remainingDays} days left • ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''}`}
+                    ? `ថ្ងៃផុតកំណត់៖ ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (${remainingDays} ថ្ងៃ)`
+                    : `Expires: ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (${remainingDays}d)`}
                 </span>
               </div>
             </div>
           </div>
-          <button
-            onClick={() => openUpgradeVipModal(true)}
-            className={`px-3 py-1.5 rounded-xl text-white text-xs font-bold shadow-xs transition shrink-0 active:scale-95 cursor-pointer ${remainingDays <= 3 ? 'bg-rose-600 hover:bg-rose-700' : 'bg-amber-500 hover:bg-amber-600'}`}
-          >
-            {isKm ? '🔄 បន្ត VIP' : 'Renew VIP'}
-          </button>
+          <span className="px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-700 dark:text-emerald-300 text-[10px] font-black shrink-0">
+            {currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
+              ? tr(language, 'បន្តស្វ័យប្រវត្តិ ON', 'Auto-Renew ON', '自动续费 ON')
+              : tr(language, 'បន្តស្វ័យប្រវត្តិ OFF', 'Auto-Renew OFF', '自动续费 OFF')}
+          </span>
         </div>
       ) : currentUser?.subscriptionStatus === 'pending' ? (
         /* PENDING ADMIN CONFIRMATION CARD */
@@ -1983,37 +1907,25 @@ export const ProfileView: React.FC = () => {
               )}
             </div>
 
-            {/* Upgrade / Renew CTA */}
-            <button
-              onClick={() => openUpgradeVipModal(Boolean(isVip || currentUser?.subscriptionStatus === 'expired'))}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <Crown className="w-4 h-4 fill-white" />
-              <span>
-                {isVip 
-                  ? tr(
-                      language,
-                      `🔄 បន្តសមាជិកភាព VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ)`,
-                      `Renew VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d)`,
-                      `🔄 续费 VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}天 • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}天)`
-                    )
-                  : currentUser?.subscriptionStatus === 'pending'
-                  ? tr(language, '⏳ មើលស្ថានភាពសំណើដំឡើង VIP', 'View Pending Request Status', '⏳ 查看 VIP 升级申请状态')
-                  : currentUser?.subscriptionStatus === 'expired'
-                  ? tr(
-                      language,
-                      `🔄 បន្តសមាជិកភាព VIP ឡើងវិញ ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ)`,
-                      `Renew VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d)`,
-                      `🔄 续费 VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}天 • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}天)`
-                    )
-                  : tr(
-                      language,
-                      `👑 ដំឡើងទៅជា VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ)`,
-                      `Upgrade to VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d)`,
-                      `👑 升级至 VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}天 • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}天)`
-                    )}
-              </span>
-            </button>
+            {/* Upgrade CTA (Only shown for non-VIP or expired accounts; active VIP accounts auto-renew automatically) */}
+            {!isVip && (
+              <button
+                onClick={() => openUpgradeVipModal(false)}
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Crown className="w-4 h-4 fill-white" />
+                <span>
+                  {currentUser?.subscriptionStatus === 'pending'
+                    ? tr(language, '⏳ មើលស្ថានភាពសំណើដំឡើង VIP', 'View Pending Request Status', '⏳ 查看 VIP 升级申请状态')
+                    : tr(
+                        language,
+                        `👑 ដំឡើងទៅជា VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ)`,
+                        `Upgrade to VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d)`,
+                        `👑 升级至 VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}天 • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}天)`
+                      )}
+                </span>
+              </button>
+            )}
 
             <button
               type="button"
@@ -2033,191 +1945,31 @@ export const ProfileView: React.FC = () => {
           </div>
           )}
 
-          {/* Automatic VIP Renewal & Payment History Card in Membership Tab */}
+          {/* Billing Dates & VIP Membership History Card in Membership Tab */}
           {currentUser && (
             <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center shrink-0">
-                    <RefreshCw className="w-4 h-4 text-emerald-600 dark:text-emerald-400" strokeWidth={1.75} />
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                  <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                    {tr(language, 'ថ្ងៃផុតកំណត់សមាជិកភាព', 'Membership Expiration Date', '会员到期日')}
                   </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <h5 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
-                        {tr(language, 'ការបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ', 'Automatic VIP Renewal', 'VIP 自动续费管理')}
-                      </h5>
-                      <span
-                        className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase shrink-0 ${
-                          currentUser.autoRenew && currentUser.autoRenewConsentAt
-                            ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300'
-                            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                        }`}
-                      >
-                        {currentUser.autoRenew && currentUser.autoRenewConsentAt ? 'ON' : 'OFF'}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                      {currentUser.autoRenew && currentUser.autoRenewConsentAt
-                        ? tr(
-                            language,
-                            `មធ្យោបាយទូទាត់៖ ${currentUser.autoRenewPaymentLabel || 'ABA KHQR'} • បិទវិញបានគ្រប់ពេល`,
-                            `Authorized: ${currentUser.autoRenewPaymentLabel || 'ABA KHQR'} • Cancel anytime`,
-                            `已授权：${currentUser.autoRenewPaymentLabel || 'ABA KHQR'} • 可随时取消`
-                          )
-                        : tr(
-                            language,
-                            'មិនកាត់ប្រាក់ដោយគ្មានការអនុញ្ញាតពីអ្នកឡើយ • អាចបិទវិញបានគ្រប់ពេល',
-                            'Never charges without explicit consent • Cancel anytime',
-                            '未经明确同意绝不扣款 • 可随时取消'
-                          )}
-                    </p>
+                  <div className="text-sm font-black text-slate-900 dark:text-white mt-0.5 font-mono">
+                    {currentUser.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}
                   </div>
                 </div>
-
-                {currentUser.autoRenew && currentUser.autoRenewConsentAt ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      cancelVipAutoRenew();
-                      setShowProfileAutoRenewSetup(false);
-                    }}
-                    className="px-3 py-1.5 rounded-xl bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/60 dark:hover:bg-rose-900/70 text-rose-700 dark:text-rose-300 text-xs font-extrabold transition shrink-0 cursor-pointer"
-                  >
-                    {tr(language, 'បិទ Auto-Renew', 'Cancel Auto-Renew', '取消自动续费')}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setShowProfileAutoRenewSetup(v => !v)}
-                    className="px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-extrabold transition shrink-0 cursor-pointer"
-                  >
-                    {tr(language, 'បើក Auto-Renew', 'Enable Auto-Renew', '开启自动续费')}
-                  </button>
-                )}
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                  <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                    {tr(language, 'ថ្ងៃកាត់ប្រាក់បន្ទាប់', 'Next Billing Date', '下次扣款日期')}
+                  </div>
+                  <div className="text-sm font-black text-emerald-600 dark:text-emerald-400 mt-0.5 font-mono">
+                    {isVip && currentUser.autoRenew !== false && !currentUser.autoRenewCancelledAt
+                      ? currentUser.subscriptionExpiryDate
+                        ? currentUser.subscriptionExpiryDate.split('T')[0]
+                        : '—'
+                      : tr(language, 'គ្មានការកាត់ប្រាក់បន្ថែម', 'No Further Charges', '不再扣款')}
+                  </div>
+                </div>
               </div>
-
-              {currentUser.autoRenewLastStatus === 'failed' && (
-                <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 flex items-center justify-between gap-2">
-                  <span className="text-xs text-rose-700 dark:text-rose-300 font-semibold">
-                    {currentUser.autoRenewFailureReason ||
-                      tr(
-                        language,
-                        'ការទូទាត់ស្វ័យប្រវត្តិមិនជោគជ័យ។ សូមព្យាយាមបង់ប្រាក់ម្តងទៀត។',
-                        'Automatic renewal payment failed. Please retry payment.',
-                        '自动续费付款失败，请重试。'
-                      )}
-                  </span>
-                  <button
-                    type="button"
-                    disabled={isRetryingProfileAutoRenew}
-                    onClick={async () => {
-                      setIsRetryingProfileAutoRenew(true);
-                      await retryFailedVipAutoRenew();
-                      setIsRetryingProfileAutoRenew(false);
-                    }}
-                    className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shrink-0 cursor-pointer disabled:opacity-50"
-                  >
-                    {isRetryingProfileAutoRenew
-                      ? tr(language, 'កំពុងដំណើរការ...', 'Retrying...', '重试中...')
-                      : tr(language, 'ព្យាយាមម្តងទៀត', 'Retry Payment', '重试付款')}
-                  </button>
-                </div>
-              )}
-
-              {showProfileAutoRenewSetup && !(currentUser.autoRenew && currentUser.autoRenewConsentAt) && (
-                <div className="pt-2.5 border-t border-slate-200 dark:border-slate-700 space-y-2.5">
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { id: 'quarterly' as const, days: shortPlan.durationDays, price: shortPlan.priceUsd },
-                      { id: 'annual' as const, days: longPlan.durationDays, price: longPlan.priceUsd },
-                    ].map(p => (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => setProfileAutoRenewPlan(p.id)}
-                        className={`p-2.5 rounded-xl border text-left transition cursor-pointer ${
-                          profileAutoRenewPlan === p.id
-                            ? 'border-emerald-600 bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
-                            : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300'
-                        }`}
-                      >
-                        <div className="text-xs font-extrabold">
-                          {p.days} {tr(language, 'ថ្ងៃ', 'Days', '天')}
-                        </div>
-                        <div className="text-xs font-black text-emerald-600 dark:text-emerald-400">
-                          ${p.price.toFixed(2)} USD
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {(
-                      [
-                        { id: 'KHQR', label: 'ABA KHQR' },
-                        { id: 'Bakong', label: 'Bakong' },
-                        { id: 'Card', label: 'Visa / Card' },
-                      ] as const
-                    ).map(m => (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => setProfileAutoRenewMethod(m.id)}
-                        className={`py-1.5 px-2 rounded-lg border text-xs font-bold transition cursor-pointer ${
-                          profileAutoRenewMethod === m.id
-                            ? 'border-[#064E3B] bg-[#064E3B] text-white'
-                            : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300'
-                        }`}
-                      >
-                        {m.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  <label className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={profileAutoRenewConsent}
-                      onChange={e => setProfileAutoRenewConsent(e.target.checked)}
-                      className="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                    />
-                    <span>
-                      {tr(
-                        language,
-                        'ខ្ញុំយល់ព្រមអនុញ្ញាតឱ្យបន្តសមាជិកភាព VIP ដោយស្វ័យប្រវត្តិមុនថ្ងៃផុតកំណត់តាមមធ្យោបាយទូទាត់ដែលបានជ្រើសរើស។ ខ្ញុំអាចបិទ Auto-Renew វិញបានគ្រប់ពេល។',
-                        'I explicitly authorize automatic VIP renewal before expiration using the selected payment method. I can cancel Auto-Renew anytime.',
-                        '我明确授权在到期前使用所选付款方式自动续费 VIP，我可随时取消自动续费。'
-                      )}
-                    </span>
-                  </label>
-
-                  <button
-                    type="button"
-                    disabled={!profileAutoRenewConsent}
-                    onClick={async () => {
-                      const label =
-                        profileAutoRenewMethod === 'Bakong'
-                          ? 'Bakong KHQR'
-                          : profileAutoRenewMethod === 'Card'
-                          ? 'Visa / Mastercard'
-                          : 'ABA KHQR (095 245 959)';
-                      const res = await configureVipAutoRenew({
-                        enabled: true,
-                        planId: profileAutoRenewPlan,
-                        paymentMethod: profileAutoRenewMethod,
-                        paymentLabel: label,
-                        explicitConsent: true,
-                      });
-                      if (res.success) {
-                        setShowProfileAutoRenewSetup(false);
-                      }
-                    }}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-extrabold transition cursor-pointer disabled:opacity-50"
-                  >
-                    {tr(language, 'បញ្ជាក់ការអនុញ្ញាត និងបើក Auto-Renew', 'Authorize & Enable Auto-Renew', '授权并开启自动续费')}
-                  </button>
-                </div>
-              )}
 
               {/* VIP Membership & Renewal History List (Preserved Across Updates & Devices) */}
               {Array.isArray(currentUser.vipMembershipHistory) && currentUser.vipMembershipHistory.length > 0 && (

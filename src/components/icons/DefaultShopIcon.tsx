@@ -1,8 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { resolveFoodPhotoUrl, sanitizeRestaurantShopPhoto } from '../../types';
 import type { Restaurant } from '../../types';
-import { fetchVerifiedShopPhotoFromGoogleMaps } from '../../services/shopGooglePhotoService';
-import { recordPermanentRestaurantOverride } from '../../services/permanentMediaVaultService';
 
 export const DEFAULT_CULINARY_SHOP_PLACEHOLDER = '';
 
@@ -80,24 +78,21 @@ export interface ShopAvatarProps {
 }
 
 /**
- * Renders a restaurant's strictly verified shop photo (`photoUrl` / `profileImage`),
- * automatically retrieves its verified place photo from Google Maps by Name + GPS when visible,
- * or falls back cleanly to the neutral `<DefaultShopIcon />` whenever no matching photo is available.
+ * Renders a restaurant's strictly verified shop photo (`photoUrl` / `profileImage`) uploaded by
+ * the VIP shop owner or Admin, or falls back cleanly to the neutral `<DefaultShopIcon />`
+ * with zero Google Places API calls ($0 cost for 10,000+ users and 100% copyright safety).
  */
 export const ShopAvatar: React.FC<ShopAvatarProps> = ({
   restaurant,
-  allRestaurants,
   alt,
   className = 'w-12 h-12 rounded-xl',
   imgClassName = 'w-full h-full object-cover',
 }) => {
   const [imgError, setImgError] = useState(false);
-  const [autoFetchedPhotoUrl, setAutoFetchedPhotoUrl] = useState<string>('');
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const cleanPhoto = sanitizeRestaurantShopPhoto(
     restaurant?.id,
-    restaurant?.photoUrl || restaurant?.profileImage || autoFetchedPhotoUrl || ''
+    restaurant?.photoUrl || restaurant?.profileImage || ''
   );
   const resolvedUrl = cleanPhoto ? resolveFoodPhotoUrl(cleanPhoto, restaurant?.photoUpdatedAt) : '';
 
@@ -105,46 +100,9 @@ export const ShopAvatar: React.FC<ShopAvatarProps> = ({
     setImgError(false);
   }, [resolvedUrl]);
 
-  // Automatically fetch verified shop photo from Google Maps by Name + GPS when a photo-less shop scrolls into view
-  useEffect(() => {
-    if (resolvedUrl || !restaurant?.id || !(restaurant?.nameKh || restaurant?.nameEn)) return;
-    const node = containerRef.current;
-    if (!node || typeof IntersectionObserver === 'undefined') return;
-
-    let cancelled = false;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (!entry || !entry.isIntersecting) return;
-        observer.disconnect();
-        fetchVerifiedShopPhotoFromGoogleMaps(restaurant as Restaurant, allRestaurants || [])
-          .then((match) => {
-            if (cancelled || !match || !match.photoUrl) return;
-            setAutoFetchedPhotoUrl(match.photoUrl);
-            const nowIso = new Date().toISOString();
-            recordPermanentRestaurantOverride({
-              ...(restaurant as Restaurant),
-              photoUrl: match.photoUrl,
-              profileImage: match.photoUrl,
-              galleryPhotos: match.galleryPhotos.length > 0 ? match.galleryPhotos : [match.photoUrl],
-              photoUpdatedAt: nowIso,
-              updatedAt: nowIso,
-            });
-          })
-          .catch(() => {});
-      },
-      { rootMargin: '160px' }
-    );
-    observer.observe(node);
-    return () => {
-      cancelled = true;
-      observer.disconnect();
-    };
-  }, [restaurant, allRestaurants, resolvedUrl]);
-
   if (!resolvedUrl || imgError) {
     return (
-      <div ref={containerRef} className="shrink-0">
+      <div className="shrink-0">
         <DefaultShopIcon className={className} />
       </div>
     );
@@ -152,7 +110,6 @@ export const ShopAvatar: React.FC<ShopAvatarProps> = ({
 
   return (
     <div
-      ref={containerRef}
       data-shop-avatar="shop-photo"
       className={`relative overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0 ${className}`}
     >
