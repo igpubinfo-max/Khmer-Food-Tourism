@@ -136,6 +136,7 @@ import {
   findDuplicateDestinationForGooglePlace,
   mergeGoogleMapsPlaceWithExistingRestaurant,
 } from '../services/googlePlacesService';
+import { fetchVerifiedAttractionPhotoFromGoogleMaps } from '../services/touristAttractionPhotoService';
 import {
   computeUserIntegritySealSync,
   findLocalAuthoritativeVipEntitlement,
@@ -9132,9 +9133,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const nowIso = new Date().toISOString();
     const hasValidDestCoords = isValidCambodiaCoordinates(destData.latitude, destData.longitude) && !destData.locationNeedsReview;
     const cleanGpid = isValidOfficialGooglePlaceId(destData.googlePlaceId) ? destData.googlePlaceId : undefined;
+    const rawDestPhoto = (destData.photoUrl || '').trim();
+    const hasProvidedRealPhoto = Boolean(rawDestPhoto) && !rawDestPhoto.startsWith('data:image/svg');
+
     const newDest: TouristDestination = {
       ...destData,
       id: `dest-${Date.now()}`,
+      photoUrl: hasProvidedRealPhoto ? rawDestPhoto : '',
+      galleryPhotos: hasProvidedRealPhoto ? [rawDestPhoto] : [],
       latitude: hasValidDestCoords ? destData.latitude : 0,
       longitude: hasValidDestCoords ? destData.longitude : 0,
       mapUrl: hasValidDestCoords ? buildCanonicalGoogleMapsPinUrl(destData.latitude, destData.longitude, cleanGpid) : '',
@@ -9145,7 +9151,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       locationVerifiedAt: hasValidDestCoords ? nowIso : undefined,
       rating: 5.0,
       reviewCount: 1,
-      isCustomPhoto: true,
+      isCustomPhoto: hasProvidedRealPhoto,
       photoUpdatedAt: nowIso,
     };
     recordPermanentDestinationOverride(newDest);
@@ -9155,6 +9161,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return next;
     });
     showToast(language === 'km' ? 'បានបញ្ចូលតំបន់ទេសចរណ៍ថ្មីដោយជោគជ័យ' : 'Destination added!', 'success');
+
+    // Automatically retrieve corresponding place photo from Google Maps if none was provided
+    if (!hasProvidedRealPhoto && newDest.categorySlug !== 'hotel') {
+      fetchVerifiedAttractionPhotoFromGoogleMaps(newDest, destinations)
+        .then((match) => {
+          if (!match || !match.photoUrl) return;
+          const updatedAtIso = new Date().toISOString();
+          setDestinations((prev) => {
+            const target = prev.find((d) => d.id === newDest.id);
+            if (!target) return prev;
+            const resolvedLat = isValidCambodiaCoordinates(target.latitude, target.longitude)
+              ? target.latitude
+              : (match.matchedLat && isValidCambodiaCoordinates(match.matchedLat, match.matchedLng || 0) ? match.matchedLat : target.latitude);
+            const resolvedLng = isValidCambodiaCoordinates(target.latitude, target.longitude)
+              ? target.longitude
+              : (match.matchedLng && isValidCambodiaCoordinates(match.matchedLat || 0, match.matchedLng) ? match.matchedLng : target.longitude);
+            const resolvedGpid = target.googlePlaceId || (isValidOfficialGooglePlaceId(match.matchedPlaceId) ? match.matchedPlaceId : undefined);
+            const coordsNowValid = isValidCambodiaCoordinates(resolvedLat, resolvedLng);
+
+            const enrichedDest: TouristDestination = {
+              ...target,
+              photoUrl: match.photoUrl,
+              galleryPhotos: match.galleryPhotos.length > 0 ? match.galleryPhotos : [match.photoUrl],
+              latitude: coordsNowValid ? resolvedLat : target.latitude,
+              longitude: coordsNowValid ? resolvedLng : target.longitude,
+              googlePlaceId: resolvedGpid,
+              mapUrl: coordsNowValid ? buildCanonicalGoogleMapsPinUrl(resolvedLat, resolvedLng, resolvedGpid) : target.mapUrl,
+              locationVerificationStatus: coordsNowValid ? 'verified' : target.locationVerificationStatus,
+              locationNeedsReview: !coordsNowValid,
+              locationVerifiedAt: coordsNowValid ? updatedAtIso : target.locationVerifiedAt,
+              isCustomPhoto: true,
+              photoUpdatedAt: updatedAtIso,
+            };
+            recordPermanentDestinationOverride(enrichedDest);
+            const next = prev.map((d) => (d.id === newDest.id ? enrichedDest : d));
+            scheduleStorageWrite('kft_destinations_real_v9', next, 400);
+            return next;
+          });
+        })
+        .catch(() => {});
+    }
+
     return true;
   };
 
@@ -9255,14 +9303,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       const mappedDest = convertGooglePlaceToDestination(place);
+      const rawCustomPhoto = customEdits?.photoUrl?.trim() || mappedDest.photoUrl || '';
+      const hasRealImportPhoto = Boolean(rawCustomPhoto) && !rawCustomPhoto.startsWith('data:image/svg');
       const finalDest: TouristDestination = {
         ...mappedDest,
         nameKh: customEdits?.nameKh?.trim() || mappedDest.nameKh,
         nameEn: customEdits?.nameEn?.trim() || mappedDest.nameEn,
         provinceKh: customEdits?.provinceKh?.trim() || mappedDest.provinceKh,
         addressKh: customEdits?.addressKh?.trim() || mappedDest.addressKh,
-        photoUrl: customEdits?.photoUrl?.trim() || mappedDest.photoUrl,
-        isCustomPhoto: Boolean(customEdits?.photoUrl?.trim()),
+        photoUrl: hasRealImportPhoto ? rawCustomPhoto : '',
+        galleryPhotos: hasRealImportPhoto ? (mappedDest.galleryPhotos?.length ? mappedDest.galleryPhotos : [rawCustomPhoto]) : [],
+        isCustomPhoto: hasRealImportPhoto,
         isAdminEdited: hasCustomEdits,
         adminEditedAt: hasCustomEdits ? nowIso : undefined,
       };
@@ -9279,6 +9330,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           : `✅ Imported tourist attraction "${finalDest.nameEn}" from Google Maps!`,
         'success'
       );
+
+      // Automatically retrieve verified place photo from Google Maps if imported place lacked a real photo
+      if (!hasRealImportPhoto) {
+        fetchVerifiedAttractionPhotoFromGoogleMaps(finalDest, destinations)
+          .then((match) => {
+            if (!match || !match.photoUrl) return;
+            const updatedAtIso = new Date().toISOString();
+            setDestinations((prev) => {
+              const target = prev.find((d) => d.id === finalDest.id);
+              if (!target) return prev;
+              const enrichedDest: TouristDestination = {
+                ...target,
+                photoUrl: match.photoUrl,
+                galleryPhotos: match.galleryPhotos.length > 0 ? match.galleryPhotos : [match.photoUrl],
+                isCustomPhoto: true,
+                photoUpdatedAt: updatedAtIso,
+              };
+              recordPermanentDestinationOverride(enrichedDest);
+              const next = prev.map((d) => (d.id === finalDest.id ? enrichedDest : d));
+              scheduleStorageWrite('kft_destinations_real_v9', next, 400);
+              return next;
+            });
+          })
+          .catch(() => {});
+      }
+
       return { imported: true, duplicate: false, type: 'tourism', id: finalDest.id, item: finalDest };
     }
 

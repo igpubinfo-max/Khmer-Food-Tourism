@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TouristDestination, isAdminAccount } from '../types';
 import { useApp } from '../context/AppContext';
 import {
@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { tr } from '../utils/i18n';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
+import { fetchVerifiedAttractionPhotoFromGoogleMaps } from '../services/touristAttractionPhotoService';
+import { recordPermanentDestinationOverride } from '../services/permanentMediaVaultService';
 
 import type { Language } from '../types';
 
@@ -26,6 +28,7 @@ interface TouristCardProps {
 
 interface TouristCardViewProps {
   destination: TouristDestination;
+  allDestinations: TouristDestination[];
   language: Language;
   bookmarked: boolean;
   isAdmin: boolean;
@@ -68,6 +71,7 @@ export const DefaultDestinationIcon: React.FC<{ categorySlug?: string; className
 const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
   ({
     destination,
+    allDestinations,
     language,
     bookmarked,
     isAdmin,
@@ -75,30 +79,90 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
     toggleBookmark,
   }) => {
     const [imgError, setImgError] = useState(false);
+    const [autoFetchedPhotoUrl, setAutoFetchedPhotoUrl] = useState<string>('');
+    const cardRef = useRef<HTMLDivElement | null>(null);
     const loc = useMemo(() => getLocalizedDestination(destination, language), [destination, language]);
 
-    const rawPhoto = (destination.photoUrl || '').trim();
-    const hasClearPhoto = Boolean(rawPhoto) && !imgError;
+    const rawPhoto = (destination.photoUrl || autoFetchedPhotoUrl || '').trim();
+    const isRealPhoto = Boolean(rawPhoto) && !rawPhoto.startsWith('data:image/svg');
+    const hasClearPhoto = isRealPhoto && !imgError;
+
+    // Reset imgError when photoUrl changes
+    useEffect(() => {
+      setImgError(false);
+    }, [destination.photoUrl, autoFetchedPhotoUrl]);
+
+    // Automatic background photo retrieval when a photo-less attraction enters the viewport
+    useEffect(() => {
+      if (isRealPhoto || destination.categorySlug === 'hotel') return;
+      const node = cardRef.current;
+      if (!node || typeof IntersectionObserver === 'undefined') return;
+
+      let cancelled = false;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (!entry || !entry.isIntersecting) return;
+          observer.disconnect();
+          fetchVerifiedAttractionPhotoFromGoogleMaps(destination, allDestinations)
+            .then((match) => {
+              if (cancelled || !match || !match.photoUrl) return;
+              setAutoFetchedPhotoUrl(match.photoUrl);
+              const nowIso = new Date().toISOString();
+              recordPermanentDestinationOverride({
+                ...destination,
+                photoUrl: match.photoUrl,
+                galleryPhotos: match.galleryPhotos.length > 0 ? match.galleryPhotos : [match.photoUrl],
+                isCustomPhoto: true,
+                photoUpdatedAt: nowIso,
+              });
+            })
+            .catch(() => {});
+        },
+        { rootMargin: '180px' }
+      );
+      observer.observe(node);
+      return () => {
+        cancelled = true;
+        observer.disconnect();
+      };
+    }, [destination, allDestinations, isRealPhoto]);
 
     const resolvedDestPhotoUrl = useMemo(() => {
-      if (!rawPhoto) return '';
+      if (!isRealPhoto) return '';
       const ver = destination.photoUpdatedAt ? encodeURIComponent(destination.photoUpdatedAt) : '20261030v1';
       return rawPhoto.startsWith('/destinations/') && !rawPhoto.includes('?') ? `${rawPhoto}?v=${ver}` : rawPhoto;
-    }, [rawPhoto, destination.photoUpdatedAt]);
+    }, [rawPhoto, isRealPhoto, destination.photoUpdatedAt]);
 
-    // Compact Shop-Menu Style Card (Icon on Left + Name/Province on Right) when destination has no clear HD photo
-    if (!hasClearPhoto) {
+    const isCompactDirectoryRow = destination.id.startsWith('rac-') && !destination.isFeatured;
+
+    // Compact Shop-Menu Style Card (Thumbnail or Default Icon on Left + Name/Province on Right)
+    if (!hasClearPhoto || isCompactDirectoryRow) {
       return (
         <div
+          ref={cardRef}
           data-testid={`dest-row-${destination.id}`}
           onClick={() => setSelectedDestination(destination)}
           className="group rounded-2xl px-3 py-2.5 transition-all duration-150 cursor-pointer flex items-center gap-3 border active:scale-[0.99] bg-white dark:bg-slate-800/90 hover:bg-emerald-50/40 dark:hover:bg-slate-800 border-slate-200/90 dark:border-slate-700/80 shadow-2xs"
         >
-          {/* Left: Clean Destination Category Icon */}
-          <DefaultDestinationIcon
-            categorySlug={destination.categorySlug}
-            className="w-12 h-12 rounded-xl border border-slate-200/80 dark:border-slate-600/70"
-          />
+          {/* Left: High-Quality Google Maps Thumbnail or Default Destination Placeholder Icon */}
+          {hasClearPhoto ? (
+            <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-slate-200/80 dark:border-slate-600/70 bg-slate-100 dark:bg-slate-700 shadow-2xs">
+              <img
+                src={resolvedDestPhotoUrl}
+                alt={loc.name}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+                onError={() => setImgError(true)}
+              />
+            </div>
+          ) : (
+            <DefaultDestinationIcon
+              categorySlug={destination.categorySlug}
+              className="w-12 h-12 rounded-xl border border-slate-200/80 dark:border-slate-600/70"
+            />
+          )}
 
           {/* Right: Destination Name, Province & Category */}
           <div className="flex-1 min-w-0">
@@ -303,13 +367,14 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
 );
 
 const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
-  const { language, setSelectedDestination, isBookmarked, toggleBookmark, currentUser } = useApp();
+  const { destinations, language, setSelectedDestination, isBookmarked, toggleBookmark, currentUser } = useApp();
   const bookmarked = isBookmarked(destination.id);
   const isAdmin = isAdminAccount(currentUser);
 
   return (
     <TouristCardView
       destination={destination}
+      allDestinations={destinations}
       language={language}
       bookmarked={bookmarked}
       isAdmin={isAdmin}

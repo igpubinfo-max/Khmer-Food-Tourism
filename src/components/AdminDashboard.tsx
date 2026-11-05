@@ -27,6 +27,12 @@ import {
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
 import { TouristImageModal } from './TouristImageModal';
+import { DefaultDestinationIcon } from './TouristCard';
+import {
+  batchAutoFetchMissingAttractionPhotos,
+  fetchVerifiedAttractionPhotoFromGoogleMaps,
+  AttractionBatchFetchProgress,
+} from '../services/touristAttractionPhotoService';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
 import {
   getCloudApiConfig,
@@ -144,15 +150,21 @@ export const AdminDashboard: React.FC = () => {
   const [newDestCategory, setNewDestCategory] = useState<DestinationCategorySlug>('temple');
   const [newDestProvince, setNewDestProvince] = useState('ខេត្តសៀមរាប');
   const [newDestAddress, setNewDestAddress] = useState('');
+  const [newDestLatInput, setNewDestLatInput] = useState('');
+  const [newDestLngInput, setNewDestLngInput] = useState('');
   const [newDestFee, setNewDestFee] = useState('');
   const [newDestBestTime, setNewDestBestTime] = useState('ពេញមួយឆ្នាំ');
-  const [newDestPhotoUrl, setNewDestPhotoUrl] = useState('https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=800&auto=format&fit=crop&q=80');
+  const [newDestPhotoUrl, setNewDestPhotoUrl] = useState('');
   const [newDestDescKh, setNewDestDescKh] = useState('');
   const [showAddDestForm, setShowAddDestForm] = useState(false);
   const [selectedDestForImageEdit, setSelectedDestForImageEdit] = useState<TouristDestination | null>(null);
   const [destSearchQuery, setDestSearchQuery] = useState('');
   const [destProvinceFilter, setDestProvinceFilter] = useState('all');
   const [destLocationFilter, setDestLocationFilter] = useState<'all' | 'with_photo' | 'no_photo' | 'verified_gps' | 'needs_gps_review'>('all');
+  const [isBatchFetchingDestPhotos, setIsBatchFetchingDestPhotos] = useState(false);
+  const [destBatchProgress, setDestBatchProgress] = useState<AttractionBatchFetchProgress | null>(null);
+  const [fetchingSingleDestId, setFetchingSingleDestId] = useState<string | null>(null);
+  const cancelDestBatchRef = useRef(false);
   const [adminRestSearchQuery, setAdminRestSearchQuery] = useState('');
   const [adminRestLocationFilter, setAdminRestLocationFilter] = useState<'all' | 'verified_gps' | 'needs_gps_review'>('all');
 
@@ -398,34 +410,147 @@ export const AdminDashboard: React.FC = () => {
 
   const handleCreateDestination = (e: React.FormEvent) => {
     e.preventDefault();
+    const parsedLat = parseFloat(newDestLatInput.trim());
+    const parsedLng = parseFloat(newDestLngInput.trim());
+    const hasCoords = Number.isFinite(parsedLat) && Number.isFinite(parsedLng) && parsedLat !== 0 && parsedLng !== 0;
+
     addDestination({
-      nameKh: newDestNameKh,
-      nameEn: newDestNameEn || newDestNameKh,
+      nameKh: newDestNameKh.trim(),
+      nameEn: (newDestNameEn || newDestNameKh).trim(),
       categorySlug: newDestCategory,
-      categoryKh: newDestCategory === 'temple' ? 'ប្រាសាទបុរាណ' : newDestCategory === 'nature' ? 'ធម្មជាតិ & ទឹកធ្លាក់' : 'ទេសចរណ៍',
+      categoryKh:
+        newDestCategory === 'temple'
+          ? 'ប្រាសាទបុរាណ & វត្តអារាម'
+          : newDestCategory === 'nature' || newDestCategory === 'waterfall'
+          ? 'ធម្មជាតិ & ទឹកធ្លាក់'
+          : newDestCategory === 'beach'
+          ? 'កោះ & ឆ្នេរសមុទ្រ'
+          : newDestCategory === 'mountain'
+          ? 'ភ្នំ & ឧទ្យានជាតិ'
+          : 'វប្បធម៌ និងរមណីយដ្ឋាន',
       categoryEn: newDestCategory,
-      descriptionKh: newDestDescKh,
-      descriptionEn: newDestDescKh,
-      photoUrl: newDestPhotoUrl,
-      provinceKh: newDestProvince,
-      provinceEn: newDestProvince,
-      addressKh: newDestAddress || newDestProvince,
-      addressEn: newDestAddress || newDestProvince,
+      descriptionKh: newDestDescKh.trim() || `${newDestNameKh.trim()} ជាតំបន់ទេសចរណ៍ដ៏ស្រស់ស្អាតនៅក្នុង ${newDestProvince}។`,
+      descriptionEn: newDestDescKh.trim() || `${(newDestNameEn || newDestNameKh).trim()} in ${newDestProvince}, Cambodia.`,
+      photoUrl: newDestPhotoUrl.trim(),
+      provinceKh: newDestProvince.trim(),
+      provinceEn: newDestProvince.trim(),
+      addressKh: (newDestAddress || newDestProvince).trim(),
+      addressEn: (newDestAddress || newDestProvince).trim(),
       entranceFeeKh: newDestFee,
       entranceFeeEn: newDestFee,
       bestTimeToVisitKh: newDestBestTime,
       bestTimeToVisitEn: newDestBestTime,
       mapUrl: '',
-      latitude: 0,
-      longitude: 0,
-      locationVerificationStatus: 'needs_admin_review',
-      locationNeedsReview: true,
-      locationReviewNote: 'New attraction added without GPS coordinates — open Edit GPS to set exact coordinates',
+      latitude: hasCoords ? parsedLat : 0,
+      longitude: hasCoords ? parsedLng : 0,
+      locationVerificationStatus: hasCoords ? 'verified' : 'needs_admin_review',
+      locationNeedsReview: !hasCoords,
+      locationReviewNote: hasCoords
+        ? 'Verified coordinates provided on creation'
+        : 'New attraction added — auto-matching photo & GPS from Google Maps',
       highlightsKh: ['ទេសភាពស្រស់ស្អាត', 'វប្បធម៌ខ្មែរ', 'ខ្យល់អាកាសបរិសុទ្ធ'],
     });
     setNewDestNameKh('');
+    setNewDestNameEn('');
+    setNewDestAddress('');
+    setNewDestLatInput('');
+    setNewDestLngInput('');
+    setNewDestPhotoUrl('');
     setNewDestDescKh('');
     setShowAddDestForm(false);
+  };
+
+  const handleAutoFetchSingleDestPhoto = async (dest: TouristDestination) => {
+    if (fetchingSingleDestId) return;
+    setFetchingSingleDestId(dest.id);
+    try {
+      const match = await fetchVerifiedAttractionPhotoFromGoogleMaps(dest, destinations);
+      if (match && match.photoUrl) {
+        updateDestination({
+          ...dest,
+          photoUrl: match.photoUrl,
+          galleryPhotos: match.galleryPhotos.length > 0 ? match.galleryPhotos : [match.photoUrl],
+          latitude: dest.latitude || match.matchedLat || 0,
+          longitude: dest.longitude || match.matchedLng || 0,
+          googlePlaceId: dest.googlePlaceId || match.matchedPlaceId,
+        });
+        showToast(
+          isKm
+            ? `បានទាញយករូបភាពពី Google Maps សម្រាប់ «${dest.nameKh}» ដោយជោគជ័យ!`
+            : `Fetched verified photo from Google Maps for "${dest.nameEn}"!`,
+          'success'
+        );
+      } else {
+        showToast(
+          isKm
+            ? `មិនพบរូបភាពដែលត្រូវគ្នា 100% សម្រាប់ «${dest.nameKh}» ទេ (រក្សាទុក Icon លំនាំដើម)`
+            : `No verified matching photo found for "${dest.nameEn}" (keeping default placeholder icon).`,
+          'info'
+        );
+      }
+    } finally {
+      setFetchingSingleDestId(null);
+    }
+  };
+
+  const handleBatchAutoFetchDestPhotos = async () => {
+    if (isBatchFetchingDestPhotos) {
+      cancelDestBatchRef.current = true;
+      return;
+    }
+    const missingTargets = destinations.filter(
+      (d) =>
+        d.categorySlug !== 'hotel' &&
+        (!d.photoUrl || !d.photoUrl.trim() || d.photoUrl.startsWith('data:image/svg')) &&
+        (destProvinceFilter === 'all' || d.provinceKh === destProvinceFilter)
+    );
+    if (missingTargets.length === 0) {
+      showToast(
+        isKm
+          ? 'តំបន់ទេសចរណ៍ក្នុងផ្នែកនេះមានរូបភាពគ្រប់អស់ហើយ!'
+          : 'All tourist attractions in this filter already have photos!',
+        'info'
+      );
+      return;
+    }
+
+    cancelDestBatchRef.current = false;
+    setIsBatchFetchingDestPhotos(true);
+    const batchTargets = missingTargets.slice(0, 60);
+    setDestBatchProgress({
+      total: batchTargets.length,
+      processed: 0,
+      matched: 0,
+      skippedNoMatch: 0,
+      currentName: batchTargets[0]?.nameKh || '',
+    });
+
+    try {
+      const finalProgress = await batchAutoFetchMissingAttractionPhotos(
+        batchTargets,
+        destinations,
+        (prog) => setDestBatchProgress({ ...prog }),
+        (dest, match) => {
+          updateDestination({
+            ...dest,
+            photoUrl: match.photoUrl,
+            galleryPhotos: match.galleryPhotos.length > 0 ? match.galleryPhotos : [match.photoUrl],
+            latitude: dest.latitude || match.matchedLat || 0,
+            longitude: dest.longitude || match.matchedLng || 0,
+            googlePlaceId: dest.googlePlaceId || match.matchedPlaceId,
+          });
+        },
+        () => cancelDestBatchRef.current
+      );
+      showToast(
+        isKm
+          ? `បានផ្គូផ្គងរូបភាពពី Google Maps ចំនួន ${finalProgress.matched}/${finalProgress.processed} កន្លែង!`
+          : `Matched ${finalProgress.matched}/${finalProgress.processed} attraction photos from Google Maps!`,
+        finalProgress.matched > 0 ? 'success' : 'info'
+      );
+    } finally {
+      setIsBatchFetchingDestPhotos(false);
+    }
   };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
@@ -3146,20 +3271,68 @@ export const AdminDashboard: React.FC = () => {
                 <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
                   <button
                     type="button"
-                    onClick={() => openGoogleMapsSearchModal('tourism')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold font-khmer text-xs shadow-xs transition active:scale-95 cursor-pointer"
+                    onClick={handleBatchAutoFetchDestPhotos}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold font-khmer text-xs shadow-xs transition active:scale-95 cursor-pointer ${
+                      isBatchFetchingDestPhotos
+                        ? 'bg-rose-600 hover:bg-rose-700 text-white'
+                        : 'bg-amber-500 hover:bg-amber-600 text-slate-950'
+                    }`}
                   >
-                    <span>🗺️ {isKm ? 'នាំចូលពី Google Maps' : 'Import from Google Maps'}</span>
+                    <RefreshCw className={`w-3.5 h-3.5 ${isBatchFetchingDestPhotos ? 'animate-spin' : ''}`} strokeWidth={1.75} />
+                    <span>
+                      {isBatchFetchingDestPhotos
+                        ? isKm
+                          ? 'បញ្ឈប់ការទាញយក'
+                          : 'Stop Auto-Fetch'
+                        : isKm
+                        ? 'ទាញរូបពី Google Maps ស្វ័យប្រវត្តិ'
+                        : 'Auto-Fetch Google Maps Photos'}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openGoogleMapsSearchModal('tourism')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold font-khmer text-xs shadow-xs transition active:scale-95 cursor-pointer"
+                  >
+                    <Compass className="w-3.5 h-3.5" strokeWidth={1.75} />
+                    <span>{isKm ? 'នាំចូលពី Google Maps' : 'Import from Google Maps'}</span>
                   </button>
                   <button
                     onClick={() => setShowAddDestForm(!showAddDestForm)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#064E3B] text-white font-bold hover:bg-[#047857] font-khmer text-xs shadow-xs transition active:scale-95"
                   >
-                    <Plus className="w-3.5 h-3.5 text-emerald-200" />
+                    <Plus className="w-3.5 h-3.5 text-emerald-200" strokeWidth={1.75} />
                     <span>{showAddDestForm ? 'បិទ' : 'បញ្ចូលកន្លែងថ្មី'}</span>
                   </button>
                 </div>
               </div>
+
+              {destBatchProgress && (
+                <div className="p-3 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/70 space-y-1.5 font-khmer">
+                  <div className="flex items-center justify-between text-xs font-bold text-[#064E3B] dark:text-emerald-300">
+                    <span>
+                      {isBatchFetchingDestPhotos
+                        ? isKm
+                          ? `កំពុងផ្គូផ្គងរូបភាពតាមឈ្មោះ & GPS៖ «${destBatchProgress.currentName}»...`
+                          : `Matching photo by Name & GPS: "${destBatchProgress.currentName}"...`
+                        : isKm
+                        ? 'ការទាញយករូបភាពពី Google Maps បានបញ្ចប់'
+                        : 'Google Maps Photo Auto-Fetch Completed'}
+                    </span>
+                    <span>
+                      {destBatchProgress.processed}/{destBatchProgress.total} ({isKm ? 'បានផ្គូផ្គង' : 'Matched'}: {destBatchProgress.matched})
+                    </span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-emerald-200/70 dark:bg-slate-700 overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-600 transition-all duration-200"
+                      style={{
+                        width: `${destBatchProgress.total > 0 ? Math.round((destBatchProgress.processed / destBatchProgress.total) * 100) : 0}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Search & Province Filter */}
               <div className="space-y-2">
@@ -3215,13 +3388,20 @@ export const AdminDashboard: React.FC = () => {
 
               {showAddDestForm && (
                 <form onSubmit={handleCreateDestination} className="p-4 rounded-2xl bg-slate-50 dark:bg-stone-800 border border-slate-200 dark:border-slate-700 dark:border-stone-700 space-y-3 font-khmer">
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <input
                       type="text"
                       required
                       value={newDestNameKh}
                       onChange={(e) => setNewDestNameKh(e.target.value)}
-                      placeholder="ឈ្មោះកន្លែងទេសចរណ៍ *"
+                      placeholder="ឈ្មោះកន្លែងទេសចរណ៍ (ខ្មែរ) *"
+                      className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700 text-xs focus:outline-none focus:border-[#059669]"
+                    />
+                    <input
+                      type="text"
+                      value={newDestNameEn}
+                      onChange={(e) => setNewDestNameEn(e.target.value)}
+                      placeholder="English Name (សម្រាប់ផ្គូផ្គងរូប Google Maps)"
                       className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700 text-xs focus:outline-none focus:border-[#059669]"
                     />
                     <input
@@ -3232,19 +3412,54 @@ export const AdminDashboard: React.FC = () => {
                       className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700 text-xs focus:outline-none focus:border-[#059669]"
                     />
                   </div>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded-xl bg-[#064E3B] text-white font-bold hover:bg-[#047857] font-khmer text-xs transition active:scale-95 shadow-xs"
-                  >
-                    រក្សាទុក
-                  </button>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <select
+                      value={newDestCategory}
+                      onChange={(e) => setNewDestCategory(e.target.value as DestinationCategorySlug)}
+                      className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700 text-xs focus:outline-none focus:border-[#059669]"
+                    >
+                      <option value="temple">ប្រាសាទបុរាណ & វត្តអារាម</option>
+                      <option value="nature">ធម្មជាតិ & ទឹកធ្លាក់</option>
+                      <option value="beach">កោះ & ឆ្នេរសមុទ្រ</option>
+                      <option value="mountain">ភ្នំ & ឧទ្យានជាតិ</option>
+                      <option value="resort">វប្បធម៌ និងរមណីយដ្ឋាន</option>
+                      <option value="ecotourism">អេកូទេសចរណ៍</option>
+                    </select>
+                    <input
+                      type="text"
+                      value={newDestLatInput}
+                      onChange={(e) => setNewDestLatInput(e.target.value)}
+                      placeholder="GPS Latitude (ឧ. 13.4125)"
+                      className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700 text-xs focus:outline-none focus:border-[#059669] font-mono"
+                    />
+                    <input
+                      type="text"
+                      value={newDestLngInput}
+                      onChange={(e) => setNewDestLngInput(e.target.value)}
+                      placeholder="GPS Longitude (ឧ. 103.8670)"
+                      className="px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700 text-xs focus:outline-none focus:border-[#059669] font-mono"
+                    />
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <p className="text-[11px] text-emerald-700 dark:text-emerald-300">
+                      {isKm
+                        ? 'ប្រព័ន្ធនឹងទាញយករូបភាពពី Google Maps ដោយស្វ័យប្រវត្តិតាមឈ្មោះ និងនិយាមកា GPS (ឬប្រើ Icon លំនាំដើមប្រសិនបើមិនមានរូបត្រូវគ្នា)'
+                        : 'Photos are automatically fetched from Google Maps by Place Name & GPS coordinates (or fall back to default placeholder icon).'}
+                    </p>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 rounded-xl bg-[#064E3B] text-white font-bold hover:bg-[#047857] font-khmer text-xs transition active:scale-95 shadow-xs shrink-0"
+                    >
+                      រក្សាទុក & ទាញរូបស្វ័យប្រវត្តិ
+                    </button>
+                  </div>
                 </form>
               )}
 
               {/* Destination Photo & GPS Verification Filter Pills */}
               <div className="flex items-center gap-1.5 flex-wrap font-khmer">
                 {(() => {
-                  const withPhotoCount = destinations.filter((d) => Boolean(d.photoUrl && d.photoUrl.trim())).length;
+                  const withPhotoCount = destinations.filter((d) => Boolean(d.photoUrl && d.photoUrl.trim() && !d.photoUrl.startsWith('data:image/svg'))).length;
                   const noPhotoCount = destinations.length - withPhotoCount;
                   const verifiedDestCount = destinations.filter((d) => isPlaceLocationVerified(d)).length;
                   const reviewDestCount = destinations.length - verifiedDestCount;
@@ -3314,7 +3529,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="space-y-2.5 max-h-[58vh] overflow-y-auto no-scrollbar">
                 {destinations
                   .filter(d => {
-                    const hasPhoto = Boolean(d.photoUrl && d.photoUrl.trim());
+                    const hasPhoto = Boolean(d.photoUrl && d.photoUrl.trim() && !d.photoUrl.startsWith('data:image/svg'));
                     if (destLocationFilter === 'with_photo' && !hasPhoto) return false;
                     if (destLocationFilter === 'no_photo' && hasPhoto) return false;
                     const gpsOk = isPlaceLocationVerified(d);
@@ -3329,23 +3544,32 @@ export const AdminDashboard: React.FC = () => {
                     const matchesProvince = destProvinceFilter === 'all' || d.provinceKh === destProvinceFilter;
                     return matchesSearch && matchesProvince;
                   })
-                  .map((d) => (
+                  .map((d) => {
+                    const hasRealRowPhoto = Boolean(d.photoUrl && d.photoUrl.trim() && !d.photoUrl.startsWith('data:image/svg'));
+                    return (
                     <div 
                       key={d.id} 
                       className="p-3 bg-white dark:bg-stone-800/90 rounded-2xl border border-slate-200 dark:border-slate-700 dark:border-stone-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs hover:border-slate-300 dark:border-slate-600 transition"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        {/* Thumbnail with quick click to edit photo */}
+                        {/* Thumbnail with quick click to edit photo (or DefaultDestinationIcon when no photo) */}
                         <div 
                           onClick={() => setSelectedDestForImageEdit(d)}
                           className="relative w-14 h-14 rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-700 shrink-0 cursor-pointer group border border-slate-200 dark:border-slate-700"
                           title={isKm ? 'ចុចដើម្បីប្តូររូបភាព' : 'Click to change photo'}
                         >
-                          <img 
-                            src={d.photoUrl} 
-                            alt={d.nameKh} 
-                            className="w-full h-full object-cover group-hover:scale-110 transition duration-200" 
-                          />
+                          {hasRealRowPhoto ? (
+                            <img 
+                              src={d.photoUrl} 
+                              alt={d.nameKh} 
+                              className="w-full h-full object-cover group-hover:scale-110 transition duration-200" 
+                            />
+                          ) : (
+                            <DefaultDestinationIcon
+                              categorySlug={d.categorySlug}
+                              className="w-full h-full rounded-xl"
+                            />
+                          )}
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-white">
                             <Camera className="w-4 h-4 text-emerald-200" />
                           </div>
@@ -3379,6 +3603,18 @@ export const AdminDashboard: React.FC = () => {
                       </div>
 
                       <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                        {!hasRealRowPhoto && (
+                          <button
+                            type="button"
+                            disabled={fetchingSingleDestId === d.id}
+                            onClick={() => handleAutoFetchSingleDestPhoto(d)}
+                            className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-khmer font-bold text-xs flex items-center gap-1 transition active:scale-95 shadow-2xs cursor-pointer"
+                            title={isKm ? 'ទាញយករូបភាពពី Google Maps តាមឈ្មោះ និង GPS' : 'Auto-fetch photo from Google Maps by Name & GPS'}
+                          >
+                            <RefreshCw className={`w-3.5 h-3.5 ${fetchingSingleDestId === d.id ? 'animate-spin' : ''}`} strokeWidth={1.75} />
+                            <span>{isKm ? 'ទាញរូប Google' : 'Auto Photo'}</span>
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => {
@@ -3411,7 +3647,8 @@ export const AdminDashboard: React.FC = () => {
                         </button>
                       </div>
                     </div>
-                  ))}
+                  );
+                  })}
               </div>
             </div>
           )}

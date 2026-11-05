@@ -219,6 +219,8 @@ export function includesNormalizedKhmerToken(hay: string, token: string): boolea
   return false;
 }
 
+export const includesKhmerToken = includesNormalizedKhmerToken;
+
 export function isBeverageFood(food: FoodItem): boolean {
   if (food.categorySlug === 'drink') return true;
   const normName = normalizeKhmerFoodText(food.nameKh);
