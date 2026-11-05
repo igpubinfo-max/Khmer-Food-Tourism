@@ -4025,6 +4025,13 @@ export function convertGooglePlaceToRestaurant(place: GooglePlaceCachedItem): Re
     place.photoAttributions && place.photoAttributions.length > 0
       ? ` (រូបភាពពី Google Maps៖ ${place.photoAttributions.slice(0, 2).join(', ')})`
       : '';
+  const rawPlacePhoto = (place.photoUrl || '').trim();
+  const hasRealPhoto = Boolean(rawPlacePhoto) && !rawPlacePhoto.startsWith('data:image/svg');
+  const cleanGallery = Array.isArray(place.photoUrls)
+    ? place.photoUrls.filter((u) => Boolean(u) && !String(u).startsWith('data:image/svg'))
+    : hasRealPhoto
+    ? [rawPlacePhoto]
+    : [];
 
   return {
     id: place.placeId,
@@ -4035,9 +4042,9 @@ export function convertGooglePlaceToRestaurant(place: GooglePlaceCachedItem): Re
     nameEn: place.nameEn || place.nameKh,
     descriptionKh: `${place.nameKh} មានទីតាំងស្ថិតនៅ ${place.address}។ ទាញយកទិន្នន័យផ្លូវការ និងទីតាំង GPS ពីផែនទី Google Maps${attributionSuffix}។`,
     descriptionEn: `${place.nameEn || place.nameKh} located in ${resolvedProvEn}, Cambodia. Imported via Google Maps Platform.`,
-    photoUrl: place.photoUrl,
-    profileImage: place.photoUrl,
-    galleryPhotos: place.photoUrls && place.photoUrls.length > 0 ? place.photoUrls : [place.photoUrl],
+    photoUrl: hasRealPhoto ? rawPlacePhoto : '',
+    profileImage: hasRealPhoto ? rawPlacePhoto : '',
+    galleryPhotos: cleanGallery,
     addressKh: place.address,
     addressEn: place.address,
     provinceKh: place.province,

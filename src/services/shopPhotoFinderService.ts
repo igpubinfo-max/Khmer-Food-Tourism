@@ -31,6 +31,7 @@ import {
 } from './googlePlacesService';
 import type { GooglePlaceCachedItem } from './googlePlacesService';
 import { initialFoods } from '../data/seedData';
+import { fetchVerifiedShopPhotoFromGoogleMaps } from './shopGooglePhotoService';
 
 const PLACES_SEARCH_TEXT_URL = 'https://places.googleapis.com/v1/places:searchText';
 
@@ -397,96 +398,28 @@ export function matchVerifiedCambodiaSpecialtyPhotoForShop(
  */
 export async function findVerifiedGooglePhotoForShop(
   shop: Restaurant,
-  usedFoodIds: Set<string> = new Set()
+  _usedFoodIds: Set<string> = new Set(),
+  allRestaurants: Restaurant[] = []
 ): Promise<ShopPhotoReplacementRequest | null> {
-  const hasCoords = isValidCambodiaCoordinates(shop.latitude, shop.longitude);
-  const name = (shop.nameEn || shop.nameKh || '').trim();
-  if (!name) return null;
-  const province = (shop.provinceEn || shop.provinceKh || '').trim();
-
-  if (!isPlacesV1Blocked()) {
-    const body: Record<string, unknown> = {
-      textQuery: [name, province, 'Cambodia'].filter(Boolean).join(' '),
-      maxResultCount: 5,
-    };
-    if (hasCoords) {
-      body.locationBias = {
-        circle: { center: { latitude: shop.latitude, longitude: shop.longitude }, radius: 1500 },
-      };
-    }
-
-    const places = await placesSearchText(body);
-    let best: { raw: any; score: number; dist: number } | null = null;
-
-    for (const p of places) {
-      if (!p || p.businessStatus === 'CLOSED_PERMANENTLY') continue;
-      if (!Array.isArray(p.photos) || p.photos.length === 0) continue;
-      const types: string[] = Array.isArray(p.types) ? p.types : [];
-      if (!isFoodBusiness(types)) continue;
-      const lat = Number(p.location?.latitude);
-      const lng = Number(p.location?.longitude);
-      if (!isValidCambodiaCoordinates(lat, lng)) continue;
-
-      const placeName = String(p.displayName?.text || '').trim();
-      const score = scoreShopNameMatch(shop, placeName);
-      if (score < MIN_PHOTO_MATCH_SCORE) continue;
-
-      const dist = hasCoords ? calculateHaversineMeters(shop.latitude, shop.longitude, lat, lng) : -1;
-      if (hasCoords) {
-        if (dist > MAX_PHOTO_MATCH_DISTANCE_METERS) continue;
-      } else {
-        const address = String(p.formattedAddress || '').toLowerCase();
-        const provGeo = resolveProvinceGeoConfig(shop.provinceKh || shop.provinceEn);
-        const sameProvince = provGeo
-          ? address.includes(provGeo.en.toLowerCase()) || provGeo.aliases.some((a) => address.includes(a))
-          : false;
-        if (score < 85 || !sameProvince) continue;
-      }
-
-      if (!best || score > best.score || (score === best.score && dist >= 0 && dist < best.dist)) {
-        best = { raw: p, score, dist };
-      }
-    }
-
-    if (best) {
-      const photoUrl = buildThumbnailPhotoUrl(best.raw);
-      if (photoUrl) {
-        return {
-          newPhotoUrl: photoUrl,
-          status: 'pending',
-          submittedAt: new Date().toISOString(),
-          submittedByName: 'Google Places (auto)',
-          source: 'google_places_match',
-          matchedGooglePlaceId: String(best.raw.id || ''),
-          matchedPlaceName: String(best.raw.displayName?.text || ''),
-          matchedPlaceAddress: String(best.raw.formattedAddress || ''),
-          matchedGoogleMapsUrl: best.raw.googleMapsUri || undefined,
-          matchDistanceMeters: best.dist >= 0 ? Math.round(best.dist) : undefined,
-          matchScore: best.score,
-          photoAttribution: firstPhotoAttribution(best.raw),
-        };
-      }
-    }
+  const match = await fetchVerifiedShopPhotoFromGoogleMaps(shop, allRestaurants);
+  if (!match || !match.photoUrl) {
+    return null;
   }
 
-  // Fallback: Verified Cambodia Shop & Signature Dish Matcher (100% unique photo per shop, zero API errors)
-  const matchedFood = matchVerifiedCambodiaSpecialtyPhotoForShop(shop, usedFoodIds);
-  if (!matchedFood) return null;
-
-  const verifiedPhotoUrl = `/foods/${matchedFood.id}.jpg?verified_shop=${encodeURIComponent(shop.id)}`;
   return {
-    newPhotoUrl: verifiedPhotoUrl,
+    newPhotoUrl: match.photoUrl,
     status: 'pending',
     submittedAt: new Date().toISOString(),
-    submittedByName: 'Cambodia Verified Directory (Auto)',
+    submittedByName: 'Google Maps Places (Auto)',
     source: 'google_places_match',
-    matchedGooglePlaceId: shop.googlePlaceId || shop.id,
-    matchedPlaceName: `${shop.nameKh}${shop.nameEn ? ` (${shop.nameEn})` : ''}`,
-    matchedPlaceAddress: `${shop.addressKh || shop.addressEn || ''} • ${shop.provinceKh || shop.provinceEn || ''}`,
-    matchedGoogleMapsUrl: shop.mapUrl,
-    matchDistanceMeters: 0,
-    matchScore: 96,
-    photoAttribution: `ម្ហូបប្រចាំហាង៖ ${matchedFood.nameKh} (${matchedFood.nameEn})`,
+    matchedGooglePlaceId: match.googlePlaceId || match.matchedPlaceId || shop.googlePlaceId || shop.id,
+    matchedPlaceName: match.matchedName || `${shop.nameKh}${shop.nameEn ? ` (${shop.nameEn})` : ''}`,
+    matchedPlaceAddress:
+      match.matchedAddress || `${shop.addressKh || shop.addressEn || ''} • ${shop.provinceKh || shop.provinceEn || ''}`,
+    matchedGoogleMapsUrl: match.matchedGoogleMapsUrl || shop.mapUrl,
+    matchDistanceMeters: match.distanceMeters,
+    matchScore: match.confidenceScore,
+    photoAttribution: match.photoAttribution || 'Google Maps',
   };
 }
 
@@ -539,7 +472,11 @@ export async function findVerifiedPhotosForShops(
     const shop = shops[i];
     onProgress?.({ done: i, total: shops.length, currentName: shop.nameEn || shop.nameKh });
     try {
-      const req = await findVerifiedGooglePhotoForShop(shop, usedFoodIds);
+      const req = await findVerifiedGooglePhotoForShop(
+        shop,
+        usedFoodIds,
+        existingRestaurants.length > 0 ? existingRestaurants : shops
+      );
       if (req) candidates.push({ restaurantId: shop.id, request: req });
       else noMatch.push(shop);
     } catch (err: any) {
@@ -678,16 +615,10 @@ export async function findReplacementShopsWithPhotos(
 
       if (item) {
         const base = convertGooglePlaceToRestaurant(item);
-        const matchedFood = matchVerifiedCambodiaSpecialtyPhotoForShop(
-          { ...oldShop, ...base, signatureDishesKh: oldShop.signatureDishesKh },
-          usedFoodIds
-        );
-        const rawThumb: string = (item as any).__thumb || '';
+        const rawThumb: string = (item as any).__thumb || base.photoUrl || '';
         const verifiedThumb =
           rawThumb && !rawThumb.startsWith('data:image/svg')
             ? rawThumb
-            : matchedFood
-            ? `/foods/${matchedFood.id}.jpg?verified_shop=${encodeURIComponent(base.id)}`
             : '';
 
         if (!verifiedThumb) {
@@ -716,16 +647,14 @@ export async function findReplacementShopsWithPhotos(
             newPhotoUrl: verifiedThumb,
             status: 'pending',
             submittedAt: nowIso,
-            submittedByName: 'Google Maps & Cambodia Directory (Auto)',
+            submittedByName: 'Google Maps Places (Auto)',
             source: 'google_places_replacement_shop',
             matchedGooglePlaceId: item.googlePlaceId || base.id,
             matchedPlaceName: item.nameEn || item.nameKh,
             matchedPlaceAddress: item.address,
             matchedGoogleMapsUrl: (item as any).__mapsUri || item.googleMapsUrl,
             matchScore: 96,
-            photoAttribution:
-              (item as any).__attribution ||
-              (matchedFood ? `ម្ហូបប្រចាំហាង៖ ${matchedFood.nameKh}` : 'Google Maps Cambodia'),
+            photoAttribution: (item as any).__attribution || 'Google Maps',
             replacesRestaurantId: oldShop.id,
             replacesRestaurantName: oldShop.nameKh || oldShop.nameEn,
           },
@@ -735,46 +664,7 @@ export async function findReplacementShopsWithPhotos(
         return;
       }
 
-      // If no external replacement place was returned, attach a verified photo directly to a verified replacement record
-      const matchedFood = matchVerifiedCambodiaSpecialtyPhotoForShop(oldShop, usedFoodIds);
-      if (!matchedFood) {
-        unreplaced.push(oldShop);
-        return;
-      }
-      const replacementId = `rest-verified-${oldShop.id}-${Date.now().toString(36)}-${idx}`;
-      const verifiedThumb = `/foods/${matchedFood.id}.jpg?verified_shop=${encodeURIComponent(replacementId)}`;
-      const newShop: Restaurant = {
-        ...oldShop,
-        id: replacementId,
-        photoUrl: '',
-        profileImage: '',
-        galleryPhotos: [],
-        status: 'approved',
-        isVerified: true,
-        createdAt: nowIso,
-        updatedAt: nowIso,
-        replacedFromRestaurantId: oldShop.id,
-        locationVerificationStatus: 'verified',
-        locationNeedsReview: false,
-        locationVerifiedAt: nowIso,
-        pendingPhotoReplacement: {
-          newPhotoUrl: verifiedThumb,
-          status: 'pending',
-          submittedAt: nowIso,
-          submittedByName: 'Cambodia Verified Directory (Auto)',
-          source: 'google_places_replacement_shop',
-          matchedGooglePlaceId: replacementId,
-          matchedPlaceName: `${oldShop.nameKh} (${oldShop.nameEn})`,
-          matchedPlaceAddress: `${oldShop.addressKh || oldShop.addressEn} • ${oldShop.provinceKh}`,
-          matchedGoogleMapsUrl: oldShop.mapUrl,
-          matchScore: 98,
-          photoAttribution: `ម្ហូបប្រចាំហាង៖ ${matchedFood.nameKh}`,
-          replacesRestaurantId: oldShop.id,
-          replacesRestaurantName: oldShop.nameKh || oldShop.nameEn,
-        },
-      };
-      newShops.push(newShop);
-      knownList.push(newShop);
+      unreplaced.push(oldShop);
     });
     onProgress?.({ done: processed, total: shopsToReplace.length });
   }

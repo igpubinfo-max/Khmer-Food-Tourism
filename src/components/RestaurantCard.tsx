@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Restaurant,
   isAdminAccount,
@@ -12,6 +12,8 @@ import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { ListingRow, ListingFeaturedCard, isVipOwnerListing } from './listing/ListingUI';
+import { fetchVerifiedShopPhotoFromGoogleMaps } from '../services/shopGooglePhotoService';
+import { recordPermanentRestaurantOverride } from '../services/permanentMediaVaultService';
 
 import type { Language } from '../types';
 
@@ -21,6 +23,7 @@ interface RestaurantCardProps {
 
 interface RestaurantCardViewProps {
   restaurant: Restaurant;
+  allRestaurants: Restaurant[];
   language: Language;
   isAdmin: boolean;
   setSelectedRestaurant: (r: Restaurant | null) => void;
@@ -32,6 +35,7 @@ interface RestaurantCardViewProps {
 const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
   ({
     restaurant,
+    allRestaurants,
     language,
     isAdmin,
     setSelectedRestaurant,
@@ -39,14 +43,40 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
     deleteRestaurant,
     trackRestaurantView,
   }) => {
+    const [autoFetchedPhoto, setAutoFetchedPhoto] = useState<string>('');
     const loc = useMemo(() => getLocalizedRestaurant(restaurant, language), [restaurant, language]);
 
     const resolvedShopPhotoUrl = useMemo(() => {
       return sanitizeRestaurantShopPhoto(
         restaurant.id,
-        restaurant.photoUrl || restaurant.profileImage || ''
+        restaurant.photoUrl || restaurant.profileImage || autoFetchedPhoto || ''
       );
-    }, [restaurant.id, restaurant.photoUrl, restaurant.profileImage]);
+    }, [restaurant.id, restaurant.photoUrl, restaurant.profileImage, autoFetchedPhoto]);
+
+    const isVipFeatured = isVipOwnerListing(restaurant);
+
+    useEffect(() => {
+      if (!isVipFeatured || resolvedShopPhotoUrl) return;
+      let cancelled = false;
+      fetchVerifiedShopPhotoFromGoogleMaps(restaurant, allRestaurants)
+        .then((match) => {
+          if (cancelled || !match || !match.photoUrl) return;
+          setAutoFetchedPhoto(match.photoUrl);
+          const nowIso = new Date().toISOString();
+          recordPermanentRestaurantOverride({
+            ...restaurant,
+            photoUrl: match.photoUrl,
+            profileImage: match.photoUrl,
+            galleryPhotos: match.galleryPhotos.length > 0 ? match.galleryPhotos : [match.photoUrl],
+            photoUpdatedAt: nowIso,
+            updatedAt: nowIso,
+          });
+        })
+        .catch(() => {});
+      return () => {
+        cancelled = true;
+      };
+    }, [isVipFeatured, resolvedShopPhotoUrl, restaurant, allRestaurants]);
 
     const handleCardClick = () => {
       trackRestaurantView(restaurant.id);
@@ -123,6 +153,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
         thumb={
           <ShopAvatar
             restaurant={{ ...restaurant, photoUrl: resolvedShopPhotoUrl }}
+            allRestaurants={allRestaurants}
             alt={loc.name}
             className="w-12 h-12 rounded-xl border border-slate-200/80 dark:border-slate-600/70"
           />
@@ -150,6 +181,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
 
 const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
   const {
+    restaurants,
     language,
     setSelectedRestaurant,
     currentUser,
@@ -162,6 +194,7 @@ const RestaurantCardInner: React.FC<RestaurantCardProps> = ({ restaurant }) => {
   return (
     <RestaurantCardView
       restaurant={restaurant}
+      allRestaurants={restaurants}
       language={language}
       isAdmin={isAdmin}
       setSelectedRestaurant={setSelectedRestaurant}

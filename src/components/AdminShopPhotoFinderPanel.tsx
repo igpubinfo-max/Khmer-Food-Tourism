@@ -8,6 +8,7 @@ import {
   getShopsMissingVerifiedPhoto,
   ShopPhotoFinderProgress,
 } from '../services/shopPhotoFinderService';
+import { batchAutoFetchMissingShopPhotos } from '../services/shopGooglePhotoService';
 
 /**
  * Admin tool: automatically finds REAL shop photos on Google Places / Cambodia Verified Directory
@@ -17,6 +18,7 @@ import {
 export const AdminShopPhotoFinderPanel: React.FC = () => {
   const {
     restaurants,
+    updateRestaurant,
     language,
     showToast,
     queueShopPhotoCandidates,
@@ -25,7 +27,7 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
   const isKm = language === 'km';
 
   const [batchSize, setBatchSize] = useState<number>(25);
-  const [running, setRunning] = useState<null | 'match' | 'replace'>(null);
+  const [running, setRunning] = useState<null | 'match' | 'replace' | 'auto_apply'>(null);
   const [progress, setProgress] = useState<ShopPhotoFinderProgress | null>(null);
   const [summary, setSummary] = useState<string>('');
   const [errorText, setErrorText] = useState<string>('');
@@ -124,6 +126,39 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
     }
   };
 
+  const runAutoFetchAndApplyPhotos = async () => {
+    const targets = getShopsMissingVerifiedPhoto(restaurants, 'match').slice(0, batchSize);
+    if (targets.length === 0) {
+      showToast(isKm ? 'គ្មានហាងដែលខ្វះរូបភាពទៀតទេ' : 'No shops are missing photos', 'success');
+      return;
+    }
+    cancelRef.current = false;
+    setRunning('auto_apply');
+    setSummary('');
+    setErrorText('');
+    try {
+      const res = await batchAutoFetchMissingShopPhotos(
+        targets,
+        restaurants,
+        (prog) => setProgress({ done: prog.processed, total: prog.total, currentName: prog.currentName }),
+        (updatedShop) => {
+          updateRestaurant(updatedShop);
+        },
+        () => cancelRef.current
+      );
+      setSummary(
+        isKm
+          ? `បានទាញយក និងដាក់បង្ហាញរូបភាពពី Google Maps ដោយស្វ័យប្រវត្តិសម្រាប់ ${res.matched}/${res.processed} ហាង (ប្រើ Icon លំនាំដើមសម្រាប់ ${res.skippedCount} ហាងដែលមិនមានរូបត្រូវគ្នា)`
+          : `Auto-fetched and applied Google Maps photos for ${res.matched}/${res.processed} shops (${res.skippedCount} kept default placeholder icon)`
+      );
+    } catch (err) {
+      handleError(err);
+    } finally {
+      setRunning(null);
+      setProgress(null);
+    }
+  };
+
   const pct = progress && progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0;
 
   return (
@@ -192,6 +227,20 @@ export const AdminShopPhotoFinderPanel: React.FC = () => {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-2">
+        <button
+          type="button"
+          id="kft-admin-auto-apply-shop-photos"
+          disabled={Boolean(running) || stats.missingForMatch === 0}
+          onClick={runAutoFetchAndApplyPhotos}
+          className="flex-1 px-3 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] disabled:opacity-50 text-white text-[11px] font-bold flex items-center justify-center gap-1.5 transition cursor-pointer disabled:cursor-not-allowed"
+        >
+          {running === 'auto_apply' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+          <span>
+            {isKm
+              ? `ទាញរូបពី Google Maps ស្វ័យប្រវត្តិ (${stats.missingForMatch})`
+              : `Auto-Fetch Google Maps Photos (${stats.missingForMatch})`}
+          </span>
+        </button>
         <button
           type="button"
           id="kft-admin-find-exact-shop-photos"

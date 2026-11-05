@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { resolveFoodPhotoUrl, sanitizeRestaurantShopPhoto } from '../../types';
 import type { Restaurant } from '../../types';
+import { fetchVerifiedShopPhotoFromGoogleMaps } from '../../services/shopGooglePhotoService';
+import { recordPermanentRestaurantOverride } from '../../services/permanentMediaVaultService';
 
 export const DEFAULT_CULINARY_SHOP_PLACEHOLDER = '';
 
@@ -69,9 +71,9 @@ export const DefaultShopIcon: React.FC<DefaultShopIconProps> = ({ className = 'w
 );
 
 export interface ShopAvatarProps {
-  restaurant: Pick<Restaurant, 'isVerified' | 'photoUrl' | 'profileImage' | 'photoUpdatedAt' | 'nameKh' | 'nameEn'> & {
-    id?: string;
-  };
+  restaurant: Pick<Restaurant, 'isVerified' | 'photoUrl' | 'profileImage' | 'photoUpdatedAt' | 'nameKh' | 'nameEn'> &
+    Partial<Restaurant>;
+  allRestaurants?: Restaurant[];
   alt?: string;
   className?: string;
   imgClassName?: string;
@@ -79,18 +81,23 @@ export interface ShopAvatarProps {
 
 /**
  * Renders a restaurant's strictly verified shop photo (`photoUrl` / `profileImage`),
- * or falls back cleanly to the neutral `<DefaultShopIcon />` whenever no verified photo is linked.
+ * automatically retrieves its verified place photo from Google Maps by Name + GPS when visible,
+ * or falls back cleanly to the neutral `<DefaultShopIcon />` whenever no matching photo is available.
  */
 export const ShopAvatar: React.FC<ShopAvatarProps> = ({
   restaurant,
+  allRestaurants,
   alt,
   className = 'w-12 h-12 rounded-xl',
   imgClassName = 'w-full h-full object-cover',
 }) => {
   const [imgError, setImgError] = useState(false);
+  const [autoFetchedPhotoUrl, setAutoFetchedPhotoUrl] = useState<string>('');
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
   const cleanPhoto = sanitizeRestaurantShopPhoto(
     restaurant?.id,
-    restaurant?.photoUrl || restaurant?.profileImage || ''
+    restaurant?.photoUrl || restaurant?.profileImage || autoFetchedPhotoUrl || ''
   );
   const resolvedUrl = cleanPhoto ? resolveFoodPhotoUrl(cleanPhoto, restaurant?.photoUpdatedAt) : '';
 
@@ -98,12 +105,54 @@ export const ShopAvatar: React.FC<ShopAvatarProps> = ({
     setImgError(false);
   }, [resolvedUrl]);
 
+  // Automatically fetch verified shop photo from Google Maps by Name + GPS when a photo-less shop scrolls into view
+  useEffect(() => {
+    if (resolvedUrl || !restaurant?.id || !(restaurant?.nameKh || restaurant?.nameEn)) return;
+    const node = containerRef.current;
+    if (!node || typeof IntersectionObserver === 'undefined') return;
+
+    let cancelled = false;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry || !entry.isIntersecting) return;
+        observer.disconnect();
+        fetchVerifiedShopPhotoFromGoogleMaps(restaurant as Restaurant, allRestaurants || [])
+          .then((match) => {
+            if (cancelled || !match || !match.photoUrl) return;
+            setAutoFetchedPhotoUrl(match.photoUrl);
+            const nowIso = new Date().toISOString();
+            recordPermanentRestaurantOverride({
+              ...(restaurant as Restaurant),
+              photoUrl: match.photoUrl,
+              profileImage: match.photoUrl,
+              galleryPhotos: match.galleryPhotos.length > 0 ? match.galleryPhotos : [match.photoUrl],
+              photoUpdatedAt: nowIso,
+              updatedAt: nowIso,
+            });
+          })
+          .catch(() => {});
+      },
+      { rootMargin: '160px' }
+    );
+    observer.observe(node);
+    return () => {
+      cancelled = true;
+      observer.disconnect();
+    };
+  }, [restaurant, allRestaurants, resolvedUrl]);
+
   if (!resolvedUrl || imgError) {
-    return <DefaultShopIcon className={className} />;
+    return (
+      <div ref={containerRef} className="shrink-0">
+        <DefaultShopIcon className={className} />
+      </div>
+    );
   }
 
   return (
     <div
+      ref={containerRef}
       data-shop-avatar="shop-photo"
       className={`relative overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0 ${className}`}
     >

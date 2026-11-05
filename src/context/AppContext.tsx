@@ -137,6 +137,7 @@ import {
   mergeGoogleMapsPlaceWithExistingRestaurant,
 } from '../services/googlePlacesService';
 import { fetchVerifiedAttractionPhotoFromGoogleMaps } from '../services/touristAttractionPhotoService';
+import { fetchVerifiedShopPhotoFromGoogleMaps } from '../services/shopGooglePhotoService';
 import {
   computeUserIntegritySealSync,
   findLocalAuthoritativeVipEntitlement,
@@ -7536,6 +7537,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSelectedRestaurant(newRest);
     }
 
+    // Automatically retrieve corresponding shop photo from Google Maps by Name + GPS if no photo was provided
+    if (!profileImg) {
+      fetchVerifiedShopPhotoFromGoogleMaps(newRest, restaurants)
+        .then((match) => {
+          if (!match || !match.photoUrl) return;
+          const updatedAtIso = new Date().toISOString();
+          setRestaurants((prev) => {
+            const target = prev.find((r) => r.id === newRest.id);
+            if (!target || target.photoUrl) return prev;
+            const resolvedLat = isValidCambodiaCoordinates(target.latitude, target.longitude)
+              ? target.latitude
+              : match.matchedLat && isValidCambodiaCoordinates(match.matchedLat, match.matchedLng || 0)
+              ? match.matchedLat
+              : target.latitude;
+            const resolvedLng = isValidCambodiaCoordinates(target.latitude, target.longitude)
+              ? target.longitude
+              : match.matchedLng && isValidCambodiaCoordinates(match.matchedLat || 0, match.matchedLng)
+              ? match.matchedLng
+              : target.longitude;
+            const resolvedGpid =
+              target.googlePlaceId ||
+              (isValidOfficialGooglePlaceId(match.matchedPlaceId) ? match.matchedPlaceId : undefined);
+            const coordsNowValid = isValidCambodiaCoordinates(resolvedLat, resolvedLng);
+
+            const enrichedRest: Restaurant = normalizeRestaurant({
+              ...target,
+              photoUrl: match.photoUrl,
+              profileImage: match.photoUrl,
+              galleryPhotos: match.galleryPhotos.length > 0 ? match.galleryPhotos : [match.photoUrl],
+              latitude: coordsNowValid ? resolvedLat : target.latitude,
+              longitude: coordsNowValid ? resolvedLng : target.longitude,
+              googlePlaceId: resolvedGpid,
+              mapUrl: coordsNowValid ? buildCanonicalGoogleMapsPinUrl(resolvedLat, resolvedLng, resolvedGpid) : target.mapUrl,
+              locationVerificationStatus: coordsNowValid ? 'verified' : target.locationVerificationStatus,
+              locationNeedsReview: !coordsNowValid,
+              locationVerifiedAt: coordsNowValid ? updatedAtIso : target.locationVerifiedAt,
+              photoUpdatedAt: updatedAtIso,
+              updatedAt: updatedAtIso,
+            });
+            recordPermanentRestaurantOverride(enrichedRest);
+            const nextList = prev.map((r) => (r.id === newRest.id ? enrichedRest : r));
+            latestSyncStateRef.current.restaurants = nextList;
+            writeRestaurantsToStorageImmediate(nextList);
+            return nextList;
+          });
+        })
+        .catch(() => {});
+    }
+
     if (isPendingManualReview) {
       showToast(
         language === 'km'
@@ -9399,6 +9449,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const mappedRest = convertGooglePlaceToRestaurant(place);
     const rotationCfg = getVipFeaturedRotationConfig(appSettings);
     const featuredUntilIso = new Date(Date.now() + rotationCfg.durationMs).toISOString();
+    const rawCustomRestPhoto = customEdits?.photoUrl?.trim() || mappedRest.photoUrl || '';
+    const hasRealRestImportPhoto =
+      Boolean(rawCustomRestPhoto) && !rawCustomRestPhoto.startsWith('data:image/svg');
     const finalRest: Restaurant = normalizeRestaurant({
       ...mappedRest,
       nameKh: customEdits?.nameKh?.trim() || mappedRest.nameKh,
@@ -9406,8 +9459,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       provinceKh: customEdits?.provinceKh?.trim() || mappedRest.provinceKh,
       addressKh: customEdits?.addressKh?.trim() || mappedRest.addressKh,
       phone: customEdits?.phone?.trim() || mappedRest.phone,
-      photoUrl: customEdits?.photoUrl?.trim() || mappedRest.photoUrl,
-      profileImage: customEdits?.photoUrl?.trim() || mappedRest.profileImage || mappedRest.photoUrl,
+      photoUrl: hasRealRestImportPhoto ? rawCustomRestPhoto : '',
+      profileImage: hasRealRestImportPhoto ? rawCustomRestPhoto : '',
+      galleryPhotos: hasRealRestImportPhoto
+        ? mappedRest.galleryPhotos?.length
+          ? mappedRest.galleryPhotos
+          : [rawCustomRestPhoto]
+        : [],
       membershipTier: 'premium',
       isPromoted: true,
       isFeatured: true,
@@ -9443,6 +9501,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         : `✅ Imported "${finalRest.nameEn}" from Google Maps into the app directory!`,
       'success'
     );
+
+    // Automatically retrieve verified shop photo from Google Maps if imported place lacked a real photo
+    if (!hasRealRestImportPhoto) {
+      fetchVerifiedShopPhotoFromGoogleMaps(finalRest, restaurants)
+        .then((match) => {
+          if (!match || !match.photoUrl) return;
+          const updatedAtIso = new Date().toISOString();
+          setRestaurants((prev) => {
+            const target = prev.find((r) => r.id === finalRest.id);
+            if (!target) return prev;
+            const enrichedRest: Restaurant = normalizeRestaurant({
+              ...target,
+              photoUrl: match.photoUrl,
+              profileImage: match.photoUrl,
+              galleryPhotos: match.galleryPhotos.length > 0 ? match.galleryPhotos : [match.photoUrl],
+              photoUpdatedAt: updatedAtIso,
+              updatedAt: updatedAtIso,
+            });
+            recordPermanentRestaurantOverride(enrichedRest);
+            const next = prev.map((r) => (r.id === finalRest.id ? enrichedRest : r));
+            writeRestaurantsToStorageImmediate(next);
+            return next;
+          });
+        })
+        .catch(() => {});
+    }
+
     return { imported: true, duplicate: false, type: 'restaurant', id: finalRest.id, item: finalRest };
   };
 
