@@ -51,7 +51,12 @@ function loadDestinations() {
     compilerOptions: { module: ts.ModuleKind.CommonJS },
   }).outputText;
   const mod = { exports: {} };
-  const customRequire = (id) => (id.includes('types') ? {} : require(id));
+  const customRequire = (id) => {
+    if (id.includes('types')) return {};
+    if (id.includes('seedRacCambodiaTourDestinations')) return { racCambodiaTourDestinations: [] };
+    if (id.includes('seedHotels100')) return { seedHotels100: [] };
+    return require(id);
+  };
   new Function('module', 'exports', 'require', transpiled)(mod, mod.exports, customRequire);
   return mod.exports.initial100Destinations || [];
 }
@@ -258,7 +263,7 @@ async function runImport() {
   for (let rowNumber = 2; rowNumber <= ws.rowCount; rowNumber++) {
     const row = ws.getRow(rowNumber);
     const id = cellText(row.getCell(2));
-    if (!id || !id.startsWith('dest-')) continue;
+    if (!id || (!id.startsWith('dest-') && !id.startsWith('gmap-') && !id.startsWith('rac-'))) continue;
 
     const isNew = !destMap.has(id);
     const dest = destMap.get(id) || {
@@ -394,11 +399,22 @@ async function runImport() {
 
   if (updatedPhotos > 0 || updatedFields > 0 || addedDestinations > 0) {
     const finalArray = Array.from(destMap.values());
-    const outTs = `import { TouristDestination } from '../types';\n\nexport const initial100Destinations: TouristDestination[] = ${JSON.stringify(
+    const outTs = `import { TouristDestination } from '../types';
+import { racCambodiaTourDestinations } from './seedRacCambodiaTourDestinations';
+import { seedHotels100 } from './seedHotels100';
+
+const baseSeedDestinations: TouristDestination[] = ${JSON.stringify(
       finalArray,
       null,
       2
-    )};\n`;
+    )};
+
+export const initial100Destinations: TouristDestination[] = [
+  ...baseSeedDestinations,
+  ...racCambodiaTourDestinations,
+  ...seedHotels100,
+];
+`;
     fs.writeFileSync(SEED_DEST_PATH, outTs, 'utf8');
     console.log(
       `✅ Travel Excel Import Complete: ${updatedPhotos} photo(s) updated, ${updatedFields} destination text record(s) updated, ${addedDestinations} new destination(s) added.`

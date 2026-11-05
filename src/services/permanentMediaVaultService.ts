@@ -2938,6 +2938,7 @@ export function applyDestinationOverrides(
       ov.photoUrl.startsWith('/destinations/');
     const useOverridePhoto =
       !isOvStaticBundledDestPath &&
+      ovTime >= seedTime - 1000 &&
       (!isSeedBundledStaticPhoto ||
         isGenuineCustomPhotoUrl(ov.photoUrl) ||
         ov.isCustomPhoto ||

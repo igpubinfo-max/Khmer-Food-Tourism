@@ -1863,6 +1863,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               const isOvBundledStaticDestPath = ov.photoUrl.startsWith('/destinations/');
               const useOvPhoto =
                 !isOvBundledStaticDestPath &&
+                ovTime >= seedTime - 1000 &&
                 (!isBundledStaticTempleSeed ||
                   isGenuineCustomPhotoUrl(ov.photoUrl) ||
                   ov.isCustomPhoto ||
