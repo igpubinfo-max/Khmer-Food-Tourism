@@ -177,7 +177,7 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
     Write-Host ""
     Write-Host "  [1/2] Downloading Direct-Install Android APK ($apkOutName)..." -ForegroundColor Green
     if (Test-Path $CurlExe) {
-        & $CurlExe -L --fail --retry 3 --progress-bar -H "Cache-Control: no-cache" -o $apkOutPath "$($apkAsset.browser_download_url)?cb=$ts"
+        & $CurlExe -C - -L --fail --retry 5 --progress-bar -H "Cache-Control: no-cache" -o $apkOutPath "$($apkAsset.browser_download_url)?cb=$ts"
         if ($LASTEXITCODE -ne 0) { throw "curl failed downloading APK." }
     } else {
         Invoke-WebRequest -Uri "$($apkAsset.browser_download_url)?cb=$ts" -OutFile $apkOutPath -UseBasicParsing
@@ -186,7 +186,7 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
     Write-Host ""
     Write-Host "  [2/2] Downloading Google Play Store Bundle ($aabOutName)..." -ForegroundColor Green
     if (Test-Path $CurlExe) {
-        & $CurlExe -L --fail --retry 3 --progress-bar -H "Cache-Control: no-cache" -o $aabOutPath "$($aabAsset.browser_download_url)?cb=$ts"
+        & $CurlExe -C - -L --fail --retry 5 --progress-bar -H "Cache-Control: no-cache" -o $aabOutPath "$($aabAsset.browser_download_url)?cb=$ts"
         if ($LASTEXITCODE -ne 0) { throw "curl failed downloading AAB." }
     } else {
         Invoke-WebRequest -Uri "$($aabAsset.browser_download_url)?cb=$ts" -OutFile $aabOutPath -UseBasicParsing
