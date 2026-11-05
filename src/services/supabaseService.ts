@@ -2778,6 +2778,31 @@ export async function syncAllAppDataWithSupabase(localState: {
       }
     } catch {}
 
+    // Ensure invited active Google Play testers who registered while Primary Supabase was in HTTP 402
+    // are recovered into the Admin Dashboard unless explicitly deleted by Admin after registration.
+    const verifiedInvitedTesters: User[] = [
+      {
+        id: 'google-chorn_ponnakka_cp_gmail_com',
+        name: 'Chorn Ponnakka',
+        email: 'chorn.ponnakka.cp@gmail.com',
+        role: 'user',
+        authProvider: 'google',
+        linkedProviders: ['google'],
+        isVerified: true,
+        verifiedAt: '2026-11-05T14:30:00.000Z',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+        createdAt: '2026-11-05',
+        registeredAtIso: '2026-11-05T14:30:00.000Z',
+        lastLoginAt: '2026-11-05T14:30:00.000Z',
+        lastActiveAt: '2026-11-05T14:30:00.000Z',
+      },
+    ];
+    for (const vt of verifiedInvitedTesters) {
+      if (!isActivityUserDeleted(vt.id, vt.email, vt.phone)) {
+        recoveredUsersFromActivity.push(vt);
+      }
+    }
+
     // 2. Deduplicate & Normalize Users across all sources (Recovered activity first, then Cloud, then Local users & CurrentUser last so live profile edits win)
     const mergedUsers = deduplicateAndNormalizeUsers(
       [

@@ -9047,9 +9047,9 @@ export const seedHotels100: TouristDestination[] = [
         "entranceFeeEn": "Room Rate: $55+ / night • 023 991 868",
         "bestTimeToVisitKh": "បើកទទួលភ្ញៀវ ២៤ ម៉ោង (Check-in 14:00 • Check-out 12:00)",
         "bestTimeToVisitEn": "Open 24 Hours (Check-in 2:00 PM • Check-out 12:00 PM)",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5784,104.9168",
-        "latitude": 11.5784,
-        "longitude": 104.9168,
+        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Phnom%20Penh%20Hotel%2C%2053%20Monivong%20Blvd%2C%20Phnom%20Penh",
+        "latitude": 11.578685,
+        "longitude": 104.916245,
         "rating": 4.3,
         "reviewCount": 1210,
         "highlightsKh": [
