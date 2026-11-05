@@ -154,6 +154,7 @@ export const HotelView: React.FC = () => {
   const hotelCategories = [
     { id: 'all', nameKh: 'គ្រប់ប្រភេទសណ្ឋាគារ', nameEn: 'All Hotels & Stays', nameZh: '全部酒店与客栈' },
     { id: 'verified_big', nameKh: 'សណ្ឋាគារ VIP', nameEn: 'VIP Hotels', nameZh: 'VIP 酒店' },
+    { id: 'hotel_stay', nameKh: 'សណ្ឋាគារ & ភោជនីយដ្ឋាន', nameEn: 'Hotels & Dining', nameZh: '酒店与餐厅' },
     { id: 'luxury_resort', nameKh: 'សណ្ឋាគារប្រណីត & រីសត', nameEn: 'Luxury & Resorts', nameZh: '豪华酒店与度假村' },
     { id: 'boutique_villa', nameKh: 'ប៊ូទិក & វីឡា', nameEn: 'Boutique & Villas', nameZh: '精品酒店与别墅' },
     { id: 'guesthouse', nameKh: 'ផ្ទះសំណាក់ & បឹងហ្គាឡូ', nameEn: 'Guesthouses & Lodges', nameZh: '客栈与木屋' },
