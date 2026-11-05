@@ -113,6 +113,34 @@ const QUERY_STOPWORDS = new Set<string>([
   'cambodian',
   'recommend',
   'craving',
+  'the',
+  'in',
+  'at',
+  'of',
+  'by',
+  'to',
+  'on',
+  'for',
+  'with',
+  'from',
+  'and',
+  'or',
+  'ដឹ',
+  'ឌឺ',
+  'សណ្ឋាគារ',
+  'ផ្ទះសំណាក់',
+  'រីសត',
+  'បឹងហ្គាឡូ',
+  'hotel',
+  'hotels',
+  'resort',
+  'resorts',
+  'guesthouse',
+  'hostel',
+  'motel',
+  'bungalow',
+  'villa',
+  'boutique',
 ]);
 
 const BEVERAGE_OR_SWEET_NAME_RE =
@@ -1030,15 +1058,39 @@ export function searchKhmerFoods(foods: FoodItem[], rawQuery: string): FoodItem[
   const parsed = parseKhmerFoodSearchQuery(rawQuery);
   if (!parsed.normalizedQuery) return [];
 
+  // Do not return food dishes when the user explicitly searches for a hotel / resort / guesthouse
+  if (
+    /(?:\bhotel\b|\bhotels\b|\bresort\b|\bresorts\b|\bguesthouse\b|\bhostel\b|\bbungalow\b|\bmotel\b|សណ្ឋាគារ|ផ្ទះសំណាក់|រីសត|បឹងហ្គាឡូ)/i.test(
+      rawQuery
+    ) &&
+    parsed.flavorIntents.length === 0 &&
+    parsed.categoryIntents.length === 0
+  ) {
+    return [];
+  }
+
   const scored: Array<{ food: FoodItem; score: number }> = [];
   const nameQa = parsed.isFlavorOnlyQuery ? null : analyzeSearchQuery(rawQuery);
+  const requireDistinctiveMatch =
+    Boolean(nameQa && nameQa.distinctive.length > 0) &&
+    parsed.flavorIntents.length === 0 &&
+    parsed.categoryIntents.length === 0 &&
+    (!parsed.occasionIntents || parsed.occasionIntents.length === 0);
+
   for (const food of foods) {
     let score = scoreFoodForKhmerQuery(food, parsed);
-    if (score < 55 && score >= 0 && nameQa && nameQa.distinctive.length > 0) {
-      // Typo-tolerant / partial dish-name fallback (e.g. "amock" → "Amok", "nom banh chok" → "Num Banh Chok")
-      const detail = scoreSearchRecord(nameQa, { names: [food.nameKh, food.nameEn, food.nameZh] });
-      if (detail.matchedInName && detail.score >= 500) {
+    if (nameQa && nameQa.distinctive.length > 0) {
+      const detail = scoreSearchRecord(nameQa, {
+        names: [food.nameKh, food.nameEn, food.nameZh],
+        categories: [food.categoryKh, food.categoryEn, ...(food.ingredientsKh || [])],
+        texts: [food.descriptionKh, food.descriptionEn],
+      });
+      if (score < 55 && score >= 0 && detail.matchedInName && detail.score >= 500) {
+        // Typo-tolerant / partial dish-name fallback (e.g. "amock" → "Amok", "nom banh chok" → "Num Banh Chok")
         score = 56 + Math.round(detail.score / 20);
+      } else if (requireDistinctiveMatch && detail.score < 200 && score < 220) {
+        // Prevent a province-only hit (e.g. "Kampot" in "The Square Kampot") from matching Kampot foods when "Square" didn't match
+        score = 0;
       }
     }
     if (score >= 55) {

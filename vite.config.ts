@@ -44,9 +44,37 @@ function kftVersionManifestPlugin(): Plugin {
     );
   };
 
+  const handleFreeGmapsProxy = (req: any, res: any, next: () => void) => {
+    if (req.url && req.url.startsWith('/__gmaps_free_search')) {
+      const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+      const targetUrl = `https://www.google.com/search${qs}`;
+      fetch(targetUrl, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          'Accept-Language': 'en-US,en;q=0.9,km;q=0.8',
+        },
+      })
+        .then(async (upstream) => {
+          const text = await upstream.text();
+          res.statusCode = upstream.status;
+          res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.end(text);
+        })
+        .catch((err) => {
+          res.statusCode = 502;
+          res.end(String(err?.message || 'Proxy error'));
+        });
+      return;
+    }
+    next();
+  };
+
   return {
     name: 'kft-version-manifest',
     configureServer(server) {
+      server.middlewares.use(handleFreeGmapsProxy);
       server.middlewares.use((req, res, next) => {
         if (req.url && req.url.split('?')[0] === '/version.json') {
           res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -56,6 +84,9 @@ function kftVersionManifestPlugin(): Plugin {
         }
         next();
       });
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(handleFreeGmapsProxy);
     },
     generateBundle() {
       this.emitFile({

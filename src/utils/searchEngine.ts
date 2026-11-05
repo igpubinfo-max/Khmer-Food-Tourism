@@ -68,9 +68,46 @@ const isNonLatinScript = (s: string) => KHMER_RX.test(s) || CJK_RX.test(s);
 export const SEARCH_STOPWORDS = new Set([
   'the', 'a', 'an', 'of', 'and', 'at', 'in', 'on', 'by', 'for', 'to', 'with', 'from', 'near', 'nearby',
   'me', 'my', 'around', 'best', 'top', 'le', 'la', 'les', 'de', 'du', 'des', 'el', 'il',
-  'និង', 'នៅ', 'ក្នុង', 'ជិត', 'ជិតខ្ញុំ', 'របស់', 'ដ៏', 'ល្អ', 'ល្បី',
+  'ដឹ', 'ឌឺ', 'និង', 'នៅ', 'ក្នុង', 'ជិត', 'ជិតខ្ញុំ', 'របស់', 'ដ៏', 'ល្អ', 'ល្បី',
   '的', '在', '和', '附近',
 ]);
+
+/** Cross-script brand/word transliterations so Khmer queries match English-only names and vice-versa. */
+const BRAND_TRANSLITERATION_GROUPS: string[][] = [
+  ['square', 'ស្វែរ', 'សឃ្វែរ'],
+  ['manna', 'ម៉ាន់ណា', '玛娜'],
+  ['malis', 'ម៉ាលីស', 'ម្លិះ', '茉莉'],
+  ['romdeng', 'រំដេង', '高良姜'],
+  ['kravanh', 'ក្រវាញ', '豆蔻'],
+  ['chumnor', 'jomnor', 'ជំនោរ', '微风'],
+  ['sovanna', 'សុវណ្ណា', '苏万纳'],
+  ['brown', 'ប្រោន'],
+  ['brooklyn', 'ប្រ៊ុកលីន', '布鲁克林'],
+  ['jaan', 'ចានបាយ'],
+  ['kinyei', 'គិនយី'],
+  ['nary', 'ណារី', '娜丽'],
+  ['amber', 'អេមប៊ឺ'],
+  ['bamboo', 'ឫស្សី', 'បែមប៊ូ'],
+  ['privilege', 'ព្រីវីលេជ'],
+  ['senses', 'សេនស៍'],
+  ['sailing', 'សេលីង'],
+  ['palace', 'ផាឡេស', 'វាំង'],
+  ['bridge', 'ប្រ៊ីជ', 'ស្ពាន'],
+  ['paradise', 'ភែរើដាយ', 'ប៉ារ៉ាដាយ'],
+  ['rainforest', 'រេនហ្វរេស'],
+  ['cinema', 'រោងកុន', 'ស៊ីនេម៉ា'],
+];
+
+const BRAND_TRANSLIT_MAP = new Map<string, string[]>();
+for (const group of BRAND_TRANSLITERATION_GROUPS) {
+  const normGroup = group.map((w) => normalizeSearchText(w)).filter(Boolean);
+  for (const w of normGroup) {
+    BRAND_TRANSLIT_MAP.set(
+      w,
+      normGroup.filter((other) => other !== w)
+    );
+  }
+}
 
 /** Category / business-type words → soft hints (never sufficient on their own when a name is typed). */
 const CATEGORY_SYNONYM_GROUPS: string[][] = [
@@ -329,7 +366,7 @@ function prepareField(text: string): PreparedField {
  * 1.0 exact word · 0.9 Khmer/CJK substring · 0.85 word prefix · 0.75 compact substring
  * · 0.55–0.7 typo match · 0 no match.
  */
-function matchTokenInField(tok: string, f: PreparedField, allowFuzzy: boolean): number {
+function matchTokenInFieldDirect(tok: string, f: PreparedField, allowFuzzy: boolean): number {
   if (!tok || !f.norm) return 0;
   if (isNonLatinScript(tok)) {
     if (khmerSafeIncludes(f.compact, tok)) return f.tokens.includes(tok) ? 1 : 0.9;
@@ -366,6 +403,18 @@ function matchTokenInField(tok: string, f: PreparedField, allowFuzzy: boolean): 
       const d = damerauLevenshtein(tok, t.slice(0, tok.length), 1);
       if (d <= 1) best = Math.max(best, 0.55);
     }
+  }
+  return best;
+}
+
+function matchTokenInField(tok: string, f: PreparedField, allowFuzzy: boolean): number {
+  const direct = matchTokenInFieldDirect(tok, f, allowFuzzy);
+  if (direct >= 0.85) return direct;
+  const translits = BRAND_TRANSLIT_MAP.get(tok);
+  if (!translits || translits.length === 0) return direct;
+  let best = direct;
+  for (const alt of translits) {
+    best = Math.max(best, matchTokenInFieldDirect(alt, f, false) * 0.95);
   }
   return best;
 }
