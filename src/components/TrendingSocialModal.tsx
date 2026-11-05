@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import {
   X, Utensils, ExternalLink, Navigation, Phone, Share2, Calendar,
   UtensilsCrossed, RefreshCw, ChefHat, CheckCircle2, Play,
-  Search, AlertCircle, RotateCcw, ChevronRight, Loader2
+  Search, AlertCircle, RotateCcw, ChevronRight, Loader2, WifiOff
 } from 'lucide-react';
 import {
   TrendingFoodCategorySlug,
@@ -91,7 +91,61 @@ export const TrendingSocialModal: React.FC = () => {
   const [activePlayerItemId, setActivePlayerItemId] = useState<string | null>(null);
   const [embedFallbackItemIds, setEmbedFallbackItemIds] = useState<Record<string, boolean>>({});
   const [verifyingPlayItemId, setVerifyingPlayItemId] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState<boolean>(
+    () => typeof navigator !== 'undefined' && navigator.onLine === false
+  );
+  const [isRetryingConnection, setIsRetryingConnection] = useState<boolean>(false);
+  const [playerReloadKey, setPlayerReloadKey] = useState<number>(0);
   const activeIframeRef = useRef<HTMLIFrameElement | null>(null);
+
+  /** Lightweight connectivity probe to prevent Android WebView raw error page when offline */
+  const checkYouTubeConnectivity = useCallback(async (): Promise<boolean> => {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      return false;
+    }
+    if (typeof fetch !== 'function') {
+      return true;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 2500);
+    try {
+      await fetch(`https://www.youtube.com/generate_204?_=${Date.now()}`, {
+        method: 'GET',
+        mode: 'no-cors',
+        cache: 'no-store',
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      return true;
+    } catch {
+      clearTimeout(timer);
+      return false;
+    }
+  }, []);
+
+  // Automatically sync online/offline state and reload active video when internet is restored
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleOffline = () => {
+      setIsOffline(true);
+    };
+
+    const handleOnline = async () => {
+      const reachable = await checkYouTubeConnectivity();
+      if (reachable) {
+        setIsOffline(false);
+        setPlayerReloadKey((prev) => prev + 1);
+      }
+    };
+
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [checkYouTubeConnectivity]);
 
   // Concurrency guard ref to prevent overlapping fetches
   const isFetchingRef = useRef<boolean>(false);
@@ -487,8 +541,8 @@ export const TrendingSocialModal: React.FC = () => {
   /**
    * Verify availability & embeddability before playing inline:
    * - Toggle off if already open
-   * - Check oEmbed / thumbnail status if not yet verified
-   * - If unavailable, auto-replace with a verified playable Cambodian video
+   * - Check internet connectivity before mounting YouTube Embed Player so Android WebView
+   *   never renders the raw `Web page not available / net::ERR_INTERNET_DISCONNECTED` screen
    * - If embedding is disabled, show the clear "Watch on YouTube" fallback UI
    */
   const handlePlayOrOpenItem = async (item: OnlineFoodDiscoveryItem) => {
@@ -504,6 +558,17 @@ export const TrendingSocialModal: React.FC = () => {
     }
 
     if (playerInfo.canInlineEmbed && playerInfo.embedUrl) {
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        setIsOffline(true);
+        setActivePlayerItemId(item.id);
+        return;
+      }
+
+      setVerifyingPlayItemId(item.id);
+      const reachable = await checkYouTubeConnectivity();
+      setVerifyingPlayItemId(null);
+
+      setIsOffline(!reachable);
       setActivePlayerItemId(item.id);
       return;
     }
@@ -522,6 +587,31 @@ export const TrendingSocialModal: React.FC = () => {
     if (item.matchedFoodId) {
       const f = foods.find((x) => x.id === item.matchedFoodId);
       if (f) setSelectedFood(f);
+    }
+  };
+
+  /** Retry loading and playing the YouTube Embed Player once internet is restored */
+  const handleRetryVideoPlayback = async (item: OnlineFoodDiscoveryItem) => {
+    setIsRetryingConnection(true);
+    const reachable = await checkYouTubeConnectivity();
+    setIsRetryingConnection(false);
+
+    if (reachable) {
+      setIsOffline(false);
+      setEmbedFallbackItemIds((prev) => ({ ...prev, [item.id]: false }));
+      setPlayerReloadKey((prev) => prev + 1);
+      setActivePlayerItemId(item.id);
+    } else {
+      setIsOffline(true);
+      showToast(
+        tr(
+          language,
+          'សូមភ្ជាប់អ៊ីនធឺណិត ដើម្បីមើលវីដេអូនេះ',
+          'Please connect to the internet to watch this video',
+          '请连接互联网以观看此视频'
+        ),
+        'warning'
+      );
     }
   };
 
@@ -1036,9 +1126,94 @@ export const TrendingSocialModal: React.FC = () => {
                     style={{ contentVisibility: 'auto', containIntrinsicSize: '360px' }}
                     className="rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-sm space-y-3 transition hover:shadow-md"
                   >
-                    {/* Inline YouTube Embed Player OR Fallback OR High-Res Thumbnail */}
+                    {/* Inline YouTube Embed Player OR Offline Friendly Notice OR Fallback OR High-Res Thumbnail */}
                     {isPlayingInline ? (
-                      isEmbedFallback || !playerInfo.embedUrl ? (
+                      isOffline ? (
+                        <div className="relative aspect-16/9 w-full bg-slate-950 overflow-hidden flex flex-col items-center justify-center p-4 text-center">
+                          {/* Keep original video thumbnail visible when offline */}
+                          <img
+                            src={item.thumbnailUrl}
+                            alt={displayTitle}
+                            className="absolute inset-0 w-full h-full object-cover opacity-45 pointer-events-none"
+                            onError={(e) => {
+                              const fallbackFood = item.matchedFoodId
+                                ? foods.find((x) => x.id === item.matchedFoodId)
+                                : undefined;
+                              const fallbackSrc = fallbackFood
+                                ? resolveFoodPhotoUrl(fallbackFood.photoUrl, fallbackFood.id)
+                                : '/welcome/hero-bg.webp';
+                              if (e.currentTarget.src !== window.location.origin + fallbackSrc) {
+                                e.currentTarget.src = fallbackSrc;
+                              }
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/65 to-black/55 pointer-events-none" />
+
+                          {/* Top-left YouTube & Verification attribution badges */}
+                          <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1.5 flex-wrap">
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black shadow-xs bg-red-600 text-white flex items-center gap-1">
+                              <Play className="w-2.5 h-2.5 fill-current" />
+                              <span>YouTube</span>
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full bg-black/70 text-emerald-200 text-[9px] font-bold backdrop-blur-xs flex items-center gap-1 border border-white/15">
+                              <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
+                              <span>{tr(language, item.verificationBadgeKh, item.verificationBadgeEn, item.verificationBadgeZh)}</span>
+                            </span>
+                          </div>
+
+                          {/* Top-right YouTube attribution & Close buttons */}
+                          <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
+                            <button
+                              type="button"
+                              onClick={() => openExternalVideoSafely(playerInfo.watchUrl, displayTitle)}
+                              className="px-2.5 py-1 rounded-lg bg-black/85 hover:bg-red-600 text-white text-[10px] font-bold flex items-center gap-1 border border-white/25 backdrop-blur-xs cursor-pointer transition"
+                              title={tr(language, 'មើលលើ YouTube', 'Watch on YouTube', '在 YouTube 上观看')}
+                            >
+                              <ExternalLink className="w-3 h-3 text-red-400" />
+                              <span>{tr(language, 'មើលលើ YouTube', 'Watch on YouTube', '在 YouTube 观看')}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setActivePlayerItemId(null)}
+                              className="px-2 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold flex items-center gap-1 shadow-md cursor-pointer"
+                            >
+                              <X className="w-3 h-3" />
+                              <span>{tr(language, 'បិទ', 'Close', '关闭')}</span>
+                            </button>
+                          </div>
+
+                          {/* Clean, professional Khmer offline message & Retry button */}
+                          <div className="relative z-10 flex flex-col items-center max-w-xs space-y-2.5 px-3 py-2.5 rounded-2xl bg-slate-900/80 border border-white/15 backdrop-blur-xs shadow-xl">
+                            <div className="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300">
+                              <WifiOff className="w-5 h-5" />
+                            </div>
+                            <p className="text-xs sm:text-sm font-extrabold text-white leading-relaxed">
+                              {tr(
+                                language,
+                                'សូមភ្ជាប់អ៊ីនធឺណិត ដើម្បីមើលវីដេអូនេះ',
+                                'Please connect to the internet to watch this video',
+                                '请连接互联网以观看此视频'
+                              )}
+                            </p>
+                            <button
+                              type="button"
+                              disabled={isRetryingConnection}
+                              onClick={() => handleRetryVideoPlayback(item)}
+                              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-70 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-lg border border-emerald-400/40 cursor-pointer transition"
+                            >
+                              <RefreshCw className={`w-3.5 h-3.5 ${isRetryingConnection ? 'animate-spin' : ''}`} />
+                              <span>{tr(language, 'សាកល្បងម្ដងទៀត', 'Retry', '重试')}</span>
+                            </button>
+                          </div>
+
+                          {/* Keep video title & source attribution visible at bottom */}
+                          <div className="absolute bottom-2 left-3 right-3 z-10 text-left pointer-events-none">
+                            <p className="text-[10px] text-amber-200 font-bold truncate drop-shadow">
+                              📡 {item.sourceName} • 📍 {displayProv}
+                            </p>
+                          </div>
+                        </div>
+                      ) : isEmbedFallback || !playerInfo.embedUrl ? (
                         <div className="relative aspect-16/9 w-full bg-slate-950 flex flex-col items-center justify-center p-4 text-center space-y-2.5">
                           <img
                             src={item.thumbnailUrl}
@@ -1086,6 +1261,7 @@ export const TrendingSocialModal: React.FC = () => {
                       ) : (
                         <div className="relative aspect-16/9 w-full bg-black overflow-hidden shadow-inner">
                           <iframe
+                            key={`${item.id}-${playerReloadKey}`}
                             ref={activeIframeRef}
                             src={playerInfo.embedUrl}
                             title={displayTitle}
@@ -1104,6 +1280,10 @@ export const TrendingSocialModal: React.FC = () => {
                               }
                             }}
                             onError={() => {
+                              if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+                                setIsOffline(true);
+                                return;
+                              }
                               setEmbedFallbackItemIds((prev) => ({ ...prev, [item.id]: true }));
                             }}
                           />
@@ -1140,14 +1320,29 @@ export const TrendingSocialModal: React.FC = () => {
                           loading="lazy"
                           decoding="async"
                           onLoad={(e) => {
-                            if (e.currentTarget.naturalWidth > 0 && e.currentTarget.naturalWidth <= 120) {
+                            if (
+                              !isOffline &&
+                              (typeof navigator === 'undefined' || navigator.onLine !== false) &&
+                              e.currentTarget.naturalWidth > 0 &&
+                              e.currentTarget.naturalWidth <= 120
+                            ) {
                               handleReplaceUnavailableVideo(item, false);
                             }
                           }}
-                          onError={() => {
-                            if (typeof navigator === 'undefined' || navigator.onLine !== false) {
-                              handleReplaceUnavailableVideo(item, false);
+                          onError={(e) => {
+                            if (isOffline || (typeof navigator !== 'undefined' && navigator.onLine === false)) {
+                              const fallbackFood = item.matchedFoodId
+                                ? foods.find((x) => x.id === item.matchedFoodId)
+                                : undefined;
+                              const fallbackSrc = fallbackFood
+                                ? resolveFoodPhotoUrl(fallbackFood.photoUrl, fallbackFood.id)
+                                : '/welcome/hero-bg.webp';
+                              if (e.currentTarget.src !== window.location.origin + fallbackSrc) {
+                                e.currentTarget.src = fallbackSrc;
+                              }
+                              return;
                             }
+                            handleReplaceUnavailableVideo(item, false);
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />

@@ -5,7 +5,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1458;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1461;
 export const APP_RELEASE_DATE = '2026-11-05';
 
 /**
@@ -1583,6 +1583,7 @@ export const isCustomRestaurant = (restaurant?: Restaurant | null): boolean => {
 
 export interface BusinessCategoryOption {
   id: string;
+  value: string;
   businessType: 'restaurant' | 'hotel';
   labelKh: string;
   labelEn: string;
@@ -1597,6 +1598,7 @@ export const BUSINESS_CATEGORY_CATALOG: BusinessCategoryOption[] = [
   // Hotel / Accommodation Categories
   {
     id: 'hotel',
+    value: 'hotel',
     businessType: 'hotel',
     labelKh: '🏨 សណ្ឋាគារ (Hotel)',
     labelEn: '🏨 Hotel & Stay',
@@ -1608,6 +1610,7 @@ export const BUSINESS_CATEGORY_CATALOG: BusinessCategoryOption[] = [
   },
   {
     id: 'resort',
+    value: 'resort',
     businessType: 'hotel',
     labelKh: '🌴 រីសត (Resort)',
     labelEn: '🌴 Resort & Spa',
@@ -1619,6 +1622,7 @@ export const BUSINESS_CATEGORY_CATALOG: BusinessCategoryOption[] = [
   },
   {
     id: 'boutique_villa',
+    value: 'boutique_villa',
     businessType: 'hotel',
     labelKh: '🏡 ប៊ូទិក & វីឡា (Boutique / Villa)',
     labelEn: '🏡 Boutique & Villa',
@@ -1630,6 +1634,7 @@ export const BUSINESS_CATEGORY_CATALOG: BusinessCategoryOption[] = [
   },
   {
     id: 'guesthouse',
+    value: 'guesthouse',
     businessType: 'hotel',
     labelKh: '🛏️ ផ្ទះសំណាក់ & បឹងហ្គាឡូ (Guesthouse)',
     labelEn: '🛏️ Guesthouse & Lodge',
@@ -1642,6 +1647,7 @@ export const BUSINESS_CATEGORY_CATALOG: BusinessCategoryOption[] = [
   // Restaurant / Food Shop Categories
   {
     id: 'restaurant',
+    value: 'restaurant',
     businessType: 'restaurant',
     labelKh: '🍽️ ភោជនីយដ្ឋានម្ហូបខ្មែរ',
     labelEn: '🍽️ Khmer Restaurant',
@@ -1653,6 +1659,7 @@ export const BUSINESS_CATEGORY_CATALOG: BusinessCategoryOption[] = [
   },
   {
     id: 'cafe',
+    value: 'cafe',
     businessType: 'restaurant',
     labelKh: '☕ ហាងកាហ្វេ & ភេសជ្ជៈ',
     labelEn: '☕ Cafe & Beverages',
@@ -1664,6 +1671,7 @@ export const BUSINESS_CATEGORY_CATALOG: BusinessCategoryOption[] = [
   },
   {
     id: 'street_food',
+    value: 'street_food',
     businessType: 'restaurant',
     labelKh: '🍜 អាហារដ្ឋាន / គុយទាវ / បាយ',
     labelEn: '🍜 Noodles, Rice & Eatery',
@@ -1675,6 +1683,7 @@ export const BUSINESS_CATEGORY_CATALOG: BusinessCategoryOption[] = [
   },
   {
     id: 'seafood',
+    value: 'seafood',
     businessType: 'restaurant',
     labelKh: '🦐 គ្រឿងសមុទ្រ & សាច់អាំង',
     labelEn: '🦐 Seafood & BBQ',
@@ -1686,6 +1695,7 @@ export const BUSINESS_CATEGORY_CATALOG: BusinessCategoryOption[] = [
   },
   {
     id: 'bakery',
+    value: 'bakery',
     businessType: 'restaurant',
     labelKh: '🍰 ហាងនំប៉័ង & បង្អែម',
     labelEn: '🍰 Bakery & Desserts',
@@ -1697,6 +1707,7 @@ export const BUSINESS_CATEGORY_CATALOG: BusinessCategoryOption[] = [
   },
   {
     id: 'vegetarian',
+    value: 'vegetarian',
     businessType: 'restaurant',
     labelKh: '🥬 ម្ហូបបួស & សុខភាព',
     labelEn: '🥬 Vegetarian & Healthy',
@@ -1730,6 +1741,8 @@ export const inferBusinessTypeAndCategory = (
   businessCategory: string;
   categoryKh: string;
   categoryEn: string;
+  shortKh: string;
+  shortEn: string;
   labelKh: string;
   labelEn: string;
   emoji: string;
@@ -1771,11 +1784,15 @@ export const inferBusinessTypeAndCategory = (
       subCat = 'guesthouse';
     }
     const found = BUSINESS_CATEGORY_CATALOG.find((c) => c.id === subCat) || BUSINESS_CATEGORY_CATALOG[0];
+    const resolvedCatKh = rawCatKh && !/ម្ហូប|ភោជនីយដ្ឋាន|អាហារដ្ឋាន|កាហ្វេ/.test(rawCatKh) ? rawCatKh : found.shortKh;
+    const resolvedCatEn = rawCatEn && !/restaurant|food|cafe|eatery/i.test(rawCatEn) ? rawCatEn : found.shortEn;
     return {
       businessType: 'hotel',
       businessCategory: found.id,
-      categoryKh: rawCatKh && !/ម្ហូប|ភោជនីយដ្ឋាន|អាហារដ្ឋាន|កាហ្វេ/.test(rawCatKh) ? rawCatKh : found.shortKh,
-      categoryEn: rawCatEn && !/restaurant|food|cafe|eatery/i.test(rawCatEn) ? rawCatEn : found.shortEn,
+      categoryKh: resolvedCatKh,
+      categoryEn: resolvedCatEn,
+      shortKh: resolvedCatKh,
+      shortEn: resolvedCatEn,
       labelKh: found.labelKh,
       labelEn: found.labelEn,
       emoji: found.emoji,
@@ -1802,11 +1819,15 @@ export const inferBusinessTypeAndCategory = (
     BUSINESS_CATEGORY_CATALOG.find((c) => c.businessType === 'restaurant' && c.id === restCat) ||
     BUSINESS_CATEGORY_CATALOG.find((c) => c.id === 'restaurant')!;
 
+  const resolvedRestKh = rawCatKh || foundRest.shortKh;
+  const resolvedRestEn = rawCatEn || foundRest.shortEn;
   return {
     businessType: 'restaurant',
     businessCategory: foundRest.id,
-    categoryKh: rawCatKh || foundRest.shortKh,
-    categoryEn: rawCatEn || foundRest.shortEn,
+    categoryKh: resolvedRestKh,
+    categoryEn: resolvedRestEn,
+    shortKh: resolvedRestKh,
+    shortEn: resolvedRestEn,
     labelKh: foundRest.labelKh,
     labelEn: foundRest.labelEn,
     emoji: foundRest.emoji,

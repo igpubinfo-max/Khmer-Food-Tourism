@@ -70,9 +70,12 @@ export const ManageMenuModal: React.FC = () => {
   const [stagedReplacementPhoto, setStagedReplacementPhoto] = useState<string>('');
 
   // Self-Service Store Info fields
-  const initialInferred = inferBusinessTypeAndCategory(managingRestaurant || {});
-  const [storeBusinessType, setStoreBusinessType] = useState<'restaurant' | 'hotel'>(initialInferred.businessType);
-  const [storeBusinessCategory, setStoreBusinessCategory] = useState<string>(initialInferred.businessCategory);
+  const [storeBusinessType, setStoreBusinessType] = useState<'restaurant' | 'hotel'>(
+    () => inferBusinessTypeAndCategory(managingRestaurant || {}).businessType
+  );
+  const [storeBusinessCategory, setStoreBusinessCategory] = useState<string>(
+    () => inferBusinessTypeAndCategory(managingRestaurant || {}).businessCategory
+  );
   const [storeNameKh, setStoreNameKh] = useState(managingRestaurant?.nameKh || '');
   const [storeNameEn, setStoreNameEn] = useState(managingRestaurant?.nameEn || '');
   const [storePhone, setStorePhone] = useState(managingRestaurant?.phone || '');
@@ -547,6 +550,8 @@ export const ManageMenuModal: React.FC = () => {
                   <img
                     src={managingRestaurant.photoUrl}
                     alt={managingRestaurant.nameKh}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -634,6 +639,8 @@ export const ManageMenuModal: React.FC = () => {
                       <img
                         src={shop.photoUrl}
                         alt={shop.nameKh}
+                        loading="lazy"
+                        decoding="async"
                         className="w-4 h-4 rounded-full object-cover shrink-0"
                       />
                       <span className="max-w-[130px] truncate">
@@ -1439,6 +1446,8 @@ export const ManageMenuModal: React.FC = () => {
                     <img
                       src={currentRest.photoUrl}
                       alt={currentRest.nameKh}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -1493,6 +1502,8 @@ export const ManageMenuModal: React.FC = () => {
                       <img
                         src={currentRest.pendingPhotoReplacement.newPhotoUrl}
                         alt="New replacement photo"
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -1575,6 +1586,8 @@ export const ManageMenuModal: React.FC = () => {
                     <img
                       src={stagedReplacementPhoto}
                       alt="Staged New Shop Photo"
+                      loading="lazy"
+                      decoding="async"
                       className="w-16 h-16 rounded-xl object-cover border border-emerald-500 shrink-0"
                     />
                     <div className="flex-1 min-w-0">

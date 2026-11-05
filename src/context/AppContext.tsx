@@ -4714,7 +4714,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (restId) {
           const found = restaurants.find(r => r.id === restId);
           if (found) {
-            setActiveTab(found.businessType === 'hotel' ? 'hotels' : 'restaurants');
+            setActiveTab(isHotelBusinessRecord(found) ? 'hotels' : 'restaurants');
             setSelectedRestaurant(found);
           }
         } else if (foodId) {

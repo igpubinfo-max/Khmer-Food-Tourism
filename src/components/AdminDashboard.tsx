@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Shield, Utensils, Store, Compass, MessageSquare, 
@@ -170,6 +170,17 @@ export const AdminDashboard: React.FC = () => {
   const cancelDestBatchRef = useRef(false);
   const [adminRestSearchQuery, setAdminRestSearchQuery] = useState('');
   const [adminRestLocationFilter, setAdminRestLocationFilter] = useState<'all' | 'verified_gps' | 'needs_gps_review'>('all');
+  const [visibleAdminFoodCount, setVisibleAdminFoodCount] = useState(50);
+  const [visibleAdminRestCount, setVisibleAdminRestCount] = useState(50);
+  const [visibleAdminDestCount, setVisibleAdminDestCount] = useState(50);
+
+  useEffect(() => {
+    setVisibleAdminRestCount(50);
+  }, [adminRestSearchQuery, adminRestLocationFilter]);
+
+  useEffect(() => {
+    setVisibleAdminDestCount(50);
+  }, [destSearchQuery, destProvinceFilter, destLocationFilter]);
 
   // Form states for Settings & Promotional pricing
   const [playStoreUrl, setPlayStoreUrl] = useState(appSettings.playStoreUrl);
@@ -319,65 +330,173 @@ export const AdminDashboard: React.FC = () => {
     }
   }, [isAdminOpen, activeTab]);
 
+  const shopOnlyRestaurants = useMemo(
+    () => (isAdminOpen ? restaurants.filter(r => !isHotelBusinessRecord(r)) : []),
+    [isAdminOpen, restaurants]
+  );
+  const hotelVipRestaurants = useMemo(
+    () => (isAdminOpen ? restaurants.filter(r => isHotelBusinessRecord(r)) : []),
+    [isAdminOpen, restaurants]
+  );
+  const hotelDestinationsCount = useMemo(
+    () => (isAdminOpen ? destinations.filter(d => d && d.categorySlug === 'hotel').length : 0),
+    [isAdminOpen, destinations]
+  );
+  const pendingRestaurants = useMemo(
+    () => shopOnlyRestaurants.filter(r => r.status === 'pending'),
+    [shopOnlyRestaurants]
+  );
+  const pendingShopUpgradeRequests = useMemo(
+    () => shopOnlyRestaurants.filter(r => r.pendingUpgradeRequest?.status === 'pending'),
+    [shopOnlyRestaurants]
+  );
+  const pendingPhotoReplacementRestaurants = useMemo(
+    () => shopOnlyRestaurants.filter(r => r.pendingPhotoReplacement?.status === 'pending'),
+    [shopOnlyRestaurants]
+  );
+  const reviewedPhotoReplacementRestaurants = useMemo(
+    () =>
+      shopOnlyRestaurants
+        .filter(r => r.pendingPhotoReplacement && r.pendingPhotoReplacement.status !== 'pending')
+        .sort((a, b) =>
+          String(b.pendingPhotoReplacement?.reviewedAt || '').localeCompare(
+            String(a.pendingPhotoReplacement?.reviewedAt || '')
+          )
+        )
+        .slice(0, 12),
+    [shopOnlyRestaurants]
+  );
+  const pendingHotelSubmissions = useMemo(
+    () => hotelVipRestaurants.filter(r => r.status === 'pending'),
+    [hotelVipRestaurants]
+  );
+  const pendingHotelUpgradeRequests = useMemo(
+    () => hotelVipRestaurants.filter(r => r.pendingUpgradeRequest?.status === 'pending'),
+    [hotelVipRestaurants]
+  );
+  const pendingHotelPhotoReplacements = useMemo(
+    () => hotelVipRestaurants.filter(r => r.pendingPhotoReplacement?.status === 'pending'),
+    [hotelVipRestaurants]
+  );
+  const verifiedRestaurantsCount = useMemo(
+    () => shopOnlyRestaurants.filter(r => r.isVerified).length,
+    [shopOnlyRestaurants]
+  );
+  const pendingTxns = useMemo(
+    () =>
+      isAdminOpen
+        ? transactions.filter(t => t.status === 'pending_verification' || t.status === 'needs_more_info')
+        : [],
+    [isAdminOpen, transactions]
+  );
+  const archivedTxns = useMemo(
+    () =>
+      isAdminOpen
+        ? transactions.filter(t => t.status !== 'pending_verification' && t.status !== 'needs_more_info')
+        : [],
+    [isAdminOpen, transactions]
+  );
+  const verifiedTxns = useMemo(
+    () => (isAdminOpen ? transactions.filter(t => t.status === 'verified') : []),
+    [isAdminOpen, transactions]
+  );
+  const rejectedTxns = useMemo(
+    () =>
+      isAdminOpen
+        ? transactions.filter(t => t.status === 'rejected' || t.status === 'failed' || t.status === 'cancelled')
+        : [],
+    [isAdminOpen, transactions]
+  );
+  const pendingSupportTickets = useMemo(
+    () =>
+      isAdminOpen ? supportTickets.filter(t => String(t.status || '').toLowerCase() === 'pending') : [],
+    [isAdminOpen, supportTickets]
+  );
+  const unreadAdminTickets = useMemo(
+    () => (isAdminOpen ? supportTickets.filter(t => t.unreadByAdmin) : []),
+    [isAdminOpen, supportTickets]
+  );
+  const filteredSupportTickets = useMemo(
+    () =>
+      isAdminOpen
+        ? supportTickets.filter(t => {
+            if (ticketFilter === 'all') return true;
+            return String(t.status || '').toLowerCase() === ticketFilter.toLowerCase();
+          })
+        : [],
+    [isAdminOpen, supportTickets, ticketFilter]
+  );
+  const filteredTransactions = useMemo(
+    () =>
+      isAdminOpen
+        ? transactions.filter(t => {
+            if (txnFilter === 'all') return true;
+            if (txnFilter === 'pending')
+              return t.status === 'pending_verification' || t.status === 'needs_more_info';
+            if (txnFilter === 'archived')
+              return t.status !== 'pending_verification' && t.status !== 'needs_more_info';
+            if (txnFilter === 'rejected')
+              return t.status === 'rejected' || t.status === 'failed' || t.status === 'cancelled';
+            return t.status === txnFilter;
+          })
+        : [],
+    [isAdminOpen, transactions, txnFilter]
+  );
+  const filteredAdminRestaurants = useMemo(() => {
+    if (!isAdminOpen) return [];
+    const q = adminRestSearchQuery.trim().toLowerCase();
+    return shopOnlyRestaurants.filter(rest => {
+      const gpsOk = isPlaceLocationVerified(rest);
+      if (adminRestLocationFilter === 'verified_gps' && !gpsOk) return false;
+      if (adminRestLocationFilter === 'needs_gps_review' && gpsOk) return false;
+      if (!q) return true;
+      return (
+        matchesSearchQuery(adminRestSearchQuery, restaurantSearchFields(rest)) ||
+        (rest.nameKh || '').toLowerCase().includes(q) ||
+        (rest.nameEn || '').toLowerCase().includes(q) ||
+        (rest.phone || '').toLowerCase().includes(q) ||
+        (rest.provinceKh || '').toLowerCase().includes(q) ||
+        (rest.provinceEn || '').toLowerCase().includes(q) ||
+        (rest.addressKh || '').toLowerCase().includes(q) ||
+        (rest.ownerName || '').toLowerCase().includes(q) ||
+        (rest.ownerPhone || '').toLowerCase().includes(q) ||
+        (rest.ownerEmail || '').toLowerCase().includes(q) ||
+        (rest.id || '').toLowerCase().includes(q)
+      );
+    });
+  }, [isAdminOpen, shopOnlyRestaurants, adminRestLocationFilter, adminRestSearchQuery]);
+
+  const filteredAdminDestinations = useMemo(() => {
+    if (!isAdminOpen) return [];
+    const q = destSearchQuery.toLowerCase().trim();
+    return destinations.filter(d => {
+      const hasPhoto = Boolean(d.photoUrl && d.photoUrl.trim() && !d.photoUrl.startsWith('data:image/svg'));
+      if (destLocationFilter === 'with_photo' && !hasPhoto) return false;
+      if (destLocationFilter === 'no_photo' && hasPhoto) return false;
+      const gpsOk = isPlaceLocationVerified(d);
+      if (destLocationFilter === 'verified_gps' && !gpsOk) return false;
+      if (destLocationFilter === 'needs_gps_review' && gpsOk) return false;
+      const matchesSearch =
+        !q ||
+        matchesSearchQuery(destSearchQuery, destinationSearchFields(d)) ||
+        (d.nameKh || '').toLowerCase().includes(q) ||
+        (d.nameEn || '').toLowerCase().includes(q) ||
+        (d.provinceKh || '').toLowerCase().includes(q) ||
+        (d.id || '').toLowerCase().includes(q);
+      const matchesProvince = destProvinceFilter === 'all' || d.provinceKh === destProvinceFilter;
+      return matchesSearch && matchesProvince;
+    });
+  }, [isAdminOpen, destinations, destLocationFilter, destSearchQuery, destProvinceFilter]);
+
   if (!isAdminOpen) return null;
 
   const smartCacheStats = getSmartCacheStats();
 
   const isKm = language === 'km';
-  const shopOnlyRestaurants = restaurants.filter(r => !isHotelBusinessRecord(r));
-  const hotelVipRestaurants = restaurants.filter(r => isHotelBusinessRecord(r));
-  const pendingRestaurants = shopOnlyRestaurants.filter(r => r.status === 'pending');
-  const pendingShopUpgradeRequests = shopOnlyRestaurants.filter(
-    r => r.pendingUpgradeRequest?.status === 'pending'
-  );
-  const pendingPhotoReplacementRestaurants = shopOnlyRestaurants.filter(
-    r => r.pendingPhotoReplacement?.status === 'pending'
-  );
-  const reviewedPhotoReplacementRestaurants = shopOnlyRestaurants
-    .filter(r => r.pendingPhotoReplacement && r.pendingPhotoReplacement.status !== 'pending')
-    .sort((a, b) =>
-      String(b.pendingPhotoReplacement?.reviewedAt || '').localeCompare(String(a.pendingPhotoReplacement?.reviewedAt || ''))
-    )
-    .slice(0, 12);
-  const pendingHotelSubmissions = hotelVipRestaurants.filter(r => r.status === 'pending');
-  const pendingHotelUpgradeRequests = hotelVipRestaurants.filter(
-    r => r.pendingUpgradeRequest?.status === 'pending'
-  );
-  const pendingHotelPhotoReplacements = hotelVipRestaurants.filter(
-    r => r.pendingPhotoReplacement?.status === 'pending'
-  );
   const totalPendingShopCount =
     pendingRestaurants.length + pendingShopUpgradeRequests.length + pendingPhotoReplacementRestaurants.length;
   const totalPendingHotelCount =
     pendingHotelSubmissions.length + pendingHotelUpgradeRequests.length + pendingHotelPhotoReplacements.length;
-  const verifiedRestaurantsCount = shopOnlyRestaurants.filter(r => r.isVerified).length;
-  const pendingTxns = transactions.filter(
-    t => t.status === 'pending_verification' || t.status === 'needs_more_info'
-  );
-  const archivedTxns = transactions.filter(
-    t => t.status !== 'pending_verification' && t.status !== 'needs_more_info'
-  );
-  const verifiedTxns = transactions.filter(t => t.status === 'verified');
-  const rejectedTxns = transactions.filter(
-    t => t.status === 'rejected' || t.status === 'failed' || t.status === 'cancelled'
-  );
-  const pendingSupportTickets = supportTickets.filter(t => String(t.status || '').toLowerCase() === 'pending');
-  const unreadAdminTickets = supportTickets.filter(t => t.unreadByAdmin);
-  const filteredSupportTickets = supportTickets.filter(t => {
-    if (ticketFilter === 'all') return true;
-    return String(t.status || '').toLowerCase() === ticketFilter.toLowerCase();
-  });
-
-  const filteredTransactions = transactions.filter(t => {
-    if (txnFilter === 'all') return true;
-    if (txnFilter === 'pending')
-      return t.status === 'pending_verification' || t.status === 'needs_more_info';
-    if (txnFilter === 'archived')
-      return t.status !== 'pending_verification' && t.status !== 'needs_more_info';
-    if (txnFilter === 'rejected')
-      return t.status === 'rejected' || t.status === 'failed' || t.status === 'cancelled';
-    return t.status === txnFilter;
-  });
 
 
   const handleCreateFood = (e: React.FormEvent) => {
@@ -868,8 +987,8 @@ export const AdminDashboard: React.FC = () => {
               </div>
               <p className="text-xs text-emerald-200 font-khmer">
                 {isKm 
-                  ? `គ្រប់គ្រងហាងអាហារ (${shopOnlyRestaurants.length}) សណ្ឋាគារ (${destinations.filter((d) => d && d.categorySlug === 'hotel').length}) មុខម្ហូប (${foods.length}) ទេសចរណ៍ (${destinations.length}) ការទូទាត់ VIP និងសន្តិសុខ` 
-                  : `Manage shops (${shopOnlyRestaurants.length}), hotels (${destinations.filter((d) => d && d.categorySlug === 'hotel').length}), foods (${foods.length}), travel (${destinations.length}), VIP transactions, and security`}
+                  ? `គ្រប់គ្រងហាងអាហារ (${shopOnlyRestaurants.length}) សណ្ឋាគារ (${hotelDestinationsCount}) មុខម្ហូប (${foods.length}) ទេសចរណ៍ (${destinations.length}) ការទូទាត់ VIP និងសន្តិសុខ` 
+                  : `Manage shops (${shopOnlyRestaurants.length}), hotels (${hotelDestinationsCount}), foods (${foods.length}), travel (${destinations.length}), VIP transactions, and security`}
               </p>
             </div>
           </div>
@@ -1012,8 +1131,8 @@ export const AdminDashboard: React.FC = () => {
             <BedDouble className="w-3.5 h-3.5 shrink-0" />
             <span className="min-w-0 break-words text-center leading-tight">
               {isKm
-                ? `សណ្ឋាគារ (${destinations.filter((d) => d && d.categorySlug === 'hotel').length})`
-                : `Hotels (${destinations.filter((d) => d && d.categorySlug === 'hotel').length})`}
+                ? `សណ្ឋាគារ (${hotelDestinationsCount})`
+                : `Hotels (${hotelDestinationsCount})`}
             </span>
             {totalPendingHotelCount > 0 && (
               <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[9px] font-bold shrink-0">
@@ -1125,7 +1244,7 @@ export const AdminDashboard: React.FC = () => {
                 <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500 space-y-2">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <p className="font-bold text-amber-950 dark:text-amber-200 flex items-center gap-2 font-khmer text-xs">
-                      <BedDouble className="w-4 h-4 text-amber-600 animate-bounce" />
+                      <BedDouble className="w-4 h-4 text-amber-600 shrink-0" />
                       <span>
                         {isKm
                           ? `🏨 មានសំណើសណ្ឋាគារ / ផ្ទះសំណាក់ថ្មីចំនួន ${totalPendingHotelCount} កំពុងរង់ចាំការត្រួតពិនិត្យ និងអនុម័តក្នុងផ្នែក «សណ្ឋាគារ»!`
@@ -1147,7 +1266,7 @@ export const AdminDashboard: React.FC = () => {
                 <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500 space-y-2">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <p className="font-bold text-amber-950 dark:text-amber-200 flex items-center gap-2 font-khmer text-xs">
-                      <Store className="w-4 h-4 text-amber-600 animate-bounce" />
+                      <Store className="w-4 h-4 text-amber-600 shrink-0" />
                       <span>
                         {isKm
                           ? `🏪 មានសំណើហាងអាហារថ្មីចំនួន ${totalPendingShopCount} កំពុងរង់ចាំការត្រួតពិនិត្យ និងអនុម័តក្នុងផ្នែក «ហាងអាហារ»!`
@@ -1169,7 +1288,7 @@ export const AdminDashboard: React.FC = () => {
                 <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500 space-y-2">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <p className="font-bold text-amber-950 dark:text-amber-200 flex items-center gap-2 font-khmer text-xs">
-                      <MessageSquare className="w-4 h-4 text-amber-600 animate-bounce" />
+                      <MessageSquare className="w-4 h-4 text-amber-600 shrink-0" />
                       <span>
                         {isKm
                           ? `🔔 មានសារជំនួយបញ្ហាការបង់ប្រាក់ VIP ថ្មីចំនួន ${unreadAdminTickets.length || pendingSupportTickets.length} កំពុងរង់ចាំការឆ្លើយតបពីរដ្ឋបាល!`
@@ -2580,10 +2699,10 @@ export const AdminDashboard: React.FC = () => {
 
               {/* Food List */}
               <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
-                {foods.map((food) => (
+                {foods.slice(0, visibleAdminFoodCount).map((food) => (
                   <div key={food.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-slate-200 dark:border-slate-700 dark:border-stone-700 flex items-center justify-between">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <img src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt)} alt="food" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700" />
+                      <img src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt)} alt="food" loading="lazy" decoding="async" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700" />
                       <div className="overflow-hidden">
                         <h4 className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer truncate">{food.nameKh}</h4>
                         <p className="text-[10px] text-stone-400 truncate">
@@ -2628,6 +2747,17 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
                 ))}
+                {visibleAdminFoodCount < foods.length && (
+                  <button
+                    type="button"
+                    onClick={() => setVisibleAdminFoodCount((c) => c + 60)}
+                    className="w-full py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-khmer font-bold text-xs transition cursor-pointer"
+                  >
+                    {isKm
+                      ? `បង្ហាញមុខម្ហូបបន្ថែម (${visibleAdminFoodCount}/${foods.length})`
+                      : `Show More Foods (${visibleAdminFoodCount}/${foods.length})`}
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -3197,28 +3327,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
-                {shopOnlyRestaurants
-                  .filter((rest) => {
-                    const gpsOk = isPlaceLocationVerified(rest);
-                    if (adminRestLocationFilter === 'verified_gps' && !gpsOk) return false;
-                    if (adminRestLocationFilter === 'needs_gps_review' && gpsOk) return false;
-                    const q = adminRestSearchQuery.trim().toLowerCase();
-                    if (!q) return true;
-                    return (
-                      matchesSearchQuery(adminRestSearchQuery, restaurantSearchFields(rest)) ||
-                      (rest.nameKh || '').toLowerCase().includes(q) ||
-                      (rest.nameEn || '').toLowerCase().includes(q) ||
-                      (rest.phone || '').toLowerCase().includes(q) ||
-                      (rest.provinceKh || '').toLowerCase().includes(q) ||
-                      (rest.provinceEn || '').toLowerCase().includes(q) ||
-                      (rest.addressKh || '').toLowerCase().includes(q) ||
-                      (rest.ownerName || '').toLowerCase().includes(q) ||
-                      (rest.ownerPhone || '').toLowerCase().includes(q) ||
-                      (rest.ownerEmail || '').toLowerCase().includes(q) ||
-                      (rest.id || '').toLowerCase().includes(q)
-                    );
-                  })
-                  .map((rest) => (
+                {filteredAdminRestaurants.slice(0, visibleAdminRestCount).map((rest) => (
                   <div key={rest.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-slate-200 dark:border-slate-700 dark:border-stone-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                     <div
                       onClick={() => setSelectedRestaurant(rest)}
@@ -3305,6 +3414,17 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
                 ))}
+                {visibleAdminRestCount < filteredAdminRestaurants.length && (
+                  <button
+                    type="button"
+                    onClick={() => setVisibleAdminRestCount((c) => c + 60)}
+                    className="w-full py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-khmer font-bold text-xs transition cursor-pointer"
+                  >
+                    {isKm
+                      ? `បង្ហាញហាងបន្ថែម (${visibleAdminRestCount}/${filteredAdminRestaurants.length})`
+                      : `Show More Shops (${visibleAdminRestCount}/${filteredAdminRestaurants.length})`}
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -3706,25 +3826,7 @@ export const AdminDashboard: React.FC = () => {
 
               {/* Destination Items List */}
               <div className="space-y-2.5 max-h-[58vh] overflow-y-auto no-scrollbar">
-                {destinations
-                  .filter(d => {
-                    const hasPhoto = Boolean(d.photoUrl && d.photoUrl.trim() && !d.photoUrl.startsWith('data:image/svg'));
-                    if (destLocationFilter === 'with_photo' && !hasPhoto) return false;
-                    if (destLocationFilter === 'no_photo' && hasPhoto) return false;
-                    const gpsOk = isPlaceLocationVerified(d);
-                    if (destLocationFilter === 'verified_gps' && !gpsOk) return false;
-                    if (destLocationFilter === 'needs_gps_review' && gpsOk) return false;
-                    const q = destSearchQuery.toLowerCase().trim();
-                    const matchesSearch = !q || 
-                      matchesSearchQuery(destSearchQuery, destinationSearchFields(d)) ||
-                      d.nameKh.toLowerCase().includes(q) ||
-                      d.nameEn.toLowerCase().includes(q) ||
-                      d.provinceKh.toLowerCase().includes(q) ||
-                      d.id.toLowerCase().includes(q);
-                    const matchesProvince = destProvinceFilter === 'all' || d.provinceKh === destProvinceFilter;
-                    return matchesSearch && matchesProvince;
-                  })
-                  .map((d) => {
+                {filteredAdminDestinations.slice(0, visibleAdminDestCount).map((d) => {
                     const hasRealRowPhoto = Boolean(d.photoUrl && d.photoUrl.trim() && !d.photoUrl.startsWith('data:image/svg'));
                     return (
                     <div 
@@ -3742,6 +3844,8 @@ export const AdminDashboard: React.FC = () => {
                             <img 
                               src={d.photoUrl} 
                               alt={d.nameKh} 
+                              loading="lazy"
+                              decoding="async"
                               className="w-full h-full object-cover group-hover:scale-110 transition duration-200" 
                             />
                           ) : (
@@ -3829,6 +3933,17 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   );
                   })}
+                {visibleAdminDestCount < filteredAdminDestinations.length && (
+                  <button
+                    type="button"
+                    onClick={() => setVisibleAdminDestCount((c) => c + 60)}
+                    className="w-full py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-khmer font-bold text-xs transition cursor-pointer"
+                  >
+                    {isKm
+                      ? `បង្ហាញតំបន់ទេសចរណ៍បន្ថែម (${visibleAdminDestCount}/${filteredAdminDestinations.length})`
+                      : `Show More Attractions (${visibleAdminDestCount}/${filteredAdminDestinations.length})`}
+                  </button>
+                )}
               </div>
             </div>
           )}

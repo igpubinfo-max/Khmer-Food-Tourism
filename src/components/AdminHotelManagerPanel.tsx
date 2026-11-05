@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Ban,
   BedDouble,
@@ -113,6 +113,11 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'with_photo' | 'no_photo' | 'big_card' | 'compact_row'>('all');
   const [provinceFilter, setProvinceFilter] = useState('all');
+  const [visibleCount, setVisibleCount] = useState(40);
+
+  useEffect(() => {
+    setVisibleCount(40);
+  }, [searchQuery, statusFilter, provinceFilter]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingHotelId, setEditingHotelId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<Partial<TouristDestination>>({});
@@ -485,6 +490,8 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                     <img
                       src={rest.photoUrl}
                       alt={rest.nameKh}
+                      loading="lazy"
+                      decoding="async"
                       className="w-14 h-14 rounded-xl object-cover shrink-0 border border-amber-400"
                     />
                     <div className="min-w-0 flex-1 space-y-1">
@@ -593,6 +600,8 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                     <img
                       src={ch.photoUrl || rest.photoUrl}
                       alt={ch.nameKh || rest.nameKh}
+                      loading="lazy"
+                      decoding="async"
                       className="w-14 h-14 rounded-xl object-cover shrink-0 border-2 border-amber-400"
                     />
                     <div className="min-w-0 flex-1 space-y-1">
@@ -704,6 +713,8 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                       <img
                         src={resolveFoodPhotoUrl(rest.photoUrl)}
                         alt={rest.nameKh}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-24 object-cover rounded-lg border border-slate-200"
                       />
                     </div>
@@ -714,6 +725,8 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                       <img
                         src={resolveFoodPhotoUrl(req.newPhotoUrl)}
                         alt={rest.nameKh}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-24 object-cover rounded-lg border border-amber-400"
                       />
                     </div>
@@ -1019,7 +1032,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
           2. HOTEL ITEMS LIST WITH INLINE ADMIN CONTROLS
           ===================================================================== */}
       <div className="space-y-2.5 max-h-[62vh] overflow-y-auto no-scrollbar">
-        {filteredHotels.map((h) => {
+        {filteredHotels.slice(0, visibleCount).map((h) => {
           const hasPhoto = Boolean(h.photoUrl && h.photoUrl.trim());
           const isBig = isHotelBigCard(h);
           const isVipRecord = vipHotelIdSet.has(h.id);
@@ -1039,7 +1052,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                     title={tr(language, 'ចុចដើម្បីដាក់ ឬប្តូររូបភាពសណ្ឋាគារ', 'Click to upload or change hotel photo', '点击上传或更换酒店图片')}
                   >
                     {hasPhoto ? (
-                      <img src={h.photoUrl} alt={h.nameKh} className="w-full h-full object-cover" />
+                      <img src={h.photoUrl} alt={h.nameKh} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                     ) : (
                       <BedDouble className="w-6 h-6 text-emerald-200" strokeWidth={1.75} />
                     )}
@@ -1297,6 +1310,21 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
             </div>
           );
         })}
+
+        {visibleCount < filteredHotels.length && (
+          <button
+            type="button"
+            onClick={() => setVisibleCount((c) => c + 50)}
+            className="w-full py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold text-xs transition-colors cursor-pointer"
+          >
+            {tr(
+              language,
+              `បង្ហាញសណ្ឋាគារបន្ថែម (${visibleCount}/${filteredHotels.length})`,
+              `Show More Hotels (${visibleCount}/${filteredHotels.length})`,
+              `显示更多酒店 (${visibleCount}/${filteredHotels.length})`
+            )}
+          </button>
+        )}
 
         {filteredHotels.length === 0 && (
           <div className="py-10 text-center text-slate-400 text-xs">

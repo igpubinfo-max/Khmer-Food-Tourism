@@ -1665,6 +1665,8 @@ export const VipAddRestaurantModal: React.FC = () => {
                     <img
                       src={store.photoUrl}
                       alt={store.nameKh}
+                      loading="lazy"
+                      decoding="async"
                       className="w-14 h-14 rounded-xl object-cover shrink-0 border border-emerald-500/40"
                     />
                   ) : (
@@ -1982,7 +1984,7 @@ export const VipAddRestaurantModal: React.FC = () => {
             <div className="rounded-2xl overflow-hidden border-2 border-emerald-500/50 bg-white dark:bg-slate-800 shadow-md">
               <div className="relative h-40 bg-slate-900">
                 {coverPhoto ? (
-                  <img src={coverPhoto} alt={nameKh || nameEn} className="w-full h-full object-cover" />
+                  <img src={coverPhoto} alt={nameKh || nameEn} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 ) : (
                   <DefaultShopIcon className="w-full h-full" />
                 )}
@@ -2613,7 +2615,7 @@ export const VipAddRestaurantModal: React.FC = () => {
                             >
                               <div className="flex items-center gap-2 min-w-0 flex-1">
                                 {dup.photoUrl ? (
-                                  <img src={dup.photoUrl} alt={dup.nameKh} className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                                  <img src={dup.photoUrl} alt={dup.nameKh} loading="lazy" decoding="async" className="w-10 h-10 rounded-lg object-cover shrink-0" />
                                 ) : (
                                   <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
                                     <DefaultShopIcon className="w-full h-full" />
