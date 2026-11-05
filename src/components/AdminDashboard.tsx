@@ -102,16 +102,21 @@ export const AdminDashboard: React.FC = () => {
     }
   }, [isAdminOpen]);
 
-  // Lightweight background refresh while viewing the Users tab (every 2 minutes)
+  // Real-time background cloud sync while Admin Dashboard is open (every 15s when visible)
   useEffect(() => {
-    if (!isAdminOpen || activeTab !== 'users') return;
+    if (!isAdminOpen) return;
+    if (typeof document === 'undefined' || !document.hidden) {
+      if (triggerCloudSyncNow) {
+        triggerCloudSyncNow(true);
+      }
+    }
     const interval = setInterval(() => {
       if (typeof document === 'undefined' || !document.hidden) {
         if (triggerCloudSyncNow) {
-          triggerCloudSyncNow(false);
+          triggerCloudSyncNow(true);
         }
       }
-    }, 120000);
+    }, 15000);
     return () => clearInterval(interval);
   }, [isAdminOpen, activeTab]);
 
@@ -3950,15 +3955,34 @@ export const AdminDashboard: React.FC = () => {
 
           {/* USERS TAB */}
           {activeTab === 'users' && (() => {
-            const deletedIdsSet = new Set(
-              (deletedUsers || []).map(d => (d.id || '').trim().toLowerCase()).filter(Boolean)
-            );
-            const deletedEmailsSet = new Set(
-              (deletedUsers || []).map(d => (d.email || '').trim().toLowerCase()).filter(Boolean)
-            );
-            const deletedPhonesSet = new Set(
-              (deletedUsers || []).map(d => (d.phone || '').replace(/[\s()-]/g, '').trim()).filter(Boolean)
-            );
+            const isUserDeletedByTombstone = (u: User): boolean => {
+              const uId = (u.id || '').trim().toLowerCase();
+              const uEmail = (u.email || '').trim().toLowerCase();
+              const uPhone = (u.phone || '').replace(/[\s()-]/g, '').trim();
+              const uActivityMs = Math.max(
+                u.lastLoginAt ? new Date(u.lastLoginAt).getTime() || 0 : 0,
+                u.registeredAtIso ? new Date(u.registeredAtIso).getTime() || 0 : 0,
+                (u as any).restoredAt ? new Date((u as any).restoredAt).getTime() || 0 : 0
+              );
+              for (const d of deletedUsers || []) {
+                if (!d) continue;
+                const dId = (d.id || '').trim().toLowerCase();
+                const dEmail = (d.email || '').trim().toLowerCase();
+                const dPhone = (d.phone || '').replace(/[\s()-]/g, '').trim();
+                const matched =
+                  (uId && dId && uId === dId) ||
+                  (uEmail && dEmail && uEmail === dEmail) ||
+                  (uPhone.length >= 7 && dPhone.length >= 7 && uPhone === dPhone);
+                if (matched) {
+                  const delMs = d.deletedAt ? new Date(d.deletedAt).getTime() || 0 : 0;
+                  if (delMs > 0 && uActivityMs > delMs + 5000) {
+                    continue;
+                  }
+                  return true;
+                }
+              }
+              return false;
+            };
 
             const deletableUsers = users.filter(u => {
               if (
@@ -3969,15 +3993,10 @@ export const AdminDashboard: React.FC = () => {
               ) {
                 return false;
               }
-              if ((u as any).permanentlyDeleted === true || u.isDisabled === true) {
+              if ((u as any).permanentlyDeleted === true) {
                 return false;
               }
-              const uId = (u.id || '').trim().toLowerCase();
-              const uEmail = (u.email || '').trim().toLowerCase();
-              const uPhone = (u.phone || '').replace(/[\s()-]/g, '').trim();
-              if (uId && deletedIdsSet.has(uId)) return false;
-              if (uEmail && deletedEmailsSet.has(uEmail)) return false;
-              if (uPhone && deletedPhonesSet.has(uPhone)) return false;
+              if (isUserDeletedByTombstone(u)) return false;
               return true;
             });
             const validSelectedIds = selectedUserIdsForDeletion.filter(id =>

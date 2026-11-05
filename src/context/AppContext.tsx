@@ -96,6 +96,7 @@ import {
   mergeAndPushTransactionsToCloud,
   mergeAndPushSupportTicketsToCloud,
   uploadBase64ImageToSupabaseStorage,
+  subscribeToCloudRealtimeUpdates,
 } from '../services/supabaseService';
 import { authenticateAdminWithBiometric, setSavedAdminUsername } from '../services/biometricService';
 import {
@@ -542,7 +543,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const checkIsUserDeleted = (
-    candidate: { id?: string; email?: string; phone?: string; username?: string } | null | undefined,
+    candidate:
+      | {
+          id?: string;
+          email?: string;
+          phone?: string;
+          username?: string;
+          lastLoginAt?: string;
+          registeredAtIso?: string;
+          restoredAt?: string;
+        }
+      | null
+      | undefined,
     list: DeletedUserRecord[] = deletedUsers
   ): boolean => {
     if (!candidate || !Array.isArray(list) || list.length === 0) return false;
@@ -550,18 +562,65 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const candEmail = candidate.email ? String(candidate.email).toLowerCase().trim() : '';
     const candUsername = candidate.username ? String(candidate.username).toLowerCase().trim() : '';
     const candPhone = candidate.phone ? String(candidate.phone).replace(/[\s-+]/g, '') : '';
+    const candActivityMs = Math.max(
+      parseSafeDateMs(candidate.lastLoginAt),
+      parseSafeDateMs(candidate.registeredAtIso),
+      parseSafeDateMs(candidate.restoredAt)
+    );
 
     return list.some(d => {
       if (!d) return false;
-      if (candId && d.id && d.id === candId) return true;
-      if (candEmail && d.email && d.email.toLowerCase().trim() === candEmail) return true;
-      if (candUsername && d.username && d.username.toLowerCase().trim() === candUsername) return true;
+      let matched = false;
+      if (candId && d.id && d.id === candId) matched = true;
+      else if (candEmail && d.email && d.email.toLowerCase().trim() === candEmail) matched = true;
+      else if (candUsername && d.username && d.username.toLowerCase().trim() === candUsername) matched = true;
+      else if (candPhone.length >= 7 && d.phone) {
+        const dPhone = d.phone.replace(/[\s-+]/g, '');
+        if (dPhone.length >= 7 && dPhone === candPhone) matched = true;
+      }
+      if (!matched) return false;
+
+      const delMs = d.deletedAt ? parseSafeDateMs(d.deletedAt) : 0;
+      if (delMs > 0 && candActivityMs > delMs + 5000) {
+        return false;
+      }
+      return true;
+    });
+  };
+
+  const pruneStaleDeletedTombstoneForActiveAuth = (candidate: {
+    id?: string;
+    email?: string;
+    phone?: string;
+    username?: string;
+  }): DeletedUserRecord[] => {
+    const liveList = latestSyncStateRef.current.deletedUsers || deletedUsers;
+    if (!Array.isArray(liveList) || liveList.length === 0) return [];
+    const candId = candidate.id ? String(candidate.id).trim() : '';
+    const candEmail = candidate.email ? String(candidate.email).toLowerCase().trim() : '';
+    const candUsername = candidate.username ? String(candidate.username).toLowerCase().trim() : '';
+    const candPhone = candidate.phone ? String(candidate.phone).replace(/[\s-+]/g, '') : '';
+
+    const filtered = liveList.filter(d => {
+      if (!d) return false;
+      if (candId && d.id && d.id === candId) return false;
+      if (candEmail && d.email && d.email.toLowerCase().trim() === candEmail) return false;
+      if (candUsername && d.username && d.username.toLowerCase().trim() === candUsername) return false;
       if (candPhone.length >= 7 && d.phone) {
         const dPhone = d.phone.replace(/[\s-+]/g, '');
-        if (dPhone.length >= 7 && dPhone === candPhone) return true;
+        if (dPhone.length >= 7 && dPhone === candPhone) return false;
       }
-      return false;
+      return true;
     });
+
+    if (filtered.length !== liveList.length) {
+      latestSyncStateRef.current.deletedUsers = filtered;
+      setDeletedUsers(filtered);
+      try {
+        localStorage.setItem('kft_deleted_users_v1', JSON.stringify(filtered));
+      } catch {}
+    }
+    return filtered;
   };
 
   const sanitizeUserSocialAccounts = (u: User): User => {
@@ -4199,7 +4258,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const triggerCloudSyncNow = async (force: boolean = false): Promise<boolean> => {
     if (!isSupabaseConfigured()) return false;
-    if (isSupabaseEgressCooldownActive() && !(force && isAdminOpen)) return false;
     if (!force && typeof document !== 'undefined' && document.hidden) return false;
     const now = Date.now();
     if (cloudSyncInFlightRef.current) {
@@ -4209,7 +4267,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return false;
     }
-    if (!force && now - lastCloudSyncAtRef.current < 300000) {
+    const minSyncIntervalMs = isAdminOpen ? 10_000 : 45_000;
+    if (!force && now - lastCloudSyncAtRef.current < minSyncIntervalMs) {
       return false;
     }
     cloudSyncInFlightRef.current = true;
@@ -4674,6 +4733,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     let syncTimer: any;
     let periodicSyncInterval: any;
+    let unsubscribeRealtimeCloud: (() => void) | null = null;
     const handleVisibilityCloudSync = () => {
       if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
         triggerCloudSyncNow(false);
@@ -4699,10 +4759,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (isAppActiveRef.current && (typeof document === 'undefined' || !document.hidden)) {
           triggerCloudSyncNow(false);
         }
-      }, 600000);
+      }, 60000);
       if (typeof document !== 'undefined') {
         document.addEventListener('visibilitychange', handleVisibilityCloudSync);
       }
+      // Subscribe to real-time SSE stream so new tester registrations, Google sign-ins, support messages,
+      // and shop submissions appear immediately (< 1 second) without manual refresh or re-login.
+      unsubscribeRealtimeCloud = subscribeToCloudRealtimeUpdates((evt) => {
+        if (!evt || !evt.key) return;
+        if (evt.key.startsWith(USER_RECORD_PREFIX) && evt.payload && typeof evt.payload === 'object') {
+          const incomingUser = evt.payload as User;
+          if (incomingUser.id || incomingUser.email) {
+            pruneStaleDeletedTombstoneForActiveAuth(incomingUser);
+            setUsers((prev) => {
+              const liveDel = latestSyncStateRef.current.deletedUsers || [];
+              const next = deduplicateAndNormalizeUsers([...prev, incomingUser], liveDel);
+              latestSyncStateRef.current.users = next;
+              safeSetCriticalAccountStorage('kft_users_v5', next);
+              return next;
+            });
+            setLastUsersSyncedAt(new Date().toISOString());
+          }
+          return;
+        }
+        if ((evt.key === 'kft_cloud_users_v2' || evt.key === 'kft_cloud_users_v1') && Array.isArray(evt.payload)) {
+          const incomingUsers = evt.payload as User[];
+          if (incomingUsers.length > 0) {
+            setUsers((prev) => {
+              const liveDel = latestSyncStateRef.current.deletedUsers || [];
+              const next = deduplicateAndNormalizeUsers([...prev, ...incomingUsers], liveDel);
+              latestSyncStateRef.current.users = next;
+              safeSetCriticalAccountStorage('kft_users_v5', next);
+              return next;
+            });
+            setLastUsersSyncedAt(new Date().toISOString());
+          }
+          return;
+        }
+        if (
+          evt.key === 'kft_cloud_support_tickets_v1' ||
+          evt.key === 'kft_cloud_transactions_v1' ||
+          evt.key === 'kft_cloud_custom_restaurants_v1' ||
+          evt.key === 'kft_cloud_deleted_users_v1'
+        ) {
+          triggerCloudSyncNow(true);
+        }
+      });
     }
     // Handle direct shared deep links (?restaurant=..., ?food=..., ?destination=...)
     try {
@@ -4735,6 +4837,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return () => {
       unsubscribeMediaVault();
+      if (unsubscribeRealtimeCloud) unsubscribeRealtimeCloud();
       if (syncTimer) clearTimeout(syncTimer);
       if (periodicSyncInterval) clearInterval(periodicSyncInterval);
       if (typeof document !== 'undefined') {
@@ -5041,14 +5144,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
    */
   const syncLoggedInUserFromCloud = (userObj: User) => {
     safeSetCriticalAccountStorage('kft_current_user_v5', userObj);
+    const cleanedDeleted = pruneStaleDeletedTombstoneForActiveAuth(userObj);
     if (!isSupabaseConfigured()) return;
-    upsertSingleUserToCloud(userObj, latestSyncStateRef.current.deletedUsers || deletedUsers, true)
+    upsertSingleUserToCloud(userObj, cleanedDeleted, true)
       .then(cloudMerged => {
         if (Array.isArray(cloudMerged) && cloudMerged.length > 0) {
           setUsers(prev => {
             const next = deduplicateAndNormalizeUsers(
-              [...cloudMerged, ...prev],
-              latestSyncStateRef.current.deletedUsers || deletedUsers
+              [...cloudMerged, ...prev, userObj],
+              latestSyncStateRef.current.deletedUsers || cleanedDeleted
             );
             latestSyncStateRef.current.users = next;
             safeSetCriticalAccountStorage('kft_users_v5', next);
@@ -5106,20 +5210,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const emailVal = isPhone ? `user_${cleanDigits}@phone.kh` : (clean.includes('@') ? clean : `${clean}@user.kh`);
     const nowIso = new Date().toISOString();
 
-    // 1. Strictly block permanently deleted accounts from logging back in
-    if (
-      checkIsUserDeleted({ id: clean, email: clean, phone: cleanDigits, username: clean }) ||
-      checkIsUserDeleted({ email: emailVal })
-    ) {
-      recordSecurityAudit('DELETED_USER_LOGIN_BLOCKED', 'BLOCKED', 'AuthModal', `Blocked login attempt by deleted account: ${identifier}`);
-      showToast(
-        language === 'km'
-          ? '🚫 គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ដោយរដ្ឋបាល (Admin) ហើយមិនអាចចូលប្រើប្រាស់បានទៀតទេ។'
-          : '🚫 This account has been permanently deleted by the Administrator and can no longer log in.',
-        'warning'
-      );
-      return false;
-    }
+    // Clear any stale deletion tombstone so invited testers can sign in and re-register cleanly
+    const activeDeletedList = pruneStaleDeletedTombstoneForActiveAuth({
+      id: clean,
+      email: emailVal,
+      phone: cleanDigits,
+      username: clean,
+    });
 
     const existing = users.find(u =>
       doesUserMatchTarget(u, { id: clean, email: emailVal, phone: isPhone ? cleanDigits : undefined }) ||
@@ -6802,20 +6899,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const displayName = name.trim() || (isPhone ? `អ្នកប្រើប្រាស់ ${cleanId}` : cleanId.split('@')[0]);
     const nowIso = new Date().toISOString();
 
-    // Block permanently deleted accounts from re-registering or logging in
-    if (
-      checkIsUserDeleted({ email: cleanId, phone: cleanPhoneDigits }) ||
-      checkIsUserDeleted({ email: emailVal })
-    ) {
-      recordSecurityAudit('DELETED_USER_REGISTER_BLOCKED', 'BLOCKED', 'AuthModal', `Blocked registration attempt by deleted account: ${emailOrPhone}`);
-      showToast(
-        language === 'km'
-          ? '🚫 គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ដោយរដ្ឋបាល (Admin) ហើយមិនអាចចូលប្រើប្រាស់បានទៀតទេ។'
-          : '🚫 This account has been permanently deleted by the Administrator and can no longer log in.',
-        'warning'
-      );
-      return false;
-    }
+    // Clear any stale deletion tombstone so invited testers can register cleanly
+    pruneStaleDeletedTombstoneForActiveAuth({
+      email: emailVal,
+      phone: cleanPhoneDigits,
+    });
 
     // Check if user already exists
     const existing = users.find(u =>
@@ -6911,20 +6999,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
     const nowIso = new Date().toISOString();
 
-    // Strictly block permanently deleted accounts from logging in via Google
-    if (
-      checkIsUserDeleted({ id: profile.id, email: cleanEmail, phone: profile.phone }) ||
-      checkIsUserDeleted({ id: canonicalGoogleId, email: cleanEmail })
-    ) {
-      recordSecurityAudit('DELETED_USER_GOOGLE_LOGIN_BLOCKED', 'BLOCKED', 'AuthModal', `Blocked Google login attempt by deleted account: ${cleanEmail || profile.id}`);
-      showToast(
-        language === 'km'
-          ? '🚫 គណនីនេះត្រូវបានលុបជាអចិន្ត្រៃយ៍ដោយរដ្ឋបាល (Admin) ហើយមិនអាចចូលប្រើប្រាស់បានទៀតទេ។'
-          : '🚫 This account has been permanently deleted by the Administrator and can no longer log in.',
-        'warning'
-      );
-      return false;
-    }
+    // Clear any stale deletion tombstone so invited Google testers can sign in cleanly
+    pruneStaleDeletedTombstoneForActiveAuth({
+      id: canonicalGoogleId,
+      email: cleanEmail,
+      phone: profile.phone,
+    });
 
     // Check if user already exists with this canonical ID, legacy ID, or Email
     const existing = users.find(u =>

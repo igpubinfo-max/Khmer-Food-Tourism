@@ -22,6 +22,25 @@ export function buildCanonicalGoogleUserId(email: string): string {
   return `google-${cleanEmail.replace(/[^a-z0-9]/g, '_')}`;
 }
 
+let cachedNativeGoogleAuthPlugin: any = null;
+
+export async function getNativeGoogleAuthPlugin(): Promise<any> {
+  if (cachedNativeGoogleAuthPlugin) return cachedNativeGoogleAuthPlugin;
+  try {
+    const { Capacitor, registerPlugin } = await import('@capacitor/core');
+    if (!Capacitor.isNativePlatform()) return null;
+    const win = window as any;
+    if (win?.Capacitor?.Plugins?.NativeGoogleAuth) {
+      cachedNativeGoogleAuthPlugin = win.Capacitor.Plugins.NativeGoogleAuth;
+      return cachedNativeGoogleAuthPlugin;
+    }
+    cachedNativeGoogleAuthPlugin = registerPlugin<any>('NativeGoogleAuth');
+    return cachedNativeGoogleAuthPlugin;
+  } catch {
+    return (window as any)?.Capacitor?.Plugins?.NativeGoogleAuth || null;
+  }
+}
+
 /**
  * Initiates the authentic Google Sign-In popup flow (identical to Pacdora, Canva, YouTube)
  * Automatically detects the Google account currently active in Chrome / on the device.

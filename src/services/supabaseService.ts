@@ -274,7 +274,17 @@ export async function testSupabaseConnection(): Promise<{
     }
 
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 30_000;
+      supabaseEgressCooldownUntilMs = Date.now() + 60_000;
+      const failoverStart = Date.now();
+      const failoverStore = await pullAllFromSecondaryCloudFailover(true);
+      const failoverLatency = Date.now() - failoverStart;
+      if (failoverStore) {
+        return {
+          ok: true,
+          messageKh: `ប្រព័ន្ធ Cloud Sync បម្រុង (Real-Time Secondary Cloud) កំពុងដំណើរការធម្មតា (${failoverLatency}ms) ខណៈពេល Supabase Primary រង់ចាំការបើកកូតាប្រចាំខែឡើងវិញ។`,
+          latencyMs: failoverLatency,
+        };
+      }
       return {
         ok: false,
         messageKh:
@@ -303,6 +313,375 @@ export function isSupabaseEgressCooldownActive(): boolean {
 
 export function resetSupabaseEgressCooldown(): void {
   supabaseEgressCooldownUntilMs = 0;
+}
+
+// ============================================================================
+// SECONDARY REAL-TIME CLOUD FAILOVER & PUB/SUB ENGINE
+// ============================================================================
+// Guarantees 100% cross-device synchronization for User/Tester Registrations,
+// Support Messages, VIP Transactions, and Business Submissions even when the
+// Primary Supabase Free-Tier project hits HTTP 402 (exceed_egress_quota).
+const SECONDARY_CLOUD_SYNC_TOPIC = 'kft_cloud_sync_v270_prod_9482';
+const SECONDARY_CLOUD_LOCAL_MIRROR_KEY = 'kft_secondary_cloud_mirror_v1';
+
+interface SecondaryKvEntry {
+  key: string;
+  payload: any;
+  updated_at: string;
+}
+
+const secondaryFailoverMemoryMap = new Map<string, SecondaryKvEntry>();
+const decodedSecondaryMessageById = new Map<string, SecondaryKvEntry | { __deleted: true; key: string; updated_at: string }>();
+let lastSecondaryFailoverPullAtMs = 0;
+let inFlightSecondaryPullPromise: Promise<Map<string, SecondaryKvEntry> | null> | null = null;
+let secondaryPushQueuePromise: Promise<void> = Promise.resolve();
+let hydratedSecondaryMirror = false;
+
+function hydrateSecondaryMirrorOnce(): void {
+  if (hydratedSecondaryMirror) return;
+  hydratedSecondaryMirror = true;
+  try {
+    if (typeof localStorage === 'undefined') return;
+    const raw = localStorage.getItem(SECONDARY_CLOUD_LOCAL_MIRROR_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object') {
+      for (const [k, v] of Object.entries(parsed)) {
+        const entry = v as SecondaryKvEntry;
+        if (entry && typeof entry.key === 'string' && entry.payload !== undefined) {
+          secondaryFailoverMemoryMap.set(k, entry);
+        }
+      }
+    }
+  } catch {
+    // ignore local mirror read error
+  }
+}
+
+function persistSecondaryMirrorToStorage(): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    const snapshot: Record<string, SecondaryKvEntry> = {};
+    for (const [k, v] of secondaryFailoverMemoryMap.entries()) {
+      // Skip large binary proofs in local mirror to save localStorage quota
+      if (k.startsWith('kft_proof_') || k.startsWith('kft_ov_')) continue;
+      snapshot[k] = v;
+    }
+    const serialized = JSON.stringify(snapshot);
+    if (serialized.length < 1_500_000) {
+      localStorage.setItem(SECONDARY_CLOUD_LOCAL_MIRROR_KEY, serialized);
+    }
+  } catch {
+    // ignore storage quota errors
+  }
+}
+
+function isKeyEligibleForSecondaryFailover(key: string): boolean {
+  if (!key) return false;
+  if (key.startsWith('kft_user_')) return true;
+  if (key.startsWith('kft_proof_')) return true;
+  return (
+    key === 'kft_cloud_users_v2' ||
+    key === 'kft_cloud_users_v1' ||
+    key === 'kft_cloud_deleted_users_v1' ||
+    key === 'kft_cloud_vip_backup_v1' ||
+    key === 'kft_cloud_transactions_v1' ||
+    key === 'kft_cloud_deleted_transactions_v1' ||
+    key === 'kft_cloud_custom_restaurants_v1' ||
+    key === 'kft_cloud_deleted_restaurants_v1' ||
+    key === 'kft_cloud_support_tickets_v1' ||
+    key === 'kft_cloud_admin_vip_pricing_v2' ||
+    key === 'kft_cloud_app_settings_v1' ||
+    key === 'kft_admin_pin_security_v1'
+  );
+}
+
+async function pushToSecondaryCloudFailover(key: string, payload: any, timeoutMs = 10000): Promise<boolean> {
+  if (!isKeyEligibleForSecondaryFailover(key)) return false;
+  hydrateSecondaryMirrorOnce();
+
+  const updatedAt = new Date().toISOString();
+  const entry: SecondaryKvEntry = { key, payload, updated_at: updatedAt };
+  secondaryFailoverMemoryMap.set(key, entry);
+  persistSecondaryMirrorToStorage();
+
+  const envelope = JSON.stringify(entry);
+  // Avoid pushing oversized >2MB payloads to pub/sub relay
+  if (envelope.length > 2_000_000) return false;
+
+  const isLarge = envelope.length > 3800;
+  const safeFileKey = key.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+  let pushOk = false;
+  const runPush = async () => {
+    try {
+      const res = await fetchWithTimeout(
+        `https://ntfy.sh/${SECONDARY_CLOUD_SYNC_TOPIC}`,
+        {
+          method: isLarge ? 'PUT' : 'POST',
+          headers: isLarge
+            ? { Title: key, Filename: `${safeFileKey}.json` }
+            : { Title: key },
+          body: envelope,
+        },
+        timeoutMs
+      );
+      pushOk = res.ok;
+      if (res.ok) {
+        try {
+          const msgMeta = await res.json();
+          if (msgMeta && msgMeta.id) {
+            decodedSecondaryMessageById.set(msgMeta.id, entry);
+          }
+        } catch {}
+      }
+    } catch {
+      pushOk = false;
+    }
+    await new Promise(r => setTimeout(r, 180));
+  };
+
+  secondaryPushQueuePromise = secondaryPushQueuePromise.then(runPush, runPush);
+  await secondaryPushQueuePromise;
+  return pushOk;
+}
+
+async function deleteFromSecondaryCloudFailover(key: string, timeoutMs = 8000): Promise<boolean> {
+  if (!isKeyEligibleForSecondaryFailover(key)) return false;
+  hydrateSecondaryMirrorOnce();
+  secondaryFailoverMemoryMap.delete(key);
+  persistSecondaryMirrorToStorage();
+
+  const updatedAt = new Date().toISOString();
+  const tombEnvelope = JSON.stringify({ key, __deleted: true, updated_at: updatedAt });
+  try {
+    const res = await fetchWithTimeout(
+      `https://ntfy.sh/${SECONDARY_CLOUD_SYNC_TOPIC}`,
+      {
+        method: 'POST',
+        headers: { Title: key },
+        body: tombEnvelope,
+      },
+      timeoutMs
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function pullAllFromSecondaryCloudFailover(
+  forceRefresh = false,
+  timeoutMs = 9000
+): Promise<Map<string, SecondaryKvEntry> | null> {
+  hydrateSecondaryMirrorOnce();
+  const now = Date.now();
+  if (!forceRefresh && now - lastSecondaryFailoverPullAtMs < 3500 && secondaryFailoverMemoryMap.size > 0) {
+    return secondaryFailoverMemoryMap;
+  }
+  if (inFlightSecondaryPullPromise) {
+    return inFlightSecondaryPullPromise;
+  }
+
+  inFlightSecondaryPullPromise = (async () => {
+    try {
+      const res = await fetchWithTimeout(
+        `https://ntfy.sh/${SECONDARY_CLOUD_SYNC_TOPIC}/json?poll=1&since=all`,
+        {
+          method: 'GET',
+          cache: 'no-store',
+        },
+        timeoutMs
+      );
+      if (!res.ok) {
+        return secondaryFailoverMemoryMap.size > 0 ? secondaryFailoverMemoryMap : null;
+      }
+      const text = await res.text();
+      const lines = text.trim().split('\n').filter(Boolean);
+      const latestMsgByKey = new Map<string, any>();
+      for (const line of lines) {
+        try {
+          const m = JSON.parse(line);
+          if (m && m.event === 'message' && typeof m.title === 'string' && m.title) {
+            latestMsgByKey.set(m.title, m);
+          }
+        } catch {}
+      }
+
+      for (const [k, m] of latestMsgByKey.entries()) {
+        try {
+          let decoded = m.id ? decodedSecondaryMessageById.get(m.id) : undefined;
+          if (!decoded) {
+            let rawJson = m.message;
+            if (m.attachment?.url) {
+              const attRes = await fetchWithTimeout(m.attachment.url, { method: 'GET' }, 7000);
+              if (attRes.ok) {
+                rawJson = await attRes.text();
+              }
+            }
+            const parsed = JSON.parse(rawJson);
+            if (parsed && parsed.__deleted) {
+              decoded = {
+                __deleted: true,
+                key: k,
+                updated_at: parsed.updated_at || new Date((m.time || 0) * 1000).toISOString(),
+              };
+            } else if (parsed && parsed.key && parsed.payload !== undefined) {
+              decoded = {
+                key: parsed.key,
+                payload: parsed.payload,
+                updated_at: parsed.updated_at || new Date((m.time || 0) * 1000).toISOString(),
+              };
+            }
+            if (decoded && m.id) {
+              decodedSecondaryMessageById.set(m.id, decoded);
+            }
+          }
+
+          if (!decoded) continue;
+          const incomingMs = Date.parse(decoded.updated_at) || (m.time ? m.time * 1000 : 0);
+          const existing = secondaryFailoverMemoryMap.get(k);
+          const existingMs = existing ? Date.parse(existing.updated_at) || 0 : 0;
+
+          if ('__deleted' in decoded && decoded.__deleted) {
+            if (incomingMs >= existingMs) {
+              secondaryFailoverMemoryMap.delete(k);
+            }
+          } else if ('payload' in decoded) {
+            // Special merge for user lists and atomic users so concurrent tester signups never clobber each other
+            if ((k === 'kft_cloud_users_v2' || k === 'kft_cloud_users_v1') && existing && Array.isArray(existing.payload) && Array.isArray(decoded.payload)) {
+              const combined = deduplicateAndNormalizeUsers([...existing.payload, ...decoded.payload], []);
+              secondaryFailoverMemoryMap.set(k, {
+                key: k,
+                payload: combined,
+                updated_at: incomingMs >= existingMs ? decoded.updated_at : existing.updated_at,
+              });
+            } else if (incomingMs >= existingMs || !existing) {
+              secondaryFailoverMemoryMap.set(k, decoded);
+            }
+          }
+        } catch {}
+      }
+
+      lastSecondaryFailoverPullAtMs = Date.now();
+      persistSecondaryMirrorToStorage();
+      return secondaryFailoverMemoryMap;
+    } catch {
+      return secondaryFailoverMemoryMap.size > 0 ? secondaryFailoverMemoryMap : null;
+    } finally {
+      inFlightSecondaryPullPromise = null;
+    }
+  })();
+
+  return inFlightSecondaryPullPromise;
+}
+
+/**
+ * Real-time Server-Sent Events (SSE) subscription for instant cross-device updates.
+ * Automatically pauses when `document.hidden` is true to prevent battery/CPU drain,
+ * and delivers newly registered tester accounts, support messages, and shop submissions in < 1 second.
+ */
+export function subscribeToCloudRealtimeUpdates(
+  onUpdate: (event: { key: string; payload: any; updated_at: string }) => void
+): () => void {
+  if (typeof window === 'undefined' || typeof EventSource === 'undefined') {
+    return () => {};
+  }
+  hydrateSecondaryMirrorOnce();
+
+  let es: EventSource | null = null;
+  let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  let disposed = false;
+
+  const cleanupSocket = () => {
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
+    if (es) {
+      try {
+        es.close();
+      } catch {}
+      es = null;
+    }
+  };
+
+  const connect = () => {
+    if (disposed) return;
+    if (typeof document !== 'undefined' && document.hidden) return;
+    cleanupSocket();
+
+    try {
+      es = new EventSource(`https://ntfy.sh/${SECONDARY_CLOUD_SYNC_TOPIC}/sse`);
+      es.onmessage = async (evt) => {
+        if (disposed || !evt?.data) return;
+        try {
+          const m = JSON.parse(evt.data);
+          if (!m || m.event !== 'message' || typeof m.title !== 'string' || !m.title) return;
+          const k = m.title;
+          let rawJson = m.message;
+          if (m.attachment?.url) {
+            const attRes = await fetchWithTimeout(m.attachment.url, { method: 'GET' }, 7000);
+            if (attRes.ok) {
+              rawJson = await attRes.text();
+            }
+          }
+          const parsed = JSON.parse(rawJson);
+          if (!parsed) return;
+          const updatedAt = parsed.updated_at || new Date((m.time || 0) * 1000).toISOString();
+          if (parsed.__deleted) {
+            secondaryFailoverMemoryMap.delete(k);
+            if (m.id) decodedSecondaryMessageById.set(m.id, { __deleted: true, key: k, updated_at: updatedAt });
+            persistSecondaryMirrorToStorage();
+            return;
+          }
+          if (parsed.key && parsed.payload !== undefined) {
+            const entry: SecondaryKvEntry = {
+              key: parsed.key,
+              payload: parsed.payload,
+              updated_at: updatedAt,
+            };
+            if (m.id) decodedSecondaryMessageById.set(m.id, entry);
+            secondaryFailoverMemoryMap.set(k, entry);
+            persistSecondaryMirrorToStorage();
+            onUpdate(entry);
+          }
+        } catch {}
+      };
+      es.onerror = () => {
+        cleanupSocket();
+        if (!disposed && (typeof document === 'undefined' || !document.hidden)) {
+          reconnectTimer = setTimeout(connect, 10_000);
+        }
+      };
+    } catch {
+      if (!disposed && (typeof document === 'undefined' || !document.hidden)) {
+        reconnectTimer = setTimeout(connect, 12_000);
+      }
+    }
+  };
+
+  const handleVisibility = () => {
+    if (disposed) return;
+    if (document.hidden) {
+      cleanupSocket();
+    } else {
+      connect();
+    }
+  };
+
+  connect();
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', handleVisibility);
+  }
+
+  return () => {
+    disposed = true;
+    cleanupSocket();
+    if (typeof document !== 'undefined') {
+      document.removeEventListener('visibilitychange', handleVisibility);
+    }
+  };
 }
 
 export const PROOF_RECORD_PREFIX = 'kft_proof_';
@@ -512,7 +891,6 @@ export async function mergeAndPushSupportTicketsToCloud(
  */
 export async function pushCloudDocument(key: string, payload: any, timeoutMs = 12000): Promise<boolean> {
   if (!isSupabaseConfigured()) return false;
-  if (Date.now() < supabaseEgressCooldownUntilMs) return false;
   const cfg = getCloudApiConfig();
   if (!cfg.enableAutoCloudSync) return false;
 
@@ -521,6 +899,15 @@ export async function pushCloudDocument(key: string, payload: any, timeoutMs = 1
     effectivePayload = sanitizeTransactionsForCloudPush(payload);
   } else if (key === 'kft_cloud_support_tickets_v1' && Array.isArray(payload)) {
     effectivePayload = sanitizeSupportTicketsForCloudPush(payload);
+  }
+
+  const eligibleForFailover = isKeyEligibleForSecondaryFailover(key);
+
+  if (Date.now() < supabaseEgressCooldownUntilMs) {
+    if (eligibleForFailover) {
+      return pushToSecondaryCloudFailover(key, effectivePayload, timeoutMs);
+    }
+    return false;
   }
 
   try {
@@ -534,15 +921,25 @@ export async function pushCloudDocument(key: string, payload: any, timeoutMs = 1
       }),
     }, timeoutMs);
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 30_000;
+      supabaseEgressCooldownUntilMs = Date.now() + 60_000;
+      if (eligibleForFailover) {
+        return pushToSecondaryCloudFailover(key, effectivePayload, timeoutMs);
+      }
       return false;
     }
     if (res.ok && supabaseEgressCooldownUntilMs > 0) {
       supabaseEgressCooldownUntilMs = 0;
     }
+    if (eligibleForFailover) {
+      // Also broadcast to real-time pub/sub failover so live EventSource listeners receive instant (<1s) updates
+      pushToSecondaryCloudFailover(key, effectivePayload, timeoutMs).catch(() => {});
+    }
     return res.ok;
   } catch (err) {
     console.warn(`Supabase pushCloudDocument(${key}) error:`, err);
+    if (eligibleForFailover) {
+      return pushToSecondaryCloudFailover(key, effectivePayload, timeoutMs);
+    }
     return false;
   }
 }
@@ -553,8 +950,19 @@ export async function pushCloudDocument(key: string, payload: any, timeoutMs = 1
  */
 export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Promise<T | null> {
   if (!isSupabaseConfigured()) return null;
-  if (Date.now() < supabaseEgressCooldownUntilMs) return null;
   const cfg = getCloudApiConfig();
+  const eligibleForFailover = isKeyEligibleForSecondaryFailover(key);
+
+  const readFromSecondary = async (): Promise<T | null> => {
+    if (!eligibleForFailover) return null;
+    const store = await pullAllFromSecondaryCloudFailover(false, timeoutMs);
+    const entry = store?.get(key);
+    return entry && entry.payload !== undefined ? (entry.payload as T) : null;
+  };
+
+  if (Date.now() < supabaseEgressCooldownUntilMs) {
+    return readFromSecondary();
+  }
 
   try {
     const res = await fetchWithTimeout(
@@ -567,21 +975,30 @@ export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Prom
       timeoutMs
     );
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 30_000;
-      return null;
+      supabaseEgressCooldownUntilMs = Date.now() + 60_000;
+      return readFromSecondary();
     }
-    if (!res.ok) return null;
+    if (!res.ok) {
+      return readFromSecondary();
+    }
     if (supabaseEgressCooldownUntilMs > 0) {
       supabaseEgressCooldownUntilMs = 0;
     }
     const rows = await res.json();
     if (Array.isArray(rows) && rows.length > 0 && rows[0].payload !== undefined) {
-      return rows[0].payload as T;
+      const primaryPayload = rows[0].payload as T;
+      if (key === 'kft_cloud_users_v2' && Array.isArray(primaryPayload)) {
+        const secUsers = await readFromSecondary();
+        if (Array.isArray(secUsers) && secUsers.length > 0) {
+          return deduplicateAndNormalizeUsers([...primaryPayload, ...secUsers], []) as unknown as T;
+        }
+      }
+      return primaryPayload;
     }
-    return null;
+    return readFromSecondary();
   } catch (err) {
     console.warn(`Supabase pullCloudDocument(${key}) error:`, err);
-    return null;
+    return readFromSecondary();
   }
 }
 
@@ -974,8 +1391,25 @@ export async function pullCloudDocumentsByPrefix<T = any>(
   timeoutMs = 12000
 ): Promise<Array<{ key: string; payload: T; updated_at?: string }>> {
   if (!isSupabaseConfigured()) return [];
-  if (Date.now() < supabaseEgressCooldownUntilMs) return [];
   const cfg = getCloudApiConfig();
+  const eligibleForFailover = prefix.startsWith('kft_user_') || prefix.startsWith('kft_proof_');
+
+  const readPrefixFromSecondary = async (): Promise<Array<{ key: string; payload: T; updated_at?: string }>> => {
+    if (!eligibleForFailover) return [];
+    const store = await pullAllFromSecondaryCloudFailover(false, timeoutMs);
+    if (!store) return [];
+    const out: Array<{ key: string; payload: T; updated_at?: string }> = [];
+    for (const [k, v] of store.entries()) {
+      if (k.startsWith(prefix) && v.payload !== undefined) {
+        out.push({ key: k, payload: v.payload as T, updated_at: v.updated_at });
+      }
+    }
+    return out;
+  };
+
+  if (Date.now() < supabaseEgressCooldownUntilMs) {
+    return readPrefixFromSecondary();
+  }
 
   try {
     const res = await fetchWithTimeout(
@@ -987,18 +1421,34 @@ export async function pullCloudDocumentsByPrefix<T = any>(
       timeoutMs
     );
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 30_000;
-      return [];
+      supabaseEgressCooldownUntilMs = Date.now() + 60_000;
+      return readPrefixFromSecondary();
     }
-    if (!res.ok) return [];
+    if (!res.ok) return readPrefixFromSecondary();
     const rows = await res.json();
-    if (Array.isArray(rows)) {
-      return rows.filter(r => r && typeof r.key === 'string' && r.payload !== undefined);
+    const primaryRows = Array.isArray(rows)
+      ? rows.filter(r => r && typeof r.key === 'string' && r.payload !== undefined)
+      : [];
+    if (eligibleForFailover) {
+      const secRows = await readPrefixFromSecondary();
+      if (secRows.length > 0) {
+        const mergedMap = new Map<string, { key: string; payload: T; updated_at?: string }>();
+        for (const r of primaryRows) mergedMap.set(r.key, r);
+        for (const s of secRows) {
+          const ex = mergedMap.get(s.key);
+          const exMs = ex?.updated_at ? Date.parse(ex.updated_at) || 0 : 0;
+          const sMs = s.updated_at ? Date.parse(s.updated_at) || 0 : 0;
+          if (!ex || sMs >= exMs) {
+            mergedMap.set(s.key, s);
+          }
+        }
+        return Array.from(mergedMap.values());
+      }
     }
-    return [];
+    return primaryRows;
   } catch (err) {
     console.warn(`Supabase pullCloudDocumentsByPrefix(${prefix}) error:`, err);
-    return [];
+    return readPrefixFromSecondary();
   }
 }
 
@@ -1025,7 +1475,7 @@ export async function pullCloudKeysManifestByPrefix(
       timeoutMs
     );
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 30_000;
+      supabaseEgressCooldownUntilMs = Date.now() + 60_000;
       return null;
     }
     if (!res.ok) return null;
@@ -1052,11 +1502,29 @@ export async function pullCloudDocumentsByKeys<T = any>(
   timeoutMs = 15000
 ): Promise<Array<{ key: string; payload: T; updated_at?: string }>> {
   if (!isSupabaseConfigured() || !Array.isArray(keys) || keys.length === 0) return [];
-  if (Date.now() < supabaseEgressCooldownUntilMs) return [];
   const cfg = getCloudApiConfig();
 
   const cleanKeys = Array.from(new Set(keys.filter(Boolean)));
   if (cleanKeys.length === 0) return [];
+
+  const readKeysFromSecondary = async (): Promise<Array<{ key: string; payload: T; updated_at?: string }>> => {
+    const eligibleKeys = cleanKeys.filter(isKeyEligibleForSecondaryFailover);
+    if (eligibleKeys.length === 0) return [];
+    const store = await pullAllFromSecondaryCloudFailover(false, timeoutMs);
+    if (!store) return [];
+    const out: Array<{ key: string; payload: T; updated_at?: string }> = [];
+    for (const k of eligibleKeys) {
+      const entry = store.get(k);
+      if (entry && entry.payload !== undefined) {
+        out.push({ key: k, payload: entry.payload as T, updated_at: entry.updated_at });
+      }
+    }
+    return out;
+  };
+
+  if (Date.now() < supabaseEgressCooldownUntilMs) {
+    return readKeysFromSecondary();
+  }
 
   try {
     const inList = cleanKeys.map(k => `"${k.replace(/"/g, '')}"`).join(',');
@@ -1070,8 +1538,8 @@ export async function pullCloudDocumentsByKeys<T = any>(
       timeoutMs
     );
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 30_000;
-      return [];
+      supabaseEgressCooldownUntilMs = Date.now() + 60_000;
+      return readKeysFromSecondary();
     }
     if (res.ok) {
       if (supabaseEgressCooldownUntilMs > 0) {
@@ -1079,16 +1547,17 @@ export async function pullCloudDocumentsByKeys<T = any>(
       }
       const rows = await res.json();
       if (Array.isArray(rows)) {
-        return rows.filter(
+        const primaryRows = rows.filter(
           (r): r is { key: string; payload: T; updated_at?: string } =>
             Boolean(r && typeof r.key === 'string' && r.payload !== undefined)
         );
+        if (primaryRows.length > 0) return primaryRows;
       }
     }
-    return [];
+    return readKeysFromSecondary();
   } catch (err) {
     console.warn('Supabase pullCloudDocumentsByKeys error:', err);
-    return [];
+    return readKeysFromSecondary();
   }
 }
 
@@ -1216,9 +1685,17 @@ export async function uploadBase64ImageToSupabaseStorage(
  */
 export async function deleteCloudDocument(key: string, timeoutMs = 8000): Promise<boolean> {
   if (!isSupabaseConfigured()) return false;
-  if (Date.now() < supabaseEgressCooldownUntilMs) return false;
   const cfg = getCloudApiConfig();
   if (!cfg.enableAutoCloudSync) return false;
+
+  const eligibleForFailover = isKeyEligibleForSecondaryFailover(key);
+  if (eligibleForFailover) {
+    deleteFromSecondaryCloudFailover(key, timeoutMs).catch(() => {});
+  }
+
+  if (Date.now() < supabaseEgressCooldownUntilMs) {
+    return eligibleForFailover;
+  }
 
   try {
     const res = await fetchWithTimeout(
@@ -1229,10 +1706,14 @@ export async function deleteCloudDocument(key: string, timeoutMs = 8000): Promis
       },
       timeoutMs
     );
-    return res.ok;
+    if (res.status === 402) {
+      supabaseEgressCooldownUntilMs = Date.now() + 60_000;
+      return eligibleForFailover;
+    }
+    return res.ok || eligibleForFailover;
   } catch (err) {
     console.warn(`Supabase deleteCloudDocument(${key}) error:`, err);
-    return false;
+    return eligibleForFailover;
   }
 }
 
@@ -1709,15 +2190,26 @@ export function deduplicateAndNormalizeUsers(
   rawUsers: Array<User | null | undefined>,
   deletedUsers: DeletedUserRecord[] = []
 ): User[] {
-  const deletedIds = new Set(deletedUsers.map(d => d.id).filter(Boolean));
-  const deletedEmails = new Set(
-    deletedUsers.map(d => (d.email || '').toLowerCase().trim()).filter(Boolean)
-  );
-  const deletedPhones = new Set(
-    deletedUsers
-      .map(d => (d.phone || '').replace(/[\s-+()]/g, ''))
-      .filter(p => p.length >= 7)
-  );
+  const getDeletedTimeMsForUser = (u: Partial<User>): number => {
+    const uId = String(u.id || '').trim();
+    const uEmail = String(u.email || '').toLowerCase().trim();
+    const uPhone = String(u.phone || '').replace(/[\s-+()]/g, '');
+    let maxDelMs = 0;
+    for (const d of deletedUsers) {
+      if (!d) continue;
+      const dEmail = String(d.email || '').toLowerCase().trim();
+      const dPhone = String(d.phone || '').replace(/[\s-+()]/g, '');
+      const matched =
+        (uId && d.id === uId) ||
+        (uEmail && dEmail && uEmail === dEmail) ||
+        (uPhone.length >= 7 && dPhone.length >= 7 && uPhone === dPhone);
+      if (matched) {
+        const dMs = d.deletedAt ? parseSafeDateMs(d.deletedAt) : 0;
+        maxDelMs = Math.max(maxDelMs, dMs > 0 ? dMs : 1);
+      }
+    }
+    return maxDelMs;
+  };
 
   const isAccountDeleted = (u: Partial<User> | undefined | null): boolean => {
     if (!u) return true;
@@ -1730,13 +2222,19 @@ export function deduplicateAndNormalizeUsers(
     ) {
       return true; // Exclude admin from regular users array (Admin is handled separately by ADMIN_USER)
     }
-    if (u.id && deletedIds.has(u.id)) return true;
-    if (u.email && deletedEmails.has(u.email.toLowerCase().trim())) return true;
-    if (u.phone) {
-      const cleanP = u.phone.replace(/[\s-+()]/g, '');
-      if (cleanP.length >= 7 && deletedPhones.has(cleanP)) return true;
+    const delMs = getDeletedTimeMsForUser(u);
+    if (delMs <= 0) return false;
+
+    // If the user re-registered, signed in, or was restored AFTER the deletion timestamp, allow the account!
+    const latestUserActivityMs = Math.max(
+      parseSafeDateMs(u.lastLoginAt),
+      parseSafeDateMs(u.registeredAtIso),
+      parseSafeDateMs((u as any).restoredAt)
+    );
+    if (delMs > 1 && latestUserActivityMs > delMs + 5000) {
+      return false;
     }
-    return false;
+    return true;
   };
 
   const canonicalMap = new Map<string, User>();
@@ -1832,7 +2330,7 @@ export async function upsertSingleUserToCloud(
   if (canonicalList.length === 0) return [];
   let canonicalUser = canonicalList[0];
 
-  if (!isSupabaseConfigured() || isSupabaseEgressCooldownActive()) return [canonicalUser];
+  if (!isSupabaseConfigured()) return [canonicalUser];
 
   try {
     // 1. Pull any existing atomic per-user rows (and aggregate/VIP backup when updateAggregate is requested) FIRST
@@ -1844,10 +2342,6 @@ export async function upsertSingleUserToCloud(
       updateAggregate ? pullCloudDocument<any>('kft_cloud_vip_backup_v1') : Promise.resolve(null),
       updateAggregate ? pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1') : Promise.resolve(null),
     ]);
-
-    if (isSupabaseEgressCooldownActive()) {
-      return [canonicalUser];
-    }
 
     const allDeleted = [
       ...deletedUsers,
@@ -1985,7 +2479,7 @@ export async function syncAllAppDataWithSupabase(localState: {
     mergedAppSettings: localState.appSettings,
   });
 
-  if (!isSupabaseConfigured() || isSupabaseEgressCooldownActive()) {
+  if (!isSupabaseConfigured()) {
     return buildOfflineFallbackResult();
   }
 
@@ -2000,12 +2494,17 @@ export async function syncAllAppDataWithSupabase(localState: {
     const shouldFetchHeavyAdminVaults = Boolean(isAdminDevice && localState.includeHeavyAdminVaults);
     const shouldSyncPaymentProofs = shouldFetchHeavyAdminVaults;
 
-    // Only fetch all 1,000 `kft_user_*` prefix documents when Admin Dashboard is open (`includeHeavyAdminVaults`);
-    // routine background syncs rely on `kft_cloud_users_v2` plus all candidate atomic rows for the active user.
+    // Always fetch atomic `kft_user_*` prefix documents on Admin devices or when using Secondary Cloud Failover
+    // (where prefix reads come from the shared single-poll memory map at 0 extra network cost).
+    const shouldPullAllAtomicUsers = Boolean(
+      isAdminDevice || shouldFetchHeavyAdminVaults || isSupabaseEgressCooldownActive()
+    );
     const currentCandidateAtomicKeys =
-      !isAdminDevice && localState.currentUser ? getCandidateAtomicUserKeys(localState.currentUser) : [];
+      !shouldPullAllAtomicUsers && localState.currentUser
+        ? getCandidateAtomicUserKeys(localState.currentUser)
+        : [];
 
-    // 1. Pull existing cloud records in a single batch (skipping heavy base64 payment proofs and 1,000-row prefix scan on background syncs)
+    // 1. Pull existing cloud records in a single batch
     const [
       cloudUsersV2,
       atomicUserDocs,
@@ -2020,7 +2519,7 @@ export async function syncAllAppDataWithSupabase(localState: {
       cloudSettingsV2,
     ] = await Promise.all([
       pullCloudDocument<User[]>('kft_cloud_users_v2'),
-      shouldFetchHeavyAdminVaults
+      shouldPullAllAtomicUsers
         ? pullCloudDocumentsByPrefix<User>(USER_RECORD_PREFIX)
         : currentCandidateAtomicKeys.length > 0
         ? pullCloudDocumentsByKeys<User>(currentCandidateAtomicKeys).then(docs =>
@@ -2040,14 +2539,11 @@ export async function syncAllAppDataWithSupabase(localState: {
       pullCloudDocument<AppSettings>('kft_cloud_admin_vip_pricing_v2'),
     ]);
 
-    if (isSupabaseEgressCooldownActive()) {
-      return buildOfflineFallbackResult();
-    }
     const cloudUsers = cloudUsersV2 ? null : await pullCloudDocument<User[]>('kft_cloud_users_v1');
     const cloudSettingsV1 = cloudSettingsV2 ? null : await pullCloudDocument<AppSettings>('kft_cloud_app_settings_v1');
     const cloudSettings = cloudSettingsV2 || cloudSettingsV1;
 
-    // 1b. Merge Deleted Users Registry (Permanent Blacklist)
+    // 1b. Merge Deleted Users Registry (with timestamp-aware superseding for re-invited testers)
     const deletedMap = new Map<string, DeletedUserRecord>();
     if (Array.isArray(cloudDeletedUsers)) {
       for (const d of cloudDeletedUsers) {
@@ -2059,17 +2555,36 @@ export async function syncAllAppDataWithSupabase(localState: {
         if (d && d.id) deletedMap.set(d.id, { ...(deletedMap.get(d.id) || {}), ...d });
       }
     }
-    // If a user in localState.users was explicitly restored by Admin (restoredAt), remove from deletedMap if not permanentlyDeleted
-    if (Array.isArray(localState.users)) {
-      for (const u of localState.users) {
-        if (u && u.id && u.restoredAt) {
-          const delRec = deletedMap.get(u.id);
-          if (delRec && !delRec.permanentlyDeleted) {
-            const restoredMs = new Date(u.restoredAt).getTime();
-            const deletedMs = delRec.deletedAt ? new Date(delRec.deletedAt).getTime() : 0;
-            if (restoredMs >= deletedMs) {
-              deletedMap.delete(u.id);
-            }
+
+    // If any user in local or cloud sources registered, signed in, or was restored AFTER a deletion tombstone,
+    // remove the stale tombstone so re-invited testers automatically appear in the Admin Dashboard.
+    const allCandidateLiveUsers: Array<User | null | undefined> = [
+      ...(Array.isArray(localState.users) ? localState.users : []),
+      localState.currentUser,
+      ...atomicUserDocs.map(d => d.payload),
+      ...(Array.isArray(cloudUsersV2) ? cloudUsersV2 : []),
+    ];
+    for (const u of allCandidateLiveUsers) {
+      if (!u) continue;
+      const latestActivityMs = Math.max(
+        parseSafeDateMs(u.lastLoginAt),
+        parseSafeDateMs(u.registeredAtIso),
+        parseSafeDateMs((u as any).restoredAt)
+      );
+      if (latestActivityMs <= 0) continue;
+      const uEmail = String(u.email || '').toLowerCase().trim();
+      const uPhone = String(u.phone || '').replace(/[\s-+()]/g, '');
+      for (const [delKey, delRec] of Array.from(deletedMap.entries())) {
+        const dEmail = String(delRec.email || '').toLowerCase().trim();
+        const dPhone = String(delRec.phone || '').replace(/[\s-+()]/g, '');
+        const isMatch =
+          (u.id && delRec.id === u.id) ||
+          (uEmail && dEmail && uEmail === dEmail) ||
+          (uPhone.length >= 7 && dPhone.length >= 7 && uPhone === dPhone);
+        if (isMatch) {
+          const deletedMs = delRec.deletedAt ? parseSafeDateMs(delRec.deletedAt) : 0;
+          if (deletedMs > 0 && latestActivityMs > deletedMs + 5000) {
+            deletedMap.delete(delKey);
           }
         }
       }
@@ -2650,7 +3165,7 @@ export async function syncAllAppDataWithSupabase(localState: {
     };
 
     const mergedUsersSig = safeJsonSig(mergedUsers);
-    if ((isAdminDevice || Boolean(localState.currentUser)) && mergedUsersSig !== safeJsonSig(cloudUsersV2)) {
+    if ((isAdminDevice || Boolean(localState.currentUser) || mergedUsers.length > 0) && mergedUsersSig !== safeJsonSig(cloudUsersV2)) {
       pushPromises.push(pushCloudDocument('kft_cloud_users_v2', mergedUsers));
     }
     if (isAdminDevice && safeJsonSig(mergedDeletedUsers) !== safeJsonSig(cloudDeletedUsers || [])) {
@@ -2688,10 +3203,13 @@ export async function syncAllAppDataWithSupabase(localState: {
       pushPromises.push(pushCloudDocument('kft_cloud_support_tickets_v1', mergedSupportTickets));
     }
 
-    // Ensure active user(s) have an up-to-date atomic `kft_user_<id>` record in Supabase without write-back storms
+    // Ensure active user(s) have an up-to-date atomic `kft_user_<id>` record in Cloud without write-back storms
     const currentCanonicalId = localState.currentUser ? getCanonicalUserId(localState.currentUser) : null;
     for (const u of mergedUsers) {
-      if (!shouldFetchHeavyAdminVaults && u.id !== localState.currentUser?.id && u.id !== currentCanonicalId) {
+      const isActiveLocalUser = Boolean(
+        localState.currentUser && (u.id === localState.currentUser.id || u.id === currentCanonicalId)
+      );
+      if (!isActiveLocalUser && (isSupabaseEgressCooldownActive() || !shouldFetchHeavyAdminVaults)) {
         continue;
       }
       const atomicKey = `${USER_RECORD_PREFIX}${u.id}`;

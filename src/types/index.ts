@@ -5,7 +5,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1461;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1462;
 export const APP_RELEASE_DATE = '2026-11-05';
 
 /**
@@ -236,7 +236,7 @@ export const EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS: Record<string, string> = {
   'food-220': '2026-11-03T18:00:00.000Z',
   'food-221': '2026-11-03T18:00:00.000Z',
   'food-222': '2026-11-03T18:00:00.000Z',
-  'food-223': '2026-11-03T18:00:00.000Z',
+  'food-223': '2026-11-05T19:55:35.000Z',
   'food-224': '2026-11-03T18:00:00.000Z',
   'food-225': '2026-11-03T18:00:00.000Z',
   'food-226': '2026-11-03T18:00:00.000Z',

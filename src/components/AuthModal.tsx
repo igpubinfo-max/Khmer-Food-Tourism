@@ -5,7 +5,7 @@ import {
   ArrowRight, ShieldCheck, Loader2, LogOut, CheckCircle2
 } from 'lucide-react';
 import { UserRole, hasAuthenticatedEmailAccount } from '../types';
-import { signInWithGoogleReal, buildCanonicalGoogleUserId } from '../services/googleAuth';
+import { signInWithGoogleReal, buildCanonicalGoogleUserId, getNativeGoogleAuthPlugin } from '../services/googleAuth';
 
 export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatoryGate = false }) => {
   const { 
@@ -58,10 +58,10 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
 
     try {
       // 1. Android Native System Account Selector (Zero config, picks phone Gmail)
-      const { Capacitor, registerPlugin } = await import('@capacitor/core');
+      const { Capacitor } = await import('@capacitor/core');
       if (Capacitor.isNativePlatform()) {
         try {
-          const NativeGoogleAuth = registerPlugin<any>('NativeGoogleAuth');
+          const NativeGoogleAuth = await getNativeGoogleAuthPlugin();
           if (NativeGoogleAuth && typeof NativeGoogleAuth.signIn === 'function') {
             const res = await NativeGoogleAuth.signIn();
             if (res && res.email) {
