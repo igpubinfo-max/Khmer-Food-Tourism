@@ -111,12 +111,81 @@ function ConvertTo-UtcDateTime($val) {
     ).ToUniversalTime()
 }
 
+function Invoke-FastAssetDownload([string]$url, [string]$outPath, [long]$expectedSize) {
+    $tempOutPath = "$outPath.$PID.tmp"
+    $cleanUrl = $url -replace '\?.*$', ''
+
+    if ((Test-Path $CurlExe) -and ($expectedSize -gt 4MB)) {
+        $parts = 16
+        $chunkSize = [long][Math]::Ceiling($expectedSize / [double]$parts)
+        $partDir = Join-Path $env:TEMP ("kft_dl_" + [Guid]::NewGuid().ToString("N").Substring(0, 8))
+        New-Item -ItemType Directory -Path $partDir -Force | Out-Null
+        try {
+            $curlArgs = @("--parallel", "--parallel-max", "16", "--progress-bar")
+            for ($i = 0; $i -lt $parts; $i++) {
+                $start = [long]($i * $chunkSize)
+                $end = [long][Math]::Min($expectedSize - 1, (($i + 1) * $chunkSize) - 1)
+                $partFile = Join-Path $partDir ("part_{0:D2}.bin" -f $i)
+                if ($i -gt 0) { $curlArgs += "--next" }
+                $curlArgs += @(
+                    "-L", "--fail", "--retry", "4", "--retry-delay", "1",
+                    "--connect-timeout", "20", "--speed-limit", "5120", "--speed-time", "20",
+                    "-H", "Cache-Control: no-cache",
+                    "-r", "$start-$end",
+                    "-o", $partFile,
+                    $cleanUrl
+                )
+            }
+
+            & $CurlExe @curlArgs
+            if ($LASTEXITCODE -eq 0) {
+                $partFiles = @(Get-ChildItem -LiteralPath $partDir -Filter "part_*.bin" | Sort-Object Name)
+                $totalDownloaded = [long](($partFiles | Measure-Object -Property Length -Sum).Sum)
+                if (($partFiles.Count -eq $parts) -and ($totalDownloaded -eq $expectedSize)) {
+                    $outStream = [System.IO.File]::Open($tempOutPath, [System.IO.FileMode]::Create, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+                    try {
+                        $buf = New-Object byte[] (1024 * 1024)
+                        foreach ($pf in $partFiles) {
+                            $inStream = [System.IO.File]::OpenRead($pf.FullName)
+                            try {
+                                while (($read = $inStream.Read($buf, 0, $buf.Length)) -gt 0) {
+                                    $outStream.Write($buf, 0, $read)
+                                }
+                            } finally {
+                                $inStream.Close()
+                            }
+                        }
+                    } finally {
+                        $outStream.Close()
+                    }
+                    Move-Item -LiteralPath $tempOutPath -Destination $outPath -Force
+                    return
+                }
+            }
+            Write-Host "  Parallel turbo download interrupted, switching to standard stream..." -ForegroundColor Yellow
+        } catch {
+            Write-Host "  Switching to standard download stream..." -ForegroundColor Yellow
+        } finally {
+            Remove-Item -LiteralPath $partDir -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    if (Test-Path $CurlExe) {
+        & $CurlExe -L --http1.1 --fail --retry 5 --retry-delay 2 --connect-timeout 20 --progress-bar -H "Cache-Control: no-cache" -o $tempOutPath $cleanUrl
+        if ($LASTEXITCODE -ne 0) { throw "curl failed downloading asset from $cleanUrl" }
+    } else {
+        Invoke-WebRequest -Uri $cleanUrl -OutFile $tempOutPath -UseBasicParsing
+    }
+    Move-Item -LiteralPath $tempOutPath -Destination $outPath -Force
+}
+
 function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, [datetime]$minAssetTimeUtc) {
     Write-Banner "STEP 4: DOWNLOADING SIGNED APK & PLAY STORE AAB TO YOUR PC"
 
     $release = $null
     $apkAsset = $null
     $aabAsset = $null
+    $effectiveMinTimeUtc = $minAssetTimeUtc.AddMinutes(-5)
 
     for ($attempt = 1; $attempt -le 10; $attempt++) {
         try {
@@ -135,7 +204,7 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
             if ($apkAsset -and $aabAsset) {
                 $apkUpdated = ConvertTo-UtcDateTime $apkAsset.updated_at
                 $aabUpdated = ConvertTo-UtcDateTime $aabAsset.updated_at
-                if (($apkUpdated -ge $minAssetTimeUtc) -and ($aabUpdated -ge $minAssetTimeUtc)) {
+                if (($apkUpdated -ge $effectiveMinTimeUtc) -and ($aabUpdated -ge $effectiveMinTimeUtc)) {
                     break
                 }
                 Write-Host "  Waiting for fresh release assets to finish uploading (attempt $attempt/10)..." -ForegroundColor Yellow
@@ -172,25 +241,13 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
         }
     } catch {}
 
-    $ts = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+    Write-Host ""
+    Write-Host "  [1/2] Downloading Direct-Install Android APK ($apkOutName) [16x Turbo]..." -ForegroundColor Green
+    Invoke-FastAssetDownload -url $apkAsset.browser_download_url -outPath $apkOutPath -expectedSize ([long]$apkAsset.size)
 
     Write-Host ""
-    Write-Host "  [1/2] Downloading Direct-Install Android APK ($apkOutName)..." -ForegroundColor Green
-    if (Test-Path $CurlExe) {
-        & $CurlExe -C - -L --fail --retry 5 --progress-bar -H "Cache-Control: no-cache" -o $apkOutPath "$($apkAsset.browser_download_url)?cb=$ts"
-        if ($LASTEXITCODE -ne 0) { throw "curl failed downloading APK." }
-    } else {
-        Invoke-WebRequest -Uri "$($apkAsset.browser_download_url)?cb=$ts" -OutFile $apkOutPath -UseBasicParsing
-    }
-
-    Write-Host ""
-    Write-Host "  [2/2] Downloading Google Play Store Bundle ($aabOutName)..." -ForegroundColor Green
-    if (Test-Path $CurlExe) {
-        & $CurlExe -C - -L --fail --retry 5 --progress-bar -H "Cache-Control: no-cache" -o $aabOutPath "$($aabAsset.browser_download_url)?cb=$ts"
-        if ($LASTEXITCODE -ne 0) { throw "curl failed downloading AAB." }
-    } else {
-        Invoke-WebRequest -Uri "$($aabAsset.browser_download_url)?cb=$ts" -OutFile $aabOutPath -UseBasicParsing
-    }
+    Write-Host "  [2/2] Downloading Google Play Store Bundle ($aabOutName) [16x Turbo]..." -ForegroundColor Green
+    Invoke-FastAssetDownload -url $aabAsset.browser_download_url -outPath $aabOutPath -expectedSize ([long]$aabAsset.size)
 
     $apkFile = Get-Item -LiteralPath $apkOutPath
     $aabFile = Get-Item -LiteralPath $aabOutPath
@@ -301,19 +358,19 @@ $headSha = (Invoke-GitQuiet @("rev-parse", "HEAD")).Output
 $remoteMainSha = (Invoke-GitQuiet @("rev-parse", "origin/main")).Output
 $remoteTestSha = (Invoke-GitQuiet @("rev-parse", "origin/test-ui-apk")).Output
 
-# Ensure local and remote test-ui-apk stay synced with HEAD if already on main
-if ($headSha -and $remoteTestSha -and ($headSha -ne $remoteTestSha)) {
-    $null = Invoke-GitQuiet @("branch", "-f", "test-ui-apk", "HEAD")
-    $null = Invoke-GitQuiet @("push", "-u", "origin", "HEAD:test-ui-apk", "--force-with-lease")
-}
-
 # Check uncommitted app changes (ignore this helper script itself when deciding if app code changed)
 $statusRes = Invoke-GitQuiet @("status", "--porcelain")
 $rawStatus = @($statusRes.Output -split "`r?`n" | Where-Object { $_ })
-$helperIgnoreRegex = '^.. (Build_APK_and_AAB\.bat|Build APK & Play Store AAB\.bat|Push_Test_Branch\.bat|Push_To_GitHub\.bat|scripts/build-and-download-apk-aab\.ps1|\.gitignore)$'
+$helperIgnoreRegex = '^.. "?(Build_APK_and_AAB\.bat|Build APK & Play Store AAB\.bat|Build APK and Play Store AAB\.bat|Push_Test_Branch\.bat|Push_To_GitHub\.bat|scripts/build-and-download-apk-aab\.ps1|\.gitignore|\.gitattributes)"?$'
 $appDirtyLines = @($rawStatus | Where-Object { $_ -and ($_ -notmatch $helperIgnoreRegex) })
 
 $hasAppChanges = ($appDirtyLines.Count -gt 0) -or ($headSha -ne $remoteMainSha)
+
+# Ensure local and remote test-ui-apk stay synced with HEAD if already synced with main
+if (-not $hasAppChanges -and $headSha -and $remoteTestSha -and ($headSha -ne $remoteTestSha)) {
+    $null = Invoke-GitQuiet @("branch", "-f", "test-ui-apk", "HEAD")
+    $null = Invoke-GitQuiet @("push", "-u", "origin", "HEAD:test-ui-apk", "--force-with-lease")
+}
 
 # Query latest GitHub Actions run across branches
 $latestRunNumber = 391
