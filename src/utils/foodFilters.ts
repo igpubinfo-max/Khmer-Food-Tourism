@@ -685,6 +685,8 @@ const KHMER_DISH_SUBTOKENS = [
   'ឡុកឡាក់',
   'សម្លកកូរ',
   'កកូរ',
+  'សម្លប្រហើរ',
+  'ប្រហើរ',
   'សម្លម្ជូរ',
   'ម្ជូរគ្រឿង',
   'ម្ជូរព្រៃ',
@@ -693,7 +695,18 @@ const KHMER_DISH_SUBTOKENS = [
   'ការី',
   'ប្រហុកខ្ទិះ',
   'ប្រហុក',
+  'ផ្អក',
+  'ម៉ាំ',
   'ទឹកគ្រឿង',
+  'ខជើងជ្រូក',
+  'ខសាច់ជ្រូក',
+  'ខគោ',
+  'ខត្រី',
+  'ស្ងោរទំពាំង',
+  'ស្ងោរជ្រក់',
+  'ស្ងោរម្រះ',
+  'ង៉ាំង៉ូវ',
+  'ងាំង៉ូវ',
   'បាយសាច់ជ្រូក',
   'បាយមាន់',
   'បាយឆា',
@@ -702,36 +715,81 @@ const KHMER_DISH_SUBTOKENS = [
   'បាយ',
   'បបរ',
   'សាច់គោអាំង',
+  'គោអាំង',
+  'ងៀតគោ',
+  'គោងៀត',
+  'សាច់ជ្រូកអាំង',
+  'ពោះជ្រូកអាំង',
   'សាច់អាំង',
+  'សាច់ក្រក',
   'ឆ្អឹងជំនី',
   'មាន់ដុត',
   'មាន់អាំង',
+  'ទាអាំង',
+  'ទាដុត',
   'ត្រីអាំង',
+  'ត្រីដុត',
   'ត្រីបំពង',
+  'ត្រីងៀត',
+  'ត្រីឆ្អើរ',
+  'កង្កែបអាំង',
+  'កង្កែប',
+  'អន្ទង់',
   'ក្តាម',
   'ក្ដាម',
   'បង្គា',
   'បង្កង',
+  'កំពិស',
   'មឹក',
   'ងាវ',
+  'លៀស',
+  'លាស',
+  'គ្រំ',
   'ខ្យង',
   'ភ្លាសាច់គោ',
   'ភ្លា',
   'ញាំស្វាយ',
   'ញាំ',
+  'ជ្រក់ជើងមាន់',
   'បុកល្ហុង',
+  'បុកក្រសាំង',
   'បុក',
   'ឆាក្តៅ',
   'ឆាខ្ញី',
   'ឆាម្រះព្រៅ',
+  'ឆាគ្រឿង',
+  'ឆាត្រកួន',
+  'ឆាខាត់ណា',
+  'ឆាផ្សិត',
+  'ឆាត្រប់',
+  'ឆាព្រលិត',
+  'ឆាបន្លែ',
+  'ឆាជូរផ្អែម',
+  'លីងសាច់មាន់',
+  'ប្រហិត',
+  'ពងទាកូន',
   'បង្អែម',
   'ចេកខ្ទិះ',
+  'ចេកចៀន',
   'សង់ខ្យា',
   'ក្រឡាន',
   'អន្សម',
+  'នំគម',
+  'នំកាឆាយ',
+  'នំត្រាវ',
+  'បាយដំណើប',
   'បាញ់ឆែវ',
   'នំគ្រក់',
   'គ្រឿងសមុទ្រ',
+  'ម្ហូបបួស',
+  'បួស',
+  'តៅហ៊ូ',
+  'ស្ប៉ាហ្គេទី',
+  'ទឹកត្នោត',
+  'ទឹកដូង',
+  'ទឹកអំពៅ',
+  'ទឹកក្រឡុក',
+  'តែក្រូចឆ្មារ',
   'ត្រី',
   'សាច់គោ',
   'សាច់ជ្រូក',
@@ -921,8 +979,13 @@ const PRIMARY_PRODUCT_GROUPS: ReadonlyArray<{
     intent: 'savory_food',
   },
   {
+    id: 'samlor_proher',
+    tokens: ['សម្លប្រហើរ', 'ប្រហើរ', 'samlor proher', 'proher'],
+    intent: 'savory_food',
+  },
+  {
     id: 'samlor_machu',
-    tokens: ['សម្លម្ជូរ', 'ម្ជូរគ្រឿង', 'ម្ជូរព្រៃ', 'ស្ងោរជ្រក់', 'ង៉ាំង៉ូវ', 'samlor machu', 'sour soup', 'ngam ngov', '酸汤'],
+    tokens: ['សម្លម្ជូរ', 'ម្ជូរគ្រឿង', 'ម្ជូរព្រៃ', 'ស្ងោរជ្រក់', 'ង៉ាំង៉ូវ', 'ងាំង៉ូវ', 'ស្ងោរទំពាំង', 'samlor machu', 'sour soup', 'ngam ngov', 'ngam ngouv', '酸汤'],
     intent: 'savory_food',
   },
   {
@@ -936,8 +999,13 @@ const PRIMARY_PRODUCT_GROUPS: ReadonlyArray<{
     intent: 'savory_food',
   },
   {
+    id: 'khor_braised',
+    tokens: ['ខជើងជ្រូក', 'ខសាច់ជ្រូក', 'ខគោ', 'ខត្រី', 'បាយខជើងជ្រូក', 'pork trotter', 'caramelized pork'],
+    intent: 'savory_food',
+  },
+  {
     id: 'prahok',
-    tokens: ['ប្រហុកខ្ទិះ', 'ប្រហុកដុត', 'ប្រហុកចំហុយ', 'ទឹកគ្រឿង', 'ម៉ាំល្ហុង', 'prahok', 'teuk kroeung'],
+    tokens: ['ប្រហុកខ្ទិះ', 'ប្រហុកដុត', 'ប្រហុកចំហុយ', 'ប្រហុកអាំង', 'ប្រហុកកប់', 'ប្រហុក', 'ផ្អកចំហុយ', 'ផ្អក', 'ទឹកគ្រឿង', 'ម៉ាំល្ហុង', 'ម៉ាំ', 'កាពិផាវ', 'prahok', 'pha-ork', 'teuk kroeung'],
     intent: 'savory_food',
   },
   {
@@ -952,17 +1020,17 @@ const PRIMARY_PRODUCT_GROUPS: ReadonlyArray<{
   },
   {
     id: 'bai_cha',
-    tokens: ['បាយឆា', 'បាយក្តាំង', 'បាយមាន់', 'fried rice', 'chicken rice', '炒饭', '鸡饭'],
+    tokens: ['បាយឆា', 'បាយក្តាំង', 'បាយមាន់', 'បាយគោងៀត', 'fried rice', 'chicken rice', '炒饭', '鸡饭'],
     intent: 'savory_food',
   },
   {
     id: 'banh_chao',
-    tokens: ['បាញ់ឆែវ', 'នំគ្រក់', 'ណែមឆៅ', 'ណែមបាត់ដំបង', 'banh chao', 'num krok', 'spring roll', '煎饼'],
+    tokens: ['បាញ់ឆែវ', 'បាញ់ហយ', 'នំគ្រក់', 'ណែមឆៅ', 'ណែមបាត់ដំបង', 'នំកាឆាយ', 'នំត្រាវ', 'banh chao', 'num krok', 'spring roll', '煎饼'],
     intent: 'savory_food',
   },
   {
     id: 'bok_lhong',
-    tokens: ['បុកល្ហុង', 'បុកមី', 'បុកកាពិ', 'បុកស្វាយ', 'bok lhong', 'papaya salad', '木瓜沙拉'],
+    tokens: ['បុកល្ហុង', 'បុកមី', 'បុកកាពិ', 'បុកស្វាយ', 'បុកក្រសាំង', 'ជ្រក់ជើងមាន់', 'bok lhong', 'papaya salad', '木瓜沙拉'],
     intent: 'savory_food',
   },
   {
@@ -972,17 +1040,27 @@ const PRIMARY_PRODUCT_GROUPS: ReadonlyArray<{
   },
   {
     id: 'crab_seafood',
-    tokens: ['ក្តាមឆាម្រេច', 'ក្តាមសេះ', 'បង្កងអាំង', 'បង្គាអាំង', 'មឹកអាំង', 'គ្រឿងសមុទ្រ', 'kampot crab', 'seafood', '海鲜', '螃蟹'],
+    tokens: ['ក្តាមឆាម្រេច', 'ក្តាមសេះ', 'បង្កងអាំង', 'ឆាបង្កង', 'បង្គាអាំង', 'មឹកអាំង', 'ឆាមឹក', 'លាសឆា', 'លៀសហាល', 'ងាវស្រុះ', 'ងាវអាំង', 'គ្រំសមុទ្រ', 'ខ្យងស្រែ', 'កំពិសលីង', 'គ្រឿងសមុទ្រ', 'kampot crab', 'seafood', 'clam', 'mussel', '海鲜', '螃蟹'],
     intent: 'savory_food',
   },
   {
     id: 'bbq_grilled',
-    tokens: ['សាច់គោអាំង', 'គោឡើងភ្នំ', 'មាន់ដុត', 'ត្រីដុត', 'សាច់អាំង', 'ស៊ុបគោ', 'bbq', 'grilled beef', 'roast chicken', '烧烤', '烤肉'],
+    tokens: ['សាច់គោអាំង', 'គោឡើងភ្នំ', 'ងៀតគោ', 'គោងៀត', 'សាច់ជ្រូកអាំង', 'ពោះជ្រូកអាំង', 'សាច់ក្រក', 'មាន់ដុត', 'កោះមាន់អាំង', 'ទាអាំង', 'ត្រីដុត', 'ត្រីអាំង', 'ត្រីងៀត', 'កង្កែបអាំង', 'ពងទាកូន', 'ប្រហិតសាច់គោ', 'សាច់អាំង', 'ស៊ុបគោ', 'bbq', 'grilled beef', 'roast chicken', 'roasted duck', '燒烤', '烧烤', '烤肉'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'khmer_stirfry',
+    tokens: ['ឆាក្តៅ', 'ឆាខ្ញី', 'ឆាម្រះព្រៅ', 'ឆាគ្រឿង', 'ឆាត្រកួន', 'ឆាខាត់ណា', 'ឆាផ្កាខាត់ណា', 'ឆាផ្សិត', 'ឆាត្រប់', 'ឆាព្រលិត', 'ឆាស្ពៃ', 'ឆាបន្លែ', 'ឆាជូរផ្អែម', 'ឆាកង្កែប', 'លីងសាច់មាន់', 'ត្រីប្រម៉ា', 'stir-fried', 'wok-fried'],
+    intent: 'savory_food',
+  },
+  {
+    id: 'vegetarian_food',
+    tokens: ['ម្ហូបបួស', 'បួស', 'តៅហ៊ូបំពង', 'ហែមបួស', 'សាឡាដបន្លែស្រស់បួស', 'ស្ប៉ាហ្គេទី', 'vegetarian', 'vegan', 'tofu', '素食'],
     intent: 'savory_food',
   },
   {
     id: 'khmer_dessert',
-    tokens: ['បង្អែម', 'ចេកខ្ទិះ', 'សង់ខ្យា', 'ក្រឡាន', 'អន្សម', 'នំគម', 'នំកង', 'នំអាកោ', 'លតអង្ករ', 'kralan', 'sangkhya', 'ansom'],
+    tokens: ['បង្អែម', 'ចេកខ្ទិះ', 'ចេកចៀន', 'បាយដំណើបស្វាយទុំ', 'សង់ខ្យា', 'ក្រឡាន', 'អន្សម', 'នំអន្សម', 'នំគម', 'នំកង', 'នំអាកោ', 'លតអង្ករ', 'kralan', 'sangkhya', 'ansom'],
     intent: 'dessert',
   },
   {
@@ -992,7 +1070,7 @@ const PRIMARY_PRODUCT_GROUPS: ReadonlyArray<{
   },
   {
     id: 'coffee_drink',
-    tokens: ['ហាងកាហ្វេ', 'កាហ្វេ', 'តែគុជ', 'តែបៃតង', 'ទឹកអំពៅ', 'ទឹកសណ្តែក', 'coffee', 'cafe', 'café', 'espresso', 'latte', 'milk tea', 'boba', '咖啡', '奶茶'],
+    tokens: ['ហាងកាហ្វេ', 'កាហ្វេ', 'តែគុជ', 'តែបៃតង', 'តែក្រូចឆ្មារ', 'ទឹកអំពៅ', 'ទឹកសណ្តែក', 'ទឹកត្នោត', 'ទឹកដូង', 'ទឹកក្រឡុក', 'coffee', 'cafe', 'café', 'espresso', 'latte', 'milk tea', 'boba', 'smoothie', 'coconut water', '咖啡', '奶茶'],
     intent: 'coffee_drink',
   },
   {
@@ -1119,15 +1197,20 @@ export function matchShopToProductQuery(
   // but identify the most specific primary group (first in PRIMARY_PRODUCT_GROUPS order, e.g. `mi_suor` before `crab_seafood`).
   const primaryGroup = matchedProductGroups[0] || null;
 
-  const isSearchingBakery = matchedProductGroups.some((g) => g.intent === 'bakery_bread') ||
-    /នំប៉័ង|នំខេក|នំដុត|ក្រូសង់|bakery|bread|cake|pastry|banh\s*mi|croissant|n[oö]mpang/i.test(combinedSearchText);
+  const isTraditionalKhmerCakeOrSweet =
+    matchedProductGroups.some((g) => g.intent === 'dessert') ||
+    /អន្សម|នំគម|នំកាឆាយ|នំត្រាវ|នំគ្រក់|បាញ់ឆែវ|ចេកខ្ទិះ|ចេកចៀន|បង្អែម|សង់ខ្យា|ក្រឡាន/i.test(combinedSearchText);
+  const isSearchingBakery =
+    !isTraditionalKhmerCakeOrSweet &&
+    (matchedProductGroups.some((g) => g.intent === 'bakery_bread') ||
+      /នំប៉័ង|នំខេក|នំដុត|ក្រូសង់|\b(?:bakery|bread|pastry|banh\s*mi|croissant|n[oö]mpang)\b/i.test(combinedSearchText));
   const isSearchingCoffee = matchedProductGroups.some((g) => g.intent === 'coffee_drink') ||
-    /កាហ្វេ|តែគុជ|តែបៃតង|ភេសជ្ជៈ|coffee|cafe|café|latte|espresso|tea|boba/i.test(combinedSearchText);
+    /កាហ្វេ|តែគុជ|តែបៃតង|តែក្រូចឆ្មារ|ទឹកអំពៅ|ទឹកដូង|ទឹកត្នោត|ទឹកក្រឡុក|ភេសជ្ជៈ|coffee|cafe|café|latte|espresso|tea|boba|smoothie/i.test(combinedSearchText);
   const isSearchingPizzaWestern = matchedProductGroups.some((g) => g.intent === 'pizza_western') ||
     /ភីហ្សា|ប៉ាស្តា|បឺហ្គឺ|ស្តេក|pizza|pasta|burger|steak|burrito|taco/i.test(combinedSearchText);
 
   // STRICT BUSINESS TYPE GUARD:
-  // Never return bread shops / bakeries when the user is searching for noodles, soups, rice, or any non-bakery product!
+  // Never return bread shops / bakeries when the user is searching for noodles, soups, rice, traditional Khmer sweets, or any non-bakery product!
   if (!isSearchingBakery && shopKind === 'bakery_bread') {
     return { matches: false, score: 0, matchedInventoryItems: [], isExactProductMatch: false, shopKind };
   }
@@ -1135,8 +1218,8 @@ export function matchShopToProductQuery(
   if (!isSearchingCoffee && !isSearchingBakery && shopKind === 'coffee_drink') {
     return { matches: false, score: 0, matchedInventoryItems: [], isExactProductMatch: false, shopKind };
   }
-  // Never return pizza/western fast-food shops when the user is searching for a traditional Khmer / noodle / soup dish!
-  if (!isSearchingPizzaWestern && shopKind === 'pizza_western' && primaryGroup && primaryGroup.intent === 'savory_food') {
+  // Never return pizza/western fast-food shops when the user is searching for a traditional Khmer / noodle / soup / dessert dish!
+  if (!isSearchingPizzaWestern && shopKind === 'pizza_western') {
     return { matches: false, score: 0, matchedInventoryItems: [], isExactProductMatch: false, shopKind };
   }
 

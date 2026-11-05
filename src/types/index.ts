@@ -3,9 +3,9 @@ declare const __KFT_BUILD_CODE__: number | undefined;
 export const APP_VERSION_NAME: string =
   typeof __KFT_VERSION_NAME__ === 'string' && __KFT_VERSION_NAME__.trim()
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
-    : '2.6.9';
+    : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1433;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1442;
 export const APP_RELEASE_DATE = '2026-11-05';
 
 /**

@@ -198,10 +198,13 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
         throw "Downloaded package size looks incomplete. Please check internet connection and retry."
     }
 
-    # Also keep root CambodiaFlavorsTourism-v2.5.0.apk updated so any copy in the root folder is also the newest version
+    # Also keep root and Desktop updated with latest APK
     try {
         $rootApkPath = Join-Path $RepoRoot "CambodiaFlavorsTourism-v$versionName.apk"
         Copy-Item -LiteralPath $apkOutPath -Destination $rootApkPath -Force
+        if (Test-Path "$env:USERPROFILE\Desktop") {
+            Copy-Item -LiteralPath $apkOutPath -Destination (Join-Path "$env:USERPROFILE\Desktop" "CambodiaFlavorsTourism-v$versionName.apk") -Force
+        }
     } catch {}
 
     $apkSizeMb = [Math]::Round($apkFile.Length / 1MB, 2)
@@ -304,7 +307,7 @@ if ($headSha -and $remoteTestSha -and ($headSha -ne $remoteTestSha)) {
 # Check uncommitted app changes (ignore this helper script itself when deciding if app code changed)
 $statusRes = Invoke-GitQuiet @("status", "--porcelain")
 $rawStatus = @($statusRes.Output -split "`r?`n" | Where-Object { $_ })
-$helperIgnoreRegex = '^.. (Build_APK_and_AAB\.bat|Push_Test_Branch\.bat|Push_To_GitHub\.bat|scripts/build-and-download-apk-aab\.ps1|\.gitignore)$'
+$helperIgnoreRegex = '^.. (Build_APK_and_AAB\.bat|Build APK & Play Store AAB\.bat|Push_Test_Branch\.bat|Push_To_GitHub\.bat|scripts/build-and-download-apk-aab\.ps1|\.gitignore)$'
 $appDirtyLines = @($rawStatus | Where-Object { $_ -and ($_ -notmatch $helperIgnoreRegex) })
 
 $hasAppChanges = ($appDirtyLines.Count -gt 0) -or ($headSha -ne $remoteMainSha)
@@ -462,3 +465,4 @@ $completedRun = Wait-ForGitHubWorkflow -targetSha $newSha -notBeforeUtc $buildSt
 $finalBuildCode = [Math]::Max($nextVC, 900 + [int]$completedRun.run_number)
 
 Download-ReleasePackages -versionName $versionName -displayBuildCode $finalBuildCode -minAssetTimeUtc $buildStartTimeUtc
+exit 0

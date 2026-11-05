@@ -44,9 +44,12 @@ jobs:
           else
             FINAL_VC=$AUTO_VC
           fi
+          VERSION_NAME=$(grep -oP 'versionName\s+"\K[^"]+' android/app/build.gradle || echo "2.7.0")
           sed -i "s/versionCode [0-9]\+/versionCode $FINAL_VC/g" android/app/build.gradle
           sed -i "s/APP_BUILD_CODE: number = .*/APP_BUILD_CODE: number = $FINAL_VC;/g" src/types/index.ts
-          echo "Synchronized Android versionCode and APP_BUILD_CODE to $FINAL_VC"
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          echo "FINAL_VC=$FINAL_VC" >> $GITHUB_ENV
+          echo "Synchronized Android versionCode to $FINAL_VC and versionName to $VERSION_NAME"
           npm run build
           cp dist/index.html dist/404.html
 
@@ -115,16 +118,16 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test-ui-apk'
         with:
-          tag_name: v2.6.8
-          name: "Cambodia Flavors & Tourism v2.6.8"
+          tag_name: v${{ env.VERSION_NAME }}
+          name: "Cambodia Flavors & Tourism v${{ env.VERSION_NAME }}"
           make_latest: true
           body: |
-            ### 🇰🇭 Cambodia Flavors & Tourism v2.6.8
+            ### 🇰🇭 Cambodia Flavors & Tourism v${{ env.VERSION_NAME }}
             **រសជាតិ និងទេសចរណ៍កម្ពុជា • 柬埔寨风味与旅游**
 
-            **Official Release v2.6.8:**
-            - 📲 **CambodiaFlavorsTourism-v2.6.8:** Clicking any shop in the Shop menu (`ហាងអាហារ`) now opens the in-app Shop Details modal (`RestaurantDetailModal`) styled like the Hotel menu detail modal (with Call, Open in Google Maps, Navigate/Directions, Opening Hours, Address, About, and Signature Dishes).
-            - 📦 **CambodiaFlavorsTourism-v2.6.8-PlayStore.aab:** Signed Android App Bundle for Google Play Console.
+            **Official Release v${{ env.VERSION_NAME }} (Build ${{ env.FINAL_VC }}):**
+            - 📱 **CambodiaFlavorsTourism-v${{ env.VERSION_NAME }}:** Signed Direct-Install APK for Android.
+            - 📦 **CambodiaFlavorsTourism-v${{ env.VERSION_NAME }}-PlayStore.aab:** Signed Android App Bundle for Google Play Console.
           draft: false
           prerelease: false
           files: |

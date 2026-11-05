@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal EnableDelayedExpansion
 title Khmer Food ^& Tourism - Build Latest APK ^& Play Store AAB
 cd /d "%~dp0"
 
@@ -9,8 +9,12 @@ set "EXIT_CODE=%ERRORLEVEL%"
 echo.
 if %EXIT_CODE% neq 0 (
     echo ======================================================================
-    echo   BUILD STOPPED WITH ERROR (Code: %EXIT_CODE%)
+    echo   BUILD STOPPED WITH ERROR [Code: %EXIT_CODE%]
     echo   Please check the red message above.
+    echo ======================================================================
+) else (
+    echo ======================================================================
+    echo   BUILD AND DOWNLOAD COMPLETED SUCCESSFULLY
     echo ======================================================================
 )
 pause

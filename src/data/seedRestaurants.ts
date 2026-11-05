@@ -73,7 +73,9 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "អាម៉ុកត្រីស្លឹកញ",
       "សម្លម្ជូរគ្រឿងសាច់គោ",
-      "បង្អែមចេកខ្ទិះ"
+      "បង្អែមចេកខ្ទិះ",
+      "ខសាច់ជ្រូកពងទា",
+      "លតឆាសាច់គោពងទាចៀន"
     ],
     "status": "approved",
     "isVerified": true,
@@ -235,7 +237,10 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "សាច់គោអាំងទឹកប្រហុក",
       "ឆ្អឹងជំនីរជ្រូកអាំង",
-      "មឹកអាំងអំបិលម្ទេស"
+      "មឹកអាំងអំបិលម្ទេស",
+      "ស្លាបមាន់អាំងទឹកឃ្មុំអំបិលម្ទេស",
+      "ត្រីអណ្តែងអាំង",
+      "សាច់គោចង្កាក់អាំងគ្រឿងបាត់ដំបង"
     ],
     "status": "approved",
     "isVerified": true,
@@ -276,7 +281,11 @@ export const initial100Restaurants: Restaurant[] = [
     "signatureDishesKh": [
       "សម្លកកូរខ្មែរ",
       "បង្កងអាំងទឹកត្រីកោះកុង",
-      "ឆាក្តៅសាច់មាន់"
+      "ឆាក្តៅសាច់មាន់",
+      "ស៊ុបប្រហិតត្រី",
+      "បាយខជើងជ្រូក",
+      "ខជើងជ្រូកពងទាស្ករត្នោត",
+      "ខគោនំប៉័ង"
     ],
     "status": "approved",
     "isVerified": true,
