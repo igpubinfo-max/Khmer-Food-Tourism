@@ -173,14 +173,14 @@ export const TourismView: React.FC = () => {
             <option value="">
               {tr(
                 language,
-                `គ្រប់រាជធានី-ខេត្តទាំង ២៥ (${categoryMatchedDestinations.length})`,
-                `All 25 Provinces & Capital (${categoryMatchedDestinations.length})`,
-                `全部 25 个省市 (${categoryMatchedDestinations.length})`
+                'គ្រប់រាជធានី-ខេត្តទាំង ២៥',
+                'All 25 Provinces & Capital',
+                '全部 25 个省市'
               )}
             </option>
             {provinceOptions.map((p) => (
               <option key={p.id} value={p.value}>
-                {tr(language, p.fullKh, p.en, p.zh)} ({p.count})
+                {tr(language, p.fullKh, p.en, p.zh)}
               </option>
             ))}
           </select>
@@ -219,9 +219,9 @@ export const TourismView: React.FC = () => {
               >
                 {tr(
                   language,
-                  `បង្ហាញតំបន់ទេសចរណ៍បន្ថែម (${displayedDestinations.length} / ${filteredDestinations.length})`,
-                  `Show More Destinations (${displayedDestinations.length} / ${filteredDestinations.length})`,
-                  `加载更多旅游景点 (${displayedDestinations.length} / ${filteredDestinations.length})`
+                  'បង្ហាញតំបន់ទេសចរណ៍បន្ថែម',
+                  'Show More Destinations',
+                  '加载更多旅游景点'
                 )}
               </button>
             </div>

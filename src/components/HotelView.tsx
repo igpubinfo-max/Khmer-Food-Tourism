@@ -328,14 +328,14 @@ export const HotelView: React.FC = () => {
             <option value="">
               {tr(
                 language,
-                `គ្រប់រាជធានី-ខេត្តទាំង ២៥ (${categoryMatchedHotels.length})`,
-                `All 25 Provinces & Capital (${categoryMatchedHotels.length})`,
-                `全部 25 个省市 (${categoryMatchedHotels.length})`
+                'គ្រប់រាជធានី-ខេត្តទាំង ២៥',
+                'All 25 Provinces & Capital',
+                '全部 25 个省市'
               )}
             </option>
             {provinceOptions.map((p) => (
               <option key={p.id} value={p.value}>
-                {tr(language, p.fullKh, p.en, p.zh)} ({p.count})
+                {tr(language, p.fullKh, p.en, p.zh)}
               </option>
             ))}
           </select>
@@ -386,9 +386,9 @@ export const HotelView: React.FC = () => {
               <span className="truncate">
                 {tr(
                   language,
-                  `គ្រប់គ្រងសណ្ឋាគារទាំងអស់ (${allHotels.length})`,
-                  `Manage All Hotels (${allHotels.length})`,
-                  `管理全部酒店 (${allHotels.length})`
+                  'គ្រប់គ្រងសណ្ឋាគារទាំងអស់',
+                  'Manage All Hotels',
+                  '管理全部酒店'
                 )}
               </span>
             </button>
@@ -603,9 +603,9 @@ export const HotelView: React.FC = () => {
                 >
                   {tr(
                     language,
-                    `បង្ហាញសណ្ឋាគារបន្ថែម (${displayedHotels.length} / ${filteredHotels.length})`,
-                    `Show More Hotels (${displayedHotels.length} / ${filteredHotels.length})`,
-                    `加载更多酒店 (${displayedHotels.length} / ${filteredHotels.length})`
+                    'បង្ហាញសណ្ឋាគារបន្ថែម',
+                    'Show More Hotels',
+                    '加载更多酒店'
                   )}
                 </button>
               </div>
