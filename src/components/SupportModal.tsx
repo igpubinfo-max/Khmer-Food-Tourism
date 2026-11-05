@@ -1,8 +1,8 @@
-import React from 'react';
-import { X, Heart, ShieldCheck, Download, Smartphone, Mail, Share2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Heart, ShieldCheck, Download, Smartphone, Mail, MessageSquare, Send, CheckCircle2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { tr } from '../utils/i18n';
-import { savePngDataUrlToGallery, shareQrImageNativeOrWeb } from '../utils/androidMediaHelper';
+import { savePngDataUrlToGallery } from '../utils/androidMediaHelper';
 
 export const SupportModal: React.FC = () => {
   const {
@@ -11,9 +11,48 @@ export const SupportModal: React.FC = () => {
     appSettings,
     language,
     showToast,
+    currentUser,
+    createSupportTicket,
+    supportTickets,
+    triggerCloudSyncNow,
   } = useApp();
 
+  const [supportMessageInput, setSupportMessageInput] = useState('');
+  const [senderContactInput, setSenderContactInput] = useState(currentUser?.phone || currentUser?.email || '');
+  const [sentSuccess, setSentSuccess] = useState(false);
+
   if (!isSupportModalOpen) return null;
+
+  const myTickets = supportTickets.filter(
+    (t) =>
+      currentUser &&
+      (t.userId === currentUser.id ||
+        t.username === currentUser.username ||
+        t.username === currentUser.name)
+  );
+
+  const handleSendDirectSupportMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const msg = supportMessageInput.trim();
+    if (!msg) {
+      showToast(
+        tr(language, '⚠️ សូមសរសេរសារ ឬមតិកែលម្អរបស់អ្នកជាមុនសិន!', '⚠️ Please enter your message first!', '⚠️ 请先输入您的留言！'),
+        'warning'
+      );
+      return;
+    }
+    const contactNote = senderContactInput.trim() ? ` (ទំនាក់ទំនង: ${senderContactInput.trim()})` : '';
+    createSupportTicket({
+      planType: 'quarterly',
+      paymentRef: 'GENERAL-SUPPORT',
+      message: `${msg}${contactNote}`,
+    });
+    setSupportMessageInput('');
+    setSentSuccess(true);
+    if (triggerCloudSyncNow) {
+      triggerCloudSyncNow(true);
+    }
+  };
 
   const officialQrUrl =
     appSettings.supportQrImageUrl && appSettings.supportQrImageUrl !== '/donation-qr.png'
@@ -148,6 +187,123 @@ export const SupportModal: React.FC = () => {
               <Heart className="w-3.5 h-3.5 fill-[#059669]" />
               <span>{tr(language, 'សូមថ្លែងអំណរគុណដោយស្មោះ!', 'Thank you for your support!', '衷心感谢您的支持！')}</span>
             </div>
+          </div>
+
+          {/* Direct In-App Message to Admin Section */}
+          <div className="p-4 bg-amber-50/80 border-2 border-amber-300 rounded-2xl space-y-3 font-khmer">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-amber-950">
+                <MessageSquare className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>
+                  {tr(
+                    language,
+                    '💬 ផ្ញើសារជំនួយ ឬមតិកែលម្អទៅកាន់ Admin ផ្ទាល់',
+                    '💬 Send Direct Support / Feedback to Admin',
+                    '💬 直接向管理员发送支持或反馈消息'
+                  )}
+                </span>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[9px]">
+                REAL-TIME SYNC
+              </span>
+            </div>
+
+            <form onSubmit={handleSendDirectSupportMessage} className="space-y-2.5">
+              <input
+                type="text"
+                value={senderContactInput}
+                onChange={(e) => setSenderContactInput(e.target.value)}
+                placeholder={tr(
+                  language,
+                  'លេខទូរស័ព្ទ ឬអ៊ីមែលទំនាក់ទំនង (ឧ. 012 345 678)',
+                  'Your phone or email (optional)',
+                  '您的电话或邮箱（选填）'
+                )}
+                className="w-full px-3 py-2 rounded-xl border border-amber-300 bg-white text-xs text-slate-900 outline-none focus:border-emerald-600"
+              />
+              <textarea
+                rows={3}
+                value={supportMessageInput}
+                onChange={(e) => {
+                  setSupportMessageInput(e.target.value);
+                  if (sentSuccess) setSentSuccess(false);
+                }}
+                placeholder={tr(
+                  language,
+                  'សរសេរសារ សំណូមពរ ឬបញ្ហាដែលអ្នកជួបប្រទះ ដើម្បីផ្ញើទៅកាន់ផ្ទាំងរដ្ឋបាល (Admin Dashboard)...',
+                  'Write your message, question, or issue to send directly to the Admin Dashboard...',
+                  '输入您的问题、建议或反馈，直接发送至管理员后台...'
+                )}
+                className="w-full px-3 py-2 rounded-xl border border-amber-300 bg-white text-xs text-slate-900 resize-none outline-none focus:border-emerald-600"
+              />
+              <button
+                type="submit"
+                className="w-full py-2.5 px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>
+                  {tr(language, '📨 ផ្ញើសារទៅកាន់ Admin ឥឡូវនេះ', '📨 Send Message to Admin', '📨 立即发送给管理员')}
+                </span>
+              </button>
+            </form>
+
+            {sentSuccess && (
+              <div className="p-2.5 rounded-xl bg-emerald-100 border border-emerald-400 text-emerald-900 text-[11px] font-bold flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+                <span>
+                  {tr(
+                    language,
+                    '✅ សាររបស់អ្នកត្រូវបានបញ្ជូនទៅកាន់ផ្ទាំង Admin (សារជំនួយ) ដោយជោគជ័យ!',
+                    '✅ Your message has been delivered to the Admin Dashboard!',
+                    '✅ 您的消息已成功发送至管理员后台！'
+                  )}
+                </span>
+              </div>
+            )}
+
+            {myTickets.length > 0 && (
+              <div className="pt-2 border-t border-amber-200 space-y-2">
+                <div className="text-[11px] font-bold text-amber-950">
+                  {tr(
+                    language,
+                    `ប្រវត្តិសារជំនួយរបស់ខ្ញុំ (${myTickets.length})`,
+                    `My Support Messages (${myTickets.length})`,
+                    `我的消息记录 (${myTickets.length})`
+                  )}
+                </div>
+                <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                  {myTickets.slice(0, 5).map((t) => (
+                    <div key={t.id} className="p-2 rounded-xl bg-white border border-amber-200 text-[11px] space-y-1">
+                      <div className="flex items-center justify-between text-[10px] text-slate-500">
+                        <span className="font-mono font-bold text-slate-700">{t.id}</span>
+                        <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">
+                          {t.status === 'replied'
+                            ? tr(language, '💬 Admin បានឆ្លើយតប', '💬 Admin Replied', '💬 管理员已回复')
+                            : t.status === 'resolved'
+                            ? tr(language, '✅ ដោះស្រាយរួច', '✅ Resolved', '✅ 已解决')
+                            : tr(language, '⏳ រង់ចាំពិនិត្យ', '⏳ Pending', '⏳ 等待处理')}
+                        </span>
+                      </div>
+                      {t.messages.map((m) => (
+                        <div
+                          key={m.id}
+                          className={`p-1.5 rounded-lg ${
+                            m.senderRole === 'admin'
+                              ? 'bg-emerald-50 text-emerald-950 border border-emerald-200'
+                              : 'bg-slate-50 text-slate-800'
+                          }`}
+                        >
+                          <span className="font-bold">
+                            {m.senderRole === 'admin' ? '🛡️ Admin: ' : '👤 ខ្ញុំ: '}
+                          </span>
+                          <span>{m.message}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Feedback & Inquiries Email Section */}

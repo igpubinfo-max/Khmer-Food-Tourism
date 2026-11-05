@@ -1,10 +1,12 @@
 import React, { useMemo, useRef, useState } from 'react';
 import {
+  Ban,
   BedDouble,
   Camera,
   Check,
   Download,
   Edit2,
+  ExternalLink,
   MapPin,
   Phone,
   Plus,
@@ -15,7 +17,13 @@ import {
   X,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { TouristDestination, isPlaceLocationVerified } from '../types';
+import {
+  TouristDestination,
+  isPlaceLocationVerified,
+  inferBusinessTypeAndCategory,
+  isHotelBusinessRecord,
+  resolveFoodPhotoUrl,
+} from '../types';
 import { DISH_PROVINCES } from '../utils/foodFilters';
 import { tr } from '../utils/i18n';
 
@@ -89,6 +97,12 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
     updateDestination,
     deleteDestination,
     deleteRestaurant,
+    approveRestaurant,
+    rejectRestaurant,
+    approveListingUpgradeRequest,
+    rejectListingUpgradeRequest,
+    approveShopPhotoReplacement,
+    rejectShopPhotoReplacement,
     openManageMyVipStore,
     showToast,
   } = useApp();
@@ -116,41 +130,58 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
   const [newLng, setNewLng] = useState('104.9282');
   const [newIsFeatured, setNewIsFeatured] = useState(false);
 
+  // Pending Hotel / Accommodation Approval Queues
+  const pendingHotelSubmissions = useMemo(
+    () => restaurants.filter((r) => isHotelBusinessRecord(r) && r.status === 'pending'),
+    [restaurants]
+  );
+  const pendingHotelUpgrades = useMemo(
+    () => restaurants.filter((r) => isHotelBusinessRecord(r) && r.pendingUpgradeRequest?.status === 'pending'),
+    [restaurants]
+  );
+  const pendingHotelPhotos = useMemo(
+    () => restaurants.filter((r) => isHotelBusinessRecord(r) && r.pendingPhotoReplacement?.status === 'pending'),
+    [restaurants]
+  );
+
   // Combine VIP-added hotels + seed/admin hotels
   const vipHotelDestinations = useMemo<TouristDestination[]>(() => {
     return restaurants
-      .filter((r) => r && r.businessType === 'hotel')
-      .map((r) => ({
-        id: r.id,
-        nameKh: r.nameKh,
-        nameEn: r.nameEn || r.nameKh,
-        categorySlug: 'hotel' as const,
-        categoryKh: r.categoryKh || 'សណ្ឋាគារ & កន្លែងស្នាក់នៅ',
-        categoryEn: r.categoryEn || 'Hotel & Stay',
-        descriptionKh: r.descriptionKh || `${r.nameKh} — កន្លែងស្នាក់នៅស្អាត និងមានផាសុកភាព។`,
-        descriptionEn: r.descriptionEn || `${r.nameEn || r.nameKh} — Verified accommodation in ${r.provinceEn}.`,
-        photoUrl: r.profileImage || r.photoUrl || '',
-        galleryPhotos: r.galleryPhotos || [],
-        provinceKh: r.provinceKh,
-        provinceEn: r.provinceEn,
-        addressKh: r.addressKh || r.provinceKh,
-        addressEn: r.addressEn || r.provinceEn,
-        phone: r.phone,
-        priceRange: r.priceLevel || '$$',
-        entranceFeeKh: `តម្លៃបន្ទប់៖ ${r.priceLevel || '$$'}`,
-        entranceFeeEn: `Room Rate: ${r.priceLevel || '$$'}`,
-        bestTimeToVisitKh: r.openingHoursKh || 'បើកទទួលភ្ញៀវ ២៤ ម៉ោង',
-        bestTimeToVisitEn: r.openingHoursEn || 'Open 24 Hours',
-        mapUrl: r.mapUrl || `https://www.google.com/maps/search/?api=1&query=${r.latitude},${r.longitude}`,
-        latitude: r.latitude,
-        longitude: r.longitude,
-        rating: r.rating || 4.9,
-        reviewCount: r.reviewCount || 128,
-        highlightsKh: r.signatureDishesKh || [],
-        isFeatured: true,
-        isAdminEdited: true,
-        locationVerificationStatus: 'verified' as const,
-      }));
+      .filter((r) => r && isHotelBusinessRecord(r))
+      .map((r) => {
+        const catInfo = inferBusinessTypeAndCategory(r);
+        return {
+          id: r.id,
+          nameKh: r.nameKh,
+          nameEn: r.nameEn || r.nameKh,
+          categorySlug: 'hotel' as const,
+          categoryKh: r.categoryKh || catInfo.shortKh,
+          categoryEn: r.categoryEn || catInfo.shortEn,
+          descriptionKh: r.descriptionKh || `${r.nameKh} — កន្លែងស្នាក់នៅស្អាត និងមានផាសុកភាព។`,
+          descriptionEn: r.descriptionEn || `${r.nameEn || r.nameKh} — Verified accommodation in ${r.provinceEn}.`,
+          photoUrl: r.profileImage || r.photoUrl || '',
+          galleryPhotos: r.galleryPhotos || [],
+          provinceKh: r.provinceKh,
+          provinceEn: r.provinceEn,
+          addressKh: r.addressKh || r.provinceKh,
+          addressEn: r.addressEn || r.provinceEn,
+          phone: r.phone,
+          priceRange: r.priceLevel || '$$',
+          entranceFeeKh: `តម្លៃបន្ទប់៖ ${r.priceLevel || '$$'}`,
+          entranceFeeEn: `Room Rate: ${r.priceLevel || '$$'}`,
+          bestTimeToVisitKh: r.openingHoursKh || 'បើកទទួលភ្ញៀវ ២៤ ម៉ោង',
+          bestTimeToVisitEn: r.openingHoursEn || 'Open 24 Hours',
+          mapUrl: r.mapUrl || `https://www.google.com/maps/search/?api=1&query=${r.latitude},${r.longitude}`,
+          latitude: r.latitude,
+          longitude: r.longitude,
+          rating: r.rating || 4.9,
+          reviewCount: r.reviewCount || 128,
+          highlightsKh: r.signatureDishesKh || [],
+          isFeatured: true,
+          isAdminEdited: true,
+          locationVerificationStatus: 'verified' as const,
+        };
+      });
   }, [restaurants]);
 
   const vipHotelIdSet = useMemo(() => new Set(vipHotelDestinations.map((h) => h.id)), [vipHotelDestinations]);
@@ -423,6 +454,277 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
 
   return (
     <div className="space-y-4 font-khmer">
+      {/* =====================================================================
+          0. PENDING HOTEL / ACCOMMODATION SUBMISSIONS & UPGRADES FOR ADMIN APPROVAL
+          ===================================================================== */}
+      {pendingHotelSubmissions.length > 0 && (
+        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 space-y-3">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <h4 className="font-bold text-amber-900 dark:text-amber-200 font-khmer text-xs sm:text-sm flex items-center gap-1.5">
+              <span>
+                ⏳{' '}
+                {isKm
+                  ? `សណ្ឋាគារ និងកន្លែងស្នាក់នៅរង់ចាំការត្រួតពិនិត្យ និងអនុម័តពី Admin (${pendingHotelSubmissions.length})`
+                  : `Pending Hotel / Accommodation Submissions for Admin Approval (${pendingHotelSubmissions.length})`}
+              </span>
+            </h4>
+            <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px]">
+              ADMIN HOTEL APPROVAL REQUIRED
+            </span>
+          </div>
+
+          <div className="space-y-2.5">
+            {pendingHotelSubmissions.map((rest) => {
+              const catInfo = inferBusinessTypeAndCategory(rest);
+              return (
+                <div
+                  key={`pending-hotel-${rest.id}`}
+                  className="p-3.5 rounded-xl bg-white dark:bg-stone-800 border border-amber-300 dark:border-amber-700 flex flex-col gap-3"
+                >
+                  <div className="flex items-start gap-3 min-w-0">
+                    <img
+                      src={rest.photoUrl}
+                      alt={rest.nameKh}
+                      className="w-14 h-14 rounded-xl object-cover shrink-0 border border-amber-400"
+                    />
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-700 text-stone-800 dark:text-stone-200">
+                          {rest.id}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
+                          {isKm ? catInfo.labelKh : catInfo.labelEn}
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-[9px] font-bold">
+                          {isKm ? 'រង់ចាំអនុម័ត' : 'Pending Approval'}
+                        </span>
+                      </div>
+                      <h5 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white break-words">
+                        {rest.nameKh} {rest.nameEn && rest.nameEn !== rest.nameKh ? `(${rest.nameEn})` : ''}
+                      </h5>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                        📍 {rest.provinceKh} {rest.addressKh ? `(${rest.addressKh})` : ''} • 📞 {rest.phone} • 👤{' '}
+                        {rest.ownerName || 'Hotel Owner'}
+                      </p>
+                      {rest.mapUrl && (
+                        <a
+                          href={rest.mapUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 underline"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          <span>{isKm ? 'បើកមើលទីតាំងលើ Google Maps' : 'Open Location in Google Maps'}</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 flex-wrap pt-2 border-t border-slate-100 dark:border-stone-700">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        (window as any).__kft_manage_initial_tab = 'info';
+                        openManageMyVipStore(rest.id);
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-[11px] font-black shadow-xs flex items-center gap-1 transition cursor-pointer"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>{isKm ? 'កែប្រែ' : 'Edit'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => approveRestaurant(rest.id)}
+                      className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
+                    >
+                      {isKm ? '✅ អនុម័ត (Approve)' : '✅ Approve'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => rejectRestaurant(rest.id)}
+                      className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
+                    >
+                      {isKm ? '🚫 បដិសេធ (Reject)' : '🚫 Reject'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteRestaurant(rest.id)}
+                      className="px-2.5 py-1.5 rounded-xl bg-rose-100 dark:bg-rose-950/60 hover:bg-rose-600 hover:text-white text-rose-700 dark:text-rose-300 text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{isKm ? 'លុប' : 'Delete'}</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Pending Existing Hotel Upgrade Requests from VIP Users */}
+      {pendingHotelUpgrades.length > 0 && (
+        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500 space-y-3">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <h4 className="font-bold text-amber-950 dark:text-amber-200 font-khmer text-xs sm:text-sm flex items-center gap-1.5">
+              <span>
+                ⬆️{' '}
+                {isKm
+                  ? `សំណើដំឡើង និងកែប្រែសណ្ឋាគារដែលមានស្រាប់ពីសមាជិក VIP (${pendingHotelUpgrades.length})`
+                  : `Pending Existing Hotel Upgrade Requests (${pendingHotelUpgrades.length})`}
+              </span>
+            </h4>
+            <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px]">
+              ADMIN HOTEL APPROVAL REQUIRED
+            </span>
+          </div>
+
+          <div className="space-y-2.5">
+            {pendingHotelUpgrades.map((rest) => {
+              const upg = rest.pendingUpgradeRequest!;
+              const ch = upg.proposedChanges || {};
+              const catInfo = inferBusinessTypeAndCategory(rest);
+              return (
+                <div
+                  key={`upg-hotel-${rest.id}`}
+                  className="p-3.5 rounded-xl bg-white dark:bg-stone-800 border border-amber-300 dark:border-amber-700 flex flex-col gap-3"
+                >
+                  <div className="flex items-start gap-3 min-w-0">
+                    <img
+                      src={ch.photoUrl || rest.photoUrl}
+                      alt={ch.nameKh || rest.nameKh}
+                      className="w-14 h-14 rounded-xl object-cover shrink-0 border-2 border-amber-400"
+                    />
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-700 text-stone-800 dark:text-stone-200">
+                          {rest.id}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
+                          {isKm ? catInfo.labelKh : catInfo.labelEn}
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-[9px] font-bold">
+                          {isKm ? 'សំណើដំឡើងសណ្ឋាគារដែលមានស្រាប់' : 'Existing Hotel Upgrade'}
+                        </span>
+                      </div>
+                      <h5 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white break-words">
+                        {ch.nameKh || rest.nameKh} ({ch.nameEn || rest.nameEn})
+                      </h5>
+                      <p className="text-[10px] text-slate-600 dark:text-slate-300">
+                        👤 VIP: <b>{upg.submittedByName}</b>{' '}
+                        {upg.submittedByPhone ? `• 📞 ${upg.submittedByPhone}` : ''} • 📍{' '}
+                        {ch.provinceKh || rest.provinceKh}
+                      </p>
+                      <p className="text-[10px] text-emerald-700 dark:text-emerald-400">
+                        📞 {ch.phone || rest.phone} • 🕒 {ch.openingHoursKh || rest.openingHoursKh} • 📍{' '}
+                        {ch.addressKh || rest.addressKh}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 flex-wrap pt-2 border-t border-slate-100 dark:border-stone-700">
+                    <button
+                      type="button"
+                      onClick={() => approveListingUpgradeRequest(rest.id)}
+                      className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-xs transition cursor-pointer"
+                    >
+                      {isKm ? '✅ អនុម័ត និងផ្សព្វផ្សាយ (Approve)' : '✅ Approve & Publish'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => rejectListingUpgradeRequest(rest.id)}
+                      className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shadow-xs transition cursor-pointer"
+                    >
+                      {isKm ? '🚫 បដិសេធ (Reject)' : '🚫 Reject'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Pending Hotel Photo Replacement Requests */}
+      {pendingHotelPhotos.length > 0 && (
+        <div className="p-4 rounded-2xl bg-amber-50/90 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-700/60 space-y-3">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <h4 className="font-bold text-amber-900 dark:text-amber-300 text-xs sm:text-sm">
+              {isKm
+                ? `📸 សំណើប្តូររូបភាពសណ្ឋាគារថ្មី (${pendingHotelPhotos.length} រង់ចាំការអនុម័ត)`
+                : `📸 Hotel Photo Replacement Requests (${pendingHotelPhotos.length} Pending Approval)`}
+            </h4>
+          </div>
+          <div className="space-y-2.5">
+            {pendingHotelPhotos.map((rest) => {
+              const req = rest.pendingPhotoReplacement!;
+              return (
+                <div
+                  key={`hotel-photo-req-${rest.id}`}
+                  className="p-3 bg-white dark:bg-stone-900 rounded-xl border border-amber-200 dark:border-amber-800/60 flex flex-col gap-3"
+                >
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div>
+                      <h5 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                        {rest.nameKh} ({rest.id})
+                      </h5>
+                      <p className="text-[11px] text-slate-500">
+                        {rest.provinceKh} • 📞 {rest.phone}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => approveShopPhotoReplacement(rest.id)}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>{isKm ? 'អនុម័តរូបភាពថ្មី' : 'Approve Photo'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          rejectShopPhotoReplacement(
+                            rest.id,
+                            isKm ? 'បដិសេធដោយ Admin' : 'Rejected by Admin'
+                          )
+                        }
+                        className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                      >
+                        <Ban className="w-3.5 h-3.5" />
+                        <span>{isKm ? 'បដិសេធ' : 'Reject'}</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <span className="block text-[10px] font-bold text-slate-500 mb-1">
+                        {isKm ? '១. រូបបច្ចុប្បន្ន' : '1. Current Photo'}
+                      </span>
+                      <img
+                        src={resolveFoodPhotoUrl(rest.photoUrl)}
+                        alt={rest.nameKh}
+                        className="w-full h-24 object-cover rounded-lg border border-slate-200"
+                      />
+                    </div>
+                    <div>
+                      <span className="block text-[10px] font-bold text-amber-800 mb-1">
+                        {isKm ? '២. រូបថ្មីដែលស្នើប្តូរ' : '2. Submitted Photo'}
+                      </span>
+                      <img
+                        src={resolveFoodPhotoUrl(req.newPhotoUrl)}
+                        alt={rest.nameKh}
+                        className="w-full h-24 object-cover rounded-lg border border-amber-400"
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* =====================================================================
           1. HEADER & EXCEL PHOTO TEMPLATE TOOLBAR
           ===================================================================== */}

@@ -22,6 +22,8 @@ import {
   resolveUserActualVipPlanDays,
   sanitizeUserVipPlanAndExpiry,
   isDeprecatedDemoSeedTransaction,
+  inferBusinessTypeAndCategory,
+  isHotelBusinessRecord,
   type ShopPhotoReplacementRequest,
   type PendingListingUpgradeRequest,
 } from '../types';
@@ -1149,6 +1151,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     
     const restId = r.id || `rest-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const isSeed = isSeedRestaurantId(restId);
+    const inferredBiz = inferBusinessTypeAndCategory({ ...r, id: restId });
+    const isHotel = inferredBiz.businessType === 'hotel';
 
     const galleryPhotos: string[] = Array.isArray(r.galleryPhotos) && r.galleryPhotos.length > 0
       ? r.galleryPhotos
@@ -1178,12 +1182,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       googleMapsMeta: r.googleMapsMeta,
     });
 
+    const healedAiCategoryVerification = (() => {
+      if (!r.aiCategoryVerification) return undefined;
+      if (isHotel && r.aiCategoryVerification.detectedType !== 'hotel') {
+        const isApprovedStatus = (r.status || 'approved') === 'approved';
+        return {
+          ...r.aiCategoryVerification,
+          decision: isApprovedStatus ? ('approved' as const) : ('pending_review' as const),
+          isFoodBusiness: false,
+          detectedType: 'hotel',
+          detectedCategoryLabelKh: inferredBiz.categoryKh,
+          detectedCategoryLabelEn: inferredBiz.categoryEn,
+          reasonKh: isApprovedStatus
+            ? `✅ ត្រូវបានពិនិត្យ និងអនុម័តដោយ Administrator ថាជាសណ្ឋាគារ / កន្លែងស្នាក់នៅ (${inferredBiz.categoryKh}) ត្រឹមត្រូវ។`
+            : `⏳ កំពុងរង់ចាំ Admin ពិនិត្យ និងអនុម័តសណ្ឋាគារ / កន្លែងស្នាក់នៅ (${inferredBiz.categoryKh})។`,
+          reasonEn: isApprovedStatus
+            ? `✅ Verified and approved by Administrator as ${inferredBiz.categoryEn}.`
+            : `⏳ Pending Administrator review and approval for ${inferredBiz.categoryEn}.`,
+        };
+      }
+      return r.aiCategoryVerification;
+    })();
+
     return {
       id: restId,
-      nameKh: stripForeignScripts(r.nameKh || 'ភោជនីយដ្ឋានខ្មែរ'),
-      nameEn: stripForeignScripts(r.nameEn || r.nameKh || 'Khmer Restaurant'),
-      descriptionKh: stripForeignScripts(r.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។'),
-      descriptionEn: stripForeignScripts(r.descriptionEn || 'Authentic traditional Khmer restaurant.'),
+      nameKh: stripForeignScripts(r.nameKh || (isHotel ? 'សណ្ឋាគារ និងកន្លែងស្នាក់នៅ' : 'ភោជនីយដ្ឋានខ្មែរ')),
+      nameEn: stripForeignScripts(r.nameEn || r.nameKh || (isHotel ? 'Hotel & Stay' : 'Khmer Restaurant')),
+      descriptionKh: stripForeignScripts(
+        r.descriptionKh ||
+          (isHotel
+            ? 'សណ្ឋាគារ និងកន្លែងស្នាក់នៅស្អាត មានផាសុកភាព និងសេវាកម្មល្អសម្រាប់ភ្ញៀវទេសចរ។'
+            : 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។')
+      ),
+      descriptionEn: stripForeignScripts(
+        r.descriptionEn ||
+          (isHotel
+            ? 'Comfortable hotel and accommodation with quality amenities for travelers.'
+            : 'Authentic traditional Khmer restaurant.')
+      ),
       photoUrl,
       profileImage: cleanProfileImage,
       galleryPhotos: galleryPhotos.length > 0 ? galleryPhotos : photoUrl ? [photoUrl] : [],
@@ -1199,8 +1235,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         !String(r.phone).includes('មាននៅលើ')
           ? r.phone
           : '',
-      openingHoursKh: stripForeignScripts(r.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់'),
-      openingHoursEn: stripForeignScripts(r.openingHoursEn || '07:00 AM - 09:00 PM'),
+      openingHoursKh: stripForeignScripts(r.openingHoursKh || (isHotel ? 'បើកទទួលភ្ញៀវ ២៤ ម៉ោង' : '០៧:០០ ព្រឹក - ០៩:០០ យប់')),
+      openingHoursEn: stripForeignScripts(r.openingHoursEn || (isHotel ? 'Open 24 Hours' : '07:00 AM - 09:00 PM')),
       priceLevel: r.priceLevel || '$$',
       ...(() => {
         const cleanGpid = isValidOfficialGooglePlaceId(r.googlePlaceId) ? r.googlePlaceId : undefined;
@@ -1259,7 +1295,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       reviews: genuineReviews,
       signatureDishesKh: Array.isArray(r.signatureDishesKh) && r.signatureDishesKh.length > 0
         ? r.signatureDishesKh.map((d: string) => stripForeignScripts(d))
-        : ['ម្ហូបខ្មែរប្រពៃណី', 'ម្ហូបពិសេសប្រចាំហាង'],
+        : (isHotel ? ['បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ និង Wi-Fi'] : ['ម្ហូបខ្មែរប្រពៃណី', 'ម្ហូបពិសេសប្រចាំហាង']),
       status: r.status || 'approved',
       isVerified: typeof r.isVerified === 'boolean' ? r.isVerified : true,
       isFeatured: Boolean(r.isFeatured),
@@ -1284,14 +1320,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       telegramUrl: r.telegramUrl,
       facebookUrl: r.facebookUrl,
       websiteUrl: r.websiteUrl,
-      businessCategory: r.businessCategory,
-      businessType: r.businessType === 'hotel' ? 'hotel' : r.businessType === 'restaurant' ? 'restaurant' : undefined,
+      businessCategory: inferredBiz.businessCategory,
+      businessType: inferredBiz.businessType,
+      categoryKh: inferredBiz.categoryKh,
+      categoryEn: inferredBiz.categoryEn,
       dataSource: r.dataSource,
       googleMapsMeta: r.googleMapsMeta,
       isAdminEdited: Boolean(r.isAdminEdited),
       adminEditedAt: r.adminEditedAt,
-      aiCategoryVerification: r.aiCategoryVerification,
+      aiCategoryVerification: healedAiCategoryVerification,
       pendingPhotoReplacement: r.pendingPhotoReplacement,
+      pendingUpgradeRequest: r.pendingUpgradeRequest,
       storeSlotNumber: r.storeSlotNumber,
       replacedFromRestaurantId: r.replacedFromRestaurantId,
       replacedAt: r.replacedAt,
@@ -4333,6 +4372,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               localStorage.setItem('kft_support_tickets_v1', JSON.stringify(mergedTickets));
             } catch {}
             return mergedTickets;
+          });
+        }
+        const mergedCheckIns = (result as any).mergedAiCheckIns;
+        if (Array.isArray(mergedCheckIns)) {
+          setAiCheckIns(prev => {
+            if (prev.length === mergedCheckIns.length && JSON.stringify(prev) === JSON.stringify(mergedCheckIns)) {
+              return prev;
+            }
+            try {
+              localStorage.setItem('kft_ai_checkins_v1', JSON.stringify(mergedCheckIns));
+            } catch {}
+            return mergedCheckIns;
           });
         }
         const syncedDeletedRests = result.mergedDeletedRestaurantIds || loadDeletedRestaurantIdsMap();
@@ -8009,6 +8060,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       facebookUrl: updated.facebookUrl !== undefined ? updated.facebookUrl : original?.facebookUrl,
       websiteUrl: updated.websiteUrl !== undefined ? updated.websiteUrl : original?.websiteUrl,
       businessCategory: updated.businessCategory !== undefined ? updated.businessCategory : original?.businessCategory,
+      businessType: updated.businessType !== undefined ? updated.businessType : original?.businessType,
+      categoryKh: updated.categoryKh !== undefined ? updated.categoryKh : original?.categoryKh,
+      categoryEn: updated.categoryEn !== undefined ? updated.categoryEn : original?.categoryEn,
       approvedAt: original?.approvedAt,
       featuredFromAt: original?.featuredFromAt,
       featuredUntilAt: original?.featuredUntilAt,
@@ -8032,6 +8086,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return next;
     });
+    if (isHotelBusinessRecord(safeUpdated) && (safeUpdated.status === 'approved' || isAdmin)) {
+      setDestinations(prev => {
+        const hasMatch = prev.some(d => d && d.id === safeUpdated.id);
+        if (!hasMatch) return prev;
+        const nextDests = prev.map(d => {
+          if (!d || d.id !== safeUpdated.id) return d;
+          return {
+            ...d,
+            nameKh: safeUpdated.nameKh || d.nameKh,
+            nameEn: safeUpdated.nameEn || d.nameEn,
+            categorySlug: 'hotel' as const,
+            categoryKh: safeUpdated.categoryKh || d.categoryKh || 'សណ្ឋាគារ & កន្លែងស្នាក់នៅ',
+            categoryEn: safeUpdated.categoryEn || d.categoryEn || 'Hotel & Stay',
+            descriptionKh: safeUpdated.descriptionKh || d.descriptionKh,
+            descriptionEn: safeUpdated.descriptionEn || d.descriptionEn,
+            photoUrl: safeUpdated.photoUrl || safeUpdated.profileImage || d.photoUrl,
+            galleryPhotos: safeUpdated.galleryPhotos?.length ? safeUpdated.galleryPhotos : d.galleryPhotos,
+            provinceKh: safeUpdated.provinceKh || d.provinceKh,
+            provinceEn: safeUpdated.provinceEn || d.provinceEn,
+            addressKh: safeUpdated.addressKh || d.addressKh,
+            addressEn: safeUpdated.addressEn || d.addressEn,
+            phone: safeUpdated.phone || d.phone,
+            priceRange: safeUpdated.priceLevel || d.priceRange,
+            mapUrl: safeUpdated.mapUrl || d.mapUrl,
+            latitude: safeUpdated.latitude || d.latitude,
+            longitude: safeUpdated.longitude || d.longitude,
+            isFeatured: true,
+            isAdminEdited: true,
+            isCustomPhoto: Boolean(safeUpdated.photoUrl || safeUpdated.profileImage || d.isCustomPhoto),
+            updatedAt: editNowIso,
+          };
+        });
+        scheduleStorageWrite('kft_destinations_real_v15', nextDests, 400);
+        return nextDests;
+      });
+    }
     if (selectedRestaurant && selectedRestaurant.id === updated.id) {
       setSelectedRestaurant(safeUpdated);
     }
@@ -8616,6 +8706,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 reviewedBy: currentUser?.name || 'Administrator',
               }
             : r.pendingPhotoReplacement,
+          businessType: inferBusinessTypeAndCategory(r).businessType,
+          businessCategory: inferBusinessTypeAndCategory(r).businessCategory,
+          categoryKh: inferBusinessTypeAndCategory(r).categoryKh,
+          categoryEn: inferBusinessTypeAndCategory(r).categoryEn,
           status: 'approved',
           isVerified: true,
           isPromoted: r.membershipTier === 'premium' ? true : Boolean(r.isPromoted),
@@ -8623,21 +8717,75 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           featuredFromAt: nowIso,
           featuredUntilAt: featuredUntilIso,
           updatedAt: nowIso,
-          aiCategoryVerification: r.aiCategoryVerification
-            ? {
-                ...r.aiCategoryVerification,
-                decision: 'approved',
-                isFoodBusiness: true,
-                reasonKh: `✅ ត្រូវបានពិនិត្យ និងអនុម័តដោយ Administrator ថាជាអាជីវកម្មម្ហូបអាហារត្រឹមត្រូវ។`,
-                reasonEn: `✅ Manually reviewed and approved by Administrator as an eligible food business.`,
-                verifiedAt: nowIso,
-                verifiedByModel: 'admin_manual_override',
-              }
-            : undefined,
+          aiCategoryVerification: (() => {
+            const biz = inferBusinessTypeAndCategory(r);
+            const isHotelListing = biz.businessType === 'hotel';
+            return {
+              ...(r.aiCategoryVerification || {
+                detectedCategory: 'restaurant' as const,
+                confidenceScore: 100,
+                isBypassAttempt: false,
+                matchedFoodSignals: [],
+                flaggedNonFoodSignals: [],
+                photoAnalysisSummaryKh: '',
+                photoAnalysisSummaryEn: '',
+                verificationToken: `KFT-ADMIN-APP-${Date.now()}`,
+              }),
+              decision: 'approved' as const,
+              isFoodBusiness: !isHotelListing,
+              detectedType: isHotelListing ? 'hotel' : 'restaurant',
+              detectedCategoryLabelKh: biz.categoryKh,
+              detectedCategoryLabelEn: biz.categoryEn,
+              reasonKh: isHotelListing
+                ? `✅ ត្រូវបានពិនិត្យ និងអនុម័តដោយ Administrator ថាជាសណ្ឋាគារ / កន្លែងស្នាក់នៅ (${biz.categoryKh}) ត្រឹមត្រូវ។`
+                : `✅ ត្រូវបានពិនិត្យ និងអនុម័តដោយ Administrator ថាជាអាជីវកម្មម្ហូបអាហារ (${biz.categoryKh}) ត្រឹមត្រូវ។`,
+              reasonEn: isHotelListing
+                ? `✅ Manually reviewed and approved by Administrator as ${biz.categoryEn}.`
+                : `✅ Manually reviewed and approved by Administrator as an eligible food business (${biz.categoryEn}).`,
+              verifiedAt: nowIso,
+              verifiedByModel: 'admin_manual_override' as const,
+            };
+          })(),
         };
         recordPermanentRestaurantOverride(approvedRest);
         if (managingRestaurant?.id === id) setManagingRestaurant(approvedRest);
         if (selectedRestaurant?.id === id) setSelectedRestaurant(approvedRest);
+        if (isHotelBusinessRecord(approvedRest)) {
+          setDestinations(prevDests => {
+            const hasMatch = prevDests.some(d => d && d.id === approvedRest.id);
+            if (!hasMatch) return prevDests;
+            const nextDests = prevDests.map(d => {
+              if (!d || d.id !== approvedRest.id) return d;
+              return {
+                ...d,
+                nameKh: approvedRest.nameKh || d.nameKh,
+                nameEn: approvedRest.nameEn || d.nameEn,
+                categorySlug: 'hotel' as const,
+                categoryKh: approvedRest.categoryKh || d.categoryKh || 'សណ្ឋាគារ & កន្លែងស្នាក់នៅ',
+                categoryEn: approvedRest.categoryEn || d.categoryEn || 'Hotel & Stay',
+                descriptionKh: approvedRest.descriptionKh || d.descriptionKh,
+                descriptionEn: approvedRest.descriptionEn || d.descriptionEn,
+                photoUrl: approvedRest.photoUrl || approvedRest.profileImage || d.photoUrl,
+                galleryPhotos: approvedRest.galleryPhotos?.length ? approvedRest.galleryPhotos : d.galleryPhotos,
+                provinceKh: approvedRest.provinceKh || d.provinceKh,
+                provinceEn: approvedRest.provinceEn || d.provinceEn,
+                addressKh: approvedRest.addressKh || d.addressKh,
+                addressEn: approvedRest.addressEn || d.addressEn,
+                phone: approvedRest.phone || d.phone,
+                priceRange: approvedRest.priceLevel || d.priceRange,
+                mapUrl: approvedRest.mapUrl || d.mapUrl,
+                latitude: approvedRest.latitude || d.latitude,
+                longitude: approvedRest.longitude || d.longitude,
+                isFeatured: true,
+                isAdminEdited: true,
+                isCustomPhoto: Boolean(approvedRest.photoUrl || approvedRest.profileImage || d.isCustomPhoto),
+                updatedAt: nowIso,
+              };
+            });
+            scheduleStorageWrite('kft_destinations_real_v15', nextDests, 400);
+            return nextDests;
+          });
+        }
         return approvedRest;
       });
       scheduleStorageWrite('kft_restaurants_real_v13', next, 400);
@@ -8648,24 +8796,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return next;
     });
+    const targetApproved = restaurants.find(r => r.id === id);
+    const isTargetHotel = isHotelBusinessRecord(targetApproved);
     showToast(
       language === 'km'
-        ? '✅ បានអនុម័តហាងអាហារជោគជ័យ និងដាក់បង្ហាញជាសាធារណៈរួចរាល់!'
-        : '✅ Restaurant approved and published!',
+        ? isTargetHotel
+          ? '✅ បានអនុម័តសណ្ឋាគារ / កន្លែងស្នាក់នៅជោគជ័យ និងដាក់បង្ហាញក្នុងផ្នែកសណ្ឋាគាររួចរាល់!'
+          : '✅ បានអនុម័តហាងអាហារជោគជ័យ និងដាក់បង្ហាញជាសាធារណៈរួចរាល់!'
+        : isTargetHotel
+          ? '✅ Hotel / Accommodation approved and published in Hotels directory!'
+          : '✅ Restaurant approved and published!',
       'success'
     );
   };
 
   const rejectRestaurant = (id: string, reasonKh?: string) => {
     const nowIso = new Date().toISOString();
+    const targetToReject = restaurants.find(r => r.id === id);
+    const isTargetHotel = isHotelBusinessRecord(targetToReject);
     const defaultReasonKh =
       reasonKh?.trim() ||
-      '🚫 សំណើបង្កើតហាងត្រូវបានបដិសេធដោយ Administrator ដោយសារមិនមែនជាភោជនីយដ្ឋាន ឬហាងលក់ម្ហូបអាហារចម្អិនស្រាប់។';
+      (isTargetHotel
+        ? '🚫 សំណើសណ្ឋាគារ / កន្លែងស្នាក់នៅត្រូវបានបដិសេធដោយ Administrator។ សូមពិនិត្យព័ត៌មាន រូបភាព និងទីតាំងម្តងទៀត។'
+        : '🚫 សំណើបង្កើតហាងត្រូវបានបដិសេធដោយ Administrator ដោយសារមិនមែនជាភោជនីយដ្ឋាន ឬហាងលក់ម្ហូបអាហារចម្អិនស្រាប់។');
     setRestaurants(prev => {
       const next = prev.map(r => {
         if (r.id !== id) return r;
+        const biz = inferBusinessTypeAndCategory(r);
         const rejectedRest: Restaurant = {
           ...r,
+          businessType: biz.businessType,
+          businessCategory: biz.businessCategory,
+          categoryKh: biz.categoryKh,
+          categoryEn: biz.categoryEn,
           status: 'rejected',
           isVerified: false,
           isPromoted: false,
@@ -8673,8 +8836,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           aiCategoryVerification: {
             ...(r.aiCategoryVerification || {
               detectedCategory: 'non_food_other',
-              detectedCategoryLabelKh: 'អាជីវកម្មមិនពាក់ព័ន្ធនឹងម្ហូបអាហារ',
-              detectedCategoryLabelEn: 'Non-Food Business',
+              detectedCategoryLabelKh: biz.categoryKh,
+              detectedCategoryLabelEn: biz.categoryEn,
               confidenceScore: 100,
               isBypassAttempt: false,
               matchedFoodSignals: [],
@@ -8685,8 +8848,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }),
             decision: 'rejected',
             isFoodBusiness: false,
+            detectedType: biz.businessType,
             reasonKh: defaultReasonKh,
-            reasonEn: '🚫 Store rejected by Administrator: Does not meet prepared-food business criteria.',
+            reasonEn:
+              biz.businessType === 'hotel'
+                ? '🚫 Hotel / Accommodation submission rejected by Administrator.'
+                : '🚫 Store rejected by Administrator: Does not meet prepared-food business criteria.',
             verifiedAt: nowIso,
             verifiedByModel: 'admin_manual_override',
           },
@@ -8706,8 +8873,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
     showToast(
       language === 'km'
-        ? '🚫 បានបដិសេធសំណើបង្កើតហាងរួចរាល់!'
-        : '🚫 Rejected store submission!',
+        ? isTargetHotel
+          ? '🚫 បានបដិសេធសំណើសណ្ឋាគារ / កន្លែងស្នាក់នៅរួចរាល់!'
+          : '🚫 បានបដិសេធសំណើបង្កើតហាងរួចរាល់!'
+        : isTargetHotel
+          ? '🚫 Rejected hotel submission!'
+          : '🚫 Rejected store submission!',
       'info'
     );
   };

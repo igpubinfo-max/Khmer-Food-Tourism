@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
-import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isStrictVerifiedCambodiaRestaurant, openExternalUrlNativeSafe } from '../types';
+import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isStrictVerifiedCambodiaRestaurant, openExternalUrlNativeSafe, isHotelBusinessRecord } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { Store, Edit2, Settings, MapPin, Search } from 'lucide-react';
 import {
@@ -170,7 +170,7 @@ export const RestaurantView: React.FC = () => {
   const validDirectoryRestaurants = useMemo(() => {
     const seenIds = new Set<string>();
     return sessionShuffledRestaurants.filter((r) => {
-      if (r.businessType === 'hotel') {
+      if (isHotelBusinessRecord(r)) {
         return false;
       }
       if (!isStrictVerifiedCambodiaRestaurant(r)) {

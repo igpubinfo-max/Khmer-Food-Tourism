@@ -13,6 +13,7 @@ import {
   getDynamicVipPlans, getDynamicVipBenefits,
   isValidCambodiaCoordinates, buildCanonicalGoogleMapsPinUrl,
   isValidGoogleMapsUrl, extractCoordsFromGoogleMapsUrl,
+  BUSINESS_CATEGORY_CATALOG, inferBusinessTypeAndCategory, isHotelBusinessRecord,
 } from '../types';
 import { tr } from '../utils/i18n';
 import {
@@ -69,6 +70,9 @@ export const ManageMenuModal: React.FC = () => {
   const [stagedReplacementPhoto, setStagedReplacementPhoto] = useState<string>('');
 
   // Self-Service Store Info fields
+  const initialInferred = inferBusinessTypeAndCategory(managingRestaurant || {});
+  const [storeBusinessType, setStoreBusinessType] = useState<'restaurant' | 'hotel'>(initialInferred.businessType);
+  const [storeBusinessCategory, setStoreBusinessCategory] = useState<string>(initialInferred.businessCategory);
   const [storeNameKh, setStoreNameKh] = useState(managingRestaurant?.nameKh || '');
   const [storeNameEn, setStoreNameEn] = useState(managingRestaurant?.nameEn || '');
   const [storePhone, setStorePhone] = useState(managingRestaurant?.phone || '');
@@ -115,6 +119,9 @@ export const ManageMenuModal: React.FC = () => {
   useEffect(() => {
     if (managingRestaurant) {
       const fresh = restaurants.find((r) => r.id === managingRestaurant.id) || managingRestaurant;
+      const inferred = inferBusinessTypeAndCategory(fresh);
+      setStoreBusinessType(inferred.businessType);
+      setStoreBusinessCategory(inferred.businessCategory);
       setStoreNameKh(fresh.nameKh || '');
       setStoreNameEn(fresh.nameEn || '');
       setStorePhone(fresh.phone || '');
@@ -385,8 +392,15 @@ export const ManageMenuModal: React.FC = () => {
 
     const finalCover = storeCoverPhoto.trim() || managingRestaurant.photoUrl;
     const finalGallery = [finalCover].filter(Boolean);
+    const matchedCat =
+      BUSINESS_CATEGORY_CATALOG.find((c) => c.value === storeBusinessCategory) ||
+      (storeBusinessType === 'hotel' ? BUSINESS_CATEGORY_CATALOG[6] : BUSINESS_CATEGORY_CATALOG[0]);
     updateRestaurant({
       ...managingRestaurant,
+      businessType: storeBusinessType,
+      businessCategory: matchedCat.value,
+      categoryKh: matchedCat.shortKh,
+      categoryEn: matchedCat.shortEn,
       nameKh: storeNameKh.trim() || storeNameEn.trim(),
       nameEn: storeNameEn.trim() || storeNameKh.trim(),
       phone: storePhone.trim(),
@@ -542,14 +556,16 @@ export const ManageMenuModal: React.FC = () => {
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <h2 className="font-moul text-xs sm:text-sm text-white leading-snug truncate">
-                    {isKm ? 'គ្រប់គ្រងហាង VIP របស់ខ្ញុំ' : 'Manage My VIP Store'}
+                    {storeBusinessType === 'hotel' || isHotelBusinessRecord(currentRest)
+                      ? (isKm ? 'គ្រប់គ្រងសណ្ឋាគារ / ផ្ទះសំណាក់ VIP របស់ខ្ញុំ' : 'Manage My VIP Hotel / Stay')
+                      : (isKm ? 'គ្រប់គ្រងហាង VIP របស់ខ្ញុំ' : 'Manage My VIP Store')}
                   </h2>
                   <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[9px]">
-                    ID: {managingRestaurant.id.slice(-8)}
+                    ID: {managingRestaurant.id.length > 14 ? managingRestaurant.id.slice(-10) : managingRestaurant.id}
                   </span>
                 </div>
                 <p className="text-xs font-bold text-amber-200 font-khmer truncate">
-                  🏪 {isKm ? managingRestaurant.nameKh : (managingRestaurant.nameEn || managingRestaurant.nameKh)}
+                  {storeBusinessType === 'hotel' || isHotelBusinessRecord(currentRest) ? '🏨' : '🏪'} {isKm ? managingRestaurant.nameKh : (managingRestaurant.nameEn || managingRestaurant.nameKh)}
                 </p>
               </div>
             </div>
@@ -800,21 +816,33 @@ export const ManageMenuModal: React.FC = () => {
             <div className="space-y-0.5 flex-1">
               <p className="font-bold">
                 {currentRest.status === 'pending'
-                  ? isKm
-                    ? '⏳ កំពុងរង់ចាំ Admin ពិនិត្យប្រភេទអាជីវកម្មម្ហូបអាហារ (Pending Admin Review)'
-                    : '⏳ Pending Admin Food-Category Review'
-                  : isKm
-                    ? '🚫 សំណើហាងត្រូវបានបដិសេធ (មិនមែនជាហាងលក់ម្ហូបអាហារចម្អិនស្រាប់)'
-                    : '🚫 Store Rejected (Non-Food Business)'}
+                  ? storeBusinessType === 'hotel' || isHotelBusinessRecord(currentRest)
+                    ? isKm
+                      ? '⏳ កំពុងរង់ចាំ Admin ពិនិត្យសណ្ឋាគារ / កន្លែងស្នាក់នៅ (Pending Admin Hotel Review)'
+                      : '⏳ Pending Admin Hotel / Accommodation Review'
+                    : isKm
+                      ? '⏳ កំពុងរង់ចាំ Admin ពិនិត្យប្រភេទអាជីវកម្មម្ហូបអាហារ (Pending Admin Review)'
+                      : '⏳ Pending Admin Food-Category Review'
+                  : storeBusinessType === 'hotel' || isHotelBusinessRecord(currentRest)
+                    ? isKm
+                      ? '🚫 សំណើសណ្ឋាគារ / ផ្ទះសំណាក់ត្រូវបានបដិសេធ'
+                      : '🚫 Hotel / Accommodation Submission Rejected'
+                    : isKm
+                      ? '🚫 សំណើហាងត្រូវបានបដិសេធ (មិនមែនជាហាងលក់ម្ហូបអាហារចម្អិនស្រាប់)'
+                      : '🚫 Store Rejected (Non-Food Business)'}
               </p>
               <p className="text-[11px] leading-relaxed">
-                {currentRest.aiCategoryVerification
+                {storeBusinessType === 'hotel' || isHotelBusinessRecord(currentRest)
                   ? isKm
-                    ? currentRest.aiCategoryVerification.reasonKh
-                    : currentRest.aiCategoryVerification.reasonEn
-                  : isKm
-                    ? 'សូមបំពេញព័ត៌មានហាង រូបភាពហាង ១ សន្លឹក និងលីង Google Maps ឱ្យបានច្បាស់លាស់ ដើម្បីឱ្យ Admin ត្រួតពិនិត្យ និងអនុម័តដាក់បង្ហាញជាសាធារណៈ។'
-                    : 'Please provide clear store info, single shop photo, and Google Maps link for Admin approval.'}
+                    ? `ប្រភេទអាជីវកម្ម៖ ${inferBusinessTypeAndCategory(currentRest).labelKh} • សូមបំពេញព័ត៌មានសណ្ឋាគារ រូបភាព ១ សន្លឹក និងលីង Google Maps ឱ្យបានច្បាស់លាស់ ដើម្បីឱ្យ Admin ត្រួតពិនិត្យ និងអនុម័តដាក់បង្ហាញក្នុងផ្នែកសណ្ឋាគារ។`
+                    : `Category: ${inferBusinessTypeAndCategory(currentRest).labelEn} • Please provide clear hotel details, 1 photo, and Google Maps link for Admin review.`
+                  : currentRest.aiCategoryVerification
+                    ? isKm
+                      ? currentRest.aiCategoryVerification.reasonKh
+                      : currentRest.aiCategoryVerification.reasonEn
+                    : isKm
+                      ? 'សូមបំពេញព័ត៌មានហាង រូបភាពហាង ១ សន្លឹក និងលីង Google Maps ឱ្យបានច្បាស់លាស់ ដើម្បីឱ្យ Admin ត្រួតពិនិត្យ និងអនុម័តដាក់បង្ហាញជាសាធារណៈ។'
+                      : 'Please provide clear store info, single shop photo, and Google Maps link for Admin approval.'}
               </p>
             </div>
           </div>
@@ -943,9 +971,13 @@ export const ManageMenuModal: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Store className="w-4 h-4 text-[#064E3B] dark:text-emerald-400 shrink-0" />
                     <span className="text-[11px] text-[#064E3B] dark:text-emerald-300 leading-snug font-bold">
-                      {isKm 
-                        ? '🏪 កែប្រែព័ត៌មានហាង ឬប្តូរហាងថ្មី (ឥតគិតថ្លៃ $0.00)' 
-                        : '🏪 Edit Store Info or Replace Store (Free $0.00)'}
+                      {storeBusinessType === 'hotel'
+                        ? isKm
+                          ? '🏨 កែប្រែព័ត៌មានសណ្ឋាគារ / ផ្ទះសំណាក់ ឬប្តូរអាជីវកម្មថ្មី (ឥតគិតថ្លៃ $0.00)'
+                          : '🏨 Edit Hotel / Stay Info or Replace Business (Free $0.00)'
+                        : isKm 
+                          ? '🏪 កែប្រែព័ត៌មានហាង ឬប្តូរហាងថ្មី (ឥតគិតថ្លៃ $0.00)' 
+                          : '🏪 Edit Store Info or Replace Store (Free $0.00)'}
                     </span>
                   </div>
                   <button
@@ -957,9 +989,13 @@ export const ManageMenuModal: React.FC = () => {
                 </div>
                 <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-emerald-200/70 dark:border-emerald-800/60 text-[10px] text-slate-600 dark:text-slate-300">
                   <span>
-                    {isKm
-                      ? 'អ្នកអាចកែប្រែព័ត៌មានហាងនេះ ឬប្តូរដាក់ហាងថ្មីជំនួសហាងនេះដោយមិនបាច់បង់ប្រាក់បន្ថែមឡើយ ($0)។'
-                      : 'You can edit this store or replace it with a brand-new store at zero additional cost ($0).'}
+                    {storeBusinessType === 'hotel'
+                      ? isKm
+                        ? 'អ្នកអាចកែប្រែព័ត៌មានសណ្ឋាគារនេះ ឬប្តូរប្រភេទអាជីវកម្មដោយមិនបាច់បង់ប្រាក់បន្ថែមឡើយ ($0)។'
+                        : 'You can edit this hotel or replace it with another business at zero additional cost ($0).'
+                      : isKm
+                        ? 'អ្នកអាចកែប្រែព័ត៌មានហាងនេះ ឬប្តូរដាក់ហាងថ្មីជំនួសហាងនេះដោយមិនបាច់បង់ប្រាក់បន្ថែមឡើយ ($0)។'
+                        : 'You can edit this store or replace it with a brand-new store at zero additional cost ($0).'}
                   </span>
                   <button
                     type="button"
@@ -975,10 +1011,74 @@ export const ManageMenuModal: React.FC = () => {
                 </div>
               </div>
 
+              {/* Business Type & Exact Sub-Category Selector */}
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/70 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2.5">
+                <label className="block font-bold text-[#0F172A] dark:text-slate-200 text-xs">
+                  {isKm ? '🏷️ ប្រភេទអាជីវកម្ម (ហាងអាហារ ឬ សណ្ឋាគារ / កន្លែងស្នាក់នៅ) *' : '🏷️ Business Type & Category *'}
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStoreBusinessType('restaurant');
+                      if (['hotel', 'resort', 'boutique_villa', 'guesthouse'].includes(storeBusinessCategory)) {
+                        setStoreBusinessCategory('restaurant');
+                      }
+                    }}
+                    className={`py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 border transition cursor-pointer ${
+                      storeBusinessType === 'restaurant'
+                        ? 'bg-[#064E3B] text-white border-[#059669] shadow-sm'
+                        : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700'
+                    }`}
+                  >
+                    <span>🍽️</span>
+                    <span>{isKm ? 'ហាងអាហារ / កាហ្វេ' : 'Food / Restaurant'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStoreBusinessType('hotel');
+                      if (!['hotel', 'resort', 'boutique_villa', 'guesthouse'].includes(storeBusinessCategory)) {
+                        setStoreBusinessCategory('hotel');
+                      }
+                    }}
+                    className={`py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 border transition cursor-pointer ${
+                      storeBusinessType === 'hotel'
+                        ? 'bg-[#064E3B] text-white border-[#059669] shadow-sm'
+                        : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700'
+                    }`}
+                  >
+                    <span>🏨</span>
+                    <span>{isKm ? 'សណ្ឋាគារ / ផ្ទះសំណាក់' : 'Hotel / Stay'}</span>
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {BUSINESS_CATEGORY_CATALOG.filter((c) => c.businessType === storeBusinessType).map((cat) => {
+                    const active = storeBusinessCategory === cat.value;
+                    return (
+                      <button
+                        key={cat.value}
+                        type="button"
+                        onClick={() => setStoreBusinessCategory(cat.value)}
+                        className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold border transition cursor-pointer ${
+                          active
+                            ? 'bg-amber-400 text-slate-950 border-amber-500 shadow-xs'
+                            : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:border-emerald-500'
+                        }`}
+                      >
+                        {isKm ? cat.labelKh : cat.labelEn}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                    {isKm ? '១. ឈ្មោះហាង (ជាភាសាខ្មែរ) *' : '1. Restaurant Name (Khmer) *'}
+                    {storeBusinessType === 'hotel'
+                      ? (isKm ? '១. ឈ្មោះសណ្ឋាគារ / ផ្ទះសំណាក់ (ជាភាសាខ្មែរ) *' : '1. Hotel / Stay Name (Khmer) *')
+                      : (isKm ? '១. ឈ្មោះហាង (ជាភាសាខ្មែរ) *' : '1. Restaurant Name (Khmer) *')}
                   </label>
                   <input
                     type="text"
@@ -991,7 +1091,9 @@ export const ManageMenuModal: React.FC = () => {
 
                 <div>
                   <label className="block font-bold text-[#0F172A] dark:text-slate-300 mb-1">
-                    {isKm ? '២. ឈ្មោះហាង (ជាភាសាអង់គ្លេស)' : '2. Restaurant Name (English)'}
+                    {storeBusinessType === 'hotel'
+                      ? (isKm ? '២. ឈ្មោះសណ្ឋាគារ / ផ្ទះសំណាក់ (ជាភាសាអង់គ្លេស)' : '2. Hotel / Stay Name (English)')
+                      : (isKm ? '២. ឈ្មោះហាង (ជាភាសាអង់គ្លេស)' : '2. Restaurant Name (English)')}
                   </label>
                   <input
                     type="text"

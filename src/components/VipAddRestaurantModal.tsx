@@ -40,6 +40,8 @@ import {
   buildCanonicalGoogleMapsPinUrl,
   isValidGoogleMapsUrl,
   extractCoordsFromGoogleMapsUrl,
+  inferBusinessTypeAndCategory,
+  isHotelBusinessRecord,
 } from '../types';
 import {
   isNativeAndroidOrIosPlatform,
@@ -440,7 +442,7 @@ export const VipAddRestaurantModal: React.FC = () => {
       .map((r) => ({
         id: r.id,
         source: 'restaurant' as const,
-        businessType: r.businessType === 'hotel' ? ('hotel' as const) : ('restaurant' as const),
+        businessType: isHotelBusinessRecord(r) ? ('hotel' as const) : ('restaurant' as const),
         nameKh: r.nameKh || '',
         nameEn: r.nameEn || '',
         provinceKh: r.provinceKh || '',
@@ -571,7 +573,8 @@ export const VipAddRestaurantModal: React.FC = () => {
   };
 
   const beginUpgradeExistingStore = (store: (typeof restaurants)[0]) => {
-    const bType = store.businessType === 'hotel' ? 'hotel' : 'restaurant';
+    const inferred = inferBusinessTypeAndCategory(store);
+    const bType = inferred.businessType;
     setBusinessType(bType);
     setFormMode('upgrade_existing');
     setUpgradingExistingStoreId(store.id);
@@ -591,14 +594,14 @@ export const VipAddRestaurantModal: React.FC = () => {
     setGpsInputText(latVal !== null && lngVal !== null ? `${latVal.toFixed(6)}, ${lngVal.toFixed(6)}` : '');
     setShopMapUrl(store.mapUrl || '');
     setPhone(store.phone || currentUser?.phone || '');
-    setOpeningHoursKh(store.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់');
+    setOpeningHoursKh(store.openingHoursKh || (bType === 'hotel' ? 'បើកទទួលភ្ញៀវ ២៤ ម៉ោង' : '០៧:០០ ព្រឹក - ០៩:០០ យប់'));
     setPriceLevel(store.priceLevel || '$');
     setShopPhoto(store.profileImage || store.photoUrl || '');
     setModerationWarning(null);
     setDescriptionKh(store.descriptionKh || '');
     setImportedGooglePlaceId(store.googlePlaceId);
     setImportedGoogleMeta(store.googleMapsMeta);
-    setBusinessCategory(store.businessCategory || (bType === 'hotel' ? 'hotel' : 'restaurant'));
+    setBusinessCategory(inferred.businessCategory);
     setWebsiteUrl(store.websiteUrl || store.googleMapsMeta?.websiteUri || '');
     setSignatureDishesKh(
       Array.isArray(store.signatureDishesKh) && store.signatureDishesKh.length > 0
@@ -611,7 +614,8 @@ export const VipAddRestaurantModal: React.FC = () => {
   };
 
   const beginReplaceStore = (store: (typeof ownedRestaurants)[0]) => {
-    const bType = store.businessType === 'hotel' ? 'hotel' : 'restaurant';
+    const inferred = inferBusinessTypeAndCategory(store);
+    const bType = inferred.businessType;
     setBusinessType(bType);
     setReplacingStoreId(store.id);
     setClaimingDestinationId(null);
@@ -629,18 +633,18 @@ export const VipAddRestaurantModal: React.FC = () => {
     setGpsInputText(latVal !== null && lngVal !== null ? `${latVal.toFixed(6)}, ${lngVal.toFixed(6)}` : '');
     setShopMapUrl(store.mapUrl || '');
     setPhone(store.phone || currentUser?.phone || '');
-    setOpeningHoursKh(store.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់');
+    setOpeningHoursKh(store.openingHoursKh || (bType === 'hotel' ? 'បើកទទួលភ្ញៀវ ២៤ ម៉ោង' : '០៧:០០ ព្រឹក - ០៩:០០ យប់'));
     setShopPhoto(store.profileImage || store.photoUrl || '');
     setModerationWarning(null);
     setDescriptionKh(store.descriptionKh || '');
     setImportedGooglePlaceId(store.googlePlaceId);
     setImportedGoogleMeta(store.googleMapsMeta);
-    setBusinessCategory(store.businessCategory || 'restaurant');
+    setBusinessCategory(inferred.businessCategory);
     setWebsiteUrl(store.websiteUrl || store.googleMapsMeta?.websiteUri || '');
     setSignatureDishesKh(
       Array.isArray(store.signatureDishesKh) && store.signatureDishesKh.length > 0
         ? store.signatureDishesKh
-        : ['ម្ហូបខ្មែរប្រចាំហាង']
+        : [bType === 'hotel' ? 'បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ និង Wi-Fi' : 'ម្ហូបខ្មែរប្រចាំហាង']
     );
     setIsPreviewStep(false);
     setActiveTab('create_form');
@@ -1523,24 +1527,43 @@ export const VipAddRestaurantModal: React.FC = () => {
               <Clock className="w-8 h-8" />
             </div>
             <div className="space-y-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 font-bold text-xs border border-amber-300 dark:border-amber-700">
-                ⏳ {tr(language, 'រង់ចាំការត្រួតពិនិត្យ និងអនុម័តពី Admin', 'Pending Admin Review & Approval', '等待管理员审核与批准')}
-              </span>
+              <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200 font-bold text-xs border border-emerald-300 dark:border-emerald-700">
+                  {isKm ? inferBusinessTypeAndCategory(submittedPendingShop).labelKh : inferBusinessTypeAndCategory(submittedPendingShop).labelEn}
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 font-bold text-xs border border-amber-300 dark:border-amber-700">
+                  ⏳ {tr(language, 'រង់ចាំការត្រួតពិនិត្យ និងអនុម័តពី Admin', 'Pending Admin Review & Approval', '等待管理员审核与批准')}
+                </span>
+              </div>
               <h4 className="font-moul text-base text-slate-900 dark:text-white pt-1">
-                {tr(
-                  language,
-                  '✅ បានទទួលសំណើបន្ថែមហាងរបស់អ្នកជោគជ័យ!',
-                  '✅ Shop Submission Received!',
-                  '✅ 您的店铺申请已成功提交！'
-                )}
+                {isHotelBusinessRecord(submittedPendingShop)
+                  ? tr(
+                      language,
+                      '✅ បានទទួលសំណើសណ្ឋាគារ / កន្លែងស្នាក់នៅរបស់អ្នកជោគជ័យ!',
+                      '✅ Hotel / Accommodation Submission Received!',
+                      '✅ 您的酒店/住宿申请已成功提交！'
+                    )
+                  : tr(
+                      language,
+                      '✅ បានទទួលសំណើបន្ថែមហាងរបស់អ្នកជោគជ័យ!',
+                      '✅ Shop Submission Received!',
+                      '✅ 您的店铺申请已成功提交！'
+                    )}
               </h4>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                {tr(
-                  language,
-                  `ហាង «${submittedPendingShop.nameKh || submittedPendingShop.nameEn}» ត្រូវបានបញ្ជូនទៅកាន់រដ្ឋបាល (Admin) ដើម្បីត្រួតពិនិត្យ និងផ្ទៀងផ្ទាត់ទីតាំង។ បន្ទាប់ពីផ្ទៀងផ្ទាត់រួចរាល់ ហាងរបស់អ្នកនឹងបង្ហាញជាផ្លូវការ!`,
-                  `Your shop "${submittedPendingShop.nameEn || submittedPendingShop.nameKh}" has been sent for verification.`,
-                  `您的店铺“${submittedPendingShop.nameEn || submittedPendingShop.nameKh}”已提交管理员核验！`
-                )}
+                {isHotelBusinessRecord(submittedPendingShop)
+                  ? tr(
+                      language,
+                      `សណ្ឋាគារ «${submittedPendingShop.nameKh || submittedPendingShop.nameEn}» ត្រូវបានបញ្ជូនទៅកាន់ផ្នែក «សណ្ឋាគារ» របស់ Admin ដើម្បីត្រួតពិនិត្យ។ បន្ទាប់ពីអនុម័តរួចរាល់ នឹងបង្ហាញក្នុងផ្នែកសណ្ឋាគារជាផ្លូវការ!`,
+                      `Your hotel "${submittedPendingShop.nameEn || submittedPendingShop.nameKh}" has been sent to the Admin Hotels queue for verification.`,
+                      `您的酒店“${submittedPendingShop.nameEn || submittedPendingShop.nameKh}”已提交管理员酒店审核队列！`
+                    )
+                  : tr(
+                      language,
+                      `ហាង «${submittedPendingShop.nameKh || submittedPendingShop.nameEn}» ត្រូវបានបញ្ជូនទៅកាន់រដ្ឋបាល (Admin) ដើម្បីត្រួតពិនិត្យ និងផ្ទៀងផ្ទាត់ទីតាំង។ បន្ទាប់ពីផ្ទៀងផ្ទាត់រួចរាល់ ហាងរបស់អ្នកនឹងបង្ហាញជាផ្លូវការ!`,
+                      `Your shop "${submittedPendingShop.nameEn || submittedPendingShop.nameKh}" has been sent for verification.`,
+                      `您的店铺“${submittedPendingShop.nameEn || submittedPendingShop.nameKh}”已提交管理员核验！`
+                    )}
               </p>
             </div>
             <div className="pt-2 space-y-2">
@@ -1556,7 +1579,9 @@ export const VipAddRestaurantModal: React.FC = () => {
                 }}
                 className="w-full py-3 px-4 rounded-2xl bg-[#064E3B] hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition cursor-pointer"
               >
-                {tr(language, '🏪 ពិនិត្យ និងកែប្រែព័ត៌មានហាងឥឡូវនេះ', '🏪 View & Edit Shop Info Now', '🏪 立即查看与编辑店铺信息')}
+                {isHotelBusinessRecord(submittedPendingShop)
+                  ? tr(language, '🏨 ពិនិត្យ និងកែប្រែព័ត៌មានសណ្ឋាគារឥឡូវនេះ', '🏨 View & Edit Hotel Info Now', '🏨 立即查看与编辑酒店信息')
+                  : tr(language, '🏪 ពិនិត្យ និងកែប្រែព័ត៌មានហាងឥឡូវនេះ', '🏪 View & Edit Shop Info Now', '🏪 立即查看与编辑店铺信息')}
               </button>
               <button
                 type="button"
@@ -1648,9 +1673,12 @@ export const VipAddRestaurantModal: React.FC = () => {
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-mono text-[10px] font-bold">
                         #{idx + 1}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[10px] font-bold">
+                        {isKm ? inferBusinessTypeAndCategory(store).labelKh : inferBusinessTypeAndCategory(store).labelEn}
                       </span>
                       <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">
                         {isKm ? store.nameKh : store.nameEn || store.nameKh}
@@ -2157,7 +2185,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               </div>
 
               {/* Business Type Switcher: Shop / Restaurant vs Hotel / Stay */}
-              {!upgradingExistingStoreId && !replacingStoreId && !claimingDestinationId && (
+              {!upgradingExistingStoreId && !claimingDestinationId && (
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"

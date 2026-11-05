@@ -6,6 +6,8 @@ import {
   isAdminAccount,
   openDestinationGoogleExternal,
   openExternalUrlNativeSafe,
+  inferBusinessTypeAndCategory,
+  isHotelBusinessRecord,
 } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { BedDouble, Edit2, Settings, MapPin, Heart, Lock, Camera, Star, Trash2, Download } from 'lucide-react';
@@ -58,11 +60,11 @@ export const HotelView: React.FC = () => {
     [restaurants, currentUser, activeManagedShopId]
   );
   const myExistingShop = useMemo(
-    () => myOwnedBusinesses.find((r) => r.businessType !== 'hotel'),
+    () => myOwnedBusinesses.find((r) => !isHotelBusinessRecord(r)),
     [myOwnedBusinesses]
   );
   const myExistingHotel = useMemo(
-    () => myOwnedBusinesses.find((r) => r.businessType === 'hotel'),
+    () => myOwnedBusinesses.find((r) => isHotelBusinessRecord(r)),
     [myOwnedBusinesses]
   );
 
@@ -84,43 +86,46 @@ export const HotelView: React.FC = () => {
     setVisibleCount(HOTEL_BATCH_SIZE);
   }, [selectedProvince, categoryFilter, hotelSearchQuery]);
 
-  // Convert any VIP-added Hotel records (from `restaurants` where `businessType === 'hotel'`) into TouristDestination format so they appear first as Verified Big Cards
+  // Convert any VIP-added Hotel records (from `restaurants` where `isHotelBusinessRecord(r)`) into TouristDestination format so they appear first as Verified Big Cards
   const vipAddedHotelDestinations = useMemo<TouristDestination[]>(() => {
     return restaurants
-      .filter((r: Restaurant) => r && r.businessType === 'hotel' && (r.status === 'approved' || isAdmin || r.ownerId === currentUser?.id))
-      .map((r: Restaurant) => ({
-        id: r.id,
-        nameKh: r.nameKh,
-        nameEn: r.nameEn || r.nameKh,
-        categorySlug: 'hotel' as const,
-        categoryKh: r.categoryKh || 'សណ្ឋាគារ & កន្លែងស្នាក់នៅ',
-        categoryEn: r.categoryEn || 'Hotel & Stay',
-        descriptionKh: r.descriptionKh || `${r.nameKh} — កន្លែងស្នាក់នៅស្អាត និងមានផាសុកភាព។`,
-        descriptionEn: r.descriptionEn || `${r.nameEn || r.nameKh} — Verified accommodation in ${r.provinceEn}.`,
-        photoUrl: r.profileImage || r.photoUrl || '',
-        galleryPhotos: r.galleryPhotos || [],
-        provinceKh: r.provinceKh,
-        provinceEn: r.provinceEn,
-        addressKh: r.addressKh || r.provinceKh,
-        addressEn: r.addressEn || r.provinceEn,
-        phone: r.phone,
-        priceRange: r.priceLevel || '$$',
-        entranceFeeKh: `តម្លៃបន្ទប់៖ ${r.priceLevel || '$'} • ${r.phone || ''}`,
-        entranceFeeEn: `Room Rate: ${r.priceLevel || '$'} • ${r.phone || ''}`,
-        bestTimeToVisitKh: r.openingHoursKh || 'បើកទទួលភ្ញៀវ ២៤ ម៉ោង',
-        bestTimeToVisitEn: r.openingHoursEn || 'Open 24 Hours',
-        mapUrl: r.mapUrl || `https://www.google.com/maps/search/?api=1&query=${r.latitude},${r.longitude}`,
-        latitude: r.latitude,
-        longitude: r.longitude,
-        rating: r.rating || 4.9,
-        reviewCount: r.reviewCount || 128,
-        highlightsKh: r.signatureDishesKh?.length
-          ? r.signatureDishesKh
-          : ['បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ Wi-Fi និងចំណតរថយន្តសុវត្ថិភាព'],
-        isFeatured: true,
-        isCustomPhoto: Boolean(r.profileImage || r.photoUrl),
-        locationVerificationStatus: 'verified' as const,
-      }));
+      .filter((r: Restaurant) => r && isHotelBusinessRecord(r) && (r.status === 'approved' || isAdmin || r.ownerId === currentUser?.id))
+      .map((r: Restaurant) => {
+        const catInfo = inferBusinessTypeAndCategory(r);
+        return {
+          id: r.id,
+          nameKh: r.nameKh,
+          nameEn: r.nameEn || r.nameKh,
+          categorySlug: 'hotel' as const,
+          categoryKh: r.categoryKh || catInfo.shortKh,
+          categoryEn: r.categoryEn || catInfo.shortEn,
+          descriptionKh: r.descriptionKh || `${r.nameKh} — កន្លែងស្នាក់នៅស្អាត និងមានផាសុកភាព។`,
+          descriptionEn: r.descriptionEn || `${r.nameEn || r.nameKh} — Verified accommodation in ${r.provinceEn}.`,
+          photoUrl: r.profileImage || r.photoUrl || '',
+          galleryPhotos: r.galleryPhotos || [],
+          provinceKh: r.provinceKh,
+          provinceEn: r.provinceEn,
+          addressKh: r.addressKh || r.provinceKh,
+          addressEn: r.addressEn || r.provinceEn,
+          phone: r.phone,
+          priceRange: r.priceLevel || '$$',
+          entranceFeeKh: `តម្លៃបន្ទប់៖ ${r.priceLevel || '$'} • ${r.phone || ''}`,
+          entranceFeeEn: `Room Rate: ${r.priceLevel || '$'} • ${r.phone || ''}`,
+          bestTimeToVisitKh: r.openingHoursKh || 'បើកទទួលភ្ញៀវ ២៤ ម៉ោង',
+          bestTimeToVisitEn: r.openingHoursEn || 'Open 24 Hours',
+          mapUrl: r.mapUrl || `https://www.google.com/maps/search/?api=1&query=${r.latitude},${r.longitude}`,
+          latitude: r.latitude,
+          longitude: r.longitude,
+          rating: r.rating || 4.9,
+          reviewCount: r.reviewCount || 128,
+          highlightsKh: r.signatureDishesKh?.length
+            ? r.signatureDishesKh
+            : ['បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ Wi-Fi និងចំណតរថយន្តសុវត្ថិភាព'],
+          isFeatured: true,
+          isCustomPhoto: Boolean(r.profileImage || r.photoUrl),
+          locationVerificationStatus: 'verified' as const,
+        };
+      });
   }, [restaurants, isAdmin, currentUser?.id]);
 
   // Combine VIP-added hotels + seed/admin hotels from `destinations` (where categorySlug === 'hotel')

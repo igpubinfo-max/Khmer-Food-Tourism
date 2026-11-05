@@ -1581,6 +1581,243 @@ export const isCustomRestaurant = (restaurant?: Restaurant | null): boolean => {
   return !isSeedRestaurantId(restaurant.id);
 };
 
+export interface BusinessCategoryOption {
+  id: string;
+  businessType: 'restaurant' | 'hotel';
+  labelKh: string;
+  labelEn: string;
+  labelZh: string;
+  shortKh: string;
+  shortEn: string;
+  emoji: string;
+  defaultHighlightKh: string;
+}
+
+export const BUSINESS_CATEGORY_CATALOG: BusinessCategoryOption[] = [
+  // Hotel / Accommodation Categories
+  {
+    id: 'hotel',
+    businessType: 'hotel',
+    labelKh: '🏨 សណ្ឋាគារ (Hotel)',
+    labelEn: '🏨 Hotel & Stay',
+    labelZh: '🏨 酒店',
+    shortKh: 'សណ្ឋាគារ & កន្លែងស្នាក់នៅ',
+    shortEn: 'Hotel & Stay',
+    emoji: '🏨',
+    defaultHighlightKh: 'បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ Wi-Fi និងចំណតរថយន្តសុវត្ថិភាព',
+  },
+  {
+    id: 'resort',
+    businessType: 'hotel',
+    labelKh: '🌴 រីសត (Resort)',
+    labelEn: '🌴 Resort & Spa',
+    labelZh: '🌴 度假村与水疗',
+    shortKh: 'សណ្ឋាគារប្រណីត & រីសត',
+    shortEn: 'Resort & Spa',
+    emoji: '🌴',
+    defaultHighlightKh: 'អាងហែលទឹក សួនធម្មជាតិ និងបន្ទប់ប្រណីត',
+  },
+  {
+    id: 'boutique_villa',
+    businessType: 'hotel',
+    labelKh: '🏡 ប៊ូទិក & វីឡា (Boutique / Villa)',
+    labelEn: '🏡 Boutique & Villa',
+    labelZh: '🏡 精品酒店与别墅',
+    shortKh: 'ប៊ូទិក & វីឡា',
+    shortEn: 'Boutique & Villa',
+    emoji: '🏡',
+    defaultHighlightKh: 'ប៊ូទិកស្ងប់ស្ងាត់ បន្ទប់ទូលាយ និងសេវាកម្មរួសរាយ',
+  },
+  {
+    id: 'guesthouse',
+    businessType: 'hotel',
+    labelKh: '🛏️ ផ្ទះសំណាក់ & បឹងហ្គាឡូ (Guesthouse)',
+    labelEn: '🛏️ Guesthouse & Lodge',
+    labelZh: '🛏️ 客栈与木屋',
+    shortKh: 'ផ្ទះសំណាក់ & បឹងហ្គាឡូ',
+    shortEn: 'Guesthouse & Lodge',
+    emoji: '🛏️',
+    defaultHighlightKh: 'បន្ទប់ស្នាក់នៅស្អាត តម្លៃសមរម្យ និងមានផាសុកភាព',
+  },
+  // Restaurant / Food Shop Categories
+  {
+    id: 'restaurant',
+    businessType: 'restaurant',
+    labelKh: '🍽️ ភោជនីយដ្ឋានម្ហូបខ្មែរ',
+    labelEn: '🍽️ Khmer Restaurant',
+    labelZh: '🍽️ 柬式餐厅',
+    shortKh: 'ភោជនីយដ្ឋានម្ហូបខ្មែរ',
+    shortEn: 'Khmer Restaurant',
+    emoji: '🍽️',
+    defaultHighlightKh: 'ម្ហូបខ្មែរប្រពៃណី',
+  },
+  {
+    id: 'cafe',
+    businessType: 'restaurant',
+    labelKh: '☕ ហាងកាហ្វេ & ភេសជ្ជៈ',
+    labelEn: '☕ Cafe & Beverages',
+    labelZh: '☕ 咖啡与饮品',
+    shortKh: 'ហាងកាហ្វេ & ភេសជ្ជៈ',
+    shortEn: 'Cafe & Beverages',
+    emoji: '☕',
+    defaultHighlightKh: 'កាហ្វេឆ្ងាញ់ និងភេសជ្ជៈ',
+  },
+  {
+    id: 'street_food',
+    businessType: 'restaurant',
+    labelKh: '🍜 អាហារដ្ឋាន / គុយទាវ / បាយ',
+    labelEn: '🍜 Noodles, Rice & Eatery',
+    labelZh: '🍜 粉面饭食快餐',
+    shortKh: 'អាហារដ្ឋាន / គុយទាវ / បាយ',
+    shortEn: 'Noodles, Rice & Eatery',
+    emoji: '🍜',
+    defaultHighlightKh: 'បាយ គុយទាវ និងម្ហូបកម្ម៉ង់',
+  },
+  {
+    id: 'seafood',
+    businessType: 'restaurant',
+    labelKh: '🦐 គ្រឿងសមុទ្រ & សាច់អាំង',
+    labelEn: '🦐 Seafood & BBQ',
+    labelZh: '🦐 海鲜与烧烤',
+    shortKh: 'គ្រឿងសមុទ្រ & សាច់អាំង',
+    shortEn: 'Seafood & BBQ',
+    emoji: '🦐',
+    defaultHighlightKh: 'គ្រឿងសមុទ្រស្រស់ៗ និងសាច់អាំង',
+  },
+  {
+    id: 'bakery',
+    businessType: 'restaurant',
+    labelKh: '🍰 ហាងនំប៉័ង & បង្អែម',
+    labelEn: '🍰 Bakery & Desserts',
+    labelZh: '🍰 烘焙与甜品',
+    shortKh: 'ហាងនំប៉័ង & បង្អែម',
+    shortEn: 'Bakery & Desserts',
+    emoji: '🍰',
+    defaultHighlightKh: 'បង្អែមខ្មែរ និងនំដុតថ្មីៗ',
+  },
+  {
+    id: 'vegetarian',
+    businessType: 'restaurant',
+    labelKh: '🥬 ម្ហូបបួស & សុខភាព',
+    labelEn: '🥬 Vegetarian & Healthy',
+    labelZh: '🥬 素食与健康餐饮',
+    shortKh: 'ម្ហូបបួស & សុខភាព',
+    shortEn: 'Vegetarian & Healthy',
+    emoji: '🥬',
+    defaultHighlightKh: 'ម្ហូបបួសសុខភាព',
+  },
+];
+
+const HOTEL_CATEGORY_IDS = new Set([
+  'hotel',
+  'resort',
+  'luxury_resort',
+  'boutique_villa',
+  'guesthouse',
+  'hotel_stay',
+]);
+
+/**
+ * Authoritative Business Type & Category inference and auto-healing helper.
+ * Preserves the exact user-selected category and automatically heals any legacy/pending
+ * hotel record (e.g. `hotel-378` or records with hotel categories/names) that was previously
+ * misclassified as a restaurant.
+ */
+export const inferBusinessTypeAndCategory = (
+  raw?: Partial<Restaurant> | null
+): {
+  businessType: 'restaurant' | 'hotel';
+  businessCategory: string;
+  categoryKh: string;
+  categoryEn: string;
+  labelKh: string;
+  labelEn: string;
+  emoji: string;
+} => {
+  const idStr = String(raw?.id || '').trim().toLowerCase();
+  const rawType = String(raw?.businessType || '').trim().toLowerCase();
+  const rawCat = String(raw?.businessCategory || '').trim().toLowerCase();
+  const rawCatKh = String(raw?.categoryKh || '').trim();
+  const rawCatEn = String(raw?.categoryEn || '').trim();
+  const nameKh = String(raw?.nameKh || '').trim();
+  const nameEn = String(raw?.nameEn || '').trim().toLowerCase();
+  const openHoursKh = String(raw?.openingHoursKh || '').trim();
+  const combinedText = `${nameKh} ${nameEn} ${rawCatKh} ${rawCatEn.toLowerCase()}`;
+
+  const isExplicitSeedShop = isSeedRestaurantId(idStr) && rawType !== 'hotel' && !HOTEL_CATEGORY_IDS.has(rawCat);
+
+  const hasHotelIdPrefix = idStr.startsWith('hotel-') || idStr.startsWith('stay-') || idStr.startsWith('resort-');
+  const hasExplicitHotelType =
+    rawType === 'hotel' ||
+    HOTEL_CATEGORY_IDS.has(rawCat) ||
+    raw?.aiCategoryVerification?.detectedType === 'hotel';
+
+  const hasStrongHotelTextSignal =
+    !isExplicitSeedShop &&
+    (/សណ្ឋាគារ|រីសត|ផ្ទះសំណាក់|ផ្ទះស្នាក់|បឹងហ្គាឡូ|ប៊ូទិក|វីឡា/.test(combinedText) ||
+      /\b(hotel|resort|guesthouse|guest\s*house|bungalow|boutique\s+hotel|villa|hostel|homestay|lodge|inn)\b/i.test(combinedText) ||
+      /check-in|បើកទទួលភ្ញៀវ\s*២៤\s*ម៉ោង/i.test(openHoursKh)) &&
+    !(/ភោជនីយដ្ឋាន|អាហារដ្ឋាន|ហាងបាយ|ហាងគុយទាវ|ហាងកាហ្វេ/.test(nameKh) && !hasHotelIdPrefix && !nameKh.startsWith('សណ្ឋាគារ') && !nameKh.startsWith('ផ្ទះសំណាក់') && !nameKh.startsWith('រីសត'));
+
+  const isHotel = hasHotelIdPrefix || hasExplicitHotelType || hasStrongHotelTextSignal;
+
+  if (isHotel) {
+    let subCat: 'hotel' | 'resort' | 'boutique_villa' | 'guesthouse' = 'hotel';
+    if (rawCat === 'resort' || rawCat === 'luxury_resort' || /រីសត|\bresort\b/i.test(combinedText)) {
+      subCat = 'resort';
+    } else if (rawCat === 'boutique_villa' || /ប៊ូទិក|វីឡា|\b(boutique|villa)\b/i.test(combinedText)) {
+      subCat = 'boutique_villa';
+    } else if (rawCat === 'guesthouse' || /ផ្ទះសំណាក់|ផ្ទះស្នាក់|បឹងហ្គាឡូ|\b(guesthouse|guest\s*house|bungalow|hostel|homestay|lodge|inn)\b/i.test(combinedText)) {
+      subCat = 'guesthouse';
+    }
+    const found = BUSINESS_CATEGORY_CATALOG.find((c) => c.id === subCat) || BUSINESS_CATEGORY_CATALOG[0];
+    return {
+      businessType: 'hotel',
+      businessCategory: found.id,
+      categoryKh: rawCatKh && !/ម្ហូប|ភោជនីយដ្ឋាន|អាហារដ្ឋាន|កាហ្វេ/.test(rawCatKh) ? rawCatKh : found.shortKh,
+      categoryEn: rawCatEn && !/restaurant|food|cafe|eatery/i.test(rawCatEn) ? rawCatEn : found.shortEn,
+      labelKh: found.labelKh,
+      labelEn: found.labelEn,
+      emoji: found.emoji,
+    };
+  }
+
+  let restCat = rawCat;
+  if (!restCat || HOTEL_CATEGORY_IDS.has(restCat)) {
+    if (/កាហ្វេ|ភេសជ្ជៈ|\b(cafe|coffee|tea|bakery)\b/i.test(combinedText)) {
+      restCat = 'cafe';
+    } else if (/គ្រឿងសមុទ្រ|សាច់អាំង|\b(seafood|bbq|grill)\b/i.test(combinedText)) {
+      restCat = 'seafood';
+    } else if (/គុយទាវ|បាយ|អាហារដ្ឋាន|\b(noodle|eatery|street\s*food)\b/i.test(combinedText)) {
+      restCat = 'street_food';
+    } else if (/នំប៉័ង|បង្អែម|\b(bakery|dessert|cake)\b/i.test(combinedText)) {
+      restCat = 'bakery';
+    } else if (/ម្ហូបបួស|បួស|\b(vegetarian|vegan)\b/i.test(combinedText)) {
+      restCat = 'vegetarian';
+    } else {
+      restCat = 'restaurant';
+    }
+  }
+  const foundRest =
+    BUSINESS_CATEGORY_CATALOG.find((c) => c.businessType === 'restaurant' && c.id === restCat) ||
+    BUSINESS_CATEGORY_CATALOG.find((c) => c.id === 'restaurant')!;
+
+  return {
+    businessType: 'restaurant',
+    businessCategory: foundRest.id,
+    categoryKh: rawCatKh || foundRest.shortKh,
+    categoryEn: rawCatEn || foundRest.shortEn,
+    labelKh: foundRest.labelKh,
+    labelEn: foundRest.labelEn,
+    emoji: foundRest.emoji,
+  };
+};
+
+export const isHotelBusinessRecord = (r?: Partial<Restaurant> | null): boolean => {
+  if (!r) return false;
+  return inferBusinessTypeAndCategory(r).businessType === 'hotel';
+};
+
 /**
  * Strictly verified unique restaurant storefront/dining photos bundled in `public/Shop/`.
  * All other cloned/shared/mismatched `/Shop/rest-*.jpg` and `culinary-placeholder.jpg` files
@@ -3221,6 +3458,7 @@ export const isRestaurantEligibleForVipRotation = (
 ): boolean => {
   if (!restaurant || !restaurant.id) return false;
   if (isSeedRestaurantId(restaurant.id)) return false;
+  if (isHotelBusinessRecord(restaurant)) return false;
   if (String(restaurant.id).startsWith('food-') || String(restaurant.id).startsWith('dest-')) {
     return false;
   }

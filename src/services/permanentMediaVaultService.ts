@@ -41,6 +41,7 @@ import {
   sanitizeRestaurantGalleryPhotos,
   isValidGoogleMapsUrl,
   computeFastPhotoSignature,
+  inferBusinessTypeAndCategory,
 } from '../types';
 import { initial100Destinations } from '../data/seedDestinations';
 import { initial200Foods } from '../data/seedFoods';
@@ -377,6 +378,8 @@ export interface RestaurantMediaOverride {
   websiteUrl?: string;
   businessCategory?: string;
   businessType?: 'restaurant' | 'hotel';
+  categoryKh?: string;
+  categoryEn?: string;
   ownerId?: string;
   ownerName?: string;
   ownerEmail?: string;
@@ -1989,6 +1992,7 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
   const cleanGallery = sanitizeRestaurantGalleryPhotos(rest.id, rest.galleryPhotos, primaryPhoto);
   const dedupedGallery = cleanGallery.filter((g) => g && g !== primaryPhoto);
   const gallerySet = new Set([primaryPhoto, ...dedupedGallery].filter(Boolean));
+  const inferredBiz = inferBusinessTypeAndCategory(rest);
   const overrideRecord: RestaurantMediaOverride = {
     id: rest.id,
     photoUrl: primaryPhoto,
@@ -2019,8 +2023,10 @@ export function recordPermanentRestaurantOverride(rest: Restaurant): void {
     telegramUrl: rest.telegramUrl,
     facebookUrl: rest.facebookUrl,
     websiteUrl: rest.websiteUrl,
-    businessCategory: rest.businessCategory,
-    businessType: rest.businessType,
+    businessCategory: inferredBiz.businessCategory,
+    businessType: inferredBiz.businessType,
+    categoryKh: inferredBiz.categoryKh,
+    categoryEn: inferredBiz.categoryEn,
     ownerId: rest.ownerId,
     ownerName: rest.ownerName,
     ownerEmail: rest.ownerEmail,
@@ -2677,6 +2683,16 @@ export function applyRestaurantOverrides(
     const candidateOvProfile = sanitizeVerifiedShopPhotoUrl(r.id, ov.profileImage);
     const nextProfileImage =
       useOverrideShopPhoto && candidateOvProfile ? candidateOvProfile : photoUrl;
+    const mergedBiz = inferBusinessTypeAndCategory({
+      ...r,
+      businessType: ov.businessType || r.businessType,
+      businessCategory: ov.businessCategory || r.businessCategory,
+      categoryKh: ov.categoryKh || r.categoryKh,
+      categoryEn: ov.categoryEn || r.categoryEn,
+      nameKh: ov.nameKh || r.nameKh,
+      nameEn: ov.nameEn || r.nameEn,
+      openingHoursKh: ov.openingHoursKh || r.openingHoursKh,
+    });
 
     if (
       r.photoUrl === photoUrl &&
@@ -2690,6 +2706,10 @@ export function applyRestaurantOverrides(
       r.addressKh === (ov.addressKh || r.addressKh) &&
       r.provinceKh === (ov.provinceKh || r.provinceKh) &&
       r.phone === (ov.phone !== undefined ? ov.phone : r.phone) &&
+      r.businessType === mergedBiz.businessType &&
+      r.businessCategory === mergedBiz.businessCategory &&
+      r.categoryKh === mergedBiz.categoryKh &&
+      r.categoryEn === mergedBiz.categoryEn &&
       r.isVerified === (typeof ov.isVerified === 'boolean' ? ov.isVerified : r.isVerified) &&
       r.status === (ov.status || r.status) &&
       r.pendingPhotoReplacement === (ov.pendingPhotoReplacement !== undefined ? ov.pendingPhotoReplacement : r.pendingPhotoReplacement) &&
@@ -2747,8 +2767,10 @@ export function applyRestaurantOverrides(
       telegramUrl: ov.telegramUrl !== undefined ? ov.telegramUrl : r.telegramUrl,
       facebookUrl: ov.facebookUrl !== undefined ? ov.facebookUrl : r.facebookUrl,
       websiteUrl: ov.websiteUrl !== undefined ? ov.websiteUrl : r.websiteUrl,
-      businessCategory: ov.businessCategory !== undefined ? ov.businessCategory : r.businessCategory,
-      businessType: ov.businessType !== undefined ? ov.businessType : r.businessType,
+      businessCategory: mergedBiz.businessCategory,
+      businessType: mergedBiz.businessType,
+      categoryKh: mergedBiz.categoryKh,
+      categoryEn: mergedBiz.categoryEn,
       ownerId: ov.ownerId || r.ownerId,
       ownerName: ov.ownerName || r.ownerName,
       ownerEmail: ov.ownerEmail || r.ownerEmail,
@@ -2813,12 +2835,31 @@ export function applyRestaurantOverrides(
     const photoUrl = sanitizeRestaurantShopPhoto(ovId, ov.photoUrl || ov.profileImage || '');
     const cleanGpid = isValidOfficialGooglePlaceId(ov.googlePlaceId) ? ov.googlePlaceId : undefined;
     const resolvedCreatedAt = ov.createdAt || ov.created_at || ov.adminEditedAt || ov.updatedAt || new Date().toISOString();
+    const synthBiz = inferBusinessTypeAndCategory({
+      id: ovId,
+      businessType: ov.businessType,
+      businessCategory: ov.businessCategory,
+      categoryKh: ov.categoryKh,
+      categoryEn: ov.categoryEn,
+      nameKh: ov.nameKh,
+      nameEn: ov.nameEn,
+      openingHoursKh: ov.openingHoursKh,
+    });
+    const isSynthHotel = synthBiz.businessType === 'hotel';
     const candidateRest: Restaurant = {
       id: ovId,
-      nameKh: ov.nameKh || ov.nameEn || 'ភោជនីយដ្ឋានខ្មែរ',
-      nameEn: ov.nameEn || ov.nameKh || 'Khmer Restaurant',
-      descriptionKh: ov.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
-      descriptionEn: ov.descriptionEn || 'Authentic Cambodian restaurant.',
+      nameKh: ov.nameKh || ov.nameEn || (isSynthHotel ? 'សណ្ឋាគារ និងកន្លែងស្នាក់នៅ' : 'ភោជនីយដ្ឋានខ្មែរ'),
+      nameEn: ov.nameEn || ov.nameKh || (isSynthHotel ? 'Hotel & Stay' : 'Khmer Restaurant'),
+      descriptionKh:
+        ov.descriptionKh ||
+        (isSynthHotel
+          ? 'សណ្ឋាគារ និងកន្លែងស្នាក់នៅស្អាត មានផាសុកភាព និងសេវាកម្មល្អសម្រាប់ភ្ញៀវទេសចរ។'
+          : 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។'),
+      descriptionEn:
+        ov.descriptionEn ||
+        (isSynthHotel
+          ? 'Comfortable hotel and accommodation with quality amenities for travelers.'
+          : 'Authentic Cambodian restaurant.'),
       photoUrl,
       profileImage: photoUrl,
       galleryPhotos: sanitizeRestaurantGalleryPhotos(ovId, ov.galleryPhotos, photoUrl),
@@ -2830,8 +2871,8 @@ export function applyRestaurantOverrides(
       provinceKh: ov.provinceKh || 'រាជធានីភ្នំពេញ',
       provinceEn: ov.provinceEn || 'Phnom Penh',
       phone: ov.phone || '',
-      openingHoursKh: ov.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
-      openingHoursEn: ov.openingHoursEn || '07:00 AM - 09:00 PM',
+      openingHoursKh: ov.openingHoursKh || (isSynthHotel ? 'បើកទទួលភ្ញៀវ ២៤ ម៉ោង' : '០៧:០០ ព្រឹក - ០៩:០០ យប់'),
+      openingHoursEn: ov.openingHoursEn || (isSynthHotel ? 'Open 24 Hours' : '07:00 AM - 09:00 PM'),
       priceLevel: ov.priceLevel || '$$',
       mapUrl:
         isValidGoogleMapsUrl(ov.mapUrl) && (ov.isAdminEdited || ov.dataSource === 'vip_owner' || Boolean(ov.ownerId) || !hasValidCoords)
@@ -2850,13 +2891,18 @@ export function applyRestaurantOverrides(
       locationVerifiedAt: ov.locationVerifiedAt,
       rating: typeof ov.rating === 'number' ? ov.rating : 0,
       reviewCount: typeof ov.reviewCount === 'number' ? ov.reviewCount : 0,
-      signatureDishesKh: Array.isArray(ov.signatureDishesKh) && ov.signatureDishesKh.length > 0 ? ov.signatureDishesKh : ['ម្ហូបប្រចាំហាង'],
+      signatureDishesKh:
+        Array.isArray(ov.signatureDishesKh) && ov.signatureDishesKh.length > 0
+          ? ov.signatureDishesKh
+          : [isSynthHotel ? 'បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ និង Wi-Fi' : 'ម្ហូបប្រចាំហាង'],
       promoVideoUrl: ov.promoVideoUrl,
       telegramUrl: ov.telegramUrl,
       facebookUrl: ov.facebookUrl,
       websiteUrl: ov.websiteUrl,
-      businessCategory: ov.businessCategory,
-      businessType: ov.businessType,
+      businessCategory: synthBiz.businessCategory,
+      businessType: synthBiz.businessType,
+      categoryKh: synthBiz.categoryKh,
+      categoryEn: synthBiz.categoryEn,
       ownerId: ov.ownerId,
       ownerName: ov.ownerName,
       ownerEmail: ov.ownerEmail,
@@ -2877,6 +2923,8 @@ export function applyRestaurantOverrides(
       paymentStatus: ov.paymentStatus || 'verified',
       isAdminEdited: true,
       adminEditedAt: ov.adminEditedAt || ov.updatedAt,
+      pendingPhotoReplacement: ov.pendingPhotoReplacement,
+      pendingUpgradeRequest: ov.pendingUpgradeRequest,
       isCustomPhoto: Boolean(photoUrl),
       photoUpdatedAt: ov.updatedAt,
       created_at: resolvedCreatedAt,

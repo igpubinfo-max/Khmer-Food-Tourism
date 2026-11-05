@@ -12,7 +12,8 @@ import {
   VipBenefitItem, TEN_VIP_BENEFITS, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
   getVipFeaturedRotationConfig, getVipFeaturedRotationState,
   sanitizeManualFeaturedSchedule, getManualFeaturedSlotEndMs, ManualFeaturedSlot, MAX_MANUAL_FEATURED_SLOTS,
-  isPlaceLocationVerified, resolveFoodPhotoUrl
+  isPlaceLocationVerified, resolveFoodPhotoUrl,
+  inferBusinessTypeAndCategory, isHotelBusinessRecord,
 } from '../types';
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession, getOfficialOwnershipCertificate, verifyAppOwnershipAndDomainIntegrity } from '../utils/security';
 import { FoodImageModal } from './FoodImageModal';
@@ -323,17 +324,33 @@ export const AdminDashboard: React.FC = () => {
   const smartCacheStats = getSmartCacheStats();
 
   const isKm = language === 'km';
-  const pendingRestaurants = restaurants.filter(r => r.status === 'pending');
-  const pendingPhotoReplacementRestaurants = restaurants.filter(
+  const shopOnlyRestaurants = restaurants.filter(r => !isHotelBusinessRecord(r));
+  const hotelVipRestaurants = restaurants.filter(r => isHotelBusinessRecord(r));
+  const pendingRestaurants = shopOnlyRestaurants.filter(r => r.status === 'pending');
+  const pendingShopUpgradeRequests = shopOnlyRestaurants.filter(
+    r => r.pendingUpgradeRequest?.status === 'pending'
+  );
+  const pendingPhotoReplacementRestaurants = shopOnlyRestaurants.filter(
     r => r.pendingPhotoReplacement?.status === 'pending'
   );
-  const reviewedPhotoReplacementRestaurants = restaurants
+  const reviewedPhotoReplacementRestaurants = shopOnlyRestaurants
     .filter(r => r.pendingPhotoReplacement && r.pendingPhotoReplacement.status !== 'pending')
     .sort((a, b) =>
       String(b.pendingPhotoReplacement?.reviewedAt || '').localeCompare(String(a.pendingPhotoReplacement?.reviewedAt || ''))
     )
     .slice(0, 12);
-  const verifiedRestaurantsCount = restaurants.filter(r => r.isVerified).length;
+  const pendingHotelSubmissions = hotelVipRestaurants.filter(r => r.status === 'pending');
+  const pendingHotelUpgradeRequests = hotelVipRestaurants.filter(
+    r => r.pendingUpgradeRequest?.status === 'pending'
+  );
+  const pendingHotelPhotoReplacements = hotelVipRestaurants.filter(
+    r => r.pendingPhotoReplacement?.status === 'pending'
+  );
+  const totalPendingShopCount =
+    pendingRestaurants.length + pendingShopUpgradeRequests.length + pendingPhotoReplacementRestaurants.length;
+  const totalPendingHotelCount =
+    pendingHotelSubmissions.length + pendingHotelUpgradeRequests.length + pendingHotelPhotoReplacements.length;
+  const verifiedRestaurantsCount = shopOnlyRestaurants.filter(r => r.isVerified).length;
   const pendingTxns = transactions.filter(
     t => t.status === 'pending_verification' || t.status === 'needs_more_info'
   );
@@ -851,8 +868,8 @@ export const AdminDashboard: React.FC = () => {
               </div>
               <p className="text-xs text-emerald-200 font-khmer">
                 {isKm 
-                  ? `គ្រប់គ្រងហាងអាហារ (${restaurants.length}) មុខម្ហូប (${foods.length}) ទេសចរណ៍ (${destinations.length}) ការទូទាត់ VIP និងសន្តិសុខ` 
-                  : `Manage shops (${restaurants.length}), foods (${foods.length}), travel (${destinations.length}), VIP transactions, and security`}
+                  ? `គ្រប់គ្រងហាងអាហារ (${shopOnlyRestaurants.length}) សណ្ឋាគារ (${destinations.filter((d) => d && d.categorySlug === 'hotel').length}) មុខម្ហូប (${foods.length}) ទេសចរណ៍ (${destinations.length}) ការទូទាត់ VIP និងសន្តិសុខ` 
+                  : `Manage shops (${shopOnlyRestaurants.length}), hotels (${destinations.filter((d) => d && d.categorySlug === 'hotel').length}), foods (${foods.length}), travel (${destinations.length}), VIP transactions, and security`}
               </p>
             </div>
           </div>
@@ -957,10 +974,10 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <Store className="w-3.5 h-3.5 shrink-0" />
-            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `ហាងអាហារ (${restaurants.length})` : `Shops (${restaurants.length})`}</span>
-            {(pendingRestaurants.length + pendingPhotoReplacementRestaurants.length) > 0 && (
+            <span className="min-w-0 break-words text-center leading-tight">{isKm ? `ហាងអាហារ (${shopOnlyRestaurants.length})` : `Shops (${shopOnlyRestaurants.length})`}</span>
+            {totalPendingShopCount > 0 && (
               <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[9px] font-bold shrink-0">
-                {pendingRestaurants.length + pendingPhotoReplacementRestaurants.length}
+                {totalPendingShopCount}
               </span>
             )}
           </button>
@@ -986,7 +1003,7 @@ export const AdminDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('hotels')}
-            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl font-bold border transition cursor-pointer ${
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl font-bold border transition relative cursor-pointer ${
               activeTab === 'hotels'
                 ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
                 : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
@@ -998,6 +1015,11 @@ export const AdminDashboard: React.FC = () => {
                 ? `សណ្ឋាគារ (${destinations.filter((d) => d && d.categorySlug === 'hotel').length})`
                 : `Hotels (${destinations.filter((d) => d && d.categorySlug === 'hotel').length})`}
             </span>
+            {totalPendingHotelCount > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[9px] font-bold shrink-0">
+                {totalPendingHotelCount}
+              </span>
+            )}
           </button>
 
           <button
@@ -1061,7 +1083,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="grid grid-cols-3 divide-x divide-slate-200 dark:divide-stone-700 rounded-2xl bg-white dark:bg-stone-800 border border-slate-200/80 dark:border-stone-700 shadow-xs overflow-hidden">
                 {[
                   {
-                    n: restaurants.length,
+                    n: shopOnlyRestaurants.length,
                     label: isKm ? 'ហាងអាហារសរុប' : 'Total Shops',
                     Icon: Store,
                     tab: 'restaurants' as const,
@@ -1097,6 +1119,50 @@ export const AdminDashboard: React.FC = () => {
                   </button>
                 ))}
               </div>
+
+              {/* Pending Hotel Submissions Alert Banner */}
+              {totalPendingHotelCount > 0 && (
+                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500 space-y-2">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <p className="font-bold text-amber-950 dark:text-amber-200 flex items-center gap-2 font-khmer text-xs">
+                      <BedDouble className="w-4 h-4 text-amber-600 animate-bounce" />
+                      <span>
+                        {isKm
+                          ? `🏨 មានសំណើសណ្ឋាគារ / ផ្ទះសំណាក់ថ្មីចំនួន ${totalPendingHotelCount} កំពុងរង់ចាំការត្រួតពិនិត្យ និងអនុម័តក្នុងផ្នែក «សណ្ឋាគារ»!`
+                          : `🏨 ${totalPendingHotelCount} Pending Hotel / Accommodation submission(s) awaiting Admin approval!`}
+                      </span>
+                    </p>
+                    <button
+                      onClick={() => setActiveTab('hotels')}
+                      className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl font-khmer font-bold text-xs transition active:scale-95 cursor-pointer"
+                    >
+                      {isKm ? '🏨 ពិនិត្យក្នុងផ្នែកសណ្ឋាគារឥឡូវនេះ' : '🏨 Review in Hotels Tab'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Pending Food Shop Submissions Alert Banner */}
+              {totalPendingShopCount > 0 && (
+                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500 space-y-2">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <p className="font-bold text-amber-950 dark:text-amber-200 flex items-center gap-2 font-khmer text-xs">
+                      <Store className="w-4 h-4 text-amber-600 animate-bounce" />
+                      <span>
+                        {isKm
+                          ? `🏪 មានសំណើហាងអាហារថ្មីចំនួន ${totalPendingShopCount} កំពុងរង់ចាំការត្រួតពិនិត្យ និងអនុម័តក្នុងផ្នែក «ហាងអាហារ»!`
+                          : `🏪 ${totalPendingShopCount} Pending Food / Restaurant submission(s) awaiting Admin approval!`}
+                      </span>
+                    </p>
+                    <button
+                      onClick={() => setActiveTab('restaurants')}
+                      className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl font-khmer font-bold text-xs transition active:scale-95 cursor-pointer"
+                    >
+                      {isKm ? '🏪 ពិនិត្យក្នុងផ្នែកហាងអាហារឥឡូវនេះ' : '🏪 Review in Shops Tab'}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Pending Support Messages Alert Banner */}
               {(unreadAdminTickets.length > 0 || pendingSupportTickets.length > 0) && (
@@ -2569,19 +2635,40 @@ export const AdminDashboard: React.FC = () => {
           {/* RESTAURANTS TAB */}
           {activeTab === 'restaurants' && (
             <div className="space-y-4">
+              {/* Quick Redirect Notice if Admin has Pending Hotel Submissions */}
+              {totalPendingHotelCount > 0 && (
+                <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 flex items-center justify-between gap-3 flex-wrap font-khmer">
+                  <div className="flex items-center gap-2 text-xs font-bold text-amber-950 dark:text-amber-200">
+                    <BedDouble className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>
+                      {isKm
+                        ? `🏨 មានសំណើសណ្ឋាគារ / ផ្ទះសំណាក់ចំនួន ${totalPendingHotelCount} កំពុងរង់ចាំការអនុម័តនៅក្នុងផ្នែក «សណ្ឋាគារ»`
+                        : `🏨 You have ${totalPendingHotelCount} pending Hotel / Accommodation submission(s) under the Hotels tab`}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('hotels')}
+                    className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition cursor-pointer shrink-0"
+                  >
+                    {isKm ? '🏨 ទៅកាន់ផ្នែកសណ្ឋាគារឥឡូវនេះ →' : '🏨 Go to Hotels Tab →'}
+                  </button>
+                </div>
+              )}
+
               {/* SECTION 1: ADD NEW SHOP & DIRECTORY STATUS (បន្ថែមហាងថ្មី) */}
               <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950/90 via-[#064E3B] to-teal-900 text-white border border-emerald-700/60 shadow-sm space-y-2.5">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div>
                     <h3 className="font-bold text-white font-khmer text-sm flex items-center gap-2">
-                      <span>➕ {isKm ? `បន្ថែមហាងថ្មី & គ្រប់គ្រងហាង (សរុប ${restaurants.length} ហាង)` : `Add New Shop & Manage (${restaurants.length} shops)`}</span>
+                      <span>➕ {isKm ? `បន្ថែមហាងថ្មី & គ្រប់គ្រងហាង (សរុប ${shopOnlyRestaurants.length} ហាង)` : `Add New Shop & Manage (${shopOnlyRestaurants.length} shops)`}</span>
                       <span className="px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-200 text-[10px] font-bold">
-                        ✅ Verified: {restaurants.filter(r => r.isVerified).length}/{restaurants.length}
+                        ✅ Verified: {shopOnlyRestaurants.filter(r => r.isVerified).length}/{shopOnlyRestaurants.length}
                       </span>
                     </h3>
                     <p className="text-[10px] text-emerald-100/80 font-khmer mt-0.5">
                       {isKm
-                        ? `ចុចប៊ូតុង «+ បន្ថែមហាងថ្មី» ដើម្បីបំពេញព័ត៌មានហាង ជ្រើសរើសទីតាំងលើផែនទី Google Maps និងដាក់ស្នើ • ហាងមានរូបភាព ${restaurants.filter(r => Boolean(r.photoUrl || r.profileImage)).length}/${restaurants.length}`
+                        ? `ចុចប៊ូតុង «+ បន្ថែមហាងថ្មី» ដើម្បីបំពេញព័ត៌មានហាង ជ្រើសរើសទីតាំងលើផែនទី Google Maps និងដាក់ស្នើ • ហាងមានរូបភាព ${shopOnlyRestaurants.filter(r => Boolean(r.photoUrl || r.profileImage)).length}/${shopOnlyRestaurants.length}`
                         : `Tap "+ Add New Shop" to enter shop details, select location on Google Maps, and submit`}
                     </p>
                   </div>
@@ -2611,96 +2698,98 @@ export const AdminDashboard: React.FC = () => {
 
               {pendingRestaurants.length > 0 && (
                 <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 space-y-3">
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
                     <h4 className="font-bold text-amber-900 dark:text-amber-200 font-khmer text-xs sm:text-sm flex items-center gap-1.5">
-                      <span>⏳ {isKm ? `ហាងរង់ចាំការត្រួតពិនិត្យ និងអនុម័តពី Admin (${pendingRestaurants.length})` : `Pending Shop Submissions for Admin Approval (${pendingRestaurants.length})`}</span>
+                      <span>⏳ {isKm ? `ហាងអាហាររង់ចាំការត្រួតពិនិត្យ និងអនុម័តពី Admin (${pendingRestaurants.length})` : `Pending Food / Restaurant Submissions for Admin Approval (${pendingRestaurants.length})`}</span>
                     </h4>
                     <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px]">
                       ADMIN APPROVAL REQUIRED
                     </span>
                   </div>
-                  <div className="space-y-2">
-                    {pendingRestaurants.map((rest) => (
-                      <div
-                        key={`pending-${rest.id}`}
-                        className="p-3 rounded-xl bg-white dark:bg-stone-800 border border-amber-300 dark:border-amber-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                      >
-                        <div className="flex items-start gap-3 min-w-0">
-                          <img
-                            src={rest.photoUrl}
-                            alt={rest.nameKh}
-                            className="w-12 h-12 rounded-xl object-cover shrink-0 border border-amber-400"
-                          />
-                          <div className="min-w-0 space-y-0.5 font-khmer">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <h5 className="font-bold text-xs text-slate-900 dark:text-white truncate">
-                                {rest.nameKh} ({rest.nameEn})
-                              </h5>
-                              <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-[9px] font-bold">
-                                {isKm ? 'រង់ចាំអនុម័ត' : 'Pending Approval'}
-                              </span>
+                  <div className="space-y-2.5">
+                    {pendingRestaurants.map((rest) => {
+                      const catInfo = inferBusinessTypeAndCategory(rest);
+                      return (
+                        <div
+                          key={`pending-${rest.id}`}
+                          className="p-3.5 rounded-xl bg-white dark:bg-stone-800 border border-amber-300 dark:border-amber-700 flex flex-col gap-3"
+                        >
+                          <div className="flex items-start gap-3 min-w-0">
+                            <img
+                              src={rest.photoUrl}
+                              alt={rest.nameKh}
+                              className="w-14 h-14 rounded-xl object-cover shrink-0 border border-amber-400"
+                            />
+                            <div className="min-w-0 flex-1 space-y-1 font-khmer">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <h5 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white break-words">
+                                  {rest.nameKh} {rest.nameEn && rest.nameEn !== rest.nameKh ? `(${rest.nameEn})` : ''}
+                                </h5>
+                                <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
+                                  {isKm ? catInfo.labelKh : catInfo.labelEn}
+                                </span>
+                                <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-[9px] font-bold">
+                                  {isKm ? 'រង់ចាំអនុម័ត' : 'Pending Approval'}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                                📍 {rest.provinceKh} {rest.addressKh ? `(${rest.addressKh})` : ''} • 📞 {rest.phone} • 👤 {rest.ownerName || 'Shop Owner'}
+                              </p>
                             </div>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                              📍 {rest.provinceKh} • 📞 {rest.phone} • 👤 {rest.ownerName || 'Shop Owner'}
-                            </p>
+                          </div>
+
+                          <div className="flex items-center justify-end gap-2 flex-wrap pt-2 border-t border-slate-100 dark:border-stone-700 font-khmer">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                (window as any).__kft_manage_initial_tab = 'info';
+                                openManageMyVipStore(rest.id);
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-[11px] font-black shadow-xs flex items-center gap-1 transition cursor-pointer"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                              <span>{isKm ? 'កែប្រែ' : 'Edit'}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => approveRestaurant(rest.id)}
+                              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
+                            >
+                              {isKm ? '✅ អនុម័ត (Approve)' : '✅ Approve'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => rejectRestaurant(rest.id)}
+                              className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
+                            >
+                              {isKm ? '🚫 បដិសេធ (Reject)' : '🚫 Reject'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => deleteRestaurant(rest.id)}
+                              className="px-2.5 py-1.5 rounded-xl bg-rose-100 dark:bg-rose-950/60 hover:bg-rose-600 hover:text-white text-rose-700 dark:text-rose-300 text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>{isKm ? 'លុប' : 'Delete'}</span>
+                            </button>
                           </div>
                         </div>
-
-                        <div className="flex items-center gap-2 shrink-0 self-end sm:self-center font-khmer">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              (window as any).__kft_manage_initial_tab = 'info';
-                              openManageMyVipStore(rest.id);
-                            }}
-                            className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 text-[11px] font-black shadow-xs flex items-center gap-1 transition cursor-pointer"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                            <span>{isKm ? 'កែប្រែ' : 'Edit'}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => approveRestaurant(rest.id)}
-                            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
-                          >
-                            {isKm ? '✅ អនុម័ត (Approve)' : '✅ Approve'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => rejectRestaurant(rest.id)}
-                            className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-xs transition cursor-pointer"
-                          >
-                            {isKm ? '🚫 បដិសេធ (Reject)' : '🚫 Reject'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => deleteRestaurant(rest.id)}
-                            className="px-2.5 py-1.5 rounded-xl bg-rose-100 dark:bg-rose-950/60 hover:bg-rose-600 hover:text-white text-rose-700 dark:text-rose-300 text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            <span>{isKm ? 'លុប' : 'Delete'}</span>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
-              {/* Pending Existing Shop / Hotel Upgrade Requests from VIP Users */}
-              {restaurants.some((r) => r.pendingUpgradeRequest?.status === 'pending') && (
+              {/* Pending Existing Shop Upgrade Requests from VIP Users */}
+              {pendingShopUpgradeRequests.length > 0 && (
                 <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-500 space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <h4 className="font-bold text-amber-950 dark:text-amber-200 font-khmer text-xs sm:text-sm flex items-center gap-1.5">
                       <span>
                         ⬆️{' '}
                         {isKm
-                          ? `សំណើដំឡើង និងកែប្រែហាង/សណ្ឋាគារដែលមានស្រាប់ពីសមាជិក VIP (${
-                              restaurants.filter((r) => r.pendingUpgradeRequest?.status === 'pending').length
-                            })`
-                          : `Pending Existing Shop / Hotel Upgrade Requests (${
-                              restaurants.filter((r) => r.pendingUpgradeRequest?.status === 'pending').length
-                            })`}
+                          ? `សំណើដំឡើង និងកែប្រែហាងអាហារដែលមានស្រាប់ពីសមាជិក VIP (${pendingShopUpgradeRequests.length})`
+                          : `Pending Existing Shop Upgrade Requests (${pendingShopUpgradeRequests.length})`}
                       </span>
                     </h4>
                     <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px]">
@@ -2709,9 +2798,7 @@ export const AdminDashboard: React.FC = () => {
                   </div>
 
                   <div className="space-y-2.5">
-                    {restaurants
-                      .filter((r) => r.pendingUpgradeRequest?.status === 'pending')
-                      .map((rest) => {
+                    {pendingShopUpgradeRequests.map((rest) => {
                         const upg = rest.pendingUpgradeRequest!;
                         const ch = upg.proposedChanges || {};
                         return (
@@ -3041,8 +3128,8 @@ export const AdminDashboard: React.FC = () => {
                 {/* Admin GPS Location Verification Filter Pills */}
                 <div className="flex items-center gap-1.5 flex-wrap">
                   {(() => {
-                    const verifiedCount = restaurants.filter((r) => isPlaceLocationVerified(r)).length;
-                    const reviewCount = restaurants.length - verifiedCount;
+                    const verifiedCount = shopOnlyRestaurants.filter((r) => isPlaceLocationVerified(r)).length;
+                    const reviewCount = shopOnlyRestaurants.length - verifiedCount;
                     return (
                       <>
                         <button
@@ -3054,7 +3141,7 @@ export const AdminDashboard: React.FC = () => {
                               : 'bg-slate-50 dark:bg-stone-900 text-slate-700 dark:text-stone-300 border border-slate-200 dark:border-stone-700'
                           }`}
                         >
-                          {isKm ? `ហាងទាំងអស់ (${restaurants.length})` : `All Shops (${restaurants.length})`}
+                          {isKm ? `ហាងទាំងអស់ (${shopOnlyRestaurants.length})` : `All Shops (${shopOnlyRestaurants.length})`}
                         </button>
                         <button
                           type="button"
@@ -3110,7 +3197,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar">
-                {restaurants
+                {shopOnlyRestaurants
                   .filter((rest) => {
                     const gpsOk = isPlaceLocationVerified(rest);
                     if (adminRestLocationFilter === 'verified_gps' && !gpsOk) return false;

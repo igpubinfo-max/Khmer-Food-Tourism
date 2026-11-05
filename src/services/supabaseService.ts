@@ -26,6 +26,7 @@ import {
   resolveUserActualVipPlanDays,
   sanitizeUserVipPlanAndExpiry,
   isDeprecatedDemoSeedTransaction,
+  inferBusinessTypeAndCategory,
 } from '../types';
 
 export interface CloudApiConfig {
@@ -273,7 +274,7 @@ export async function testSupabaseConnection(): Promise<{
     }
 
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 600_000;
+      supabaseEgressCooldownUntilMs = Date.now() + 30_000;
       return {
         ok: false,
         messageKh:
@@ -533,7 +534,7 @@ export async function pushCloudDocument(key: string, payload: any, timeoutMs = 1
       }),
     }, timeoutMs);
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 600_000;
+      supabaseEgressCooldownUntilMs = Date.now() + 30_000;
       return false;
     }
     if (res.ok && supabaseEgressCooldownUntilMs > 0) {
@@ -566,7 +567,7 @@ export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Prom
       timeoutMs
     );
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 600_000;
+      supabaseEgressCooldownUntilMs = Date.now() + 30_000;
       return null;
     }
     if (!res.ok) return null;
@@ -986,7 +987,7 @@ export async function pullCloudDocumentsByPrefix<T = any>(
       timeoutMs
     );
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 600_000;
+      supabaseEgressCooldownUntilMs = Date.now() + 30_000;
       return [];
     }
     if (!res.ok) return [];
@@ -1024,7 +1025,7 @@ export async function pullCloudKeysManifestByPrefix(
       timeoutMs
     );
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 600_000;
+      supabaseEgressCooldownUntilMs = Date.now() + 30_000;
       return null;
     }
     if (!res.ok) return null;
@@ -1069,7 +1070,7 @@ export async function pullCloudDocumentsByKeys<T = any>(
       timeoutMs
     );
     if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 600_000;
+      supabaseEgressCooldownUntilMs = Date.now() + 30_000;
       return [];
     }
     if (res.ok) {
@@ -1186,7 +1187,7 @@ export async function uploadBase64ImageToSupabaseStorage(
         }
 
         if (res.status === 402) {
-          supabaseEgressCooldownUntilMs = Date.now() + 600_000;
+          supabaseEgressCooldownUntilMs = Date.now() + 30_000;
           return null;
         }
 
@@ -1966,6 +1967,7 @@ export async function syncAllAppDataWithSupabase(localState: {
   mergedTransactions: RegistrationTransaction[];
   mergedCustomRestaurants: Restaurant[];
   mergedDeletedRestaurantIds?: Record<string, string>;
+  mergedSupportTickets?: SupportTicket[];
   mergedPaymentProofsVault: Record<string, any>;
   mergedAppSettings?: AppSettings;
 }> {
@@ -1978,6 +1980,7 @@ export async function syncAllAppDataWithSupabase(localState: {
     mergedDeletedUsers: localState.deletedUsers || [],
     mergedTransactions: Array.isArray(localState.transactions) ? localState.transactions : [],
     mergedCustomRestaurants: Array.isArray(localState.customRestaurants) ? localState.customRestaurants : [],
+    mergedSupportTickets: Array.isArray(localState.supportTickets) ? localState.supportTickets : [],
     mergedPaymentProofsVault: localState.paymentProofsVault,
     mergedAppSettings: localState.appSettings,
   });
@@ -2561,7 +2564,46 @@ export async function syncAllAppDataWithSupabase(localState: {
         }
       }
     }
-    const mergedCustomRestaurants = Array.from(restMap.values());
+    const mergedCustomRestaurants = Array.from(restMap.values()).map((r) => {
+      const biz = inferBusinessTypeAndCategory(r);
+      return {
+        ...r,
+        businessType: biz.businessType,
+        businessCategory: biz.businessCategory,
+        categoryKh: biz.categoryKh,
+        categoryEn: biz.categoryEn,
+      };
+    });
+
+    // 4b. Merge Support Tickets (`kft_cloud_support_tickets_v1`) so user/tester messages & Admin replies sync across devices
+    const ticketMap = new Map<string, SupportTicket>();
+    for (const ct of Array.isArray(cloudTickets) ? cloudTickets : []) {
+      if (ct && ct.id) ticketMap.set(ct.id, ct);
+    }
+    for (const lt of Array.isArray(localState.supportTickets) ? localState.supportTickets : []) {
+      if (!lt || !lt.id) continue;
+      const existing = ticketMap.get(lt.id);
+      if (!existing) {
+        ticketMap.set(lt.id, lt);
+      } else {
+        const msgMap = new Map<string, any>();
+        for (const m of [...(existing.messages || []), ...(lt.messages || [])]) {
+          if (m && m.id) msgMap.set(m.id, m);
+        }
+        const exUpd = parseSafeDateMs(existing.updatedAt || existing.createdAt);
+        const ltUpd = parseSafeDateMs(lt.updatedAt || lt.createdAt);
+        const newerBase = ltUpd >= exUpd ? { ...existing, ...lt } : { ...lt, ...existing };
+        ticketMap.set(lt.id, {
+          ...newerBase,
+          vipApproved: Boolean(existing.vipApproved || lt.vipApproved),
+          vipApprovedAt: lt.vipApprovedAt || existing.vipApprovedAt,
+          messages: Array.from(msgMap.values()),
+        });
+      }
+    }
+    const mergedSupportTickets = Array.from(ticketMap.values()).sort(
+      (a, b) => parseSafeDateMs(b.updatedAt || b.createdAt) - parseSafeDateMs(a.updatedAt || a.createdAt)
+    );
 
     // 5. Merge Payment Proofs Vault (excluding deleted transactions)
     const mergedPaymentProofsVault: Record<string, any> = {
@@ -2639,6 +2681,12 @@ export async function syncAllAppDataWithSupabase(localState: {
     if (shouldSyncPaymentProofs && safeJsonSig(mergedPaymentProofsVault) !== safeJsonSig(cloudProofs || {})) {
       pushPromises.push(pushCloudDocument('kft_cloud_payment_proofs_v1', mergedPaymentProofsVault));
     }
+    if (
+      (isAdminDevice || Boolean(localState.currentUser) || (Array.isArray(localState.supportTickets) && localState.supportTickets.length > 0)) &&
+      safeJsonSig(mergedSupportTickets) !== safeJsonSig(cloudTickets || [])
+    ) {
+      pushPromises.push(pushCloudDocument('kft_cloud_support_tickets_v1', mergedSupportTickets));
+    }
 
     // Ensure active user(s) have an up-to-date atomic `kft_user_<id>` record in Supabase without write-back storms
     const currentCanonicalId = localState.currentUser ? getCanonicalUserId(localState.currentUser) : null;
@@ -2665,6 +2713,7 @@ export async function syncAllAppDataWithSupabase(localState: {
       mergedTransactions,
       mergedCustomRestaurants,
       mergedDeletedRestaurantIds,
+      mergedSupportTickets,
       mergedPaymentProofsVault,
       mergedAppSettings,
     };
@@ -2679,6 +2728,7 @@ export async function syncAllAppDataWithSupabase(localState: {
       mergedDeletedUsers: localState.deletedUsers || [],
       mergedTransactions: Array.isArray(localState.transactions) ? localState.transactions : [],
       mergedCustomRestaurants: Array.isArray(localState.customRestaurants) ? localState.customRestaurants : [],
+      mergedSupportTickets: Array.isArray(localState.supportTickets) ? localState.supportTickets : [],
       mergedPaymentProofsVault: localState.paymentProofsVault,
       mergedAppSettings: localState.appSettings,
     };
