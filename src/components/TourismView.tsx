@@ -64,13 +64,17 @@ export const TourismView: React.FC = () => {
     });
   }, [categoryMatchedDestinations]);
 
-  // Separate HD-photo destinations (shuffled first) and compact icon-row destinations (shuffled second)
+  // Separate full-card HD destinations (shuffled first) and compact directory rows (shuffled second)
   const orderedSessionDestinations = useMemo(() => {
-    const withPhoto = scenicDestinationsOnly.filter((d) => Boolean(d.photoUrl && d.photoUrl.trim()));
-    const withoutPhoto = scenicDestinationsOnly.filter((d) => Boolean(!d.photoUrl || !d.photoUrl.trim()));
+    const fullCards = scenicDestinationsOnly.filter(
+      (d) => Boolean(d.photoUrl && d.photoUrl.trim()) && (!d.id.startsWith('rac-') || Boolean(d.isFeatured))
+    );
+    const compactRows = scenicDestinationsOnly.filter(
+      (d) => Boolean(!d.photoUrl || !d.photoUrl.trim() || (d.id.startsWith('rac-') && !d.isFeatured))
+    );
     return [
-      ...shuffleForCurrentSession(withPhoto),
-      ...shuffleForCurrentSession(withoutPhoto),
+      ...shuffleForCurrentSession(fullCards),
+      ...shuffleForCurrentSession(compactRows),
     ];
   }, [scenicDestinationsOnly]);
 

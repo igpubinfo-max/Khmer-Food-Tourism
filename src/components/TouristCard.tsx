@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { tr } from '../utils/i18n';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
+import { fetchVerifiedAttractionPhotoFromGoogleMaps } from '../services/touristAttractionPhotoService';
+import { recordPermanentDestinationOverride } from '../services/permanentMediaVaultService';
 
 import type { Language } from '../types';
 
@@ -69,6 +71,7 @@ export const DefaultDestinationIcon: React.FC<{ categorySlug?: string; className
 const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
   ({
     destination,
+    allDestinations,
     language,
     bookmarked,
     isAdmin,
@@ -76,10 +79,11 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
     toggleBookmark,
   }) => {
     const [imgError, setImgError] = useState(false);
+    const [autoFetchedPhotoUrl, setAutoFetchedPhotoUrl] = useState<string>('');
     const cardRef = useRef<HTMLDivElement | null>(null);
     const loc = useMemo(() => getLocalizedDestination(destination, language), [destination, language]);
 
-    const rawPhoto = (destination.photoUrl || '').trim();
+    const rawPhoto = (destination.photoUrl || autoFetchedPhotoUrl || '').trim();
     const isRealPhoto =
       Boolean(rawPhoto) &&
       !rawPhoto.startsWith('data:image/svg') &&
@@ -89,7 +93,53 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
     // Reset imgError when photoUrl changes
     useEffect(() => {
       setImgError(false);
-    }, [destination.photoUrl]);
+    }, [destination.photoUrl, autoFetchedPhotoUrl]);
+
+    // Automatic Wikimedia Commons / Wikipedia attraction image fetching when a tourist attraction is missing a photo
+    useEffect(() => {
+      if (isRealPhoto || destination.categorySlug === 'hotel') return;
+      let cancelled = false;
+      const runFetch = () => {
+        fetchVerifiedAttractionPhotoFromGoogleMaps(destination, allDestinations)
+          .then((match) => {
+            if (cancelled || !match || !match.photoUrl) return;
+            setAutoFetchedPhotoUrl(match.photoUrl);
+            try {
+              recordPermanentDestinationOverride({
+                ...destination,
+                photoUrl: match.photoUrl,
+                galleryPhotos: match.galleryPhotos?.length ? match.galleryPhotos : [match.photoUrl],
+                isCustomPhoto: true,
+                photoUpdatedAt: new Date().toISOString(),
+              });
+            } catch {}
+          })
+          .catch(() => {});
+      };
+
+      const el = cardRef.current;
+      if (!el || typeof IntersectionObserver === 'undefined') {
+        runFetch();
+        return () => {
+          cancelled = true;
+        };
+      }
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0]?.isIntersecting) {
+            observer.disconnect();
+            runFetch();
+          }
+        },
+        { rootMargin: '240px' }
+      );
+      observer.observe(el);
+      return () => {
+        cancelled = true;
+        observer.disconnect();
+      };
+    }, [destination, allDestinations, isRealPhoto]);
 
     const resolvedDestPhotoUrl = useMemo(() => {
       if (!isRealPhoto) return '';

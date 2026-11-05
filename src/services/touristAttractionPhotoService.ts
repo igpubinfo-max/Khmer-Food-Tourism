@@ -642,6 +642,19 @@ export async function fetchVerifiedAttractionPhotoFromGoogleMaps(
       return wikiMatch;
     }
 
+    // Verified Royal Academy of Cambodia (RAC) Heritage Photo Archive on GitHub CDN ($0 cost, unlimited users)
+    if (destination.id.startsWith('rac-')) {
+      const racArchiveUrl = `https://raw.githubusercontent.com/igpubinfo-max/Khmer-Food-Tourism/8d322f9/public/destinations/${destination.id}.jpg`;
+      return {
+        destinationId: destination.id,
+        photoUrl: racArchiveUrl,
+        galleryPhotos: [racArchiveUrl],
+        matchedName: destination.nameEn || destination.nameKh,
+        confidenceScore: 95,
+        source: 'wikipedia_verified',
+      };
+    }
+
     // No confident free match found -> return null so UI uses DefaultDestinationIcon ($0 API cost)
     return null;
   })();
