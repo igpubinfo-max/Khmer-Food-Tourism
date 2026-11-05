@@ -4,6 +4,16 @@ on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
+    inputs:
+      build_target:
+        description: 'Package to build (all / apk-only / aab-only)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - apk-only
+          - aab-only
 
 concurrency:
   group: build-android-apk
@@ -58,7 +68,7 @@ jobs:
         run: |
           rm -rf android/app/src/main/assets/public && mkdir -p android/app/src/main/assets/public && cp -rf dist/* android/app/src/main/assets/public/
 
-      - name: 7. Build & V1+V2+V3 Sign Single Direct-Install APK & Play Store AAB
+      - name: 7. Build & V1+V2+V3 Sign Android Package (APK / AAB)
         run: |
           set -euo pipefail
           if [ ! -f android/app/khmerfood-upload-key.jks ]; then
@@ -70,7 +80,27 @@ jobs:
           AAB_NAME="CambodiaFlavorsTourism-v${VERSION_NAME}-PlayStore.aab"
           echo "APK_NAME=$APK_NAME" >> $GITHUB_ENV
           echo "AAB_NAME=$AAB_NAME" >> $GITHUB_ENV
-          echo "Building Android APK & Play Store AAB with versionCode $FINAL_VC"
+
+          # Detect build target from commit message tag or workflow dispatch input
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          DISPATCH_INPUT="${{ github.event.inputs.build_target }}"
+          BUILD_APK=true
+          BUILD_AAB=true
+
+          if [ "$DISPATCH_INPUT" = "apk-only" ] || [[ "$COMMIT_MSG" == *"[apk-only]"* ]]; then
+            BUILD_AAB=false
+            echo "🎯 Target mode: APK ONLY (Skipping AAB)"
+          elif [ "$DISPATCH_INPUT" = "aab-only" ] || [[ "$COMMIT_MSG" == *"[aab-only]"* ]]; then
+            BUILD_APK=false
+            echo "🎯 Target mode: PLAY STORE AAB ONLY (Skipping APK)"
+          else
+            echo "🎯 Target mode: BOTH APK & PLAY STORE AAB"
+          fi
+
+          echo "BUILD_APK=$BUILD_APK" >> $GITHUB_ENV
+          echo "BUILD_AAB=$BUILD_AAB" >> $GITHUB_ENV
+          echo "Building versionCode $FINAL_VC (APK=$BUILD_APK, AAB=$BUILD_AAB)"
+
           BUILD_TOOLS_DIR=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
           ZIPALIGN="$BUILD_TOOLS_DIR/zipalign"
           APKSIGNER="$BUILD_TOOLS_DIR/apksigner"
@@ -81,98 +111,114 @@ jobs:
 
           cd android
           chmod +x ./gradlew
+
           # 1. Build Play Store AAB with official Play Store package ID (com.khmerfood.tourism)
-          ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
-          REL_AAB=$(find app/build/outputs/bundle/release -name "*.aab" | head -n 1)
-          cp "$REL_AAB" "../release_out/$AAB_NAME"
+          if [ "$BUILD_AAB" = "true" ]; then
+            echo "::group::Building Google Play Store Bundle (.AAB)"
+            ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
+            REL_AAB=$(find app/build/outputs/bundle/release -name "*.aab" | head -n 1)
+            cp "$REL_AAB" "../release_out/$AAB_NAME"
+            unzip -tq "../release_out/$AAB_NAME"
+            jarsigner -verify "../release_out/$AAB_NAME" > ../release_out/aab-verify.txt 2>&1 || true
+            cat ../release_out/aab-verify.txt
+            grep -q "jar verified" ../release_out/aab-verify.txt || { echo "::error::AAB is not signed"; exit 1; }
+            rm -f ../release_out/aab-verify.txt
+            AAB_SHA=$(sha256sum "../release_out/$AAB_NAME" | cut -d' ' -f1)
+            AAB_SIZE=$(stat -c%s "../release_out/$AAB_NAME")
+            echo "AAB_SHA=$AAB_SHA" >> $GITHUB_ENV
+            echo "AAB_SIZE=$AAB_SIZE" >> $GITHUB_ENV
+            echo "::endgroup::"
+          fi
 
           # 2. Build SINGLE APK with conflict-free package ID (com.khmerfood.tourism.direct)
           # Guarantees 1-tap installation on Samsung Android 15 without Play Store signature conflicts
-          ./gradlew assembleRelease -PcustomAppId=com.khmerfood.tourism.direct --no-daemon -x lint -x lintVitalRelease
-          REL_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
-          "$ZIPALIGN" -p -f 4 "$REL_APK" ../release_out/aligned-official.apk
-          "$APKSIGNER" sign \
-            --ks app/khmerfood-upload-key.jks \
-            --ks-key-alias khmerfood-upload \
-            --ks-pass pass:KhmerFood2026PlayStore \
-            --key-pass pass:KhmerFood2026PlayStore \
-            --v1-signing-enabled true \
-            --v2-signing-enabled true \
-            --v3-signing-enabled true \
-            --v4-signing-enabled false \
-            --out "../release_out/$APK_NAME" \
-            ../release_out/aligned-official.apk
-          rm -f ../release_out/aligned-official.apk
+          if [ "$BUILD_APK" = "true" ]; then
+            echo "::group::Building Direct-Install Android APK (.APK)"
+            ./gradlew assembleRelease -PcustomAppId=com.khmerfood.tourism.direct --no-daemon -x lint -x lintVitalRelease
+            REL_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
+            "$ZIPALIGN" -p -f 4 "$REL_APK" ../release_out/aligned-official.apk
+            "$APKSIGNER" sign \
+              --ks app/khmerfood-upload-key.jks \
+              --ks-key-alias khmerfood-upload \
+              --ks-pass pass:KhmerFood2026PlayStore \
+              --key-pass pass:KhmerFood2026PlayStore \
+              --v1-signing-enabled true \
+              --v2-signing-enabled true \
+              --v3-signing-enabled true \
+              --v4-signing-enabled false \
+              --out "../release_out/$APK_NAME" \
+              ../release_out/aligned-official.apk
+            rm -f ../release_out/aligned-official.apk
+
+            "$APKSIGNER" verify --verbose "../release_out/$APK_NAME"
+            "$AAPT" dump badging "../release_out/$APK_NAME" > ../release_out/badging.txt
+            BADGING=$(sed -n '1p' ../release_out/badging.txt)
+            rm -f ../release_out/badging.txt
+            echo "APK badging: $BADGING"
+            APK_VC=$(echo "$BADGING" | grep -oP "versionCode='\K[0-9]+")
+            APK_VN=$(echo "$BADGING" | grep -oP "versionName='\K[^']+")
+            if [ "$APK_VC" != "$FINAL_VC" ] || [ "$APK_VN" != "$VERSION_NAME" ]; then
+              echo "::error::APK version mismatch (got $APK_VN/$APK_VC, expected $VERSION_NAME/$FINAL_VC)"
+              exit 1
+            fi
+            APK_SHA=$(sha256sum "../release_out/$APK_NAME" | cut -d' ' -f1)
+            APK_SIZE=$(stat -c%s "../release_out/$APK_NAME")
+            echo "APK_SHA=$APK_SHA" >> $GITHUB_ENV
+            echo "APK_SIZE=$APK_SIZE" >> $GITHUB_ENV
+            echo "::endgroup::"
+          fi
           cd ..
 
-          # 3. Verify APK signature, installability metadata and that it contains THIS build's version
-          "$APKSIGNER" verify --verbose "release_out/$APK_NAME"
-          "$AAPT" dump badging "release_out/$APK_NAME" > release_out/badging.txt
-          BADGING=$(sed -n '1p' release_out/badging.txt)
-          rm -f release_out/badging.txt
-          echo "APK badging: $BADGING"
-          APK_VC=$(echo "$BADGING" | grep -oP "versionCode='\K[0-9]+")
-          APK_VN=$(echo "$BADGING" | grep -oP "versionName='\K[^']+")
-          if [ "$APK_VC" != "$FINAL_VC" ] || [ "$APK_VN" != "$VERSION_NAME" ]; then
-            echo "::error::APK version mismatch (got $APK_VN/$APK_VC, expected $VERSION_NAME/$FINAL_VC)"
-            exit 1
-          fi
-          # Verify the AAB is a valid, signed zip bundle
-          unzip -tq "release_out/$AAB_NAME"
-          jarsigner -verify "release_out/$AAB_NAME" > release_out/aab-verify.txt 2>&1 || true
-          cat release_out/aab-verify.txt
-          grep -q "jar verified" release_out/aab-verify.txt || { echo "::error::AAB is not signed"; exit 1; }
-          rm -f release_out/aab-verify.txt
-
-          # 4. Write release-info.json (version + SHA256) so the PC downloader can verify files
-          APK_SHA=$(sha256sum "release_out/$APK_NAME" | cut -d' ' -f1)
-          AAB_SHA=$(sha256sum "release_out/$AAB_NAME" | cut -d' ' -f1)
-          APK_SIZE=$(stat -c%s "release_out/$APK_NAME")
-          AAB_SIZE=$(stat -c%s "release_out/$AAB_NAME")
-          cat > release_out/release-info.json <<EOF
-          {
-            "versionName": "$VERSION_NAME",
-            "versionCode": $FINAL_VC,
-            "commit": "$GITHUB_SHA",
-            "runNumber": ${{ github.run_number }},
-            "builtAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "apk": { "name": "$APK_NAME", "size": $APK_SIZE, "sha256": "$APK_SHA", "packageId": "com.khmerfood.tourism.direct" },
-            "aab": { "name": "$AAB_NAME", "size": $AAB_SIZE, "sha256": "$AAB_SHA", "packageId": "com.khmerfood.tourism" }
-          }
-          EOF
+          # 3. Write release-info.json so PC downloader verifies files
+          node -e '
+            const fs = require("fs");
+            const bApk = process.env.BUILD_APK === "true";
+            const bAab = process.env.BUILD_AAB === "true";
+            const info = {
+              versionName: process.env.VERSION_NAME,
+              versionCode: Number(process.env.FINAL_VC),
+              commit: process.env.GITHUB_SHA,
+              runNumber: Number(process.env.RUN_NUMBER || "${{ github.run_number }}"),
+              builtAt: new Date().toISOString(),
+              target: bApk && bAab ? "all" : bApk ? "apk-only" : "aab-only",
+            };
+            if (bApk) {
+              info.apk = {
+                name: process.env.APK_NAME,
+                size: Number(process.env.APK_SIZE),
+                sha256: process.env.APK_SHA,
+                packageId: "com.khmerfood.tourism.direct"
+              };
+            }
+            if (bAab) {
+              info.aab = {
+                name: process.env.AAB_NAME,
+                size: Number(process.env.AAB_SIZE),
+                sha256: process.env.AAB_SHA,
+                packageId: "com.khmerfood.tourism"
+              };
+            }
+            fs.writeFileSync("release_out/release-info.json", JSON.stringify(info, null, 2));
+          '
           cat release_out/release-info.json
           ls -la release_out/
 
-      - name: 8. Upload Android Packages Artifact (Single APK + Play Store AAB)
+      - name: 8. Upload Android Packages Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Cambodia-Flavors-Tourism-Release-Packages
-          path: |
-            release_out/${{ env.APK_NAME }}
-            release_out/${{ env.AAB_NAME }}
-            release_out/release-info.json
+          path: release_out/*
 
-      - name: 9. Publish GitHub Release with Signed APK & Play Store AAB
+      - name: 9. Publish GitHub Release with Signed Android Package
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test-ui-apk'
         with:
           tag_name: v${{ env.VERSION_NAME }}
           name: "Cambodia Flavors & Tourism v${{ env.VERSION_NAME }}"
           make_latest: true
-          body: |
-            ### 🇰🇭 Cambodia Flavors & Tourism v${{ env.VERSION_NAME }}
-            **រសជាតិ និងទេសចរណ៍កម្ពុជា • 柬埔寨风味与旅游**
-
-            **Official Release v${{ env.VERSION_NAME }} (Build ${{ env.FINAL_VC }}):**
-            - 📱 **${{ env.APK_NAME }}:** Signed Direct-Install APK for Android.
-            - 📦 **${{ env.AAB_NAME }}:** Signed Android App Bundle for Google Play Console.
-            - 🧾 **release-info.json:** Version code + SHA256 checksums.
           draft: false
           prerelease: false
-          files: |
-            release_out/${{ env.APK_NAME }}
-            release_out/${{ env.AAB_NAME }}
-            release_out/release-info.json
+          files: release_out/*
 
       - name: 10. Deploy Web App to GitHub Pages (gh-pages)
         uses: peaceiris/actions-gh-pages@v4

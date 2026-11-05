@@ -24,8 +24,13 @@ import {
   Eye,
   ExternalLink,
   Navigation,
+  Search,
+  Crosshair,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import {
+  TouristDestination,
   RestaurantPriceLevel,
   GoogleMapsPlaceMetadata,
   isUserVipActive,
@@ -45,6 +50,8 @@ import { validateAndModerateShopImage } from '../utils/imageModeration';
 import { DefaultShopIcon } from './icons/DefaultShopIcon';
 import { tr } from '../utils/i18n';
 import { ShopLocationCheckInPickerModal, ShopCheckInLocationResult } from './ShopLocationCheckInPickerModal';
+import { getCurrentDeviceLocation } from '../services/restaurantCheckInService';
+import { inferCambodiaProvinceFromAddressOrGps } from '../services/googlePlacesService';
 
 const PROVINCES = [
   { nameKh: 'រាជធានីភ្នំពេញ', nameEn: 'Phnom Penh' },
@@ -150,6 +157,125 @@ const HOTEL_CATEGORIES = [
   },
 ];
 
+// ----------------------------------------------------------------------------
+// Search / validation helpers (pure functions, no hooks)
+// ----------------------------------------------------------------------------
+
+/** Lower-case, strip zero-width characters & normalize Unicode so Khmer and English search reliably. */
+const normalizeSearchText = (s?: string | null): string =>
+  String(s || '')
+    .normalize('NFC')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .toLowerCase()
+    .trim();
+
+/** "ខេត្តកំពត" / "កំពត" / "Kampot" all normalize to a comparable province key. */
+const stripProvincePrefix = (s?: string | null): string =>
+  normalizeSearchText(s).replace(/^(ខេត្ត|រាជធានី)\s*/, '').replace(/\s+/g, '');
+
+const findProvinceMatch = (kh?: string | null, en?: string | null) => {
+  const khKey = stripProvincePrefix(kh);
+  const enKey = normalizeSearchText(en).replace(/\s+/g, '');
+  return (
+    PROVINCES.find(
+      (p) =>
+        (khKey && stripProvincePrefix(p.nameKh) === khKey) ||
+        (enKey && p.nameEn.toLowerCase().replace(/\s+/g, '') === enKey) ||
+        (khKey && p.nameEn.toLowerCase().replace(/\s+/g, '') === khKey)
+    ) || null
+  );
+};
+
+/** Accepts Cambodian local (012 345 678), +855 and other international formats (8–13 digits). */
+const isPlausiblePhoneNumber = (raw: string): boolean => {
+  const digits = raw.replace(/[^\d]/g, '');
+  return digits.length >= 8 && digits.length <= 13;
+};
+
+const parseGpsText = (val: string): { lat: number; lng: number } | null => {
+  const match = val.trim().match(/(-?\d+(?:\.\d+)?)\s*[,/\s]\s*(-?\d+(?:\.\d+)?)/);
+  if (!match) return null;
+  const lat = parseFloat(match[1]);
+  const lng = parseFloat(match[2]);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  return { lat, lng };
+};
+
+/** Free reverse geocoding (ArcGIS → OpenStreetMap fallback). No paid Google API calls. */
+const reverseGeocodeFreeAddress = async (lat: number, lng: number): Promise<string | null> => {
+  const withTimeout = async (url: string, ms: number, init?: RequestInit) => {
+    const controller = new AbortController();
+    const tId = setTimeout(() => controller.abort(), ms);
+    try {
+      return await fetch(url, { ...(init || {}), signal: controller.signal });
+    } finally {
+      clearTimeout(tId);
+    }
+  };
+  try {
+    const res = await withTimeout(
+      `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=json&location=${lng},${lat}&langCode=km`,
+      4000
+    );
+    if (res.ok) {
+      const data = await res.json();
+      const a = data?.address;
+      if (a) {
+        const parts = [a.Address, a.Neighborhood || a.District, a.City || a.Subregion, a.Region]
+          .map((p: unknown) => String(p || '').trim())
+          .filter(Boolean);
+        const unique = Array.from(new Set(parts));
+        if (unique.length > 0) return unique.join(', ');
+      }
+    }
+  } catch {}
+  try {
+    const res = await withTimeout(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=km,en`,
+      4500,
+      { headers: { Accept: 'application/json' } }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      const a = data?.address || {};
+      const parts = [
+        a.road || a.pedestrian,
+        a.suburb || a.quarter || a.village,
+        a.city_district || a.county || a.town,
+        a.city || a.state,
+      ]
+        .map((p: unknown) => String(p || '').trim())
+        .filter(Boolean);
+      const unique = Array.from(new Set(parts));
+      if (unique.length > 0) return unique.join(', ');
+    }
+  } catch {}
+  return null;
+};
+
+type ExistingListingOption = {
+  id: string;
+  source: 'restaurant' | 'destination';
+  businessType: 'restaurant' | 'hotel';
+  nameKh: string;
+  nameEn: string;
+  provinceKh: string;
+  provinceEn: string;
+  addressKh: string;
+  phone: string;
+  photoUrl: string;
+  isPending: boolean;
+  extraText?: string;
+};
+
+const classifyHotelCategoryFromText = (text: string): string => {
+  const t = normalizeSearchText(text);
+  if (/resort|រីសត/.test(t)) return 'resort';
+  if (/villa|boutique|វីឡា|ប៊ូទិក/.test(t)) return 'boutique_villa';
+  if (/guest\s*house|guesthouse|bungalow|hostel|ផ្ទះសំណាក់|បឹងហ្គាឡូ/.test(t)) return 'guesthouse';
+  return 'hotel';
+};
+
 export const VipAddRestaurantModal: React.FC = () => {
   const {
     isVipAddRestaurantModalOpen,
@@ -170,6 +296,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     setIsAuthModalOpen,
     appSettings,
     restaurants,
+    destinations,
     openUpgradeVipModal,
   } = useApp();
 
@@ -186,13 +313,24 @@ export const VipAddRestaurantModal: React.FC = () => {
   const [replacingStoreId, setReplacingStoreId] = useState<string | null>(null);
   const [confirmDeleteStoreId, setConfirmDeleteStoreId] = useState<string | null>(null);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+  // Seed hotel (from `destinations`) that a VIP owner is claiming/upgrading → saved as a VIP listing with the same id
+  const [claimingDestinationId, setClaimingDestinationId] = useState<string | null>(null);
+  // Inline validation: errors are shown only after the first submit attempt
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [locationNotice, setLocationNotice] = useState<{ type: 'error' | 'warning' | 'success'; text: string } | null>(null);
+  const [showAdvancedLocation, setShowAdvancedLocation] = useState(false);
 
   const isApprovedVip = isUserVipActive(currentUser);
   const dynamicPlans = getDynamicVipPlans(appSettings);
   const quota = getCurrentUserStoreQuota(currentUser);
   const ownedRestaurants = getOwnedRestaurantsForUser(currentUser);
   const requiresAdditionalPayment =
-    !isAdmin && !replacingStoreId && !upgradingExistingStoreId && formMode === 'add_new' && quota.remainingAvailableSlots <= 0;
+    !isAdmin &&
+    !replacingStoreId &&
+    !upgradingExistingStoreId &&
+    (formMode === 'add_new' || Boolean(claimingDestinationId)) &&
+    quota.remainingAvailableSlots <= 0;
 
   // 7 Core Form Fields requested by User:
   // 1. Shop / Hotel Name
@@ -252,9 +390,20 @@ export const VipAddRestaurantModal: React.FC = () => {
     [upgradingExistingStoreId, restaurants]
   );
 
+  const targetClaimingDestination = useMemo<TouristDestination | null>(
+    () => (claimingDestinationId ? (destinations || []).find((d) => d.id === claimingDestinationId) || null : null),
+    [claimingDestinationId, destinations]
+  );
+
+  // Seed hotels live in `destinations` (categorySlug === 'hotel'), not in `restaurants`
+  const seedHotelDestinations = useMemo(() => {
+    const restIds = new Set(restaurants.map((r) => r.id));
+    return (destinations || []).filter((d) => d && d.categorySlug === 'hotel' && !restIds.has(d.id));
+  }, [destinations, restaurants]);
+
   // Live duplicate detection when user is in 'add_new' mode
   const detectedDuplicates = useMemo(() => {
-    if (formMode !== 'add_new' || replacingStoreId || upgradingExistingStoreId) return [];
+    if (formMode !== 'add_new' || replacingStoreId || upgradingExistingStoreId || claimingDestinationId) return [];
     if (nameKh.trim().length < 2 && nameEn.trim().length < 2 && phone.trim().length < 8) return [];
     return findDuplicateOrExistingListings({
       nameKh: nameKh.trim(),
@@ -271,6 +420,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     formMode,
     replacingStoreId,
     upgradingExistingStoreId,
+    claimingDestinationId,
     nameKh,
     nameEn,
     phone,
@@ -283,31 +433,109 @@ export const VipAddRestaurantModal: React.FC = () => {
     findDuplicateOrExistingListings,
   ]);
 
-  // Searchable list of existing shops/hotels for the 'upgrade_existing' selector
+  // Unified list of every existing shop/hotel (VIP/seed restaurants + seed hotels from `destinations`)
+  const allExistingListingOptions = useMemo<ExistingListingOption[]>(() => {
+    const fromRestaurants: ExistingListingOption[] = restaurants
+      .filter((r) => r && r.status !== 'rejected')
+      .map((r) => ({
+        id: r.id,
+        source: 'restaurant' as const,
+        businessType: r.businessType === 'hotel' ? ('hotel' as const) : ('restaurant' as const),
+        nameKh: r.nameKh || '',
+        nameEn: r.nameEn || '',
+        provinceKh: r.provinceKh || '',
+        provinceEn: r.provinceEn || '',
+        addressKh: r.addressKh || r.addressEn || '',
+        phone: r.phone || '',
+        photoUrl: r.profileImage || r.photoUrl || '',
+        isPending: r.status === 'pending',
+        extraText: Array.isArray(r.signatureDishesKh) ? r.signatureDishesKh.join(' ') : '',
+      }));
+    const fromDestinations: ExistingListingOption[] = seedHotelDestinations.map((d) => ({
+      id: d.id,
+      source: 'destination' as const,
+      businessType: 'hotel' as const,
+      nameKh: d.nameKh || '',
+      nameEn: d.nameEn || '',
+      provinceKh: d.provinceKh || '',
+      provinceEn: d.provinceEn || '',
+      addressKh: d.addressKh || d.addressEn || '',
+      phone: d.phone || '',
+      photoUrl: d.photoUrl || '',
+      isPending: false,
+    }));
+    return [...fromRestaurants, ...fromDestinations];
+  }, [restaurants, seedHotelDestinations]);
+
+  // Searchable list for the 'upgrade_existing' selector.
+  // - Token based (every word must match), Khmer/English/phone/address aware
+  // - Province filter tolerant of "ខេត្តកំពត" vs "កំពត" vs "Kampot"
+  // - Searches BOTH shops and hotels when a query is typed (current type ranked first)
   const searchableExistingListings = useMemo(() => {
-    const q = existingSearchQuery.trim().toLowerCase();
-    return restaurants
-      .filter((r) => {
-        if (!r || r.status === 'rejected') return false;
-        const rType = r.businessType === 'hotel' ? 'hotel' : 'restaurant';
-        if (rType !== businessType) return false;
-        if (existingProvinceFilter !== 'ALL' && r.provinceKh !== existingProvinceFilter) return false;
-        if (!q) return true;
-        const nKh = (r.nameKh || '').toLowerCase();
-        const nEn = (r.nameEn || '').toLowerCase();
-        const addr = (r.addressKh || '').toLowerCase();
-        const ph = (r.phone || '').replace(/[\s\-+]/g, '');
-        const qClean = q.replace(/[\s\-+]/g, '');
-        return (
-          nKh.includes(q) ||
-          nEn.includes(q) ||
-          addr.includes(q) ||
-          (qClean.length >= 3 && ph.includes(qClean)) ||
-          (Array.isArray(r.signatureDishesKh) && r.signatureDishesKh.some((d) => d.toLowerCase().includes(q)))
-        );
+    const q = normalizeSearchText(existingSearchQuery);
+    const tokens = q.split(/\s+/).filter(Boolean);
+    const provinceKey = existingProvinceFilter === 'ALL' ? '' : stripProvincePrefix(existingProvinceFilter);
+    const provinceObj = existingProvinceFilter === 'ALL' ? null : findProvinceMatch(existingProvinceFilter);
+    const provinceEnKey = provinceObj ? provinceObj.nameEn.toLowerCase().replace(/\s+/g, '') : '';
+
+    const scored: Array<{ item: ExistingListingOption; score: number }> = [];
+    for (const item of allExistingListingOptions) {
+      if (!tokens.length && item.businessType !== businessType) continue;
+      if (provinceKey) {
+        const itemProvKh = stripProvincePrefix(item.provinceKh);
+        const itemProvEn = normalizeSearchText(item.provinceEn).replace(/\s+/g, '');
+        const addr = normalizeSearchText(item.addressKh);
+        const provinceOk =
+          itemProvKh === provinceKey ||
+          (provinceEnKey && itemProvEn === provinceEnKey) ||
+          (provinceEnKey && itemProvKh === provinceEnKey) ||
+          addr.includes(provinceKey);
+        if (!provinceOk) continue;
+      }
+
+      let score = item.businessType === businessType ? 50 : 0;
+      if (tokens.length) {
+        const nKh = normalizeSearchText(item.nameKh);
+        const nEn = normalizeSearchText(item.nameEn);
+        const haystack = `${nKh} ${nEn} ${normalizeSearchText(item.addressKh)} ${normalizeSearchText(item.provinceKh)} ${normalizeSearchText(item.provinceEn)} ${normalizeSearchText(item.extraText)}`;
+        const phoneDigits = item.phone.replace(/[^\d]/g, '');
+        const allMatch = tokens.every((t) => {
+          if (haystack.includes(t)) return true;
+          const tDigits = t.replace(/[^\d]/g, '');
+          return tDigits.length >= 3 && phoneDigits.includes(tDigits);
+        });
+        if (!allMatch) continue;
+        if (nKh.startsWith(q) || nEn.startsWith(q)) score += 30;
+        else if (nKh.includes(q) || nEn.includes(q)) score += 20;
+        else score += 5;
+      }
+      scored.push({ item, score });
+    }
+    scored.sort((a, b) => b.score - a.score || (a.item.nameEn || a.item.nameKh).localeCompare(b.item.nameEn || b.item.nameKh));
+    return { total: scored.length, items: scored.slice(0, 40).map((s) => s.item) };
+  }, [allExistingListingOptions, businessType, existingProvinceFilter, existingSearchQuery]);
+
+  // Duplicate detection against seed hotels (which `findDuplicateOrExistingListings` does not cover)
+  const detectedSeedHotelDuplicates = useMemo<ExistingListingOption[]>(() => {
+    if (formMode !== 'add_new' || businessType !== 'hotel' || replacingStoreId || upgradingExistingStoreId || claimingDestinationId) return [];
+    const nK = normalizeSearchText(nameKh);
+    const nE = normalizeSearchText(nameEn);
+    if (nK.length < 4 && nE.length < 4) return [];
+    const phoneDigits = phone.replace(/[^\d]/g, '');
+    return allExistingListingOptions
+      .filter((o) => o.source === 'destination')
+      .filter((o) => {
+        const oK = normalizeSearchText(o.nameKh);
+        const oE = normalizeSearchText(o.nameEn);
+        const nameHit =
+          (nK.length >= 4 && (oK.includes(nK) || oE.includes(nK))) ||
+          (nE.length >= 4 && (oE.includes(nE) || oK.includes(nE)));
+        const oPhone = o.phone.replace(/[^\d]/g, '');
+        const phoneHit = phoneDigits.length >= 8 && oPhone.length >= 8 && oPhone.endsWith(phoneDigits.slice(-8));
+        return nameHit || phoneHit;
       })
-      .slice(0, 30);
-  }, [restaurants, businessType, existingProvinceFilter, existingSearchQuery]);
+      .slice(0, 3);
+  }, [formMode, businessType, replacingStoreId, upgradingExistingStoreId, claimingDestinationId, nameKh, nameEn, phone, allExistingListingOptions]);
 
   const activeCategoryList = businessType === 'hotel' ? HOTEL_CATEGORIES : SHOP_CATEGORIES;
   const selectedCategoryObj = useMemo(
@@ -329,9 +557,13 @@ export const VipAddRestaurantModal: React.FC = () => {
     setModerationWarning(null);
     setReplacingStoreId(null);
     setUpgradingExistingStoreId(null);
+    setClaimingDestinationId(null);
     setExistingSearchQuery('');
     setShowMoreOptions(false);
     setIsPreviewStep(false);
+    setSubmitAttempted(false);
+    setLocationNotice(null);
+    setShowAdvancedLocation(false);
     setImportedGooglePlaceId(undefined);
     setImportedGoogleMeta(undefined);
     setWebsiteUrl('');
@@ -343,6 +575,9 @@ export const VipAddRestaurantModal: React.FC = () => {
     setBusinessType(bType);
     setFormMode('upgrade_existing');
     setUpgradingExistingStoreId(store.id);
+    setClaimingDestinationId(null);
+    setSubmitAttempted(false);
+    setLocationNotice(null);
     setReplacingStoreId(null);
     setNameKh(store.nameKh || '');
     setNameEn(store.nameEn || '');
@@ -379,6 +614,9 @@ export const VipAddRestaurantModal: React.FC = () => {
     const bType = store.businessType === 'hotel' ? 'hotel' : 'restaurant';
     setBusinessType(bType);
     setReplacingStoreId(store.id);
+    setClaimingDestinationId(null);
+    setUpgradingExistingStoreId(null);
+    setSubmitAttempted(false);
     setNameKh(store.nameKh || '');
     setNameEn(store.nameEn || '');
     setProvinceKh(store.provinceKh || 'រាជធានីភ្នំពេញ');
@@ -406,6 +644,62 @@ export const VipAddRestaurantModal: React.FC = () => {
     );
     setIsPreviewStep(false);
     setActiveTab('create_form');
+  };
+
+  // Claim / upgrade a seed hotel that exists only in `destinations` → submitted as VIP listing (same id) for Admin approval
+  const beginClaimDestinationHotel = (dest: TouristDestination) => {
+    setBusinessType('hotel');
+    setFormMode('upgrade_existing');
+    setClaimingDestinationId(dest.id);
+    setUpgradingExistingStoreId(null);
+    setReplacingStoreId(null);
+    setSubmitAttempted(false);
+    setLocationNotice(null);
+    setNameKh(dest.nameKh || '');
+    setNameEn(dest.nameEn || '');
+    const prov = findProvinceMatch(dest.provinceKh, dest.provinceEn);
+    setProvinceKh(prov?.nameKh || dest.provinceKh || 'រាជធានីភ្នំពេញ');
+    setProvinceEn(prov?.nameEn || dest.provinceEn || 'Phnom Penh');
+    setAddressKh(dest.addressKh || dest.addressEn || '');
+    const latVal = typeof dest.latitude === 'number' && isValidCambodiaCoordinates(dest.latitude, dest.longitude) ? dest.latitude : null;
+    const lngVal = latVal !== null ? dest.longitude : null;
+    setShopLat(latVal);
+    setShopLng(lngVal);
+    setGpsInputText(latVal !== null && lngVal !== null ? `${latVal.toFixed(6)}, ${lngVal.toFixed(6)}` : '');
+    setShopMapUrl(dest.mapUrl || '');
+    setPhone(dest.phone || currentUser?.phone || '');
+    setOpeningHoursKh(dest.bestTimeToVisitKh || 'បើកទទួលភ្ញៀវ ២៤ ម៉ោង');
+    setShopPhoto(dest.photoUrl || '');
+    setModerationWarning(null);
+    setDescriptionKh(dest.descriptionKh || '');
+    setImportedGooglePlaceId(undefined);
+    setImportedGoogleMeta(undefined);
+    setBusinessCategory(classifyHotelCategoryFromText(`${dest.nameEn} ${dest.nameKh} ${dest.categoryEn || ''}`));
+    setWebsiteUrl('');
+    setSignatureDishesKh(
+      Array.isArray(dest.highlightsKh) && dest.highlightsKh.length > 0
+        ? dest.highlightsKh.slice(0, 4)
+        : ['បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ និង Wi-Fi']
+    );
+    setShowMoreOptions(true);
+    setIsPreviewStep(false);
+    setActiveTab('create_form');
+  };
+
+  const selectExistingOption = (opt: ExistingListingOption) => {
+    if (opt.source === 'destination') {
+      const dest = (destinations || []).find((d) => d.id === opt.id);
+      if (dest) beginClaimDestinationHotel(dest);
+      return;
+    }
+    const rest = restaurants.find((r) => r.id === opt.id);
+    if (rest) beginUpgradeExistingStore(rest);
+  };
+
+  const clearUpgradeSelection = () => {
+    setUpgradingExistingStoreId(null);
+    setClaimingDestinationId(null);
+    setFormMode('upgrade_existing');
   };
 
   // When modal opens, check for initial mode or prefilled location from Google Maps Search
@@ -485,6 +779,9 @@ export const VipAddRestaurantModal: React.FC = () => {
     }
     setUpgradingExistingStoreId(null);
     setReplacingStoreId(null);
+    setClaimingDestinationId(null);
+    setSubmitAttempted(false);
+    setLocationNotice(null);
     setSubmittedPendingShop(null);
     setIsPreviewStep(false);
     setActiveTab('create_form');
@@ -579,52 +876,217 @@ export const VipAddRestaurantModal: React.FC = () => {
 
   const handleGpsInputChange = (val: string) => {
     setGpsInputText(val);
-    const match = val.trim().match(/(-?\d+\.\d+)\s*[,/\s]\s*(-?\d+\.\d+)/);
+    const parsed = parseGpsText(val);
+    if (parsed) {
+      setShopLat(Number(parsed.lat.toFixed(6)));
+      setShopLng(Number(parsed.lng.toFixed(6)));
+      if (!shopMapUrl.trim()) {
+        setShopMapUrl(`https://www.google.com/maps/search/?api=1&query=${parsed.lat.toFixed(6)},${parsed.lng.toFixed(6)}`);
+      }
+    } else if (!val.trim()) {
+      setShopLat(null);
+      setShopLng(null);
+    }
+  };
+
+  const applyDetectedProvince = (provinceText: string) => {
+    const match = findProvinceMatch(provinceText);
     if (match) {
-      const pLat = parseFloat(match[1]);
-      const pLng = parseFloat(match[2]);
-      if (Number.isFinite(pLat) && Number.isFinite(pLng)) {
-        setShopLat(Number(pLat.toFixed(6)));
-        setShopLng(Number(pLng.toFixed(6)));
-        if (!shopMapUrl.trim()) {
-          setShopMapUrl(`https://www.google.com/maps/search/?api=1&query=${pLat.toFixed(6)},${pLng.toFixed(6)}`);
+      setProvinceKh(match.nameKh);
+      setProvinceEn(match.nameEn);
+    }
+  };
+
+  const clearLocation = () => {
+    setShopLat(null);
+    setShopLng(null);
+    setGpsInputText('');
+    setShopMapUrl('');
+    setLocationNotice(null);
+  };
+
+  // 1-tap automatic location detection (device GPS → Google Maps pin link → province & address auto-fill, $0 cost)
+  const handleDetectCurrentLocation = async () => {
+    if (isDetectingLocation) return;
+    setLocationNotice(null);
+    setIsDetectingLocation(true);
+    try {
+      const gps = await getCurrentDeviceLocation(true);
+      if (gps.errorMessage) {
+        setLocationNotice({
+          type: 'error',
+          text: tr(
+            language,
+            '⚠️ មិនអាចទាញយកទីតាំង GPS បានទេ។ សូមបើកសិទ្ធិទីតាំង (Location) ក្នុងទូរស័ព្ទ ឬចុច «ជ្រើសលើផែនទី» ជំនួសវិញ។',
+            '⚠️ Could not get your GPS location. Please allow Location permission, or tap "Pick on Map" instead.',
+            '⚠️ 无法获取 GPS 位置。请允许定位权限，或点击“在地图上选择”。'
+          ),
+        });
+        return;
+      }
+      const lat = Number(gps.latitude.toFixed(6));
+      const lng = Number(gps.longitude.toFixed(6));
+      if (!gps.isInsideCambodia || !isValidCambodiaCoordinates(lat, lng)) {
+        setLocationNotice({
+          type: 'error',
+          text: tr(
+            language,
+            '⚠️ ទីតាំងបច្ចុប្បន្នរបស់អ្នកមិននៅក្នុងប្រទេសកម្ពុជាទេ។ សូមចុច «ជ្រើសលើផែនទី» ដើម្បីកំណត់ទីតាំងហាង។',
+            '⚠️ Your current location is outside Cambodia. Please tap "Pick on Map" to set the listing location.',
+            '⚠️ 您当前的位置不在柬埔寨境内。请点击“在地图上选择”设置位置。'
+          ),
+        });
+        return;
+      }
+
+      setShopLat(lat);
+      setShopLng(lng);
+      setGpsInputText(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+      setShopMapUrl(buildCanonicalGoogleMapsPinUrl(lat, lng, importedGooglePlaceId));
+      applyDetectedProvince(inferCambodiaProvinceFromAddressOrGps('', lat, lng));
+
+      if (!addressKh.trim()) {
+        const addr = await reverseGeocodeFreeAddress(lat, lng);
+        if (addr) {
+          setAddressKh(addr);
+          applyDetectedProvince(inferCambodiaProvinceFromAddressOrGps(addr, lat, lng));
         }
       }
+
+      setLocationNotice(
+        gps.isSufficientAccuracy
+          ? {
+              type: 'success',
+              text: tr(
+                language,
+                `✅ បានកំណត់ទីតាំងដោយស្វ័យប្រវត្តិ (ភាពត្រឹមត្រូវ ±${Math.round(gps.accuracyMeters)}m)`,
+                `✅ Location detected automatically (accuracy ±${Math.round(gps.accuracyMeters)}m)`,
+                `✅ 已自动定位（精度 ±${Math.round(gps.accuracyMeters)} 米）`
+              ),
+            }
+          : {
+              type: 'warning',
+              text: tr(
+                language,
+                `⚠️ ទីតាំងមិនសូវច្បាស់ (±${Math.round(gps.accuracyMeters)}m)។ សូមចុច «ជ្រើសលើផែនទី» ដើម្បីកែម្ជុលឱ្យចំហាង។`,
+                `⚠️ Low GPS accuracy (±${Math.round(gps.accuracyMeters)}m). Tap "Pick on Map" to fine-tune the pin.`,
+                `⚠️ GPS 精度较低（±${Math.round(gps.accuracyMeters)} 米）。请点击“在地图上选择”微调位置。`
+              ),
+            }
+      );
+    } catch {
+      setLocationNotice({
+        type: 'error',
+        text: tr(
+          language,
+          '⚠️ មិនអាចទាញយកទីតាំងបានទេ។ សូមព្យាយាមម្តងទៀត ឬជ្រើសលើផែនទី។',
+          '⚠️ Could not detect location. Please try again or pick on the map.',
+          '⚠️ 无法获取位置，请重试或在地图上选择。'
+        ),
+      });
+    } finally {
+      setIsDetectingLocation(false);
     }
+  };
+
+  /** Returns field → message for every invalid field (empty object = valid). */
+  const validateForm = (): Record<string, string> => {
+    const errs: Record<string, string> = {};
+    const nK = nameKh.trim();
+    const nE = nameEn.trim();
+    if (!nK && !nE) {
+      errs.name =
+        businessType === 'hotel'
+          ? tr(language, 'សូមបញ្ចូលឈ្មោះសណ្ឋាគារ / ផ្ទះសំណាក់', 'Please enter the hotel / stay name', '请输入酒店/客栈名称')
+          : tr(language, 'សូមបញ្ចូលឈ្មោះហាង', 'Please enter the shop name', '请输入店铺名称');
+    } else if (Math.max(nK.length, nE.length) < 2) {
+      errs.name = tr(language, 'ឈ្មោះខ្លីពេក (យ៉ាងតិច ២ តួអក្សរ)', 'Name is too short (at least 2 characters)', '名称太短（至少 2 个字符）');
+    }
+
+    const ph = phone.trim();
+    if (!ph) {
+      errs.phone = tr(language, 'សូមបញ្ចូលលេខទូរស័ព្ទទំនាក់ទំនង', 'Please enter a contact phone number', '请输入联系电话');
+    } else if (!isPlausiblePhoneNumber(ph)) {
+      errs.phone = tr(
+        language,
+        'លេខទូរស័ព្ទមិនត្រឹមត្រូវ (ឧ. 012 345 678 ឬ +855 12 345 678)',
+        'Invalid phone number (e.g. 012 345 678 or +855 12 345 678)',
+        '电话号码无效（例如 012 345 678 或 +855 12 345 678）'
+      );
+    }
+
+    const mapUrl = shopMapUrl.trim();
+    if (mapUrl && !isValidGoogleMapsUrl(mapUrl)) {
+      errs.location = tr(
+        language,
+        'តំណភ្ជាប់ Google Maps មិនត្រឹមត្រូវ។ សូមចុច «ជ្រើសលើផែនទី» ជំនួសវិញ។',
+        'Invalid Google Maps link. Please tap "Pick on Map" instead.',
+        'Google 地图链接无效，请点击“在地图上选择”。'
+      );
+    } else if (gpsInputText.trim()) {
+      const parsed = parseGpsText(gpsInputText);
+      if (!parsed) {
+        errs.location = tr(
+          language,
+          'ទម្រង់ GPS មិនត្រឹមត្រូវ (ឧ. 11.556400, 104.928200)',
+          'Invalid GPS format (e.g. 11.556400, 104.928200)',
+          'GPS 格式无效（例如 11.556400, 104.928200）'
+        );
+      } else if (!isValidCambodiaCoordinates(parsed.lat, parsed.lng)) {
+        errs.location = tr(
+          language,
+          'កូអរដោនេ GPS ត្រូវតែនៅក្នុងប្រទេសកម្ពុជា',
+          'GPS coordinates must be inside Cambodia',
+          'GPS 坐标必须位于柬埔寨境内'
+        );
+      }
+    }
+    return errs;
   };
 
   // Validate form and open Preview screen before submitting
   const handleProceedToPreview = (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitAttempted(true);
+    const errs = validateForm();
+    const errKeys = Object.keys(errs);
+    if (errKeys.length > 0) {
+      const firstKey = ['name', 'phone', 'location'].find((k) => errs[k]) || errKeys[0];
+      showToast(`⚠️ ${errs[firstKey]}`, 'warning');
+      if (firstKey === 'location') setShowAdvancedLocation(true);
+      setTimeout(() => {
+        const el = document.getElementById(`kft-addshop-field-${firstKey}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const input = el.querySelector('input, select, textarea') as HTMLElement | null;
+          input?.focus({ preventScroll: true });
+        }
+      }, 60);
+      return;
+    }
     const trimmedNameKh = nameKh.trim();
     const trimmedNameEn = nameEn.trim();
-    if (!trimmedNameKh && !trimmedNameEn) {
-      showToast(
-        tr(language, '⚠️ សូមបញ្ចូលឈ្មោះហាងរបស់អ្នក!', '⚠️ Please enter your shop name!', '⚠️ 请输入您的店铺名称！'),
-        'warning'
-      );
-      return;
-    }
 
-    if (!phone.trim()) {
-      showToast(
-        tr(language, '⚠️ សូមបញ្ចូលលេខទូរស័ព្ទទំនាក់ទំនងហាង!', '⚠️ Please enter your shop phone number!', '⚠️ 请输入店铺联系电话！'),
-        'warning'
+    // Exact-name match against a seed hotel → ask the owner to claim/upgrade it instead of creating a duplicate
+    const exactSeedHotel = detectedSeedHotelDuplicates.find((d) => {
+      const a = normalizeSearchText(trimmedNameKh);
+      const b = normalizeSearchText(trimmedNameEn);
+      return (
+        (a.length >= 3 && (normalizeSearchText(d.nameKh) === a || normalizeSearchText(d.nameEn) === a)) ||
+        (b.length >= 3 && (normalizeSearchText(d.nameEn) === b || normalizeSearchText(d.nameKh) === b))
       );
-      return;
-    }
-
-    const trimmedMapUrl = shopMapUrl.trim();
-    if (trimmedMapUrl && !isValidGoogleMapsUrl(trimmedMapUrl)) {
+    });
+    if (exactSeedHotel) {
       showToast(
         tr(
           language,
-          '⚠️ សូមបញ្ចូលតំណភ្ជាប់ Google Maps ឱ្យបានត្រឹមត្រូវ ឬចុចប៊ូតុងជ្រើសរើសទីតាំងលើផែនទី!',
-          '⚠️ Please enter a valid Google Maps link or use the Select Location on Google Maps button!',
-          '⚠️ 请输入有效的 Google 地图链接，或点击在地图上选择位置按钮！'
+          `⚠️ «${exactSeedHotel.nameKh || exactSeedHotel.nameEn}» មានក្នុងប្រព័ន្ធរួចហើយ! សូមចុច «ជ្រើសរើស និងដំឡើង» ខាងក្រោមជំនួសការបង្កើតស្ទួន។`,
+          `⚠️ "${exactSeedHotel.nameEn || exactSeedHotel.nameKh}" already exists! Please tap "Select & Upgrade" below instead of creating a duplicate.`,
+          `⚠️ “${exactSeedHotel.nameEn || exactSeedHotel.nameKh}” 已存在！请点击下方“选择并升级”，避免重复创建。`
         ),
         'warning'
       );
+      document.getElementById('kft-addshop-field-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
@@ -802,7 +1264,9 @@ export const VipAddRestaurantModal: React.FC = () => {
 
       const created = replacingStoreId
         ? replaceExistingRestaurant(replacingStoreId, newRestData)
-        : addRestaurant(newRestData);
+        : claimingDestinationId
+          ? addRestaurant({ ...newRestData, id: claimingDestinationId })
+          : addRestaurant(newRestData);
 
       if (!created) {
         setIsSaving(false);
@@ -901,6 +1365,32 @@ export const VipAddRestaurantModal: React.FC = () => {
   };
 
   const coverPhoto = shopPhoto.trim();
+  const isHotel = businessType === 'hotel';
+  const isSelectingExisting = formMode === 'upgrade_existing' && !upgradingExistingStoreId && !claimingDestinationId;
+  const errors: Record<string, string> = submitAttempted ? validateForm() : {};
+  const hasName = Boolean(nameKh.trim() || nameEn.trim());
+  const hasPhone = isPlausiblePhoneNumber(phone);
+  const hasLocation = shopLat !== null && shopLng !== null;
+  const hasPhoto = Boolean(coverPhoto);
+  const completedCount = [hasName, hasPhone, hasLocation, hasPhoto].filter(Boolean).length;
+  const activeUpgradeName = targetUpgradingExistingStore
+    ? targetUpgradingExistingStore.nameKh || targetUpgradingExistingStore.nameEn
+    : targetClaimingDestination
+      ? targetClaimingDestination.nameKh || targetClaimingDestination.nameEn
+      : '';
+  const inputClass = (hasErr: boolean) =>
+    `w-full px-3.5 py-3 rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm outline-none transition ${
+      hasErr
+        ? 'border-rose-500 ring-2 ring-rose-500/20'
+        : 'border-slate-300 dark:border-slate-700 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20'
+    }`;
+  const renderFieldError = (key: string) =>
+    errors[key] ? (
+      <p role="alert" className="mt-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 flex items-start gap-1">
+        <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-px" />
+        <span>{errors[key]}</span>
+      </p>
+    ) : null;
 
   return (
     <div
@@ -943,23 +1433,27 @@ export const VipAddRestaurantModal: React.FC = () => {
                   ? tr(language, '🔄 កែប្តូរព័ត៌មានថ្មី ($0)', '🔄 Replace Listing ($0)', '🔄 更换信息 ($0)')
                   : isPreviewStep
                   ? tr(language, '👁️ មើលជាមុន និងដាក់ស្នើ', '👁️ Preview & Submit', '👁️ 预览并提交')
+                  : activeUpgradeName || isSelectingExisting
+                  ? tr(language, '⬆️ កែប្រែហាង / សណ្ឋាគារដែលមានស្រាប់', '⬆️ Update Existing Listing', '⬆️ 更新现有列表')
                   : businessType === 'hotel'
                   ? tr(language, '🏨 បន្ថែមសណ្ឋាគារ / ផ្ទះសំណាក់ថ្មី', '🏨 Add New Hotel / Stay', '🏨 添加新酒店/客栈')
-                  : tr(language, '➕ បន្ថែមហាងថ្មី (Add New Shop)', '➕ Add New Shop', '➕ 添加新店铺')}
+                  : tr(language, '➕ បន្ថែមហាងថ្មី', '➕ Add New Shop', '➕ 添加新店铺')}
               </h3>
               <p className="text-[11px] text-emerald-100 font-khmer truncate">
                 {isPreviewStep
                   ? tr(
                       language,
-                      'ជំហានទី ៣៖ ពិនិត្យព័ត៌មានហាងមុនពេលបញ្ជូនទៅផ្ទៀងផ្ទាត់',
-                      'Step 3: Review your shop details before submitting',
-                      '第 3 步：提交审核前检查店铺信息'
+                      'ពិនិត្យព័ត៌មានម្តងទៀតមុនពេលដាក់ស្នើ',
+                      'Check your details once more before submitting',
+                      '提交前再次检查信息'
                     )
+                  : isSelectingExisting
+                  ? tr(language, 'ស្វែងរក ហើយចុចជ្រើសរើសរបស់អ្នក', 'Search, then tap your listing', '搜索并点击您的列表')
                   : tr(
                       language,
-                      'បំពេញព័ត៌មានហាង ជ្រើសរើសទីតាំងលើ Google Maps រួចដាក់ស្នើ',
-                      'Enter shop info, select location on Google Maps & submit',
-                      '填写店铺信息，在 Google 地图上选择位置并提交'
+                      'បំពេញព័ត៌មាន ៣ ផ្នែកខ្លីៗ រួចដាក់ស្នើ',
+                      'Fill in 3 short sections, then submit',
+                      '填写 3 个简短部分后提交'
                     )}
               </p>
             </div>
@@ -1557,8 +2051,39 @@ export const VipAddRestaurantModal: React.FC = () => {
               </div>
             </div>
 
+            {(!hasLocation || !hasPhoto) && (
+              <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-400 space-y-1 text-[11px] text-amber-900 dark:text-amber-200">
+                {!hasLocation && (
+                  <div className="flex items-start gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-px" />
+                    <span>
+                      {tr(
+                        language,
+                        'មិនទាន់មានទីតាំងលើផែនទី — Admin នឹងត្រូវផ្ទៀងផ្ទាត់ទីតាំងមុនអនុម័ត (អាចយឺតជាង)។',
+                        'No map location yet — Admin must verify the location before approval (may take longer).',
+                        '尚未设置地图位置——管理员需先核实位置（审核可能较慢）。'
+                      )}
+                    </span>
+                  </div>
+                )}
+                {!hasPhoto && (
+                  <div className="flex items-start gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-px" />
+                    <span>
+                      {tr(
+                        language,
+                        'មិនទាន់មានរូបភាព — អ្នកអាចបន្ថែមពេលក្រោយក្នុង «គ្រប់គ្រងហាង»។',
+                        'No photo yet — you can add one later from "Manage Shop".',
+                        '尚未添加照片——稍后可在“管理店铺”中添加。'
+                      )}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Action Buttons: Edit vs Confirm & Submit */}
-            <div className="grid grid-cols-2 gap-2.5 pt-1">
+            <div className="grid grid-cols-2 gap-2.5 pt-1 sticky bottom-0 -mx-4 px-4 py-2.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-t border-slate-200 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setIsPreviewStep(false)}
@@ -1585,137 +2110,153 @@ export const VipAddRestaurantModal: React.FC = () => {
           </div>
         ) : (
           /* ============================================================================
-             SIMPLE, CLEAR ADD NEW SHOP FORM (3-STEP KHMER GUIDE + 7 FIELDS)
+             REDESIGNED ADD / UPGRADE SHOP & HOTEL FORM
+             (Mode → Type → Basic Info → Location → Photo → Optional details, sticky submit bar)
              ============================================================================ */
           <form
             onSubmit={handleProceedToPreview}
             noValidate
-            className="p-4 space-y-3.5 overflow-y-auto flex-1 font-khmer text-xs"
+            className="flex-1 min-h-0 flex flex-col font-khmer text-xs"
           >
-            {/* Mode Switcher: Add New vs Upgrade Existing Shop / Hotel */}
-            <div className="p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 grid grid-cols-2 gap-1.5">
-              <button
-                type="button"
-                onClick={() => {
-                  setFormMode('add_new');
-                  setUpgradingExistingStoreId(null);
-                }}
-                className={`py-2.5 px-2.5 rounded-xl font-extrabold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                  formMode === 'add_new' && !upgradingExistingStoreId
-                    ? 'bg-[#064E3B] text-white shadow-xs'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-700/50'
-                }`}
-              >
-                <PlusCircle className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">
-                  {tr(language, 'បន្ថែមថ្មី (Add New)', 'Add New Listing', '添加新列表')}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setFormMode('upgrade_existing');
-                  setReplacingStoreId(null);
-                }}
-                className={`py-2.5 px-2.5 rounded-xl font-extrabold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                  formMode === 'upgrade_existing' || Boolean(upgradingExistingStoreId)
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-xs'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-700/50'
-                }`}
-              >
-                <span>⬆️</span>
-                <span className="truncate">
-                  {tr(
-                    language,
-                    'ដំឡើងដែលមានស្រាប់ (Upgrade Existing)',
-                    'Upgrade Existing Shop / Hotel',
-                    '升级现有店铺/酒店'
-                  )}
-                </span>
-              </button>
-            </div>
-
-            {/* Business Type Switcher: Shop / Restaurant vs Hotel / Stay */}
-            {!upgradingExistingStoreId && !replacingStoreId && (
-              <div className="grid grid-cols-2 gap-1.5">
+            <div className="p-4 space-y-3 overflow-y-auto flex-1 overscroll-contain">
+              {/* Mode Switcher: Add New vs Existing Listing */}
+              <div className="p-1 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 grid grid-cols-2 gap-1">
                 <button
                   type="button"
                   onClick={() => {
-                    setBusinessType('restaurant');
-                    setBusinessCategory('restaurant');
-                    setSignatureDishesKh(['ម្ហូបខ្មែរប្រចាំហាង']);
+                    setFormMode('add_new');
+                    setUpgradingExistingStoreId(null);
+                    setClaimingDestinationId(null);
+                    setSubmitAttempted(false);
                   }}
-                  className={`py-2 px-3 rounded-xl border text-[11px] font-bold transition cursor-pointer ${
-                    businessType === 'restaurant'
-                      ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200'
-                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                  className={`min-h-[44px] py-2 px-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                    formMode === 'add_new' && !upgradingExistingStoreId && !claimingDestinationId
+                      ? 'bg-[#064E3B] text-white shadow-xs'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-700/50'
                   }`}
                 >
-                  🍽️ {tr(language, 'ហាងអាហារ (Shop / Restaurant)', 'Shop / Restaurant', '餐饮店铺')}
+                  <PlusCircle className="w-4 h-4 shrink-0" />
+                  <span>{tr(language, 'បន្ថែមថ្មី', 'Add New', '添加新列表')}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => {
-                    setBusinessType('hotel');
-                    setBusinessCategory('hotel');
-                    setSignatureDishesKh(['បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ និង Wi-Fi']);
+                    setFormMode('upgrade_existing');
+                    setReplacingStoreId(null);
+                    setSubmitAttempted(false);
                   }}
-                  className={`py-2 px-3 rounded-xl border text-[11px] font-bold transition cursor-pointer ${
-                    businessType === 'hotel'
-                      ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200'
-                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                  className={`min-h-[44px] py-2 px-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                    formMode === 'upgrade_existing' || Boolean(upgradingExistingStoreId) || Boolean(claimingDestinationId)
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-xs'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-700/50'
                   }`}
                 >
-                  🏨 {tr(language, 'សណ្ឋាគារ / ផ្ទះសំណាក់ (Hotel)', 'Hotel / Stay', '酒店 / 住宿')}
+                  <Search className="w-4 h-4 shrink-0" />
+                  <span>{tr(language, 'មានក្នុងកម្មវិធីរួចហើយ', 'Already Listed', '已有列表')}</span>
                 </button>
               </div>
-            )}
 
-            {/* Existing Listing Selector when in 'upgrade_existing' mode and no listing selected yet */}
-            {formMode === 'upgrade_existing' && !upgradingExistingStoreId ? (
-              <div className="p-3.5 rounded-2xl bg-amber-50/70 dark:bg-slate-800/90 border-2 border-amber-400/70 space-y-3">
-                <div className="space-y-1">
-                  <div className="font-extrabold text-amber-950 dark:text-amber-200 text-xs flex items-center gap-1.5">
-                    <span>⬆️</span>
-                    <span>
+              {/* Business Type Switcher: Shop / Restaurant vs Hotel / Stay */}
+              {!upgradingExistingStoreId && !replacingStoreId && !claimingDestinationId && (
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBusinessType('restaurant');
+                      setBusinessCategory('restaurant');
+                      setSignatureDishesKh(['ម្ហូបខ្មែរប្រចាំហាង']);
+                    }}
+                    className={`min-h-[44px] py-2 px-3 rounded-xl border-2 text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                      !isHotel
+                        ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200'
+                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                    }`}
+                  >
+                    <span>🍽️</span>
+                    <span>{tr(language, 'ហាងអាហារ / កាហ្វេ', 'Shop / Restaurant', '餐饮店铺')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBusinessType('hotel');
+                      setBusinessCategory('hotel');
+                      setSignatureDishesKh(['បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ និង Wi-Fi']);
+                    }}
+                    className={`min-h-[44px] py-2 px-3 rounded-xl border-2 text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                      isHotel
+                        ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200'
+                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                    }`}
+                  >
+                    <span>🏨</span>
+                    <span>{tr(language, 'សណ្ឋាគារ / ផ្ទះសំណាក់', 'Hotel / Stay', '酒店 / 住宿')}</span>
+                  </button>
+                </div>
+              )}
+
+              {isSelectingExisting ? (
+                /* ---------------- EXISTING LISTING FINDER ---------------- */
+                <div className="space-y-3">
+                  <div className="p-3 rounded-2xl bg-amber-50/80 dark:bg-slate-800/90 border border-amber-400/70 space-y-1">
+                    <div className="font-extrabold text-amber-950 dark:text-amber-200 text-xs flex items-center gap-1.5">
+                      <Search className="w-4 h-4 shrink-0" />
+                      <span>
+                        {tr(
+                          language,
+                          'ស្វែងរកហាង ឬសណ្ឋាគាររបស់អ្នក',
+                          'Find your shop or hotel',
+                          '查找您的店铺或酒店'
+                        )}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
                       {tr(
                         language,
-                        'ជ្រើសរើសហាង ឬសណ្ឋាគារដែលមានស្រាប់ដើម្បីដំឡើង និងកែប្រែព័ត៌មាន',
-                        'Select an Existing Shop or Hotel to Upgrade',
-                        '选择现有店铺或酒店进行升级与修改'
+                        'វាយឈ្មោះ (ខ្មែរ ឬអង់គ្លេស) លេខទូរស័ព្ទ ឬអាសយដ្ឋាន រួចចុចលើលទ្ធផលដើម្បីកែប្រែរូបភាព ព័ត៌មាន និងទីតាំង។ ការកែប្រែត្រូវរង់ចាំ Admin អនុម័ត។',
+                        'Type a name (Khmer or English), phone, or address, then tap a result to update its photo, details and location. Changes are reviewed by Admin.',
+                        '输入名称（柬文或英文）、电话或地址，点击结果即可更新照片、信息和位置。修改需管理员审核。'
                       )}
-                    </span>
+                    </p>
                   </div>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                    {tr(
-                      language,
-                      'ស្វែងរកហាង ឬសណ្ឋាគាររបស់អ្នកដែលមានក្នុងប្រព័ន្ធរួចហើយ រួចចុច «ជ្រើសរើស» ដើម្បីបន្ថែម ឬកែប្រែរូបភាព ការពិពណ៌នា លេខទូរស័ព្ទ និងទីតាំង (តម្រូវឱ្យមានការអនុម័តពី Admin មុនផ្សព្វផ្សាយ)។',
-                      'Search for your existing shop or hotel below and tap Select to update photos, descriptions, contact details, and business info (requires Admin approval before publishing).',
-                      '搜索现有店铺或酒店并点击选择，即可更新照片、简介、联系方式及位置（需管理员审核批准后发布）。'
-                    )}
-                  </p>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    value={existingSearchQuery}
-                    onChange={(e) => setExistingSearchQuery(e.target.value)}
-                    placeholder={tr(
-                      language,
-                      '🔍 ស្វែងរកតាមឈ្មោះ លេខទូរស័ព្ទ ឬអាសយដ្ឋាន...',
-                      '🔍 Search by name, phone, or address...',
-                      '🔍 按名称、电话或地址搜索...'
+                  <div className="relative">
+                    <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <input
+                      type="search"
+                      autoFocus
+                      enterKeyHint="search"
+                      value={existingSearchQuery}
+                      onChange={(e) => setExistingSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') e.preventDefault();
+                      }}
+                      placeholder={tr(
+                        language,
+                        'ឧ. Diamond, សុខា, 012 345 678...',
+                        'e.g. Diamond, Sokha, 012 345 678...',
+                        '例如：Diamond、Sokha、012 345 678...'
+                      )}
+                      className="w-full pl-10 pr-10 py-3 rounded-xl border border-amber-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                    />
+                    {existingSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setExistingSearchQuery('')}
+                        aria-label={tr(language, 'សម្អាត', 'Clear', '清除')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     )}
-                    className="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500"
-                  />
+                  </div>
+
                   <select
                     value={existingProvinceFilter}
                     onChange={(e) => setExistingProvinceFilter(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-amber-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-bold outline-none"
+                    className="w-full px-3.5 py-3 rounded-xl border border-amber-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm font-bold outline-none"
                   >
                     <option value="ALL">
-                      {tr(language, 'គ្រប់រាជធានី-ខេត្តទាំង ២៥', 'All 25 Provinces', '全部 25 个省市')}
+                      {tr(language, '📍 គ្រប់រាជធានី-ខេត្តទាំង ២៥', '📍 All 25 Provinces', '📍 全部 25 个省市')}
                     </option>
                     {PROVINCES.map((p) => (
                       <option key={p.nameKh} value={p.nameKh}>
@@ -1723,29 +2264,65 @@ export const VipAddRestaurantModal: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                </div>
 
-                <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
-                  {searchableExistingListings.length === 0 ? (
-                    <div className="p-4 text-center text-slate-500 dark:text-slate-400 text-xs">
-                      {tr(
-                        language,
-                        'រកមិនឃើញហាង/សណ្ឋាគារដែលត្រូវនឹងពាក្យស្វែងរកទេ។',
-                        'No matching existing shops or hotels found.',
-                        '未找到匹配的现有店铺或酒店。'
-                      )}
-                    </div>
-                  ) : (
-                    searchableExistingListings.map((item) => (
-                      <div
-                        key={item.id}
-                        className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2.5 hover:border-amber-400 transition"
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 px-0.5">
+                    <span>
+                      {existingSearchQuery.trim()
+                        ? tr(
+                            language,
+                            `រកឃើញ ${searchableExistingListings.total} លទ្ធផល`,
+                            `${searchableExistingListings.total} result(s) found`,
+                            `找到 ${searchableExistingListings.total} 个结果`
+                          )
+                        : isHotel
+                        ? tr(language, 'សណ្ឋាគារដែលមានក្នុងប្រព័ន្ធ', 'Hotels already in the app', '应用中已有的酒店')
+                        : tr(language, 'ហាងដែលមានក្នុងប្រព័ន្ធ', 'Shops already in the app', '应用中已有的店铺')}
+                    </span>
+                    {existingProvinceFilter !== 'ALL' && (
+                      <button
+                        type="button"
+                        onClick={() => setExistingProvinceFilter('ALL')}
+                        className="font-bold text-amber-700 dark:text-amber-300 underline cursor-pointer"
                       >
-                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        {tr(language, 'បង្ហាញគ្រប់ខេត្ត', 'Show all provinces', '显示所有省份')}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    {searchableExistingListings.items.length === 0 ? (
+                      <div className="p-4 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 text-center space-y-2">
+                        <div className="text-2xl">🔎</div>
+                        <p className="font-bold text-slate-700 dark:text-slate-200 text-xs">
+                          {tr(
+                            language,
+                            'រកមិនឃើញហាង/សណ្ឋាគារដែលត្រូវគ្នាទេ',
+                            'No matching shop or hotel found',
+                            '未找到匹配的店铺或酒店'
+                          )}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                          {tr(
+                            language,
+                            'សាកល្បងវាយពាក្យខ្លីជាងនេះ (ឧ. ពាក្យតែមួយ) ឬជ្រើស «គ្រប់ខេត្ត»។',
+                            'Try a shorter keyword (e.g. a single word) or choose "All Provinces".',
+                            '请尝试更短的关键词（如单个词）或选择“全部省市”。'
+                          )}
+                        </p>
+                      </div>
+                    ) : (
+                      searchableExistingListings.items.map((item) => (
+                        <button
+                          type="button"
+                          key={`${item.source}-${item.id}`}
+                          onClick={() => selectExistingOption(item)}
+                          className="w-full text-left p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center gap-2.5 hover:border-amber-400 active:scale-[0.99] transition cursor-pointer"
+                        >
                           {item.photoUrl ? (
                             <img
                               src={item.photoUrl}
-                              alt={item.nameKh}
+                              alt={item.nameKh || item.nameEn}
+                              loading="lazy"
                               className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700"
                             />
                           ) : (
@@ -1757,636 +2334,802 @@ export const VipAddRestaurantModal: React.FC = () => {
                             <div className="font-bold text-slate-900 dark:text-white text-xs truncate">
                               {item.nameKh || item.nameEn}
                             </div>
-                            {item.nameEn && item.nameKh && (
-                              <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                                {item.nameEn}
-                              </div>
+                            {item.nameEn && item.nameKh && item.nameEn !== item.nameKh && (
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{item.nameEn}</div>
                             )}
                             <div className="text-[10px] text-emerald-700 dark:text-emerald-400 truncate">
-                              📍 {item.provinceKh} {item.phone ? `• 📞 ${item.phone}` : ''}
+                              {item.businessType === 'hotel' ? '🏨' : '🍽️'} 📍 {isKm ? item.provinceKh : item.provinceEn || item.provinceKh}
+                              {item.phone ? ` • 📞 ${item.phone}` : ''}
                             </div>
+                            {item.isPending && (
+                              <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 text-[9px] font-bold">
+                                ⏳ {tr(language, 'រង់ចាំ Admin', 'Pending review', '待审核')}
+                              </span>
+                            )}
                           </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => beginUpgradeExistingStore(item)}
-                          className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-slate-950 font-black text-[11px] shrink-0 shadow-2xs transition active:scale-95 cursor-pointer"
-                        >
-                          {tr(language, '⬆️ ជ្រើសរើស', '⬆️ Select', '⬆️ 选择')}
+                          <span className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 font-black text-[11px] shrink-0 shadow-2xs">
+                            {tr(language, 'ជ្រើសរើស', 'Select', '选择')}
+                          </span>
                         </button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            ) : null}
-
-            {/* Active Existing Listing Upgrade Banner */}
-            {targetUpgradingExistingStore && (
-              <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border-2 border-amber-400 space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="text-[10px] font-black uppercase text-amber-700 dark:text-amber-300">
-                      ⬆️ {tr(language, 'កំពុងស្នើដំឡើងហាង/សណ្ឋាគារដែលមានស្រាប់', 'Upgrading Existing Listing', '正在升级现有列表')}
-                    </div>
-                    <div className="font-extrabold text-xs text-slate-900 dark:text-white truncate">
-                      {targetUpgradingExistingStore.nameKh || targetUpgradingExistingStore.nameEn}
-                    </div>
+                      ))
+                    )}
                   </div>
+
                   <button
                     type="button"
                     onClick={() => {
+                      const q = existingSearchQuery.trim();
+                      setFormMode('add_new');
                       setUpgradingExistingStoreId(null);
-                      setFormMode('upgrade_existing');
+                      setClaimingDestinationId(null);
+                      if (q && !nameKh.trim() && !/^[\d\s+\-()]+$/.test(q)) setNameKh(q);
+                      if (existingProvinceFilter !== 'ALL') {
+                        const p = findProvinceMatch(existingProvinceFilter);
+                        if (p) {
+                          setProvinceKh(p.nameKh);
+                          setProvinceEn(p.nameEn);
+                        }
+                      }
                     }}
-                    className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-amber-400 text-amber-800 dark:text-amber-200 font-bold text-[10px] shrink-0 cursor-pointer"
+                    className="w-full min-h-[44px] py-3 px-3 rounded-2xl bg-[#064E3B] hover:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
                   >
-                    {tr(language, '🔄 ប្តូរជ្រើសរើស', '🔄 Change', '🔄 更换选择')}
+                    <PlusCircle className="w-4 h-4 shrink-0" />
+                    <span>
+                      {isHotel
+                        ? tr(language, 'រកមិនឃើញ? បន្ថែមសណ្ឋាគារថ្មី', "Can't find it? Add a new hotel", '找不到？添加新酒店')
+                        : tr(language, 'រកមិនឃើញ? បន្ថែមហាងថ្មី', "Can't find it? Add a new shop", '找不到？添加新店铺')}
+                    </span>
                   </button>
                 </div>
-                <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-snug">
-                  {tr(
-                    language,
-                    'អ្នកអាចបន្ថែម ឬកែប្រែរូបភាព ការពិពណ៌នា លេខទូរស័ព្ទ អាសយដ្ឋាន និងផែនទីខាងក្រោម។ រាល់ការកែប្រែនឹងត្រូវដាក់ជូន Admin អនុម័តមុនពេលផ្សព្វផ្សាយ។',
-                    'Add or update photos, descriptions, contact details, and location below. Changes require Admin approval before publishing.',
-                    '在下方添加或更新照片、简介、联系方式及位置。修改内容需经管理员批准后发布。'
-                  )}
-                </p>
-              </div>
-            )}
-
-            {/* 3-Step Khmer Guide Banner */}
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/50 dark:to-slate-800 border border-emerald-400/50 space-y-1.5">
-              <div className="font-bold text-emerald-950 dark:text-emerald-200 text-xs flex items-center gap-1.5">
-                <span>📋</span>
-                <span>
-                  {tr(
-                    language,
-                    'ការណែនាំ ៣ ជំហានងាយៗក្នុងការបន្ថែមហាងថ្មី៖',
-                    '3 Simple Steps to Add a New Shop:',
-                    '添加新店铺的 3 个简单步骤：'
-                  )}
-                </span>
-              </div>
-              <div className="text-[11px] text-slate-700 dark:text-slate-300 space-y-1 leading-relaxed">
-                <div>
-                  <b className="text-emerald-800 dark:text-emerald-300">
-                    {tr(language, 'ជំហានទី ១៖', 'Step 1:', '第 1 步：')}
-                  </b>{' '}
-                  {tr(
-                    language,
-                    'បំពេញឈ្មោះហាង ប្រភេទហាង លេខទូរស័ព្ទ អាសយដ្ឋាន/ខេត្ត និងរូបភាពហាង។',
-                    'Enter shop name, category, phone, address/province, and shop photo.',
-                    '填写店铺名称、类别、电话、地址/省份及店铺照片。'
-                  )}
-                </div>
-                <div>
-                  <b className="text-emerald-800 dark:text-emerald-300">
-                    {tr(language, 'ជំហានទី ២៖', 'Step 2:', '第 2 步：')}
-                  </b>{' '}
-                  {tr(
-                    language,
-                    'ចុចប៊ូតុង «📍 ជ្រើសរើសទីតាំងលើផែនទី Google Maps» ដើម្បីទាញយកកូអរដោនេ GPS និងលីងផែនទីដោយស្វ័យប្រវត្តិ។',
-                    'Tap "Select Location on Google Maps" to auto-retrieve GPS coordinates & Maps link.',
-                    '点击“在 Google 地图上选择位置”自动获取 GPS 坐标和地图链接。'
-                  )}
-                </div>
-                <div>
-                  <b className="text-emerald-800 dark:text-emerald-300">
-                    {tr(language, 'ជំហានទី ៣៖', 'Step 3:', '第 3 步：')}
-                  </b>{' '}
-                  {tr(
-                    language,
-                    'ចុច «👁️ មើលជាមុន និងដាក់ស្នើហាង» ដើម្បីពិនិត្យម្ដងទៀត មុនបញ្ជូនទៅផ្ទៀងផ្ទាត់។',
-                    'Tap "Preview & Submit" to review before sending for verification.',
-                    '点击“预览并提交”核对信息后提交审核。'
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Store Quota & Additional Shop Fee Notice */}
-            {requiresAdditionalPayment ? (
-              <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border-2 border-amber-400 space-y-2 shadow-2xs">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="font-bold text-amber-900 dark:text-amber-200 text-xs flex items-center gap-1.5">
-                    <CreditCard className="w-4 h-4 text-amber-600 shrink-0" />
-                    <span>
-                      {tr(
-                        language,
-                        `បន្ថែមហាងទី ${quota.nextStoreSlotNumber} (ហាងបន្ថែម)`,
-                        `Adding Shop #${quota.nextStoreSlotNumber}`,
-                        `添加第 ${quota.nextStoreSlotNumber} 家店铺`
-                      )}
-                    </span>
-                  </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-mono font-black text-xs shrink-0">
-                    +${quota.additionalStoreFeeUsd.toFixed(2)} USD
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('pay_additional_slot')}
-                    className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-[11px] flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
-                  >
-                    <QrCode className="w-3.5 h-3.5" />
-                    <span>
-                      {tr(
-                        language,
-                        `បង់ប្រាក់បន្ថែមហាង (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
-                        `Pay Extra Shop Fee (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
-                        `支付额外店铺费 (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`
-                      )}
-                    </span>
-                  </button>
-                  {ownedRestaurants[0] && (
-                    <button
-                      type="button"
-                      onClick={() => beginReplaceStore(ownedRestaurants[0])}
-                      className="py-2 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-[11px] flex items-center justify-center gap-1 cursor-pointer"
-                    >
-                      <RefreshCw className="w-3 h-3" />
-                      <span>{tr(language, 'ប្តូរហាងចាស់ ($0)', 'Replace ($0)', '更换旧店 ($0)')}</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            ) : null}
-
-            {/* FIELD 1: Shop / Hotel Name */}
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
-              <div>
-                <label className="block font-bold text-slate-900 dark:text-white mb-1">
-                  {businessType === 'hotel'
-                    ? tr(language, '១. ឈ្មោះសណ្ឋាគារ / ផ្ទះសំណាក់ (Hotel Name) *', '1. Hotel / Stay Name *', '1. 酒店/客栈名称 *')
-                    : tr(language, '១. ឈ្មោះហាង (Shop Name) *', '1. Shop Name *', '1. 店铺名称 *')}
-                </label>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-1.5">
-                  {tr(
-                    language,
-                    'វាយបញ្ចូលឈ្មោះជាភាសាខ្មែរ ឬអង់គ្លេសឱ្យបានច្បាស់លាស់។',
-                    'Enter the name in Khmer or English.',
-                    '请输入清晰的柬文或英文名称。'
-                  )}
-                </p>
-                <input
-                  type="text"
-                  required
-                  value={nameKh}
-                  onChange={(e) => setNameKh(e.target.value)}
-                  placeholder={
-                    businessType === 'hotel'
-                      ? tr(language, 'ឧ. សណ្ឋាគារ សុខា ឬ ផ្ទះសំណាក់ មេគង្គ', 'e.g. Sokha Hotel or Mekong Guesthouse', '例如：索卡酒店')
-                      : tr(language, 'ឧ. ភោជនីយដ្ឋាន ម្លិះ ឬ ហាងកាហ្វេភ្នំពេញ', 'e.g. Malis Restaurant or Café', '例如：茉莉餐厅')
-                  }
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-600 dark:text-slate-400 mb-1 text-[11px]">
-                  {tr(language, 'ឈ្មោះជាអក្សរឡាតាំង / អង់គ្លេស (មិនបាច់ដាក់ក៏បាន)', 'English Name (Optional)', '英文名称（选填）')}
-                </label>
-                <input
-                  type="text"
-                  value={nameEn}
-                  onChange={(e) => setNameEn(e.target.value)}
-                  placeholder={businessType === 'hotel' ? 'e.g. Angkor Boutique Hotel' : 'e.g. Malis Restaurant'}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-white text-xs focus:border-emerald-600 outline-none"
-                />
-              </div>
-
-              {/* Live Duplicate Detection Alert & 1-Tap Select to Upgrade Existing Listing */}
-              {detectedDuplicates.length > 0 && (
-                <div className="mt-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/60 border-2 border-amber-400 space-y-2 animate-fade-in">
-                  <div className="font-extrabold text-amber-900 dark:text-amber-200 text-[11px] flex items-center gap-1.5">
-                    <span>⚠️</span>
-                    <span>
-                      {tr(
-                        language,
-                        'រកឃើញហាង/សណ្ឋាគារដែលមានក្នុងប្រព័ន្ធរួចហើយ! (Duplicate Detected)',
-                        'Existing Shop / Hotel Detected in Database!',
-                        '检测到系统中已存在相同店铺/酒店！'
-                      )}
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-slate-700 dark:text-slate-300 leading-snug">
-                    {tr(
-                      language,
-                      'ដើម្បីបង្ការការបង្កើតស្ទួន សូមជ្រើសរើសហាង/សណ្ឋាគារដែលមានស្រាប់ខាងក្រោម ហើយដាក់ស្នើដំឡើង និងកែប្រែព័ត៌មាន (Upgrade Request)៖',
-                      'To prevent duplicate listings, select the existing listing below and submit an upgrade request with your updated photos, description, and contact info:',
-                      '为防止重复创建，请选择下方现有列表并提交升级与信息修改申请：'
-                    )}
-                  </p>
-                  <div className="space-y-1.5">
-                    {detectedDuplicates.slice(0, 3).map((dup) => (
-                      <div
-                        key={dup.id}
-                        className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 flex items-center justify-between gap-2"
-                      >
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          {dup.photoUrl ? (
-                            <img
-                              src={dup.photoUrl}
-                              alt={dup.nameKh}
-                              className="w-10 h-10 rounded-lg object-cover shrink-0"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
-                              <DefaultShopIcon className="w-full h-full" />
-                            </div>
-                          )}
-                          <div className="min-w-0 flex-1">
-                            <div className="font-bold text-slate-900 dark:text-white text-xs truncate">
-                              {dup.nameKh || dup.nameEn}
-                            </div>
-                            <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                              📍 {dup.provinceKh} {dup.phone ? `• 📞 ${dup.phone}` : ''}
-                            </div>
+              ) : (
+                /* ---------------- ADD / UPDATE FORM ---------------- */
+                <>
+                  {/* Active Existing Listing Upgrade Banner */}
+                  {activeUpgradeName && (
+                    <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border-2 border-amber-400 space-y-1.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="text-[10px] font-black uppercase text-amber-700 dark:text-amber-300">
+                            ⬆️ {tr(language, 'កំពុងកែប្រែព័ត៌មានដែលមានស្រាប់', 'Updating existing listing', '正在更新现有列表')}
                           </div>
+                          <div className="font-extrabold text-xs text-slate-900 dark:text-white truncate">{activeUpgradeName}</div>
                         </div>
                         <button
                           type="button"
-                          onClick={() => beginUpgradeExistingStore(dup)}
-                          className="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-slate-950 font-black text-[10px] shrink-0 shadow-2xs cursor-pointer"
+                          onClick={clearUpgradeSelection}
+                          className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-amber-400 text-amber-800 dark:text-amber-200 font-bold text-[11px] shrink-0 cursor-pointer"
                         >
-                          {tr(language, '⬆️ ជ្រើសរើស និងដំឡើង', '⬆️ Select & Upgrade', '⬆️ 选择并升级')}
+                          {tr(language, '🔄 ប្តូរ', '🔄 Change', '🔄 更换')}
                         </button>
+                      </div>
+                      <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-snug">
+                        {tr(
+                          language,
+                          'ពិនិត្យ និងកែប្រែព័ត៌មានខាងក្រោម។ ការកែប្រែនឹងត្រូវ Admin អនុម័តមុនពេលបង្ហាញជាសាធារណៈ។',
+                          'Review and update the details below. Changes are published after Admin approval.',
+                          '请检查并更新以下信息。修改经管理员批准后发布。'
+                        )}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Store Quota & Additional Shop Fee Notice */}
+                  {requiresAdditionalPayment ? (
+                    <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border-2 border-amber-400 space-y-2 shadow-2xs">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="font-bold text-amber-900 dark:text-amber-200 text-xs flex items-center gap-1.5">
+                          <CreditCard className="w-4 h-4 text-amber-600 shrink-0" />
+                          <span>
+                            {tr(
+                              language,
+                              `បន្ថែមហាងទី ${quota.nextStoreSlotNumber} (ហាងបន្ថែម)`,
+                              `Adding Shop #${quota.nextStoreSlotNumber}`,
+                              `添加第 ${quota.nextStoreSlotNumber} 家店铺`
+                            )}
+                          </span>
+                        </div>
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-mono font-black text-xs shrink-0">
+                          +${quota.additionalStoreFeeUsd.toFixed(2)} USD
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('pay_additional_slot')}
+                          className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-[11px] flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                        >
+                          <QrCode className="w-3.5 h-3.5" />
+                          <span>
+                            {tr(
+                              language,
+                              `បង់ប្រាក់បន្ថែមហាង (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
+                              `Pay Extra Shop Fee (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
+                              `支付额外店铺费 (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`
+                            )}
+                          </span>
+                        </button>
+                        {ownedRestaurants[0] && (
+                          <button
+                            type="button"
+                            onClick={() => beginReplaceStore(ownedRestaurants[0])}
+                            className="py-2.5 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-[11px] flex items-center justify-center gap-1 cursor-pointer"
+                          >
+                            <RefreshCw className="w-3 h-3" />
+                            <span>{tr(language, 'ប្តូរហាងចាស់ ($0)', 'Replace ($0)', '更换旧店 ($0)')}</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {/* Progress checklist */}
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[
+                      { ok: hasName, label: tr(language, 'ឈ្មោះ', 'Name', '名称'), required: true },
+                      { ok: hasPhone, label: tr(language, 'ទូរស័ព្ទ', 'Phone', '电话'), required: true },
+                      { ok: hasLocation, label: tr(language, 'ទីតាំង', 'Location', '位置'), required: false },
+                      { ok: hasPhoto, label: tr(language, 'រូបភាព', 'Photo', '照片'), required: false },
+                    ].map((s) => (
+                      <div
+                        key={s.label}
+                        className={`py-1.5 px-1 rounded-xl border text-[10px] font-bold flex items-center justify-center gap-1 ${
+                          s.ok
+                            ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-400 text-emerald-800 dark:text-emerald-300'
+                            : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'
+                        }`}
+                      >
+                        {s.ok ? <CheckCircle2 className="w-3 h-3 shrink-0" /> : <span className="w-3 h-3 rounded-full border border-current shrink-0" />}
+                        <span className="truncate">
+                          {s.label}
+                          {s.required ? ' *' : ''}
+                        </span>
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-            </div>
 
-            {/* FIELD 2: Category */}
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
-              <label className="block font-bold text-slate-900 dark:text-white">
-                {businessType === 'hotel'
-                  ? tr(language, '២. ប្រភេទកន្លែងស្នាក់នៅ (Hotel Category) *', '2. Accommodation Category *', '2. 住宿类别 *')
-                  : tr(language, '២. ប្រភេទហាង (Shop Category) *', '2. Shop Category *', '2. 店铺类别 *')}
-              </label>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                {tr(
-                  language,
-                  'ជ្រើសរើសប្រភេទដើម្បីឱ្យភ្ញៀវងាយស្រួលស្វែងរកតាមផ្នែក។',
-                  'Select your category so guests can easily find you.',
-                  '选择类别，方便客人按分类查找。'
-                )}
-              </p>
-              <select
-                value={businessCategory}
-                onChange={(e) => {
-                  const nextCat = e.target.value;
-                  setBusinessCategory(nextCat);
-                  const found = activeCategoryList.find((c) => c.id === nextCat);
-                  if (found) {
-                    setSignatureDishesKh([found.defaultDishKh]);
-                  }
-                }}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:border-emerald-600 outline-none"
-              >
-                {activeCategoryList.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {language === 'km' ? cat.labelKh : language === 'zh' ? cat.labelZh : cat.labelEn}
-                  </option>
-                ))}
-              </select>
-            </div>
+                  {/* SECTION 1: Basic Information */}
+                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+                    <div className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-[#064E3B] text-white text-[11px] flex items-center justify-center shrink-0">1</span>
+                      <span>{tr(language, 'ព័ត៌មានទូទៅ', 'Basic Information', '基本信息')}</span>
+                    </div>
 
-            {/* FIELD 3: Phone Number (លេខទូរស័ព្ទ) */}
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1.5">
-              <label className="block font-bold text-slate-900 dark:text-white">
-                <Phone className="w-3.5 h-3.5 inline mr-1 text-emerald-600" />
-                {tr(language, '៣. លេខទូរស័ព្ទហាង (Phone Number) *', '3. Phone Number *', '3. 联系电话 *')}
-              </label>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                {tr(
-                  language,
-                  'បញ្ចូលលេខទូរស័ព្ទសម្រាប់ភ្ញៀវទាក់ទងមកកាន់ហាងផ្ទាល់។',
-                  'Enter contact phone number for customers.',
-                  '输入供顾客联系的电话号码。'
-                )}
-              </p>
-              <input
-                type="tel"
-                required
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="012 345 678"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-emerald-600 outline-none"
-              />
-            </div>
+                    {/* Name */}
+                    <div id="kft-addshop-field-name">
+                      <label htmlFor="kft-addshop-name" className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
+                        {isHotel
+                          ? tr(language, 'ឈ្មោះសណ្ឋាគារ / ផ្ទះសំណាក់ *', 'Hotel / Stay Name *', '酒店/客栈名称 *')
+                          : tr(language, 'ឈ្មោះហាង *', 'Shop Name *', '店铺名称 *')}
+                      </label>
+                      <input
+                        id="kft-addshop-name"
+                        type="text"
+                        autoComplete="organization"
+                        enterKeyHint="next"
+                        value={nameKh}
+                        onChange={(e) => setNameKh(e.target.value)}
+                        aria-invalid={Boolean(errors.name)}
+                        placeholder={
+                          isHotel
+                            ? tr(language, 'ឧ. សណ្ឋាគារ សុខា', 'e.g. Sokha Hotel', '例如：索卡酒店')
+                            : tr(language, 'ឧ. ភោជនីយដ្ឋាន ម្លិះ', 'e.g. Malis Restaurant', '例如：茉莉餐厅')
+                        }
+                        className={inputClass(Boolean(errors.name))}
+                      />
+                      {renderFieldError('name')}
+                    </div>
 
-            {/* FIELD 4: Address / Province (អាសយដ្ឋាន / ខេត្ត-រាជធានី) */}
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
-              <div>
-                <label className="block font-bold text-slate-900 dark:text-white mb-1">
-                  <MapPin className="w-3.5 h-3.5 inline mr-1 text-emerald-600" />
-                  {tr(language, '៤. ខេត្ត / រាជធានី និងអាសយដ្ឋាន (Address / Province) *', '4. Province & Address *', '4. 省份与详细地址 *')}
-                </label>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-1.5">
-                  {tr(
-                    language,
-                    'ជ្រើសរើសខេត្ត/រាជធានី និងបញ្ចូលអាសយដ្ឋានហាង (ឬវានឹងបំពេញស្វ័យប្រវត្តិពេលអ្នករើសទីតាំងលើផែនទីខាងក្រោម)។',
-                    'Select province and enter address (or auto-fill by selecting location on Google Maps below).',
-                    '选择省份并输入地址（也可通过下方在 Google 地图上选择位置自动填充）。'
-                  )}
-                </p>
-                <select
-                  value={provinceKh}
-                  onChange={(e) => {
-                    const found = PROVINCES.find((p) => p.nameKh === e.target.value);
-                    setProvinceKh(e.target.value);
-                    if (found) setProvinceEn(found.nameEn);
-                  }}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium focus:border-emerald-600 outline-none"
-                >
-                  {PROVINCES.map((p) => (
-                    <option key={p.nameKh} value={p.nameKh}>
-                      {isKm ? p.nameKh : p.nameEn}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                    <div>
+                      <label htmlFor="kft-addshop-name-en" className="block font-bold text-slate-600 dark:text-slate-400 mb-1 text-[11px]">
+                        {tr(language, 'ឈ្មោះជាអក្សរឡាតាំង (ស្រេចចិត្ត)', 'Name in English (optional)', '英文名称（选填）')}
+                      </label>
+                      <input
+                        id="kft-addshop-name-en"
+                        type="text"
+                        enterKeyHint="next"
+                        value={nameEn}
+                        onChange={(e) => setNameEn(e.target.value)}
+                        placeholder={isHotel ? 'e.g. Angkor Boutique Hotel' : 'e.g. Malis Restaurant'}
+                        className={inputClass(false)}
+                      />
+                    </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[11px]">
-                  {tr(language, 'អាសយដ្ឋានហាង (ផ្លូវ ភូមិ សង្កាត់ ឬទីតាំងសម្គាល់)', 'Street / Sangkat / Landmark Address', '街道 / 分区 / 地标地址')}
-                </label>
-                <input
-                  type="text"
-                  value={addressKh}
-                  onChange={(e) => setAddressKh(e.target.value)}
-                  placeholder={tr(language, 'ឧ. ផ្លូវលេខ ៦៣ សង្កាត់បឹងកេងកង១ (ជិតផ្សារថ្មី)...', 'e.g. St. 63, Boeung Keng Kang 1...', '例如：63号路，万景岗1分区...')}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:border-emerald-600 outline-none"
-                />
-              </div>
-            </div>
-
-            {/* FIELDS 5 & 6: Select Location on Google Maps + Google Maps Link + GPS Location */}
-            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/80 to-amber-50/60 dark:from-emerald-950/60 dark:via-slate-800 dark:to-slate-800 border-2 border-emerald-500/60 space-y-3">
-              <div className="space-y-1">
-                <div className="font-bold text-emerald-950 dark:text-emerald-200 text-xs flex items-center gap-1.5">
-                  <span>📍</span>
-                  <span>
-                    {tr(
-                      language,
-                      '៥ & ៦. ជ្រើសរើសទីតាំងលើផែនទី Google Maps (GPS & លីងផែនទី)',
-                      '5 & 6. Select Location on Google Maps (GPS & Maps Link)',
-                      '5 & 6. 在 Google 地图上选择位置（GPS 与地图链接）'
+                    {/* Live Duplicate Detection Alert & 1-Tap Select to Upgrade Existing Listing */}
+                    {(detectedDuplicates.length > 0 || detectedSeedHotelDuplicates.length > 0) && (
+                      <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/60 border-2 border-amber-400 space-y-2 animate-fade-in">
+                        <div className="font-extrabold text-amber-900 dark:text-amber-200 text-[11px] flex items-center gap-1.5">
+                          <AlertCircle className="w-4 h-4 shrink-0" />
+                          <span>
+                            {tr(
+                              language,
+                              'ហាង/សណ្ឋាគារនេះប្រហែលជាមានក្នុងកម្មវិធីរួចហើយ!',
+                              'This listing may already exist in the app!',
+                              '该店铺/酒店可能已存在于应用中！'
+                            )}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-slate-700 dark:text-slate-300 leading-snug">
+                          {tr(
+                            language,
+                            'ប្រសិនបើជារបស់អ្នក សូមចុច «ជ្រើសរើស និងដំឡើង» ដើម្បីកែប្រែវា ជំនួសការបង្កើតស្ទួន។',
+                            'If it is yours, tap "Select & Upgrade" to update it instead of creating a duplicate.',
+                            '如果是您的店铺，请点击“选择并升级”进行更新，避免重复创建。'
+                          )}
+                        </p>
+                        <div className="space-y-1.5">
+                          {[
+                            ...detectedDuplicates.slice(0, 3).map((dup) => ({
+                              id: dup.id,
+                              source: 'restaurant' as const,
+                              nameKh: dup.nameKh,
+                              nameEn: dup.nameEn,
+                              provinceKh: dup.provinceKh,
+                              phone: dup.phone,
+                              photoUrl: dup.photoUrl,
+                              onSelect: () => beginUpgradeExistingStore(dup),
+                            })),
+                            ...detectedSeedHotelDuplicates.map((dup) => ({
+                              id: dup.id,
+                              source: 'destination' as const,
+                              nameKh: dup.nameKh,
+                              nameEn: dup.nameEn,
+                              provinceKh: dup.provinceKh,
+                              phone: dup.phone,
+                              photoUrl: dup.photoUrl,
+                              onSelect: () => selectExistingOption(dup),
+                            })),
+                          ].map((dup) => (
+                            <div
+                              key={`${dup.source}-${dup.id}`}
+                              className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 flex items-center justify-between gap-2"
+                            >
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
+                                {dup.photoUrl ? (
+                                  <img src={dup.photoUrl} alt={dup.nameKh} className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                                ) : (
+                                  <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
+                                    <DefaultShopIcon className="w-full h-full" />
+                                  </div>
+                                )}
+                                <div className="min-w-0 flex-1">
+                                  <div className="font-bold text-slate-900 dark:text-white text-xs truncate">{dup.nameKh || dup.nameEn}</div>
+                                  <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                                    📍 {dup.provinceKh} {dup.phone ? `• 📞 ${dup.phone}` : ''}
+                                  </div>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={dup.onSelect}
+                                className="px-2.5 py-2 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-slate-950 font-black text-[10px] shrink-0 shadow-2xs cursor-pointer"
+                              >
+                                {tr(language, '⬆️ ជ្រើសរើស និងដំឡើង', '⬆️ Select & Upgrade', '⬆️ 选择并升级')}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     )}
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {tr(
-                    language,
-                    'ចុចប៊ូតុងពណ៌បៃតងខាងក្រោម ដើម្បីបើកផែនទី Google Maps និងជ្រើសរើសទីតាំងហាងរបស់អ្នក។ ពេលជ្រើសរើសរួច ប្រព័ន្ធនឹងត្រឡប់មកវិញ ហើយបំពេញកូអរដោនេ GPS និងតំណភ្ជាប់ Google Maps ដោយស្វ័យប្រវត្តិ!',
-                    'Tap the button below to open Google Maps and select your shop location. Returning will automatically fill in GPS coordinates and the Google Maps link!',
-                    '点击下方按钮打开 Google 地图并选择店铺准确位置，返回后将自动填写 GPS 坐标和地图链接！'
-                  )}
-                </p>
-              </div>
 
-              {/* Prominent Select Location on Google Maps Button */}
-              <button
-                type="button"
-                onClick={() => setIsCheckInPickerOpen(true)}
-                className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#064E3B] via-emerald-600 to-teal-700 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xs flex items-center justify-center gap-2 shadow-md border border-emerald-300/40 transition active:scale-98 cursor-pointer"
-              >
-                <MapPin className="w-4 h-4 text-amber-300 shrink-0" />
-                <span>
-                  {tr(
-                    language,
-                    '📍 ជ្រើសរើសទីតាំងលើផែនទី Google Maps',
-                    '📍 Select Location on Google Maps',
-                    '📍 在 Google 地图上选择位置'
-                  )}
-                </span>
-              </button>
+                    {/* Category chips */}
+                    <div>
+                      <div className="block font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                        {isHotel
+                          ? tr(language, 'ប្រភេទកន្លែងស្នាក់នៅ *', 'Accommodation Type *', '住宿类别 *')
+                          : tr(language, 'ប្រភេទហាង *', 'Shop Category *', '店铺类别 *')}
+                      </div>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {activeCategoryList.map((cat) => {
+                          const selected = businessCategory === cat.id;
+                          return (
+                            <button
+                              type="button"
+                              key={cat.id}
+                              aria-pressed={selected}
+                              onClick={() => {
+                                setBusinessCategory(cat.id);
+                                setSignatureDishesKh([cat.defaultDishKh]);
+                              }}
+                              className={`min-h-[44px] px-2.5 py-2 rounded-xl border-2 text-left text-[11px] font-bold leading-snug transition cursor-pointer ${
+                                selected
+                                  ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200'
+                                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                              }`}
+                            >
+                              {language === 'km' ? cat.labelKh : language === 'zh' ? cat.labelZh : cat.labelEn}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
 
-              {/* Auto-filled / Editable GPS Location Field */}
-              <div className="space-y-1">
-                <label className="block font-bold text-slate-800 dark:text-slate-200 text-[11px]">
-                  <Navigation className="w-3 h-3 inline mr-1 text-emerald-600" />
-                  {tr(language, 'ទីតាំងកូអរដោនេ GPS (Latitude, Longitude)៖', 'GPS Location (Latitude, Longitude):', 'GPS 坐标（纬度, 经度）：')}
-                </label>
-                <div className="flex gap-1.5">
-                  <input
-                    type="text"
-                    value={
-                      gpsInputText ||
-                      (shopLat !== null && shopLng !== null ? `${shopLat.toFixed(6)}, ${shopLng.toFixed(6)}` : '')
-                    }
-                    onChange={(e) => handleGpsInputChange(e.target.value)}
-                    placeholder={tr(
-                      language,
-                      'បំពេញស្វ័យប្រវត្តិពេលរើសលើផែនទី (ឧ. 11.556400, 104.928200)',
-                      'Auto-filled from map (e.g. 11.556400, 104.928200)',
-                      '从地图选择后自动填充（如 11.556400, 104.928200）'
-                    )}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-emerald-300 font-mono text-xs focus:border-emerald-600 outline-none"
-                  />
-                </div>
-                {shopLat !== null && shopLng !== null && (
-                  <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                    <span>
-                      {tr(
-                        language,
-                        `✅ បានភ្ជាប់កូអរដោនេ GPS រួចរាល់ (${shopLat.toFixed(5)}, ${shopLng.toFixed(5)})`,
-                        `✅ GPS coordinates ready (${shopLat.toFixed(5)}, ${shopLng.toFixed(5)})`,
-                        `✅ 已获取 GPS 坐标 (${shopLat.toFixed(5)}, ${shopLng.toFixed(5)})`
-                      )}
-                    </span>
+                    {/* Phone */}
+                    <div id="kft-addshop-field-phone">
+                      <label htmlFor="kft-addshop-phone" className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
+                        <Phone className="w-3.5 h-3.5 inline mr-1 text-emerald-600" />
+                        {tr(language, 'លេខទូរស័ព្ទទំនាក់ទំនង *', 'Contact Phone *', '联系电话 *')}
+                      </label>
+                      <input
+                        id="kft-addshop-phone"
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        aria-invalid={Boolean(errors.phone)}
+                        placeholder="012 345 678"
+                        className={`${inputClass(Boolean(errors.phone))} font-mono`}
+                      />
+                      {renderFieldError('phone')}
+                    </div>
                   </div>
-                )}
-              </div>
 
-              {/* Auto-filled / Editable Google Maps Link Field */}
-              <div className="space-y-1">
-                <label className="block font-bold text-slate-800 dark:text-slate-200 text-[11px]">
-                  🗺️ {tr(language, 'តំណភ្ជាប់ផែនទី Google Maps (Google Maps Link)៖', 'Google Maps Link:', 'Google 地图链接：')}
-                </label>
-                <input
-                  type="url"
-                  value={shopMapUrl}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setShopMapUrl(val);
-                    const extracted = extractCoordsFromGoogleMapsUrl(val);
-                    if (extracted) {
-                      setShopLat(Number(extracted.latitude.toFixed(6)));
-                      setShopLng(Number(extracted.longitude.toFixed(6)));
-                      setGpsInputText(`${extracted.latitude.toFixed(6)}, ${extracted.longitude.toFixed(6)}`);
-                    }
-                  }}
-                  placeholder="https://www.google.com/maps/search/?api=1&query=... ឬ https://maps.app.goo.gl/..."
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-xs focus:border-emerald-600 outline-none"
-                />
-                {shopMapUrl.trim() && (
+                  {/* SECTION 2: Location */}
                   <div
-                    className={`text-[10px] font-bold flex items-center gap-1 ${
-                      isValidGoogleMapsUrl(shopMapUrl)
-                        ? 'text-emerald-700 dark:text-emerald-300'
-                        : 'text-rose-600 dark:text-rose-400'
+                    id="kft-addshop-field-location"
+                    className={`p-3.5 rounded-2xl border space-y-3 ${
+                      errors.location
+                        ? 'bg-rose-50/60 dark:bg-rose-950/20 border-rose-400'
+                        : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'
                     }`}
                   >
-                    {isValidGoogleMapsUrl(shopMapUrl) ? (
-                      <>
-                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                        <span>{tr(language, '✅ តំណភ្ជាប់ Google Maps ត្រឹមត្រូវ', '✅ Valid Google Maps link', '✅ 有效的 Google 地图链接')}</span>
-                      </>
+                    <div className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-[#064E3B] text-white text-[11px] flex items-center justify-center shrink-0">2</span>
+                      <span>{tr(language, 'ទីតាំង', 'Location', '位置')}</span>
+                      <span className="ml-auto text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                        {tr(language, 'ណែនាំឱ្យដាក់', 'Recommended', '推荐填写')}
+                      </span>
+                    </div>
+
+                    {hasLocation ? (
+                      <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-400 flex items-center gap-2.5">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-emerald-900 dark:text-emerald-200 text-[11px]">
+                            {tr(language, 'បានកំណត់ទីតាំងលើផែនទី', 'Location pinned on map', '已在地图上标记位置')}
+                          </div>
+                          <div className="font-mono text-[10px] text-emerald-700 dark:text-emerald-300 truncate">
+                            {shopLat!.toFixed(6)}, {shopLng!.toFixed(6)}
+                          </div>
+                        </div>
+                        <a
+                          href={shopMapUrl.trim() || `https://www.google.com/maps/search/?api=1&query=${shopLat},${shopLng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300 shrink-0"
+                          aria-label={tr(language, 'បើកក្នុង Google Maps', 'Open in Google Maps', '在 Google 地图中打开')}
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                        <button
+                          type="button"
+                          onClick={clearLocation}
+                          className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-500 hover:text-rose-600 shrink-0 cursor-pointer"
+                          aria-label={tr(language, 'លុបទីតាំង', 'Clear location', '清除位置')}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     ) : (
-                      <span>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
                         {tr(
                           language,
-                          '⚠️ សូមបញ្ចូលលីងពី Google Maps ឬចុចប៊ូតុងជ្រើសរើសទីតាំងខាងលើ',
-                          '⚠️ Please enter a valid Google Maps URL or use the button above',
-                          '⚠️ 请输入有效的 Google 地图链接或使用上方按钮'
+                          'ប្រសិនបើអ្នកកំពុងនៅហាង ចុច «ប្រើទីតាំងខ្ញុំ»។ បើមិននៅទេ ចុច «ជ្រើសលើផែនទី»។ ហាងដែលមានទីតាំងត្រឹមត្រូវ ទទួលបានការអនុម័តលឿនជាង។',
+                          'At the shop right now? Tap "Use My Location". Otherwise tap "Pick on Map". Listings with a location get approved faster.',
+                          '如果您正在店内，请点击“使用我的位置”，否则点击“在地图上选择”。有准确位置的列表审核更快。'
                         )}
+                      </p>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={handleDetectCurrentLocation}
+                        disabled={isDetectingLocation}
+                        className="min-h-[48px] py-2.5 px-2 rounded-xl bg-gradient-to-r from-[#064E3B] to-emerald-700 hover:from-emerald-700 text-white font-bold text-[11px] flex items-center justify-center gap-1.5 shadow-sm transition active:scale-[0.98] cursor-pointer disabled:opacity-70"
+                      >
+                        {isDetectingLocation ? (
+                          <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                        ) : (
+                          <Crosshair className="w-4 h-4 text-amber-300 shrink-0" />
+                        )}
+                        <span>
+                          {isDetectingLocation
+                            ? tr(language, 'កំពុងស្វែងរក...', 'Detecting...', '定位中...')
+                            : tr(language, 'ប្រើទីតាំងខ្ញុំ', 'Use My Location', '使用我的位置')}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsCheckInPickerOpen(true)}
+                        className="min-h-[48px] py-2.5 px-2 rounded-xl bg-white dark:bg-slate-900 border-2 border-emerald-600 text-emerald-800 dark:text-emerald-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition active:scale-[0.98] cursor-pointer"
+                      >
+                        <MapPin className="w-4 h-4 shrink-0" />
+                        <span>
+                          {hasLocation
+                            ? tr(language, 'កែលើផែនទី', 'Adjust on Map', '在地图上调整')
+                            : tr(language, 'ជ្រើសលើផែនទី', 'Pick on Map', '在地图上选择')}
+                        </span>
+                      </button>
+                    </div>
+
+                    {locationNotice && (
+                      <div
+                        role="status"
+                        className={`p-2.5 rounded-xl text-[11px] font-bold leading-snug border ${
+                          locationNotice.type === 'error'
+                            ? 'bg-rose-50 dark:bg-rose-950/50 border-rose-400 text-rose-800 dark:text-rose-200'
+                            : locationNotice.type === 'warning'
+                            ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-400 text-amber-900 dark:text-amber-200'
+                            : 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-400 text-emerald-800 dark:text-emerald-200'
+                        }`}
+                      >
+                        {locationNotice.text}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 gap-2.5">
+                      <div>
+                        <label htmlFor="kft-addshop-province" className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
+                          {tr(language, 'ខេត្ត / រាជធានី *', 'Province / City *', '省份 / 城市 *')}
+                        </label>
+                        <select
+                          id="kft-addshop-province"
+                          value={provinceKh}
+                          onChange={(e) => {
+                            const found = PROVINCES.find((p) => p.nameKh === e.target.value);
+                            setProvinceKh(e.target.value);
+                            if (found) setProvinceEn(found.nameEn);
+                          }}
+                          className={`${inputClass(false)} font-medium`}
+                        >
+                          {PROVINCES.map((p) => (
+                            <option key={p.nameKh} value={p.nameKh}>
+                              {isKm ? p.nameKh : p.nameEn}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="kft-addshop-address" className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[11px]">
+                          {tr(language, 'អាសយដ្ឋាន (ផ្លូវ សង្កាត់ ឬកន្លែងសម្គាល់)', 'Address (street, sangkat or landmark)', '地址（街道、分区或地标）')}
+                        </label>
+                        <input
+                          id="kft-addshop-address"
+                          type="text"
+                          autoComplete="street-address"
+                          value={addressKh}
+                          onChange={(e) => setAddressKh(e.target.value)}
+                          placeholder={tr(language, 'ឧ. ផ្លូវលេខ ៦៣ ជិតផ្សារថ្មី', 'e.g. St. 63, near Central Market', '例如：63号路，中央市场附近')}
+                          className={inputClass(false)}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Advanced: paste Google Maps link / GPS coordinates */}
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => setShowAdvancedLocation((prev) => !prev)}
+                        className="w-full py-2 px-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 flex items-center justify-between cursor-pointer"
+                      >
+                        <span>
+                          🗺️ {tr(language, 'បិទភ្ជាប់លីង Google Maps ឬ GPS ដោយដៃ', 'Paste a Google Maps link or GPS manually', '手动粘贴 Google 地图链接或 GPS')}
+                        </span>
+                        {showAdvancedLocation ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
+                      {showAdvancedLocation && (
+                        <div className="space-y-2.5 pt-1">
+                          <div className="space-y-1">
+                            <label htmlFor="kft-addshop-mapurl" className="block font-bold text-slate-700 dark:text-slate-300 text-[11px]">
+                              {tr(language, 'លីង Google Maps', 'Google Maps Link', 'Google 地图链接')}
+                            </label>
+                            <input
+                              id="kft-addshop-mapurl"
+                              type="url"
+                              inputMode="url"
+                              value={shopMapUrl}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setShopMapUrl(val);
+                                const extracted = extractCoordsFromGoogleMapsUrl(val);
+                                if (extracted) {
+                                  setShopLat(Number(extracted.latitude.toFixed(6)));
+                                  setShopLng(Number(extracted.longitude.toFixed(6)));
+                                  setGpsInputText(`${extracted.latitude.toFixed(6)}, ${extracted.longitude.toFixed(6)}`);
+                                }
+                              }}
+                              placeholder="https://maps.app.goo.gl/..."
+                              className={`${inputClass(Boolean(errors.location) && Boolean(shopMapUrl.trim()) && !isValidGoogleMapsUrl(shopMapUrl))} font-mono text-xs`}
+                            />
+                            {shopMapUrl.trim() && (
+                              <div
+                                className={`text-[10px] font-bold flex items-center gap-1 ${
+                                  isValidGoogleMapsUrl(shopMapUrl) ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-600 dark:text-rose-400'
+                                }`}
+                              >
+                                {isValidGoogleMapsUrl(shopMapUrl) ? (
+                                  <>
+                                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                    <span>{tr(language, 'លីង Google Maps ត្រឹមត្រូវ', 'Valid Google Maps link', '有效的 Google 地图链接')}</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                    <span>
+                                      {tr(
+                                        language,
+                                        'លីងនេះមិនមែនជាលីង Google Maps ទេ',
+                                        'This is not a valid Google Maps link',
+                                        '这不是有效的 Google 地图链接'
+                                      )}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <div className="space-y-1">
+                            <label htmlFor="kft-addshop-gps" className="block font-bold text-slate-700 dark:text-slate-300 text-[11px]">
+                              <Navigation className="w-3 h-3 inline mr-1 text-emerald-600" />
+                              {tr(language, 'កូអរដោនេ GPS (Latitude, Longitude)', 'GPS (Latitude, Longitude)', 'GPS 坐标（纬度, 经度）')}
+                            </label>
+                            <input
+                              id="kft-addshop-gps"
+                              type="text"
+                              inputMode="decimal"
+                              value={
+                                gpsInputText ||
+                                (shopLat !== null && shopLng !== null ? `${shopLat.toFixed(6)}, ${shopLng.toFixed(6)}` : '')
+                              }
+                              onChange={(e) => handleGpsInputChange(e.target.value)}
+                              placeholder="11.556400, 104.928200"
+                              className={`${inputClass(false)} font-mono text-xs`}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {renderFieldError('location')}
+                  </div>
+
+                  {/* SECTION 3: Photo */}
+                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+                    <div className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-[#064E3B] text-white text-[11px] flex items-center justify-center shrink-0">3</span>
+                      <span>
+                        {isHotel
+                          ? tr(language, 'រូបភាពសណ្ឋាគារ', 'Hotel Photo', '酒店照片')
+                          : tr(language, 'រូបភាពហាង', 'Shop Photo', '店铺照片')}
                       </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+                      <span className="ml-auto text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                        {tr(language, 'ណែនាំឱ្យដាក់', 'Recommended', '推荐填写')}
+                      </span>
+                    </div>
 
-            {/* FIELD 7: Shop Photos (រូបភាពហាង) */}
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2.5">
-              <div className="flex items-center gap-3">
-                <div className="relative w-20 h-20 rounded-2xl overflow-hidden border-2 border-emerald-500 shrink-0 bg-slate-200 dark:bg-slate-700 shadow-xs">
-                  {coverPhoto ? (
-                    <img
-                      src={coverPhoto}
-                      alt="Shop Photo"
-                      className="w-full h-full object-cover"
-                      onError={() => setShopPhoto('')}
-                    />
-                  ) : (
-                    <DefaultShopIcon className="w-full h-full" />
-                  )}
-                  <span className="absolute bottom-0 inset-x-0 bg-black/70 text-white text-[9px] text-center py-0.5 font-bold">
-                    {tr(language, 'រូបភាពហាង', 'Shop Photo', '店铺照片')}
-                  </span>
-                </div>
-
-                <div className="flex-1 space-y-1.5">
-                  <div className="font-bold text-slate-900 dark:text-white text-xs">
-                    {tr(language, '៧. រូបភាពហាង (Shop Photos)', '7. Shop Photos', '7. 店铺照片')}
-                  </div>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-snug">
-                    {tr(
-                      language,
-                      'ជ្រើសរើសរូបភាពមុខហាងពីទូរស័ព្ទ ឬថតរូបហាងផ្ទាល់ ដើម្បីបង្ហាញជូនអតិថិជន។',
-                      'Select a storefront photo from your phone gallery or take a photo.',
-                      '从手机相册选择门面照片或直接拍照上传。'
-                    )}
-                  </p>
-                  <div className="grid grid-cols-2 gap-1.5">
                     <button
                       type="button"
                       disabled={isUploadingPhoto}
                       onClick={handlePickFromGallery}
-                      className="py-2 px-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-[11px] flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer disabled:opacity-50"
+                      className={`relative w-full h-40 rounded-2xl overflow-hidden flex items-center justify-center transition cursor-pointer ${
+                        coverPhoto
+                          ? 'border-2 border-emerald-500'
+                          : 'border-2 border-dashed border-emerald-500/60 bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
+                      }`}
                     >
-                      <ImageIcon className="w-3.5 h-3.5 shrink-0" />
-                      <span>
-                        {isUploadingPhoto
-                          ? tr(language, 'កំពុងពិនិត្យ...', 'Checking...', '审核中...')
-                          : coverPhoto
-                          ? tr(language, 'ប្តូររូបហាង', 'Change Photo', '更换照片')
-                          : tr(language, 'រើសរូបពីទូរស័ព្ទ', 'Choose Photo', '相册选图')}
-                      </span>
+                      {coverPhoto ? (
+                        <>
+                          <img
+                            src={coverPhoto}
+                            alt={tr(language, 'រូបភាពហាង', 'Shop photo', '店铺照片')}
+                            className="w-full h-full object-cover"
+                            onError={() => setShopPhoto('')}
+                          />
+                          <span className="absolute bottom-2 right-2 px-2.5 py-1 rounded-full bg-black/70 text-white text-[10px] font-bold flex items-center gap-1">
+                            <Edit2 className="w-3 h-3" />
+                            {tr(language, 'ប្តូររូប', 'Change', '更换')}
+                          </span>
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center gap-1.5 text-emerald-800 dark:text-emerald-300 px-4 text-center">
+                          {isUploadingPhoto ? <Loader2 className="w-7 h-7 animate-spin" /> : <Upload className="w-7 h-7" />}
+                          <span className="font-bold text-xs">
+                            {isUploadingPhoto
+                              ? tr(language, 'កំពុងពិនិត្យរូបភាព...', 'Checking photo...', '正在检查照片...')
+                              : tr(language, 'ចុចទីនេះដើម្បីជ្រើសរូបភាព', 'Tap here to choose a photo', '点击此处选择照片')}
+                          </span>
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                            {tr(
+                              language,
+                              'រូបមុខហាង ឬខាងក្នុងហាងដែលច្បាស់ល្អ',
+                              'A clear photo of the storefront or interior',
+                              '清晰的门面或店内照片'
+                            )}
+                          </span>
+                        </div>
+                      )}
+                      {isUploadingPhoto && coverPhoto && (
+                        <span className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <Loader2 className="w-7 h-7 text-white animate-spin" />
+                        </span>
+                      )}
                     </button>
 
+                    <div className="grid grid-cols-3 gap-1.5">
+                      <button
+                        type="button"
+                        disabled={isUploadingPhoto}
+                        onClick={handlePickFromGallery}
+                        className="min-h-[44px] py-2 px-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs transition cursor-pointer disabled:opacity-50"
+                      >
+                        <ImageIcon className="w-3.5 h-3.5 shrink-0" />
+                        <span>{tr(language, 'វិចិត្រសាល', 'Gallery', '相册')}</span>
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isUploadingPhoto}
+                        onClick={() => cameraInputRef.current?.click()}
+                        className="min-h-[44px] py-2 px-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs transition cursor-pointer disabled:opacity-50"
+                      >
+                        <Camera className="w-3.5 h-3.5 shrink-0" />
+                        <span>{tr(language, 'ថតរូប', 'Camera', '拍照')}</span>
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isUploadingPhoto || !coverPhoto}
+                        onClick={() => {
+                          setShopPhoto('');
+                          setModerationWarning(null);
+                        }}
+                        className="min-h-[44px] py-2 px-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-rose-600 font-bold text-[11px] flex items-center justify-center gap-1 transition cursor-pointer disabled:opacity-40"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                        <span>{tr(language, 'លុប', 'Remove', '删除')}</span>
+                      </button>
+                    </div>
+
+                    {moderationWarning && (
+                      <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-400 text-rose-800 dark:text-rose-200 text-[11px] font-bold flex items-start gap-1.5">
+                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                        <span>{moderationWarning}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Optional Extra Info (Opening Hours, Price, Website & Description) */}
+                  <div className="rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                     <button
                       type="button"
-                      disabled={isUploadingPhoto}
-                      onClick={() => cameraInputRef.current?.click()}
-                      className="py-2 px-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-[11px] flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer disabled:opacity-50"
+                      onClick={() => setShowMoreOptions((prev) => !prev)}
+                      className="w-full min-h-[44px] py-2.5 px-3.5 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[11px] flex items-center justify-between transition cursor-pointer"
                     >
-                      <Camera className="w-3.5 h-3.5 shrink-0" />
-                      <span>{tr(language, 'ថតរូបហាង', 'Take Photo', '拍摄店铺')}</span>
+                      <span>
+                        ⚙️ {tr(
+                          language,
+                          'ព័ត៌មានបន្ថែម៖ ម៉ោងបើក តម្លៃ ការពិពណ៌នា (ស្រេចចិត្ត)',
+                          'More details: hours, price, description (optional)',
+                          '更多信息：营业时间、价格、简介（选填）'
+                        )}
+                      </span>
+                      {showMoreOptions ? <ChevronUp className="w-4 h-4 shrink-0" /> : <ChevronDown className="w-4 h-4 shrink-0" />}
                     </button>
+
+                    {showMoreOptions && (
+                      <div className="p-3.5 space-y-3 bg-white dark:bg-slate-900/40">
+                        <div>
+                          <label htmlFor="kft-addshop-hours" className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[11px]">
+                            <Clock className="w-3 h-3 inline mr-1 text-emerald-600" />
+                            {isHotel
+                              ? tr(language, 'ម៉ោងទទួលភ្ញៀវ / Check-in', 'Reception / Check-in hours', '前台/入住时间')
+                              : tr(language, 'ម៉ោងបើក និងបិទ', 'Opening hours', '营业时间')}
+                          </label>
+                          <input
+                            id="kft-addshop-hours"
+                            type="text"
+                            value={openingHoursKh}
+                            onChange={(e) => setOpeningHoursKh(e.target.value)}
+                            placeholder="០៧:០០ ព្រឹក - ០៩:០០ យប់"
+                            className={inputClass(false)}
+                          />
+                        </div>
+
+                        <div>
+                          <div className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[11px]">
+                            {tr(language, 'កម្រិតតម្លៃ', 'Price level', '价格等级')}
+                          </div>
+                          <div className="grid grid-cols-4 gap-1.5">
+                            {(['$', '$$', '$$$', '$$$$'] as RestaurantPriceLevel[]).map((lvl) => (
+                              <button
+                                type="button"
+                                key={lvl}
+                                aria-pressed={priceLevel === lvl}
+                                onClick={() => setPriceLevel(lvl)}
+                                className={`min-h-[40px] rounded-xl border-2 font-mono font-black text-xs transition cursor-pointer ${
+                                  priceLevel === lvl
+                                    ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200'
+                                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                                }`}
+                              >
+                                {lvl}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label htmlFor="kft-addshop-website" className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[11px]">
+                            {tr(language, 'គេហទំព័រ ឬ Facebook', 'Website or Facebook page', '网站或 Facebook 主页')}
+                          </label>
+                          <input
+                            id="kft-addshop-website"
+                            type="url"
+                            inputMode="url"
+                            value={websiteUrl}
+                            onChange={(e) => setWebsiteUrl(e.target.value)}
+                            placeholder="https://facebook.com/..."
+                            className={`${inputClass(false)} text-xs`}
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="kft-addshop-desc" className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[11px]">
+                            {isHotel
+                              ? tr(language, 'ការពិពណ៌នាអំពីសណ្ឋាគារ', 'Hotel description', '酒店简介')
+                              : tr(language, 'ការពិពណ៌នាអំពីហាង', 'Shop description', '店铺简介')}
+                          </label>
+                          <textarea
+                            id="kft-addshop-desc"
+                            rows={3}
+                            maxLength={600}
+                            value={descriptionKh}
+                            onChange={(e) => setDescriptionKh(e.target.value)}
+                            placeholder={
+                              isHotel
+                                ? tr(language, 'រៀបរាប់ខ្លីៗអំពីបន្ទប់ និងសេវាកម្ម...', 'Briefly describe your rooms & services...', '简短介绍客房与服务...')
+                                : tr(language, 'រៀបរាប់ខ្លីៗអំពីរសជាតិម្ហូប និងសេវាកម្ម...', 'Brief description of your food & service...', '简短介绍您的招牌美食与服务...')
+                            }
+                            className={`${inputClass(false)} resize-none`}
+                          />
+                          <div className="text-right text-[10px] text-slate-400 mt-0.5">{descriptionKh.length}/600</div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
+                </>
+              )}
+            </div>
+
+            {/* Sticky Submit Bar (always reachable on mobile) */}
+            {!isSelectingExisting && (
+              <div className="shrink-0 px-4 pt-2.5 pb-3 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm space-y-1.5">
+                {submitAttempted && Object.keys(errors).length > 0 && (
+                  <div className="text-[11px] font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>
+                      {tr(
+                        language,
+                        `សូមកែ ${Object.keys(errors).length} ចំណុចដែលបានសម្គាល់ពណ៌ក្រហម`,
+                        `Please fix ${Object.keys(errors).length} highlighted field(s)`,
+                        `请修正 ${Object.keys(errors).length} 个标红的字段`
+                      )}
+                    </span>
+                  </div>
+                )}
+                <button
+                  type="submit"
+                  disabled={isSaving || isUploadingPhoto || isDetectingLocation}
+                  className="w-full min-h-[50px] py-3 px-4 rounded-2xl bg-gradient-to-r from-[#064E3B] via-emerald-700 to-[#047857] hover:from-emerald-800 hover:to-emerald-700 disabled:opacity-60 text-white font-extrabold text-sm shadow-lg flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer"
+                >
+                  <Eye className="w-5 h-5 text-amber-300 shrink-0" />
+                  <span>
+                    {activeUpgradeName
+                      ? tr(language, 'ពិនិត្យ និងដាក់ស្នើការកែប្រែ', 'Review & Submit Update', '检查并提交修改')
+                      : tr(language, 'ពិនិត្យ និងដាក់ស្នើ', 'Review & Submit', '检查并提交')}
+                  </span>
+                  <span className="ml-1 px-2 py-0.5 rounded-full bg-white/15 text-[10px] font-bold">{completedCount}/4</span>
+                </button>
               </div>
-
-              {moderationWarning && (
-                <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-400 text-rose-800 dark:text-rose-200 text-[10px] font-bold">
-                  {moderationWarning}
-                </div>
-              )}
-            </div>
-
-            {/* Optional Extra Info (Opening Hours & Description) */}
-            <div>
-              <button
-                type="button"
-                onClick={() => setShowMoreOptions((prev) => !prev)}
-                className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[11px] flex items-center justify-between transition cursor-pointer"
-              >
-                <span>
-                  {tr(
-                    language,
-                    '⚙️ បន្ថែមម៉ោងបើកហាង និងការពិពណ៌នា (មិនបាច់ដាក់ក៏បាន)',
-                    '⚙️ Add Opening Hours & Description (Optional)',
-                    '⚙️ 添加营业时间与简介（选填）'
-                  )}
-                </span>
-                {showMoreOptions ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-
-              {showMoreOptions && (
-                <div className="mt-2.5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[11px]">
-                      {tr(language, 'ម៉ោងបើក & បិទហាង', 'Opening Hours', '营业时间')}
-                    </label>
-                    <input
-                      type="text"
-                      value={openingHoursKh}
-                      onChange={(e) => setOpeningHoursKh(e.target.value)}
-                      placeholder="០៧:០០ ព្រឹក - ០៩:០០ យប់"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[11px]">
-                      {tr(language, 'ការពិពណ៌នាអំពីហាង', 'Shop Description', '店铺简介')}
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={descriptionKh}
-                      onChange={(e) => setDescriptionKh(e.target.value)}
-                      placeholder={tr(language, 'រៀបរាប់ខ្លីៗអំពីរសជាតិម្ហូប និងសេវាកម្ម...', 'Brief description of your food & service...', '简短介绍您的招牌美食与服务...')}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs resize-none"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Preview & Submit Button */}
-            <div className="pt-1">
-              <button
-                type="submit"
-                disabled={isSaving || isUploadingPhoto}
-                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#064E3B] via-emerald-700 to-[#047857] hover:from-emerald-800 hover:to-emerald-700 disabled:opacity-60 text-white font-extrabold text-sm shadow-lg flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
-              >
-                <Eye className="w-5 h-5 text-amber-300 shrink-0" />
-                <span>
-                  {tr(
-                    language,
-                    '👁️ មើលជាមុន និងដាក់ស្នើហាង (Preview & Submit)',
-                    '👁️ Preview & Submit Shop',
-                    '👁️ 预览并提交店铺'
-                  )}
-                </span>
-              </button>
-            </div>
+            )}
           </form>
         )}
 
@@ -2404,14 +3147,11 @@ export const VipAddRestaurantModal: React.FC = () => {
             setShopLng(loc.longitude);
             setGpsInputText(`${loc.latitude.toFixed(6)}, ${loc.longitude.toFixed(6)}`);
             setShopMapUrl(loc.mapUrl);
+            setLocationNotice(null);
             if (loc.formattedAddressKh) {
               setAddressKh(loc.formattedAddressKh);
             }
-            const matchedProv = PROVINCES.find(
-              (p) =>
-                p.nameKh === loc.provinceKh ||
-                p.nameKh.replace(/^ខេត្ត|^រាជធានី/g, '') === loc.provinceKh.replace(/^ខេត្ត|^រាជធានី/g, '')
-            );
+            const matchedProv = findProvinceMatch(loc.provinceKh, loc.provinceEn);
             if (matchedProv) {
               setProvinceKh(matchedProv.nameKh);
               setProvinceEn(matchedProv.nameEn);

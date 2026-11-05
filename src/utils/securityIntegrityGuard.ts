@@ -483,12 +483,20 @@ export async function verifyAndSanitizeUserSession(
           const ownArMs = parseSafeDateMs(sanitized.autoRenewUpdatedAt || sanitized.autoRenewConsentAt);
           const matchArMs = parseSafeDateMs(mu.autoRenewUpdatedAt || mu.autoRenewConsentAt);
           if (matchArMs > ownArMs || (sanitized.autoRenew === undefined && mu.autoRenew !== undefined)) {
-            sanitized.autoRenew = Boolean(mu.autoRenew && mu.autoRenewConsentAt);
+            const isExplicitlyCancelled = Boolean(
+              mu.autoRenewCancelledAt || (mu.autoRenew === false && mu.autoRenewCancelledAt)
+            );
+            sanitized.autoRenew = isExplicitlyCancelled ? false : (mu.autoRenew !== false);
             sanitized.autoRenewPlanId = mu.autoRenewPlanId || sanitized.autoRenewPlanId;
             sanitized.autoRenewPaymentMethod = mu.autoRenewPaymentMethod || sanitized.autoRenewPaymentMethod;
             sanitized.autoRenewPaymentLabel = mu.autoRenewPaymentLabel || sanitized.autoRenewPaymentLabel;
-            sanitized.autoRenewConsentAt = mu.autoRenewConsentAt || sanitized.autoRenewConsentAt;
-            sanitized.autoRenewCancelledAt = mu.autoRenewCancelledAt;
+            sanitized.autoRenewConsentAt =
+              mu.autoRenewConsentAt ||
+              sanitized.autoRenewConsentAt ||
+              (!isExplicitlyCancelled ? (sanitized.subscriptionStartDate || sanitized.verifiedAt || new Date().toISOString()) : undefined);
+            sanitized.autoRenewCancelledAt = isExplicitlyCancelled
+              ? (mu.autoRenewCancelledAt || sanitized.autoRenewCancelledAt)
+              : undefined;
             sanitized.autoRenewLastChargedAt = mu.autoRenewLastChargedAt || sanitized.autoRenewLastChargedAt;
             sanitized.autoRenewLastStatus = mu.autoRenewLastStatus;
             sanitized.autoRenewFailureReason = mu.autoRenewFailureReason;
@@ -634,12 +642,20 @@ export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | n
               const ownArMs = parseSafeDateMs(parsed.autoRenewUpdatedAt || parsed.autoRenewConsentAt);
               const matchArMs = parseSafeDateMs(mu.autoRenewUpdatedAt || mu.autoRenewConsentAt);
               if (matchArMs > ownArMs || (parsed.autoRenew === undefined && mu.autoRenew !== undefined)) {
-                parsed.autoRenew = Boolean(mu.autoRenew && mu.autoRenewConsentAt);
+                const isExplicitlyCancelled = Boolean(
+                  mu.autoRenewCancelledAt || (mu.autoRenew === false && mu.autoRenewCancelledAt)
+                );
+                parsed.autoRenew = isExplicitlyCancelled ? false : (mu.autoRenew !== false);
                 parsed.autoRenewPlanId = mu.autoRenewPlanId || parsed.autoRenewPlanId;
                 parsed.autoRenewPaymentMethod = mu.autoRenewPaymentMethod || parsed.autoRenewPaymentMethod;
                 parsed.autoRenewPaymentLabel = mu.autoRenewPaymentLabel || parsed.autoRenewPaymentLabel;
-                parsed.autoRenewConsentAt = mu.autoRenewConsentAt || parsed.autoRenewConsentAt;
-                parsed.autoRenewCancelledAt = mu.autoRenewCancelledAt;
+                parsed.autoRenewConsentAt =
+                  mu.autoRenewConsentAt ||
+                  parsed.autoRenewConsentAt ||
+                  (!isExplicitlyCancelled ? (parsed.subscriptionStartDate || parsed.verifiedAt || new Date().toISOString()) : undefined);
+                parsed.autoRenewCancelledAt = isExplicitlyCancelled
+                  ? (mu.autoRenewCancelledAt || parsed.autoRenewCancelledAt)
+                  : undefined;
                 parsed.autoRenewLastChargedAt = mu.autoRenewLastChargedAt || parsed.autoRenewLastChargedAt;
                 parsed.autoRenewLastStatus = mu.autoRenewLastStatus;
                 parsed.autoRenewFailureReason = mu.autoRenewFailureReason;

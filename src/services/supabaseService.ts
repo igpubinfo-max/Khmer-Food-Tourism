@@ -1558,8 +1558,13 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
         .sort((a, b) => parseValidMs(b.date) - parseValidMs(a.date))
         .slice(0, 50);
 
+      const isExplicitlyCancelled = Boolean(
+        arSource.autoRenewCancelledAt || (arSource.autoRenew === false && arSource.autoRenewCancelledAt)
+      );
+      const resolvedAutoRenew = isExplicitlyCancelled ? false : (arSource.autoRenew !== false);
+
       return {
-        autoRenew: Boolean(arSource.autoRenew && arSource.autoRenewConsentAt),
+        autoRenew: resolvedAutoRenew,
         autoRenewPlanId: arSource.autoRenewPlanId || second.autoRenewPlanId || first.autoRenewPlanId,
         autoRenewPaymentMethod:
           arSource.autoRenewPaymentMethod ||
@@ -1569,8 +1574,14 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
           arSource.autoRenewPaymentLabel ||
           second.autoRenewPaymentLabel ||
           first.autoRenewPaymentLabel,
-        autoRenewConsentAt: arSource.autoRenewConsentAt || second.autoRenewConsentAt || first.autoRenewConsentAt,
-        autoRenewCancelledAt: arSource.autoRenewCancelledAt,
+        autoRenewConsentAt:
+          arSource.autoRenewConsentAt ||
+          second.autoRenewConsentAt ||
+          first.autoRenewConsentAt ||
+          (!isExplicitlyCancelled ? (arSource.subscriptionStartDate || arSource.verifiedAt || new Date().toISOString()) : undefined),
+        autoRenewCancelledAt: isExplicitlyCancelled
+          ? (arSource.autoRenewCancelledAt || second.autoRenewCancelledAt || first.autoRenewCancelledAt)
+          : undefined,
         autoRenewLastChargedAt:
           parseValidMs(second.autoRenewLastChargedAt) >= parseValidMs(first.autoRenewLastChargedAt)
             ? second.autoRenewLastChargedAt || first.autoRenewLastChargedAt

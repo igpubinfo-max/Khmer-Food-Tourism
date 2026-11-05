@@ -274,13 +274,22 @@ function Get-ReleaseInfoJson($release) {
 }
 
 function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, [datetime]$minAssetTimeUtc, [int]$minVersionCode = 0) {
-    Write-Banner "STEP 4: DOWNLOADING SIGNED APK & PLAY STORE AAB TO YOUR PC"
+    $bannerText = if ($ApkOnly) {
+        "STEP 4: DOWNLOADING SIGNED ANDROID APK TO YOUR PC"
+    } elseif ($AabOnly) {
+        "STEP 4: DOWNLOADING SIGNED PLAY STORE AAB TO YOUR PC"
+    } else {
+        "STEP 4: DOWNLOADING SIGNED APK & PLAY STORE AAB TO YOUR PC"
+    }
+    Write-Banner $bannerText
 
     $release = $null
     $apkAsset = $null
     $aabAsset = $null
     $info = $null
     $effectiveMinTimeUtc = $minAssetTimeUtc.AddMinutes(-5)
+    $needApk = (-not $AabOnly)
+    $needAab = (-not $ApkOnly)
 
     for ($attempt = 1; $attempt -le 15; $attempt++) {
         try {
@@ -294,21 +303,38 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
             if ($release -and $release.assets) {
                 $info = Get-ReleaseInfoJson $release
                 if ($info) {
-                    $apkAsset = $release.assets | Where-Object { $_.name -eq $info.apk.name } | Select-Object -First 1
-                    $aabAsset = $release.assets | Where-Object { $_.name -eq $info.aab.name } | Select-Object -First 1
+                    if ($needApk -and $info.apk) {
+                        $apkAsset = $release.assets | Where-Object { $_.name -eq $info.apk.name } | Select-Object -First 1
+                    }
+                    if ($needAab -and $info.aab) {
+                        $aabAsset = $release.assets | Where-Object { $_.name -eq $info.aab.name } | Select-Object -First 1
+                    }
                 } else {
-                    $apkAsset = $release.assets | Where-Object { $_.name -like "*.apk" } | Sort-Object -Property updated_at -Descending | Select-Object -First 1
-                    $aabAsset = $release.assets | Where-Object { $_.name -like "*.aab" } | Sort-Object -Property updated_at -Descending | Select-Object -First 1
+                    if ($needApk) {
+                        $apkAsset = $release.assets | Where-Object { $_.name -like "*.apk" } | Sort-Object -Property updated_at -Descending | Select-Object -First 1
+                    }
+                    if ($needAab) {
+                        $aabAsset = $release.assets | Where-Object { $_.name -like "*.aab" } | Sort-Object -Property updated_at -Descending | Select-Object -First 1
+                    }
                 }
             }
 
-            if ($apkAsset -and $aabAsset) {
+            $hasRequired = $true
+            if ($needApk -and -not $apkAsset) { $hasRequired = $false }
+            if ($needAab -and -not $aabAsset) { $hasRequired = $false }
+
+            if ($hasRequired) {
                 $fresh = $true
                 if ($info -and $minVersionCode -gt 0 -and [int]$info.versionCode -lt $minVersionCode) { $fresh = $false }
                 if (-not $info) {
-                    $apkUpdated = ConvertTo-UtcDateTime $apkAsset.updated_at
-                    $aabUpdated = ConvertTo-UtcDateTime $aabAsset.updated_at
-                    if (($apkUpdated -lt $effectiveMinTimeUtc) -or ($aabUpdated -lt $effectiveMinTimeUtc)) { $fresh = $false }
+                    if ($needApk -and $apkAsset) {
+                        $apkUpdated = ConvertTo-UtcDateTime $apkAsset.updated_at
+                        if ($apkUpdated -lt $effectiveMinTimeUtc) { $fresh = $false }
+                    }
+                    if ($needAab -and $aabAsset) {
+                        $aabUpdated = ConvertTo-UtcDateTime $aabAsset.updated_at
+                        if ($aabUpdated -lt $effectiveMinTimeUtc) { $fresh = $false }
+                    }
                 }
                 if ($fresh) { break }
                 Write-Host "  Waiting for fresh release assets to finish uploading (attempt $attempt/15)..." -ForegroundColor Yellow
@@ -321,8 +347,11 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
         }
     }
 
-    if (-not $apkAsset -or -not $aabAsset) {
-        throw "Could not find .apk and .aab assets on GitHub Release v$versionName."
+    if ($needApk -and -not $apkAsset) {
+        throw "Could not find .apk asset on GitHub Release v$versionName."
+    }
+    if ($needAab -and -not $aabAsset) {
+        throw "Could not find .aab asset on GitHub Release v$versionName."
     }
 
     $apkSha = ""
@@ -330,8 +359,8 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
     if ($info) {
         $displayBuildCode = [int]$info.versionCode
         $versionName = [string]$info.versionName
-        $apkSha = ([string]$info.apk.sha256).ToLowerInvariant()
-        $aabSha = ([string]$info.aab.sha256).ToLowerInvariant()
+        if ($info.apk) { $apkSha = ([string]$info.apk.sha256).ToLowerInvariant() }
+        if ($info.aab) { $aabSha = ([string]$info.aab.sha256).ToLowerInvariant() }
         Write-Host "  Cloud build verified: v$versionName  versionCode $displayBuildCode  (commit $(([string]$info.commit).Substring(0,7)))" -ForegroundColor Green
     }
 
@@ -340,26 +369,41 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
     $apkOutPath = Join-Path $OutDir $apkOutName
     $aabOutPath = Join-Path $OutDir $aabOutName
 
-    # Move any older APK/AAB files out of Release_APK_AAB into Old_Builds so only the newest build is visible
+    # Move any older APK/AAB files out of Release_APK_AAB into Old_Builds so only the newly built package is visible
     try {
-        $targetExtensions = if ($ApkOnly) { @('.apk') } elseif ($AabOnly) { @('.aab') } else { @('.apk', '.aab') }
-        $oldPackages = Get-ChildItem -LiteralPath $OutDir -File | Where-Object {
-            ($_.Extension -in $targetExtensions) -and ($_.Name -notin @($apkOutName, $aabOutName))
+        if (-not (Test-Path $ArchiveDir)) {
+            New-Item -ItemType Directory -Path $ArchiveDir -Force | Out-Null
         }
-        if ($oldPackages) {
-            if (-not (Test-Path $ArchiveDir)) {
-                New-Item -ItemType Directory -Path $ArchiveDir -Force | Out-Null
+        if ($ApkOnly) {
+            # In APK-only mode, only keep the newest APK; move older APKs AND any AAB files to Old_Builds
+            $toArchive = Get-ChildItem -LiteralPath $OutDir -File | Where-Object {
+                ($_.Extension -eq '.apk' -and $_.Name -ne $apkOutName) -or ($_.Extension -eq '.aab')
             }
-            foreach ($oldFile in $oldPackages) {
-                Move-Item -LiteralPath $oldFile.FullName -Destination (Join-Path $ArchiveDir $oldFile.Name) -Force
+            foreach ($f in $toArchive) {
+                Move-Item -LiteralPath $f.FullName -Destination (Join-Path $ArchiveDir $f.Name) -Force
+            }
+        } elseif ($AabOnly) {
+            # In AAB-only mode, only keep the newest AAB; move older AABs AND any APK files to Old_Builds
+            $toArchive = Get-ChildItem -LiteralPath $OutDir -File | Where-Object {
+                ($_.Extension -eq '.aab' -and $_.Name -ne $aabOutName) -or ($_.Extension -eq '.apk')
+            }
+            foreach ($f in $toArchive) {
+                Move-Item -LiteralPath $f.FullName -Destination (Join-Path $ArchiveDir $f.Name) -Force
+            }
+        } else {
+            $toArchive = Get-ChildItem -LiteralPath $OutDir -File | Where-Object {
+                ($_.Extension -in @('.apk', '.aab')) -and ($_.Name -notin @($apkOutName, $aabOutName))
+            }
+            foreach ($f in $toArchive) {
+                Move-Item -LiteralPath $f.FullName -Destination (Join-Path $ArchiveDir $f.Name) -Force
             }
         }
         # Remove stale leftovers from the old downloader
         Get-ChildItem -LiteralPath $OutDir -File -Filter "*.part" -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
     } catch {}
 
-    $apkMb = [Math]::Round($apkAsset.size / 1MB, 1)
-    $aabMb = [Math]::Round($aabAsset.size / 1MB, 1)
+    $apkMb = if ($apkAsset) { [Math]::Round($apkAsset.size / 1MB, 1) } else { 0 }
+    $aabMb = if ($aabAsset) { [Math]::Round($aabAsset.size / 1MB, 1) } else { 0 }
 
     if ($AabOnly) {
         Write-Host ""
@@ -379,9 +423,9 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
         Invoke-FastAssetDownload -url $aabAsset.browser_download_url -outPath $aabOutPath -expectedSize ([long]$aabAsset.size) -expectedSha $aabSha
     }
 
-    $apkFile = if ((-not $AabOnly) -and (Test-Path -LiteralPath $apkOutPath)) { Get-Item -LiteralPath $apkOutPath } else { $null }
-    $aabFile = if ((-not $ApkOnly) -and (Test-Path -LiteralPath $aabOutPath)) { Get-Item -LiteralPath $aabOutPath } else { $null }
-    if ((($null -ne $apkFile) -and ($apkFile.Length -ne [long]$apkAsset.size)) -or (($null -ne $aabFile) -and ($aabFile.Length -ne [long]$aabAsset.size))) {
+    $apkFile = if ($needApk -and (Test-Path -LiteralPath $apkOutPath)) { Get-Item -LiteralPath $apkOutPath } else { $null }
+    $aabFile = if ($needAab -and (Test-Path -LiteralPath $aabOutPath)) { Get-Item -LiteralPath $aabOutPath } else { $null }
+    if (($needApk -and $apkFile -and $apkFile.Length -ne [long]$apkAsset.size) -or ($needAab -and $aabFile -and $aabFile.Length -ne [long]$aabAsset.size)) {
         throw "Downloaded package size does not match the cloud build. Please run the builder again (it will resume)."
     }
 
@@ -446,13 +490,21 @@ function Download-ReleasePackages([string]$versionName, [int]$displayBuildCode, 
 }
 
 function Wait-ForGitHubWorkflow([string]$targetSha, [datetime]$notBeforeUtc) {
-    Write-Banner "STEP 3: BUILDING SIGNED APK & AAB ON GITHUB CLOUD (~2.5 MINS)"
+    $bannerText = if ($ApkOnly) {
+        "STEP 3: BUILDING SIGNED ANDROID APK ON GITHUB CLOUD (~1.5 MINS)"
+    } elseif ($AabOnly) {
+        "STEP 3: BUILDING SIGNED PLAY STORE AAB ON GITHUB CLOUD (~1.5 MINS)"
+    } else {
+        "STEP 3: BUILDING SIGNED APK & AAB ON GITHUB CLOUD (~2.5 MINS)"
+    }
+    Write-Banner $bannerText
     Write-Host "  Watching Commit : $($targetSha.Substring(0, 7))" -ForegroundColor Cyan
     Write-Host "  Workflow Page   : https://github.com/$OwnerRepo/actions/workflows/$WorkflowFile" -ForegroundColor DarkGray
     Write-Host ""
 
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
     $matchedRun = $null
+    $compilingDesc = if ($ApkOnly) { "compiling & signing APK only" } elseif ($AabOnly) { "compiling & signing AAB only" } else { "compiling & signing APK + AAB" }
 
     while ($sw.Elapsed.TotalMinutes -lt 15) {
         $elapsedStr = "{0:mm\:ss}" -f $sw.Elapsed
@@ -477,7 +529,7 @@ function Wait-ForGitHubWorkflow([string]$targetSha, [datetime]$notBeforeUtc) {
                     }
                     return $matchedRun
                 } else {
-                    Write-Host "`r  [$elapsedStr] Cloud Run #$runNum is $status... (compiling & signing APK + AAB)   " -NoNewline -ForegroundColor Yellow
+                    Write-Host "`r  [$elapsedStr] Cloud Run #$runNum is $status... ($compilingDesc)   " -NoNewline -ForegroundColor Yellow
                 }
             } else {
                 Write-Host "`r  [$elapsedStr] Waiting for GitHub Cloud runner to pick up commit $($targetSha.Substring(0,7))...   " -NoNewline -ForegroundColor Cyan
@@ -649,10 +701,19 @@ $buildStartTimeUtc = [datetime]::UtcNow.AddSeconds(-10)
 
 $null = Invoke-GitQuiet @("add", "-A")
 $diffRes = Invoke-GitQuiet @("diff", "--cached", "--quiet")
-if ($diffRes.ExitCode -ne 0) {
-    $commitRes = Invoke-GitQuiet @("commit", "-m", "v$versionName (build $nextVC): Release Android APK & Play Store AAB")
+$commitTargetTag = if ($ApkOnly) {
+    "[apk-only]: Release Android APK"
+} elseif ($AabOnly) {
+    "[aab-only]: Release Play Store AAB"
 } else {
-    $commitRes = Invoke-GitQuiet @("commit", "--allow-empty", "-m", "v$versionName (build $nextVC): Trigger Android APK & Play Store AAB")
+    ": Release Android APK & Play Store AAB"
+}
+$commitDesc = "v$versionName (build $nextVC) $commitTargetTag"
+
+if ($diffRes.ExitCode -ne 0) {
+    $commitRes = Invoke-GitQuiet @("commit", "-m", $commitDesc)
+} else {
+    $commitRes = Invoke-GitQuiet @("commit", "--allow-empty", "-m", $commitDesc)
 }
 if ($commitRes.ExitCode -ne 0) {
     throw "Git commit failed: $($commitRes.Output)"
