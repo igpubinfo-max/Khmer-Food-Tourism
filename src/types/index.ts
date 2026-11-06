@@ -2578,7 +2578,7 @@ export function isIosOrIpadAppStoreRuntime(): boolean {
 }
 
 export const isUserVipActive = (user?: User | null): boolean => {
-  if (user && !isAdminAccount(user) && isIosOrIpadAppStoreRuntime()) return true;
+  if ((!user || !isAdminAccount(user)) && isIosOrIpadAppStoreRuntime()) return true;
   if (!user) return false;
   // Administrators use administrative privileges and are strictly separated from consumer VIP accounts
   if (isAdminAccount(user)) {
