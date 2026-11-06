@@ -2318,25 +2318,43 @@ export function deduplicateAndNormalizeUsers(
   rawUsers: Array<User | null | undefined>,
   deletedUsers: DeletedUserRecord[] = []
 ): User[] {
+  // Pre-index deletedUsers in O(D) so tombstone checks for 10,000-50,000+ users run in O(1) time
+  const deletedById = new Map<string, number>();
+  const deletedByEmail = new Map<string, number>();
+  const deletedByPhone = new Map<string, number>();
+  for (let i = 0; i < deletedUsers.length; i++) {
+    const d = deletedUsers[i];
+    if (!d) continue;
+    const dMs = d.deletedAt ? parseSafeDateMs(d.deletedAt) : 0;
+    const effectiveMs = dMs > 0 ? dMs : 1;
+    if (d.id) {
+      const k = String(d.id).trim();
+      const prev = deletedById.get(k) || 0;
+      if (effectiveMs > prev) deletedById.set(k, effectiveMs);
+    }
+    if (d.email) {
+      const k = String(d.email).toLowerCase().trim();
+      const prev = deletedByEmail.get(k) || 0;
+      if (effectiveMs > prev) deletedByEmail.set(k, effectiveMs);
+    }
+    if (d.phone) {
+      const k = String(d.phone).replace(/[\s-+()]/g, '');
+      if (k.length >= 7) {
+        const prev = deletedByPhone.get(k) || 0;
+        if (effectiveMs > prev) deletedByPhone.set(k, effectiveMs);
+      }
+    }
+  }
+
   const getDeletedTimeMsForUser = (u: Partial<User>): number => {
     const uId = String(u.id || '').trim();
     const uEmail = String(u.email || '').toLowerCase().trim();
     const uPhone = String(u.phone || '').replace(/[\s-+()]/g, '');
-    let maxDelMs = 0;
-    for (const d of deletedUsers) {
-      if (!d) continue;
-      const dEmail = String(d.email || '').toLowerCase().trim();
-      const dPhone = String(d.phone || '').replace(/[\s-+()]/g, '');
-      const matched =
-        (uId && d.id === uId) ||
-        (uEmail && dEmail && uEmail === dEmail) ||
-        (uPhone.length >= 7 && dPhone.length >= 7 && uPhone === dPhone);
-      if (matched) {
-        const dMs = d.deletedAt ? parseSafeDateMs(d.deletedAt) : 0;
-        maxDelMs = Math.max(maxDelMs, dMs > 0 ? dMs : 1);
-      }
-    }
-    return maxDelMs;
+    return Math.max(
+      uId ? deletedById.get(uId) || 0 : 0,
+      uEmail ? deletedByEmail.get(uEmail) || 0 : 0,
+      uPhone.length >= 7 ? deletedByPhone.get(uPhone) || 0 : 0
+    );
   };
 
   const isAccountDeleted = (u: Partial<User> | undefined | null): boolean => {
@@ -2699,6 +2717,210 @@ export async function upsertSingleUserToCloud(
  * Synchronize Users, Transactions, Payment Proofs Vault, and Custom/Cached Restaurants
  * between this device and Supabase Cloud.
  */
+
+export interface ServerPaginatedUsersRequest {
+  searchQuery?: string;
+  roleFilter?: 'all' | 'regular' | 'owner' | 'vip';
+  vipStatusFilter?: 'all' | 'active_vip' | 'expired_vip' | 'pending_vip' | 'free';
+  accountStatusFilter?: 'all' | 'active' | 'disabled' | 'verified' | 'unverified';
+  authProviderFilter?: 'all' | 'google' | 'phone' | 'email';
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  pageSize?: number;
+  timeoutMs?: number;
+}
+
+export interface ServerPaginatedUsersResponse {
+  ok: boolean;
+  source: 'supabase_postgrest' | 'local_indexed_fallback';
+  items: User[];
+  totalServerCount: number;
+  page: number;
+  pageSize: number;
+  latencyMs: number;
+}
+
+/**
+ * Server-Side Paginated & Indexed User Query against Supabase PostgreSQL (PostgREST).
+ * Fetches ONLY a single page slice (`limit` & `offset` with `Range` and `Prefer: count=exact`)
+ * and applies server-side filtering & ILIKE search on indexed JSONB expressions so the client
+ * never downloads all 10,000+ user records at once.
+ */
+export async function fetchServerPaginatedUsersFromSupabase(
+  req: ServerPaginatedUsersRequest
+): Promise<ServerPaginatedUsersResponse> {
+  const t0 = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  const page = Math.max(1, req.page || 1);
+  const pageSize = Math.max(5, Math.min(250, req.pageSize || 25));
+  const offset = (page - 1) * pageSize;
+
+  if (!isSupabaseConfigured() || isSupabaseEgressCooldownActive()) {
+    return {
+      ok: false,
+      source: 'local_indexed_fallback',
+      items: [],
+      totalServerCount: 0,
+      page,
+      pageSize,
+      latencyMs: 0,
+    };
+  }
+
+  const cfg = getCloudApiConfig();
+  const baseUrl = cfg.supabaseUrl.replace(/\/+$/, '');
+  const timeoutMs = req.timeoutMs || 8000;
+
+  try {
+    const queryParts: string[] = [
+      'select=key,payload,updated_at',
+      `key=like.${encodeURIComponent(USER_RECORD_PREFIX)}*`,
+      'payload->>role=neq.admin',
+    ];
+
+    // 1. Server-side Role / Account Type filter
+    if (req.roleFilter === 'owner') {
+      queryParts.push('payload->>role=eq.owner');
+    } else if (req.roleFilter === 'regular') {
+      queryParts.push('payload->>role=eq.user');
+    } else if (req.roleFilter === 'vip') {
+      queryParts.push('payload->>membershipTier=eq.premium_vip');
+      queryParts.push('payload->>subscriptionStatus=eq.active');
+    }
+
+    // 2. Server-side VIP status filter
+    if (req.vipStatusFilter === 'active_vip') {
+      queryParts.push('payload->>membershipTier=eq.premium_vip');
+      queryParts.push('payload->>subscriptionStatus=eq.active');
+    } else if (req.vipStatusFilter === 'expired_vip') {
+      queryParts.push('payload->>subscriptionStatus=eq.expired');
+    } else if (req.vipStatusFilter === 'pending_vip') {
+      queryParts.push('payload->>paymentStatus=eq.pending_verification');
+    } else if (req.vipStatusFilter === 'free') {
+      queryParts.push('or=(payload->>membershipTier.is.null,payload->>membershipTier.eq.free)');
+    }
+
+    // 3. Server-side Account Status filter
+    if (req.accountStatusFilter === 'disabled') {
+      queryParts.push('payload->>isDisabled=eq.true');
+    } else if (req.accountStatusFilter === 'active') {
+      queryParts.push('or=(payload->>isDisabled.is.null,payload->>isDisabled.eq.false)');
+    }
+
+    // 4. Server-side Auth Provider filter
+    if (req.authProviderFilter && req.authProviderFilter !== 'all') {
+      queryParts.push(`payload->>authProvider=eq.${encodeURIComponent(req.authProviderFilter)}`);
+    }
+
+    // 5. Server-side Search Query (name, email, phone, username, id)
+    const rawQ = (req.searchQuery || '').trim();
+    if (rawQ) {
+      const safeQ = rawQ.replace(/[,()*]/g, '').trim();
+      if (safeQ) {
+        const enc = encodeURIComponent(`*${safeQ}*`);
+        queryParts.push(
+          `or=(key.ilike.${enc},payload->>name.ilike.${enc},payload->>email.ilike.${enc},payload->>phone.ilike.${enc},payload->>username.ilike.${enc},payload->>id.ilike.${enc})`
+        );
+      }
+    }
+
+    // 6. Server-side Ordering & Limit/Offset Pagination
+    const dir = req.sortOrder === 'asc' ? 'asc' : 'desc';
+    queryParts.push(`order=updated_at.${dir}`);
+    queryParts.push(`limit=${pageSize}`);
+    queryParts.push(`offset=${offset}`);
+
+    const url = `${baseUrl}/rest/v1/kft_app_kv_store?${queryParts.join('&')}`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        apikey: cfg.supabaseAnonKey,
+        Authorization: `Bearer ${cfg.supabaseAnonKey}`,
+        Accept: 'application/json',
+        Prefer: 'count=exact',
+        'Range-Unit': 'items',
+        Range: `${offset}-${offset + pageSize - 1}`,
+      },
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+
+    if (res.status === 402 || res.status === 429) {
+      return {
+        ok: false,
+        source: 'local_indexed_fallback',
+        items: [],
+        totalServerCount: 0,
+        page,
+        pageSize,
+        latencyMs: Number(((typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0).toFixed(2)),
+      };
+    }
+
+    if (!res.ok && res.status !== 206) {
+      return {
+        ok: false,
+        source: 'local_indexed_fallback',
+        items: [],
+        totalServerCount: 0,
+        page,
+        pageSize,
+        latencyMs: Number(((typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0).toFixed(2)),
+      };
+    }
+
+    // Parse exact server count from Content-Range header (e.g. "0-24/10450" or "*/0")
+    const contentRange = res.headers.get('content-range') || '';
+    let totalServerCount = 0;
+    const slashIdx = contentRange.indexOf('/');
+    if (slashIdx !== -1) {
+      const parsedTotal = parseInt(contentRange.slice(slashIdx + 1), 10);
+      if (Number.isFinite(parsedTotal) && parsedTotal >= 0) {
+        totalServerCount = parsedTotal;
+      }
+    }
+
+    const rows = await res.json();
+    const rawUsers: User[] = [];
+    if (Array.isArray(rows)) {
+      for (const row of rows) {
+        if (row && row.payload && typeof row.payload === 'object') {
+          rawUsers.push(normalizeVipExpiryOnUser(row.payload as User));
+        }
+      }
+    }
+
+    if (totalServerCount === 0 && rawUsers.length > 0) {
+      totalServerCount = rawUsers.length;
+    }
+
+    const t1 = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    return {
+      ok: true,
+      source: 'supabase_postgrest',
+      items: rawUsers,
+      totalServerCount,
+      page,
+      pageSize,
+      latencyMs: Number((t1 - t0).toFixed(2)),
+    };
+  } catch {
+    const t1 = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    return {
+      ok: false,
+      source: 'local_indexed_fallback',
+      items: [],
+      totalServerCount: 0,
+      page,
+      pageSize,
+      latencyMs: Number((t1 - t0).toFixed(2)),
+    };
+  }
+}
+
 export async function syncAllAppDataWithSupabase(localState: {
   users: User[];
   currentUser?: User | null;
@@ -3140,32 +3362,65 @@ export async function syncAllAppDataWithSupabase(localState: {
       }
     }
 
-    // 2b. Reconcile verified VIP transactions against mergedUsers (matching canonical ID, legacyIds, email, or phone)
+    // 2b. Pre-index transactions in O(T) so reconciling against 10,000-50,000+ users runs in O(U + T)
+    const txnsByUserKey = new Map<string, RegistrationTransaction[]>();
+    const addTxnKey = (k: string | undefined | null, t: RegistrationTransaction) => {
+      if (!k) return;
+      const clean = k.trim().toLowerCase();
+      if (!clean) return;
+      const arr = txnsByUserKey.get(clean);
+      if (arr) arr.push(t);
+      else txnsByUserKey.set(clean, [t]);
+    };
+    for (let ti = 0; ti < allTxnsCombined.length; ti++) {
+      const t = allTxnsCombined[ti];
+      if (!t) continue;
+      addTxnKey(t.userId, t);
+      if (t.ownerId && t.ownerId !== t.userId) addTxnKey(t.ownerId, t);
+      addTxnKey(t.userEmail, t);
+      const tPhone = (t.phone || t.ownerPhone || '').replace(/[\s-+()]/g, '');
+      if (tPhone.length >= 7) addTxnKey(`phone:${tPhone}`, t);
+    }
+
+    const nowReconcileMs = Date.now();
     for (let i = 0; i < mergedUsers.length; i++) {
       const usr = mergedUsers[i];
       if (usr.role === 'admin' || usr.subscriptionStatus === 'cancelled') continue;
       const usrEmail = (usr.email || '').toLowerCase().trim();
       const usrPhone = (usr.phone || '').replace(/[\s-+()]/g, '');
-      const usrIdSet = new Set<string>([usr.id, ...(Array.isArray(usr.legacyIds) ? usr.legacyIds : [])]);
-      if (usrEmail && usrEmail.includes('@')) {
-        const slug = usrEmail.replace(/[^a-z0-9]/g, '_');
-        usrIdSet.add(`user-${slug}`);
-        usrIdSet.add(`google-${slug}`);
-        usrIdSet.add(`owner-${slug}`);
+      const lookupKeys: string[] = [usr.id.toLowerCase()];
+      if (Array.isArray(usr.legacyIds)) {
+        for (const lid of usr.legacyIds) if (lid) lookupKeys.push(lid.toLowerCase());
       }
+      if (usrEmail) {
+        lookupKeys.push(usrEmail);
+        if (usrEmail.includes('@')) {
+          const slug = usrEmail.replace(/[^a-z0-9]/g, '_');
+          lookupKeys.push(`user-${slug}`, `google-${slug}`, `owner-${slug}`);
+        }
+      }
+      if (usrPhone.length >= 7) lookupKeys.push(`phone:${usrPhone}`);
 
-      const verifiedFutureTxns = allTxnsCombined.filter(t => {
-        if (!t || t.status !== 'verified' || t.type === 'additional_store_slot' || !t.expiresAt) return false;
-        const expMs = parseSafeDateMs(t.expiresAt);
-        if (expMs <= Date.now()) return false;
-        const tPhone = (t.phone || t.ownerPhone || '').replace(/[\s-+()]/g, '');
-        return (
-          (t.userId && usrIdSet.has(t.userId)) ||
-          (t.ownerId && usrIdSet.has(t.ownerId)) ||
-          (usrEmail && t.userEmail && t.userEmail.toLowerCase().trim() === usrEmail) ||
-          (usrPhone.length >= 7 && tPhone === usrPhone)
-        );
-      });
+      const candidateTxnMap = new Map<string, RegistrationTransaction>();
+      for (let ki = 0; ki < lookupKeys.length; ki++) {
+        const list = txnsByUserKey.get(lookupKeys[ki]);
+        if (list) {
+          for (let li = 0; li < list.length; li++) {
+            const tx = list[li];
+            if (tx && tx.id) candidateTxnMap.set(tx.id, tx);
+          }
+        }
+      }
+      if (candidateTxnMap.size === 0) continue;
+
+      const userTxns = Array.from(candidateTxnMap.values());
+      const verifiedFutureTxns = userTxns.filter(
+        t =>
+          t.status === 'verified' &&
+          t.type !== 'additional_store_slot' &&
+          Boolean(t.expiresAt) &&
+          parseSafeDateMs(t.expiresAt) > nowReconcileMs
+      );
       if (verifiedFutureTxns.length > 0) {
         verifiedFutureTxns.sort((a, b) => parseSafeDateMs(b.expiresAt) - parseSafeDateMs(a.expiresAt));
         const bestTxn = verifiedFutureTxns[0];
@@ -3193,16 +3448,8 @@ export async function syncAllAppDataWithSupabase(localState: {
         }
       }
 
-      // Also reconcile pending_verification VIP transactions if user has no active VIP
       if (mergedUsers[i].membershipTier !== 'premium_vip') {
-        const pendingVipTxn = allTxnsCombined.find(t => {
-          if (!t || t.status !== 'pending_verification') return false;
-          return (
-            (t.userId && usrIdSet.has(t.userId)) ||
-            (t.ownerId && usrIdSet.has(t.ownerId)) ||
-            (usrEmail && t.userEmail && t.userEmail.toLowerCase().trim() === usrEmail)
-          );
-        });
+        const pendingVipTxn = userTxns.find(t => t.status === 'pending_verification');
         if (pendingVipTxn && mergedUsers[i].paymentStatus !== 'verified') {
           mergedUsers[i] = {
             ...mergedUsers[i],
@@ -3213,15 +3460,9 @@ export async function syncAllAppDataWithSupabase(localState: {
         }
       }
 
-      // Also reconcile verified additional_store_slot transactions so paidAdditionalStoreSlots is always accurate
-      const verifiedAdditionalStoreTxns = allTxnsCombined.filter(t => {
-        if (!t || t.type !== 'additional_store_slot' || t.status !== 'verified') return false;
-        return (
-          (t.userId && usrIdSet.has(t.userId)) ||
-          (t.ownerId && usrIdSet.has(t.ownerId)) ||
-          (usrEmail && t.userEmail && t.userEmail.toLowerCase().trim() === usrEmail)
-        );
-      });
+      const verifiedAdditionalStoreTxns = userTxns.filter(
+        t => t.type === 'additional_store_slot' && t.status === 'verified'
+      );
       {
         const uniqueVerifiedRefs = new Set(verifiedAdditionalStoreTxns.map(t => t.id));
         const slotCount = uniqueVerifiedRefs.size;
@@ -3547,7 +3788,8 @@ export async function syncAllAppDataWithSupabase(localState: {
     };
 
     const mergedUsersSig = safeJsonSig(mergedUsers);
-    if ((isAdminDevice || Boolean(localState.currentUser) || mergedUsers.length > 0) && mergedUsersSig !== safeJsonSig(cloudUsersV2)) {
+    // Scale Optimization (10,000+ users): Regular user devices ONLY sync their own atomic kft_user_<id> record below, never uploading the entire user list!
+    if (isAdminDevice && mergedUsers.length <= 2500 && mergedUsersSig !== safeJsonSig(cloudUsersV2)) {
       pushPromises.push(pushCloudDocument('kft_cloud_users_v2', mergedUsers));
     }
     if (isAdminDevice && safeJsonSig(mergedDeletedUsers) !== safeJsonSig(cloudDeletedUsers || [])) {
@@ -3585,19 +3827,21 @@ export async function syncAllAppDataWithSupabase(localState: {
       pushPromises.push(pushCloudDocument('kft_cloud_support_tickets_v1', mergedSupportTickets));
     }
 
-    // Ensure active user(s) have an up-to-date atomic `kft_user_<id>` record in Cloud without write-back storms
+    // Ensure active user(s) have an up-to-date atomic `kft_user_<id>` record in Cloud without write-back storms (capped at 12 per cycle for 10,000+ user scale)
     const currentCanonicalId = localState.currentUser ? getCanonicalUserId(localState.currentUser) : null;
+    let atomicBackfillCount = 0;
     for (const u of mergedUsers) {
       const isActiveLocalUser = Boolean(
         localState.currentUser && (u.id === localState.currentUser.id || u.id === currentCanonicalId)
       );
-      if (!isActiveLocalUser && (isSupabaseEgressCooldownActive() || !shouldFetchHeavyAdminVaults)) {
+      if (!isActiveLocalUser && (isSupabaseEgressCooldownActive() || !shouldFetchHeavyAdminVaults || atomicBackfillCount >= 12)) {
         continue;
       }
       const atomicKey = `${USER_RECORD_PREFIX}${u.id}`;
       const existingAtomic = existingAtomicMap.get(atomicKey);
       if (!existingAtomic || safeJsonSig(existingAtomic) !== safeJsonSig(u)) {
         pushPromises.push(pushCloudDocument(atomicKey, u));
+        if (!isActiveLocalUser) atomicBackfillCount++;
       }
     }
 

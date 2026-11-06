@@ -36,6 +36,14 @@ import {
   getRememberedCloudUrlForEntity,
 } from '../services/cloudImageStorageService';
 import {
+  verifyAdminPermissionOrThrow,
+  isProtectedSystemAdminAccount,
+  recordUserActivityAndAdminLog,
+  createUsersBackupSnapshot,
+  runUserDataIntegrityAuditAndRepair,
+  type UserDataIntegrityReport,
+} from '../services/adminUserManagementService';
+import {
   verifyAbaPaymentAndReceipt,
   computeReceiptImageFingerprint,
   recordVerifiedReceiptFingerprint,
@@ -190,6 +198,13 @@ interface AppContextType {
     deletedStats?: { restaurants: number; transactions: number; tickets: number };
   }>;
   clearAllRegisteredUsers: () => Promise<{ success: boolean; count: number }>;
+  bulkGrantUserVip: (userIds: string[], durationDays?: number) => Promise<{ success: boolean; count: number }>;
+  bulkCancelUserVip: (userIds: string[]) => Promise<{ success: boolean; count: number }>;
+  bulkSetUserAccountStatus: (userIds: string[], status: 'active' | 'disabled') => Promise<{ success: boolean; count: number }>;
+  bulkUpdateUserRole: (userIds: string[], newRole: UserRole) => Promise<{ success: boolean; count: number }>;
+  bulkDeleteUsers: (userIds: string[]) => Promise<{ success: boolean; count: number }>;
+  restoreUsersFromBackup: (snapshotUsers: User[], mode?: 'merge' | 'replace') => Promise<{ success: boolean; count: number }>;
+  runUsersIntegrityCheckAndRepair: () => Promise<UserDataIntegrityReport>;
 
   // Social Account Linking (TikTok & Facebook)
   connectTikTokAccount: (username: string, displayName?: string, profileUrl?: string, avatarUrl?: string) => Promise<{ success: boolean; error?: string }>;
@@ -6265,6 +6280,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       'AdminPortal',
       `Granted ${validDays}-day VIP access to ${approved.name} (${approved.id}, ${approved.email}) until ${approved.subscriptionExpiryDate}`
     );
+    recordUserActivityAndAdminLog({
+      category: 'vip_change',
+      action: 'ADMIN_DIRECT_VIP_GRANT',
+      userId: approved.id,
+      userName: approved.name,
+      userEmail: approved.email,
+      userPhone: approved.phone,
+      actorId: currentUser.id,
+      actorName: currentUser.name || 'Admin',
+      status: 'SUCCESS',
+      details: `Granted ${validDays}-day VIP access until ${approved.subscriptionExpiryDate?.slice(0, 10)}`,
+    }, true);
 
     showToast(
       language === 'km'
@@ -6560,6 +6587,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       'AdminPortal',
       `Cancelled VIP for user ${targetUser.name} (${targetUser.id}, ${targetUser.email}) and downgraded to normal user while preserving account login access`
     );
+    recordUserActivityAndAdminLog({
+      category: 'vip_change',
+      action: 'USER_VIP_CANCELLED',
+      userId: targetUser.id,
+      userName: targetUser.name,
+      userEmail: targetUser.email,
+      userPhone: targetUser.phone,
+      actorId: currentUser?.id,
+      actorName: currentUser?.name || 'Admin',
+      status: 'WARNING',
+      details: 'Cancelled VIP status and downgraded to regular account (login access preserved)',
+    }, true);
 
     showToast(
       language === 'km'
@@ -6694,6 +6733,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       'AdminPortal',
       `Restored user account access for ${restoredUser.name} (${restoredUser.id}, ${restoredUser.email})`
     );
+    recordUserActivityAndAdminLog({
+      category: 'account_status',
+      action: 'USER_ACCESS_RESTORED',
+      userId: restoredUser.id,
+      userName: restoredUser.name,
+      userEmail: restoredUser.email,
+      userPhone: restoredUser.phone,
+      actorId: currentUser?.id,
+      actorName: currentUser?.name || 'Admin',
+      status: 'SUCCESS',
+      details: 'Restored and reactivated user account access',
+    }, true);
 
     showToast(
       language === 'km'
@@ -6748,6 +6799,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     } catch {}
 
+    recordUserActivityAndAdminLog({
+      category: 'account_status',
+      action: 'USER_ACCOUNT_DISABLED',
+      userId: targetUser.id,
+      userName: targetUser.name,
+      userEmail: targetUser.email,
+      userPhone: targetUser.phone,
+      actorId: currentUser?.id,
+      actorName: currentUser?.name || 'Admin',
+      status: 'WARNING',
+      details: 'Temporarily deactivated/suspended user account',
+    }, true);
     showToast(
       language === 'km'
         ? `⚠️ បានផ្អាកគណនី "${targetUser.name}" បណ្តោះអាសន្ន (អាចស្តារឡើងវិញបានតាមរយៈ Restore User Access)`
@@ -6991,6 +7054,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       'AdminPortal',
       `Permanently deleted user ${targetUser.name} (${targetUser.id}, ${targetUser.email}) and all associated data`
     );
+    recordUserActivityAndAdminLog({
+      category: 'admin_action',
+      action: 'USER_ACCOUNT_DELETED',
+      userId: targetUser.id,
+      userName: targetUser.name,
+      userEmail: targetUser.email,
+      userPhone: targetUser.phone,
+      actorId: currentUser?.id,
+      actorName: currentUser?.name || 'Admin',
+      status: 'WARNING',
+      details: `Permanently deleted account (${targetUser.email || targetUser.id}) and associated records`,
+    }, true);
 
     showToast(
       language === 'km'
@@ -7092,6 +7167,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     recordSecurityAudit('USERS_DATABASE_PURGE', 'SUCCESS', 'AdminPortal', `Admin cleared all ${count} registered users`);
+    recordUserActivityAndAdminLog({
+      category: 'admin_action',
+      action: 'USERS_DATABASE_PURGE',
+      actorId: currentUser?.id,
+      actorName: currentUser?.name || 'Admin',
+      status: 'WARNING',
+      details: `Purged ${count} registered user accounts from active directory`,
+    }, true);
     showToast(
       language === 'km' 
         ? `បានសម្អាតគណនីអ្នកប្រើប្រាស់ ${count} នាក់ចេញពី Database ដោយជោគជ័យ!` 
@@ -7099,6 +7182,488 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       'success'
     );
     return { success: true, count };
+  };
+
+  /**
+   * Atomic O(N) Bulk VIP Grant for 1 to 10,000+ selected users in a single state & storage pass.
+   */
+  const bulkGrantUserVip = async (
+    userIds: string[],
+    durationDays: number = 30
+  ): Promise<{ success: boolean; count: number }> => {
+    const rbac = verifyAdminPermissionOrThrow(currentUser, 'users.manage_vip', `Bulk VIP grant (${userIds.length} users)`);
+    if (!rbac.allowed) {
+      showToast(language === 'km' ? '⛔ អ្នកគ្មានសិទ្ធិផ្តល់ VIP ជាក្រុមទេ!' : '⛔ Unauthorized for Bulk VIP management!', 'warning');
+      return { success: false, count: 0 };
+    }
+    const targetSet = new Set(userIds.filter(Boolean));
+    if (targetSet.size === 0) return { success: false, count: 0 };
+
+    const liveUsers = latestSyncStateRef.current.users || users;
+    await createUsersBackupSnapshot(liveUsers, deletedUsers, `Pre-Bulk VIP Grant (${targetSet.size} users)`, 'pre_bulk_action', currentUser);
+
+    const validDays = Math.max(1, Math.round(durationDays || 30));
+    const resolvedPlan = resolveAndValidateVipPlan({ durationDays: validDays }, appSettingsRef.current);
+    const nowIso = new Date().toISOString();
+    const newTxns: RegistrationTransaction[] = [];
+    let updatedCount = 0;
+
+    const nextUsers = liveUsers.map((u) => {
+      if (!targetSet.has(u.id) || isProtectedSystemAdminAccount(u)) return u;
+      updatedCount++;
+      const { startDate, expiryDate } = calculateVipDates(
+        u.subscriptionExpiryDate,
+        validDays,
+        appSettingsRef.current
+      );
+      const txnRef = `BULK-VIP-${validDays}D-${Date.now().toString(36).toUpperCase()}-${updatedCount}`;
+      newTxns.push({
+        id: `TXN-BVIP-${Date.now().toString(36).toUpperCase()}-${updatedCount}`,
+        type: 'user_vip_upgrade',
+        userId: u.id,
+        userName: u.name,
+        userEmail: u.email,
+        ownerId: u.id,
+        ownerName: u.name,
+        planType: resolvedPlan.id,
+        amountUsd: resolvedPlan.priceUsd,
+        currency: 'USD',
+        durationDays: validDays,
+        membershipTier: 'premium_vip',
+        status: 'verified',
+        paymentMethod: 'KHQR',
+        transactionRef: txnRef,
+        createdAt: startDate,
+        expiresAt: expiryDate,
+        verifiedAt: nowIso,
+        verifiedBy: `${currentUser?.name || 'Admin'} (Bulk VIP Grant)`,
+        notes: `Bulk Admin VIP activation (${validDays} days)`,
+      });
+      return {
+        ...u,
+        membershipTier: 'premium_vip' as const,
+        subscriptionStatus: 'active' as const,
+        subscriptionStartDate: startDate,
+        subscriptionExpiryDate: expiryDate,
+        vipStatus: 'active' as const,
+        vipPlanType: resolvedPlan.id,
+        vipPlanDays: validDays,
+        vipExpiresAt: expiryDate,
+        vipCancelledAt: undefined,
+        paymentStatus: 'verified' as const,
+        paymentMethod: 'KHQR' as const,
+        transactionRef: txnRef,
+      };
+    });
+
+    if (updatedCount === 0) return { success: false, count: 0 };
+
+    latestSyncStateRef.current.users = nextUsers;
+    setUsers(nextUsers);
+    safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+
+    setTransactions((prev) => {
+      const nextTxns = [...newTxns, ...prev];
+      latestSyncStateRef.current.transactions = nextTxns;
+      return nextTxns;
+    });
+
+    if (isSupabaseConfigured()) {
+      pushCloudDocument('kft_cloud_users_v2', nextUsers).catch(() => {});
+    }
+
+    recordUserActivityAndAdminLog({
+      category: 'vip_change',
+      action: 'ADMIN_BULK_VIP_GRANT',
+      actorId: currentUser?.id,
+      actorName: currentUser?.name || 'Admin',
+      actorRole: rbac.tier,
+      status: 'SUCCESS',
+      details: `Granted ${validDays}-day VIP membership to ${updatedCount} user(s) in bulk`,
+    }, true);
+
+    showToast(
+      language === 'km'
+        ? `👑 បានបើកដំណើរការ VIP (${validDays} ថ្ងៃ) ជូនគណនីចំនួន ${updatedCount} ដោយជោគជ័យ!`
+        : `👑 Activated ${validDays}-day VIP for ${updatedCount} accounts!`,
+      'success'
+    );
+    return { success: true, count: updatedCount };
+  };
+
+  /**
+   * Atomic O(N) Bulk VIP Cancellation for selected users.
+   */
+  const bulkCancelUserVip = async (
+    userIds: string[]
+  ): Promise<{ success: boolean; count: number }> => {
+    const rbac = verifyAdminPermissionOrThrow(currentUser, 'users.manage_vip', `Bulk VIP cancel (${userIds.length} users)`);
+    if (!rbac.allowed) {
+      showToast(language === 'km' ? '⛔ គ្មានសិទ្ធិបិទ VIP ជាក្រុមទេ!' : '⛔ Unauthorized for Bulk VIP cancellation!', 'warning');
+      return { success: false, count: 0 };
+    }
+    const targetSet = new Set(userIds.filter(Boolean));
+    if (targetSet.size === 0) return { success: false, count: 0 };
+
+    const liveUsers = latestSyncStateRef.current.users || users;
+    await createUsersBackupSnapshot(liveUsers, deletedUsers, `Pre-Bulk VIP Cancel (${targetSet.size} users)`, 'pre_bulk_action', currentUser);
+
+    const nowIso = new Date().toISOString();
+    let updatedCount = 0;
+
+    const nextUsers = liveUsers.map((u) => {
+      if (!targetSet.has(u.id) || isProtectedSystemAdminAccount(u)) return u;
+      updatedCount++;
+      return {
+        ...u,
+        membershipTier: 'free' as const,
+        subscriptionStatus: 'cancelled' as const,
+        subscriptionExpiryDate: nowIso,
+        vipStatus: 'none' as const,
+        vipExpiresAt: nowIso,
+        vipCancelledAt: nowIso,
+        autoRenew: false,
+      };
+    });
+
+    if (updatedCount === 0) return { success: false, count: 0 };
+
+    latestSyncStateRef.current.users = nextUsers;
+    setUsers(nextUsers);
+    safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+
+    if (isSupabaseConfigured()) {
+      pushCloudDocument('kft_cloud_users_v2', nextUsers).catch(() => {});
+    }
+
+    recordUserActivityAndAdminLog({
+      category: 'vip_change',
+      action: 'ADMIN_BULK_VIP_CANCEL',
+      actorId: currentUser?.id,
+      actorName: currentUser?.name || 'Admin',
+      actorRole: rbac.tier,
+      status: 'WARNING',
+      details: `Cancelled VIP membership for ${updatedCount} user(s) in bulk`,
+    }, true);
+
+    showToast(
+      language === 'km'
+        ? `បានបញ្ឈប់សមាជិកភាព VIP ចំនួន ${updatedCount} គណនីដោយជោគជ័យ!`
+        : `Cancelled VIP membership for ${updatedCount} accounts!`,
+      'info'
+    );
+    return { success: true, count: updatedCount };
+  };
+
+  /**
+   * Atomic O(N) Bulk Account Activation / Deactivation.
+   */
+  const bulkSetUserAccountStatus = async (
+    userIds: string[],
+    status: 'active' | 'disabled'
+  ): Promise<{ success: boolean; count: number }> => {
+    const rbac = verifyAdminPermissionOrThrow(currentUser, 'users.activate_deactivate', `Bulk account status ${status}`);
+    if (!rbac.allowed) {
+      showToast(language === 'km' ? '⛔ គ្មានសិទ្ធិបើក/បិទគណនីជាក្រុមទេ!' : '⛔ Unauthorized for Bulk status change!', 'warning');
+      return { success: false, count: 0 };
+    }
+    const targetSet = new Set(userIds.filter(Boolean));
+    if (targetSet.size === 0) return { success: false, count: 0 };
+
+    const liveUsers = latestSyncStateRef.current.users || users;
+    await createUsersBackupSnapshot(liveUsers, deletedUsers, `Pre-Bulk Status ${status} (${targetSet.size} users)`, 'pre_bulk_action', currentUser);
+
+    const nowIso = new Date().toISOString();
+    const shouldDisable = status === 'disabled';
+    let updatedCount = 0;
+
+    const nextUsers = liveUsers.map((u) => {
+      if (!targetSet.has(u.id) || isProtectedSystemAdminAccount(u)) return u;
+      updatedCount++;
+      return {
+        ...u,
+        isDisabled: shouldDisable,
+        disabledAt: shouldDisable ? nowIso : undefined,
+        restoredAt: !shouldDisable ? nowIso : u.restoredAt,
+      };
+    });
+
+    if (updatedCount === 0) return { success: false, count: 0 };
+
+    latestSyncStateRef.current.users = nextUsers;
+    setUsers(nextUsers);
+    safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+
+    if (isSupabaseConfigured()) {
+      pushCloudDocument('kft_cloud_users_v2', nextUsers).catch(() => {});
+    }
+
+    recordUserActivityAndAdminLog({
+      category: 'account_status',
+      action: shouldDisable ? 'ADMIN_BULK_DEACTIVATE_USERS' : 'ADMIN_BULK_ACTIVATE_USERS',
+      actorId: currentUser?.id,
+      actorName: currentUser?.name || 'Admin',
+      actorRole: rbac.tier,
+      status: shouldDisable ? 'WARNING' : 'SUCCESS',
+      details: `${shouldDisable ? 'Deactivated' : 'Activated'} ${updatedCount} user account(s) in bulk`,
+    }, true);
+
+    showToast(
+      language === 'km'
+        ? shouldDisable
+          ? `⚠️ បានផ្អាកដំណើរការគណនីចំនួន ${updatedCount} ជាបណ្តោះអាសន្ន!`
+          : `✅ បានបើកដំណើរការគណនីចំនួន ${updatedCount} ឡើងវិញដោយជោគជ័យ!`
+        : shouldDisable
+        ? `⚠️ Deactivated ${updatedCount} user accounts!`
+        : `✅ Activated ${updatedCount} user accounts!`,
+      shouldDisable ? 'info' : 'success'
+    );
+    return { success: true, count: updatedCount };
+  };
+
+  /**
+   * Atomic O(N) Bulk Role Update (e.g., Regular User <-> Shop Owner).
+   */
+  const bulkUpdateUserRole = async (
+    userIds: string[],
+    newRole: UserRole
+  ): Promise<{ success: boolean; count: number }> => {
+    const rbac = verifyAdminPermissionOrThrow(currentUser, 'users.edit_role', `Bulk role update to ${newRole}`);
+    if (!rbac.allowed || newRole === 'admin') {
+      showToast(language === 'km' ? '⛔ មិនអនុញ្ញាតឱ្យកែប្រែតួនាទីនេះទេ!' : '⛔ Role update not permitted!', 'warning');
+      return { success: false, count: 0 };
+    }
+    const targetSet = new Set(userIds.filter(Boolean));
+    if (targetSet.size === 0) return { success: false, count: 0 };
+
+    const liveUsers = latestSyncStateRef.current.users || users;
+    let updatedCount = 0;
+
+    const nextUsers = liveUsers.map((u) => {
+      if (!targetSet.has(u.id) || isProtectedSystemAdminAccount(u)) return u;
+      updatedCount++;
+      return { ...u, role: newRole };
+    });
+
+    if (updatedCount === 0) return { success: false, count: 0 };
+
+    latestSyncStateRef.current.users = nextUsers;
+    setUsers(nextUsers);
+    safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+
+    if (isSupabaseConfigured()) {
+      pushCloudDocument('kft_cloud_users_v2', nextUsers).catch(() => {});
+    }
+
+    recordUserActivityAndAdminLog({
+      category: 'role_change',
+      action: 'ADMIN_BULK_ROLE_CHANGE',
+      actorId: currentUser?.id,
+      actorName: currentUser?.name || 'Admin',
+      actorRole: rbac.tier,
+      status: 'SUCCESS',
+      details: `Updated role to "${newRole}" for ${updatedCount} user(s) in bulk`,
+    }, true);
+
+    showToast(
+      language === 'km'
+        ? `បានប្តូរតួនាទីគណនីចំនួន ${updatedCount} ទៅជា "${newRole === 'owner' ? 'ម្ចាស់ហាង' : 'អ្នកប្រើប្រាស់ទូទៅ'}" ដោយជោគជ័យ!`
+        : `Updated ${updatedCount} accounts to "${newRole}"!`,
+      'success'
+    );
+    return { success: true, count: updatedCount };
+  };
+
+  /**
+   * Atomic O(N) Bulk User Deletion (replaces slow O(K * N) sequential deleteUserAccount loop).
+   */
+  const bulkDeleteUsers = async (
+    userIds: string[]
+  ): Promise<{ success: boolean; count: number }> => {
+    const rbac = verifyAdminPermissionOrThrow(currentUser, 'users.delete', `Bulk delete (${userIds.length} users)`);
+    if (!rbac.allowed) {
+      showToast(language === 'km' ? '⛔ គ្មានសិទ្ធិលុបគណនីជាក្រុមទេ!' : '⛔ Unauthorized for Bulk User Deletion!', 'warning');
+      return { success: false, count: 0 };
+    }
+    const targetIdSet = new Set(userIds.filter(Boolean));
+    if (targetIdSet.size === 0) return { success: false, count: 0 };
+
+    const liveUsers = latestSyncStateRef.current.users || users;
+    const liveDeletedUsers = latestSyncStateRef.current.deletedUsers || deletedUsers;
+
+    await createUsersBackupSnapshot(liveUsers, liveDeletedUsers, `Pre-Bulk Delete (${targetIdSet.size} users)`, 'pre_delete', currentUser);
+
+    const nowIso = new Date().toISOString();
+    const newTombstones: DeletedUserRecord[] = [];
+    const purgedIds = new Set<string>();
+    const purgedEmails = new Set<string>();
+
+    for (const u of liveUsers) {
+      if (!u || !targetIdSet.has(u.id) || isProtectedSystemAdminAccount(u)) continue;
+      purgedIds.add(u.id);
+      if (Array.isArray(u.legacyIds)) {
+        for (const lid of u.legacyIds) if (lid) purgedIds.add(lid);
+      }
+      const cleanEm = (u.email || '').toLowerCase().trim();
+      if (cleanEm) purgedEmails.add(cleanEm);
+      newTombstones.push({
+        id: u.id,
+        email: cleanEm,
+        phone: u.phone ? u.phone.replace(/[\s-+()]/g, '') : undefined,
+        username: u.username ? u.username.toLowerCase().trim() : undefined,
+        name: u.name,
+        deletedAt: nowIso,
+        deletedBy: currentUser?.name || 'Admin',
+        permanentlyDeleted: true,
+      });
+    }
+
+    if (newTombstones.length === 0) return { success: false, count: 0 };
+
+    const nextDeletedUsers = [
+      ...liveDeletedUsers.filter((d) => !purgedIds.has(d.id)),
+      ...newTombstones,
+    ];
+    const nextUsers = liveUsers.filter(
+      (u) =>
+        !purgedIds.has(u.id) &&
+        !(u.email && purgedEmails.has(u.email.toLowerCase().trim()))
+    );
+
+    latestSyncStateRef.current.deletedUsers = nextDeletedUsers;
+    latestSyncStateRef.current.users = nextUsers;
+    setDeletedUsers(nextDeletedUsers);
+    setUsers(nextUsers);
+
+    try {
+      localStorage.setItem('kft_deleted_users_v1', JSON.stringify(nextDeletedUsers));
+      safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+    } catch {}
+
+    if (isSupabaseConfigured()) {
+      Promise.all([
+        pushCloudDocument('kft_cloud_users_v2', nextUsers),
+        pushCloudDocument('kft_cloud_deleted_users_v1', nextDeletedUsers),
+      ]).catch(() => {});
+    }
+
+    recordUserActivityAndAdminLog({
+      category: 'admin_action',
+      action: 'ADMIN_BULK_DELETE_USERS',
+      actorId: currentUser?.id,
+      actorName: currentUser?.name || 'Admin',
+      actorRole: rbac.tier,
+      status: 'WARNING',
+      details: `Permanently deleted ${newTombstones.length} user account(s) in bulk`,
+    }, true);
+
+    showToast(
+      language === 'km'
+        ? `🗑️ បានលុបគណនីចំនួន ${newTombstones.length} ចេញពីប្រព័ន្ធដោយជោគជ័យ!`
+        : `🗑️ Deleted ${newTombstones.length} user accounts!`,
+      'success'
+    );
+    return { success: true, count: newTombstones.length };
+  };
+
+  /**
+   * Restores users from a saved Backup Snapshot or JSON Backup File (Safe Merge or Full Replace).
+   */
+  const restoreUsersFromBackup = async (
+    snapshotUsers: User[],
+    mode: 'merge' | 'replace' = 'merge'
+  ): Promise<{ success: boolean; count: number }> => {
+    const rbac = verifyAdminPermissionOrThrow(currentUser, 'users.backup_restore', `Restore users (${mode})`);
+    if (!rbac.allowed) {
+      showToast(language === 'km' ? '⛔ គ្មានសិទ្ធិស្តារទិន្នន័យ Backup ទេ!' : '⛔ Unauthorized for Database Restore!', 'warning');
+      return { success: false, count: 0 };
+    }
+    if (!Array.isArray(snapshotUsers) || snapshotUsers.length === 0) {
+      return { success: false, count: 0 };
+    }
+
+    const liveUsers = latestSyncStateRef.current.users || users;
+    const restoredIds = new Set(snapshotUsers.map((u) => u.id).filter(Boolean));
+    const restoredEmails = new Set(
+      snapshotUsers.map((u) => (u.email || '').toLowerCase().trim()).filter(Boolean)
+    );
+
+    // Clear tombstones for restored accounts so they are active immediately
+    const nextDeletedUsers = (latestSyncStateRef.current.deletedUsers || deletedUsers).filter(
+      (d) =>
+        !restoredIds.has(d.id) &&
+        !(d.email && restoredEmails.has(d.email.toLowerCase().trim()))
+    );
+
+    const combinedRaw = mode === 'replace' ? snapshotUsers : [...liveUsers, ...snapshotUsers];
+    const { repairedUsers } = runUserDataIntegrityAuditAndRepair(
+      combinedRaw,
+      latestSyncStateRef.current.transactions || transactions
+    );
+
+    latestSyncStateRef.current.deletedUsers = nextDeletedUsers;
+    latestSyncStateRef.current.users = repairedUsers;
+    setDeletedUsers(nextDeletedUsers);
+    setUsers(repairedUsers);
+
+    try {
+      localStorage.setItem('kft_deleted_users_v1', JSON.stringify(nextDeletedUsers));
+      safeSetCriticalAccountStorage('kft_users_v5', repairedUsers);
+    } catch {}
+
+    if (isSupabaseConfigured()) {
+      Promise.all([
+        pushCloudDocument('kft_cloud_users_v2', repairedUsers),
+        pushCloudDocument('kft_cloud_deleted_users_v1', nextDeletedUsers),
+      ]).catch(() => {});
+    }
+
+    recordUserActivityAndAdminLog({
+      category: 'backup_restore',
+      action: 'DB_BACKUP_RESTORED',
+      actorId: currentUser?.id,
+      actorName: currentUser?.name || 'Admin',
+      actorRole: rbac.tier,
+      status: 'SUCCESS',
+      details: `Restored ${snapshotUsers.length} user record(s) via "${mode}" mode (Total active: ${repairedUsers.length})`,
+    }, true);
+
+    showToast(
+      language === 'km'
+        ? `✅ បានស្តារទិន្នន័យគណនីចំនួន ${snapshotUsers.length} ពី Backup ដោយជោគជ័យ!`
+        : `✅ Successfully restored ${snapshotUsers.length} user accounts from backup!`,
+      'success'
+    );
+    return { success: true, count: repairedUsers.length };
+  };
+
+  /**
+   * Runs a full Data Integrity Audit & Repair across all users and verified transactions.
+   */
+  const runUsersIntegrityCheckAndRepair = async (): Promise<UserDataIntegrityReport> => {
+    const liveUsers = latestSyncStateRef.current.users || users;
+    const liveTxns = latestSyncStateRef.current.transactions || transactions;
+    const { repairedUsers, report } = runUserDataIntegrityAuditAndRepair(liveUsers, liveTxns);
+
+    if (report.status === 'REPAIRED') {
+      latestSyncStateRef.current.users = repairedUsers;
+      setUsers(repairedUsers);
+      safeSetCriticalAccountStorage('kft_users_v5', repairedUsers);
+      if (isSupabaseConfigured()) {
+        pushCloudDocument('kft_cloud_users_v2', repairedUsers).catch(() => {});
+      }
+    }
+
+    recordUserActivityAndAdminLog({
+      category: 'security',
+      action: 'USER_DATA_INTEGRITY_AUDIT',
+      actorId: currentUser?.id || 'system',
+      actorName: currentUser?.name || 'Admin',
+      status: 'SUCCESS',
+      details: `Integrity Audit: ${report.status} (${report.validUsersCount} valid users, Checksum: ${report.checksum})`,
+    });
+
+    return report;
   };
 
   const setAdminPassword = async (newPassword: string): Promise<boolean> => {
@@ -7878,16 +8443,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateUserRole = (userId: string, newRole: UserRole) => {
+    const rbac = verifyAdminPermissionOrThrow(currentUser, 'users.edit_role', `Update role of ${userId} to ${newRole}`);
+    if (!rbac.allowed) {
+      showToast(language === 'km' ? '⛔ អ្នកគ្មានសិទ្ធិកែប្រែតួនាទីអ្នកប្រើប្រាស់ទេ!' : '⛔ Unauthorized: Missing users.edit_role permission!', 'warning');
+      return;
+    }
     if (newRole === 'admin') {
       showToast(language === 'km' ? 'មិនអនុញ្ញាតឱ្យបង្កើតគណនីរដ្ឋបាលស្ទួនឡើយ!' : 'Duplicate admin accounts are strictly prohibited!', 'warning');
       recordSecurityAudit('ROLE_PROMOTION_BLOCKED', 'BLOCKED', 'UserManagement', `Attempted promotion of ${userId} to admin`);
       return;
     }
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    let targetUserObj: User | undefined;
+    setUsers(prev => {
+      const next = prev.map(u => {
+        if (u.id === userId) {
+          if (isProtectedSystemAdminAccount(u)) return u;
+          targetUserObj = { ...u, role: newRole };
+          return targetUserObj;
+        }
+        return u;
+      });
+      latestSyncStateRef.current.users = next;
+      safeSetCriticalAccountStorage('kft_users_v5', next);
+      return next;
+    });
     if (currentUser?.id === userId) {
       setCurrentUser(prev => prev ? { ...prev, role: newRole } : null);
     }
     recordSecurityAudit('ROLE_CHANGE', 'SUCCESS', 'UserManagement', `User ${userId} role changed to ${newRole}`);
+    recordUserActivityAndAdminLog({
+      category: 'role_change',
+      action: 'ADMIN_ROLE_CHANGE',
+      userId,
+      userName: targetUserObj?.name,
+      userEmail: targetUserObj?.email,
+      actorId: currentUser?.id,
+      actorName: currentUser?.name || 'Admin',
+      actorRole: rbac.tier,
+      status: 'SUCCESS',
+      details: `Changed account role to "${newRole}"`,
+    }, true);
     showToast(language === 'km' ? 'បានកែប្រែសិទ្ធិអ្នកប្រើប្រាស់' : 'Updated user role', 'success');
   };
 
@@ -13857,6 +14452,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         disableUserAccount,
         deleteUserAccount,
         clearAllRegisteredUsers,
+        bulkGrantUserVip,
+        bulkCancelUserVip,
+        bulkSetUserAccountStatus,
+        bulkUpdateUserRole,
+        bulkDeleteUsers,
+        restoreUsersFromBackup,
+        runUsersIntegrityCheckAndRepair,
         loginAdmin,
         loginAdminWithBiometric,
         setAdminPassword,
