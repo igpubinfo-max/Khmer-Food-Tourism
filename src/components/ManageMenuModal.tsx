@@ -14,6 +14,7 @@ import {
   isValidCambodiaCoordinates, buildCanonicalGoogleMapsPinUrl,
   isValidGoogleMapsUrl, extractCoordsFromGoogleMapsUrl,
   BUSINESS_CATEGORY_CATALOG, inferBusinessTypeAndCategory, isHotelBusinessRecord,
+  isUserOwnerOfRestaurantRecord,
 } from '../types';
 import { tr } from '../utils/i18n';
 import {
@@ -178,12 +179,12 @@ export const ManageMenuModal: React.FC = () => {
     currentUser?.username === 'admin' || 
     currentUser?.username === 'cheasavuth';
 
+  const ownedShopsForCurrentUser = getOwnedRestaurantsForUser(currentUser);
   const isOwner = Boolean(
     currentUser &&
-      (managingRestaurant.ownerId === currentUser.id ||
-        (currentUser.email &&
-          managingRestaurant.ownerEmail &&
-          managingRestaurant.ownerEmail.trim().toLowerCase() === currentUser.email.trim().toLowerCase()))
+      (isUserOwnerOfRestaurantRecord(currentUser, currentRest) ||
+        isUserOwnerOfRestaurantRecord(currentUser, managingRestaurant) ||
+        ownedShopsForCurrentUser.some((r) => r.id === currentRest.id))
   );
   const isApprovedVip = isUserVipActive(currentUser);
   const vipState = getVipAccountState(currentUser);
@@ -200,7 +201,7 @@ export const ManageMenuModal: React.FC = () => {
     ? [...restaurants.filter((r) => !isSeedRestaurantId(r.id))].sort(
         (a, b) => getRestaurantCreatedAtMs(b) - getRestaurantCreatedAtMs(a)
       )
-    : getOwnedRestaurantsForUser(currentUser);
+    : ownedShopsForCurrentUser;
 
   const isPremiumActive = isRestaurantPremiumActive(currentRest) || isApprovedVip || isAdmin;
   const isExpired = vipState === 'expired_vip' || (currentRest.membershipTier === 'premium' && !isPremiumActive);

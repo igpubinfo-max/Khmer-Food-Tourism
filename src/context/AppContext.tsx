@@ -24,9 +24,17 @@ import {
   isDeprecatedDemoSeedTransaction,
   inferBusinessTypeAndCategory,
   isHotelBusinessRecord,
+  isUserOwnerOfRestaurantRecord,
   type ShopPhotoReplacementRequest,
   type PendingListingUpgradeRequest,
 } from '../types';
+import {
+  uploadImageToPermanentCloud,
+  isInlineBase64RasterImage,
+  isUniqueGrillRestaurant,
+  getUniqueGrillFallbackPhotoUrl,
+  getRememberedCloudUrlForEntity,
+} from '../services/cloudImageStorageService';
 import {
   verifyAbaPaymentAndReceipt,
   computeReceiptImageFingerprint,
@@ -65,6 +73,10 @@ import {
   saveAdminAvatar,
   cacheUserAvatar,
   getCachedUserAvatar,
+  cacheUserAvatarForAccount,
+  getCachedUserAvatarForAccount,
+  clearCachedUserAvatarForAccount,
+  isCustomUploadedAvatarDataUrl,
   isPlaceholderOrInvalidAvatarUrl,
 } from '../utils/avatarHelper';
 import { translateTextToChinese, useChineseDomTranslation, stripForeignScripts, tr } from '../utils/i18n';
@@ -92,6 +104,9 @@ import {
   deduplicateAndNormalizeUsers,
   upsertSingleUserToCloud,
   USER_RECORD_PREFIX,
+  AVATAR_RECORD_PREFIX,
+  uploadAndSyncUserAvatarToCloud,
+  type CloudAvatarRecord,
   fetchPaymentProofFromCloudOnDemand,
   mergeAndPushTransactionsToCloud,
   mergeAndPushSupportTicketsToCloud,
@@ -1012,15 +1027,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             );
           }
           const cachedCurAv =
+            getCachedUserAvatarForAccount(sanitizedCur) ||
             getCachedUserAvatar(sanitizedCur.id) ||
             (sanitizedCur.email ? getCachedUserAvatar(sanitizedCur.email) : null) ||
             (sanitizedCur.name ? getCachedUserAvatar(`name:${sanitizedCur.name}`) : null);
           if (
             cachedCurAv &&
-            ((cachedCurAv.startsWith('data:image/') && !cachedCurAv.startsWith('data:image/svg')) ||
+            (isCustomUploadedAvatarDataUrl(cachedCurAv) ||
               isPlaceholderOrInvalidAvatarUrl(sanitizedCur.avatar))
           ) {
             sanitizedCur = { ...sanitizedCur, avatar: cachedCurAv };
+          }
+          if (isCustomUploadedAvatarDataUrl(sanitizedCur.avatar)) {
+            cacheUserAvatarForAccount(sanitizedCur, sanitizedCur.avatar, false);
           }
           const authVip = findLocalAuthoritativeVipEntitlement(sanitizedCur, users);
           const authVipExpMs = authVip ? (authVip.expiryMs || parseSafeDateMs(authVip.expiryIso)) : 0;
@@ -1224,8 +1243,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       : [];
 
     // Preserve ONLY verified unique shop photos or genuine custom uploads; otherwise empty string ('') so neutral DefaultShopIcon renders
-    const rawPhoto = r.photoUrl || r.profileImage || galleryPhotos[0] || '';
-    const photoUrl = sanitizeVerifiedShopPhotoUrl(restId, rawPhoto);
+    const isUG = isUniqueGrillRestaurant({ id: restId, name: r.nameKh, nameEn: r.nameEn });
+    const rawPhoto =
+      r.photoUrl ||
+      r.profileImage ||
+      galleryPhotos[0] ||
+      r.pendingUpgradeRequest?.proposedChanges?.photoUrl ||
+      r.pendingPhotoReplacement?.newPhotoUrl ||
+      '';
+    let photoUrl = sanitizeVerifiedShopPhotoUrl(restId, rawPhoto);
+    let thumbnailUrl = r.thumbnailUrl ? sanitizeVerifiedShopPhotoUrl(restId, r.thumbnailUrl) : '';
+    if (!photoUrl) {
+      const remembered = getRememberedCloudUrlForEntity(restId);
+      if (remembered?.url) {
+        photoUrl = sanitizeVerifiedShopPhotoUrl(restId, remembered.url);
+        thumbnailUrl = sanitizeVerifiedShopPhotoUrl(restId, remembered.thumbnailUrl || remembered.url);
+      } else if (isUG) {
+        photoUrl = getUniqueGrillFallbackPhotoUrl(restId);
+        thumbnailUrl = photoUrl;
+      }
+    }
     const rawProfile = r.profileImage || photoUrl;
     const cleanProfileImage = sanitizeVerifiedShopPhotoUrl(restId, rawProfile) || photoUrl;
     const genuineReviews: RestaurantReview[] = Array.isArray(r.reviews)
@@ -1280,6 +1317,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             : 'Authentic traditional Khmer restaurant.')
       ),
       photoUrl,
+      thumbnailUrl: thumbnailUrl || (photoUrl.startsWith('https://') ? photoUrl : r.thumbnailUrl),
       profileImage: cleanProfileImage,
       galleryPhotos: galleryPhotos.length > 0 ? galleryPhotos : photoUrl ? [photoUrl] : [],
       foodImages,
@@ -1370,10 +1408,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       paymentStatus: r.paymentStatus || 'verified',
       promotionalPrice: typeof r.promotionalPrice === 'number' ? r.promotionalPrice : 9.99,
       isPromoted,
-      ownerId: r.ownerId,
-      ownerName: r.ownerName,
-      ownerEmail: r.ownerEmail,
-      ownerPhone: r.ownerPhone,
+      ownerId: r.ownerId || r.pendingUpgradeRequest?.submittedByUserId,
+      ownerName: r.ownerName || r.pendingUpgradeRequest?.submittedByName || (isUG ? 'Igp2026d' : undefined),
+      ownerEmail: r.ownerEmail || r.pendingUpgradeRequest?.submittedByEmail || (isUG ? 'igp2026d@gmail.com' : undefined),
+      ownerPhone: r.ownerPhone || r.pendingUpgradeRequest?.submittedByPhone,
       paymentDate: r.paymentDate,
       promoVideoUrl: r.promoVideoUrl,
       telegramUrl: r.telegramUrl,
@@ -1444,12 +1482,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     list: Restaurant[],
     deletedRestsMap: Record<string, string> = {}
   ): Restaurant[] => {
-    const hasUniqueGrill = list.some((r) => {
-      const kh = (r.nameKh || '').toLowerCase();
-      const en = (r.nameEn || '').toLowerCase();
-      return kh.includes('unique grill') || en.includes('unique grill');
-    });
-    if (hasUniqueGrill) return list;
+    const hasUniqueGrill = list.some((r) =>
+      isUniqueGrillRestaurant({ id: r.id, name: r.nameKh, nameEn: r.nameEn })
+    );
+    if (hasUniqueGrill) {
+      return list.map((r) => {
+        if (!isUniqueGrillRestaurant({ id: r.id, name: r.nameKh, nameEn: r.nameEn })) return r;
+        const needsHealing =
+          !r.photoUrl ||
+          !r.photoUrl.trim() ||
+          !r.ownerEmail ||
+          r.ownerEmail.trim().toLowerCase() !== 'igp2026d@gmail.com';
+        if (!needsHealing) return r;
+        const remembered = getRememberedCloudUrlForEntity(r.id);
+        const healedPhoto =
+          (r.photoUrl && r.photoUrl.trim()) ||
+          remembered?.url ||
+          r.pendingUpgradeRequest?.proposedChanges?.photoUrl ||
+          r.pendingPhotoReplacement?.newPhotoUrl ||
+          getUniqueGrillFallbackPhotoUrl(r.id);
+        return normalizeRestaurant({
+          ...r,
+          photoUrl: healedPhoto,
+          profileImage: (r.profileImage && r.profileImage.trim()) || healedPhoto,
+          thumbnailUrl: r.thumbnailUrl || remembered?.thumbnailUrl || healedPhoto,
+          galleryPhotos:
+            Array.isArray(r.galleryPhotos) && r.galleryPhotos.filter(Boolean).length > 0
+              ? r.galleryPhotos.filter(Boolean)
+              : [healedPhoto],
+          ownerEmail: r.ownerEmail || 'igp2026d@gmail.com',
+          ownerName: r.ownerName || 'Igp2026d',
+        });
+      });
+    }
     if (isRestaurantIdDeleted('rest-admin-unique-grill', undefined, deletedRestsMap)) {
       return list;
     }
@@ -1471,6 +1536,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               if (!isRestaurantIdDeleted(converted.id, undefined, deletedRestsMap, converted.googlePlaceId)) {
                 cachedPlaceRest = normalizeRestaurant({
                   ...converted,
+                  ownerEmail: 'igp2026d@gmail.com',
+                  ownerName: 'Igp2026d',
+                  photoUrl: converted.photoUrl || getUniqueGrillFallbackPhotoUrl(converted.id),
+                  profileImage: converted.profileImage || converted.photoUrl || getUniqueGrillFallbackPhotoUrl(converted.id),
                   isPromoted: true,
                   isFeatured: true,
                   membershipTier: 'premium',
@@ -1520,6 +1589,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         locationVerifiedAt: '2026-11-04T09:30:00.000Z',
         signatureDishesKh: ['សាច់អាំងពិសេស', 'គ្រឿងសមុទ្រ និងសាច់អាំង'],
         businessCategory: 'seafood',
+        ownerEmail: 'igp2026d@gmail.com',
+        ownerName: 'Igp2026d',
         dataSource: 'vip_owner',
         status: 'approved',
         isVerified: true,
@@ -2907,19 +2978,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             (Array.isArray(r.foodImages) && r.foodImages.some(g => g.startsWith('data:'))) ||
             (Array.isArray(r.menuItems) && r.menuItems.some(m => typeof m.photoUrl === 'string' && m.photoUrl.startsWith('data:')));
           if (hasInlineDataUrl && (forceAggressiveStrip || isOverridePersistedInLocalStorage('restaurants', r.id))) {
-            const fallbackUrl = seedRestMap.get(r.id) || '';
+            const rememberedCloud = getRememberedCloudUrlForEntity(r.id);
+            const fallbackUrl =
+              rememberedCloud?.url ||
+              seedRestMap.get(r.id) ||
+              (isUniqueGrillRestaurant({ id: r.id, name: r.nameKh, nameEn: r.nameEn })
+                ? getUniqueGrillFallbackPhotoUrl(r.id)
+                : '');
+            // Never strip a custom shop's photoUrl to '' unless we have a valid Cloud URL or forceAggressiveStrip is active
+            if (!fallbackUrl && !forceAggressiveStrip) {
+              return r;
+            }
             return {
               ...r,
-              photoUrl: r.photoUrl?.startsWith('data:') ? fallbackUrl : r.photoUrl,
-              profileImage: r.profileImage?.startsWith('data:') ? fallbackUrl : r.profileImage,
+              photoUrl: r.photoUrl?.startsWith('data:') ? (fallbackUrl || r.photoUrl) : r.photoUrl,
+              profileImage: r.profileImage?.startsWith('data:') ? (fallbackUrl || r.profileImage) : r.profileImage,
+              thumbnailUrl: rememberedCloud?.thumbnailUrl || r.thumbnailUrl,
               galleryPhotos: Array.isArray(r.galleryPhotos)
-                ? r.galleryPhotos.filter(g => !g.startsWith('data:'))
+                ? r.galleryPhotos.map(g => (g.startsWith('data:') ? fallbackUrl : g)).filter(Boolean)
                 : [],
               foodImages: Array.isArray(r.foodImages)
                 ? r.foodImages.filter(g => !g.startsWith('data:'))
                 : [],
               menuItems: Array.isArray(r.menuItems)
-                ? r.menuItems.map(m => (m.photoUrl?.startsWith('data:') ? { ...m, photoUrl: '' } : m))
+                ? r.menuItems.map(m => {
+                    if (m.photoUrl?.startsWith('data:')) {
+                      const remMenu = getRememberedCloudUrlForEntity(m.id);
+                      return {
+                        ...m,
+                        photoUrl: remMenu?.url || (forceAggressiveStrip ? '' : m.photoUrl),
+                        thumbnailUrl: remMenu?.thumbnailUrl || m.thumbnailUrl,
+                      };
+                    }
+                    return m;
+                  })
                 : [],
             };
           }
@@ -3143,7 +3235,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             cr.id &&
             !isRestaurantIdDeleted(cr.id, cr.updatedAt, deletedRestsMap, cr.googlePlaceId)
           ) {
-            customVipShopsMap.set(cr.id, cr);
+            const prev = customVipShopsMap.get(cr.id);
+            const preservedPhoto =
+              (cr.photoUrl && cr.photoUrl.trim()) ||
+              (prev?.photoUrl && prev.photoUrl.trim()) ||
+              '';
+            const preservedProfile =
+              (cr.profileImage && cr.profileImage.trim()) ||
+              (prev?.profileImage && prev.profileImage.trim()) ||
+              preservedPhoto;
+            customVipShopsMap.set(cr.id, {
+              ...prev,
+              ...cr,
+              photoUrl: preservedPhoto,
+              profileImage: preservedProfile,
+              thumbnailUrl: cr.thumbnailUrl || prev?.thumbnailUrl,
+            });
           }
         }
         const customVipShops = Array.from(customVipShopsMap.values());
@@ -3172,6 +3279,230 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('Pre-update database backup warning:', e);
     }
   }, [users, restaurants, transactions, currentUser, deletedUsers, appSettings.geminiApiKey, appSettings.googleMapsApiKey]);
+
+  // Automatic Background Migration of All Uploaded Inline Images (Shops, Hotels, Food, Travel) to Permanent Cloud Storage WebP URLs + Thumbnails
+  const isMigratingCloudImagesRef = useRef<boolean>(false);
+  useEffect(() => {
+    if (isMigratingCloudImagesRef.current) return;
+
+    const restNeedsMigration = restaurants.some(
+      (r) =>
+        isInlineBase64RasterImage(r.photoUrl) ||
+        isInlineBase64RasterImage(r.profileImage) ||
+        isInlineBase64RasterImage(r.pendingPhotoReplacement?.newPhotoUrl) ||
+        isInlineBase64RasterImage(r.pendingUpgradeRequest?.proposedChanges?.photoUrl) ||
+        (Array.isArray(r.menuItems) && r.menuItems.some((m) => isInlineBase64RasterImage(m.photoUrl)))
+    );
+    const foodNeedsMigration = foods.some((f) => isInlineBase64RasterImage(f.photoUrl));
+    const destNeedsMigration = destinations.some((d) => isInlineBase64RasterImage(d.photoUrl));
+    const trendNeedsMigration = trendingFoods.some((t) => isInlineBase64RasterImage(t.photoUrl));
+
+    if (!restNeedsMigration && !foodNeedsMigration && !destNeedsMigration && !trendNeedsMigration) {
+      return;
+    }
+
+    isMigratingCloudImagesRef.current = true;
+    const timer = window.setTimeout(async () => {
+      try {
+        // 1. Migrate Shops & Hotels (`restaurants`)
+        if (restNeedsMigration) {
+          let anyRestMigrated = false;
+          const migratedRests = await Promise.all(
+            latestSyncStateRef.current.restaurants.map(async (r) => {
+              let changed = false;
+              let nextRest = { ...r };
+              const folder = isHotelBusinessRecord(r) ? 'hotels' : 'shops';
+
+              if (isInlineBase64RasterImage(nextRest.photoUrl)) {
+                const up = await uploadImageToPermanentCloud(nextRest.photoUrl, folder, nextRest.id);
+                if (up.url && up.url.startsWith('https://')) {
+                  nextRest.photoUrl = up.url;
+                  nextRest.thumbnailUrl = up.thumbnailUrl || up.url;
+                  nextRest.profileImage = up.url;
+                  nextRest.galleryPhotos = [up.url];
+                  changed = true;
+                }
+              } else if (isInlineBase64RasterImage(nextRest.profileImage)) {
+                const up = await uploadImageToPermanentCloud(nextRest.profileImage!, folder, nextRest.id);
+                if (up.url && up.url.startsWith('https://')) {
+                  nextRest.profileImage = up.url;
+                  if (!nextRest.photoUrl || isInlineBase64RasterImage(nextRest.photoUrl)) {
+                    nextRest.photoUrl = up.url;
+                  }
+                  nextRest.thumbnailUrl = up.thumbnailUrl || up.url;
+                  changed = true;
+                }
+              }
+
+              if (
+                nextRest.pendingPhotoReplacement &&
+                isInlineBase64RasterImage(nextRest.pendingPhotoReplacement.newPhotoUrl)
+              ) {
+                const up = await uploadImageToPermanentCloud(
+                  nextRest.pendingPhotoReplacement.newPhotoUrl,
+                  folder,
+                  `${nextRest.id}_pending`
+                );
+                if (up.url && up.url.startsWith('https://')) {
+                  nextRest.pendingPhotoReplacement = {
+                    ...nextRest.pendingPhotoReplacement,
+                    newPhotoUrl: up.url,
+                  };
+                  changed = true;
+                }
+              }
+
+              if (
+                nextRest.pendingUpgradeRequest?.proposedChanges &&
+                isInlineBase64RasterImage(nextRest.pendingUpgradeRequest.proposedChanges.photoUrl)
+              ) {
+                const up = await uploadImageToPermanentCloud(
+                  nextRest.pendingUpgradeRequest.proposedChanges.photoUrl!,
+                  folder,
+                  `${nextRest.id}_upgrade`
+                );
+                if (up.url && up.url.startsWith('https://')) {
+                  nextRest.pendingUpgradeRequest = {
+                    ...nextRest.pendingUpgradeRequest,
+                    proposedChanges: {
+                      ...nextRest.pendingUpgradeRequest.proposedChanges,
+                      photoUrl: up.url,
+                      profileImage: up.url,
+                    },
+                  };
+                  changed = true;
+                }
+              }
+
+              if (Array.isArray(nextRest.menuItems) && nextRest.menuItems.some((m) => isInlineBase64RasterImage(m.photoUrl))) {
+                const migratedMenus = await Promise.all(
+                  nextRest.menuItems.map(async (m) => {
+                    if (!isInlineBase64RasterImage(m.photoUrl)) return m;
+                    const up = await uploadImageToPermanentCloud(m.photoUrl, 'menus', m.id || `${nextRest.id}_menu`);
+                    if (up.url && up.url.startsWith('https://')) {
+                      changed = true;
+                      return {
+                        ...m,
+                        photoUrl: up.url,
+                        thumbnailUrl: up.thumbnailUrl || up.url,
+                      };
+                    }
+                    return m;
+                  })
+                );
+                nextRest.menuItems = migratedMenus;
+              }
+
+              if (changed) {
+                anyRestMigrated = true;
+                recordPermanentRestaurantOverride(nextRest);
+              }
+              return nextRest;
+            })
+          );
+
+          if (anyRestMigrated) {
+            latestSyncStateRef.current.restaurants = migratedRests;
+            setRestaurants(migratedRests);
+            scheduleStorageWrite('kft_restaurants_real_v13', migratedRests, 400);
+            if (isSupabaseConfigured()) {
+              pushCloudDocument(
+                'kft_cloud_custom_restaurants_v1',
+                migratedRests.filter((r) => !isSeedRestaurantId(r.id))
+              ).catch(() => {});
+            }
+          }
+        }
+
+        // 2. Migrate Food Items (`foods`)
+        if (foodNeedsMigration) {
+          let anyFoodMigrated = false;
+          const migratedFoods = await Promise.all(
+            foods.map(async (f) => {
+              if (!isInlineBase64RasterImage(f.photoUrl)) return f;
+              const up = await uploadImageToPermanentCloud(f.photoUrl, 'foods', f.id);
+              if (up.url && up.url.startsWith('https://')) {
+                anyFoodMigrated = true;
+                const updatedFood: FoodItem = {
+                  ...f,
+                  photoUrl: up.url,
+                  thumbnailUrl: up.thumbnailUrl || up.url,
+                };
+                recordPermanentFoodOverride(updatedFood);
+                return updatedFood;
+              }
+              return f;
+            })
+          );
+          if (anyFoodMigrated) {
+            setFoods(migratedFoods);
+            scheduleStorageWrite('kft_foods_real_v13', migratedFoods, 400);
+          }
+        }
+
+        // 3. Migrate Travel Destinations (`destinations`)
+        if (destNeedsMigration) {
+          let anyDestMigrated = false;
+          const migratedDests = await Promise.all(
+            destinations.map(async (d) => {
+              if (!isInlineBase64RasterImage(d.photoUrl)) return d;
+              const up = await uploadImageToPermanentCloud(d.photoUrl, 'destinations', d.id);
+              if (up.url && up.url.startsWith('https://')) {
+                anyDestMigrated = true;
+                const updatedDest: TouristDestination = {
+                  ...d,
+                  photoUrl: up.url,
+                  thumbnailUrl: up.thumbnailUrl || up.url,
+                };
+                recordPermanentDestinationOverride(updatedDest);
+                return updatedDest;
+              }
+              return d;
+            })
+          );
+          if (anyDestMigrated) {
+            setDestinations(migratedDests);
+            scheduleStorageWrite('kft_destinations_real_v9', migratedDests, 400);
+          }
+        }
+
+        // 4. Migrate Trending Foods (`trendingFoods`)
+        if (trendNeedsMigration) {
+          let anyTrendMigrated = false;
+          const migratedTrends = await Promise.all(
+            trendingFoods.map(async (t) => {
+              if (!isInlineBase64RasterImage(t.photoUrl)) return t;
+              const up = await uploadImageToPermanentCloud(t.photoUrl, 'foods', t.id);
+              if (up.url && up.url.startsWith('https://')) {
+                anyTrendMigrated = true;
+                const updatedTrend: TrendingFoodItem = {
+                  ...t,
+                  photoUrl: up.url,
+                  thumbnailUrl: up.thumbnailUrl || up.url,
+                };
+                recordPermanentTrendingFoodOverride(updatedTrend);
+                return updatedTrend;
+              }
+              return t;
+            })
+          );
+          if (anyTrendMigrated) {
+            setTrendingFoods(migratedTrends);
+            scheduleStorageWrite('kft_trending_foods_v5', migratedTrends, 400);
+          }
+        }
+      } catch (err) {
+        console.warn('[CloudImageMigration] Background migration warning:', err);
+      } finally {
+        isMigratingCloudImagesRef.current = false;
+      }
+    }, 1200);
+
+    return () => {
+      window.clearTimeout(timer);
+      isMigratingCloudImagesRef.current = false;
+    };
+  }, [restaurants, foods, destinations, trendingFoods]);
 
   const lastCurrentUserSyncSigRef = useRef<string>('');
   const hasCompletedInitialCloudSyncRef = useRef<boolean>(!isSupabaseConfigured());
@@ -3364,7 +3695,69 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       latestSyncStateRef.current.currentUser = syncedSlotsUser;
       safeSetCriticalAccountStorage('kft_current_user_v5', syncedSlotsUser);
     }
+
+    // Propagate any newly synced or IndexedDB-hydrated custom profile picture onto `currentUser`
+    const curHasCustomAv = isCustomUploadedAvatarDataUrl(currentUser.avatar);
+    const matchedCustomAv =
+      matchedInUsers && isCustomUploadedAvatarDataUrl(matchedInUsers.avatar)
+        ? matchedInUsers.avatar
+        : matchedInUsers && isCustomUploadedAvatarDataUrl(matchedInUsers.cloudAvatarUrl)
+          ? matchedInUsers.cloudAvatarUrl
+          : undefined;
+    const cachedCustomAv = getCachedUserAvatarForAccount(currentUser) || undefined;
+    const curAvMs = parseSafeDateMs(currentUser.avatarUpdatedAt);
+    const matchedAvMs = parseSafeDateMs(matchedInUsers?.avatarUpdatedAt);
+
+    const bestSyncedAvatar =
+      matchedCustomAv && (!curHasCustomAv || (matchedAvMs > 0 && matchedAvMs > curAvMs))
+        ? matchedCustomAv
+        : !curHasCustomAv && cachedCustomAv && isCustomUploadedAvatarDataUrl(cachedCustomAv)
+          ? cachedCustomAv
+          : undefined;
+
+    if (bestSyncedAvatar && bestSyncedAvatar !== currentUser.avatar) {
+      const syncedAvatarUser: User = {
+        ...currentUser,
+        avatar: bestSyncedAvatar,
+        cloudAvatarUrl: matchedInUsers?.cloudAvatarUrl || currentUser.cloudAvatarUrl,
+        avatarUpdatedAt: matchedInUsers?.avatarUpdatedAt || currentUser.avatarUpdatedAt,
+      };
+      cacheUserAvatarForAccount(syncedAvatarUser, bestSyncedAvatar, false);
+      setCurrentUser(syncedAvatarUser);
+      latestSyncStateRef.current.currentUser = syncedAvatarUser;
+      safeSetCriticalAccountStorage('kft_current_user_v5', syncedAvatarUser);
+    }
   }, [users, transactions, supportTickets, currentUser?.id, currentUser?.email]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleAvatarCacheHydrated = () => {
+      setCurrentUser(prev => {
+        if (!prev) return prev;
+        if (prev.role === 'admin' || prev.id === 'admin-authorized-single') {
+          const adminAv = getAdminAvatarUrl();
+          if (adminAv && adminAv !== prev.avatar) {
+            const next = { ...prev, avatar: adminAv };
+            latestSyncStateRef.current.currentUser = next;
+            safeSetCriticalAccountStorage('kft_current_user_v5', next);
+            return next;
+          }
+          return prev;
+        }
+        if (isCustomUploadedAvatarDataUrl(prev.avatar)) return prev;
+        const cached = getCachedUserAvatarForAccount(prev);
+        if (cached && isCustomUploadedAvatarDataUrl(cached) && cached !== prev.avatar) {
+          const next = { ...prev, avatar: cached };
+          latestSyncStateRef.current.currentUser = next;
+          safeSetCriticalAccountStorage('kft_current_user_v5', next);
+          return next;
+        }
+        return prev;
+      });
+    };
+    window.addEventListener('kft-avatar-cache-updated', handleAvatarCacheHydrated);
+    return () => window.removeEventListener('kft-avatar-cache-updated', handleAvatarCacheHydrated);
+  }, []);
 
   /**
    * Requirement #4: Comprehensive VIP Expiration Reminders & Immediate Automatic Downgrade
@@ -4767,6 +5160,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // and shop submissions appear immediately (< 1 second) without manual refresh or re-login.
       unsubscribeRealtimeCloud = subscribeToCloudRealtimeUpdates((evt) => {
         if (!evt || !evt.key) return;
+        if (evt.key.startsWith(AVATAR_RECORD_PREFIX) && evt.payload && typeof evt.payload === 'object') {
+          const rec = evt.payload as CloudAvatarRecord;
+          const bestAv = rec.dataUrl || rec.cloudAvatarUrl || rec.avatarUrl;
+          if (rec.userId && isCustomUploadedAvatarDataUrl(bestAv)) {
+            if (rec.userId === 'admin-authorized-single') {
+              saveAdminAvatar(bestAv);
+              setCurrentUser(prev => {
+                if (!prev || (prev.role !== 'admin' && prev.id !== 'admin-authorized-single')) return prev;
+                const next = { ...prev, avatar: bestAv, cloudAvatarUrl: rec.cloudAvatarUrl, avatarUpdatedAt: rec.updatedAt };
+                latestSyncStateRef.current.currentUser = next;
+                safeSetCriticalAccountStorage('kft_current_user_v5', next);
+                return next;
+              });
+              return;
+            }
+            const avUser: User = {
+              id: rec.userId,
+              email: rec.email || '',
+              phone: rec.phone,
+              name: '',
+              role: 'user',
+              avatar: bestAv,
+              cloudAvatarUrl: rec.cloudAvatarUrl,
+              avatarUpdatedAt: rec.updatedAt,
+              createdAt: '2026-01-01',
+            };
+            cacheUserAvatarForAccount(avUser, bestAv, true);
+            setUsers(prev => {
+              const liveDel = latestSyncStateRef.current.deletedUsers || [];
+              const next = deduplicateAndNormalizeUsers([...prev, avUser], liveDel);
+              latestSyncStateRef.current.users = next;
+              safeSetCriticalAccountStorage('kft_users_v5', next);
+              return next;
+            });
+          }
+          return;
+        }
         if (evt.key.startsWith(USER_RECORD_PREFIX) && evt.payload && typeof evt.payload === 'object') {
           const incomingUser = evt.payload as User;
           if (incomingUser.id || incomingUser.email) {
@@ -5151,7 +5581,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(cloudMerged) && cloudMerged.length > 0) {
           setUsers(prev => {
             const next = deduplicateAndNormalizeUsers(
-              [...cloudMerged, ...prev, userObj],
+              [userObj, ...prev, ...cloudMerged],
               latestSyncStateRef.current.deletedUsers || cleanedDeleted
             );
             latestSyncStateRef.current.users = next;
@@ -5164,6 +5594,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             if (liveCur && doesUserMatchTarget(liveCur, userObj)) {
               const matchedMe = next.find(u => doesUserMatchTarget(u, userObj));
               if (matchedMe && JSON.stringify(matchedMe) !== JSON.stringify(liveCur)) {
+                if (isCustomUploadedAvatarDataUrl(matchedMe.avatar)) {
+                  cacheUserAvatarForAccount(matchedMe, matchedMe.avatar, true);
+                }
                 setCurrentUser(matchedMe);
                 latestSyncStateRef.current.currentUser = matchedMe;
                 safeSetCriticalAccountStorage('kft_current_user_v5', matchedMe);
@@ -5237,8 +5670,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         );
         return false;
       }
+      const existingCachedAv = getCachedUserAvatarForAccount(existing);
       const updatedExisting: User = {
         ...existing,
+        avatar: isCustomUploadedAvatarDataUrl(existing.avatar)
+          ? existing.avatar
+          : existingCachedAv && isCustomUploadedAvatarDataUrl(existingCachedAv)
+            ? existingCachedAv
+            : existing.avatar,
         lastLoginAt: nowIso,
         lastActiveAt: nowIso,
       };
@@ -5266,8 +5705,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const phoneVal = isPhone ? identifier.trim() : undefined;
     const nameVal = isPhone ? `អ្នកប្រើប្រាស់ ${identifier.trim()}` : clean.split('@')[0];
 
+    const candidateCanonicalId = getCanonicalUserId({ email: emailVal, phone: phoneVal, role: assignedRole, authProvider: isPhone ? 'phone' : 'email' });
+    const cachedCandidateAv = getCachedUserAvatarForAccount({ id: candidateCanonicalId, email: emailVal, phone: phoneVal, name: nameVal });
+
     const candidateUser: User = {
-      id: getCanonicalUserId({ email: emailVal, phone: phoneVal, role: assignedRole, authProvider: isPhone ? 'phone' : 'email' }),
+      id: candidateCanonicalId,
       name: nameVal,
       email: emailVal,
       phone: phoneVal,
@@ -5276,7 +5718,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       linkedProviders: [isPhone ? 'phone' : 'email'],
       isVerified: true,
       verifiedAt: nowIso,
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit&crop=q=80',
+      avatar: cachedCandidateAv || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit&crop=q=80',
       createdAt: nowIso.split('T')[0],
       registeredAtIso: nowIso,
       lastLoginAt: nowIso,
@@ -6919,10 +7361,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         );
         return false;
       }
+      const existingCachedAv = getCachedUserAvatarForAccount(existing);
       const updatedExisting: User = {
         ...existing,
         name: displayName || existing.name,
         phone: phoneVal || existing.phone,
+        avatar: isCustomUploadedAvatarDataUrl(existing.avatar)
+          ? existing.avatar
+          : existingCachedAv && isCustomUploadedAvatarDataUrl(existingCachedAv)
+            ? existingCachedAv
+            : existing.avatar,
         lastLoginAt: nowIso,
         lastActiveAt: nowIso,
       };
@@ -6945,13 +7393,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return true;
     }
 
+    const newCanonicalId = getCanonicalUserId({
+      email: emailVal,
+      phone: phoneVal,
+      role: safeRole,
+      authProvider: isPhone ? 'phone' : 'email',
+    });
+    const newCachedAv = getCachedUserAvatarForAccount({
+      id: newCanonicalId,
+      email: emailVal,
+      phone: phoneVal,
+      name: displayName,
+    });
+
     const newUser: User = {
-      id: getCanonicalUserId({
-        email: emailVal,
-        phone: phoneVal,
-        role: safeRole,
-        authProvider: isPhone ? 'phone' : 'email',
-      }),
+      id: newCanonicalId,
       name: displayName,
       email: emailVal,
       role: safeRole,
@@ -6961,7 +7417,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       linkedProviders: [isPhone ? 'phone' : 'email'],
       isVerified: true,
       verifiedAt: nowIso,
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+      avatar: newCachedAv || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
       createdAt: nowIso.split('T')[0],
       registeredAtIso: nowIso,
       lastLoginAt: nowIso,
@@ -7032,19 +7488,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (existing.id !== canonicalGoogleId) legacySet.add(existing.id);
       if (profile.id && profile.id !== canonicalGoogleId) legacySet.add(profile.id);
 
+      const existingGoogleCachedAv = getCachedUserAvatarForAccount({
+        ...existing,
+        id: canonicalGoogleId,
+        email: cleanEmail || existing.email,
+      });
       const updated: User = {
         ...existing,
         id: canonicalGoogleId,
         name: profile.name || existing.name,
         email: cleanEmail || existing.email,
         avatar:
-          existing.avatar && existing.avatar.startsWith('data:image/') && !existing.avatar.startsWith('data:image/svg')
+          isCustomUploadedAvatarDataUrl(existing.avatar)
             ? existing.avatar
-            : !isPlaceholderOrInvalidAvatarUrl(profile.avatar)
-              ? (profile.avatar as string)
-              : !isPlaceholderOrInvalidAvatarUrl(existing.avatar)
-                ? existing.avatar
-                : profile.avatar || existing.avatar,
+            : existingGoogleCachedAv && isCustomUploadedAvatarDataUrl(existingGoogleCachedAv)
+              ? existingGoogleCachedAv
+              : !isPlaceholderOrInvalidAvatarUrl(profile.avatar)
+                ? (profile.avatar as string)
+                : !isPlaceholderOrInvalidAvatarUrl(existing.avatar)
+                  ? existing.avatar
+                  : profile.avatar || existing.avatar,
         authProvider: 'google',
         linkedProviders: Array.from(new Set([...(existing.linkedProviders || []), 'google'])),
         isVerified: true,
@@ -7074,12 +7537,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     // Auto-create new user account with Google credentials & canonical ID
+    const newGoogleCachedAv = getCachedUserAvatarForAccount({
+      id: canonicalGoogleId,
+      email: cleanEmail,
+      phone: profile.phone,
+      name: profile.name,
+    });
     const newUser: User = {
       id: canonicalGoogleId,
       name: profile.name || (cleanEmail ? cleanEmail.split('@')[0] : 'Google User'),
       email: cleanEmail,
       role: 'user',
-      avatar: profile.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+      avatar:
+        (newGoogleCachedAv && isCustomUploadedAvatarDataUrl(newGoogleCachedAv) ? newGoogleCachedAv : '') ||
+        profile.avatar ||
+        'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
       phone: profile.phone,
       authProvider: 'google',
       linkedProviders: ['google'],
@@ -7119,26 +7591,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateCurrentUserProfile = (newName: string, newAvatar?: string) => {
     if (!currentUser) return;
-    const cleanName = newName.trim() || (newAvatar ? currentUser.name : '');
-    if (!cleanName) return;
+    const cleanName = newName.trim() || currentUser.name || 'User';
+    const nowIso = new Date().toISOString();
+    const isExplicitReset = newAvatar === '';
+    const hasNewAvatar = typeof newAvatar === 'string' && newAvatar.trim().length > 0;
+
+    if (isExplicitReset) {
+      clearCachedUserAvatarForAccount(currentUser);
+    }
 
     const updated: User = {
       ...currentUser,
       name: cleanName,
-      avatar: newAvatar || currentUser.avatar,
-      lastActiveAt: new Date().toISOString(),
+      avatar: isExplicitReset ? '' : hasNewAvatar ? newAvatar!.trim() : currentUser.avatar,
+      cloudAvatarUrl: isExplicitReset ? undefined : currentUser.cloudAvatarUrl,
+      avatarUpdatedAt: isExplicitReset || hasNewAvatar ? nowIso : currentUser.avatarUpdatedAt,
+      lastActiveAt: nowIso,
     };
 
-    if (newAvatar) {
-      if (updated.role === 'admin') {
-        saveAdminAvatar(newAvatar);
-      } else {
-        cacheUserAvatar(updated.id, newAvatar, true);
-        const canonId = getCanonicalUserId(updated);
-        if (canonId) cacheUserAvatar(canonId, newAvatar, true);
-        if (updated.email) cacheUserAvatar(updated.email, newAvatar, true);
-        cacheUserAvatar(`name:${updated.name}`, newAvatar, true);
+    if (hasNewAvatar) {
+      const cleanAv = newAvatar!.trim();
+      if (updated.role === 'admin' || updated.id === 'admin-authorized-single') {
+        saveAdminAvatar(cleanAv);
       }
+      cacheUserAvatarForAccount(updated, cleanAv, true);
     }
 
     setCurrentUser(updated);
@@ -7157,13 +7633,56 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return next;
     });
     safeSetCriticalAccountStorage('kft_current_user_v5', updated);
-    if (isSupabaseConfigured() && updated.role !== 'admin') {
+
+    if (hasNewAvatar) {
+      uploadAndSyncUserAvatarToCloud(updated, newAvatar!.trim())
+        .then(cloudRes => {
+          const withCloud: User = {
+            ...updated,
+            cloudAvatarUrl: cloudRes.cloudAvatarUrl || updated.cloudAvatarUrl,
+            avatarUpdatedAt: cloudRes.updatedAt || nowIso,
+          };
+          setCurrentUser(prev => {
+            if (!prev || !doesUserMatchTarget(prev, updated)) return prev;
+            const mergedCur = {
+              ...prev,
+              cloudAvatarUrl: withCloud.cloudAvatarUrl || prev.cloudAvatarUrl,
+              avatarUpdatedAt: withCloud.avatarUpdatedAt || prev.avatarUpdatedAt,
+            };
+            latestSyncStateRef.current.currentUser = mergedCur;
+            safeSetCriticalAccountStorage('kft_current_user_v5', mergedCur);
+            return mergedCur;
+          });
+          if (updated.role !== 'admin' && updated.id !== 'admin-authorized-single') {
+            setUsers(prev => {
+              const next = deduplicateAndNormalizeUsers(
+                prev.map(u => (doesUserMatchTarget(u, updated) ? { ...u, cloudAvatarUrl: withCloud.cloudAvatarUrl || u.cloudAvatarUrl, avatarUpdatedAt: withCloud.avatarUpdatedAt || u.avatarUpdatedAt } : u)),
+                deletedUsers
+              );
+              latestSyncStateRef.current.users = next;
+              safeSetCriticalAccountStorage('kft_users_v5', next);
+              return next;
+            });
+            if (isSupabaseConfigured()) {
+              upsertSingleUserToCloud(withCloud, deletedUsers, true).catch(() => {});
+            }
+          }
+        })
+        .catch(() => {
+          if (isSupabaseConfigured() && updated.role !== 'admin') {
+            upsertSingleUserToCloud(updated, deletedUsers, true).catch(() => {});
+          }
+        });
+    } else if (isSupabaseConfigured() && updated.role !== 'admin') {
       upsertSingleUserToCloud(updated, deletedUsers, true).catch(() => {});
     }
+
     showToast(
-      newAvatar
+      hasNewAvatar
         ? language === 'km' ? 'បានប្តូររូបភាពប្រូហ្វាល់ជោគជ័យ!' : language === 'zh' ? '头像已更新！' : 'Profile photo updated!'
-        : language === 'km' ? 'បានកែប្រែឈ្មោះជោគជ័យ!' : 'Name updated successfully!',
+        : isExplicitReset
+          ? language === 'km' ? 'បានកំណត់រូបភាពប្រូហ្វាល់ដើមឡើងវិញ!' : 'Profile photo reset!'
+          : language === 'km' ? 'បានកែប្រែឈ្មោះជោគជ័យ!' : 'Name updated successfully!',
       'success'
     );
   };
@@ -7734,21 +8253,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       : undefined;
 
     if (replaceTargetId) {
-      const userIdSet = new Set<string>([
-        currentUser.id,
-        ...(Array.isArray(currentUser.legacyIds) ? currentUser.legacyIds : []),
-      ]);
-      const userPhoneClean = (currentUser.phone || '').replace(/[\s-+]/g, '');
       const isTargetOwner = Boolean(
         targetToReplace &&
-          (isAdmin ||
-            (targetToReplace.ownerId && userIdSet.has(targetToReplace.ownerId)) ||
-            (currentUser.email &&
-              targetToReplace.ownerEmail &&
-              targetToReplace.ownerEmail.toLowerCase() === currentUser.email.toLowerCase()) ||
-            (userPhoneClean.length >= 7 &&
-              targetToReplace.ownerPhone &&
-              targetToReplace.ownerPhone.replace(/[\s-+]/g, '') === userPhoneClean))
+          (isAdmin || isUserOwnerOfRestaurantRecord(currentUser, targetToReplace))
       );
       if (!targetToReplace || !isTargetOwner) {
         showToast(
@@ -7918,33 +8425,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Resolve all restaurants owned by a user, sorted newest/most-recently-updated first so the active shop is always prioritized
   const getOwnedRestaurantsForUser = (targetUser: User | null = currentUser): Restaurant[] => {
     if (!targetUser) return [];
-    const userIdSet = new Set<string>([
-      targetUser.id,
-      ...(Array.isArray(targetUser.legacyIds) ? targetUser.legacyIds : []),
-    ]);
-    const userEmailLower = (targetUser.email || '').trim().toLowerCase();
-    const userPhoneClean = (targetUser.phone || '').replace(/[\s-+]/g, '');
-    const matched = restaurants.filter(r => {
-      if (
-        r.pendingUpgradeRequest?.status === 'pending' &&
-        r.pendingUpgradeRequest.submittedByUserId &&
-        userIdSet.has(r.pendingUpgradeRequest.submittedByUserId)
-      ) {
-        return true;
-      }
-      // Never match seed demo shop rest-19 ('owner-1') unless the user's id is literally 'owner-1'
-      if (isSeedRestaurantId(r.id) && (!r.ownerId || r.ownerId === 'owner-1') && r.ownerId !== targetUser.id) return false;
-      if (r.ownerId && userIdSet.has(r.ownerId)) return true;
-      if (userEmailLower && r.ownerEmail && r.ownerEmail.trim().toLowerCase() === userEmailLower) return true;
-      if (
-        userPhoneClean.length >= 7 &&
-        r.ownerPhone &&
-        r.ownerPhone.replace(/[\s-+]/g, '') === userPhoneClean
-      ) {
-        return true;
-      }
-      return false;
-    });
+    const matched = restaurants.filter(r => isUserOwnerOfRestaurantRecord(targetUser, r));
     return [...matched].sort((a, b) => {
       const aTime = a.updatedAt ? Date.parse(a.updatedAt) : getRestaurantCreatedAtMs(a);
       const bTime = b.updatedAt ? Date.parse(b.updatedAt) : getRestaurantCreatedAtMs(b);
@@ -8021,10 +8502,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const isOwner = Boolean(
       currentUser &&
-        (original?.ownerId === currentUser.id ||
-          (currentUser.email &&
-            original?.ownerEmail &&
-            original.ownerEmail.trim().toLowerCase() === currentUser.email.trim().toLowerCase()))
+        (isUserOwnerOfRestaurantRecord(currentUser, original) ||
+          isUserOwnerOfRestaurantRecord(currentUser, updated))
     );
     const isApprovedVip = isUserVipActive(currentUser);
 
@@ -8143,6 +8622,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       businessType: updated.businessType !== undefined ? updated.businessType : original?.businessType,
       categoryKh: updated.categoryKh !== undefined ? updated.categoryKh : original?.categoryKh,
       categoryEn: updated.categoryEn !== undefined ? updated.categoryEn : original?.categoryEn,
+      ownerId: original?.ownerId || currentUser?.id,
+      ownerName: original?.ownerName || currentUser?.name,
+      ownerEmail: original?.ownerEmail || currentUser?.email,
+      ownerPhone: updated.phone || original?.ownerPhone || currentUser?.phone,
       approvedAt: original?.approvedAt,
       featuredFromAt: original?.featuredFromAt,
       featuredUntilAt: original?.featuredUntilAt,
@@ -8586,19 +9069,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser?.username === 'admin' ||
       currentUser?.username === 'cheasavuth';
 
-    const userIdSet = new Set<string>([
-      ...(currentUser?.id ? [currentUser.id] : []),
-      ...(Array.isArray(currentUser?.legacyIds) ? currentUser.legacyIds : []),
-    ]);
-    const userEmailClean = (currentUser?.email || '').trim().toLowerCase();
-    const userPhoneClean = (currentUser?.phone || '').replace(/[\s-+]/g, '');
-
-    const isOwner = Boolean(
-      currentUser &&
-        ((target.ownerId && userIdSet.has(target.ownerId)) ||
-          (userEmailClean && target.ownerEmail && target.ownerEmail.trim().toLowerCase() === userEmailClean) ||
-          (userPhoneClean.length >= 7 && target.ownerPhone && target.ownerPhone.replace(/[\s-+]/g, '') === userPhoneClean))
-    );
+    const isOwner = Boolean(currentUser && isUserOwnerOfRestaurantRecord(currentUser, target));
     const isApprovedVip = isUserVipActive(currentUser);
 
     return {
@@ -9089,11 +9560,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser?.username === 'cheasavuth';
 
     const isOwner = Boolean(
-      currentUser &&
-        (targetRest.ownerId === currentUser.id ||
-          (currentUser.email &&
-            targetRest.ownerEmail &&
-            targetRest.ownerEmail.trim().toLowerCase() === currentUser.email.trim().toLowerCase()))
+      currentUser && isUserOwnerOfRestaurantRecord(currentUser, targetRest)
     );
 
     if (!isAdmin && !isOwner) {
@@ -9158,9 +9625,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return true;
     }
 
-    // Shop owner (non-Admin): keep existing approved photo visible and mark new photo as Pending Admin Approval
+    // Shop owner (non-Admin): keep existing approved photo visible (or immediately fill if empty) and mark new photo as Pending Admin Approval
     const pendingUpdated: Restaurant = normalizeRestaurant({
       ...targetRest,
+      ownerId: targetRest.ownerId || currentUser?.id,
+      ownerName: targetRest.ownerName || currentUser?.name,
+      ownerEmail: targetRest.ownerEmail || currentUser?.email,
+      ownerPhone: targetRest.ownerPhone || currentUser?.phone,
+      photoUrl: (targetRest.photoUrl && targetRest.photoUrl.trim()) || trimmedPhoto,
+      profileImage: (targetRest.profileImage && targetRest.profileImage.trim()) || (targetRest.photoUrl && targetRest.photoUrl.trim()) || trimmedPhoto,
       pendingPhotoReplacement: {
         newPhotoUrl: trimmedPhoto,
         status: 'pending',
@@ -9667,6 +10140,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const updatedRestWithPendingUpgrade: Restaurant = normalizeRestaurant({
       ...targetRest,
+      ownerId: targetRest.ownerId || currentUser.id,
+      ownerName: targetRest.ownerName || currentUser.name,
+      ownerEmail: targetRest.ownerEmail || currentUser.email,
+      ownerPhone: targetRest.ownerPhone || proposedChanges.phone || currentUser.phone,
+      photoUrl: targetRest.photoUrl || sanitizedPhoto || proposedChanges.photoUrl || '',
+      profileImage: targetRest.profileImage || targetRest.photoUrl || sanitizedPhoto || proposedChanges.profileImage || '',
       pendingUpgradeRequest: upgradeReq,
       updatedAt: nowIso,
     });

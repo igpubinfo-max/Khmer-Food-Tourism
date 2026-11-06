@@ -971,6 +971,7 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex items-center gap-3.5">
             <div className="relative shrink-0">
               <img 
+                key={resolveUserAvatarUrl(currentUser)}
                 src={resolveUserAvatarUrl(currentUser)} 
                 alt={currentUser?.name || "Admin"} 
                 referrerPolicy="no-referrer"
@@ -4323,7 +4324,7 @@ export const AdminDashboard: React.FC = () => {
                                 <Shield className="w-3.5 h-3.5 text-emerald-600" />
                               </div>
                             )}
-                            <img src={resolveUserAvatarUrl(u)} alt={u.name} referrerPolicy="no-referrer" onError={(e) => handleAvatarImageError(e, u)} className="w-11 h-11 rounded-full object-cover border border-stone-200 dark:border-stone-600 shrink-0 bg-emerald-950" />
+                            <img key={resolveUserAvatarUrl(u)} src={resolveUserAvatarUrl(u)} alt={u.name} referrerPolicy="no-referrer" onError={(e) => handleAvatarImageError(e, u)} className="w-11 h-11 rounded-full object-cover border border-stone-200 dark:border-stone-600 shrink-0 bg-emerald-950" />
                             <div className="min-w-0">
                               <h4 className="font-bold text-stone-900 dark:text-stone-100 font-khmer flex items-center gap-2 flex-wrap">
                                 <span>{u.name}</span>
@@ -4504,6 +4505,7 @@ export const AdminDashboard: React.FC = () => {
                                 className="p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-center gap-3"
                               >
                                 <img
+                                  key={resolveUserAvatarUrl(target)}
                                   src={resolveUserAvatarUrl(target)}
                                   alt={target.name}
                                   referrerPolicy="no-referrer"

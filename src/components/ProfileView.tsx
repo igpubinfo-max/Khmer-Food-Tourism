@@ -24,6 +24,7 @@ import {
 } from '../utils/androidMediaHelper';
 import { requestManualUpdateCheck } from '../services/appUpdateService';
 import { IconNavFood, IconNavShop, IconNavTourism } from './icons/HandcraftedIcons';
+import { ShopAvatar } from './icons/DefaultShopIcon';
 
 export const ProfileView: React.FC = () => {
   const { 
@@ -613,6 +614,7 @@ export const ProfileView: React.FC = () => {
               <div className="flex items-start gap-3 flex-1 min-w-0">
                 <div className="relative shrink-0">
                   <img 
+                    key={resolveUserAvatarUrl(currentUser)}
                     src={resolveUserAvatarUrl(currentUser)} 
                     alt={currentUser.name} 
                     referrerPolicy="no-referrer"
@@ -1343,7 +1345,20 @@ export const ProfileView: React.FC = () => {
               return (
                 <div key={restaurant.id} className="p-4 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-3.5">
                   <div className="flex items-center gap-3">
-                    <img src={restaurant.photoUrl} alt="restaurant" className="w-16 h-16 rounded-2xl object-cover border border-slate-200 shrink-0" />
+                    <ShopAvatar
+                      restaurant={{
+                        ...restaurant,
+                        photoUrl:
+                          restaurant.thumbnailUrl ||
+                          restaurant.photoUrl ||
+                          restaurant.profileImage ||
+                          restaurant.pendingUpgradeRequest?.proposedChanges?.photoUrl ||
+                          restaurant.pendingPhotoReplacement?.newPhotoUrl ||
+                          '',
+                      }}
+                      alt={restaurant.nameKh || restaurant.nameEn || 'restaurant'}
+                      className="w-16 h-16 rounded-2xl border border-slate-200 shrink-0"
+                    />
                     <div className="flex-1 min-w-0">
                       <h4 className="font-bold text-[#0F172A] dark:text-white text-sm truncate">
                         {isKm ? restaurant.nameKh : restaurant.nameEn}

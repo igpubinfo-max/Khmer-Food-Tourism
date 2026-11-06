@@ -61,7 +61,8 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
             >
               <div className="relative shrink-0">
                 <img
-                  src={resolveUserAvatarUrl(currentUser)}
+                key={resolveUserAvatarUrl(currentUser)}
+                src={resolveUserAvatarUrl(currentUser)}
                   alt={currentUser.name}
                   decoding="async"
                   referrerPolicy="no-referrer"
@@ -118,6 +119,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
               className="relative shrink-0 cursor-pointer active:scale-95 transition"
             >
               <img
+                key={resolveUserAvatarUrl(currentUser)}
                 src={resolveUserAvatarUrl(currentUser)}
                 alt={currentUser.name}
                 decoding="async"

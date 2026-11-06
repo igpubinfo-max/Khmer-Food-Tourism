@@ -1,10 +1,17 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useDeferredValue } from 'react';
 import { useApp } from '../context/AppContext';
 import { TouristCard } from './TouristCard';
 import { Compass, MapPin } from 'lucide-react';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { DISH_PROVINCES } from '../utils/foodFilters';
 import { tr } from '../utils/i18n';
+import { ListingSearchInput } from './listing/ListingUI';
+import {
+  rankBySearchRelevance,
+  destinationSearchFields,
+  normalizeSearchText,
+} from '../utils/searchEngine';
+import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 
 const TOURISM_BATCH_SIZE = 24;
 
@@ -16,12 +23,14 @@ export const TourismView: React.FC = () => {
     setSelectedProvince,
   } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [visibleCount, setVisibleCount] = useState<number>(TOURISM_BATCH_SIZE);
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setVisibleCount(TOURISM_BATCH_SIZE);
-  }, [selectedCategory, selectedProvince]);
+  }, [selectedCategory, selectedProvince, deferredSearchQuery]);
 
   const categories = [
     { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All', nameZh: '全部景点' },
@@ -64,6 +73,35 @@ export const TourismView: React.FC = () => {
     });
   }, [categoryMatchedDestinations]);
 
+  // Precompute trilingual (Khmer, English, Simplified Chinese) search fields once per destination
+  const searchIndexById = useMemo(() => {
+    const map = new Map<
+      string,
+      {
+        fields: ReturnType<typeof destinationSearchFields>;
+        combinedNormName: string;
+        combinedNormAll: string;
+      }
+    >();
+    for (const d of scenicDestinationsOnly) {
+      const zhLoc = getLocalizedDestination(d, 'zh');
+      const fields = destinationSearchFields(d, [
+        zhLoc.name,
+        zhLoc.category,
+        zhLoc.province,
+        zhLoc.address,
+      ]);
+      const combinedNormName = normalizeSearchText(
+        `${d.nameKh || ''} ${d.nameEn || ''} ${zhLoc.name || ''}`
+      );
+      const combinedNormAll = normalizeSearchText(
+        `${d.nameKh || ''} ${d.nameEn || ''} ${zhLoc.name || ''} ${d.provinceKh || ''} ${d.provinceEn || ''} ${zhLoc.province || ''} ${d.categoryKh || ''} ${d.categoryEn || ''} ${zhLoc.category || ''}`
+      );
+      map.set(d.id, { fields, combinedNormName, combinedNormAll });
+    }
+    return map;
+  }, [scenicDestinationsOnly]);
+
   // Separate full-card HD destinations (shuffled first) and compact directory rows (shuffled second)
   const orderedSessionDestinations = useMemo(() => {
     const fullCards = scenicDestinationsOnly.filter(
@@ -80,7 +118,7 @@ export const TourismView: React.FC = () => {
 
   const filteredDestinations = useMemo(() => {
     const cleanSelProv = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
-    return orderedSessionDestinations.filter((d) => {
+    const scoped = orderedSessionDestinations.filter((d) => {
       if (selectedCategory === 'trending_social') {
         if (!d.isTrendingSocial) return false;
       } else if (selectedCategory === 'cultural') {
@@ -93,17 +131,52 @@ export const TourismView: React.FC = () => {
       }
       return true;
     });
-  }, [orderedSessionDestinations, selectedCategory, selectedProvince]);
+
+    const trimmedQuery = deferredSearchQuery.trim();
+    if (!trimmedQuery) return scoped;
+
+    const ranked = rankBySearchRelevance(
+      scoped,
+      trimmedQuery,
+      (d) => searchIndexById.get(d.id)?.fields || destinationSearchFields(d),
+      {
+        bucketSize: 80,
+        tieBreak: (a, b) => (b.rating || 0) - (a.rating || 0),
+      }
+    );
+
+    if (ranked.length > 0) return ranked;
+
+    // Fast partial-keyword fallback (including 1-2 character partial keywords in Khmer, English, or Chinese)
+    const normQuery = normalizeSearchText(trimmedQuery);
+    if (!normQuery) return scoped;
+    const tokens = normQuery.split(/\s+/).filter(Boolean);
+
+    const nameMatches: typeof scoped = [];
+    const metaMatches: typeof scoped = [];
+    for (const d of scoped) {
+      const entry = searchIndexById.get(d.id);
+      if (!entry) continue;
+      if (tokens.every((tok) => entry.combinedNormName.includes(tok))) {
+        nameMatches.push(d);
+      } else if (tokens.every((tok) => entry.combinedNormAll.includes(tok))) {
+        metaMatches.push(d);
+      }
+    }
+    return [...nameMatches, ...metaMatches];
+  }, [orderedSessionDestinations, selectedCategory, selectedProvince, deferredSearchQuery, searchIndexById]);
 
   const displayedDestinations = useMemo(
     () => filteredDestinations.slice(0, visibleCount),
     [filteredDestinations, visibleCount]
   );
 
-  const hasActiveFilters = selectedCategory !== 'all' || Boolean(selectedProvince);
+  const hasActiveFilters =
+    selectedCategory !== 'all' || Boolean(selectedProvince) || Boolean(searchQuery.trim());
   const resetAllFilters = () => {
     setSelectedCategory('all');
     setSelectedProvince('');
+    setSearchQuery('');
   };
 
   useEffect(() => {
@@ -133,7 +206,30 @@ export const TourismView: React.FC = () => {
             <span>{tr(language, 'តំបន់ទេសចរណ៍ស្រស់ត្រកាល', 'Scenic Destinations', '柬埔寨著名旅游景点')}</span>
           </h2>
         </div>
+        {searchQuery.trim() && (
+          <span className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/70 text-[11px] font-bold text-[#064E3B] dark:text-emerald-300 font-khmer">
+            {tr(
+              language,
+              `រកឃើញ ${filteredDestinations.length}`,
+              `${filteredDestinations.length} found`,
+              `找到 ${filteredDestinations.length} 处`
+            )}
+          </span>
+        )}
       </div>
+
+      {/* Trilingual Search Bar (Khmer, English, Simplified Chinese + partial keywords) */}
+      <ListingSearchInput
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder={tr(
+          language,
+          'ស្វែងរកតំបន់ទេសចរណ៍ (ខ្មែរ / EN / 中文)...',
+          'Search destinations by Khmer, English, or Chinese name...',
+          '搜索旅游景点名称（支持中文 / 英文 / 柬文）...'
+        )}
+        clearLabel={tr(language, 'សម្អាតការស្វែងរក', 'Clear search', '清除搜索')}
+      />
 
       {/* Category Pills */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 font-khmer">

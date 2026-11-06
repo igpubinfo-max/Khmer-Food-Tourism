@@ -1703,7 +1703,6 @@ async function syncSingleOverrideRecordToCloud(
   }
 
   for (let attempt = 1; attempt <= 3; attempt++) {
-    if (isSupabaseEgressCooldownActive()) break;
     try {
       const ok = await pushCloudDocument(perRecordKey, payloadToPush, 20000);
       if (ok) {
@@ -1749,7 +1748,48 @@ async function syncSingleOverrideRecordToCloud(
             notifyPersistentMediaVaultSubscribers(upgradedBundle);
           }
           cleanupOutdatedLegacyMasterCloudEntry('foods', recordId).catch(() => {});
+        } else if (category === 'rest') {
+          const latestBundle = loadLocalMediaOverrides();
+          const upgradedBundle: AllMediaOverridesBundle = {
+            ...latestBundle,
+            restaurants: {
+              ...latestBundle.restaurants,
+              [recordId]: payloadToPush,
+            },
+            updatedAt: payloadToPush.updatedAt || new Date().toISOString(),
+          };
+          inMemoryMasterBundle = upgradedBundle;
+          await saveSingleRecordToIdb(`rest:${recordId}`, payloadToPush);
+          saveLocalMediaOverrides(upgradedBundle);
+          notifyPersistentMediaVaultSubscribers(upgradedBundle);
+        } else if (category === 'dest') {
+          const latestBundle = loadLocalMediaOverrides();
+          const upgradedBundle: AllMediaOverridesBundle = {
+            ...latestBundle,
+            destinations: {
+              ...latestBundle.destinations,
+              [recordId]: payloadToPush,
+            },
+            updatedAt: payloadToPush.updatedAt || new Date().toISOString(),
+          };
+          inMemoryMasterBundle = upgradedBundle;
+          await saveSingleRecordToIdb(`dest:${recordId}`, payloadToPush);
+          saveLocalMediaOverrides(upgradedBundle);
+          notifyPersistentMediaVaultSubscribers(upgradedBundle);
         } else if (category === 'trend') {
+          const latestBundle = loadLocalMediaOverrides();
+          const upgradedBundle: AllMediaOverridesBundle = {
+            ...latestBundle,
+            trendingFoods: {
+              ...latestBundle.trendingFoods,
+              [recordId]: payloadToPush,
+            },
+            updatedAt: payloadToPush.updatedAt || new Date().toISOString(),
+          };
+          inMemoryMasterBundle = upgradedBundle;
+          await saveSingleRecordToIdb(`trend:${recordId}`, payloadToPush);
+          saveLocalMediaOverrides(upgradedBundle);
+          notifyPersistentMediaVaultSubscribers(upgradedBundle);
           cleanupOutdatedLegacyMasterCloudEntry('trendingFoods', recordId).catch(() => {});
         }
         return true;
@@ -1769,7 +1809,7 @@ async function syncSingleOverrideRecordToCloud(
  */
 let flushQueueInFlight: Promise<number> | null = null;
 export async function flushPendingMediaCloudQueue(): Promise<number> {
-  if (!isSupabaseConfigured() || isSupabaseEgressCooldownActive()) return 0;
+  if (!isSupabaseConfigured()) return 0;
   if (flushQueueInFlight) return flushQueueInFlight;
 
   flushQueueInFlight = (async () => {
@@ -1780,7 +1820,6 @@ export async function flushPendingMediaCloudQueue(): Promise<number> {
     const bundle = await hydrateFromLocalIdbImmediate();
     let flushedCount = 0;
     for (const item of items) {
-      if (isSupabaseEgressCooldownActive()) break;
       let payload: any = null;
       if (item.category === 'food') payload = bundle.foods[item.id];
       else if (item.category === 'rest') payload = bundle.restaurants[item.id];

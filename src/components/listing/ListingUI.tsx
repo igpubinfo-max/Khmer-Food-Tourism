@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { tr } from '../../utils/i18n';
 import type { Language } from '../../types';
+import { getCachedCloudImageDataUrl } from '../../services/cloudImageStorageService';
 
 /**
  * Shared, flat-color building blocks for the Shop menu and Hotel menu.
@@ -39,13 +40,17 @@ export const ListingThumb: React.FC<ListingThumbProps> = ({
   className = 'w-12 h-12 rounded-xl',
 }) => {
   const [failed, setFailed] = useState(false);
+  const [fallbackDataUrl, setFallbackDataUrl] = useState<string | null>(null);
   const clean = (src || '').trim();
 
   useEffect(() => {
     setFailed(false);
+    setFallbackDataUrl(null);
   }, [clean]);
 
-  if (!clean || failed) {
+  const activeSrc = fallbackDataUrl || clean;
+
+  if (!activeSrc || failed) {
     return (
       <div
         className={`shrink-0 select-none flex items-center justify-center bg-emerald-900 border border-emerald-700/60 ${className}`}
@@ -60,12 +65,26 @@ export const ListingThumb: React.FC<ListingThumbProps> = ({
       className={`shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-700 border border-slate-200/80 dark:border-slate-600/70 ${className}`}
     >
       <img
-        src={clean}
+        src={activeSrc}
         alt={alt || ''}
         loading="lazy"
         decoding="async"
         draggable={false}
-        onError={() => setFailed(true)}
+        onError={() => {
+          if (!fallbackDataUrl && clean.startsWith('https://')) {
+            getCachedCloudImageDataUrl(clean)
+              .then((cached) => {
+                if (cached) {
+                  setFallbackDataUrl(cached);
+                } else {
+                  setFailed(true);
+                }
+              })
+              .catch(() => setFailed(true));
+          } else {
+            setFailed(true);
+          }
+        }}
         className="w-full h-full object-cover select-none"
       />
     </div>
@@ -187,11 +206,15 @@ export const ListingFeaturedCard: React.FC<ListingFeaturedCardProps> = ({
   topRightActions,
 }) => {
   const [coverFailed, setCoverFailed] = useState(false);
+  const [fallbackCoverDataUrl, setFallbackCoverDataUrl] = useState<string | null>(null);
   const cover = (coverUrl || '').trim();
 
   useEffect(() => {
     setCoverFailed(false);
+    setFallbackCoverDataUrl(null);
   }, [cover]);
+
+  const activeCover = fallbackCoverDataUrl || cover;
 
   return (
     <div
@@ -200,14 +223,28 @@ export const ListingFeaturedCard: React.FC<ListingFeaturedCardProps> = ({
       className="group overflow-hidden rounded-2xl cursor-pointer bg-white dark:bg-slate-800 border border-emerald-700/30 dark:border-emerald-500/30 shadow-xs transition-colors active:scale-[0.995]"
     >
       <div className="relative h-40 sm:h-44 w-full bg-emerald-900">
-        {cover && !coverFailed ? (
+        {activeCover && !coverFailed ? (
           <img
-            src={cover}
+            src={activeCover}
             alt={title}
             loading="lazy"
             decoding="async"
             draggable={false}
-            onError={() => setCoverFailed(true)}
+            onError={() => {
+              if (!fallbackCoverDataUrl && cover.startsWith('https://')) {
+                getCachedCloudImageDataUrl(cover)
+                  .then((cached) => {
+                    if (cached) {
+                      setFallbackCoverDataUrl(cached);
+                    } else {
+                      setCoverFailed(true);
+                    }
+                  })
+                  .catch(() => setCoverFailed(true));
+              } else {
+                setCoverFailed(true);
+              }
+            }}
             className="w-full h-full object-cover select-none"
           />
         ) : (

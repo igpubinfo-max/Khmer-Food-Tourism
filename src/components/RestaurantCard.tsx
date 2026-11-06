@@ -46,9 +46,21 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
     const resolvedShopPhotoUrl = useMemo(() => {
       return sanitizeRestaurantShopPhoto(
         restaurant.id,
-        restaurant.photoUrl || restaurant.profileImage || ''
+        restaurant.photoUrl ||
+          restaurant.profileImage ||
+          restaurant.thumbnailUrl ||
+          restaurant.pendingUpgradeRequest?.proposedChanges?.photoUrl ||
+          restaurant.pendingPhotoReplacement?.newPhotoUrl ||
+          ''
       );
-    }, [restaurant.id, restaurant.photoUrl, restaurant.profileImage]);
+    }, [
+      restaurant.id,
+      restaurant.photoUrl,
+      restaurant.profileImage,
+      restaurant.thumbnailUrl,
+      restaurant.pendingUpgradeRequest?.proposedChanges?.photoUrl,
+      restaurant.pendingPhotoReplacement?.newPhotoUrl,
+    ]);
 
     const handleCardClick = () => {
       trackRestaurantView(restaurant.id);

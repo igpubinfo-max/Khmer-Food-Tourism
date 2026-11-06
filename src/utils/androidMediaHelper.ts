@@ -415,6 +415,10 @@ export async function processAndCompressImageFile(
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+        const webpOut = canvas.toDataURL('image/webp', effectiveQuality);
+        if (webpOut && webpOut.startsWith('data:image/webp')) {
+          return webpOut;
+        }
         return canvas.toDataURL('image/jpeg', effectiveQuality);
       }
     } catch {
@@ -462,6 +466,11 @@ export async function processAndCompressImageFile(
           ctx.fillStyle = '#FFFFFF';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const webpOut = canvas.toDataURL('image/webp', effectiveQuality);
+          if (webpOut && webpOut.startsWith('data:image/webp')) {
+            resolve(webpOut);
+            return;
+          }
           const compressed = canvas.toDataURL('image/jpeg', effectiveQuality);
           resolve(compressed);
         } catch {

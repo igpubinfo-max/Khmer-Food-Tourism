@@ -28,6 +28,18 @@ import {
   isDeprecatedDemoSeedTransaction,
   inferBusinessTypeAndCategory,
 } from '../types';
+import {
+  uploadImageToPermanentCloud,
+  isUniqueGrillRestaurant,
+  getUniqueGrillFallbackPhotoUrl,
+  getRememberedCloudUrlForEntity,
+} from './cloudImageStorageService';
+import {
+  isCustomUploadedAvatarDataUrl,
+  cacheUserAvatarForAccount,
+  getCachedUserAvatarForAccount,
+  createCompactSyncAvatarDataUrl,
+} from '../utils/avatarHelper';
 
 export interface CloudApiConfig {
   supabaseUrl: string;
@@ -379,7 +391,9 @@ function persistSecondaryMirrorToStorage(): void {
 function isKeyEligibleForSecondaryFailover(key: string): boolean {
   if (!key) return false;
   if (key.startsWith('kft_user_')) return true;
+  if (key.startsWith('kft_avatar_')) return true;
   if (key.startsWith('kft_proof_')) return true;
+  if (key.startsWith('kft_ov_')) return true;
   return (
     key === 'kft_cloud_users_v2' ||
     key === 'kft_cloud_users_v1' ||
@@ -389,6 +403,7 @@ function isKeyEligibleForSecondaryFailover(key: string): boolean {
     key === 'kft_cloud_deleted_transactions_v1' ||
     key === 'kft_cloud_custom_restaurants_v1' ||
     key === 'kft_cloud_deleted_restaurants_v1' ||
+    key === 'kft_cloud_media_overrides_v1' ||
     key === 'kft_cloud_support_tickets_v1' ||
     key === 'kft_cloud_admin_vip_pricing_v2' ||
     key === 'kft_cloud_app_settings_v1' ||
@@ -987,10 +1002,24 @@ export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Prom
     const rows = await res.json();
     if (Array.isArray(rows) && rows.length > 0 && rows[0].payload !== undefined) {
       const primaryPayload = rows[0].payload as T;
+      const primaryUpdatedMs = rows[0].updated_at ? Date.parse(rows[0].updated_at) || 0 : 0;
       if (key === 'kft_cloud_users_v2' && Array.isArray(primaryPayload)) {
         const secUsers = await readFromSecondary();
         if (Array.isArray(secUsers) && secUsers.length > 0) {
           return deduplicateAndNormalizeUsers([...primaryPayload, ...secUsers], []) as unknown as T;
+        }
+      } else if (eligibleForFailover) {
+        const store = await pullAllFromSecondaryCloudFailover(false, timeoutMs);
+        const secEntry = store?.get(key);
+        if (secEntry && secEntry.payload !== undefined) {
+          if (key.startsWith('kft_user_')) {
+            const merged = deduplicateAndNormalizeUsers([primaryPayload as any, secEntry.payload as any], []);
+            if (merged.length > 0) return merged[0] as unknown as T;
+          }
+          const secMs = secEntry.updated_at ? Date.parse(secEntry.updated_at) || 0 : 0;
+          if (secMs >= primaryUpdatedMs) {
+            return secEntry.payload as T;
+          }
         }
       }
       return primaryPayload;
@@ -1392,7 +1421,10 @@ export async function pullCloudDocumentsByPrefix<T = any>(
 ): Promise<Array<{ key: string; payload: T; updated_at?: string }>> {
   if (!isSupabaseConfigured()) return [];
   const cfg = getCloudApiConfig();
-  const eligibleForFailover = prefix.startsWith('kft_user_') || prefix.startsWith('kft_proof_');
+  const eligibleForFailover =
+    prefix.startsWith('kft_user_') ||
+    prefix.startsWith('kft_avatar_') ||
+    prefix.startsWith('kft_proof_');
 
   const readPrefixFromSecondary = async (): Promise<Array<{ key: string; payload: T; updated_at?: string }>> => {
     if (!eligibleForFailover) return [];
@@ -1438,7 +1470,19 @@ export async function pullCloudDocumentsByPrefix<T = any>(
           const ex = mergedMap.get(s.key);
           const exMs = ex?.updated_at ? Date.parse(ex.updated_at) || 0 : 0;
           const sMs = s.updated_at ? Date.parse(s.updated_at) || 0 : 0;
-          if (!ex || sMs >= exMs) {
+          if (!ex) {
+            mergedMap.set(s.key, s);
+          } else if (s.key.startsWith('kft_user_')) {
+            const mergedUser = deduplicateAndNormalizeUsers(
+              sMs >= exMs ? [ex.payload as any, s.payload as any] : [s.payload as any, ex.payload as any],
+              []
+            );
+            mergedMap.set(s.key, {
+              key: s.key,
+              payload: (mergedUser[0] || (sMs >= exMs ? s.payload : ex.payload)) as unknown as T,
+              updated_at: sMs >= exMs ? s.updated_at : ex.updated_at,
+            });
+          } else if (sMs >= exMs) {
             mergedMap.set(s.key, s);
           }
         }
@@ -1551,6 +1595,32 @@ export async function pullCloudDocumentsByKeys<T = any>(
           (r): r is { key: string; payload: T; updated_at?: string } =>
             Boolean(r && typeof r.key === 'string' && r.payload !== undefined)
         );
+        const secRows = await readKeysFromSecondary();
+        if (secRows.length > 0) {
+          const mergedMap = new Map<string, { key: string; payload: T; updated_at?: string }>();
+          for (const r of primaryRows) mergedMap.set(r.key, r);
+          for (const s of secRows) {
+            const ex = mergedMap.get(s.key);
+            const exMs = ex?.updated_at ? Date.parse(ex.updated_at) || 0 : 0;
+            const sMs = s.updated_at ? Date.parse(s.updated_at) || 0 : 0;
+            if (!ex) {
+              mergedMap.set(s.key, s);
+            } else if (s.key.startsWith('kft_user_')) {
+              const mergedUser = deduplicateAndNormalizeUsers(
+                sMs >= exMs ? [ex.payload as any, s.payload as any] : [s.payload as any, ex.payload as any],
+                []
+              );
+              mergedMap.set(s.key, {
+                key: s.key,
+                payload: (mergedUser[0] || (sMs >= exMs ? s.payload : ex.payload)) as unknown as T,
+                updated_at: sMs >= exMs ? s.updated_at : ex.updated_at,
+              });
+            } else if (sMs >= exMs) {
+              mergedMap.set(s.key, s);
+            }
+          }
+          return Array.from(mergedMap.values());
+        }
         if (primaryRows.length > 0) return primaryRows;
       }
     }
@@ -1572,25 +1642,41 @@ let lastStorageBucketCheckProjectUrl = '';
  * Returns `null` cleanly if Supabase Storage bucket is not provisioned or offline so KV fallback handles it seamlessly.
  */
 export async function uploadBase64ImageToSupabaseStorage(
-  folder: 'foods' | 'restaurants' | 'destinations' | 'trending',
+  folder: 'foods' | 'restaurants' | 'destinations' | 'trending' | 'avatars',
   recordId: string,
   dataUrl: string,
   timeoutMs = 20000,
   revision?: number
 ): Promise<string | null> {
-  if (!isSupabaseConfigured() || !dataUrl || !dataUrl.startsWith('data:image/')) {
+  if (!dataUrl || !dataUrl.startsWith('data:image/')) {
     return null;
   }
-  if (Date.now() < supabaseEgressCooldownUntilMs) return null;
   const cfg = getCloudApiConfig();
   if (!cfg.enableAutoCloudSync) return null;
+
+  const fallbackToPermanentCloudCdn = async (): Promise<string | null> => {
+    try {
+      const mappedFolder = folder === 'restaurants' ? 'shops' : folder;
+      const uploaded = await uploadImageToPermanentCloud(dataUrl, mappedFolder, recordId);
+      if (uploaded && uploaded.url && uploaded.url.startsWith('https://')) {
+        return uploaded.url;
+      }
+    } catch {
+      // Ignore
+    }
+    return null;
+  };
+
+  if (!isSupabaseConfigured() || Date.now() < supabaseEgressCooldownUntilMs) {
+    return fallbackToPermanentCloudCdn();
+  }
 
   if (lastStorageBucketCheckProjectUrl !== cfg.supabaseUrl) {
     lastStorageBucketCheckProjectUrl = cfg.supabaseUrl;
     storageBucketAvailabilityState = 'unknown';
   }
   if (storageBucketAvailabilityState === 'unavailable') {
-    return null;
+    return fallbackToPermanentCloudCdn();
   }
 
   try {
@@ -1612,7 +1698,7 @@ export async function uploadBase64ImageToSupabaseStorage(
     } else if (typeof (globalThis as any).Buffer !== 'undefined') {
       bytes = new Uint8Array((globalThis as any).Buffer.from(b64, 'base64'));
     } else {
-      return null;
+      return fallbackToPermanentCloudCdn();
     }
 
     const blobBody: BodyInit =
@@ -1657,14 +1743,14 @@ export async function uploadBase64ImageToSupabaseStorage(
 
         if (res.status === 402) {
           supabaseEgressCooldownUntilMs = Date.now() + 30_000;
-          return null;
+          return fallbackToPermanentCloudCdn();
         }
 
         if (res.status === 404 || res.status === 400) {
           const errText = await res.text().catch(() => '');
           if (/bucket not found/i.test(errText)) {
             storageBucketAvailabilityState = 'unavailable';
-            return null;
+            return fallbackToPermanentCloudCdn();
           }
         }
       } catch {
@@ -1674,9 +1760,9 @@ export async function uploadBase64ImageToSupabaseStorage(
         await new Promise((r) => setTimeout(r, 900));
       }
     }
-    return null;
+    return fallbackToPermanentCloudCdn();
   } catch {
-    return null;
+    return fallbackToPermanentCloudCdn();
   }
 }
 
@@ -1945,8 +2031,7 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
       ? 'owner'
       : 'user';
 
-  const isCustomDataAvatar = (av?: string) =>
-    Boolean(av && av.startsWith('data:image/') && !av.startsWith('data:image/svg'));
+  const isCustomAvatar = (av?: string) => isCustomUploadedAvatarDataUrl(av);
   const isValidNonStockAvatar = (av?: string) =>
     Boolean(
       av &&
@@ -1955,6 +2040,55 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
         !av.includes('photo-1507003211169') &&
         !av.includes('photo-1517841905240')
     );
+
+  const firstHasCustomAvatar = isCustomAvatar(first.avatar) || isCustomAvatar(first.cloudAvatarUrl);
+  const secondHasCustomAvatar = isCustomAvatar(second.avatar) || isCustomAvatar(second.cloudAvatarUrl);
+  const firstAvatarMs = parseValidMs(first.avatarUpdatedAt);
+  const secondAvatarMs = parseValidMs(second.avatarUpdatedAt);
+
+  let chosenAvatar = '';
+  let chosenCloudAvatarUrl = second.cloudAvatarUrl || first.cloudAvatarUrl;
+  let chosenAvatarUpdatedAt = second.avatarUpdatedAt || first.avatarUpdatedAt;
+
+  if (firstHasCustomAvatar && secondHasCustomAvatar) {
+    if (firstAvatarMs > 0 && secondAvatarMs > 0 && firstAvatarMs > secondAvatarMs) {
+      chosenAvatar = isCustomAvatar(first.avatar) ? first.avatar! : first.cloudAvatarUrl!;
+      chosenCloudAvatarUrl = first.cloudAvatarUrl || second.cloudAvatarUrl;
+      chosenAvatarUpdatedAt = first.avatarUpdatedAt;
+    } else if (secondAvatarMs > 0 && firstAvatarMs === 0) {
+      chosenAvatar = isCustomAvatar(second.avatar) ? second.avatar! : second.cloudAvatarUrl!;
+      chosenCloudAvatarUrl = second.cloudAvatarUrl || first.cloudAvatarUrl;
+      chosenAvatarUpdatedAt = second.avatarUpdatedAt;
+    } else if (firstAvatarMs > 0 && secondAvatarMs === 0) {
+      chosenAvatar = isCustomAvatar(first.avatar) ? first.avatar! : first.cloudAvatarUrl!;
+      chosenCloudAvatarUrl = first.cloudAvatarUrl || second.cloudAvatarUrl;
+      chosenAvatarUpdatedAt = first.avatarUpdatedAt;
+    } else {
+      // Equal or no timestamps: prefer full data:image/ if one side is a remote URL and the other is data:image/, otherwise prefer second
+      chosenAvatar = isCustomAvatar(second.avatar) ? second.avatar! : isCustomAvatar(first.avatar) ? first.avatar! : (second.cloudAvatarUrl || first.cloudAvatarUrl || '');
+      chosenCloudAvatarUrl = second.cloudAvatarUrl || first.cloudAvatarUrl;
+      chosenAvatarUpdatedAt = second.avatarUpdatedAt || first.avatarUpdatedAt;
+    }
+  } else if (secondHasCustomAvatar) {
+    chosenAvatar = isCustomAvatar(second.avatar) ? second.avatar! : second.cloudAvatarUrl!;
+    chosenCloudAvatarUrl = second.cloudAvatarUrl || (second.avatar?.startsWith('http') ? second.avatar : first.cloudAvatarUrl);
+    chosenAvatarUpdatedAt = second.avatarUpdatedAt || first.avatarUpdatedAt;
+  } else if (firstHasCustomAvatar) {
+    chosenAvatar = isCustomAvatar(first.avatar) ? first.avatar! : first.cloudAvatarUrl!;
+    chosenCloudAvatarUrl = first.cloudAvatarUrl || (first.avatar?.startsWith('http') ? first.avatar : second.cloudAvatarUrl);
+    chosenAvatarUpdatedAt = first.avatarUpdatedAt || second.avatarUpdatedAt;
+  } else {
+    const cachedAvatar = getCachedUserAvatarForAccount(second) || getCachedUserAvatarForAccount(first);
+    if (cachedAvatar && isCustomAvatar(cachedAvatar)) {
+      chosenAvatar = cachedAvatar;
+    } else if (isValidNonStockAvatar(second.avatar)) {
+      chosenAvatar = second.avatar!;
+    } else if (isValidNonStockAvatar(first.avatar)) {
+      chosenAvatar = first.avatar!;
+    } else {
+      chosenAvatar = second.avatar || first.avatar || '';
+    }
+  }
 
   const baseMerged: User = {
     ...first,
@@ -1967,15 +2101,9 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
     email: (second.email || first.email || '').trim().toLowerCase(),
     phone: second.phone || first.phone || undefined,
     role: mergedRole,
-    avatar: isCustomDataAvatar(second.avatar)
-      ? second.avatar!
-      : isCustomDataAvatar(first.avatar)
-        ? first.avatar!
-        : isValidNonStockAvatar(second.avatar)
-          ? second.avatar!
-          : isValidNonStockAvatar(first.avatar)
-            ? first.avatar!
-            : second.avatar || first.avatar || '',
+    avatar: chosenAvatar,
+    cloudAvatarUrl: chosenCloudAvatarUrl,
+    avatarUpdatedAt: chosenAvatarUpdatedAt,
     restaurantId: second.restaurantId || first.restaurantId,
     authProvider:
       first.authProvider === 'google' || second.authProvider === 'google'
@@ -2281,19 +2409,37 @@ export function deduplicateAndNormalizeUsers(
 
     if (!existingKey || !canonicalMap.has(existingKey)) {
       const legacyIds = item.id && item.id !== targetCanonicalId ? [item.id] : item.legacyIds;
+      let resolvedFirstAvatar = item.avatar || '';
+      if (!isCustomUploadedAvatarDataUrl(resolvedFirstAvatar)) {
+        if (isCustomUploadedAvatarDataUrl(item.cloudAvatarUrl)) {
+          resolvedFirstAvatar = item.cloudAvatarUrl!;
+        } else {
+          const cached = getCachedUserAvatarForAccount({ ...item, id: targetCanonicalId });
+          if (cached && isCustomUploadedAvatarDataUrl(cached)) {
+            resolvedFirstAvatar = cached;
+          }
+        }
+      }
       const normalized: User = normalizeVipExpiryOnUser({
         ...item,
         id: targetCanonicalId,
         email: cleanEmail || item.email || '',
+        avatar: resolvedFirstAvatar,
         createdAt: item.createdAt || '2026-01-01',
         registeredAtIso: item.registeredAtIso || item.createdAt || '2026-01-01T00:00:00.000Z',
         legacyIds: legacyIds && legacyIds.length > 0 ? Array.from(new Set(legacyIds)) : undefined,
       });
+      if (isCustomUploadedAvatarDataUrl(normalized.avatar)) {
+        cacheUserAvatarForAccount(normalized, normalized.avatar, false);
+      }
       canonicalMap.set(normalized.id, normalized);
       indexUser(normalized);
     } else {
       const existing = canonicalMap.get(existingKey)!;
       const merged = mergeTwoUserRecordsCanonical(existing, item);
+      if (isCustomUploadedAvatarDataUrl(merged.avatar)) {
+        cacheUserAvatarForAccount(merged, merged.avatar, false);
+      }
       if (existingKey !== merged.id) {
         canonicalMap.delete(existingKey);
       }
@@ -2303,6 +2449,90 @@ export function deduplicateAndNormalizeUsers(
   }
 
   return Array.from(canonicalMap.values());
+}
+
+export const AVATAR_RECORD_PREFIX = 'kft_avatar_';
+
+export interface CloudAvatarRecord {
+  userId: string;
+  email?: string;
+  phone?: string;
+  avatarUrl: string;
+  cloudAvatarUrl?: string;
+  dataUrl?: string;
+  updatedAt: string;
+}
+
+/**
+ * Permanently upload and synchronize a user's (or Admin's) profile picture to Cloud Storage
+ * and atomic Cloud KV (`kft_avatar_<canonicalId>`), ensuring it persists across logins,
+ * app updates, and multiple devices even if Primary Supabase is in HTTP 402 cooldown.
+ */
+export async function uploadAndSyncUserAvatarToCloud(
+  user: User,
+  avatarDataUrl: string
+): Promise<{ avatarUrl: string; cloudAvatarUrl?: string; updatedAt: string }> {
+  const updatedAt = user.avatarUpdatedAt || new Date().toISOString();
+  const isAdmin =
+    user.role === 'admin' ||
+    user.id === 'admin-authorized-single' ||
+    user.username === 'admin' ||
+    user.username === 'cheasavuth';
+  const canonicalId = isAdmin ? 'admin-authorized-single' : getCanonicalUserId(user);
+  const cleanEmail = (user.email || '').trim().toLowerCase();
+  const cleanPhone = (user.phone || '').replace(/[\s-+()]/g, '');
+
+  cacheUserAvatarForAccount({ id: canonicalId, email: user.email, phone: user.phone, name: user.name, role: user.role, legacyIds: user.legacyIds }, avatarDataUrl, true);
+
+  let cloudUrl: string | null = null;
+  if (avatarDataUrl.startsWith('data:image/')) {
+    try {
+      cloudUrl = await uploadBase64ImageToSupabaseStorage('avatars', canonicalId, avatarDataUrl, 15000);
+    } catch {
+      // Ignore upload error; compact dataUrl fallback will still sync via KV
+    }
+  } else if (avatarDataUrl.startsWith('http://') || avatarDataUrl.startsWith('https://')) {
+    cloudUrl = avatarDataUrl;
+  }
+
+  if (cloudUrl) {
+    cacheUserAvatarForAccount({ id: canonicalId, email: user.email, phone: user.phone, name: user.name, role: user.role, legacyIds: user.legacyIds }, avatarDataUrl, true);
+  }
+
+  let compactDataUrl = avatarDataUrl.startsWith('data:image/') && avatarDataUrl.length <= 3200 ? avatarDataUrl : '';
+  if (!compactDataUrl && avatarDataUrl.startsWith('data:image/')) {
+    try {
+      compactDataUrl = (await createCompactSyncAvatarDataUrl(avatarDataUrl)) || '';
+    } catch {}
+  }
+
+  const record: CloudAvatarRecord = {
+    userId: canonicalId,
+    email: cleanEmail || undefined,
+    phone: cleanPhone || undefined,
+    avatarUrl: cloudUrl || compactDataUrl || avatarDataUrl,
+    cloudAvatarUrl: cloudUrl || undefined,
+    dataUrl: compactDataUrl || (avatarDataUrl.startsWith('data:image/') && avatarDataUrl.length <= 24000 ? avatarDataUrl : undefined),
+    updatedAt,
+  };
+
+  try {
+    await pushCloudDocument(`${AVATAR_RECORD_PREFIX}${canonicalId}`, record, 8000);
+    if (cleanEmail && cleanEmail.includes('@')) {
+      const emailSlug = cleanEmail.replace(/[^a-z0-9]/g, '_');
+      if (`user-${emailSlug}` !== canonicalId && `google-${emailSlug}` !== canonicalId) {
+        pushCloudDocument(`${AVATAR_RECORD_PREFIX}email_${emailSlug}`, record, 8000).catch(() => {});
+      }
+    }
+  } catch {
+    // Ignore network errors
+  }
+
+  return {
+    avatarUrl: avatarDataUrl.startsWith('data:image/') ? avatarDataUrl : (cloudUrl || avatarDataUrl),
+    cloudAvatarUrl: cloudUrl || undefined,
+    updatedAt,
+  };
 }
 
 /**
@@ -2336,8 +2566,17 @@ export async function upsertSingleUserToCloud(
     // 1. Pull any existing atomic per-user rows (and aggregate/VIP backup when updateAggregate is requested) FIRST
     // so logging in on an updated device NEVER overwrites an Admin-approved VIP user with a blank `free` login record
     const candidateKeys = getCandidateAtomicUserKeys(canonicalUser);
-    const [existingAtomicDocs, cloudUsersV2, cloudVipBackup, cloudDeleted] = await Promise.all([
+    const candidateAvatarKeys = Array.from(
+      new Set([
+        `${AVATAR_RECORD_PREFIX}${canonicalUser.id}`,
+        ...(canonicalUser.email && canonicalUser.email.includes('@')
+          ? [`${AVATAR_RECORD_PREFIX}email_${canonicalUser.email.toLowerCase().trim().replace(/[^a-z0-9]/g, '_')}`]
+          : []),
+      ])
+    );
+    const [existingAtomicDocs, existingAvatarDocs, cloudUsersV2, cloudVipBackup, cloudDeleted] = await Promise.all([
       candidateKeys.length > 0 ? pullCloudDocumentsByKeys<User>(candidateKeys, 6000) : Promise.resolve([]),
+      candidateAvatarKeys.length > 0 ? pullCloudDocumentsByKeys<CloudAvatarRecord>(candidateAvatarKeys, 6000) : Promise.resolve([]),
       updateAggregate ? pullCloudDocument<User[]>('kft_cloud_users_v2') : Promise.resolve(null),
       updateAggregate ? pullCloudDocument<any>('kft_cloud_vip_backup_v1') : Promise.resolve(null),
       updateAggregate ? pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1') : Promise.resolve(null),
@@ -2372,8 +2611,26 @@ export async function upsertSingleUserToCloud(
       }
     }
 
+    const avatarDocUsers: User[] = [];
+    for (const avDoc of existingAvatarDocs) {
+      const rec = avDoc?.payload;
+      if (!rec || (!rec.avatarUrl && !rec.dataUrl && !rec.cloudAvatarUrl)) continue;
+      avatarDocUsers.push({
+        id: rec.userId || canonicalUser.id,
+        email: rec.email || canonicalUser.email || '',
+        phone: rec.phone || canonicalUser.phone,
+        name: canonicalUser.name,
+        role: canonicalUser.role,
+        avatar: rec.dataUrl || rec.cloudAvatarUrl || rec.avatarUrl,
+        cloudAvatarUrl: rec.cloudAvatarUrl || (rec.avatarUrl?.startsWith('http') ? rec.avatarUrl : undefined),
+        avatarUpdatedAt: rec.updatedAt,
+        createdAt: canonicalUser.createdAt || '2026-01-01',
+      });
+    }
+
     const matchingCloudUsers = [
       ...existingAtomicDocs.map(d => d.payload),
+      ...avatarDocUsers,
       ...(Array.isArray(cloudUsersV2) ? cloudUsersV2 : []),
       ...vipBackupUsers,
     ].filter(
@@ -2503,11 +2760,24 @@ export async function syncAllAppDataWithSupabase(localState: {
       !shouldPullAllAtomicUsers && localState.currentUser
         ? getCandidateAtomicUserKeys(localState.currentUser)
         : [];
+    const currentCandidateAvatarKeys =
+      !shouldPullAllAtomicUsers && localState.currentUser
+        ? Array.from(
+            new Set([
+              `${AVATAR_RECORD_PREFIX}${getCanonicalUserId(localState.currentUser)}`,
+              `${AVATAR_RECORD_PREFIX}${localState.currentUser.id}`,
+              ...(localState.currentUser.email && localState.currentUser.email.includes('@')
+                ? [`${AVATAR_RECORD_PREFIX}email_${localState.currentUser.email.toLowerCase().trim().replace(/[^a-z0-9]/g, '_')}`]
+                : []),
+            ])
+          )
+        : [];
 
     // 1. Pull existing cloud records in a single batch
     const [
       cloudUsersV2,
       atomicUserDocs,
+      avatarDocs,
       cloudVipBackup,
       cloudDeletedUsers,
       cloudTxns,
@@ -2526,6 +2796,13 @@ export async function syncAllAppDataWithSupabase(localState: {
             docs.map(d => ({ key: d.key, payload: d.payload, updated_at: d.updated_at || '' }))
           )
         : Promise.resolve([] as Array<{ key: string; payload: User; updated_at: string }>),
+      shouldPullAllAtomicUsers
+        ? pullCloudDocumentsByPrefix<CloudAvatarRecord>(AVATAR_RECORD_PREFIX)
+        : currentCandidateAvatarKeys.length > 0
+        ? pullCloudDocumentsByKeys<CloudAvatarRecord>(currentCandidateAvatarKeys).then(docs =>
+            docs.map(d => ({ key: d.key, payload: d.payload, updated_at: d.updated_at || '' }))
+          )
+        : Promise.resolve([] as Array<{ key: string; payload: CloudAvatarRecord; updated_at: string }>),
       pullCloudDocument<Record<string, Partial<User>>>('kft_cloud_vip_backup_v1'),
       pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1'),
       pullCloudDocument<RegistrationTransaction[]>('kft_cloud_transactions_v1'),
@@ -2816,6 +3093,53 @@ export async function syncAllAppDataWithSupabase(localState: {
       mergedDeletedUsers
     );
 
+    // 2a. Apply atomic Cloud Avatar records (`kft_avatar_*`) so profile pictures sync across devices for all users & Admin
+    if (Array.isArray(avatarDocs) && avatarDocs.length > 0) {
+      for (const avDoc of avatarDocs) {
+        const rec = avDoc?.payload;
+        if (!rec || (!rec.avatarUrl && !rec.dataUrl && !rec.cloudAvatarUrl)) continue;
+        const bestAv = rec.dataUrl || rec.cloudAvatarUrl || rec.avatarUrl;
+        if (!isCustomUploadedAvatarDataUrl(bestAv)) continue;
+
+        if (rec.userId === 'admin-authorized-single') {
+          cacheUserAvatarForAccount(
+            { id: 'admin-authorized-single', role: 'admin', name: 'System Administrator', email: rec.email || '' },
+            bestAv,
+            true
+          );
+          continue;
+        }
+
+        const recEmail = (rec.email || '').trim().toLowerCase();
+        const recPhone = (rec.phone || '').replace(/[\s-+()]/g, '');
+        const recMs = parseSafeDateMs(rec.updatedAt);
+
+        for (let i = 0; i < mergedUsers.length; i++) {
+          const usr = mergedUsers[i];
+          const usrEmail = (usr.email || '').trim().toLowerCase();
+          const usrPhone = (usr.phone || '').replace(/[\s-+()]/g, '');
+          const matched =
+            usr.id === rec.userId ||
+            (Array.isArray(usr.legacyIds) && usr.legacyIds.includes(rec.userId)) ||
+            (recEmail && usrEmail && recEmail === usrEmail) ||
+            (recPhone.length >= 7 && usrPhone.length >= 7 && recPhone === usrPhone);
+          if (!matched) continue;
+
+          const usrMs = parseSafeDateMs(usr.avatarUpdatedAt);
+          if (!isCustomUploadedAvatarDataUrl(usr.avatar) || (recMs > 0 && recMs >= usrMs)) {
+            const updatedUsr: User = {
+              ...usr,
+              avatar: bestAv,
+              cloudAvatarUrl: rec.cloudAvatarUrl || usr.cloudAvatarUrl,
+              avatarUpdatedAt: rec.updatedAt || usr.avatarUpdatedAt,
+            };
+            mergedUsers[i] = updatedUsr;
+            cacheUserAvatarForAccount(updatedUsr, bestAv, true);
+          }
+        }
+      }
+    }
+
     // 2b. Reconcile verified VIP transactions against mergedUsers (matching canonical ID, legacyIds, email, or phone)
     for (let i = 0; i < mergedUsers.length; i++) {
       const usr = mergedUsers[i];
@@ -3087,17 +3411,26 @@ export async function syncAllAppDataWithSupabase(localState: {
               : existingMenu.length > 0
               ? existingMenu
               : localMenu;
+          const isRealHttpPhoto = (u?: string) =>
+            Boolean(u && (u.startsWith('https://') || u.startsWith('http://') || u.startsWith('/')));
           const bestPhoto =
-            r.photoUrl?.startsWith('data:') && localMs >= existingMs
-              ? r.photoUrl
-              : existing.photoUrl?.startsWith('data:')
+            localMs >= existingMs
+              ? (r.photoUrl && r.photoUrl.trim().length > 0 ? r.photoUrl : existing.photoUrl || r.photoUrl || '')
+              : isRealHttpPhoto(existing.photoUrl)
               ? existing.photoUrl
-              : base.photoUrl || existing.photoUrl || r.photoUrl;
+              : isRealHttpPhoto(r.photoUrl)
+              ? r.photoUrl
+              : existing.photoUrl || r.photoUrl || '';
+          const bestThumb =
+            localMs >= existingMs
+              ? r.thumbnailUrl || existing.thumbnailUrl || (isRealHttpPhoto(bestPhoto) ? bestPhoto : undefined)
+              : existing.thumbnailUrl || r.thumbnailUrl || (isRealHttpPhoto(bestPhoto) ? bestPhoto : undefined);
           restMap.set(r.id, {
             ...base,
             menuItems: bestMenuItems,
             photoUrl: bestPhoto,
-            profileImage: base.profileImage?.startsWith('data:') ? base.profileImage : bestPhoto,
+            thumbnailUrl: bestThumb,
+            profileImage: base.profileImage && base.profileImage.trim().length > 0 ? base.profileImage : bestPhoto,
             updatedAt: localMs >= existingMs ? (r.updatedAt || existing.updatedAt) : (existing.updatedAt || r.updatedAt),
             photoUpdatedAt: localMs >= existingMs ? (r.photoUpdatedAt || existing.photoUpdatedAt) : (existing.photoUpdatedAt || r.photoUpdatedAt),
           });
@@ -3106,8 +3439,32 @@ export async function syncAllAppDataWithSupabase(localState: {
     }
     const mergedCustomRestaurants = Array.from(restMap.values()).map((r) => {
       const biz = inferBusinessTypeAndCategory(r);
+      const isUG = isUniqueGrillRestaurant({ id: r.id, name: r.nameKh, nameEn: r.nameEn });
+      let resolvedPhoto = (
+        r.photoUrl ||
+        r.profileImage ||
+        r.pendingUpgradeRequest?.proposedChanges?.photoUrl ||
+        r.pendingPhotoReplacement?.newPhotoUrl ||
+        ''
+      ).trim();
+      let resolvedThumb = (r.thumbnailUrl || '').trim();
+      if (!resolvedPhoto) {
+        const remembered = getRememberedCloudUrlForEntity(r.id);
+        if (remembered?.url) {
+          resolvedPhoto = remembered.url;
+          resolvedThumb = remembered.thumbnailUrl || remembered.url;
+        } else if (isUG) {
+          resolvedPhoto = getUniqueGrillFallbackPhotoUrl(r.id);
+          resolvedThumb = resolvedPhoto;
+        }
+      }
       return {
         ...r,
+        ownerEmail: r.ownerEmail || (isUG ? 'igp2026d@gmail.com' : r.ownerEmail),
+        ownerName: r.ownerName || (isUG ? 'Igp2026d' : r.ownerName),
+        photoUrl: resolvedPhoto || r.photoUrl,
+        profileImage: (r.profileImage || '').trim() || resolvedPhoto || r.profileImage,
+        thumbnailUrl: resolvedThumb || (resolvedPhoto.startsWith('https://') ? resolvedPhoto : r.thumbnailUrl),
         businessType: biz.businessType,
         businessCategory: biz.businessCategory,
         categoryKh: biz.categoryKh,

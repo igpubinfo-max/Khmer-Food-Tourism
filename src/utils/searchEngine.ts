@@ -260,7 +260,7 @@ export function analyzeSearchQuery(rawQuery: string): AnalyzedSearchQuery {
         }
       }
       for (const piece of tok.split(/\s+/)) {
-        if (piece.length >= 2 && !SEARCH_STOPWORDS.has(piece)) distinctive.push(piece);
+        if ((piece.length >= 2 || CJK_RX.test(piece)) && !SEARCH_STOPWORDS.has(piece)) distinctive.push(piece);
       }
       continue;
     }
@@ -385,7 +385,8 @@ function matchTokenInFieldDirect(tok: string, f: PreparedField, allowFuzzy: bool
   for (const t of f.tokens) {
     if (t === tok) return 1;
     if (tok.length >= 3 && t.startsWith(tok)) best = Math.max(best, 0.85);
-    else if (tok.length === 2 && t.startsWith(tok)) best = Math.max(best, 0.5);
+    else if (tok.length === 2 && t.startsWith(tok)) best = Math.max(best, 0.65);
+    else if (tok.length >= 3 && t.includes(tok)) best = Math.max(best, 0.78);
   }
   if (best >= 0.85) return best;
   if (tok.length >= 4 && f.compact.includes(tok)) best = Math.max(best, 0.75);
@@ -478,7 +479,7 @@ export function scoreSearchRecord(q: AnalyzedSearchQuery, fields: SearchableFiel
   // --- Phrase matches on names ----------------------------------------------
   let phraseScore = 0;
   let exactName = false;
-  if (q.phrase.length >= 2) {
+  if (q.phrase.length >= 1) {
     for (const nf of nameFields) {
       const nameNoStop = nf.tokens.filter((t) => !SEARCH_STOPWORDS.has(t)).join(' ');
       if (nf.norm === q.normalized || nameNoStop === q.phrase) {
@@ -488,7 +489,10 @@ export function scoreSearchRecord(q: AnalyzedSearchQuery, fields: SearchableFiel
         phraseScore = Math.max(phraseScore, 900);
       } else if (` ${nameNoStop} `.includes(` ${q.phrase} `)) {
         phraseScore = Math.max(phraseScore, 860);
-      } else if (q.phraseCompact.length >= 4 && (isNonLatinScript(q.phraseCompact) ? khmerSafeIncludes(nf.compact, q.phraseCompact) : nf.compact.includes(q.phraseCompact))) {
+      } else if (
+        (isNonLatinScript(q.phraseCompact) && q.phraseCompact.length >= 2 && khmerSafeIncludes(nf.compact, q.phraseCompact)) ||
+        (!isNonLatinScript(q.phraseCompact) && q.phraseCompact.length >= 3 && nf.compact.includes(q.phraseCompact))
+      ) {
         phraseScore = Math.max(phraseScore, 820);
       }
     }

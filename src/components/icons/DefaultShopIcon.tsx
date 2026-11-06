@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { resolveFoodPhotoUrl, sanitizeRestaurantShopPhoto } from '../../types';
 import type { Restaurant } from '../../types';
+import { getCachedCloudImageDataUrl } from '../../services/cloudImageStorageService';
 
 export const DEFAULT_CULINARY_SHOP_PLACEHOLDER = '';
 
@@ -89,18 +90,30 @@ export const ShopAvatar: React.FC<ShopAvatarProps> = ({
   imgClassName = 'w-full h-full object-cover',
 }) => {
   const [imgError, setImgError] = useState(false);
+  const [recoveredSrc, setRecoveredSrc] = useState<string | null>(null);
 
-  const cleanPhoto = sanitizeRestaurantShopPhoto(
+  const primaryCandidate = sanitizeRestaurantShopPhoto(
     restaurant?.id,
     restaurant?.photoUrl || restaurant?.profileImage || ''
   );
-  const resolvedUrl = cleanPhoto ? resolveFoodPhotoUrl(cleanPhoto, restaurant?.photoUpdatedAt) : '';
+  const secondaryCandidate = sanitizeRestaurantShopPhoto(
+    restaurant?.id,
+    restaurant?.profileImage && restaurant?.profileImage !== restaurant?.photoUrl
+      ? restaurant.profileImage
+      : ''
+  );
+  const resolvedUrl = primaryCandidate
+    ? resolveFoodPhotoUrl(primaryCandidate, restaurant?.photoUpdatedAt)
+    : '';
 
   useEffect(() => {
     setImgError(false);
-  }, [resolvedUrl]);
+    setRecoveredSrc(null);
+  }, [resolvedUrl, secondaryCandidate]);
 
-  if (!resolvedUrl || imgError) {
+  const activeSrc = recoveredSrc || resolvedUrl;
+
+  if (!activeSrc || imgError) {
     return (
       <div className="shrink-0">
         <DefaultShopIcon className={className} />
@@ -114,13 +127,34 @@ export const ShopAvatar: React.FC<ShopAvatarProps> = ({
       className={`relative overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0 ${className}`}
     >
       <img
-        src={resolvedUrl}
+        key={activeSrc}
+        src={activeSrc}
         alt={alt || restaurant?.nameKh || restaurant?.nameEn || 'Shop'}
         loading="lazy"
         decoding="async"
         draggable={false}
         onContextMenu={(e) => e.preventDefault()}
-        onError={() => setImgError(true)}
+        onError={() => {
+          if (!recoveredSrc) {
+            if (secondaryCandidate && secondaryCandidate !== primaryCandidate) {
+              setRecoveredSrc(resolveFoodPhotoUrl(secondaryCandidate, restaurant?.photoUpdatedAt));
+              return;
+            }
+            if (primaryCandidate.startsWith('http://') || primaryCandidate.startsWith('https://')) {
+              getCachedCloudImageDataUrl(primaryCandidate)
+                .then((cached) => {
+                  if (cached && cached.startsWith('data:image/')) {
+                    setRecoveredSrc(cached);
+                  } else {
+                    setImgError(true);
+                  }
+                })
+                .catch(() => setImgError(true));
+              return;
+            }
+          }
+          setImgError(true);
+        }}
         className={`select-none ${imgClassName}`}
       />
     </div>

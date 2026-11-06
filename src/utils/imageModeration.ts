@@ -1,9 +1,12 @@
 import { Language } from '../types';
 import { tr } from './i18n';
+import { uploadImageToPermanentCloud } from '../services/cloudImageStorageService';
 
 export interface ShopImageModerationResult {
   valid: boolean;
   dataUrl?: string;
+  thumbnailUrl?: string;
+  localWebpDataUrl?: string;
   errorMessage?: string;
   reason?: string;
   category?: 'invalid_format' | 'inappropriate_nsfw' | 'political_offensive' | 'blank_or_unusable';
@@ -216,10 +219,32 @@ export async function validateAndModerateShopImage(
       // Ignore canvas taint if external URL
     }
 
-    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.84);
+    const webpCandidate = canvas.toDataURL('image/webp', 0.84);
+    const compressedDataUrl =
+      webpCandidate && webpCandidate.startsWith('data:image/webp')
+        ? webpCandidate
+        : canvas.toDataURL('image/jpeg', 0.84);
+
+    // Immediately upload compressed WebP + Thumbnail to Permanent Cloud Storage
+    try {
+      const cloudRes = await uploadImageToPermanentCloud(compressedDataUrl, 'shops', 'shop_upload');
+      if (cloudRes && cloudRes.url) {
+        return {
+          valid: true,
+          dataUrl: cloudRes.url,
+          thumbnailUrl: cloudRes.thumbnailUrl || cloudRes.url,
+          localWebpDataUrl: compressedDataUrl,
+        };
+      }
+    } catch {
+      // Fallback to compressed WebP dataUrl if offline; background migration will upload when online
+    }
+
     return {
       valid: true,
       dataUrl: compressedDataUrl,
+      thumbnailUrl: compressedDataUrl,
+      localWebpDataUrl: compressedDataUrl,
     };
   } catch {
     return buildInvalidModerationResult(
