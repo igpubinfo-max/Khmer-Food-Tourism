@@ -477,6 +477,24 @@ async function pushToSecondaryCloudFailover(key: string, payload: any, timeoutMs
         };
       });
       envelope = JSON.stringify({ key, payload: wirePayload, updated_at: updatedAt });
+      if (envelope.length > 3700) {
+        wirePayload = wirePayload.map((c: any) => ({
+          id: c.id,
+          email: c.email,
+          membershipTier: c.membershipTier,
+          subscriptionStartDate: c.subscriptionStartDate,
+          subscriptionExpiryDate: c.subscriptionExpiryDate,
+          subscriptionStatus: c.subscriptionStatus,
+          paymentStatus: c.paymentStatus,
+          vipPlanDays: c.vipPlanDays,
+          freeTrialActivated: c.freeTrialActivated,
+          freeTrialActivatedAt: c.freeTrialActivatedAt,
+          freeTrialExpiresAt: c.freeTrialExpiresAt,
+          freeTrialDurationDays: c.freeTrialDurationDays,
+          ...(c.paidAdditionalStoreSlots ? { paidAdditionalStoreSlots: c.paidAdditionalStoreSlots } : {}),
+        }));
+        envelope = JSON.stringify({ key, payload: wirePayload, updated_at: updatedAt });
+      }
     }
   }
 
