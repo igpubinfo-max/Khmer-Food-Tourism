@@ -58,7 +58,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
       className="shrink-0 w-full z-30 bg-[#064E3B] text-white shadow-md border-b border-emerald-400/20"
       style={{ paddingTop: 'var(--kft-safe-top, 0px)' }}
     >
-      <div className="max-w-md mx-auto px-3 py-2 flex items-center justify-between gap-2">
+      <div className="max-w-md md:max-w-5xl lg:max-w-6xl mx-auto px-3 py-2 flex items-center justify-between gap-2">
         {/* Brand Logo & Title */}
         <div
           onClick={() => {

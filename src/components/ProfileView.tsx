@@ -13,7 +13,8 @@ import {
 import {
   isRestaurantPremiumActive, isUserVipActive, getVipAccountState, getVipRemainingDays,
   APP_VERSION, APP_BUILD_CODE, getDynamicVipPlans, getDynamicVipBenefits,
-  isAdminAccount, getVipFeaturedRotationConfig, getVipFeaturedRotationState
+  isAdminAccount,
+  isIosOrIpadAppStoreRuntime, getVipFeaturedRotationConfig, getVipFeaturedRotationState
 } from '../types';
 import { tr } from '../utils/i18n';
 import { resolveUserAvatarUrl, handleAvatarImageError, fileToAvatarDataUrl, isCustomUploadedAvatarDataUrl, rotateDataUrl } from '../utils/avatarHelper';
@@ -41,6 +42,7 @@ export const ProfileView: React.FC = () => {
     getOwnedRestaurantsForUser, openManageMyVipStore, activeManagedShopId,
     setSelectedFood, setSelectedRestaurant, setSelectedDestination,
     deleteRestaurant,
+    deleteUserAccount,
     resetAllData, showToast, updateCurrentUserProfile,
     openUpgradeVipModal,
     configureVipAutoRenew,
@@ -54,6 +56,16 @@ export const ProfileView: React.FC = () => {
 
   const isKm = language === 'km';
   const isAdmin = isAdminAccount(currentUser);
+  const isIosAppStore = isIosOrIpadAppStoreRuntime();
+
+  const handleSelfDeleteAccount = async () => {
+    if (!currentUser || isAdmin) return;
+    const msg = language === 'km'
+      ? `តើអ្នកពិតជាចង់លុបគណនីរបស់អ្នក (${currentUser.email || currentUser.name}) ជាអចិន្ត្រៃយ៍មែនទេ? ទិន្នន័យគណនី រូបភាព និងការកំណត់ទាំងអស់នឹងត្រូវលុបចេញភ្លាមៗ ហើយមិនអាចយកមកវិញបានទេ។`
+      : `Are you sure you want to permanently delete your account (${currentUser.email || currentUser.name})? All your profile data, saved favorites, and account settings will be permanently deleted and cannot be undone.`;
+    if (!window.confirm(msg)) return;
+    await deleteUserAccount(currentUser.id);
+  };
   const isVip = isUserVipActive(currentUser);
   const vipAccountState = getVipAccountState(currentUser);
   const storeQuota = getCurrentUserStoreQuota();
@@ -605,7 +617,7 @@ export const ProfileView: React.FC = () => {
   );
 
   return (
-    <div className="max-w-md mx-auto w-full px-3.5 py-3 space-y-3 pb-8">
+    <div className="max-w-md md:max-w-5xl lg:max-w-6xl mx-auto w-full px-3.5 md:px-6 py-3 space-y-3 pb-8">
       {/* User Header Profile Card */}
       <div className="shrink-0 p-3 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 shadow-xs">
         {currentUser ? (
@@ -1448,8 +1460,8 @@ export const ProfileView: React.FC = () => {
         </div>
       )}
 
-      {/* Tab: Membership Page (Consumer Users Only) */}
-      {!isAdmin && activeSubTab === 'membership' && (
+      {/* Tab: Membership Page (Consumer Users Only - hidden on iOS App Store per Guideline 3.1.1) */}
+      {!isAdmin && !isIosAppStore && activeSubTab === 'membership' && (
         <div className="space-y-4 font-khmer">
           {isVip ? (
             vipDashboard

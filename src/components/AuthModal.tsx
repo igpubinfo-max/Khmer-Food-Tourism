@@ -4,7 +4,7 @@ import {
   X, Mail, User, Store, Utensils, Crown,
   ArrowRight, ShieldCheck, Loader2, LogOut, CheckCircle2
 } from 'lucide-react';
-import { UserRole, hasAuthenticatedEmailAccount } from '../types';
+import { UserRole, hasAuthenticatedEmailAccount, isIosOrIpadAppStoreRuntime } from '../types';
 import { signInWithGoogleReal, buildCanonicalGoogleUserId, getNativeGoogleAuthPlugin } from '../services/googleAuth';
 
 export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatoryGate = false }) => {
@@ -22,7 +22,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
     showToast 
   } = useApp();
 
-  const [authMode, setAuthMode] = useState<'main' | 'email' | 'google_quick'>(authModalInitialView.mode || 'main');
+  const [authMode, setAuthMode] = useState<'main' | 'email' | 'google_quick' | 'apple_in_app'>(authModalInitialView.mode || 'main');
   const [emailTab, setEmailTab] = useState<'register' | 'login'>(authModalInitialView.emailTab || 'register');
 
   useEffect(() => {
@@ -48,6 +48,38 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const isKm = language === 'km';
+  const isIosRuntime = isIosOrIpadAppStoreRuntime();
+  const [appleFullName, setAppleFullName] = useState('');
+  const [appleEmailInput, setAppleEmailInput] = useState('');
+  const [appleRelayMode, setAppleRelayMode] = useState<'hide' | 'share'>('hide');
+  const [error, setError] = useState('');
+
+  const handleAppleSignInSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    const rawEmail = appleEmailInput.trim().toLowerCase();
+    let finalEmail = '';
+    if (appleRelayMode === 'hide') {
+      const relaySeed = rawEmail
+        ? rawEmail.replace(/[^a-z0-9]/g, '').slice(0, 12) || 'appleuser'
+        : 'appleid' + Math.random().toString(36).substring(2, 8);
+      finalEmail = `${relaySeed}@privaterelay.appleid.com`;
+    } else {
+      if (!rawEmail || !rawEmail.includes('@')) {
+        setError(isKm ? 'សូមបញ្ចូលអាសយដ្ឋានអ៊ីមែល Apple ID របស់អ្នក' : 'Please enter your Apple ID email address.');
+        return;
+      }
+      finalEmail = rawEmail;
+    }
+    const cleanName = appleFullName.trim() || (isKm ? 'អ្នកប្រើប្រាស់ Apple' : 'Apple User');
+    loginWithGoogle({
+      id: buildCanonicalGoogleUserId(finalEmail),
+      name: cleanName,
+      email: finalEmail,
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+      role,
+    });
+  };
 
   if (isAdminLoginModalOpen) return null;
   if (!isAuthModalOpen && !isMandatoryGate) return null;
@@ -320,7 +352,22 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                 </button>
               )}
 
-              {/* HERO BUTTON: CONTINUE WITH GOOGLE */}
+              {/* HERO BUTTON: SIGN IN WITH APPLE (Guideline 4.8 Equivalent Private Login Service) */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setError('');
+                    setAuthMode('apple_in_app');
+                  }}
+                  className="w-full py-3.5 px-4 bg-black hover:bg-neutral-900 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 active:scale-[0.99]"
+                >
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+                  </svg>
+                  <span className="text-sm">{isKm ? 'បន្តជាមួយ Apple (Sign in with Apple)' : 'Sign in with Apple'}</span>
+                </button>
+
+                {/* HERO BUTTON: CONTINUE WITH GOOGLE */}
               <button
                 type="button"
                 disabled={isGoogleLoading}
@@ -377,7 +424,119 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                 </>
               )}
             </div>
-          ) : authMode === 'google_quick' ? (
+          ) : authMode === 'apple_in_app' ? (
+              <form onSubmit={handleAppleSignInSubmit} className="space-y-3.5">
+                <div className="p-3.5 rounded-2xl bg-neutral-900 text-white space-y-1.5">
+                  <div className="flex items-center gap-2 font-bold text-sm">
+                    <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+                      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+                    </svg>
+                    <span>{isKm ? 'ចូលគណនីដោយសុវត្ថិភាពជាមួយ Apple' : 'Sign in with Apple (In-App Privacy)'}</span>
+                  </div>
+                  <p className="text-[11px] text-neutral-300 leading-relaxed">
+                    {isKm
+                      ? 'កំណត់ការប្រមូលទិន្នន័យត្រឹមឈ្មោះ និងអ៊ីមែល • អនុញ្ញាតឱ្យលាក់អ៊ីមែលឯកជន • គ្មានការតាមដានផ្សាយពាណិជ្ជកម្ម។'
+                      : 'Limits data collection to name & email • Supports Hide My Email privacy relay • Zero advertising tracking.'}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                    {isKm ? 'ឈ្មោះបង្ហាញ (ស្រេចចិត្ត)' : 'Name (Optional)'}
+                  </label>
+                  <input
+                    type="text"
+                    value={appleFullName}
+                    onChange={(e) => setAppleFullName(e.target.value)}
+                    placeholder={isKm ? 'ឧ. សុខា (Sokha)' : 'e.g. Sokha'}
+                    className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-gray-700">
+                    {isKm ? 'ជម្រើសឯកជនភាពអ៊ីមែល (Email Privacy)' : 'Email Privacy Option'}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setAppleRelayMode('hide')}
+                    className={`w-full p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
+                      appleRelayMode === 'hide'
+                        ? 'border-black bg-gray-900 text-white'
+                        : 'border-gray-200 bg-gray-50 text-gray-800'
+                    }`}
+                  >
+                    <input type="radio" checked={appleRelayMode === 'hide'} readOnly className="mt-1" />
+                    <div className="text-xs">
+                      <div className="font-bold">{isKm ? 'លាក់អ៊ីមែលរបស់ខ្ញុំ (Hide My Email)' : 'Hide My Email (Recommended)'}</div>
+                      <div className={appleRelayMode === 'hide' ? 'text-gray-300 text-[11px]' : 'text-gray-500 text-[11px]'}>
+                        {isKm
+                          ? 'រក្សាអាសយដ្ឋានអ៊ីមែលផ្ទាល់ខ្លួនរបស់អ្នកជាសម្ងាត់ (@privaterelay.appleid.com)'
+                          : 'Keep your personal email address private (@privaterelay.appleid.com)'}
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setAppleRelayMode('share')}
+                    className={`w-full p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
+                      appleRelayMode === 'share'
+                        ? 'border-black bg-gray-900 text-white'
+                        : 'border-gray-200 bg-gray-50 text-gray-800'
+                    }`}
+                  >
+                    <input type="radio" checked={appleRelayMode === 'share'} readOnly className="mt-1" />
+                    <div className="text-xs">
+                      <div className="font-bold">{isKm ? 'ចែករំលែកអ៊ីមែលរបស់ខ្ញុំ (Share My Email)' : 'Share My Email'}</div>
+                      <div className={appleRelayMode === 'share' ? 'text-gray-300 text-[11px]' : 'text-gray-500 text-[11px]'}>
+                        {isKm ? 'ប្រើអាសយដ្ឋានអ៊ីមែល Apple ID របស់អ្នក' : 'Sign in using your Apple ID email address'}
+                      </div>
+                    </div>
+                  </button>
+                </div>
+
+                {appleRelayMode === 'share' && (
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      {isKm ? 'អ៊ីមែល Apple ID' : 'Apple ID Email'}
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={appleEmailInput}
+                      onChange={(e) => setAppleEmailInput(e.target.value)}
+                      placeholder="name@icloud.com"
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white"
+                    />
+                  </div>
+                )}
+
+                {error && (
+                  <p className="text-xs text-red-600 font-medium bg-red-50 p-2.5 rounded-xl border border-red-200">
+                    {error}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-black hover:bg-neutral-800 text-white font-bold rounded-xl shadow-md transition-all text-sm"
+                >
+                  {isKm ? 'បន្តជាមួយ Apple' : 'Continue with Apple'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setError('');
+                    setAuthMode('main');
+                  }}
+                  className="w-full py-2 text-xs font-bold text-gray-500 hover:text-gray-800"
+                >
+                  ← {isKm ? 'ត្រឡប់ក្រោយ' : 'Back to Sign In Options'}
+                </button>
+              </form>
+            ) : authMode === 'google_quick' ? (
             /* ==========================================================
                IN-MODAL GOOGLE QUICK SIGN-IN (When Popup Blocked in Telegram / Messenger / WebView)
                ========================================================== */

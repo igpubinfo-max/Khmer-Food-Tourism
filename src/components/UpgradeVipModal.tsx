@@ -11,7 +11,7 @@ import {
   isUserVipActive, getVipRemainingDays,
   APP_VERSION, APP_BUILD_CODE,
   getDynamicVipPlans, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
-  hasAuthenticatedEmailAccount, isAdminAccount
+  hasAuthenticatedEmailAccount, isAdminAccount, isIosOrIpadAppStoreRuntime
 } from '../types';
 import {
   savePngDataUrlToGallery,
@@ -224,7 +224,7 @@ export const UpgradeVipModal: React.FC = () => {
     }
   }, [isUpgradeVipModalOpen, currentUser, isVipRenewMode]);
 
-  if (!isUpgradeVipModalOpen) return null;
+  if (!isUpgradeVipModalOpen || isIosOrIpadAppStoreRuntime()) return null;
   if (!isAdminAccount(currentUser) && !hasAuthenticatedEmailAccount(currentUser)) {
     return null;
   }

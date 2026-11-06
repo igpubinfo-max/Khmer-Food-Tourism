@@ -279,6 +279,10 @@ async function run() {
   }
 
   const candidates = [
+    path.join(PROJECT_ROOT, 'Khmer_Food_100_Dishes_With_Photos.xlsx'),
+    path.join(PROJECT_ROOT, 'Khmer_Food_100_Dishes_Picture_Template.xlsx'),
+    path.join(PROJECT_ROOT, 'KhmerFoodTourism_100_Foodpanda_Khmer_Foods_Photo_Template.xlsx'),
+    path.join(PROJECT_ROOT, 'templates/Cambodian_Foodpanda_100_Dishes_Template.xlsx'),
     path.join(PROJECT_ROOT, 'templates/KhmerFoodTourism_Food_1_to_100_Photo_Template.xlsx'),
     path.join(PROJECT_ROOT, 'templates/KhmerFoodTourism_Photo_Insert_Template.xlsx'),
     path.join(PROJECT_ROOT, 'templates/KhmerFoodTourism_Travel_Photo_Insert_Template.xlsx'),

@@ -11,7 +11,7 @@ import {
   DeletedUserRecord, AbaReceiptVerificationReport,
   getDynamicVipPlans, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
   getUserStoreQuotaSummary, UserStoreQuotaSummary,
-  isAdminAccount, getVipFeaturedRotationConfig, sanitizeManualFeaturedSchedule,
+  isAdminAccount, isIosOrIpadAppStoreRuntime, getVipFeaturedRotationConfig, sanitizeManualFeaturedSchedule,
   parseSafeDateMs, isGpipRegisteredRestaurant, openRestaurantGoogleExternal,
   isValidCambodiaCoordinates, isValidOfficialGooglePlaceId, buildCanonicalGoogleMapsPinUrl,
   isStrictVerifiedCambodiaRestaurant, SEED_FOOD_PHOTO_BASELINE_MS,

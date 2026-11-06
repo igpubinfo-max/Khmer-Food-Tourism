@@ -249,3 +249,15 @@ img[src^="data:image"],
   font-size: 16.25px !important;
   line-height: 1.58 !important;
 }
+
+/* iPad & Tablet Full-Screen Responsive Adaptation (Guideline 4) */
+@media (min-width: 768px) {
+  .max-w-md {
+    max-width: 64rem !important;
+  }
+}
+@media (min-width: 1024px) {
+  .max-w-md {
+    max-width: 72rem !important;
+  }
+}

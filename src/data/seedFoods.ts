@@ -7,6 +7,7 @@ import {
 } from '../types';
 import { additional100Foods } from './seedAdditional100Foods';
 import { vegetarian30Foods } from './seedVegetarian30Foods';
+import { foodpanda100Foods } from './seedFoodpanda100Foods';
 
 export const seedFoods: FoodItem[] = [
   // ==========================================
@@ -6491,7 +6492,8 @@ export const generateFull100Foods = (): FoodItem[] => {
   });
 
   return deduplicateFoodItems(
-    [...fullList, ...additional100Foods, ...vegetarian30Foods].map((f) => ({
+    [...fullList, ...additional100Foods, ...vegetarian30Foods,
+    ...foodpanda100Foods].map((f) => ({
       ...f,
       priceRiel: 0,
       priceUsd: 0,
@@ -6508,4 +6510,5 @@ export const generateFull100Foods = (): FoodItem[] => {
 export const initial100Foods: FoodItem[] = generateFull100Foods();
 export const initial200Foods: FoodItem[] = initial100Foods;
 export const initial230Foods: FoodItem[] = initial100Foods;
-export { vegetarian30Foods };
+export const initial330Foods: FoodItem[] = initial100Foods;
+export { vegetarian30Foods, foodpanda100Foods };

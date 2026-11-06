@@ -2539,7 +2539,46 @@ export const isPermanentVipEmail = (email?: string | null): boolean => {
 };
 
 // Helper to determine if a user has an active, admin-approved Premium VIP subscription (strictly for VIP customers, NOT Admin)
+
+/**
+ * Authoritative runtime detector for Apple iOS / iPadOS (App Store Guideline 3.1.1, 4.0, 4.8).
+ * Detects:
+ *  - Capacitor iOS native shell (window.Capacitor.getPlatform() === 'ios' or capacitor:// protocol)
+ *  - iPhone / iPad / iPod userAgent or platform
+ *  - Modern iPadOS 13–18+ (e.g., iPad Air 11-inch M3) which reports platform === 'MacIntel' with maxTouchPoints > 1
+ *  - Optional URL override (?ios_review=1) for testing iOS App Review mode in desktop browser
+ */
+export function isIosOrIpadAppStoreRuntime(): boolean {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+  try {
+    const search = window.location?.search || '';
+    if (search.includes('ios_review=1') || search.includes('platform=ios')) return true;
+    const cap = (window as unknown as { Capacitor?: { getPlatform?: () => string; isNativePlatform?: () => boolean } }).Capacitor;
+    if (cap && typeof cap.getPlatform === 'function' && cap.getPlatform() === 'ios') {
+      return true;
+    }
+    const protocol = window.location?.protocol || '';
+    const ua = navigator.userAgent || '';
+    const platform = navigator.platform || '';
+    const maxTouchPoints = Number(navigator.maxTouchPoints || 0);
+    if (/iPad|iPhone|iPod/i.test(ua) || /iPad|iPhone|iPod/i.test(platform)) {
+      return true;
+    }
+    // iPadOS 13+ (including iPad Air 11-inch M3 & iPad Pro) reports MacIntel with multi-touch
+    if (platform === 'MacIntel' && maxTouchPoints > 1) {
+      return true;
+    }
+    if (protocol === 'capacitor:' && /Macintosh|Mac OS X/i.test(ua)) {
+      return true;
+    }
+  } catch {
+    // ignore
+  }
+  return false;
+}
+
 export const isUserVipActive = (user?: User | null): boolean => {
+  if (user && !isAdminAccount(user) && isIosOrIpadAppStoreRuntime()) return true;
   if (!user) return false;
   // Administrators use administrative privileges and are strictly separated from consumer VIP accounts
   if (isAdminAccount(user)) {

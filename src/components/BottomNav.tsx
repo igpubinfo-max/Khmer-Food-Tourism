@@ -39,7 +39,7 @@ export const BottomNav: React.FC = () => {
       {/* Subtle luxury gold hairline highlight across top edge */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/55 to-transparent" />
 
-      <div className="max-w-md mx-auto grid grid-cols-7 gap-0.5 px-1 py-1.5">
+      <div className="max-w-md md:max-w-5xl lg:max-w-6xl mx-auto grid grid-cols-7 gap-0.5 px-1 py-1.5">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
