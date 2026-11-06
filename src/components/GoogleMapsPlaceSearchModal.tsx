@@ -109,7 +109,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
       currentUser.username === 'admin' ||
       currentUser.username === 'cheasavuth')
   );
-  const isVipActive = Boolean(currentUser && isUserVipActive(currentUser));
+  const isVipActive = Boolean(isUserVipActive(currentUser));
   const canManagePlaces = isAdmin;
 
   const [query, setQuery] = useState('');

@@ -289,7 +289,7 @@ export const FoodView: React.FC = () => {
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs sm:text-sm font-bold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
             <IconHealthyLeaf className="w-4 h-4 shrink-0" />
-            <span>{tr(language, 'ស្លាកប្រភេទម្ហូបពិសេស (VIP)៖', 'Special Dish Tags (VIP):', '特色菜品标签 (VIP)：')}</span>
+            <span>{canUseVip ? tr(language, 'ស្លាកប្រភេទម្ហូបសុខភាព និងពិសេស៖', 'Healthy & Special Dish Tags:', '健康与特色菜品标签：') : tr(language, 'ស្លាកប្រភេទម្ហូបពិសេស (VIP)៖', 'Special Dish Tags (VIP):', '特色菜品标签 (VIP)：')}</span>
             {!canUseVip && (
               <span className="px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-extrabold inline-flex items-center gap-0.5">
                 <Lock className="w-2.5 h-2.5" />

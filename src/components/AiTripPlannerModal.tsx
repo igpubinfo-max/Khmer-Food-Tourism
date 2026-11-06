@@ -99,7 +99,7 @@ export const AiTripPlannerModal: React.FC = () => {
     openUpgradeVipModal,
   } = useApp();
 
-  const canUseVip = Boolean(currentUser && (isUserVipActive(currentUser) || isAdminAccount(currentUser)));
+  const canUseVip = Boolean(isUserVipActive(currentUser) || (currentUser && isAdminAccount(currentUser)));
 
   // Active Smart AI Assistant Mode Tab
   const [assistantTab, setAssistantTab] = useState<AssistantTab>('food_advisor');

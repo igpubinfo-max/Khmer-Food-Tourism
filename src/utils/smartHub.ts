@@ -8,7 +8,7 @@ import type { TagFilterId } from './dishTags';
  * Daily Food Discovery, and Map Navigation) remain 100% Free for all users.
  */
 export function hasSpecialAndHealthyFoodVipAccess(user?: User | null): boolean {
-  return Boolean(user && (isUserVipActive(user) || isAdminAccount(user)));
+  return Boolean(isUserVipActive(user) || (user && isAdminAccount(user)));
 }
 
 /**

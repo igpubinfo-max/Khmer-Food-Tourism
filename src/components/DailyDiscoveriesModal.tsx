@@ -60,7 +60,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
   const isKm = language === 'km';
   const isZh = language === 'zh';
   const canUseVip = Boolean(
-    currentUser && (isUserVipActive(currentUser) || isAdminAccount(currentUser))
+    (isUserVipActive(currentUser) || (currentUser && isAdminAccount(currentUser)))
   );
 
   const [selectedProvinceId, setSelectedProvinceId] = useState<string>('all');
