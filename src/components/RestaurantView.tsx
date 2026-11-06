@@ -82,14 +82,31 @@ export const RestaurantView: React.FC = () => {
   const isKm = language === 'km';
 
   const classifyRestaurantCategory = (r: Restaurant): string => {
-    const text = `${r.nameKh || ''} ${r.nameEn || ''} ${r.descriptionKh || ''} ${r.descriptionEn || ''} ${(r.signatureDishesKh || []).join(' ')}`.toLowerCase();
+    const text = `${r.nameKh || ''} ${r.nameEn || ''} ${r.descriptionKh || ''} ${r.descriptionEn || ''} ${(r.signatureDishesKh || []).join(' ')} ${(r.signatureDishesEn || []).join(' ')}`.toLowerCase();
     if (
       text.includes('កាហ្វេ') ||
+      text.includes('តែគុជ') ||
+      text.includes('ប៊ីស្រ្តូ') ||
       text.includes('cafe') ||
+      text.includes('café') ||
       text.includes('coffee') ||
       text.includes('roastery') ||
       text.includes('atelier') ||
-      text.includes('kinyei')
+      text.includes('kinyei') ||
+      text.includes('bistro') ||
+      text.includes('brown ') ||
+      text.includes('tube ') ||
+      text.includes('starbucks') ||
+      text.includes('amazon') ||
+      text.includes('chagee') ||
+      text.includes('koi ') ||
+      text.includes('mixue') ||
+      text.includes('boba') ||
+      text.includes('bakery') ||
+      text.includes('pastry') ||
+      text.includes('sister srey') ||
+      text.includes('ministry of cat') ||
+      text.includes('camping')
     ) {
       return 'cafe_bistro';
     }
@@ -136,10 +153,10 @@ export const RestaurantView: React.FC = () => {
 
   const restaurantCategories = [
     { id: 'all', nameKh: 'គ្រប់ប្រភេទហាង', nameEn: 'All Restaurants', nameZh: '全部餐厅' },
+    { id: 'cafe_bistro', nameKh: '☕ កាហ្វេប្រេន & កន្លែងល្បីយុវវ័យ', nameEn: '☕ Branded Cafes & Youth Spots', nameZh: '☕ 品牌咖啡与青年热门打卡点' },
     { id: 'khmer_fine_dining', nameKh: 'ម្ហូបខ្មែរប្រណីត', nameEn: 'Khmer Fine Dining', nameZh: '高端柬式料理' },
     { id: 'seafood_riverside', nameKh: 'គ្រឿងសមុទ្រ & មាត់ទន្លេ', nameEn: 'Seafood & Riverside', nameZh: '海鲜与河畔餐厅' },
     { id: 'family_garden', nameKh: 'ភោជនីយដ្ឋានគ្រួសារ & សួន', nameEn: 'Family & Garden', nameZh: '家庭与花园餐厅' },
-    { id: 'cafe_bistro', nameKh: 'កាហ្វេ & ប៊ីស្រ្តូ', nameEn: 'Cafe & Bistro', nameZh: '咖啡与简餐' },
     { id: 'bbq_grill', nameKh: 'សាច់អាំង & ជួបជុំ', nameEn: 'BBQ & Grill', nameZh: '烧烤与聚餐' },
   ];
 
