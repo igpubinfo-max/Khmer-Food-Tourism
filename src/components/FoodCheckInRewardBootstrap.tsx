@@ -7,9 +7,12 @@ import {
   FOOD_CHECKIN_CLOUD_CLAIMS_KEY,
   FOOD_CHECKIN_DAILY_CAP,
   FOOD_CHECKIN_REWARD_TARGET,
+  FOOD_CHECKIN_REWARD_VIP_DAYS,
   applyCheckIn,
   findExistingRewardClaimAt,
+  getFreeTrialStatus,
   getVerifiedServerNowMs,
+  isRealIsoTimestamp,
   ledgerProgress,
   loadLedgerForUser,
   loadLocalClaimRegistry,
@@ -24,41 +27,65 @@ import {
 } from '../utils/foodCheckInReward';
 
 /**
- * Invisible controller for the "taste 30 dishes -> 30 days VIP" reward:
+ * Invisible controller for the Free 30-Day VIP Trial & "taste 30 dishes -> 30 days VIP" reward:
  *  - synchronizes the authoritative internet server clock (never trusting `new Date()` device clock),
- *  - reconciles the one-time reward lock across local storage and Supabase Cloud by both User ID and Email,
- *  - keeps the per-account ledger (each dish once, max 1 check-in per server day),
- *  - asks the app to grant the one-time reward when the 30th dish is counted.
- * Admin accounts and guests are never eligible. The grant itself is idempotent (see grantFoodCheckInReward).
+ *  - reconciles and self-heals existing users' Free Trial / VIP activation date, expiry date, and remaining days
+ *    across local storage, User records, and Supabase/Secondary Cloud by both User ID and Email,
+ *  - keeps the per-account ledger synced to the backend User record,
+ *  - grants the one-time reward when the 30th dish is counted or heals an unpersisted activation.
  */
 export const FoodCheckInRewardBootstrap: React.FC = () => {
-  const { currentUser, grantFoodCheckInReward, showToast, language } = useApp();
-  const latest = useRef({ currentUser, grantFoodCheckInReward, showToast, language });
-  latest.current = { currentUser, grantFoodCheckInReward, showToast, language };
+  const { currentUser, grantFoodCheckInReward, syncUserCheckInLedgerToBackend, showToast, language } = useApp();
+  const latest = useRef({
+    currentUser,
+    grantFoodCheckInReward,
+    syncUserCheckInLedgerToBackend,
+    showToast,
+    language,
+  });
+  latest.current = {
+    currentUser,
+    grantFoodCheckInReward,
+    syncUserCheckInLedgerToBackend,
+    showToast,
+    language,
+  };
   const inFlight = useRef(false);
 
-  const runGrant = useCallback(async () => {
+  const runGrant = useCallback(async (silentHeal = false) => {
     const user = latest.current.currentUser;
     if (!user || inFlight.current) return;
     inFlight.current = true;
     try {
-      const res = await latest.current.grantFoodCheckInReward();
-      // Success OR "already granted": either way the local ledger and claim lock must never ask again.
+      const res = await latest.current.grantFoodCheckInReward({ silentHeal });
       if (res.success || res.alreadyGranted) {
         const verifiedMs = getVerifiedServerNowMs() || (await syncVerifiedServerClock());
-        const atIso = user.foodCheckInRewardAt || (verifiedMs ? new Date(verifiedMs).toISOString() : 'granted');
+        const liveUser = latest.current.currentUser || user;
+        const atIso =
+          (isRealIsoTimestamp(liveUser.freeTrialActivatedAt) ? liveUser.freeTrialActivatedAt : undefined) ||
+          (isRealIsoTimestamp(liveUser.foodCheckInRewardAt) ? liveUser.foodCheckInRewardAt : undefined) ||
+          (verifiedMs ? new Date(verifiedMs).toISOString() : new Date().toISOString());
+        const expIso =
+          liveUser.freeTrialExpiresAt ||
+          liveUser.subscriptionExpiryDate ||
+          liveUser.vipExpiresAt;
         recordFoodCheckInRewardClaim(
           {
-            userId: user.id,
-            legacyIds: user.legacyIds || [],
-            email: user.email,
-            foodCheckInRewardAt: user.foodCheckInRewardAt,
+            userId: liveUser.id,
+            legacyIds: liveUser.legacyIds || [],
+            email: liveUser.email,
+            foodCheckInRewardAt: atIso,
+            freeTrialActivatedAt: atIso,
+            freeTrialExpiresAt: expIso,
           },
-          atIso
+          atIso,
+          undefined,
+          expIso,
+          FOOD_CHECKIN_REWARD_VIP_DAYS
         );
       }
     } catch {
-      // grant failed: the ledger stays at the target and the retry below / next stamp will try again
+      // grant failed: will retry on next launch/sync
     } finally {
       inFlight.current = false;
     }
@@ -88,23 +115,23 @@ export const FoodCheckInRewardBootstrap: React.FC = () => {
       const user = latest.current.currentUser;
       if (!user || isAdminAccount(user) || user.isDisabled) return { kind: 'ineligible' };
       const legacy = user.legacyIds || [];
-      const ledger = loadLedgerForUser(user.id, legacy);
+      const ledger = loadLedgerForUser(user.id, legacy, user.foodCheckInLedger);
 
-      const claimedAt = findExistingRewardClaimAt({
-        userId: user.id,
-        legacyIds: legacy,
-        email: user.email,
-        foodCheckInRewardAt: user.foodCheckInRewardAt,
-      });
-      if (claimedAt) {
-        if (!ledger.grantedAt) markLedgerGranted(user.id, legacy, claimedAt);
+      const trialStatus = getFreeTrialStatus(user);
+      if (trialStatus.hasEverActivated) {
+        if (!ledger.grantedAt && trialStatus.activatedAt) {
+          markLedgerGranted(user.id, legacy, trialStatus.activatedAt);
+        }
         return { kind: 'already_granted' };
       }
 
       const verifiedMs = getVerifiedServerNowMs();
       const { ledger: next, outcome } = applyCheckIn(ledger, foodId, verifiedMs);
-      if (next.entries.length !== ledger.entries.length) saveLedgerForUser(user.id, next);
-      if (outcome.kind === 'reached') void runGrant();
+      if (next.entries.length !== ledger.entries.length) {
+        saveLedgerForUser(user.id, next);
+        latest.current.syncUserCheckInLedgerToBackend(next);
+      }
+      if (outcome.kind === 'reached') void runGrant(false);
 
       // If the monotonic server clock anchor had not finished warming up yet, verify immediately over the network.
       if (outcome.kind === 'unverified_time') {
@@ -123,13 +150,18 @@ export const FoodCheckInRewardBootstrap: React.FC = () => {
             );
             return;
           }
-          const latestLedger = loadLedgerForUser(liveUser.id, liveUser.legacyIds || []);
+          const latestLedger = loadLedgerForUser(
+            liveUser.id,
+            liveUser.legacyIds || [],
+            liveUser.foodCheckInLedger
+          );
           const retry = applyCheckIn(latestLedger, foodId, freshMs);
           if (retry.ledger.entries.length !== latestLedger.entries.length) {
             saveLedgerForUser(liveUser.id, retry.ledger);
+            latest.current.syncUserCheckInLedgerToBackend(retry.ledger);
           }
           if (retry.outcome.kind === 'reached') {
-            void runGrant();
+            void runGrant(false);
           } else if (retry.outcome.kind === 'counted') {
             latest.current.showToast(
               tr(
@@ -149,13 +181,17 @@ export const FoodCheckInRewardBootstrap: React.FC = () => {
     return () => setFoodCheckInHandler(null);
   }, [runGrant]);
 
-  // Reconcile on launch / account switch, including pulling the cloud claim lock by User ID & Email.
+  // Reconcile on launch / account switch / cloud sync:
+  // 1. Pull cloud claim lock by User ID & Email.
+  // 2. Sync any cloud foodCheckInLedger into local storage.
+  // 3. Self-heal existing users whose Free Trial / VIP entitlement was activated so it never resets to 0/30.
   useEffect(() => {
     if (!currentUser || isAdminAccount(currentUser) || currentUser.isDisabled) return;
     let cancelled = false;
     const legacy = currentUser.legacyIds || [];
 
     const reconcile = async () => {
+      await syncVerifiedServerClock();
       let cloudReg: RewardClaimRegistry | null = null;
       if (isSupabaseConfigured()) {
         cloudReg = await pullCloudDocument<RewardClaimRegistry>(FOOD_CHECKIN_CLOUD_CLAIMS_KEY, 6000);
@@ -165,31 +201,56 @@ export const FoodCheckInRewardBootstrap: React.FC = () => {
       }
       if (cancelled) return;
 
-      const ledger = loadLedgerForUser(currentUser.id, legacy);
+      // Merge cloud user ledger with local ledger so dish check-ins survive app updates and reinstalls
+      const mergedLedger = loadLedgerForUser(currentUser.id, legacy, currentUser.foodCheckInLedger);
+      if (mergedLedger.entries.length > 0 || mergedLedger.grantedAt) {
+        saveLedgerForUser(currentUser.id, mergedLedger);
+      }
+
+      const status = getFreeTrialStatus(currentUser, cloudReg);
+
+      // If the user has an active or previously activated trial that needs backend/user-record healing, heal immediately
+      if (status.needsBackendHeal) {
+        await runGrant(true);
+        return;
+      }
+
+      if (status.hasEverActivated && status.activatedAt) {
+        recordFoodCheckInRewardClaim(
+          {
+            userId: currentUser.id,
+            legacyIds: legacy,
+            email: currentUser.email,
+            foodCheckInRewardAt: status.activatedAt,
+            freeTrialActivatedAt: status.activatedAt,
+            freeTrialExpiresAt: status.expiresAt,
+          },
+          status.activatedAt,
+          cloudReg,
+          status.expiresAt,
+          status.totalDays
+        );
+        return;
+      }
+
       const claimedAt = findExistingRewardClaimAt(
         {
           userId: currentUser.id,
           legacyIds: legacy,
           email: currentUser.email,
           foodCheckInRewardAt: currentUser.foodCheckInRewardAt,
+          freeTrialActivatedAt: currentUser.freeTrialActivatedAt,
+          freeTrialExpiresAt: currentUser.freeTrialExpiresAt,
         },
         cloudReg
       );
-      if (claimedAt) {
-        recordFoodCheckInRewardClaim(
-          {
-            userId: currentUser.id,
-            legacyIds: legacy,
-            email: currentUser.email,
-            foodCheckInRewardAt: claimedAt,
-          },
-          claimedAt,
-          cloudReg
-        );
+      if (claimedAt && isRealIsoTimestamp(claimedAt)) {
+        await runGrant(true);
         return;
       }
-      if (!ledger.grantedAt && ledgerProgress(ledger) >= FOOD_CHECKIN_REWARD_TARGET) {
-        void runGrant();
+
+      if (!mergedLedger.grantedAt && ledgerProgress(mergedLedger) >= FOOD_CHECKIN_REWARD_TARGET) {
+        void runGrant(false);
       }
     };
 
@@ -198,7 +259,13 @@ export const FoodCheckInRewardBootstrap: React.FC = () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser?.id, currentUser?.email, currentUser?.foodCheckInRewardAt]);
+  }, [
+    currentUser?.id,
+    currentUser?.email,
+    currentUser?.foodCheckInRewardAt,
+    currentUser?.freeTrialActivated,
+    currentUser?.subscriptionExpiryDate,
+  ]);
 
   return null;
 };

@@ -60,7 +60,8 @@ export const AdminDashboard: React.FC = () => {
   const { 
     isAdminOpen, setIsAdminOpen, language,
     foods, addFood, updateFood, deleteFood,
-    restaurants, deleteRestaurant, approveRestaurant, rejectRestaurant, toggleVerifyRestaurant, bulkVerifyAndEnrichAllRestaurants,
+    restaurants, updateRestaurant,
+    deleteRestaurant, approveRestaurant, rejectRestaurant, toggleVerifyRestaurant, bulkVerifyAndEnrichAllRestaurants,
     approveShopPhotoReplacement, approveAllPendingShopPhotoReplacements, rejectShopPhotoReplacement,
     approveListingUpgradeRequest, rejectListingUpgradeRequest,
     destinations, addDestination, updateDestination, deleteDestination,
@@ -168,7 +169,7 @@ export const AdminDashboard: React.FC = () => {
   const [fetchingSingleDestId, setFetchingSingleDestId] = useState<string | null>(null);
   const cancelDestBatchRef = useRef(false);
   const [adminRestSearchQuery, setAdminRestSearchQuery] = useState('');
-  const [adminRestLocationFilter, setAdminRestLocationFilter] = useState<'all' | 'verified_gps' | 'needs_gps_review'>('all');
+  const [adminRestLocationFilter, setAdminRestLocationFilter] = useState<'all' | 'owned_shops' | 'suspended' | 'verified_gps' | 'needs_gps_review'>('all');
   const [visibleAdminFoodCount, setVisibleAdminFoodCount] = useState(50);
   const [visibleAdminRestCount, setVisibleAdminRestCount] = useState(50);
   const [visibleAdminDestCount, setVisibleAdminDestCount] = useState(50);
@@ -441,11 +442,44 @@ export const AdminDashboard: React.FC = () => {
         : [],
     [isAdminOpen, transactions, txnFilter]
   );
+  const resolveBusinessOwnerInfo = useMemo(() => {
+    const byId = new Map<string, User>();
+    const byEmail = new Map<string, User>();
+    const byPhone = new Map<string, User>();
+    for (const u of users) {
+      if (!u) continue;
+      if (u.id) byId.set(String(u.id).trim(), u);
+      if (u.email) byEmail.set(String(u.email).trim().toLowerCase(), u);
+      if (u.phone) byPhone.set(String(u.phone).replace(/\s+/g, ''), u);
+    }
+    return (rest: any) => {
+      const rawOwnerId = String(rest.ownerId || rest.pendingUpgradeRequest?.submittedByUserId || '').trim();
+      const rawOwnerEmail = String(rest.ownerEmail || rest.pendingUpgradeRequest?.submittedByEmail || '').trim().toLowerCase();
+      const rawOwnerPhone = String(rest.ownerPhone || rest.pendingUpgradeRequest?.submittedByPhone || '').trim();
+      const matchedUser =
+        (rawOwnerId && byId.get(rawOwnerId)) ||
+        (rawOwnerEmail && byEmail.get(rawOwnerEmail)) ||
+        (rawOwnerPhone && byPhone.get(rawOwnerPhone.replace(/\s+/g, ''))) ||
+        null;
+      const hasOwner = Boolean(matchedUser || rawOwnerId || rawOwnerEmail || rest.ownerName || !isSeedRestaurantId(rest.id));
+      return {
+        hasOwner,
+        userId: matchedUser?.id || rawOwnerId || '',
+        ownerName: matchedUser?.name || rest.ownerName || rest.pendingUpgradeRequest?.submittedByName || '',
+        ownerEmail: matchedUser?.email || rawOwnerEmail || '',
+        ownerPhone: matchedUser?.phone || rawOwnerPhone || rest.phone || '',
+      };
+    };
+  }, [users]);
+
   const filteredAdminRestaurants = useMemo(() => {
     if (!isAdminOpen) return [];
     const q = adminRestSearchQuery.trim().toLowerCase();
     return shopOnlyRestaurants.filter(rest => {
       const gpsOk = isPlaceLocationVerified(rest);
+      const ownerInfo = resolveBusinessOwnerInfo(rest);
+      if (adminRestLocationFilter === 'owned_shops' && !ownerInfo.hasOwner) return false;
+      if (adminRestLocationFilter === 'suspended' && !(rest as any).isSuspended) return false;
       if (adminRestLocationFilter === 'verified_gps' && !gpsOk) return false;
       if (adminRestLocationFilter === 'needs_gps_review' && gpsOk) return false;
       if (!q) return true;
@@ -460,10 +494,15 @@ export const AdminDashboard: React.FC = () => {
         (rest.ownerName || '').toLowerCase().includes(q) ||
         (rest.ownerPhone || '').toLowerCase().includes(q) ||
         (rest.ownerEmail || '').toLowerCase().includes(q) ||
+        (rest.ownerId || '').toLowerCase().includes(q) ||
+        ownerInfo.userId.toLowerCase().includes(q) ||
+        ownerInfo.ownerName.toLowerCase().includes(q) ||
+        ownerInfo.ownerEmail.toLowerCase().includes(q) ||
+        ownerInfo.ownerPhone.toLowerCase().includes(q) ||
         (rest.id || '').toLowerCase().includes(q)
       );
     });
-  }, [isAdminOpen, shopOnlyRestaurants, adminRestLocationFilter, adminRestSearchQuery]);
+  }, [isAdminOpen, shopOnlyRestaurants, adminRestLocationFilter, adminRestSearchQuery, resolveBusinessOwnerInfo]);
 
   const filteredAdminDestinations = useMemo(() => {
     if (!isAdminOpen) return [];
@@ -3260,6 +3299,8 @@ export const AdminDashboard: React.FC = () => {
                   {(() => {
                     const verifiedCount = shopOnlyRestaurants.filter((r) => isPlaceLocationVerified(r)).length;
                     const reviewCount = shopOnlyRestaurants.length - verifiedCount;
+                    const ownedCount = shopOnlyRestaurants.filter((r) => resolveBusinessOwnerInfo(r).hasOwner).length;
+                    const suspendedCount = shopOnlyRestaurants.filter((r) => Boolean((r as any).isSuspended)).length;
                     return (
                       <>
                         <button
@@ -3273,6 +3314,30 @@ export const AdminDashboard: React.FC = () => {
                         >
                           {isKm ? `ហាងទាំងអស់ (${shopOnlyRestaurants.length})` : `All Shops (${shopOnlyRestaurants.length})`}
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => setAdminRestLocationFilter('owned_shops')}
+                          className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
+                            adminRestLocationFilter === 'owned_shops'
+                              ? 'bg-amber-500 text-slate-950 shadow-xs'
+                              : 'bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700'
+                          }`}
+                        >
+                          {isKm ? `👤 ហាងមានម្ចាស់គណនី (${ownedCount})` : `👤 Owned Shops (${ownedCount})`}
+                        </button>
+                        {suspendedCount > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setAdminRestLocationFilter('suspended')}
+                            className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer ${
+                              adminRestLocationFilter === 'suspended'
+                                ? 'bg-rose-600 text-white shadow-xs'
+                                : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-700'
+                            }`}
+                          >
+                            {isKm ? `⏸️ ផ្អាក (${suspendedCount})` : `⏸️ Suspended (${suspendedCount})`}
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => setAdminRestLocationFilter('verified_gps')}
@@ -3368,12 +3433,66 @@ export const AdminDashboard: React.FC = () => {
                           {rest.isPromoted && <span className="text-[#064E3B] dark:text-emerald-400 text-[10px] font-bold">★ Promoted</span>}
                         </div>
                         <p className="text-[10px] text-stone-400 truncate">
-                          {rest.provinceKh} • 📞 {rest.phone} • ⭐ {(rest.rating || 4.7).toFixed(1)}
+                          <span className="font-mono font-bold text-slate-600 dark:text-stone-300">ID: {rest.id}</span> • {rest.provinceKh} • 📞 {rest.phone} • ⭐ {(rest.rating || 4.7).toFixed(1)}
                         </p>
+                        {(() => {
+                          const ownerInfo = resolveBusinessOwnerInfo(rest);
+                          if (!ownerInfo.hasOwner) return null;
+                          return (
+                            <div className="mt-1 px-2 py-1 rounded-lg bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-[10px] text-amber-950 dark:text-amber-200 flex items-center gap-1.5 flex-wrap font-khmer">
+                              <span className="font-bold">👤 {ownerInfo.ownerName || 'Shop Owner'}</span>
+                              {ownerInfo.userId && <span className="font-mono px-1 rounded bg-white/80 dark:bg-stone-900 border border-amber-300/60">User ID: {ownerInfo.userId}</span>}
+                              {ownerInfo.ownerEmail && <span>• ✉️ {ownerInfo.ownerEmail}</span>}
+                              {ownerInfo.ownerPhone && <span>• 📞 {ownerInfo.ownerPhone}</span>}
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center flex-wrap">
+                      {(() => {
+                        const ownerInfo = resolveBusinessOwnerInfo(rest);
+                        if (!ownerInfo.hasOwner) return null;
+                        return (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              (window as any).__kft_admin_user_initial_search = ownerInfo.userId || ownerInfo.ownerEmail || ownerInfo.ownerName || rest.id;
+                              setActiveTab('users');
+                            }}
+                            className="px-2.5 py-1 rounded-lg text-[10px] font-bold font-khmer bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/70 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 cursor-pointer"
+                            title={isKm ? 'មើលគណនីម្ចាស់ហាងក្នុងផ្នែកអ្នកប្រើប្រាស់' : 'View Owner Account in Users Tab'}
+                          >
+                            👤 {isKm ? 'មើលម្ចាស់' : 'Owner'}
+                          </button>
+                        );
+                      })()}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nextSusp = !Boolean((rest as any).isSuspended);
+                          updateRestaurant({
+                            ...rest,
+                            isSuspended: nextSusp,
+                            status: nextSusp ? ('suspended' as any) : 'approved',
+                            updatedAt: new Date().toISOString(),
+                          } as any);
+                          showToast(
+                            nextSusp
+                              ? (isKm ? `⏸️ បានផ្អាកហាង "${rest.nameKh}"` : `⏸️ Suspended "${rest.nameEn || rest.nameKh}"`)
+                              : (isKm ? `▶️ បានបើកហាង "${rest.nameKh}" ឡើងវិញ` : `▶️ Reactivated "${rest.nameEn || rest.nameKh}"`),
+                            'info'
+                          );
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold font-khmer cursor-pointer ${
+                          (rest as any).isSuspended
+                            ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                            : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
+                        }`}
+                      >
+                        {(rest as any).isSuspended ? (isKm ? '▶️ បើកវិញ' : '▶️ Activate') : (isKm ? '⏸️ ផ្អាក' : '⏸️ Suspend')}
+                      </button>
                       {rest.status !== 'approved' && (
                         <button
                           onClick={() => approveRestaurant(rest.id)}
@@ -3548,9 +3667,19 @@ export const AdminDashboard: React.FC = () => {
             <AdminHotelManagerPanel
               onOpenImageModal={(hotel) => setSelectedDestForImageEdit(hotel)}
               onOpenGpsEditor={(hotel) => {
+                const matchingRest = restaurants.find((r) => r.id === hotel.id);
+                if (matchingRest) {
+                  (window as any).__kft_manage_initial_tab = 'info';
+                  openManageMyVipStore(matchingRest.id);
+                  return;
+                }
                 (window as any).__kft_open_dest_edit = true;
                 setIsAdminOpen(false);
                 setSelectedDestination(hotel);
+              }}
+              onNavigateToOwnerUser={(query) => {
+                (window as any).__kft_admin_user_initial_search = query;
+                setActiveTab('users');
               }}
             />
           )}
@@ -3949,7 +4078,23 @@ export const AdminDashboard: React.FC = () => {
           )}
 
           {/* USERS TAB (Enterprise 10,000-50,000+ Scale User Directory, Bulk Control, Activity Logs & Backup/Recovery) */}
-          {activeTab === 'users' && <AdminUsersDirectoryPanel />}
+          {activeTab === 'users' && (
+            <AdminUsersDirectoryPanel
+              onNavigateToShop={(shopId) => {
+                const targetRest = restaurants.find((r) => r.id === shopId);
+                if (targetRest && isHotelBusinessRecord(targetRest)) {
+                  setActiveTab('hotels');
+                  openManageMyVipStore(targetRest.id);
+                  return;
+                }
+                setAdminRestSearchQuery(shopId);
+                setActiveTab('restaurants');
+                if (targetRest) {
+                  openManageMyVipStore(targetRest.id);
+                }
+              }}
+            />
+          )}
 
           {/* SECURITY & AUDIT LOGS TAB */}
           {activeTab === 'security' && (
@@ -5895,6 +6040,17 @@ export const AdminDashboard: React.FC = () => {
         isOpen={!!selectedDestForImageEdit}
         onClose={() => setSelectedDestForImageEdit(null)}
         onSave={(updatedDest) => {
+          const matchingRest = restaurants.find((r) => r.id === updatedDest.id);
+          if (matchingRest) {
+            updateRestaurant({
+              ...matchingRest,
+              photoUrl: updatedDest.photoUrl,
+              profileImage: updatedDest.photoUrl,
+              galleryPhotos: updatedDest.galleryPhotos?.length ? updatedDest.galleryPhotos : [updatedDest.photoUrl].filter(Boolean),
+              isAdminEdited: true,
+              updatedAt: new Date().toISOString(),
+            });
+          }
           updateDestination(updatedDest);
           showToast(isKm ? `បានរក្សាទុករូបភាពសម្រាប់ "${updatedDest.nameKh}" ជោគជ័យ!` : `Updated photo for "${updatedDest.nameEn}"!`, 'success');
         }}

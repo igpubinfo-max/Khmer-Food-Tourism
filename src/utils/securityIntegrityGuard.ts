@@ -18,6 +18,7 @@
 import {
   User,
   parseSafeDateMs,
+  getAuthoritativeServerNowMs,
   isPermanentVipEmail,
   resolveUserActualVipPlanDays,
   sanitizeUserVipPlanAndExpiry,
@@ -240,7 +241,7 @@ export function findLocalAuthoritativeVipEntitlement(
   extraCloudUsers?: User[] | null
 ): LocalAuthoritativeVipMatch {
   if (!targetUser) return { found: false, expiryMs: 0 };
-  const nowMs = Date.now();
+  const nowMs = getAuthoritativeServerNowMs();
   let bestExpMs = 0;
   let bestStartIso: string | undefined;
   let bestTxnRef: string | undefined;
@@ -368,6 +369,42 @@ export function findLocalAuthoritativeVipEntitlement(
           }
         }
       }
+
+      // 5. Check Free 30-Day VIP Trial Claim Registry (`kft_v3_food_checkin_reward_claims_v1`) & Secondary Cloud Mirror
+      const claims = getCachedParsedLocalStorage('kft_v3_food_checkin_reward_claims_v1');
+      if (claims && typeof claims === 'object') {
+        const targetIds = [targetUser.id, ...(Array.isArray(targetUser.legacyIds) ? targetUser.legacyIds : [])].filter(Boolean) as string[];
+        const targetEmail = String(targetUser.email || '').trim().toLowerCase();
+        let claimStartIso = '';
+        let claimExpIso = '';
+        for (const id of targetIds) {
+          if (claims.trialsByUserId?.[id]?.activatedAt) {
+            claimStartIso = claims.trialsByUserId[id].activatedAt;
+            claimExpIso = claims.trialsByUserId[id].expiresAt || '';
+            break;
+          }
+          if (typeof claims.byUserId?.[id] === 'string' && claims.byUserId[id] !== 'granted') {
+            claimStartIso = claims.byUserId[id];
+            break;
+          }
+        }
+        if (!claimStartIso && targetEmail) {
+          if (claims.trialsByEmail?.[targetEmail]?.activatedAt) {
+            claimStartIso = claims.trialsByEmail[targetEmail].activatedAt;
+            claimExpIso = claims.trialsByEmail[targetEmail].expiresAt || '';
+          } else if (typeof claims.byEmail?.[targetEmail] === 'string' && claims.byEmail[targetEmail] !== 'granted') {
+            claimStartIso = claims.byEmail[targetEmail];
+          }
+        }
+        const cStartMs = parseSafeDateMs(claimStartIso);
+        const cExpMs = parseSafeDateMs(claimExpIso) || (cStartMs > 0 ? cStartMs + 30 * 24 * 60 * 60 * 1000 : 0);
+        if (cExpMs > nowMs && cExpMs > bestExpMs) {
+          bestExpMs = cExpMs;
+          bestStartIso = cStartMs > 0 ? new Date(cStartMs).toISOString() : bestStartIso;
+          bestTxnRef = bestTxnRef || `REWARD-FOODCHECKIN30-${targetUser.id || 'USER'}`;
+          bestMethod = bestMethod || 'Manual';
+        }
+      }
     }
   } catch {}
 
@@ -386,7 +423,9 @@ export function findLocalAuthoritativeVipEntitlement(
 
   if (isPermanentVipEmail(targetUser.email)) {
     const planDays = resolveUserActualVipPlanDays(targetUser as User);
-    const permExpMs = nowMs + planDays * 24 * 60 * 60 * 1000;
+    const existingTargetExpMs = parseSafeDateMs(targetUser.subscriptionExpiryDate || targetUser.vipExpiresAt);
+    // Reuse existing future expiry timestamp so permanent VIP email does not trigger a 60-second cloud push loop
+    const permExpMs = existingTargetExpMs > nowMs ? existingTargetExpMs : nowMs + planDays * 24 * 60 * 60 * 1000;
     return {
       found: true,
       expiryMs: permExpMs,
@@ -438,15 +477,18 @@ export async function verifyAndSanitizeUserSession(
     sanitized.subscriptionStatus === 'active' ||
     sanitized.membershipTier === 'premium_vip';
 
+  const nowServerMs = getAuthoritativeServerNowMs();
   const entitlement = findLocalAuthoritativeVipEntitlement(sanitized, authoritativeCloudUsers);
-  const ownExpMs = parseSafeDateMs(sanitized.subscriptionExpiryDate || sanitized.vipExpiresAt);
+  const ownExpMs = parseSafeDateMs(
+    sanitized.subscriptionExpiryDate || sanitized.vipExpiresAt || (sanitized.freeTrialActivated ? sanitized.freeTrialExpiresAt : undefined)
+  );
   const hasOwnValidFutureExpiry =
-    isVipClaimed &&
+    (isVipClaimed || sanitized.freeTrialActivated) &&
     sanitized.subscriptionStatus !== 'cancelled' &&
     sanitized.paymentStatus !== 'cancelled' &&
-    ownExpMs > Date.now();
+    ownExpMs > nowServerMs;
 
-  if (isVipClaimed || entitlement.found) {
+  if (isVipClaimed || sanitized.freeTrialActivated || entitlement.found) {
     let sealMatches = false;
     if (sanitized.integritySeal) {
       sealMatches = await verifyUserIntegritySeal(sanitized);
@@ -457,7 +499,7 @@ export async function verifyAndSanitizeUserSession(
         entitlement.expiryIso ? parseSafeDateMs(entitlement.expiryIso) : 0,
         hasOwnValidFutureExpiry ? ownExpMs : 0
       );
-      if (bestExpMs > Date.now()) {
+      if (bestExpMs > nowServerMs) {
         const cleanExpIso = new Date(bestExpMs).toISOString();
         sanitized.membershipTier = 'premium_vip';
         sanitized.subscriptionStatus = 'active';

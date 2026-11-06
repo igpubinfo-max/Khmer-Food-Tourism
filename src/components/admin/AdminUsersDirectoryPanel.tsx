@@ -26,11 +26,18 @@ import {
   X,
   CheckSquare,
   Square,
+  Store,
+  ArrowRightLeft,
+  ExternalLink,
+  PauseCircle,
+  PlayCircle,
+  Settings,
+  Link2,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { fetchServerPaginatedUsersFromSupabase } from '../../services/supabaseService';
 import type { User, UserRole } from '../../types';
-import { getVipRemainingDays } from '../../types';
+import { getVipRemainingDays, isSeedRestaurantId, type Restaurant } from '../../types';
 import { resolveUserAvatarUrl, handleAvatarImageError } from '../../utils/avatarHelper';
 import {
   getOrBuildUserDirectoryIndex,
@@ -52,14 +59,17 @@ import {
   type UserAuthProviderFilter,
   type UserDateRangeFilter,
   type UserSortField,
+  recordUserActivityAndAdminLog,
+  type OwnedShopSummary,
   type IndexedUserRecord,
   type UserActivityLogEntry,
   type UserActivityCategory,
   type StressTestBenchmarkResult,
   type UserDataIntegrityReport,
+  getCanonicalUserId,
 } from '../../services/adminUserManagementService';
 
-export const AdminUsersDirectoryPanel: React.FC = () => {
+export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: string) => void }> = ({ onNavigateToShop }) => {
   const {
     language,
     users,
@@ -87,13 +97,24 @@ export const AdminUsersDirectoryPanel: React.FC = () => {
     bulkDeleteUsers,
     restoreUsersFromBackup,
     runUsersIntegrityCheckAndRepair,
+    updateRestaurant,
+    setSelectedRestaurant,
+    setManagingRestaurant,
+    setIsManageMenuModalOpen,
+    setIsAdminOpen,
   } = useApp();
 
   const isKm = language === 'km';
   const adminTier = getAdminRoleTier(currentUser);
 
   // Sub-navigation: Directory vs Activity/Login/Admin Logs vs Backup & 50k Stress Test
-  const [subView, setSubView] = useState<'directory' | 'activity_logs' | 'backup_diagnostics'>('directory');
+  const [subView, setSubView] = useState<'directory' | 'shop_ownership' | 'activity_logs' | 'backup_diagnostics'>('directory');
+  const [shopDirectorySearch, setShopDirectorySearch] = useState('');
+  const [shopStatusFilter, setShopStatusFilter] = useState<'all' | 'active' | 'pending' | 'suspended' | 'unlinked'>('all');
+  const [shopTransferModalTarget, setShopTransferModalTarget] = useState<OwnedShopSummary | null>(null);
+  const [transferTargetQuery, setTransferTargetQuery] = useState('');
+  const [selectedTransferUserId, setSelectedTransferUserId] = useState('');
+  const [isSyncingShopLinks, setIsSyncingShopLinks] = useState(false);
 
   // Search, Filters & Sorting state (with 280ms debounce for smooth Server-Side Search & Pagination)
   const [searchQuery, setSearchQuery] = useState('');
@@ -243,20 +264,93 @@ export const AdminUsersDirectoryPanel: React.FC = () => {
     pageSize,
   ]);
 
-  // Combine active users with any newly fetched server page items (preserving 100% of existing accounts)
+  // Combine active users with server page items AND auto-reconcile any shop owner accounts from restaurants
   const combinedUsersWorkingSet = useMemo(() => {
-    if (serverPageUsers.length === 0) return users;
     const map = new Map<string, User>();
-    for (const u of users) {
-      if (u && u.id) map.set(u.id, u);
-    }
+    const emailMap = new Map<string, string>();
+    const phoneMap = new Map<string, string>();
+
+    const registerUserInMap = (u: User) => {
+      if (!u || !u.id) return;
+      map.set(u.id, u);
+      if (Array.isArray(u.legacyIds)) {
+        for (const lid of u.legacyIds) {
+          if (lid) map.set(lid, u);
+        }
+      }
+      if (u.email) emailMap.set(u.email.trim().toLowerCase(), u.id);
+      const pDigits = (u.phone || '').replace(/[\s\-+()]/g, '').trim();
+      if (pDigits.length >= 7) phoneMap.set(pDigits, u.id);
+    };
+
+    for (const u of users) registerUserInMap(u);
     for (const su of serverPageUsers) {
-      if (su && su.id && !map.has(su.id)) {
-        map.set(su.id, su);
+      if (su && su.id && !map.has(su.id)) registerUserInMap(su);
+    }
+
+    // Ensure every shop with owner metadata is linked to a user record (backfilling phone/role or recovering missing owner record)
+    for (const r of restaurants) {
+      if (!r || !r.id) continue;
+      const hasOwner =
+        !isSeedRestaurantId(r.id) ||
+        (Boolean(r.ownerId) && r.ownerId !== 'owner-1') ||
+        Boolean(r.ownerEmail) ||
+        r.dataSource === 'vip_owner';
+      if (!hasOwner) continue;
+
+      const rOwnerId = (r.ownerId || r.pendingUpgradeRequest?.submittedByUserId || '').trim();
+      const rEmail = (r.ownerEmail || r.pendingUpgradeRequest?.submittedByEmail || '').trim().toLowerCase();
+      const rPhoneRaw = (r.ownerPhone || r.pendingUpgradeRequest?.submittedByPhone || r.phone || '').trim();
+      const rPhoneDigits = rPhoneRaw.replace(/[\s\-+()]/g, '');
+      const rOwnerName = (r.ownerName || r.pendingUpgradeRequest?.submittedByName || r.nameEn || r.nameKh || 'Shop Owner').trim();
+
+      let matchedUser: User | undefined =
+        (rOwnerId ? map.get(rOwnerId) : undefined) ||
+        (rEmail && emailMap.has(rEmail) ? map.get(emailMap.get(rEmail)!) : undefined) ||
+        (rPhoneDigits.length >= 7 && phoneMap.has(rPhoneDigits) ? map.get(phoneMap.get(rPhoneDigits)!) : undefined);
+
+      if (matchedUser) {
+        // Enrich phone or owner role in working set if missing on user profile
+        const needsPhone = !matchedUser.phone && rPhoneRaw;
+        const needsOwnerRole = matchedUser.role === 'user';
+        if (needsPhone || needsOwnerRole) {
+          const enriched: User = {
+            ...matchedUser,
+            phone: matchedUser.phone || rPhoneRaw,
+            role: matchedUser.role === 'admin' ? 'admin' : 'owner',
+          };
+          map.set(matchedUser.id, enriched);
+        }
+      } else if (rOwnerId || rEmail) {
+        const synthId = rEmail ? getCanonicalUserId({ id: rOwnerId, email: rEmail }) : rOwnerId;
+        if (synthId && !map.has(synthId)) {
+          const recoveredOwner: User = {
+            id: synthId,
+            name: rOwnerName,
+            email: rEmail || '',
+            phone: rPhoneRaw || undefined,
+            role: 'owner',
+            avatar: r.profileImage || r.photoUrl || '',
+            authProvider: rEmail.includes('@') ? 'email' : 'phone',
+            isVerified: true,
+            membershipTier: r.membershipTier === 'premium' ? 'premium_vip' : 'free',
+            subscriptionStatus: r.membershipTier === 'premium' ? 'active' : 'none',
+            createdAt: (r.createdAt || '2026-01-01').slice(0, 10),
+            registeredAtIso: r.createdAt || new Date().toISOString(),
+            legacyIds: rOwnerId && rOwnerId !== synthId ? [rOwnerId] : undefined,
+          };
+          registerUserInMap(recoveredOwner);
+        }
       }
     }
-    return Array.from(map.values());
-  }, [users, serverPageUsers]);
+
+    // Deduplicate by primary user.id
+    const uniqueByPrimaryId = new Map<string, User>();
+    for (const u of map.values()) {
+      if (u && u.id) uniqueByPrimaryId.set(u.id, u);
+    }
+    return Array.from(uniqueByPrimaryId.values());
+  }, [users, serverPageUsers, restaurants]);
 
   // 1. Build O(1) Multi-Index & Pre-Aggregated Statistics
   const directoryIndex = useMemo(() => {
@@ -340,6 +434,171 @@ export const AdminUsersDirectoryPanel: React.FC = () => {
       setSelectedUserIds([]);
     } else {
       setSelectedUserIds(queryResult.allFilteredIds);
+    }
+  };
+
+  // Admin Actions for Shop Ownership: View, Manage, Suspend/Activate, Transfer Ownership, and Database Sync
+  const handleViewShopDetails = (shopId: string) => {
+    const fullShop = restaurants.find((r) => r.id === shopId);
+    if (!fullShop) {
+      showToast(isKm ? 'រកមិនឃើញទិន្នន័យហាងនេះទេ' : 'Shop record not found', 'error');
+      return;
+    }
+    setInspectedUserRecord(null);
+    setIsAdminOpen(false);
+    setSelectedRestaurant(fullShop);
+  };
+
+  const handleManageShop = (shopId: string) => {
+    const fullShop = restaurants.find((r) => r.id === shopId);
+    if (!fullShop) {
+      showToast(isKm ? 'រកមិនឃើញទិន្នន័យហាងនេះទេ' : 'Shop record not found', 'error');
+      return;
+    }
+    setInspectedUserRecord(null);
+    setManagingRestaurant(fullShop);
+    setIsManageMenuModalOpen(true);
+  };
+
+  const handleToggleSuspendShop = (shopId: string) => {
+    const fullShop = restaurants.find((r) => r.id === shopId);
+    if (!fullShop) return;
+    const isCurrentlySuspended = fullShop.status === 'rejected';
+    const nextStatus: 'approved' | 'rejected' = isCurrentlySuspended ? 'approved' : 'rejected';
+    const updatedShop: Restaurant = {
+      ...fullShop,
+      status: nextStatus,
+      isAdminEdited: true,
+      adminEditedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    updateRestaurant(updatedShop);
+    recordUserActivityAndAdminLog(
+      {
+        category: 'admin_action',
+        action: isCurrentlySuspended ? 'SHOP_REACTIVATED' : 'SHOP_SUSPENDED',
+        userId: fullShop.ownerId,
+        userName: fullShop.ownerName,
+        userEmail: fullShop.ownerEmail,
+        actorId: currentUser?.id,
+        actorName: currentUser?.name || 'Admin',
+        actorRole: adminTier,
+        status: 'SUCCESS',
+        details: `${isCurrentlySuspended ? 'Reactivated' : 'Suspended'} shop "${fullShop.nameKh || fullShop.nameEn}" (Shop ID: ${fullShop.id})`,
+      },
+      true
+    );
+    setActivityLogsVersion((v) => v + 1);
+    showToast(
+      isCurrentlySuspended
+        ? isKm
+          ? `✅ បានបើកដំណើរការហាង "${fullShop.nameKh}" ឡើងវិញដោយជោគជ័យ!`
+          : `✅ Reactivated shop "${fullShop.nameEn || fullShop.nameKh}"!`
+        : isKm
+        ? `⏸️ បានផ្អាកដំណើរការហាង "${fullShop.nameKh}" បណ្ដោះអាសន្ន!`
+        : `⏸️ Suspended shop "${fullShop.nameEn || fullShop.nameKh}"!`,
+      'success'
+    );
+  };
+
+  const handleConfirmShopOwnershipTransfer = (targetUser: User) => {
+    if (!shopTransferModalTarget || !targetUser) return;
+    const fullShop = restaurants.find((r) => r.id === shopTransferModalTarget.id);
+    if (!fullShop) return;
+    const prevOwnerLabel = `${fullShop.ownerName || 'Unassigned'} (${fullShop.ownerId || fullShop.ownerEmail || 'N/A'})`;
+    const nowIso = new Date().toISOString();
+
+    const updatedShop: Restaurant = {
+      ...fullShop,
+      ownerId: targetUser.id,
+      ownerName: targetUser.name,
+      ownerEmail: targetUser.email || fullShop.ownerEmail,
+      ownerPhone: targetUser.phone || fullShop.ownerPhone || fullShop.phone,
+      isAdminEdited: true,
+      adminEditedAt: nowIso,
+      updatedAt: nowIso,
+    };
+    updateRestaurant(updatedShop);
+    if (targetUser.role === 'user') {
+      updateUserRole(targetUser.id, 'owner');
+    }
+
+    recordUserActivityAndAdminLog(
+      {
+        category: 'admin_action',
+        action: 'SHOP_OWNERSHIP_TRANSFERRED',
+        userId: targetUser.id,
+        userName: targetUser.name,
+        userEmail: targetUser.email,
+        userPhone: targetUser.phone,
+        actorId: currentUser?.id,
+        actorName: currentUser?.name || 'Admin',
+        actorRole: adminTier,
+        status: 'SUCCESS',
+        details: `Transferred shop "${fullShop.nameKh || fullShop.nameEn}" (ID: ${fullShop.id}) from ${prevOwnerLabel} to ${targetUser.name} (ID: ${targetUser.id}, Email: ${targetUser.email || 'N/A'})`,
+      },
+      true
+    );
+    setActivityLogsVersion((v) => v + 1);
+    setShopTransferModalTarget(null);
+    setTransferTargetQuery('');
+    setSelectedTransferUserId('');
+    showToast(
+      isKm
+        ? `🔄 បានផ្ទេរកម្មសិទ្ធិហាង "${fullShop.nameKh}" ទៅគណនី "${targetUser.name}" (${targetUser.id}) ដោយជោគជ័យ!`
+        : `🔄 Transferred "${fullShop.nameEn || fullShop.nameKh}" to "${targetUser.name}" (${targetUser.id})!`,
+      'success'
+    );
+  };
+
+  const handleSyncAndRepairAllShopOwnershipLinks = async () => {
+    setIsSyncingShopLinks(true);
+    try {
+      let linkedShopsCount = 0;
+      const nowIso = new Date().toISOString();
+      for (const r of restaurants) {
+        if (!r || !r.id) continue;
+        const rec =
+          (r.ownerId ? directoryIndex.byId.get(r.ownerId.trim().toLowerCase()) : undefined) ||
+          (r.ownerEmail ? directoryIndex.byEmail.get(r.ownerEmail.trim().toLowerCase()) : undefined) ||
+          ((r.ownerPhone || r.phone)
+            ? directoryIndex.byPhone.get((r.ownerPhone || r.phone || '').replace(/[\s\-+()]/g, ''))
+            : undefined);
+
+        if (rec) {
+          const u = rec.user;
+          const needsUpdate =
+            r.ownerId !== u.id ||
+            r.ownerName !== u.name ||
+            (u.email && r.ownerEmail !== u.email) ||
+            (u.phone && !r.ownerPhone);
+          if (needsUpdate) {
+            updateRestaurant({
+              ...r,
+              ownerId: u.id,
+              ownerName: u.name,
+              ownerEmail: u.email || r.ownerEmail,
+              ownerPhone: u.phone || r.ownerPhone || r.phone,
+              updatedAt: nowIso,
+            });
+            linkedShopsCount++;
+          }
+          if (u.role === 'user') {
+            updateUserRole(u.id, 'owner');
+          }
+        }
+      }
+      if (syncUsersNow) {
+        await syncUsersNow();
+      }
+      showToast(
+        isKm
+          ? `✅ បានផ្ទៀងផ្ទាត់ និងភ្ជាប់កម្មសិទ្ធិហាងទាំងអស់ជាមួយគណនីម្ចាស់ហាងរួចរាល់ (${directoryIndex.allOwnedShops.length} ហាង, កែតម្រូវ ${linkedShopsCount} ហាង)!`
+          : `✅ Verified & synchronized ${directoryIndex.allOwnedShops.length} shops with owner accounts (updated ${linkedShopsCount} link(s))!`,
+        'success'
+      );
+    } finally {
+      setIsSyncingShopLinks(false);
     }
   };
 
@@ -531,6 +790,23 @@ export const AdminUsersDirectoryPanel: React.FC = () => {
           >
             <Users className="w-3.5 h-3.5" />
             <span>{isKm ? `បញ្ជីគណនី (${stats.totalUsers.toLocaleString()})` : `Directory (${stats.totalUsers.toLocaleString()})`}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSubView('shop_ownership')}
+            className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              subView === 'shop_ownership'
+                ? 'bg-[#064E3B] text-white shadow-xs'
+                : 'bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-800 hover:bg-amber-100'
+            }`}
+          >
+            <Store className="w-3.5 h-3.5" />
+            <span>
+              {isKm
+                ? `🏪 ម្ចាស់ហាង & ហាងទាំងអស់ (${directoryIndex.allOwnedShops.length})`
+                : `🏪 Shop Ownership (${directoryIndex.allOwnedShops.length})`}
+            </span>
           </button>
 
           <button
@@ -778,8 +1054,8 @@ export const AdminUsersDirectoryPanel: React.FC = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={
                     isKm
-                      ? 'ស្វែងរកតាម ឈ្មោះ, username, អ៊ីមែល (email:...), លេខទូរស័ព្ទ (phone:...), User ID ឬឈ្មោះហាង...'
-                      : 'Search by name, username, email (email:...), phone (phone:...), User ID, or shop...'
+                      ? 'ស្វែងរកតាម ឈ្មោះហាង (Shop Name), Shop ID, ឈ្មោះម្ចាស់គណនី (Owner Name), User ID, អ៊ីមែល (Email), ឬលេខទូរស័ព្ទ (Phone)...'
+                      : 'Search by Shop Name, Shop ID, Owner Name, User ID, Email, or Phone Number...'
                   }
                   className="w-full pl-9 pr-8 py-2 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                 />
@@ -1394,6 +1670,271 @@ export const AdminUsersDirectoryPanel: React.FC = () => {
       )}
 
       {/* =====================================================================
+          SUB-VIEW 1B: DEDICATED SHOP OWNERSHIP DIRECTORY (ALL SHOPS <-> OWNER ACCOUNTS)
+         ===================================================================== */}
+      {subView === 'shop_ownership' && (
+        <div className="space-y-3.5">
+          <div className="p-4 rounded-3xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 space-y-3 shadow-2xs">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div>
+                <h4 className="font-extrabold text-sm text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                  <Store className="w-4 h-4 text-emerald-600" />
+                  <span>
+                    {isKm
+                      ? `តារាងម្ចាស់ហាង និងហាងទាំងអស់ (${directoryIndex.allOwnedShops.length} ហាង / ${stats.shopOwnersCount} គណនីម្ចាស់ហាង)`
+                      : `Complete Shop Ownership Directory (${directoryIndex.allOwnedShops.length} Shops / ${stats.shopOwnersCount} Owner Accounts)`}
+                  </span>
+                </h4>
+                <p className="text-[11px] text-stone-500 mt-0.5">
+                  {isKm
+                    ? 'បង្ហាញយ៉ាងច្បាស់នូវ ឈ្មោះហាង, Shop ID, ឈ្មោះម្ចាស់គណនី, User ID, អ៊ីមែល, លេខទូរស័ព្ទ និងចំនួនហាងសរុប ព្រមទាំងប៊ូតុង មើលហាង គ្រប់គ្រង ផ្អាក និងផ្ទេរកម្មសិទ្ធិ។'
+                    : 'Clearly identifies which registered user account owns each shop with Shop Name, Shop ID, Owner Name, User ID, Email, Phone Number, and instant ownership actions.'}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                disabled={isSyncingShopLinks}
+                onClick={handleSyncAndRepairAllShopOwnershipLinks}
+                className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
+              >
+                <Link2 className={`w-3.5 h-3.5 ${isSyncingShopLinks ? 'animate-spin' : ''}`} />
+                <span>
+                  {isSyncingShopLinks
+                    ? isKm
+                      ? 'កំពុងភ្ជាប់ទិន្នន័យ...'
+                      : 'Syncing Links...'
+                    : isKm
+                    ? '🔗 ផ្ទៀងផ្ទាត់ & ភ្ជាប់កម្មសិទ្ធិហាងជាមួយ Database'
+                    : '🔗 Verify & Sync Shop Ownership Links'}
+                </span>
+              </button>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={shopDirectorySearch}
+                  onChange={(e) => setShopDirectorySearch(e.target.value)}
+                  placeholder={
+                    isKm
+                      ? 'ស្វែងរកតាម ឈ្មោះហាង, Shop ID, ឈ្មោះម្ចាស់គណនី, User ID, អ៊ីមែល ឬលេខទូរស័ព្ទ...'
+                      : 'Search by Shop Name, Shop ID, Owner Name, User ID, Email, or Phone Number...'
+                  }
+                  className="w-full pl-9 pr-8 py-2 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-xs"
+                />
+                {shopDirectorySearch && (
+                  <button
+                    type="button"
+                    onClick={() => setShopDirectorySearch('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {(
+                  [
+                    { id: 'all', label: isKm ? 'ទាំងអស់ (All)' : 'All Shops' },
+                    { id: 'active', label: isKm ? '✅ សកម្ម (Active)' : '✅ Active' },
+                    { id: 'pending', label: isKm ? '⏳ រង់ចាំអនុម័ត' : '⏳ Pending' },
+                    { id: 'suspended', label: isKm ? '⏸️ បានផ្អាក (Suspended)' : '⏸️ Suspended' },
+                  ] as const
+                ).map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setShopStatusFilter(tab.id)}
+                    className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border cursor-pointer ${
+                      shopStatusFilter === tab.id
+                        ? 'bg-[#064E3B] text-white border-[#064E3B]'
+                        : 'bg-stone-50 dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2.5">
+              {directoryIndex.allOwnedShops
+                .filter((s) => {
+                  if (shopStatusFilter === 'active' && (s.isSuspended || s.status === 'pending')) return false;
+                  if (shopStatusFilter === 'pending' && s.status !== 'pending') return false;
+                  if (shopStatusFilter === 'suspended' && !s.isSuspended) return false;
+                  const q = shopDirectorySearch.trim().toLowerCase();
+                  if (!q) return true;
+                  const hay = `${s.id} ${s.nameKh} ${s.nameEn} ${s.ownerId} ${s.ownerName} ${s.ownerEmail} ${s.ownerPhone} ${s.phone} ${s.province}`.toLowerCase();
+                  return hay.includes(q);
+                })
+                .map((shop) => {
+                  const ownerRec =
+                    (shop.ownerId ? directoryIndex.byId.get(shop.ownerId.trim().toLowerCase()) : undefined) ||
+                    (shop.ownerEmail ? directoryIndex.byEmail.get(shop.ownerEmail.trim().toLowerCase()) : undefined);
+                  const ownerUser = ownerRec?.user || shop.linkedUser;
+                  const totalShopsForThisOwner = ownerRec ? ownerRec.shopsCount : shop.ownerShopsCount || 1;
+
+                  return (
+                    <div
+                      key={shop.id}
+                      className="p-3.5 rounded-2xl bg-stone-50/70 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-700 flex flex-col lg:flex-row lg:items-center justify-between gap-3"
+                    >
+                      <div className="space-y-2 min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-extrabold text-sm text-stone-900 dark:text-white">
+                            🏪 {shop.nameKh}
+                            {shop.nameEn && shop.nameEn !== shop.nameKh ? ` (${shop.nameEn})` : ''}
+                          </span>
+                          <code className="px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[11px] font-mono font-bold">
+                            Shop ID: {shop.id}
+                          </code>
+                          <span
+                            className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold ${
+                              shop.isSuspended
+                                ? 'bg-rose-100 text-rose-700 border border-rose-300'
+                                : shop.status === 'pending'
+                                ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                                : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            }`}
+                          >
+                            {shop.isSuspended
+                              ? isKm
+                                ? '⏸️ ផ្អាកដំណើរការ (Suspended)'
+                                : '⏸️ Suspended'
+                              : shop.status === 'pending'
+                              ? isKm
+                                ? '⏳ រង់ចាំអនុម័ត (Pending)'
+                                : '⏳ Pending'
+                              : isKm
+                              ? '✅ កំពុងដំណើរការ (Active)'
+                              : '✅ Active'}
+                          </span>
+                          {shop.province && (
+                            <span className="px-2 py-0.5 rounded-lg bg-stone-200/70 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[10px] font-bold">
+                              📍 {shop.province}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Complete 6-Field Owner & Shop Mapping Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 p-2.5 rounded-xl bg-white dark:bg-stone-800 border border-stone-200/80 dark:border-stone-700 text-xs">
+                          <div>
+                            <div className="text-[10px] text-stone-400 font-semibold">
+                              {isKm ? 'ឈ្មោះម្ចាស់គណនី (Owner Name)' : 'Owner Name'}
+                            </div>
+                            <div className="font-bold text-stone-900 dark:text-white truncate">
+                              👤 {ownerUser?.name || shop.ownerName || 'N/A'}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-stone-400 font-semibold">
+                              {isKm ? 'លេខសម្គាល់គណនី (User ID)' : 'User ID'}
+                            </div>
+                            <code className="font-mono font-bold text-emerald-700 dark:text-emerald-400 text-[11px] break-all">
+                              {ownerUser?.id || shop.ownerId || 'N/A'}
+                            </code>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-stone-400 font-semibold">
+                              {isKm ? 'អ៊ីមែលគណនី (Email)' : 'Account Email'}
+                            </div>
+                            <div className="font-semibold text-stone-800 dark:text-stone-200 truncate">
+                              ✉️ {ownerUser?.email || shop.ownerEmail || 'N/A'}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-stone-400 font-semibold">
+                              {isKm ? 'លេខទូរស័ព្ទ (Phone Number)' : 'Phone Number'}
+                            </div>
+                            <div className="font-semibold text-stone-800 dark:text-stone-200 truncate">
+                              📱 {ownerUser?.phone || shop.ownerPhone || shop.phone || 'N/A'}
+                            </div>
+                          </div>
+                        </div>
+
+                        {ownerRec && (
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <button
+                              type="button"
+                              onClick={() => setInspectedUserRecord(ownerRec)}
+                              className="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/70 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 text-[11px] font-extrabold flex items-center gap-1 cursor-pointer"
+                            >
+                              <Store className="w-3.5 h-3.5" />
+                              <span>
+                                {isKm
+                                  ? `មើលហាងទាំង ${totalShopsForThisOwner} របស់គណនី "${ownerRec.user.name}" →`
+                                  : `View All ${totalShopsForThisOwner} Shop(s) Owned by "${ownerRec.user.name}" →`}
+                              </span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleViewShopDetails(shop.id)}
+                          className="px-3 py-1.5 rounded-xl bg-stone-200/80 hover:bg-stone-300 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>{isKm ? 'មើលហាង' : 'View Shop'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleManageShop(shop.id)}
+                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 cursor-pointer shadow-xs"
+                        >
+                          <Settings className="w-3.5 h-3.5" />
+                          <span>{isKm ? 'គ្រប់គ្រងហាង' : 'Manage Shop'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleSuspendShop(shop.id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer ${
+                            shop.isSuspended
+                              ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                              : 'bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300'
+                          }`}
+                        >
+                          {shop.isSuspended ? (
+                            <>
+                              <PlayCircle className="w-3.5 h-3.5" />
+                              <span>{isKm ? 'បើកហាងវិញ' : 'Reactivate'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <PauseCircle className="w-3.5 h-3.5" />
+                              <span>{isKm ? 'ផ្អាកហាង' : 'Suspend'}</span>
+                            </>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShopTransferModalTarget(shop);
+                            setTransferTargetQuery('');
+                            setSelectedTransferUserId('');
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1 cursor-pointer shadow-xs"
+                        >
+                          <ArrowRightLeft className="w-3.5 h-3.5" />
+                          <span>{isKm ? 'ផ្ទេរកម្មសិទ្ធិ' : 'Transfer Ownership'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================================
           SUB-VIEW 2: USER ACTIVITY LOGS, LOGIN HISTORY, REGISTRATION & ADMIN LOGS
          ===================================================================== */}
       {subView === 'activity_logs' && (
@@ -1895,23 +2436,96 @@ export const AdminUsersDirectoryPanel: React.FC = () => {
               </div>
             </div>
 
-            {inspectedUserRecord.associations.shopNames.length > 0 && (
-              <div className="p-3 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-xs">
-                <div className="font-bold text-emerald-900 dark:text-emerald-200 mb-1">
-                  🏪 {isKm ? 'បញ្ជីហាងរបស់គណនីនេះ៖' : 'Owned Shops:'}
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {inspectedUserRecord.associations.shopNames.map((name, i) => (
-                    <span
-                      key={i}
-                      className="px-2.5 py-1 rounded-lg bg-white dark:bg-stone-800 border border-emerald-300 dark:border-emerald-700 font-bold"
-                    >
-                      {name}
-                    </span>
-                  ))}
+            <div className="p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-xs space-y-2.5">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="font-extrabold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
+                  <Store className="w-4 h-4 text-emerald-600" />
+                  <span>
+                    {isKm
+                      ? `បញ្ជីហាងដែលគ្រប់គ្រងដោយគណនី "${inspectedUserRecord.user.name}" (${inspectedUserRecord.shopsCount} ហាង)៖`
+                      : `Shops Owned by "${inspectedUserRecord.user.name}" (${inspectedUserRecord.shopsCount}):`}
+                  </span>
                 </div>
               </div>
-            )}
+
+              {inspectedUserRecord.associations.ownedShops.length === 0 ? (
+                <p className="text-[11px] text-stone-500">
+                  {isKm ? 'គណនីនេះមិនទាន់មានហាងនៅឡើយទេ (0 ហាង)។' : 'This account does not currently own any shops (0 shops).'}
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {inspectedUserRecord.associations.ownedShops.map((shop) => (
+                    <div
+                      key={shop.id}
+                      className="p-3 rounded-xl bg-white dark:bg-stone-900 border border-emerald-300 dark:border-emerald-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
+                    >
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-extrabold text-stone-900 dark:text-white text-xs">
+                            🏪 {shop.nameKh}
+                            {shop.nameEn && shop.nameEn !== shop.nameKh ? ` (${shop.nameEn})` : ''}
+                          </span>
+                          <code className="px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-[10px] font-mono text-emerald-700 dark:text-emerald-300">
+                            Shop ID: {shop.id}
+                          </code>
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              shop.isSuspended
+                                ? 'bg-rose-100 text-rose-700'
+                                : shop.status === 'pending'
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-emerald-100 text-emerald-800'
+                            }`}
+                          >
+                            {shop.isSuspended ? 'Suspended' : shop.status}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-stone-500 flex items-center gap-2 flex-wrap">
+                          <span>👤 Owner: <strong>{inspectedUserRecord.user.name}</strong> ({inspectedUserRecord.user.id})</span>
+                          <span>• ✉️ {inspectedUserRecord.user.email || shop.ownerEmail || 'N/A'}</span>
+                          <span>• 📱 {inspectedUserRecord.user.phone || shop.ownerPhone || shop.phone || 'N/A'}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleViewShopDetails(shop.id)}
+                          className="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-bold text-[11px] cursor-pointer"
+                        >
+                          {isKm ? '👁️ មើលហាង' : '👁️ View'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleManageShop(shop.id)}
+                          className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] cursor-pointer"
+                        >
+                          {isKm ? '⚙️ គ្រប់គ្រង' : '⚙️ Manage'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleSuspendShop(shop.id)}
+                          className="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer"
+                        >
+                          {shop.isSuspended ? (isKm ? '▶️ បើកវិញ' : '▶️ Reactivate') : (isKm ? '⏸️ ផ្អាក' : '⏸️ Suspend')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShopTransferModalTarget(shop);
+                            setTransferTargetQuery('');
+                            setSelectedTransferUserId('');
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-[11px] cursor-pointer"
+                        >
+                          {isKm ? '🔄 ផ្ទេរកម្មសិទ្ធិ' : '🔄 Transfer'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* User Specific Activity & Login History */}
             <div className="space-y-2">
@@ -1944,6 +2558,136 @@ export const AdminUsersDirectoryPanel: React.FC = () => {
                     </div>
                   ))}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================================
+          TRANSFER SHOP OWNERSHIP TO ANOTHER REGISTERED ACCOUNT MODAL
+         ===================================================================== */}
+      {shopTransferModalTarget && (
+        <div
+          className="fixed inset-0 z-90 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4"
+          onClick={() => setShopTransferModalTarget(null)}
+        >
+          <div
+            className="w-full max-w-lg max-h-[88vh] overflow-y-auto bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-700 shadow-2xl p-5 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3 border-b border-stone-200 dark:border-stone-800 pb-3">
+              <div>
+                <h4 className="font-extrabold text-sm text-stone-900 dark:text-white flex items-center gap-2">
+                  <ArrowRightLeft className="w-4 h-4 text-purple-600" />
+                  <span>
+                    {isKm ? 'ផ្ទេរកម្មសិទ្ធិហាងទៅគណនីអ្នកប្រើប្រាស់ផ្សេង' : 'Transfer Shop Ownership to Registered Account'}
+                  </span>
+                </h4>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  {isKm
+                    ? 'ជ្រើសរើសគណនីអ្នកប្រើប្រាស់ថ្មី ដើម្បីភ្ជាប់កម្មសិទ្ធិហាងនេះ និងធ្វើសមកាលកម្មជាមួយ Database ភ្លាមៗ។'
+                    : 'Select the new registered user account to own this shop and synchronize with the database.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShopTransferModalTarget(null)}
+                className="p-1.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 text-xs space-y-1">
+              <div className="font-extrabold text-purple-950 dark:text-purple-200">
+                🏪 {shopTransferModalTarget.nameKh} ({shopTransferModalTarget.nameEn})
+              </div>
+              <div className="text-[11px] text-purple-800 dark:text-purple-300 font-mono">
+                Shop ID: {shopTransferModalTarget.id}
+              </div>
+              <div className="text-[11px] text-stone-600 dark:text-stone-400">
+                {isKm ? 'ម្ចាស់បច្ចុប្បន្ន៖ ' : 'Current Owner: '}
+                <strong>{shopTransferModalTarget.ownerName || 'N/A'}</strong> ({shopTransferModalTarget.ownerId || 'N/A'}) •{' '}
+                {shopTransferModalTarget.ownerEmail || 'N/A'} • {shopTransferModalTarget.ownerPhone || 'N/A'}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-stone-700 dark:text-stone-200">
+                {isKm ? 'ស្វែងរកគណនីម្ចាស់ថ្មី (តាមឈ្មោះ, User ID, អ៊ីមែល ឬលេខទូរស័ព្ទ)៖' : 'Search Target Account (by Name, User ID, Email, or Phone):'}
+              </label>
+              <input
+                type="text"
+                value={transferTargetQuery}
+                onChange={(e) => setTransferTargetQuery(e.target.value)}
+                placeholder={isKm ? 'វាយឈ្មោះ, អ៊ីមែល, លេខទូរស័ព្ទ ឬ User ID...' : 'Type Name, Email, Phone, or User ID...'}
+                className="w-full px-3.5 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-xs"
+              />
+
+              <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
+                {directoryIndex.records
+                  .filter((r) => {
+                    const q = transferTargetQuery.trim().toLowerCase();
+                    if (!q) return true;
+                    return (
+                      r.nameLower.includes(q) ||
+                      r.idLower.includes(q) ||
+                      r.emailLower.includes(q) ||
+                      r.phoneClean.includes(q)
+                    );
+                  })
+                  .slice(0, 25)
+                  .map((r) => {
+                    const isPicked = selectedTransferUserId === r.user.id;
+                    return (
+                      <button
+                        key={r.user.id}
+                        type="button"
+                        onClick={() => setSelectedTransferUserId(r.user.id)}
+                        className={`w-full text-left p-2.5 rounded-xl border transition flex items-center justify-between gap-2 cursor-pointer ${
+                          isPicked
+                            ? 'bg-purple-600 text-white border-purple-600'
+                            : 'bg-stone-50 dark:bg-stone-800/80 text-stone-800 dark:text-stone-200 border-stone-200 dark:border-stone-700 hover:border-purple-400'
+                        }`}
+                      >
+                        <div className="min-w-0">
+                          <div className="font-bold text-xs truncate">
+                            {r.user.name} <span className="font-mono text-[10px] opacity-80">({r.user.id})</span>
+                          </div>
+                          <div className={`text-[11px] truncate ${isPicked ? 'text-purple-100' : 'text-stone-500'}`}>
+                            ✉️ {r.user.email || 'N/A'} • 📱 {r.user.phone || 'N/A'} • 🏪 {r.shopsCount} shops
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-extrabold shrink-0">
+                          {isPicked ? (isKm ? '✓ បានជ្រើសរើស' : '✓ Selected') : (isKm ? 'ជ្រើសរើស' : 'Select')}
+                        </span>
+                      </button>
+                    );
+                  })}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShopTransferModalTarget(null)}
+                className="px-4 py-2 rounded-xl bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-bold cursor-pointer"
+              >
+                {isKm ? 'បោះបង់ (Cancel)' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                disabled={!selectedTransferUserId}
+                onClick={() => {
+                  const targetRec = directoryIndex.byId.get(selectedTransferUserId.toLowerCase());
+                  if (targetRec) {
+                    handleConfirmShopOwnershipTransfer(targetRec.user);
+                  }
+                }}
+                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-40 text-white text-xs font-extrabold cursor-pointer shadow-sm"
+              >
+                {isKm ? '🔄 បញ្ជាក់ការផ្ទេរកម្មសិទ្ធិហាង' : '🔄 Confirm Ownership Transfer'}
+              </button>
             </div>
           </div>
         </div>

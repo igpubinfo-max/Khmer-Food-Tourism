@@ -1,24 +1,34 @@
 import { useEffect, useState } from 'react';
-import { isUserVipActive, parseSafeDateMs, resolveUserActualVipPlanDays, type User } from '../types';
+import {
+  getAuthoritativeServerNowMs,
+  isAdminAccount,
+  isUserVipActive,
+  parseSafeDateMs,
+  resolveUserActualVipPlanDays,
+  setAuthoritativeServerNowMs,
+  type User,
+} from '../types';
 
 /**
- * "Taste 30 dishes -> 30 days of VIP" reward program with strict anti-cheat rules:
+ * "Taste 30 dishes -> 30 days of VIP" & Free 30-Day VIP Trial system with strict anti-cheat rules:
  *
  * 1. Authoritative Internet Server Time (no device `new Date()` trust):
- *    - Daily check-in dates are derived strictly from verified internet server time
- *      (Cloudflare/Supabase `/cdn-cgi/trace` epoch timestamp or HTTP `Date` header)
- *      anchored to a monotonic session timer (`performance.now()`), converted to
+ *    - Daily check-in dates and remaining trial days are derived strictly from verified internet
+ *      server time anchored to a monotonic session timer (`performance.now()`), converted to
  *      Cambodia Standard Time (`UTC+7`, `YYYY-MM-DD`).
- *    - Changing the phone's system date, time, or timezone cannot advance or repeat days.
+ *    - Changing the phone's system date, time, or timezone cannot advance, repeat, or extend days.
  *
  * 2. Max 1 Check-In per Server Day (`FOOD_CHECKIN_DAILY_CAP = 1`):
  *    - At most 1 dish per server calendar day counts toward the 30-point reward
  *      (requiring 30 distinct server days and 30 distinct dishes).
  *    - Un-stamping and re-stamping the same dish never adds points.
  *
- * 3. One-Time Reward Lock (Local + Supabase Cloud by User ID and Email):
- *    - Granted strictly once per user account, recorded in local storage and synced to
- *      Supabase Cloud indexed by both canonical/legacy `userId` and normalized `email`.
+ * 3. Permanent Backend Free Trial & One-Time Reward Lock (Local + Cloud by User ID and Email):
+ *    - Stored permanently on the `User` record (`freeTrialActivated`, `freeTrialActivatedAt`,
+ *      `freeTrialExpiresAt`, `foodCheckInRewardAt`, `foodCheckInLedger`) and synced to
+ *      Supabase & Secondary Cloud indexed by canonical/legacy `userId` and normalized `email`.
+ *    - Preserves original activation date, expiry date, and remaining days across app updates,
+ *      reinstallations, and device changes.
  */
 export const FOOD_CHECKIN_REWARD_TARGET = 30;
 export const FOOD_CHECKIN_REWARD_VIP_DAYS = 30;
@@ -34,12 +44,18 @@ const CAMBODIA_UTC_OFFSET_MS = 7 * 60 * 60 * 1000;
 const SERVER_CLOCK_TTL_MS = 10 * 60 * 1000;
 const MIN_VALID_SERVER_EPOCH_MS = Date.UTC(2025, 0, 1);
 const MAX_VALID_SERVER_EPOCH_MS = Date.UTC(2100, 0, 1);
+const DAY_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * Authoritative server time endpoints ordered with CORS-enabled JSON time APIs first
+ * so Capacitor Android/iOS WebViews (`Origin: https://localhost`) and browsers always succeed.
+ */
 const SERVER_TIME_ENDPOINTS: readonly string[] = [
+  'https://timeapi.io/api/Time/current/zone?timeZone=Asia/Phnom_Penh',
+  'https://ntfy.sh/kft_cloud_sync_v270_prod_9482/json?poll=1&since=all',
   'https://ryvltobwuwuulazqjnza.supabase.co/cdn-cgi/trace',
   'https://www.cloudflare.com/cdn-cgi/trace',
   'https://1.1.1.1/cdn-cgi/trace',
-  'https://igpubinfo-max.github.io/Khmer-Food-Tourism/version.json',
 ];
 
 export interface CheckInEntry {
@@ -55,9 +71,17 @@ export interface CheckInLedger {
   grantedAt?: string;
 }
 
+export interface FreeTrialClaimWindow {
+  activatedAt: string;
+  expiresAt: string;
+  durationDays: number;
+}
+
 export interface RewardClaimRegistry {
   byUserId: Record<string, string>;
   byEmail: Record<string, string>;
+  trialsByUserId?: Record<string, FreeTrialClaimWindow>;
+  trialsByEmail?: Record<string, FreeTrialClaimWindow>;
   updatedAt?: string;
 }
 
@@ -90,7 +114,20 @@ function monotonicNowMs(): number {
 }
 
 function isValidServerEpochMs(ms: unknown): ms is number {
-  return typeof ms === 'number' && Number.isFinite(ms) && ms >= MIN_VALID_SERVER_EPOCH_MS && ms <= MAX_VALID_SERVER_EPOCH_MS;
+  return (
+    typeof ms === 'number' &&
+    Number.isFinite(ms) &&
+    ms >= MIN_VALID_SERVER_EPOCH_MS &&
+    ms <= MAX_VALID_SERVER_EPOCH_MS
+  );
+}
+
+export function isRealIsoTimestamp(raw?: string | null): boolean {
+  if (!raw || typeof raw !== 'string') return false;
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed === 'granted') return false;
+  const ms = parseSafeDateMs(trimmed);
+  return ms >= Date.UTC(2024, 0, 1) && ms <= MAX_VALID_SERVER_EPOCH_MS;
 }
 
 /**
@@ -108,33 +145,84 @@ export function toServerDayKey(serverTime: Date | number): string {
 }
 
 /**
- * Extracts a verified server epoch timestamp (ms) from a trace/JSON body or HTTP `Date` header.
+ * Extracts a verified server epoch timestamp (ms) from a trace/JSON/NDJSON body or HTTP `Date` header.
  */
 export function parseServerTimeResponse(bodyText: string, dateHeader?: string | null): number | null {
   if (typeof bodyText === 'string' && bodyText.trim()) {
+    const trimmed = bodyText.trim();
     // 1. Cloudflare / Supabase `/cdn-cgi/trace` format: `ts=1793686806.000`
-    const traceMatch = bodyText.match(/(?:^|\n)ts=(\d{10}(?:\.\d+)?)/);
+    const traceMatch = trimmed.match(/(?:^|\n)ts=(\d{10}(?:\.\d+)?)/);
     if (traceMatch) {
       const ms = Math.round(Number(traceMatch[1]) * 1000);
       if (isValidServerEpochMs(ms)) return ms;
     }
-    // 2. JSON payload with `unixtime`, `epochMs`, `utc_datetime`, or `datetime`
-    if (bodyText.trim().startsWith('{')) {
-      try {
-        const parsed = JSON.parse(bodyText) as Record<string, unknown>;
-        if (typeof parsed.epochMs === 'number' && isValidServerEpochMs(parsed.epochMs)) {
-          return Math.round(parsed.epochMs);
+
+    // 2. JSON or NDJSON payload (timeapi.io, worldtimeapi, ntfy.sh)
+    if (trimmed.startsWith('{')) {
+      const lines = trimmed.split(/\r?\n/).filter(Boolean);
+      let latestNtfyTimeMs: number | null = null;
+      for (const line of lines) {
+        try {
+          const parsed = JSON.parse(line) as Record<string, unknown>;
+          if (typeof parsed.epochMs === 'number' && isValidServerEpochMs(parsed.epochMs)) {
+            return Math.round(parsed.epochMs);
+          }
+          if (typeof parsed.unixtime === 'number' && isValidServerEpochMs(parsed.unixtime * 1000)) {
+            return Math.round(parsed.unixtime * 1000);
+          }
+          // timeapi.io structured fields: year, month, day, hour, minute, seconds, milliSeconds, timeZone
+          if (
+            typeof parsed.year === 'number' &&
+            typeof parsed.month === 'number' &&
+            typeof parsed.day === 'number' &&
+            typeof parsed.hour === 'number' &&
+            typeof parsed.minute === 'number'
+          ) {
+            const sec = typeof parsed.seconds === 'number' ? parsed.seconds : 0;
+            const msPart = typeof parsed.milliSeconds === 'number' ? parsed.milliSeconds : 0;
+            const tz = typeof parsed.timeZone === 'string' ? parsed.timeZone : '';
+            const offsetMs = tz === 'Asia/Phnom_Penh' ? CAMBODIA_UTC_OFFSET_MS : 0;
+            const computedUtcMs =
+              Date.UTC(parsed.year, parsed.month - 1, parsed.day, parsed.hour, parsed.minute, sec, msPart) - offsetMs;
+            if (isValidServerEpochMs(computedUtcMs)) {
+              return Math.round(computedUtcMs);
+            }
+          }
+          const rawIso =
+            typeof parsed.utc_datetime === 'string'
+              ? parsed.utc_datetime
+              : typeof parsed.datetime === 'string'
+                ? parsed.datetime
+                : typeof parsed.dateTime === 'string'
+                  ? parsed.dateTime
+                  : typeof parsed.currentDateTime === 'string'
+                    ? parsed.currentDateTime
+                    : '';
+          if (rawIso) {
+            const hasZone = /Z$|[+-]\d{2}:?\d{2}$/i.test(rawIso.trim());
+            const tz = typeof parsed.timeZone === 'string' ? parsed.timeZone : '';
+            const isoWithZone =
+              !hasZone && tz === 'Asia/Phnom_Penh'
+                ? `${rawIso.trim()}+07:00`
+                : !hasZone
+                  ? `${rawIso.trim()}Z`
+                  : rawIso.trim();
+            const parsedIso = Date.parse(isoWithZone);
+            if (isValidServerEpochMs(parsedIso)) return parsedIso;
+          }
+          // ntfy.sh message `time` field (unix seconds)
+          if (typeof parsed.time === 'number' && isValidServerEpochMs(parsed.time * 1000)) {
+            const candidateMs = Math.round(parsed.time * 1000);
+            if (latestNtfyTimeMs === null || candidateMs > latestNtfyTimeMs) {
+              latestNtfyTimeMs = candidateMs;
+            }
+          }
+        } catch {
+          // ignore malformed line
         }
-        if (typeof parsed.unixtime === 'number' && isValidServerEpochMs(parsed.unixtime * 1000)) {
-          return Math.round(parsed.unixtime * 1000);
-        }
-        const iso = typeof parsed.utc_datetime === 'string' ? parsed.utc_datetime : typeof parsed.datetime === 'string' ? parsed.datetime : '';
-        if (iso) {
-          const parsedIso = Date.parse(iso);
-          if (isValidServerEpochMs(parsedIso)) return parsedIso;
-        }
-      } catch {
-        // ignore non-JSON body
+      }
+      if (latestNtfyTimeMs !== null && isValidServerEpochMs(latestNtfyTimeMs)) {
+        return latestNtfyTimeMs;
       }
     }
   }
@@ -162,16 +250,19 @@ export function getVerifiedServerNowMs(): number | null {
 
 /**
  * Test / internal helper to seed or clear the verified server clock anchor.
+ * Also updates the global authoritative server clock in `types/index.ts`.
  */
 export function setVerifiedServerClock(serverEpochMs: number | null): void {
   if (serverEpochMs === null || !isValidServerEpochMs(serverEpochMs)) {
     serverClockAnchor = null;
     return;
   }
+  const cleanMs = Math.round(serverEpochMs);
   serverClockAnchor = {
-    serverEpochMs: Math.round(serverEpochMs),
+    serverEpochMs: cleanMs,
     perfNowMs: monotonicNowMs(),
   };
+  setAuthoritativeServerNowMs(cleanMs);
 }
 
 /**
@@ -189,9 +280,9 @@ export async function syncVerifiedServerClock(customFetch?: typeof fetch): Promi
   const run = (async (): Promise<number | null> => {
     for (const url of SERVER_TIME_ENDPOINTS) {
       const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-      const timer = controller ? setTimeout(() => controller.abort(), 3500) : null;
+      const timer = controller ? setTimeout(() => controller.abort(), 4000) : null;
       try {
-        const res = await fetcher(`${url}${url.includes('?') ? '&' : '?'} _t=${Math.random().toString(36).slice(2)}`.replace(' ', ''), {
+        const res = await fetcher(`${url}${url.includes('?') ? '&' : '?'}_t=${Math.random().toString(36).slice(2)}`, {
           method: 'GET',
           cache: 'no-store',
           signal: controller?.signal,
@@ -213,6 +304,36 @@ export async function syncVerifiedServerClock(customFetch?: typeof fetch): Promi
         if (timer) clearTimeout(timer);
       }
     }
+
+    // Fallback CORS-enabled POST ping to ntfy.sh which returns exact current server unix epoch in JSON `{"time": ...}`
+    if (!customFetch) {
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timer = controller ? setTimeout(() => controller.abort(), 4000) : null;
+      try {
+        const pingRes = await fetcher('https://ntfy.sh/kft_server_clock_ping_v1', {
+          method: 'POST',
+          body: 'ping',
+          cache: 'no-store',
+          signal: controller?.signal,
+        });
+        if (pingRes && pingRes.ok) {
+          const text = typeof pingRes.text === 'function' ? await pingRes.text() : '';
+          const verifiedMs = parseServerTimeResponse(text, null);
+          if (verifiedMs !== null) {
+            setVerifiedServerClock(verifiedMs);
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent(FOOD_CHECKIN_CHANGED_EVENT));
+            }
+            return verifiedMs;
+          }
+        }
+      } catch {
+        // ignore ping failure
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
+    }
+
     return null;
   })();
 
@@ -272,7 +393,8 @@ export function applyCheckIn(
   verifiedServerTime?: Date | number | null
 ): { ledger: CheckInLedger; outcome: CheckInOutcome } {
   const l = sanitizeLedger(ledger);
-  if (l.grantedAt) return { ledger: l, outcome: { kind: 'already_granted' } };
+  if (l.grantedAt && isRealIsoTimestamp(l.grantedAt)) return { ledger: l, outcome: { kind: 'already_granted' } };
+  if (l.grantedAt === 'granted') return { ledger: l, outcome: { kind: 'already_granted' } };
   const progress = ledgerProgress(l);
   // Target already reached: ask for the grant again without adding extra entries.
   if (progress >= FOOD_CHECKIN_REWARD_TARGET) return { ledger: l, outcome: { kind: 'reached', progress } };
@@ -325,15 +447,32 @@ function readAll(): Record<string, unknown> {
   }
 }
 
-/** Ledger of one account. Legacy ids are merged so a changed canonical id never loses progress. */
-export function loadLedgerForUser(userId: string, legacyIds: string[] = []): CheckInLedger {
+/** Ledger of one account. Legacy ids and optional cloud user ledger are merged so progress is never lost across app updates or device changes. */
+export function loadLedgerForUser(
+  userId: string,
+  legacyIds: string[] = [],
+  cloudUserLedger?: CheckInLedger | null
+): CheckInLedger {
   const all = readAll();
   const entries: CheckInEntry[] = [];
   let grantedAt: string | undefined;
+  if (cloudUserLedger) {
+    const cl = sanitizeLedger(cloudUserLedger);
+    if (cl.grantedAt && isRealIsoTimestamp(cl.grantedAt)) {
+      grantedAt = cl.grantedAt;
+    }
+    for (const e of cl.entries) {
+      entries.push(e);
+    }
+  }
   for (const id of [userId, ...legacyIds]) {
     if (!id) continue;
     const l = sanitizeLedger(all[id]);
-    grantedAt = grantedAt || l.grantedAt;
+    if (l.grantedAt) {
+      if (!grantedAt || (grantedAt === 'granted' && isRealIsoTimestamp(l.grantedAt))) {
+        grantedAt = l.grantedAt;
+      }
+    }
     for (const e of l.entries) {
       entries.push(e);
     }
@@ -354,16 +493,38 @@ export function saveLedgerForUser(userId: string, ledger: CheckInLedger): void {
 }
 
 export function markLedgerGranted(userId: string, legacyIds: string[] = [], at?: string): void {
-  const verifiedMs = getVerifiedServerNowMs();
-  const fallbackIso = at || (verifiedMs ? new Date(verifiedMs).toISOString() : 'granted');
+  const verifiedMs = getVerifiedServerNowMs() || getAuthoritativeServerNowMs();
+  const fallbackIso =
+    at && isRealIsoTimestamp(at)
+      ? at
+      : at || (verifiedMs ? new Date(verifiedMs).toISOString() : new Date().toISOString());
   const l = loadLedgerForUser(userId, legacyIds);
-  saveLedgerForUser(userId, { ...l, grantedAt: l.grantedAt || fallbackIso });
+  const nextGrantedAt =
+    l.grantedAt && isRealIsoTimestamp(l.grantedAt) ? l.grantedAt : fallbackIso;
+  saveLedgerForUser(userId, { ...l, grantedAt: nextGrantedAt });
 }
 
-/* ---------------- One-Time Reward Lock (User ID + Email) ---------------- */
+/* ---------------- One-Time Reward & Free Trial Lock (User ID + Email) ---------------- */
 
 export function normalizeRewardEmail(email?: string | null): string {
   return typeof email === 'string' ? email.trim().toLowerCase() : '';
+}
+
+function sanitizeTrialWindowMap(raw: unknown): Record<string, FreeTrialClaimWindow> {
+  const out: Record<string, FreeTrialClaimWindow> = {};
+  if (!raw || typeof raw !== 'object') return out;
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (!k || !v || typeof v !== 'object') continue;
+    const w = v as Partial<FreeTrialClaimWindow>;
+    if (typeof w.activatedAt === 'string' && w.activatedAt && typeof w.expiresAt === 'string' && w.expiresAt) {
+      out[k.trim()] = {
+        activatedAt: w.activatedAt,
+        expiresAt: w.expiresAt,
+        durationDays: typeof w.durationDays === 'number' && w.durationDays >= 1 ? w.durationDays : FOOD_CHECKIN_REWARD_VIP_DAYS,
+      };
+    }
+  }
+  return out;
 }
 
 export function sanitizeClaimRegistry(raw: unknown): RewardClaimRegistry {
@@ -381,9 +542,18 @@ export function sanitizeClaimRegistry(raw: unknown): RewardClaimRegistry {
       if (nk && typeof v === 'string' && v) byEmail[nk] = v;
     }
   }
+  const trialsByUserId = sanitizeTrialWindowMap(r.trialsByUserId);
+  const rawTrialsByEmail = sanitizeTrialWindowMap(r.trialsByEmail);
+  const trialsByEmail: Record<string, FreeTrialClaimWindow> = {};
+  for (const [k, v] of Object.entries(rawTrialsByEmail)) {
+    const nk = normalizeRewardEmail(k);
+    if (nk) trialsByEmail[nk] = v;
+  }
   return {
     byUserId,
     byEmail,
+    ...(Object.keys(trialsByUserId).length > 0 ? { trialsByUserId } : {}),
+    ...(Object.keys(trialsByEmail).length > 0 ? { trialsByEmail } : {}),
     updatedAt: typeof r.updatedAt === 'string' ? r.updatedAt : undefined,
   };
 }
@@ -407,15 +577,42 @@ export function saveLocalClaimRegistry(reg: RewardClaimRegistry): RewardClaimReg
   return clean;
 }
 
+function pickBetterClaimTimestamp(a?: string, b?: string): string | undefined {
+  if (isRealIsoTimestamp(a) && isRealIsoTimestamp(b)) {
+    return parseSafeDateMs(a) <= parseSafeDateMs(b) ? a : b;
+  }
+  if (isRealIsoTimestamp(a)) return a;
+  if (isRealIsoTimestamp(b)) return b;
+  return a || b;
+}
+
 export function mergeClaimRegistries(
   first?: RewardClaimRegistry | null,
   second?: RewardClaimRegistry | null
 ): RewardClaimRegistry {
   const a = sanitizeClaimRegistry(first);
   const b = sanitizeClaimRegistry(second);
+  const byUserId: Record<string, string> = { ...b.byUserId };
+  for (const [k, v] of Object.entries(a.byUserId)) {
+    byUserId[k] = pickBetterClaimTimestamp(v, byUserId[k]) || v;
+  }
+  const byEmail: Record<string, string> = { ...b.byEmail };
+  for (const [k, v] of Object.entries(a.byEmail)) {
+    byEmail[k] = pickBetterClaimTimestamp(v, byEmail[k]) || v;
+  }
+  const trialsByUserId: Record<string, FreeTrialClaimWindow> = {
+    ...(b.trialsByUserId || {}),
+    ...(a.trialsByUserId || {}),
+  };
+  const trialsByEmail: Record<string, FreeTrialClaimWindow> = {
+    ...(b.trialsByEmail || {}),
+    ...(a.trialsByEmail || {}),
+  };
   return {
-    byUserId: { ...b.byUserId, ...a.byUserId },
-    byEmail: { ...b.byEmail, ...a.byEmail },
+    byUserId,
+    byEmail,
+    ...(Object.keys(trialsByUserId).length > 0 ? { trialsByUserId } : {}),
+    ...(Object.keys(trialsByEmail).length > 0 ? { trialsByEmail } : {}),
     updatedAt: a.updatedAt || b.updatedAt,
   };
 }
@@ -425,32 +622,57 @@ export interface RewardIdentityCheck {
   legacyIds?: string[];
   email?: string | null;
   foodCheckInRewardAt?: string;
+  freeTrialActivatedAt?: string;
+  freeTrialExpiresAt?: string;
 }
 
 /**
  * Checks if this user (by `userId`, `legacyIds`, OR normalized `email`) has ever claimed
- * the 30-day VIP food check-in reward across the user record, local ledger, local claim
- * registry, or Supabase Cloud claim registry.
+ * the 30-day VIP food check-in reward / Free Trial across the user record, local ledger,
+ * local claim registry, or Supabase Cloud claim registry.
  */
 export function findExistingRewardClaimAt(
   identity: RewardIdentityCheck,
   cloudRegistry?: RewardClaimRegistry | null
 ): string | undefined {
-  if (typeof identity.foodCheckInRewardAt === 'string' && identity.foodCheckInRewardAt) {
+  if (isRealIsoTimestamp(identity.freeTrialActivatedAt)) {
+    return identity.freeTrialActivatedAt;
+  }
+  if (isRealIsoTimestamp(identity.foodCheckInRewardAt)) {
     return identity.foodCheckInRewardAt;
   }
   const ids = [identity.userId, ...(identity.legacyIds || [])].filter(
     (id): id is string => typeof id === 'string' && Boolean(id.trim())
   );
+  const merged = mergeClaimRegistries(loadLocalClaimRegistry(), cloudRegistry);
+  for (const id of ids) {
+    if (merged.trialsByUserId?.[id]?.activatedAt && isRealIsoTimestamp(merged.trialsByUserId[id].activatedAt)) {
+      return merged.trialsByUserId[id].activatedAt;
+    }
+    if (merged.byUserId[id] && isRealIsoTimestamp(merged.byUserId[id])) {
+      return merged.byUserId[id];
+    }
+  }
+  const normEmail = normalizeRewardEmail(identity.email);
+  if (normEmail) {
+    if (merged.trialsByEmail?.[normEmail]?.activatedAt && isRealIsoTimestamp(merged.trialsByEmail[normEmail].activatedAt)) {
+      return merged.trialsByEmail[normEmail].activatedAt;
+    }
+    if (merged.byEmail[normEmail] && isRealIsoTimestamp(merged.byEmail[normEmail])) {
+      return merged.byEmail[normEmail];
+    }
+  }
   if (identity.userId) {
     const ledger = loadLedgerForUser(identity.userId, identity.legacyIds || []);
+    if (ledger.grantedAt && isRealIsoTimestamp(ledger.grantedAt)) return ledger.grantedAt;
     if (ledger.grantedAt) return ledger.grantedAt;
   }
-  const merged = mergeClaimRegistries(loadLocalClaimRegistry(), cloudRegistry);
+  if (typeof identity.foodCheckInRewardAt === 'string' && identity.foodCheckInRewardAt) {
+    return identity.foodCheckInRewardAt;
+  }
   for (const id of ids) {
     if (merged.byUserId[id]) return merged.byUserId[id];
   }
-  const normEmail = normalizeRewardEmail(identity.email);
   if (normEmail && merged.byEmail[normEmail]) {
     return merged.byEmail[normEmail];
   }
@@ -465,30 +687,62 @@ export function hasClaimedFoodCheckInReward(
 }
 
 /**
- * Records a one-time reward claim locally (both in the claim registry by `userId` + `email`
+ * Records a one-time reward / Free Trial claim locally (both in the claim registry by `userId` + `email`
  * and in the user's ledger) and returns the merged registry ready to sync to Supabase Cloud.
  */
 export function recordFoodCheckInRewardClaim(
   identity: RewardIdentityCheck,
   atIso: string,
-  cloudRegistry?: RewardClaimRegistry | null
+  cloudRegistry?: RewardClaimRegistry | null,
+  expiresAtIso?: string,
+  durationDays: number = FOOD_CHECKIN_REWARD_VIP_DAYS
 ): RewardClaimRegistry {
   const merged = mergeClaimRegistries(loadLocalClaimRegistry(), cloudRegistry);
-  const effectiveAt = findExistingRewardClaimAt(identity, merged) || atIso;
+  const existingAt = findExistingRewardClaimAt(identity, merged);
+  const effectiveAt =
+    pickBetterClaimTimestamp(existingAt, atIso) ||
+    new Date(getAuthoritativeServerNowMs()).toISOString();
+  const startMs = parseSafeDateMs(effectiveAt) || getAuthoritativeServerNowMs();
+  const effectiveExpiresIso =
+    expiresAtIso && isRealIsoTimestamp(expiresAtIso)
+      ? expiresAtIso
+      : identity.freeTrialExpiresAt && isRealIsoTimestamp(identity.freeTrialExpiresAt)
+        ? identity.freeTrialExpiresAt
+        : new Date(startMs + durationDays * DAY_MS).toISOString();
+
   const ids = [identity.userId, ...(identity.legacyIds || [])].filter(
     (id): id is string => typeof id === 'string' && Boolean(id.trim())
   );
+  const trialsByUserId: Record<string, FreeTrialClaimWindow> = { ...(merged.trialsByUserId || {}) };
+  const trialsByEmail: Record<string, FreeTrialClaimWindow> = { ...(merged.trialsByEmail || {}) };
+  const windowRecord: FreeTrialClaimWindow = {
+    activatedAt: effectiveAt,
+    expiresAt: effectiveExpiresIso,
+    durationDays,
+  };
+
   for (const id of ids) {
-    if (!merged.byUserId[id]) merged.byUserId[id] = effectiveAt;
+    merged.byUserId[id] = pickBetterClaimTimestamp(merged.byUserId[id], effectiveAt) || effectiveAt;
+    if (!trialsByUserId[id] || !isRealIsoTimestamp(trialsByUserId[id].activatedAt)) {
+      trialsByUserId[id] = windowRecord;
+    }
   }
   const normEmail = normalizeRewardEmail(identity.email);
-  if (normEmail && !merged.byEmail[normEmail]) {
-    merged.byEmail[normEmail] = effectiveAt;
+  if (normEmail) {
+    merged.byEmail[normEmail] = pickBetterClaimTimestamp(merged.byEmail[normEmail], effectiveAt) || effectiveAt;
+    if (!trialsByEmail[normEmail] || !isRealIsoTimestamp(trialsByEmail[normEmail].activatedAt)) {
+      trialsByEmail[normEmail] = windowRecord;
+    }
   }
-  merged.updatedAt = effectiveAt;
+  merged.trialsByUserId = trialsByUserId;
+  merged.trialsByEmail = trialsByEmail;
+  merged.updatedAt = new Date(getAuthoritativeServerNowMs()).toISOString();
   const saved = saveLocalClaimRegistry(merged);
   if (identity.userId) {
     markLedgerGranted(identity.userId, identity.legacyIds || [], effectiveAt);
+  }
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(FOOD_CHECKIN_CHANGED_EVENT));
   }
   return saved;
 }
@@ -512,7 +766,6 @@ export function computeRewardVipWindow(
   now: Date,
   rewardDays: number = FOOD_CHECKIN_REWARD_VIP_DAYS
 ): RewardVipWindow {
-  const dayMs = 24 * 60 * 60 * 1000;
   const nowMs = now.getTime();
   const wasVipActive = isUserVipActive(user);
   const existingExpiryMs = parseSafeDateMs(user.subscriptionExpiryDate || user.vipExpiresAt);
@@ -524,8 +777,206 @@ export function computeRewardVipWindow(
   return {
     wasVipActive,
     startDate,
-    expiryDate: new Date(baseMs + rewardDays * dayMs).toISOString(),
+    expiryDate: new Date(baseMs + rewardDays * DAY_MS).toISOString(),
     durationDays: wasVipActive ? resolveUserActualVipPlanDays(user) : rewardDays,
+  };
+}
+
+/* ---------------- Authoritative Free Trial Status & Reconciliation ---------------- */
+
+export interface UserFreeTrialStatus {
+  state: 'guest' | 'admin' | 'eligible' | 'active' | 'expired';
+  hasEverActivated: boolean;
+  isVipActive: boolean;
+  activatedAt?: string;
+  expiresAt?: string;
+  remainingDays: number;
+  totalDays: number;
+  checkInProgress: number;
+  checkInTarget: number;
+  needsBackendHeal: boolean;
+}
+
+/**
+ * Computes the authoritative Free 30-Day VIP Trial status for a user using verified server time.
+ * Preserves original activation date, expiry date, and remaining days across app updates,
+ * reinstallations, and device changes.
+ */
+export function getFreeTrialStatus(
+  user?: User | null,
+  cloudRegistry?: RewardClaimRegistry | null
+): UserFreeTrialStatus {
+  if (!user) {
+    return {
+      state: 'guest',
+      hasEverActivated: false,
+      isVipActive: false,
+      remainingDays: 0,
+      totalDays: FOOD_CHECKIN_REWARD_VIP_DAYS,
+      checkInProgress: 0,
+      checkInTarget: FOOD_CHECKIN_REWARD_TARGET,
+      needsBackendHeal: false,
+    };
+  }
+  if (isAdminAccount(user)) {
+    return {
+      state: 'admin',
+      hasEverActivated: false,
+      isVipActive: false,
+      remainingDays: 0,
+      totalDays: FOOD_CHECKIN_REWARD_VIP_DAYS,
+      checkInProgress: 0,
+      checkInTarget: FOOD_CHECKIN_REWARD_TARGET,
+      needsBackendHeal: false,
+    };
+  }
+
+  const nowServerMs = getAuthoritativeServerNowMs();
+  const legacyIds = user.legacyIds || [];
+  const normEmail = normalizeRewardEmail(user.email);
+  const ledger = loadLedgerForUser(user.id, legacyIds, user.foodCheckInLedger);
+  const mergedReg = mergeClaimRegistries(loadLocalClaimRegistry(), cloudRegistry);
+
+  // 1. Resolve any stored trial window from registry (by userId, legacyIds, or email)
+  let regWindow: FreeTrialClaimWindow | undefined;
+  for (const id of [user.id, ...legacyIds]) {
+    if (id && mergedReg.trialsByUserId?.[id]) {
+      regWindow = mergedReg.trialsByUserId[id];
+      break;
+    }
+  }
+  if (!regWindow && normEmail && mergedReg.trialsByEmail?.[normEmail]) {
+    regWindow = mergedReg.trialsByEmail[normEmail];
+  }
+
+  // 2. Resolve earliest valid activation timestamp across all sources
+  const rawClaimAt = findExistingRewardClaimAt(
+    {
+      userId: user.id,
+      legacyIds,
+      email: user.email,
+      foodCheckInRewardAt: user.foodCheckInRewardAt,
+      freeTrialActivatedAt: user.freeTrialActivatedAt,
+      freeTrialExpiresAt: user.freeTrialExpiresAt,
+    },
+    mergedReg
+  );
+
+  const totalDays = FOOD_CHECKIN_REWARD_VIP_DAYS;
+  const ref = String(user.transactionRef || '').trim();
+  const isRewardOrTrialRef =
+    ref.startsWith('REWARD-FOODCHECKIN') ||
+    ref.startsWith('FREE-TRIAL-') ||
+    ref.startsWith('VIP-TRIAL-');
+
+  const subExpMs = parseSafeDateMs(user.subscriptionExpiryDate || user.vipExpiresAt);
+  const isDirectVipActiveRecord =
+    user.subscriptionStatus !== 'cancelled' &&
+    user.paymentStatus !== 'cancelled' &&
+    (user.membershipTier === 'premium_vip' || user.subscriptionStatus === 'active' || user.vipStatus === 'active') &&
+    subExpMs > nowServerMs;
+
+  const hasExplicitTrialRecord = Boolean(
+    user.freeTrialActivated ||
+      isRealIsoTimestamp(user.freeTrialActivatedAt) ||
+      isRealIsoTimestamp(user.foodCheckInRewardAt) ||
+      isRealIsoTimestamp(rawClaimAt) ||
+      regWindow ||
+      isRewardOrTrialRef ||
+      isDirectVipActiveRecord
+  );
+
+  const userStartMs = hasExplicitTrialRecord
+    ? parseSafeDateMs(
+        user.freeTrialActivatedAt ||
+          (isRealIsoTimestamp(user.foodCheckInRewardAt) ? user.foodCheckInRewardAt : undefined) ||
+          regWindow?.activatedAt ||
+          (isRealIsoTimestamp(rawClaimAt) ? rawClaimAt : undefined) ||
+          user.subscriptionStartDate
+      )
+    : 0;
+
+  const rawTrialExpMs = parseSafeDateMs(user.freeTrialExpiresAt || regWindow?.expiresAt);
+  // Strictly enforce a 30-day Free Trial window from activation so paid 90-day plans never inflate Free Trial beyond 30 days
+  const effectiveStartMs =
+    userStartMs > 0
+      ? userStartMs
+      : rawTrialExpMs > 0
+        ? rawTrialExpMs - totalDays * DAY_MS
+        : isDirectVipActiveRecord && subExpMs > 0
+          ? subExpMs - totalDays * DAY_MS
+          : 0;
+
+  const effectiveExpMs =
+    rawTrialExpMs > 0 && (effectiveStartMs <= 0 || rawTrialExpMs - effectiveStartMs <= 32 * DAY_MS)
+      ? rawTrialExpMs
+      : effectiveStartMs > 0 && hasExplicitTrialRecord
+        ? effectiveStartMs + totalDays * DAY_MS
+        : 0;
+
+  const activatedAtIso = effectiveStartMs > 0 ? new Date(effectiveStartMs).toISOString() : undefined;
+  const expiresAtIso = effectiveExpMs > 0 ? new Date(effectiveExpMs).toISOString() : undefined;
+
+  // Case A: Active 30-Day Free Trial (server time < 30-day trial expiry time)
+  if (
+    hasExplicitTrialRecord &&
+    effectiveExpMs > nowServerMs &&
+    user.subscriptionStatus !== 'cancelled' &&
+    user.paymentStatus !== 'cancelled'
+  ) {
+    const remainingDays = Math.min(totalDays, Math.max(1, Math.ceil((effectiveExpMs - nowServerMs) / DAY_MS)));
+    const needsBackendHeal = Boolean(
+      !user.freeTrialActivated ||
+        !user.freeTrialActivatedAt ||
+        !user.freeTrialExpiresAt ||
+        !user.subscriptionExpiryDate ||
+        user.membershipTier !== 'premium_vip' ||
+        user.subscriptionStatus !== 'active'
+    );
+    return {
+      state: 'active',
+      hasEverActivated: true,
+      isVipActive: true,
+      activatedAt: activatedAtIso,
+      expiresAt: expiresAtIso,
+      remainingDays,
+      totalDays,
+      checkInProgress: FOOD_CHECKIN_REWARD_TARGET,
+      checkInTarget: FOOD_CHECKIN_REWARD_TARGET,
+      needsBackendHeal,
+    };
+  }
+
+  // Case B: Previously activated Free Trial that has genuinely expired by server time
+  if (hasExplicitTrialRecord && effectiveExpMs > 0 && effectiveExpMs <= nowServerMs) {
+    const needsBackendHeal = Boolean(
+      !user.freeTrialActivated || !user.freeTrialActivatedAt || !user.freeTrialExpiresAt
+    );
+    return {
+      state: 'expired',
+      hasEverActivated: true,
+      isVipActive: false,
+      activatedAt: activatedAtIso,
+      expiresAt: expiresAtIso,
+      remainingDays: 0,
+      totalDays: FOOD_CHECKIN_REWARD_VIP_DAYS,
+      checkInProgress: FOOD_CHECKIN_REWARD_TARGET,
+      checkInTarget: FOOD_CHECKIN_REWARD_TARGET,
+      needsBackendHeal,
+    };
+  }
+
+  // Case C: Eligible (never activated, or stuck on a legacy ungranted 'granted' placeholder with 0 expiry)
+  const stuckOnLegacyPlaceholder = rawClaimAt === 'granted' && effectiveExpMs <= 0;
+  return {
+    state: 'eligible',
+    hasEverActivated: false,
+    isVipActive: false,
+    remainingDays: 0,
+    totalDays: FOOD_CHECKIN_REWARD_VIP_DAYS,
+    checkInProgress: ledgerProgress(ledger),
+    checkInTarget: FOOD_CHECKIN_REWARD_TARGET,
+    needsBackendHeal: stuckOnLegacyPlaceholder,
   };
 }
 
@@ -557,37 +1008,66 @@ export interface FoodCheckInProgress {
   dailyCap: number;
   granted: boolean;
   serverTimeVerified: boolean;
+  trialState: UserFreeTrialStatus['state'];
+  remainingDays: number;
+  totalDays: number;
+  activatedAt?: string;
+  expiresAt?: string;
 }
 
 export function useFoodCheckInProgress(
   userId?: string,
   legacyIds: string[] = [],
   rewardGrantedAt?: string,
-  userEmail?: string
+  userEmail?: string,
+  userObj?: User | null
 ): FoodCheckInProgress {
   const read = (): FoodCheckInProgress => {
-    const l = userId ? loadLedgerForUser(userId, legacyIds) : emptyLedger();
+    const l = userId ? loadLedgerForUser(userId, legacyIds, userObj?.foodCheckInLedger) : emptyLedger();
     const verifiedMs = getVerifiedServerNowMs();
-    const serverDay = verifiedMs !== null ? toServerDayKey(verifiedMs) : '';
-    const claimed = userId
-      ? hasClaimedFoodCheckInReward({
-          userId,
-          legacyIds,
-          email: userEmail,
-          foodCheckInRewardAt: rewardGrantedAt,
-        })
-      : Boolean(rewardGrantedAt);
+    const authoritativeMs = verifiedMs ?? getAuthoritativeServerNowMs();
+    const serverDay = authoritativeMs ? toServerDayKey(authoritativeMs) : '';
+    const trialStatus = userObj
+      ? getFreeTrialStatus(userObj)
+      : userId
+        ? getFreeTrialStatus({
+            id: userId,
+            name: '',
+            email: userEmail || '',
+            role: 'user',
+            avatar: '',
+            createdAt: '',
+            legacyIds,
+            foodCheckInRewardAt: rewardGrantedAt,
+          })
+        : null;
+    const claimed = trialStatus
+      ? trialStatus.hasEverActivated
+      : userId
+        ? hasClaimedFoodCheckInReward({
+            userId,
+            legacyIds,
+            email: userEmail,
+            foodCheckInRewardAt: rewardGrantedAt,
+          })
+        : Boolean(rewardGrantedAt);
     return {
       progress: ledgerProgress(l),
       target: FOOD_CHECKIN_REWARD_TARGET,
       todayCount: serverDay ? ledgerTodayCount(l, serverDay) : 0,
       dailyCap: FOOD_CHECKIN_DAILY_CAP,
-      granted: Boolean(l.grantedAt || claimed),
+      granted: Boolean(claimed || (l.grantedAt && isRealIsoTimestamp(l.grantedAt))),
       serverTimeVerified: verifiedMs !== null,
+      trialState: trialStatus?.state || (userId ? 'eligible' : 'guest'),
+      remainingDays: trialStatus?.remainingDays || 0,
+      totalDays: trialStatus?.totalDays || FOOD_CHECKIN_REWARD_VIP_DAYS,
+      activatedAt: trialStatus?.activatedAt,
+      expiresAt: trialStatus?.expiresAt,
     };
   };
   const [state, setState] = useState<FoodCheckInProgress>(read);
   const legacyKey = legacyIds.join('|');
+  const userExpKey = userObj?.subscriptionExpiryDate || userObj?.freeTrialExpiresAt || '';
   useEffect(() => {
     const refresh = () => {
       setState((prev) => {
@@ -598,30 +1078,25 @@ export function useFoodCheckInProgress(
           prev.todayCount === next.todayCount &&
           prev.dailyCap === next.dailyCap &&
           prev.granted === next.granted &&
-          prev.serverTimeVerified === next.serverTimeVerified
+          prev.serverTimeVerified === next.serverTimeVerified &&
+          prev.trialState === next.trialState &&
+          prev.remainingDays === next.remainingDays &&
+          prev.totalDays === next.totalDays &&
+          prev.expiresAt === next.expiresAt
         ) {
           return prev;
         }
         return next;
       });
     };
-    const onStorage = (e: StorageEvent) => {
-      if (
-        !e.key ||
-        e.key.startsWith(FOOD_CHECKIN_LEDGER_KEY) ||
-        e.key === FOOD_CHECKIN_CLAIMS_KEY
-      ) {
-        refresh();
-      }
-    };
     refresh();
     window.addEventListener(FOOD_CHECKIN_CHANGED_EVENT, refresh);
-    window.addEventListener('storage', onStorage);
+    window.addEventListener('storage', refresh);
     return () => {
       window.removeEventListener(FOOD_CHECKIN_CHANGED_EVENT, refresh);
-      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('storage', refresh);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, legacyKey, rewardGrantedAt, userEmail]);
+  }, [userId, legacyKey, rewardGrantedAt, userEmail, userExpKey]);
   return state;
 }

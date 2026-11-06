@@ -5,7 +5,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1471;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1472;
 export const APP_RELEASE_DATE = '2026-11-06';
 
 /**
@@ -706,8 +706,17 @@ export interface User {
   vipExpiresAt?: string;
   approvedStoresCount?: number;
 
-  // One-time "taste 30 dishes -> 30 days VIP" reward. Set when granted; its presence means the reward can NEVER be granted again.
+  // One-time "taste 30 dishes -> 30 days VIP" reward & Free 30-Day VIP Trial permanent backend fields.
+  // Linked to User ID & Email so activation date, expiry date, and remaining days survive app updates, reinstalls, and device changes.
   foodCheckInRewardAt?: string;
+  freeTrialActivated?: boolean;
+  freeTrialActivatedAt?: string;
+  freeTrialExpiresAt?: string;
+  freeTrialDurationDays?: number;
+  foodCheckInLedger?: {
+    entries: Array<{ foodId: string; day: string; at: string }>;
+    grantedAt?: string;
+  };
 }
 
 export interface VipMembershipHistoryEntry {
@@ -1938,6 +1947,94 @@ export const parseSafeDateMs = (raw?: string | null): number => {
   return Number.isNaN(fallback) ? 0 : fallback;
 };
 
+// ============================================================================
+// AUTHORITATIVE SERVER CLOCK ANCHOR (Anti-Tamper Server Time Calculation)
+// ============================================================================
+const SERVER_CLOCK_STORAGE_KEY = 'kft_verified_server_clock_v1';
+const MIN_VALID_AUTHORITATIVE_MS = Date.UTC(2025, 0, 1);
+const MAX_VALID_AUTHORITATIVE_MS = Date.UTC(2100, 0, 1);
+
+let authoritativeServerAnchor: { serverEpochMs: number; perfNowMs: number } | null = null;
+
+function getMonotonicPerfMs(): number {
+  if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+    return performance.now();
+  }
+  return 0;
+}
+
+export const setAuthoritativeServerNowMs = (serverEpochMs: number | null): void => {
+  if (
+    serverEpochMs === null ||
+    typeof serverEpochMs !== 'number' ||
+    !Number.isFinite(serverEpochMs) ||
+    serverEpochMs < MIN_VALID_AUTHORITATIVE_MS ||
+    serverEpochMs > MAX_VALID_AUTHORITATIVE_MS
+  ) {
+    return;
+  }
+  const cleanMs = Math.round(serverEpochMs);
+  authoritativeServerAnchor = {
+    serverEpochMs: cleanMs,
+    perfNowMs: getMonotonicPerfMs(),
+  };
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(
+        SERVER_CLOCK_STORAGE_KEY,
+        JSON.stringify({
+          serverEpochMs: cleanMs,
+          savedAtDeviceMs: Date.now(),
+        })
+      );
+    }
+  } catch {
+    // ignore storage errors
+  }
+};
+
+/**
+ * Returns authoritative server time in milliseconds for VIP & Free Trial remaining-days calculation.
+ * - Uses in-memory monotonic server clock anchor when verified.
+ * - Falls back to persisted server clock snapshot + forward elapsed time before the first network sync completes,
+ *   and strictly prevents backward device clock tampering from extending expired trials.
+ */
+export const getAuthoritativeServerNowMs = (): number => {
+  if (authoritativeServerAnchor) {
+    const delta = getMonotonicPerfMs() - authoritativeServerAnchor.perfNowMs;
+    if (Number.isFinite(delta) && delta >= -1000 && delta <= 12 * 60 * 60 * 1000) {
+      return authoritativeServerAnchor.serverEpochMs + Math.max(0, Math.round(delta));
+    }
+  }
+  const deviceNow = Date.now();
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const raw = localStorage.getItem(SERVER_CLOCK_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const savedServerMs = Number(parsed?.serverEpochMs || 0);
+        const savedDeviceMs = Number(parsed?.savedAtDeviceMs || 0);
+        if (
+          savedServerMs >= MIN_VALID_AUTHORITATIVE_MS &&
+          savedServerMs <= MAX_VALID_AUTHORITATIVE_MS
+        ) {
+          const deviceDelta = deviceNow - savedDeviceMs;
+          if (savedDeviceMs > 0 && deviceDelta >= 0 && deviceDelta <= 7 * 24 * 60 * 60 * 1000) {
+            return savedServerMs + deviceDelta;
+          }
+          // If the user wound their device clock backward, never allow time to go earlier than the last verified server timestamp
+          if (deviceNow < savedServerMs) {
+            return savedServerMs;
+          }
+        }
+      }
+    }
+  } catch {
+    // ignore storage errors
+  }
+  return deviceNow;
+};
+
 // Helper to determine whether a restaurant has a registered app partner owner account.
 // Note: ALL shops (both registered and unregistered) are displayed and fully openable inside the app by all users without VIP restrictions.
 export const isGpipRegisteredRestaurant = (restaurant?: Partial<Restaurant> | null): boolean => {
@@ -2611,23 +2708,36 @@ export const isUserVipActive = (user?: User | null): boolean => {
     return false;
   }
 
-  const rawExpiry = user.subscriptionExpiryDate || user.vipExpiresAt;
+  const nowServerMs = getAuthoritativeServerNowMs();
+  const rawExpiry =
+    user.subscriptionExpiryDate ||
+    user.vipExpiresAt ||
+    (user.freeTrialActivated ? user.freeTrialExpiresAt : undefined);
   if (rawExpiry) {
     const expiryTime = parseSafeDateMs(rawExpiry);
-    if (expiryTime > Date.now()) {
+    if (expiryTime > nowServerMs) {
       return true;
     }
-    if (expiryTime > 0 && expiryTime <= Date.now()) {
+    if (expiryTime > 0 && expiryTime <= nowServerMs) {
       return false;
     }
   }
 
-  // Fallback for legacy/migrated active VIP records where expiry timestamp was omitted
-  if (user.membershipTier === 'premium_vip' && user.subscriptionStatus === 'active') {
+  // Fallback for legacy/migrated active VIP or Free Trial records where expiry timestamp was omitted
+  if (
+    (user.membershipTier === 'premium_vip' && user.subscriptionStatus === 'active') ||
+    user.freeTrialActivated ||
+    Boolean(user.foodCheckInRewardAt && parseSafeDateMs(user.foodCheckInRewardAt) > 0)
+  ) {
     const startMs = parseSafeDateMs(
-      user.subscriptionStartDate || user.verifiedAt || user.lastLoginAt || user.registeredAtIso
+      user.freeTrialActivatedAt ||
+        user.foodCheckInRewardAt ||
+        user.subscriptionStartDate ||
+        user.verifiedAt ||
+        user.lastLoginAt ||
+        user.registeredAtIso
     );
-    if (startMs <= 0 || startMs + 30 * 24 * 60 * 60 * 1000 > Date.now()) {
+    if (startMs <= 0 || startMs + 30 * 24 * 60 * 60 * 1000 > nowServerMs) {
       return true;
     }
   }
@@ -2652,15 +2762,19 @@ export const getVipAccountState = (user?: User | null): VipAccountState => {
   ) {
     return 'pending_vip';
   }
-  // Check if expired
-  const rawExpiry = user.subscriptionExpiryDate || user.vipExpiresAt;
+  // Check if expired using authoritative server time
+  const nowServerMs = getAuthoritativeServerNowMs();
+  const rawExpiry =
+    user.subscriptionExpiryDate ||
+    user.vipExpiresAt ||
+    user.freeTrialExpiresAt;
   if (rawExpiry) {
     const expiryTime = parseSafeDateMs(rawExpiry);
-    if (expiryTime > 0 && expiryTime <= Date.now()) {
+    if (expiryTime > 0 && expiryTime <= nowServerMs) {
       return 'expired_vip';
     }
   }
-  if (user.subscriptionStatus === 'expired') {
+  if (user.subscriptionStatus === 'expired' || user.freeTrialActivated) {
     return 'expired_vip';
   }
   return 'regular_unpaid';
@@ -2729,94 +2843,201 @@ export const resolveUserActualVipPlanDays = (user?: User | null): number => {
  */
 export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
   if (!user || isAdminAccount(user)) return user;
-  const rawExpiry = user.subscriptionExpiryDate || user.vipExpiresAt;
-  const expMs = parseSafeDateMs(rawExpiry);
-  const nowMs = Date.now();
-  const remainingDays = expMs > nowMs ? Math.ceil((expMs - nowMs) / (1000 * 60 * 60 * 24)) : 0;
-  const actualPlanDays = resolveUserActualVipPlanDays(user);
-  const rawStartMs = parseSafeDateMs(user.subscriptionStartDate || user.verifiedAt);
-  const spanDays =
-    rawStartMs > 0 && expMs > rawStartMs ? Math.round((expMs - rawStartMs) / (1000 * 60 * 60 * 24)) : 0;
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const nowMs = getAuthoritativeServerNowMs();
   const ref = String(user.transactionRef || '').trim();
+  const actualPlanDays = resolveUserActualVipPlanDays(user);
+
+  // Reconcile permanent Free 30-Day Trial fields across legacy & updated user records
+  const isRewardOrTrialRef =
+    ref.startsWith('REWARD-FOODCHECKIN') ||
+    ref.startsWith('FREE-TRIAL-') ||
+    ref.startsWith('VIP-TRIAL-');
+  const rewardAtMs = user.foodCheckInRewardAt && user.foodCheckInRewardAt !== 'granted' ? parseSafeDateMs(user.foodCheckInRewardAt) : 0;
+  const freeTrialStartMs = parseSafeDateMs(user.freeTrialActivatedAt);
+  const subStartMs = parseSafeDateMs(user.subscriptionStartDate);
+  const rawExpiry =
+    user.subscriptionExpiryDate ||
+    user.vipExpiresAt ||
+    user.freeTrialExpiresAt;
+  let expMs = parseSafeDateMs(rawExpiry);
+
+  const isExplicitlyActiveVip =
+    user.subscriptionStatus !== 'cancelled' &&
+    user.paymentStatus !== 'cancelled' &&
+    (user.membershipTier === 'premium_vip' || user.subscriptionStatus === 'active' || user.vipStatus === 'active') &&
+    expMs > nowMs;
+
+  const hasActivatedTrialOrVip = Boolean(
+    user.freeTrialActivated ||
+      rewardAtMs > 0 ||
+      freeTrialStartMs > 0 ||
+      isRewardOrTrialRef ||
+      isExplicitlyActiveVip
+  );
+
+  let reconciledUser: User = user;
+  if (hasActivatedTrialOrVip) {
+    const effectiveTrialStartMs =
+      freeTrialStartMs > 0
+        ? freeTrialStartMs
+        : rewardAtMs > 0
+          ? rewardAtMs
+          : subStartMs > 0
+            ? subStartMs
+            : expMs > 0
+              ? expMs - 30 * DAY_MS
+              : 0;
+    const rawFreeTrialExpMs = parseSafeDateMs(user.freeTrialExpiresAt);
+    // Free Trial window is strictly 30 days from activation (never 90 days from a paid annual plan)
+    const effectiveTrialExpMs =
+      rawFreeTrialExpMs > 0 && effectiveTrialStartMs > 0 && rawFreeTrialExpMs - effectiveTrialStartMs <= 32 * DAY_MS
+        ? rawFreeTrialExpMs
+        : effectiveTrialStartMs > 0
+          ? effectiveTrialStartMs + 30 * DAY_MS
+          : rawFreeTrialExpMs > 0
+            ? rawFreeTrialExpMs
+            : 0;
+
+    if (effectiveTrialStartMs > 0 && effectiveTrialExpMs > 0) {
+      const startIso = new Date(effectiveTrialStartMs).toISOString();
+      const trialExpIso = new Date(effectiveTrialExpMs).toISOString();
+      const finalExpMs = Math.max(expMs, effectiveTrialExpMs);
+      const finalExpIso = new Date(finalExpMs).toISOString();
+      const isStillActiveOnServer =
+        finalExpMs > nowMs &&
+        user.subscriptionStatus !== 'cancelled' &&
+        user.paymentStatus !== 'cancelled';
+
+      if (
+        !user.freeTrialActivated ||
+        user.freeTrialActivatedAt !== startIso ||
+        user.freeTrialExpiresAt !== trialExpIso ||
+        user.freeTrialDurationDays !== 30 ||
+        !user.foodCheckInRewardAt ||
+        (isStillActiveOnServer &&
+          (user.membershipTier !== 'premium_vip' ||
+            user.subscriptionStatus !== 'active' ||
+            !user.subscriptionExpiryDate))
+      ) {
+        reconciledUser = {
+          ...user,
+          freeTrialActivated: true,
+          freeTrialActivatedAt: startIso,
+          freeTrialExpiresAt: trialExpIso,
+          freeTrialDurationDays: 30,
+          foodCheckInRewardAt: rewardAtMs > 0 ? user.foodCheckInRewardAt : startIso,
+          ...(isStillActiveOnServer
+            ? {
+                membershipTier: 'premium_vip',
+                subscriptionStatus: 'active',
+                vipStatus: 'active',
+                paymentStatus: 'verified',
+                subscriptionStartDate: user.subscriptionStartDate || startIso,
+                subscriptionExpiryDate: finalExpIso,
+                vipExpiresAt: finalExpIso,
+                vipPlanDays: user.vipPlanDays || actualPlanDays,
+              }
+            : {}),
+        };
+        expMs = finalExpMs;
+      }
+    }
+  }
+
+  const remainingDays = expMs > nowMs ? Math.ceil((expMs - nowMs) / DAY_MS) : 0;
+  const rawStartMs = parseSafeDateMs(reconciledUser.subscriptionStartDate || reconciledUser.verifiedAt);
+  const spanDays =
+    rawStartMs > 0 && expMs > rawStartMs ? Math.round((expMs - rawStartMs) / DAY_MS) : 0;
 
   // Detect genuine legacy synthetic 365-day inflation without touching stacked renewals (e.g. 115d or 170d) or legitimate 365d plans
   const hasSynthetic365Inflation =
     actualPlanDays <= 90 &&
     ((ref === 'VIP-PERMANENT-IGP2026D' && remainingDays > 95) ||
-      (remainingDays > 300 && user.vipPlanDays !== 365) ||
+      (remainingDays > 300 && reconciledUser.vipPlanDays !== 365) ||
       (spanDays >= 350 &&
         !/(?:^|[-_])(180|365)D(?:[-_]|$)/i.test(ref) &&
-        (user.vipPlanType === 'quarterly' || user.vipPlanType === '30d' || !user.vipPlanDays)));
+        (reconciledUser.vipPlanType === 'quarterly' || reconciledUser.vipPlanType === '30d' || !reconciledUser.vipPlanDays)));
 
   if (hasSynthetic365Inflation) {
     const validStartMs =
-      rawStartMs > 0 && nowMs - rawStartMs < actualPlanDays * 24 * 60 * 60 * 1000 && rawStartMs <= nowMs
+      rawStartMs > 0 && nowMs - rawStartMs < actualPlanDays * DAY_MS && rawStartMs <= nowMs
         ? rawStartMs
         : nowMs;
-    const correctedExpIso = new Date(validStartMs + actualPlanDays * 24 * 60 * 60 * 1000).toISOString();
+    const correctedExpIso = new Date(validStartMs + actualPlanDays * DAY_MS).toISOString();
     const correctedStartIso = new Date(validStartMs).toISOString();
     return {
-      ...user,
+      ...reconciledUser,
       vipPlanDays: actualPlanDays,
-      vipPlanType: actualPlanDays <= 30 ? 'quarterly' : user.vipPlanType || 'annual',
+      vipPlanType: actualPlanDays <= 30 ? 'quarterly' : reconciledUser.vipPlanType || 'annual',
       subscriptionStartDate: correctedStartIso,
       subscriptionExpiryDate: correctedExpIso,
       vipExpiresAt: correctedExpIso,
+      freeTrialActivated: true,
+      freeTrialActivatedAt: reconciledUser.freeTrialActivatedAt || correctedStartIso,
+      freeTrialExpiresAt: correctedExpIso,
+      freeTrialDurationDays: actualPlanDays,
       transactionRef:
-        user.transactionRef === 'VIP-PERMANENT-IGP2026D'
+        reconciledUser.transactionRef === 'VIP-PERMANENT-IGP2026D'
           ? `VIP-${actualPlanDays}D-IGP2026D`
-          : user.transactionRef,
+          : reconciledUser.transactionRef,
     };
   }
 
   // If permanent VIP email has expired or missing expiry, set to actualPlanDays (30 days default)
-  if (isPermanentVipEmail(user.email) && expMs <= nowMs) {
-    const correctedExpIso = new Date(nowMs + actualPlanDays * 24 * 60 * 60 * 1000).toISOString();
+  if (isPermanentVipEmail(reconciledUser.email) && expMs <= nowMs) {
+    const correctedExpIso = new Date(nowMs + actualPlanDays * DAY_MS).toISOString();
     return {
-      ...user,
+      ...reconciledUser,
       membershipTier: 'premium_vip',
       subscriptionStatus: 'active',
       vipStatus: 'active',
       paymentStatus: 'verified',
       vipPlanDays: actualPlanDays,
       vipPlanType: actualPlanDays <= 30 ? 'quarterly' : 'annual',
-      subscriptionStartDate: user.subscriptionStartDate || new Date(nowMs).toISOString(),
+      subscriptionStartDate: reconciledUser.subscriptionStartDate || new Date(nowMs).toISOString(),
       subscriptionExpiryDate: correctedExpIso,
       vipExpiresAt: correctedExpIso,
     };
   }
 
-  if (!user.vipPlanDays && isUserVipActive(user)) {
+  if (!reconciledUser.vipPlanDays && isUserVipActive(reconciledUser)) {
     return {
-      ...user,
+      ...reconciledUser,
       vipPlanDays: actualPlanDays,
     };
   }
 
-  return user;
+  return reconciledUser;
 };
 
-// Helper to calculate remaining days in VIP subscription (strictly for VIP users, 0 for Admin)
+// Helper to calculate remaining days in VIP / Free Trial subscription using authoritative server time (strictly for VIP users, 0 for Admin)
 export const getVipRemainingDays = (user?: User | null): number => {
   if (!user || isAdminAccount(user)) return 0;
   if (!isUserVipActive(user)) return 0;
+  const nowServerMs = getAuthoritativeServerNowMs();
   const planDays = resolveUserActualVipPlanDays(user);
-  const rawExpiry = user.subscriptionExpiryDate || user.vipExpiresAt;
+  const rawExpiry =
+    user.subscriptionExpiryDate ||
+    user.vipExpiresAt ||
+    (user.freeTrialActivated ? user.freeTrialExpiresAt : undefined);
   if (!rawExpiry) return planDays;
   const expMs = parseSafeDateMs(rawExpiry);
   if (expMs <= 0) return planDays;
-  const diffMs = expMs - Date.now();
+  const diffMs = expMs - nowServerMs;
   if (diffMs <= 0) {
     return isPermanentVipEmail(user.email) ? planDays : 0;
   }
   const computedDays = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
   // Guard against displaying >95 days (e.g. 365 days) when the user's plan is a 30-day or 90-day package
   if (computedDays > 95 && planDays <= 90) {
-    const startMs = parseSafeDateMs(user.subscriptionStartDate || user.verifiedAt);
-    if (startMs > 0 && startMs <= Date.now()) {
+    const startMs = parseSafeDateMs(
+      user.subscriptionStartDate || user.freeTrialActivatedAt || user.verifiedAt
+    );
+    if (startMs > 0 && startMs <= nowServerMs) {
       const trueExpMs = startMs + planDays * 24 * 60 * 60 * 1000;
-      if (trueExpMs > Date.now()) {
-        return Math.max(1, Math.ceil((trueExpMs - Date.now()) / (1000 * 60 * 60 * 24)));
+      if (trueExpMs > nowServerMs) {
+        return Math.max(1, Math.ceil((trueExpMs - nowServerMs) / (1000 * 60 * 60 * 24)));
       }
     }
     return planDays;

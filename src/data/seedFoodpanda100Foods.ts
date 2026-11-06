@@ -1,9 +1,8 @@
 import { FoodItem } from '../types';
 
 /**
- * 100 Authentic Khmer Dishes (food-231 to food-330)
- * - food-231 to food-307 (77 dishes): Custom dishes & photos from Khmer_Food_100_Easy_Photo_And_Name_Template.xlsx
- * - food-308 to food-330 (23 dishes): Traditional Khmer specialties
+ * 77 Authentic Khmer Dishes (food-231 to food-307)
+ * Custom dishes & photos from Khmer_Food_100_Easy_Photo_And_Name_Template.xlsx
  */
 export const foodpanda100Foods: FoodItem[] = [
   {
@@ -76,7 +75,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-232",
@@ -148,7 +147,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-233",
@@ -220,7 +219,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-234",
@@ -292,7 +291,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-235",
@@ -364,7 +363,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-236",
@@ -436,7 +435,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-237",
@@ -508,7 +507,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-238",
@@ -580,7 +579,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-239",
@@ -652,7 +651,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-240",
@@ -724,7 +723,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-241",
@@ -796,7 +795,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-242",
@@ -868,7 +867,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-243",
@@ -940,7 +939,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-244",
@@ -1012,7 +1011,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-245",
@@ -1084,7 +1083,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-246",
@@ -1156,7 +1155,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-247",
@@ -1228,7 +1227,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-248",
@@ -1300,7 +1299,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-249",
@@ -1372,7 +1371,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-250",
@@ -1444,7 +1443,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-251",
@@ -1516,7 +1515,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-252",
@@ -1588,7 +1587,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-253",
@@ -1660,7 +1659,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-254",
@@ -1732,7 +1731,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-255",
@@ -1804,7 +1803,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-256",
@@ -1876,7 +1875,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-257",
@@ -1948,7 +1947,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-258",
@@ -2020,7 +2019,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-259",
@@ -2092,7 +2091,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-260",
@@ -2164,7 +2163,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-261",
@@ -2236,7 +2235,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-262",
@@ -2308,7 +2307,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-263",
@@ -2380,7 +2379,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-264",
@@ -2452,7 +2451,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-265",
@@ -2524,7 +2523,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-266",
@@ -2596,7 +2595,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-267",
@@ -2668,7 +2667,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-268",
@@ -2740,7 +2739,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-269",
@@ -2812,7 +2811,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-270",
@@ -2884,7 +2883,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-271",
@@ -2956,7 +2955,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-272",
@@ -3028,7 +3027,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-273",
@@ -3100,7 +3099,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-274",
@@ -3172,7 +3171,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-275",
@@ -3244,7 +3243,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-276",
@@ -3316,7 +3315,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-277",
@@ -3388,7 +3387,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-278",
@@ -3460,7 +3459,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-279",
@@ -3532,7 +3531,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-280",
@@ -3604,7 +3603,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-281",
@@ -3676,7 +3675,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-282",
@@ -3748,7 +3747,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-283",
@@ -3820,7 +3819,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-284",
@@ -3892,7 +3891,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-285",
@@ -3964,7 +3963,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-286",
@@ -4036,7 +4035,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-287",
@@ -4108,7 +4107,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-288",
@@ -4180,7 +4179,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-289",
@@ -4252,7 +4251,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-290",
@@ -4324,7 +4323,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-291",
@@ -4396,7 +4395,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-292",
@@ -4468,7 +4467,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-293",
@@ -4540,7 +4539,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-294",
@@ -4612,7 +4611,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-295",
@@ -4684,7 +4683,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-296",
@@ -4756,7 +4755,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-297",
@@ -4828,7 +4827,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-298",
@@ -4900,7 +4899,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-299",
@@ -4972,7 +4971,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-300",
@@ -5044,7 +5043,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-301",
@@ -5116,7 +5115,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-302",
@@ -5188,7 +5187,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-303",
@@ -5260,7 +5259,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-304",
@@ -5332,7 +5331,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-305",
@@ -5404,7 +5403,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "បាត់ដំបង",
     "provinceEn": "Battambang",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-306",
@@ -5476,7 +5475,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "សៀមរាប",
     "provinceEn": "Siem Reap",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   },
   {
     "id": "food-307",
@@ -5548,1663 +5547,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "provinceKh": "ភ្នំពេញ",
     "provinceEn": "Phnom Penh",
     "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-308",
-    "nameKh": "បាយឆ្អឹងជំនីរជ្រូកអាំងស្ករត្នោតពងទាចៀន",
-    "nameEn": "Palm Sugar Grilled Pork Rib Rice with Fried Duck Egg & Pickles",
-    "nameZh": "棕榈糖炭烤猪排饭配煎鸭蛋与泡菜",
-    "categorySlug": "noodles",
-    "categoryKh": "បាយ មី និងអាហារពេលព្រឹក",
-    "categoryEn": "Rice, Noodles & Breakfast",
-    "categoryZh": "米饭、面食与早餐",
-    "descriptionKh": "អាហារពេលព្រឹកដ៏ពេញនិយមលើ Foodpanda! ឆ្អឹងជំនីរជ្រូកប្រឡាក់ស្ករត្នោតខ្ទិះដូងអាំងឈ្ងុយ ញ៉ាំជាមួយបាយស ពងទាចៀន និងជ្រក់ល្ហុង។",
-    "descriptionEn": "Beloved Cambodian breakfast plate of smoky palm-sugar grilled pork ribs over broken jasmine rice with a fried duck egg and papaya pickle.",
-    "descriptionZh": "Foodpanda早餐爆款，棕榈糖椰浆腌制的炭烤猪肋排配茉莉香米饭、煎鸭蛋与青木瓜泡菜。",
-    "photoUrl": "/foods/food-308.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "4 នាក់",
-    "difficulty": "easy",
-    "priceRiel": 51000,
-    "priceUsd": 12.75,
-    "ingredients": [
-      {
-        "nameKh": "ឆ្អឹងជំនីរជ្រូកប្រឡាក់ស្ករត្នោត ខ្ទឹមស និងខ្ទិះដូង",
-        "nameEn": "Pork spare ribs marinated in palm sugar, garlic & coconut milk",
-        "nameZh": "棕榈糖蒜蓉椰奶腌猪肋排",
-        "amount": "250 ក្រាម (250g)"
-      },
-      {
-        "nameKh": "បាយសក្ដៅៗ និងខ្លាញ់ស្លឹកខ្ទឹម",
-        "nameEn": "Steamed jasmine rice drizzled with scallion oil",
-        "nameZh": "热茉莉香米饭淋葱油",
-        "amount": "1 ចាន (1 plate)"
-      },
-      {
-        "nameKh": "ពងទាចៀន ១ គ្រាប់ និងជ្រក់ល្ហុងត្រសក់",
-        "nameEn": "1 crispy fried duck egg & pickled papaya/cucumber",
-        "nameZh": "煎鸭蛋1颗与木瓜黄瓜泡菜",
-        "amount": "1 ឈុត (1 set)"
-      },
-      {
-        "nameKh": "ទឹកត្រីកោះកុងផ្អែម និងទឹកស៊ុបក្តៅៗ",
-        "nameEn": "Sweet garlic-chili fish sauce & clear pork broth",
-        "nameZh": "甜酸蒜辣鱼露汁与热猪骨清汤",
-        "amount": "1 ឈុត (1 set)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "អាំងឆ្អឹងជំនីរជ្រូកលើរងើកភ្លើងធ្យូងរហូតឆ្អិនឡើងពណ៌ក្រហមឈ្ងុយស្ករត្នោត។",
-        "instructionEn": "Grill the marinated pork ribs over glowing charcoal until caramelized and tender.",
-        "instructionZh": "将腌好的猪肋排在炭火上烤至焦糖色泽、香气扑鼻。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ចៀនពងទាឱ្យស្រួយជាយ ហើយស្រោចខ្លាញ់ស្លឹកខ្ទឹមបន្តិចលើបាយសក្ដៅៗ។",
-        "instructionEn": "Fry the duck egg with crispy edges and drizzle fragrant scallion oil over hot rice.",
-        "instructionZh": "煎好脆边鸭蛋，在热米饭上淋少许香葱油。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "រៀបឆ្អឹងជំនីរជ្រូកអាំង ពងទាចៀន និងជ្រក់ដាក់ចាន ញ៉ាំជាមួយទឹកត្រីផ្អែមនិងទឹកស៊ុប។",
-        "instructionEn": "Serve the grilled ribs and egg beside rice with pickles, sweet fish sauce, and soup.",
-        "instructionZh": "排骨、煎蛋与泡菜装盘，配甜鱼露汁与清汤享用。"
-      }
-    ],
-    "rating": 4.6,
-    "reviewCount": 73,
-    "provinceKh": "បាត់ដំបង",
-    "provinceEn": "Battambang",
-    "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-309",
-    "nameKh": "បបរគ្រឿងត្រីរ៉ស់ពងទាប្រៃ",
-    "nameEn": "Cambodian Herbed Snakehead Fish Congee with Salted Duck Egg",
-    "nameZh": "高棉香草鳢鱼咸鸭蛋绵密米粥",
-    "categorySlug": "noodles",
-    "categoryKh": "បាយ មី និងអាហារពេលព្រឹក",
-    "categoryEn": "Rice, Noodles & Breakfast",
-    "categoryZh": "米饭、面食与早餐",
-    "descriptionKh": "បបរត្រីរ៉ស់សាច់សខ្ចី ដាក់ឆៃប៉ូវលីង ខ្ទឹមសបំពង ខ្ញីសរសៃ សណ្តែកបណ្តុះ និងពងទាប្រៃកាត់ចំណិត។",
-    "descriptionEn": "Silky Cambodian rice porridge topped with flaky Tonle Sap snakehead fish, salted duck egg wedges, preserved radish, and crispy garlic.",
-    "descriptionZh": "绵密香滑的高棉米粥，铺上洞里萨湖鲜嫩鳢鱼片、咸鸭蛋块、菜脯粒、姜丝与金黄炸蒜酥。",
-    "photoUrl": "/foods/food-309.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "2 នាក់",
-    "difficulty": "medium",
-    "priceRiel": 13000,
-    "priceUsd": 3.25,
-    "ingredients": [
-      {
-        "nameKh": "អង្ករផ្កាម្លិះរម្ងាស់ជាមួយទឹកស៊ុបឆ្អឹងត្រី",
-        "nameEn": "Jasmine rice slow-simmered in aromatic fish bone broth",
-        "nameZh": "鱼骨高汤慢熬茉莉香米粥",
-        "amount": "1 ចានគោមធំ (1 large bowl)"
-      },
-      {
-        "nameKh": "សាច់ត្រីរ៉ស់ស្រស់ហាន់បន្ទះ និងពងទាប្រៃស្ងោរ",
-        "nameEn": "Sliced fresh snakehead fish fillet & boiled salted duck egg",
-        "nameZh": "新鲜鳢鱼片与熟咸鸭蛋",
-        "amount": "200 ក្រាម (200g)"
-      },
-      {
-        "nameKh": "ឆៃប៉ូវផ្អែមចិញ្ច្រាំ ខ្ញីហាន់សរសៃ និងខ្ទឹមសបំពង",
-        "nameEn": "Minced sweet preserved radish, julienned ginger & fried garlic",
-        "nameZh": "甜菜脯粒、嫩姜丝与炸蒜酥",
-        "amount": "50 ក្រាម (50g)"
-      },
-      {
-        "nameKh": "សណ្តែកបណ្តុះ ស្លឹកខ្ទឹម ជីរវ៉ាន់ស៊ុយ និងម្រេចកំពត",
-        "nameEn": "Bean sprouts, scallions, cilantro & Kampot pepper",
-        "nameZh": "豆芽、葱花、香菜与贡布胡椒粉",
-        "amount": "60 ក្រាម (60g)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "រម្ងាស់អង្ករជាមួយទឹកស៊ុបរហូតបែកគ្រាប់បបរខាប់ល្មម រួចដាក់សាច់ត្រីរ៉ស់ចូលឱ្យឆ្អិនផ្អែម។",
-        "instructionEn": "Simmer jasmine rice in broth until creamy, then poach the snakehead fish slices directly in the hot congee.",
-        "instructionZh": "将米粥熬至绵滑，下入鳢鱼片烫熟保持鲜嫩。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ដាក់សណ្តែកបណ្តុះនៅបាតចាន ដួសបបរត្រីក្ដៅៗចាក់ពីលើ។",
-        "instructionEn": "Place fresh bean sprouts at the bottom of a bowl and ladle the piping hot fish congee over top.",
-        "instructionZh": "碗底铺鲜豆芽，盛入滚烫的鳢鱼粥。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "រៀបពងទាប្រៃ រោយឆៃប៉ូវ ខ្ញីសរសៃ ខ្ទឹមសបំពង ជីរ និងម្រេចកំពត។",
-        "instructionEn": "Top with salted duck egg wedges, preserved radish, ginger, fried garlic, herbs, and Kampot pepper.",
-        "instructionZh": "摆上咸鸭蛋块，撒菜脯粒、姜丝、炸蒜酥、香菜与贡布胡椒粉即可。"
-      }
-    ],
-    "rating": 4.9,
-    "reviewCount": 84,
-    "provinceKh": "សៀមរាប",
-    "provinceEn": "Siem Reap",
-    "isFeatured": false,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-310",
-    "nameKh": "បបរមាន់ស្រែខ្ញីស្រស់ពងមាន់",
-    "nameEn": "Free-Range Shredded Chicken Congee with Soft Egg & Ginger",
-    "nameZh": "高棉走地鸡丝滑蛋姜丝粥 (Borbor Moan Srae)",
-    "categorySlug": "noodles",
-    "categoryKh": "បាយ មី និងអាហារពេលព្រឹក",
-    "categoryEn": "Rice, Noodles & Breakfast",
-    "categoryZh": "米饭、面食与早餐",
-    "descriptionKh": "បបរមាន់ស្រែទឹកស៊ុបផ្អែម ដាក់សាច់មាន់ហែក ពងមាន់ស្រស់ ខ្ញីហាន់សរសៃ ខ្ទឹមសបំពង និងជីរវ៉ាន់ស៊ុយ។",
-    "descriptionEn": "Heartwarming Cambodian porridge simmered in free-range chicken broth, topped with hand-shredded chicken, a poached egg, and ginger.",
-    "descriptionZh": "走地鸡高汤熬制的暖胃米粥，配手撕鸡肉丝、窝蛋、鲜姜丝与炸蒜酥。",
-    "photoUrl": "/foods/food-310.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "3 នាក់",
-    "difficulty": "easy",
-    "priceRiel": 20000,
-    "priceUsd": 5,
-    "ingredients": [
-      {
-        "nameKh": "សាច់មាន់ស្រែស្ងោរហែកជាសរសៃ",
-        "nameEn": "Poached and hand-shredded free-range chicken meat",
-        "nameZh": "手撕熟走地鸡肉丝",
-        "amount": "200 ក្រាម (200g)"
-      },
-      {
-        "nameKh": "បបរអង្ករផ្កាម្លិះរម្ងាស់ទឹកស៊ុបមាន់ និងពងមាន់ ១ គ្រាប់",
-        "nameEn": "Chicken-broth rice porridge & 1 fresh egg",
-        "nameZh": "鸡汤茉莉米粥与新鲜鸡蛋1颗",
-        "amount": "1 ចានគោម (1 large bowl)"
-      },
-      {
-        "nameKh": "ខ្ញីខ្ចីហាន់សរសៃ និងខ្ទឹមសបំពងមាស",
-        "nameEn": "Julienne young ginger & golden crispy garlic",
-        "nameZh": "嫩姜丝与金黄炸蒜酥",
-        "amount": "3 ស្លាបព្រាបាយ (3 tbsp)"
-      },
-      {
-        "nameKh": "សណ្តែកបណ្តុះ ស្លឹកខ្ទឹម ជីរវ៉ាន់ស៊ុយ និងក្រូចឆ្មារ",
-        "nameEn": "Bean sprouts, scallions, cilantro & fresh lime wedge",
-        "nameZh": "豆芽、葱花、香菜与青柠角",
-        "amount": "50 ក្រាម (50g)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "ស្ងោរមាន់ស្រែយកទឹកស៊ុបរម្ងាស់បបរឱ្យទន់ខាប់ឈ្ងុយ។",
-        "instructionEn": "Poach the free-range chicken and use the rich stock to simmer the rice porridge until velvety.",
-        "instructionZh": "煮熟走地鸡，取原汤将大米慢熬成浓稠米粥。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "គោះពងមាន់ស្រស់ដាក់បាតចាន ចាក់បបរកំពុងពុះពីលើ រួចដាក់សាច់មាន់ហែក។",
-        "instructionEn": "Crack a fresh egg into the bowl, ladle boiling porridge over it, and pile on shredded chicken.",
-        "instructionZh": "碗底打入鲜鸡蛋，冲入滚烫米粥，铺上手撕鸡丝。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "រោយខ្ញីសរសៃ ខ្ទឹមសបំពង ស្លឹកខ្ទឹម និងម្រេចកំពត។",
-        "instructionEn": "Garnish with julienned ginger, crispy garlic, scallions, and Kampot pepper.",
-        "instructionZh": "撒上姜丝、炸蒜酥、葱花与贡布黑胡椒即可。"
-      }
-    ],
-    "rating": 4.8,
-    "reviewCount": 95,
-    "provinceKh": "ភ្នំពេញ",
-    "provinceEn": "Phnom Penh",
-    "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-311",
-    "nameKh": "បបរខកង្កែបឆ្នាំងដីភ្នំពេញ",
-    "nameEn": "Phnom Penh Claypot Braised Frog Legs with Plain Rice Congee",
-    "nameZh": "金边砂锅红烧田鸡配白粥 (Borbor Khor Kangkaeb)",
-    "categorySlug": "noodles",
-    "categoryKh": "បាយ មី និងអាហារពេលព្រឹក",
-    "categoryEn": "Rice, Noodles & Breakfast",
-    "categoryZh": "米饭、面食与早餐",
-    "descriptionKh": "អាហារពេលយប់ដ៏ល្បីនៅភ្នំពេញ! កង្កែបខក្នុងឆ្នាំងដីជាមួយខ្ញី ម្ទេសក្រៀម ស្លឹកខ្ទឹម និងទឹកខខាប់ៗ ញ៉ាំជាមួយបបរសក្ដៅៗ។",
-    "descriptionEn": "Iconic Phnom Penh late-night comfort dish of plump frog legs braised in a sizzling claypot with ginger, dark soy, and scallions, served with plain congee.",
-    "descriptionZh": "金边超人气宵夜，肥美田鸡配老姜、干辣椒与秘制酱汁在砂锅中慢焖收汁，配热腾腾白粥。",
-    "photoUrl": "/foods/food-311.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "4 នាក់",
-    "difficulty": "easy",
-    "priceRiel": 27000,
-    "priceUsd": 6.75,
-    "ingredients": [
-      {
-        "nameKh": "កង្កែបស្រែធំៗបកស្បែកលាងស្អាតកាប់ដុំ",
-        "nameEn": "Plump cleaned field frogs cut into pieces",
-        "nameZh": "洗净切块肥美田鸡",
-        "amount": "350 ក្រាម (350g)"
-      },
-      {
-        "nameKh": "បបរសស្លឹកតយខាប់ក្ដៅៗ",
-        "nameEn": "Silky pandan-infused plain white rice congee",
-        "nameZh": "香兰叶绵密白粥",
-        "amount": "1 ចានគោម (1 large bowl)"
-      },
-      {
-        "nameKh": "ខ្ញីហាន់បន្ទះ ខ្ទឹមស ម្ទេសក្រៀម និងស្លឹកខ្ទឹមធំៗ",
-        "nameEn": "Sliced ginger, garlic cloves, dried chilies & scallion batons",
-        "nameZh": "姜片、蒜瓣、干红辣椒与大葱段",
-        "amount": "100 ក្រាម (100g)"
-      },
-      {
-        "nameKh": "ប្រេងខ្យង ទឹកស៊ីអ៊ីវខាប់ ស្ករត្នោត និងប្រេងល្ង",
-        "nameEn": "Oyster sauce, dark soy sauce, palm sugar & sesame oil",
-        "nameZh": "蚝油、老抽、棕榈糖与香油",
-        "amount": "4 ស្លាបព្រាបាយ (4 tbsp)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "ឆាខ្ញី ខ្ទឹមស និងម្ទេសក្រៀមក្នុងឆ្នាំងដីឱ្យឈ្ងុយ រួចដាក់សាច់កង្កែបចូលឆាឱ្យតឹងសាច់។",
-        "instructionEn": "Sauté ginger, garlic, and dried chilies in a claypot, then sear the frog pieces.",
-        "instructionZh": "砂锅中爆香姜片、蒜瓣与干辣椒，放入田鸡块翻炒紧实。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ដាក់ប្រេងខ្យង ទឹកស៊ីអ៊ីវខាប់ និងស្ករត្នោត រម្ងាស់ឱ្យឡើងទឹកខខាប់រលោង។",
-        "instructionEn": "Add oyster sauce, dark soy sauce, and palm sugar, braising until the glaze is thick and bubbling.",
-        "instructionZh": "加入蚝油、老抽与棕榈糖，焖煮至酱汁浓稠红亮。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "បង់ស្លឹកខ្ទឹមធំៗនិងប្រេងល្ង លើកឆ្នាំងដីដាក់ញ៉ាំជាមួយបបរសក្ដៅៗ។",
-        "instructionEn": "Top with scallion batons and sesame oil, serving sizzling alongside plain rice congee.",
-        "instructionZh": "放入大葱段淋香油，原煲配滚烫白粥上桌。"
-      }
-    ],
-    "rating": 4.7,
-    "reviewCount": 106,
-    "provinceKh": "បាត់ដំបង",
-    "provinceEn": "Battambang",
-    "isFeatured": false,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-312",
-    "nameKh": "នំបញ្ចុកសម្លការីសាច់មាន់ខ្មែរ",
-    "nameEn": "Fresh Khmer Rice Vermicelli with Red Chicken Curry (Num Banh Chok Kari Moan)",
-    "nameZh": "高棉红咖喱走地鸡鲜米粉 (Num Banh Chok Kari)",
-    "categorySlug": "noodles",
-    "categoryKh": "បាយ មី និងអាហារពេលព្រឹក",
-    "categoryEn": "Rice, Noodles & Breakfast",
-    "categoryZh": "米饭、面食与早餐",
-    "descriptionKh": "នំបញ្ចុកស្រស់ស្រោចទឹកសម្លការីសាច់មាន់ខ្ទិះដូងខាប់ ដាក់ឈាមជ្រូក ដំឡូងជ្វា និងអន្លក់សណ្តែកកួរ ត្រយូងចេក។",
-    "descriptionEn": "Soft fermented rice noodles ladled with rich Cambodian red coconut chicken curry, sweet potatoes, yardlong beans, and banana blossom.",
-    "descriptionZh": "爽滑高棉鲜米粉浇上浓郁椰浆红咖喱鸡汤，配红薯块及豆角丝、香蕉花等鲜蔬。",
-    "photoUrl": "/foods/food-312.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "2 នាក់",
-    "difficulty": "medium",
-    "priceRiel": 34000,
-    "priceUsd": 8.5,
-    "ingredients": [
-      {
-        "nameKh": "នំបញ្ចុកអង្ករខ្មែរស្រស់",
-        "nameEn": "Fresh Cambodian rice vermicelli noodles",
-        "nameZh": "新鲜高棉发酵细米粉",
-        "amount": "300 ក្រាម (300g)"
-      },
-      {
-        "nameKh": "សាច់មាន់ស្រែ និងគ្រឿងការីក្រហមខ្ទិះដូង",
-        "nameEn": "Free-range chicken simmered in red coconut curry",
-        "nameZh": "椰浆红咖喱炖走地鸡肉",
-        "amount": "350 ក្រាម (350g)"
-      },
-      {
-        "nameKh": "ដំឡូងជ្វា សណ្តែកដី និងខ្ទឹមបារាំង",
-        "nameEn": "Sweet potato cubes, peanuts & onions",
-        "nameZh": "红薯块、花生与洋葱",
-        "amount": "150 ក្រាម (150g)"
-      },
-      {
-        "nameKh": "បន្លែស្រស់ (ត្រយូងចេក សណ្តែកកួរ ស្ពៃក្តោប ជីរ)",
-        "nameEn": "Fresh crudités (banana blossom, long beans, cabbage, herbs)",
-        "nameZh": "鲜蔬配菜（香蕉花丝、长豆角、包菜丝、香草）",
-        "amount": "200 ក្រាម (200g)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "រម្ងាស់សម្លការីក្រហមសាច់មាន់ជាមួយខ្ទិះដូងនិងដំឡូងជ្វាឱ្យឆ្អិនឈ្ងុយ។",
-        "instructionEn": "Simmer the Cambodian red chicken curry with coconut milk and sweet potatoes until rich and fragrant.",
-        "instructionZh": "将高棉红咖喱与走地鸡、椰奶及红薯块慢炖至香浓。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "រៀបបន្លែស្រស់ហាន់សរសៃដាក់បាតចាន ហើយដាក់ចង្វាយនំបញ្ចុកពីលើ។",
-        "instructionEn": "Layer shredded fresh vegetables in a deep bowl and top with coils of fresh rice noodles.",
-        "instructionZh": "碗底铺满鲜蔬细丝，码入新鲜高棉米粉。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "ដួសទឹកសម្លការីសាច់មាន់ក្ដៅៗស្រោចពីលើ។",
-        "instructionEn": "Ladle the piping hot red chicken curry generously over the noodles.",
-        "instructionZh": "浇上滚烫浓郁的红咖喱鸡汤即可享用。"
-      }
-    ],
-    "rating": 4.6,
-    "reviewCount": 117,
-    "provinceKh": "សៀមរាប",
-    "provinceEn": "Siem Reap",
-    "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-313",
-    "nameKh": "គុយទាវឆាផាត់ស៊ីអ៊ីវសាច់គោបែបខ្មែរ",
-    "nameEn": "Wok-Charred Flat Rice Noodles with Beef & Chinese Broccoli",
-    "nameZh": "高棉豉油皇芥兰炒牛河",
-    "categorySlug": "noodles",
-    "categoryKh": "បាយ មី និងអាហារពេលព្រឹក",
-    "categoryEn": "Rice, Noodles & Breakfast",
-    "categoryZh": "米饭、面食与早餐",
-    "descriptionKh": "គុយទាវសរសៃធំឆាភ្លើងខ្លាំងជាមួយសាច់គោផុយ ខាត់ណា ពងទា និងទឹកស៊ីអ៊ីវខាប់ ឈ្ងុយផ្សែងខ្ទះ។",
-    "descriptionEn": "Smoky flat rice noodles wok-fried over high heat with tender beef slices, crisp Chinese broccoli (Kailan), duck egg, and sweet dark soy.",
-    "descriptionZh": "宽河粉配嫩牛肉片、脆嫩芥兰、鸭蛋与甜豉油猛火快炒，锅气十足。",
-    "photoUrl": "/foods/food-313.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "3 នាក់",
-    "difficulty": "easy",
-    "priceRiel": 41000,
-    "priceUsd": 10.25,
-    "ingredients": [
-      {
-        "nameKh": "សរសៃគុយទាវធំស្រស់",
-        "nameEn": "Fresh wide flat rice noodles",
-        "nameZh": "新鲜宽河粉",
-        "amount": "300 ក្រាម (300g)"
-      },
-      {
-        "nameKh": "សាច់គោផុយហាន់ស្ដើង និងពងទា ១ គ្រាប់",
-        "nameEn": "Thinly sliced tender beef & 1 duck egg",
-        "nameZh": "嫩牛肉片与1颗鸭蛋",
-        "amount": "200 ក្រាម (200g)"
-      },
-      {
-        "nameKh": "បន្លែខាត់ណា ខ្ទឹមសចិញ្ច្រាំ និងម្រេចកំពត",
-        "nameEn": "Chinese broccoli (Kailan), minced garlic & Kampot pepper",
-        "nameZh": "芥兰、蒜末与贡布黑胡椒粉",
-        "amount": "150 ក្រាម (150g)"
-      },
-      {
-        "nameKh": "ទឹកស៊ីអ៊ីវខាប់ ប្រេងខ្យង និងស្ករត្នោត",
-        "nameEn": "Dark soy sauce, oyster sauce & palm sugar",
-        "nameZh": "老抽、蚝油与棕榈糖",
-        "amount": "3 ស្លាបព្រាបាយ (3 tbsp)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "ឆាខ្ទឹមសជាមួយសាច់គោនិងខាត់ណាលើភ្លើងខ្លាំងឱ្យឆ្អិនស្រួយ រួចគោះពងទាចូល។",
-        "instructionEn": "Stir-fry garlic, beef, and Chinese broccoli over high heat, then crack in the duck egg.",
-        "instructionZh": "大火爆香蒜末，滑炒牛肉片与芥兰，打入鸭蛋炒香。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ដាក់សរសៃគុយទាវធំ ទឹកស៊ីអ៊ីវខាប់ ប្រេងខ្យង និងស្ករត្នោត ឆាត្រឡប់ឱ្យឈ្ងុយផ្សែងខ្ទះ។",
-        "instructionEn": "Add the flat rice noodles, dark soy, oyster sauce, and palm sugar, tossing for smoky wok hei.",
-        "instructionZh": "加入宽河粉、老抽、蚝油与棕榈糖，猛火快炒出焦香锅气。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "រោយម្រេចកំពតម៉ត់ រួចដួសដាក់ចាន។",
-        "instructionEn": "Sprinkle with ground Kampot pepper and serve hot.",
-        "instructionZh": "撒上贡布黑胡椒粉即可装盘。"
-      }
-    ],
-    "rating": 4.9,
-    "reviewCount": 128,
-    "provinceKh": "ភ្នំពេញ",
-    "provinceEn": "Phnom Penh",
-    "isFeatured": false,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-314",
-    "nameKh": "មីទាញសាច់គោចិញ្ច្រាំពងទាចៀន",
-    "nameEn": "Springy Egg Noodles with Savory Minced Beef & Crispy Fried Egg",
-    "nameZh": "高棉香浓牛肉末拌面配煎鸭蛋",
-    "categorySlug": "noodles",
-    "categoryKh": "បាយ មី និងអាហារពេលព្រឹក",
-    "categoryEn": "Rice, Noodles & Breakfast",
-    "categoryZh": "米饭、面食与早餐",
-    "descriptionKh": "មីពងទាស្វិតឆ្ងាញ់ ស្រោចសាច់គោចិញ្ច្រាំឆាប៉េងប៉ោះប្រេងខ្យង បន្លែស្ពៃតឿ និងពងទាចៀនពីលើ។",
-    "descriptionEn": "Bouncy yellow egg noodles tossed in garlic oil and topped with savory braised minced beef sauce, bok choy, and a sunny-side-up duck egg.",
-    "descriptionZh": "弹牙鸡蛋面拌入蒜香油，浇上番茄蚝油牛肉肉燥、小棠菜与单面煎鸭蛋。",
-    "photoUrl": "/foods/food-314.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "4 នាក់",
-    "difficulty": "easy",
-    "priceRiel": 48000,
-    "priceUsd": 12,
-    "ingredients": [
-      {
-        "nameKh": "មីពងទាស្រស់ស្រុសទឹកក្តៅ",
-        "nameEn": "Fresh yellow egg noodles, blanched",
-        "nameZh": "焯熟新鲜鸡蛋面",
-        "amount": "250 ក្រាម (250g)"
-      },
-      {
-        "nameKh": "សាច់គោចិញ្ច្រាំឆាជាមួយប៉េងប៉ោះនិងប្រេងខ្យង",
-        "nameEn": "Minced beef braised with diced tomatoes & oyster sauce",
-        "nameZh": "番茄蚝油焖牛肉末",
-        "amount": "200 ក្រាម (200g)"
-      },
-      {
-        "nameKh": "ស្ពៃតឿស្រុស និងពងទាចៀន ១ គ្រាប់",
-        "nameEn": "Blanched baby bok choy & 1 fried duck egg",
-        "nameZh": "焯水小棠菜与煎鸭蛋1颗",
-        "amount": "100 ក្រាម (100g)"
-      },
-      {
-        "nameKh": "ខ្លាញ់ខ្ទឹមសបំពង ស្លឹកខ្ទឹម និងទឹកម្ទេស",
-        "nameEn": "Crispy garlic oil, scallions & chili sauce",
-        "nameZh": "炸蒜油、葱花与辣椒酱",
-        "amount": "2 ស្លាបព្រាបាយ (2 tbsp)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "ស្រុសមីពងទានិងស្ពៃតឿឱ្យឆ្អិន រួចច្របល់ជាមួយខ្លាញ់ខ្ទឹមសបំពងឱ្យឈ្ងុយមិនជាប់គ្នា។",
-        "instructionEn": "Blanch egg noodles and bok choy, then toss the noodles immediately with golden garlic oil.",
-        "instructionZh": "将鸡蛋面与小棠菜焯熟，面条趁热拌入炸蒜油防粘。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ឆាសាច់គោចិញ្ច្រាំជាមួយខ្ទឹមស ប៉េងប៉ោះ និងប្រេងខ្យងឱ្យឡើងទឹកខាប់ៗ។",
-        "instructionEn": "Simmer minced beef with garlic, tomatoes, and oyster sauce into a rich savory ragù.",
-        "instructionZh": "蒜末炒香牛肉末、番茄丁与蚝油，熬成浓郁牛肉酱。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "ដួសសាច់គោចិញ្ច្រាំដាក់លើមី ដាក់ពងទាចៀន និងរោយស្លឹកខ្ទឹម។",
-        "instructionEn": "Spoon the minced beef sauce over the noodles, crown with a fried egg, and garnish with scallions.",
-        "instructionZh": "将牛肉酱浇在面上，放上煎鸭蛋并撒葱花即可。"
-      }
-    ],
-    "rating": 4.8,
-    "reviewCount": 139,
-    "provinceKh": "បាត់ដំបង",
-    "provinceEn": "Battambang",
-    "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-315",
-    "nameKh": "គុយទាវប្រហិតត្រីឆ្លាតសាច់ជ្រូកចិញ្ច្រាំ",
-    "nameEn": "Phnom Penh Rice Noodle Soup with Featherback Fish Balls & Minced Pork",
-    "nameZh": "金边手打青铜鯠鱼丸肉末粿条汤",
-    "categorySlug": "noodles",
-    "categoryKh": "បាយ មី និងអាហារពេលព្រឹក",
-    "categoryEn": "Rice, Noodles & Breakfast",
-    "categoryZh": "米饭、面食与早餐",
-    "descriptionKh": "គុយទាវទឹកស៊ុបឆ្អឹងជ្រូកថ្លាផ្អែម ដាក់ប្រហិតត្រីឆ្លាតបាត់ដំបងស្វិតៗ សាច់ជ្រូកចិញ្ច្រាំ និងខ្ទឹមសបំពង។",
-    "descriptionEn": "Clear, slow-simmered pork bone broth rice noodle soup loaded with bouncy featherback fish balls, minced pork, bean sprouts, and fried garlic.",
-    "descriptionZh": "清甜慢熬猪骨汤河粉，配弹牙马德望青铜鯠鱼丸、猪肉末、豆芽与金黄蒜酥。",
-    "photoUrl": "/foods/food-315.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "2 នាក់",
-    "difficulty": "medium",
-    "priceRiel": 10000,
-    "priceUsd": 2.5,
-    "ingredients": [
-      {
-        "nameKh": "សរសៃគុយទាវអង្ករស្រស់ និងសណ្តែកបណ្តុះ",
-        "nameEn": "Fresh Phnom Penh rice noodles & crisp bean sprouts",
-        "nameZh": "新鲜金边细河粉与脆豆芽",
-        "amount": "250 ក្រាម (250g)"
-      },
-      {
-        "nameKh": "ប្រហិតត្រីឆ្លាត និងសាច់ជ្រូកចិញ្ច្រាំ",
-        "nameEn": "Bouncy featherback fish balls & seasoned minced pork",
-        "nameZh": "青铜鯠鱼丸与调味猪肉末",
-        "amount": "200 ក្រាម (200g)"
-      },
-      {
-        "nameKh": "ទឹកស៊ុបឆ្អឹងជ្រូករម្ងាស់ជាមួយមឹកក្រៀមអាំង",
-        "nameEn": "Clear pork bone broth simmered with roasted dried squid",
-        "nameZh": "烤鱿鱼干慢熬猪骨清汤",
-        "amount": "500 មីលីលីត្រ (500ml)"
-      },
-      {
-        "nameKh": "ខ្ទឹមសបំពង ស្លឹកខ្ទឹម ជីររណារ និងក្រូចឆ្មារ",
-        "nameEn": "Crispy fried garlic, scallions, culantro & lime wedge",
-        "nameZh": "炸蒜酥、葱花、刺芫荽与青柠角",
-        "amount": "40 ក្រាម (40g)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "ស្រុសសរសៃគុយទាវនិងសណ្តែកបណ្តុះដាក់ក្នុងចានគោម។",
-        "instructionEn": "Blanch the fresh rice noodles and bean sprouts and place into a deep soup bowl.",
-        "instructionZh": "将新鲜河粉与豆芽焯水放入大汤碗中。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ដាំទឹកស៊ុបឱ្យពុះ ដាក់ប្រហិតត្រីឆ្លាតនិងសាច់ជ្រូកចិញ្ច្រាំឱ្យឆ្អិន រួចដួសចាក់លើគុយទាវ។",
-        "instructionEn": "Poach the featherback fish balls and minced pork in boiling broth, then ladle over the noodles.",
-        "instructionZh": "在沸腾猪骨汤中煮熟鱼丸与猪肉末，连汤浇在河粉上。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "រោយខ្ទឹមសបំពង ស្លឹកខ្ទឹម ជីររណារ និងម្រេចកំពត។",
-        "instructionEn": "Top with crispy garlic, scallions, culantro, and ground Kampot pepper.",
-        "instructionZh": "撒上炸蒜酥、葱花、刺芫荽与贡布胡椒粉即可。"
-      }
-    ],
-    "rating": 4.7,
-    "reviewCount": 150,
-    "provinceKh": "សៀមរាប",
-    "provinceEn": "Siem Reap",
-    "isFeatured": false,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-316",
-    "nameKh": "លតឆាក្តាមសេះពងទាចៀន",
-    "nameEn": "Wok-Fried Short Pin Noodles with Fresh Crab Meat & Crispy Duck Egg (Lort Cha Kdam)",
-    "nameZh": "高棉鲜蟹肉炒老鼠粉配煎鸭蛋 (Lort Cha Kdam)",
-    "categorySlug": "noodles",
-    "categoryKh": "បាយ មី និងអាហារពេលព្រឹក",
-    "categoryEn": "Rice, Noodles & Breakfast",
-    "categoryZh": "米饭、面食与早餐",
-    "descriptionKh": "លតឆាពិសេសដាក់សាច់ក្តាមសេះស្រស់ៗ ស្លឹកគូឆាយ សណ្តែកបណ្តុះ និងពងទាចៀន ស្រោចទឹកត្រីផ្អែមម្ទេស។",
-    "descriptionEn": "Deluxe Phnom Penh wok-charred short rice pin noodles tossed with sweet picked crab meat, garlic chives, bean sprouts, and a fried duck egg.",
-    "descriptionZh": "金边豪华版炒老鼠粉，加入鲜拆兰花蟹肉、韭菜段与豆芽大火快炒，盖煎鸭蛋配甜辣鱼露。",
-    "photoUrl": "/foods/food-316.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "3 នាក់",
-    "difficulty": "easy",
-    "priceRiel": 17000,
-    "priceUsd": 4.25,
-    "ingredients": [
-      {
-        "nameKh": "សរសៃលតអង្ករស្រស់",
-        "nameEn": "Fresh short rice pin noodles (Lort)",
-        "nameZh": "新鲜高棉米老鼠粉 (Lort)",
-        "amount": "300 ក្រាម (300g)"
-      },
-      {
-        "nameKh": "សាច់ក្តាមសេះស្រស់បកស្អាត និងពងទា ១ គ្រាប់",
-        "nameEn": "Fresh picked blue swimmer crab meat & 1 duck egg",
-        "nameZh": "鲜拆兰花蟹肉与1颗鸭蛋",
-        "amount": "180 ក្រាម (180g)"
-      },
-      {
-        "nameKh": "ស្លឹកគូឆាយ សណ្តែកបណ្តុះ និងខ្ទឹមសចិញ្ច្រាំ",
-        "nameEn": "Garlic chives, bean sprouts & minced garlic",
-        "nameZh": "韭菜段、豆芽与蒜末",
-        "amount": "150 ក្រាម (150g)"
-      },
-      {
-        "nameKh": "ប្រេងខ្យង ទឹកស៊ីអ៊ីវខាប់ និងទឹកត្រីផ្អែមម្ទេស",
-        "nameEn": "Oyster sauce, dark soy & sweet chili fish sauce",
-        "nameZh": "蚝油、老抽与甜辣鱼露蘸汁",
-        "amount": "3 ស្លាបព្រាបាយ (3 tbsp)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "បំពងខ្ទឹមសឱ្យឈ្ងុយ ដាក់សរសៃលតចូលឆាជាមួយប្រេងខ្យងនិងទឹកស៊ីអ៊ីវខាប់លើភ្លើងខ្លាំង។",
-        "instructionEn": "Sauté garlic in a hot wok, then char-fry the pin noodles with oyster sauce and dark soy sauce.",
-        "instructionZh": "热锅爆香蒜末，倒入老鼠粉加蚝油和老抽大火炒香。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ដាក់សាច់ក្តាមសេះ សណ្តែកបណ្តុះ និងស្លឹកគូឆាយចូលឆាត្រឡប់ឱ្យសព្វ។",
-        "instructionEn": "Fold in the fresh crab meat, bean sprouts, and garlic chives, tossing briefly.",
-        "instructionZh": "加入鲜蟹肉、豆芽和韭菜段快速翻炒均匀。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "ដួសដាក់ចាន ដាក់ពងទាចៀនពីលើ និងស្រោចទឹកត្រីផ្អែមម្ទេស។",
-        "instructionEn": "Plate, crown with a crispy fried duck egg, and serve with sweet chili fish sauce.",
-        "instructionZh": "装盘盖上煎鸭蛋，淋上甜辣鱼露即可。"
-      }
-    ],
-    "rating": 4.6,
-    "reviewCount": 161,
-    "provinceKh": "ភ្នំពេញ",
-    "provinceEn": "Phnom Penh",
-    "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-317",
-    "nameKh": "នំប៉័ងសាច់ជ្រូកអាំងជ្រក់ល្ហុងពិសេស",
-    "nameEn": "Cambodian Charcoal-Grilled Lemongrass Pork Baguette (Num Pang Sach Chrouk Ang)",
-    "nameZh": "高棉香茅炭烤猪肉法棍三明治 (Num Pang)",
-    "categorySlug": "noodles",
-    "categoryKh": "បាយ មី និងអាហារពេលព្រឹក",
-    "categoryEn": "Rice, Noodles & Breakfast",
-    "categoryZh": "米饭、面食与早餐",
-    "descriptionKh": "នំប៉័ងខ្មែរអាំងស្រួយ លាបប៊័រនិងប៉ាតេ ញាត់សាច់ជ្រូកអាំងគល់ស្លឹកគ្រៃឈ្ងុយៗ ជ្រក់ល្ហុង ត្រសក់ និងជីរវ៉ាន់ស៊ុយ។",
-    "descriptionEn": "Crusty Cambodian baguette spread with butter and liver pâté, stuffed with smoky lemongrass-grilled pork, pickled papaya, and herbs.",
-    "descriptionZh": "酥脆高棉法棍抹上黄油与猪肝酱，夹入炭火香茅烤猪肉片、酸甜木瓜泡菜与香菜。",
-    "photoUrl": "/foods/food-317.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "4 នាក់",
-    "difficulty": "easy",
-    "priceRiel": 24000,
-    "priceUsd": 6,
-    "ingredients": [
-      {
-        "nameKh": "នំប៉័ងខ្មែរអាំងស្រួយ ១ ដើម",
-        "nameEn": "1 crusty Cambodian short baguette, toasted",
-        "nameZh": "烤脆高棉短法棍1根",
-        "amount": "1 ដើម (1 baguette)"
-      },
-      {
-        "nameKh": "សាច់ជ្រូកប្រឡាក់គល់ស្លឹកគ្រៃស្ករត្នោតអាំង",
-        "nameEn": "Charcoal-grilled lemongrass & palm sugar pork slices",
-        "nameZh": "炭烤香茅棕榈糖猪肉片",
-        "amount": "150 ក្រាម (150g)"
-      },
-      {
-        "nameKh": "ប៊័រពងមាន់ និងប៉ាតេថ្លើមជ្រូក",
-        "nameEn": "Homemade egg butter & savory pork liver pâté",
-        "nameZh": "自制鸡蛋黄油与猪肝酱",
-        "amount": "2 ស្លាបព្រាបាយ (2 tbsp)"
-      },
-      {
-        "nameKh": "ជ្រក់ល្ហុងការ៉ុត ត្រសក់ ជីរវ៉ាន់ស៊ុយ និងម្ទេស",
-        "nameEn": "Pickled papaya/carrot, cucumber strips, cilantro & chili",
-        "nameZh": "木瓜胡萝卜泡菜、黄瓜条、香菜与辣椒",
-        "amount": "100 ក្រាម (100g)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "វះនំប៉័ងអាំងឱ្យស្រួយ រួចលាបប៊័រពងមាន់និងប៉ាតេថ្លើមជ្រូកនៅខាងក្នុង។",
-        "instructionEn": "Split the toasted baguette and generously spread with egg butter and liver pâté.",
-        "instructionZh": "将烤脆的法棍切开，内侧抹匀鸡蛋黄油与猪肝酱。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "រៀបសាច់ជ្រូកអាំងក្ដៅៗ និងត្រសក់ហាន់បន្ទះដាក់ចូល។",
-        "instructionEn": "Layer in the warm charcoal-grilled pork slices and crisp cucumber strips.",
-        "instructionZh": "夹入温热的炭烤香茅猪肉片与脆黄瓜条。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "ដាក់ជ្រក់ល្ហុងការ៉ុត ជីរវ៉ាន់ស៊ុយ និងទឹកម្ទេសពីលើ។",
-        "instructionEn": "Top with tangy pickled papaya, cilantro sprigs, and chili sauce.",
-        "instructionZh": "铺上酸甜木瓜泡菜、香菜与辣酱即可享用。"
-      }
-    ],
-    "rating": 4.9,
-    "reviewCount": 52,
-    "provinceKh": "បាត់ដំបង",
-    "provinceEn": "Battambang",
-    "isFeatured": false,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-318",
-    "nameKh": "បាញ់សុងខ្ទិះដូងសាច់ជ្រូកអាំងណែមបំពង",
-    "nameEn": "Cambodian Coconut Cream Rice Vermicelli Bowl with Grilled Pork & Crispy Spring Rolls (Banh Sung)",
-    "nameZh": "高棉椰浆烤肉炸春卷拌檬粉 (Banh Sung)",
-    "categorySlug": "noodles",
-    "categoryKh": "បាយ មី និងអាហារពេលព្រឹក",
-    "categoryEn": "Rice, Noodles & Breakfast",
-    "categoryZh": "米饭、面食与早餐",
-    "descriptionKh": "បាញ់សុងខ្មែរដ៏ល្បីល្បាញ! នំបញ្ចុកស្រស់ ដាក់សាច់ជ្រូកអាំង ណែមបំពងស្រួយ ជីរគ្រប់មុខ សណ្តែកដី ស្រោចខ្ទិះដូងខាប់និងទឹកត្រីផ្អែម។",
-    "descriptionEn": "Beloved Cambodian noodle bowl combining fresh rice vermicelli, grilled pork, crispy fried spring rolls, herbs, thick coconut cream, and sweet fish sauce.",
-    "descriptionZh": "极具人气的高棉椰浆拌米粉，鲜米粉配炭烤猪肉、酥炸春卷、香草与花生碎，淋上浓椰浆与甜酸鱼露。",
-    "photoUrl": "/foods/food-318.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "2 នាក់",
-    "difficulty": "medium",
-    "priceRiel": 31000,
-    "priceUsd": 7.75,
-    "ingredients": [
-      {
-        "nameKh": "នំបញ្ចុកស្រស់ និងបន្លែជីរត្រសក់ហាន់សរសៃ",
-        "nameEn": "Fresh rice vermicelli & shredded cucumber/herbs",
-        "nameZh": "新鲜细米粉与黄瓜丝、什锦香草",
-        "amount": "250 ក្រាម (250g)"
-      },
-      {
-        "nameKh": "សាច់ជ្រូកអាំងហាន់បន្ទះ និងណែមបំពងស្រួយ",
-        "nameEn": "Sliced grilled pork & crispy fried pork spring rolls",
-        "nameZh": "炭烤猪肉片与酥炸猪肉春卷",
-        "amount": "200 ក្រាម (200g)"
-      },
-      {
-        "nameKh": "ខ្ទិះដូងដើមដាំជាមួយស្លឹកខ្ទឹម",
-        "nameEn": "Rich simmered coconut cream with chopped scallions",
-        "nameZh": "葱花熬煮头道浓椰浆",
-        "amount": "100 មីលីលីត្រ (100ml)"
-      },
-      {
-        "nameKh": "ទឹកត្រីផ្អែមក្រូចឆ្មារ សណ្តែកដីលីងបុក និងជ្រក់ល្ហុង",
-        "nameEn": "Sweet lime fish sauce, crushed peanuts & papaya pickle",
-        "nameZh": "酸甜青柠鱼露汁、烤花生碎与木瓜泡菜",
-        "amount": "100 ក្រាម (100g)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "រៀបត្រសក់ សណ្តែកបណ្តុះ និងជីរគ្រប់មុខដាក់បាតចាន រួចដាក់នំបញ្ចុកស្រស់ពីលើ។",
-        "instructionEn": "Place shredded cucumber, bean sprouts, and herbs in a bowl and top with rice vermicelli.",
-        "instructionZh": "碗底铺黄瓜丝、豆芽与香草，码上新鲜米粉。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "រៀបសាច់ជ្រូកអាំង ណែមបំពងកាត់ដុំ និងជ្រក់ល្ហុងពីលើ។",
-        "instructionEn": "Arrange sliced grilled pork, cut crispy spring rolls, and papaya pickle on top.",
-        "instructionZh": "摆上炭烤猪肉片、切段炸春卷与木瓜泡菜。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "ស្រោចខ្ទិះដូងដើមខាប់ ទឹកត្រីផ្អែម និងរោយសណ្តែកដីលីងបុក។",
-        "instructionEn": "Ladle rich coconut cream and sweet fish sauce over the bowl and sprinkle with crushed peanuts.",
-        "instructionZh": "淋上葱香浓椰浆与甜酸鱼露汁，撒烤花生碎即可。"
-      }
-    ],
-    "rating": 4.8,
-    "reviewCount": 63,
-    "provinceKh": "សៀមរាប",
-    "provinceEn": "Siem Reap",
-    "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-319",
-    "nameKh": "បង្អែមត្នោតខ្ទិះដូងស្លឹកតយ",
-    "nameEn": "Sweet Toddy Palm Fruit in Fragrant Pandan Coconut Cream (Bang-Aem Tnot)",
-    "nameZh": "香兰椰浆糖棕果甜汤 (Bang-Aem Tnot)",
-    "categorySlug": "dessert",
-    "categoryKh": "បង្អែម នំខ្មែរ និងភេសជ្ជៈ",
-    "categoryEn": "Khmer Desserts & Drinks",
-    "categoryZh": "高棉甜品与传统饮品",
-    "descriptionKh": "គ្រាប់ត្នោតខ្ចីហាន់បន្ទះទន់ផ្អែម រម្ងាស់ជាមួយស្ករត្នោត ស្លឹកតយ និងស្រោចខ្ទិះដូងដើមខាប់ឈ្ងុយ។",
-    "descriptionEn": "Translucent young toddy palm fruit slices gently simmered in palm sugar and pandan syrup, finished with salted coconut cream.",
-    "descriptionZh": "晶莹软嫩的鲜糖棕果片，以棕榈糖与香兰叶慢煮，淋上微咸头道浓椰浆。",
-    "photoUrl": "/foods/food-319.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "3 នាក់",
-    "difficulty": "easy",
-    "priceRiel": 38000,
-    "priceUsd": 9.5,
-    "ingredients": [
-      {
-        "nameKh": "គ្រាប់ត្នោតខ្ចីបកសំបកហាន់បន្ទះស្ដើង",
-        "nameEn": "Peeled and sliced translucent young toddy palm fruit",
-        "nameZh": "去皮切片鲜嫩糖棕果肉",
-        "amount": "350 ក្រាម (350g)"
-      },
-      {
-        "nameKh": "ស្ករត្នោតខ្មែរ និងស្លឹកតយស្រស់",
-        "nameEn": "Cambodian palm sugar & knotted pandan leaves",
-        "nameZh": "高棉棕榈糖与香兰叶结",
-        "amount": "120 ក្រាម (120g)"
-      },
-      {
-        "nameKh": "ខ្ទិះដូងដើមខាប់ និងអំបិលម៉ត់បន្តិច",
-        "nameEn": "Thick coconut cream & a pinch of fine sea salt",
-        "nameZh": "头道浓椰浆与少许海盐",
-        "amount": "200 មីលីលីត្រ (200ml)"
-      },
-      {
-        "nameKh": "គ្រាប់សាគូតូចៗស្ងោរឆ្អិន",
-        "nameEn": "Cooked translucent sago pearls",
-        "nameZh": "煮熟透明西米",
-        "amount": "80 ក្រាម (80g)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "ដាំទឹកជាមួយស្លឹកតយនិងស្ករត្នោតឱ្យពុះ រួចដាក់សាច់ត្នោតខ្ចីចូលរម្ងាស់ឱ្យទន់ផ្អែម។",
-        "instructionEn": "Simmer pandan leaves and palm sugar in water, then add sliced toddy palm fruit until tender.",
-        "instructionZh": "将香兰叶与棕榈糖加水煮沸，放入糖棕果片慢煮入味。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ដាក់គ្រាប់សាគូឆ្អិនចូលកូរឱ្យខាប់ល្មម។",
-        "instructionEn": "Stir in cooked sago pearls to lightly thicken the sweet soup.",
-        "instructionZh": "加入煮熟的西米搅拌均匀。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "ដួសដាក់ចាន ស្រោចខ្ទិះដូងដើមលាយអំបិលបន្តិចពីលើ។",
-        "instructionEn": "Ladle into bowls and drizzle with warm salted coconut cream.",
-        "instructionZh": "盛碗后淋上微咸浓椰浆即可。"
-      }
-    ],
-    "rating": 4.7,
-    "reviewCount": 74,
-    "provinceKh": "ភ្នំពេញ",
-    "provinceEn": "Phnom Penh",
-    "isFeatured": false,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-320",
-    "nameKh": "បង្អែមគ្រាប់ជីរទឹកដូងសាច់ដូងខ្ចី",
-    "nameEn": "Chilled Basil Seed, Young Coconut & Palm Jelly Sweet Drink",
-    "nameZh": "冰镇罗勒籽嫩椰肉清凉甜饮",
-    "categorySlug": "dessert",
-    "categoryKh": "បង្អែម នំខ្មែរ និងភេសជ្ជៈ",
-    "categoryEn": "Khmer Desserts & Drinks",
-    "categoryZh": "高棉甜品与传统饮品",
-    "descriptionKh": "បង្អែមត្រជាក់បំបាត់ស្រេកទឹក មានគ្រាប់ជីរ ទឹកដូងក្រអូប សាច់ដូងខ្ចី និងចាហួយខ្មៅ។",
-    "descriptionEn": "Refreshing Cambodian chilled dessert drink featuring swollen sweet basil seeds, fragrant coconut water, young coconut strips, and grass jelly.",
-    "descriptionZh": "消暑解渴的高棉冰镇甜品，含饱满罗勒籽、芳香椰子水、嫩椰肉条与黑凉粉。",
-    "photoUrl": "/foods/food-320.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "4 នាក់",
-    "difficulty": "easy",
-    "priceRiel": 45000,
-    "priceUsd": 11.25,
-    "ingredients": [
-      {
-        "nameKh": "គ្រាប់ជីរត្រាំទឹកឱ្យរីក",
-        "nameEn": "Soaked sweet basil seeds (Krob Chi)",
-        "nameZh": "泡发罗勒籽 (Krob Chi)",
-        "amount": "3 ស្លាបព្រាបាយ (3 tbsp)"
-      },
-      {
-        "nameKh": "ទឹកដូងក្រអូបស្រស់ និងសាច់ដូងខ្ចីកោស",
-        "nameEn": "Fresh fragrant coconut water & scraped young coconut meat",
-        "nameZh": "新鲜芳香椰子水与嫩椰肉条",
-        "amount": "400 មីលីលីត្រ (400ml)"
-      },
-      {
-        "nameKh": "ចាហួយខ្មៅកាត់ដុំតូចៗ",
-        "nameEn": "Diced herbal grass jelly cubes",
-        "nameZh": "黑凉粉小丁",
-        "amount": "100 ក្រាម (100g)"
-      },
-      {
-        "nameKh": "ទឹកស្ករស្លឹកតយ និងទឹកកកម៉ត់",
-        "nameEn": "Pandan sugar syrup & crushed ice",
-        "nameZh": "香兰糖水与碎冰",
-        "amount": "តាមចំណូលចិត្ត (To taste)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "ត្រាំគ្រាប់ជីរក្នុងទឹកស្អាតរហូតរីកពេញល្អ។",
-        "instructionEn": "Soak the sweet basil seeds in filtered water until fully bloomed.",
-        "instructionZh": "将罗勒籽用清水泡发至晶莹饱满。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ដាក់គ្រាប់ជីរ សាច់ដូងខ្ចី និងចាហួយខ្មៅចូលក្នុងកែវ។",
-        "instructionEn": "Layer the bloomed basil seeds, young coconut strips, and grass jelly cubes into a tall glass.",
-        "instructionZh": "在杯中依次放入罗勒籽、嫩椰肉条与黑凉粉丁。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "ចាក់ទឹកដូងស្រស់ ទឹកស្ករស្លឹកតយ និងទឹកកកម៉ត់ពីលើ។",
-        "instructionEn": "Pour in fresh coconut water and pandan syrup, and top with crushed ice.",
-        "instructionZh": "倒入鲜椰子水、香兰糖水与碎冰即可饮用。"
-      }
-    ],
-    "rating": 4.6,
-    "reviewCount": 85,
-    "provinceKh": "បាត់ដំបង",
-    "provinceEn": "Battambang",
-    "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-321",
-    "nameKh": "បង្អែមពោតខ្ទិះដូងដើម",
-    "nameEn": "Cambodian Sweet Waxy Corn Pudding in Rich Coconut Cream (Borbor Poat)",
-    "nameZh": "高棉椰浆甜糯玉米羹 (Borbor Poat)",
-    "categorySlug": "dessert",
-    "categoryKh": "បង្អែម នំខ្មែរ និងភេសជ្ជៈ",
-    "categoryEn": "Khmer Desserts & Drinks",
-    "categoryZh": "高棉甜品与传统饮品",
-    "descriptionKh": "ពោតដំណើបខ្មែរចិតស្ដើងៗ រម្ងាស់ជាមួយអង្ករដំណើបបន្តិច ស្ករត្នោត ស្លឹកតយ និងខ្ទិះដូងដើមខាប់ឈ្ងុយ។",
-    "descriptionEn": "Creamy Cambodian dessert of shaved waxy corn kernels simmered with glutinous rice, pandan, and luscious salted coconut cream.",
-    "descriptionZh": "高棉糯玉米刨片与少许糯米、香兰叶慢熬成浓羹，淋上咸香头道浓椰浆。",
-    "photoUrl": "/foods/food-321.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "2 នាក់",
-    "difficulty": "medium",
-    "priceRiel": 52000,
-    "priceUsd": 13,
-    "ingredients": [
-      {
-        "nameKh": "ពោតដំណើបខ្មែរចិតយកគ្រាប់ស្ដើងៗ",
-        "nameEn": "Fresh Cambodian waxy corn kernels, shaved thin",
-        "nameZh": "薄削高棉糯玉米粒",
-        "amount": "3 ផ្លែ (3 ears)"
-      },
-      {
-        "nameKh": "អង្ករដំណើបត្រាំទឹកបន្តិច និងគ្រាប់សាគូ",
-        "nameEn": "Soaked glutinous rice & sago pearls",
-        "nameZh": "泡软糯米与西米",
-        "amount": "60 ក្រាម (60g)"
-      },
-      {
-        "nameKh": "ខ្ទិះដូងដើម ស្ករស និងស្ករត្នោត",
-        "nameEn": "Thick coconut cream, cane sugar & palm sugar",
-        "nameZh": "头道浓椰浆、白糖与棕榈糖",
-        "amount": "250 មីលីលីត្រ (250ml)"
-      },
-      {
-        "nameKh": "ស្លឹកតយស្រស់ និងអំបិលម៉ត់បន្តិច",
-        "nameEn": "Fresh pandan leaves & a pinch of salt",
-        "nameZh": "鲜香兰叶与少许海盐",
-        "amount": "1 ដុំ (1 bundle)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "ស្ងោរអង្ករដំណើបនិងពោតដំណើបជាមួយស្លឹកតយរហូតផុយទន់ខាប់។",
-        "instructionEn": "Simmer the glutinous rice and shaved waxy corn with pandan leaves until soft and creamy.",
-        "instructionZh": "将糯米与糯玉米片加香兰叶慢煮至软糯浓稠。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ដាក់គ្រាប់សាគូនិងស្ករចូលកូរឱ្យរលាយសព្វ។",
-        "instructionEn": "Stir in sago pearls and sugar until dissolved and glossy.",
-        "instructionZh": "加入西米与糖搅拌至融化。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "ដួសដាក់ចាន ស្រោចខ្ទិះដូងដើមលាយអំបិលបន្តិចពីលើ។",
-        "instructionEn": "Serve warm topped with thick salted coconut cream.",
-        "instructionZh": "盛碗后淋上微咸浓椰浆享用。"
-      }
-    ],
-    "rating": 4.9,
-    "reviewCount": 96,
-    "provinceKh": "សៀមរាប",
-    "provinceEn": "Siem Reap",
-    "isFeatured": false,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-322",
-    "nameKh": "បង្អែមសណ្តែកខៀវខ្ទិះដូង",
-    "nameEn": "Split Mung Bean Sweet Soup with Salted Coconut Cream (Borbor Sandaek Khiev)",
-    "nameZh": "高棉椰浆脱皮绿豆沙甜汤",
-    "categorySlug": "dessert",
-    "categoryKh": "បង្អែម នំខ្មែរ និងភេសជ្ជៈ",
-    "categoryEn": "Khmer Desserts & Drinks",
-    "categoryZh": "高棉甜品与传统饮品",
-    "descriptionKh": "សណ្តែកខៀវបកសំបកលឿងឆ្អិនផុយ ដាំជាមួយគ្រាប់សាគូ ស្លឹកតយ និងស្រោចខ្ទិះដូងដើមខាប់ឈ្ងុយ។",
-    "descriptionEn": "Golden split mung beans simmered with pandan leaves and sago pearls, topped with rich salted coconut cream.",
-    "descriptionZh": "金黄脱皮绿豆配香兰叶与西米慢熬成绵密甜羹，淋上咸甜浓椰浆。",
-    "photoUrl": "/foods/food-322.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "3 នាក់",
-    "difficulty": "easy",
-    "priceRiel": 14000,
-    "priceUsd": 3.5,
-    "ingredients": [
-      {
-        "nameKh": "សណ្តែកបាយបកសំបក (សណ្តែកលឿង) ត្រាំទឹក",
-        "nameEn": "Soaked yellow split mung beans",
-        "nameZh": "泡发脱皮绿豆仁",
-        "amount": "250 ក្រាម (250g)"
-      },
-      {
-        "nameKh": "គ្រាប់សាគូ និងស្លឹកតយស្រស់",
-        "nameEn": "Tapioca sago pearls & fresh pandan leaves",
-        "nameZh": "西米与新鲜香兰叶",
-        "amount": "80 ក្រាម (80g)"
-      },
-      {
-        "nameKh": "ស្ករត្នោត ឬស្ករស",
-        "nameEn": "Palm sugar or cane sugar",
-        "nameZh": "棕榈糖或白砂糖",
-        "amount": "120 ក្រាម (120g)"
-      },
-      {
-        "nameKh": "ខ្ទិះដូងដើមខាប់ និងអំបិលម៉ត់បន្តិច",
-        "nameEn": "Thick coconut cream & pinch of sea salt",
-        "nameZh": "头道浓椰浆与少许海盐",
-        "amount": "200 មីលីលីត្រ (200ml)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "ចំហុយឬស្ងោរសណ្តែកលឿងជាមួយស្លឹកតយឱ្យឆ្អិនផុយដោយមិនបែកគ្រាប់ពេក។",
-        "instructionEn": "Steam or gently simmer the split mung beans with pandan until tender while holding their shape.",
-        "instructionZh": "将脱皮绿豆仁与香兰叶蒸熟或慢煮至软糯完整。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ដាំទឹកស្ករជាមួយគ្រាប់សាគូឱ្យថ្លាខាប់ រួចដាក់សណ្តែកលឿងចូលកូរថ្នមៗ។",
-        "instructionEn": "Cook sago pearls in sugar syrup until translucent, then fold in the tender mung beans.",
-        "instructionZh": "糖水中煮熟西米至透明，轻轻拌入绿豆仁。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "ដួសដាក់ចាន ស្រោចខ្ទិះដូងដើមពីលើ។",
-        "instructionEn": "Ladle into bowls and top generously with salted coconut cream.",
-        "instructionZh": "盛入碗中，淋上浓椰浆即可。"
-      }
-    ],
-    "rating": 4.8,
-    "reviewCount": 107,
-    "provinceKh": "ភ្នំពេញ",
-    "provinceEn": "Phnom Penh",
-    "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-323",
-    "nameKh": "នំផ្លែអាយស្ករត្នោតដូងទុំ",
-    "nameEn": "Glutinous Rice Balls Bursting with Liquid Palm Sugar & Grated Coconut (Num Plae Ai)",
-    "nameZh": "高棉爆浆棕榈糖椰丝糯米球 (Num Plae Ai)",
-    "categorySlug": "dessert",
-    "categoryKh": "បង្អែម នំខ្មែរ និងភេសជ្ជៈ",
-    "categoryEn": "Khmer Desserts & Drinks",
-    "categoryZh": "高棉甜品与传统饮品",
-    "descriptionKh": "នំផ្លែអាយម្សៅអង្ករដំណើបទន់ស្វិត ស្នូលស្ករត្នោតរលាយពេលខាំ រោយសាច់ដូងទុំកោសសខ្ចីនិងល្ងលីង។",
-    "descriptionEn": "Bite-sized chewy glutinous rice dumplings filled with molten Cambodian palm sugar and rolled in fresh grated mature coconut.",
-    "descriptionZh": "软糯弹牙的糯米团子，内裹融化爆浆的高棉棕榈糖芯，外层裹满鲜刨椰丝与芝麻。",
-    "photoUrl": "/foods/food-323.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "4 នាក់",
-    "difficulty": "easy",
-    "priceRiel": 21000,
-    "priceUsd": 5.25,
-    "ingredients": [
-      {
-        "nameKh": "ម្សៅអង្ករដំណើបលាយទឹកស្លឹកតយ",
-        "nameEn": "Glutinous rice flour kneaded with pandan water",
-        "nameZh": "香兰汁揉制的糯米粉团",
-        "amount": "250 ក្រាម (250g)"
-      },
-      {
-        "nameKh": "ស្ករត្នោតខ្មែររឹងកាត់ដុំតូចៗ",
-        "nameEn": "Firm Cambodian palm sugar cut into small cubes",
-        "nameZh": "切小块的固态高棉棕榈糖",
-        "amount": "120 ក្រាម (120g)"
-      },
-      {
-        "nameKh": "សាច់ដូងទុំកោសសរសៃលាយអំបិលបន្តិច",
-        "nameEn": "Freshly grated mature white coconut with a pinch of salt",
-        "nameZh": "拌少许盐的鲜刨白椰丝",
-        "amount": "150 ក្រាម (150g)"
-      },
-      {
-        "nameKh": "ល្ងសលីងឈ្ងុយ",
-        "nameEn": "Toasted white sesame seeds",
-        "nameZh": "焙香白芝麻",
-        "amount": "2 ស្លាបព្រាបាយ (2 tbsp)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "លុញម្សៅអង្ករដំណើបជាគ្រាប់មូល ដាក់ដុំស្ករត្នោតនៅកណ្តាលរួចខ្ចប់ឱ្យជិត។",
-        "instructionEn": "Flatten balls of glutinous rice dough, place a cube of palm sugar inside, and seal tightly.",
-        "instructionZh": "将糯米团按扁，包入一小块棕榈糖搓圆封口。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ដាក់ស្ងោរក្នុងទឹកពុះរហូតនំអណ្តែតឡើងលើ រួចស្រង់ចេញភ្លាម។",
-        "instructionEn": "Boil the dumplings in water until they float to the surface, indicating the sugar center has melted.",
-        "instructionZh": "下入沸水中煮至糯米球浮起、糖芯融化后捞出。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "រមៀលនំលើសាច់ដូងទុំកោស និងរោយល្ងសលីងពីលើ។",
-        "instructionEn": "Roll the warm dumplings in salted grated coconut and sprinkle with toasted sesame seeds.",
-        "instructionZh": "趁热裹满鲜椰丝并撒上熟白芝麻即可。"
-      }
-    ],
-    "rating": 4.7,
-    "reviewCount": 118,
-    "provinceKh": "បាត់ដំបង",
-    "provinceEn": "Battambang",
-    "isFeatured": false,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-324",
-    "nameKh": "នំចាក់ចុលបំពងស្ករត្នោត",
-    "nameEn": "Cambodian Crispy Fried Ring-Shaped Rice Flour Donuts (Num Chak Chol)",
-    "nameZh": "高棉香脆棕榈糖炸米圈 (Num Chak Chol)",
-    "categorySlug": "dessert",
-    "categoryKh": "បង្អែម នំខ្មែរ និងភេសជ្ជៈ",
-    "categoryEn": "Khmer Desserts & Drinks",
-    "categoryZh": "高棉甜品与传统饮品",
-    "descriptionKh": "នំចាក់ចុលបុរាណខ្មែរ ធ្វើពីម្សៅអង្ករដំណើបលាយស្ករត្នោត បំពងឡើងប៉ោងស្រួយក្រៅទន់ស្វិតខាងក្នុង។",
-    "descriptionEn": "Traditional Cambodian street-side fried rice-flour ring cakes sweetened with dark palm sugar and topped with sesame seeds.",
-    "descriptionZh": "柬埔寨街头传统炸米圈，以糯米粉与棕榈糖调浆油炸而成，外酥内软糯。",
-    "photoUrl": "/foods/food-324.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "2 នាក់",
-    "difficulty": "medium",
-    "priceRiel": 28000,
-    "priceUsd": 7,
-    "ingredients": [
-      {
-        "nameKh": "ម្សៅអង្ករដំណើប និងម្សៅអង្ករខ្សាយ",
-        "nameEn": "Glutinous rice flour & regular rice flour blend",
-        "nameZh": "糯米粉与粘米粉混合粉",
-        "amount": "300 ក្រាម (300g)"
-      },
-      {
-        "nameKh": "ស្ករត្នោតខ្មែររម្ងាស់ឱ្យឈ្ងុយ",
-        "nameEn": "Melted dark Cambodian palm sugar syrup",
-        "nameZh": "熬香深色高棉棕榈糖浆",
-        "amount": "150 ក្រាម (150g)"
-      },
-      {
-        "nameKh": "ខ្ទិះដូង និងល្ងស",
-        "nameEn": "Coconut milk & white sesame seeds",
-        "nameZh": "椰奶与白芝麻",
-        "amount": "100 មីលីលីត្រ (100ml)"
-      },
-      {
-        "nameKh": "ប្រេងឆាសម្រាប់បំពង",
-        "nameEn": "Cooking oil for deep-frying",
-        "nameZh": "炸制用植物油",
-        "amount": "500 មីលីលីត្រ (500ml)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "កូរលាយម្សៅអង្ករទាំងពីរមុខជាមួយទឹកស្ករត្នោតនិងខ្ទិះដូងឱ្យខាប់ល្មម រួចផ្អាប់ទុក ៣០ នាទី។",
-        "instructionEn": "Whisk the rice flours with warm palm sugar syrup and coconut milk into a thick batter, resting for 30 minutes.",
-        "instructionZh": "将两种米粉与温棕榈糖浆、椰奶调成浓稠面糊，静置30分钟。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ដួសម្សៅចាក់ក្នុងខ្ទះប្រេងក្តៅឱ្យឡើងរាងមូលប៉ោង និងមានរន្ធកណ្តាល។",
-        "instructionEn": "Ladle the batter into hot oil so it puffs into a golden ring with lacy edges.",
-        "instructionZh": "将面糊舀入热油锅中，炸至自动膨起成金黄圆圈状。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "រោយល្ងស ស្រង់ឱ្យស្រស់ប្រេង រួចពិសាទាន់នៅក្ដៅៗ។",
-        "instructionEn": "Sprinkle with sesame seeds, drain, and enjoy warm and crispy.",
-        "instructionZh": "撒上白芝麻沥油，趁热酥脆享用。"
-      }
-    ],
-    "rating": 4.6,
-    "reviewCount": 129,
-    "provinceKh": "សៀមរាប",
-    "provinceEn": "Siem Reap",
-    "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-325",
-    "nameKh": "នំក្រូចស្នូលសណ្តែកលឿងល្ងស",
-    "nameEn": "Crispy Sesame Glutinous Rice Balls Stuffed with Sweet Mung Bean (Num Krouch)",
-    "nameZh": "高棉香脆芝麻绿豆沙麻球 (Num Krouch)",
-    "categorySlug": "dessert",
-    "categoryKh": "បង្អែម នំខ្មែរ និងភេសជ្ជៈ",
-    "categoryEn": "Khmer Desserts & Drinks",
-    "categoryZh": "高棉甜品与传统饮品",
-    "descriptionKh": "នំក្រូចខ្មែរសំបកល្ងសបំពងស្រួយ ញាត់ស្នូលសណ្តែកលឿងកូរជាមួយស្ករត្នោតនិងដូងកោស ឈ្ងុយឆ្ងាញ់។",
-    "descriptionEn": "Golden sesame-crusted glutinous rice balls filled with sweet mashed mung bean and coconut paste, fried until crisp outside and chewy inside.",
-    "descriptionZh": "外裹满白芝麻的黄金糯米球，内馅为香甜绿豆椰丝泥，外脆里糯。",
-    "photoUrl": "/foods/food-325.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "3 នាក់",
-    "difficulty": "easy",
-    "priceRiel": 35000,
-    "priceUsd": 8.75,
-    "ingredients": [
-      {
-        "nameKh": "ម្សៅអង្ករដំណើប និងដំឡូងបារាំងស្ងោរកិនបន្តិច",
-        "nameEn": "Glutinous rice flour & a touch of mashed potato",
-        "nameZh": "糯米粉与少许熟土豆泥",
-        "amount": "250 ក្រាម (250g)"
-      },
-      {
-        "nameKh": "សណ្តែកលឿងចំហុយកិនលាយស្ករត្នោតនិងដូងកោស",
-        "nameEn": "Steamed split mung bean paste cooked with palm sugar & coconut",
-        "nameZh": "棕榈糖椰丝绿豆沙馅",
-        "amount": "200 ក្រាម (200g)"
-      },
-      {
-        "nameKh": "ល្ងសសម្រាប់ប្រឡាក់សំបកនំ",
-        "nameEn": "White sesame seeds for coating",
-        "nameZh": "裹表皮用白芝麻",
-        "amount": "80 ក្រាម (80g)"
-      },
-      {
-        "nameKh": "ប្រេងឆាសម្រាប់បំពង",
-        "nameEn": "Vegetable oil for frying",
-        "nameZh": "煎炸用植物油",
-        "amount": "500 មីលីលីត្រ (500ml)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "លុញស្នូលសណ្តែកលឿងជាគ្រាប់មូល រួចយកម្សៅអង្ករដំណើបមកខ្ចប់ពីក្រៅឱ្យជិត។",
-        "instructionEn": "Roll the sweet mung bean filling into balls and encase smoothly in glutinous rice dough.",
-        "instructionZh": "将绿豆椰丝馅搓成小圆球，外层包上糯米粉团。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ប្រឡាក់គ្រាប់នំជាមួយល្ងសឱ្យសព្វពេញសំបក។",
-        "instructionEn": "Roll each ball in white sesame seeds, pressing gently so the seeds adhere.",
-        "instructionZh": "表面滚满白芝麻并轻轻按实。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "បំពងក្នុងប្រេងភ្លើងល្មមរហូតឡើងប៉ោងពណ៌មាសស្រួយ។",
-        "instructionEn": "Deep-fry over medium heat until puffed and golden-crisp.",
-        "instructionZh": "下入中温油锅慢炸至金黄酥脆。"
-      }
-    ],
-    "rating": 4.9,
-    "reviewCount": 140,
-    "provinceKh": "ភ្នំពេញ",
-    "provinceEn": "Phnom Penh",
-    "isFeatured": false,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-326",
-    "nameKh": "ចេកអាំងខ្ទិះដូងស្លឹកខ្ទឹម",
-    "nameEn": "Charcoal-Grilled Plantain Bananas with Sweet Scallion Coconut Cream (Chek Ang Ktis)",
-    "nameZh": "炭烤芭蕉淋香葱椰浆 (Chek Ang Ktis)",
-    "categorySlug": "dessert",
-    "categoryKh": "បង្អែម នំខ្មែរ និងភេសជ្ជៈ",
-    "categoryEn": "Khmer Desserts & Drinks",
-    "categoryZh": "高棉甜品与传统饮品",
-    "descriptionKh": "ចេកណាំវ៉ាគៀបសំប៉ែតអាំងលើរងើកភ្លើងធ្យូងឱ្យឈ្ងុយ រួចជ្រលក់ឬស្រោចខ្ទិះដូងដើមលាយស្លឹកខ្ទឹមប្រៃផ្អែម។",
-    "descriptionEn": "Pressed Namva bananas roasted over charcoal embers until caramelized, brushed generously with sweet-salted scallion coconut cream.",
-    "descriptionZh": "柬埔寨街头经典小吃，压扁的南华芭蕉在炭火上烤至焦香，淋上咸甜香葱浓椰浆。",
-    "photoUrl": "/foods/food-326.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "4 នាក់",
-    "difficulty": "easy",
-    "priceRiel": 42000,
-    "priceUsd": 10.5,
-    "ingredients": [
-      {
-        "nameKh": "ចេកណាំវ៉ាទុំល្មមបកសំបកគៀបសំប៉ែត",
-        "nameEn": "Firm-ripe Namva bananas, peeled and gently flattened",
-        "nameZh": "去皮压扁的半熟南华芭蕉",
-        "amount": "6 ផ្លែ (6 bananas)"
-      },
-      {
-        "nameKh": "ខ្ទិះដូងដើមខាប់",
-        "nameEn": "Thick first-press coconut cream",
-        "nameZh": "头道浓椰浆",
-        "amount": "200 មីលីលីត្រ (200ml)"
-      },
-      {
-        "nameKh": "ស្ករត្នោត និងអំបិលម៉ត់បន្តិច",
-        "nameEn": "Palm sugar & a pinch of sea salt",
-        "nameZh": "棕榈糖与少许海盐",
-        "amount": "2 ស្លាបព្រាបាយ (2 tbsp)"
-      },
-      {
-        "nameKh": "ស្លឹកខ្ទឹមហាន់ល្អិត និងល្ងលីង",
-        "nameEn": "Finely chopped scallions & toasted sesame seeds",
-        "nameZh": "细葱花与熟芝麻",
-        "amount": "2 ស្លាបព្រាបាយ (2 tbsp)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "ដាក់ចេកណាំវ៉ាអាំងលើភ្លើងធ្យូងតិចៗ រួចគៀបឱ្យសំប៉ែតហើយអាំងបន្តឱ្យក្រហមឈ្ងុយ។",
-        "instructionEn": "Grill the Namva bananas over charcoal embers, press flat, and roast until golden and aromatic.",
-        "instructionZh": "将芭蕉置于炭火上烤软后压扁，继续烤至表皮金黄焦香。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "កូរខ្ទិះដូងដើមជាមួយស្ករត្នោត អំបិល និងស្លឹកខ្ទឹមហាន់លើភ្លើងតិចៗឱ្យខាប់។",
-        "instructionEn": "Warm thick coconut cream with palm sugar, salt, and chopped scallions until glossy.",
-        "instructionZh": "将浓椰浆、棕榈糖、海盐与葱花小火熬至浓稠。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "ស្រោចទឹកខ្ទិះដូងស្លឹកខ្ទឹមពីលើចេកអាំងក្ដៅៗ។",
-        "instructionEn": "Brush and ladle the savory-sweet scallion coconut cream over the hot grilled bananas.",
-        "instructionZh": "趁热将香葱椰浆淋在烤芭蕉上即可。"
-      }
-    ],
-    "rating": 4.8,
-    "reviewCount": 151,
-    "provinceKh": "បាត់ដំបង",
-    "provinceEn": "Battambang",
-    "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-327",
-    "nameKh": "ដំឡូងមីចំហុយដូងកោសស្ករត្នោត",
-    "nameEn": "Steamed Sweet Cassava with Grated Coconut & Palm Sugar Drizzle",
-    "nameZh": "高棉椰丝棕榈糖蒸木薯 (Damlong Mi Chamhoy)",
-    "categorySlug": "dessert",
-    "categoryKh": "បង្អែម នំខ្មែរ និងភេសជ្ជៈ",
-    "categoryEn": "Khmer Desserts & Drinks",
-    "categoryZh": "高棉甜品与传统饮品",
-    "descriptionKh": "ដំឡូងមីខ្មែរចំហុយស្លឹកតយឱ្យផុយស្អិត ញ៉ាំជាមួយសាច់ដូងទុំកោស ល្ងលីង និងទឹកស្ករត្នោតខាប់។",
-    "descriptionEn": "Fluffy pandan-steamed Cambodian cassava root topped with fresh grated coconut, toasted sesame seeds, and warm palm sugar syrup.",
-    "descriptionZh": "香兰叶清蒸至粉糯的高棉木薯，铺上鲜刨白椰丝、烤芝麻与温热棕榈糖浆。",
-    "photoUrl": "/foods/food-327.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "35 នាទី",
-    "servings": "2 នាក់",
-    "difficulty": "medium",
-    "priceRiel": 49000,
-    "priceUsd": 12.25,
-    "ingredients": [
-      {
-        "nameKh": "ដំឡូងមីស្រស់បកសំបកកាត់ដុំ",
-        "nameEn": "Fresh cassava root, peeled and cut into chunks",
-        "nameZh": "去皮切块的新鲜木薯",
-        "amount": "400 ក្រាម (400g)"
-      },
-      {
-        "nameKh": "ស្លឹកតយស្រស់ និងខ្ទិះដូងដើម",
-        "nameEn": "Fresh pandan leaves & thick coconut cream",
-        "nameZh": "新鲜香兰叶与浓椰浆",
-        "amount": "100 មីលីលីត្រ (100ml)"
-      },
-      {
-        "nameKh": "សាច់ដូងទុំកោស និងល្ងសលីង",
-        "nameEn": "Grated mature coconut & toasted sesame seeds",
-        "nameZh": "鲜刨椰丝与熟白芝麻",
-        "amount": "100 ក្រាម (100g)"
-      },
-      {
-        "nameKh": "ទឹកស្ករត្នោតខ្មែររម្ងាស់ខាប់",
-        "nameEn": "Thick Cambodian palm sugar syrup",
-        "nameZh": "浓稠高棉棕榈糖浆",
-        "amount": "3 ស្លាបព្រាបាយ (3 tbsp)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "ដាក់ដំឡូងមីចំហុយជាមួយស្លឹកតយរយៈពេល ២៥ នាទីរហូតឆ្អិនផុយល្អ។",
-        "instructionEn": "Steam the cassava chunks with pandan leaves for 25 minutes until fork-tender and fluffy.",
-        "instructionZh": "将木薯块与香兰叶上锅大火蒸25分钟至粉糯。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "រៀបដំឡូងមីដាក់ចាន ស្រោចខ្ទិះដូងដើមនិងទឹកស្ករត្នោតពីលើ។",
-        "instructionEn": "Arrange the warm cassava on a plate and drizzle with coconut cream and palm sugar syrup.",
-        "instructionZh": "木薯摆盘，淋上浓椰浆与棕榈糖浆。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "រោយសាច់ដូងទុំកោស និងល្ងសលីង។",
-        "instructionEn": "Top generously with grated coconut and toasted sesame seeds.",
-        "instructionZh": "撒上大把鲜椰丝与熟白芝麻即可。"
-      }
-    ],
-    "rating": 4.7,
-    "reviewCount": 162,
-    "provinceKh": "សៀមរាប",
-    "provinceEn": "Siem Reap",
-    "isFeatured": false,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-328",
-    "nameKh": "ទឹកត្រឡាចត្រជាក់ស្លឹកតយ",
-    "nameEn": "Chilled Homemade Winter Melon & Pandan Tea (Teuk Tralach)",
-    "nameZh": "高棉自制香兰冬瓜露 (Teuk Tralach)",
-    "categorySlug": "dessert",
-    "categoryKh": "បង្អែម នំខ្មែរ និងភេសជ្ជៈ",
-    "categoryEn": "Khmer Desserts & Drinks",
-    "categoryZh": "高棉甜品与传统饮品",
-    "descriptionKh": "ទឹកត្រឡាចរម្ងាស់ជាមួយស្ករត្នោត ស្ករក្រាម និងស្លឹកតយ ត្រជាក់ផ្អែមស្រទន់ ត្រជាក់ក្នុងខ្លួន។",
-    "descriptionEn": "Refreshing Cambodian slow-brewed winter melon drink infused with caramelized palm sugar, rock sugar, and fragrant pandan leaves.",
-    "descriptionZh": "冬瓜配高棉棕榈糖、冰糖与香兰叶慢火熬煮的清凉冬瓜茶，清热解暑。",
-    "photoUrl": "/foods/food-328.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "20 នាទី",
-    "servings": "3 នាក់",
-    "difficulty": "easy",
-    "priceRiel": 11000,
-    "priceUsd": 2.75,
-    "ingredients": [
-      {
-        "nameKh": "ផ្លែត្រឡាចចាស់ល្មមហាន់ដុំ",
-        "nameEn": "Fresh winter melon cut into chunks",
-        "nameZh": "新鲜冬瓜切块",
-        "amount": "500 ក្រាម (500g)"
-      },
-      {
-        "nameKh": "ស្ករត្នោតខ្មែរ និងស្ករក្រាម",
-        "nameEn": "Cambodian palm sugar & rock sugar",
-        "nameZh": "高棉棕榈糖与冰糖",
-        "amount": "150 ក្រាម (150g)"
-      },
-      {
-        "nameKh": "ស្លឹកតយស្រស់ចងជាដុំ",
-        "nameEn": "Fresh knotted pandan leaves",
-        "nameZh": "新鲜香兰叶结",
-        "amount": "1 ដុំ (1 bundle)"
-      },
-      {
-        "nameKh": "ទឹកស្អាត និងទឹកកកអនាម័យ",
-        "nameEn": "Filtered water & clean ice cubes",
-        "nameZh": "纯净水与冰块",
-        "amount": "1 លីត្រ (1 liter)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "ប្រឡាក់ដុំត្រឡាចជាមួយស្ករត្នោតទុក ១៥ នាទីឱ្យចេញទឹកផ្អែមឈ្ងុយ។",
-        "instructionEn": "Macerate winter melon chunks with palm sugar for 15 minutes to draw out the natural juices.",
-        "instructionZh": "将冬瓜块与棕榈糖拌匀静置15分钟出汁。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ចាក់ទឹកនិងដាក់ស្លឹកតយ ស្ករក្រាម រម្ងាស់រយៈពេល ៣០ នាទី រួចច្រោះយកទឹកថ្លា។",
-        "instructionEn": "Add water, pandan leaves, and rock sugar, simmering for 30 minutes before straining.",
-        "instructionZh": "加入清水、香兰叶和冰糖慢煮30分钟，过滤取清汁。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "ចាក់ដាក់កែវទឹកកក ពិសាត្រជាក់ៗ។",
-        "instructionEn": "Pour over ice cubes and serve chilled.",
-        "instructionZh": "倒入冰杯中冰镇饮用。"
-      }
-    ],
-    "rating": 4.6,
-    "reviewCount": 53,
-    "provinceKh": "ភ្នំពេញ",
-    "provinceEn": "Phnom Penh",
-    "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-329",
-    "nameKh": "ទឹកក្រឡុកផ្លែស្រកានាគក្រហមទឹកដោះគោស្រស់",
-    "nameEn": "Cambodian Red Dragon Fruit & Fresh Milk Smoothie",
-    "nameZh": "高棉红心火龙果鲜奶冰沙",
-    "categorySlug": "dessert",
-    "categoryKh": "បង្អែម នំខ្មែរ និងភេសជ្ជៈ",
-    "categoryEn": "Khmer Desserts & Drinks",
-    "categoryZh": "高棉甜品与传统饮品",
-    "descriptionKh": "ទឹកក្រឡុកផ្លែស្រកានាគក្រហមធម្មជាតិ លាយទឹកដោះគោស្រស់និងទឹកដោះគោខាប់ ផ្អែមត្រជាក់សម្បូរវីតាមីន។",
-    "descriptionEn": "Vibrant magenta smoothie blended from sweet Cambodian red dragon fruit, fresh milk, condensed milk, and crushed ice.",
-    "descriptionZh": "甄选柬埔寨红心火龙果配鲜牛奶与炼乳打制的绵密冰沙，色泽艳丽，果香浓郁。",
-    "photoUrl": "/foods/food-329.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "25 នាទី",
-    "servings": "4 នាក់",
-    "difficulty": "easy",
-    "priceRiel": 18000,
-    "priceUsd": 4.5,
-    "ingredients": [
-      {
-        "nameKh": "ផ្លែស្រកានាគក្រហមទុំផ្អែមបកសំបកកាត់ដុំ",
-        "nameEn": "Ripe Cambodian red dragon fruit, peeled and cubed",
-        "nameZh": "去皮切块熟红心火龙果",
-        "amount": "250 ក្រាម (250g)"
-      },
-      {
-        "nameKh": "ទឹកដោះគោស្រស់ និងទឹកដោះគោខាប់",
-        "nameEn": "Fresh milk & sweetened condensed milk",
-        "nameZh": "鲜牛奶与甜炼乳",
-        "amount": "120 មីលីលីត្រ (120ml)"
-      },
-      {
-        "nameKh": "ទឹកស្ករតិចៗ",
-        "nameEn": "Touch of sugar syrup",
-        "nameZh": "少许糖浆",
-        "amount": "1 ស្លាបព្រាបាយ (1 tbsp)"
-      },
-      {
-        "nameKh": "ទឹកកកអនាម័យ",
-        "nameEn": "Clean ice cubes",
-        "nameZh": "纯净冰块",
-        "amount": "1 កែវ (1 cup)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "ដាក់ផ្លែស្រកានាគក្រហម ទឹកដោះគោស្រស់ ទឹកដោះគោខាប់ និងទឹកកកចូលក្នុងម៉ាស៊ីនក្រឡុក។",
-        "instructionEn": "Combine cubed red dragon fruit, fresh milk, condensed milk, and ice in a blender.",
-        "instructionZh": "将红心火龙果块、鲜奶、炼乳与冰块放入料理机。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ក្រឡុកឱ្យម៉ត់ខាប់រលោងពណ៌ផ្កាឈូកក្រហមស្អាត។",
-        "instructionEn": "Blend on high speed until velvety smooth and vibrant magenta.",
-        "instructionZh": "高速搅打至绵密顺滑的玫红色冰沙。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "ចាក់ដាក់កែវ តុបតែងដុំស្រកានាគពីលើ។",
-        "instructionEn": "Pour into a tall glass and garnish with fresh dragon fruit cubes.",
-        "instructionZh": "倒入高杯中，顶部点缀鲜火龙果粒即可。"
-      }
-    ],
-    "rating": 4.9,
-    "reviewCount": 64,
-    "provinceKh": "បាត់ដំបង",
-    "provinceEn": "Battambang",
-    "isFeatured": false,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
-  },
-  {
-    "id": "food-330",
-    "nameKh": "ទឹកក្រឡុកផ្លែទៀបខ្មែរទឹកដោះគោខាប់",
-    "nameEn": "Creamy Cambodian Sugar Apple (Custard Apple) Smoothie (Teuk Kralok Plae Tiep)",
-    "nameZh": "高棉释迦果（番荔枝）炼乳冰沙",
-    "categorySlug": "dessert",
-    "categoryKh": "បង្អែម នំខ្មែរ និងភេសជ្ជៈ",
-    "categoryEn": "Khmer Desserts & Drinks",
-    "categoryZh": "高棉甜品与传统饮品",
-    "descriptionKh": "សាច់ផ្លែទៀបខ្មែរទុំក្រអូបផ្អែម យកគ្រាប់ចេញ ក្រឡុកជាមួយទឹកដោះគោស្រស់និងទឹកដោះគោខាប់ ខាប់ឈ្ងុយឆ្ងាញ់ប្លែក។",
-    "descriptionEn": "Luscious Cambodian smoothie made from fragrant seeded sugar apple (custard apple) flesh blended with fresh milk, condensed milk, and ice.",
-    "descriptionZh": "芳香甘甜的柬埔寨熟释迦果去籽取肉，配鲜牛奶与炼乳打成丝滑浓香冰沙。",
-    "photoUrl": "/foods/food-330.jpg",
-    "prepTime": "15 នាទី",
-    "cookTime": "30 នាទី",
-    "servings": "2 នាក់",
-    "difficulty": "medium",
-    "priceRiel": 25000,
-    "priceUsd": 6.25,
-    "ingredients": [
-      {
-        "nameKh": "សាច់ផ្លែទៀបខ្មែរទុំឆ្កឹះគ្រាប់ចេញ",
-        "nameEn": "Pitted ripe Cambodian sugar apple (custard apple) flesh",
-        "nameZh": "去籽熟透高棉释迦果肉",
-        "amount": "250 ក្រាម (250g)"
-      },
-      {
-        "nameKh": "ទឹកដោះគោស្រស់ និងទឹកដោះគោខាប់",
-        "nameEn": "Fresh milk & sweetened condensed milk",
-        "nameZh": "鲜牛奶与甜炼乳",
-        "amount": "120 មីលីលីត្រ (120ml)"
-      },
-      {
-        "nameKh": "អំបិលម៉ត់មួយចុងស្លាបព្រា",
-        "nameEn": "Tiny pinch of fine sea salt",
-        "nameZh": "一小撮细海盐",
-        "amount": "1 ចុងស្លាបព្រា (1 pinch)"
-      },
-      {
-        "nameKh": "ទឹកកកអនាម័យ",
-        "nameEn": "Clean ice cubes",
-        "nameZh": "纯净冰块",
-        "amount": "1 កែវ (1 cup)"
-      }
-    ],
-    "steps": [
-      {
-        "stepNumber": 1,
-        "instructionKh": "បកសំបកផ្លែទៀបទុំ ហើយញែកយកគ្រាប់ខ្មៅចេញឱ្យអស់ ទុកតែសាច់សផ្អែម។",
-        "instructionEn": "Scoop the fragrant white flesh from ripe sugar apples and remove all black seeds.",
-        "instructionZh": "剥开熟释迦果，剔除黑籽只留香甜白果肉。"
-      },
-      {
-        "stepNumber": 2,
-        "instructionKh": "ដាក់សាច់ផ្លែទៀប ទឹកដោះគោស្រស់ ទឹកដោះគោខាប់ អំបិលបន្តិច និងទឹកកកចូលម៉ាស៊ីនក្រឡុកឱ្យម៉ត់។",
-        "instructionEn": "Blend the sugar apple pulp, fresh milk, condensed milk, a pinch of salt, and ice until creamy.",
-        "instructionZh": "将释迦果肉、鲜奶、炼乳、少许海盐与冰块一同搅打至顺滑。"
-      },
-      {
-        "stepNumber": 3,
-        "instructionKh": "ចាក់ដាក់កែវពិសាត្រជាក់ៗ។",
-        "instructionEn": "Pour into a chilled glass and serve immediately.",
-        "instructionZh": "倒入冰杯中即可享用。"
-      }
-    ],
-    "rating": 4.8,
-    "reviewCount": 75,
-    "provinceKh": "សៀមរាប",
-    "provinceEn": "Siem Reap",
-    "isFeatured": true,
-    "photoUpdatedAt": "2026-11-06T18:15:00.000Z"
+    "photoUpdatedAt": "2026-11-06T21:46:00.000Z"
   }
 ];
 

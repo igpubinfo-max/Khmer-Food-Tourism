@@ -30,6 +30,7 @@ import { tr } from '../utils/i18n';
 interface AdminHotelManagerPanelProps {
   onOpenImageModal: (hotel: TouristDestination) => void;
   onOpenGpsEditor: (hotel: TouristDestination) => void;
+  onNavigateToOwnerUser?: (ownerQuery: string) => void;
 }
 
 const HOTEL_CATEGORY_OPTIONS = [
@@ -88,13 +89,16 @@ const compressHotelImageFile = (
 export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
   onOpenImageModal,
   onOpenGpsEditor,
+  onNavigateToOwnerUser,
 }) => {
   const {
     destinations,
     restaurants,
+    users,
     language,
     addDestination,
     updateDestination,
+    updateRestaurant,
     deleteDestination,
     deleteRestaurant,
     approveRestaurant,
@@ -111,7 +115,9 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
   const batchFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'with_photo' | 'no_photo' | 'big_card' | 'compact_row'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'owned_hotel' | 'with_photo' | 'no_photo' | 'big_card' | 'compact_row'>('all');
+  const [transferringHotelId, setTransferringHotelId] = useState<string | null>(null);
+  const [transferOwnerSearch, setTransferOwnerSearch] = useState('');
   const [provinceFilter, setProvinceFilter] = useState('all');
   const [visibleCount, setVisibleCount] = useState(40);
 
@@ -191,6 +197,50 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
 
   const vipHotelIdSet = useMemo(() => new Set(vipHotelDestinations.map((h) => h.id)), [vipHotelDestinations]);
 
+  const hotelRestById = useMemo(() => {
+    const map = new Map<string, any>();
+    for (const r of restaurants) {
+      if (r && isHotelBusinessRecord(r)) {
+        map.set(r.id, r);
+      }
+    }
+    return map;
+  }, [restaurants]);
+
+  const resolveHotelOwnerInfo = useMemo(() => {
+    const byId = new Map<string, any>();
+    const byEmail = new Map<string, any>();
+    const byPhone = new Map<string, any>();
+    for (const u of users || []) {
+      if (!u) continue;
+      if (u.id) byId.set(String(u.id).trim(), u);
+      if (u.email) byEmail.set(String(u.email).trim().toLowerCase(), u);
+      if (u.phone) byPhone.set(String(u.phone).replace(/\s+/g, ''), u);
+    }
+    return (hotelId: string) => {
+      const rest = hotelRestById.get(hotelId);
+      if (!rest) return { hasOwner: false, userId: '', ownerName: '', ownerEmail: '', ownerPhone: '', isSuspended: false, rest: null };
+      const rawId = String(rest.ownerId || rest.pendingUpgradeRequest?.submittedByUserId || '').trim();
+      const rawEmail = String(rest.ownerEmail || rest.pendingUpgradeRequest?.submittedByEmail || '').trim().toLowerCase();
+      const rawPhone = String(rest.ownerPhone || rest.pendingUpgradeRequest?.submittedByPhone || '').trim();
+      const matchedUser =
+        (rawId && byId.get(rawId)) ||
+        (rawEmail && byEmail.get(rawEmail)) ||
+        (rawPhone && byPhone.get(rawPhone.replace(/\s+/g, ''))) ||
+        null;
+      const hasOwner = Boolean(matchedUser || rawId || rawEmail || rest.ownerName);
+      return {
+        hasOwner,
+        userId: matchedUser?.id || rawId || '',
+        ownerName: matchedUser?.name || rest.ownerName || rest.pendingUpgradeRequest?.submittedByName || 'VIP Hotel Owner',
+        ownerEmail: matchedUser?.email || rawEmail || '',
+        ownerPhone: matchedUser?.phone || rawPhone || rest.phone || '',
+        isSuspended: Boolean(rest.isSuspended || rest.status === 'suspended'),
+        rest,
+      };
+    };
+  }, [users, hotelRestById]);
+
   const allHotels = useMemo<TouristDestination[]>(() => {
     const seedHotels = destinations.filter((d) => Boolean(d && d.categorySlug === 'hotel'));
     return [...vipHotelDestinations, ...seedHotels.filter((d) => !vipHotelIdSet.has(d.id))];
@@ -204,20 +254,23 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
     let withPhoto = 0;
     let bigCard = 0;
     let verifiedGps = 0;
+    let ownedCount = 0;
     for (const h of allHotels) {
       if (h.photoUrl && h.photoUrl.trim()) withPhoto++;
       if (isHotelBigCard(h)) bigCard++;
       if (isPlaceLocationVerified(h)) verifiedGps++;
+      if (resolveHotelOwnerInfo(h.id).hasOwner || vipHotelIdSet.has(h.id)) ownedCount++;
     }
     return {
       total: allHotels.length,
+      ownedCount,
       withPhoto,
       noPhoto: allHotels.length - withPhoto,
       bigCard,
       compactRow: allHotels.length - bigCard,
       verifiedGps,
     };
-  }, [allHotels, vipHotelIdSet]);
+  }, [allHotels, vipHotelIdSet, resolveHotelOwnerInfo]);
 
   const filteredHotels = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -226,6 +279,8 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
     return allHotels.filter((h) => {
       const hasPhoto = Boolean(h.photoUrl && h.photoUrl.trim());
       const big = isHotelBigCard(h);
+      const ownerInfo = resolveHotelOwnerInfo(h.id);
+      if (statusFilter === 'owned_hotel' && !ownerInfo.hasOwner && !vipHotelIdSet.has(h.id)) return false;
       if (statusFilter === 'with_photo' && !hasPhoto) return false;
       if (statusFilter === 'no_photo' && hasPhoto) return false;
       if (statusFilter === 'big_card' && !big) return false;
@@ -236,12 +291,12 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
       }
 
       if (q) {
-        const hay = `${h.id} ${h.nameKh || ''} ${h.nameEn || ''} ${h.provinceKh || ''} ${h.provinceEn || ''} ${h.phone || ''} ${h.addressKh || ''}`.toLowerCase();
+        const hay = `${h.id} ${h.nameKh || ''} ${h.nameEn || ''} ${h.provinceKh || ''} ${h.provinceEn || ''} ${h.phone || ''} ${h.addressKh || ''} ${ownerInfo.userId} ${ownerInfo.ownerName} ${ownerInfo.ownerEmail} ${ownerInfo.ownerPhone}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
     });
-  }, [allHotels, searchQuery, statusFilter, provinceFilter, vipHotelIdSet]);
+  }, [allHotels, searchQuery, statusFilter, provinceFilter, vipHotelIdSet, resolveHotelOwnerInfo]);
 
   const handleDownloadHotelExcelTemplate = () => {
     const link = document.createElement('a');
@@ -369,10 +424,6 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
   };
 
   const startInlineEdit = (hotel: TouristDestination) => {
-    if (vipHotelIdSet.has(hotel.id)) {
-      openManageMyVipStore(hotel.id);
-      return;
-    }
     setEditingHotelId(hotel.id);
     setEditDraft({
       nameKh: hotel.nameKh,
@@ -399,6 +450,31 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
       HOTEL_CATEGORY_OPTIONS.find((c) => c.kh === editDraft.categoryKh) || HOTEL_CATEGORY_OPTIONS[0];
     const lat = Number(editDraft.latitude) || hotel.latitude;
     const lng = Number(editDraft.longitude) || hotel.longitude;
+
+    const matchingRest = hotelRestById.get(hotel.id);
+    if (matchingRest) {
+      updateRestaurant({
+        ...matchingRest,
+        nameKh: (editDraft.nameKh || hotel.nameKh).trim(),
+        nameEn: (editDraft.nameEn || hotel.nameEn).trim(),
+        provinceKh: editDraft.provinceKh || hotel.provinceKh,
+        provinceEn: provMeta?.en || hotel.provinceEn,
+        categoryKh: catMeta.kh,
+        categoryEn: catMeta.en,
+        priceLevel: (editDraft.priceRange ?? hotel.priceRange ?? '').trim(),
+        phone: (editDraft.phone ?? hotel.phone ?? '').trim(),
+        addressKh: (editDraft.addressKh ?? hotel.addressKh ?? '').trim(),
+        addressEn: (editDraft.addressEn ?? hotel.addressEn ?? '').trim(),
+        latitude: lat,
+        longitude: lng,
+        mapUrl:
+          (editDraft.mapUrl || '').trim() ||
+          `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
+        descriptionKh: (editDraft.descriptionKh ?? hotel.descriptionKh ?? '').trim(),
+        isAdminEdited: true,
+        updatedAt: new Date().toISOString(),
+      });
+    }
 
     updateDestination({
       ...hotel,
@@ -1004,6 +1080,7 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
         <div className="flex items-center gap-1.5 flex-wrap text-xs">
           {[
             { id: 'all', label: tr(language, `ទាំងអស់ (${stats.total})`, `All (${stats.total})`, `全部 (${stats.total})`) },
+            { id: 'owned_hotel', label: tr(language, `👤 មានម្ចាស់គណនី (${stats.ownedCount})`, `👤 Owned Hotels (${stats.ownedCount})`, `👤 已有店主 (${stats.ownedCount})`) },
             { id: 'with_photo', label: tr(language, `មានរូបភាព (${stats.withPhoto})`, `With Photo (${stats.withPhoto})`, `有图片 (${stats.withPhoto})`) },
             { id: 'no_photo', label: tr(language, `គ្មានរូបភាព (${stats.noPhoto})`, `No Photo (${stats.noPhoto})`, `无图片 (${stats.noPhoto})`) },
             { id: 'big_card', label: tr(language, `កាតធំ / VIP (${stats.bigCard})`, `Big Card / VIP (${stats.bigCard})`, `大卡片 (${stats.bigCard})`) },
@@ -1095,11 +1172,90 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                         </span>
                       )}
                     </div>
+                    {(() => {
+                      const ownerInfo = resolveHotelOwnerInfo(h.id);
+                      if (!ownerInfo.hasOwner && !isVipRecord) return null;
+                      return (
+                        <div className="mt-1 px-2 py-1 rounded-lg bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-[10px] text-amber-950 dark:text-amber-200 flex items-center gap-1.5 flex-wrap">
+                          <span className="font-bold">👤 {ownerInfo.ownerName || 'Hotel Owner'}</span>
+                          {ownerInfo.userId && <span className="font-mono px-1 rounded bg-white/80 dark:bg-stone-900 border border-amber-300/60">User ID: {ownerInfo.userId}</span>}
+                          {ownerInfo.ownerEmail && <span>• ✉️ {ownerInfo.ownerEmail}</span>}
+                          {ownerInfo.ownerPhone && <span>• 📞 {ownerInfo.ownerPhone}</span>}
+                          {ownerInfo.isSuspended && <span className="px-1.5 py-0.5 rounded bg-rose-600 text-white font-bold">⏸️ SUSPENDED</span>}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-1.5 self-end sm:self-auto shrink-0 flex-wrap">
+                  {(() => {
+                    const ownerInfo = resolveHotelOwnerInfo(h.id);
+                    return (
+                      <>
+                        {(ownerInfo.hasOwner || isVipRecord) && onNavigateToOwnerUser && (
+                          <button
+                            type="button"
+                            onClick={() => onNavigateToOwnerUser(ownerInfo.userId || ownerInfo.ownerEmail || ownerInfo.ownerName || h.id)}
+                            className="px-2.5 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/70 text-amber-950 dark:text-amber-200 border border-amber-300 dark:border-amber-700 font-bold text-xs cursor-pointer"
+                            title={isKm ? 'មើលគណនីម្ចាស់សណ្ឋាគារក្នុងផ្នែកអ្នកប្រើប្រាស់' : 'View Hotel Owner in Users Tab'}
+                          >
+                            👤 {isKm ? 'មើលម្ចាស់' : 'Owner'}
+                          </button>
+                        )}
+                        {isVipRecord && (
+                          <button
+                            type="button"
+                            onClick={() => openManageMyVipStore(h.id)}
+                            className="px-2.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs cursor-pointer"
+                            title={isKm ? 'បើកផ្ទាំងគ្រប់គ្រងសណ្ឋាគារពេញលេញ' : 'Open Full Hotel Manager'}
+                          >
+                            🏨 {isKm ? 'គ្រប់គ្រង' : 'Manage'}
+                          </button>
+                        )}
+                        {ownerInfo.rest && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const nextSusp = !ownerInfo.isSuspended;
+                              updateRestaurant({
+                                ...ownerInfo.rest,
+                                isSuspended: nextSusp,
+                                status: nextSusp ? ('suspended' as any) : 'approved',
+                                updatedAt: new Date().toISOString(),
+                              });
+                              showToast(
+                                nextSusp
+                                  ? (isKm ? `⏸️ បានផ្អាកសណ្ឋាគារ "${h.nameKh}"` : `⏸️ Suspended "${h.nameEn || h.nameKh}"`)
+                                  : (isKm ? `▶️ បានបើកសណ្ឋាគារ "${h.nameKh}" ឡើងវិញ` : `▶️ Reactivated "${h.nameEn || h.nameKh}"`),
+                                'info'
+                              );
+                            }}
+                            className={`px-2.5 py-1.5 rounded-xl font-bold text-xs cursor-pointer border ${
+                              ownerInfo.isSuspended
+                                ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                            }`}
+                          >
+                            {ownerInfo.isSuspended ? (isKm ? '▶️ បើកវិញ' : '▶️ Activate') : (isKm ? '⏸️ ផ្អាក' : '⏸️ Suspend')}
+                          </button>
+                        )}
+                        {ownerInfo.rest && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTransferringHotelId(transferringHotelId === h.id ? null : h.id);
+                              setTransferOwnerSearch('');
+                            }}
+                            className="px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800 font-bold text-xs cursor-pointer"
+                          >
+                            🔄 {isKm ? 'ផ្ទេរម្ចាស់' : 'Transfer'}
+                          </button>
+                        )}
+                      </>
+                    );
+                  })()}
                   <button
                     type="button"
                     onClick={() => onOpenImageModal(h)}
@@ -1160,6 +1316,76 @@ export const AdminHotelManagerPanel: React.FC<AdminHotelManagerPanelProps> = ({
                   </button>
                 </div>
               </div>
+
+              {/* Inline Hotel Owner Transfer Selector */}
+              {transferringHotelId === h.id && hotelRestById.get(h.id) && (
+                <div className="pt-3 border-t border-blue-200 dark:border-blue-800/60 bg-blue-50/50 dark:bg-blue-950/30 p-3 rounded-xl space-y-2 text-xs">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-blue-900 dark:text-blue-200">
+                      🔄 {isKm ? `ផ្ទេរសិទ្ធិគ្រប់គ្រងសណ្ឋាគារ «${h.nameKh}» ទៅគណនីអ្នកប្រើប្រាស់៖` : `Transfer Hotel "${h.nameEn || h.nameKh}" Ownership to User:`}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setTransferringHotelId(null)}
+                      className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={transferOwnerSearch}
+                    onChange={(e) => setTransferOwnerSearch(e.target.value)}
+                    placeholder={isKm ? 'ស្វែងរកគណនីតាមឈ្មោះ អ៊ីមែល លេខទូរស័ព្ទ ឬ User ID...' : 'Search user by name, email, phone, or User ID...'}
+                    className="w-full px-3 py-1.5 rounded-lg border border-blue-300 dark:border-blue-700 bg-white dark:bg-stone-900 text-slate-900 dark:text-white"
+                  />
+                  <div className="max-h-36 overflow-y-auto space-y-1">
+                    {(users || [])
+                      .filter((u) => {
+                        if (!u) return false;
+                        const q = transferOwnerSearch.trim().toLowerCase();
+                        if (!q) return true;
+                        return `${u.id} ${u.name || ''} ${u.email || ''} ${u.phone || ''}`.toLowerCase().includes(q);
+                      })
+                      .slice(0, 8)
+                      .map((u) => (
+                        <div key={u.id} className="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-700">
+                          <div className="truncate">
+                            <span className="font-bold text-slate-900 dark:text-white">{u.name}</span>
+                            <span className="text-[10px] font-mono text-slate-500 ml-1.5">ID: {u.id}</span>
+                            {u.email && <span className="text-[10px] text-slate-500 ml-1.5">• {u.email}</span>}
+                            {u.phone && <span className="text-[10px] text-emerald-700 ml-1.5">• {u.phone}</span>}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const targetRest = hotelRestById.get(h.id);
+                              if (!targetRest) return;
+                              updateRestaurant({
+                                ...targetRest,
+                                ownerId: u.id,
+                                ownerName: u.name,
+                                ownerEmail: u.email || targetRest.ownerEmail,
+                                ownerPhone: u.phone || targetRest.ownerPhone || targetRest.phone,
+                                updatedAt: new Date().toISOString(),
+                              });
+                              setTransferringHotelId(null);
+                              showToast(
+                                isKm
+                                  ? `✅ បានផ្ទេរសណ្ឋាគារ «${h.nameKh}» ទៅគណនី ${u.name} (${u.id}) ជោគជ័យ!`
+                                  : `✅ Transferred "${h.nameEn || h.nameKh}" to ${u.name} (${u.id})!`,
+                                'success'
+                              );
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] shrink-0 cursor-pointer"
+                          >
+                            {isKm ? 'ជ្រើសរើសគណនីនេះ' : 'Assign Owner'}
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
 
               {/* Inline Hotel Editor */}
               {isEditingThis && (

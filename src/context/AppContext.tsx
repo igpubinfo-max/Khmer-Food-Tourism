@@ -12,7 +12,7 @@ import {
   getDynamicVipPlans, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
   getUserStoreQuotaSummary, UserStoreQuotaSummary,
   isAdminAccount, isIosOrIpadAppStoreRuntime, getVipFeaturedRotationConfig, sanitizeManualFeaturedSchedule,
-  parseSafeDateMs, isGpipRegisteredRestaurant, openRestaurantGoogleExternal,
+  parseSafeDateMs, getAuthoritativeServerNowMs, isGpipRegisteredRestaurant, openRestaurantGoogleExternal,
   isValidCambodiaCoordinates, isValidOfficialGooglePlaceId, buildCanonicalGoogleMapsPinUrl,
   isStrictVerifiedCambodiaRestaurant, SEED_FOOD_PHOTO_BASELINE_MS,
   sanitizeVerifiedShopPhotoUrl, isVerifiedShopSpecialtyPhotoUrl, isValidGoogleMapsUrl, extractCoordsFromGoogleMapsUrl,
@@ -64,10 +64,14 @@ import {
   FOOD_CHECKIN_REWARD_VIP_DAYS,
   computeRewardVipWindow,
   findExistingRewardClaimAt,
+  getFreeTrialStatus,
   getVerifiedServerNowMs,
+  isRealIsoTimestamp,
+  loadLedgerForUser,
   normalizeRewardEmail,
   recordFoodCheckInRewardClaim,
   syncVerifiedServerClock,
+  type CheckInLedger,
   type RewardClaimRegistry,
 } from '../utils/foodCheckInReward';
 import { 
@@ -189,7 +193,8 @@ interface AppContextType {
   updateCurrentUserProfile: (newName: string, newAvatar?: string) => void;
   adminGrantUserVip: (userIdOrEmail: string, durationDays?: number) => Promise<{ success: boolean }>;
   /** One-time reward for the signed-in user after 30 distinct dishes tried (see utils/foodCheckInReward). Idempotent. */
-  grantFoodCheckInReward: () => Promise<{ success: boolean; alreadyGranted?: boolean }>;
+  grantFoodCheckInReward: (options?: { directTrialActivation?: boolean; silentHeal?: boolean }) => Promise<{ success: boolean; alreadyGranted?: boolean; restoredExisting?: boolean }>;
+  syncUserCheckInLedgerToBackend: (ledger: CheckInLedger) => void;
   cancelUserVip: (userId: string) => Promise<{ success: boolean }>;
   restoreUserAccess: (userIdOrEmail: string) => Promise<{ success: boolean; restoredUser?: User; error?: string }>;
   disableUserAccount: (userId: string) => Promise<{ success: boolean }>;
@@ -3597,9 +3602,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (isAdmin) return;
     if (currentUser.subscriptionStatus === 'cancelled' && currentUser.paymentStatus === 'cancelled') return;
 
-    const nowMs = Date.now();
+    const nowMs = getAuthoritativeServerNowMs();
     const curActive = isUserVipActive(currentUser);
-    const curExpMs = parseSafeDateMs(currentUser.subscriptionExpiryDate || currentUser.vipExpiresAt);
+    const curExpMs = parseSafeDateMs(
+      currentUser.subscriptionExpiryDate ||
+        currentUser.vipExpiresAt ||
+        (currentUser.freeTrialActivated ? currentUser.freeTrialExpiresAt : undefined)
+    );
 
     // 1. Check matching user record in `users`
     const matchedInUsers = users.find(u => doesUserMatchTarget(u, currentUser));
@@ -3678,6 +3687,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         subscriptionStartDate: nextStartIso,
         subscriptionExpiryDate: nextExpIso,
         vipExpiresAt: nextExpIso,
+        freeTrialActivated:
+          currentUser.freeTrialActivated ||
+          matchedInUsers?.freeTrialActivated ||
+          Boolean(currentUser.foodCheckInRewardAt || matchedInUsers?.foodCheckInRewardAt) ||
+          true,
+        freeTrialActivatedAt:
+          currentUser.freeTrialActivatedAt ||
+          matchedInUsers?.freeTrialActivatedAt ||
+          nextStartIso,
+        freeTrialExpiresAt:
+          currentUser.freeTrialExpiresAt ||
+          matchedInUsers?.freeTrialExpiresAt ||
+          nextExpIso,
+        freeTrialDurationDays:
+          currentUser.freeTrialDurationDays ||
+          matchedInUsers?.freeTrialDurationDays ||
+          30,
+        foodCheckInRewardAt:
+          currentUser.foodCheckInRewardAt ||
+          matchedInUsers?.foodCheckInRewardAt ||
+          nextStartIso,
         vipCancelledAt: undefined,
         transactionRef:
           currentUser.transactionRef ||
@@ -3783,7 +3813,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
    */
   useEffect(() => {
     const enforceVipExpirationsAndReminders = () => {
-      const nowMs = Date.now();
+      const nowMs = getAuthoritativeServerNowMs();
       const todayStr = new Date(nowMs).toISOString().split('T')[0];
 
       const isAdminAccount = (u?: User | null) =>
@@ -6311,7 +6341,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
    *   3. Deterministic reward transaction reference (`REWARD-FOODCHECKIN30-<userId>`).
    * It never reduces existing paid VIP time and never touches Admin accounts.
    */
-  const grantFoodCheckInReward = async (): Promise<{ success: boolean; alreadyGranted?: boolean }> => {
+  const syncUserCheckInLedgerToBackend = useCallback((ledger: CheckInLedger): void => {
+    const liveCur = latestSyncStateRef.current.currentUser || currentUser;
+    if (!liveCur || isAdminAccount(liveCur) || liveCur.isDisabled) return;
+    const updatedCur: User = {
+      ...liveCur,
+      foodCheckInLedger: {
+        entries: ledger.entries,
+        ...(ledger.grantedAt ? { grantedAt: ledger.grantedAt } : {}),
+      },
+    };
+    latestSyncStateRef.current.currentUser = updatedCur;
+    setCurrentUser(updatedCur);
+    safeSetCriticalAccountStorage('kft_current_user_v5', updatedCur);
+
+    const liveUsers = latestSyncStateRef.current.users || users;
+    const nextUsers = liveUsers.map(u =>
+      doesUserMatchTarget(u, updatedCur)
+        ? { ...u, foodCheckInLedger: updatedCur.foodCheckInLedger }
+        : u
+    );
+    latestSyncStateRef.current.users = nextUsers;
+    setUsers(nextUsers);
+    safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+
+    if (isSupabaseConfigured()) {
+      const atomicKeys = getCandidateAtomicUserKeys(updatedCur);
+      Promise.all([
+        ...atomicKeys.map(k => pushCloudDocument(k, updatedCur)),
+        pushCloudDocument('kft_cloud_users_v2', nextUsers),
+      ]).catch(() => {});
+    }
+  }, [currentUser, users]);
+
+  const grantFoodCheckInReward = async (
+    options?: { directTrialActivation?: boolean; silentHeal?: boolean }
+  ): Promise<{ success: boolean; alreadyGranted?: boolean; restoredExisting?: boolean }> => {
     const liveCur = latestSyncStateRef.current.currentUser || currentUser;
     if (!liveCur || isAdminAccount(liveCur) || liveCur.isDisabled) return { success: false };
 
@@ -6327,45 +6392,170 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       cloudRegistry = await pullCloudDocument<RewardClaimRegistry>(FOOD_CHECKIN_CLOUD_CLAIMS_KEY, 6000);
     }
 
-    const anyUserWithSameIdentityRewarded = liveUsers.some(u => {
-      if (!u || !u.foodCheckInRewardAt) return false;
+    // Verify true server time first (with safe fallback to authoritative server clock anchor)
+    const verifiedServerMs =
+      getVerifiedServerNowMs() || (await syncVerifiedServerClock()) || getAuthoritativeServerNowMs();
+    if (!verifiedServerMs) {
+      return { success: false };
+    }
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const rewardDays = FOOD_CHECKIN_REWARD_VIP_DAYS;
+
+    // Inspect all matching identity records across users, transactions, and claim registries
+    const matchedRewardedUser = liveUsers.find(u => {
+      if (!u) return false;
+      const hasFlag = Boolean(
+        u.freeTrialActivated ||
+          isRealIsoTimestamp(u.freeTrialActivatedAt) ||
+          isRealIsoTimestamp(u.foodCheckInRewardAt) ||
+          isRealIsoTimestamp(u.freeTrialExpiresAt)
+      );
+      if (!hasFlag) return false;
       if (doesUserMatchTarget(u, record)) return true;
       return Boolean(normEmail && normalizeRewardEmail(u.email) === normEmail);
     });
+
+    const matchedRewardTxn = liveTxns.find(
+      t =>
+        t &&
+        t.status === 'verified' &&
+        (t.transactionRef === rewardRef ||
+          (rewardEmailRef && t.transactionRef === rewardEmailRef) ||
+          (normEmail &&
+            normalizeRewardEmail(t.userEmail) === normEmail &&
+            typeof t.transactionRef === 'string' &&
+            (t.transactionRef.startsWith(`REWARD-FOODCHECKIN${FOOD_CHECKIN_REWARD_TARGET}-`) ||
+              t.transactionRef.startsWith('FREE-TRIAL-'))))
+    );
 
     const existingClaimAt = findExistingRewardClaimAt(
       {
         userId: record.id,
         legacyIds: record.legacyIds || liveCur.legacyIds || [],
         email: normEmail,
-        foodCheckInRewardAt: record.foodCheckInRewardAt || liveCur.foodCheckInRewardAt,
+        foodCheckInRewardAt:
+          record.foodCheckInRewardAt ||
+          liveCur.foodCheckInRewardAt ||
+          matchedRewardedUser?.foodCheckInRewardAt,
+        freeTrialActivatedAt:
+          record.freeTrialActivatedAt ||
+          liveCur.freeTrialActivatedAt ||
+          matchedRewardedUser?.freeTrialActivatedAt,
+        freeTrialExpiresAt:
+          record.freeTrialExpiresAt ||
+          liveCur.freeTrialExpiresAt ||
+          matchedRewardedUser?.freeTrialExpiresAt,
       },
       cloudRegistry
     );
 
+    const trialStatus = getFreeTrialStatus(record, cloudRegistry);
+
+    // If the user already has a valid activation timestamp in any backend/local source:
     if (
-      existingClaimAt ||
-      anyUserWithSameIdentityRewarded ||
-      liveTxns.some(
-        t =>
-          t.transactionRef === rewardRef ||
-          (rewardEmailRef && t.transactionRef === rewardEmailRef) ||
-          (normEmail &&
-            normalizeRewardEmail(t.userEmail) === normEmail &&
-            typeof t.transactionRef === 'string' &&
-            t.transactionRef.startsWith(`REWARD-FOODCHECKIN${FOOD_CHECKIN_REWARD_TARGET}-`))
-      )
+      isRealIsoTimestamp(existingClaimAt) ||
+      matchedRewardedUser ||
+      matchedRewardTxn ||
+      trialStatus.hasEverActivated
     ) {
-      const lockIso = existingClaimAt || record.foodCheckInRewardAt || liveCur.foodCheckInRewardAt || 'granted';
+      const origStartIso =
+        (isRealIsoTimestamp(record.freeTrialActivatedAt) ? record.freeTrialActivatedAt : undefined) ||
+        (isRealIsoTimestamp(matchedRewardedUser?.freeTrialActivatedAt) ? matchedRewardedUser?.freeTrialActivatedAt : undefined) ||
+        (isRealIsoTimestamp(existingClaimAt) ? existingClaimAt : undefined) ||
+        (isRealIsoTimestamp(record.foodCheckInRewardAt) ? record.foodCheckInRewardAt : undefined) ||
+        (isRealIsoTimestamp(matchedRewardTxn?.createdAt) ? matchedRewardTxn?.createdAt : undefined) ||
+        record.subscriptionStartDate ||
+        new Date(verifiedServerMs).toISOString();
+
+      const origStartMs = parseSafeDateMs(origStartIso) || verifiedServerMs;
+      const candidateExpIso =
+        record.freeTrialExpiresAt ||
+        matchedRewardedUser?.freeTrialExpiresAt ||
+        matchedRewardTxn?.expiresAt ||
+        record.subscriptionExpiryDate ||
+        record.vipExpiresAt;
+      const origExpMs =
+        parseSafeDateMs(candidateExpIso) || origStartMs + rewardDays * DAY_MS;
+      const origExpIso = new Date(origExpMs).toISOString();
+
+      // Self-Heal: If the user's original 30-day Free Trial window is STILL ACTIVE on server time,
+      // ensure their User record & cloud database retain their original activation & expiry dates!
+      if (
+        origExpMs > verifiedServerMs &&
+        record.subscriptionStatus !== 'cancelled' &&
+        record.paymentStatus !== 'cancelled'
+      ) {
+        const needsPersistenceHeal =
+          !isUserVipActive(record) ||
+          !record.freeTrialActivated ||
+          record.freeTrialActivatedAt !== origStartIso ||
+          record.freeTrialExpiresAt !== origExpIso ||
+          !record.subscriptionExpiryDate;
+
+        if (needsPersistenceHeal) {
+          const planDays = Math.max(rewardDays, resolveUserActualVipPlanDays(record));
+          const planType =
+            record.vipPlanType || resolveAndValidateVipPlan({ durationDays: planDays }, appSettingsRef.current).id;
+          const healed = persistApprovedVipUserAndCloud({
+            targetId: record.id,
+            targetEmail: record.email,
+            targetName: record.name,
+            targetPhone: record.phone,
+            startDate: origStartIso,
+            expiryDate: origExpIso,
+            durationDays: planDays,
+            planType,
+            paymentMethod: record.paymentMethod || 'Manual',
+            transactionRef: record.transactionRef || rewardRef,
+            extraFields: {
+              foodCheckInRewardAt: origStartIso,
+              freeTrialActivated: true,
+              freeTrialActivatedAt: origStartIso,
+              freeTrialExpiresAt: origExpIso,
+              freeTrialDurationDays: rewardDays,
+              foodCheckInLedger: loadLedgerForUser(
+                record.id,
+                record.legacyIds || [],
+                record.foodCheckInLedger
+              ),
+            },
+          });
+          const syncedClaims = recordFoodCheckInRewardClaim(
+            {
+              userId: healed.id,
+              legacyIds: healed.legacyIds || record.legacyIds || [],
+              email: healed.email || normEmail,
+              foodCheckInRewardAt: origStartIso,
+              freeTrialActivatedAt: origStartIso,
+              freeTrialExpiresAt: origExpIso,
+            },
+            origStartIso,
+            cloudRegistry,
+            origExpIso,
+            rewardDays
+          );
+          if (isSupabaseConfigured()) {
+            pushCloudDocument(FOOD_CHECKIN_CLOUD_CLAIMS_KEY, syncedClaims).catch(() => {});
+          }
+          return { success: true, restoredExisting: true };
+        }
+      }
+
+      // Otherwise, the trial is already active & synced, OR has genuinely expired after 30 days.
+      // Lock the claim registry with the real activation & expiry dates and prevent duplicate free trials.
       const syncedClaims = recordFoodCheckInRewardClaim(
         {
           userId: record.id,
           legacyIds: record.legacyIds || liveCur.legacyIds || [],
           email: normEmail,
-          foodCheckInRewardAt: lockIso,
+          foodCheckInRewardAt: origStartIso,
+          freeTrialActivatedAt: origStartIso,
+          freeTrialExpiresAt: origExpIso,
         },
-        lockIso,
-        cloudRegistry
+        origStartIso,
+        cloudRegistry,
+        origExpIso,
+        rewardDays
       );
       if (isSupabaseConfigured()) {
         pushCloudDocument(FOOD_CHECKIN_CLOUD_CLAIMS_KEY, syncedClaims).catch(() => {});
@@ -6373,20 +6563,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, alreadyGranted: true };
     }
 
-    // Strictly verify true server time before calculating VIP start/expiry dates.
-    const verifiedServerMs = getVerifiedServerNowMs() || (await syncVerifiedServerClock());
-    if (!verifiedServerMs) {
-      return { success: false };
-    }
-
-    const rewardDays = FOOD_CHECKIN_REWARD_VIP_DAYS;
+    // Brand-new 1-time Free 30-Day VIP Trial activation (or self-healing a broken 'granted' placeholder with 0 expiry)
     const serverNow = new Date(verifiedServerMs);
     const nowIso = serverNow.toISOString();
-    // Pure, unit-tested date math: stacks on remaining VIP time, never shortens it.
     const { wasVipActive, startDate, expiryDate, durationDays } = computeRewardVipWindow(record, serverNow, rewardDays);
     const planType = wasVipActive
       ? record.vipPlanType || resolveAndValidateVipPlan({ durationDays }, appSettingsRef.current).id
       : resolveAndValidateVipPlan({ durationDays: rewardDays }, appSettingsRef.current).id;
+
+    const currentLedger = loadLedgerForUser(
+      record.id,
+      record.legacyIds || liveCur.legacyIds || [],
+      record.foodCheckInLedger
+    );
 
     const approved = persistApprovedVipUserAndCloud({
       targetId: record.id,
@@ -6398,9 +6587,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       durationDays,
       planType,
       paymentMethod: wasVipActive ? undefined : 'Manual',
-      // A paying member keeps their original payment reference; only brand-new VIPs get the reward reference.
       transactionRef: wasVipActive ? undefined : rewardRef,
-      extraFields: { foodCheckInRewardAt: nowIso },
+      extraFields: {
+        foodCheckInRewardAt: startDate,
+        freeTrialActivated: true,
+        freeTrialActivatedAt: startDate,
+        freeTrialExpiresAt: expiryDate,
+        freeTrialDurationDays: rewardDays,
+        foodCheckInLedger: {
+          entries: currentLedger.entries,
+          grantedAt: startDate,
+        },
+      },
     });
 
     const updatedClaims = recordFoodCheckInRewardClaim(
@@ -6408,10 +6606,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         userId: approved.id,
         legacyIds: approved.legacyIds || record.legacyIds || [],
         email: approved.email || normEmail,
-        foodCheckInRewardAt: nowIso,
+        foodCheckInRewardAt: startDate,
+        freeTrialActivatedAt: startDate,
+        freeTrialExpiresAt: expiryDate,
       },
-      nowIso,
-      cloudRegistry
+      startDate,
+      cloudRegistry,
+      expiryDate,
+      rewardDays
     );
     if (isSupabaseConfigured()) {
       pushCloudDocument(FOOD_CHECKIN_CLOUD_CLAIMS_KEY, updatedClaims).catch(() => {});
@@ -6433,49 +6635,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: 'verified',
       paymentMethod: 'Manual',
       transactionRef: rewardRef,
-      createdAt: nowIso,
+      createdAt: startDate,
       expiresAt: approved.subscriptionExpiryDate || expiryDate,
       verifiedAt: nowIso,
-      verifiedBy: `System (Reward: ${FOOD_CHECKIN_REWARD_TARGET} food check-ins)`,
-      notes: `Reward: ${FOOD_CHECKIN_REWARD_TARGET} distinct dishes tried -> ${rewardDays} days VIP${wasVipActive ? ' (added to existing VIP time)' : ''}`,
+      verifiedBy: `System (Free VIP ${rewardDays}-Day Trial)`,
+      notes: `Free VIP ${rewardDays}-Day Trial activated -> ${rewardDays} days VIP${wasVipActive ? ' (added to existing VIP time)' : ''}`,
     };
     setTransactions(prev => {
-      const nextTxns = [rewardTxn, ...prev];
+      const nextTxns = [rewardTxn, ...prev.filter(t => t.transactionRef !== rewardRef)];
       latestSyncStateRef.current.transactions = nextTxns;
+      if (isSupabaseConfigured()) {
+        pushCloudDocument('kft_cloud_transactions_v1', nextTxns).catch(() => {});
+      }
       return nextTxns;
     });
 
     setNotifications(prev => [
       {
         id: `notif-food-reward-${approved.id}`,
-        titleKh: `អបអរសាទរ! ទទួលបានសមាជិក VIP ${rewardDays} ថ្ងៃ`,
-        titleEn: `Congratulations! You earned ${rewardDays} days of VIP`,
-        titleZh: `恭喜！您获得 ${rewardDays} 天 VIP`,
-        messageKh: `អ្នកបានភ្លក់ម្ហូប ${FOOD_CHECKIN_REWARD_TARGET} មុខផ្សេងគ្នា។ សមាជិក VIP របស់អ្នកមានសុពលភាពដល់ ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}។`,
-        messageEn: `You tried ${FOOD_CHECKIN_REWARD_TARGET} different dishes. Your VIP is valid until ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}.`,
-        messageZh: `您已品尝 ${FOOD_CHECKIN_REWARD_TARGET} 道不同的菜品。VIP 有效期至 ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}。`,
+        titleKh: `អបអរសាទរ! ទទួលបានសមាជិក Free VIP ${rewardDays} ថ្ងៃ`,
+        titleEn: `Congratulations! Free ${rewardDays}-Day VIP Activated`,
+        titleZh: `恭喜！已激活 ${rewardDays} 天免费 VIP`,
+        messageKh: `គណនីរបស់អ្នកបានបើកដំណើរការ រង្វាន់ Free VIP ${rewardDays} ថ្ងៃ ដោយជោគជ័យ។ សុពលភាពរហូតដល់ ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}។`,
+        messageEn: `Your Free ${rewardDays}-Day VIP Trial is now active until ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}.`,
+        messageZh: `您的 ${rewardDays} 天免费 VIP 已激活，有效期至 ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}。`,
         type: 'system',
         isRead: false,
         createdAt: nowIso,
       },
-      ...prev,
+      ...prev.filter(n => n.id !== `notif-food-reward-${approved.id}`),
     ]);
 
     recordSecurityAudit(
       'FOOD_CHECKIN_REWARD_GRANTED',
       'SUCCESS',
       'FoodPassport',
-      `Granted ${rewardDays}-day VIP reward to ${approved.name} (${approved.id}, ${normEmail}) after ${FOOD_CHECKIN_REWARD_TARGET} distinct dishes; VIP until ${approved.subscriptionExpiryDate}${wasVipActive ? ' (stacked on existing VIP)' : ''}`
+      `Granted ${rewardDays}-day Free VIP Trial to ${approved.name} (${approved.id}, ${normEmail}); VIP until ${approved.subscriptionExpiryDate}${wasVipActive ? ' (stacked on existing VIP)' : ''}`
     );
 
-    showToast(
-      language === 'km'
-        ? `អបអរសាទរ! អ្នកបានភ្លក់ម្ហូបគ្រប់ ${FOOD_CHECKIN_REWARD_TARGET} ដង — ទទួលបានសមាជិក VIP ${rewardDays} ថ្ងៃដោយស្វ័យប្រវត្តិ!`
-        : language === 'zh'
-          ? `恭喜！您已品尝满 ${FOOD_CHECKIN_REWARD_TARGET} 次 — 已自动升级 ${rewardDays} 天 VIP 会员！`
-          : `Congratulations! You completed ${FOOD_CHECKIN_REWARD_TARGET} food check-ins — upgraded to VIP for ${rewardDays} days!`,
-      'success'
-    );
+    if (!options?.silentHeal) {
+      showToast(
+        language === 'km'
+          ? `🎉 អបអរសាទរ! បានបើកដំណើរការ រង្វាន់ Free VIP ${rewardDays} ថ្ងៃ ជូនគណនីរបស់អ្នកដោយជោគជ័យ (សល់ ${rewardDays}/${rewardDays} ថ្ងៃ)!`
+          : language === 'zh'
+            ? `🎉 恭喜！您的账号已成功激活 ${rewardDays} 天免费 VIP 试用（剩余 ${rewardDays}/${rewardDays} 天）！`
+            : `🎉 Congratulations! Your Free ${rewardDays}-Day VIP Trial is now active (${rewardDays}/${rewardDays} days left)!`,
+        'success'
+      );
+    }
     return { success: true };
   };
 
@@ -8762,6 +8969,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Restaurant CRUD (Supports Free 1st VIP Store, Free Replace of Existing Store, and Paid $10 Additional Stores)
+  const isCloudSyncedRestaurantRecord = (r: Restaurant): boolean =>
+    !isSeedRestaurantId(r.id) ||
+    Boolean(
+      r.ownerId ||
+        r.ownerEmail ||
+        r.ownerPhone ||
+        r.pendingUpgradeRequest ||
+        r.pendingPhotoReplacement ||
+        (r as any).isSuspended ||
+        r.isAdminEdited
+    );
+
   const addRestaurant = (
     restData: Omit<Restaurant, 'id' | 'rating' | 'reviewCount' | 'status'> & { id?: string; status?: 'approved' | 'pending' | 'rejected' },
     options?: { replaceRestaurantId?: string }
@@ -9236,9 +9455,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const next = prev.map(r => r.id === updated.id ? safeUpdated : r);
       latestSyncStateRef.current.restaurants = next;
       scheduleStorageWrite('kft_restaurants_real_v13', next, 300);
-      if (!isSeedRestaurantId(safeUpdated.id) && isSupabaseConfigured()) {
+      if (isCloudSyncedRestaurantRecord(safeUpdated) && isSupabaseConfigured()) {
         try {
-          const customRests = next.filter(r => !isSeedRestaurantId(r.id));
+          const customRests = next.filter(r => isCloudSyncedRestaurantRecord(r));
           pushCloudDocument('kft_cloud_custom_restaurants_v1', customRests);
         } catch {}
       }
@@ -9364,7 +9583,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scheduleStorageWrite('kft_restaurants_real_v13', next, 300);
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -9424,7 +9643,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scheduleStorageWrite('kft_restaurants_real_v13', next, 300);
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -9474,7 +9693,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scheduleStorageWrite('kft_restaurants_real_v13', next, 300);
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -9548,7 +9767,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scheduleStorageWrite('kft_restaurants_real_v13', next, 400);
       if (!isSeedRestaurantId(restaurantId) && isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -9750,7 +9969,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       if (isSupabaseConfigured()) {
         try {
-          const customRests = next.filter(r => !isSeedRestaurantId(r.id));
+          const customRests = next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited));
           const deleteCloudPromises: Promise<any>[] = [
             pushCloudDocument('kft_cloud_custom_restaurants_v1', customRests),
             pushCloudDocument('kft_cloud_deleted_restaurants_v1', updatedDeletedMap),
@@ -9937,7 +10156,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scheduleStorageWrite('kft_restaurants_real_v13', next, 400);
       if (isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -10012,7 +10231,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scheduleStorageWrite('kft_restaurants_real_v13', next, 400);
       if (isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -10062,7 +10281,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scheduleStorageWrite('kft_restaurants_real_v13', next, 300);
       if (isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -10204,7 +10423,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         scheduleStorageWrite('kft_restaurants_real_v13', next, 300);
         if (!isSeedRestaurantId(adminUpdated.id) && isSupabaseConfigured()) {
           try {
-            pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+            pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
           } catch {}
         }
         return next;
@@ -10247,7 +10466,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scheduleStorageWrite('kft_restaurants_real_v13', next, 300);
       if (!isSeedRestaurantId(pendingUpdated.id) && isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -10328,7 +10547,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         scheduleStorageWrite('kft_restaurants_real_v13', next, 300);
         if (!isSeedRestaurantId(restaurantId)) {
           try {
-            pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+            pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
           } catch {}
         }
         return next;
@@ -10387,7 +10606,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scheduleStorageWrite('kft_restaurants_real_v13', next, 300);
       if (isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -10436,7 +10655,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scheduleStorageWrite('kft_restaurants_real_v13', next, 300);
       if (!isSeedRestaurantId(approvedRest.id) && isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -10528,7 +10747,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scheduleStorageWrite('kft_restaurants_real_v13', next, 300);
       if (isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -10581,7 +10800,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scheduleStorageWrite('kft_restaurants_real_v13', next, 300);
       if (!isSeedRestaurantId(rejectedRest.id) && isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -10701,7 +10920,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         writeRestaurantsToStorageImmediate(next);
         if (isSupabaseConfigured()) {
           try {
-            pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id)));
+            pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
           } catch {}
         }
         return next;
@@ -10756,7 +10975,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       writeRestaurantsToStorageImmediate(next);
       if (isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -10892,7 +11111,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       writeRestaurantsToStorageImmediate(next);
       if (isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -10959,7 +11178,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       writeRestaurantsToStorageImmediate(next);
       if (isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -11299,7 +11518,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         scheduleStorageWrite('kft_restaurants_real_v13', next, 400);
         if (!isSeedRestaurantId(finalMerged.id) && isSupabaseConfigured()) {
           try {
-            pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+            pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
           } catch {}
         }
         return next;
@@ -11357,7 +11576,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       writeRestaurantsToStorageImmediate(next);
       if (isSupabaseConfigured()) {
         try {
-          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter(r => !isSeedRestaurantId(r.id)));
+          pushCloudDocument('kft_cloud_custom_restaurants_v1', next.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.pendingUpgradeRequest || r.pendingPhotoReplacement || (r as any).isSuspended || r.isAdminEdited)));
         } catch {}
       }
       return next;
@@ -14447,6 +14666,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateCurrentUserProfile,
         adminGrantUserVip,
         grantFoodCheckInReward,
+        syncUserCheckInLedgerToBackend,
         cancelUserVip,
         restoreUserAccess,
         disableUserAccount,

@@ -23,6 +23,8 @@ import {
   SupportTicket,
   isSeedRestaurantId,
   parseSafeDateMs,
+  getAuthoritativeServerNowMs,
+  setAuthoritativeServerNowMs,
   resolveUserActualVipPlanDays,
   sanitizeUserVipPlanAndExpiry,
   isDeprecatedDemoSeedTransaction,
@@ -399,6 +401,7 @@ function isKeyEligibleForSecondaryFailover(key: string): boolean {
     key === 'kft_cloud_users_v1' ||
     key === 'kft_cloud_deleted_users_v1' ||
     key === 'kft_cloud_vip_backup_v1' ||
+    key === 'kft_cloud_food_checkin_reward_claims_v1' ||
     key === 'kft_cloud_transactions_v1' ||
     key === 'kft_cloud_deleted_transactions_v1' ||
     key === 'kft_cloud_custom_restaurants_v1' ||
@@ -411,16 +414,72 @@ function isKeyEligibleForSecondaryFailover(key: string): boolean {
   );
 }
 
+function compactUserForInlineSecondarySync(u: any): any {
+  if (!u || typeof u !== 'object') return u;
+  const copy = { ...u };
+  if (typeof copy.avatar === 'string' && copy.avatar.startsWith('data:') && copy.avatar.length > 900) {
+    copy.avatar = copy.cloudAvatarUrl && !copy.cloudAvatarUrl.startsWith('data:') ? copy.cloudAvatarUrl : '';
+  }
+  if (typeof copy.cloudAvatarUrl === 'string' && copy.cloudAvatarUrl.startsWith('data:') && copy.cloudAvatarUrl.length > 900) {
+    delete copy.cloudAvatarUrl;
+  }
+  if (Array.isArray(copy.vipMembershipHistory) && copy.vipMembershipHistory.length > 3) {
+    copy.vipMembershipHistory = copy.vipMembershipHistory.slice(0, 3);
+  }
+  return copy;
+}
+
 async function pushToSecondaryCloudFailover(key: string, payload: any, timeoutMs = 10000): Promise<boolean> {
   if (!isKeyEligibleForSecondaryFailover(key)) return false;
   hydrateSecondaryMirrorOnce();
 
-  const updatedAt = new Date().toISOString();
+  const updatedAt = new Date(getAuthoritativeServerNowMs()).toISOString();
   const entry: SecondaryKvEntry = { key, payload, updated_at: updatedAt };
   secondaryFailoverMemoryMap.set(key, entry);
   persistSecondaryMirrorToStorage();
 
-  const envelope = JSON.stringify(entry);
+  let wirePayload = payload;
+  let envelope = JSON.stringify(entry);
+  // Keep atomic user & VIP backup records under 3800 bytes whenever possible so ntfy.sh stores them inline (never expiring as attachments)
+  if (envelope.length > 3700) {
+    if (key.startsWith('kft_user_') && payload && typeof payload === 'object') {
+      wirePayload = compactUserForInlineSecondarySync(payload);
+      envelope = JSON.stringify({ key, payload: wirePayload, updated_at: updatedAt });
+    } else if (key === 'kft_cloud_vip_backup_v1' && Array.isArray(payload)) {
+      wirePayload = payload.map(u => {
+        const c = compactUserForInlineSecondarySync(u);
+        if (!c || typeof c !== 'object') return c;
+        return {
+          id: c.id,
+          name: c.name,
+          email: c.email,
+          phone: c.phone,
+          role: c.role,
+          membershipTier: c.membershipTier,
+          subscriptionStartDate: c.subscriptionStartDate,
+          subscriptionExpiryDate: c.subscriptionExpiryDate,
+          subscriptionStatus: c.subscriptionStatus,
+          paymentStatus: c.paymentStatus,
+          paymentMethod: c.paymentMethod,
+          transactionRef: c.transactionRef,
+          vipStatus: c.vipStatus,
+          vipPlanDays: c.vipPlanDays,
+          vipPlanType: c.vipPlanType,
+          vipExpiresAt: c.vipExpiresAt,
+          freeTrialActivated: c.freeTrialActivated,
+          freeTrialActivatedAt: c.freeTrialActivatedAt,
+          freeTrialExpiresAt: c.freeTrialExpiresAt,
+          freeTrialDurationDays: c.freeTrialDurationDays,
+          foodCheckInRewardAt: c.foodCheckInRewardAt,
+          paidAdditionalStoreSlots: c.paidAdditionalStoreSlots,
+          legacyIds: c.legacyIds,
+          integritySeal: c.integritySeal,
+        };
+      });
+      envelope = JSON.stringify({ key, payload: wirePayload, updated_at: updatedAt });
+    }
+  }
+
   // Avoid pushing oversized >2MB payloads to pub/sub relay
   if (envelope.length > 2_000_000) return false;
 
@@ -445,6 +504,9 @@ async function pushToSecondaryCloudFailover(key: string, payload: any, timeoutMs
       if (res.ok) {
         try {
           const msgMeta = await res.json();
+          if (msgMeta && typeof msgMeta.time === 'number') {
+            setAuthoritativeServerNowMs(msgMeta.time * 1000);
+          }
           if (msgMeta && msgMeta.id) {
             decodedSecondaryMessageById.set(msgMeta.id, entry);
           }
@@ -514,13 +576,20 @@ async function pullAllFromSecondaryCloudFailover(
       const text = await res.text();
       const lines = text.trim().split('\n').filter(Boolean);
       const latestMsgByKey = new Map<string, any>();
+      let maxServerEpochSec = 0;
       for (const line of lines) {
         try {
           const m = JSON.parse(line);
+          if (m && typeof m.time === 'number' && m.time > maxServerEpochSec) {
+            maxServerEpochSec = m.time;
+          }
           if (m && m.event === 'message' && typeof m.title === 'string' && m.title) {
             latestMsgByKey.set(m.title, m);
           }
         } catch {}
+      }
+      if (maxServerEpochSec > 0) {
+        setAuthoritativeServerNowMs(maxServerEpochSec * 1000);
       }
 
       for (const [k, m] of latestMsgByKey.entries()) {
@@ -563,12 +632,36 @@ async function pullAllFromSecondaryCloudFailover(
               secondaryFailoverMemoryMap.delete(k);
             }
           } else if ('payload' in decoded) {
-            // Special merge for user lists and atomic users so concurrent tester signups never clobber each other
-            if ((k === 'kft_cloud_users_v2' || k === 'kft_cloud_users_v1') && existing && Array.isArray(existing.payload) && Array.isArray(decoded.payload)) {
+            // Special merge for user lists, VIP backups, and Free Trial claim registries so concurrent updates never clobber each other
+            if (
+              (k === 'kft_cloud_users_v2' || k === 'kft_cloud_users_v1' || k === 'kft_cloud_vip_backup_v1') &&
+              existing &&
+              Array.isArray(existing.payload) &&
+              Array.isArray(decoded.payload)
+            ) {
               const combined = deduplicateAndNormalizeUsers([...existing.payload, ...decoded.payload], []);
               secondaryFailoverMemoryMap.set(k, {
                 key: k,
                 payload: combined,
+                updated_at: incomingMs >= existingMs ? decoded.updated_at : existing.updated_at,
+              });
+            } else if (
+              k === 'kft_cloud_food_checkin_reward_claims_v1' &&
+              existing &&
+              existing.payload &&
+              typeof existing.payload === 'object' &&
+              decoded.payload &&
+              typeof decoded.payload === 'object'
+            ) {
+              secondaryFailoverMemoryMap.set(k, {
+                key: k,
+                payload: {
+                  byUserId: { ...(existing.payload.byUserId || {}), ...(decoded.payload.byUserId || {}) },
+                  byEmail: { ...(existing.payload.byEmail || {}), ...(decoded.payload.byEmail || {}) },
+                  trialsByUserId: { ...(existing.payload.trialsByUserId || {}), ...(decoded.payload.trialsByUserId || {}) },
+                  trialsByEmail: { ...(existing.payload.trialsByEmail || {}), ...(decoded.payload.trialsByEmail || {}) },
+                  updatedAt: incomingMs >= existingMs ? decoded.updated_at : existing.updated_at,
+                },
                 updated_at: incomingMs >= existingMs ? decoded.updated_at : existing.updated_at,
               });
             } else if (incomingMs >= existingMs || !existing) {
@@ -1884,10 +1977,11 @@ export function normalizeVipExpiryOnUser(rawUser: User): User {
     rawUser.username === 'cheasavuth';
   if (isAdmin) return rawUser;
   const u = sanitizeUserVipPlanAndExpiry(rawUser);
-  const rawExp = u.subscriptionExpiryDate || (u as any).vipExpiresAt;
+  const nowServerMs = getAuthoritativeServerNowMs();
+  const rawExp = u.subscriptionExpiryDate || (u as any).vipExpiresAt || (u.freeTrialActivated ? u.freeTrialExpiresAt : undefined);
   if (rawExp) {
     const expMs = parseSafeDateMs(rawExp);
-    if (expMs > 0 && expMs <= Date.now()) {
+    if (expMs > 0 && expMs <= nowServerMs) {
       if (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active') {
         return {
           ...u,
@@ -1896,12 +1990,15 @@ export function normalizeVipExpiryOnUser(rawUser: User): User {
         };
       }
     } else if (
-      expMs > Date.now() &&
+      expMs > nowServerMs &&
       u.subscriptionStatus !== 'cancelled' &&
       u.subscriptionStatus !== 'expired' &&
       u.paymentStatus !== 'cancelled' &&
       u.paymentStatus !== 'rejected' &&
-      (u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active' || (u as any).vipStatus === 'active')
+      (u.membershipTier === 'premium_vip' ||
+        u.subscriptionStatus === 'active' ||
+        (u as any).vipStatus === 'active' ||
+        u.freeTrialActivated)
     ) {
       const cleanExpIso = new Date(expMs).toISOString();
       const planDays = resolveUserActualVipPlanDays(u);
@@ -2128,11 +2225,57 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
         ...(Array.isArray(second.additionalStorePaymentIds) ? second.additionalStorePaymentIds : []),
       ])
     ),
-    // One-time food check-in reward flag must survive every merge (keep the earliest grant time if both sides have it).
+    // One-time food check-in reward & Free 30-Day VIP Trial fields must survive every merge across updates and devices.
     foodCheckInRewardAt:
-      [first.foodCheckInRewardAt, second.foodCheckInRewardAt]
-        .filter((v): v is string => typeof v === 'string' && v.length > 0)
+      [first.foodCheckInRewardAt, second.foodCheckInRewardAt, first.freeTrialActivatedAt, second.freeTrialActivatedAt]
+        .filter((v): v is string => typeof v === 'string' && v.length > 0 && v !== 'granted')
+        .sort()[0] ||
+      first.foodCheckInRewardAt ||
+      second.foodCheckInRewardAt ||
+      undefined,
+    freeTrialActivated: Boolean(
+      first.freeTrialActivated ||
+        second.freeTrialActivated ||
+        first.foodCheckInRewardAt ||
+        second.foodCheckInRewardAt ||
+        first.freeTrialActivatedAt ||
+        second.freeTrialActivatedAt
+    ) || undefined,
+    freeTrialActivatedAt:
+      [first.freeTrialActivatedAt, second.freeTrialActivatedAt, first.foodCheckInRewardAt, second.foodCheckInRewardAt]
+        .filter((v): v is string => typeof v === 'string' && v.length > 0 && v !== 'granted')
         .sort()[0] || undefined,
+    freeTrialExpiresAt: (() => {
+      const fExp = parseValidMs(first.freeTrialExpiresAt);
+      const sExp = parseValidMs(second.freeTrialExpiresAt);
+      const best = Math.max(fExp, sExp);
+      return best > 0 ? new Date(best).toISOString() : first.freeTrialExpiresAt || second.freeTrialExpiresAt || undefined;
+    })(),
+    freeTrialDurationDays: Math.max(first.freeTrialDurationDays || 0, second.freeTrialDurationDays || 0) || undefined,
+    foodCheckInLedger: (() => {
+      const fEntries = Array.isArray(first.foodCheckInLedger?.entries) ? first.foodCheckInLedger!.entries : [];
+      const sEntries = Array.isArray(second.foodCheckInLedger?.entries) ? second.foodCheckInLedger!.entries : [];
+      if (fEntries.length === 0 && sEntries.length === 0 && !first.foodCheckInLedger?.grantedAt && !second.foodCheckInLedger?.grantedAt) {
+        return undefined;
+      }
+      const seenFoods = new Set<string>();
+      const seenDays = new Set<string>();
+      const mergedEntries: Array<{ foodId: string; day: string; at: string }> = [];
+      for (const e of [...fEntries, ...sEntries]) {
+        if (!e || !e.foodId || !e.day || seenFoods.has(e.foodId) || seenDays.has(e.day)) continue;
+        seenFoods.add(e.foodId);
+        seenDays.add(e.day);
+        mergedEntries.push({ foodId: e.foodId, day: e.day, at: e.at || '' });
+        if (mergedEntries.length >= 30) break;
+      }
+      const grantedAt =
+        [first.foodCheckInLedger?.grantedAt, second.foodCheckInLedger?.grantedAt]
+          .filter((v): v is string => typeof v === 'string' && v.length > 0 && v !== 'granted')
+          .sort()[0] ||
+        first.foodCheckInLedger?.grantedAt ||
+        second.foodCheckInLedger?.grantedAt;
+      return { entries: mergedEntries, ...(grantedAt ? { grantedAt } : {}) };
+    })(),
     ...(() => {
       const firstArMs = Math.max(
         parseValidMs(first.autoRenewUpdatedAt),
@@ -2207,7 +2350,7 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
     })(),
   };
 
-  const nowMs = Date.now();
+  const nowMs = getAuthoritativeServerNowMs();
   const firstNorm = normalizeVipExpiryOnUser(first);
   const secondNorm = normalizeVipExpiryOnUser(second);
   const firstExpMs = parseValidMs(firstNorm.subscriptionExpiryDate || (firstNorm as any).vipExpiresAt);

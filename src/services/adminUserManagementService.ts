@@ -1,11 +1,11 @@
+import { isUserOwnerOfRestaurantRecord, isHotelBusinessRecord } from '../types';
 import type {
   User,
   UserRole,
   DeletedUserRecord,
   Restaurant,
   RegistrationTransaction,
-  SupportTicket,
-} from '../types';
+  SupportTicket,} from '../types';
 import { isSeedRestaurantId } from '../types';
 import { getCanonicalUserId, pushCloudDocument, pullCloudDocument } from './supabaseService';
 
@@ -406,9 +406,32 @@ export async function syncActivityLogsWithCloud(): Promise<UserActivityLogEntry[
 // 3. MULTI-INDEX ENGINE & O(1) REAL-TIME STATISTICS FOR 10,000–50,000+ USERS
 // ============================================================================
 
+export interface OwnedShopSummary {
+  id: string;
+  nameKh: string;
+  nameEn: string;
+  businessType: 'restaurant' | 'hotel';
+  categoryLabel: string;
+  province: string;
+  phone: string;
+  status: 'approved' | 'pending' | 'rejected';
+  isSuspended: boolean;
+  membershipTier: 'free' | 'premium';
+  isPromoted: boolean;
+  ownerId: string;
+  ownerName: string;
+  ownerEmail: string;
+  ownerPhone: string;
+  photoUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface UserEntityAssociations {
   shopsCount: number;
   shopNames: string[];
+  shopIds: string[];
+  ownedShops: OwnedShopSummary[];
   txnsCount: number;
   totalSpentUsd: number;
   verifiedVipTxn?: RegistrationTransaction;
@@ -468,6 +491,7 @@ export interface UserDirectoryIndex {
   byId: Map<string, IndexedUserRecord>;
   byEmail: Map<string, IndexedUserRecord>;
   byPhone: Map<string, IndexedUserRecord>;
+  allOwnedShops: Array<OwnedShopSummary & { linkedUser?: User; ownerShopsCount: number }>;
   stats: UserDirectoryStats;
 }
 
@@ -574,25 +598,84 @@ export function getOrBuildUserDirectoryIndex(
     return true;
   };
 
-  // 2. Pre-index custom restaurants by ownerId & ownerEmail in O(R)
-  const shopsByOwnerId = new Map<string, string[]>();
-  const shopsByOwnerEmail = new Map<string, string[]>();
+  // 2. Pre-index all user-owned / claimed restaurants & hotels by ownerId, ownerEmail, ownerPhone & ownerName in O(R)
+  const toShopSummary = (r: Restaurant): OwnedShopSummary => {
+    const st: 'approved' | 'pending' | 'rejected' =
+      r.status === 'pending' ? 'pending' : r.status === 'rejected' ? 'rejected' : 'approved';
+    const isHotel =
+      r.businessType === 'hotel' ||
+      r.businessCategory === 'hotel' ||
+      r.businessCategory === 'resort' ||
+      r.businessCategory === 'guesthouse';
+    return {
+      id: r.id,
+      nameKh: r.nameKh || r.nameEn || r.id,
+      nameEn: r.nameEn || r.nameKh || r.id,
+      businessType: isHotel ? 'hotel' : 'restaurant',
+      categoryLabel: r.categoryKh || r.categoryEn || (isHotel ? 'សណ្ឋាគារ / ផ្ទះសំណាក់' : 'ភោជនីយដ្ឋាន / ហាងអាហារ'),
+      province: r.provinceKh || (r as any).province || '',
+      phone: r.phone || r.ownerPhone || '',
+      status: st,
+      isSuspended: st === 'rejected' || Boolean((r as any).isDisabled),
+      membershipTier: r.membershipTier === 'premium' ? 'premium' : 'free',
+      isPromoted: Boolean(r.isPromoted),
+      ownerId: r.ownerId || r.pendingUpgradeRequest?.submittedByUserId || '',
+      ownerName: r.ownerName || r.pendingUpgradeRequest?.submittedByName || '',
+      ownerEmail: r.ownerEmail || r.pendingUpgradeRequest?.submittedByEmail || '',
+      ownerPhone: r.ownerPhone || r.pendingUpgradeRequest?.submittedByPhone || r.phone || '',
+      photoUrl: r.profileImage || r.photoUrl || (r as any).imageUrl,
+      createdAt: r.createdAt || r.created_at,
+      updatedAt: r.updatedAt,
+    };
+  };
+
+  const shopsByOwnerId = new Map<string, OwnedShopSummary[]>();
+  const shopsByOwnerEmail = new Map<string, OwnedShopSummary[]>();
+  const shopsByOwnerPhone = new Map<string, OwnedShopSummary[]>();
+  const shopsByOwnerName = new Map<string, OwnedShopSummary[]>();
+  const candidateOwnedRestList: Restaurant[] = [];
 
   for (let i = 0; i < restaurants.length; i++) {
     const r = restaurants[i];
-    if (!r || isSeedRestaurantId(r.id)) continue;
-    const shopLabel = r.nameKh || r.nameEn || r.id;
-    if (r.ownerId) {
-      const k = r.ownerId.trim();
+    if (!r || !r.id) continue;
+    const hasOwnerSignal =
+      !isSeedRestaurantId(r.id) ||
+      (Boolean(r.ownerId) && r.ownerId !== 'owner-1') ||
+      Boolean(r.ownerEmail) ||
+      Boolean(r.ownerPhone) ||
+      r.dataSource === 'vip_owner' ||
+      Boolean(r.pendingUpgradeRequest?.submittedByUserId || r.pendingUpgradeRequest?.submittedByEmail) ||
+      Boolean(r.pendingPhotoReplacement?.submittedByUserId);
+    if (!hasOwnerSignal) continue;
+
+    candidateOwnedRestList.push(r);
+    const summary = toShopSummary(r);
+
+    if (summary.ownerId) {
+      const k = summary.ownerId.trim().toLowerCase();
       const arr = shopsByOwnerId.get(k);
-      if (arr) arr.push(shopLabel);
-      else shopsByOwnerId.set(k, [shopLabel]);
+      if (arr) arr.push(summary);
+      else shopsByOwnerId.set(k, [summary]);
     }
-    if (r.ownerEmail) {
-      const k = r.ownerEmail.trim().toLowerCase();
+    if (summary.ownerEmail) {
+      const k = summary.ownerEmail.trim().toLowerCase();
       const arr = shopsByOwnerEmail.get(k);
-      if (arr) arr.push(shopLabel);
-      else shopsByOwnerEmail.set(k, [shopLabel]);
+      if (arr) arr.push(summary);
+      else shopsByOwnerEmail.set(k, [summary]);
+    }
+    const pDigits = normalizePhoneDigits(summary.ownerPhone || summary.phone);
+    if (pDigits.length >= 7) {
+      const arr = shopsByOwnerPhone.get(pDigits);
+      if (arr) arr.push(summary);
+      else shopsByOwnerPhone.set(pDigits, [summary]);
+    }
+    if (summary.ownerName) {
+      const nKey = summary.ownerName.trim().toLowerCase();
+      if (nKey.length >= 2) {
+        const arr = shopsByOwnerName.get(nKey);
+        if (arr) arr.push(summary);
+        else shopsByOwnerName.set(nKey, [summary]);
+      }
     }
   }
 
@@ -679,22 +762,54 @@ export function getOrBuildUserDirectoryIndex(
     const emailLower = (u.email || '').trim().toLowerCase();
     const phoneClean = normalizePhoneDigits(u.phone);
 
-    // Resolve O(1) associations
-    const shopNamesSet = new Set<string>();
-    const byUidShops = shopsByOwnerId.get(u.id);
-    if (byUidShops) for (const s of byUidShops) shopNamesSet.add(s);
+    // Resolve O(1) shop associations (by User ID, Legacy IDs, Email, Phone, Name, and authoritative helper)
+    const ownedShopsMap = new Map<string, OwnedShopSummary>();
+    const addShopSummary = (s: OwnedShopSummary) => {
+      if (s && s.id && !ownedShopsMap.has(s.id)) {
+        ownedShopsMap.set(s.id, s);
+      }
+    };
+
+    const byUidShops = shopsByOwnerId.get(idLower);
+    if (byUidShops) for (const s of byUidShops) addShopSummary(s);
     if (Array.isArray(u.legacyIds)) {
       for (const lid of u.legacyIds) {
-        const lShops = shopsByOwnerId.get(lid);
-        if (lShops) for (const s of lShops) shopNamesSet.add(s);
+        if (!lid) continue;
+        const lShops = shopsByOwnerId.get(lid.trim().toLowerCase());
+        if (lShops) for (const s of lShops) addShopSummary(s);
       }
     }
     if (emailLower) {
       const byEmShops = shopsByOwnerEmail.get(emailLower);
-      if (byEmShops) for (const s of byEmShops) shopNamesSet.add(s);
+      if (byEmShops) for (const s of byEmShops) addShopSummary(s);
     }
-    const shopNames = Array.from(shopNamesSet);
-    const shopsCount = shopNames.length;
+    if (phoneClean.length >= 7) {
+      const byPhShops = shopsByOwnerPhone.get(phoneClean);
+      if (byPhShops) for (const s of byPhShops) addShopSummary(s);
+    }
+    if (nameLower.length >= 2) {
+      const byNmShops = shopsByOwnerName.get(nameLower);
+      if (byNmShops) {
+        for (const s of byNmShops) {
+          if (!s.ownerEmail || s.ownerEmail.trim().toLowerCase() === emailLower) {
+            addShopSummary(s);
+          }
+        }
+      }
+    }
+    for (let cIdx = 0; cIdx < candidateOwnedRestList.length; cIdx++) {
+      const cand = candidateOwnedRestList[cIdx];
+      if (!ownedShopsMap.has(cand.id) && isUserOwnerOfRestaurantRecord(u, cand)) {
+        addShopSummary(toShopSummary(cand));
+      }
+    }
+
+    const ownedShops = Array.from(ownedShopsMap.values());
+    const shopNames = ownedShops.map((s) =>
+      s.nameEn && s.nameEn !== s.nameKh ? `${s.nameKh} (${s.nameEn})` : s.nameKh
+    );
+    const shopIds = ownedShops.map((s) => s.id);
+    const shopsCount = ownedShops.length;
 
     const matchedTxnsMap = new Map<string, RegistrationTransaction>();
     const byUidTxns = txnsByUserId.get(u.id);
@@ -793,11 +908,21 @@ export function getOrBuildUserDirectoryIndex(
       if (loginAgeMs <= sevenDaysMs) activeLast7DaysCount++;
     }
 
-    const searchBlob = `${nameLower} ${usernameLower} ${emailLower} ${phoneClean} ${idLower} ${(u.restaurantName || '').toLowerCase()} ${(u.transactionRef || '').toLowerCase()} ${shopNames.join(' ').toLowerCase()}`;
+    const shopSearchTokens = ownedShops
+      .map(
+        (s) =>
+          `${s.id} ${s.nameKh} ${s.nameEn} ${s.ownerName} ${s.ownerEmail} ${normalizePhoneDigits(s.ownerPhone)} ${normalizePhoneDigits(s.phone)} ${s.province}`
+      )
+      .join(' ')
+      .toLowerCase();
+
+    const searchBlob = `${nameLower} ${usernameLower} ${emailLower} ${(u.phone || '').toLowerCase()} ${phoneClean} ${idLower} ${(u.restaurantName || '').toLowerCase()} ${(u.transactionRef || '').toLowerCase()} ${shopNames.join(' ').toLowerCase()} ${shopIds.join(' ').toLowerCase()} ${shopSearchTokens}`;
 
     const associations: UserEntityAssociations = {
       shopsCount,
       shopNames,
+      shopIds,
+      ownedShops,
       txnsCount,
       totalSpentUsd,
       verifiedVipTxn,
@@ -866,11 +991,46 @@ export function getOrBuildUserDirectoryIndex(
     indexBuildDurationMs: Number((t1 - t0).toFixed(2)),
   };
 
+  const allOwnedShopsMap = new Map<string, OwnedShopSummary & { linkedUser?: User; ownerShopsCount: number }>();
+  for (let i = 0; i < records.length; i++) {
+    const rec = records[i];
+    for (const s of rec.associations.ownedShops) {
+      allOwnedShopsMap.set(s.id, {
+        ...s,
+        ownerId: rec.user.id,
+        ownerName: rec.user.name || s.ownerName,
+        ownerEmail: rec.user.email || s.ownerEmail,
+        ownerPhone: rec.user.phone || s.ownerPhone || s.phone,
+        linkedUser: rec.user,
+        ownerShopsCount: rec.shopsCount,
+      });
+    }
+  }
+  for (let i = 0; i < candidateOwnedRestList.length; i++) {
+    const r = candidateOwnedRestList[i];
+    if (!allOwnedShopsMap.has(r.id)) {
+      const s = toShopSummary(r);
+      const matchedRec =
+        (s.ownerId ? byId.get(s.ownerId.trim().toLowerCase()) : undefined) ||
+        (s.ownerEmail ? byEmail.get(s.ownerEmail.trim().toLowerCase()) : undefined) ||
+        (normalizePhoneDigits(s.ownerPhone).length >= 7
+          ? byPhone.get(normalizePhoneDigits(s.ownerPhone))
+          : undefined);
+      allOwnedShopsMap.set(r.id, {
+        ...s,
+        linkedUser: matchedRec?.user,
+        ownerShopsCount: matchedRec ? matchedRec.shopsCount : 1,
+      });
+    }
+  }
+  const allOwnedShops = Array.from(allOwnedShopsMap.values());
+
   const index: UserDirectoryIndex = {
     records,
     byId,
     byEmail,
     byPhone,
+    allOwnedShops,
     stats,
   };
 
@@ -1035,7 +1195,26 @@ export function queryUserDirectoryPaginated(
             break;
           }
         } else if (tok.startsWith('phone:')) {
-          if (!r.phoneClean.includes(tok.slice(6))) {
+          const pVal = normalizePhoneDigits(tok.slice(6));
+          if (!r.phoneClean.includes(pVal) && !r.searchBlob.includes(pVal)) {
+            allMatch = false;
+            break;
+          }
+        } else if (tok.startsWith('shop:') || tok.startsWith('shopid:')) {
+          const sVal = tok.replace(/^shop(id)?:/, '');
+          const hasShopMatch = r.associations.ownedShops.some(
+            (s) =>
+              s.id.toLowerCase().includes(sVal) ||
+              s.nameKh.toLowerCase().includes(sVal) ||
+              s.nameEn.toLowerCase().includes(sVal)
+          );
+          if (!hasShopMatch && !r.searchBlob.includes(sVal)) {
+            allMatch = false;
+            break;
+          }
+        } else if (tok.startsWith('owner:')) {
+          const oVal = tok.slice(6);
+          if (!r.nameLower.includes(oVal) && !r.idLower.includes(oVal) && !r.emailLower.includes(oVal)) {
             allMatch = false;
             break;
           }
@@ -1418,6 +1597,8 @@ export function exportUsersToCsvString(records: IndexedUserRecord[]): string {
     'Subscription Status',
     'VIP Expiry Date',
     'Shops Count',
+    'Owned Shop Names',
+    'Owned Shop IDs',
     'Transactions Count',
     'Total Spent (USD)',
     'Registered At',
@@ -1442,6 +1623,8 @@ export function exportUsersToCsvString(records: IndexedUserRecord[]): string {
       u.subscriptionStatus || 'none',
       u.subscriptionExpiryDate || '',
       r.shopsCount,
+      r.associations.shopNames.join(' | '),
+      r.associations.shopIds.join(' | '),
       r.txnsCount,
       r.associations.totalSpentUsd.toFixed(2),
       u.registeredAtIso || u.createdAt || '',
@@ -1611,3 +1794,5 @@ export function runUserManagementStressBenchmark(
     testedAt: new Date().toISOString(),
   };
 }
+
+export { getCanonicalUserId };
