@@ -45,25 +45,26 @@ async function ascRequest(endpoint, method = 'GET', body = null) {
   return json;
 }
 
-const REVIEW_NOTES = `1. Screen Recording Demonstration:
-Please see the attached screen recording (IMG_0317.MP4) recorded on a physical iOS device showing the app launching from the home screen, selecting languages (Khmer, English, Chinese), tapping Start on the Welcome Screen, and navigating through Home, Food (recipes & ingredients), Shops (restaurants), Travel (tourist destinations), Map, and Profile. No login or account registration is required, and there is no paid or locked content.
+const REVIEW_NOTES = `Hello Apple App Review Team,
 
-2. App Purpose & Target Audience:
-Khmer Food & Tourism is an all-in-one cultural culinary and travel guide for Cambodia designed for international tourists, local residents, and food lovers. It solves the problem of scattered travel/recipe information and limited internet connectivity in remote temple areas by providing an offline-ready, trilingual (Khmer, English, Chinese) directory of 300+ authentic Cambodian dishes with recipes, 120+ local restaurants, and 125+ tourist destinations across all 25 provinces.
+Thank you very much for your detailed feedback on Submission ID: 3bbca3d5-915b-4548-8bb0-627d77752449. We have resolved all items in this build:
 
-3. Instructions for Accessing Main Features:
-No login credentials, account creation, or sample files are required. Simply launch the app, tap "Start" on the Welcome Screen, and use the bottom navigation tabs (Home, Food, Shops, Travel, Map, Profile) to access all content immediately.
+1. Guideline 4.8 - Design - Login Services (Sign in with Apple / Equivalent Private Login):
+- Added "Sign in with Apple" ("បន្តជាមួយ Apple") at the top of our in-app sign-in modal (Profile tab -> Sign In).
+- Strictly limits data collection to name & email, supports "Hide My Email" (@privaterelay.appleid.com) privacy relay, and performs zero advertising tracking.
 
-4. External Services & Platforms Used:
-- Supabase (PostgreSQL cloud database for read-only public content sync, with full offline fallback data bundled in the app)
-- OpenStreetMap / Leaflet & Apple/Google Maps links for destination coordinates and directions
-- YouTube Embedded Player for public cultural cooking and travel videos
+2. Guideline 4 - Design (In-App Sign-In, Registration & Account Deletion):
+- All sign-in and account registration flows take place 100% inside the native app modal without opening the external Safari browser.
+- Account Deletion is available directly inside the app at: (a) Profile tab -> Top Profile Card -> "Delete Account" ("លុបគណនី"), and (b) Profile tab -> Settings -> "Permanently Delete My Account".
 
-5. Regional Differences:
-None. The app functions identically across all countries and regions worldwide.
+3. Guideline 4 - Design (Optimized for iPad Air 11-inch M3 & All Screen Sizes):
+- Expanded the responsive container and grid layout edge-to-edge across iPad Air 11-inch (M3), iPad Pro, and all iPhone resolutions.
 
-6. Regulated Industry / Protected Third-Party Material:
-Not applicable. The app is a public cultural food, recipe, and tourism guide and does not operate in a regulated industry.`;
+4. Guideline 3.1.1 - Business - Payments - In-App Purchase:
+- Removed and disabled all non-IAP VIP membership upgrade screens, pricing prompts, and external payment mechanisms on iOS and iPadOS. All consumer features are unlocked and free to use on iOS/iPadOS.
+
+5. Guideline 2.3.3 - Performance - Accurate Metadata (Screenshots):
+- Updated all iPhone and iPad screenshots in Media Manager to show actual in-app UI screens in use.`;
 
 async function main() {
   if (!ISSUER_ID || !KEY_ID || !PRIVATE_KEY) {
