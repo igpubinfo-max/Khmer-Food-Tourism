@@ -89,6 +89,7 @@ import { RichAnswerText } from './RichAnswerText';
 import { prepareFoodImage, FoodImageError, type PreparedFoodImage } from '../utils/foodImageUpload';
 import {
   askFoodAssistant,
+  isAiGatewayConfigured,
   buildAssistantFailureMessage,
   toHistoryTurns,
   type FoodAssistantFailure,
@@ -1147,7 +1148,10 @@ export const WhatToEatModal: React.FC = () => {
       });
 
     let geminiKey = resolveGeminiApiKey(appSettings?.geminiApiKey);
-    if (!geminiKey && refreshAppSettingsFromServer) {
+    // The Gemini key now lives in a Supabase secret behind the `food-ai` Edge Function, so a device without its own key
+    // can (and should) still use the live assistant. Only without any gateway/key do we fall back to the offline engine.
+    const gatewayAvailable = isAiGatewayConfigured();
+    if (!geminiKey && !gatewayAvailable && refreshAppSettingsFromServer) {
       try {
         const latest = await refreshAppSettingsFromServer(false);
         if (latest?.geminiApiKey) {
@@ -1159,7 +1163,7 @@ export const WhatToEatModal: React.FC = () => {
     }
 
     // A) A photo needs the live vision model. Without it we say so honestly instead of guessing a dish.
-    if (image && !geminiKey) {
+    if (image && !geminiKey && !gatewayAvailable) {
       const reply = buildAssistantFailureMessage('no_key', language, true, { isAdmin });
       setChatMessages((prev) => [...prev.slice(-12), userMsg, reply]);
       scrollChatToTop();
@@ -1167,7 +1171,7 @@ export const WhatToEatModal: React.FC = () => {
     }
 
     // B) No AI connection: offline rules engine (honest about what it cannot answer).
-    if (!geminiKey) {
+    if (!geminiKey && !gatewayAvailable) {
       const t0 = performance.now();
       const { reply, nextMemory } = runRules();
       recordAiAgentTelemetryEvent({

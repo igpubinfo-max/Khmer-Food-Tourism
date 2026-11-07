@@ -879,6 +879,14 @@ export function resetFoodAiProxyState(): void {
   proxyDownUntil = 0;
 }
 
+/**
+ * True when the secure `food-ai` Edge Function can be addressed (Supabase URL + anon key present). The device then
+ * needs NO Gemini key of its own: the key lives in a Supabase secret.
+ */
+export function isAiGatewayConfigured(): boolean {
+  return hasProxyConfig();
+}
+
 function hasProxyConfig(): boolean {
   try {
     const cfg = getCloudApiConfig();

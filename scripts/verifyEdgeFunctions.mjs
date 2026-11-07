@@ -192,6 +192,13 @@ ok('no Google Maps / Gemini key is bundled in the app source (keys live only in 
   const svc = read('src/services/supabaseService.ts');
   assert.ok(svc.includes("DEFAULT_GOOGLE_MAPS_API_KEY = ''") && svc.includes("DEFAULT_GEMINI_API_KEY = ''") && !svc.includes('decodeRuntimeKey'), 'embedded char-code keys must stay removed');
 });
+ok('AI chat does not require a device-side Gemini key when the Edge gateway is available (regression: chat fell back to offline engine)', () => {
+  const t = read('src/components/WhatToEatModal.tsx');
+  assert.ok(t.includes('isAiGatewayConfigured()'), 'gateway availability must be consulted');
+  assert.ok(!/if \(!geminiKey\) \{/.test(t) && !/image && !geminiKey\) \{/.test(t), 'a bare `!geminiKey` gate would disable AI for every device without its own key');
+  assert.ok(/image && !geminiKey && !gatewayAvailable/.test(t) && /if \(!geminiKey && !gatewayAvailable\)/.test(t));
+  assert.ok(read('src/services/foodAssistantLlm.ts').includes('export function isAiGatewayConfigured'));
+});
 ok('Pro platform SQL is service-role only and non-destructive', () => {
   const sql = read('supabase_pro_platform_v1.sql');
   const code = sql.split(/\r?\n/).filter((l) => !l.trim().startsWith('--')).join('\n');
