@@ -13,6 +13,7 @@
  * 9. Preserve all existing app data unchanged.
  */
 
+import { placesFetch, buildPlacesPhotoUrl, getEffectivePlacesKey, isPlacesProxyKnownAlive, ensurePlacesProxyProbed } from './placesProxy';
 import {
   FoodItem,
   Restaurant,
@@ -25,6 +26,7 @@ import {
   isValidOfficialGooglePlaceId,
   isPlaceLocationVerified,
   isStrictVerifiedCambodiaRestaurant,
+  doesVerifiedPlaceNameMatchTarget,
   getCachedVerifiedPlaceForCoords,
   saveCachedVerifiedPlaceForCoords,
   buildCanonicalGoogleMapsPinUrl,
@@ -2369,8 +2371,10 @@ function savePersistedGoogleApiDiagnosis(diag: GooglePlacesApiDiagnosticReport):
 export function isGooglePlacesV1CurrentlyBlocked(): boolean {
   const cfg = getCloudApiConfig();
   const key = (cfg.googleMapsApiKey || '').trim();
-  // Automatically bypass paid Places API v1 when using the default unbilled key so users never pay ($0 Free Mode)
-  if (!key || key === DEFAULT_GOOGLE_MAPS_API_KEY) {
+  // Automatically bypass paid Places API v1 when using the default unbilled key so users never pay ($0 Free Mode).
+  // Exception: when the secure `places-proxy` Edge Function is deployed it holds the real (billed, quota-capped) key.
+  if ((!key || key === DEFAULT_GOOGLE_MAPS_API_KEY) && !isPlacesProxyKnownAlive()) {
+    if (!key) ensurePlacesProxyProbed();
     return true;
   }
   if (!lastGooglePlacesApiDiagnosis) {
@@ -2618,7 +2622,7 @@ export async function verifyGooglePlacesApiStatus(): Promise<{
     };
   }
   try {
-    const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+    const res = await placesFetch('https://places.googleapis.com/v1/places:searchText', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -2767,9 +2771,7 @@ export function mapRawGooglePlaceV1ToCachedItem(
     .filter((ph: any) => ph && ph.name)
     .map(
       (ph: any) =>
-        `https://places.googleapis.com/v1/${ph.name}/media?maxHeightPx=700&maxWidthPx=900&key=${encodeURIComponent(
-          apiKey
-        )}`
+        buildPlacesPhotoUrl(ph.name, 900, 700, apiKey)
     );
 
   const photoAttributions: string[] = [];
@@ -2877,7 +2879,7 @@ export async function fetchGooglePlaceDetailsById(
   try {
     const controller = new AbortController();
     const tId = setTimeout(() => controller.abort(), 6000);
-    const res = await fetch(
+    const res = await placesFetch(
       `https://places.googleapis.com/v1/places/${encodeURIComponent(cleanId)}?languageCode=${langCode}&regionCode=KH`,
       {
         method: 'GET',
@@ -3144,7 +3146,9 @@ export async function resolveCoordinateVerifiedGooglePlace(item: {
   }
 
   const cached = getCachedVerifiedPlaceForCoords(item.id, lat, lng);
-  if (cached) return cached;
+  if (cached && doesVerifiedPlaceNameMatchTarget(cached.officialName, item.nameKh, item.nameEn)) {
+    return cached;
+  }
 
   const lockKey = item.id || `coord:${lat!.toFixed(4)},${lng!.toFixed(4)}`;
   const active = inFlightCoordPlaceResolvers.get(lockKey);
@@ -3154,20 +3158,17 @@ export async function resolveCoordinateVerifiedGooglePlace(item: {
     try {
       const localCache = getLocalSmartCache();
       let bestCandidate: GooglePlaceCachedItem | null = null;
-      let bestDist = 3500;
-      const targetNormKh = normalizePlaceNameForComparison(item.nameKh);
-      const targetNormEn = normalizePlaceNameForComparison(item.nameEn);
+      let bestDist = 1500;
 
       for (const c of localCache) {
         if (!isValidOfficialGooglePlaceId(c.googlePlaceId)) continue;
         const d = calculateHaversineMeters(lat!, lng!, c.lat, c.lng);
-        if (d > 2500) continue;
-        const cNormKh = normalizePlaceNameForComparison(c.nameKh);
-        const cNormEn = normalizePlaceNameForComparison(c.nameEn);
-        const nameMatch =
-          (targetNormKh && (cNormKh.includes(targetNormKh) || targetNormKh.includes(cNormKh))) ||
-          (targetNormEn && (cNormEn.includes(targetNormEn) || targetNormEn.includes(cNormEn))) ||
-          d <= 250;
+        if (d > 1500) continue;
+        const nameMatch = doesVerifiedPlaceNameMatchTarget(
+          `${c.nameKh || ''} ${c.nameEn || ''}`,
+          item.nameKh,
+          item.nameEn
+        );
         if (nameMatch && d < bestDist) {
           bestDist = d;
           bestCandidate = c;
@@ -3179,8 +3180,8 @@ export async function resolveCoordinateVerifiedGooglePlace(item: {
         const queries = Array.from(
           new Set(
             [
-              item.nameKh ? `${item.nameKh} ${item.provinceKh || item.provinceEn || ''}`.trim() : '',
               item.nameEn ? `${item.nameEn} ${item.provinceEn || item.provinceKh || ''}`.trim() : '',
+              item.nameKh ? `${item.nameKh} ${item.provinceKh || item.provinceEn || ''}`.trim() : '',
             ].filter((q) => q.length >= 3)
           )
         );
@@ -3189,19 +3190,25 @@ export async function resolveCoordinateVerifiedGooglePlace(item: {
           for (const c of tbmItems) {
             if (!isValidOfficialGooglePlaceId(c.googlePlaceId)) continue;
             const d = calculateHaversineMeters(lat!, lng!, c.lat, c.lng);
-            if (d <= 3500 && d < bestDist) {
+            if (d > 1500) continue;
+            const nameMatch = doesVerifiedPlaceNameMatchTarget(
+              `${c.nameKh || ''} ${c.nameEn || ''}`,
+              item.nameKh,
+              item.nameEn
+            );
+            if (nameMatch && d < bestDist) {
               bestDist = d;
               bestCandidate = c;
             }
           }
-          if (bestCandidate && bestDist <= 1200) break;
+          if (bestCandidate && bestDist <= 800) break;
         }
       }
 
       if (bestCandidate && isValidOfficialGooglePlaceId(bestCandidate.googlePlaceId)) {
         const resolvedEntry: VerifiedGooglePlaceCoordEntry = {
           placeId: bestCandidate.googlePlaceId!.trim(),
-          officialName: (bestCandidate.nameKh || bestCandidate.nameEn || item.nameKh || item.nameEn || '').trim(),
+          officialName: (item.nameEn || item.nameKh || bestCandidate.nameEn || bestCandidate.nameKh || '').trim(),
           lat: bestCandidate.lat,
           lng: bestCandidate.lng,
           googleMapsUri: bestCandidate.googleMapsUrl,
@@ -4353,7 +4360,7 @@ export async function searchGoogleMapsPlacesAdvanced(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-    const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+    const res = await placesFetch('https://places.googleapis.com/v1/places:searchText', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -4436,7 +4443,7 @@ export async function searchGoogleMapsPlacesAdvanced(
 
     // If province-scoped text search returned 0 results for a specific business name, retry Nationwide across Cambodia!
     if (places.length === 0 && provGeo && cleanQuery.length >= 2 && !req.pageToken) {
-      const nationwideRes = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      const nationwideRes = await placesFetch('https://places.googleapis.com/v1/places:searchText', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -4469,7 +4476,7 @@ export async function searchGoogleMapsPlacesAdvanced(
             : categoryFilter === 'cafe'
             ? ['cafe', 'coffee_shop', 'bakery']
             : ['restaurant', 'cafe', 'meal_takeaway'];
-        const nearbyRes = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
+        const nearbyRes = await placesFetch('https://places.googleapis.com/v1/places:searchNearby', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -4615,12 +4622,15 @@ export async function resolveRestaurantPhoneOnDemand(
     return resolvedPhoneMemoryCache.get(cacheKey) || '';
   }
   const cfg = getCloudApiConfig();
-  const key = (cfg.googleMapsApiKey || '').trim();
+  const key = getEffectivePlacesKey();
   const queryText = province ? `${name} ${province} Cambodia` : `${name} Cambodia`;
   if (!key || key === DEFAULT_GOOGLE_MAPS_API_KEY || isGooglePlacesV1CurrentlyBlocked()) {
     try {
       const freePlaces = await fetchFreeGoogleMapsTbmPlaces(queryText);
-      const found = formatDisplayPhone(freePlaces[0]?.phone || '');
+      const matchedPlace = freePlaces.find((c) =>
+        doesVerifiedPlaceNameMatchTarget(`${c.nameKh || ''} ${c.nameEn || ''}`, name, name)
+      );
+      const found = formatDisplayPhone(matchedPlace?.phone || '');
       resolvedPhoneMemoryCache.set(cacheKey, found);
       return found;
     } catch {
@@ -4629,23 +4639,26 @@ export async function resolveRestaurantPhoneOnDemand(
     }
   }
   try {
-    const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+    const res = await placesFetch('https://places.googleapis.com/v1/places:searchText', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': cfg.googleMapsApiKey,
         'X-Goog-FieldMask':
-          'places.nationalPhoneNumber,places.internationalPhoneNumber',
+          'places.displayName,places.nationalPhoneNumber,places.internationalPhoneNumber',
       },
       body: JSON.stringify({
         textQuery: queryText,
         regionCode: 'KH',
-        maxResultCount: 1,
+        maxResultCount: 3,
       }),
     });
     if (res.ok) {
       const data = await res.json();
-      const first = data?.places?.[0];
+      const places: any[] = Array.isArray(data?.places) ? data.places : [];
+      const first = places.find((p) =>
+        doesVerifiedPlaceNameMatchTarget(p?.displayName?.text || '', name, name)
+      );
       const found = formatDisplayPhone(
         first?.nationalPhoneNumber || first?.internationalPhoneNumber || ''
       );
@@ -5006,7 +5019,7 @@ export async function searchNearbyPlacesWithin500m(
       try {
         const controller = new AbortController();
         const tId = setTimeout(() => controller.abort(), 5500);
-        const res = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
+        const res = await placesFetch('https://places.googleapis.com/v1/places:searchNearby', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -5062,9 +5075,7 @@ export async function searchNearbyPlacesWithin500m(
               .filter((ph: any) => ph && ph.name)
               .map(
                 (ph: any) =>
-                  `https://places.googleapis.com/v1/${ph.name}/media?maxHeightPx=700&maxWidthPx=900&key=${encodeURIComponent(
-                    cfg.googleMapsApiKey
-                  )}`
+                  buildPlacesPhotoUrl(ph.name, 900, 700, cfg.googleMapsApiKey)
               );
             const hasOfficialGooglePhoto = officialPhotoUrls.length > 0;
             const primaryPhotoUrl = hasOfficialGooglePhoto

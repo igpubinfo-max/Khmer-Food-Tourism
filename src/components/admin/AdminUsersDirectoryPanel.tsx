@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { fetchServerPaginatedUsersFromSupabase } from '../../services/supabaseService';
+import { AdminUserDataSafetyCard } from './AdminUserDataSafetyCard';
 import type { User, UserRole } from '../../types';
 import { getVipRemainingDays, isSeedRestaurantId, type Restaurant } from '../../types';
 import { resolveUserAvatarUrl, handleAvatarImageError } from '../../utils/avatarHelper';
@@ -2078,6 +2079,9 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
          ===================================================================== */}
       {subView === 'backup_diagnostics' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="lg:col-span-2">
+            <AdminUserDataSafetyCard />
+          </div>
           {/* Backup, Restore & Data Integrity Protection Card */}
           <div className="p-4 rounded-3xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 space-y-4">
             <div>

@@ -36,6 +36,7 @@ import {
   resolveAiAgentUserRole,
   tryExecuteAiAgentTurn,
 } from '../services/aiAgentPlatformService';
+import { verifyUserVipStatusFromBackend } from '../services/supabaseService';
 import {
   IconFoodPicks,
   IconBeveragePairing,
@@ -329,7 +330,11 @@ export const WhatToEatModal: React.FC = () => {
   const [isTestingInlineKey, setIsTestingInlineKey] = useState(false);
   const [confirmedOwnerUpdates, setConfirmedOwnerUpdates] = useState<Record<string, 'confirmed' | 'cancelled'>>({});
   const [savedItineraryIds, setSavedItineraryIds] = useState<Record<string, boolean>>({});
+  const [backendVipVerified, setBackendVipVerified] = useState<boolean>(false);
+  const [isVerifyingVipBackend, setIsVerifyingVipBackend] = useState<boolean>(false);
+  const [showVipAiUpgradeNotice, setShowVipAiUpgradeNotice] = useState<boolean>(false);
   const userGpsRef = useRef<{ lat: number; lng: number } | null>(null);
+  const canUseAiAssistant = Boolean(canUseVip && backendVipVerified);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Filters: Conversational Input, Category, Meal Time, Dietary / Health Style
@@ -386,6 +391,53 @@ export const WhatToEatModal: React.FC = () => {
     });
   };
 
+  // Verify VIP status through the Supabase backend whenever modal opens or user changes
+  useEffect(() => {
+    let cancelled = false;
+    if (!currentUser || !canUseVip) {
+      setBackendVipVerified(false);
+      setIsVerifyingVipBackend(false);
+      return;
+    }
+    setIsVerifyingVipBackend(true);
+    verifyUserVipStatusFromBackend(currentUser)
+      .then((res) => {
+        if (!cancelled) {
+          setBackendVipVerified(res.isVip);
+          if (res.isVip) {
+            setShowVipAiUpgradeNotice(false);
+          }
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setBackendVipVerified(Boolean(canUseVip));
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsVerifyingVipBackend(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isWhatToEatModalOpen, currentUser, canUseVip]);
+
+  const promptVipUpgradeForAiAssistant = () => {
+    setShowVipAiUpgradeNotice(true);
+    showToast(
+      tr(
+        language,
+        '👑 មុខងារ «ជំនួយការ AI ម្ហូបអាហារ» គឺសម្រាប់សមាជិក VIP ប៉ុណ្ណោះ! សូមដំឡើងទៅកាន់ VIP ដើម្បីសួរសំណួរ និងទទួលចម្លើយពី AI។',
+        '👑 The AI Assistant feature is VIP-only! Please upgrade to VIP to submit questions and receive AI-generated answers.',
+        '👑「AI 美食助手」为 VIP 会员专属功能！请升级 VIP 以提问并获取 AI 回答。'
+      ),
+      'info'
+    );
+    openUpgradeVipModal();
+  };
+
   // Initialize welcome message when modal opens or language changes
   useEffect(() => {
     if (isWhatToEatModalOpen) {
@@ -408,7 +460,9 @@ export const WhatToEatModal: React.FC = () => {
       const pendingAiQuery = typeof window !== 'undefined' ? String((window as any).__kft_pending_ai_query || '').trim() : '';
       if (pendingAiQuery) {
         (window as any).__kft_pending_ai_query = '';
-        setCravingQuery(pendingAiQuery);
+        if (canUseVip) {
+          setCravingQuery(pendingAiQuery);
+        }
         setTimeout(() => {
           sendConversationalMessageRef.current?.(pendingAiQuery);
         }, 60);
@@ -422,7 +476,9 @@ export const WhatToEatModal: React.FC = () => {
       const q = String((e as CustomEvent<{ query?: string }>).detail?.query || (window as any).__kft_pending_ai_query || '').trim();
       if (!q || !isWhatToEatModalOpen) return;
       (window as any).__kft_pending_ai_query = '';
-      setCravingQuery(q);
+      if (canUseVip) {
+        setCravingQuery(q);
+      }
       setTimeout(() => {
         sendConversationalMessageRef.current?.(q);
       }, 60);
@@ -978,6 +1034,19 @@ export const WhatToEatModal: React.FC = () => {
     if (isAiThinking) return;
     setForceBigCard(false);
 
+    // 1. Strict Frontend + Backend VIP Verification before accepting any AI question or photo
+    if (!canUseVip) {
+      promptVipUpgradeForAiAssistant();
+      return;
+    }
+    const backendCheck = await verifyUserVipStatusFromBackend(currentUser);
+    setBackendVipVerified(backendCheck.isVip);
+    if (!backendCheck.isVip) {
+      promptVipUpgradeForAiAssistant();
+      return;
+    }
+    setShowVipAiUpgradeNotice(false);
+
     const userMsg: AiAssistantMessage = {
       id: `user-${Date.now()}`,
       role: 'user',
@@ -1030,6 +1099,7 @@ export const WhatToEatModal: React.FC = () => {
         trendingFoods,
         activeProvinceKh: chatMemory.activeProvinceKh,
         userCoords: userGpsRef.current,
+        isVipVerified: backendCheck.isVip,
         generateAiTripPlan,
       });
 
@@ -1160,6 +1230,7 @@ export const WhatToEatModal: React.FC = () => {
       memory: chatMemory,
       image,
       geminiApiKey: geminiKey,
+      currentUser,
     })
       .then((result) => {
         if (!result.ok) {
@@ -1196,6 +1267,16 @@ export const WhatToEatModal: React.FC = () => {
   const handleImagePicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
+    if (!canUseVip) {
+      promptVipUpgradeForAiAssistant();
+      return;
+    }
+    const vipCheck = await verifyUserVipStatusFromBackend(currentUser);
+    setBackendVipVerified(vipCheck.isVip);
+    if (!vipCheck.isVip) {
+      promptVipUpgradeForAiAssistant();
+      return;
+    }
     if (!file) return;
     setImageError('');
     setIsPreparingImage(true);
@@ -1224,6 +1305,10 @@ export const WhatToEatModal: React.FC = () => {
   const handleCravingSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     cravingInputRef.current?.blur();
+    if (!canUseAiAssistant) {
+      promptVipUpgradeForAiAssistant();
+      return;
+    }
     if (!cravingQuery.trim() && !pendingImage) return;
     const image = pendingImage;
     setPendingImage(null);
@@ -1486,10 +1571,20 @@ export const WhatToEatModal: React.FC = () => {
                 <h3 className="font-moul text-sm text-white truncate">
                   {tr(language, 'ជំនួយការ AI ម្ហូបអាហារ', 'AI Food Assistant', 'AI 美食助手')}
                 </h3>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 text-[10px] font-extrabold shrink-0">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-300" />
-                  <span>{tr(language, 'ឥតគិតថ្លៃ • FREE', 'FREE Access', '免费使用')}</span>
-                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!canUseAiAssistant) promptVipUpgradeForAiAssistant();
+                  }}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/60 text-amber-200 text-[10px] font-extrabold shrink-0 cursor-pointer"
+                >
+                  <Crown className="w-3 h-3 text-amber-300" />
+                  <span>
+                    {canUseAiAssistant
+                      ? tr(language, 'សមាជិក VIP • បើករួច', 'VIP Active', 'VIP 已激活')
+                      : tr(language, 'សម្រាប់ VIP • VIP ONLY', 'VIP Only', 'VIP 专属')}
+                  </span>
+                </button>
               </div>
               <p className="text-[11px] text-emerald-100 font-khmer truncate">
                 {tr(
@@ -1528,7 +1623,13 @@ export const WhatToEatModal: React.FC = () => {
               <button
                 id="kft-wte-photo-btn"
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => {
+                  if (!canUseAiAssistant) {
+                    promptVipUpgradeForAiAssistant();
+                    return;
+                  }
+                  fileInputRef.current?.click();
+                }}
                 disabled={isAiThinking || isPreparingImage}
                 aria-label={tr(language, 'ថតរូប ឬជ្រើសរើសរូបម្ហូប', 'Take or choose a food photo', '拍摄或选择美食照片')}
                 title={tr(language, 'ថតរូប ឬជ្រើសរើសរូបម្ហូប', 'Take or choose a food photo', '拍摄或选择美食照片')}
@@ -1543,8 +1644,18 @@ export const WhatToEatModal: React.FC = () => {
                   ref={cravingInputRef}
                   type="search"
                   enterKeyHint="send"
+                  readOnly={!canUseAiAssistant && !isVerifyingVipBackend}
                   value={cravingQuery}
+                  onClick={() => {
+                    if (!canUseAiAssistant && !isVerifyingVipBackend) {
+                      promptVipUpgradeForAiAssistant();
+                    }
+                  }}
                   onChange={(e) => {
+                    if (!canUseAiAssistant) {
+                      promptVipUpgradeForAiAssistant();
+                      return;
+                    }
                     setCravingQuery(e.target.value);
                     setCurrentDishId('');
                     setSpinCount(0);
@@ -1602,6 +1713,45 @@ export const WhatToEatModal: React.FC = () => {
                   </span>
                 )}
                 {imageError && <span className="text-[11px] font-bold text-rose-600 flex-1">{imageError}</span>}
+              </div>
+            )}
+
+            {(!canUseAiAssistant || showVipAiUpgradeNotice) && !isVerifyingVipBackend && (
+              <div
+                id="kft-wte-vip-upgrade-notice"
+                className="p-3 rounded-2xl bg-gradient-to-r from-amber-50 via-yellow-50/90 to-amber-100/80 dark:from-amber-950/50 dark:via-slate-800 dark:to-amber-900/30 border border-amber-300 dark:border-amber-700/70 flex items-center justify-between gap-2.5"
+              >
+                <div className="flex items-start gap-2 min-w-0">
+                  <span className="w-8 h-8 rounded-xl bg-amber-400/25 border border-amber-400/50 flex items-center justify-center text-amber-700 dark:text-amber-300 shrink-0 mt-0.5">
+                    <Crown className="w-4 h-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <div className="text-xs font-extrabold text-amber-950 dark:text-amber-200">
+                      {tr(
+                        language,
+                        '👑 មុខងារជំនួយការ AI គឺសម្រាប់សមាជិក VIP ប៉ុណ្ណោះ',
+                        '👑 AI Assistant is Exclusive to VIP Members',
+                        '👑 AI 美食助手为 VIP 会员专属功能'
+                      )}
+                    </div>
+                    <p className="text-[11px] text-amber-900/90 dark:text-amber-100/80 leading-snug mt-0.5">
+                      {tr(
+                        language,
+                        'សូមដំឡើងទៅកាន់ VIP ដើម្បីសួរសំណួរ ថតរូបម្ហូប និងទទួលចម្លើយពី AI។ (ការស្វែងរកម្ហូប ហាង និងតំបន់ទេសចរណ៍ធម្មតា នៅតែឥតគិតថ្លៃ 100%)',
+                        'Upgrade to VIP to submit questions, analyze food photos, and receive AI answers. (Normal food, shop & tourism search remains 100% free.)',
+                        '请升级 VIP 以提问、拍照识菜并获取 AI 回答。（常规美食、餐厅与景点搜索仍 100% 免费。）'
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openUpgradeVipModal()}
+                  className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 text-slate-950 text-[11px] font-black shadow-xs shrink-0 flex items-center gap-1 cursor-pointer transition active:scale-95"
+                >
+                  <Crown className="w-3.5 h-3.5" />
+                  <span>{tr(language, 'ដំឡើង VIP', 'Upgrade VIP', '升级 VIP')}</span>
+                </button>
               </div>
             )}
 
@@ -2705,6 +2855,10 @@ export const WhatToEatModal: React.FC = () => {
                             key={chip.id}
                             type="button"
                             onClick={() => {
+                              if (!canUseAiAssistant) {
+                                promptVipUpgradeForAiAssistant();
+                                return;
+                              }
                               setCravingQuery(chip.query);
                               sendConversationalMessage(chip.query);
                             }}
@@ -2729,6 +2883,10 @@ export const WhatToEatModal: React.FC = () => {
                             key={chip.id}
                             type="button"
                             onClick={() => {
+                              if (!canUseAiAssistant) {
+                                promptVipUpgradeForAiAssistant();
+                                return;
+                              }
                               setCravingQuery(chip.query);
                               sendConversationalMessage(chip.query);
                             }}
@@ -2932,6 +3090,10 @@ export const WhatToEatModal: React.FC = () => {
                         type="button"
                         data-testid={`wte-craving-${chip.id}`}
                         onClick={() => {
+                          if (!canUseAiAssistant) {
+                            promptVipUpgradeForAiAssistant();
+                            return;
+                          }
                           setCravingQuery(chipQuery);
                           setDrinkMode(false);
                           // Clear categoryFilter when selecting a preset Craving chip so they never conflict (e.g. Dessert + Grilled)

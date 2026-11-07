@@ -326,7 +326,8 @@ function section(t) {
     const geminiOk = (obj) => ({ candidates: [{ content: { parts: [{ text: JSON.stringify(obj) }] }, finishReason: 'STOP' }] });
     const mkResp = (status, data, proxy) => ({ ok: status >= 200 && status < 300, status, headers: { get: (k) => (proxy && k.toLowerCase() === 'x-food-ai-proxy' ? '1' : null) }, json: async () => data });
     const payload = { domain: 'food', intent: 'general_food_qa', answer: 'Via proxy OK', needsClarification: false };
-    const t16 = { uiLanguage: 'en', foods, restaurants: [], history: [], memory, userText: 'hello', geminiApiKey: 'LOCALKEY' };
+    // AI is VIP-only (verified against the backend before any model call); an admin session passes that gate locally.
+    const t16 = { uiLanguage: 'en', foods, restaurants: [], history: [], memory, userText: 'hello', geminiApiKey: 'LOCALKEY', currentUser: { id: 'admin-authorized-single', role: 'admin', username: 'admin' } };
     try {
       // (a) proxy answers -> direct Google endpoint never contacted, key never sent
       llm.resetFoodAiProxyState();

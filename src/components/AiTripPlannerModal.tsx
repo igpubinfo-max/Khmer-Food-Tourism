@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { FoodTripTemplates } from './FoodTripTemplates';
 import { SmartHubHealthySection } from './SmartHubHealthySection';
 import { useApp } from '../context/AppContext';
@@ -39,6 +39,7 @@ import {
   getAiFoodAdvisorRecommendations,
 } from '../services/aiFoodAdvisorService';
 import { AiBrainInsightCard } from './AiBrainInsightCard';
+import { verifyUserVipStatusFromBackend } from '../services/supabaseService';
 
 export interface CambodiaProvinceTripOption {
   id: string;
@@ -99,7 +100,40 @@ export const AiTripPlannerModal: React.FC = () => {
     openUpgradeVipModal,
   } = useApp();
 
-  const canUseVip = Boolean(isUserVipActive(currentUser) || (currentUser && isAdminAccount(currentUser)));
+  const canUseVipLocal = Boolean(isUserVipActive(currentUser) || (currentUser && isAdminAccount(currentUser)));
+  const [backendVipVerified, setBackendVipVerified] = useState<boolean>(false);
+  const canUseVip = Boolean(canUseVipLocal && backendVipVerified);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!currentUser || !canUseVipLocal) {
+      setBackendVipVerified(false);
+      return;
+    }
+    verifyUserVipStatusFromBackend(currentUser)
+      .then((res) => {
+        if (!cancelled) setBackendVipVerified(res.isVip);
+      })
+      .catch(() => {
+        if (!cancelled) setBackendVipVerified(canUseVipLocal);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isAiTripPlannerModalOpen, currentUser, canUseVipLocal]);
+
+  const promptVipForAi = () => {
+    showToast(
+      tr(
+        language,
+        '👑 មុខងារជំនួយការ AI គឺសម្រាប់សមាជិក VIP ប៉ុណ្ណោះ! សូមដំឡើងទៅកាន់ VIP ដើម្បីប្រើប្រាស់។',
+        '👑 The AI Assistant feature is VIP-only! Please upgrade to VIP to use it.',
+        '👑 AI 智能助手为 VIP 会员专属功能！请升级 VIP 以使用。'
+      ),
+      'info'
+    );
+    openUpgradeVipModal();
+  };
 
   // Active Smart AI Assistant Mode Tab
   const [assistantTab, setAssistantTab] = useState<AssistantTab>('food_advisor');
@@ -186,9 +220,36 @@ export const AiTripPlannerModal: React.FC = () => {
     });
   };
 
-  const handleAdvisorSearchSubmit = (e?: React.FormEvent) => {
+  const handleAdvisorSearchSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     advisorInputRef.current?.blur();
+    if (!canUseVip) {
+      showToast(
+        tr(
+          language,
+          '👑 មុខងារសួរសំណួរទៅកាន់ជំនួយការ AI គឺសម្រាប់សមាជិក VIP ប៉ុណ្ណោះ! សូមដំឡើងទៅកាន់ VIP។',
+          '👑 Submitting questions to the AI Assistant is for VIP members only! Please upgrade to VIP.',
+          '👑 向 AI 助手提问仅限 VIP 会员使用！请升级 VIP。'
+        ),
+        'info'
+      );
+      openUpgradeVipModal();
+      return;
+    }
+    const backendCheck = await verifyUserVipStatusFromBackend(currentUser);
+    if (!backendCheck.isVip) {
+      showToast(
+        tr(
+          language,
+          '👑 គណនីរបស់អ្នកមិនទាន់មានសុពលភាព VIP នៅលើប្រព័ន្ធមេ (Server) ទេ។ សូមដំឡើងទៅកាន់ VIP!',
+          '👑 Your account does not have an active backend-verified VIP membership. Please upgrade to VIP!',
+          '👑 您的账户尚未通过服务器 VIP 验证，请升级 VIP 会员！'
+        ),
+        'info'
+      );
+      openUpgradeVipModal();
+      return;
+    }
     if (!advisorPrompt.trim()) {
       const targetGoal = expandedGoalId || advisorGoal || 'quick_daily';
       setAdvisorGoal(targetGoal);
@@ -543,8 +604,16 @@ export const AiTripPlannerModal: React.FC = () => {
                       ref={advisorInputRef}
                       type="text"
                       enterKeyHint="search"
+                      readOnly={!canUseVip}
                       value={advisorPrompt}
+                      onClick={() => {
+                        if (!canUseVip) promptVipForAi();
+                      }}
                       onChange={(e) => {
+                        if (!canUseVip) {
+                          promptVipForAi();
+                          return;
+                        }
                         setAdvisorPrompt(e.target.value);
                         setAdvisorSeed(1);
                       }}
@@ -594,6 +663,10 @@ export const AiTripPlannerModal: React.FC = () => {
                         key={chip.id}
                         type="button"
                         onClick={() => {
+                          if (!canUseVip) {
+                            promptVipForAi();
+                            return;
+                          }
                           if (isActive) {
                             setAdvisorPrompt('');
                           } else {

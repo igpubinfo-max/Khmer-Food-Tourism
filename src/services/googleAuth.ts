@@ -1,6 +1,6 @@
 /**
  * Real Google OAuth 2.0 & Google Identity Services (GIS) Provider
- * Configured with official Google OAuth Client ID for Khmer Food & Tourism
+ * Configured with official Google OAuth Client ID for Cambodia Flavors & Tourism
  */
 
 export const GOOGLE_CLIENT_ID = '834153814844-po5bjnuts0urg1imef38617kgpol1dq2.apps.googleusercontent.com';

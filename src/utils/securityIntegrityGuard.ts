@@ -1,5 +1,5 @@
 /**
- * Khmer Food & Tourism - Anti-Tamper Session & VIP Integrity Guard
+ * Cambodia Flavors & Tourism - Anti-Tamper Session & VIP Integrity Guard
  *
  * Provides:
  * 1. Cryptographic HMAC-SHA256 seal (computeUserIntegritySeal) & synchronous seal (computeUserIntegritySealSync)

@@ -13,6 +13,7 @@
  * - If not configured yet, safely falls back to local device storage without errors.
  */
 
+import { ensurePlacesProxyProbed, isPlacesProxyKnownAlive } from './placesProxy';
 import {
   User,
   Restaurant,
@@ -42,6 +43,32 @@ import {
   getCachedUserAvatarForAccount,
   createCompactSyncAvatarDataUrl,
 } from '../utils/avatarHelper';
+import {
+  evaluateAggregatePush,
+  isUserAggregateKey,
+  isUserCriticalKey,
+  mergeOutboxEntry,
+  planUserCursorSync,
+  MAX_PREFIX_PAGES,
+  PREFIX_PAGE_SIZE,
+  type OutboxEntry,
+} from '../utils/userDataSafety';
+import {
+  logIntegrityEvent,
+  noteServerAggregateCount,
+  readServerAggregateCount,
+  readUserHighWater,
+  readUserSyncCursor,
+  writeUserSyncCursor,
+  readAtomicBackfillPending,
+  writeAtomicBackfillPending,
+  runUserDataIntegrityCheck,
+} from './userDataIntegrityService';
+
+export interface CloudWriteOptions {
+  /** Explicit, intentional admin action that may shrink/delete protected user data (sends x-kft-allow-destructive). */
+  allowDestructive?: boolean;
+}
 
 export interface CloudApiConfig {
   supabaseUrl: string;
@@ -58,20 +85,11 @@ const CLOUD_API_CONFIG_STORAGE_KEY = 'kft_cloud_api_config_v1';
 // Official Production Supabase Free-Tier Project (Southeast Asia - Singapore)
 export const DEFAULT_SUPABASE_URL = 'https://ryvltobwuwuulazqjnza.supabase.co';
 export const DEFAULT_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_h5ufAaA0qAL3s-ebprATsw_8AApv71l';
-const decodeRuntimeKey = (codes: number[]): string =>
-  codes.map((c) => String.fromCharCode(c + (Date.now() < 0 ? 1 : 0))).join('');
-
-// Built-in official Google Maps Places API Key safely assembled at runtime
-export const DEFAULT_GOOGLE_MAPS_API_KEY = decodeRuntimeKey([
-  65, 73, 122, 97, 83, 121, 67, 90, 110, 89, 78, 81, 76, 78, 99, 117, 99, 111, 53, 72,
-  120, 100, 109, 114, 87, 86, 88, 75, 88, 119, 118, 65, 114, 55, 109, 103, 55, 118, 48,
-]);
-// Built-in official Google Gemini AI Key (KhmerFoodAI) safely assembled at runtime
-export const DEFAULT_GEMINI_API_KEY = decodeRuntimeKey([
-  65, 81, 46, 65, 98, 56, 82, 78, 54, 73, 66, 90, 102, 54, 89, 56, 104, 108, 100, 78,
-  50, 50, 53, 118, 76, 49, 109, 53, 121, 97, 113, 67, 72, 65, 81, 65, 57, 117, 55, 120,
-  119, 120, 87, 107, 90, 103, 76, 98, 112, 117, 67, 52, 81,
-]);
+// SECURITY: no Google Maps / Gemini key is bundled in the app any more (the old ones were extractable from the APK).
+// Both keys now live ONLY in Supabase secrets behind the `places-proxy` and `food-ai` Edge Functions.
+// A device may still hold its own key (Admin -> Cloud API settings or VITE_* env) as a fall-back for outages.
+export const DEFAULT_GOOGLE_MAPS_API_KEY = '';
+export const DEFAULT_GEMINI_API_KEY = '';
 
 let cachedCloudApiConfig: CloudApiConfig | null = null;
 let cachedCloudApiRawStr: string | null | undefined = undefined;
@@ -208,7 +226,11 @@ export function isSupabaseConfigured(): boolean {
 
 export function isGoogleMapsConfigured(): boolean {
   const cfg = getCloudApiConfig();
-  return Boolean(cfg.googleMapsApiKey && cfg.googleMapsApiKey.length > 15);
+  if (cfg.googleMapsApiKey && cfg.googleMapsApiKey.length > 15) return true;
+  // No Google key on this device: still "configured" when the secure `places-proxy` Edge Function holds the key.
+  if (isPlacesProxyKnownAlive()) return true;
+  ensurePlacesProxyProbed();
+  return false;
 }
 
 /**
@@ -354,6 +376,7 @@ let hydratedSecondaryMirror = false;
 function hydrateSecondaryMirrorOnce(): void {
   if (hydratedSecondaryMirror) return;
   hydratedSecondaryMirror = true;
+  let purgedIneligible = false;
   try {
     if (typeof localStorage === 'undefined') return;
     const raw = localStorage.getItem(SECONDARY_CLOUD_LOCAL_MIRROR_KEY);
@@ -362,11 +385,16 @@ function hydrateSecondaryMirrorOnce(): void {
     if (parsed && typeof parsed === 'object') {
       for (const [k, v] of Object.entries(parsed)) {
         const entry = v as SecondaryKvEntry;
+        if (!isKeyEligibleForSecondaryFailover(k)) {
+          purgedIneligible = true; // drop personal data cached by older app versions
+          continue;
+        }
         if (entry && typeof entry.key === 'string' && entry.payload !== undefined) {
           secondaryFailoverMemoryMap.set(k, entry);
         }
       }
     }
+    if (purgedIneligible) persistSecondaryMirrorToStorage();
   } catch {
     // ignore local mirror read error
   }
@@ -390,28 +418,21 @@ function persistSecondaryMirrorToStorage(): void {
   }
 }
 
-function isKeyEligibleForSecondaryFailover(key: string): boolean {
-  if (!key) return false;
-  if (key.startsWith('kft_user_')) return true;
-  if (key.startsWith('kft_avatar_')) return true;
-  if (key.startsWith('kft_proof_')) return true;
-  if (key.startsWith('kft_ov_')) return true;
-  return (
-    key === 'kft_cloud_users_v2' ||
-    key === 'kft_cloud_users_v1' ||
-    key === 'kft_cloud_deleted_users_v1' ||
-    key === 'kft_cloud_vip_backup_v1' ||
-    key === 'kft_cloud_food_checkin_reward_claims_v1' ||
-    key === 'kft_cloud_transactions_v1' ||
-    key === 'kft_cloud_deleted_transactions_v1' ||
-    key === 'kft_cloud_custom_restaurants_v1' ||
-    key === 'kft_cloud_deleted_restaurants_v1' ||
-    key === 'kft_cloud_media_overrides_v1' ||
-    key === 'kft_cloud_support_tickets_v1' ||
-    key === 'kft_cloud_admin_vip_pricing_v2' ||
-    key === 'kft_cloud_app_settings_v1' ||
-    key === 'kft_admin_pin_security_v1'
-  );
+/**
+ * PRIVACY: the secondary failover channel is a PUBLIC ntfy.sh topic - anyone who knows the
+ * topic name can read every message. It must therefore NEVER carry personal data
+ * (emails, phone numbers, names, avatars, payment receipts, owner contacts) or secrets
+ * (admin password / PIN hashes). This is a strict ALLOW-LIST of public, non-personal
+ * catalogue content only. Everything else (users, VIP backup, transactions, receipts,
+ * tickets, custom restaurants with owner contacts, app settings, admin PIN ...) is
+ * deliberately NOT eligible; those documents only live in Supabase (+ the local durable outbox).
+ */
+export function isKeyEligibleForSecondaryFailover(key: string): boolean {
+  if (!key || typeof key !== 'string') return false;
+  if (key.startsWith('kft_ov_food_')) return true;
+  if (key.startsWith('kft_ov_dest_')) return true;
+  if (key.startsWith('kft_ov_trend_')) return true;
+  return key === 'kft_cloud_deleted_restaurants_v1';
 }
 
 function compactUserForInlineSecondarySync(u: any): any {
@@ -611,6 +632,8 @@ async function pullAllFromSecondaryCloudFailover(
       }
 
       for (const [k, m] of latestMsgByKey.entries()) {
+        // Never ingest anything outside the public allow-list (old builds published personal data here).
+        if (!isKeyEligibleForSecondaryFailover(k)) continue;
         try {
           let decoded = m.id ? decodedSecondaryMessageById.get(m.id) : undefined;
           if (!decoded) {
@@ -745,6 +768,7 @@ export function subscribeToCloudRealtimeUpdates(
           const m = JSON.parse(evt.data);
           if (!m || m.event !== 'message' || typeof m.title !== 'string' || !m.title) return;
           const k = m.title;
+          if (!isKeyEligibleForSecondaryFailover(k)) return;
           let rawJson = m.message;
           if (m.attachment?.url) {
             const attRes = await fetchWithTimeout(m.attachment.url, { method: 'GET' }, 7000);
@@ -1015,7 +1039,12 @@ export async function mergeAndPushSupportTicketsToCloud(
  * Using a unified JSONB table + structured columns makes Free Tier setup 1-click simple
  * and syncs Users, Transactions, Payment Proofs, and Smart-Cached Restaurants reliably.
  */
-export async function pushCloudDocument(key: string, payload: any, timeoutMs = 12000): Promise<boolean> {
+export async function pushCloudDocument(
+  key: string,
+  payload: any,
+  timeoutMs = 12000,
+  opts: CloudWriteOptions = {}
+): Promise<boolean> {
   if (!isSupabaseConfigured()) return false;
   const cfg = getCloudApiConfig();
   if (!cfg.enableAutoCloudSync) return false;
@@ -1027,19 +1056,57 @@ export async function pushCloudDocument(key: string, payload: any, timeoutMs = 1
     effectivePayload = sanitizeSupportTicketsForCloudPush(payload);
   }
 
+  // ROOT-CAUSE GUARD #1: never let a device with an incomplete local list overwrite the central user list.
+  if (isUserAggregateKey(key)) {
+    const decision = evaluateAggregatePush({
+      key,
+      payload: effectivePayload,
+      baselineCount: readServerAggregateCount(),
+      allowDestructive: opts.allowDestructive,
+    });
+    if (!decision.allow) {
+      if (decision.reason === 'shrink_blocked' || decision.reason === 'not_array') {
+        logIntegrityEvent('critical', 'aggregate_push_blocked', `${key}: ${decision.detail}`, { key });
+      }
+      return decision.treatAsSuccess;
+    }
+  }
+
+  // Egress reduction: inline base64 avatars are replaced by their cloud-hosted URL when one exists.
+  if (key.startsWith(USER_RECORD_PREFIX) && effectivePayload && typeof effectivePayload === 'object') {
+    effectivePayload = stripInlineAvatarWhenCloudHosted(effectivePayload);
+  }
+
   const eligibleForFailover = isKeyEligibleForSecondaryFailover(key);
+  const critical = isUserCriticalKey(key);
+
+  // ROOT-CAUSE GUARD #2: durable outbox. A critical write that did not reach the PRIMARY database
+  // (HTTP 402 quota, offline, timeout) is queued and retried until the primary accepts it.
+  const finish = (primaryOk: boolean, ret: boolean, retryable = true): boolean => {
+    if (critical) {
+      if (primaryOk || !retryable) dropFromCloudOutbox(key);
+      else enqueueCloudOutbox(key, effectivePayload);
+    }
+    if (primaryOk && isUserAggregateKey(key) && Array.isArray(effectivePayload)) {
+      noteServerAggregateCount(effectivePayload.length);
+    }
+    return ret;
+  };
 
   if (Date.now() < supabaseEgressCooldownUntilMs) {
     if (eligibleForFailover) {
-      return pushToSecondaryCloudFailover(key, effectivePayload, timeoutMs);
+      return finish(false, await pushToSecondaryCloudFailover(key, effectivePayload, timeoutMs));
     }
-    return false;
+    return finish(false, false);
   }
 
   try {
     const res = await fetchWithTimeout(`${cfg.supabaseUrl}/rest/v1/kft_app_kv_store`, {
       method: 'POST',
-      headers: getSupabaseHeaders(false),
+      headers: {
+        ...getSupabaseHeaders(false),
+        ...(opts.allowDestructive ? { 'x-kft-allow-destructive': 'true' } : {}),
+      },
       body: JSON.stringify({
         key,
         payload: effectivePayload,
@@ -1048,10 +1115,11 @@ export async function pushCloudDocument(key: string, payload: any, timeoutMs = 1
     }, timeoutMs);
     if (res.status === 402) {
       supabaseEgressCooldownUntilMs = Date.now() + 60_000;
+      logIntegrityEvent('critical', 'primary_db_402', `Supabase primary rejected write for ${key} (HTTP 402 quota). Queued in outbox.`, { key });
       if (eligibleForFailover) {
-        return pushToSecondaryCloudFailover(key, effectivePayload, timeoutMs);
+        return finish(false, await pushToSecondaryCloudFailover(key, effectivePayload, timeoutMs));
       }
-      return false;
+      return finish(false, false);
     }
     if (res.ok && supabaseEgressCooldownUntilMs > 0) {
       supabaseEgressCooldownUntilMs = 0;
@@ -1060,14 +1128,163 @@ export async function pushCloudDocument(key: string, payload: any, timeoutMs = 1
       // Also broadcast to real-time pub/sub failover so live EventSource listeners receive instant (<1s) updates
       pushToSecondaryCloudFailover(key, effectivePayload, timeoutMs).catch(() => {});
     }
-    return res.ok;
+    if (!res.ok && critical) {
+      let bodyText = '';
+      try {
+        bodyText = (await res.text()).slice(0, 300);
+      } catch {
+        /* ignore */
+      }
+      const guardBlocked = res.status >= 400 && res.status < 500 && bodyText.includes('KFT_GUARD');
+      logIntegrityEvent(guardBlocked ? 'critical' : 'warn', guardBlocked ? 'server_guard_blocked' : 'push_http_error', `${key} HTTP ${res.status} ${bodyText}`, { key, status: res.status });
+      return finish(false, false, !guardBlocked && !(res.status >= 400 && res.status < 500 && res.status !== 408 && res.status !== 429));
+    }
+    return finish(res.ok, res.ok);
   } catch (err) {
     console.warn(`Supabase pushCloudDocument(${key}) error:`, err);
     if (eligibleForFailover) {
-      return pushToSecondaryCloudFailover(key, effectivePayload, timeoutMs);
+      return finish(false, await pushToSecondaryCloudFailover(key, effectivePayload, timeoutMs));
     }
-    return false;
+    return finish(false, false);
   }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Durable cloud outbox (critical user/VIP writes survive 402 outages, offline mode and app restarts)
+// ---------------------------------------------------------------------------------------------
+const CLOUD_OUTBOX_KEY = 'kft_cloud_outbox_v1';
+let cloudOutboxFlushInFlight = false;
+
+function readCloudOutbox(): OutboxEntry[] {
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(CLOUD_OUTBOX_KEY) : null;
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((e) => e && typeof e.key === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeCloudOutbox(queue: OutboxEntry[]): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    if (queue.length === 0) {
+      localStorage.removeItem(CLOUD_OUTBOX_KEY);
+      return;
+    }
+    localStorage.setItem(CLOUD_OUTBOX_KEY, JSON.stringify(queue));
+  } catch {
+    // Quota: keep only the lightweight per-user entries so accounts are never the thing that gets dropped.
+    try {
+      const slim = queue.filter((e) => e.key.startsWith(USER_RECORD_PREFIX)).slice(-150);
+      localStorage.setItem(CLOUD_OUTBOX_KEY, JSON.stringify(slim));
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
+function enqueueCloudOutbox(key: string, payload: unknown): void {
+  try {
+    // Whole-list aggregates can be megabytes; atomic rows are the source of truth so skip oversized ones.
+    if (isUserAggregateKey(key) && JSON.stringify(payload).length > 400_000) return;
+    const next = mergeOutboxEntry(
+      readCloudOutbox(),
+      { key, payload, queuedAt: new Date().toISOString(), attempts: 0 },
+      300
+    );
+    writeCloudOutbox(next);
+  } catch {
+    /* ignore */
+  }
+}
+
+function dropFromCloudOutbox(key: string): void {
+  const q = readCloudOutbox();
+  if (q.some((e) => e.key === key)) writeCloudOutbox(q.filter((e) => e.key !== key));
+}
+
+export function getCloudOutboxSize(): number {
+  return readCloudOutbox().length;
+}
+
+/** Retry queued critical writes against the PRIMARY database. Safe to call often; no-ops when empty/offline. */
+export async function flushCloudOutbox(maxEntries = 40): Promise<{ flushed: number; remaining: number }> {
+  if (cloudOutboxFlushInFlight || !isSupabaseConfigured()) {
+    return { flushed: 0, remaining: getCloudOutboxSize() };
+  }
+  const cfg = getCloudApiConfig();
+  if (!cfg.enableAutoCloudSync || Date.now() < supabaseEgressCooldownUntilMs) {
+    return { flushed: 0, remaining: getCloudOutboxSize() };
+  }
+  let queue = readCloudOutbox();
+  if (queue.length === 0) return { flushed: 0, remaining: 0 };
+  cloudOutboxFlushInFlight = true;
+  let flushed = 0;
+  try {
+    for (const entry of queue.slice(0, maxEntries)) {
+      if (isUserAggregateKey(entry.key)) {
+        const decision = evaluateAggregatePush({
+          key: entry.key,
+          payload: entry.payload,
+          baselineCount: readServerAggregateCount(),
+        });
+        if (!decision.allow) {
+          queue = queue.filter((e) => e.key !== entry.key);
+          continue;
+        }
+      }
+      try {
+        const res = await fetchWithTimeout(`${cfg.supabaseUrl}/rest/v1/kft_app_kv_store`, {
+          method: 'POST',
+          headers: getSupabaseHeaders(false),
+          body: JSON.stringify({ key: entry.key, payload: entry.payload, updated_at: new Date().toISOString() }),
+        }, 10000);
+        if (res.status === 402) {
+          supabaseEgressCooldownUntilMs = Date.now() + 60_000;
+          break;
+        }
+        if (res.ok) {
+          queue = queue.filter((e) => e.key !== entry.key);
+          flushed++;
+          if (isUserAggregateKey(entry.key) && Array.isArray(entry.payload)) noteServerAggregateCount(entry.payload.length);
+        } else if (res.status >= 400 && res.status < 500 && res.status !== 408 && res.status !== 429) {
+          // Permanent rejection (e.g. server guard): do not retry forever.
+          queue = queue.filter((e) => e.key !== entry.key);
+          logIntegrityEvent('warn', 'outbox_rejected', `${entry.key} rejected with HTTP ${res.status}; dropped from outbox`, { key: entry.key });
+        } else {
+          queue = queue.map((e) => (e.key === entry.key ? { ...e, attempts: e.attempts + 1 } : e));
+        }
+      } catch {
+        break; // offline / timeout: keep everything, try again next cycle
+      }
+    }
+  } finally {
+    writeCloudOutbox(queue);
+    cloudOutboxFlushInFlight = false;
+  }
+  if (flushed > 0) {
+    logIntegrityEvent('info', 'outbox_flushed', `Delivered ${flushed} queued write(s) to the primary database`, { flushed, remaining: queue.length });
+  }
+  return { flushed, remaining: queue.length };
+}
+
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+  window.addEventListener('online', () => {
+    flushCloudOutbox().catch(() => {});
+  });
+}
+
+/** Replace a huge inline `data:` avatar with its already-uploaded cloud URL (never drops the only copy). */
+function stripInlineAvatarWhenCloudHosted(user: any): any {
+  if (!user || typeof user !== 'object') return user;
+  const av = typeof user.avatar === 'string' ? user.avatar : '';
+  const cloud = typeof user.cloudAvatarUrl === 'string' ? user.cloudAvatarUrl : '';
+  if (av.startsWith('data:') && av.length > 900 && cloud.startsWith('http')) {
+    return { ...user, avatar: cloud };
+  }
+  return user;
 }
 
 /**
@@ -1079,7 +1296,10 @@ export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Prom
   const cfg = getCloudApiConfig();
   const eligibleForFailover = isKeyEligibleForSecondaryFailover(key);
 
+  // `cloudPullOkByKey` lets callers tell "server answered: document absent/empty" apart from
+  // "server unreachable / quota-blocked" (both used to look like `null`, which caused destructive overwrites).
   const readFromSecondary = async (): Promise<T | null> => {
+    cloudPullOkByKey.set(key, false);
     if (!eligibleForFailover) return null;
     const store = await pullAllFromSecondaryCloudFailover(false, timeoutMs);
     const entry = store?.get(key);
@@ -1110,12 +1330,17 @@ export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Prom
     if (supabaseEgressCooldownUntilMs > 0) {
       supabaseEgressCooldownUntilMs = 0;
     }
+    cloudPullOkByKey.set(key, true);
     const rows = await res.json();
     if (Array.isArray(rows) && rows.length > 0 && rows[0].payload !== undefined) {
       const primaryPayload = rows[0].payload as T;
       const primaryUpdatedMs = rows[0].updated_at ? Date.parse(rows[0].updated_at) || 0 : 0;
+      if (isUserAggregateKey(key) && Array.isArray(primaryPayload)) {
+        noteServerAggregateCount((primaryPayload as unknown[]).length);
+      }
       if (key === 'kft_cloud_users_v2' && Array.isArray(primaryPayload)) {
         const secUsers = await readFromSecondary();
+        cloudPullOkByKey.set(key, true);
         if (Array.isArray(secUsers) && secUsers.length > 0) {
           return deduplicateAndNormalizeUsers([...primaryPayload, ...secUsers], []) as unknown as T;
         }
@@ -1135,12 +1360,27 @@ export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Prom
       }
       return primaryPayload;
     }
-    return readFromSecondary();
+    const fallback = await readFromSecondary();
+    cloudPullOkByKey.set(key, true);
+    return fallback;
   } catch (err) {
     console.warn(`Supabase pullCloudDocument(${key}) error:`, err);
     return readFromSecondary();
   }
 }
+
+/** true only when the PRIMARY database answered the last read of `key` (even if the document is absent). */
+export function wasCloudPullOk(key: string): boolean {
+  return cloudPullOkByKey.get(key) === true;
+}
+
+/** true only when the last paginated prefix pull completed every page against the PRIMARY database. */
+export function wasPrefixPullComplete(prefix: string): boolean {
+  return prefixPullCompleteByPrefix.get(prefix) === true;
+}
+
+const cloudPullOkByKey = new Map<string, boolean>();
+const prefixPullCompleteByPrefix = new Map<string, boolean>();
 
 // ============================================================================
 // ADMIN 6-DIGIT PIN SECURITY HELPERS
@@ -1528,22 +1768,24 @@ export async function saveAuthoritativeAppSettingsToServer(
  */
 export async function pullCloudDocumentsByPrefix<T = any>(
   prefix: string,
-  timeoutMs = 12000
+  timeoutMs = 12000,
+  opts: { sinceIso?: string } = {}
 ): Promise<Array<{ key: string; payload: T; updated_at?: string }>> {
   if (!isSupabaseConfigured()) return [];
   const cfg = getCloudApiConfig();
-  const eligibleForFailover =
-    prefix.startsWith('kft_user_') ||
-    prefix.startsWith('kft_avatar_') ||
-    prefix.startsWith('kft_proof_');
+  // Personal-data prefixes (kft_user_/kft_avatar_/kft_proof_) are never mirrored to the public channel.
+  const eligibleForFailover = isKeyEligibleForSecondaryFailover(prefix);
+  const sinceMs = opts.sinceIso ? Date.parse(opts.sinceIso) || 0 : 0;
 
   const readPrefixFromSecondary = async (): Promise<Array<{ key: string; payload: T; updated_at?: string }>> => {
+    prefixPullCompleteByPrefix.set(prefix, false);
     if (!eligibleForFailover) return [];
     const store = await pullAllFromSecondaryCloudFailover(false, timeoutMs);
     if (!store) return [];
     const out: Array<{ key: string; payload: T; updated_at?: string }> = [];
     for (const [k, v] of store.entries()) {
       if (k.startsWith(prefix) && v.payload !== undefined) {
+        if (sinceMs > 0 && (Date.parse(v.updated_at || '') || 0) <= sinceMs) continue;
         out.push({ key: k, payload: v.payload as T, updated_at: v.updated_at });
       }
     }
@@ -1555,25 +1797,47 @@ export async function pullCloudDocumentsByPrefix<T = any>(
   }
 
   try {
-    const res = await fetchWithTimeout(
-      `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=like.${encodeURIComponent(prefix)}*&select=key,payload,updated_at&limit=1000`,
-      {
-        method: 'GET',
-        headers: getSupabaseHeaders(false),
-      },
-      timeoutMs
-    );
-    if (res.status === 402) {
-      supabaseEgressCooldownUntilMs = Date.now() + 60_000;
-      return readPrefixFromSecondary();
+    // ROOT-CAUSE FIX: this used to be a single request hard-capped at `limit=1000` with no ordering, so any
+    // deployment above 1000 users silently saw (and then merged/pushed) only a random 1000. Now fully paginated.
+    const primaryRows: Array<{ key: string; payload: T; updated_at?: string }> = [];
+    let complete = true;
+    const sinceQuery = opts.sinceIso ? `&updated_at=gt.${encodeURIComponent(opts.sinceIso)}` : '';
+    for (let page = 0; page < MAX_PREFIX_PAGES; page++) {
+      const offset = page * PREFIX_PAGE_SIZE;
+      const res = await fetchWithTimeout(
+        `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=like.${encodeURIComponent(prefix)}*${sinceQuery}&select=key,payload,updated_at&order=key.asc&limit=${PREFIX_PAGE_SIZE}&offset=${offset}`,
+        {
+          method: 'GET',
+          headers: getSupabaseHeaders(false),
+        },
+        timeoutMs
+      );
+      if (res.status === 402) {
+        supabaseEgressCooldownUntilMs = Date.now() + 60_000;
+        if (page === 0) return readPrefixFromSecondary();
+        complete = false;
+        break;
+      }
+      if (!res.ok) {
+        if (page === 0) return readPrefixFromSecondary();
+        complete = false;
+        break;
+      }
+      const rows = await res.json();
+      const valid = Array.isArray(rows)
+        ? rows.filter((r) => r && typeof r.key === 'string' && r.payload !== undefined)
+        : [];
+      primaryRows.push(...valid);
+      if (!Array.isArray(rows) || rows.length < PREFIX_PAGE_SIZE) break;
+      if (page === MAX_PREFIX_PAGES - 1) complete = false;
     }
-    if (!res.ok) return readPrefixFromSecondary();
-    const rows = await res.json();
-    const primaryRows = Array.isArray(rows)
-      ? rows.filter(r => r && typeof r.key === 'string' && r.payload !== undefined)
-      : [];
+    prefixPullCompleteByPrefix.set(prefix, complete);
+    if (!complete) {
+      logIntegrityEvent('warn', 'prefix_pull_incomplete', `Paginated pull of ${prefix}* stopped early after ${primaryRows.length} rows`, { prefix, rows: primaryRows.length });
+    }
     if (eligibleForFailover) {
       const secRows = await readPrefixFromSecondary();
+      prefixPullCompleteByPrefix.set(prefix, complete);
       if (secRows.length > 0) {
         const mergedMap = new Map<string, { key: string; payload: T; updated_at?: string }>();
         for (const r of primaryRows) mergedMap.set(r.key, r);
@@ -1605,6 +1869,42 @@ export async function pullCloudDocumentsByPrefix<T = any>(
     console.warn(`Supabase pullCloudDocumentsByPrefix(${prefix}) error:`, err);
     return readPrefixFromSecondary();
   }
+}
+
+/**
+ * Cheap server-side user counts (HTTP `Prefer: count=exact`, zero rows downloaded) for integrity checks.
+ */
+export async function fetchServerUserCounts(
+  timeoutMs = 8000
+): Promise<{ ok: boolean; status: number; total: number; vipActive: number; error?: string }> {
+  if (!isSupabaseConfigured()) return { ok: false, status: 0, total: 0, vipActive: 0, error: 'Supabase not configured' };
+  const cfg = getCloudApiConfig();
+  const count = async (extra: string): Promise<{ ok: boolean; status: number; n: number; err?: string }> => {
+    try {
+      const res = await fetchWithTimeout(
+        `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?select=key&key=like.${encodeURIComponent(USER_RECORD_PREFIX)}*&payload-%3E%3Erole=neq.admin${extra}&limit=1`,
+        {
+          method: 'GET',
+          headers: { ...getSupabaseHeaders(false), Prefer: 'count=exact', Range: '0-0', 'Range-Unit': 'items' },
+        },
+        timeoutMs
+      );
+      if (res.status === 402) {
+        supabaseEgressCooldownUntilMs = Date.now() + 60_000;
+        return { ok: false, status: 402, n: 0, err: 'HTTP 402 exceed_egress_quota (primary database restricted)' };
+      }
+      if (!res.ok && res.status !== 206) return { ok: false, status: res.status, n: 0, err: `HTTP ${res.status}` };
+      const range = res.headers.get('content-range') || '';
+      const total = Number(range.split('/')[1]);
+      return { ok: true, status: res.status, n: Number.isFinite(total) ? total : 0 };
+    } catch (e: any) {
+      return { ok: false, status: 0, n: 0, err: e?.message || 'network error' };
+    }
+  };
+  const all = await count('');
+  if (!all.ok) return { ok: false, status: all.status, total: 0, vipActive: 0, error: all.err };
+  const vip = await count('&payload-%3E%3EmembershipTier=eq.premium_vip&payload-%3E%3EsubscriptionStatus=eq.active');
+  return { ok: true, status: all.status, total: all.n, vipActive: vip.ok ? vip.n : 0 };
 }
 
 /**
@@ -1880,7 +2180,7 @@ export async function uploadBase64ImageToSupabaseStorage(
 /**
  * Delete a specific key from Supabase `kft_app_kv_store`.
  */
-export async function deleteCloudDocument(key: string, timeoutMs = 8000): Promise<boolean> {
+export async function deleteCloudDocument(key: string, timeoutMs = 8000, opts: CloudWriteOptions = {}): Promise<boolean> {
   if (!isSupabaseConfigured()) return false;
   const cfg = getCloudApiConfig();
   if (!cfg.enableAutoCloudSync) return false;
@@ -1899,7 +2199,10 @@ export async function deleteCloudDocument(key: string, timeoutMs = 8000): Promis
       `${cfg.supabaseUrl}/rest/v1/kft_app_kv_store?key=eq.${encodeURIComponent(key)}`,
       {
         method: 'DELETE',
-        headers: getSupabaseHeaders(false),
+        headers: {
+          ...getSupabaseHeaders(false),
+          ...(opts.allowDestructive ? { 'x-kft-allow-destructive': 'true' } : {}),
+        },
       },
       timeoutMs
     );
@@ -1920,6 +2223,119 @@ export const USER_RECORD_PREFIX = 'kft_user_';
  * Determine a deterministic canonical User ID so the same person (across Android APK, Web OAuth,
  * or Email/Phone sign-in) always maps to a single unified account without creating duplicates.
  */
+
+// Short-lived cache (15s) for authoritative backend VIP verification so rapid UI taps do not spam Supabase
+const backendVipVerifyCache = new Map<string, { expiresAt: number; isVip: boolean; verifiedUser: User | null }>();
+
+/**
+ * Authoritative Backend VIP Verification:
+ * Verifies a user's active VIP membership status against Supabase Cloud (`kft_user_<canonicalId>`,
+ * `kft_cloud_vip_backup_v1`, and `kft_cloud_users_v2`) rather than trusting frontend localStorage state alone.
+ */
+export async function verifyUserVipStatusFromBackend(
+  user?: User | null
+): Promise<{ isVip: boolean; verifiedUser: User | null; source: 'admin' | 'supabase_cloud' | 'local_fallback' }> {
+  if (!user || !user.id) {
+    return { isVip: false, verifiedUser: null, source: 'supabase_cloud' };
+  }
+  if (
+    user.role === 'admin' ||
+    user.id === 'admin-authorized-single' ||
+    user.username === 'admin' ||
+    user.username === 'cheasavuth'
+  ) {
+    return { isVip: true, verifiedUser: user, source: 'admin' };
+  }
+
+  const canonicalId = getCanonicalUserId(user);
+  const cached = backendVipVerifyCache.get(canonicalId);
+  if (cached && cached.expiresAt > Date.now()) {
+    return { isVip: cached.isVip, verifiedUser: cached.verifiedUser, source: 'supabase_cloud' };
+  }
+
+  const localNormalized = normalizeVipExpiryOnUser(user);
+  const localHasVip = Boolean(
+    localNormalized.membershipTier === 'premium_vip' &&
+      localNormalized.subscriptionStatus === 'active' &&
+      !localNormalized.vipCancelledAt
+  );
+
+  if (!isSupabaseConfigured()) {
+    return { isVip: localHasVip, verifiedUser: localNormalized, source: 'local_fallback' };
+  }
+
+  try {
+    const candidateKeys = getCandidateAtomicUserKeys(user);
+    const atomicRows = candidateKeys.length > 0 ? await pullCloudDocumentsByKeys<User>(candidateKeys, 4500) : [];
+    let serverUser: User | null = null;
+
+    for (const row of atomicRows) {
+      const doc = row?.payload;
+      if (doc && typeof doc === 'object' && doc.id) {
+        serverUser = serverUser ? mergeTwoUserRecordsCanonical(serverUser, doc) : normalizeVipExpiryOnUser(doc);
+      }
+    }
+
+    // Also check cloud VIP backup registry if atomic record was not found or not yet marked VIP
+    if (!serverUser || serverUser.membershipTier !== 'premium_vip') {
+      const vipBackup = await pullCloudDocument<any>('kft_cloud_vip_backup_v1', 4500);
+      const emailLower = (user.email || '').trim().toLowerCase();
+      if (Array.isArray(vipBackup)) {
+        const match = vipBackup.find(
+          (v: any) =>
+            v &&
+            (getCanonicalUserId(v) === canonicalId ||
+              (emailLower && String(v.email || '').trim().toLowerCase() === emailLower))
+        );
+        if (match) {
+          const normMatch = normalizeVipExpiryOnUser({ ...user, ...match });
+          serverUser = serverUser ? mergeTwoUserRecordsCanonical(serverUser, normMatch) : normMatch;
+        }
+      } else if (vipBackup && typeof vipBackup === 'object') {
+        for (const [k, val] of Object.entries(vipBackup)) {
+          const vObj = val as any;
+          if (
+            k === canonicalId ||
+            (emailLower && k.toLowerCase() === emailLower) ||
+            (vObj && getCanonicalUserId(vObj) === canonicalId)
+          ) {
+            const normMatch = normalizeVipExpiryOnUser({ ...user, ...vObj });
+            serverUser = serverUser ? mergeTwoUserRecordsCanonical(serverUser, normMatch) : normMatch;
+          }
+        }
+      }
+    }
+
+    if (serverUser) {
+      const finalNorm = normalizeVipExpiryOnUser(serverUser);
+      const expMs = finalNorm.subscriptionExpiryDate ? Date.parse(finalNorm.subscriptionExpiryDate) : 0;
+      const isServerVip = Boolean(
+        finalNorm.membershipTier === 'premium_vip' &&
+          finalNorm.subscriptionStatus === 'active' &&
+          !finalNorm.vipCancelledAt &&
+          (!expMs || expMs > Date.now())
+      );
+      backendVipVerifyCache.set(canonicalId, {
+        expiresAt: Date.now() + 15000,
+        isVip: isServerVip,
+        verifiedUser: finalNorm,
+      });
+      return { isVip: isServerVip, verifiedUser: finalNorm, source: 'supabase_cloud' };
+    }
+
+    // User does not exist in cloud VIP records -> reject any unverified frontend VIP claim
+    backendVipVerifyCache.set(canonicalId, {
+      expiresAt: Date.now() + 10000,
+      isVip: false,
+      verifiedUser: null,
+    });
+    return { isVip: false, verifiedUser: null, source: 'supabase_cloud' };
+  } catch {
+    // Offline / transient network timeout fallback
+    return { isVip: localHasVip, verifiedUser: localNormalized, source: 'local_fallback' };
+  }
+}
+
 export function getCanonicalUserId(u: Partial<User>): string {
   const rawId = String(u.id || '').trim();
   const cleanEmail = String(u.email || '').trim().toLowerCase();
@@ -2753,13 +3169,21 @@ export async function upsertSingleUserToCloud(
           : []),
       ])
     );
-    const [existingAtomicDocs, existingAvatarDocs, cloudUsersV2, cloudVipBackup, cloudDeleted] = await Promise.all([
+    const [existingAtomicDocs, existingAvatarDocs] = await Promise.all([
       candidateKeys.length > 0 ? pullCloudDocumentsByKeys<User>(candidateKeys, 6000) : Promise.resolve([]),
       candidateAvatarKeys.length > 0 ? pullCloudDocumentsByKeys<CloudAvatarRecord>(candidateAvatarKeys, 6000) : Promise.resolve([]),
-      updateAggregate ? pullCloudDocument<User[]>('kft_cloud_users_v2') : Promise.resolve(null),
-      updateAggregate ? pullCloudDocument<any>('kft_cloud_vip_backup_v1') : Promise.resolve(null),
-      updateAggregate ? pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1') : Promise.resolve(null),
     ]);
+    // ROOT-CAUSE/EGRESS FIX: every login used to download AND rewrite the entire user list. The whole-list
+    // aggregates are now consulted only for LEGACY accounts that have no atomic `kft_user_<id>` row yet.
+    const needLegacyAggregateLookup = updateAggregate && existingAtomicDocs.length === 0;
+    const [cloudUsersV2, cloudVipBackup, cloudDeleted]: [User[] | null, any, DeletedUserRecord[] | null] =
+      needLegacyAggregateLookup
+        ? await Promise.all([
+            pullCloudDocument<User[]>('kft_cloud_users_v2'),
+            pullCloudDocument<any>('kft_cloud_vip_backup_v1'),
+            pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1'),
+          ])
+        : [null, null, null];
 
     const allDeleted = [
       ...deletedUsers,
@@ -2834,40 +3258,18 @@ export async function upsertSingleUserToCloud(
     const atomicKey = `${USER_RECORD_PREFIX}${canonicalUser.id}`;
     const userSig = JSON.stringify(canonicalUser);
     if (lastPushedAtomicUserSigMap.get(atomicKey) !== userSig) {
-      lastPushedAtomicUserSigMap.set(atomicKey, userSig);
-      await pushCloudDocument(atomicKey, canonicalUser);
+      const atomicOk = await pushCloudDocument(atomicKey, canonicalUser);
+      if (atomicOk) lastPushedAtomicUserSigMap.set(atomicKey, userSig);
     }
 
     if (!updateAggregate) {
       return [canonicalUser];
     }
 
-    // 3. Merge into aggregate `kft_cloud_users_v2`
-    const merged = deduplicateAndNormalizeUsers(
-      [
-        ...(Array.isArray(cloudUsersV2) ? cloudUsersV2 : []),
-        ...vipBackupUsers,
-        canonicalUser,
-      ],
-      allDeleted
-    );
-
-    const updatedCanonical = merged.find(
-      u =>
-        u.id === canonicalUser.id ||
-        (canonicalUser.email && u.email && u.email.toLowerCase().trim() === canonicalUser.email.toLowerCase().trim())
-    );
-    if (updatedCanonical) {
-      const nextAtomicKey = `${USER_RECORD_PREFIX}${updatedCanonical.id}`;
-      const nextSig = JSON.stringify(updatedCanonical);
-      if (lastPushedAtomicUserSigMap.get(nextAtomicKey) !== nextSig) {
-        lastPushedAtomicUserSigMap.set(nextAtomicKey, nextSig);
-        await pushCloudDocument(nextAtomicKey, updatedCanonical);
-      }
-    }
-
-    await pushCloudDocument('kft_cloud_users_v2', merged);
-    return merged;
+    // 3. The whole-list aggregate is NO LONGER rewritten from a login. A per-login read-modify-write of one shared
+    // JSON document was a classic lost-update race (two logins => one overwrote the other) and re-uploaded every
+    // user on every login. Admin devices rebuild the aggregate from the atomic rows (guarded, see pushCloudDocument).
+    return [canonicalUser];
   } catch (err) {
     console.warn('upsertSingleUserToCloud warning:', err);
     return [canonicalUser];
@@ -3124,6 +3526,8 @@ export async function syncAllAppDataWithSupabase(localState: {
   }
 
   try {
+    // Deliver any critical writes that previously failed (402 / offline) before doing anything else.
+    void flushCloudOutbox().catch(() => {});
     const isAdminDevice = Boolean(
       localState.currentUser &&
         (localState.currentUser.role === 'admin' ||
@@ -3133,6 +3537,13 @@ export async function syncAllAppDataWithSupabase(localState: {
     );
     const shouldFetchHeavyAdminVaults = Boolean(isAdminDevice && localState.includeHeavyAdminVaults);
     const shouldSyncPaymentProofs = shouldFetchHeavyAdminVaults;
+    // Admin devices download only CHANGED user rows once they hold a trustworthy local copy (egress + 10k scale).
+    const userCursorPlan = planUserCursorSync({
+      cursorIso: readUserSyncCursor(),
+      localCount: Array.isArray(localState.users) ? localState.users.length : 0,
+      baselineCount: readUserHighWater().count,
+    });
+    const userDeltaMode = isAdminDevice && userCursorPlan.mode === 'delta';
 
     // Always fetch atomic `kft_user_*` prefix documents on Admin devices or when using Secondary Cloud Failover
     // (where prefix reads come from the shared single-poll memory map at 0 extra network cost).
@@ -3157,7 +3568,8 @@ export async function syncAllAppDataWithSupabase(localState: {
         : [];
 
     // 1. Pull existing cloud records in a single batch
-    const [
+    // eslint-disable-next-line prefer-const
+    let [
       cloudUsersV2,
       atomicUserDocs,
       avatarDocs,
@@ -3171,9 +3583,15 @@ export async function syncAllAppDataWithSupabase(localState: {
       cloudProofs,
       cloudSettingsV2,
     ] = await Promise.all([
-      pullCloudDocument<User[]>('kft_cloud_users_v2'),
+      isAdminDevice || shouldFetchHeavyAdminVaults
+        ? pullCloudDocument<User[]>('kft_cloud_users_v2')
+        : Promise.resolve(null as User[] | null),
       shouldPullAllAtomicUsers
-        ? pullCloudDocumentsByPrefix<User>(USER_RECORD_PREFIX)
+        ? pullCloudDocumentsByPrefix<User>(
+            USER_RECORD_PREFIX,
+            12000,
+            userDeltaMode ? { sinceIso: userCursorPlan.sinceIso } : {}
+          )
         : currentCandidateAtomicKeys.length > 0
         ? pullCloudDocumentsByKeys<User>(currentCandidateAtomicKeys).then(docs =>
             docs.map(d => ({ key: d.key, payload: d.payload, updated_at: d.updated_at || '' }))
@@ -3186,7 +3604,9 @@ export async function syncAllAppDataWithSupabase(localState: {
             docs.map(d => ({ key: d.key, payload: d.payload, updated_at: d.updated_at || '' }))
           )
         : Promise.resolve([] as Array<{ key: string; payload: CloudAvatarRecord; updated_at: string }>),
-      pullCloudDocument<Record<string, Partial<User>>>('kft_cloud_vip_backup_v1'),
+      isAdminDevice
+        ? pullCloudDocument<Record<string, Partial<User>>>('kft_cloud_vip_backup_v1')
+        : Promise.resolve(null as Record<string, Partial<User>> | null),
       pullCloudDocument<DeletedUserRecord[]>('kft_cloud_deleted_users_v1'),
       pullCloudDocument<RegistrationTransaction[]>('kft_cloud_transactions_v1'),
       pullCloudDocument<string[]>('kft_cloud_deleted_transactions_v1'),
@@ -3199,7 +3619,20 @@ export async function syncAllAppDataWithSupabase(localState: {
       pullCloudDocument<AppSettings>('kft_cloud_admin_vip_pricing_v2'),
     ]);
 
-    const cloudUsers = cloudUsersV2 ? null : await pullCloudDocument<User[]>('kft_cloud_users_v1');
+    // Regular devices skip the PII-heavy whole-list documents; only legacy accounts without an atomic row need them.
+    const needLegacyAggregateFallback =
+      !isAdminDevice && !shouldFetchHeavyAdminVaults && Boolean(localState.currentUser) && atomicUserDocs.length === 0;
+    if (needLegacyAggregateFallback) {
+      const [aggFallback, vipFallback] = await Promise.all([
+        pullCloudDocument<User[]>('kft_cloud_users_v2'),
+        pullCloudDocument<Record<string, Partial<User>>>('kft_cloud_vip_backup_v1'),
+      ]);
+      cloudUsersV2 = aggFallback;
+      cloudVipBackup = vipFallback;
+    }
+    const allowLegacyAggregatePull = isAdminDevice || shouldFetchHeavyAdminVaults || needLegacyAggregateFallback;
+    const cloudUsers =
+      cloudUsersV2 || !allowLegacyAggregatePull ? null : await pullCloudDocument<User[]>('kft_cloud_users_v1');
     const cloudSettingsV1 = cloudSettingsV2 ? null : await pullCloudDocument<AppSettings>('kft_cloud_app_settings_v1');
     const cloudSettings = cloudSettingsV2 || cloudSettingsV1;
 
@@ -3438,31 +3871,6 @@ export async function syncAllAppDataWithSupabase(localState: {
       }
     } catch {}
 
-    // Ensure invited active Google Play testers who registered while Primary Supabase was in HTTP 402
-    // are recovered into the Admin Dashboard unless explicitly deleted by Admin after registration.
-    const verifiedInvitedTesters: User[] = [
-      {
-        id: 'google-chorn_ponnakka_cp_gmail_com',
-        name: 'Chorn Ponnakka',
-        email: 'chorn.ponnakka.cp@gmail.com',
-        role: 'user',
-        authProvider: 'google',
-        linkedProviders: ['google'],
-        isVerified: true,
-        verifiedAt: '2026-11-05T14:30:00.000Z',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-        createdAt: '2026-11-05',
-        registeredAtIso: '2026-11-05T14:30:00.000Z',
-        lastLoginAt: '2026-11-05T14:30:00.000Z',
-        lastActiveAt: '2026-11-05T14:30:00.000Z',
-      },
-    ];
-    for (const vt of verifiedInvitedTesters) {
-      if (!isActivityUserDeleted(vt.id, vt.email, vt.phone)) {
-        recoveredUsersFromActivity.push(vt);
-      }
-    }
-
     // 2. Deduplicate & Normalize Users across all sources (Recovered activity first, then Cloud, then Local users & CurrentUser last so live profile edits win)
     const mergedUsers = deduplicateAndNormalizeUsers(
       [
@@ -3475,6 +3883,21 @@ export async function syncAllAppDataWithSupabase(localState: {
       ],
       mergedDeletedUsers
     );
+
+    // Delta cursor + integrity bookkeeping (cursor only advances after a COMPLETE, successful primary pull)
+    try {
+      if (isAdminDevice && shouldPullAllAtomicUsers && wasPrefixPullComplete(USER_RECORD_PREFIX)) {
+        let maxMs = userDeltaMode ? Date.parse(readUserSyncCursor() || '') || 0 : 0;
+        for (const d of atomicUserDocs) {
+          const ms = d.updated_at ? Date.parse(d.updated_at) || 0 : 0;
+          if (ms > maxMs) maxMs = ms;
+        }
+        if (maxMs > 0) writeUserSyncCursor(new Date(maxMs).toISOString());
+      }
+      runUserDataIntegrityCheck(mergedUsers, localState.currentUser?.id);
+    } catch {
+      /* integrity bookkeeping must never break sync */
+    }
 
     // 2a. Apply atomic Cloud Avatar records (`kft_avatar_*`) so profile pictures sync across devices for all users & Admin
     if (Array.isArray(avatarDocs) && avatarDocs.length > 0) {
@@ -3950,10 +4373,21 @@ export async function syncAllAppDataWithSupabase(localState: {
 
     const mergedUsersSig = safeJsonSig(mergedUsers);
     // Scale Optimization (10,000+ users): Regular user devices ONLY sync their own atomic kft_user_<id> record below, never uploading the entire user list!
-    if (isAdminDevice && mergedUsers.length <= 2500 && mergedUsersSig !== safeJsonSig(cloudUsersV2)) {
+    // Never rewrite the central list unless the PRIMARY database actually answered our read (a failed/402 read
+    // used to look like "no users" and let a tiny local list overwrite the real one).
+    if (
+      isAdminDevice &&
+      mergedUsers.length <= 2500 &&
+      wasCloudPullOk('kft_cloud_users_v2') &&
+      mergedUsersSig !== safeJsonSig(cloudUsersV2)
+    ) {
       pushPromises.push(pushCloudDocument('kft_cloud_users_v2', mergedUsers));
     }
-    if (isAdminDevice && safeJsonSig(mergedDeletedUsers) !== safeJsonSig(cloudDeletedUsers || [])) {
+    if (
+      isAdminDevice &&
+      wasCloudPullOk('kft_cloud_deleted_users_v1') &&
+      safeJsonSig(mergedDeletedUsers) !== safeJsonSig(cloudDeletedUsers || [])
+    ) {
       pushPromises.push(pushCloudDocument('kft_cloud_deleted_users_v1', mergedDeletedUsers));
     }
     if (
@@ -3991,20 +4425,35 @@ export async function syncAllAppDataWithSupabase(localState: {
     // Ensure active user(s) have an up-to-date atomic `kft_user_<id>` record in Cloud without write-back storms (capped at 12 per cycle for 10,000+ user scale)
     const currentCanonicalId = localState.currentUser ? getCanonicalUserId(localState.currentUser) : null;
     let atomicBackfillCount = 0;
+    // Legacy users that exist only inside the old whole-list document get an atomic row progressively
+    // (12 per cycle). On a FULL pull we recompute who is missing; in delta mode we continue the saved list.
+    let pendingBackfill: Set<string> = new Set(readAtomicBackfillPending());
+    if (isAdminDevice && !userDeltaMode && shouldPullAllAtomicUsers && wasPrefixPullComplete(USER_RECORD_PREFIX)) {
+      pendingBackfill = new Set(
+        mergedUsers.filter((u) => !existingAtomicMap.has(`${USER_RECORD_PREFIX}${u.id}`)).map((u) => u.id)
+      );
+    }
     for (const u of mergedUsers) {
       const isActiveLocalUser = Boolean(
         localState.currentUser && (u.id === localState.currentUser.id || u.id === currentCanonicalId)
       );
-      if (!isActiveLocalUser && (isSupabaseEgressCooldownActive() || !shouldFetchHeavyAdminVaults || atomicBackfillCount >= 12)) {
-        continue;
+      if (!isActiveLocalUser) {
+        if (isSupabaseEgressCooldownActive() || !shouldFetchHeavyAdminVaults || atomicBackfillCount >= 12) {
+          continue;
+        }
+        if (userDeltaMode && !pendingBackfill.has(u.id)) continue;
       }
       const atomicKey = `${USER_RECORD_PREFIX}${u.id}`;
       const existingAtomic = existingAtomicMap.get(atomicKey);
       if (!existingAtomic || safeJsonSig(existingAtomic) !== safeJsonSig(u)) {
         pushPromises.push(pushCloudDocument(atomicKey, u));
-        if (!isActiveLocalUser) atomicBackfillCount++;
+        if (!isActiveLocalUser) {
+          atomicBackfillCount++;
+          pendingBackfill.delete(u.id);
+        }
       }
     }
+    if (isAdminDevice) writeAtomicBackfillPending(Array.from(pendingBackfill).slice(0, 5000));
 
     // Do not overwrite cloud VIP settings during general sync
     if (pushPromises.length > 0) {
@@ -4044,7 +4493,7 @@ export async function syncAllAppDataWithSupabase(localState: {
  * SQL Script for 1-Click Setup in Supabase SQL Editor (Free Tier)
  */
 export const SUPABASE_SETUP_SQL = `-- ============================================================================
--- Khmer Food & Tourism (v1.7.5) — Supabase Free Tier Cloud Database Setup
+-- Cambodia Flavors & Tourism (v1.7.5) — Supabase Free Tier Cloud Database Setup
 -- Copy and Run this once in your Supabase Dashboard -> SQL Editor -> New Query
 -- ============================================================================
 

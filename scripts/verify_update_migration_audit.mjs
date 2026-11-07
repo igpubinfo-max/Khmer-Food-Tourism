@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 /**
  * scripts/verify_update_migration_audit.mjs
  *
@@ -22,9 +22,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import ts from 'typescript';
 
 const hardTimeout = setTimeout(() => {
-  console.error('[FATAL TIMEOUT] verify_update_migration_audit.mjs exceeded 25s limit.');
+  console.error('[FATAL TIMEOUT] verify_update_migration_audit.mjs exceeded 120s limit.');
   process.exit(1);
-}, 25000);
+}, 120000);
 hardTimeout.unref();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -209,7 +209,8 @@ function createSimulatedEnvironment() {
 
   // Programmable in-memory Supabase `app_sync_store` + offline/latency network simulator
   const cloudKvTable = new Map(); // key -> { key, payload, updated_at }
-  let networkMode = 'online'; // 'online' | 'offline' | 'slow_timeout'
+  let networkMode = 'online'; // 'online' | 'offline' | 'slow_timeout' | 'quota_402'
+  const requestLog = [];
 
   const makeJsonResponse = (status, data) => ({
     ok: status >= 200 && status < 300,
@@ -224,6 +225,10 @@ function createSimulatedEnvironment() {
   });
 
   globalThis.fetch = async (input, init = {}) => {
+    requestLog.push({ method: String(init.method || 'GET').toUpperCase(), url: typeof input === 'string' ? input : String(input?.url || '') });
+    if (networkMode === 'quota_402' && String(typeof input === 'string' ? input : input?.url || '').includes('/rest/v1/')) {
+      return makeJsonResponse(402, { message: 'Service for this project is restricted due to the following violations: exceed_egress_quota.' });
+    }
     if (networkMode === 'offline') {
       throw new TypeError('Failed to fetch (Simulated Offline Network)');
     }
@@ -267,6 +272,17 @@ function createSimulatedEnvironment() {
           );
           rows = rows.filter((r) => wanted.has(r.key));
         }
+        const sinceParam = parsedUrl.searchParams.get('updated_at');
+        if (sinceParam && sinceParam.startsWith('gt.')) {
+          const sinceMs = Date.parse(sinceParam.slice(3));
+          rows = rows.filter((r) => Date.parse(r.updated_at) > sinceMs);
+        }
+        if ((parsedUrl.searchParams.get('order') || '').startsWith('key.asc')) {
+          rows = rows.slice().sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+        }
+        const limParam = Number(parsedUrl.searchParams.get('limit'));
+        const offParam = Number(parsedUrl.searchParams.get('offset') || 0);
+        if (Number.isFinite(limParam) && limParam > 0) rows = rows.slice(offParam, offParam + limParam);
         if (selectParam === 'key,updated_at') {
           return makeJsonResponse(
             200,
@@ -326,6 +342,7 @@ function createSimulatedEnvironment() {
     localStorageMock,
     indexedDBMock,
     cloudKvTable,
+    requestLog,
     setNetworkMode(mode) {
       networkMode = mode;
       mockNavigator.onLine = mode === 'online';
@@ -545,7 +562,7 @@ async function main() {
 
     env.localStorageMock.setQuotaChars(2_500_000);
     console.log(
-      '✓ Suite 1 (Quota Overflow, IndexedDB & Slow/Offline Cloud Resilience) : PASS (500KB overrides survived 320KB quota + offline/timeout)'
+      'âœ“ Suite 1 (Quota Overflow, IndexedDB & Slow/Offline Cloud Resilience) : PASS (500KB overrides survived 320KB quota + offline/timeout)'
     );
   }
 
@@ -658,14 +675,14 @@ async function main() {
     // 5. VIP-Owned Custom Shops (1 verified GPS + 1 newly submitted shop with GPS awaiting Admin review)
     const vipShopVerified = {
       id: 'rest-vip-dara-shop-1',
-      nameKh: 'ភោជនីយដ្ឋាន តារា ម្ហូបខ្មែរ VIP',
+      nameKh: 'áž—áŸ„áž‡áž“áž¸áž™ážŠáŸ’áž‹áž¶áž“ ážáž¶ážšáž¶ áž˜áŸ’áž áž¼áž”ážáŸ’áž˜áŸ‚ážš VIP',
       nameEn: 'Dara Khmer VIP Kitchen',
-      descriptionKh: 'ហាងម្ហូបខ្មែររបស់សមាជិក VIP',
+      descriptionKh: 'áž áž¶áž„áž˜áŸ’áž áž¼áž”ážáŸ’áž˜áŸ‚ážšážšáž”ážŸáŸ‹ážŸáž˜áž¶áž‡áž·áž€ VIP',
       descriptionEn: 'VIP member authentic Khmer restaurant',
       photoUrl: 'data:image/jpeg;base64,VIP_SHOP_1_PHOTO_DATA',
       profileImage: 'data:image/jpeg;base64,VIP_SHOP_1_PHOTO_DATA',
-      addressKh: 'ទួលគោក រាជធានីភ្នំពេញ',
-      provinceKh: 'រាជធានីភ្នំពេញ',
+      addressKh: 'áž‘áž½áž›áž‚áŸ„áž€ ážšáž¶áž‡áž’áž¶áž“áž¸áž—áŸ’áž“áŸ†áž–áŸáž‰',
+      provinceKh: 'ážšáž¶áž‡áž’áž¶áž“áž¸áž—áŸ’áž“áŸ†áž–áŸáž‰',
       phone: '098776655',
       latitude: 11.5761,
       longitude: 104.8992,
@@ -681,19 +698,19 @@ async function main() {
       membershipTier: 'premium',
       paymentStatus: 'verified',
       menuItems: [
-        { id: 'm-vip-1', nameKh: 'អាម៉ុកត្រីពិសេស', nameEn: 'Special Fish Amok', priceUsd: 6.5, priceRiel: 26000 },
+        { id: 'm-vip-1', nameKh: 'áž¢áž¶áž˜áŸ‰áž»áž€ážáŸ’ážšáž¸áž–áž·ážŸáŸážŸ', nameEn: 'Special Fish Amok', priceUsd: 6.5, priceRiel: 26000 },
       ],
       updatedAt: new Date(nowMs - 3600_000).toISOString(),
     };
 
     const vipShopPendingGps = {
       id: 'rest-vip-dara-pending-gps-2',
-      nameKh: 'ហាងកាហ្វេ តារា សាខាទី២ (រង់ចាំផ្ទៀងផ្ទាត់ផែនទី)',
+      nameKh: 'áž áž¶áž„áž€áž¶áž áŸ’ážœáŸ ážáž¶ážšáž¶ ážŸáž¶ážáž¶áž‘áž¸áŸ¢ (ážšáž„áŸ‹áž…áž¶áŸ†áž•áŸ’áž‘áŸ€áž„áž•áŸ’áž‘áž¶ážáŸ‹áž•áŸ‚áž“áž‘áž¸)',
       nameEn: 'Dara Cafe Branch 2',
       photoUrl: 'data:image/jpeg;base64,VIP_SHOP_2_PHOTO_DATA',
       profileImage: 'data:image/jpeg;base64,VIP_SHOP_2_PHOTO_DATA',
-      addressKh: 'ក្រុងសៀមរាប ខេត្តសៀមរាប',
-      provinceKh: 'សៀមរាប',
+      addressKh: 'áž€áŸ’ážšáž»áž„ážŸáŸ€áž˜ážšáž¶áž” ážáŸážáŸ’ážážŸáŸ€áž˜ážšáž¶áž”',
+      provinceKh: 'ážŸáŸ€áž˜ážšáž¶áž”',
       phone: '098776655',
       latitude: 0,
       longitude: 0,
@@ -872,8 +889,14 @@ async function main() {
       paymentProofsVault: {},
       appSettings: { vipQuarterlyPriceUsd: 4.99, vipAnnualPriceUsd: 14.99 },
     });
+    // No hard-coded accounts may be injected by the sync: the merged list must be EXACTLY the 4 real users.
+    const syncedRealUsers = cloudSyncRes.mergedUsers;
+    assert.ok(
+      !syncedRealUsers.some((u) => /chorn/i.test(String(u.id) + String(u.email) + String(u.name))),
+      'no hard-coded tester account may be injected by syncAllAppDataWithSupabase'
+    );
     assert.equal(
-      cloudSyncRes.mergedUsers.length,
+      syncedRealUsers.length,
       4,
       'syncAllAppDataWithSupabase must recover all 4 registered users from pre-update backup even if localState.users was empty'
     );
@@ -886,7 +909,7 @@ async function main() {
 
     env.localStorageMock.setQuotaChars(2_500_000);
     console.log(
-      '✓ Suite 2 (Registered Users, Session, Avatars, VIP 30d/165d/365d, VIP Shops & Txns) : PASS (100% preserved across 2 APK upgrades)'
+      'âœ“ Suite 2 (Registered Users, Session, Avatars, VIP 30d/165d/365d, VIP Shops & Txns) : PASS (100% preserved across 2 APK upgrades)'
     );
   }
 
@@ -1150,13 +1173,198 @@ async function main() {
     );
 
     console.log(
-      '✓ Suite 3 (Anti-Revert Custom Photos & Anti-Resurrect Deleted Items) : PASS (Food, Shop & Tourism verified on upgrade + fresh device sync)'
+      'âœ“ Suite 3 (Anti-Revert Custom Photos & Anti-Resurrect Deleted Items) : PASS (Food, Shop & Tourism verified on upgrade + fresh device sync)'
+    );
+  }
+
+
+  // ===========================================================================
+  // SUITE 4: USER-LIST ROOT-CAUSE REGRESSION (pagination, shrink guard, 402 outbox, egress, upgrade audit)
+  // ===========================================================================
+  {
+    const integ = await import(pathToFileURL(path.join(ROOT_DIR, 'src', 'services', 'userDataIntegrityService.ts')).href);
+    env.localStorageMock.clear();
+    env.cloudKvTable.clear();
+    env.setNetworkMode('online');
+    app.resetSupabaseEgressCooldown();
+    env.localStorageMock.setQuotaChars(2_500_000);
+    const iso = (offsetMs = 0) => new Date(Date.now() + offsetMs).toISOString();
+    const dayMs4 = 24 * 60 * 60 * 1000;
+    const mkUser = (i, vip = false) => ({
+      id: `u-${String(i).padStart(5, '0')}`,
+      name: `User ${i}`,
+      email: `user${i}@example.com`,
+      role: 'user',
+      createdAt: '2026-10-01',
+      ...(vip
+        ? { membershipTier: 'premium_vip', subscriptionStatus: 'active', subscriptionExpiryDate: iso(20 * dayMs4) }
+        : {}),
+    });
+    const syncState = (over) => ({
+      users: [],
+      deletedUsers: [],
+      transactions: [],
+      customRestaurants: [],
+      supportTickets: [],
+      paymentProofsVault: {},
+      appSettings: { vipQuarterlyPriceUsd: 4.99, vipAnnualPriceUsd: 14.99 },
+      ...over,
+    });
+
+    // 4a. Pagination: 2,600 atomic users must ALL be returned (the old single request was capped at 1000)
+    for (let i = 0; i < 2600; i++) {
+      env.cloudKvTable.set(`kft_user_u-${i}`, { key: `kft_user_u-${i}`, payload: mkUser(i, i % 10 === 0), updated_at: iso(-i * 1000) });
+    }
+    const allRows = await app.pullCloudDocumentsByPrefix('kft_user_');
+    const pulledKeys = new Set(allRows.map((r) => r.key));
+    let missingFromPull = 0;
+    for (let i = 0; i < 2600; i++) if (!pulledKeys.has('kft_user_u-' + i)) missingFromPull++;
+    // (a secondary-failover mirror from earlier suites may legitimately add a few extra rows, never fewer)
+    assert.equal(missingFromPull, 0, 'prefix pull must paginate and return ALL 2,600 users (old code returned at most 1000); got ' + allRows.length);
+    assert.equal(new Set(allRows.map((r) => r.key)).size, allRows.length, 'no duplicate rows across pages');
+    assert.equal(app.wasPrefixPullComplete('kft_user_'), true, 'complete pull must be flagged complete');
+    const deltaRows = await app.pullCloudDocumentsByPrefix('kft_user_', 12000, { sinceIso: iso(-100_500) });
+    assert.ok(deltaRows.length >= 90 && deltaRows.length <= 105, `delta pull must return only recently changed rows (got ${deltaRows.length})`);
+
+    // 4b. Server-aggregate shrink guard (an incomplete device list can never replace the central list)
+    env.cloudKvTable.clear();
+    env.cloudKvTable.set('kft_cloud_users_v2', {
+      key: 'kft_cloud_users_v2',
+      payload: Array.from({ length: 20 }, (_, i) => mkUser(i)),
+      updated_at: iso(),
+    });
+    await app.pullCloudDocument('kft_cloud_users_v2');
+    assert.equal(integ.readServerAggregateCount(), 20, 'a successful read records the server list size');
+    const blocked = await app.pushCloudDocument('kft_cloud_users_v2', [mkUser(1), mkUser(2)]);
+    assert.equal(blocked, false, '2-user device list must be refused');
+    assert.equal(env.cloudKvTable.get('kft_cloud_users_v2').payload.length, 20, 'central list must be untouched');
+    assert.ok(integ.readIntegrityLog().some((e) => e.code === 'aggregate_push_blocked'), 'blocked overwrite must be logged');
+    assert.equal(await app.pushCloudDocument('kft_cloud_users_v2', Array.from({ length: 19 }, (_, i) => mkUser(i))), true, 'normal 1-user removal still works');
+    assert.equal(env.cloudKvTable.get('kft_cloud_users_v2').payload.length, 19);
+    assert.equal(await app.pushCloudDocument('kft_cloud_users_v2', [], 12000, { allowDestructive: true }), true, 'explicit admin purge is allowed');
+    env.cloudKvTable.set('kft_cloud_users_v2', {
+      key: 'kft_cloud_users_v2',
+      payload: Array.from({ length: 20 }, (_, i) => mkUser(i)),
+      updated_at: iso(),
+    });
+
+    // 4c. A FAILED read is not an EMPTY read
+    env.setNetworkMode('quota_402');
+    app.resetSupabaseEgressCooldown();
+    await app.pullCloudDocument('kft_cloud_users_v2');
+    assert.equal(app.wasCloudPullOk('kft_cloud_users_v2'), false, 'HTTP 402 read must NOT be treated as "no users"');
+    env.setNetworkMode('online');
+    app.resetSupabaseEgressCooldown();
+    await app.pullCloudDocument('kft_cloud_users_v2');
+    assert.equal(app.wasCloudPullOk('kft_cloud_users_v2'), true);
+
+    // 4d. Registration during a 402 outage is queued and delivered later (no more "lost until re-register")
+    const outageUser = { ...mkUser(99999, true), name: 'Registered During Outage' };
+    env.setNetworkMode('quota_402');
+    app.resetSupabaseEgressCooldown();
+    await app.pushCloudDocument('kft_user_u-99999', outageUser);
+    assert.ok(app.getCloudOutboxSize() >= 1, 'failed critical write must be queued in the durable outbox');
+    assert.equal(env.cloudKvTable.has('kft_user_u-99999'), false, 'row cannot exist on the restricted primary yet');
+    env.setNetworkMode('online');
+    app.resetSupabaseEgressCooldown();
+    const flushed = await app.flushCloudOutbox();
+    assert.ok(flushed.flushed >= 1, 'outbox must deliver after the server recovers');
+    assert.equal(env.cloudKvTable.get('kft_user_u-99999')?.payload?.name, 'Registered During Outage');
+    assert.equal(app.getCloudOutboxSize(), 0, 'outbox is empty after delivery');
+
+    // 4e. Admin device syncing during an outage with a tiny local list must not touch the central list
+    const adminUser = { id: 'admin-authorized-single', role: 'admin', name: 'Admin', username: 'admin', email: '' };
+    env.setNetworkMode('quota_402');
+    app.resetSupabaseEgressCooldown();
+    await app.syncAllAppDataWithSupabase(syncState({ users: [mkUser(1), mkUser(2)], currentUser: adminUser }));
+    assert.equal(env.cloudKvTable.get('kft_cloud_users_v2').payload.length, 20, 'outage sync must not overwrite the central list');
+    env.setNetworkMode('online');
+    app.resetSupabaseEgressCooldown();
+    const adminOnline = await app.syncAllAppDataWithSupabase(syncState({ users: [mkUser(1), mkUser(2)], currentUser: adminUser }));
+    assert.ok(adminOnline.mergedUsers.length >= 20, 'admin with a tiny local list must recover ALL central users');
+    assert.ok(env.cloudKvTable.get('kft_cloud_users_v2').payload.length >= 20, 'central list must never shrink');
+
+    // 4f. Egress: steady-state regular devices never download whole-list user documents
+    env.setNetworkMode('online');
+    app.resetSupabaseEgressCooldown();
+    const regularUser = mkUser(5);
+    env.cloudKvTable.set('kft_user_u-00005', { key: 'kft_user_u-00005', payload: regularUser, updated_at: iso() });
+    env.requestLog.length = 0;
+    await app.syncAllAppDataWithSupabase(syncState({ users: [regularUser], currentUser: regularUser }));
+    const aggReads = env.requestLog.filter((r) => r.method === 'GET' && /kft_cloud_users_v[12]|kft_cloud_vip_backup_v1/.test(r.url));
+    assert.equal(aggReads.length, 0, 'regular devices must not download whole-list user/VIP documents every sync');
+    const legacyUser = mkUser(777);
+    env.requestLog.length = 0;
+    await app.syncAllAppDataWithSupabase(syncState({ users: [legacyUser], currentUser: legacyUser }));
+    assert.ok(
+      env.requestLog.some((r) => /kft_cloud_users_v2/.test(r.url)),
+      'a legacy account with no atomic row still gets a one-time aggregate lookup'
+    );
+
+    // 4g. Upgrade audit proves no user / VIP loss across a version change (and flags it when there is)
+    env.localStorageMock.clear();
+    const upUsers = Array.from({ length: 12 }, (_, i) => mkUser(i, i < 4));
+    env.localStorageMock.setItem('kft_app_installed_ver', '2.6.9_1400');
+    env.localStorageMock.setItem('kft_users_v5', JSON.stringify(upUsers));
+    runMainPreBoot('2.7.0', 1500);
+    const upgradeAudit = JSON.parse(env.localStorageMock.getItem('kft_upgrade_audit_log_v1'));
+    assert.equal(upgradeAudit[0].usersBefore, 12);
+    assert.equal(upgradeAudit[0].usersAfter, 12, 'all 12 users present after upgrade');
+    assert.equal(upgradeAudit[0].vipBefore, 4);
+    assert.equal(upgradeAudit[0].vipAfter, 4, 'all 4 VIPs present after upgrade');
+    const bootLog = JSON.parse(env.localStorageMock.getItem('kft_integrity_log_v1') || '[]');
+    assert.ok(!bootLog.some((e) => e.code === 'upgrade_lost_users'), 'healthy upgrade must not raise a loss alarm');
+    integ.recordUpgradeAudit({ from: 'a', to: 'b', usersBefore: 12, usersAfter: 3, vipBefore: 4, vipAfter: 0 });
+    assert.ok(
+      integ.readIntegrityLog().some((e) => e.code === 'upgrade_lost_users' && e.level === 'critical'),
+      'negative control: a lossy upgrade MUST be flagged critical'
+    );
+
+    // 4h. Shrink detector (wiped/short list after update vs confirmed high-water mark)
+    integ.resetUserHighWater(0);
+    integ.noteConfirmedUserCount(500, 40);
+    const shrinkCheck = integ.runUserDataIntegrityCheck(Array.from({ length: 3 }, (_, i) => mkUser(i)), null);
+    assert.equal(shrinkCheck.shrink.level, 'critical', '500 -> 3 users must be flagged critical');
+
+    // 4i. PRIVACY: the public ntfy.sh failover channel must never receive personal data or secrets
+    const piiKeys = [
+      'kft_user_x', 'kft_avatar_x', 'kft_proof_x', 'kft_cloud_users_v2', 'kft_cloud_users_v1', 'kft_cloud_vip_backup_v1',
+      'kft_cloud_deleted_users_v1', 'kft_cloud_transactions_v1', 'kft_cloud_deleted_transactions_v1',
+      'kft_cloud_support_tickets_v1', 'kft_cloud_app_settings_v1', 'kft_cloud_admin_vip_pricing_v2',
+      'kft_admin_pin_security_v1', 'kft_cloud_food_checkin_reward_claims_v1', 'kft_cloud_custom_restaurants_v1',
+      'kft_cloud_media_overrides_v1', 'kft_ov_rest_x', 'kft_user_', 'kft_avatar_', 'kft_proof_',
+    ];
+    for (const k of piiKeys) {
+      assert.equal(app.isKeyEligibleForSecondaryFailover(k), false, 'must NOT be eligible for the public ntfy channel: ' + k);
+    }
+    for (const k of ['kft_ov_food_x', 'kft_ov_dest_x', 'kft_ov_trend_x']) {
+      assert.equal(app.isKeyEligibleForSecondaryFailover(k), true, 'public catalogue content may use the failover: ' + k);
+    }
+    env.setNetworkMode('quota_402');
+    app.resetSupabaseEgressCooldown();
+    env.requestLog.length = 0;
+    await app.pushCloudDocument('kft_user_u-88888', { ...mkUser(88888), phone: '012345678' });
+    await app.pushCloudDocument('kft_proof_u-88888', { dataUrl: 'data:image/png;base64,AAAA' });
+    await app.pushCloudDocument('kft_cloud_users_v2', [mkUser(1), mkUser(2), mkUser(3)]);
+    await app.pushCloudDocument('kft_admin_pin_security_v1', { pinHash: 'secret' });
+    assert.equal(
+      env.requestLog.filter((r) => /ntfy\.sh/.test(r.url) && r.method !== 'GET').length,
+      0,
+      'a failed Supabase write of personal data must NOT be published to ntfy.sh'
+    );
+    env.setNetworkMode('online');
+    app.resetSupabaseEgressCooldown();
+
+    env.setNetworkMode('online');
+    app.resetSupabaseEgressCooldown();
+    console.log(
+      'âœ“ Suite 4 (Pagination >1000, Shrink Guard, 402 Outbox, Failed-Readâ‰ Empty, Egress, Upgrade Audit, Shrink Alarm) : PASS'
     );
   }
 
   const elapsedMs = Date.now() - t0;
   console.log('========================================================================');
-  console.log(` ALL 3 MIGRATION & DATA SAFETY SUITES PASSED 100% (${elapsedMs} ms)`);
+  console.log(` ALL 4 MIGRATION & DATA SAFETY SUITES PASSED 100% (${elapsedMs} ms)`);
   console.log('========================================================================');
 }
 

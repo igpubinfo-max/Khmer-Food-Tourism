@@ -2,8 +2,10 @@ import {
   getDestinationGoogleExternalUrl,
   getRestaurantGoogleExternalUrl,
   isHotelBusinessRecord,
+  isAdminAccount,
   isPlaceLocationVerified,
   isUserOwnerOfRestaurantRecord,
+  isUserVipActive,
   resolveFoodPhotoUrl,
   type FoodItem,
   type Language,
@@ -901,6 +903,7 @@ export function tryExecuteAiAgentTurn(params: {
   trendingFoods: TrendingFoodItem[];
   activeProvinceKh?: string;
   userCoords?: { lat: number; lng: number } | null;
+  isVipVerified?: boolean;
   generateAiTripPlan: (
     provinceKh: string,
     durationDays: number,
@@ -931,6 +934,41 @@ export function tryExecuteAiAgentTurn(params: {
 
   const userRole = resolveAiAgentUserRole(currentUser, restaurants);
   const rateKey = currentUser?.id || 'guest-device';
+
+  // Enforce strict VIP-only access for AI Agent execution
+  const hasVerifiedVip = Boolean(
+    params.isVipVerified !== false &&
+      currentUser &&
+      (isAdminAccount(currentUser) || isUserVipActive(currentUser))
+  );
+  if (!hasVerifiedVip) {
+    const latencyMs = Math.max(1, Math.round(performance.now() - startedAt));
+    recordAiAgentTelemetryEvent({
+      user: currentUser,
+      userRole,
+      toolName: 'recommend_khmer_food',
+      query: trimmed,
+      latencyMs,
+      status: 'blocked',
+      note: 'Blocked: Free user attempted AI Assistant query (VIP membership required)',
+    });
+    return {
+      handled: true,
+      toolName: 'recommend_khmer_food',
+      userRole,
+      latencyMs,
+      fromCache: false,
+      estimatedCostUsd: 0,
+      blockedReason: 'vip_required',
+      headline: tr(
+        language,
+        '👑 មុខងារ «ជំនួយការ AI ម្ហូបអាហារ» គឺសម្រាប់សមាជិក VIP ប៉ុណ្ណោះ។ សូមដំឡើងទៅកាន់គណនី VIP ដើម្បីសួរសំណួរ និងទទួលចម្លើយពី AI!',
+        '👑 The AI Assistant feature is exclusive to VIP members. Please upgrade to VIP to submit questions and receive AI-generated answers!',
+        '👑「AI 美食助手」为 VIP 会员专属功能。请升级 VIP 会员以提问并获取 AI 回答！'
+      ),
+      followUpChips: [],
+    };
+  }
 
   // Check rate limit first on agent intents
   const isAgentCandidate =

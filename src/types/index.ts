@@ -5,7 +5,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1477;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1478;
 export const APP_RELEASE_DATE = '2026-11-07';
 
 /**
@@ -469,7 +469,27 @@ export const sanitizeRestaurantGalleryPhotos = (
  * Resolve any Food, Shop, or Destination photo URL with an always-fresh build + update cache-buster
  * so Android WebView and browser HTTP caches never display outdated static or cloud-hosted pictures.
  */
-export const resolveFoodPhotoUrl = (photoUrl?: string, photoUpdatedAt?: string): string => {
+/**
+ * Supabase Pro "Image Transformation": serve a resized + recompressed copy of a photo that lives in the public
+ * `food-media` Storage bucket (typically 60-80% smaller than the stored original => big egress and speed win).
+ * Anything that is not a food-media Storage URL is returned unchanged. Callers should keep an `onError` fallback to
+ * the original URL (see FoodCard) so a disabled transformation service can never leave a blank picture.
+ */
+export const toStorageThumbnail = (url: string, widthPx: number): string => {
+  const m = /^(https:\/\/[a-z0-9-]+\.supabase\.co)\/storage\/v1\/object\/public\/(food-media\/[^?#]+)(\?[^#]*)?$/i.exec(url || '');
+  if (!m) return url;
+  const q = new URLSearchParams(m[3] ? m[3].slice(1) : '');
+  q.set('width', String(Math.max(64, Math.min(1600, Math.round(widthPx)))));
+  q.set('quality', '70');
+  return `${m[1]}/storage/v1/render/image/public/${m[2]}?${q.toString()}`;
+};
+
+export const resolveFoodPhotoUrl = (photoUrl?: string, photoUpdatedAt?: string, thumbWidthPx?: number): string => {
+  const full = resolveFoodPhotoUrlFull(photoUrl, photoUpdatedAt);
+  return thumbWidthPx ? toStorageThumbnail(full, thumbWidthPx) : full;
+};
+
+const resolveFoodPhotoUrlFull = (photoUrl?: string, photoUpdatedAt?: string): string => {
   if (!photoUrl || typeof photoUrl !== 'string') return '';
   const trimmed = photoUrl.trim();
   if (!trimmed) return '';
@@ -1581,10 +1601,10 @@ export const sortRestaurantsChronologically = (list: Restaurant[]): Restaurant[]
   });
 };
 
-// Helper to identify built-in seed restaurants (rest-1 to rest-9999) vs user custom/VIP restaurants (rest-<13-digit-timestamp>-... / rest-vip-...)
+// Helper to identify built-in seed restaurants (rest-1 to rest-9999, rest-youth-1 to rest-youth-999, hotel-1 to hotel-999) vs user custom/VIP restaurants (rest-<13-digit-timestamp>-... / rest-vip-...)
 export const isSeedRestaurantId = (id: string | number): boolean => {
-  const str = String(id || '');
-  const match = str.match(/^rest-(\d+)$/);
+  const str = String(id || '').trim();
+  const match = str.match(/^(?:rest|rest-youth|hotel)-(\d+)$/i);
   if (!match) return false;
   const num = parseInt(match[1], 10);
   return num >= 1 && num <= 9999;
@@ -2176,8 +2196,71 @@ export interface VerifiedGooglePlaceCoordEntry {
   updatedAt: string;
 }
 
-const COORD_VERIFIED_GPLACES_STORAGE_KEY = 'kft_coord_verified_gplaces_v1';
+const COORD_VERIFIED_GPLACES_STORAGE_KEY = 'kft_coord_verified_gplaces_v5';
 let inMemoryCoordVerifiedGplaces: Record<string, VerifiedGooglePlaceCoordEntry> | null = null;
+
+const GENERIC_PLACE_STOP_WORDS = new Set([
+  'restaurant', 'restaurants', 'cafe', 'coffee', 'café', 'bakery', 'bistro', 'bar', 'grill', 'kitchen',
+  'eatery', 'food', 'shop', 'store', 'house', 'place', 'lounge', 'garden', 'club', 'pub', 'dining',
+  'hotel', 'resort', 'guesthouse', 'villa', 'boutique', 'hostel', 'stay', 'lodge', 'inn', 'spa',
+  'authentic', 'khmer', 'cambodian', 'cambodia', 'traditional', 'local', 'family', 'street', 'market',
+  'old', 'new', 'river', 'riverside', 'riverfront', 'beach', 'sea', 'seafood', 'view', 'sunset', 'night',
+  'phnom', 'penh', 'siem', 'reap', 'sihanoukville', 'preah', 'sihanouk', 'kampot', 'kep', 'kaeb',
+  'battambang', 'kampong', 'cham', 'thom', 'chhnang', 'speu', 'kandal', 'takeo', 'prey', 'veng',
+  'svay', 'rieng', 'kratie', 'stung', 'treng', 'ratanakiri', 'banlung', 'mondulkiri', 'sen', 'monorom',
+  'koh', 'kong', 'pursat', 'banteay', 'meanchey', 'poipet', 'sisophon', 'pailin', 'oddar',
+  'vihear', 'tboung', 'tbong', 'khmum', 'suong', 'bkk1', 'bkk', 'tuol', 'toul', 'kork', 'tom', 'poung',
+  'pich', 'elysee', 'elysée', 'flagship', 'branch', 'roastery', 'reserve', 'specialty', 'tea', 'ice', 'cream',
+  'ភោជនីយដ្ឋាន', 'អាហារដ្ឋាន', 'ហាង', 'កាហ្វេ', 'ហាងកាហ្វេ', 'បាយ', 'គុយទាវ', 'ម្ហូប', 'ខ្មែរ', 'គ្រឿងសមុទ្រ',
+  'សាច់អាំង', 'ស៊ុប', 'បង្អែម', 'នំប៉័ង', 'តែគុជ', 'ភេសជ្ជៈ', 'មាត់ទន្លេ', 'ឆ្នេរ', 'ផ្សារ', 'ចាស់', 'ថ្មី', 'សាខា',
+  'សណ្ឋាគារ', 'រីសត', 'ផ្ទះសំណាក់', 'បឹងហ្គាឡូ', 'វីឡា', 'រមណីយដ្ឋាន', 'តំបន់ទេសចរណ៍',
+  'ភ្នំពេញ', 'សៀមរាប', 'ព្រះសីហនុ', 'កំពត', 'កែប', 'បាត់ដំបង', 'កំពង់ចាម', 'កំពង់ធំ', 'កំពង់ឆ្នាំង',
+  'កំពង់ស្ពឺ', 'កណ្តាល', 'តាកែវ', 'ព្រៃវែង', 'ស្វាយរៀង', 'ក្រចេះ', 'ស្ទឹងត្រែង', 'រតនគិរី', 'មណ្ឌលគិរី',
+  'កោះកុង', 'ពោធិ៍សាត់', 'បន្ទាយមានជ័យ', 'ប៉ៃលិន', 'ឧត្តរមានជ័យ', 'ព្រះវិហារ', 'ត្បូងឃ្មុំ', 'បឹងកេងកង',
+  'ទួលគោក', 'ទួលទំពូង', 'កោះពេជ្រ', 'ចតុមុខ', 'the', 'and', 'of', 'in', 'at', 'by', 'no', 'st', 'rd', 'cuisine'
+]);
+
+const extractDistinctiveBrandTokens = (text?: string | null): string[] => {
+  if (!text) return [];
+  const cleaned = String(text)
+    .toLowerCase()
+    .replace(/[()[\]{}|/\\,.;:'"`~!@#$%^&*+=<>?-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return cleaned
+    .split(' ')
+    .map((t) => t.trim())
+    .filter((t) => t.length >= 2 && !GENERIC_PLACE_STOP_WORDS.has(t) && !/^\d+$/.test(t));
+};
+
+/**
+ * Verifies that a resolved Google Maps place name genuinely shares at least one distinctive brand/name token
+ * with the target shop/hotel/destination (preventing neighboring shops like "The Kori Elysée Koh Pich"
+ * from hijacking "BROWN Coffee Koh Pich").
+ */
+export const doesVerifiedPlaceNameMatchTarget = (
+  candidateName?: string | null,
+  targetNameKh?: string | null,
+  targetNameEn?: string | null
+): boolean => {
+  const candRaw = String(candidateName || '').trim().toLowerCase();
+  if (!candRaw) return false;
+  const candTokens = new Set(extractDistinctiveBrandTokens(candRaw));
+  const targetTokens = [
+    ...extractDistinctiveBrandTokens(targetNameKh),
+    ...extractDistinctiveBrandTokens(targetNameEn),
+  ];
+  if (targetTokens.length === 0) return false;
+  for (const tok of targetTokens) {
+    if (candTokens.has(tok)) return true;
+    if (tok.length >= 3 && candRaw.includes(tok)) return true;
+  }
+  const targetCombined = `${targetNameKh || ''} ${targetNameEn || ''}`.toLowerCase();
+  for (const cTok of candTokens) {
+    if (cTok.length >= 3 && targetCombined.includes(cTok)) return true;
+  }
+  return false;
+};
 
 const computeSimpleMetersBetween = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
   const toRad = (deg: number) => (deg * Math.PI) / 180;
@@ -2197,6 +2280,10 @@ const loadCoordVerifiedGplacesMap = (): Record<string, VerifiedGooglePlaceCoordE
     return inMemoryCoordVerifiedGplaces;
   }
   try {
+    localStorage.removeItem('kft_coord_verified_gplaces_v1');
+    localStorage.removeItem('kft_coord_verified_gplaces_v2');
+    localStorage.removeItem('kft_coord_verified_gplaces_v3');
+    localStorage.removeItem('kft_coord_verified_gplaces_v4');
     const raw = localStorage.getItem(COORD_VERIFIED_GPLACES_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
@@ -2325,9 +2412,6 @@ export const buildCanonicalGoogleMapsPinUrl = (
     }
     return `https://www.google.com/maps/search/?api=1&query=${q}&query_place_id=${encodeURIComponent(cleanId)}`;
   }
-  if (placeNameQuery && placeNameQuery.trim().length > 2) {
-    return `https://www.google.com/maps/search/${encodeURIComponent(placeNameQuery.trim())}/@${latFixed},${lngFixed},17z`;
-  }
   return `https://www.google.com/maps/search/?api=1&query=${latFixed},${lngFixed}`;
 };
 
@@ -2398,11 +2482,15 @@ export const getRestaurantGoogleExternalUrl = (
   const lat = restaurant.latitude!;
   const lng = restaurant.longitude!;
   const hasValidCoords = isValidCambodiaCoordinates(lat, lng);
-  const cachedVerified = hasValidCoords ? getCachedVerifiedPlaceForCoords(restaurant.id, lat, lng) : null;
+  const rawCached = hasValidCoords ? getCachedVerifiedPlaceForCoords(restaurant.id, lat, lng) : null;
+  const cachedVerified =
+    rawCached && doesVerifiedPlaceNameMatchTarget(rawCached.officialName, restaurant.nameKh, restaurant.nameEn)
+      ? rawCached
+      : null;
   const rawPlaceId = restaurant.googlePlaceId || restaurant.googleMapsMeta?.placeId;
   const placeId = isValidOfficialGooglePlaceId(rawPlaceId) ? rawPlaceId : cachedVerified?.placeId;
   const placeNameForMaps = [
-    cachedVerified?.officialName || restaurant.nameKh || restaurant.nameEn,
+    restaurant.nameEn || restaurant.nameKh,
     restaurant.provinceEn || restaurant.provinceKh,
     'Cambodia',
   ]
@@ -2417,21 +2505,6 @@ export const getRestaurantGoogleExternalUrl = (
   const hasExplicitNamedMapUrl = isValidGoogleMapsUrl(trimmedMapUrl) && !isRawCoordOnlyUrl;
 
   if (mode === 'directions') {
-    // If a branded shop (e.g. rest-youth-*) or owner has an explicit named ?query=... URL without a ChIJ Place ID,
-    // extract that exact business name+street query so turn-by-turn navigation targets the official storefront.
-    if (hasExplicitNamedMapUrl && !isValidOfficialGooglePlaceId(placeId)) {
-      try {
-        const parsedUrl = new URL(trimmedMapUrl);
-        const namedQ = parsedUrl.searchParams.get('query') || parsedUrl.searchParams.get('q');
-        if (namedQ && namedQ.trim().length > 3) {
-          let dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(namedQ.trim())}`;
-          if (origin && isValidCambodiaCoordinates(origin.lat, origin.lng)) {
-            dirUrl += `&origin=${Number(origin.lat.toFixed(6))},${Number(origin.lng.toFixed(6))}`;
-          }
-          return dirUrl;
-        }
-      } catch {}
-    }
     if (hasValidCoords) {
       return buildCanonicalGoogleMapsDirectionsUrl(lat, lng, origin, placeId, placeNameForMaps);
     }
@@ -2441,9 +2514,12 @@ export const getRestaurantGoogleExternalUrl = (
     return '';
   }
 
-  // Honor explicit named Google Maps links (maps.app.goo.gl, /maps/place/, or named ?query=Brand+Street)
-  // while upgrading legacy bare ?query=lat,lng links to canonical @lat,lng,17z place cards.
-  if (hasExplicitNamedMapUrl && !isValidOfficialGooglePlaceId(placeId)) {
+  // Honor explicit short/place links (maps.app.goo.gl or /maps/place/) entered by Admin/VIP owner
+  if (
+    hasExplicitNamedMapUrl &&
+    !isValidOfficialGooglePlaceId(placeId) &&
+    (trimmedMapUrl.includes('maps.app.goo.gl') || trimmedMapUrl.includes('/maps/place/'))
+  ) {
     return trimmedMapUrl;
   }
 
@@ -2519,11 +2595,15 @@ export const getDestinationGoogleExternalUrl = (
   const lat = destination.latitude!;
   const lng = destination.longitude!;
   const hasValidCoords = isValidCambodiaCoordinates(lat, lng);
-  const cachedVerified = hasValidCoords ? getCachedVerifiedPlaceForCoords(destination.id, lat, lng) : null;
+  const rawCached = hasValidCoords ? getCachedVerifiedPlaceForCoords(destination.id, lat, lng) : null;
+  const cachedVerified =
+    rawCached && doesVerifiedPlaceNameMatchTarget(rawCached.officialName, destination.nameKh, destination.nameEn)
+      ? rawCached
+      : null;
   const rawPlaceId = destination.googlePlaceId || destination.googleMapsMeta?.placeId;
   const placeId = isValidOfficialGooglePlaceId(rawPlaceId) ? rawPlaceId : cachedVerified?.placeId;
   const placeNameForMaps = [
-    cachedVerified?.officialName || destination.nameKh || destination.nameEn,
+    destination.nameEn || destination.nameKh,
     destination.provinceEn || destination.provinceKh,
     'Cambodia',
   ]
@@ -2588,9 +2668,13 @@ export const getTrendingFoodGoogleExternalUrl = (
   if (!isValidCambodiaCoordinates(lat, lng)) {
     return '';
   }
-  const cachedVerified = getCachedVerifiedPlaceForCoords(item.id, lat, lng);
+  const rawCached = getCachedVerifiedPlaceForCoords(item.id, lat, lng);
+  const cachedVerified =
+    rawCached && doesVerifiedPlaceNameMatchTarget(rawCached.officialName, item.restaurantNameKh, item.restaurantNameEn)
+      ? rawCached
+      : null;
   const placeNameForMaps = [
-    cachedVerified?.officialName || item.restaurantNameKh || item.restaurantNameEn,
+    item.restaurantNameEn || item.restaurantNameKh,
     item.locationKh,
     'Cambodia',
   ]

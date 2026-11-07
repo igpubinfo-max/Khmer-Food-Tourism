@@ -38,8 +38,13 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
 
   const resolvedPhotoUrl = useMemo(() => {
     const raw = food.photoUrl || '/welcome/hero-bg.webp';
-    return resolveFoodPhotoUrl(raw, food.photoUpdatedAt);
+    // Grid cards show a resized copy (Supabase Image Transformation); onError below falls back to the original file.
+    return resolveFoodPhotoUrl(raw, food.photoUpdatedAt, 720);
   }, [food.photoUrl, food.photoUpdatedAt]);
+  const fullPhotoUrl = useMemo(
+    () => resolveFoodPhotoUrl(food.photoUrl || '/welcome/hero-bg.webp', food.photoUpdatedAt),
+    [food.photoUrl, food.photoUpdatedAt]
+  );
 
   return (
     <div 
@@ -57,7 +62,10 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
           decoding="async"
           onError={(e) => {
             const target = e.currentTarget;
-            if (!target.dataset.fallback) {
+            if (!target.dataset.fallback && fullPhotoUrl && target.src !== fullPhotoUrl && resolvedPhotoUrl !== fullPhotoUrl) {
+              target.dataset.fallback = 'full'; // resized copy unavailable -> original file
+              target.src = fullPhotoUrl;
+            } else if (target.dataset.fallback !== '1') {
               target.dataset.fallback = '1';
               target.src = '/welcome/hero-bg.webp';
             }

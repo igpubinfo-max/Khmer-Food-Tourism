@@ -13,6 +13,7 @@
  * 5. If no confident matching photo is available, returns `null` so the UI cleanly displays the default placeholder icon.
  */
 
+import { placesFetch, buildPlacesPhotoUrl, getEffectivePlacesKey } from './placesProxy';
 import type { TouristDestination } from '../types';
 import { isValidCambodiaCoordinates } from '../types';
 import { getCloudApiConfig } from './supabaseService';
@@ -329,7 +330,7 @@ async function queryGooglePlacesPhotoForAttraction(
   if (isGooglePlacesV1CurrentlyBlocked()) return null;
 
   const cfg = getCloudApiConfig();
-  const apiKey = (cfg.googleMapsApiKey || '').trim();
+  const apiKey = getEffectivePlacesKey();
   if (!apiKey) return null;
 
   const hasValidGps = isValidCambodiaCoordinates(destination.latitude, destination.longitude);
@@ -356,7 +357,7 @@ async function queryGooglePlacesPhotoForAttraction(
         },
       };
 
-      const res = await fetch(PLACES_SEARCH_TEXT_URL, {
+      const res = await placesFetch(PLACES_SEARCH_TEXT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -412,9 +413,7 @@ async function queryGooglePlacesPhotoForAttraction(
         for (const p of photos) {
           const photoResName = String(p?.name || '').trim();
           if (!photoResName) continue;
-          const candidateUrl = `https://places.googleapis.com/v1/${photoResName}/media?maxHeightPx=480&maxWidthPx=640&key=${encodeURIComponent(
-            apiKey
-          )}`;
+          const candidateUrl = buildPlacesPhotoUrl(photoResName, 640, 480, apiKey);
           const fp = normalizePhotoFingerprint(candidateUrl);
           if (!fp || usedFingerprints.has(fp)) continue;
           selectedUrls.push(candidateUrl);

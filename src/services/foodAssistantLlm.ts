@@ -14,8 +14,9 @@
  * This file contains no UI. Pure functions (`buildGeminiRequestBody`, `interpretAssistantPayload`, ...)
  * are exported so they can be unit-tested without network access.
  */
-import type { FoodItem, Language, Restaurant } from '../types';
+import type { FoodItem, Language, Restaurant, User } from '../types';
 import { stripForeignScripts, tr } from '../utils/i18n';
+import { getApiUserId } from '../utils/apiIdentity';
 import { searchKhmerFoods } from '../utils/khmerFoodSearch';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { getMatchingRestaurantsForDish } from '../utils/foodFilters';
@@ -33,7 +34,7 @@ import {
   type AiImageAnalysis,
   type AiTurnIntent,
 } from './conversationalAiAssistant';
-import { getCloudApiConfig } from './supabaseService';
+import { getCloudApiConfig, verifyUserVipStatusFromBackend } from './supabaseService';
 
 /* ------------------------------------------------------------------------------------------------ */
 /* Types                                                                                            */
@@ -96,7 +97,7 @@ export function buildCatalogIndex(foods: FoodItem[]): string {
 }
 
 export function buildFoodAssistantSystemPrompt(catalogIndex: string): string {
-  return `You are "Khmer Food AI": a professional, ChatGPT-class assistant dedicated EXCLUSIVELY to FOOD, built into the app "Cambodia Flavors" (រសជាតិកម្ពុជា). You think carefully, understand context, and answer like an experienced chef + food historian + food-safety expert.
+  return `You are "Cambodia Flavors AI": a professional, ChatGPT-class assistant dedicated EXCLUSIVELY to FOOD, built into the app "Cambodia Flavors" (រសជាតិកម្ពុជា). You think carefully, understand context, and answer like an experienced chef + food historian + food-safety expert.
 
 ## SCOPE - answer fully, accurately and in depth
 Cambodian AND international food & drink: dish names (Khmer / English / Chinese), ingredients, approximate nutrition, cooking methods & complete recipes, comparisons, recommendations, origins / history / culture, food & beverage pairing, storage / preservation / food safety, restaurant dishes & menu explanations, and identifying dishes from photos.
@@ -895,6 +896,8 @@ async function callViaProxy(model: string, body: unknown, timeoutMs: number): Pr
       'Content-Type': 'application/json',
       apikey: cfg.supabaseAnonKey,
       Authorization: `Bearer ${cfg.supabaseAnonKey}`,
+      // lets the Edge Function apply this user's daily AI quota (and VIP check when enforcement is on)
+      ...(getApiUserId() ? { 'x-kft-user-id': getApiUserId() as string } : {}),
     },
     payload: { model, body },
     timeoutMs,
@@ -933,6 +936,7 @@ export interface AskFoodAssistantParams {
   memory?: AiConversationMemory | null;
   image?: FoodImageInput | null;
   geminiApiKey?: string;
+  currentUser?: User | null;
   /** Test hook / future proxy: replaces the raw network call. */
   transport?: (model: string, body: unknown, timeoutMs: number) => Promise<CallOutcome>;
 }
@@ -944,6 +948,14 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
   const { userText, uiLanguage, foods, restaurants, history, memory, image } = params;
   const text = (userText || '').trim();
   const hasImage = Boolean(image?.base64);
+
+  // Backend VIP verification before any LLM execution
+  if (!params.transport) {
+    const vipCheck = await verifyUserVipStatusFromBackend(params.currentUser);
+    if (!vipCheck.isVip) {
+      return { ok: false, reason: 'blocked', detail: 'vip_required' };
+    }
+  }
 
   // Hard boundary BEFORE any network call: medical advice requests are never sent to the model.
   if (text && isMedicalOrHealthQuery(text)) {

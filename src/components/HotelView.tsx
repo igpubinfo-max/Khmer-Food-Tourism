@@ -117,8 +117,9 @@ export const HotelView: React.FC = () => {
           mapUrl: r.mapUrl || `https://www.google.com/maps/search/?api=1&query=${r.latitude},${r.longitude}`,
           latitude: r.latitude,
           longitude: r.longitude,
-          rating: r.rating || 4.9,
-          reviewCount: r.reviewCount || 128,
+          googlePlaceId: r.googlePlaceId,
+          rating: r.rating || 0,
+          reviewCount: r.reviewCount || 0,
           highlightsKh: r.signatureDishesKh?.length
             ? r.signatureDishesKh
             : ['បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ Wi-Fi និងចំណតរថយន្តសុវត្ថិភាព'],

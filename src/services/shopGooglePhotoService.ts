@@ -13,6 +13,7 @@
  * 5. If no matching photo is available, returns `null` so the UI cleanly displays `<DefaultShopIcon />`.
  */
 
+import { placesFetch, buildPlacesPhotoUrl, getEffectivePlacesKey } from './placesProxy';
 import type { Restaurant } from '../types';
 import { isValidCambodiaCoordinates, sanitizeRestaurantShopPhoto } from '../types';
 import { getCloudApiConfig } from './supabaseService';
@@ -375,7 +376,7 @@ async function searchGoogleMapsShopPhoto(
 ): Promise<ShopPhotoMatchResult | null> {
   if (isGooglePlacesV1CurrentlyBlocked()) return null;
   const cfg = getCloudApiConfig();
-  const apiKey = (cfg.googleMapsApiKey || '').trim();
+  const apiKey = getEffectivePlacesKey();
   if (!apiKey || apiKey.length < 15) return null;
 
   const hasValidGps = isValidCambodiaCoordinates(shop.latitude, shop.longitude);
@@ -406,7 +407,7 @@ async function searchGoogleMapsShopPhoto(
         },
       };
 
-      const res = await fetch(PLACES_SEARCH_TEXT_URL, {
+      const res = await placesFetch(PLACES_SEARCH_TEXT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -462,9 +463,7 @@ async function searchGoogleMapsShopPhoto(
         for (const p of photos) {
           const photoResName = String(p?.name || '').trim();
           if (!photoResName) continue;
-          const candidateUrl = `https://places.googleapis.com/v1/${photoResName}/media?maxWidthPx=480&maxHeightPx=480&key=${encodeURIComponent(
-            apiKey
-          )}`;
+          const candidateUrl = buildPlacesPhotoUrl(photoResName, 480, 480, apiKey);
           const fp = normalizeShopPhotoFingerprint(candidateUrl);
           if (!fp || usedFingerprints.has(fp)) continue;
           selectedUrls.push(candidateUrl);

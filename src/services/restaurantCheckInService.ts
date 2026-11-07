@@ -1,4 +1,4 @@
-// Khmer Food & Tourism — Smart Restaurant Discovery & GPS Check-in Service
+// Cambodia Flavors & Tourism — Smart Restaurant Discovery & GPS Check-in Service
 // Spatial Distance Verification, Anti-Spam Filtering, Moderation Queue & Privacy Protection
 
 import { Restaurant } from '../types';

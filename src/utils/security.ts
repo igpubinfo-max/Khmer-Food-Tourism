@@ -1,5 +1,5 @@
 /**
- * Khmer Food & Tourism - Enterprise Security & Cryptography Module
+ * Cambodia Flavors & Tourism - Enterprise Security & Cryptography Module
  * 
  * Implements:
  * 1. PBKDF2-HMAC-SHA256 Password Hashing with 100,000 iterations and 32-byte cryptographic salt (NIST SP 800-132)

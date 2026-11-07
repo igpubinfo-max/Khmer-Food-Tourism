@@ -10,7 +10,8 @@ Admin → Overview → Box 4.
 npm i -g supabase            # or: scoop install supabase
 supabase login
 supabase secrets set GEMINI_API_KEY=<key from aistudio.google.com> --project-ref ryvltobwuwuulazqjnza
-supabase functions deploy food-ai --project-ref ryvltobwuwuulazqjnza
+supabase functions deploy food-ai --no-verify-jwt --project-ref ryvltobwuwuulazqjnza
+# optional: OpenAI fail-over + limits -> see docs/SUPABASE_PRO_SETUP.md  (or just run deploy_supabase_pro.bat)
 ```
 
 After it works you can delete the Gemini key from Admin → Box 4 (the app then never holds a Gemini key).

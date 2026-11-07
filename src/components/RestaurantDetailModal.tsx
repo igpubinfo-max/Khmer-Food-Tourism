@@ -60,24 +60,6 @@ export const RestaurantDetailModal: React.FC = () => {
       resolveCoordinateVerifiedGooglePlace(selectedRestaurant).catch(() => {});
       setActivePhoto(selectedRestaurant.photoUrl);
       trackRestaurantView(selectedRestaurant.id);
-      if (!sanitizeDialablePhone(selectedRestaurant.phone)) {
-        resolveRestaurantPhoneOnDemand(
-          selectedRestaurant.nameKh || selectedRestaurant.nameEn,
-          selectedRestaurant.provinceKh
-        ).then((foundPhone) => {
-          if (foundPhone) {
-            const updated = { ...selectedRestaurant, phone: foundPhone };
-            setSelectedRestaurant(updated);
-            const canPersist =
-              currentUser?.role === 'admin' ||
-              currentUser?.id === 'admin-authorized-single' ||
-              Boolean(currentUser?.id && selectedRestaurant.ownerId === currentUser.id);
-            if (canPersist) {
-              updateRestaurant(updated);
-            }
-          }
-        });
-      }
     }
   }, [selectedRestaurant?.id]);
 

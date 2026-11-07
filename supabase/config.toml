@@ -1,0 +1,14 @@
+# Supabase CLI configuration for the Edge Functions.
+# verify_jwt = false: the app calls the functions with the new `sb_publishable_...` key, which is NOT a JWT, so the
+# gateway's JWT check would reject every request. Each function enforces its own rate limits, daily quotas and
+# request whitelists instead (see supabase/functions/*/sanitize.ts and _shared/).
+project_id = "ryvltobwuwuulazqjnza"
+
+[functions.food-ai]
+verify_jwt = false
+
+[functions.places-proxy]
+verify_jwt = false
+
+[functions.social-food-discovery]
+verify_jwt = false

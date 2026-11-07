@@ -1,4 +1,4 @@
-// Khmer Food & Tourism - Strictly Verified Cambodia Restaurant & Food Shop Directory (200 Verified Shops)
+// Cambodia Flavors & Tourism - Strictly Verified Cambodia Restaurant & Food Shop Directory (200 Verified Shops)
 // Rebuilt & Audited — 100% Verified Cambodia GPS Coordinates, Bundled Local Shop Photos & Canonical Google Maps Links
 import { Restaurant } from '../types';
 
@@ -22,9 +22,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "06:00 AM - 10:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.553152,104.928957",
-    "latitude": 11.553152,
-    "longitude": 104.928957,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Malis%20Restaurant%20Phnom%20Penh%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJJaAn2y9RCTERzQk2y8vSnbo",
+    "latitude": 11.553153,
+    "longitude": 104.929129,
     "rating": 4.9,
     "reviewCount": 420,
     "signatureDishesKh": [
@@ -44,7 +44,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "/Shop/rest-1.jpg",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJJaAn2y9RCTERzQk2y8vSnbo"
   },
   {
     "id": "rest-2",
@@ -65,9 +66,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "១១:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "11:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.559,104.92387",
-    "latitude": 11.559,
-    "longitude": 104.92387,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Romdeng%20Restaurant%20Phnom%20Penh%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJZ3m0TABRCTERjO3u-HGNuaM",
+    "latitude": 11.558767,
+    "longitude": 104.923952,
     "rating": 4.7,
     "reviewCount": 310,
     "signatureDishesKh": [
@@ -87,7 +88,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "/Shop/rest-2.jpg",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJZ3m0TABRCTERjO3u-HGNuaM"
   },
   {
     "id": "rest-3",
@@ -106,9 +108,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.550114,104.925439",
-    "latitude": 11.550114,
-    "longitude": 104.925439,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Eleven%20One%20Kitchen%20BKK1%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJY-45ESRRCTERZM43nIuqZ-M",
+    "latitude": 11.550147,
+    "longitude": 104.926388,
     "rating": 4.8,
     "reviewCount": 260,
     "signatureDishesKh": [
@@ -128,7 +130,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJY-45ESRRCTERZM43nIuqZ-M"
   },
   {
     "id": "rest-4",
@@ -147,9 +150,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "១០:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "10:00 AM - 09:30 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.557382,104.933324",
-    "latitude": 11.557382,
-    "longitude": 104.933324,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Kravanh%20Authentic%20Khmer%20Restaurant%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJI4Pe2TNRCTERBsvdzo-09q8",
+    "latitude": 11.564687,
+    "longitude": 104.922673,
     "rating": 4.7,
     "reviewCount": 180,
     "signatureDishesKh": [
@@ -169,7 +172,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJI4Pe2TNRCTERBsvdzo-09q8"
   },
   {
     "id": "rest-5",
@@ -190,9 +194,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "១០:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "10:00 AM - 10:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.555057,104.924525",
-    "latitude": 11.555057,
-    "longitude": 104.924525,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Khmer%20Surin%20Restaurant%20BKK1%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJh4BFeuxQCTERE6TiI29Kti8",
+    "latitude": 11.554895,
+    "longitude": 104.924918,
     "rating": 4.6,
     "reviewCount": 340,
     "signatureDishesKh": [
@@ -210,7 +214,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "/Shop/rest-5.jpg",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJh4BFeuxQCTERE6TiI29Kti8"
   },
   {
     "id": "rest-6",
@@ -229,9 +234,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៤:០០ ល្ងាច - ១១:០០ យប់",
     "openingHoursEn": "04:00 PM - 11:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.55064,104.930277",
-    "latitude": 11.55064,
-    "longitude": 104.930277,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sovanna%20Restaurant%20%26%20BBQ%20Phnom%20Penh%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJ7RWqyDFRCTERXd96LGckfkk",
+    "latitude": 11.554965,
+    "longitude": 104.930849,
     "rating": 4.6,
     "reviewCount": 290,
     "signatureDishesKh": [
@@ -252,7 +257,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJ7RWqyDFRCTERXd96LGckfkk"
   },
   {
     "id": "rest-7",
@@ -273,9 +279,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "06:30 AM - 09:30 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.583051,104.898124",
-    "latitude": 11.583051,
-    "longitude": 104.898124,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=One%20More%20Restaurant%20Toul%20Kork%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJEzYFqXlRCTERfq0FP5MCro4",
+    "latitude": 11.580071,
+    "longitude": 104.895719,
     "rating": 4.8,
     "reviewCount": 210,
     "signatureDishesKh": [
@@ -297,7 +303,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "/Shop/rest-7.jpg",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJEzYFqXlRCTERfq0FP5MCro4"
   },
   {
     "id": "rest-8",
@@ -318,9 +325,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "១១:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "11:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.553706,104.925791",
-    "latitude": 11.553706,
-    "longitude": 104.925791,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mok%20Mony%20Restaurant%20Phnom%20Penh%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJI0ajVLVRCTERyTUB0ytdH-o",
+    "latitude": 11.559502,
+    "longitude": 104.855087,
     "rating": 4.7,
     "reviewCount": 175,
     "signatureDishesKh": [
@@ -338,7 +345,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "/Shop/rest-8.jpg",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJI0ajVLVRCTERyTUB0ytdH-o"
   },
   {
     "id": "rest-9",
@@ -355,13 +363,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 215 Street 13, Sangkat Chey Chumneas (near National Museum), Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "012 802 072",
+    "phone": "017 704 354",
     "openingHoursKh": "១១:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "11:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5675,104.9292",
-    "latitude": 11.5675,
-    "longitude": 104.9292,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Friends%20the%20Restaurant%20Phnom%20Penh%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJ66z5QEhRCTERD5UhUVtB8_g",
+    "latitude": 11.566695,
+    "longitude": 104.929088,
     "rating": 4.8,
     "reviewCount": 360,
     "signatureDishesKh": [
@@ -379,7 +387,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "/Shop/rest-9.jpg",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJ66z5QEhRCTERD5UhUVtB8_g"
   },
   {
     "id": "rest-10",
@@ -400,9 +409,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "១១:០០ ព្រឹក - ១០:៣០ យប់",
     "openingHoursEn": "11:00 AM - 10:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.57489,104.92743",
-    "latitude": 11.57489,
-    "longitude": 104.92743,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bopha%20Phnom%20Penh%20Titanic%20Riverside%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJPRvdKklRCTERiKmQ8z92Tok",
+    "latitude": 11.574891,
+    "longitude": 104.927427,
     "rating": 4.6,
     "reviewCount": 290,
     "signatureDishesKh": [
@@ -420,7 +429,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "/Shop/rest-10.jpg",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJPRvdKklRCTERiKmQ8z92Tok"
   },
   {
     "id": "rest-11",
@@ -437,13 +447,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 27, Wat Bo Village, Sangkat Sala Kamreuk, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
-    "phone": "063 964 838",
+    "phone": "012 818 143",
     "openingHoursKh": "១១:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "11:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3522,103.8611",
-    "latitude": 13.3522,
-    "longitude": 103.8611,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=The%20Sugar%20Palm%20Siem%20Reap%2C%20Siem%20Reap%2C%20Cambodia&query_place_id=ChIJ9aDUBwsXEDERpv6kyOmDnMk",
+    "latitude": 13.35228,
+    "longitude": 103.860153,
     "rating": 4.8,
     "reviewCount": 390,
     "signatureDishesKh": [
@@ -464,7 +474,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "/Shop/rest-11.jpg",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJ9aDUBwsXEDERpv6kyOmDnMk"
   },
   {
     "id": "rest-12",
@@ -485,9 +496,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "១១:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "11:00 AM - 10:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3521,103.8562",
-    "latitude": 13.3521,
-    "longitude": 103.8562,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Chanrey%20Tree%20Riverside%20Siem%20Reap%2C%20Siem%20Reap%2C%20Cambodia&query_place_id=ChIJZc90E3AXEDERy5mydokFV-8",
+    "latitude": 13.356118,
+    "longitude": 103.85761,
     "rating": 4.9,
     "reviewCount": 480,
     "signatureDishesKh": [
@@ -505,7 +516,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "/Shop/rest-12.jpg",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJZc90E3AXEDERy5mydokFV-8"
   },
   {
     "id": "rest-13",
@@ -522,13 +534,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Wat Damnak Village, Sangkat Sala Kamreuk, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
-    "phone": "077 347 705",
+    "phone": "077 347 762",
     "openingHoursKh": "០៦:៣០ ល្ងាច - ១០:៣០ យប់",
     "openingHoursEn": "06:30 PM - 10:30 PM",
     "priceLevel": "$$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.349634,103.860148",
-    "latitude": 13.349634,
-    "longitude": 103.860148,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Cuisine%20Wat%20Damnak%20Siem%20Reap%2C%20Siem%20Reap%2C%20Cambodia&query_place_id=ChIJ4y9biHsXEDERVLRYgGEWEXk",
+    "latitude": 13.34963,
+    "longitude": 103.860142,
     "rating": 4.9,
     "reviewCount": 520,
     "signatureDishesKh": [
@@ -546,7 +558,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "/Shop/rest-13.jpg",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJ4y9biHsXEDERVLRYgGEWEXk"
   },
   {
     "id": "rest-14",
@@ -561,13 +574,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 8A Phum Slokram, Sangkat Slorkram, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
-    "phone": "017 363 284",
+    "phone": "012 363 284",
     "openingHoursKh": "១១:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "11:00 AM - 10:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.364821,103.862614",
-    "latitude": 13.364821,
-    "longitude": 103.862614,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Marum%20Training%20Restaurant%20Siem%20Reap%2C%20Siem%20Reap%2C%20Cambodia&query_place_id=ChIJ1bXzonQXEDERZevwiMx2Jt0",
+    "latitude": 13.364689,
+    "longitude": 103.862628,
     "rating": 4.8,
     "reviewCount": 360,
     "signatureDishesKh": [
@@ -585,7 +598,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJ1bXzonQXEDERZevwiMx2Jt0"
   },
   {
     "id": "rest-15",
@@ -602,13 +616,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Chocolate Road, Wat Damnak Area, Sangkat Sala Kamreuk, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
-    "phone": "078 340 140",
+    "phone": "078 342 404",
     "openingHoursKh": "១១:៣០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "11:30 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3497,103.8608",
-    "latitude": 13.3497,
-    "longitude": 103.8608,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Haven%20Restaurant%20Siem%20Reap%2C%20Siem%20Reap%2C%20Cambodia&query_place_id=ChIJE9tumWUXEDERiapAWHJ3ziY",
+    "latitude": 13.349663,
+    "longitude": 103.860934,
     "rating": 4.9,
     "reviewCount": 430,
     "signatureDishesKh": [
@@ -626,7 +640,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "/Shop/rest-15.jpg",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJE9tumWUXEDERiapAWHJ3ziY"
   },
   {
     "id": "rest-16",
@@ -645,9 +660,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "១១:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "11:00 AM - 10:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.356506,103.860076",
-    "latitude": 13.356506,
-    "longitude": 103.860076,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Viroth's%20Restaurant%20Siem%20Reap%2C%20Siem%20Reap%2C%20Cambodia&query_place_id=ChIJuRvr8nAXEDER_tiROhpxUZY",
+    "latitude": 13.356849,
+    "longitude": 103.86021,
     "rating": 4.9,
     "reviewCount": 450,
     "signatureDishesKh": [
@@ -665,7 +680,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJuRvr8nAXEDER_tiROhpxUZY"
   },
   {
     "id": "rest-17",
@@ -680,13 +696,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Wat Damnak / Sambatt Mean Chey, Sangkat Sala Kamreuk, Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
-    "phone": "076 226 2662",
+    "phone": "076 277 6667",
     "openingHoursKh": "១១:៣០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "11:30 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.349204,103.857159",
-    "latitude": 13.349204,
-    "longitude": 103.857159,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Spoons%20Cambodia%20Training%20Restaurant%2C%20Siem%20Reap%2C%20Cambodia&query_place_id=ChIJT4PEqHwXEDERMxREstk4zgQ",
+    "latitude": 13.349229,
+    "longitude": 103.857006,
     "rating": 4.9,
     "reviewCount": 320,
     "signatureDishesKh": [
@@ -704,7 +720,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJT4PEqHwXEDERMxREstk4zgQ"
   },
   {
     "id": "rest-18",
@@ -725,9 +742,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "១១:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "11:00 AM - 10:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.351935,103.855589",
-    "latitude": 13.351935,
-    "longitude": 103.855589,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Pou%20Restaurant%20and%20Bar%20Siem%20Reap%2C%20Siem%20Reap%2C%20Cambodia&query_place_id=ChIJhxIt7TYXEDERbNf5rzQpXmI",
+    "latitude": 13.351483,
+    "longitude": 103.863746,
     "rating": 4.8,
     "reviewCount": 290,
     "signatureDishesKh": [
@@ -745,7 +762,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "/Shop/rest-18.jpg",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJhxIt7TYXEDERbNf5rzQpXmI"
   },
   {
     "id": "rest-19",
@@ -764,9 +782,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "១០:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "10:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.48825,104.28908",
-    "latitude": 10.48825,
-    "longitude": 104.28908,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Kimly%20Seafood%20Restaurant%20Crab%20Market%20Kep%2C%20Kep%2C%20Cambodia&query_place_id=ChIJAWL_qk3NCTERMkTHC4szlBU",
+    "latitude": 10.486911,
+    "longitude": 104.289186,
     "rating": 4.9,
     "reviewCount": 490,
     "signatureDishesKh": [
@@ -786,7 +804,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJAWL_qk3NCTERMkTHC4szlBU"
   },
   {
     "id": "rest-20",
@@ -803,13 +822,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Kep Crab Market Waterfront (Plus Code F7PQ+VPC), Krong Kaeb, Kep",
     "provinceKh": "ខេត្តកែប",
     "provinceEn": "Kep",
-    "phone": "097 912 3456",
+    "phone": "071 439 9998",
     "openingHoursKh": "១០:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "10:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.487187,104.289266",
-    "latitude": 10.487187,
-    "longitude": 104.289266,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Holy%20Crab%20Restaurant%20Kep%2C%20Kep%2C%20Cambodia&query_place_id=ChIJsY7oVEzNCTERFwpH2Lc6FuY",
+    "latitude": 10.487178,
+    "longitude": 104.289251,
     "rating": 4.7,
     "reviewCount": 240,
     "signatureDishesKh": [
@@ -827,7 +846,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "/Shop/rest-20.jpg",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJsY7oVEzNCTERFwpH2Lc6FuY"
   },
   {
     "id": "rest-21",
@@ -844,13 +864,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Riverside Road (Street 735), Sangkat Kampong Kandal, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "012 235 102",
+    "phone": "017 306 557",
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:៣០ យប់",
     "openingHoursEn": "07:00 AM - 10:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.60647,104.1797",
-    "latitude": 10.60647,
-    "longitude": 104.1797,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Rikitikitavi%20Riverside%20Kampot%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJ--wl7Ig2CDERopjLJHI1AGg",
+    "latitude": 10.606263,
+    "longitude": 104.179772,
     "rating": 4.8,
     "reviewCount": 380,
     "signatureDishesKh": [
@@ -868,7 +888,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "/Shop/rest-21.jpg",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJ--wl7Ig2CDERopjLJHI1AGg"
   },
   {
     "id": "rest-22",
@@ -883,13 +904,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 735 (Riverside Road), Old Town, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "096 339 9888",
+    "phone": "010 446 044",
     "openingHoursKh": "១១:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "11:00 AM - 09:30 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6042,104.1772",
-    "latitude": 10.6042,
-    "longitude": 104.1772,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Atelier%20Kampot%20French%20%26%20Khmer%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJnY4d-Ig2CDERxHr09Y3SrbM",
+    "latitude": 10.60721,
+    "longitude": 104.179287,
     "rating": 4.9,
     "reviewCount": 290,
     "signatureDishesKh": [
@@ -907,7 +928,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJnY4d-Ig2CDERxHr09Y3SrbM"
   },
   {
     "id": "rest-23",
@@ -963,13 +985,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 2 (near Psar Nat Central Market), Sangkat Svay Pao, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
-    "phone": "070 283 262",
+    "phone": "078 263 144",
     "openingHoursKh": "១១:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "11:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.101518,103.198719",
-    "latitude": 13.101518,
-    "longitude": 103.198719,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Jaan%20Bai%20Restaurant%20Battambang%2C%20Battambang%2C%20Cambodia&query_place_id=ChIJT3C9lYxJBTER8uSNK9EIa4A",
+    "latitude": 13.101455,
+    "longitude": 103.19863,
     "rating": 4.8,
     "reviewCount": 310,
     "signatureDishesKh": [
@@ -989,7 +1011,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "/Shop/rest-25.jpg",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJT3C9lYxJBTER8uSNK9EIa4A"
   },
   {
     "id": "rest-26",
@@ -1008,9 +1031,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:៣០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:30 AM - 09:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.103325,103.196403",
-    "latitude": 13.103325,
-    "longitude": 103.196403,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Nary%20Kitchen%20%26%20Cooking%20School%2C%20Battambang%2C%20Cambodia&query_place_id=ChIJT5Dcr_RJBTERR2zOmWkxUaU",
+    "latitude": 13.103336,
+    "longitude": 103.196444,
     "rating": 4.8,
     "reviewCount": 260,
     "signatureDishesKh": [
@@ -1030,7 +1053,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJT5Dcr_RJBTERR2zOmWkxUaU"
   },
   {
     "id": "rest-27",
@@ -1049,9 +1073,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "១១:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "11:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.618956,103.5228",
-    "latitude": 10.618956,
-    "longitude": 103.5228,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sandan%20Training%20Restaurant%20Sihanoukville%2C%20Preah%20Sihanouk%2C%20Cambodia&query_place_id=ChIJvdWMvuzhBzERdTXwC7jmxXY",
+    "latitude": 10.618679,
+    "longitude": 103.525067,
     "rating": 4.7,
     "reviewCount": 270,
     "signatureDishesKh": [
@@ -1071,7 +1095,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJvdWMvuzhBzERdTXwC7jmxXY"
   },
   {
     "id": "rest-42",
@@ -1090,9 +1115,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ១០:៣០ យប់",
     "openingHoursEn": "06:30 AM - 10:30 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.356338,103.857669",
-    "latitude": 13.356338,
-    "longitude": 103.857669,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Malis%20Restaurant%20Siem%20Reap%20Pokambor%20Riverside%2C%20Siem%20Reap%2C%20Cambodia&query_place_id=ChIJW1G2anAXEDERu0nJw0rapOc",
+    "latitude": 13.356285,
+    "longitude": 103.857649,
     "rating": 4.9,
     "reviewCount": 724,
     "signatureDishesKh": [
@@ -1113,7 +1138,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJW1G2anAXEDERu0nJw0rapOc"
   },
   {
     "id": "rest-43",
@@ -1128,13 +1154,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 1.5, Sangkat Svay Pao, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
-    "phone": "017 860 003",
+    "phone": "069 734 745",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៦:០០ ល្ងាច",
     "openingHoursEn": "07:00 AM - 06:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.1027,103.1977",
-    "latitude": 13.1027,
-    "longitude": 103.1977,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Kinyei%20Specialty%20Cafe%20%26%20Bistro%20Battambang%2C%20Battambang%2C%20Cambodia&query_place_id=ChIJCaVhjYxJBTERht_x4CujIW8",
+    "latitude": 13.101304,
+    "longitude": 103.199022,
     "rating": 4.6,
     "reviewCount": 761,
     "signatureDishesKh": [
@@ -1153,7 +1179,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJCaVhjYxJBTERht_x4CujIW8"
   },
   {
     "id": "rest-44",
@@ -1172,9 +1199,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៩:០០ ព្រឹក - ០៥:៣០ ល្ងាច",
     "openingHoursEn": "09:00 AM - 05:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6122,104.3163",
-    "latitude": 10.6122,
-    "longitude": 104.3163,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Plantation%20Pepper%20Farm%20Bistro%20Kampot%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJ_4jXyeXKCTER18e4pdCJPdI",
+    "latitude": 10.609976,
+    "longitude": 104.316219,
     "rating": 4.8,
     "reviewCount": 798,
     "signatureDishesKh": [
@@ -1193,7 +1220,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJ_4jXyeXKCTER18e4pdCJPdI"
   },
   {
     "id": "rest-67",
@@ -1208,13 +1236,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Corner of Street 9 & Alley West, Old Market (Psar Chas), Siem Reap",
     "provinceKh": "ខេត្តសៀមរាប",
     "provinceEn": "Siem Reap",
-    "phone": "094 569 271",
+    "phone": "012 763 468",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.354338,103.854205",
-    "latitude": 13.354338,
-    "longitude": 103.854205,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Khmer%20Kitchen%20Restaurant%20Old%20Market%20Siem%20Reap%2C%20Siem%20Reap%2C%20Cambodia&query_place_id=ChIJwWW3bWUXEDERMeHgPmyN3vk",
+    "latitude": 13.354416,
+    "longitude": 103.855294,
     "rating": 4.9,
     "reviewCount": 699,
     "signatureDishesKh": [
@@ -1235,7 +1263,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJwWW3bWUXEDERMeHgPmyN3vk"
   },
   {
     "id": "rest-92",
@@ -1254,9 +1283,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.373,103.864",
-    "latitude": 13.373,
-    "longitude": 103.864,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mahob%20Khmer%20Cuisine%20Siem%20Reap%2C%20Siem%20Reap%2C%20Cambodia&query_place_id=ChIJmWuYKwoXEDER0cAT6Idnj3s",
+    "latitude": 13.373113,
+    "longitude": 103.863098,
     "rating": 4.9,
     "reviewCount": 674,
     "signatureDishesKh": [
@@ -1275,7 +1304,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJmWuYKwoXEDER0cAT6Idnj3s"
   },
   {
     "id": "rest-120",
@@ -1294,9 +1324,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.489762,104.296109",
-    "latitude": 10.489762,
-    "longitude": 104.296109,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Led%20Zep%20Mountain%20View%20Cafe%20Kep%2C%20Kep%2C%20Cambodia&query_place_id=ChIJjQW1y0jNCTERd_5vWB98EwM",
+    "latitude": 10.489756,
+    "longitude": 104.296098,
     "rating": 4.5,
     "reviewCount": 760,
     "signatureDishesKh": [
@@ -1315,7 +1345,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJjQW1y0jNCTERd_5vWB98EwM"
   },
   {
     "id": "rest-192",
@@ -1334,9 +1365,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.354011,103.856211",
-    "latitude": 13.354011,
-    "longitude": 103.856211,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sister%20Srey%20Cafe%20%26%20Bakery%20Siem%20Reap%2C%20Siem%20Reap%2C%20Cambodia&query_place_id=ChIJHxMcS2UXEDER-C_iDS_8Mz4",
+    "latitude": 13.354313,
+    "longitude": 103.856879,
     "rating": 4.9,
     "reviewCount": 574,
     "signatureDishesKh": [
@@ -1355,7 +1386,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJHxMcS2UXEDER-C_iDS_8Mz4"
   },
   {
     "id": "rest-224",
@@ -1370,13 +1402,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 534 Preah Monivong Blvd, Sangkat Phsar Daeum Thkov, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "095 387 733",
+    "phone": "012 913 888",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.530221,104.929304",
-    "latitude": 11.530221,
-    "longitude": 104.929304,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Tonle%20Bassac%20II%20Khmer%20%26%20International%20Restaurant%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJicHQ3M9QCTERNgsxrDpECVc",
+    "latitude": 11.530779,
+    "longitude": 104.92973,
     "rating": 4.7,
     "reviewCount": 687,
     "signatureDishesKh": [
@@ -1397,7 +1429,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJicHQ3M9QCTERNgsxrDpECVc"
   },
   {
     "id": "rest-225",
@@ -1412,13 +1445,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 2, Sangkat Svay Pao, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
-    "phone": "097 401 759",
+    "phone": "012 536 500",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:០០ យប់",
     "openingHoursEn": "06:30 AM - 08:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.099167,103.198333",
-    "latitude": 13.099167,
-    "longitude": 103.198333,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=White%20Rose%20Restaurant%20Battambang%2C%20Battambang%2C%20Cambodia&query_place_id=ChIJvTQ8PY1JBTER6gXaGvm3vPo",
+    "latitude": 13.099128,
+    "longitude": 103.198209,
     "rating": 4.6,
     "reviewCount": 761,
     "signatureDishesKh": [
@@ -1437,7 +1470,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T20:42:00.000Z"
+    "locationVerifiedAt": "2026-10-31T20:42:00.000Z",
+    "googlePlaceId": "ChIJvTQ8PY1JBTER6gXaGvm3vPo"
   },
   {
     "id": "rest-301",
@@ -1456,9 +1490,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "១០:០០ ព្រឹក - ១០:៣០ យប់",
     "openingHoursEn": "10:00 AM - 10:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5535,104.9268",
-    "latitude": 11.5535,
-    "longitude": 104.9268,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Pizza%204P's%20Phnom%20Penh%20BKK1%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJlTtOn49RCTERwm3dco0w1TU",
+    "latitude": 11.548863,
+    "longitude": 104.927417,
     "rating": 4.8,
     "reviewCount": 420,
     "signatureDishesKh": [
@@ -1475,7 +1509,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJlTtOn49RCTERwm3dco0w1TU"
   },
   {
     "id": "rest-302",
@@ -1494,9 +1529,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៩:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "09:00 AM - 10:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.56956,104.92964",
-    "latitude": 11.56956,
-    "longitude": 104.92964,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=The%20Pizza%20Company%20Sisowath%20Quay%20Riverside%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJT7ciom5RCTERzBRUx1ZnMFc",
+    "latitude": 11.572292,
+    "longitude": 104.929184,
     "rating": 4.5,
     "reviewCount": 310,
     "signatureDishesKh": [
@@ -1513,7 +1548,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJT7ciom5RCTERzBRUx1ZnMFc"
   },
   {
     "id": "rest-303",
@@ -1532,9 +1568,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "06:30 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5533,104.9248",
-    "latitude": 11.5533,
-    "longitude": 104.9248,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=BROWN%20Coffee%20and%20Bakery%20Roastery%20BKK1%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJof-GJSVRCTERM6fHgiy-UkA",
+    "latitude": 11.553286,
+    "longitude": 104.924836,
     "rating": 4.6,
     "reviewCount": 380,
     "signatureDishesKh": [
@@ -1551,7 +1587,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJof-GJSVRCTERM6fHgiy-UkA"
   },
   {
     "id": "rest-304",
@@ -1604,13 +1641,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 207, Phum Rumcheck 4, Sangkat Rotanak, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
-    "phone": "017 873 444",
+    "phone": "093 230 033",
     "openingHoursKh": "០៩:០០ ព្រឹក - ០៧:០០ យប់",
     "openingHoursEn": "09:00 AM - 07:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.0984,103.2062",
-    "latitude": 13.0984,
-    "longitude": 103.2062,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Manna%20Kitchen%20Vegetarian%20%26%20Korean%20Restaurant%20Battambang%2C%20Battambang%2C%20Cambodia&query_place_id=ChIJe4LD9h1JBTER6mhm5oWfJ6Q",
+    "latitude": 13.096569,
+    "longitude": 103.203887,
     "rating": 4.9,
     "reviewCount": 97,
     "signatureDishesKh": [
@@ -1627,7 +1664,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJe4LD9h1JBTER6mhm5oWfJ6Q"
   },
   {
     "id": "rest-306",
@@ -1642,13 +1680,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. #7AB Street 147, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855886305128",
+    "phone": "088 630 5128",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.533901,104.915881",
-    "latitude": 11.533901,
-    "longitude": 104.915881,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Princella%20Flavors%20of%20Saffron%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJPzz3Xd1QCTER60BC6reB_0o",
+    "latitude": 11.541423,
+    "longitude": 104.916677,
     "rating": 4.5,
     "reviewCount": 55,
     "signatureDishesKh": [
@@ -1666,7 +1704,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJPzz3Xd1QCTER60BC6reB_0o"
   },
   {
     "id": "rest-307",
@@ -1681,13 +1720,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 54 Old Market Street, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "+855 70 430 221",
+    "phone": "069 932 422",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.607909,104.180634",
-    "latitude": 10.607909,
-    "longitude": 104.180634,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Simple%20Things%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJzVuib4g2CDERNfS1VE-rItg",
+    "latitude": 10.607987,
+    "longitude": 104.180593,
     "rating": 4.6,
     "reviewCount": 84,
     "signatureDishesKh": [
@@ -1706,7 +1745,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJzVuib4g2CDERNfS1VE-rItg"
   },
   {
     "id": "rest-308",
@@ -1721,13 +1761,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 59 Street 159D, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
-    "phone": "+855963607417",
+    "phone": "096 360 7417",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.103625,103.201432",
-    "latitude": 13.103625,
-    "longitude": 103.201432,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Pizza%20Battambang%2C%20Battambang%2C%20Cambodia&query_place_id=ChIJ6YHHlItJBTERiqOLRUAgYQE",
+    "latitude": 13.103632,
+    "longitude": 103.201375,
     "rating": 4.7,
     "reviewCount": 113,
     "signatureDishesKh": [
@@ -1744,7 +1784,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ6YHHlItJBTERiqOLRUAgYQE"
   },
   {
     "id": "rest-309",
@@ -1759,13 +1800,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 44.street​ Street 44, Krong Banlung, Ratanakiri",
     "provinceKh": "ខេត្តរតនគិរី",
     "provinceEn": "Ratanakiri",
-    "phone": "0978250366",
+    "phone": "097 369 9978",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "24/7",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.744252,106.979811",
-    "latitude": 13.744252,
-    "longitude": 106.979811,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Banlung%E2%80%8B%20Reggae%E2%80%8B%20Bar%E2%80%8B%20and%E2%80%8B%20Restaurant%E2%80%8B%2C%20Ratanakiri%2C%20Cambodia&query_place_id=ChIJT205RBnhbDERgPWyn2fBreI",
+    "latitude": 13.744635,
+    "longitude": 106.979873,
     "rating": 4.8,
     "reviewCount": 142,
     "signatureDishesKh": [
@@ -1783,7 +1824,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJT205RBnhbDERgPWyn2fBreI"
   },
   {
     "id": "rest-310",
@@ -1798,13 +1840,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 843 Street 210, Krong Ta Khmao, Kandal",
     "provinceKh": "ខេត្តកណ្តាល",
     "provinceEn": "Kandal",
-    "phone": "077857788",
+    "phone": "077 857 788",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.479319,104.949879",
-    "latitude": 11.479319,
-    "longitude": 104.949879,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Hang%20Neak%20Restaurant%2C%20Kandal%2C%20Cambodia&query_place_id=ChIJPzVKcPJZCTER061i_1grUZ4",
+    "latitude": 11.479148,
+    "longitude": 104.949939,
     "rating": 4.9,
     "reviewCount": 171,
     "signatureDishesKh": [
@@ -1821,7 +1863,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJPzVKcPJZCTER061i_1grUZ4"
   },
   {
     "id": "rest-311",
@@ -1836,13 +1879,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 1 National Road 33A, Krong Kep, Kep",
     "provinceKh": "ខេត្តកែប",
     "provinceEn": "Kep",
-    "phone": "090385652",
+    "phone": "099 490 150",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.479613,104.314349",
-    "latitude": 10.479613,
-    "longitude": 104.314349,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Chicken%20King%2C%20Kep%2C%20Cambodia&query_place_id=ChIJA28bvEzNCTERleZGuY9yZ-8",
+    "latitude": 10.551664,
+    "longitude": 104.290995,
     "rating": 4.6,
     "reviewCount": 200,
     "signatureDishesKh": [
@@ -1860,7 +1903,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJA28bvEzNCTERleZGuY9yZ-8"
   },
   {
     "id": "rest-312",
@@ -1875,7 +1919,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 11 Pasteur, Krong Kampong Cham, Kampong Cham",
     "provinceKh": "ខេត្តកំពង់ចាម",
     "provinceEn": "Kampong Cham",
-    "phone": "0968213005",
+    "phone": "096 821 3005",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
@@ -1914,7 +1958,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "phum 2, sangkat 2, Krong Preah Sihanouk, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
-    "phone": "034934672",
+    "phone": "034 934 672",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
@@ -1952,13 +1996,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 0716026521 76, Krong Sen Monorom, Mondulkiri",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
-    "phone": "+855 88 593 5588",
+    "phone": "088 593 5588",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "24/7",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.45734,107.187899",
-    "latitude": 12.45734,
-    "longitude": 107.187899,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Monorom%20Pizza%2C%20Mondulkiri%2C%20Cambodia&query_place_id=ChIJe6rQ7s7wcjER7R38K1hy1HE",
+    "latitude": 12.458561,
+    "longitude": 107.187267,
     "rating": 4.5,
     "reviewCount": 287,
     "signatureDishesKh": [
@@ -1976,7 +2020,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJe6rQ7s7wcjER7R38K1hy1HE"
   },
   {
     "id": "rest-315",
@@ -1991,13 +2036,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Sala Krong street, Krong Khemarak Phoumin, Koh Kong",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
-    "phone": "85587668168",
+    "phone": "087 668 168",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "24/7",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.607361,102.985385",
-    "latitude": 11.607361,
-    "longitude": 102.985385,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Touk%20Thnoat%20Cafe%2C%20Koh%20Kong%2C%20Cambodia&query_place_id=ChIJD7uTX6Z6BjERMcymG80mEDM",
+    "latitude": 11.607335,
+    "longitude": 102.985339,
     "rating": 4.6,
     "reviewCount": 316,
     "signatureDishesKh": [
@@ -2014,7 +2059,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJD7uTX6Z6BjERMcymG80mEDM"
   },
   {
     "id": "rest-316",
@@ -2029,13 +2075,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "4, Krong Chbar Mon, Kampong Speu",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
-    "phone": "015602885",
+    "phone": "015 602 885",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.465848,104.526813",
-    "latitude": 11.465848,
-    "longitude": 104.526813,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=LOTUS%20COFFEE%2C%20Kampong%20Speu%2C%20Cambodia&query_place_id=ChIJ-Xq0E687CTERU_oE8aSAgbk",
+    "latitude": 11.465705,
+    "longitude": 104.526791,
     "rating": 4.7,
     "reviewCount": 55,
     "signatureDishesKh": [
@@ -2052,7 +2098,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ-Xq0E687CTERU_oE8aSAgbk"
   },
   {
     "id": "rest-317",
@@ -2067,13 +2114,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 009 ​2, Krong Doun Kaev, Takeo",
     "provinceKh": "ខេត្តតាកែវ",
     "provinceEn": "Takeo",
-    "phone": "0969179999",
+    "phone": "096 917 9999",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "24/7",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.987341,104.782393",
-    "latitude": 10.987341,
-    "longitude": 104.782393,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=TK%20Seafood%2C%20Takeo%2C%20Cambodia&query_place_id=ChIJLf3AtiR2CTERC28jxw2XrWI",
+    "latitude": 10.987496,
+    "longitude": 104.782436,
     "rating": 4.8,
     "reviewCount": 84,
     "signatureDishesKh": [
@@ -2091,7 +2138,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJLf3AtiR2CTERC28jxw2XrWI"
   },
   {
     "id": "rest-318",
@@ -2106,13 +2154,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Rue N° 1, Krong Kratie, Kratie",
     "provinceKh": "ខេត្តក្រចេះ",
     "provinceEn": "Kratie",
-    "phone": "+855 10 285 656",
+    "phone": "010 285 656",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.492936,106.015858",
-    "latitude": 12.492936,
-    "longitude": 106.015858,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sorya%20Guesthouse%2C%20Kratie%2C%20Cambodia&query_place_id=ChIJawkAmYcaDTER4O2r55rTunk",
+    "latitude": 12.492688,
+    "longitude": 106.015915,
     "rating": 4.9,
     "reviewCount": 113,
     "signatureDishesKh": [
@@ -2130,7 +2178,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJawkAmYcaDTER4O2r55rTunk"
   },
   {
     "id": "rest-319",
@@ -2145,13 +2194,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Stueng Saen, Kampong Thom",
     "provinceKh": "ខេត្តកំពង់ធំ",
     "provinceEn": "Kampong Thom",
-    "phone": "093533362",
+    "phone": "081 658 378",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.712649,104.888717",
-    "latitude": 12.712649,
-    "longitude": 104.888717,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=The%20Third%20Place%20Coffee%2C%20Kampong%20Thom%2C%20Cambodia&query_place_id=ChIJmxzb0_xyDjERgwHak-mCCD4",
+    "latitude": 12.712545,
+    "longitude": 104.888759,
     "rating": 4.6,
     "reviewCount": 142,
     "signatureDishesKh": [
@@ -2168,7 +2217,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJmxzb0_xyDjERgwHak-mCCD4"
   },
   {
     "id": "rest-320",
@@ -2183,13 +2233,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Pursat, Pursat",
     "provinceKh": "ខេត្តពោធិ៍សាត់",
     "provinceEn": "Pursat",
-    "phone": "085 348 909",
+    "phone": "093 710 168",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.533464,103.916992",
-    "latitude": 12.533464,
-    "longitude": 103.916992,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Gosy%2C%20Pursat%2C%20Cambodia&query_place_id=ChIJ0349VACiDzER1CFuc5gK74E",
+    "latitude": 12.533591,
+    "longitude": 103.916956,
     "rating": 4.7,
     "reviewCount": 171,
     "signatureDishesKh": [
@@ -2206,7 +2256,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ0349VACiDzER1CFuc5gK74E"
   },
   {
     "id": "rest-321",
@@ -2221,13 +2272,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. #464 Street 163, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855-81-506-042",
+    "phone": "092 410 004",
     "openingHoursKh": "១១:០០ ព្រឹក - ១០:៣០ យប់",
     "openingHoursEn": "11:00 AM - 10:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.545297,104.914101",
-    "latitude": 11.545297,
-    "longitude": 104.914101,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Fresh%20Pizza%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJZUzXvx9RCTERT44o60vqltc",
+    "latitude": 11.534573,
+    "longitude": 104.914291,
     "rating": 4.8,
     "reviewCount": 200,
     "signatureDishesKh": [
@@ -2245,7 +2296,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJZUzXvx9RCTERT44o60vqltc"
   },
   {
     "id": "rest-322",
@@ -2260,13 +2312,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 51 Street 728, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "+855962941560",
+    "phone": "096 294 1560",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.606961,104.181051",
-    "latitude": 10.606961,
-    "longitude": 104.181051,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Chameleon%20Bistro%20%26%20Cocktail%20Bar%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJydntJII3CDERYbCgCYPQyIY",
+    "latitude": 10.606962,
+    "longitude": 104.180904,
     "rating": 4.5,
     "reviewCount": 229,
     "signatureDishesKh": [
@@ -2284,7 +2336,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJydntJII3CDERYbCgCYPQyIY"
   },
   {
     "id": "rest-323",
@@ -2299,13 +2352,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 2.5, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
-    "phone": "010805868",
+    "phone": "010 805 868",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.099265,103.197532",
-    "latitude": 13.099265,
-    "longitude": 103.197532,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Meow%20Meow%20Dim%20Sum%2C%20Battambang%2C%20Cambodia&query_place_id=ChIJR8KcixRJBTER6IFZC1XVjiM",
+    "latitude": 13.096556,
+    "longitude": 103.197187,
     "rating": 4.6,
     "reviewCount": 258,
     "signatureDishesKh": [
@@ -2323,7 +2376,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJR8KcixRJBTER6IFZC1XVjiM"
   },
   {
     "id": "rest-324",
@@ -2338,7 +2392,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. Eo. 009 Street 62, Krong Banlung, Ratanakiri",
     "provinceKh": "ខេត្តរតនគិរី",
     "provinceEn": "Ratanakiri",
-    "phone": "0885999017",
+    "phone": "088 599 9017",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
@@ -2377,13 +2431,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. #963 210, Takhmao, Kandal",
     "provinceKh": "ខេត្តកណ្តាល",
     "provinceEn": "Kandal",
-    "phone": "+855 93 963 009",
+    "phone": "069 986 168",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "06:30-22:00",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.475438,104.951238",
-    "latitude": 11.475438,
-    "longitude": 104.951238,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Spring%20Caf%C3%A9%20%26%20Cocktail%2C%20Kandal%2C%20Cambodia&query_place_id=ChIJBeg9rZJZCTERRSzwpYM4bnQ",
+    "latitude": 11.475428,
+    "longitude": 104.951196,
     "rating": 4.8,
     "reviewCount": 316,
     "signatureDishesKh": [
@@ -2401,7 +2455,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJBeg9rZJZCTERRSzwpYM4bnQ"
   },
   {
     "id": "rest-326",
@@ -2420,9 +2475,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.477586,104.30793",
-    "latitude": 10.477586,
-    "longitude": 104.30793,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sahie%20Restaurant%2C%20Kep%2C%20Cambodia&query_place_id=ChIJRaF983rNCTER8dDlJFaf0oo",
+    "latitude": 10.477228,
+    "longitude": 104.306791,
     "rating": 4.9,
     "reviewCount": 55,
     "signatureDishesKh": [
@@ -2439,7 +2494,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJRaF983rNCTER8dDlJFaf0oo"
   },
   {
     "id": "rest-327",
@@ -2454,13 +2510,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Bamboo Bridge, Krong Kampong Cham, Kampong Cham",
     "provinceKh": "ខេត្តកំពង់ចាម",
     "provinceEn": "Kampong Cham",
-    "phone": "+855011522922",
+    "phone": "011 922 522",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.979559,105.462126",
-    "latitude": 11.979559,
-    "longitude": 105.462126,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=River%20Grass%20Restaurant%2C%20Kampong%20Cham%2C%20Cambodia&query_place_id=ChIJuwRFemdqDDERvV5g-PMgPSQ",
+    "latitude": 11.979585,
+    "longitude": 105.461965,
     "rating": 4.6,
     "reviewCount": 84,
     "signatureDishesKh": [
@@ -2477,7 +2533,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJuwRFemdqDDERvV5g-PMgPSQ"
   },
   {
     "id": "rest-328",
@@ -2492,7 +2549,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Koh Rong street (110), Krong Preah Sihanouk, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
-    "phone": "010638998",
+    "phone": "010 638 998",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
@@ -2531,13 +2588,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Bamboo Cafe, Krong Sen Monorom, Mondulkiri",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
-    "phone": "+855977559509",
+    "phone": "097 755 9509",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.458783,107.190033",
-    "latitude": 12.458783,
-    "longitude": 107.190033,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bamboo%20Cafe%2C%20Mondulkiri%2C%20Cambodia&query_place_id=ChIJAbdHsc_wcjER16EpUAv4fBA",
+    "latitude": 12.458739,
+    "longitude": 107.190055,
     "rating": 4.8,
     "reviewCount": 142,
     "signatureDishesKh": [
@@ -2555,7 +2612,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJAbdHsc_wcjER16EpUAv4fBA"
   },
   {
     "id": "rest-330",
@@ -2570,13 +2628,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "National Road 48, Krong Khemarak Phoumin, Koh Kong",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
-    "phone": "+855 93 698 607",
+    "phone": "093 698 607",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.615639,102.984482",
-    "latitude": 11.615639,
-    "longitude": 102.984482,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=VR%20Coffee%2C%20Koh%20Kong%2C%20Cambodia&query_place_id=ChIJzwt--6F6BjERpv2YIGTZwno",
+    "latitude": 11.615441,
+    "longitude": 102.984418,
     "rating": 4.5,
     "reviewCount": 171,
     "signatureDishesKh": [
@@ -2593,7 +2651,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJzwt--6F6BjERpv2YIGTZwno"
   },
   {
     "id": "rest-331",
@@ -2608,13 +2667,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "4, Krong Chbar Mon, Kampong Speu",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
-    "phone": "016396372",
+    "phone": "016 396 372",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.466093,104.529899",
-    "latitude": 11.466093,
-    "longitude": 104.529899,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Chamka%20Nonong%2C%20Kampong%20Speu%2C%20Cambodia&query_place_id=ChIJL7o2wA07CTER-nHppm2Q9zE",
+    "latitude": 11.465046,
+    "longitude": 104.507272,
     "rating": 4.6,
     "reviewCount": 200,
     "signatureDishesKh": [
@@ -2632,7 +2691,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJL7o2wA07CTER-nHppm2Q9zE"
   },
   {
     "id": "rest-332",
@@ -2647,7 +2707,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "9, Krong Doun Kaev, Takeo",
     "provinceKh": "ខេត្តតាកែវ",
     "provinceEn": "Takeo",
-    "phone": "+85512977435",
+    "phone": "012 977 435",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "24/7",
     "priceLevel": "$$",
@@ -2686,13 +2746,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Rue N° 3, Krong Kratie, Kratie",
     "provinceKh": "ខេត្តក្រចេះ",
     "provinceEn": "Kratie",
-    "phone": "086 569 432",
+    "phone": "069 741 503",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.490687,106.016143",
-    "latitude": 12.490687,
-    "longitude": 106.016143,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Street%20Three%20Restaurant%20%26%20Bar%2C%20Kratie%2C%20Cambodia&query_place_id=ChIJi9mlhtIbDTERY5f6Xx181ZA",
+    "latitude": 12.490665,
+    "longitude": 106.016221,
     "rating": 4.8,
     "reviewCount": 258,
     "signatureDishesKh": [
@@ -2710,7 +2770,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJi9mlhtIbDTERY5f6Xx181ZA"
   },
   {
     "id": "rest-334",
@@ -2725,13 +2786,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Stueng Saen, Kampong Thom",
     "provinceKh": "ខេត្តកំពង់ធំ",
     "provinceEn": "Kampong Thom",
-    "phone": "012354650",
+    "phone": "012 354 650",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.7115,104.887104",
-    "latitude": 12.7115,
-    "longitude": 104.887104,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Prum%20Bayon%2C%20Kampong%20Thom%2C%20Cambodia&query_place_id=ChIJQ6vOmfxyDjERynTQkEfU5uQ",
+    "latitude": 12.711376,
+    "longitude": 104.88699,
     "rating": 4.9,
     "reviewCount": 287,
     "signatureDishesKh": [
@@ -2749,7 +2810,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJQ6vOmfxyDjERynTQkEfU5uQ"
   },
   {
     "id": "rest-335",
@@ -2764,13 +2826,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Pursat, Pursat",
     "provinceKh": "ខេត្តពោធិ៍សាត់",
     "provinceEn": "Pursat",
-    "phone": "092 603 494",
+    "phone": "015 796 000",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.533543,103.917978",
-    "latitude": 12.533543,
-    "longitude": 103.917978,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Zara%20Coffee%2C%20Pursat%2C%20Cambodia&query_place_id=ChIJheJZrwGiDzERa-_7Mgx0M8E",
+    "latitude": 12.533389,
+    "longitude": 103.918005,
     "rating": 4.6,
     "reviewCount": 316,
     "signatureDishesKh": [
@@ -2787,7 +2849,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJheJZrwGiDzERa-_7Mgx0M8E"
   },
   {
     "id": "rest-336",
@@ -2802,7 +2865,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 973 Street 101, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855 12 949 492",
+    "phone": "012 949 492",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
@@ -2840,13 +2903,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 5 N° 5 1 ouksaphea village, sangkat Kompong Kandal, kampot town, kampot province, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "086534739",
+    "phone": "086 534 739",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.608735,104.18054",
-    "latitude": 10.608735,
-    "longitude": 104.18054,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Food%20Addiction%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJkZ9SMAA3CDERaV4MeKMZgio",
+    "latitude": 10.610635,
+    "longitude": 104.180939,
     "rating": 4.8,
     "reviewCount": 84,
     "signatureDishesKh": [
@@ -2864,7 +2927,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJkZ9SMAA3CDERaV4MeKMZgio"
   },
   {
     "id": "rest-338",
@@ -2879,13 +2943,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 650 Street 111, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
-    "phone": "012763950",
+    "phone": "012 763 950",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.103439,103.196533",
-    "latitude": 13.103439,
-    "longitude": 103.196533,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Nary%20Kitchen%20and%20cooking%20school%2C%20Battambang%2C%20Cambodia&query_place_id=ChIJT5Dcr_RJBTERR2zOmWkxUaU",
+    "latitude": 13.103336,
+    "longitude": 103.196444,
     "rating": 4.5,
     "reviewCount": 113,
     "signatureDishesKh": [
@@ -2903,7 +2967,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJT5Dcr_RJBTERR2zOmWkxUaU"
   },
   {
     "id": "rest-339",
@@ -2918,7 +2983,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 21, Krong Banlung, Ratanakiri",
     "provinceKh": "ខេត្តរតនគិរី",
     "provinceEn": "Ratanakiri",
-    "phone": "0978250366",
+    "phone": "",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "24/7",
     "priceLevel": "$$",
@@ -2996,13 +3061,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Kep, Kep",
     "provinceKh": "ខេត្តកែប",
     "provinceEn": "Kep",
-    "phone": "0964136923",
+    "phone": "096 413 6923",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.492542,104.32098",
-    "latitude": 10.492542,
-    "longitude": 104.32098,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Parenth%C3%A8se%2C%20Kep%2C%20Cambodia&query_place_id=ChIJ1T31kZDNCTERx2DI_ngSxn8",
+    "latitude": 10.492308,
+    "longitude": 104.32101,
     "rating": 4.8,
     "reviewCount": 200,
     "signatureDishesKh": [
@@ -3020,7 +3085,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ1T31kZDNCTERx2DI_ngSxn8"
   },
   {
     "id": "rest-342",
@@ -3074,7 +3140,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Victory Hill, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
-    "phone": "+855888839623",
+    "phone": "088 883 9623",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
@@ -3113,7 +3179,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "krong Senmonorom, Krong Sen Monorom, Mondulkiri",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
-    "phone": "086606658",
+    "phone": "086 606 658",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
@@ -3151,13 +3217,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "101, Krong Chbar Mon, Kampong Speu",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
-    "phone": "093313474",
+    "phone": "010 313 474",
     "openingHoursKh": "១១:០០ ព្រឹក - ១០:៣០ យប់",
     "openingHoursEn": "11:00 AM - 10:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.45846,104.523143",
-    "latitude": 11.45846,
-    "longitude": 104.523143,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Pizza%20Aloha%2C%20Kampong%20Speu%2C%20Cambodia&query_place_id=ChIJT_RZNKE7CTERwOJv7844auQ",
+    "latitude": 11.458503,
+    "longitude": 104.523088,
     "rating": 4.8,
     "reviewCount": 316,
     "signatureDishesKh": [
@@ -3175,7 +3241,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJT_RZNKE7CTERwOJv7844auQ"
   },
   {
     "id": "rest-347",
@@ -3194,9 +3261,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.993517,104.786352",
-    "latitude": 10.993517,
-    "longitude": 104.786352,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Stung%20Takeo%2C%20Takeo%2C%20Cambodia&query_place_id=ChIJNXQF9zl2CTERQTy2PappA4Y",
+    "latitude": 10.993453,
+    "longitude": 104.78623,
     "rating": 4.5,
     "reviewCount": 55,
     "signatureDishesKh": [
@@ -3214,7 +3281,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJNXQF9zl2CTERQTy2PappA4Y"
   },
   {
     "id": "rest-348",
@@ -3233,9 +3301,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.483991,106.017591",
-    "latitude": 12.483991,
-    "longitude": 106.017591,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=U-Hong%20II%20Guest%20House%2C%20Kratie%2C%20Cambodia&query_place_id=ChIJN9j0C3UbDTEReiQYvDNxf_E",
+    "latitude": 12.485169,
+    "longitude": 106.01804,
     "rating": 4.6,
     "reviewCount": 84,
     "signatureDishesKh": [
@@ -3253,7 +3321,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJN9j0C3UbDTEReiQYvDNxf_E"
   },
   {
     "id": "rest-349",
@@ -3272,9 +3341,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.708465,104.889627",
-    "latitude": 12.708465,
-    "longitude": 104.889627,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=DR%20RESTAURANT%2C%20Kampong%20Thom%2C%20Cambodia&query_place_id=ChIJQdoBJARzDjERkjcGaeevtAo",
+    "latitude": 12.708735,
+    "longitude": 104.889367,
     "rating": 4.7,
     "reviewCount": 113,
     "signatureDishesKh": [
@@ -3292,7 +3361,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJQdoBJARzDjERkjcGaeevtAo"
   },
   {
     "id": "rest-350",
@@ -3311,9 +3381,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.536799,103.920684",
-    "latitude": 12.536799,
-    "longitude": 103.920684,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Amazon%2C%20Pursat%2C%20Cambodia&query_place_id=ChIJI2vvwkKjDzERrDn_tOKphq0",
+    "latitude": 12.530486,
+    "longitude": 103.933376,
     "rating": 4.8,
     "reviewCount": 142,
     "signatureDishesKh": [
@@ -3330,7 +3400,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJI2vvwkKjDzERrDn_tOKphq0"
   },
   {
     "id": "rest-351",
@@ -3345,13 +3416,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 792 Street 474, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855 93 474474",
+    "phone": "093 474 474",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.53653,104.921762",
-    "latitude": 11.53653,
-    "longitude": 104.921762,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=474%20Bistro%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJO8PppJZRCTERBKhfyRQYuw0",
+    "latitude": 11.536573,
+    "longitude": 104.921678,
     "rating": 4.9,
     "reviewCount": 171,
     "signatureDishesKh": [
@@ -3368,7 +3439,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJO8PppJZRCTERBKhfyRQYuw0"
   },
   {
     "id": "rest-352",
@@ -3383,13 +3455,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 17 Street 730, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "+8550969236582",
+    "phone": "096 923 6582",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.606593,104.182108",
-    "latitude": 10.606593,
-    "longitude": 104.182108,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Fringale%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJP2GERHk3CDERTilQQQRms3U",
+    "latitude": 10.606611,
+    "longitude": 104.18216,
     "rating": 4.6,
     "reviewCount": 200,
     "signatureDishesKh": [
@@ -3407,7 +3479,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJP2GERHk3CDERTilQQQRms3U"
   },
   {
     "id": "rest-353",
@@ -3422,13 +3495,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 1.5, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
-    "phone": "016 892 141",
+    "phone": "069 734 745",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.101308,103.199077",
-    "latitude": 13.101308,
-    "longitude": 103.199077,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Kinyei%20Caf%C3%A9%2C%20Battambang%2C%20Cambodia&query_place_id=ChIJCaVhjYxJBTERht_x4CujIW8",
+    "latitude": 13.101304,
+    "longitude": 103.199022,
     "rating": 4.7,
     "reviewCount": 229,
     "signatureDishesKh": [
@@ -3445,7 +3518,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJCaVhjYxJBTERht_x4CujIW8"
   },
   {
     "id": "rest-355",
@@ -3460,13 +3534,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "National Road No. 2, Takhmao, Kandal",
     "provinceKh": "ខេត្តកណ្តាល",
     "provinceEn": "Kandal",
-    "phone": "017 909 172",
+    "phone": "012 909 133",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "06:00-15:00",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.490869,104.942809",
-    "latitude": 11.490869,
-    "longitude": 104.942809,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Big%20Luck%2099%2C%20Kandal%2C%20Cambodia&query_place_id=ChIJZaGiL9pZCTERMgah_8ohwvw",
+    "latitude": 11.489783,
+    "longitude": 104.942314,
     "rating": 4.8,
     "reviewCount": 258,
     "signatureDishesKh": [
@@ -3484,7 +3558,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJZaGiL9pZCTERMgah_8ohwvw"
   },
   {
     "id": "rest-356",
@@ -3499,13 +3574,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Kep, Kep",
     "provinceKh": "ខេត្តកែប",
     "provinceEn": "Kep",
-    "phone": "077 926 203",
+    "phone": "092 668 489",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.479812,104.315171",
-    "latitude": 10.479812,
-    "longitude": 104.315171,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Captain%20Chim's%20II%2C%20Kep%2C%20Cambodia&query_place_id=ChIJmZdhh2bNCTERkT-qxERIX_A",
+    "latitude": 10.479891,
+    "longitude": 104.315115,
     "rating": 4.5,
     "reviewCount": 287,
     "signatureDishesKh": [
@@ -3523,7 +3598,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJmZdhh2bNCTERkT-qxERIX_A"
   },
   {
     "id": "rest-357",
@@ -3538,13 +3614,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Kampong Cham, Kampong Cham",
     "provinceKh": "ខេត្តកំពង់ចាម",
     "provinceEn": "Kampong Cham",
-    "phone": "078 943 234",
+    "phone": "",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.994006,105.467362",
-    "latitude": 11.994006,
-    "longitude": 105.467362,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Volcano%2C%20Kampong%20Cham%2C%20Cambodia&query_place_id=ChIJGTQclQ1rDDERiONvhxjjAqM",
+    "latitude": 11.99391,
+    "longitude": 105.4673,
     "rating": 4.6,
     "reviewCount": 316,
     "signatureDishesKh": [
@@ -3562,7 +3638,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJGTQclQ1rDDERiONvhxjjAqM"
   },
   {
     "id": "rest-358",
@@ -3577,13 +3654,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. A-15 R1 Street 815, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
-    "phone": "+855 70 309 515",
+    "phone": "070 309 515",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.62569,103.535513",
-    "latitude": 10.62569,
-    "longitude": 103.535513,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=MerryBelle%20x%20DenBagus%2C%20Preah%20Sihanouk%2C%20Cambodia&query_place_id=ChIJCTHmEVLhBzER5W_Eg5fDCcA",
+    "latitude": 10.625663,
+    "longitude": 103.535503,
     "rating": 4.7,
     "reviewCount": 55,
     "signatureDishesKh": [
@@ -3601,7 +3678,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJCTHmEVLhBzER5W_Eg5fDCcA"
   },
   {
     "id": "rest-359",
@@ -3616,13 +3694,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Sen Monorom, Mondulkiri",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
-    "phone": "0887219991",
+    "phone": "078 258 485",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.456834,107.188272",
-    "latitude": 12.456834,
-    "longitude": 107.188272,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=The%20Hangout%2C%20Mondulkiri%2C%20Cambodia&query_place_id=ChIJw1eJ6c7wcjERiU3g3EOlT60",
+    "latitude": 12.456886,
+    "longitude": 107.188278,
     "rating": 4.8,
     "reviewCount": 84,
     "signatureDishesKh": [
@@ -3640,7 +3718,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJw1eJ6c7wcjERiU3g3EOlT60"
   },
   {
     "id": "rest-360",
@@ -3655,13 +3734,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Khemarak Phoumin, Koh Kong",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
-    "phone": "089 214 327",
+    "phone": "087 269 620",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.608914,102.983275",
-    "latitude": 11.608914,
-    "longitude": 102.983275,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Pizza%20Bar%2023%2C%20Koh%20Kong%2C%20Cambodia&query_place_id=ChIJBWQxH6R6BjERkVlMVHry17E",
+    "latitude": 11.608992,
+    "longitude": 102.983421,
     "rating": 4.9,
     "reviewCount": 113,
     "signatureDishesKh": [
@@ -3678,7 +3757,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJBWQxH6R6BjERkVlMVHry17E"
   },
   {
     "id": "rest-362",
@@ -3697,9 +3777,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.992189,104.786363",
-    "latitude": 10.992189,
-    "longitude": 104.786363,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Bistro%20de%20Fred%2C%20Takeo%2C%20Cambodia&query_place_id=ChIJVxMQDjp2CTERdoBT4N_4d7c",
+    "latitude": 10.992337,
+    "longitude": 104.786373,
     "rating": 4.6,
     "reviewCount": 142,
     "signatureDishesKh": [
@@ -3717,7 +3797,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJVxMQDjp2CTERdoBT4N_4d7c"
   },
   {
     "id": "rest-363",
@@ -3771,13 +3852,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Stueng Saen, Kampong Thom",
     "provinceKh": "ខេត្តកំពង់ធំ",
     "provinceEn": "Kampong Thom",
-    "phone": "098 265 420",
+    "phone": "012 836 107",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.711477,104.888376",
-    "latitude": 12.711477,
-    "longitude": 104.888376,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Arunras%2C%20Kampong%20Thom%2C%20Cambodia&query_place_id=ChIJVw6QwvxyDjERJwOzS4H7Z40",
+    "latitude": 12.711401,
+    "longitude": 104.888286,
     "rating": 4.8,
     "reviewCount": 200,
     "signatureDishesKh": [
@@ -3795,7 +3876,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJVw6QwvxyDjERJwOzS4H7Z40"
   },
   {
     "id": "rest-365",
@@ -3810,13 +3892,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 100 Street 430, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "0966622227",
+    "phone": "096 662 2227",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.539951,104.910135",
-    "latitude": 11.539951,
-    "longitude": 104.910135,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Coffee%20Culture%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJRaIIXeFQCTEREkefBZnEdKE",
+    "latitude": 11.539666,
+    "longitude": 104.910254,
     "rating": 4.5,
     "reviewCount": 229,
     "signatureDishesKh": [
@@ -3833,7 +3915,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJRaIIXeFQCTEREkefBZnEdKE"
   },
   {
     "id": "rest-366",
@@ -3848,13 +3931,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 23 Str 278, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "+855 88 88 20 245",
+    "phone": "088 882 0245",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "08:00-23:00",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.606746,104.180476",
-    "latitude": 10.606746,
-    "longitude": 104.180476,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Auberge%20du%20Soleil%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJ9xs0j4g2CDERHHIlunSwO1s",
+    "latitude": 10.606722,
+    "longitude": 104.180441,
     "rating": 4.6,
     "reviewCount": 258,
     "signatureDishesKh": [
@@ -3872,7 +3955,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ9xs0j4g2CDERHHIlunSwO1s"
   },
   {
     "id": "rest-367",
@@ -3887,13 +3971,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 2, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
-    "phone": "077547766",
+    "phone": "077 547 766",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.098918,103.197987",
-    "latitude": 13.098918,
-    "longitude": 103.197987,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Battambang%20Town%20Restaurant%2C%20Battambang%2C%20Cambodia&query_place_id=ChIJHTeYO41JBTERM6v7q-O6OOc",
+    "latitude": 13.098914,
+    "longitude": 103.198004,
     "rating": 4.7,
     "reviewCount": 287,
     "signatureDishesKh": [
@@ -3911,7 +3995,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJHTeYO41JBTERM6v7q-O6OOc"
   },
   {
     "id": "rest-369",
@@ -3926,13 +4011,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Ta Khmao, Kandal",
     "provinceKh": "ខេត្តកណ្តាល",
     "provinceEn": "Kandal",
-    "phone": "+85512736836",
+    "phone": "012 736 836",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.491473,104.942965",
-    "latitude": 11.491473,
-    "longitude": 104.942965,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Noreay%20999%2C%20Kandal%2C%20Cambodia&query_place_id=ChIJQ3kPEOtYCTER5ntZyCAd-ws",
+    "latitude": 11.538121,
+    "longitude": 104.735687,
     "rating": 4.8,
     "reviewCount": 316,
     "signatureDishesKh": [
@@ -3950,7 +4035,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJQ3kPEOtYCTER5ntZyCAd-ws"
   },
   {
     "id": "rest-370",
@@ -4007,9 +4093,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.989347,105.462802",
-    "latitude": 11.989347,
-    "longitude": 105.462802,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Hao%20An%2C%20Kampong%20Cham%2C%20Cambodia&query_place_id=ChIJm59TL2VqDDERZiBDH5914QU",
+    "latitude": 11.989378,
+    "longitude": 105.462761,
     "rating": 4.6,
     "reviewCount": 84,
     "signatureDishesKh": [
@@ -4027,7 +4113,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJm59TL2VqDDERZiBDH5914QU"
   },
   {
     "id": "rest-372",
@@ -4042,13 +4129,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 62/7 7 Makara Street, Sihanoukville, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
-    "phone": "+855 12 952 011",
+    "phone": "012 952 011",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00-17:30",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.620784,103.527477",
-    "latitude": 10.620784,
-    "longitude": 103.527477,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Starfish%20Cafe%20%26%20Bakery%2C%20Preah%20Sihanouk%2C%20Cambodia&query_place_id=ChIJR9_uQ8LhBzER62q2YS5dyTE",
+    "latitude": 10.621151,
+    "longitude": 103.527227,
     "rating": 4.7,
     "reviewCount": 113,
     "signatureDishesKh": [
@@ -4065,7 +4152,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJR9_uQ8LhBzER62q2YS5dyTE"
   },
   {
     "id": "rest-374",
@@ -4080,13 +4168,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Khemarak Phoumin, Koh Kong",
     "provinceKh": "ខេត្តកោះកុង",
     "provinceEn": "Koh Kong",
-    "phone": "0356666616",
+    "phone": "087 666 966",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.612293,102.983343",
-    "latitude": 11.612293,
-    "longitude": 102.983343,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Lim%20Moha%20Leap%20III%2C%20Koh%20Kong%2C%20Cambodia&query_place_id=ChIJK1tlNDd7BjERAiluf076PDs",
+    "latitude": 11.6114,
+    "longitude": 102.986648,
     "rating": 4.8,
     "reviewCount": 142,
     "signatureDishesKh": [
@@ -4104,7 +4192,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJK1tlNDd7BjERAiluf076PDs"
   },
   {
     "id": "rest-375",
@@ -4119,7 +4208,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Chbar Mon, Kampong Speu",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
-    "phone": "0719555513",
+    "phone": "071 955 5513",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
@@ -4158,13 +4247,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Kratie, Kratie",
     "provinceKh": "ខេត្តក្រចេះ",
     "provinceEn": "Kratie",
-    "phone": "092 435 730",
+    "phone": "012 495 070",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.487097,106.017649",
-    "latitude": 12.487097,
-    "longitude": 106.017649,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mlub%20Putrea%20Restaurant%2C%20Kratie%2C%20Cambodia&query_place_id=ChIJrWSqe2IaDTERIvxFh8Ij5_s",
+    "latitude": 12.487054,
+    "longitude": 106.017548,
     "rating": 4.6,
     "reviewCount": 200,
     "signatureDishesKh": [
@@ -4183,7 +4272,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJrWSqe2IaDTERIvxFh8Ij5_s"
   },
   {
     "id": "rest-378",
@@ -4236,13 +4326,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 408 Boulevard (245), Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855-77-607-195",
+    "phone": "015 323 382",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "06:30-21:30",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.546925,104.908806",
-    "latitude": 11.546925,
-    "longitude": 104.908806,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Lucy's%20Cone%20Pizza%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJ15sCXBxRCTERIF5hpdS93vY",
+    "latitude": 11.54062,
+    "longitude": 104.911329,
     "rating": 4.8,
     "reviewCount": 258,
     "signatureDishesKh": [
@@ -4260,7 +4350,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ15sCXBxRCTERIF5hpdS93vY"
   },
   {
     "id": "rest-380",
@@ -4275,13 +4366,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 11 Street 276, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "+855 89 98 19 74",
+    "phone": "012 839 445",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.60705,104.17982",
-    "latitude": 10.60705,
-    "longitude": 104.17982,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=The%20Loving%20Spoon%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJ_8Pu9Ig2CDERcUHwLgQTLoA",
+    "latitude": 10.60701,
+    "longitude": 104.179898,
     "rating": 4.9,
     "reviewCount": 287,
     "signatureDishesKh": [
@@ -4299,7 +4390,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ_8Pu9Ig2CDERcUHwLgQTLoA"
   },
   {
     "id": "rest-381",
@@ -4318,9 +4410,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.106288,103.19693",
-    "latitude": 13.106288,
-    "longitude": 103.19693,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Ahaa%20Boer%20Vegetarian%20restaurant%2C%20Battambang%2C%20Cambodia&query_place_id=ChIJSymKMfVJBTER4BmgYNQ0zWM",
+    "latitude": 13.106373,
+    "longitude": 103.196737,
     "rating": 4.6,
     "reviewCount": 316,
     "signatureDishesKh": [
@@ -4338,7 +4430,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJSymKMfVJBTER4BmgYNQ0zWM"
   },
   {
     "id": "rest-382",
@@ -4353,13 +4446,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Banlung, Ratanakiri",
     "provinceKh": "ខេត្តរតនគិរី",
     "provinceEn": "Ratanakiri",
-    "phone": "012 0117948",
+    "phone": "097 557 8555",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.737867,106.988859",
-    "latitude": 13.737867,
-    "longitude": 106.988859,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Ta%20Nam%20Restaurant%2C%20Ratanakiri%2C%20Cambodia&query_place_id=ChIJYzUZ4nPhbDERVhesFhB0GAo",
+    "latitude": 13.737898,
+    "longitude": 106.988757,
     "rating": 4.7,
     "reviewCount": 55,
     "signatureDishesKh": [
@@ -4377,7 +4470,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJYzUZ4nPhbDERVhesFhB0GAo"
   },
   {
     "id": "rest-383",
@@ -4392,13 +4486,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Kampong Cham, Kampong Cham",
     "provinceKh": "ខេត្តកំពង់ចាម",
     "provinceEn": "Kampong Cham",
-    "phone": "017 537 916",
+    "phone": "087 547 330",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.987555,105.466159",
-    "latitude": 11.987555,
-    "longitude": 105.466159,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Viva%20la%20pizza%2C%20Kampong%20Cham%2C%20Cambodia&query_place_id=ChIJ1fQicGlrDDER6d_IsCsW-Gw",
+    "latitude": 11.987606,
+    "longitude": 105.466281,
     "rating": 4.8,
     "reviewCount": 84,
     "signatureDishesKh": [
@@ -4416,7 +4510,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ1fQicGlrDDER6d_IsCsW-Gw"
   },
   {
     "id": "rest-384",
@@ -4435,9 +4530,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "24/7",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.633464,103.531532",
-    "latitude": 10.633464,
-    "longitude": 103.531532,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=M'lop%20Reussey%2C%20Preah%20Sihanouk%2C%20Cambodia&query_place_id=ChIJ4x9vex7hBzERQ4P3gCmCfck",
+    "latitude": 10.633495,
+    "longitude": 103.531677,
     "rating": 4.5,
     "reviewCount": 113,
     "signatureDishesKh": [
@@ -4454,7 +4549,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ4x9vex7hBzERQ4P3gCmCfck"
   },
   {
     "id": "rest-385",
@@ -4473,9 +4569,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.459665,107.185958",
-    "latitude": 12.459665,
-    "longitude": 107.185958,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Chumnor%20Thmey%20Restaurant%2C%20Mondulkiri%2C%20Cambodia&query_place_id=ChIJZYHRx8_wcjERRZ5rHkeRndc",
+    "latitude": 12.459698,
+    "longitude": 107.186066,
     "rating": 4.6,
     "reviewCount": 142,
     "signatureDishesKh": [
@@ -4493,7 +4589,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJZYHRx8_wcjERRZ5rHkeRndc"
   },
   {
     "id": "rest-386",
@@ -4512,9 +4609,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.609317,102.98085",
-    "latitude": 11.609317,
-    "longitude": 102.98085,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bay%20Chha%20Koh%20Kong%2C%20Koh%20Kong%2C%20Cambodia&query_place_id=ChIJCyiDiqR6BjERUqqV6BD1azw",
+    "latitude": 11.609121,
+    "longitude": 102.980959,
     "rating": 4.7,
     "reviewCount": 171,
     "signatureDishesKh": [
@@ -4533,7 +4630,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJCyiDiqR6BjERUqqV6BD1azw"
   },
   {
     "id": "rest-387",
@@ -4548,7 +4646,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Chbar Mon, Kampong Speu",
     "provinceKh": "ខេត្តកំពង់ស្ពឺ",
     "provinceEn": "Kampong Speu",
-    "phone": "015235577",
+    "phone": "015 235 577",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
@@ -4630,9 +4728,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.712856,104.888768",
-    "latitude": 12.712856,
-    "longitude": 104.888768,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Stung%20Sen%2C%20Kampong%20Thom%2C%20Cambodia&query_place_id=ChIJN2D5y55QDjERVKGgt34ZHyg",
+    "latitude": 12.714949,
+    "longitude": 104.882612,
     "rating": 4.6,
     "reviewCount": 258,
     "signatureDishesKh": [
@@ -4650,7 +4748,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJN2D5y55QDjERVKGgt34ZHyg"
   },
   {
     "id": "rest-396",
@@ -4665,7 +4764,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 77B Street 99, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "086933332",
+    "phone": "086 933 332",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
@@ -4704,13 +4803,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. #53 Street 450, 1, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855-96-415-5605",
+    "phone": "096 415 5605",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.540132,104.916526",
-    "latitude": 11.540132,
-    "longitude": 104.916526,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=ar_kun%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJ5QFqOt5QCTER9ieF2xZBBRY",
+    "latitude": 11.540111,
+    "longitude": 104.916508,
     "rating": 4.8,
     "reviewCount": 316,
     "signatureDishesKh": [
@@ -4728,7 +4827,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ5QFqOt5QCTER9ieF2xZBBRY"
   },
   {
     "id": "rest-398",
@@ -4743,7 +4843,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 82 Street 446, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855886856336",
+    "phone": "088 685 6336",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
@@ -4781,13 +4881,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 26 Street 350, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855-96-390-0968",
+    "phone": "017 561 788",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.548499,104.91744",
-    "latitude": 11.548499,
-    "longitude": 104.91744,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Babylon%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJwewa5AVRCTEROInSkYqBxpM",
+    "latitude": 11.56096,
+    "longitude": 104.894689,
     "rating": 4.6,
     "reviewCount": 84,
     "signatureDishesKh": [
@@ -4805,7 +4905,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJwewa5AVRCTEROInSkYqBxpM"
   },
   {
     "id": "rest-400",
@@ -4820,7 +4921,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 68A Street 456, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855-77-994-254",
+    "phone": "077 994 254",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
@@ -4859,13 +4960,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 183A Street 163, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "011838518",
+    "phone": "011 838 518",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.53489,104.914018",
-    "latitude": 11.53489,
-    "longitude": 104.914018,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=1990s%20Cake%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJ7RvwuqRRCTERMglJEDwKcRw",
+    "latitude": 11.534983,
+    "longitude": 104.914118,
     "rating": 4.8,
     "reviewCount": 142,
     "signatureDishesKh": [
@@ -4882,7 +4983,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ7RvwuqRRCTERMglJEDwKcRw"
   },
   {
     "id": "rest-402",
@@ -4897,13 +4999,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 21 Street 466, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+85570370672",
+    "phone": "070 370 672",
     "openingHoursKh": "១១:០០ ព្រឹក - ១០:៣០ យប់",
     "openingHoursEn": "11:00 AM - 10:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.538831,104.924182",
-    "latitude": 11.538831,
-    "longitude": 104.924182,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Pizzeria%20Matteo%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJzSOTeNlQCTER2yOBLivO0zg",
+    "latitude": 11.53797,
+    "longitude": 104.924563,
     "rating": 4.9,
     "reviewCount": 171,
     "signatureDishesKh": [
@@ -4921,7 +5023,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJzSOTeNlQCTER2yOBLivO0zg"
   },
   {
     "id": "rest-403",
@@ -4936,13 +5039,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. #44 Street 135, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855-31-423-4291",
+    "phone": "031 423 4291",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.54097,104.916685",
-    "latitude": 11.54097,
-    "longitude": 104.916685,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mang%20Miguel%20Kainan%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJ17-vTcJQCTERqlxLmT40S24",
+    "latitude": 11.540847,
+    "longitude": 104.916941,
     "rating": 4.6,
     "reviewCount": 200,
     "signatureDishesKh": [
@@ -4960,7 +5063,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ17-vTcJQCTERqlxLmT40S24"
   },
   {
     "id": "rest-409",
@@ -4975,7 +5079,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 89 Street 163, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "081311117",
+    "phone": "081 311 117",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
@@ -5014,13 +5118,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. #25 Street 320, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "069800071",
+    "phone": "069 800 071",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.550341,104.91555",
-    "latitude": 11.550341,
-    "longitude": 104.91555,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Cafe%200071%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJs_lwM7hRCTERipRRhScgK4U",
+    "latitude": 11.550292,
+    "longitude": 104.915629,
     "rating": 4.8,
     "reviewCount": 258,
     "signatureDishesKh": [
@@ -5037,7 +5141,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJs_lwM7hRCTERipRRhScgK4U"
   },
   {
     "id": "rest-417",
@@ -5052,13 +5157,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. #204 Street 155, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+85512989491",
+    "phone": "",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.536393,104.915546",
-    "latitude": 11.536393,
-    "longitude": 104.915546,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Racer%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJw5aASuFQCTERfuNeZrwML50",
+    "latitude": 11.538528,
+    "longitude": 104.911137,
     "rating": 4.5,
     "reviewCount": 287,
     "signatureDishesKh": [
@@ -5075,7 +5180,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJw5aASuFQCTERfuNeZrwML50"
   },
   {
     "id": "rest-418",
@@ -5090,7 +5196,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. #146 Street 163, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+85512989491",
+    "phone": "",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
@@ -5128,13 +5234,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 62 Street 135, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+85569494411",
+    "phone": "069 494 411",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.539868,104.916786",
-    "latitude": 11.539868,
-    "longitude": 104.916786,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Rama%20Steakhouse%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJFQuitMdRCTERITtOHvWx_eE",
+    "latitude": 11.539835,
+    "longitude": 104.916761,
     "rating": 4.7,
     "reviewCount": 55,
     "signatureDishesKh": [
@@ -5152,7 +5258,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJFQuitMdRCTERITtOHvWx_eE"
   },
   {
     "id": "rest-423",
@@ -5167,13 +5274,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 73 Street 724, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "+855 67 551 447",
+    "phone": "067 551 447",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "Monday - Sunday 12:00 22:00",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.60833,104.181068",
-    "latitude": 10.60833,
-    "longitude": 104.181068,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Greek%20Food%20Kampot%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJtStcNAA3CDER7k53jrvkQtM",
+    "latitude": 10.608318,
+    "longitude": 104.181095,
     "rating": 4.8,
     "reviewCount": 84,
     "signatureDishesKh": [
@@ -5191,7 +5298,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJtStcNAA3CDER7k53jrvkQtM"
   },
   {
     "id": "rest-424",
@@ -5206,13 +5314,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 36 Street 334, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "016962099",
+    "phone": "016 962 099",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "24/7",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.549729,104.923567",
-    "latitude": 11.549729,
-    "longitude": 104.923567,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=LyVy%20Coffee%20%26%20BBQ%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJLZ8iOiRRCTERQ27MQTfmBKc",
+    "latitude": 11.549768,
+    "longitude": 104.923462,
     "rating": 4.9,
     "reviewCount": 113,
     "signatureDishesKh": [
@@ -5230,7 +5338,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJLZ8iOiRRCTERQ27MQTfmBKc"
   },
   {
     "id": "rest-425",
@@ -5249,9 +5358,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.541694,104.911706",
-    "latitude": 11.541694,
-    "longitude": 104.911706,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Teuk%20Sieng%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJkfGP6TtRCTERbImNpRkX5tY",
+    "latitude": 11.558865,
+    "longitude": 104.922726,
     "rating": 4.6,
     "reviewCount": 142,
     "signatureDishesKh": [
@@ -5269,7 +5378,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJkfGP6TtRCTERbImNpRkX5tY"
   },
   {
     "id": "rest-426",
@@ -5284,7 +5394,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 111 Street 470, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+85598290094",
+    "phone": "098 290 094",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
@@ -5323,13 +5433,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 74 Street 456, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+85561573618",
+    "phone": "061 573 618",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "24/7",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.538771,104.914678",
-    "latitude": 11.538771,
-    "longitude": 104.914678,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=The%20Wine%20Bakery%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJexWAZyJRCTERYCPcfrvdeM4",
+    "latitude": 11.538777,
+    "longitude": 104.9148,
     "rating": 4.8,
     "reviewCount": 200,
     "signatureDishesKh": [
@@ -5347,7 +5457,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJexWAZyJRCTERYCPcfrvdeM4"
   },
   {
     "id": "rest-428",
@@ -5362,13 +5473,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 722, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "+855 78 796 440",
+    "phone": "078 796 440",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.609728,104.181095",
-    "latitude": 10.609728,
-    "longitude": 104.181095,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Aroma%20house%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJdyL6rWI2CDERNCXvVMAqVPY",
+    "latitude": 10.609716,
+    "longitude": 104.181155,
     "rating": 4.5,
     "reviewCount": 229,
     "signatureDishesKh": [
@@ -5386,7 +5497,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJdyL6rWI2CDERNCXvVMAqVPY"
   },
   {
     "id": "rest-429",
@@ -5401,7 +5513,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 720, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "0718666357",
+    "phone": "071 866 6357",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
@@ -5440,13 +5552,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "National Road 33, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "068234123",
+    "phone": "068 234 123",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.60658,104.188234",
-    "latitude": 10.60658,
-    "longitude": 104.188234,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=The%20Java%20Cafe%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJqSzrdBM3CDERSmsoux32_Zs",
+    "latitude": 10.59737,
+    "longitude": 104.188828,
     "rating": 4.7,
     "reviewCount": 287,
     "signatureDishesKh": [
@@ -5463,7 +5575,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJqSzrdBM3CDERSmsoux32_Zs"
   },
   {
     "id": "rest-431",
@@ -5478,7 +5591,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "National Road 3 (Kampong Bay Bridge), Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "071 81 11 112",
+    "phone": "",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
@@ -5517,13 +5630,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 42-44 Street 726, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "+855 96 405 7979",
+    "phone": "096 405 7979",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.607098,104.180621",
-    "latitude": 10.607098,
-    "longitude": 104.180621,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Pilgrim%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJJ4d0YAk3CDER8L-I5dWlJQc",
+    "latitude": 10.607181,
+    "longitude": 104.180793,
     "rating": 4.9,
     "reviewCount": 55,
     "signatureDishesKh": [
@@ -5541,7 +5654,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJJ4d0YAk3CDER8L-I5dWlJQc"
   },
   {
     "id": "rest-446",
@@ -5595,13 +5709,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 456, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "095260148",
+    "phone": "095 260 148",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.538819,104.916347",
-    "latitude": 11.538819,
-    "longitude": 104.916347,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Inasal%20Nation%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJ0U8kG95QCTERqCg73oJW_PA",
+    "latitude": 11.538822,
+    "longitude": 104.915961,
     "rating": 4.7,
     "reviewCount": 113,
     "signatureDishesKh": [
@@ -5619,7 +5733,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ0U8kG95QCTERqCg73oJW_PA"
   },
   {
     "id": "rest-448",
@@ -5634,7 +5749,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 175, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "011386789",
+    "phone": "",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
@@ -5713,13 +5828,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 735, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "+85510446044",
+    "phone": "010 446 044",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.607257,104.179312",
-    "latitude": 10.607257,
-    "longitude": 104.179312,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Artisans%20by%20Atelier%20Kampot%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJnY4d-Ig2CDERxHr09Y3SrbM",
+    "latitude": 10.60721,
+    "longitude": 104.179287,
     "rating": 4.6,
     "reviewCount": 200,
     "signatureDishesKh": [
@@ -5737,7 +5852,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJnY4d-Ig2CDERxHr09Y3SrbM"
   },
   {
     "id": "rest-452",
@@ -5756,9 +5872,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.606905,104.180042",
-    "latitude": 10.606905,
-    "longitude": 104.180042,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=The%20Moon%20Cafe%20%26%20Restaurant%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJT4GuDFg3CDERFvim902Uyrc",
+    "latitude": 10.599186,
+    "longitude": 104.177177,
     "rating": 4.7,
     "reviewCount": 229,
     "signatureDishesKh": [
@@ -5776,7 +5892,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJT4GuDFg3CDERFvim902Uyrc"
   },
   {
     "id": "rest-455",
@@ -5791,13 +5908,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 37 Street 123, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "017 369 272",
+    "phone": "086 619 111",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5383,104.917349",
-    "latitude": 11.5383,
-    "longitude": 104.917349,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Eleven%20One%20Kitchen%20TTP%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJgz-wdt5QCTER4ythnUFoq1w",
+    "latitude": 11.538269,
+    "longitude": 104.91738,
     "rating": 4.8,
     "reviewCount": 258,
     "signatureDishesKh": [
@@ -5814,7 +5931,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJgz-wdt5QCTER4ythnUFoq1w"
   },
   {
     "id": "rest-456",
@@ -5829,7 +5947,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 18A Street 350, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "0972880901",
+    "phone": "097 288 0901",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
@@ -5868,13 +5986,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. #59c Street 155, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855 17 316 033",
+    "phone": "017 316 033",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.537403,104.915256",
-    "latitude": 11.537403,
-    "longitude": 104.915256,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Century%209%20Inspired%20Eatery%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJv9xTWOdQCTERXmE4J23mSGk",
+    "latitude": 11.537349,
+    "longitude": 104.915265,
     "rating": 4.6,
     "reviewCount": 316,
     "signatureDishesKh": [
@@ -5892,7 +6010,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJv9xTWOdQCTERXmE4J23mSGk"
   },
   {
     "id": "rest-458",
@@ -5907,13 +6026,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 155, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "085 420 365",
+    "phone": "012 608 700",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.534693,104.915321",
-    "latitude": 11.534693,
-    "longitude": 104.915321,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Open%20Arms%20Cafe%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJ5-ebh-dQCTERelJ2EU-YyRQ",
+    "latitude": 11.566253,
+    "longitude": 104.923979,
     "rating": 4.7,
     "reviewCount": 55,
     "signatureDishesKh": [
@@ -5930,7 +6049,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ5-ebh-dQCTERelJ2EU-YyRQ"
   },
   {
     "id": "rest-459",
@@ -5949,9 +6069,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.539642,104.918191",
-    "latitude": 11.539642,
-    "longitude": 104.918191,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Kungfu%20Kitchen%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJ861hf2FRCTERVHPtT9BfLP8",
+    "latitude": 11.547896,
+    "longitude": 104.932202,
     "rating": 4.8,
     "reviewCount": 84,
     "signatureDishesKh": [
@@ -5969,7 +6089,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ861hf2FRCTERVHPtT9BfLP8"
   },
   {
     "id": "rest-460",
@@ -6023,13 +6144,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 06b 440, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855(0)969520388",
+    "phone": "096 952 0388",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.541038,104.918943",
-    "latitude": 11.541038,
-    "longitude": 104.918943,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bake%20and%20Bake%20Bakery%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJIxZ0GpQJCDERNZXnAU12yyU",
+    "latitude": 11.540105,
+    "longitude": 104.911358,
     "rating": 4.6,
     "reviewCount": 142,
     "signatureDishesKh": [
@@ -6047,7 +6168,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJIxZ0GpQJCDERNZXnAU12yyU"
   },
   {
     "id": "rest-462",
@@ -6062,13 +6184,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 72 Street 113, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855 70 438 098",
+    "phone": "070 438 098",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.548273,104.91798",
-    "latitude": 11.548273,
-    "longitude": 104.91798,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Toss%20It!%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJtdX220xRCTERqbT2Bp8dwAg",
+    "latitude": 11.54826,
+    "longitude": 104.917983,
     "rating": 4.7,
     "reviewCount": 171,
     "signatureDishesKh": [
@@ -6086,7 +6208,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJtdX220xRCTERqbT2Bp8dwAg"
   },
   {
     "id": "rest-463",
@@ -6101,13 +6224,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "070559565",
+    "phone": "092 820 087",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.607958,104.180045",
-    "latitude": 10.607958,
-    "longitude": 104.180045,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Milano%20Cafe%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJV7sdaIg2CDER3q0gmYUksvg",
+    "latitude": 10.607919,
+    "longitude": 104.180076,
     "rating": 4.8,
     "reviewCount": 200,
     "signatureDishesKh": [
@@ -6125,7 +6248,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJV7sdaIg2CDER3q0gmYUksvg"
   },
   {
     "id": "rest-464",
@@ -6140,13 +6264,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 700, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "010581390",
+    "phone": "010 581 390",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.609608,104.17958",
-    "latitude": 10.609608,
-    "longitude": 104.17958,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Caf%C3%A9%20Kampot%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJ36Io_qc3CDERyy4WFwi1Fz0",
+    "latitude": 10.609752,
+    "longitude": 104.179467,
     "rating": 4.9,
     "reviewCount": 229,
     "signatureDishesKh": [
@@ -6163,7 +6287,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ36Io_qc3CDERyy4WFwi1Fz0"
   },
   {
     "id": "rest-465",
@@ -6178,13 +6303,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 701, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "+855968213005",
+    "phone": "096 821 3005",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.604354,104.183574",
-    "latitude": 10.604354,
-    "longitude": 104.183574,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=LPOW%20restaurant%20Moustache%20and%20Nico%20Kampot%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJETlHcAQ3CDER-0CKjB2nS-o",
+    "latitude": 10.604212,
+    "longitude": 104.183698,
     "rating": 4.6,
     "reviewCount": 258,
     "signatureDishesKh": [
@@ -6202,7 +6327,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJETlHcAQ3CDER-0CKjB2nS-o"
   },
   {
     "id": "rest-470",
@@ -6221,9 +6347,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.534681,104.922322",
-    "latitude": 11.534681,
-    "longitude": 104.922322,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Any%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJ42tqxz1RCTERuyW1WugOAZw",
+    "latitude": 11.556374,
+    "longitude": 104.92821,
     "rating": 4.7,
     "reviewCount": 287,
     "signatureDishesKh": [
@@ -6240,7 +6366,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ42tqxz1RCTERuyW1WugOAZw"
   },
   {
     "id": "rest-471",
@@ -6255,13 +6382,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 460, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855 099 474 579",
+    "phone": "009 947 4579",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.53852,104.918118",
-    "latitude": 11.53852,
-    "longitude": 104.918118,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Trattoria%20Bello%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJHYhBet5QCTERuQWfOowdYbc",
+    "latitude": 11.538518,
+    "longitude": 104.918189,
     "rating": 4.8,
     "reviewCount": 316,
     "signatureDishesKh": [
@@ -6278,7 +6405,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJHYhBet5QCTERuQWfOowdYbc"
   },
   {
     "id": "rest-472",
@@ -6293,13 +6421,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 446, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "086878918",
+    "phone": "086 878 918",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.540462,104.91632",
-    "latitude": 11.540462,
-    "longitude": 104.91632,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Taste%20of%20the%20middle%20east%20restaurant%202%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJuyIuMt5QCTERBMmNSjiuKaE",
+    "latitude": 11.540516,
+    "longitude": 104.916361,
     "rating": 4.5,
     "reviewCount": 55,
     "signatureDishesKh": [
@@ -6317,7 +6445,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJuyIuMt5QCTERBMmNSjiuKaE"
   },
   {
     "id": "rest-473",
@@ -6332,13 +6461,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 133D Street 199 - Street 199, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "078 607 706",
+    "phone": "069 465 555",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.548596,104.904795",
-    "latitude": 11.548596,
-    "longitude": 104.904795,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Unnie%20Vanda%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJs-DgUwBRCTERulmFmlE81CM",
+    "latitude": 11.548555,
+    "longitude": 104.904796,
     "rating": 4.6,
     "reviewCount": 84,
     "signatureDishesKh": [
@@ -6356,7 +6485,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJs-DgUwBRCTERulmFmlE81CM"
   },
   {
     "id": "rest-475",
@@ -6371,13 +6501,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 729, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "085 624 737",
+    "phone": "012 897 205",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.609802,104.181286",
-    "latitude": 10.609802,
-    "longitude": 104.181286,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Jenny's%20Corner%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJCXrM19g3CDERzbLNvIwXFck",
+    "latitude": 10.600657,
+    "longitude": 104.182314,
     "rating": 4.7,
     "reviewCount": 113,
     "signatureDishesKh": [
@@ -6395,7 +6525,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJCXrM19g3CDERzbLNvIwXFck"
   },
   {
     "id": "rest-476",
@@ -6410,13 +6541,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 1 Street 730, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "+855312294506",
+    "phone": "031 229 4506",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.606134,104.181247",
-    "latitude": 10.606134,
-    "longitude": 104.181247,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=BeksRoy%20The%20Reggae%20Bar%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJtQvcSJA3CDER3HpMi8_-VAc",
+    "latitude": 10.606028,
+    "longitude": 104.181161,
     "rating": 4.8,
     "reviewCount": 142,
     "signatureDishesKh": [
@@ -6434,7 +6565,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJtQvcSJA3CDER3HpMi8_-VAc"
   },
   {
     "id": "rest-484",
@@ -6453,9 +6585,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.539358,104.916058",
-    "latitude": 11.539358,
-    "longitude": 104.916058,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Roots%20and%20Burgers%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJdZXgGN5QCTERqSWzlBSdowo",
+    "latitude": 11.539327,
+    "longitude": 104.916002,
     "rating": 4.9,
     "reviewCount": 171,
     "signatureDishesKh": [
@@ -6473,7 +6605,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJdZXgGN5QCTERqSWzlBSdowo"
   },
   {
     "id": "rest-485",
@@ -6492,9 +6625,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.540115,104.915758",
-    "latitude": 11.540115,
-    "longitude": 104.915758,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Banh%20Mi%20%26%20Bros%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJG1FCOTtRCTERPkTto8-CvbE",
+    "latitude": 11.55528,
+    "longitude": 104.922989,
     "rating": 4.6,
     "reviewCount": 200,
     "signatureDishesKh": [
@@ -6512,7 +6645,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJG1FCOTtRCTERPkTto8-CvbE"
   },
   {
     "id": "rest-486",
@@ -6531,9 +6665,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.547664,104.914296",
-    "latitude": 11.547664,
-    "longitude": 104.914296,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Seoul%20Spicy%20Noodles%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJJSHV_2BQCTERvWv7RDwUja4",
+    "latitude": 11.520213,
+    "longitude": 104.889178,
     "rating": 4.7,
     "reviewCount": 229,
     "signatureDishesKh": [
@@ -6550,7 +6684,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJJSHV_2BQCTERvWv7RDwUja4"
   },
   {
     "id": "rest-487",
@@ -6565,13 +6700,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. #66 Street 113, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855-85-540-525",
+    "phone": "085 540 525",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.550045,104.918077",
-    "latitude": 11.550045,
-    "longitude": 104.918077,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Alamo%20Caf%C3%A9%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJIyyVyEVRCTERqVjpTbauJYs",
+    "latitude": 11.571943,
+    "longitude": 104.924924,
     "rating": 4.8,
     "reviewCount": 258,
     "signatureDishesKh": [
@@ -6589,7 +6724,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJIyyVyEVRCTERqVjpTbauJYs"
   },
   {
     "id": "rest-488",
@@ -6646,9 +6782,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.539364,104.917593",
-    "latitude": 11.539364,
-    "longitude": 104.917593,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Piseth's%20Cali%20Burrito%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJ64Ld3eJRCTER7laHPLNdieI",
+    "latitude": 11.54414,
+    "longitude": 104.906858,
     "rating": 4.6,
     "reviewCount": 316,
     "signatureDishesKh": [
@@ -6666,7 +6802,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ64Ld3eJRCTER7laHPLNdieI"
   },
   {
     "id": "rest-490",
@@ -6681,13 +6818,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 5 Street 442, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855-11-763-401",
+    "phone": "076 285 0610",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.54081,104.91073",
-    "latitude": 11.54081,
-    "longitude": 104.91073,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Ministry%20of%20Cat%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJmxa_uB9RCTERn-wPMaLa5og",
+    "latitude": 11.540823,
+    "longitude": 104.910755,
     "rating": 4.7,
     "reviewCount": 55,
     "signatureDishesKh": [
@@ -6704,7 +6841,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJmxa_uB9RCTERn-wPMaLa5og"
   },
   {
     "id": "rest-491",
@@ -6719,13 +6857,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 450, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "017 777 136",
+    "phone": "090 595 500",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.539918,104.91762",
-    "latitude": 11.539918,
-    "longitude": 104.91762,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bay%20Area%20Tacos%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJM_kPsuhRCTER2esBnNsuUX4",
+    "latitude": 11.539986,
+    "longitude": 104.91761,
     "rating": 4.8,
     "reviewCount": 84,
     "signatureDishesKh": [
@@ -6743,7 +6881,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJM_kPsuhRCTER2esBnNsuUX4"
   },
   {
     "id": "rest-493",
@@ -6762,9 +6901,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.540481,104.919151",
-    "latitude": 11.540481,
-    "longitude": 104.919151,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=R%C3%89T%20Eatery%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJ40qZnDpRCTERDs8-oyuVLCs",
+    "latitude": 11.540422,
+    "longitude": 104.919014,
     "rating": 4.9,
     "reviewCount": 113,
     "signatureDishesKh": [
@@ -6782,7 +6921,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ40qZnDpRCTERDs8-oyuVLCs"
   },
   {
     "id": "rest-494",
@@ -6801,9 +6941,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.606724,104.186294",
-    "latitude": 10.606724,
-    "longitude": 104.186294,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Wish%20Oun%20Nim%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJPzdb3oY2CDERGyOM6T-oXTg",
+    "latitude": 10.606643,
+    "longitude": 104.185972,
     "rating": 4.6,
     "reviewCount": 142,
     "signatureDishesKh": [
@@ -6821,7 +6961,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJPzdb3oY2CDERGyOM6T-oXTg"
   },
   {
     "id": "rest-495",
@@ -6840,9 +6981,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.606727,104.182333",
-    "latitude": 10.606727,
-    "longitude": 104.182333,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Cidershack%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJmZT7Ur83CDERpmm5CexyS-U",
+    "latitude": 10.606754,
+    "longitude": 104.182499,
     "rating": 4.7,
     "reviewCount": 171,
     "signatureDishesKh": [
@@ -6860,7 +7001,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJmZT7Ur83CDERpmm5CexyS-U"
   },
   {
     "id": "rest-496",
@@ -6875,13 +7017,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "077839531",
+    "phone": "096 405 0446",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.606077,104.183282",
-    "latitude": 10.606077,
-    "longitude": 104.183282,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=The%20Hideout%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJ9_aeb4Y2CDERVrvfsVv6Wvc",
+    "latitude": 10.606063,
+    "longitude": 104.183234,
     "rating": 4.8,
     "reviewCount": 200,
     "signatureDishesKh": [
@@ -6899,7 +7041,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ9_aeb4Y2CDERVrvfsVv6Wvc"
   },
   {
     "id": "rest-497",
@@ -6914,13 +7057,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 666 Street 729, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "089 862 291",
+    "phone": "071 264 2714",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.609706,104.181516",
-    "latitude": 10.609706,
-    "longitude": 104.181516,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=wake'n'bake%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJ_13BsU83CDERAhFyk1w0oTI",
+    "latitude": 10.609735,
+    "longitude": 104.181487,
     "rating": 4.5,
     "reviewCount": 229,
     "signatureDishesKh": [
@@ -6938,7 +7081,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ_13BsU83CDERAhFyk1w0oTI"
   },
   {
     "id": "rest-498",
@@ -6953,7 +7097,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "National Road 33, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "023300015",
+    "phone": "023 300 015",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
@@ -6991,13 +7135,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "7 Makara Street (200), Krong Preah Sihanouk, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
-    "phone": "015444663",
+    "phone": "015 444 663",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.617876,103.523977",
-    "latitude": 10.617876,
-    "longitude": 103.523977,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Chamka%20Spei%20Restaurant%2C%20Preah%20Sihanouk%2C%20Cambodia&query_place_id=ChIJ2X7Z0MHhBzERvgjDgOLD_WI",
+    "latitude": 10.617648,
+    "longitude": 103.524047,
     "rating": 4.7,
     "reviewCount": 287,
     "signatureDishesKh": [
@@ -7015,7 +7159,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ2X7Z0MHhBzERvgjDgOLD_WI"
   },
   {
     "id": "rest-500",
@@ -7030,13 +7175,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 198 Ekareach Street, Krong Preah Sihanouk, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
-    "phone": "+855070505775",
+    "phone": "070 772 447",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.623454,103.523993",
-    "latitude": 10.623454,
-    "longitude": 103.523993,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Del%20Mar%20Pastry%20%26%20Coffee%2C%20Preah%20Sihanouk%2C%20Cambodia&query_place_id=ChIJwyouBqvhBzERgA4eq4fIRXk",
+    "latitude": 10.623469,
+    "longitude": 103.523902,
     "rating": 4.8,
     "reviewCount": 316,
     "signatureDishesKh": [
@@ -7053,7 +7198,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJwyouBqvhBzERgA4eq4fIRXk"
   },
   {
     "id": "rest-501",
@@ -7068,13 +7214,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 203, Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
-    "phone": "012 930 415",
+    "phone": "015 993 343",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.098606,103.20258",
-    "latitude": 13.098606,
-    "longitude": 103.20258,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Rainbow%20house%2C%20Battambang%2C%20Cambodia&query_place_id=ChIJO6SU2o1JBTERhw8dQBkyaZ0",
+    "latitude": 13.098801,
+    "longitude": 103.202327,
     "rating": 4.9,
     "reviewCount": 55,
     "signatureDishesKh": [
@@ -7092,7 +7238,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJO6SU2o1JBTERhw8dQBkyaZ0"
   },
   {
     "id": "rest-503",
@@ -7150,9 +7297,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.548704,104.905198",
-    "latitude": 11.548704,
-    "longitude": 104.905198,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Talk%20Coffee%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJWdzMBABRCTERsYE1VxuZnlw",
+    "latitude": 11.554816,
+    "longitude": 104.907831,
     "rating": 4.7,
     "reviewCount": 113,
     "signatureDishesKh": [
@@ -7169,7 +7316,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJWdzMBABRCTERsYE1VxuZnlw"
   },
   {
     "id": "rest-505",
@@ -7188,9 +7336,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.549865,104.918069",
-    "latitude": 11.549865,
-    "longitude": 104.918069,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Cafe%20%26%20Bakery%20Tokio%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJZ6VaEABRCTERQ_4jkSKBdrM",
+    "latitude": 11.54964,
+    "longitude": 104.919582,
     "rating": 4.8,
     "reviewCount": 142,
     "signatureDishesKh": [
@@ -7207,7 +7355,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJZ6VaEABRCTERQ_4jkSKBdrM"
   },
   {
     "id": "rest-506",
@@ -7222,13 +7371,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 163, Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "093532222",
+    "phone": "093 532 222",
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.544529,104.9138",
-    "latitude": 11.544529,
-    "longitude": 104.9138,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Tous%20les%20Jours%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJ81o1c8BRCTERPCFusbjyYb8",
+    "latitude": 11.566507,
+    "longitude": 104.89409,
     "rating": 4.5,
     "reviewCount": 171,
     "signatureDishesKh": [
@@ -7245,7 +7394,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ81o1c8BRCTERPCFusbjyYb8"
   },
   {
     "id": "rest-507",
@@ -7260,7 +7410,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Khan Chamkarmon, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "+855-11-910-912",
+    "phone": "011 910 912",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
@@ -7299,13 +7449,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "No. 20 Street 725, Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "085 252 601",
+    "phone": "070 754 264",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.608,104.178965",
-    "latitude": 10.608,
-    "longitude": 104.178965,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Max's%20Bar%20%26%20Kitchen%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJidb9TYg2CDERBnjrippjWVc",
+    "latitude": 10.60824,
+    "longitude": 104.178849,
     "rating": 4.7,
     "reviewCount": 229,
     "signatureDishesKh": [
@@ -7323,7 +7473,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJidb9TYg2CDERBnjrippjWVc"
   },
   {
     "id": "rest-509",
@@ -7342,9 +7493,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.607205,104.181003",
-    "latitude": 10.607205,
-    "longitude": 104.181003,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Papa's%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJMaHofYg2CDER_sJYj-iBQ3A",
+    "latitude": 10.607228,
+    "longitude": 104.181038,
     "rating": 4.8,
     "reviewCount": 258,
     "signatureDishesKh": [
@@ -7361,7 +7512,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJMaHofYg2CDER_sJYj-iBQ3A"
   },
   {
     "id": "rest-510",
@@ -7380,9 +7532,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.615055,104.179386",
-    "latitude": 10.615055,
-    "longitude": 104.179386,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Noodle%20soup%20pho%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJn3d-b2M2CDER8zdBNfGzM4I",
+    "latitude": 10.615046,
+    "longitude": 104.179498,
     "rating": 4.9,
     "reviewCount": 287,
     "signatureDishesKh": [
@@ -7401,7 +7553,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJn3d-b2M2CDER8zdBNfGzM4I"
   },
   {
     "id": "rest-511",
@@ -7420,9 +7573,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.626358,103.514514",
-    "latitude": 10.626358,
-    "longitude": 103.514514,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Salumiere%2C%20Preah%20Sihanouk%2C%20Cambodia&query_place_id=ChIJV8ZlKbrhBzERlUDH9KzilE8",
+    "latitude": 10.626327,
+    "longitude": 103.51453,
     "rating": 4.6,
     "reviewCount": 316,
     "signatureDishesKh": [
@@ -7440,7 +7593,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJV8ZlKbrhBzERlUDH9KzilE8"
   },
   {
     "id": "rest-514",
@@ -7459,9 +7613,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.534006,104.91853",
-    "latitude": 11.534006,
-    "longitude": 104.91853,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bengawan%20Solo%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJLcjA4dxQCTER0a9oTxCDeng",
+    "latitude": 11.534059,
+    "longitude": 104.918527,
     "rating": 4.7,
     "reviewCount": 55,
     "signatureDishesKh": [
@@ -7479,7 +7633,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJLcjA4dxQCTER0a9oTxCDeng"
   },
   {
     "id": "rest-515",
@@ -7498,9 +7653,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៦:៣០ ព្រឹក - ០៨:៣០ យប់",
     "openingHoursEn": "06:30 AM - 08:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.54166,104.921138",
-    "latitude": 11.54166,
-    "longitude": 104.921138,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Coffee%20Today%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJMRyBlFVQCTERSAVBZ0BditY",
+    "latitude": 11.540569,
+    "longitude": 104.891212,
     "rating": 4.8,
     "reviewCount": 84,
     "signatureDishesKh": [
@@ -7517,7 +7672,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJMRyBlFVQCTERSAVBZ0BditY"
   },
   {
     "id": "rest-517",
@@ -7536,9 +7692,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.547702,104.916647",
-    "latitude": 11.547702,
-    "longitude": 104.916647,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Meatophum%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJGc_8JV1RCTERLNG5t25lbqw",
+    "latitude": 11.577408,
+    "longitude": 104.918068,
     "rating": 4.5,
     "reviewCount": 113,
     "signatureDishesKh": [
@@ -7556,7 +7712,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJGc_8JV1RCTERLNG5t25lbqw"
   },
   {
     "id": "rest-518",
@@ -7614,9 +7771,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.539448,104.916686",
-    "latitude": 11.539448,
-    "longitude": 104.916686,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Golden%20Pumpkin%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJl_SfaDQXEDERbdurcFeWdJE",
+    "latitude": 11.539403,
+    "longitude": 104.916705,
     "rating": 4.7,
     "reviewCount": 171,
     "signatureDishesKh": [
@@ -7634,7 +7791,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJl_SfaDQXEDERbdurcFeWdJE"
   },
   {
     "id": "rest-520",
@@ -7649,13 +7807,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "+855 963 482 351",
+    "phone": "096 348 2351",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.607546,104.17931",
-    "latitude": 10.607546,
-    "longitude": 104.17931,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=BurgerShack%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJJ5p2htw3CDERkdBmKuc5p_Q",
+    "latitude": 10.606766,
+    "longitude": 104.179641,
     "rating": 4.8,
     "reviewCount": 200,
     "signatureDishesKh": [
@@ -7673,7 +7831,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJJ5p2htw3CDERkdBmKuc5p_Q"
   },
   {
     "id": "rest-521",
@@ -7688,13 +7847,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Kampot, Kampot",
     "provinceKh": "ខេត្តកំពត",
     "provinceEn": "Kampot",
-    "phone": "+855 88 955 1058",
+    "phone": "088 955 1058",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.607982,104.175594",
-    "latitude": 10.607982,
-    "longitude": 104.175594,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Razorback%20Bar%20BQ%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJYXUkKIo2CDERVzLg6LU6m18",
+    "latitude": 10.608025,
+    "longitude": 104.175907,
     "rating": 4.9,
     "reviewCount": 229,
     "signatureDishesKh": [
@@ -7712,7 +7871,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJYXUkKIo2CDERVzLg6LU6m18"
   },
   {
     "id": "rest-522",
@@ -7731,9 +7891,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:០០ យប់",
     "openingHoursEn": "07:00 AM - 09:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.613051,104.171387",
-    "latitude": 10.613051,
-    "longitude": 104.171387,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Sela%20organic%20kitchen%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJ0Tp8j3I3CDERH1q9E1NQ1f8",
+    "latitude": 10.613066,
+    "longitude": 104.171548,
     "rating": 4.6,
     "reviewCount": 258,
     "signatureDishesKh": [
@@ -7751,7 +7911,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJ0Tp8j3I3CDERH1q9E1NQ1f8"
   },
   {
     "id": "rest-523",
@@ -7766,13 +7927,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Preah Sihanouk, Preah Sihanouk",
     "provinceKh": "ខេត្តព្រះសីហនុ",
     "provinceEn": "Preah Sihanouk",
-    "phone": "086745073",
+    "phone": "086 745 073",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.614607,103.523743",
-    "latitude": 10.614607,
-    "longitude": 103.523743,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=FROGGIES%20CR%C3%8APES%20%26%20TAPAS%2C%20Preah%20Sihanouk%2C%20Cambodia&query_place_id=ChIJm9pcVOrhBzER_OeU3A5uyeo",
+    "latitude": 10.614715,
+    "longitude": 103.523728,
     "rating": 4.7,
     "reviewCount": 287,
     "signatureDishesKh": [
@@ -7789,7 +7950,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJm9pcVOrhBzER_OeU3A5uyeo"
   },
   {
     "id": "rest-524",
@@ -7804,13 +7966,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Krong Battambang, Battambang",
     "provinceKh": "ខេត្តបាត់ដំបង",
     "provinceEn": "Battambang",
-    "phone": "098343472",
+    "phone": "098 343 472",
     "openingHoursKh": "០៧:០០ ព្រឹក - ០៩:៣០ យប់",
     "openingHoursEn": "07:00 AM - 09:30 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.089899,103.190185",
-    "latitude": 13.089899,
-    "longitude": 103.190185,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=About%20The%20World%20Home%2C%20Battambang%2C%20Cambodia&query_place_id=ChIJvRHF0IxJBTERqz_7emsXw0U",
+    "latitude": 13.089927,
+    "longitude": 103.190775,
     "rating": 4.8,
     "reviewCount": 316,
     "signatureDishesKh": [
@@ -7828,7 +7990,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-10-31T16:00:00.000Z"
+    "locationVerifiedAt": "2026-10-31T16:00:00.000Z",
+    "googlePlaceId": "ChIJvRHF0IxJBTERqz_7emsXw0U"
   },
   {
     "id": "rest-525",
@@ -7847,9 +8010,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "07:00 AM - 10:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5602,104.9245",
-    "latitude": 11.5602,
-    "longitude": 104.9245,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Kravanh%20Authentic%20Khmer%20Cuisine%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJI4Pe2TNRCTERBsvdzo-09q8",
+    "latitude": 11.564687,
+    "longitude": 104.922673,
     "rating": 4.8,
     "reviewCount": 412,
     "signatureDishesKh": [
@@ -7867,7 +8030,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-04T17:30:00.000Z"
+    "locationVerifiedAt": "2026-11-04T17:30:00.000Z",
+    "googlePlaceId": "ChIJI4Pe2TNRCTERBsvdzo-09q8"
   },
   {
     "id": "rest-526",
@@ -7886,9 +8050,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "07:00 AM - 10:00 PM",
     "priceLevel": "$$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=13.3695,103.8521",
-    "latitude": 13.3695,
-    "longitude": 103.8521,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mahob%20Khmer%20Cuisine%2C%20Siem%20Reap%2C%20Cambodia&query_place_id=ChIJmWuYKwoXEDER0cAT6Idnj3s",
+    "latitude": 13.373113,
+    "longitude": 103.863098,
     "rating": 4.8,
     "reviewCount": 460,
     "signatureDishesKh": [
@@ -7906,7 +8070,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-04T17:30:00.000Z"
+    "locationVerifiedAt": "2026-11-04T17:30:00.000Z",
+    "googlePlaceId": "ChIJmWuYKwoXEDER0cAT6Idnj3s"
   },
   {
     "id": "rest-527",
@@ -8040,7 +8205,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Street 126, Near Central Market, Daun Penh, Phnom Penh",
     "provinceKh": "រាជធានីភ្នំពេញ",
     "provinceEn": "Phnom Penh",
-    "phone": "012 341 882",
+    "phone": "",
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "07:00 AM - 10:00 PM",
     "priceLevel": "$",
@@ -8086,9 +8251,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "07:00 AM - 10:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5945,104.9352",
-    "latitude": 11.5945,
-    "longitude": 104.9352,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Mekong%20Breeze%20Chroy%20Changvar%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJNbsMewBTCTER05z1Q6_Tctk",
+    "latitude": 11.653189,
+    "longitude": 104.915399,
     "rating": 4.8,
     "reviewCount": 275,
     "signatureDishesKh": [
@@ -8106,7 +8271,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-04T17:30:00.000Z"
+    "locationVerifiedAt": "2026-11-04T17:30:00.000Z",
+    "googlePlaceId": "ChIJNbsMewBTCTER05z1Q6_Tctk"
   },
   {
     "id": "rest-532",
@@ -8361,9 +8527,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "07:00 AM - 10:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.6184,104.3245",
-    "latitude": 10.6184,
-    "longitude": 104.3245,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=La%20Plantation%20Pepper%20Bistro%20Kampot%2C%20Kampot%2C%20Cambodia&query_place_id=ChIJ_4jXyeXKCTER18e4pdCJPdI",
+    "latitude": 10.609976,
+    "longitude": 104.316219,
     "rating": 4.9,
     "reviewCount": 495,
     "signatureDishesKh": [
@@ -8381,7 +8547,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-04T17:30:00.000Z"
+    "locationVerifiedAt": "2026-11-04T17:30:00.000Z",
+    "googlePlaceId": "ChIJ_4jXyeXKCTER18e4pdCJPdI"
   },
   {
     "id": "rest-539",
@@ -8552,7 +8719,7 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "Deum Srol, Monorom, Krong Sen Monorom, Mondulkiri",
     "provinceKh": "ខេត្តមណ្ឌលគិរី",
     "provinceEn": "Mondulkiri",
-    "phone": "097 884 5678",
+    "phone": "",
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "07:00 AM - 10:00 PM",
     "priceLevel": "$",
@@ -8673,9 +8840,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "07:00 AM - 10:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.7115,104.8895",
-    "latitude": 12.7115,
-    "longitude": 104.8895,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Stueng%20Saen%20Riverside%20Restaurant%2C%20Kampong%20Thom%2C%20Cambodia&query_place_id=ChIJ-eJH0_xyDjERBD3deqB6Uh4",
+    "latitude": 12.712812,
+    "longitude": 104.888714,
     "rating": 4.6,
     "reviewCount": 185,
     "signatureDishesKh": [
@@ -8693,7 +8860,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-04T17:30:00.000Z"
+    "locationVerifiedAt": "2026-11-04T17:30:00.000Z",
+    "googlePlaceId": "ChIJ-eJH0_xyDjERBD3deqB6Uh4"
   },
   {
     "id": "rest-547",
@@ -8712,9 +8880,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "07:00 AM - 10:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=12.5382,103.9195",
-    "latitude": 12.5382,
-    "longitude": 103.9195,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Koh%20Sampov%20Meas%20Dining%20Pursat%2C%20Pursat%2C%20Cambodia&query_place_id=ChIJ1bxf2A6iDzERWacpJabIzPQ",
+    "latitude": 12.544999,
+    "longitude": 103.921106,
     "rating": 4.7,
     "reviewCount": 198,
     "signatureDishesKh": [
@@ -8732,7 +8900,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-04T17:30:00.000Z"
+    "locationVerifiedAt": "2026-11-04T17:30:00.000Z",
+    "googlePlaceId": "ChIJ1bxf2A6iDzERWacpJabIzPQ"
   },
   {
     "id": "rest-548",
@@ -8792,9 +8961,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "07:00 AM - 10:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=10.9912,104.7882",
-    "latitude": 10.9912,
-    "longitude": 104.7882,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Takeo%20Giant%20River%20Prawn%20House%2C%20Takeo%2C%20Cambodia&query_place_id=ChIJNXQF9zl2CTERQTy2PappA4Y",
+    "latitude": 10.993453,
+    "longitude": 104.78623,
     "rating": 4.8,
     "reviewCount": 312,
     "signatureDishesKh": [
@@ -8812,7 +8981,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-04T17:30:00.000Z"
+    "locationVerifiedAt": "2026-11-04T17:30:00.000Z",
+    "googlePlaceId": "ChIJNXQF9zl2CTERQTy2PappA4Y"
   },
   {
     "id": "rest-550",
@@ -8831,9 +9001,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "07:00 AM - 10:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.0852,105.7995",
-    "latitude": 11.0852,
-    "longitude": 105.7995,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Waiko%20Riverfront%20Restaurant%2C%20Svay%20Rieng%2C%20Cambodia&query_place_id=ChIJpy3pZgAHCzERgdzKKy-PbF8",
+    "latitude": 11.079822,
+    "longitude": 105.805086,
     "rating": 4.6,
     "reviewCount": 164,
     "signatureDishesKh": [
@@ -8851,7 +9021,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-04T17:30:00.000Z"
+    "locationVerifiedAt": "2026-11-04T17:30:00.000Z",
+    "googlePlaceId": "ChIJpy3pZgAHCzERgdzKKy-PbF8"
   },
   {
     "id": "rest-551",
@@ -8989,9 +9160,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "07:00 AM - 10:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.5534,104.9296",
-    "latitude": 11.5534,
-    "longitude": 104.9296,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bassac%20Lane%20Khmer%20Bistro%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJnfzyzC9RCTER3E3rAtnM9q4",
+    "latitude": 11.552971,
+    "longitude": 104.929722,
     "rating": 4.8,
     "reviewCount": 318,
     "signatureDishesKh": [
@@ -9009,7 +9180,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-04T17:30:00.000Z"
+    "locationVerifiedAt": "2026-11-04T17:30:00.000Z",
+    "googlePlaceId": "ChIJnfzyzC9RCTER3E3rAtnM9q4"
   },
   {
     "id": "rest-555",
@@ -9539,9 +9711,9 @@ export const initial100Restaurants: Restaurant[] = [
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "07:00 AM - 10:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.2618,105.2912",
-    "latitude": 11.2618,
-    "longitude": 105.2912,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Neak%20Loeung%20Mekong%20Fish%20House%2C%20Prey%20Veng%2C%20Cambodia&query_place_id=ChIJ-7zCikzCCzERIX9Jrc2Vm78",
+    "latitude": 11.265081,
+    "longitude": 105.283851,
     "rating": 4.7,
     "reviewCount": 220,
     "signatureDishesKh": [
@@ -9559,7 +9731,8 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-04T17:30:00.000Z"
+    "locationVerifiedAt": "2026-11-04T17:30:00.000Z",
+    "googlePlaceId": "ChIJ-7zCikzCCzERIX9Jrc2Vm78"
   },
   {
     "id": "rest-569",
@@ -9691,13 +9864,13 @@ export const initial100Restaurants: Restaurant[] = [
     "addressEn": "National Road 7, Krong Suong, Tboung Khmum",
     "provinceKh": "ខេត្តត្បូងឃ្មុំ",
     "provinceEn": "Tboung Khmum",
-    "phone": "042 948 512",
+    "phone": "015 738 738",
     "openingHoursKh": "០៧:០០ ព្រឹក - ១០:០០ យប់",
     "openingHoursEn": "07:00 AM - 10:00 PM",
     "priceLevel": "$",
-    "mapUrl": "https://www.google.com/maps/search/?api=1&query=11.9145,105.6512",
-    "latitude": 11.9145,
-    "longitude": 105.6512,
+    "mapUrl": "https://www.google.com/maps/search/?api=1&query=Suong%20Garden%20Family%20Restaurant%2C%20Tboung%20Khmum%2C%20Cambodia&query_place_id=ChIJjU4KKoRjDDER3bPrIufXyeo",
+    "latitude": 11.881336,
+    "longitude": 105.702171,
     "rating": 4.6,
     "reviewCount": 165,
     "signatureDishesKh": [
@@ -9717,6 +9890,7 @@ export const initial100Restaurants: Restaurant[] = [
     "profileImage": "",
     "locationVerificationStatus": "verified",
     "locationNeedsReview": false,
-    "locationVerifiedAt": "2026-11-04T17:30:00.000Z"
+    "locationVerifiedAt": "2026-11-04T17:30:00.000Z",
+    "googlePlaceId": "ChIJjU4KKoRjDDER3bPrIufXyeo"
   }
 ];

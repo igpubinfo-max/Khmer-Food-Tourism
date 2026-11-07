@@ -5,6 +5,7 @@ import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { sanitizeStartupCurrentUser } from './utils/securityIntegrityGuard.ts'
 import { APP_VERSION_NAME, APP_BUILD_CODE } from './types/index.ts'
+import { runUserDataIntegrityCheck } from './services/userDataIntegrityService.ts'
 
 // 0. Pre-boot cache sanitation & obsolete bulk cache eviction:
 // Free up localStorage quota FIRST on every boot / version update so account & VIP keys (`kft_current_user_v5`,
@@ -81,7 +82,33 @@ try {
 try {
   const CURRENT_VER_BUILD = `${APP_VERSION_NAME}_${APP_BUILD_CODE}`;
   const installedVer = localStorage.getItem('kft_app_installed_ver');
+  // Self-contained (no imports) so the upgrade audit also runs inside the scripted migration tests.
+  const __kftCountStoredUsers = (): { users: number; vip: number } => {
+    try {
+      const ids = new Set<string>();
+      let vip = 0;
+      const nowTs = Date.now();
+      for (const k of ['kft_users_v5', 'kft_users_v4']) {
+        const rawU = localStorage.getItem(k);
+        if (!rawU || rawU === 'undefined' || rawU === 'null') continue;
+        const arrU = JSON.parse(rawU);
+        if (!Array.isArray(arrU)) continue;
+        for (const u of arrU) {
+          if (!u || !u.id || u.role === 'admin' || u.isGuest) continue;
+          const id = String(u.id);
+          if (ids.has(id)) continue;
+          ids.add(id);
+          const exp = Date.parse(String(u.subscriptionExpiryDate || u.vipExpiresAt || '')) || 0;
+          if ((u.membershipTier === 'premium_vip' || u.subscriptionStatus === 'active') && u.subscriptionStatus !== 'cancelled' && exp > nowTs) vip++;
+        }
+      }
+      return { users: ids.size, vip };
+    } catch {
+      return { users: 0, vip: 0 };
+    }
+  };
   if (installedVer !== CURRENT_VER_BUILD) {
+    const __auditBefore = __kftCountStoredUsers();
     // Step 1A: Evict heavy expendable legacy bulk caches FIRST so pre-upgrade backups NEVER hit QuotaExceededError!
     // (All custom Admin/Owner food, restaurant & destination overrides live safely in kft_permanent_*_overrides_v1 + IndexedDB.)
     for (const staleBulkKey of [
@@ -442,6 +469,41 @@ try {
       }
     } catch {}
 
+    // Upgrade audit: prove (and log) that no registered user / active VIP was lost by this version change.
+    try {
+      const __auditAfter = __kftCountStoredUsers();
+      const auditEntry = {
+        from: installedVer || 'initial',
+        to: CURRENT_VER_BUILD,
+        usersBefore: __auditBefore.users,
+        usersAfter: __auditAfter.users,
+        vipBefore: __auditBefore.vip,
+        vipAfter: __auditAfter.vip,
+        at: new Date().toISOString(),
+      };
+      const rawAudit = localStorage.getItem('kft_upgrade_audit_log_v1');
+      const auditLog: any[] = rawAudit ? JSON.parse(rawAudit) : [];
+      auditLog.unshift(auditEntry);
+      auditLog.length = Math.min(auditLog.length, 40);
+      localStorage.setItem('kft_upgrade_audit_log_v1', JSON.stringify(auditLog));
+      if (auditEntry.usersAfter < auditEntry.usersBefore || auditEntry.vipAfter < auditEntry.vipBefore) {
+        const rawLog = localStorage.getItem('kft_integrity_log_v1');
+        const integrityLog: any[] = rawLog ? JSON.parse(rawLog) : [];
+        integrityLog.unshift({
+          at: auditEntry.at,
+          level: 'critical',
+          code: 'upgrade_lost_users',
+          message: `Upgrade ${auditEntry.from} -> ${auditEntry.to}: users ${auditEntry.usersBefore} -> ${auditEntry.usersAfter}, VIP ${auditEntry.vipBefore} -> ${auditEntry.vipAfter}`,
+          data: auditEntry,
+        });
+        integrityLog.length = Math.min(integrityLog.length, 200);
+        localStorage.setItem('kft_integrity_log_v1', JSON.stringify(integrityLog));
+        console.error('[KFT] Upgrade lost users!', auditEntry);
+      }
+    } catch {
+      /* audit must never break the upgrade */
+    }
+
     safeWriteUpgradeKey('kft_app_installed_ver', CURRENT_VER_BUILD);
   }
 } catch (e) {
@@ -470,6 +532,15 @@ try {
   });
 } catch (e) {
   console.warn('Image protection warning:', e);
+}
+
+// 3. Boot-time user-data integrity check: logs shrinkage / duplicates / missing registration dates BEFORE any sync can propagate them
+try {
+  const rawBootUsers = localStorage.getItem('kft_users_v5');
+  const bootUsers = rawBootUsers && rawBootUsers !== 'undefined' && rawBootUsers !== 'null' ? JSON.parse(rawBootUsers) : [];
+  runUserDataIntegrityCheck(Array.isArray(bootUsers) ? bootUsers.filter((u: any) => u && u.role !== 'admin') : []);
+} catch (e) {
+  console.warn('Boot user-data integrity check warning:', e);
 }
 
 createRoot(document.getElementById('root')!).render(

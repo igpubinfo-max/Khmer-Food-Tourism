@@ -633,7 +633,9 @@ export async function uploadImageToPermanentCloud(
     }
 
     // Tier 2: Failover to Permanent Secondary Cloud Binary CDN (`https://ntfy.sh/kft_cloud_media_cdn_v270`)
-    if (!finalUrl) {
+    // PRIVACY: that CDN is a PUBLIC topic, so personal images (profile photos, payment receipts) must never go there.
+    const isPersonalImageFolder = safeFolder === 'avatars' || safeFolder === 'proofs';
+    if (!finalUrl && !isPersonalImageFolder) {
       const cdnFullFilename = `${safeFolder}_${safeEntityId}_${bundle.hash}.${bundle.extension}`;
       const cdnThumbFilename = `${safeFolder}_${safeEntityId}_${bundle.hash}_thumb.${bundle.extension}`;
 

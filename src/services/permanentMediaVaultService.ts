@@ -46,6 +46,7 @@ import {
 import { initial100Destinations } from '../data/seedDestinations';
 import { initial200Foods } from '../data/seedFoods';
 import { initial100Restaurants } from '../data/seedRestaurants';
+import { youthBrandedCafes30 } from '../data/seedYouthBrandedCafes';
 import {
   generateAuthenticRecipeByDishName,
   hasPlaceholderOrIncompleteRecipe,
@@ -82,7 +83,7 @@ const IMMUTABLE_SEED_FOOD_MAP = new Map<string, FoodItem>(
 );
 
 const IMMUTABLE_SEED_REST_MAP = new Map<string, Restaurant>(
-  initial100Restaurants.map((r) => [r.id, r])
+  [...youthBrandedCafes30, ...initial100Restaurants].map((r) => [r.id, r])
 );
 // Authoritative baseline timestamp for bundled `/foods/food-*.jpg` assets
 export { SEED_FOOD_PHOTO_BASELINE_ISO, SEED_FOOD_PHOTO_BASELINE_MS };
@@ -924,10 +925,19 @@ function isObsoleteSeedPhoto(url?: string): boolean {
 
 function isFakeSeedRestaurantOverride(rec?: RestaurantMediaOverride | null): boolean {
   if (!rec || !rec.id) return true;
-  if (rec.pendingPhotoReplacement || rec.isAdminEdited) return false;
-  const isSeedId = /^rest-\d+$/.test(String(rec.id).trim());
-  if (!isSeedId) return false;
+  const idStr = String(rec.id).trim();
   const url = String(rec.photoUrl || rec.profileImage || '').trim();
+  // Purge stale pre-verified rest-youth-* overrides that had hardcoded 012 818 209 or lacked official ChIJ placeId and have no custom photo
+  if (
+    idStr.startsWith('rest-youth-') &&
+    !url &&
+    (rec.phone === '012 818 209' || !isValidOfficialGooglePlaceId(rec.googlePlaceId))
+  ) {
+    return true;
+  }
+  if (rec.pendingPhotoReplacement || rec.isAdminEdited) return false;
+  const isSeedId = isSeedRestaurantId(idStr);
+  if (!isSeedId) return false;
   const isStaticDefaultPath = /^\/(Shop\/rest-\d+|foods\/food-\d+)\.(jpg|jpeg|png|webp)$/i.test(url);
   const hasCustomName = Boolean(rec.nameKh && rec.nameKh.trim().length > 0);
   const hasReviews = Array.isArray(rec.reviews) && rec.reviews.length > 0;
@@ -935,7 +945,7 @@ function isFakeSeedRestaurantOverride(rec?: RestaurantMediaOverride | null): boo
     Array.isArray(rec.menuItems) &&
     rec.menuItems.length > 0 &&
     !(rec.id === 'rest-19' && rec.menuItems.length === 3 && rec.menuItems[0]?.id === 'menu-1');
-  return isStaticDefaultPath && !hasCustomName && !hasReviews && !hasCustomMenu;
+  return (!url || isStaticDefaultPath) && !hasCustomName && !hasReviews && !hasCustomMenu;
 }
 
 function safeReadJsonMap<T>(key: string): Record<string, T> {
@@ -1103,10 +1113,21 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
   }
 
   // Strip any accidental unedited seed restaurant entries or deleted restaurants from restaurants vault
+  let evictedStaleRestFromDisk = false;
   for (const [id, restOv] of Object.entries(restaurants)) {
     if (isFakeSeedRestaurantOverride(restOv) || isRestaurantIdDeleted(id, restOv?.updatedAt, deletedRestaurants)) {
       delete restaurants[id];
+      evictedStaleRestFromDisk = true;
+    } else if (restOv && restOv.phone === '012 818 209') {
+      const seedR = IMMUTABLE_SEED_REST_MAP.get(id);
+      if (seedR && seedR.phone !== '012 818 209') {
+        restOv.phone = seedR.phone || '';
+        evictedStaleRestFromDisk = true;
+      }
     }
+  }
+  if (evictedStaleRestFromDisk) {
+    safeWriteJsonMap(VAULT_KEYS.RESTAURANTS, restaurants);
   }
 
   for (const fid of Object.keys(deletedFoods)) {
@@ -2767,13 +2788,21 @@ export function applyRestaurantOverrides(
       return r;
     }
 
+    const seedRest = IMMUTABLE_SEED_REST_MAP.get(r.id);
+    const seedHasOfficialGpid = Boolean(seedRest && isValidOfficialGooglePlaceId(seedRest.googlePlaceId));
+    const ovHasOfficialGpid = isValidOfficialGooglePlaceId(ov.googlePlaceId);
     const ovHasVerifiedCambodiaLoc =
       isValidCambodiaCoordinates(ov.latitude, ov.longitude) &&
       ov.locationNeedsReview !== true &&
-      ov.locationVerificationStatus !== 'needs_admin_review';
-    const nextCleanGpid = isValidOfficialGooglePlaceId(ov.googlePlaceId)
+      ov.locationVerificationStatus !== 'needs_admin_review' &&
+      (!seedHasOfficialGpid || ovHasOfficialGpid);
+    const nextCleanGpid = ovHasOfficialGpid
       ? ov.googlePlaceId
       : (isValidOfficialGooglePlaceId(r.googlePlaceId) ? r.googlePlaceId : undefined);
+    const resolvedPhone =
+      ov.phone === '012 818 209' && seedRest && seedRest.phone !== '012 818 209'
+        ? r.phone
+        : (ov.phone !== undefined ? ov.phone : r.phone);
 
     anyChanged = true;
     return {
@@ -2795,17 +2824,17 @@ export function applyRestaurantOverrides(
       })(),
       menuItems: resolvedMenuItems,
       reviews: Array.isArray(ov.reviews) ? ov.reviews : r.reviews,
-      rating: typeof ov.rating === 'number' ? ov.rating : r.rating,
-      reviewCount: typeof ov.reviewCount === 'number' ? ov.reviewCount : r.reviewCount,
-      nameKh: ov.nameKh || r.nameKh,
-      nameEn: ov.nameEn || r.nameEn,
+      rating: String(r.id).startsWith('rest-youth-') ? r.rating : (typeof ov.rating === 'number' ? ov.rating : r.rating),
+      reviewCount: String(r.id).startsWith('rest-youth-') ? r.reviewCount : (typeof ov.reviewCount === 'number' ? ov.reviewCount : r.reviewCount),
+      nameKh: String(r.id).startsWith('rest-youth-') && !ovHasOfficialGpid ? r.nameKh : (ov.nameKh || r.nameKh),
+      nameEn: String(r.id).startsWith('rest-youth-') && !ovHasOfficialGpid ? r.nameEn : (ov.nameEn || r.nameEn),
       descriptionKh: ov.descriptionKh || r.descriptionKh,
       descriptionEn: ov.descriptionEn || r.descriptionEn,
-      addressKh: ov.addressKh || r.addressKh,
-      addressEn: ov.addressEn || r.addressEn,
+      addressKh: String(r.id).startsWith('rest-youth-') && !ovHasOfficialGpid ? r.addressKh : (ov.addressKh || r.addressKh),
+      addressEn: String(r.id).startsWith('rest-youth-') && !ovHasOfficialGpid ? r.addressEn : (ov.addressEn || r.addressEn),
       provinceKh: ov.provinceKh || r.provinceKh,
       provinceEn: ov.provinceEn || r.provinceEn,
-      phone: ov.phone !== undefined ? ov.phone : r.phone,
+      phone: resolvedPhone,
       openingHoursKh: ov.openingHoursKh || r.openingHoursKh,
       openingHoursEn: ov.openingHoursEn || r.openingHoursEn,
       signatureDishesKh: Array.isArray(ov.signatureDishesKh) && ov.signatureDishesKh.length > 0 ? ov.signatureDishesKh : r.signatureDishesKh,
@@ -3476,8 +3505,17 @@ export async function hydrateAndSyncMediaOverrides(
   mediaSyncInFlightPromise = (async () => {
     let current = await hydrateFromLocalIdbImmediate();
     let hasRemoteChanges = false;
-    if (Object.keys(current.foods || {}).length === 0) {
+    // EGRESS FIX: an app UPDATE keeps IndexedDB/localStorage (same origin), so the manifest delta (`kft_cloud_row_seen_v1`)
+    // is still valid. Only a genuinely EMPTY local vault (fresh install / cleared data) needs the full re-download.
+    // Previously every device re-downloaded ALL ~280 photo rows (~49 MB) and the 4.5 MB legacy document on EVERY update.
+    const localVaultIsEmpty =
+      Object.keys(current.foods || {}).length === 0 &&
+      Object.keys(current.restaurants || {}).length === 0 &&
+      Object.keys(current.destinations || {}).length === 0;
+    if (localVaultIsEmpty) {
       isBuildUpgradeOrEmptyVault = true;
+    } else if (isBuildUpgradeOrEmptyVault) {
+      isBuildUpgradeOrEmptyVault = false;
     }
 
     // 1. Flush any pending unsynced local Admin overrides to Supabase Cloud FIRST

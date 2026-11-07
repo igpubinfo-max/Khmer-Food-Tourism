@@ -15,7 +15,14 @@
     "test:festival": "node scripts/festivalFoodAudit.cjs",
     "test:reward": "node scripts/foodCheckInRewardAudit.cjs",
     "hotel:excel:export": "node scripts/export_hotel_excel.cjs",
-    "hotel:excel:import": "node scripts/import_hotel_excel.cjs"
+    "hotel:excel:import": "node scripts/import_hotel_excel.cjs",
+    "backup:users": "node scripts/userDataBackup.mjs",
+    "test:users:restore": "node scripts/userDataRestoreTest.mjs",
+    "test:users:safety": "node scripts/verifyUserDataSafety.mjs",
+    "test:users:migration": "node scripts/verify_update_migration_audit.mjs",
+    "test:edge": "node scripts/verifyEdgeFunctions.mjs",
+    "predeploy:users": "npm run test:users:safety && npm run test:edge && npm run test:users:migration && npm run backup:users && npm run test:users:restore",
+    "build:release": "npm run predeploy:users && vite build"
   },
   "dependencies": {
     "@capacitor/app": "^8.0.0",

@@ -126,6 +126,7 @@ import {
   uploadBase64ImageToSupabaseStorage,
   subscribeToCloudRealtimeUpdates,
 } from '../services/supabaseService';
+import { resetUserHighWater } from '../services/userDataIntegrityService';
 import { authenticateAdminWithBiometric, setSavedAdminUsername } from '../services/biometricService';
 import {
   loadLocalMediaOverrides,
@@ -1599,13 +1600,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addressEn: 'Street 134, Khan Tuol Kork, Phnom Penh',
         provinceKh: 'រាជធានីភ្នំពេញ',
         provinceEn: 'Phnom Penh',
-        phone: '012 345 678',
+        phone: '081 688 768',
         openingHoursKh: '០៤:០០ រសៀល - ១១:០០ យប់',
         openingHoursEn: '04:00 PM - 11:00 PM',
         priceLevel: '$$',
-        mapUrl: 'https://www.google.com/maps/search/?api=1&query=Unique+Grill+Street+134+Phnom+Penh',
-        latitude: 11.5654,
-        longitude: 104.9012,
+        mapUrl: 'https://www.google.com/maps/search/?api=1&query=Unique%20Grill%2C%20Phnom%20Penh%2C%20Cambodia&query_place_id=ChIJ4xhFEnhRCTER8wocF08aJBM',
+        latitude: 11.566817,
+        longitude: 104.9031,
+        googlePlaceId: 'ChIJ4xhFEnhRCTER8wocF08aJBM',
         locationVerificationStatus: 'verified',
         locationNeedsReview: false,
         locationVerifiedAt: '2026-11-04T09:30:00.000Z',
@@ -1758,18 +1760,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                   : [],
                 menuItems: ov?.menuItems || r.menuItems || [],
                 reviews: ov?.reviews || r.reviews || [],
-                addressKh: ov?.addressKh || seed.addressKh,
-                addressEn: ov?.addressEn || seed.addressEn,
+                addressKh: (isValidOfficialGooglePlaceId(seed.googlePlaceId) && !isValidOfficialGooglePlaceId(ov?.googlePlaceId)) ? seed.addressKh : (ov?.addressKh || seed.addressKh),
+                addressEn: (isValidOfficialGooglePlaceId(seed.googlePlaceId) && !isValidOfficialGooglePlaceId(ov?.googlePlaceId)) ? seed.addressEn : (ov?.addressEn || seed.addressEn),
                 provinceKh: ov?.provinceKh || seed.provinceKh,
                 provinceEn: ov?.provinceEn || seed.provinceEn,
-                phone: ov?.phone || (r.isAdminEdited && r.phone ? r.phone : seed.phone),
+                phone: ((ov?.phone && ov.phone !== '012 818 209') ? ov.phone : ((r.isAdminEdited && r.phone && r.phone !== '012 818 209') ? r.phone : seed.phone)) || '',
                 openingHoursKh: ov?.openingHoursKh || (r.isAdminEdited && r.openingHoursKh ? r.openingHoursKh : seed.openingHoursKh),
                 openingHoursEn: ov?.openingHoursEn || (r.isAdminEdited && r.openingHoursEn ? r.openingHoursEn : seed.openingHoursEn),
                 rating: typeof ov?.rating === 'number' && ov.rating > 0 ? ov.rating : seed.rating,
                 reviewCount: typeof ov?.reviewCount === 'number' && ov.reviewCount > 0 ? ov.reviewCount : seed.reviewCount,
                 ...(Boolean(ov?.locationVerifiedAt) &&
                 isValidCambodiaCoordinates(ov?.latitude, ov?.longitude) &&
-                ov?.locationNeedsReview !== true
+                ov?.locationNeedsReview !== true &&
+                (!isValidOfficialGooglePlaceId(seed.googlePlaceId) || isValidOfficialGooglePlaceId(ov?.googlePlaceId))
                   ? {
                       mapUrl: buildCanonicalGoogleMapsPinUrl(
                         ov!.latitude!,
@@ -7356,8 +7359,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // so the UI updates & modal closes immediately without waiting for network roundtrips!
     if (isSupabaseConfigured()) {
       const customRests = nextRestaurants.filter(r => !isSeedRestaurantId(r.id));
+      // Intentional admin deletion of specific accounts: allowed through the server-side delete guard.
+      resetUserHighWater(nextUsers.length);
       const atomicDeletes = allTargetIds.map(tid =>
-        deleteCloudDocument(`${USER_RECORD_PREFIX}${tid}`)
+        deleteCloudDocument(`${USER_RECORD_PREFIX}${tid}`, 8000, { allowDestructive: true })
       );
       Promise.all([
         ...atomicDeletes,
@@ -7407,7 +7412,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.setItem('kft_deleted_users_v1', JSON.stringify(newDeletedList));
     } catch {}
 
-    // 1. Clear users in state
+    // 1. Clear users in state (intentional admin purge: lower the integrity baseline so no false alarm fires)
+    resetUserHighWater(0);
     setUsers([]);
     // 2. Clear currentUser if not admin
     if (currentUser && currentUser.role !== 'admin') {
@@ -7435,8 +7441,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       if (isSupabaseConfigured()) {
         await Promise.all([
-          pushCloudDocument('kft_cloud_users_v1', []),
-          pushCloudDocument('kft_cloud_users_v2', []),
+          pushCloudDocument('kft_cloud_users_v1', [], 12000, { allowDestructive: true }),
+          pushCloudDocument('kft_cloud_users_v2', [], 12000, { allowDestructive: true }),
           pushCloudDocument('kft_cloud_deleted_users_v1', newDeletedList),
         ]);
       }
@@ -7819,8 +7825,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch {}
 
     if (isSupabaseConfigured()) {
+      // Intentional bulk admin deletion: lower the integrity baseline and allow the aggregate to shrink.
+      resetUserHighWater(nextUsers.length);
       Promise.all([
-        pushCloudDocument('kft_cloud_users_v2', nextUsers),
+        pushCloudDocument('kft_cloud_users_v2', nextUsers, 12000, { allowDestructive: true }),
         pushCloudDocument('kft_cloud_deleted_users_v1', nextDeletedUsers),
       ]).catch(() => {});
     }
@@ -10397,11 +10405,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           galleryPhotos: Array.isArray(r.galleryPhotos) && r.galleryPhotos.length > 0
             ? r.galleryPhotos.map(u => sanitizeVerifiedShopPhotoUrl(r.id, u)).filter(Boolean)
             : (resolvedPhoto ? [resolvedPhoto] : []),
-          phone: r.phone || seed?.phone || '012 818 209',
+          phone: ((r.phone && r.phone !== '012 818 209') ? r.phone : seed?.phone) || '',
           openingHoursKh: r.openingHoursKh || seed?.openingHoursKh || '០៧:០០ ព្រឹក - ០៩:៣០ យប់',
           openingHoursEn: r.openingHoursEn || seed?.openingHoursEn || '07:00 AM - 09:30 PM',
-          rating: r.rating && r.rating > 0 ? r.rating : (seed?.rating || 4.7),
-          reviewCount: r.reviewCount && r.reviewCount > 0 ? r.reviewCount : (seed?.reviewCount || 42),
+          rating: r.rating && r.rating > 0 ? r.rating : (seed?.rating || 0),
+          reviewCount: r.reviewCount && r.reviewCount > 0 ? r.reviewCount : (seed?.reviewCount || 0),
           descriptionKh: r.descriptionKh || seed?.descriptionKh || 'ភោជនីយដ្ឋានម្ហូបខ្មែររសជាតិដើម ផាសុកភាព និងអនាម័យខ្ពស់។',
           descriptionEn: r.descriptionEn || seed?.descriptionEn || 'Authentic traditional Khmer restaurant with quality dining.',
           updatedAt: needsEnrichment ? nowIso : (r.updatedAt || nowIso),

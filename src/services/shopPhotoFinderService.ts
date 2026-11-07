@@ -12,6 +12,7 @@
  * Nothing found here is ever published automatically: every photo is queued as a
  * `pendingPhotoReplacement` so the Admin can review and approve (single or 1-click Approve All).
  */
+import { placesFetch, buildPlacesPhotoUrl, getEffectivePlacesKey } from './placesProxy';
 import type { FoodItem, Restaurant, ShopPhotoReplacementRequest } from '../types';
 import {
   hasApprovedShopPhoto,
@@ -201,7 +202,7 @@ async function placesSearchText(body: Record<string, unknown>): Promise<any[]> {
   }
   const cfg = getCloudApiConfig();
   try {
-    const res = await fetch(PLACES_SEARCH_TEXT_URL, {
+    const res = await placesFetch(PLACES_SEARCH_TEXT_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -229,10 +230,8 @@ async function placesSearchText(body: Record<string, unknown>): Promise<any[]> {
 function buildThumbnailPhotoUrl(rawPlace: any): string {
   const photo = Array.isArray(rawPlace?.photos) ? rawPlace.photos[0] : null;
   if (!photo?.name) return '';
-  const key = getCloudApiConfig().googleMapsApiKey;
-  return `https://places.googleapis.com/v1/${photo.name}/media?maxWidthPx=480&maxHeightPx=480&key=${encodeURIComponent(
-    key
-  )}`;
+  const key = getEffectivePlacesKey();
+  return buildPlacesPhotoUrl(photo.name, 480, 480, key);
 }
 
 function firstPhotoAttribution(rawPlace: any): string | undefined {
@@ -551,7 +550,7 @@ export async function findReplacementShopsWithPhotos(
           }
           const places = await placesSearchText(body);
           if (isPlacesV1Blocked()) break;
-          const apiKey = getCloudApiConfig().googleMapsApiKey;
+          const apiKey = getEffectivePlacesKey();
           for (const p of places) {
             if (pool.length >= shops.length) break;
             if (!p || p.businessStatus === 'CLOSED_PERMANENTLY') continue;

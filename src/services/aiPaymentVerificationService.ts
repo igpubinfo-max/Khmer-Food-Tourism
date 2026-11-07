@@ -1,3 +1,4 @@
+import { callAiGateway } from './aiGatewayClient';
 import {
   AbaReceiptVerificationReport,
   AbaVerificationCheckItem,
@@ -297,7 +298,8 @@ async function extractReceiptViaGeminiVision(
       cloudConfig.geminiApiKey ||
       (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_GEMINI_API_KEY ||
       '';
-    if (!apiKey || !receiptDataUrl.startsWith('data:image/')) {
+    // The key may legitimately be empty on the device when the secure `food-ai` Edge Function holds it.
+    if (!receiptDataUrl.startsWith('data:image/')) {
       return null;
     }
 
@@ -329,7 +331,25 @@ async function extractReceiptViaGeminiVision(
       'gemini-flash-latest',
     ];
     let textOut = '';
-    for (const modelName of candidateModels) {
+    // 1) Secure gateway (Supabase Edge Function): no AI key on the device, per-user daily quota.
+    for (const modelName of candidateModels.slice(0, 3)) {
+      const gw = await callAiGateway(
+        modelName,
+        {
+          contents: [{ role: 'user', parts: [{ text: prompt }, { inlineData: { mimeType, data: base64Data } }] }],
+          generationConfig: { temperature: 0, responseMimeType: 'application/json' },
+        },
+        { timeoutMs: 15000, purpose: 'payment' }
+      );
+      if (gw.ok) {
+        textOut = gw.json?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (textOut) break;
+      } else if (gw.reason === 'unavailable' || gw.reason === 'quota' || gw.reason === 'forbidden') {
+        break; // not deployed / limit reached -> fall back to the on-device key (if any)
+      }
+    }
+    // 2) Legacy direct call with a key stored on the device.
+    for (const modelName of apiKey && !textOut ? candidateModels : []) {
       try {
         const cleanKey = encodeURIComponent(apiKey.trim());
         const endpointUrl = apiKey.trim().startsWith('AQ.')

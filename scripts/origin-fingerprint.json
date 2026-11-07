@@ -1,0 +1,8 @@
+{
+  "_note": "Changing any of these values changes the WebView storage origin or backup behaviour and WIPES every user's local data on update. Edit this file ONLY as a conscious, announced migration (and ship a server-side restore path first).",
+  "appId": "com.khmerfood.tourism",
+  "iosScheme": "DiscoverCambodia",
+  "androidSchemeConfigured": false,
+  "serverHostnameConfigured": false,
+  "androidAllowBackupFalse": true
+}

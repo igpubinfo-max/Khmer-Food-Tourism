@@ -1223,7 +1223,7 @@ export const VipAddRestaurantModal: React.FC = () => {
         addressEn: addressKh.trim() || `${provinceEn}, Cambodia`,
         provinceKh,
         provinceEn,
-        phone: phone.trim() || currentUser?.phone || '012 345 678',
+        phone: phone.trim() || currentUser?.phone || '',
         openingHoursKh: openingHoursKh.trim() || '០៧:០០ ព្រឹក - ០៩:០០ យប់',
         openingHoursEn: '07:00 AM - 09:00 PM',
         priceLevel,
