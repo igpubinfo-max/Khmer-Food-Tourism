@@ -16,3 +16,6 @@ verify_jwt = false
 [functions.admin-auth]
 verify_jwt = false
 
+[functions.vip-purchase]
+verify_jwt = false
+

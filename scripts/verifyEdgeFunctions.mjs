@@ -127,8 +127,8 @@ ok('Gemini request converts to chat completions (system, roles, image, JSON mode
   assert.equal(out.max_tokens, 500);
 });
 ok('OpenAI answer converts back to a Gemini-shaped response (the app never notices)', () => {
-  const g = oa.openAiToGemini({ model: 'gpt-4o-mini', choices: [{ message: { content: 'សួស្តី' }, finish_reason: 'stop' }], usage: { prompt_tokens: 10, completion_tokens: 4 } });
-  assert.equal(g.candidates[0].content.parts[0].text, 'សួស្តី');
+  const g = oa.openAiToGemini({ model: 'gpt-4o-mini', choices: [{ message: { content: 'Ã¡Å¾Å¸Ã¡Å¾Â½Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾ÂÃ¡Å¾Â¸' }, finish_reason: 'stop' }], usage: { prompt_tokens: 10, completion_tokens: 4 } });
+  assert.equal(g.candidates[0].content.parts[0].text, 'Ã¡Å¾Å¸Ã¡Å¾Â½Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾ÂÃ¡Å¾Â¸');
   assert.equal(g.usageMetadata.totalTokenCount, 14);
   assert.equal(oa.openAiToGemini({ choices: [{ message: { content: '' } }] }), null);
 });
@@ -168,7 +168,7 @@ ok('functions allow the new request headers (otherwise browsers block the call a
 });
 ok('config.toml disables gateway JWT checks (new sb_publishable_ keys are not JWTs)', () => {
   const t = read('supabase/config.toml');
-  for (const fn of ['food-ai', 'places-proxy', 'social-food-discovery', 'admin-auth']) assert.ok(new RegExp(`\\[functions\\.${fn}\\][^\\[]*verify_jwt\\s*=\\s*false`).test(t), fn);
+  for (const fn of ['food-ai', 'places-proxy', 'social-food-discovery', 'admin-auth', 'vip-purchase']) assert.ok(new RegExp(`\\[functions\\.${fn}\\][^\\[]*verify_jwt\\s*=\\s*false`).test(t), fn);
 });
 ok('every Google Places call in the app goes through placesFetch (no raw fetch left)', () => {
   const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : /\.(ts|tsx)$/.test(e.name) ? [path.join(d, e.name)] : []));
@@ -221,7 +221,7 @@ await ok('HMAC matches Node crypto (the SQL check uses the same algorithm: hmac_
   const nodeCrypto = await import('node:crypto');
   const mac = nodeCrypto.createHmac('sha256', 'k3y').update('payload.part').digest('hex');
   assert.equal(await at.hmacHex('k3y', 'payload.part'), mac);
-  assert.equal(at.b64urlDecodeToString(at.b64urlEncode('សួស្តី Cambodia')), 'សួស្តី Cambodia');
+  assert.equal(at.b64urlDecodeToString(at.b64urlEncode('Ã¡Å¾Å¸Ã¡Å¾Â½Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾ÂÃ¡Å¾Â¸ Cambodia')), 'Ã¡Å¾Å¸Ã¡Å¾Â½Ã¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾ÂÃ¡Å¾Â¸ Cambodia');
   assert.equal(await at.safeSecretEqual('123456', '123456'), true);
   assert.equal(await at.safeSecretEqual('123456', '1234567'), false);
 });
@@ -260,6 +260,162 @@ ok('admin security SQL: private table, starts in "off", no policies, non-destruc
   assert.ok(/ON CONFLICT \(name\) DO NOTHING/.test(code), 'must never rotate an existing secret');
   assert.ok(!/DROP\s+TABLE|TRUNCATE|DELETE\s+FROM|UPDATE\s+public\.kft_app_kv_store/i.test(code));
   assert.ok(/current_user IN \('postgres', 'supabase_admin', 'service_role'\)/.test(code), 'SQL editor / service role stay allowed');
+});
+console.log('[edge] VIP purchase security (Phase B2)');
+const rr = await load('supabase/functions/_shared/receipt-rules.ts');
+const NOW = Date.parse('2026-11-07T08:00:00Z');
+const goodReceipt = { isAbaReceipt: true, trxId: '176121426630955', amountUsd: 4.99, currency: 'USD', recipientName: 'CHEA KIMSENG', recipientAccount: '095 245 959', transactionDate: 'Nov 6, 2026 06:31 PM', senderName: 'TESTER' };
+const ev = (over = {}, extra = {}) => rr.evaluateReceipt({ extracted: { ...goodReceipt, ...over }, expectedAmountUsd: 4.99, expectedDays: 30, nowMs: NOW, ...extra });
+ok('receipt: a genuine receipt passes all four content checks', () => {
+  const e = ev();
+  assert.equal(e.allPassed, true);
+  assert.equal(e.trxKey, '176121426630955');
+});
+ok('receipt: wrong recipient / wrong amount / wrong currency / old / future / missing Trx ID are all refused', () => {
+  assert.equal(ev({ recipientName: 'SONLEAK ROUERN', recipientAccount: '010 339 036' }).allPassed, false, 'another person');
+  assert.equal(ev({ recipientName: undefined, recipientAccount: '010 339 036' }).allPassed, false, 'another account');
+  assert.equal(ev({ amountUsd: 2.99 }).allPassed, false, 'cheaper plan amount');
+  assert.equal(ev({ amountUsd: 4.99, currency: 'KHR' }).allPassed, false, 'currency');
+  assert.equal(ev({ transactionDate: 'Oct 1, 2025 06:31 PM' }).allPassed, false, 'stale receipt');
+  assert.equal(ev({ transactionDate: 'Dec 25, 2026 06:31 PM' }).allPassed, false, 'future date');
+  assert.equal(ev({ transactionDate: undefined }).allPassed, false, 'no date');
+  assert.equal(ev({ trxId: undefined }).allPassed, false, 'no Trx ID may be invented any more');
+  assert.equal(ev({ trxId: '123' }).allPassed, false, 'malformed Trx ID');
+  assert.equal(ev({ isAbaReceipt: false }).allPassed, false, 'not an ABA receipt');
+});
+ok('receipt: the Trx ID typed by the user must match the receipt; app placeholders are ignored', () => {
+  assert.equal(ev({}, { submittedTrxId: '176121426630955' }).allPassed, true);
+  assert.equal(ev({}, { submittedTrxId: '999999999999999' }).allPassed, false);
+  assert.equal(ev({}, { submittedTrxId: 'ABA-KHQR-1730000000' }).allPassed, true, 'auto-generated reference is ignored');
+});
+ok('plans come from the SERVER pricing (never from the client) and are matched by duration', () => {
+  const pricing = { vipShortDurationDays: 30, vipShortPriceUsd: 4.99, vipLongDurationDays: 60, vipLongPriceUsd: 6.99 };
+  assert.deepEqual(rr.resolvePlan(pricing, 30), { planType: 'quarterly', days: 30, priceUsd: 4.99 });
+  assert.deepEqual(rr.resolvePlan(pricing, 60), { planType: 'annual', days: 60, priceUsd: 6.99 });
+  assert.equal(rr.resolvePlan(pricing, 3650), null, 'an invented 10-year plan is refused');
+  assert.equal(rr.resolvePlan({ vipShortDurationDays: 30, vipShortPriceUsd: 0 }, 30), null, 'free plan is refused');
+  assert.equal(rr.resolvePlan(null, 30), null);
+});
+ok('VIP window: starts now, renewals stack on the remaining time, expired VIP restarts from now', () => {
+  const w1 = rr.computeVipWindow(undefined, 30, NOW);
+  assert.equal(w1.expiryIso, new Date(NOW + 30 * 86400000).toISOString());
+  const active = new Date(NOW + 10 * 86400000).toISOString();
+  assert.equal(rr.computeVipWindow(active, 30, NOW).expiryIso, new Date(NOW + 40 * 86400000).toISOString());
+  const expired = new Date(NOW - 5 * 86400000).toISOString();
+  assert.equal(rr.computeVipWindow(expired, 30, NOW).expiryIso, w1.expiryIso);
+});
+ok('applyVipGrant writes only entitlement fields and clears a previous cancellation', () => {
+  const doc = { id: 'u1', email: 'a@b.c', name: 'Sok', vipCancelledAt: '2026-10-01', membershipTier: 'free', phone: '012' };
+  const g = rr.applyVipGrant(doc, { startIso: '2026-11-07T00:00:00.000Z', expiryIso: '2026-12-07T00:00:00.000Z', days: 30, planType: 'quarterly', trxId: 'T123456789' });
+  assert.equal(g.membershipTier, 'premium_vip');
+  assert.equal(g.subscriptionExpiryDate, '2026-12-07T00:00:00.000Z');
+  assert.equal(g.vipExpiresAt, '2026-12-07T00:00:00.000Z');
+  assert.equal(g.vipCancelledAt, undefined);
+  assert.equal(g.email, 'a@b.c');
+  assert.equal(g.phone, '012');
+});
+ok('report has the exact shape of the app AbaReceiptVerificationReport (verified / pending / rejected)', () => {
+  const e = ev();
+  const v = rr.buildReport({ decision: 'verified', evaluation: e, extracted: goodReceipt, duplicate: false, noteKh: 'k', noteEn: 'e', nowIso: '2026-11-07T08:00:00.000Z' });
+  assert.equal(v.status, 'verified');
+  assert.equal(v.canAutoApprove, true);
+  assert.deepEqual(Object.keys(v.checks).sort(), ['amount', 'antiReplay', 'date', 'recipient', 'trxId']);
+  assert.equal(v.confidenceScore, 100);
+  const p = rr.buildReport({ decision: 'pending', evaluation: null, extracted: null, duplicate: false, noteKh: 'k', noteEn: 'e', nowIso: '2026-11-07T08:00:00.000Z' });
+  assert.equal(p.status, 'flagged_manual_review');
+  assert.equal(p.canAutoApprove, false);
+  const r = rr.buildReport({ decision: 'rejected', evaluation: e, extracted: goodReceipt, duplicate: true, noteKh: 'k', noteEn: 'e', nowIso: '2026-11-07T08:00:00.000Z' });
+  assert.equal(r.status, 'rejected_mismatch');
+  assert.equal(r.checks.antiReplay.passed, false);
+});
+ok('vip-purchase function: no client-supplied price, receipts reserved before the grant, VIP written with the service role', () => {
+  const fn = read('supabase/functions/vip-purchase/index.ts');
+  assert.ok(!/body\.(priceUsd|amountUsd|price)\b/.test(fn), 'price must never be taken from the request');
+  assert.ok(fn.includes("readUserDoc('kft_cloud_admin_vip_pricing_v2')"), 'server pricing is used');
+  assert.ok(fn.indexOf("restInsert('kft_payment_receipts', { ...baseRow, status: 'verified'") < fn.indexOf('writeKv(userKvKey(userId)'), 'the unique receipt row must be reserved BEFORE the grant is written');
+  assert.ok(fn.includes('ins.status === 409'), 'a unique-index conflict means "already used"');
+  assert.ok(/VIP_AUTO_APPROVE'\) === 'true'/.test(fn) && /autoApprove && evaluation\.allPassed/.test(fn), 'automatic activation must be OFF unless explicitly enabled (manual approval is the default)');
+  assert.ok(/status=in\.\(verified,pending\)/.test(fn), 'a Trx ID that is already pending/verified cannot fund a second VIP');
+  assert.ok(!/AIza[0-9A-Za-z_-]{20,}|AQ\.Ab8/.test(fn), 'no key literal');
+});
+ok('client: purchase flow asks the server first, uses the server dates, falls back to the old check only when unavailable', () => {
+  const ctx = read('src/context/AppContext.tsx');
+  assert.ok(ctx.includes('verifyVipPurchaseOnServer({'), 'server verification wired in');
+  assert.ok(/serverRes\.kind !== 'unavailable'/.test(ctx) && /serverGrant\s*\n?\s*\?/.test(ctx), 'server result + server dates are used');
+  const cl = read('src/services/vipPurchaseClient.ts');
+  assert.ok(cl.includes("x-vip-purchase") && cl.includes("kind: 'unavailable'"));
+  assert.ok(read('src/services/adminAuthClient.ts').includes("key.startsWith('kft_user_')"), 'admin token is attached to user rows (admin VIP grants)');
+});
+ok('VIP security SQL: private ledger with UNIQUE receipt + Trx ID, shadow first, upsert-aware, trusted callers only', () => {
+  const sql = read('supabase_vip_security_v1.sql');
+  const code = sql.split(/\r?\n/).filter((l) => !l.trim().startsWith('--')).join('\n');
+  assert.ok(/CREATE UNIQUE INDEX IF NOT EXISTS uq_kft_receipts_image\s+ON public\.kft_payment_receipts \(image_hash\)/.test(code));
+  assert.ok(/uq_kft_receipts_trx_ver[\s\S]*WHERE status = 'verified'/.test(code));
+  assert.ok(/VALUES \('enforce_vip_grants', 'shadow'\)/.test(code), 'must start in shadow (log only) mode');
+  assert.ok(/SELECT payload INTO old_p FROM public\.kft_app_kv_store WHERE key = NEW\.key/.test(code), 'the upsert (INSERT .. ON CONFLICT) path must compare against the stored row');
+  assert.ok(/current_user IN \('postgres', 'supabase_admin', 'service_role'\)/.test(code));
+  assert.ok(/kft_admin_token_ok\(v_tok\)/.test(code), 'admin token accepted');
+  assert.ok(/BEFORE INSERT OR UPDATE ON public\.kft_app_kv_store/.test(code));
+  for (const t of ['kft_payment_receipts', 'kft_security_events']) {
+    assert.ok(new RegExp(`ALTER TABLE public\\.${t}\\s+ENABLE ROW LEVEL SECURITY`).test(code), 'RLS ' + t);
+    assert.ok(new RegExp(`REVOKE ALL ON public\\.${t} FROM anon, authenticated`).test(code), 'revoke ' + t);
+  }
+  assert.ok(!/CREATE POLICY/i.test(code));
+  assert.ok(!/DROP\s+TABLE|TRUNCATE|DELETE\s+FROM\s+public\.kft_app_kv_store|UPDATE\s+public\.kft_app_kv_store/i.test(code), 'never touches existing data');
+});
+const sm = await load('src/utils/statementMatch.ts');
+const statementCsv = [
+  'Date,Description,Reference,Debit,Credit,Balance',
+  '"Nov 6, 2026 06:31 PM","Transfer from TESTER ONE","FT176121426630955",,4.99,"1,204.99"',
+  '"Nov 6, 2026 07:02 PM","Transfer from TESTER TWO","176121426630111",,2.99,"1,207.98"',
+  '"Nov 6, 2026 09:10 PM","Payment to SUPPLIER","999000111222333",12.50,,"1,195.48"',
+].join('\n');
+ok('statement: CSV parsing handles quotes, thousands separators and the delimiter', () => {
+  const rows = sm.parseCsv(statementCsv);
+  assert.equal(rows.length, 4);
+  assert.equal(rows[1][0], 'Nov 6, 2026 06:31 PM');
+  assert.equal(rows[1][5], '1,204.99');
+  assert.equal(sm.parseCsv('a;b;c\n1;2;3').length, 2);
+  assert.equal(sm.parseCsv('a;b;c\n1;2;3')[1][2], '3');
+  const entries = sm.normalizeRows(rows);
+  assert.ok(entries[1].amounts.includes(4.99) && entries[1].amounts.includes(1204.99));
+});
+ok('statement: a payment is "matched" only with its Trx ID AND the incoming amount; everything else needs a human', () => {
+  const entries = sm.normalizeRows(sm.parseCsv(statementCsv));
+  const pay = (id, trx, amt) => ({ id, trxId: trx, amountUsd: amt });
+  const r = sm.matchPayments(
+    [
+      pay('T1', '176121426630955', 4.99), // genuine (reference has an FT prefix in the statement)
+      pay('T2', '176121426630111', 4.99), // right Trx ID, wrong amount (paid 2.99 for a 4.99 plan)
+      pay('T3', '555555555555555', 4.99), // fabricated receipt: not in the statement
+      pay('T4', '', 4.99), // no Trx ID
+      pay('T5', '999000111222333', 12.5), // an outgoing payment, not an incoming one
+    ],
+    entries
+  );
+  const by = Object.fromEntries(r.map((x) => [x.payment.id, x.status]));
+  assert.equal(by.T1, 'matched');
+  assert.equal(by.T2, 'amount_mismatch');
+  assert.equal(by.T3, 'not_found');
+  assert.equal(by.T4, 'no_trx_id');
+  assert.equal(by.T5, 'not_credit', 'a debit row must never approve a VIP');
+  // single signed Amount column (credits +, debits -)
+  const signed = sm.normalizeRows(sm.parseCsv('Date,Details,Amount\n2026-11-06,Received 176121426630955,4.99\n2026-11-06,Sent 999000111222333,-12.50'));
+  const r2 = sm.matchPayments([{ id: 'S1', trxId: '176121426630955', amountUsd: 4.99 }, { id: 'S2', trxId: '999000111222333', amountUsd: 12.5 }], signed);
+  assert.equal(r2[0].status, 'matched');
+  assert.equal(r2[1].status, 'not_credit');
+});
+ok('statement: one transfer can fund only one VIP (duplicate Trx IDs and reused rows are never auto-matched)', () => {
+  const entries = sm.normalizeRows(sm.parseCsv(statementCsv));
+  const dup = sm.matchPayments([{ id: 'A', trxId: '176121426630955', amountUsd: 4.99 }, { id: 'B', trxId: '176 121 426 630 955', amountUsd: 4.99 }], entries);
+  assert.deepEqual(dup.map((x) => x.status), ['duplicate_trx', 'duplicate_trx']);
+});
+ok('statement panel: reads the file on-device only, approves through the existing admin approval (verifyTransaction)', () => {
+  const t = read('src/components/admin/AdminStatementMatchPanel.tsx');
+  assert.ok(!/fetch\(|XMLHttpRequest|sendBeacon/.test(t), 'the statement must never be uploaded');
+  assert.ok(t.includes('verifyTransaction(r.payment.id)'));
+  assert.ok(t.includes('window.confirm'), 'bulk approval needs a confirmation');
+  assert.ok(read('src/components/AdminDashboard.tsx').includes('<AdminStatementMatchPanel />'));
 });
 ok('Pro platform SQL is service-role only and non-destructive', () => {
   const sql = read('supabase_pro_platform_v1.sql');

@@ -1,3 +1,4 @@
+import { AdminStatementMatchPanel } from './admin/AdminStatementMatchPanel';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
@@ -1949,6 +1950,9 @@ export const AdminDashboard: React.FC = () => {
                     </button>
                   </div>
                 </div>
+
+                {/* Bank-statement matching (admin approves) */}
+                <AdminStatementMatchPanel />
 
                 {/* Transactions List */}
                 <div className="space-y-3">

@@ -1,3 +1,4 @@
+import { verifyVipPurchaseOnServer } from '../services/vipPurchaseClient';
 import { adminServerLogin, isAdminServerAuthActive } from '../services/adminAuthClient';
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { 
@@ -12875,19 +12876,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Run AI + Deterministic Receipt Verification if payment proof image is attached (bounded to 2.5s so slow networks never stall submission)
     let aiReport: AbaReceiptVerificationReport | undefined;
+    let serverGrant: { startIso: string; expiryIso: string } | undefined;
     if (paymentProofData?.dataUrl) {
-      aiReport = await Promise.race([
-        verifyAbaPaymentAndReceipt({
-          receiptDataUrl: paymentProofData.dataUrl,
-          expectedAmountUsd: validPrice,
-          expectedDurationDays: validDays,
-          submittedTrxId: cleanTrxRef,
-          submittedDate: nowIso.split('T')[0],
-          userId: currentUser.id,
-          existingTransactions: transactions,
-        }).catch(() => undefined),
-        new Promise<undefined>(resolve => setTimeout(() => resolve(undefined), 2500)),
-      ]);
+      // 1) Server-side verification (Edge Function): the server reads the receipt, checks recipient / amount / date /
+      //    Trx ID / anti-replay and - only on a clean pass - writes the VIP entitlement itself.
+      const serverRes = await verifyVipPurchaseOnServer({
+        userId: currentUser.id,
+        durationDays: validDays,
+        receiptDataUrl: paymentProofData.dataUrl,
+        submittedTrxId: cleanTrxRef,
+      });
+      if (serverRes.kind !== 'unavailable') {
+        aiReport = serverRes.report as unknown as AbaReceiptVerificationReport;
+        if (serverRes.kind === 'verified') serverGrant = serverRes.grant;
+      } else {
+        // 2) Legacy on-device verification - ONLY when the server function is not deployed / reachable.
+        aiReport = await Promise.race([
+          verifyAbaPaymentAndReceipt({
+            receiptDataUrl: paymentProofData.dataUrl,
+            expectedAmountUsd: validPrice,
+            expectedDurationDays: validDays,
+            submittedTrxId: cleanTrxRef,
+            submittedDate: nowIso.split('T')[0],
+            userId: currentUser.id,
+            existingTransactions: transactions,
+          }).catch(() => undefined),
+          new Promise<undefined>(resolve => setTimeout(() => resolve(undefined), 2500)),
+        ]);
+      }
     }
 
     const effectiveTrxRef =
@@ -12899,10 +12915,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       aiReport && aiReport.canAutoApprove && aiReport.status === 'verified'
     );
 
-    const { startDate, expiryDate } = calculateVipDates(
-      currentUser.subscriptionExpiryDate,
-      validDays
-    );
+    // When the SERVER granted the VIP, use exactly the dates it stored so this device and the database agree.
+    const { startDate, expiryDate } = serverGrant
+      ? { startDate: serverGrant.startIso, expiryDate: serverGrant.expiryIso }
+      : calculateVipDates(currentUser.subscriptionExpiryDate, validDays);
 
     if (isAutoVerified && paymentProofData?.dataUrl) {
       recordVerifiedTransaction(effectiveTrxRef);

@@ -63,6 +63,36 @@ export async function getSecurityConfig(name: string): Promise<string | null> {
   return Array.isArray(rows) && rows[0] && typeof rows[0].value === 'string' ? rows[0].value : null;
 }
 
+/** Generic helpers used by the payment function (service role). */
+export async function restInsert(table: string, row: Record<string, unknown>): Promise<{ status: number; error?: string }> {
+  const r = await call(table, { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify(row), timeoutMs: 6000 });
+  if (!r) return { status: 0, error: 'unreachable' };
+  return { status: r.status, error: r.ok ? undefined : (await r.text().catch(() => '')).slice(0, 200) };
+}
+
+export async function restSelectRows(pathAndQuery: string): Promise<Array<Record<string, unknown>> | null> {
+  const r = await call(pathAndQuery, { timeoutMs: 5000 });
+  if (!r || !r.ok) return null;
+  const rows = await r.json();
+  return Array.isArray(rows) ? rows : null;
+}
+
+export async function restPatch(pathAndQuery: string, patch: Record<string, unknown>): Promise<boolean> {
+  const r = await call(pathAndQuery, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify(patch), timeoutMs: 5000 });
+  return Boolean(r && r.ok);
+}
+
+/** Upsert one kv document (service role => trusted by the VIP / admin guards). */
+export async function writeKv(key: string, payload: unknown): Promise<boolean> {
+  const r = await call('kft_app_kv_store?on_conflict=key', {
+    method: 'POST',
+    headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({ key, payload, updated_at: new Date().toISOString() }),
+    timeoutMs: 6000,
+  });
+  return Boolean(r && r.ok);
+}
+
 export interface UsageLogRow {
   user_key?: string | null;
   kind: string;
