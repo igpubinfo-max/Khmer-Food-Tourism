@@ -12,3 +12,7 @@ verify_jwt = false
 
 [functions.social-food-discovery]
 verify_jwt = false
+
+[functions.admin-auth]
+verify_jwt = false
+

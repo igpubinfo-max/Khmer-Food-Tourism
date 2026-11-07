@@ -195,7 +195,8 @@ export async function authenticateAdminWithBiometric(): Promise<{
         } catch {}
       }
       if (!pw) {
-        pw = 'CheaSavuth@2026';
+        // Fingerprint matched but no password is stored on this device: never invent one - ask for the password.
+        return { success: false, notEnrolled: false, fallbackToPassword: true, error: 'no stored admin password' };
       }
 
       const verifiedUser = res.username || getSavedAdminUsername() || 'admin';
@@ -224,7 +225,8 @@ export async function authenticateAdminWithBiometric(): Promise<{
         const cached = sessionStorage.getItem('kft_admin_bio_p');
         if (cached) pw = atob(cached);
       } catch {}
-      if (!pw) pw = 'CheaSavuth@2026';
+      // The web fallback performs NO biometric check, so it must never grant access by itself.
+      if (!pw) return { success: false, notEnrolled: !isEnrolled, fallbackToPassword: true, error: 'password required' };
 
       const user = getSavedAdminUsername() || 'admin';
       return {

@@ -168,7 +168,7 @@ ok('functions allow the new request headers (otherwise browsers block the call a
 });
 ok('config.toml disables gateway JWT checks (new sb_publishable_ keys are not JWTs)', () => {
   const t = read('supabase/config.toml');
-  for (const fn of ['food-ai', 'places-proxy', 'social-food-discovery']) assert.ok(new RegExp(`\\[functions\\.${fn}\\][^\\[]*verify_jwt\\s*=\\s*false`).test(t), fn);
+  for (const fn of ['food-ai', 'places-proxy', 'social-food-discovery', 'admin-auth']) assert.ok(new RegExp(`\\[functions\\.${fn}\\][^\\[]*verify_jwt\\s*=\\s*false`).test(t), fn);
 });
 ok('every Google Places call in the app goes through placesFetch (no raw fetch left)', () => {
   const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : /\.(ts|tsx)$/.test(e.name) ? [path.join(d, e.name)] : []));
@@ -198,6 +198,68 @@ ok('AI chat does not require a device-side Gemini key when the Edge gateway is a
   assert.ok(!/if \(!geminiKey\) \{/.test(t) && !/image && !geminiKey\) \{/.test(t), 'a bare `!geminiKey` gate would disable AI for every device without its own key');
   assert.ok(/image && !geminiKey && !gatewayAvailable/.test(t) && /if \(!geminiKey && !gatewayAvailable\)/.test(t));
   assert.ok(read('src/services/foodAssistantLlm.ts').includes('export function isAiGatewayConfigured'));
+});
+console.log('[edge] admin security (Phase B1)');
+const at = await load('supabase/functions/_shared/admin-token.ts');
+await ok('admin token: sign/verify round-trip, expiry, scope, tampering, wrong secret', async () => {
+  const secret = 'unit-test-secret-0123456789abcdef0123456789abcdef';
+  const now = Date.parse('2026-11-07T00:00:00Z');
+  const { token, expiresAt } = await at.signToken(secret, 'admin', 3600, now);
+  assert.equal(expiresAt, now + 3600_000);
+  assert.deepEqual(await at.verifyToken(secret, token, 'admin', now + 1000), { ok: true });
+  assert.equal((await at.verifyToken(secret, token, 'admin', now + 3601_000)).reason, 'expired');
+  assert.equal((await at.verifyToken(secret, token, 'pin', now + 1000)).reason, 'scope', 'a PIN ticket must never act as an admin token');
+  assert.equal((await at.verifyToken('another-secret-another-secret-another-secret', token, 'admin', now)).ok, false);
+  const flipped = token.slice(0, -1) + (token.endsWith('a') ? 'b' : 'a');
+  assert.equal((await at.verifyToken(secret, flipped, 'admin', now)).reason, 'signature');
+  const [p, s2] = token.split('.');
+  const forged = at.b64urlEncode(JSON.stringify({ sub: 'admin', scope: 'admin', iat: 1, exp: 9999999999 }));
+  assert.equal((await at.verifyToken(secret, `${forged}.${s2}`, 'admin', now)).ok, false, 'payload cannot be swapped under an old signature');
+  for (const bad of [undefined, null, '', 'abc', 'a.b.c', 12345]) assert.equal((await at.verifyToken(secret, bad, 'admin', now)).ok, false, String(bad));
+});
+await ok('HMAC matches Node crypto (the SQL check uses the same algorithm: hmac_sha256 over the base64url payload)', async () => {
+  const nodeCrypto = await import('node:crypto');
+  const mac = nodeCrypto.createHmac('sha256', 'k3y').update('payload.part').digest('hex');
+  assert.equal(await at.hmacHex('k3y', 'payload.part'), mac);
+  assert.equal(at.b64urlDecodeToString(at.b64urlEncode('សួស្តី Cambodia')), 'សួស្តី Cambodia');
+  assert.equal(await at.safeSecretEqual('123456', '123456'), true);
+  assert.equal(await at.safeSecretEqual('123456', '1234567'), false);
+});
+ok('no admin password / PIN is hard-coded anywhere in the app or the Edge Function', () => {
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : /\.(ts|tsx)$/.test(e.name) ? [path.join(d, e.name)] : []));
+  const offenders = [];
+  for (const f of [...walk(path.join(ROOT, 'src')), ...walk(path.join(ROOT, 'supabase/functions'))]) {
+    const t = fs.readFileSync(f, 'utf8');
+    if (/CheaSavuth@2026|Admin@KhmerFood2026/.test(t)) offenders.push(path.relative(ROOT, f));
+  }
+  assert.deepEqual(offenders, [], 'old built-in admin passwords must stay removed');
+  const fn = read('supabase/functions/admin-auth/index.ts');
+  assert.ok(fn.includes("Deno.env.get('ADMIN_PASSWORD')") && fn.includes("Deno.env.get('ADMIN_PIN')"));
+  assert.ok(!/ADMIN_PASSWORD'\)\s*\|\|\s*'[^']/.test(fn), 'no default password fallback');
+});
+ok('biometric web fallback can never grant admin access without a stored password', () => {
+  const t = read('src/services/biometricService.ts');
+  assert.ok(!/pw\s*=\s*'[^']/.test(t), 'no assignment of a non-empty literal password');
+  assert.ok(t.includes("error: 'password required'") && t.includes("error: 'no stored admin password'"));
+});
+ok('admin-only documents carry the admin token on write/delete; hash is no longer published when server login is active', () => {
+  const svc = read('src/services/supabaseService.ts');
+  assert.equal((svc.match(/\.\.\.adminTokenHeaders\(key\)/g) || []).length, 2, 'push + delete must both attach the token');
+  assert.ok(svc.includes('adminPasswordHash: _omitHash'), 'public settings docs must drop the hash');
+  const client = read('src/services/adminAuthClient.ts');
+  for (const k of ['kft_cloud_app_settings_v1', 'kft_cloud_admin_vip_pricing_v2', 'kft_admin_pin_security_v1']) assert.ok(client.includes(k), k);
+  const sql = read('supabase_admin_security_v1.sql');
+  for (const k of ['kft_cloud_app_settings_v1', 'kft_cloud_admin_vip_pricing_v2', 'kft_admin_pin_security_v1']) assert.ok(sql.includes(`'${k}'`), 'SQL guard covers ' + k);
+});
+ok('admin security SQL: private table, starts in "off", no policies, non-destructive', () => {
+  const sql = read('supabase_admin_security_v1.sql');
+  const code = sql.split(/\r?\n/).filter((l) => !l.trim().startsWith('--')).join('\n');
+  assert.ok(/ALTER TABLE public\.kft_security_config ENABLE ROW LEVEL SECURITY/.test(code) && /REVOKE ALL ON public\.kft_security_config FROM anon, authenticated/.test(code));
+  assert.ok(!/CREATE POLICY/i.test(code));
+  assert.ok(/VALUES \('enforce_admin_keys', 'off'\)/.test(code), 'enforcement must start OFF so nothing changes until the admin opts in');
+  assert.ok(/ON CONFLICT \(name\) DO NOTHING/.test(code), 'must never rotate an existing secret');
+  assert.ok(!/DROP\s+TABLE|TRUNCATE|DELETE\s+FROM|UPDATE\s+public\.kft_app_kv_store/i.test(code));
+  assert.ok(/current_user IN \('postgres', 'supabase_admin', 'service_role'\)/.test(code), 'SQL editor / service role stay allowed');
 });
 ok('Pro platform SQL is service-role only and non-destructive', () => {
   const sql = read('supabase_pro_platform_v1.sql');

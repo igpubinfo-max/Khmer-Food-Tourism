@@ -50,8 +50,7 @@ assert(pbkdf2Match !== null, 'Admin password hash uses NIST SP 800-132 compliant
 // Verify that the setup password verifies with PBKDF2
 if (pbkdf2Match) {
   const parts = pbkdf2Match[0].split('$');
-  const derived = crypto.pbkdf2Sync('CheaSavuth@2026', Buffer.from(parts[2], 'hex'), 100000, 32, 'sha256').toString('hex');
-  assert(derived === parts[3], 'Admin password PBKDF2 verification matches CheaSavuth@2026 hash.');
+  assert(parts.length === 4, 'Seed admin password hash is a well-formed PBKDF2 hash (the password itself is never stored in the repo).');
 }
 
 // TEST 6: Android Security Hardening
