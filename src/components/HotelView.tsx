@@ -21,7 +21,8 @@ import {
   ListingFeaturedCard,
   ListingThumb,
 } from './listing/ListingUI';
-import { rankBySearchRelevance, destinationSearchFields } from '../utils/searchEngine';
+import { rankBySearchRelevance, destinationSearchFields, analyzeSearchQuery } from '../utils/searchEngine';
+import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 import { DISH_PROVINCES } from '../utils/foodFilters';
 import { tr } from '../utils/i18n';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
@@ -200,12 +201,19 @@ export const HotelView: React.FC = () => {
   }, [allHotels]);
 
   const filteredHotels = useMemo(() => {
-    const cleanSelProv = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
+    const trimmedQ = debouncedSearchQuery.trim();
+    const smartIntent = trimmedQ ? parseSmartSearchIntent(trimmedQ) : null;
+    const effectiveProvRaw = selectedProvince || smartIntent?.detectedProvinceKh || '';
+    const cleanSelProv = effectiveProvRaw.replace(/^រាជធានី|^ខេត្ត/g, '').trim();
 
     const scoped = orderedHotels.filter((h) => {
       if (categoryFilter === 'verified_big' && !isVerifiedBigHotel(h)) return false;
       if (categoryFilter !== 'all' && categoryFilter !== 'verified_big' && classifyHotelSubCategory(h) !== categoryFilter) {
         return false;
+      }
+      if (categoryFilter === 'all' && smartIntent?.semanticCategory) {
+        if (smartIntent.semanticCategory === 'resort' && classifyHotelSubCategory(h) !== 'luxury_resort') return false;
+        if (smartIntent.semanticCategory === 'guesthouse' && classifyHotelSubCategory(h) !== 'guesthouse') return false;
       }
       if (cleanSelProv && !(h.provinceKh || '').replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) {
         return false;
@@ -213,13 +221,18 @@ export const HotelView: React.FC = () => {
       return true;
     });
 
-    if (!debouncedSearchQuery.trim()) return scoped;
+    if (!trimmedQ) return scoped;
+
+    const qa = analyzeSearchQuery(trimmedQ);
+    if (qa.distinctive.length === 0 && (smartIntent?.detectedProvinceKh || smartIntent?.semanticCategory)) {
+      return scoped;
+    }
 
     // Relevance-ranked search: exact name → prefix → all words → typo-tolerant match → category/address,
     // Khmer + English + Chinese names, with unrelated hotels removed. Ties: rating, then name (deterministic).
     return rankBySearchRelevance(
       scoped,
-      debouncedSearchQuery,
+      trimmedQ,
       (h) => destinationSearchFields(h, [getLocalizedDestination(h, 'zh').name, classifyHotelSubCategory(h)]),
       {
         bucketSize: 100,

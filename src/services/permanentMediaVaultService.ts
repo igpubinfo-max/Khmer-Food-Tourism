@@ -69,6 +69,14 @@ const IMMUTABLE_SEED_DEST_MAP = new Map<string, TouristDestination>(
   initial100Destinations.map((d) => [d.id, d])
 );
 
+export function registerExtendedSeedDestinationsInVault(items: TouristDestination[]): void {
+  for (const d of items) {
+    if (d && d.id && !IMMUTABLE_SEED_DEST_MAP.has(d.id)) {
+      IMMUTABLE_SEED_DEST_MAP.set(d.id, d);
+    }
+  }
+}
+
 const IMMUTABLE_SEED_FOOD_MAP = new Map<string, FoodItem>(
   initial200Foods.map((f) => [f.id, f])
 );

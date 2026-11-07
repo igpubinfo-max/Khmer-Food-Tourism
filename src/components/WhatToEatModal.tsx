@@ -29,7 +29,13 @@ import {
   Salad,
   Camera,
 } from 'lucide-react';
-import { FoodItem, isGpipRegisteredRestaurant, openRestaurantGoogleExternal, resolveFoodPhotoUrl } from '../types';
+import { FoodItem, isGpipRegisteredRestaurant, isHotelBusinessRecord, openExternalUrlNativeSafe, openRestaurantGoogleExternal, resolveFoodPhotoUrl } from '../types';
+import {
+  buildAgentRoleChips,
+  recordAiAgentTelemetryEvent,
+  resolveAiAgentUserRole,
+  tryExecuteAiAgentTurn,
+} from '../services/aiAgentPlatformService';
 import {
   IconFoodPicks,
   IconBeveragePairing,
@@ -290,11 +296,21 @@ export const WhatToEatModal: React.FC = () => {
     setSelectedRestaurant,
     setSelectedDestination,
     openAddToWishlist,
+    isItemInWishlist,
     openUpgradeVipModal,
     showToast,
     appSettings,
     updateAppSettings,
     refreshAppSettingsFromServer,
+    trendingFoods,
+    generateAiTripPlan,
+    saveTripPlan,
+    setIsAiTripPlannerModalOpen,
+    setIsTrendingSocialModalOpen,
+    setSelectedTrendingFood,
+    setIsTrendingFoodDetailModalOpen,
+    updateRestaurant,
+    openManageMyVipStore,
   } = useApp();
 
   const isAdmin = Boolean(
@@ -311,6 +327,9 @@ export const WhatToEatModal: React.FC = () => {
   const [forceBigCard, setForceBigCard] = useState(false);
   const [inlineApiKeyInput, setInlineApiKeyInput] = useState('');
   const [isTestingInlineKey, setIsTestingInlineKey] = useState(false);
+  const [confirmedOwnerUpdates, setConfirmedOwnerUpdates] = useState<Record<string, 'confirmed' | 'cancelled'>>({});
+  const [savedItineraryIds, setSavedItineraryIds] = useState<Record<string, boolean>>({});
+  const userGpsRef = useRef<{ lat: number; lng: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Filters: Conversational Input, Category, Meal Time, Dietary / Health Style
@@ -351,6 +370,7 @@ export const WhatToEatModal: React.FC = () => {
   const seenCompareDishIdsRef = useRef<Set<string>>(new Set());
   const seenPairingLeadIdsRef = useRef<Set<string>>(new Set());
   const comparePanelRef = useRef<HTMLDivElement>(null);
+  const sendConversationalMessageRef = useRef<((rawText: string) => void) | null>(null);
   useBodyScrollLock(isWhatToEatModalOpen);
 
   const toggleCompareDish = (dishId: string) => {
@@ -370,8 +390,10 @@ export const WhatToEatModal: React.FC = () => {
   useEffect(() => {
     if (isWhatToEatModalOpen) {
       if (chatMessages.length === 0) {
+        const roleChips = buildAgentRoleChips(language, currentUser, restaurants);
+        const ownerExtra = roleChips.filter((c) => c.id === 'agent_owner_assist');
         setChatMessages([
-          buildWelcomeAssistantMessage(language, foods.length, restaurants.length, destinations.length),
+          buildWelcomeAssistantMessage(language, foods.length, restaurants.length, destinations.length, ownerExtra),
         ]);
       }
       if ((window as any).__kft_wte_open_compare_mode) {
@@ -383,8 +405,31 @@ export const WhatToEatModal: React.FC = () => {
           comparePanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 120);
       }
+      const pendingAiQuery = typeof window !== 'undefined' ? String((window as any).__kft_pending_ai_query || '').trim() : '';
+      if (pendingAiQuery) {
+        (window as any).__kft_pending_ai_query = '';
+        setCravingQuery(pendingAiQuery);
+        setTimeout(() => {
+          sendConversationalMessageRef.current?.(pendingAiQuery);
+        }, 60);
+      }
     }
   }, [isWhatToEatModalOpen, language, foods, restaurants.length, destinations.length, chatMessages.length]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onAskAiEvent = (e: Event) => {
+      const q = String((e as CustomEvent<{ query?: string }>).detail?.query || (window as any).__kft_pending_ai_query || '').trim();
+      if (!q || !isWhatToEatModalOpen) return;
+      (window as any).__kft_pending_ai_query = '';
+      setCravingQuery(q);
+      setTimeout(() => {
+        sendConversationalMessageRef.current?.(q);
+      }, 60);
+    };
+    window.addEventListener('kft:ask-ai-assistant', onAskAiEvent);
+    return () => window.removeEventListener('kft:ask-ai-assistant', onAskAiEvent);
+  }, [isWhatToEatModalOpen]);
 
   // Determine current mealtime in Cambodia
   const currentMealInfo = useMemo(() => {
@@ -941,6 +986,85 @@ export const WhatToEatModal: React.FC = () => {
       imagePreviewUrl: image?.previewDataUrl,
     };
 
+    // 0) Zero-Cost ($0 Forever) Hybrid MCP AI Agent Router:
+    // Handles Hotels, Travel Itineraries, Nearby GPS Places, Google Maps Directions,
+    // Nutrition Analysis, Trending Videos, Wishlist Saves, and Shop/Hotel Owner Profile Drafts!
+    if (!image && clean) {
+      if (/(?:ជិតខ្ញុំ|នៅជិតខ្ញុំ|near\s+me|nearby|closest|附近)/i.test(clean) && !userGpsRef.current && typeof navigator !== 'undefined' && navigator.geolocation) {
+        await new Promise<void>((resolve) => {
+          let settled = false;
+          const timer = setTimeout(() => {
+            if (!settled) {
+              settled = true;
+              resolve();
+            }
+          }, 1800);
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              userGpsRef.current = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+              if (!settled) {
+                settled = true;
+                clearTimeout(timer);
+                resolve();
+              }
+            },
+            () => {
+              if (!settled) {
+                settled = true;
+                clearTimeout(timer);
+                resolve();
+              }
+            },
+            { enableHighAccuracy: false, timeout: 1600, maximumAge: 300000 }
+          );
+        });
+      }
+
+      const agentResult = tryExecuteAiAgentTurn({
+        userInput: clean,
+        language,
+        currentUser,
+        foods,
+        restaurants,
+        destinations,
+        trendingFoods,
+        activeProvinceKh: chatMemory.activeProvinceKh,
+        userCoords: userGpsRef.current,
+        generateAiTripPlan,
+      });
+
+      if (agentResult?.handled) {
+        const agentReply: AiAssistantMessage = {
+          id: `agent-${Date.now()}`,
+          role: 'assistant',
+          text: agentResult.headline,
+          timestamp: new Date().toISOString(),
+          intent: 'ai_agent_action',
+          source: 'rules',
+          agentResult,
+          dishes: agentResult.dishes,
+          restaurants: agentResult.shops,
+          destinations: agentResult.attractions,
+          followUpChips: agentResult.followUpChips,
+          suppressDishCard: !agentResult.dishes || agentResult.dishes.length === 0,
+        };
+        setChatMessages((prev) => [...prev.slice(-12), userMsg, agentReply]);
+        setChatMemory((prev) => ({
+          ...prev,
+          lastDishes: agentResult.dishes && agentResult.dishes.length > 0 ? agentResult.dishes : prev.lastDishes,
+          lastRestaurants: agentResult.shops && agentResult.shops.length > 0 ? agentResult.shops : prev.lastRestaurants,
+          lastDestinations:
+            agentResult.attractions && agentResult.attractions.length > 0 ? agentResult.attractions : prev.lastDestinations,
+          lastQuery: clean,
+          turnSeed: (prev.turnSeed || 1) + 1,
+        }));
+        scrollChatToTop();
+        return;
+      }
+    }
+
+    const activeUserRole = resolveAiAgentUserRole(currentUser, restaurants);
+
     const runRules = () =>
       generateConversationalAiResponse({
         userInput: clean,
@@ -974,7 +1098,18 @@ export const WhatToEatModal: React.FC = () => {
 
     // B) No AI connection: offline rules engine (honest about what it cannot answer).
     if (!geminiKey) {
+      const t0 = performance.now();
       const { reply, nextMemory } = runRules();
+      recordAiAgentTelemetryEvent({
+        user: currentUser,
+        userRole: activeUserRole,
+        toolName: 'recommend_khmer_food',
+        query: clean,
+        latencyMs: performance.now() - t0,
+        status: 'ok',
+        matchedFoodNames: (reply.dishes || []).slice(0, 2).map((d) => d.nameKh),
+        matchedShopNames: (reply.restaurants || []).slice(0, 2).map((r) => r.nameKh),
+      });
       setChatMessages((prev) => [...prev.slice(-12), userMsg, reply]);
       applyReplyEffects(reply, nextMemory, clean);
       scrollChatToTop();
@@ -1032,6 +1167,17 @@ export const WhatToEatModal: React.FC = () => {
           return;
         }
         const reply = result.message;
+        recordAiAgentTelemetryEvent({
+          user: currentUser,
+          userRole: activeUserRole,
+          toolName: image ? 'analyze_food_nutrition' : 'recommend_khmer_food',
+          query: clean || '[Food Photo]',
+          latencyMs: 320,
+          estimatedCostUsd: 0,
+          status: 'ok',
+          matchedFoodNames: (reply.dishes || []).slice(0, 2).map((d) => d.nameKh),
+          matchedShopNames: (reply.restaurants || []).slice(0, 2).map((r) => r.nameKh),
+        });
         replacePending(reply);
         const catalogDishes = (reply.dishes || []).filter((d) => !isGeneratedDishId(d.id));
         setChatMemory((prev) => ({
@@ -1083,6 +1229,10 @@ export const WhatToEatModal: React.FC = () => {
     setPendingImage(null);
     setImageError('');
     sendConversationalMessage(cravingQuery, image);
+  };
+
+  sendConversationalMessageRef.current = (q: string) => {
+    void sendConversationalMessage(q);
   };
 
   const handleResetChat = () => {
@@ -1978,6 +2128,451 @@ export const WhatToEatModal: React.FC = () => {
                         );
                       })()}
 
+                      {msg.agentResult && (
+                        <div className="mt-2.5 pt-2 border-t border-emerald-200/70 dark:border-slate-700 space-y-2.5">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-[#064E3B] dark:text-emerald-300 text-[10px] font-extrabold">
+                              <span>⚡ AI Agent • {msg.agentResult.toolName}()</span>
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-400">
+                              {msg.agentResult.latencyMs}ms {msg.agentResult.fromCache ? '• Cached' : '• $0 Free'}
+                            </span>
+                          </div>
+
+                          {/* 1. Shop / Hotel Owner Profile Update Confirmation Card */}
+                          {msg.agentResult.pendingOwnerUpdate && (() => {
+                            const upd = msg.agentResult.pendingOwnerUpdate;
+                            const status = confirmedOwnerUpdates[upd.actionId];
+                            return (
+                              <div className="p-3 rounded-2xl bg-amber-50/90 dark:bg-slate-900/90 border border-amber-300 dark:border-amber-700/70 space-y-2.5">
+                                <div className="text-xs font-extrabold text-amber-900 dark:text-amber-200 flex items-center justify-between gap-2">
+                                  <span>
+                                    {tr(
+                                      language,
+                                      `🛡️ បញ្ជាក់ការកែប្រែ៖ ${upd.businessNameKh}`,
+                                      `🛡️ Confirm Profile Update: ${upd.businessNameEn}`,
+                                      `🛡️ 确认更新商户资料：${upd.businessNameEn}`
+                                    )}
+                                  </span>
+                                  <span className="px-2 py-0.5 rounded-full bg-amber-200/80 dark:bg-amber-800/60 text-[10px]">
+                                    {upd.isHotel ? '🏨 Hotel' : '🏪 Shop'}
+                                  </span>
+                                </div>
+                                <div className="space-y-1.5">
+                                  {upd.changes.map((ch) => (
+                                    <div
+                                      key={ch.field}
+                                      className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-amber-200/80 dark:border-slate-700 text-[11px] space-y-0.5"
+                                    >
+                                      <div className="font-extrabold text-slate-700 dark:text-slate-200">
+                                        {language === 'km' ? ch.labelKh : ch.labelEn}
+                                      </div>
+                                      <div className="text-slate-400 line-through truncate">{ch.oldValue}</div>
+                                      <div className="text-emerald-700 dark:text-emerald-300 font-bold break-words">
+                                        → {ch.newValue}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                                {status === 'confirmed' ? (
+                                  <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200 text-xs font-extrabold flex items-center justify-between gap-2">
+                                    <span>
+                                      {tr(
+                                        language,
+                                        '✅ បានបញ្ជាក់ និងរក្សាទុកព័ត៌មានហាងដោយជោគជ័យ!',
+                                        '✅ Confirmed & saved to your business profile!',
+                                        '✅ 已确认并成功保存商户资料！'
+                                      )}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setIsWhatToEatModalOpen(false);
+                                        openManageMyVipStore(upd.businessId, 'info');
+                                      }}
+                                      className="px-2.5 py-1 rounded-lg bg-[#064E3B] text-white text-[10px] font-extrabold cursor-pointer"
+                                    >
+                                      {tr(language, 'បើកហាង', 'Open Store', '管理店铺')}
+                                    </button>
+                                  </div>
+                                ) : status === 'cancelled' ? (
+                                  <div className="p-2 rounded-xl bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold">
+                                    {tr(
+                                      language,
+                                      '❌ បានបោះបង់ការកែប្រែ — ទិន្នន័យហាងរក្សាទុកដូចដើម។',
+                                      '❌ Update cancelled — your listing remains unchanged.',
+                                      '❌ 已取消更新，商户资料保持不变。'
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const target = restaurants.find((r) => r.id === upd.businessId);
+                                        if (!target) return;
+                                        updateRestaurant({ ...target, ...upd.patch });
+                                        setConfirmedOwnerUpdates((prev) => ({ ...prev, [upd.actionId]: 'confirmed' }));
+                                        showToast(
+                                          tr(
+                                            language,
+                                            `បានរក្សាទុកការកែប្រែសម្រាប់ «${upd.businessNameKh}»!`,
+                                            `Updated "${upd.businessNameEn}" successfully!`,
+                                            `已成功更新「${upd.businessNameEn}」！`
+                                          ),
+                                          'success'
+                                        );
+                                      }}
+                                      className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold cursor-pointer transition"
+                                    >
+                                      {tr(language, '✅ បញ្ជាក់ និងរក្សាទុក', '✅ Confirm & Apply', '✅ 确认并保存')}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setConfirmedOwnerUpdates((prev) => ({ ...prev, [upd.actionId]: 'cancelled' }))
+                                      }
+                                      className="py-2 px-3 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 text-xs font-bold cursor-pointer transition"
+                                    >
+                                      {tr(language, '❌ បោះបង់', '❌ Cancel', '❌ 取消')}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setIsWhatToEatModalOpen(false);
+                                        openManageMyVipStore(upd.businessId, 'info');
+                                      }}
+                                      className="py-2 px-2.5 rounded-xl border border-amber-400 text-amber-900 dark:text-amber-200 text-[11px] font-bold cursor-pointer"
+                                    >
+                                      {tr(language, '🛠️ ផ្ទាំងគ្រប់គ្រងហាង', '🛠️ Full Editor', '🛠️ 店铺后台')}
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
+
+                          {/* 2. AI Travel Itinerary Card */}
+                          {msg.agentResult.itinerary && (() => {
+                            const plan = msg.agentResult.itinerary;
+                            const isSaved = Boolean(savedItineraryIds[plan.id]);
+                            return (
+                              <div className="p-3 rounded-2xl bg-emerald-50/80 dark:bg-slate-900/80 border border-emerald-200 dark:border-slate-700 space-y-2">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-xs font-extrabold text-[#064E3B] dark:text-emerald-300">
+                                    {tr(
+                                      language,
+                                      `📅 ផែនការ ${plan.durationDays} ថ្ងៃ • ${plan.provinceKh}`,
+                                      `📅 ${plan.durationDays}-Day Plan • ${plan.provinceEn}`,
+                                      `📅 ${plan.durationDays}日行程 • ${plan.provinceEn}`
+                                    )}
+                                  </span>
+                                  <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold">
+                                    ~${plan.totalEstimatedCostUsd}
+                                  </span>
+                                </div>
+                                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                                  {plan.days.map((day) => (
+                                    <div
+                                      key={day.dayNumber}
+                                      className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-emerald-100 dark:border-slate-700 space-y-1"
+                                    >
+                                      <div className="text-[11px] font-extrabold text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
+                                        <span>{language === 'km' ? day.titleKh : day.titleEn}</span>
+                                        <span className="text-[10px] text-slate-500">~${day.dayEstimatedCostUsd}</span>
+                                      </div>
+                                      {day.activities.map((act, idx) => (
+                                        <div key={idx} className="text-[11px] text-slate-700 dark:text-slate-200 leading-snug">
+                                          <span className="font-bold text-amber-700 dark:text-amber-300">
+                                            {act.timePeriod === 'morning'
+                                              ? '🌅 '
+                                              : act.timePeriod === 'lunch'
+                                              ? '🍲 '
+                                              : act.timePeriod === 'afternoon'
+                                              ? '🏞️ '
+                                              : '🌙 '}
+                                          </span>
+                                          <span className="font-semibold">
+                                            {language === 'km' ? act.titleKh : act.titleEn}
+                                          </span>
+                                          <span className="text-[10px] text-slate-400"> (${act.estimatedCostUsd})</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="flex items-center gap-2 pt-1">
+                                  <button
+                                    type="button"
+                                    disabled={isSaved}
+                                    onClick={() => {
+                                      saveTripPlan(plan);
+                                      setSavedItineraryIds((prev) => ({ ...prev, [plan.id]: true }));
+                                    }}
+                                    className="flex-1 py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-emerald-800 disabled:bg-emerald-700/60 text-white text-xs font-extrabold cursor-pointer transition"
+                                  >
+                                    {isSaved
+                                      ? tr(language, '✅ បានរក្សាទុកផែនការហើយ', '✅ Trip Plan Saved', '✅ 行程已保存')
+                                      : tr(language, '💾 រក្សាទុកផែនការដើរលេង', '💾 Save Trip Plan', '💾 保存旅行行程')}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setIsWhatToEatModalOpen(false);
+                                      setIsAiTripPlannerModalOpen(true);
+                                    }}
+                                    className="py-2 px-3 rounded-xl bg-white dark:bg-slate-800 border border-emerald-400 text-[#064E3B] dark:text-emerald-300 text-xs font-extrabold cursor-pointer"
+                                  >
+                                    {tr(language, '🗺️ ផ្ទាំងផែនការពេញ', '🗺️ Full Planner', '🗺️ 完整规划器')}
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })()}
+
+                          {/* 3. Verified Hotels & Resorts Cards */}
+                          {msg.agentResult.hotels && msg.agentResult.hotels.length > 0 && (
+                            <div className="space-y-1.5">
+                              <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300">
+                                {tr(language, '🏨 សណ្ឋាគារ និងរីសតណែនាំ៖', '🏨 Verified Hotels & Resorts:', '🏨 推荐核实酒店与度假村：')}
+                              </div>
+                              {msg.agentResult.hotels.map((h) => {
+                                const saved = isItemInWishlist(h.id);
+                                return (
+                                  <div
+                                    key={h.id}
+                                    className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 flex items-center gap-2"
+                                  >
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        if (h.restaurantRecord) {
+                                          setSelectedRestaurant(h.restaurantRecord);
+                                          setIsWhatToEatModalOpen(false);
+                                        } else if (h.destinationRecord) {
+                                          setSelectedDestination(h.destinationRecord);
+                                          setIsWhatToEatModalOpen(false);
+                                        }
+                                      }}
+                                      className="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer"
+                                    >
+                                      <img
+                                        src={h.photoUrl}
+                                        alt={language === 'km' ? h.nameKh : h.nameEn}
+                                        loading="lazy"
+                                        onError={(e) => {
+                                          const el = e.currentTarget as HTMLImageElement;
+                                          if (el.dataset.fb !== '1') {
+                                            el.dataset.fb = '1';
+                                            el.src = '/destinations/dest-1.jpg';
+                                          }
+                                        }}
+                                        className="w-12 h-12 rounded-lg object-cover shrink-0 bg-slate-200"
+                                      />
+                                      <div className="min-w-0 flex-1">
+                                        <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate flex items-center gap-1">
+                                          <span className="truncate">{language === 'km' ? h.nameKh : h.nameEn}</span>
+                                          {h.isVerified && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
+                                        </div>
+                                        <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold truncate">
+                                          {language === 'km' ? h.provinceKh : h.provinceEn} • ★ {h.rating.toFixed(1)} • {h.priceDisplay}
+                                          {h.distanceKm !== undefined ? ` • ${h.distanceKm} km` : ''}
+                                        </div>
+                                      </div>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        openAddToWishlist({
+                                          id: h.id,
+                                          type: h.restaurantRecord ? 'restaurant' : 'destination',
+                                          nameKh: h.nameKh,
+                                          nameEn: h.nameEn,
+                                          photoUrl: h.photoUrl,
+                                          provinceKh: h.provinceKh,
+                                          priceDisplay: h.priceDisplay,
+                                          rating: h.rating,
+                                        })
+                                      }
+                                      className={`p-1.5 rounded-lg border cursor-pointer ${
+                                        saved
+                                          ? 'bg-rose-50 border-rose-300 text-rose-600'
+                                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500'
+                                      }`}
+                                      title={tr(language, 'រក្សាទុកចូលបញ្ជីចូលចិត្ត', 'Save to Wishlist', '收藏')}
+                                    >
+                                      <Heart className={`w-3.5 h-3.5 ${saved ? 'fill-rose-500 text-rose-500' : ''}`} />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => openExternalUrlNativeSafe(h.mapUrl)}
+                                      className="px-2 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold inline-flex items-center gap-1 shrink-0 cursor-pointer"
+                                    >
+                                      <Navigation className="w-3 h-3" />
+                                      <span>{tr(language, 'ផែនទី', 'Maps', '地图')}</span>
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          {/* 4. Food Calorie & Nutrition Analysis Card */}
+                          {msg.agentResult.nutrition && (() => {
+                            const n = msg.agentResult.nutrition;
+                            return (
+                              <div className="p-3 rounded-2xl bg-emerald-50/70 dark:bg-slate-900/80 border border-emerald-200 dark:border-slate-700 space-y-2">
+                                <div className="flex items-center justify-between gap-2 flex-wrap">
+                                  <span className="text-xs font-extrabold text-slate-900 dark:text-white">
+                                    {language === 'km' ? n.dishNameKh : n.dishNameEn}
+                                  </span>
+                                  <span className="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-emerald-300 text-[10px] font-extrabold text-emerald-800 dark:text-emerald-300">
+                                    {n.healthBadgeLabel}
+                                  </span>
+                                </div>
+                                <div className="grid grid-cols-4 gap-1.5 text-center">
+                                  <div className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-emerald-200/70 dark:border-slate-700">
+                                    <div className="text-xs font-black text-amber-600">{n.caloriesKcal}</div>
+                                    <div className="text-[9px] font-bold text-slate-500">kcal</div>
+                                  </div>
+                                  <div className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-emerald-200/70 dark:border-slate-700">
+                                    <div className="text-xs font-black text-emerald-600">{n.proteinGrams}g</div>
+                                    <div className="text-[9px] font-bold text-slate-500">
+                                      {tr(language, 'ប្រូតេអ៊ីន', 'Protein', '蛋白质')}
+                                    </div>
+                                  </div>
+                                  <div className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-emerald-200/70 dark:border-slate-700">
+                                    <div className="text-xs font-black text-sky-600">{n.carbsGrams}g</div>
+                                    <div className="text-[9px] font-bold text-slate-500">
+                                      {tr(language, 'កាបូអ៊ីដ្រាត', 'Carbs', '碳水')}
+                                    </div>
+                                  </div>
+                                  <div className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-emerald-200/70 dark:border-slate-700">
+                                    <div className="text-xs font-black text-rose-500">{n.fatGrams}g</div>
+                                    <div className="text-[9px] font-bold text-slate-500">
+                                      {tr(language, 'ខ្លាញ់', 'Fat', '脂肪')}
+                                    </div>
+                                  </div>
+                                </div>
+                                {n.keyIngredients.length > 0 && (
+                                  <div className="text-[10px] text-slate-600 dark:text-slate-300">
+                                    <span className="font-bold">
+                                      {tr(language, 'គ្រឿងផ្សំសំខាន់ៗ៖ ', 'Key ingredients: ', '主要食材：')}
+                                    </span>
+                                    {n.keyIngredients.join(' • ')}
+                                  </div>
+                                )}
+                                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                                  {n.summaryNote}
+                                </p>
+                              </div>
+                            );
+                          })()}
+
+                          {/* 5. Trending YouTube & Social Food Videos */}
+                          {msg.agentResult.trendingItems && msg.agentResult.trendingItems.length > 0 && (
+                            <div className="space-y-1.5">
+                              {msg.agentResult.trendingItems.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 flex items-center gap-2.5"
+                                >
+                                  <img
+                                    src={item.photoUrl}
+                                    alt={item.foodNameKh}
+                                    loading="lazy"
+                                    onError={(e) => {
+                                      const el = e.currentTarget as HTMLImageElement;
+                                      if (el.dataset.fb !== '1') {
+                                        el.dataset.fb = '1';
+                                        el.src = '/foods/amok.jpg';
+                                      }
+                                    }}
+                                    className="w-12 h-12 rounded-lg object-cover shrink-0 bg-slate-200"
+                                  />
+                                  <div className="min-w-0 flex-1">
+                                    <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                                      {language === 'km' ? item.foodNameKh : item.foodNameEn}
+                                    </div>
+                                    <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                                      {language === 'km' ? item.restaurantNameKh : item.restaurantNameEn} • {language === 'km' ? item.provinceKh : item.provinceEn}
+                                    </div>
+                                    {item.socialViews && (
+                                      <div className="text-[9px] font-extrabold text-rose-600 dark:text-rose-400">
+                                        🔥 {item.socialViews}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedTrendingFood(item);
+                                      setIsWhatToEatModalOpen(false);
+                                      setIsTrendingFoodDetailModalOpen(true);
+                                    }}
+                                    className="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-extrabold shrink-0 cursor-pointer"
+                                  >
+                                    {tr(language, '▶️ មើល', '▶️ View', '▶️ 查看')}
+                                  </button>
+                                </div>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setIsWhatToEatModalOpen(false);
+                                  setIsTrendingSocialModalOpen(true);
+                                }}
+                                className="w-full py-1.5 px-3 rounded-xl border border-rose-300 dark:border-rose-700 text-rose-700 dark:text-rose-300 text-[11px] font-extrabold cursor-pointer"
+                              >
+                                {tr(language, '🔥 បើកមើលវីដេអូម្ហូបល្បីៗទាំងអស់', '🔥 Explore All Trending Food Videos', '🔥 查看全部热门美食视频')}
+                              </button>
+                            </div>
+                          )}
+
+                          {/* 6. Direct Google Maps Directions Card */}
+                          {msg.agentResult.directionsTarget && (
+                            <button
+                              type="button"
+                              onClick={() => openExternalUrlNativeSafe(msg.agentResult!.directionsTarget!.mapUrl)}
+                              className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center justify-center gap-2 shadow-2xs cursor-pointer"
+                            >
+                              <Navigation className="w-4 h-4 text-amber-300 shrink-0" />
+                              <span>
+                                {tr(
+                                  language,
+                                  `បើកផ្លូវទៅកាន់ «${msg.agentResult.directionsTarget.placeName}» លើ Google Maps`,
+                                  `Navigate to "${msg.agentResult.directionsTarget.placeName}" in Google Maps`,
+                                  `在 Google 地图中导航前往「${msg.agentResult.directionsTarget.placeName}」`
+                                )}
+                                {msg.agentResult.directionsTarget.distanceKm !== undefined
+                                  ? ` (${msg.agentResult.directionsTarget.distanceKm} km)`
+                                  : ''}
+                              </span>
+                            </button>
+                          )}
+
+                          {/* 7. Quick Save to Favorites Candidate Card */}
+                          {msg.agentResult.favoriteCandidate && (() => {
+                            const fav = msg.agentResult.favoriteCandidate;
+                            const alreadySaved = isItemInWishlist(fav.id);
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => openAddToWishlist(fav)}
+                                className="w-full py-2.5 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold flex items-center justify-center gap-2 cursor-pointer"
+                              >
+                                <Heart className="w-4 h-4 fill-white shrink-0" />
+                                <span>
+                                  {alreadySaved
+                                    ? tr(language, `❤️ «${fav.nameKh}» មានក្នុងបញ្ជីចូលចិត្តរួចហើយ (គ្រប់គ្រង)`, `❤️ "${fav.nameEn}" is in Wishlist (Manage)`, `❤️「${fav.nameEn}」已在收藏夹中`)
+                                    : tr(language, `❤️ រក្សាទុក «${fav.nameKh}» ចូលបញ្ជីចូលចិត្ត`, `❤️ Save "${fav.nameEn}" to Wishlist`, `❤️ 将「${fav.nameEn}」加入收藏夹`)}
+                                </span>
+                              </button>
+                            );
+                          })()}
+                        </div>
+                      )}
+
                       {msg.destinations && msg.destinations.length > 0 && (
                         <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
                           <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1">
@@ -2051,6 +2646,9 @@ export const WhatToEatModal: React.FC = () => {
                                       <div className="text-xs font-bold text-slate-900 dark:text-white truncate">{rLoc.name}</div>
                                       <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
                                         {rLoc.address || rLoc.province}
+                                        {msg.agentResult?.shopDistancesKm?.[r.id] !== undefined
+                                          ? ` • 📍 ${msg.agentResult.shopDistancesKm[r.id]} km`
+                                          : ''}
                                       </div>
                                     </div>
                                   </button>

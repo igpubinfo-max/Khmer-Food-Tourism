@@ -55,6 +55,7 @@ import {
 import { testGeminiApiConnection } from '../services/conversationalAiAssistant';
 import { matchesSearchQuery, restaurantSearchFields, destinationSearchFields } from '../utils/searchEngine';
 import { AdminUsersDirectoryPanel } from './admin/AdminUsersDirectoryPanel';
+import { AdminAiAgentMonitorPanel } from './admin/AdminAiAgentMonitorPanel';
 
 export const AdminDashboard: React.FC = () => {
   const { 
@@ -74,7 +75,7 @@ export const AdminDashboard: React.FC = () => {
     openGoogleMapsSearchModal, openManageMyVipStore, setSelectedRestaurant, setSelectedDestination, setIsVipAddRestaurantModalOpen
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'stats' | 'support_tickets' | 'food' | 'restaurants' | 'hotels' | 'destinations' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins'>(() => {
+  const [activeTab, setActiveTab] = useState<'stats' | 'support_tickets' | 'food' | 'restaurants' | 'hotels' | 'destinations' | 'users' | 'transactions' | 'settings' | 'security' | 'image_audit' | 'ai_checkins' | 'ai_agent'>(() => {
     return (window as any).__kft_admin_tab || 'stats';
   });
 
@@ -1204,6 +1205,19 @@ export const AdminDashboard: React.FC = () => {
           >
             <Users className="w-3.5 h-3.5 shrink-0" />
             <span className="min-w-0 break-words text-center leading-tight">{isKm ? `អ្នកប្រើ (${users.length})` : `Users (${users.length})`}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('ai_agent')}
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl font-bold border transition cursor-pointer ${
+              activeTab === 'ai_agent'
+                ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
+                : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-800 hover:border-emerald-500/50'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+            <span className="min-w-0 break-words text-center leading-tight">{isKm ? '🤖 AI Agent' : '🤖 AI Agent'}</span>
           </button>
 
           <button
@@ -4076,6 +4090,9 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* AI AGENT MONITORING DASHBOARD ($0 Forever Hybrid MCP Platform) */}
+          {activeTab === 'ai_agent' && <AdminAiAgentMonitorPanel />}
 
           {/* USERS TAB (Enterprise 10,000-50,000+ Scale User Directory, Bulk Control, Activity Logs & Backup/Recovery) */}
           {activeTab === 'users' && (

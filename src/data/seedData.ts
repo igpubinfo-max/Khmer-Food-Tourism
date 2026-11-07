@@ -1,6 +1,7 @@
 import { FoodItem, Restaurant, TouristDestination, User, AppSettings, RegistrationTransaction, TEN_VIP_BENEFITS } from '../types';
 import { initial100Foods } from './seedFoods';
 import { initial100Restaurants } from './seedRestaurants';
+import { youthBrandedCafes30 } from './seedYouthBrandedCafes';
 import { initial100Destinations } from './seedDestinations';
 
 // Registered user accounts database: Cleared per administrative directive (Backup preserved in /backup)
@@ -45,7 +46,7 @@ export const initialAppSettings: AppSettings = {
 export const initialFoods: FoodItem[] = initial100Foods;
 
 // 100+ Cambodian Restaurants & Food Shops
-export const initialRestaurants: Restaurant[] = initial100Restaurants;
+export const initialRestaurants: Restaurant[] = [...youthBrandedCafes30, ...initial100Restaurants];
 
 // 100+ Authentic Tourist Destinations across 25 Cambodian Provinces
 export const initialDestinations: TouristDestination[] = initial100Destinations;

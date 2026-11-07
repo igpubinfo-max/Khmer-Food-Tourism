@@ -118,6 +118,12 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           const norm = id.replace(/\\/g, '/');
+          if (norm.includes('/src/data/seedRacCambodiaTourDestinations')) {
+            return 'data-rac-destinations';
+          }
+          if (norm.includes('/src/data/seedHotels100')) {
+            return 'data-hotels';
+          }
           if (norm.includes('/src/data/seedDestinations') || norm.includes('/src/data/touristDestinationsList')) {
             return 'data-destinations';
           }

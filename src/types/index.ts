@@ -5,8 +5,8 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1474;
-export const APP_RELEASE_DATE = '2026-11-06';
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1475;
+export const APP_RELEASE_DATE = '2026-11-07';
 
 /**
  * Audited duplicate food IDs removed from the Food Menu so every dish and photograph is 100% unique
@@ -2250,6 +2250,65 @@ export const saveCachedVerifiedPlaceForCoords = (
   }
 };
 
+
+/**
+ * 25-Province / Municipality Geographic Bounding Boxes for Cambodia (with ~0.22° border tolerance
+ * so river/mountain border landmarks like Preah Nimith Waterfall, Boeung Tonle Chhmar & Khnong Phsar pass cleanly).
+ */
+export const CAMBODIA_PROVINCE_GEO_BOUNDS: Record<
+  string,
+  { minLat: number; maxLat: number; minLng: number; maxLng: number; aliases: string[] }
+> = {
+  'ភ្នំពេញ': { minLat: 11.35, maxLat: 11.78, minLng: 104.72, maxLng: 105.08, aliases: ['phnom penh', 'រាជធានីភ្នំពេញ'] },
+  'សៀមរាប': { minLat: 12.75, maxLat: 13.98, minLng: 103.35, maxLng: 104.72, aliases: ['siem reap', 'ខេត្តសៀមរាប'] },
+  'ព្រះសីហនុ': { minLat: 10.25, maxLat: 11.35, minLng: 103.10, maxLng: 104.12, aliases: ['preah sihanouk', 'sihanoukville', 'ខេត្តព្រះសីហនុ'] },
+  'កំពត': { minLat: 10.32, maxLat: 11.25, minLng: 103.82, maxLng: 104.72, aliases: ['kampot', 'ខេត្តកំពត'] },
+  'កែប': { minLat: 10.35, maxLat: 10.68, minLng: 104.18, maxLng: 104.52, aliases: ['kep', 'kaeb', 'ខេត្តកែប'] },
+  'បាត់ដំបង': { minLat: 12.30, maxLat: 13.62, minLng: 102.30, maxLng: 103.90, aliases: ['battambang', 'ខេត្តបាត់ដំបង'] },
+  'កណ្តាល': { minLat: 10.88, maxLat: 11.98, minLng: 104.58, maxLng: 105.38, aliases: ['kandal', 'កណ្ដាល', 'ខេត្តកណ្តាល', 'ខេត្តកណ្ដាល'] },
+  'កំពង់ចាម': { minLat: 11.72, maxLat: 12.60, minLng: 104.85, maxLng: 105.85, aliases: ['kampong cham', 'ខេត្តកំពង់ចាម'] },
+  'កំពង់ឆ្នាំង': { minLat: 11.72, maxLat: 12.68, minLng: 104.15, maxLng: 104.95, aliases: ['kampong chhnang', 'ខេត្តកំពង់ឆ្នាំង'] },
+  'កំពង់ស្ពឺ': { minLat: 11.05, maxLat: 12.15, minLng: 103.75, maxLng: 104.78, aliases: ['kampong speu', 'ខេត្តកំពង់ស្ពឺ'] },
+  'កំពង់ធំ': { minLat: 12.18, maxLat: 13.75, minLng: 104.12, maxLng: 105.78, aliases: ['kampong thom', 'ខេត្តកំពង់ធំ'] },
+  'កោះកុង': { minLat: 10.55, maxLat: 12.20, minLng: 102.70, maxLng: 104.22, aliases: ['koh kong', 'ខេត្តកោះកុង'] },
+  'ក្រចេះ': { minLat: 11.95, maxLat: 13.52, minLng: 105.52, maxLng: 106.82, aliases: ['kratie', 'ខេត្តក្រចេះ'] },
+  'មណ្ឌលគិរី': { minLat: 11.95, maxLat: 13.52, minLng: 106.30, maxLng: 107.68, aliases: ['mondulkiri', 'ខេត្តមណ្ឌលគិរី'] },
+  'បន្ទាយមានជ័យ': { minLat: 13.28, maxLat: 14.32, minLng: 102.30, maxLng: 103.52, aliases: ['banteay meanchey', 'ខេត្តបន្ទាយមានជ័យ'] },
+  'ព្រះវិហារ': { minLat: 13.05, maxLat: 14.55, minLng: 104.25, maxLng: 106.05, aliases: ['preah vihear', 'ខេត្តព្រះវិហារ'] },
+  'ព្រៃវែង': { minLat: 10.82, maxLat: 11.90, minLng: 105.05, maxLng: 105.88, aliases: ['prey veng', 'ខេត្តព្រៃវែង'] },
+  'ពោធិ៍សាត់': { minLat: 11.75, maxLat: 13.15, minLng: 102.70, maxLng: 104.52, aliases: ['pursat', 'ខេត្តពោធិ៍សាត់'] },
+  'រតនគិរី': { minLat: 13.10, maxLat: 14.75, minLng: 106.45, maxLng: 107.68, aliases: ['ratanakiri', 'ខេត្តរតនគិរី'] },
+  'ស្ទឹងត្រែង': { minLat: 13.05, maxLat: 14.62, minLng: 105.45, maxLng: 106.88, aliases: ['stung treng', 'ខេត្តស្ទឹងត្រែង'] },
+  'ស្វាយរៀង': { minLat: 10.72, maxLat: 11.65, minLng: 105.48, maxLng: 106.28, aliases: ['svay rieng', 'ខេត្តស្វាយរៀង'] },
+  'តាកែវ': { minLat: 10.48, maxLat: 11.48, minLng: 104.28, maxLng: 105.22, aliases: ['takeo', 'ខេត្តតាកែវ'] },
+  'ឧត្តរមានជ័យ': { minLat: 13.78, maxLat: 14.52, minLng: 103.00, maxLng: 104.62, aliases: ['oddar meanchey', 'ឧត្ដរមានជ័យ', 'ខេត្តឧត្តរមានជ័យ', 'ខេត្តឧត្ដរមានជ័យ'] },
+  'ប៉ៃលិន': { minLat: 12.55, maxLat: 13.18, minLng: 102.42, maxLng: 102.92, aliases: ['pailin', 'ខេត្តប៉ៃលិន'] },
+  'ត្បូងឃ្មុំ': { minLat: 11.55, maxLat: 12.42, minLng: 105.35, maxLng: 106.48, aliases: ['tboung khmum', 'tbong khmum', 'ខេត្តត្បូងឃ្មុំ'] },
+};
+
+export const isCoordinateMatchingCambodiaProvince = (
+  lat?: number | null,
+  lng?: number | null,
+  provinceKhOrEn?: string | null
+): boolean => {
+  if (typeof lat !== 'number' || typeof lng !== 'number' || !isValidCambodiaCoordinates(lat, lng)) {
+    return false;
+  }
+  const raw = String(provinceKhOrEn || '').trim().toLowerCase();
+  if (!raw) return true;
+  const stripped = raw.replace(/^រាជធានី|^ខេត្ត|s+province$/g, '').trim();
+  for (const [key, cfg] of Object.entries(CAMBODIA_PROVINCE_GEO_BOUNDS)) {
+    if (
+      key === stripped ||
+      stripped.includes(key) ||
+      cfg.aliases.some((a) => raw === a || stripped === a || raw.includes(a))
+    ) {
+      return lat >= cfg.minLat && lat <= cfg.maxLat && lng >= cfg.minLng && lng <= cfg.maxLng;
+    }
+  }
+  return true;
+};
+
 export const buildCanonicalGoogleMapsPinUrl = (
   lat: number,
   lng: number,
@@ -2265,6 +2324,9 @@ export const buildCanonicalGoogleMapsPinUrl = (
       return `https://www.google.com/maps?q=${q}&ftid=${encodeURIComponent(cleanId)}`;
     }
     return `https://www.google.com/maps/search/?api=1&query=${q}&query_place_id=${encodeURIComponent(cleanId)}`;
+  }
+  if (placeNameQuery && placeNameQuery.trim().length > 2) {
+    return `https://www.google.com/maps/search/${encodeURIComponent(placeNameQuery.trim())}/@${latFixed},${lngFixed},17z`;
   }
   return `https://www.google.com/maps/search/?api=1&query=${latFixed},${lngFixed}`;
 };
@@ -2348,26 +2410,41 @@ export const getRestaurantGoogleExternalUrl = (
     .filter(Boolean)
     .join(', ');
 
+  const trimmedMapUrl = (restaurant.mapUrl || '').trim();
+  const isRawCoordOnlyUrl = Boolean(
+    trimmedMapUrl && /[?&]query=-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/i.test(trimmedMapUrl)
+  );
+  const hasExplicitNamedMapUrl = isValidGoogleMapsUrl(trimmedMapUrl) && !isRawCoordOnlyUrl;
+
   if (mode === 'directions') {
+    // If a branded shop (e.g. rest-youth-*) or owner has an explicit named ?query=... URL without a ChIJ Place ID,
+    // extract that exact business name+street query so turn-by-turn navigation targets the official storefront.
+    if (hasExplicitNamedMapUrl && !isValidOfficialGooglePlaceId(placeId)) {
+      try {
+        const parsedUrl = new URL(trimmedMapUrl);
+        const namedQ = parsedUrl.searchParams.get('query') || parsedUrl.searchParams.get('q');
+        if (namedQ && namedQ.trim().length > 3) {
+          let dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(namedQ.trim())}`;
+          if (origin && isValidCambodiaCoordinates(origin.lat, origin.lng)) {
+            dirUrl += `&origin=${Number(origin.lat.toFixed(6))},${Number(origin.lng.toFixed(6))}`;
+          }
+          return dirUrl;
+        }
+      } catch {}
+    }
     if (hasValidCoords) {
       return buildCanonicalGoogleMapsDirectionsUrl(lat, lng, origin, placeId, placeNameForMaps);
     }
-    if (isValidGoogleMapsUrl(restaurant.mapUrl)) {
-      return restaurant.mapUrl!.trim();
+    if (isValidGoogleMapsUrl(trimmedMapUrl)) {
+      return trimmedMapUrl;
     }
     return '';
   }
 
-  // Honor explicit verified Google Maps links added by Admin or Shop Owner (unless it's only a raw coordinate query and we have a verified Place ID)
-  const isRawCoordOnlyUrl = Boolean(
-    restaurant.mapUrl && /[?&]query=-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/i.test(restaurant.mapUrl.trim())
-  );
-  if (
-    (restaurant.isAdminEdited || restaurant.dataSource === 'vip_owner' || Boolean(restaurant.ownerId)) &&
-    isValidGoogleMapsUrl(restaurant.mapUrl) &&
-    (!isRawCoordOnlyUrl || !isValidOfficialGooglePlaceId(placeId))
-  ) {
-    return restaurant.mapUrl!.trim();
+  // Honor explicit named Google Maps links (maps.app.goo.gl, /maps/place/, or named ?query=Brand+Street)
+  // while upgrading legacy bare ?query=lat,lng links to canonical @lat,lng,17z place cards.
+  if (hasExplicitNamedMapUrl && !isValidOfficialGooglePlaceId(placeId)) {
+    return trimmedMapUrl;
   }
 
   const metaUri = restaurant.googleMapsMeta?.googleMapsUri || cachedVerified?.googleMapsUri;
@@ -2473,7 +2550,8 @@ export const getDestinationGoogleExternalUrl = (
   }
 
   if (hasValidCoords) {
-    return buildCanonicalGoogleMapsPinUrl(lat, lng, placeId, placeNameForMaps);
+    const isRuralRacSite = String(destination.id || '').startsWith('rac-');
+    return buildCanonicalGoogleMapsPinUrl(lat, lng, placeId, isRuralRacSite ? undefined : placeNameForMaps);
   }
 
   if (isValidGoogleMapsUrl(destination.mapUrl)) {

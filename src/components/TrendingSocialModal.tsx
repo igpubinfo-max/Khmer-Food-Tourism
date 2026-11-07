@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import {
   X, Utensils, ExternalLink, Navigation, Phone, Share2, Calendar,
   UtensilsCrossed, RefreshCw, ChefHat, CheckCircle2, Play,
-  Search, AlertCircle, RotateCcw, ChevronRight, Loader2, WifiOff
+  Search, Sparkles, AlertCircle, RotateCcw, ChevronRight, Loader2, WifiOff
 } from 'lucide-react';
 import {
   TrendingFoodCategorySlug,
@@ -13,6 +13,7 @@ import {
   resolveFoodPhotoUrl,
 } from '../types';
 import { shareRichContent } from '../utils/androidMediaHelper';
+import { openAiAssistantWithQuery, getAskAiButtonLabel } from '../utils/aiSearchBridge';
 import { tr, translateProvince } from '../utils/i18n';
 import {
   getLocalizedFood,
@@ -46,6 +47,7 @@ export const TrendingSocialModal: React.FC = () => {
   const {
     isTrendingSocialModalOpen,
     setIsTrendingSocialModalOpen,
+    setIsWhatToEatModalOpen,
     trendingFoods,
     foods,
     restaurants,
@@ -767,6 +769,22 @@ export const TrendingSocialModal: React.FC = () => {
               </button>
             )}
           </div>
+          {searchQuery.trim().length >= 2 && (
+            <div className="flex justify-end pt-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  const q = searchQuery.trim();
+                  setIsTrendingSocialModalOpen(false);
+                  openAiAssistantWithQuery(q, setIsWhatToEatModalOpen);
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-800 hover:bg-emerald-700 text-amber-300 text-[11px] font-bold shadow-2xs transition active:scale-95 cursor-pointer font-khmer"
+              >
+                <Sparkles className="w-3 h-3" />
+                <span>{getAskAiButtonLabel(language)}</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Category Tabs: 4 Categories + All Trending */}

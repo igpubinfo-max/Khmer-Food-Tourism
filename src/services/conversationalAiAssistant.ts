@@ -18,6 +18,7 @@ import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } fro
 import { isMedicalOrHealthQuery, buildMedicalScopeNotice, describeDish, type BrainChip } from './aiFoodBrain';
 import { getAiFoodAdvisorRecommendations, isVegetarianQuery } from './aiFoodAdvisorService';
 import { getCloudApiConfig, DEFAULT_GOOGLE_MAPS_API_KEY } from './supabaseService';
+import type { AiAgentToolResult } from './aiAgentPlatformService';
 
 export type AiTurnIntent =
   | 'welcome'
@@ -31,6 +32,7 @@ export type AiTurnIntent =
   | 'general_food_qa'
   | 'image_identification'
   | 'clarification'
+  | 'ai_agent_action'
   | 'off_topic';
 
 export interface AiRecipePreview {
@@ -88,6 +90,8 @@ export interface AiAssistantMessage {
   model?: string;
   /** Reason code when the live AI call could not complete (used to show inline key setup UI). */
   failureReason?: 'no_key' | 'auth' | 'network' | 'timeout' | 'quota' | 'blocked' | 'bad_response' | 'unavailable';
+  /** Structured MCP AI Agent action output (hotels, itinerary, nutrition, trending videos, owner confirmation, etc.). */
+  agentResult?: AiAgentToolResult;
 }
 
 export interface AiConversationMemory {
@@ -179,7 +183,50 @@ export function detectProvinceFromText(input: string): { kh: string; en: string;
   return null;
 }
 
-export function buildWelcomeAssistantMessage(language: Language, foodCount: number, shopCount: number, _destCount?: number): AiAssistantMessage {
+export function buildWelcomeAssistantMessage(
+  language: Language,
+  foodCount: number,
+  shopCount: number,
+  destCount?: number,
+  extraChips?: BrainChip[]
+): AiAssistantMessage {
+  const placeTotal = destCount && destCount > 0 ? destCount : 250;
+  const defaultChips: BrainChip[] = [
+    {
+      id: 'craving_sour_spicy',
+      label: tr(language, '🍲 ម្ហូបជូរហឹរឆ្ងាញ់ៗ', '🍲 Spicy & Sour Dishes', '🍲 酸辣开胃菜'),
+      query: tr(language, 'ថ្ងៃនេះចង់ញ៉ាំម្ហូបជូរហឹរ មានអ្វីខ្លះ?', 'What spicy and sour Cambodian dishes do you recommend today?', '今天想吃酸辣的高棉菜，有什么推荐？'),
+    },
+    {
+      id: 'agent_hotels_siemreap',
+      label: tr(language, '🏨 សណ្ឋាគារសៀមរាប', '🏨 Siem Reap Hotels', '🏨 暹粒核实酒店'),
+      query: tr(language, 'ស្វែងរកសណ្ឋាគារនៅសៀមរាប', 'Find verified hotels in Siem Reap', '查找暹粒已核实的酒店'),
+    },
+    {
+      id: 'agent_trip_kampot',
+      label: tr(language, '🗺️ ផែនការដើរលេងកំពត ២ថ្ងៃ', '🗺️ 2-Day Kampot Itinerary', '🗺️ 贡布2日游行程'),
+      query: tr(language, 'រៀបផែនការដើរលេងកំពត ២ ថ្ងៃ ថវិកាមធ្យម', 'Create a 2-day travel itinerary for Kampot with medium budget', '规划贡布2天中等预算旅行行程'),
+    },
+    {
+      id: 'agent_nearby_shops',
+      label: tr(language, '📍 ហាងអាហារជិតខ្ញុំ', '📍 Nearby Restaurants', '📍 附近核实餐厅'),
+      query: tr(language, 'ស្វែងរកហាងអាហារ និងហាងកាហ្វេជិតខ្ញុំ', 'Find verified restaurants and coffee shops near me', '查找我附近的已核实餐厅和咖啡馆'),
+    },
+    {
+      id: 'agent_nutrition_amok',
+      label: tr(language, '🥗 កាឡូរីអាម៉ុកត្រី', '🥗 Fish Amok Nutrition', '🥗 阿莫克鱼营养热量'),
+      query: tr(language, 'វិភាគកាឡូរី និងអាហារូបត្ថម្ភ អាម៉ុកត្រី', 'Analyze calories and nutrition of Fish Amok', '分析阿莫克鱼的热量和营养成分'),
+    },
+    {
+      id: 'agent_trending_yt',
+      label: tr(language, '🔥 ម្ហូបកំពុងល្បី YouTube', '🔥 Trending Food Videos', '🔥 热门美食视频'),
+      query: tr(language, 'បង្ហាញម្ហូប និងហាងកំពុងល្បីលើ YouTube', 'Show trending Cambodian food and coffee shops on YouTube', '展示热门高棉美食与探店视频'),
+    },
+  ];
+  const mergedChips = extraChips && extraChips.length > 0
+    ? [...extraChips.slice(0, 1), ...defaultChips].slice(0, 6)
+    : defaultChips;
+
   return {
     id: 'ai-welcome',
     role: 'assistant',
@@ -187,32 +234,11 @@ export function buildWelcomeAssistantMessage(language: Language, foodCount: numb
     intent: 'welcome',
     text: tr(
       language,
-      `សួស្តី! ខ្ញុំជាជំនួយការ AI ឯកទេសលើ «ម្ហូបអាហារ» ប៉ុណ្ណោះ។ សួរខ្ញុំជាភាសាខ្មែរ អង់គ្លេស ឬចិនបាន៖\n• ថតរូបម្ហូប ដើម្បីឱ្យខ្ញុំប្រាប់ថាជាម្ហូបអ្វី\n• ម្ហូបខ្មែរ និងអន្តរជាតិ (មាន ${foodCount}+ មុខក្នុងបញ្ជីផ្ទៀងផ្ទាត់)\n• រូបមន្ត គ្រឿងផ្សំ វិធីចម្អិន និងអាហារូបត្ថម្ភប្រហាក់ប្រហែល\n• ប្រៀបធៀបម្ហូប ប្រវត្តិ វប្បធម៌ និងការផ្គូផ្គងភេសជ្ជៈ\n• ការរក្សាទុក និងសុវត្ថិភាពអាហារ • ហាងអាហារ (${shopCount}+ ហាង)`,
-      `Hello! I’m an AI assistant dedicated ONLY to food. Ask me in Khmer, English or Chinese:\n• Send a food photo and I’ll tell you what it is\n• Cambodian & international dishes (${foodCount}+ verified menu items)\n• Recipes, ingredients, cooking methods and approximate nutrition\n• Comparisons, history, culture and drink pairings\n• Storage & food safety • Restaurants (${shopCount}+ shops)`,
-      `您好！我是只专注于「美食」的 AI 助手。可用高棉语、英语或中文提问：\n• 发送美食照片，我来告诉您这是什么菜\n• 高棉与各国美食（已核实菜单 ${foodCount}+ 道）\n• 食谱、食材、烹饪方法与大致营养\n• 菜品对比、历史文化与饮品搭配\n• 食物保存与食品安全 • 餐厅推荐（${shopCount}+ 家）`
+      `សួស្តី! ខ្ញុំជាជំនួយការឆ្លាតវៃ AI Agent នៃកម្មវិធី «រសជាតិ និងទេសចរណ៍កម្ពុជា» (Cambodia Flavors & Tourism)។ សួរខ្ញុំជាភាសាខ្មែរ អង់គ្លេស ឬចិនបានគ្រប់ពេល៖\n• 🍽️ ណែនាំម្ហូបខ្មែរ (${foodCount}+ មុខ) រូបមន្ត វិធីចម្អិន និងថតរូបម្ហូបដើម្បីសម្គាល់ឈ្មោះ\n• 🏪 ស្វែងរកហាងអាហារ ហាងកាហ្វេ (${shopCount}+ ហាង) សណ្ឋាគារ និងផ្លូវទៅលើ Google Maps\n• 🗺️ រៀបចំផែនការដើរលេង (${placeTotal}+ តំបន់) គណនាថវិកា • 🥗 វិភាគកាឡូរី និងអាហារូបត្ថម្ភ • 🔥 វីដេអូម្ហូបកំពុងល្បី`,
+      `Hello! I am your Cambodia Flavors & Tourism Smart AI Agent. Ask me in Khmer, English, or Chinese:\n• 🍽️ Cambodian & regional dish recommendations (${foodCount}+ dishes), recipes & photo identification\n• 🏪 Verified restaurants, coffee shops (${shopCount}+ listings), hotels & Google Maps directions\n• 🗺️ Custom travel itineraries (${placeTotal}+ places) & budgets • 🥗 Calorie & nutrition analysis • 🔥 Trending food videos`,
+      `您好！我是「柬埔寨风味与旅游」(Cambodia Flavors & Tourism) 智能 AI 助手，支持高棉语、英语与中文：\n• 🍽️ 美食推荐（${foodCount}+ 道核实菜品）、食谱做法与拍照识菜\n• 🏪 查找核实餐厅、咖啡馆（${shopCount}+ 家）、酒店住宿与 Google 地图导航\n• 🗺️ 智能旅行行程与预算规划（${placeTotal}+ 个景点）• 🥗 热量与营养估算 • 🔥 热门探店视频`
     ),
-    followUpChips: [
-      {
-        id: 'craving_sour_spicy',
-        label: tr(language, 'ចង់ញ៉ាំម្ហូបជូរហឹរ', 'Craving Spicy & Sour', '想吃酸辣开胃菜'),
-        query: tr(language, 'ថ្ងៃនេះចង់ញ៉ាំម្ហូបជូរហឹរ មានអ្វីខ្លះ?', 'What spicy and sour Cambodian dishes do you recommend today?', '今天想吃酸辣的高棉菜，有什么推荐？'),
-      },
-      {
-        id: 'recipe_amok',
-        label: tr(language, 'របៀបធ្វើអាម៉ុកត្រី', 'Fish Amok Recipe', '阿莫克鱼食谱做法'),
-        query: tr(language, 'សុំគ្រឿងផ្សំ និងរបៀបធ្វើអាម៉ុកត្រី', 'Show me the ingredients and recipe for Fish Amok', '请告诉我阿莫克鱼的食材和做法'),
-      },
-      {
-        id: 'storage_soup',
-        label: tr(language, 'រក្សាទុកម្ហូបសម្ល', 'Storing leftover soup', '剩汤如何保存'),
-        query: tr(language, 'តើរក្សាទុកម្ហូបសម្លក្នុងទូទឹកកកបានប៉ុន្មានថ្ងៃ?', 'How long can leftover soup stay in the fridge?', '剩下的汤放冰箱能保存几天？'),
-      },
-      {
-        id: 'compare_dishes',
-        label: tr(language, 'ប្រៀបធៀបម្ហូប', 'Compare dishes', '菜品对比'),
-        query: tr(language, 'ប្រៀបធៀបអាម៉ុក និងការីខ្មែរ', 'Compare amok and Khmer red curry', '对比阿莫克和高棉红咖喱'),
-      },
-    ],
+    followUpChips: mergedChips,
   };
 }
 

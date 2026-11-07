@@ -68,7 +68,12 @@ const isNonLatinScript = (s: string) => KHMER_RX.test(s) || CJK_RX.test(s);
 export const SEARCH_STOPWORDS = new Set([
   'the', 'a', 'an', 'of', 'and', 'at', 'in', 'on', 'by', 'for', 'to', 'with', 'from', 'near', 'nearby',
   'me', 'my', 'around', 'best', 'top', 'le', 'la', 'les', 'de', 'du', 'des', 'el', 'il',
-  'ដឹ', 'ឌឺ', 'និង', 'នៅ', 'ក្នុង', 'ជិត', 'ជិតខ្ញុំ', 'របស់', 'ដ៏', 'ល្អ', 'ល្បី',
+  'please', 'help', 'find', 'search', 'recommend', 'recommended', 'suggestion', 'suggest',
+  'where', 'what', 'which', 'can', 'could', 'should', 'would', 'want', 'looking',
+  'eat', 'drink', 'visit', 'stay', 'good', 'nice', 'great', 'delicious', 'yummy', 'tasty',
+  'famous', 'popular', 'trending', 'viral', 'beautiful', 'pretty', 'cheap', 'affordable',
+  'place', 'places', 'spot', 'spots', 'cambodia', 'cambodian', 'khmer', 'i', 'we', 'is', 'are',
+  'ដឹ', 'ឌឺ', 'និង', 'នៅ', 'ក្នុង', 'ជិត', 'ជិតខ្ញុំ', 'របស់', 'ដ៏', 'ល្អ', 'ល្បី', 'ស្អាត', 'ឆ្ងាញ់',
   '的', '在', '和', '附近',
 ]);
 
@@ -126,6 +131,9 @@ const CATEGORY_SYNONYM_GROUPS: string[][] = [
   ['beach', 'island', 'koh', 'ឆ្នេរ', 'កោះ', '海滩', '岛'],
   ['museum', 'សារមន្ទីរ', '博物馆'],
   ['park', 'garden', 'ឧទ្យាន', 'សួន', '公园'],
+  ['seafood', 'crab', 'shrimp', 'prawn', 'គ្រឿងសមុទ្រ', 'ក្តាម', 'បង្គា', '海鲜', '螃蟹'],
+  ['bbq', 'grill', 'grilled', 'buffet', 'hotpot', 'សាច់អាំង', 'ប៊ូហ្វេ', 'ស៊ុប', '烧烤', '火锅', '自助餐'],
+  ['boba', 'bubble', 'matcha', 'milktea', 'តែគុជ', 'ម៉ាត់ឆា', 'មិចឆា', 'តែទឹកដោះគោ', '奶茶', '珍珠奶茶', '抹茶'],
   ['shop', 'store', 'ហាង', '商店'],
 ];
 
@@ -170,6 +178,17 @@ const PROVINCE_ALIAS_LIST: ProvinceAliasEntry[] = PROVINCE_ALIASES.flatMap(([key
 ).sort((a, b) => b.alias.length - a.alias.length);
 
 const KHMER_ADMIN_WORDS = ['រាជធានី', 'ខេត្ត', 'ក្រុង', 'ស្រុក', 'ខណ្ឌ', 'សង្កាត់', 'ឃុំ', 'ភូមិ'];
+
+const NON_LATIN_CONVERSATIONAL_FILLERS = [
+  'សូមជួយណែនាំ', 'សូមជួយរក', 'ជួយណែនាំ', 'ជួយរក', 'ណែនាំ',
+  'ចង់ទៅលេង', 'ចង់ស្នាក់នៅ', 'ចង់ញ៉ាំ', 'ចង់ញាំ', 'ចង់ផឹក', 'ចង់ទៅ', 'ចង់រក',
+  'មានកន្លែងណា', 'កន្លែងដើរលេង', 'កន្លែងណា', 'ហាងណា', 'តើមាន', 'នៅឯណា', 'ឯណា',
+  'ស្វែងរក', 'រកមើល', 'ដែលឆ្ងាញ់', 'ឆ្ងាញ់ៗ', 'ឆ្ងាញ់', 'ស្អាតៗ', 'ស្អាត',
+  'ពេញនិយម', 'ល្បីៗ', 'តម្លៃសមរម្យ', 'ថោកៗ', 'សម្រាប់យុវវ័យ', 'យុវវ័យ',
+  'នៅជិតខ្ញុំ', 'ជិតខ្ញុំ', 'ក្នុងខេត្ត', 'នៅខេត្ត', 'នៅក្រុង', 'នៅម្ដុំ', 'នៅម្តុំ', 'ម្តុំ',
+  '请帮我找', '帮我找', '推荐一下', '求推荐', '推荐', '想吃', '想喝', '想去', '想住',
+  '哪里有', '哪家', '好吃的', '好喝的', '好玩的', '好看的', '好吃', '好喝', '好玩', '著名', '热门', '网红',
+].map((w) => normalizeSearchText(w)).filter(Boolean).sort((a, b) => b.length - a.length);
 
 const NON_LATIN_GENERIC_WORDS = CATEGORY_SYNONYM_GROUPS.flat()
   .filter((w) => isNonLatinScript(w))
@@ -249,7 +268,10 @@ export function analyzeSearchQuery(rawQuery: string): AnalyzedSearchQuery {
     if (SEARCH_STOPWORDS.has(tok)) continue;
 
     if (isNonLatinScript(tok)) {
-      // Khmer / Chinese are written without spaces — peel off admin, category and stop words inside the token.
+      // Khmer / Chinese are written without spaces — peel off conversational fillers, admin, category and edge stop words.
+      for (const f of NON_LATIN_CONVERSATIONAL_FILLERS) {
+        if (tok.includes(f)) tok = tok.split(f).join(' ');
+      }
       for (const w of KHMER_ADMIN_WORDS) tok = tok.split(w).join(' ');
       for (const w of NON_LATIN_GENERIC_WORDS) {
         if (tok.includes(w)) {
@@ -259,7 +281,8 @@ export function analyzeSearchQuery(rawQuery: string): AnalyzedSearchQuery {
           tok = tok.split(w).join(' ');
         }
       }
-      for (const piece of tok.split(/\s+/)) {
+      for (let piece of tok.split(/\s+/)) {
+        piece = piece.replace(/^(?:នៅ|ក្នុង|ជិត|និង|ដ៏|របស់|的|在)+|(?:នៅ|ក្នុង|ជិត|និង|ដ៏|របស់|ហើយ|ទេ|ដែរ|មែនទេ|的|吗|呢)+$/g, '').trim();
         if ((piece.length >= 2 || CJK_RX.test(piece)) && !SEARCH_STOPWORDS.has(piece)) distinctive.push(piece);
       }
       continue;

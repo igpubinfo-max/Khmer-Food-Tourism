@@ -1,6 +1,4 @@
 import { TouristDestination } from '../types';
-import { racCambodiaTourDestinations } from './seedRacCambodiaTourDestinations';
-import { seedHotels100 } from './seedHotels100';
 
 const baseSeedDestinations: TouristDestination[] = [
   {
@@ -11713,6 +11711,37 @@ const baseSeedDestinations: TouristDestination[] = [
 
 export const initial100Destinations: TouristDestination[] = [
   ...baseSeedDestinations,
-  ...racCambodiaTourDestinations,
-  ...seedHotels100,
 ];
+
+let extendedLoadedPromise: Promise<TouristDestination[]> | null = null;
+let hasAppendedExtendedToSeed = false;
+
+/**
+ * Lazily loads the 1,168 RAC Cambodia archaeological/eco sites and 359 directory hotels
+ * after initial first paint (~250ms idle) so mobile devices skip parsing ~5.85 MB of JS synchronously at cold boot.
+ */
+export function loadExtendedDestinationsAndHotels(): Promise<TouristDestination[]> {
+  if (!extendedLoadedPromise) {
+    extendedLoadedPromise = Promise.all([
+      import('./seedRacCambodiaTourDestinations'),
+      import('./seedHotels100'),
+    ]).then(([racMod, hotelMod]) => {
+      const extended: TouristDestination[] = [
+        ...(racMod.racCambodiaTourDestinations || []),
+        ...(hotelMod.seedHotels100 || []),
+      ];
+      if (!hasAppendedExtendedToSeed && extended.length > 0) {
+        hasAppendedExtendedToSeed = true;
+        const existingIds = new Set(initial100Destinations.map((d) => d.id));
+        for (const item of extended) {
+          if (item && item.id && !existingIds.has(item.id)) {
+            initial100Destinations.push(item);
+            existingIds.add(item.id);
+          }
+        }
+      }
+      return extended;
+    });
+  }
+  return extendedLoadedPromise;
+}

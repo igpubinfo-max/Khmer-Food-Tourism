@@ -50,6 +50,7 @@ import {
   destinationSearchFields,
   type SearchableFields,
 } from '../utils/searchEngine';
+import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 import { initial100Restaurants as SEED_RESTAURANTS } from '../data/seedRestaurants';
 import { initial100Destinations as SEED_DESTINATIONS } from '../data/seedDestinations';
 import { isRestaurantIdDeleted, loadDeletedRestaurantIdsMap } from './permanentMediaVaultService';
@@ -5523,8 +5524,12 @@ export function performUnifiedCambodiaSearch(
     return { foods: [], restaurants: [], destinations: [], externalPlaces: [], totalCount: 0 };
   }
 
-  const parsedFoodQuery = parseKhmerFoodSearchQuery(query);
-  const placeEffectiveQuery = parsedFoodQuery.coreQuery || q;
+  const smartIntent = parseSmartSearchIntent(query);
+  const parsedFoodQuery = parseKhmerFoodSearchQuery(smartIntent.coreQuery || query);
+  const placeEffectiveQuery =
+    (smartIntent.isConversationalPrompt && smartIntent.coreQuery ? normalizeKhmerSearchText(smartIntent.coreQuery) : '') ||
+    parsedFoodQuery.coreQuery ||
+    q;
   const tokens = expandMultilingualPlaceQuery(placeEffectiveQuery, 'all').matchTokens;
   const distinctiveTokens = extractDistinctiveQueryTokens(placeEffectiveQuery);
   // Shared relevance engine: when the query contains a specific name ("The Square Kampot Hotel"),
@@ -5534,7 +5539,7 @@ export function performUnifiedCambodiaSearch(
   const rawProv =
     provinceFilter && provinceFilter !== 'all' && provinceFilter !== 'ទាំងអស់'
       ? provinceFilter
-      : '';
+      : smartIntent.detectedProvinceKh || '';
   const cleanSelProv = rawProv.replace(/^រាជធានី|^ខេត្ត/g, '').trim();
   const provGeo = resolveProvinceGeoConfig(cleanSelProv);
   const hasRadiusFilter =

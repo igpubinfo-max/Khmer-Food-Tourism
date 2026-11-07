@@ -15,6 +15,7 @@ import { analyzeSearchQuery, scoreSearchRecord, restaurantSearchFields } from '.
 import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { matchShopToProductQuery, verifyShopDataForDisplay } from '../utils/foodFilters';
+import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 
 const RESTAURANT_BATCH_SIZE = 40;
 
@@ -67,7 +68,7 @@ export const RestaurantView: React.FC = () => {
       if (typeof document === 'undefined' || !document.hidden) {
         setNowTickMs(Date.now());
       }
-    }, 10 * 60 * 1000);
+    }, 30 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -215,10 +216,13 @@ export const RestaurantView: React.FC = () => {
   }, [sessionShuffledRestaurants, currentUser?.role, currentUser?.id, isAdmin]);
 
   const filteredRestaurants = useMemo(() => {
-    const cleanSelProv = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
     const rawQuery = debouncedShopSearchQuery.trim();
-    const normQuery = normalizeKhmerSearchText(rawQuery);
-    const rawQueryLower = rawQuery.toLowerCase();
+    const smartIntent = rawQuery ? parseSmartSearchIntent(rawQuery) : null;
+    const effectiveProvRaw = selectedProvince || smartIntent?.detectedProvinceKh || '';
+    const cleanSelProv = effectiveProvRaw.replace(/^រាជធានី|^ខេត្ត/g, '').trim();
+    const effectiveProductQuery = (smartIntent?.isConversationalPrompt && smartIntent.coreQuery ? smartIntent.coreQuery : rawQuery).trim();
+    const normQuery = normalizeKhmerSearchText(effectiveProductQuery || rawQuery);
+    const rawQueryLower = (effectiveProductQuery || rawQuery).toLowerCase();
     const queryAnalysis = rawQuery ? analyzeSearchQuery(rawQuery) : null;
 
     return validDirectoryRestaurants.filter((r) => {
@@ -235,6 +239,12 @@ export const RestaurantView: React.FC = () => {
         return false;
       }
       if (rawQuery) {
+        // 0. Natural-language semantic category match (e.g. "ជួយរកហាងកាហ្វេស្អាតនៅកំពត")
+        if (smartIntent && queryAnalysis && queryAnalysis.distinctive.length === 0) {
+          if (smartIntent.semanticCategory === 'cafe' && classifyRestaurantCategory(r) === 'cafe_bistro') return true;
+          if ((smartIntent.semanticCategory === 'seafood' || smartIntent.semanticCategory === 'bbq' || smartIntent.semanticCategory === 'fine_dining') && classifyRestaurantCategory(r) === 'khmer_dining') return true;
+          if (!smartIntent.semanticCategory && smartIntent.detectedProvinceKh) return true;
+        }
         // 1. Shop name match (exact / partial / typo-tolerant, Khmer + English + Chinese names)
         if (queryAnalysis) {
           const nameDetail = scoreSearchRecord(
@@ -246,7 +256,7 @@ export const RestaurantView: React.FC = () => {
           }
         }
         // 2. Product / dish match (menu, signature dishes, shop category)
-        const productMatch = matchShopToProductQuery(r, rawQuery);
+        const productMatch = matchShopToProductQuery(r, effectiveProductQuery || rawQuery);
         if (productMatch.matches) {
           return true;
         }

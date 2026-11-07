@@ -29,10 +29,11 @@ import { VipStatusNotice } from './home/VipStatusNotice';
 import { MyShopPanel } from './home/MyShopPanel';
 import { getMealSlot, getMealHint, seededShuffle, type MealSlot } from './home/homeUtils';
 import { getAuthenticCambodianDishesForMealTime } from '../utils/cambodianMealHabits';
+import { openAiAssistantWithQuery, getAskAiButtonLabel } from '../utils/aiSearchBridge';
 import {
   ChevronRight, Utensils, Store, Compass,
   MapPin,
-  ExternalLink, Search, RefreshCw,
+  ExternalLink, Search, Sparkles, RefreshCw,
   Plus, Edit2, X, Trash2, Globe, Loader2,
   Users, CreditCard, Settings, MessageSquare, Shield
 } from 'lucide-react';
@@ -338,13 +339,23 @@ export const HomeView: React.FC = () => {
                 {tr(language, `លទ្ធផលស្វែងរក (${searchResults.totalCount})`, `Search Results (${searchResults.totalCount})`, `搜索结果 (${searchResults.totalCount})`)}
               </h3>
             </div>
-            <button
-              onClick={() => setGlobalSearchQuery('')}
-              className="text-xs text-rose-500 hover:text-rose-600 font-bold flex items-center gap-0.5"
-            >
-              <span>{tr(language, 'បិទការស្វែងរក', 'Close', '关闭')}</span>
-              <X className="w-3.5 h-3.5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => openAiAssistantWithQuery(globalSearchQuery, setIsWhatToEatModalOpen)}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#064E3B] hover:bg-emerald-800 text-amber-300 text-[11px] font-bold shadow-xs transition active:scale-95 cursor-pointer"
+              >
+                <Sparkles className="w-3 h-3" />
+                <span>{getAskAiButtonLabel(language)}</span>
+              </button>
+              <button
+                onClick={() => setGlobalSearchQuery('')}
+                className="text-xs text-rose-500 hover:text-rose-600 font-bold flex items-center gap-0.5"
+              >
+                <span>{tr(language, 'បិទការស្វែងរក', 'Close', '关闭')}</span>
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
           {/* Quick Province Chips inside Home Search */}

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   X, Navigation, Compass, Store, Mountain, 
-  Phone, Star, ArrowUpRight, LocateFixed, Loader2, MapPin, RefreshCw, Search, UtensilsCrossed, CheckCircle2
+  Phone, Star, ArrowUpRight, LocateFixed, Loader2, MapPin, RefreshCw, Search, Sparkles, UtensilsCrossed, CheckCircle2
 } from 'lucide-react';
 import {
   sanitizeDialablePhone,
@@ -35,6 +35,7 @@ import {
 import { normalizeKhmerFoodText } from '../utils/khmerFoodSearch';
 import { matchesSearchQuery, destinationSearchFields, analyzeSearchQuery, scoreSearchRecord, restaurantSearchFields } from '../utils/searchEngine';
 import { ShopAvatar } from './icons/DefaultShopIcon';
+import { openAiAssistantWithQuery, getAskAiButtonLabel } from '../utils/aiSearchBridge';
 
 // Haversine formula for distance between 2 GPS coordinates in meters
 export function calculateDistanceMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -116,7 +117,8 @@ function saveUserGps(coords: { lat: number; lng: number }) {
 
 export const NearMeModal: React.FC = () => {
   const { 
-    isNearMeModalOpen, setIsNearMeModalOpen, 
+    isNearMeModalOpen,
+    setIsWhatToEatModalOpen, setIsNearMeModalOpen, 
     restaurants, destinations, language,
     setSelectedRestaurant, setSelectedDestination 
   } = useApp();
@@ -811,6 +813,22 @@ export const NearMeModal: React.FC = () => {
               </button>
             )}
           </div>
+          {nearbyQuery.trim().length >= 2 && (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  const q = nearbyQuery.trim();
+                  setIsNearMeModalOpen(false);
+                  openAiAssistantWithQuery(q, setIsWhatToEatModalOpen);
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#064E3B] hover:bg-emerald-800 text-amber-300 text-[11px] font-bold shadow-2xs transition active:scale-95 cursor-pointer"
+              >
+                <Sparkles className="w-3 h-3" />
+                <span>{getAskAiButtonLabel(language)}</span>
+              </button>
+            </div>
+          )}
 
           <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
             {(activeType === 'restaurants'

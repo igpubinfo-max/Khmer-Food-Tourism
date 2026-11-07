@@ -10,7 +10,9 @@ import {
   rankBySearchRelevance,
   destinationSearchFields,
   normalizeSearchText,
+  analyzeSearchQuery,
 } from '../utils/searchEngine';
+import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 
 const TOURISM_BATCH_SIZE = 24;
@@ -117,13 +119,27 @@ export const TourismView: React.FC = () => {
   }, [scenicDestinationsOnly]);
 
   const filteredDestinations = useMemo(() => {
-    const cleanSelProv = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
+    const trimmedQuery = deferredSearchQuery.trim();
+    const smartIntent = trimmedQuery ? parseSmartSearchIntent(trimmedQuery) : null;
+    const effectiveProvRaw = selectedProvince || smartIntent?.detectedProvinceKh || '';
+    const cleanSelProv = effectiveProvRaw.replace(/^រាជធានី|^ខេត្ត/g, '').trim();
+    const mappedSemanticCat =
+      smartIntent?.semanticCategory === 'waterfall'
+        ? 'nature'
+        : smartIntent?.semanticCategory === 'temple' ||
+          smartIntent?.semanticCategory === 'beach' ||
+          smartIntent?.semanticCategory === 'mountain'
+        ? smartIntent.semanticCategory
+        : '';
+
     const scoped = orderedSessionDestinations.filter((d) => {
       if (selectedCategory === 'trending_social') {
         if (!d.isTrendingSocial) return false;
       } else if (selectedCategory === 'cultural') {
         if (d.categorySlug !== 'cultural' && d.categorySlug !== 'resort') return false;
       } else if (selectedCategory !== 'all' && d.categorySlug !== selectedCategory) {
+        return false;
+      } else if (selectedCategory === 'all' && mappedSemanticCat && d.categorySlug !== mappedSemanticCat) {
         return false;
       }
       if (cleanSelProv && !(d.provinceKh || '').replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanSelProv)) {
@@ -132,8 +148,11 @@ export const TourismView: React.FC = () => {
       return true;
     });
 
-    const trimmedQuery = deferredSearchQuery.trim();
     if (!trimmedQuery) return scoped;
+    const qa = analyzeSearchQuery(trimmedQuery);
+    if (qa.distinctive.length === 0 && (smartIntent?.detectedProvinceKh || mappedSemanticCat)) {
+      return scoped;
+    }
 
     const ranked = rankBySearchRelevance(
       scoped,

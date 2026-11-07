@@ -6,6 +6,7 @@ import {
   Phone,
   Plus,
   Search,
+  Sparkles,
   Star,
   X,
   type LucideIcon,
@@ -13,6 +14,8 @@ import {
 import { tr } from '../../utils/i18n';
 import type { Language } from '../../types';
 import { getCachedCloudImageDataUrl } from '../../services/cloudImageStorageService';
+import { useApp } from '../../context/AppContext';
+import { openAiAssistantWithQuery, getAskAiButtonLabel } from '../../utils/aiSearchBridge';
 
 /**
  * Shared, flat-color building blocks for the Shop menu and Hotel menu.
@@ -382,31 +385,57 @@ export const ListingSearchInput: React.FC<ListingSearchInputProps> = ({
   onChange,
   placeholder,
   clearLabel,
-}) => (
-  <div className="relative">
-    <Search
-      className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-      strokeWidth={ICON_STROKE}
-    />
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-[#0F172A] dark:text-white placeholder:text-slate-400 font-khmer focus:outline-none focus:ring-2 focus:ring-emerald-600/40"
-    />
-    {value && (
-      <button
-        type="button"
-        onClick={() => onChange('')}
-        title={clearLabel}
-        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-      >
-        <X className="w-4 h-4" strokeWidth={ICON_STROKE} />
-      </button>
-    )}
-  </div>
-);
+}) => {
+  const { language, setIsWhatToEatModalOpen } = useApp();
+  const trimmed = value.trim();
+  return (
+    <div className="space-y-1.5">
+      <div className="relative">
+        <Search
+          className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+          strokeWidth={ICON_STROKE}
+        />
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-[#0F172A] dark:text-white placeholder:text-slate-400 font-khmer focus:outline-none focus:ring-2 focus:ring-emerald-600/40"
+        />
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            title={clearLabel}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+          >
+            <X className="w-4 h-4" strokeWidth={ICON_STROKE} />
+          </button>
+        )}
+      </div>
+      {trimmed.length >= 2 && (
+        <div className="flex items-center justify-between gap-2 px-1">
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate font-khmer">
+            {tr(
+              language,
+              'គាំទ្រការស្វែងរកជាប្រយោគធម្មជាតិ & AI',
+              'Smart AI & natural-language search active',
+              '已启用智能自然语言与 AI 搜索'
+            )}
+          </span>
+          <button
+            type="button"
+            onClick={() => openAiAssistantWithQuery(trimmed, setIsWhatToEatModalOpen)}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-800 hover:bg-emerald-700 text-amber-300 text-[11px] font-bold shadow-2xs transition active:scale-95 cursor-pointer shrink-0 font-khmer"
+          >
+            <Sparkles className="w-3 h-3" strokeWidth={ICON_STROKE} />
+            <span>{getAskAiButtonLabel(language)}</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface ListingPillsProps {
   items: { id: string; label: string }[];

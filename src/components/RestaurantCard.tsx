@@ -144,7 +144,28 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
         }
         title={loc.name}
         province={loc.province}
-        chips={restaurant.priceLevel ? [{ text: restaurant.priceLevel, tone: 'amber' }] : undefined}
+        chips={(() => {
+          const chips: { text: string; tone?: 'amber' | 'emerald' }[] = [];
+          const isYouthSpot =
+            String(restaurant.id || '').startsWith('rest-youth-') ||
+            /ប្រោន|brown|tube|chagee|ឆាជី|koi|ខយ|starbucks|ស្តាបាក់|mixue|មីស៊ូវ|temple|ធេមផល|noir|the grounds|factory|ផ្លូវដើរ|កោះនរា|amazon|អាម៉ាហ្សូន|gong cha|the alley|feel good|sister srey|brother bong|kinyei|epic arts|kep coffee/i.test(
+              `${restaurant.nameKh || ''} ${restaurant.nameEn || ''}`
+            );
+          if (isYouthSpot) {
+            chips.push({
+              text: tr(language, '☕ ប្រេនល្បី / យុវវ័យ', '☕ Famous Brand / Youth', '☕ 热门品牌/青年打卡'),
+              tone: 'emerald',
+            });
+          }
+          if (restaurant.priceLevel) {
+            chips.push({ text: restaurant.priceLevel, tone: 'amber' });
+          }
+          const sigList = language === 'km' ? restaurant.signatureDishesKh : restaurant.signatureDishesEn;
+          if (isYouthSpot && Array.isArray(sigList) && sigList[0]) {
+            chips.push({ text: sigList[0], tone: 'amber' });
+          }
+          return chips.length > 0 ? chips : undefined;
+        })()}
         onClick={handleCardClick}
         actionTitle={viewDetailsTitle}
         trailingActions={

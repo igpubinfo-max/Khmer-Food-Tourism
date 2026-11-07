@@ -78,6 +78,7 @@ import {
   initialUsers, initialFoods, initialRestaurants, 
   initialDestinations, initialAppSettings, initialTransactions 
 } from '../data/seedData';
+import { loadExtendedDestinationsAndHotels } from '../data/seedDestinations';
 import { hashPassword, verifyPassword } from '../utils/crypto';
 import { recordMeaningfulAction } from '../utils/engagement';
 import {
@@ -150,6 +151,7 @@ import {
   applyFoodOverrides,
   applyRestaurantOverrides,
   applyDestinationOverrides,
+  registerExtendedSeedDestinationsInVault,
   applyTrendingFoodOverrides,
   hydrateFromLocalIdbImmediate,
   hydrateAndSyncMediaOverrides,
@@ -2013,7 +2015,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               d.id &&
               !REMOVED_DUPLICATE_DEST_IDS.has(d.id) &&
               !d.id.startsWith('kr-hotel-') &&
-              !(d.id.startsWith('hotel-') && !d.isAdminEdited && !vault.destinations[d.id])
+              !((d.id.startsWith('hotel-') || d.id.startsWith('rac-')) && !d.isAdminEdited && !vault.destinations[d.id])
           );
           const upgraded = filteredParsed.map((d: TouristDestination) => {
             const seed = initialMap.get(d.id);
@@ -2180,6 +2182,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       vault.deletedDestinations || loadDeletedDestinationIdsMap()
     );
   });
+
+  // Hydrate extended RAC archaeological sites & 359 hotels on idle after first paint to eliminate 5.85 MB cold-start JS parse spike
+  useEffect(() => {
+    let cancelled = false;
+    const hydrateExtended = () => {
+      loadExtendedDestinationsAndHotels()
+        .then((extended) => {
+          if (cancelled || !extended || extended.length === 0) return;
+          registerExtendedSeedDestinationsInVault(extended);
+          seedDestPhotoMapRef.current = null;
+          setDestinations((prev) => {
+            const vault = loadLocalMediaOverrides();
+            const deletedMap = vault.deletedDestinations || loadDeletedDestinationIdsMap();
+            const prevById = new Map(prev.map((d) => [d.id, d]));
+            let changed = false;
+            const toAppend: TouristDestination[] = [];
+            for (const ext of extended) {
+              if (!ext || !ext.id) continue;
+              if (isDestinationIdDeleted(ext.id, undefined, deletedMap, ext.googlePlaceId)) continue;
+              if (!prevById.has(ext.id)) {
+                toAppend.push(ext);
+                changed = true;
+              }
+            }
+            if (!changed) return prev;
+            return applyDestinationOverrides([...prev, ...toAppend], vault.destinations, deletedMap);
+          });
+        })
+        .catch(() => {});
+    };
+
+    let idleHandle: any;
+    let timeoutHandle: any;
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      idleHandle = (window as any).requestIdleCallback(hydrateExtended, { timeout: 600 });
+    } else {
+      timeoutHandle = setTimeout(hydrateExtended, 220);
+    }
+    return () => {
+      cancelled = true;
+      if (idleHandle && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        (window as any).cancelIdleCallback(idleHandle);
+      }
+      if (timeoutHandle) clearTimeout(timeoutHandle);
+    };
+  }, []);
 
   const [bookmarks, setBookmarks] = useState<string[]>(() => {
     try {
@@ -2925,7 +2973,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           seedDestPhotoMapRef.current = new Map(initialDestinations.map(d => [d.id, d.photoUrl]));
         }
         const seedDestMap = seedDestPhotoMapRef.current;
-        return (data as TouristDestination[]).map(d => {
+        return (data as TouristDestination[])
+          .filter(
+            (d) =>
+              Boolean(d && d.id) &&
+              !(
+                (d.id.startsWith('hotel-') || d.id.startsWith('rac-')) &&
+                !d.isAdminEdited &&
+                !d.isCustomPhoto &&
+                !isOverridePersistedInLocalStorage('destinations', d.id)
+              )
+          )
+          .map(d => {
           if (!d) return d;
           const isSeedDest = seedDestMap.has(d.id);
           const strippedStaticDesc =
@@ -4344,10 +4403,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     enforceVipExpirationsAndReminders();
 
     const intervalId = window.setInterval(() => {
-      if (isAppActiveRef.current && (typeof document === 'undefined' || !document.hidden)) {
+      if (
+        isAppActiveRef.current &&
+        (typeof document === 'undefined' || !document.hidden) &&
+        (typeof navigator === 'undefined' || navigator.onLine !== false)
+      ) {
         enforceVipExpirationsAndReminders();
       }
-    }, 600000);
+    }, 900000);
     return () => {
       window.clearInterval(intervalId);
     };
@@ -4652,10 +4715,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     window.addEventListener('storage', handleStorageEvent);
 
     const pollInterval = setInterval(() => {
-      if (isAppActiveRef.current && (typeof document === 'undefined' || !document.hidden)) {
+      if (
+        isAppActiveRef.current &&
+        (typeof document === 'undefined' || !document.hidden) &&
+        (typeof navigator === 'undefined' || navigator.onLine !== false)
+      ) {
         refreshAppSettingsFromServer(true);
       }
-    }, 600000);
+    }, 900000);
 
     return () => {
       window.removeEventListener('focus', handleVisibilityOrFocus);
@@ -5194,10 +5261,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }, 600);
       periodicSyncInterval = setInterval(() => {
-        if (isAppActiveRef.current && (typeof document === 'undefined' || !document.hidden)) {
+        if (
+          isAppActiveRef.current &&
+          (typeof document === 'undefined' || !document.hidden) &&
+          (typeof navigator === 'undefined' || navigator.onLine !== false)
+        ) {
           triggerCloudSyncNow(false);
         }
-      }, 60000);
+      }, 300000);
       if (typeof document !== 'undefined') {
         document.addEventListener('visibilitychange', handleVisibilityCloudSync);
       }
