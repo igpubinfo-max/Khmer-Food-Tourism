@@ -417,6 +417,13 @@ ok('statement panel: reads the file on-device only, approves through the existin
   assert.ok(t.includes('window.confirm'), 'bulk approval needs a confirmation');
   assert.ok(read('src/components/AdminDashboard.tsx').includes('<AdminStatementMatchPanel />'));
 });
+ok('statement panel: the lazy one-click approval only covers payments that passed EVERY AI check, and warns before acting', () => {
+  const t = read('src/components/admin/AdminStatementMatchPanel.tsx');
+  assert.ok(/c\.recipient\?\.passed && c\.amount\?\.passed && c\.date\?\.passed && c\.trxId\?\.passed && c\.antiReplay\?\.passed/.test(t), 'all five checks required');
+  assert.ok(t.includes("t.status !== 'pending_verification'"), 'only pending payments');
+  assert.ok((t.match(/window\.confirm/g) || []).length >= 2, 'both bulk actions are confirmed');
+  assert.ok(/WITHOUT checking your bank statement/.test(t), 'the risk is stated in the dialog');
+});
 ok('Pro platform SQL is service-role only and non-destructive', () => {
   const sql = read('supabase_pro_platform_v1.sql');
   const code = sql.split(/\r?\n/).filter((l) => !l.trim().startsWith('--')).join('\n');

@@ -64,6 +64,19 @@ export const AdminStatementMatchPanel: React.FC = () => {
 
   const rematch = (rows: ReturnType<typeof normalizeRows>) => setResults(matchPayments(pending, rows));
 
+  // Payments whose AI pre-check passed EVERY check (recipient, amount, date, Trx ID, not a duplicate).
+  // This is the "lazy" shortcut: no bank-statement check - see the warning in the confirmation dialog.
+  const aiPassed = useMemo(
+    () =>
+      transactions.filter((t) => {
+        if (t.status !== 'pending_verification') return false;
+        const c = t.aiVerificationReport?.checks;
+        return Boolean(c && c.recipient?.passed && c.amount?.passed && c.date?.passed && c.trxId?.passed && c.antiReplay?.passed);
+      }),
+    [transactions]
+  );
+  const aiPassedTotal = aiPassed.reduce((sum, t) => sum + (Number(t.amountUsd) || 0), 0);
+
   const onFile = async (file: File | undefined) => {
     if (!file) return;
     setBusy(true);
@@ -109,6 +122,26 @@ export const AdminStatementMatchPanel: React.FC = () => {
         await new Promise((res) => setTimeout(res, 700)); // let each approval settle before the next one
       }
       showToast(isKm ? `✅ បានអនុម័ត ${matched.length} ការទូទាត់` : `✅ Approved ${matched.length} payment(s)`, 'success');
+    } finally {
+      setApproving(false);
+    }
+  };
+
+  const approveAllAiPassed = async () => {
+    if (aiPassed.length === 0) return;
+    const ok = window.confirm(
+      isKm
+        ? `⚠️ អនុម័ត ${aiPassed.length} ការទូទាត់ (សរុប $${aiPassedTotal.toFixed(2)}) ដោយ មិនបានផ្ទៀងផ្ទាត់ជាមួយ statement ធនាគារ?\n\nមានតែការពិនិត្យរូបភាពដោយ AI ប៉ុណ្ណោះ។ វិក្កយបត្រក្លែងដែលមើលទៅត្រឹមត្រូវអាចបានជាប់។ អ្នកទទួលខុសត្រូវលើការអនុម័តនេះ។`
+        : `⚠️ Approve ${aiPassed.length} payment(s) (total $${aiPassedTotal.toFixed(2)}) WITHOUT checking your bank statement?\n\nOnly the AI image check was done. A well-forged receipt could pass it. You take responsibility for this approval.`
+    );
+    if (!ok) return;
+    setApproving(true);
+    try {
+      for (const t of aiPassed) {
+        verifyTransaction(t.id);
+        await new Promise((res) => setTimeout(res, 700));
+      }
+      showToast(isKm ? `✅ បានអនុម័ត ${aiPassed.length} ការទូទាត់ (មិនទាន់ផ្ទៀងផ្ទាត់ statement)` : `✅ Approved ${aiPassed.length} payment(s) (statement not checked)`, 'success');
     } finally {
       setApproving(false);
     }
@@ -176,6 +209,24 @@ export const AdminStatementMatchPanel: React.FC = () => {
           </button>
         )}
       </div>
+
+      {aiPassed.length > 0 && (
+        <div className="p-3 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/20 flex flex-col sm:flex-row sm:items-center gap-2">
+          <div className="flex-1 font-khmer text-[11px] text-amber-900 dark:text-amber-200 leading-relaxed">
+            {isKm
+              ? `⚡ ផ្លូវកាត់ (ខ្ជិល)៖ មាន ${aiPassed.length} ការទូទាត់ (សរុប $${aiPassedTotal.toFixed(2)}) ដែល AI ពិនិត្យជាប់ទាំងអស់ (អ្នកទទួល ចំនួន កាលបរិច្ឆេទ Trx ID មិនស្ទួន)។ ចុចម្តងអនុម័តទាំងអស់ — ប៉ុន្តែ មិនបានផ្ទៀងផ្ទាត់ statement វិក្កយបត្រក្លែងអាចជាប់។`
+              : `⚡ Shortcut: ${aiPassed.length} payment(s) (total $${aiPassedTotal.toFixed(2)}) passed every AI check (recipient, amount, date, Trx ID, not a duplicate). One click approves them all - but your bank statement is NOT checked, so a forged receipt could pass.`}
+          </div>
+          <button
+            type="button"
+            disabled={approving}
+            onClick={() => void approveAllAiPassed()}
+            className="px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-khmer text-xs font-bold cursor-pointer disabled:opacity-60 whitespace-nowrap"
+          >
+            {isKm ? 'អនុម័តទាំងអស់ (មិនពិនិត្យ statement)' : 'Approve all (no statement check)'}
+          </button>
+        </div>
+      )}
 
       {results && results.length === 0 && (
         <p className="font-khmer text-xs text-stone-600 dark:text-stone-300">{isKm ? 'គ្មានការទូទាត់កំពុងរង់ចាំទេ។' : 'No pending payments to match.'}</p>
