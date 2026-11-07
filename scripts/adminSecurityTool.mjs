@@ -61,8 +61,8 @@ if (!st.data.configured) { console.log('\nNot configured yet - finish the deploy
 const pin = await ask('Admin PIN (6 digits, hidden): ', true);
 const password = await ask('Admin password (hidden): ', true);
 
-// negative controls first (they count towards the server-side lockout, so only 1 of each)
-const SKIP_NEG = process.argv.includes('--skip-negative');
+// negative controls first (they count towards the server-side lockout, so only 1 of each, and skipped on migrate)
+const SKIP_NEG = cmd === 'migrate' || process.argv.includes('--skip-negative');
 if (!/^\d{6}$/.test(pin)) { console.log('\nThe PIN must be exactly 6 digits (you typed ' + pin.length + ' characters). Run again.'); process.exit(1); }
 if (!SKIP_NEG) {
   const wrongPin = await call('pin', { pin: pin === '000000' ? '111111' : '000000' });
