@@ -5368,10 +5368,10 @@ export const AdminDashboard: React.FC = () => {
                 <div className="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-700">
                   <div>
                     <h4 className="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-2">
-                      <span>ប្រព័ន្ធ Cloud Supabase (Free Tier) & Google Maps Places API + Smart Cache</span>
+                      <span>ប្រព័ន្ធ Cloud Supabase (Pro Tier) & Google Maps Places API + Smart Cache</span>
                     </h4>
                     <p className="text-[11px] text-stone-500 mt-0.5">
-                      ភ្ជាប់ Supabase ឥតគិតថ្លៃ (50,000 នាក់/ខែ, 500MB Database, 1GB រូបភាព) និង Google Maps Places API ($200/ខែ Free Credit + Smart Cache សន្សំកូតា)
+                      ភ្ជាប់ Supabase Pro ($25/ខែ) - ដំណើរការខ្ពស់ (8GB DB, 100GB Storage, Smart Image CDN, Edge Functions) និង Smart Cache សន្សំកូតា API
                     </p>
                   </div>
                 </div>
@@ -5567,7 +5567,7 @@ export const AdminDashboard: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
-                      1. Supabase Project URL (Free Tier)
+                      1. Supabase Project URL (Pro Tier)
                     </label>
                     <input
                       type="text"

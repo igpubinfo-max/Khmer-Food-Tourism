@@ -1,6 +1,6 @@
 @echo off
 setlocal
-title Khmer Food ^& Tourism - 2. Create Play Store AAB
+title Cambodia Flavors ^& Tourism - Create Play Store AAB
 set "REPO_DIR=%~dp0"
 if not exist "%REPO_DIR%scripts\build-and-download-apk-aab.ps1" set "REPO_DIR=F:\Soft\System Program 2027 kimseng\KhmerFoodTourism\"
 cd /d "%REPO_DIR%"
