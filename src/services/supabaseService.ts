@@ -13,6 +13,7 @@
  * - If not configured yet, safely falls back to local device storage without errors.
  */
 
+import { adminTokenHeaders, isAdminServerAuthActive } from './adminAuthClient';
 import { ensurePlacesProxyProbed, isPlacesProxyKnownAlive } from './placesProxy';
 import {
   User,
@@ -1106,6 +1107,7 @@ export async function pushCloudDocument(
       headers: {
         ...getSupabaseHeaders(false),
         ...(opts.allowDestructive ? { 'x-kft-allow-destructive': 'true' } : {}),
+        ...adminTokenHeaders(key), // admin-only documents (settings / pricing / PIN) need the signed admin token
       },
       body: JSON.stringify({
         key,
@@ -1416,6 +1418,8 @@ export async function getAdminPinHash(): Promise<string> {
 }
 
 export async function setAdminPinHash(newPin: string): Promise<boolean> {
+  // With server-side admin login the PIN is a Supabase secret (ADMIN_PIN); it cannot be changed from the app.
+  if (await isAdminServerAuthActive()) return false;
   const hash = await hashAdminPin(newPin);
   try {
     localStorage.setItem(ADMIN_PIN_KV_KEY, hash);
@@ -1715,9 +1719,16 @@ export async function saveAuthoritativeAppSettingsToServer(
     promotionPeriodEn: `Official VIP Plans: ${shortPrice.toFixed(2)} for ${shortDays} Days or ${longPrice.toFixed(2)} for ${longDays} Days • Additional Store: ${extraStoreFee.toFixed(2)} / store`,
   };
 
+  // When the admin password is verified on the server, the (offline-crackable) hash must not be published in the
+  // world-readable settings documents any more.
+  let publicDoc: AppSettings = normalized;
+  if (await isAdminServerAuthActive()) {
+    const { adminPasswordHash: _omitHash, ...rest } = normalized as AppSettings & { adminPasswordHash?: string };
+    publicDoc = rest as AppSettings;
+  }
   const [pushedV2, pushedV1] = await Promise.all([
-    pushCloudDocument('kft_cloud_admin_vip_pricing_v2', normalized, timeoutMs),
-    pushCloudDocument('kft_cloud_app_settings_v1', normalized, timeoutMs),
+    pushCloudDocument('kft_cloud_admin_vip_pricing_v2', publicDoc, timeoutMs),
+    pushCloudDocument('kft_cloud_app_settings_v1', publicDoc, timeoutMs),
   ]);
 
   if (!pushedV2) {
@@ -2202,6 +2213,7 @@ export async function deleteCloudDocument(key: string, timeoutMs = 8000, opts: C
         headers: {
           ...getSupabaseHeaders(false),
           ...(opts.allowDestructive ? { 'x-kft-allow-destructive': 'true' } : {}),
+          ...adminTokenHeaders(key),
         },
       },
       timeoutMs

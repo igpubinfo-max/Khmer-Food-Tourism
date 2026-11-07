@@ -1,3 +1,4 @@
+import { adminServerVerifyPin, isAdminServerAuthActive } from '../services/adminAuthClient';
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, ShieldAlert, Lock, User as UserIcon, Eye, EyeOff, 
@@ -195,10 +196,20 @@ export const AdminLoginModal: React.FC = () => {
     setPinErrorMsg('');
 
     try {
-      const enteredHash = await hashAdminPin(pinCandidate);
-      const expectedHash = await getAdminPinHash();
+      // 1) Server-side check (PIN is a Supabase secret). 2) Legacy local hash ONLY when the server login is unavailable.
+      const serverPin = await adminServerVerifyPin(pinCandidate);
+      let pinMatches: boolean;
+      if (serverPin.kind === 'ok') {
+        pinMatches = true;
+      } else if (serverPin.kind === 'invalid' || serverPin.kind === 'locked') {
+        pinMatches = false;
+      } else {
+        const enteredHash = await hashAdminPin(pinCandidate);
+        const expectedHash = await getAdminPinHash();
+        pinMatches = enteredHash.toLowerCase() === expectedHash.toLowerCase();
+      }
 
-      if (enteredHash.toLowerCase() === expectedHash.toLowerCase()) {
+      if (pinMatches) {
         // Success: Clear lockout and proceed to Step 2
         savePinLockout({ failedAttempts: 0, lockoutUntil: 0 });
         setPinErrorMsg('');
@@ -317,7 +328,7 @@ export const AdminLoginModal: React.FC = () => {
       }
 
       const filledUser = bioAuth.username || 'admin';
-      const filledPass = bioAuth.password || 'CheaSavuth@2026';
+      const filledPass = bioAuth.password || '';
 
       setUsername(filledUser);
       setPassword(filledPass);
@@ -428,6 +439,15 @@ export const AdminLoginModal: React.FC = () => {
 
     setLoading(true);
     try {
+      if (await isAdminServerAuthActive()) {
+        setErrorMsg(
+          isKm
+            ? 'ពាក្យសម្ងាត់រដ្ឋបាលត្រូវបានគ្រប់គ្រងលើ Server។ ប្តូរតាម Supabase secret (ADMIN_PASSWORD)។'
+            : 'The admin password is managed on the server. Change it via the Supabase secret ADMIN_PASSWORD.'
+        );
+        setLoading(false);
+        return;
+      }
       const isCurrentValid = await loginAdmin(username || 'admin', currentAdminPass);
       if (!isCurrentValid) {
         setErrorMsg(isKm ? 'ពាក្យសម្ងាត់បច្ចុប្បន្នមិនត្រឹមត្រូវទេ!' : 'Current password incorrect!');
@@ -482,6 +502,18 @@ export const AdminLoginModal: React.FC = () => {
 
     setPinChangeLoading(true);
     try {
+      if (await isAdminServerAuthActive()) {
+        setErrorMsg(
+          tr(
+            language,
+            'លេខ PIN ត្រូវបានគ្រប់គ្រងលើ Server។ ប្តូរតាម Supabase secret (ADMIN_PIN)។',
+            'The PIN is managed on the server. Change it via the Supabase secret ADMIN_PIN.',
+            'PIN 码由服务器管理，请通过 Supabase secret (ADMIN_PIN) 修改。'
+          )
+        );
+        setPinChangeLoading(false);
+        return;
+      }
       const ok = await setAdminPinHash(newPin);
       if (ok) {
         setNewPin('');

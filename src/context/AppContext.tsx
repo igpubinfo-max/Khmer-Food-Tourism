@@ -1,3 +1,4 @@
+import { adminServerLogin, isAdminServerAuthActive } from '../services/adminAuthClient';
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { 
   User, FoodItem, Restaurant, TouristDestination, 
@@ -5884,13 +5885,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const cleanPass = password.trim();
     let isValid = false;
-    try {
-      isValid = await verifyPasswordPBKDF2(cleanPass, appSettings.adminPasswordHash);
-    } catch {
-      isValid = false;
-    }
-    if (!isValid && (cleanPass === 'CheaSavuth@2026' || cleanPass === 'Admin@KhmerFood2026!')) {
+    // 1) Server-side verification: the credentials live in Supabase secrets and a signed admin token is issued.
+    const serverLogin = await adminServerLogin(cleanUser, cleanPass);
+    if (serverLogin.kind === 'ok') {
       isValid = true;
+    } else if (serverLogin.kind === 'pin_required') {
+      showToast(language === 'km' ? 'សូមបញ្ចូលលេខកូដ PIN ៦ ខ្ទង់ជាមុនសិន' : 'Please enter the 6-digit PIN first', 'warning');
+      return false;
+    } else if (serverLogin.kind === 'locked') {
+      showToast(
+        language === 'km' ? 'ការព្យាយាមច្រើនពេក! Server បានចាក់សោរជាបណ្តោះអាសន្ន។' : 'Too many attempts! The server has locked admin login for a while.',
+        'warning'
+      );
+      return false;
+    } else if (serverLogin.kind === 'unavailable') {
+      // 2) Legacy local check - ONLY when the server login is not deployed / not configured / unreachable.
+      //    (No hard-coded passwords: the old built-in fallback passwords were removed.)
+      try {
+        isValid = await verifyPasswordPBKDF2(cleanPass, appSettings.adminPasswordHash);
+      } catch {
+        isValid = false;
+      }
     }
     if (!isValid) {
       const fail = recordAdminLoginFailed();
@@ -5943,6 +5958,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const loginAdminWithBiometric = async (preVerified: boolean = false, preVerifiedUser?: string): Promise<boolean> => {
+    // With server-side admin login a fingerprint alone cannot obtain the signed admin token: return false so the caller
+    // continues with the password stored in the device keystore (verified by the server).
+    if (await isAdminServerAuthActive()) return false;
     const status = checkAdminLoginAllowed();
     if (!status.allowed) {
       recordSecurityAudit('ADMIN_BIOMETRIC_LOGIN', 'BLOCKED', 'AdminPortal', `Lockout active for ${status.remainingLockoutSeconds}s`);
@@ -7953,6 +7971,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const setAdminPassword = async (newPassword: string): Promise<boolean> => {
+    if (await isAdminServerAuthActive()) {
+      showToast(
+        language === 'km'
+          ? 'ពាក្យសម្ងាត់រដ្ឋបាលត្រូវបានគ្រប់គ្រងលើ Server។ ប្តូរតាម Supabase secret (ADMIN_PASSWORD)។'
+          : 'The admin password is managed on the server. Change it via the Supabase secret ADMIN_PASSWORD.',
+        'warning'
+      );
+      return false;
+    }
     if (!newPassword || newPassword.length < 8) {
       showToast(language === 'km' ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ!' : 'Password must be at least 8 characters!', 'warning');
       return false;

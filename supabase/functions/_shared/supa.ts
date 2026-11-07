@@ -44,6 +44,25 @@ export async function usageHit(userKey: string, kind: string, weight = 1): Promi
   return Number.isFinite(n) ? n : null;
 }
 
+/** Read today's counter without incrementing it (null when unavailable). */
+export async function usageGet(userKey: string, kind: string): Promise<number | null> {
+  const day = new Date(Date.now() + 7 * 3600_000).toISOString().slice(0, 10); // Asia/Phnom_Penh (UTC+7)
+  const r = await call(
+    `kft_api_usage_daily?day=eq.${day}&user_key=eq.${encodeURIComponent(userKey.slice(0, 160))}&kind=eq.${encodeURIComponent(kind)}&select=hits&limit=1`
+  );
+  if (!r || !r.ok) return null;
+  const rows = await r.json();
+  return Array.isArray(rows) ? (rows[0] ? Number(rows[0].hits) || 0 : 0) : null;
+}
+
+/** Private server-side config value (kft_security_config is service-role only). */
+export async function getSecurityConfig(name: string): Promise<string | null> {
+  const r = await call(`kft_security_config?name=eq.${encodeURIComponent(name)}&select=value&limit=1`);
+  if (!r || !r.ok) return null;
+  const rows = await r.json();
+  return Array.isArray(rows) && rows[0] && typeof rows[0].value === 'string' ? rows[0].value : null;
+}
+
 export interface UsageLogRow {
   user_key?: string | null;
   kind: string;
