@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
-import { TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isGpipRegisteredRestaurant, openRestaurantGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError, isStrictVerifiedCambodiaRestaurant } from '../types';
+import { TrendingFoodItem, isUserVipActive, getVipAccountState, getVipRemainingDays, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isGpipRegisteredRestaurant, openRestaurantGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError, isStrictVerifiedCambodiaRestaurant, isIosOrIpadAppStoreRuntime } from '../types';
 import {
   normalizeKhmerSearchText,
   searchGoogleMapsPlacesAdvanced,
@@ -64,9 +64,9 @@ export const HomeView: React.FC = () => {
   const isAdmin = isAdminAccount(currentUser);
   const storeQuota = getCurrentUserStoreQuota(currentUser);
   const myRestaurants = useMemo(() => {
-    if (!isVip && !isAdmin) return [];
+    if (!currentUser) return [];
     return getOwnedRestaurantsForUser(currentUser);
-  }, [restaurants, currentUser, activeManagedShopId, isVip, isAdmin, getOwnedRestaurantsForUser]);
+  }, [restaurants, currentUser, activeManagedShopId, getOwnedRestaurantsForUser]);
 
   // Search results tab filter, radius filter, and pagination when global search is active
   const [searchTab, setSearchTab] = useState<'all' | 'food' | 'restaurants' | 'tourism' | 'external'>('all');
@@ -1085,7 +1085,7 @@ export const HomeView: React.FC = () => {
 
 
               {/* 9. VIP members manage their shop; everyone else sees one calm benefits card */}
-              {isVip ? (
+              {myRestaurants.length > 0 || isVip ? (
                 <MyShopPanel
                   language={language}
                   shops={myRestaurants}
@@ -1101,9 +1101,9 @@ export const HomeView: React.FC = () => {
                   }}
                   onDelete={deleteRestaurant ? (shopId) => { deleteRestaurant(shopId); } : undefined}
                 />
-              ) : (
+              ) : !isIosOrIpadAppStoreRuntime() ? (
                 <VipPerksCard language={language} onLearnMore={handleUpgradeVip} />
-              )}
+              ) : null}
             </>
           )}
         </>

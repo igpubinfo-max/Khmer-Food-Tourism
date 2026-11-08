@@ -33,6 +33,10 @@ import {
   TouristDestination,
   RestaurantPriceLevel,
   GoogleMapsPlaceMetadata,
+  SHOP_ALL_INCLUSIVE_5_BENEFITS,
+  getShopSubscriptionCatalog,
+  isShopSubscriptionActive,
+  isIosOrIpadAppStoreRuntime,
   isUserVipActive,
   getDynamicVipPlans,
   isAdminAccount,
@@ -323,18 +327,14 @@ export const VipAddRestaurantModal: React.FC = () => {
   const [locationNotice, setLocationNotice] = useState<{ type: 'error' | 'warning' | 'success'; text: string } | null>(null);
   const [showAdvancedLocation, setShowAdvancedLocation] = useState(false);
 
-  const isApprovedVip = isUserVipActive(currentUser);
-  const dynamicPlans = getDynamicVipPlans(appSettings);
+  const isIosAppStore = isIosOrIpadAppStoreRuntime();
+  const shopCatalog = useMemo(() => getShopSubscriptionCatalog(appSettings), [appSettings]);
   const quota = getCurrentUserStoreQuota(currentUser);
   const ownedRestaurants = getOwnedRestaurantsForUser(currentUser);
-  const requiresAdditionalPayment =
-    !isAdmin &&
-    !replacingStoreId &&
-    !upgradingExistingStoreId &&
-    (formMode === 'add_new' || Boolean(claimingDestinationId)) &&
-    quota.remainingAvailableSlots <= 0;
+  // Section B: Independent Shop Package — submitting a shop has ZERO Consumer VIP prerequisite and ZERO extra-slot lock!
+  const requiresAdditionalPayment = false;
 
-  // 7 Core Form Fields requested by User:
+    // 7 Core Form Fields requested by User:
   // 1. Shop / Hotel Name
   const [businessType, setBusinessType] = useState<'restaurant' | 'hotel'>('restaurant');
   const [nameKh, setNameKh] = useState('');
@@ -1127,11 +1127,7 @@ export const VipAddRestaurantModal: React.FC = () => {
     const trimmedNameEn = nameEn.trim();
     if (!trimmedNameKh && !trimmedNameEn) return;
 
-    if (!isAdmin && !replacingStoreId && !upgradingExistingStoreId && quota.remainingAvailableSlots <= 0) {
-      setIsPreviewStep(false);
-      setActiveTab('pay_additional_slot');
-      return;
-    }
+    // Section B: Any signed-in user can submit 1 or multiple shops; each shop activates its own Shop Package after Admin approval.
 
     const finalNameKh = trimmedNameKh || trimmedNameEn;
     const finalNameEn = trimmedNameEn || trimmedNameKh;
@@ -1566,6 +1562,28 @@ export const VipAddRestaurantModal: React.FC = () => {
                     )}
               </p>
             </div>
+            {!isIosAppStore && (
+              <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-left text-[11px] text-slate-700 dark:text-slate-200 space-y-1">
+                <div className="font-extrabold text-amber-900 dark:text-amber-200">
+                  {tr(language, '💡 ជំហានបន្ទាប់ (មិនបាច់បង់ប្រាក់មុនអនុម័តទេ)៖', '💡 Next Step (Pay Only After Approval):', '💡 下一步（审核通过后再付款）：')}
+                </div>
+                <p>
+                  {appSettings.shopPayAfterApproval !== false
+                    ? tr(
+                        language,
+                        `ក្រោយពេល Admin ត្រួតពិនិត្យ និងអនុម័តរួច អ្នកអាចបើកកញ្ចប់ហាង ($${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ ឬ $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/ឆ្នាំ) ដើម្បីទទួលបានគ្រប់មុខងារទាំង ៥!`,
+                        `Once Admin approves your listing, you can activate the All-Inclusive Shop Package ($${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d or $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr) for all 5 benefits!`,
+                        `管理员批准后，即可开通全包店铺套餐（$${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天 或 $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/年）解锁全部 5 项权益！`
+                      )
+                    : tr(
+                        language,
+                        'អ្នកអាចចូលទៅបើកកញ្ចប់ហាង VIP ឥឡូវនេះ ឬរង់ចាំ Admin អនុម័តជាមុនក៏បាន។',
+                        'You can activate your VIP Shop Package now or after Admin approval.',
+                        '您可立即开通店铺 VIP 套餐，或等待管理员批准后开通。'
+                      )}
+                </p>
+              </div>
+            )}
             <div className="pt-2 space-y-2">
               <button
                 type="button"
@@ -1573,15 +1591,15 @@ export const VipAddRestaurantModal: React.FC = () => {
                   const shop = submittedPendingShop;
                   setSubmittedPendingShop(null);
                   setIsVipAddRestaurantModalOpen(false);
-                  (window as any).__kft_manage_initial_tab = 'info';
+                  (window as any).__kft_manage_initial_tab = !isIosAppStore && appSettings.shopPayAfterApproval === false ? 'membership' : 'info';
                   setManagingRestaurant(shop);
                   setIsManageMenuModalOpen(true);
                 }}
                 className="w-full py-3 px-4 rounded-2xl bg-[#064E3B] hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition cursor-pointer"
               >
                 {isHotelBusinessRecord(submittedPendingShop)
-                  ? tr(language, '🏨 ពិនិត្យ និងកែប្រែព័ត៌មានសណ្ឋាគារឥឡូវនេះ', '🏨 View & Edit Hotel Info Now', '🏨 立即查看与编辑酒店信息')
-                  : tr(language, '🏪 ពិនិត្យ និងកែប្រែព័ត៌មានហាងឥឡូវនេះ', '🏪 View & Edit Shop Info Now', '🏪 立即查看与编辑店铺信息')}
+                  ? tr(language, '🏨 ពិនិត្យ និងគ្រប់គ្រងសណ្ឋាគារឥឡូវនេះ', '🏨 Manage Hotel Info & Menu Now', '🏨 立即管理酒店信息')
+                  : tr(language, '🏪 ពិនិត្យព័ត៌មានហាង & ម៉ឺនុយម្ហូបឥឡូវនេះ', '🏪 Manage Shop Info & Menu Now', '🏪 立即管理店铺与菜单')}
               </button>
               <button
                 type="button"
@@ -1620,34 +1638,6 @@ export const VipAddRestaurantModal: React.FC = () => {
               className="px-6 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-md transition cursor-pointer"
             >
               {tr(language, 'ចូលគណនីឥឡូវនេះ', 'Sign In Now', '立即登录')}
-            </button>
-          </div>
-        ) : !isAdmin && !isApprovedVip ? (
-          <div className="p-6 text-center space-y-3.5 font-khmer">
-            <div className="w-14 h-14 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
-              <Crown className="w-7 h-7" />
-            </div>
-            <h4 className="font-moul text-sm text-slate-900 dark:text-white">
-              {tr(language, '🔒 សម្រាប់សមាជិក VIP សកម្មប៉ុណ្ណោះ', '🔒 Active VIP Membership Required', '🔒 仅限活跃 VIP 会员')}
-            </h4>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              {tr(
-                language,
-                `កញ្ចប់ VIP រួមបញ្ចូលសិទ្ធិបង្កើតហាងទី ១ ដោយឥតគិតថ្លៃ ($0)។ សូមដំឡើង ឬបន្តសមាជិកភាព VIP (${dynamicPlans.quarterly.priceUsd.toFixed(2)} / ${dynamicPlans.quarterly.durationDays} ថ្ងៃ ឬ ${dynamicPlans.annual.priceUsd.toFixed(2)} / ${dynamicPlans.annual.durationDays} ថ្ងៃ) ជាមុនសិន!`,
-                `Your 1st shop is included with an active VIP subscription ($0). Please upgrade or renew VIP first!`,
-                `VIP 会员免费包含第 1 家店铺 ($0)。请先开通或续费 VIP 套餐！`
-              )}
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setIsVipAddRestaurantModalOpen(false);
-                openUpgradeVipModal();
-              }}
-              className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-xs shadow-md flex items-center justify-center gap-2 transition cursor-pointer"
-            >
-              <Crown className="w-4 h-4 fill-slate-950" />
-              <span>{tr(language, '👑 ដំឡើងទៅកញ្ចប់ VIP ឥឡូវនេះ', '👑 Upgrade to VIP Now', '👑 立即升级 VIP')}</span>
             </button>
           </div>
         ) : activeTab === 'my_stores' ? (
@@ -1691,8 +1681,12 @@ export const VipAddRestaurantModal: React.FC = () => {
                     </p>
                     <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
                       {store.status === 'pending'
-                        ? tr(language, '⏳ រង់ចាំការអនុម័តពី Admin', '⏳ Pending Admin Review', '⏳ 等待管理员审核')
-                        : tr(language, '✅ បានអនុម័ត', '✅ Verified Shop', '✅ 已认证店铺')}
+                        ? tr(language, '⏳ រង់ចាំ Admin អនុម័ត', '⏳ Pending Admin Review', '⏳ 等待管理员审核')
+                        : isShopSubscriptionActive(store)
+                        ? tr(language, '👑 កញ្ចប់ហាង VIP សកម្ម', '👑 VIP Shop Active', '👑 店铺 VIP 已激活')
+                        : store.shopPaymentStatus === 'pending_verification'
+                        ? tr(language, '⏳ រង់ចាំផ្ទៀងផ្ទាត់ការបង់ប្រាក់', '⏳ Payment Under Review', '⏳ 付款审核中')
+                        : tr(language, '✅ បានអនុម័ត • អាចបើកកញ្ចប់ហាង', '✅ Approved • Ready for Shop Package', '✅ 已批准 • 可开通套餐')}
                     </span>
                   </div>
                 </div>
@@ -1774,16 +1768,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-xs shadow-sm flex items-center justify-center gap-2 transition cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
-              <span>
-                {quota.canAddWithoutNewPayment
-                  ? tr(language, '+ បន្ថែមហាងថ្មីមួយទៀត ($0)', '+ Add Another Shop ($0)', '+ 再添加一家新店铺 ($0)')
-                  : tr(
-                      language,
-                      `+ បន្ថែមហាងទី ${quota.nextStoreSlotNumber} (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
-                      `+ Add Shop #${quota.nextStoreSlotNumber} (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`,
-                      `+ 添加第 ${quota.nextStoreSlotNumber} 家店铺 (+${quota.additionalStoreFeeUsd.toFixed(2)} USD)`
-                    )}
-              </span>
+              <span>{tr(language, '+ បន្ថែមហាងថ្មីមួយទៀត', '+ Add Another Shop', '+ 再添加一家新店铺')}</span>
             </button>
 
             <button
@@ -2491,6 +2476,50 @@ export const VipAddRestaurantModal: React.FC = () => {
                       </div>
                     </div>
                   ) : null}
+
+                  {/* All-Inclusive Shop Package Overview (Android & Web only; hidden on iOS) */}
+                  {!isIosAppStore && (
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-50 via-white to-emerald-50 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-950/40 border border-amber-400/80 space-y-2 shadow-2xs">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <span className="font-extrabold text-xs text-[#064E3B] dark:text-amber-300 flex items-center gap-1.5">
+                          <Crown className="w-4 h-4 text-amber-500 fill-amber-500 shrink-0" />
+                          <span>
+                            {tr(
+                              language,
+                              'កញ្ចប់ដាក់ហាងរួមបញ្ចូលទាំង ៥ មុខងារ (គ្មានទារថ្លៃបន្ថែម)',
+                              'All-Inclusive Shop Package (All 5 Benefits Included)',
+                              '全包店铺套餐（含全部 5 大权益，无额外广告费）'
+                            )}
+                          </span>
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-[#064E3B] text-amber-300 font-mono font-black text-[10px]">
+                          {'$'}{shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d • {'$'}{(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr
+                        </span>
+                      </div>
+                      <ul className="space-y-1 text-[10.5px] text-slate-700 dark:text-slate-200">
+                        {SHOP_ALL_INCLUSIVE_5_BENEFITS.map((b, i) => (
+                          <li key={i} className="leading-snug">
+                            {isKm ? b.km : language === 'zh' ? b.zh : b.en}
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="pt-1 border-t border-amber-200/70 dark:border-slate-700 text-[10px] font-bold text-emerald-800 dark:text-emerald-300">
+                        {appSettings.shopPayAfterApproval !== false
+                          ? tr(
+                              language,
+                              '✨ ដាក់ស្នើហាងដោយឥតគិតថ្លៃឥឡូវនេះ — បង់ប្រាក់តែក្រោយពេល Admin ត្រួតពិនិត្យ និងអនុម័តប៉ុណ្ណោះ!',
+                              '✨ Submit your shop for free now — pay only AFTER Admin reviews and approves your listing!',
+                              '✨ 现在免费提交店铺——仅在管理员审核通过后再付款开通！'
+                            )
+                          : tr(
+                              language,
+                              `✨ ប្រូម៉ូសិន ${shopCatalog.earlyBirdCap} ហាងដំបូង៖ $${shopCatalog.earlyBirdPlan.priceUsd.toFixed(2)}/ឆ្នាំ (នៅសល់ ${shopCatalog.earlyBirdRemaining} កន្លែង)`,
+                              `✨ Early-Bird First ${shopCatalog.earlyBirdCap} Shops: $${shopCatalog.earlyBirdPlan.priceUsd.toFixed(2)}/year (${shopCatalog.earlyBirdRemaining} spots left)`,
+                              `✨ 前 ${shopCatalog.earlyBirdCap} 家早鸟优惠：$${shopCatalog.earlyBirdPlan.priceUsd.toFixed(2)}/年（剩余 ${shopCatalog.earlyBirdRemaining} 名额）`
+                            )}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Progress checklist */}
                   <div className="grid grid-cols-4 gap-1.5">

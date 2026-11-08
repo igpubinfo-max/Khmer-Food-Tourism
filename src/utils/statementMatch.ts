@@ -12,6 +12,11 @@ export interface PendingPayment {
   userEmail?: string;
   trxId: string; // from the receipt / typed reference ('' when unknown)
   amountUsd: number;
+  planId?: string;
+  planLabel?: string;
+  shopId?: string;
+  shopName?: string;
+  isShopPlan?: boolean;
 }
 
 export interface StatementEntry {

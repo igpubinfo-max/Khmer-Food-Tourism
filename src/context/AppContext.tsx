@@ -1,4 +1,9 @@
-import { verifyVipPurchaseOnServer } from '../services/vipPurchaseClient';
+import { verifyVipPurchaseOnServer, claimConsumerTrialOnServer } from '../services/vipPurchaseClient';
+import { getDeviceHashForTrialOrPromoClaim } from '../services/deviceIdentityService';
+import {
+  syncTrialWinbackNotifications,
+  cancelTrialWinbackNotifications,
+} from '../services/trialWinbackNotificationService';
 import { adminServerLogin, adminServerChangePassword, isAdminServerAuthActive } from '../services/adminAuthClient';
 import { checkBiometricAvailability, enrollAdminBiometric, getSavedAdminUsername } from '../services/biometricService';
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
@@ -19,7 +24,7 @@ import {
   isValidCambodiaCoordinates, isValidOfficialGooglePlaceId, buildCanonicalGoogleMapsPinUrl,
   isStrictVerifiedCambodiaRestaurant, SEED_FOOD_PHOTO_BASELINE_MS,
   sanitizeVerifiedShopPhotoUrl, isVerifiedShopSpecialtyPhotoUrl, isValidGoogleMapsUrl, extractCoordsFromGoogleMapsUrl,
-  AuthModalInitialView, hasAuthenticatedEmailAccount, computeFastPhotoSignature,
+  AuthModalInitialView, hasAuthenticatedEmailAccount, hasAuthenticatedPhoneAccount, hasAuthenticatedAccount, computeFastPhotoSignature,
   APP_VERSION_NAME, APP_BUILD_CODE,
   deduplicateFoodItems,
   resolveUserActualVipPlanDays,
@@ -28,6 +33,14 @@ import {
   inferBusinessTypeAndCategory,
   isHotelBusinessRecord,
   isUserOwnerOfRestaurantRecord,
+  OfficialPlanId,
+  getConsumerVipPricingCatalog,
+  getShopSubscriptionCatalog,
+  resolveOfficialPlanById,
+  isConsumerTrial7dEligible,
+  isConsumerPromo099Eligible,
+  isShopSubscriptionActive,
+  isNativeIosApp,
   type ShopPhotoReplacementRequest,
   type PendingListingUpgradeRequest,
 } from '../types';
@@ -61,28 +74,14 @@ import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { buildDynamicNotificationsList } from '../services/dailyDiscoveryAndNotificationService';
 import { findDuplicateRestaurant, mergeRestaurantRecords } from '../utils/duplicateDetector';
 import { recordSubmissionTimestamp, checkSubmissionRateLimit } from '../services/aiCheckInService';
-import {
-  FOOD_CHECKIN_CLOUD_CLAIMS_KEY,
-  FOOD_CHECKIN_REWARD_TARGET,
-  FOOD_CHECKIN_REWARD_VIP_DAYS,
-  computeRewardVipWindow,
-  findExistingRewardClaimAt,
-  getFreeTrialStatus,
-  getVerifiedServerNowMs,
-  isRealIsoTimestamp,
-  loadLedgerForUser,
-  normalizeRewardEmail,
-  recordFoodCheckInRewardClaim,
-  syncVerifiedServerClock,
-  type CheckInLedger,
-  type RewardClaimRegistry,
-} from '../utils/foodCheckInReward';
+
 import { 
   initialUsers, initialFoods, initialRestaurants, 
   initialDestinations, initialAppSettings, initialTransactions 
 } from '../data/seedData';
 import { loadExtendedDestinationsAndHotels } from '../data/seedDestinations';
 import { hashPassword, verifyPassword } from '../utils/crypto';
+import { normalizeCambodiaPhone, getCanonicalPhoneDigits, isDisposableEmailAddress, computeIdentityClaimHashes } from '../utils/identityNormalize';
 import { recordMeaningfulAction } from '../utils/engagement';
 import {
   getAdminAvatarUrl,
@@ -193,14 +192,19 @@ interface AppContextType {
   deletedUsers: DeletedUserRecord[];
   login: (email: string, role?: UserRole) => boolean;
   register: (name: string, email: string, role: UserRole, phone?: string, restaurantName?: string) => boolean;
+  registerWithPhone: (params: {
+    name: string;
+    phone: string;
+    password: string;
+    role?: UserRole;
+    restaurantName?: string;
+  }) => Promise<{ ok: boolean; error?: string }>;
+  loginWithPhone: (params: { phone: string; password: string }) => Promise<{ ok: boolean; error?: string }>;
   loginWithGoogle: (profile: any) => boolean;
   logout: () => void;
   updateUserRole: (userId: string, newRole: UserRole) => void;
   updateCurrentUserProfile: (newName: string, newAvatar?: string) => void;
   adminGrantUserVip: (userIdOrEmail: string, durationDays?: number) => Promise<{ success: boolean }>;
-  /** One-time reward for the signed-in user after 30 distinct dishes tried (see utils/foodCheckInReward). Idempotent. */
-  grantFoodCheckInReward: (options?: { directTrialActivation?: boolean; silentHeal?: boolean }) => Promise<{ success: boolean; alreadyGranted?: boolean; restoredExisting?: boolean }>;
-  syncUserCheckInLedgerToBackend: (ledger: CheckInLedger) => void;
   cancelUserVip: (userId: string) => Promise<{ success: boolean }>;
   restoreUserAccess: (userIdOrEmail: string) => Promise<{ success: boolean; restoredUser?: User; error?: string }>;
   disableUserAccount: (userId: string) => Promise<{ success: boolean }>;
@@ -450,6 +454,13 @@ interface AppContextType {
   isVipRenewMode: boolean;
   setIsVipRenewMode: (renew: boolean) => void;
   openUpgradeVipModal: (renewMode?: boolean) => void;
+  claimConsumerFreeTrial: () => Promise<{ success: boolean; error?: string }>;
+  submitShopSubscriptionPaymentRequest: (params: {
+    shopId: string;
+    planId: 'shop_30d' | 'shop_365d' | 'shop_earlybird_365d';
+    transactionRef?: string;
+    paymentProofData?: { dataUrl: string; fileName?: string; mimeType?: string };
+  }) => Promise<{ success: boolean; transactionId: string; autoVerified?: boolean; error?: string }>;
   submitVipUpgradeRequest: (
     durationDays?: number,
     amountUsd?: number,
@@ -461,7 +472,8 @@ interface AppContextType {
       paymentMethod?: 'KHQR' | 'Bakong' | 'Card' | 'GooglePlayBilling';
       paymentLabel?: string;
       explicitConsent?: boolean;
-    }
+    },
+    explicitPlanId?: OfficialPlanId
   ) => Promise<{ success: boolean; transactionId: string; error?: string }>;
   upgradeCurrentUserToVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string, last4?: string, amountUsd?: number, durationDays?: number) => Promise<{ success: boolean; error?: string }>;
   renewCurrentUserVip: (paymentMethod: 'GooglePlayBilling' | 'KHQR' | 'Bakong' | 'Card', transactionRef: string, durationDays?: number, amountUsd?: number) => Promise<{ success: boolean; error?: string }>;
@@ -755,6 +767,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return true;
       }
     }
+    const uPhoneCanon = getCanonicalPhoneDigits(u.phone);
+    const tPhoneCanon = getCanonicalPhoneDigits(target.phone);
+    if (uPhoneCanon && tPhoneCanon && uPhoneCanon === tPhoneCanon) return true;
     const uPhone = (u.phone || '').replace(/[\s-+()]/g, '');
     const tPhone = (target.phone || '').replace(/[\s-+()]/g, '');
     if (uPhone.length >= 7 && tPhone.length >= 7 && uPhone === tPhone) return true;
@@ -2382,7 +2397,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!pendingVipUpgradeAfterAuthRef.current.active) {
       return false;
     }
-    if (!hasAuthenticatedEmailAccount(authenticatedUser)) {
+    if (!hasAuthenticatedEmailAccount(authenticatedUser) && !hasAuthenticatedPhoneAccount(authenticatedUser)) {
       return false;
     }
     const { renewMode } = pendingVipUpgradeAfterAuthRef.current;
@@ -2413,7 +2428,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       return;
     }
-    if (!hasAuthenticatedEmailAccount(currentUser)) {
+    if (!hasAuthenticatedEmailAccount(currentUser) && !hasAuthenticatedPhoneAccount(currentUser)) {
       redirectToEmailLoginForVipUpgrade(isVipRenewMode);
       return;
     }
@@ -2433,7 +2448,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       return;
     }
-    if (!hasAuthenticatedEmailAccount(currentUser)) {
+    if (!hasAuthenticatedEmailAccount(currentUser) && !hasAuthenticatedPhoneAccount(currentUser)) {
       redirectToEmailLoginForVipUpgrade(Boolean(renewMode));
       return;
     }
@@ -3799,24 +3814,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         freeTrialActivated:
           currentUser.freeTrialActivated ||
           matchedInUsers?.freeTrialActivated ||
-          Boolean(currentUser.foodCheckInRewardAt || matchedInUsers?.foodCheckInRewardAt) ||
-          true,
+          undefined,
         freeTrialActivatedAt:
           currentUser.freeTrialActivatedAt ||
           matchedInUsers?.freeTrialActivatedAt ||
-          nextStartIso,
+          undefined,
         freeTrialExpiresAt:
           currentUser.freeTrialExpiresAt ||
           matchedInUsers?.freeTrialExpiresAt ||
-          nextExpIso,
+          undefined,
         freeTrialDurationDays:
           currentUser.freeTrialDurationDays ||
           matchedInUsers?.freeTrialDurationDays ||
-          30,
-        foodCheckInRewardAt:
-          currentUser.foodCheckInRewardAt ||
-          matchedInUsers?.foodCheckInRewardAt ||
-          nextStartIso,
+          undefined,
         vipCancelledAt: undefined,
         transactionRef:
           currentUser.transactionRef ||
@@ -6179,9 +6189,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ? dynamicPlans.annual.priceUsd
         : dynamicPlans.quarterly.priceUsd;
     const expFormatted = cleanExpiryIso.split('T')[0];
-    const isRewardGrant = Boolean(params.extraFields?.foodCheckInRewardAt && !existing?.foodCheckInRewardAt);
+    const isTrialGrant = Boolean(resolvedRef && resolvedRef.startsWith('TRIAL-7D-')) || (resolvedPlanType as string) === 'trial_7d';
     const isAutoRenewGrant = params.extraFields?.autoRenewLastStatus === 'renewed';
-    const histAction = isRewardGrant
+    const histAction = isTrialGrant
       ? ('reward' as const)
       : isAutoRenewGrant
       ? ('auto_renewal' as const)
@@ -6195,18 +6205,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       action: histAction,
       planType: (resolvedPlanType === 'annual' ? 'annual' : 'quarterly') as 'quarterly' | 'annual',
       durationDays: resolvedPlanDays,
-      amountUsd: isRewardGrant ? 0 : planPrice,
+      amountUsd: isTrialGrant ? 0 : planPrice,
       paymentMethod: resolvedMethod,
       transactionRef: resolvedRef,
       expiryDate: cleanExpiryIso,
       status: 'verified' as const,
-      noteKh: isRewardGrant
-        ? `រង្វាន់ភ្លក់ម្ហូប ៣០ មុខ៖ ទទួលបាន VIP ឥតគិតថ្លៃ (${resolvedPlanDays} ថ្ងៃ) រហូតដល់ ${expFormatted}`
+      noteKh: isTrialGrant
+        ? `បានបើកសាកល្បង VIP ឥតគិតថ្លៃ (${resolvedPlanDays} ថ្ងៃ) រហូតដល់ ${expFormatted}`
         : isAutoRenewGrant
         ? `បានបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (${resolvedPlanDays} ថ្ងៃ / $${planPrice.toFixed(2)} USD) រហូតដល់ ${expFormatted}`
         : `បានបើកដំណើរការ ឬបន្តសមាជិកភាព VIP (${resolvedPlanDays} ថ្ងៃ / $${planPrice.toFixed(2)} USD) រហូតដល់ ${expFormatted}`,
-      noteEn: isRewardGrant
-        ? `30-Dish Check-In Reward: Free VIP (${resolvedPlanDays} days) until ${expFormatted}`
+      noteEn: isTrialGrant
+        ? `Activated Free VIP Trial (${resolvedPlanDays} days) until ${expFormatted}`
         : isAutoRenewGrant
         ? `Automatically renewed VIP (${resolvedPlanDays} days / $${planPrice.toFixed(2)} USD) until ${expFormatted}`
         : `Activated / renewed VIP membership (${resolvedPlanDays} days / $${planPrice.toFixed(2)} USD) until ${expFormatted}`,
@@ -6482,360 +6492,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         : `👑 Activated VIP (${validDays} days) for "${approved.name}" successfully!`,
       'success'
     );
-    return { success: true };
-  };
-
-  /**
-   * One-time reward: 30 distinct dishes tried across 30 verified server days -> 30 days of VIP,
-   * stacked on top of any VIP time the user still has.
-   * Idempotent by design — enforces:
-   *   1. Authoritative internet server time (never trusts `new Date()` device clock),
-   *   2. One-time reward lock across local storage and Supabase Cloud by both User ID and Email,
-   *   3. Deterministic reward transaction reference (`REWARD-FOODCHECKIN30-<userId>`).
-   * It never reduces existing paid VIP time and never touches Admin accounts.
-   */
-  const syncUserCheckInLedgerToBackend = useCallback((ledger: CheckInLedger): void => {
-    const liveCur = latestSyncStateRef.current.currentUser || currentUser;
-    if (!liveCur || isAdminAccount(liveCur) || liveCur.isDisabled) return;
-    const updatedCur: User = {
-      ...liveCur,
-      foodCheckInLedger: {
-        entries: ledger.entries,
-        ...(ledger.grantedAt ? { grantedAt: ledger.grantedAt } : {}),
-      },
-    };
-    latestSyncStateRef.current.currentUser = updatedCur;
-    setCurrentUser(updatedCur);
-    safeSetCriticalAccountStorage('kft_current_user_v5', updatedCur);
-
-    const liveUsers = latestSyncStateRef.current.users || users;
-    const nextUsers = liveUsers.map(u =>
-      doesUserMatchTarget(u, updatedCur)
-        ? { ...u, foodCheckInLedger: updatedCur.foodCheckInLedger }
-        : u
-    );
-    latestSyncStateRef.current.users = nextUsers;
-    setUsers(nextUsers);
-    safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
-
-    if (isSupabaseConfigured()) {
-      const atomicKeys = getCandidateAtomicUserKeys(updatedCur);
-      Promise.all([
-        ...atomicKeys.map(k => pushCloudDocument(k, updatedCur)),
-        pushCloudDocument('kft_cloud_users_v2', nextUsers),
-      ]).catch(() => {});
-    }
-  }, [currentUser, users]);
-
-  const grantFoodCheckInReward = async (
-    options?: { directTrialActivation?: boolean; silentHeal?: boolean }
-  ): Promise<{ success: boolean; alreadyGranted?: boolean; restoredExisting?: boolean }> => {
-    const liveCur = latestSyncStateRef.current.currentUser || currentUser;
-    if (!liveCur || isAdminAccount(liveCur) || liveCur.isDisabled) return { success: false };
-
-    const liveUsers = latestSyncStateRef.current.users || users;
-    const record = liveUsers.find(u => doesUserMatchTarget(u, liveCur)) || liveCur;
-    const normEmail = normalizeRewardEmail(record.email || liveCur.email);
-    const rewardRef = `REWARD-FOODCHECKIN${FOOD_CHECKIN_REWARD_TARGET}-${record.id}`;
-    const rewardEmailRef = normEmail ? `REWARD-FOODCHECKIN${FOOD_CHECKIN_REWARD_TARGET}-EMAIL-${normEmail}` : '';
-    const liveTxns = latestSyncStateRef.current.transactions || transactions;
-
-    let cloudRegistry: RewardClaimRegistry | null = null;
-    if (isSupabaseConfigured()) {
-      cloudRegistry = await pullCloudDocument<RewardClaimRegistry>(FOOD_CHECKIN_CLOUD_CLAIMS_KEY, 6000);
-    }
-
-    // Verify true server time first (with safe fallback to authoritative server clock anchor)
-    const verifiedServerMs =
-      getVerifiedServerNowMs() || (await syncVerifiedServerClock()) || getAuthoritativeServerNowMs();
-    if (!verifiedServerMs) {
-      return { success: false };
-    }
-    const DAY_MS = 24 * 60 * 60 * 1000;
-    const rewardDays = FOOD_CHECKIN_REWARD_VIP_DAYS;
-
-    // Inspect all matching identity records across users, transactions, and claim registries
-    const matchedRewardedUser = liveUsers.find(u => {
-      if (!u) return false;
-      const hasFlag = Boolean(
-        u.freeTrialActivated ||
-          isRealIsoTimestamp(u.freeTrialActivatedAt) ||
-          isRealIsoTimestamp(u.foodCheckInRewardAt) ||
-          isRealIsoTimestamp(u.freeTrialExpiresAt)
-      );
-      if (!hasFlag) return false;
-      if (doesUserMatchTarget(u, record)) return true;
-      return Boolean(normEmail && normalizeRewardEmail(u.email) === normEmail);
-    });
-
-    const matchedRewardTxn = liveTxns.find(
-      t =>
-        t &&
-        t.status === 'verified' &&
-        (t.transactionRef === rewardRef ||
-          (rewardEmailRef && t.transactionRef === rewardEmailRef) ||
-          (normEmail &&
-            normalizeRewardEmail(t.userEmail) === normEmail &&
-            typeof t.transactionRef === 'string' &&
-            (t.transactionRef.startsWith(`REWARD-FOODCHECKIN${FOOD_CHECKIN_REWARD_TARGET}-`) ||
-              t.transactionRef.startsWith('FREE-TRIAL-'))))
-    );
-
-    const existingClaimAt = findExistingRewardClaimAt(
-      {
-        userId: record.id,
-        legacyIds: record.legacyIds || liveCur.legacyIds || [],
-        email: normEmail,
-        foodCheckInRewardAt:
-          record.foodCheckInRewardAt ||
-          liveCur.foodCheckInRewardAt ||
-          matchedRewardedUser?.foodCheckInRewardAt,
-        freeTrialActivatedAt:
-          record.freeTrialActivatedAt ||
-          liveCur.freeTrialActivatedAt ||
-          matchedRewardedUser?.freeTrialActivatedAt,
-        freeTrialExpiresAt:
-          record.freeTrialExpiresAt ||
-          liveCur.freeTrialExpiresAt ||
-          matchedRewardedUser?.freeTrialExpiresAt,
-      },
-      cloudRegistry
-    );
-
-    const trialStatus = getFreeTrialStatus(record, cloudRegistry);
-
-    // If the user already has a valid activation timestamp in any backend/local source:
-    if (
-      isRealIsoTimestamp(existingClaimAt) ||
-      matchedRewardedUser ||
-      matchedRewardTxn ||
-      trialStatus.hasEverActivated
-    ) {
-      const origStartIso =
-        (isRealIsoTimestamp(record.freeTrialActivatedAt) ? record.freeTrialActivatedAt : undefined) ||
-        (isRealIsoTimestamp(matchedRewardedUser?.freeTrialActivatedAt) ? matchedRewardedUser?.freeTrialActivatedAt : undefined) ||
-        (isRealIsoTimestamp(existingClaimAt) ? existingClaimAt : undefined) ||
-        (isRealIsoTimestamp(record.foodCheckInRewardAt) ? record.foodCheckInRewardAt : undefined) ||
-        (isRealIsoTimestamp(matchedRewardTxn?.createdAt) ? matchedRewardTxn?.createdAt : undefined) ||
-        record.subscriptionStartDate ||
-        new Date(verifiedServerMs).toISOString();
-
-      const origStartMs = parseSafeDateMs(origStartIso) || verifiedServerMs;
-      const candidateExpIso =
-        record.freeTrialExpiresAt ||
-        matchedRewardedUser?.freeTrialExpiresAt ||
-        matchedRewardTxn?.expiresAt ||
-        record.subscriptionExpiryDate ||
-        record.vipExpiresAt;
-      const origExpMs =
-        parseSafeDateMs(candidateExpIso) || origStartMs + rewardDays * DAY_MS;
-      const origExpIso = new Date(origExpMs).toISOString();
-
-      // Self-Heal: If the user's original 30-day Free Trial window is STILL ACTIVE on server time,
-      // ensure their User record & cloud database retain their original activation & expiry dates!
-      if (
-        origExpMs > verifiedServerMs &&
-        record.subscriptionStatus !== 'cancelled' &&
-        record.paymentStatus !== 'cancelled'
-      ) {
-        const needsPersistenceHeal =
-          !isUserVipActive(record) ||
-          !record.freeTrialActivated ||
-          record.freeTrialActivatedAt !== origStartIso ||
-          record.freeTrialExpiresAt !== origExpIso ||
-          !record.subscriptionExpiryDate;
-
-        if (needsPersistenceHeal) {
-          const planDays = Math.max(rewardDays, resolveUserActualVipPlanDays(record));
-          const planType =
-            record.vipPlanType || resolveAndValidateVipPlan({ durationDays: planDays }, appSettingsRef.current).id;
-          const healed = persistApprovedVipUserAndCloud({
-            targetId: record.id,
-            targetEmail: record.email,
-            targetName: record.name,
-            targetPhone: record.phone,
-            startDate: origStartIso,
-            expiryDate: origExpIso,
-            durationDays: planDays,
-            planType,
-            paymentMethod: record.paymentMethod || 'Manual',
-            transactionRef: record.transactionRef || rewardRef,
-            extraFields: {
-              foodCheckInRewardAt: origStartIso,
-              freeTrialActivated: true,
-              freeTrialActivatedAt: origStartIso,
-              freeTrialExpiresAt: origExpIso,
-              freeTrialDurationDays: rewardDays,
-              foodCheckInLedger: loadLedgerForUser(
-                record.id,
-                record.legacyIds || [],
-                record.foodCheckInLedger
-              ),
-            },
-          });
-          const syncedClaims = recordFoodCheckInRewardClaim(
-            {
-              userId: healed.id,
-              legacyIds: healed.legacyIds || record.legacyIds || [],
-              email: healed.email || normEmail,
-              foodCheckInRewardAt: origStartIso,
-              freeTrialActivatedAt: origStartIso,
-              freeTrialExpiresAt: origExpIso,
-            },
-            origStartIso,
-            cloudRegistry,
-            origExpIso,
-            rewardDays
-          );
-          if (isSupabaseConfigured()) {
-            pushCloudDocument(FOOD_CHECKIN_CLOUD_CLAIMS_KEY, syncedClaims).catch(() => {});
-          }
-          return { success: true, restoredExisting: true };
-        }
-      }
-
-      // Otherwise, the trial is already active & synced, OR has genuinely expired after 30 days.
-      // Lock the claim registry with the real activation & expiry dates and prevent duplicate free trials.
-      const syncedClaims = recordFoodCheckInRewardClaim(
-        {
-          userId: record.id,
-          legacyIds: record.legacyIds || liveCur.legacyIds || [],
-          email: normEmail,
-          foodCheckInRewardAt: origStartIso,
-          freeTrialActivatedAt: origStartIso,
-          freeTrialExpiresAt: origExpIso,
-        },
-        origStartIso,
-        cloudRegistry,
-        origExpIso,
-        rewardDays
-      );
-      if (isSupabaseConfigured()) {
-        pushCloudDocument(FOOD_CHECKIN_CLOUD_CLAIMS_KEY, syncedClaims).catch(() => {});
-      }
-      return { success: false, alreadyGranted: true };
-    }
-
-    // Brand-new 1-time Free 30-Day VIP Trial activation (or self-healing a broken 'granted' placeholder with 0 expiry)
-    const serverNow = new Date(verifiedServerMs);
-    const nowIso = serverNow.toISOString();
-    const { wasVipActive, startDate, expiryDate, durationDays } = computeRewardVipWindow(record, serverNow, rewardDays);
-    const planType = wasVipActive
-      ? record.vipPlanType || resolveAndValidateVipPlan({ durationDays }, appSettingsRef.current).id
-      : resolveAndValidateVipPlan({ durationDays: rewardDays }, appSettingsRef.current).id;
-
-    const currentLedger = loadLedgerForUser(
-      record.id,
-      record.legacyIds || liveCur.legacyIds || [],
-      record.foodCheckInLedger
-    );
-
-    const approved = persistApprovedVipUserAndCloud({
-      targetId: record.id,
-      targetEmail: record.email,
-      targetName: record.name,
-      targetPhone: record.phone,
-      startDate,
-      expiryDate,
-      durationDays,
-      planType,
-      paymentMethod: wasVipActive ? undefined : 'Manual',
-      transactionRef: wasVipActive ? undefined : rewardRef,
-      extraFields: {
-        foodCheckInRewardAt: startDate,
-        freeTrialActivated: true,
-        freeTrialActivatedAt: startDate,
-        freeTrialExpiresAt: expiryDate,
-        freeTrialDurationDays: rewardDays,
-        foodCheckInLedger: {
-          entries: currentLedger.entries,
-          grantedAt: startDate,
-        },
-      },
-    });
-
-    const updatedClaims = recordFoodCheckInRewardClaim(
-      {
-        userId: approved.id,
-        legacyIds: approved.legacyIds || record.legacyIds || [],
-        email: approved.email || normEmail,
-        foodCheckInRewardAt: startDate,
-        freeTrialActivatedAt: startDate,
-        freeTrialExpiresAt: expiryDate,
-      },
-      startDate,
-      cloudRegistry,
-      expiryDate,
-      rewardDays
-    );
-    if (isSupabaseConfigured()) {
-      pushCloudDocument(FOOD_CHECKIN_CLOUD_CLAIMS_KEY, updatedClaims).catch(() => {});
-    }
-
-    const rewardTxn: RegistrationTransaction = {
-      id: `TXN-REWARD-${verifiedServerMs.toString(36).toUpperCase()}`,
-      type: 'user_vip_upgrade',
-      userId: approved.id,
-      userName: approved.name,
-      userEmail: approved.email,
-      ownerId: approved.id,
-      ownerName: approved.name,
-      planType: resolveAndValidateVipPlan({ durationDays: rewardDays }, appSettingsRef.current).id,
-      amountUsd: 0,
-      currency: 'USD',
-      durationDays: rewardDays,
-      membershipTier: 'premium_vip',
-      status: 'verified',
-      paymentMethod: 'Manual',
-      transactionRef: rewardRef,
-      createdAt: startDate,
-      expiresAt: approved.subscriptionExpiryDate || expiryDate,
-      verifiedAt: nowIso,
-      verifiedBy: `System (Free VIP ${rewardDays}-Day Trial)`,
-      notes: `Free VIP ${rewardDays}-Day Trial activated -> ${rewardDays} days VIP${wasVipActive ? ' (added to existing VIP time)' : ''}`,
-    };
-    setTransactions(prev => {
-      const nextTxns = [rewardTxn, ...prev.filter(t => t.transactionRef !== rewardRef)];
-      latestSyncStateRef.current.transactions = nextTxns;
-      if (isSupabaseConfigured()) {
-        pushCloudDocument('kft_cloud_transactions_v1', nextTxns).catch(() => {});
-      }
-      return nextTxns;
-    });
-
-    setNotifications(prev => [
-      {
-        id: `notif-food-reward-${approved.id}`,
-        titleKh: `អបអរសាទរ! ទទួលបានសមាជិក Free VIP ${rewardDays} ថ្ងៃ`,
-        titleEn: `Congratulations! Free ${rewardDays}-Day VIP Activated`,
-        titleZh: `恭喜！已激活 ${rewardDays} 天免费 VIP`,
-        messageKh: `គណនីរបស់អ្នកបានបើកដំណើរការ រង្វាន់ Free VIP ${rewardDays} ថ្ងៃ ដោយជោគជ័យ។ សុពលភាពរហូតដល់ ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}។`,
-        messageEn: `Your Free ${rewardDays}-Day VIP Trial is now active until ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}.`,
-        messageZh: `您的 ${rewardDays} 天免费 VIP 已激活，有效期至 ${new Date(approved.subscriptionExpiryDate || expiryDate).toLocaleDateString()}。`,
-        type: 'system',
-        isRead: false,
-        createdAt: nowIso,
-      },
-      ...prev.filter(n => n.id !== `notif-food-reward-${approved.id}`),
-    ]);
-
-    recordSecurityAudit(
-      'FOOD_CHECKIN_REWARD_GRANTED',
-      'SUCCESS',
-      'FoodPassport',
-      `Granted ${rewardDays}-day Free VIP Trial to ${approved.name} (${approved.id}, ${normEmail}); VIP until ${approved.subscriptionExpiryDate}${wasVipActive ? ' (stacked on existing VIP)' : ''}`
-    );
-
-    if (!options?.silentHeal) {
-      showToast(
-        language === 'km'
-          ? `🎉 អបអរសាទរ! បានបើកដំណើរការ រង្វាន់ Free VIP ${rewardDays} ថ្ងៃ ជូនគណនីរបស់អ្នកដោយជោគជ័យ (សល់ ${rewardDays}/${rewardDays} ថ្ងៃ)!`
-          : language === 'zh'
-            ? `🎉 恭喜！您的账号已成功激活 ${rewardDays} 天免费 VIP 试用（剩余 ${rewardDays}/${rewardDays} 天）！`
-            : `🎉 Congratulations! Your Free ${rewardDays}-Day VIP Trial is now active (${rewardDays}/${rewardDays} days left)!`,
-        'success'
-      );
-    }
     return { success: true };
   };
 
@@ -8312,6 +7968,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Enforce: only one authorized admin exists. Users can NEVER self-register as admin
     const safeRole: UserRole = role === 'admin' ? 'user' : role;
     const cleanId = emailOrPhone.trim();
+    if (cleanId.includes('@') && isDisposableEmailAddress(cleanId)) {
+      showToast(
+        tr(
+          language,
+          'មិនអនុញ្ញាតឱ្យប្រើអ៊ីមែលបណ្តោះអាសន្ន (Disposable Email) ឡើយ។ សូមប្រើ Gmail ឬលេខទូរស័ព្ទពិតប្រាកដ។',
+          'Disposable email addresses are not allowed. Please use a real email or phone number.',
+          '不支持一次性临时邮箱，请使用真实邮箱或手机号码。'
+        ),
+        'warning'
+      );
+      return false;
+    }
     const isPhone = /^[0-9+ ]{7,15}$/.test(cleanId);
     if (pendingVipUpgradeAfterAuthRef.current.active && (isPhone || !hasAuthenticatedEmailAccount({ email: cleanId }))) {
       showToast(
@@ -8427,6 +8095,302 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     syncLoggedInUserFromCloud(newUser);
     return true;
+  };
+
+  const registerWithPhone = async (params: {
+    name: string;
+    phone: string;
+    password: string;
+    role?: UserRole;
+    restaurantName?: string;
+  }): Promise<{ ok: boolean; error?: string }> => {
+    const canonicalPhone = normalizeCambodiaPhone(params.phone);
+    if (!canonicalPhone) {
+      const msg = tr(
+        language,
+        'សូមបញ្ចូលលេខទូរស័ព្ទឱ្យបានត្រឹមត្រូវ (ឧ. 012 345 678)',
+        'Please enter a valid phone number (e.g. 012 345 678)',
+        '请输入有效的手机号码（例如 012 345 678）'
+      );
+      showToast(msg, 'warning');
+      return { ok: false, error: msg };
+    }
+    const cleanPass = String(params.password || '').trim();
+    if (cleanPass.length < 6) {
+      const msg = tr(
+        language,
+        'លេខសម្ងាត់ត្រូវមានយ៉ាងតិច ៦ តួអក្សរ',
+        'Password must be at least 6 characters',
+        '密码至少需要 6 个字符'
+      );
+      showToast(msg, 'warning');
+      return { ok: false, error: msg };
+    }
+    const displayName = String(params.name || '').trim() || `អ្នកប្រើប្រាស់ ${canonicalPhone.slice(-4)}`;
+    const safeRole: UserRole = params.role === 'owner' ? 'owner' : 'user';
+    const digits = canonicalPhone.slice(1);
+    const syntheticEmail = `phone_${digits}@phone.kh`;
+    const canonicalId = `user-phone-${digits}`;
+
+    let cloudExisting: User | null = null;
+    if (isSupabaseConfigured()) {
+      try {
+        const pulled =
+          (await pullCloudDocument<User>(`${USER_RECORD_PREFIX}${canonicalId}`, 5000)) ||
+          (await pullCloudDocument<User>(`${USER_RECORD_PREFIX}user-phone_${digits}_phone_kh`, 4000));
+        if (pulled && pulled.id) cloudExisting = pulled;
+      } catch {}
+    }
+
+    const localExisting = (latestSyncStateRef.current.users || users).find((u) =>
+      doesUserMatchTarget(u, { id: canonicalId, phone: canonicalPhone, email: syntheticEmail })
+    );
+    const existing = cloudExisting || localExisting || null;
+
+    if (existing) {
+      if (existing.isDisabled) {
+        const msg = tr(
+          language,
+          '⚠️ គណនីនេះត្រូវបានផ្អាកជាបណ្តោះអាសន្ន។ សូមទាក់ទង Admin។',
+          '⚠️ This account has been disabled. Please contact Admin.',
+          '⚠️ 该账号已被暂停，请联系管理员。'
+        );
+        showToast(msg, 'warning');
+        return { ok: false, error: msg };
+      }
+      if (existing.passwordHash && existing.passwordHash.length >= 20) {
+        const isPbkdf2 = existing.passwordHash.indexOf('pbkdf2') === 0;
+        const matches = isPbkdf2
+          ? await verifyPasswordPBKDF2(cleanPass, existing.passwordHash)
+          : await verifyPassword(cleanPass, existing.passwordHash);
+        if (!matches) {
+          const msg = tr(
+            language,
+            'លេខទូរស័ព្ទនេះមានគណនីរួចហើយ! សូមចុចផ្ទាំង «ចូលគណនី» ហើយវាយលេខសម្ងាត់របស់អ្នក។',
+            'This phone number is already registered! Switch to Sign In and enter your password.',
+            '该手机号已注册！请切换到“登录”并输入您的密码。'
+          );
+          showToast(msg, 'warning');
+          return { ok: false, error: msg };
+        }
+      }
+    }
+
+    const pwHash = await hashPasswordPBKDF2(cleanPass);
+    const nowIso = new Date().toISOString();
+    pruneStaleDeletedTombstoneForActiveAuth({ id: canonicalId, email: syntheticEmail, phone: canonicalPhone });
+
+    const savedUser: User = existing
+      ? {
+          ...existing,
+          name: displayName || existing.name,
+          phone: canonicalPhone,
+          passwordHash: pwHash,
+          authProvider: existing.authProvider || 'phone',
+          linkedProviders: Array.from(new Set([...(existing.linkedProviders || []), 'phone'])) as User['linkedProviders'],
+          isVerified: true,
+          verifiedAt: existing.verifiedAt || nowIso,
+          lastLoginAt: nowIso,
+          lastActiveAt: nowIso,
+        }
+      : {
+          id: canonicalId,
+          name: displayName,
+          email: syntheticEmail,
+          phone: canonicalPhone,
+          passwordHash: pwHash,
+          role: safeRole,
+          restaurantName: params.restaurantName?.trim() || undefined,
+          authProvider: 'phone',
+          linkedProviders: ['phone'],
+          isVerified: true,
+          verifiedAt: nowIso,
+          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+          createdAt: nowIso.split('T')[0],
+          registeredAtIso: nowIso,
+          lastLoginAt: nowIso,
+          lastActiveAt: nowIso,
+        };
+
+    setUsers((prev) => {
+      const next = deduplicateAndNormalizeUsers(
+        [...prev.filter((u) => !doesUserMatchTarget(u, savedUser)), savedUser],
+        deletedUsers
+      );
+      latestSyncStateRef.current.users = next;
+      safeSetCriticalAccountStorage('kft_users_v5', next);
+      return next;
+    });
+    setCurrentUser(savedUser);
+    latestSyncStateRef.current.currentUser = savedUser;
+    safeSetCriticalAccountStorage('kft_current_user_v5', savedUser);
+    if (isSupabaseConfigured()) {
+      upsertSingleUserToCloud(savedUser).catch(() => {});
+    }
+    showToast(
+      tr(
+        language,
+        `សូមស្វាគមន៍ ${savedUser.name}!`,
+        `Welcome, ${savedUser.name}!`,
+        `欢迎，${savedUser.name}！`
+      ),
+      'success'
+    );
+    if (!completePendingVipRedirectAfterEmailAuth(savedUser)) {
+      setIsAuthModalOpen(false);
+    }
+    syncLoggedInUserFromCloud(savedUser);
+    return { ok: true };
+  };
+
+  const loginWithPhone = async (params: {
+    phone: string;
+    password: string;
+  }): Promise<{ ok: boolean; error?: string }> => {
+    const rawTrim = String(params.phone || '').trim().toLowerCase();
+    if (
+      rawTrim === 'admin' ||
+      rawTrim === 'cheasavuth' ||
+      rawTrim === 'chea savuth' ||
+      rawTrim === 'admin@khmerfoodtourism.com'
+    ) {
+      setIsAuthModalOpen(false);
+      setIsAdminLoginModalOpen(true);
+      return { ok: false };
+    }
+
+    const canonicalPhone = normalizeCambodiaPhone(params.phone);
+    if (!canonicalPhone) {
+      const msg = tr(
+        language,
+        'សូមបញ្ចូលលេខទូរស័ព្ទឱ្យបានត្រឹមត្រូវ (ឧ. 012 345 678)',
+        'Please enter a valid phone number (e.g. 012 345 678)',
+        '请输入有效的手机号码（例如 012 345 678）'
+      );
+      showToast(msg, 'warning');
+      return { ok: false, error: msg };
+    }
+    const cleanPass = String(params.password || '').trim();
+    if (!cleanPass) {
+      const msg = tr(language, 'សូមបញ្ចូលលេខសម្ងាត់របស់អ្នក', 'Please enter your password', '请输入您的密码');
+      showToast(msg, 'warning');
+      return { ok: false, error: msg };
+    }
+
+    const digits = canonicalPhone.slice(1);
+    const localZeroDigits = canonicalPhone.startsWith('+855') ? `0${canonicalPhone.slice(4)}` : digits;
+    const canonicalId = `user-phone-${digits}`;
+
+    let candidate: User | null =
+      (latestSyncStateRef.current.users || users).find((u) =>
+        doesUserMatchTarget(u, { id: canonicalId, phone: canonicalPhone })
+      ) || null;
+
+    if (isSupabaseConfigured()) {
+      try {
+        const cloudKeys = [
+          `${USER_RECORD_PREFIX}${canonicalId}`,
+          `${USER_RECORD_PREFIX}user-phone-${localZeroDigits}`,
+          `${USER_RECORD_PREFIX}user-phone_${digits}_phone_kh`,
+          ...(candidate ? getCandidateAtomicUserKeys(candidate) : []),
+        ];
+        for (const ck of Array.from(new Set(cloudKeys))) {
+          const pulled = await pullCloudDocument<User>(ck, 5000);
+          if (pulled && pulled.id) {
+            candidate = candidate ? deduplicateAndNormalizeUsers([candidate, pulled], [])[0] || pulled : pulled;
+            break;
+          }
+        }
+      } catch {}
+    }
+
+    if (!candidate) {
+      const msg = tr(
+        language,
+        'រកមិនឃើញគណនីតាមលេខទូរស័ព្ទនេះទេ។ សូមចុច «បង្កើតគណនីថ្មី» ជាមុនសិន!',
+        'No account found for this phone number. Please tap Create Account first!',
+        '未找到该手机号对应的账号，请先点击“注册新账号”！'
+      );
+      showToast(msg, 'warning');
+      return { ok: false, error: msg };
+    }
+
+    if (candidate.isDisabled) {
+      const msg = tr(
+        language,
+        '⚠️ គណនីនេះត្រូវបានផ្អាកជាបណ្តោះអាសន្ន។ សូមទាក់ទង Admin។',
+        '⚠️ This account has been disabled. Please contact Admin.',
+        '⚠️ 该账号已被暂停，请联系管理员。'
+      );
+      showToast(msg, 'warning');
+      return { ok: false, error: msg };
+    }
+
+    if (candidate.passwordHash && candidate.passwordHash.length >= 20) {
+      const isPbkdf2 = candidate.passwordHash.indexOf('pbkdf2') === 0;
+      const valid = isPbkdf2
+        ? await verifyPasswordPBKDF2(cleanPass, candidate.passwordHash)
+        : await verifyPassword(cleanPass, candidate.passwordHash);
+      if (!valid) {
+        const msg = tr(
+          language,
+          'លេខសម្ងាត់មិនត្រឹមត្រូវទេ សូមពិនិត្យម្តងទៀត!',
+          'Incorrect password. Please try again!',
+          '密码不正确，请重试！'
+        );
+        showToast(msg, 'warning');
+        return { ok: false, error: msg };
+      }
+    } else {
+      candidate = {
+        ...candidate,
+        passwordHash: await hashPasswordPBKDF2(cleanPass),
+      };
+    }
+
+    const nowIso = new Date().toISOString();
+    const existingCachedAv = getCachedUserAvatarForAccount(candidate);
+    const updatedUser: User = {
+      ...candidate,
+      phone: canonicalPhone,
+      avatar: isCustomUploadedAvatarDataUrl(candidate.avatar)
+        ? candidate.avatar
+        : existingCachedAv && isCustomUploadedAvatarDataUrl(existingCachedAv)
+          ? existingCachedAv
+          : candidate.avatar,
+      lastLoginAt: nowIso,
+      lastActiveAt: nowIso,
+    };
+
+    setUsers((prev) => {
+      const next = deduplicateAndNormalizeUsers(
+        [...prev.filter((u) => !doesUserMatchTarget(u, updatedUser)), updatedUser],
+        deletedUsers
+      );
+      latestSyncStateRef.current.users = next;
+      safeSetCriticalAccountStorage('kft_users_v5', next);
+      return next;
+    });
+    setCurrentUser(updatedUser);
+    latestSyncStateRef.current.currentUser = updatedUser;
+    safeSetCriticalAccountStorage('kft_current_user_v5', updatedUser);
+    if (isSupabaseConfigured()) {
+      upsertSingleUserToCloud(updatedUser).catch(() => {});
+    }
+    showToast(
+      tr(
+        language,
+        `សូមស្វាគមន៍មកវិញ ${updatedUser.name}!`,
+        `Welcome back, ${updatedUser.name}!`,
+        `欢迎回来，${updatedUser.name}！`
+      ),
+      'success'
+    );
+    if (!completePendingVipRedirectAfterEmailAuth(updatedUser)) {
+      setIsAuthModalOpen(false);
+    }
+    syncLoggedInUserFromCloud(updatedUser);
+    return { ok: true };
   };
 
   const loginWithGoogle = (profile: {
@@ -9220,23 +9184,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser.username === 'admin' || 
       currentUser.username === 'cheasavuth';
 
-    const isApprovedVip = isUserVipActive(currentUser);
-    const dynamicPlans = getDynamicVipPlans(appSettings);
-
-    if (!isAdmin && !isApprovedVip) {
-      recordSecurityAudit(
-        'NON_VIP_STORE_CREATE_BLOCKED',
-        'BLOCKED',
-        'VipCreateStore',
-        `Blocked store creation by non-VIP user ${currentUser.name} (${currentUser.id})`
-      );
+    if (!isAdmin && !hasAuthenticatedAccount(currentUser)) {
       showToast(
         language === 'km'
-          ? `🔒 មានតែគណនី VIP សកម្មប៉ុណ្ណោះដែលអាចបង្កើតហាងអាហារបាន។ សូមដំឡើងទៅកញ្ចប់ VIP (${dynamicPlans.quarterly.priceUsd.toFixed(2)} ឬ ${dynamicPlans.annual.priceUsd.toFixed(2)}) ជាមុនសិន!`
-          : `🔒 Only active VIP accounts can register a shop. Please upgrade to a VIP plan (${dynamicPlans.quarterly.priceUsd.toFixed(2)} or ${dynamicPlans.annual.priceUsd.toFixed(2)}) first!`,
+          ? 'សូមចុះឈ្មោះ ឬចូលគណនី (លេខទូរស័ព្ទ ឬ Google) ជាមុនសិន ដើម្បីដាក់ស្នើហាង!'
+          : 'Please sign in with Phone or Google first to submit your shop!',
         'warning'
       );
-      openUpgradeVipModal();
+      setIsAuthModalOpen(true);
       return null;
     }
 
@@ -9298,21 +9253,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         );
         return null;
       }
-    } else if (!isAdmin && quota.remainingAvailableSlots <= 0) {
-      // Server/Context enforcement: Additional stores beyond the allowed quota require verified $10 payment
-      recordSecurityAudit(
-        'ADDITIONAL_STORE_UNPAID_BLOCKED',
-        'BLOCKED',
-        'VipCreateStore',
-        `Blocked unpaid additional store creation by ${currentUser.name} (${currentUser.id}). Used: ${quota.usedStoresCount}/${quota.totalAllowedStores}`
-      );
-      showToast(
-        language === 'km'
-          ? `🔒 អ្នកបានប្រើប្រាស់កូតាហាងចំនួន ${quota.usedStoresCount}/${quota.totalAllowedStores} រួចហើយ! អ្នកអាចកែប្រែ ឬប្តូរហាងដែលមានស្រាប់ដោយឥតគិតថ្លៃ ($0) ឬបង់ប្រាក់ $${quota.additionalStoreFeeUsd.toFixed(2)} USD ដើម្បីបន្ថែមហាងថ្មីមួយទៀត។`
-          : `🔒 You have used ${quota.usedStoresCount}/${quota.totalAllowedStores} store slots! You can edit or replace your existing store for free ($0), or pay $${quota.additionalStoreFeeUsd.toFixed(2)} USD to add an additional store.`,
-        'warning'
-      );
-      return null;
     }
 
     const requestedProfileImg = sanitizeVerifiedShopPhotoUrl(
@@ -9336,14 +9276,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const finalStatus: 'approved' | 'pending' | 'rejected' =
       isPendingPayment || isPendingManualReview
         ? 'pending'
-        : 'approved';
+        : (targetToReplace?.status || 'approved');
+    const inheritedShopActive = Boolean(targetToReplace && isShopSubscriptionActive(targetToReplace));
     const finalIsVerified = !isPendingManualReview && !isPendingPayment && (targetToReplace ? Boolean(targetToReplace.isVerified) : true);
-    const finalIsPromoted = !isPendingManualReview && !isPendingPayment && (isAdmin || isApprovedVip);
+    const finalIsPromoted = finalStatus === 'approved' && (isAdmin || inheritedShopActive);
 
     const nowIso = new Date().toISOString();
-    const expiryIso =
-      currentUser.subscriptionExpiryDate ||
-      new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
+    const adminDefaultExpiryIso = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+    const inheritedExpiryIso =
+      targetToReplace?.shopSubscriptionExpiresAt ||
+      targetToReplace?.subscriptionExpiresAt ||
+      targetToReplace?.membershipExpiresAt;
     const rotationCfg = getVipFeaturedRotationConfig(appSettings);
     const featuredUntilIso = new Date(Date.now() + rotationCfg.durationMs).toISOString();
     const uniqueShopId = targetToReplace
@@ -9380,10 +9323,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: finalStatus,
       isVerified: finalIsVerified,
       isPromoted: finalIsPromoted,
-      membershipTier: (isAdmin || isApprovedVip) ? 'premium' : 'free',
-      membershipExpiresAt: (isAdmin || isApprovedVip) ? expiryIso : undefined,
-      paymentStatus: isPendingPayment ? 'pending_verification' : (isAdmin || isApprovedVip) ? 'verified' : undefined,
-      menuItems: [],
+      membershipTier: (isAdmin || inheritedShopActive) ? 'premium' : 'free',
+      membershipExpiresAt: isAdmin ? adminDefaultExpiryIso : (inheritedShopActive ? inheritedExpiryIso : undefined),
+      subscriptionExpiresAt: isAdmin ? adminDefaultExpiryIso : (inheritedShopActive ? inheritedExpiryIso : undefined),
+      shopSubscriptionExpiresAt: isAdmin ? adminDefaultExpiryIso : (inheritedShopActive ? inheritedExpiryIso : undefined),
+      shopPaymentStatus: isAdmin
+        ? 'active'
+        : inheritedShopActive
+          ? 'active'
+          : finalStatus === 'pending' && appSettings.shopPayAfterApproval !== false
+            ? 'awaiting_admin_approval'
+            : 'awaiting_payment',
+      activeShopPlanId: targetToReplace?.activeShopPlanId,
+      paymentStatus: isPendingPayment ? 'pending_verification' : (isAdmin || inheritedShopActive) ? 'verified' : undefined,
+      menuItems: targetToReplace?.menuItems || [],
       storeSlotNumber: slotNumber,
       replacedFromRestaurantId: targetToReplace ? targetToReplace.id : undefined,
       replacedAt: targetToReplace ? nowIso : undefined,
@@ -9580,11 +9533,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const nextIsPromotedAfterAiCheck: boolean = nextStatusAfterAiCheck === 'approved';
 
     const preservedCreatedAt = original?.created_at || original?.createdAt || updated.created_at || updated.createdAt || getRestaurantCreatedAtIso(original || updated);
-    const effectiveTier: MembershipTier = (isAdmin || isApprovedVip) ? 'premium' : 'free';
+    const shopSubActive = isShopSubscriptionActive(original);
+    const effectiveTier: MembershipTier = shopSubActive
+      ? 'premium'
+      : (original?.membershipTier === 'premium' ? 'premium' : 'free');
     const effectiveExpiry =
-      original?.membershipExpiresAt ||
-      currentUser?.subscriptionExpiryDate ||
-      (effectiveTier === 'premium' ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() : undefined);
+      original?.shopSubscriptionExpiresAt ||
+      original?.subscriptionExpiresAt ||
+      original?.membershipExpiresAt;
     const editNowIso = new Date().toISOString();
 
     const nextPendingPhotoReplacement = isPhotoChangedByOwner
@@ -9639,8 +9595,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       photoUpdatedAt: editNowIso,
       membershipTier: effectiveTier,
       membershipExpiresAt: effectiveExpiry,
-      isPromoted: effectiveTier === 'premium' ? nextIsPromotedAfterAiCheck : Boolean(original?.isPromoted),
-      paymentStatus: effectiveTier === 'premium' ? 'verified' : original?.paymentStatus,
+      subscriptionExpiresAt: original?.subscriptionExpiresAt ?? effectiveExpiry,
+      shopSubscriptionExpiresAt: original?.shopSubscriptionExpiresAt ?? effectiveExpiry,
+      shopPaymentStatus: original?.shopPaymentStatus,
+      activeShopPlanId: original?.activeShopPlanId,
+      isPromoted: shopSubActive && nextStatusAfterAiCheck === 'approved',
+      paymentStatus: shopSubActive ? 'verified' : original?.paymentStatus,
       status: nextStatusAfterAiCheck,
       isVerified: nextIsVerifiedAfterAiCheck,
       aiCategoryVerification: updatedAiVerification,
@@ -9752,25 +9712,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Restaurant Food Menu Items (Strictly disabled for General Users & VIP Users; Admin-only)
+  // Restaurant Food Menu Items (Shop Owner for their own shop OR Admin — Shop Package Benefit #1)
   const addRestaurantMenuItem = (
     restaurantId: string, 
     itemData: Omit<RestaurantMenuItem, 'id' | 'createdAt' | 'restaurantId'>
   ): boolean => {
-    if (!isCurrentUserAdmin()) {
-      showToast(
-        language === 'km'
-          ? '🔒 មានតែ Admin ប៉ុណ្ណោះដែលអាចបញ្ចូលមុខម្ហូបបាន!'
-          : language === 'zh'
-          ? '🔒 仅限管理员添加菜品！'
-          : '🔒 Only Admin can insert food items!',
-        'warning'
-      );
-      return false;
-    }
     const targetRest = restaurants.find(r => r.id === restaurantId);
     if (!targetRest) {
       showToast(language === 'km' ? 'រកមិនឃើញហាងអាហារទេ!' : 'Restaurant not found!', 'warning');
+      return false;
+    }
+    const isOwnerOfTarget = Boolean(currentUser && isUserOwnerOfRestaurantRecord(currentUser, targetRest));
+    if (!isCurrentUserAdmin() && !isOwnerOfTarget) {
+      showToast(
+        language === 'km'
+          ? '🔒 មានតែម្ចាស់ហាងផ្ទាល់ ឬ Admin ប៉ុណ្ណោះដែលអាចបញ្ចូលមុខម្ហូបក្នុងហាងនេះបាន!'
+          : language === 'zh'
+          ? '🔒 仅限店主本人或管理员添加菜品！'
+          : '🔒 Only the shop owner or Admin can add menu items to this shop!',
+        'warning'
+      );
       return false;
     }
 
@@ -9826,19 +9787,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateRestaurantMenuItem = (restaurantId: string, updatedItem: RestaurantMenuItem): boolean => {
-    if (!isCurrentUserAdmin()) {
+    const targetRest = restaurants.find(r => r.id === restaurantId);
+    if (!targetRest) return false;
+    const isOwnerOfTarget = Boolean(currentUser && isUserOwnerOfRestaurantRecord(currentUser, targetRest));
+    if (!isCurrentUserAdmin() && !isOwnerOfTarget) {
       showToast(
         language === 'km'
-          ? '🔒 មានតែ Admin ប៉ុណ្ណោះដែលអាចកែប្រែមុខម្ហូបបាន!'
+          ? '🔒 មានតែម្ចាស់ហាងផ្ទាល់ ឬ Admin ប៉ុណ្ណោះដែលអាចកែប្រែមុខម្ហូបបាន!'
           : language === 'zh'
-          ? '🔒 仅限管理员编辑菜品！'
-          : '🔒 Only Admin can edit food items!',
+          ? '🔒 仅限店主本人或管理员编辑菜品！'
+          : '🔒 Only the shop owner or Admin can edit menu items!',
         'warning'
       );
       return false;
     }
-    const targetRest = restaurants.find(r => r.id === restaurantId);
-    if (!targetRest) return false;
 
     const nowIso = new Date().toISOString();
     const updatedMenuItems = (targetRest.menuItems || []).map(item => 
@@ -9878,19 +9840,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteRestaurantMenuItem = (restaurantId: string, menuItemId: string): boolean => {
-    if (!isCurrentUserAdmin()) {
+    const targetRest = restaurants.find(r => r.id === restaurantId);
+    if (!targetRest) return false;
+    const isOwnerOfTarget = Boolean(currentUser && isUserOwnerOfRestaurantRecord(currentUser, targetRest));
+    if (!isCurrentUserAdmin() && !isOwnerOfTarget) {
       showToast(
         language === 'km'
-          ? '🔒 មានតែ Admin ប៉ុណ្ណោះដែលអាចលុបមុខម្ហូបបាន!'
+          ? '🔒 មានតែម្ចាស់ហាងផ្ទាល់ ឬ Admin ប៉ុណ្ណោះដែលអាចលុបមុខម្ហូបបាន!'
           : language === 'zh'
-          ? '🔒 仅限管理员删除菜品！'
-          : '🔒 Only Admin can delete food items!',
+          ? '🔒 仅限店主本人或管理员删除菜品！'
+          : '🔒 Only the shop owner or Admin can delete menu items!',
         'warning'
       );
       return false;
     }
-    const targetRest = restaurants.find(r => r.id === restaurantId);
-    if (!targetRest) return false;
 
     const nowIso = new Date().toISOString();
     const updatedMenuItems = (targetRest.menuItems || []).filter(item => item.id !== menuItemId);
@@ -10295,10 +10258,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           categoryEn: inferBusinessTypeAndCategory(r).categoryEn,
           status: 'approved',
           isVerified: true,
-          isPromoted: r.membershipTier === 'premium' ? true : Boolean(r.isPromoted),
+          isPromoted: isShopSubscriptionActive(r) || Boolean(r.isAdminEdited && r.ownerId === 'admin-authorized-single'),
+          membershipTier: (isShopSubscriptionActive(r) || Boolean(r.isAdminEdited && r.ownerId === 'admin-authorized-single')) ? 'premium' : 'free',
+          shopPaymentStatus: isShopSubscriptionActive(r) ? 'active' : (r.shopPaymentStatus === 'pending_verification' ? 'pending_verification' : 'awaiting_payment'),
           approvedAt: nowIso,
-          featuredFromAt: nowIso,
-          featuredUntilAt: featuredUntilIso,
+          featuredFromAt: isShopSubscriptionActive(r) ? nowIso : r.featuredFromAt,
+          featuredUntilAt: isShopSubscriptionActive(r) ? featuredUntilIso : r.featuredUntilAt,
           updatedAt: nowIso,
           aiCategoryVerification: (() => {
             const biz = inferBusinessTypeAndCategory(r);
@@ -12015,6 +11980,135 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
+    // Case 1B: Approving an Independent All-Inclusive Shop Package (shop_30d / shop_365d / shop_earlybird_365d)
+    const isShopPackageTxn = Boolean(
+      (matchedTxn.planId && String(matchedTxn.planId).startsWith('shop_')) ||
+        (matchedTxn.type === 'restaurant_registration' && (matchedTxn.shopId || matchedTxn.restaurantId))
+    );
+    if (isShopPackageTxn) {
+      const shopId = matchedTxn.shopId || matchedTxn.restaurantId || '';
+      const resolvedShopPlan = matchedTxn.planId ? resolveOfficialPlanById(matchedTxn.planId, appSettings) : null;
+      const shopDurationDays =
+        typeof matchedTxn.durationDays === 'number' && matchedTxn.durationDays >= 1
+          ? matchedTxn.durationDays
+          : resolvedShopPlan?.durationDays || 30;
+      const shopFinalAmountUsd =
+        typeof matchedTxn.amountUsd === 'number' && matchedTxn.amountUsd > 0
+          ? matchedTxn.amountUsd
+          : resolvedShopPlan?.priceUsd || 6.99;
+
+      const existingShop = (latestSyncStateRef.current.restaurants || restaurants).find((r) => r.id === shopId);
+      const existingExpRaw =
+        existingShop?.shopSubscriptionExpiresAt ||
+        existingShop?.subscriptionExpiresAt ||
+        existingShop?.membershipExpiresAt;
+      const existingExpMs = parseSafeDateMs(existingExpRaw);
+      const baseStartMs = existingExpMs !== null && existingExpMs > now.getTime() ? existingExpMs : now.getTime();
+      const calcShopExpiry = new Date(baseStartMs + shopDurationDays * 24 * 60 * 60 * 1000).toISOString();
+      const rotationCfg = getVipFeaturedRotationConfig(appSettings);
+      const featuredUntilIso = new Date(now.getTime() + rotationCfg.durationMs).toISOString();
+
+      if (matchedTxn.transactionRef) {
+        recordVerifiedTransaction(matchedTxn.transactionRef);
+      }
+
+      setTransactions((prev) => {
+        const nextTxns = prev.map((t) => {
+          if (t.id !== txnId) return t;
+          return {
+            ...t,
+            shopId: shopId || t.shopId,
+            restaurantId: shopId || t.restaurantId,
+            durationDays: shopDurationDays,
+            amountUsd: shopFinalAmountUsd,
+            status: 'verified' as const,
+            paymentStatus: 'verified' as const,
+            verifiedAt: now.toISOString(),
+            verifiedBy: adminIdentity,
+            expiresAt: calcShopExpiry,
+          };
+        });
+        skipNextTransactionsCloudPushRef.current = false;
+        latestSyncStateRef.current.transactions = nextTxns;
+        try {
+          localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTxns));
+        } catch {}
+        if (isSupabaseConfigured()) {
+          mergeAndPushTransactionsToCloud(nextTxns).catch(() => {});
+        }
+        return nextTxns;
+      });
+
+      if (shopId) {
+        setRestaurants((prev) => {
+          const nextRests = prev.map((r) => {
+            if (r.id !== shopId) return r;
+            const activatedShop: Restaurant = {
+              ...r,
+              status: 'approved',
+              isVerified: true,
+              isPromoted: true,
+              isPromotedBadge: true,
+              membershipTier: 'premium',
+              membershipExpiresAt: calcShopExpiry,
+              subscriptionExpiresAt: calcShopExpiry,
+              shopSubscriptionExpiresAt: calcShopExpiry,
+              paymentStatus: 'verified',
+              shopPaymentStatus: 'active',
+              activeShopPlanId: (matchedTxn.planId as any) || (shopDurationDays >= 300 ? 'shop_365d' : 'shop_30d'),
+              paymentDate: now.toISOString().split('T')[0],
+              approvedAt: r.approvedAt || now.toISOString(),
+              featuredFromAt: now.toISOString(),
+              featuredUntilAt: featuredUntilIso,
+              updatedAt: now.toISOString(),
+            };
+            recordPermanentRestaurantOverride(activatedShop);
+            if (managingRestaurant?.id === shopId) setManagingRestaurant(activatedShop);
+            if (selectedRestaurant?.id === shopId) setSelectedRestaurant(activatedShop);
+            return activatedShop;
+          });
+          latestSyncStateRef.current.restaurants = nextRests;
+          scheduleStorageWrite('kft_restaurants_real_v13', nextRests, 300);
+          if (isSupabaseConfigured()) {
+            try {
+              pushCloudDocument(
+                'kft_cloud_custom_restaurants_v1',
+                nextRests.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.isAdminEdited))
+              );
+            } catch {}
+          }
+          return nextRests;
+        });
+      }
+
+      if (matchedTxn.planId === 'shop_earlybird_365d') {
+        const nextClaimed = Math.max(0, Number(appSettings.shopEarlyBirdClaimedCount || 0)) + 1;
+        updateAppSettings({ shopEarlyBirdClaimedCount: nextClaimed }).catch(() => {});
+      }
+
+      setNotifications((prev) => [
+        {
+          id: `notif-shop-pkg-approved-${Date.now()}`,
+          titleKh: '🏪 កញ្ចប់ហាង VIP ត្រូវបានអនុម័ត និងបើកដំណើរការ!',
+          titleEn: '🏪 VIP Shop Package Approved & Activated!',
+          messageKh: `ហាង «${matchedTxn.restaurantNameKh || existingShop?.nameKh || shopId}» ត្រូវបានបើកកញ្ចប់ហាង VIP (${shopDurationDays} ថ្ងៃ) រួមបញ្ចូលមុខងារទាំង ៥ ពេញលេញ!`,
+          messageEn: `Shop "${matchedTxn.restaurantNameKh || existingShop?.nameEn || shopId}" is now active with all 5 VIP Shop benefits for ${shopDurationDays} days!`,
+          type: 'system',
+          date: now.toISOString().split('T')[0],
+          isRead: false,
+        },
+        ...prev,
+      ]);
+
+      showToast(
+        language === 'km'
+          ? `✅ បានអនុម័ត និងបើកកញ្ចប់ហាង VIP (${shopDurationDays} ថ្ងៃ) ដោយជោគជ័យ!`
+          : `✅ Verified & activated VIP Shop Package (${shopDurationDays} days)!`,
+        'success'
+      );
+      return;
+    }
+
     // Case 2: Standard VIP Membership Upgrade / Registration
     const validatedPlan = resolveAndValidateVipPlan(
       {
@@ -12111,6 +12205,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     if (targetUserId || matchedTxn.userEmail) {
+      const resolvedConsumerPlanId: OfficialPlanId =
+        (matchedTxn.planId as OfficialPlanId) ||
+        (durationDays >= 300
+          ? 'consumer_365d'
+          : durationDays >= 80
+            ? 'consumer_90d'
+            : finalAmountUsd <= 1.25
+              ? 'consumer_promo_30d'
+              : 'consumer_30d');
       persistApprovedVipUserAndCloud({
         targetId: targetUserId || undefined,
         targetEmail: matchedTxn.userEmail || undefined,
@@ -12121,7 +12224,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         planType: validatedPlan.id,
         paymentMethod: matchedTxn.paymentMethod,
         transactionRef: matchedTxn.transactionRef,
+        extraFields: {
+          activeConsumerPlanId: resolvedConsumerPlanId,
+          ...(resolvedConsumerPlanId === 'consumer_promo_30d' ? { promo099Used: true } : {}),
+        },
       });
+      if (
+        currentUser &&
+        doesUserMatchTarget(currentUser, { id: targetUserId || undefined, email: matchedTxn.userEmail || undefined })
+      ) {
+        cancelTrialWinbackNotifications().catch(() => {});
+      }
 
       // Add approval notification
       const approvalNotif: AppNotification = {
@@ -12625,9 +12738,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     amountUsd?: number,
     durationDays?: number
   ): Promise<{ success: boolean; error?: string }> => {
-    if (!currentUser || (!isAdminAccount(currentUser) && !hasAuthenticatedEmailAccount(currentUser))) {
+    if (!currentUser || (!isAdminAccount(currentUser) && !hasAuthenticatedAccount(currentUser))) {
       redirectToEmailLoginForVipUpgrade(false);
-      return { success: false, error: 'Please log in with your email account first.' };
+      return { success: false, error: 'Please log in with your phone or Google/email account first.' };
     }
 
     const latestSettings = await refreshAppSettingsFromServer(true);
@@ -12747,9 +12860,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     durationDays?: number,
     amountUsd?: number
   ): Promise<{ success: boolean; error?: string }> => {
-    if (!currentUser || (!isAdminAccount(currentUser) && !hasAuthenticatedEmailAccount(currentUser))) {
+    if (!currentUser || (!isAdminAccount(currentUser) && !hasAuthenticatedAccount(currentUser))) {
       redirectToEmailLoginForVipUpgrade(true);
-      return { success: false, error: 'Please log in with your email account first.' };
+      return { success: false, error: 'Please log in with your phone or Google/email account first.' };
     }
 
     const latestSettings = await refreshAppSettingsFromServer(true);
@@ -12835,6 +12948,386 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { success: true, restored: true, message: successMsg };
   };
 
+  // Section A.3/A.4: 1-Time 7-Day Free Consumer VIP Trial (Android & Web ONLY; two-line identity + device hash guard)
+  const claimConsumerFreeTrial = async (): Promise<{ success: boolean; error?: string }> => {
+    if (isIosOrIpadAppStoreRuntime() || isNativeIosApp()) {
+      return { success: false, error: 'Not applicable on iOS' };
+    }
+    if (!currentUser || (!isAdminAccount(currentUser) && !hasAuthenticatedAccount(currentUser))) {
+      redirectToEmailLoginForVipUpgrade(false);
+      return { success: false, error: 'Authentication required' };
+    }
+    if (currentUser.email && isDisposableEmailAddress(currentUser.email)) {
+      const msg = tr(
+        language,
+        '⚠️ មិនអនុញ្ញាតឱ្យប្រើអ៊ីមែលបណ្តោះអាសន្នសម្រាប់ការសាកល្បងឥតគិតថ្លៃឡើយ។ សូមប្រើលេខទូរស័ព្ទ ឬគណនី Google ពិតប្រាកដ។',
+        '⚠️ Disposable email addresses cannot claim the free trial. Please use your phone number or Google account.',
+        '⚠️ 临时邮箱无法领取免费试用，请使用真实手机号或 Google 账号。'
+      );
+      showToast(msg, 'warning');
+      return { success: false, error: msg };
+    }
+    if (!isConsumerTrial7dEligible(currentUser)) {
+      const msg = tr(
+        language,
+        '⚠️ គណនីនេះធ្លាប់បានប្រើការសាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃរួចហើយ (១ ដងគត់)។',
+        '⚠️ This account has already used its one-time 7-day free trial.',
+        '⚠️ 此账号已使用过一次性 7 天免费试用。'
+      );
+      showToast(msg, 'warning');
+      return { success: false, error: msg };
+    }
+
+    const latestSettings = (await refreshAppSettingsFromServer(true)) || appSettings;
+    const catalog = getConsumerVipPricingCatalog(latestSettings);
+    if (!catalog.consumerVipEnabled || !catalog.trialPlan.enabled) {
+      const msg = tr(language, 'ការសាកល្បងឥតគិតថ្លៃត្រូវបានបិទបណ្តោះអាសន្ន។', 'Free trial is currently unavailable.', '免费试用当前不可用。');
+      showToast(msg, 'info');
+      return { success: false, error: msg };
+    }
+
+    const [deviceInfo, identityInfo] = await Promise.all([
+      getDeviceHashForTrialOrPromoClaim(),
+      computeIdentityClaimHashes({ email: currentUser.email, phone: currentUser.phone }),
+    ]);
+
+    const serverClaim = await claimConsumerTrialOnServer({
+      userId: currentUser.id,
+      email: currentUser.email,
+      phone: currentUser.phone,
+      deviceHash: deviceInfo.deviceHash || undefined,
+      identityHashes: identityInfo.identityHashes,
+      platform: deviceInfo.platform,
+    });
+
+    if (serverClaim.kind === 'already_claimed') {
+      const msg =
+        language === 'km'
+          ? serverClaim.messageKh
+          : language === 'zh'
+            ? '⚠️ 此账号或设备已领取过一次性 7 天免费试用。'
+            : serverClaim.messageEn;
+      showToast(msg, 'warning');
+      return { success: false, error: msg };
+    }
+
+    const trialDays = serverClaim.kind === 'granted' ? serverClaim.grant.days : catalog.trialPlan.durationDays;
+    const fallbackDates = calculateVipDates(undefined, trialDays, latestSettings);
+    const startDate = serverClaim.kind === 'granted' ? serverClaim.grant.startIso : fallbackDates.startDate;
+    const expiryDate = serverClaim.kind === 'granted' ? serverClaim.grant.expiryIso : fallbackDates.expiryDate;
+    const trialRef = `TRIAL-7D-${Date.now().toString(36).toUpperCase()}`;
+
+    persistApprovedVipUserAndCloud({
+      targetId: currentUser.id,
+      targetEmail: currentUser.email,
+      targetName: currentUser.name,
+      targetPhone: currentUser.phone,
+      startDate,
+      expiryDate,
+      durationDays: trialDays,
+      planType: 'quarterly',
+      paymentMethod: 'KHQR',
+      transactionRef: trialRef,
+      extraFields: {
+        activeConsumerPlanId: 'trial_7d',
+        freeTrialActivated: true,
+        freeTrialActivatedAt: startDate,
+        freeTrialExpiresAt: expiryDate,
+        autoRenew: false,
+        autoRenewCancelledAt: startDate,
+      },
+    });
+
+    syncTrialWinbackNotifications({
+      user: {
+        ...currentUser,
+        membershipTier: 'premium_vip',
+        subscriptionStatus: 'active',
+        subscriptionStartDate: startDate,
+        subscriptionExpiryDate: expiryDate,
+        activeConsumerPlanId: 'trial_7d',
+        freeTrialActivated: true,
+        freeTrialActivatedAt: startDate,
+        freeTrialExpiresAt: expiryDate,
+      },
+      language,
+      promoPriceUsd: catalog.promo30d.priceUsd,
+      requestPermissionIfPrompt: true,
+    }).catch(() => {});
+
+    setIsUpgradeVipModalOpen(false);
+    showToast(
+      tr(
+        language,
+        `🎉 បានបើកការសាកល្បង VIP ឥតគិតថ្លៃ ${trialDays} ថ្ងៃជោគជ័យ! (AI ${catalog.trialAiDailyLimit} ដង/ថ្ងៃ)`,
+        `🎉 Activated your ${trialDays}-day Free VIP Trial! (${catalog.trialAiDailyLimit} AI requests/day)`,
+        `🎉 已成功开启 ${trialDays} 天免费 VIP 试用！（每日 ${catalog.trialAiDailyLimit} 次 AI）`
+      ),
+      'success'
+    );
+    return { success: true };
+  };
+
+  // Section B: Independent All-Inclusive Shop Package Payment ($6.99/30d, $49.99 Early-Bird/365d, $59.99/365d — NO Lifetime)
+  const submitShopSubscriptionPaymentRequest = async (params: {
+    shopId: string;
+    planId: 'shop_30d' | 'shop_365d' | 'shop_earlybird_365d';
+    transactionRef?: string;
+    paymentProofData?: { dataUrl: string; fileName?: string; mimeType?: string };
+  }): Promise<{ success: boolean; transactionId: string; autoVerified?: boolean; error?: string }> => {
+    if (isIosOrIpadAppStoreRuntime() || isNativeIosApp()) {
+      return { success: false, transactionId: '', error: 'Unavailable on iOS' };
+    }
+    if (!currentUser || (!isAdminAccount(currentUser) && !hasAuthenticatedAccount(currentUser))) {
+      setIsAuthModalOpen(true);
+      return { success: false, transactionId: '', error: 'Sign in required' };
+    }
+
+    const targetShop = (latestSyncStateRef.current.restaurants || restaurants).find((r) => r.id === params.shopId);
+    if (!targetShop) {
+      showToast(tr(language, '⚠️ រកមិនឃើញហាងនេះទេ!', '⚠️ Shop not found!', '⚠️ 未找到该店铺！'), 'warning');
+      return { success: false, transactionId: '', error: 'Shop not found' };
+    }
+
+    const latestSettings = (await refreshAppSettingsFromServer(true)) || appSettings;
+    if (latestSettings.shopPayAfterApproval !== false && targetShop.status !== 'approved' && !isAdminAccount(currentUser)) {
+      const waitMsg = tr(
+        language,
+        '⏳ សូមរង់ចាំ Admin ពិនិត្យ និងអនុម័តហាងរបស់អ្នកជាមុនសិន មុនពេលបង់ប្រាក់បើកកញ្ចប់ហាង។',
+        '⏳ Please wait for Admin to approve your shop listing before submitting Shop Package payment.',
+        '⏳ 请等待管理员审核批准您的店铺后再支付店铺套餐。'
+      );
+      showToast(waitMsg, 'info');
+      return { success: false, transactionId: '', error: waitMsg };
+    }
+
+    const shopCat = getShopSubscriptionCatalog(latestSettings);
+    const chosenPlan =
+      params.planId === 'shop_earlybird_365d'
+        ? shopCat.earlyBirdRemaining > 0 && shopCat.earlyBirdPlan.enabled
+          ? shopCat.earlyBirdPlan
+          : shopCat.yearlyPlan
+        : params.planId === 'shop_365d'
+          ? shopCat.yearlyPlan
+          : shopCat.monthlyPlan;
+
+    const validDays = chosenPlan.durationDays;
+    const validPrice = chosenPlan.priceUsd;
+    const resolvedPlanId = chosenPlan.planId;
+    const cleanTrxRef =
+      (params.transactionRef || '').trim().toUpperCase() ||
+      `ABA-SHOP-${validDays}D-${Date.now().toString(36).toUpperCase()}`;
+
+    const now = new Date();
+    const nowIso = now.toISOString();
+    const formattedNow = nowIso.replace('T', ' ').slice(0, 16);
+    const txnId = `TXN-SHOP-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
+
+    if (params.paymentProofData?.dataUrl) {
+      try {
+        const rawVault = localStorage.getItem('kft_secure_payment_proofs_vault_v1');
+        const vault = rawVault ? JSON.parse(rawVault) : {};
+        vault[txnId] = {
+          txnId,
+          userId: currentUser.id,
+          dataUrl: params.paymentProofData.dataUrl,
+          fileName: params.paymentProofData.fileName || 'aba_shop_receipt.png',
+          mimeType: params.paymentProofData.mimeType || 'image/png',
+          uploadedAt: nowIso,
+        };
+        localStorage.setItem('kft_secure_payment_proofs_vault_v1', JSON.stringify(vault));
+      } catch {}
+    }
+
+    let aiReport: AbaReceiptVerificationReport | undefined;
+    let serverGrant: { startIso: string; expiryIso: string } | undefined;
+    if (params.paymentProofData?.dataUrl) {
+      const serverRes = await verifyVipPurchaseOnServer({
+        userId: currentUser.id,
+        durationDays: validDays,
+        receiptDataUrl: params.paymentProofData.dataUrl,
+        submittedTrxId: cleanTrxRef,
+        planId: resolvedPlanId,
+        shopId: targetShop.id,
+      });
+      if (serverRes.kind !== 'unavailable') {
+        aiReport = serverRes.report as unknown as AbaReceiptVerificationReport;
+        if (serverRes.kind === 'verified') serverGrant = serverRes.grant;
+      } else {
+        aiReport = await Promise.race([
+          verifyAbaPaymentAndReceipt({
+            receiptDataUrl: params.paymentProofData.dataUrl,
+            expectedAmountUsd: validPrice,
+            expectedDurationDays: validDays,
+            submittedTrxId: cleanTrxRef,
+            submittedDate: nowIso.split('T')[0],
+            userId: currentUser.id,
+            existingTransactions: transactions,
+          }).catch(() => undefined),
+          new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 2500)),
+        ]);
+      }
+    }
+
+    const effectiveTrxRef =
+      aiReport?.extractedReceipt?.trxId && /^ABA-SHOP-/i.test(cleanTrxRef)
+        ? aiReport.extractedReceipt.trxId
+        : cleanTrxRef;
+
+    const isAutoVerified = Boolean(aiReport && aiReport.canAutoApprove && aiReport.status === 'verified');
+    const existingExpRaw =
+      targetShop.shopSubscriptionExpiresAt || targetShop.subscriptionExpiresAt || targetShop.membershipExpiresAt;
+    const existingExpMs = parseSafeDateMs(existingExpRaw);
+    const baseStartMs = existingExpMs !== null && existingExpMs > now.getTime() ? existingExpMs : now.getTime();
+    const stackedExpiryIso =
+      serverGrant?.expiryIso || new Date(baseStartMs + validDays * 24 * 60 * 60 * 1000).toISOString();
+
+    if (isAutoVerified && params.paymentProofData?.dataUrl) {
+      recordVerifiedTransaction(effectiveTrxRef);
+      recordVerifiedReceiptFingerprint(
+        computeReceiptImageFingerprint(params.paymentProofData.dataUrl),
+        currentUser.id,
+        effectiveTrxRef
+      );
+    }
+
+    const newTxn: RegistrationTransaction = {
+      id: txnId,
+      type: 'restaurant_registration',
+      planId: resolvedPlanId,
+      shopId: targetShop.id,
+      restaurantId: targetShop.id,
+      restaurantNameKh: targetShop.nameKh || targetShop.nameEn,
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userEmail: currentUser.email,
+      ownerId: currentUser.id,
+      ownerName: currentUser.name,
+      planType: validDays >= 300 ? 'annual' : 'quarterly',
+      amountUsd: validPrice,
+      currency: 'USD',
+      durationDays: validDays,
+      membershipTier: 'premium',
+      status: isAutoVerified ? 'verified' : 'pending_verification',
+      paymentMethod: 'KHQR',
+      transactionRef: effectiveTrxRef,
+      paymentProofUrl: params.paymentProofData?.dataUrl,
+      paymentProofUploadedAt: params.paymentProofData?.dataUrl ? formattedNow : undefined,
+      paymentProofFileName: params.paymentProofData?.fileName,
+      paymentProofMimeType: params.paymentProofData?.mimeType,
+      createdAt: formattedNow,
+      expiresAt: isAutoVerified ? stackedExpiryIso : undefined,
+      verifiedAt: isAutoVerified ? formattedNow : undefined,
+      verifiedBy: isAutoVerified ? 'AI & Server Receipt Verification' : undefined,
+      notes: `Shop Package (${resolvedPlanId}: $${validPrice.toFixed(2)} / ${validDays}d) for "${targetShop.nameKh || targetShop.nameEn}"`,
+      aiVerificationReport: aiReport,
+    };
+
+    const baseTxns = latestSyncStateRef.current.transactions || transactions;
+    const nextTxns = [newTxn, ...baseTxns.filter((t) => t.id !== newTxn.id)];
+    skipNextTransactionsCloudPushRef.current = false;
+    latestSyncStateRef.current.transactions = nextTxns;
+    try {
+      localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTxns));
+    } catch {}
+    setTransactions(nextTxns);
+    if (isSupabaseConfigured()) {
+      await mergeAndPushTransactionsToCloud(nextTxns).catch(() => {});
+    }
+
+    const rotationCfg = getVipFeaturedRotationConfig(latestSettings);
+    const featuredUntilIso = new Date(now.getTime() + rotationCfg.durationMs).toISOString();
+
+    setRestaurants((prev) => {
+      const nextRests = prev.map((r) => {
+        if (r.id !== targetShop.id) return r;
+        const nextShop: Restaurant = isAutoVerified
+          ? {
+              ...r,
+              status: 'approved',
+              isVerified: true,
+              isPromoted: true,
+              isPromotedBadge: true,
+              membershipTier: 'premium',
+              membershipExpiresAt: stackedExpiryIso,
+              subscriptionExpiresAt: stackedExpiryIso,
+              shopSubscriptionExpiresAt: stackedExpiryIso,
+              paymentStatus: 'verified',
+              shopPaymentStatus: 'active',
+              activeShopPlanId: resolvedPlanId,
+              paymentDate: nowIso.split('T')[0],
+              featuredFromAt: nowIso,
+              featuredUntilAt: featuredUntilIso,
+              updatedAt: nowIso,
+            }
+          : {
+              ...r,
+              paymentStatus: 'pending_verification',
+              shopPaymentStatus: 'pending_verification',
+              activeShopPlanId: resolvedPlanId,
+              updatedAt: nowIso,
+            };
+        recordPermanentRestaurantOverride(nextShop);
+        if (managingRestaurant?.id === targetShop.id) setManagingRestaurant(nextShop);
+        if (selectedRestaurant?.id === targetShop.id) setSelectedRestaurant(nextShop);
+        return nextShop;
+      });
+      latestSyncStateRef.current.restaurants = nextRests;
+      scheduleStorageWrite('kft_restaurants_real_v13', nextRests, 300);
+      if (isSupabaseConfigured()) {
+        try {
+          pushCloudDocument(
+            'kft_cloud_custom_restaurants_v1',
+            nextRests.filter((r) => !isSeedRestaurantId(r.id) || Boolean(r.ownerId || r.ownerEmail || r.ownerPhone || r.isAdminEdited))
+          );
+        } catch {}
+      }
+      return nextRests;
+    });
+
+    if (isAutoVerified) {
+      if (resolvedPlanId === 'shop_earlybird_365d') {
+        const nextClaimed = Math.max(0, Number(latestSettings.shopEarlyBirdClaimedCount || 0)) + 1;
+        updateAppSettings({ shopEarlyBirdClaimedCount: nextClaimed }).catch(() => {});
+      }
+      showToast(
+        tr(
+          language,
+          `🎉 ផ្ទៀងផ្ទាត់ជោគជ័យ! កញ្ចប់ហាង VIP (${validDays} ថ្ងៃ) សម្រាប់ «${targetShop.nameKh || targetShop.nameEn}» ត្រូវបានបើកដំណើរការ!`,
+          `🎉 Verified! VIP Shop Package (${validDays} days) for "${targetShop.nameEn || targetShop.nameKh}" is now active!`,
+          `🎉 验证成功！店铺 VIP 套餐（${validDays} 天）已正式激活！`
+        ),
+        'success'
+      );
+      return { success: true, transactionId: txnId, autoVerified: true };
+    }
+
+    setNotifications((prev) => [
+      {
+        id: `notif-shop-pay-pending-${Date.now()}`,
+        titleKh: '⏳ សំណើបង់ប្រាក់កញ្ចប់ហាងកំពុងរង់ចាំផ្ទៀងផ្ទាត់',
+        titleEn: '⏳ Shop Package Payment Awaiting Verification',
+        messageKh: `សំណើបង់ប្រាក់ $${validPrice.toFixed(2)} (${validDays} ថ្ងៃ) សម្រាប់ហាង «${targetShop.nameKh || targetShop.nameEn}» ត្រូវបានបញ្ជូនទៅរដ្ឋបាលដើម្បីផ្ទៀងផ្ទាត់។`,
+        messageEn: `Your $${validPrice.toFixed(2)} (${validDays} days) payment for "${targetShop.nameEn || targetShop.nameKh}" is awaiting Admin verification.`,
+        type: 'system',
+        date: nowIso.split('T')[0],
+        isRead: false,
+      },
+      ...prev,
+    ]);
+
+    showToast(
+      tr(
+        language,
+        '✅ បានបញ្ជូនវិក្កយបត្រកញ្ចប់ហាងរួចរាល់! កំពុងរង់ចាំរដ្ឋបាលផ្ទៀងផ្ទាត់ និងអនុម័ត។',
+        '✅ Shop Package receipt submitted! Awaiting Admin verification & approval.',
+        '✅ 店铺套餐凭据已提交！正在等待管理员审核批准。'
+      ),
+      'success'
+    );
+    return { success: true, transactionId: txnId, autoVerified: false };
+  };
+
   // Submit VIP Upgrade Request for Administrator Review & Approval
   const submitVipUpgradeRequest = async (
     durationDays?: number,
@@ -12847,18 +13340,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       paymentMethod?: 'KHQR' | 'Bakong' | 'Card' | 'GooglePlayBilling';
       paymentLabel?: string;
       explicitConsent?: boolean;
-    }
+    },
+    explicitPlanId?: OfficialPlanId
   ): Promise<{ success: boolean; transactionId: string; error?: string }> => {
-    if (!currentUser || (!isAdminAccount(currentUser) && !hasAuthenticatedEmailAccount(currentUser))) {
+    if (!currentUser || (!isAdminAccount(currentUser) && !hasAuthenticatedAccount(currentUser))) {
       redirectToEmailLoginForVipUpgrade(false);
-      return { success: false, transactionId: '', error: 'Email account authentication required before VIP payment' };
+      return { success: false, transactionId: '', error: 'Account authentication required before VIP payment' };
     }
 
     const latestSettings = await refreshAppSettingsFromServer(true);
+    const resolvedOfficial = explicitPlanId ? resolveOfficialPlanById(explicitPlanId, latestSettings) : null;
+    if (resolvedOfficial?.planId === 'consumer_promo_30d' && !isConsumerPromo099Eligible(currentUser)) {
+      const ineligibleMsg = tr(
+        language,
+        '⚠️ ប្រូម៉ូសិន $0.99 គឺសម្រាប់តែគណនីដែលបានប្រើការសាកល្បង 7 ថ្ងៃផុតកំណត់ប៉ុណ្ណោះ (១ ដងគត់)។',
+        '⚠️ The $0.99 win-back promo is only available once after completing the 7-day trial.',
+        '⚠️ $0.99 回归优惠仅限完成 7 天试用后使用一次。'
+      );
+      showToast(ineligibleMsg, 'warning');
+      return { success: false, transactionId: '', error: ineligibleMsg };
+    }
     const validatedPlan = resolveAndValidateVipPlan({ durationDays, amountUsd }, latestSettings);
-    const validDays = validatedPlan.durationDays;
-    const validPrice = validatedPlan.priceUsd;
-    const planType: 'quarterly' | 'annual' = validatedPlan.id;
+    const validDays = resolvedOfficial ? resolvedOfficial.durationDays : validatedPlan.durationDays;
+    const validPrice = resolvedOfficial ? resolvedOfficial.priceUsd : validatedPlan.priceUsd;
+    const resolvedConsumerPlanId: OfficialPlanId =
+      resolvedOfficial?.planId ||
+      (validDays >= 300
+        ? 'consumer_365d'
+        : validDays >= 80
+          ? 'consumer_90d'
+          : validPrice <= 1.25
+            ? 'consumer_promo_30d'
+            : 'consumer_30d');
+    const planType: 'quarterly' | 'annual' = validDays >= 300 ? 'annual' : validatedPlan.id;
 
     // Check if there is an existing pending or needs_more_info request for this user
     const existingPending = transactions.find(
@@ -12991,11 +13505,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (paymentProofData?.dataUrl) {
       // 1) Server-side verification (Edge Function): the server reads the receipt, checks recipient / amount / date /
       //    Trx ID / anti-replay and - only on a clean pass - writes the VIP entitlement itself.
+      const [claimDeviceInfo, claimIdentityInfo] =
+        resolvedConsumerPlanId === 'consumer_promo_30d'
+          ? await Promise.all([
+              getDeviceHashForTrialOrPromoClaim(),
+              computeIdentityClaimHashes({ email: currentUser.email, phone: currentUser.phone }),
+            ])
+          : [null, null];
       const serverRes = await verifyVipPurchaseOnServer({
         userId: currentUser.id,
         durationDays: validDays,
         receiptDataUrl: paymentProofData.dataUrl,
         submittedTrxId: cleanTrxRef,
+        planId: resolvedConsumerPlanId,
+        email: currentUser.email,
+        phone: currentUser.phone,
+        deviceHash: claimDeviceInfo?.deviceHash || undefined,
+        identityHashes: claimIdentityInfo?.identityHashes,
       });
       if (serverRes.kind !== 'unavailable') {
         aiReport = serverRes.report as unknown as AbaReceiptVerificationReport;
@@ -13043,6 +13569,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newTxn: RegistrationTransaction = {
       id: txnId,
       type: 'user_vip_upgrade',
+      planId: resolvedConsumerPlanId,
       userId: currentUser.id,
       userName: currentUser.name,
       userEmail: currentUser.email,
@@ -13129,8 +13656,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         planType,
         paymentMethod: 'KHQR',
         transactionRef: effectiveTrxRef,
-        extraFields: autoRenewExtraFields,
+        extraFields: {
+          ...autoRenewExtraFields,
+          activeConsumerPlanId: resolvedConsumerPlanId,
+          ...(resolvedConsumerPlanId === 'consumer_promo_30d' ? { promo099Used: true } : {}),
+        },
       });
+      cancelTrialWinbackNotifications().catch(() => {});
 
       const userSuccessNotif: AppNotification = {
         id: `notif-user-vip-auto-${Date.now()}`,
@@ -14893,13 +15425,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deletedUsers,
         login,
         register,
+        registerWithPhone,
+        loginWithPhone,
         loginWithGoogle,
         logout,
         updateUserRole,
         updateCurrentUserProfile,
         adminGrantUserVip,
-        grantFoodCheckInReward,
-        syncUserCheckInLedgerToBackend,
         cancelUserVip,
         restoreUserAccess,
         disableUserAccount,
@@ -15080,6 +15612,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isVipRenewMode,
         setIsVipRenewMode,
         openUpgradeVipModal,
+        claimConsumerFreeTrial,
+        submitShopSubscriptionPaymentRequest,
         submitVipUpgradeRequest,
         upgradeCurrentUserToVip,
         renewCurrentUserVip,

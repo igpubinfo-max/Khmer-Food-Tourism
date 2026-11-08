@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { CheckCircle2, FileSpreadsheet, ShieldCheck, Upload, XCircle } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { resolveOfficialPlanById } from '../../types';
 import { matchPayments, normalizeRows, parseCsv, type MatchResult, type PendingPayment } from '../../utils/statementMatch';
 
 /**
@@ -58,8 +59,18 @@ export const AdminStatementMatchPanel: React.FC = () => {
           userEmail: t.userEmail,
           trxId: String(t.aiVerificationReport?.extractedReceipt?.trxId || t.transactionRef || ''),
           amountUsd: Number(t.amountUsd) || 0,
+          planId: t.planId,
+          planLabel: (() => {
+            const resolved = t.planId ? resolveOfficialPlanById(t.planId) : null;
+            if (resolved) return isKm ? resolved.titleKm : resolved.titleEn;
+            if (t.type === 'restaurant_registration') return isKm ? `កញ្ចប់ហាង (${t.durationDays || 30} ថ្ងៃ)` : `Shop Plan (${t.durationDays || 30}d)`;
+            return isKm ? `Consumer VIP (${t.durationDays || 30} ថ្ងៃ)` : `Consumer VIP (${t.durationDays || 30}d)`;
+          })(),
+          shopId: t.shopId || t.restaurantId,
+          shopName: t.restaurantNameKh,
+          isShopPlan: Boolean((t.planId && String(t.planId).startsWith('shop_')) || t.type === 'restaurant_registration'),
         })),
-    [transactions]
+    [transactions, isKm]
   );
 
   const rematch = (rows: ReturnType<typeof normalizeRows>) => setResults(matchPayments(pending, rows));
@@ -243,6 +254,9 @@ export const AdminStatementMatchPanel: React.FC = () => {
                     <span className={`px-2 py-0.5 rounded-full font-khmer font-bold text-[10px] ${l.cls}`}>{l.text}</span>
                     <span className="font-mono text-[11px] font-bold">{r.payment.id}</span>
                     <span className="font-mono text-[11px] text-emerald-700 font-bold">${r.payment.amountUsd.toFixed(2)}</span>
+                    <span className={`px-2 py-0.5 rounded-full font-khmer text-[10px] font-bold ${r.payment.isShopPlan ? 'bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-200' : 'bg-emerald-100 text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-200'}`}>
+                      {r.payment.isShopPlan ? `🏪 ${r.payment.shopName || r.payment.planLabel || 'Shop'}` : `👑 ${r.payment.planLabel || 'VIP'}`}
+                    </span>
                   </div>
                   <div className="font-khmer text-[11px] text-stone-600 dark:text-stone-300 truncate">
                     {r.payment.userName || r.payment.userEmail || '—'} · Trx ID: <span className="font-mono">{r.payment.trxId || '—'}</span>

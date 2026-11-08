@@ -10,6 +10,7 @@ import {
 import { IconSmartAssistant } from './icons/HandcraftedIcons';
 import { openSmartHub } from '../utils/smartHub';
 import { tr } from '../utils/i18n';
+import { isNativeIosApp } from '../types';
 
 interface HeaderProps {
   onOpenSmartHub?: () => void;
@@ -174,17 +175,20 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
                     <span>{tr(language, 'ស្កេនកូដ QR ហាង', 'Scan QR Code', '扫描店铺二维码')}</span>
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setIsSupportModalOpen(true);
-                    }}
-                    className="w-full px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-white/10 transition cursor-pointer text-left font-semibold"
-                  >
-                    <Heart className="w-4 h-4 text-rose-400 fill-rose-400" />
-                    <span>{tr(language, 'គាំទ្រការអភិវឌ្ឍកម្មវិធី', 'Support App', '支持应用开发')}</span>
-                  </button>
+                  {/* App Store Guideline 3.1.1: no external donation / KHQR payment inside the iOS app */}
+                  {!isNativeIosApp() && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        setIsSupportModalOpen(true);
+                      }}
+                      className="w-full px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-white/10 transition cursor-pointer text-left font-semibold"
+                    >
+                      <Heart className="w-4 h-4 text-rose-400 fill-rose-400" />
+                      <span>{tr(language, 'គាំទ្រការអភិវឌ្ឍកម្មវិធី', 'Support App', '支持应用开发')}</span>
+                    </button>
+                  )}
 
                   <div className="my-1 border-t border-white/10" />
 

@@ -15,7 +15,7 @@
 import { MAX_REQUEST_BYTES, SlidingWindowLimiter, sanitizeGeminiRequest } from './sanitize.ts';
 import { geminiToOpenAi, openAiToGemini, pickOpenAiModel, shouldFailover } from './openai.ts';
 import { geminiEndpoints, shouldTryNextEndpoint } from './endpoint.ts';
-import { decideQuota, envInt, isVipActive, safeUserId, userKvKey } from '../_shared/common.ts';
+import { decideQuota, isVipActive, resolveUserAiDailyLimit, safeUserId, userKvKey } from '../_shared/common.ts';
 import { background, logUsage, readUserDoc, usageHit } from '../_shared/supa.ts';
 
 declare const Deno: {
@@ -27,12 +27,25 @@ const corsHeaders: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-kft-user-id, x-kft-purpose',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Expose-Headers': 'x-food-ai-proxy, x-food-ai-provider, x-kft-quota-used, x-kft-quota-limit',
+  'Access-Control-Expose-Headers': 'x-food-ai-proxy, x-food-ai-provider, x-kft-quota-used, x-kft-quota-limit, x-kft-quota-tier',
   'x-food-ai-proxy': '1',
 };
 
 const perMinute = new SlidingWindowLimiter(20, 60_000);
 const perHour = new SlidingWindowLimiter(240, 60 * 60_000);
+
+let cachedPricingDoc: unknown = null;
+let cachedPricingAt = 0;
+async function getCachedPricingDoc(): Promise<unknown> {
+  const now = Date.now();
+  if (cachedPricingDoc && now - cachedPricingAt < 60_000) return cachedPricingDoc;
+  const doc = await readUserDoc('kft_cloud_admin_vip_pricing_v2');
+  if (doc) {
+    cachedPricingDoc = doc;
+    cachedPricingAt = now;
+  }
+  return cachedPricingDoc;
+}
 
 function json(status: number, payload: unknown, extra: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(payload), {
@@ -164,8 +177,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
   // VIP rule but have their own small daily allowance and must carry an image.
   const isPayment = req.headers.get('x-kft-purpose') === 'payment';
   const enforceVip = Deno.env.get('FOOD_AI_ENFORCE_VIP') === 'true' && !isPayment;
-  let vip = false;
-  if (userId) vip = isVipActive(await readUserDoc(userKvKey(userId)));
+  const [userDoc, pricingDoc] = userId
+    ? await Promise.all([readUserDoc(userKvKey(userId)), getCachedPricingDoc()])
+    : [null, null];
+  const vip = userId ? isVipActive(userDoc) : false;
   if (enforceVip) {
     if (!userId) return json(401, { error: { status: 'AUTH_REQUIRED', message: 'Sign in to use AI.' } });
     if (!vip) return json(403, { error: { status: 'VIP_REQUIRED', message: 'VIP membership is required for AI features.' } });
@@ -175,16 +190,23 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const hasImage = contents.some((t) => (t.parts || []).some((p) => p.inlineData));
   if (isPayment && !hasImage) return json(400, { error: { status: 'INVALID_ARGUMENT', message: 'payment check needs an image' } });
   const weight = hasImage ? 3 : 1; // image recognition costs more than a text question
-  const limit = isPayment
-    ? envInt(Deno.env.get('AI_DAILY_LIMIT_PAYMENT'), 45)
-    : userId
-      ? vip
-        ? envInt(Deno.env.get('AI_DAILY_LIMIT_VIP'), 150)
-        : envInt(Deno.env.get('AI_DAILY_LIMIT_FREE'), 20)
-      : envInt(Deno.env.get('AI_DAILY_LIMIT_ANON'), 20);
+  const { limit, tier: quotaTier } = resolveUserAiDailyLimit({
+    isPayment,
+    userId,
+    userDoc,
+    pricingDoc,
+    envTrial: Deno.env.get('AI_DAILY_LIMIT_TRIAL'),
+    envVip: Deno.env.get('AI_DAILY_LIMIT_VIP'),
+    envFree: Deno.env.get('AI_DAILY_LIMIT_FREE'),
+    envAnon: Deno.env.get('AI_DAILY_LIMIT_ANON'),
+    envPayment: Deno.env.get('AI_DAILY_LIMIT_PAYMENT'),
+  });
   const quotaKey = userId || `ip:${ip}`;
   const used = await usageHit(quotaKey, isPayment ? 'ai_payment' : 'ai', weight); // null => counter unavailable => fail open
-  const quotaHeaders: Record<string, string> = used === null ? {} : { 'x-kft-quota-used': String(used), 'x-kft-quota-limit': String(limit) };
+  const quotaHeaders: Record<string, string> =
+    used === null
+      ? { 'x-kft-quota-tier': quotaTier }
+      : { 'x-kft-quota-used': String(used), 'x-kft-quota-limit': String(limit), 'x-kft-quota-tier': quotaTier };
   if (used !== null && !decideQuota(used, limit).allowed) {
     background(logUsage({ user_key: quotaKey, kind: 'ai', status: 429, note: 'daily_quota', ms: Date.now() - started }));
     return json(429, { error: { status: 'DAILY_QUOTA_EXCEEDED', message: 'Daily AI limit reached. Try again tomorrow.' } }, { 'Retry-After': '3600', ...quotaHeaders });

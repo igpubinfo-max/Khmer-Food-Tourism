@@ -14,6 +14,7 @@
  */
 
 import { adminTokenHeaders, isAdminServerAuthActive, adminServerChangePin } from './adminAuthClient';
+import { getCanonicalPhoneDigits } from '../utils/identityNormalize';
 import { ensurePlacesProxyProbed, isPlacesProxyKnownAlive } from './placesProxy';
 import {
   User,
@@ -1518,9 +1519,41 @@ export function normalizeAuthoritativeAppSettings(
   }
 
   const includedFree =
-    typeof merged.includedFreeStoresPerVip === 'number' && merged.includedFreeStoresPerVip >= 1
+    typeof merged.includedFreeStoresPerVip === 'number' && merged.includedFreeStoresPerVip >= 0
       ? Math.round(merged.includedFreeStoresPerVip)
-      : 1;
+      : 0;
+
+  const sanitizeMoney = (v: unknown, def: number) => {
+    const n = Number(v);
+    return Number.isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : def;
+  };
+  const sanitizeDays = (v: unknown, def: number) => {
+    const n = Number(v);
+    return Number.isFinite(n) && n >= 1 ? Math.min(3650, Math.round(n)) : def;
+  };
+
+  const consumerVipEnabled = merged.consumerVipEnabled !== false;
+  const consumerTrialDays = sanitizeDays(merged.consumerTrialDays, 7);
+  const consumerTrialAiDailyLimit = sanitizeDays(merged.consumerTrialAiDailyLimit, 15);
+  const consumerPaidAiDailyLimit = sanitizeDays(merged.consumerPaidAiDailyLimit, 80);
+  const consumerPromo30dPriceUsd = sanitizeMoney(merged.consumerPromo30dPriceUsd, 0.99);
+  const consumerPromo30dDays = sanitizeDays(merged.consumerPromo30dDays, 30);
+  const consumer30dPriceUsd = sanitizeMoney(merged.consumer30dPriceUsd, 2.99);
+  const consumer30dDays = sanitizeDays(merged.consumer30dDays, 30);
+  const consumer90dPriceUsd = sanitizeMoney(merged.consumer90dPriceUsd, 6.99);
+  const consumer90dDays = sanitizeDays(merged.consumer90dDays, 90);
+  const consumer365dPriceUsd = sanitizeMoney(merged.consumer365dPriceUsd, 19.99);
+  const consumer365dDays = sanitizeDays(merged.consumer365dDays, 365);
+
+  const shopMonthlyPriceUsd = sanitizeMoney(merged.shopMonthlyPriceUsd, 6.99);
+  const shopMonthlyDays = sanitizeDays(merged.shopMonthlyDays, 30);
+  const shopYearlyPriceUsd = sanitizeMoney(merged.shopYearlyPriceUsd, 59.99);
+  const shopYearlyDays = sanitizeDays(merged.shopYearlyDays, 365);
+  const shopEarlyBirdEnabled = merged.shopEarlyBirdEnabled !== false;
+  const shopEarlyBirdYearlyPriceUsd = sanitizeMoney(merged.shopEarlyBirdYearlyPriceUsd, 49.99);
+  const shopEarlyBirdMaxShops = sanitizeDays(merged.shopEarlyBirdMaxShops, 50);
+  const shopEarlyBirdClaimedCount = Math.max(0, Math.floor(Number(merged.shopEarlyBirdClaimedCount) || 0));
+  const shopPayAfterApproval = merged.shopPayAfterApproval !== false;
 
   const vipFeaturedRotationEnabled = merged.vipFeaturedRotationEnabled !== false;
   const rawFeaturedDays = Number(merged.vipFeaturedDurationDays);
@@ -1590,6 +1623,27 @@ export function normalizeAuthoritativeAppSettings(
     includedFreeStoresPerVip: includedFree,
     vipFeaturedRotationEnabled,
     vipFeaturedDurationDays,
+    consumerVipEnabled,
+    consumerTrialDays,
+    consumerTrialAiDailyLimit,
+    consumerPaidAiDailyLimit,
+    consumerPromo30dPriceUsd,
+    consumerPromo30dDays,
+    consumer30dPriceUsd,
+    consumer30dDays,
+    consumer90dPriceUsd,
+    consumer90dDays,
+    consumer365dPriceUsd,
+    consumer365dDays,
+    shopMonthlyPriceUsd,
+    shopMonthlyDays,
+    shopYearlyPriceUsd,
+    shopYearlyDays,
+    shopEarlyBirdEnabled,
+    shopEarlyBirdYearlyPriceUsd,
+    shopEarlyBirdMaxShops,
+    shopEarlyBirdClaimedCount,
+    shopPayAfterApproval,
     promotionalFeeUsd: shortPrice,
     promotionPeriodKh: `កញ្ចប់ VIP ផ្លូវការ៖ ${shortPrice.toFixed(2)} សម្រាប់ ${shortDays} ថ្ងៃ ឬ ${longPrice.toFixed(2)} សម្រាប់ ${longDays} ថ្ងៃ • បន្ថែមហាងថ្មី៖ ${extraStoreFee.toFixed(2)} / ១ ហាង`,
     promotionPeriodEn: `Official VIP Plans: ${shortPrice.toFixed(2)} for ${shortDays} Days or ${longPrice.toFixed(2)} for ${longDays} Days • Additional Store: ${extraStoreFee.toFixed(2)} / store`,
@@ -1713,7 +1767,7 @@ export async function saveAuthoritativeAppSettingsToServer(
   const longNameKh = (settings.vipLongNameKh || '').trim() || `VIP ${longDays} ថ្ងៃ`;
   const longNameEn = (settings.vipLongNameEn || '').trim() || `VIP ${longDays} Days`;
 
-  const normalized: AppSettings = {
+  const normalized: AppSettings = normalizeAuthoritativeAppSettings({
     ...settings,
     apkDownloadUrl: '',
     playStoreUrl: settings.playStoreUrl || 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism',
@@ -1731,9 +1785,7 @@ export async function saveAuthoritativeAppSettingsToServer(
     vipFeaturedRotationEnabled,
     vipFeaturedDurationDays,
     promotionalFeeUsd: shortPrice,
-    promotionPeriodKh: `កញ្ចប់ VIP ផ្លូវការ៖ ${shortPrice.toFixed(2)} សម្រាប់ ${shortDays} ថ្ងៃ ឬ ${longPrice.toFixed(2)} សម្រាប់ ${longDays} ថ្ងៃ • បន្ថែមហាងថ្មី៖ ${extraStoreFee.toFixed(2)} / ១ ហាង`,
-    promotionPeriodEn: `Official VIP Plans: ${shortPrice.toFixed(2)} for ${shortDays} Days or ${longPrice.toFixed(2)} for ${longDays} Days • Additional Store: ${extraStoreFee.toFixed(2)} / store`,
-  };
+  });
 
   // When the admin password is verified on the server, the (offline-crackable) hash must not be published in the
   // world-readable settings documents any more.
@@ -2370,7 +2422,7 @@ export async function verifyUserVipStatusFromBackend(
 export function getCanonicalUserId(u: Partial<User>): string {
   const rawId = String(u.id || '').trim();
   const cleanEmail = String(u.email || '').trim().toLowerCase();
-  const cleanPhone = String(u.phone || '').replace(/[\s-+()]/g, '');
+  const cleanPhone = getCanonicalPhoneDigits(u.phone) || String(u.phone || '').replace(/[\s-+()]/g, '');
 
   // Preserve protected built-in IDs
   if (rawId === 'admin-authorized-single') return 'admin-authorized-single';
@@ -2427,9 +2479,14 @@ export function getCandidateAtomicUserKeys(u?: Partial<User> | null): string[] {
     keys.add(`${USER_RECORD_PREFIX}google-${slug}`);
     keys.add(`${USER_RECORD_PREFIX}owner-${slug}`);
   }
-  const cleanPhone = String(u.phone || '').replace(/[\s-+()]/g, '');
-  if (cleanPhone.length >= 7) {
-    keys.add(`${USER_RECORD_PREFIX}user-phone-${cleanPhone}`);
+  const rawPhoneDigits = String(u.phone || '').replace(/[\s-+()]/g, '');
+  const canonPhoneDigits = getCanonicalPhoneDigits(u.phone);
+  if (canonPhoneDigits && canonPhoneDigits.length >= 8) {
+    keys.add(`${USER_RECORD_PREFIX}user-phone-${canonPhoneDigits}`);
+    keys.add(`${USER_RECORD_PREFIX}user-phone_${canonPhoneDigits}_phone_kh`);
+  }
+  if (rawPhoneDigits.length >= 7) {
+    keys.add(`${USER_RECORD_PREFIX}user-phone-${rawPhoneDigits}`);
   }
   return Array.from(keys);
 }
@@ -2690,24 +2747,15 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
         ...(Array.isArray(second.additionalStorePaymentIds) ? second.additionalStorePaymentIds : []),
       ])
     ),
-    // One-time food check-in reward & Free 30-Day VIP Trial fields must survive every merge across updates and devices.
-    foodCheckInRewardAt:
-      [first.foodCheckInRewardAt, second.foodCheckInRewardAt, first.freeTrialActivatedAt, second.freeTrialActivatedAt]
-        .filter((v): v is string => typeof v === 'string' && v.length > 0 && v !== 'granted')
-        .sort()[0] ||
-      first.foodCheckInRewardAt ||
-      second.foodCheckInRewardAt ||
-      undefined,
+    // Server-verified 7-Day Free Trial fields survive merges across updates and devices (retired foodCheckInRewardAt never activates trial).
     freeTrialActivated: Boolean(
       first.freeTrialActivated ||
         second.freeTrialActivated ||
-        first.foodCheckInRewardAt ||
-        second.foodCheckInRewardAt ||
         first.freeTrialActivatedAt ||
         second.freeTrialActivatedAt
     ) || undefined,
     freeTrialActivatedAt:
-      [first.freeTrialActivatedAt, second.freeTrialActivatedAt, first.foodCheckInRewardAt, second.foodCheckInRewardAt]
+      [first.freeTrialActivatedAt, second.freeTrialActivatedAt]
         .filter((v): v is string => typeof v === 'string' && v.length > 0 && v !== 'granted')
         .sort()[0] || undefined,
     freeTrialExpiresAt: (() => {

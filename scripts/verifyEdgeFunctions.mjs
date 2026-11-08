@@ -467,4 +467,171 @@ await ok('ephemeral image URLs (ntfy.sh/file/*) are blocked from upload and auto
   assert.ok(!cloudImg.includes("fetch('https://ntfy.sh/'"), 'secondary ntfy.sh image upload must stay disabled');
 });
 
+
+console.log('[edge] Phase E.2 Consumer VIP, Shop Package & Two-Line Trial Abuse Protection');
+const idNormServer = await load('supabase/functions/_shared/identity-normalize.ts');
+const idNormClient = await load('src/utils/identityNormalize.ts');
+const winbackSvc = await load('src/services/trialWinbackNotificationService.ts');
+
+ok('resolveOfficialServerPlan resolves all 7 paid Consumer & Shop plans, enforces 50-shop Early-Bird cap, and refuses trial_7d on receipt endpoint', () => {
+  const defPricing = {};
+  assert.deepEqual(rr.resolveOfficialServerPlan(defPricing, 'consumer_promo_30d'), {
+    planId: 'consumer_promo_30d',
+    category: 'consumer',
+    planType: 'quarterly',
+    days: 30,
+    priceUsd: 0.99,
+  });
+  assert.deepEqual(rr.resolveOfficialServerPlan(defPricing, 'consumer_30d'), {
+    planId: 'consumer_30d',
+    category: 'consumer',
+    planType: 'quarterly',
+    days: 30,
+    priceUsd: 2.99,
+  });
+  assert.deepEqual(rr.resolveOfficialServerPlan(defPricing, 'consumer_90d'), {
+    planId: 'consumer_90d',
+    category: 'consumer',
+    planType: 'annual',
+    days: 90,
+    priceUsd: 6.99,
+  });
+  assert.deepEqual(rr.resolveOfficialServerPlan(defPricing, 'consumer_365d'), {
+    planId: 'consumer_365d',
+    category: 'consumer',
+    planType: 'annual',
+    days: 365,
+    priceUsd: 19.99,
+  });
+  assert.deepEqual(rr.resolveOfficialServerPlan(defPricing, 'shop_30d'), {
+    planId: 'shop_30d',
+    category: 'shop',
+    planType: 'quarterly',
+    days: 30,
+    priceUsd: 6.99,
+  });
+  assert.deepEqual(rr.resolveOfficialServerPlan({ shopEarlyBirdClaimedCount: 12, shopEarlyBirdMaxShops: 50 }, 'shop_earlybird_365d'), {
+    planId: 'shop_earlybird_365d',
+    category: 'shop',
+    planType: 'annual',
+    days: 365,
+    priceUsd: 49.99,
+  });
+  // Cap reached (50/50) -> automatic fallback to standard $59.99 shop_365d
+  assert.deepEqual(rr.resolveOfficialServerPlan({ shopEarlyBirdClaimedCount: 50, shopEarlyBirdMaxShops: 50 }, 'shop_earlybird_365d'), {
+    planId: 'shop_365d',
+    category: 'shop',
+    planType: 'annual',
+    days: 365,
+    priceUsd: 59.99,
+  });
+  assert.equal(rr.resolveOfficialServerPlan(defPricing, 'trial_7d'), null, 'free trial uses claim_trial action, never receipt verification');
+  assert.equal(rr.resolveOfficialServerPlan(defPricing, 'lifetime_forever'), null, 'no lifetime shop or consumer plan');
+});
+
+ok('applyShopSubscriptionGrant stacks early shop renewals and applyTrial7dGrant records trial metadata cleanly', () => {
+  const activeExp = new Date(NOW + 10 * 86400000).toISOString();
+  const { updatedShop, expiryIso } = rr.applyShopSubscriptionGrant(
+    { id: 'rest-vip-1', shopSubscriptionExpiresAt: activeExp },
+    { startIso: new Date(NOW).toISOString(), days: 30, planId: 'shop_30d', trxId: 'TRXSHOP30', nowMs: NOW }
+  );
+  assert.equal(expiryIso, new Date(NOW + 40 * 86400000).toISOString(), 'early renewal must stack remaining days');
+  assert.equal(updatedShop.shopPaymentStatus, 'active');
+  assert.equal(updatedShop.activeShopPlanId, 'shop_30d');
+
+  const trialUser = rr.applyTrial7dGrant(
+    { id: 'u-trial', email: 'sok@gmail.com', membershipTier: 'free' },
+    { startIso: '2026-11-08T00:00:00.000Z', expiryIso: '2026-11-15T00:00:00.000Z', days: 7, trxId: 'TRIAL-7D-1' }
+  );
+  assert.equal(trialUser.membershipTier, 'premium_vip');
+  assert.equal(trialUser.activeConsumerPlanId, 'trial_7d');
+  assert.equal(trialUser.freeTrialActivated, true);
+});
+
+ok('server AI daily quota distinguishes 7-day trial VIP (15/day) from paid Consumer VIP (80/day)', () => {
+  const future = '2026-12-01T00:00:00.000Z';
+  const trialDoc = {
+    membershipTier: 'premium_vip',
+    subscriptionStatus: 'active',
+    subscriptionExpiryDate: future,
+    activeConsumerPlanId: 'trial_7d',
+    freeTrialActivated: true,
+  };
+  const paidDoc = {
+    membershipTier: 'premium_vip',
+    subscriptionStatus: 'active',
+    subscriptionExpiryDate: future,
+    activeConsumerPlanId: 'consumer_90d',
+  };
+  assert.equal(common.classifyVipQuotaTier(trialDoc, NOW), 'trial_vip');
+  assert.equal(common.classifyVipQuotaTier(paidDoc, NOW), 'paid_vip');
+  assert.deepEqual(common.resolveUserAiDailyLimit({ isPayment: false, userId: 'u1', userDoc: trialDoc, nowMs: NOW }), {
+    limit: 15,
+    tier: 'trial_vip',
+  });
+  assert.deepEqual(common.resolveUserAiDailyLimit({ isPayment: false, userId: 'u2', userDoc: paidDoc, nowMs: NOW }), {
+    limit: 80,
+    tier: 'paid_vip',
+  });
+});
+
+await ok('Cambodia +855 phone & Gmail canonicalization produce byte-identical hashes on client and server, and block disposable emails', async () => {
+  for (const variant of ['012 345 678', '85512345678', '+855 12 345 678', '+855012345678', '០១២ ៣៤៥ ៦៧៨']) {
+    assert.equal(idNormServer.normalizeCambodiaPhone(variant), '+85512345678', variant);
+    assert.equal(idNormClient.normalizeCambodiaPhone(variant), '+85512345678', variant);
+  }
+  const g1 = idNormServer.normalizeEmailForIdentity('Sok.Ha+promo1@googlemail.com');
+  assert.deepEqual(g1, { canonical: 'sokha@gmail.com', isDisposable: false });
+  const disp = idNormServer.normalizeEmailForIdentity('burner@mailinator.com');
+  assert.equal(disp?.isDisposable, true);
+
+  const srvHashes = await idNormServer.computeServerIdentityHashes({ email: 'Sok.Ha+vip@gmail.com', phone: '012 345 678' });
+  const cliHashes = await idNormClient.computeIdentityClaimHashes({ email: 'sokha@googlemail.com', phone: '+85512345678' });
+  assert.deepEqual(srvHashes.identityHashes.sort(), cliHashes.identityHashes.sort(), 'client & server SHA-256 identity hashes must match');
+});
+
+ok('Trial Win-Back planner schedules Day 6 (880001) & Day 8 (880002) for active trial and cancels on paid upgrade', () => {
+  const startMs = Date.parse('2026-11-08T03:00:00.000Z');
+  const expIso = new Date(startMs + 7 * 86400000).toISOString();
+  const trialUser = {
+    id: 'u-trial',
+    name: 'Dara',
+    role: 'user',
+    membershipTier: 'premium_vip',
+    subscriptionStatus: 'active',
+    subscriptionExpiryDate: expIso,
+    activeConsumerPlanId: 'trial_7d',
+    freeTrialActivated: true,
+    freeTrialExpiresAt: expIso,
+  };
+  const planned = winbackSvc.planTrialWinbackNotifications({
+    user: trialUser,
+    language: 'km',
+    nowMs: startMs + 1000,
+    promoPriceUsd: 0.99,
+    skipIosCheckForTest: true,
+  });
+  assert.deepEqual(planned.map((p) => p.id), [880001, 880002]);
+
+  const upgradedUser = { ...trialUser, activeConsumerPlanId: 'consumer_90d' };
+  const afterUpgrade = winbackSvc.planTrialWinbackNotifications({
+    user: upgradedUser,
+    language: 'km',
+    nowMs: startMs + 1000,
+    skipIosCheckForTest: true,
+  });
+  assert.deepEqual(afterUpgrade, []);
+});
+
+ok('Pricing & Two-Line Trial SQL (supabase_pricing_trial_shop_v1.sql) is RLS-locked, service-role only, and non-destructive', () => {
+  const sql = read('supabase_pricing_trial_shop_v1.sql');
+  const code = sql.split(/\r?\n/).filter((l) => !l.trim().startsWith('--')).join('\n');
+  assert.ok(/CREATE TABLE IF NOT EXISTS public\.kft_trial_promo_claims/.test(code));
+  assert.ok(/ALTER TABLE public\.kft_trial_promo_claims ENABLE ROW LEVEL SECURITY/.test(code));
+  assert.ok(/REVOKE ALL ON public\.kft_trial_promo_claims FROM anon, authenticated/.test(code));
+  assert.ok(/uq_kft_trial_promo_identity/.test(code) && /uq_kft_trial_promo_device/.test(code));
+  assert.ok(!/CREATE POLICY/i.test(code));
+  assert.ok(!/DROP\s+TABLE|TRUNCATE|DELETE\s+FROM/i.test(code));
+});
+
 console.log(`\n[edge] ALL ${passed} CHECKS PASSED`);

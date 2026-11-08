@@ -206,6 +206,22 @@ export const AdminDashboard: React.FC = () => {
   const [vipBenefitsDraft, setVipBenefitsDraft] = useState<VipBenefitItem[]>(() => getDynamicVipBenefits(appSettings));
   const [vipFeaturedRotationEnabledInput, setVipFeaturedRotationEnabledInput] = useState<boolean>(() => appSettings.vipFeaturedRotationEnabled !== false);
   const [vipFeaturedDurationDaysInput, setVipFeaturedDurationDaysInput] = useState<string>(() => String(appSettings.vipFeaturedDurationDays ?? 1));
+
+  // New Consumer VIP + AI Quota + Shop Subscription (Monthly / Yearly / Early-Bird 50) Admin States
+  const [consumerVipEnabledInput, setConsumerVipEnabledInput] = useState<boolean>(() => appSettings.consumerVipEnabled !== false);
+  const [consumerTrialDaysInput, setConsumerTrialDaysInput] = useState<string>(() => String(appSettings.consumerTrialDays ?? 7));
+  const [consumerTrialAiLimitInput, setConsumerTrialAiLimitInput] = useState<string>(() => String(appSettings.consumerTrialAiDailyLimit ?? 15));
+  const [consumerPaidAiLimitInput, setConsumerPaidAiLimitInput] = useState<string>(() => String(appSettings.consumerPaidAiDailyLimit ?? 80));
+  const [consumerPromoPriceInput, setConsumerPromoPriceInput] = useState<string>(() => String(appSettings.consumerPromo30dPriceUsd ?? 0.99));
+  const [consumer30dPriceInput, setConsumer30dPriceInput] = useState<string>(() => String(appSettings.consumer30dPriceUsd ?? 2.99));
+  const [consumer90dPriceInput, setConsumer90dPriceInput] = useState<string>(() => String(appSettings.consumer90dPriceUsd ?? 6.99));
+  const [consumer365dPriceInput, setConsumer365dPriceInput] = useState<string>(() => String(appSettings.consumer365dPriceUsd ?? 19.99));
+  const [shopMonthlyPriceInput, setShopMonthlyPriceInput] = useState<string>(() => String(appSettings.shopMonthlyPriceUsd ?? 6.99));
+  const [shopYearlyPriceInput, setShopYearlyPriceInput] = useState<string>(() => String(appSettings.shopYearlyPriceUsd ?? 59.99));
+  const [shopEarlyBirdEnabledInput, setShopEarlyBirdEnabledInput] = useState<boolean>(() => appSettings.shopEarlyBirdEnabled !== false);
+  const [shopEarlyBirdPriceInput, setShopEarlyBirdPriceInput] = useState<string>(() => String(appSettings.shopEarlyBirdYearlyPriceUsd ?? 49.99));
+  const [shopEarlyBirdMaxInput, setShopEarlyBirdMaxInput] = useState<string>(() => String(appSettings.shopEarlyBirdMaxShops ?? 50));
+  const [shopPayAfterApprovalInput, setShopPayAfterApprovalInput] = useState<boolean>(() => appSettings.shopPayAfterApproval !== false);
   // Manual Top Listing schedule form (Admin picks shop + start date/time + duration)
   const toLocalDateTimeInput = (d: Date) => {
     const p = (n: number) => String(n).padStart(2, '0');
@@ -249,6 +265,20 @@ export const AdminDashboard: React.FC = () => {
     setVipBenefitsDraft(getDynamicVipBenefits(s));
     setVipFeaturedRotationEnabledInput(rotCfg.enabled);
     setVipFeaturedDurationDaysInput(String(rotCfg.durationDays));
+    setConsumerVipEnabledInput(s.consumerVipEnabled !== false);
+    setConsumerTrialDaysInput(String(s.consumerTrialDays ?? 7));
+    setConsumerTrialAiLimitInput(String(s.consumerTrialAiDailyLimit ?? 15));
+    setConsumerPaidAiLimitInput(String(s.consumerPaidAiDailyLimit ?? 80));
+    setConsumerPromoPriceInput(String(s.consumerPromo30dPriceUsd ?? 0.99));
+    setConsumer30dPriceInput(String(s.consumer30dPriceUsd ?? 2.99));
+    setConsumer90dPriceInput(String(s.consumer90dPriceUsd ?? 6.99));
+    setConsumer365dPriceInput(String(s.consumer365dPriceUsd ?? 19.99));
+    setShopMonthlyPriceInput(String(s.shopMonthlyPriceUsd ?? 6.99));
+    setShopYearlyPriceInput(String(s.shopYearlyPriceUsd ?? 59.99));
+    setShopEarlyBirdEnabledInput(s.shopEarlyBirdEnabled !== false);
+    setShopEarlyBirdPriceInput(String(s.shopEarlyBirdYearlyPriceUsd ?? 49.99));
+    setShopEarlyBirdMaxInput(String(s.shopEarlyBirdMaxShops ?? 50));
+    setShopPayAfterApprovalInput(s.shopPayAfterApproval !== false);
     setCloudCfg(getCloudApiConfig());
   };
 
@@ -824,7 +854,27 @@ export const AdminDashboard: React.FC = () => {
         vipLongPriceUsd: cleanLongPrice,
         vipLongNameKh: cleanLongNameKh,
         vipLongNameEn: cleanLongNameEn,
-        additionalStoreFeeUsd: cleanExtraFee,
+        additionalStoreFeeUsd: Math.max(0.01, parseFloat(shopMonthlyPriceInput) || cleanExtraFee),
+        consumerVipEnabled: consumerVipEnabledInput,
+        consumerTrialDays: Math.max(1, parseInt(consumerTrialDaysInput, 10) || 7),
+        consumerTrialAiDailyLimit: Math.max(1, parseInt(consumerTrialAiLimitInput, 10) || 15),
+        consumerPaidAiDailyLimit: Math.max(1, parseInt(consumerPaidAiLimitInput, 10) || 80),
+        consumerPromo30dPriceUsd: Math.max(0.01, parseFloat(consumerPromoPriceInput) || 0.99),
+        consumerPromo30dDays: 30,
+        consumer30dPriceUsd: Math.max(0.01, parseFloat(consumer30dPriceInput) || 2.99),
+        consumer30dDays: 30,
+        consumer90dPriceUsd: Math.max(0.01, parseFloat(consumer90dPriceInput) || 6.99),
+        consumer90dDays: 90,
+        consumer365dPriceUsd: Math.max(0.01, parseFloat(consumer365dPriceInput) || 19.99),
+        consumer365dDays: 365,
+        shopMonthlyPriceUsd: Math.max(0.01, parseFloat(shopMonthlyPriceInput) || 6.99),
+        shopMonthlyDays: 30,
+        shopYearlyPriceUsd: Math.max(0.01, parseFloat(shopYearlyPriceInput) || 59.99),
+        shopYearlyDays: 365,
+        shopEarlyBirdEnabled: shopEarlyBirdEnabledInput,
+        shopEarlyBirdYearlyPriceUsd: Math.max(0.01, parseFloat(shopEarlyBirdPriceInput) || 49.99),
+        shopEarlyBirdMaxShops: Math.max(1, parseInt(shopEarlyBirdMaxInput, 10) || 50),
+        shopPayAfterApproval: shopPayAfterApprovalInput,
         vipFeaturedRotationEnabled: vipFeaturedRotationEnabledInput,
         vipFeaturedDurationDays: cleanFeaturedDays,
         vipBenefitsList: vipBenefitsDraft.map((b, idx) => ({
@@ -4853,7 +4903,259 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 <form onSubmit={handleSaveSettings} className="space-y-4">
-                  {/* Short & Long VIP Packages Grid */}
+                  {/* ==========================================================
+                      NEW CONSUMER VIP & ALL-INCLUSIVE SHOP PRICING CONTROLS
+                      ========================================================== */}
+                  <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-stone-900/90 border-2 border-emerald-400/70 dark:border-emerald-700/70 space-y-3">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div>
+                        <h5 className="font-bold text-xs text-emerald-950 dark:text-emerald-200">
+                          {isKm
+                            ? '👑 កញ្ចប់អ្នកប្រើទូទៅ (Consumer VIP — Android & Web; iOS FREE 100%)'
+                            : '👑 Consumer VIP Plans & AI Daily Quotas (Android & Web)'}
+                        </h5>
+                        <p className="text-[10.5px] text-stone-600 dark:text-stone-400">
+                          {isKm
+                            ? 'កែតម្លៃកញ្ចប់អ្នកប្រើ ថ្ងៃសាកល្បង និងចំនួនសួរ AI ក្នុងមួយថ្ងៃ (ការមើលម្ហូប ហាង សណ្ឋាគារ តំបន់ទេសចរណ៍ និងផែនទី គឺ FREE ជារៀងរហូត)'
+                            : 'Configure trial days, AI daily quotas, and 30d / 90d / 365d consumer pricing'}
+                        </p>
+                      </div>
+                      <label className="inline-flex items-center gap-2 text-xs font-bold text-emerald-900 dark:text-emerald-300 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={consumerVipEnabledInput}
+                          onChange={e => {
+                            isVipFormDirtyRef.current = true;
+                            setConsumerVipEnabledInput(e.target.checked);
+                          }}
+                          className="rounded border-emerald-400"
+                        />
+                        <span>{isKm ? 'បើកលក់ VIP អ្នកប្រើ' : 'Enable Consumer VIP'}</span>
+                      </label>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      <div>
+                        <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                          {isKm ? 'Trial ឥតគិតថ្លៃ (ថ្ងៃ)' : 'Free Trial (Days)'}
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={90}
+                          value={consumerTrialDaysInput}
+                          onChange={e => {
+                            isVipFormDirtyRef.current = true;
+                            setConsumerTrialDaysInput(e.target.value);
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-mono font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                          {isKm ? 'កូតា AI ពេល Trial (/ថ្ងៃ)' : 'Trial AI Quota (/day)'}
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={500}
+                          value={consumerTrialAiLimitInput}
+                          onChange={e => {
+                            isVipFormDirtyRef.current = true;
+                            setConsumerTrialAiLimitInput(e.target.value);
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-mono font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                          {isKm ? 'កូតា AI អ្នកបង់ប្រាក់ (/ថ្ងៃ)' : 'Paid VIP AI Quota (/day)'}
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={2000}
+                          value={consumerPaidAiLimitInput}
+                          onChange={e => {
+                            isVipFormDirtyRef.current = true;
+                            setConsumerPaidAiLimitInput(e.target.value);
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-mono font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                          {isKm ? 'Win-Back ក្រោយ Trial ($)' : 'Win-Back 30d ($)'}
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={consumerPromoPriceInput}
+                          onChange={e => {
+                            isVipFormDirtyRef.current = true;
+                            setConsumerPromoPriceInput(e.target.value);
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-xl border border-amber-400 dark:border-amber-700 bg-white dark:bg-stone-800 text-xs font-mono font-bold"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      <div>
+                        <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                          {isKm ? 'ប្រចាំខែ 30 ថ្ងៃ ($ USD)' : 'Monthly 30 Days ($ USD)'}
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={consumer30dPriceInput}
+                          onChange={e => {
+                            isVipFormDirtyRef.current = true;
+                            setConsumer30dPriceInput(e.target.value);
+                            setVipShortPriceInput(e.target.value);
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-mono font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                          {isKm ? 'ត្រីមាស 90 ថ្ងៃ ($ USD)' : 'Quarterly 90 Days ($ USD)'}
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={consumer90dPriceInput}
+                          onChange={e => {
+                            isVipFormDirtyRef.current = true;
+                            setConsumer90dPriceInput(e.target.value);
+                            setVipLongPriceInput(e.target.value);
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-mono font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                          {isKm ? 'ប្រចាំឆ្នាំ 365 ថ្ងៃ ($ USD)' : 'Yearly 365 Days ($ USD)'}
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={consumer365dPriceInput}
+                          onChange={e => {
+                            isVipFormDirtyRef.current = true;
+                            setConsumer365dPriceInput(e.target.value);
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-mono font-bold"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-stone-900/90 border-2 border-amber-400/70 dark:border-amber-700/70 space-y-3">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div>
+                        <h5 className="font-bold text-xs text-amber-950 dark:text-amber-200">
+                          {isKm
+                            ? '🏪 កញ្ចប់ដាក់ហាង (All-Inclusive Shop Package — រួមបញ្ចូលអត្ថប្រយោជន៍ទាំង ៥ គ្មាន Lifetime)'
+                            : '🏪 All-Inclusive Shop Subscription (30d / 365d / Early-Bird 50 — No Lifetime)'}
+                        </h5>
+                        <p className="text-[10.5px] text-stone-600 dark:text-stone-400">
+                          {isKm
+                            ? `ប្រើរួច Early-Bird៖ ${appSettings.shopEarlyBirdClaimedCount ?? 0} / ${shopEarlyBirdMaxInput || 50} ហាង (ប្តូរទៅតម្លៃពេញស្វ័យប្រវត្តិពេលគ្រប់ចំនួន)`
+                            : `Early-Bird claimed: ${appSettings.shopEarlyBirdClaimedCount ?? 0} / ${shopEarlyBirdMaxInput || 50} shops`}
+                        </p>
+                      </div>
+                      <label className="inline-flex items-center gap-2 text-xs font-bold text-amber-900 dark:text-amber-300 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={shopPayAfterApprovalInput}
+                          onChange={e => {
+                            isVipFormDirtyRef.current = true;
+                            setShopPayAfterApprovalInput(e.target.checked);
+                          }}
+                          className="rounded border-amber-400"
+                        />
+                        <span>{isKm ? 'បង់ប្រាក់ក្រោយ Admin អនុម័តហាង' : 'Pay After Admin Approval'}</span>
+                      </label>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      <div>
+                        <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                          {isKm ? 'ហាងប្រចាំខែ 30d ($)' : 'Shop 30 Days ($)'}
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={shopMonthlyPriceInput}
+                          onChange={e => {
+                            isVipFormDirtyRef.current = true;
+                            setShopMonthlyPriceInput(e.target.value);
+                            setAdditionalStoreFeeInput(e.target.value);
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-mono font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                          {isKm ? 'ហាងប្រចាំឆ្នាំ 365d ($)' : 'Shop 365 Days ($)'}
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={shopYearlyPriceInput}
+                          onChange={e => {
+                            isVipFormDirtyRef.current = true;
+                            setShopYearlyPriceInput(e.target.value);
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-mono font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                          {isKm ? 'Early-Bird ឆ្នាំ ($)' : 'Early-Bird Yr ($)'}
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={shopEarlyBirdPriceInput}
+                          onChange={e => {
+                            isVipFormDirtyRef.current = true;
+                            setShopEarlyBirdPriceInput(e.target.value);
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-xl border border-amber-400 dark:border-amber-700 bg-white dark:bg-stone-800 text-xs font-mono font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="flex items-center justify-between text-[10.5px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                          <span>{isKm ? 'ចំនួនហាង Early-Bird' : 'Early-Bird Cap'}</span>
+                          <input
+                            type="checkbox"
+                            checked={shopEarlyBirdEnabledInput}
+                            onChange={e => {
+                              isVipFormDirtyRef.current = true;
+                              setShopEarlyBirdEnabledInput(e.target.checked);
+                            }}
+                            title="Enable Early-Bird Promo"
+                          />
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={5000}
+                          disabled={!shopEarlyBirdEnabledInput}
+                          value={shopEarlyBirdMaxInput}
+                          onChange={e => {
+                            isVipFormDirtyRef.current = true;
+                            setShopEarlyBirdMaxInput(e.target.value);
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-mono font-bold disabled:opacity-50"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Short & Long VIP Packages Grid (Legacy Compatibility Mirror) */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Package 1: Short VIP Plan (Default 10 Days) */}
                     <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-stone-900/80 border border-amber-300 dark:border-amber-800/60 space-y-3">

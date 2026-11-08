@@ -10,8 +10,12 @@ import {
 import { 
   isUserVipActive, getVipRemainingDays,
   APP_VERSION, APP_BUILD_CODE,
-  getDynamicVipPlans, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
-  hasAuthenticatedEmailAccount, isAdminAccount, isIosOrIpadAppStoreRuntime
+  getDynamicVipBenefits,
+  OfficialPlanId,
+  getConsumerVipPricingCatalog,
+  isConsumerTrial7dEligible,
+  isConsumerPromo099Eligible,
+  hasAuthenticatedEmailAccount, hasAuthenticatedPhoneAccount, isAdminAccount, isIosOrIpadAppStoreRuntime
 } from '../types';
 import {
   savePngDataUrlToGallery,
@@ -23,12 +27,14 @@ import { tr } from '../utils/i18n';
 
 interface VipPlanOption {
   id: 'annual' | 'quarterly';
+  planId: OfficialPlanId;
   titleKh: string;
   titleEn: string;
   days: number;
   priceUsd: number;
-  priceKhrApprox: string;
+  badgeText?: string;
   isPopular?: boolean;
+  isWinbackPromo?: boolean;
 }
 
 // Strict Payment Status Flow (Requirement 6 + Admin Request More Info)
@@ -58,6 +64,7 @@ export const UpgradeVipModal: React.FC = () => {
     language,
     showToast,
     setIsAuthModalOpen,
+    claimConsumerFreeTrial,
     submitVipUpgradeRequest,
     uploadPaymentProofToTransaction,
     restoreCurrentUserVipPurchases,
@@ -70,49 +77,72 @@ export const UpgradeVipModal: React.FC = () => {
   const isVip = isUserVipActive(currentUser);
   const remainingDays = getVipRemainingDays(currentUser);
 
-  // Dynamically derive VIP plans, benefits, and additional store fee from Admin settings
+  const consumerCatalog = useMemo(() => getConsumerVipPricingCatalog(appSettings), [appSettings]);
+  const canClaimTrial7d = useMemo(
+    () => Boolean(consumerCatalog.consumerVipEnabled && consumerCatalog.trialPlan.enabled && isConsumerTrial7dEligible(currentUser)),
+    [consumerCatalog, currentUser]
+  );
+  const canClaimWinback099 = useMemo(
+    () => Boolean(consumerCatalog.consumerVipEnabled && consumerCatalog.promo30dPlan.enabled && isConsumerPromo099Eligible(currentUser)),
+    [consumerCatalog, currentUser]
+  );
+  const [isClaimingTrial, setIsClaimingTrial] = useState(false);
+
+  // Dynamically derive official Consumer VIP paid plans ($0.99 post-trial win-back, $2.99/30d, $6.99/90d, $19.99/365d)
   const dynamicPlansList = useMemo<VipPlanOption[]>(() => {
-    const plans = getDynamicVipPlans(appSettings);
-    const shortPlan = plans.quarterly;
-    const longPlan = plans.annual;
-    return [
-      {
+    const list: VipPlanOption[] = [];
+    if (canClaimWinback099) {
+      const p = consumerCatalog.promo30dPlan;
+      list.push({
         id: 'quarterly',
-        titleKh: `${shortPlan.nameKh} ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} ថ្ងៃ)`,
-        titleEn: `${shortPlan.nameEn} ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} days)`,
-        days: shortPlan.durationDays,
-        priceUsd: shortPlan.priceUsd,
-        priceKhrApprox: shortPlan.priceKhrDisplay || '៤០,៩៥៩ រៀល',
-        isPopular: true,
-      },
-      {
-        id: 'annual',
-        titleKh: `${longPlan.nameKh} ($${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} ថ្ងៃ)`,
-        titleEn: `${longPlan.nameEn} ($${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} days)`,
-        days: longPlan.durationDays,
-        priceUsd: longPlan.priceUsd,
-        priceKhrApprox: longPlan.priceKhrDisplay || '១០២,៤៥៩ រៀល',
-        isPopular: false,
-      },
-    ];
-  }, [appSettings]);
+        planId: p.planId,
+        titleKh: p.titleKm,
+        titleEn: p.titleEn,
+        days: p.durationDays,
+        priceUsd: p.priceUsd,
+        badgeText: isKm ? (p.badgeKm || '១ ដងគត់ក្រោយសាកល្បង') : (p.badgeEn || 'Post-Trial Special'),
+        isWinbackPromo: true,
+      });
+    }
+    for (const p of [consumerCatalog.monthlyPlan, consumerCatalog.quarterlyPlan, consumerCatalog.yearlyPlan]) {
+      if (!p.enabled) continue;
+      list.push({
+        id: p.durationDays >= 300 ? 'annual' : 'quarterly',
+        planId: p.planId,
+        titleKh: p.titleKm,
+        titleEn: p.titleEn,
+        days: p.durationDays,
+        priceUsd: p.priceUsd,
+        badgeText: isKm ? p.badgeKm : p.badgeEn,
+        isPopular: p.planId === 'consumer_90d' || p.planId === 'consumer_365d',
+      });
+    }
+    return list;
+  }, [consumerCatalog, canClaimWinback099, isKm]);
 
   const dynamicBenefits = useMemo(() => getDynamicVipBenefits(appSettings), [appSettings]);
-  const additionalStoreFeeUsd = useMemo(() => getAdditionalStoreFeeUsd(appSettings), [appSettings]);
   const isVipConfigValid = useMemo(
     () =>
-      dynamicPlansList.length >= 2 &&
-      dynamicPlansList.every(p => Number.isFinite(p.priceUsd) && p.priceUsd > 0 && Number.isFinite(p.days) && p.days > 0) &&
-      dynamicBenefits.length > 0,
-    [dynamicPlansList, dynamicBenefits]
+      Boolean(consumerCatalog.consumerVipEnabled) &&
+      dynamicPlansList.length >= 1 &&
+      dynamicPlansList.every(p => Number.isFinite(p.priceUsd) && p.priceUsd > 0 && Number.isFinite(p.days) && p.days > 0),
+    [consumerCatalog.consumerVipEnabled, dynamicPlansList]
   );
 
-  const [selectedPlanId, setSelectedPlanId] = useState<'quarterly' | 'annual'>('quarterly');
+  const [selectedOfficialPlanId, setSelectedOfficialPlanId] = useState<OfficialPlanId>('consumer_90d');
+  useEffect(() => {
+    if (canClaimWinback099) {
+      setSelectedOfficialPlanId('consumer_promo_30d');
+    } else if (!dynamicPlansList.some((p) => p.planId === selectedOfficialPlanId) && dynamicPlansList[0]) {
+      setSelectedOfficialPlanId(dynamicPlansList[0].planId);
+    }
+  }, [canClaimWinback099, dynamicPlansList]);
+
   const selectedPlan = useMemo(
-    () => dynamicPlansList.find(p => p.id === selectedPlanId) || dynamicPlansList[0],
-    [dynamicPlansList, selectedPlanId]
+    () => dynamicPlansList.find(p => p.planId === selectedOfficialPlanId) || dynamicPlansList[0],
+    [dynamicPlansList, selectedOfficialPlanId]
   );
-  
+
   // Payment Lifecycle State
   const [paymentState, setPaymentState] = useState<PaymentStatusFlow>('AWAITING_PAYMENT');
   const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
@@ -219,13 +249,22 @@ export const UpgradeVipModal: React.FC = () => {
 
   // Hard authentication guard: never allow VIP payment page or ABA QR code to render without email login
   useEffect(() => {
-    if (isUpgradeVipModalOpen && !isAdminAccount(currentUser) && !hasAuthenticatedEmailAccount(currentUser)) {
+    if (
+      isUpgradeVipModalOpen &&
+      !isAdminAccount(currentUser) &&
+      !hasAuthenticatedEmailAccount(currentUser) &&
+      !hasAuthenticatedPhoneAccount(currentUser)
+    ) {
       openUpgradeVipModal(isVipRenewMode);
     }
   }, [isUpgradeVipModalOpen, currentUser, isVipRenewMode]);
 
   if (!isUpgradeVipModalOpen || isIosOrIpadAppStoreRuntime()) return null;
-  if (!isAdminAccount(currentUser) && !hasAuthenticatedEmailAccount(currentUser)) {
+  if (
+    !isAdminAccount(currentUser) &&
+    !hasAuthenticatedEmailAccount(currentUser) &&
+    !hasAuthenticatedPhoneAccount(currentUser)
+  ) {
     return null;
   }
 
@@ -279,12 +318,22 @@ export const UpgradeVipModal: React.FC = () => {
   };
 
   const handleSelectPlan = (plan: VipPlanOption) => {
-    setSelectedPlanId(plan.id);
+    setSelectedOfficialPlanId(plan.planId);
     setCustomTxnRef(`ABA-KHQR-${plan.days}D-${Date.now().toString(36).toUpperCase()}`);
     setSessionExpiryTime(Date.now() + 15 * 60 * 1000);
     try {
       localStorage.setItem('kft_user_active_plan_type', plan.id);
     } catch {}
+  };
+
+  const handleClaimFreeTrial = async () => {
+    if (isClaimingTrial) return;
+    setIsClaimingTrial(true);
+    try {
+      await claimConsumerFreeTrial();
+    } finally {
+      setIsClaimingTrial(false);
+    }
   };
 
   const handleRestartSession = () => {
@@ -559,21 +608,28 @@ export const UpgradeVipModal: React.FC = () => {
 
     try {
       const latestSettings = (await refreshAppSettingsFromServer?.(true)) || appSettings;
-      const livePlans = getDynamicVipPlans(latestSettings);
-      const liveSelectedPlan = livePlans[selectedPlan.id];
+      const liveCatalog = getConsumerVipPricingCatalog(latestSettings);
+      const allLivePlans = [
+        liveCatalog.promo30dPlan,
+        liveCatalog.monthlyPlan,
+        liveCatalog.quarterlyPlan,
+        liveCatalog.yearlyPlan,
+      ];
+      const liveSelected = allLivePlans.find((p) => p.planId === selectedPlan.planId) || liveCatalog.monthlyPlan;
 
       const reqResult = await submitVipUpgradeRequest(
-        liveSelectedPlan.durationDays,
-        liveSelectedPlan.priceUsd,
+        liveSelected.durationDays,
+        liveSelected.priceUsd,
         customTxnRef,
-        `VIP Upgrade Request (${liveSelectedPlan.durationDays} Days / $${liveSelectedPlan.priceUsd.toFixed(2)} USD) via ABA KHQR — Pending Admin Verification`,
+        `Consumer VIP (${liveSelected.planId}: ${liveSelected.durationDays} Days / $${liveSelected.priceUsd.toFixed(2)} USD) via ABA KHQR`,
         paymentProofDraft || undefined,
         {
           enabled: autoRenewOptIn,
           paymentMethod: 'KHQR',
           paymentLabel: 'ABA KHQR (095 245 959)',
           explicitConsent: autoRenewOptIn,
-        }
+        },
+        liveSelected.planId
       );
 
       setIsSubmittingRequest(false);
@@ -652,7 +708,12 @@ export const UpgradeVipModal: React.FC = () => {
                   {tr(language, 'ដំឡើងសមាជិកភាព VIP', 'Upgrade to VIP', '升级 VIP 会员')}
                 </h3>
                 <p className="text-[11px] text-amber-200 font-khmer truncate">
-                  {tr(language, 'ដោះសោមុខងារពិសេស និងឧបករណ៍គ្រប់គ្រងហាង', 'Unlock dining perks & restaurant owner tools', '解锁专属美食权益与商家管理工具')}
+                  {tr(
+                    language,
+                    `ជំនួយការ AI ម្ហូប & ទេសចរណ៍ (${consumerCatalog.paidAiDailyLimit} ដង/ថ្ងៃ) • ផែនការដើរលេងពិសេស`,
+                    `AI Food & Travel Assistant (${consumerCatalog.paidAiDailyLimit}/day) • Smart Trip Planner`,
+                    `AI 美食与旅游助手（每日 ${consumerCatalog.paidAiDailyLimit} 次）• 智能行程规划`
+                  )}
                 </p>
               </div>
             </div>
@@ -1090,6 +1151,17 @@ export const UpgradeVipModal: React.FC = () => {
             </div>
           )}
 
+          {paymentState === 'AWAITING_PAYMENT' && !consumerCatalog.consumerVipEnabled && (
+            <div className="p-5 rounded-2xl bg-emerald-50 dark:bg-slate-800 border border-emerald-300 dark:border-slate-700 text-center space-y-2.5">
+              <div className="font-bold text-sm text-slate-900 dark:text-white">
+                {tr(language, '🌿 ការប្រើប្រាស់កម្មវិធីគឺឥតគិតថ្លៃ!', '🌿 Core App Browsing is Free!', '🌿 核心浏览功能免费开放！')}
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300">
+                {tr(language, 'ការមើលម្ហូប ហាង សណ្ឋាគារ តំបន់ទេសចរណ៍ និងផែនទី គឺ FREE ជារៀងរហូត។', 'Browsing dishes, shops, hotels, attractions, and maps is FREE forever.', '浏览美食、餐厅、酒店、景点与地图永久免费。')}
+              </p>
+            </div>
+          )}
+
           {/* STATE 1: AWAITING_PAYMENT — Clean, Short 4-Step VIP Payment Screen */}
           {paymentState === 'AWAITING_PAYMENT' && isVipConfigValid && (
             <div className="space-y-2.5">
@@ -1118,35 +1190,116 @@ export const UpgradeVipModal: React.FC = () => {
                 </div>
               )}
 
-              {/* VIP Plan Selector (compact) */}
+              {/* Free Forever Core Browsing Reassurance Banner */}
+              <div className="p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-700/70 text-[11px] text-emerald-900 dark:text-emerald-200 font-bold flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                <span>
+                  {tr(
+                    language,
+                    'ការមើលម្ហូប រូបមន្ត ហាង សណ្ឋាគារ តំបន់ទេសចរណ៍ និងផែនទីនាំផ្លូវ គឺ FREE ជារៀងរហូត! VIP គឺសម្រាប់មុខងារ AI កម្រិតខ្ពស់បន្ថែមប៉ុណ្ណោះ។',
+                    'Browsing dishes, recipes, shops, hotels, attractions & map navigation is FREE forever! VIP is an optional AI & planner upgrade.',
+                    '浏览菜品、食谱、餐厅、酒店、景点与地图导航永久免费！VIP 仅为可选 AI 增强升级。'
+                  )}
+                </span>
+              </div>
+
+              {/* 1-Time 7-Day Free Consumer VIP Trial Card */}
+              {canClaimTrial7d && (
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-50 via-yellow-50 to-emerald-50 dark:from-amber-950/40 dark:via-slate-800 dark:to-emerald-950/40 border-2 border-amber-400 shadow-xs space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="font-extrabold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <Crown className="w-4 h-4 text-amber-500 fill-amber-500 shrink-0" />
+                      <span>
+                        {tr(
+                          language,
+                          `🎁 សាកល្បង VIP ឥតគិតថ្លៃ ${consumerCatalog.trialPlan.durationDays} ថ្ងៃ ($0)`,
+                          `🎁 Free ${consumerCatalog.trialPlan.durationDays}-Day VIP Trial ($0)`,
+                          `🎁 免费试用 ${consumerCatalog.trialPlan.durationDays} 天 VIP ($0)`
+                        )}
+                      </span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black shrink-0">
+                      {tr(language, '១ ដងគត់', '1-Time Only', '仅限 1 次')}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-snug">
+                    {tr(
+                      language,
+                      `បើកប្រើជំនួយការ AI (${consumerCatalog.trialAiDailyLimit} ដង/ថ្ងៃ) និងផែនការដើរលេង ដោយឥតគិតថ្លៃ ${consumerCatalog.trialPlan.durationDays} ថ្ងៃ (មិនរួមបញ្ចូលកញ្ចប់ដាក់ហាងទេ)។`,
+                      `Try AI assistant (${consumerCatalog.trialAiDailyLimit} requests/day) & smart trip planner free for ${consumerCatalog.trialPlan.durationDays} days (Shop Package sold separately).`,
+                      `免费体验 ${consumerCatalog.trialPlan.durationDays} 天 AI 助手（每日 ${consumerCatalog.trialAiDailyLimit} 次）与智能行程规划（不含开店套餐）。`
+                    )}
+                  </p>
+                  <button
+                    type="button"
+                    disabled={isClaimingTrial}
+                    onClick={handleClaimFreeTrial}
+                    className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-xs shadow-sm flex items-center justify-center gap-1.5 transition active:scale-98 cursor-pointer disabled:opacity-60"
+                  >
+                    {isClaimingTrial ? (
+                      <RefreshCw className="w-4 h-4 animate-spin shrink-0" />
+                    ) : (
+                      <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
+                    )}
+                    <span>
+                      {tr(
+                        language,
+                        `ចាប់ផ្តើមសាកល្បងឥតគិតថ្លៃ ${consumerCatalog.trialPlan.durationDays} ថ្ងៃឥឡូវនេះ`,
+                        `Start Free ${consumerCatalog.trialPlan.durationDays}-Day Trial Now`,
+                        `立即开启 ${consumerCatalog.trialPlan.durationDays} 天免费试用`
+                      )}
+                    </span>
+                  </button>
+                </div>
+              )}
+
+              {/* Post-Trial Win-Back Highlight Banner ($0.99 vs 90-day $6.99 Saver) */}
+              {canClaimWinback099 && (
+                <div className="p-2.5 rounded-2xl bg-amber-100/80 dark:bg-amber-950/50 border border-amber-400 text-[11px] text-amber-950 dark:text-amber-200 font-bold">
+                  {tr(
+                    language,
+                    `✨ ផ្តល់ជូនពិសេសក្រោយសាកល្បង៖ ខែដំបូងត្រឹមតែ $${consumerCatalog.promo30dPlan.priceUsd.toFixed(2)} (30 ថ្ងៃ) ឬជ្រើសកញ្ចប់សន្សំ 90 ថ្ងៃ $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)} (-22%)!`,
+                    `✨ Post-Trial Offer: First 30 days just $${consumerCatalog.promo30dPlan.priceUsd.toFixed(2)}, or lock in 90 days for $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)} (-22% saver)!`,
+                    `✨ 试用结束特惠：首 30 天仅 $${consumerCatalog.promo30dPlan.priceUsd.toFixed(2)}，或选择 90 天省钱套餐 $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)} (-22%)！`
+                  )}
+                </div>
+              )}
+
+              {/* Official Consumer VIP Plan Selector ($0.99 post-trial / $2.99 / $6.99 / $19.99) */}
               <div className="grid grid-cols-2 gap-2">
                 {dynamicPlansList.map((plan) => {
-                  const isSelected = selectedPlan.id === plan.id;
+                  const isSelected = selectedPlan?.planId === plan.planId;
                   return (
                     <div
-                      key={plan.id}
+                      key={plan.planId}
                       onClick={() => handleSelectPlan(plan)}
-                      className={`relative px-3 py-2 rounded-2xl border-2 cursor-pointer transition text-left flex items-center justify-between gap-2 ${
+                      className={`relative px-3 py-2.5 rounded-2xl border-2 cursor-pointer transition text-left flex items-center justify-between gap-2 ${
                         isSelected
                           ? 'bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-600/20 border-amber-500 shadow-sm ring-2 ring-amber-400/30'
                           : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-amber-300'
                       }`}
                     >
-                      {plan.isPopular && (
-                        <span className="absolute -top-2 right-2 px-2 py-px rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-black uppercase tracking-wider font-sans shadow-xs">
-                          {tr(language, 'ពេញនិយម', 'Popular', '热门')}
+                      {plan.badgeText && (
+                        <span
+                          className={`absolute -top-2 right-2 px-2 py-px rounded-full text-white text-[9px] font-black tracking-wide font-khmer shadow-xs ${
+                            plan.isWinbackPromo
+                              ? 'bg-gradient-to-r from-rose-500 to-amber-500'
+                              : 'bg-gradient-to-r from-emerald-600 to-teal-600'
+                          }`}
+                        >
+                          {plan.badgeText}
                         </span>
                       )}
                       <div className="min-w-0">
-                        <div className="text-xs font-bold text-slate-600 dark:text-slate-300 truncate">
-                          {tr(language, `${plan.days} ថ្ងៃ`, `${plan.days} Days`, `${plan.days} 天`)}
+                        <div className="text-[11px] font-extrabold text-slate-700 dark:text-slate-200 truncate">
+                          {isKm ? plan.titleKh : plan.titleEn}
                         </div>
-                        <div className="flex items-baseline gap-1">
-                          <span className="font-moul text-lg text-slate-900 dark:text-white font-mono leading-tight">
-                            ${plan.priceUsd.toFixed(2)}
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                          <span className="font-moul text-base sm:text-lg text-slate-900 dark:text-white font-mono leading-tight">
+                            {'$'}{plan.priceUsd.toFixed(2)}
                           </span>
                           <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">
-                            {tr(language, 'ដុល្លារ', 'USD', '美元')}
+                            / {tr(language, `${plan.days}ថ្ងៃ`, `${plan.days}d`, `${plan.days}天`)}
                           </span>
                         </div>
                       </div>
@@ -1160,6 +1313,11 @@ export const UpgradeVipModal: React.FC = () => {
                     </div>
                   );
                 })}
+              </div>
+
+              <div className="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 text-[10.5px] text-slate-600 dark:text-slate-300 flex items-center justify-between gap-2">
+                <span>🤖 {tr(language, `កូតា AI៖ ${consumerCatalog.paidAiDailyLimit} ដង/ថ្ងៃ`, `AI Quota: ${consumerCatalog.paidAiDailyLimit}/day`, `AI 配额：每日 ${consumerCatalog.paidAiDailyLimit} 次`)}</span>
+                <span>🏪 {tr(language, 'កញ្ចប់ដាក់ហាងគិតដាច់ដោយឡែក', 'Shop Package is separate', '开店套餐单独计费')}</span>
               </div>
 
               {/* STEP 1 & 2: Scan / save ABA KHQR + pay via ABA Mobile */}

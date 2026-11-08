@@ -5,8 +5,8 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1487;
-export const APP_RELEASE_DATE = '2026-11-08';
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1488;
+export const APP_RELEASE_DATE = '2026-11-09';
 
 /**
  * Audited duplicate food IDs removed from the Food Menu so every dish and photograph is 100% unique
@@ -274,7 +274,7 @@ export const EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS: Record<string, string> = {
 };
 
 export interface AuthModalInitialView {
-  mode: 'main' | 'email';
+  mode: 'main' | 'phone' | 'email' | 'google_quick';
   emailTab: 'register' | 'login';
   requireEmailForVip?: boolean;
 }
@@ -668,6 +668,33 @@ export const hasAuthenticatedEmailAccount = (user?: Partial<User> | null): boole
   return true;
 };
 
+/**
+ * Verifies that the signed-in user possesses a password-protected canonical Phone Number account
+ * (e.g. "+85512345678" + PBKDF2/SHA256 passwordHash), excluding legacy passwordless phone stubs or guests.
+ */
+export const hasAuthenticatedPhoneAccount = (user?: Partial<User> | null): boolean => {
+  if (!user || typeof user !== 'object') return false;
+  const rawUser = user as Record<string, unknown>;
+  if (rawUser.isGuest === true || rawUser.role === 'guest' || rawUser.authProvider === 'guest') {
+    return false;
+  }
+  if (typeof user.id === 'string' && (user.id === 'guest' || user.id.startsWith('guest-'))) {
+    return false;
+  }
+  const rawPhone = typeof user.phone === 'string' ? user.phone.trim() : '';
+  const digits = rawPhone.replace(/\D+/g, '');
+  if (digits.length < 8 || digits.length > 15) return false;
+  const hasPassword = typeof user.passwordHash === 'string' && user.passwordHash.trim().length >= 20;
+  return hasPassword;
+};
+
+/**
+ * Unified account authentication check: accepts verified Google / Email accounts OR password-protected Phone accounts.
+ */
+export const hasAuthenticatedAccount = (user?: Partial<User> | null): boolean => {
+  return hasAuthenticatedEmailAccount(user) || hasAuthenticatedPhoneAccount(user);
+};
+
 export type LocationVerificationStatus = 'verified' | 'needs_admin_review';
 
 export interface GoogleMapsPlaceMetadata {
@@ -831,6 +858,9 @@ export interface User {
   freeTrialActivatedAt?: string;
   freeTrialExpiresAt?: string;
   freeTrialDurationDays?: number;
+  promo099Used?: boolean;
+  promo099UsedAt?: string;
+  activeConsumerPlanId?: string;
   foodCheckInLedger?: {
     entries: Array<{ foodId: string; day: string; at: string }>;
     grantedAt?: string;
@@ -1305,6 +1335,7 @@ export interface RestaurantMenuItem {
   descriptionEn?: string;
   categoryKh?: string;
   isAvailable?: boolean;
+  isSignature?: boolean;
   createdAt: string;
   updatedAt?: string;
 }
@@ -1358,9 +1389,21 @@ export interface AbaReceiptVerificationReport {
 
 export type TransactionType = 'restaurant_registration' | 'user_vip_upgrade' | 'additional_store_slot';
 
+export type OfficialPlanId =
+  | 'trial_7d'
+  | 'consumer_promo_30d'
+  | 'consumer_30d'
+  | 'consumer_90d'
+  | 'consumer_365d'
+  | 'shop_30d'
+  | 'shop_365d'
+  | 'shop_earlybird_365d';
+
 export interface RegistrationTransaction {
   id: string; // e.g. "TXN-20261020-001", "TXN-VIP-20261021-001", or "TXN-STORE-20261024-001"
   type?: TransactionType;
+  planId?: OfficialPlanId | string;
+  shopId?: string;
   restaurantId?: string;
   restaurantNameKh?: string;
   restaurantNameEn?: string;
@@ -1575,10 +1618,16 @@ export interface Restaurant {
   isVerified: boolean;
   isFeatured?: boolean;
   
-  // Membership & Menu Items ($0 Free Listing vs VIP $2.99/30d or $4.99/90d)
-  membershipTier?: MembershipTier; // 'free' ($0) or 'premium' ($2.99 / $4.99)
-  membershipExpiresAt?: string; // ISO 8601 date timestamp (30 or 90 days from activation)
+  // Independent Shop Subscription Package ($6.99/30d, $59.99/365d, Early-Bird $49.99/365d — No Lifetime)
+  membershipTier?: MembershipTier;
+  membershipExpiresAt?: string;
   subscriptionExpiresAt?: string;
+  shopPlanId?: 'shop_30d' | 'shop_365d' | 'shop_earlybird_365d' | string;
+  shopPaymentStatus?: 'awaiting_admin_approval' | 'awaiting_payment' | 'pending_verification' | 'active' | 'expired';
+  shopActivatedAt?: string;
+  shopSubscriptionExpiresAt?: string;
+  activeShopPlanId?: OfficialPlanId | string;
+  isPromotedBadge?: boolean;
   menuItems?: RestaurantMenuItem[]; // Up to 20 items for active Premium restaurants
   
   // 10 VIP Benefits tracking & Analytics
@@ -2898,6 +2947,20 @@ export const isPermanentVipEmail = (email?: string | null): boolean => {
 // Helper to determine if a user has an active, admin-approved Premium VIP subscription (strictly for VIP customers, NOT Admin)
 
 /**
+ * True only inside the native Capacitor iOS shell (the App Store build). Unlike `isIosOrIpadAppStoreRuntime()` this
+ * is NOT true for Safari / PWA on an iPhone, so web features (e.g. optional donations) stay available there.
+ */
+export function isNativeIosApp(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const cap = (window as unknown as { Capacitor?: { getPlatform?: () => string } }).Capacitor;
+    return Boolean(cap && typeof cap.getPlatform === 'function' && cap.getPlatform() === 'ios');
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Authoritative runtime detector for Apple iOS / iPadOS (App Store Guideline 3.1.1, 4.0, 4.8).
  * Detects:
  *  - Capacitor iOS native shell (window.Capacitor.getPlatform() === 'ios' or capacitor:// protocol)
@@ -2909,7 +2972,11 @@ export function isIosOrIpadAppStoreRuntime(): boolean {
   if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
   try {
     const search = window.location?.search || '';
-    if (search.includes('ios_review=1') || search.includes('platform=ios')) return true;
+    // The URL override is a desktop-testing aid only. It must never switch a real web visitor into the iOS
+    // (everything-unlocked) mode, otherwise appending ?platform=ios would hand out VIP features for free.
+    const host = window.location?.hostname || '';
+    const isLocalDev = host === 'localhost' || host === '127.0.0.1';
+    if (isLocalDev && (search.includes('ios_review=1') || search.includes('platform=ios'))) return true;
     const cap = (window as unknown as { Capacitor?: { getPlatform?: () => string; isNativePlatform?: () => boolean } }).Capacitor;
     if (cap && typeof cap.getPlatform === 'function' && cap.getPlatform() === 'ios') {
       return true;
@@ -2955,6 +3022,10 @@ export const isUserVipActive = (user?: User | null): boolean => {
   ) {
     return false;
   }
+  // Retired 30-dish check-in reward references never grant active VIP
+  if (typeof user.transactionRef === 'string' && user.transactionRef.trim().startsWith('REWARD-FOODCHECKIN')) {
+    return false;
+  }
   const hasVipTierOrActiveStatus =
     user.membershipTier === 'premium_vip' ||
     user.subscriptionStatus === 'active' ||
@@ -2983,21 +3054,22 @@ export const isUserVipActive = (user?: User | null): boolean => {
     }
   }
 
-  // Fallback for legacy/migrated active VIP or Free Trial records where expiry timestamp was omitted
-  if (
-    (user.membershipTier === 'premium_vip' && user.subscriptionStatus === 'active') ||
-    user.freeTrialActivated ||
-    Boolean(user.foodCheckInRewardAt && parseSafeDateMs(user.foodCheckInRewardAt) > 0)
-  ) {
+  // Fallback for active VIP records where expiry timestamp was omitted
+  if (user.membershipTier === 'premium_vip' && user.subscriptionStatus === 'active') {
+    const fallbackDays =
+      typeof user.vipPlanDays === 'number' && user.vipPlanDays >= 1
+        ? user.vipPlanDays
+        : typeof user.freeTrialDurationDays === 'number' && user.freeTrialDurationDays >= 1
+          ? user.freeTrialDurationDays
+          : 30;
     const startMs = parseSafeDateMs(
-      user.freeTrialActivatedAt ||
-        user.foodCheckInRewardAt ||
-        user.subscriptionStartDate ||
+      user.subscriptionStartDate ||
+        user.freeTrialActivatedAt ||
         user.verifiedAt ||
         user.lastLoginAt ||
         user.registeredAtIso
     );
-    if (startMs <= 0 || startMs + 30 * 24 * 60 * 60 * 1000 > nowServerMs) {
+    if (startMs <= 0 || startMs + fallbackDays * 24 * 60 * 60 * 1000 > nowServerMs) {
       return true;
     }
   }
@@ -3046,9 +3118,9 @@ export const getVipAccountState = (user?: User | null): VipAccountState => {
  */
 export const resolveUserActualVipPlanDays = (user?: User | null): number => {
   if (!user) return 30;
-  // 1. Check explicit transactionRef tag (e.g. TXN-30D-..., VIP-90D-..., ADMIN-VIP-365D-...)
+  // 1. Check explicit transactionRef tag (e.g. TRIAL-7D-..., TXN-30D-..., VIP-90D-..., ADMIN-VIP-365D-...)
   const ref = String(user.transactionRef || '').trim();
-  const refDaysMatch = ref.match(/(?:^|[-_])(10|30|60|90|180|365)D(?:[-_]|$)/i);
+  const refDaysMatch = ref.match(/(?:^|[-_])(7|10|30|60|90|180|365)D(?:[-_]|$)/i);
   if (refDaysMatch) {
     const parsed = Number(refDaysMatch[1]);
     if (parsed >= 1) return parsed;
@@ -3062,16 +3134,24 @@ export const resolveUserActualVipPlanDays = (user?: User | null): number => {
     return user.vipPlanDays;
   }
   // 3. Check vipPlanType
-  if (user.vipPlanType === 'quarterly' || user.vipPlanType === '30d') {
+  if (user.vipPlanType === 'trial_7d' || user.vipPlanType === '7d') {
+    return 7;
+  }
+  if (
+    user.vipPlanType === 'quarterly' ||
+    user.vipPlanType === '30d' ||
+    user.vipPlanType === 'consumer_promo_30d' ||
+    user.vipPlanType === 'consumer_30d'
+  ) {
     return 30;
   }
-  if (user.vipPlanType === '90d') {
+  if (user.vipPlanType === '90d' || user.vipPlanType === 'consumer_90d') {
     return 90;
   }
   if (user.vipPlanType === '60d') {
     return 60;
   }
-  if (user.vipPlanType === '365d') {
+  if (user.vipPlanType === '365d' || user.vipPlanType === 'consumer_365d') {
     return 365;
   }
   // 4. Inspect start -> expiry delta for non-synthetic durations (30, 60, 90, 180, or verified 365-day annual)
@@ -3108,56 +3188,42 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
   const ref = String(user.transactionRef || '').trim();
   const actualPlanDays = resolveUserActualVipPlanDays(user);
 
-  // Reconcile permanent Free 30-Day Trial fields across legacy & updated user records
-  const isRewardOrTrialRef =
-    ref.startsWith('REWARD-FOODCHECKIN') ||
-    ref.startsWith('FREE-TRIAL-') ||
-    ref.startsWith('VIP-TRIAL-');
-  const rewardAtMs = user.foodCheckInRewardAt && user.foodCheckInRewardAt !== 'granted' ? parseSafeDateMs(user.foodCheckInRewardAt) : 0;
+  // Retired 30-dish check-in reward references must never grant or maintain VIP
+  if (ref.startsWith('REWARD-FOODCHECKIN')) {
+    return {
+      ...user,
+      membershipTier: 'free',
+      subscriptionStatus: 'none',
+      vipStatus: 'none',
+      foodCheckInRewardAt: undefined,
+    };
+  }
+
+  const isServerTrialRef = ref.startsWith('TRIAL-7D-') || ref.startsWith('FREE-TRIAL-') || ref.startsWith('VIP-TRIAL-');
   const freeTrialStartMs = parseSafeDateMs(user.freeTrialActivatedAt);
-  const subStartMs = parseSafeDateMs(user.subscriptionStartDate);
   const rawExpiry =
     user.subscriptionExpiryDate ||
     user.vipExpiresAt ||
-    user.freeTrialExpiresAt;
+    (user.freeTrialActivated ? user.freeTrialExpiresAt : undefined);
   let expMs = parseSafeDateMs(rawExpiry);
 
-  const isExplicitlyActiveVip =
-    user.subscriptionStatus !== 'cancelled' &&
-    user.paymentStatus !== 'cancelled' &&
-    (user.membershipTier === 'premium_vip' || user.subscriptionStatus === 'active' || user.vipStatus === 'active') &&
-    expMs > nowMs;
-
-  const hasActivatedTrialOrVip = Boolean(
-    user.freeTrialActivated ||
-      rewardAtMs > 0 ||
-      freeTrialStartMs > 0 ||
-      isRewardOrTrialRef ||
-      isExplicitlyActiveVip
-  );
-
   let reconciledUser: User = user;
-  if (hasActivatedTrialOrVip) {
+  if (user.freeTrialActivated || freeTrialStartMs > 0 || isServerTrialRef) {
+    const trialDays =
+      typeof user.freeTrialDurationDays === 'number' && user.freeTrialDurationDays >= 1
+        ? user.freeTrialDurationDays
+        : 7;
     const effectiveTrialStartMs =
       freeTrialStartMs > 0
         ? freeTrialStartMs
-        : rewardAtMs > 0
-          ? rewardAtMs
-          : subStartMs > 0
-            ? subStartMs
-            : expMs > 0
-              ? expMs - 30 * DAY_MS
-              : 0;
+        : parseSafeDateMs(user.subscriptionStartDate) || 0;
     const rawFreeTrialExpMs = parseSafeDateMs(user.freeTrialExpiresAt);
-    // Free Trial window is strictly 30 days from activation (never 90 days from a paid annual plan)
     const effectiveTrialExpMs =
-      rawFreeTrialExpMs > 0 && effectiveTrialStartMs > 0 && rawFreeTrialExpMs - effectiveTrialStartMs <= 32 * DAY_MS
+      rawFreeTrialExpMs > 0
         ? rawFreeTrialExpMs
         : effectiveTrialStartMs > 0
-          ? effectiveTrialStartMs + 30 * DAY_MS
-          : rawFreeTrialExpMs > 0
-            ? rawFreeTrialExpMs
-            : 0;
+          ? effectiveTrialStartMs + trialDays * DAY_MS
+          : 0;
 
     if (effectiveTrialStartMs > 0 && effectiveTrialExpMs > 0) {
       const startIso = new Date(effectiveTrialStartMs).toISOString();
@@ -3173,8 +3239,7 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
         !user.freeTrialActivated ||
         user.freeTrialActivatedAt !== startIso ||
         user.freeTrialExpiresAt !== trialExpIso ||
-        user.freeTrialDurationDays !== 30 ||
-        !user.foodCheckInRewardAt ||
+        user.freeTrialDurationDays !== trialDays ||
         (isStillActiveOnServer &&
           (user.membershipTier !== 'premium_vip' ||
             user.subscriptionStatus !== 'active' ||
@@ -3185,8 +3250,7 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
           freeTrialActivated: true,
           freeTrialActivatedAt: startIso,
           freeTrialExpiresAt: trialExpIso,
-          freeTrialDurationDays: 30,
-          foodCheckInRewardAt: rewardAtMs > 0 ? user.foodCheckInRewardAt : startIso,
+          freeTrialDurationDays: trialDays,
           ...(isStillActiveOnServer
             ? {
                 membershipTier: 'premium_vip',
@@ -3196,7 +3260,7 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
                 subscriptionStartDate: user.subscriptionStartDate || startIso,
                 subscriptionExpiryDate: finalExpIso,
                 vipExpiresAt: finalExpIso,
-                vipPlanDays: user.vipPlanDays || actualPlanDays,
+                vipPlanDays: user.vipPlanDays || trialDays,
               }
             : {}),
         };
@@ -3638,6 +3702,31 @@ export interface AppSettings {
   updateReleaseNotesKh?: string;
   updateReleaseNotesEn?: string;
   forceAppUpdate?: boolean;
+
+  // --- New Consumer VIP & AI Quota Dynamic Settings (Android & Web; iOS stays 100% Free) ---
+  consumerVipEnabled?: boolean; // Default: true (remote toggle)
+  consumerTrialDays?: number; // Default: 7 days
+  consumerTrialAiDailyLimit?: number; // Default: 15 AI requests/day
+  consumerPaidAiDailyLimit?: number; // Default: 80 AI requests/day
+  consumerPromo30dPriceUsd?: number; // Default: $0.99 (shown ONLY after 7d trial expired)
+  consumerPromo30dDays?: number; // Default: 30 days
+  consumer30dPriceUsd?: number; // Default: $2.99
+  consumer30dDays?: number; // Default: 30 days
+  consumer90dPriceUsd?: number; // Default: $6.99 (-22% savings)
+  consumer90dDays?: number; // Default: 90 days
+  consumer365dPriceUsd?: number; // Default: $19.99 (-44% savings)
+  consumer365dDays?: number; // Default: 365 days
+
+  // --- New Independent All-Inclusive Shop Subscription Settings (No Lifetime) ---
+  shopMonthlyPriceUsd?: number; // Default: $6.99 / 30 days / shop
+  shopMonthlyDays?: number; // Default: 30 days
+  shopYearlyPriceUsd?: number; // Default: $59.99 / 365 days / shop (-28% savings)
+  shopYearlyDays?: number; // Default: 365 days
+  shopEarlyBirdEnabled?: boolean; // Default: true
+  shopEarlyBirdYearlyPriceUsd?: number; // Default: $49.99 / 365 days (first 50 shops)
+  shopEarlyBirdMaxShops?: number; // Default: 50 shops
+  shopEarlyBirdClaimedCount?: number; // Default: 0 (auto-switches to $59.99 once >= max)
+  shopPayAfterApproval?: boolean; // Default: true (submit -> Admin approve -> pay -> active)
 }
 
 // User–Admin Two-Way Support & Payment Verification System
@@ -3795,6 +3884,374 @@ export const getDynamicVipPlans = (
       priceKhrDisplay: `${Math.round(longPrice * 4100).toLocaleString()} រៀល`,
     },
   };
+};
+
+export interface OfficialPlanDefinition {
+  planId: OfficialPlanId;
+  category: 'consumer' | 'shop';
+  enabled: boolean;
+  priceUsd: number;
+  durationDays: number;
+  nameKh: string;
+  nameEn: string;
+  nameZh: string;
+  titleKm: string;
+  titleEn: string;
+  titleZh: string;
+  badgeKh?: string;
+  badgeKm?: string;
+  badgeEn?: string;
+  badgeZh?: string;
+  priceKhrApprox: string;
+  equivalentMonthlyUsd?: string;
+}
+
+export const SHOP_ALL_INCLUSIVE_5_BENEFITS: ReadonlyArray<{
+  id: number;
+  km: string;
+  en: string;
+  zh: string;
+}> = [
+  {
+    id: 1,
+    km: '✅ ដាក់ហាង ទីតាំង GPS លេខទូរស័ព្ទ និងម៉ឺនុយម្ហូបលើ App',
+    en: '✅ List your shop, GPS pin, phone number & full food menu in the App',
+    zh: '✅ 在应用上架店铺、GPS 定位、联系电话与完整菜单',
+  },
+  {
+    id: 2,
+    km: '✅ ភ្ញៀវអាចស្វែងរកឃើញហាង និងចុចនាំផ្លូវទៅហាងផ្ទាល់',
+    en: '✅ Customers can search & tap direct turn-by-turn navigation to your shop',
+    zh: '✅ 顾客可直接搜索并一键导航前往您的店铺',
+  },
+  {
+    id: 3,
+    km: '✅ បើក ផ្លាកសញ្ញា VIP (VIP Badge) ពណ៌មាសលើកាតហាង',
+    en: '✅ Unlock the Gold VIP Badge on your shop card',
+    zh: '✅ 解锁店铺卡片专属金色 VIP 徽章',
+  },
+  {
+    id: 4,
+    km: '✅ ហាងលោតលើគេ (Featured Placement) ក្នុងទំព័រដើម និងពេលស្វែងរក',
+    en: '✅ Featured Top Placement on Home & Search (fair rotation)',
+    zh: '✅ 首页与搜索结果置顶推荐展示（公平轮播）',
+  },
+  {
+    id: 5,
+    km: '✅ មើលស្ថិតិអ្នកចូលមើល (Store Analytics) (ចំនួនអ្នកមើល, អ្នកចុចហៅទូរស័ព្ទ, អ្នកចុចផែនទី)',
+    en: '✅ Full Store Analytics (views, phone call taps & map navigation clicks)',
+    zh: '✅ 查看完整店铺数据统计（浏览量、电话点击与地图导航次数）',
+  },
+];
+
+const clampPosMoney = (v: unknown, def: number): number => {
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : def;
+};
+
+const clampPosDays = (v: unknown, def: number): number => {
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 1 ? Math.min(3650, Math.round(n)) : def;
+};
+
+export const getConsumerVipPricingCatalog = (settings?: Partial<AppSettings> | null) => {
+  const s = settings || getStoredAppSettingsFallback();
+  const consumerVipEnabled = s.consumerVipEnabled !== false;
+  const trialDays = clampPosDays(s.consumerTrialDays, 7);
+  const trialAiDailyLimit = clampPosDays(s.consumerTrialAiDailyLimit, 15);
+  const paidAiDailyLimit = clampPosDays(s.consumerPaidAiDailyLimit, 80);
+
+  const promoPrice = clampPosMoney(s.consumerPromo30dPriceUsd, 0.99);
+  const promoDays = clampPosDays(s.consumerPromo30dDays, 30);
+
+  const mPrice = clampPosMoney(s.consumer30dPriceUsd, 2.99);
+  const mDays = clampPosDays(s.consumer30dDays, 30);
+
+  const qPrice = clampPosMoney(s.consumer90dPriceUsd, 6.99);
+  const qDays = clampPosDays(s.consumer90dDays, 90);
+
+  const yPrice = clampPosMoney(s.consumer365dPriceUsd, 19.99);
+  const yDays = clampPosDays(s.consumer365dDays, 365);
+
+  const toKhr = (usd: number) => `${Math.round(usd * 4100).toLocaleString()} រៀល`;
+
+  const withTitles = (p: Omit<OfficialPlanDefinition, 'titleKm' | 'titleEn' | 'titleZh'>): OfficialPlanDefinition => ({
+    ...p,
+    titleKm: p.nameKh,
+    titleEn: p.nameEn,
+    titleZh: p.nameZh,
+    badgeKm: p.badgeKh,
+  });
+
+  const trialPlan: OfficialPlanDefinition = withTitles({
+    planId: 'trial_7d',
+    category: 'consumer',
+    enabled: consumerVipEnabled,
+    priceUsd: 0,
+    durationDays: trialDays,
+    nameKh: `សាកល្បង VIP ឥតគិតថ្លៃ ${trialDays} ថ្ងៃ`,
+    nameEn: `${trialDays}-Day Free VIP Trial`,
+    nameZh: `${trialDays} 天免费 VIP 试用`,
+    badgeKh: 'ម្តងគត់',
+    badgeEn: '1-Time Free',
+    badgeZh: '限享一次',
+    priceKhrApprox: '0 រៀល',
+  });
+
+  const promo30d: OfficialPlanDefinition = withTitles({
+    planId: 'consumer_promo_30d',
+    category: 'consumer',
+    enabled: consumerVipEnabled,
+    priceUsd: promoPrice,
+    durationDays: promoDays,
+    nameKh: `ប្រូម៉ូសិនពិសេស ${promoDays} ថ្ងៃ`,
+    nameEn: `Special Win-Back ${promoDays} Days`,
+    nameZh: `专属回归特惠 ${promoDays} 天`,
+    badgeKh: 'ប្រូម៉ូសិនពិសេសម្តងគត់',
+    badgeEn: '1-Time Special Offer',
+    badgeZh: '限享一次特惠',
+    priceKhrApprox: toKhr(promoPrice),
+  });
+
+  const monthly30d: OfficialPlanDefinition = withTitles({
+    planId: 'consumer_30d',
+    category: 'consumer',
+    enabled: consumerVipEnabled,
+    priceUsd: mPrice,
+    durationDays: mDays,
+    nameKh: `VIP ប្រចាំខែ (${mDays} ថ្ងៃ)`,
+    nameEn: `Monthly VIP (${mDays} Days)`,
+    nameZh: `月度 VIP（${mDays} 天）`,
+    priceKhrApprox: toKhr(mPrice),
+    equivalentMonthlyUsd: mPrice.toFixed(2),
+  });
+
+  const quarterly90d: OfficialPlanDefinition = withTitles({
+    planId: 'consumer_90d',
+    category: 'consumer',
+    enabled: consumerVipEnabled,
+    priceUsd: qPrice,
+    durationDays: qDays,
+    nameKh: `VIP សន្សំសំចៃ ${qDays} ថ្ងៃ`,
+    nameEn: `Quarterly Saver (${qDays} Days)`,
+    nameZh: `季度省心包（${qDays} 天）`,
+    badgeKh: 'ចំណេញ 22%',
+    badgeEn: 'Save 22%',
+    badgeZh: '省 22%',
+    priceKhrApprox: toKhr(qPrice),
+    equivalentMonthlyUsd: ((qPrice / qDays) * 30).toFixed(2),
+  });
+
+  const yearly365d: OfficialPlanDefinition = withTitles({
+    planId: 'consumer_365d',
+    category: 'consumer',
+    enabled: consumerVipEnabled,
+    priceUsd: yPrice,
+    durationDays: yDays,
+    nameKh: `VIP ប្រចាំឆ្នាំ (${yDays} ថ្ងៃ)`,
+    nameEn: `Annual VIP (${yDays} Days)`,
+    nameZh: `年度 VIP（${yDays} 天）`,
+    badgeKh: 'ចំណេញ 44% • ពេញនិយម',
+    badgeEn: 'Save 44% • Best Value',
+    badgeZh: '省 44% • 超值推荐',
+    priceKhrApprox: toKhr(yPrice),
+    equivalentMonthlyUsd: (yPrice / 12).toFixed(2),
+  });
+
+  return {
+    consumerVipEnabled,
+    trialDays,
+    trialAiDailyLimit,
+    paidAiDailyLimit,
+    trialPlan,
+    promo30d,
+    promo30dPlan: promo30d,
+    monthly30d,
+    monthlyPlan: monthly30d,
+    quarterly90d,
+    quarterlyPlan: quarterly90d,
+    yearly365d,
+    yearlyPlan: yearly365d,
+  };
+};
+
+export const getShopSubscriptionCatalog = (
+  settings?: Partial<AppSettings> | null,
+  activeEarlyBirdCountOverride?: number
+) => {
+  const s = settings || getStoredAppSettingsFallback();
+  const mPrice = clampPosMoney(s.shopMonthlyPriceUsd, 6.99);
+  const mDays = clampPosDays(s.shopMonthlyDays, 30);
+
+  const yPrice = clampPosMoney(s.shopYearlyPriceUsd, 59.99);
+  const yDays = clampPosDays(s.shopYearlyDays, 365);
+
+  const ebEnabled = s.shopEarlyBirdEnabled !== false;
+  const ebPrice = clampPosMoney(s.shopEarlyBirdYearlyPriceUsd, 49.99);
+  const ebMax = clampPosDays(s.shopEarlyBirdMaxShops, 50);
+  const ebClaimed =
+    typeof activeEarlyBirdCountOverride === 'number' && activeEarlyBirdCountOverride >= 0
+      ? Math.floor(activeEarlyBirdCountOverride)
+      : Math.max(0, Math.floor(Number(s.shopEarlyBirdClaimedCount) || 0));
+  const ebRemaining = Math.max(0, ebMax - ebClaimed);
+  const isEarlyBirdAvailable = ebEnabled && ebRemaining > 0;
+  const payAfterApproval = s.shopPayAfterApproval !== false;
+
+  const toKhr = (usd: number) => `${Math.round(usd * 4100).toLocaleString()} រៀល`;
+  const withTitles = (p: Omit<OfficialPlanDefinition, 'titleKm' | 'titleEn' | 'titleZh'>): OfficialPlanDefinition => ({
+    ...p,
+    titleKm: p.nameKh,
+    titleEn: p.nameEn,
+    titleZh: p.nameZh,
+    badgeKm: p.badgeKh,
+  });
+
+  const monthly30d: OfficialPlanDefinition = withTitles({
+    planId: 'shop_30d',
+    category: 'shop',
+    enabled: true,
+    priceUsd: mPrice,
+    durationDays: mDays,
+    nameKh: `កញ្ចប់ហាងប្រចាំខែ (${mDays} ថ្ងៃ)`,
+    nameEn: `Monthly Shop Plan (${mDays} Days)`,
+    nameZh: `店铺月度套餐（${mDays} 天）`,
+    priceKhrApprox: toKhr(mPrice),
+    equivalentMonthlyUsd: mPrice.toFixed(2),
+  });
+
+  const yearly365d: OfficialPlanDefinition = withTitles({
+    planId: 'shop_365d',
+    category: 'shop',
+    enabled: true,
+    priceUsd: yPrice,
+    durationDays: yDays,
+    nameKh: `កញ្ចប់ហាងប្រចាំឆ្នាំ (${yDays} ថ្ងៃ)`,
+    nameEn: `Annual Shop Plan (${yDays} Days)`,
+    nameZh: `店铺年度套餐（${yDays} 天）`,
+    badgeKh: 'ចំណេញ 28%',
+    badgeEn: 'Save 28%',
+    badgeZh: '省 28%',
+    priceKhrApprox: toKhr(yPrice),
+    equivalentMonthlyUsd: (yPrice / 12).toFixed(2),
+  });
+
+  const earlyBird365d: OfficialPlanDefinition = withTitles({
+    planId: 'shop_earlybird_365d',
+    category: 'shop',
+    enabled: isEarlyBirdAvailable,
+    priceUsd: ebPrice,
+    durationDays: yDays,
+    nameKh: `ប្រូម៉ូសិន Early-Bird ប្រចាំឆ្នាំ (${ebMax} ហាងដំបូង)`,
+    nameEn: `Early-Bird Annual Shop Promo (First ${ebMax} Shops)`,
+    nameZh: `早鸟年度店铺特惠（前 ${ebMax} 家店）`,
+    badgeKh: `សល់ ${ebRemaining}/${ebMax} កន្លែង`,
+    badgeEn: `${ebRemaining}/${ebMax} left`,
+    badgeZh: `剩余 ${ebRemaining}/${ebMax} 名额`,
+    priceKhrApprox: toKhr(ebPrice),
+    equivalentMonthlyUsd: (ebPrice / 12).toFixed(2),
+  });
+
+  return {
+    shopPlansEnabled: true,
+    monthly30d,
+    monthlyPlan: monthly30d,
+    yearly365d,
+    yearlyPlan: yearly365d,
+    earlyBird365d,
+    earlyBirdPlan: earlyBird365d,
+    effectiveYearlyPlan: isEarlyBirdAvailable ? earlyBird365d : yearly365d,
+    earlyBirdEnabled: ebEnabled,
+    earlyBirdMaxShops: ebMax,
+    earlyBirdCap: ebMax,
+    earlyBirdClaimedCount: ebClaimed,
+    earlyBirdRemainingSlots: ebRemaining,
+    earlyBirdRemaining: ebRemaining,
+    isEarlyBirdAvailable,
+    payAfterApproval,
+  };
+};
+
+export const resolveOfficialPlanById = (
+  planId?: string | null,
+  settings?: Partial<AppSettings> | null
+): OfficialPlanDefinition | null => {
+  if (!planId) return null;
+  const c = getConsumerVipPricingCatalog(settings);
+  const sh = getShopSubscriptionCatalog(settings);
+  switch (planId) {
+    case 'trial_7d':
+      return c.trialPlan;
+    case 'consumer_promo_30d':
+      return c.promo30d;
+    case 'consumer_30d':
+      return c.monthly30d;
+    case 'consumer_90d':
+      return c.quarterly90d;
+    case 'consumer_365d':
+      return c.yearly365d;
+    case 'shop_30d':
+      return sh.monthly30d;
+    case 'shop_365d':
+      return sh.yearly365d;
+    case 'shop_earlybird_365d':
+      return sh.isEarlyBirdAvailable ? sh.earlyBird365d : sh.yearly365d;
+    default:
+      return null;
+  }
+};
+
+/**
+ * Eligible for 1-time 7-Day Free Trial ONLY when never activated trial/VIP before and not on iOS.
+ */
+export const isConsumerTrial7dEligible = (user?: User | null): boolean => {
+  if (isIosOrIpadAppStoreRuntime() || isNativeIosApp()) return false;
+  if (!user) return true; // Guest sees CTA which prompts sign-in first
+  if (isAdminAccount(user)) return false;
+  if (isUserVipActive(user)) return false;
+  if (user.freeTrialActivated || Boolean(user.freeTrialActivatedAt) || Boolean(user.freeTrialExpiresAt)) {
+    return false;
+  }
+  if (user.subscriptionExpiryDate || user.vipExpiresAt) {
+    return false;
+  }
+  return true;
+};
+
+/**
+ * $0.99 Win-Back Promo is strictly shown ONLY AFTER the 7-day trial has been used and expired (never at day 0),
+ * and only once per user/device.
+ */
+export const isConsumerPromo099Eligible = (user?: User | null): boolean => {
+  if (isIosOrIpadAppStoreRuntime() || isNativeIosApp()) return false;
+  if (!user || isAdminAccount(user)) return false;
+  if (isUserVipActive(user)) return false;
+  if (user.promo099Used) return false;
+  const hadTrial = Boolean(user.freeTrialActivated || user.freeTrialActivatedAt || user.freeTrialExpiresAt);
+  if (!hadTrial) return false;
+  const nowMs = getAuthoritativeServerNowMs();
+  const trialExpMs = parseSafeDateMs(user.freeTrialExpiresAt || user.subscriptionExpiryDate || user.vipExpiresAt);
+  return trialExpMs > 0 && trialExpMs <= nowMs;
+};
+
+/**
+ * Checks whether a custom shop's paid 30-day / 365-day subscription is currently active.
+ * Seed catalog restaurants are public directory entries (not custom paid shop subscriptions).
+ */
+export const isShopSubscriptionActive = (
+  restaurant?: Partial<Restaurant> | null,
+  nowOverrideMs?: number
+): boolean => {
+  if (!restaurant || !restaurant.id) return false;
+  if (isSeedRestaurantId(restaurant.id)) return false;
+  if (restaurant.status !== 'approved') return false;
+  const nowMs = typeof nowOverrideMs === 'number' ? nowOverrideMs : getAuthoritativeServerNowMs();
+  const expRaw =
+    restaurant.shopSubscriptionExpiresAt ||
+    restaurant.subscriptionExpiresAt ||
+    restaurant.membershipExpiresAt;
+  const expMs = parseSafeDateMs(expRaw);
+  if (expMs > nowMs) return true;
+  return false;
 };
 
 /**
@@ -4192,6 +4649,7 @@ export const isRestaurantEligibleForVipRotation = (
   if (!restaurant || !restaurant.id) return false;
   if (isSeedRestaurantId(restaurant.id)) return false;
   if (isHotelBusinessRecord(restaurant)) return false;
+  if ((restaurant as any).isSuspended) return false;
   if (String(restaurant.id).startsWith('food-') || String(restaurant.id).startsWith('dest-')) {
     return false;
   }
@@ -4205,41 +4663,30 @@ export const isRestaurantEligibleForVipRotation = (
     return false;
   }
 
-  // Check if owner is an active VIP member or if the shop itself has an active premium tier
+  // Respect disabled owner accounts
   if (Array.isArray(users) && users.length > 0 && restaurant.ownerId) {
     const owner = users.find(
       (u) =>
         u.id === restaurant.ownerId ||
         (Array.isArray(u.legacyIds) && u.legacyIds.includes(restaurant.ownerId!))
     );
-    if (owner) {
-      if (owner.isDisabled) return false;
-      if (isUserVipActive(owner) || isAdminAccount(owner)) return true;
-      // If owner's VIP subscription has explicitly expired, shop is not eligible for VIP rotation
-      if (owner.subscriptionExpiryDate) {
-        const exp = Date.parse(owner.subscriptionExpiryDate);
-        if (!Number.isNaN(exp) && exp <= Date.now()) {
-          return false;
-        }
-      }
-    }
+    if (owner?.isDisabled) return false;
+    if (owner && isAdminAccount(owner) && restaurant.membershipTier === 'premium') return true;
   }
 
-  if (isRestaurantPremiumActive(restaurant)) return true;
-  if (
-    restaurant.membershipTier === 'premium' ||
-    restaurant.dataSource === 'vip_owner' ||
-    restaurant.isFeatured ||
-    restaurant.isAdminEdited ||
-    !isSeedRestaurantId(restaurant.id)
-  ) {
-    if (restaurant.membershipExpiresAt) {
-      const exp = Date.parse(restaurant.membershipExpiresAt);
-      if (!Number.isNaN(exp) && exp <= Date.now()) {
-        return false;
-      }
-    }
+  // Section B: Independent Shop Package — custom shops rotate in Featured VIP slots
+  // ONLY while their Shop Package (30d / 365d) is active (or Admin-managed official featured shop).
+  if (isShopSubscriptionActive(restaurant)) {
     return true;
+  }
+
+  if (
+    restaurant.isAdminEdited &&
+    restaurant.ownerId === 'admin-authorized-single' &&
+    restaurant.membershipTier === 'premium'
+  ) {
+    const expMs = parseSafeDateMs(restaurant.membershipExpiresAt);
+    return expMs === null || expMs > Date.now();
   }
 
   return false;

@@ -10,33 +10,24 @@ interface PrivacyPolicyModalProps {
 }
 
 export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, onClose }) => {
-  const { language, setLanguage, currentUser, logout, showToast } = useApp();
+  const { language, setLanguage, currentUser, deleteUserAccount } = useApp();
 
   if (!isOpen) return null;
 
-  const handleDeleteAccount = () => {
-    if (
-      window.confirm(
-        tr(
-          language,
-          'តើអ្នកពិតជាចង់លុបគណនី និងទិន្នន័យផ្ទាល់ខ្លួនរបស់អ្នកចេញពីប្រព័ន្ធមែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។',
-          'Are you sure you want to permanently delete your account and personal data? This cannot be undone.',
-          '您确定要永久删除您的账号和个人数据吗？此操作无法撤销。'
-        )
+  // App Store Guideline 5.1.1(v): this button must REALLY delete the account (it used to only log the user out).
+  const handleDeleteAccount = async () => {
+    if (!currentUser) return;
+    const confirmed = window.confirm(
+      tr(
+        language,
+        'តើអ្នកពិតជាចង់លុបគណនី និងទិន្នន័យផ្ទាល់ខ្លួនរបស់អ្នកជាអចិន្ត្រៃយ៍មែនទេ? ហាង សមាជិកភាព VIP និងកំណត់ត្រាទូទាត់ដែលភ្ជាប់នឹងគណនីនេះក៏នឹងត្រូវលុបផងដែរ ហើយមិនអាចយកមកវិញបានទេ។',
+        'Are you sure you want to permanently delete your account and personal data? Restaurants you listed, your VIP membership and related payment records will also be removed. This cannot be undone.',
+        '您确定要永久删除您的账号和个人数据吗？您发布的店铺、VIP 会员资格及相关付款记录也将被一并删除，且无法恢复。'
       )
-    ) {
-      logout();
-      showToast(
-        tr(
-          language,
-          'គណនី និងទិន្នន័យត្រូវបានលុបជោគជ័យ',
-          'Account and data deleted successfully',
-          '账号与个人数据已成功删除'
-        ),
-        'success'
-      );
-      onClose();
-    }
+    );
+    if (!confirmed) return;
+    const result = await deleteUserAccount(currentUser.id);
+    if (result.success) onClose();
   };
 
   return (
@@ -320,9 +311,9 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
               </span>{' '}
               {tr(
                 language,
-                'កម្មវិធីយើងខ្ញុំមិនលក់ មិនចែកចាយ ឬជួញដូរទិន្នន័យឯកជនរបស់អ្នកប្រើប្រាស់ទៅឱ្យតតិយជនឡើយ។ រាល់ការតភ្ជាប់ប្រើប្រាស់បច្ចេកវិទ្យាការពារការអ៊ិនគ្រីប HTTPS/TLS កម្រិតខ្ពស់។',
-                'We never sell, rent, or trade your personal information to third parties. All network traffic is encrypted via HTTPS/TLS.',
-                '我们绝不向第三方出售、出租或交易您的个人数据。所有网络通信均采用 HTTPS/TLS 加密保护。'
+                'កម្មវិធីយើងខ្ញុំមិនលក់ មិនចែកចាយ ឬជួញដូរទិន្នន័យឯកជនរបស់អ្នកប្រើប្រាស់ទៅឱ្យតតិយជនឡើយ។ រាល់ការតភ្ជាប់ប្រើប្រាស់បច្ចេកវិទ្យាការពារការអ៊ិនគ្រីប HTTPS/TLS កម្រិតខ្ពស់។ នៅលើប្រព័ន្ធ Android និង Web កម្មវិធីប្រើប្រាស់លេខសម្គាល់ឧបករណ៍ដែលបានបម្លែងកូដសម្ងាត់ (SHA-256 Device Hash) សម្រាប់ការពារការបន្លំប្រើប្រាស់សាកល្បង (Trial/Promo Fraud Prevention) តែមួយមុខគត់ ដោយមិនប្រើសម្រាប់តាមដានពាណិជ្ជកម្មឡើយ (ហើយសិទ្ធិសមាជិកដែលបានបង់ប្រាក់រួចនៅតែប្រើបន្តបានធម្មតាពេលប្តូរទូរស័ព្ទថ្មី)។',
+                'We never sell, rent, or trade your personal information to third parties. All network traffic is encrypted via HTTPS/TLS. On Android and Web, a one-way cryptographic hash (SHA-256) of an app-scoped device identifier is processed strictly for fraud and one-time trial/promotion abuse prevention (never for advertising or cross-app tracking, and never collected on iOS; paid memberships remain portable when changing phones).',
+                '我们绝不向第三方出售、出租或交易您的个人数据。所有网络通信均采用 HTTPS/TLS 加密保护。在 Android 与网页版上，应用仅使用单向加密（SHA-256）设备标识哈希值用于防范一次性免费试用/优惠滥用，绝不用于广告追踪（iOS 端不收集；已付费会员更换手机登录仍可正常使用）。'
               )}
             </div>
           </div>

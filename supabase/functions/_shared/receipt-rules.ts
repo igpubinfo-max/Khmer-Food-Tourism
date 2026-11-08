@@ -136,11 +136,132 @@ export interface PricingDoc {
   vipShortPriceUsd?: number;
   vipLongDurationDays?: number;
   vipLongPriceUsd?: number;
+  // Consumer VIP & AI Quotas
+  consumerVipEnabled?: boolean;
+  consumerTrialDays?: number;
+  consumerTrialAiDailyLimit?: number;
+  consumerPaidAiDailyLimit?: number;
+  consumerPromo30dPriceUsd?: number;
+  consumerPromo30dDays?: number;
+  consumer30dPriceUsd?: number;
+  consumer30dDays?: number;
+  consumer90dPriceUsd?: number;
+  consumer90dDays?: number;
+  consumer365dPriceUsd?: number;
+  consumer365dDays?: number;
+  // Independent All-Inclusive Shop Plans (No Lifetime)
+  shopMonthlyPriceUsd?: number;
+  shopMonthlyDays?: number;
+  shopYearlyPriceUsd?: number;
+  shopYearlyDays?: number;
+  shopEarlyBirdEnabled?: boolean;
+  shopEarlyBirdYearlyPriceUsd?: number;
+  shopEarlyBirdMaxShops?: number;
+  shopEarlyBirdClaimedCount?: number;
+  shopPayAfterApproval?: boolean;
 }
 export interface ResolvedPlan {
   planType: 'quarterly' | 'annual';
   days: number;
   priceUsd: number;
+}
+
+export type OfficialPaidPlanId =
+  | 'consumer_promo_30d'
+  | 'consumer_30d'
+  | 'consumer_90d'
+  | 'consumer_365d'
+  | 'shop_30d'
+  | 'shop_365d'
+  | 'shop_earlybird_365d';
+
+export interface OfficialResolvedPlan {
+  planId: OfficialPaidPlanId;
+  category: 'consumer' | 'shop';
+  planType: 'quarterly' | 'annual';
+  days: number;
+  priceUsd: number;
+}
+
+function resolvePositivePrice(val: unknown, fallback: number): number | null {
+  if (val === undefined || val === null) return fallback;
+  const n = Number(val);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.round(n * 100) / 100;
+}
+
+function resolvePositiveDays(val: unknown, fallback: number): number | null {
+  if (val === undefined || val === null) return fallback;
+  const n = Number(val);
+  if (!Number.isFinite(n) || n < 1 || n > 3650) return null;
+  return Math.round(n);
+}
+
+/**
+ * Resolves an explicit paid planId (Consumer VIP or Independent Shop Plan) from SERVER pricing.
+ * Returns null for unknown planIds, 'trial_7d' ($0 uses action: 'claim_trial'), or disabled <= 0 prices.
+ * Automatically falls back from shop_earlybird_365d ($49.99) to shop_365d ($59.99) once the 50-shop cap is reached.
+ */
+export function resolveOfficialServerPlan(
+  p: PricingDoc | null | undefined,
+  rawPlanId: unknown
+): OfficialResolvedPlan | null {
+  if (typeof rawPlanId !== 'string' || !rawPlanId.trim()) return null;
+  const doc: PricingDoc = p && typeof p === 'object' ? p : {};
+  const id = rawPlanId.trim();
+
+  switch (id) {
+    case 'consumer_promo_30d': {
+      if (doc.consumerVipEnabled === false) return null;
+      const priceUsd = resolvePositivePrice(doc.consumerPromo30dPriceUsd, 0.99);
+      const days = resolvePositiveDays(doc.consumerPromo30dDays, 30);
+      return priceUsd && days ? { planId: 'consumer_promo_30d', category: 'consumer', planType: 'quarterly', days, priceUsd } : null;
+    }
+    case 'consumer_30d': {
+      if (doc.consumerVipEnabled === false) return null;
+      const priceUsd = resolvePositivePrice(doc.consumer30dPriceUsd, 2.99);
+      const days = resolvePositiveDays(doc.consumer30dDays, 30);
+      return priceUsd && days ? { planId: 'consumer_30d', category: 'consumer', planType: 'quarterly', days, priceUsd } : null;
+    }
+    case 'consumer_90d': {
+      if (doc.consumerVipEnabled === false) return null;
+      const priceUsd = resolvePositivePrice(doc.consumer90dPriceUsd, 6.99);
+      const days = resolvePositiveDays(doc.consumer90dDays, 90);
+      return priceUsd && days ? { planId: 'consumer_90d', category: 'consumer', planType: 'annual', days, priceUsd } : null;
+    }
+    case 'consumer_365d': {
+      if (doc.consumerVipEnabled === false) return null;
+      const priceUsd = resolvePositivePrice(doc.consumer365dPriceUsd, 19.99);
+      const days = resolvePositiveDays(doc.consumer365dDays, 365);
+      return priceUsd && days ? { planId: 'consumer_365d', category: 'consumer', planType: 'annual', days, priceUsd } : null;
+    }
+    case 'shop_30d': {
+      const priceUsd = resolvePositivePrice(doc.shopMonthlyPriceUsd, 6.99);
+      const days = resolvePositiveDays(doc.shopMonthlyDays, 30);
+      return priceUsd && days ? { planId: 'shop_30d', category: 'shop', planType: 'quarterly', days, priceUsd } : null;
+    }
+    case 'shop_365d': {
+      const priceUsd = resolvePositivePrice(doc.shopYearlyPriceUsd, 59.99);
+      const days = resolvePositiveDays(doc.shopYearlyDays, 365);
+      return priceUsd && days ? { planId: 'shop_365d', category: 'shop', planType: 'annual', days, priceUsd } : null;
+    }
+    case 'shop_earlybird_365d': {
+      const ebEnabled = doc.shopEarlyBirdEnabled !== false;
+      const maxShops = resolvePositiveDays(doc.shopEarlyBirdMaxShops, 50) ?? 50;
+      const claimed = Math.max(0, Math.floor(Number(doc.shopEarlyBirdClaimedCount) || 0));
+      const days = resolvePositiveDays(doc.shopYearlyDays, 365);
+      if (!days) return null;
+      if (ebEnabled && claimed < maxShops) {
+        const ebPrice = resolvePositivePrice(doc.shopEarlyBirdYearlyPriceUsd, 49.99);
+        return ebPrice ? { planId: 'shop_earlybird_365d', category: 'shop', planType: 'annual', days, priceUsd: ebPrice } : null;
+      }
+      // Cap reached or Early-Bird toggled off -> fall back to standard $59.99 annual shop plan
+      const stdPrice = resolvePositivePrice(doc.shopYearlyPriceUsd, 59.99);
+      return stdPrice ? { planId: 'shop_365d', category: 'shop', planType: 'annual', days, priceUsd: stdPrice } : null;
+    }
+    default:
+      return null;
+  }
 }
 
 /** short plan = "quarterly" in the app's vocabulary, long plan = "annual". Matched by duration; null when unknown. */
@@ -166,7 +287,7 @@ export function computeVipWindow(existingExpiryIso: unknown, days: number, nowMs
 /** Writes ONLY the entitlement fields onto the stored user document. */
 export function applyVipGrant(
   doc: Record<string, unknown>,
-  g: { startIso: string; expiryIso: string; days: number; planType: string; trxId: string }
+  g: { startIso: string; expiryIso: string; days: number; planType: string; trxId: string; planId?: OfficialPaidPlanId }
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {
     ...doc,
@@ -182,8 +303,73 @@ export function applyVipGrant(
     vipPlanType: g.planType,
     transactionRef: g.trxId,
   };
+  if (g.planId) {
+    out.activeConsumerPlanId = g.planId;
+    if (g.planId === 'consumer_promo_30d') {
+      out.promo099Used = true;
+      out.promo099ClaimedAt = g.startIso;
+    }
+  }
   delete out.vipCancelledAt;
   return out;
+}
+
+/** Writes the 1-time 7-Day Free Trial onto the stored user document (server-authoritative). */
+export function applyTrial7dGrant(
+  doc: Record<string, unknown>,
+  g: { startIso: string; expiryIso: string; days: number; trxId: string }
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {
+    ...doc,
+    membershipTier: 'premium_vip',
+    subscriptionStatus: 'active',
+    vipStatus: 'active',
+    paymentStatus: 'verified',
+    paymentMethod: 'FREE_TRIAL_7D',
+    subscriptionStartDate: g.startIso,
+    subscriptionExpiryDate: g.expiryIso,
+    vipExpiresAt: g.expiryIso,
+    vipPlanDays: g.days,
+    vipPlanType: 'trial_7d',
+    activeConsumerPlanId: 'trial_7d',
+    freeTrialActivated: true,
+    freeTrialActivatedAt: g.startIso,
+    freeTrialExpiresAt: g.expiryIso,
+    freeTrialDurationDays: g.days,
+    transactionRef: g.trxId,
+  };
+  delete out.vipCancelledAt;
+  return out;
+}
+
+/**
+ * Applies an Independent All-Inclusive Shop Subscription (30d / 365d / Early-Bird 365d) onto a shop record,
+ * stacking onto any remaining active shop subscription time without modifying the owner's Consumer VIP status.
+ */
+export function applyShopSubscriptionGrant(
+  shopDoc: Record<string, unknown>,
+  g: { startIso: string; days: number; planId: OfficialPaidPlanId; trxId: string; nowMs: number }
+): { updatedShop: Record<string, unknown>; expiryIso: string } {
+  const existingExp =
+    shopDoc.shopSubscriptionExpiresAt ||
+    shopDoc.subscriptionExpiresAt ||
+    shopDoc.membershipExpiresAt;
+  const win = computeVipWindow(existingExp, g.days, g.nowMs);
+  const updatedShop: Record<string, unknown> = {
+    ...shopDoc,
+    membershipTier: 'premium',
+    isFeatured: true,
+    isPromotedBadge: true,
+    shopPaymentStatus: 'active',
+    activeShopPlanId: g.planId,
+    shopSubscriptionStartedAt: g.startIso,
+    shopSubscriptionExpiresAt: win.expiryIso,
+    subscriptionExpiresAt: win.expiryIso,
+    membershipExpiresAt: win.expiryIso,
+    lastShopPaymentRef: g.trxId,
+    lastShopPaidAt: g.startIso,
+  };
+  return { updatedShop, expiryIso: win.expiryIso };
 }
 
 export type ReceiptDecision = 'verified' | 'pending' | 'rejected';

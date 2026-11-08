@@ -47,24 +47,28 @@ async function ascRequest(endpoint, method = 'GET', body = null) {
 
 const REVIEW_NOTES = `Hello Apple App Review Team,
 
-Thank you very much for your detailed feedback on Submission ID: 3bbca3d5-915b-4548-8bb0-627d77752449. We have resolved all items in this build:
+Thank you for your feedback. This build addresses the following:
 
-1. Guideline 4.8 - Design - Login Services (Sign in with Apple / Equivalent Private Login):
-- Added "Sign in with Apple" ("បន្តជាមួយ Apple") at the top of our in-app sign-in modal (Profile tab -> Sign In).
-- Strictly limits data collection to name & email, supports "Hide My Email" (@privaterelay.appleid.com) privacy relay, and performs zero advertising tracking.
+1. Guideline 4.8 - Login Services:
+- The iOS app offers only its own email-based account (name and email, no advertising tracking). No third-party or social login is offered inside the iOS app: Google sign-in is hidden on iOS and the earlier custom "Sign in with Apple" button has been removed, so an additional login service is not required.
 
-2. Guideline 4 - Design (In-App Sign-In, Registration & Account Deletion):
-- All sign-in and account registration flows take place 100% inside the native app modal without opening the external Safari browser.
-- Account Deletion is available directly inside the app at: (a) Profile tab -> Top Profile Card -> "Delete Account" ("លុបគណនី"), and (b) Profile tab -> Settings -> "Permanently Delete My Account".
+2. Guideline 5.1.1(v) - Account Deletion:
+- Profile tab -> Settings -> "Delete My Account & Data" (also available under Profile -> Settings -> Privacy Policy -> "Delete My Account & Data Now"). After a confirmation prompt the account and its associated data (profile, favourites, trip plans, listings, support messages and payment records) are permanently removed from the app and from our server.
 
-3. Guideline 4 - Design (Optimized for iPad Air 11-inch M3 & All Screen Sizes):
-- Expanded the responsive container and grid layout edge-to-edge across iPad Air 11-inch (M3), iPad Pro, and all iPhone resolutions.
+3. Guideline 3.1.1 - In-App Purchase:
+- The iOS app contains no purchases, subscriptions, donations or external payment links. All consumer features are available free of charge in the iOS app, and the Support/donation screen is not shown on iOS.
 
-4. Guideline 3.1.1 - Business - Payments - In-App Purchase:
-- Removed and disabled all non-IAP VIP membership upgrade screens, pricing prompts, and external payment mechanisms on iOS and iPadOS. All consumer features are unlocked and free to use on iOS/iPadOS.
+4. Guideline 5.1.2(i) - Third-party AI:
+- The AI food assistant asks for explicit in-app permission before any question, photo or account ID is shared with a third-party AI provider (Google Gemini or OpenAI). The user can decline and continue using the app without AI.
 
-5. Guideline 2.3.3 - Performance - Accurate Metadata (Screenshots):
-- Updated all iPhone and iPad screenshots in Media Manager to show actual in-app UI screens in use.`;
+5. Guideline 4 - iPad:
+- The layout expands to the available screen width on iPad (no fixed phone-width column on large screens).
+
+6. Guideline 2.3.3 - Accurate Metadata (Screenshots):
+- iPhone and iPad screenshots show actual in-app screens.
+
+7. Demo account:
+- No demo account is required. Reviewers can register or sign in with any valid email address.`;
 
 async function main() {
   if (!ISSUER_ID || !KEY_ID || !PRIVATE_KEY) {

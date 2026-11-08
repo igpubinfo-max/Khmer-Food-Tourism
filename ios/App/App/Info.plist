@@ -69,14 +69,14 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 		<key>NSCameraUsageDescription</key>
-	<string>Discover Cambodia Food &amp; Tourism needs camera access to photograph dishes for AI recognition, scan QR codes, and upload restaurant food photos / កម្មវិធីត្រូវការសិទ្ធិប្រើកាមេរ៉ាដើម្បីថតរូបម្ហូប ស្កេន QR Code និងបង្ហោះរូបភាពហាង</string>
+	<string>Cambodia Flavors &amp; Tourism needs camera access to photograph dishes for AI recognition, scan QR codes, and upload restaurant food photos / កម្មវិធីត្រូវការសិទ្ធិប្រើកាមេរ៉ាដើម្បីថតរូបម្ហូប ស្កេន QR Code និងបង្ហោះរូបភាពហាង</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Discover Cambodia Food &amp; Tourism needs photo library access to upload restaurant dishes, attach payment receipts, and save food cards / កម្មវិធីត្រូវការសិទ្ធិមើលវិចិត្រសាលរូបភាពដើម្បីជ្រើសរើសរូបម្ហូប និងបង្កាន់ដៃបង់ប្រាក់</string>
+	<string>Cambodia Flavors &amp; Tourism needs photo library access to upload restaurant and dish photos and to save food cards / កម្មវិធីត្រូវការសិទ្ធិចូលមើលរូបភាពក្នុងទូរស័ព្ទ ដើម្បីបង្ហោះរូបភាពហាង និងម្ហូប ព្រមទាំងរក្សាទុកកាតម្ហូប</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Discover Cambodia Food &amp; Tourism needs permission to save KHQR payment codes and food photos to your photo library / កម្មវិធីត្រូវការសិទ្ធិរក្សាទុករូបភាព QR Code និងរូបម្ហូបក្នុងទូរស័ព្ទរបស់អ្នក</string>
+	<string>Cambodia Flavors &amp; Tourism needs permission to save food photos and food cards to your photo library / កម្មវិធីត្រូវការសិទ្ធិរក្សាទុករូបភាពម្ហូប និងកាតម្ហូបក្នុងទូរស័ព្ទរបស់អ្នក</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Discover Cambodia Food &amp; Tourism uses your GPS location to display nearby restaurants, attractions, and distance calculations / កម្មវិធីត្រូវការទីតាំង GPS ដើម្បីបង្ហាញភោជនីយដ្ឋាន និងរមណីយដ្ឋានទេសចរណ៍នៅក្បែរអ្នក</string>
+	<string>Cambodia Flavors &amp; Tourism uses your GPS location to display nearby restaurants, attractions, and distance calculations / កម្មវិធីត្រូវការទីតាំង GPS ដើម្បីបង្ហាញភោជនីយដ្ឋាន និងរមណីយដ្ឋានទេសចរណ៍នៅក្បែរអ្នក</string>
 	<key>NSFaceIDUsageDescription</key>
-	<string>Discover Cambodia Food &amp; Tourism uses Face ID for secure administrator login / កម្មវិធីប្រើប្រាស់ Face ID សម្រាប់ការផ្ទៀងផ្ទាត់សុវត្ថិភាពអ្នកគ្រប់គ្រង</string>
+	<string>Cambodia Flavors &amp; Tourism uses Face ID for secure administrator login / កម្មវិធីប្រើប្រាស់ Face ID សម្រាប់ការផ្ទៀងផ្ទាត់សុវត្ថិភាពអ្នកគ្រប់គ្រង</string>
 </dict>
 </plist>

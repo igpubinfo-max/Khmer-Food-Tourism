@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
-import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isStrictVerifiedCambodiaRestaurant, openExternalUrlNativeSafe, isHotelBusinessRecord } from '../types';
+import { Restaurant, sortRestaurantsWithVipRotation, isAdminAccount, getVipFeaturedRotationConfig, isStrictVerifiedCambodiaRestaurant, openExternalUrlNativeSafe, isHotelBusinessRecord, isIosOrIpadAppStoreRuntime, getShopSubscriptionCatalog } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { Store, Edit2, Settings, MapPin, Search } from 'lucide-react';
 import {
@@ -327,31 +327,11 @@ export const RestaurantView: React.FC = () => {
 
   const handleAddShopClick = () => {
     if (!currentUser) {
+      showToast(
+        tr(language, 'សូមចូលគណនីជាមុនសិន ដើម្បីបន្ថែមហាងថ្មី', 'Please sign in first to add a shop', '请先登录以添加新店铺'),
+        'info'
+      );
       setIsAuthModalOpen(true);
-      return;
-    }
-    if (!isAdmin && myExistingRest && myExistingRest.businessType === 'hotel') {
-      showToast(
-        tr(
-          language,
-          `គណនី VIP អាចបង្កើតហាងអាហារ ឬសណ្ឋាគារបានតែ ១ ប៉ុណ្ណោះ! អ្នកបានបង្កើតសណ្ឋាគារ «${myExistingRest.nameKh}» រួចហើយ ដូច្នេះមិនអាចបន្ថែមហាងអាហារទៀតបានទេ។`,
-          `VIP accounts can add 1 listing only (Shop OR Hotel). You already added Hotel "${myExistingRest.nameEn || myExistingRest.nameKh}", so you cannot add a Shop.`,
-          `VIP 账号仅可添加 1 家（餐厅或酒店二选一）。您已添加酒店“${myExistingRest.nameEn || myExistingRest.nameKh}”，无法再添加餐厅。`
-        ),
-        'warning'
-      );
-      return;
-    }
-    if (!isAdmin && myExistingRest && storeQuota.remainingAvailableSlots <= 0) {
-      showToast(
-        tr(
-          language,
-          `គណនី VIP អាចបង្កើតហាងបានតែ ១ ប៉ុណ្ណោះ! អ្នកបានបង្កើតហាង «${myExistingRest.nameKh}» រួចហើយ (អាចចុច «កែប្រែហាងខ្ញុំ» ដើម្បីកែព័ត៌មាន)។`,
-          `VIP accounts can add 1 listing only! You already added "${myExistingRest.nameEn || myExistingRest.nameKh}" (tap "Edit My Shop" below to update it).`,
-          `VIP 账号仅可添加 1 家店铺！您已添加“${myExistingRest.nameEn || myExistingRest.nameKh}”（可点击下方编辑）。`
-        ),
-        'warning'
-      );
       return;
     }
     (window as any).__kft_vip_store_initial_mode = { mode: 'create', businessType: 'restaurant' };
@@ -422,12 +402,25 @@ export const RestaurantView: React.FC = () => {
       <ListingAddPanel
         icon={Store}
         title={tr(language, 'បន្ថែមហាងថ្មី (Add New Shop)', 'Add New Shop', '添加新店铺')}
-        description={tr(
-          language,
-          'ហាងដែលបន្ថែមដោយគណនី VIP នឹងបង្ហាញជាកាតធំ។ បំពេញឈ្មោះហាង ប្រភេទហាង លេខទូរស័ព្ទ រូបភាព និងជ្រើសរើសទីតាំងលើផែនទី Google Maps។',
-          'Shops added by a VIP account are showcased as large cards. Enter shop details, choose the location on Google Maps, then submit.',
-          'VIP 账号添加的店铺将以大卡片展示。填写店铺信息并在 Google 地图上选择位置后提交。'
-        )}
+        description={(() => {
+          if (isIosOrIpadAppStoreRuntime()) {
+            return tr(
+              language,
+              'បំពេញឈ្មោះហាង ប្រភេទហាង លេខទូរស័ព្ទ រូបភាព និងជ្រើសរើសទីតាំងលើផែនទី Google Maps ដើម្បីដាក់ស្នើឱ្យរដ្ឋបាលពិនិត្យអនុម័ត។',
+              'Enter shop details, phone, photo, and Google Maps pin to submit for Admin review and approval.',
+              '填写店铺信息、电话、照片并在 Google 地图上选择位置后提交审核。'
+            );
+          }
+          const shopCat = getShopSubscriptionCatalog(appSettings);
+          const mPrice = shopCat.monthlyPlan.priceUsd.toFixed(2);
+          const yPrice = (shopCat.earlyBirdRemaining > 0 && shopCat.earlyBirdPlan.enabled ? shopCat.earlyBirdPlan.priceUsd : shopCat.yearlyPlan.priceUsd).toFixed(2);
+          return tr(
+            language,
+            `ដាក់ស្នើហាងដោយឥតគិតថ្លៃ! ក្រោយ Admin អនុម័ត អាចបើកកញ្ចប់ហាង ($${mPrice}/ខែ ឬ $${yPrice}/ឆ្នាំ) បើកគ្រប់មុខងារទាំង ៥ (គ្មានទារថ្លៃផ្សព្វផ្សាយបន្ថែម)។`,
+            `Submit your shop for free! After Admin approval, activate the All-Inclusive Shop Package ($${mPrice}/mo or $${yPrice}/yr) with all 5 benefits included.`,
+            `免费提交店铺！管理员审核通过后可开通全包店铺套餐（$${mPrice}/月 或 $${yPrice}/年），含全部 5 大权益。`
+          );
+        })()}
         actionLabel={tr(language, 'បន្ថែមហាងថ្មី (Add New Shop)', 'Add New Shop', '添加新店铺')}
         onAction={handleAddShopClick}
       >

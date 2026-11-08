@@ -9,6 +9,7 @@ import {
   AppSettings,
   getDynamicVipPlans,
   getAdditionalStoreFeeUsd,
+  resolveOfficialPlanById,
   DEFAULT_ADDITIONAL_STORE_FEE_USD,
   parseSafeDateMs,
 } from '../types';
@@ -28,12 +29,26 @@ export { VIP_PLANS, getDynamicVipPlans, getAdditionalStoreFeeUsd };
  */
 export function resolveAndValidateVipPlan(
   input?: {
+    planId?: string;
     planType?: 'quarterly' | 'annual' | string;
     durationDays?: number;
     amountUsd?: number;
   },
   settings?: Partial<AppSettings> | null
 ): VipPlanConfig {
+  const explicit = resolveOfficialPlanById(input?.planId || input?.planType, settings);
+  if (explicit) {
+    return {
+      id: explicit.durationDays >= 90 ? 'annual' : 'quarterly',
+      nameEn: explicit.nameEn,
+      nameKh: explicit.nameKh,
+      priceUsd: explicit.priceUsd,
+      durationDays: explicit.durationDays,
+      labelEn: `${explicit.nameEn} ($${explicit.priceUsd.toFixed(2)} USD / ${explicit.durationDays} days)`,
+      labelKh: `${explicit.nameKh} ($${explicit.priceUsd.toFixed(2)} USD / ${explicit.durationDays} ថ្ងៃ)`,
+      priceKhrDisplay: explicit.priceKhrApprox,
+    };
+  }
   const dynamicPlans = getDynamicVipPlans(settings);
   if (typeof input?.durationDays === 'number' && input.durationDays >= 1) {
     if (input.durationDays === dynamicPlans.quarterly.durationDays || input.durationDays === 30 || input.durationDays === 10) {

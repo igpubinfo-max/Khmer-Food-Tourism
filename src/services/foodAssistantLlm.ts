@@ -35,6 +35,7 @@ import {
   type AiTurnIntent,
 } from './conversationalAiAssistant';
 import { getCloudApiConfig, verifyUserVipStatusFromBackend } from './supabaseService';
+import { ensureAiConsent } from './aiConsent';
 
 /* ------------------------------------------------------------------------------------------------ */
 /* Types                                                                                            */
@@ -983,6 +984,37 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
         followUpChips: notice.followUps,
       },
     };
+  }
+
+  // App Store Guideline 5.1.2(i): ask for explicit permission before anything is shared with a third-party AI.
+  if (!params.transport) {
+    const consentText = tr(
+      uiLanguage,
+      'ជំនួយ AI នឹងផ្ញើសំណួរ រូបថត (បើអ្នកភ្ជាប់) និងលេខសម្គាល់គណនី (ប្រើសម្រាប់កំណត់ចំនួនប្រើប្រាស់ប្រចាំថ្ងៃ) ទៅម៉ាស៊ីនបម្រើសុវត្ថិភាពរបស់យើង និងអ្នកផ្តល់សេវា AI ភាគីទីបី (Google Gemini ឬ OpenAI) ដើម្បីបង្កើតចម្លើយ។ យើងមិនលក់ទិន្នន័យរបស់អ្នកទេ។ តើអ្នកយល់ព្រមដែរឬទេ?',
+      'The AI assistant sends your question, any photo you attach, and an account ID (used for daily usage limits) to our secure server and to third-party AI providers (Google Gemini or OpenAI) to generate the answer. Your data is not sold. Do you agree?',
+      'AI 助手会将您的问题、您附加的照片以及账号 ID（用于每日使用限额）发送到我们的安全服务器和第三方 AI 服务商（Google Gemini 或 OpenAI）以生成回答。我们不会出售您的数据。您是否同意？'
+    );
+    if (!ensureAiConsent(consentText)) {
+      return {
+        ok: true,
+        model: 'policy',
+        message: {
+          id: `ai-${Date.now()}`,
+          role: 'assistant',
+          timestamp: new Date().toISOString(),
+          intent: 'clarification',
+          suppressDishCard: true,
+          source: 'notice',
+          text: tr(
+            uiLanguage,
+            'ជំនួយ AI ត្រូវការការអនុញ្ញាតរបស់អ្នកមុនពេលប្រើ។ សូមផ្ញើសំណួរម្តងទៀត ហើយចុច «យល់ព្រម» ដើម្បីបើកវា។ ប្រសិនបើមិនយល់ព្រម អ្នកនៅតែអាចរកមើលម្ហូប និងទីតាំងដោយខ្លួនឯងបាន។',
+            'The AI assistant needs your permission first. Send your question again and choose OK to enable it. You can still browse dishes and places without AI.',
+            'AI 助手需要您先授权。请再次发送问题并选择“确定”以启用。不使用 AI 时，您仍可浏览美食和景点。'
+          ),
+          followUpChips: [],
+        },
+      };
+    }
   }
 
   const key = resolveGeminiApiKey(params.geminiApiKey);

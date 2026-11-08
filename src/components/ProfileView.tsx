@@ -14,7 +14,8 @@ import {
   isRestaurantPremiumActive, isUserVipActive, getVipAccountState, getVipRemainingDays,
   APP_VERSION, APP_BUILD_CODE, getDynamicVipPlans, getDynamicVipBenefits,
   isAdminAccount,
-  isIosOrIpadAppStoreRuntime, getVipFeaturedRotationConfig, getVipFeaturedRotationState
+  isIosOrIpadAppStoreRuntime, getVipFeaturedRotationConfig, getVipFeaturedRotationState,
+  isShopSubscriptionActive, getShopSubscriptionCatalog
 } from '../types';
 import { tr } from '../utils/i18n';
 import { resolveUserAvatarUrl, handleAvatarImageError, fileToAvatarDataUrl, isCustomUploadedAvatarDataUrl, rotateDataUrl } from '../utils/avatarHelper';
@@ -61,8 +62,8 @@ export const ProfileView: React.FC = () => {
   const handleSelfDeleteAccount = async () => {
     if (!currentUser || isAdmin) return;
     const msg = language === 'km'
-      ? `តើអ្នកពិតជាចង់លុបគណនីរបស់អ្នក (${currentUser.email || currentUser.name}) ជាអចិន្ត្រៃយ៍មែនទេ? ទិន្នន័យគណនី រូបភាព និងការកំណត់ទាំងអស់នឹងត្រូវលុបចេញភ្លាមៗ ហើយមិនអាចយកមកវិញបានទេ។`
-      : `Are you sure you want to permanently delete your account (${currentUser.email || currentUser.name})? All your profile data, saved favorites, and account settings will be permanently deleted and cannot be undone.`;
+      ? `តើអ្នកពិតជាចង់លុបគណនីរបស់អ្នក (${currentUser.email || currentUser.name}) ជាអចិន្ត្រៃយ៍មែនទេ? ទិន្នន័យគណនី រូបភាព និងការកំណត់ទាំងអស់នឹងត្រូវលុបចេញភ្លាមៗ។ ហាង សមាជិកភាព VIP និងកំណត់ត្រាទូទាត់ដែលភ្ជាប់នឹងគណនីនេះក៏នឹងត្រូវលុបផងដែរ ហើយមិនអាចយកមកវិញបានទេ។`
+      : `Are you sure you want to permanently delete your account (${currentUser.email || currentUser.name})? All your profile data, saved favorites, and account settings will be permanently deleted. Restaurants you listed, your VIP membership and related payment records will also be removed, and this cannot be undone.`;
     if (!window.confirm(msg)) return;
     await deleteUserAccount(currentUser.id);
   };
@@ -1316,23 +1317,9 @@ export const ProfileView: React.FC = () => {
             <>
               <div className="flex items-center justify-between pb-1 flex-wrap gap-2">
                 <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                  {currentUser?.role === 'admin'
-                    ? (isKm ? `ហាងរបស់ខ្ញុំ (${myRestaurants.length})` : `My Restaurants (${myRestaurants.length})`)
-                    : (isKm
-                        ? `ហាងរបស់ខ្ញុំ (${storeQuota.usedStoresCount}/${storeQuota.totalAllowedStores} ហាង)`
-                        : `My Stores (${storeQuota.usedStoresCount}/${storeQuota.totalAllowedStores})`)}
+                  {isKm ? `ហាងរបស់ខ្ញុំ (${myRestaurants.length} ហាង)` : `My Shops (${myRestaurants.length})`}
                 </span>
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <button
-                    onClick={() => {
-                      (window as any).__kft_vip_store_initial_mode = { mode: "replace", storeId: myRestaurants[0]?.id };
-                      setIsVipAddRestaurantModalOpen(true);
-                    }}
-                    className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs flex items-center gap-1 transition cursor-pointer"
-                  >
-                    <RefreshCw className="w-3 h-3" />
-                    <span>{isKm ? 'ប្តូរហាងថ្មី ($0)' : 'Replace Store ($0)'}</span>
-                  </button>
                   <button
                     onClick={() => {
                       (window as any).__kft_vip_store_initial_mode = { mode: "create" };
@@ -1341,18 +1328,17 @@ export const ProfileView: React.FC = () => {
                     className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 font-bold text-[11px] shadow-xs flex items-center gap-1 transition cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span>
-                      {storeQuota.canAddWithoutNewPayment
-                        ? (isKm ? '+ បន្ថែមហាងថ្មី ($0)' : '+ Add Store ($0)')
-                        : (isKm ? `+ បន្ថែមហាងថ្មី (+$${storeQuota.additionalStoreFeeUsd.toFixed(2)})` : `+ Add Store (+$${storeQuota.additionalStoreFeeUsd.toFixed(2)})`)}
-                    </span>
+                    <span>{isKm ? '+ បន្ថែមហាងថ្មី' : '+ Add New Shop'}</span>
                   </button>
                 </div>
               </div>
               {myRestaurants.map(restaurant => {
-              const isPremium = isRestaurantPremiumActive(restaurant) || isVip || currentUser?.role === 'admin';
-              const isExpired = restaurant.membershipTier === 'premium' && !isPremium;
+              const shopSubActive = isShopSubscriptionActive(restaurant) || currentUser?.role === 'admin';
+              const shopExpRaw = restaurant.shopSubscriptionExpiresAt || restaurant.subscriptionExpiresAt || restaurant.membershipExpiresAt;
+              const isPremium = shopSubActive;
+              const isExpired = !isPremium && Boolean(shopExpRaw || restaurant.shopPaymentStatus === 'expired');
               const isFree = !isPremium && !isExpired;
+              const shopCat = getShopSubscriptionCatalog(appSettings);
 
               return (
                 <div key={restaurant.id} className="p-4 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-3.5">
@@ -1405,42 +1391,58 @@ export const ProfileView: React.FC = () => {
                       </div>
                     </div>
 
-                    {isPremium && (restaurant.membershipExpiresAt || currentUser?.subscriptionExpiryDate) && (
+                    {isPremium && shopExpRaw && (
                       <p className="text-[10px] text-slate-700 dark:text-slate-300">
-                        {isKm 
-                          ? `📅 ផុតកំណត់នៅថ្ងៃទី៖ ${new Date(restaurant.membershipExpiresAt || currentUser?.subscriptionExpiryDate || '').toLocaleDateString()} (កញ្ចប់ VIP $${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} ថ្ងៃ ឬ $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} ថ្ងៃ)` 
-                          : `Valid until: ${new Date(restaurant.membershipExpiresAt || currentUser?.subscriptionExpiryDate || '').toLocaleDateString()} (VIP $${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays}d or $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays}d)`}
+                        {isKm
+                          ? `📅 សុពលភាពកញ្ចប់ហាងដល់ថ្ងៃទី៖ ${new Date(shopExpRaw).toLocaleDateString()}`
+                          : `Shop Package valid until: ${new Date(shopExpRaw).toLocaleDateString()}`}
                       </p>
                     )}
 
-                    {isFree && (
-                      <p className="text-[10px] text-slate-500">
-                        {isKm 
-                          ? `ដំឡើងទៅកញ្ចប់ VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} ថ្ងៃ ឬ $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} ថ្ងៃ) ដើម្បីទទួលបានស្លាកសញ្ញា 👑 VIP និងអាទិភាពបង្ហាញលើគេ!` 
-                          : `Upgrade to VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} days or $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} days) for the 👑 VIP badge and priority placement!`}
+                    {!isIosAppStore && isFree && (
+                      <p className="text-[10px] text-slate-600 dark:text-slate-300">
+                        {restaurant.status === 'pending'
+                          ? (isKm ? '⏳ កំពុងរង់ចាំ Admin ពិនិត្យអនុម័តហាងជាមុនសិន មុនពេលបើកកញ្ចប់ហាង។' : '⏳ Waiting for Admin shop approval before activating Shop Package.')
+                          : (isKm
+                              ? `💳 ហាងត្រូវបានអនុម័ត! បើកកញ្ចប់ហាង ($${shopCat.monthlyPlan.priceUsd.toFixed(2)}/ខែ ឬ $${(shopCat.earlyBirdRemaining > 0 && shopCat.earlyBirdPlan.enabled ? shopCat.earlyBirdPlan.priceUsd : shopCat.yearlyPlan.priceUsd).toFixed(2)}/ឆ្នាំ) ដើម្បីទទួលបានមុខងារទាំង ៥។`
+                              : `💳 Shop approved! Activate Shop Package ($${shopCat.monthlyPlan.priceUsd.toFixed(2)}/mo or $${(shopCat.earlyBirdRemaining > 0 && shopCat.earlyBirdPlan.enabled ? shopCat.earlyBirdPlan.priceUsd : shopCat.yearlyPlan.priceUsd).toFixed(2)}/yr) to unlock all 5 benefits.`)}
                       </p>
                     )}
 
-                    {isExpired && (
+                    {!isIosAppStore && isExpired && (
                       <p className="text-[10px] text-red-600">
-                        {isKm 
-                          ? `សមាជិកភាព VIP បានផុតកំណត់ហើយ។ ទិន្នន័យហាងទាំងអស់ត្រូវបានរក្សាទុកដដែល។ សូមបន្តសមាជិកភាព VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} ថ្ងៃ ឬ $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} ថ្ងៃ)។` 
-                          : `VIP expired. All store details are retained. Renew VIP ($${shortPlan.priceUsd.toFixed(2)} / ${shortPlan.durationDays} days or $${longPlan.priceUsd.toFixed(2)} / ${longPlan.durationDays} days).`}
+                        {isKm
+                          ? `កញ្ចប់ហាងបានផុតកំណត់ (ទិន្នន័យ និងម៉ឺនុយត្រូវបានរក្សាទុក 100%)។ សូមបន្តកញ្ចប់ហាង ($${shopCat.monthlyPlan.priceUsd.toFixed(2)}/ខែ ឬ $${shopCat.yearlyPlan.priceUsd.toFixed(2)}/ឆ្នាំ)។`
+                          : `Shop Package expired (all shop & menu data 100% preserved). Renew ($${shopCat.monthlyPlan.priceUsd.toFixed(2)}/mo or $${shopCat.yearlyPlan.priceUsd.toFixed(2)}/yr).`}
                       </p>
                     )}
 
-                    <div className="pt-1 flex items-center gap-2">
+                    <div className="pt-1 flex items-center gap-2 flex-wrap">
                       <button
                         onClick={() => {
                           (window as any).__kft_manage_initial_tab = 'info';
                           setManagingRestaurant(restaurant);
                           setIsManageMenuModalOpen(true);
                         }}
-                        className="flex-1 py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs flex items-center justify-center gap-1.5 transition active:scale-95"
+                        className="flex-1 py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
                       >
                         <Edit2 className="w-3.5 h-3.5 text-emerald-200" />
-                        <span>{isKm ? 'កែប្រែព័ត៌មានហាង & រូបភាព' : 'Edit Store & Photo'}</span>
+                        <span>{isKm ? 'គ្រប់គ្រងហាង & ម៉ឺនុយ' : 'Manage Shop & Menu'}</span>
                       </button>
+
+                      {!isIosAppStore && (
+                        <button
+                          onClick={() => {
+                            (window as any).__kft_manage_initial_tab = 'membership';
+                            setManagingRestaurant(restaurant);
+                            setIsManageMenuModalOpen(true);
+                          }}
+                          className="py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs shadow-xs flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer"
+                        >
+                          <Crown className="w-3.5 h-3.5" />
+                          <span>{isPremium ? (isKm ? 'បន្តកញ្ចប់ហាង' : 'Renew') : (isKm ? 'បើកកញ្ចប់ហាង' : 'Activate')}</span>
+                        </button>
+                      )}
 
                       <button
                         onClick={() => deleteRestaurant(restaurant.id)}
@@ -2404,6 +2406,23 @@ export const ProfileView: React.FC = () => {
               {isKm ? 'មើល' : 'View'}
             </button>
           </div>
+
+          {/* Account deletion (App Store Guideline 5.1.1(v)) */}
+          {currentUser && !isAdmin && (
+            <div className="flex items-center justify-between gap-3 py-2 border-b border-slate-100 dark:border-slate-700">
+              <span className="font-medium text-rose-700 dark:text-rose-300 flex items-center gap-2">
+                <Trash2 className="w-4 h-4" />
+                {tr(language, 'លុបគណនី និងទិន្នន័យរបស់ខ្ញុំ', 'Delete My Account & Data', '删除我的账号与数据')}
+              </span>
+              <button
+                type="button"
+                onClick={handleSelfDeleteAccount}
+                className="px-3 py-1 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold transition text-xs"
+              >
+                {tr(language, 'លុប', 'Delete', '删除')}
+              </button>
+            </div>
+          )}
 
           {/* Check for App Updates */}
           <div className="flex items-center justify-between gap-3 py-2 border-b border-slate-100 dark:border-slate-700">

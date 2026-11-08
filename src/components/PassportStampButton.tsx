@@ -5,11 +5,6 @@ import { tr } from '../utils/i18n';
 import { togglePassportStamp, useIsFoodStamped, getPassportStamps, getPassportLevel, levelTitle } from '../utils/foodPassport';
 import { recordMeaningfulAction } from '../utils/engagement';
 import { touchDailyStreak } from '../utils/dailyHabit';
-import {
-  FOOD_CHECKIN_DAILY_CAP,
-  FOOD_CHECKIN_REWARD_TARGET,
-  reportFoodStamped,
-} from '../utils/foodCheckInReward';
 
 interface Props {
   foodId: string;
@@ -31,11 +26,6 @@ const PassportStampButtonInner: React.FC<Props> = ({ foodId, language, showToast
     recordMeaningfulAction('favorite');
     touchDailyStreak();
 
-    // Food check-in reward ("taste 30 dishes -> 30 days VIP"): the shell answers synchronously with what really happened.
-    const outcome = reportFoodStamped(foodId);
-    // The 30th dish: the grant shows its own celebration, so no regular toast here.
-    if (outcome.kind === 'reached') return;
-
     // Celebrate crossing into a new level (cheap: depends on the count only).
     const before = getPassportLevel(countBefore).level;
     const after = getPassportLevel(countBefore + 1).level;
@@ -49,18 +39,7 @@ const PassportStampButtonInner: React.FC<Props> = ({ foodId, language, showToast
           )
         : tr(language, 'បានបន្ថែមទៅ រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Added to Cambodia Flavors & Tourism', '已加入柬埔寨风味与旅游');
 
-    let suffix = '';
-    if (outcome.kind === 'counted') {
-      suffix = ` • VIP ${outcome.progress}/${FOOD_CHECKIN_REWARD_TARGET}`;
-    } else if (outcome.kind === 'daily_cap') {
-      suffix = ` • ${tr(
-        language,
-        `ពិន្ទុរង្វាន់ថ្ងៃនេះគ្រប់ ${FOOD_CHECKIN_DAILY_CAP} ដងហើយ — សូមបន្តនៅថ្ងៃស្អែក`,
-        `Today's ${FOOD_CHECKIN_DAILY_CAP} reward check-in is complete — continue tomorrow`,
-        `今日 ${FOOD_CHECKIN_DAILY_CAP} 次奖励打卡已完成 — 请明天继续`
-      )}`;
-    }
-    showToast?.(base + suffix, 'success');
+    showToast?.(base, 'success');
   };
 
   const label = stamped

@@ -4,7 +4,8 @@ import {
   X, Trash2, Award, 
   AlertCircle, CheckCircle2, Image, DollarSign, Calendar, Clock,
   Store, BarChart3, ShieldCheck, Share2, Phone, MapPin, ExternalLink,
-  MessageCircle, Copy, Check, HelpCircle, ArrowRight, Camera, Upload, Lock, ShieldAlert, Star, Mail
+  MessageCircle, Copy, Check, HelpCircle, ArrowRight, Camera, Upload, Lock, ShieldAlert, Star, Mail,
+  QrCode, Download, Plus, RefreshCw
 } from 'lucide-react';
 import { 
   RestaurantPriceLevel, isRestaurantPremiumActive, isUserVipActive, 
@@ -15,11 +16,17 @@ import {
   isValidGoogleMapsUrl, extractCoordsFromGoogleMapsUrl,
   BUSINESS_CATEGORY_CATALOG, inferBusinessTypeAndCategory, isHotelBusinessRecord,
   isUserOwnerOfRestaurantRecord,
+  SHOP_ALL_INCLUSIVE_5_BENEFITS,
+  getShopSubscriptionCatalog,
+  isShopSubscriptionActive,
+  isIosOrIpadAppStoreRuntime,
+  parseSafeDateMs,
 } from '../types';
 import { tr } from '../utils/i18n';
 import {
   isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
+  savePngDataUrlToGallery,
 } from '../utils/androidMediaHelper';
 import { validateAndModerateShopImage } from '../utils/imageModeration';
 import { DefaultShopIcon } from './icons/DefaultShopIcon';
@@ -37,9 +44,12 @@ export const ManageMenuModal: React.FC = () => {
     getCurrentUserStoreQuota,
     updateRestaurant,
     deleteRestaurant,
+    addRestaurantMenuItem,
+    deleteRestaurantMenuItem,
     submitShopPhotoReplacementRequest,
     approveShopPhotoReplacement,
     rejectShopPhotoReplacement,
+    submitShopSubscriptionPaymentRequest,
     upgradeRestaurantToPremium,
     getOwnedRestaurantsForUser,
     setActiveManagedShopId,
@@ -51,11 +61,23 @@ export const ManageMenuModal: React.FC = () => {
   } = useApp();
 
   const isKm = language === 'km';
-  const [selectedVipPlan, setSelectedVipPlan] = useState<VipPlanType>('quarterly');
+  const isIosAppStore = isIosOrIpadAppStoreRuntime();
+  const shopCatalog = getShopSubscriptionCatalog(appSettings);
+  const [selectedShopPlanId, setSelectedShopPlanId] = useState<'shop_30d' | 'shop_365d' | 'shop_earlybird_365d'>(
+    () => (shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? 'shop_earlybird_365d' : 'shop_30d')
+  );
+  const [shopTrxRef, setShopTrxRef] = useState('');
+  const [shopReceiptDraft, setShopReceiptDraft] = useState<{ dataUrl: string; fileName: string; mimeType: string } | null>(null);
+  const [isSubmittingShopPayment, setIsSubmittingShopPayment] = useState(false);
+  const shopReceiptInputRef = useRef<HTMLInputElement>(null);
+
+  // Dish Menu Item quick-add state (Shop Package Benefit #1)
+  const [dishNameKh, setDishNameKh] = useState('');
+  const [dishNameEn, setDishNameEn] = useState('');
+  const [dishPriceUsd, setDishPriceUsd] = useState('');
+
   const dynamicPlansMap = getDynamicVipPlans(appSettings);
   const dynamicBenefits = getDynamicVipBenefits(appSettings);
-  const activePlan = dynamicPlansMap[selectedVipPlan];
-  const promoPrice = activePlan.priceUsd;
   const storeQuota = getCurrentUserStoreQuota();
 
   // Main Tabs: info, photos, analytics, membership
@@ -156,6 +178,9 @@ export const ManageMenuModal: React.FC = () => {
       if (requestedTab === 'video' || requestedTab === 'menu') {
         setMainTab('info');
         (window as any).__kft_manage_initial_tab = undefined;
+      } else if (requestedTab === 'membership' && isIosAppStore) {
+        setMainTab('info');
+        (window as any).__kft_manage_initial_tab = undefined;
       } else if (requestedTab && ['info', 'photos', 'analytics', 'membership'].includes(requestedTab)) {
         setMainTab(requestedTab);
         (window as any).__kft_manage_initial_tab = undefined;
@@ -203,10 +228,18 @@ export const ManageMenuModal: React.FC = () => {
       )
     : ownedShopsForCurrentUser;
 
-  const isPremiumActive = isRestaurantPremiumActive(currentRest) || isApprovedVip || isAdmin;
-  const isExpired = vipState === 'expired_vip' || (currentRest.membershipTier === 'premium' && !isPremiumActive);
-  const vipRemainingDays = getVipRemainingDays(currentUser);
-  const vipExpiryRaw = currentUser?.subscriptionExpiryDate || currentRest.membershipExpiresAt || currentRest.subscriptionExpiresAt;
+  const isShopSubActive = isShopSubscriptionActive(currentRest) || isAdmin;
+  const isPremiumActive = isShopSubActive;
+  const shopExpiryRaw =
+    currentRest.shopSubscriptionExpiresAt || currentRest.subscriptionExpiresAt || currentRest.membershipExpiresAt;
+  const shopExpMs = parseSafeDateMs(shopExpiryRaw);
+  const shopRemainingDays =
+    shopExpMs !== null && shopExpMs > Date.now()
+      ? Math.max(1, Math.ceil((shopExpMs - Date.now()) / (24 * 60 * 60 * 1000)))
+      : 0;
+  const isExpired = !isShopSubActive && Boolean(shopExpiryRaw || currentRest.shopPaymentStatus === 'expired');
+  const vipRemainingDays = shopRemainingDays;
+  const vipExpiryRaw = shopExpiryRaw;
   const formattedVipExpiry = vipExpiryRaw
     ? (() => {
         try {
@@ -614,9 +647,7 @@ export const ManageMenuModal: React.FC = () => {
                     }}
                     className="px-2 py-0.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/30 border border-amber-300/40 text-amber-200 font-bold text-[10px] transition cursor-pointer"
                   >
-                    {storeQuota.canAddWithoutNewPayment
-                      ? (isKm ? '+ បន្ថែមហាងថ្មី ($0)' : '+ Add Store ($0)')
-                      : (isKm ? `+ បន្ថែមហាងថ្មី (+$${storeQuota.additionalStoreFeeUsd.toFixed(2)})` : `+ Add Store (+$${storeQuota.additionalStoreFeeUsd.toFixed(2)})`)}
+                    {isKm ? '+ បន្ថែមហាងថ្មី' : '+ Add New Shop'}
                   </button>
                 </div>
               </div>
@@ -856,8 +887,8 @@ export const ManageMenuModal: React.FC = () => {
           </div>
         )}
 
-        {/* Clearly Separated Management Sections (No Add Dish Menu Tab) */}
-        <div className="grid grid-cols-4 bg-slate-100 dark:bg-slate-800/80 p-1 border-b border-slate-200 dark:border-slate-700 text-center font-khmer gap-0.5">
+        {/* Clearly Separated Management Sections */}
+        <div className={`grid ${isIosAppStore ? 'grid-cols-3' : 'grid-cols-4'} bg-slate-100 dark:bg-slate-800/80 p-1 border-b border-slate-200 dark:border-slate-700 text-center font-khmer gap-0.5`}>
           <button
             onClick={() => { setMainTab('info'); setStatusBanner(null); }}
             className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
@@ -894,17 +925,19 @@ export const ManageMenuModal: React.FC = () => {
             <span className="leading-tight">{isKm ? '៣. ស្ថិតិ & ផ្កាយ' : '3. Stats'}</span>
           </button>
 
-          <button
-            onClick={() => { setMainTab('membership'); setStatusBanner(null); }}
-            className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
-              mainTab === 'membership'
-                ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs ring-1 ring-emerald-500/40'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-            }`}
-          >
-            <Award className="w-3.5 h-3.5 text-amber-500" />
-            <span className="leading-tight">{isKm ? '៤. គម្រោង VIP' : '4. VIP'}</span>
-          </button>
+          {!isIosAppStore && (
+            <button
+              onClick={() => { setMainTab('membership'); setStatusBanner(null); }}
+              className={`py-2 px-1 text-[10px] sm:text-[11px] font-bold rounded-xl transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                mainTab === 'membership'
+                  ? 'bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-400 shadow-xs ring-1 ring-emerald-500/40'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+              }`}
+            >
+              <Award className="w-3.5 h-3.5 text-amber-500" />
+              <span className="leading-tight">{isKm ? '៤. កញ្ចប់ហាង' : '4. Shop Plan'}</span>
+            </button>
+          )}
         </div>
 
         {/* Status Bar: Separate VIP Status, Verification, and Customer Rating */}
@@ -1342,6 +1375,106 @@ export const ManageMenuModal: React.FC = () => {
                 </div>
               </div>
 
+              {/* Benefit #1: Shop Menu Items Manager (ម៉ឺនុយម្ហូបប្រចាំហាង) */}
+              <div className="p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-slate-800/90 border border-emerald-300 dark:border-emerald-800 space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-bold text-xs text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
+                    <span>🍽️</span>
+                    <span>{isKm ? 'ម៉ឺនុយម្ហូបប្រចាំហាង (Shop Menu Items)' : 'Shop Menu Items'}</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-mono font-bold text-[10px]">
+                    {(currentRest.menuItems || []).length} {isKm ? 'មុខ' : 'items'}
+                  </span>
+                </div>
+
+                {(currentRest.menuItems || []).length > 0 && (
+                  <div className="space-y-1.5 max-h-44 overflow-y-auto pr-0.5">
+                    {(currentRest.menuItems || []).map((mi) => (
+                      <div
+                        key={mi.id}
+                        className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2 text-xs"
+                      >
+                        <div className="min-w-0">
+                          <div className="font-bold text-slate-900 dark:text-white truncate">
+                            {mi.nameKh || mi.nameEn}
+                            {mi.nameEn && mi.nameKh && mi.nameEn !== mi.nameKh ? ` • ${mi.nameEn}` : ''}
+                          </div>
+                          <div className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400">
+                            {typeof mi.priceUsd === 'number' && mi.priceUsd > 0 ? `$${mi.priceUsd.toFixed(2)}` : ''}
+                            {mi.priceRiel ? ` (${mi.priceRiel.toLocaleString()}៛)` : ''}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => deleteRestaurantMenuItem(currentRest.id, mi.id)}
+                          className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white transition cursor-pointer shrink-0"
+                          title={isKm ? 'លុបមុខម្ហូប' : 'Delete dish'}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <input
+                    type="text"
+                    value={dishNameKh}
+                    onChange={(e) => setDishNameKh(e.target.value)}
+                    placeholder={isKm ? 'ឈ្មោះម្ហូប (ឧ. អាម៉ុកត្រី)' : 'Dish name (Khmer/EN)'}
+                    className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-white"
+                  />
+                  <input
+                    type="text"
+                    value={dishNameEn}
+                    onChange={(e) => setDishNameEn(e.target.value)}
+                    placeholder={isKm ? 'ឈ្មោះអង់គ្លេស (ស្រេចចិត្ត)' : 'English name (optional)'}
+                    className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-white"
+                  />
+                  <div className="flex gap-1.5">
+                    <input
+                      type="number"
+                      step="0.25"
+                      min="0"
+                      value={dishPriceUsd}
+                      onChange={(e) => setDishPriceUsd(e.target.value)}
+                      placeholder="$ USD"
+                      className="w-full px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono text-slate-900 dark:text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const kh = dishNameKh.trim();
+                        const en = dishNameEn.trim();
+                        if (!kh && !en) {
+                          showToast(isKm ? 'សូមបញ្ចូលឈ្មោះមុខម្ហូបជាមុនសិន!' : 'Please enter a dish name!', 'warning');
+                          return;
+                        }
+                        const usd = Math.max(0, Number(dishPriceUsd) || 0);
+                        const ok = addRestaurantMenuItem(currentRest.id, {
+                          nameKh: kh || en,
+                          nameEn: en || kh,
+                          priceUsd: usd,
+                          priceRiel: usd > 0 ? Math.round(usd * 4100) : 0,
+                          photoUrl: '',
+                          isSignature: true,
+                        });
+                        if (ok) {
+                          setDishNameKh('');
+                          setDishNameEn('');
+                          setDishPriceUsd('');
+                        }
+                      }}
+                      className="px-3 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center gap-1 shrink-0 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>{isKm ? 'បន្ថែម' : 'Add'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <div className="pt-2 space-y-2.5">
                 <button
                   type="submit"
@@ -1710,7 +1843,32 @@ export const ManageMenuModal: React.FC = () => {
                 </p>
               </div>
 
-              {/* 4 Metric Cards */}
+              {/* 4 Metric Cards (Unlocked with Active Shop Package — Benefit #5) */}
+              {!isShopSubActive ? (
+                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-slate-800 border-2 border-amber-400/80 text-center space-y-2.5">
+                  <Lock className="w-6 h-6 text-amber-600 mx-auto" />
+                  <div className="font-bold text-xs text-slate-900 dark:text-white">
+                    {isKm
+                      ? '🔒 ស្ថិតិអ្នកចូលមើលហាងលម្អិត (Store Analytics) រួមបញ្ចូលក្នុងកញ្ចប់ហាង VIP'
+                      : '🔒 Live Store Analytics is included in the VIP Shop Package'}
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                    {isKm
+                      ? 'ទិន្នន័យហាងរបស់អ្នកត្រូវបានរក្សាទុកជានិច្ច។ បើក ឬបន្តកញ្ចប់ហាង ដើម្បីមើលចំនួនអ្នកចូលមើល អ្នកចុចហៅទូរស័ព្ទ និងអ្នកចុចផែនទី!'
+                      : 'Your shop data is safely preserved. Activate or renew the Shop Package to view views, phone clicks, and map navigations!'}
+                  </p>
+                  {!isIosAppStore && (
+                    <button
+                      type="button"
+                      onClick={() => setMainTab('membership')}
+                      className="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
+                    >
+                      <Award className="w-4 h-4" />
+                      <span>{isKm ? 'ទៅកាន់ផ្ទាំងកញ្ចប់ហាង' : 'Open Shop Package'}</span>
+                    </button>
+                  )}
+                </div>
+              ) : (
               <div className="grid grid-cols-2 gap-3">
                 {/* Page Views */}
                 <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
@@ -1760,6 +1918,7 @@ export const ManageMenuModal: React.FC = () => {
                   <span className="text-[9px] text-slate-400">{isKm ? 'ដង' : 'total shares'}</span>
                 </div>
               </div>
+              )}
 
               {/* Shareable Restaurant Page Link (Benefit 5) */}
               <div className="p-3.5 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
@@ -1809,28 +1968,109 @@ export const ManageMenuModal: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 5: VIP MEMBERSHIP PLAN & DIRECT SUPPORT (Free vs VIP Comparison & Synced Pricing) */}
-          {mainTab === 'membership' && (
-            <div className="space-y-4 font-khmer">
-              {/* 1. Current Shop Plan, Payment Status & Expiration Summary Card */}
-              <div
-                className={`p-4 rounded-2xl border-2 space-y-2.5 ${
-                  isPremiumActive
-                    ? 'bg-gradient-to-br from-emerald-50 via-teal-50/70 to-amber-50/40 dark:from-emerald-950/40 dark:to-slate-900 border-emerald-500/80'
-                    : vipState === 'pending_vip'
-                    ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-400'
-                    : 'bg-slate-50 dark:bg-slate-800/80 border-slate-300 dark:border-slate-700'
-                }`}
-              >
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <div className="flex items-center gap-2">
+          {/* TAB 4: INDEPENDENT ALL-INCLUSIVE SHOP PACKAGE ($6.99/30d, $49.99 Early-Bird/365d, $59.99/365d — NO Lifetime; hidden on iOS) */}
+          {!isIosAppStore && mainTab === 'membership' && (() => {
+            const shopOptions = [
+              shopCatalog.monthlyPlan,
+              ...(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? [shopCatalog.earlyBirdPlan] : []),
+              shopCatalog.yearlyPlan,
+            ].filter((p) => p.enabled);
+            const activeShopPlan =
+              shopOptions.find((p) => p.planId === selectedShopPlanId) || shopOptions[0] || shopCatalog.monthlyPlan;
+            const mustWaitForAdminApproval =
+              !isAdmin && appSettings.shopPayAfterApproval !== false && currentRest.status !== 'approved';
+
+            const handlePickShopReceipt = async () => {
+              if (isNativeAndroidOrIosPlatform()) {
+                try {
+                  const picked = await pickImageUsingNativeAndroidGallery(1200, 0.85);
+                  if (picked?.cancelled) return;
+                  if (picked?.dataUrl) {
+                    setShopReceiptDraft({
+                      dataUrl: picked.dataUrl,
+                      fileName: picked.fileName || `aba_shop_receipt_${Date.now()}.jpg`,
+                      mimeType: picked.mimeType || 'image/jpeg',
+                    });
+                    showToast(isKm ? '✅ បានភ្ជាប់វិក្កយបត្រ ABA រួចរាល់!' : '✅ Attached ABA receipt!', 'success');
+                    return;
+                  }
+                } catch {}
+              }
+              shopReceiptInputRef.current?.click();
+            };
+
+            const handleShopReceiptFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+              const file = e.target.files?.[0];
+              e.target.value = '';
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = () => {
+                if (typeof reader.result === 'string') {
+                  setShopReceiptDraft({
+                    dataUrl: reader.result,
+                    fileName: file.name || 'aba_shop_receipt.png',
+                    mimeType: file.type || 'image/png',
+                  });
+                  showToast(isKm ? '✅ បានភ្ជាប់វិក្កយបត្រ ABA រួចរាល់!' : '✅ Attached ABA receipt!', 'success');
+                }
+              };
+              reader.readAsDataURL(file);
+            };
+
+            const handleSubmitShopPayment = async () => {
+              if (isSubmittingShopPayment) return;
+              if (!shopReceiptDraft?.dataUrl) {
+                showToast(
+                  isKm ? '⚠️ សូមភ្ជាប់រូបភាពវិក្កយបត្រ ABA ជាមុនសិន!' : '⚠️ Please attach your ABA payment receipt screenshot first!',
+                  'warning'
+                );
+                return;
+              }
+              setIsSubmittingShopPayment(true);
+              try {
+                const res = await submitShopSubscriptionPaymentRequest({
+                  shopId: currentRest.id,
+                  planId: activeShopPlan.planId as 'shop_30d' | 'shop_365d' | 'shop_earlybird_365d',
+                  transactionRef: shopTrxRef.trim() || undefined,
+                  paymentProofData: shopReceiptDraft,
+                });
+                if (res.success) {
+                  setShopReceiptDraft(null);
+                  setShopTrxRef('');
+                }
+              } finally {
+                setIsSubmittingShopPayment(false);
+              }
+            };
+
+            return (
+              <div className="space-y-4 font-khmer">
+                <input
+                  ref={shopReceiptInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png"
+                  onChange={handleShopReceiptFileChange}
+                  className="hidden"
+                />
+
+                {/* 1. Shop Package Status & Expiry Summary */}
+                <div
+                  className={`p-4 rounded-2xl border-2 space-y-2 ${
+                    isShopSubActive
+                      ? 'bg-gradient-to-br from-emerald-50 via-teal-50/70 to-amber-50/40 dark:from-emerald-950/40 dark:to-slate-900 border-emerald-500/80'
+                      : currentRest.shopPaymentStatus === 'pending_verification'
+                      ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-400'
+                      : 'bg-slate-50 dark:bg-slate-800/80 border-slate-300 dark:border-slate-700'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
                     <span
                       className={`px-2.5 py-1 rounded-full text-[11px] font-black flex items-center gap-1 shadow-xs ${
                         isAdmin
                           ? 'bg-amber-400 text-slate-950'
-                          : isPremiumActive
+                          : isShopSubActive
                           ? 'bg-[#064E3B] text-white'
-                          : vipState === 'pending_vip'
+                          : currentRest.shopPaymentStatus === 'pending_verification'
                           ? 'bg-amber-500 text-slate-950'
                           : 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100'
                       }`}
@@ -1838,289 +2078,272 @@ export const ManageMenuModal: React.FC = () => {
                       <Award className="w-3.5 h-3.5" />
                       <span>
                         {isAdmin
-                          ? tr(language, '🛡️ គណនី Admin (សិទ្ធិ VIP អចិន្ត្រៃយ៍)', '🛡️ System Admin (Permanent VIP)', '🛡️ 系统管理员（永久 VIP）')
-                          : isPremiumActive
-                          ? tr(language, '👑 គម្រោង VIP កំពុងដំណើរការ', '👑 Active VIP Plan', '👑 VIP 会员已激活')
-                          : vipState === 'pending_vip'
-                          ? tr(language, '⏳ កំពុងរង់ចាំ Admin អនុម័ត VIP', '⏳ Pending VIP Verification', '⏳ 等待管理员审核 VIP')
+                          ? tr(language, '🛡️ គណនី Admin (សិទ្ធិពេញលេញ)', '🛡️ System Admin Access', '🛡️ 管理员全权限')
+                          : isShopSubActive
+                          ? tr(language, '👑 កញ្ចប់ហាង VIP សកម្ម', '👑 VIP Shop Package Active', '👑 店铺 VIP 套餐已生效')
+                          : currentRest.shopPaymentStatus === 'pending_verification'
+                          ? tr(language, '⏳ កំពុងរង់ចាំផ្ទៀងផ្ទាត់វិក្កយបត្រ', '⏳ Receipt Under Review', '⏳ 付款审核中')
                           : isExpired
-                          ? tr(language, '⚠️ គម្រោង VIP បានផុតកំណត់', '⚠️ VIP Plan Expired', '⚠️ VIP 会员已过期')
-                          : tr(language, '🏷️ គម្រោងមូលដ្ឋានឥតគិតថ្លៃ ($0)', '🏷️ Free Basic Plan ($0)', '🏷️ 免费基础计划 ($0)')}
+                          ? tr(language, '⚠️ កញ្ចប់ហាងបានផុតកំណត់ (ទិន្នន័យរក្សាទុក 100%)', '⚠️ Shop Package Expired (Data Safe)', '⚠️ 套餐已到期（数据完整保留）')
+                          : currentRest.status === 'pending'
+                          ? tr(language, '⏳ រង់ចាំ Admin អនុម័តហាងជាមុន', '⏳ Pending Admin Shop Approval', '⏳ 等待管理员审核店铺')
+                          : tr(language, '💳 រង់ចាំបើកកញ្ចប់ហាង VIP', '💳 Ready to Activate Shop Package', '💳 待开通店铺 VIP 套餐')}
                       </span>
                     </span>
+
+                    {formattedVipExpiry && (
+                      <span className="text-[11px] font-mono font-bold text-[#064E3B] dark:text-emerald-300">
+                        📅 {formattedVipExpiry} {vipRemainingDays > 0 ? `(${vipRemainingDays}d)` : ''}
+                      </span>
+                    )}
                   </div>
 
-                  <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
-                    {isAdmin
-                      ? tr(language, 'ស្ថានភាព៖ អនុម័តពេញលេញ ($0)', 'Status: Full Admin Access', '状态：管理员全权限')
-                      : isPremiumActive
-                      ? tr(language, 'ការបង់ប្រាក់៖ ✅ បានផ្ទៀងផ្ទាត់', 'Payment: ✅ Verified', '支付状态：✅ 已验证')
-                      : vipState === 'pending_vip'
-                      ? tr(language, 'ការបង់ប្រាក់៖ ⏳ រង់ចាំពិនិត្យ', 'Payment: ⏳ Pending Review', '支付状态：⏳ 待审核')
-                      : tr(language, 'ការបង់ប្រាក់៖ ឥតគិតថ្លៃ ($0)', 'Payment: Free Tier ($0)', '支付状态：免费 ($0)')}
-                  </span>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
+                    {isShopSubActive && !isAdmin
+                      ? tr(
+                          language,
+                          '💡 អ្នកអាចបង់បន្តមុនថ្ងៃផុតកំណត់បានគ្រប់ពេល — ប្រព័ន្ធនឹងបូកបន្ថែមចំនួនថ្ងៃ (30 ឬ 365 ថ្ងៃ) ពីលើថ្ងៃផុតកំណត់បច្ចុប្បន្នដោយស្វ័យប្រវត្តិ!',
+                          '💡 Renew early anytime — 30 or 365 days stack directly onto your current expiration date!',
+                          '💡 可随时提前续费——新天数将自动叠加在当前到期日之后！'
+                        )
+                      : tr(
+                          language,
+                          'កញ្ចប់ហាងនេះដាច់ដោយឡែកពី Consumer VIP ហើយគ្មានគម្រោង Lifetime ទេ។ ពេលផុតកំណត់ ស្លាក VIP នឹងផ្អាកបណ្ដោះអាសន្ន ដោយរក្សាទុកទិន្នន័យ និងម៉ឺនុយហាង 100%។',
+                          'Shop Package is independent of Consumer VIP (no Lifetime tier). If expired, VIP visibility pauses without deleting any shop or menu data.',
+                          '店铺套餐独立于个人 VIP（无终身套餐）。到期仅暂停置顶与金牌展示，所有店铺及菜单数据 100% 保留。'
+                        )}
+                  </p>
                 </div>
 
-                {/* Expiration Date & Remaining Days */}
-                <div className="pt-2 border-t border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between text-[11px] flex-wrap gap-2">
-                  <div className="text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-[#064E3B] dark:text-emerald-400" />
+                {/* 2. All 5 Included Benefits (Zero Extra Advertising Fees) */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-50/90 via-white to-emerald-50/60 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-950/30 border border-amber-400/80 space-y-2">
+                  <div className="font-bold text-xs text-[#064E3B] dark:text-amber-300 flex items-center justify-between gap-2">
                     <span>
-                      {isAdmin
-                        ? tr(language, 'សុពលភាព VIP៖ គ្មានថ្ងៃផុតកំណត់ (Permanent)', 'VIP Expiry: Never Expires (Admin)', '有效期：永久有效（管理员）')
-                        : formattedVipExpiry
-                        ? tr(
-                            language,
-                            `ថ្ងៃផុតកំណត់ VIP៖ ${formattedVipExpiry}${vipRemainingDays > 0 ? ` (នៅសល់ ${vipRemainingDays} ថ្ងៃ)` : ''}`,
-                            `VIP Expiration: ${formattedVipExpiry}${vipRemainingDays > 0 ? ` (${vipRemainingDays} days left)` : ''}`,
-                            `VIP 到期日：${formattedVipExpiry}${vipRemainingDays > 0 ? `（剩余 ${vipRemainingDays} 天）` : ''}`
-                          )
-                        : tr(
-                            language,
-                            'អ្នកកំពុងប្រើប្រាស់មុខងារគ្រប់គ្រងហាងមូលដ្ឋានដោយឥតគិតថ្លៃ ($0)។',
-                            'You are using basic shop management for free ($0).',
-                            '您当前正在免费使用基础店铺管理功能 ($0)。'
-                          )}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 2. Clear Comparison: Free Basic Plan ($0) vs Optional Paid VIP Plan */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Free Basic Plan Card */}
-                <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2">
-                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
-                    <span className="font-bold text-xs text-slate-800 dark:text-slate-100">
-                      {tr(language, '🏷️ គម្រោងមូលដ្ឋាន (Free)', '🏷️ Free Basic Plan', '🏷️ 免费基础计划')}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-mono font-black text-xs">
-                      $0.00
-                    </span>
-                  </div>
-                  <ul className="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300">
-                    <li className="flex items-start gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>{tr(language, 'កែប្រែព័ត៌មានហាង លេខទូរស័ព្ទ និងផែនទីដោយសេរី', 'Edit shop info, phone, hours & Google Maps link', '免费编辑店铺信息、电话、营业时间与地图链接')}</span>
-                    </li>
-                    <li className="flex items-start gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>{tr(language, 'រូបភាពមុខហាងផ្លូវការ ១ សន្លឹកគត់', '1 official storefront photo', '1 张官方店铺门面照片')}</span>
-                    </li>
-                    <li className="flex items-start gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>{tr(language, 'មើលស្ថិតិអ្នកចូលមើល និងផ្កាយវាយតម្លៃ', 'View store statistics & genuine customer ratings', '查看基础访问统计与顾客真实评分')}</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* VIP Premium Plan Card */}
-                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-50/90 via-white to-emerald-50/60 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-950/30 border-2 border-amber-400/80 space-y-2 shadow-xs">
-                  <div className="flex items-center justify-between border-b border-amber-200/70 dark:border-slate-700 pb-2">
-                    <span className="font-bold text-xs text-[#064E3B] dark:text-amber-300 flex items-center gap-1">
-                      <Award className="w-3.5 h-3.5 text-amber-500" />
-                      <span>{tr(language, 'គម្រោង VIP Premium', 'VIP Premium Plan', 'VIP 尊享计划')}</span>
-                    </span>
-                    <span className="px-2 py-0.5 rounded-lg bg-[#064E3B] text-amber-300 font-mono font-black text-xs">
-                      ${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.priceUsd.toFixed(2)}
+                      {tr(
+                        language,
+                        '✨ មុខងារទាំង ៥ ក្នុងកញ្ចប់តែមួយ (គ្មានទារថ្លៃផ្សព្វផ្សាយបន្ថែម)',
+                        '✨ All 5 Benefits Included in One Package (No Extra Ad Fees)',
+                        '✨ 单一套餐包含全部 5 大权益（无任何额外广告费）'
+                      )}
                     </span>
                   </div>
                   <ul className="space-y-1.5 text-[11px] text-slate-700 dark:text-slate-200">
-                    <li className="flex items-start gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                      <span>{tr(language, 'ស្លាកសញ្ញា 👑 VIP Gold Badge & អាទិភាពបង្ហាញលើគេ', '👑 VIP Gold Badge & Top Priority Home/Directory Ranking', '👑 VIP 金牌标识及首页/餐厅列表置顶优先展示')}</span>
-                    </li>
-                    <li className="flex items-start gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                      <span>{tr(language, 'ភ្ជាប់វីដេអូផ្សព្វផ្សាយហាង (TikTok / Facebook / YouTube)', 'Store Promotional Video Reels (TikTok / FB / YouTube)', '绑定店铺宣传短视频 (TikTok / FB / YouTube)')}</span>
-                    </li>
-                    <li className="flex items-start gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                      <span>{tr(language, 'ម្ហូបសុខភាព អាហារ ៣ ពេល និងផែនការដំណើរកម្សាន្ត ១ ថ្ងៃ', 'Healthy dish filters, 3-meal ideas & 1-day trip planner', '健康菜品筛选、三餐灵感与一日游规划')}</span>
-                    </li>
-                    <li className="flex items-start gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                      <span>{tr(language, 'រួមបញ្ចូលហាង VIP ទី ១ ឥតគិតថ្លៃ ($0) និងស្ថិតិពេញលេញ', 'Includes 1st VIP Store free ($0) + full analytics & VIP tools', '包含第 1 家 VIP 店铺免费 ($0) 及完整数据分析')}</span>
-                    </li>
+                    {SHOP_ALL_INCLUSIVE_5_BENEFITS.map((b, idx) => (
+                      <li key={idx} className="leading-snug">
+                        {isKm ? b.km : language === 'zh' ? b.zh : b.en}
+                      </li>
+                    ))}
                   </ul>
                 </div>
-              </div>
 
-              {/* 3. Synchronized VIP Plan Selector & Optional Upgrade / Renewal Action */}
-              <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border-2 border-emerald-500/80 space-y-3">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <span className="font-bold text-xs text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
-                    <Award className="w-4 h-4 text-amber-500" />
-                    <span>
+                {/* 3. Pay-After-Approval Guard OR Official Shop Plan Selector + ABA KHQR Checkout */}
+                {!shopCatalog.shopPlansEnabled ? (
+                  <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-center text-xs text-slate-600 dark:text-slate-300">
+                    {tr(language, 'កញ្ចប់ហាងត្រូវបានផ្អាកបណ្តោះអាសន្នដោយ Admin។', 'Shop subscriptions are temporarily paused by Admin.', '管理员已暂停店铺套餐开通。')}
+                  </div>
+                ) : mustWaitForAdminApproval ? (
+                  <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-400 text-center space-y-2">
+                    <Clock className="w-7 h-7 text-amber-600 mx-auto" />
+                    <div className="font-bold text-xs text-amber-950 dark:text-amber-200">
                       {tr(
                         language,
-                        'ជ្រើសរើសកញ្ចប់សមាជិកភាព VIP (តម្លៃផ្លូវការពី Admin)',
-                        'Official VIP Plans (Synced with Admin Settings)',
-                        '官方 VIP 套餐（与管理员设置实时同步）'
+                        '⏳ រង់ចាំ Admin ពិនិត្យ និងអនុម័តហាងជាមុនសិន មុនពេលបង់ប្រាក់!',
+                        '⏳ Please wait for Admin to approve your shop before paying!',
+                        '⏳ 请等待管理员审核批准您的店铺后再付款！'
                       )}
-                    </span>
-                  </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 text-[#064E3B] dark:text-emerald-300 font-bold border border-emerald-300">
-                    {tr(language, 'មិនបង្ខំ (Optional Upgrade)', 'Optional Paid Upgrade', '可选付费升级')}
-                  </span>
-                </div>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                      {tr(
+                        language,
+                        'ដើម្បីការពារម្ចាស់ហាង ប្រព័ន្ធនឹងបើកផ្ទាំងបង់ប្រាក់ ABA KHQR ភ្លាមៗបន្ទាប់ពីរដ្ឋបាល (Admin) ពិនិត្យអនុម័តហាងរបស់អ្នករួចរាល់។',
+                        'To protect shop owners, ABA KHQR checkout unlocks right after Admin approves your shop listing.',
+                        '为保障商家权益，管理员审核通过您的店铺后将立即开放 ABA KHQR 付款。'
+                      )}
+                    </p>
+                  </div>
+                ) : !isAdmin ? (
+                  <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border-2 border-emerald-500/70 space-y-3 shadow-xs">
+                    <div className="font-extrabold text-xs text-slate-900 dark:text-white flex items-center justify-between gap-2">
+                      <span>{tr(language, '១. ជ្រើសរើសកញ្ចប់ហាង (ក្នុង ១ ហាង)', '1. Choose Shop Plan (per shop)', '1. 选择单店套餐')}</span>
+                      {shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled && (
+                        <span className="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-black">
+                          🔥 {tr(language, `សល់ ${shopCatalog.earlyBirdRemaining}/${shopCatalog.earlyBirdCap} ហាង`, `${shopCatalog.earlyBirdRemaining}/${shopCatalog.earlyBirdCap} left`, `剩余 ${shopCatalog.earlyBirdRemaining}/${shopCatalog.earlyBirdCap} 名额`)}
+                        </span>
+                      )}
+                    </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  {(['quarterly', 'annual'] as VipPlanType[]).map((pk) => {
-                    const p = dynamicPlansMap[pk];
-                    const active = selectedVipPlan === pk;
-                    return (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {shopOptions.map((opt) => {
+                        const selected = activeShopPlan.planId === opt.planId;
+                        return (
+                          <button
+                            key={opt.planId}
+                            type="button"
+                            onClick={() => setSelectedShopPlanId(opt.planId as any)}
+                            className={`p-3 rounded-2xl border-2 text-left transition cursor-pointer relative ${
+                              selected
+                                ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/30 shadow-xs'
+                                : 'border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/70 hover:border-amber-300'
+                            }`}
+                          >
+                            {(opt.badgeKm || opt.badgeEn) && (
+                              <span className="inline-block mb-1 px-2 py-0.5 rounded-full bg-emerald-700 text-amber-200 text-[9px] font-black">
+                                {isKm ? opt.badgeKm : opt.badgeEn}
+                              </span>
+                            )}
+                            <div className="flex items-baseline justify-between gap-2">
+                              <span className="font-bold text-xs text-slate-900 dark:text-white">
+                                {isKm ? opt.titleKm : opt.titleEn}
+                              </span>
+                              <span className="font-mono font-black text-base text-[#064E3B] dark:text-amber-300">
+                                {'$'}{opt.priceUsd.toFixed(2)}
+                              </span>
+                            </div>
+                            <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                              {tr(language, `សុពលភាព ${opt.durationDays} ថ្ងៃពេញ`, `${opt.durationDays} days active`, `有效期 ${opt.durationDays} 天`)}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Step 2: ABA KHQR */}
+                    <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center gap-3">
                       <button
-                        key={pk}
                         type="button"
-                        onClick={() => setSelectedVipPlan(pk)}
-                        className={`p-2.5 rounded-xl border text-left transition cursor-pointer ${
-                          active
-                            ? 'border-[#064E3B] bg-white dark:bg-slate-900 text-[#064E3B] dark:text-emerald-300 font-bold shadow'
-                            : 'border-emerald-300/60 dark:border-slate-700 text-slate-600 dark:text-slate-400'
-                        }`}
+                        onClick={async () => {
+                          try {
+                            await savePngDataUrlToGallery('/images/aba_qr_code_only.png', 'ABA-KHQR-KIMSENG-CHEA-095245959.png');
+                            showToast(isKm ? '✅ បានរក្សាទុក ABA QR ទៅក្នុង រូបភាពរបស់ខ្ញុំ!' : '✅ Saved ABA QR to Gallery!', 'success');
+                          } catch {}
+                        }}
+                        className="w-28 h-28 p-1.5 rounded-xl bg-white border-2 border-emerald-500/50 shrink-0 cursor-pointer"
                       >
-                        <div className="flex items-center justify-between">
-                          <span>{isKm ? p.nameKh : p.nameEn}</span>
-                          <span className="font-mono font-black">${p.priceUsd.toFixed(2)}</span>
-                        </div>
-                        <div className="text-[10px] opacity-80">
-                          {tr(language, `សុពលភាព ${p.durationDays} ថ្ងៃ`, `${p.durationDays} days duration`, `有效期 ${p.durationDays} 天`)}
-                        </div>
+                        <img src="/images/aba_qr_code_only.png" alt="ABA KHQR" className="w-full h-full object-contain" />
                       </button>
-                    );
-                  })}
-                </div>
-
-                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
-                  {tr(
-                    language,
-                    `ការទូទាត់តែមួយលើក $${activePlan.priceUsd.toFixed(2)} សម្រាប់រយៈពេល ${activePlan.durationDays} ថ្ងៃពេញ • រួមបញ្ចូលហាងទី ១ ឥតគិតថ្លៃ ($0) • បន្ថែមហាងបន្ទាប់ +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD / ហាង។ ទិន្នន័យហាងរបស់អ្នកត្រូវបានរក្សាទុកជានិច្ច មិនបាត់បង់ឡើយ។`,
-                    `One-time payment of $${activePlan.priceUsd.toFixed(2)} for ${activePlan.durationDays} days • Includes 1st Store Free ($0) • Additional stores +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD / store. Your existing shop data is always preserved.`,
-                    `一次性支付 $${activePlan.priceUsd.toFixed(2)} 即可享受 ${activePlan.durationDays} 天 VIP 权益 • 首店免费 ($0) • 新增分店 +$${storeQuota.additionalStoreFeeUsd.toFixed(2)} USD/店。您的所有店铺数据永久保留。`
-                  )}
-                </p>
-
-                {isAdmin ? (
-                  <div className="p-3 rounded-xl bg-white/90 dark:bg-slate-900 border border-emerald-400 text-[11px] text-[#064E3B] dark:text-emerald-300 font-bold flex items-center justify-between gap-2">
-                    <span>
-                      {tr(
-                        language,
-                        '✅ គណនី Admin មានសិទ្ធិ VIP អចិន្ត្រៃយ៍លើគ្រប់ហាងទាំងអស់ ដោយមិនចាំបាច់បង់ប្រាក់ឡើយ។',
-                        '✅ Your Admin account has permanent full VIP access for all shops with no payment required.',
-                        '✅ 您的管理员账号拥有所有店铺的永久 VIP 权限，无需付费。'
-                      )}
-                    </span>
-                  </div>
-                ) : isPremiumActive ? (
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="p-2.5 rounded-xl bg-white/10 border border-white/20">
-                      <div className="text-[10px] font-bold text-emerald-100">
-                        {tr(language, 'ថ្ងៃផុតកំណត់សមាជិកភាព', 'Membership Expiration Date', '会员到期日')}
-                      </div>
-                      <div className="text-xs font-black text-amber-300 mt-0.5 font-mono">
-                        {currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}
+                      <div className="min-w-0 flex-1 space-y-1.5 text-xs">
+                        <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                          <QrCode className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span>ABA KHQR • CHEA KIMSENG</span>
+                        </div>
+                        <div className="font-mono font-black text-sm text-[#004B87] dark:text-sky-400">095 245 959</div>
+                        <div className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                          {tr(
+                            language,
+                            `ចំនួនទឹកប្រាក់ត្រូវបង់៖ $${activeShopPlan.priceUsd.toFixed(2)} USD (${activeShopPlan.durationDays} ថ្ងៃ)`,
+                            `Amount due: $${activeShopPlan.priceUsd.toFixed(2)} USD (${activeShopPlan.durationDays} days)`,
+                            `应付金额：$${activeShopPlan.priceUsd.toFixed(2)} USD（${activeShopPlan.durationDays} 天）`
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              await savePngDataUrlToGallery('/images/aba_qr_code_only.png', 'ABA-KHQR-KIMSENG-CHEA-095245959.png');
+                              showToast(isKm ? '✅ បានរក្សាទុក ABA QR!' : '✅ Saved ABA QR!', 'success');
+                            } catch {}
+                          }}
+                          className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          <Download className="w-3 h-3 text-emerald-600" />
+                          <span>{isKm ? 'រក្សាទុក QR' : 'Save QR'}</span>
+                        </button>
                       </div>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-white/10 border border-white/20">
-                      <div className="text-[10px] font-bold text-emerald-100">
-                        {tr(language, 'ថ្ងៃកាត់ប្រាក់បន្ទាប់', 'Next Billing Date', '下次扣款日期')}
-                      </div>
-                      <div className="text-xs font-black text-emerald-200 mt-0.5 font-mono">
-                        {currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
-                          ? currentUser?.subscriptionExpiryDate
-                            ? currentUser.subscriptionExpiryDate.split('T')[0]
-                            : '—'
-                          : tr(language, 'គ្មានការកាត់ប្រាក់បន្ថែម', 'No Further Charges', '不再扣款')}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleCloseModal();
-                      openUpgradeVipModal(false);
-                    }}
-                    className="w-full py-3 px-4 rounded-2xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer"
-                  >
-                    <Award className="w-4 h-4" />
-                    <span>
-                      {tr(
-                        language,
-                        `ដំឡើងទៅគម្រោង ${activePlan.nameKh} ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} ថ្ងៃ)`,
-                        `Upgrade to ${activePlan.nameEn} ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} Days)`,
-                        `升级至 ${activePlan.nameEn} ($${activePlan.priceUsd.toFixed(2)} / ${activePlan.durationDays} 天)`
-                      )}
-                    </span>
-                  </button>
-                )}
-              </div>
 
-              {/* Dynamic VIP Benefits Breakdown */}
-              <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2.5">
-                <h4 className="font-bold text-xs text-[#064E3B] dark:text-emerald-400 border-b border-slate-200 dark:border-slate-700 pb-1.5 flex items-center gap-1.5">
-                  <Award className="w-4 h-4 text-amber-500" />
-                  <span>
-                    {tr(
-                      language,
-                      `អត្ថប្រយោជន៍ទាំង ${dynamicBenefits.length} យ៉ាងនៃសមាជិកភាព VIP Premium`,
-                      `${dynamicBenefits.length} Full Benefits of Premium VIP Membership`,
-                      `VIP 尊享会员全部 ${dynamicBenefits.length} 项特权`
-                    )}
-                  </span>
-                </h4>
-
-                <div className="grid grid-cols-1 gap-1.5 text-[11px] text-slate-700 dark:text-slate-300">
-                  {dynamicBenefits.map((b, idx) => (
-                    <div key={b.id || idx} className="flex items-start gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0 mt-0.5" />
-                      <span>
-                        <strong>
-                          {idx + 1}. {isKm ? b.titleKh : b.titleEn}
-                        </strong>
-                        {(b.descKh || b.descEn) && (
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-                            {isKm ? b.descKh : b.descEn}
+                    {/* Step 3: Upload ABA Receipt + Submit */}
+                    <div className="space-y-2">
+                      {shopReceiptDraft && (
+                        <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 flex items-center justify-between gap-2 text-xs">
+                          <span className="font-bold text-emerald-800 dark:text-emerald-200 truncate">
+                            ✅ {shopReceiptDraft.fileName}
                           </span>
-                        )}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                          <button
+                            type="button"
+                            onClick={() => setShopReceiptDraft(null)}
+                            className="p-1 text-rose-600 hover:bg-rose-100 rounded-lg cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
 
-              {/* VIP Member Support Channel (Benefit 10) */}
-              <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 space-y-2">
-                <span className="font-bold text-xs text-[#064E3B] dark:text-emerald-400 block">
-                  {isKm ? 'សេវាជំនួយសមាជិក VIP (VIP Member Support)' : 'VIP Member Support Channel'}
-                </span>
-                <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                  {isKm 
-                    ? 'មានចម្ងល់ ឬត្រូវការជំនួយក្នុងការរៀបចំហាងរបស់អ្នក? ទាក់ទងផ្ទាល់មកកាន់ក្រុមការងាររដ្ឋបាល៖' 
-                    : 'Need priority assistance with your restaurant setup? Contact our VIP team directly:'}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <a
-                    href="https://t.me/cheasavuth"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 py-2.5 px-3 bg-[#059669] hover:bg-[#047857] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow transition"
-                  >
-                    <MessageCircle className="w-4 h-4 shrink-0" />
-                    <span>Telegram VIP Support</span>
-                  </a>
-                  <a
-                    href="mailto:kftcam@gmail.com"
-                    className="flex-1 py-2.5 px-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition font-mono break-all"
-                  >
-                    <Mail className="w-3.5 h-3.5 shrink-0" />
-                    <span>kftcam@gmail.com</span>
-                  </a>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={handlePickShopReceipt}
+                          className="py-2.5 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Upload className="w-4 h-4" />
+                          <span>{isKm ? 'ភ្ជាប់វិក្កយបត្រ ABA' : 'Attach ABA Receipt'}</span>
+                        </button>
+                        <input
+                          type="text"
+                          value={shopTrxRef}
+                          onChange={(e) => setShopTrxRef(e.target.value)}
+                          placeholder={isKm ? 'លេខ Trx ID (ស្រេចចិត្ត)' : 'ABA Trx ID (optional)'}
+                          className="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-white"
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled={isSubmittingShopPayment}
+                        onClick={handleSubmitShopPayment}
+                        className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#064E3B] to-emerald-700 hover:from-emerald-800 text-white font-black text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-60"
+                      >
+                        {isSubmittingShopPayment ? (
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <CheckCircle2 className="w-4 h-4 text-amber-300" />
+                        )}
+                        <span>
+                          {isShopSubActive
+                            ? tr(
+                                language,
+                                `🔄 បន្តសុពលភាពកញ្ចប់ហាង ($${activeShopPlan.priceUsd.toFixed(2)} / +${activeShopPlan.durationDays} ថ្ងៃ)`,
+                                `🔄 Renew Shop Package ($${activeShopPlan.priceUsd.toFixed(2)} / +${activeShopPlan.durationDays}d)`,
+                                `🔄 续费店铺套餐 ($${activeShopPlan.priceUsd.toFixed(2)} / +${activeShopPlan.durationDays}天)`
+                              )
+                            : tr(
+                                language,
+                                `✅ បញ្ជូនវិក្កយបត្របើកកញ្ចប់ហាង ($${activeShopPlan.priceUsd.toFixed(2)})`,
+                                `✅ Submit Receipt & Activate Shop ($${activeShopPlan.priceUsd.toFixed(2)})`,
+                                `✅ 提交凭证开通套餐 ($${activeShopPlan.priceUsd.toFixed(2)})`
+                              )}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Support Channel */}
+                <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 space-y-2">
+                  <span className="font-bold text-xs text-[#064E3B] dark:text-emerald-400 block">
+                    {isKm ? 'ជំនួយម្ចាស់ហាង (Shop Owner Support)' : 'Shop Owner Support'}
+                  </span>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <a
+                      href="https://t.me/cheasavuth"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 py-2 px-3 bg-[#059669] hover:bg-[#047857] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow transition"
+                    >
+                      <MessageCircle className="w-4 h-4 shrink-0" />
+                      <span>Telegram Support</span>
+                    </a>
+                    <a
+                      href="mailto:kftcam@gmail.com"
+                      className="flex-1 py-2 px-3 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition font-mono"
+                    >
+                      <Mail className="w-3.5 h-3.5 shrink-0" />
+                      <span>kftcam@gmail.com</span>
+                    </a>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
         </div>
         </>
@@ -2129,13 +2352,15 @@ export const ManageMenuModal: React.FC = () => {
         {/* Footer */}
         <div className="p-3.5 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs text-slate-500 font-khmer">
           <span>
-            {isKm
-              ? `សមាជិកភាព VIP (${dynamicPlansMap.quarterly.durationDays} ថ្ងៃ $${dynamicPlansMap.quarterly.priceUsd.toFixed(2)} / ${dynamicPlansMap.annual.durationDays} ថ្ងៃ $${dynamicPlansMap.annual.priceUsd.toFixed(2)})`
-              : `VIP Plans: ${dynamicPlansMap.quarterly.durationDays} Days ($${dynamicPlansMap.quarterly.priceUsd.toFixed(2)}) / ${dynamicPlansMap.annual.durationDays} Days ($${dynamicPlansMap.annual.priceUsd.toFixed(2)})`}
+            {isIosAppStore
+              ? (isKm ? 'គ្រប់គ្រងព័ត៌មានហាង ម៉ឺនុយ និងទីតាំងផែនទី' : 'Manage shop details, menu & map pin')
+              : (isKm
+                  ? `កញ្ចប់ហាង៖ $${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/ខែ • $${shopCatalog.yearlyPlan.priceUsd.toFixed(2)}/ឆ្នាំ`
+                  : `Shop Plans: $${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/mo • $${shopCatalog.yearlyPlan.priceUsd.toFixed(2)}/yr`)}
           </span>
           <button
             onClick={handleCloseModal}
-            className="px-4 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl transition font-medium"
+            className="px-4 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl transition font-medium cursor-pointer"
           >
             {isKm ? 'បិទ' : 'Close'}
           </button>

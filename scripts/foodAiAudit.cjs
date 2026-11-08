@@ -31,6 +31,7 @@ function section(t) {
     const brain = await server.ssrLoadModule('/src/services/aiFoodBrain.ts');
     const conv = await server.ssrLoadModule('/src/services/conversationalAiAssistant.ts');
     const llm = await server.ssrLoadModule('/src/services/foodAssistantLlm.ts');
+const consent = await server.ssrLoadModule('/src/services/aiConsent.ts');
     const api = await server.ssrLoadModule('/src/utils/universalDishOpenApi.ts');
     const rich = await server.ssrLoadModule('/src/components/RichAnswerText.tsx');
     const up = await server.ssrLoadModule('/src/utils/foodImageUpload.ts');
@@ -328,6 +329,40 @@ function section(t) {
     const payload = { domain: 'food', intent: 'general_food_qa', answer: 'Via proxy OK', needsClarification: false };
     // AI is VIP-only (verified against the backend before any model call); an admin session passes that gate locally.
     const t16 = { uiLanguage: 'en', foods, restaurants: [], history: [], memory, userText: 'hello', geminiApiKey: 'LOCALKEY', currentUser: { id: 'admin-authorized-single', role: 'admin', username: 'admin' } };
+
+    // (0) App Store Guideline 5.1.2(i): nothing may leave the device before the user agrees to third-party AI processing.
+    {
+      const prevFetch = globalThis.fetch;
+      let calls = 0;
+      globalThis.fetch = async () => {
+        calls++;
+        return mkResp(200, geminiOk(payload), true);
+      };
+      try {
+        consent.revokeAiConsent();
+        const r0 = await llm.askFoodAssistant(t16);
+        ok(r0.ok && r0.model === 'policy' && r0.message.source === 'notice' && calls === 0, 'no consent (no dialog possible) -> notice only, ZERO network calls');
+
+        let asked = 0;
+        globalThis.window = { confirm: () => (asked++, false) };
+        consent.revokeAiConsent();
+        const r1 = await llm.askFoodAssistant(t16);
+        await llm.askFoodAssistant(t16);
+        ok(r1.ok && r1.model === 'policy' && calls === 0 && asked === 1, 'declined -> notice, no network, and the user is not asked again in the same session');
+
+        globalThis.window = { confirm: () => (asked++, true) };
+        consent.revokeAiConsent();
+        const r2 = await llm.askFoodAssistant(t16);
+        ok(r2.ok && r2.message.text === 'Via proxy OK' && calls === 1 && consent.hasAiConsent(), 'agreed -> request is sent and the permission is remembered');
+        const before = asked;
+        await llm.askFoodAssistant(t16);
+        ok(asked === before, 'remembered permission: no second prompt');
+      } finally {
+        delete globalThis.window;
+        globalThis.fetch = prevFetch;
+        consent.grantAiConsent();
+      }
+    }
     try {
       // (a) proxy answers -> direct Google endpoint never contacted, key never sent
       llm.resetFoodAiProxyState();

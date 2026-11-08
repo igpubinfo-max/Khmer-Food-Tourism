@@ -12,7 +12,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { tr } from '../../utils/i18n';
-import type { Language } from '../../types';
+import { type Language, type Restaurant, isShopSubscriptionActive } from '../../types';
 import { getCachedCloudImageDataUrl } from '../../services/cloudImageStorageService';
 import { useApp } from '../../context/AppContext';
 import { openAiAssistantWithQuery, getAskAiButtonLabel } from '../../utils/aiSearchBridge';
@@ -517,5 +517,5 @@ export const ListingAddPanel: React.FC<ListingAddPanelProps> = ({
 /** Vip-created listings (Shop or Hotel) are the only ones rendered as large featured cards. */
 export const isVipOwnerListing = (r?: { dataSource?: string; id?: string | number } | null): boolean => {
   if (!r) return false;
-  return r.dataSource === 'vip_owner' || String(r.id || '').startsWith('rest-vip-');
+  return isShopSubscriptionActive(r as Partial<Restaurant>);
 };

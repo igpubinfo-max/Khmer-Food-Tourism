@@ -370,41 +370,7 @@ export function findLocalAuthoritativeVipEntitlement(
         }
       }
 
-      // 5. Check Free 30-Day VIP Trial Claim Registry (`kft_v3_food_checkin_reward_claims_v1`) & Secondary Cloud Mirror
-      const claims = getCachedParsedLocalStorage('kft_v3_food_checkin_reward_claims_v1');
-      if (claims && typeof claims === 'object') {
-        const targetIds = [targetUser.id, ...(Array.isArray(targetUser.legacyIds) ? targetUser.legacyIds : [])].filter(Boolean) as string[];
-        const targetEmail = String(targetUser.email || '').trim().toLowerCase();
-        let claimStartIso = '';
-        let claimExpIso = '';
-        for (const id of targetIds) {
-          if (claims.trialsByUserId?.[id]?.activatedAt) {
-            claimStartIso = claims.trialsByUserId[id].activatedAt;
-            claimExpIso = claims.trialsByUserId[id].expiresAt || '';
-            break;
-          }
-          if (typeof claims.byUserId?.[id] === 'string' && claims.byUserId[id] !== 'granted') {
-            claimStartIso = claims.byUserId[id];
-            break;
-          }
-        }
-        if (!claimStartIso && targetEmail) {
-          if (claims.trialsByEmail?.[targetEmail]?.activatedAt) {
-            claimStartIso = claims.trialsByEmail[targetEmail].activatedAt;
-            claimExpIso = claims.trialsByEmail[targetEmail].expiresAt || '';
-          } else if (typeof claims.byEmail?.[targetEmail] === 'string' && claims.byEmail[targetEmail] !== 'granted') {
-            claimStartIso = claims.byEmail[targetEmail];
-          }
-        }
-        const cStartMs = parseSafeDateMs(claimStartIso);
-        const cExpMs = parseSafeDateMs(claimExpIso) || (cStartMs > 0 ? cStartMs + 30 * 24 * 60 * 60 * 1000 : 0);
-        if (cExpMs > nowMs && cExpMs > bestExpMs) {
-          bestExpMs = cExpMs;
-          bestStartIso = cStartMs > 0 ? new Date(cStartMs).toISOString() : bestStartIso;
-          bestTxnRef = bestTxnRef || `REWARD-FOODCHECKIN30-${targetUser.id || 'USER'}`;
-          bestMethod = bestMethod || 'Manual';
-        }
-      }
+      // Retired: old 30-dish check-in reward (`kft_v3_food_checkin_reward_claims_v1`) never grants VIP.
     }
   } catch {}
 

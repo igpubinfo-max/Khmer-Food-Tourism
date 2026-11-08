@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Heart, ShieldCheck, Download, Smartphone, Mail, MessageSquare, Send, CheckCircle2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { tr } from '../utils/i18n';
+import { isNativeIosApp } from '../types';
 import { savePngDataUrlToGallery } from '../utils/androidMediaHelper';
 
 export const SupportModal: React.FC = () => {
@@ -21,7 +22,7 @@ export const SupportModal: React.FC = () => {
   const [senderContactInput, setSenderContactInput] = useState(currentUser?.phone || currentUser?.email || '');
   const [sentSuccess, setSentSuccess] = useState(false);
 
-  if (!isSupportModalOpen) return null;
+  if (!isSupportModalOpen || isNativeIosApp()) return null;
 
   const myTickets = supportTickets.filter(
     (t) =>

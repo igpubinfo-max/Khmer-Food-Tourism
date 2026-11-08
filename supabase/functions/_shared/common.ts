@@ -43,6 +43,86 @@ export function decideQuota(used: number, limit: number): QuotaDecision {
   return { allowed: used <= limit, limit, used };
 }
 
+export type VipQuotaTier = 'paid_vip' | 'trial_vip' | 'free';
+
+const PAID_CONSUMER_PLAN_IDS: ReadonlySet<string> = new Set([
+  'consumer_promo_30d',
+  'consumer_30d',
+  'consumer_90d',
+  'consumer_365d',
+]);
+
+/**
+ * Distinguishes 7-Day Free Trial VIP (default 15 AI requests/day) from Paid Consumer VIP (default 80 AI requests/day).
+ */
+export function classifyVipQuotaTier(u: unknown, nowMs: number = Date.now()): VipQuotaTier {
+  if (!isVipActive(u, nowMs)) return 'free';
+  const r = u as Record<string, unknown>;
+  const activePlan = typeof r.activeConsumerPlanId === 'string' ? r.activeConsumerPlanId.trim() : '';
+  if (PAID_CONSUMER_PLAN_IDS.has(activePlan)) return 'paid_vip';
+
+  const planType = typeof r.vipPlanType === 'string' ? r.vipPlanType.trim() : '';
+  const ref = typeof r.transactionRef === 'string' ? r.transactionRef.trim() : '';
+  const method = typeof r.paymentMethod === 'string' ? r.paymentMethod.trim() : '';
+  if (
+    activePlan === 'trial_7d' ||
+    planType === 'trial_7d' ||
+    planType === '7d' ||
+    ref.startsWith('TRIAL-7D-') ||
+    method === 'FREE_TRIAL_7D'
+  ) {
+    return 'trial_vip';
+  }
+  return 'paid_vip';
+}
+
+export function resolveUserAiDailyLimit(params: {
+  isPayment: boolean;
+  userId: string | null;
+  userDoc: unknown;
+  pricingDoc?: unknown;
+  envTrial?: string;
+  envVip?: string;
+  envFree?: string;
+  envAnon?: string;
+  envPayment?: string;
+  nowMs?: number;
+}): { limit: number; tier: 'payment' | 'paid_vip' | 'trial_vip' | 'free' | 'anon' } {
+  if (params.isPayment) {
+    return { limit: envInt(params.envPayment, 45, 1, 500), tier: 'payment' };
+  }
+  if (!params.userId) {
+    return { limit: envInt(params.envAnon, 15, 1, 500), tier: 'anon' };
+  }
+  const pricing =
+    params.pricingDoc && typeof params.pricingDoc === 'object'
+      ? (params.pricingDoc as Record<string, unknown>)
+      : {};
+  const adminTrialLimit = envInt(
+    pricing.consumerTrialAiDailyLimit !== undefined ? String(pricing.consumerTrialAiDailyLimit) : undefined,
+    15,
+    1,
+    1000
+  );
+  const adminPaidLimit = envInt(
+    pricing.consumerPaidAiDailyLimit !== undefined ? String(pricing.consumerPaidAiDailyLimit) : undefined,
+    80,
+    1,
+    5000
+  );
+
+  const tier = classifyVipQuotaTier(params.userDoc, params.nowMs ?? Date.now());
+  if (tier === 'trial_vip') {
+    const limit = params.envTrial ? envInt(params.envTrial, adminTrialLimit, 1, 1000) : adminTrialLimit;
+    return { limit, tier: 'trial_vip' };
+  }
+  if (tier === 'paid_vip') {
+    const limit = params.envVip ? envInt(params.envVip, adminPaidLimit, 1, 5000) : adminPaidLimit;
+    return { limit, tier: 'paid_vip' };
+  }
+  return { limit: envInt(params.envFree, 15, 1, 500), tier: 'free' };
+}
+
 export function envInt(raw: string | undefined, fallback: number, min = 1, max = 100000): number {
   const n = Number(raw);
   if (!Number.isFinite(n)) return fallback;
