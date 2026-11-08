@@ -23,6 +23,7 @@ import {
   organizeAndDeduplicateFoods,
   isGpipRegisteredRestaurant,
   resolveFoodPhotoUrl,
+  handleFoodImageError,
   openRestaurantGoogleExternal,
 } from '../types';
 import {
@@ -650,9 +651,11 @@ export const DailyDiscoveriesModal: React.FC = () => {
               const locFood = getLocalizedFood(food, language);
               const matchedRests = getMatchingRestaurantsForProvinceDish(food, provMeta, restaurants);
               const resolvedPhoto = resolveFoodPhotoUrl(
-                food.photoUrl || '/foods/food-1.jpg',
-                food.photoUpdatedAt
-              );
+                food.photoUrl,
+                food.photoUpdatedAt,
+                720,
+                food.id
+              ) || '/welcome/hero-bg.webp';
 
               return (
                 <div
@@ -670,13 +673,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                     <img
                       src={resolvedPhoto}
                       alt={locFood.name}
-                      onError={(e) => {
-                        const target = e.currentTarget;
-                        if (!target.dataset.fallback) {
-                          target.dataset.fallback = '1';
-                          target.src = '/welcome/hero-bg.webp';
-                        }
-                      }}
+                      onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
                       className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                       loading="lazy"
                     />

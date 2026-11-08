@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FoodItem, resolveFoodPhotoUrl } from '../types';
+import { FoodItem, resolveFoodPhotoUrl, handleFoodImageError } from '../types';
 import { 
   X, Upload, Image as ImageIcon, Check, RefreshCw, 
   AlertTriangle, CheckCircle2, Eye, Sliders, Smartphone, Search, Globe 
@@ -346,7 +346,8 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
               <div className="relative aspect-[16/10] bg-slate-900 flex items-center justify-center overflow-hidden">
                 {photoUrl ? (
                   <img 
-                    src={resolveFoodPhotoUrl(photoUrl, food.photoUpdatedAt)} 
+                    src={resolveFoodPhotoUrl(photoUrl, food.photoUpdatedAt, undefined, food.id)} 
+                    onError={(e) => handleFoodImageError(e, food.id, photoUrl)}
                     alt={food.nameKh} 
                     className={`w-full h-full transition-all duration-200 ${
                       fitMode === 'cover' ? 'object-cover' : 'object-contain'

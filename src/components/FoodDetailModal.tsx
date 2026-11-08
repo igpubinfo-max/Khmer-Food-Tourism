@@ -11,7 +11,7 @@ import {
   processAndCompressImageFile,
 } from '../utils/androidMediaHelper';
 import { searchOnlineFoodImages, OnlineFoodImageCandidate } from '../services/onlineFoodImageService';
-import { FoodCategorySlug, FoodItem, Ingredient, CookingStep, resolveFoodPhotoUrl } from '../types';
+import { FoodCategorySlug, FoodItem, Ingredient, CookingStep, resolveFoodPhotoUrl, handleFoodImageError } from '../types';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { DishTagChips } from './DishTagChips';
@@ -580,11 +580,9 @@ export const FoodDetailModal: React.FC = () => {
                   className="relative aspect-16/10 rounded-xl overflow-hidden bg-slate-900 border border-amber-400/50 cursor-pointer group"
                 >
                   <img
-                    src={resolveFoodPhotoUrl(editPhotoUrl || selectedFood.photoUrl, selectedFood.photoUpdatedAt)}
+                    src={resolveFoodPhotoUrl(editPhotoUrl || selectedFood.photoUrl, selectedFood.photoUpdatedAt, undefined, selectedFood.id)}
                     alt="Preview"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
-                    }}
+                    onError={(e) => handleFoodImageError(e, selectedFood.id, selectedFood.photoUrl)}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
@@ -981,12 +979,10 @@ export const FoodDetailModal: React.FC = () => {
           {/* Hero Image */}
           <div className="relative h-64 sm:h-72 w-full bg-slate-800">
             <img 
-              src={resolveFoodPhotoUrl(selectedFood.photoUrl, selectedFood.photoUpdatedAt)} 
+              src={resolveFoodPhotoUrl(selectedFood.photoUrl, selectedFood.photoUpdatedAt, undefined, selectedFood.id)} 
               alt={loc.name}
               referrerPolicy="no-referrer"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = '/foods/food-1.jpg';
-              }}
+              onError={(e) => handleFoodImageError(e, selectedFood.id, selectedFood.photoUrl)}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />

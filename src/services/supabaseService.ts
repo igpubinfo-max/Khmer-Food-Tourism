@@ -13,7 +13,7 @@
  * - If not configured yet, safely falls back to local device storage without errors.
  */
 
-import { adminTokenHeaders, isAdminServerAuthActive } from './adminAuthClient';
+import { adminTokenHeaders, isAdminServerAuthActive, adminServerChangePin } from './adminAuthClient';
 import { ensurePlacesProxyProbed, isPlacesProxyKnownAlive } from './placesProxy';
 import {
   User,
@@ -373,6 +373,16 @@ let lastSecondaryFailoverPullAtMs = 0;
 let inFlightSecondaryPullPromise: Promise<Map<string, SecondaryKvEntry> | null> | null = null;
 let secondaryPushQueuePromise: Promise<void> = Promise.resolve();
 let hydratedSecondaryMirror = false;
+let persistSecondaryMirrorTimer: ReturnType<typeof setTimeout> | null = null;
+const MAX_SECONDARY_CACHE_ENTRIES = 200;
+
+function trimMapToMaxSize<K, V>(map: Map<K, V>, max: number): void {
+  while (map.size > max) {
+    const oldestKey = map.keys().next().value;
+    if (oldestKey === undefined) break;
+    map.delete(oldestKey);
+  }
+}
 
 function hydrateSecondaryMirrorOnce(): void {
   if (hydratedSecondaryMirror) return;
@@ -402,21 +412,26 @@ function hydrateSecondaryMirrorOnce(): void {
 }
 
 function persistSecondaryMirrorToStorage(): void {
-  try {
-    if (typeof localStorage === 'undefined') return;
-    const snapshot: Record<string, SecondaryKvEntry> = {};
-    for (const [k, v] of secondaryFailoverMemoryMap.entries()) {
-      // Skip large binary proofs in local mirror to save localStorage quota
-      if (k.startsWith('kft_proof_') || k.startsWith('kft_ov_')) continue;
-      snapshot[k] = v;
+  trimMapToMaxSize(secondaryFailoverMemoryMap, MAX_SECONDARY_CACHE_ENTRIES);
+  trimMapToMaxSize(decodedSecondaryMessageById, MAX_SECONDARY_CACHE_ENTRIES);
+  if (persistSecondaryMirrorTimer) return;
+  persistSecondaryMirrorTimer = setTimeout(() => {
+    persistSecondaryMirrorTimer = null;
+    try {
+      if (typeof localStorage === 'undefined') return;
+      const snapshot: Record<string, SecondaryKvEntry> = {};
+      for (const [k, v] of secondaryFailoverMemoryMap.entries()) {
+        if (k.startsWith('kft_proof_') || k.startsWith('kft_ov_')) continue;
+        snapshot[k] = v;
+      }
+      const serialized = JSON.stringify(snapshot);
+      if (serialized.length < 250_000) {
+        localStorage.setItem(SECONDARY_CLOUD_LOCAL_MIRROR_KEY, serialized);
+      }
+    } catch {
+      // ignore storage quota errors
     }
-    const serialized = JSON.stringify(snapshot);
-    if (serialized.length < 1_500_000) {
-      localStorage.setItem(SECONDARY_CLOUD_LOCAL_MIRROR_KEY, serialized);
-    }
-  } catch {
-    // ignore storage quota errors
-  }
+  }, 1500);
 }
 
 /**
@@ -759,6 +774,12 @@ export function subscribeToCloudRealtimeUpdates(
   const connect = () => {
     if (disposed) return;
     if (typeof document !== 'undefined' && document.hidden) return;
+    // Only open secondary public SSE stream when primary Supabase is in HTTP 402 egress cooldown.
+    // Prevents continuous background SSE reconnects, battery/CPU drain, and memory growth when Supabase Pro is healthy.
+    if (!isSupabaseEgressCooldownActive()) {
+      cleanupSocket();
+      return;
+    }
     cleanupSocket();
 
     try {
@@ -1126,8 +1147,7 @@ export async function pushCloudDocument(
     if (res.ok && supabaseEgressCooldownUntilMs > 0) {
       supabaseEgressCooldownUntilMs = 0;
     }
-    if (eligibleForFailover) {
-      // Also broadcast to real-time pub/sub failover so live EventSource listeners receive instant (<1s) updates
+    if (!res.ok && eligibleForFailover) {
       pushToSecondaryCloudFailover(key, effectivePayload, timeoutMs).catch(() => {});
     }
     if (!res.ok && critical) {
@@ -1337,34 +1357,13 @@ export async function pullCloudDocument<T>(key: string, timeoutMs = 10000): Prom
     if (Array.isArray(rows) && rows.length > 0 && rows[0].payload !== undefined) {
       const primaryPayload = rows[0].payload as T;
       const primaryUpdatedMs = rows[0].updated_at ? Date.parse(rows[0].updated_at) || 0 : 0;
+      void primaryUpdatedMs;
       if (isUserAggregateKey(key) && Array.isArray(primaryPayload)) {
         noteServerAggregateCount((primaryPayload as unknown[]).length);
       }
-      if (key === 'kft_cloud_users_v2' && Array.isArray(primaryPayload)) {
-        const secUsers = await readFromSecondary();
-        cloudPullOkByKey.set(key, true);
-        if (Array.isArray(secUsers) && secUsers.length > 0) {
-          return deduplicateAndNormalizeUsers([...primaryPayload, ...secUsers], []) as unknown as T;
-        }
-      } else if (eligibleForFailover) {
-        const store = await pullAllFromSecondaryCloudFailover(false, timeoutMs);
-        const secEntry = store?.get(key);
-        if (secEntry && secEntry.payload !== undefined) {
-          if (key.startsWith('kft_user_')) {
-            const merged = deduplicateAndNormalizeUsers([primaryPayload as any, secEntry.payload as any], []);
-            if (merged.length > 0) return merged[0] as unknown as T;
-          }
-          const secMs = secEntry.updated_at ? Date.parse(secEntry.updated_at) || 0 : 0;
-          if (secMs >= primaryUpdatedMs) {
-            return secEntry.payload as T;
-          }
-        }
-      }
       return primaryPayload;
     }
-    const fallback = await readFromSecondary();
-    cloudPullOkByKey.set(key, true);
-    return fallback;
+    return null;
   } catch (err) {
     console.warn(`Supabase pullCloudDocument(${key}) error:`, err);
     return readFromSecondary();
@@ -1418,15 +1417,32 @@ export async function getAdminPinHash(): Promise<string> {
 }
 
 export async function setAdminPinHash(newPin: string): Promise<boolean> {
-  // With server-side admin login the PIN is a Supabase secret (ADMIN_PIN); it cannot be changed from the app.
-  if (await isAdminServerAuthActive()) return false;
-  const hash = await hashAdminPin(newPin);
+  const cleanPin = (newPin || '').trim();
+  if (!/^\d{6}$/.test(cleanPin)) return false;
+
+  if (await isAdminServerAuthActive()) {
+    const srv = await adminServerChangePin(cleanPin);
+    if (srv.kind !== 'ok') {
+      return false;
+    }
+    const hash = await hashAdminPin(cleanPin);
+    try {
+      localStorage.setItem(ADMIN_PIN_KV_KEY, hash);
+    } catch {}
+    pushCloudDocument(ADMIN_PIN_KV_KEY, {
+      pinHash: hash,
+      updatedAt: new Date().toISOString(),
+    }).catch(() => {});
+    return true;
+  }
+
+  const hash = await hashAdminPin(cleanPin);
   try {
     localStorage.setItem(ADMIN_PIN_KV_KEY, hash);
   } catch {}
   const pushed = await pushCloudDocument(ADMIN_PIN_KV_KEY, {
     pinHash: hash,
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   });
   return pushed;
 }
@@ -2197,11 +2213,14 @@ export async function deleteCloudDocument(key: string, timeoutMs = 8000, opts: C
   if (!cfg.enableAutoCloudSync) return false;
 
   const eligibleForFailover = isKeyEligibleForSecondaryFailover(key);
-  if (eligibleForFailover) {
-    deleteFromSecondaryCloudFailover(key, timeoutMs).catch(() => {});
+  if (Date.now() < supabaseEgressCooldownUntilMs) {
+    if (eligibleForFailover) {
+      deleteFromSecondaryCloudFailover(key, timeoutMs).catch(() => {});
+    }
+    return eligibleForFailover;
   }
 
-  if (Date.now() < supabaseEgressCooldownUntilMs) {
+  if (false) {
     return eligibleForFailover;
   }
 

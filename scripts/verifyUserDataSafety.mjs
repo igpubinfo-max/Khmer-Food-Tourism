@@ -184,9 +184,12 @@ ok('public ntfy.sh failover is an allow-list of non-personal keys only', () => {
   assert.ok(/pullCloudDocumentsByPrefix[\s\S]*?const eligibleForFailover = isKeyEligibleForSecondaryFailover\(prefix\)/.test(supa), 'prefix pull must use the same allow-list');
   assert.ok(supa.includes('if (!isKeyEligibleForSecondaryFailover(k)) continue;') && supa.includes('if (!isKeyEligibleForSecondaryFailover(k)) return;'), 'ingestion filters for pulled/streamed ntfy messages missing');
 });
-ok('personal images (avatars, payment proofs) are never uploaded to the public ntfy media CDN', () => {
+ok('personal images (avatars, payment proofs) and catalog photos are never uploaded to the public ntfy media CDN', () => {
   const t = read('src/services/cloudImageStorageService.ts');
-  assert.ok(/isPersonalImageFolder\s*=\s*safeFolder === 'avatars' \|\| safeFolder === 'proofs'/.test(t) && /!finalUrl && !isPersonalImageFolder/.test(t));
+  const fnStart = t.indexOf('export async function uploadBlobToSecondaryCloudCdn');
+  const fnBody = t.slice(fnStart, t.indexOf('}', fnStart) + 1);
+  assert.ok(fnStart > 0 && !fnBody.includes('fetch(') && fnBody.includes('return null;'), 'ntfy media uploader must remain a disabled no-op');
+  assert.ok(!/await\s+uploadBlobToSecondaryCloudCdn\(/.test(t), 'uploadImageToPermanentCloud must never invoke ntfy binary upload');
 });
 
 console.log(`\n[user-data-safety] ALL ${passed} CHECKS PASSED`);

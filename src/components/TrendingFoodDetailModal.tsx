@@ -5,7 +5,7 @@ import {
   Calendar, Navigation, Bookmark, MessageSquareQuote, Play, Utensils, ChefHat
 } from 'lucide-react';
 import { tr, translateProvince } from '../utils/i18n';
-import { openTrendingFoodGoogleExternal, resolveFoodPhotoUrl } from '../types';
+import { openTrendingFoodGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError } from '../types';
 import { translateDynamicTextToZh, sanitizeStrictLanguageText, toConciseSummary } from '../utils/zhDynamicTranslator';
 import { extractYouTubeVideoId, isKnownUnavailableVideo } from '../services/onlineFoodDiscoveryService';
 
@@ -177,15 +177,12 @@ export const TrendingFoodDetailModal: React.FC = () => {
                     matchedFood.photoUrl.startsWith('http'))
                     ? matchedFood.photoUrl
                     : item.photoUrl || matchedFood?.photoUrl || '/welcome/hero-bg.webp';
-                return resolveFoodPhotoUrl(rawUrl, matchedFood?.photoUpdatedAt || item.photoUpdatedAt);
+                return resolveFoodPhotoUrl(rawUrl, matchedFood?.photoUpdatedAt || item.photoUpdatedAt, undefined, matchedFood?.id || item.matchedFoodId);
               })()
             } 
             alt={displayFoodName}
             decoding="async"
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = '/welcome/hero-bg.webp';
-            }}
+            onError={(e) => handleFoodImageError(e, matchedFood?.id || item.matchedFoodId, matchedFood?.photoUrl)}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />

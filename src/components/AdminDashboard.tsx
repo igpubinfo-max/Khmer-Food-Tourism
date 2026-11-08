@@ -6,14 +6,14 @@ import {
   Users, Plus, Trash2, Edit2, CheckCircle2, AlertTriangle, Settings, 
   QrCode, Heart, KeyRound, Lock, ExternalLink, CreditCard,
   ShieldCheck, ShieldAlert, Clock, RefreshCw, FileText, Check, Ban,
-  Image as ImageIcon, Search, Camera, Upload, BedDouble
+  Image as ImageIcon, Search, Camera, Upload, BedDouble, Eye, EyeOff
 } from 'lucide-react';
 import {
   FoodCategorySlug, DestinationCategorySlug, UserRole, User, RegistrationTransaction, FoodItem, TouristDestination, isSeedRestaurantId,
   VipBenefitItem, TEN_VIP_BENEFITS, getDynamicVipBenefits, getAdditionalStoreFeeUsd,
   getVipFeaturedRotationConfig, getVipFeaturedRotationState,
   sanitizeManualFeaturedSchedule, getManualFeaturedSlotEndMs, ManualFeaturedSlot, MAX_MANUAL_FEATURED_SLOTS,
-  isPlaceLocationVerified, resolveFoodPhotoUrl,
+  isPlaceLocationVerified, resolveFoodPhotoUrl, handleFoodImageError,
   inferBusinessTypeAndCategory, isHotelBusinessRecord,
 } from '../types';
 import { getSecurityAuditLogs, SecurityAuditEntry, revokeAdminSession, getOfficialOwnershipCertificate, verifyAppOwnershipAndDomainIntegrity } from '../utils/security';
@@ -106,23 +106,18 @@ export const AdminDashboard: React.FC = () => {
     }
   }, [isAdminOpen]);
 
-  // Real-time background cloud sync while Admin Dashboard is open (every 15s when visible)
+  // Gentle periodic cloud sync while Admin Dashboard stays open (every 90s when visible; initial open already syncs above)
   useEffect(() => {
     if (!isAdminOpen) return;
-    if (typeof document === 'undefined' || !document.hidden) {
-      if (triggerCloudSyncNow) {
-        triggerCloudSyncNow(true);
-      }
-    }
     const interval = setInterval(() => {
       if (typeof document === 'undefined' || !document.hidden) {
         if (triggerCloudSyncNow) {
-          triggerCloudSyncNow(true);
+          triggerCloudSyncNow(false);
         }
       }
-    }, 15000);
+    }, 90000);
     return () => clearInterval(interval);
-  }, [isAdminOpen, activeTab]);
+  }, [isAdminOpen]);
 
   const [adminReplyDrafts, setAdminReplyDrafts] = useState<Record<string, string>>({});
   const [inspectingTicketReceipt, setInspectingTicketReceipt] = useState<string | null>(null);
@@ -194,6 +189,9 @@ export const AdminDashboard: React.FC = () => {
   const [promotionalFeeUsd, setPromotionalFeeUsd] = useState(appSettings.promotionalFeeUsd || 4.99);
   const [promotionPeriodKh, setPromotionPeriodKh] = useState(appSettings.promotionPeriodKh || '');
   const [newAdminPass, setNewAdminPass] = useState('');
+  const [confirmNewAdminPass, setConfirmNewAdminPass] = useState('');
+  const [showNewAdminPass, setShowNewAdminPass] = useState(false);
+  const [isUpdatingAdminPass, setIsUpdatingAdminPass] = useState(false);
 
   // Dynamic VIP Membership & Store Fee Admin Settings States (Controlled String Drafts so clearing/typing never reverts)
   const [vipShortDurationInput, setVipShortDurationInput] = useState<string>(() => String(appSettings.vipShortDurationDays ?? 30));
@@ -868,16 +866,28 @@ export const AdminDashboard: React.FC = () => {
 
   const handleChangeAdminPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newAdminPass || newAdminPass.length < 8) {
+    const trimmed = newAdminPass.trim();
+    if (!trimmed || trimmed.length < 8) {
       showToast(isKm ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោច ៨ តួអក្សរ!' : 'Password must be at least 8 characters!', 'warning');
       return;
     }
+    if (trimmed !== confirmNewAdminPass.trim()) {
+      showToast(isKm ? 'ការផ្ទៀងផ្ទាត់ពាក្យសម្ងាត់មិនត្រូវគ្នាទេ!' : 'Password confirmation does not match!', 'warning');
+      return;
+    }
+    if (isUpdatingAdminPass) return;
+    setIsUpdatingAdminPass(true);
     try {
-      const ok = await setAdminPassword(newAdminPass);
-      if (ok) setNewAdminPass('');
+      const ok = await setAdminPassword(trimmed);
+      if (ok) {
+        setNewAdminPass('');
+        setConfirmNewAdminPass('');
+      }
     } catch (err) {
       console.warn('Admin password update failed:', err);
-      showToast(isKm ? 'ផ្លាស់ប្តូរពាក្យសម្ងាត់មិនបានសម្រេច សូមព្យាយាមម្តងទៀត!' : 'Could not update the password. Please try again!', 'error');
+      showToast(isKm ? 'ផ្លាស់ប្តូរពាក្យសម្ងាត់មិនបានសម្រេច សូមព្យាយាមម្តងទៀត!' : 'Could not update the password. Please try again!', 'warning');
+    } finally {
+      setIsUpdatingAdminPass(false);
     }
   };
 
@@ -2759,7 +2769,7 @@ export const AdminDashboard: React.FC = () => {
                 {foods.slice(0, visibleAdminFoodCount).map((food) => (
                   <div key={food.id} className="p-3 bg-white dark:bg-stone-800 rounded-2xl border border-slate-200 dark:border-slate-700 dark:border-stone-700 flex items-center justify-between">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <img src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt)} alt="food" loading="lazy" decoding="async" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700" />
+                      <img src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 240, food.id)} onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)} alt="food" loading="lazy" decoding="async" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700" />
                       <div className="overflow-hidden">
                         <h4 className="font-bold text-[#0F172A] dark:text-stone-100 font-khmer truncate">{food.nameKh}</h4>
                         <p className="text-[10px] text-stone-400 truncate">
@@ -5342,21 +5352,55 @@ export const AdminDashboard: React.FC = () => {
                     <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
                       {isKm ? 'ពាក្យសម្ងាត់ថ្មី (New Password - យ៉ាងហោច ៨ តួ)' : 'New Admin Password (min 8 chars)'}
                     </label>
+                    <div className="relative">
+                      <input
+                        type={showNewAdminPass ? 'text' : 'password'}
+                        value={newAdminPass}
+                        onChange={e => setNewAdminPass(e.target.value)}
+                        placeholder="••••••••••••"
+                        autoComplete="new-password"
+                        className="w-full px-3 py-2 pr-10 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewAdminPass(v => !v)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-800 dark:text-stone-300 cursor-pointer"
+                        aria-label={showNewAdminPass ? 'Hide password' : 'Show password'}
+                      >
+                        {showNewAdminPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold mb-1 text-stone-700 dark:text-stone-300">
+                      {isKm ? 'បញ្ជាក់ពាក្យសម្ងាត់ថ្មី (Confirm New Password)' : 'Confirm New Admin Password'}
+                    </label>
                     <input
-                      type="password"
-                      value={newAdminPass}
-                      onChange={e => setNewAdminPass(e.target.value)}
+                      type={showNewAdminPass ? 'text' : 'password'}
+                      value={confirmNewAdminPass}
+                      onChange={e => setConfirmNewAdminPass(e.target.value)}
                       placeholder="••••••••••••"
+                      autoComplete="new-password"
                       className="w-full px-3 py-2 rounded-xl border bg-stone-50 dark:bg-stone-700 text-stone-800 dark:text-stone-100 font-mono"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="px-5 py-2.5 bg-[#064E3B] hover:bg-[#047857] text-white font-bold rounded-xl shadow-md transition-all text-xs flex items-center gap-2 active:scale-95"
+                    disabled={isUpdatingAdminPass}
+                    className="px-5 py-2.5 bg-[#064E3B] hover:bg-[#047857] disabled:opacity-60 text-white font-bold rounded-xl shadow-md transition-all text-xs flex items-center gap-2 active:scale-95 cursor-pointer"
                   >
-                    <Lock className="w-3.5 h-3.5 text-emerald-200" />
-                    <span>{isKm ? 'Hash PBKDF2 និងផ្លាស់ប្តូរ' : 'Hash PBKDF2 & Update'}</span>
+                    {isUpdatingAdminPass ? (
+                      <RefreshCw className="w-3.5 h-3.5 text-emerald-200 animate-spin" />
+                    ) : (
+                      <Lock className="w-3.5 h-3.5 text-emerald-200" />
+                    )}
+                    <span>
+                      {isUpdatingAdminPass
+                        ? (isKm ? 'កំពុងរក្សាទុកដោយសុវត្ថិភាព...' : 'Updating securely...')
+                        : (isKm ? 'Hash PBKDF2 និងផ្លាស់ប្តូរ' : 'Hash PBKDF2 & Update')}
+                    </span>
                   </button>
                 </form>
               </div>
@@ -5848,7 +5892,8 @@ export const AdminDashboard: React.FC = () => {
                       >
                         <div className="flex gap-3">
                           <img 
-                            src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt)} 
+                            src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 240, food.id)} 
+                            onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
                             alt={food.nameKh}
                             className="w-24 h-24 object-cover rounded-xl border border-stone-300 shadow-sm shrink-0" 
                           />
@@ -5992,7 +6037,8 @@ export const AdminDashboard: React.FC = () => {
                       className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 dark:border-stone-700 bg-white dark:bg-stone-900/50 flex gap-3 items-center hover:border-slate-300 dark:border-slate-600 transition shadow-xs"
                     >
                       <img 
-                        src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt)} 
+                        src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 240, food.id)} 
+                        onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
                         alt={food.nameKh}
                         className="w-16 h-16 object-cover rounded-xl border border-slate-200 dark:border-slate-700 shrink-0" 
                       />

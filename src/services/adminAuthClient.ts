@@ -108,16 +108,16 @@ export type ServerAuthOutcome =
   | { kind: 'invalid'; attemptsLeft?: number }
   | { kind: 'locked'; retryAfterSeconds?: number }
   | { kind: 'pin_required' }
-  | { kind: 'unavailable' };
+  | { kind: 'unavailable'; errorCode?: string };
 
 function mapOutcome(r: CallResult): ServerAuthOutcome {
   if (r.kind === 'unavailable') return { kind: 'unavailable' };
-  if (r.status === 503) return { kind: 'unavailable' }; // not configured yet
+  if (r.status === 503) return { kind: 'unavailable', errorCode: r.data?.error }; // not configured yet
   if (r.status === 200 && r.data?.ok) return { kind: 'ok' };
   if (r.status === 429) return { kind: 'locked', retryAfterSeconds: Number(r.data?.retryAfterSeconds) || undefined };
   if (r.data?.error === 'PIN_REQUIRED') return { kind: 'pin_required' };
   if (r.status === 401) return { kind: 'invalid', attemptsLeft: typeof r.data?.attemptsLeft === 'number' ? r.data.attemptsLeft : undefined };
-  return { kind: 'unavailable' };
+  return { kind: 'unavailable', errorCode: typeof r.data?.error === 'string' ? r.data.error : undefined };
 }
 
 export async function adminServerVerifyPin(pin: string): Promise<ServerAuthOutcome> {
@@ -142,6 +142,59 @@ export async function adminServerLogin(username: string, password: string): Prom
     pinTicket = null;
   }
   if (out.kind === 'pin_required') pinTicket = null;
+  return out;
+}
+
+/**
+ * Change Admin password securely on the server (`kft_security_config.admin_password_hash` via PBKDF2-SHA256).
+ * Works both when already signed into AdminDashboard (using stored `admin` token) and from AdminLoginModal
+ * (using the 10-minute `pin` ticket + `currentPassword`).
+ */
+export async function adminServerChangePassword(params: {
+  newPassword: string;
+  currentPassword?: string;
+}): Promise<ServerAuthOutcome> {
+  const token = getAdminToken();
+  const ticket = pinTicket && pinTicket.expiresAt > Date.now() ? pinTicket.ticket : undefined;
+  if (!token && !ticket) {
+    return (await isAdminServerAuthActive()) ? { kind: 'pin_required' } : { kind: 'unavailable' };
+  }
+  const r = await callAdminAuth({
+    action: 'change_password',
+    newPassword: params.newPassword.trim(),
+    ...(params.currentPassword ? { currentPassword: params.currentPassword.trim() } : {}),
+    ...(token ? { token } : {}),
+    ...(ticket ? { ticket } : {}),
+  });
+  const out = mapOutcome(r);
+  if (out.kind === 'ok' && r.kind === 'response' && r.data?.token) {
+    storeAdminToken(String(r.data.token), Number(r.data.expiresAt) || Date.now() + 7 * 24 * 3600_000);
+  }
+  return out;
+}
+
+/**
+ * Change Admin 6-digit PIN securely on the server (`kft_security_config.admin_pin_hash` via PBKDF2-SHA256).
+ */
+export async function adminServerChangePin(newPin: string): Promise<ServerAuthOutcome> {
+  const token = getAdminToken();
+  const ticket = pinTicket && pinTicket.expiresAt > Date.now() ? pinTicket.ticket : undefined;
+  if (!token && !ticket) {
+    return (await isAdminServerAuthActive()) ? { kind: 'pin_required' } : { kind: 'unavailable' };
+  }
+  const r = await callAdminAuth({
+    action: 'change_pin',
+    newPin: newPin.trim(),
+    ...(token ? { token } : {}),
+    ...(ticket ? { ticket } : {}),
+  });
+  const out = mapOutcome(r);
+  if (out.kind === 'ok' && r.kind === 'response' && r.data?.ticket) {
+    pinTicket = {
+      ticket: String(r.data.ticket),
+      expiresAt: Number(r.data.ticketExpiresAt) || Date.now() + 9 * 60_000,
+    };
+  }
   return out;
 }
 

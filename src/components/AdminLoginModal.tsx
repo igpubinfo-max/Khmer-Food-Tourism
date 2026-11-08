@@ -1,4 +1,9 @@
-import { adminServerVerifyPin, isAdminServerAuthActive } from '../services/adminAuthClient';
+import {
+  adminServerVerifyPin,
+  adminServerChangePassword,
+  adminServerChangePin,
+  isAdminServerAuthActive,
+} from '../services/adminAuthClient';
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, ShieldAlert, Lock, User as UserIcon, Eye, EyeOff, 
@@ -440,22 +445,58 @@ export const AdminLoginModal: React.FC = () => {
     setLoading(true);
     try {
       if (await isAdminServerAuthActive()) {
-        setErrorMsg(
-          isKm
-            ? 'ពាក្យសម្ងាត់រដ្ឋបាលត្រូវបានគ្រប់គ្រងលើ Server។ ប្តូរតាម Supabase secret (ADMIN_PASSWORD)។'
-            : 'The admin password is managed on the server. Change it via the Supabase secret ADMIN_PASSWORD.'
-        );
-        setLoading(false);
-        return;
+        const srv = await adminServerChangePassword({
+          newPassword: newAdminPass.trim(),
+          currentPassword: currentAdminPass,
+        });
+        if (srv.kind === 'invalid') {
+          setErrorMsg(isKm ? 'ពាក្យសម្ងាត់បច្ចុប្បន្នមិនត្រឹមត្រូវទេ!' : 'Current password incorrect!');
+          setLoading(false);
+          return;
+        }
+        if (srv.kind === 'pin_required') {
+          setErrorMsg(
+            isKm
+              ? 'ការផ្ទៀងផ្ទាត់លេខកូដ PIN បានផុតកំណត់ សូមវាយលេខកូដ PIN ៦ ខ្ទង់ម្តងទៀត!'
+              : 'PIN verification expired. Please re-enter your 6-digit PIN first!'
+          );
+          setAdminStep('pin');
+          setLoading(false);
+          return;
+        }
+        if (srv.kind === 'locked') {
+          setErrorMsg(
+            isKm
+              ? `សូមរង់ចាំ ${srv.retryAfterSeconds || 60} វិនាទីមុនព្យាយាមម្តងទៀត!`
+              : `Too many attempts. Please wait ${srv.retryAfterSeconds || 60}s and retry!`
+          );
+          setLoading(false);
+          return;
+        }
+        if (srv.kind !== 'ok') {
+          setErrorMsg(
+            isKm
+              ? `មិនអាចធ្វើបច្ចុប្បន្នភាពលើ Server បានទេ (${srv.errorCode || 'UNAVAILABLE'})។`
+              : `Could not update password on server (${srv.errorCode || 'UNAVAILABLE'}).`
+          );
+          setLoading(false);
+          return;
+        }
+        await setAdminPassword(newAdminPass.trim(), currentAdminPass, true);
+      } else {
+        const isCurrentValid = await loginAdmin(username || 'admin', currentAdminPass);
+        if (!isCurrentValid) {
+          setErrorMsg(isKm ? 'ពាក្យសម្ងាត់បច្ចុប្បន្នមិនត្រឹមត្រូវទេ!' : 'Current password incorrect!');
+          setLoading(false);
+          return;
+        }
+        const ok = await setAdminPassword(newAdminPass.trim(), currentAdminPass, true);
+        if (!ok) {
+          setErrorMsg(isKm ? 'បរាជ័យក្នុងការផ្លាស់ប្តូរពាក្យសម្ងាត់' : 'Failed to update password');
+          setLoading(false);
+          return;
+        }
       }
-      const isCurrentValid = await loginAdmin(username || 'admin', currentAdminPass);
-      if (!isCurrentValid) {
-        setErrorMsg(isKm ? 'ពាក្យសម្ងាត់បច្ចុប្បន្នមិនត្រឹមត្រូវទេ!' : 'Current password incorrect!');
-        setLoading(false);
-        return;
-      }
-
-      await setAdminPassword(newAdminPass);
       setCurrentAdminPass('');
       setNewAdminPass('');
       setConfirmAdminPass('');
@@ -503,15 +544,61 @@ export const AdminLoginModal: React.FC = () => {
     setPinChangeLoading(true);
     try {
       if (await isAdminServerAuthActive()) {
-        setErrorMsg(
+        const srv = await adminServerChangePin(newPin);
+        if (srv.kind === 'pin_required') {
+          setErrorMsg(
+            tr(
+              language,
+              'ការផ្ទៀងផ្ទាត់ PIN បានផុតកំណត់ សូមវាយលេខកូដ PIN ៦ ខ្ទង់ម្តងទៀត!',
+              'PIN verification expired. Please re-enter your 6-digit PIN first!',
+              'PIN 验证已过期，请重新输入 6 位 PIN 码！'
+            )
+          );
+          setAdminStep('pin');
+          setPinChangeLoading(false);
+          return;
+        }
+        if (srv.kind === 'locked') {
+          setErrorMsg(
+            tr(
+              language,
+              `សូមរង់ចាំ ${srv.retryAfterSeconds || 60} វិនាទីមុនព្យាយាមម្តងទៀត!`,
+              `Too many attempts. Please wait ${srv.retryAfterSeconds || 60}s and retry!`,
+              `尝试次数过多，请等待 ${srv.retryAfterSeconds || 60} 秒后重试！`
+            )
+          );
+          setPinChangeLoading(false);
+          return;
+        }
+        if (srv.kind !== 'ok') {
+          const code = srv.kind === 'unavailable' ? srv.errorCode || 'UNAVAILABLE' : 'UNAUTHORIZED';
+          setErrorMsg(
+            tr(
+              language,
+              `មិនអាចផ្លាស់ប្តូរ PIN លើ Server បានទេ (${code})។`,
+              `Could not update PIN on server (${code}).`,
+              `无法在服务器上更新 PIN 码 (${code})。`
+            )
+          );
+          setPinChangeLoading(false);
+          return;
+        }
+        const hash = await hashAdminPin(newPin);
+        try {
+          localStorage.setItem('kft_admin_pin_security_v1', hash);
+        } catch {}
+        setNewPin('');
+        setConfirmNewPin('');
+        setActiveTab('login');
+        showToast(
           tr(
             language,
-            'លេខ PIN ត្រូវបានគ្រប់គ្រងលើ Server។ ប្តូរតាម Supabase secret (ADMIN_PIN)។',
-            'The PIN is managed on the server. Change it via the Supabase secret ADMIN_PIN.',
-            'PIN 码由服务器管理，请通过 Supabase secret (ADMIN_PIN) 修改。'
-          )
+            '✅ បានរក្សាទុក និងធ្វើសមកាលកម្មលេខកូដ PIN ៦ ខ្ទង់ថ្មីជោគជ័យ!',
+            '✅ New 6-digit PIN saved and synchronized successfully!',
+            '✅ 新的 6 位 PIN 码保存并同步成功！'
+          ),
+          'success'
         );
-        setPinChangeLoading(false);
         return;
       }
       const ok = await setAdminPinHash(newPin);

@@ -5,8 +5,8 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1485;
-export const APP_RELEASE_DATE = '2026-11-07';
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1486;
+export const APP_RELEASE_DATE = '2026-11-08';
 
 /**
  * Audited duplicate food IDs removed from the Food Menu so every dish and photograph is 100% unique
@@ -389,6 +389,10 @@ export const sanitizeRestaurantShopPhoto = (
     return trimmed;
   }
 
+  if (isEphemeralDeadImageUrl(trimmed)) {
+    return '';
+  }
+
   const lower = trimmed.toLowerCase();
   if (
     lower.startsWith('/foods/') ||
@@ -484,15 +488,68 @@ export const toStorageThumbnail = (url: string, widthPx: number): string => {
   return `${m[1]}/storage/v1/render/image/public/${m[2]}?${q.toString()}`;
 };
 
-export const resolveFoodPhotoUrl = (photoUrl?: string, photoUpdatedAt?: string, thumbWidthPx?: number): string => {
-  const full = resolveFoodPhotoUrlFull(photoUrl, photoUpdatedAt);
+/**
+ * Detect dead/ephemeral temporary file-host URLs (such as `ntfy.sh/file/` attachments which expire after 3 hours)
+ * so they are immediately healed to bundled local assets or permanent Supabase Storage URLs.
+ */
+export const isEphemeralDeadImageUrl = (url?: string | null): boolean => {
+  if (!url || typeof url !== 'string') return false;
+  const lower = url.trim().toLowerCase();
+  if (!lower) return false;
+  return (
+    lower.includes('ntfy.sh/file/') ||
+    lower.includes('ntfy.sh/kft_cloud_media_cdn') ||
+    lower.includes('0x0.st/') ||
+    lower.includes('tmpfiles.org/') ||
+    lower.includes('uguu.se/') ||
+    lower.includes('file.io/')
+  );
+};
+
+/**
+ * Return the bundled static APK/Web photo path (`/foods/food-<N>.jpg`) for seed food IDs `food-1` .. `food-307`.
+ */
+export const getBundledSeedFoodFallbackPath = (foodId?: string | null): string | null => {
+  if (!foodId || typeof foodId !== 'string') return null;
+  const m = /^food-(\d+)$/i.exec(foodId.trim());
+  if (!m) return null;
+  const num = Number(m[1]);
+  if (Number.isInteger(num) && num >= 1 && num <= 307) {
+    return `/foods/food-${num}.jpg`;
+  }
+  return null;
+};
+
+export const resolveFoodPhotoUrl = (
+  photoUrl?: string,
+  photoUpdatedAt?: string,
+  thumbWidthPx?: number,
+  foodId?: string
+): string => {
+  const inferredFoodId =
+    foodId || (photoUpdatedAt && /^food-\d+$/i.test(photoUpdatedAt.trim()) ? photoUpdatedAt.trim() : undefined);
+  const effectiveUpdatedAt =
+    photoUpdatedAt && /^food-\d+$/i.test(photoUpdatedAt.trim()) ? undefined : photoUpdatedAt;
+  const full = resolveFoodPhotoUrlFull(photoUrl, effectiveUpdatedAt, inferredFoodId);
   return thumbWidthPx ? toStorageThumbnail(full, thumbWidthPx) : full;
 };
 
-const resolveFoodPhotoUrlFull = (photoUrl?: string, photoUpdatedAt?: string): string => {
-  if (!photoUrl || typeof photoUrl !== 'string') return '';
+const resolveFoodPhotoUrlFull = (
+  photoUrl?: string,
+  photoUpdatedAt?: string,
+  foodId?: string
+): string => {
+  const seedFallbackPath = getBundledSeedFoodFallbackPath(foodId);
+  if (!photoUrl || typeof photoUrl !== 'string') {
+    return seedFallbackPath ? `${seedFallbackPath}?v=${APP_BUILD_CODE}` : '';
+  }
   const trimmed = photoUrl.trim();
-  if (!trimmed) return '';
+  if (!trimmed) {
+    return seedFallbackPath ? `${seedFallbackPath}?v=${APP_BUILD_CODE}` : '';
+  }
+  if (isEphemeralDeadImageUrl(trimmed)) {
+    return seedFallbackPath ? `${seedFallbackPath}?v=${APP_BUILD_CODE}` : '/welcome/hero-bg.webp';
+  }
   if (trimmed.startsWith('data:') || trimmed.startsWith('blob:')) {
     return trimmed;
   }
@@ -515,6 +572,47 @@ const resolveFoodPhotoUrlFull = (photoUrl?: string, photoUpdatedAt?: string): st
     return `${trimmed}${sep}v=${APP_BUILD_CODE}${revSuffix}`;
   }
   return trimmed;
+};
+
+/**
+ * Multi-stage `<img>` error recovery for food cards/modals:
+ * 1) Non-transformed full URL (if Supabase image render transform was used)
+ * 2) Bundled local `/foods/food-<N>.jpg` asset (for `food-1` .. `food-307`)
+ * 3) Bundled `/welcome/hero-bg.webp` hero fallback (prevents broken-image icon permanently)
+ */
+export const handleFoodImageError = (
+  e: { currentTarget: HTMLImageElement },
+  foodId?: string,
+  fullPhotoUrl?: string
+): void => {
+  const img = e?.currentTarget;
+  if (!img) return;
+  const stage = Number(img.dataset.kftFallbackStage || '0');
+  if (stage >= 3) return;
+
+  if (stage < 1 && fullPhotoUrl && !isEphemeralDeadImageUrl(fullPhotoUrl)) {
+    const resolvedFull = resolveFoodPhotoUrl(fullPhotoUrl, undefined, undefined, foodId);
+    if (resolvedFull && !img.src.endsWith(resolvedFull) && img.src !== resolvedFull) {
+      img.dataset.kftFallbackStage = '1';
+      img.src = resolvedFull;
+      return;
+    }
+  }
+
+  const seedFallback = getBundledSeedFoodFallbackPath(foodId);
+  if (stage < 2 && seedFallback) {
+    const targetSeed = `${seedFallback}?v=${APP_BUILD_CODE}`;
+    if (!img.src.includes(seedFallback)) {
+      img.dataset.kftFallbackStage = '2';
+      img.src = targetSeed;
+      return;
+    }
+  }
+
+  img.dataset.kftFallbackStage = '3';
+  if (!img.src.includes('/welcome/hero-bg.webp')) {
+    img.src = '/welcome/hero-bg.webp';
+  }
 };
 
 /**

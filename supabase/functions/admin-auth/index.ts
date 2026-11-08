@@ -1,23 +1,21 @@
 // Supabase Edge Function: admin-auth
-// Server-side verification of the Admin PIN + password. The credentials live ONLY in Supabase secrets
-// (ADMIN_PIN, ADMIN_PASSWORD) - never in the APK, never in a public table. A successful login returns a signed,
-// expiring token that the database guard (kft_admin_keys_guard) checks before it accepts writes to the admin-only
-// documents (app settings, VIP pricing, payment QR / bank details, download links, PIN).
-//
-// Deploy:
-//   supabase secrets set ADMIN_PIN=<6 digits> ADMIN_PASSWORD=<long password> --project-ref ryvltobwuwuulazqjnza
-//   supabase functions deploy admin-auth --no-verify-jwt --project-ref ryvltobwuwuulazqjnza
-// (run supabase_admin_security_v1.sql once first: it creates the private signing secret)
+// Server-side verification & rotation of the Admin PIN + password.
+// Initial credentials live in Supabase secrets (ADMIN_PIN, ADMIN_PASSWORD); when the Admin changes their password or
+// PIN inside the app, the PBKDF2-SHA256 hash (`admin_password_hash` / `admin_pin_hash`) is stored in the private
+// service-role-only `public.kft_security_config` table (RLS enabled, zero anon/authenticated policies) and takes
+// precedence over the initial bootstrap env secret.
 //
 // POST /admin-auth
-//   {action:'status'}                         -> {configured}
-//   {action:'pin', pin}                       -> {ok, ticket, ticketExpiresAt}        (ticket valid 10 min)
-//   {action:'login', username, password, ticket} -> {ok, token, expiresAt}            (token valid 7 days)
-//   {action:'verify', token}                  -> {ok}
+//   {action:'status'}                                                 -> {ok, configured}
+//   {action:'pin', pin}                                               -> {ok, ticket, ticketExpiresAt}  (10 min)
+//   {action:'login', username, password, ticket}                      -> {ok, token, expiresAt}         (7 days)
+//   {action:'verify', token}                                          -> {ok}
+//   {action:'change_password', newPassword, currentPassword?, token?, ticket?} -> {ok, token, expiresAt}
+//   {action:'change_pin', newPin, currentPassword?, token?, ticket?}  -> {ok, ticket, ticketExpiresAt}
 
-import { safeSecretEqual, signToken, verifyToken } from '../_shared/admin-token.ts';
+import { hashSecretPBKDF2, safeSecretEqual, signToken, verifySecretPBKDF2, verifyToken } from '../_shared/admin-token.ts';
 import { WindowLimiter, envInt } from '../_shared/common.ts';
-import { background, getSecurityConfig, logUsage, usageGet, usageHit } from '../_shared/supa.ts';
+import { background, getSecurityConfig, logUsage, setSecurityConfig, usageGet, usageHit } from '../_shared/supa.ts';
 
 declare const Deno: {
   serve: (handler: (req: Request) => Promise<Response> | Response) => void;
@@ -35,7 +33,7 @@ const corsHeaders: Record<string, string> = {
 const ADMIN_USERNAMES = new Set(['chea savuth', 'cheasavuth', 'admin']);
 const TICKET_TTL_S = 10 * 60;
 const TOKEN_TTL_S = 7 * 24 * 3600;
-const burst = new WindowLimiter(12, 5 * 60_000); // per isolate / IP / 5 min (the daily DB counters are the hard limit)
+const burst = new WindowLimiter(20, 5 * 60_000);
 
 function json(status: number, payload: unknown): Response {
   return new Response(JSON.stringify(payload), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -54,14 +52,37 @@ async function tokenSecret(): Promise<string | null> {
   return v && v.length >= 32 ? v : null;
 }
 
+async function verifyActivePin(candidatePin: string, envPin: string, storedPinHash: string | null): Promise<boolean> {
+  if (!/^\d{6}$/.test(candidatePin)) return false;
+  if (storedPinHash && storedPinHash.startsWith('pbkdf2$')) {
+    return await verifySecretPBKDF2(candidatePin, storedPinHash);
+  }
+  return envPin.length >= 6 ? await safeSecretEqual(candidatePin, envPin) : false;
+}
+
+async function verifyActivePassword(candidatePass: string, envPass: string, storedPassHash: string | null): Promise<boolean> {
+  if (!candidatePass) return false;
+  if (storedPassHash && storedPassHash.startsWith('pbkdf2$')) {
+    return await verifySecretPBKDF2(candidatePass, storedPassHash);
+  }
+  return envPass.length >= 8 ? await safeSecretEqual(candidatePass, envPass.trim()) : false;
+}
+
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json(405, { ok: false, error: 'METHOD_NOT_ALLOWED' });
 
-  const adminPin = Deno.env.get('ADMIN_PIN') || '';
-  const adminPassword = Deno.env.get('ADMIN_PASSWORD') || '';
-  const secret = await tokenSecret();
-  const configured = adminPin.length >= 6 && adminPassword.length >= 10 && Boolean(secret);
+  const adminPinEnv = Deno.env.get('ADMIN_PIN') || '';
+  const adminPasswordEnv = Deno.env.get('ADMIN_PASSWORD') || '';
+  const [secret, storedPassHash, storedPinHash] = await Promise.all([
+    tokenSecret(),
+    getSecurityConfig('admin_password_hash'),
+    getSecurityConfig('admin_pin_hash'),
+  ]);
+
+  const hasValidPin = Boolean((storedPinHash && storedPinHash.startsWith('pbkdf2$')) || adminPinEnv.length >= 6);
+  const hasValidPass = Boolean((storedPassHash && storedPassHash.startsWith('pbkdf2$')) || adminPasswordEnv.length >= 8);
+  const configured = hasValidPin && hasValidPass && Boolean(secret);
 
   let body: Record<string, unknown> = {};
   try {
@@ -80,7 +101,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const r = await verifyToken(secret, body.token, 'admin');
     return json(200, { ok: r.ok });
   }
-  if (action !== 'pin' && action !== 'login') return json(400, { ok: false, error: 'UNKNOWN_ACTION' });
+
+  if (
+    action !== 'pin' &&
+    action !== 'login' &&
+    action !== 'change_password' &&
+    action !== 'change_pin'
+  ) {
+    return json(400, { ok: false, error: 'UNKNOWN_ACTION' });
+  }
 
   // ---- brute-force protection (per IP and global, persisted in Postgres) ------------------------------------
   const ip = clientIp(req);
@@ -101,11 +130,61 @@ Deno.serve(async (req: Request): Promise<Response> => {
   };
 
   if (action === 'pin') {
-    const pin = typeof body.pin === 'string' ? body.pin : '';
-    if (!/^\d{6}$/.test(pin) || !(await safeSecretEqual(pin, adminPin))) return await fail('INVALID_PIN');
+    const pin = typeof body.pin === 'string' ? body.pin.trim() : '';
+    if (!(await verifyActivePin(pin, adminPinEnv, storedPinHash))) return await fail('INVALID_PIN');
     const t = await signToken(secret, 'pin', TICKET_TTL_S);
     background(logUsage({ user_key: ipKey, kind: 'admin_auth', status: 200, note: 'pin_ok' }));
     return json(200, { ok: true, ticket: t.token, ticketExpiresAt: t.expiresAt });
+  }
+
+  if (action === 'change_password') {
+    const newPassword = typeof body.newPassword === 'string' ? body.newPassword.trim() : '';
+    const currentPassword = typeof body.currentPassword === 'string' ? body.currentPassword.trim() : '';
+    if (newPassword.length < 8 || newPassword.length > 256) {
+      return json(400, { ok: false, error: 'PASSWORD_TOO_SHORT' });
+    }
+
+    const adminTok = await verifyToken(secret, body.token, 'admin');
+    const pinTok = await verifyToken(secret, body.ticket, 'pin');
+    if (!adminTok.ok && !pinTok.ok) {
+      return json(401, { ok: false, error: 'PIN_REQUIRED' });
+    }
+
+    // If changing via PIN ticket (not yet logged into AdminDashboard), currentPassword MUST be supplied and valid.
+    // If already logged into AdminDashboard with a valid signed admin token, also verify currentPassword when supplied.
+    if (!adminTok.ok || currentPassword.length > 0) {
+      const curOk = await verifyActivePassword(currentPassword, adminPasswordEnv, storedPassHash);
+      if (!curOk) return await fail('INVALID_CREDENTIALS');
+    }
+
+    const newHash = await hashSecretPBKDF2(newPassword);
+    const saved = await setSecurityConfig('admin_password_hash', newHash);
+    if (!saved) return json(500, { ok: false, error: 'SAVE_FAILED' });
+
+    const freshToken = await signToken(secret, 'admin', TOKEN_TTL_S);
+    background(logUsage({ user_key: ipKey, kind: 'admin_auth', status: 200, note: 'password_changed' }));
+    return json(200, { ok: true, token: freshToken.token, expiresAt: freshToken.expiresAt });
+  }
+
+  if (action === 'change_pin') {
+    const newPin = typeof body.newPin === 'string' ? body.newPin.trim() : '';
+    if (!/^\d{6}$/.test(newPin)) {
+      return json(400, { ok: false, error: 'INVALID_NEW_PIN' });
+    }
+
+    const adminTok = await verifyToken(secret, body.token, 'admin');
+    const pinTok = await verifyToken(secret, body.ticket, 'pin');
+    if (!adminTok.ok && !pinTok.ok) {
+      return json(401, { ok: false, error: 'PIN_REQUIRED' });
+    }
+
+    const newPinHash = await hashSecretPBKDF2(newPin);
+    const saved = await setSecurityConfig('admin_pin_hash', newPinHash);
+    if (!saved) return json(500, { ok: false, error: 'SAVE_FAILED' });
+
+    const freshTicket = await signToken(secret, 'pin', TICKET_TTL_S);
+    background(logUsage({ user_key: ipKey, kind: 'admin_auth', status: 200, note: 'pin_changed' }));
+    return json(200, { ok: true, ticket: freshTicket.token, ticketExpiresAt: freshTicket.expiresAt });
   }
 
   // action === 'login'
@@ -114,7 +193,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const username = typeof body.username === 'string' ? body.username.trim().toLowerCase() : '';
   const password = typeof body.password === 'string' ? body.password.trim() : '';
   const userOk = ADMIN_USERNAMES.has(username);
-  const passOk = await safeSecretEqual(password, adminPassword.trim());
+  const passOk = await verifyActivePassword(password, adminPasswordEnv, storedPassHash);
   if (!userOk || !passOk) return await fail('INVALID_CREDENTIALS');
   const t = await signToken(secret, 'admin', TOKEN_TTL_S);
   background(logUsage({ user_key: ipKey, kind: 'admin_auth', status: 200, note: 'login_ok' }));

@@ -810,6 +810,22 @@ export function useChineseDomTranslation(language: Language): void {
     const flushPendingNodes = () => {
       debounceTimerId = null;
       if (document.hidden || pendingNodes.size === 0) return;
+      // Prune detached DOM nodes so SPA navigation never leaks Text/Element references in memory
+      if (mutatedTextNodes.size > 300) {
+        mutatedTextNodes.forEach((_, textNode) => {
+          if (!textNode.isConnected) mutatedTextNodes.delete(textNode);
+        });
+      }
+      if (mutatedPlaceholders.size > 100) {
+        mutatedPlaceholders.forEach((_, el) => {
+          if (!el.isConnected) mutatedPlaceholders.delete(el);
+        });
+      }
+      if (mutatedTitles.size > 100) {
+        mutatedTitles.forEach((_, el) => {
+          if (!el.isConnected) mutatedTitles.delete(el);
+        });
+      }
       const nodes = Array.from(pendingNodes).filter((n) => n.isConnected);
       pendingNodes.clear();
       // Skip child nodes whose ancestor is already queued in the same batch

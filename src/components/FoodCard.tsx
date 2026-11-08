@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { FoodItem, resolveFoodPhotoUrl } from '../types';
+import { FoodItem, resolveFoodPhotoUrl, handleFoodImageError } from '../types';
 import { useApp } from '../context/AppContext';
 import { Star, Heart, Utensils, Edit2 } from 'lucide-react';
 import { tr } from '../utils/i18n';
@@ -37,13 +37,12 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
   const tags = useMemo(() => getDisplayTags(food, 3), [food]);
 
   const resolvedPhotoUrl = useMemo(() => {
-    const raw = food.photoUrl || '/welcome/hero-bg.webp';
-    // Grid cards show a resized copy (Supabase Image Transformation); onError below falls back to the original file.
-    return resolveFoodPhotoUrl(raw, food.photoUpdatedAt, 720);
-  }, [food.photoUrl, food.photoUpdatedAt]);
+    // Grid cards show a resized copy (Supabase Image Transformation); onError below falls back to original/seed file.
+    return resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 720, food.id) || '/welcome/hero-bg.webp';
+  }, [food.photoUrl, food.photoUpdatedAt, food.id]);
   const fullPhotoUrl = useMemo(
-    () => resolveFoodPhotoUrl(food.photoUrl || '/welcome/hero-bg.webp', food.photoUpdatedAt),
-    [food.photoUrl, food.photoUpdatedAt]
+    () => resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, undefined, food.id) || '/welcome/hero-bg.webp',
+    [food.photoUrl, food.photoUpdatedAt, food.id]
   );
 
   return (
@@ -60,16 +59,7 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
           className="w-full h-full object-cover"
           loading="lazy"
           decoding="async"
-          onError={(e) => {
-            const target = e.currentTarget;
-            if (!target.dataset.fallback && fullPhotoUrl && target.src !== fullPhotoUrl && resolvedPhotoUrl !== fullPhotoUrl) {
-              target.dataset.fallback = 'full'; // resized copy unavailable -> original file
-              target.src = fullPhotoUrl;
-            } else if (target.dataset.fallback !== '1') {
-              target.dataset.fallback = '1';
-              target.src = '/welcome/hero-bg.webp';
-            }
-          }}
+          onError={(e) => handleFoodImageError(e, food.id, fullPhotoUrl)}
         />
         
         {/* Category tag */}

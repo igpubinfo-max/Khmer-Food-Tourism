@@ -434,4 +434,37 @@ ok('Pro platform SQL is service-role only and non-destructive', () => {
   for (const j of ['kft-nightly-snapshot', 'kft-snapshot-prune', 'kft-history-prune', 'kft-platform-cleanup']) assert.ok(code.includes(j), j);
 });
 
+await ok('PBKDF2 password/PIN hashing & verification round-trip, salt uniqueness, and rejection', async () => {
+  const h1 = await at.hashSecretPBKDF2('MyNewStrongPass#2026');
+  const h2 = await at.hashSecretPBKDF2('MyNewStrongPass#2026');
+  assert.notEqual(h1, h2, 'each hash must generate a fresh random salt');
+  assert.ok(h1.startsWith('pbkdf2$100000$'));
+  assert.equal(await at.verifySecretPBKDF2('MyNewStrongPass#2026', h1), true);
+  assert.equal(await at.verifySecretPBKDF2('MyNewStrongPass#2026', h2), true);
+  assert.equal(await at.verifySecretPBKDF2('WrongPassword#2026', h1), false);
+  for (const bad of ['', 'plain', 'pbkdf2$100000$bad', 'pbkdf2$0$aa$bb', null, undefined]) {
+    assert.equal(await at.verifySecretPBKDF2('MyNewStrongPass#2026', bad), false, String(bad));
+  }
+});
+ok('admin-auth supports persistent change_password & change_pin via private kft_security_config', () => {
+  const fn = read('supabase/functions/admin-auth/index.ts');
+  assert.ok(fn.includes("action === 'change_password'") && fn.includes("action === 'change_pin'"));
+  assert.ok(fn.includes("setSecurityConfig('admin_password_hash'") && fn.includes("setSecurityConfig('admin_pin_hash'"));
+  assert.ok(fn.includes("getSecurityConfig('admin_password_hash')") && fn.includes("getSecurityConfig('admin_pin_hash')"));
+  const supa = read('supabase/functions/_shared/supa.ts');
+  assert.ok(supa.includes('export async function setSecurityConfig'));
+  const client = read('src/services/adminAuthClient.ts');
+  assert.ok(client.includes('export async function adminServerChangePassword') && client.includes('export async function adminServerChangePin'));
+});
+await ok('ephemeral image URLs (ntfy.sh/file/*) are blocked from upload and auto-healed on render', async () => {
+  const typesMod = await load('src/types/index.ts');
+  assert.equal(typesMod.isEphemeralDeadImageUrl('https://ntfy.sh/file/abc123.webp'), true);
+  assert.equal(typesMod.isEphemeralDeadImageUrl('https://ryvltobwuwuulazqjnza.supabase.co/storage/v1/object/public/food-media/ov/kft_ov_food_food-69_healed.jpg'), false);
+  assert.equal(typesMod.getBundledSeedFoodFallbackPath('food-69'), '/foods/food-69.jpg');
+  const healed = typesMod.resolveFoodPhotoUrl('https://ntfy.sh/file/expired.webp', 'https://ntfy.sh/file/expired.webp', undefined, 'food-69');
+  assert.ok(healed.startsWith('/foods/food-69.jpg'), 'expected /foods/food-69.jpg?v=..., got ' + healed);
+  const cloudImg = read('src/services/cloudImageStorageService.ts');
+  assert.ok(!cloudImg.includes("fetch('https://ntfy.sh/'"), 'secondary ntfy.sh image upload must stay disabled');
+});
+
 console.log(`\n[edge] ALL ${passed} CHECKS PASSED`);

@@ -47,6 +47,57 @@ export async function safeSecretEqual(a: string, b: string): Promise<boolean> {
   return constantTimeEqual(ha, hb);
 }
 
+function bytesToHex(bytes: Uint8Array): string {
+  let out = '';
+  for (let i = 0; i < bytes.length; i++) out += bytes[i].toString(16).padStart(2, '0');
+  return out;
+}
+
+function hexToBytes(hex: string): Uint8Array | null {
+  if (!hex || hex.length % 2 !== 0 || !/^[0-9a-fA-F]+$/.test(hex)) return null;
+  const out = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < out.length; i++) {
+    out[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+  }
+  return out;
+}
+
+/**
+ * Hash a secret (Admin password or PIN) with PBKDF2-HMAC-SHA256 for storage in private `kft_security_config`.
+ * Format: `pbkdf2$<iterations>$<saltHex>$<derivedHex>`
+ */
+export async function hashSecretPBKDF2(secret: string, iterations: number = 100_000): Promise<string> {
+  const salt = new Uint8Array(16);
+  crypto.getRandomValues(salt);
+  const baseKey = await crypto.subtle.importKey('raw', enc.encode(secret), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: salt as unknown as BufferSource, iterations, hash: 'SHA-256' },
+    baseKey,
+    256
+  );
+  return `pbkdf2$${iterations}$${bytesToHex(salt)}$${bytesToHex(new Uint8Array(bits))}`;
+}
+
+/** Verify a candidate secret against a `pbkdf2$<iterations>$<saltHex>$<derivedHex>` string in constant time. */
+export async function verifySecretPBKDF2(candidate: string, storedHash: string): Promise<boolean> {
+  if (typeof candidate !== 'string' || typeof storedHash !== 'string') return false;
+  const parts = storedHash.split('$');
+  if (parts.length !== 4 || parts[0] !== 'pbkdf2') return false;
+  const iterations = Number(parts[1]);
+  if (!Number.isInteger(iterations) || iterations < 10_000 || iterations > 1_000_000) return false;
+  const salt = hexToBytes(parts[2]);
+  const expectedHex = parts[3].toLowerCase();
+  if (!salt || expectedHex.length !== 64) return false;
+  const baseKey = await crypto.subtle.importKey('raw', enc.encode(candidate), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: salt as unknown as BufferSource, iterations, hash: 'SHA-256' },
+    baseKey,
+    256
+  );
+  const actualHex = bytesToHex(new Uint8Array(bits));
+  return constantTimeEqual(actualHex, expectedHex);
+}
+
 export type TokenScope = 'admin' | 'pin';
 
 export async function signToken(

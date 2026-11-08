@@ -62,6 +62,16 @@ export async function getSecurityConfig(name: string): Promise<string | null> {
   const rows = await r.json();
   return Array.isArray(rows) && rows[0] && typeof rows[0].value === 'string' ? rows[0].value : null;
 }
+/** Upsert private server-side config value (kft_security_config is service-role only). */
+export async function setSecurityConfig(name: string, value: string): Promise<boolean> {
+  const r = await call('kft_security_config?on_conflict=name', {
+    method: 'POST',
+    headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({ name, value, updated_at: new Date().toISOString() }),
+    timeoutMs: 6000,
+  });
+  return Boolean(r && r.ok);
+}
 
 /** Generic helpers used by the payment function (service role). */
 export async function restInsert(table: string, row: Record<string, unknown>): Promise<{ status: number; error?: string }> {

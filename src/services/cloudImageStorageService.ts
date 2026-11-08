@@ -16,6 +16,8 @@
  * 5. Local IndexedDB + Cache API acceleration so Cloud URLs render instantaneously and work offline.
  */
 
+import { isEphemeralDeadImageUrl } from '../types';
+
 const CLOUD_IMAGE_LEDGER_KEY = 'kft_cloud_image_url_ledger_v1';
 const CLOUD_IMAGE_IDB_NAME = 'kft_cloud_image_cdn_cache_v1';
 const CLOUD_IMAGE_IDB_STORE = 'images';
@@ -99,7 +101,25 @@ function readCloudImageLedger(): Record<string, LedgerEntry> {
     const raw = localStorage.getItem(CLOUD_IMAGE_LEDGER_KEY);
     if (!raw) return {};
     const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === 'object' ? parsed : {};
+    if (!parsed || typeof parsed !== 'object') return {};
+    let dirty = false;
+    for (const [k, v] of Object.entries(parsed as Record<string, LedgerEntry>)) {
+      if (!v || !v.url || isEphemeralDeadImageUrl(v.url)) {
+        delete (parsed as Record<string, LedgerEntry>)[k];
+        dirty = true;
+      } else if (v.thumbnailUrl && isEphemeralDeadImageUrl(v.thumbnailUrl)) {
+        v.thumbnailUrl = v.url;
+        dirty = true;
+      }
+    }
+    if (dirty) {
+      try {
+        localStorage.setItem(CLOUD_IMAGE_LEDGER_KEY, JSON.stringify(parsed));
+      } catch {
+        // Ignore quota errors
+      }
+    }
+    return parsed;
   } catch {
     return {};
   }
@@ -302,23 +322,29 @@ function renderCanvasToWebpOrJpeg(
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-  // Try encoding as WebP first
-  const webpDataUrl = canvas.toDataURL('image/webp', quality);
-  if (webpDataUrl && webpDataUrl.startsWith('data:image/webp')) {
-    return {
-      dataUrl: webpDataUrl,
-      mimeType: 'image/webp',
-      extension: 'webp',
-    };
-  }
+  try {
+    // Try encoding as WebP first
+    const webpDataUrl = canvas.toDataURL('image/webp', quality);
+    if (webpDataUrl && webpDataUrl.startsWith('data:image/webp')) {
+      return {
+        dataUrl: webpDataUrl,
+        mimeType: 'image/webp',
+        extension: 'webp',
+      };
+    }
 
-  // Fallback for legacy WebViews that return image/png when image/webp is unsupported
-  const jpegDataUrl = canvas.toDataURL('image/jpeg', quality);
-  return {
-    dataUrl: jpegDataUrl,
-    mimeType: 'image/jpeg',
-    extension: 'jpg',
-  };
+    // Fallback for legacy WebViews that return image/png when image/webp is unsupported
+    const jpegDataUrl = canvas.toDataURL('image/jpeg', quality);
+    return {
+      dataUrl: jpegDataUrl,
+      mimeType: 'image/jpeg',
+      extension: 'jpg',
+    };
+  } finally {
+    // Release GPU/RAM backing bitmap immediately to prevent WebView memory buildup
+    canvas.width = 0;
+    canvas.height = 0;
+  }
 }
 
 /**
@@ -421,35 +447,17 @@ export async function compressToWebpWithThumbnail(
  * Uploads a binary WebP Blob via HTTP PUT and returns the permanent HTTPS attachment URL
  * (`https://ntfy.sh/file/<id>.webp`). Works 24/7 even when Supabase is in HTTP 402!
  */
+/**
+ * Deprecated secondary relay stub: `ntfy.sh` file attachments expire after ~3 hours (HTTP 404).
+ * Kept as a safe no-op returning `null` so all permanent cloud media stays strictly on Supabase Storage
+ * (`food-media` public bucket) with local WebP / IndexedDB persistence when offline.
+ */
 export async function uploadBlobToSecondaryCloudCdn(
-  blob: Blob,
-  filename: string
+  _blob: Blob,
+  _filename: string
 ): Promise<string | null> {
-  try {
-    const cleanFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const response = await fetch(SECONDARY_CLOUD_BINARY_CDN_URL, {
-      method: 'PUT',
-      headers: {
-        Filename: cleanFilename,
-        Title: `KFT Cloud Media CDN: ${cleanFilename}`,
-      },
-      body: blob,
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    const data = await response.json();
-    const attachmentUrl: string | undefined = data?.attachment?.url;
-    if (attachmentUrl && attachmentUrl.startsWith('https://')) {
-      return attachmentUrl;
-    }
-    return null;
-  } catch (err) {
-    console.warn('[CloudImageStorage] Secondary Cloud CDN upload failed:', err);
-    return null;
-  }
+  void SECONDARY_CLOUD_BINARY_CDN_URL;
+  return null;
 }
 
 const FALLBACK_SUPABASE_URL = 'https://ryvltobwuwuulazqjnza.supabase.co';
@@ -547,9 +555,23 @@ export async function uploadImageToPermanentCloud(
   folder: 'shops' | 'hotels' | 'foods' | 'destinations' | 'menus' | 'reviews' | 'proofs' | string = 'shops',
   entityId: string = 'item'
 ): Promise<CloudImageUploadResult> {
-  // If already a permanent HTTPS URL (and not a blob: or data: URL), return immediately
+  // If already a permanent HTTPS URL (and not a blob:, data:, or dead ephemeral URL), return immediately
   if (typeof input === 'string') {
     const trimmed = input.trim();
+    if (isEphemeralDeadImageUrl(trimmed)) {
+      const fallback = '/welcome/hero-bg.webp';
+      return {
+        url: fallback,
+        thumbnailUrl: fallback,
+        hash: computeImageHash(fallback),
+        mimeType: 'image/webp',
+        width: 1080,
+        height: 720,
+        sizeBytes: 0,
+        thumbnailSizeBytes: 0,
+        provider: 'cached-ledger',
+      };
+    }
     if (trimmed.startsWith('https://') || trimmed.startsWith('http://') || trimmed.startsWith('/')) {
       const hash = computeImageHash(trimmed);
       return {
@@ -632,28 +654,7 @@ export async function uploadImageToPermanentCloud(
       provider = 'supabase-storage';
     }
 
-    // Tier 2: Failover to Permanent Secondary Cloud Binary CDN (`https://ntfy.sh/kft_cloud_media_cdn_v270`)
-    // PRIVACY: that CDN is a PUBLIC topic, so personal images (profile photos, payment receipts) must never go there.
-    const isPersonalImageFolder = safeFolder === 'avatars' || safeFolder === 'proofs';
-    if (!finalUrl && !isPersonalImageFolder) {
-      const cdnFullFilename = `${safeFolder}_${safeEntityId}_${bundle.hash}.${bundle.extension}`;
-      const cdnThumbFilename = `${safeFolder}_${safeEntityId}_${bundle.hash}_thumb.${bundle.extension}`;
-
-      const [cdnFullUrl, cdnThumbUrl] = await Promise.all([
-        uploadBlobToSecondaryCloudCdn(bundle.fullBlob, cdnFullFilename),
-        uploadBlobToSecondaryCloudCdn(bundle.thumbnailBlob, cdnThumbFilename),
-      ]);
-
-      if (cdnFullUrl) {
-        finalUrl = cdnFullUrl;
-        finalThumbUrl = cdnThumbUrl || cdnFullUrl;
-        provider = 'cloud-cdn-relay';
-      } else if (cdnThumbUrl) {
-        finalUrl = cdnThumbUrl;
-        finalThumbUrl = cdnThumbUrl;
-        provider = 'cloud-cdn-relay';
-      }
-    }
+    // Note: Ephemeral secondary relays (e.g. ntfy.sh) are intentionally never used because their attachments expire.
 
     // If completely offline, keep compressed WebP dataUrl temporarily and queue for background upload
     const resolvedUrl = finalUrl || bundle.fullDataUrl;
@@ -722,6 +723,8 @@ export function isUniqueGrillRestaurant(rest: { id?: string; name?: string; name
     idLower.includes('unique-grill') ||
     idLower.endsWith('ique-grill') ||
     nameLower.includes('unique grill') ||
-    nameEnLower.includes('unique grill')
+    nameEnLower.includes('unique grill') ||
+    nameLower.includes('uniquegrill') ||
+    nameEnLower.includes('uniquegrill')
   );
 }

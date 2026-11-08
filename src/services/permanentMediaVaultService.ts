@@ -39,6 +39,8 @@ import {
   sanitizeVerifiedShopPhotoUrl,
   sanitizeRestaurantShopPhoto,
   sanitizeRestaurantGalleryPhotos,
+  isEphemeralDeadImageUrl,
+  getBundledSeedFoodFallbackPath,
   isValidGoogleMapsUrl,
   computeFastPhotoSignature,
   inferBusinessTypeAndCategory,
@@ -220,6 +222,7 @@ export function isGenuineCustomPhotoUrl(url?: string): boolean {
 
 export function isLegacyAutoScrapedFoodPlaceholderUrl(url?: string): boolean {
   if (!url || typeof url !== 'string') return false;
+  if (isEphemeralDeadImageUrl(url)) return true;
   const lower = url.trim().toLowerCase();
   return (
     lower.includes('themealdb.com') ||
@@ -920,6 +923,7 @@ function getPersistedSetForCategory(category: 'foods' | 'restaurants' | 'destina
 
 function isObsoleteSeedPhoto(url?: string): boolean {
   if (!url) return true;
+  if (isEphemeralDeadImageUrl(url)) return true;
   return url.includes('Huay_Kaew_waterfall_mu_yang.jpg') || url.includes('Global_Forest_Change_tree-cover_loss_year');
 }
 
@@ -1115,6 +1119,16 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
   // Strip any accidental unedited seed restaurant entries or deleted restaurants from restaurants vault
   let evictedStaleRestFromDisk = false;
   for (const [id, restOv] of Object.entries(restaurants)) {
+    if (restOv && (isEphemeralDeadImageUrl(restOv.photoUrl) || isEphemeralDeadImageUrl(restOv.profileImage))) {
+      const nameLow = ((restOv.nameKh || '') + ' ' + (restOv.nameEn || '')).toLowerCase();
+      const ugFallback =
+        nameLow.includes('uniquegrill') || nameLow.includes('unique grill') || id.toLowerCase().includes('unique-grill')
+          ? `/foods/food-19.jpg?verified_shop=${id}`
+          : '';
+      if (isEphemeralDeadImageUrl(restOv.photoUrl)) restOv.photoUrl = ugFallback;
+      if (isEphemeralDeadImageUrl(restOv.profileImage)) restOv.profileImage = ugFallback;
+      evictedStaleRestFromDisk = true;
+    }
     if (isFakeSeedRestaurantOverride(restOv) || isRestaurantIdDeleted(id, restOv?.updatedAt, deletedRestaurants)) {
       delete restaurants[id];
       evictedStaleRestFromDisk = true;
@@ -2486,6 +2500,13 @@ export function applyFoodOverrides(
     const cleanedBaseDescKh = stripLegacyFoodPhraseKh(f.descriptionKh);
     const ov = safeOverrides[f.id];
     if (!ov || !ov.photoUrl || isRejectedLegacyFoodOverridePhoto(f.id, ov)) {
+      const healedPhotoUrl =
+        isEphemeralDeadImageUrl(f.photoUrl) || isLegacyAutoScrapedFoodPlaceholderUrl(f.photoUrl)
+          ? IMMUTABLE_SEED_FOOD_MAP.get(f.id)?.photoUrl ||
+            getBundledSeedFoodFallbackPath(f.id) ||
+            '/welcome/hero-bg.webp'
+          : f.photoUrl;
+      const photoHealed = healedPhotoUrl !== f.photoUrl;
       if (hasPlaceholderOrIncompleteRecipe(f.ingredients, f.steps)) {
         const gen = generateAuthenticRecipeByDishName(
           f.nameKh,
@@ -2496,15 +2517,22 @@ export function applyFoodOverrides(
         anyChanged = true;
         return {
           ...f,
+          photoUrl: healedPhotoUrl,
+          ...(photoHealed ? { isCustomPhoto: false } : {}),
           descriptionKh: gen.descriptionKh,
           descriptionEn: f.descriptionEn || gen.descriptionEn,
           ingredients: gen.ingredients,
           steps: gen.steps,
         };
       }
-      if (cleanedBaseDescKh !== (f.descriptionKh || '')) {
+      if (photoHealed || cleanedBaseDescKh !== (f.descriptionKh || '')) {
         anyChanged = true;
-        return { ...f, descriptionKh: cleanedBaseDescKh };
+        return {
+          ...f,
+          photoUrl: healedPhotoUrl,
+          ...(photoHealed ? { isCustomPhoto: false } : {}),
+          descriptionKh: cleanedBaseDescKh,
+        };
       }
       return f;
     }
@@ -3606,9 +3634,9 @@ export async function hydrateAndSyncMediaOverrides(
           }
         }
 
-        // Fetch any missing or newer per-record overrides in progressive batches of 10 keys
+        // Fetch any missing or newer per-record overrides in batches of 50 keys (notifies once at end)
         if (keysToFetch.length > 0) {
-          const BATCH_SIZE = 10;
+          const BATCH_SIZE = 50;
           let seenChanged = false;
           const canCleanupStaleCloud =
             typeof localStorage !== 'undefined' && Boolean(localStorage.getItem('kft_admin_session_token'));
@@ -3725,7 +3753,6 @@ export async function hydrateAndSyncMediaOverrides(
                   saveSingleRecordToIdb(`trend:${tid}`, winner).catch(() => {});
                 }
               }
-              notifyListeners(current);
             }
           }
           if (seenChanged) {

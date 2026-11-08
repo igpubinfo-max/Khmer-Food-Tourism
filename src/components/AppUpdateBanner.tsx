@@ -22,69 +22,69 @@ export const AppUpdateBanner: React.FC = () => {
   const [downloadProgressPct, setDownloadProgressPct] = useState<number | null>(null);
   const checkingRef = useRef(false);
   const lastAutoCheckAtRef = useRef(0);
+  const latestContextRef = useRef({ appSettings, language, showToast });
+  latestContextRef.current = { appSettings, language, showToast };
 
-  const runCheck = useCallback(
-    async (isManual = false) => {
-      if (checkingRef.current) return;
-      if (!isManual && Date.now() - lastAutoCheckAtRef.current < MIN_AUTO_CHECK_COOLDOWN_MS) {
-        return;
+  const runCheck = useCallback(async (isManual = false) => {
+    if (checkingRef.current) return;
+    if (!isManual && Date.now() - lastAutoCheckAtRef.current < MIN_AUTO_CHECK_COOLDOWN_MS) {
+      return;
+    }
+    const { appSettings: curSettings, language: curLang, showToast: toastFn } = latestContextRef.current;
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      if (isManual) {
+        toastFn(
+          tr(
+            curLang,
+            'សូមភ្ជាប់អ៊ីនធឺណិតដើម្បីពិនិត្យកំណែអាប់ដេតថ្មី',
+            'Please connect to the internet to check for updates',
+            '请连接网络以检查新版本'
+          ),
+          'info'
+        );
       }
-      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-        if (isManual) {
-          showToast(
-            tr(
-              language,
-              'សូមភ្ជាប់អ៊ីនធឺណិតដើម្បីពិនិត្យកំណែអាប់ដេតថ្មី',
-              'Please connect to the internet to check for updates',
-              '请连接网络以检查新版本'
-            ),
-            'info'
-          );
-        }
-        return;
-      }
+      return;
+    }
 
-      checkingRef.current = true;
-      if (!isManual) {
-        lastAutoCheckAtRef.current = Date.now();
-      }
-      try {
-        const status = await checkLiveAppUpdate(appSettings);
-        setUpdateStatus(status);
+    checkingRef.current = true;
+    if (!isManual) {
+      lastAutoCheckAtRef.current = Date.now();
+    }
+    try {
+      const status = await checkLiveAppUpdate(curSettings);
+      setUpdateStatus(status);
 
-        if (status.hasUpdate) {
-          if (
-            isManual ||
-            status.forceUpdate ||
-            status.updateDownloaded ||
-            !isUpdateSnoozed(status.latestBuildCode, status.latestVersion)
-          ) {
-            setVisible(true);
-          } else {
-            setVisible(false);
-          }
+      if (status.hasUpdate) {
+        if (
+          isManual ||
+          status.forceUpdate ||
+          status.updateDownloaded ||
+          !isUpdateSnoozed(status.latestBuildCode, status.latestVersion)
+        ) {
+          setVisible(true);
         } else {
           setVisible(false);
-          if (isManual) {
-            showToast(
-              tr(
-                language,
-                `កម្មវិធីរបស់អ្នកជាកំណែចុងក្រោយបង្អស់រួចហើយ (${status.currentVersion} • Build ${status.currentBuildCode})`,
-                `You are already on the latest version (${status.currentVersion} • Build ${status.currentBuildCode})`,
-                `当前已是最新版本 (${status.currentVersion} • Build ${status.currentBuildCode})`
-              ),
-              'success'
-            );
-          }
         }
-      } catch {
-        // Silent fail on background network hiccups
-      } finally {
-        checkingRef.current = false;
+      } else {
+        setVisible(false);
+        if (isManual) {
+          toastFn(
+            tr(
+              curLang,
+              `កម្មវិធីរបស់អ្នកជាកំណែចុងក្រោយបង្អស់រួចហើយ (${status.currentVersion} • Build ${status.currentBuildCode})`,
+              `You are already on the latest version (${status.currentVersion} • Build ${status.currentBuildCode})`,
+              `当前已是最新版本 (${status.currentVersion} • Build ${status.currentBuildCode})`
+            ),
+            'success'
+          );
+        }
       }
-    },
-    [appSettings, language, showToast]
-  );
+    } catch {
+      // Silent fail on background network hiccups
+    } finally {
+      checkingRef.current = false;
+    }
+  }, []);
 
   // Initial check once on app startup + manual check trigger (avoid annoying repeated checks on every tab/focus switch)
   useEffect(() => {

@@ -29,7 +29,7 @@ import {
   Salad,
   Camera,
 } from 'lucide-react';
-import { FoodItem, isGpipRegisteredRestaurant, isHotelBusinessRecord, openExternalUrlNativeSafe, openRestaurantGoogleExternal, resolveFoodPhotoUrl } from '../types';
+import { FoodItem, isGpipRegisteredRestaurant, isHotelBusinessRecord, openExternalUrlNativeSafe, openRestaurantGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError } from '../types';
 import {
   buildAgentRoleChips,
   recordAiAgentTelemetryEvent,
@@ -2256,14 +2256,12 @@ export const WhatToEatModal: React.FC = () => {
                                     className="p-1.5 rounded-xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 flex items-center gap-2 text-left transition cursor-pointer"
                                   >
                                     <img
-                                      src={resolveFoodPhotoUrl(sim.photoUrl, sim.photoUpdatedAt)}
+                                      src={resolveFoodPhotoUrl(sim.photoUrl, sim.photoUpdatedAt, 240, sim.id)}
                                       alt={sLoc.name}
                                       referrerPolicy="no-referrer"
                                       loading="lazy"
                                       decoding="async"
-                                      onError={(e) => {
-                                        const imgEl = e.currentTarget as HTMLImageElement; if (imgEl.dataset.fb === (imgEl.getAttribute('src') || '')) return; imgEl.src = '/foods/food-1.jpg'; imgEl.dataset.fb = imgEl.getAttribute('src') || '';
-                                      }}
+                                      onError={(e) => handleFoodImageError(e, sim.id, sim.photoUrl)}
                                       className="w-9 h-9 rounded-lg object-cover shrink-0 bg-slate-200"
                                     />
                                     <div className="min-w-0 flex-1">
@@ -3270,7 +3268,8 @@ export const WhatToEatModal: React.FC = () => {
                             >
                               <span className="block aspect-4/3 w-full overflow-hidden bg-slate-200">
                                 <img
-                                  src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt)}
+                                  src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 480, food.id)}
+                                  onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
                                   alt={fLoc.name}
                                   loading="lazy"
                                   decoding="async"
@@ -3357,11 +3356,9 @@ export const WhatToEatModal: React.FC = () => {
                         <div className="space-y-1">
                           <div className="relative aspect-16/10 rounded-lg overflow-hidden bg-slate-200">
                             <img
-                              src={resolveFoodPhotoUrl(cDish.photoUrl, cDish.photoUpdatedAt)}
+                              src={resolveFoodPhotoUrl(cDish.photoUrl, cDish.photoUpdatedAt, 480, cDish.id)}
                               alt={cLoc.name}
-                              onError={(e) => {
-                                const imgEl = e.currentTarget as HTMLImageElement; if (imgEl.dataset.fb === (imgEl.getAttribute('src') || '')) return; imgEl.src = '/foods/food-1.jpg'; imgEl.dataset.fb = imgEl.getAttribute('src') || '';
-                              }}
+                              onError={(e) => handleFoodImageError(e, cDish.id, cDish.photoUrl)}
                               className="w-full h-full object-cover"
                             />
                             <button
@@ -3639,13 +3636,11 @@ export const WhatToEatModal: React.FC = () => {
                         className="p-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 flex items-center gap-2 cursor-pointer hover:border-emerald-500 transition shadow-2xs group"
                       >
                         <img
-                          src={resolveFoodPhotoUrl(d.photoUrl, d.photoUpdatedAt)}
+                          src={resolveFoodPhotoUrl(d.photoUrl, d.photoUpdatedAt, 240, d.id)}
                           alt={dLoc.name}
                           loading="lazy"
                           decoding="async"
-                          onError={(e) => {
-                            const imgEl = e.currentTarget as HTMLImageElement; if (imgEl.dataset.fb === (imgEl.getAttribute('src') || '')) return; imgEl.src = '/foods/food-1.jpg'; imgEl.dataset.fb = imgEl.getAttribute('src') || '';
-                          }}
+                          onError={(e) => handleFoodImageError(e, d.id, d.photoUrl)}
                           className="w-10 h-10 rounded-xl object-cover shrink-0 group-hover:scale-105 transition-transform"
                         />
                         <div className="min-w-0">

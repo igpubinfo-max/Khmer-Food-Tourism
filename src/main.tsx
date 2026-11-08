@@ -32,6 +32,9 @@ try {
     'kft_posts_v6',
     'kft_settings_v3',
     'kft_settings_v4',
+    'kft_foods_real_v13',
+    'kft_destinations_real_v15',
+    'kft_trending_foods_v5',
   ];
   for (const key of obsoleteBulkKeys) {
     localStorage.removeItem(key);

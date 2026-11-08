@@ -1,5 +1,6 @@
 import { verifyVipPurchaseOnServer } from '../services/vipPurchaseClient';
-import { adminServerLogin, isAdminServerAuthActive } from '../services/adminAuthClient';
+import { adminServerLogin, adminServerChangePassword, isAdminServerAuthActive } from '../services/adminAuthClient';
+import { checkBiometricAvailability, enrollAdminBiometric, getSavedAdminUsername } from '../services/biometricService';
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { 
   User, FoodItem, Restaurant, TouristDestination, 
@@ -225,7 +226,7 @@ interface AppContextType {
   // Admin Auth (Chea Savuth)
   loginAdmin: (username: string, password: string) => Promise<boolean>;
   loginAdminWithBiometric: (preVerified?: boolean, preVerifiedUser?: string) => Promise<boolean>;
-  setAdminPassword: (newPassword: string) => Promise<boolean>;
+  setAdminPassword: (newPassword: string, currentPassword?: string, skipServerSync?: boolean) => Promise<boolean>;
   
   // App Settings & QR Codes
   appSettings: AppSettings;
@@ -1136,7 +1137,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 50) {
+        if (Array.isArray(parsed)) {
           const initialMap = new Map(initialFoods.map(f => [f.id, f]));
           const deletedFoodsMap = vault.deletedFoods || loadDeletedFoodIdsMap();
           const customAddedFoods: FoodItem[] = [];
@@ -1661,7 +1662,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 40) {
+        if (Array.isArray(parsed)) {
           const seenIds = new Set<string>();
           const normalizedList: Restaurant[] = [];
           for (const r of parsed) {
@@ -2012,7 +2013,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 100 && !String(parsed[0]?.photoUrl || '').includes('1569683795645')) {
+        if (Array.isArray(parsed) && !String(parsed[0]?.photoUrl || '').includes('1569683795645')) {
           const initialMap = new Map(initialDestinations.map(d => [d.id, d]));
           const filteredParsed = parsed.filter(
             (d: TouristDestination) =>
@@ -2966,6 +2967,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const seedFoodPhotoMapRef = useRef<Map<string, string> | null>(null);
   const seedRestPhotoMapRef = useRef<Map<string, string> | null>(null);
 
+  const lastWrittenStorageJsonRef = useRef<Record<string, string>>({});
+
   const compactDataForBulkLocalStorage = (
     key: string,
     data: unknown,
@@ -2973,6 +2976,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ): unknown => {
     if (!Array.isArray(data)) return data;
     try {
+      // Persist ONLY custom or Admin-edited destinations (<5 KB instead of 5.56 MB!).
+      // Immutable seed destinations (100 core + 1,068 RAC + 359 hotels) are already in JS bundle + permanentMediaVaultService.
       if (key === 'kft_destinations_real_v9') {
         if (!seedDestPhotoMapRef.current) {
           seedDestPhotoMapRef.current = new Map(initialDestinations.map(d => [d.id, d.photoUrl]));
@@ -2982,78 +2987,70 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           .filter(
             (d) =>
               Boolean(d && d.id) &&
-              !(
-                (d.id.startsWith('hotel-') || d.id.startsWith('rac-')) &&
-                !d.isAdminEdited &&
-                !d.isCustomPhoto &&
-                !isOverridePersistedInLocalStorage('destinations', d.id)
-              )
+              (Boolean(d.isAdminEdited) ||
+                (!seedDestMap.has(d.id) && !d.id.startsWith('hotel-') && !d.id.startsWith('rac-')))
           )
           .map(d => {
-          if (!d) return d;
-          const isSeedDest = seedDestMap.has(d.id);
-          const strippedStaticDesc =
-            isSeedDest && !d.isAdminEdited
-              ? { descriptionKh: undefined, descriptionEn: undefined, highlightsKh: undefined }
-              : {};
-          if (
-            typeof d.photoUrl === 'string' &&
-            d.photoUrl.startsWith('data:') &&
-            (forceAggressiveStrip || isOverridePersistedInLocalStorage('destinations', d.id))
-          ) {
-            const fallbackUrl = seedDestMap.get(d.id) || '';
-            return {
-              ...d,
-              ...strippedStaticDesc,
-              photoUrl: fallbackUrl,
-              galleryPhotos: fallbackUrl ? [fallbackUrl] : [],
-              isCustomPhoto: true,
-              __compactedFromVault: true,
-            };
-          }
-          return isSeedDest && !d.isAdminEdited ? { ...d, ...strippedStaticDesc } : d;
-        });
+            if (
+              typeof d.photoUrl === 'string' &&
+              d.photoUrl.startsWith('data:') &&
+              (forceAggressiveStrip || isOverridePersistedInLocalStorage('destinations', d.id))
+            ) {
+              const fallbackUrl = seedDestMap.get(d.id) || '';
+              return {
+                ...d,
+                photoUrl: fallbackUrl,
+                galleryPhotos: fallbackUrl ? [fallbackUrl] : [],
+                isCustomPhoto: true,
+                __compactedFromVault: true,
+              };
+            }
+            return d;
+          });
       }
+      // Persist ONLY custom or Admin-edited foods (<10 KB instead of 1.2 MB!).
       if (key === 'kft_foods_200_v10') {
         if (!seedFoodPhotoMapRef.current) {
           seedFoodPhotoMapRef.current = new Map(initialFoods.map(f => [f.id, f.photoUrl]));
         }
         const seedFoodMap = seedFoodPhotoMapRef.current;
-        return (data as FoodItem[]).map(f => {
-          if (!f) return f;
-          const isSeedDish = seedFoodMap.has(f.id);
-          const strippedRecipeProps =
-            isSeedDish && !f.isAdminEdited
-              ? { ingredients: undefined, steps: undefined }
-              : {};
-          if (
-            typeof f.photoUrl === 'string' &&
-            f.photoUrl.startsWith('data:') &&
-            (forceAggressiveStrip || isOverridePersistedInLocalStorage('foods', f.id))
-          ) {
-            return {
-              ...f,
-              ...strippedRecipeProps,
-              photoUrl: seedFoodMap.get(f.id) || `/foods/${f.id}.jpg`,
-              isCustomPhoto: true,
-              __compactedFromVault: true,
-            };
-          }
-          if (isSeedDish && !f.isAdminEdited) {
-            return {
-              ...f,
-              ...strippedRecipeProps,
-            };
-          }
-          return f;
-        });
+        return (data as FoodItem[])
+          .filter((f) => Boolean(f && f.id) && (!seedFoodMap.has(f.id) || Boolean(f.isAdminEdited)))
+          .map(f => {
+            if (
+              typeof f.photoUrl === 'string' &&
+              f.photoUrl.startsWith('data:') &&
+              (forceAggressiveStrip || isOverridePersistedInLocalStorage('foods', f.id))
+            ) {
+              return {
+                ...f,
+                photoUrl: seedFoodMap.get(f.id) || `/foods/${f.id}.jpg`,
+                isCustomPhoto: true,
+                __compactedFromVault: true,
+              };
+            }
+            return f;
+          });
       }
+      // Persist ONLY custom / VIP-owned / Admin-edited / reviewed restaurants (<25 KB instead of 1.8 MB!).
       if (key === 'kft_restaurants_real_v13' || key === 'kft_restaurants_real_v12') {
         if (!seedRestPhotoMapRef.current) {
           seedRestPhotoMapRef.current = new Map(initialRestaurants.map(r => [r.id, r.photoUrl]));
         }
         const seedRestMap = seedRestPhotoMapRef.current;
-        return (data as Restaurant[]).map(r => {
+        return (data as Restaurant[])
+          .filter(
+            (r) =>
+              Boolean(r && r.id) &&
+              (!isSeedRestaurantId(r.id) ||
+                Boolean(r.isAdminEdited) ||
+                Boolean(r.ownerId && r.ownerId !== 'owner-1') ||
+                r.dataSource === 'vip_owner' ||
+                Boolean(r.pendingPhotoReplacement) ||
+                Boolean(r.pendingUpgradeRequest) ||
+                (Array.isArray(r.reviews) && r.reviews.length > 0))
+          )
+          .map(r => {
           if (!r) return r;
           const hasInlineDataUrl =
             (typeof r.photoUrl === 'string' && r.photoUrl.startsWith('data:')) ||
@@ -3115,7 +3112,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const performWrite = () => {
         try {
           const compacted = compactDataForBulkLocalStorage(key, data, false);
-          localStorage.setItem(key, JSON.stringify(compacted));
+          const serialized = JSON.stringify(compacted);
+          if (lastWrittenStorageJsonRef.current[key] === serialized) return;
+          localStorage.setItem(key, serialized);
+          lastWrittenStorageJsonRef.current[key] = serialized;
         } catch (e) {
           if (
             key === 'kft_users_v5' ||
@@ -3185,17 +3185,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const hasAttemptedVersionBackupRef = useRef(false);
   const lastPreUpdateSnapMetaRef = useRef<{
     usersCount: number;
+    totalRestsLen: number;
     customRestsCount: number;
     geminiKey: string;
     mapsKey: string;
   } | null>(null);
   useEffect(() => {
     try {
+      const meta = lastPreUpdateSnapMetaRef.current;
+      if (
+        hasAttemptedVersionBackupRef.current &&
+        meta &&
+        users.length <= meta.usersCount &&
+        restaurants.length <= meta.totalRestsLen &&
+        (appSettings.geminiApiKey || '').trim() === meta.geminiKey &&
+        (appSettings.googleMapsApiKey || '').trim() === meta.mapsKey
+      ) {
+        return;
+      }
       const CURRENT_VERSION_TAG = `${APP_VERSION_NAME}_${APP_BUILD_CODE}`;
       const liveCustomRests = restaurants.filter(
         r => r && (!isSeedRestaurantId(r.id) || (r.ownerId && r.ownerId !== 'owner-1') || r.dataSource === 'vip_owner' || r.isAdminEdited)
       );
-      const meta = lastPreUpdateSnapMetaRef.current;
       if (
         hasAttemptedVersionBackupRef.current &&
         meta &&
@@ -3204,6 +3215,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         (appSettings.geminiApiKey || '').trim() === meta.geminiKey &&
         (appSettings.googleMapsApiKey || '').trim() === meta.mapsKey
       ) {
+        meta.totalRestsLen = restaurants.length;
         return;
       }
 
@@ -3282,6 +3294,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       hasAttemptedVersionBackupRef.current = true;
       lastPreUpdateSnapMetaRef.current = {
         usersCount: Math.max(users.length, existingAllUsers.length),
+        totalRestsLen: restaurants.length,
         customRestsCount: Math.max(liveCustomRests.length, existingCustomRestaurants.length),
         geminiKey: (appSettings.geminiApiKey || '').trim(),
         mapsKey: (appSettings.googleMapsApiKey || '').trim(),
@@ -3366,20 +3379,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Automatic Background Migration of All Uploaded Inline Images (Shops, Hotels, Food, Travel) to Permanent Cloud Storage WebP URLs + Thumbnails
   const isMigratingCloudImagesRef = useRef<boolean>(false);
+  const attemptedCloudMigrationSigsRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     if (isMigratingCloudImagesRef.current) return;
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+    if (isSupabaseEgressCooldownActive()) return;
+
+    const needsUnattemptedUpload = (id: string, url?: string | null): boolean => {
+      if (!isInlineBase64RasterImage(url)) return false;
+      const sig = `${id}:${url!.length}:${url!.slice(-24)}`;
+      return !attemptedCloudMigrationSigsRef.current.has(sig);
+    };
+    const markMigrationAttempted = (id: string, url?: string | null): void => {
+      if (!url) return;
+      attemptedCloudMigrationSigsRef.current.add(`${id}:${url.length}:${url.slice(-24)}`);
+    };
 
     const restNeedsMigration = restaurants.some(
       (r) =>
-        isInlineBase64RasterImage(r.photoUrl) ||
-        isInlineBase64RasterImage(r.profileImage) ||
-        isInlineBase64RasterImage(r.pendingPhotoReplacement?.newPhotoUrl) ||
-        isInlineBase64RasterImage(r.pendingUpgradeRequest?.proposedChanges?.photoUrl) ||
-        (Array.isArray(r.menuItems) && r.menuItems.some((m) => isInlineBase64RasterImage(m.photoUrl)))
+        needsUnattemptedUpload(r.id, r.photoUrl) ||
+        needsUnattemptedUpload(`${r.id}_prof`, r.profileImage) ||
+        needsUnattemptedUpload(`${r.id}_pend`, r.pendingPhotoReplacement?.newPhotoUrl) ||
+        needsUnattemptedUpload(`${r.id}_upg`, r.pendingUpgradeRequest?.proposedChanges?.photoUrl) ||
+        (Array.isArray(r.menuItems) && r.menuItems.some((m) => needsUnattemptedUpload(m.id, m.photoUrl)))
     );
-    const foodNeedsMigration = foods.some((f) => isInlineBase64RasterImage(f.photoUrl));
-    const destNeedsMigration = destinations.some((d) => isInlineBase64RasterImage(d.photoUrl));
-    const trendNeedsMigration = trendingFoods.some((t) => isInlineBase64RasterImage(t.photoUrl));
+    const foodNeedsMigration = foods.some((f) => needsUnattemptedUpload(f.id, f.photoUrl));
+    const destNeedsMigration = destinations.some((d) => needsUnattemptedUpload(d.id, d.photoUrl));
+    const trendNeedsMigration = trendingFoods.some((t) => needsUnattemptedUpload(t.id, t.photoUrl));
 
     if (!restNeedsMigration && !foodNeedsMigration && !destNeedsMigration && !trendNeedsMigration) {
       return;
@@ -3388,16 +3414,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isMigratingCloudImagesRef.current = true;
     const timer = window.setTimeout(async () => {
       try {
-        // 1. Migrate Shops & Hotels (`restaurants`)
+        // 1. Migrate Shops & Hotels (`restaurants`) sequentially to avoid Canvas/GPU memory spikes
         if (restNeedsMigration) {
           let anyRestMigrated = false;
-          const migratedRests = await Promise.all(
-            latestSyncStateRef.current.restaurants.map(async (r) => {
+          const migratedRests: Restaurant[] = [];
+          for (const r of latestSyncStateRef.current.restaurants) {
               let changed = false;
               let nextRest = { ...r };
               const folder = isHotelBusinessRecord(r) ? 'hotels' : 'shops';
 
-              if (isInlineBase64RasterImage(nextRest.photoUrl)) {
+              if (needsUnattemptedUpload(nextRest.id, nextRest.photoUrl)) {
+                markMigrationAttempted(nextRest.id, nextRest.photoUrl);
                 const up = await uploadImageToPermanentCloud(nextRest.photoUrl, folder, nextRest.id);
                 if (up.url && up.url.startsWith('https://')) {
                   nextRest.photoUrl = up.url;
@@ -3406,7 +3433,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                   nextRest.galleryPhotos = [up.url];
                   changed = true;
                 }
-              } else if (isInlineBase64RasterImage(nextRest.profileImage)) {
+              } else if (needsUnattemptedUpload(`${nextRest.id}_prof`, nextRest.profileImage)) {
+                markMigrationAttempted(`${nextRest.id}_prof`, nextRest.profileImage);
                 const up = await uploadImageToPermanentCloud(nextRest.profileImage!, folder, nextRest.id);
                 if (up.url && up.url.startsWith('https://')) {
                   nextRest.profileImage = up.url;
@@ -3420,8 +3448,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
               if (
                 nextRest.pendingPhotoReplacement &&
-                isInlineBase64RasterImage(nextRest.pendingPhotoReplacement.newPhotoUrl)
+                needsUnattemptedUpload(`${nextRest.id}_pend`, nextRest.pendingPhotoReplacement.newPhotoUrl)
               ) {
+                markMigrationAttempted(`${nextRest.id}_pend`, nextRest.pendingPhotoReplacement.newPhotoUrl);
                 const up = await uploadImageToPermanentCloud(
                   nextRest.pendingPhotoReplacement.newPhotoUrl,
                   folder,
@@ -3438,8 +3467,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
               if (
                 nextRest.pendingUpgradeRequest?.proposedChanges &&
-                isInlineBase64RasterImage(nextRest.pendingUpgradeRequest.proposedChanges.photoUrl)
+                needsUnattemptedUpload(`${nextRest.id}_upg`, nextRest.pendingUpgradeRequest.proposedChanges.photoUrl)
               ) {
+                markMigrationAttempted(`${nextRest.id}_upg`, nextRest.pendingUpgradeRequest.proposedChanges.photoUrl);
                 const up = await uploadImageToPermanentCloud(
                   nextRest.pendingUpgradeRequest.proposedChanges.photoUrl!,
                   folder,
@@ -3458,22 +3488,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 }
               }
 
-              if (Array.isArray(nextRest.menuItems) && nextRest.menuItems.some((m) => isInlineBase64RasterImage(m.photoUrl))) {
-                const migratedMenus = await Promise.all(
-                  nextRest.menuItems.map(async (m) => {
-                    if (!isInlineBase64RasterImage(m.photoUrl)) return m;
-                    const up = await uploadImageToPermanentCloud(m.photoUrl, 'menus', m.id || `${nextRest.id}_menu`);
-                    if (up.url && up.url.startsWith('https://')) {
-                      changed = true;
-                      return {
-                        ...m,
-                        photoUrl: up.url,
-                        thumbnailUrl: up.thumbnailUrl || up.url,
-                      };
-                    }
-                    return m;
-                  })
-                );
+              if (Array.isArray(nextRest.menuItems) && nextRest.menuItems.some((m) => needsUnattemptedUpload(m.id, m.photoUrl))) {
+                const migratedMenus: RestaurantMenuItem[] = [];
+                for (const m of nextRest.menuItems) {
+                  if (!needsUnattemptedUpload(m.id, m.photoUrl)) {
+                    migratedMenus.push(m);
+                    continue;
+                  }
+                  markMigrationAttempted(m.id, m.photoUrl);
+                  const up = await uploadImageToPermanentCloud(m.photoUrl, 'menus', m.id || `${nextRest.id}_menu`);
+                  if (up.url && up.url.startsWith('https://')) {
+                    changed = true;
+                    migratedMenus.push({
+                      ...m,
+                      photoUrl: up.url,
+                      thumbnailUrl: up.thumbnailUrl || up.url,
+                    });
+                  } else {
+                    migratedMenus.push(m);
+                  }
+                }
                 nextRest.menuItems = migratedMenus;
               }
 
@@ -3481,9 +3515,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 anyRestMigrated = true;
                 recordPermanentRestaurantOverride(nextRest);
               }
-              return nextRest;
-            })
-          );
+              migratedRests.push(nextRest);
+          }
 
           if (anyRestMigrated) {
             latestSyncStateRef.current.restaurants = migratedRests;
@@ -3498,81 +3531,93 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
         }
 
-        // 2. Migrate Food Items (`foods`)
+        // 2. Migrate Food Items (`foods`) sequentially
         if (foodNeedsMigration) {
           let anyFoodMigrated = false;
-          const migratedFoods = await Promise.all(
-            foods.map(async (f) => {
-              if (!isInlineBase64RasterImage(f.photoUrl)) return f;
-              const up = await uploadImageToPermanentCloud(f.photoUrl, 'foods', f.id);
-              if (up.url && up.url.startsWith('https://')) {
-                anyFoodMigrated = true;
-                const updatedFood: FoodItem = {
-                  ...f,
-                  photoUrl: up.url,
-                  thumbnailUrl: up.thumbnailUrl || up.url,
-                };
-                recordPermanentFoodOverride(updatedFood);
-                return updatedFood;
-              }
-              return f;
-            })
-          );
+          const migratedFoods: FoodItem[] = [];
+          for (const f of foods) {
+            if (!needsUnattemptedUpload(f.id, f.photoUrl)) {
+              migratedFoods.push(f);
+              continue;
+            }
+            markMigrationAttempted(f.id, f.photoUrl);
+            const up = await uploadImageToPermanentCloud(f.photoUrl, 'foods', f.id);
+            if (up.url && up.url.startsWith('https://')) {
+              anyFoodMigrated = true;
+              const updatedFood: FoodItem = {
+                ...f,
+                photoUrl: up.url,
+                thumbnailUrl: up.thumbnailUrl || up.url,
+              };
+              recordPermanentFoodOverride(updatedFood);
+              migratedFoods.push(updatedFood);
+            } else {
+              migratedFoods.push(f);
+            }
+          }
           if (anyFoodMigrated) {
             setFoods(migratedFoods);
-            scheduleStorageWrite('kft_foods_real_v13', migratedFoods, 400);
+            scheduleStorageWrite('kft_foods_200_v10', migratedFoods, 400);
           }
         }
 
-        // 3. Migrate Travel Destinations (`destinations`)
+        // 3. Migrate Travel Destinations (`destinations`) sequentially
         if (destNeedsMigration) {
           let anyDestMigrated = false;
-          const migratedDests = await Promise.all(
-            destinations.map(async (d) => {
-              if (!isInlineBase64RasterImage(d.photoUrl)) return d;
-              const up = await uploadImageToPermanentCloud(d.photoUrl, 'destinations', d.id);
-              if (up.url && up.url.startsWith('https://')) {
-                anyDestMigrated = true;
-                const updatedDest: TouristDestination = {
-                  ...d,
-                  photoUrl: up.url,
-                  thumbnailUrl: up.thumbnailUrl || up.url,
-                };
-                recordPermanentDestinationOverride(updatedDest);
-                return updatedDest;
-              }
-              return d;
-            })
-          );
+          const migratedDests: TouristDestination[] = [];
+          for (const d of destinations) {
+            if (!needsUnattemptedUpload(d.id, d.photoUrl)) {
+              migratedDests.push(d);
+              continue;
+            }
+            markMigrationAttempted(d.id, d.photoUrl);
+            const up = await uploadImageToPermanentCloud(d.photoUrl, 'destinations', d.id);
+            if (up.url && up.url.startsWith('https://')) {
+              anyDestMigrated = true;
+              const updatedDest: TouristDestination = {
+                ...d,
+                photoUrl: up.url,
+                thumbnailUrl: up.thumbnailUrl || up.url,
+              };
+              recordPermanentDestinationOverride(updatedDest);
+              migratedDests.push(updatedDest);
+            } else {
+              migratedDests.push(d);
+            }
+          }
           if (anyDestMigrated) {
             setDestinations(migratedDests);
             scheduleStorageWrite('kft_destinations_real_v9', migratedDests, 400);
           }
         }
 
-        // 4. Migrate Trending Foods (`trendingFoods`)
+        // 4. Migrate Trending Foods (`trendingFoods`) sequentially
         if (trendNeedsMigration) {
           let anyTrendMigrated = false;
-          const migratedTrends = await Promise.all(
-            trendingFoods.map(async (t) => {
-              if (!isInlineBase64RasterImage(t.photoUrl)) return t;
-              const up = await uploadImageToPermanentCloud(t.photoUrl, 'foods', t.id);
-              if (up.url && up.url.startsWith('https://')) {
-                anyTrendMigrated = true;
-                const updatedTrend: TrendingFoodItem = {
-                  ...t,
-                  photoUrl: up.url,
-                  thumbnailUrl: up.thumbnailUrl || up.url,
-                };
-                recordPermanentTrendingFoodOverride(updatedTrend);
-                return updatedTrend;
-              }
-              return t;
-            })
-          );
+          const migratedTrends: TrendingFoodItem[] = [];
+          for (const t of trendingFoods) {
+            if (!needsUnattemptedUpload(t.id, t.photoUrl)) {
+              migratedTrends.push(t);
+              continue;
+            }
+            markMigrationAttempted(t.id, t.photoUrl);
+            const up = await uploadImageToPermanentCloud(t.photoUrl, 'foods', t.id);
+            if (up.url && up.url.startsWith('https://')) {
+              anyTrendMigrated = true;
+              const updatedTrend: TrendingFoodItem = {
+                ...t,
+                photoUrl: up.url,
+                thumbnailUrl: up.thumbnailUrl || up.url,
+              };
+              recordPermanentTrendingFoodOverride(updatedTrend);
+              migratedTrends.push(updatedTrend);
+            } else {
+              migratedTrends.push(t);
+            }
+          }
           if (anyTrendMigrated) {
             setTrendingFoods(migratedTrends);
-            scheduleStorageWrite('kft_trending_foods_v5', migratedTrends, 400);
+            scheduleStorageWrite('kft_trending_foods_v4', migratedTrends, 400);
           }
         }
       } catch (err) {
@@ -4498,10 +4543,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [destinations]);
 
-  // One-time cleanup: the retired Community Feed stored its posts here; the feature no longer exists.
+  // One-time cleanup: reclaim megabytes of localStorage from retired or bloated pre-delta seed dumps
   useEffect(() => {
     try {
       localStorage.removeItem('kft_posts_v6');
+      localStorage.removeItem('kft_foods_real_v13');
+      localStorage.removeItem('kft_destinations_real_v15');
+      localStorage.removeItem('kft_trending_foods_v5');
+      const rawDest = localStorage.getItem('kft_destinations_real_v9');
+      if (rawDest && rawDest.length > 120_000) {
+        scheduleStorageWrite('kft_destinations_real_v9', destinations, 800);
+      }
+      const rawFoods = localStorage.getItem('kft_foods_200_v10');
+      if (rawFoods && rawFoods.length > 120_000) {
+        scheduleStorageWrite('kft_foods_200_v10', foods, 1000);
+      }
+      const rawRests = localStorage.getItem('kft_restaurants_real_v13');
+      if (rawRests && rawRests.length > 150_000) {
+        scheduleStorageWrite('kft_restaurants_real_v13', restaurants, 1200);
+      }
     } catch {}
   }, []);
 
@@ -5131,7 +5191,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               });
             }
           };
-          if ((force && isAdminOpen) || Date.now() - lastMediaVaultCloudSyncAtRef.current > 25000) {
+          if ((force && isAdminOpen) || Date.now() - lastMediaVaultCloudSyncAtRef.current > 300000) {
             lastMediaVaultCloudSyncAtRef.current = Date.now();
             await flushPendingMediaCloudQueue().catch(() => {});
             const syncedMediaBundle = await hydrateAndSyncMediaOverrides(Boolean(force && isAdminOpen), applySyncedBundle);
@@ -7971,22 +8031,61 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return report;
   };
 
-  const setAdminPassword = async (newPassword: string): Promise<boolean> => {
-    if (await isAdminServerAuthActive()) {
-      showToast(
-        language === 'km'
-          ? 'ពាក្យសម្ងាត់រដ្ឋបាលត្រូវបានគ្រប់គ្រងលើ Server។ ប្តូរតាម Supabase secret (ADMIN_PASSWORD)។'
-          : 'The admin password is managed on the server. Change it via the Supabase secret ADMIN_PASSWORD.',
-        'warning'
-      );
-      return false;
-    }
-    if (!newPassword || newPassword.length < 8) {
+  const setAdminPassword = async (
+    newPassword: string,
+    currentPassword?: string,
+    skipServerSync: boolean = false
+  ): Promise<boolean> => {
+    const trimmedPassword = (newPassword || '').trim();
+    if (!trimmedPassword || trimmedPassword.length < 8) {
       showToast(language === 'km' ? 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ!' : 'Password must be at least 8 characters!', 'warning');
       return false;
     }
 
-    const newHash = await hashPasswordPBKDF2(newPassword);
+    if (!skipServerSync && (await isAdminServerAuthActive())) {
+      const srv = await adminServerChangePassword({
+        newPassword: trimmedPassword,
+        currentPassword,
+      });
+      if (srv.kind === 'pin_required') {
+        showToast(
+          language === 'km'
+            ? '⚠️ សម័យកាលផ្ទៀងផ្ទាត់ Server បានផុតកំណត់ សូមចេញហើយផ្ទៀងផ្ទាត់លេខ PIN ៦ ខ្ទង់ម្តងទៀត!'
+            : '⚠️ Server admin session expired. Please sign out, verify your 6-digit PIN again, and retry.',
+          'warning'
+        );
+        return false;
+      }
+      if (srv.kind === 'invalid') {
+        showToast(
+          language === 'km'
+            ? '❌ ពាក្យសម្ងាត់បច្ចុប្បន្នមិនត្រឹមត្រូវទេ!'
+            : '❌ Current admin password is incorrect!',
+          'warning'
+        );
+        return false;
+      }
+      if (srv.kind === 'locked') {
+        showToast(
+          language === 'km'
+            ? `⏳ សូមរង់ចាំ ${srv.retryAfterSeconds || 60} វិនាទីមុនព្យាយាមម្តងទៀត។`
+            : `⏳ Too many attempts. Please wait ${srv.retryAfterSeconds || 60}s and retry.`,
+          'warning'
+        );
+        return false;
+      }
+      if (srv.kind === 'unavailable' && srv.errorCode) {
+        showToast(
+          language === 'km'
+            ? `⚠️ Server admin-auth ត្រូវការដាក់ឱ្យដំណើរការកំណែថ្មី (${srv.errorCode}) ដើម្បីរក្សាទុកលើ Server។`
+            : `⚠️ Server admin-auth function needs deployment update (${srv.errorCode}) to persist on server.`,
+          'warning'
+        );
+        return false;
+      }
+    }
+
+    const newHash = await hashPasswordPBKDF2(trimmedPassword);
     // Keep the live ref, local storage and cloud copy in sync so the new hash can never be overwritten by a stale
     // ref (next settings save) or an older cloud snapshot (background merge).
     const nowIso = new Date().toISOString();
@@ -8007,8 +8106,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (isSupabaseConfigured()) {
       saveAuthoritativeAppSettingsToServer(nextSettings).catch(() => {});
     }
+    // Keep enrolled biometric credentials synchronized with the updated password
+    checkBiometricAvailability()
+      .then((bio) => {
+        if (bio.isAppEnrolled) {
+          return enrollAdminBiometric(
+            bio.savedUsername || getSavedAdminUsername() || currentUser?.username || 'admin',
+            trimmedPassword
+          );
+        }
+      })
+      .catch(() => {});
+
     recordSecurityAudit('ADMIN_CREDENTIALS_UPDATE', 'SUCCESS', 'AdminPortal', 'Admin password updated with PBKDF2');
-    showToast(language === 'km' ? 'បានផ្លាស់ប្តូរពាក្យសម្ងាត់រដ្ឋបាលដោយសុវត្ថិភាព (PBKDF2)!' : 'Admin password updated securely (PBKDF2)!', 'success');
+    showToast(language === 'km' ? '✅ បានផ្លាស់ប្តូរពាក្យសម្ងាត់រដ្ឋបាលដោយសុវត្ថិភាព!' : '✅ Admin password updated securely!', 'success');
     return true;
   };
 
@@ -9602,7 +9713,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             updatedAt: editNowIso,
           };
         });
-        scheduleStorageWrite('kft_destinations_real_v15', nextDests, 400);
+        scheduleStorageWrite('kft_destinations_real_v9', nextDests, 400);
         return nextDests;
       });
     }
@@ -10254,7 +10365,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 updatedAt: nowIso,
               };
             });
-            scheduleStorageWrite('kft_destinations_real_v15', nextDests, 400);
+            scheduleStorageWrite('kft_destinations_real_v9', nextDests, 400);
             return nextDests;
           });
         }

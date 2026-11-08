@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { TouristDestination, isAdminAccount } from '../types';
+import React, { useEffect, useMemo, useState } from 'react';
+import { TouristDestination, isAdminAccount, isEphemeralDeadImageUrl } from '../types';
 import { useApp } from '../context/AppContext';
 import {
   MapPin,
@@ -17,9 +17,6 @@ import {
 } from 'lucide-react';
 import { tr } from '../utils/i18n';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
-import { fetchVerifiedAttractionPhotoFromGoogleMaps } from '../services/touristAttractionPhotoService';
-import { recordPermanentDestinationOverride } from '../services/permanentMediaVaultService';
-
 import type { Language } from '../types';
 
 interface TouristCardProps {
@@ -28,7 +25,6 @@ interface TouristCardProps {
 
 interface TouristCardViewProps {
   destination: TouristDestination;
-  allDestinations: TouristDestination[];
   language: Language;
   bookmarked: boolean;
   isAdmin: boolean;
@@ -71,7 +67,6 @@ export const DefaultDestinationIcon: React.FC<{ categorySlug?: string; className
 const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
   ({
     destination,
-    allDestinations,
     language,
     bookmarked,
     isAdmin,
@@ -79,13 +74,12 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
     toggleBookmark,
   }) => {
     const [imgError, setImgError] = useState(false);
-    const [autoFetchedPhotoUrl, setAutoFetchedPhotoUrl] = useState<string>('');
-    const cardRef = useRef<HTMLDivElement | null>(null);
     const loc = useMemo(() => getLocalizedDestination(destination, language), [destination, language]);
 
-    const rawPhoto = (destination.photoUrl || autoFetchedPhotoUrl || '').trim();
+    const rawPhoto = (destination.photoUrl || '').trim();
     const isRealPhoto =
       Boolean(rawPhoto) &&
+      !isEphemeralDeadImageUrl(rawPhoto) &&
       !rawPhoto.startsWith('data:image/svg') &&
       !rawPhoto.includes('places.googleapis.com');
     const hasClearPhoto = isRealPhoto && !imgError;
@@ -93,53 +87,7 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
     // Reset imgError when photoUrl changes
     useEffect(() => {
       setImgError(false);
-    }, [destination.photoUrl, autoFetchedPhotoUrl]);
-
-    // Automatic Wikimedia Commons / Wikipedia attraction image fetching when a tourist attraction is missing a photo
-    useEffect(() => {
-      if (isRealPhoto || destination.categorySlug === 'hotel') return;
-      let cancelled = false;
-      const runFetch = () => {
-        fetchVerifiedAttractionPhotoFromGoogleMaps(destination, allDestinations)
-          .then((match) => {
-            if (cancelled || !match || !match.photoUrl) return;
-            setAutoFetchedPhotoUrl(match.photoUrl);
-            try {
-              recordPermanentDestinationOverride({
-                ...destination,
-                photoUrl: match.photoUrl,
-                galleryPhotos: match.galleryPhotos?.length ? match.galleryPhotos : [match.photoUrl],
-                isCustomPhoto: true,
-                photoUpdatedAt: new Date().toISOString(),
-              });
-            } catch {}
-          })
-          .catch(() => {});
-      };
-
-      const el = cardRef.current;
-      if (!el || typeof IntersectionObserver === 'undefined') {
-        runFetch();
-        return () => {
-          cancelled = true;
-        };
-      }
-
-      const observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0]?.isIntersecting) {
-            observer.disconnect();
-            runFetch();
-          }
-        },
-        { rootMargin: '240px' }
-      );
-      observer.observe(el);
-      return () => {
-        cancelled = true;
-        observer.disconnect();
-      };
-    }, [destination, allDestinations, isRealPhoto]);
+    }, [destination.photoUrl]);
 
     const resolvedDestPhotoUrl = useMemo(() => {
       if (!isRealPhoto) return '';
@@ -153,7 +101,6 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
     if (!hasClearPhoto || isCompactDirectoryRow) {
       return (
         <div
-          ref={cardRef}
           data-testid={`dest-row-${destination.id}`}
           onClick={() => setSelectedDestination(destination)}
           className="group rounded-2xl px-3 py-2.5 transition-all duration-150 cursor-pointer flex items-center gap-3 border active:scale-[0.99] bg-white dark:bg-slate-800/90 hover:bg-emerald-50/40 dark:hover:bg-slate-800 border-slate-200/90 dark:border-slate-700/80 shadow-2xs"
@@ -380,14 +327,13 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
 );
 
 const TouristCardInner: React.FC<TouristCardProps> = ({ destination }) => {
-  const { destinations, language, setSelectedDestination, isBookmarked, toggleBookmark, currentUser } = useApp();
+  const { language, setSelectedDestination, isBookmarked, toggleBookmark, currentUser } = useApp();
   const bookmarked = isBookmarked(destination.id);
   const isAdmin = isAdminAccount(currentUser);
 
   return (
     <TouristCardView
       destination={destination}
-      allDestinations={destinations}
       language={language}
       bookmarked={bookmarked}
       isAdmin={isAdmin}

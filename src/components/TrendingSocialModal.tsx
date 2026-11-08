@@ -11,6 +11,7 @@ import {
   getTrendingFoodGoogleExternalUrl,
   openExternalUrlNativeSafe,
   resolveFoodPhotoUrl,
+  handleFoodImageError,
 } from '../types';
 import { shareRichContent } from '../utils/androidMediaHelper';
 import { openAiAssistantWithQuery, getAskAiButtonLabel } from '../utils/aiSearchBridge';
@@ -950,7 +951,8 @@ export const TrendingSocialModal: React.FC = () => {
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <img
-                            src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt)}
+                            src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 240, food.id)}
+                            onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
                             alt={locF.name}
                             loading="lazy"
                             decoding="async"
