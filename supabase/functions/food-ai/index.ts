@@ -182,9 +182,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const [userDoc, pricingDoc] = userId
     ? await Promise.all([readUserDoc(userKvKey(userId)), getCachedPricingDoc()])
     : [null, null];
-  const vip = userId ? isVipActive(userDoc) : false;
+  // Only bind daily quota to userId when a real user record exists in kft_app_kv_store;
+  // invented/self-asserted userId strings without a stored user record fall back to IP quota.
+  const verifiedUserId = userDoc && typeof userDoc === 'object' ? userId : null;
+  const vip = verifiedUserId ? isVipActive(userDoc) : false;
   if (enforceVip) {
-    if (!userId) return json(401, { error: { status: 'AUTH_REQUIRED', message: 'Sign in to use AI.' } });
+    if (!verifiedUserId) return json(401, { error: { status: 'AUTH_REQUIRED', message: 'Sign in to use AI.' } });
     if (!vip) return json(403, { error: { status: 'VIP_REQUIRED', message: 'VIP membership is required for AI features.' } });
   }
 
@@ -194,7 +197,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const weight = hasImage ? 3 : 1; // image recognition costs more than a text question
   const { limit, tier: quotaTier } = resolveUserAiDailyLimit({
     isPayment,
-    userId,
+    userId: verifiedUserId,
     userDoc,
     pricingDoc,
     envTrial: Deno.env.get('AI_DAILY_LIMIT_TRIAL'),
@@ -203,7 +206,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     envAnon: Deno.env.get('AI_DAILY_LIMIT_ANON'),
     envPayment: Deno.env.get('AI_DAILY_LIMIT_PAYMENT'),
   });
-  const quotaKey = userId || `ip:${ip}`;
+  const quotaKey = verifiedUserId || `ip:${ip}`;
   const used = await usageHit(quotaKey, isPayment ? 'ai_payment' : 'ai', weight); // null => counter unavailable => fail open
   const quotaHeaders: Record<string, string> =
     used === null

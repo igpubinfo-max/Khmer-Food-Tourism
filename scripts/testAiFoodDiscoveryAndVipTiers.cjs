@@ -304,7 +304,7 @@ test('Welcome Screen (3-5s before Login), Gemini Vision API Key, Dish-Specific P
   const restCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/RestaurantCard.tsx'), 'utf8');
   const touristCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/TouristCard.tsx'), 'utf8');
 
-  assert(aiFoodServiceContent.includes("DEFAULT_GEMINI_VISION_API_KEY = 'AIzaSyCZnYNQLNcuco5HxdmrWVXKXwvAr7mg7v0'"), 'Gemini Vision API key pre-configured');
+  assert(!/AIza[0-9A-Za-z_-]{30,}/.test(aiFoodServiceContent), 'No hardcoded Gemini Vision API key in client source');
   assert(welcomeModalContent.includes('WELCOME_DURATION_MS = 8000') && welcomeModalContent.includes('ចាប់ផ្តើមប្រើប្រាស់ឥឡូវនេះ'), 'WelcomeScreenModal has 8s timer and Get Started button');
   assert(appContent.includes('WELCOME_SESSION_KEY') && appContent.includes('<WelcomeScreenModal'), 'WelcomeScreenModal integrated once per session in App.tsx');
   assert(add100Content.includes('DISH_SPECIFIC_PHOTOS') && !add100Content.includes('images.unsplash.com'), 'All 100 new dishes (food-101..200) use dish-specific Wikimedia Commons photos');

@@ -8388,7 +8388,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
-    const pwHash = await hashPasswordPBKDF2(cleanPass);
+    const pwHash =
+      existing?.passwordHash && existing.passwordHash.indexOf('pbkdf2') === 0
+        ? existing.passwordHash
+        : await hashPasswordPBKDF2(cleanPass);
     const nowIso = new Date().toISOString();
     pruneStaleDeletedTombstoneForActiveAuth({ id: canonicalId, email: syntheticEmail, phone: canonicalPhone });
 

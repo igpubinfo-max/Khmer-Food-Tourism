@@ -61,9 +61,19 @@ export function clearAdminToken(): void {
 
 /** Header carrying the admin token for writes to admin-only documents (empty object otherwise). */
 export function adminTokenHeaders(key: string): Record<string, string> {
-  // Admin-only documents, and per-user rows (an admin can grant / adjust VIP from the Admin portal; the database VIP guard
-  // accepts those writes only with a valid admin token). Ordinary users never have a token.
-  if (!ADMIN_ONLY_KV_KEYS.includes(key) && !key.startsWith('kft_user_')) return {};
+  // Admin-only documents, protected aggregate lists, and per-user rows (an admin can grant / adjust VIP or delete accounts
+  // from the Admin portal; the database guards accept those writes/deletes only with a valid admin token).
+  if (
+    !ADMIN_ONLY_KV_KEYS.includes(key) &&
+    !key.startsWith('kft_user_') &&
+    key !== 'kft_cloud_users_v1' &&
+    key !== 'kft_cloud_users_v2' &&
+    key !== 'kft_cloud_vip_backup_v1' &&
+    key !== 'kft_cloud_deleted_users_v1' &&
+    key !== 'kft_cloud_transactions_v1'
+  ) {
+    return {};
+  }
   const token = getAdminToken();
   return token ? { 'x-kft-admin-token': token } : {};
 }
