@@ -47,7 +47,7 @@ import {
 } from './icons/HandcraftedIcons';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { tr } from '../utils/i18n';
-import { FOOD_WATERMARK_TEXT, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
+import { FOOD_WATERMARK_TEXT, FOOD_WATERMARK_BADGE_CLASS, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { useBodyScrollLock } from '../utils/useBodyScrollLock';
 import { hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
@@ -2133,8 +2133,8 @@ export const WhatToEatModal: React.FC = () => {
                                       {rpLoc.category}
                                     </span>
                                   </div>
-                                  {!isUrlWatermarkedAtPixelLevel(resolveFoodPhotoUrl(rpFood)) && (
-                                    <span className="absolute bottom-2 right-2.5 z-10 bg-slate-900/40 backdrop-blur-xs text-white/80 text-[8px] px-2 py-0.5 rounded-full border border-white/15 select-none pointer-events-none">
+                                  {!isUrlWatermarkedAtPixelLevel(rpFood.photoUrl) && (
+                                    <span className={FOOD_WATERMARK_BADGE_CLASS}>
                                       {FOOD_WATERMARK_TEXT}
                                     </span>
                                   )}
@@ -3459,9 +3459,9 @@ export const WhatToEatModal: React.FC = () => {
                       </span>
                     </div>
 
-                    {/* Watermark fallback only for external URLs not watermarked at pixel level */}
-                    {!isUrlWatermarkedAtPixelLevel(resolveFoodPhotoUrl(currentDish)) && (
-                      <span className="absolute bottom-2 right-2.5 z-10 bg-slate-900/40 backdrop-blur-xs text-white/80 text-[8px] sm:text-[9px] px-2 py-0.5 rounded-full border border-white/15 select-none pointer-events-none">
+                    {/* Khmer ownership watermark (applied once) */}
+                    {!isUrlWatermarkedAtPixelLevel(currentDish.photoUrl) && (
+                      <span className={FOOD_WATERMARK_BADGE_CLASS}>
                         {FOOD_WATERMARK_TEXT}
                       </span>
                     )}

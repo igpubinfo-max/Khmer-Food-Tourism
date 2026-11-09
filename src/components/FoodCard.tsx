@@ -7,7 +7,7 @@ import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { getDisplayTags, tagLabel } from '../utils/dishTags';
 import { PassportStampButton } from './PassportStampButton';
 import { DishTagIcon } from './icons/HandcraftedIcons';
-import { FOOD_WATERMARK_TEXT, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
+import { FOOD_WATERMARK_TEXT, FOOD_WATERMARK_BADGE_CLASS, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
 
 import type { Language } from '../types';
 
@@ -104,9 +104,9 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
           <Heart className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
         </button>
 
-        {/* Watermark fallback only for external URLs not watermarked at pixel level */}
-        {!isUrlWatermarkedAtPixelLevel(resolveFoodPhotoUrl(food)) && (
-          <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-full bg-slate-900/40 backdrop-blur-xs text-[8px] sm:text-[9px] font-medium text-white/80 border border-white/15 select-none pointer-events-none shadow-2xs">
+        {/* Khmer ownership watermark (applied once) */}
+        {!isUrlWatermarkedAtPixelLevel(resolvedPhotoUrl) && (
+          <div className={FOOD_WATERMARK_BADGE_CLASS}>
             <span>{FOOD_WATERMARK_TEXT}</span>
           </div>
         )}

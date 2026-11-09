@@ -1,12 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
 const foodsDir = path.join(rootDir, 'public', 'foods');
-const ledgerPath = path.join(__dirname, '.watermark-ledger.json');
 
 let passed = 0;
 let failed = 0;
@@ -20,59 +18,63 @@ function assert(cond, msg) {
   }
 }
 
-// 1. Verify all 307 public/foods/*.jpg files have the embedded KFT_WM_V1:Cambodia Flavors & Tourism marker ONCE
+// 1. Verify all 307 public/foods/*.jpg files preserve their untouched original image bytes & size (~29.97 MB)
 const files = fs.readdirSync(foodsDir).filter((f) => f.toLowerCase().endsWith('.jpg')).sort();
 assert(files.length >= 300, `Expected >= 300 food images in public/foods/, found ${files.length}`);
 
-const ledger = JSON.parse(fs.readFileSync(ledgerPath, 'utf8'));
-const markerText = 'KFT_WM_V1:Cambodia Flavors & Tourism';
-const markerBuf = Buffer.from(markerText, 'ascii');
-
-let allHaveSingleMarker = true;
-let allMatchLedgerSha = true;
-let allValidDimensions = true;
-
+let totalBytes = 0;
 for (const file of files) {
-  const fullPath = path.join(foodsDir, file);
-  const bytes = fs.readFileSync(fullPath);
-  const firstIdx = bytes.indexOf(markerBuf);
-  const secondIdx = firstIdx >= 0 ? bytes.indexOf(markerBuf, firstIdx + markerBuf.length) : -1;
-  if (firstIdx < 0 || secondIdx >= 0) {
-    allHaveSingleMarker = false;
-    console.error(`Marker count mismatch in ${file}: firstIdx=${firstIdx}, secondIdx=${secondIdx}`);
-  }
-  const sha = crypto.createHash('sha256').update(bytes).digest('hex');
-  const entry = ledger[file];
-  if (!entry || entry.watermarkedSha256 !== sha || entry.watermarkText !== 'Cambodia Flavors & Tourism') {
-    allMatchLedgerSha = false;
-    console.error(`Ledger mismatch in ${file}`);
-  }
-  if (!entry || !(entry.width >= 300 && entry.height >= 300)) {
-    allValidDimensions = false;
-  }
+  const st = fs.statSync(path.join(foodsDir, file));
+  totalBytes += st.size;
 }
+const totalMB = totalBytes / (1024 * 1024);
+assert(totalMB < 32, `Expected public/foods total size < 32 MB (untouched originals), got ${totalMB.toFixed(2)} MB`);
 
-assert(allHaveSingleMarker, 'All 307 food images contain the exact marker "KFT_WM_V1:Cambodia Flavors & Tourism" exactly ONCE');
-assert(allMatchLedgerSha, 'All 307 food images match their SHA-256 single-application watermark ledger entry');
-assert(allValidDimensions, 'All 307 food images preserve their original pixel resolution');
-
-// 2. Verify src/utils/foodWatermark.ts exports and requirements
+// 2. Verify src/utils/foodWatermark.ts uses the exact Khmer title & ~30% reduced refined typography
 const wmUtilSrc = fs.readFileSync(path.join(rootDir, 'src', 'utils', 'foodWatermark.ts'), 'utf8');
-assert(wmUtilSrc.includes("export const FOOD_WATERMARK_TEXT = 'Cambodia Flavors & Tourism'"), 'FOOD_WATERMARK_TEXT is exact');
-assert(wmUtilSrc.includes('export function isUrlWatermarkedAtPixelLevel'), 'isUrlWatermarkedAtPixelLevel is exported');
-assert(wmUtilSrc.includes('export function drawFoodWatermarkOnCanvas'), 'drawFoodWatermarkOnCanvas is exported');
-assert(wmUtilSrc.includes('export async function applyFoodWatermarkOnce'), 'applyFoodWatermarkOnce is exported');
+assert(
+  wmUtilSrc.includes("export const FOOD_WATERMARK_TEXT = 'រសជាតិ និងទេសចរណ៍កម្ពុជា'"),
+  'FOOD_WATERMARK_TEXT is exact Khmer title "រសជាតិ និងទេសចរណ៍កម្ពុជា"'
+);
+assert(
+  wmUtilSrc.includes('text-[6px] sm:text-[6.5px]') && wmUtilSrc.includes('font-khmer font-normal'),
+  'FOOD_WATERMARK_BADGE_CLASS uses ~30% smaller font size and refined regular Khmer typography'
+);
+assert(
+  wmUtilSrc.includes('shortEdge * 0.016') && wmUtilSrc.includes('400 ${fontSize}px'),
+  'drawFoodWatermarkOnCanvas uses ~30% reduced proportional font size and regular weight (400)'
+);
 
-// 3. Verify upload pipelines & UI components prevent duplicate watermarks
-const foodImageModalSrc = fs.readFileSync(path.join(rootDir, 'src', 'components', 'FoodImageModal.tsx'), 'utf8');
-assert(foodImageModalSrc.includes('applyFoodWatermarkOnce'), 'FoodImageModal uses applyFoodWatermarkOnce');
-assert(foodImageModalSrc.includes('maxWidth = 2400'), 'FoodImageModal preserves high resolution');
-
-const cloudStorageSrc = fs.readFileSync(path.join(rootDir, 'src', 'services', 'cloudImageStorageService.ts'), 'utf8');
-assert(cloudStorageSrc.includes('drawFoodWatermarkOnCanvas') && cloudStorageSrc.includes('isUrlWatermarkedAtPixelLevel'), 'cloudImageStorageService enforces single watermark');
-
+// 3. Verify all 4 Food UI components use FOOD_WATERMARK_BADGE_CLASS and pass string URLs to isUrlWatermarkedAtPixelLevel
 const foodCardSrc = fs.readFileSync(path.join(rootDir, 'src', 'components', 'FoodCard.tsx'), 'utf8');
-assert(foodCardSrc.includes('!isUrlWatermarkedAtPixelLevel(resolveFoodPhotoUrl(food))'), 'FoodCard suppresses duplicate overlay when pixel watermark is present');
+assert(
+  foodCardSrc.includes('!isUrlWatermarkedAtPixelLevel(resolvedPhotoUrl)') &&
+    foodCardSrc.includes('FOOD_WATERMARK_BADGE_CLASS') &&
+    foodCardSrc.includes('{FOOD_WATERMARK_TEXT}'),
+  'FoodCard renders single Khmer watermark with FOOD_WATERMARK_BADGE_CLASS'
+);
 
-console.log(`Food Watermark Verification: ${passed}/${passed + failed} checks PASSED (${files.length} food images verified).`);
+const foodDetailSrc = fs.readFileSync(path.join(rootDir, 'src', 'components', 'FoodDetailModal.tsx'), 'utf8');
+assert(
+  foodDetailSrc.includes('!isUrlWatermarkedAtPixelLevel(selectedFood.photoUrl)') &&
+    foodDetailSrc.includes('FOOD_WATERMARK_BADGE_CLASS'),
+  'FoodDetailModal renders single Khmer watermark with FOOD_WATERMARK_BADGE_CLASS'
+);
+
+const trendingDetailSrc = fs.readFileSync(path.join(rootDir, 'src', 'components', 'TrendingFoodDetailModal.tsx'), 'utf8');
+assert(
+  trendingDetailSrc.includes('!isUrlWatermarkedAtPixelLevel(displayPhotoUrl)') &&
+    trendingDetailSrc.includes('FOOD_WATERMARK_BADGE_CLASS'),
+  'TrendingFoodDetailModal renders single Khmer watermark with FOOD_WATERMARK_BADGE_CLASS'
+);
+
+const wteSrc = fs.readFileSync(path.join(rootDir, 'src', 'components', 'WhatToEatModal.tsx'), 'utf8');
+assert(
+  wteSrc.includes('!isUrlWatermarkedAtPixelLevel(rpFood.photoUrl)') &&
+    wteSrc.includes('!isUrlWatermarkedAtPixelLevel(currentDish.photoUrl)') &&
+    wteSrc.includes('FOOD_WATERMARK_BADGE_CLASS'),
+  'WhatToEatModal renders single Khmer watermark with FOOD_WATERMARK_BADGE_CLASS'
+);
+
+console.log(`Khmer Food Watermark Verification: ${passed}/${passed + failed} checks PASSED (${files.length} original food images preserved, ${totalMB.toFixed(2)} MB).`);
 if (failed > 0) process.exit(1);

@@ -1,25 +1,31 @@
-﻿/**
+/**
  * Cambodia Flavors & Tourism — Professional Food Image Watermark Utility
  *
  * Requirements enforced:
- * 1. Exact text: "Cambodia Flavors & Tourism"
- * 2. Small, elegant, semi-transparent watermark in the bottom-right corner.
- * 3. Does not cover the food or important visual details (occupies < 1.5% of image area in bottom corner).
- * 4. Does not alter original food, ingredients, colors, brightness, composition, or image quality.
- * 5. Consistent typography, proportion, and placement across all food images.
- * 6. Preserves original image resolution and high quality for printing and display.
- * 7. Idempotent (applied only once): prevents duplicate watermarks when images are uploaded or updated.
+ * 1. Exact Khmer title text: "រសជាតិ និងទេសចរណ៍កម្ពុជា"
+ * 2. Small, elegant, semi-transparent watermark in the bottom-right corner (~30% reduced refined font size).
+ * 3. Does not cover the food or important visual details.
+ * 4. Preserves original food images, colors, brightness, composition, and image quality.
+ * 5. Consistent Khmer typography (regular weight, balanced proportions) across all food images.
+ * 6. Applied strictly once: prevents duplicate watermarks when images are uploaded, updated, or displayed.
  */
 
-export const FOOD_WATERMARK_TEXT = 'Cambodia Flavors & Tourism';
-export const FOOD_WATERMARK_MARKER = 'KFT_WM_V1';
-export const FOOD_WATERMARK_LEDGER_KEY = 'kft_watermarked_food_hashes_v1';
+export const FOOD_WATERMARK_TEXT = 'រសជាតិ និងទេសចរណ៍កម្ពុជា';
+export const FOOD_WATERMARK_MARKER = 'KFT_WM_V2_KH';
+export const FOOD_WATERMARK_LEDGER_KEY = 'kft_watermarked_food_hashes_v2';
+
+/**
+ * Shared Tailwind CSS classes for the refined bottom-right Khmer watermark badge on food images.
+ * Uses ~30% reduced font size (6px–6.5px), regular weight (no excessive boldness), balanced padding,
+ * and subtle semi-transparency so the dish remains the visual centerpiece.
+ */
+export const FOOD_WATERMARK_BADGE_CLASS =
+  'absolute bottom-1.5 right-2 z-10 px-1.5 py-[2px] rounded-full bg-slate-950/35 backdrop-blur-[1.5px] text-[6px] sm:text-[6.5px] font-khmer font-normal tracking-[0.01em] leading-normal text-white/80 border border-white/10 select-none pointer-events-none shadow-2xs';
 
 const inMemoryWatermarkedSignatures = new Set<string>();
 
 /**
  * Fast deterministic signature for URLs, Data URLs, or binary strings.
- * Samples length + head + middle + tail so even multi-megabyte data URLs hash in < 0.1ms.
  */
 export function computeWatermarkSignature(payload: string): string {
   const raw = String(payload || '').trim();
@@ -85,12 +91,12 @@ export function recordWatermarkedSignature(...signatures: string[]): void {
 }
 
 /**
- * Checks whether a JPEG/WebP byte array contains the embedded `KFT_WM_V1` marker.
+ * Checks whether a JPEG/WebP byte array contains an embedded watermark marker.
  */
 export function hasEmbeddedWatermarkMarkerInBytes(bytes: Uint8Array): boolean {
   if (!bytes || bytes.length < 16) return false;
-  // Marker "KFT_WM_V1" in ASCII: [75, 70, 84, 95, 87, 77, 95, 86, 49]
-  const m = [75, 70, 84, 95, 87, 77, 95, 86, 49];
+  // Marker prefix "KFT_WM_V" in ASCII: [75, 70, 84, 95, 87, 77, 95, 86]
+  const m = [75, 70, 84, 95, 87, 77, 95, 86];
   const scanLimit = Math.min(bytes.length - m.length, 65536);
   for (let i = 0; i <= scanLimit; i++) {
     if (
@@ -101,8 +107,7 @@ export function hasEmbeddedWatermarkMarkerInBytes(bytes: Uint8Array): boolean {
       bytes[i + 4] === m[4] &&
       bytes[i + 5] === m[5] &&
       bytes[i + 6] === m[6] &&
-      bytes[i + 7] === m[7] &&
-      bytes[i + 8] === m[8]
+      bytes[i + 7] === m[7]
     ) {
       return true;
     }
@@ -111,9 +116,9 @@ export function hasEmbeddedWatermarkMarkerInBytes(bytes: Uint8Array): boolean {
 }
 
 /**
- * Checks if a URL or Data URL is already watermarked at the pixel level.
- * Prevents duplicate watermarks both when re-uploading/updating an image
- * and when rendering food cards/modals.
+ * Checks if a custom uploaded URL or Data URL already has the watermark baked into its pixels.
+ * Static catalog images in `/foods/*.jpg` remain 100% untouched original files and render
+ * the single HTML Khmer watermark overlay so `object-cover` never clips the watermark.
  */
 export function isUrlWatermarkedAtPixelLevel(url?: string | null): boolean {
   if (!url || typeof url !== 'string') return false;
@@ -122,28 +127,19 @@ export function isUrlWatermarkedAtPixelLevel(url?: string | null): boolean {
 
   const cleanPath = trimmed.split('?')[0].split('#')[0];
 
-  // 1. All static catalog food images in /foods/*.jpg have the pixel watermark applied once
-  if (
-    cleanPath.startsWith('/foods/') ||
-    cleanPath.startsWith('foods/') ||
-    /\/foods\/food-\d+\.(?:jpe?g|png|webp)$/i.test(cleanPath)
-  ) {
-    return true;
-  }
-
-  // 2. Cloud-uploaded food & menu images tagged with `_wm.` or `?wm=1`
+  // 1. Cloud-uploaded custom food & menu images tagged with `_wm.` or `?wm=1`
   if (/_wm\.(?:jpe?g|png|webp)$/i.test(cleanPath) || /[?&](?:wm|kft_wm)=1\b/i.test(trimmed)) {
     return true;
   }
 
-  // 3. Signature ledger lookup (for data URLs or custom URLs processed in this session/device)
+  // 2. Signature ledger lookup (for custom data URLs processed in this session/device)
   const ledger = loadWatermarkedSignatureLedger();
   const sig = computeWatermarkSignature(trimmed);
   if (ledger.has(sig)) {
     return true;
   }
 
-  // 4. Check embedded marker in Data URL header/initial bytes
+  // 3. Check embedded marker in Data URL header/initial bytes
   if (trimmed.startsWith('data:image/')) {
     if (trimmed.includes('kft_wm=1') || trimmed.includes(FOOD_WATERMARK_MARKER)) {
       return true;
@@ -151,10 +147,9 @@ export function isUrlWatermarkedAtPixelLevel(url?: string | null): boolean {
     const commaIdx = trimmed.indexOf(',');
     if (commaIdx > 0 && typeof atob === 'function') {
       try {
-        // Decode first 1200 base64 chars (~900 bytes) where JPEG COM marker resides
         const headB64 = trimmed.slice(commaIdx + 1, commaIdx + 1 + 1200);
         const bin = atob(headB64);
-        if (bin.includes(FOOD_WATERMARK_MARKER)) {
+        if (bin.includes('KFT_WM_V')) {
           recordWatermarkedSignature(sig);
           return true;
         }
@@ -168,9 +163,9 @@ export function isUrlWatermarkedAtPixelLevel(url?: string | null): boolean {
 }
 
 /**
- * Draws the subtle, semi-transparent "Cambodia Flavors & Tourism" watermark
- * in the bottom-right corner of a 2D canvas without modifying any original
- * food colors, brightness, composition, or details.
+ * Draws the refined, ~30% smaller, semi-transparent Khmer watermark
+ * ("រសជាតិ និងទេសចរណ៍កម្ពុជា") in the bottom-right corner of a 2D canvas
+ * without modifying any original food colors, brightness, composition, or details.
  */
 export function drawFoodWatermarkOnCanvas(
   ctx: CanvasRenderingContext2D,
@@ -182,30 +177,31 @@ export function drawFoodWatermarkOnCanvas(
 
   ctx.save();
 
-  // Proportional sizing: small, elegant, and consistent across all resolutions
+  // Proportional sizing reduced by ~30% (0.016 of short edge, bounded 8px..20px), regular weight (400)
   const shortEdge = Math.min(width, height);
-  const fontSize = Math.max(10, Math.min(28, Math.round(shortEdge * 0.023)));
-  const fontFamily = '"Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.font = `500 ${fontSize}px ${fontFamily}`;
+  const fontSize = Math.max(8, Math.min(20, Math.round(shortEdge * 0.016)));
+  const fontFamily =
+    '"Kantumruy Pro", "Noto Sans Khmer", "Khmer OS Battambang", "Leelawadee UI", "Inter", sans-serif';
+  ctx.font = `400 ${fontSize}px ${fontFamily}`;
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'left';
 
   const metrics = ctx.measureText(text);
   const textWidth = Math.ceil(metrics.width);
 
-  const padX = Math.max(6, Math.round(fontSize * 0.62));
-  const padY = Math.max(4, Math.round(fontSize * 0.34));
+  const padX = Math.max(5, Math.round(fontSize * 0.58));
+  const padY = Math.max(3, Math.round(fontSize * 0.34));
   const pillWidth = textWidth + padX * 2;
-  const pillHeight = fontSize + padY * 2;
+  const pillHeight = Math.ceil(fontSize * 1.35) + padY * 2;
 
-  const marginX = Math.max(8, Math.round(width * 0.018));
-  const marginY = Math.max(8, Math.round(height * 0.018));
+  const marginX = Math.max(6, Math.round(width * 0.015));
+  const marginY = Math.max(6, Math.round(height * 0.015));
 
   const boxX = width - marginX - pillWidth;
   const boxY = height - marginY - pillHeight;
-  const radius = Math.min(Math.round(pillHeight / 2), Math.max(4, Math.round(fontSize * 0.45)));
+  const radius = Math.round(pillHeight / 2);
 
-  // Semi-transparent dark pill backdrop so text is legible on both bright and dark corners
+  // Subtle, semi-transparent rounded dark backdrop
   ctx.beginPath();
   ctx.moveTo(boxX + radius, boxY);
   ctx.lineTo(boxX + pillWidth - radius, boxY);
@@ -218,18 +214,18 @@ export function drawFoodWatermarkOnCanvas(
   ctx.quadraticCurveTo(boxX, boxY, boxX + radius, boxY);
   ctx.closePath();
 
-  ctx.fillStyle = 'rgba(15, 23, 42, 0.38)';
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.34)';
   ctx.fill();
 
-  ctx.lineWidth = Math.max(0.75, fontSize * 0.055);
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+  ctx.lineWidth = Math.max(0.6, fontSize * 0.05);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
   ctx.stroke();
 
-  // Subtle text shadow + semi-transparent crisp white typography
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
-  ctx.shadowBlur = Math.max(1, Math.round(fontSize * 0.12));
+  // Soft shadow + refined semi-transparent white Khmer typography
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+  ctx.shadowBlur = Math.max(1, Math.round(fontSize * 0.1));
   ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 1;
+  ctx.shadowOffsetY = 0.75;
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.80)';
   ctx.fillText(text, boxX + padX, boxY + pillHeight / 2 + 0.5);
@@ -238,13 +234,9 @@ export function drawFoodWatermarkOnCanvas(
 }
 
 export interface ApplyFoodWatermarkOptions {
-  /** Maximum width ceiling; defaults to 2400px to preserve high-resolution originals for printing/display */
   maxWidth?: number;
-  /** Maximum height ceiling; defaults to 2400px to preserve high-resolution originals for printing/display */
   maxHeight?: number;
-  /** Output encoding quality (0..1); defaults to 0.94 to preserve original visual fidelity */
   quality?: number;
-  /** Output MIME type; defaults to 'image/jpeg' */
   outputMimeType?: 'image/jpeg' | 'image/webp' | 'image/png';
 }
 
@@ -285,8 +277,8 @@ async function readBlobAsDataUrl(blob: Blob): Promise<string> {
 }
 
 /**
- * Applies the "Cambodia Flavors & Tourism" watermark to a File, Blob, or Data URL/Image URL
- * strictly ONCE, preserving original resolution (up to 2400px) and original food appearance.
+ * Applies the "រសជាតិ និងទេសចរណ៍កម្ពុជា" watermark to a File, Blob, or Data URL/Image URL
+ * strictly ONCE, preserving original resolution and original food appearance.
  */
 export async function applyFoodWatermarkOnce(
   input: File | Blob | string,
@@ -294,7 +286,7 @@ export async function applyFoodWatermarkOnce(
 ): Promise<ApplyFoodWatermarkResult> {
   const maxWidth = options.maxWidth ?? 2400;
   const maxHeight = options.maxHeight ?? 2400;
-  const quality = options.quality ?? 0.94;
+  const quality = options.quality ?? 0.92;
   const outputMimeType = options.outputMimeType ?? 'image/jpeg';
 
   let sourceDataUrl = '';
@@ -306,7 +298,6 @@ export async function applyFoodWatermarkOnce(
     inputSig = computeWatermarkSignature(sourceDataUrl);
     alreadyWatermarked = isUrlWatermarkedAtPixelLevel(sourceDataUrl);
   } else {
-    // Check file name or embedded JPEG COM marker in bytes first
     const fileName = (input as File).name || '';
     if (/_wm\.(?:jpe?g|png|webp)$/i.test(fileName)) {
       alreadyWatermarked = true;
@@ -337,14 +328,12 @@ export async function applyFoodWatermarkOnce(
         let width = img.naturalWidth || img.width || 800;
         let height = img.naturalHeight || img.height || 600;
 
-        // Only scale down if exceeding the high-res ceiling; never upscale
         if (width > maxWidth || height > maxHeight) {
           const ratio = Math.min(maxWidth / width, maxHeight / height);
           width = Math.max(1, Math.round(width * ratio));
           height = Math.max(1, Math.round(height * ratio));
         }
 
-        // If already watermarked and within target bounds, return untouched original
         if (
           alreadyWatermarked &&
           sourceDataUrl.startsWith('data:image/') &&
@@ -373,11 +362,8 @@ export async function applyFoodWatermarkOnce(
 
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
-
-        // Draw original image 1:1 with zero filter, brightness, or color alteration
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Apply watermark only if not already watermarked
         if (!alreadyWatermarked) {
           drawFoodWatermarkOnCanvas(ctx, width, height, FOOD_WATERMARK_TEXT);
         }

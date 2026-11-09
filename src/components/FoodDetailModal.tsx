@@ -17,7 +17,7 @@ import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { DishTagChips } from './DishTagChips';
 import { PassportStampButton } from './PassportStampButton';
 import { WhereToEat } from './WhereToEat';
-import { FOOD_WATERMARK_TEXT, applyFoodWatermarkOnce, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
+import { FOOD_WATERMARK_TEXT, FOOD_WATERMARK_BADGE_CLASS, applyFoodWatermarkOnce, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
 import {
   generateAuthenticRecipeByDishName,
   areIngredientsIdentical,
@@ -1007,10 +1007,12 @@ export const FoodDetailModal: React.FC = () => {
               </h2>
             </div>
 
-            {/* Reference Image Label (រូបភាពយោង) */}
-            <div className="absolute bottom-2.5 right-3 z-10 px-1.5 py-0.5 rounded bg-black/55 backdrop-blur-xs text-[8px] sm:text-[9px] text-white/85 font-khmer border border-white/15 select-none pointer-events-none shadow-2xs">
-              <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
-            </div>
+            {/* Khmer ownership watermark (applied once) */}
+            {!isUrlWatermarkedAtPixelLevel(selectedFood.photoUrl) && (
+              <div className={FOOD_WATERMARK_BADGE_CLASS}>
+                <span>{FOOD_WATERMARK_TEXT}</span>
+              </div>
+            )}
           </div>
 
           <div className="p-4 sm:p-6 space-y-5">

@@ -8,7 +8,7 @@ import { tr, translateProvince } from '../utils/i18n';
 import { openTrendingFoodGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError } from '../types';
 import { translateDynamicTextToZh, sanitizeStrictLanguageText, toConciseSummary } from '../utils/zhDynamicTranslator';
 import { extractYouTubeVideoId, isKnownUnavailableVideo } from '../services/onlineFoodDiscoveryService';
-import { FOOD_WATERMARK_TEXT, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
+import { FOOD_WATERMARK_TEXT, FOOD_WATERMARK_BADGE_CLASS, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
 
 export const TrendingFoodDetailModal: React.FC = () => {
   const { 
@@ -216,10 +216,12 @@ export const TrendingFoodDetailModal: React.FC = () => {
             )}
           </div>
 
-          {/* Location / Village Scenery Label */}
-          <span className="absolute bottom-2.5 right-3 z-10 bg-black/55 backdrop-blur-xs text-white/85 text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded font-khmer border border-white/15 select-none pointer-events-none shadow-2xs">
-            {tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}
-          </span>
+          {/* Khmer ownership watermark (applied once) */}
+          {!isUrlWatermarkedAtPixelLevel(displayPhotoUrl) && (
+            <span className={FOOD_WATERMARK_BADGE_CLASS}>
+              {FOOD_WATERMARK_TEXT}
+            </span>
+          )}
 
           {/* Title overlay */}
           <div className="absolute bottom-3 left-3 right-24 font-khmer">
