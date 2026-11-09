@@ -135,7 +135,7 @@ export function normalizeRows(rows: string[][]): StatementEntry[] {
   rows.forEach((cells, rowIndex) => {
     const joined = cells.map((c) => String(c ?? '')).join(' | ');
     const compact = joined.replace(/[^0-9A-Za-z]/g, '').toUpperCase();
-    // cells that are ENTIRELY a number/amount, plus amounts embedded in text such as "4.99 USD"
+    // cells that are ENTIRELY a number/amount, plus amounts embedded in text such as "2.99 USD"
     const amounts: number[] = [];
     for (const c of cells) {
       const s = String(c ?? '').trim();

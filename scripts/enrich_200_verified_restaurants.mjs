@@ -388,7 +388,7 @@ async function main() {
       isVerified: true,
       isFeatured: idx < 30 ? true : Boolean(r.isFeatured),
       paymentStatus: 'verified',
-      promotionalPrice: 4.99,
+      promotionalPrice: 2.99,
       isPromoted: Boolean(r.isPromoted),
       paymentDate: r.paymentDate || '2026-01-15',
       profileImage: localPhotoUrl,

@@ -31,6 +31,8 @@ import {
   setAuthoritativeServerNowMs,
   resolveUserActualVipPlanDays,
   sanitizeUserVipPlanAndExpiry,
+  sanitizeVipMembershipHistoryEntry,
+  sanitizeLegacyVipTransactionPricing,
   isDeprecatedDemoSeedTransaction,
   inferBusinessTypeAndCategory,
 } from '../types';
@@ -873,8 +875,9 @@ export function sanitizeTransactionsForCloudPush(
   txns: RegistrationTransaction[]
 ): RegistrationTransaction[] {
   if (!Array.isArray(txns)) return [];
-  return txns.map(t => {
-    if (!t || !t.id) return t;
+  return txns.map(rawT => {
+    if (!rawT || !rawT.id) return rawT;
+    const t = sanitizeLegacyVipTransactionPricing(rawT);
     if (typeof t.paymentProofUrl === 'string' && t.paymentProofUrl.startsWith('data:image/')) {
       const proofKey = `${PROOF_RECORD_PREFIX}${t.id}`;
       if (!pushedProofKeysInSession.has(proofKey) && isSupabaseConfigured()) {
@@ -1531,10 +1534,10 @@ export function normalizeAuthoritativeAppSettings(
       ? Math.round(rawExtraFee * 100) / 100
       : 6.99;
 
+  if (shortPrice === 9.99 || shortPrice === 4.99) shortPrice = 2.99;
+  if (longPrice === 24.99 || longPrice === 4.99) longPrice = 6.99;
   if (isLegacyCorrupted) {
-    if (shortPrice === 9.99 || shortPrice === 4.99) shortPrice = 2.99;
     if (shortDays === 3) shortDays = 30;
-    if (longPrice === 24.99) longPrice = 6.99;
     if (longDays === 9 || longDays === 60) longDays = 90;
     if (extraStoreFee === 10.0 || extraStoreFee === 5.0) extraStoreFee = 6.99;
   }
@@ -1559,9 +1562,11 @@ export function normalizeAuthoritativeAppSettings(
   const consumerPaidAiDailyLimit = sanitizeDays(merged.consumerPaidAiDailyLimit, 80);
   const consumerPromo30dPriceUsd = sanitizeMoney(merged.consumerPromo30dPriceUsd, 0.99);
   const consumerPromo30dDays = sanitizeDays(merged.consumerPromo30dDays, 30);
-  const consumer30dPriceUsd = sanitizeMoney(merged.consumer30dPriceUsd, 2.99);
+  const rawC30Price = sanitizeMoney(merged.consumer30dPriceUsd, 2.99);
+  const consumer30dPriceUsd = rawC30Price === 4.99 || rawC30Price === 9.99 ? 2.99 : rawC30Price;
   const consumer30dDays = sanitizeDays(merged.consumer30dDays, 30);
-  const consumer90dPriceUsd = sanitizeMoney(merged.consumer90dPriceUsd, 6.99);
+  const rawC90Price = sanitizeMoney(merged.consumer90dPriceUsd, 6.99);
+  const consumer90dPriceUsd = rawC90Price === 4.99 || rawC90Price === 24.99 ? 6.99 : rawC90Price;
   const consumer90dDays = sanitizeDays(merged.consumer90dDays, 90);
   const consumer365dPriceUsd = sanitizeMoney(merged.consumer365dPriceUsd, 19.99);
   const consumer365dDays = sanitizeDays(merged.consumer365dDays, 365);
@@ -1666,8 +1671,8 @@ export function normalizeAuthoritativeAppSettings(
     shopEarlyBirdClaimedCount,
     shopPayAfterApproval,
     promotionalFeeUsd: shortPrice,
-    promotionPeriodKh: `សាកល្បង VIP ${consumerTrialDays} ថ្ងៃ FREE • កញ្ចប់អ្នកប្រើ៖ ${consumer30dPriceUsd.toFixed(2)}/ខែ, ${consumer90dPriceUsd.toFixed(2)}/90ថ្ងៃ, ${consumer365dPriceUsd.toFixed(2)}/ឆ្នាំ • កញ្ចប់ដាក់ហាង៖ ${shopMonthlyPriceUsd.toFixed(2)}/ខែ ឬ ${shopYearlyPriceUsd.toFixed(2)}/ឆ្នាំ`,
-    promotionPeriodEn: `${consumerTrialDays}-Day Free Trial • Consumer VIP: ${consumer30dPriceUsd.toFixed(2)}/mo, ${consumer90dPriceUsd.toFixed(2)}/90d, ${consumer365dPriceUsd.toFixed(2)}/yr • Shop Plan: ${shopMonthlyPriceUsd.toFixed(2)}/mo or ${shopYearlyPriceUsd.toFixed(2)}/yr`,
+    promotionPeriodKh: `សាកល្បង VIP ${consumerTrialDays} ថ្ងៃ FREE • កញ្ចប់អ្នកប្រើ៖ $${consumer30dPriceUsd.toFixed(2)}/ខែ, $${consumer90dPriceUsd.toFixed(2)}/90ថ្ងៃ, $${consumer365dPriceUsd.toFixed(2)}/ឆ្នាំ • កញ្ចប់ដាក់ហាង៖ $${shopMonthlyPriceUsd.toFixed(2)}/ខែ ឬ $${shopYearlyPriceUsd.toFixed(2)}/ឆ្នាំ`,
+    promotionPeriodEn: `${consumerTrialDays}-Day Free Trial • Consumer VIP: $${consumer30dPriceUsd.toFixed(2)}/mo, $${consumer90dPriceUsd.toFixed(2)}/90d, $${consumer365dPriceUsd.toFixed(2)}/yr • Shop Plan: $${shopMonthlyPriceUsd.toFixed(2)}/mo or $${shopYearlyPriceUsd.toFixed(2)}/yr`,
   };
 }
 
@@ -2933,7 +2938,7 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
         ...(Array.isArray(second.vipMembershipHistory) ? second.vipMembershipHistory : []),
       ]) {
         if (h && typeof h === 'object' && h.id) {
-          historyMap.set(h.id, h);
+          historyMap.set(h.id, sanitizeVipMembershipHistoryEntry(h));
         }
       }
       const mergedHistory = Array.from(historyMap.values())

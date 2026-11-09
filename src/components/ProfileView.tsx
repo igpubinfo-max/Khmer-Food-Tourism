@@ -15,7 +15,7 @@ import {
   APP_VERSION, APP_BUILD_CODE, getDynamicVipPlans, getDynamicVipBenefits,
   isAdminAccount,
   isIosOrIpadAppStoreRuntime, getVipFeaturedRotationConfig, getVipFeaturedRotationState,
-  isShopSubscriptionActive, getShopSubscriptionCatalog
+  isShopSubscriptionActive, getShopSubscriptionCatalog, sanitizeVipMembershipHistoryEntry, sanitizeLegacyVipTransactionPricing
 } from '../types';
 import { tr } from '../utils/i18n';
 import { resolveUserAvatarUrl, handleAvatarImageError, fileToAvatarDataUrl, isCustomUploadedAvatarDataUrl, rotateDataUrl } from '../utils/avatarHelper';
@@ -1723,7 +1723,8 @@ export const ProfileView: React.FC = () => {
               noteEn?: string;
             }> = [];
 
-            for (const txn of myTransactions) {
+            for (const rawTxn of myTransactions) {
+              const txn = sanitizeLegacyVipTransactionPricing(rawTxn);
               const refKey = String(txn.transactionRef || txn.id || '').trim().toUpperCase();
               if (refKey) seenRefs.add(refKey);
               const normalizedStatus: 'verified' | 'pending' | 'failed' | 'cancelled' =
@@ -1761,8 +1762,9 @@ export const ProfileView: React.FC = () => {
               });
             }
 
-            for (const h of rawHistory) {
-              if (!h) continue;
+            for (const rawH of rawHistory) {
+              if (!rawH) continue;
+              const h = sanitizeVipMembershipHistoryEntry(rawH);
               const refKey = h.transactionRef ? String(h.transactionRef).trim().toUpperCase() : '';
               if (refKey && seenRefs.has(refKey)) continue;
               if (refKey) seenRefs.add(refKey);

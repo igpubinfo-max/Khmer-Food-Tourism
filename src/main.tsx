@@ -83,7 +83,7 @@ try {
     }
   });
 
-  // Auto-upgrade any cached pre-v100 VIP pricing ($4.99 / 30d or $6.99 / 60d) in kft_settings_v5 immediately on boot
+  // Auto-upgrade any cached pre-v101 VIP pricing (legacy 30d or 60d prices) in kft_settings_v5 immediately on boot
   const rawSettingsV5 = localStorage.getItem('kft_settings_v5');
   if (rawSettingsV5) {
     try {
@@ -91,8 +91,9 @@ try {
       if (parsedSettings && typeof parsedSettings === 'object') {
         const ver = Number(parsedSettings.settingsVersion) || 0;
         if (
-          ver < 100 ||
-          Number(parsedSettings.vipShortPriceUsd) === 4.99 ||
+          ver < 101 ||
+          Number(parsedSettings.vipShortPriceUsd) > 2.99 ||
+          Number(parsedSettings.consumer30dPriceUsd) > 2.99 ||
           Number(parsedSettings.vipLongDurationDays) === 60
         ) {
           parsedSettings.vipShortPriceUsd = 2.99;
@@ -107,12 +108,97 @@ try {
           parsedSettings.shopYearlyPriceUsd = 59.99;
           parsedSettings.shopEarlyBirdYearlyPriceUsd = 49.99;
           parsedSettings.additionalStoreFeeUsd = 6.99;
-          parsedSettings.settingsVersion = Math.max(ver, 100);
+          parsedSettings.promotionalFeeUsd = 2.99;
+          parsedSettings.settingsVersion = Math.max(ver, 101);
           localStorage.setItem('kft_settings_v5', JSON.stringify(parsedSettings));
         }
       }
     } catch {
       // Ignore malformed settings JSON
+    }
+  }
+
+  // Sanitize any cached legacy 30-day VIP history/transaction entries in localStorage on boot
+  const sanitizeCachedVipHistoryInObject = (u: any): boolean => {
+    if (!u || typeof u !== 'object' || !Array.isArray(u.vipMembershipHistory)) return false;
+    let mod = false;
+    u.vipMembershipHistory = u.vipMembershipHistory.map((h: any) => {
+      if (!h || typeof h !== 'object') return h;
+      let nextH = { ...h };
+      let hMod = false;
+      const is30d = !nextH.durationDays || nextH.durationDays <= 35 || nextH.planType === 'quarterly';
+      if (is30d && (nextH.amountUsd === 4.99 || nextH.amountUsd === 9.99)) {
+        nextH.amountUsd = 2.99;
+        hMod = true;
+      }
+      if (typeof nextH.noteKh === 'string' && nextH.noteKh.includes('$4.99')) {
+        nextH.noteKh = nextH.noteKh.split('$4.99').join('$2.99');
+        hMod = true;
+      }
+      if (typeof nextH.noteEn === 'string' && nextH.noteEn.includes('$4.99')) {
+        nextH.noteEn = nextH.noteEn.split('$4.99').join('$2.99');
+        hMod = true;
+      }
+      if (hMod) mod = true;
+      return hMod ? nextH : h;
+    });
+    return mod;
+  };
+
+  for (const singleUserKey of ['kft_current_user_v5', 'kft_current_user_v4']) {
+    const rawCur = localStorage.getItem(singleUserKey);
+    if (rawCur) {
+      try {
+        const parsedCur = JSON.parse(rawCur);
+        if (sanitizeCachedVipHistoryInObject(parsedCur)) {
+          localStorage.setItem(singleUserKey, JSON.stringify(parsedCur));
+        }
+      } catch {}
+    }
+  }
+
+  for (const listUserKey of ['kft_users_v5', 'kft_users_v4', 'kft_vip_registry_backup_v1']) {
+    const rawList = localStorage.getItem(listUserKey);
+    if (rawList) {
+      try {
+        const parsedList = JSON.parse(rawList);
+        if (Array.isArray(parsedList)) {
+          let listMod = false;
+          for (const item of parsedList) {
+            if (sanitizeCachedVipHistoryInObject(item)) listMod = true;
+          }
+          if (listMod) {
+            localStorage.setItem(listUserKey, JSON.stringify(parsedList));
+          }
+        }
+      } catch {}
+    }
+  }
+
+  for (const txnKey of ['kft_transactions_v4', 'kft_transactions_v3']) {
+    const rawTxns = localStorage.getItem(txnKey);
+    if (rawTxns) {
+      try {
+        const parsedTxns = JSON.parse(rawTxns);
+        if (Array.isArray(parsedTxns)) {
+          let txnMod = false;
+          for (const t of parsedTxns) {
+            if (!t || typeof t !== 'object') continue;
+            const is30d = !t.durationDays || t.durationDays <= 35 || t.planType === 'quarterly';
+            if (is30d && (t.amountUsd === 4.99 || t.amountUsd === 9.99)) {
+              t.amountUsd = 2.99;
+              txnMod = true;
+            }
+            if (typeof t.notes === 'string' && t.notes.includes('$4.99')) {
+              t.notes = t.notes.split('$4.99').join('$2.99');
+              txnMod = true;
+            }
+          }
+          if (txnMod) {
+            localStorage.setItem(txnKey, JSON.stringify(parsedTxns));
+          }
+        }
+      } catch {}
     }
   }
 

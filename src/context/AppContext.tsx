@@ -35,6 +35,8 @@ import {
   deduplicateFoodItems,
   resolveUserActualVipPlanDays,
   sanitizeUserVipPlanAndExpiry,
+  sanitizeVipMembershipHistoryEntry,
+  sanitizeLegacyVipTransactionPricing,
   isDeprecatedDemoSeedTransaction,
   inferBusinessTypeAndCategory,
   isHotelBusinessRecord,
@@ -262,7 +264,7 @@ interface AppContextType {
   restaurants: Restaurant[];
   destinations: TouristDestination[];
 
-  // Transactions & $4.99 Registration Payments
+  // Transactions & $2.99 Registration Payments
   transactions: RegistrationTransaction[];
   addRegistrationTransaction: (txn: Omit<RegistrationTransaction, 'id' | 'createdAt' | 'status'>) => RegistrationTransaction;
   verifyTransaction: (txnId: string) => void;
@@ -469,7 +471,7 @@ interface AppContextType {
   // Reset & Backup
   resetAllData: () => void;
 
-  // Premium VIP Subscription ($2.99 / 30 Days or $4.99 / 90 Days)
+  // Premium VIP Subscription ($2.99 / 30 Days or $6.99 / 90 Days)
   isUpgradeVipModalOpen: boolean;
   setIsUpgradeVipModalOpen: (open: boolean) => void;
   isVipRenewMode: boolean;
@@ -2024,9 +2026,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          const cleaned = parsed.filter(
-            (t: RegistrationTransaction) => t && t.id && !isDeprecatedDemoSeedTransaction(t)
-          );
+          const cleaned = parsed
+            .filter((t: RegistrationTransaction) => t && t.id && !isDeprecatedDemoSeedTransaction(t))
+            .map((t: RegistrationTransaction) => sanitizeLegacyVipTransactionPricing(t));
           if (cleaned.length !== parsed.length) {
             try {
               localStorage.setItem('kft_transactions_v4', JSON.stringify(cleaned));
@@ -5095,9 +5097,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
           }
         }
-        const sanitizedMergedTxns = result.mergedTransactions.filter(
-          (t) => t && t.id && !isDeprecatedDemoSeedTransaction(t)
-        );
+        const sanitizedMergedTxns = result.mergedTransactions
+          .filter((t) => t && t.id && !isDeprecatedDemoSeedTransaction(t))
+          .map((t) => sanitizeLegacyVipTransactionPricing(t));
         setTransactions(prev => {
           if (prev.length === sanitizedMergedTxns.length && JSON.stringify(prev) === JSON.stringify(sanitizedMergedTxns)) {
             return prev;
@@ -6394,7 +6396,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       : [];
     const mergedVipHistory = [
       newHistEntry,
-      ...baseHist.filter(h => h && h.id !== newHistId),
+      ...baseHist.filter(h => h && h.id !== newHistId).map(h => sanitizeVipMembershipHistoryEntry(h)),
     ].slice(0, 50);
 
     const approvedUser: User = {
@@ -12484,7 +12486,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(language === 'km' ? 'បានលុបតំបន់ទេសចរណ៍ជាអចិន្ត្រៃយ៍' : 'Destination permanently deleted', 'info');
   };
 
-  // Transactions & $4.99 Registration Payment
+  // Transactions & $2.99 Registration Payment
   const addRegistrationTransaction = (txnData: Omit<RegistrationTransaction, 'id' | 'createdAt' | 'status'>): RegistrationTransaction => {
     const id = `TXN-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(100 + Math.random() * 900)}`;
     const newTxn: RegistrationTransaction = {
@@ -16458,7 +16460,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setTargetWishlistItem,
         openAddToWishlist,
 
-        // Premium VIP Subscription ($2.99 / 30 Days or $4.99 / 90 Days)
+        // Premium VIP Subscription ($2.99 / 30 Days or $6.99 / 90 Days)
         isUpgradeVipModalOpen,
         setIsUpgradeVipModalOpen,
         isVipRenewMode,

@@ -63,7 +63,7 @@ const PROMPT = `Analyze this Cambodian ABA Bank / KHQR payment receipt image and
 {
   "isAbaReceipt": boolean,
   "trxId": string or null (the Trx. ID / Reference number printed on the receipt),
-  "amountUsd": number or null (the numeric payment amount, positive, e.g. 4.99),
+  "amountUsd": number or null (the numeric payment amount, positive, e.g. 2.99 or 6.99),
   "currency": "USD" or "KHR",
   "recipientName": string or null (the recipient account name shown on the receipt),
   "recipientAccount": string or null (the "To account" number),

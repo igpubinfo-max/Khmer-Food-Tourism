@@ -475,7 +475,7 @@ export const ZH_UI_EXTRA: Record<string, string> = {
   "2. Device Permissions": "2. 设备权限",
   "3. Security & Storage": "3. 安全与存储",
   "4. Payment & Promotions": "4. 付款与推广",
-  "The $4.99 USD restaurant promotional registration fee is a physical business marketing service. Official admin verification is required before activation. No credit card or private bank credentials are stored on the device.": "4.99美元的餐厅推广注册费是一项实体商家营销服务。激活前需要管理员官方审核。设备上不会存储任何信用卡或私人银行凭据。",
+  "The $2.99 USD restaurant promotional registration fee is a physical business marketing service. Official admin verification is required before activation. No credit card or private bank credentials are stored on the device.": "2.99美元的餐厅推广注册费是一项实体商家营销服务。激活前需要管理员官方审核。设备上不会存储任何信用卡或私人银行凭据。",
   "5. Account & Data Deletion": "5. 账户与数据删除",
   "Delete My Account & Data Now": "立即删除我的账户和数据",
   "Developer & Support Contact:": "开发者与支持联系方式：",

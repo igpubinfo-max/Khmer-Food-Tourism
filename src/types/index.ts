@@ -5,8 +5,8 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1512;
-export const APP_RELEASE_DATE = '2026-11-09';
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1513;
+export const APP_RELEASE_DATE = '2026-11-10';
 
 /**
  * Audited duplicate food IDs removed from the Food Menu so every dish and photograph is 100% unique
@@ -888,7 +888,7 @@ export interface User {
   googleSub?: string;
   legacyIds?: string[];
 
-  // Premium VIP Subscription ($2.99 for 10 days or $4.99 for 90 days, configurable by Admin)
+  // Premium VIP Subscription ($2.99 for 30 days or $6.99 for 90 days, configurable by Admin)
   membershipTier?: 'free' | 'premium_vip';
   subscriptionStartDate?: string;
   subscriptionExpiryDate?: string;
@@ -3360,8 +3360,114 @@ export const resolveUserActualVipPlanDays = (user?: User | null): number => {
  * when the user actually registered for a 30-day (or 90-day) VIP plan, while strictly preserving
  * legitimate 365-day annual memberships and stacked early VIP renewals (e.g. 60d+60d or 90d+90d).
  */
+/**
+ * Normalizes legacy $4.99 / $9.99 30-day or $24.99 90-day prices inside a VIP membership history entry
+ * so historical and newly-synced records consistently reflect the official $2.99 (30d) / $6.99 (90d) pricing.
+ */
+export const sanitizeVipMembershipHistoryEntry = (
+  entry: VipMembershipHistoryEntry
+): VipMembershipHistoryEntry => {
+  if (!entry || typeof entry !== 'object') return entry;
+  let changed = false;
+  let amountUsd = entry.amountUsd;
+  let noteKh = entry.noteKh;
+  let noteEn = entry.noteEn;
+
+  const is30DayOrQuarterly =
+    !entry.durationDays || entry.durationDays <= 35 || entry.planType === 'quarterly';
+  const is90DayOrAnnual =
+    Boolean(entry.durationDays && entry.durationDays > 35 && entry.durationDays <= 100) ||
+    entry.planType === 'annual';
+
+  if (amountUsd === 4.99 || (is30DayOrQuarterly && amountUsd === 9.99)) {
+    amountUsd = is90DayOrAnnual && !is30DayOrQuarterly ? VIP_ANNUAL_PRICE_USD : VIP_QUARTERLY_PRICE_USD;
+    changed = true;
+  } else if (is90DayOrAnnual && amountUsd === 24.99) {
+    amountUsd = VIP_ANNUAL_PRICE_USD;
+    changed = true;
+  }
+
+  const targetPriceStr =
+    is90DayOrAnnual && !is30DayOrQuarterly
+      ? `${VIP_ANNUAL_PRICE_USD.toFixed(2)}`
+      : `${VIP_QUARTERLY_PRICE_USD.toFixed(2)}`;
+
+  if (typeof noteKh === 'string' && noteKh.includes('$4.99')) {
+    noteKh = noteKh.replace(/\$4\.99/g, targetPriceStr);
+    changed = true;
+  }
+  if (typeof noteEn === 'string' && noteEn.includes('$4.99')) {
+    noteEn = noteEn.replace(/\$4\.99/g, targetPriceStr);
+    changed = true;
+  }
+
+  if (!changed) return entry;
+  return {
+    ...entry,
+    amountUsd,
+    noteKh,
+    noteEn,
+  };
+};
+
+/**
+ * Normalizes legacy $4.99 / $9.99 30-day or $24.99 90-day prices on RegistrationTransaction records.
+ */
+export const sanitizeLegacyVipTransactionPricing = (
+  txn: RegistrationTransaction
+): RegistrationTransaction => {
+  if (!txn || typeof txn !== 'object') return txn;
+  let changed = false;
+  let amountUsd = txn.amountUsd;
+  let notes = txn.notes;
+
+  const is30DayOrQuarterly =
+    !txn.durationDays || txn.durationDays <= 35 || txn.planType === 'quarterly' || txn.planId === 'consumer_30d';
+  const is90DayOrAnnual =
+    Boolean(txn.durationDays && txn.durationDays > 35 && txn.durationDays <= 100) ||
+    txn.planType === 'annual' ||
+    txn.planId === 'consumer_90d';
+
+  if (amountUsd === 4.99 || (is30DayOrQuarterly && amountUsd === 9.99)) {
+    amountUsd = is90DayOrAnnual && !is30DayOrQuarterly ? VIP_ANNUAL_PRICE_USD : VIP_QUARTERLY_PRICE_USD;
+    changed = true;
+  } else if (is90DayOrAnnual && amountUsd === 24.99) {
+    amountUsd = VIP_ANNUAL_PRICE_USD;
+    changed = true;
+  }
+
+  const targetPriceStr =
+    is90DayOrAnnual && !is30DayOrQuarterly
+      ? `${VIP_ANNUAL_PRICE_USD.toFixed(2)}`
+      : `${VIP_QUARTERLY_PRICE_USD.toFixed(2)}`;
+
+  if (typeof notes === 'string' && notes.includes('$4.99')) {
+    notes = notes.replace(/\$4\.99/g, targetPriceStr);
+    changed = true;
+  }
+
+  if (!changed) return txn;
+  return {
+    ...txn,
+    amountUsd,
+    notes,
+  };
+};
+
 export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
-  if (!user || isAdminAccount(user)) return user;
+  if (!user) return user;
+  if (Array.isArray(user.vipMembershipHistory) && user.vipMembershipHistory.length > 0) {
+    let histChanged = false;
+    const cleanHist = user.vipMembershipHistory.map(h => {
+      const nextH = sanitizeVipMembershipHistoryEntry(h);
+      if (nextH !== h) histChanged = true;
+      return nextH;
+    });
+    if (histChanged) {
+      user = { ...user, vipMembershipHistory: cleanHist };
+    }
+  }
+  if (isAdminAccount(user)) return user;
   const DAY_MS = 24 * 60 * 60 * 1000;
   const nowMs = getAuthoritativeServerNowMs();
   const ref = String(user.transactionRef || '').trim();
@@ -3877,7 +3983,7 @@ export interface AppSettings {
   vipShortNameKh?: string; // Default: "កញ្ចប់ VIP 10 ថ្ងៃ"
   vipShortNameEn?: string; // Default: "VIP 10 Days"
   vipLongDurationDays?: number; // Default: 90 days
-  vipLongPriceUsd?: number; // Default: $4.99
+  vipLongPriceUsd?: number; // Default: $6.99
   vipLongNameKh?: string; // Default: "កញ្ចប់ VIP 90 ថ្ងៃ"
   vipLongNameEn?: string; // Default: "VIP 90 Days"
   additionalStoreFeeUsd?: number; // Default: $10.00 per additional store beyond the 1st
@@ -3947,7 +4053,7 @@ export interface SupportTicket {
   userEmail?: string;
   userPhone?: string;
   paymentPlanId: 'quarterly' | 'annual' | 'additional_store';
-  paymentPlanLabel: string; // e.g. "VIP 10 Days ($2.99)" or "VIP 90 Days ($4.99)" or "Additional Store (+$10.00)"
+  paymentPlanLabel: string; // e.g. "VIP 30 Days ($2.99)" or "VIP 90 Days ($6.99)" or "Additional Store (+$6.99)"
   amountUsd: number;
   durationDays: number;
   paymentDate: string;
@@ -3984,7 +4090,7 @@ export const getStoredAppSettingsFallback = (): Partial<AppSettings> => {
 };
 
 /**
- * Resolve dynamic VIP plans from centralized Admin settings (with safe defaults: 30 days @ $9.99, 90 days @ $24.99)
+ * Resolve dynamic VIP plans from centralized Admin settings (with safe defaults: 30 days @ $2.99, 90 days @ $6.99)
  */
 export const getDynamicVipPlans = (
   settings?: Partial<AppSettings> | null
@@ -4023,10 +4129,10 @@ export const getDynamicVipPlans = (
       ? Math.round(rawLongPrice * 100) / 100
       : VIP_ANNUAL_PRICE_USD;
 
+  if (shortPrice === 9.99 || shortPrice === 4.99) shortPrice = VIP_QUARTERLY_PRICE_USD;
+  if (longPrice === 24.99 || longPrice === 4.99) longPrice = VIP_ANNUAL_PRICE_USD;
   if (isLegacyCorrupted) {
-    if (shortPrice === 9.99 || shortPrice === 4.99) shortPrice = VIP_QUARTERLY_PRICE_USD;
     if (shortDays === 3) shortDays = VIP_QUARTERLY_DAYS;
-    if (longPrice === 24.99) longPrice = VIP_ANNUAL_PRICE_USD;
     if (longDays === 9 || longDays === 60) longDays = VIP_SUBSCRIPTION_DAYS;
   }
 
@@ -4162,10 +4268,12 @@ export const getConsumerVipPricingCatalog = (settings?: Partial<AppSettings> | n
   const promoPrice = clampPosMoney(s.consumerPromo30dPriceUsd, 0.99);
   const promoDays = clampPosDays(s.consumerPromo30dDays, 30);
 
-  const mPrice = clampPosMoney(s.consumer30dPriceUsd, 2.99);
+  const rawMPrice = clampPosMoney(s.consumer30dPriceUsd, 2.99);
+  const mPrice = rawMPrice === 4.99 || rawMPrice === 9.99 ? 2.99 : rawMPrice;
   const mDays = clampPosDays(s.consumer30dDays, 30);
 
-  const qPrice = clampPosMoney(s.consumer90dPriceUsd, 6.99);
+  const rawQPrice = clampPosMoney(s.consumer90dPriceUsd, 6.99);
+  const qPrice = rawQPrice === 4.99 || rawQPrice === 24.99 ? 6.99 : rawQPrice;
   const qDays = clampPosDays(s.consumer90dDays, 90);
 
   const yPrice = clampPosMoney(s.consumer365dPriceUsd, 19.99);

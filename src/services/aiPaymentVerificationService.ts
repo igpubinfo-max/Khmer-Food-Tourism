@@ -317,7 +317,7 @@ async function extractReceiptViaGeminiVision(
 {
   "isAbaReceipt": boolean,
   "trxId": string or null (the Trx. ID / Reference number on the receipt),
-  "amountUsd": number or null (the numeric payment amount in USD, positive number e.g. 2.99 or 4.99 or 55.00),
+  "amountUsd": number or null (the numeric payment amount in USD, positive number e.g. 2.99 or 6.99 or 59.99),
   "currency": "USD" or "KHR",
   "recipientName": string or null (the recipient account name at the top of the ABA receipt, e.g. "CHEA KIMSENG" or "SONLEAK ROUERN"),
   "recipientAccount": string or null (the "To account" number, e.g. "095 245 959" or "010 339 036"),
@@ -593,7 +593,7 @@ export async function verifyAbaPaymentAndReceipt(params: {
   };
 
   // ============================================================================
-  // CHECK 2: Payment Amount ($2.99 USD for 30 Days or $4.99 USD for 90 Days)
+  // CHECK 2: Payment Amount ($2.99 USD for 30 Days or $6.99 USD for 90 Days)
   // ============================================================================
   const detectedAmount = extracted.amountUsd;
   const amountMatched =

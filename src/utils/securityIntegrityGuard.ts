@@ -22,6 +22,7 @@ import {
   isPermanentVipEmail,
   resolveUserActualVipPlanDays,
   sanitizeUserVipPlanAndExpiry,
+  sanitizeVipMembershipHistoryEntry,
 } from '../types';
 import { verifyAdminSession, createAdminSession, revokeAdminSession } from './security';
 
@@ -762,7 +763,7 @@ export async function verifyAndSanitizeUserSession(
               ...(Array.isArray(sanitized.vipMembershipHistory) ? sanitized.vipMembershipHistory : []),
               ...mu.vipMembershipHistory,
             ]) {
-              if (h && h.id) histMap.set(h.id, h);
+              if (h && h.id) histMap.set(h.id, sanitizeVipMembershipHistoryEntry(h));
             }
             sanitized.vipMembershipHistory = Array.from(histMap.values())
               .sort((a, b) => parseSafeDateMs(b.date) - parseSafeDateMs(a.date))
@@ -940,7 +941,7 @@ export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | n
                   ...(Array.isArray(parsed.vipMembershipHistory) ? parsed.vipMembershipHistory : []),
                   ...mu.vipMembershipHistory,
                 ]) {
-                  if (h && h.id) histMap.set(h.id, h);
+                  if (h && h.id) histMap.set(h.id, sanitizeVipMembershipHistoryEntry(h));
                 }
                 parsed.vipMembershipHistory = Array.from(histMap.values())
                   .sort((a, b) => parseSafeDateMs(b.date) - parseSafeDateMs(a.date))

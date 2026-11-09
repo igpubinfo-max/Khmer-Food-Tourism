@@ -24,7 +24,7 @@ export { VIP_PLANS, getDynamicVipPlans, getAdditionalStoreFeeUsd };
 
 /**
  * Centralized backend plan validator.
- * Dynamically resolves against the centralized Admin VIP settings (defaulting to VIP 10 Days @ $2.99 and VIP 90 Days @ $4.99).
+ * Dynamically resolves against the centralized Admin VIP settings (defaulting to VIP 30 Days @ $2.99 and VIP 90 Days @ $6.99).
  * Never trusts arbitrary unverified client prices.
  */
 export function resolveAndValidateVipPlan(
