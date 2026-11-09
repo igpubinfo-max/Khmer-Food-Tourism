@@ -1,9 +1,18 @@
 import crypto from 'crypto';
+import fs from 'fs';
 
 const ISSUER_ID = (process.env.APPSTORE_ISSUER_ID || '').trim();
 const KEY_ID = (process.env.APPSTORE_KEY_ID || '').trim();
 const PRIVATE_KEY = (process.env.APPSTORE_PRIVATE_KEY || '').trim();
 const APP_ID = '6826976670';
+
+function setGithubEnv(key, value) {
+  try {
+    if (process.env.GITHUB_ENV && value) {
+      fs.appendFileSync(process.env.GITHUB_ENV, `${key}=${value}\n`);
+    }
+  } catch {}
+}
 
 function createJwt() {
   const header = Buffer.from(JSON.stringify({ alg: 'ES256', kid: KEY_ID, typ: 'JWT' })).toString('base64url');
@@ -75,7 +84,7 @@ async function main() {
     console.log('Skipping ASC Review Notes update (missing credentials).');
     return;
   }
-  console.log('Updating App Store Review Notes via ASC API...');
+  console.log('Checking App Store Version & Review Status via ASC API...');
   const versions = await ascRequest(`/apps/${APP_ID}/appStoreVersions?filter[platform]=IOS`);
   const versionObj = versions?.data?.[0];
   if (!versionObj) {
@@ -87,22 +96,12 @@ async function main() {
   const currentVerStr = versionObj.attributes?.versionString;
   console.log('Found iOS App Store Version ID:', versionId, 'Version:', currentVerStr, 'State:', currentState);
 
-  if (currentState === 'WAITING_FOR_REVIEW') {
-    console.log('Cancelling old WAITING_FOR_REVIEW submission so v2.7.0 build can replace it...');
-    const subs = await ascRequest(`/apps/${APP_ID}/reviewSubmissions?filter[platform]=IOS&filter[state]=WAITING_FOR_REVIEW`);
-    for (const sub of subs?.data || []) {
-      await ascRequest(`/reviewSubmissions/${sub.id}`, 'PATCH', {
-        data: {
-          type: 'reviewSubmissions',
-          id: sub.id,
-          attributes: { canceled: true },
-        },
-      });
-    }
-    const legacySub = await ascRequest(`/appStoreVersions/${versionId}/appStoreVersionSubmission`);
-    if (legacySub?.data?.id) {
-      await ascRequest(`/appStoreVersionSubmissions/${legacySub.data.id}`, 'DELETE');
-    }
+  // IMPORTANT: Never cancel an active WAITING_FOR_REVIEW or IN_REVIEW submission!
+  // Cancelling a submission via the API causes App Store Connect to mark the version as "Developer Rejected".
+  if (currentState === 'WAITING_FOR_REVIEW' || currentState === 'IN_REVIEW' || currentState === 'PENDING_APPLE_RELEASE') {
+    console.log(`Version ${currentVerStr} is already in active review state (${currentState}). Preserving submission without modification.`);
+    setGithubEnv('ASC_REVIEW_STATE', currentState);
+    return;
   }
 
   if (currentVerStr !== '2.7.0') {
@@ -117,6 +116,15 @@ async function main() {
     });
   }
 
+  const reviewAttributes = {
+    contactFirstName: 'Savuth',
+    contactLastName: 'Chea',
+    contactPhone: '+85512649051',
+    contactEmail: 'savuthapple59@gmail.com',
+    demoAccountRequired: false,
+    notes: REVIEW_NOTES,
+  };
+
   const existingDetail = await ascRequest(`/appStoreVersions/${versionId}/appStoreReviewDetail`);
   if (existingDetail?.data?.id) {
     const detailId = existingDetail.data.id;
@@ -124,10 +132,7 @@ async function main() {
       data: {
         type: 'appStoreReviewDetails',
         id: detailId,
-        attributes: {
-          demoAccountRequired: false,
-          notes: REVIEW_NOTES,
-        },
+        attributes: reviewAttributes,
       },
     });
     console.log('Successfully updated App Store Review Notes on detail ID:', detailId);
@@ -135,10 +140,7 @@ async function main() {
     await ascRequest('/appStoreReviewDetails', 'POST', {
       data: {
         type: 'appStoreReviewDetails',
-        attributes: {
-          demoAccountRequired: false,
-          notes: REVIEW_NOTES,
-        },
+        attributes: reviewAttributes,
         relationships: {
           appStoreVersion: {
             data: {
@@ -150,6 +152,129 @@ async function main() {
       },
     });
     console.log('Successfully created App Store Review Notes for version ID:', versionId);
+  }
+
+  // Ensure a valid processed build is attached to this App Store Version
+  const attachedBuildResp = await ascRequest(`/appStoreVersions/${versionId}/build`);
+  let attachedBuildId = attachedBuildResp?.data?.id || null;
+  let attachedBuildVersion = attachedBuildResp?.data?.attributes?.version || null;
+  console.log('Currently attached build:', attachedBuildId, 'build number:', attachedBuildVersion);
+
+  const validBuildsResp = await ascRequest(
+    `/builds?filter[app]=${APP_ID}&filter[processingState]=VALID&sort=-uploadedDate&limit=10`
+  );
+  const validBuilds = validBuildsResp?.data || [];
+  if (validBuilds.length > 0) {
+    const newestBuild = validBuilds[0];
+    console.log(
+      'Newest VALID processed build on ASC:',
+      newestBuild.id,
+      'build number:',
+      newestBuild.attributes?.version,
+      'uploaded:',
+      newestBuild.attributes?.uploadedDate
+    );
+    if (!attachedBuildId || attachedBuildId !== newestBuild.id) {
+      console.log(`Attaching build ${newestBuild.attributes?.version} (${newestBuild.id}) to version 2.7.0...`);
+      await ascRequest(`/appStoreVersions/${versionId}/relationships/build`, 'PATCH', {
+        data: {
+          type: 'builds',
+          id: newestBuild.id,
+        },
+      });
+      attachedBuildId = newestBuild.id;
+      attachedBuildVersion = newestBuild.attributes?.version;
+    }
+  }
+
+  if (!attachedBuildId) {
+    console.warn('No valid processed build is attached yet; cannot submit for review.');
+    return;
+  }
+
+  // Automatically submit to Apple App Review if currently DEVELOPER_REJECTED, PREPARE_FOR_SUBMISSION, or REJECTED
+  console.log(`Submitting iOS v2.7.0 (Build ${attachedBuildVersion}) to Apple App Review...`);
+  let submissionId = null;
+  const openSubs = await ascRequest(
+    `/apps/${APP_ID}/reviewSubmissions?filter[platform]=IOS&filter[state]=READY_FOR_REVIEW,UNRESOLVED_ISSUES`
+  );
+  if (openSubs?.data?.length > 0) {
+    submissionId = openSubs.data[0].id;
+    console.log('Reusing existing open reviewSubmission ID:', submissionId);
+  } else {
+    const createdSub = await ascRequest('/reviewSubmissions', 'POST', {
+      data: {
+        type: 'reviewSubmissions',
+        attributes: {
+          platform: 'IOS',
+        },
+        relationships: {
+          app: {
+            data: {
+              type: 'apps',
+              id: APP_ID,
+            },
+          },
+        },
+      },
+    });
+    submissionId = createdSub?.data?.id || null;
+    console.log('Created new reviewSubmission ID:', submissionId);
+  }
+
+  if (submissionId) {
+    await ascRequest('/reviewSubmissionItems', 'POST', {
+      data: {
+        type: 'reviewSubmissionItems',
+        relationships: {
+          reviewSubmission: {
+            data: {
+              type: 'reviewSubmissions',
+              id: submissionId,
+            },
+          },
+          appStoreVersion: {
+            data: {
+              type: 'appStoreVersions',
+              id: versionId,
+            },
+          },
+        },
+      },
+    });
+
+    const submittedRes = await ascRequest(`/reviewSubmissions/${submissionId}`, 'PATCH', {
+      data: {
+        type: 'reviewSubmissions',
+        id: submissionId,
+        attributes: {
+          submitted: true,
+        },
+      },
+    });
+    console.log('Submitted reviewSubmission state:', submittedRes?.data?.attributes?.state);
+  } else {
+    // Fallback to legacy appStoreVersionSubmissions endpoint
+    await ascRequest('/appStoreVersionSubmissions', 'POST', {
+      data: {
+        type: 'appStoreVersionSubmissions',
+        relationships: {
+          appStoreVersion: {
+            data: {
+              type: 'appStoreVersions',
+              id: versionId,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  const verifyVer = await ascRequest(`/appStoreVersions/${versionId}`);
+  const finalState = verifyVer?.data?.attributes?.appStoreState || '';
+  console.log('=== FINAL iOS APP STORE VERSION STATE:', finalState, '===');
+  if (finalState) {
+    setGithubEnv('ASC_REVIEW_STATE', finalState);
   }
 }
 

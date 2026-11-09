@@ -77,6 +77,7 @@ ok('public privacy policy names the real processors, the AI consent and the dele
 ok('App Store Connect review notes do not claim a "Sign in with Apple" button or an IAP that the app lacks', () => {
   const t = read('scripts/update-asc-review-notes.mjs');
   assert.ok(!/Added "Sign in with Apple"/.test(t));
+  assert.ok(!/canceled\s*:\s*true/.test(t), 'must never cancel an active WAITING_FOR_REVIEW submission');
   assert.ok(t.includes('Delete My Account & Data'));
   assert.ok(t.includes('Support/donation screen is not shown on iOS'));
 });
