@@ -1,4 +1,4 @@
-﻿package com.khmerfood.tourism;
+package com.khmerfood.tourism;
 
 import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;

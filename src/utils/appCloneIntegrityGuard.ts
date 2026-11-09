@@ -1,4 +1,4 @@
-﻿import { Capacitor, registerPlugin } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
 
 export const OFFICIAL_APP_PACKAGE_ID = 'com.khmerfood.tourism';
