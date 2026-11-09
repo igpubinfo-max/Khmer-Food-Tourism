@@ -1,4 +1,4 @@
-﻿import fs from 'node:fs';
+import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
 const foodsDir = path.join(rootDir, 'public', 'foods');
-const ledgerPath = path.join(foodsDir, '.watermark-ledger.json');
+const ledgerPath = path.join(__dirname, '.watermark-ledger.json');
 
 let passed = 0;
 let failed = 0;

@@ -1,0 +1,2765 @@
+{
+    "food-167.jpg":  {
+                         "fileName":  "food-167.jpg",
+                         "width":  720,
+                         "height":  720,
+                         "originalSha256":  "33fa3c99b99d5cb89546719d035158ae1e9f714589bf7d689e6fcb5630433835",
+                         "watermarkedSha256":  "ba2717b8446e14ad799456aba0b70c3eb36dd6f304c8420292c1953d48f076d6",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:37.2021448+07:00"
+                     },
+    "food-56.jpg":  {
+                        "fileName":  "food-56.jpg",
+                        "width":  720,
+                        "height":  479,
+                        "originalSha256":  "cd69fe702c578ae348ba131d687538d5b2747bb65ae9c2797c6fa453687a7e24",
+                        "watermarkedSha256":  "c1e43b3ec2f4a2e338a2488dd2f5e1338a4ea182040764beedb0720bee06f0be",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:49.8750604+07:00"
+                    },
+    "food-15.jpg":  {
+                        "fileName":  "food-15.jpg",
+                        "width":  720,
+                        "height":  540,
+                        "originalSha256":  "384ff819a170eac77a41480f79068039e0e7058382bf8e658c22d302372c5f10",
+                        "watermarkedSha256":  "aeb0a13833cac09ecd915aad3f21e587523d882743e3e47c2312db32c39bd777",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:35.8181732+07:00"
+                    },
+    "food-18.jpg":  {
+                        "fileName":  "food-18.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "04407e2bd72345803ecd0b52e6db61f2d89465cf85fd8889ee13314c073e0df9",
+                        "watermarkedSha256":  "0894e7b508a6d58dcc4d7b85c67b84c9b2816c05b9632f311624a28a5deed041",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:38.2182440+07:00"
+                    },
+    "food-21.jpg":  {
+                        "fileName":  "food-21.jpg",
+                        "width":  720,
+                        "height":  658,
+                        "originalSha256":  "93c9b984e5959958558f3b7db73f088a9bf81432d3ada615b29e7dca7e472747",
+                        "watermarkedSha256":  "1eade4fba83892ec6fe92213024b1f000133f031509ee8dcd6bf5deb05664cd1",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:40.1597651+07:00"
+                    },
+    "food-299.jpg":  {
+                         "fileName":  "food-299.jpg",
+                         "width":  800,
+                         "height":  800,
+                         "originalSha256":  "df7d224289a8430d0d0462bd7c8a3ad2394a5f8adef005391c7c4af37c579171",
+                         "watermarkedSha256":  "0f66e38b8fe9260b5a668b6dcd759faaae65dfd3cc5c6efb80e1e41e12b8e7e8",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:47.3471129+07:00"
+                     },
+    "food-178.jpg":  {
+                         "fileName":  "food-178.jpg",
+                         "width":  720,
+                         "height":  720,
+                         "originalSha256":  "be4008fa3328d6caa84a342972e264e63fd9bb10c27c9c6dbe7942b5a3c66eba",
+                         "watermarkedSha256":  "220821a55a123fdfe173b3751b924f56b2d0853f2063d643c82965ca250503d9",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:38.0830113+07:00"
+                     },
+    "food-54.jpg":  {
+                        "fileName":  "food-54.jpg",
+                        "width":  720,
+                        "height":  720,
+                        "originalSha256":  "b861d8b290e61583dc50f1cd873493a529749cd247ba931e794062db179a4458",
+                        "watermarkedSha256":  "661b2853e6817dcc3713d8d8eebb6bca8d4cdf4be6e133da4e144c49df827916",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:49.7458896+07:00"
+                    },
+    "food-199.jpg":  {
+                         "fileName":  "food-199.jpg",
+                         "width":  720,
+                         "height":  479,
+                         "originalSha256":  "1fa2dae952c21c82d1992e3d8b6bf2d9902126bb7c39696573dfd0c503a57c47",
+                         "watermarkedSha256":  "64d729106f47014fb4d45dde46be1fce18fe9990655197ccc0285d7b54ea0a9b",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.4338464+07:00"
+                     },
+    "food-264.jpg":  {
+                         "fileName":  "food-264.jpg",
+                         "width":  800,
+                         "height":  800,
+                         "originalSha256":  "d2db9f4e98815d60e8251751e2cf28554378ae4b6a5c9c085e8f1b34ac949057",
+                         "watermarkedSha256":  "81309daffadd0abca44d0d82145871049db54ba4ffd697994368a3f88f1a051e",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:44.3512428+07:00"
+                     },
+    "food-41.jpg":  {
+                        "fileName":  "food-41.jpg",
+                        "width":  540,
+                        "height":  720,
+                        "originalSha256":  "c9f8baa0ef4947044953a1533216d6af17319e5e1c4325e0bc2f809009afc814",
+                        "watermarkedSha256":  "3527b8da52cacc55e509f9b17bc9272e3b2e5411fbcafbe4d705fd3752221860",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:48.8276519+07:00"
+                    },
+    "food-4.jpg":  {
+                       "fileName":  "food-4.jpg",
+                       "width":  720,
+                       "height":  540,
+                       "originalSha256":  "2f675ac7d97fa340a22c974c2af237eb23dde73fee8c346f099ee70e5dcdaf18",
+                       "watermarkedSha256":  "699c331927378615172a16bf33f102be9e70143408f76dfb4fe9a4817711c8d9",
+                       "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                       "watermarkedAt":  "2026-11-09T13:44:48.6887494+07:00"
+                   },
+    "food-271.jpg":  {
+                         "fileName":  "food-271.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "2fafdcaff9e7b281f940c17017e5f1df86ce0c780c65a1ac96e19223fc59de0e",
+                         "watermarkedSha256":  "7fa5c19bdc2eee4a6cd1c1837d973e72e645706b4cd49c014f356013820bddf4",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:44.9503045+07:00"
+                     },
+    "food-185.jpg":  {
+                         "fileName":  "food-185.jpg",
+                         "width":  720,
+                         "height":  481,
+                         "originalSha256":  "9cf15b5dd642b53207142612a19e09ef2cfbdf5a86000261bb6df41869a2004a",
+                         "watermarkedSha256":  "e362476bd871f448b08ab3ec117d340434beb4439f00ed2231d1017e3a5b5c91",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:38.5954344+07:00"
+                     },
+    "food-210.jpg":  {
+                         "fileName":  "food-210.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "a0e61339d64b187f0c2234467c7e44fbb72b8d5862f68db70c6912aa78886c07",
+                         "watermarkedSha256":  "32f4d7c87b374ea73dcbccfd6415f878d04c88cce1a4cae98abf99e01a31df10",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:40.2086659+07:00"
+                     },
+    "food-121.jpg":  {
+                         "fileName":  "food-121.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "3ae0ea7d2d8947266988d6da382ce2e85c0372c0d3445350446e6a35579c511b",
+                         "watermarkedSha256":  "360afe62fcf70ea9cd085ad26f85a177c106e97d2facbe391bf755a2e9010af5",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:33.6630366+07:00"
+                     },
+    "food-280.jpg":  {
+                         "fileName":  "food-280.jpg",
+                         "width":  800,
+                         "height":  450,
+                         "originalSha256":  "d1dc79b1ca9ca255a2048085dbda0db4ba5e490db9a32238c34f48f664398b58",
+                         "watermarkedSha256":  "6b00b0f9178da135a45296ee3741625eda1e66d5859f36c4e8f0650dbc064f88",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:45.7281271+07:00"
+                     },
+    "food-235.jpg":  {
+                         "fileName":  "food-235.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "11fbfda704f5acf1c4ff99648d98f70adaba17ba99b2e11795ec9d71afefad9b",
+                         "watermarkedSha256":  "370a605a509ac6829e79127f9db4aae6a7341d68d4ee72232e87e36f3dc07fa3",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:41.9687419+07:00"
+                     },
+    "food-238.jpg":  {
+                         "fileName":  "food-238.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "3430040bf0ccbb4692340b3cb18db38fbb2a90c338ca296109fdf569bbb90a89",
+                         "watermarkedSha256":  "35a47034091d72745a5554e18e1a5994a64207da05bb2c58de550444f69b31a5",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:42.2383073+07:00"
+                     },
+    "food-76.jpg":  {
+                        "fileName":  "food-76.jpg",
+                        "width":  720,
+                        "height":  540,
+                        "originalSha256":  "af6b3f9dfed13faa59f3867d5afd17520944890211d735188f52128314ee4178",
+                        "watermarkedSha256":  "16a0baa0915148645b7bd9a7a42363ec047c691efd9597aa0f4a79355a8198a7",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:51.4147749+07:00"
+                    },
+    "food-17.jpg":  {
+                        "fileName":  "food-17.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "8b69cd0bcd6247802e19ef1758fd63a8c725df08fc67d4ac2add0acca0b32822",
+                        "watermarkedSha256":  "6d31b086608eda6f54a5105068cc493aa963e1f183bf0c98a0c1995088163473",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:37.4411255+07:00"
+                    },
+    "food-198.jpg":  {
+                         "fileName":  "food-198.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "41a8752e05776a943c8617984e52f3354d99ed9a3bdb5ae5569919906f958375",
+                         "watermarkedSha256":  "d22434f0f5e0872b7a39ccf2cc39dbe6d182a85a41313cf27e47951e06562022",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.3769475+07:00"
+                     },
+    "food-157.jpg":  {
+                         "fileName":  "food-157.jpg",
+                         "width":  658,
+                         "height":  720,
+                         "originalSha256":  "9db425d16f0eee6eaf9dda91243983351072ccfad7282bec39c2297bacae4ee5",
+                         "watermarkedSha256":  "d9d094a1952db7c11bc84538acb07a9557fda948782086fa582cdc80508fecc4",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:36.3972055+07:00"
+                     },
+    "food-204.jpg":  {
+                         "fileName":  "food-204.jpg",
+                         "width":  720,
+                         "height":  368,
+                         "originalSha256":  "c4b1221bd8611fa8efce8d98215ac07715e21c76a6217743289680836631e10e",
+                         "watermarkedSha256":  "55903ddad83a63955d4376f6f7490598d4f0b9506bfe751ab6fe139658abbc03",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.8112256+07:00"
+                     },
+    "food-115.jpg":  {
+                         "fileName":  "food-115.jpg",
+                         "width":  720,
+                         "height":  540,
+                         "originalSha256":  "91fbed8c9366424b6d29e3167fb7e08813ec8848dbdf8814432f6da501ce8906",
+                         "watermarkedSha256":  "9b72b351e5ba6c297d5cb9a8c59eb107026291dffffa54c19323c508d8ec1f7d",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:33.1912917+07:00"
+                     },
+    "food-132.jpg":  {
+                         "fileName":  "food-132.jpg",
+                         "width":  720,
+                         "height":  409,
+                         "originalSha256":  "648aeec49513aeb44499cb44acded59df9fa0c405286fdbe28f3a18c60b9d8f4",
+                         "watermarkedSha256":  "60ded64895857b13a0d738c875d0625478e9bf125d9f5a7103c9cc75f201bf13",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:34.5185197+07:00"
+                     },
+    "food-270.jpg":  {
+                         "fileName":  "food-270.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "59968d60ede0374f37ea2b92032a9ae66022ce7355f05c8bb3ffabf346a640b7",
+                         "watermarkedSha256":  "62a118fdcf9d5f5df86cbe6d195e304c4b7888ac4f16c988ddce773a9fe6a556",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:44.8891849+07:00"
+                     },
+    "food-202.jpg":  {
+                         "fileName":  "food-202.jpg",
+                         "width":  720,
+                         "height":  390,
+                         "originalSha256":  "38d5baae579c2fd3abbd3d9bc1880cdf60e711be0ad2f1750db244edbc699cc5",
+                         "watermarkedSha256":  "fc1a29be3907a1163b8d2bc5705329e93ad4962c41245357bacfbeb4f626dfa5",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.7181967+07:00"
+                     },
+    "food-241.jpg":  {
+                         "fileName":  "food-241.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "3f1fe38cf5d40070262c6ec7b6858fc63f0c101856b9e0f7aaa7a660a263e96d",
+                         "watermarkedSha256":  "07b8f08640168373c6f33be6d0253b147e411ef74f9e502d1fdd8ec731d17cae",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:42.5560471+07:00"
+                     },
+    "food-106.jpg":  {
+                         "fileName":  "food-106.jpg",
+                         "width":  720,
+                         "height":  479,
+                         "originalSha256":  "3a1cb328c581cb9689348777ab67b40f11b76178a0e24e96a2930ce5eac0ee9a",
+                         "watermarkedSha256":  "3daa209963def5336ed5910b3bc8a62f76646372c07a7dd6b765a02653a6ad9b",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:32.4911401+07:00"
+                     },
+    "food-222.jpg":  {
+                         "fileName":  "food-222.jpg",
+                         "width":  720,
+                         "height":  360,
+                         "originalSha256":  "6613aedce514639ff18ccc9e89fe78a444874e229fc1de02cc3e92477d8c360c",
+                         "watermarkedSha256":  "f372d69e5f1f9c986f4b7541fe2ffd01b7a4fc93b741ef8d6d598bb84371e331",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:40.9577580+07:00"
+                     },
+    "food-130.jpg":  {
+                         "fileName":  "food-130.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "37f0a8c08bd09618499848f5f548c7a4288b4ea69fbd208945e6b3ebf20904b1",
+                         "watermarkedSha256":  "482917873e2b766bb692823b4eb678ae8ba3b6a2c8d2c67db33b022e378b20aa",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:34.4071511+07:00"
+                     },
+    "food-143.jpg":  {
+                         "fileName":  "food-143.jpg",
+                         "width":  653,
+                         "height":  720,
+                         "originalSha256":  "ab7b7cc64db5dee6569599ae3272407f586158903226833a02e06143074bf6b9",
+                         "watermarkedSha256":  "22f6a3b3ccc2cf7e79334114cea323c30a025a8152fd5f16d44b4576e335a583",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:35.3591057+07:00"
+                     },
+    "food-35.jpg":  {
+                        "fileName":  "food-35.jpg",
+                        "width":  720,
+                        "height":  541,
+                        "originalSha256":  "83e1234776914b4df70bcbe8c1c8feede7bd0ac71e17e32c96ce53e63d14401a",
+                        "watermarkedSha256":  "a791a1eb048aa602737e007cbcb91323c155792439f02b805ae245955b9af7fc",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:48.3710540+07:00"
+                    },
+    "food-166.jpg":  {
+                         "fileName":  "food-166.jpg",
+                         "width":  720,
+                         "height":  612,
+                         "originalSha256":  "48622381dc8f74792573c60c023d21d82e63ad92d61cf3d606a94c001ccfd601",
+                         "watermarkedSha256":  "4abc4c1da4ac21c5c8a8e0e38a7bdfc5fb14497ed1a905c9015460257f09205d",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:37.1353822+07:00"
+                     },
+    "food-119.jpg":  {
+                         "fileName":  "food-119.jpg",
+                         "width":  720,
+                         "height":  508,
+                         "originalSha256":  "2ad69dc9217030c76303110d18381d0835b0ee8fdbe6b20844f6a2afce4b8842",
+                         "watermarkedSha256":  "412f0a9715096c0a70badc1ca0262834c7056f21a723dc3b9017af508758d9b9",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:33.4750502+07:00"
+                     },
+    "food-14.jpg":  {
+                        "fileName":  "food-14.jpg",
+                        "width":  720,
+                        "height":  720,
+                        "originalSha256":  "c5a2f9390d7d6a3606f525cef725cb5f1026e90916fe2923ca096b88f812177c",
+                        "watermarkedSha256":  "25f3a7f2614785549b102bc8d6130953eb48b9c6c783f8e619a2d7cf8f04886d",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:35.0895889+07:00"
+                    },
+    "food-136.jpg":  {
+                         "fileName":  "food-136.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "3e23ee6d1f7166f181ff58f8c74b5d39a24d88fc606a0ea88a9bac25ffc3f0fb",
+                         "watermarkedSha256":  "81c2501421d5d42b339d729f218163e7eeb92afe890458cff80fd8b3a2253f9d",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:34.7873993+07:00"
+                     },
+    "food-276.jpg":  {
+                         "fileName":  "food-276.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "7ddead6fd1e6e2228a27f4608765230c5371ac567a703d4b0eebe9817618706a",
+                         "watermarkedSha256":  "47c88193b0e93d15c756ec5ede55c348ae39620e2427e93bc4b2381ef3e5998b",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:45.3317000+07:00"
+                     },
+    "food-158.jpg":  {
+                         "fileName":  "food-158.jpg",
+                         "width":  720,
+                         "height":  720,
+                         "originalSha256":  "4571031c48971d704315d564922ae9a9878643d7d8467211d237321f52e97f82",
+                         "watermarkedSha256":  "1b0a46f3cd52af4499a410495d006f05bbb3bfba4016f51a659bd1afd6455624",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:36.4816100+07:00"
+                     },
+    "food-29.jpg":  {
+                        "fileName":  "food-29.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "78c4bb7f2279c00c1f5ce1482b6ef13e1e84c13b156d7df06418f54c3fb61c44",
+                        "watermarkedSha256":  "d520ac9e66b2b59fabf339fa1171811597f5774b62d48ab23e1d9eacd5a881a1",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:46.5214792+07:00"
+                    },
+    "food-58.jpg":  {
+                        "fileName":  "food-58.jpg",
+                        "width":  720,
+                        "height":  449,
+                        "originalSha256":  "81fd0be1fa81feaa1bbe365a3c9eb24d72089745ba8031dd669f5b4ea3c4afec",
+                        "watermarkedSha256":  "2f858a8041b92db46876e4d3cc3a2132659b69b282e093cda4f61598d92925cd",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:50.0215704+07:00"
+                    },
+    "food-274.jpg":  {
+                         "fileName":  "food-274.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "827dde501b7c220c86fa39bf73f96a663fa5ddab31c176fcbe5b9af9bf8d7dd7",
+                         "watermarkedSha256":  "89e6806a1be2799eb6ed35b55935c46e7c395c5c3634db167fcad02706511428",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:45.1727819+07:00"
+                     },
+    "food-301.jpg":  {
+                         "fileName":  "food-301.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "5a63872c195d16ee5b86b81287a67b84af1172adb501c3afb77ab347ff9ac0b6",
+                         "watermarkedSha256":  "3855bca53bf915addca47cbd8f02838a035c13d6b0f022f106dc3fe5138fec31",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:47.6217317+07:00"
+                     },
+    "food-284.jpg":  {
+                         "fileName":  "food-284.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "29990fe2d704a5de4135e1383e5397ac141a77cda645ae8953abf69731b95391",
+                         "watermarkedSha256":  "2bff7b671f9cd6a894fe5db475893ddea0c663ca949bf082e568c074f02bda52",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:46.0431162+07:00"
+                     },
+    "food-91.jpg":  {
+                        "fileName":  "food-91.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "9d80a7d3c34b706410ba9668c48a0186966de7b1f318d25cbd94f89fd09763b5",
+                        "watermarkedSha256":  "1fea6fd15c2a4bb63149c55c2880b4044809e03a70e8be3870f147e933e751e3",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:52.5896971+07:00"
+                    },
+    "food-10.jpg":  {
+                        "fileName":  "food-10.jpg",
+                        "width":  720,
+                        "height":  720,
+                        "originalSha256":  "4a4d23f38097d620707a4e03f2fbb17eccdf3fe05c32c21446a5623240960185",
+                        "watermarkedSha256":  "5b2b7228f39c010cae59a82a0cf4398f7d189af24c80c1715750bf7a0112ef24",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:32.0805187+07:00"
+                    },
+    "food-162.jpg":  {
+                         "fileName":  "food-162.jpg",
+                         "width":  720,
+                         "height":  658,
+                         "originalSha256":  "523bdceb8211042550cb3a1c3775dacda8074b30f1c2c5b2ccf7016a1408dd19",
+                         "watermarkedSha256":  "898f63ace4664eded5b082802c70c11fe340b3b11045bdf9ee54b6b6b20525b3",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:36.8437214+07:00"
+                     },
+    "food-189.jpg":  {
+                         "fileName":  "food-189.jpg",
+                         "width":  720,
+                         "height":  481,
+                         "originalSha256":  "f6ab0de01e8ca1537d48bf95767f9812ac5f09ff5b47e5f613e8a5c71e3588db",
+                         "watermarkedSha256":  "707ccff9229c057059af4f9384364467473bc3cd027a2b792fc513a4c99edbdc",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:38.8306199+07:00"
+                     },
+    "food-184.jpg":  {
+                         "fileName":  "food-184.jpg",
+                         "width":  720,
+                         "height":  657,
+                         "originalSha256":  "5af894a60a9f32eadfb8df6a0401a1b5e4d5e97491b495e23e28653bc542bdc0",
+                         "watermarkedSha256":  "af8ffe0d8de1b388cfe10aa69fc175993a11a53811dd1c8c54a5400b96a22366",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:38.5313826+07:00"
+                     },
+    "food-73.jpg":  {
+                        "fileName":  "food-73.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "d1c02165e18b410f8391888edadf58db40955d2404a4cce0deed7f4ae694406c",
+                        "watermarkedSha256":  "51c82edbc490f1c698a7a0a1b170b7b43268c379288f5474443aa994c47c6568",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:51.2107583+07:00"
+                    },
+    "food-200.jpg":  {
+                         "fileName":  "food-200.jpg",
+                         "width":  720,
+                         "height":  720,
+                         "originalSha256":  "496508762b3e4882048663f31eb0cf3a501459ba0de035810c542588844107a8",
+                         "watermarkedSha256":  "32be1df44e9c1e2421e56bfb1e5ec5b0a5d7751f517b305f108a8af7ef42e101",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.6233841+07:00"
+                     },
+    "food-123.jpg":  {
+                         "fileName":  "food-123.jpg",
+                         "width":  720,
+                         "height":  540,
+                         "originalSha256":  "d9590d96dc792dcb186fcfbdde9dc6275a1d481737aa3688a9c64151641658f6",
+                         "watermarkedSha256":  "9e865d9ba26c60e4db72762d8b8060d17dcaef9da2a97466430c083864dea904",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:33.8366623+07:00"
+                     },
+    "food-291.jpg":  {
+                         "fileName":  "food-291.jpg",
+                         "width":  682,
+                         "height":  800,
+                         "originalSha256":  "e14b80b255836a20dbcea42fa758cd919ecf4bf33fa76a271ca5d6060a55d04a",
+                         "watermarkedSha256":  "019f44dbec3c6e6af52d2998b9e1ead2213dc61591fb8ad094b58e049ab71dce",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:46.6928967+07:00"
+                     },
+    "food-219.jpg":  {
+                         "fileName":  "food-219.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "74ecc60eacf5cc070dddb228f3d70f18628aeaedb314976546616c0e8dc5ae0c",
+                         "watermarkedSha256":  "32040acab2de4fc70a06ee4c08e07a8788454a8582e4bf0bb42c018389228b9f",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:40.7350559+07:00"
+                     },
+    "food-258.jpg":  {
+                         "fileName":  "food-258.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "434ba803443445204d7eed8af55072cf85ce9b39753f22d3912851fce0273c7d",
+                         "watermarkedSha256":  "71f3ce7b7900a7ebdc958e8033d494f1a8b071d4c115f745ec9a191b9c6b3953",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:43.8722693+07:00"
+                     },
+    "food-217.jpg":  {
+                         "fileName":  "food-217.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "15464861932ba7df5183df19d0e22742725e1dc22e61a090f559a30ddd648391",
+                         "watermarkedSha256":  "a72f38939874db411cc00829a38c2b4e1b7634040e682978a53820c41e61e421",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:40.5968413+07:00"
+                     },
+    "food-279.jpg":  {
+                         "fileName":  "food-279.jpg",
+                         "width":  731,
+                         "height":  800,
+                         "originalSha256":  "eab654b20e4a1be13d3b71c779903dc9570dd79150e3d4c12c9b42e165bc5f6b",
+                         "watermarkedSha256":  "d32df1fbdce4afd11204b82c83fc90080c2303ef63c1f940da5e760fb725dd8f",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:45.5849554+07:00"
+                     },
+    "food-16.jpg":  {
+                        "fileName":  "food-16.jpg",
+                        "width":  720,
+                        "height":  720,
+                        "originalSha256":  "9ac6c2353ccacf7978d0b62a6e2d8fb813439496cd5672e238aa4c8dfbb988d4",
+                        "watermarkedSha256":  "6a758a5fae90b220ecaaede91de4766382f75878c5ffbdd3b1381db0bb53a612",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:36.6329861+07:00"
+                    },
+    "food-100.jpg":  {
+                         "fileName":  "food-100.jpg",
+                         "width":  720,
+                         "height":  720,
+                         "originalSha256":  "ead185efe175d2bfac9ab90b86b90d3ff532e0bb8f4ed3f5bea5b93d09881ad5",
+                         "watermarkedSha256":  "ed0889688d96652c163fe1c53109b7125deb270f543af066b700a4611bf790db",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:32.1439649+07:00"
+                     },
+    "food-190.jpg":  {
+                         "fileName":  "food-190.jpg",
+                         "width":  720,
+                         "height":  477,
+                         "originalSha256":  "40007160d0f06bba13991c14da26183812492f5d4b6441a242d0b43f9d99dbbe",
+                         "watermarkedSha256":  "cbac819092a78d3c32b0a9c2bdc8629dd3401a8d7e6977b11ef055d1b55506fd",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:38.9406060+07:00"
+                     },
+    "food-63.jpg":  {
+                        "fileName":  "food-63.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "5fdbac90310874807c459118b8999a9e5ad03d43505976cb8d38ea208af6b943",
+                        "watermarkedSha256":  "38509e5fb6ccbd37c9ce08cc59d12da7852662f0cee3ca11df3e7e11e6b44d84",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:50.4575457+07:00"
+                    },
+    "food-155.jpg":  {
+                         "fileName":  "food-155.jpg",
+                         "width":  720,
+                         "height":  658,
+                         "originalSha256":  "2865b1e36111846c7df5555f53b84deebdba9a41fa2ddf538244ee5b6d9def2c",
+                         "watermarkedSha256":  "de9977f0a4b506644abe51add4ccc8663341d20f934c69596e67348a22d1eda6",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:36.2560028+07:00"
+                     },
+    "food-206.jpg":  {
+                         "fileName":  "food-206.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "9988cd7d35cd90edda95f851843e84ef6545afe2e63273da42ec85d7aeccd5e7",
+                         "watermarkedSha256":  "e29a4e4d0bf2dc8491ab95d518b7410a6e4f2b26bf3a1a9bc7b3ca831c45100b",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.9215918+07:00"
+                     },
+    "food-82.jpg":  {
+                        "fileName":  "food-82.jpg",
+                        "width":  720,
+                        "height":  540,
+                        "originalSha256":  "3460a06cbbd80598a5ad38e4a450a86292cbcd0e91fc01fb0d29d1b1b755deb8",
+                        "watermarkedSha256":  "5d0e156c6cf90d29951113e12d1085d26b8f7dfbff0d863f0935f3898cc608e4",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:51.9089672+07:00"
+                    },
+    "food-165.jpg":  {
+                         "fileName":  "food-165.jpg",
+                         "width":  573,
+                         "height":  720,
+                         "originalSha256":  "31e1762dcc3985de68fbf1f2e5f5577e9db81a5c7d76e4c8b82c0aba34724a1b",
+                         "watermarkedSha256":  "5dc06cd3eed5225967084323273619fedfaca525eed7df6189322815d4f57f45",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:37.0605803+07:00"
+                     },
+    "food-261.jpg":  {
+                         "fileName":  "food-261.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "dea5d33cac0f46116a5957076791bc2305ca090a2b5ebcd750ff73841aba09fd",
+                         "watermarkedSha256":  "83c394782d06f44899a2f3959c1a70a661f93038794898a9f68f3d6302746b2a",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:44.1258409+07:00"
+                     },
+    "food-282.jpg":  {
+                         "fileName":  "food-282.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "8cd3e4e1c1ef01f116c5098df467794d6e74fb3a0969a638e22c697850b51a77",
+                         "watermarkedSha256":  "e304772b43b5be251f10202656a69ed5128e7423f5efa550e18b5a389c075535",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:45.8856792+07:00"
+                     },
+    "food-246.jpg":  {
+                         "fileName":  "food-246.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "847a1108a09109e079e9b1127bbe52e67fde1952d0b36c1676efbbad8d4e3ae2",
+                         "watermarkedSha256":  "57211ea12bb3e8a368b80e8398e741fed8341e4707e58c1110736b78656eb9c1",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:42.9538821+07:00"
+                     },
+    "food-307.jpg":  {
+                         "fileName":  "food-307.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "5ce8f789b39136f3131678a589caeea542f191fe9ffa409187ffa9904951f4b3",
+                         "watermarkedSha256":  "a6378ec1a7be661818e0a1759e0c9eaf455548e98d11aca84252709801604c56",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:48.0603861+07:00"
+                     },
+    "food-223.jpg":  {
+                         "fileName":  "food-223.jpg",
+                         "width":  960,
+                         "height":  480,
+                         "originalSha256":  "600a1e24d48eeedea7c53553791368b9cc51c7f057c3142f702c126e6f5bc3c1",
+                         "watermarkedSha256":  "6b03c8a32cd349a3542b23656bfff5cb71e3eab7e5e86d1d516fef90de0fdc3e",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:41.0361878+07:00"
+                     },
+    "food-87.jpg":  {
+                        "fileName":  "food-87.jpg",
+                        "width":  720,
+                        "height":  658,
+                        "originalSha256":  "f218655678f2324ceefc013dfe68746d8b8e51cb898a8e8285fe1df922f157cb",
+                        "watermarkedSha256":  "13d254b526ce0b4873241a53a24aadd1a7a6de3cbd3ce75b78ae2177fd471deb",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:52.2573281+07:00"
+                    },
+    "food-186.jpg":  {
+                         "fileName":  "food-186.jpg",
+                         "width":  720,
+                         "height":  479,
+                         "originalSha256":  "cf2e17691722fdf4842bc3cf2b93ae9fe29576d8a4fadb381929b533ecd26ea2",
+                         "watermarkedSha256":  "a34443d738415bee20fe4d51946de9717e72069b0f0203193d5d97f2b73d0677",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:38.6416293+07:00"
+                     },
+    "food-9.jpg":  {
+                       "fileName":  "food-9.jpg",
+                       "width":  720,
+                       "height":  480,
+                       "originalSha256":  "2705219a2adc3b27e70ce7b8b8aad1a86a9d3488795e18e8ecf01c7e6b255479",
+                       "watermarkedSha256":  "7c03b198b304d44c6b84bb80da66a8bf7e5c8487755d79b46d9593f6f8f2ed90",
+                       "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                       "watermarkedAt":  "2026-11-09T13:44:52.4947927+07:00"
+                   },
+    "food-85.jpg":  {
+                        "fileName":  "food-85.jpg",
+                        "width":  656,
+                        "height":  720,
+                        "originalSha256":  "2a4dbdf47cf7ba3391b45fdf4b4665e2fee37a4d8cf48cd28a2aebe11bdb25c8",
+                        "watermarkedSha256":  "f21b9d2d9a65cc3d60aa3d132ce05324cfc826dca2aa8dfca7964432e8330c61",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:52.1146345+07:00"
+                    },
+    "food-226.jpg":  {
+                         "fileName":  "food-226.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "2740b2fa3a25a139e33c6487343b2cab6c5f71400deec8fbb247b5a71c2f20f6",
+                         "watermarkedSha256":  "a84ef47d76a519e27cea72179e390eb37fb0521d4fac93405a10cd7c02d6e9cb",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:41.2434862+07:00"
+                     },
+    "food-120.jpg":  {
+                         "fileName":  "food-120.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "34ebd4f9eeb4c9eecb602d4c9b14ac4aa4ccfe7bf59e7e51c467585587aeecae",
+                         "watermarkedSha256":  "4c2025a15b4ddb4dea77f3eafde084523f6731620a8f415f5e14ca176adeed9f",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:33.6151159+07:00"
+                     },
+    "food-304.jpg":  {
+                         "fileName":  "food-304.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "0706889d4ff4e247b67efa67c656c39b8b6e39ee60a9bc96d2d42cab6c29fe4f",
+                         "watermarkedSha256":  "a13efd7611f7e3db5223995ad3b1c842ee8fa103c6e57e87ab5e91cab492da1e",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:47.8267498+07:00"
+                     },
+    "food-137.jpg":  {
+                         "fileName":  "food-137.jpg",
+                         "width":  480,
+                         "height":  720,
+                         "originalSha256":  "b4f888e2d9469ac2fa466a082f8c7dfcbf9a73063462bfbc922b965bc4e53a02",
+                         "watermarkedSha256":  "14391714e2191927e436084602d8aa4e9c297358e25d797da7bef2f7cfc77fa5",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:34.8512521+07:00"
+                     },
+    "food-154.jpg":  {
+                         "fileName":  "food-154.jpg",
+                         "width":  720,
+                         "height":  540,
+                         "originalSha256":  "acca8d0fb825db2f44bacc089b84bb1c8f246586ef28d2785c7938220a10ec99",
+                         "watermarkedSha256":  "d5fc3d6b4142ca6bbbe27ea7eeb9df1ddd21882e324c81fa7aae773c449301a7",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:36.1813768+07:00"
+                     },
+    "food-113.jpg":  {
+                         "fileName":  "food-113.jpg",
+                         "width":  576,
+                         "height":  720,
+                         "originalSha256":  "c3516e680f5723db46fca78f0d0a150a380185d7d52916cfbbe6ee48f383fa06",
+                         "watermarkedSha256":  "0403fc685f229d9481ecc091cffe02b75095eafd06f88be0c9a581673c4db9a4",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:33.0702036+07:00"
+                     },
+    "food-75.jpg":  {
+                        "fileName":  "food-75.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "b267b423147d082c50879eb767bc83ff8d983d73390147a8cf09859ec8fb596a",
+                        "watermarkedSha256":  "fb4cbe6acf7609560be01b579eb28de0538f59e4a708f801132713f5e843feee",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:51.3374498+07:00"
+                    },
+    "food-55.jpg":  {
+                        "fileName":  "food-55.jpg",
+                        "width":  720,
+                        "height":  658,
+                        "originalSha256":  "f2dce4bb5db2775397a677b784a94d28d0baab65f1d4c5eee1061ad157205ff4",
+                        "watermarkedSha256":  "49b819fc316d594e4e43de61f510e79bd88a71bf402cc68e3ee12e8ad51328a3",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:49.8215314+07:00"
+                    },
+    "food-227.jpg":  {
+                         "fileName":  "food-227.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "1f0cae0455603855ab799a24ade9c49e365502e8ccfe5a7c7b4ace83d10cb8a5",
+                         "watermarkedSha256":  "4ddd7c9ead0478caa5a3bef2efe9c9722760cdea5c89ab6f46e5fb87128d134d",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:41.2904644+07:00"
+                     },
+    "food-79.jpg":  {
+                        "fileName":  "food-79.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "d0d2d4fa510bba8b99df650f48439abfb1fae11cc8251dd7153c52a3ddf62d88",
+                        "watermarkedSha256":  "ea4adb6a0cf74da5fc8f5291a0cfbfbf81ee3fafb4efbc7330e7c4b385a59655",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:51.6234841+07:00"
+                    },
+    "food-285.jpg":  {
+                         "fileName":  "food-285.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "5722c4ef650119f697bf6b6a2ab1f817e81ba05f2b1138e0ddd868965739ea07",
+                         "watermarkedSha256":  "a80e9d27e40471e728d70a824e47ab1e834c3198ce1920b768e0d740464ebb47",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:46.1392532+07:00"
+                     },
+    "food-257.jpg":  {
+                         "fileName":  "food-257.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "75a4be2939327494f31afd68218067c676d3fd3626ecdcf39eb829a72caf5a00",
+                         "watermarkedSha256":  "d460745ce59ca78bce451e91ce9b96fcbf3e7891be8b5850e3d79123973174f1",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:43.8098206+07:00"
+                     },
+    "food-12.jpg":  {
+                        "fileName":  "food-12.jpg",
+                        "width":  720,
+                        "height":  628,
+                        "originalSha256":  "42b6280b8ac42dc7cca01abe04edbebbfbc372a4410e53d0d47cd39c81c295fe",
+                        "watermarkedSha256":  "badaff2f0e145b4038ae58796b6ee344aa420ee27714f465202798aae0b98568",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:33.5527673+07:00"
+                    },
+    "food-40.jpg":  {
+                        "fileName":  "food-40.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "df5315cd1d9d0bd066a0a49baaeda001d761bc6b85a2d45bbb116275c3b72051",
+                        "watermarkedSha256":  "3c03d3fb4917d4e136eab40a956a30d9943edaf68fbaca6072f7d02f27b7c82c",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:48.7539404+07:00"
+                    },
+    "food-188.jpg":  {
+                         "fileName":  "food-188.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "afce9b9ba70fa7a7c79c55b9d79f3159cb9791eb65e522086c31bc9c90ccc0d9",
+                         "watermarkedSha256":  "c38d96e52073df61cef18e43d6c7f5029dade827719196160d68e7bb38c9f38d",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:38.7670458+07:00"
+                     },
+    "food-281.jpg":  {
+                         "fileName":  "food-281.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "0a3cf7b5daee9d64a7401d7fa9351968041d4aacdd48fe1256e901910fb5ed12",
+                         "watermarkedSha256":  "44802d7d9d536cd351e364b8938e480ef45ee5338b43a69106802e80c153f1cc",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:45.7922190+07:00"
+                     },
+    "food-122.jpg":  {
+                         "fileName":  "food-122.jpg",
+                         "width":  720,
+                         "height":  657,
+                         "originalSha256":  "f5f1968e1dbcf0738a31b803cda6c48600438ba6634757c342f225b1f309c73d",
+                         "watermarkedSha256":  "1bf93626e963bf435ed7f75680ec7ec77a62afae3eb07d57026c450c7e1e1652",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:33.7577459+07:00"
+                     },
+    "food-294.jpg":  {
+                         "fileName":  "food-294.jpg",
+                         "width":  800,
+                         "height":  582,
+                         "originalSha256":  "ab86342024f30180a77b7e313ed5909f93bc48f007e5a99074b7bd0b19dda1e0",
+                         "watermarkedSha256":  "4c71df2b858c2633cb3d18b0f7147440a67df52fa09c60265e4d1a377767d0b1",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:46.9213573+07:00"
+                     },
+    "food-201.jpg":  {
+                         "fileName":  "food-201.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "6eb1ef9391bb35d59829e588bc1fb31e6bae1c3dd24e65a0ad280d3eb77821c5",
+                         "watermarkedSha256":  "ec64596f8811de7e8b8339f17490e537a53448c7823a8c372f496716f7dc5002",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.6834508+07:00"
+                     },
+    "food-77.jpg":  {
+                        "fileName":  "food-77.jpg",
+                        "width":  720,
+                        "height":  720,
+                        "originalSha256":  "9680fafa2566bfa3437a402b939387019f5e772173a7c346ebd949c681adfcb4",
+                        "watermarkedSha256":  "26d388a9cf4271c7ca22f5d10b3a825ed0cbbffd44cf2e7c3ce82f7fa1f1d183",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:51.4955877+07:00"
+                    },
+    "food-216.jpg":  {
+                         "fileName":  "food-216.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "dda81aead5ebf941cac258d30d404036b28076d06eba981eb4152cce9a8d9eb5",
+                         "watermarkedSha256":  "a84a6670cc379e2299dbf960155a4705258df80ed4b1d98a31703fb51426b7d2",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:40.5454381+07:00"
+                     },
+    "food-275.jpg":  {
+                         "fileName":  "food-275.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "edfb71024d89f208ee0d91b56829887741d133e528c0ce6f8a02c8ad1f3b1eb0",
+                         "watermarkedSha256":  "38e7aa28b0e61f5398aed836cee884a336637bf6a9d04a23ff065deaf16eed33",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:45.2525411+07:00"
+                     },
+    "food-193.jpg":  {
+                         "fileName":  "food-193.jpg",
+                         "width":  720,
+                         "height":  481,
+                         "originalSha256":  "58f2b6d9c66a34e3dc2235d74f8c9060a5292bbd6c25b22aa9017db82ea653e9",
+                         "watermarkedSha256":  "5e66239f71092221d215cff5f8a223032d8320be4ebea85acab95a894ef55d67",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.0976037+07:00"
+                     },
+    "food-138.jpg":  {
+                         "fileName":  "food-138.jpg",
+                         "width":  720,
+                         "height":  720,
+                         "originalSha256":  "10234e8de589a595520f215c32423b9b33197285deb4db3d5d1bd572807e614b",
+                         "watermarkedSha256":  "74ad72fde319f58576fa1f06000130b2c17ad4959faf0d1ca3eff9edef5fd9c2",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:34.9315225+07:00"
+                     },
+    "food-179.jpg":  {
+                         "fileName":  "food-179.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "f6e9a45d488dbcecb0f440d952f509f51544854aa2cfdd773ce919034dac0f7a",
+                         "watermarkedSha256":  "f70258e4ac155791ae39273cd7553b4f51618bf88f09fba6ac98e7e1d8413836",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:38.1540131+07:00"
+                     },
+    "food-156.jpg":  {
+                         "fileName":  "food-156.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "d0895594c07ff24ecf985ea8409ac0975cc543072950ae89f622a5d267d19edf",
+                         "watermarkedSha256":  "ec05f74a50fdd6cf9a32bf57bacad0b032a47325f5410e159dec1297edf296ca",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:36.3079945+07:00"
+                     },
+    "food-205.jpg":  {
+                         "fileName":  "food-205.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "628146ee40da00cfac0153c3cc1c314aa659eba17e8180fe292dd2e77c80fcf9",
+                         "watermarkedSha256":  "3f8ebc84aedcc56f7ea96f28325e8303c2090c507c696f68afce6312aa1ffbbb",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.8770735+07:00"
+                     },
+    "food-13.jpg":  {
+                        "fileName":  "food-13.jpg",
+                        "width":  658,
+                        "height":  720,
+                        "originalSha256":  "148279806bdf0c6e98522e5da9f85195e3c9c879042bb10a1b2019554d4a62d0",
+                        "watermarkedSha256":  "56befddfc7503c7b7bee24494beb47331e00715792a8ae25a8abd4e7f5f9a64d",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:34.3437543+07:00"
+                    },
+    "food-102.jpg":  {
+                         "fileName":  "food-102.jpg",
+                         "width":  720,
+                         "height":  405,
+                         "originalSha256":  "69c4a3bc4bd38e9a91a1a51bee466c3671f39e5379c79aa1f6ae44e3cc579390",
+                         "watermarkedSha256":  "65fb6633d0261c25cd2a0a3cceeb8587d6fd85f3ce6386360b09eff427259c06",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:32.2715508+07:00"
+                     },
+    "food-203.jpg":  {
+                         "fileName":  "food-203.jpg",
+                         "width":  720,
+                         "height":  369,
+                         "originalSha256":  "0c36112e38375b9858d7c7b8bea5e4d81600c0f06aa4e6eac4e2190b85354223",
+                         "watermarkedSha256":  "c3f366e9fe73b83290eef8aec11976cb08a4e32f9fb4f838a88b3aa836cae9f0",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.7624699+07:00"
+                     },
+    "food-126.jpg":  {
+                         "fileName":  "food-126.jpg",
+                         "width":  538,
+                         "height":  720,
+                         "originalSha256":  "c90f54e7de7029328343145e33b12103e559beb618a54a4e5a4711eafd121d13",
+                         "watermarkedSha256":  "b12e6f0c58b58ce60a3048f05bddb8f00c3634e0fb77baedd8b7892dbed52488",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:34.0586736+07:00"
+                     },
+    "food-247.jpg":  {
+                         "fileName":  "food-247.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "69e63a54770445364bd4d65dadd07d5adc53eda6809bc266f5ee6e9fbe50f411",
+                         "watermarkedSha256":  "609fa914646a368e632b8d2cbcc8e356744045437279ebbf5cf1e646792641c4",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:43.0466660+07:00"
+                     },
+    "food-278.jpg":  {
+                         "fileName":  "food-278.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "c3bcddcbbd82eb3b60541797d229dbfc94e75ebfd0dbf86fc26bd4d84c2746eb",
+                         "watermarkedSha256":  "87b9b76e2f0c2078cdae7409609341af5ccb0783c2ebb44e730602863795a65b",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:45.4906988+07:00"
+                     },
+    "food-221.jpg":  {
+                         "fileName":  "food-221.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "38b358ebe15988ea1a408fd1334688499fe22bfa3b50c45123b665c07ec574a9",
+                         "watermarkedSha256":  "68d4c58aad618af17d3d4c9f3980fa8f069a001ebcb458a2967f4ce3342de130",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:40.9182466+07:00"
+                     },
+    "food-141.jpg":  {
+                         "fileName":  "food-141.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "cf0c924fb50812b521a9538b434b09d553da6819a4f912e0d1e56e15b6ae44bd",
+                         "watermarkedSha256":  "648ed68a6c7cb080216094356a016f8025da2ce15bb5c2da0c87a597c2977c2e",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:35.2181348+07:00"
+                     },
+    "food-160.jpg":  {
+                         "fileName":  "food-160.jpg",
+                         "width":  720,
+                         "height":  526,
+                         "originalSha256":  "454a86d5b5f627b97bb605ca47ae1f504292313b01449f33742b6dbfdfbfe311",
+                         "watermarkedSha256":  "76e2f698b649dafcee442f361db1fcf821f192a6e299757e5495ead341388f62",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:36.7171283+07:00"
+                     },
+    "food-149.jpg":  {
+                         "fileName":  "food-149.jpg",
+                         "width":  720,
+                         "height":  540,
+                         "originalSha256":  "5e1c07427ce5811314e291cfc63b1df0476fb2f67a6f25fd6e5577cd37aada96",
+                         "watermarkedSha256":  "86b1f35a0b037872c4185636bd8690a68c31551fa46e2d067b4daad2bdcced86",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:35.7698000+07:00"
+                     },
+    "food-152.jpg":  {
+                         "fileName":  "food-152.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "2023cf134da9afa802c67266224e9a1cdfcd2dfb48e007e6580ed2e92bf20b00",
+                         "watermarkedSha256":  "65e2df7bceaa58ac3dd4d38ccf394a5be0e7e5b1a007de0f442b8c41f5882af5",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:36.0389513+07:00"
+                     },
+    "food-22.jpg":  {
+                        "fileName":  "food-22.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "6f920640cd40088b62467f08bf1cabad5537ddbd3903c7f8a85447c23329cc5a",
+                        "watermarkedSha256":  "03dafdeea5221e0978419687e57546fef9fb24b68504ec4cb3e7dde197825650",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:40.8004813+07:00"
+                    },
+    "food-114.jpg":  {
+                         "fileName":  "food-114.jpg",
+                         "width":  540,
+                         "height":  720,
+                         "originalSha256":  "200a319945a1ced6c83f575824b68523ce5c0a5e897ea292a7201dcb5a202228",
+                         "watermarkedSha256":  "a05e4536e47cdc43baf0b1e0b22113eaf0903f2da42fa26ecef0703d77377f8b",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:33.1199321+07:00"
+                     },
+    "food-177.jpg":  {
+                         "fileName":  "food-177.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "0633fa79fc268671f58ffeb9b442ae2f624bc5c40cfb0c703ef73044a44531c7",
+                         "watermarkedSha256":  "c586cd628fe4b5e041e574f247926952ca890f8d207d6dd3897921a36c00ce18",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:37.9915808+07:00"
+                     },
+    "food-20.jpg":  {
+                        "fileName":  "food-20.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "4a2c0843fd1e0c03f0bec7bf9f139c575fc103eb896a65229383e025e2518b87",
+                        "watermarkedSha256":  "5c6b6b5bfaf0a007eb0aa3bb6298ad1d9a8b1e551050bbcf44d8c32e5ef99785",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:39.5598697+07:00"
+                    },
+    "food-159.jpg":  {
+                         "fileName":  "food-159.jpg",
+                         "width":  720,
+                         "height":  540,
+                         "originalSha256":  "8ff93f2f3826af1b162934cbd74def0c1cdaf767bf23930725b400a55f4b82ff",
+                         "watermarkedSha256":  "3e2141636169d3cebc37fa70631ba896e935be6798a5d19e3d9d5169e54f57b0",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:36.5532134+07:00"
+                     },
+    "food-59.jpg":  {
+                        "fileName":  "food-59.jpg",
+                        "width":  720,
+                        "height":  499,
+                        "originalSha256":  "1863bdd7380ebfb2777fd2fab25e57341a11e0e0c30bcf3298687a36894a4d2b",
+                        "watermarkedSha256":  "0506237e337ce097c58959825f423f8915899bb74a35e71022f5acaa36e6daae",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:50.0936803+07:00"
+                    },
+    "food-33.jpg":  {
+                        "fileName":  "food-33.jpg",
+                        "width":  720,
+                        "height":  540,
+                        "originalSha256":  "07cb2d60176971b85d5655ee8b1d1cb087e2f59a3752e4a70ba86f888b38ff82",
+                        "watermarkedSha256":  "9812f9b9ecbd4407b139347ab1e2ab70ca679cb00cd99b92dea4b553d768cd5f",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:48.2381993+07:00"
+                    },
+    "food-133.jpg":  {
+                         "fileName":  "food-133.jpg",
+                         "width":  720,
+                         "height":  720,
+                         "originalSha256":  "74757fe84a92ec7029b92f4be682005b2553d0f1833f9c54bb73364813eb7b29",
+                         "watermarkedSha256":  "1411d2c80b164396d00e2766b70ab709e0fe6a0c1ffc8a3023da398f57a452ea",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:34.6182284+07:00"
+                     },
+    "food-225.jpg":  {
+                         "fileName":  "food-225.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "79ad4e3b486dff9678b25bd6bac46c10d6f9c74115197e1dbfbc1d7b5ce9ec9e",
+                         "watermarkedSha256":  "f5bb8011126f24631392fa55dfe377c04282e9d677f25728c8c9229cbe721adc",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:41.1477582+07:00"
+                     },
+    "food-118.jpg":  {
+                         "fileName":  "food-118.jpg",
+                         "width":  720,
+                         "height":  657,
+                         "originalSha256":  "c9903b0c5c7d3e18a2b7db5f9c1b45af3466b62885b58f79cb467ed68c20c9b6",
+                         "watermarkedSha256":  "70e285317085c9b64f04b46ae12da0c7417be53e5db6147ffbafbf9fe6a61750",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:33.3951688+07:00"
+                     },
+    "food-71.jpg":  {
+                        "fileName":  "food-71.jpg",
+                        "width":  480,
+                        "height":  720,
+                        "originalSha256":  "3b197f6f6020606504c7cb0c717ca3840245a439de0667eb3588a6b9a797e329",
+                        "watermarkedSha256":  "a6f9caaf5c12c925a43f762122ac5677ba210d7f3d294c3389d7d1b8e30eb62b",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:51.0686448+07:00"
+                    },
+    "food-163.jpg":  {
+                         "fileName":  "food-163.jpg",
+                         "width":  720,
+                         "height":  720,
+                         "originalSha256":  "333588c1cbb6b31bd4eb1ee3e029bfd1d964615e04991caf42658c7eb20f7693",
+                         "watermarkedSha256":  "d6779bb348747867f16ef8e5657bde5e8b65f02f9876c7d0f16573fac5beba4f",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:36.9176151+07:00"
+                     },
+    "food-124.jpg":  {
+                         "fileName":  "food-124.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "78acff53c3d29e3e176b037f1f4f962b5ab8ff539e2c2b2ae2c4b7df62d296d3",
+                         "watermarkedSha256":  "b0b686de1ae4d8b1845b36137958922a02a77a08232582174c8f5f3ea0019d4c",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:33.9156101+07:00"
+                     },
+    "food-209.jpg":  {
+                         "fileName":  "food-209.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "523679962d72a0f7ebf7ad0b8e31acfae1c557bc574dedb4cea5bc9b9a7a5cb1",
+                         "watermarkedSha256":  "b74a88f0a8c3221b8404f6dbb1a560c73506276cf79039c1f0288eb1adc1b87c",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:40.0938828+07:00"
+                     },
+    "food-273.jpg":  {
+                         "fileName":  "food-273.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "9d8d9a558d8672df6bfba7a81b1e83f1962f97c8bf3cf1014d7c410e4438162e",
+                         "watermarkedSha256":  "3d437e71df6b05a32bd76851ef8ef824647243eccbd344c2634b408228616ee8",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:45.1099676+07:00"
+                     },
+    "food-265.jpg":  {
+                         "fileName":  "food-265.jpg",
+                         "width":  800,
+                         "height":  800,
+                         "originalSha256":  "7bd725b1de36e563e6748e8202482c78868c225f6393806891fa4e4b56c3dbe7",
+                         "watermarkedSha256":  "e7c6f223a47f8376c8d857566b0748d9919b6062027595798d196f16fad13201",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:44.4433901+07:00"
+                     },
+    "food-259.jpg":  {
+                         "fileName":  "food-259.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "0686f180c02470efc04deecc0a53f15677d3ace9ce091a5dab44adf59e3e7145",
+                         "watermarkedSha256":  "87d21d906cb1c69210a8d2cc6d200a2c70a89d7bb5541382a44a2fc1163fa8d3",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:43.9358358+07:00"
+                     },
+    "food-256.jpg":  {
+                         "fileName":  "food-256.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "9ea64bee7f9d6f7db95be3938713e0e953fc351a0185ed32bacbde507060e083",
+                         "watermarkedSha256":  "cf7b9f833a868358436b9812fa3d308e91f2da9656b42307d2253f2ce73448aa",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:43.7288140+07:00"
+                     },
+    "food-303.jpg":  {
+                         "fileName":  "food-303.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "2f0faa2fd61bda00061791cd85265e90f0b5e732ddcc0bfef4bbb9906b8b9c1a",
+                         "watermarkedSha256":  "661d2e76177b3379336081c3e3c0507a458119fca5261ca95c38a52dce62a042",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:47.7705487+07:00"
+                     },
+    "food-90.jpg":  {
+                        "fileName":  "food-90.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "b1c8b849a87458abef3611470da320cbb16db4e598f579f1190d3dd2cb45982d",
+                        "watermarkedSha256":  "e28716d8d8f8ab3a48c23ec197a620d2044685481068a6a506068b07215f0b5f",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:52.5431231+07:00"
+                    },
+    "food-139.jpg":  {
+                         "fileName":  "food-139.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "ad0062e700bf00afb6e78b62a8f89facf8fa83ee8794dc4f16d796ef54118e16",
+                         "watermarkedSha256":  "638405bde2d0b0e6357db7b2f4a76005ec449c904bbcac1fcf8ae24332fc5afa",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:35.0097343+07:00"
+                     },
+    "food-81.jpg":  {
+                        "fileName":  "food-81.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "974425cb763826052f7e39ed2377b949957cc8a039c5f04091434a37525e4cb6",
+                        "watermarkedSha256":  "76ec60e81ff829fddcae998ff9c14145bce979eacf641fec59ba57e8a1cdaf68",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:51.8454830+07:00"
+                    },
+    "food-224.jpg":  {
+                         "fileName":  "food-224.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "c1d454ee91da154d40a053a81cedbcb3deff4651b7b087595fa83fc047749b44",
+                         "watermarkedSha256":  "c3b7e4300041439dfe47e93d2a6c4c3e0c23c3ffdc9a9b94471b23ebe9dfd2a3",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:41.0993586+07:00"
+                     },
+    "food-94.jpg":  {
+                        "fileName":  "food-94.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "504f338f9f054efbd0e46105b17cbf71a4fe80770cb60a00ff8f2389f5756009",
+                        "watermarkedSha256":  "be4a690f8f483ffa8e9c910104c2fe87165fcf4f86b42b1761a52eb6c16909ed",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:52.7681627+07:00"
+                    },
+    "food-105.jpg":  {
+                         "fileName":  "food-105.jpg",
+                         "width":  720,
+                         "height":  455,
+                         "originalSha256":  "db3f5b29beb1a78e57e098907ab5ff87c6e97449ee1d3c2d30e9868dd37210a3",
+                         "watermarkedSha256":  "409409ac19b93efcd3c5386e52f36f72ca8ff4f2fa1a080e5150d9a690454f7f",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:32.4439089+07:00"
+                     },
+    "food-88.jpg":  {
+                        "fileName":  "food-88.jpg",
+                        "width":  720,
+                        "height":  720,
+                        "originalSha256":  "2be5c5a647ea8a4ce64f82f1dc4593552c567d6747b52da56b962de709df2ffc",
+                        "watermarkedSha256":  "7f5741cae691e0913483dd689a8102856d4d6f941634af604a37d1eeedad5a38",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:52.3367632+07:00"
+                    },
+    "food-108.jpg":  {
+                         "fileName":  "food-108.jpg",
+                         "width":  720,
+                         "height":  657,
+                         "originalSha256":  "21157842044d0dc4532f416248b07df2d49276ad0023f081f108dad6d7032d49",
+                         "watermarkedSha256":  "535f31ec434624982dcd711b61060df69605947c10202d96f159b0430c6206d2",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:32.6180791+07:00"
+                     },
+    "food-86.jpg":  {
+                        "fileName":  "food-86.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "e8a0874141c8aa88d0f46dc6c44c4f33bc45986c2e2381f0d2859b43f1e352c1",
+                        "watermarkedSha256":  "971e78e670cb395fb811d37f330a41fb2ff7b9e174e4125cc75b057881fee52b",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:52.1622631+07:00"
+                    },
+    "food-7.jpg":  {
+                       "fileName":  "food-7.jpg",
+                       "width":  720,
+                       "height":  540,
+                       "originalSha256":  "639ac0cc3971b9f13e18872e2e2f2b4efa8ca2f7721fac95aa254971b5941a69",
+                       "watermarkedSha256":  "3b46340aac09166329f3667d30ded4796e08f632c57aa8928f6ae499a5be89f0",
+                       "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                       "watermarkedAt":  "2026-11-09T13:44:50.9415623+07:00"
+                   },
+    "food-72.jpg":  {
+                        "fileName":  "food-72.jpg",
+                        "width":  665,
+                        "height":  720,
+                        "originalSha256":  "c1afc58b8fbe73bc067bdd3d03f8342d36657be6df0a85f90f54377e044c842e",
+                        "watermarkedSha256":  "ff430e838f521bffce263892b32912682daf3cc4dbcf30c4bf20f4b6ee223046",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:51.1477423+07:00"
+                    },
+    "food-260.jpg":  {
+                         "fileName":  "food-260.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "fae0b8286e85d0f868dcae899ee96f890da5d4e1cfbf0e2e2b21783f0960738f",
+                         "watermarkedSha256":  "8d9091f6688c657596068dcf838b2d4edc87f5e54de1454d94f06185e52b83bf",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:44.0635627+07:00"
+                     },
+    "food-140.jpg":  {
+                         "fileName":  "food-140.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "66f093edfba9b69f55939680ca69cd3ea93477931303abc3553821ef256fcab1",
+                         "watermarkedSha256":  "9634410bbadb5ff3a944a38fd8baf3113458408e254b0528be4e14862e5c612a",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:35.1536357+07:00"
+                     },
+    "food-8.jpg":  {
+                       "fileName":  "food-8.jpg",
+                       "width":  720,
+                       "height":  405,
+                       "originalSha256":  "8f8b5fe68ac061a6ffceffa2d21679d0ea18757115c0cd21fecba64e6bdfe8e9",
+                       "watermarkedSha256":  "fa2c5c507f488fbf62f8ecd481a9e9920cf932a252aa33bfa2b39f91536dff7e",
+                       "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                       "watermarkedAt":  "2026-11-09T13:44:51.6878645+07:00"
+                   },
+    "food-253.jpg":  {
+                         "fileName":  "food-253.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "fd6b1adc27c21a3a57a3779bcda294c38d1cda9e343da527df76c0dfed8330cd",
+                         "watermarkedSha256":  "6a0025a691e92849f02be247b0023c9c4b974a6dbb9cc54c55b29209b919c339",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:43.5228177+07:00"
+                     },
+    "food-36.jpg":  {
+                        "fileName":  "food-36.jpg",
+                        "width":  720,
+                        "height":  527,
+                        "originalSha256":  "ba3fb70bca7efdba8d54042c69745a1674264122819f9c76c16b591b0ee65e8e",
+                        "watermarkedSha256":  "fc4fbda2830f7058e3d3965d22929b33ca6b635f4c2736a0617c915dbc20d2a2",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:48.4367297+07:00"
+                    },
+    "food-153.jpg":  {
+                         "fileName":  "food-153.jpg",
+                         "width":  540,
+                         "height":  720,
+                         "originalSha256":  "37757a1c0d7230605c0f1bbd5bf22628d91136ae1fc6b136a95cef020f0bdcfd",
+                         "watermarkedSha256":  "49b824278ddcdf98791677cfc6329134e9ab28180b6958ce6bbc442fe6698f7a",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:36.1056394+07:00"
+                     },
+    "food-23.jpg":  {
+                        "fileName":  "food-23.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "6abd9b3a20e7c5910f8f76d0b884b9d2bd636a3b7d433316ab9ce532323c11e9",
+                        "watermarkedSha256":  "e645aa956a0a11782ab206400b86cf72a934429ccd3342686757fc0085da0cc1",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:41.4789269+07:00"
+                    },
+    "food-174.jpg":  {
+                         "fileName":  "food-174.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "221da4faf3143b474f3466489fa882b0d823bbe006eab518716482ceec27bfea",
+                         "watermarkedSha256":  "2f6c161cd0afec5403c084d9bddacd1dd5e3b420188db4b47eca1840f58809c2",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:37.7873476+07:00"
+                     },
+    "food-30.jpg":  {
+                        "fileName":  "food-30.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "1450ee3a96cb9ef5c9d715f39405219babdf5bce1490464928fbf6fea40820b3",
+                        "watermarkedSha256":  "24d26301d8f312bb812bf0e940fee036c59c8bd34c3acdf0eebbb2eafa8c32c3",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:47.4739680+07:00"
+                    },
+    "food-277.jpg":  {
+                         "fileName":  "food-277.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "6db459af3815400c83ebebe7b5a4863b8aeaf8199a350e2e384cf7578cfc34f6",
+                         "watermarkedSha256":  "340718dec7335f1077c53ad4daa7621451ed4fb5a02c7404a2f09e69165dd207",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:45.4104107+07:00"
+                     },
+    "food-170.jpg":  {
+                         "fileName":  "food-170.jpg",
+                         "width":  720,
+                         "height":  658,
+                         "originalSha256":  "831295851a6f6a334eac9a5963c61e0ca03250e53fd5f5c0c514979d14dc52e1",
+                         "watermarkedSha256":  "5162b9c56e88e683151397ecdbef5fb9f975fd064c30941f5931ef61024d34e3",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:37.5029632+07:00"
+                     },
+    "food-182.jpg":  {
+                         "fileName":  "food-182.jpg",
+                         "width":  720,
+                         "height":  540,
+                         "originalSha256":  "70d59007b4b65f2793f094100ae350b0ace200583d6253434af71fea95959b1f",
+                         "watermarkedSha256":  "c9eef10d7be536cc8cea105473490c85c895ff6fff0b6e90b86058a09f8f5b56",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:38.4043510+07:00"
+                     },
+    "food-232.jpg":  {
+                         "fileName":  "food-232.jpg",
+                         "width":  731,
+                         "height":  800,
+                         "originalSha256":  "5b6fc08e0e149c901595da04cc2892ef8663b8ace46f019705cdd8c36696cefa",
+                         "watermarkedSha256":  "704ac1bda07600844f8d16fd43fc03ae8b5ac719f117b02ba7f128f9b0d66350",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:41.7310793+07:00"
+                     },
+    "food-44.jpg":  {
+                        "fileName":  "food-44.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "9185902dca1bd60f2dee2406c4bd8b81daa6b3e19a498ba4c46431ff3b34c64e",
+                        "watermarkedSha256":  "9726750256140c0ec09e78a1f77695137b6fcba4dfc7bb029d52fda0c627bc6c",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:49.0178079+07:00"
+                    },
+    "food-128.jpg":  {
+                         "fileName":  "food-128.jpg",
+                         "width":  651,
+                         "height":  720,
+                         "originalSha256":  "89bd4f9ec8c0d153d6b2a0949916fb244a9151634d1e0192acd32fc02d33325c",
+                         "watermarkedSha256":  "dd38bc3813e516c70ccc4c7e005bac73f214e67355523a3170332d5616db408c",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:34.2168102+07:00"
+                     },
+    "food-65.jpg":  {
+                        "fileName":  "food-65.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "a97eb770bde21a72ab2ec3ef928ab1a4cfc0da8e7cf703ab03fa11631f4d4360",
+                        "watermarkedSha256":  "d060f3b429de5b1e039a0e7c787dd6478a9c5b822af7ce41fdd33c1336ad6d68",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:50.5626058+07:00"
+                    },
+    "food-2.jpg":  {
+                       "fileName":  "food-2.jpg",
+                       "width":  720,
+                       "height":  547,
+                       "originalSha256":  "1b96946cae405a9146e5cebbb85544f9a071bb9bc01ac07f0858a803cd9c715e",
+                       "watermarkedSha256":  "95b62096e0b8fa5ac0c76a6ee65f6acffe15a8dc37b74b5cb31c14972be3ad2a",
+                       "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                       "watermarkedAt":  "2026-11-09T13:44:39.5098490+07:00"
+                   },
+    "food-296.jpg":  {
+                         "fileName":  "food-296.jpg",
+                         "width":  731,
+                         "height":  800,
+                         "originalSha256":  "9c0793bb65a32e621d06ed6681532c4148864e4fe1a809d139b0de8c55f5e5cb",
+                         "watermarkedSha256":  "308f7e4cf11b51c35df0c2f8e2e8ff8b033c4fbeb0680e95dcc30c46317559b3",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:47.0728017+07:00"
+                     },
+    "food-187.jpg":  {
+                         "fileName":  "food-187.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "5d721831707f8448823fcdff60d3cc08bb9f06018803f3c55fdafb72a3b7e51b",
+                         "watermarkedSha256":  "2e48f09b370acacebfdc06d29f12cfb8a47bddf373179e31972653f675679a23",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:38.7264241+07:00"
+                     },
+    "food-272.jpg":  {
+                         "fileName":  "food-272.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "e4db1ff2f9487d6633d940e0c6de0029bd41e8146b73900fcdefb2ccc4b1130d",
+                         "watermarkedSha256":  "f32297eeab421eae0a61def3924ffd8594aa96d20ab50ce98e9aeba7a231aef6",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:45.0300797+07:00"
+                     },
+    "food-116.jpg":  {
+                         "fileName":  "food-116.jpg",
+                         "width":  720,
+                         "height":  658,
+                         "originalSha256":  "4cfd2fa40fdaf17a53e2e10227787cdc9c1bcdbd9adb6d683b36e67f28d1f164",
+                         "watermarkedSha256":  "f1bbdb63ba0dd07b2fc8d3c19bb6c042751b608565a178d62871a7ba815ee10c",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:33.2524748+07:00"
+                     },
+    "food-255.jpg":  {
+                         "fileName":  "food-255.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "4342ac1c6aa33023fae31931783382889055da021020350038747020aaf376d4",
+                         "watermarkedSha256":  "334453e2ed8409e6aed3915733c85bb24ceb7bd6e0d855768bddac69014718a1",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:43.6664676+07:00"
+                     },
+    "food-25.jpg":  {
+                        "fileName":  "food-25.jpg",
+                        "width":  538,
+                        "height":  720,
+                        "originalSha256":  "56a4d6a866f7f53a3e776c11e3436fb9222bc080dbbc5e65445facf28bfcdf4e",
+                        "watermarkedSha256":  "c5724bb4de03bbc8faedf4d774a737c74b1c042bea07293bbf05f58c1c47d5c9",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:43.2538627+07:00"
+                    },
+    "food-191.jpg":  {
+                         "fileName":  "food-191.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "1c930394d2763f222b362e68bc3836b4ebd11410b37b33314b03d3f83a13624e",
+                         "watermarkedSha256":  "bda701f6bc9893453e0e47211a27f960c39aceb16063ee674f41cb39190b2c46",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:38.9901694+07:00"
+                     },
+    "food-228.jpg":  {
+                         "fileName":  "food-228.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "6888d994bcec89db620b85ba16da10d6dc6f307bded6c8c8fea87ab3e9829c7d",
+                         "watermarkedSha256":  "233cb39cf9ea9cc73f584c5bd9fd55327937a99af1e2ed2d4624b58a00784b39",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:41.3687582+07:00"
+                     },
+    "food-269.jpg":  {
+                         "fileName":  "food-269.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "ba685b238fc4113701e87f34e6801a8017a23c786f40d1631296554fc65b7e5c",
+                         "watermarkedSha256":  "542f45c980468d9b8c631c4e29a6489f8568e31e5bb2ec05a216209ecdaff6d3",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:44.7442790+07:00"
+                     },
+    "food-142.jpg":  {
+                         "fileName":  "food-142.jpg",
+                         "width":  720,
+                         "height":  477,
+                         "originalSha256":  "ed1bd3333a02b7a87b77c32db25d34f069f1d871645ee5a0df3aba48a1f06111",
+                         "watermarkedSha256":  "98a5db4f3b28290c362ad9c57db042a781a9a53862fc35430fbd1be81373beae",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:35.2803998+07:00"
+                     },
+    "food-104.jpg":  {
+                         "fileName":  "food-104.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "2303790761b726cd0140644519d676430a0158d0b4c6d6e11db49e46d8f48025",
+                         "watermarkedSha256":  "f3b6cadf8983937cb91be463693ef8f478a6fa2c810ba36981d5d9e4433807b8",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:32.3900253+07:00"
+                     },
+    "food-168.jpg":  {
+                         "fileName":  "food-168.jpg",
+                         "width":  540,
+                         "height":  720,
+                         "originalSha256":  "9add7bd9b576e4f62133aee16e38aeea43c9d849778ea892f96982859ed799ac",
+                         "watermarkedSha256":  "bc19d3c610c9a476cbc4297e05be6168e311063088b8e708ab630fed40bee70b",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:37.2787294+07:00"
+                     },
+    "food-127.jpg":  {
+                         "fileName":  "food-127.jpg",
+                         "width":  626,
+                         "height":  720,
+                         "originalSha256":  "56c48b4fee20f915904190d1b0c7adce6b287c11b77d0d9e712a4becc0f15f1c",
+                         "watermarkedSha256":  "14a2b78b146b57b7acea0f95247dfed25b7a44e5f3de3bdf3e7d5dd43d5a4558",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:34.1537704+07:00"
+                     },
+    "food-251.jpg":  {
+                         "fileName":  "food-251.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "d4a97fd74a08b0c20914c851bb909e11a8ce891778fa169e351b38c20f260709",
+                         "watermarkedSha256":  "6293bdbc8103e4f008a93e944f617cbe9a136641e6a67c5c47fe6fa174f6f6c8",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:43.3667033+07:00"
+                     },
+    "food-243.jpg":  {
+                         "fileName":  "food-243.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "3d3f4e35fd1878099d161d4a11da6a85945bab2f3333d71e1b77bac7fef715c6",
+                         "watermarkedSha256":  "d2bdb0bd405fad6ef486ee5ddfb26772f7eaa6e24a1bc620de8ed0899e02e236",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:42.7298803+07:00"
+                     },
+    "food-70.jpg":  {
+                        "fileName":  "food-70.jpg",
+                        "width":  720,
+                        "height":  534,
+                        "originalSha256":  "98b0dab521a8c52ba13718ac8786ae4ea5d66a5c58167a7dae8c4c8ebec7fea0",
+                        "watermarkedSha256":  "40539f85a827d8580ac6b2d54c96ed4c0b1f31e62337368a129e857cd75d039b",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:50.9902953+07:00"
+                    },
+    "food-57.jpg":  {
+                        "fileName":  "food-57.jpg",
+                        "width":  656,
+                        "height":  720,
+                        "originalSha256":  "fdddeaf59f7d1ca61d6ec6e5abd2cc7292a0f2e9c80ccc3fb0f52a9b84a805aa",
+                        "watermarkedSha256":  "b61d838c1395e2be659917fd2982b66e5afb7e950798630628430850df70548c",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:49.9547375+07:00"
+                    },
+    "food-300.jpg":  {
+                         "fileName":  "food-300.jpg",
+                         "width":  800,
+                         "height":  450,
+                         "originalSha256":  "47e0a84248cf1a8785d84d26f8923057c70ab98569c34348f87b7d3101315b0a",
+                         "watermarkedSha256":  "b0987ed90e9f3bce395dd8499930cd6314b12df28a4520b30d28f9de874a35b7",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:47.5393562+07:00"
+                     },
+    "food-151.jpg":  {
+                         "fileName":  "food-151.jpg",
+                         "width":  720,
+                         "height":  540,
+                         "originalSha256":  "928ca64b66579b4bee9f151e428bfa855410efc622f593d96ece4721780503a6",
+                         "watermarkedSha256":  "2afcf95040c9c0e3b430fb1d35d7955b2c3652973a3ee4c83d41358e0d2a2bbf",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:35.9679340+07:00"
+                     },
+    "food-176.jpg":  {
+                         "fileName":  "food-176.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "6839fa347eb09b6a94ac5f6e010660a415acfcc260632963f14705326b88f375",
+                         "watermarkedSha256":  "cb80f85118e71a6c4b87fc977b387cd81858bc554b4fe7462579e4adc808f80f",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:37.9461822+07:00"
+                     },
+    "food-131.jpg":  {
+                         "fileName":  "food-131.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "617b50ef1d3f89f7b674e2d6041c6490a61c75b1d03a73a3df975569e0d99c4b",
+                         "watermarkedSha256":  "2dbfa9fe840e9efd3bfd3d3b83eac317b1008e9b2c34748cfd7125d4f3194a1d",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:34.4706711+07:00"
+                     },
+    "food-288.jpg":  {
+                         "fileName":  "food-288.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "c516a0ccc9afb74d9c6e6417bd329f90be959447a241e961d92660cb6fc568f1",
+                         "watermarkedSha256":  "44c00319acef8c3cf5593348dfe4a8fe441b56dd80ae1e6b3d5e968e6966287c",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:46.3911272+07:00"
+                     },
+    "food-242.jpg":  {
+                         "fileName":  "food-242.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "b75840a6b0e4e32301e1e928736a01a66e1f10c2097250e00507f58cf1cd9ef0",
+                         "watermarkedSha256":  "54fc1c22d2ed45233f496d99e0108f4827e5fbe0eb255222c24e6142d765e7b9",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:42.6503376+07:00"
+                     },
+    "food-64.jpg":  {
+                        "fileName":  "food-64.jpg",
+                        "width":  720,
+                        "height":  405,
+                        "originalSha256":  "911ef067b14f8305af312d49d3282449c6704498f5437ac2e27ed3b7e990e2fc",
+                        "watermarkedSha256":  "7a0c293fb3503cf0e5274fbdd25761fe327c5ca3e7f6db9e6bf3b1ea4e70f699",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:50.5179997+07:00"
+                    },
+    "food-48.jpg":  {
+                        "fileName":  "food-48.jpg",
+                        "width":  720,
+                        "height":  540,
+                        "originalSha256":  "188f95211e46b3ef36d732b2ebd92d6ca012a91fc3ce6be0af8918c1ac1bb69d",
+                        "watermarkedSha256":  "6710873980c4cc823d905cf0e9ca9454f13f48baba4ef84baeb9ff62f2a196db",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:49.2911951+07:00"
+                    },
+    "food-45.jpg":  {
+                        "fileName":  "food-45.jpg",
+                        "width":  720,
+                        "height":  720,
+                        "originalSha256":  "71d66d2c2ee3fe4a1e0c6045a470d57d72462e4fa7e02e0199c92160867019e3",
+                        "watermarkedSha256":  "2cf6a0e1a92c39ab8d0e7cb8b4ecc51a27b5f5b061bb9e44491eac9117565132",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:49.0871944+07:00"
+                    },
+    "food-93.jpg":  {
+                        "fileName":  "food-93.jpg",
+                        "width":  720,
+                        "height":  558,
+                        "originalSha256":  "b226e9a0b99561735203172591bcb8a7474f7335e786edfbceb51443ddd41fe9",
+                        "watermarkedSha256":  "af3cfef61bb70b2c141320c5a21c408fd3a3ed3ac8fa2653544db1d3094f3c4c",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:52.7168439+07:00"
+                    },
+    "food-69.jpg":  {
+                        "fileName":  "food-69.jpg",
+                        "width":  720,
+                        "height":  720,
+                        "originalSha256":  "5a20fa5451aea0443aaab20e3c4d4503ea2a93e52bb33a9ee2753af8068485fb",
+                        "watermarkedSha256":  "62c5f82f3f531741ac70081e1cb556e27c575b7a957cb545c8e6b1dc9c7a9c01",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:50.8618362+07:00"
+                    },
+    "food-293.jpg":  {
+                         "fileName":  "food-293.jpg",
+                         "width":  800,
+                         "height":  586,
+                         "originalSha256":  "987190de771947bcbb857eea1db2642448509c4fa090316c57b74cf00e99fcf1",
+                         "watermarkedSha256":  "64d8d94e3143a0d3654804df0860a8e09cc42552ab31544dad558a8c58f0152a",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:46.8228965+07:00"
+                     },
+    "food-172.jpg":  {
+                         "fileName":  "food-172.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "9ffc07ab21b7be9d81500caa2c3a9add33f7a34ecb38714b948226b124b83006",
+                         "watermarkedSha256":  "b88bb0879c26112196a4046db2f4955584c42c64d0d4024e51e2e78e3da8173c",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:37.6449724+07:00"
+                     },
+    "food-194.jpg":  {
+                         "fileName":  "food-194.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "e9ee56e6ba7f7f1adb428dc042952f4a8df4c7597d9e87d9cde7cd1cac3326ee",
+                         "watermarkedSha256":  "1aeddd1132fd57c986e01c67bf7e1aa2564b78c8fabcaac9571f8cf60cd5a9d6",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.1614403+07:00"
+                     },
+    "food-117.jpg":  {
+                         "fileName":  "food-117.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "86f41fa6e2bdb80a67138707f9811f65d74786922346ceaf6455b9281c6433ee",
+                         "watermarkedSha256":  "3c165419a074d9bb81e6eb4d59b25413a43ebf41657e5f2f16351c5c90b09ee5",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:33.3170497+07:00"
+                     },
+    "food-78.jpg":  {
+                        "fileName":  "food-78.jpg",
+                        "width":  575,
+                        "height":  720,
+                        "originalSha256":  "3c0f92920cedb5f4a64277902baeb6c4252ab7b65cbccc6d400effd06d09ccd3",
+                        "watermarkedSha256":  "db6461417c15b3fc8f5dfd66530fe23b1dc771341e3d047f28bc7032085676af",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:51.5677714+07:00"
+                    },
+    "food-302.jpg":  {
+                         "fileName":  "food-302.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "d01be91c1b830cf8a6bbf8a4cf9b725f275763076036ad92c22885ca0cbca1de",
+                         "watermarkedSha256":  "4011ad551a0ae62991e1da040cb1d9a2b3d4244aadd70b6844c93e584d7b81f0",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:47.6879551+07:00"
+                     },
+    "food-37.jpg":  {
+                        "fileName":  "food-37.jpg",
+                        "width":  654,
+                        "height":  720,
+                        "originalSha256":  "860df6aeb38e6259270863cd36d06f81ed5a5c221406c1804d3cef18f683fa0c",
+                        "watermarkedSha256":  "381961ea4bdbea3831bdd651b9f1414922d5d9fc790a131a3a41259eed809b03",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:48.5020181+07:00"
+                    },
+    "food-248.jpg":  {
+                         "fileName":  "food-248.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "fd9b0bb77b131e0efc66b9776ddc7a8c08e0b1ceaa16b9c719116be0c168b0cb",
+                         "watermarkedSha256":  "26237beee52d5a5c1e28299bcbfb0a84a33d544c91f89fb7ebc44ba100ebed71",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:43.1301771+07:00"
+                     },
+    "food-89.jpg":  {
+                        "fileName":  "food-89.jpg",
+                        "width":  720,
+                        "height":  658,
+                        "originalSha256":  "831295851a6f6a334eac9a5963c61e0ca03250e53fd5f5c0c514979d14dc52e1",
+                        "watermarkedSha256":  "5162b9c56e88e683151397ecdbef5fb9f975fd064c30941f5931ef61024d34e3",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:52.4319121+07:00"
+                    },
+    "food-47.jpg":  {
+                        "fileName":  "food-47.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "2293036d0662cff9ee23f9012d441faae87dadd676a9e4ef8b2ae48db3d4c7f3",
+                        "watermarkedSha256":  "34e9c8fbb24938f86309f2ee5991989aa0ae4e6e55548ed73fbbd390b87b9021",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:49.1980803+07:00"
+                    },
+    "food-181.jpg":  {
+                         "fileName":  "food-181.jpg",
+                         "width":  720,
+                         "height":  720,
+                         "originalSha256":  "05915d5b5c2a98fa06f011ee3580ab0c5622127980b25a83b2607ef6b91a9d41",
+                         "watermarkedSha256":  "f09bda80e39f1cb1f1bce2c7c7ba9d4f0c23e07c100b32b42f6b14ec44938787",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:38.3510601+07:00"
+                     },
+    "food-145.jpg":  {
+                         "fileName":  "food-145.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "8b4cabc416464f9a2d154c172884dca1a6082fd3da7ab75803457b80d77778e4",
+                         "watermarkedSha256":  "88817f374391de57e6fcbc182d5dfc0ee569b7820268534b338721fcc171b926",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:35.5019189+07:00"
+                     },
+    "food-148.jpg":  {
+                         "fileName":  "food-148.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "2f0b2998e3e83014883b96dbfcea3442ed1642996d3a8351c28286c3cb29d89b",
+                         "watermarkedSha256":  "22d085dd85fa1bfd154156c235e5b0cb978019769a7ecaff314228c1c47687f7",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:35.6908443+07:00"
+                     },
+    "food-42.jpg":  {
+                        "fileName":  "food-42.jpg",
+                        "width":  657,
+                        "height":  720,
+                        "originalSha256":  "7c560396262f089ef103055b4186d8feb5ae4d031bb83c755e5de881783d21d8",
+                        "watermarkedSha256":  "413366d629e7e48f5aa179a17b8232acd40fbb31449bb5564050b453f865b3d1",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:48.8993066+07:00"
+                    },
+    "food-164.jpg":  {
+                         "fileName":  "food-164.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "5600cfe70478707b0ebe13d4d4e44e276c5d8edbe16917f90b2d20479f67773c",
+                         "watermarkedSha256":  "931953caf0439d00daa8177c7db6c1f6a99c0ddaeb495f9fe76eb173912f1260",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:36.9974513+07:00"
+                     },
+    "food-240.jpg":  {
+                         "fileName":  "food-240.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "c0915f7d6c9ef11ac256478cf566eca6ae4a096d343cdcb0a1d486dd5343c291",
+                         "watermarkedSha256":  "0fb0bf0b88d224d442760479b12c7cb31a908b130b4d4d76d592a353b4200143",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:42.4918348+07:00"
+                     },
+    "food-250.jpg":  {
+                         "fileName":  "food-250.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "429191b67048a9dda5424bbe2f5110eb0a60abcbac145258a96b90ba437e16f1",
+                         "watermarkedSha256":  "116e6cbe180f0549b9aac1f643dafe8fefe143bbf19b365aa883283742331f40",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:43.3023711+07:00"
+                     },
+    "food-213.jpg":  {
+                         "fileName":  "food-213.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "3fba3bfffc3a94ebffd04e48916402b4fe8031fa45dfc8499fd63f01255c814c",
+                         "watermarkedSha256":  "2d8dace04cf1c04afb4c14f02e60d1ad3bbf24b70a6ae32fed306d0dd9054b3c",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:40.3778752+07:00"
+                     },
+    "food-244.jpg":  {
+                         "fileName":  "food-244.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "1b3093318d7ba5178a06b2c1a43231c6293cb2313fda80d90a20b853c86ad3fa",
+                         "watermarkedSha256":  "e2588b7f7842415e3248acb9367baf529acd70770b2abdb97adeb35fa947591c",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:42.8088462+07:00"
+                     },
+    "food-53.jpg":  {
+                        "fileName":  "food-53.jpg",
+                        "width":  720,
+                        "height":  540,
+                        "originalSha256":  "16f8a1dc0bbd702474304fe816b74a98af21c7b4337b69e9fd49f413a962b9c4",
+                        "watermarkedSha256":  "d08b279b0c8ba5ce5dc95db38d93dc8fb0a377dab6e4cf5ec9d57145805d2bb9",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:49.6671016+07:00"
+                    },
+    "food-80.jpg":  {
+                        "fileName":  "food-80.jpg",
+                        "width":  653,
+                        "height":  720,
+                        "originalSha256":  "2b40376ecde752808d7f1019bce88ba168cc0d0aa6d34757de8b3d5e87507fb3",
+                        "watermarkedSha256":  "7d5873cd4e37571d57538cbbf90a4430999bd4f0d1da63924ea88d404c7256ee",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:51.7658628+07:00"
+                    },
+    "food-211.jpg":  {
+                         "fileName":  "food-211.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "633567f48d990878fe76924dadd7b01bc084abd8462d46d58d160671bd43b87a",
+                         "watermarkedSha256":  "d009efb78ffa19895bf8a2c0e4bae02bde266185abce579bc6de859cb65f8a69",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:40.2841545+07:00"
+                     },
+    "food-196.jpg":  {
+                         "fileName":  "food-196.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "3d05ac110cb2537f577a4a6309ac909d8294c50aca13776a771eb7908a70f9e1",
+                         "watermarkedSha256":  "cf6f5b87487c711c49182daf5cfd86b5dc03a7b4b536168ccee9f0d2f08d71c8",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.2843549+07:00"
+                     },
+    "food-290.jpg":  {
+                         "fileName":  "food-290.jpg",
+                         "width":  800,
+                         "height":  800,
+                         "originalSha256":  "188e733a1e5912c0280e3fdde3edfb4a6a18f70866e8e4e1f31a55e459e613ef",
+                         "watermarkedSha256":  "5658e676735588860d02bc808d22fdb0ab16cdc78ac7f8adb6d951d3d956418a",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:46.6063606+07:00"
+                     },
+    "food-111.jpg":  {
+                         "fileName":  "food-111.jpg",
+                         "width":  720,
+                         "height":  720,
+                         "originalSha256":  "c93c0070282e570a8afcd73353e9f913c34c7e07dfd57bef02c78ca38f71136b",
+                         "watermarkedSha256":  "fa180e81f9bbd2db7784f44cf3ff6aff1b08353f7bde3f68165878c729285274",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:32.9192526+07:00"
+                     },
+    "food-28.jpg":  {
+                        "fileName":  "food-28.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "b26d7eb9af04adb3e0610edb26e33f980e706f4f48a6a1c3cba849910961b004",
+                        "watermarkedSha256":  "32ee78e1b76507c1167cd70ed7e72f2e43e1f53d229fb1c0b1bfd230102833a2",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:45.6481512+07:00"
+                    },
+    "food-27.jpg":  {
+                        "fileName":  "food-27.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "af2a2d3e90b480b410890e8a56b1a587e5652d4226aac1fd2ec020c4bbf28d5f",
+                        "watermarkedSha256":  "b20652e2705c4004e7c585a36c76d7a92d582b21932f88099445192182bd1f70",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:44.8076463+07:00"
+                    },
+    "food-286.jpg":  {
+                         "fileName":  "food-286.jpg",
+                         "width":  800,
+                         "height":  800,
+                         "originalSha256":  "fe6fdd6cacf1dadb4491b47e53fe6e1358cb27bcc46d4faa260c3f1db7004533",
+                         "watermarkedSha256":  "5500d54db65e43b43da98b6795a7e1b51a6f7c7e12e08005660e2b6660a9f1c2",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:46.2177240+07:00"
+                     },
+    "food-287.jpg":  {
+                         "fileName":  "food-287.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "01428422a5b88132d6e95e9c891809a2a4964fab9279eab7f5c78a4d556932c8",
+                         "watermarkedSha256":  "a4dc0946adf7f3ddf044895248112a91042956eef03887fced83476845ae08e4",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:46.3181303+07:00"
+                     },
+    "food-50.jpg":  {
+                        "fileName":  "food-50.jpg",
+                        "width":  720,
+                        "height":  658,
+                        "originalSha256":  "946d476d6eb5bbc66d9ba041aafe2701220b8a4657aa09ff42b5a707279b7cf1",
+                        "watermarkedSha256":  "66456d1f8733494f5b6ea030c7de589c4179640f594fa05d0469226f563fb276",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:49.4775350+07:00"
+                    },
+    "food-267.jpg":  {
+                         "fileName":  "food-267.jpg",
+                         "width":  600,
+                         "height":  800,
+                         "originalSha256":  "5981cbd9b78f906785c379508d108508077cfc920c94ad88f1610bce27afd991",
+                         "watermarkedSha256":  "48fc058356380c250bb743517dddfd5cef59f244939c2837d0f7b48e27cd88f7",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:44.6013286+07:00"
+                     },
+    "food-183.jpg":  {
+                         "fileName":  "food-183.jpg",
+                         "width":  720,
+                         "height":  498,
+                         "originalSha256":  "1cdffe50900f00b9dd2ea235efe71e94dc1d01da14dad00a84c95c1e6a7bdb5c",
+                         "watermarkedSha256":  "a5c4bfc0efa4592e479135bf00efcc5e845aab2678988435f02eb88f22e65b76",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:38.4672546+07:00"
+                     },
+    "food-147.jpg":  {
+                         "fileName":  "food-147.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "aa58b19641820aab6aa519c700458ec1bd36d2692007cdbe75dde90a07f9b437",
+                         "watermarkedSha256":  "ed6c99db9777295f835dd0c0cfff66c7cf69d6182be3d5de6f85bfe901ebd0eb",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:35.6434018+07:00"
+                     },
+    "food-46.jpg":  {
+                        "fileName":  "food-46.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "0f997286825bc4c720d5a839dcbafca3c6f79aeb2db3b60c7c4dcc8450ea51fb",
+                        "watermarkedSha256":  "7dcef4f3dc2b824596992f463b496a0d5e478d6602e9b01bddb59502a19fb6ac",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:49.1602273+07:00"
+                    },
+    "food-49.jpg":  {
+                        "fileName":  "food-49.jpg",
+                        "width":  720,
+                        "height":  720,
+                        "originalSha256":  "67185c12b3cc79240d30be7926d4f92bb7547ff37377607b0209061779fd15b0",
+                        "watermarkedSha256":  "f977780decc55ddedeaf5c0a2e1cc60b63ac8f5d4809c09e9fed214e8de16a28",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:49.3528039+07:00"
+                    },
+    "food-215.jpg":  {
+                         "fileName":  "food-215.jpg",
+                         "width":  720,
+                         "height":  720,
+                         "originalSha256":  "290435797226aafd3ae5833f728d8c74049e50680342f979b84bcb5d1703631a",
+                         "watermarkedSha256":  "f26763901796ad4532b1e7b42cffe93423d345a89f8466b2a0772f2244ac8570",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:40.4843919+07:00"
+                     },
+    "food-92.jpg":  {
+                        "fileName":  "food-92.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "72397e09407ca11bf4fb22ea773cab31f86f55ee97abf81fc52bcfe2a2de15bb",
+                        "watermarkedSha256":  "112299857775ef44ef820c3972da6401c88d75aa12ec8d7ea66cdab6a94ae9b6",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:52.6374753+07:00"
+                    },
+    "food-62.jpg":  {
+                        "fileName":  "food-62.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "84c4c3e6acea34080ea76f93ecc629c42d1e5905c090e6634fc0a0f8f8a7d664",
+                        "watermarkedSha256":  "de03d67c91ddd9c051c6a90889ff8cb9fcab168ca58f0beb362c550a1e245697",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:50.3888399+07:00"
+                    },
+    "food-292.jpg":  {
+                         "fileName":  "food-292.jpg",
+                         "width":  800,
+                         "height":  583,
+                         "originalSha256":  "e7ba9b4a143527caca3a73b1d2c050cc8541c882f2095b5d14f6cb50ddbe7904",
+                         "watermarkedSha256":  "8998a8c5175961eca950d784acffaae8607aed209166c2426854d82c4ba487cd",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:46.7714322+07:00"
+                     },
+    "food-1.jpg":  {
+                       "fileName":  "food-1.jpg",
+                       "width":  720,
+                       "height":  480,
+                       "originalSha256":  "f56bd397a2d362602d8eac149e251fd52aa5a9373d9cdb0549c0f91bbc11883a",
+                       "watermarkedSha256":  "a0823770b6d276edc981acea2b57474d84a106877905a774fc458bade129ec19",
+                       "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                       "watermarkedAt":  "2026-11-09T13:44:32.0029103+07:00"
+                   },
+    "food-173.jpg":  {
+                         "fileName":  "food-173.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "88f5c7c317022bea26f114b61d51d072860c7d61982ea401841ec406fbf32830",
+                         "watermarkedSha256":  "8dee1f458af571c37873e4b920033514da02c5b619fc620447e35e9aac697dc6",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:37.7088405+07:00"
+                     },
+    "food-306.jpg":  {
+                         "fileName":  "food-306.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "e8ca7ec33bffe7fce4577393f9f741b619f97f25d1aedd85b394db2050f5174b",
+                         "watermarkedSha256":  "18c6c81193b831cda4153e7f10cf41370adb41479f6f87b7baf04cce5534af81",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:47.9772724+07:00"
+                     },
+    "food-66.jpg":  {
+                        "fileName":  "food-66.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "3e3c4ed00338656c7129c0062b4fbefce0d495c15b98a71abccd9ff6a093370a",
+                        "watermarkedSha256":  "e94a3128b335e46557a8790d95ff88610e49329c74682bbf4e25b5d1d7bda356",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:50.6547461+07:00"
+                    },
+    "food-96.jpg":  {
+                        "fileName":  "food-96.jpg",
+                        "width":  658,
+                        "height":  720,
+                        "originalSha256":  "d8803d5ad28e96dd3d37f9bc3cd03640d5148b2920559f1b493fd8fb9347a6b7",
+                        "watermarkedSha256":  "9a40e0c96740b928e3abca10e07d962955802b86d7480cd34d1ee007baf0413a",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:52.9068192+07:00"
+                    },
+    "food-263.jpg":  {
+                         "fileName":  "food-263.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "e9d1a7af1a6c02b1b38fa0c38fc25f18b62595b33fb63122bfa9abdaab8dc3d2",
+                         "watermarkedSha256":  "3cd10f962c0e246285762ff0653c5286876251a67ccb0d8e2e49d447104c31b3",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:44.2692443+07:00"
+                     },
+    "food-207.jpg":  {
+                         "fileName":  "food-207.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "916d1221b540b27a3fc8238c72f68bbba1dbe23bfc81fe2ba0d6fd10dd718310",
+                         "watermarkedSha256":  "ec8216b0bf215dc78d00576bcc2e9cb29ba16c70757d364c4ecb147f551bed34",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.9750841+07:00"
+                     },
+    "food-249.jpg":  {
+                         "fileName":  "food-249.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "71e0ba630a9ae20cdfaae64d385e8bb32e715f8e267744dcdbaacbe01e24ce44",
+                         "watermarkedSha256":  "934036048b62b04eb1d9660e71e7fb961b839cef396f4432a7826b04b1fff1b8",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:43.1819619+07:00"
+                     },
+    "food-268.jpg":  {
+                         "fileName":  "food-268.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "fbcc3bd09f27e09e6d4d5d009fac19b111fea26112e000b01d40d5f7aaba8849",
+                         "watermarkedSha256":  "954e2c29ee4b501b98513ebaf163e6ffa3892e0bca5f661cce80d530341318ca",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:44.6679974+07:00"
+                     },
+    "food-11.jpg":  {
+                        "fileName":  "food-11.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "abdd9d29d9e097e865a6f341911db81dd6ed6885b7839326ab6d5844d7f9da15",
+                        "watermarkedSha256":  "c19323572809ead35d69599ab02eb5aa084f9e984d7b5358e94f808ed1885a1d",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:32.7618445+07:00"
+                    },
+    "food-197.jpg":  {
+                         "fileName":  "food-197.jpg",
+                         "width":  720,
+                         "height":  482,
+                         "originalSha256":  "ed4d6cd024155ea7ef786bfe0bf89e313a729ad164534538d7974dc4a25163ee",
+                         "watermarkedSha256":  "6dd35599933b9cf56e46f4639b93fa922145d31c94676075639488869fa82c62",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.3310747+07:00"
+                     },
+    "food-84.jpg":  {
+                        "fileName":  "food-84.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "753e35e81b79e3ae9c6b117f2901cc1973a725a15df6a9137ad5466f1943be89",
+                        "watermarkedSha256":  "7dfda3eec8c07c73acafdd8d235e41ac6541dca469f05a0899fb17eac3af50f0",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:52.0353111+07:00"
+                    },
+    "food-144.jpg":  {
+                         "fileName":  "food-144.jpg",
+                         "width":  658,
+                         "height":  720,
+                         "originalSha256":  "d8803d5ad28e96dd3d37f9bc3cd03640d5148b2920559f1b493fd8fb9347a6b7",
+                         "watermarkedSha256":  "9a40e0c96740b928e3abca10e07d962955802b86d7480cd34d1ee007baf0413a",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:35.4382667+07:00"
+                     },
+    "food-5.jpg":  {
+                       "fileName":  "food-5.jpg",
+                       "width":  720,
+                       "height":  509,
+                       "originalSha256":  "06c6428dc6160202c7d065ff2b9af06997f20607a0fc2d385004fd8eec5b031c",
+                       "watermarkedSha256":  "f28b3ee6eedae650330adcb5f935211d57c447b4771d7e7af10feae57db3b9b2",
+                       "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                       "watermarkedAt":  "2026-11-09T13:44:49.4035533+07:00"
+                   },
+    "food-83.jpg":  {
+                        "fileName":  "food-83.jpg",
+                        "width":  720,
+                        "height":  525,
+                        "originalSha256":  "56bb68a2d54ed6266668cc34729bddc5765f6d26b2182ede240032ab1dafd54d",
+                        "watermarkedSha256":  "660edc98d08ac9b87a6ea0cd8982823bd9d4b489dc609ed8d6ce7a9ef623c3f5",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:51.9876773+07:00"
+                    },
+    "food-101.jpg":  {
+                         "fileName":  "food-101.jpg",
+                         "width":  720,
+                         "height":  658,
+                         "originalSha256":  "5aaffc0aefb621c01bd49743373811c40a25c007e3aa2bc70b3ee789ba19186d",
+                         "watermarkedSha256":  "32634d2b8c595996282bf5c95e75c117f87e6a1ab6e196f04aa9a21eb2600000",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:32.2231648+07:00"
+                     },
+    "food-39.jpg":  {
+                        "fileName":  "food-39.jpg",
+                        "width":  720,
+                        "height":  720,
+                        "originalSha256":  "53be0ef72883a15cbeb8552877902430817d640329ba37942be3f59f542b840f",
+                        "watermarkedSha256":  "d6274e495b59c7a08342829aa5771cbf325ebea27d7a66c04dbb7d780877d818",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:48.6390950+07:00"
+                    },
+    "food-298.jpg":  {
+                         "fileName":  "food-298.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "fff8bc7013fc10b1f01fe6d8de5e4cb255c6dfdc3dee6d906ed78259bb791ca3",
+                         "watermarkedSha256":  "77a1c70ada46dccb78af92069ba7249b88e952f9bcc5e852ea8a87285756b805",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:47.2385505+07:00"
+                     },
+    "food-252.jpg":  {
+                         "fileName":  "food-252.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "aae9fba7435a57bfd56a50a8ea097d7e41791b10a7e7c7677282485dc880c032",
+                         "watermarkedSha256":  "1b3113241ef08b4293119aa1262a7b04d2e7507a0871d912dbd69cc3810a86f6",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:43.4443409+07:00"
+                     },
+    "food-231.jpg":  {
+                         "fileName":  "food-231.jpg",
+                         "width":  731,
+                         "height":  800,
+                         "originalSha256":  "d6e3b52ce62530c7f77033b50e75a2cbe34c5dfda743c2282d2f64531a83888d",
+                         "watermarkedSha256":  "664049347115936e563ee6000d84b111bf993e6329f92f22f6038a1dfcc015d8",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:41.6527351+07:00"
+                     },
+    "food-99.jpg":  {
+                        "fileName":  "food-99.jpg",
+                        "width":  720,
+                        "height":  559,
+                        "originalSha256":  "80abfb6cc98ee19cd6cdfe29b289b544565942bfed3a72b7ee9639961be3e118",
+                        "watermarkedSha256":  "a8451b06d6115f47767a5b2752de75bfcb9502c037ac394b1b6d0b91ef68c01e",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:53.0822349+07:00"
+                    },
+    "food-171.jpg":  {
+                         "fileName":  "food-171.jpg",
+                         "width":  720,
+                         "height":  720,
+                         "originalSha256":  "05af4a07ae4aea8d1b63f43f07d21873cd2230d052a6d6ab9c6b5e57abccf9b2",
+                         "watermarkedSha256":  "a7fb507dcd196e8794afc1a79b9dd97c7697e89ab6f56bb7ca2afae2f6643510",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:37.5977719+07:00"
+                     },
+    "food-150.jpg":  {
+                         "fileName":  "food-150.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "7fc3e640ddcfe7b65075e41605bef00a42933f8e81b8b2aa4b7d55ea3e89aece",
+                         "watermarkedSha256":  "12b76862d441d7a34f1bc9e8a1591db10ec134aedbe24432c907ef7f44ba6c0c",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:35.8964441+07:00"
+                     },
+    "food-112.jpg":  {
+                         "fileName":  "food-112.jpg",
+                         "width":  720,
+                         "height":  720,
+                         "originalSha256":  "19e0709eaa60cdc2a2e08e1162e46b2ae91e2118be3b5759a7443ef0f1a2e3e8",
+                         "watermarkedSha256":  "4d46e259f6c5e6c98f51c923b02b8a957241100713788050f50c1c0b39e79bbd",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:33.0152886+07:00"
+                     },
+    "food-98.jpg":  {
+                        "fileName":  "food-98.jpg",
+                        "width":  720,
+                        "height":  540,
+                        "originalSha256":  "d38b591b6952a6e97ad03f6c31fdc1dac05c6fb0d4ab8c8c6944fa2aec1f3ec2",
+                        "watermarkedSha256":  "6f4d36c101a8aa60304e081c7a88d2b7bc283608aa96515c27abdd50e84aee05",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:53.0337981+07:00"
+                    },
+    "food-24.jpg":  {
+                        "fileName":  "food-24.jpg",
+                        "width":  720,
+                        "height":  658,
+                        "originalSha256":  "40d618c952082268a32b0b359f192c2795bf1960c927934e77aabd766a1a84ef",
+                        "watermarkedSha256":  "31d66f8046064414f0c6670137076ada5b20466e5bf2dbbd101d95ea1b553c86",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:42.4182240+07:00"
+                    },
+    "food-229.jpg":  {
+                         "fileName":  "food-229.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "0a2c8d83294f7b87c2e1e2305f8233f9cd1e7ce65d8367a78a6fe9086e27136f",
+                         "watermarkedSha256":  "0d3247b7097300cc350354507fcf92336780c6e1e9b6d7f2b433440392e4f6e8",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:41.4317544+07:00"
+                     },
+    "food-97.jpg":  {
+                        "fileName":  "food-97.jpg",
+                        "width":  720,
+                        "height":  559,
+                        "originalSha256":  "7e0be0c9b59034a6fd77f7c636324a6e95e0bdf15961b3283c89151160a46bd3",
+                        "watermarkedSha256":  "a592fd153dc9deed8b71bc3d23bbde09a57e60b69cc34700ff7a130e202add9f",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:52.9866758+07:00"
+                    },
+    "food-180.jpg":  {
+                         "fileName":  "food-180.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "37f61553bf1b332e453cfaed3429970a1e57d8c3b5ca95c949fb02c9acc319e6",
+                         "watermarkedSha256":  "d7397b594dd932588bd9fa6b334a858e2b4cfbf0b9bba1c1d108b3cb3cfa1c85",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:38.2667721+07:00"
+                     },
+    "food-146.jpg":  {
+                         "fileName":  "food-146.jpg",
+                         "width":  480,
+                         "height":  720,
+                         "originalSha256":  "71d3ea675e74aa7b85078922b842a78c0c91cf06195cd378c5caaef96e4bf8dc",
+                         "watermarkedSha256":  "66bad7f2f033db244a37ba8153f639306a5e7636d24ea077fa75fd0cdfaa7a96",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:35.5654774+07:00"
+                     },
+    "food-297.jpg":  {
+                         "fileName":  "food-297.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "a9a2322915928731d60da72b66b7a3a0f2553efb4c05e7939380d5ce524d8c29",
+                         "watermarkedSha256":  "29fa964e911fdd5c61b37abe1e073ea9e1bace06919436d3597611a4f393a538",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:47.1656663+07:00"
+                     },
+    "food-214.jpg":  {
+                         "fileName":  "food-214.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "4c15124a4a18acc557a68ad0e75a2e8e0db226b8069c82cdc409dd0ae252ff7b",
+                         "watermarkedSha256":  "3437a4ddb70a91dff89e0269a6561b7f7c1a232aa5f703368b28dc9524161ec9",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:40.4055059+07:00"
+                     },
+    "food-52.jpg":  {
+                        "fileName":  "food-52.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "42af54fd188615951302a4c26b4c716078a474a60cc421d957b73189766de2dd",
+                        "watermarkedSha256":  "87398d1d9d0c50ce27411ae6512e41c8e16643898186f97fe48998ccfc2ba2ca",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:49.5906270+07:00"
+                    },
+    "food-61.jpg":  {
+                        "fileName":  "food-61.jpg",
+                        "width":  693,
+                        "height":  720,
+                        "originalSha256":  "b0dff758ed0ee52e38200e6f359f2a5bd1e18cc8c324247108c3d39332bde3b0",
+                        "watermarkedSha256":  "7d0e4bec806c456fbd020541b83e4f57b8e69af82d3e02e12e9d478bb0cd78d4",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:50.3410095+07:00"
+                    },
+    "food-220.jpg":  {
+                         "fileName":  "food-220.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "63b5883da03434b200368ad28416d1741d30b87bbaa51eb49c2c25bb5a37963d",
+                         "watermarkedSha256":  "3e58246ad31d6643908c78685b5d59780da7ebf0a9b8eec48f95e877c05b91eb",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:40.8626068+07:00"
+                     },
+    "food-60.jpg":  {
+                        "fileName":  "food-60.jpg",
+                        "width":  720,
+                        "height":  540,
+                        "originalSha256":  "1f7e38485e76acf872fceb816fff27833d28670fc9c15d11625d42508a760d9a",
+                        "watermarkedSha256":  "f9b4b318d89257c55924549fb0f90136d9006be347fc74272ea5353f1fa59414",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:50.2477475+07:00"
+                    },
+    "food-134.jpg":  {
+                         "fileName":  "food-134.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "80f3525606eb3d9da379ffe66c5a0b3505868dac6d132a745c54fad146c9d5b9",
+                         "watermarkedSha256":  "68c20cc173f745b75cd0b5764bbfa8dc1c4ba1a02ed5d474bcf072181e0e3222",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:34.6765934+07:00"
+                     },
+    "food-236.jpg":  {
+                         "fileName":  "food-236.jpg",
+                         "width":  800,
+                         "height":  731,
+                         "originalSha256":  "e1bf8f5a019bf9a51c04770bf471257f1e7cc4210995300b40502be85aaed4fd",
+                         "watermarkedSha256":  "593ff66192722c59d70a59b76eb3de2871286ebc125f19d0d97119452e9e8bee",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:42.0637029+07:00"
+                     },
+    "food-95.jpg":  {
+                        "fileName":  "food-95.jpg",
+                        "width":  720,
+                        "height":  559,
+                        "originalSha256":  "4636b04f19e6f0a3b7371d55009245574006abd76746eb8ce0047ceaa3335b92",
+                        "watermarkedSha256":  "ace91edb3914a60d30ba38b84016c9ee21c73052394b50e4a249b8733862a939",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:52.8275786+07:00"
+                    },
+    "food-107.jpg":  {
+                         "fileName":  "food-107.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "7e4d413c4b24d0e1ae26844d2bf361421172a3d026f2e390ec3c74e65c104093",
+                         "watermarkedSha256":  "843ab4f1474f670d6c5f30a357e64a6f32ce961afc1678b8e3ee6411096f383d",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:32.5549012+07:00"
+                     },
+    "food-109.jpg":  {
+                         "fileName":  "food-109.jpg",
+                         "width":  720,
+                         "height":  449,
+                         "originalSha256":  "6303b7a1b1540260826467062bfb40d87696a3d315c7d60ac0ad8aefc7d953de",
+                         "watermarkedSha256":  "0fc8910f55ca1e0483f3370b91d99f8449b93730cb2c62b86c0f4b28e1ef9f74",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:32.6989759+07:00"
+                     },
+    "food-245.jpg":  {
+                         "fileName":  "food-245.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "bc13241b1c162009335f9d1cdd44ddbe5929446999d40892ed3a066052cc6a69",
+                         "watermarkedSha256":  "352b08a1279f7ac8bda52cfd9e3f7d8884721380301685f0c04e10381b570b6e",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:42.8885556+07:00"
+                     },
+    "food-289.jpg":  {
+                         "fileName":  "food-289.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "3c6747584a05f887877dabb44cc18bb2491b71228dae46ed1f36f9e0229d3a3b",
+                         "watermarkedSha256":  "a1a5cd391c0c78918cff8e18535d11cdcb3ed0507a97825308498b7c56c7c78f",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:46.4643250+07:00"
+                     },
+    "food-110.jpg":  {
+                         "fileName":  "food-110.jpg",
+                         "width":  720,
+                         "height":  540,
+                         "originalSha256":  "cee6f110da8cec8f13f469747669cb735ef1780bd0b3c3ae0efc97a2104113cd",
+                         "watermarkedSha256":  "68fe095214f52f12163dbc361b0033856a54ed2a68c00f69185699416cae9b43",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:32.8245847+07:00"
+                     },
+    "food-254.jpg":  {
+                         "fileName":  "food-254.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "ee59a60282f82bd22d309c54b9541e1ded3ff531dca5c4d8bec7041a9d479395",
+                         "watermarkedSha256":  "0fc38fd0feb7a602f0066a0de957f82faf055bcec7c58dbdebdcd13562f0e133",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:43.5861366+07:00"
+                     },
+    "food-6.jpg":  {
+                       "fileName":  "food-6.jpg",
+                       "width":  720,
+                       "height":  720,
+                       "originalSha256":  "bb0387fc25e76f47a196bed9d1e8bbb4bb47b4f712371a8faeced8a2f4629e1c",
+                       "watermarkedSha256":  "6eddd490e21e5feeefd35d543f2dad974013f303983612384d7b79516c1ed82a",
+                       "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                       "watermarkedAt":  "2026-11-09T13:44:50.1695824+07:00"
+                   },
+    "food-19.jpg":  {
+                        "fileName":  "food-19.jpg",
+                        "width":  720,
+                        "height":  540,
+                        "originalSha256":  "70febeaa5b7a0415e2179d6c2d66e9e664ab53409018178daa76ff2122c6621c",
+                        "watermarkedSha256":  "2c10f520ec0e653609cabf873ce8ee65d7d7e735b36c79d18ca52cc820390d4d",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:38.8993953+07:00"
+                    },
+    "food-68.jpg":  {
+                        "fileName":  "food-68.jpg",
+                        "width":  720,
+                        "height":  536,
+                        "originalSha256":  "35c7c732690dd3d73cc6b703ae864cdd9fc6a7ea3820f66f9e418590033568fb",
+                        "watermarkedSha256":  "e290395d6e656474dd41621725550cd16d25038a180dab79cb2d84baa55c09d4",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:50.7904831+07:00"
+                    },
+    "food-237.jpg":  {
+                         "fileName":  "food-237.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "10df71b291d7c533588f46b3cacaf10f1adb340588f2f90d015a2a224c619497",
+                         "watermarkedSha256":  "d65ecb103f2a953da8860c4f582e7dbfef29284ce4fea9ee6126c633f3ab9441",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:42.1606194+07:00"
+                     },
+    "food-38.jpg":  {
+                        "fileName":  "food-38.jpg",
+                        "width":  720,
+                        "height":  658,
+                        "originalSha256":  "5a0ea6684895559a068efaee6bfb4548615a60461b5e7ddfdaca4072e171f343",
+                        "watermarkedSha256":  "9f5b73e496d71239528d6498c34888f6bd9a098bc52e7c49b046ac59628cc1db",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:48.5729738+07:00"
+                    },
+    "food-295.jpg":  {
+                         "fileName":  "food-295.jpg",
+                         "width":  731,
+                         "height":  800,
+                         "originalSha256":  "3d3c575ef710a08c031cc13b4f3f1f538a0e73f9fca70421dc4ab603d682e73f",
+                         "watermarkedSha256":  "f5ffa2a8f2f3015075919eef808b4b1acc9e83d3b8e85d427f1e0d4426d5df08",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:47.0043696+07:00"
+                     },
+    "food-212.jpg":  {
+                         "fileName":  "food-212.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "a6c592d926c1b9a78d2104c7ccadd574f5af703b24b9e0e5f46b9adf1e6d7197",
+                         "watermarkedSha256":  "9e6348680f8ae4c052687ad5f367f471ba75b4d38c2a9698932064abd10b725a",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:40.3202254+07:00"
+                     },
+    "food-305.jpg":  {
+                         "fileName":  "food-305.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "1e02e5fb21a39d4d25c310f1d562e306a086d32244b25d77ab3a4da1795c561d",
+                         "watermarkedSha256":  "bd194a6969e0a54b4060e1f7dad345e1af57da76c953aeb89ecb2d9c67c33f4a",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:47.8852405+07:00"
+                     },
+    "food-195.jpg":  {
+                         "fileName":  "food-195.jpg",
+                         "width":  720,
+                         "height":  483,
+                         "originalSha256":  "a3ad627cb0de7ebed5f64d2a1f1131e6746a287add14ac7cab843b4942c85598",
+                         "watermarkedSha256":  "27727f064c7019c4b758a7c41b15d035fc8ba1660bdc54f5d57bc5dbba361bef",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.2204920+07:00"
+                     },
+    "food-43.jpg":  {
+                        "fileName":  "food-43.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "35a24b03a94b00433efffca87cdcf1996c2e398fbdd0bb51e993f03dc3f66cd6",
+                        "watermarkedSha256":  "cbe3b46361a7825c30231b8ede8d0b8ac9094f92b5d09a5f62d202e98a62af33",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:48.9671817+07:00"
+                    },
+    "food-233.jpg":  {
+                         "fileName":  "food-233.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "78b77691862c43ba4ddeaf7aa934612f9d7f8b77bb8ff6a194f5b7da7351ff20",
+                         "watermarkedSha256":  "cba3c5a8a1ba10e4b5951088f8bf24fc6a5e01f3adecfc3d67581c169f718059",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:41.8271104+07:00"
+                     },
+    "food-169.jpg":  {
+                         "fileName":  "food-169.jpg",
+                         "width":  720,
+                         "height":  720,
+                         "originalSha256":  "2be5c5a647ea8a4ce64f82f1dc4593552c567d6747b52da56b962de709df2ffc",
+                         "watermarkedSha256":  "7f5741cae691e0913483dd689a8102856d4d6f941634af604a37d1eeedad5a38",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:37.3599474+07:00"
+                     },
+    "food-34.jpg":  {
+                        "fileName":  "food-34.jpg",
+                        "width":  720,
+                        "height":  658,
+                        "originalSha256":  "f7c6e315055006080b0a59db091f8bc00990912c6743a19646c7e92cb352d861",
+                        "watermarkedSha256":  "8353384cc3fb2f8aa1299d07bd31508d993e5be47f356058c97a59432a5cce00",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:48.3086288+07:00"
+                    },
+    "food-31.jpg":  {
+                        "fileName":  "food-31.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "c580e855c5b2b10e369df52a767af0598d942c5b8d951e545650b58333b33374",
+                        "watermarkedSha256":  "404afc0404e232e5fc9022d73ef9c69fd3bee37be41d9f4470378853d7f60e1d",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:48.1113136+07:00"
+                    },
+    "food-266.jpg":  {
+                         "fileName":  "food-266.jpg",
+                         "width":  800,
+                         "height":  600,
+                         "originalSha256":  "f30abce48512af44794786970eec9705bd488cab9b3426f85a69c21cb84dc739",
+                         "watermarkedSha256":  "2cc4b245af8dc98f115031b7b9682e5ba328fb0b96b1d6110648503073eefca0",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:44.5067013+07:00"
+                     },
+    "food-161.jpg":  {
+                         "fileName":  "food-161.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "129335660230e1a1693dd2b393341efb839e05f09517bea2c2da427c48e7cc0e",
+                         "watermarkedSha256":  "a5b55112d558aa7248e672bbab298429a16581879fb70efe1c3aef58f13acfd6",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:36.7747716+07:00"
+                     },
+    "food-26.jpg":  {
+                        "fileName":  "food-26.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "e3e65b3857a64e6eb2b2b475a3448fc3ca3e31cbb22f42cf6a885a4f96a0843d",
+                        "watermarkedSha256":  "16ce117cfbcb525b0df3a2f343608b6fe0e7bfcdc5aab5db59354793e42a9704",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:43.9831999+07:00"
+                    },
+    "food-32.jpg":  {
+                        "fileName":  "food-32.jpg",
+                        "width":  720,
+                        "height":  405,
+                        "originalSha256":  "3fc8776cea50a75b3594d55f9bb87d7a57375846d91a2c8b3685338542aab651",
+                        "watermarkedSha256":  "1f0d80e983d5b4dd467215c18deb593b059733bd7502d79ace06ed393a603f11",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:48.1523912+07:00"
+                    },
+    "food-103.jpg":  {
+                         "fileName":  "food-103.jpg",
+                         "width":  720,
+                         "height":  405,
+                         "originalSha256":  "2e61194c0eeed0ae227c36a982429c0c7f75f08caacbb8588ad277a890c72e61",
+                         "watermarkedSha256":  "c7d9310cc295560bc05b771b016ce798625dbe5aa5abd32876603c638dd97a15",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:32.3181859+07:00"
+                     },
+    "food-3.jpg":  {
+                       "fileName":  "food-3.jpg",
+                       "width":  720,
+                       "height":  720,
+                       "originalSha256":  "5da6511aec0d921cfd298803e138a6c7fda25e6954b24a37ace1b87c878dcdab",
+                       "watermarkedSha256":  "5b058e8c67cd62a7f3e51ccbf0669db85e060f9cf2a836caaa511dc8367461a0",
+                       "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                       "watermarkedAt":  "2026-11-09T13:44:47.4066100+07:00"
+                   },
+    "food-239.jpg":  {
+                         "fileName":  "food-239.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "2a25b5b2c9707a8bd6f2d50e4597603bb2f82b87a742069f65aa62f1e7e2ceb8",
+                         "watermarkedSha256":  "7033df423da3f3c3163aa76c766e5975b34b1e8a7fa74e7423c88923ff04b343",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:42.3182375+07:00"
+                     },
+    "food-234.jpg":  {
+                         "fileName":  "food-234.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "5817ddd013842aa0afe6e68b73db3dcb3da007562e5c16008c40e5e10d691d2e",
+                         "watermarkedSha256":  "d33e9928952197766b7bf77e912a4f1c19a1115f4949891dc585915960baa7dc",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:41.8897228+07:00"
+                     },
+    "food-51.jpg":  {
+                        "fileName":  "food-51.jpg",
+                        "width":  720,
+                        "height":  405,
+                        "originalSha256":  "19bcd51d5aa138445725435a8f58394b903cb132cac65fa936c12954272a0bc6",
+                        "watermarkedSha256":  "f4ba05abd351e545b98c709b2c5d64138ca95b9de2b512b4e77be0dfe821bc83",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:49.5495845+07:00"
+                    },
+    "food-218.jpg":  {
+                         "fileName":  "food-218.jpg",
+                         "width":  720,
+                         "height":  540,
+                         "originalSha256":  "b03c011a4f2ee117fc14749bef5cf2f4b629b567b09f14947efabee60827ea2c",
+                         "watermarkedSha256":  "aaef7cc4403fc4a46af3264a9248e9a918c57f1eaf1b3d990daa335d21973111",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:40.6563700+07:00"
+                     },
+    "food-192.jpg":  {
+                         "fileName":  "food-192.jpg",
+                         "width":  720,
+                         "height":  477,
+                         "originalSha256":  "62a951c111ce2cbe2e62183641c2b35572d51f68262678f1ab442890df20d4fe",
+                         "watermarkedSha256":  "d01255f95344b55006a4a6b0e7445ae11326f03aecc259d4455bebbc4dd89981",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:39.0627635+07:00"
+                     },
+    "food-208.jpg":  {
+                         "fileName":  "food-208.jpg",
+                         "width":  667,
+                         "height":  720,
+                         "originalSha256":  "95d966c419925259f77f0ec4ae444660e1179d59ed1d3717f1ba1c2fc7ebf511",
+                         "watermarkedSha256":  "bdbea757ab7ca367f842373ce927d1bf58c23dc2631739bd0fe228d39b74c46f",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:40.0330725+07:00"
+                     },
+    "food-129.jpg":  {
+                         "fileName":  "food-129.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "9321e374199c286ec1195163b8bc0d356fa69d58f4c76770c57bfe17a5610c95",
+                         "watermarkedSha256":  "a6ee1438fbfbe143d6b8695469c9f478ba22ee2fa834bac8b6cb8e0c070b916d",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:34.2807140+07:00"
+                     },
+    "food-135.jpg":  {
+                         "fileName":  "food-135.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "b3ad67b2e8ca44ebb80775090e1e40c13fa75de3e971f2fe02d7e3d9b2561c5f",
+                         "watermarkedSha256":  "d5a5ff7dfa340b03ed2ffeee6c488eebbb88ba3eec1cd29e907c4b469aec17b4",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:34.7400470+07:00"
+                     },
+    "food-175.jpg":  {
+                         "fileName":  "food-175.jpg",
+                         "width":  720,
+                         "height":  658,
+                         "originalSha256":  "d096fdc8055faa41b96a1474c785ea2662f4781e20d253479fd598a74f1744e4",
+                         "watermarkedSha256":  "405462aaaf800f5fc4d0a5bb8b4b0ba80a4240d083c36bf7937e7cef4f574f7c",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:37.8650199+07:00"
+                     },
+    "food-283.jpg":  {
+                         "fileName":  "food-283.jpg",
+                         "width":  600,
+                         "height":  800,
+                         "originalSha256":  "0d40896730f4011ee3b2264637d95d88fc4df244e75f8da38de89f29bc4e17d5",
+                         "watermarkedSha256":  "980f2d425c116d21cbcf73f0778706e10fe9e7cb0fb7d5d635dbcc5ef9e905f8",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:45.9712590+07:00"
+                     },
+    "food-230.jpg":  {
+                         "fileName":  "food-230.jpg",
+                         "width":  720,
+                         "height":  480,
+                         "originalSha256":  "2d793901bd283a5efe06aa94dc4216bdc3b77fc05a5f6ac339f9236790444796",
+                         "watermarkedSha256":  "db2fca183b406d81dfae35702d977ae4f1d6f6d8691e9f640acd16223d3ad433",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:41.5578488+07:00"
+                     },
+    "food-125.jpg":  {
+                         "fileName":  "food-125.jpg",
+                         "width":  720,
+                         "height":  540,
+                         "originalSha256":  "5954ee7f00cdc1bcefc5cc8c4d6eaed3469155961bc37340f98d75e91dc6acb4",
+                         "watermarkedSha256":  "d998bb8a6fb49653c02f264540d8d791cb69af0ec237a76573c0c67694165729",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:33.9946795+07:00"
+                     },
+    "food-262.jpg":  {
+                         "fileName":  "food-262.jpg",
+                         "width":  800,
+                         "height":  533,
+                         "originalSha256":  "376e56d3ebfaa0c249463d760a5164ccce86db7b2507ffc0bda0f8c3db112fe6",
+                         "watermarkedSha256":  "9c93cba7681dec992c6d6afaa74a8c6fede93259b7a925025b3ef05204a7411b",
+                         "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                         "watermarkedAt":  "2026-11-09T13:44:44.1894158+07:00"
+                     },
+    "food-67.jpg":  {
+                        "fileName":  "food-67.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "335411027ba2ca04ffbb85f13fc200ab1a2b0636df37b4e2632d0a96233c810e",
+                        "watermarkedSha256":  "3fda9b66efb2afe01412596bd48b1f0d710deb3eec798c7873a6fe3d0e9e1678",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:50.7041040+07:00"
+                    },
+    "food-74.jpg":  {
+                        "fileName":  "food-74.jpg",
+                        "width":  720,
+                        "height":  480,
+                        "originalSha256":  "04c61cd5b4ef91f5cdb00f0a0cf6662590c05207f8c020ed3dbc4043ad18b0c0",
+                        "watermarkedSha256":  "5d3469fb93caf7f25f4d6aa76b2c0bebec8798b1945a69a21942ebc9ecead79e",
+                        "watermarkText":  "Cambodia Flavors \u0026 Tourism",
+                        "watermarkedAt":  "2026-11-09T13:44:51.2741980+07:00"
+                    }
+}
