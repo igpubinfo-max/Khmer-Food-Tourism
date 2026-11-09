@@ -112,6 +112,16 @@ jobs:
           cd android
           chmod +x ./gradlew
 
+          # Ensure Gradle distribution is fetched reliably with retry (handles CDN 504 hiccups)
+          for attempt in 1 2 3 4 5; do
+            if ./gradlew --version; then
+              echo "Gradle wrapper ready."
+              break
+            fi
+            echo "Gradle wrapper download hit temporary network issue. Retrying (attempt \/5)..."
+            sleep 4
+          done
+
           # 1. Build Play Store AAB with official Play Store package ID (com.khmerfood.tourism)
           if [ "$BUILD_AAB" = "true" ]; then
             echo "::group::Building Google Play Store Bundle (.AAB)"
