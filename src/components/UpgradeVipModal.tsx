@@ -278,6 +278,7 @@ export const UpgradeVipModal: React.FC = () => {
     setIsUpgradeVipModalOpen(false);
     openSupportTicketModal({
       planType: selectedPlan.id,
+      planId: selectedPlan.planId,
       paymentRef: userLatestVipTxn?.transactionRef || customTxnRef,
       receiptUrl: paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl,
     });

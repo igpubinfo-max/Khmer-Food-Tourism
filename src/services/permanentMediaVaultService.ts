@@ -31,6 +31,11 @@ import {
   SEED_FOOD_PHOTO_BASELINE_ISO,
   SEED_FOOD_PHOTO_BASELINE_MS,
   EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS,
+  REMOVED_DUPLICATE_FOOD_IDS,
+  deduplicateFoodItems,
+  normalizeFoodNameKhForDedup,
+  normalizeFoodNameEnForDedup,
+  normalizeFoodPhotoUrlForDedup,
   isSeedRestaurantId,
   isValidCambodiaCoordinates,
   isValidOfficialGooglePlaceId,
@@ -235,10 +240,14 @@ export function isLegacyAutoScrapedFoodPlaceholderUrl(url?: string): boolean {
 }
 
 export function getSeedFoodPhotoBaselineMs(foodId: string): number {
-  const excelBakedIso = EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS[foodId];
+  const cleanId = String(foodId || '').trim();
+  const excelBakedIso = EXCEL_BAKED_FOOD_PHOTO_TIMESTAMPS[cleanId];
   const excelBakedMs = excelBakedIso ? Date.parse(excelBakedIso) || 0 : 0;
-  const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(foodId);
+  const seedFood = IMMUTABLE_SEED_FOOD_MAP.get(cleanId);
   if (!seedFood || !seedFood.photoUrl?.startsWith('/foods/')) {
+    if (REMOVED_DUPLICATE_FOOD_IDS.has(cleanId) || /^food-([1-9]\d{0,2})$/i.test(cleanId)) {
+      return Math.max(SEED_FOOD_PHOTO_BASELINE_MS, excelBakedMs);
+    }
     return excelBakedMs;
   }
   const seedPhotoMs = seedFood.photoUpdatedAt ? Date.parse(seedFood.photoUpdatedAt) || 0 : 0;
@@ -257,6 +266,10 @@ export function isRejectedLegacyFoodOverridePhoto(
     isCustomPhoto?: boolean;
   } | null
 ): boolean {
+  const cleanId = String(foodId || '').trim();
+  if (!cleanId || REMOVED_DUPLICATE_FOOD_IDS.has(cleanId)) {
+    return true;
+  }
   if (!ov || typeof ov.photoUrl !== 'string' || !ov.photoUrl.trim()) {
     return true;
   }
@@ -1015,6 +1028,7 @@ export function loadLocalMediaOverrides(forceDiskRead = false): AllMediaOverride
   for (const [lid, lEntry] of Object.entries(ledger)) {
     if (
       !lEntry ||
+      REMOVED_DUPLICATE_FOOD_IDS.has(lid) ||
       isLegacyAutoScrapedFoodPlaceholderUrl(lEntry.cloudUrl)
     ) {
       delete ledger[lid];
@@ -2432,27 +2446,53 @@ export function applyFoodOverrides(
   const safeOverrides = overridesMap || {};
   const deletedFoodsMap =
     explicitDeletedMap || loadLocalMediaOverrides().deletedFoods || loadDeletedFoodIdsMap();
-  const hasDeletedFoods = Object.keys(deletedFoodsMap).length > 0;
-  const filteredBaseFoods = hasDeletedFoods
-    ? foods.filter((f) => f && f.id && !deletedFoodsMap[f.id])
-    : foods;
+  const filteredBaseFoods = foods.filter(
+    (f) => f && f.id && !REMOVED_DUPLICATE_FOOD_IDS.has(f.id) && !deletedFoodsMap[f.id]
+  );
 
   // Also synthesize any Admin-inserted custom foods in safeOverrides that are not yet in filteredBaseFoods
   const existingFoodIds = new Set(filteredBaseFoods.map((f) => f.id));
+  const existingNamesKh = new Set(
+    filteredBaseFoods.map((f) => normalizeFoodNameKhForDedup(f.nameKh)).filter(Boolean)
+  );
+  const existingNamesEn = new Set(
+    filteredBaseFoods.map((f) => normalizeFoodNameEnForDedup(f.nameEn)).filter(Boolean)
+  );
+  const existingPhotoUrls = new Set(
+    filteredBaseFoods
+      .map((f) => normalizeFoodPhotoUrlForDedup(f.photoUrl))
+      .filter((u) => u && !u.startsWith('data:image/'))
+  );
   const synthesizedAdminFoods: FoodItem[] = [];
   for (const [ovId, ov] of Object.entries(safeOverrides)) {
+    const cleanOvId = String(ovId || '').trim();
     if (
       !ov ||
-      !ovId ||
-      existingFoodIds.has(ovId) ||
-      deletedFoodsMap[ovId] ||
-      IMMUTABLE_SEED_FOOD_MAP.has(ovId) ||
+      !cleanOvId ||
+      REMOVED_DUPLICATE_FOOD_IDS.has(cleanOvId) ||
+      /^food-([1-9]\d{0,2})$/i.test(cleanOvId) ||
+      existingFoodIds.has(cleanOvId) ||
+      deletedFoodsMap[cleanOvId] ||
+      IMMUTABLE_SEED_FOOD_MAP.has(cleanOvId) ||
       !ov.nameKh ||
       !ov.photoUrl ||
-      isRejectedLegacyFoodOverridePhoto(ovId, ov)
+      isRejectedLegacyFoodOverridePhoto(cleanOvId, ov)
     ) {
       continue;
     }
+    const normKh = normalizeFoodNameKhForDedup(ov.nameKh);
+    const normEn = normalizeFoodNameEnForDedup(ov.nameEn);
+    const normPhoto = normalizeFoodPhotoUrlForDedup(ov.photoUrl);
+    if (
+      (normKh && existingNamesKh.has(normKh)) ||
+      (normEn && existingNamesEn.has(normEn)) ||
+      (normPhoto && !normPhoto.startsWith('data:image/') && existingPhotoUrls.has(normPhoto))
+    ) {
+      continue;
+    }
+    if (normKh) existingNamesKh.add(normKh);
+    if (normEn) existingNamesEn.add(normEn);
+    if (normPhoto && !normPhoto.startsWith('data:image/')) existingPhotoUrls.add(normPhoto);
     const gen = generateAuthenticRecipeByDishName(
       ov.nameKh,
       ov.nameEn || ov.nameKh,
@@ -2687,7 +2727,7 @@ export function applyFoodOverrides(
       photoUpdatedAt: nextPhotoUpdatedAt,
     };
   });
-  return anyChanged ? mapped : foods;
+  return deduplicateFoodItems(anyChanged ? mapped : foods, safeOverrides);
 }
 
 /**

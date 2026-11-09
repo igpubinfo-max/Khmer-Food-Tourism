@@ -19,7 +19,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { getDynamicVipPlans, SupportTicket, AbaReceiptVerificationReport } from '../types';
+import { getDynamicVipPlans, getConsumerVipPricingCatalog, isConsumerPromo099Eligible, OfficialPlanId, SupportTicket, AbaReceiptVerificationReport } from '../types';
 import { tr } from '../utils/i18n';
 import {
   pickImageUsingNativeAndroidGallery,
@@ -48,9 +48,54 @@ export const PaymentSupportModal: React.FC = () => {
   } = useApp();
 
   const dynamicPlans = getDynamicVipPlans(appSettings);
+  const consumerCatalog = getConsumerVipPricingCatalog(appSettings);
+  const canClaimWinback099 = Boolean(
+    consumerCatalog.consumerVipEnabled &&
+      consumerCatalog.promo30dPlan.enabled &&
+      isConsumerPromo099Eligible(currentUser)
+  );
+  const availablePaidPlans = [
+    ...(canClaimWinback099
+      ? [
+          {
+            planId: consumerCatalog.promo30dPlan.planId as OfficialPlanId,
+            planType: 'quarterly' as const,
+            nameKh: consumerCatalog.promo30dPlan.titleKm,
+            nameEn: consumerCatalog.promo30dPlan.titleEn,
+            priceUsd: consumerCatalog.promo30dPlan.priceUsd,
+            durationDays: consumerCatalog.promo30dPlan.durationDays,
+          },
+        ]
+      : []),
+    {
+      planId: consumerCatalog.plan30d.planId as OfficialPlanId,
+      planType: 'quarterly' as const,
+      nameKh: consumerCatalog.plan30d.titleKm,
+      nameEn: consumerCatalog.plan30d.titleEn,
+      priceUsd: consumerCatalog.plan30d.priceUsd,
+      durationDays: consumerCatalog.plan30d.durationDays,
+    },
+    {
+      planId: consumerCatalog.plan90d.planId as OfficialPlanId,
+      planType: 'annual' as const,
+      nameKh: consumerCatalog.plan90d.titleKm,
+      nameEn: consumerCatalog.plan90d.titleEn,
+      priceUsd: consumerCatalog.plan90d.priceUsd,
+      durationDays: consumerCatalog.plan90d.durationDays,
+    },
+    {
+      planId: consumerCatalog.plan365d.planId as OfficialPlanId,
+      planType: 'annual' as const,
+      nameKh: consumerCatalog.plan365d.titleKm,
+      nameEn: consumerCatalog.plan365d.titleEn,
+      priceUsd: consumerCatalog.plan365d.priceUsd,
+      durationDays: consumerCatalog.plan365d.durationDays,
+    },
+  ];
 
   const [activeTab, setActiveTab] = useState<'new' | 'history'>('new');
   const [selectedPlan, setSelectedPlan] = useState<'quarterly' | 'annual'>('quarterly');
+  const [selectedPlanId, setSelectedPlanId] = useState<OfficialPlanId>('consumer_30d');
   const [paymentDate, setPaymentDate] = useState<string>(() =>
     new Date().toISOString().slice(0, 10)
   );
@@ -76,8 +121,13 @@ export const PaymentSupportModal: React.FC = () => {
   useEffect(() => {
     if (isSupportTicketModalOpen && currentUser) {
       refreshAppSettingsFromServer?.(true);
-      if (supportModalPrefill?.planType) {
+      if (supportModalPrefill?.planId) {
+        setSelectedPlanId(supportModalPrefill.planId as OfficialPlanId);
+        const matched = availablePaidPlans.find((p) => p.planId === supportModalPrefill.planId);
+        if (matched) setSelectedPlan(matched.planType);
+      } else if (supportModalPrefill?.planType) {
         setSelectedPlan(supportModalPrefill.planType);
+        setSelectedPlanId(supportModalPrefill.planType === 'annual' ? 'consumer_90d' : 'consumer_30d');
       }
       const latestTxn = transactions.find((t) => t.userId === currentUser.id);
       const rawRef =
@@ -102,7 +152,7 @@ export const PaymentSupportModal: React.FC = () => {
     }
   }, [isSupportTicketModalOpen]);
 
-  const currentPlanConfig = dynamicPlans[selectedPlan];
+  const currentPlanConfig = availablePaidPlans.find((p) => p.planId === selectedPlanId) || dynamicPlans[selectedPlan];
 
   // Automatically run AI + Deterministic Receipt Verification whenever a receipt image is attached or plan/ref/price changes
   useEffect(() => {
@@ -113,7 +163,7 @@ export const PaymentSupportModal: React.FC = () => {
       return;
     }
 
-    const planCfg = dynamicPlans[selectedPlan];
+    const planCfg = availablePaidPlans.find((p) => p.planId === selectedPlanId) || dynamicPlans[selectedPlan];
     setIsVerifyingAi(true);
     verifyAbaPaymentAndReceipt({
       receiptDataUrl,
@@ -148,6 +198,7 @@ export const PaymentSupportModal: React.FC = () => {
   }, [
     receiptDataUrl,
     selectedPlan,
+    selectedPlanId,
     paymentDate,
     paymentRef,
     currentPlanConfig.priceUsd,
@@ -253,8 +304,16 @@ export const PaymentSupportModal: React.FC = () => {
     }
 
     const latestSettings = (await refreshAppSettingsFromServer?.(true)) || appSettings;
+    const liveCatalog = getConsumerVipPricingCatalog(latestSettings);
     const livePlans = getDynamicVipPlans(latestSettings);
-    const livePlanCfg = livePlans[selectedPlan];
+    const livePlanCfg =
+      selectedPlanId === 'consumer_365d'
+        ? { priceUsd: liveCatalog.plan365d.priceUsd, durationDays: liveCatalog.plan365d.durationDays }
+        : selectedPlanId === 'consumer_90d'
+        ? { priceUsd: liveCatalog.plan90d.priceUsd, durationDays: liveCatalog.plan90d.durationDays }
+        : selectedPlanId === 'consumer_promo_30d'
+        ? { priceUsd: liveCatalog.promo30dPlan.priceUsd, durationDays: liveCatalog.promo30dPlan.durationDays }
+        : livePlans[selectedPlan];
 
     let finalReport = aiReport;
     if (
@@ -282,6 +341,7 @@ export const PaymentSupportModal: React.FC = () => {
     const created = createSupportTicket({
       message: messageText.trim(),
       planType: selectedPlan,
+      planId: selectedPlanId,
       paymentDate,
       paymentRef:
         paymentRef.trim() ||
@@ -504,51 +564,41 @@ export const PaymentSupportModal: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPlan('quarterly')}
-                    className={`p-3 rounded-2xl border-2 text-left transition flex flex-col justify-between ${
-                      selectedPlan === 'quarterly'
-                        ? 'border-amber-500 bg-amber-50/70 shadow-sm'
-                        : 'border-gray-200 bg-white hover:border-amber-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-extrabold text-gray-900">
-                        {tr(language, dynamicPlans.quarterly.nameKh, dynamicPlans.quarterly.nameEn, `${dynamicPlans.quarterly.durationDays}天 VIP 套餐`)}
-                      </span>
-                      <Crown className="w-4 h-4 text-amber-500" />
-                    </div>
-                    <div className="text-lg font-black text-amber-600 mt-1">
-                      ${dynamicPlans.quarterly.priceUsd.toFixed(2)}{' '}
-                      <span className="text-xs font-semibold text-gray-600">
-                        / {dynamicPlans.quarterly.durationDays} {tr(language, 'ថ្ងៃ', 'days', '天')}
-                      </span>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPlan('annual')}
-                    className={`p-3 rounded-2xl border-2 text-left transition flex flex-col justify-between ${
-                      selectedPlan === 'annual'
-                        ? 'border-amber-500 bg-amber-50/70 shadow-sm'
-                        : 'border-gray-200 bg-white hover:border-amber-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-extrabold text-gray-900">
-                        {tr(language, dynamicPlans.annual.nameKh, dynamicPlans.annual.nameEn, `${dynamicPlans.annual.durationDays}天 VIP 套餐`)}
-                      </span>
-                      <Award className="w-4 h-4 text-orange-500" />
-                    </div>
-                    <div className="text-lg font-black text-orange-600 mt-1">
-                      ${dynamicPlans.annual.priceUsd.toFixed(2)}{' '}
-                      <span className="text-xs font-semibold text-gray-600">
-                        / {dynamicPlans.annual.durationDays} {tr(language, 'ថ្ងៃ', 'days', '天')}
-                      </span>
-                    </div>
-                  </button>
+                  {availablePaidPlans.map((planOpt) => {
+                    const isSelected = selectedPlanId === planOpt.planId;
+                    return (
+                      <button
+                        key={planOpt.planId}
+                        type="button"
+                        onClick={() => {
+                          setSelectedPlanId(planOpt.planId);
+                          setSelectedPlan(planOpt.planType);
+                        }}
+                        className={`p-3 rounded-2xl border-2 text-left transition flex flex-col justify-between ${
+                          isSelected
+                            ? 'border-amber-500 bg-amber-50/70 shadow-sm'
+                            : 'border-gray-200 bg-white hover:border-amber-300'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-extrabold text-gray-900">
+                            {tr(language, planOpt.nameKh, planOpt.nameEn, `${planOpt.durationDays}天 VIP 套餐`)}
+                          </span>
+                          {planOpt.durationDays >= 90 ? (
+                            <Award className="w-4 h-4 text-orange-500 shrink-0" />
+                          ) : (
+                            <Crown className="w-4 h-4 text-amber-500 shrink-0" />
+                          )}
+                        </div>
+                        <div className="text-lg font-black text-amber-600 mt-1">
+                          ${planOpt.priceUsd.toFixed(2)}{' '}
+                          <span className="text-xs font-semibold text-gray-600">
+                            / {planOpt.durationDays} {tr(language, 'ថ្ងៃ', 'days', '天')}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

@@ -1494,50 +1494,49 @@ export function normalizeAuthoritativeAppSettings(
 
   const ver = Number(merged.settingsVersion || 0);
   const isLegacyCorrupted =
-    ver < 25 &&
+    ver < 100 &&
     (Number(merged.vipShortPriceUsd) === 9.99 ||
+      Number(merged.vipShortPriceUsd) === 4.99 ||
       Number(merged.vipLongPriceUsd) === 24.99 ||
+      Number(merged.vipLongDurationDays) === 60 ||
       (Number(merged.vipShortDurationDays) === 3 && Number(merged.vipLongDurationDays) === 9));
 
-  const rawShortDays = Number(merged.vipShortDurationDays);
+  const rawShortDays = Number(merged.consumer30dDays ?? merged.vipShortDurationDays);
   let shortDays =
     Number.isFinite(rawShortDays) && rawShortDays >= 1
       ? Math.round(rawShortDays)
       : 30;
 
-  const rawShortPrice = Number(merged.vipShortPriceUsd);
+  const rawShortPrice = Number(merged.consumer30dPriceUsd ?? merged.vipShortPriceUsd);
   let shortPrice =
     Number.isFinite(rawShortPrice) && rawShortPrice > 0
       ? Math.round(rawShortPrice * 100) / 100
-      : 4.99;
+      : 2.99;
 
-  const rawLongDays = Number(merged.vipLongDurationDays);
+  const rawLongDays = Number(merged.consumer90dDays ?? merged.vipLongDurationDays);
   let longDays =
     Number.isFinite(rawLongDays) && rawLongDays >= 1
       ? Math.round(rawLongDays)
-      : 60;
+      : 90;
 
-  const rawLongPrice = Number(merged.vipLongPriceUsd);
+  const rawLongPrice = Number(merged.consumer90dPriceUsd ?? merged.vipLongPriceUsd);
   let longPrice =
     Number.isFinite(rawLongPrice) && rawLongPrice > 0
       ? Math.round(rawLongPrice * 100) / 100
       : 6.99;
 
-  const rawExtraFee = Number(merged.additionalStoreFeeUsd);
+  const rawExtraFee = Number(merged.shopMonthlyPriceUsd ?? merged.additionalStoreFeeUsd);
   let extraStoreFee =
-    merged.additionalStoreFeeUsd !== undefined &&
-    merged.additionalStoreFeeUsd !== null &&
-    Number.isFinite(rawExtraFee) &&
-    rawExtraFee >= 0
+    Number.isFinite(rawExtraFee) && rawExtraFee >= 0
       ? Math.round(rawExtraFee * 100) / 100
-      : 5.0;
+      : 6.99;
 
   if (isLegacyCorrupted) {
-    if (shortPrice === 9.99) shortPrice = 4.99;
+    if (shortPrice === 9.99 || shortPrice === 4.99) shortPrice = 2.99;
     if (shortDays === 3) shortDays = 30;
     if (longPrice === 24.99) longPrice = 6.99;
-    if (longDays === 9 || longDays === 90) longDays = 60;
-    if (ver < 15 && extraStoreFee === 10.0) extraStoreFee = 5.0;
+    if (longDays === 9 || longDays === 60) longDays = 90;
+    if (extraStoreFee === 10.0 || extraStoreFee === 5.0) extraStoreFee = 6.99;
   }
 
   const includedFree =
@@ -1629,7 +1628,7 @@ export function normalizeAuthoritativeAppSettings(
     ...merged,
     apkDownloadUrl: '',
     playStoreUrl: merged.playStoreUrl || 'https://play.google.com/store/apps/details?id=com.khmerfood.tourism',
-    settingsVersion: Math.max(25, ver),
+    settingsVersion: Math.max(100, ver),
     supportAccountName: merged.supportAccountName || 'CHEA KIMSENG',
     geminiApiKey: resolvedGeminiKey,
     googleMapsApiKey: resolvedMapsKey,
@@ -1667,8 +1666,8 @@ export function normalizeAuthoritativeAppSettings(
     shopEarlyBirdClaimedCount,
     shopPayAfterApproval,
     promotionalFeeUsd: shortPrice,
-    promotionPeriodKh: `កញ្ចប់ VIP ផ្លូវការ៖ ${shortPrice.toFixed(2)} សម្រាប់ ${shortDays} ថ្ងៃ ឬ ${longPrice.toFixed(2)} សម្រាប់ ${longDays} ថ្ងៃ • បន្ថែមហាងថ្មី៖ ${extraStoreFee.toFixed(2)} / ១ ហាង`,
-    promotionPeriodEn: `Official VIP Plans: ${shortPrice.toFixed(2)} for ${shortDays} Days or ${longPrice.toFixed(2)} for ${longDays} Days • Additional Store: ${extraStoreFee.toFixed(2)} / store`,
+    promotionPeriodKh: `សាកល្បង VIP ${consumerTrialDays} ថ្ងៃ FREE • កញ្ចប់អ្នកប្រើ៖ ${consumer30dPriceUsd.toFixed(2)}/ខែ, ${consumer90dPriceUsd.toFixed(2)}/90ថ្ងៃ, ${consumer365dPriceUsd.toFixed(2)}/ឆ្នាំ • កញ្ចប់ដាក់ហាង៖ ${shopMonthlyPriceUsd.toFixed(2)}/ខែ ឬ ${shopYearlyPriceUsd.toFixed(2)}/ឆ្នាំ`,
+    promotionPeriodEn: `${consumerTrialDays}-Day Free Trial • Consumer VIP: ${consumer30dPriceUsd.toFixed(2)}/mo, ${consumer90dPriceUsd.toFixed(2)}/90d, ${consumer365dPriceUsd.toFixed(2)}/yr • Shop Plan: ${shopMonthlyPriceUsd.toFixed(2)}/mo or ${shopYearlyPriceUsd.toFixed(2)}/yr`,
   };
 }
 
@@ -1772,11 +1771,11 @@ export async function saveAuthoritativeAppSettingsToServer(
   const nextVersion = serverMaxVer + 1;
   const nowIso = new Date().toISOString();
 
-  const shortDays = Math.max(1, Math.round(Number(settings.vipShortDurationDays) || 30));
-  const shortPrice = Math.max(0.01, Math.round((Number(settings.vipShortPriceUsd) || 4.99) * 100) / 100);
-  const longDays = Math.max(1, Math.round(Number(settings.vipLongDurationDays) || 60));
-  const longPrice = Math.max(0.01, Math.round((Number(settings.vipLongPriceUsd) || 6.99) * 100) / 100);
-  const extraStoreFee = Math.max(0, Math.round((Number(settings.additionalStoreFeeUsd ?? 5.0)) * 100) / 100);
+  const shortDays = Math.max(1, Math.round(Number(settings.consumer30dDays ?? settings.vipShortDurationDays) || 30));
+  const shortPrice = Math.max(0.01, Math.round((Number(settings.consumer30dPriceUsd ?? settings.vipShortPriceUsd) || 2.99) * 100) / 100);
+  const longDays = Math.max(1, Math.round(Number(settings.consumer90dDays ?? settings.vipLongDurationDays) || 90));
+  const longPrice = Math.max(0.01, Math.round((Number(settings.consumer90dPriceUsd ?? settings.vipLongPriceUsd) || 6.99) * 100) / 100);
+  const extraStoreFee = Math.max(0, Math.round((Number(settings.shopMonthlyPriceUsd ?? settings.additionalStoreFeeUsd ?? 6.99)) * 100) / 100);
   const vipFeaturedRotationEnabled = settings.vipFeaturedRotationEnabled !== false;
   const rawFeaturedDays = Number(settings.vipFeaturedDurationDays);
   const vipFeaturedDurationDays =

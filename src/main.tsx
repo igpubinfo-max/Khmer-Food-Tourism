@@ -4,7 +4,13 @@ import './index.css'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { sanitizeStartupCurrentUser } from './utils/securityIntegrityGuard.ts'
-import { APP_VERSION_NAME, APP_BUILD_CODE } from './types/index.ts'
+import {
+  APP_VERSION_NAME,
+  APP_BUILD_CODE,
+  REMOVED_DUPLICATE_FOOD_IDS,
+  remapDuplicateFoodIdToCanonical,
+  deduplicateFoodItems,
+} from './types/index.ts'
 import { runUserDataIntegrityCheck } from './services/userDataIntegrityService.ts'
 
 // 0. Pre-boot cache sanitation & obsolete bulk cache eviction:
@@ -76,6 +82,114 @@ try {
       localStorage.removeItem(key);
     }
   });
+
+  // Auto-upgrade any cached pre-v100 VIP pricing ($4.99 / 30d or $6.99 / 60d) in kft_settings_v5 immediately on boot
+  const rawSettingsV5 = localStorage.getItem('kft_settings_v5');
+  if (rawSettingsV5) {
+    try {
+      const parsedSettings = JSON.parse(rawSettingsV5);
+      if (parsedSettings && typeof parsedSettings === 'object') {
+        const ver = Number(parsedSettings.settingsVersion) || 0;
+        if (
+          ver < 100 ||
+          Number(parsedSettings.vipShortPriceUsd) === 4.99 ||
+          Number(parsedSettings.vipLongDurationDays) === 60
+        ) {
+          parsedSettings.vipShortPriceUsd = 2.99;
+          parsedSettings.vipShortDurationDays = 30;
+          parsedSettings.vipLongPriceUsd = 6.99;
+          parsedSettings.vipLongDurationDays = 90;
+          parsedSettings.consumerPromo30dPriceUsd = 0.99;
+          parsedSettings.consumer30dPriceUsd = 2.99;
+          parsedSettings.consumer90dPriceUsd = 6.99;
+          parsedSettings.consumer365dPriceUsd = 19.99;
+          parsedSettings.shopMonthlyPriceUsd = 6.99;
+          parsedSettings.shopYearlyPriceUsd = 59.99;
+          parsedSettings.shopEarlyBirdYearlyPriceUsd = 49.99;
+          parsedSettings.additionalStoreFeeUsd = 6.99;
+          parsedSettings.settingsVersion = Math.max(ver, 100);
+          localStorage.setItem('kft_settings_v5', JSON.stringify(parsedSettings));
+        }
+      }
+    } catch {
+      // Ignore malformed settings JSON
+    }
+  }
+
+  // Purge any removed duplicate food IDs from cached food overrides, ledger, cloud retry queue, and food catalog cache
+  for (const mapKey of ['kft_permanent_food_overrides_v1', 'kft_food_revision_ledger_v1']) {
+    const rawMap = localStorage.getItem(mapKey);
+    if (rawMap) {
+      try {
+        const parsedMap = JSON.parse(rawMap);
+        if (parsedMap && typeof parsedMap === 'object') {
+          let changed = false;
+          for (const fid of Object.keys(parsedMap)) {
+            if (REMOVED_DUPLICATE_FOOD_IDS.has(fid)) {
+              delete parsedMap[fid];
+              changed = true;
+            }
+          }
+          if (changed) {
+            localStorage.setItem(mapKey, JSON.stringify(parsedMap));
+          }
+        }
+      } catch {}
+    }
+  }
+
+  const rawPendingQueue = localStorage.getItem('kft_pending_media_cloud_queue_v1');
+  if (rawPendingQueue) {
+    try {
+      const parsedQueue = JSON.parse(rawPendingQueue);
+      if (parsedQueue && typeof parsedQueue === 'object') {
+        let qChanged = false;
+        for (const qk of Object.keys(parsedQueue)) {
+          const item = parsedQueue[qk];
+          if (item && item.category === 'food' && REMOVED_DUPLICATE_FOOD_IDS.has(item.id)) {
+            delete parsedQueue[qk];
+            qChanged = true;
+          }
+        }
+        if (qChanged) {
+          localStorage.setItem('kft_pending_media_cloud_queue_v1', JSON.stringify(parsedQueue));
+        }
+      }
+    } catch {}
+  }
+
+  const rawCachedFoods = localStorage.getItem('kft_foods_200_v10');
+  if (rawCachedFoods) {
+    try {
+      const parsedFoods = JSON.parse(rawCachedFoods);
+      if (Array.isArray(parsedFoods)) {
+        const dedupedFoods = deduplicateFoodItems(parsedFoods);
+        if (dedupedFoods.length !== parsedFoods.length) {
+          localStorage.setItem('kft_foods_200_v10', JSON.stringify(dedupedFoods));
+        }
+      }
+    } catch {}
+  }
+
+  // Remap any bookmarked duplicate food IDs to their canonical dish ID so user favorites are never lost
+  const rawBookmarksV5 = localStorage.getItem('kft_bookmarks_v5');
+  if (rawBookmarksV5) {
+    try {
+      const parsedBm = JSON.parse(rawBookmarksV5);
+      if (Array.isArray(parsedBm)) {
+        const remappedBm = Array.from(
+          new Set(
+            parsedBm
+              .filter((id): id is string => typeof id === 'string' && id.trim().length > 0)
+              .map((id) => remapDuplicateFoodIdToCanonical(id))
+          )
+        );
+        if (remappedBm.length !== parsedBm.length || remappedBm.some((id, i) => id !== parsedBm[i])) {
+          localStorage.setItem('kft_bookmarks_v5', JSON.stringify(remappedBm));
+        }
+      }
+    } catch {}
+  }
 } catch (e) {
   console.warn('Pre-boot cache sanitation warning:', e);
 }

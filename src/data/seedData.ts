@@ -58,8 +58,8 @@ export const initialAppSettings: AppSettings = {
   shopEarlyBirdMaxShops: 50,
   shopEarlyBirdClaimedCount: 0,
   shopPayAfterApproval: true,
-  settingsVersion: 26,
-  settingsUpdatedAt: '2026-10-25T05:15:00.000Z',
+  settingsVersion: 100,
+  settingsUpdatedAt: '2026-11-09T13:30:00.000Z',
   settingsUpdatedBy: 'រដ្ឋបាលប្រព័ន្ធ (Chea Savuth / Admin)',
 };
 

@@ -27,6 +27,11 @@ import {
   sanitizeVerifiedShopPhotoUrl, isVerifiedShopSpecialtyPhotoUrl, isValidGoogleMapsUrl, extractCoordsFromGoogleMapsUrl,
   AuthModalInitialView, hasAuthenticatedEmailAccount, hasAuthenticatedPhoneAccount, hasAuthenticatedAccount, computeFastPhotoSignature,
   APP_VERSION_NAME, APP_BUILD_CODE,
+  REMOVED_DUPLICATE_FOOD_IDS,
+  remapDuplicateFoodIdToCanonical,
+  normalizeFoodNameKhForDedup,
+  normalizeFoodNameEnForDedup,
+  normalizeFoodPhotoUrlForDedup,
   deduplicateFoodItems,
   resolveUserActualVipPlanDays,
   sanitizeUserVipPlanAndExpiry,
@@ -508,11 +513,12 @@ interface AppContextType {
   supportTickets: SupportTicket[];
   isSupportTicketModalOpen: boolean;
   setIsSupportTicketModalOpen: (open: boolean) => void;
-  supportModalPrefill: { planType?: 'quarterly' | 'annual'; paymentRef?: string; receiptUrl?: string } | null;
-  openSupportTicketModal: (prefill?: { planType?: 'quarterly' | 'annual'; paymentRef?: string; receiptUrl?: string }) => void;
+  supportModalPrefill: { planType?: 'quarterly' | 'annual'; planId?: string; paymentRef?: string; receiptUrl?: string } | null;
+  openSupportTicketModal: (prefill?: { planType?: 'quarterly' | 'annual'; planId?: string; paymentRef?: string; receiptUrl?: string }) => void;
   createSupportTicket: (input: {
     message: string;
     planType?: 'quarterly' | 'annual';
+    planId?: string;
     paymentDate?: string;
     paymentRef?: string;
     receiptUrl?: string;
@@ -1190,9 +1196,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const deletedFoodsMap = vault.deletedFoods || loadDeletedFoodIdsMap();
           const customAddedFoods: FoodItem[] = [];
           for (const f of parsed as FoodItem[]) {
-            if (!f || !f.id || deletedFoodsMap[f.id]) continue;
+            if (!f || !f.id || REMOVED_DUPLICATE_FOOD_IDS.has(f.id) || deletedFoodsMap[f.id]) continue;
             const seed = initialMap.get(f.id);
             if (!seed) {
+              if (/^food-([1-9]\d{0,2})$/i.test(f.id)) continue;
               customAddedFoods.push(f);
               continue;
             }
@@ -2288,7 +2295,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const savedV5 = localStorage.getItem('kft_bookmarks_v5');
       if (savedV5 && savedV5 !== 'undefined' && savedV5 !== 'null') {
         const parsedV5 = JSON.parse(savedV5);
-        if (Array.isArray(parsedV5)) return parsedV5;
+        if (Array.isArray(parsedV5)) {
+          const remapped = Array.from(
+            new Set(
+              parsedV5
+                .filter((id): id is string => typeof id === 'string' && id.trim().length > 0)
+                .map((id) => remapDuplicateFoodIdToCanonical(id))
+            )
+          );
+          if (remapped.length !== parsedV5.length || remapped.some((id, idx) => id !== parsedV5[idx])) {
+            localStorage.setItem('kft_bookmarks_v5', JSON.stringify(remapped));
+          }
+          return remapped;
+        }
       }
       // One-time migration from legacy v4/v3: strip the old auto-populated ['food-1', 'dest-1'] defaults while preserving any real user-saved items
       const legacySaved = localStorage.getItem('kft_bookmarks_v4') || localStorage.getItem('kft_bookmarks_v3');
@@ -2559,11 +2578,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isSupportTicketModalOpen, setIsSupportTicketModalOpen] = useState(false);
   const [supportModalPrefill, setSupportModalPrefill] = useState<{
     planType?: 'quarterly' | 'annual';
+    planId?: string;
     paymentRef?: string;
     receiptUrl?: string;
   } | null>(null);
   const openSupportTicketModal = (prefill?: {
     planType?: 'quarterly' | 'annual';
+    planId?: string;
     paymentRef?: string;
     receiptUrl?: string;
   }) => {
@@ -8186,7 +8207,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const shortPrice = mergedCandidate.vipShortPriceUsd!;
     const longDays = mergedCandidate.vipLongDurationDays!;
     const longPrice = mergedCandidate.vipLongPriceUsd!;
-    const extraStoreFee = mergedCandidate.additionalStoreFeeUsd ?? 5.0;
+    const extraStoreFee = mergedCandidate.additionalStoreFeeUsd ?? 6.99;
 
     mergedCandidate.promotionalFeeUsd = shortPrice;
     mergedCandidate.promotionPeriodKh = `កញ្ចប់ VIP ផ្លូវការ៖ ${shortPrice.toFixed(2)} សម្រាប់ ${shortDays} ថ្ងៃ ឬ ${longPrice.toFixed(2)} សម្រាប់ ${longDays} ថ្ងៃ • បន្ថែមហាងថ្មី៖ ${extraStoreFee.toFixed(2)} / ១ ហាង`;
@@ -9523,6 +9544,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       return;
     }
+    const normKh = normalizeFoodNameKhForDedup(foodData.nameKh);
+    const normEn = normalizeFoodNameEnForDedup(foodData.nameEn);
+    const normPhoto = normalizeFoodPhotoUrlForDedup(foodData.photoUrl);
+    const existingDuplicate = foods.find((f) => {
+      if (normKh && normalizeFoodNameKhForDedup(f.nameKh) === normKh) return true;
+      if (normEn && normalizeFoodNameEnForDedup(f.nameEn) === normEn) return true;
+      if (
+        normPhoto &&
+        !normPhoto.startsWith('data:image/') &&
+        normalizeFoodPhotoUrlForDedup(f.photoUrl) === normPhoto
+      ) {
+        return true;
+      }
+      return false;
+    });
+    if (existingDuplicate) {
+      void updateFood({
+        ...existingDuplicate,
+        ...foodData,
+        id: existingDuplicate.id,
+        rating: existingDuplicate.rating,
+        reviewCount: existingDuplicate.reviewCount,
+      });
+      return;
+    }
     const nowIso = new Date().toISOString();
     const newFood: FoodItem = {
       ...foodData,
@@ -9536,7 +9582,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     recordPermanentFoodOverride(newFood);
     setFoods(prev => {
-      const next = [newFood, ...prev];
+      const next = deduplicateFoodItems([newFood, ...prev]);
       scheduleStorageWrite('kft_foods_200_v10', next, 400);
       return next;
     });
@@ -9598,7 +9644,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setFoods(prev => {
-      const next = prev.map(f => (f.id === customUpdated.id ? customUpdated : f));
+      const next = deduplicateFoodItems(
+        prev.map(f => (f.id === customUpdated.id ? customUpdated : f)),
+        vaultImmediate.foods
+      );
       scheduleStorageWrite('kft_foods_200_v10', next, 400);
       setTrendingFoods(prevTrending =>
         applyTrendingFoodOverrides(prevTrending, vaultImmediate.trendingFoods, vaultImmediate.foods, next)
@@ -9619,7 +9668,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (finalUpdated.photoUrl !== customUpdated.photoUrl || finalUpdated.photoUpdatedAt !== customUpdated.photoUpdatedAt) {
       const vaultAfter = loadLocalMediaOverrides();
       setFoods(prev => {
-        const next = prev.map(f => (f.id === finalUpdated.id ? finalUpdated : f));
+        const next = deduplicateFoodItems(
+          prev.map(f => (f.id === finalUpdated.id ? finalUpdated : f)),
+          vaultAfter.foods
+        );
         scheduleStorageWrite('kft_foods_200_v10', next, 400);
         setTrendingFoods(prevTrending =>
           applyTrendingFoodOverrides(prevTrending, vaultAfter.trendingFoods, vaultAfter.foods, next)
@@ -15033,6 +15085,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const createSupportTicket = (input: {
     message: string;
     planType?: 'quarterly' | 'annual';
+    planId?: string;
     paymentDate?: string;
     paymentRef?: string;
     receiptUrl?: string;
@@ -15058,7 +15111,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const plan = resolveAndValidateVipPlan(
-      { planType: input.planType || 'quarterly' },
+      { planId: input.planId, planType: input.planType || 'quarterly' },
       appSettingsRef.current
     );
     const now = new Date();

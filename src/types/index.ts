@@ -5,7 +5,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1506;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1507;
 export const APP_RELEASE_DATE = '2026-11-09';
 
 /**
@@ -13,44 +13,129 @@ export const APP_RELEASE_DATE = '2026-11-09';
  * without shifting permanent `food-1..food-200` IDs or breaking `/foods/food-XXX.jpg` bindings.
  * Any ID that has an explicit Admin custom override is automatically preserved by `deduplicateFoodItems`.
  */
-export const REMOVED_DUPLICATE_FOOD_IDS: ReadonlySet<string> = new Set([
-  'food-12',
-  'food-21',
-  'food-22',
-  'food-30',
-  'food-31',
-  'food-33',
-  'food-43',
-  'food-46',
-  'food-51',
-  'food-55',
-  'food-56',
-  'food-69',
-  'food-71',
-  'food-75',
-  'food-79',
-  'food-92',
-  'food-96',
-  'food-99',
-  'food-110',
-  'food-111',
-  'food-121',
-  'food-122',
-  'food-126',
-  'food-153',
-  'food-168',
-  'food-169',
-  'food-170',
-  'food-184',
-  'food-186',
-]);
+export const REMOVED_DUPLICATE_FOOD_CANONICAL_MAP: Readonly<Record<string, string>> = {
+  'food-12': 'food-106',
+  'food-21': 'food-118',
+  'food-22': 'food-120',
+  'food-30': 'food-135',
+  'food-31': 'food-147',
+  'food-33': 'food-154',
+  'food-43': 'food-167',
+  'food-46': 'food-187',
+  'food-51': 'food-103',
+  'food-55': 'food-108',
+  'food-56': 'food-106',
+  'food-69': 'food-138',
+  'food-71': 'food-137',
+  'food-75': 'food-131',
+  'food-79': 'food-34',
+  'food-92': 'food-190',
+  'food-96': 'food-144',
+  'food-99': 'food-185',
+  'food-110': 'food-5',
+  'food-111': 'food-14',
+  'food-121': 'food-23',
+  'food-122': 'food-25',
+  'food-126': 'food-25',
+  'food-153': 'food-148',
+  'food-168': 'food-41',
+  'food-169': 'food-88',
+  'food-170': 'food-89',
+  'food-184': 'food-50',
+  'food-186': 'food-48',
+};
+
+export const REMOVED_DUPLICATE_FOOD_IDS: ReadonlySet<string> = new Set(
+  Object.keys(REMOVED_DUPLICATE_FOOD_CANONICAL_MAP)
+);
+
+export const DUPLICATE_FOOD_PHOTO_CANONICAL_MAP: Readonly<Record<string, string>> = {
+  '/foods/food-12.jpg': '/foods/food-106.jpg',
+  '/foods/food-21.jpg': '/foods/food-118.jpg',
+  '/foods/food-22.jpg': '/foods/food-120.jpg',
+  '/foods/food-30.jpg': '/foods/food-135.jpg',
+  '/foods/food-31.jpg': '/foods/food-147.jpg',
+  '/foods/food-33.jpg': '/foods/food-154.jpg',
+  '/foods/food-43.jpg': '/foods/food-167.jpg',
+  '/foods/food-46.jpg': '/foods/food-187.jpg',
+  '/foods/food-51.jpg': '/foods/food-103.jpg',
+  '/foods/food-55.jpg': '/foods/food-108.jpg',
+  '/foods/food-56.jpg': '/foods/food-106.jpg',
+  '/foods/food-69.jpg': '/foods/food-138.jpg',
+  '/foods/food-71.jpg': '/foods/food-137.jpg',
+  '/foods/food-75.jpg': '/foods/food-131.jpg',
+  '/foods/food-79.jpg': '/foods/food-34.jpg',
+  '/foods/food-92.jpg': '/foods/food-190.jpg',
+  '/foods/food-96.jpg': '/foods/food-144.jpg',
+  '/foods/food-99.jpg': '/foods/food-185.jpg',
+  '/foods/food-110.jpg': '/foods/food-53.jpg',
+  '/foods/food-111.jpg': '/foods/food-14.jpg',
+  '/foods/food-121.jpg': '/foods/food-23.jpg',
+  '/foods/food-122.jpg': '/foods/food-25.jpg',
+  '/foods/food-126.jpg': '/foods/food-25.jpg',
+  '/foods/food-153.jpg': '/foods/food-148.jpg',
+  '/foods/food-168.jpg': '/foods/food-41.jpg',
+  '/foods/food-169.jpg': '/foods/food-88.jpg',
+  '/foods/food-170.jpg': '/foods/food-89.jpg',
+  '/foods/food-184.jpg': '/foods/food-50.jpg',
+  '/foods/food-186.jpg': '/foods/food-48.jpg',
+};
+
+export function remapDuplicateFoodIdToCanonical(foodId?: string | null): string {
+  if (!foodId || typeof foodId !== 'string') return '';
+  const trimmed = foodId.trim();
+  return REMOVED_DUPLICATE_FOOD_CANONICAL_MAP[trimmed] || trimmed;
+}
+
+export function normalizeFoodNameKhForDedup(nameKh?: string | null): string {
+  if (!nameKh || typeof nameKh !== 'string') return '';
+  return nameKh
+    .normalize('NFC')
+    .replace(/\u17D2\u178A/g, '\u17D2\u178F') // Normalize ្ដ and ្ត
+    .replace(/ប្ញ/g, 'ឫ')
+    .replace(/[\s\u200B-\u200D\uFEFF()（）[\]•·.,/\-–—:;|]+/g, '')
+    .toLowerCase();
+}
+
+export function normalizeFoodNameEnForDedup(nameEn?: string | null): string {
+  if (!nameEn || typeof nameEn !== 'string') return '';
+  return nameEn
+    .normalize('NFC')
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+export function normalizeFoodPhotoUrlForDedup(photoUrl?: string | null): string {
+  if (!photoUrl || typeof photoUrl !== 'string') return '';
+  const trimmed = photoUrl.trim();
+  if (!trimmed || trimmed.startsWith('data:image/')) return trimmed;
+  const base = trimmed.split('?')[0].split('#')[0].trim();
+  // Also detect Supabase Storage override filenames for removed duplicate IDs (e.g. kft_ov_food_food-71_healed.jpg)
+  const cloudOvMatch = base.match(/kft_ov_food_(food-\d+)/i);
+  if (cloudOvMatch) {
+    const canonicalId = remapDuplicateFoodIdToCanonical(cloudOvMatch[1].toLowerCase());
+    return `/foods/${canonicalId}.jpg`;
+  }
+  return DUPLICATE_FOOD_PHOTO_CANONICAL_MAP[base] || base;
+}
 
 export function deduplicateFoodItems<
-  T extends { id: string; nameKh?: string; isAdminEdited?: boolean; isCustomPhoto?: boolean }
->(items: T[], foodOverrides?: Record<string, any> | null): T[] {
+  T extends {
+    id: string;
+    nameKh?: string;
+    nameEn?: string;
+    photoUrl?: string;
+    isAdminEdited?: boolean;
+    isCustomPhoto?: boolean;
+  }
+>(items: T[], _foodOverrides?: Record<string, any> | null): T[] {
   if (!Array.isArray(items) || items.length === 0) return Array.isArray(items) ? items : [];
   const seenIds = new Set<string>();
   const seenNamesKh = new Set<string>();
+  const seenNamesEn = new Set<string>();
+  const seenPhotoUrls = new Set<string>();
   const out: T[] = [];
   let anySkipped = false;
 
@@ -59,34 +144,34 @@ export function deduplicateFoodItems<
       anySkipped = true;
       continue;
     }
-    if (seenIds.has(item.id)) {
+    const id = String(item.id).trim();
+    if (!id || REMOVED_DUPLICATE_FOOD_IDS.has(id) || seenIds.has(id)) {
       anySkipped = true;
       continue;
     }
 
-    const ov = foodOverrides ? foodOverrides[item.id] : undefined;
-    const hasAdminCustomization = Boolean(
-      item.isAdminEdited ||
-        item.isCustomPhoto ||
-        ov?.isCustomPhoto ||
-        ov?.adminApprovedAt
-    );
-
-    if (!hasAdminCustomization && REMOVED_DUPLICATE_FOOD_IDS.has(item.id)) {
+    const normNameKh = normalizeFoodNameKhForDedup(item.nameKh);
+    if (normNameKh && seenNamesKh.has(normNameKh)) {
       anySkipped = true;
       continue;
     }
 
-    const normNameKh = String(item.nameKh || '')
-      .trim()
-      .replace(/\s+/g, '');
-    if (normNameKh && seenNamesKh.has(normNameKh) && !hasAdminCustomization) {
+    const normNameEn = normalizeFoodNameEnForDedup(item.nameEn);
+    if (normNameEn && seenNamesEn.has(normNameEn)) {
       anySkipped = true;
       continue;
     }
 
-    seenIds.add(item.id);
+    const normPhoto = normalizeFoodPhotoUrlForDedup(item.photoUrl);
+    if (normPhoto && !normPhoto.startsWith('data:image/') && seenPhotoUrls.has(normPhoto)) {
+      anySkipped = true;
+      continue;
+    }
+
+    seenIds.add(id);
     if (normNameKh) seenNamesKh.add(normNameKh);
+    if (normNameEn) seenNamesEn.add(normNameEn);
+    if (normPhoto && !normPhoto.startsWith('data:image/')) seenPhotoUrls.add(normPhoto);
     out.push(item);
   }
   return anySkipped ? out : items;
@@ -732,10 +817,10 @@ export interface DeletedUserRecord {
 }
 
 export const VIP_ANNUAL_PRICE_USD = 6.99;
-export const VIP_SUBSCRIPTION_DAYS = 60;
-export const VIP_QUARTERLY_PRICE_USD = 4.99;
+export const VIP_SUBSCRIPTION_DAYS = 90;
+export const VIP_QUARTERLY_PRICE_USD = 2.99;
 export const VIP_QUARTERLY_DAYS = 30;
-export const DEFAULT_ADDITIONAL_STORE_FEE_USD = 5.0;
+export const DEFAULT_ADDITIONAL_STORE_FEE_USD = 6.99;
 export const DEFAULT_INCLUDED_FREE_STORES = 1;
 
 export type VipPlanType = 'quarterly' | 'annual';
@@ -764,12 +849,12 @@ export const VIP_PLANS: Record<'quarterly' | 'annual', VipPlanConfig> = {
   },
   annual: {
     id: 'annual',
-    nameEn: 'VIP 2 Months (60 Days)',
-    nameKh: 'VIP ២ ខែ (60 ថ្ងៃ)',
+    nameEn: 'VIP 3 Months (90 Days)',
+    nameKh: 'VIP ៣ ខែ (90 ថ្ងៃ)',
     priceUsd: VIP_ANNUAL_PRICE_USD,
     durationDays: VIP_SUBSCRIPTION_DAYS,
-    labelEn: `VIP 2 Months / ${VIP_SUBSCRIPTION_DAYS} Days ($${VIP_ANNUAL_PRICE_USD.toFixed(2)} USD)`,
-    labelKh: `VIP ២ ខែ / ${VIP_SUBSCRIPTION_DAYS} ថ្ងៃ ($${VIP_ANNUAL_PRICE_USD.toFixed(2)} USD)`,
+    labelEn: `VIP 3 Months / ${VIP_SUBSCRIPTION_DAYS} Days (${VIP_ANNUAL_PRICE_USD.toFixed(2)} USD)`,
+    labelKh: `VIP ៣ ខែ / ${VIP_SUBSCRIPTION_DAYS} ថ្ងៃ (${VIP_ANNUAL_PRICE_USD.toFixed(2)} USD)`,
     priceKhrDisplay: `${Math.round(VIP_ANNUAL_PRICE_USD * 4100).toLocaleString()} រៀល`
   }
 };
@@ -1260,27 +1345,42 @@ export function organizeAndDeduplicateFoods(items: FoodItem[]): FoodItem[] {
   if (cached) return cached;
 
   const byId = new Map<string, FoodItem>();
-  const byNormName = new Map<string, FoodItem>();
+  const byNormNameKh = new Map<string, FoodItem>();
+  const byNormNameEn = new Map<string, FoodItem>();
+  const byNormPhoto = new Map<string, FoodItem>();
 
   for (const raw of items) {
     if (!raw || !raw.id || !raw.nameKh) continue;
-    const normKh = raw.nameKh.replace(/\s+/g, '').trim();
-    const existingById = byId.get(raw.id);
-    const existingByName = byNormName.get(normKh);
-    const existing = existingById || existingByName;
+    const rawId = String(raw.id).trim();
+    if (!rawId || REMOVED_DUPLICATE_FOOD_IDS.has(rawId)) continue;
+
+    const normKh = normalizeFoodNameKhForDedup(raw.nameKh);
+    const normEn = normalizeFoodNameEnForDedup(raw.nameEn);
+    const normPhoto = normalizeFoodPhotoUrlForDedup(raw.photoUrl);
+    if (!normKh) continue;
+
+    const existing =
+      byId.get(rawId) ||
+      byNormNameKh.get(normKh) ||
+      (normEn ? byNormNameEn.get(normEn) : undefined) ||
+      (normPhoto && !normPhoto.startsWith('data:image/') ? byNormPhoto.get(normPhoto) : undefined);
 
     if (!existing) {
-      byId.set(raw.id, raw);
-      byNormName.set(normKh, raw);
+      byId.set(rawId, raw);
+      byNormNameKh.set(normKh, raw);
+      if (normEn) byNormNameEn.set(normEn, raw);
+      if (normPhoto && !normPhoto.startsWith('data:image/')) byNormPhoto.set(normPhoto, raw);
     } else {
-      // Prefer item with custom Admin photo or newer photoUpdatedAt
+      // Prefer item with higher reviewCount or newer Admin edit on the canonical ID
       const keepNew =
-        (raw.isCustomPhoto && !existing.isCustomPhoto) ||
-        (raw.photoUpdatedAt && (!existing.photoUpdatedAt || raw.photoUpdatedAt > existing.photoUpdatedAt));
+        raw.id === existing.id &&
+        ((raw.isCustomPhoto && !existing.isCustomPhoto) ||
+          (raw.photoUpdatedAt && (!existing.photoUpdatedAt || raw.photoUpdatedAt > existing.photoUpdatedAt)));
       if (keepNew) {
-        byId.delete(existing.id);
-        byId.set(raw.id, raw);
-        byNormName.set(normKh, raw);
+        byId.set(rawId, raw);
+        byNormNameKh.set(normKh, raw);
+        if (normEn) byNormNameEn.set(normEn, raw);
+        if (normPhoto && !normPhoto.startsWith('data:image/')) byNormPhoto.set(normPhoto, raw);
       }
     }
   }
@@ -3892,40 +3992,42 @@ export const getDynamicVipPlans = (
   const s = settings || getStoredAppSettingsFallback();
   const ver = Number(s.settingsVersion || 0);
   const isLegacyCorrupted =
-    ver < 25 &&
+    ver < 100 &&
     (Number(s.vipShortPriceUsd) === 9.99 ||
+      Number(s.vipShortPriceUsd) === 4.99 ||
       Number(s.vipLongPriceUsd) === 24.99 ||
+      Number(s.vipLongDurationDays) === 60 ||
       (Number(s.vipShortDurationDays) === 3 && Number(s.vipLongDurationDays) === 9));
 
-  const rawShortDays = Number(s.vipShortDurationDays);
+  const rawShortDays = Number(s.consumer30dDays ?? s.vipShortDurationDays);
   let shortDays =
     Number.isFinite(rawShortDays) && rawShortDays >= 1
       ? Math.round(rawShortDays)
       : VIP_QUARTERLY_DAYS;
 
-  const rawShortPrice = Number(s.vipShortPriceUsd);
+  const rawShortPrice = Number(s.consumer30dPriceUsd ?? s.vipShortPriceUsd);
   let shortPrice =
     Number.isFinite(rawShortPrice) && rawShortPrice > 0
       ? Math.round(rawShortPrice * 100) / 100
       : VIP_QUARTERLY_PRICE_USD;
 
-  const rawLongDays = Number(s.vipLongDurationDays);
+  const rawLongDays = Number(s.consumer90dDays ?? s.vipLongDurationDays);
   let longDays =
     Number.isFinite(rawLongDays) && rawLongDays >= 1
       ? Math.round(rawLongDays)
       : VIP_SUBSCRIPTION_DAYS;
 
-  const rawLongPrice = Number(s.vipLongPriceUsd);
+  const rawLongPrice = Number(s.consumer90dPriceUsd ?? s.vipLongPriceUsd);
   let longPrice =
     Number.isFinite(rawLongPrice) && rawLongPrice > 0
       ? Math.round(rawLongPrice * 100) / 100
       : VIP_ANNUAL_PRICE_USD;
 
   if (isLegacyCorrupted) {
-    if (shortPrice === 9.99) shortPrice = VIP_QUARTERLY_PRICE_USD;
+    if (shortPrice === 9.99 || shortPrice === 4.99) shortPrice = VIP_QUARTERLY_PRICE_USD;
     if (shortDays === 3) shortDays = VIP_QUARTERLY_DAYS;
     if (longPrice === 24.99) longPrice = VIP_ANNUAL_PRICE_USD;
-    if (longDays === 9 || longDays === 90) longDays = VIP_SUBSCRIPTION_DAYS;
+    if (longDays === 9 || longDays === 60) longDays = VIP_SUBSCRIPTION_DAYS;
   }
 
   const shortNameKhRaw = (s.vipShortNameKh || '').trim();
@@ -3946,15 +4048,15 @@ export const getDynamicVipPlans = (
         : `VIP ${shortDays} Days`
       : shortNameEnRaw;
   const longNameKh =
-    !longNameKhRaw || /^VIP\s+\d+\s*(ថ្ងៃ|\?+)$/i.test(longNameKhRaw)
-      ? longDays === 60
-        ? 'VIP ២ ខែ (60 ថ្ងៃ)'
+    !longNameKhRaw || /^VIP\s+\d+\s*(ថ្ងៃ|\?+)$/i.test(longNameKhRaw) || /60/.test(longNameKhRaw)
+      ? longDays === 90
+        ? 'VIP ៣ ខែ (90 ថ្ងៃ)'
         : `VIP ${longDays} ថ្ងៃ`
       : longNameKhRaw;
   const longNameEn =
-    !longNameEnRaw || /^VIP\s+\d+\s*Days?$/i.test(longNameEnRaw)
-      ? longDays === 60
-        ? 'VIP 2 Months (60 Days)'
+    !longNameEnRaw || /^VIP\s+\d+\s*Days?$/i.test(longNameEnRaw) || /60/.test(longNameEnRaw)
+      ? longDays === 90
+        ? 'VIP 3 Months (90 Days)'
         : `VIP ${longDays} Days`
       : longNameEnRaw;
 
@@ -4423,15 +4525,12 @@ export const getAdditionalStoreFeeUsd = (
   settings?: Partial<AppSettings> | null
 ): number => {
   const s = settings || getStoredAppSettingsFallback();
-  const rawVal = Number(s.additionalStoreFeeUsd);
-  if (
-    s.additionalStoreFeeUsd !== undefined &&
-    s.additionalStoreFeeUsd !== null &&
-    Number.isFinite(rawVal) &&
-    rawVal >= 0
-  ) {
+  const rawVal = Number(s.shopMonthlyPriceUsd ?? s.additionalStoreFeeUsd);
+  if (Number.isFinite(rawVal) && rawVal >= 0) {
     const val = Math.round(rawVal * 100) / 100;
-    if (Number(s.settingsVersion || 0) < 15 && val === 10.0) return DEFAULT_ADDITIONAL_STORE_FEE_USD;
+    if (Number(s.settingsVersion || 0) < 100 && (val === 10.0 || val === 5.0)) {
+      return DEFAULT_ADDITIONAL_STORE_FEE_USD;
+    }
     return val;
   }
   return DEFAULT_ADDITIONAL_STORE_FEE_USD;

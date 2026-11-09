@@ -309,9 +309,12 @@ export function resolvePlan(p: PricingDoc | null | undefined, durationDays: unkn
   const shortPrice = Number(p.vipShortPriceUsd);
   const longDays = Number(p.vipLongDurationDays);
   const longPrice = Number(p.vipLongPriceUsd);
+  const yearlyDays = Number(p.consumer365dDays);
+  const yearlyPrice = Number(p.consumer365dPriceUsd);
   const d = Math.round(durationDays);
   if (shortDays >= 1 && shortPrice > 0 && d === Math.round(shortDays)) return { planType: 'quarterly', days: Math.round(shortDays), priceUsd: shortPrice };
   if (longDays >= 1 && longPrice > 0 && d === Math.round(longDays)) return { planType: 'annual', days: Math.round(longDays), priceUsd: longPrice };
+  if (yearlyDays >= 1 && yearlyPrice > 0 && d === Math.round(yearlyDays)) return { planType: 'annual', days: Math.round(yearlyDays), priceUsd: yearlyPrice };
   return null;
 }
 

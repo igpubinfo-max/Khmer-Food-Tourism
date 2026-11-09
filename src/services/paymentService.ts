@@ -14,9 +14,9 @@ import {
   parseSafeDateMs,
 } from '../types';
 
-export const VIP_ANNUAL_PRICE_USD = 24.99;
+export const VIP_ANNUAL_PRICE_USD = 6.99;
 export const VIP_SUBSCRIPTION_DAYS = 90;
-export const VIP_QUARTERLY_PRICE_USD = 9.99;
+export const VIP_QUARTERLY_PRICE_USD = 2.99;
 export const VIP_QUARTERLY_DAYS = 30;
 export const ADDITIONAL_STORE_FEE_USD = DEFAULT_ADDITIONAL_STORE_FEE_USD;
 export const GOOGLE_PLAY_PRODUCT_ID = 'com.khmerfoodtourism.subscription.vip.90days';
@@ -65,7 +65,7 @@ export function resolveAndValidateVipPlan(
         ...dynamicPlans.annual,
         id: 'annual',
         durationDays: 365,
-        priceUsd: typeof input.amountUsd === 'number' && input.amountUsd > 0 ? input.amountUsd : dynamicPlans.annual.priceUsd,
+        priceUsd: typeof input.amountUsd === 'number' && input.amountUsd > 0 ? input.amountUsd : (Number(settings?.consumer365dPriceUsd) > 0 ? Number(settings?.consumer365dPriceUsd) : 19.99),
         nameKh: 'កញ្ចប់ VIP 365 ថ្ងៃ',
         nameEn: 'VIP 365 Days Plan',
       };
@@ -83,6 +83,32 @@ export function resolveAndValidateVipPlan(
     }
     if (Math.abs(input.amountUsd - dynamicPlans.annual.priceUsd) <= 0.05) {
       return dynamicPlans.annual;
+    }
+    const p365 = resolveOfficialPlanById('consumer_365d', settings);
+    if (p365 && Math.abs(input.amountUsd - p365.priceUsd) <= 0.05) {
+      return {
+        id: 'annual',
+        nameEn: p365.nameEn,
+        nameKh: p365.nameKh,
+        priceUsd: p365.priceUsd,
+        durationDays: p365.durationDays,
+        labelEn: `${p365.nameEn} (${p365.priceUsd.toFixed(2)} USD / ${p365.durationDays} days)`,
+        labelKh: `${p365.nameKh} (${p365.priceUsd.toFixed(2)} USD / ${p365.durationDays} ថ្ងៃ)`,
+        priceKhrDisplay: p365.priceKhrApprox,
+      };
+    }
+    const pPromo = resolveOfficialPlanById('consumer_promo_30d', settings);
+    if (pPromo && Math.abs(input.amountUsd - pPromo.priceUsd) <= 0.05) {
+      return {
+        id: 'quarterly',
+        nameEn: pPromo.nameEn,
+        nameKh: pPromo.nameKh,
+        priceUsd: pPromo.priceUsd,
+        durationDays: pPromo.durationDays,
+        labelEn: `${pPromo.nameEn} (${pPromo.priceUsd.toFixed(2)} USD / ${pPromo.durationDays} days)`,
+        labelKh: `${pPromo.nameKh} (${pPromo.priceUsd.toFixed(2)} USD / ${pPromo.durationDays} ថ្ងៃ)`,
+        priceKhrDisplay: pPromo.priceKhrApprox,
+      };
     }
   }
   return dynamicPlans.quarterly;
@@ -231,7 +257,7 @@ export async function verifyPaymentOnBackend(
   const isValidStandardPlanPrice =
     isAnnualPrice ||
     isQuarterlyPrice ||
-    [2.99, 4.99, 6.99, 9.99, 19.99].some(p => Math.abs(req.amountUsd - p) <= 0.05);
+    [0.99, 2.99, 6.99, 19.99, 49.99, 59.99].some(p => Math.abs(req.amountUsd - p) <= 0.05);
 
   if (!isValidStandardPlanPrice) {
     return {
@@ -329,7 +355,7 @@ export async function verifyAbaPaymentTransaction(
   const isValidStandardPlanPrice =
     isAnnualPrice ||
     isQuarterlyPrice ||
-    [2.99, 4.99, 6.99, 9.99, 19.99].some(p => Math.abs(req.amountUsd - p) <= 0.05);
+    [0.99, 2.99, 6.99, 19.99, 49.99, 59.99].some(p => Math.abs(req.amountUsd - p) <= 0.05);
   if (!isValidStandardPlanPrice) {
     return {
       success: false,

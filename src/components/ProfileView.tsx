@@ -1583,9 +1583,9 @@ export const ProfileView: React.FC = () => {
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                       {tr(
                         language,
-                        `កញ្ចប់ $${shortPlan.priceUsd.toFixed(2)} (${shortPlan.durationDays} ថ្ងៃ) ឬ $${longPlan.priceUsd.toFixed(2)} (${longPlan.durationDays} ថ្ងៃ)`,
-                        `$${shortPlan.priceUsd.toFixed(2)} USD (${shortPlan.durationDays} Days) or $${longPlan.priceUsd.toFixed(2)} USD (${longPlan.durationDays} Days)`,
-                        `$${shortPlan.priceUsd.toFixed(2)} 美元 (${shortPlan.durationDays} 天) 或 $${longPlan.priceUsd.toFixed(2)} 美元 (${longPlan.durationDays} 天)`
+                        `សាកល្បង ${consumerCatalog.trialDays} ថ្ងៃ FREE • ${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)} (${consumerCatalog.monthlyPlan.durationDays} ថ្ងៃ) • ${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)} (${consumerCatalog.quarterlyPlan.durationDays} ថ្ងៃ) • ${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)} (365 ថ្ងៃ)`,
+                        `${consumerCatalog.trialDays}-Day Free Trial • ${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)} (${consumerCatalog.monthlyPlan.durationDays}d) • ${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)} (${consumerCatalog.quarterlyPlan.durationDays}d) • ${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)} (365d)`,
+                        `${consumerCatalog.trialDays}天免费试用 • ${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)} (${consumerCatalog.monthlyPlan.durationDays}天) • ${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)} (${consumerCatalog.quarterlyPlan.durationDays}天) • ${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)} (365天)`
                       )}
                     </p>
                   </div>
@@ -1674,9 +1674,9 @@ export const ProfileView: React.FC = () => {
                       )
                     : tr(
                         language,
-                        `👑 ដំឡើងទៅជា VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}ថ្ងៃ • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}ថ្ងៃ)`,
-                        `Upgrade to VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}d • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}d)`,
-                        `👑 升级至 VIP ($${shortPlan.priceUsd.toFixed(2)}/${shortPlan.durationDays}天 • $${longPlan.priceUsd.toFixed(2)}/${longPlan.durationDays}天)`
+                        `👑 ដំឡើងទៅជា VIP (${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/${consumerCatalog.monthlyPlan.durationDays}ថ្ងៃ • ${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/${consumerCatalog.quarterlyPlan.durationDays}ថ្ងៃ • ${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/ឆ្នាំ)`,
+                        `Upgrade to VIP (${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/${consumerCatalog.monthlyPlan.durationDays}d • ${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/${consumerCatalog.quarterlyPlan.durationDays}d • ${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/yr)`,
+                        `👑 升级至 VIP (${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/${consumerCatalog.monthlyPlan.durationDays}天 • ${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/${consumerCatalog.quarterlyPlan.durationDays}天 • ${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/年)`
                       )}
                 </span>
               </button>

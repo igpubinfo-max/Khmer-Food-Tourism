@@ -186,7 +186,7 @@ export const AdminDashboard: React.FC = () => {
   const [bankName, setBankName] = useState(appSettings.supportBankName);
   const [accountName, setAccountName] = useState(appSettings.supportAccountName);
   const [supportMessageKh, setSupportMessageKh] = useState(appSettings.supportMessageKh);
-  const [promotionalFeeUsd, setPromotionalFeeUsd] = useState(appSettings.promotionalFeeUsd || 4.99);
+  const [promotionalFeeUsd, setPromotionalFeeUsd] = useState(appSettings.promotionalFeeUsd || 2.99);
   const [promotionPeriodKh, setPromotionPeriodKh] = useState(appSettings.promotionPeriodKh || '');
   const [newAdminPass, setNewAdminPass] = useState('');
   const [confirmNewAdminPass, setConfirmNewAdminPass] = useState('');
@@ -195,13 +195,13 @@ export const AdminDashboard: React.FC = () => {
 
   // Dynamic VIP Membership & Store Fee Admin Settings States (Controlled String Drafts so clearing/typing never reverts)
   const [vipShortDurationInput, setVipShortDurationInput] = useState<string>(() => String(appSettings.vipShortDurationDays ?? 30));
-  const [vipShortPriceInput, setVipShortPriceInput] = useState<string>(() => String(appSettings.vipShortPriceUsd ?? 4.99));
+  const [vipShortPriceInput, setVipShortPriceInput] = useState<string>(() => String(appSettings.consumer30dPriceUsd ?? appSettings.vipShortPriceUsd ?? 2.99));
   const [vipShortNameKh, setVipShortNameKh] = useState<string>(appSettings.vipShortNameKh || `VIP ${appSettings.vipShortDurationDays ?? 30} ថ្ងៃ`);
   const [vipShortNameEn, setVipShortNameEn] = useState<string>(appSettings.vipShortNameEn || `VIP ${appSettings.vipShortDurationDays ?? 30} Days`);
-  const [vipLongDurationInput, setVipLongDurationInput] = useState<string>(() => String(appSettings.vipLongDurationDays ?? 60));
-  const [vipLongPriceInput, setVipLongPriceInput] = useState<string>(() => String(appSettings.vipLongPriceUsd ?? 6.99));
-  const [vipLongNameKh, setVipLongNameKh] = useState<string>(appSettings.vipLongNameKh || `VIP ${appSettings.vipLongDurationDays ?? 60} ថ្ងៃ`);
-  const [vipLongNameEn, setVipLongNameEn] = useState<string>(appSettings.vipLongNameEn || `VIP ${appSettings.vipLongDurationDays ?? 60} Days`);
+  const [vipLongDurationInput, setVipLongDurationInput] = useState<string>(() => String(appSettings.consumer90dDays ?? appSettings.vipLongDurationDays ?? 90));
+  const [vipLongPriceInput, setVipLongPriceInput] = useState<string>(() => String(appSettings.consumer90dPriceUsd ?? appSettings.vipLongPriceUsd ?? 6.99));
+  const [vipLongNameKh, setVipLongNameKh] = useState<string>(appSettings.vipLongNameKh || `VIP ${appSettings.vipLongDurationDays ?? 90} ថ្ងៃ`);
+  const [vipLongNameEn, setVipLongNameEn] = useState<string>(appSettings.vipLongNameEn || `VIP ${appSettings.vipLongDurationDays ?? 90} Days`);
   const [additionalStoreFeeInput, setAdditionalStoreFeeInput] = useState<string>(() => String(getAdditionalStoreFeeUsd(appSettings)));
   const [vipBenefitsDraft, setVipBenefitsDraft] = useState<VipBenefitItem[]>(() => getDynamicVipBenefits(appSettings));
   const [vipFeaturedRotationEnabledInput, setVipFeaturedRotationEnabledInput] = useState<boolean>(() => appSettings.vipFeaturedRotationEnabled !== false);
@@ -240,10 +240,10 @@ export const AdminDashboard: React.FC = () => {
   const [vipSaveFeedback, setVipSaveFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const hydrateVipFormFromSettings = (s: typeof appSettings) => {
-    const sDays = s.vipShortDurationDays ?? 30;
-    const sPrice = s.vipShortPriceUsd ?? 4.99;
-    const lDays = s.vipLongDurationDays ?? 60;
-    const lPrice = s.vipLongPriceUsd ?? 6.99;
+    const sDays = s.consumer30dDays ?? s.vipShortDurationDays ?? 30;
+    const sPrice = s.consumer30dPriceUsd ?? s.vipShortPriceUsd ?? 2.99;
+    const lDays = s.consumer90dDays ?? s.vipLongDurationDays ?? 90;
+    const lPrice = s.consumer90dPriceUsd ?? s.vipLongPriceUsd ?? 6.99;
     const rotCfg = getVipFeaturedRotationConfig(s);
     setPlayStoreUrl(s.playStoreUrl);
     setAppStoreUrl(s.appStoreUrl);
@@ -1454,8 +1454,8 @@ export const AdminDashboard: React.FC = () => {
                   </h3>
                   <p className="text-stone-500 font-khmer text-xs">
                     {isKm
-                      ? `ពិនិត្យសារបញ្ហាការបង់ប្រាក់ ABA រូបវិក្កយបត្រ ឆ្លើយតបទៅអ្នកប្រើប្រាស់ផ្ទាល់ និងអនុម័តបើក VIP (${appSettings.vipShortDurationDays ?? 30} ថ្ងៃ $${Number(appSettings.vipShortPriceUsd ?? 4.99).toFixed(2)} ឬ ${appSettings.vipLongDurationDays ?? 60} ថ្ងៃ ${Number(appSettings.vipLongPriceUsd ?? 6.99).toFixed(2)})`
-                      : `Inspect user ABA payment issues, receipts, reply in-app, and approve & activate VIP (${appSettings.vipShortDurationDays ?? 30} Days $${Number(appSettings.vipShortPriceUsd ?? 4.99).toFixed(2)} or ${appSettings.vipLongDurationDays ?? 60} Days ${Number(appSettings.vipLongPriceUsd ?? 6.99).toFixed(2)})`}
+                      ? `ពិនិត្យសារបញ្ហាការបង់ប្រាក់ ABA រូបវិក្កយបត្រ ឆ្លើយតបទៅអ្នកប្រើប្រាស់ផ្ទាល់ និងអនុម័តបើក VIP (${appSettings.vipShortDurationDays ?? 30} ថ្ងៃ ${Number(appSettings.vipShortPriceUsd ?? 2.99).toFixed(2)} ឬ ${appSettings.vipLongDurationDays ?? 90} ថ្ងៃ ${Number(appSettings.vipLongPriceUsd ?? 6.99).toFixed(2)})`
+                      : `Inspect user ABA payment issues, receipts, reply in-app, and approve & activate VIP (${appSettings.vipShortDurationDays ?? 30} Days ${Number(appSettings.vipShortPriceUsd ?? 2.99).toFixed(2)} or ${appSettings.vipLongDurationDays ?? 90} Days ${Number(appSettings.vipLongPriceUsd ?? 6.99).toFixed(2)})`}
                   </p>
                 </div>
 
@@ -5199,7 +5199,7 @@ export const AdminDashboard: React.FC = () => {
                           <input
                             type="text"
                             inputMode="decimal"
-                            placeholder="4.99"
+                            placeholder="2.99"
                             value={vipShortPriceInput}
                             onChange={e => {
                               const raw = e.target.value.replace(/[^0-9.]/g, '');
