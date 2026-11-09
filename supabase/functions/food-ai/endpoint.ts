@@ -15,15 +15,16 @@ export function isVertexExpressKey(key: string): boolean {
   return key.trim().startsWith('AQ.');
 }
 
-export function geminiEndpoints(key: string, model: string): GeminiTarget[] {
+export function geminiEndpoints(key: string, model: string, stream = false): GeminiTarget[] {
   const k = key.trim();
+  const method = stream ? 'streamGenerateContent' : 'generateContent';
   const studio: GeminiTarget = {
-    url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+    url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:${method}${stream ? '?alt=sse' : ''}`,
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': k },
   };
   if (!isVertexExpressKey(k)) return [studio];
   const vertex: GeminiTarget = {
-    url: `https://aiplatform.googleapis.com/v1/publishers/google/models/${model}:generateContent?key=${encodeURIComponent(k)}`,
+    url: `https://aiplatform.googleapis.com/v1/publishers/google/models/${model}:${method}?${stream ? 'alt=sse&' : ''}key=${encodeURIComponent(k)}`,
     headers: { 'Content-Type': 'application/json' },
   };
   return [studio, vertex];

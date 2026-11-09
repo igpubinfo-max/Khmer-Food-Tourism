@@ -176,7 +176,7 @@ export async function verifyAppCloneIntegrity(): Promise<AppCloneIntegrityState>
             };
             return cachedIntegrityState;
           }
-          if (cert && cert !== OFFICIAL_ANDROID_CERT_SHA256) {
+          if (cert && cert !== OFFICIAL_ANDROID_CERT_SHA256 && !nativeRes.isPlayStoreInstall) {
             cachedIntegrityState = {
               checked: true,
               tampered: true,

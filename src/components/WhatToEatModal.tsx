@@ -29,7 +29,7 @@ import {
   Salad,
   Camera,
 } from 'lucide-react';
-import { FoodItem, isGpipRegisteredRestaurant, isHotelBusinessRecord, openExternalUrlNativeSafe, openRestaurantGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError } from '../types';
+import { FoodItem, isGpipRegisteredRestaurant, isHotelBusinessRecord, openExternalUrlNativeSafe, openRestaurantGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError, isIosOrIpadAppStoreRuntime } from '../types';
 import {
   buildAgentRoleChips,
   recordAiAgentTelemetryEvent,
@@ -1230,7 +1230,15 @@ export const WhatToEatModal: React.FC = () => {
     if (!isIosOrIpadAppStoreRuntime()) {
       grantAiConsent();
     }
+    let lastPartialEmit = 0;
+    const showPartialAnswer = (partial: string) => {
+      const now = performance.now();
+      if (partial && now - lastPartialEmit < 120) return; // keep re-renders light while tokens arrive (a reset always passes)
+      lastPartialEmit = now;
+      setChatMessages((prev) => prev.map((m) => (m.id === pendingId && m.isPending ? { ...m, text: partial } : m)));
+    };
     void askFoodAssistant({
+      onPartialAnswer: showPartialAnswer,
       userText: clean,
       uiLanguage: language,
       foods,
@@ -1796,7 +1804,7 @@ export const WhatToEatModal: React.FC = () => {
                             : 'bg-white dark:bg-slate-800 border-emerald-200/80 dark:border-slate-700 text-slate-800 dark:text-slate-100'
                       }`}
                     >
-                      {msg.isPending ? (
+                      {msg.isPending && !msg.text ? (
                         <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 font-bold">
                           <span className="inline-flex gap-1" aria-hidden="true">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.3s]" />

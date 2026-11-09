@@ -414,7 +414,8 @@ export function buildGeminiRequestBody(params: BuildRequestParams): Record<strin
   const generationConfig: Record<string, unknown> = {
     temperature: hasImage ? 0.2 : 0.35,
     topP: 0.9,
-    maxOutputTokens: 6144,
+    // Real answers use ~250-1300 tokens; a 6144 cap made looping replies (finish=MAX_TOKENS) take 13s+.
+    maxOutputTokens: 4096,
     responseMimeType: 'application/json',
   };
   if (level <= 1) generationConfig.responseSchema = FOOD_ASSISTANT_RESPONSE_SCHEMA;
@@ -770,6 +771,8 @@ type CallFailureKind =
   | 'not_found'
   | 'server'
   | 'bad_response'
+  /** The model fell into a repetition loop (seen with Khmer text): aborted early so the same model can retry. */
+  | 'runaway'
   /** The Supabase `food-ai` proxy is not deployed / not configured -> use the direct key instead. */
   | 'proxy_unavailable';
 
@@ -781,6 +784,130 @@ interface RawCall {
   payload: unknown;
   timeoutMs: number;
   viaProxy?: boolean;
+  /** Ask the proxy for a Server-Sent-Events stream and report the accumulated model text as it grows. */
+  stream?: boolean;
+  onPartialText?: (accumulated: string) => void;
+}
+
+/** True when the end of a growing reply is the same ~60 characters repeated again and again (degenerate loop). */
+export function isRunawayRepetition(text: string): boolean {
+  if (text.length < 700) return false;
+  const tail = text.slice(-60);
+  const window = text.slice(-1400);
+  let count = 0;
+  let pos = 0;
+  while (count < 4) {
+    const at = window.indexOf(tail, pos);
+    if (at < 0) break;
+    count++;
+    pos = at + tail.length;
+  }
+  return count >= 4;
+}
+
+/** Reads a Gemini SSE stream to the end, reporting the growing text. Same outcome shape as the non-stream path. */
+async function readGeminiSse(response: Response, onPartial?: (accumulated: string) => void): Promise<CallOutcome> {
+  const reader = response.body?.getReader();
+  if (!reader) return { ok: false, kind: 'bad_response', message: 'no stream body' };
+  const decoder = new TextDecoder();
+  let buf = '';
+  let acc = '';
+  let finishReason = '';
+  let blockReason = '';
+  const handleLine = (line: string) => {
+    if (!line.startsWith('data:')) return;
+    const payload = line.slice(5).trim();
+    if (!payload || payload === '[DONE]') return;
+    let data: any;
+    try {
+      data = JSON.parse(payload);
+    } catch {
+      return;
+    }
+    if (data?.promptFeedback?.blockReason) blockReason = String(data.promptFeedback.blockReason);
+    const cand = data?.candidates?.[0];
+    if (cand?.finishReason) finishReason = String(cand.finishReason);
+    const parts: any[] = Array.isArray(cand?.content?.parts) ? cand.content.parts : [];
+    let added = false;
+    for (const pt of parts) {
+      if (typeof pt?.text === 'string' && !pt.thought) {
+        acc += pt.text;
+        added = true;
+      }
+    }
+    if (added && onPartial) {
+      try {
+        onPartial(acc);
+      } catch {
+        /* UI callback must never break the stream */
+      }
+    }
+  };
+  let sinceCheck = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    const lines = buf.split(/\r?\n/);
+    buf = lines.pop() || '';
+    for (const l of lines) handleLine(l);
+    if (++sinceCheck >= 4) {
+      sinceCheck = 0;
+      if (isRunawayRepetition(acc)) {
+        try {
+          await reader.cancel();
+        } catch {
+          /* already closed */
+        }
+        return { ok: false, kind: 'runaway', message: 'repetition loop detected' };
+      }
+    }
+  }
+  buf += decoder.decode();
+  if (buf) handleLine(buf);
+  if (blockReason) return { ok: false, kind: 'blocked', message: blockReason };
+  const text = acc.trim();
+  if (!text) {
+    if (finishReason === 'SAFETY' || finishReason === 'PROHIBITED_CONTENT') {
+      return { ok: false, kind: 'blocked', message: finishReason };
+    }
+    return { ok: false, kind: 'bad_response', message: `empty response (${finishReason || 'unknown'})` };
+  }
+  return { ok: true, text };
+}
+
+/**
+ * Pulls the (possibly still incomplete) value of the top-level "answer" field out of streamed JSON so the user
+ * can read the reply while the rest of the structured payload is still being generated.
+ */
+export function extractPartialAnswer(jsonText: string): string {
+  const m = /"answer"\s*:\s*"/.exec(jsonText);
+  if (!m) return '';
+  let i = m.index + m[0].length;
+  let out = '';
+  while (i < jsonText.length) {
+    const ch = jsonText[i];
+    if (ch === '"') break;
+    if (ch === '\\') {
+      const nx = jsonText[i + 1];
+      if (nx === undefined) break; // dangling escape
+      if (nx === 'n') out += '\n';
+      else if (nx === 't') out += '\t';
+      else if (nx === 'r') out += '';
+      else if (nx === 'u') {
+        const hex = jsonText.slice(i + 2, i + 6);
+        if (hex.length < 4 || !/^[0-9a-fA-F]{4}$/.test(hex)) break; // incomplete unicode escape
+        out += String.fromCharCode(parseInt(hex, 16));
+        i += 6;
+        continue;
+      } else out += nx; // \" \\ \/
+      i += 2;
+      continue;
+    }
+    out += ch;
+    i++;
+  }
+  return out;
 }
 
 async function callGeminiRaw(call: RawCall): Promise<CallOutcome> {
@@ -793,7 +920,10 @@ async function callGeminiRaw(call: RawCall): Promise<CallOutcome> {
       signal: controller.signal,
       body: JSON.stringify(call.payload),
     });
-    clearTimeout(timer);
+    const isSse =
+      Boolean(call.stream) && response.ok && (response.headers.get('content-type') || '').includes('text/event-stream');
+    // A streamed answer keeps the same overall deadline until its last chunk; everything else is done after the headers.
+    if (!isSse) clearTimeout(timer);
 
     if (call.viaProxy) {
       // Our proxy stamps every answer with this header. No header (gateway 401/404) or 503 = proxy not usable.
@@ -814,6 +944,13 @@ async function callGeminiRaw(call: RawCall): Promise<CallOutcome> {
         return { ok: false, kind: 'bad_request', status, message };
       }
       return { ok: false, kind: 'server', status, message };
+    }
+    if (isSse) {
+      try {
+        return await readGeminiSse(response, call.onPartialText);
+      } finally {
+        clearTimeout(timer);
+      }
     }
     const data = await response.json();
     if (data?.promptFeedback?.blockReason) {
@@ -898,7 +1035,12 @@ function hasProxyConfig(): boolean {
   }
 }
 
-async function callViaProxy(model: string, body: unknown, timeoutMs: number): Promise<CallOutcome> {
+async function callViaProxy(
+  model: string,
+  body: unknown,
+  timeoutMs: number,
+  onPartialText?: (accumulated: string) => void
+): Promise<CallOutcome> {
   if (isAppCloneTampered()) return { ok: false, kind: 'blocked', status: 403, message: 'Forbidden: Cloned/repackaged app' };
   const cfg = getCloudApiConfig();
   const out = await callGeminiRaw({
@@ -911,9 +1053,11 @@ async function callViaProxy(model: string, body: unknown, timeoutMs: number): Pr
       ...(getApiUserId() ? { 'x-kft-user-id': getApiUserId() as string } : {}),
       ...getAppAttestationHeaders(),
     },
-    payload: { model, body },
+    payload: { model, body, ...(onPartialText ? { stream: true } : {}) },
     timeoutMs,
     viaProxy: true,
+    stream: Boolean(onPartialText),
+    onPartialText,
   });
   // The proxy host itself is unreachable -> let the direct path try.
   if (!out.ok && out.kind === 'network') return { ok: false, kind: 'proxy_unavailable' };
@@ -950,7 +1094,14 @@ export interface AskFoodAssistantParams {
   geminiApiKey?: string;
   currentUser?: User | null;
   /** Test hook / future proxy: replaces the raw network call. */
-  transport?: (model: string, body: unknown, timeoutMs: number) => Promise<CallOutcome>;
+  transport?: (
+    model: string,
+    body: unknown,
+    timeoutMs: number,
+    onPartialText?: (accumulated: string) => void
+  ) => Promise<CallOutcome>;
+  /** Called with the readable part of the answer while it is still being generated (progressive display). */
+  onPartialAnswer?: (partialAnswer: string) => void;
 }
 
 /**
@@ -1027,9 +1178,14 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
   // 1) Supabase proxy (key never leaves the server)  2) fallback: key stored in the app
   const transport =
     params.transport ||
-    (async (model: string, body: unknown, timeoutMs: number): Promise<CallOutcome> => {
+    (async (
+      model: string,
+      body: unknown,
+      timeoutMs: number,
+      onPartialText?: (accumulated: string) => void
+    ): Promise<CallOutcome> => {
       if (proxyPossible && Date.now() >= proxyDownUntil) {
-        const viaProxy = await callViaProxy(model, body, timeoutMs);
+        const viaProxy = await callViaProxy(model, body, timeoutMs, onPartialText);
         if (!(viaProxy.ok === false && viaProxy.kind === 'proxy_unavailable')) return viaProxy;
         proxyDownUntil = Date.now() + PROXY_RETRY_AFTER_MS;
       }
@@ -1067,12 +1223,26 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
         model,
         level,
       });
-      const out = await transport(model, body, timeoutMs);
+      const onPartialText =
+        params.onPartialAnswer && level <= 2
+          ? (acc: string) => {
+              const partial = stripForeignScripts(extractPartialAnswer(acc));
+              // Same safety rule as the final answer: never flash a medical claim while streaming.
+              if (partial && !containsMedicalClaim(partial)) params.onPartialAnswer?.(partial);
+            }
+          : undefined;
+      const out = await transport(model, body, timeoutMs, onPartialText);
       if (out.ok) {
         const json = parseModelJson(out.text);
         const message = interpretAssistantPayload(json, { ...ctx, model });
         if (message) return { message };
         lastFail = { fail: 'bad_response', detail: 'unparseable model output' };
+        continue;
+      }
+      if (out.kind === 'runaway') {
+        // Looping reply (would otherwise burn ~13s and end as invalid JSON): clear the half-shown text, retry the SAME model.
+        params.onPartialAnswer?.('');
+        lastFail = { fail: 'bad_response', detail: 'repetition loop' };
         continue;
       }
       if (out.kind === 'bad_request') {

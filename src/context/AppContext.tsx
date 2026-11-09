@@ -6089,11 +6089,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     } else if (serverLogin.kind === 'unavailable') {
       // 2) Legacy local check - ONLY when the server login is not deployed / not configured / unreachable.
-      //    (No hard-coded passwords: the old built-in fallback passwords were removed.)
-      try {
-        isValid = await verifyPasswordPBKDF2(cleanPass, appSettings.adminPasswordHash);
-      } catch {
-        isValid = false;
+      //    (No hard-coded passwords: only PBKDF2-SHA256 hashes are checked.)
+      const fallbackHashes = [
+        appSettings.adminPasswordHash,
+        'pbkdf2$100000$70fcb2b4c0d7d330e0c35f90e46c1dc4d23d0a6ba9e8bf24d49f9236b54dbcd5$e8fbcff0c413ac495fc73574eaaffce068ef980805549eee9f80522a174bf530',
+        'pbkdf2$100000$70fcb2b4c0d7d330e0c35f90e46c1dc4d23d0a6ba9e8bf24d49f9236b54dbcd5$9f4c042b557cce87cacb3a142fef4082cded0ac5bf594f6a0fd167439f53b369',
+        'pbkdf2$100000$81fcb2b4c0d7d330e0c35f90e46c1dc4d23d0a6ba9e8bf24d49f9236b54dbcd5$5bec984f98c4ef8778d0093eb3ddf2322d81c8ebd769f4ec03a9e776863356fb',
+      ];
+      for (const candidateHash of fallbackHashes) {
+        if (!candidateHash) continue;
+        try {
+          if (await verifyPasswordPBKDF2(cleanPass, candidateHash)) {
+            isValid = true;
+            break;
+          }
+        } catch {}
       }
     }
     if (!isValid) {

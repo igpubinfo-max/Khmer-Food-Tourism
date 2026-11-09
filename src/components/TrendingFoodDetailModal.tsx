@@ -155,6 +155,17 @@ export const TrendingFoodDetailModal: React.FC = () => {
     openTrendingFoodGoogleExternal(item, 'maps');
   };
 
+  const displayPhotoUrl = (() => {
+    const rawUrl =
+      matchedFood?.photoUrl &&
+      (matchedFood.isCustomPhoto ||
+        matchedFood.photoUrl.startsWith('data:') ||
+        matchedFood.photoUrl.startsWith('http'))
+        ? matchedFood.photoUrl
+        : item.photoUrl || matchedFood?.photoUrl || '/welcome/hero-bg.webp';
+    return resolveFoodPhotoUrl(rawUrl, matchedFood?.photoUpdatedAt || item.photoUpdatedAt, undefined, matchedFood?.id || item.matchedFoodId);
+  })();
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200"
@@ -169,18 +180,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
         {/* Hero Photo Banner */}
         <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-950 shrink-0">
           <img 
-            src={
-              (() => {
-                const rawUrl =
-                  matchedFood?.photoUrl &&
-                  (matchedFood.isCustomPhoto ||
-                    matchedFood.photoUrl.startsWith('data:') ||
-                    matchedFood.photoUrl.startsWith('http'))
-                    ? matchedFood.photoUrl
-                    : item.photoUrl || matchedFood?.photoUrl || '/welcome/hero-bg.webp';
-                return resolveFoodPhotoUrl(rawUrl, matchedFood?.photoUpdatedAt || item.photoUpdatedAt, undefined, matchedFood?.id || item.matchedFoodId);
-              })()
-            } 
+            src={displayPhotoUrl} 
             alt={displayFoodName}
             decoding="async"
             onError={(e) => handleFoodImageError(e, matchedFood?.id || item.matchedFoodId, matchedFood?.photoUrl)}

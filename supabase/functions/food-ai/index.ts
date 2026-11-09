@@ -118,6 +118,73 @@ async function callOpenAi(apiKey: string, body: Record<string, unknown>, timeout
   }
 }
 
+/** Opens a Gemini SSE stream. Returns the live upstream Response on 200, otherwise the failure as an Upstream. */
+async function openGeminiStream(apiKey: string, model: string, body: unknown, timeoutMs: number): Promise<Response | Upstream> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs); // covers time-to-first-byte only
+  try {
+    const targets = geminiEndpoints(apiKey, model, true);
+    let first: Upstream = null;
+    let last: Upstream = null;
+    for (let i = 0; i < targets.length; i++) {
+      const upstream = await fetch(targets[i].url, {
+        method: 'POST',
+        headers: targets[i].headers,
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+      if (upstream.status === 200 && upstream.body) {
+        clearTimeout(timer);
+        return upstream;
+      }
+      last = { status: upstream.status, text: await upstream.text(), provider: 'gemini', model };
+      if (i === 0) first = last;
+      if (!shouldTryNextEndpoint(last.status)) return last;
+    }
+    clearTimeout(timer);
+    return first || last;
+  } catch {
+    clearTimeout(timer);
+    return null;
+  }
+}
+
+/** Pass-through of the SSE stream that remembers the last usageMetadata so the usage log stays accurate. */
+function tapStream(upstream: Response, onDone: (inTok: number | null, outTok: number | null) => void): ReadableStream<Uint8Array> {
+  const decoder = new TextDecoder();
+  let tail = '';
+  let inTok: number | null = null;
+  let outTok: number | null = null;
+  const scan = (chunkText: string) => {
+    tail += chunkText;
+    const lines = tail.split('\n');
+    tail = lines.pop() || '';
+    for (const line of lines) {
+      if (!line.startsWith('data:') || !line.includes('usageMetadata')) continue;
+      try {
+        const u = JSON.parse(line.slice(5).trim())?.usageMetadata;
+        if (u) {
+          inTok = Number(u.promptTokenCount) || inTok;
+          outTok = Number(u.candidatesTokenCount) || outTok;
+        }
+      } catch {
+        /* ignore partial line */
+      }
+    }
+  };
+  return upstream.body!.pipeThrough(
+    new TransformStream<Uint8Array, Uint8Array>({
+      transform(chunk, controller) {
+        controller.enqueue(chunk);
+        scan(decoder.decode(chunk, { stream: true }));
+      },
+      flush() {
+        onDone(inTok, outTok);
+      },
+    })
+  );
+}
+
 function tokensOf(text: string): { inTok: number | null; outTok: number | null } {
   try {
     const u = JSON.parse(text)?.usageMetadata;
@@ -219,7 +286,41 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   // ---- provider call: Gemini first, OpenAI as fail-over -----------------------------------------------------
   let result: Upstream = null;
-  if (geminiKey) result = await callGemini(geminiKey, checked.model, checked.body, 55_000);
+  const wantsStream = Boolean((parsed as Record<string, unknown>)?.stream === true) && Boolean(geminiKey);
+  if (wantsStream && geminiKey) {
+    // Progressive answer: the first tokens reach the phone as soon as Gemini produces them.
+    const opened = await openGeminiStream(geminiKey, checked.model, checked.body, 55_000);
+    if (opened instanceof Response) {
+      const tapped = tapStream(opened, (inTok, outTok) => {
+        background(
+          logUsage({
+            user_key: quotaKey,
+            kind: 'ai',
+            provider: 'gemini',
+            model: checked.model,
+            status: 200,
+            tokens_in: inTok,
+            tokens_out: outTok,
+            ms: Date.now() - started,
+            note: hasImage ? 'image,stream' : 'stream',
+          })
+        );
+      });
+      return new Response(tapped, {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'text/event-stream; charset=utf-8',
+          'Cache-Control': 'no-cache, no-transform',
+          'x-food-ai-provider': 'gemini',
+          ...quotaHeaders,
+        },
+      });
+    }
+    result = opened; // stream refused -> same failure handling / OpenAI fail-over as before
+  } else if (geminiKey) {
+    result = await callGemini(geminiKey, checked.model, checked.body, 55_000);
+  }
   const geminiFailed = !geminiKey || result === null || shouldFailover(result.status);
   if (geminiFailed && openAiKey) {
     const fallback = await callOpenAi(openAiKey, checked.body, 55_000);

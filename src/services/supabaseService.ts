@@ -1408,10 +1408,20 @@ export async function hashAdminPin(pin: string): Promise<string> {
   return hashArr.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+const SCRAMBLED_MIGRATION_PIN_HASH = '2104fdf016323761b2480b7e2c7665eeaf58cb2eec819006b4af3f1dcb58fb44';
+
 export async function getAdminPinHash(): Promise<string> {
   try {
-    const cloudRecord = await pullCloudDocument<{ pinHash: string }>(ADMIN_PIN_KV_KEY, 4000);
-    if (cloudRecord && typeof cloudRecord.pinHash === 'string' && cloudRecord.pinHash.length === 64) {
+    const cloudRecord = await pullCloudDocument<{ pinHash: string; note?: string }>(ADMIN_PIN_KV_KEY, 4000);
+    const isScrambledPlaceholder =
+      Boolean(cloudRecord?.note && cloudRecord.note.toLowerCase().includes('disabled')) ||
+      cloudRecord?.pinHash?.toLowerCase() === SCRAMBLED_MIGRATION_PIN_HASH;
+    if (
+      cloudRecord &&
+      typeof cloudRecord.pinHash === 'string' &&
+      cloudRecord.pinHash.length === 64 &&
+      !isScrambledPlaceholder
+    ) {
       try {
         localStorage.setItem(ADMIN_PIN_KV_KEY, cloudRecord.pinHash);
       } catch {}
@@ -1420,7 +1430,11 @@ export async function getAdminPinHash(): Promise<string> {
   } catch {}
   try {
     const cached = localStorage.getItem(ADMIN_PIN_KV_KEY);
-    if (cached && cached.length === 64) return cached;
+    if (cached && cached.toLowerCase() === SCRAMBLED_MIGRATION_PIN_HASH) {
+      localStorage.removeItem(ADMIN_PIN_KV_KEY);
+    } else if (cached && cached.length === 64) {
+      return cached;
+    }
   } catch {}
   return DEFAULT_ADMIN_PIN_HASH;
 }
@@ -2477,7 +2491,7 @@ export async function verifyUserVipStatusFromBackend(
       }
 
       backendVipVerifyCache.set(canonicalId, {
-        expiresAt: Date.now() + 15000,
+        expiresAt: Date.now() + (isServerVip ? 120000 : 15000),
         isVip: isServerVip,
         verifiedUser: finalNorm,
       });

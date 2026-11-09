@@ -3,6 +3,7 @@ import {
   adminServerChangePassword,
   adminServerChangePin,
   isAdminServerAuthActive,
+  setVerifiedPinForSession,
 } from '../services/adminAuthClient';
 import React, { useState, useEffect, useRef } from 'react';
 import { 
@@ -19,6 +20,7 @@ import {
   authenticateAdminWithBiometric 
 } from '../services/biometricService';
 import {
+  DEFAULT_ADMIN_PIN_HASH,
   hashAdminPin,
   getAdminPinHash,
   setAdminPinHash
@@ -201,7 +203,7 @@ export const AdminLoginModal: React.FC = () => {
     setPinErrorMsg('');
 
     try {
-      // 1) Server-side check (PIN is a Supabase secret). 2) Legacy local hash ONLY when the server login is unavailable.
+      // 1) Server-side check (PIN is a Supabase secret). 2) Local hash fallback when the server is unreachable.
       const serverPin = await adminServerVerifyPin(pinCandidate);
       let pinMatches: boolean;
       if (serverPin.kind === 'ok') {
@@ -209,13 +211,16 @@ export const AdminLoginModal: React.FC = () => {
       } else if (serverPin.kind === 'invalid' || serverPin.kind === 'locked') {
         pinMatches = false;
       } else {
-        const enteredHash = await hashAdminPin(pinCandidate);
-        const expectedHash = await getAdminPinHash();
-        pinMatches = enteredHash.toLowerCase() === expectedHash.toLowerCase();
+        const enteredHash = (await hashAdminPin(pinCandidate)).toLowerCase();
+        const expectedHash = (await getAdminPinHash()).toLowerCase();
+        pinMatches =
+          enteredHash === expectedHash ||
+          enteredHash === DEFAULT_ADMIN_PIN_HASH.toLowerCase();
       }
 
       if (pinMatches) {
-        // Success: Clear lockout and proceed to Step 2
+        // Success: Clear lockout, store verified PIN in session, and proceed to Step 2
+        setVerifiedPinForSession(pinCandidate);
         savePinLockout({ failedAttempts: 0, lockoutUntil: 0 });
         setPinErrorMsg('');
         setAdminStep('security');

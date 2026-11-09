@@ -22,7 +22,15 @@ const TOKEN_STORAGE_KEY = 'kft_admin_token_v1';
 const STATUS_TTL_MS = 60_000;
 
 let pinTicket: { ticket: string; expiresAt: number } | null = null;
+let lastVerifiedPin: string | null = null;
 let statusCache: { active: boolean; at: number } | null = null;
+
+export function setVerifiedPinForSession(pin: string): void {
+  const clean = (pin || '').trim();
+  if (/^\d{6}$/.test(clean)) {
+    lastVerifiedPin = clean;
+  }
+}
 
 interface StoredToken {
   token: string;
@@ -82,7 +90,7 @@ type CallResult =
   | { kind: 'unavailable' }
   | { kind: 'response'; status: number; data: any };
 
-async function callAdminAuth(body: Record<string, unknown>, timeoutMs = 9000): Promise<CallResult> {
+async function callAdminAuthOnce(body: Record<string, unknown>, timeoutMs = 9000): Promise<CallResult> {
   if (isAppCloneTampered()) return { kind: 'unavailable' };
   const cfg = getCloudApiConfig();
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || typeof fetch === 'undefined') return { kind: 'unavailable' };
@@ -104,6 +112,14 @@ async function callAdminAuth(body: Record<string, unknown>, timeoutMs = 9000): P
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function callAdminAuth(body: Record<string, unknown>, timeoutMs = 9000): Promise<CallResult> {
+  const first = await callAdminAuthOnce(body, timeoutMs);
+  if (first.kind !== 'unavailable') return first;
+  if (isAppCloneTampered()) return first;
+  await new Promise((r) => setTimeout(r, 450));
+  return callAdminAuthOnce(body, timeoutMs);
 }
 
 /** True when the server-side admin login is deployed and configured (cached for a minute). */
@@ -133,16 +149,22 @@ function mapOutcome(r: CallResult): ServerAuthOutcome {
 }
 
 export async function adminServerVerifyPin(pin: string): Promise<ServerAuthOutcome> {
-  const r = await callAdminAuth({ action: 'pin', pin });
+  const cleanPin = (pin || '').trim();
+  const r = await callAdminAuth({ action: 'pin', pin: cleanPin });
   const out = mapOutcome(r);
   if (out.kind === 'ok' && r.kind === 'response') {
     pinTicket = { ticket: String(r.data.ticket), expiresAt: Number(r.data.ticketExpiresAt) || Date.now() + 9 * 60_000 };
+    lastVerifiedPin = cleanPin;
     statusCache = { active: true, at: Date.now() };
   }
   return out;
 }
 
 export async function adminServerLogin(username: string, password: string): Promise<ServerAuthOutcome> {
+  if ((!pinTicket || pinTicket.expiresAt < Date.now()) && lastVerifiedPin) {
+    // If Step 1 succeeded via local fallback during a brief network switch, mint a fresh server PIN ticket now.
+    await adminServerVerifyPin(lastVerifiedPin);
+  }
   if (!pinTicket || pinTicket.expiresAt < Date.now()) {
     // No PIN ticket in this session: only meaningful when the server auth is active; otherwise legacy path applies.
     return (await isAdminServerAuthActive()) ? { kind: 'pin_required' } : { kind: 'unavailable' };
@@ -249,5 +271,6 @@ export async function adminServerChangePin(newPin: string): Promise<ServerAuthOu
 /** Test hook. */
 export function resetAdminAuthClientState(): void {
   pinTicket = null;
+  lastVerifiedPin = null;
   statusCache = null;
 }
