@@ -3,7 +3,7 @@ import type { Language } from '../../types';
 import { tr } from '../../utils/i18n';
 import {
   IconNearbyFood,
-  IconCravingSpark,
+  IconBeveragePairing,
   IconFoodPicks,
   IconProvinceFood,
   IconMapRoute,
@@ -56,8 +56,8 @@ const FeatureGridImpl: React.FC<Props> = ({
     },
     {
       id: 'compare-dishes',
-      label: tr(language, 'ប្រៀបធៀបម្ហូប', 'Compare Dishes', '美食对比'),
-      icon: IconCravingSpark,
+      label: tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佐餐与饮品搭配'),
+      icon: IconBeveragePairing,
       badgeType: 'free',
       badgeLabel: tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费'),
       iconContainerClass: FLAT_ICON_CONTAINER,
@@ -142,7 +142,7 @@ const FeatureGridImpl: React.FC<Props> = ({
 
               {/* Crisp 1-line Khmer label */}
               <span
-                className={`text-[11px] sm:text-xs font-bold leading-normal text-center truncate w-full px-0.5 ${
+                className={`font-khmer text-[11px] sm:text-xs font-bold leading-normal text-center truncate w-full px-0.5 ${
                   isVipCard ? 'text-white' : 'text-slate-800 dark:text-slate-100'
                 }`}
               >

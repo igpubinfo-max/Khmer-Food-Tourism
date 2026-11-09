@@ -75,19 +75,27 @@ export const IconSmartAssistant: React.FC<IconProps> = ({ className = 'w-5 h-5',
   </svg>
 );
 
-/** 7. Beverage Pairings (ម្ហូបអមភេសជ្ជៈ) — Savory sharing platter paired with a chilled citrus refreshment glass */
+/** 7. Beverage Pairings (ម្ហូបអមភេសជ្ជៈ) — Two clinking drinking glasses (🥂) */
 export const IconBeveragePairing: React.FC<IconProps> = ({ className = 'w-5 h-5', ...props }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.85} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
-    {/* Chilled refreshment glass with straw & citrus garnish */}
-    <path d="M14.2 7.5h6.3l-.7 11.2a1.6 1.6 0 0 1-1.6 1.5h-1.7a1.6 1.6 0 0 1-1.6-1.5L14.2 7.5Z" fill="currentColor" fillOpacity={0.18} />
-    <path d="M14.5 11.5h5.7" />
-    <path d="M17.5 7.5 19.2 3.5h1.6" />
-    <circle cx={14.2} cy={7.2} r={2} fill="currentColor" fillOpacity={0.22} />
-    {/* Dining platter / savory bowl on left */}
-    <path d="M2.5 15.5a5.2 5.2 0 0 1 10.4 0H2.5Z" fill="currentColor" fillOpacity={0.18} />
-    <path d="M2 15.5h11.4" />
-    <path d="M3.2 18.2a4.8 4.8 0 0 0 9 0" />
-    <path d="M7.7 8.8v1.5" />
+    {/* Clinking spark rays at top center */}
+    <path d="M12 2v2.2" />
+    <path d="m9.2 3 1.1 1.5" />
+    <path d="m14.8 3-1.1 1.5" />
+    {/* Left clinking glass (tilted right) */}
+    <g transform="rotate(13 8.5 13)">
+      <path d="M5.5 6.5h6l-.7 5.6a2.3 2.3 0 0 1-4.6 0L5.5 6.5Z" fill="currentColor" fillOpacity={0.2} />
+      <path d="M5.8 9.2h5.4" />
+      <path d="M8.5 14.4v4.6" />
+      <path d="M6.3 19h4.4" />
+    </g>
+    {/* Right clinking glass (tilted left) */}
+    <g transform="rotate(-13 15.5 13)">
+      <path d="M12.5 6.5h6l-.7 5.6a2.3 2.3 0 0 1-4.6 0l-.7-5.6Z" fill="currentColor" fillOpacity={0.2} />
+      <path d="M12.8 9.2h5.4" />
+      <path d="M15.5 14.4v4.6" />
+      <path d="M13.3 19h4.4" />
+    </g>
   </svg>
 );
 
