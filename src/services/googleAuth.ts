@@ -23,6 +23,50 @@ export function buildCanonicalGoogleUserId(email: string): string {
 }
 
 let cachedNativeGoogleAuthPlugin: any = null;
+const GOOGLE_OAUTH_TOKEN_STORAGE_KEY = 'kft_google_oauth_token_v1';
+
+export function saveActiveGoogleAccessToken(token: string | null | undefined): void {
+  try {
+    if (token && typeof token === 'string') {
+      sessionStorage.setItem(GOOGLE_OAUTH_TOKEN_STORAGE_KEY, token);
+    } else {
+      sessionStorage.removeItem(GOOGLE_OAUTH_TOKEN_STORAGE_KEY);
+    }
+  } catch {}
+}
+
+/**
+ * Properly clears & revokes any active Google OAuth token / auto-select state on Logout
+ * so the next sign-in always prompts the user to choose an account.
+ */
+export async function revokeGoogleOAuthSession(): Promise<void> {
+  try {
+    const win = window as any;
+    try {
+      win?.google?.accounts?.id?.disableAutoSelect?.();
+    } catch {}
+    let tok: string | null = null;
+    try {
+      tok = sessionStorage.getItem(GOOGLE_OAUTH_TOKEN_STORAGE_KEY);
+      sessionStorage.removeItem(GOOGLE_OAUTH_TOKEN_STORAGE_KEY);
+      localStorage.removeItem(GOOGLE_OAUTH_TOKEN_STORAGE_KEY);
+    } catch {}
+    if (tok && win?.google?.accounts?.oauth2?.revoke) {
+      await new Promise<void>((resolve) => {
+        try {
+          win.google.accounts.oauth2.revoke(tok, () => resolve());
+          setTimeout(resolve, 1200);
+        } catch {
+          resolve();
+        }
+      });
+    }
+    const nativePlugin = await getNativeGoogleAuthPlugin();
+    if (nativePlugin && typeof nativePlugin.signOut === 'function') {
+      await nativePlugin.signOut().catch(() => {});
+    }
+  } catch {}
+}
 
 export async function getNativeGoogleAuthPlugin(): Promise<any> {
   if (cachedNativeGoogleAuthPlugin) return cachedNativeGoogleAuthPlugin;
@@ -61,6 +105,7 @@ export const signInWithGoogleReal = (): Promise<GoogleUserProfile> => {
               return;
             }
             if (tokenResponse?.access_token) {
+              saveActiveGoogleAccessToken(tokenResponse.access_token);
               try {
                 const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                   headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
@@ -140,6 +185,7 @@ export const signInWithGoogleReal = (): Promise<GoogleUserProfile> => {
             popup.close();
 
             if (token) {
+              saveActiveGoogleAccessToken(token);
               const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                 headers: { Authorization: `Bearer ${token}` }
               });

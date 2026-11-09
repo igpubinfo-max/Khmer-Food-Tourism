@@ -10,7 +10,7 @@ import {
   KeyRound, CheckCircle2, ShieldCheck, AlertCircle, Clock, Fingerprint, Delete, Key
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { checkAdminLoginAllowed } from '../utils/security';
+import { checkAdminLoginAllowed, resetAdminLoginAttempts } from '../utils/security';
 import { 
   checkBiometricAvailability, 
   setSavedAdminUsername, 

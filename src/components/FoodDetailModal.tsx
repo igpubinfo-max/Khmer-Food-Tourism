@@ -17,6 +17,7 @@ import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { DishTagChips } from './DishTagChips';
 import { PassportStampButton } from './PassportStampButton';
 import { WhereToEat } from './WhereToEat';
+import { FOOD_WATERMARK_TEXT, applyFoodWatermarkOnce, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
 import {
   generateAuthenticRecipeByDishName,
   areIngredientsIdentical,
@@ -188,6 +189,8 @@ export const FoodDetailModal: React.FC = () => {
         return;
       }
       if (pick.dataUrl && selectedFood) {
+        const wmPick = await applyFoodWatermarkOnce(pick.dataUrl, { maxWidth: 2400, maxHeight: 2400, quality: 0.94, outputMimeType: 'image/jpeg' });
+        pick.dataUrl = wmPick.dataUrl;
         const nowIso = new Date().toISOString();
         const updated = {
           ...selectedFood,
@@ -225,7 +228,8 @@ export const FoodDetailModal: React.FC = () => {
     if (!file) return;
     setIsUploadingPhoto(true);
     try {
-      const dataUrl = await processAndCompressImageFile(file, 720, 0.76);
+      const wmRes = await applyFoodWatermarkOnce(file, { maxWidth: 2400, maxHeight: 2400, quality: 0.94, outputMimeType: 'image/jpeg' });
+      const dataUrl = wmRes.dataUrl;
       setEditPhotoUrl(dataUrl);
       if (selectedFood) {
         const nowIso = new Date().toISOString();

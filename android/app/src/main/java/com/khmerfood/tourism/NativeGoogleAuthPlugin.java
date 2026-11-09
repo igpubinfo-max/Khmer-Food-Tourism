@@ -14,6 +14,13 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 public class NativeGoogleAuthPlugin extends Plugin {
 
     @PluginMethod
+    public void signOut(PluginCall call) {
+        JSObject ret = new JSObject();
+        ret.put("ok", true);
+        call.resolve(ret);
+    }
+
+    @PluginMethod
     public void signIn(PluginCall call) {
         try {
             // Android OS native Google account selector

@@ -10,6 +10,7 @@ import {
   isNativeAndroidOrIosPlatform,
   pickImageUsingNativeAndroidGallery,
 } from '../utils/androidMediaHelper';
+import { applyFoodWatermarkOnce } from '../utils/foodWatermark';
 
 interface FoodImageModalProps {
   food: FoodItem | null;
@@ -19,53 +20,20 @@ interface FoodImageModalProps {
   isKm: boolean;
 }
 
-// Compress and resize images smoothly client-side
-const compressImageFile = (
-  file: File, 
-  maxWidth = 720, 
-  maxHeight = 540, 
-  quality = 0.76
+// Preserve original resolution & quality and apply the "Cambodia Flavors & Tourism" watermark once
+const compressImageFile = async (
+  file: File,
+  maxWidth = 2400,
+  maxHeight = 2400,
+  quality = 0.94
 ): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        let width = img.width;
-        let height = img.height;
-        if (width > maxWidth || height > maxHeight) {
-          const ratio = Math.min(maxWidth / width, maxHeight / height);
-          width = Math.round(width * ratio);
-          height = Math.round(height * ratio);
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          resolve(e.target?.result as string);
-          return;
-        }
-        // Fill white background for transparent PNGs converted to JPEG
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(img, 0, 0, width, height);
-
-        try {
-          const webp = canvas.toDataURL('image/webp', quality);
-          if (webp.startsWith('data:image/webp')) {
-            resolve(webp);
-            return;
-          }
-        } catch {}
-        resolve(canvas.toDataURL('image/jpeg', quality));
-      };
-      img.onerror = () => reject(new Error('Failed to parse image file'));
-      img.src = e.target?.result as string;
-    };
-    reader.onerror = () => reject(new Error('Failed to read file from disk'));
-    reader.readAsDataURL(file);
+  const result = await applyFoodWatermarkOnce(file, {
+    maxWidth,
+    maxHeight,
+    quality,
+    outputMimeType: 'image/jpeg',
   });
+  return result.dataUrl;
 };
 
 export const FoodImageModal: React.FC<FoodImageModalProps> = ({
@@ -142,6 +110,8 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
         return;
       }
       if (pick.dataUrl) {
+        const wmRes = await applyFoodWatermarkOnce(pick.dataUrl, { maxWidth: 2400, maxHeight: 2400, quality: 0.94, outputMimeType: 'image/jpeg' });
+        pick.dataUrl = wmRes.dataUrl;
         const note = isKm
           ? `រូបភាពបានបញ្ចូលដោយរដ្ឋបាលពីទូរស័ព្ទ (${(pick.dataUrl.length / 1024).toFixed(0)} KB)`
           : `Custom photo uploaded by admin (${(pick.dataUrl.length / 1024).toFixed(0)} KB)`;

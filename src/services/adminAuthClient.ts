@@ -186,6 +186,42 @@ export async function adminServerChangePassword(params: {
 }
 
 /**
+ * Secure Admin Password Reset function using the 6-digit Admin Security PIN + Admin Username.
+ * Hashes the new password with PBKDF2-HMAC-SHA256 (100,000 iterations) on the server, saves it to
+ * `public.kft_security_config.admin_password_hash`, clears lockouts, and issues a fresh signed admin token.
+ */
+export async function adminServerResetPasswordWithPin(params: {
+  username: string;
+  pin: string;
+  newPassword: string;
+}): Promise<ServerAuthOutcome> {
+  const token = getAdminToken();
+  const ticket = pinTicket && pinTicket.expiresAt > Date.now() ? pinTicket.ticket : undefined;
+  if (!token && !ticket) {
+    // Attempt to obtain a fresh PIN ticket automatically using the supplied 6-digit PIN
+    const pinVerify = await adminServerVerifyPin(params.pin.trim());
+    if (pinVerify.kind !== 'ok') {
+      return pinVerify;
+    }
+  }
+  const activeTicket = pinTicket && pinTicket.expiresAt > Date.now() ? pinTicket.ticket : undefined;
+  const r = await callAdminAuth({
+    action: 'reset_password',
+    username: params.username.trim().toLowerCase(),
+    pin: params.pin.trim(),
+    newPassword: params.newPassword.trim(),
+    ...(token ? { token } : {}),
+    ...(activeTicket ? { ticket: activeTicket } : {}),
+  });
+  const out = mapOutcome(r);
+  if (out.kind === 'ok' && r.kind === 'response' && r.data?.token) {
+    storeAdminToken(String(r.data.token), Number(r.data.expiresAt) || Date.now() + 7 * 24 * 3600_000);
+    pinTicket = null;
+  }
+  return out;
+}
+
+/**
  * Change Admin 6-digit PIN securely on the server (`kft_security_config.admin_pin_hash` via PBKDF2-SHA256).
  */
 export async function adminServerChangePin(newPin: string): Promise<ServerAuthOutcome> {

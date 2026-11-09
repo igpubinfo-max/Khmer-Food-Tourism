@@ -17,6 +17,12 @@
  */
 
 import { isEphemeralDeadImageUrl } from '../types';
+import {
+  drawFoodWatermarkOnCanvas,
+  isUrlWatermarkedAtPixelLevel,
+  computeWatermarkSignature,
+  recordWatermarkedSignature,
+} from '../utils/foodWatermark';
 
 const CLOUD_IMAGE_LEDGER_KEY = 'kft_cloud_image_url_ledger_v1';
 const CLOUD_IMAGE_IDB_NAME = 'kft_cloud_image_cdn_cache_v1';
@@ -306,7 +312,8 @@ function renderCanvasToWebpOrJpeg(
   img: HTMLImageElement,
   targetWidth: number,
   targetHeight: number,
-  quality: number
+  quality: number,
+  applyFoodWatermark = false
 ): { dataUrl: string; mimeType: string; extension: 'webp' | 'jpg' } {
   const canvas = document.createElement('canvas');
   canvas.width = Math.max(1, Math.round(targetWidth));
@@ -321,6 +328,9 @@ function renderCanvasToWebpOrJpeg(
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  if (applyFoodWatermark) {
+    drawFoodWatermarkOnCanvas(ctx, canvas.width, canvas.height);
+  }
 
   try {
     // Try encoding as WebP first
@@ -357,6 +367,7 @@ export async function compressToWebpWithThumbnail(
     fullQuality?: number;
     maxThumbDimension?: number;
     thumbQuality?: number;
+    applyFoodWatermark?: boolean;
   }
 ): Promise<CompressedWebpBundle> {
   const maxFullDimension = options?.maxFullDimension ?? 1080;
@@ -405,7 +416,17 @@ export async function compressToWebpWithThumbnail(
       }
     }
 
-    const fullEncoded = renderCanvasToWebpOrJpeg(img, fullW, fullH, fullQuality);
+    const alreadyWatermarked = typeof input === 'string'
+      ? isUrlWatermarkedAtPixelLevel(input)
+      : isUrlWatermarkedAtPixelLevel((input as File).name || '');
+    const shouldWatermark = Boolean(options?.applyFoodWatermark && !alreadyWatermarked);
+    const fullEncoded = renderCanvasToWebpOrJpeg(img, fullW, fullH, fullQuality, shouldWatermark);
+    if (options?.applyFoodWatermark) {
+      if (typeof input === 'string') {
+        recordWatermarkedSignature(computeWatermarkSignature(input));
+      }
+      recordWatermarkedSignature(computeWatermarkSignature(fullEncoded.dataUrl));
+    }
     const thumbEncoded = renderCanvasToWebpOrJpeg(img, thumbW, thumbH, thumbQuality);
 
     const fullBlob = dataUrlToBlob(fullEncoded.dataUrl);
@@ -588,8 +609,14 @@ export async function uploadImageToPermanentCloud(
     }
   }
 
-  // Compress to WebP + generate thumbnail
-  const bundle = await compressToWebpWithThumbnail(input);
+  // Compress to WebP + generate thumbnail (preserve high resolution & watermark once for food/menu images)
+  const isFoodOrMenuFolder = folder === 'foods' || folder === 'menus' || folder === 'trending';
+  const bundle = await compressToWebpWithThumbnail(
+    input,
+    isFoodOrMenuFolder
+      ? { maxFullDimension: 2048, fullQuality: 0.92, applyFoodWatermark: true }
+      : undefined
+  );
   const safeFolder = (folder || 'shops').replace(/[^a-zA-Z0-9_-]/g, '');
   const safeEntityId = (entityId || 'item').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 48);
 

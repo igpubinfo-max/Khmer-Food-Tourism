@@ -44,6 +44,15 @@ export async function usageHit(userKey: string, kind: string, weight = 1): Promi
   return Number.isFinite(n) ? n : null;
 }
 
+/** Reset/clear today's counter for a specific userKey + kind (e.g., on successful login/reset). */
+export async function usageClear(userKey: string, kind: string): Promise<void> {
+  const day = new Date(Date.now() + 7 * 3600_000).toISOString().slice(0, 10);
+  await call(
+    `kft_api_usage_daily?day=eq.${day}&user_key=eq.${encodeURIComponent(userKey.slice(0, 160))}&kind=eq.${encodeURIComponent(kind)}`,
+    { method: 'DELETE', headers: { Prefer: 'return=minimal' } }
+  );
+}
+
 /** Read today's counter without incrementing it (null when unavailable). */
 export async function usageGet(userKey: string, kind: string): Promise<number | null> {
   const day = new Date(Date.now() + 7 * 3600_000).toISOString().slice(0, 10); // Asia/Phnom_Penh (UTC+7)

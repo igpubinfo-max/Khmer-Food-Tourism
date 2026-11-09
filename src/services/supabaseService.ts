@@ -46,6 +46,7 @@ import {
   getCachedUserAvatarForAccount,
   createCompactSyncAvatarDataUrl,
 } from '../utils/avatarHelper';
+import { applyFoodWatermarkOnce, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
 import {
   evaluateAggregatePush,
   isUserAggregateKey,
@@ -2147,6 +2148,14 @@ export async function uploadBase64ImageToSupabaseStorage(
 ): Promise<string | null> {
   if (!dataUrl || !dataUrl.startsWith('data:image/')) {
     return null;
+  }
+  if ((folder === 'foods' || folder === 'trending') && !isUrlWatermarkedAtPixelLevel(dataUrl)) {
+    try {
+      const wmRes = await applyFoodWatermarkOnce(dataUrl, { maxWidth: 2400, maxHeight: 2400, quality: 0.94 });
+      dataUrl = wmRes.dataUrl;
+    } catch {
+      // Keep original dataUrl if canvas is unavailable in test runner
+    }
   }
   const cfg = getCloudApiConfig();
   if (!cfg.enableAutoCloudSync) return null;

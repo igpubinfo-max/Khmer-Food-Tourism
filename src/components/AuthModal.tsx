@@ -104,6 +104,28 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
   const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
+  useEffect(() => {
+    // Reset sensitive form fields on logout so another user cannot see or reuse previous inputs
+    if (!currentUser) {
+      setPhoneName('');
+      setPhoneInput('');
+      setPhonePassword('');
+      setPhoneConfirmPassword('');
+      setPhoneOtpStep(false);
+      setPhoneOtpExpected('');
+      setPhoneOtpInput('');
+      setName('');
+      setEmail('');
+      setPhone('');
+      setEmailPassword('');
+      setEmailConfirmPassword('');
+      setLoginEmail('');
+      setLoginPassword('');
+      setGoogleQuickEmail('');
+      setGoogleQuickName('');
+    }
+  }, [currentUser]);
+
   const isKm = language === 'km';
 
   if (isAdminLoginModalOpen) return null;
@@ -184,7 +206,15 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
           'info'
         );
       } else {
-        setAuthMode('google_quick');
+        showToast(
+          tr(
+            language,
+            '⚠️ មិនអាចបើកផ្ទាំង Google Sign-In បានទេ។ សូមពិនិត្យអ៊ីនធឺណិត ឬអនុញ្ញាត Popup រួចសាកល្បងម្តងទៀត។',
+            '⚠️ Could not open Google Sign-In. Please check your connection or allow popups and try again.',
+            '⚠️ 无法打开 Google 登录窗口，请检查网络或允许弹窗后重试。'
+          ),
+          'warning'
+        );
       }
     } finally {
       setIsGoogleLoading(false);

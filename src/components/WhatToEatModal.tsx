@@ -47,6 +47,7 @@ import {
 } from './icons/HandcraftedIcons';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { tr } from '../utils/i18n';
+import { FOOD_WATERMARK_TEXT, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { useBodyScrollLock } from '../utils/useBodyScrollLock';
 import { hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
@@ -2132,15 +2133,11 @@ export const WhatToEatModal: React.FC = () => {
                                       {rpLoc.category}
                                     </span>
                                   </div>
-                                  <span className="absolute bottom-2 right-2.5 z-10 bg-black/55 backdrop-blur-xs text-white/85 text-[8px] px-1.5 py-0.5 rounded border border-white/15 font-khmer select-none pointer-events-none">
-                                    {isGeneratedDishId(rpFood.id) && /^data:/i.test(rpFood.photoUrl || '')
-                                      ? tr(language, 'រូបភាពរបស់អ្នក', 'Your photo', '您的照片')
-                                      : isGeneratedDishId(rpFood.id) && /^https?:\/\//i.test(rpFood.photoUrl || '')
-                                        ? tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')
-                                        : isGeneratedDishId(rpFood.id)
-                                          ? tr(language, 'គ្មានរូបភាពផ្ទៀងផ្ទាត់', 'No verified photo', '暂无已核实图片')
-                                          : tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}
-                                  </span>
+                                  {!isUrlWatermarkedAtPixelLevel(resolveFoodPhotoUrl(rpFood)) && (
+                                    <span className="absolute bottom-2 right-2.5 z-10 bg-slate-900/40 backdrop-blur-xs text-white/80 text-[8px] px-2 py-0.5 rounded-full border border-white/15 select-none pointer-events-none">
+                                      {FOOD_WATERMARK_TEXT}
+                                    </span>
+                                  )}
                                   <div className="absolute bottom-2 left-3 right-20 text-white space-y-0.5">
                                     <div className="text-sm font-extrabold leading-snug drop-shadow truncate">
                                       {rpLoc.name}
@@ -3462,16 +3459,12 @@ export const WhatToEatModal: React.FC = () => {
                       </span>
                     </div>
 
-                    {/* Reference label */}
-                    <span className="absolute bottom-2 right-2.5 z-10 bg-black/55 backdrop-blur-xs text-white/85 text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded border border-white/15 font-khmer select-none pointer-events-none">
-                      {isGeneratedDishId(currentDish.id) && /^data:/i.test(currentDish.photoUrl || '')
-                        ? tr(language, 'រូបភាពរបស់អ្នក', 'Your photo', '您的照片')
-                        : isGeneratedDishId(currentDish.id) && /^https?:\/\//i.test(currentDish.photoUrl || '')
-                          ? tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')
-                          : isGeneratedDishId(currentDish.id)
-                            ? tr(language, 'គ្មានរូបភាពផ្ទៀងផ្ទាត់', 'No verified photo', '暂无已核实图片')
-                            : tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}
-                    </span>
+                    {/* Watermark fallback only for external URLs not watermarked at pixel level */}
+                    {!isUrlWatermarkedAtPixelLevel(resolveFoodPhotoUrl(currentDish)) && (
+                      <span className="absolute bottom-2 right-2.5 z-10 bg-slate-900/40 backdrop-blur-xs text-white/80 text-[8px] sm:text-[9px] px-2 py-0.5 rounded-full border border-white/15 select-none pointer-events-none">
+                        {FOOD_WATERMARK_TEXT}
+                      </span>
+                    )}
 
                     {/* Title overlay */}
                     <div className="absolute bottom-3 left-3 right-24 text-white">

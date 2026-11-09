@@ -798,6 +798,11 @@ export async function verifyAndSanitizeUserSession(
  */
 export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | null } {
   try {
+    if (localStorage.getItem('kft_explicit_logged_out_v1') === '1') {
+      localStorage.removeItem('kft_current_user_v5');
+      localStorage.removeItem('kft_current_user_v4');
+      return { tampered: false, user: null };
+    }
     // Migrate legacy v4 user keys if v5 is not yet present
     const rawV5 = localStorage.getItem('kft_current_user_v5');
     const rawV4 = localStorage.getItem('kft_current_user_v4');

@@ -8,6 +8,7 @@ import { tr, translateProvince } from '../utils/i18n';
 import { openTrendingFoodGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError } from '../types';
 import { translateDynamicTextToZh, sanitizeStrictLanguageText, toConciseSummary } from '../utils/zhDynamicTranslator';
 import { extractYouTubeVideoId, isKnownUnavailableVideo } from '../services/onlineFoodDiscoveryService';
+import { FOOD_WATERMARK_TEXT, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
 
 export const TrendingFoodDetailModal: React.FC = () => {
   const { 

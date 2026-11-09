@@ -5,7 +5,7 @@ import {
   syncTrialWinbackNotifications,
   cancelTrialWinbackNotifications,
 } from '../services/trialWinbackNotificationService';
-import { adminServerLogin, adminServerChangePassword, isAdminServerAuthActive } from '../services/adminAuthClient';
+import { adminServerLogin, adminServerChangePassword, clearAdminToken, isAdminServerAuthActive } from '../services/adminAuthClient';
 import { checkBiometricAvailability, enrollAdminBiometric, getSavedAdminUsername } from '../services/biometricService';
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { 
@@ -1068,6 +1068,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (rawDel) localDeleted = JSON.parse(rawDel) || [];
       } catch {}
 
+      if (localStorage.getItem('kft_explicit_logged_out_v1') === '1') {
+        localStorage.removeItem('kft_current_user_v5');
+        localStorage.removeItem('kft_current_user_v4');
+        return null;
+      }
       const saved = localStorage.getItem('kft_current_user_v5') || localStorage.getItem('kft_current_user_v4');
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
@@ -3699,6 +3704,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     try {
       if (currentUser) {
+        localStorage.removeItem('kft_explicit_logged_out_v1');
         safeSetCriticalAccountStorage('kft_current_user_v5', currentUser);
         const userLang = localStorage.getItem(`kft_lang_user_${currentUser.id}`);
         if (userLang === 'km' || userLang === 'en' || userLang === 'zh') {
@@ -3750,6 +3756,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } else {
         lastCurrentUserSyncSigRef.current = '';
         localStorage.removeItem('kft_current_user_v5');
+        localStorage.removeItem('kft_current_user_v4');
       }
     } catch (e) {
       console.warn('Storage sync failed for currentUser:', e);
@@ -6112,6 +6119,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     resetAdminLoginAttempts();
     await createAdminSession();
+    // Synchronize local PBKDF2 password hash & biometric keystore with the verified password
+    hashPasswordPBKDF2(cleanPass)
+      .then((verifiedHash) => {
+        if (verifiedHash && appSettingsRef.current.adminPasswordHash !== verifiedHash) {
+          const syncedSettings: AppSettings = {
+            ...appSettingsRef.current,
+            adminPasswordHash: verifiedHash,
+            isAdminInitialized: true,
+          };
+          appSettingsRef.current = syncedSettings;
+          setAppSettings(syncedSettings);
+          try {
+            localStorage.setItem('kft_settings_v5', JSON.stringify(syncedSettings));
+          } catch {}
+        }
+      })
+      .catch(() => {});
     recordSecurityAudit('ADMIN_LOGIN_SUCCESS', 'SUCCESS', 'AdminPortal', 'Authorized admin session established');
 
     // Isolated single authorized administrator profile with official profile photo (strictly separated from consumer VIP)
@@ -8903,33 +8927,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         showToast(msg, 'warning');
         return { ok: false, error: msg };
       }
-    } else if (
-      !isNativeIosApp() &&
-      (candidate.authProvider === 'google' || String(candidate.id || '').startsWith('google-'))
-    ) {
+    } else {
+      // Existing account was created via Google OAuth (or has no separate password):
+      // Never allow another user to set a password on an existing Google account or hijack it without Google OAuth.
       const msg = tr(
         language,
-        '🔒 គណនីនេះត្រូវបានបង្កើតតាមរយៈ Google។ សូមចុចប៊ូតុង «ចូលរហ័សតាម Google» ដើម្បីផ្ទៀងផ្ទាត់ម្ចាស់គណនី!',
-        '🔒 This account was created via Google Sign-In. Please use "Continue with Google" to verify ownership!',
-        '🔒 此账号通过 Google 创建，请使用“通过 Google 登录”验证身份！'
+        '🔒 គណនីនេះប្រើ Google Sign-In។ សូមចុចប៊ូតុង «ចូលរហ័សតាម Google» ដោយមិនចាំបាច់វាយ Password!',
+        '🔒 This account uses Google Sign-In. Please tap "Continue with Google" (no password needed)!',
+        '🔒 此账号使用 Google 登录，请直接点击“通过 Google 登录”（无需输入密码）！'
       );
       showToast(msg, 'warning');
       return { ok: false, error: msg };
-    } else {
-      if (cleanPass.length < 6) {
-        const msg = tr(
-          language,
-          'លេខសម្ងាត់ត្រូវមានយ៉ាងតិច ៦ តួអក្សរ',
-          'Password must be at least 6 characters',
-          '密码至少需要 6 个字符'
-        );
-        showToast(msg, 'warning');
-        return { ok: false, error: msg };
-      }
-      candidate = {
-        ...candidate,
-        passwordHash: await hashPasswordPBKDF2(cleanPass),
-      };
     }
 
     const nowIso = new Date().toISOString();
@@ -9120,10 +9128,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logout = () => {
     revokeAdminSession();
+    clearAdminToken();
+    try {
+      localStorage.setItem('kft_explicit_logged_out_v1', '1');
+      localStorage.removeItem('kft_current_user_v5');
+      localStorage.removeItem('kft_current_user_v4');
+      localStorage.removeItem('kft_google_oauth_token_v1');
+      sessionStorage.removeItem('kft_google_oauth_token_v1');
+      sessionStorage.removeItem('kft_admin_session_token');
+    } catch {}
+    lastCurrentUserSyncSigRef.current = '';
+    setActiveManagedShopIdState(null);
     setCurrentUser(null);
     latestSyncStateRef.current.currentUser = null;
     setIsAdminOpen(false);
-    showToast(language === 'km' ? 'បានចាកចេញពីគណនី' : 'Logged out', 'info');
+    showToast(language === 'km' ? 'បានចាកចេញពីគណនីដោយសុវត្ថិភាព' : 'Logged out securely', 'info');
   };
 
   const updateCurrentUserProfile = (newName: string, newAvatar?: string) => {

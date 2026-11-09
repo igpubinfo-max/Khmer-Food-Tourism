@@ -7,6 +7,7 @@ import { getLocalizedFood } from '../utils/zhDynamicTranslator';
 import { getDisplayTags, tagLabel } from '../utils/dishTags';
 import { PassportStampButton } from './PassportStampButton';
 import { DishTagIcon } from './icons/HandcraftedIcons';
+import { FOOD_WATERMARK_TEXT, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
 
 import type { Language } from '../types';
 
@@ -102,11 +103,10 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
         >
           <Heart className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
         </button>
-
-        {/* Reference Image Label (រូបភាពយោង) - hidden for custom admin-replaced photos */}
-        {!food.isCustomPhoto && food.photoUrl === `/foods/${food.id}.jpg` && (
-          <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/55 backdrop-blur-xs text-[8px] sm:text-[9px] text-white/85 font-khmer border border-white/15 select-none pointer-events-none shadow-2xs">
-            <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
+        {/* Watermark fallback only for external URLs not watermarked at pixel level */}
+        {!isUrlWatermarkedAtPixelLevel(resolveFoodPhotoUrl(food)) && (
+          <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-full bg-slate-900/40 backdrop-blur-xs text-[8px] sm:text-[9px] font-medium text-white/80 border border-white/15 select-none pointer-events-none shadow-2xs">
+            <span>{FOOD_WATERMARK_TEXT}</span>
           </div>
         )}
       </div>
@@ -124,22 +124,15 @@ const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
               {loc.description}
             </p>
           )}
-          {/* Up to 3 recipe-derived tags (estimated from the recipe, no health claims) */}
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-3" title={tr(language, 'ប៉ាន់ស្មានពីរូបមន្ត', 'Estimated from the recipe', '根据食谱估算')}>
-              {tags.map((tg) => (
+          {displayTags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {displayTags.map((tag) => (
                 <span
-                  key={tg.id}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${
-                    tg.tone === 'green'
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
-                      : tg.tone === 'blue'
-                      ? 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800'
-                      : 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'
-                  }`}
+                  key={tag}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 text-[11px] font-semibold"
                 >
-                  <DishTagIcon id={tg.id} className="w-3.5 h-3.5 shrink-0" />
-                  <span>{tagLabel(tg, language)}</span>
+                  <DishTagIcon tag={tag} className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                  {tagLabel(tag, language)}
                 </span>
               ))}
             </div>
