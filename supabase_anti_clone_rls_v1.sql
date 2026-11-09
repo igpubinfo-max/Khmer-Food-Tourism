@@ -155,6 +155,11 @@ BEGIN
 END;
 $$;
 
+-- 3a. B-Tree Expression Index on registeredDeviceHash for O(1) Per-Device Account Cap Lookup
+CREATE INDEX IF NOT EXISTS idx_kft_kv_user_registered_device_hash
+  ON public.kft_app_kv_store ((payload ->> 'registeredDeviceHash'))
+  WHERE key LIKE 'kft_user_%' AND (payload ->> 'registeredDeviceHash') IS NOT NULL;
+
 -- 3. Add Anti-Clone / Anti-Repackage & Per-Device Account Spam Guard trigger on kft_app_kv_store
 CREATE OR REPLACE FUNCTION public.kft_clone_guard()
 RETURNS trigger

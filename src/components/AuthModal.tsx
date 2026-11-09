@@ -42,6 +42,8 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
     register,
     registerWithPhone,
     loginWithPhone,
+    registerWithEmail,
+    loginWithEmail,
     loginWithGoogle,
     exitAppNow,
     language,
@@ -84,13 +86,16 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
   const [phoneOtpInput, setPhoneOtpInput] = useState('');
   const [phoneOtpAttempts, setPhoneOtpAttempts] = useState(0);
 
-  // Email form fields (kept for existing email accounts)
+  // Email form fields (with PBKDF2 password protection)
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [emailPassword, setEmailPassword] = useState('');
+  const [emailConfirmPassword, setEmailConfirmPassword] = useState('');
   const [restaurantName, setRestaurantName] = useState('');
   const [role, setRole] = useState<UserRole>('user');
   const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
 
   // Quick Google fallback fields (when popup is blocked in Telegram/Messenger/WebView or device lacks GMS)
   const [googleQuickEmail, setGoogleQuickEmail] = useState('');
@@ -106,6 +111,10 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
 
   // Handle Google Sign-In: 1-Tap Real Google OAuth (Android Native Account Selector + Web Popup + In-App Fallback)
   const handleGoogleSignIn = async () => {
+    if (isNativeIosApp()) {
+      setAuthMode('phone');
+      return;
+    }
     setIsGoogleLoading(true);
     try {
       const { Capacitor } = await import('@capacitor/core');
@@ -197,25 +206,21 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
       );
       return;
     }
-    const derivedName = googleQuickName.trim() || cleanEmail.split('@')[0].replace(/[._-]+/g, ' ');
-    const profile = {
-      id: buildCanonicalGoogleUserId(cleanEmail),
-      name: derivedName,
-      email: cleanEmail,
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-      authProvider: 'google' as const,
-      linkedProviders: ['google' as const],
-      isVerified: true,
-      verifiedAt: new Date().toISOString(),
-    };
-    const ok = loginWithGoogle(profile);
-    if (ok) {
-      showToast(
-        tr(language, `សូមស្វាគមន៍ ${derivedName}!`, `Welcome ${derivedName}!`, `欢迎 ${derivedName}！`),
-        'success'
-      );
-      setIsAuthModalOpen(false);
-    }
+    // Redirect to password-protected Email Sign-In / Register instead of unverified email login
+    setLoginEmail(cleanEmail);
+    setEmail(cleanEmail);
+    if (googleQuickName.trim()) setName(googleQuickName.trim());
+    setEmailTab('login');
+    setAuthMode('email');
+    showToast(
+      tr(
+        language,
+        '🔒 សូមវាយបញ្ចូលលេខសម្ងាត់គណនីរបស់អ្នក (ឬចុចផ្ទាំង «ចុះឈ្មោះ» ប្រសិនបើគណនីថ្មី)',
+        '🔒 Please enter your account password (or switch to Register if creating a new account)',
+        '🔒 请输入您的账号密码（如果是新账号请切换到“注册”）'
+      ),
+      'info'
+    );
   };
 
   const handlePhoneRegisterSubmit = async (e: React.FormEvent) => {
@@ -350,7 +355,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
     }
   };
 
-  const handleEmailRegister = (e: React.FormEvent) => {
+  const handleEmailRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim()) {
       showToast(
@@ -378,6 +383,30 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
       );
       return;
     }
+    if (emailPassword.trim().length < 6) {
+      showToast(
+        tr(
+          language,
+          'លេខសម្ងាត់ត្រូវមានយ៉ាងតិច ៦ តួអក្សរ',
+          'Password must be at least 6 characters',
+          '密码至少需要 6 个字符'
+        ),
+        'warning'
+      );
+      return;
+    }
+    if (emailPassword.trim() !== emailConfirmPassword.trim()) {
+      showToast(
+        tr(
+          language,
+          'លេខសម្ងាត់បញ្ជាក់មិនដូចគ្នាទេ សូមពិនិត្យម្តងទៀត!',
+          'Passwords do not match. Please check again!',
+          '两次输入的密码不一致，请重新检查！'
+        ),
+        'warning'
+      );
+      return;
+    }
     if (role === 'owner' && !restaurantName.trim()) {
       showToast(
         tr(language, 'សូមបំពេញឈ្មោះហាងអាហាររបស់អ្នក', 'Please enter restaurant name', '请输入餐厅名称'),
@@ -388,19 +417,14 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
 
     setIsSubmitting(true);
     try {
-      const ok = register(
-        name.trim(),
-        email.trim().toLowerCase(),
+      await registerWithEmail({
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        password: emailPassword.trim(),
         role,
-        phone.trim() || undefined,
-        restaurantName.trim() || undefined
-      );
-      if (ok) {
-        showToast(
-          tr(language, 'បានបង្កើតគណនីជោគជ័យ!', 'Account created successfully!', '账号创建成功！'),
-          'success'
-        );
-      }
+        phone: phone.trim() || undefined,
+        restaurantName: restaurantName.trim() || undefined,
+      });
     } catch (err: any) {
       showToast(err?.message || (isKm ? 'មានបញ្ហាក្នុងការចុះឈ្មោះ' : 'Registration error'), 'warning');
     } finally {
@@ -408,7 +432,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
     }
   };
 
-  const handleEmailLogin = (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const rawLogin = loginEmail.trim().toLowerCase();
     const isPrivateAdminId =
@@ -417,7 +441,12 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
       rawLogin === 'chea savuth' ||
       rawLogin === 'admin@khmerfoodtourism.com';
 
-    if (!rawLogin || (!isPrivateAdminId && !hasAuthenticatedEmailAccount({ email: loginEmail }))) {
+    if (isPrivateAdminId) {
+      login(rawLogin);
+      return;
+    }
+
+    if (!rawLogin || !hasAuthenticatedEmailAccount({ email: loginEmail })) {
       showToast(
         tr(
           language,
@@ -430,15 +459,20 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
       return;
     }
 
+    if (!loginPassword.trim()) {
+      showToast(
+        tr(language, 'សូមវាយបញ្ចូលលេខសម្ងាត់គណនីរបស់អ្នក', 'Please enter your account password', '请输入您的账号密码'),
+        'warning'
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const success = login(rawLogin);
-      if (success) {
-        showToast(
-          tr(language, 'ចូលគណនីបានជោគជ័យ!', 'Signed in successfully!', '登录成功！'),
-          'success'
-        );
-      }
+      await loginWithEmail({
+        email: rawLogin,
+        password: loginPassword.trim(),
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -1001,7 +1035,51 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        placeholder="012 345 678"
+                        placeholder="012 245 959"
+                        className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[11px]">
+                      {tr(language, 'បង្កើតលេខសម្ងាត់ (យ៉ាងតិច ៦ ខ្ទង់)', 'Create Password (min 6 chars)', '设置密码（至少 6 位）')}
+                    </label>
+                    <div className="relative flex items-center">
+                      <Lock className="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        autoComplete="new-password"
+                        required
+                        minLength={6}
+                        value={emailPassword}
+                        onChange={(e) => setEmailPassword(e.target.value)}
+                        placeholder="••••••"
+                        className="w-full pl-9 pr-9 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((s) => !s)}
+                        className="absolute right-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                        aria-label="Toggle password visibility"
+                      >
+                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[11px]">
+                      {tr(language, 'បញ្ជាក់លេខសម្ងាត់ម្តងទៀត', 'Confirm Password', '再次确认密码')}
+                    </label>
+                    <div className="relative flex items-center">
+                      <Lock className="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        autoComplete="new-password"
+                        required
+                        minLength={6}
+                        value={emailConfirmPassword}
+                        onChange={(e) => setEmailConfirmPassword(e.target.value)}
+                        placeholder="••••••"
                         className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs"
                       />
                     </div>
@@ -1040,6 +1118,30 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                         placeholder="name@example.com"
                         className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs"
                       />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[11px]">
+                      {tr(language, 'លេខសម្ងាត់', 'Password', '密码')}
+                    </label>
+                    <div className="relative flex items-center">
+                      <Lock className="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        autoComplete="current-password"
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        placeholder="••••••"
+                        className="w-full pl-9 pr-9 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((s) => !s)}
+                        className="absolute right-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                        aria-label="Toggle password visibility"
+                      >
+                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
                     </div>
                   </div>
                   <button

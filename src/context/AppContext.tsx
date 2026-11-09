@@ -69,7 +69,7 @@ import {
   verifyPaymentOnBackend, calculateVipDates, checkEligibleRestoration,
   VIP_ANNUAL_PRICE_USD, VIP_SUBSCRIPTION_DAYS, VIP_QUARTERLY_PRICE_USD, VIP_QUARTERLY_DAYS,
   PaymentVerificationRequest, verifyAbaPaymentTransaction, resolveAndValidateVipPlan,
-  verifyAdditionalStorePaymentOnBackend, recordVerifiedTransaction
+  verifyAdditionalStorePaymentOnBackend, recordVerifiedTransaction, checkDuplicateTransaction
 } from '../services/paymentService';
 import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { buildDynamicNotificationsList } from '../services/dailyDiscoveryAndNotificationService';
@@ -204,6 +204,15 @@ interface AppContextType {
     restaurantName?: string;
   }) => Promise<{ ok: boolean; error?: string }>;
   loginWithPhone: (params: { phone: string; password: string }) => Promise<{ ok: boolean; error?: string }>;
+  registerWithEmail: (params: {
+    name: string;
+    email: string;
+    password: string;
+    role?: UserRole;
+    phone?: string;
+    restaurantName?: string;
+  }) => Promise<{ ok: boolean; error?: string }>;
+  loginWithEmail: (params: { email: string; password: string }) => Promise<{ ok: boolean; error?: string }>;
   loginWithGoogle: (profile: any) => boolean;
   logout: () => void;
   updateUserRole: (userId: string, newRole: UserRole) => void;
@@ -5938,6 +5947,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         );
         return false;
       }
+      if (existing.passwordHash && existing.passwordHash.length >= 20) {
+        showToast(
+          tr(
+            language,
+            '🔒 គណនីនេះមានលេខសម្ងាត់ការពារ។ សូមវាយបញ្ចូលលេខសម្ងាត់របស់អ្នកដើម្បីចូលគណនី!',
+            '🔒 This account is password-protected. Please enter your password to sign in!',
+            '🔒 此账号受密码保护，请输入密码登录！'
+          ),
+          'warning'
+        );
+        return false;
+      }
+      if (existing.authProvider === 'google' || String(existing.id || '').startsWith('google-')) {
+        showToast(
+          tr(
+            language,
+            '🔒 គណនីនេះត្រូវបានភ្ជាប់ជាមួយ Google។ សូមចុចប៊ូតុង «ចូលរហ័សតាម Google» ដើម្បីផ្ទៀងផ្ទាត់ម្ចាស់គណនី!',
+            '🔒 This account is linked with Google. Please use "Continue with Google" to verify ownership!',
+            '🔒 此账号已绑定 Google，请点击“通过 Google 登录”验证身份！'
+          ),
+          'warning'
+        );
+        return false;
+      }
       const existingCachedAv = getCachedUserAvatarForAccount(existing);
       const updatedExisting: User = {
         ...existing,
@@ -8233,46 +8266,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       doesUserMatchTarget(u, { email: emailVal, phone: cleanPhoneDigits.length >= 7 ? cleanPhoneDigits : undefined })
     );
     if (existing) {
-      if (existing.isDisabled) {
-        showToast(
-          language === 'km'
-            ? '⚠️ គណនីនេះត្រូវបានផ្អាកជាបណ្តោះអាសន្ន។ សូមទាក់ទង Admin ដើម្បីស្តារសិទ្ធិចូលប្រើប្រាស់ឡើងវិញ (Restore User Access)។'
-            : '⚠️ This account has been disabled. Please contact Admin to Restore User Access.',
-          'warning'
-        );
-        return false;
-      }
-      const existingCachedAv = getCachedUserAvatarForAccount(existing);
-      const updatedExisting: User = {
-        ...existing,
-        name: displayName || existing.name,
-        phone: phoneVal || existing.phone,
-        avatar: isCustomUploadedAvatarDataUrl(existing.avatar)
-          ? existing.avatar
-          : existingCachedAv && isCustomUploadedAvatarDataUrl(existingCachedAv)
-            ? existingCachedAv
-            : existing.avatar,
-        lastLoginAt: nowIso,
-        lastActiveAt: nowIso,
-      };
-      setUsers(prev => {
-        const next = deduplicateAndNormalizeUsers(
-          prev.map(u => (u.id === existing.id ? updatedExisting : u)),
-          deletedUsers
-        );
-        latestSyncStateRef.current.users = next;
-        safeSetCriticalAccountStorage('kft_users_v5', next);
-        return next;
-      });
-      setCurrentUser(updatedExisting);
-      latestSyncStateRef.current.currentUser = updatedExisting;
-      showToast(language === 'km' ? `សូមស្វាគមន៍មកវិញ ${updatedExisting.name}!` : `Welcome back, ${updatedExisting.name}!`, 'success');
-      if (!completePendingVipRedirectAfterEmailAuth(updatedExisting)) {
-        setIsAuthModalOpen(false);
-      }
-      syncLoggedInUserFromCloud(updatedExisting);
-      return true;
+      showToast(
+        tr(
+          language,
+          '⚠️ អ៊ីមែល ឬលេខទូរស័ព្ទនេះមានគណនីរួចហើយ! សូមចុចផ្ទាំង «ចូលគណនី» ហើយវាយលេខសម្ងាត់របស់អ្នក។',
+          '⚠️ An account with this email or phone already exists! Please switch to Sign In and enter your password.',
+          '⚠️ 该邮箱或手机号已注册！请切换到“登录”并输入密码。'
+        ),
+        'warning'
+      );
+      return false;
     }
+    
 
     const newCanonicalId = getCanonicalUserId({
       email: emailVal,
@@ -8592,6 +8597,345 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const updatedUser: User = {
       ...candidate,
       phone: canonicalPhone,
+      avatar: isCustomUploadedAvatarDataUrl(candidate.avatar)
+        ? candidate.avatar
+        : existingCachedAv && isCustomUploadedAvatarDataUrl(existingCachedAv)
+          ? existingCachedAv
+          : candidate.avatar,
+      lastLoginAt: nowIso,
+      lastActiveAt: nowIso,
+    };
+
+    setUsers((prev) => {
+      const next = deduplicateAndNormalizeUsers(
+        [...prev.filter((u) => !doesUserMatchTarget(u, updatedUser)), updatedUser],
+        deletedUsers
+      );
+      latestSyncStateRef.current.users = next;
+      safeSetCriticalAccountStorage('kft_users_v5', next);
+      return next;
+    });
+    setCurrentUser(updatedUser);
+    latestSyncStateRef.current.currentUser = updatedUser;
+    safeSetCriticalAccountStorage('kft_current_user_v5', updatedUser);
+    if (isSupabaseConfigured()) {
+      upsertSingleUserToCloud(updatedUser).catch(() => {});
+    }
+    showToast(
+      tr(
+        language,
+        `សូមស្វាគមន៍មកវិញ ${updatedUser.name}!`,
+        `Welcome back, ${updatedUser.name}!`,
+        `欢迎回来，${updatedUser.name}！`
+      ),
+      'success'
+    );
+    if (!completePendingVipRedirectAfterEmailAuth(updatedUser)) {
+      setIsAuthModalOpen(false);
+    }
+    syncLoggedInUserFromCloud(updatedUser);
+    return { ok: true };
+  };
+
+  const registerWithEmail = async (params: {
+    name: string;
+    email: string;
+    password: string;
+    role?: UserRole;
+    phone?: string;
+    restaurantName?: string;
+  }): Promise<{ ok: boolean; error?: string }> => {
+    const cleanEmail = String(params.email || '').trim().toLowerCase();
+    if (!cleanEmail || !hasAuthenticatedEmailAccount({ email: cleanEmail }) || isDisposableEmailAddress(cleanEmail)) {
+      const msg = tr(
+        language,
+        'សូមវាយបញ្ចូលអាសយដ្ឋានអ៊ីមែលពិតប្រាកដ (ឧ. name@gmail.com)',
+        'Please enter a valid non-disposable email address (e.g. name@gmail.com)',
+        '请输入真实有效的电子邮箱地址（如 name@gmail.com）'
+      );
+      showToast(msg, 'warning');
+      return { ok: false, error: msg };
+    }
+    const cleanPass = String(params.password || '').trim();
+    if (cleanPass.length < 6) {
+      const msg = tr(
+        language,
+        'លេខសម្ងាត់ត្រូវមានយ៉ាងតិច ៦ តួអក្សរ',
+        'Password must be at least 6 characters',
+        '密码至少需要 6 个字符'
+      );
+      showToast(msg, 'warning');
+      return { ok: false, error: msg };
+    }
+
+    let validatedPhone: string | undefined = undefined;
+    if (params.phone && params.phone.trim()) {
+      const phoneCheck = validateCambodiaPhoneForRegistration(params.phone.trim());
+      if (!phoneCheck.valid || !phoneCheck.canonicalPhone) {
+        const msg = (language === 'km' ? phoneCheck.messageKh : phoneCheck.messageEn) || 'Invalid phone number';
+        showToast(msg, 'warning');
+        return { ok: false, error: msg };
+      }
+      validatedPhone = phoneCheck.canonicalPhone;
+    }
+
+    const normIdentity = normalizeEmailForIdentity(cleanEmail)?.canonical || cleanEmail;
+    const safeRole: UserRole = params.role === 'owner' ? 'owner' : 'user';
+    const displayName = String(params.name || '').trim() || cleanEmail.split('@')[0];
+    const canonicalId = getCanonicalUserId({
+      email: cleanEmail,
+      phone: validatedPhone,
+      role: safeRole,
+      authProvider: 'email',
+    });
+    const emailSlug = cleanEmail.replace(/[^a-z0-9]/g, '_');
+
+    let cloudExisting: User | null = null;
+    if (isSupabaseConfigured()) {
+      try {
+        const pulled =
+          (await pullCloudDocument<User>(`${USER_RECORD_PREFIX}${canonicalId}`, 5000)) ||
+          (await pullCloudDocument<User>(`${USER_RECORD_PREFIX}user-${emailSlug}`, 4000)) ||
+          (await pullCloudDocument<User>(`${USER_RECORD_PREFIX}google-${emailSlug}`, 4000));
+        if (pulled && pulled.id) cloudExisting = pulled;
+      } catch {}
+    }
+
+    const localExisting = (latestSyncStateRef.current.users || users).find((u) => {
+      const uNormE = normalizeEmailForIdentity(u.email)?.canonical || String(u.email || '').trim().toLowerCase();
+      return (
+        doesUserMatchTarget(u, { id: canonicalId, email: cleanEmail, phone: validatedPhone }) ||
+        (uNormE && uNormE === normIdentity)
+      );
+    });
+    const existing = cloudExisting || localExisting || null;
+
+    if (existing) {
+      if (existing.isDisabled) {
+        const msg = tr(
+          language,
+          '⚠️ គណនីនេះត្រូវបានផ្អាកជាបណ្តោះអាសន្ន។ សូមទាក់ទង Admin។',
+          '⚠️ This account has been disabled. Please contact Admin.',
+          '⚠️ 该账号已被暂停，请联系管理员。'
+        );
+        showToast(msg, 'warning');
+        return { ok: false, error: msg };
+      }
+      const msg = tr(
+        language,
+        '⚠️ អ៊ីមែលនេះមានគណនីរួចហើយ! សូមចុចផ្ទាំង «ចូលគណនី» ហើយវាយលេខសម្ងាត់របស់អ្នក។',
+        '⚠️ This email address is already registered! Please switch to Sign In and enter your password.',
+        '⚠️ 该邮箱已注册！请切换到“登录”并输入您的密码。'
+      );
+      showToast(msg, 'warning');
+      return { ok: false, error: msg };
+    }
+
+    const devElig = await checkDeviceAccountRegistrationEligibility({
+      candidateAccountKey: normIdentity,
+      existingUsers: latestSyncStateRef.current.users || users,
+    });
+    if (!devElig.allowed) {
+      const msg = (language === 'km' ? devElig.messageKh : devElig.messageEn) || 'Device account limit reached';
+      showToast(msg, 'warning');
+      return { ok: false, error: msg };
+    }
+    const registeredDeviceHash = devElig.deviceHash || undefined;
+    await recordDeviceAccountRegistration(normIdentity, devElig.deviceHash);
+
+    const pwHash = await hashPasswordPBKDF2(cleanPass);
+    const nowIso = new Date().toISOString();
+    pruneStaleDeletedTombstoneForActiveAuth({ id: canonicalId, email: cleanEmail, phone: validatedPhone });
+
+    const newCachedAv = getCachedUserAvatarForAccount({
+      id: canonicalId,
+      email: cleanEmail,
+      phone: validatedPhone,
+      name: displayName,
+    });
+
+    const savedUser: User = {
+      id: canonicalId,
+      name: displayName,
+      email: cleanEmail,
+      phone: validatedPhone,
+      passwordHash: pwHash,
+      role: safeRole,
+      restaurantName: params.restaurantName?.trim() || undefined,
+      authProvider: 'email',
+      linkedProviders: ['email'],
+      isVerified: true,
+      verifiedAt: nowIso,
+      avatar: newCachedAv || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+      createdAt: nowIso.split('T')[0],
+      registeredAtIso: nowIso,
+      lastLoginAt: nowIso,
+      lastActiveAt: nowIso,
+      registeredDeviceHash,
+    };
+
+    setUsers((prev) => {
+      const next = deduplicateAndNormalizeUsers(
+        [...prev.filter((u) => !doesUserMatchTarget(u, savedUser)), savedUser],
+        deletedUsers
+      );
+      latestSyncStateRef.current.users = next;
+      safeSetCriticalAccountStorage('kft_users_v5', next);
+      return next;
+    });
+    setCurrentUser(savedUser);
+    latestSyncStateRef.current.currentUser = savedUser;
+    safeSetCriticalAccountStorage('kft_current_user_v5', savedUser);
+    if (isSupabaseConfigured()) {
+      upsertSingleUserToCloud(savedUser).catch(() => {});
+    }
+    showToast(
+      tr(language, `សូមស្វាគមន៍ ${savedUser.name}!`, `Welcome, ${savedUser.name}!`, `欢迎，${savedUser.name}！`),
+      'success'
+    );
+    if (!completePendingVipRedirectAfterEmailAuth(savedUser)) {
+      setIsAuthModalOpen(false);
+    }
+    syncLoggedInUserFromCloud(savedUser);
+    return { ok: true };
+  };
+
+  const loginWithEmail = async (params: {
+    email: string;
+    password: string;
+  }): Promise<{ ok: boolean; error?: string }> => {
+    const cleanEmail = String(params.email || '').trim().toLowerCase();
+    if (
+      cleanEmail === 'admin' ||
+      cleanEmail === 'cheasavuth' ||
+      cleanEmail === 'chea savuth' ||
+      cleanEmail === 'admin@khmerfoodtourism.com'
+    ) {
+      setIsAuthModalOpen(false);
+      setIsAdminLoginModalOpen(true);
+      return { ok: false };
+    }
+
+    if (!cleanEmail || !hasAuthenticatedEmailAccount({ email: cleanEmail })) {
+      const msg = tr(
+        language,
+        'សូមវាយបញ្ចូលអាសយដ្ឋានអ៊ីមែលរបស់អ្នកឱ្យបានត្រឹមត្រូវ (ឧ. name@gmail.com)',
+        'Please enter a valid email address (e.g. name@gmail.com)',
+        '请输入有效的电子邮箱地址（如 name@gmail.com）'
+      );
+      showToast(msg, 'warning');
+      return { ok: false, error: msg };
+    }
+
+    const cleanPass = String(params.password || '').trim();
+    if (!cleanPass) {
+      const msg = tr(language, 'សូមបញ្ចូលលេខសម្ងាត់របស់អ្នក', 'Please enter your password', '请输入您的密码');
+      showToast(msg, 'warning');
+      return { ok: false, error: msg };
+    }
+
+    const normIdentity = normalizeEmailForIdentity(cleanEmail)?.canonical || cleanEmail;
+    const emailSlug = cleanEmail.replace(/[^a-z0-9]/g, '_');
+
+    let candidate: User | null =
+      (latestSyncStateRef.current.users || users).find((u) => {
+        const uNormE = normalizeEmailForIdentity(u.email)?.canonical || String(u.email || '').trim().toLowerCase();
+        return doesUserMatchTarget(u, { email: cleanEmail }) || (uNormE && uNormE === normIdentity);
+      }) || null;
+
+    if (isSupabaseConfigured()) {
+      try {
+        const cloudKeys = [
+          `${USER_RECORD_PREFIX}user-${emailSlug}`,
+          `${USER_RECORD_PREFIX}google-${emailSlug}`,
+          ...(candidate ? getCandidateAtomicUserKeys(candidate) : []),
+        ];
+        for (const ck of Array.from(new Set(cloudKeys))) {
+          const pulled = await pullCloudDocument<User>(ck, 5000);
+          if (pulled && pulled.id) {
+            candidate = candidate ? deduplicateAndNormalizeUsers([candidate, pulled], [])[0] || pulled : pulled;
+            break;
+          }
+        }
+      } catch {}
+    }
+
+    if (!candidate) {
+      const msg = tr(
+        language,
+        'រកមិនឃើញគណនីតាមអ៊ីមែលនេះទេ។ សូមចុចផ្ទាំង «ចុះឈ្មោះ» ដើម្បីបង្កើតគណនីជាមុនសិន!',
+        'No account found for this email. Please switch to Register to create an account first!',
+        '未找到该邮箱对应的账号，请先切换到“注册”创建账号！'
+      );
+      showToast(msg, 'warning');
+      return { ok: false, error: msg };
+    }
+
+    if (candidate.role === 'admin') {
+      setIsAuthModalOpen(false);
+      setIsAdminLoginModalOpen(true);
+      return { ok: false };
+    }
+
+    if (candidate.isDisabled) {
+      const msg = tr(
+        language,
+        '⚠️ គណនីនេះត្រូវបានផ្អាកជាបណ្តោះអាសន្ន។ សូមទាក់ទង Admin។',
+        '⚠️ This account has been disabled. Please contact Admin.',
+        '⚠️ 该账号已被暂停，请联系管理员。'
+      );
+      showToast(msg, 'warning');
+      return { ok: false, error: msg };
+    }
+
+    if (candidate.passwordHash && candidate.passwordHash.length >= 20) {
+      const isPbkdf2 = candidate.passwordHash.indexOf('pbkdf2') === 0;
+      const valid = isPbkdf2
+        ? await verifyPasswordPBKDF2(cleanPass, candidate.passwordHash)
+        : await verifyPassword(cleanPass, candidate.passwordHash);
+      if (!valid) {
+        const msg = tr(
+          language,
+          'លេខសម្ងាត់មិនត្រឹមត្រូវទេ សូមពិនិត្យម្តងទៀត!',
+          'Incorrect password. Please try again!',
+          '密码不正确，请重试！'
+        );
+        showToast(msg, 'warning');
+        return { ok: false, error: msg };
+      }
+    } else if (
+      !isNativeIosApp() &&
+      (candidate.authProvider === 'google' || String(candidate.id || '').startsWith('google-'))
+    ) {
+      const msg = tr(
+        language,
+        '🔒 គណនីនេះត្រូវបានបង្កើតតាមរយៈ Google។ សូមចុចប៊ូតុង «ចូលរហ័សតាម Google» ដើម្បីផ្ទៀងផ្ទាត់ម្ចាស់គណនី!',
+        '🔒 This account was created via Google Sign-In. Please use "Continue with Google" to verify ownership!',
+        '🔒 此账号通过 Google 创建，请使用“通过 Google 登录”验证身份！'
+      );
+      showToast(msg, 'warning');
+      return { ok: false, error: msg };
+    } else {
+      if (cleanPass.length < 6) {
+        const msg = tr(
+          language,
+          'លេខសម្ងាត់ត្រូវមានយ៉ាងតិច ៦ តួអក្សរ',
+          'Password must be at least 6 characters',
+          '密码至少需要 6 个字符'
+        );
+        showToast(msg, 'warning');
+        return { ok: false, error: msg };
+      }
+      candidate = {
+        ...candidate,
+        passwordHash: await hashPasswordPBKDF2(cleanPass),
+      };
+    }
+
+    const nowIso = new Date().toISOString();
+    const existingCachedAv = getCachedUserAvatarForAccount(candidate);
+    const updatedUser: User = {
+      ...candidate,
       avatar: isCustomUploadedAvatarDataUrl(candidate.avatar)
         ? candidate.avatar
         : existingCachedAv && isCustomUploadedAvatarDataUrl(existingCachedAv)
@@ -15833,6 +16177,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         register,
         registerWithPhone,
         loginWithPhone,
+        registerWithEmail,
+        loginWithEmail,
         loginWithGoogle,
         logout,
         updateUserRole,
