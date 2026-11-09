@@ -13,8 +13,33 @@ permissions:
   contents: write
 
 jobs:
-  build-ios:
+  submit-appstore-review:
     if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[ios]') || (!contains(github.event.head_commit.message, '[apk-only]') && !contains(github.event.head_commit.message, '[aab-only]') && !contains(github.event.head_commit.message, 'Release Android APK') && !contains(github.event.head_commit.message, 'Release Play Store AAB'))
+    runs-on: ubuntu-latest
+    outputs:
+      asc_review_state: ${{ steps.asc.outputs.asc_review_state }}
+    steps:
+      - name: 1. Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 2. Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 3. Ensure App Store Connect Review Notes & Active Submission
+        id: asc
+        env:
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+        run: |
+          node scripts/update-asc-review-notes.mjs || true
+          echo "asc_review_state=${ASC_REVIEW_STATE}" >> "$GITHUB_OUTPUT"
+
+  build-ios:
+    needs: submit-appstore-review
+    if: (needs.submit-appstore-review.outputs.asc_review_state != 'WAITING_FOR_REVIEW' && needs.submit-appstore-review.outputs.asc_review_state != 'IN_REVIEW' && needs.submit-appstore-review.outputs.asc_review_state != 'PENDING_APPLE_RELEASE') || contains(github.event.head_commit.message, '[force-ios-build]')
     runs-on: macos-latest
     continue-on-error: true
 
@@ -28,32 +53,20 @@ jobs:
           node-version: 22
           cache: 'npm'
 
-      - name: 3. Ensure App Store Connect Review Notes & Active Submission
-        env:
-          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
-          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
-          APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
-        run: |
-          node scripts/update-asc-review-notes.mjs || true
-
-      - name: 4. Install Dependencies
-        if: env.ASC_REVIEW_STATE != 'WAITING_FOR_REVIEW' && env.ASC_REVIEW_STATE != 'IN_REVIEW' || contains(github.event.head_commit.message, '[force-ios-build]')
+      - name: 3. Install Dependencies
         run: npm install
 
-      - name: 5. Build Web Bundle
-        if: env.ASC_REVIEW_STATE != 'WAITING_FOR_REVIEW' && env.ASC_REVIEW_STATE != 'IN_REVIEW' || contains(github.event.head_commit.message, '[force-ios-build]')
+      - name: 4. Build Web Bundle
         run: npm run build
 
-      - name: 6. Sync Capacitor iOS Platform
-        if: env.ASC_REVIEW_STATE != 'WAITING_FOR_REVIEW' && env.ASC_REVIEW_STATE != 'IN_REVIEW' || contains(github.event.head_commit.message, '[force-ios-build]')
+      - name: 5. Sync Capacitor iOS Platform
         run: |
           if [ ! -d "ios/App" ]; then
             npx cap add ios
           fi
           npx cap sync ios
 
-      - name: 7. Generate Compliant Full-Bleed 1024x1024 RGB iPad & iPhone Icons (Zero Transparency)
-        if: env.ASC_REVIEW_STATE != 'WAITING_FOR_REVIEW' && env.ASC_REVIEW_STATE != 'IN_REVIEW' || contains(github.event.head_commit.message, '[force-ios-build]')
+      - name: 6. Generate Compliant Full-Bleed 1024x1024 RGB iPad & iPhone Icons (Zero Transparency)
         run: |
           pip3 install Pillow --break-system-packages || pip3 install Pillow || true
           python3 -c "
@@ -88,8 +101,7 @@ jobs:
               print(f'Icon generation warning: {e}')
           "
 
-      - name: 8. Verify iOS Privacy Descriptions in Info.plist
-        if: env.ASC_REVIEW_STATE != 'WAITING_FOR_REVIEW' && env.ASC_REVIEW_STATE != 'IN_REVIEW' || contains(github.event.head_commit.message, '[force-ios-build]')
+      - name: 7. Verify iOS Privacy Descriptions in Info.plist
         run: |
           PLIST="ios/App/App/Info.plist"
           if [ -f "$PLIST" ]; then
@@ -97,8 +109,7 @@ jobs:
             grep -E "NSCameraUsageDescription|NSPhotoLibraryUsageDescription|NSPhotoLibraryAddUsageDescription|NSLocationWhenInUseUsageDescription|NSFaceIDUsageDescription" "$PLIST" || echo "Privacy keys verified"
           fi
 
-      - name: 9. Build & Archive Xcode Release
-        if: env.ASC_REVIEW_STATE != 'WAITING_FOR_REVIEW' && env.ASC_REVIEW_STATE != 'IN_REVIEW' || contains(github.event.head_commit.message, '[force-ios-build]')
+      - name: 8. Build & Archive Xcode Release
         env:
           APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
           APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
@@ -157,7 +168,7 @@ jobs:
               PROVISIONING_PROFILE_SPECIFIER=""
 
             if [ -d "build/App.xcarchive/Products/Applications/App.app" ]; then
-              mkdir -p ios/App/build/Payload
+              mkdir -p build/Payload
               cp -r "build/App.xcarchive/Products/Applications/App.app" build/Payload/
               cd build
               zip -qry CambodiaFlavorsTourism-v2.7.0.ipa Payload
@@ -168,8 +179,8 @@ jobs:
             fi
           fi
 
-      - name: 10. Upload Signed IPA & Submit to Apple App Store Connect
-        if: (env.ASC_REVIEW_STATE != 'WAITING_FOR_REVIEW' && env.ASC_REVIEW_STATE != 'IN_REVIEW' || contains(github.event.head_commit.message, '[force-ios-build]')) && env.APPSTORE_PRIVATE_KEY != '' && env.APPSTORE_KEY_ID != '' && env.APPSTORE_ISSUER_ID != ''
+      - name: 9. Upload Signed IPA & Submit to Apple App Store Connect
+        if: env.APPSTORE_PRIVATE_KEY != '' && env.APPSTORE_KEY_ID != '' && env.APPSTORE_ISSUER_ID != ''
         env:
           APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
           APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
@@ -188,17 +199,16 @@ jobs:
           fi
           node scripts/update-asc-review-notes.mjs || true
 
-      - name: 11. Upload iOS Release Packages Artifact
-        if: env.ASC_REVIEW_STATE != 'WAITING_FOR_REVIEW' && env.ASC_REVIEW_STATE != 'IN_REVIEW' || contains(github.event.head_commit.message, '[force-ios-build]')
+      - name: 10. Upload iOS Release Packages Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Cambodia-Flavors-Tourism-iOS-v2.7.0-Package
           path: |
             ios/App/build/CambodiaFlavorsTourism-v2.7.0.ipa
 
-      - name: 12. Attach iOS IPA to GitHub Release v2.5.0
+      - name: 11. Attach iOS IPA to GitHub Release v2.5.0
         uses: softprops/action-gh-release@v2
-        if: (env.ASC_REVIEW_STATE != 'WAITING_FOR_REVIEW' && env.ASC_REVIEW_STATE != 'IN_REVIEW' || contains(github.event.head_commit.message, '[force-ios-build]')) && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main'
         with:
           tag_name: v2.7.0
           name: "Cambodia Flavors & Tourism v2.7.0"
