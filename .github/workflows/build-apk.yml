@@ -125,7 +125,13 @@ jobs:
           # 1. Build Play Store AAB with official Play Store package ID (com.khmerfood.tourism)
           if [ "$BUILD_AAB" = "true" ]; then
             echo "::group::Building Google Play Store Bundle (.AAB)"
-            ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease
+            for bAttempt in 1 2 3; do
+              if ./gradlew bundleRelease --no-daemon -x lint -x lintVitalRelease; then
+                break
+              fi
+              echo "bundleRelease hit temporary network issue. Retrying in 6s (attempt \/3)..."
+              sleep 6
+            done
             REL_AAB=$(find app/build/outputs/bundle/release -name "*.aab" | head -n 1)
             cp "$REL_AAB" "../release_out/$AAB_NAME"
             unzip -tq "../release_out/$AAB_NAME"
@@ -144,7 +150,13 @@ jobs:
           # Ensures only 1 unified app icon/program exists on Android
           if [ "$BUILD_APK" = "true" ]; then
             echo "::group::Building Direct-Install Android APK (.APK)"
-            ./gradlew assembleRelease --no-daemon -x lint -x lintVitalRelease
+            for aAttempt in 1 2 3; do
+              if ./gradlew assembleRelease --no-daemon -x lint -x lintVitalRelease; then
+                break
+              fi
+              echo "assembleRelease hit temporary network issue. Retrying in 6s (attempt \/3)..."
+              sleep 6
+            done
             REL_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
             "$ZIPALIGN" -p -f 4 "$REL_APK" ../release_out/aligned-official.apk
             "$APKSIGNER" sign \
