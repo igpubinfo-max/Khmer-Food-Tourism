@@ -4,10 +4,10 @@ android {
     namespace = "com.khmerfood.tourism"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId project.hasProperty("customAppId") ? project.property("customAppId") : "com.khmerfood.tourism"
+        applicationId "com.khmerfood.tourism"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1488
+        versionCode 1489
         versionName "2.7.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         ndk {

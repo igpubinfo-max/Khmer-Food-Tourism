@@ -8,7 +8,7 @@
 		"scheme": "DiscoverCambodia"
 	},
 	"android": {
-		"allowMixedContent": true,
+		"allowMixedContent": false,
 		"backgroundColor": "#0F172A"
 	},
 	"plugins": {

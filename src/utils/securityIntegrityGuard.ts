@@ -212,6 +212,170 @@ export interface LocalAuthoritativeVipMatch {
 
 const parsedStorageCache = new Map<string, { raw: string; parsed: any }>();
 
+export function isUserExplicitlyCancelled(u: Partial<User> | null | undefined): boolean {
+  if (!u || typeof u !== 'object') return false;
+  return (
+    u.subscriptionStatus === 'cancelled' ||
+    u.paymentStatus === 'cancelled' ||
+    (Boolean(u.vipCancelledAt) && u.subscriptionStatus !== 'active')
+  );
+}
+
+/**
+ * Purges a cancelled user's stale VIP records from all local caches and backup registries
+ * so local storage never resurrects VIP status after an Admin cancellation.
+ */
+export function purgeCancelledUserFromLocalCaches(targetUser: Partial<User> | null | undefined): void {
+  if (!targetUser) return;
+  parsedStorageCache.clear();
+  try {
+    if (typeof localStorage === 'undefined') return;
+
+    // 1. Remove from kft_vip_registry_backup_v1
+    const rawVipBackup = localStorage.getItem('kft_vip_registry_backup_v1');
+    if (rawVipBackup) {
+      try {
+        const parsed = JSON.parse(rawVipBackup);
+        if (Array.isArray(parsed)) {
+          const filtered = parsed.filter((u: any) => !doesUserMatchCandidate(u, targetUser));
+          localStorage.setItem('kft_vip_registry_backup_v1', JSON.stringify(filtered));
+        }
+      } catch {}
+    }
+
+    // 2. Clean kft_pre_update_db_backup_v1 (vipUsers, allUsers, verifiedTransactions)
+    const rawPreUpdate = localStorage.getItem('kft_pre_update_db_backup_v1');
+    if (rawPreUpdate) {
+      try {
+        const snap = JSON.parse(rawPreUpdate);
+        if (snap && typeof snap === 'object') {
+          let changed = false;
+          if (Array.isArray(snap.vipUsers)) {
+            const nextVip = snap.vipUsers.filter((u: any) => !doesUserMatchCandidate(u, targetUser));
+            if (nextVip.length !== snap.vipUsers.length) {
+              snap.vipUsers = nextVip;
+              changed = true;
+            }
+          }
+          if (Array.isArray(snap.allUsers)) {
+            snap.allUsers = snap.allUsers.map((u: any) => {
+              if (!doesUserMatchCandidate(u, targetUser)) return u;
+              changed = true;
+              return {
+                ...u,
+                membershipTier: 'free',
+                subscriptionStatus: 'cancelled',
+                paymentStatus: 'cancelled',
+                vipStatus: 'none',
+                subscriptionExpiryDate: undefined,
+                vipExpiresAt: undefined,
+                freeTrialActivated: false,
+                freeTrialExpiresAt: undefined,
+                autoRenew: false,
+                vipCancelledAt: targetUser.vipCancelledAt || new Date().toISOString(),
+              };
+            });
+          }
+          if (Array.isArray(snap.verifiedTransactions)) {
+            const nextTxns = snap.verifiedTransactions.filter((t: any) => !doesUserMatchCandidate(t, targetUser));
+            if (nextTxns.length !== snap.verifiedTransactions.length) {
+              snap.verifiedTransactions = nextTxns;
+              changed = true;
+            }
+          }
+          if (changed) {
+            localStorage.setItem('kft_pre_update_db_backup_v1', JSON.stringify(snap));
+          }
+        }
+      } catch {}
+    }
+
+    // 3. Downgrade in legacy/aggregate local user lists
+    for (const listKey of ['kft_cloud_users_v2', 'kft_cloud_users_v1', 'kft_users_v4']) {
+      const rawList = localStorage.getItem(listKey);
+      if (!rawList) continue;
+      try {
+        const parsed = JSON.parse(rawList);
+        if (Array.isArray(parsed)) {
+          let changed = false;
+          const updated = parsed.map((u: any) => {
+            if (!doesUserMatchCandidate(u, targetUser)) return u;
+            changed = true;
+            return {
+              ...u,
+              membershipTier: 'free',
+              subscriptionStatus: 'cancelled',
+              paymentStatus: 'cancelled',
+              vipStatus: 'none',
+              subscriptionExpiryDate: undefined,
+              vipExpiresAt: undefined,
+              freeTrialActivated: false,
+              freeTrialExpiresAt: undefined,
+              autoRenew: false,
+              vipCancelledAt: targetUser.vipCancelledAt || new Date().toISOString(),
+            };
+          });
+          if (changed) {
+            localStorage.setItem(listKey, JSON.stringify(updated));
+          }
+        }
+      } catch {}
+    }
+
+    // 4. Clean legacy kft_current_user_v4 if matching
+    const rawV4 = localStorage.getItem('kft_current_user_v4');
+    if (rawV4) {
+      try {
+        const parsedV4 = JSON.parse(rawV4);
+        if (parsedV4 && doesUserMatchCandidate(parsedV4, targetUser)) {
+          localStorage.removeItem('kft_current_user_v4');
+        }
+      } catch {}
+    }
+
+    // 5. Clean kft_secondary_cloud_mirror_v1 so secondary failover mirror never resurrects VIP
+    const rawMirror = localStorage.getItem('kft_secondary_cloud_mirror_v1');
+    if (rawMirror) {
+      try {
+        const mirrorObj = JSON.parse(rawMirror);
+        if (mirrorObj && typeof mirrorObj === 'object') {
+          let mirrorChanged = false;
+          for (const [mKey, rawMEntry] of Object.entries(mirrorObj)) {
+            const mEntry = rawMEntry as any;
+            if (!mEntry || typeof mEntry !== 'object') continue;
+            if (mKey.startsWith('kft_user_') && mEntry.payload && doesUserMatchCandidate(mEntry.payload, targetUser)) {
+              mEntry.payload = {
+                ...mEntry.payload,
+                membershipTier: 'free',
+                subscriptionStatus: 'cancelled',
+                paymentStatus: 'cancelled',
+                vipStatus: 'none',
+                subscriptionExpiryDate: undefined,
+                vipExpiresAt: undefined,
+                freeTrialActivated: false,
+                freeTrialExpiresAt: undefined,
+                autoRenew: false,
+                vipCancelledAt: targetUser.vipCancelledAt || new Date().toISOString(),
+              };
+              mirrorChanged = true;
+            } else if (mKey === 'kft_cloud_vip_backup_v1' && Array.isArray(mEntry.payload)) {
+              const filtered = mEntry.payload.filter((u: any) => !doesUserMatchCandidate(u, targetUser));
+              if (filtered.length !== mEntry.payload.length) {
+                mEntry.payload = filtered;
+                mirrorChanged = true;
+              }
+            }
+          }
+          if (mirrorChanged) {
+            localStorage.setItem('kft_secondary_cloud_mirror_v1', JSON.stringify(mirrorObj));
+          }
+        }
+      } catch {}
+    }
+  } catch {}
+  parsedStorageCache.clear();
+}
+
 function getCachedParsedLocalStorage(key: string): any {
   try {
     if (typeof localStorage === 'undefined') return null;
@@ -241,27 +405,78 @@ export function findLocalAuthoritativeVipEntitlement(
   extraCloudUsers?: User[] | null
 ): LocalAuthoritativeVipMatch {
   if (!targetUser) return { found: false, expiryMs: 0 };
+  let bestSlots = typeof targetUser.paidAdditionalStoreSlots === 'number' ? targetUser.paidAdditionalStoreSlots : 0;
+
+  // Never resurrect VIP from local cache if targetUser itself is explicitly cancelled
+  if (isUserExplicitlyCancelled(targetUser)) {
+    return { found: false, expiryMs: 0, paidAdditionalStoreSlots: bestSlots };
+  }
+
   const nowMs = getAuthoritativeServerNowMs();
+  let latestCancelMs = 0;
+  let hasExplicitCancelledRecord = false;
+  let latestActiveCloudGrantMs = 0;
+
+  const inspectForCancellation = (rawCand: any, isAuthoritativeList: boolean) => {
+    if (!rawCand || typeof rawCand !== 'object') return;
+    if (!doesUserMatchCandidate(rawCand, targetUser)) return;
+    if (isUserExplicitlyCancelled(rawCand)) {
+      hasExplicitCancelledRecord = true;
+      const cMs = parseSafeDateMs(rawCand.vipCancelledAt || rawCand.autoRenewCancelledAt || rawCand.lastActiveAt);
+      if (cMs > latestCancelMs) latestCancelMs = cMs;
+    } else if (
+      isAuthoritativeList &&
+      (rawCand.membershipTier === 'premium_vip' || rawCand.subscriptionStatus === 'active')
+    ) {
+      const sMs = parseSafeDateMs(rawCand.subscriptionStartDate || rawCand.verifiedAt);
+      if (sMs > latestActiveCloudGrantMs) latestActiveCloudGrantMs = sMs;
+    }
+  };
+
+  if (Array.isArray(extraCloudUsers)) {
+    for (const u of extraCloudUsers) inspectForCancellation(u, true);
+  }
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const parsedCur = getCachedParsedLocalStorage('kft_current_user_v5');
+      if (parsedCur) inspectForCancellation(parsedCur, false);
+      const parsedUsersV5 = getCachedParsedLocalStorage('kft_users_v5');
+      if (Array.isArray(parsedUsersV5)) {
+        for (const u of parsedUsersV5) inspectForCancellation(u, true);
+      }
+    }
+  } catch {}
+
+  // If an explicit Admin cancellation exists and no newer authoritative VIP grant happened after it, block local cache resurrection
+  if (hasExplicitCancelledRecord && (latestCancelMs === 0 || latestActiveCloudGrantMs <= latestCancelMs)) {
+    return { found: false, expiryMs: 0, paidAdditionalStoreSlots: bestSlots };
+  }
+
   let bestExpMs = 0;
   let bestStartIso: string | undefined;
   let bestTxnRef: string | undefined;
   let bestMethod: User['paymentMethod'] | undefined;
-  let bestSlots = typeof targetUser.paidAdditionalStoreSlots === 'number' ? targetUser.paidAdditionalStoreSlots : 0;
   let bestMatchedUser: User | undefined;
 
   const considerUserRecord = (rawCand: any) => {
     if (!rawCand || typeof rawCand !== 'object') return;
     if (!doesUserMatchCandidate(rawCand, targetUser)) return;
+    if (isUserExplicitlyCancelled(rawCand)) return;
     const cand = sanitizeUserVipPlanAndExpiry(rawCand as User);
     if (typeof cand.paidAdditionalStoreSlots === 'number' && cand.paidAdditionalStoreSlots > bestSlots) {
       bestSlots = cand.paidAdditionalStoreSlots;
     }
-    if (cand.subscriptionStatus === 'cancelled' || cand.paymentStatus === 'cancelled') return;
+    if (isUserExplicitlyCancelled(cand)) return;
     const isVip =
       cand.membershipTier === 'premium_vip' ||
       cand.subscriptionStatus === 'active' ||
       cand.vipStatus === 'active';
     if (!isVip) return;
+
+    const candStartMs = parseSafeDateMs(cand.subscriptionStartDate || cand.verifiedAt);
+    if (latestCancelMs > 0 && candStartMs <= latestCancelMs) {
+      return;
+    }
 
     const rawExp = cand.subscriptionExpiryDate || cand.vipExpiresAt;
     let expMs = parseSafeDateMs(rawExp);
@@ -318,6 +533,8 @@ export function findLocalAuthoritativeVipEntitlement(
           for (const t of snap.verifiedTransactions) {
             if (!t || t.status !== 'verified' || t.type === 'additional_store_slot') continue;
             if (!doesUserMatchCandidate(t, targetUser)) continue;
+            const txnStartMs = parseSafeDateMs(t.verifiedAt || t.createdAt);
+            if (latestCancelMs > 0 && txnStartMs <= latestCancelMs) continue;
             const expMs = parseSafeDateMs(t.expiresAt);
             if (expMs > nowMs && expMs > bestExpMs) {
               bestExpMs = expMs;
@@ -337,6 +554,8 @@ export function findLocalAuthoritativeVipEntitlement(
             if (!t || t.status !== 'verified') continue;
             if (!doesUserMatchCandidate(t, targetUser)) continue;
             if (t.type === 'additional_store_slot') continue;
+            const txnStartMs = parseSafeDateMs(t.verifiedAt || t.createdAt);
+            if (latestCancelMs > 0 && txnStartMs <= latestCancelMs) continue;
             const expMs = parseSafeDateMs(t.expiresAt);
             if (expMs > nowMs && expMs > bestExpMs) {
               bestExpMs = expMs;
@@ -359,7 +578,7 @@ export function findLocalAuthoritativeVipEntitlement(
             parseSafeDateMs(tk.updatedAt) ||
             parseSafeDateMs(tk.createdAt);
           const days = typeof tk.durationDays === 'number' && tk.durationDays >= 1 ? tk.durationDays : 30;
-          if (baseMs > 0) {
+          if (baseMs > 0 && (latestCancelMs <= 0 || baseMs > latestCancelMs)) {
             const expMs = baseMs + days * 24 * 60 * 60 * 1000;
             if (expMs > nowMs && expMs > bestExpMs) {
               bestExpMs = expMs;
@@ -438,6 +657,33 @@ export async function verifyAndSanitizeUserSession(
   }
 
   // 2. VIP Status Integrity & Self-Healing
+  const cloudMatchedCancelled = Array.isArray(authoritativeCloudUsers)
+    ? authoritativeCloudUsers.find(cu => doesUserMatchCandidate(cu, sanitized) && isUserExplicitlyCancelled(cu))
+    : undefined;
+  if (isUserExplicitlyCancelled(user) || isUserExplicitlyCancelled(sanitized) || cloudMatchedCancelled) {
+    const cancelIso =
+      cloudMatchedCancelled?.vipCancelledAt ||
+      sanitized.vipCancelledAt ||
+      user.vipCancelledAt ||
+      new Date().toISOString();
+    sanitized.membershipTier = 'free';
+    sanitized.subscriptionStatus = 'cancelled';
+    sanitized.paymentStatus = 'cancelled';
+    sanitized.vipStatus = 'none';
+    delete sanitized.subscriptionExpiryDate;
+    delete sanitized.vipExpiresAt;
+    sanitized.freeTrialActivated = false;
+    delete sanitized.freeTrialExpiresAt;
+    sanitized.autoRenew = false;
+    sanitized.vipCancelledAt = cancelIso;
+    sanitized.integritySeal = await computeUserIntegritySeal(sanitized);
+    purgeCancelledUserFromLocalCaches(sanitized);
+    try {
+      localStorage.setItem('kft_current_user_v5', JSON.stringify(sanitized));
+    } catch {}
+    return { user: sanitized, tampered, reason };
+  }
+
   const isVipClaimed =
     (sanitized as any).vipStatus === 'active' ||
     sanitized.subscriptionStatus === 'active' ||
@@ -603,7 +849,21 @@ export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | n
         parsed.membershipTier === 'premium_vip';
 
       const isExplicitlyCancelled =
-        parsed.subscriptionStatus === 'cancelled' || parsed.paymentStatus === 'cancelled';
+        isUserExplicitlyCancelled(rawParsed) || isUserExplicitlyCancelled(parsed);
+      if (isExplicitlyCancelled) {
+        parsed.membershipTier = 'free';
+        parsed.subscriptionStatus = 'cancelled';
+        parsed.paymentStatus = 'cancelled';
+        parsed.vipStatus = 'none';
+        delete parsed.subscriptionExpiryDate;
+        delete parsed.vipExpiresAt;
+        parsed.freeTrialActivated = false;
+        delete parsed.freeTrialExpiresAt;
+        parsed.autoRenew = false;
+        parsed.integritySeal = computeUserIntegritySealSync(parsed);
+        purgeCancelledUserFromLocalCaches(parsed);
+        updated = true;
+      }
 
       const entitlement = !isExplicitlyCancelled
         ? findLocalAuthoritativeVipEntitlement(parsed)

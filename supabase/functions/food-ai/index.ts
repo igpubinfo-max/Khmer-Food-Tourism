@@ -15,7 +15,7 @@
 import { MAX_REQUEST_BYTES, SlidingWindowLimiter, sanitizeGeminiRequest } from './sanitize.ts';
 import { geminiToOpenAi, openAiToGemini, pickOpenAiModel, shouldFailover } from './openai.ts';
 import { geminiEndpoints, shouldTryNextEndpoint } from './endpoint.ts';
-import { decideQuota, isVipActive, resolveUserAiDailyLimit, safeUserId, userKvKey } from '../_shared/common.ts';
+import { decideQuota, isVipActive, resolveUserAiDailyLimit, safeUserId, userKvKey, verifyClientAppIntegrity } from '../_shared/common.ts';
 import { background, logUsage, readUserDoc, usageHit } from '../_shared/supa.ts';
 
 declare const Deno: {
@@ -25,7 +25,7 @@ declare const Deno: {
 
 const corsHeaders: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-kft-user-id, x-kft-purpose',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-kft-user-id, x-kft-purpose, x-kft-app-id, x-kft-app-platform, x-kft-app-sig',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Expose-Headers': 'x-food-ai-proxy, x-food-ai-provider, x-kft-quota-used, x-kft-quota-limit, x-kft-quota-tier',
   'x-food-ai-proxy': '1',
@@ -130,6 +130,8 @@ function tokensOf(text: string): { inTok: number | null; outTok: number | null }
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json(405, { error: { status: 'METHOD_NOT_ALLOWED', message: 'POST only' } });
+  const appIntegrity = verifyClientAppIntegrity(req);
+  if (!appIntegrity.ok) return json(403, { error: { status: 'PERMISSION_DENIED', message: 'Unauthorized cloned/modified app' } });
 
   const geminiKey = Deno.env.get('GEMINI_API_KEY');
   const openAiKey = Deno.env.get('OPENAI_API_KEY');

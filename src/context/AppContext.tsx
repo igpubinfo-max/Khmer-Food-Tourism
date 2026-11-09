@@ -1,3 +1,4 @@
+import { verifyAppCloneIntegrity } from '../utils/appCloneIntegrityGuard';
 import { verifyVipPurchaseOnServer, claimConsumerTrialOnServer } from '../services/vipPurchaseClient';
 import { getDeviceHashForTrialOrPromoClaim } from '../services/deviceIdentityService';
 import {
@@ -10,7 +11,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, useMemo,
 import { 
   User, FoodItem, Restaurant, TouristDestination, 
   Language, UserRole, AppSettings, RegistrationTransaction,
-  RestaurantMenuItem, RestaurantReview, MembershipTier, isRestaurantPremiumActive, isUserVipActive, getVipRemainingDays,
+  RestaurantMenuItem, RestaurantReview, MembershipTier, isRestaurantPremiumActive, isUserVipActive, isUserPaidVipActive, isUserOnConsumerFreeTrial, getVipRemainingDays,
   getVipAccountState, VipAccountState,
   getRestaurantCreatedAtIso, getRestaurantCreatedAtMs, sortRestaurantsChronologically, isSeedRestaurantId, getRestaurantRatingSummary,
   Wishlist, WishlistItem, TripPlan, AppNotification,
@@ -127,6 +128,7 @@ import {
   mergeAndPushSupportTicketsToCloud,
   uploadBase64ImageToSupabaseStorage,
   subscribeToCloudRealtimeUpdates,
+  clearBackendVipVerifyCache,
 } from '../services/supabaseService';
 import { resetUserHighWater } from '../services/userDataIntegrityService';
 import { authenticateAdminWithBiometric, setSavedAdminUsername } from '../services/biometricService';
@@ -176,6 +178,8 @@ import { fetchVerifiedAttractionPhotoFromGoogleMaps } from '../services/touristA
 import {
   computeUserIntegritySealSync,
   findLocalAuthoritativeVipEntitlement,
+  isUserExplicitlyCancelled,
+  purgeCancelledUserFromLocalCaches,
 } from '../utils/securityIntegrityGuard';
 
 export type ActiveTab = 'home' | 'food' | 'restaurants' | 'hotels' | 'tourism' | 'guide' | 'profile';
@@ -831,20 +835,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         } catch {}
         cachedVipBackupListRef.current = diskVips;
       }
-      // Put cached backup records first, then live usersList second so newly updated avatars/names on usersList win
+      const cancelledUsersInList = usersList.filter(u => u && isUserExplicitlyCancelled(u));
+      const isCancelledInLiveList = (cand: User): boolean =>
+        cancelledUsersInList.some(cu => doesUserMatchTarget(cand, cu));
+
+      // Put non-cancelled cached backup records first, then live usersList second so newly updated avatars/names on usersList win
       for (const v of cachedVipBackupListRef.current) {
-        if (v && isUserVipActive(v) && !checkIsUserDeleted(v, deletedList)) {
+        if (v && isUserVipActive(v) && !isCancelledInLiveList(v) && !checkIsUserDeleted(v, deletedList)) {
           candidates.push(v);
         }
       }
       for (const u of usersList) {
-        if (u && isUserVipActive(u) && !checkIsUserDeleted(u, deletedList)) {
+        if (u && isUserVipActive(u) && !isUserExplicitlyCancelled(u) && !checkIsUserDeleted(u, deletedList)) {
           candidates.push(u);
         }
       }
-      if (candidates.length === 0) return [];
+      if (candidates.length === 0) {
+        cachedVipBackupListRef.current = [];
+        if (lastWrittenVipBackupSigRef.current !== 'EMPTY') {
+          lastWrittenVipBackupSigRef.current = 'EMPTY';
+          safeSetCriticalAccountStorage('kft_vip_registry_backup_v1', []);
+        }
+        return [];
+      }
       const mergedVips = deduplicateAndNormalizeUsers(candidates, deletedList)
-        .filter(u => isUserVipActive(u))
+        .filter(u => isUserVipActive(u) && !isCancelledInLiveList(u))
         .map(u => ({
           ...u,
           vipStatus: 'active' as const,
@@ -853,17 +868,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           integritySeal: computeUserIntegritySealSync(u),
         }));
       cachedVipBackupListRef.current = mergedVips;
-      if (mergedVips.length > 0) {
-        const sig = mergedVips
-          .map(
-            u =>
-              `${u.id}:${u.name || ''}:${u.avatar ? u.avatar.length + ':' + u.avatar.slice(-16) : ''}:${u.subscriptionExpiryDate || ''}:${u.paidAdditionalStoreSlots || 0}`
-          )
-          .join('|');
-        if (sig !== lastWrittenVipBackupSigRef.current) {
-          lastWrittenVipBackupSigRef.current = sig;
-          safeSetCriticalAccountStorage('kft_vip_registry_backup_v1', mergedVips);
-        }
+      const sig =
+        mergedVips.length > 0
+          ? mergedVips
+              .map(
+                u =>
+                  `${u.id}:${u.name || ''}:${u.avatar ? u.avatar.length + ':' + u.avatar.slice(-16) : ''}:${u.subscriptionExpiryDate || ''}:${u.paidAdditionalStoreSlots || 0}`
+              )
+              .join('|')
+          : 'EMPTY';
+      if (sig !== lastWrittenVipBackupSigRef.current) {
+        lastWrittenVipBackupSigRef.current = sig;
+        safeSetCriticalAccountStorage('kft_vip_registry_backup_v1', mergedVips);
       }
       return mergedVips;
     } catch {
@@ -967,7 +983,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ];
 
         deduped = deduped.map(u => {
-          if (u.subscriptionStatus === 'cancelled' && u.paymentStatus === 'cancelled') return u;
+          if (isUserExplicitlyCancelled(u)) return u;
           const authVip = findLocalAuthoritativeVipEntitlement(u, deduped);
           const authVipExpMs = authVip ? (authVip.expiryMs || parseSafeDateMs(authVip.expiryIso)) : 0;
           if (authVip && authVipExpMs > Date.now()) {
@@ -1087,7 +1103,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (
             authVip &&
             authVipExpMs > Date.now() &&
-            !(sanitizedCur.subscriptionStatus === 'cancelled' && sanitizedCur.paymentStatus === 'cancelled')
+            !isUserExplicitlyCancelled(sanitizedCur)
           ) {
             sanitizedCur = {
               ...sanitizedCur,
@@ -3196,6 +3212,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     mergeAndSaveVipRegistryBackup(users, deletedUsers);
   }, [users, deletedUsers]);
 
+  // Verify Native Package ID & APK Signing Certificate on startup to detect cloned/repackaged copies
+  useEffect(() => {
+    verifyAppCloneIntegrity()
+      .then((res) => {
+        if (res.tampered) {
+          console.error('[Anti-Clone Guard] Tampered/repackaged app detected:', res.reason, res.packageName);
+          showToast(
+            language === 'km'
+              ? '⚠️ កម្មវិធីនេះជាច្បាប់ចម្លងមិនផ្លូវការ (Cloned/Modified App) — មុខងារ Cloud និង AI ត្រូវបានបិទការពារសុវត្ថិភាព!'
+              : '⚠️ Unauthorized cloned/modified app detected — Cloud & AI features are locked for security!',
+            'warning'
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Automatic Pre-Update Database & VIP Snapshot Backup whenever App Version or Build Code changes (runs at most once per session)
   const hasAttemptedVersionBackupRef = useRef(false);
   const lastPreUpdateSnapMetaRef = useRef<{
@@ -3724,8 +3757,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser.username === 'admin' ||
       currentUser.username === 'cheasavuth';
     if (isAdmin) return;
-    if (currentUser.subscriptionStatus === 'cancelled' && currentUser.paymentStatus === 'cancelled') return;
-
     const nowMs = getAuthoritativeServerNowMs();
     const curActive = isUserVipActive(currentUser);
     const curExpMs = parseSafeDateMs(
@@ -3736,6 +3767,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // 1. Check matching user record in `users`
     const matchedInUsers = users.find(u => doesUserMatchTarget(u, currentUser));
+
+    // 1a. Immediate Real-Time Cancellation Downgrade: if Server/Admin cancelled VIP, downgrade currentUser to Normal User immediately without logout!
+    if (matchedInUsers && isUserExplicitlyCancelled(matchedInUsers)) {
+      const needsDowngradeSync =
+        currentUser.membershipTier === 'premium_vip' ||
+        currentUser.subscriptionStatus !== 'cancelled' ||
+        currentUser.paymentStatus !== 'cancelled' ||
+        Boolean(currentUser.subscriptionExpiryDate) ||
+        Boolean(currentUser.vipExpiresAt) ||
+        Boolean(currentUser.freeTrialActivated);
+      if (needsDowngradeSync) {
+        const downgradedCurrent: User = {
+          ...currentUser,
+          ...matchedInUsers,
+          id: matchedInUsers.id || currentUser.id,
+          membershipTier: 'free',
+          subscriptionStatus: 'cancelled',
+          paymentStatus: 'cancelled',
+          vipStatus: 'none',
+          subscriptionExpiryDate: undefined,
+          vipExpiresAt: undefined,
+          freeTrialActivated: false,
+          freeTrialExpiresAt: undefined,
+          autoRenew: false,
+          vipCancelledAt: matchedInUsers.vipCancelledAt || currentUser.vipCancelledAt || new Date(nowMs).toISOString(),
+        };
+        downgradedCurrent.integritySeal = computeUserIntegritySealSync(downgradedCurrent);
+        purgeCancelledUserFromLocalCaches(downgradedCurrent);
+        clearBackendVipVerifyCache(downgradedCurrent);
+        setCurrentUser(downgradedCurrent);
+        latestSyncStateRef.current.currentUser = downgradedCurrent;
+        safeSetCriticalAccountStorage('kft_current_user_v5', downgradedCurrent);
+        mergeAndSaveVipRegistryBackup(users, deletedUsers);
+      }
+      return;
+    }
+
+    if (isUserExplicitlyCancelled(currentUser)) return;
     const userRecActive = matchedInUsers ? isUserVipActive(matchedInUsers) : false;
     const userRecExpMs = matchedInUsers
       ? parseSafeDateMs(matchedInUsers.subscriptionExpiryDate || matchedInUsers.vipExpiresAt)
@@ -5391,12 +5460,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (evt.key.startsWith(USER_RECORD_PREFIX) && evt.payload && typeof evt.payload === 'object') {
           const incomingUser = evt.payload as User;
           if (incomingUser.id || incomingUser.email) {
+            if (isUserExplicitlyCancelled(incomingUser)) {
+              purgeCancelledUserFromLocalCaches(incomingUser);
+              clearBackendVipVerifyCache(incomingUser);
+            }
             pruneStaleDeletedTombstoneForActiveAuth(incomingUser);
             setUsers((prev) => {
               const liveDel = latestSyncStateRef.current.deletedUsers || [];
               const next = deduplicateAndNormalizeUsers([...prev, incomingUser], liveDel);
               latestSyncStateRef.current.users = next;
               safeSetCriticalAccountStorage('kft_users_v5', next);
+              mergeAndSaveVipRegistryBackup(next, liveDel);
               return next;
             });
             setLastUsersSyncedAt(new Date().toISOString());
@@ -6211,12 +6285,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       expiryDate: cleanExpiryIso,
       status: 'verified' as const,
       noteKh: isTrialGrant
-        ? `បានបើកសាកល្បង VIP ឥតគិតថ្លៃ (${resolvedPlanDays} ថ្ងៃ) រហូតដល់ ${expFormatted}`
+        ? `បានបើកការសាកល្បងឥតគិតថ្លៃ (${resolvedPlanDays} ថ្ងៃ — ជំនួយការ AI មិនរួមបញ្ចូលកញ្ចប់ដាក់ហាងទេ) រហូតដល់ ${expFormatted}`
         : isAutoRenewGrant
         ? `បានបន្តសមាជិកភាព VIP ស្វ័យប្រវត្តិ (${resolvedPlanDays} ថ្ងៃ / $${planPrice.toFixed(2)} USD) រហូតដល់ ${expFormatted}`
         : `បានបើកដំណើរការ ឬបន្តសមាជិកភាព VIP (${resolvedPlanDays} ថ្ងៃ / $${planPrice.toFixed(2)} USD) រហូតដល់ ${expFormatted}`,
       noteEn: isTrialGrant
-        ? `Activated Free VIP Trial (${resolvedPlanDays} days) until ${expFormatted}`
+        ? `Activated Consumer Free Trial (${resolvedPlanDays} days — AI trial only, excludes Shop Package) until ${expFormatted}`
         : isAutoRenewGrant
         ? `Automatically renewed VIP (${resolvedPlanDays} days / $${planPrice.toFixed(2)} USD) until ${expFormatted}`
         : `Activated / renewed VIP membership (${resolvedPlanDays} days / $${planPrice.toFixed(2)} USD) until ${expFormatted}`,
@@ -6501,7 +6575,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
    * and strictly preserves the account, email, password, and login access.
    */
   const cancelUserVip = async (userId: string): Promise<{ success: boolean }> => {
-    const targetUser = users.find(u => u.id === userId);
+    const liveUsers = latestSyncStateRef.current.users || users;
+    const targetUser = liveUsers.find(u => u.id === userId || doesUserMatchTarget(u, { id: userId, email: userId }));
     if (!targetUser) {
       showToast(language === 'km' ? 'រកមិនឃើញគណនីអ្នកប្រើប្រាស់នេះទេ!' : 'User account not found!', 'warning');
       return { success: false };
@@ -6518,41 +6593,125 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const nowIso = new Date().toISOString();
-    const downgradedUser: User = {
-      ...targetUser,
-      membershipTier: 'free',
-      subscriptionStatus: 'cancelled',
-      subscriptionExpiryDate: undefined,
-      paymentStatus: 'cancelled',
-      autoRenew: false,
-      vipCancelledAt: nowIso,
-      isDisabled: false,
+    const buildCancelledUser = (u: User): User => {
+      const cleaned: User = {
+        ...u,
+        membershipTier: 'free',
+        subscriptionStatus: 'cancelled',
+        subscriptionStartDate: undefined,
+        subscriptionExpiryDate: undefined,
+        vipStatus: 'none',
+        vipExpiresAt: undefined,
+        vipPlanDays: undefined,
+        vipPlanType: undefined,
+        freeTrialActivated: false,
+        freeTrialExpiresAt: undefined,
+        paymentStatus: 'cancelled',
+        autoRenew: false,
+        autoRenewCancelledAt: nowIso,
+        vipCancelledAt: nowIso,
+        isDisabled: false,
+      };
+      cleaned.integritySeal = computeUserIntegritySealSync(cleaned);
+      return cleaned;
     };
 
-    // 1. Update users array while preserving account, email, passwordHash, and login access
-    const nextUsers = users.map(u => (u.id === userId ? downgradedUser : u));
-    setUsers(nextUsers);
-    try {
-      localStorage.setItem('kft_users_v5', JSON.stringify(nextUsers));
-    } catch {}
+    const downgradedUser = buildCancelledUser(targetUser);
 
-    // 2. If this user is currently logged in, update currentUser and close any open VIP Personalized Feature modals
-    if (currentUser?.id === userId) {
-      setCurrentUser(downgradedUser);
+    // 0. Purge all local backup registries & backend verification cache immediately so local cache never resurrects VIP
+    purgeCancelledUserFromLocalCaches(downgradedUser);
+    clearBackendVipVerifyCache(downgradedUser);
+    if (cachedVipBackupListRef.current) {
+      cachedVipBackupListRef.current = cachedVipBackupListRef.current.filter(
+        v => !doesUserMatchTarget(v, downgradedUser)
+      );
+    }
+
+    // 1. Update users array across all matching alias/canonical records while preserving account, email, passwordHash, and login access
+    const nextUsers = deduplicateAndNormalizeUsers(
+      liveUsers.map(u => (doesUserMatchTarget(u, targetUser) ? buildCancelledUser(u) : u)),
+      deletedUsers
+    );
+    latestSyncStateRef.current.users = nextUsers;
+    setUsers(nextUsers);
+    safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+    const nextVipBackup = mergeAndSaveVipRegistryBackup(nextUsers, deletedUsers);
+
+    // 2. If this user is currently logged in, immediately update currentUser to Normal User and close VIP modals
+    const liveCur = latestSyncStateRef.current.currentUser || currentUser;
+    if (liveCur && doesUserMatchTarget(liveCur, targetUser)) {
+      const downgradedCurrent = buildCancelledUser({ ...liveCur, ...downgradedUser, id: downgradedUser.id });
+      latestSyncStateRef.current.currentUser = downgradedCurrent;
+      setCurrentUser(downgradedCurrent);
       closeAllPersonalizedFeatureModals();
+      safeSetCriticalAccountStorage('kft_current_user_v5', downgradedCurrent);
+    }
+
+    // 2b. Mark any verified VIP upgrade transactions & support tickets for this user as cancelled/rejected so sync never re-upgrades them
+    const liveTxns = latestSyncStateRef.current.transactions || transactions;
+    let txnsChanged = false;
+    const nextTxns = liveTxns.map(t => {
+      if (
+        t &&
+        t.status === 'verified' &&
+        t.type !== 'additional_store_slot' &&
+        doesUserMatchTarget({ id: t.userId || t.ownerId, email: t.userEmail, phone: t.phone }, targetUser)
+      ) {
+        txnsChanged = true;
+        return {
+          ...t,
+          status: 'rejected' as const,
+          rejectionReason: 'Admin cancelled VIP membership',
+        };
+      }
+      return t;
+    });
+    if (txnsChanged) {
+      latestSyncStateRef.current.transactions = nextTxns;
+      setTransactions(nextTxns);
       try {
-        localStorage.setItem('kft_current_user_v5', JSON.stringify(downgradedUser));
+        localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTxns));
+      } catch {}
+    }
+
+    const liveTickets = latestSyncStateRef.current.supportTickets || supportTickets;
+    let ticketsChanged = false;
+    const nextTickets = liveTickets.map(tk => {
+      if (
+        tk &&
+        tk.vipApproved &&
+        doesUserMatchTarget({ id: tk.userId, email: tk.userEmail, phone: tk.userPhone }, targetUser)
+      ) {
+        ticketsChanged = true;
+        return {
+          ...tk,
+          vipApproved: false,
+        };
+      }
+      return tk;
+    });
+    if (ticketsChanged) {
+      latestSyncStateRef.current.supportTickets = nextTickets;
+      setSupportTickets(nextTickets);
+      try {
+        localStorage.setItem('kft_support_tickets_v1', JSON.stringify(nextTickets));
       } catch {}
     }
 
     // 3. Downgrade any custom restaurant owned by this user from VIP/premium to normal ('free')
     let nextRestaurants = restaurants;
     const hasPromotedShop = restaurants.some(
-      r => !isSeedRestaurantId(r.id) && r.ownerId === userId && (r.membershipTier === 'premium' || r.isPromoted)
+      r =>
+        !isSeedRestaurantId(r.id) &&
+        doesUserMatchTarget({ id: r.ownerId, email: r.ownerEmail, phone: r.ownerPhone }, targetUser) &&
+        (r.membershipTier === 'premium' || r.isPromoted)
     );
     if (hasPromotedShop) {
       nextRestaurants = restaurants.map(r => {
-        if (!isSeedRestaurantId(r.id) && r.ownerId === userId) {
+        if (
+          !isSeedRestaurantId(r.id) &&
+          doesUserMatchTarget({ id: r.ownerId, email: r.ownerEmail, phone: r.ownerPhone }, targetUser)
+        ) {
           return {
             ...r,
             membershipTier: 'free' as MembershipTier,
@@ -6563,6 +6722,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         return r;
       });
+      latestSyncStateRef.current.restaurants = nextRestaurants;
       setRestaurants(nextRestaurants);
       try {
         localStorage.setItem('kft_restaurants_real_v13', JSON.stringify(nextRestaurants));
@@ -6582,14 +6742,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setNotifications(prev => [cancelNotif, ...prev]);
 
-    // 5. Sync to Supabase Cloud
+    // 5. Sync to Supabase Cloud across ALL candidate atomic keys + aggregate lists + VIP backup + transactions
     try {
       if (isSupabaseConfigured()) {
         const customRests = nextRestaurants.filter(r => !isSeedRestaurantId(r.id));
+        const candidateAtomicKeys = getCandidateAtomicUserKeys(downgradedUser);
         await Promise.all([
-          pushCloudDocument(`${USER_RECORD_PREFIX}${downgradedUser.id}`, downgradedUser),
-          pushCloudDocument('kft_cloud_users_v2', nextUsers),
-          pushCloudDocument('kft_cloud_users_v1', nextUsers),
+          ...candidateAtomicKeys.map(k =>
+            pushCloudDocument(
+              k,
+               { ...downgradedUser, id: k.slice(USER_RECORD_PREFIX.length) || downgradedUser.id },
+              8000,
+              { allowDestructive: true }
+            )
+          ),
+          pushCloudDocument('kft_cloud_users_v2', nextUsers, 8000, { allowDestructive: true }),
+          pushCloudDocument('kft_cloud_users_v1', nextUsers, 8000, { allowDestructive: true }),
+          pushCloudDocument('kft_cloud_vip_backup_v1', nextVipBackup, 8000, { allowDestructive: true }),
+          ...(txnsChanged
+            ? [pushCloudDocument('kft_cloud_transactions_v1', nextTxns, 8000, { allowDestructive: true })]
+            : []),
+          ...(ticketsChanged
+            ? [pushCloudDocument('kft_cloud_support_tickets_v1', nextTickets, 8000, { allowDestructive: true })]
+            : []),
           pushCloudDocument('kft_cloud_custom_restaurants_v1', customRests),
         ]);
       }
@@ -7330,19 +7505,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const nowIso = new Date().toISOString();
     let updatedCount = 0;
 
+    const cancelledList: User[] = [];
     const nextUsers = liveUsers.map((u) => {
       if (!targetSet.has(u.id) || isProtectedSystemAdminAccount(u)) return u;
       updatedCount++;
-      return {
+      const cleaned: User = {
         ...u,
         membershipTier: 'free' as const,
         subscriptionStatus: 'cancelled' as const,
-        subscriptionExpiryDate: nowIso,
+        paymentStatus: 'cancelled' as const,
+        subscriptionStartDate: undefined,
+        subscriptionExpiryDate: undefined,
         vipStatus: 'none' as const,
-        vipExpiresAt: nowIso,
+        vipExpiresAt: undefined,
+        vipPlanDays: undefined,
+        vipPlanType: undefined,
+        freeTrialActivated: false,
+        freeTrialExpiresAt: undefined,
         vipCancelledAt: nowIso,
         autoRenew: false,
+        autoRenewCancelledAt: nowIso,
       };
+      cleaned.integritySeal = computeUserIntegritySealSync(cleaned);
+      purgeCancelledUserFromLocalCaches(cleaned);
+      clearBackendVipVerifyCache(cleaned);
+      cancelledList.push(cleaned);
+      return cleaned;
     });
 
     if (updatedCount === 0) return { success: false, count: 0 };
@@ -7350,9 +7538,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     latestSyncStateRef.current.users = nextUsers;
     setUsers(nextUsers);
     safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+    const nextVipBackup = mergeAndSaveVipRegistryBackup(nextUsers, deletedUsers);
+
+    const liveCur = latestSyncStateRef.current.currentUser || currentUser;
+    if (liveCur && cancelledList.some(cu => doesUserMatchTarget(liveCur, cu))) {
+      const matchedCancel = cancelledList.find(cu => doesUserMatchTarget(liveCur, cu))!;
+      latestSyncStateRef.current.currentUser = matchedCancel;
+      setCurrentUser(matchedCancel);
+      safeSetCriticalAccountStorage('kft_current_user_v5', matchedCancel);
+    }
 
     if (isSupabaseConfigured()) {
-      pushCloudDocument('kft_cloud_users_v2', nextUsers).catch(() => {});
+      const atomicPushes: Promise<boolean>[] = [];
+      for (const cu of cancelledList) {
+        for (const k of getCandidateAtomicUserKeys(cu)) {
+          atomicPushes.push(
+            pushCloudDocument(k, { ...cu, id: k.slice(USER_RECORD_PREFIX.length) || cu.id }, 8000, {
+              allowDestructive: true,
+            })
+          );
+        }
+      }
+      Promise.all([
+        ...atomicPushes,
+        pushCloudDocument('kft_cloud_users_v2', nextUsers, 8000, { allowDestructive: true }),
+        pushCloudDocument('kft_cloud_users_v1', nextUsers, 8000, { allowDestructive: true }),
+        pushCloudDocument('kft_cloud_vip_backup_v1', nextVipBackup, 8000, { allowDestructive: true }),
+      ]).catch(() => {});
     }
 
     recordUserActivityAndAdminLog({
@@ -12991,11 +13203,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       computeIdentityClaimHashes({ email: currentUser.email, phone: currentUser.phone }),
     ]);
 
+    if (!deviceInfo.deviceHash) {
+      const msg = tr(
+        language,
+        '⚠️ មិនអាចផ្ទៀងផ្ទាត់ឧបករណ៍បានទេ។ សូមបើកកម្មវិធីម្ដងទៀត រួចសាកល្បងម្ដងទៀត។',
+        '⚠️ Could not verify device identity. Please reopen the app and try again.',
+        '⚠️ 无法验证设备标识，请重新打开应用后再试。'
+      );
+      showToast(msg, 'warning');
+      return { success: false, error: msg };
+    }
+
     const serverClaim = await claimConsumerTrialOnServer({
       userId: currentUser.id,
       email: currentUser.email,
       phone: currentUser.phone,
-      deviceHash: deviceInfo.deviceHash || undefined,
+      deviceHash: deviceInfo.deviceHash,
       identityHashes: identityInfo.identityHashes,
       platform: deviceInfo.platform,
     });
@@ -13011,11 +13234,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, error: msg };
     }
 
-    const trialDays = serverClaim.kind === 'granted' ? serverClaim.grant.days : catalog.trialPlan.durationDays;
-    const fallbackDates = calculateVipDates(undefined, trialDays, latestSettings);
-    const startDate = serverClaim.kind === 'granted' ? serverClaim.grant.startIso : fallbackDates.startDate;
-    const expiryDate = serverClaim.kind === 'granted' ? serverClaim.grant.expiryIso : fallbackDates.expiryDate;
-    const trialRef = `TRIAL-7D-${Date.now().toString(36).toUpperCase()}`;
+    if (serverClaim.kind !== 'granted') {
+      const msg = tr(
+        language,
+        '⚠️ មិនអាចភ្ជាប់ទៅម៉ាស៊ីនមេដើម្បីផ្ទៀងផ្ទាត់ការសាកល្បងឥតគិតថ្លៃបានទេ។ សូមពិនិត្យអ៊ីនធឺណិត រួចសាកល្បងម្ដងទៀត។',
+        '⚠️ Could not reach the server to verify free trial eligibility. Please check your internet connection and try again.',
+        '⚠️ 无法连接服务器验证免费试用资格，请检查网络后重试。'
+      );
+      showToast(msg, 'warning');
+      return { success: false, error: msg };
+    }
+
+    const trialDays = serverClaim.grant.days;
+    const startDate = serverClaim.grant.startIso;
+    const expiryDate = serverClaim.grant.expiryIso;
+    const trialRef = serverClaim.grant.trxId || `TRIAL-7D-${Date.now().toString(36).toUpperCase()}`;
 
     persistApprovedVipUserAndCloud({
       targetId: currentUser.id,
@@ -13025,14 +13258,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       startDate,
       expiryDate,
       durationDays: trialDays,
-      planType: 'quarterly',
-      paymentMethod: 'KHQR',
+      planType: 'trial_7d',
+      paymentMethod: 'FREE_TRIAL_7D' as any,
       transactionRef: trialRef,
       extraFields: {
         activeConsumerPlanId: 'trial_7d',
+        vipPlanType: 'trial_7d',
+        vipPlanDays: trialDays,
         freeTrialActivated: true,
         freeTrialActivatedAt: startDate,
         freeTrialExpiresAt: expiryDate,
+        freeTrialDurationDays: trialDays,
         autoRenew: false,
         autoRenewCancelledAt: startDate,
       },
@@ -13059,9 +13295,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(
       tr(
         language,
-        `🎉 បានបើកការសាកល្បង VIP ឥតគិតថ្លៃ ${trialDays} ថ្ងៃជោគជ័យ! (AI ${catalog.trialAiDailyLimit} ដង/ថ្ងៃ)`,
-        `🎉 Activated your ${trialDays}-day Free VIP Trial! (${catalog.trialAiDailyLimit} AI requests/day)`,
-        `🎉 已成功开启 ${trialDays} 天免费 VIP 试用！（每日 ${catalog.trialAiDailyLimit} 次 AI）`
+        `🎉 បានបើកការសាកល្បងឥតគិតថ្លៃ ${trialDays} ថ្ងៃជោគជ័យ! (ជំនួយការ AI ${catalog.trialAiDailyLimit} ដង/ថ្ងៃ • មិនរួមបញ្ចូលកញ្ចប់ដាក់ហាង VIP ទេ)`,
+        `🎉 Activated your ${trialDays}-day Consumer Free Trial! (${catalog.trialAiDailyLimit} AI/day • Shop Package not included)`,
+        `🎉 已成功开启 ${trialDays} 天免费试用！（每日 ${catalog.trialAiDailyLimit} 次 AI • 不含开店套餐）`
       ),
       'success'
     );
@@ -14024,7 +14260,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser.id === 'admin-authorized-single' ||
       currentUser.username === 'admin' ||
       currentUser.username === 'cheasavuth';
-    if (!isAdmin && !isUserVipActive(currentUser)) {
+    if (!isAdmin && !isUserPaidVipActive(currentUser)) {
       const msg =
         language === 'km'
           ? '🔒 មានតែគណនី VIP សកម្មប៉ុណ្ណោះដែលអាចបន្ថែមហាងថ្មីបាន។ សូមដំឡើង ឬបន្តសមាជិកភាព VIP ជាមុនសិន!'

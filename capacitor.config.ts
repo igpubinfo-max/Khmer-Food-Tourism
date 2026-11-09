@@ -1,4 +1,4 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+﻿import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.khmerfood.tourism',
@@ -10,7 +10,7 @@ const config: CapacitorConfig = {
     scheme: 'DiscoverCambodia',
   },
   android: {
-    allowMixedContent: true,
+    allowMixedContent: false,
     backgroundColor: '#0F172A',
   },
   plugins: {

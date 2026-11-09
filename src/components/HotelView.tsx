@@ -8,6 +8,7 @@ import {
   openExternalUrlNativeSafe,
   inferBusinessTypeAndCategory,
   isHotelBusinessRecord,
+  isShopSubscriptionActive,
 } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { BedDouble, Edit2, Settings, MapPin, Heart, Lock, Camera, Star, Trash2, Download } from 'lucide-react';
@@ -133,9 +134,20 @@ export const HotelView: React.FC = () => {
   // Combine VIP-added hotels + seed/admin hotels from `destinations` (where categorySlug === 'hotel')
   const allHotels = useMemo<TouristDestination[]>(() => {
     const seedHotels = destinations.filter((d) => Boolean(d && d.categorySlug === 'hotel'));
-    const vipIds = new Set(vipAddedHotelDestinations.map((d) => d.id));
-    return [...vipAddedHotelDestinations, ...seedHotels.filter((d) => !vipIds.has(d.id))];
-  }, [destinations, vipAddedHotelDestinations]);
+    const customIds = new Set(vipAddedHotelDestinations.map((d) => d.id));
+    const activeVipHotels = vipAddedHotelDestinations.filter((d) =>
+      restaurants.some(
+        (r) =>
+          r.id === d.id &&
+          r.status === 'approved' &&
+          (isShopSubscriptionActive(r) || Boolean(r.isAdminEdited && r.membershipTier === 'premium'))
+      )
+    );
+    const nonVipCustomHotels = vipAddedHotelDestinations.filter(
+      (d) => !activeVipHotels.some((v) => v.id === d.id)
+    );
+    return [...activeVipHotels, ...seedHotels.filter((d) => !customIds.has(d.id)), ...nonVipCustomHotels];
+  }, [destinations, vipAddedHotelDestinations, restaurants]);
 
   const classifyHotelSubCategory = (h: TouristDestination): string => {
     const text = `${h.nameKh || ''} ${h.nameEn || ''} ${h.categoryKh || ''} ${h.categoryEn || ''}`.toLowerCase();
@@ -151,10 +163,21 @@ export const HotelView: React.FC = () => {
     return 'hotel_stay';
   };
 
-  // Only hotels added by a VIP owner (or explicitly promoted by Admin) are showcased as large cards. All other hotels use the compact row layout.
+  // Only hotels with an active Paid Shop/Hotel Package (or explicitly promoted by Admin) get Featured Big Card + Gold VIP Badge.
   const vipHotelIds = useMemo(
-    () => new Set(vipAddedHotelDestinations.map((d) => d.id)),
-    [vipAddedHotelDestinations]
+    () =>
+      new Set(
+        restaurants
+          .filter(
+            (r: Restaurant) =>
+              r &&
+              isHotelBusinessRecord(r) &&
+              r.status === 'approved' &&
+              (isShopSubscriptionActive(r) || Boolean(r.isAdminEdited && r.membershipTier === 'premium'))
+          )
+          .map((r) => r.id)
+      ),
+    [restaurants]
   );
   const isVerifiedBigHotel = (h: TouristDestination): boolean =>
     vipHotelIds.has(h.id) || Boolean(h.isAdminEdited && h.isFeatured);
@@ -376,9 +399,9 @@ export const HotelView: React.FC = () => {
         title={tr(language, 'បន្ថែមសណ្ឋាគារ / ផ្ទះសំណាក់ថ្មី', 'Add New Hotel / Stay', '添加新酒店/客栈')}
         description={tr(
           language,
-          'គណនី VIP អាចបង្កើតហាងអាហារ ឬសណ្ឋាគារបានតែ ១ កន្លែងប៉ុណ្ណោះ។ សណ្ឋាគារដែលបន្ថែមដោយ VIP នឹងបង្ហាញជាកាតធំ។',
-          'A VIP account can register 1 business only (Shop OR Hotel). Hotels added by VIP are showcased as large cards.',
-          'VIP 账号仅可添加 1 家（餐厅或酒店二选一）。VIP 添加的酒店将以大卡片展示。'
+          'ចុះបញ្ជីសណ្ឋាគារ/ផ្ទះសំណាក់ក្នុងកញ្ចប់ហាង VIP បង់ប្រាក់ ($6.99/ខែ ឬ $49.99/ឆ្នាំ — មិនរួមបញ្ចូលក្នុង Free Trial 7 ថ្ងៃទេ) ដើម្បីទទួលបានផ្លាកសញ្ញា VIP កាតធំ និងស្ថិតិអ្នកចូលមើល។',
+          'Register your hotel/guesthouse with the Paid VIP Package ($6.99/mo or $49.99/yr — not included in 7-Day Free Trial) to unlock Featured Big Card, Gold Badge & Analytics.',
+          '开通付费 VIP 套餐（$6.99/月 或 $49.99/年——不含在 7 天免费试用内）即可解锁大卡片置顶展示、金色徽章与访客数据统计。'
         )}
         actionLabel={tr(language, 'បន្ថែមសណ្ឋាគារ / ផ្ទះសំណាក់ថ្មី', 'Add New Hotel / Guesthouse', '添加新酒店 / 客栈')}
         onAction={handleAddHotelClick}

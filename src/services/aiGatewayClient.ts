@@ -1,3 +1,4 @@
+import { getAppAttestationHeaders, isAppCloneTampered } from '../utils/appCloneIntegrityGuard';
 /**
  * Minimal client for the `food-ai` Edge Function (Gemini / OpenAI gateway) for callers outside the food assistant
  * (e.g. payment-receipt reading). The AI keys live in Supabase secrets; the request carries the user id so the server
@@ -15,6 +16,7 @@ export async function callAiGateway(
   body: unknown,
   opts: { timeoutMs?: number; purpose?: 'payment' } = {}
 ): Promise<AiGatewayResult> {
+  if (isAppCloneTampered()) return { ok: false, reason: 'forbidden', status: 403 };
   const cfg = getCloudApiConfig();
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || typeof fetch === 'undefined') return { ok: false, reason: 'unavailable' };
   const controller = new AbortController();
@@ -29,6 +31,7 @@ export async function callAiGateway(
         Authorization: `Bearer ${cfg.supabaseAnonKey}`,
         ...(userId ? { 'x-kft-user-id': userId } : {}),
         ...(opts.purpose ? { 'x-kft-purpose': opts.purpose } : {}),
+        ...getAppAttestationHeaders(),
       },
       body: JSON.stringify({ model, body }),
       signal: controller.signal,

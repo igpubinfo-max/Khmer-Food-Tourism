@@ -6,6 +6,8 @@ import {
   isPlaceLocationVerified,
   isUserOwnerOfRestaurantRecord,
   isUserVipActive,
+  isUserOnConsumerFreeTrial,
+  getConsumerVipPricingCatalog,
   resolveFoodPhotoUrl,
   type FoodItem,
   type Language,
@@ -453,6 +455,40 @@ function checkRateLimit(userKey: string): boolean {
   prev.push(now);
   userRateBuckets.set(userKey, prev);
   return true;
+}
+
+const DAILY_AI_USAGE_STORAGE_KEY = 'kft_daily_ai_tier_usage_v1';
+
+function checkAndIncrementDailyTierAiQuota(user?: User | null): {
+  allowed: boolean;
+  usedToday: number;
+  dailyLimit: number;
+  isFreeTrial: boolean;
+} {
+  if (!user || isAdminAccount(user)) {
+    return { allowed: true, usedToday: 0, dailyLimit: 9999, isFreeTrial: false };
+  }
+  const catalog = getConsumerVipPricingCatalog();
+  const isFreeTrial = isUserOnConsumerFreeTrial(user);
+  const dailyLimit = isFreeTrial ? catalog.trialAiDailyLimit : catalog.paidAiDailyLimit;
+  const todayKey = new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
+  const bucketKey = `${user.id || 'user'}:${todayKey}`;
+
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(DAILY_AI_USAGE_STORAGE_KEY) : null;
+    const map: Record<string, number> = raw ? JSON.parse(raw) : {};
+    const used = Math.max(0, Number(map[bucketKey]) || 0);
+    if (used >= dailyLimit) {
+      return { allowed: false, usedToday: used, dailyLimit, isFreeTrial };
+    }
+    map[bucketKey] = used + 1;
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(DAILY_AI_USAGE_STORAGE_KEY, JSON.stringify(map));
+    }
+    return { allowed: true, usedToday: used + 1, dailyLimit, isFreeTrial };
+  } catch {
+    return { allowed: true, usedToday: 1, dailyLimit, isFreeTrial };
+  }
 }
 
 function computeHaversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -984,6 +1020,43 @@ export function tryExecuteAiAgentTurn(params: {
 
   if (!isAgentCandidate) {
     return null;
+  }
+
+  const dailyQuota = checkAndIncrementDailyTierAiQuota(currentUser);
+  if (!dailyQuota.allowed) {
+    const latencyMs = Math.max(1, Math.round(performance.now() - startedAt));
+    recordAiAgentTelemetryEvent({
+      user: currentUser,
+      userRole,
+      toolName: 'recommend_khmer_food',
+      query: trimmed,
+      latencyMs,
+      status: 'rate_limited',
+      note: `Daily AI quota reached (${dailyQuota.usedToday}/${dailyQuota.dailyLimit}) for ${dailyQuota.isFreeTrial ? 'Free Trial 7D' : 'Paid VIP'}`,
+    });
+    return {
+      handled: true,
+      toolName: 'recommend_khmer_food',
+      userRole,
+      latencyMs,
+      fromCache: false,
+      estimatedCostUsd: 0,
+      blockedReason: 'rate_limited',
+      headline: dailyQuota.isFreeTrial
+        ? tr(
+            language,
+            `⏳ អ្នកបានប្រើប្រាស់កូតា AI សម្រាប់ការសាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃ គ្រប់ចំនួន ${dailyQuota.dailyLimit} ដងសម្រាប់ថ្ងៃនេះហើយ។ សូមដំឡើងទៅជាសមាជិក VIP បង់ប្រាក់ ដើម្បីទទួលបានរហូតដល់ 80 ដង/ថ្ងៃ!`,
+            `⏳ You have reached your Free Trial limit of ${dailyQuota.dailyLimit} AI requests for today. Upgrade to Paid VIP for up to 80 AI requests/day!`,
+            `⏳ 您今日的 7 天免费试用 AI 配额（${dailyQuota.dailyLimit} 次/日）已用完。升级付费 VIP 可享每日 80 次！`
+          )
+        : tr(
+            language,
+            `⏳ អ្នកបានប្រើប្រាស់កូតា AI ប្រចាំថ្ងៃគ្រប់ចំនួន ${dailyQuota.dailyLimit} ដងសម្រាប់ថ្ងៃនេះហើយ។ កូតានឹងបើកឡើងវិញនៅថ្ងៃស្អែក!`,
+            `⏳ You have reached your daily quota of ${dailyQuota.dailyLimit} AI requests for today. Your quota resets tomorrow!`,
+            `⏳ 您今日的 AI 配额（${dailyQuota.dailyLimit} 次/日）已用完，明日将自动重置！`
+          ),
+      followUpChips: buildAgentRoleChips(language, currentUser, restaurants).slice(0, 4),
+    };
   }
 
   if (!checkRateLimit(rateKey)) {

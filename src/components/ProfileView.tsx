@@ -11,7 +11,7 @@ import {
   Edit2, Check, X as CloseIcon, Crown, Award, Copy, Clock, MessageSquare, Mail, Settings, Camera, RotateCw, RotateCcw
 } from 'lucide-react';
 import {
-  isRestaurantPremiumActive, isUserVipActive, getVipAccountState, getVipRemainingDays,
+  isRestaurantPremiumActive, isUserVipActive, isUserOnConsumerFreeTrial, isUserPaidVipActive, getConsumerVipPricingCatalog, getVipAccountState, getVipRemainingDays,
   APP_VERSION, APP_BUILD_CODE, getDynamicVipPlans, getDynamicVipBenefits,
   isAdminAccount,
   isIosOrIpadAppStoreRuntime, getVipFeaturedRotationConfig, getVipFeaturedRotationState,
@@ -25,6 +25,7 @@ import {
   pickImageUsingNativeAndroidGallery,
 } from '../utils/androidMediaHelper';
 import { requestManualUpdateCheck } from '../services/appUpdateService';
+import { verifyUserVipStatusFromBackend } from '../services/supabaseService';
 import { IconNavFood, IconNavShop, IconNavTourism } from './icons/HandcraftedIcons';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 
@@ -52,7 +53,7 @@ export const ProfileView: React.FC = () => {
     supportTickets, openSupportTicketModal, transactions,
     setActiveTab, setIsRestaurantCheckInModalOpen,
     openGoogleMapsSearchModal,
-    appSettings, updateAppSettings, getCurrentUserStoreQuota
+    appSettings, updateAppSettings, getCurrentUserStoreQuota, triggerCloudSyncNow
   } = useApp();
 
   const isKm = language === 'km';
@@ -68,6 +69,9 @@ export const ProfileView: React.FC = () => {
     await deleteUserAccount(currentUser.id);
   };
   const isVip = isUserVipActive(currentUser);
+  const isFreeTrial7d = isUserOnConsumerFreeTrial(currentUser);
+  const isPaidVip = isUserPaidVipActive(currentUser);
+  const consumerCatalog = getConsumerVipPricingCatalog(appSettings);
   const vipAccountState = getVipAccountState(currentUser);
   const storeQuota = getCurrentUserStoreQuota();
   const dynamicPlans = getDynamicVipPlans(appSettings);
@@ -97,6 +101,28 @@ export const ProfileView: React.FC = () => {
       setActiveSubTab('bookmarks');
     }
   }, [isAdmin, isVip, activeSubTab]);
+
+  // Authoritative Server VIP Verification on Profile View mount:
+  // Ensures Profile never displays stale local cached VIP status if Admin cancelled VIP on the server.
+  useEffect(() => {
+    if (!currentUser || isAdmin) return;
+    let cancelled = false;
+    verifyUserVipStatusFromBackend(currentUser, true)
+      .then((res) => {
+        if (cancelled) return;
+        if (
+          res.source === 'supabase_cloud' &&
+          (!res.isVip || res.verifiedUser?.subscriptionStatus === 'cancelled') &&
+          (currentUser.membershipTier === 'premium_vip' || currentUser.subscriptionStatus === 'active')
+        ) {
+          if (triggerCloudSyncNow) { Promise.resolve(triggerCloudSyncNow(true)).catch(() => {}); }
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser?.id, currentUser?.membershipTier, currentUser?.subscriptionStatus, isAdmin]);
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState('');
@@ -262,7 +288,75 @@ export const ProfileView: React.FC = () => {
   // Owner restaurants (sorted newest/active first via getOwnedRestaurantsForUser)
   const myRestaurants = getOwnedRestaurantsForUser(currentUser);
 
-  const vipDashboard = (
+  const freeTrialDashboard = (
+        <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-amber-50 via-white to-emerald-50 dark:from-slate-800 dark:via-slate-900 dark:to-emerald-950/30 border-2 border-amber-400/80 shadow-md space-y-3.5 transition animate-fade-in font-khmer">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-2xl bg-amber-400 text-slate-950 shadow-md">
+                <Clock className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-xs font-bold text-slate-900 dark:text-white">
+                    {isKm ? 'ស្ថានភាពគណនី៖' : 'Account Tier:'}
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-slate-950 shadow-2xs">
+                    {tr(language, '🎁 សាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃ (Consumer Trial)', '🎁 7-Day Consumer Free Trial', '🎁 7 天个人版免费试用')}
+                  </span>
+                </div>
+                <p className="text-[11px] text-amber-800 dark:text-amber-300 font-bold mt-0.5 flex items-center gap-1">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>
+                    {isKm
+                      ? `ថ្ងៃផុតកំណត់សាកល្បង៖ ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (សល់ ${remainingDays} ថ្ងៃ)`
+                      : `Trial Expires: ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : ''} (${remainingDays} days left)`}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-3 bg-white dark:bg-slate-800/90 rounded-2xl border border-emerald-400/60 space-y-1.5 text-xs">
+            <div className="font-extrabold text-emerald-800 dark:text-emerald-300">
+              {tr(language, '✅ សិទ្ធិដែលទទួលបានក្នុងការសាកល្បង 7 ថ្ងៃ (សម្រាប់អ្នកប្រើប្រាស់ទូទៅ)៖', '✅ Included in Your 7-Day Consumer Trial:', '✅ 7 天免费试用包含的个人权益：')}
+            </div>
+            <ul className="space-y-1 text-[11px] text-slate-700 dark:text-slate-200">
+              <li>• {tr(language, `ជំនួយការឆ្លាតវៃ AI ម្ហូប & ទេសចរណ៍ (${consumerCatalog.trialAiDailyLimit} ដង/ថ្ងៃ)`, `AI Food & Travel Assistant (${consumerCatalog.trialAiDailyLimit} requests/day)`, `AI 美食与旅游助手（每日 ${consumerCatalog.trialAiDailyLimit} 次）`)}</li>
+              <li>• {tr(language, 'រៀបចំផែនការដើរលេងឆ្លាតវៃ (AI Trip Planner)', 'Smart AI Trip Planner', 'AI 智能行程规划')}</li>
+              <li>• {tr(language, 'វិភាគអាហារូបត្ថម្ភ និងមុខម្ហូបសុខភាពប្រចាំថ្ងៃ', 'Daily Nutrition & Healthy Dish Recommendations', '每日营养分析与健康菜品推荐')}</li>
+            </ul>
+          </div>
+
+          <div className="p-3 bg-rose-50/80 dark:bg-rose-950/30 rounded-2xl border border-rose-300 dark:border-rose-800/70 space-y-1.5 text-xs">
+            <div className="font-extrabold text-rose-800 dark:text-rose-300">
+              {tr(language, '🔒 មិនរួមបញ្ចូលមុខងារ VIP បង់ប្រាក់ និងកញ្ចប់ដាក់ហាងឡើយ៖', '🔒 Paid VIP & Shop Package Features NOT Included in Trial:', '🔒 免费试用不包含以下付费 VIP 与商家套餐权益：')}
+            </div>
+            <ul className="space-y-1 text-[11px] text-slate-700 dark:text-slate-300">
+              <li>• {tr(language, 'មិនមានសិទ្ធិដាក់ហាងដោយឥតគិតថ្លៃទេ (ត្រូវបើកកញ្ចប់ហាងបង់ប្រាក់ $6.99/30d ឬ $49.99/yr)', 'No free shop listing (requires Paid Shop Package $6.99/30d or $49.99/yr)', '不含免费上架店铺（需开通付费店铺套餐 $6.99/30天 或 $49.99/年）')}</li>
+              <li>• {tr(language, 'មិនរួមបញ្ចូល ហាងលោតលើគេ (Featured Placement) ឬផ្លាកសញ្ញា VIP មាសលើហាង', 'No Featured Placement or Gold VIP Shop Badge', '不含首页置顶推荐 (Featured Placement) 或店铺金色 VIP 徽章')}</li>
+              <li>• {tr(language, 'មិនរួមបញ្ចូល ស្ថិតិអ្នកចូលមើលហាង (Store Analytics)', 'No Store Analytics (views, calls, map taps)', '不含店铺访客数据统计 (Store Analytics)')}</li>
+            </ul>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => openUpgradeVipModal(true)}
+            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black text-xs shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
+          >
+            <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
+            <span>
+              {tr(
+                language,
+                `👑 ដំឡើងទៅជាសមាជិក VIP បង់ប្រាក់ពេញលេញ (AI ${consumerCatalog.paidAiDailyLimit} ដង/ថ្ងៃ)`,
+                `👑 Upgrade to Full Paid VIP (${consumerCatalog.paidAiDailyLimit} AI/day)`,
+                `👑 升级正式付费 VIP 会员（每日 ${consumerCatalog.paidAiDailyLimit} 次 AI）`
+              )}
+            </span>
+          </button>
+        </div>
+  );
+
+  const paidVipDashboard = (
         <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-amber-500/20 via-yellow-500/10 to-amber-600/25 border-2 border-amber-400/80 shadow-md space-y-3.5 transition animate-fade-in font-khmer">
           {/* Header row */}
           <div className="flex items-center justify-between gap-3">
@@ -435,8 +529,8 @@ export const ProfileView: React.FC = () => {
               </button>
             </div>
 
-            {/* Interactive VIP Live Analytics & Food Video Reels Quick Panel */}
-            {selectedVipPowerPanel === 'analytics' && (
+            {/* Interactive VIP Live Analytics & Food Video Reels Quick Panel (Requires Active Paid Shop Package) */}
+            {selectedVipPowerPanel === 'analytics' && isShopSubscriptionActive(myRestaurants[0]) && (
               <div className="mt-2 p-3 rounded-2xl bg-gradient-to-br from-emerald-950 to-slate-900 text-white border border-emerald-500/40 space-y-2.5 animate-fade-in">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-amber-300 flex items-center gap-1.5">
@@ -732,14 +826,19 @@ export const ProfileView: React.FC = () => {
                         <Shield className="w-3.5 h-3.5 text-emerald-700 fill-emerald-700 dark:text-emerald-400 dark:fill-emerald-400" />
                         <span>🛡️ {tr(language, 'អ្នកគ្រប់គ្រងប្រព័ន្ធ', 'Administrator', '系统管理员')}</span>
                       </span>
-                    ) : isVip ? (
+                    ) : isFreeTrial7d ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-amber-100 text-amber-900 dark:bg-amber-950/80 dark:text-amber-200 border border-amber-400 shadow-2xs font-khmer">
+                        <Clock className="w-3.5 h-3.5 text-amber-700 dark:text-amber-300" />
+                        <span>{tr(language, '🎁 សាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃ (Free Trial)', '🎁 7-Day Free Trial', '🎁 7 天免费试用')}</span>
+                      </span>
+                    ) : isPaidVip ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-amber-200 to-amber-300 text-amber-950 border border-amber-400 shadow-2xs font-khmer">
                         <Crown className="w-3.5 h-3.5 fill-amber-700 text-amber-700" />
-                        <span>{tr(language, 'សមាជិក VIP', 'VIP MEMBER', 'VIP 尊享会员')}</span>
+                        <span>{tr(language, 'សមាជិក VIP បង់ប្រាក់', 'Paid VIP Member', '付费 VIP 尊享会员')}</span>
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 shadow-2xs font-khmer">
-                        <span>{tr(language, 'គណនីឥតគិតថ្លៃ', 'Free User', '免费账户')}</span>
+                        <span>{tr(language, 'គណនីធម្មតា (Free User)', 'Free User', '普通免费账户')}</span>
                       </span>
                     )}
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 shadow-2xs font-khmer" title={tr(language, 'គណនីបានផ្ទៀងផ្ទាត់', 'Verified Account', '已认证账户')}>
@@ -1465,8 +1564,10 @@ export const ProfileView: React.FC = () => {
       {/* Tab: Membership Page (Consumer Users Only - hidden on iOS App Store per Guideline 3.1.1) */}
       {!isAdmin && !isIosAppStore && activeSubTab === 'membership' && (
         <div className="space-y-4 font-khmer">
-          {isVip ? (
-            vipDashboard
+          {isFreeTrial7d ? (
+            freeTrialDashboard
+          ) : isPaidVip ? (
+            paidVipDashboard
           ) : (
             /* Header Card (shown for non-VIP or expired users; active VIPs already see vipDashboard above) */
             <div className="p-4 rounded-3xl bg-gradient-to-br from-amber-500/20 via-emerald-500/10 to-teal-500/15 border-2 border-amber-400/50 shadow-xs space-y-3">

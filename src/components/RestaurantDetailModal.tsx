@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import {
   isUserVipActive,
+  isUserPaidVipActive,
+  isShopSubscriptionActive,
   getRestaurantRatingSummary,
   getRestaurantGoogleExternalUrl,
   openRestaurantGoogleExternal,
@@ -73,8 +75,10 @@ export const RestaurantDetailModal: React.FC = () => {
     currentUser?.id === 'admin-authorized-single' || 
     currentUser?.username === 'admin' || 
     currentUser?.username === 'cheasavuth';
-  const isApprovedVip = isUserVipActive(currentUser);
-  const canEditShop = Boolean(isAdmin || (isOwner && isApprovedVip));
+  const isShopVipActive = Boolean(isAdmin || isShopSubscriptionActive(selectedRestaurant));
+  const isApprovedVip = Boolean(isShopVipActive || isUserPaidVipActive(currentUser));
+  const canEditShop = Boolean(isAdmin || isOwner);
+  const canUsePaidShopVipFeatures = Boolean(isAdmin || (isOwner && isShopVipActive));
   const dialablePhone = sanitizeDialablePhone(selectedRestaurant.phone);
   const displayPhone = formatDisplayPhone(selectedRestaurant.phone);
   const ratingSummary = getRestaurantRatingSummary(selectedRestaurant);
@@ -566,14 +570,14 @@ export const RestaurantDetailModal: React.FC = () => {
             )}
 
             {/* VIP Store Video Reels Section (Benefit 5) */}
-            {(selectedRestaurant.promoVideoUrl || canEditShop) && (
+            {(selectedRestaurant.promoVideoUrl || canUsePaidShopVipFeatures) && (
               <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-teal-500/10 border border-amber-400/50 space-y-2 text-xs font-khmer">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5">
                     <Video className="w-4 h-4 text-amber-500" />
                     <span>{tr(language, 'វីដេអូផ្សព្វផ្សាយហាង (Video Reels)', 'Store Video Reels', '店铺短视频 (Video Reels)')}</span>
                   </span>
-                  {canEditShop && (
+                  {canUsePaidShopVipFeatures && (
                     <button
                       type="button"
                       onClick={() => {
@@ -694,32 +698,32 @@ export const RestaurantDetailModal: React.FC = () => {
               </div>
             )}
 
-            {/* Restaurant Profile View & Click Analytics (shown for Owner/Admin) */}
-            {canEditShop && (
+            {/* Restaurant Profile View & Click Analytics (Strictly gated by Active Paid Shop Package / Admin — never unlocked by 7-Day Free Trial) */}
+            {canUsePaidShopVipFeatures && (
               <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700 space-y-2 text-xs font-khmer">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-[#0F172A] dark:text-white flex items-center gap-1.5">
                     <BarChart3 className="w-4 h-4 text-emerald-600" />
-                    <span>{tr(language, 'ស្ថិតិអ្នកចូលទស្សនា & ចុចមើល', 'Profile & Contact Analytics', '店铺浏览与互动统计')}</span>
+                    <span>{tr(language, 'ស្ថិតិអ្នកចូលទស្សនា & ចុចមើល (Store Analytics)', 'Store Analytics', '店铺浏览与互动统计')}</span>
                   </span>
                   <span className="text-[10px] text-emerald-600 font-bold">● {tr(language, 'តាមដានផ្ទាល់', 'Live Tracked', '实时统计')}</span>
                 </div>
                 <div className="grid grid-cols-4 gap-2 text-center">
                   <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
                     <div className="text-slate-400 text-[10px]">{tr(language, 'អ្នកមើល', 'Views', '浏览量')}</div>
-                    <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.views || 1240}</div>
+                    <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.views ?? 0}</div>
                   </div>
                   <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
                     <div className="text-slate-400 text-[10px]">{tr(language, 'ចុច Call', 'Calls', '拨打次数')}</div>
-                    <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.phoneClicks || 180}</div>
+                    <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.phoneClicks ?? 0}</div>
                   </div>
                   <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
                     <div className="text-slate-400 text-[10px]">{tr(language, 'ចុច Map', 'Maps', '导航次数')}</div>
-                    <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.mapClicks || 340}</div>
+                    <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.mapClicks ?? 0}</div>
                   </div>
                   <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
                     <div className="text-slate-400 text-[10px]">{tr(language, 'ចែករំលែក', 'Shares', '分享次数')}</div>
-                    <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.shareClicks || 95}</div>
+                    <div className="font-bold font-mono text-[#064E3B] dark:text-emerald-400">{selectedRestaurant.analytics?.shareClicks ?? 0}</div>
                   </div>
                 </div>
               </div>

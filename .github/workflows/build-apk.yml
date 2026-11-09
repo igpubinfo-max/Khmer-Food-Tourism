@@ -130,11 +130,11 @@ jobs:
             echo "::endgroup::"
           fi
 
-          # 2. Build SINGLE APK with conflict-free package ID (com.khmerfood.tourism.direct)
-          # Guarantees 1-tap installation on Samsung Android 15 without Play Store signature conflicts
+          # 2. Build SINGLE APK with official package ID (com.khmerfood.tourism) matching Play Store AAB
+          # Ensures only 1 unified app icon/program exists on Android
           if [ "$BUILD_APK" = "true" ]; then
             echo "::group::Building Direct-Install Android APK (.APK)"
-            ./gradlew assembleRelease -PcustomAppId=com.khmerfood.tourism.direct --no-daemon -x lint -x lintVitalRelease
+            ./gradlew assembleRelease --no-daemon -x lint -x lintVitalRelease
             REL_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
             "$ZIPALIGN" -p -f 4 "$REL_APK" ../release_out/aligned-official.apk
             "$APKSIGNER" sign \
@@ -193,7 +193,7 @@ jobs:
                 name: process.env.APK_NAME,
                 size: Number(process.env.APK_SIZE),
                 sha256: process.env.APK_SHA,
-                packageId: "com.khmerfood.tourism.direct"
+                packageId: "com.khmerfood.tourism"
               };
             }
             if (bAab) {

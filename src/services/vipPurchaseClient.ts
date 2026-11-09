@@ -1,3 +1,4 @@
+import { getAppAttestationHeaders, isAppCloneTampered } from '../utils/appCloneIntegrityGuard';
 /**
  * Client of the `vip-purchase` Edge Function:
  *   1. `claimConsumerTrialOnServer`: activates the 1-time 7-Day Consumer Free Trial (Android/Web only) with
@@ -47,6 +48,7 @@ export async function verifyVipPurchaseOnServer(params: {
   deviceHash?: string | null;
   identityHashes?: string[];
 }): Promise<ServerPurchaseOutcome> {
+  if (isAppCloneTampered()) return { kind: 'unavailable' };
   const cfg = getCloudApiConfig();
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || typeof fetch === 'undefined') return { kind: 'unavailable' };
   const controller = new AbortController();
@@ -59,6 +61,7 @@ export async function verifyVipPurchaseOnServer(params: {
         apikey: cfg.supabaseAnonKey,
         Authorization: `Bearer ${cfg.supabaseAnonKey}`,
         'x-kft-user-id': params.userId,
+        ...getAppAttestationHeaders(),
       },
       body: JSON.stringify(params),
       signal: controller.signal,
@@ -98,6 +101,7 @@ export async function claimConsumerTrialOnServer(params: {
         apikey: cfg.supabaseAnonKey,
         Authorization: `Bearer ${cfg.supabaseAnonKey}`,
         'x-kft-user-id': params.userId,
+        ...getAppAttestationHeaders(),
       },
       body: JSON.stringify({
         action: 'claim_trial',

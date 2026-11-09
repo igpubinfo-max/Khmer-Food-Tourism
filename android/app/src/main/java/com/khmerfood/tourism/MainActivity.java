@@ -1,7 +1,6 @@
-package com.khmerfood.tourism;
+﻿package com.khmerfood.tourism;
 
 import android.os.Bundle;
-import android.webkit.WebView;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -11,6 +10,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(NativeAbaLauncherPlugin.class);
         registerPlugin(NativeBiometricAuthPlugin.class);
         registerPlugin(NativeAppUpdatePlugin.class);
+        registerPlugin(NativeAppIntegrityPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }

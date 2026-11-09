@@ -1,3 +1,4 @@
+import { getAppAttestationHeaders, isAppCloneTampered } from '../utils/appCloneIntegrityGuard';
 /**
  * Supabase Cloud Database & Storage Synchronization Service (Free Tier Compatible)
  *
@@ -244,6 +245,7 @@ function getSupabaseHeaders(preferRepresentation = false): Record<string, string
     apikey: cfg.supabaseAnonKey,
     Authorization: `Bearer ${cfg.supabaseAnonKey}`,
     'Content-Type': 'application/json',
+    ...getAppAttestationHeaders(),
   };
   if (preferRepresentation) {
     headers['Prefer'] = 'resolution=merge-duplicates,return=representation';
@@ -1068,6 +1070,10 @@ export async function pushCloudDocument(
   timeoutMs = 12000,
   opts: CloudWriteOptions = {}
 ): Promise<boolean> {
+  if (isAppCloneTampered()) {
+    logIntegrityEvent('critical', 'clone_write_blocked', `Blocked cloud write for ${key} from unauthorized cloned/repackaged app`, { key });
+    return false;
+  }
   if (!isSupabaseConfigured()) return false;
   const cfg = getCloudApiConfig();
   if (!cfg.enableAutoCloudSync) return false;
@@ -2310,13 +2316,28 @@ export const USER_RECORD_PREFIX = 'kft_user_';
 // Short-lived cache (15s) for authoritative backend VIP verification so rapid UI taps do not spam Supabase
 const backendVipVerifyCache = new Map<string, { expiresAt: number; isVip: boolean; verifiedUser: User | null }>();
 
+export function clearBackendVipVerifyCache(user?: Partial<User> | null): void {
+  if (!user) {
+    backendVipVerifyCache.clear();
+    lastPushedAtomicUserSigMap.clear();
+    return;
+  }
+  const canonicalId = getCanonicalUserId(user);
+  backendVipVerifyCache.delete(canonicalId);
+  if (user.id) backendVipVerifyCache.delete(user.id);
+  for (const k of getCandidateAtomicUserKeys(user)) {
+    lastPushedAtomicUserSigMap.delete(k);
+  }
+}
+
 /**
  * Authoritative Backend VIP Verification:
  * Verifies a user's active VIP membership status against Supabase Cloud (`kft_user_<canonicalId>`,
  * `kft_cloud_vip_backup_v1`, and `kft_cloud_users_v2`) rather than trusting frontend localStorage state alone.
  */
 export async function verifyUserVipStatusFromBackend(
-  user?: User | null
+  user?: User | null,
+  forceRefresh = false
 ): Promise<{ isVip: boolean; verifiedUser: User | null; source: 'admin' | 'supabase_cloud' | 'local_fallback' }> {
   if (!user || !user.id) {
     return { isVip: false, verifiedUser: null, source: 'supabase_cloud' };
@@ -2331,15 +2352,18 @@ export async function verifyUserVipStatusFromBackend(
   }
 
   const canonicalId = getCanonicalUserId(user);
-  const cached = backendVipVerifyCache.get(canonicalId);
-  if (cached && cached.expiresAt > Date.now()) {
-    return { isVip: cached.isVip, verifiedUser: cached.verifiedUser, source: 'supabase_cloud' };
+  if (!forceRefresh) {
+    const cached = backendVipVerifyCache.get(canonicalId);
+    if (cached && cached.expiresAt > Date.now()) {
+      return { isVip: cached.isVip, verifiedUser: cached.verifiedUser, source: 'supabase_cloud' };
+    }
   }
 
   const localNormalized = normalizeVipExpiryOnUser(user);
   const localHasVip = Boolean(
     localNormalized.membershipTier === 'premium_vip' &&
       localNormalized.subscriptionStatus === 'active' &&
+      localNormalized.paymentStatus !== 'cancelled' &&
       !localNormalized.vipCancelledAt
   );
 
@@ -2359,8 +2383,15 @@ export async function verifyUserVipStatusFromBackend(
       }
     }
 
-    // Also check cloud VIP backup registry if atomic record was not found or not yet marked VIP
-    if (!serverUser || serverUser.membershipTier !== 'premium_vip') {
+    const isServerExplicitlyCancelled = Boolean(
+      serverUser &&
+        (serverUser.subscriptionStatus === 'cancelled' ||
+          serverUser.paymentStatus === 'cancelled' ||
+          (Boolean(serverUser.vipCancelledAt) && serverUser.subscriptionStatus !== 'active'))
+    );
+
+    // Also check cloud VIP backup registry ONLY if atomic record was not explicitly cancelled and not yet marked VIP
+    if (!isServerExplicitlyCancelled && (!serverUser || serverUser.membershipTier !== 'premium_vip')) {
       const vipBackup = await pullCloudDocument<any>('kft_cloud_vip_backup_v1', 4500);
       const emailLower = (user.email || '').trim().toLowerCase();
       if (Array.isArray(vipBackup)) {
@@ -2498,6 +2529,24 @@ export function normalizeVipExpiryOnUser(rawUser: User): User {
     rawUser.username === 'admin' ||
     rawUser.username === 'cheasavuth';
   if (isAdmin) return rawUser;
+  if (
+    rawUser.subscriptionStatus === 'cancelled' ||
+    rawUser.paymentStatus === 'cancelled' ||
+    (Boolean(rawUser.vipCancelledAt) && rawUser.subscriptionStatus !== 'active')
+  ) {
+    return {
+      ...rawUser,
+      membershipTier: 'free',
+      subscriptionStatus: 'cancelled',
+      paymentStatus: 'cancelled',
+      vipStatus: 'none',
+      subscriptionExpiryDate: undefined,
+      vipExpiresAt: undefined,
+      freeTrialActivated: false,
+      freeTrialExpiresAt: undefined,
+      autoRenew: false,
+    };
+  }
   const u = sanitizeUserVipPlanAndExpiry(rawUser);
   const nowServerMs = getAuthoritativeServerNowMs();
   const rawExp = u.subscriptionExpiryDate || (u as any).vipExpiresAt || (u.freeTrialActivated ? u.freeTrialExpiresAt : undefined);
@@ -2747,13 +2796,19 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
         ...(Array.isArray(second.additionalStorePaymentIds) ? second.additionalStorePaymentIds : []),
       ])
     ),
-    // Server-verified 7-Day Free Trial fields survive merges across updates and devices (retired foodCheckInRewardAt never activates trial).
-    freeTrialActivated: Boolean(
-      first.freeTrialActivated ||
-        second.freeTrialActivated ||
-        first.freeTrialActivatedAt ||
-        second.freeTrialActivatedAt
-    ) || undefined,
+    // Server-verified 7-Day Free Trial fields survive merges across updates and devices (unless VIP was explicitly cancelled).
+    freeTrialActivated:
+      first.subscriptionStatus === 'cancelled' ||
+      second.subscriptionStatus === 'cancelled' ||
+      first.paymentStatus === 'cancelled' ||
+      second.paymentStatus === 'cancelled'
+        ? false
+        : Boolean(
+            first.freeTrialActivated ||
+              second.freeTrialActivated ||
+              first.freeTrialActivatedAt ||
+              second.freeTrialActivatedAt
+          ) || undefined,
     freeTrialActivatedAt:
       [first.freeTrialActivatedAt, second.freeTrialActivatedAt]
         .filter((v): v is string => typeof v === 'string' && v.length > 0 && v !== 'granted')
@@ -2884,45 +2939,68 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
     secondNorm.paymentStatus !== 'rejected' &&
     secondExpMs > nowMs;
 
-  const firstStartMs = parseValidMs(firstNorm.subscriptionStartDate);
-  const secondStartMs = parseValidMs(secondNorm.subscriptionStartDate);
+  const firstStartMs = Math.max(
+    parseValidMs(firstNorm.subscriptionStartDate),
+    parseValidMs(firstNorm.verifiedAt),
+    parseValidMs(firstNorm.freeTrialActivatedAt)
+  );
+  const secondStartMs = Math.max(
+    parseValidMs(secondNorm.subscriptionStartDate),
+    parseValidMs(secondNorm.verifiedAt),
+    parseValidMs(secondNorm.freeTrialActivatedAt)
+  );
   const firstCancelMs = parseValidMs(first.vipCancelledAt);
   const secondCancelMs = parseValidMs(second.vipCancelledAt);
 
-  // Only honor an explicit Admin cancellation if the cancelled record has a newer cancellation timestamp
-  // than the other record's VIP start date AND wasn't just a leftover `vipCancelledAt` field on an already re-upgraded record.
-  const wasSecondCancelledAfterFirstStart =
-    second.subscriptionStatus === 'cancelled' &&
-    second.paymentStatus === 'cancelled' &&
-    secondCancelMs > 0 &&
-    second.vipCancelledAt !== first.vipCancelledAt &&
-    (!isFirstValidVip ||
-      (firstStartMs > 0 &&
-        secondCancelMs > firstStartMs &&
-        secondCancelMs > firstExpMs - 30 * 24 * 60 * 60 * 1000));
+  const isFirstExplicitlyCancelled =
+    first.subscriptionStatus === 'cancelled' ||
+    first.paymentStatus === 'cancelled' ||
+    (Boolean(first.vipCancelledAt) && first.subscriptionStatus !== 'active');
+  const isSecondExplicitlyCancelled =
+    second.subscriptionStatus === 'cancelled' ||
+    second.paymentStatus === 'cancelled' ||
+    (Boolean(second.vipCancelledAt) && second.subscriptionStatus !== 'active');
 
-  const wasFirstCancelledAfterSecondStart =
-    first.subscriptionStatus === 'cancelled' &&
-    first.paymentStatus === 'cancelled' &&
-    firstCancelMs > 0 &&
-    first.vipCancelledAt !== second.vipCancelledAt &&
-    (!isSecondValidVip ||
-      (secondStartMs > 0 &&
-        firstCancelMs > secondStartMs &&
-        firstCancelMs > secondExpMs - 30 * 24 * 60 * 60 * 1000));
+  if (isFirstExplicitlyCancelled || isSecondExplicitlyCancelled) {
+    const effectiveCancelMs = Math.max(
+      isFirstExplicitlyCancelled ? firstCancelMs : 0,
+      isSecondExplicitlyCancelled ? secondCancelMs : 0
+    );
+    const effectiveCancelIso =
+      (isSecondExplicitlyCancelled && secondCancelMs >= firstCancelMs
+        ? second.vipCancelledAt
+        : first.vipCancelledAt) ||
+      second.vipCancelledAt ||
+      first.vipCancelledAt ||
+      new Date(nowMs).toISOString();
 
-  if (wasSecondCancelledAfterFirstStart || wasFirstCancelledAfterSecondStart) {
-    const cancelledRec = wasSecondCancelledAfterFirstStart ? second : first;
-    return normalizeVipExpiryOnUser({
-      ...baseMerged,
-      membershipTier: 'free',
-      subscriptionStatus: 'cancelled',
-      subscriptionExpiryDate: undefined,
-      vipExpiresAt: undefined,
-      vipStatus: 'expired',
-      paymentStatus: 'cancelled',
-      vipCancelledAt: cancelledRec.vipCancelledAt,
-    });
+    // A cancelled record is only superseded if the other record is an active VIP whose subscriptionStartDate is strictly newer than the cancellation
+    const isFirstNewerRegrant =
+      !isFirstExplicitlyCancelled &&
+      isFirstValidVip &&
+      effectiveCancelMs > 0 &&
+      firstStartMs > effectiveCancelMs;
+    const isSecondNewerRegrant =
+      !isSecondExplicitlyCancelled &&
+      isSecondValidVip &&
+      effectiveCancelMs > 0 &&
+      secondStartMs > effectiveCancelMs;
+
+    if (!isFirstNewerRegrant && !isSecondNewerRegrant) {
+      return normalizeVipExpiryOnUser({
+        ...baseMerged,
+        membershipTier: 'free',
+        subscriptionStatus: 'cancelled',
+        subscriptionExpiryDate: undefined,
+        vipExpiresAt: undefined,
+        vipStatus: 'none',
+        paymentStatus: 'cancelled',
+        freeTrialActivated: false,
+        freeTrialExpiresAt: undefined,
+        autoRenew: false,
+        vipCancelledAt: effectiveCancelIso,
+      });
+    }
   }
 
   if (isFirstValidVip && isSecondValidVip) {
@@ -3310,18 +3388,50 @@ export async function upsertSingleUserToCloud(
       });
     }
 
-    const matchingCloudUsers = [
-      ...existingAtomicDocs.map(d => d.payload),
-      ...avatarDocUsers,
-      ...(Array.isArray(cloudUsersV2) ? cloudUsersV2 : []),
-      ...vipBackupUsers,
-    ].filter(
-      u =>
+    const matchesCanonicalTarget = (u: any): boolean =>
+      Boolean(
         u &&
-        (u.id === canonicalUser.id ||
-          (Array.isArray(u.legacyIds) && u.legacyIds.includes(canonicalUser.id)) ||
-          (canonicalUser.email && u.email && u.email.toLowerCase().trim() === canonicalUser.email.toLowerCase().trim()))
+          (u.id === canonicalUser.id ||
+            (Array.isArray(u.legacyIds) && u.legacyIds.includes(canonicalUser.id)) ||
+            (canonicalUser.email && u.email && u.email.toLowerCase().trim() === canonicalUser.email.toLowerCase().trim()))
+      );
+
+    const cloudAuthoritativeMatches = [
+      ...existingAtomicDocs.map(d => d.payload),
+      ...(Array.isArray(cloudUsersV2) ? cloudUsersV2 : []),
+    ].filter(matchesCanonicalTarget);
+
+    const cloudCancelledRecord = cloudAuthoritativeMatches.find(
+      u =>
+        u.subscriptionStatus === 'cancelled' ||
+        u.paymentStatus === 'cancelled' ||
+        (Boolean(u.vipCancelledAt) && u.subscriptionStatus !== 'active')
     );
+    const cloudCancelMs = cloudCancelledRecord ? parseSafeDateMs(cloudCancelledRecord.vipCancelledAt) : 0;
+    const localStartMs = parseSafeDateMs(canonicalUser.subscriptionStartDate || canonicalUser.verifiedAt);
+
+    // If cloud says this user's VIP was cancelled and local user wasn't newly granted VIP after cloudCancelMs, strip stale local VIP
+    if (cloudCancelledRecord && (cloudCancelMs === 0 || localStartMs <= cloudCancelMs)) {
+      canonicalUser = normalizeVipExpiryOnUser({
+        ...canonicalUser,
+        membershipTier: 'free',
+        subscriptionStatus: 'cancelled',
+        paymentStatus: 'cancelled',
+        vipStatus: 'none',
+        subscriptionExpiryDate: undefined,
+        vipExpiresAt: undefined,
+        freeTrialActivated: false,
+        freeTrialExpiresAt: undefined,
+        autoRenew: false,
+        vipCancelledAt: cloudCancelledRecord.vipCancelledAt || new Date().toISOString(),
+      });
+    }
+
+    const matchingCloudUsers = [
+      ...cloudAuthoritativeMatches,
+      ...avatarDocUsers,
+      ...(cloudCancelledRecord ? [] : vipBackupUsers.filter(matchesCanonicalTarget)),
+    ];
 
     if (matchingCloudUsers.length > 0) {
       const mergedSingle = deduplicateAndNormalizeUsers(
@@ -3333,12 +3443,19 @@ export async function upsertSingleUserToCloud(
       }
     }
 
-    // 2. Write merged atomic per-user row immediately (deduplicated within session)
-    const atomicKey = `${USER_RECORD_PREFIX}${canonicalUser.id}`;
+    // 2. Write merged atomic per-user row immediately (and update any existing alias atomic keys so they never diverge)
+    const keysToPush = Array.from(
+      new Set([
+        `${USER_RECORD_PREFIX}${canonicalUser.id}`,
+        ...existingAtomicDocs.map(d => d.key).filter(Boolean),
+      ])
+    );
     const userSig = JSON.stringify(canonicalUser);
-    if (lastPushedAtomicUserSigMap.get(atomicKey) !== userSig) {
-      const atomicOk = await pushCloudDocument(atomicKey, canonicalUser);
-      if (atomicOk) lastPushedAtomicUserSigMap.set(atomicKey, userSig);
+    for (const atomicKey of keysToPush) {
+      if (lastPushedAtomicUserSigMap.get(atomicKey) !== userSig) {
+        const atomicOk = await pushCloudDocument(atomicKey, canonicalUser);
+        if (atomicOk) lastPushedAtomicUserSigMap.set(atomicKey, userSig);
+      }
     }
 
     if (!updateAggregate) {
@@ -3790,6 +3907,57 @@ export async function syncAllAppDataWithSupabase(localState: {
       ...(Array.isArray(localState.supportTickets) ? localState.supportTickets : []),
     ];
 
+    // Build authoritative cancellation lookup across Cloud & Local records so cancelled users are never re-upgraded by old backups/txns
+    const cancelledById = new Map<string, number>();
+    const cancelledByEmail = new Map<string, number>();
+    const cancelledByPhone = new Map<string, number>();
+    const recordCancelledUser = (u: Partial<User> | null | undefined) => {
+      if (!u || typeof u !== 'object') return;
+      const isCanc =
+        u.subscriptionStatus === 'cancelled' ||
+        u.paymentStatus === 'cancelled' ||
+        (Boolean(u.vipCancelledAt) && u.subscriptionStatus !== 'active');
+      if (!isCanc) return;
+      const cMs = parseSafeDateMs(u.vipCancelledAt) || Date.now();
+      const registerKey = (map: Map<string, number>, k?: string) => {
+        if (!k) return;
+        const prev = map.get(k) || 0;
+        if (cMs > prev) map.set(k, cMs);
+      };
+      if (u.id) registerKey(cancelledById, String(u.id).trim());
+      if (Array.isArray(u.legacyIds)) {
+        for (const lid of u.legacyIds) if (lid) registerKey(cancelledById, String(lid).trim());
+      }
+      const em = String(u.email || '').trim().toLowerCase();
+      if (em) {
+        registerKey(cancelledByEmail, em);
+        if (em.includes('@')) {
+          const slug = em.replace(/[^a-z0-9]/g, '_');
+          registerKey(cancelledById, `user-${slug}`);
+          registerKey(cancelledById, `google-${slug}`);
+          registerKey(cancelledById, `owner-${slug}`);
+        }
+      }
+      const ph = String(u.phone || '').replace(/[\s-+()]/g, '');
+      if (ph.length >= 7) registerKey(cancelledByPhone, ph);
+    };
+    for (const doc of atomicUserDocs) recordCancelledUser(doc?.payload);
+    if (Array.isArray(cloudUsersV2)) for (const u of cloudUsersV2) recordCancelledUser(u);
+    if (Array.isArray(cloudUsers)) for (const u of cloudUsers) recordCancelledUser(u);
+    if (Array.isArray(localState.users)) for (const u of localState.users) recordCancelledUser(u);
+    recordCancelledUser(localState.currentUser);
+
+    const getCancelledMsForActivity = (uid?: string, email?: string, phone?: string): number => {
+      const cleanId = String(uid || '').trim();
+      const cleanE = String(email || '').trim().toLowerCase();
+      const cleanP = String(phone || '').replace(/[\s-+()]/g, '');
+      return Math.max(
+        cleanId ? cancelledById.get(cleanId) || 0 : 0,
+        cleanE ? cancelledByEmail.get(cleanE) || 0 : 0,
+        cleanP.length >= 7 ? cancelledByPhone.get(cleanP) || 0 : 0
+      );
+    };
+
     const recoveredUsersFromActivity: User[] = [];
     for (const t of allTxnsCombined) {
       if (!t) continue;
@@ -3803,7 +3971,10 @@ export async function syncAllAppDataWithSupabase(localState: {
       const isGoogle = String(uid || '').startsWith('google-');
       const createdDate = t.createdAt ? t.createdAt.split('T')[0].split(' ')[0] : '2026-01-01';
       const txnExpMs = parseSafeDateMs(t.expiresAt);
-      const isActiveVerifiedVipTxn = t.status === 'verified' && txnExpMs > Date.now();
+      const txnStartMs = parseSafeDateMs(t.verifiedAt || t.createdAt);
+      const userCancelMs = getCancelledMsForActivity(uid, uEmail, uPhone);
+      const isCancelledAfterTxn = userCancelMs > 0 && (txnStartMs <= 0 || txnStartMs <= userCancelMs);
+      const isActiveVerifiedVipTxn = t.status === 'verified' && txnExpMs > Date.now() && !isCancelledAfterTxn;
       recoveredUsersFromActivity.push({
         id: uid || `user-${uEmail.replace(/[^a-z0-9]/g, '_')}`,
         name: t.userName || (uEmail ? uEmail.split('@')[0] : 'Member'),
@@ -3819,9 +3990,9 @@ export async function syncAllAppDataWithSupabase(localState: {
         lastActiveAt: t.verifiedAt || t.createdAt,
         membershipTier: isActiveVerifiedVipTxn ? 'premium_vip' : 'free',
         subscriptionStatus: isActiveVerifiedVipTxn ? 'active' : 'none',
-        subscriptionStartDate: t.status === 'verified' ? (t.verifiedAt || t.createdAt) : undefined,
-        subscriptionExpiryDate: t.status === 'verified' ? t.expiresAt : undefined,
-        paymentStatus: t.status === 'verified' ? 'verified' : t.status === 'pending_verification' ? 'pending_verification' : 'unpaid',
+        subscriptionStartDate: isActiveVerifiedVipTxn ? (t.verifiedAt || t.createdAt) : undefined,
+        subscriptionExpiryDate: isActiveVerifiedVipTxn ? t.expiresAt : undefined,
+        paymentStatus: isActiveVerifiedVipTxn ? 'verified' : t.status === 'pending_verification' ? 'pending_verification' : 'unpaid',
         paymentMethod: (t.paymentMethod as any) || undefined,
         transactionRef: t.transactionRef || undefined,
       });
@@ -3833,12 +4004,15 @@ export async function syncAllAppDataWithSupabase(localState: {
       if (isActivityUserDeleted(tk.userId, uEmail, tk.userPhone)) continue;
       const isGoogle = String(tk.userId).startsWith('google-');
       let tkExpiryIso: string | undefined;
+      const tkCancelMs = getCancelledMsForActivity(tk.userId, uEmail, tk.userPhone);
       if (tk.vipApproved && tk.status === 'resolved') {
         const baseMs = parseSafeDateMs(tk.vipApprovedAt || tk.updatedAt || tk.createdAt) || Date.now();
-        const days = typeof tk.durationDays === 'number' && tk.durationDays >= 1 ? tk.durationDays : 30;
-        const calcExpMs = baseMs + days * 24 * 60 * 60 * 1000;
-        if (calcExpMs > Date.now()) {
-          tkExpiryIso = new Date(calcExpMs).toISOString();
+        if (tkCancelMs <= 0 || baseMs > tkCancelMs) {
+          const days = typeof tk.durationDays === 'number' && tk.durationDays >= 1 ? tk.durationDays : 30;
+          const calcExpMs = baseMs + days * 24 * 60 * 60 * 1000;
+          if (calcExpMs > Date.now()) {
+            tkExpiryIso = new Date(calcExpMs).toISOString();
+          }
         }
       }
       recoveredUsersFromActivity.push({
@@ -3874,6 +4048,7 @@ export async function syncAllAppDataWithSupabase(localState: {
         const vObj = val as Partial<User>;
         if (!vObj.id && !vObj.email) continue;
         if (isActivityUserDeleted(vObj.id, vObj.email, vObj.phone)) continue;
+        if (getCancelledMsForActivity(vObj.id, vObj.email, vObj.phone) > 0) continue;
         recoveredUsersFromActivity.push({
           ...(vObj as User),
           id: vObj.id || `google-${(vObj.email || '').replace(/[^a-z0-9]/g, '_')}`,
@@ -3892,6 +4067,7 @@ export async function syncAllAppDataWithSupabase(localState: {
         const idFromKey = key.startsWith('id:') ? key.slice(3) : (val.id || '');
         if (!idFromKey && !emailFromKey) continue;
         if (isActivityUserDeleted(idFromKey, emailFromKey, val.phone)) continue;
+        if (getCancelledMsForActivity(idFromKey, emailFromKey, val.phone) > 0) continue;
         recoveredUsersFromActivity.push({
           ...(val as User),
           id: idFromKey || `google-${emailFromKey.replace(/[^a-z0-9]/g, '_')}`,
@@ -3923,7 +4099,12 @@ export async function syncAllAppDataWithSupabase(localState: {
           const parsedLocalVip = JSON.parse(rawLocalVip);
           if (Array.isArray(parsedLocalVip)) {
             for (const v of parsedLocalVip) {
-              if (v && (v.id || v.email) && !isActivityUserDeleted(v.id, v.email, v.phone)) {
+              if (
+                v &&
+                (v.id || v.email) &&
+                !isActivityUserDeleted(v.id, v.email, v.phone) &&
+                getCancelledMsForActivity(v.id, v.email, v.phone) <= 0
+              ) {
                 recoveredUsersFromActivity.push(v as User);
               }
             }
@@ -3934,14 +4115,24 @@ export async function syncAllAppDataWithSupabase(localState: {
           const parsedPreUpdate = JSON.parse(rawPreUpdate);
           if (Array.isArray(parsedPreUpdate?.allUsers)) {
             for (const u of parsedPreUpdate.allUsers) {
-              if (u && (u.id || u.email) && !isActivityUserDeleted(u.id, u.email, u.phone)) {
+              if (
+                u &&
+                (u.id || u.email) &&
+                !isActivityUserDeleted(u.id, u.email, u.phone) &&
+                getCancelledMsForActivity(u.id, u.email, u.phone) <= 0
+              ) {
                 recoveredUsersFromActivity.push(u as User);
               }
             }
           }
           if (Array.isArray(parsedPreUpdate?.vipUsers)) {
             for (const v of parsedPreUpdate.vipUsers) {
-              if (v && (v.id || v.email) && !isActivityUserDeleted(v.id, v.email, v.phone)) {
+              if (
+                v &&
+                (v.id || v.email) &&
+                !isActivityUserDeleted(v.id, v.email, v.phone) &&
+                getCancelledMsForActivity(v.id, v.email, v.phone) <= 0
+              ) {
                 recoveredUsersFromActivity.push(v as User);
               }
             }
@@ -4048,7 +4239,14 @@ export async function syncAllAppDataWithSupabase(localState: {
     const nowReconcileMs = Date.now();
     for (let i = 0; i < mergedUsers.length; i++) {
       const usr = mergedUsers[i];
-      if (usr.role === 'admin' || usr.subscriptionStatus === 'cancelled') continue;
+      if (
+        usr.role === 'admin' ||
+        usr.subscriptionStatus === 'cancelled' ||
+        usr.paymentStatus === 'cancelled' ||
+        (Boolean(usr.vipCancelledAt) && usr.subscriptionStatus !== 'active')
+      ) {
+        continue;
+      }
       const usrEmail = (usr.email || '').toLowerCase().trim();
       const usrPhone = (usr.phone || '').replace(/[\s-+()]/g, '');
       const lookupKeys: string[] = [usr.id.toLowerCase()];
@@ -4197,7 +4395,16 @@ export async function syncAllAppDataWithSupabase(localState: {
             : existing.paymentProofUrl?.startsWith('data:image/')
             ? existing.paymentProofUrl
             : t.paymentProofUrl || existing.paymentProofUrl;
-        if (existing.status !== 'pending_verification' && t.status === 'pending_verification') {
+        if (existing.status === 'rejected' || t.status === 'rejected') {
+          const rejSource = existing.status === 'rejected' ? existing : t;
+          txnMap.set(t.id, {
+            ...existing,
+            ...t,
+            status: 'rejected',
+            notes: (rejSource as any).rejectionReason || rejSource.notes || 'Admin cancelled VIP membership',
+            paymentProofUrl: bestProofUrl,
+          });
+        } else if (existing.status !== 'pending_verification' && t.status === 'pending_verification') {
           txnMap.set(t.id, { ...existing, paymentProofUrl: bestProofUrl });
         } else {
           txnMap.set(t.id, { ...existing, ...t, paymentProofUrl: bestProofUrl });

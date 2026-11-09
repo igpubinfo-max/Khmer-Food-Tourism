@@ -1,3 +1,4 @@
+import { getAppAttestationHeaders, isAppCloneTampered } from '../utils/appCloneIntegrityGuard';
 /**
  * Food Assistant LLM engine ("ChatGPT, but only for food").
  *
@@ -898,6 +899,7 @@ function hasProxyConfig(): boolean {
 }
 
 async function callViaProxy(model: string, body: unknown, timeoutMs: number): Promise<CallOutcome> {
+  if (isAppCloneTampered()) return { ok: false, kind: 'blocked', status: 403, message: 'Forbidden: Cloned/repackaged app' };
   const cfg = getCloudApiConfig();
   const out = await callGeminiRaw({
     url: `${cfg.supabaseUrl}/functions/v1/food-ai`,
@@ -907,6 +909,7 @@ async function callViaProxy(model: string, body: unknown, timeoutMs: number): Pr
       Authorization: `Bearer ${cfg.supabaseAnonKey}`,
       // lets the Edge Function apply this user's daily AI quota (and VIP check when enforcement is on)
       ...(getApiUserId() ? { 'x-kft-user-id': getApiUserId() as string } : {}),
+      ...getAppAttestationHeaders(),
     },
     payload: { model, body },
     timeoutMs,

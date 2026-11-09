@@ -162,3 +162,20 @@ export class WindowLimiter {
     return true;
   }
 }
+
+export const OFFICIAL_APP_PACKAGE_ID = 'com.khmerfood.tourism';
+
+/**
+ * Verifies client app attestation headers to block repackaged/cloned APKs from abusing Edge Functions.
+ */
+export function verifyClientAppIntegrity(req: Request): { ok: boolean; reason?: string } {
+  const appId = (req.headers.get('x-kft-app-id') || '').trim();
+  const appSig = (req.headers.get('x-kft-app-sig') || '').trim();
+  if (appSig === 'TAMPERED_CLONE') {
+    return { ok: false, reason: 'TAMPERED_CLONE_SIGNATURE' };
+  }
+  if (appId && appId !== OFFICIAL_APP_PACKAGE_ID) {
+    return { ok: false, reason: `UNRECOGNIZED_APP_ID:${appId}` };
+  }
+  return { ok: true };
+}

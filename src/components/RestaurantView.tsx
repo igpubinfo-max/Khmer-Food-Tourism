@@ -416,9 +416,9 @@ export const RestaurantView: React.FC = () => {
           const yPrice = (shopCat.earlyBirdRemaining > 0 && shopCat.earlyBirdPlan.enabled ? shopCat.earlyBirdPlan.priceUsd : shopCat.yearlyPlan.priceUsd).toFixed(2);
           return tr(
             language,
-            `ដាក់ស្នើហាងដោយឥតគិតថ្លៃ! ក្រោយ Admin អនុម័ត អាចបើកកញ្ចប់ហាង ($${mPrice}/ខែ ឬ $${yPrice}/ឆ្នាំ) បើកគ្រប់មុខងារទាំង ៥ (គ្មានទារថ្លៃផ្សព្វផ្សាយបន្ថែម)។`,
-            `Submit your shop for free! After Admin approval, activate the All-Inclusive Shop Package ($${mPrice}/mo or $${yPrice}/yr) with all 5 benefits included.`,
-            `免费提交店铺！管理员审核通过后可开通全包店铺套餐（$${mPrice}/月 或 $${yPrice}/年），含全部 5 大权益。`
+            `ចុះបញ្ជីហាងក្នុងកញ្ចប់ហាង VIP បង់ប្រាក់ (${mPrice}/ខែ ឬ ${yPrice}/ឆ្នាំ) បើកគ្រប់មុខងារទាំង ៥ (មិនរួមបញ្ចូលក្នុង Free Trial 7 ថ្ងៃឡើយ • បង់ប្រាក់ក្រោយ Admin អនុម័ត)។`,
+            `Register your shop with the Paid All-Inclusive Shop Package (${mPrice}/mo or ${yPrice}/yr) for all 5 VIP benefits (not included in 7-Day Free Trial; pay after Admin approval).`,
+            `开通付费全包店铺套餐（${mPrice}/月 或 ${yPrice}/年）享全部 5 大权益（不含在 7 天免费试用内，管理员审核通过后付款）。`
           );
         })()}
         actionLabel={tr(language, 'បន្ថែមហាងថ្មី (Add New Shop)', 'Add New Shop', '添加新店铺')}

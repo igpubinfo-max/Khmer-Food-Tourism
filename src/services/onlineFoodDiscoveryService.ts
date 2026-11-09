@@ -1,3 +1,4 @@
+import { getAppAttestationHeaders, isAppCloneTampered } from '../utils/appCloneIntegrityGuard';
 import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import { FoodItem, TrendingFoodCategorySlug, TrendingFoodItem } from '../types';
 import { initialFoods } from '../data/seedData';
@@ -2056,7 +2057,7 @@ export async function searchAndDiscoverSocialFood(
   let fromBackendEdge = false;
 
   // Only call remote Supabase Edge Function when user explicitly taps Refresh (prevents background radio/CPU drain)
-  if (forceRefresh && (typeof navigator === 'undefined' || navigator.onLine !== false)) {
+  if (forceRefresh && !isAppCloneTampered() && (typeof navigator === 'undefined' || navigator.onLine !== false)) {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 3500);
@@ -2067,6 +2068,7 @@ export async function searchAndDiscoverSocialFood(
           'Content-Type': 'application/json',
           apikey: SUPABASE_ANON_KEY,
           Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          ...getAppAttestationHeaders(),
         },
         body: JSON.stringify({ query: query || 'Cambodia food travel 2026', platform: 'youtube' }),
         signal: controller.signal,

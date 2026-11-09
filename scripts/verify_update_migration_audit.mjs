@@ -1362,9 +1362,219 @@ async function main() {
     );
   }
 
+  // ==========================================================================
+  // SUITE 5: Deep VIP Cancellation, Cache Purge & Cross-Device Sync Audit
+  // ==========================================================================
+  {
+    env.setNetworkMode('online');
+    app.resetSupabaseEgressCooldown();
+    env.localStorageMock.clear();
+    env.cloudKvTable.clear();
+
+    const NOW = Date.now();
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const startIso = new Date(NOW - 2 * DAY_MS).toISOString();
+    const future120dIso = new Date(NOW + 120 * DAY_MS).toISOString();
+    const cancelIso = new Date(NOW).toISOString();
+
+    const staleLocalIgp2026d = {
+      id: 'google-igp2026d_gmail_com',
+      legacyIds: ['user-igp2026d_gmail_com', 'owner-igp2026d_gmail_com'],
+      name: 'Igp2026d',
+      email: 'igp2026d@gmail.com',
+      role: 'owner',
+      authProvider: 'google',
+      membershipTier: 'premium_vip',
+      subscriptionStatus: 'active',
+      paymentStatus: 'verified',
+      vipStatus: 'active',
+      vipPlanDays: 30,
+      vipPlanType: 'quarterly',
+      subscriptionStartDate: startIso,
+      subscriptionExpiryDate: future120dIso,
+      vipExpiresAt: future120dIso,
+      freeTrialActivated: true,
+      freeTrialExpiresAt: new Date(NOW + 5 * DAY_MS).toISOString(),
+      createdAt: '2026-03-22',
+      registeredAtIso: '2026-03-22T03:40:00.000Z',
+    };
+
+    const serverCancelledIgp2026d = {
+      ...staleLocalIgp2026d,
+      membershipTier: 'free',
+      subscriptionStatus: 'cancelled',
+      paymentStatus: 'cancelled',
+      vipStatus: 'none',
+      subscriptionStartDate: undefined,
+      subscriptionExpiryDate: undefined,
+      vipExpiresAt: undefined,
+      freeTrialActivated: false,
+      freeTrialExpiresAt: undefined,
+      autoRenew: false,
+      vipCancelledAt: cancelIso,
+    };
+
+    const activeOtherVip = {
+      id: 'google-igp2026e_gmail_com',
+      name: 'Igp2026e',
+      email: 'igp2026e@gmail.com',
+      role: 'user',
+      authProvider: 'google',
+      membershipTier: 'premium_vip',
+      subscriptionStatus: 'active',
+      paymentStatus: 'verified',
+      vipStatus: 'active',
+      vipPlanDays: 30,
+      vipPlanType: 'quarterly',
+      subscriptionStartDate: startIso,
+      subscriptionExpiryDate: new Date(NOW + 28 * DAY_MS).toISOString(),
+      vipExpiresAt: new Date(NOW + 28 * DAY_MS).toISOString(),
+      createdAt: '2026-03-25',
+      registeredAtIso: '2026-03-25T05:00:00.000Z',
+    };
+
+    // 5a. Helper & sanitizer verification on cancelled igp2026d
+    assert.equal(app.isUserVipActive(serverCancelledIgp2026d), false, 'Cancelled igp2026d must NOT be active VIP');
+    assert.equal(app.getVipRemainingDays(serverCancelledIgp2026d), 0, 'Cancelled igp2026d must have 0 remaining VIP days');
+    const sanitizedDirtyCancel = app.sanitizeUserVipPlanAndExpiry({
+      ...staleLocalIgp2026d,
+      subscriptionStatus: 'cancelled',
+      paymentStatus: 'cancelled',
+      vipCancelledAt: cancelIso,
+    });
+    assert.equal(sanitizedDirtyCancel.membershipTier, 'free');
+    assert.equal(sanitizedDirtyCancel.subscriptionExpiryDate, undefined);
+    assert.equal(sanitizedDirtyCancel.vipExpiresAt, undefined);
+    assert.equal(sanitizedDirtyCancel.freeTrialActivated, false);
+
+    // 5b. Canonical merge: even when stale local record has >120d remaining expiry, server cancellation wins
+    const mergedA = app.mergeTwoUserRecordsCanonical(staleLocalIgp2026d, serverCancelledIgp2026d);
+    const mergedB = app.mergeTwoUserRecordsCanonical(serverCancelledIgp2026d, staleLocalIgp2026d);
+    assert.equal(mergedA.membershipTier, 'free', 'mergeTwoUserRecordsCanonical(stale, cancelled) must be free');
+    assert.equal(mergedA.subscriptionStatus, 'cancelled');
+    assert.equal(mergedA.subscriptionExpiryDate, undefined);
+    assert.equal(mergedB.membershipTier, 'free', 'mergeTwoUserRecordsCanonical(cancelled, stale) must be free');
+    assert.equal(mergedB.subscriptionStatus, 'cancelled');
+
+    // 5c. Seed Cloud with cancelled igp2026d and active igp2026e, while local device has stale VIP caches everywhere
+    for (const k of [
+      'kft_user_google-igp2026d_gmail_com',
+      'kft_user_user-igp2026d_gmail_com',
+      'kft_user_owner-igp2026d_gmail_com',
+    ]) {
+      env.cloudKvTable.set(k, {
+        key: k,
+        payload: { ...serverCancelledIgp2026d, id: k.replace(/^kft_user_/, '') },
+        updated_at: cancelIso,
+      });
+    }
+    env.cloudKvTable.set('kft_user_google-igp2026e_gmail_com', {
+      key: 'kft_user_google-igp2026e_gmail_com',
+      payload: activeOtherVip,
+      updated_at: startIso,
+    });
+    env.cloudKvTable.set('kft_cloud_users_v2', {
+      key: 'kft_cloud_users_v2',
+      payload: [serverCancelledIgp2026d, activeOtherVip],
+      updated_at: cancelIso,
+    });
+    env.cloudKvTable.set('kft_cloud_vip_backup_v1', {
+      key: 'kft_cloud_vip_backup_v1',
+      payload: [activeOtherVip],
+      updated_at: cancelIso,
+    });
+
+    // Populate device localStorage with stale VIP caches for igp2026d
+    env.localStorageMock.setItem('kft_current_user_v5', JSON.stringify(staleLocalIgp2026d));
+    env.localStorageMock.setItem('kft_users_v5', JSON.stringify([staleLocalIgp2026d, activeOtherVip]));
+    env.localStorageMock.setItem('kft_vip_registry_backup_v1', JSON.stringify([staleLocalIgp2026d, activeOtherVip]));
+    env.localStorageMock.setItem(
+      'kft_pre_update_db_backup_v1',
+      JSON.stringify({
+        allUsers: [staleLocalIgp2026d, activeOtherVip],
+        vipUsers: [staleLocalIgp2026d, activeOtherVip],
+        verifiedTransactions: [
+          {
+            id: 'TXN-STALE-IGP2026D',
+            userId: staleLocalIgp2026d.id,
+            userEmail: staleLocalIgp2026d.email,
+            status: 'verified',
+            createdAt: startIso,
+            verifiedAt: startIso,
+            expiresAt: future120dIso,
+          },
+        ],
+      })
+    );
+
+    // Backend verification must return isVip: false from authoritative server state
+    const backendCheck = await app.verifyUserVipStatusFromBackend(staleLocalIgp2026d, true);
+    assert.equal(backendCheck.isVip, false, 'verifyUserVipStatusFromBackend must return isVip=false for cancelled user');
+    assert.equal(backendCheck.verifiedUser?.membershipTier, 'free');
+    assert.equal(backendCheck.verifiedUser?.subscriptionStatus, 'cancelled');
+
+    // Re-login / upsertSingleUserToCloud with stale local VIP must NOT overwrite server cancellation
+    const upsertedOnLogin = await app.upsertSingleUserToCloud(staleLocalIgp2026d, [], false);
+    assert.equal(upsertedOnLogin[0]?.membershipTier, 'free', 'upsertSingleUserToCloud must downgrade stale local user to free');
+    assert.equal(upsertedOnLogin[0]?.subscriptionStatus, 'cancelled');
+    assert.equal(
+      env.cloudKvTable.get('kft_user_google-igp2026d_gmail_com')?.payload?.membershipTier,
+      'free',
+      'Cloud atomic row must remain free after stale device login'
+    );
+
+    // Full Cloud Sync from stale device must downgrade igp2026d while keeping igp2026e active VIP
+    const syncRes = await app.syncAllAppDataWithSupabase({
+      users: [staleLocalIgp2026d, activeOtherVip],
+      currentUser: staleLocalIgp2026d,
+      transactions: [],
+      customRestaurants: [],
+      paymentProofsVault: {},
+    });
+    const syncedIgpD = syncRes.mergedUsers.find((u) => u.email === 'igp2026d@gmail.com');
+    const syncedIgpE = syncRes.mergedUsers.find((u) => u.email === 'igp2026e@gmail.com');
+    assert.equal(syncedIgpD?.membershipTier, 'free', 'syncAllAppDataWithSupabase must downgrade igp2026d to free');
+    assert.equal(syncedIgpD?.subscriptionStatus, 'cancelled');
+    assert.equal(app.isUserVipActive(syncedIgpD), false);
+    assert.equal(syncedIgpE?.membershipTier, 'premium_vip', 'Other VIP user igp2026e must remain premium_vip');
+    assert.equal(app.isUserVipActive(syncedIgpE), true);
+
+    // Session & Startup sanitization after cancellation must purge local caches and never resurrect VIP on App Update
+    const sessionCheck = await app.verifyAndSanitizeUserSession(staleLocalIgp2026d, syncRes.mergedUsers);
+    assert.equal(sessionCheck.user?.membershipTier, 'free');
+    assert.equal(sessionCheck.user?.subscriptionStatus, 'cancelled');
+    env.localStorageMock.setItem('kft_app_installed_ver', '2.6.9_1400');
+    runMainPreBoot('2.7.0', 1500);
+    const startupCheck = app.sanitizeStartupCurrentUser();
+    assert.equal(startupCheck.user?.membershipTier, 'free', 'App version update must NOT resurrect cancelled VIP');
+    assert.equal(startupCheck.user?.subscriptionStatus, 'cancelled');
+
+    // 5d. Re-granting VIP after cancellation (subscriptionStartDate > vipCancelledAt) must succeed cleanly
+    const regrantStartIso = new Date(NOW + 10_000).toISOString();
+    const regrantExpIso = new Date(NOW + 30 * DAY_MS).toISOString();
+    const newlyRegrantedIgp2026d = {
+      ...serverCancelledIgp2026d,
+      membershipTier: 'premium_vip',
+      subscriptionStatus: 'active',
+      paymentStatus: 'verified',
+      vipStatus: 'active',
+      subscriptionStartDate: regrantStartIso,
+      subscriptionExpiryDate: regrantExpIso,
+      vipExpiresAt: regrantExpIso,
+      vipCancelledAt: undefined,
+    };
+    const mergedAfterRegrant = app.mergeTwoUserRecordsCanonical(serverCancelledIgp2026d, newlyRegrantedIgp2026d);
+    assert.equal(mergedAfterRegrant.membershipTier, 'premium_vip', 'New VIP grant after cancellation must activate VIP');
+    assert.equal(app.isUserVipActive(mergedAfterRegrant), true);
+
+    console.log(
+      '✓ Suite 5 (Deep VIP Cancellation, Cache Purge, Re-Login, App Update & Other VIP Safety) : PASS'
+    );
+  }
+
   const elapsedMs = Date.now() - t0;
   console.log('========================================================================');
-  console.log(` ALL 4 MIGRATION & DATA SAFETY SUITES PASSED 100% (${elapsedMs} ms)`);
+  console.log(` ALL 5 MIGRATION & DATA SAFETY SUITES PASSED 100% (${elapsedMs} ms)`);
   console.log('========================================================================');
 }
 

@@ -1,4 +1,4 @@
-// Supabase Edge Function: admin-auth
+﻿// Supabase Edge Function: admin-auth
 // Server-side verification & rotation of the Admin PIN + password.
 // Initial credentials live in Supabase secrets (ADMIN_PIN, ADMIN_PASSWORD); when the Admin changes their password or
 // PIN inside the app, the PBKDF2-SHA256 hash (`admin_password_hash` / `admin_pin_hash`) is stored in the private
@@ -14,7 +14,7 @@
 //   {action:'change_pin', newPin, currentPassword?, token?, ticket?}  -> {ok, ticket, ticketExpiresAt}
 
 import { hashSecretPBKDF2, safeSecretEqual, signToken, verifySecretPBKDF2, verifyToken } from '../_shared/admin-token.ts';
-import { WindowLimiter, envInt } from '../_shared/common.ts';
+import { WindowLimiter, envInt, verifyClientAppIntegrity } from '../_shared/common.ts';
 import { background, getSecurityConfig, logUsage, setSecurityConfig, usageGet, usageHit } from '../_shared/supa.ts';
 
 declare const Deno: {
@@ -24,7 +24,7 @@ declare const Deno: {
 
 const corsHeaders: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-kft-app-id, x-kft-app-platform, x-kft-app-sig',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Expose-Headers': 'x-admin-auth',
   'x-admin-auth': '1',
@@ -65,12 +65,15 @@ async function verifyActivePassword(candidatePass: string, envPass: string, stor
   if (storedPassHash && storedPassHash.startsWith('pbkdf2$')) {
     return await verifySecretPBKDF2(candidatePass, storedPassHash);
   }
-  return envPass.length >= 8 ? await safeSecretEqual(candidatePass, envPass.trim()) : false;
+  return envPass.length >= 6 ? await safeSecretEqual(candidatePass, envPass.trim()) : false;
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json(405, { ok: false, error: 'METHOD_NOT_ALLOWED' });
+
+  const appIntegrity = verifyClientAppIntegrity(req);
+  if (!appIntegrity.ok) return json(403, { ok: false, error: 'CLONED_APP_BLOCKED' });
 
   const adminPinEnv = Deno.env.get('ADMIN_PIN') || '';
   const adminPasswordEnv = Deno.env.get('ADMIN_PASSWORD') || '';
@@ -81,7 +84,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   ]);
 
   const hasValidPin = Boolean((storedPinHash && storedPinHash.startsWith('pbkdf2$')) || adminPinEnv.length >= 6);
-  const hasValidPass = Boolean((storedPassHash && storedPassHash.startsWith('pbkdf2$')) || adminPasswordEnv.length >= 8);
+  const hasValidPass = Boolean((storedPassHash && storedPassHash.startsWith('pbkdf2$')) || adminPasswordEnv.length >= 6);
   const configured = hasValidPin && hasValidPass && Boolean(secret);
 
   let body: Record<string, unknown> = {};
@@ -140,7 +143,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (action === 'change_password') {
     const newPassword = typeof body.newPassword === 'string' ? body.newPassword.trim() : '';
     const currentPassword = typeof body.currentPassword === 'string' ? body.currentPassword.trim() : '';
-    if (newPassword.length < 8 || newPassword.length > 256) {
+    if (newPassword.length < 6 || newPassword.length > 256) {
       return json(400, { ok: false, error: 'PASSWORD_TOO_SHORT' });
     }
 
@@ -150,8 +153,6 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return json(401, { ok: false, error: 'PIN_REQUIRED' });
     }
 
-    // If changing via PIN ticket (not yet logged into AdminDashboard), currentPassword MUST be supplied and valid.
-    // If already logged into AdminDashboard with a valid signed admin token, also verify currentPassword when supplied.
     if (!adminTok.ok || currentPassword.length > 0) {
       const curOk = await verifyActivePassword(currentPassword, adminPasswordEnv, storedPassHash);
       if (!curOk) return await fail('INVALID_CREDENTIALS');

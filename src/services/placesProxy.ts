@@ -1,3 +1,4 @@
+import { getAppAttestationHeaders, isAppCloneTampered } from '../utils/appCloneIntegrityGuard';
 /**
  * Client side of the `places-proxy` Supabase Edge Function.
  *
@@ -134,6 +135,9 @@ function parsePlacesUrl(url: string): { path: string; query: URLSearchParams } |
  * Drop-in replacement for `fetch('https://places.googleapis.com/v1/...', { headers: {X-Goog-Api-Key, X-Goog-FieldMask} })`.
  */
 export async function placesFetch(url: string, init: RequestInit = {}): Promise<Response> {
+  if (isAppCloneTampered()) {
+    return new Response(JSON.stringify({ error: { status: 'PERMISSION_DENIED', message: 'Cloned app blocked' } }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+  }
   const parsed = parsePlacesUrl(url);
   const state = readState();
   const proxyUsable = !state || state.ok || Date.now() - state.at > DOWN_RETRY_MS;
@@ -159,6 +163,7 @@ export async function placesFetch(url: string, init: RequestInit = {}): Promise<
         apikey: cfg.supabaseAnonKey,
         Authorization: `Bearer ${cfg.supabaseAnonKey}`,
         ...(userId ? { 'x-kft-user-id': userId } : {}),
+        ...getAppAttestationHeaders(),
       },
       body: JSON.stringify({ path: parsed.path, fieldMask, languageCode: parsed.query.get('languageCode') || undefined, body }),
       signal: init.signal,

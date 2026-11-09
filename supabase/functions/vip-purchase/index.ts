@@ -12,7 +12,7 @@
 // Deploy:  supabase functions deploy vip-purchase --no-verify-jwt --project-ref ryvltobwuwuulazqjnza
 
 import { geminiEndpoints, shouldTryNextEndpoint } from '../food-ai/endpoint.ts';
-import { WindowLimiter, envInt, safeUserId, userKvKey } from '../_shared/common.ts';
+import { WindowLimiter, envInt, safeUserId, userKvKey, verifyClientAppIntegrity } from '../_shared/common.ts';
 import { computeServerIdentityHashes, sanitizeHexHash } from '../_shared/identity-normalize.ts';
 import { createAbaReceiptVisionAdapter } from '../_shared/payment-adapter.ts';
 import {
@@ -37,7 +37,7 @@ declare const Deno: {
 
 const corsHeaders: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-kft-user-id',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-kft-user-id, x-kft-app-id, x-kft-app-platform, x-kft-app-sig',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Expose-Headers': 'x-vip-purchase',
   'x-vip-purchase': '1',
@@ -173,6 +173,8 @@ async function hasExistingClaim(
 
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  const appIntegrity = verifyClientAppIntegrity(req);
+  if (!appIntegrity.ok) return json(403, { ok: false, error: 'CLONED_APP_BLOCKED' });
   if (req.method !== 'POST') return json(405, { ok: false, error: 'METHOD_NOT_ALLOWED' });
 
   const started = Date.now();
@@ -191,7 +193,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   // 1-Time 7-Day Consumer Free Trial (Android & Web only; does not require Gemini vision)
   if (body.action === 'claim_trial') {
-    return handleClaimTrial(body, started);
+    return handleClaimTrial(body, started, ip);
   }
 
   const geminiKey = Deno.env.get('GEMINI_API_KEY');
@@ -235,6 +237,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
   });
 
   if (officialPlan && officialPlan.planId === 'consumer_promo_30d') {
+    if (!deviceHash) {
+      return json(400, { ok: false, error: 'DEVICE_REQUIRED' });
+    }
     if (idInfo.isDisposableEmail) {
       return json(400, { ok: false, error: 'DISPOSABLE_EMAIL_NOT_ALLOWED' });
     }
@@ -485,7 +490,7 @@ async function activateShopOnServer(
   return saved;
 }
 
-async function handleClaimTrial(body: Record<string, unknown>, started: number): Promise<Response> {
+async function handleClaimTrial(body: Record<string, unknown>, started: number, ip = 'unknown'): Promise<Response> {
   if (body.platform === 'ios') {
     return json(200, {
       ok: true,
@@ -538,11 +543,31 @@ async function handleClaimTrial(body: Record<string, unknown>, started: number):
   }
 
   const deviceHash = sanitizeHexHash(body.deviceHash);
+  if (!deviceHash) {
+    return json(200, {
+      ok: true,
+      decision: 'already_claimed',
+      reason: 'device_required',
+      messageKh: '⚠️ មិនអាចផ្ទៀងផ្ទាត់ឧបករណ៍បានទេ។ សូមបើកកម្មវិធីម្ដងទៀត រួចសាកល្បងម្ដងទៀត។',
+      messageEn: '⚠️ Could not verify device identity. Please reopen the app and try again.',
+    });
+  }
+
   const idInfo = await computeServerIdentityHashes({
     email: stored.email ?? body.email,
     phone: stored.phone ?? body.phone,
     clientIdentityHashes: body.identityHashes,
   });
+
+  if (!idInfo.identityHashes || idInfo.identityHashes.length === 0) {
+    return json(200, {
+      ok: true,
+      decision: 'already_claimed',
+      reason: 'identity_required',
+      messageKh: '⚠️ សូមចូលគណនីដោយប្រើលេខទូរស័ព្ទ ឬ Google ជាមុនសិន ដើម្បីបើកការសាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃ។',
+      messageEn: '⚠️ Please sign in with a valid phone number or Google account first to claim your 7-day free trial.',
+    });
+  }
 
   if (idInfo.isDisposableEmail) {
     return json(200, {
@@ -565,6 +590,19 @@ async function handleClaimTrial(body: Record<string, unknown>, started: number):
         ? 'This device has already used its one-time 7-day free trial. Core browsing & maps remain 100% FREE forever!'
         : 'This account or phone/email has already used its one-time 7-day free trial.';
     return json(200, { ok: true, decision: 'already_claimed', reason: existingReason, messageKh: msgKh, messageEn: msgEn });
+  }
+
+  if (ip && ip !== 'unknown') {
+    const ipUsed = await usageHit(`ip:${ip}`, 'trial_ip', 1);
+    if (ipUsed !== null && ipUsed > envInt(Deno.env.get('TRIAL_IP_DAILY_LIMIT'), 2, 1, 20)) {
+      return json(200, {
+        ok: true,
+        decision: 'already_claimed',
+        reason: 'ip_rate_limited',
+        messageKh: '⚠️ បណ្ដាញអ៊ីនធឺណិត (IP) នេះបានបើកការសាកល្បងឥតគិតថ្លៃគ្រប់កំណត់ប្រចាំថ្ងៃហើយ (២ ដង/ថ្ងៃ)។',
+        messageEn: '⚠️ Daily free-trial limit reached for this network (IP).',
+      });
+    }
   }
 
   const trialDays = Math.min(60, Math.max(1, Math.round(Number(pricing.consumerTrialDays) || 7)));

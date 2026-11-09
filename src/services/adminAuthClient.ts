@@ -1,3 +1,4 @@
+import { getAppAttestationHeaders, isAppCloneTampered } from '../utils/appCloneIntegrityGuard';
 /**
  * Client side of the `admin-auth` Supabase Edge Function.
  *
@@ -72,6 +73,7 @@ type CallResult =
   | { kind: 'response'; status: number; data: any };
 
 async function callAdminAuth(body: Record<string, unknown>, timeoutMs = 9000): Promise<CallResult> {
+  if (isAppCloneTampered()) return { kind: 'unavailable' };
   const cfg = getCloudApiConfig();
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || typeof fetch === 'undefined') return { kind: 'unavailable' };
   const controller = new AbortController();
@@ -79,7 +81,7 @@ async function callAdminAuth(body: Record<string, unknown>, timeoutMs = 9000): P
   try {
     const res = await fetch(`${cfg.supabaseUrl.replace(/\/+$/, '')}/functions/v1/admin-auth`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: cfg.supabaseAnonKey, Authorization: `Bearer ${cfg.supabaseAnonKey}` },
+      headers: { 'Content-Type': 'application/json', apikey: cfg.supabaseAnonKey, Authorization: `Bearer ${cfg.supabaseAnonKey}`, ...getAppAttestationHeaders() },
       body: JSON.stringify(body),
       signal: controller.signal,
     });

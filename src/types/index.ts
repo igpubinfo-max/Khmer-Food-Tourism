@@ -5,7 +5,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1488;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1489;
 export const APP_RELEASE_DATE = '2026-11-09';
 
 /**
@@ -1436,6 +1436,7 @@ export interface RegistrationTransaction {
   verifiedAt?: string;
   verifiedBy?: string;
   notes?: string;
+  rejectionReason?: string;
   isAutoRenewal?: boolean;
   aiVerificationReport?: AbaReceiptVerificationReport;
 }
@@ -2935,9 +2936,7 @@ export const isAdminAccount = (user?: User | null): boolean => {
   );
 };
 
-export const PERMANENT_VIP_EMAILS = new Set<string>([
-  'igp2026d@gmail.com',
-]);
+export const PERMANENT_VIP_EMAILS = new Set<string>([]);
 
 export const isPermanentVipEmail = (email?: string | null): boolean => {
   if (!email) return false;
@@ -3008,19 +3007,20 @@ export const isUserVipActive = (user?: User | null): boolean => {
   if (isAdminAccount(user)) {
     return false;
   }
-  if (isPermanentVipEmail(user.email)) {
-    return true;
-  }
   if (user.isDisabled) {
     return false;
   }
   if (
-    user.subscriptionStatus === 'cancelled' ||
+    (user.subscriptionStatus as string) === 'cancelled' ||
     user.subscriptionStatus === 'expired' ||
-    user.paymentStatus === 'cancelled' ||
-    (user.paymentStatus as string) === 'rejected'
+    (user.paymentStatus as string) === 'cancelled' ||
+    (user.paymentStatus as string) === 'rejected' ||
+    (Boolean(user.vipCancelledAt) && user.subscriptionStatus !== 'active')
   ) {
     return false;
+  }
+  if (isPermanentVipEmail(user.email)) {
+    return true;
   }
   // Retired 30-dish check-in reward references never grant active VIP
   if (typeof user.transactionRef === 'string' && user.transactionRef.trim().startsWith('REWARD-FOODCHECKIN')) {
@@ -3074,6 +3074,81 @@ export const isUserVipActive = (user?: User | null): boolean => {
     }
   }
   return false;
+};
+
+/**
+ * Strictly identifies whether an active user is currently on the 1-Time 7-Day Consumer Free Trial
+ * (as opposed to a Paid Consumer VIP membership).
+ * Free Trial 7 Days grants ONLY consumer AI & Trip Planner trial perks (15 AI requests/day),
+ * and NEVER grants Paid Shop/Merchant VIP privileges (Featured Placement, Store Analytics, Gold Shop Badge, or free shop slots).
+ */
+export const isUserOnConsumerFreeTrial = (user?: User | null): boolean => {
+  if (!user || isAdminAccount(user)) return false;
+  if (isPermanentVipEmail(user.email)) return false;
+  if (!isUserVipActive(user)) return false;
+
+  const activePlanId = String(user.activeConsumerPlanId || '').trim().toLowerCase();
+  if (
+    activePlanId === 'consumer_promo_30d' ||
+    activePlanId === 'consumer_30d' ||
+    activePlanId === 'consumer_90d' ||
+    activePlanId === 'consumer_365d'
+  ) {
+    return false;
+  }
+  if (activePlanId === 'trial_7d') return true;
+
+  const planType = String(user.vipPlanType || '').trim().toLowerCase();
+  if (planType === 'trial_7d' || planType === '7d') return true;
+
+  const ref = String(user.transactionRef || '').trim().toUpperCase();
+  if (ref.startsWith('TRIAL-7D-') || ref.startsWith('FREE-TRIAL-') || ref.startsWith('VIP-TRIAL-')) {
+    return true;
+  }
+
+  const payMethod = String(user.paymentMethod || '').trim().toUpperCase();
+  if (payMethod === 'FREETRIAL' || payMethod === 'FREE_TRIAL_7D' || payMethod === 'FREE_TRIAL') {
+    return true;
+  }
+
+  if (
+    user.freeTrialActivated &&
+    user.freeTrialExpiresAt &&
+    (!user.subscriptionExpiryDate || user.subscriptionExpiryDate === user.freeTrialExpiresAt) &&
+    (user.vipPlanDays === 7 || user.freeTrialDurationDays === 7)
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
+/**
+ * Strictly identifies whether a user has an active PAID Consumer VIP membership
+ * (excludes Free Users and 7-Day Free Trial users).
+ */
+export const isUserPaidVipActive = (user?: User | null): boolean => {
+  if (!user) return false;
+  if (!isUserVipActive(user)) return false;
+  if (isUserOnConsumerFreeTrial(user)) return false;
+  return true;
+};
+
+/**
+ * Strictly separates the 3 user membership tiers (+ Admin):
+ *  - 'admin': System Administrator
+ *  - 'paid_vip': Paid Consumer VIP Member ($0.99 / $2.99 / $6.99 / $19.99)
+ *  - 'free_trial_7d': 1-Time 7-Day Consumer Free Trial (Consumer AI & Planner trial ONLY; zero Shop VIP features)
+ *  - 'free_user': Regular Free User
+ */
+export type UserMembershipTierKind = 'admin' | 'paid_vip' | 'free_trial_7d' | 'free_user';
+
+export const getUserMembershipTierKind = (user?: User | null): UserMembershipTierKind => {
+  if (!user) return 'free_user';
+  if (isAdminAccount(user)) return 'admin';
+  if (isUserOnConsumerFreeTrial(user)) return 'free_trial_7d';
+  if (isUserPaidVipActive(user)) return 'paid_vip';
+  return 'free_user';
 };
 
 // Helper to classify user's exact VIP state (Admin, Approved VIP, Pending Admin Approval, Expired VIP, or Regular Unpaid)
@@ -3199,6 +3274,26 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
     };
   }
 
+  // Explicit Admin VIP Cancellation must immediately strip all leftover VIP & trial fields
+  if (
+    (user.subscriptionStatus as string) === 'cancelled' ||
+    (user.paymentStatus as string) === 'cancelled' ||
+    (Boolean(user.vipCancelledAt) && user.subscriptionStatus !== 'active')
+  ) {
+    return {
+      ...user,
+      membershipTier: 'free',
+      subscriptionStatus: 'cancelled',
+      paymentStatus: 'cancelled',
+      vipStatus: 'none',
+      subscriptionExpiryDate: undefined,
+      vipExpiresAt: undefined,
+      freeTrialActivated: false,
+      freeTrialExpiresAt: undefined,
+      autoRenew: false,
+    };
+  }
+
   const isServerTrialRef = ref.startsWith('TRIAL-7D-') || ref.startsWith('FREE-TRIAL-') || ref.startsWith('VIP-TRIAL-');
   const freeTrialStartMs = parseSafeDateMs(user.freeTrialActivatedAt);
   const rawExpiry =
@@ -3230,10 +3325,7 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
       const trialExpIso = new Date(effectiveTrialExpMs).toISOString();
       const finalExpMs = Math.max(expMs, effectiveTrialExpMs);
       const finalExpIso = new Date(finalExpMs).toISOString();
-      const isStillActiveOnServer =
-        finalExpMs > nowMs &&
-        user.subscriptionStatus !== 'cancelled' &&
-        user.paymentStatus !== 'cancelled';
+      const isStillActiveOnServer = finalExpMs > nowMs;
 
       if (
         !user.freeTrialActivated ||
@@ -4515,22 +4607,23 @@ export const getUserStoreQuotaSummary = (
     ? user.paidAdditionalStoreSlots
     : 0;
 
-  // Only the 1st shop is included with an active VIP subscription; each additional shop requires a separate verified payment
+  // Strict separation: 7-Day Consumer Free Trial NEVER includes a free shop slot or free store replacement.
+  const isPaidVip = isUserPaidVipActive(user);
   const includedFreeStores = isAdmin
     ? 9999
-    : isVipActive
+    : isPaidVip
     ? DEFAULT_INCLUDED_FREE_STORES
     : 0;
 
   const totalAllowedStores = isAdmin
     ? 9999
-    : isVipActive
+    : isPaidVip
     ? includedFreeStores + paidAdditionalStoreSlots
     : 0;
   const usedStoresCount = ownedStores.length;
   const remainingAvailableSlots = Math.max(0, totalAllowedStores - usedStoresCount);
-  const canCreateNewStoreWithoutPayment = isAdmin || (isVipActive && remainingAvailableSlots > 0);
-  const canReplaceExistingStoreForFree = isAdmin || (isVipActive && usedStoresCount > 0);
+  const canCreateNewStoreWithoutPayment = isAdmin || (isPaidVip && remainingAvailableSlots > 0);
+  const canReplaceExistingStoreForFree = isAdmin || (isPaidVip && usedStoresCount > 0);
   const canEditExistingFree = true;
 
   return {

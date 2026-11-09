@@ -8,7 +8,7 @@ import {
   CheckCircle, XCircle, Upload, Image as ImageIcon, Camera, Trash2, MessageSquareWarning
 } from 'lucide-react';
 import { 
-  isUserVipActive, getVipRemainingDays,
+  isUserVipActive, isUserOnConsumerFreeTrial, getVipRemainingDays,
   APP_VERSION, APP_BUILD_CODE,
   getDynamicVipBenefits,
   OfficialPlanId,
@@ -75,6 +75,7 @@ export const UpgradeVipModal: React.FC = () => {
 
   const isKm = language === 'km';
   const isVip = isUserVipActive(currentUser);
+  const isFreeTrial7d = isUserOnConsumerFreeTrial(currentUser);
   const remainingDays = getVipRemainingDays(currentUser);
 
   const consumerCatalog = useMemo(() => getConsumerVipPricingCatalog(appSettings), [appSettings]);
@@ -744,15 +745,24 @@ export const UpgradeVipModal: React.FC = () => {
 
               <div>
                 <h4 className="font-moul text-lg text-slate-900 dark:text-white mt-2">
-                  {tr(language, '🎉 សមាជិកភាព VIP ត្រូវបានអនុម័ត!', '🎉 VIP Membership Approved!', '🎉 VIP 会员已获批生效！')}
+                  {isFreeTrial7d
+                    ? tr(language, '🎁 កំពុងប្រើការសាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃ!', '🎁 7-Day Consumer Free Trial Active!', '🎁 7 天免费试用生效中！')
+                    : tr(language, '🎉 សមាជិកភាព VIP បង់ប្រាក់ត្រូវបានអនុម័ត!', '🎉 Paid VIP Membership Approved!', '🎉 付费 VIP 会员已获批生效！')}
                 </h4>
                 <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-sm mx-auto leading-relaxed">
-                  {tr(
-                    language,
-                    `រដ្ឋបាលបានផ្ទៀងផ្ទាត់ការទូទាត់ និងអនុម័តគណនី VIP របស់អ្នករួចរាល់ (នៅសល់ ${remainingDays} ថ្ងៃ)!`,
-                    `Administrator verified your payment and activated your VIP account (${remainingDays} days remaining)!`,
-                    `管理员已核实您的付款并开通尊享 VIP 会员（剩余 ${remainingDays} 天）！`
-                  )}
+                  {isFreeTrial7d
+                    ? tr(
+                        language,
+                        `អ្នកកំពុងប្រើប្រាស់ការសាកល្បងឥតគិតថ្លៃសម្រាប់ជំនួយការ AI (${consumerCatalog.trialAiDailyLimit} ដង/ថ្ងៃ • នៅសល់ ${remainingDays} ថ្ងៃ)។ មិនរួមបញ្ចូលកញ្ចប់ដាក់ហាង Featured Placement ឬ Store Analytics ឡើយ។`,
+                        `You are using the Consumer Free Trial (${consumerCatalog.trialAiDailyLimit} AI requests/day • ${remainingDays} days remaining). Paid Shop Package, Featured Placement & Store Analytics are not included.`,
+                        `您正在使用个人版免费试用（每日 ${consumerCatalog.trialAiDailyLimit} 次 AI • 剩余 ${remainingDays} 天）。不含开店套餐、置顶推荐与店铺统计。`
+                      )
+                    : tr(
+                        language,
+                        `រដ្ឋបាលបានផ្ទៀងផ្ទាត់ការទូទាត់ និងអនុម័តគណនី VIP បង់ប្រាក់របស់អ្នករួចរាល់ (នៅសល់ ${remainingDays} ថ្ងៃ)!`,
+                        `Administrator verified your payment and activated your Paid VIP account (${remainingDays} days remaining)!`,
+                        `管理员已核实您的付款并开通正式付费 VIP 会员（剩余 ${remainingDays} 天）！`
+                      )}
                 </p>
               </div>
 

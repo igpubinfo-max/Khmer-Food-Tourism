@@ -1565,7 +1565,7 @@ export const VipAddRestaurantModal: React.FC = () => {
             {!isIosAppStore && (
               <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-left text-[11px] text-slate-700 dark:text-slate-200 space-y-1">
                 <div className="font-extrabold text-amber-900 dark:text-amber-200">
-                  {tr(language, '💡 ជំហានបន្ទាប់ (មិនបាច់បង់ប្រាក់មុនអនុម័តទេ)៖', '💡 Next Step (Pay Only After Approval):', '💡 下一步（审核通过后再付款）：')}
+                  {tr(language, '💡 ជំហានបន្ទាប់ (បង់ប្រាក់បើកកញ្ចប់ហាងក្រោយ Admin អនុម័ត)៖', '💡 Next Step (Activate Paid Shop Package After Approval):', '💡 下一步（管理员批准后付款开通店铺套餐）：')}
                 </div>
                 <p>
                   {appSettings.shopPayAfterApproval !== false
@@ -1830,9 +1830,9 @@ export const VipAddRestaurantModal: React.FC = () => {
               <p className="text-[11px] text-slate-700 dark:text-slate-200 leading-relaxed">
                 {tr(
                   language,
-                  `ហាងទី ១ ត្រូវបានរួមបញ្ចូលក្នុងកញ្ចប់ VIP រួចហើយ ($0)។ រាល់ការបន្ថែមហាងទី ២ ឬហាងបន្តបន្ទាប់ តម្រូវឱ្យបង់ប្រាក់បន្ថែម ${quota.additionalStoreFeeUsd.toFixed(2)} USD ក្នុង ១ ហាង។`,
-                  `Your 1st shop is covered by your VIP subscription ($0). Each additional shop requires a separate ${quota.additionalStoreFeeUsd.toFixed(2)} USD payment.`,
-                  `您的第 1 家店铺已包含在 VIP 订阅中 ($0)。每增加一家额外店铺需单独支付 ${quota.additionalStoreFeeUsd.toFixed(2)} USD。`
+                  `ការដាក់ហាង និងមុខងារ VIP ទាំង ៥ តម្រូវឱ្យបើកកញ្ចប់ហាងបង់ប្រាក់ (មិនរួមបញ្ចូលក្នុង Free Trial 7 ថ្ងៃទេ)។ រាល់ការបន្ថែមហាងបន្ទាប់ តម្រូវឱ្យបង់ប្រាក់បន្ថែម ${quota.additionalStoreFeeUsd.toFixed(2)} USD ក្នុង ១ ហាង។`,
+                  `Shop listing & all 5 VIP store benefits require the Paid Shop Package (not included in the 7-Day Free Trial). Each additional shop slot requires ${quota.additionalStoreFeeUsd.toFixed(2)} USD.`,
+                  `上架店铺及 5 项 VIP 权益需开通付费店铺套餐（不含在 7 天免费试用内）。每增加一家额外店铺需支付 ${quota.additionalStoreFeeUsd.toFixed(2)} USD。`
                 )}
               </p>
             </div>
@@ -2503,20 +2503,13 @@ export const VipAddRestaurantModal: React.FC = () => {
                           </li>
                         ))}
                       </ul>
-                      <div className="pt-1 border-t border-amber-200/70 dark:border-slate-700 text-[10px] font-bold text-emerald-800 dark:text-emerald-300">
-                        {appSettings.shopPayAfterApproval !== false
-                          ? tr(
-                              language,
-                              '✨ ដាក់ស្នើហាងដោយឥតគិតថ្លៃឥឡូវនេះ — បង់ប្រាក់តែក្រោយពេល Admin ត្រួតពិនិត្យ និងអនុម័តប៉ុណ្ណោះ!',
-                              '✨ Submit your shop for free now — pay only AFTER Admin reviews and approves your listing!',
-                              '✨ 现在免费提交店铺——仅在管理员审核通过后再付款开通！'
-                            )
-                          : tr(
-                              language,
-                              `✨ ប្រូម៉ូសិន ${shopCatalog.earlyBirdCap} ហាងដំបូង៖ $${shopCatalog.earlyBirdPlan.priceUsd.toFixed(2)}/ឆ្នាំ (នៅសល់ ${shopCatalog.earlyBirdRemaining} កន្លែង)`,
-                              `✨ Early-Bird First ${shopCatalog.earlyBirdCap} Shops: $${shopCatalog.earlyBirdPlan.priceUsd.toFixed(2)}/year (${shopCatalog.earlyBirdRemaining} spots left)`,
-                              `✨ 前 ${shopCatalog.earlyBirdCap} 家早鸟优惠：$${shopCatalog.earlyBirdPlan.priceUsd.toFixed(2)}/年（剩余 ${shopCatalog.earlyBirdRemaining} 名额）`
-                            )}
+                      <div className="pt-1 border-t border-amber-200/70 dark:border-slate-700 text-[10px] font-bold text-amber-900 dark:text-amber-300">
+                        {tr(
+                          language,
+                          `🔒 កញ្ចប់ដាក់ហាងបង់ប្រាក់ (${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ ឬ ${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/ឆ្នាំ) — មិនរួមបញ្ចូលក្នុង Free Trial 7 ថ្ងៃឡើយ។ ការបង់ប្រាក់ធ្វើឡើងក្រោយពេល Admin ត្រួតពិនិត្យ និងអនុម័តព័ត៌មានហាង។`,
+                          `🔒 Paid Shop Package (${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d or ${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr) — Not included in the 7-Day Free Trial. Payment is completed after Admin approves your shop details.`,
+                          `🔒 付费店铺套餐（${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天 或 ${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/年）——不含在 7 天免费试用内，管理员审核通过后付款开通。`
+                        )}
                       </div>
                     </div>
                   )}
