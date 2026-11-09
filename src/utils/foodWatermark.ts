@@ -20,7 +20,7 @@ export const FOOD_WATERMARK_LEDGER_KEY = 'kft_watermarked_food_hashes_v2';
  * and subtle semi-transparency so the dish remains the visual centerpiece.
  */
 export const FOOD_WATERMARK_BADGE_CLASS =
-  'absolute bottom-1.5 right-2 z-10 px-1.5 py-[2px] rounded-full bg-slate-950/35 backdrop-blur-[1.5px] text-[6px] sm:text-[6.5px] font-khmer font-normal tracking-[0.01em] leading-normal text-white/80 border border-white/10 select-none pointer-events-none shadow-2xs';
+  'absolute bottom-1.5 right-2 z-10 px-1.5 py-[2px] rounded-full bg-slate-950/45 text-[6px] sm:text-[6.5px] font-khmer font-normal tracking-[0.01em] leading-normal text-white/80 border border-white/10 select-none pointer-events-none shadow-2xs';
 
 const inMemoryWatermarkedSignatures = new Set<string>();
 

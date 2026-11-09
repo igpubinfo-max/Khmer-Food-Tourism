@@ -1041,7 +1041,7 @@ export async function saveToSmartCache(newItems: GooglePlaceCachedItem[]): Promi
   const seedById = new Map<string, GooglePlaceCachedItem>();
   for (const seed of EXTENDED_PHNOM_PENH_CAMBODIA_PLACES) seedById.set(seed.placeId, seed);
   const merged = Array.from(map.values())
-    .filter((it) => seedById.get(it.placeId) !== it)
+    .filter((it) => !seedById.has(it.placeId))
     .sort((a, b) => new Date(b.cachedAt || 0).getTime() - new Date(a.cachedAt || 0).getTime())
     .slice(0, SMART_CACHE_MAX_PERSISTED_ITEMS);
   try {
@@ -4127,7 +4127,9 @@ export async function searchGoogleMapsPlacesAdvanced(
           for (const item of cleanedCloudPool) map.set(item.placeId, item);
           cachePool = Array.from(map.values());
           try {
-            localStorage.setItem(SMART_CACHE_STORAGE_KEY, JSON.stringify(cachePool));
+            const seedIds = new Set(EXTENDED_PHNOM_PENH_CAMBODIA_PLACES.map((s) => s.placeId));
+            const persistable = cachePool.filter((it) => !seedIds.has(it.placeId)).slice(0, SMART_CACHE_MAX_PERSISTED_ITEMS);
+            localStorage.setItem(SMART_CACHE_STORAGE_KEY, JSON.stringify(persistable));
           } catch {
             // ignore
           }

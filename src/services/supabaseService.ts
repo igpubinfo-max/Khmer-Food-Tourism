@@ -2431,14 +2431,51 @@ export async function verifyUserVipStatusFromBackend(
     }
 
     if (serverUser) {
-      const finalNorm = normalizeVipExpiryOnUser(serverUser);
+      let finalNorm = normalizeVipExpiryOnUser(serverUser);
       const expMs = finalNorm.subscriptionExpiryDate ? Date.parse(finalNorm.subscriptionExpiryDate) : 0;
-      const isServerVip = Boolean(
+      let isServerVip = Boolean(
         finalNorm.membershipTier === 'premium_vip' &&
           finalNorm.subscriptionStatus === 'active' &&
           !finalNorm.vipCancelledAt &&
           (!expMs || expMs > Date.now())
       );
+
+      // Self-heal check: if local device has active VIP and cloud transaction ledger (kft_cloud_transactions_v1)
+      // has a verified, non-expired VIP upgrade for this user (newer than any old cancellation), honor it.
+      if (!isServerVip && localHasVip) {
+        try {
+          const cloudTxns = await pullCloudDocument<RegistrationTransaction[]>('kft_cloud_transactions_v1', 3500);
+          if (Array.isArray(cloudTxns)) {
+            const emailLower = (user.email || '').trim().toLowerCase();
+            const cancelMs = finalNorm.vipCancelledAt ? Date.parse(finalNorm.vipCancelledAt) : 0;
+            const matchingVerifiedTxn = cloudTxns.find((t) => {
+              if (!t || t.status !== 'verified' || t.type === 'restaurant_registration') return false;
+              const tExpMs = t.expiresAt ? Date.parse(t.expiresAt) : 0;
+              if (!tExpMs || tExpMs <= Date.now()) return false;
+              if (t.rejectionReason && cancelMs > 0) return false;
+              const tUserMatch =
+                (t.userId && getCanonicalUserId({ id: t.userId, email: t.userEmail }) === canonicalId) ||
+                (emailLower && String(t.userEmail || '').trim().toLowerCase() === emailLower);
+              return Boolean(tUserMatch);
+            });
+            if (matchingVerifiedTxn) {
+              finalNorm = normalizeVipExpiryOnUser({
+                ...finalNorm,
+                ...localNormalized,
+                membershipTier: 'premium_vip',
+                subscriptionStatus: 'active',
+                vipStatus: 'active',
+                paymentStatus: 'verified',
+                subscriptionExpiryDate: matchingVerifiedTxn.expiresAt || localNormalized.subscriptionExpiryDate,
+                vipExpiresAt: matchingVerifiedTxn.expiresAt || localNormalized.subscriptionExpiryDate,
+                vipCancelledAt: undefined,
+              });
+              isServerVip = true;
+            }
+          }
+        } catch {}
+      }
+
       backendVipVerifyCache.set(canonicalId, {
         expiresAt: Date.now() + 15000,
         isVip: isServerVip,

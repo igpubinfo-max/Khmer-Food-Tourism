@@ -1041,6 +1041,28 @@ async function handleAdminApproveTransaction(req: Request, body: Record<string, 
     user_email: targetEmail,
   });
 
+  // Also persist Consumer VIP grant onto the stored kft_user_<id> record with service_role
+  // so verifyUserVipStatusFromBackend and food-ai immediately recognize the user's active VIP.
+  if (targetUserId && targetUserId !== 'unknown' && (!planId || !planId.startsWith('shop_'))) {
+    try {
+      const existingDoc = await readUserDoc(userKvKey(targetUserId));
+      const baseDoc = existingDoc && typeof existingDoc === 'object' ? (existingDoc as Record<string, unknown>) : { id: targetUserId, email: targetEmail || '' };
+      const win = computeVipWindow(baseDoc.subscriptionExpiryDate, durationDays, Date.now());
+      const planType = durationDays >= 300 ? 'annual' : 'quarterly';
+      const updatedDoc = applyVipGrant(baseDoc, {
+        startIso: win.startIso,
+        expiryIso: win.expiryIso,
+        days: durationDays,
+        planType,
+        trxId: trxKey,
+        ...(planId ? { planId: planId as OfficialPaidPlanId } : {}),
+      });
+      await writeKv(userKvKey(targetUserId), updatedDoc);
+    } catch {
+      // non-fatal; client also syncs atomic user record
+    }
+  }
+
   if (statementMatched) {
     await recordPaymentAuditLog({
       event_type: 'statement_matched',

@@ -3468,16 +3468,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         needsUnattemptedUpload(`${r.id}_upg`, r.pendingUpgradeRequest?.proposedChanges?.photoUrl) ||
         (Array.isArray(r.menuItems) && r.menuItems.some((m) => needsUnattemptedUpload(m.id, m.photoUrl)))
     );
-    const foodNeedsMigration = foods.some((f) => needsUnattemptedUpload(f.id, f.photoUrl));
-    const destNeedsMigration = destinations.some((d) => needsUnattemptedUpload(d.id, d.photoUrl));
-    const trendNeedsMigration = trendingFoods.some((t) => needsUnattemptedUpload(t.id, t.photoUrl));
+    const isAdminSession = isCurrentUserAdmin();
+    const foodNeedsMigration = isAdminSession && foods.some((f) => needsUnattemptedUpload(f.id, f.photoUrl));
+    const destNeedsMigration = isAdminSession && destinations.some((d) => needsUnattemptedUpload(d.id, d.photoUrl));
+    const trendNeedsMigration = isAdminSession && trendingFoods.some((t) => needsUnattemptedUpload(t.id, t.photoUrl));
 
     if (!restNeedsMigration && !foodNeedsMigration && !destNeedsMigration && !trendNeedsMigration) {
       return;
     }
 
-    isMigratingCloudImagesRef.current = true;
     const timer = window.setTimeout(async () => {
+      if (isMigratingCloudImagesRef.current) return;
+      isMigratingCloudImagesRef.current = true;
       try {
         // 1. Migrate Shops & Hotels (`restaurants`) sequentially to avoid Canvas/GPU memory spikes
         if (restNeedsMigration) {
@@ -3694,7 +3696,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return () => {
       window.clearTimeout(timer);
-      isMigratingCloudImagesRef.current = false;
     };
   }, [restaurants, foods, destinations, trendingFoods]);
 
@@ -6600,6 +6601,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       latestSyncStateRef.current.transactions = nextTxns;
       return nextTxns;
     });
+
+    // Also persist the Admin VIP grant in the server-side authoritative ledger (service_role)
+    adminApproveAndLockTransactionOnServer({
+      trxId: txnRef,
+      txnId: adminTxn.id,
+      targetUserId: approved.id,
+      targetEmail: approved.email,
+      adminActor: `${currentUser.name || 'Admin'} (Direct VIP Grant)`,
+      verifiedUsd: resolvedPlan.priceUsd,
+      durationDays: validDays,
+      planId: (resolvedPlan as any).officialPlanId || 'consumer_30d',
+      transactionDate: adminTxn.createdAt,
+      statementMatched: true,
+    }).catch(() => {});
 
     recordSecurityAudit(
       'ADMIN_DIRECT_VIP_GRANT',

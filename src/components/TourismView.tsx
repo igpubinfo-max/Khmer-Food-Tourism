@@ -76,7 +76,9 @@ export const TourismView: React.FC = () => {
   }, [categoryMatchedDestinations]);
 
   // Precompute trilingual (Khmer, English, Simplified Chinese) search fields once per destination
+  const hasActiveTourismSearch = deferredSearchQuery.trim().length > 0;
   const searchIndexById = useMemo(() => {
+    if (!hasActiveTourismSearch) return new Map();
     const map = new Map<
       string,
       {
@@ -102,7 +104,7 @@ export const TourismView: React.FC = () => {
       map.set(d.id, { fields, combinedNormName, combinedNormAll });
     }
     return map;
-  }, [scenicDestinationsOnly]);
+  }, [scenicDestinationsOnly, hasActiveTourismSearch]);
 
   // Separate full-card HD destinations (shuffled first) and compact directory rows (shuffled second)
   const orderedSessionDestinations = useMemo(() => {

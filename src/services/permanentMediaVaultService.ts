@@ -2650,8 +2650,8 @@ export function applyFoodOverrides(
       f.servings === nextServings &&
       f.calories === nextCalories &&
       f.difficulty === nextDifficulty &&
-      f.ingredients === nextIngredients &&
-      f.steps === nextSteps &&
+      areIngredientsIdentical(f.ingredients, nextIngredients) &&
+      areStepsIdentical(f.steps, nextSteps) &&
       f.priceRiel === nextPriceRiel &&
       f.priceUsd === nextPriceUsd &&
       f.imageAuditStatus === nextAuditStatus &&
@@ -3536,7 +3536,10 @@ export async function hydrateAndSyncMediaOverrides(
     // EGRESS FIX: an app UPDATE keeps IndexedDB/localStorage (same origin), so the manifest delta (`kft_cloud_row_seen_v1`)
     // is still valid. Only a genuinely EMPTY local vault (fresh install / cleared data) needs the full re-download.
     // Previously every device re-downloaded ALL ~280 photo rows (~49 MB) and the 4.5 MB legacy document on EVERY update.
+    const existingSeenMap = loadSeenCloudRowTimestamps();
+    const hasPreviouslyVerifiedManifest = Object.keys(existingSeenMap).length > 0;
     const localVaultIsEmpty =
+      !hasPreviouslyVerifiedManifest &&
       Object.keys(current.foods || {}).length === 0 &&
       Object.keys(current.restaurants || {}).length === 0 &&
       Object.keys(current.destinations || {}).length === 0;
@@ -3620,12 +3623,16 @@ export async function hydrateAndSyncMediaOverrides(
               continue;
             }
             // Skip downloading unchanged cloud rows we already fetched & verified on this exact build (0 bytes wasted egress!)
-            if (hasLocalPhoto && item.updated_at && seenRows[item.key] === item.updated_at) {
+            if (!isBuildUpgradeOrEmptyVault && item.updated_at && seenRows[item.key] === item.updated_at) {
               continue;
             }
 
             // Skip downloading destination cloud rows whose table timestamp is older than the bundled destination seed baseline
             if (seedUpdatedAtMs > 0 && remoteMs > 0 && remoteMs <= seedUpdatedAtMs) {
+              if (item.updated_at && seenRows[item.key] !== item.updated_at) {
+                seenRows[item.key] = item.updated_at;
+                saveSeenCloudRowTimestamps(seenRows);
+              }
               continue;
             }
 
