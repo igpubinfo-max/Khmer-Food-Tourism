@@ -293,7 +293,7 @@ export const HomeView: React.FC = () => {
   }, [setIsNearMeModalOpen]);
 
   const handleNearbyPlaces = useCallback(() => {
-    (window as any).__kft_wte_open_compare_mode = true;
+    (window as any).__kft_wte_open_drink_pairing = true;
     setIsWhatToEatModalOpen(true);
   }, [setIsWhatToEatModalOpen]);
 

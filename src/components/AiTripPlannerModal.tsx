@@ -141,6 +141,7 @@ export const AiTripPlannerModal: React.FC = () => {
   // Mode 1: AI Food & Craving Advisor State
   const [advisorGoal, setAdvisorGoal] = useState<AdvisorGoalId>('quick_daily');
   const [expandedGoalId, setExpandedGoalId] = useState<AdvisorGoalId | null>(null);
+  const [isGoalDropdownOpen, setIsGoalDropdownOpen] = useState<boolean>(false);
   const [advisorPrompt, setAdvisorPrompt] = useState<string>('');
   const [advisorSeed, setAdvisorSeed] = useState<number>(1);
   const [goalSeed, setGoalSeed] = useState<number>(1);
@@ -391,9 +392,9 @@ export const AiTripPlannerModal: React.FC = () => {
   }> = [
     {
       id: 'quick_daily',
-      kh: '⚡ អាហាររហ័ស & ងាយស្រួលប្រចាំថ្ងៃ',
-      en: '⚡ Quick & Convenient Daily Meal',
-      zh: '⚡ 快捷便利日常简餐',
+      kh: 'អាហាររហ័ស & ងាយស្រួលប្រចាំថ្ងៃ',
+      en: 'Quick & Convenient Daily Meal',
+      zh: '快捷便利日常简餐',
       descKh: 'ម្ហូបញ៉ាំប្រចាំថ្ងៃ រហ័ស ឆ្ងាញ់ និងសម្បូរបែប',
       descEn: 'Fast, tasty everyday dishes for breakfast, lunch, or dinner',
       descZh: '适合日常早午晚餐的快捷美味菜品',
@@ -401,9 +402,9 @@ export const AiTripPlannerModal: React.FC = () => {
     },
     {
       id: 'khmer_comfort',
-      kh: '🍲 ម្ហូបខ្មែរពេញនិយមប្រចាំថ្ងៃ',
-      en: '🍲 Daily Khmer Comfort Food',
-      zh: '🍲 经典柬式家常美味',
+      kh: 'ម្ហូបខ្មែរពេញនិយមប្រចាំថ្ងៃ',
+      en: 'Daily Khmer Comfort Food',
+      zh: '经典柬式家常美味',
       descKh: 'សម្លខ្មែរ អាម៉ុក និងម្ហូបប្រពៃណីសម្រាប់គ្រួសារ',
       descEn: 'Authentic Cambodian soups, curries, and homestyle favorites',
       descZh: '正宗柬埔寨汤品、阿莫克与家常名菜',
@@ -411,9 +412,9 @@ export const AiTripPlannerModal: React.FC = () => {
     },
     {
       id: 'vip_light_cal',
-      kh: '🍲 ម្ហូបចំហុយ & ស្ងោរប្រពៃណី',
-      en: '🍲 Steamed & Boiled Specialties',
-      zh: '🍲 清蒸与炖汤精选',
+      kh: 'ម្ហូបចំហុយ & ស្ងោរប្រពៃណី',
+      en: 'Steamed & Boiled Specialties',
+      zh: '清蒸与炖汤精选',
       descKh: 'ម្ហូបចំហុយ ស៊ុបថ្លា និងសម្លប្រពៃណីរសជាតិស្រាលឆ្ងាញ់',
       descEn: 'Traditional steamed fish, clear soups & delicate Cambodian dishes',
       descZh: '传统清蒸鱼、清汤与风味清雅的柬式菜肴',
@@ -421,9 +422,9 @@ export const AiTripPlannerModal: React.FC = () => {
     },
     {
       id: 'vip_high_protein',
-      kh: '🥩 សាច់អាំង & គ្រឿងសមុទ្រពិសេស',
-      en: '🥩 Grilled & Seafood Specialties',
-      zh: '🥩 炭烤与海鲜特色',
+      kh: 'សាច់អាំង & គ្រឿងសមុទ្រពិសេស',
+      en: 'Grilled & Seafood Specialties',
+      zh: '炭烤与海鲜特色',
       descKh: 'មុខម្ហូបសាច់គោអាំង ត្រីដុត បង្គា និងគ្រឿងសមុទ្រស្រស់ៗ',
       descEn: 'Charcoal-grilled meats, roasted fish & fresh coastal seafood',
       descZh: '炭烤牛肉、烤鱼与新鲜海鲜特色菜',
@@ -431,9 +432,9 @@ export const AiTripPlannerModal: React.FC = () => {
     },
     {
       id: 'vip_group_feast',
-      kh: '👨‍👩‍👧‍👦 អាហារជួបជុំគ្រួសារ & មិត្តភក្តិ',
-      en: '👨‍👩‍👧‍👦 Family & Group Dining Match',
-      zh: '👨‍👩‍👧‍👦 家庭与朋友聚餐精选',
+      kh: 'អាហារជួបជុំគ្រួសារ & មិត្តភក្តិ',
+      en: 'Family & Group Dining Match',
+      zh: '家庭与朋友聚餐精选',
       descKh: 'មុខម្ហូបឈុតធំ ស៊ុប សាច់អាំង និងហាងបរិយាកាសល្អ',
       descEn: 'Shareable platters, hotpots, grilled specialties & group venues',
       descZh: '适合多人分享的火锅、烧烤、大菜与聚会餐厅',
@@ -837,215 +838,244 @@ export const AiTripPlannerModal: React.FC = () => {
               </div>
               )}
 
-              {/* Select Daily Goal (2 Free + 3 VIP) — Clicking any button expands curated dishes & shops inline right beneath it! */}
-              <div className="space-y-2">
+              {/* Select Daily Goal (2 Free + 3 VIP) — Compact Dropdown Menu so screen isn't cluttered with excessive text */}
+              <div className="space-y-2.5" ref={(el) => { goalCardRefs.current[expandedGoalId || advisorGoal] = el; }}>
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
                   {tr(language, 'ជ្រើសរើសគោលបំណងអាហារថ្ងៃនេះ៖', 'Select your dining goal today:', '选择今日用餐目标：')}
                 </label>
-                <div className="space-y-2">
-                  {advisorGoals.map((g) => {
-                    const isLocked = g.vipOnly && !canUseVip;
-                    const isExpanded = !isLocked && expandedGoalId === g.id;
-                    return (
-                      <div
-                        key={g.id}
-                        ref={(el) => {
-                          goalCardRefs.current[g.id] = el;
-                        }}
-                        className={`rounded-2xl border transition overflow-hidden ${
-                          isExpanded
-                            ? 'bg-emerald-50/70 dark:bg-slate-800/90 border-emerald-500 ring-1 ring-emerald-500/40 shadow-sm'
-                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-emerald-400'
-                        }`}
+
+                {(() => {
+                  const activeGoalObj = advisorGoals.find((g) => g.id === (expandedGoalId || advisorGoal)) || advisorGoals[0];
+                  return (
+                    <div className="relative">
+                      {/* Compact Dropdown Trigger Button */}
+                      <button
+                        type="button"
+                        aria-expanded={isGoalDropdownOpen}
+                        onClick={() => setIsGoalDropdownOpen((v) => !v)}
+                        className="w-full px-3.5 py-2.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 text-left flex items-center justify-between gap-2.5 shadow-2xs transition cursor-pointer"
                       >
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          <span className="w-7 h-7 rounded-xl bg-emerald-600/10 dark:bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-[#064E3B] dark:text-emerald-400 shrink-0">
+                            <Utensils className="w-3.5 h-3.5" strokeWidth={1.75} />
+                          </span>
+                          <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                            {tr(language, activeGoalObj.kh, activeGoalObj.en, activeGoalObj.zh)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {activeGoalObj.vipOnly ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-black border border-amber-400/40">
+                              <Crown className="w-2.5 h-2.5" />
+                              <span>VIP</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold">
+                              <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                              <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}</span>
+                            </span>
+                          )}
+                          {isGoalDropdownOpen ? (
+                            <ChevronUp className="w-4 h-4 text-emerald-500 shrink-0" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                          )}
+                        </div>
+                      </button>
+
+                      {/* Dropdown Menu Options List */}
+                      {isGoalDropdownOpen && (
+                        <div className="mt-1.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl divide-y divide-slate-100 dark:divide-slate-700/70 overflow-hidden z-20">
+                          {advisorGoals.map((g) => {
+                            const isLocked = g.vipOnly && !canUseVip;
+                            const isSelected = (expandedGoalId || advisorGoal) === g.id;
+                            return (
+                              <button
+                                key={g.id}
+                                type="button"
+                                onClick={() => {
+                                  if (isLocked) {
+                                    setIsGoalDropdownOpen(false);
+                                    showToast(
+                                      tr(
+                                        language,
+                                        'មុខងារណែនាំមុខម្ហូបពិសេស និងជួបជុំ AI គឺសម្រាប់សមាជិក VIP!',
+                                        'Special Culinary & Group Dining AI modes are for VIP members!',
+                                        '特色美食与聚餐 AI 推荐仅限 VIP 会员！'
+                                      ),
+                                      'info'
+                                    );
+                                    openUpgradeVipModal();
+                                    return;
+                                  }
+                                  if (advisorPrompt) {
+                                    setAdvisorPrompt('');
+                                  }
+                                  setAdvisorGoal(g.id);
+                                  setExpandedGoalId(g.id);
+                                  setGoalSeed(1);
+                                  setIsGoalDropdownOpen(false);
+                                  scrollGoalIntoView(g.id);
+                                }}
+                                className={`w-full px-3.5 py-2.5 text-left flex items-center justify-between gap-2 transition cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-emerald-50 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-300'
+                                    : 'hover:bg-slate-50 dark:hover:bg-slate-700/60 text-slate-800 dark:text-slate-100'
+                                }`}
+                              >
+                                <span className="text-xs font-bold truncate flex-1">
+                                  {tr(language, g.kh, g.en, g.zh)}
+                                </span>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  {g.vipOnly ? (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-black border border-amber-400/40">
+                                      {isLocked ? <Lock className="w-2.5 h-2.5" /> : <Crown className="w-2.5 h-2.5" />}
+                                      <span>VIP</span>
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold">
+                                      <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                                      <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}</span>
+                                    </span>
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                {/* Selected Goal Recommendations (Shown cleanly beneath the dropdown when a goal is selected) */}
+                {expandedGoalId && (
+                  <div className="p-3 rounded-2xl border border-emerald-500/35 bg-slate-50/90 dark:bg-slate-900/70 space-y-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 block truncate">
+                          {tr(
+                            language,
+                            `រកឃើញ ${goalAdvisorResults.totalMatchedCount} មុខម្ហូបសមស្រប`,
+                            `${goalAdvisorResults.totalMatchedCount} matching dishes`,
+                            `共匹配 ${goalAdvisorResults.totalMatchedCount} 道菜品`
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <button
                           type="button"
-                          aria-expanded={isExpanded}
-                          onClick={() => {
-                            if (isLocked) {
-                              showToast(
-                                tr(
-                                  language,
-                                  '👑 មុខងារណែនាំមុខម្ហូបពិសេស និងជួបជុំ AI គឺសម្រាប់សមាជិក VIP!',
-                                  '👑 Special Culinary & Group Dining AI modes are for VIP members!',
-                                  '👑 特色美食与聚餐 AI 推荐仅限 VIP 会员！'
-                                ),
-                                'info'
-                              );
-                              openUpgradeVipModal();
-                              return;
-                            }
-                            if (advisorPrompt) {
-                              setAdvisorPrompt('');
-                            }
-                            if (expandedGoalId === g.id) {
-                              setExpandedGoalId(null);
-                              return;
-                            }
-                            setAdvisorGoal(g.id);
-                            setExpandedGoalId(g.id);
-                            setGoalSeed(1);
-                            scrollGoalIntoView(g.id);
-                          }}
-                          className="w-full p-3 text-left flex items-center justify-between gap-2 cursor-pointer active:scale-[0.99] transition"
+                          onClick={() => setGoalSeed((s) => s + 1)}
+                          className="px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] font-black inline-flex items-center gap-1 shrink-0 cursor-pointer active:scale-95 transition"
                         >
-                          <div className="min-w-0 flex-1">
-                            <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
-                              {tr(language, g.kh, g.en, g.zh)}
-                            </div>
-                            <div className="text-[10.5px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                              {tr(language, g.descKh, g.descEn, g.descZh)}
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            {g.vipOnly ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-black border border-amber-400/40">
-                                {isLocked ? <Lock className="w-2.5 h-2.5" /> : <Crown className="w-2.5 h-2.5" />}
-                                <span>VIP</span>
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold">
-                                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
-                                <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}</span>
-                              </span>
-                            )}
-                            {!isLocked && (
-                              isExpanded ? (
-                                <ChevronUp className="w-4 h-4 text-emerald-500 shrink-0" />
-                              ) : (
-                                <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
-                              )
-                            )}
-                          </div>
+                          <RefreshCw className="w-3 h-3" />
+                          <span>{tr(language, 'ប្តូរជម្រើសថ្មី', 'Refresh AI', '换一批')}</span>
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => setExpandedGoalId(null)}
+                          className="p-1.5 rounded-xl bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 cursor-pointer"
+                          aria-label="Close"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
 
-                        {isExpanded && (
-                          <div className="px-3 pb-3 pt-2 border-t border-emerald-500/25 bg-slate-50/90 dark:bg-slate-900/70 space-y-2.5">
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="min-w-0 flex-1">
-                                <p className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-300 leading-snug">
-                                  {goalAdvisorResults.aiSummaryText}
-                                </p>
-                                <span className="text-[10px] text-slate-500 dark:text-slate-400">
-                                  {tr(
-                                    language,
-                                    `រកឃើញ ${goalAdvisorResults.totalMatchedCount} មុខម្ហូបសមស្រប`,
-                                    `${goalAdvisorResults.totalMatchedCount} matching dishes`,
-                                    `共匹配 ${goalAdvisorResults.totalMatchedCount} 道菜品`
-                                  )}
-                                </span>
+                    <div className="space-y-2">
+                      {goalAdvisorResults.dishes.map((dish) => {
+                        const loc = getLocalizedFood(dish, language);
+                        return (
+                          <button
+                            key={dish.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedFood(dish);
+                              setIsAiTripPlannerModalOpen(false);
+                            }}
+                            className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 hover:border-emerald-500 flex items-center justify-between gap-2.5 cursor-pointer text-left transition shadow-2xs active:scale-[0.99]"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <img
+                                src={resolveFoodPhotoUrl(dish.photoUrl, dish.photoUpdatedAt, 240, dish.id)}
+                                onError={(e) => handleFoodImageError(e, dish.id, dish.photoUrl)}
+                                alt={loc.name}
+                                loading="lazy"
+                                decoding="async"
+                                className="w-12 h-12 rounded-xl object-cover shrink-0 bg-slate-200"
+                              />
+                              <div className="min-w-0">
+                                <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                                  {loc.name}
+                                </div>
+                                <div className="flex items-center gap-1.5 mt-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 flex-wrap">
+                                  <span>{dish.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}</span>
+                                  <span>•</span>
+                                  <span>★ {dish.rating}</span>
+                                  <span>•</span>
+                                  <span>{loc.category}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <span className="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 text-[10px] font-bold shrink-0 flex items-center gap-1">
+                              <ChefHat className="w-3 h-3" />
+                              <span>{tr(language, 'រូបមន្ត', 'Recipe', '食谱')}</span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {goalAdvisorResults.shops.length > 0 && (
+                      <div className="pt-2 border-t border-slate-200/80 dark:border-slate-700 space-y-1.5">
+                        <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                          <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>
+                            {tr(
+                              language,
+                              'ហាងអាហារណែនាំ និងការនាំផ្លូវ៖',
+                              'Recommended Shops & Navigation:',
+                              '推荐餐厅与路线导航：'
+                            )}
+                          </span>
+                        </div>
+                        {goalAdvisorResults.shops.map((shop) => {
+                          const sLoc = getLocalizedRestaurant(shop, language);
+                          return (
+                            <div
+                              key={shop.id}
+                              className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-2"
+                            >
+                              <div
+                                onClick={() => {
+                                  setSelectedRestaurant(shop);
+                                  setIsAiTripPlannerModalOpen(false);
+                                }}
+                                className="min-w-0 flex-1 cursor-pointer"
+                              >
+                                <div className="text-xs font-bold text-slate-900 dark:text-white truncate hover:text-emerald-600">
+                                  {sLoc.name}
+                                </div>
+                                <div className="text-[10px] text-slate-500 truncate">
+                                  {sLoc.province} • ★ {shop.rating}
+                                </div>
                               </div>
                               <button
                                 type="button"
-                                onClick={() => setGoalSeed((s) => s + 1)}
-                                className="px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] font-black inline-flex items-center gap-1 shrink-0 cursor-pointer active:scale-95 transition"
+                                onClick={() => openRestaurantGoogleExternal(shop, 'directions')}
+                                className="px-2.5 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-[10px] font-bold inline-flex items-center gap-1 shrink-0 cursor-pointer"
                               >
-                                <RefreshCw className="w-3 h-3" />
-                                <span>{tr(language, 'ប្តូរជម្រើសថ្មី', 'Refresh AI', '换一批')}</span>
+                                <Navigation className="w-3 h-3 text-emerald-300" />
+                                <span>{tr(language, 'នាំផ្លូវ', 'Navigate', '导航')}</span>
                               </button>
                             </div>
-
-                            <div className="space-y-2">
-                              {goalAdvisorResults.dishes.map((dish) => {
-                                const loc = getLocalizedFood(dish, language);
-                                return (
-                                  <button
-                                    key={dish.id}
-                                    type="button"
-                                    onClick={() => {
-                                      setSelectedFood(dish);
-                                      setIsAiTripPlannerModalOpen(false);
-                                    }}
-                                    className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 hover:border-emerald-500 flex items-center justify-between gap-2.5 cursor-pointer text-left transition shadow-2xs active:scale-[0.99]"
-                                  >
-                                    <div className="flex items-center gap-2.5 min-w-0">
-                                      <img
-                                        src={resolveFoodPhotoUrl(dish.photoUrl, dish.photoUpdatedAt, 240, dish.id)}
-                                        onError={(e) => handleFoodImageError(e, dish.id, dish.photoUrl)}
-                                        alt={loc.name}
-                                        loading="lazy"
-                                        decoding="async"
-                                        className="w-14 h-14 rounded-xl object-cover shrink-0 bg-slate-200"
-                                      />
-                                      <div className="min-w-0">
-                                        <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
-                                          {loc.name}
-                                        </div>
-                                        <div className="flex items-center gap-1.5 mt-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 flex-wrap">
-                                          <span>🔥 {dish.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}</span>
-                                          <span>•</span>
-                                          <span>⭐ {dish.rating}</span>
-                                          <span>•</span>
-                                          <span>{loc.category}</span>
-                                        </div>
-                                        <p className="text-[10.5px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
-                                          {loc.description}
-                                        </p>
-                                      </div>
-                                    </div>
-                                    <span className="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 text-[10px] font-bold shrink-0 flex items-center gap-1">
-                                      <ChefHat className="w-3 h-3" />
-                                      <span>{tr(language, 'រូបមន្ត', 'Recipe', '食谱')}</span>
-                                    </span>
-                                  </button>
-                                );
-                              })}
-                            </div>
-
-                            {goalAdvisorResults.shops.length > 0 && (
-                              <div className="pt-2 border-t border-slate-200/80 dark:border-slate-700 space-y-1.5">
-                                <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                                  <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                                  <span>
-                                    {tr(
-                                      language,
-                                      'ហាងអាហារណែនាំ និងការនាំផ្លូវ៖',
-                                      'Recommended Shops & Navigation:',
-                                      '推荐餐厅与路线导航：'
-                                    )}
-                                  </span>
-                                </div>
-                                {goalAdvisorResults.shops.map((shop) => {
-                                  const sLoc = getLocalizedRestaurant(shop, language);
-                                  return (
-                                    <div
-                                      key={shop.id}
-                                      className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-2"
-                                    >
-                                      <div
-                                        onClick={() => {
-                                          setSelectedRestaurant(shop);
-                                          setIsAiTripPlannerModalOpen(false);
-                                        }}
-                                        className="min-w-0 flex-1 cursor-pointer"
-                                      >
-                                        <div className="text-xs font-bold text-slate-900 dark:text-white truncate hover:text-emerald-600">
-                                          {sLoc.name}
-                                        </div>
-                                        <div className="text-[10px] text-slate-500 truncate">
-                                          📍 {sLoc.province} • ⭐ {shop.rating}
-                                        </div>
-                                      </div>
-                                      <button
-                                        type="button"
-                                        onClick={() => openRestaurantGoogleExternal(shop, 'directions')}
-                                        className="px-2.5 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-[10px] font-bold inline-flex items-center gap-1 shrink-0 cursor-pointer"
-                                      >
-                                        <Navigation className="w-3 h-3 text-emerald-300" />
-                                        <span>{tr(language, 'នាំផ្លូវ', 'Navigate', '导航')}</span>
-                                      </button>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        )}
+                          );
+                        })}
                       </div>
-                    );
-                  })}
-                </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
