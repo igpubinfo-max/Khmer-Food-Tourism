@@ -172,3 +172,131 @@ export async function computeServerIdentityHashes(params: {
     isDisposableEmail: Boolean(emailNorm && emailNorm.isDisposable),
   };
 }
+
+
+/**
+ * Official Cambodian TRC 9-digit-only prefixes (subscriber length after +855 is strictly 8 digits: 0xx xxx xxx).
+ */
+const CAMBODIA_9_DIGIT_ONLY_PREFIXES: ReadonlySet<string> = new Set([
+  '10', '11', '12', '14', '15', '16', '17',
+  '23', '24', '25', '26', '32', '33', '34', '35', '36',
+  '42', '43', '44', '52', '53', '54', '55',
+  '61', '62', '63', '64', '65', '69',
+  '70', '72', '73', '74', '75', '77', '78', '79',
+  '80', '81', '85', '86', '87', '89',
+  '90', '92', '93', '95', '98', '99',
+]);
+
+/**
+ * Official Cambodian TRC prefixes that support 9 or 10 digits locally (subscriber length after +855 is 8 or 9 digits: 0xx xxx xxxx).
+ */
+const CAMBODIA_9_OR_10_DIGIT_PREFIXES: ReadonlySet<string> = new Set([
+  '18', '31', '60', '66', '67', '68', '71', '76', '88', '96', '97',
+]);
+
+const FAKE_SUBSCRIBER_PATTERNS: ReadonlySet<string> = new Set([
+  '123456', '234567', '345678', '456789', '567890',
+  '654321', '765432', '876543', '987654',
+  '1234567', '2345678', '3456789', '4567890',
+  '7654321', '8765432', '9876543',
+  '123123', '1231234', '121212', '1212121', '000111', '111222',
+]);
+
+export interface PhoneRegistrationValidationResult {
+  valid: boolean;
+  canonicalPhone: string | null;
+  reason?: 'invalid_format' | 'invalid_carrier_prefix' | 'invalid_carrier_length' | 'fake_pattern';
+  messageKh?: string;
+  messageEn?: string;
+}
+
+/**
+ * Strictly validates a phone number for new account registration & Free Trial eligibility:
+ * 1. Enforces real Cambodian mobile/telecom operator prefixes (Smart, Cellcard, Metfone, Yes/Seatel).
+ * 2. Blocks fake 10-digit numbers on 9-digit-only prefixes (e.g. 012 123 4567 or 010 999 8888).
+ * 3. Blocks repetitive/sequential bogus test numbers (e.g. 096 123 4567, 012 111 111, 097 888 8888).
+ */
+export function validateCambodiaPhoneForRegistration(raw?: unknown): PhoneRegistrationValidationResult {
+  const canonical = normalizeCambodiaPhone(typeof raw === 'string' ? raw : null);
+  if (!canonical) {
+    return {
+      valid: false,
+      canonicalPhone: null,
+      reason: 'invalid_format',
+      messageKh: 'សូមបញ្ចូលលេខទូរសព្ទឱ្យបានត្រឹមត្រូវ (ឧ. 012 245 959 ឬ 096 458 2917)',
+      messageEn: 'Please enter a valid phone number (e.g. 012 245 959 or 096 458 2917)',
+    };
+  }
+
+  if (canonical.startsWith('+855')) {
+    const sub = canonical.slice(4); // 8 or 9 digits
+    const prefix2 = sub.slice(0, 2);
+    const bodyDigits = sub.slice(2);
+
+    const is9DigitOnly = CAMBODIA_9_DIGIT_ONLY_PREFIXES.has(prefix2);
+    const is9Or10Digit = CAMBODIA_9_OR_10_DIGIT_PREFIXES.has(prefix2);
+
+    if (!is9DigitOnly && !is9Or10Digit) {
+      return {
+        valid: false,
+        canonicalPhone: null,
+        reason: 'invalid_carrier_prefix',
+        messageKh: `⚠️ ក្បាលលេខ 0${prefix2} មិនមែនជាប្រព័ន្ធទូរសព្ទផ្លូវការនៅកម្ពុជាទេ (Smart / Cellcard / Metfone / Yes)។ សូមប្រើលេខពិតប្រាកដ!`,
+        messageEn: `⚠️ Prefix 0${prefix2} is not a valid Cambodian mobile operator prefix. Please enter a real phone number!`,
+      };
+    }
+
+    if (is9DigitOnly && sub.length !== 8) {
+      return {
+        valid: false,
+        canonicalPhone: null,
+        reason: 'invalid_carrier_length',
+        messageKh: `⚠️ ក្បាលលេខ 0${prefix2} នៅកម្ពុជាមានតែ ៩ ខ្ទង់ប៉ុណ្ណោះ (មិនមែន ១០ ខ្ទង់ទេ)។ សូមពិនិត្យលេខទូរសព្ទរបស់អ្នកឡើងវិញ!`,
+        messageEn: `⚠️ Cambodian prefix 0${prefix2} only has 9 digits (not 10 digits). Please check your phone number!`,
+      };
+    }
+
+    if (is9Or10Digit && sub.length !== 8 && sub.length !== 9) {
+      return {
+        valid: false,
+        canonicalPhone: null,
+        reason: 'invalid_carrier_length',
+        messageKh: `⚠️ ចំនួនខ្ទង់លេខទូរសព្ទ 0${prefix2} មិនត្រឹមត្រូវទេ។`,
+        messageEn: `⚠️ Invalid digit length for prefix 0${prefix2}.`,
+      };
+    }
+
+    // Subscriber number after operator prefix cannot start with 0, cannot have 5+ identical consecutive digits, and cannot be sequential test digits
+    if (
+      bodyDigits.startsWith('0') ||
+      /(\d)\1{4,}/.test(sub) ||
+      FAKE_SUBSCRIBER_PATTERNS.has(bodyDigits) ||
+      new Set(bodyDigits.split('')).size < 2
+    ) {
+      return {
+        valid: false,
+        canonicalPhone: null,
+        reason: 'fake_pattern',
+        messageKh: '⚠️ លេខទូរសព្ទនេះជាលេខគំរូ ឬលេខក្លែងក្លាយមិនអាចចុះឈ្មោះបានទេ។ សូមបញ្ចូលលេខទូរសព្ទពិតប្រាកដរបស់អ្នក!',
+        messageEn: '⚠️ This appears to be a fake or test phone number. Please enter your real active phone number!',
+      };
+    }
+  } else {
+    // International number: reject 5+ consecutive identical digits or sequential patterns
+    const intDigits = canonical.slice(1);
+    if (/(\d)\1{4,}/.test(intDigits) || /1234567|7654321/.test(intDigits)) {
+      return {
+        valid: false,
+        canonicalPhone: null,
+        reason: 'fake_pattern',
+        messageKh: '⚠️ លេខទូរសព្ទនេះមិនត្រឹមត្រូវទេ។ សូមបញ្ចូលលេខទូរសព្ទពិតប្រាកដ!',
+        messageEn: '⚠️ Invalid or fake phone number pattern.',
+      };
+    }
+  }
+
+  return {
+    valid: true,
+    canonicalPhone: canonical,
+  };
+}

@@ -17,6 +17,7 @@ export interface PaymentConfirmationInput {
   expectedDays: number;
   submittedTrxId?: string;
   nowMs: number;
+  lastVerifiedPaymentAtMs?: number | null;
   extractedReceipt?: ExtractedReceipt | null;
   webhookPayload?: Record<string, unknown> | null;
   webhookSignatureValid?: boolean;
@@ -54,6 +55,7 @@ export function createAbaReceiptVisionAdapter(): PaymentConfirmationAdapter {
         expectedDays: input.expectedDays,
         submittedTrxId: input.submittedTrxId,
         nowMs: input.nowMs,
+        lastVerifiedPaymentAtMs: input.lastVerifiedPaymentAtMs,
       });
       return {
         provider: 'aba_receipt_vision',

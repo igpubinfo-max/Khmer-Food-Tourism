@@ -444,13 +444,16 @@ export const UpgradeVipModal: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
     const extLower = file.name.toLowerCase();
+    const isPdfFile = file.type === 'application/pdf' || extLower.endsWith('.pdf');
     const isValidType =
+      isPdfFile ||
       allowedTypes.includes(file.type) ||
       extLower.endsWith('.jpg') ||
       extLower.endsWith('.jpeg') ||
-      extLower.endsWith('.png');
+      extLower.endsWith('.png') ||
+      extLower.endsWith('.webp');
 
     if (!isValidType) {
       showToast(
@@ -487,6 +490,25 @@ export const UpgradeVipModal: React.FC = () => {
       const rawDataUrl = ev.target?.result as string;
       if (!rawDataUrl) {
         setIsProcessingProofImage(false);
+        return;
+      }
+
+      if (isPdfFile || rawDataUrl.startsWith('data:application/pdf')) {
+        setPaymentProofDraft({
+          dataUrl: rawDataUrl,
+          fileName: file.name || `aba_receipt_${Date.now()}.pdf`,
+          mimeType: 'application/pdf',
+        });
+        setIsProcessingProofImage(false);
+        showToast(
+          tr(
+            language,
+            '\u2705 \u1794\u17b6\u1793\u1787\u17d2\u179a\u17be\u179f\u179a\u17be\u179f\u179c\u17b7\u1780\u17d2\u1780\u1799\u1794\u178f\u17d2\u179a PDF \u179a\u17bd\u1785\u179a\u17b6\u179b\u17cb!',
+            '\u2705 PDF payment receipt ready!',
+            '\u2705 PDF \u4ed8\u6b3e\u51ed\u8bc1\u5df2\u51c6\u5907\u5c31\u7eea\uff01'
+          ),
+          'success'
+        );
         return;
       }
 
@@ -680,7 +702,7 @@ export const UpgradeVipModal: React.FC = () => {
       <input
         ref={proofGalleryInputRef}
         type="file"
-        accept="image/jpeg,image/jpg,image/png"
+        accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf,.pdf"
         onChange={handleSelectPaymentProofFile}
         className="hidden"
       />
@@ -1425,11 +1447,17 @@ export const UpgradeVipModal: React.FC = () => {
 
                 {paymentProofDraft && (
                   <div className="flex items-center gap-2 p-1.5 rounded-xl bg-emerald-50/80 dark:bg-slate-900/90 border border-emerald-300 dark:border-emerald-700/60 animate-fade-in">
-                    <img
-                      src={paymentProofDraft.dataUrl}
-                      alt="Selected Payment Proof Preview"
-                      className="w-10 h-10 object-cover rounded-lg bg-white border border-slate-200 dark:border-slate-800 shrink-0"
-                    />
+                    {paymentProofDraft.mimeType === 'application/pdf' ? (
+                      <div className="w-10 h-10 rounded-lg bg-rose-600 text-white font-extrabold text-[10px] flex items-center justify-center shrink-0">
+                        PDF
+                      </div>
+                    ) : (
+                      <img
+                        src={paymentProofDraft.dataUrl}
+                        alt="Selected Payment Proof Preview"
+                        className="w-10 h-10 object-cover rounded-lg bg-white border border-slate-200 dark:border-slate-800 shrink-0"
+                      />
+                    )}
                     <span className="flex-1 min-w-0 text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                       <span className="truncate">{paymentProofDraft.fileName}</span>

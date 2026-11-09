@@ -1,9 +1,13 @@
 /**
- * Matches pending VIP payments against a bank STATEMENT exported by the admin (CSV / Excel from the ABA account).
+ * Matches pending VIP payments against a bank STATEMENT exported by the admin (CSV / Excel from the ABA account)
+ * AND against the centralized Used ABA Transaction database (`usedTrxKeys`).
  * Everything here is pure and runs on the admin's own device - the statement never leaves it.
  *
- * A pending payment is "matched" only when ONE statement row contains the payment's Trx ID AND an incoming amount equal to the
- * expected price. The admin still presses Approve (single or bulk) - this only does the tedious searching.
+ * A pending payment is "matched" only when:
+ *   1. It has a genuine ABA Trx ID (not an app-generated placeholder)
+ *   2. That Trx ID has NEVER been used before (neither in historical/centralized DB nor duplicated in pending)
+ *   3. The receipt is not flagged as modified/fake or incomplete payment status
+ *   4. ONE unused statement row contains the payment's Trx ID AND an incoming credit amount equal to the expected price.
  */
 
 export interface PendingPayment {
@@ -17,6 +21,9 @@ export interface PendingPayment {
   shopId?: string;
   shopName?: string;
   isShopPlan?: boolean;
+  receiptDate?: string;
+  paymentStatus?: string;
+  isModifiedOrFake?: boolean;
 }
 
 export interface StatementEntry {
@@ -36,7 +43,14 @@ export interface StatementEntry {
   debitAmounts?: number[];
 }
 
-export type MatchStatus = 'matched' | 'amount_mismatch' | 'not_credit' | 'not_found' | 'no_trx_id' | 'duplicate_trx' | 'row_already_used';
+export type MatchStatus =
+  | 'matched'
+  | 'amount_mismatch'
+  | 'not_credit'
+  | 'not_found'
+  | 'no_trx_id'
+  | 'duplicate_trx'
+  | 'row_already_used';
 
 export interface MatchResult {
   payment: PendingPayment;
@@ -148,12 +162,32 @@ export function normalizeRows(rows: string[][]): StatementEntry[] {
   return out;
 }
 
+export function normalizeTrxKey(v: unknown): string {
+  return normalizeTrx(typeof v === "string" ? v : "");
+}
+
 export function normalizeTrx(v: string): string {
-  return String(v || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+  const raw = String(v || '').trim();
+  if (!raw || /^ABA-KHQR-/i.test(raw) || /^ADMIN-VIP-/i.test(raw) || /^ABA-STORE-/i.test(raw) || /^AUTO/i.test(raw)) {
+    return '';
+  }
+  return raw.replace(/[^0-9A-Za-z]/g, '').toUpperCase();
 }
 
 // ------------------------------------------------------------------ matching
-export function matchPayments(payments: PendingPayment[], entries: StatementEntry[]): MatchResult[] {
+export function matchPayments(
+  payments: PendingPayment[],
+  entries: StatementEntry[],
+  usedTrxKeys?: Iterable<string>
+): MatchResult[] {
+  const alreadyUsedSet = new Set<string>();
+  if (usedTrxKeys) {
+    for (const k of usedTrxKeys) {
+      const norm = normalizeTrx(k);
+      if (norm.length >= 6) alreadyUsedSet.add(norm);
+    }
+  }
+
   // Trx IDs shared by several pending payments can never be auto-matched (one transfer can fund one VIP only)
   const trxCount = new Map<string, number>();
   for (const p of payments) {
@@ -167,6 +201,24 @@ export function matchPayments(payments: PendingPayment[], entries: StatementEntr
     const key = normalizeTrx(payment.trxId);
     if (key.length < 8) {
       results.push({ payment, status: 'no_trx_id', detail: 'No usable Trx ID on this payment - check the statement manually.' });
+      continue;
+    }
+    if (payment.isModifiedOrFake === true || payment.paymentStatus === 'pending' || payment.paymentStatus === 'failed') {
+      results.push({
+        payment,
+        status: 'duplicate_trx',
+        detail: payment.isModifiedOrFake
+          ? 'Receipt flagged as modified/fake - approval blocked.'
+          : `Payment status is "${payment.paymentStatus}" (not completed) - approval blocked.`,
+      });
+      continue;
+    }
+    if (alreadyUsedSet.has(key)) {
+      results.push({
+        payment,
+        status: 'duplicate_trx',
+        detail: 'Already used in centralized database (even across different accounts) - one ABA transaction can only activate/renew VIP once.',
+      });
       continue;
     }
     if ((trxCount.get(key) || 0) > 1) {
@@ -199,7 +251,12 @@ export function matchPayments(payments: PendingPayment[], entries: StatementEntr
       results.push({ payment, status: 'not_credit', entry: debit, detail: 'Amount matches but the row looks like an outgoing (debit) transfer.' });
       continue;
     }
-    results.push({ payment, status: 'amount_mismatch', entry: free[0], detail: `Trx ID found but no row amount equals $${want.toFixed(2)} (statement shows ${free[0].amounts.map((a) => a.toFixed(2)).join(', ') || 'no amount'}).` });
+    results.push({
+      payment,
+      status: 'amount_mismatch',
+      entry: free[0],
+      detail: `Trx ID found but no row amount equals $${want.toFixed(2)} (statement shows ${free[0].amounts.map((a) => a.toFixed(2)).join(', ') || 'no amount'}).`,
+    });
   }
   return results;
 }

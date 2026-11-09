@@ -32,6 +32,9 @@ interface ExtractedReceiptData {
   recipientAccount?: string;
   transactionDate?: string;
   senderName?: string;
+  paymentStatus?: 'completed' | 'pending' | 'failed' | 'unknown';
+  isModifiedOrFake?: boolean;
+  tamperReason?: string;
   rawOcrText?: string;
   extractionSource: 'gemini_vision_and_ocr' | 'ocr_deterministic' | 'gemini_vision' | 'none';
 }
@@ -299,7 +302,7 @@ async function extractReceiptViaGeminiVision(
       (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_GEMINI_API_KEY ||
       '';
     // The key may legitimately be empty on the device when the secure `food-ai` Edge Function holds it.
-    if (!receiptDataUrl.startsWith('data:image/')) {
+    if (!receiptDataUrl.startsWith('data:image/') && !receiptDataUrl.startsWith('data:application/pdf')) {
       return null;
     }
 
@@ -307,7 +310,7 @@ async function extractReceiptViaGeminiVision(
     if (commaIdx === -1) return null;
     const header = receiptDataUrl.slice(0, commaIdx);
     const base64Data = receiptDataUrl.slice(commaIdx + 1);
-    const mimeMatch = header.match(/data:(image\/[a-zA-Z0-9+.-]+);base64/);
+    const mimeMatch = header.match(/data:((?:image\/[a-zA-Z0-9+.-]+)|application\/pdf);base64/);
     const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
 
     const prompt = `Analyze this Cambodian ABA Bank / KHQR payment receipt image and return ONLY a JSON object with these exact keys:
@@ -319,7 +322,10 @@ async function extractReceiptViaGeminiVision(
   "recipientName": string or null (the recipient account name at the top of the ABA receipt, e.g. "CHEA KIMSENG" or "SONLEAK ROUERN"),
   "recipientAccount": string or null (the "To account" number, e.g. "095 245 959" or "010 339 036"),
   "transactionDate": string or null (the "Transaction date" printed on the receipt, e.g. "Oct 23, 2025 06:31 PM"),
-  "senderName": string or null (the "From" name on the receipt)
+  "senderName": string or null (the "From" name on the receipt),
+  "paymentStatus": "completed" | "pending" | "failed" | "unknown",
+  "isModifiedOrFake": boolean,
+  "tamperReason": string or null
 }`;
 
     const candidateModels = [
@@ -425,6 +431,9 @@ async function extractReceiptViaGeminiVision(
       recipientAccount: parsed.recipientAccount ? String(parsed.recipientAccount).trim() : undefined,
       transactionDate: parsed.transactionDate ? String(parsed.transactionDate).trim() : undefined,
       senderName: parsed.senderName ? String(parsed.senderName).trim() : undefined,
+      paymentStatus: ['completed', 'pending', 'failed', 'unknown'].includes(String(parsed.paymentStatus || '').toLowerCase()) ? (String(parsed.paymentStatus).toLowerCase() as 'completed' | 'pending' | 'failed' | 'unknown') : 'completed',
+      isModifiedOrFake: Boolean(parsed.isModifiedOrFake),
+      tamperReason: parsed.tamperReason ? String(parsed.tamperReason).trim() : undefined,
     };
   } catch (err) {
     console.warn('Gemini Vision receipt extraction fallback:', err);
@@ -512,14 +521,14 @@ export async function verifyAbaPaymentAndReceipt(params: {
     extractionSource: 'none',
   };
 
-  if (receiptDataUrl && receiptDataUrl.startsWith('data:image/')) {
+  if (receiptDataUrl && (receiptDataUrl.startsWith('data:image/') || receiptDataUrl.startsWith('data:application/pdf'))) {
     const geminiRes = await extractReceiptViaGeminiVision(receiptDataUrl);
     const needsFallbackOcr =
       !geminiRes ||
       !geminiRes.trxId ||
       geminiRes.amountUsd === undefined ||
       (!geminiRes.recipientName && !geminiRes.recipientAccount);
-    const ocrRes: Partial<ExtractedReceiptData> = needsFallbackOcr
+    const ocrRes: Partial<ExtractedReceiptData> = (needsFallbackOcr && receiptDataUrl.startsWith('data:image/'))
       ? await extractReceiptViaOcr(receiptDataUrl)
       : {};
 
@@ -533,6 +542,9 @@ export async function verifyAbaPaymentAndReceipt(params: {
       recipientAccount: geminiRes?.recipientAccount || ocrRes?.recipientAccount,
       transactionDate: geminiRes?.transactionDate || ocrRes?.transactionDate,
       senderName: geminiRes?.senderName || ocrRes?.senderName,
+      paymentStatus: geminiRes?.paymentStatus || 'completed',
+      isModifiedOrFake: Boolean(geminiRes?.isModifiedOrFake),
+      tamperReason: geminiRes?.tamperReason,
       rawOcrText: ocrRes?.rawOcrText,
       extractionSource:
         geminiRes && ocrRes?.rawOcrText
@@ -662,16 +674,7 @@ export async function verifyAbaPaymentAndReceipt(params: {
   // fall back to a deterministic receipt reference from the image fingerprint + timestamp.
   // ============================================================================
   const imgFingerprint = receiptDataUrl ? computeReceiptImageFingerprint(receiptDataUrl) : '';
-  if (
-    !extracted.trxId &&
-    extracted.isAbaReceipt &&
-    recipientMatched &&
-    amountMatched &&
-    datePassed &&
-    imgFingerprint
-  ) {
-    extracted.trxId = rawUserRef || `ABA-${imgFingerprint.slice(5, 13)}`;
-  }
+  // Strict Rule: Never invent a synthetic Trx ID from image fingerprint; require a real ABA Trx ID.
 
   const resolvedTrxId = (extracted.trxId || cleanUserTrxId || '').trim();
   const isValidAbaTrxFormat =
@@ -717,18 +720,23 @@ export async function verifyAbaPaymentAndReceipt(params: {
         return typeof res === 'boolean' ? res : Boolean(res?.isDuplicate);
       })()
     : false;
-  const dupInTxns = resolvedTrxId
-    ? existingTransactions.some(
-        t =>
-          t.status === 'verified' &&
-          t.transactionRef &&
-          t.transactionRef.trim().toUpperCase() === resolvedTrxId.toUpperCase()
-      )
+  const normResolved = resolvedTrxId.replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+  const dupInTxns = normResolved.length >= 6
+    ? existingTransactions.some(t => {
+        if (!t) return false;
+        const tRef = (t.transactionRef || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+        const tAiRef = (t.aiVerificationReport?.extractedReceipt?.trxId || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+        const matchesTrx = (tRef && tRef === normResolved) || (tAiRef && tAiRef === normResolved);
+        if (!matchesTrx) return false;
+        return t.status === 'verified' || (t.status === 'pending_verification' && t.userId && userId && t.userId !== userId);
+      })
     : false;
 
   const dupReceiptImg = isReceiptFingerprintUsed(imgFingerprint, userId);
+  const paymentStatusOk = extracted.paymentStatus !== 'pending' && extracted.paymentStatus !== 'failed';
+  const notModifiedOrFake = extracted.isModifiedOrFake !== true;
 
-  const antiReplayPassed = !isDupInLedger && !dupInTxns && !dupReceiptImg.used;
+  const antiReplayPassed = !isDupInLedger && !dupInTxns && !dupReceiptImg.used && paymentStatusOk && notModifiedOrFake;
 
   const antiReplayCheck: AbaVerificationCheckItem = {
     passed: antiReplayPassed,

@@ -107,19 +107,17 @@ BEGIN
   END;
   IF public.kft_admin_token_ok(v_tok) THEN RETURN NEW; END IF;
 
-  -- Legitimate 1-time 7-Day Consumer Free Trial (bounded <= 8 days, never previously activated on this user record)
+  -- Legitimate 1-time 7-Day Consumer Free Trial (bounded <= 8 days, never previously activated, AND verified in server kft_trial_promo_claims ledger)
   is_trial_7d := NOT slots_up
              AND (coalesce(new_p->>'vipPlanType', '') = 'trial_7d' OR coalesce(new_p->>'activeConsumerPlanId', '') = 'trial_7d')
              AND NOT coalesce((old_p->>'freeTrialActivated')::boolean, false)
-             AND new_exp <= now() + interval '8 days';
+             AND new_exp <= now() + interval '8 days'
+             AND EXISTS (
+               SELECT 1 FROM public.kft_trial_promo_claims c
+               WHERE c.claim_type = 'trial_7d'
+                 AND c.user_id = coalesce(new_p->>'id', substring(NEW.key FROM 10))
+             );
   IF is_trial_7d THEN RETURN NEW; END IF;
-
-  -- Legitimate 1-time 3-Day Food Check-in Reward (bounded <= 4 days from current expiry/now, never previously claimed)
-  is_reward := NOT slots_up
-           AND (old_p IS NULL OR (old_p->>'foodCheckInRewardAt') IS NULL)
-           AND (new_p->>'foodCheckInRewardAt') IS NOT NULL
-           AND new_exp <= greatest(coalesce(old_exp, now()), now()) + interval '4 days';
-  IF is_reward THEN RETURN NEW; END IF;
 
   PERFORM public.kft_log_security_event(
     'vip_grant_without_server',
@@ -157,16 +155,19 @@ BEGIN
 END;
 $$;
 
--- 3. Add Anti-Clone / Anti-Repackage Guard trigger on kft_app_kv_store
+-- 3. Add Anti-Clone / Anti-Repackage & Per-Device Account Spam Guard trigger on kft_app_kv_store
 CREATE OR REPLACE FUNCTION public.kft_clone_guard()
 RETURNS trigger
 LANGUAGE plpgsql
 AS $$
 DECLARE
-  hdrs     text := current_setting('request.headers', true);
-  v_key    text := CASE WHEN TG_OP = 'DELETE' THEN OLD.key ELSE NEW.key END;
-  v_app_id text;
-  v_sig    text;
+  hdrs        text := current_setting('request.headers', true);
+  v_key       text := CASE WHEN TG_OP = 'DELETE' THEN OLD.key ELSE NEW.key END;
+  v_app_id    text;
+  v_sig       text;
+  v_tok       text;
+  v_dev_hash  text;
+  v_dev_count integer := 0;
 BEGIN
   IF hdrs IS NULL OR hdrs = '' OR current_user IN ('postgres', 'supabase_admin', 'service_role') THEN
     IF TG_OP = 'DELETE' THEN RETURN OLD; END IF;
@@ -177,9 +178,11 @@ BEGIN
     BEGIN
       v_app_id := (hdrs::json) ->> 'x-kft-app-id';
       v_sig    := (hdrs::json) ->> 'x-kft-app-sig';
+      v_tok    := (hdrs::json) ->> 'x-kft-admin-token';
     EXCEPTION WHEN others THEN
       v_app_id := NULL;
       v_sig    := NULL;
+      v_tok    := NULL;
     END;
 
     IF v_sig = 'TAMPERED_CLONE' OR (v_app_id IS NOT NULL AND v_app_id <> '' AND v_app_id <> 'com.khmerfood.tourism') THEN
@@ -191,6 +194,30 @@ BEGIN
       );
       RAISE EXCEPTION 'KFT_CLONE_BLOCKED: unauthorized modified or repackaged application (% / %)', coalesce(v_app_id, 'unknown'), coalesce(v_sig, 'none')
         USING ERRCODE = 'P0001';
+    END IF;
+
+    -- Server-side Per-Device Account Cap (max 2 accounts per physical device hash)
+    IF TG_OP = 'INSERT' AND v_key LIKE 'kft_user_%' AND NOT public.kft_admin_token_ok(v_tok) THEN
+      v_dev_hash := coalesce(NEW.payload ->> 'registeredDeviceHash', '');
+      IF length(v_dev_hash) >= 16 THEN
+        SELECT count(*)
+          INTO v_dev_count
+          FROM public.kft_app_kv_store
+         WHERE key LIKE 'kft_user_%'
+           AND key <> v_key
+           AND (payload ->> 'registeredDeviceHash') = v_dev_hash;
+
+        IF v_dev_count >= 2 THEN
+          PERFORM public.kft_log_security_event(
+            'device_account_spam_blocked',
+            'on',
+            v_key,
+            jsonb_build_object('device_hash', v_dev_hash, 'existing_count', v_dev_count)
+          );
+          RAISE EXCEPTION 'KFT_DEVICE_LIMIT: maximum 2 accounts allowed per device'
+            USING ERRCODE = 'P0001';
+        END IF;
+      END IF;
     END IF;
   END IF;
 

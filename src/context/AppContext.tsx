@@ -1,6 +1,6 @@
 import { verifyAppCloneIntegrity } from '../utils/appCloneIntegrityGuard';
-import { verifyVipPurchaseOnServer, claimConsumerTrialOnServer } from '../services/vipPurchaseClient';
-import { getDeviceHashForTrialOrPromoClaim } from '../services/deviceIdentityService';
+import { verifyVipPurchaseOnServer, claimConsumerTrialOnServer, fetchCentralizedPaymentRegistryAndAudit, adminApproveAndLockTransactionOnServer, adminRejectTransactionOnServer, type UsedAbaTransactionRecord, type PaymentAuditLogRecord } from '../services/vipPurchaseClient';
+import { getDeviceHashForTrialOrPromoClaim, checkDeviceAccountRegistrationEligibility, recordDeviceAccountRegistration } from '../services/deviceIdentityService';
 import {
   syncTrialWinbackNotifications,
   cancelTrialWinbackNotifications,
@@ -82,7 +82,7 @@ import {
 } from '../data/seedData';
 import { loadExtendedDestinationsAndHotels } from '../data/seedDestinations';
 import { hashPassword, verifyPassword } from '../utils/crypto';
-import { normalizeCambodiaPhone, getCanonicalPhoneDigits, isDisposableEmailAddress, computeIdentityClaimHashes } from '../utils/identityNormalize';
+import { normalizeCambodiaPhone, validateCambodiaPhoneForRegistration, normalizeEmailForIdentity, getCanonicalPhoneDigits, isDisposableEmailAddress, computeIdentityClaimHashes } from '../utils/identityNormalize';
 import { recordMeaningfulAction } from '../utils/engagement';
 import {
   getAdminAvatarUrl,
@@ -252,6 +252,9 @@ interface AppContextType {
   transactions: RegistrationTransaction[];
   addRegistrationTransaction: (txn: Omit<RegistrationTransaction, 'id' | 'createdAt' | 'status'>) => RegistrationTransaction;
   verifyTransaction: (txnId: string) => void;
+  centralizedUsedTrxRecords?: UsedAbaTransactionRecord[];
+  centralizedPaymentAuditLogs?: PaymentAuditLogRecord[];
+  refreshCentralizedPaymentRegistry?: () => Promise<void>;
   rejectTransaction: (txnId: string, reason?: string) => void;
   requestMorePaymentInfo: (txnId: string, reason?: string) => void;
   deleteTransactions: (txnIds: string[]) => { success: boolean; deletedCount: number };
@@ -8193,6 +8196,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
     const isPhone = /^[0-9+ ]{7,15}$/.test(cleanId);
+    if (isPhone || (phone && phone.trim().length > 0)) {
+      const phoneToValidate = isPhone ? cleanId : String(phone || '').trim();
+      const phoneCheck = validateCambodiaPhoneForRegistration(phoneToValidate);
+      if (!phoneCheck.valid) {
+        showToast((language === 'km' ? phoneCheck.messageKh : phoneCheck.messageEn) || 'Invalid phone number', 'warning');
+        return false;
+      }
+    }
     if (pendingVipUpgradeAfterAuthRef.current.active && (isPhone || !hasAuthenticatedEmailAccount({ email: cleanId }))) {
       showToast(
         tr(
@@ -8293,6 +8304,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       lastLoginAt: nowIso,
       lastActiveAt: nowIso,
     };
+    recordDeviceAccountRegistration(newUser.phone || newUser.email || newUser.id).catch(() => {});
     setUsers(prev => {
       const next = deduplicateAndNormalizeUsers([...prev, newUser], deletedUsers);
       latestSyncStateRef.current.users = next;
@@ -8316,17 +8328,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     role?: UserRole;
     restaurantName?: string;
   }): Promise<{ ok: boolean; error?: string }> => {
-    const canonicalPhone = normalizeCambodiaPhone(params.phone);
-    if (!canonicalPhone) {
-      const msg = tr(
-        language,
-        'សូមបញ្ចូលលេខទូរស័ព្ទឱ្យបានត្រឹមត្រូវ (ឧ. 012 345 678)',
-        'Please enter a valid phone number (e.g. 012 345 678)',
-        '请输入有效的手机号码（例如 012 345 678）'
-      );
+    const phoneCheck = validateCambodiaPhoneForRegistration(params.phone);
+    if (!phoneCheck.valid || !phoneCheck.canonicalPhone) {
+      const msg = (language === 'km' ? phoneCheck.messageKh : phoneCheck.messageEn) || 'Invalid phone number';
       showToast(msg, 'warning');
       return { ok: false, error: msg };
     }
+    const canonicalPhone = phoneCheck.canonicalPhone;
     const cleanPass = String(params.password || '').trim();
     if (cleanPass.length < 6) {
       const msg = tr(
@@ -8388,6 +8396,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
+    let registeredDeviceHash: string | undefined = existing?.registeredDeviceHash;
+    if (!existing) {
+      const devElig = await checkDeviceAccountRegistrationEligibility({
+        candidateAccountKey: canonicalPhone,
+        existingUsers: latestSyncStateRef.current.users || users,
+      });
+      if (!devElig.allowed) {
+        const msg = (language === 'km' ? devElig.messageKh : devElig.messageEn) || 'Device account limit reached';
+        showToast(msg, 'warning');
+        return { ok: false, error: msg };
+      }
+      registeredDeviceHash = devElig.deviceHash || undefined;
+      await recordDeviceAccountRegistration(canonicalPhone, devElig.deviceHash);
+    }
+
     const pwHash =
       existing?.passwordHash && existing.passwordHash.indexOf('pbkdf2') === 0
         ? existing.passwordHash
@@ -8425,6 +8448,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           registeredAtIso: nowIso,
           lastLoginAt: nowIso,
           lastActiveAt: nowIso,
+          registeredDeviceHash,
         };
 
     setUsers((prev) => {
@@ -12033,6 +12057,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return newTxn;
   };
 
+  const [centralizedUsedTrxRecords, setCentralizedUsedTrxRecords] = useState<UsedAbaTransactionRecord[]>([]);
+  const [centralizedPaymentAuditLogs, setCentralizedPaymentAuditLogs] = useState<PaymentAuditLogRecord[]>([]);
+
+  const refreshCentralizedPaymentRegistry = useCallback(async () => {
+    if (!currentUser || currentUser.role !== 'admin') return;
+    const res = await fetchCentralizedPaymentRegistryAndAudit();
+    if (res.ok) {
+      setCentralizedUsedTrxRecords(res.usedTransactions);
+      setCentralizedPaymentAuditLogs(res.auditLogs);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser?.role === 'admin') {
+      refreshCentralizedPaymentRegistry().catch(() => {});
+    }
+  }, [currentUser?.role, refreshCentralizedPaymentRegistry]);
+
   const verifyTransaction = (txnId: string) => {
     // Security Safeguard: Only authenticated Administrator can approve payments
     if (!currentUser || currentUser.role !== 'admin') {
@@ -12058,6 +12100,93 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       return;
     }
+
+    // Strict Guard A: Block modified, fake, or explicitly mismatched receipts from being approved
+    if (matchedTxn.aiVerificationReport?.status === 'rejected_mismatch') {
+      showToast(
+        language === 'km'
+          ? '\u26d4 \u1794\u178a\u17b7\u179f\u17c1\u1792\u1780\u17b6\u179a\u17a2\u1793\u17bb\u1798\u17d0\u178f\u17d6 \u179c\u17b7\u1780\u17d2\u1780\u1799\u1794\u178f\u17d2\u179a\u1793\u17c1\u17c7\u1798\u17b7\u1793\u1787\u17b6\u1794\u17cb\u1780\u17b6\u179a\u1795\u17d2\u1791\u17c0\u1784\u1795\u17d2\u1791\u17b6\u178f\u17cb (Rejected Mismatch)!'
+          : '\u26d4 Approval Blocked: Receipt failed verification checks (modified, fake, old, duplicate, or mismatched)!',
+        'warning'
+      );
+      return;
+    }
+
+    // Strict Guard B: Extract and require a genuine ABA Transaction ID (never approve placeholder refs)
+    const rawCandidateTrx = (
+      matchedTxn.aiVerificationReport?.extractedReceipt?.trxId ||
+      matchedTxn.transactionRef ||
+      ''
+    ).trim();
+    const normTrxKey = /^ABA-KHQR-|^ADMIN-VIP-|^ABA-STORE-|^AUTO/i.test(rawCandidateTrx)
+      ? ''
+      : rawCandidateTrx.replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+
+    if (!normTrxKey || normTrxKey.length < 8) {
+      showToast(
+        language === 'km'
+          ? '\u26d4 \u1798\u17b7\u1793\u17a2\u17b6\u1785\u17a2\u1793\u17bb\u1798\u17d0\u178f\u1794\u17b6\u1793\u1791\u17c1\u17d6 \u1782\u17d2\u1798\u17b6\u1793\u179b\u17c1\u1781\u1794\u17d2\u179a\u178f\u17b7\u1794\u178f\u17d2\u178f\u17b7\u1780\u17b6\u179a ABA \u1796\u17b7\u178f\u1794\u17d2\u179a\u17b6\u1780\u178a (Trx. ID)!'
+          : '\u26d4 Approval Blocked: Missing a valid ABA Transaction ID (Trx. ID)! Only verified transactions with a genuine ABA Trx. ID can be approved.',
+        'warning'
+      );
+      return;
+    }
+
+    // Strict Guard C: Reject if this ABA Transaction ID has ALREADY been used (even across different accounts)
+    const usedInHistoricalTxns = transactions.find(t => {
+      if (!t || t.id === txnId || t.status !== 'verified') return false;
+      const tRef = (t.transactionRef || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+      const tAiRef = (t.aiVerificationReport?.extractedReceipt?.trxId || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+      return tRef === normTrxKey || tAiRef === normTrxKey;
+    });
+    const usedInCentralDb = centralizedUsedTrxRecords.find(
+      u => (u.trx_key || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase() === normTrxKey
+    );
+    const usedInLocalLedger = checkDuplicateTransaction(normTrxKey);
+
+    if (usedInHistoricalTxns || usedInCentralDb || usedInLocalLedger) {
+      const priorOwner = usedInCentralDb?.user_email || usedInHistoricalTxns?.userEmail || usedInCentralDb?.user_id || usedInHistoricalTxns?.userId || 'other_account';
+      try {
+        const rawLogs = localStorage.getItem('kft_admin_audit_logs_v1');
+        const logs = rawLogs ? JSON.parse(rawLogs) : [];
+        logs.unshift({
+          id: `audit_dup_block_${Date.now()}`,
+          action: 'BLOCKED_DUPLICATE_TRX_APPROVAL',
+          txnId,
+          transactionRef: normTrxKey,
+          targetUserId: matchedTxn.userId || matchedTxn.ownerId,
+          priorOwner,
+          amountUsd: matchedTxn.amountUsd,
+          adminId: currentUser.id,
+          adminName: currentUser.name || 'Admin',
+          timestamp: new Date().toISOString(),
+        });
+        localStorage.setItem('kft_admin_audit_logs_v1', JSON.stringify(logs.slice(0, 200)));
+      } catch {}
+      showToast(
+        language === 'km'
+          ? `\u26d4 \u1794\u178a\u17b7\u179f\u17c1\u1792\u1780\u17b6\u179a\u17a2\u1793\u17bb\u1798\u17d0\u178f\u17d6 \u179b\u17c1\u1781\u1794\u17d2\u179a\u178f\u17b7\u1794\u178f\u17d2\u178f\u17b7\u1780\u17b6\u179a ABA (${normTrxKey}) \u178f\u17d2\u179a\u17bc\u179c\u1794\u17b6\u1793\u1794\u17d2\u179a\u17be\u1794\u17d2\u179a\u17b6\u179f\u17cb\u179a\u17bd\u1785\u1798\u17d2\u178f\u1784\u17a0\u17be\u1799\u178a\u17c4\u1799 (${priorOwner})!`
+          : `\u26d4 Approval Blocked: ABA Transaction ID (${normTrxKey}) has ALREADY been used by (${priorOwner})! One ABA transaction can only activate or renew VIP once.`,
+        'warning'
+      );
+      return;
+    }
+
+    // Lock the verified ABA Transaction ID in the centralized server registry + audit log
+    adminApproveAndLockTransactionOnServer({
+      txnId,
+      trxId: normTrxKey,
+      targetUserId: matchedTxn.userId || matchedTxn.ownerId || 'unknown_user',
+      targetEmail: matchedTxn.userEmail,
+      adminActor: currentUser.email || currentUser.name || 'admin',
+      verifiedUsd: matchedTxn.amountUsd || 0,
+      durationDays: matchedTxn.durationDays || 30,
+      planId: matchedTxn.planId,
+      transactionDate: matchedTxn.aiVerificationReport?.extractedReceipt?.transactionDate || matchedTxn.createdAt,
+      statementMatched: true,
+    }).then(() => {
+      refreshCentralizedPaymentRegistry().catch(() => {});
+    }).catch(() => {});
 
     const targetRestId = matchedTxn.restaurantId || '';
     const targetUserId = matchedTxn.userId || matchedTxn.ownerId || '';
@@ -12352,15 +12481,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       appSettings
     );
 
-    if (matchedTxn.transactionRef) {
-      recordVerifiedTransaction(matchedTxn.transactionRef);
-    }
+    recordVerifiedTransaction(normTrxKey);
 
     setTransactions(prev => {
       const nextTxns = prev.map(t => {
         if (t.id !== txnId) return t;
         return {
           ...t,
+          transactionRef: normTrxKey,
           userId: matchedUserObj?.id || t.userId || targetUserId,
           userEmail: matchedUserObj?.email || t.userEmail,
           durationDays,
@@ -12492,6 +12620,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const targetUserId = matchedTxn.userId || '';
     const rejectionReason = reason || 'ការទូទាត់មិនអាចផ្ទៀងផ្ទាត់បានជាមួយរបាយការណ៍ធនាគារ (Transaction could not be verified on bank statement).';
     const adminIdentity = currentUser.name || 'Chea Savuth (Admin)';
+    adminRejectTransactionOnServer({
+      txnId,
+      trxId: matchedTxn.aiVerificationReport?.extractedReceipt?.trxId || matchedTxn.transactionRef,
+      targetUserId: matchedTxn.userId || matchedTxn.ownerId || 'unknown_user',
+      targetEmail: matchedTxn.userEmail,
+      adminActor: currentUser.email || adminIdentity,
+      verifiedUsd: matchedTxn.amountUsd || 0,
+      durationDays: matchedTxn.durationDays || 30,
+      planId: matchedTxn.planId,
+      reason: rejectionReason,
+    }).then(() => refreshCentralizedPaymentRegistry().catch(() => {})).catch(() => {});
 
     setTransactions(prev => prev.map(t => {
       if (t.id !== txnId) return t;
@@ -13172,6 +13311,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       redirectToEmailLoginForVipUpgrade(false);
       return { success: false, error: 'Authentication required' };
     }
+    if (currentUser.phone || currentUser.authProvider === 'phone' || (currentUser.email && currentUser.email.endsWith('@phone.kh'))) {
+      const candidatePhone = currentUser.phone || (currentUser.email ? '+' + currentUser.email.replace(/^phone_|^user_|@phone\.kh$/g, '') : '');
+      const phoneCheck = validateCambodiaPhoneForRegistration(candidatePhone);
+      if (!phoneCheck.valid) {
+        const msg = (language === 'km' ? phoneCheck.messageKh : phoneCheck.messageEn) || 'Invalid phone number';
+        showToast(msg, 'warning');
+        return { success: false, error: msg };
+      }
+    }
     if (currentUser.email && isDisposableEmailAddress(currentUser.email)) {
       const msg = tr(
         language,
@@ -13206,6 +13354,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       computeIdentityClaimHashes({ email: currentUser.email, phone: currentUser.phone }),
     ]);
 
+    if (deviceInfo.deviceHash) {
+      const deviceAlreadyClaimedLocally = (latestSyncStateRef.current.users || users).some(
+        (u) =>
+          u &&
+          u.id !== currentUser.id &&
+          u.registeredDeviceHash === deviceInfo.deviceHash &&
+          Boolean(u.freeTrialActivated || u.freeTrialActivatedAt)
+      );
+      if (deviceAlreadyClaimedLocally) {
+        const msg = tr(
+          language,
+          '⚠️ ឧបករណ៍នេះធ្លាប់បានប្រើការសាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃរួចហើយនៅលើគណនីផ្សេង (កំណត់ត្រឹម ១ ដងគត់ក្នុងមួយទូរស័ព្ទ)។',
+          '⚠️ This device has already claimed the one-time 7-day free trial on another account (limited to 1 trial per device).',
+          '⚠️ 此设备已在其他账号上使用过一次性 7 天免费试用（每台设备限领 1 次）。'
+        );
+        showToast(msg, 'warning');
+        return { success: false, error: msg };
+      }
+    }
     if (!deviceInfo.deviceHash) {
       const msg = tr(
         language,
@@ -15697,6 +15864,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         transactions,
         addRegistrationTransaction,
         verifyTransaction,
+        centralizedUsedTrxRecords,
+        centralizedPaymentAuditLogs,
+        refreshCentralizedPaymentRegistry,
         rejectTransaction,
         requestMorePaymentInfo,
         deleteTransactions,

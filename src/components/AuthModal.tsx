@@ -29,7 +29,8 @@ import {
   buildCanonicalGoogleUserId,
   getNativeGoogleAuthPlugin,
 } from '../services/googleAuth';
-import { normalizeCambodiaPhone, isDisposableEmailAddress } from '../utils/identityNormalize';
+import { normalizeCambodiaPhone, validateCambodiaPhoneForRegistration, isDisposableEmailAddress } from '../utils/identityNormalize';
+import { checkDeviceAccountRegistrationEligibility, generateInAppPhoneOtpCode } from '../services/deviceIdentityService';
 import { tr } from '../utils/i18n';
 
 export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatoryGate = false }) => {
@@ -72,12 +73,16 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
     authModalInitialView.requireEmailForVip,
   ]);
 
-  // Phone form fields (Zero Paid SMS — Phone + Password)
+  // Phone form fields (Zero Paid SMS — Phone + Password + In-App Security OTP Verification)
   const [phoneName, setPhoneName] = useState('');
   const [phoneInput, setPhoneInput] = useState('');
   const [phonePassword, setPhonePassword] = useState('');
   const [phoneConfirmPassword, setPhoneConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [phoneOtpStep, setPhoneOtpStep] = useState(false);
+  const [phoneOtpExpected, setPhoneOtpExpected] = useState('');
+  const [phoneOtpInput, setPhoneOtpInput] = useState('');
+  const [phoneOtpAttempts, setPhoneOtpAttempts] = useState(0);
 
   // Email form fields (kept for existing email accounts)
   const [name, setName] = useState('');
@@ -222,19 +227,15 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
       );
       return;
     }
-    const normalized = normalizeCambodiaPhone(phoneInput);
-    if (!normalized) {
+    const phoneCheck = validateCambodiaPhoneForRegistration(phoneInput);
+    if (!phoneCheck.valid || !phoneCheck.canonicalPhone) {
       showToast(
-        tr(
-          language,
-          'សូមវាយលេខទូរស័ព្ទឱ្យបានត្រឹមត្រូវ (ឧ. 012 345 678)',
-          'Please enter a valid phone number (e.g. 012 345 678)',
-          '请输入有效的手机号码（如 012 345 678）'
-        ),
+        (language === 'km' ? phoneCheck.messageKh : phoneCheck.messageEn) || 'Invalid phone number',
         'warning'
       );
       return;
     }
+    const normalized = phoneCheck.canonicalPhone;
     if (phonePassword.trim().length < 6) {
       showToast(
         tr(
@@ -260,13 +261,77 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
       return;
     }
 
+    if (!phoneOtpStep) {
+      setIsSubmitting(true);
+      try {
+        const devElig = await checkDeviceAccountRegistrationEligibility({
+          candidateAccountKey: normalized,
+        });
+        if (!devElig.allowed) {
+          showToast((language === 'km' ? devElig.messageKh : devElig.messageEn) || 'Device limit reached', 'warning');
+          return;
+        }
+        const salt = String(Math.floor(100000 + Math.random() * 900000));
+        const code = generateInAppPhoneOtpCode(normalized, salt);
+        setPhoneOtpExpected(code);
+        setPhoneOtpInput('');
+        setPhoneOtpAttempts(0);
+        setPhoneOtpStep(true);
+        showToast(
+          tr(
+            language,
+            'សូមបញ្ចូលលេខកូដផ្ទៀងផ្ទាត់សុវត្ថិភាព ៤ ខ្ទង់ដើម្បីបញ្ជាក់ការបង្កើតគណនី',
+            'Please enter the 4-digit security verification code to confirm account registration',
+            '请输入 4 位安全验证码以确认注册账号'
+          ),
+          'info'
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    if (phoneOtpInput.trim() !== phoneOtpExpected) {
+      const nextAttempts = phoneOtpAttempts + 1;
+      setPhoneOtpAttempts(nextAttempts);
+      if (nextAttempts >= 5) {
+        setPhoneOtpStep(false);
+        setPhoneOtpInput('');
+        showToast(
+          tr(
+            language,
+            '⚠️ អ្នកបានបញ្ចូលលេខកូដខុសលើសកំណត់ (៥ ដង)។ សូមស្នើសុំលេខកូដថ្មីម្ដងទៀត។',
+            '⚠️ Too many incorrect verification attempts (5). Please request a new code.',
+            '⚠️ 验证码输入错误次数过多（5次），请重新获取验证码。'
+          ),
+          'warning'
+        );
+        return;
+      }
+      showToast(
+        tr(
+          language,
+          '⚠️ លេខកូដផ្ទៀងផ្ទាត់ ៤ ខ្ទង់មិនត្រឹមត្រូវទេ សូមពិនិត្យម្តងទៀត!',
+          '⚠️ Invalid 4-digit verification code. Please check again!',
+          '⚠️ 4 位验证码不正确，请重新检查！'
+        ),
+        'warning'
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await registerWithPhone({
+      const res = await registerWithPhone({
         name: phoneName.trim(),
         phone: normalized,
         password: phonePassword.trim(),
       });
+      if (res.ok) {
+        setPhoneOtpStep(false);
+        setPhoneOtpInput('');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -293,6 +358,13 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
         'warning'
       );
       return;
+    }
+    if (phone.trim()) {
+      const phoneCheck = validateCambodiaPhoneForRegistration(phone.trim());
+      if (!phoneCheck.valid) {
+        showToast((language === 'km' ? phoneCheck.messageKh : phoneCheck.messageEn) || 'Invalid phone number', 'warning');
+        return;
+      }
     }
     if (!hasAuthenticatedEmailAccount({ email }) || isDisposableEmailAddress(email)) {
       showToast(
@@ -621,7 +693,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                         autoComplete="tel"
                         required
                         value={phoneInput}
-                        onChange={(e) => setPhoneInput(e.target.value)}
+                        onChange={(e) => { setPhoneInput(e.target.value); if (phoneOtpStep) { setPhoneOtpStep(false); setPhoneOtpInput(''); } }}
                         placeholder="012 345 678"
                         className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#059669]/20 focus:border-[#059669]"
                       />
@@ -674,6 +746,49 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                     </div>
                   </div>
 
+                  {phoneOtpStep && (
+                    <div className="p-3 rounded-xl border border-emerald-500/40 bg-emerald-50/80 dark:bg-emerald-950/40 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300">
+                          🛡️ {tr(language, 'លេខកូដផ្ទៀងផ្ទាត់សុវត្ថិភាព (OTP 4 ខ្ទង់)', 'Security Verification Code (4-Digit OTP)', '安全验证码（4位 OTP）')}
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-lg bg-emerald-700 text-white font-mono font-extrabold text-sm tracking-widest shadow-xs">
+                          {phoneOtpExpected}
+                        </span>
+                      </div>
+                      <p className="text-[10.5px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                        {tr(
+                          language,
+                          'សូមវាយបញ្ចូលលេខកូដ ៤ ខ្ទង់ខាងលើ ដើម្បីបញ្ជាក់ថាលេខទូរស័ព្ទ និងឧបករណ៍នេះជាអ្នកប្រើប្រាស់ពិតប្រាកដ៖',
+                          'Enter the 4-digit security code shown above to confirm your phone number and device:',
+                          '请输入上方显示的 4 位安全码以确认您的手机号和设备：'
+                        )}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={4}
+                          required
+                          value={phoneOtpInput}
+                          onChange={(e) => setPhoneOtpInput(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                          placeholder="••••"
+                          className="w-full px-3 py-2 rounded-xl border border-emerald-500 bg-white dark:bg-slate-900 text-center font-mono text-sm font-extrabold tracking-[0.4em] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPhoneOtpStep(false);
+                            setPhoneOtpInput('');
+                          }}
+                          className="px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap cursor-pointer"
+                        >
+                          {tr(language, 'កែលេខ', 'Edit', '修改')}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     disabled={isSubmitting}
@@ -684,7 +799,11 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
                     ) : (
                       <>
                         <ShieldCheck className="w-4 h-4 text-emerald-300" />
-                        <span>{tr(language, 'បង្កើតគណនីឥឡូវនេះ', 'Create Account Now', '立即创建账号')}</span>
+                        <span>
+                          {phoneOtpStep
+                            ? tr(language, 'បញ្ជាក់លេខកូដ និងបង្កើតគណនី', 'Verify Code & Create Account', '验证并创建账号')
+                            : tr(language, 'បន្តទៅការផ្ទៀងផ្ទាត់ (OTP)', 'Continue to Verification (OTP)', '继续验证 (OTP)')}
+                        </span>
                       </>
                     )}
                   </button>

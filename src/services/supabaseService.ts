@@ -15,7 +15,7 @@ import { getAppAttestationHeaders, isAppCloneTampered } from '../utils/appCloneI
  */
 
 import { adminTokenHeaders, isAdminServerAuthActive, adminServerChangePin } from './adminAuthClient';
-import { getCanonicalPhoneDigits } from '../utils/identityNormalize';
+import { getCanonicalPhoneDigits, normalizeEmailForIdentity } from '../utils/identityNormalize';
 import { ensurePlacesProxyProbed, isPlacesProxyKnownAlive } from './placesProxy';
 import {
   User,
@@ -513,6 +513,7 @@ async function pushToSecondaryCloudFailover(key: string, payload: any, timeoutMs
           foodCheckInRewardAt: c.foodCheckInRewardAt,
           paidAdditionalStoreSlots: c.paidAdditionalStoreSlots,
           legacyIds: c.legacyIds,
+          registeredDeviceHash: c.registeredDeviceHash,
           integritySeal: c.integritySeal,
         };
       });
@@ -2785,6 +2786,7 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
     lastLoginAt: latestLoginAt,
     lastActiveAt: second.lastActiveAt || first.lastActiveAt || latestLoginAt,
     googleSub: second.googleSub || first.googleSub,
+    registeredDeviceHash: first.registeredDeviceHash || second.registeredDeviceHash || undefined,
     legacyIds: legacyIdSet.size > 0 ? Array.from(legacyIdSet) : undefined,
     paidAdditionalStoreSlots: Math.max(
       first.paidAdditionalStoreSlots || 0,
@@ -3131,10 +3133,12 @@ export function deduplicateAndNormalizeUsers(
       }
     }
     if (u.email) {
+      const normE = normalizeEmailForIdentity(u.email)?.canonical || u.email.toLowerCase().trim();
+      emailToCanonical.set(normE, u.id);
       emailToCanonical.set(u.email.toLowerCase().trim(), u.id);
     }
     if (u.phone) {
-      const cleanP = u.phone.replace(/[\s-+()]/g, '');
+      const cleanP = getCanonicalPhoneDigits(u.phone) || u.phone.replace(/[\s-+()]/g, '');
       if (cleanP.length >= 7) phoneToCanonical.set(cleanP, u.id);
     }
     if (u.googleSub) {
@@ -3146,7 +3150,8 @@ export function deduplicateAndNormalizeUsers(
     if (!item || (!item.id && !item.email && !item.phone) || isAccountDeleted(item)) continue;
 
     const cleanEmail = (item.email || '').trim().toLowerCase();
-    const cleanPhone = (item.phone || '').replace(/[\s-+()]/g, '');
+    const normEmailIdentity = normalizeEmailForIdentity(cleanEmail)?.canonical || cleanEmail;
+    const cleanPhone = getCanonicalPhoneDigits(item.phone) || (item.phone || '').replace(/[\s-+()]/g, '');
     if (!cleanEmail && cleanPhone.length < 7 && (!item.name || item.name === 'Member')) {
       continue;
     }
@@ -3155,6 +3160,7 @@ export function deduplicateAndNormalizeUsers(
     const existingKey =
       (canonicalMap.has(targetCanonicalId) ? targetCanonicalId : undefined) ||
       (item.id ? legacyIdToCanonical.get(item.id) : undefined) ||
+      (normEmailIdentity ? emailToCanonical.get(normEmailIdentity) : undefined) ||
       (cleanEmail ? emailToCanonical.get(cleanEmail) : undefined) ||
       (item.googleSub ? googleSubToCanonical.get(item.googleSub) : undefined) ||
       (cleanPhone.length >= 7 ? phoneToCanonical.get(cleanPhone) : undefined);

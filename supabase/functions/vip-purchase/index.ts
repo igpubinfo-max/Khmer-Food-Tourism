@@ -11,9 +11,10 @@
 //
 // Deploy:  supabase functions deploy vip-purchase --no-verify-jwt --project-ref ryvltobwuwuulazqjnza
 
+import { verifyToken } from '../_shared/admin-token.ts';
 import { geminiEndpoints, shouldTryNextEndpoint } from '../food-ai/endpoint.ts';
 import { WindowLimiter, envInt, safeUserId, userKvKey, verifyClientAppIntegrity } from '../_shared/common.ts';
-import { computeServerIdentityHashes, sanitizeHexHash } from '../_shared/identity-normalize.ts';
+import { computeServerIdentityHashes, sanitizeHexHash, validateCambodiaPhoneForRegistration } from '../_shared/identity-normalize.ts';
 import { createAbaReceiptVisionAdapter } from '../_shared/payment-adapter.ts';
 import {
   applyShopSubscriptionGrant,
@@ -21,6 +22,8 @@ import {
   applyVipGrant,
   buildReport,
   computeVipWindow,
+  isValidTrxKey,
+  normalizeTrxKey,
   resolveOfficialServerPlan,
   resolvePlan,
   type ExtractedReceipt,
@@ -28,7 +31,7 @@ import {
   type PricingDoc,
   type ReceiptDecision,
 } from '../_shared/receipt-rules.ts';
-import { background, logUsage, readUserDoc, restInsert, restPatch, restSelectRows, usageHit, writeKv } from '../_shared/supa.ts';
+import { background, getSecurityConfig, logUsage, readUserDoc, restInsert, restPatch, restSelectRows, usageHit, writeKv } from '../_shared/supa.ts';
 
 declare const Deno: {
   serve: (handler: (req: Request) => Promise<Response> | Response) => void;
@@ -37,7 +40,7 @@ declare const Deno: {
 
 const corsHeaders: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-kft-user-id, x-kft-app-id, x-kft-app-platform, x-kft-app-sig',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-kft-user-id, x-kft-admin-token, x-kft-app-id, x-kft-app-platform, x-kft-app-sig',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Expose-Headers': 'x-vip-purchase',
   'x-vip-purchase': '1',
@@ -65,7 +68,10 @@ const PROMPT = `Analyze this Cambodian ABA Bank / KHQR payment receipt image and
   "recipientName": string or null (the recipient account name shown on the receipt),
   "recipientAccount": string or null (the "To account" number),
   "transactionDate": string or null (the "Transaction date" exactly as printed, e.g. "Oct 23, 2025 06:31 PM"),
-  "senderName": string or null (the "From" name)
+  "senderName": string or null (the "From" name),
+  "paymentStatus": "completed" | "pending" | "failed" | "unknown",
+  "isModifiedOrFake": boolean (true if fonts/digits/layers look edited, photoshopped, overlaid, or fake),
+  "tamperReason": string or null (reason if isModifiedOrFake is true, otherwise null)
 }
 Read ONLY what is printed. Never guess or invent a value; use null when it is not visible.`;
 
@@ -108,6 +114,12 @@ async function extractWithGemini(apiKey: string, mime: string, b64: string): Pro
             recipientAccount: p.recipientAccount ? String(p.recipientAccount).trim() : undefined,
             transactionDate: p.transactionDate ? String(p.transactionDate).trim() : undefined,
             senderName: p.senderName ? String(p.senderName).trim() : undefined,
+            paymentStatus:
+              typeof p.paymentStatus === 'string' && ['completed', 'pending', 'failed', 'unknown'].includes(p.paymentStatus.toLowerCase())
+                ? (p.paymentStatus.toLowerCase() as 'completed' | 'pending' | 'failed' | 'unknown')
+                : 'completed',
+            isModifiedOrFake: Boolean(p.isModifiedOrFake),
+            tamperReason: p.tamperReason ? String(p.tamperReason).trim() : undefined,
           };
         }
         if (!shouldTryNextEndpoint(res.status)) break;
@@ -123,11 +135,12 @@ async function extractWithGemini(apiKey: string, mime: string, b64: string): Pro
 
 function parseDataUrl(s: unknown): { mime: string; b64: string; bytes: Uint8Array } | null {
   if (typeof s !== 'string') return null;
-  const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(s.replace(/\s+/g, ''));
+  const m = /^data:(image\/(?:jpeg|png|webp)|application\/pdf);base64,([A-Za-z0-9+/=]+)$/.exec(s.replace(/\s+/g, ''));
   if (!m) return null;
   try {
     const bin = atob(m[2]);
-    if (bin.length > MAX_IMAGE_BYTES || bin.length < 2000) return null;
+    const minBytes = m[1] === 'application/pdf' ? 400 : 2000;
+    if (bin.length > MAX_IMAGE_BYTES || bin.length < minBytes) return null;
     const bytes = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
     return { mime: m[1], b64: m[2], bytes };
@@ -192,6 +205,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
   }
 
   // 1-Time 7-Day Consumer Free Trial (Android & Web only; does not require Gemini vision)
+  if (body.action === 'get_payment_registry_and_audit') {
+    return handleAdminGetPaymentRegistryAndAudit(req, body);
+  }
+  if (body.action === 'admin_approve_transaction') {
+    return handleAdminApproveTransaction(req, body, ip);
+  }
+  if (body.action === 'admin_reject_transaction') {
+    return handleAdminRejectTransaction(req, body, ip);
+  }
   if (body.action === 'claim_trial') {
     return handleClaimTrial(body, started, ip);
   }
@@ -264,21 +286,42 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return json(200, { ok: true, decision, ...extra });
   };
 
-  // Same screenshot seen before? (anti-replay, enforced by a UNIQUE index too)
-  const seen = await restSelectRows(`kft_payment_receipts?image_hash=eq.${imageHash}&select=status,user_id&limit=1`);
-  if (seen && seen[0]) {
+  const userEmail = typeof (storedUser.email ?? body.email) === 'string' ? String(storedUser.email ?? body.email).trim() : null;
+
+  // Same screenshot or PDF seen before across ANY account? (anti-replay in both kft_payment_receipts and kft_used_aba_transactions)
+  const [seenReceipt, seenUsedImg] = await Promise.all([
+    restSelectRows(`kft_payment_receipts?image_hash=eq.${imageHash}&select=status,user_id,trx_key&limit=1`),
+    restSelectRows(`kft_used_aba_transactions?image_hash=eq.${imageHash}&select=trx_key,user_id&limit=1`),
+  ]);
+  if ((seenReceipt && seenReceipt[0]) || (seenUsedImg && seenUsedImg[0])) {
+    const prevOwner = (seenUsedImg && seenUsedImg[0]?.user_id) || (seenReceipt && seenReceipt[0]?.user_id) || null;
+    await recordPaymentAuditLog({
+      event_type: 'rejected_duplicate_image',
+      trx_key: (seenUsedImg && seenUsedImg[0]?.trx_key) || (seenReceipt && seenReceipt[0]?.trx_key) || null,
+      image_hash: imageHash,
+      user_id: userId,
+      user_email: userEmail,
+      amount_usd: plan.priceUsd,
+      plan_id: officialPlan?.planId || null,
+      duration_days: plan.days,
+      payment_status: 'duplicate_image',
+      actor: `user:${userId}`,
+      ip_address: ip,
+      details: { previousOwnerUserId: prevOwner, crossAccountAttempt: Boolean(prevOwner && prevOwner !== userId) },
+    });
     const report = buildReport({
       decision: 'rejected',
       evaluation: null,
       extracted: null,
       duplicate: true,
       nowIso,
-      noteKh: '❌ វិក្កយបត្រនេះត្រូវបានប្រើរួចហើយ',
-      noteEn: '❌ This receipt screenshot has already been used.',
+      noteKh: '❌ វិក្កយបត្រនេះត្រូវបានប្រើរួចហើយ (មិនអនុញ្ញាតឲ្យប្រើស្ទួនឡើយ)',
+      noteEn: '❌ This receipt file (screenshot/PDF) has already been used and cannot be reused.',
     });
     return finish('rejected', { report });
   }
 
+  const lastVerifiedPaymentAtMs = await findLastVerifiedPaymentMs(userId, storedUser);
   const extracted = await extractWithGemini(geminiKey, img.mime, img.b64);
   const checkOutcome = receiptAdapter.verify({
     extractedReceipt: extracted,
@@ -286,14 +329,17 @@ Deno.serve(async (req: Request): Promise<Response> => {
     expectedDays: plan.days,
     submittedTrxId: typeof body.submittedTrxId === 'string' ? body.submittedTrxId : '',
     nowMs,
+    lastVerifiedPaymentAtMs,
   });
 
   const patchPlanAndShopColumns = () => {
-    if (!officialPlan) return;
     background(
       restPatch(`kft_payment_receipts?image_hash=eq.${imageHash}`, {
-        plan_id: officialPlan.planId,
-        shop_id: shopId || null,
+        ...(officialPlan ? { plan_id: officialPlan.planId, shop_id: shopId || null } : {}),
+        user_email: userEmail,
+        payment_status: extracted?.paymentStatus || 'unknown',
+        transaction_date: extracted?.transactionDate || null,
+        is_modified_or_fake: Boolean(extracted?.isModifiedOrFake),
       })
     );
   };
@@ -309,6 +355,19 @@ Deno.serve(async (req: Request): Promise<Response> => {
       grant_info: officialPlan ? { planId: officialPlan.planId, shopId: shopId || null, category: officialPlan.category } : null,
     });
     patchPlanAndShopColumns();
+    await recordPaymentAuditLog({
+      event_type: 'pending_manual_review',
+      image_hash: imageHash,
+      user_id: userId,
+      user_email: userEmail,
+      amount_usd: plan.priceUsd,
+      plan_id: officialPlan?.planId || null,
+      duration_days: plan.days,
+      payment_status: 'ai_unavailable',
+      actor: `user:${userId}`,
+      ip_address: ip,
+      details: { reason: 'ai_unavailable', mime: img.mime },
+    });
     const report = buildReport({
       decision: 'pending',
       evaluation: null,
@@ -316,18 +375,27 @@ Deno.serve(async (req: Request): Promise<Response> => {
       duplicate: false,
       nowIso,
       noteKh: '⏳ បានទទួលវិក្កយបត្រ។ រដ្ឋបាលនឹងផ្ទៀងផ្ទាត់ និងបើកកញ្ចប់ជូនលោកអ្នក។',
-      noteEn: '⏳ Receipt received. An administrator will verify it and activate your plan.',
+      noteEn: '⏳ Receipt received. An administrator will verify it against the bank statement and activate your plan.',
     });
     return finish('pending', { report });
   }
 
   const evaluation = checkOutcome.evaluation;
 
-  // Trx ID already claimed (verified OR still pending) by another submission? One payment can fund one plan only.
   let dupTrx = false;
+  let dupOwnerUserId: string | null = null;
   if (evaluation.trxKey) {
-    const rows = await restSelectRows(`kft_payment_receipts?trx_key=eq.${encodeURIComponent(evaluation.trxKey)}&status=in.(verified,pending)&select=id&limit=1`);
-    dupTrx = Boolean(rows && rows[0]);
+    const [usedRows, receiptRows] = await Promise.all([
+      restSelectRows(`kft_used_aba_transactions?trx_key=eq.${encodeURIComponent(evaluation.trxKey)}&select=trx_key,user_id,user_email&limit=1`),
+      restSelectRows(`kft_payment_receipts?trx_key=eq.${encodeURIComponent(evaluation.trxKey)}&status=in.(verified,pending)&select=id,user_id&limit=1`),
+    ]);
+    if (usedRows && usedRows[0]) {
+      dupTrx = true;
+      dupOwnerUserId = String(usedRows[0].user_id || '');
+    } else if (receiptRows && receiptRows[0]) {
+      dupTrx = true;
+      dupOwnerUserId = String(receiptRows[0].user_id || '');
+    }
   }
   const autoApprove = Deno.env.get('VIP_AUTO_APPROVE') === 'true';
 
@@ -351,17 +419,45 @@ Deno.serve(async (req: Request): Promise<Response> => {
       trxId: evaluation.trxKey,
       ...(officialPlan ? { planId: officialPlan.planId, category: officialPlan.category, shopId: shopId || undefined } : {}),
     };
-    // reserve the receipt FIRST: the unique indexes make a double-spend impossible even under concurrent requests
-    const ins = await restInsert('kft_payment_receipts', { ...baseRow, status: 'verified', grant_info: grant });
+    const usedIns = await restInsert('kft_used_aba_transactions', {
+      trx_key: evaluation.trxKey,
+      raw_trx_id: extracted.trxId || evaluation.trxKey,
+      user_id: userId,
+      user_email: userEmail,
+      image_hash: imageHash,
+      amount_usd: plan.priceUsd,
+      plan_id: officialPlan?.planId || null,
+      duration_days: plan.days,
+      transaction_date: extracted.transactionDate || null,
+      payment_status: extracted.paymentStatus || 'completed',
+      statement_matched: false,
+      approved_by: 'ai_auto_approve',
+      used_at: nowIso,
+    });
+    const ins = usedIns.status === 409 ? usedIns : await restInsert('kft_payment_receipts', { ...baseRow, status: 'verified', grant_info: grant });
     if (ins.status === 409) {
+      await recordPaymentAuditLog({
+        event_type: 'rejected_duplicate_trx',
+        trx_key: evaluation.trxKey,
+        image_hash: imageHash,
+        user_id: userId,
+        user_email: userEmail,
+        amount_usd: extracted.amountUsd ?? plan.priceUsd,
+        plan_id: officialPlan?.planId || null,
+        duration_days: plan.days,
+        payment_status: extracted.paymentStatus || 'completed',
+        actor: `user:${userId}`,
+        ip_address: ip,
+        details: { conflict409: true },
+      });
       const report = buildReport({
         decision: 'rejected',
         evaluation,
         extracted,
         duplicate: true,
         nowIso,
-        noteKh: '❌ វិក្កយបត្រ ឬលេខប្រតិបត្តិការនេះត្រូវបានប្រើរួចហើយ',
-        noteEn: '❌ This receipt or Trx. ID has already been used.',
+        noteKh: '❌ លេខប្រតិបត្តិការ ABA នេះត្រូវបានប្រើរួចហើយ',
+        noteEn: '❌ This ABA transaction ID has already been used.',
       });
       return finish('rejected', { report });
     }
@@ -377,24 +473,40 @@ Deno.serve(async (req: Request): Promise<Response> => {
         }
       }
       if (ok) {
+        await recordPaymentAuditLog({
+          event_type: 'auto_verified',
+          trx_key: evaluation.trxKey,
+          image_hash: imageHash,
+          user_id: userId,
+          user_email: userEmail,
+          amount_usd: plan.priceUsd,
+          plan_id: officialPlan?.planId || null,
+          duration_days: plan.days,
+          payment_status: extracted.paymentStatus || 'completed',
+          actor: 'ai_auto_approve',
+          ip_address: ip,
+          details: { grant },
+        });
         const report = buildReport({
           decision: 'verified',
           evaluation,
           extracted,
           duplicate: false,
           nowIso,
-          noteKh: `✅ ផ្ទៀងផ្ទាត់ 100%៖ អ្នកទទួលត្រឹមត្រូវ ចំនួន $${plan.priceUsd.toFixed(2)} USD លេខប្រតិបត្តិការ (${evaluation.trxKey}) ហើយកញ្ចប់ត្រូវបានបើក!`,
-          noteEn: `✅ 100% verified: recipient, amount $${plan.priceUsd.toFixed(2)} USD, Trx. ID (${evaluation.trxKey}) and date. Plan activated!`,
+          noteKh: `✅ ផ្ទៀងផ្ទាត់ 100%៖ អ្នកទទួលត្រឹមត្រូវ ចំនួន ${plan.priceUsd.toFixed(2)} USD លេខប្រតិបត្តិការ (${evaluation.trxKey}) ហើយកញ្ចប់ត្រូវបានបើក!`,
+          noteEn: `✅ 100% verified: recipient, amount ${plan.priceUsd.toFixed(2)} USD, Trx. ID (${evaluation.trxKey}) and date. Plan activated!`,
         });
         return finish('verified', { report, grant });
       }
-      // the entitlement write failed: do not keep a "verified" receipt that granted nothing
       await restPatch(`kft_payment_receipts?image_hash=eq.${imageHash}`, { status: 'pending', reasons: ['grant_write_failed'] });
     }
   }
 
-  // Not a clean pass -> keep for the admin. A recipient/amount/date mismatch or a duplicate is "rejected", anything else pending.
-  const hardFail = dupTrx || (extracted.isAbaReceipt && (!evaluation.checks.recipient.passed || !evaluation.checks.amount.passed || !evaluation.checks.date.passed));
+  const hardFail =
+    dupTrx ||
+    !evaluation.notModifiedOrFake ||
+    !evaluation.paymentStatusOk ||
+    (extracted.isAbaReceipt && (!evaluation.checks.recipient.passed || !evaluation.checks.amount.passed || !evaluation.checks.date.passed || !evaluation.checks.trxId.passed));
   const decision: ReceiptDecision = hardFail ? 'rejected' : 'pending';
   const readyForAdmin = decision === 'pending' && evaluation.allPassed && !dupTrx;
   await restInsert('kft_payment_receipts', {
@@ -406,16 +518,57 @@ Deno.serve(async (req: Request): Promise<Response> => {
       : Object.entries(evaluation.checks)
           .filter(([, c]) => !c.passed)
           .map(([k]) => k)
-          .concat(dupTrx ? ['duplicate_trx'] : []),
+          .concat(dupTrx ? ['duplicate_trx'] : [])
+          .concat(!evaluation.notModifiedOrFake ? ['modified_or_fake_receipt'] : [])
+          .concat(!evaluation.paymentStatusOk ? ['payment_status_not_completed'] : []),
   });
   patchPlanAndShopColumns();
+
+  const auditEventType = dupTrx
+    ? 'rejected_duplicate_trx'
+    : !evaluation.notModifiedOrFake || !evaluation.paymentStatusOk
+      ? 'rejected_fake_or_modified'
+      : !evaluation.checks.date.passed && extracted.isAbaReceipt
+        ? 'rejected_old_receipt'
+        : decision === 'rejected'
+          ? 'rejected_mismatch'
+          : 'pending_manual_review';
+
+  await recordPaymentAuditLog({
+    event_type: auditEventType,
+    trx_key: evaluation.trxKey || null,
+    image_hash: imageHash,
+    user_id: userId,
+    user_email: userEmail,
+    amount_usd: extracted.amountUsd ?? plan.priceUsd,
+    plan_id: officialPlan?.planId || null,
+    duration_days: plan.days,
+    payment_status: extracted.paymentStatus || 'unknown',
+    actor: `user:${userId}`,
+    ip_address: ip,
+    details: {
+      decision,
+      dupTrx,
+      dupOwnerUserId,
+      crossAccountDuplicateAttempt: Boolean(dupTrx && dupOwnerUserId && dupOwnerUserId !== userId),
+      isModifiedOrFake: Boolean(extracted.isModifiedOrFake),
+      tamperReason: extracted.tamperReason || null,
+      transactionDate: extracted.transactionDate || null,
+      lastVerifiedPaymentAtMs,
+    },
+  });
+
   const failedKh = Object.values(evaluation.checks)
     .filter((c) => !c.passed)
     .map((c) => c.reasonKh)
+    .concat(evaluation.statusAndTamperReasonKh ? [evaluation.statusAndTamperReasonKh] : [])
+    .concat(dupTrx ? ['❌ លេខប្រតិបត្តិការ ABA នេះត្រូវបានប្រើរួចហើយ (មួយប្រតិបត្តិការបើក VIP បានតែម្តងគត់)'] : [])
     .join(' | ');
   const failedEn = Object.values(evaluation.checks)
     .filter((c) => !c.passed)
     .map((c) => c.reasonEn)
+    .concat(evaluation.statusAndTamperReasonEn ? [evaluation.statusAndTamperReasonEn] : [])
+    .concat(dupTrx ? ['❌ This ABA Transaction ID has already been used (one transaction can only activate/renew VIP once)'] : [])
     .join(' | ');
   const report = buildReport({
     decision,
@@ -425,13 +578,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
     nowIso,
     noteKh:
       decision === 'rejected'
-        ? `🚫 ការទូទាត់មិនត្រូវគ្នា (រង់ចាំរដ្ឋបាលពិនិត្យ)៖ ${failedKh}`
+        ? `🚫 ការផ្ទៀងផ្ទាត់បដិសេធ៖ ${failedKh}`
         : readyForAdmin
           ? '⏳ បានទទួលវិក្កយបត្រ ហើយការពិនិត្យដោយ AI ជាប់ទាំងអស់ (អ្នកទទួល ចំនួន កាលបរិច្ឆេទ លេខប្រតិបត្តិការ)។ រដ្ឋបាលនឹងផ្ទៀងផ្ទាត់ជាមួយ statement ធនាគារ ហើយបើកកញ្ចប់ជូនលោកអ្នក។'
           : '⏳ បានទទួលវិក្កយបត្រ។ រដ្ឋបាលនឹងផ្ទៀងផ្ទាត់ និងបើកកញ្ចប់ជូនលោកអ្នក។',
     noteEn:
       decision === 'rejected'
-        ? `🚫 Payment mismatch (awaiting admin review): ${failedEn}`
+        ? `🚫 Payment verification rejected: ${failedEn}`
         : readyForAdmin
           ? '⏳ Receipt received and the AI pre-check passed (recipient, amount, date, Trx. ID). An administrator will match it against the bank statement and activate your plan.'
           : '⏳ Receipt received. An administrator will verify it and activate your plan.',
@@ -553,6 +706,20 @@ async function handleClaimTrial(body: Record<string, unknown>, started: number, 
     });
   }
 
+  const candidatePhoneRaw = stored.phone ?? body.phone;
+  if (typeof candidatePhoneRaw === 'string' && candidatePhoneRaw.trim().length > 0) {
+    const phoneCheck = validateCambodiaPhoneForRegistration(candidatePhoneRaw);
+    if (!phoneCheck.valid) {
+      return json(200, {
+        ok: true,
+        decision: 'already_claimed',
+        reason: 'invalid_phone',
+        messageKh: phoneCheck.messageKh,
+        messageEn: phoneCheck.messageEn,
+      });
+    }
+  }
+
   const idInfo = await computeServerIdentityHashes({
     email: stored.email ?? body.email,
     phone: stored.phone ?? body.phone,
@@ -632,4 +799,320 @@ async function handleClaimTrial(body: Record<string, unknown>, started: number, 
     return json(500, { ok: false, error: 'WRITE_FAILED' });
   }
   return json(200, { ok: true, decision: 'trial_granted', grant });
+}
+
+
+async function recordPaymentAuditLog(entry: {
+  event_type: string;
+  txn_id?: string | null;
+  trx_key?: string | null;
+  image_hash?: string | null;
+  user_id?: string | null;
+  user_email?: string | null;
+  amount_usd?: number | null;
+  plan_id?: string | null;
+  duration_days?: number | null;
+  payment_status?: string | null;
+  actor: string;
+  ip_address?: string | null;
+  details?: Record<string, unknown> | null;
+}): Promise<void> {
+  try {
+    await restInsert('kft_payment_audit_log', {
+      event_type: entry.event_type,
+      txn_id: entry.txn_id || null,
+      trx_key: entry.trx_key || null,
+      image_hash: entry.image_hash || null,
+      user_id: entry.user_id || null,
+      user_email: entry.user_email || null,
+      amount_usd: typeof entry.amount_usd === 'number' && Number.isFinite(entry.amount_usd) ? entry.amount_usd : null,
+      plan_id: entry.plan_id || null,
+      duration_days: typeof entry.duration_days === 'number' && Number.isFinite(entry.duration_days) ? entry.duration_days : null,
+      payment_status: entry.payment_status || null,
+      actor: entry.actor || 'system',
+      ip_address: entry.ip_address || null,
+      details: entry.details || {},
+    });
+  } catch {
+    /* audit log best-effort */
+  }
+}
+
+async function findLastVerifiedPaymentMs(userId: string, storedUser: Record<string, unknown>): Promise<number | null> {
+  let latestMs = 0;
+  try {
+    const [usedRows, recRows] = await Promise.all([
+      restSelectRows(`kft_used_aba_transactions?user_id=eq.${encodeURIComponent(userId)}&order=used_at.desc&select=used_at&limit=1`),
+      restSelectRows(`kft_payment_receipts?user_id=eq.${encodeURIComponent(userId)}&status=eq.verified&order=created_at.desc&select=created_at,approved_at&limit=1`),
+    ]);
+    if (usedRows && usedRows[0]?.used_at) {
+      const ms = Date.parse(String(usedRows[0].used_at));
+      if (Number.isFinite(ms) && ms > latestMs) latestMs = ms;
+    }
+    if (recRows && recRows[0]) {
+      const raw = recRows[0].approved_at || recRows[0].created_at;
+      const ms = raw ? Date.parse(String(raw)) : NaN;
+      if (Number.isFinite(ms) && ms > latestMs) latestMs = ms;
+    }
+  } catch {
+    /* ignore */
+  }
+  if (storedUser.paymentMethod !== 'FREE_TRIAL_7D' && typeof storedUser.subscriptionStartDate === 'string') {
+    const ms = Date.parse(storedUser.subscriptionStartDate);
+    if (Number.isFinite(ms) && ms > latestMs) latestMs = ms;
+  }
+  return latestMs > 0 ? latestMs : null;
+}
+
+async function verifyAdminRequest(req: Request, bodyToken: unknown): Promise<boolean> {
+  const secret = await getSecurityConfig('admin_token_secret');
+  if (!secret || secret.length < 32) return false;
+  const tok = req.headers.get('x-kft-admin-token') || (typeof bodyToken === 'string' ? bodyToken : '');
+  const res = await verifyToken(secret, tok, 'admin');
+  return res.ok;
+}
+
+async function handleAdminGetPaymentRegistryAndAudit(req: Request, body: Record<string, unknown>): Promise<Response> {
+  if (!(await verifyAdminRequest(req, body.adminToken))) {
+    return json(401, { ok: false, error: 'ADMIN_AUTH_REQUIRED' });
+  }
+  const [usedTransactions, auditLogs, receipts] = await Promise.all([
+    restSelectRows('kft_used_aba_transactions?select=*&order=used_at.desc&limit=500'),
+    restSelectRows('kft_payment_audit_log?select=*&order=created_at.desc&limit=500'),
+    restSelectRows('kft_payment_receipts?select=id,created_at,user_id,user_email,txn_id,trx_key,image_hash,amount_usd,plan_days,status,payment_status,transaction_date,is_modified_or_fake,statement_matched,reviewed_by,approved_at&order=created_at.desc&limit=300'),
+  ]);
+  return json(200, {
+    ok: true,
+    usedTransactions: usedTransactions || [],
+    auditLogs: auditLogs || [],
+    receipts: receipts || [],
+  });
+}
+
+async function handleAdminApproveTransaction(req: Request, body: Record<string, unknown>, ip: string): Promise<Response> {
+  if (!(await verifyAdminRequest(req, body.adminToken))) {
+    return json(401, { ok: false, error: 'ADMIN_AUTH_REQUIRED' });
+  }
+  const rawTrxId = typeof body.trxId === 'string' ? body.trxId.trim() : '';
+  const trxKey = normalizeTrxKey(rawTrxId);
+  const txnId = typeof body.txnId === 'string' ? body.txnId.trim() : '';
+  const targetUserId = safeUserId(body.targetUserId) || String(body.targetUserId || 'unknown').slice(0, 80);
+  const targetEmail = typeof body.targetEmail === 'string' ? body.targetEmail.trim() : null;
+  const adminActor = typeof body.adminActor === 'string' && body.adminActor.trim() ? body.adminActor.trim().slice(0, 80) : 'admin';
+  const verifiedUsd = Number(body.verifiedUsd) || 0;
+  const durationDays = Math.max(1, Math.round(Number(body.durationDays) || 30));
+  const planId = typeof body.planId === 'string' ? body.planId.trim() : null;
+  const transactionDate = typeof body.transactionDate === 'string' ? body.transactionDate.trim() : null;
+  const statementMatched = Boolean(body.statementMatched);
+  const statementRowRef = typeof body.statementRowRef === 'string' ? body.statementRowRef.trim() : null;
+
+  if (!trxKey || !isValidTrxKey(trxKey)) {
+    await recordPaymentAuditLog({
+      event_type: 'admin_blocked_duplicate',
+      txn_id: txnId || null,
+      trx_key: rawTrxId || null,
+      user_id: targetUserId,
+      user_email: targetEmail,
+      amount_usd: verifiedUsd,
+      plan_id: planId,
+      duration_days: durationDays,
+      payment_status: 'invalid_trx_id',
+      actor: adminActor,
+      ip_address: ip,
+      details: { reason: 'missing_or_placeholder_trx_id', rawTrxId },
+    });
+    return json(200, {
+      ok: true,
+      decision: 'invalid_trx_id',
+      messageKh: '🚫 មិនអាចអនុម័តបានទេ៖ គ្មានលេខប្រតិបត្តិការ ABA (Trx. ID) ពិតប្រាកដឡើយ។',
+      messageEn: '🚫 Cannot approve: missing or placeholder ABA Transaction ID (Trx. ID).',
+    });
+  }
+
+  const [existingUsed, existingReceipts] = await Promise.all([
+    restSelectRows(`kft_used_aba_transactions?trx_key=eq.${encodeURIComponent(trxKey)}&select=trx_key,user_id,user_email,txn_id,used_at&limit=1`),
+    restSelectRows(`kft_payment_receipts?trx_key=eq.${encodeURIComponent(trxKey)}&select=status,user_id,user_email,txn_id,is_modified_or_fake,payment_status&limit=5`),
+  ]);
+
+  const tamperedReceipt = (existingReceipts || []).find((r) => r.is_modified_or_fake === true);
+  if (tamperedReceipt) {
+    await recordPaymentAuditLog({
+      event_type: 'rejected_fake_or_modified',
+      txn_id: txnId || null,
+      trx_key: trxKey,
+      user_id: targetUserId,
+      user_email: targetEmail,
+      amount_usd: verifiedUsd,
+      plan_id: planId,
+      duration_days: durationDays,
+      payment_status: 'tampered_receipt',
+      actor: adminActor,
+      ip_address: ip,
+      details: { reason: 'receipt_flagged_modified_or_fake' },
+    });
+    return json(200, {
+      ok: true,
+      decision: 'invalid_trx_id',
+      messageKh: '🚫 មិនអាចអនុម័តបានទេ៖ វិក្កយបត្រនេះត្រូវបានរកឃើញថាកែប្រែ ឬក្លែងបន្លំ!',
+      messageEn: '🚫 Cannot approve: this receipt was flagged as modified or fake!',
+    });
+  }
+
+  const verifiedReceipt = (existingReceipts || []).find((r) => r.status === 'verified');
+  if ((existingUsed && existingUsed[0]) || verifiedReceipt) {
+    const prevUser = String((existingUsed && existingUsed[0]?.user_id) || verifiedReceipt?.user_id || '');
+    const prevEmail = String((existingUsed && existingUsed[0]?.user_email) || verifiedReceipt?.user_email || prevUser);
+    await recordPaymentAuditLog({
+      event_type: 'admin_blocked_duplicate',
+      txn_id: txnId || null,
+      trx_key: trxKey,
+      user_id: targetUserId,
+      user_email: targetEmail,
+      amount_usd: verifiedUsd,
+      plan_id: planId,
+      duration_days: durationDays,
+      payment_status: 'already_used',
+      actor: adminActor,
+      ip_address: ip,
+      details: {
+        usedByUserId: prevUser,
+        usedByEmail: prevEmail,
+        crossAccountAttempt: prevUser !== targetUserId,
+      },
+    });
+    return json(200, {
+      ok: true,
+      decision: 'already_used',
+      usedByUserId: prevUser,
+      usedByEmail: prevEmail,
+      messageKh: `🚫 លេខប្រតិបត្តិការ ABA (${trxKey}) ត្រូវបានប្រើរួចហើយដោយគណនី ${prevEmail}! មួយប្រតិបត្តិការបើក VIP បានតែម្តងគត់។`,
+      messageEn: `🚫 ABA Transaction ID (${trxKey}) has already been used by account ${prevEmail}! One transaction can only activate/renew VIP once.`,
+    });
+  }
+
+  const nowIso = new Date().toISOString();
+  const ins = await restInsert('kft_used_aba_transactions', {
+    trx_key: trxKey,
+    raw_trx_id: rawTrxId || trxKey,
+    txn_id: txnId || null,
+    user_id: targetUserId,
+    user_email: targetEmail,
+    amount_usd: verifiedUsd,
+    plan_id: planId,
+    duration_days: durationDays,
+    transaction_date: transactionDate,
+    payment_status: 'completed',
+    statement_matched: statementMatched,
+    statement_row_ref: statementRowRef,
+    approved_by: adminActor,
+    used_at: nowIso,
+  });
+
+  if (ins.status === 409) {
+    await recordPaymentAuditLog({
+      event_type: 'admin_blocked_duplicate',
+      txn_id: txnId || null,
+      trx_key: trxKey,
+      user_id: targetUserId,
+      user_email: targetEmail,
+      amount_usd: verifiedUsd,
+      plan_id: planId,
+      duration_days: durationDays,
+      payment_status: 'conflict_409',
+      actor: adminActor,
+      ip_address: ip,
+      details: { conflict409: true },
+    });
+    return json(200, {
+      ok: true,
+      decision: 'already_used',
+      messageKh: `🚫 លេខប្រតិបត្តិការ ABA (${trxKey}) ត្រូវបានប្រើរួចហើយ!`,
+      messageEn: `🚫 ABA Transaction ID (${trxKey}) has already been used!`,
+    });
+  }
+
+  await restPatch(`kft_payment_receipts?trx_key=eq.${encodeURIComponent(trxKey)}`, {
+    status: 'verified',
+    reviewed_at: nowIso,
+    approved_at: nowIso,
+    reviewed_by: adminActor,
+    statement_matched: statementMatched,
+    txn_id: txnId || null,
+    user_email: targetEmail,
+  });
+
+  if (statementMatched) {
+    await recordPaymentAuditLog({
+      event_type: 'statement_matched',
+      txn_id: txnId || null,
+      trx_key: trxKey,
+      user_id: targetUserId,
+      user_email: targetEmail,
+      amount_usd: verifiedUsd,
+      plan_id: planId,
+      duration_days: durationDays,
+      payment_status: 'completed',
+      actor: adminActor,
+      ip_address: ip,
+      details: { statementRowRef },
+    });
+  }
+
+  await recordPaymentAuditLog({
+    event_type: 'admin_approved',
+    txn_id: txnId || null,
+    trx_key: trxKey,
+    user_id: targetUserId,
+    user_email: targetEmail,
+    amount_usd: verifiedUsd,
+    plan_id: planId,
+    duration_days: durationDays,
+    payment_status: 'completed',
+    actor: adminActor,
+    ip_address: ip,
+    details: { statementMatched, statementRowRef },
+  });
+
+  return json(200, { ok: true, decision: 'approved_and_locked', trxKey });
+}
+
+async function handleAdminRejectTransaction(req: Request, body: Record<string, unknown>, ip: string): Promise<Response> {
+  if (!(await verifyAdminRequest(req, body.adminToken))) {
+    return json(401, { ok: false, error: 'ADMIN_AUTH_REQUIRED' });
+  }
+  const rawTrxId = typeof body.trxId === 'string' ? body.trxId.trim() : '';
+  const trxKey = normalizeTrxKey(rawTrxId);
+  const txnId = typeof body.txnId === 'string' ? body.txnId.trim() : '';
+  const targetUserId = safeUserId(body.targetUserId) || String(body.targetUserId || 'unknown').slice(0, 80);
+  const targetEmail = typeof body.targetEmail === 'string' ? body.targetEmail.trim() : null;
+  const adminActor = typeof body.adminActor === 'string' && body.adminActor.trim() ? body.adminActor.trim().slice(0, 80) : 'admin';
+  const verifiedUsd = Number(body.verifiedUsd) || 0;
+  const durationDays = Math.max(1, Math.round(Number(body.durationDays) || 30));
+  const planId = typeof body.planId === 'string' ? body.planId.trim() : null;
+  const reason = typeof body.reason === 'string' ? body.reason.trim() : 'admin_rejected';
+
+  if (trxKey) {
+    await restPatch(`kft_payment_receipts?trx_key=eq.${encodeURIComponent(trxKey)}`, {
+      status: 'rejected',
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: adminActor,
+    });
+  }
+
+  await recordPaymentAuditLog({
+    event_type: 'admin_rejected',
+    txn_id: txnId || null,
+    trx_key: trxKey || rawTrxId || null,
+    user_id: targetUserId,
+    user_email: targetEmail,
+    amount_usd: verifiedUsd,
+    plan_id: planId,
+    duration_days: durationDays,
+    payment_status: 'rejected',
+    actor: adminActor,
+    ip_address: ip,
+    details: { reason },
+  });
+
+  return json(200, { ok: true, decision: 'rejected' });
 }

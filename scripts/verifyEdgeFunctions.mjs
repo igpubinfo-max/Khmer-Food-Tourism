@@ -634,4 +634,117 @@ ok('Pricing & Two-Line Trial SQL (supabase_pricing_trial_shop_v1.sql) is RLS-loc
   assert.ok(!/DROP\s+TABLE|TRUNCATE|DELETE\s+FROM/i.test(code));
 });
 
+ok('validateCambodiaPhoneForRegistration blocks fake 10-digit numbers on 9-digit prefixes, invalid prefixes, and test patterns while accepting real 9- and 10-digit numbers', () => {
+  for (const fn of [idNormClient.validateCambodiaPhoneForRegistration, idNormServer.validateCambodiaPhoneForRegistration]) {
+    // Fake 10-digit numbers on 9-digit-only prefixes (012, 010, 077)
+    for (const fake10 of ['012 458 2917', '010 458 2917', '077 458 2917', '+855 12 458 2917']) {
+      const r = fn(fake10);
+      assert.equal(r.valid, false, fake10);
+      assert.equal(r.reason, 'invalid_carrier_length', fake10);
+    }
+    // Invalid non-existent Cambodian prefixes (000, 020, 022, 084)
+    for (const badPrefix of ['020 245 959', '022 458 2917', '084 245 959', '091 245 959']) {
+      const r = fn(badPrefix);
+      assert.equal(r.valid, false, badPrefix);
+      assert.equal(r.reason, 'invalid_carrier_prefix', badPrefix);
+    }
+    // Sequential or repetitive fake numbers
+    for (const fakePat of ['012 123 456', '096 123 4567', '012 111 111', '097 888 8888', '015 000 123']) {
+      const r = fn(fakePat);
+      assert.equal(r.valid, false, fakePat);
+      assert.equal(r.reason, 'fake_pattern', fakePat);
+    }
+    // Valid real 9-digit and 10-digit Cambodia numbers
+    for (const [raw, expected] of [
+      ['012 245 959', '+85512245959'],
+      ['010 582 914', '+85510582914'],
+      ['096 458 2917', '+855964582917'],
+      ['097 382 9104', '+855973829104'],
+      ['088 519 2048', '+855885192048'],
+      ['071 629 4815', '+855716294815'],
+    ]) {
+      const r = fn(raw);
+      assert.equal(r.valid, true, raw);
+      assert.equal(r.canonicalPhone, expected, raw);
+    }
+  }
+});
+
+
+console.log('[edge] Strict ABA VIP Renewal Verification System');
+ok('receipt renewal anti-replay: rejects receipts older than or equal to previous VIP activation timestamp', () => {
+  const prevActivationMs = Date.parse('2026-11-06T07:00:00Z');
+  // Receipt from Nov 5, 2026 (within 14 days of NOW, but BEFORE user's previous VIP activation on Nov 6)
+  const oldRenewal = ev({ transactionDate: 'Nov 5, 2026 06:31 PM' }, { lastVerifiedPaymentAtMs: prevActivationMs });
+  assert.equal(oldRenewal.allPassed, false, 'receipt older than previous activation must be rejected on renewal');
+  assert.equal(oldRenewal.checks.date.passed, false);
+
+  // Fresh receipt from Nov 6, 2026 06:31 PM UTC+7 (11:31 UTC > 07:00 UTC)
+  const freshRenewal = ev({ transactionDate: '2026-11-06T12:00:00Z' }, { lastVerifiedPaymentAtMs: prevActivationMs });
+  assert.equal(freshRenewal.allPassed, true, 'receipt newer than previous activation passes');
+});
+
+ok('receipt authenticity & payment status: rejects pending/failed transfers and modified/fake receipts', () => {
+  const pendingTransfer = ev({ paymentStatus: 'pending' });
+  assert.equal(pendingTransfer.allPassed, false, 'pending transfer screen must not pass');
+  assert.equal(pendingTransfer.paymentStatusOk, false);
+
+  const failedTransfer = ev({ paymentStatus: 'failed' });
+  assert.equal(failedTransfer.allPassed, false, 'failed transfer must not pass');
+
+  const fakeReceipt = ev({ isModifiedOrFake: true, tamperReason: 'Edited digits on amount' });
+  assert.equal(fakeReceipt.allPassed, false, 'modified/fake receipt must not pass');
+  assert.equal(fakeReceipt.notModifiedOrFake, false);
+  const rep = rr.buildReport({
+    decision: 'rejected',
+    evaluation: fakeReceipt,
+    extracted: { ...goodReceipt, isModifiedOrFake: true },
+    duplicate: false,
+    noteKh: 'k',
+    noteEn: 'e',
+    nowIso: '2026-11-07T08:00:00.000Z',
+  });
+  assert.equal(rep.checks.antiReplay.passed, false, 'buildReport marks antiReplay failed on modified/fake receipt');
+});
+
+ok('statement matcher + centralized Used-Trx database: blocks any already-used Trx ID across accounts', () => {
+  const entries = sm.normalizeRows(sm.parseCsv(statementCsv));
+  // 176121426630955 is in the statement for $4.99, but if it is in usedTrxKeys (already used by another account), it must be rejected as duplicate_trx
+  const resWithUsed = sm.matchPayments(
+    [{ id: 'P-CROSS-ACCOUNT', trxId: '176121426630955', amountUsd: 4.99 }],
+    entries,
+    ['176121426630955']
+  );
+  assert.equal(resWithUsed[0].status, 'duplicate_trx', 'already-used Trx ID must never match even if present in bank statement');
+
+  // Placeholder refs like ABA-KHQR-... are normalized to empty and treated as no_trx_id
+  const resPlaceholder = sm.matchPayments(
+    [{ id: 'P-PLACEHOLDER', trxId: 'ABA-KHQR-30D-MVOVQCZU', amountUsd: 4.99 }],
+    entries
+  );
+  assert.equal(resPlaceholder[0].status, 'no_trx_id', 'placeholder ref must never be treated as a real ABA Trx ID');
+
+  // Modified/fake receipt is blocked in statement matcher even if Trx ID is in statement
+  const resTampered = sm.matchPayments(
+    [{ id: 'P-TAMPERED', trxId: '176121426630955', amountUsd: 4.99, isModifiedOrFake: true }],
+    entries
+  );
+  assert.equal(resTampered[0].status, 'duplicate_trx', 'tampered receipt must be blocked in statement matcher');
+});
+
+ok('PDF & screenshot support + centralized Used-Trx & Audit Log SQL (supabase_aba_vip_verification_v1.sql)', () => {
+  const fn = read('supabase/functions/vip-purchase/index.ts');
+  assert.ok(fn.includes('application\\/pdf'), 'vip-purchase Edge Function parses PDF receipts alongside screenshots');
+  assert.ok(fn.includes('kft_used_aba_transactions') && fn.includes('kft_payment_audit_log'), 'centralized used-Trx and audit log tables wired');
+  assert.ok(fn.includes("action === 'admin_approve_transaction'") && fn.includes("action === 'get_payment_registry_and_audit'"));
+
+  const sql = read('supabase_aba_vip_verification_v1.sql');
+  const code = sql.split(/\r?\n/).filter((l) => !l.trim().startsWith('--')).join('\n');
+  for (const t of ['kft_used_aba_transactions', 'kft_payment_audit_log']) {
+    assert.ok(new RegExp(`CREATE TABLE IF NOT EXISTS public\\.${t}`).test(code), 'creates ' + t);
+    assert.ok(new RegExp(`ALTER TABLE public\\.${t}\\s+ENABLE ROW LEVEL SECURITY`).test(code), 'RLS ' + t);
+    assert.ok(new RegExp(`REVOKE ALL ON public\\.${t} FROM anon, authenticated`).test(code), 'revoke ' + t);
+  }
+});
+
 console.log(`\n[edge] ALL ${passed} CHECKS PASSED`);

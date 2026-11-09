@@ -18,6 +18,9 @@ export interface ExtractedReceipt {
   recipientAccount?: string;
   transactionDate?: string;
   senderName?: string;
+  paymentStatus?: 'completed' | 'pending' | 'failed' | 'unknown';
+  isModifiedOrFake?: boolean;
+  tamperReason?: string;
 }
 
 export interface CheckItem {
@@ -32,6 +35,10 @@ export interface Evaluation {
   checks: { recipient: CheckItem; amount: CheckItem; trxId: CheckItem; date: CheckItem };
   allPassed: boolean;
   trxKey: string; // upper-case, no spaces ('' when none)
+  paymentStatusOk: boolean;
+  notModifiedOrFake: boolean;
+  statusAndTamperReasonKh?: string;
+  statusAndTamperReasonEn?: string;
 }
 
 export function isOfficialRecipient(recipientName?: string, recipientAccount?: string): boolean {
@@ -49,7 +56,13 @@ export function isOfficialRecipient(recipientName?: string, recipientAccount?: s
 }
 
 export function normalizeTrxKey(v: unknown): string {
-  return typeof v === 'string' ? v.replace(/\s+/g, '').toUpperCase() : '';
+  const raw = typeof v === 'string' ? v.trim() : '';
+  if (!raw || /^ABA-KHQR-/i.test(raw) || /^ABA-\d{6}$/i.test(raw) || /^ADMIN-VIP-/i.test(raw) || /^ABA-STORE-/i.test(raw) || /^AUTO/i.test(raw)) return '';
+  return raw.replace(/[^0-9A-Za-z-]/g, '').toUpperCase();
+}
+
+export function isValidTrxKey(trxKey: string): boolean {
+  return /^[0-9A-Z-]{8,28}$/.test(trxKey) && /\d{2,}/.test(trxKey);
 }
 
 /** Ignore auto-generated placeholders the app may put in the "reference" box. */
@@ -65,6 +78,7 @@ export function evaluateReceipt(input: {
   expectedDays: number;
   submittedTrxId?: string;
   nowMs: number;
+  lastVerifiedPaymentAtMs?: number | null;
 }): Evaluation {
   const { extracted, expectedAmountUsd, expectedDays, nowMs } = input;
   const userTrx = cleanSubmittedTrx(input.submittedTrxId);
@@ -98,9 +112,12 @@ export function evaluateReceipt(input: {
     const ms = Date.parse(extracted.transactionDate);
     if (Number.isFinite(ms)) {
       const ageDays = (nowMs - ms) / 86_400_000;
+      const priorMs = input.lastVerifiedPaymentAtMs;
       if (ageDays > RECEIPT_MAX_AGE_DAYS) dateNote = `too old (${Math.round(ageDays)} days)`;
       else if (ageDays < -1.5) dateNote = 'date is in the future';
-      else {
+      else if (typeof priorMs === 'number' && Number.isFinite(priorMs) && priorMs > 0 && ms <= priorMs) {
+        dateNote = 'receipt date is on or before previous VIP activation (cannot reuse old receipt for renewal)';
+      } else {
         dateOk = true;
         dateNote = 'recent';
       }
@@ -127,7 +144,28 @@ export function evaluateReceipt(input: {
     reasonEn: trxOk ? `✅ Valid Trx. ID: ${trxKey}` : !matchesUser ? '❌ Submitted Trx. ID does not match the receipt' : '❌ Could not read a Trx. ID from the receipt',
   };
 
-  return { checks: { recipient, amount, trxId: trx, date }, allPassed: recipientOk && amountOk && dateOk && trxOk, trxKey };
+  const rawStatus = String(extracted.paymentStatus || 'completed').trim().toLowerCase();
+  const paymentStatusOk = rawStatus !== 'pending' && rawStatus !== 'failed';
+  const notModifiedOrFake = extracted.isModifiedOrFake !== true;
+  let statusAndTamperReasonKh: string | undefined;
+  let statusAndTamperReasonEn: string | undefined;
+  if (!notModifiedOrFake) {
+    statusAndTamperReasonKh = `❌ រុកឃើញវិក្កយបត្រកែប្រែ ឬក្លែងបន្លំ (${extracted.tamperReason || "Modified/Fake receipt"})`;
+    statusAndTamperReasonEn = `? Modified, edited, or fake receipt detected (${extracted.tamperReason || 'visual tampering detected'})`;
+  } else if (!paymentStatusOk) {
+    statusAndTamperReasonKh = `❌ ស្ថានភាពការទូទាត់គឺ "${extracted.paymentStatus}" — អនុញ្ញាតតែប្រតិបត្តិការជោគជ័យ (Completed) ប៉ុណ្ណោះ`;
+    statusAndTamperReasonEn = `? Payment status is "${extracted.paymentStatus}" ? only Completed/Successful ABA transfers are accepted`;
+  }
+
+  return {
+    checks: { recipient, amount, trxId: trx, date },
+    allPassed: recipientOk && amountOk && dateOk && trxOk && paymentStatusOk && notModifiedOrFake,
+    trxKey,
+    paymentStatusOk,
+    notModifiedOrFake,
+    statusAndTamperReasonKh,
+    statusAndTamperReasonEn,
+  };
 }
 
 // ------------------------------------------------------------------ plans and VIP window
@@ -387,12 +425,28 @@ export function buildReport(args: {
   const { decision, evaluation, extracted, duplicate, noteKh, noteEn, nowIso } = args;
   const blank: CheckItem = { passed: false, expected: '-', detected: '-', reasonKh: '⏳ រង់ចាំរដ្ឋបាលពិនិត្យ', reasonEn: '⏳ Awaiting administrator review' };
   const c = evaluation?.checks;
+  const statusOrTamperFailed = Boolean(evaluation && (!evaluation.paymentStatusOk || !evaluation.notModifiedOrFake));
+  const antiReplayPassed = !duplicate && !statusOrTamperFailed;
   const antiReplay: CheckItem = {
-    passed: !duplicate,
+    passed: antiReplayPassed,
     expected: 'Unique unused ABA Transaction & Receipt',
-    detected: duplicate ? 'Duplicate receipt / Trx ID' : 'មិនធ្លាប់ប្រើពីមុន',
-    reasonKh: duplicate ? '❌ វិក្កយបត្រ ឬលេខប្រតិបត្តិការនេះត្រូវបានប្រើប្រាស់រួចហើយ!' : '✅ វិក្កយបត្រ និងលេខប្រតិបត្តិការមិនធ្លាប់ប្រើពីមុន',
-    reasonEn: duplicate ? '❌ This transaction ID or receipt image has already been used!' : '✅ Receipt and Trx. ID have not been used before',
+    detected: !antiReplayPassed
+      ? duplicate
+        ? 'Duplicate receipt / Trx ID'
+        : !evaluation?.notModifiedOrFake
+          ? 'Modified / Fake Receipt'
+          : `Status: ${extracted?.paymentStatus || 'incomplete'}`
+      : 'មិនធ្លាប់ប្រើពីមុន',
+    reasonKh: !antiReplayPassed
+      ? duplicate
+        ? '❌ វិក្កយបត្រ ឬលេខប្រតិបត្តិការនេះត្រូវបានប្រើរួចហើយ!'
+        : evaluation?.statusAndTamperReasonKh || '❌ វិក្កយបត្រមិនត្រឹមត្រូវ ឬកែប្រែក្លែងបន្លំ!'
+      : '✅ វិក្កយបត្រ និងលេខប្រតិបត្តិការមិនធ្លាប់ប្រើពីមុន',
+    reasonEn: !antiReplayPassed
+      ? duplicate
+        ? '? This transaction ID or receipt image has already been used!'
+        : evaluation?.statusAndTamperReasonEn || '? Receipt failed authenticity or payment status check!'
+      : '? Receipt and Trx. ID have not been used before',
   };
   const passedCount = [c?.recipient.passed, c?.amount.passed, c?.trxId.passed, c?.date.passed, antiReplay.passed].filter(Boolean).length;
   return {
@@ -413,6 +467,9 @@ export function buildReport(args: {
           recipientAccount: extracted.recipientAccount,
           transactionDate: extracted.transactionDate,
           senderName: extracted.senderName,
+          paymentStatus: extracted.paymentStatus,
+          isModifiedOrFake: extracted.isModifiedOrFake,
+          tamperReason: extracted.tamperReason,
         }
       : undefined,
     checks: { recipient: c?.recipient || blank, amount: c?.amount || blank, trxId: c?.trxId || blank, date: c?.date || blank, antiReplay },
