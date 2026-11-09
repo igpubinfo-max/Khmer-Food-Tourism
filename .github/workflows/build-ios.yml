@@ -100,7 +100,7 @@ jobs:
             cd ios/App
             xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
 
-            IOS_BUILD_NUM=$((112 + ${{ github.run_number }}))
+            IOS_BUILD_NUM=$((200 + ${{ github.run_number }}))
             echo "Setting iOS CURRENT_PROJECT_VERSION to $IOS_BUILD_NUM"
             xcodebuild archive \
               -project App.xcodeproj \
@@ -108,6 +108,7 @@ jobs:
               -configuration Release \
               -destination "generic/platform=iOS" \
               -archivePath build/App.xcarchive \
+              MARKETING_VERSION="2.7.0" \
               CURRENT_PROJECT_VERSION="$IOS_BUILD_NUM" \
               DEVELOPMENT_TEAM=79L24WMX4R \
               CODE_SIGN_STYLE=Manual \
@@ -119,9 +120,9 @@ jobs:
               -exportOptionsPlist build/ExportOptions.plist \
               -exportPath build/export
 
-            cp build/export/*.ipa build/DiscoverCambodia-v2.5.0.ipa
+            cp build/export/*.ipa build/CambodiaFlavorsTourism-v2.7.0.ipa
             echo "=== SIGNED APP STORE IPA EXPORTED SUCCESSFULLY ==="
-            ls -lh build/DiscoverCambodia-v2.5.0.ipa
+            ls -lh build/CambodiaFlavorsTourism-v2.7.0.ipa
           else
             echo "=== Building Release Archive (Unsigned IPA Package) ==="
             cd ios/App
@@ -144,11 +145,11 @@ jobs:
               mkdir -p build/Payload
               cp -r "build/App.xcarchive/Products/Applications/App.app" build/Payload/
               cd build
-              zip -qry DiscoverCambodia-v2.5.0.ipa Payload
+              zip -qry CambodiaFlavorsTourism-v2.7.0.ipa Payload
               rm -rf Payload
               cd ..
               echo "=== UNSIGNED IPA PACKAGED SUCCESSFULLY ==="
-              ls -lh build/DiscoverCambodia-v2.5.0.ipa
+              ls -lh build/CambodiaFlavorsTourism-v2.7.0.ipa
             fi
           fi
 
@@ -162,7 +163,7 @@ jobs:
           node scripts/update-asc-review-notes.mjs || true
           mkdir -p ~/.appstoreconnect/private_keys
           echo "$APPSTORE_PRIVATE_KEY" > "$HOME/.appstoreconnect/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8"
-          IPA_PATH="ios/App/build/DiscoverCambodia-v2.5.0.ipa"
+          IPA_PATH="ios/App/build/CambodiaFlavorsTourism-v2.7.0.ipa"
           if [ -f "$IPA_PATH" ]; then
             echo "Uploading $IPA_PATH to Apple App Store Connect / TestFlight..."
             xcrun altool --upload-app \
@@ -175,18 +176,18 @@ jobs:
       - name: 10. Upload iOS Release Packages Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Discover-Cambodia-iOS-v2.5.0-Package
+          name: Cambodia-Flavors-Tourism-iOS-v2.7.0-Package
           path: |
-            ios/App/build/DiscoverCambodia-v2.5.0.ipa
+            ios/App/build/CambodiaFlavorsTourism-v2.7.0.ipa
 
       - name: 11. Attach iOS IPA to GitHub Release v2.5.0
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v2.5.0
-          name: "Discover Cambodia Food & Tourism v2.5.0"
+          tag_name: v2.7.0
+          name: "Cambodia Flavors & Tourism v2.7.0"
           make_latest: true
           draft: false
           prerelease: false
           files: |
-            ios/App/build/DiscoverCambodia-v2.5.0.ipa
+            ios/App/build/CambodiaFlavorsTourism-v2.7.0.ipa

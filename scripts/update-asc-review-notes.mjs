@@ -83,7 +83,39 @@ async function main() {
     return;
   }
   const versionId = versionObj.id;
-  console.log('Found iOS App Store Version ID:', versionId, 'State:', versionObj.attributes?.appStoreState);
+  const currentState = versionObj.attributes?.appStoreState;
+  const currentVerStr = versionObj.attributes?.versionString;
+  console.log('Found iOS App Store Version ID:', versionId, 'Version:', currentVerStr, 'State:', currentState);
+
+  if (currentState === 'WAITING_FOR_REVIEW') {
+    console.log('Cancelling old WAITING_FOR_REVIEW submission so v2.7.0 build can replace it...');
+    const subs = await ascRequest(`/apps/${APP_ID}/reviewSubmissions?filter[platform]=IOS&filter[state]=WAITING_FOR_REVIEW`);
+    for (const sub of subs?.data || []) {
+      await ascRequest(`/reviewSubmissions/${sub.id}`, 'PATCH', {
+        data: {
+          type: 'reviewSubmissions',
+          id: sub.id,
+          attributes: { canceled: true },
+        },
+      });
+    }
+    const legacySub = await ascRequest(`/appStoreVersions/${versionId}/appStoreVersionSubmission`);
+    if (legacySub?.data?.id) {
+      await ascRequest(`/appStoreVersionSubmissions/${legacySub.data.id}`, 'DELETE');
+    }
+  }
+
+  if (currentVerStr !== '2.7.0') {
+    await ascRequest(`/appStoreVersions/${versionId}`, 'PATCH', {
+      data: {
+        type: 'appStoreVersions',
+        id: versionId,
+        attributes: {
+          versionString: '2.7.0',
+        },
+      },
+    });
+  }
 
   const existingDetail = await ascRequest(`/appStoreVersions/${versionId}/appStoreReviewDetail`);
   if (existingDetail?.data?.id) {
