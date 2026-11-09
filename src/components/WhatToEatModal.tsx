@@ -48,6 +48,7 @@ import {
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { tr } from '../utils/i18n';
 import { FOOD_WATERMARK_TEXT, FOOD_WATERMARK_BADGE_CLASS, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
+import { grantAiConsent } from '../services/aiConsent';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { useBodyScrollLock } from '../utils/useBodyScrollLock';
 import { hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
@@ -1226,6 +1227,9 @@ export const WhatToEatModal: React.FC = () => {
       applyReplyEffects(withNote, nextMemory, clean);
     };
 
+    if (!isIosOrIpadAppStoreRuntime()) {
+      grantAiConsent();
+    }
     void askFoodAssistant({
       userText: clean,
       uiLanguage: language,
