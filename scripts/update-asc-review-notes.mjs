@@ -11,6 +11,9 @@ function setGithubEnv(key, value) {
     if (process.env.GITHUB_ENV && value) {
       fs.appendFileSync(process.env.GITHUB_ENV, `${key}=${value}\n`);
     }
+    if (process.env.GITHUB_OUTPUT && value) {
+      fs.appendFileSync(process.env.GITHUB_OUTPUT, `${key.toLowerCase()}=${value}\n`);
+    }
   } catch {}
 }
 

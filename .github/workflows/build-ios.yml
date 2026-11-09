@@ -35,7 +35,6 @@ jobs:
           APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
         run: |
           node scripts/update-asc-review-notes.mjs || true
-          echo "asc_review_state=${ASC_REVIEW_STATE}" >> "$GITHUB_OUTPUT"
 
   build-ios:
     needs: submit-appstore-review
