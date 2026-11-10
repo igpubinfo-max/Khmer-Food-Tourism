@@ -17,6 +17,7 @@ import { HomeGreetingSearch } from './home/HomeGreetingSearch';
 import { TrendingFoodsRow } from './home/TrendingFoodsRow';
 import { HomeSkeleton, HomeEmptyState } from './home/HomeStates';
 import { FeatureGrid } from './home/FeatureGrid';
+import { HomePopularAndSocialSection } from './home/HomePopularAndSocialSection';
 import { IconNavFood, IconNavShop, IconNavTourism, IconMapRoute } from './icons/HandcraftedIcons';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { ForYouSection } from './home/ForYouSection';
@@ -57,7 +58,7 @@ export const HomeView: React.FC = () => {
     setIsVipAddRestaurantModalOpen,
     getOwnedRestaurantsForUser, getCurrentUserStoreQuota, openManageMyVipStore, activeManagedShopId,
     openUpgradeVipModal, deleteRestaurant, openGoogleMapsSearchModal, setIsAdminOpen,
-    transactions, supportTickets, triggerCloudSyncNow
+    transactions, supportTickets, triggerCloudSyncNow, bookmarks, toggleBookmark
   } = useApp();
 
   const isVip = isUserVipActive(currentUser);
@@ -312,6 +313,37 @@ export const HomeView: React.FC = () => {
   const handleSeeAllTourism = useCallback(() => setActiveTab('tourism'), [setActiveTab]);
   const handleExploreAllTrending = useCallback(() => setIsTrendingSocialModalOpen(true), [setIsTrendingSocialModalOpen]);
 
+  const handleHomeAskAi = useCallback(
+    (q?: string) => {
+      const cleanQ = (q ?? globalSearchQuery ?? '').trim();
+      if (cleanQ) {
+        openAiAssistantWithQuery(cleanQ, setIsWhatToEatModalOpen);
+      } else {
+        setIsWhatToEatModalOpen(true);
+      }
+    },
+    [globalSearchQuery, setIsWhatToEatModalOpen]
+  );
+
+  const handleHomeCameraAi = useCallback(() => {
+    (window as any).__kft_wte_open_camera = true;
+    setIsWhatToEatModalOpen(true);
+  }, [setIsWhatToEatModalOpen]);
+
+  const handleOpenHealthyFood = useCallback(() => {
+    (window as any).__kft_wte_open_health = true;
+    setIsWhatToEatModalOpen(true);
+  }, [setIsWhatToEatModalOpen]);
+
+  const handleOpenSocialReviews = useCallback(
+    (platform: 'all' | 'tiktok' | 'facebook' | 'youtube' = 'all') => {
+      (window as any).__kft_trending_initial_platform = platform;
+      window.dispatchEvent(new CustomEvent('kft:trending-platform', { detail: platform }));
+      setIsTrendingSocialModalOpen(true);
+    },
+    [setIsTrendingSocialModalOpen]
+  );
+
   return (
     <div className="max-w-md mx-auto px-4 py-2 space-y-2.5 pb-6 font-khmer">
       {/* 1. Greeting + User Profile Card + debounced search bar */}
@@ -324,6 +356,8 @@ export const HomeView: React.FC = () => {
         onExploreProfile={handleExploreProfile}
         onUpgradeVip={handleUpgradeVip}
         onOpenAdminPanel={handleOpenAdminPanel}
+        onAskAi={handleHomeAskAi}
+        onOpenCameraAi={handleHomeCameraAi}
         hint={getMealHint(mealSlot, language)}
         query={globalSearchQuery}
         onChange={setGlobalSearchQuery}
@@ -820,11 +854,8 @@ export const HomeView: React.FC = () => {
             };
 
             return (
-              <div className="space-y-2.5 animate-in fade-in">
-                {/* 2. Free 30 Days membership section */}
-                <DailyHabitCard onOpenFood={setSelectedFood} />
-
-                {/* 3. The 6 main navigation buttons */}
+              <div className="space-y-3 animate-in fade-in">
+                {/* 1. The 6 main colorful navigation buttons */}
                 <FeatureGrid
                   language={language}
                   isVip={canUseVipActions}
@@ -835,6 +866,22 @@ export const HomeView: React.FC = () => {
                   onMapNavigation={handleMapNavigation}
                   onSmartAiAssistant={handleSmartAiAssistant}
                 />
+
+                {/* 2. Popular Dishes + 2 Feature Banners + [TikTok] [Facebook] [YouTube] Reviews */}
+                <HomePopularAndSocialSection
+                  language={language}
+                  foods={foods}
+                  favoriteIds={bookmarks}
+                  onToggleFavorite={(fid) => toggleBookmark(fid, 'food')}
+                  onOpenFood={setSelectedFood}
+                  onSeeAllFoods={handleSeeAllFoods}
+                  onOpenHealthyFood={handleOpenHealthyFood}
+                  onOpenAiAssistant={() => setIsWhatToEatModalOpen(true)}
+                  onOpenSocialReviews={handleOpenSocialReviews}
+                />
+
+                {/* 3. Meal-Time Reminder Card */}
+                <DailyHabitCard onOpenFood={setSelectedFood} />
 
 
                 {/* 2. Admin Management Menus Grid */}
@@ -1019,10 +1066,7 @@ export const HomeView: React.FC = () => {
             <HomeSkeleton />
           ) : (
             <>
-              {/* 2. Free 30 Days membership section */}
-              <DailyHabitCard onOpenFood={setSelectedFood} />
-
-              {/* 3. The 6 main navigation buttons */}
+              {/* 1. The 6 main colorful navigation buttons */}
               <FeatureGrid
                 language={language}
                 isVip={canUseVipActions}
@@ -1033,6 +1077,22 @@ export const HomeView: React.FC = () => {
                 onMapNavigation={handleMapNavigation}
                 onSmartAiAssistant={handleSmartAiAssistant}
               />
+
+              {/* 2. Popular Dishes + 2 Feature Banners + [TikTok] [Facebook] [YouTube] Reviews */}
+              <HomePopularAndSocialSection
+                language={language}
+                foods={foods}
+                favoriteIds={bookmarks}
+                onToggleFavorite={(fid) => toggleBookmark(fid, 'food')}
+                onOpenFood={setSelectedFood}
+                onSeeAllFoods={handleSeeAllFoods}
+                onOpenHealthyFood={handleOpenHealthyFood}
+                onOpenAiAssistant={() => setIsWhatToEatModalOpen(true)}
+                onOpenSocialReviews={handleOpenSocialReviews}
+              />
+
+              {/* 3. Meal-Time Reminder Card */}
+              <DailyHabitCard onOpenFood={setSelectedFood} />
 
               {/* 4. Personalized picks for the current time of day */}
               <ForYouSection

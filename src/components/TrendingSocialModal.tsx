@@ -74,7 +74,30 @@ export const TrendingSocialModal: React.FC = () => {
     const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 220);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+  const [platformFilter, setPlatformFilter] = useState<'all' | 'tiktok' | 'facebook' | 'youtube'>('all');
   const [categoryFilter, setCategoryFilter] = useState<TrendingFoodCategorySlug>('all');
+
+  useEffect(() => {
+    if (isTrendingSocialModalOpen && typeof window !== 'undefined') {
+      const initPlat = (window as any).__kft_trending_initial_platform;
+      if (initPlat === 'tiktok' || initPlat === 'facebook' || initPlat === 'youtube' || initPlat === 'all') {
+        setPlatformFilter(initPlat);
+        (window as any).__kft_trending_initial_platform = undefined;
+      }
+    }
+  }, [isTrendingSocialModalOpen]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onPlatEvent = (e: Event) => {
+      const p = (e as CustomEvent<string>).detail;
+      if (p === 'tiktok' || p === 'facebook' || p === 'youtube' || p === 'all') {
+        setPlatformFilter(p);
+      }
+    };
+    window.addEventListener('kft:trending-platform', onPlatEvent);
+    return () => window.removeEventListener('kft:trending-platform', onPlatEvent);
+  }, []);
   const [provinceFilter, setProvinceFilter] = useState<string>('all');
   const [visibleVideoCount, setVisibleVideoCount] = useState<number>(VIDEO_BATCH_SIZE);
   const loadMoreVideosRef = useRef<HTMLDivElement | null>(null);
@@ -433,6 +456,7 @@ export const TrendingSocialModal: React.FC = () => {
     };
 
     const strictMatches = discoveryItems.filter((item) => {
+      if (platformFilter !== 'all' && item.platform !== platformFilter) return false;
       if (categoryFilter !== 'all' && item.categorySlug !== categoryFilter) return false;
       if (!matchesProvince(item)) return false;
       if (debouncedSearchQuery.trim() && !matchesExpandedYouTubeQuery(item, debouncedSearchQuery)) return false;
@@ -456,7 +480,7 @@ export const TrendingSocialModal: React.FC = () => {
     }
 
     return strictMatches;
-  }, [discoveryItems, categoryFilter, provinceFilter, debouncedSearchQuery, rotationCycle]);
+  }, [discoveryItems, platformFilter, categoryFilter, provinceFilter, debouncedSearchQuery, rotationCycle]);
 
   useEffect(() => {
     setVisibleVideoCount(VIDEO_BATCH_SIZE);
@@ -676,6 +700,7 @@ export const TrendingSocialModal: React.FC = () => {
 
   const handleResetFilters = () => {
     setSearchQuery('');
+    setPlatformFilter('all');
     setCategoryFilter('all');
     setProvinceFilter('all');
   };
@@ -786,6 +811,44 @@ export const TrendingSocialModal: React.FC = () => {
               </button>
             </div>
           )}
+        </div>
+
+        {/* Platform Filter Bar: All / TikTok / Facebook / YouTube */}
+        <div className="px-2.5 py-2 bg-slate-950 border-b border-slate-800 flex items-center gap-1.5 shrink-0 font-khmer text-xs overflow-x-auto no-scrollbar">
+          {[
+            { id: 'all' as const, label: tr(language, 'ទាំងអស់', 'All Platforms', '全部平台'), activeCls: 'bg-emerald-600 text-white' },
+            { id: 'tiktok' as const, label: 'TikTok', activeCls: 'bg-black text-white border border-white/30' },
+            { id: 'facebook' as const, label: 'Facebook', activeCls: 'bg-[#1877F2] text-white' },
+            { id: 'youtube' as const, label: 'YouTube', activeCls: 'bg-[#FF0000] text-white' },
+          ].map((plat) => (
+            <button
+              key={plat.id}
+              type="button"
+              onClick={() => setPlatformFilter(plat.id)}
+              className={`px-3 py-1.5 rounded-xl font-extrabold whitespace-nowrap transition text-xs flex items-center gap-1.5 cursor-pointer ${
+                platformFilter === plat.id
+                  ? `${plat.activeCls} shadow-xs`
+                  : 'bg-slate-800/90 text-slate-300 hover:text-white border border-slate-700'
+              }`}
+            >
+              {plat.id === 'tiktok' && (
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+                </svg>
+              )}
+              {plat.id === 'facebook' && (
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.12 5.32H17V2.14A26.11 26.11 0 0 0 14.26 2c-2.72 0-4.58 1.66-4.58 4.7v2.62H6.61v3.56h3.07V22h3.68v-9.12h3.06l.46-3.56h-3.52V6.65c0-1.05.29-1.73 1.76-1.73Z" />
+                </svg>
+              )}
+              {plat.id === 'youtube' && (
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.56 31.56 0 0 0 0 12a31.56 31.56 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.56 31.56 0 0 0 24 12a31.56 31.56 0 0 0-.5-5.81zM9.54 15.57V8.43L15.82 12l-6.28 3.57z" />
+                </svg>
+              )}
+              <span>{plat.label}</span>
+            </button>
+          ))}
         </div>
 
         {/* Category Tabs: 4 Categories + All Trending */}
@@ -1367,11 +1430,19 @@ export const TrendingSocialModal: React.FC = () => {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
-                        {/* YouTube & Verification Badge */}
+                        {/* Platform & Verification Badge */}
                         <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
-                          <span className="px-2 py-0.5 rounded-full text-[9px] font-black shadow-xs bg-red-600 text-white flex items-center gap-1">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[9px] font-black shadow-xs text-white flex items-center gap-1 ${
+                              item.platform === 'tiktok'
+                                ? 'bg-black border border-white/30'
+                                : item.platform === 'facebook'
+                                ? 'bg-[#1877F2]'
+                                : 'bg-red-600'
+                            }`}
+                          >
                             <Play className="w-2.5 h-2.5 fill-current" />
-                            <span>YouTube</span>
+                            <span>{item.platform === 'tiktok' ? 'TikTok' : item.platform === 'facebook' ? 'Facebook' : 'YouTube'}</span>
                           </span>
                           <span className="px-2 py-0.5 rounded-full bg-black/70 text-emerald-200 text-[9px] font-bold backdrop-blur-xs flex items-center gap-1 border border-white/15">
                             <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
@@ -1379,16 +1450,22 @@ export const TrendingSocialModal: React.FC = () => {
                           </span>
                         </div>
 
-                        {/* Quick Watch on YouTube pill at top-right */}
+                        {/* Quick Open Platform pill at top-right */}
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             openExternalVideoSafely(playerInfo.watchUrl, displayTitle);
                           }}
-                          className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/75 hover:bg-red-600 text-white text-[9px] font-bold backdrop-blur-xs flex items-center gap-1 border border-white/20 transition cursor-pointer"
+                          className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/75 hover:bg-emerald-600 text-white text-[9px] font-bold backdrop-blur-xs flex items-center gap-1 border border-white/20 transition cursor-pointer"
                         >
-                          <span>{tr(language, 'បើក YouTube', 'Watch on YouTube', '打开 YouTube')}</span>
+                          <span>
+                            {item.platform === 'tiktok'
+                              ? tr(language, 'បើក TikTok', 'Open TikTok', '打开 TikTok')
+                              : item.platform === 'facebook'
+                              ? tr(language, 'បើក Facebook', 'Open Facebook', '打开 Facebook')
+                              : tr(language, 'បើក YouTube', 'Watch on YouTube', '打开 YouTube')}
+                          </span>
                           <ExternalLink className="w-2.5 h-2.5" />
                         </button>
 

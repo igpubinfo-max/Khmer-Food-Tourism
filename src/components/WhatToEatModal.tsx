@@ -28,6 +28,9 @@ import {
   Soup,
   Salad,
   Camera,
+  ChevronRight,
+  Plus,
+  Check,
 } from 'lucide-react';
 import { FoodItem, isGpipRegisteredRestaurant, isHotelBusinessRecord, openExternalUrlNativeSafe, openRestaurantGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError, isIosOrIpadAppStoreRuntime } from '../types';
 import {
@@ -468,6 +471,17 @@ export const WhatToEatModal: React.FC = () => {
             drinkPairingTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
         }, 60);
+      }
+      if ((window as any).__kft_wte_open_health) {
+        (window as any).__kft_wte_open_health = false;
+        setDrinkMode(false);
+        setOpenGroup('health');
+      }
+      if ((window as any).__kft_wte_open_camera) {
+        (window as any).__kft_wte_open_camera = false;
+        setTimeout(() => {
+          fileInputRef.current?.click();
+        }, 120);
       }
       const pendingAiQuery = typeof window !== 'undefined' ? String((window as any).__kft_pending_ai_query || '').trim() : '';
       if (pendingAiQuery) {
@@ -1438,8 +1452,9 @@ export const WhatToEatModal: React.FC = () => {
     }
     setIsSpinning(true);
     setTimeout(() => {
+      let nextDish: FoodItem | undefined;
       try {
-        const nextDish = pickRandomDish(currentDish?.id);
+        nextDish = pickRandomDish(currentDish?.id);
         if (nextDish) setCurrentDishId(nextDish.id);
         setSpinCount((c) => c + 1);
       } catch {
@@ -1648,47 +1663,41 @@ export const WhatToEatModal: React.FC = () => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 bg-gradient-to-r from-[#064E3B] to-[#047857] text-white flex items-center justify-between shrink-0">
+        <div className="px-4 py-3 bg-[#064E3B] text-white flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-center text-amber-300 shadow-xs shrink-0">
+            <span className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-amber-300 shrink-0">
               <IconFoodPicks className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-moul text-sm text-white truncate">
-                  {tr(language, 'ជំនួយការ AI ម្ហូបអាហារ', 'AI Food Assistant', 'AI 美食助手')}
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!canUseAiAssistant) promptVipUpgradeForAiAssistant();
-                  }}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-400/25 border border-amber-300/60 text-amber-200 text-[10px] font-extrabold shrink-0 cursor-pointer"
-                >
-                  <Crown className="w-3 h-3 text-amber-300" />
-                  <span>
-                    {canUseAiAssistant
-                      ? tr(language, 'សមាជិក VIP • បើករួច', 'VIP Active', 'VIP 已激活')
-                      : tr(language, 'សម្រាប់ VIP • VIP ONLY', 'VIP Only', 'VIP 专属')}
-                  </span>
-                </button>
-              </div>
-              <p className="text-[11px] text-emerald-100 font-khmer truncate">
-                {tr(
-                  language,
-                  `សួរអ្វីក៏បានអំពីម្ហូប • ថតរូបម្ហូប • ម្ហូប ${foods.length}+ មុខ • ហាង ${restaurants.length}+`,
-                  `Ask anything about food • photo recognition • ${foods.length}+ dishes • ${restaurants.length}+ shops`,
-                  `美食问答 • 拍照识菜 • ${foods.length}+ 道菜 • ${restaurants.length}+ 家餐厅`
-                )}
-              </p>
-            </div>
+            </span>
+            <h3 className="font-moul text-sm text-white truncate">
+              {tr(language, 'ជំនួយការ AI ម្ហូបអាហារ', 'AI Food Assistant', 'AI 美食助手')}
+            </h3>
+            <button
+              type="button"
+              onClick={() => {
+                if (!canUseAiAssistant) promptVipUpgradeForAiAssistant();
+              }}
+              aria-label={
+                canUseAiAssistant
+                  ? tr(language, 'សមាជិក VIP • បើករួច', 'VIP Active', 'VIP 已激活')
+                  : tr(language, 'សម្រាប់ VIP • VIP ONLY', 'VIP Only', 'VIP 专属')
+              }
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-extrabold shrink-0 cursor-pointer"
+            >
+              {canUseAiAssistant ? (
+                <Crown className="w-3 h-3" strokeWidth={1.75} />
+              ) : (
+                <Lock className="w-3 h-3" strokeWidth={1.75} />
+              )}
+              <span>VIP</span>
+            </button>
           </div>
           <button
             id="kft-wte-close-btn"
             onClick={() => setIsWhatToEatModalOpen(false)}
+            aria-label={tr(language, 'បិទ', 'Close', '关闭')}
             className="p-2 rounded-full hover:bg-white/10 text-emerald-100 hover:text-white transition cursor-pointer shrink-0"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" strokeWidth={1.75} />
           </button>
         </div>
 
@@ -1774,7 +1783,7 @@ export const WhatToEatModal: React.FC = () => {
               <button
                 id="kft-wte-chat-send"
                 type="submit"
-                className="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#059669] text-white text-sm font-extrabold shadow-xs flex items-center gap-1.5 shrink-0 transition active:scale-[0.98] cursor-pointer"
+                className="px-3.5 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-sm font-extrabold shadow-xs flex items-center gap-1.5 shrink-0 transition active:scale-[0.98] cursor-pointer"
               >
                 <Send className="w-4 h-4 text-amber-300 shrink-0" />
                 <span>{tr(language, 'សួរ AI', 'Ask AI', '发送')}</span>
@@ -1806,38 +1815,25 @@ export const WhatToEatModal: React.FC = () => {
             {showVipAiUpgradeNotice && !canUseAiAssistant && !isVerifyingVipBackend && (
               <div
                 id="kft-wte-vip-upgrade-notice"
-                className="p-3 rounded-2xl bg-gradient-to-r from-amber-50 via-yellow-50/90 to-amber-100/80 dark:from-amber-950/50 dark:via-slate-800 dark:to-amber-900/30 border border-amber-300 dark:border-amber-700/70 flex items-center justify-between gap-2.5"
+                className="px-3 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/70 flex items-center justify-between gap-2.5"
               >
-                <div className="flex items-start gap-2 min-w-0">
-                  <span className="w-8 h-8 rounded-xl bg-amber-400/25 border border-amber-400/50 flex items-center justify-center text-amber-700 dark:text-amber-300 shrink-0 mt-0.5">
-                    <Crown className="w-4 h-4" />
+                <div className="flex items-center gap-2 min-w-0">
+                  <Crown className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" strokeWidth={1.75} />
+                  <span className="text-xs font-extrabold text-amber-950 dark:text-amber-200 leading-snug">
+                    {tr(
+                      language,
+                      'មុខងារជំនួយការ AI គឺសម្រាប់សមាជិក VIP ប៉ុណ្ណោះ',
+                      'AI Assistant is exclusive to VIP Members',
+                      'AI 美食助手为 VIP 会员专属功能'
+                    )}
                   </span>
-                  <div className="min-w-0">
-                    <div className="text-xs font-extrabold text-amber-950 dark:text-amber-200">
-                      {tr(
-                        language,
-                        '👑 មុខងារជំនួយការ AI គឺសម្រាប់សមាជិក VIP ប៉ុណ្ណោះ',
-                        '👑 AI Assistant is Exclusive to VIP Members',
-                        '👑 AI 美食助手为 VIP 会员专属功能'
-                      )}
-                    </div>
-                    <p className="text-[11px] text-amber-900/90 dark:text-amber-100/80 leading-snug mt-0.5">
-                      {tr(
-                        language,
-                        'សូមដំឡើងទៅកាន់ VIP ដើម្បីសួរសំណួរ ថតរូបម្ហូប និងទទួលចម្លើយពី AI។ (ការស្វែងរកម្ហូប ហាង និងតំបន់ទេសចរណ៍ធម្មតា នៅតែឥតគិតថ្លៃ 100%)',
-                        'Upgrade to VIP to submit questions, analyze food photos, and receive AI answers. (Normal food, shop & tourism search remains 100% free.)',
-                        '请升级 VIP 以提问、拍照识菜并获取 AI 回答。（常规美食、餐厅与景点搜索仍 100% 免费。）'
-                      )}
-                    </p>
-                  </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => openUpgradeVipModal()}
-                  className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 text-slate-950 text-[11px] font-black shadow-xs shrink-0 flex items-center gap-1 cursor-pointer transition active:scale-95"
+                  className="px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-500 text-slate-950 text-[11px] font-black shrink-0 cursor-pointer transition active:scale-95"
                 >
-                  <Crown className="w-3.5 h-3.5" />
-                  <span>{tr(language, 'ដំឡើង VIP', 'Upgrade VIP', '升级 VIP')}</span>
+                  {tr(language, 'ដំឡើង VIP', 'Upgrade VIP', '升级 VIP')}
                 </button>
               </div>
             )}
@@ -3006,24 +3002,13 @@ export const WhatToEatModal: React.FC = () => {
                   ref={chatEndRef}
                   className="rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-emerald-200/80 dark:border-slate-700 p-3 space-y-2.5 font-khmer"
                 >
-                  <div className="flex items-center justify-between gap-2 pb-1 border-b border-slate-200/70 dark:border-slate-700">
-                    <div className="flex items-center gap-1.5 text-xs font-extrabold text-[#064E3B] dark:text-emerald-300">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.75} />
-                      <span>
-                        {tr(
-                          language,
-                          'ចម្លើយ',
-                          'Answer',
-                          '回答'
-                        )}
-                      </span>
-                    </div>
+                  <div className="flex items-center justify-end">
                     <button
                       type="button"
                       onClick={handleResetChat}
-                      className="px-2 py-0.5 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-[10px] font-bold text-slate-600 dark:text-slate-300 inline-flex items-center gap-1 hover:text-emerald-600 cursor-pointer"
+                      className="px-2 py-0.5 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-[11px] font-bold text-slate-600 dark:text-slate-300 inline-flex items-center gap-1 hover:text-emerald-600 cursor-pointer"
                     >
-                      <RotateCcw className="w-3 h-3" />
+                      <RotateCcw className="w-3 h-3" strokeWidth={1.75} />
                       <span>{tr(language, 'សម្អាតចម្លើយ', 'Clear', '清空')}</span>
                     </button>
                   </div>
@@ -3052,201 +3037,89 @@ export const WhatToEatModal: React.FC = () => {
               );
             })()}
 
-            {/* ★ Special menu: ម្ហូបអមភេសជ្ជៈ — AI auto-curated Beverage Pairings (Shown at Very Top) */}
-            <div ref={drinkPairingTopRef} className="space-y-2.5 scroll-mt-2">
-              <button
-                type="button"
-                onClick={handleOpenDrinkPairing}
-                className={`w-full rounded-2xl px-3.5 py-2.5 flex items-center gap-3 text-left shadow-md border transition active:scale-[0.99] cursor-pointer ${
-                  drinkMode
-                    ? 'bg-gradient-to-r from-[#064E3B] via-[#047857] to-[#059669] border-amber-300/80 text-white'
-                    : 'bg-gradient-to-r from-[#0f2922] via-[#133b2f] to-[#1a4d3c] border-amber-400/60 text-amber-100'
-                }`}
-              >
-                <span className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-center text-amber-300 shrink-0">
-                  <IconBeveragePairing className="w-5 h-5" />
-                </span>
-                <span className="flex-1 min-w-0">
-                  <span className="block font-moul text-sm leading-relaxed">
-                    {tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佐餐与饮品搭配')}
-                  </span>
-                  <span className="block text-xs opacity-90 leading-snug">
-                    {tr(
-                      language,
-                      'AI ជ្រើសម្ហូបអាំង ចៀនស្រួយ និងញាំជូរហឹរ សម្រាប់ញ៉ាំជុំគ្នា',
-                      'AI-curated savory dishes for dining & refreshments',
-                      'AI 精选烧烤、香脆与酸辣佐餐美食'
-                    )}
-                  </span>
-                </span>
-                <span className="shrink-0 flex flex-col items-end gap-1">
-                  <AccessBadge vip={false} />
-                  {drinkMode && (
-                    <span className="text-[10px] font-black text-amber-200">✓ {tr(language, 'បើក', 'ON', '开启')}</span>
-                  )}
-                </span>
-              </button>
-
-              {drinkMode && (
-                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/70 to-amber-50/70 dark:from-emerald-950/40 dark:via-slate-800 dark:to-amber-950/30 border border-emerald-300/70 dark:border-emerald-700/50 space-y-2.5 font-khmer">
-                  <div className="flex items-start gap-2.5">
-                    <span className="w-9 h-9 rounded-xl bg-emerald-600/15 dark:bg-amber-400/20 border border-emerald-500/30 dark:border-amber-300/40 flex items-center justify-center text-[#064E3B] dark:text-amber-300 shrink-0 mt-0.5">
-                      <IconBeveragePairing className="w-5 h-5" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <h4 className="text-sm font-extrabold text-slate-900 dark:text-white leading-relaxed">
-                        {tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佐餐与饮品搭配')}
-                      </h4>
-                      <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                        {tr(
-                          language,
-                          `ឈុតម្ហូបជ្រើសរើសដោយ AI • ${showSets ? pairingSets.length : 0} ឈុត × ${PAIRING_SET_SIZE} មុខ`,
-                          `AI-curated sets • ${showSets ? pairingSets.length : 0} sets × ${PAIRING_SET_SIZE} dishes`,
-                          `AI 精选套餐 • ${showSets ? pairingSets.length : 0} 套 × ${PAIRING_SET_SIZE} 道`
-                        )}
-                      </p>
-                    </div>
-                    <AccessBadge vip={false} className="mt-1" />
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {([
-                      {
-                        id: 'all' as const,
-                        icon: <IconBeveragePairing className="w-3.5 h-3.5 shrink-0" />,
-                        kh: 'ទាំងអស់',
-                        en: 'All Pairings',
-                        zh: '全部搭配',
-                      },
-                      {
-                        id: 'beer' as const,
-                        icon: <IconGrillFlame className="w-3.5 h-3.5 shrink-0" />,
-                        kh: 'អាំង & ចៀនស្រួយ',
-                        en: 'Grilled & Crispy',
-                        zh: '烧烤与香脆',
-                      },
-                      {
-                        id: 'spirits' as const,
-                        icon: <IconZestyCitrus className="w-3.5 h-3.5 shrink-0" />,
-                        kh: 'ញាំជូរហឹរ & ម្ហូបពិសេស',
-                        en: 'Zesty & Savory',
-                        zh: '酸辣与风味小食',
-                      },
-                    ]).map((k) => (
-                      <button
-                        key={k.id}
-                        type="button"
-                        onClick={() => {
-                          setDrinkKind(k.id);
-                          setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
-                        }}
-                        className={`px-3 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 transition cursor-pointer ${
-                          drinkKind === k.id
-                            ? 'bg-[#064E3B] text-amber-300 border border-amber-400/60 shadow-xs'
-                            : 'bg-white dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-emerald-200 dark:border-slate-600'
-                        }`}
-                      >
-                        {k.icon}
-                        <span>{tr(language, k.kh, k.en, k.zh)}</span>
-                      </button>
-                    ))}
+            {/* Filters: four short icon chips (Time, Type, Taste, Health) */}
+            <div className="space-y-2">
+              <div className="grid grid-cols-4 gap-1.5">
+                {[
+                  {
+                    id: 'time' as const,
+                    testId: 'wte-tab-time',
+                    icon: Clock,
+                    label: tr(language, 'ពេលវេលា', 'Time', '时段'),
+                    value:
+                      mealSlotFilter !== 'auto' && activeSlot
+                        ? stripLeadingSymbols(tr(language, activeSlot.kh, activeSlot.en, activeSlot.zh))
+                        : '',
+                    active: mealSlotFilter !== 'auto',
+                    vip: false,
+                  },
+                  {
+                    id: 'type' as const,
+                    testId: 'wte-tab-type',
+                    icon: Utensils,
+                    label: tr(language, 'ប្រភេទ', 'Type', '分类'),
+                    value:
+                      categoryFilter !== 'all' && activeCategory
+                        ? tr(language, activeCategory.labelKh, activeCategory.labelEn, activeCategory.labelZh)
+                        : '',
+                    active: categoryFilter !== 'all',
+                    vip: false,
+                  },
+                  {
+                    id: 'craving' as const,
+                    testId: 'wte-tab-craving',
+                    icon: Compass,
+                    label: tr(language, 'ចំណង់', 'Taste', '口味'),
+                    value: cravingQuery.trim(),
+                    active: cravingQuery.trim().length > 0,
+                    vip: false,
+                  },
+                  {
+                    id: 'health' as const,
+                    testId: 'wte-tab-health',
+                    icon: Leaf,
+                    label: tr(language, 'សុខភាព', 'Health', '健康'),
+                    value:
+                      vipDietFilter !== 'none' && activeHealth
+                        ? tr(language, activeHealth.shortKh, activeHealth.shortEn, activeHealth.shortZh)
+                        : '',
+                    active: vipDietFilter !== 'none',
+                    vip: true,
+                  },
+                ].map((g) => {
+                  const GroupIcon = g.icon;
+                  const isOpen = openGroup === g.id;
+                  return (
                     <button
+                      key={g.id}
                       type="button"
+                      data-testid={g.testId}
                       onClick={() => {
-                        setIsSpinning(true);
-                        setTimeout(() => {
-                          setSetPage(0);
-                          setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
-                          setSpinCount((c) => c + 1);
-                          setIsSpinning(false);
-                        }, 180);
+                        setShowVipAiUpgradeNotice(false);
+                        setOpenGroup((cur) => (cur === g.id ? null : g.id));
                       }}
-                      className="px-3 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 border border-amber-500/60 shadow-xs transition active:scale-95 cursor-pointer"
+                      className={`relative px-1 py-2.5 rounded-2xl border flex flex-col items-center justify-center gap-1 min-w-0 transition active:scale-[0.97] cursor-pointer ${
+                        isOpen
+                          ? 'bg-[#064E3B] text-white border-[#064E3B]'
+                          : g.active
+                            ? 'bg-emerald-50 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-200 border-emerald-500'
+                            : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:border-emerald-400'
+                      }`}
                     >
-                      <Shuffle className="w-3.5 h-3.5 shrink-0" />
-                      <span>{tr(language, 'ចាប់ឈុតថ្មីចៃដន្យ', 'Randomize Sets', '随机生成新套餐')}</span>
+                      <GroupIcon className="w-5 h-5 shrink-0" strokeWidth={1.75} />
+                      <span className="w-full text-[11px] font-bold leading-snug truncate text-center">
+                        {g.value || g.label}
+                      </span>
+                      {g.vip && !canUseVip && (
+                        <Crown className="absolute top-1 right-1 w-3 h-3 text-amber-500" strokeWidth={1.75} />
+                      )}
                     </button>
-                  </div>
-                </div>
-              )}
+                  );
+                })}
+              </div>
 
-              {showSets && (
-                <div className={`space-y-3 transition-opacity duration-200 ${isSpinning ? 'opacity-30' : 'opacity-100'}`}>
-                  {visibleSets.map((set, idx) => {
-                    const setNo = setPage * PAIRING_SETS_PER_PAGE + idx + 1;
-                    return (
-                      <div
-                        key={`${setPage}-${idx}`}
-                        className="rounded-3xl p-3 bg-gradient-to-br from-[#0f2922] via-[#133b2f] to-[#1a4d3c] border border-amber-400/50 shadow-lg space-y-2.5"
-                      >
-                        <div className="flex items-center justify-between gap-2 px-0.5">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="w-7 h-7 rounded-lg bg-amber-400 text-slate-950 text-xs font-black flex items-center justify-center shrink-0">
-                              {setNo}
-                            </span>
-                            <span className="font-moul text-xs text-amber-100 truncate">
-                              {tr(language, `ឈុតម្ហូបទី ${setNo}`, `Pairing Set ${setNo}`, `搭配套餐 ${setNo}`)}
-                            </span>
-                          </div>
-                          <IconBeveragePairing className="w-5 h-5 text-amber-300 shrink-0" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          {set.map((food) => {
-                            const fLoc = getLocalizedFood(food, language);
-                            return (
-                              <button
-                                key={food.id}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedFood(food);
-                                  setIsWhatToEatModalOpen(false);
-                                }}
-                                className="group rounded-2xl overflow-hidden bg-white/95 dark:bg-slate-800 border border-white/10 text-left active:scale-[0.97] transition cursor-pointer"
-                              >
-                                <span className="block aspect-4/3 w-full overflow-hidden bg-slate-200">
-                                  <img
-                                    src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 480, food.id)}
-                                    onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
-                                    alt={fLoc.name}
-                                    loading="lazy"
-                                    decoding="async"
-                                    draggable={false}
-                                    onContextMenu={(e) => e.preventDefault()}
-                                    className="w-full h-full object-cover select-none group-hover:scale-105 transition-transform duration-500"
-                                  />
-                                </span>
-                                <span className="block px-2 py-1.5 text-xs font-extrabold leading-snug text-slate-900 dark:text-white line-clamp-2 min-h-[2.4rem] font-khmer">
-                                  {fLoc.name}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  <p className="text-center text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                    {tr(language, 'ទំព័រ', 'Page', '第')} {setPage + 1} / {setPageCount}
-                    {language === 'zh' ? ' 页' : ''}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Redesigned 3 Free Selection Buttons: Meal Time, Food Category, Food Preferences */}
-            <div className="pt-2 space-y-2.5">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <Utensils className="w-4 h-4 text-[#064E3B] dark:text-emerald-400 shrink-0" strokeWidth={1.75} />
-                  <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
-                    {tr(
-                      language,
-                      'ជ្រើសរើសមុខម្ហូបតាមចំណូលចិត្ត (ឥតគិតថ្លៃ 100%)',
-                      'Select Dish Preferences (100% Free)',
-                      '按偏好筛选推荐菜品（100% 免费）'
-                    )}
-                  </span>
-                </div>
-                {(mealSlotFilter !== 'auto' || categoryFilter !== 'all' || cravingQuery.trim() || vipDietFilter !== 'none') && (
+              {(mealSlotFilter !== 'auto' || categoryFilter !== 'all' || cravingQuery.trim() || vipDietFilter !== 'none') && (
+                <div className="flex justify-end">
                   <button
                     type="button"
                     onClick={() => {
@@ -3261,206 +3134,17 @@ export const WhatToEatModal: React.FC = () => {
                       setSpinCount((c) => c + 1);
                       scrollToResultsSection();
                     }}
-                    className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-[11px] font-bold text-slate-700 dark:text-slate-200 inline-flex items-center gap-1 shrink-0 cursor-pointer"
+                    className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-[11px] font-bold text-slate-700 dark:text-slate-200 inline-flex items-center gap-1 cursor-pointer"
                   >
                     <RotateCcw className="w-3 h-3" strokeWidth={1.75} />
                     <span>{tr(language, 'កំណត់ឡើងវិញ', 'Reset', '重置')}</span>
                   </button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-3 gap-2">
-                {/* Button 1: Meal Time */}
-                <button
-                  type="button"
-                  data-testid="wte-tab-time"
-                  onClick={() => {
-                    setShowVipAiUpgradeNotice(false);
-                    setOpenGroup((cur) => (cur === 'time' ? null : 'time'));
-                  }}
-                  className={`relative p-2.5 rounded-2xl border text-left flex flex-col justify-between gap-1.5 transition cursor-pointer min-w-0 ${
-                    openGroup === 'time'
-                      ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-sm'
-                      : mealSlotFilter !== 'auto'
-                        ? 'bg-emerald-50 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-200 border-emerald-500'
-                        : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:border-emerald-400'
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="w-7 h-7 rounded-xl bg-emerald-600/15 dark:bg-emerald-400/15 flex items-center justify-center shrink-0">
-                      <Clock className="w-4 h-4" strokeWidth={1.75} />
-                    </span>
-                    <AccessBadge vip={false} />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-extrabold leading-snug truncate">
-                      {tr(language, '១. ពេលវេលា', '1. Meal Time', '1. 用餐时段')}
-                    </div>
-                    <div className={`text-[10px] leading-tight truncate mt-0.5 ${openGroup === 'time' ? 'text-emerald-100' : 'text-slate-500 dark:text-slate-400'}`}>
-                      {tr(language, 'ព្រឹក • ថ្ងៃត្រង់ • ល្ងាច', 'Morning, Noon, Night', '早 • 午 • 下午 • 晚')}
-                    </div>
-                  </div>
-                  <div
-                    className={`mt-0.5 px-2 py-1 rounded-lg text-[11px] font-extrabold truncate flex items-center gap-1 ${
-                      openGroup === 'time'
-                        ? 'bg-white/15 text-amber-300'
-                        : mealSlotFilter !== 'auto'
-                          ? 'bg-[#064E3B] text-white'
-                          : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
-                    }`}
-                  >
-                    <CheckCircle2 className="w-3 h-3 shrink-0" strokeWidth={1.75} />
-                    <span className="truncate">
-                      {mealSlotFilter === 'auto' || !activeSlot
-                        ? tr(language, 'ពេលនេះ', 'Right Now', '当前时段')
-                        : stripLeadingSymbols(tr(language, activeSlot.kh, activeSlot.en, activeSlot.zh))}
-                    </span>
-                  </div>
-                </button>
-
-                {/* Button 2: Food Category */}
-                <button
-                  type="button"
-                  data-testid="wte-tab-type"
-                  onClick={() => {
-                    setShowVipAiUpgradeNotice(false);
-                    setOpenGroup((cur) => (cur === 'type' ? null : 'type'));
-                  }}
-                  className={`relative p-2.5 rounded-2xl border text-left flex flex-col justify-between gap-1.5 transition cursor-pointer min-w-0 ${
-                    openGroup === 'type'
-                      ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-sm'
-                      : categoryFilter !== 'all'
-                        ? 'bg-emerald-50 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-200 border-emerald-500'
-                        : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:border-emerald-400'
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="w-7 h-7 rounded-xl bg-emerald-600/15 dark:bg-emerald-400/15 flex items-center justify-center shrink-0">
-                      <Utensils className="w-4 h-4" strokeWidth={1.75} />
-                    </span>
-                    <AccessBadge vip={false} />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-extrabold leading-snug truncate">
-                      {tr(language, '២. ប្រភេទម្ហូប', '2. Category', '2. 菜品分类')}
-                    </div>
-                    <div className={`text-[10px] leading-tight truncate mt-0.5 ${openGroup === 'type' ? 'text-emerald-100' : 'text-slate-500 dark:text-slate-400'}`}>
-                      {tr(language, 'បាយ • គុយទាវ • សម្ល • ឆា', 'Rice, Noodle, Soup', '饭 • 面 • 汤 • 烤')}
-                    </div>
-                  </div>
-                  <div
-                    className={`mt-0.5 px-2 py-1 rounded-lg text-[11px] font-extrabold truncate flex items-center gap-1 ${
-                      openGroup === 'type'
-                        ? 'bg-white/15 text-amber-300'
-                        : categoryFilter !== 'all'
-                          ? 'bg-[#064E3B] text-white'
-                          : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
-                    }`}
-                  >
-                    <CheckCircle2 className="w-3 h-3 shrink-0" strokeWidth={1.75} />
-                    <span className="truncate">
-                      {categoryFilter === 'all' || !activeCategory
-                        ? tr(language, 'ទាំងអស់', 'All Types', '全部类别')
-                        : tr(language, activeCategory.labelKh, activeCategory.labelEn, activeCategory.labelZh)}
-                    </span>
-                  </div>
-                </button>
-
-                {/* Button 3: Food Preferences */}
-                <button
-                  type="button"
-                  data-testid="wte-tab-craving"
-                  onClick={() => {
-                    setShowVipAiUpgradeNotice(false);
-                    setOpenGroup((cur) => (cur === 'craving' ? null : 'craving'));
-                  }}
-                  className={`relative p-2.5 rounded-2xl border text-left flex flex-col justify-between gap-1.5 transition cursor-pointer min-w-0 ${
-                    openGroup === 'craving'
-                      ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-sm'
-                      : cravingQuery.trim().length > 0
-                        ? 'bg-emerald-50 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-200 border-emerald-500'
-                        : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:border-emerald-400'
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="w-7 h-7 rounded-xl bg-emerald-600/15 dark:bg-emerald-400/15 flex items-center justify-center shrink-0">
-                      <Compass className="w-4 h-4" strokeWidth={1.75} />
-                    </span>
-                    <AccessBadge vip={false} />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-extrabold leading-snug truncate">
-                      {tr(language, '៣. ចំណង់ចំណូលចិត្ត', '3. Preferences', '3. 口味偏好')}
-                    </div>
-                    <div className={`text-[10px] leading-tight truncate mt-0.5 ${openGroup === 'craving' ? 'text-emerald-100' : 'text-slate-500 dark:text-slate-400'}`}>
-                      {tr(language, 'ហឹរ • ជូរហឹរ • សមុទ្រ • បួស', 'Spicy, Sour, Seafood', '辣 • 酸辣 • 海鲜 • 素')}
-                    </div>
-                  </div>
-                  <div
-                    className={`mt-0.5 px-2 py-1 rounded-lg text-[11px] font-extrabold truncate flex items-center gap-1 ${
-                      openGroup === 'craving'
-                        ? 'bg-white/15 text-amber-300'
-                        : cravingQuery.trim().length > 0
-                          ? 'bg-[#064E3B] text-white'
-                          : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
-                    }`}
-                  >
-                    <CheckCircle2 className="w-3 h-3 shrink-0" strokeWidth={1.75} />
-                    <span className="truncate">
-                      {cravingQuery.trim()
-                        ? cravingQuery.trim()
-                        : tr(language, 'គ្រប់រសជាតិ', 'Any Taste', '不限口味')}
-                    </span>
-                  </div>
-                </button>
-              </div>
-
-              {/* Optional VIP Dietary Filter Bar */}
-              <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
-                <div className="flex items-center gap-2 min-w-0">
-                  <Leaf className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.75} />
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">
-                    {tr(language, 'ជម្រើសសុខភាពបន្ថែម៖', 'Dietary Goal:', '健康饮食筛选：')}{' '}
-                    <strong className="text-[#064E3B] dark:text-emerald-300">
-                      {vipDietFilter === 'none' || !activeHealth
-                        ? tr(language, 'ធម្មតា', 'Standard', '常规')
-                        : tr(language, activeHealth.shortKh, activeHealth.shortEn, activeHealth.shortZh)}
-                    </strong>
-                  </span>
                 </div>
-                <button
-                  type="button"
-                  data-testid="wte-tab-health"
-                  onClick={() => setOpenGroup((cur) => (cur === 'health' ? null : 'health'))}
-                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-[11px] font-bold text-slate-800 dark:text-slate-100 inline-flex items-center gap-1 shrink-0 cursor-pointer"
-                >
-                  <AccessBadge vip />
-                  <span>{tr(language, 'ជ្រើសរើស', 'Select', '选择')}</span>
-                </button>
-              </div>
+              )}
 
-              {/* Expanded Options Panel when a button is clicked */}
+              {/* Expanded options panel */}
               {openGroup && (
-                <div className="p-3 rounded-2xl bg-emerald-50/90 dark:bg-slate-800 border-2 border-[#064E3B] dark:border-emerald-600 space-y-2 shadow-xs">
-                  <div className="flex items-center justify-between gap-2 pb-1 border-b border-emerald-200/80 dark:border-slate-700">
-                    <span className="text-xs font-extrabold text-[#064E3B] dark:text-emerald-300">
-                      {openGroup === 'time'
-                        ? tr(language, 'ជ្រើសរើសពេលវេលាញ៉ាំអាហារ (បង្ហាញម្ហូប ១០ មុខភ្លាមៗ)៖', 'Select Meal Time (Shows 10 Dishes Below):', '选择用餐时段（立即在下方显示 10 道推荐菜）：')
-                        : openGroup === 'type'
-                          ? tr(language, 'ជ្រើសរើសប្រភេទម្ហូប (បង្ហាញម្ហូប ១០ មុខភ្លាមៗ)៖', 'Select Food Category (Shows 10 Dishes Below):', '选择菜品分类（立即在下方显示 10 道推荐菜）：')
-                          : openGroup === 'craving'
-                            ? tr(language, 'ជ្រើសរើសចំណង់ចំណូលចិត្ត (ឥតគិតថ្លៃ • បង្ហាញម្ហូប ១០ មុខភ្លាមៗ)៖', 'Select Food Preference (Free • Shows 10 Dishes Below):', '选择口味偏好（免费 • 立即在下方显示 10 道推荐菜）：')
-                            : tr(language, 'ជ្រើសរើសរបបអាហារសុខភាព៖', 'Select Dietary Preference:', '选择健康饮食偏好：')}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setOpenGroup(null)}
-                      className="text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 cursor-pointer"
-                    >
-                      {tr(language, 'បិទ', 'Close', '关闭')}
-                    </button>
-                  </div>
-
+                <div className="p-2.5 rounded-2xl bg-emerald-50/80 dark:bg-slate-800 border border-emerald-200 dark:border-slate-700">
                   <div className="flex flex-wrap gap-1.5">
                     {openGroup === 'time' &&
                       MEAL_SLOTS.map((slot) => {
@@ -3635,7 +3319,7 @@ export const WhatToEatModal: React.FC = () => {
                           >
                             <OptIcon className="w-3.5 h-3.5 shrink-0" />
                             <span>{tr(language, opt.labelKh, opt.labelEn, opt.labelZh)}</span>
-                            <AccessBadge vip={opt.vip} />
+                            {opt.vip && <AccessBadge vip />}
                           </button>
                         );
                       })}
@@ -3643,84 +3327,177 @@ export const WhatToEatModal: React.FC = () => {
                 </div>
               )}
 
-              {/* Direct Free Generate / Shuffle 10 Recommended Dishes CTA Button */}
-              <button
-                id="kft-wte-generate-10-btn"
-                data-testid="wte-generate-10-btn"
-                type="button"
-                onClick={handleShowAnother}
-                className="w-full py-2.5 px-3.5 rounded-2xl bg-[#064E3B] hover:bg-[#047857] text-white font-extrabold text-xs shadow-xs flex items-center justify-between gap-2 transition active:scale-[0.99] cursor-pointer"
-              >
-                <span className="flex items-center gap-2 min-w-0">
-                  <Shuffle className={`w-4 h-4 text-amber-300 shrink-0 ${isSpinning ? 'animate-spin' : ''}`} strokeWidth={1.75} />
-                  <span className="truncate">
-                    {tr(
-                      language,
-                      'បញ្ចូលម្ហូបសំណាង • បង្ហាញម្ហូបណែនាំទាំង ១០ មុខ',
-                      'Lucky Dish Shuffle • Generate 10 Recommended Dishes',
-                      '幸运推荐 • 生成 10 道推荐菜品'
-                    )}
+              {/* Beverage Pairings — one slim row */}
+              <div ref={drinkPairingTopRef} className="space-y-2 scroll-mt-2">
+                <button
+                  type="button"
+                  onClick={handleOpenDrinkPairing}
+                  className={`w-full rounded-2xl px-3 py-2.5 flex items-center gap-3 text-left border transition active:scale-[0.99] cursor-pointer ${
+                    drinkMode
+                      ? 'bg-[#064E3B] border-[#064E3B] text-white'
+                      : 'bg-amber-50 dark:bg-slate-800 border-amber-200 dark:border-slate-700 text-slate-900 dark:text-white'
+                  }`}
+                >
+                  <span
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                      drinkMode ? 'bg-white/10 text-amber-300' : 'bg-amber-100 dark:bg-amber-400/15 text-amber-700 dark:text-amber-300'
+                    }`}
+                  >
+                    <IconBeveragePairing className="w-5 h-5" />
                   </span>
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-700 text-amber-200 text-[10px] font-black shrink-0">
-                  {tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}
-                </span>
-              </button>
+                  <span className="flex-1 min-w-0 font-moul text-xs leading-relaxed truncate">
+                    {tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佐餐与饮品搭配')}
+                  </span>
+                  {drinkMode ? (
+                    <CheckCircle2 className="w-4 h-4 text-amber-300 shrink-0" strokeWidth={1.75} />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" strokeWidth={1.75} />
+                  )}
+                </button>
+
+                {drinkMode && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {([
+                      {
+                        id: 'all' as const,
+                        icon: <IconBeveragePairing className="w-3.5 h-3.5 shrink-0" />,
+                        kh: 'ទាំងអស់',
+                        en: 'All Pairings',
+                        zh: '全部搭配',
+                      },
+                      {
+                        id: 'beer' as const,
+                        icon: <IconGrillFlame className="w-3.5 h-3.5 shrink-0" />,
+                        kh: 'អាំង & ចៀនស្រួយ',
+                        en: 'Grilled & Crispy',
+                        zh: '烧烤与香脆',
+                      },
+                      {
+                        id: 'spirits' as const,
+                        icon: <IconZestyCitrus className="w-3.5 h-3.5 shrink-0" />,
+                        kh: 'ញាំជូរហឹរ & ម្ហូបពិសេស',
+                        en: 'Zesty & Savory',
+                        zh: '酸辣与风味小食',
+                      },
+                    ]).map((k) => (
+                      <button
+                        key={k.id}
+                        type="button"
+                        onClick={() => {
+                          setDrinkKind(k.id);
+                          setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 transition cursor-pointer ${
+                          drinkKind === k.id
+                            ? 'bg-[#064E3B] text-white border border-[#064E3B]'
+                            : 'bg-white dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 border border-emerald-200 dark:border-slate-600'
+                        }`}
+                      >
+                        {k.icon}
+                        <span>{tr(language, k.kh, k.en, k.zh)}</span>
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSpinning(true);
+                        setTimeout(() => {
+                          setSetPage(0);
+                          setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
+                          setSpinCount((c) => c + 1);
+                          setIsSpinning(false);
+                        }, 180);
+                      }}
+                      className="px-3 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 transition active:scale-95 cursor-pointer"
+                    >
+                      <Shuffle className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+                      <span>{tr(language, 'ចាប់ឈុតថ្មីចៃដន្យ', 'Randomize Sets', '随机生成新套餐')}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Content body */}
           <div ref={dishCardRef} className="p-4 space-y-3">
 
-            {/* Clearly Labeled RESULTS Section — Placed Directly Below Selection Buttons */}
+            {/* Beverage Pairing sets */}
+            {showSets && (
+              <div className={`space-y-4 transition-opacity duration-200 ${isSpinning ? 'opacity-30' : 'opacity-100'}`}>
+                {visibleSets.map((set, idx) => {
+                  const setNo = setPage * PAIRING_SETS_PER_PAGE + idx + 1;
+                  return (
+                    <div key={`${setPage}-${idx}`} className="space-y-2">
+                      <div className="flex items-center gap-2 px-0.5">
+                        <span className="w-6 h-6 rounded-md bg-[#064E3B] text-amber-300 text-[11px] font-black flex items-center justify-center shrink-0">
+                          {setNo}
+                        </span>
+                        <span className="font-moul text-xs text-slate-900 dark:text-white truncate">
+                          {tr(language, `ឈុតម្ហូបទី ${setNo}`, `Pairing Set ${setNo}`, `搭配套餐 ${setNo}`)}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2.5">
+                        {set.map((food) => {
+                          const fLoc = getLocalizedFood(food, language);
+                          return (
+                            <button
+                              key={food.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedFood(food);
+                                setIsWhatToEatModalOpen(false);
+                              }}
+                              className="group rounded-2xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs text-left active:scale-[0.97] transition cursor-pointer"
+                            >
+                              <span className="block aspect-4/3 w-full overflow-hidden bg-slate-200">
+                                <img
+                                  src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 480, food.id)}
+                                  onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
+                                  alt={fLoc.name}
+                                  loading="lazy"
+                                  decoding="async"
+                                  draggable={false}
+                                  onContextMenu={(e) => e.preventDefault()}
+                                  className="w-full h-full object-cover select-none group-hover:scale-105 transition-transform duration-500"
+                                />
+                              </span>
+                              <span className="block px-2.5 py-2 text-[13px] font-extrabold leading-snug text-slate-900 dark:text-white line-clamp-2 min-h-[2.8rem] font-khmer">
+                                {fLoc.name}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+                <p className="text-center text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                  {tr(language, 'ទំព័រ', 'Page', '第')} {setPage + 1} / {setPageCount}
+                  {language === 'zh' ? ' 页' : ''}
+                </p>
+              </div>
+            )}
+
+            {/* Results */}
             {!showSets && !isMedicalRefusalActive && (
               <div
                 id="kft-wte-results-section"
                 data-testid="wte-results-section"
-                className="space-y-3 font-khmer"
+                className="space-y-4 font-khmer"
               >
-                {/* RESULTS Section Header */}
-                <div
-                  id="kft-wte-ai-match-banner"
-                  className="p-3.5 rounded-2xl bg-[#064E3B] text-white border border-emerald-700 shadow-xs space-y-2"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 text-[10px] font-black tracking-wide shrink-0">
-                        {tr(language, 'លទ្ធផល • RESULTS', 'RESULTS', '推荐结果')}
-                      </span>
-                      <h4 className="text-xs sm:text-sm font-extrabold text-white truncate">
-                        {tr(
-                          language,
-                          `មុខម្ហូបណែនាំទាំង ${recommendedTenDishes.length} មុខ`,
-                          `Top ${recommendedTenDishes.length} Recommended Dishes`,
-                          `为您推荐的 ${recommendedTenDishes.length} 道美食`
-                        )}
-                      </h4>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleShowAnother}
-                      className="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-extrabold inline-flex items-center gap-1 shrink-0 cursor-pointer transition active:scale-95"
-                    >
-                      <Shuffle className={`w-3.5 h-3.5 shrink-0 ${isSpinning ? 'animate-spin' : ''}`} strokeWidth={1.75} />
-                      <span>{tr(language, 'ប្តូរ ១០ មុខថ្មី', 'Shuffle 10', '换 10 道')}</span>
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2 flex-wrap text-[11px] text-emerald-100">
-                    <span>
-                      {tr(
-                        language,
-                        `ការណែនាំមុខម្ហូបសម្រាប់ «${activeCriteriaLabel}»`,
-                        `Dish picks for "${activeCriteriaLabel}"`,
-                        `当前筛选："${activeCriteriaLabel}"`
-                      )}
-                    </span>
-                    <span className="text-[10px] font-bold text-amber-300">
-                      {tr(language, 'ឥតគិតថ្លៃ 100% • ចុចលើម្ហូបដើម្បីមើលរូបមន្ត', '100% Free • Tap any dish for recipe', '100% 免费 • 点击菜品查看详情')}
-                    </span>
-                  </div>
+                <div id="kft-wte-ai-match-banner" className="px-0.5">
+                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white truncate">
+                    {tr(
+                      language,
+                      `មុខម្ហូបណែនាំទាំង ${recommendedTenDishes.length} មុខ`,
+                      `Top ${recommendedTenDishes.length} Recommended Dishes`,
+                      `为您推荐的 ${recommendedTenDishes.length} 道美食`
+                    )}
+                  </h4>
+                  {activeFilterParts.length > 0 && (
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">{activeCriteriaLabel}</p>
+                  )}
                 </div>
 
                 {/* Loading State */}
@@ -3730,14 +3507,7 @@ export const WhatToEatModal: React.FC = () => {
                     className="p-4 rounded-2xl bg-emerald-50 dark:bg-slate-800 border border-emerald-200 dark:border-slate-700 flex items-center justify-center gap-2.5 text-xs font-extrabold text-[#064E3B] dark:text-emerald-300"
                   >
                     <Shuffle className="w-4 h-4 animate-spin shrink-0" strokeWidth={1.75} />
-                    <span>
-                      {tr(
-                        language,
-                        'កំពុងជ្រើសរើសមុខម្ហូបណែនាំទាំង ១០ មុខសម្រាប់អ្នក...',
-                        'Generating your 10 recommended dishes...',
-                        '正在为您生成 10 道推荐菜品...'
-                      )}
-                    </span>
+                    <span>{tr(language, 'កំពុងជ្រើសរើសម្ហូបថ្មី...', 'Generating 10 Dishes...', '正在为您更换新推荐...')}</span>
                   </div>
                 )}
 
@@ -3774,14 +3544,6 @@ export const WhatToEatModal: React.FC = () => {
                         '没有符合该筛选组合的菜品'
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                      {tr(
-                        language,
-                        'សូមចុចកំណត់តម្រងឡើងវិញដើម្បីមើលមុខម្ហូបណែនាំទាំង ១០ មុខ។',
-                        'Reset the filters to see 10 recommended dishes.',
-                        '请重置筛选条件以查看 10 道推荐美食。'
-                      )}
-                    </p>
                     <button
                       type="button"
                       onClick={() => {
@@ -3800,120 +3562,19 @@ export const WhatToEatModal: React.FC = () => {
                   </div>
                 )}
 
-                {/* 10 Recommended Dishes List (#1 to #10) */}
-                {!recommendationError && recommendedTenDishes.length > 0 && (
-                  <div
-                    data-testid="wte-ten-dishes-results"
-                    className={`space-y-2.5 transition-opacity duration-200 ${isSpinning ? 'opacity-40' : 'opacity-100'}`}
-                  >
-                    <div className="grid grid-cols-1 gap-2.5">
-                      {recommendedTenDishes.map((d, index) => {
-                        const dLoc = getLocalizedFood(d, language);
-                        const isSelectedHero = currentDish?.id === d.id;
-                        return (
-                          <div
-                            key={d.id}
-                            data-testid={`wte-result-dish-${index + 1}`}
-                            onClick={() => {
-                              setCurrentDishId(d.id);
-                              seenDishIdsRef.current.add(d.id);
-                            }}
-                            className={`p-2.5 rounded-2xl border transition flex items-start gap-3 cursor-pointer ${
-                              isSelectedHero
-                                ? 'bg-emerald-50/90 dark:bg-emerald-950/40 border-[#064E3B] dark:border-emerald-500 shadow-xs'
-                                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-emerald-500'
-                            }`}
-                          >
-                            <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-700 shrink-0">
-                              <img
-                                src={resolveFoodPhotoUrl(d.photoUrl, d.photoUpdatedAt, 320, d.id)}
-                                alt={dLoc.name}
-                                loading="lazy"
-                                decoding="async"
-                                onError={(e) => handleFoodImageError(e, d.id, d.photoUrl)}
-                                className="w-full h-full object-cover"
-                              />
-                              <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded-md bg-[#064E3B] text-amber-300 text-[10px] font-black shadow-2xs">
-                                #{index + 1}
-                              </span>
-                            </div>
-
-                            <div className="min-w-0 flex-1 space-y-1">
-                              <div className="flex items-start justify-between gap-1.5">
-                                <h5 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white leading-snug line-clamp-1">
-                                  {dLoc.name}
-                                </h5>
-                                <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 text-[10px] font-bold shrink-0">
-                                  {dLoc.category}
-                                </span>
-                              </div>
-
-                              <div className="flex items-center gap-2.5 text-[11px] text-slate-600 dark:text-slate-300 font-semibold">
-                                <span className="inline-flex items-center gap-0.5 text-amber-600 dark:text-amber-400 font-bold">
-                                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" strokeWidth={1.75} />
-                                  {d.rating}
-                                </span>
-                                <span className="inline-flex items-center gap-1">
-                                  <Clock className="w-3.5 h-3.5 text-emerald-600" strokeWidth={1.75} />
-                                  {dLoc.cookTime}
-                                </span>
-                                <span className="inline-flex items-center gap-1">
-                                  <ChefHat className="w-3.5 h-3.5 text-emerald-600" strokeWidth={1.75} />
-                                  {dLoc.difficultyLabel}
-                                </span>
-                              </div>
-
-                              <p className="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-1 leading-relaxed">
-                                {dLoc.description}
-                              </p>
-
-                              <div className="flex items-center gap-1.5 pt-0.5">
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedFood(d);
-                                    setIsWhatToEatModalOpen(false);
-                                  }}
-                                  className="px-2.5 py-1 rounded-lg bg-[#064E3B] hover:bg-[#047857] text-white text-[10px] font-extrabold inline-flex items-center gap-1 cursor-pointer"
-                                >
-                                  <Utensils className="w-3 h-3 text-amber-300" strokeWidth={1.75} />
-                                  <span>{tr(language, 'មើលរូបមន្តលម្អិត', 'View Recipe', '查看食谱')}</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleCompareDish(d.id);
-                                  }}
-                                  className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-[10px] font-bold cursor-pointer"
-                                >
-                                  {comparedDishIds.includes(d.id)
-                                    ? tr(language, 'កំពុងប្រៀបធៀប', 'Comparing', '已对比')
-                                    : tr(language, 'ប្រៀបធៀប', 'Compare', '对比')}
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Highlighted Dish Full Preview Card */}
+                {/* Featured dish: large photo, three facts, two actions */}
                 {currentDish && currentLoc && !suppressBigCard && (
                   <div
                     data-testid="wte-picked-dish-card"
                     data-dish-id={currentDish.id}
                     className="relative rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-md"
                   >
-                    <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                    <div className="relative aspect-4/3 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                       {isGeneratedDishId(currentDish.id) &&
                       !failedOnlineDishIds[currentDish.id] &&
                       !hasRenderablePhoto(currentDish.photoUrl) ? (
-                        <div className="w-full h-full bg-gradient-to-br from-[#064E3B] via-[#047857] to-slate-900 flex flex-col items-center justify-center gap-2.5 text-emerald-100 p-6 text-center">
-                          <ChefHat className="w-8 h-8 text-amber-300" />
+                        <div className="w-full h-full bg-[#064E3B] flex flex-col items-center justify-center gap-2.5 text-emerald-100 p-6 text-center">
+                          <ChefHat className="w-8 h-8 text-amber-300" strokeWidth={1.75} />
                           <span className="text-xs font-bold font-khmer">
                             {tr(language, 'កំពុងរៀបចំរូបភាព...', 'Preparing photo...', '正在准备图片...')}
                           </span>
@@ -3931,18 +3592,11 @@ export const WhatToEatModal: React.FC = () => {
                           decoding="async"
                         />
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent pointer-events-none" />
 
-                      {/* Badge */}
-                      <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
-                        <span className="px-2.5 py-1 rounded-full bg-amber-400 text-stone-900 text-xs font-black shadow-xs flex items-center gap-1 font-khmer">
-                          <Award className="w-3.5 h-3.5 text-amber-900" />
-                          {tr(language, 'ម្ហូបណែនាំសម្រាប់អ្នក', 'Recommended Dish', '为您推荐')}
-                        </span>
-                        <span className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-xs text-white text-[11px] font-bold">
-                          {currentLoc.category}
-                        </span>
-                      </div>
+                      <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/55 backdrop-blur-xs text-white text-[11px] font-bold font-khmer">
+                        {currentLoc.category}
+                      </span>
 
                       {/* Khmer ownership watermark (applied once) */}
                       {!isUrlWatermarkedAtPixelLevel(currentDish.photoUrl) && (
@@ -3951,8 +3605,7 @@ export const WhatToEatModal: React.FC = () => {
                         </span>
                       )}
 
-                      {/* Title overlay */}
-                      <div className="absolute bottom-3 left-3 right-24 text-white">
+                      <div className="absolute bottom-3 left-4 right-24 text-white">
                         <h2
                           id="kft-wte-picked-dish-name"
                           className="font-moul text-base sm:text-lg text-white drop-shadow leading-snug"
@@ -3962,30 +3615,23 @@ export const WhatToEatModal: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Details info */}
                     <div className="p-4 space-y-3 font-khmer">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-300">
-                          {!isGeneratedDishId(currentDish.id) && (
+                      <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-300">
+                        {!isGeneratedDishId(currentDish.id) && (
                           <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                            <Star className="w-4 h-4 fill-amber-400 text-amber-400" strokeWidth={1.75} />
                             <span className="font-bold">{currentDish.rating}</span>
                           </div>
-                          )}
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-4 h-4 text-emerald-600" />
-                            <span>{currentLoc.cookTime}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <ChefHat className="w-4 h-4 text-emerald-600" />
-                            <span className="capitalize">{currentLoc.difficultyLabel}</span>
-                          </div>
+                        )}
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4 text-emerald-600" strokeWidth={1.75} />
+                          <span>{currentLoc.cookTime}</span>
+                        </div>
+                        <div className="flex items-center gap-1 min-w-0">
+                          <ChefHat className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.75} />
+                          <span className="capitalize truncate">{currentLoc.difficultyLabel}</span>
                         </div>
                       </div>
-
-                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
-                        {currentLoc.description}
-                      </p>
 
                       {(() => {
                         const pInfo = drinkMode ? getDrinkPairing(currentDish) : null;
@@ -3995,29 +3641,15 @@ export const WhatToEatModal: React.FC = () => {
                           : brainInfo?.reason;
                         if (!reason) return null;
                         return (
-                          <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
-                            <div className="flex items-start gap-1.5">
-                              <IconCravingSpark className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
-                              <span>{reason}</span>
-                            </div>
-                          </div>
+                          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2">
+                            {reason}
+                          </p>
                         );
                       })()}
 
                       {/* Restaurants Serving It */}
                       {servingRestaurants.length > 0 && (
-                        <div className="p-2.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 space-y-1.5">
-                          <div className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-400 flex items-center gap-1">
-                            <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>
-                              {tr(
-                                language,
-                                'ហាងឆ្ងាញ់ៗដែលមានលក់ម្ហូបនេះ៖',
-                                'Recommended restaurants serving this:',
-                                '推荐品尝此菜品的餐厅：'
-                              )}
-                            </span>
-                          </div>
+                        <div className="rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 px-2.5 py-1.5 divide-y divide-emerald-100/80 dark:divide-emerald-900/40">
                           {servingRestaurants.map((r) => {
                             const rLoc = getLocalizedRestaurant(r, language);
                             return (
@@ -4028,7 +3660,7 @@ export const WhatToEatModal: React.FC = () => {
                                   setSelectedRestaurant(r);
                                   setIsWhatToEatModalOpen(false);
                                 }}
-                                className="w-full flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-200 hover:text-emerald-600 py-1 cursor-pointer"
+                                className="w-full flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-200 hover:text-emerald-600 py-1.5 cursor-pointer"
                               >
                                 <ShopAvatar
                                   restaurant={r}
@@ -4036,6 +3668,7 @@ export const WhatToEatModal: React.FC = () => {
                                   className="w-7 h-7 rounded-lg"
                                 />
                                 <span className="font-bold truncate flex-1 text-left">{rLoc.name}</span>
+                                <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" strokeWidth={1.75} />
                               </button>
                             );
                           })}
@@ -4043,51 +3676,146 @@ export const WhatToEatModal: React.FC = () => {
                       )}
 
                       {/* Action Buttons */}
-                      <div className="grid grid-cols-2 gap-2 pt-1">
+                      <div className="flex items-stretch gap-2 pt-0.5">
                         <button
                           type="button"
                           onClick={() => {
                             setSelectedFood(currentDish);
                             setIsWhatToEatModalOpen(false);
                           }}
-                          className="py-2.5 px-3 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                          className="flex-1 min-w-0 py-2.5 px-3 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                         >
-                          <Utensils className="w-3.5 h-3.5 text-amber-300" />
-                          <span>{tr(language, 'មើលរូបមន្តពេញ', 'Full Recipe', '查看完整食谱')}</span>
+                          <Utensils className="w-4 h-4 text-amber-300 shrink-0" strokeWidth={1.75} />
+                          <span className="truncate">{tr(language, 'មើលរូបមន្តពេញ', 'Full Recipe', '查看完整食谱')}</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={handleFindNearbyForDish}
-                          className="py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 text-[#064E3B] dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                          className="flex-1 min-w-0 py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 text-[#064E3B] dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1.5 cursor-pointer"
                         >
-                          <Navigation className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>{tr(language, 'ស្វែងរកហាងជិតខ្ញុំ', 'Find Nearby', '查找附近餐厅')}</span>
+                          <Navigation className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.75} />
+                          <span className="truncate">{tr(language, 'ស្វែងរកហាងជិតខ្ញុំ', 'Find Nearby', '查找附近餐厅')}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          aria-label={tr(language, 'រក្សាទុកក្នុងបញ្ជីចូលចិត្ត', 'Save to Favorites', '收藏到心愿单')}
+                          title={tr(language, 'រក្សាទុកក្នុងបញ្ជីចូលចិត្ត', 'Save to Favorites', '收藏到心愿单')}
+                          onClick={() =>
+                            openAddToWishlist({
+                              id: currentDish.id,
+                              type: 'food',
+                              nameKh: currentDish.nameKh,
+                              nameEn: currentDish.nameEn,
+                              photoUrl: currentDish.photoUrl,
+                              categoryKh: currentDish.categoryKh,
+                              priceDisplay: currentLoc.cookTime,
+                              rating: currentDish.rating,
+                            })
+                          }
+                          className="w-11 shrink-0 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/70 text-slate-700 dark:text-slate-200 rounded-xl transition flex items-center justify-center cursor-pointer"
+                        >
+                          <Heart className="w-4 h-4" strokeWidth={1.75} />
                         </button>
                       </div>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          openAddToWishlist({
-                            id: currentDish.id,
-                            type: 'food',
-                            nameKh: currentDish.nameKh,
-                            nameEn: currentDish.nameEn,
-                            photoUrl: currentDish.photoUrl,
-                            categoryKh: currentDish.categoryKh,
-                            priceDisplay: currentLoc.cookTime,
-                            rating: currentDish.rating,
-                          })
-                        }
-                        className="w-full py-2 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/70 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
-                        <span>{tr(language, 'រក្សាទុកក្នុងបញ្ជីចូលចិត្ត', 'Save to Favorites', '收藏到心愿单')}</span>
-                      </button>
                     </div>
                   </div>
                 )}
+
+                {/* More dishes: large photo cards, two per row */}
+                {!recommendationError &&
+                  (() => {
+                    const heroShown = Boolean(currentDish && currentLoc && !suppressBigCard);
+                    const gridDishes = heroShown
+                      ? recommendedTenDishes.filter((x) => x.id !== currentDish!.id)
+                      : recommendedTenDishes;
+                    if (gridDishes.length === 0) return null;
+                    return (
+                      <div
+                        data-testid="wte-ten-dishes-results"
+                        className={`grid grid-cols-2 gap-3 transition-opacity duration-200 ${isSpinning ? 'opacity-40' : 'opacity-100'}`}
+                      >
+                        {gridDishes.map((d) => {
+                          const rank = recommendedTenDishes.findIndex((x) => x.id === d.id) + 1;
+                          const dLoc = getLocalizedFood(d, language);
+                          const isCompared = comparedDishIds.includes(d.id);
+                          const compareLabel = isCompared
+                            ? tr(language, 'កំពុងប្រៀបធៀប', 'Comparing', '已对比')
+                            : tr(language, 'ប្រៀបធៀប', 'Compare', '对比');
+                          return (
+                            <div
+                              key={d.id}
+                              data-testid={`wte-result-dish-${rank}`}
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => {
+                                setCurrentDishId(d.id);
+                                seenDishIdsRef.current.add(d.id);
+                                scrollToResultsSection();
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  setCurrentDishId(d.id);
+                                  seenDishIdsRef.current.add(d.id);
+                                  scrollToResultsSection();
+                                }
+                              }}
+                              className="group rounded-2xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs text-left active:scale-[0.98] transition cursor-pointer"
+                            >
+                              <div className="relative aspect-4/3 w-full overflow-hidden bg-slate-200 dark:bg-slate-700">
+                                <img
+                                  src={resolveFoodPhotoUrl(d.photoUrl, d.photoUpdatedAt, 480, d.id)}
+                                  alt={dLoc.name}
+                                  loading="lazy"
+                                  decoding="async"
+                                  onError={(e) => handleFoodImageError(e, d.id, d.photoUrl)}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                                <span className="absolute top-2 left-2 min-w-6 h-6 px-1.5 rounded-full bg-[#064E3B] text-amber-300 text-[11px] font-black flex items-center justify-center">
+                                  {rank}
+                                </span>
+                                <button
+                                  type="button"
+                                  aria-label={compareLabel}
+                                  title={compareLabel}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleCompareDish(d.id);
+                                  }}
+                                  className={`absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition active:scale-90 cursor-pointer ${
+                                    isCompared ? 'bg-amber-400 text-slate-950' : 'bg-black/50 text-white hover:bg-black/70'
+                                  }`}
+                                >
+                                  {isCompared ? (
+                                    <Check className="w-4 h-4" strokeWidth={1.75} />
+                                  ) : (
+                                    <Plus className="w-4 h-4" strokeWidth={1.75} />
+                                  )}
+                                </button>
+                              </div>
+                              <div className="p-2.5 space-y-1">
+                                <h5 className="text-[13px] font-extrabold text-slate-900 dark:text-white leading-snug line-clamp-2 min-h-[2.4rem]">
+                                  {dLoc.name}
+                                </h5>
+                                <div className="flex items-center gap-2.5 text-[11px] text-slate-600 dark:text-slate-300 font-semibold">
+                                  <span className="inline-flex items-center gap-0.5">
+                                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" strokeWidth={1.75} />
+                                    {d.rating}
+                                  </span>
+                                  <span className="inline-flex items-center gap-1 min-w-0">
+                                    <Clock className="w-3.5 h-3.5 text-emerald-600 shrink-0" strokeWidth={1.75} />
+                                    <span className="truncate">{dLoc.cookTime}</span>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
               </div>
             )}
 
@@ -4110,14 +3838,6 @@ export const WhatToEatModal: React.FC = () => {
                         )}
                       </span>
                     </div>
-                    <p className="text-[11px] font-semibold text-amber-800/95 dark:text-amber-200/90 leading-snug">
-                      {tr(
-                        language,
-                        'បីរសជាតិ បីជម្រើស តើមួយណាជាចំណង់ថ្ងៃនេះ?',
-                        'Three flavors, three choices — which one are you craving today?',
-                        '三种风味，三种选择，今天最想吃哪一道？'
-                      )}
-                    </p>
                   </div>
                   <button
                     type="button"
@@ -4162,7 +3882,7 @@ export const WhatToEatModal: React.FC = () => {
                               onClick={() => toggleCompareDish(cDish.id)}
                               className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/65 text-white flex items-center justify-center text-[10px] cursor-pointer"
                             >
-                              ✕
+                              <X className="w-3 h-3" strokeWidth={1.75} />
                             </button>
                           </div>
                           <div className="font-extrabold text-slate-900 dark:text-white line-clamp-1">{cLoc.name}</div>
@@ -4197,21 +3917,21 @@ export const WhatToEatModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Big Re-roll / Shuffle Button (100% Free for All Users): «បញ្ចូលម្ហូបសំណាង / បង្ហាញម្ហូបផ្សេងទៀត» */}
-        <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0">
+        {/* Primary action: show other dishes (free) */}
+        <div className="px-3 py-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0">
           <button
             id="kft-wte-next-dish-btn"
             type="button"
             onClick={handleShowAnother}
-            className="w-full py-3.5 px-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-black text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98] font-khmer cursor-pointer"
+            className="w-full py-3 px-4 rounded-2xl bg-[#064E3B] hover:bg-[#047857] text-white font-extrabold text-sm shadow-xs flex items-center justify-center gap-2 transition active:scale-[0.98] font-khmer cursor-pointer"
           >
-            <Shuffle className={`w-5 h-5 ${isSpinning ? 'animate-spin' : ''}`} strokeWidth={1.75} />
+            <Shuffle className={`w-4 h-4 text-amber-300 ${isSpinning ? 'animate-spin' : ''}`} strokeWidth={1.75} />
             <span>
               {isSpinning
                 ? tr(language, 'កំពុងជ្រើសរើសម្ហូបថ្មី...', 'Generating 10 Dishes...', '正在为您更换新推荐...')
                 : showSets
                   ? tr(language, 'បង្ហាញឈុតម្ហូបផ្សេងទៀត', 'Show More Sets', '查看更多套餐')
-                  : tr(language, 'បញ្ចូលម្ហូបសំណាង • បង្ហាញម្ហូបផ្សេងទៀត (ឥតគិតថ្លៃ)', 'Shuffle 10 Recommended Dishes (Free)', '换一批推荐菜品（免费）')}
+                  : tr(language, 'បង្ហាញម្ហូបផ្សេងទៀត', 'Show More Dishes', '换一批推荐菜品')}
             </span>
           </button>
         </div>
