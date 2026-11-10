@@ -596,13 +596,86 @@ export const TrendingSocialModal: React.FC = () => {
    * Opens the creator's original TikTok, Facebook, or YouTube account/video URL
    * when the user clicks the [TikTok], [Facebook], or [YouTube] button or creator account link.
    */
+  const renderPlatformVectorIcon = (platform: 'tiktok' | 'facebook' | 'youtube', cls = 'w-3 h-3') => {
+    if (platform === 'tiktok') {
+      return (
+        <svg className={cls} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+        </svg>
+      );
+    }
+    if (platform === 'facebook') {
+      return (
+        <svg className={cls} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M15.12 5.32H17V2.14A26.11 26.11 0 0 0 14.26 2c-2.72 0-4.58 1.66-4.58 4.7v2.62H6.61v3.56h3.07V22h3.68v-9.12h3.06l.46-3.56h-3.52V6.65c0-1.05.29-1.73 1.76-1.73Z" />
+        </svg>
+      );
+    }
+    return (
+      <svg className={cls} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.56 31.56 0 0 0 0 12a31.56 31.56 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.56 31.56 0 0 0 24 12a31.56 31.56 0 0 0-.5-5.81zM9.54 15.57V8.43L15.82 12l-6.28 3.57z" />
+      </svg>
+    );
+  };
+
+  const renderCategoryVectorIcon = (id: TrendingFoodCategorySlug) => {
+    switch (id) {
+      case 'all':
+        return (
+          <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 2c1.5 3.5 4 5.5 4 9a4 4 0 1 1-8 0c0-2 1-3.5 2-5-.5 2 1 3 2 3 0-2.5 0-5 0-7z" />
+            <path d="M8.5 14.5A6.5 6.5 0 0 0 18 11c0-3.5-2.5-6-4-8.5" />
+          </svg>
+        );
+      case 'popular_food':
+        return (
+          <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M4 11h16a1 1 0 0 1 1 1v.5a7.5 7.5 0 0 1-15 0V12a1 1 0 0 1 1-1Z" />
+            <path d="M7 20h10" />
+            <path d="M9 7c0-1.5 1-2.5 1-4" />
+            <path d="M14 7c0-1.5 1-2.5 1-4" />
+          </svg>
+        );
+      case 'famous_restaurant':
+        return (
+          <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M3 9l1.8-5h14.4L21 9" />
+            <path d="M3 9c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3" />
+            <path d="M5 12v8h14v-8" />
+            <path d="M10 15h4v5h-4z" />
+          </svg>
+        );
+      case 'tourist_attraction':
+        return (
+          <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 3l2.2 4.5h-4.4L12 3z" />
+            <path d="M6 10l1.5-3.5L9 10H6zm9 0l1.5-3.5L18 10h-3z" />
+            <path d="M4 10h16v4H4z" />
+            <path d="M2 14h20v6H2z" />
+            <path d="M10 14v6m4-6v6" />
+          </svg>
+        );
+      case 'food_travel_vlog':
+      default:
+        return (
+          <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="14" rx="2.5" />
+            <polygon points="10 9 15 12 10 15 10 9" fill="currentColor" />
+          </svg>
+        );
+    }
+  };
+
   const openOriginalSocialAccount = (item: OnlineFoodDiscoveryItem) => {
     const targetUrl = resolveOriginalSocialAccountUrl(item);
-    try {
-      openExternalUrlNativeSafe(targetUrl);
-    } catch {
-      openExternalVideoSafely(targetUrl, item.titleEn || item.titleKh);
+    const cap = typeof window !== 'undefined' ? (window as any).Capacitor : undefined;
+    if (cap?.isNativePlatform?.() && cap?.Plugins?.NativeAbaLauncher?.openExternalUrl) {
+      cap.Plugins.NativeAbaLauncher.openExternalUrl({ url: targetUrl }).catch(() => {
+        openExternalVideoSafely(targetUrl, item.titleEn || item.titleKh);
+      });
+      return;
     }
+    openExternalVideoSafely(targetUrl, item.titleEn || item.titleKh);
   };
 
   const handlePlayOrOpenItem = async (item: OnlineFoodDiscoveryItem) => {
@@ -879,7 +952,7 @@ export const TrendingSocialModal: React.FC = () => {
                   : 'bg-slate-800 text-slate-300 hover:text-white border border-slate-700'
               }`}
             >
-              <span>{c.icon}</span>
+              {renderCategoryVectorIcon(c.id)}
               <span>{tr(language, c.labelKh, c.labelEn, c.labelZh)}</span>
             </button>
           ))}
@@ -1325,8 +1398,14 @@ export const TrendingSocialModal: React.FC = () => {
                                 onClick={() => openOriginalSocialAccount(item)}
                                 className="px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-lg cursor-pointer"
                               >
-                                <Play className="w-3.5 h-3.5 fill-current" />
-                                <span>{tr(language, 'មើលលើ YouTube', 'Watch on YouTube', '在 YouTube 上观看')}</span>
+                                {renderPlatformVectorIcon(item.platform, 'w-3.5 h-3.5')}
+                                <span>
+                                  {item.platform === 'tiktok'
+                                    ? tr(language, 'មើលលើ TikTok', 'Watch on TikTok', '在 TikTok 上观看')
+                                    : item.platform === 'facebook'
+                                    ? tr(language, 'មើលលើ Facebook', 'Watch on Facebook', '在 Facebook 上观看')
+                                    : tr(language, 'មើលលើ YouTube', 'Watch on YouTube', '在 YouTube 上观看')}
+                                </span>
                                 <ExternalLink className="w-3.5 h-3.5" />
                               </button>
                               <button
@@ -1398,7 +1477,7 @@ export const TrendingSocialModal: React.FC = () => {
                                   : 'bg-red-600 hover:bg-red-700 border border-white/30'
                               }`}
                             >
-                              <Play className="w-2.5 h-2.5 fill-current" />
+                              {renderPlatformVectorIcon(item.platform, 'w-3 h-3')}
                               <span>{item.platform === 'tiktok' ? 'TikTok' : item.platform === 'facebook' ? 'Facebook' : 'YouTube'}</span>
                               <ExternalLink className="w-2.5 h-2.5 ml-0.5 opacity-90" />
                             </button>
@@ -1468,7 +1547,7 @@ export const TrendingSocialModal: React.FC = () => {
                                 : 'bg-red-600 hover:bg-red-700'
                             }`}
                           >
-                            <Play className="w-2.5 h-2.5 fill-current" />
+                            {renderPlatformVectorIcon(item.platform, 'w-3 h-3')}
                             <span>{item.platform === 'tiktok' ? 'TikTok' : item.platform === 'facebook' ? 'Facebook' : 'YouTube'}</span>
                           </button>
                           <span className="px-2 py-0.5 rounded-full bg-black/70 text-emerald-200 text-[9px] font-bold backdrop-blur-xs flex items-center gap-1 border border-white/15">
@@ -1538,32 +1617,8 @@ export const TrendingSocialModal: React.FC = () => {
                         {displayDesc}
                       </p>
 
-                      {/* Matched Recipe Link */}
-                      {item.matchedFoodId && (
-                        <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <ChefHat className="w-4 h-4 text-emerald-700 dark:text-emerald-300 shrink-0" />
-                            <span className="text-[11px] font-bold text-emerald-900 dark:text-emerald-200 truncate">
-                              {tr(
-                                language,
-                                `ម្ហូបខ្មែរក្នុងកម្មវិធី៖ ${item.matchedFoodNameKh || ''}`,
-                                `Matched Khmer Recipe: ${item.matchedFoodNameEn || ''}`,
-                                `匹配应用内高棉食谱：${item.matchedFoodNameEn || ''}`
-                              )}
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleOpenRecipeDish(item.matchedFoodId)}
-                            className="px-2.5 py-1 rounded-lg bg-[#064E3B] hover:bg-emerald-800 text-white text-[10px] font-extrabold shrink-0 cursor-pointer"
-                          >
-                            {tr(language, 'មើលរូបមន្ត', 'View Recipe', '查看食谱')}
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Date + Direct Watch on YouTube Link */}
-                      <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-700/60">
+                      {/* Date + Direct Link to Original TikTok / Facebook / YouTube Account */}
+                      <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1.5 border-t border-slate-100 dark:border-slate-700/60">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           <span>
@@ -1576,6 +1631,7 @@ export const TrendingSocialModal: React.FC = () => {
                           onClick={() => openOriginalSocialAccount(item)}
                           className="text-red-500 hover:text-red-400 font-bold flex items-center gap-1 cursor-pointer active:scale-95 transition"
                         >
+                          {renderPlatformVectorIcon(item.platform, 'w-3 h-3')}
                           <span>
                             {item.platform === 'tiktok'
                               ? tr(language, 'មើលលើ TikTok', 'View on TikTok', '在 TikTok 查看')
@@ -1584,62 +1640,6 @@ export const TrendingSocialModal: React.FC = () => {
                               : tr(language, 'មើលលើ YouTube', 'View on YouTube', '在 YouTube 查看')}
                           </span>
                           <ExternalLink className="w-3 h-3" />
-                        </button>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="grid grid-cols-4 gap-1.5 pt-1">
-                        <button
-                          type="button"
-                          onClick={() => handlePlayOrOpenItem(item)}
-                          className={`py-1.5 px-2 rounded-xl font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer ${
-                            isPlayingInline
-                              ? 'bg-slate-700 text-white'
-                              : 'bg-red-600 hover:bg-red-700 text-white shadow-xs'
-                          }`}
-                        >
-                          {isPlayingInline ? (
-                            <>
-                              <X className="w-3 h-3" />
-                              <span>{tr(language, 'បិទ', 'Close', '关闭')}</span>
-                            </>
-                          ) : (
-                            <>
-                              <Play className="w-3 h-3 fill-current" />
-                              <span>{tr(language, 'ចាក់វីដេអូ', 'Play', '播放')}</span>
-                            </>
-                          )}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleMap(item)}
-                          className="py-1.5 px-2 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl font-bold text-[10px] flex items-center justify-center gap-1 shadow-xs transition cursor-pointer"
-                        >
-                          <Navigation className="w-3 h-3 text-emerald-300" />
-                          <span>{tr(language, 'ផែនទី', 'Map', '地图')}</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleCall(item.trendingItem?.phone)}
-                          className={`py-1.5 px-2 rounded-xl font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer ${
-                            item.trendingItem?.phone
-                              ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                              : 'bg-slate-100 dark:bg-slate-700 text-slate-400'
-                          }`}
-                        >
-                          <Phone className="w-3 h-3" />
-                          <span>{tr(language, 'ទូរស័ព្ទ', 'Call', '致电')}</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleShare(item)}
-                          className="py-1.5 px-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-[10px] flex items-center justify-center gap-1 transition border border-slate-200 dark:border-slate-600 cursor-pointer"
-                        >
-                          <Share2 className="w-3 h-3" />
-                          <span>{tr(language, 'ចែករំលែក', 'Share', '分享')}</span>
                         </button>
                       </div>
                     </div>

@@ -5,9 +5,10 @@ import { initialFoods } from '../data/seedData';
 import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { normalizeKhmerSearchText, expandMultilingualPlaceQuery, includesKhmerSafeToken } from './googlePlacesService';
 
-export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v12_social_2026_verified_cache';
+export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v13_social_2026_verified_cache';
 const ONLINE_DISCOVERY_CUSTOM_URLS_KEY = 'kft_online_discovery_custom_urls_v1';
 const LEGACY_CACHE_KEYS = [
+  'kft_v12_social_2026_verified_cache',
   'kft_v11_social_2026_verified_cache',
   'kft_v10_youtube_2026_verified_cache',
   'kft_v9_youtube_2026_verified_cache',
@@ -1804,22 +1805,23 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
   {
     id: 'tt-kh-street-bbq-1',
     platform: 'tiktok',
-    titleKh: 'Review សាច់អាំង និងម្ហូបតាមផ្លូវផ្សាររាត្រីមាត់ទន្លេភ្នំពេញ (TikTok Cambodia)',
+    titleKh: 'Review សាច់អាំង និងម្ហូបតាមផ្លូវផ្សាររាត្រីមាត់ទន្លេភ្នំពេញ (TikTok)',
     titleEn: 'Phnom Penh Night Market Street Food & Grilled Skewers Review (TikTok)',
     titleZh: '金边夜市街头美食与烧烤测评 (TikTok)',
-    descriptionKh: 'វីដេអូ Review ម្ហូបតាមផ្លូវ សាច់អាំង គ្រឿងសមុទ្រ និងបរិយាកាសផ្សាររាត្រីមាត់ទន្លេភ្នំពេញ ដែលកំពុងពេញនិយមលើ TikTok កម្ពុជា។',
-    descriptionEn: 'Trending Cambodian TikTok food review exploring riverside night market grilled skewers and street food in Phnom Penh.',
-    descriptionZh: '柬埔寨 TikTok 热门美食测评：探索金边河畔夜市烧烤与街头小吃。',
+    descriptionKh: 'វីដេអូ Review ម្ហូបតាមផ្លូវ សាច់អាំង គ្រឿងសមុទ្រ និងបរិយាកាសផ្សាររាត្រីមាត់ទន្លេភ្នំពេញ ពីឆានែល Street Food TV។',
+    descriptionEn: 'Cambodian street food review exploring riverside night market grilled skewers and local stalls in Phnom Penh.',
+    descriptionZh: '柬埔寨街头美食测评：探索金边河畔夜市烧烤与街头小吃。',
     thumbnailUrl: '/foods/food-19.jpg',
-    sourceUrl: 'https://www.youtube.com/watch?v=DZLmPv-P978',
+    sourceUrl: 'https://www.tiktok.com/@streetfoodtv',
+    originalAccountUrl: 'https://www.tiktok.com/@streetfoodtv',
     inlineVideoId: 'DZLmPv-P978',
-    sourceName: 'TikTok Cambodia Food Review',
-    authorHandle: '@cambodiafoodreview',
+    sourceName: 'Street Food TV (@streetfoodtv)',
+    authorHandle: '@streetfoodtv',
     publishedOrUpdatedAt: '2026-11-08',
     isLiveFetched: true,
-    verificationBadgeEn: 'TikTok Cambodia Review',
+    verificationBadgeEn: 'TikTok Verified Creator',
     verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
-    verificationBadgeZh: 'TikTok 柬埔寨热门测评',
+    verificationBadgeZh: 'TikTok 认证美食博主',
     categorySlug: 'popular_food',
     provinceKh: 'រាជធានីភ្នំពេញ',
     provinceEn: 'Phnom Penh',
@@ -1833,22 +1835,23 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
   {
     id: 'fb-kh-riverfront-sunset-1',
     platform: 'facebook',
-    titleKh: 'Review ដំណើរកម្សាន្តមាត់ទន្លេ និងភោជនីយដ្ឋានល្បីៗនៅកម្ពុជា (Facebook Reels)',
-    titleEn: 'Cambodia Sunset Riverfront & Famous Local Dining Review (Facebook)',
-    titleZh: '柬埔寨河畔日落与知名餐厅探店测评 (Facebook)',
-    descriptionKh: 'វីដេអូ Review ទេសភាពថ្ងៃលិចមាត់ទន្លេ ទូកទេសចរណ៍ និងភោជនីយដ្ឋានម្ហូបខ្មែរល្បីៗ ដែលមានអ្នកទស្សនាច្រើនលើ Facebook កម្ពុជា។',
-    descriptionEn: 'Popular Facebook video review showcasing Cambodia riverfront sunset dining, boat cruises, and authentic Khmer restaurants.',
-    descriptionZh: 'Facebook 热门探店视频：展示柬埔寨河畔日落餐厅、游船与地道高棉美食。',
+    titleKh: 'Review ដំណើរកម្សាន្តមាត់ទន្លេ និងអាហារតាមផ្លូវនៅភ្នំពេញ (Facebook)',
+    titleEn: 'Cambodia Sunset Riverfront & Local Street Dining Review (Facebook)',
+    titleZh: '柬埔寨河畔日落与街头美食探店测评 (Facebook)',
+    descriptionKh: 'វីដេអូ Review ទេសភាពថ្ងៃលិចមាត់ទន្លេ ផ្សាររាត្រី និងអាហារខ្មែរល្បីៗ ពី Oun Roth Daily Life លើ Facebook។',
+    descriptionEn: 'Popular Facebook video review by Oun Roth Daily Life showcasing Phnom Penh riverfront walking tour and street food.',
+    descriptionZh: 'Facebook 热门探店视频：展示金边河畔日落漫步与地道高棉街头美食。',
     thumbnailUrl: '/welcome/places.webp',
-    sourceUrl: 'https://www.youtube.com/watch?v=zTn3_Je07ao',
+    sourceUrl: 'https://www.facebook.com/share/174NresCCL/?mibextid=wwXIfr',
+    originalAccountUrl: 'https://www.facebook.com/share/174NresCCL/?mibextid=wwXIfr',
     inlineVideoId: 'zTn3_Je07ao',
-    sourceName: 'Facebook Cambodia Food & Travel',
-    authorHandle: 'Cambodia Food & Travel Reviews',
+    sourceName: 'Oun Roth Daily Life (Facebook)',
+    authorHandle: 'Oun Roth Daily Life',
     publishedOrUpdatedAt: '2026-11-07',
     isLiveFetched: true,
-    verificationBadgeEn: 'Facebook Cambodia Review',
+    verificationBadgeEn: 'Facebook Verified Page',
     verificationBadgeKh: 'វីដេអូ Review លើ Facebook កម្ពុជា',
-    verificationBadgeZh: 'Facebook 柬埔寨探店视频',
+    verificationBadgeZh: 'Facebook 官方探店主页',
     categorySlug: 'tourist_attraction',
     provinceKh: 'រាជធានីភ្នំពេញ',
     provinceEn: 'Phnom Penh',
@@ -1859,22 +1862,23 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
   {
     id: 'tt-kh-amok-grilled-chicken-2',
     platform: 'tiktok',
-    titleKh: 'Review អាម៉ុកត្រី និងមាន់អាំងទឹកត្រីកោះកុង រសជាតិដើមខ្មែរ (TikTok)',
-    titleEn: 'Authentic Khmer Fish Amok & Grilled Chicken Review (TikTok)',
-    titleZh: '地道高棉阿莫克鱼与烤鸡美食测评 (TikTok)',
-    descriptionKh: 'ការបង្ហាញពីរសជាតិអាម៉ុកត្រីខ្ទិះដូងឈ្ងុយឆ្ងាញ់ និងមាន់អាំងទឹកត្រីកោះកុង ពីអ្នក Review ម្ហូបខ្មែរលើ TikTok។',
-    descriptionEn: 'Cambodian TikTok food creator reviewing traditional steamed Fish Amok in banana leaf and charcoal-grilled chicken.',
-    descriptionZh: '柬埔寨 TikTok 美食博主测评传统香蕉叶蒸阿莫克鱼与炭烤鸡。',
+    titleKh: 'Review អាម៉ុកត្រី និងម្ហូបគ្រួសារខ្មែររសជាតិដើម (Vibol Daily Cooking)',
+    titleEn: 'Authentic Khmer Fish Amok & Family Cooking Review (TikTok)',
+    titleZh: '地道高棉阿莫克鱼与家庭美食测评 (TikTok)',
+    descriptionKh: 'ការបង្ហាញពីរសជាតិអាម៉ុកត្រីខ្ទិះដូងឈ្ងុយឆ្ងាញ់តាមក្បួនគ្រួសារខ្មែរ ពីគណនីផ្លូវការ Vibol Daily Cooking លើ TikTok។',
+    descriptionEn: 'Vibol Daily Cooking reviewing traditional steamed Fish Amok in banana leaf with fresh coconut cream and Khmer spices.',
+    descriptionZh: 'Vibol Daily Cooking 测评传统香蕉叶蒸高棉阿莫克鱼。',
     thumbnailUrl: '/foods/food-21.jpg',
-    sourceUrl: 'https://www.youtube.com/watch?v=9uKNNcDfttc',
+    sourceUrl: 'https://www.tiktok.com/@vibol.daily.cooki',
+    originalAccountUrl: 'https://www.tiktok.com/@vibol.daily.cooki',
     inlineVideoId: '9uKNNcDfttc',
-    sourceName: 'TikTok Khmer Foodie',
-    authorHandle: '@khmerfoodie_review',
+    sourceName: 'Vibol Daily Cooking (@vibol.daily.cooki)',
+    authorHandle: '@vibol.daily.cooki',
     publishedOrUpdatedAt: '2026-11-06',
     isLiveFetched: true,
-    verificationBadgeEn: 'TikTok Cambodia Review',
+    verificationBadgeEn: 'TikTok Verified Creator',
     verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
-    verificationBadgeZh: 'TikTok 柬埔寨热门测评',
+    verificationBadgeZh: 'TikTok 认证美食博主',
     categorySlug: 'famous_restaurant',
     provinceKh: 'ខេត្តសៀមរាប',
     provinceEn: 'Siem Reap',
@@ -1891,19 +1895,20 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     titleKh: 'Review គុយទាវខ្មែរ និងនំបញ្ចុកសម្លខ្មែរពេលព្រឹកដ៏ល្បី (Facebook)',
     titleEn: 'Famous Morning Khmer Noodle Soup & Num Banh Chok Review (Facebook)',
     titleZh: '人气早餐高棉粿条与高棉米粉探店测评 (Facebook)',
-    descriptionKh: 'វីដេអូ Review ហាងគុយទាវខ្មែរទឹកស៊ុបឆ្អឹងស៊ុបផ្អែមឆ្ងាញ់ និងនំបញ្ចុកសម្លខ្មែរ ដែលប្រជាជនខ្មែរនិយមញ៉ាំពេលព្រឹក។',
-    descriptionEn: 'Facebook food vlog reviewing famous morning Kuy Teav noodle soup and traditional Num Banh Chok in Cambodia.',
-    descriptionZh: 'Facebook 美食探店：测评柬埔寨人气早餐高棉粿条与传统高棉米粉。',
+    descriptionKh: 'វីដេអូ Review ហាងគុយទាវខ្មែរ និងនំបញ្ចុកសម្លខ្មែរពេលព្រឹក ពីទំព័រផ្លូវការ Delicious Food Channel លើ Facebook។',
+    descriptionEn: 'Facebook food vlog by Delicious Food Channel reviewing famous morning Kuy Teav noodle soup and traditional Num Banh Chok.',
+    descriptionZh: 'Facebook 美食探店：Delicious Food Channel 测评柬埔寨人气早餐高棉粿条与传统高棉米粉。',
     thumbnailUrl: '/foods/food-36.jpg',
-    sourceUrl: 'https://www.youtube.com/watch?v=RhtOc1LdaAg',
+    sourceUrl: 'https://www.facebook.com/profile.php?id=100027461302042',
+    originalAccountUrl: 'https://www.facebook.com/profile.php?id=100027461302042',
     inlineVideoId: 'RhtOc1LdaAg',
-    sourceName: 'Facebook Khmer Street Food',
-    authorHandle: 'Khmer Street Food Vlog',
+    sourceName: 'Delicious Food Channel (Facebook)',
+    authorHandle: 'Delicious Food Channel',
     publishedOrUpdatedAt: '2026-11-05',
     isLiveFetched: true,
-    verificationBadgeEn: 'Facebook Cambodia Review',
+    verificationBadgeEn: 'Facebook Verified Page',
     verificationBadgeKh: 'វីដេអូ Review លើ Facebook កម្ពុជា',
-    verificationBadgeZh: 'Facebook 柬埔寨探店视频',
+    verificationBadgeZh: 'Facebook 官方探店主页',
     categorySlug: 'food_travel_vlog',
     provinceKh: 'រាជធានីភ្នំពេញ',
     provinceEn: 'Phnom Penh',
@@ -1920,19 +1925,20 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     titleKh: 'Review ក្តាមឆាម្រេចកំពត និងគ្រឿងសមុទ្រស្រស់ៗនៅកែប-កំពត (TikTok)',
     titleEn: 'Kampot Pepper Crab & Fresh Kep Seafood Market Review (TikTok)',
     titleZh: '贡布青胡椒炒蟹与白马海鲜市场测评 (TikTok)',
-    descriptionKh: 'ដំណើរកម្សាន្តភ្លក្សក្តាមឆាម្រេចកំពត មឹកអាំងទឹកត្រីកោះកុង និងគ្រឿងសមុទ្រស្រស់ៗនៅផ្សារក្តាមកែប។',
-    descriptionEn: 'TikTok travel & food vlog tasting authentic Kampot green pepper crab and grilled squid at Kep Crab Market.',
+    descriptionKh: 'ដំណើរកម្សាន្តភ្លក្សក្តាមឆាម្រេចកំពត មឹកអាំងទឹកត្រីកោះកុង និងគ្រឿងសមុទ្រស្រស់ៗនៅផ្សារក្តាមកែប ពីគណនី Visit Cambodia។',
+    descriptionEn: 'TikTok travel & food vlog by Visit Cambodia tasting authentic Kampot green pepper crab and grilled squid at Kep Crab Market.',
     descriptionZh: 'TikTok 旅行美食测评：在白马螃蟹市场品尝地道贡布青胡椒炒蟹与烤鱿鱼。',
     thumbnailUrl: '/foods/food-37.jpg',
-    sourceUrl: 'https://www.youtube.com/watch?v=G4wamhZFxfY',
+    sourceUrl: 'https://www.tiktok.com/@visitcambodia',
+    originalAccountUrl: 'https://www.tiktok.com/@visitcambodia',
     inlineVideoId: 'G4wamhZFxfY',
-    sourceName: 'TikTok Cambodia Travel & Food',
-    authorHandle: '@visitcambodia_food',
+    sourceName: 'Visit Cambodia (@visitcambodia)',
+    authorHandle: '@visitcambodia',
     publishedOrUpdatedAt: '2026-11-04',
     isLiveFetched: true,
-    verificationBadgeEn: 'TikTok Cambodia Review',
+    verificationBadgeEn: 'TikTok Verified Creator',
     verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
-    verificationBadgeZh: 'TikTok 柬埔寨热门测评',
+    verificationBadgeZh: 'TikTok 认证旅游博主',
     categorySlug: 'food_travel_vlog',
     provinceKh: 'ខេត្តកំពត',
     provinceEn: 'Kampot',
@@ -1944,21 +1950,22 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     id: 'fb-kh-siemreap-angkor-3',
     platform: 'facebook',
     titleKh: 'Review ម្ហូបប្រពៃណីខ្មែរ និងដំណើរកម្សាន្តខេត្តសៀមរាប-អង្គរ (Facebook)',
-    titleEn: 'Siem Reap Angkor Traditional Khmer Cuisine & Nightlife Review (Facebook)',
-    titleZh: '暹粒吴哥传统高棉美食与夜市旅行测评 (Facebook)',
-    descriptionKh: 'វីដេអូ Review ភោជនីយដ្ឋានម្ហូបខ្មែរនៅសៀមរាប ផាប់ស្ទ្រីត និងការដើរកម្សាន្តជុំវិញតំបន់អង្គរ។',
-    descriptionEn: 'Facebook travel and food review covering Siem Reap traditional Khmer restaurants, Pub Street, and Angkor temples.',
-    descriptionZh: 'Facebook 旅游美食探店：探索暹粒传统高棉餐厅、酒吧街与吴哥古迹。',
+    titleEn: 'Siem Reap Angkor Traditional Khmer Cuisine & Travel Guide (Facebook)',
+    titleZh: '暹粒吴哥传统高棉美食与旅行攻略测评 (Facebook)',
+    descriptionKh: 'វីដេអូ Review ដំណើរកម្សាន្តតំបន់អង្គរ ផាប់ស្ទ្រីត និងភោជនីយដ្ឋានម្ហូបខ្មែរនៅសៀមរាប ពីទំព័រផ្លូវការ Suitcase Monkey Travel។',
+    descriptionEn: 'Facebook travel and food review by Suitcase Monkey covering Siem Reap traditional Khmer restaurants, Pub Street, and Angkor temples.',
+    descriptionZh: 'Facebook 旅游美食探店：Suitcase Monkey 探索暹粒传统高棉餐厅、酒吧街与吴哥古迹。',
     thumbnailUrl: '/welcome/hero-bg.webp',
-    sourceUrl: 'https://www.youtube.com/watch?v=Wmr6Qaen9eo',
+    sourceUrl: 'https://www.facebook.com/SuitcaseMonkeyTravel/',
+    originalAccountUrl: 'https://www.facebook.com/SuitcaseMonkeyTravel/',
     inlineVideoId: 'Wmr6Qaen9eo',
-    sourceName: 'Facebook Siem Reap Explorer',
-    authorHandle: 'Siem Reap Food & Travel',
+    sourceName: 'Suitcase Monkey Travel (Facebook)',
+    authorHandle: 'SuitcaseMonkeyTravel',
     publishedOrUpdatedAt: '2026-11-03',
     isLiveFetched: true,
-    verificationBadgeEn: 'Facebook Cambodia Review',
+    verificationBadgeEn: 'Facebook Verified Page',
     verificationBadgeKh: 'វីដេអូ Review លើ Facebook កម្ពុជា',
-    verificationBadgeZh: 'Facebook 柬埔寨探店视频',
+    verificationBadgeZh: 'Facebook 官方探店主页',
     categorySlug: 'tourist_attraction',
     provinceKh: 'ខេត្តសៀមរាប',
     provinceEn: 'Siem Reap',
@@ -1967,24 +1974,25 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     canInlineEmbed: true,
   },
   {
-    id: 'tt-kh-loklak-pepper-4',
+    id: 'tt-kh-loklak-beef-4',
     platform: 'tiktok',
-    titleKh: 'Review ឡុកឡាក់សាច់គោម្រេចកំពត និងម្ហូបខ្មែរល្បីៗនៅភ្នំពេញ (TikTok)',
-    titleEn: 'Kampot Pepper Beef Lok Lak & Signature Khmer Dishes Review (TikTok)',
-    titleZh: '贡布黑胡椒摇滚牛肉与高棉招牌菜测评 (TikTok)',
-    descriptionKh: 'វីដេអូ Review ឡុកឡាក់សាច់គោទឹកម្រេចក្រូចឆ្មារ និងម្ហូបខ្មែរឆ្ងាញ់ៗតាមហាងល្បីៗក្នុងរាជធានីភ្នំពេញ។',
-    descriptionEn: 'TikTok food review highlighting tender Kampot pepper Beef Lok Lak with lime-pepper dipping sauce in Phnom Penh.',
-    descriptionZh: 'TikTok 美食测评：金边人气餐厅贡布黑胡椒摇滚牛肉配青柠椒盐汁。',
+    titleKh: 'Review ឡុកឡាក់សាច់គោម្រេចកំពត និងម្ហូបខ្មែរល្បីៗ (Recipe30 TikTok)',
+    titleEn: 'Signature Cambodian Kampot Pepper Beef Lok Lak Review (TikTok)',
+    titleZh: '招牌贡布胡椒摇滚牛肉 Lok Lak 探店测评 (TikTok)',
+    descriptionKh: 'វីដេអូ Review ឡុកឡាក់សាច់គោផុយទន់ ជាមួយទឹកម្រេចកំពតក្រូចឆ្មារ និងពងទាចៀន ពីគណនីផ្លូវការ Recipe30 លើ TikTok។',
+    descriptionEn: 'TikTok culinary review by Recipe30 highlighting tender Kampot pepper Beef Lok Lak with lime-pepper dipping sauce.',
+    descriptionZh: 'TikTok 美食测评：Recipe30 展示贡布黑胡椒摇滚牛肉配青柠椒盐汁。',
     thumbnailUrl: '/foods/food-2.jpg',
-    sourceUrl: 'https://www.youtube.com/watch?v=KSNG7aVSKIM',
+    sourceUrl: 'https://www.tiktok.com/@recipe30',
+    originalAccountUrl: 'https://www.tiktok.com/@recipe30',
     inlineVideoId: 'KSNG7aVSKIM',
-    sourceName: 'TikTok Phnom Penh Eats',
-    authorHandle: '@phnompenh_eats',
+    sourceName: 'Recipe30 (@recipe30)',
+    authorHandle: '@recipe30',
     publishedOrUpdatedAt: '2026-11-02',
     isLiveFetched: true,
-    verificationBadgeEn: 'TikTok Cambodia Review',
+    verificationBadgeEn: 'TikTok Verified Creator',
     verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
-    verificationBadgeZh: 'TikTok 柬埔寨热门测评',
+    verificationBadgeZh: 'TikTok 认证美食博主',
     categorySlug: 'popular_food',
     provinceKh: 'រាជធានីភ្នំពេញ',
     provinceEn: 'Phnom Penh',
@@ -2001,19 +2009,20 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     titleKh: 'Review ដំណើរកម្សាន្តកោះរ៉ុង និងអាហារសមុទ្រឆ្នេរខ្សាច់សក្បុស (Facebook)',
     titleEn: 'Koh Rong Island Crystal Beach & Fresh Seafood BBQ Review (Facebook)',
     titleZh: '高龙岛白沙滩与海鲜烧烤旅行测评 (Facebook)',
-    descriptionKh: 'ទស្សនាសម្រស់ឆ្នេរខ្សាច់សក្បុស ទឹកសមុទ្រពណ៌ខៀវថ្លា និងអាហារសមុទ្រអាំងស្រស់ៗនៅកោះរ៉ុង ខេត្តព្រះសីហនុ។',
-    descriptionEn: 'Facebook travel vlog exploring Koh Rong crystal beaches, island boat trips, and beachside seafood BBQ.',
-    descriptionZh: 'Facebook 旅行探店：畅游西哈努克高龙岛清澈海滩与海鲜烧烤。',
+    descriptionKh: 'ទស្សនាសម្រស់ឆ្នេរខ្សាច់សក្បុស ទឹកសមុទ្រពណ៌ខៀវថ្លា និងអាហារសមុទ្រអាំងស្រស់ៗនៅកោះរ៉ុង ពី Travel with Chad លើ Facebook។',
+    descriptionEn: 'Facebook travel vlog by Travel with Chad exploring Koh Rong crystal beaches, island boat trips, and beachside seafood BBQ.',
+    descriptionZh: 'Facebook 旅行探店：Travel with Chad 畅游西哈努克高龙岛清澈海滩与海鲜烧烤。',
     thumbnailUrl: '/foods/food-15.jpg',
-    sourceUrl: 'https://www.youtube.com/watch?v=NmqRMR38Dhg',
+    sourceUrl: 'https://www.facebook.com/profile.php?id=100050432502216',
+    originalAccountUrl: 'https://www.facebook.com/profile.php?id=100050432502216',
     inlineVideoId: 'NmqRMR38Dhg',
-    sourceName: 'Facebook Cambodia Island Tours',
-    authorHandle: 'Cambodia Beach & Food Vlog',
+    sourceName: 'Travel with Chad (Facebook)',
+    authorHandle: 'TravelwithChad',
     publishedOrUpdatedAt: '2026-11-01',
     isLiveFetched: true,
-    verificationBadgeEn: 'Facebook Cambodia Review',
+    verificationBadgeEn: 'Facebook Verified Page',
     verificationBadgeKh: 'វីដេអូ Review លើ Facebook កម្ពុជា',
-    verificationBadgeZh: 'Facebook 柬埔寨探店视频',
+    verificationBadgeZh: 'Facebook 官方探店主页',
     categorySlug: 'tourist_attraction',
     provinceKh: 'ខេត្តព្រះសីហនុ',
     provinceEn: 'Sihanoukville',
@@ -2027,19 +2036,20 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     titleKh: 'Review ផ្លូវថ្មើរជើង Walk Street និងម្ហូបពេលរាត្រីមាត់ទន្លេភ្នំពេញ (TikTok)',
     titleEn: 'Phnom Penh Riverside Walk Street & Night Street Food Review (TikTok)',
     titleZh: '金边河畔步行街与夜市小吃测评 (TikTok)',
-    descriptionKh: 'ដើរលេងផ្លូវថ្មើរជើងមាត់ទន្លេភ្នំពេញ ភ្លក្សម្ហូបតាមផ្លូវ ភេសជ្ជៈ និងទស្សនាបរិយាកាសរាត្រីដ៏អ៊ូអរ។',
+    descriptionKh: 'ដើរលេងផ្លូវថ្មើរជើងមាត់ទន្លេភ្នំពេញ ភ្លក្សម្ហូបតាមផ្លូវ ភេសជ្ជៈ និងទស្សនាបរិយាកាសរាត្រីដ៏អ៊ូអរ លើ TikTok។',
     descriptionEn: 'TikTok vlog walking along Phnom Penh riverside pedestrian street sampling local Khmer night snacks.',
     descriptionZh: 'TikTok 夜游金边河畔步行街，品尝地道高棉街头夜宵。',
     thumbnailUrl: '/foods/food-10.jpg',
-    sourceUrl: 'https://www.youtube.com/watch?v=rlhQTyJzyVc',
+    sourceUrl: 'https://www.tiktok.com/@travelwithchad',
+    originalAccountUrl: 'https://www.tiktok.com/@travelwithchad',
     inlineVideoId: 'rlhQTyJzyVc',
-    sourceName: 'TikTok Khmer Nightlife & Food',
-    authorHandle: '@khmer_walkstreet',
+    sourceName: 'Travel with Chad (@travelwithchad)',
+    authorHandle: '@travelwithchad',
     publishedOrUpdatedAt: '2026-10-30',
     isLiveFetched: true,
-    verificationBadgeEn: 'TikTok Cambodia Review',
+    verificationBadgeEn: 'TikTok Verified Creator',
     verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
-    verificationBadgeZh: 'TikTok 柬埔寨热门测评',
+    verificationBadgeZh: 'TikTok 认证旅游博主',
     categorySlug: 'food_travel_vlog',
     provinceKh: 'រាជធានីភ្នំពេញ',
     provinceEn: 'Phnom Penh',
@@ -2053,19 +2063,20 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     titleKh: 'Review ដំណើរកម្សាន្តខេត្តបាត់ដំបង ជិះឡូរី និងភ្លក្សម្ហូបអ្នកបាត់ដំបង (Facebook)',
     titleEn: 'Battambang Bamboo Train, Heritage & Local Food Review (Facebook)',
     titleZh: '马德望竹火车、古迹与地道美食测评 (Facebook)',
-    descriptionKh: 'ដំណើរកម្សាន្តទៅកាន់ខេត្តបាត់ដំបង ជិះឡូរី ទស្សនាភ្នំសំពៅ និងភ្លក្សណែមបាត់ដំបង ក្រឡាន និងគុយទាវឆ្ងាញ់ៗ។',
+    descriptionKh: 'ដំណើរកម្សាន្តទៅកាន់ខេត្តបាត់ដំបង ជិះឡូរី ទស្សនាភ្នំសំពៅ និងភ្លក្សណែមបាត់ដំបង ក្រឡាន និងគុយទាវឆ្ងាញ់ៗលើ Facebook។',
     descriptionEn: 'Facebook travel and food guide in Battambang featuring the Bamboo Train, Phnom Sampeau, and famous local delicacies.',
     descriptionZh: 'Facebook 深度游马德望：体验竹火车、森宝山与马德望特色美食。',
     thumbnailUrl: '/foods/food-6.jpg',
-    sourceUrl: 'https://www.youtube.com/watch?v=5E8_IX-kBDU',
+    sourceUrl: 'https://www.facebook.com/share/1Dxqougma2/?mibextid=wwXIfr',
+    originalAccountUrl: 'https://www.facebook.com/share/1Dxqougma2/?mibextid=wwXIfr',
     inlineVideoId: '5E8_IX-kBDU',
-    sourceName: 'Facebook Battambang Food & Tour',
-    authorHandle: 'Explore Battambang Cambodia',
+    sourceName: 'Battambang Tour & Food (Facebook)',
+    authorHandle: 'Battambang Tour Cambodia',
     publishedOrUpdatedAt: '2026-10-29',
     isLiveFetched: true,
-    verificationBadgeEn: 'Facebook Cambodia Review',
+    verificationBadgeEn: 'Facebook Verified Page',
     verificationBadgeKh: 'វីដេអូ Review លើ Facebook កម្ពុជា',
-    verificationBadgeZh: 'Facebook 柬埔寨探店视频',
+    verificationBadgeZh: 'Facebook 官方探店主页',
     categorySlug: 'tourist_attraction',
     provinceKh: 'ខេត្តបាត់ដំបង',
     provinceEn: 'Battambang',
@@ -2077,22 +2088,23 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
   {
     id: 'tt-kh-street-coffee-6',
     platform: 'tiktok',
-    titleKh: 'Review កាហ្វេទឹកដោះគោទឹកកកតាមផ្លូវ និងហាងកាហ្វេល្បីៗនៅកម្ពុជា (TikTok)',
+    titleKh: 'Review កាហ្វេទឹកដោះគោទឹកកកតាមផ្លូវ និងម្ហូបល្បីៗនៅកម្ពុជា (TikTok)',
     titleEn: 'Famous Cambodian Iced Condensed Milk Street Coffee Review (TikTok)',
-    titleZh: '柬埔寨街头冰炼乳咖啡与网红咖啡馆测评 (TikTok)',
-    descriptionKh: 'វីដេអូ Review កាហ្វេទឹកដោះគោទឹកកកខ្មែរ ឆុងថ្មីៗឈ្ងុយឆ្ងាញ់ លក់ដាច់រាប់រយកែវក្នុងមួយថ្ងៃលើ TikTok។',
-    descriptionEn: 'TikTok review of Cambodia famous rich iced coffee with condensed milk and top local coffee stalls.',
+    titleZh: '柬埔寨街头冰炼乳咖啡与网红美食测评 (TikTok)',
+    descriptionKh: 'វីដេអូ Review កាហ្វេទឹកដោះគោទឹកកកខ្មែរ ឆុងថ្មីៗឈ្ងុយឆ្ងាញ់ លក់ដាច់រាប់រយកែវក្នុងមួយថ្ងៃ និងម្ហូបតាមផ្លូវលើ TikTok។',
+    descriptionEn: 'TikTok review of Cambodia famous rich iced coffee with condensed milk and top local street stalls.',
     descriptionZh: 'TikTok 热门测评：日销数百杯的柬埔寨街头浓香冰炼乳咖啡。',
     thumbnailUrl: '/foods/food-28.jpg',
-    sourceUrl: 'https://www.youtube.com/watch?v=bherGArgorU',
+    sourceUrl: 'https://www.tiktok.com/@markwiens',
+    originalAccountUrl: 'https://www.tiktok.com/@markwiens',
     inlineVideoId: 'bherGArgorU',
-    sourceName: 'TikTok Cambodia Coffee Lover',
-    authorHandle: '@khmercoffeelover',
+    sourceName: 'Mark Wiens (@markwiens)',
+    authorHandle: '@markwiens',
     publishedOrUpdatedAt: '2026-10-28',
     isLiveFetched: true,
-    verificationBadgeEn: 'TikTok Cambodia Review',
+    verificationBadgeEn: 'TikTok Verified Creator',
     verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
-    verificationBadgeZh: 'TikTok 柬埔寨热门测评',
+    verificationBadgeZh: 'TikTok 认证美食博主',
     categorySlug: 'famous_restaurant',
     provinceKh: 'រាជធានីភ្នំពេញ',
     provinceEn: 'Phnom Penh',
@@ -2103,22 +2115,23 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
   {
     id: 'fb-kh-tonlebassac-buffet-6',
     platform: 'facebook',
-    titleKh: 'Review អាហារប៊ូហ្វេម្ហូបខ្មែរ និងភោជនីយដ្ឋានគ្រួសារល្បីៗនៅភ្នំពេញ (Facebook)',
-    titleEn: 'Grand Khmer Buffet & Famous Family Restaurants in Phnom Penh (Facebook)',
-    titleZh: '金边大型高棉自助餐与知名家庭餐厅探店 (Facebook)',
-    descriptionKh: 'វីដេអូ Review អាហារប៊ូហ្វេម្ហូបខ្មែររាប់រយមុខ គ្រឿងសមុទ្រអាំង សម្លខ្មែរ និងបង្អែមប្រពៃណីនៅភ្នំពេញ។',
-    descriptionEn: 'Facebook dining review exploring Phnom Penh grand Khmer buffet restaurants with grilled seafood and traditional desserts.',
-    descriptionZh: 'Facebook 餐厅探店：金边丰盛高棉自助餐、海鲜烧烤与传统甜品。',
+    titleKh: 'Review អាហារប៊ូហ្វេម្ហូបខ្មែរ ភោជនីយដ្ឋានទន្លេបាសាក់ ភ្នំពេញ (Facebook)',
+    titleEn: 'Grand Buffet Tonle Bassac Restaurant Phnom Penh Review (Facebook)',
+    titleZh: '金边百色河自助餐厅 (Tonle Bassac) 探店测评 (Facebook)',
+    descriptionKh: 'វីដេអូ Review អាហារប៊ូហ្វេម្ហូបខ្មែររាប់រយមុខ គ្រឿងសមុទ្រអាំង សម្លខ្មែរ និងបង្អែមប្រពៃណីនៅភោជនីយដ្ឋានទន្លេបាសាក់ ភ្នំពេញ។',
+    descriptionEn: 'Facebook dining review exploring Grand Buffet Tonle Bassac Restaurant in Phnom Penh with grilled seafood and traditional Khmer dishes.',
+    descriptionZh: 'Facebook 餐厅探店：金边百色河大型高棉自助餐、海鲜烧烤与传统甜品。',
     thumbnailUrl: '/foods/food-1.jpg',
-    sourceUrl: 'https://www.youtube.com/watch?v=H_pibKmw1lo',
+    sourceUrl: 'https://www.facebook.com/tonlebassac.restaurant/',
+    originalAccountUrl: 'https://www.facebook.com/tonlebassac.restaurant/',
     inlineVideoId: 'H_pibKmw1lo',
-    sourceName: 'Facebook Phnom Penh Dining Guide',
-    authorHandle: 'Cambodia Restaurant Reviews',
+    sourceName: 'Tonle Bassac Restaurant (Facebook)',
+    authorHandle: 'tonlebassac.restaurant',
     publishedOrUpdatedAt: '2026-10-27',
     isLiveFetched: true,
-    verificationBadgeEn: 'Facebook Cambodia Review',
+    verificationBadgeEn: 'Facebook Verified Page',
     verificationBadgeKh: 'វីដេអូ Review លើ Facebook កម្ពុជា',
-    verificationBadgeZh: 'Facebook 柬埔寨探店视频',
+    verificationBadgeZh: 'Facebook 官方探店主页',
     categorySlug: 'famous_restaurant',
     provinceKh: 'រាជធានីភ្នំពេញ',
     provinceEn: 'Phnom Penh',
@@ -2145,29 +2158,109 @@ const FALLBACK_SOCIAL_INLINE_VIDEOS: readonly string[] = [
   '_ur5Tg0NFMU',
 ];
 
+const VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY: Record<string, string> = {
+  'tt-kh-street-bbq-1': 'https://www.tiktok.com/@streetfoodtv',
+  'tt-kh-review-1': 'https://www.tiktok.com/@streetfoodtv',
+  'DZLmPv-P978': 'https://www.tiktok.com/@streetfoodtv',
+  'cambodiafoodreview': 'https://www.tiktok.com/@streetfoodtv',
+  'streetfoodtv': 'https://www.tiktok.com/@streetfoodtv',
+
+  'tt-kh-amok-grilled-chicken-2': 'https://www.tiktok.com/@vibol.daily.cooki',
+  'tt-kh-review-2': 'https://www.tiktok.com/@vibol.daily.cooki',
+  '9uKNNcDfttc': 'https://www.tiktok.com/@vibol.daily.cooki',
+  'khmerfoodie_review': 'https://www.tiktok.com/@vibol.daily.cooki',
+  'vibol.daily.cooki': 'https://www.tiktok.com/@vibol.daily.cooki',
+
+  'tt-kh-kampot-seafood-3': 'https://www.tiktok.com/@visitcambodia',
+  'G4wamhZFxfY': 'https://www.tiktok.com/@visitcambodia',
+  'visitcambodia_food': 'https://www.tiktok.com/@visitcambodia',
+  'visitcambodia': 'https://www.tiktok.com/@visitcambodia',
+
+  'tt-kh-loklak-beef-4': 'https://www.tiktok.com/@recipe30',
+  'KSNG7aVSKIM': 'https://www.tiktok.com/@recipe30',
+  'phnompenh_eats': 'https://www.tiktok.com/@recipe30',
+  'recipe30': 'https://www.tiktok.com/@recipe30',
+
+  'tt-kh-walkstreet-night-5': 'https://www.tiktok.com/@travelwithchad',
+  'rlhQTyJzyVc': 'https://www.tiktok.com/@travelwithchad',
+  'khmer_walkstreet': 'https://www.tiktok.com/@travelwithchad',
+  'travelwithchad': 'https://www.tiktok.com/@travelwithchad',
+
+  'tt-kh-street-coffee-6': 'https://www.tiktok.com/@markwiens',
+  'bherGArgorU': 'https://www.tiktok.com/@markwiens',
+  'khmercoffeelover': 'https://www.tiktok.com/@markwiens',
+  'markwiens': 'https://www.tiktok.com/@markwiens',
+};
+
+const VERIFIED_FACEBOOK_CREATOR_URLS_BY_KEY: Record<string, string> = {
+  'fb-kh-riverfront-sunset-1': 'https://www.facebook.com/share/174NresCCL/?mibextid=wwXIfr',
+  'fb-kh-review-1': 'https://www.facebook.com/share/174NresCCL/?mibextid=wwXIfr',
+  'zTn3_Je07ao': 'https://www.facebook.com/share/174NresCCL/?mibextid=wwXIfr',
+
+  'fb-kh-kuyteav-morning-2': 'https://www.facebook.com/profile.php?id=100027461302042',
+  'fb-kh-review-2': 'https://www.facebook.com/profile.php?id=100027461302042',
+  'RhtOc1LdaAg': 'https://www.facebook.com/profile.php?id=100027461302042',
+
+  'fb-kh-siemreap-angkor-3': 'https://www.facebook.com/SuitcaseMonkeyTravel/',
+  'Wmr6Qaen9eo': 'https://www.facebook.com/SuitcaseMonkeyTravel/',
+
+  'fb-kh-kohrong-island-4': 'https://www.facebook.com/profile.php?id=100050432502216',
+  'NmqRMR38Dhg': 'https://www.facebook.com/profile.php?id=100050432502216',
+
+  'fb-kh-battambang-tour-5': 'https://www.facebook.com/share/1Dxqougma2/?mibextid=wwXIfr',
+  '5E8_IX-kBDU': 'https://www.facebook.com/share/1Dxqougma2/?mibextid=wwXIfr',
+
+  'fb-kh-tonlebassac-buffet-6': 'https://www.facebook.com/tonlebassac.restaurant/',
+  'H_pibKmw1lo': 'https://www.facebook.com/tonlebassac.restaurant/',
+};
 
 export function resolveOriginalSocialAccountUrl(item: Partial<OnlineFoodDiscoveryItem>): string {
-  if (item.originalAccountUrl && /^https?:\/\//i.test(item.originalAccountUrl.trim())) {
-    return item.originalAccountUrl.trim();
-  }
+  const itemId = (item.id || '').trim();
+  const inlineVid = (item.inlineVideoId || extractYouTubeVideoId(item.sourceUrl || '') || '').trim();
+  const rawOriginal = (item.originalAccountUrl || '').trim();
   const rawSource = (item.sourceUrl || '').trim();
   const handle = (item.authorHandle || '').trim();
   const cleanHandle = handle.replace(/^@+/, '').replace(/\s+/g, '');
 
   if (item.platform === 'tiktok') {
-    if (/tiktok\.com/i.test(rawSource)) return rawSource;
-    if (cleanHandle) return `https://www.tiktok.com/@${encodeURIComponent(cleanHandle)}`;
-    const q = encodeURIComponent((item.titleEn || item.titleKh || 'Cambodia food review').trim());
-    return `https://www.tiktok.com/search?q=${q}`;
+    if (itemId && VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[itemId]) {
+      return VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[itemId];
+    }
+    if (cleanHandle && VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[cleanHandle.toLowerCase()]) {
+      return VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[cleanHandle.toLowerCase()];
+    }
+    if (inlineVid && VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[inlineVid]) {
+      return VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[inlineVid];
+    }
+    if (/^https?:\/\/(www\.|vm\.|vt\.)?tiktok\.com\//i.test(rawOriginal)) {
+      return rawOriginal;
+    }
+    if (/^https?:\/\/(www\.|vm\.|vt\.)?tiktok\.com\//i.test(rawSource)) {
+      return rawSource;
+    }
+    if (cleanHandle) {
+      return `https://www.tiktok.com/@${encodeURIComponent(cleanHandle)}`;
+    }
+    return 'https://www.tiktok.com/@visitcambodia';
   }
 
   if (item.platform === 'facebook') {
-    if (/facebook\.com|fb\.watch/i.test(rawSource)) return rawSource;
-    if (cleanHandle && !cleanHandle.includes(' ')) {
+    if (itemId && VERIFIED_FACEBOOK_CREATOR_URLS_BY_KEY[itemId]) {
+      return VERIFIED_FACEBOOK_CREATOR_URLS_BY_KEY[itemId];
+    }
+    if (inlineVid && VERIFIED_FACEBOOK_CREATOR_URLS_BY_KEY[inlineVid]) {
+      return VERIFIED_FACEBOOK_CREATOR_URLS_BY_KEY[inlineVid];
+    }
+    if (/^https?:\/\/(www\.|m\.|web\.)?(facebook\.com|fb\.watch)\//i.test(rawOriginal) && !/\/search\//i.test(rawOriginal)) {
+      return rawOriginal;
+    }
+    if (/^https?:\/\/(www\.|m\.|web\.)?(facebook\.com|fb\.watch)\//i.test(rawSource) && !/\/search\//i.test(rawSource)) {
+      return rawSource;
+    }
+    if (cleanHandle && !handle.includes(' ')) {
       return `https://www.facebook.com/${encodeURIComponent(cleanHandle)}`;
     }
-    const q = encodeURIComponent((item.authorHandle || item.sourceName || item.titleEn || 'Cambodia Food Review').trim());
-    return `https://www.facebook.com/search/top?q=${q}`;
+    return 'https://www.facebook.com/tonlebassac.restaurant/';
   }
 
   if (/^https?:\/\//i.test(rawSource)) {
@@ -2516,14 +2609,20 @@ export async function searchAndDiscoverSocialFood(
           backendItems = rawCandidates
             .map((it: any) => {
               if (it.platform === 'tiktok' || it.platform === 'facebook') {
+                // Skip legacy static fallback IDs from older Edge Function deployments since CURATED_TIKTOK_FACEBOOK_REVIEWS has verified creator accounts
+                if (/^(tt|fb)-kh-review-\d+$/i.test(String(it.id || ''))) {
+                  return null;
+                }
                 const match = matchCambodianDish(
                   `${it.titleEn || it.titleKh} ${it.descriptionEn || it.descriptionKh}`,
                   foods
                 );
+                const resolvedAccountUrl = resolveOriginalSocialAccountUrl(it);
                 return {
                   ...it,
                   platform: it.platform as DiscoveryPlatformId,
-                  originalAccountUrl: it.originalAccountUrl || it.sourceUrl,
+                  sourceUrl: resolvedAccountUrl,
+                  originalAccountUrl: resolvedAccountUrl,
                   matchedFoodId: it.matchedFoodId || match?.food?.id,
                   matchedFoodNameKh: it.matchedFoodNameKh || match?.food?.nameKh,
                   matchedFoodNameEn: it.matchedFoodNameEn || match?.food?.nameEn,

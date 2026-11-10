@@ -37,6 +37,21 @@ export const FoodView: React.FC = () => {
   const [initialTag] = useState<TagFilterId | null>(() => consumePendingTagFilter(currentUser));
   const [tagFilter, setTagFilter] = useState<TagFilterId>(canUseVip && initialTag ? initialTag : 'all');
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const dishListStartRef = useRef<HTMLDivElement | null>(null);
+
+  const handleExecuteFoodSearch = () => {
+    const trimmed = foodSearchQuery.trim();
+    if (!trimmed) {
+      searchInputRef.current?.focus();
+      return;
+    }
+    if (trimmed !== foodSearchQuery) {
+      setFoodSearchQuery(trimmed);
+    }
+    searchInputRef.current?.blur();
+    dishListStartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
 
   useEffect(() => {
     const onTag = (e: Event) => {
@@ -60,13 +75,86 @@ export const FoodView: React.FC = () => {
 
   const organizedFoods = useMemo(() => organizeAndDeduplicateFoods(foods), [foods]);
 
+  const isNoodleDish = (f: FoodItem): boolean => {
+    if (f.categorySlug === 'noodles') return true;
+    if (f.categorySlug === 'dessert' || f.categorySlug === 'drink' || f.categorySlug === 'soup') return false;
+    const text = `${f.nameKh || ''} ${f.nameEn || ''} ${f.categoryKh || ''} ${f.categoryEn || ''}`;
+    return /(^មី|មីឆា|មីគោក|មីទឹក|មីលាក់ខ្លួន|មីសួរឆា|មីកូឡា|គុយទាវ|នំបញ្ចុក|លតឆា|បាញ់កាញ់|បាញ់ហយ|បាញ់ស៊ុង|ស្ប៉ាហ្គេទី|\bnoodle|\bkuy\s*teav|\bkuyteav|\bnom\s*banh\s*chok|\bnum\s*banh\s*chok|\blort\s*cha|\bspaghetti|\bvermicelli)/i.test(
+      text
+    );
+  };
+
   const isVegetarianDish = (f: FoodItem): boolean =>
     Boolean(
-      f.isVegetarian ||
-        /បួស|\bvegetarian\b|\bvegan\b|ភេសជ្ជៈ|\bdrink\b/i.test(`${f.nameKh} ${f.nameEn} ${f.categoryKh}`)
+      f.categorySlug === 'drink' ||
+        f.isVegetarian ||
+        /បួស|\bvegetarian\b|\bvegan\b|ភេសជ្ជៈ|\bdrink\b|\bsmoothie\b|\biced\s*tea\b|\bcoffee\b/i.test(
+          `${f.nameKh || ''} ${f.nameEn || ''} ${f.categoryKh || ''} ${f.categoryEn || ''}`
+        )
     );
 
-  // 6 Square Illustrated Categories matching the reference Food Menu design
+  const isDessertDish = (f: FoodItem): boolean => {
+    if (f.categorySlug === 'drink') return false;
+    if (f.categorySlug === 'dessert') return true;
+    const kh = (f.nameKh || '').trim();
+    if (
+      kh.includes('បាញ់ឆែវ') ||
+      kh.includes('បាញ់ហយ') ||
+      kh.includes('នំប៉័ង') ||
+      kh.includes('គួង') ||
+      kh.includes('ណែម') ||
+      kh.includes('គូឆាយ') ||
+      kh.includes('កចាយ') ||
+      kh.includes('អន្សមជ្រូក') ||
+      kh.includes('អន្សមចៀន') ||
+      kh.includes('ពងទាកូន') ||
+      kh.includes('ប្រហិត')
+    ) {
+      return false;
+    }
+    return classifyKhmerFoodPrimaryGroup(f) === 'bong_aem';
+  };
+
+  const matchesSelectedFoodCategory = (f: FoodItem, catId: string): boolean => {
+    switch (catId) {
+      case 'all':
+        return true;
+      case 'samlor': {
+        if (
+          isNoodleDish(f) ||
+          isDessertDish(f) ||
+          f.categorySlug === 'drink' ||
+          f.categorySlug === 'rice' ||
+          f.categorySlug === 'salad' ||
+          f.categorySlug === 'grilled' ||
+          f.categorySlug === 'stirfry'
+        ) {
+          return false;
+        }
+        if (f.categorySlug === 'soup') return true;
+        const grp = classifyKhmerFoodPrimaryGroup(f);
+        return grp === 'samlor' || grp === 'sngor';
+      }
+      case 'sngor':
+      case 'noodles':
+        return isNoodleDish(f);
+      case 'cha': {
+        if (isNoodleDish(f) || isDessertDish(f) || f.categorySlug === 'drink' || f.categorySlug === 'soup') {
+          return false;
+        }
+        if (f.categorySlug === 'grilled' || f.categorySlug === 'stirfry') return true;
+        return classifyKhmerFoodPrimaryGroup(f) === 'cha';
+      }
+      case 'bong_aem':
+        return isDessertDish(f);
+      case 'vegetarian':
+        return isVegetarianDish(f);
+      default:
+        return classifyKhmerFoodPrimaryGroup(f) === catId;
+    }
+  };
+
+  // 6 Square Illustrated Categories with verified 1-to-1 dish photos matching Khmer, English & Chinese labels
   const categories = useMemo(
     () => [
       {
@@ -74,42 +162,42 @@ export const FoodView: React.FC = () => {
         nameKh: 'ទាំងអស់',
         nameEn: 'All',
         nameZh: '全部',
-        thumb: '/foods/food-1.jpg',
+        thumb: '/foods/food-1.jpg', // Fish Amok (អាម៉ុកត្រីស្លឹកញរ)
       },
       {
         id: 'samlor',
         nameKh: 'ស៊ុប',
         nameEn: 'Soups',
         nameZh: '汤羹',
-        thumb: '/foods/food-2.jpg',
+        thumb: '/foods/food-2.jpg', // Authentic Samlor Korko Soup (សម្លកកូរខ្មែរ)
       },
       {
         id: 'sngor',
         nameKh: 'មី',
         nameEn: 'Noodles',
         nameZh: '面条/粉',
-        thumb: '/foods/food-6.jpg',
+        thumb: '/foods/food-40.jpg', // Khmer Stir-Fried Noodles with Beef (មីឆាសាច់គោ)
       },
       {
         id: 'cha',
         nameKh: 'អាំង/ចៀន',
         nameEn: 'Grill/Fry',
         nameZh: '烧烤/热炒',
-        thumb: '/foods/food-21.jpg',
+        thumb: '/foods/food-21.jpg', // Roasted Honey Chicken (មាន់ដុតទឹកឃ្មុំព្រៃ)
       },
       {
         id: 'bong_aem',
         nameKh: 'បង្អែម',
         nameEn: 'Desserts',
         nameZh: '甜品',
-        thumb: '/foods/food-14.jpg',
+        thumb: '/foods/food-48.jpg', // Warm Banana in Sweet Coconut Cream Dessert (បង្អែមចេកខ្ទិះស្ករត្នោត)
       },
       {
         id: 'vegetarian',
         nameKh: 'ភេសជ្ជៈ/បួស',
         nameEn: 'Drinks/Veg',
         nameZh: '饮品/素食',
-        thumb: '/foods/food-25.jpg',
+        thumb: '/foods/food-197.jpg', // Chilled Fragrant Young Coconut Drink (ទឹកដូងក្រអូបស្រស់ត្រជាក់)
       },
     ],
     []
@@ -118,7 +206,7 @@ export const FoodView: React.FC = () => {
   // Meal-time matching dish IDs
   const mealTimeDishIds = useMemo(() => {
     if (mealTimeFilter === 'all') return null;
-    const matched = getAuthenticCambodianDishesForMealTime(organizedFoods, mealTimeFilter, 120);
+    const matched = getAuthenticCambodianDishesForMealTime(organizedFoods, mealTimeFilter);
     return new Set(matched.map((d) => d.id));
   }, [organizedFoods, mealTimeFilter]);
 
@@ -137,11 +225,7 @@ export const FoodView: React.FC = () => {
   const filteredFoods = useMemo(() => {
     const q = foodSearchQuery.trim().toLowerCase();
     return organizedFoods.filter((food) => {
-      const matchesCategory =
-        selectedCategory === 'all' ||
-        (selectedCategory === 'vegetarian'
-          ? isVegetarianDish(food)
-          : classifyKhmerFoodPrimaryGroup(food) === selectedCategory);
+      const matchesCategory = matchesSelectedFoodCategory(food, selectedCategory);
       if (!matchesCategory) return false;
       if (mealTimeDishIds && !mealTimeDishIds.has(food.id)) return false;
       if (provinceFilter && detectDishProvince(food) !== provinceFilter) return false;
@@ -194,12 +278,12 @@ export const FoodView: React.FC = () => {
   }, [visibleCount, filteredFoods.length]);
 
   return (
-    <div className="max-w-md mx-auto bg-[#F6F4EE] text-slate-900 min-h-full font-khmer">
+    <div className="max-w-md mx-auto bg-[#1E293B] text-slate-900 min-h-full font-khmer">
       {/* 1. Full-Bleed Angkor Wat Hero Header (No Green Bar) */}
       <AngkorHeroTopHeader mode="food" />
 
       {/* 2. White/Cream Rounded Sheet */}
-      <div className="relative z-10 -mt-6 rounded-t-[26px] bg-[#F6F4EE] pb-8 shadow-[0_-6px_20px_rgba(0,0,0,0.18)] overflow-hidden">
+      <div className="relative z-10 -mt-6 rounded-t-[26px] bg-[#1E293B] pb-8 shadow-[0_-6px_20px_rgba(0,0,0,0.18)] overflow-hidden">
         {/* Top White Header Row: មុខម្ហូបខ្មែរ ទាំងអស់ on Left + Small [👑 VIP] Pill on Right */}
         <div className="bg-[#1E293B] px-4 py-3.5 flex items-center justify-between gap-2 border-b border-slate-700/80 shadow-sm">
           <h2 className="font-khmer font-extrabold text-lg sm:text-xl text-white tracking-tight truncate">
@@ -285,7 +369,7 @@ export const FoodView: React.FC = () => {
             })}
           </div>
 
-          {/* Meal-Time Filter Pills Row: 📍 ទាំងអស់ | 🍴 ពេលព្រឹក | ☀️ ពេលថ្ងៃ | 🌙 ពេលល្ងាច */}
+          {/* Meal-Time Filter Pills Row: ទាំងអស់ | ពេលព្រឹក | ពេលថ្ងៃ | ពេលល្ងាច */}
           <div className="grid grid-cols-4 gap-2">
             {[
               {
@@ -294,7 +378,19 @@ export const FoodView: React.FC = () => {
                 labelEn: 'All',
                 labelZh: '全部',
                 renderIcon: (active: boolean) => (
-                  <MapPin className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-emerald-300' : 'text-[#235D3A]'}`} />
+                  <svg
+                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-emerald-300' : 'text-[#235D3A]'}`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 21s-6-5.2-6-10a6 6 0 1 1 12 0c0 4.8-6 10-6 10Z" />
+                    <circle cx="12" cy="11" r="2.3" />
+                  </svg>
                 ),
               },
               {
@@ -303,7 +399,21 @@ export const FoodView: React.FC = () => {
                 labelEn: 'Morning',
                 labelZh: '早餐',
                 renderIcon: (active: boolean) => (
-                  <Utensils className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-300' : 'text-[#235D3A]'}`} />
+                  <svg
+                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-300' : 'text-[#235D3A]'}`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 12h16a1 1 0 0 1 1 1v.5a7.5 7.5 0 0 1-15 0V13a1 1 0 0 1 1-1Z" />
+                    <path d="M7 20.5h10" />
+                    <path d="M9.5 8.5c0-1.4.9-2.2.9-3.5" />
+                    <path d="M14.5 8.5c0-1.4.9-2.2.9-3.5" />
+                  </svg>
                 ),
               },
               {
@@ -312,7 +422,19 @@ export const FoodView: React.FC = () => {
                 labelEn: 'Midday',
                 labelZh: '午餐',
                 renderIcon: (active: boolean) => (
-                  <Sun className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-300' : 'text-amber-500'}`} />
+                  <svg
+                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-300' : 'text-amber-500'}`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="4.2" />
+                    <path d="M12 2.5v2.2M12 19.3v2.2M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6" />
+                  </svg>
                 ),
               },
               {
@@ -321,7 +443,18 @@ export const FoodView: React.FC = () => {
                 labelEn: 'Evening',
                 labelZh: '晚餐',
                 renderIcon: (active: boolean) => (
-                  <Moon className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-200' : 'text-indigo-600'}`} />
+                  <svg
+                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-200' : 'text-indigo-600'}`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M20.4 14.5A8.5 8.5 0 0 1 9.5 3.6a8.5 8.5 0 1 0 10.9 10.9Z" />
+                  </svg>
                 ),
               },
             ].map((m) => {
@@ -344,27 +477,67 @@ export const FoodView: React.FC = () => {
             })}
           </div>
 
-          {/* Search Bar + Green Circular Filter Button Row */}
-          <div className="flex items-center gap-2.5">
-            <div className="flex-1 h-11 rounded-full bg-[#1E293B] border border-slate-600/90 shadow-sm px-4 flex items-center gap-2.5">
-              <Search className="w-4 h-4 text-white shrink-0" />
+          {/* Search Bar (#1B2C40 with Right-Side Compact Green Search Button) + Circular Filter Button Row */}
+          <div ref={dishListStartRef} className="flex items-center gap-2">
+            <div className="flex-1 h-11 rounded-full bg-[#1B2C40] border border-slate-600/80 shadow-sm pl-3.5 pr-1.5 flex items-center gap-2">
+              <svg
+                className="w-4 h-4 text-white shrink-0 pointer-events-none"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="7.5" />
+                <path d="m20 20-3.8-3.8" />
+              </svg>
               <input
+                ref={searchInputRef}
                 type="text"
                 value={foodSearchQuery}
                 onChange={(e) => setFoodSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleExecuteFoodSearch();
+                  }
+                }}
                 placeholder={tr(language, 'ស្វែងរកម្ហូប...', 'Search dishes...', '搜索高棉美食...')}
-                style={{ color: "#FFFFFF" }}
-                className="w-full bg-transparent text-xs sm:text-sm font-khmer font-bold text-white placeholder:text-white focus:outline-none"
+                style={{ color: '#FFFFFF' }}
+                className="flex-1 min-w-0 bg-transparent text-xs sm:text-sm font-khmer font-bold text-white placeholder:text-white/90 focus:outline-none"
               />
               {foodSearchQuery && (
                 <button
                   type="button"
                   onClick={() => setFoodSearchQuery('')}
-                  className="p-0.5 text-white/80 hover:text-white cursor-pointer"
+                  title={tr(language, 'សម្អាត', 'Clear', '清除')}
+                  className="p-1 rounded-full text-white/75 hover:text-white transition cursor-pointer shrink-0"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
+              <button
+                type="button"
+                onClick={handleExecuteFoodSearch}
+                className="h-8 px-3 rounded-full bg-[#15803D] hover:bg-[#166534] border border-emerald-400/35 text-white text-xs font-khmer font-extrabold flex items-center justify-center gap-1.5 shrink-0 shadow-2xs transition active:scale-95 cursor-pointer"
+              >
+                <svg
+                  className="w-3.5 h-3.5 text-white shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="11" cy="11" r="7.5" />
+                  <path d="m20 20-3.8-3.8" />
+                </svg>
+                <span className="leading-none">{tr(language, 'ស្វែងរក', 'Search', '搜索')}</span>
+              </button>
             </div>
 
             <button
@@ -377,7 +550,18 @@ export const FoodView: React.FC = () => {
                   : 'bg-[#235D3A] hover:bg-[#1B4B2E] text-white'
               }`}
             >
-              <Filter className="w-5 h-5" />
+              <svg
+                className="w-5 h-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+              </svg>
             </button>
           </div>
 

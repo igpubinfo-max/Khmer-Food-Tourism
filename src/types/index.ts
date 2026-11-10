@@ -5,7 +5,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1518;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1519;
 export const APP_RELEASE_DATE = '2026-11-10';
 
 /**
@@ -1247,7 +1247,7 @@ export function classifyKhmerFoodPrimaryGroup(food: Pick<FoodItem, 'nameKh' | 'n
   }
   if (kh.startsWith('ស្ងោរ') || kh.startsWith('ស៊ុប') || kh.startsWith('បបរ') || kh.includes('ស្ងោរ') || kh.includes('ង៉ាំង៉ូវ') || kh.includes('ឆ្នាំងភ្លើង') || kh.includes('យ៉ាវហន')) {
     // Exclude sweet dessert porridges like បង្អែមបបរ
-    if (!kh.includes('បង្អែម') && slug !== 'dessert') {
+    if (!kh.includes('បង្អែម') && slug !== 'dessert' && slug !== 'rice') {
       return 'sngor';
     }
   }
@@ -1264,7 +1264,7 @@ export function classifyKhmerFoodPrimaryGroup(food: Pick<FoodItem, 'nameKh' | 'n
   }
   if (slug === 'cake') {
     // Savory street cakes like បាញ់ឆែវ, នំប៉័ងប៉ាតេ, គួង, ណែម, នំអន្សមជ្រូកចៀន go to 'cha' (savory/pan-fried), while sweet cakes go to 'bong_aem'
-    if (kh.includes('បាញ់ឆែវ') || kh.includes('បាញ់ហយ') || kh.includes('នំប៉័ង') || kh.includes('គួង') || kh.includes('ណែម') || kh.includes('គូឆាយ') || kh.includes('កចាយ') || kh.includes('អន្សមជ្រូក')) {
+    if (kh.includes('បាញ់ឆែវ') || kh.includes('បាញ់ហយ') || kh.includes('នំប៉័ង') || kh.includes('គួង') || kh.includes('ណែម') || kh.includes('គូឆាយ') || kh.includes('កចាយ') || kh.includes('អន្សមជ្រូក') || kh.includes('អន្សមចៀន')) {
       return 'cha';
     }
     return 'bong_aem';
@@ -4245,6 +4245,74 @@ export const SHOP_ALL_INCLUSIVE_5_BENEFITS: ReadonlyArray<{
     km: '✅ មើលស្ថិតិអ្នកចូលមើល (Store Analytics) (ចំនួនអ្នកមើល, អ្នកចុចហៅទូរស័ព្ទ, អ្នកចុចផែនទី)',
     en: '✅ Full Store Analytics (views, phone call taps & map navigation clicks)',
     zh: '✅ 查看完整店铺数据统计（浏览量、电话点击与地图导航次数）',
+  },
+];
+
+export const SUMMARIZED_10_VIP_BENEFITS: ReadonlyArray<{
+  id: number;
+  km: string;
+  en: string;
+  zh: string;
+}> = [
+  {
+    id: 1,
+    km: '✅ ទម្រង់ហាងកម្រិតខ្ពស់ Theme មាស និងផ្លាកសញ្ញា Iconic VIP',
+    en: '✅ Enhanced Restaurant Profile with golden theme & Iconic VIP badge',
+    zh: '✅ 尊享金色主题餐厅主页与官方 Iconic VIP 认证标识',
+  },
+  {
+    id: 2,
+    km: '✅ ច្រោះម្ហូបសុខភាព និងគំនិតអាហារ ៣ ពេលប្រចាំថ្ងៃ',
+    en: '✅ Healthy dish filters & daily 3-meal food recommendations',
+    zh: '✅ 健康饮食筛选标签与每日三餐智能推荐',
+  },
+  {
+    id: 3,
+    km: '✅ បង្ហោះវីដេអូផ្សព្វផ្សាយម្ហូប (YouTube, TikTok, Reels) លើកាតហាង',
+    en: '✅ Embed promotional food videos (YouTube, TikTok, Reels) on shop cards',
+    zh: '✅ 在店铺卡片直接嵌入美食宣传视频（YouTube、TikTok、Reels）',
+  },
+  {
+    id: 4,
+    km: '✅ ផ្លាកសញ្ញា VIP (VIP Badge) ពណ៌មាសលើ Profile, មតិយោបល់ និងកាតហាង',
+    en: '✅ Gold VIP Badge on your Profile, comments & restaurant cards',
+    zh: '✅ 个人主页、评论与餐厅卡片专属金色 VIP 徽章',
+  },
+  {
+    id: 5,
+    km: '✅ ហាងថ្មីបង្ហាញលើគេបង្អស់ដោយស្វ័យប្រវត្តិរយៈពេល ២៤ ម៉ោង',
+    en: '✅ New VIP shops pinned at the top of the list for 24 hours',
+    zh: '✅ 新上架 VIP 店铺自动置顶展示 24 小时',
+  },
+  {
+    id: 6,
+    km: '✅ ទីតាំងលេចធ្លោលើផែនទី GPS ជាមួយ Pin ពណ៌មាស និងនាំផ្លូវ 1-Tap',
+    en: '✅ Highlighted golden GPS map pin with 1-tap turn-by-turn navigation',
+    zh: '✅ 地图专属金色定位图标与一键导航直达',
+  },
+  {
+    id: 7,
+    km: '✅ រៀបចំផែនការដើរលេង AI និងដំណើរម្ហូប ១ ថ្ងៃរួចជាស្រេច',
+    en: '✅ Smart AI Trip Planner & ready-made 1-day food itineraries',
+    zh: '✅ AI 智能行程规划与精选一日美食路线',
+  },
+  {
+    id: 8,
+    km: '✅ មើលស្ថិតិអ្នកចូលមើលហាង (ចំនួនអ្នកមើល, ចុចហៅទូរស័ព្ទ, ចុចផែនទី)',
+    en: '✅ Real-time Store Analytics (views, phone calls & map clicks)',
+    zh: '✅ 实时查看店铺数据统计（浏览量、电话点击与地图导航次数）',
+  },
+  {
+    id: 9,
+    km: '✅ ស្វែងរកទីតាំងលើ Google Maps និងកំណត់ត្រាម្ហូបដែលបានភ្លក់',
+    en: '✅ Cambodia-wide Google Maps search & personal Food Passport',
+    zh: '✅ 全柬 Google 地图搜索与个人美食打卡护照',
+  },
+  {
+    id: 10,
+    km: '✅ អាទិភាពបង្ហាញលើគេពេលស្វែងរកមុខម្ហូប និងឈ្មោះហាងក្នុង App',
+    en: '✅ Priority search ranking for your dishes and restaurant listings',
+    zh: '✅ 菜品与餐厅搜索结果优先置顶排名',
   },
 ];
 

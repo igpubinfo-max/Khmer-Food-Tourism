@@ -15,7 +15,7 @@ import {
   APP_VERSION, APP_BUILD_CODE, getDynamicVipPlans, getDynamicVipBenefits,
   isAdminAccount,
   isIosOrIpadAppStoreRuntime, getVipFeaturedRotationConfig, getVipFeaturedRotationState,
-  isShopSubscriptionActive, getShopSubscriptionCatalog, sanitizeVipMembershipHistoryEntry, sanitizeLegacyVipTransactionPricing
+  isShopSubscriptionActive, getShopSubscriptionCatalog, SHOP_ALL_INCLUSIVE_5_BENEFITS, SUMMARIZED_10_VIP_BENEFITS, sanitizeVipMembershipHistoryEntry, sanitizeLegacyVipTransactionPricing
 } from '../types';
 import { tr } from '../utils/i18n';
 import { resolveUserAvatarUrl, handleAvatarImageError, fileToAvatarDataUrl, isCustomUploadedAvatarDataUrl, rotateDataUrl } from '../utils/avatarHelper';
@@ -72,6 +72,7 @@ export const ProfileView: React.FC = () => {
   const isFreeTrial7d = isUserOnConsumerFreeTrial(currentUser);
   const isPaidVip = isUserPaidVipActive(currentUser);
   const consumerCatalog = getConsumerVipPricingCatalog(appSettings);
+  const shopCatalog = getShopSubscriptionCatalog(appSettings);
   const vipAccountState = getVipAccountState(currentUser);
   const storeQuota = getCurrentUserStoreQuota();
   const dynamicPlans = getDynamicVipPlans(appSettings);
@@ -716,6 +717,84 @@ export const ProfileView: React.FC = () => {
           </div>
         </div>
   );
+
+  const vipAndShopBenefitsCards = !isAdmin && !isIosAppStore ? (
+    <div className="space-y-3 font-khmer">
+      {/* Card 1: Summarized 10 VIP Membership Benefits (Matching Shop Package Card Design) */}
+      <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#162032] via-[#132235] to-[#0B2926] border border-amber-400/80 space-y-2.5 shadow-md">
+        <div className="space-y-1.5">
+          <div className="font-extrabold text-xs sm:text-[13px] text-amber-300 flex items-center gap-1.5">
+            <Crown className="w-4 h-4 text-amber-400 fill-amber-400 shrink-0" />
+            <span>
+              {tr(
+                language,
+                'អត្ថប្រយោជន៍ទាំង ១០ ក្នុងការចុះឈ្មោះជា VIP (គ្មានទារថ្លៃបន្ថែម)',
+                'All 10 VIP Membership Benefits Included (No Extra Fees)',
+                '注册 VIP 会员包含全部 10 大专属特权（无额外费用）'
+              )}
+            </span>
+          </div>
+          <div>
+            <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#064E3B] border border-emerald-500/40 text-amber-300 font-mono font-black text-[10.5px]">
+              {`${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d • $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90d • $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/yr`}
+            </span>
+          </div>
+        </div>
+        <ul className="space-y-1.5 text-[11px] text-slate-100">
+          {SUMMARIZED_10_VIP_BENEFITS.map((b) => (
+            <li key={b.id} className="leading-snug">
+              {isKm ? b.km : language === 'zh' ? b.zh : b.en}
+            </li>
+          ))}
+        </ul>
+        <div className="pt-2 border-t border-slate-700/80 text-[10.5px] font-bold text-amber-300 leading-relaxed">
+          {tr(
+            language,
+            `🔒 កញ្ចប់សមាជិកភាព VIP (${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ, ${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90ថ្ងៃ ឬ ${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/ឆ្នាំ) — អាចសាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃ (Free Trial) សម្រាប់ជំនួយការ AI និងផែនការដើរលេង។`,
+            `🔒 Paid VIP Membership ($${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d, $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90d or $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/yr) — 7-Day Free Trial available for AI Assistant & Trip Planner.`,
+            `🔒 付费 VIP 会员（$${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天、$${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90天 或 $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/年）——支持 7 天免费试用 AI 助手与智能行程规划。`
+          )}
+        </div>
+      </div>
+
+      {/* Card 2: All-Inclusive 5 Shop Package Benefits (Exact Match to Reference Design) */}
+      <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#162032] via-[#132235] to-[#0B2926] border border-amber-400/80 space-y-2.5 shadow-md">
+        <div className="space-y-1.5">
+          <div className="font-extrabold text-xs sm:text-[13px] text-amber-300 flex items-center gap-1.5">
+            <Crown className="w-4 h-4 text-amber-400 fill-amber-400 shrink-0" />
+            <span>
+              {tr(
+                language,
+                'កញ្ចប់ដាក់ហាងរួមបញ្ចូលទាំង ៥ មុខងារ (គ្មានទារថ្លៃបន្ថែម)',
+                'All-Inclusive Shop Package (All 5 Benefits Included)',
+                '全包店铺套餐（含全部 5 大权益，无额外广告费）'
+              )}
+            </span>
+          </div>
+          <div>
+            <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#064E3B] border border-emerald-500/40 text-amber-300 font-mono font-black text-[10.5px]">
+              {`${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d • $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr`}
+            </span>
+          </div>
+        </div>
+        <ul className="space-y-1.5 text-[11px] text-slate-100">
+          {SHOP_ALL_INCLUSIVE_5_BENEFITS.map((b, i) => (
+            <li key={i} className="leading-snug">
+              {isKm ? b.km : language === 'zh' ? b.zh : b.en}
+            </li>
+          ))}
+        </ul>
+        <div className="pt-2 border-t border-slate-700/80 text-[10.5px] font-bold text-amber-300 leading-relaxed">
+          {tr(
+            language,
+            `🔒 កញ្ចប់ដាក់ហាងបង់ប្រាក់ (${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ ឬ ${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/ឆ្នាំ) — មិនរួមបញ្ចូលក្នុង Free Trial 7 ថ្ងៃឡើយ។ ការបង់ប្រាក់ធ្វើឡើងក្រោយពេល Admin ត្រួតពិនិត្យ និងអនុម័តព័ត៌មានហាង។`,
+            `🔒 Paid Shop Package ($${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d or $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr) — Not included in the 7-Day Free Trial. Payment is completed after Admin approves your shop details.`,
+            `🔒 付费店铺套餐（$${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天 或 $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/年）——不含在 7 天免费试用内，管理员审核通过后付款开通。`
+          )}
+        </div>
+      </div>
+    </div>
+  ) : null;
 
   return (
     <div className="max-w-md md:max-w-5xl lg:max-w-6xl mx-auto w-full px-3.5 md:px-6 py-3 space-y-3 pb-8">
@@ -2162,54 +2241,7 @@ export const ProfileView: React.FC = () => {
             );
           })()}
 
-          {/* Dynamic Benefits Check-list */}
-          <div className="space-y-2">
-            <h5 className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-              <Award className="w-4 h-4 text-amber-500" />
-              <span>
-                {tr(
-                  language,
-                  `អត្ថប្រយោជន៍ទាំង ${dynamicBenefits.length} យ៉ាងនៃសមាជិក VIP៖`,
-                  `All ${dynamicBenefits.length} VIP Member Benefits:`,
-                  `VIP 会员全部 ${dynamicBenefits.length} 项专属特权：`
-                )}
-              </span>
-            </h5>
 
-            <div className="space-y-2">
-              {dynamicBenefits.map((b, idx) => (
-                <div 
-                  key={b.id || idx}
-                  className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-2xs flex items-start gap-2.5"
-                >
-                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold font-mono ${
-                    isVip 
-                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' 
-                      : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                  }`}>
-                    {idx + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-900 dark:text-white">
-                        {isKm ? b.titleKh : b.titleEn}
-                      </span>
-                      <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
-                        isVip ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'
-                      }`}>
-                        {isVip
-                          ? tr(language, '✓ សកម្ម', '✓ Active', '✓ 已开启')
-                          : tr(language, 'សម្រាប់ VIP', 'VIP Only', 'VIP 专享')}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                      {isKm ? b.descKh : b.descEn}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       )}
 

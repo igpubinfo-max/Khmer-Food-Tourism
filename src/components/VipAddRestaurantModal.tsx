@@ -2479,9 +2479,9 @@ export const VipAddRestaurantModal: React.FC = () => {
 
                   {/* All-Inclusive Shop Package Overview (Android & Web only; hidden on iOS) */}
                   {!isIosAppStore && (
-                    <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-50 via-white to-emerald-50 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-950/40 border border-amber-400/80 space-y-2 shadow-2xs">
+                    <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#162032] via-[#132235] to-[#0B2926] border border-amber-400/80 space-y-2 shadow-md">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <span className="font-extrabold text-xs text-[#064E3B] dark:text-amber-300 flex items-center gap-1.5">
+                        <span className="font-extrabold text-xs text-amber-300 flex items-center gap-1.5">
                           <Crown className="w-4 h-4 text-amber-500 fill-amber-500 shrink-0" />
                           <span>
                             {tr(
@@ -2496,14 +2496,14 @@ export const VipAddRestaurantModal: React.FC = () => {
                           {'$'}{shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d • {'$'}{(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr
                         </span>
                       </div>
-                      <ul className="space-y-1 text-[10.5px] text-slate-700 dark:text-slate-200">
+                      <ul className="space-y-1.5 text-[11px] text-slate-100">
                         {SHOP_ALL_INCLUSIVE_5_BENEFITS.map((b, i) => (
                           <li key={i} className="leading-snug">
                             {isKm ? b.km : language === 'zh' ? b.zh : b.en}
                           </li>
                         ))}
                       </ul>
-                      <div className="pt-1 border-t border-amber-200/70 dark:border-slate-700 text-[10px] font-bold text-amber-900 dark:text-amber-300">
+                      <div className="pt-2 border-t border-slate-700/80 text-[10.5px] font-bold text-amber-300 leading-relaxed">
                         {tr(
                           language,
                           `🔒 កញ្ចប់ដាក់ហាងបង់ប្រាក់ (${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ ឬ ${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/ឆ្នាំ) — មិនរួមបញ្ចូលក្នុង Free Trial 7 ថ្ងៃឡើយ។ ការបង់ប្រាក់ធ្វើឡើងក្រោយពេល Admin ត្រួតពិនិត្យ និងអនុម័តព័ត៌មានហាង។`,
