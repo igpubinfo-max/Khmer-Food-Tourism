@@ -211,7 +211,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
           {/* Left Photo Box with Distance Pill & Heart Button */}
           <div className="w-[146px] sm:w-[158px] min-h-[132px] rounded-2xl overflow-hidden relative shrink-0 bg-slate-100">
             <ShopAvatar
-              restaurant={{ ...restaurant, photoUrl: resolvedShopPhotoUrl }}
+              restaurant={avatarRestaurant}
               allRestaurants={allRestaurants}
               alt={loc.name}
               className="w-full h-full object-cover"
@@ -332,7 +332,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
       >
         <div className="w-16 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-200">
           <ShopAvatar
-            restaurant={{ ...restaurant, photoUrl: resolvedShopPhotoUrl }}
+            restaurant={avatarRestaurant}
             allRestaurants={allRestaurants}
             alt={loc.name}
             className="w-full h-full object-cover"

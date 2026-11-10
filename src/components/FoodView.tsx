@@ -5,7 +5,6 @@ import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
 import {
   FoodItem,
   organizeAndDeduplicateFoods,
-  resolveFoodPhotoUrl,
 } from '../types';
 import { Utensils, Crown, MapPin, Plus, Search, Filter, X } from 'lucide-react';
 import { DISH_PROVINCES, detectDishProvince } from '../utils/foodFilters';
@@ -13,10 +12,7 @@ import { TAG_FILTERS, matchesTagFilter, TagFilterId, DishTagId } from '../utils/
 import { TAG_FILTER_EVENT, consumePendingTagFilter, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { tr } from '../utils/i18n';
 import { DishTagIcon } from './icons/HandcraftedIcons';
-import {
-  matchesFoodScreenCategoryTab,
-  scoreCambodianDishForCategoryAndMealTime,
-} from '../utils/cambodianMealHabits';
+import { matchesFoodScreenCategoryTab } from '../utils/cambodianMealHabits';
 
 const PAGE_BATCH_SIZE = 20;
 
@@ -30,8 +26,6 @@ export const FoodView: React.FC = () => {
     openUpgradeVipModal,
     showToast,
     setIsAdminOpen,
-    setActiveTab,
-    setIsDailyDiscoveriesModalOpen,
   } = useApp();
   const isAdmin = Boolean(
     currentUser?.role === 'admin' ||
@@ -91,24 +85,8 @@ export const FoodView: React.FC = () => {
     return matchesFoodScreenCategoryTab(f, catId);
   };
 
-  const pickCategoryThumbForMealTime = (catId: string, fallbackThumb: string): string => {
-    if (mealTimeFilter === 'all') return fallbackThumb;
-    const candidates = organizedFoods
-      .filter((f) => f.photoUrl && matchesFoodScreenCategoryTab(f, catId))
-      .map((f) => ({
-        food: f,
-        score: scoreCambodianDishForCategoryAndMealTime(f, mealTimeFilter),
-      }))
-      .filter((entry) => entry.score > 0)
-      .sort((a, b) => b.score - a.score || (b.food.rating || 0) - (a.food.rating || 0));
-
-    const best = candidates[0]?.food;
-    if (!best || !best.photoUrl) return fallbackThumb;
-    return resolveFoodPhotoUrl(best.photoUrl, best.photoUpdatedAt, 320, best.id) || fallbackThumb;
-  };
-
-  // 4 Full-Image Food Category Cards:
-  // 1. មុខម្ហូប (All Dishes)
+  // 4 Full-Image Food Category Cards (Static Fixed Original Images):
+  // 1. គ្រប់មុខម្ហូប (All Dishes)
   // 2. សម្ល (Soups & Stews)
   // 3. អាំង/ចៀន (Grill/Fry & Noodles)
   // 4. បង្អែម/ភេសជ្ជៈ (Desserts & Drinks)
@@ -116,10 +94,10 @@ export const FoodView: React.FC = () => {
     () => [
       {
         id: 'all',
-        nameKh: 'មុខម្ហូប',
+        nameKh: 'គ្រប់មុខម្ហូប',
         nameEn: 'All Dishes',
         nameZh: '全部美食',
-        thumb: pickCategoryThumbForMealTime('all', '/foods/food-1.jpg'),
+        thumb: '/foods/food-1.jpg',
         overlayBg: 'linear-gradient(180deg, rgba(22, 101, 52, 0.88) 0%, rgba(6, 78, 59, 0.96) 100%)',
       },
       {
@@ -127,7 +105,7 @@ export const FoodView: React.FC = () => {
         nameKh: 'សម្ល',
         nameEn: 'Soups & Stews',
         nameZh: '高棉汤羹',
-        thumb: pickCategoryThumbForMealTime('samlor', '/foods/food-2.jpg'),
+        thumb: '/foods/food-2.jpg',
         overlayBg: 'linear-gradient(180deg, rgba(180, 83, 9, 0.88) 0%, rgba(120, 53, 15, 0.96) 100%)',
       },
       {
@@ -135,7 +113,7 @@ export const FoodView: React.FC = () => {
         nameKh: 'អាំង/ចៀន',
         nameEn: 'Grill/Fry',
         nameZh: '烧烤/热炒',
-        thumb: pickCategoryThumbForMealTime('cha', '/foods/food-21.jpg'),
+        thumb: '/foods/food-21.jpg',
         overlayBg: 'linear-gradient(180deg, rgba(185, 28, 28, 0.88) 0%, rgba(127, 29, 29, 0.96) 100%)',
       },
       {
@@ -143,11 +121,11 @@ export const FoodView: React.FC = () => {
         nameKh: 'បង្អែម/ភេសជ្ជៈ',
         nameEn: 'Desserts & Drinks',
         nameZh: '甜品/饮品',
-        thumb: pickCategoryThumbForMealTime('bong_aem', '/foods/food-48.jpg'),
+        thumb: '/foods/food-48.jpg',
         overlayBg: 'linear-gradient(180deg, rgba(109, 40, 217, 0.88) 0%, rgba(76, 29, 149, 0.96) 100%)',
       },
     ],
-    [organizedFoods, mealTimeFilter]
+    []
   );
 
   const provinceOptions = useMemo(() => {
@@ -164,12 +142,8 @@ export const FoodView: React.FC = () => {
 
   const filteredFoods = useMemo(() => {
     const q = foodSearchQuery.trim().toLowerCase();
-    const matched = organizedFoods.filter((food) => {
+    return organizedFoods.filter((food) => {
       if (!matchesSelectedFoodCategory(food, selectedCategory)) return false;
-      if (mealTimeFilter !== 'all') {
-        const mealScore = scoreCambodianDishForCategoryAndMealTime(food, mealTimeFilter);
-        if (mealScore <= 0) return false;
-      }
       if (provinceFilter && detectDishProvince(food) !== provinceFilter) return false;
       if (!matchesTagFilter(food, tagFilter)) return false;
       if (q) {
@@ -187,19 +161,7 @@ export const FoodView: React.FC = () => {
       }
       return true;
     });
-
-    if (mealTimeFilter === 'all') {
-      return matched;
-    }
-
-    return [...matched].sort((a, b) => {
-      const scoreDiff =
-        scoreCambodianDishForCategoryAndMealTime(b, mealTimeFilter) -
-        scoreCambodianDishForCategoryAndMealTime(a, mealTimeFilter);
-      if (scoreDiff !== 0) return scoreDiff;
-      return (b.rating || 0) - (a.rating || 0);
-    });
-  }, [organizedFoods, selectedCategory, mealTimeFilter, provinceFilter, tagFilter, foodSearchQuery]);
+  }, [organizedFoods, selectedCategory, provinceFilter, tagFilter, foodSearchQuery]);
 
   const displayedFoods = useMemo(
     () => filteredFoods.slice(0, visibleCount),
@@ -404,13 +366,10 @@ export const FoodView: React.FC = () => {
           className="rounded-[24px] p-2.5 sm:p-3 border border-white"
         >
           <div className="grid grid-cols-4 gap-2.5">
-            {/* 1. Food (ម្ហូបខ្មែរ) – Orange */}
+            {/* 1. All Dishes (គ្រប់មុខម្ហូប) – Orange */}
             <button
               type="button"
-              onClick={() => {
-                setSelectedCategory('all');
-                dishListStartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-              }}
+              onClick={() => setSelectedCategory('all')}
               style={{
                 background: 'linear-gradient(180deg, #FBBF24 0%, #F59E0B 48%, #D97706 100%)',
                 boxShadow: '0 6px 14px rgba(217, 119, 6, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
@@ -437,17 +396,17 @@ export const FoodView: React.FC = () => {
                 <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
               </svg>
               <span
-                className="font-khmer font-extrabold text-[11.5px] sm:text-[12px] leading-tight tracking-tight"
+                className="font-khmer font-extrabold text-[10.5px] sm:text-[11.5px] leading-tight tracking-tight px-1 truncate max-w-full"
                 style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
-                {tr(language, 'ម្ហូបខ្មែរ', 'Khmer Food', '高棉美食')}
+                {tr(language, 'គ្រប់មុខម្ហូប', 'All Dishes', '全部美食')}
               </span>
             </button>
 
-            {/* 2. Hotel (សណ្ឋាគារ) – Blue */}
+            {/* 2. Soups & Stews (សម្ល) – Blue */}
             <button
               type="button"
-              onClick={() => setActiveTab('hotels')}
+              onClick={() => setSelectedCategory('samlor')}
               style={{
                 background: 'linear-gradient(180deg, #60A5FA 0%, #3B82F6 48%, #1D4ED8 100%)',
                 boxShadow: '0 6px 14px rgba(29, 78, 216, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
@@ -475,17 +434,17 @@ export const FoodView: React.FC = () => {
                 <circle cx="6" cy="11" r="1.5" fill="currentColor" />
               </svg>
               <span
-                className="font-khmer font-extrabold text-[11.5px] sm:text-[12px] leading-tight tracking-tight"
+                className="font-khmer font-extrabold text-[11.5px] sm:text-[12px] leading-tight tracking-tight px-1 truncate max-w-full"
                 style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
-                {tr(language, 'សណ្ឋាគារ', 'Hotels', '酒店住宿')}
+                {tr(language, 'សម្ល', 'Soups & Stews', '高棉汤羹')}
               </span>
             </button>
 
-            {/* 3. Tourism (ទេសចរណ៍) – Green */}
+            {/* 3. Grill / Fry (អាំង/ចៀន) – Green */}
             <button
               type="button"
-              onClick={() => setActiveTab('tourism')}
+              onClick={() => setSelectedCategory('cha')}
               style={{
                 background: 'linear-gradient(180deg, #4ADE80 0%, #22C55E 48%, #15803D 100%)',
                 boxShadow: '0 6px 14px rgba(21, 128, 61, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
@@ -506,20 +465,17 @@ export const FoodView: React.FC = () => {
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z" />
               </svg>
               <span
-                className="font-khmer font-extrabold text-[11.5px] sm:text-[12px] leading-tight tracking-tight"
+                className="font-khmer font-extrabold text-[11px] sm:text-[11.5px] leading-tight tracking-tight px-1 truncate max-w-full"
                 style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
-                {tr(language, 'ទេសចរណ៍', 'Tourism', '旅游景点')}
+                {tr(language, 'អាំង/ចៀន', 'Grill/Fry', '烧烤/热炒')}
               </span>
             </button>
 
-            {/* 4. Attractions / Experiences (បទពិសោធន៍) – Purple */}
+            {/* 4. Desserts & Drinks (បង្អែម/ភេសជ្ជៈ) – Purple */}
             <button
               type="button"
-              onClick={() => {
-                (window as any).__kft_daily_initial_category = 'food';
-                setIsDailyDiscoveriesModalOpen(true);
-              }}
+              onClick={() => setSelectedCategory('bong_aem')}
               style={{
                 background: 'linear-gradient(180deg, #C084FC 0%, #9333EA 48%, #6B21A8 100%)',
                 boxShadow: '0 6px 14px rgba(107, 33, 168, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
@@ -545,10 +501,10 @@ export const FoodView: React.FC = () => {
                 <path d="M20.8 11.5c-.7-.5-1.5-.8-2.3-1 0 1.2-.3 2.3-.8 3.4-.8 1.8-2.3 3.3-4.2 4.2 1.6 0 3.2-.3 4.5-1.1 2-1.2 3-3.3 2.8-5.5Z" />
               </svg>
               <span
-                className="font-khmer font-extrabold text-[11.5px] sm:text-[12px] leading-tight tracking-tight"
+                className="font-khmer font-extrabold text-[10px] sm:text-[11px] leading-tight tracking-tight px-1 truncate max-w-full"
                 style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
-                {tr(language, 'បទពិសោធន៍', 'Experiences', '精选体验')}
+                {tr(language, 'បង្អែម/ភេសជ្ជៈ', 'Desserts & Drinks', '甜品/饮品')}
               </span>
             </button>
           </div>
@@ -595,7 +551,7 @@ export const FoodView: React.FC = () => {
                   {renderCategoryIcon(cat.id)}
                   <span
                     style={{
-                      fontSize: cat.id === 'bong_aem' ? '9.5px' : '10.5px',
+                      fontSize: cat.id === 'bong_aem' || cat.id === 'all' ? '9.5px' : '10.5px',
                       textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
                     }}
                     className="font-khmer font-extrabold leading-tight truncate text-white"
@@ -606,150 +562,6 @@ export const FoodView: React.FC = () => {
               </button>
             );
           })}
-        </div>
-
-        {/* 5. Time Filter Menu – Four Pill-Shaped Buttons in One Row: ទីតាំង | ពេលព្រឹក | ពេលថ្ងៃ | ពេលល្ងាច */}
-        <div className="flex items-center gap-1.5">
-          {/* Pill 1: ទីតាំង (Location / All Time) */}
-          <button
-            type="button"
-            onClick={() => {
-              if (mealTimeFilter !== 'all') {
-                setMealTimeFilter('all');
-              } else {
-                setShowFilterDrawer((prev) => !prev);
-              }
-            }}
-            style={
-              mealTimeFilter === 'all' || provinceFilter !== ''
-                ? {
-                    background: 'linear-gradient(180deg, #2E7D52 0%, #1B5E3A 100%)',
-                    boxShadow: '0 4px 10px rgba(27, 94, 58, 0.25)',
-                  }
-                : {
-                    boxShadow: '0 2px 8px rgba(15, 23, 42, 0.05)',
-                  }
-            }
-            className={`h-[36px] px-3 rounded-full text-[11.5px] font-khmer font-extrabold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer shrink-0 border ${
-              mealTimeFilter === 'all' || provinceFilter !== ''
-                ? 'border-[#1B5E3A] text-white'
-                : 'bg-white border-slate-200/90 text-[#1E293B]'
-            }`}
-          >
-            <MapPin
-              className={`w-3.5 h-3.5 shrink-0 ${
-                mealTimeFilter === 'all' || provinceFilter !== '' ? 'text-white' : 'text-[#1B5E3A]'
-              }`}
-            />
-            <span>{tr(language, 'ទីតាំង', 'Location', '位置')}</span>
-          </button>
-
-          {/* Subtle Vertical Divider */}
-          <span className="h-4 w-px bg-slate-300 shrink-0" aria-hidden="true" />
-
-          {/* Pills 2, 3, 4: ពេលព្រឹក | ពេលថ្ងៃ | ពេលល្ងាច */}
-          <div className="flex-1 grid grid-cols-3 gap-1.5">
-            {[
-              {
-                id: 'breakfast' as MealTimeFilter,
-                labelKh: 'ពេលព្រឹក',
-                labelEn: 'Morning',
-                labelZh: '早餐',
-                renderIcon: (active: boolean) => (
-                  <svg
-                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-white' : 'text-[#1B5E3A]'}`}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M4 12h16a1 1 0 0 1 1 1v.5a7.5 7.5 0 0 1-15 0V13a1 1 0 0 1 1-1Z" />
-                    <path d="M7 20.5h10" />
-                    <path d="M9.5 8.5c0-1.4.9-2.2.9-3.5" />
-                    <path d="M14.5 8.5c0-1.4.9-2.2.9-3.5" />
-                  </svg>
-                ),
-              },
-              {
-                id: 'lunch' as MealTimeFilter,
-                labelKh: 'ពេលថ្ងៃ',
-                labelEn: 'Midday',
-                labelZh: '午餐',
-                renderIcon: (active: boolean) => (
-                  <svg
-                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-white' : 'text-[#15803D]'}`}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <circle cx="12" cy="12" r="4" />
-                    <path d="M12 2v2" />
-                    <path d="M12 20v2" />
-                    <path d="m4.93 4.93 1.41 1.41" />
-                    <path d="m17.66 17.66 1.41 1.41" />
-                    <path d="M2 12h2" />
-                    <path d="M20 12h2" />
-                    <path d="m6.34 17.66-1.41 1.41" />
-                    <path d="m19.07 4.93-1.41 1.41" />
-                  </svg>
-                ),
-              },
-              {
-                id: 'dinner' as MealTimeFilter,
-                labelKh: 'ពេលល្ងាច',
-                labelEn: 'Evening',
-                labelZh: '晚餐',
-                renderIcon: (active: boolean) => (
-                  <svg
-                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-white' : 'text-[#1E293B]'}`}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-                  </svg>
-                ),
-              },
-            ].map((slot) => {
-              const active = mealTimeFilter === slot.id;
-              return (
-                <button
-                  key={slot.id}
-                  type="button"
-                  onClick={() => setMealTimeFilter(active ? 'all' : slot.id)}
-                  style={
-                    active
-                      ? {
-                          background: 'linear-gradient(180deg, #2E7D52 0%, #1B5E3A 100%)',
-                          boxShadow: '0 4px 10px rgba(27, 94, 58, 0.25)',
-                        }
-                      : {
-                          boxShadow: '0 2px 8px rgba(15, 23, 42, 0.05)',
-                        }
-                  }
-                  className={`h-[36px] px-2 rounded-full text-[11px] font-khmer font-extrabold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer border ${
-                    active
-                      ? 'border-[#1B5E3A] text-white'
-                      : 'bg-white border-slate-200/90 text-[#1E293B] hover:border-[#22C55E]/60'
-                  }`}
-                >
-                  {slot.renderIcon(active)}
-                  <span className="truncate">{tr(language, slot.labelKh, slot.labelEn, slot.labelZh)}</span>
-                </button>
-              );
-            })}
-          </div>
         </div>
 
         <div ref={dishListStartRef} />

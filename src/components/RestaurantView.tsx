@@ -38,7 +38,7 @@ import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { matchShopToProductQuery, verifyShopDataForDisplay } from '../utils/foodFilters';
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
-import { handleAvatarImageError } from '../utils/avatarHelper';
+import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
 
 const RESTAURANT_BATCH_SIZE = 40;
 

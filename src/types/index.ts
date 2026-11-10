@@ -5,7 +5,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1528;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1529;
 export const APP_RELEASE_DATE = '2026-11-10';
 
 /**
@@ -564,13 +564,12 @@ export const sanitizeRestaurantGalleryPhotos = (
  * Anything that is not a food-media Storage URL is returned unchanged. Callers should keep an `onError` fallback to
  * the original URL (see FoodCard) so a disabled transformation service can never leave a blank picture.
  */
-export const toStorageThumbnail = (url: string, widthPx: number): string => {
-  const m = /^(https:\/\/[a-z0-9-]+\.supabase\.co)\/storage\/v1\/object\/public\/(food-media\/[^?#]+)(\?[^#]*)?$/i.exec(url || '');
-  if (!m) return url;
-  const q = new URLSearchParams(m[3] ? m[3].slice(1) : '');
-  q.set('width', String(Math.max(64, Math.min(1600, Math.round(widthPx)))));
-  q.set('quality', '70');
-  return `${m[1]}/storage/v1/render/image/public/${m[2]}?${q.toString()}`;
+export const toStorageThumbnail = (url: string, _widthPx?: number): string => {
+  if (!url || typeof url !== 'string') return '';
+  if (url.includes('/storage/v1/render/image/public/')) {
+    return url.replace('/storage/v1/render/image/public/', '/storage/v1/object/public/').split('?')[0];
+  }
+  return url;
 };
 
 /**
@@ -621,16 +620,19 @@ export const resolveFoodPhotoUrl = (
 
 const resolveFoodPhotoUrlFull = (
   photoUrl?: string,
-  photoUpdatedAt?: string,
+  _photoUpdatedAt?: string,
   foodId?: string
 ): string => {
   const seedFallbackPath = getBundledSeedFoodFallbackPath(foodId);
   if (!photoUrl || typeof photoUrl !== 'string') {
     return seedFallbackPath ? `${seedFallbackPath}?v=${APP_BUILD_CODE}` : '';
   }
-  const trimmed = photoUrl.trim();
+  let trimmed = photoUrl.trim();
   if (!trimmed) {
     return seedFallbackPath ? `${seedFallbackPath}?v=${APP_BUILD_CODE}` : '';
+  }
+  if (trimmed.includes('/storage/v1/render/image/public/')) {
+    trimmed = trimmed.replace('/storage/v1/render/image/public/', '/storage/v1/object/public/').split('?')[0];
   }
   if (isEphemeralDeadImageUrl(trimmed)) {
     return seedFallbackPath ? `${seedFallbackPath}?v=${APP_BUILD_CODE}` : '/welcome/hero-bg.webp';
@@ -638,30 +640,20 @@ const resolveFoodPhotoUrlFull = (
   if (trimmed.startsWith('data:') || trimmed.startsWith('blob:')) {
     return trimmed;
   }
-  const revSuffix = photoUpdatedAt ? `_${computeFastPhotoSignature(photoUpdatedAt)}` : '';
   if (
     trimmed.startsWith('/foods/') ||
     trimmed.startsWith('/Shop/') ||
     trimmed.startsWith('/destinations/')
   ) {
     const basePath = trimmed.split('?')[0];
-    return `${basePath}?v=${APP_BUILD_CODE}${revSuffix}`;
-  }
-  if (
-    (trimmed.startsWith('https://') || trimmed.startsWith('http://')) &&
-    trimmed.includes('/storage/v1/object/public/') &&
-    photoUpdatedAt &&
-    !trimmed.includes('v=')
-  ) {
-    const sep = trimmed.includes('?') ? '&' : '?';
-    return `${trimmed}${sep}v=${APP_BUILD_CODE}${revSuffix}`;
+    return `${basePath}?v=${APP_BUILD_CODE}`;
   }
   return trimmed;
 };
 
 /**
  * Multi-stage `<img>` error recovery for food cards/modals:
- * 1) Non-transformed full URL (if Supabase image render transform was used)
+ * 1) Direct non-transformed cloud URL (if a transformed URL ever failed)
  * 2) Bundled local `/foods/food-<N>.jpg` asset (for `food-1` .. `food-307`)
  * 3) Bundled `/welcome/hero-bg.webp` hero fallback (prevents broken-image icon permanently)
  */
@@ -672,6 +664,11 @@ export const handleFoodImageError = (
 ): void => {
   const img = e?.currentTarget;
   if (!img) return;
+  const currentPrimary = fullPhotoUrl || '';
+  if (img.dataset.kftPrimaryUrl !== currentPrimary) {
+    img.dataset.kftPrimaryUrl = currentPrimary;
+    img.dataset.kftFallbackStage = '0';
+  }
   const stage = Number(img.dataset.kftFallbackStage || '0');
   if (stage >= 3) return;
 

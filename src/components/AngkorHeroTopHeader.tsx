@@ -19,7 +19,7 @@ interface AngkorHeroTopHeaderProps {
   onOpenCameraAi?: () => void;
 }
 
-export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
+const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
   mode,
   query = '',
   onChangeQuery,
@@ -69,7 +69,7 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
 
   const resolvedProfileAvatar = React.useMemo(() => {
     void avatarTick;
-    return resolveUserAvatarUrl(effectiveUser || { name: 'KH', role: 'user' });
+    return resolveUserAvatarUrl(effectiveUser || { name: 'IG', role: 'user' });
   }, [effectiveUser, avatarTick]);
   const isAdmin = isAdminAccount(currentUser);
 
@@ -137,19 +137,31 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <button
             type="button"
-            onClick={() => setActiveTab('home')}
-            style={{
-              boxShadow: '0 0 0 1.5px rgba(120, 53, 15, 0.65), 0 4px 12px rgba(0, 0, 0, 0.45)',
+            onClick={() => {
+              setActiveTab('home');
+              const mainEl = document.getElementById('kft-main-scroll');
+              if (mainEl) mainEl.scrollTop = 0;
             }}
-            className="w-[46px] h-[46px] rounded-[13px] border-[2px] border-[#FDE68A] bg-[#042F2E] overflow-hidden shrink-0 cursor-pointer active:scale-95 transition"
+            style={{
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.45)',
+            }}
+            className="w-[46px] h-[46px] rounded-[13px] p-[1.5px] bg-gradient-to-b from-[#FDE047] via-[#D4AF37] to-[#9A6F1A] overflow-hidden shrink-0 cursor-pointer active:scale-95 transition"
             title={tr(language, 'ទំព័រដើម', 'Home', '首页')}
           >
             <img
-              src="/icons/kft-app-icon-192.png?v=2704"
+              src="/logo-kft.png"
               alt="រសជាតិ និងទេសចរណ៍កម្ពុជា"
-              className="w-full h-full object-cover"
+              decoding="async"
+              className="w-full h-full rounded-[11px] object-cover bg-[#064E3B]"
               onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = '/app-logo.jpg';
+                const img = e.currentTarget as HTMLImageElement;
+                if (!img.dataset.fallback) {
+                  img.dataset.fallback = '1';
+                  img.src = '/app-logo-v200.png';
+                } else if (img.dataset.fallback === '1') {
+                  img.dataset.fallback = '2';
+                  img.src = '/icon-192.png';
+                }
               }}
             />
           </button>
@@ -223,16 +235,13 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
                   : tr(language, 'ចូលគណនី', 'Sign In', '登录')
               }
             >
-              {effectiveUser ? (
-                <img
-                  src={resolvedProfileAvatar}
-                  alt={effectiveUser.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => handleAvatarImageError(e, effectiveUser)}
-                />
-              ) : (
-                <span>IG</span>
-              )}
+              <img
+                src={resolvedProfileAvatar}
+                alt={effectiveUser?.name || 'IG'}
+                decoding="async"
+                className="w-full h-full object-cover"
+                onError={(e) => handleAvatarImageError(e, effectiveUser || { name: 'IG', role: 'user' })}
+              />
             </button>
           </div>
 
@@ -371,3 +380,5 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
     </div>
   );
 };
+
+export const AngkorHeroTopHeader = React.memo(AngkorHeroTopHeaderInner);

@@ -46,6 +46,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
     // 2. មាន់អាំង (Grilled Chicken)
     const grilledChicken =
       byId.get('food-21') ||
+      byId.get('food-118') ||
       findMatch((f) => /មាន់អាំង|មាន់ដុត|grilled chicken/i.test(`${f.nameKh} ${f.nameEn}`));
     if (grilledChicken && !picks.some((p) => p.id === grilledChicken.id)) {
       picks.push(grilledChicken);
@@ -145,7 +146,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
               const shortKhName =
                 food.id === 'food-1'
                   ? 'អាម៉ុកត្រី'
-                  : food.id === 'food-21'
+                  : food.id === 'food-21' || food.id === 'food-118'
                   ? 'មាន់អាំង'
                   : food.id === 'food-36' || food.id === 'food-6'
                   ? 'គុយទាវខ្មែរ'

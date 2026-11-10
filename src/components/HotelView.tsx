@@ -43,6 +43,7 @@ import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 import { DISH_PROVINCES } from '../utils/foodFilters';
 import { tr } from '../utils/i18n';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
+import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
 
 const HOTEL_BATCH_SIZE = 36;
 
@@ -1147,7 +1148,7 @@ export const HotelView: React.FC = () => {
           <div className="relative rounded-[20px] overflow-hidden shadow-[0_6px_18px_rgba(6,78,59,0.22)]">
             <div className="relative min-h-[108px] sm:min-h-[114px] flex items-center">
               <img
-                src="/welcome/shop-register-banner.png"
+                src="/welcome/hotel-register-banner.png"
                 alt="Register Your Hotel or Guesthouse"
                 decoding="async"
                 className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none"
