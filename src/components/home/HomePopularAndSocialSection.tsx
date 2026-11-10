@@ -125,7 +125,10 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
                   </linearGradient>
                 </defs>
               </svg>
-              <h3 className="font-khmer font-extrabold text-[15px] sm:text-base text-[#0F172A] truncate">
+              <h3
+                className="font-khmer font-extrabold text-[#0F172A] leading-[1.68] py-0.5 break-words"
+                style={{ fontSize: 'clamp(13px, 3.6vw, 16px)' }}
+              >
                 {tr(language, 'ម្ហូបពេញនិយមនៅកម្ពុជា', 'Popular Dishes in Cambodia', '柬埔寨热门美食')}
               </h3>
             </div>
@@ -194,10 +197,10 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
                   </button>
 
                   {/* Bottom Centered Dish Title */}
-                  <div className="absolute inset-x-1.5 bottom-2 text-center">
+                  <div className="absolute inset-x-1 bottom-1.5 text-center">
                     <span
-                      className="font-khmer font-extrabold text-xs sm:text-[13px] text-white line-clamp-1"
-                      style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}
+                      className="font-khmer font-extrabold text-white leading-[1.72] py-0.5 line-clamp-1 block"
+                      style={{ fontSize: 'clamp(10.5px, 2.9vw, 13.5px)', textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}
                     >
                       {displayTitle}
                     </span>
@@ -210,7 +213,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
       )}
 
       {/* 2. Two Attractive Horizontal Feature Banners Side-by-Side (ម្ហូបសុខភាព & ជំនួយការ AI ម្ហូបអាហារ) */}
-      <section className="grid grid-cols-2 gap-2.5">
+      <section className="grid grid-cols-1 min-[350px]:grid-cols-2 gap-2.5">
         {/* Left Green Banner: ម្ហូបសុខភាព with Leaf Icon & Healthy Food Bowl Photo */}
         <button
           type="button"
@@ -222,21 +225,27 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
           className="group relative rounded-2xl p-2 flex items-center justify-between gap-1.5 text-left border-2 border-white overflow-hidden active:scale-[0.97] transition cursor-pointer"
         >
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span className="w-9 h-9 rounded-full bg-[#248232] text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#248232] text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+              <svg className="w-4.5 h-4.5 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66l.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8Z" />
               </svg>
             </span>
             <div className="min-w-0 flex-1">
-              <div className="font-khmer font-extrabold text-xs sm:text-[13px] text-[#0F291E] leading-tight truncate">
+              <div
+                className="font-khmer font-extrabold text-[#0F291E] leading-[1.68] py-0.5 break-words"
+                style={{ fontSize: 'clamp(11.5px, 3.1vw, 13.5px)' }}
+              >
                 {tr(language, 'ម្ហូបសុខភាព', 'Healthy Food', '健康养生美食')}
               </div>
-              <div className="font-khmer font-bold text-[10px] text-[#1E4620]/90 leading-tight truncate mt-0.5">
+              <div
+                className="font-khmer font-bold text-[#1E4620]/95 leading-[1.65] py-0.5 break-words line-clamp-2"
+                style={{ fontSize: 'clamp(9.5px, 2.6vw, 11px)' }}
+              >
                 {tr(language, 'ជ្រើសរើសម្ហូបបំប៉នសុខភាព', 'Nutritious guide', '精选营养健康餐')}
               </div>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-xs shrink-0 bg-emerald-100">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-white shadow-xs shrink-0 bg-emerald-100">
             <img
               src="/foods/food-13.jpg"
               alt="Healthy Food"
@@ -258,13 +267,16 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
           className="group relative rounded-2xl p-2 flex items-center justify-between gap-1.5 text-left border-2 border-white overflow-hidden active:scale-[0.97] transition cursor-pointer"
         >
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span className="w-9 h-9 rounded-full bg-[#1570EF] text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#1570EF] text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+              <svg className="w-4.5 h-4.5 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 3C6.5 3 2 6.58 2 11c0 2.52 1.46 4.77 3.75 6.25L4.5 21l4.28-2.14c1.02.28 2.1.44 3.22.44 5.5 0 10-3.58 10-8s-4.5-8-10-8zm-4 9a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm4 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm4 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z" />
               </svg>
             </span>
             <div className="min-w-0 flex-1">
-              <div className="font-khmer font-extrabold text-xs sm:text-[13px] text-[#0F172A] leading-tight line-clamp-2">
+              <div
+                className="font-khmer font-extrabold text-[#0F172A] leading-[1.68] py-0.5 break-words"
+                style={{ fontSize: 'clamp(11.5px, 3.1vw, 13.5px)' }}
+              >
                 {tr(language, 'ជំនួយការ AI ម្ហូបអាហារ', 'AI Food Assistant', 'AI 美食助手')}
               </div>
             </div>
@@ -348,7 +360,10 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
             {/* Vertical Divider */}
             <span className="h-4 w-px bg-white/30 mx-1 shrink-0" aria-hidden="true" />
 
-            <h3 className="font-khmer font-extrabold text-xs sm:text-sm text-white truncate">
+            <h3
+              className="font-khmer font-extrabold text-white leading-[1.68] py-0.5 break-words"
+              style={{ fontSize: 'clamp(11px, 3.1vw, 14px)' }}
+            >
               {tr(
                 language,
                 'Review ម្ហូប និងដំណើរកម្សាន្ត',

@@ -442,7 +442,7 @@ export const FoodDetailModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-stretch md:items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overscroll-none"
       onClick={() => {
         if (isSpeaking && typeof window !== 'undefined' && 'speechSynthesis' in window) {
           window.speechSynthesis.cancel();
@@ -451,7 +451,7 @@ export const FoodDetailModal: React.FC = () => {
       }}
     >
       <div 
-        className="bg-white dark:bg-slate-900 w-full max-w-lg h-[90vh] sm:h-[85vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative border border-slate-200/80 dark:border-slate-800"
+        className="bg-white dark:bg-slate-900 w-full max-w-full md:max-w-2xl lg:max-w-3xl h-full md:h-[90dvh] rounded-none md:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative border-0 md:border border-slate-200/80 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Floating Controls */}
@@ -550,7 +550,7 @@ export const FoodDetailModal: React.FC = () => {
         </div>
 
         {/* Scrollable Body */}
-        <div className="overflow-y-auto flex-1 no-scrollbar pb-[calc(var(--kft-safe-bottom,0px)+24px)]">
+        <div className="overflow-y-auto flex-1 min-h-0 overscroll-contain [-webkit-overflow-scrolling:touch] no-scrollbar pb-[calc(var(--kft-safe-bottom,0px)+32px)]">
           {isEditingAdminFood ? (
             /* ADMIN EDIT FOOD FORM */
             <form onSubmit={handleSaveAdminFood} className="p-4 sm:p-6 space-y-4 font-khmer pt-16">
@@ -992,8 +992,8 @@ export const FoodDetailModal: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             
             {/* Bottom info inside hero */}
-            <div className="absolute bottom-3.5 left-4 right-24 text-white">
-              <div className="flex items-center gap-2 flex-wrap mb-2">
+            <div className="absolute bottom-7 left-3.5 right-3.5 sm:left-5 sm:right-5 text-white">
+              <div className="flex items-center gap-2 flex-wrap mb-1.5">
                 <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#064E3B] text-emerald-100 border border-emerald-400/40 shadow-xs">
                   {loc.category}
                 </span>
@@ -1002,7 +1002,7 @@ export const FoodDetailModal: React.FC = () => {
                   <span className="font-normal text-white/75 text-[11px]">({selectedFood.reviewCount})</span>
                 </span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold font-moul leading-snug drop-shadow text-white">
+              <h2 className="text-lg sm:text-2xl font-bold font-moul leading-[1.7] py-0.5 drop-shadow text-white break-words">
                 {loc.name}
               </h2>
             </div>
@@ -1100,7 +1100,7 @@ export const FoodDetailModal: React.FC = () => {
             )}
 
             {/* Attributes Grid */}
-            <div className="grid grid-cols-4 gap-2 text-center">
+            <div className="grid grid-cols-2 min-[400px]:grid-cols-4 gap-2 text-center">
               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700">
                 <Clock className="w-4 h-4 mx-auto text-[#059669] mb-1" />
                 <p className="text-[11px] text-slate-400">{tr(language, 'ចម្អិន', 'Cook', '烹饪时间')}</p>
@@ -1173,15 +1173,15 @@ export const FoodDetailModal: React.FC = () => {
                           : 'bg-white dark:bg-slate-800 border-slate-200/90 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:border-emerald-500'
                       }`}
                     >
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
                         {isChecked ? (
                           <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0" />
                         ) : (
                           <Circle className="w-4 h-4 text-slate-300 shrink-0" />
                         )}
-                        <span className="font-semibold">{ing.name}</span>
+                        <span className="font-semibold break-words leading-[1.65]">{ing.name}</span>
                       </div>
-                      <span className="font-bold text-slate-500 dark:text-slate-400 text-xs">{ing.amount}</span>
+                      <span className="font-bold text-slate-500 dark:text-slate-400 text-xs shrink-0 text-right">{ing.amount}</span>
                     </div>
                   );
                 })}

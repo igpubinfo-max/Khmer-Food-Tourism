@@ -6,9 +6,10 @@ import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { normalizeKhmerSearchText, expandMultilingualPlaceQuery, includesKhmerSafeToken } from './googlePlacesService';
 import { isSupabaseConfigured, pushCloudDocument, pullCloudDocument } from './supabaseService';
 
-export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v16_social_2026_verified_cache';
+export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v17_social_2026_verified_cache';
 const ONLINE_DISCOVERY_CUSTOM_URLS_KEY = 'kft_online_discovery_custom_urls_v1';
 const LEGACY_CACHE_KEYS = [
+  'kft_v16_social_2026_verified_cache',
   'kft_v15_social_2026_verified_cache',
   'kft_v14_social_2026_verified_cache',
   'kft_v13_social_2026_verified_cache',
@@ -21,6 +22,7 @@ const LEGACY_CACHE_KEYS = [
   'kft_v6_youtube_verified_cache',
   'kft_v5_youtube_discovery_cache',
   'kft_v4_online_discovery_cache',
+  'kft_live_tiktok_creators_v2',
   'kft_live_tiktok_creators_v1',
 ];
 export const ONLINE_DISCOVERY_TTL_MS = 30 * 60 * 1000; // 30 minutes cache window (prevents mobile radio/CPU overheating)
@@ -2803,15 +2805,115 @@ const tiktokStreamCacheByVid = new Map<
   string,
   { primaryUrl: string; backupUrl?: string; coverUrl?: string; resolvedAt: number }
 >();
+const tiktokStreamInFlightByVid = new Map<
+  string,
+  Promise<{ primaryUrl: string | null; backupUrl: string | null; coverUrl?: string }>
+>();
 const TIKTOK_STREAM_CACHE_TTL_MS = 20 * 60 * 1000; // 20 minutes before CDN token refresh
 
 /**
+ * Verifies whether a direct video stream URL is fresh and safe for HTML5 <video> playback without stalling.
+ * Rejects `v16m.tiktokcdn.com` (which hangs without session cookies) and expired signed TikTok CDN tokens.
+ */
+export function isDirectVideoUrlFreshAndPlayable(url?: string | null): boolean {
+  const clean = String(url || '').trim();
+  if (!clean || !/^https?:\/\//i.test(clean)) return false;
+  if (/v16m\.tiktokcdn\.com/i.test(clean)) return false;
+  if (/tiktokcdn\.com/i.test(clean)) {
+    const expMatch = clean.match(/[?&]x-expires=(\d+)/i);
+    if (!expMatch) return false;
+    const expMs = Number(expMatch[1]) * 1000;
+    if (!Number.isFinite(expMs) || expMs <= Date.now() + 5 * 60 * 1000) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Synchronously returns a cached, verified CORS-enabled TikTok MP4 stream if already pre-warmed.
+ * Allows `<video autoPlay playsInline>` to mount synchronously inside the user's tap gesture on Android & iOS!
+ */
+export function getCachedTikTokStreamUrl(
+  item: Partial<OnlineFoodDiscoveryItem>
+): { primaryUrl: string; backupUrl?: string; coverUrl?: string } | null {
+  const tiktokVid = extractTikTokVideoId(item.inlineVideoId || item.sourceUrl);
+  if (tiktokVid) {
+    const cached = tiktokStreamCacheByVid.get(tiktokVid);
+    if (
+      cached &&
+      Date.now() - cached.resolvedAt < TIKTOK_STREAM_CACHE_TTL_MS &&
+      isDirectVideoUrlFreshAndPlayable(cached.primaryUrl)
+    ) {
+      return {
+        primaryUrl: cached.primaryUrl,
+        backupUrl: isDirectVideoUrlFreshAndPlayable(cached.backupUrl) ? cached.backupUrl : undefined,
+        coverUrl: cached.coverUrl,
+      };
+    }
+  }
+  if (isDirectVideoUrlFreshAndPlayable(item.directVideoUrl)) {
+    return {
+      primaryUrl: item.directVideoUrl!,
+    };
+  }
+  return null;
+}
+
+/**
+ * Pre-warms playable CORS MP4 streams in the background for visible TikTok cards so when the user taps
+ * Play on Android or iOS, the stream URL is already resolved in memory (0ms latency, preserving user gesture).
+ */
+export async function prewarmTikTokStreams(
+  items: ReadonlyArray<Partial<OnlineFoodDiscoveryItem>>,
+  maxCount = 6
+): Promise<Record<string, { primaryUrl: string; backupUrl?: string }>> {
+  const resolvedMap: Record<string, { primaryUrl: string; backupUrl?: string }> = {};
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    return resolvedMap;
+  }
+
+  const tiktokItems = items
+    .filter((it) => it && it.platform === 'tiktok' && it.id)
+    .slice(0, maxCount);
+
+  for (const it of tiktokItems) {
+    const syncCached = getCachedTikTokStreamUrl(it);
+    if (syncCached && it.id) {
+      resolvedMap[it.id] = {
+        primaryUrl: syncCached.primaryUrl,
+        backupUrl: syncCached.backupUrl,
+      };
+    }
+  }
+
+  const uncached = tiktokItems.filter((it) => it.id && !resolvedMap[it.id]);
+  const concurrency = 2;
+  for (let i = 0; i < uncached.length; i += concurrency) {
+    const batch = uncached.slice(i, i + concurrency);
+    await Promise.allSettled(
+      batch.map(async (it) => {
+        const res = await resolvePlayableTikTokStreamUrl(it);
+        if (res.primaryUrl && it.id) {
+          resolvedMap[it.id] = {
+            primaryUrl: res.primaryUrl,
+            backupUrl: res.backupUrl || undefined,
+          };
+        }
+      })
+    );
+  }
+
+  return resolvedMap;
+}
+
+/**
  * Resolves a direct, playable MP4 stream URL for a TikTok video so it plays smoothly inside a native
- * HTML5 <video> element on Android WebView and Web without triggering TikTok's iframe 'Server error'.
+ * HTML5 <video> element on Android WebView, iOS WKWebView, and Web without buffering or freezing at 0:00.
  *
- * Layer 1: Fresh in-memory stream cache (populated from /embed/@handle or tikwm API).
- * Layer 2: CORS-enabled TikTok stream resolver (https://www.tikwm.com/api/?url=...).
- * Layer 3: TikTok official creator embed state (https://www.tiktok.com/embed/@handle -> videoList[].playAddr).
+ * Layer 1: Fresh in-memory stream cache (populated from tikwm CORS API).
+ * Layer 2: CORS-enabled TikTok stream resolver (https://www.tikwm.com/api/?url=...) returning H.264/AAC MP4 with ACAO: *.
+ * Layer 3: TikTok creator embed state fallback (non-v16m CDN hosts only).
  */
 export async function resolvePlayableTikTokStreamUrl(
   item: Partial<OnlineFoodDiscoveryItem>
@@ -2823,152 +2925,183 @@ export async function resolvePlayableTikTokStreamUrl(
       .trim() ||
     (item.sourceUrl?.match(/tiktok\.com\/@([^/?#]+)/i)?.[1] ?? 'eatame.eater');
 
-  if (tiktokVid) {
-    const cached = tiktokStreamCacheByVid.get(tiktokVid);
-    if (cached && Date.now() - cached.resolvedAt < TIKTOK_STREAM_CACHE_TTL_MS && cached.primaryUrl) {
-      return {
-        primaryUrl: cached.primaryUrl,
-        backupUrl: cached.backupUrl || item.directVideoUrl || null,
-        coverUrl: cached.coverUrl,
-      };
-    }
-  }
-
-  const canonicalTikTokUrl = tiktokVid
-    ? `https://www.tiktok.com/@${cleanHandle}/video/${tiktokVid}`
-    : String(item.sourceUrl || '').trim();
-
-  const isNative = Boolean(Capacitor?.isNativePlatform?.());
-
-  // Layer 2: Query CORS-enabled tikwm API for fresh CDN MP4 stream (play + wmplay)
-  if (canonicalTikTokUrl && /^https?:\/\//i.test(canonicalTikTokUrl)) {
-    const apiEndpoint = `https://www.tikwm.com/api/?url=${encodeURIComponent(canonicalTikTokUrl)}`;
-    try {
-      let json: any = null;
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 3800);
-      try {
-        const res = await fetch(apiEndpoint, {
-          method: 'GET',
-          headers: { Accept: 'application/json' },
-          signal: controller.signal,
-        });
-        clearTimeout(timer);
-        if (res.ok) {
-          json = await res.json();
-        }
-      } catch {
-        clearTimeout(timer);
-        if (isNative && CapacitorHttp?.get) {
-          const resp = await CapacitorHttp.get({
-            url: apiEndpoint,
-            headers: { Accept: 'application/json' },
-            connectTimeout: 4000,
-            readTimeout: 4000,
-          });
-          if (resp && resp.status >= 200 && resp.status < 300) {
-            json = typeof resp.data === 'string' ? JSON.parse(resp.data) : resp.data;
-          }
-        }
-      }
-
-      const playUrl = String(json?.data?.play || '').trim();
-      const wmPlayUrl = String(json?.data?.wmplay || '').trim();
-      const coverUrl = String(json?.data?.cover || json?.data?.origin_cover || '').trim() || undefined;
-      if (playUrl && /^https?:\/\//i.test(playUrl)) {
-        const backup = wmPlayUrl && wmPlayUrl !== playUrl ? wmPlayUrl : item.directVideoUrl || undefined;
-        if (tiktokVid) {
-          tiktokStreamCacheByVid.set(tiktokVid, {
-            primaryUrl: playUrl,
-            backupUrl: backup,
-            coverUrl,
-            resolvedAt: Date.now(),
-          });
-        }
-        return {
-          primaryUrl: playUrl,
-          backupUrl: backup || null,
-          coverUrl,
-        };
-      }
-    } catch {
-      // Fall through to Layer 3
-    }
-  }
-
-  // Layer 3: Extract playAddr from TikTok's public creator embed feed (/embed/@handle)
-  if (tiktokVid && cleanHandle) {
-    try {
-      const embedEndpoint = `https://www.tiktok.com/embed/@${cleanHandle}`;
-      let html = '';
-      if (isNative && CapacitorHttp?.get) {
-        const resp = await CapacitorHttp.get({
-          url: embedEndpoint,
-          headers: {
-            Accept: 'text/html,application/xhtml+xml',
-            'User-Agent':
-              'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
-          },
-          connectTimeout: 4000,
-          readTimeout: 4000,
-        });
-        if (resp && resp.status >= 200 && resp.status < 300 && typeof resp.data === 'string') {
-          html = resp.data;
-        }
-      } else {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 3800);
-        const res = await fetch(embedEndpoint, { signal: controller.signal });
-        clearTimeout(timer);
-        if (res.ok) {
-          html = await res.text();
-        }
-      }
-
-      if (html) {
-        const stateMatch = html.match(
-          /<script id="__FRONTITY_CONNECT_STATE__" type="application\/json">([\s\S]*?)<\/script>/
-        );
-        if (stateMatch && stateMatch[1]) {
-          const parsedState = JSON.parse(stateMatch[1]);
-          const creatorData = parsedState?.source?.data?.[`/embed/@${cleanHandle}`];
-          const videoList = Array.isArray(creatorData?.videoList) ? creatorData.videoList : [];
-          for (const v of videoList) {
-            const vId = extractTikTokVideoId(String(v?.id || ''));
-            const vPlayAddr = String(v?.playAddr || '').trim();
-            const vCover = String(v?.coverUrl || v?.originCoverUrl || '').trim() || undefined;
-            if (vId && vPlayAddr && /^https?:\/\//i.test(vPlayAddr)) {
-              tiktokStreamCacheByVid.set(vId, {
-                primaryUrl: vPlayAddr,
-                backupUrl: undefined,
-                coverUrl: vCover,
-                resolvedAt: Date.now(),
-              });
-            }
-          }
-          const matched = tiktokStreamCacheByVid.get(tiktokVid);
-          if (matched?.primaryUrl) {
-            return {
-              primaryUrl: matched.primaryUrl,
-              backupUrl: item.directVideoUrl && item.directVideoUrl !== matched.primaryUrl ? item.directVideoUrl : null,
-              coverUrl: matched.coverUrl,
-            };
-          }
-        }
-      }
-    } catch {
-      // Ignore network/CORS error and fall back
-    }
-  }
-
-  if (item.directVideoUrl && /^https?:\/\//i.test(item.directVideoUrl)) {
+  const syncCached = getCachedTikTokStreamUrl(item);
+  if (syncCached) {
     return {
-      primaryUrl: item.directVideoUrl,
-      backupUrl: null,
+      primaryUrl: syncCached.primaryUrl,
+      backupUrl: syncCached.backupUrl || null,
+      coverUrl: syncCached.coverUrl,
     };
   }
 
-  return { primaryUrl: null, backupUrl: null };
+  if (tiktokVid && tiktokStreamInFlightByVid.has(tiktokVid)) {
+    return tiktokStreamInFlightByVid.get(tiktokVid)!;
+  }
+
+  const task = (async (): Promise<{ primaryUrl: string | null; backupUrl: string | null; coverUrl?: string }> => {
+    const canonicalTikTokUrl = tiktokVid
+      ? `https://www.tiktok.com/@${cleanHandle}/video/${tiktokVid}`
+      : String(item.sourceUrl || '').trim();
+
+    const isNative = Boolean(Capacitor?.isNativePlatform?.());
+
+    // Layer 2: Query CORS-enabled tikwm API for fresh H.264/AAC CDN MP4 stream (play + wmplay with ACAO: *)
+    if (canonicalTikTokUrl && /^https?:\/\//i.test(canonicalTikTokUrl)) {
+      const apiEndpoint = `https://www.tikwm.com/api/?url=${encodeURIComponent(canonicalTikTokUrl)}`;
+      try {
+        let json: any = null;
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 2500);
+        try {
+          const res = await fetch(apiEndpoint, {
+            method: 'GET',
+            headers: { Accept: 'application/json' },
+            signal: controller.signal,
+          });
+          clearTimeout(timer);
+          if (res.ok) {
+            json = await res.json();
+          }
+        } catch {
+          clearTimeout(timer);
+          if (isNative && CapacitorHttp?.get) {
+            const resp = await CapacitorHttp.get({
+              url: apiEndpoint,
+              headers: { Accept: 'application/json' },
+              connectTimeout: 2600,
+              readTimeout: 2600,
+            });
+            if (resp && resp.status >= 200 && resp.status < 300) {
+              json = typeof resp.data === 'string' ? JSON.parse(resp.data) : resp.data;
+            }
+          }
+        }
+
+        const playUrl = String(json?.data?.play || '').trim();
+        const wmPlayUrl = String(json?.data?.wmplay || '').trim();
+        const coverUrl = String(json?.data?.cover || json?.data?.origin_cover || '').trim() || undefined;
+        const validPrimary = isDirectVideoUrlFreshAndPlayable(playUrl)
+          ? playUrl
+          : isDirectVideoUrlFreshAndPlayable(wmPlayUrl)
+          ? wmPlayUrl
+          : '';
+        if (validPrimary) {
+          const backup =
+            isDirectVideoUrlFreshAndPlayable(wmPlayUrl) && wmPlayUrl !== validPrimary
+              ? wmPlayUrl
+              : isDirectVideoUrlFreshAndPlayable(item.directVideoUrl)
+              ? item.directVideoUrl
+              : undefined;
+          if (tiktokVid) {
+            tiktokStreamCacheByVid.set(tiktokVid, {
+              primaryUrl: validPrimary,
+              backupUrl: backup,
+              coverUrl,
+              resolvedAt: Date.now(),
+            });
+          }
+          return {
+            primaryUrl: validPrimary,
+            backupUrl: backup || null,
+            coverUrl,
+          };
+        }
+      } catch {
+        // Fall through to Layer 3
+      }
+    }
+
+    // Layer 3: Extract playAddr from TikTok's public creator embed feed (/embed/@handle), rejecting v16m hosts
+    if (tiktokVid && cleanHandle) {
+      try {
+        const embedEndpoint = `https://www.tiktok.com/embed/@${cleanHandle}`;
+        let html = '';
+        if (isNative && CapacitorHttp?.get) {
+          const resp = await CapacitorHttp.get({
+            url: embedEndpoint,
+            headers: {
+              Accept: 'text/html,application/xhtml+xml',
+              'User-Agent':
+                'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+            },
+            connectTimeout: 2600,
+            readTimeout: 2600,
+          });
+          if (resp && resp.status >= 200 && resp.status < 300 && typeof resp.data === 'string') {
+            html = resp.data;
+          }
+        } else {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 2500);
+          const res = await fetch(embedEndpoint, { signal: controller.signal });
+          clearTimeout(timer);
+          if (res.ok) {
+            html = await res.text();
+          }
+        }
+
+        if (html) {
+          const stateMatch = html.match(
+            /<script id="__FRONTITY_CONNECT_STATE__" type="application\/json">([\s\S]*?)<\/script>/
+          );
+          if (stateMatch && stateMatch[1]) {
+            const parsedState = JSON.parse(stateMatch[1]);
+            const creatorData = parsedState?.source?.data?.[`/embed/@${cleanHandle}`];
+            const videoList = Array.isArray(creatorData?.videoList) ? creatorData.videoList : [];
+            for (const v of videoList) {
+              const vId = extractTikTokVideoId(String(v?.id || ''));
+              const vPlayAddr = String(v?.playAddr || '').trim();
+              const vCover = String(v?.coverUrl || v?.originCoverUrl || '').trim() || undefined;
+              if (
+                vId &&
+                isDirectVideoUrlFreshAndPlayable(vPlayAddr) &&
+                !tiktokStreamCacheByVid.has(vId)
+              ) {
+                tiktokStreamCacheByVid.set(vId, {
+                  primaryUrl: vPlayAddr,
+                  backupUrl: undefined,
+                  coverUrl: vCover,
+                  resolvedAt: Date.now(),
+                });
+              }
+            }
+            const matched = tiktokStreamCacheByVid.get(tiktokVid);
+            if (matched?.primaryUrl) {
+              return {
+                primaryUrl: matched.primaryUrl,
+                backupUrl:
+                  isDirectVideoUrlFreshAndPlayable(item.directVideoUrl) &&
+                  item.directVideoUrl !== matched.primaryUrl
+                    ? item.directVideoUrl!
+                    : null,
+                coverUrl: matched.coverUrl,
+              };
+            }
+          }
+        }
+      } catch {
+        // Ignore network/CORS error and fall back
+      }
+    }
+
+    if (isDirectVideoUrlFreshAndPlayable(item.directVideoUrl)) {
+      return {
+        primaryUrl: item.directVideoUrl!,
+        backupUrl: null,
+      };
+    }
+
+    return { primaryUrl: null, backupUrl: null };
+  })();
+
+  if (tiktokVid) {
+    tiktokStreamInFlightByVid.set(tiktokVid, task);
+    task.finally(() => {
+      tiktokStreamInFlightByVid.delete(tiktokVid);
+    });
+  }
+
+  return task;
 }
 
 export function resolveInlineVideoIdForSocialItem(item: Partial<OnlineFoodDiscoveryItem>): string {
@@ -3045,7 +3178,7 @@ export const OFFICIAL_PRIORITY_TIKTOK_CREATORS: Array<{
   },
 ];
 
-const LIVE_TIKTOK_CREATORS_CACHE_KEY = 'kft_live_tiktok_creators_v2';
+const LIVE_TIKTOK_CREATORS_CACHE_KEY = 'kft_live_tiktok_creators_v3';
 const CLOUD_TIKTOK_DISCOVERED_DOC_KEY = 'kft_cloud_tiktok_discovered_videos_v1';
 const LIVE_TIKTOK_CREATORS_TTL_MS = 20 * 60 * 1000; // 20 minutes automatic discovery cycle
 
@@ -3076,7 +3209,10 @@ export async function fetchLiveTikTokCreatorVideos(
         const parsed = JSON.parse(raw);
         const age = Date.now() - (Date.parse(parsed.updatedAt) || 0);
         if (age < LIVE_TIKTOK_CREATORS_TTL_MS && Array.isArray(parsed.items) && parsed.items.length > 0) {
-          return parsed.items;
+          return parsed.items.map((it: OnlineFoodDiscoveryItem) => ({
+            ...it,
+            directVideoUrl: isDirectVideoUrlFreshAndPlayable(it.directVideoUrl) ? it.directVideoUrl : undefined,
+          }));
         }
       }
     } catch {
@@ -3112,6 +3248,7 @@ export async function fetchLiveTikTokCreatorVideos(
               inlineVideoId: vid,
               canInlineEmbed: true,
               isPlayableVerified: true,
+              directVideoUrl: undefined,
             });
           }
         }
@@ -3187,14 +3324,6 @@ export async function fetchLiveTikTokCreatorVideos(
           const isoDate = tiktokSnowflakeIdToIsoDate(vid);
           const dateLabel = isoDate ? isoDate.slice(0, 10) : new Date().toISOString().slice(0, 10);
           const coverUrl = String(rawVid?.coverUrl || rawVid?.originCoverUrl || '').trim();
-          const playAddr = String(rawVid?.playAddr || '').trim();
-          if (playAddr && /^https?:\/\//i.test(playAddr)) {
-            tiktokStreamCacheByVid.set(vid, {
-              primaryUrl: playAddr,
-              coverUrl: coverUrl || undefined,
-              resolvedAt: Date.now(),
-            });
-          }
           const match = matchCambodianDish(desc, foods);
           const cleanCaption = desc.replace(/#\S+/g, '').replace(/\s+/g, ' ').trim();
           const titleKh =
@@ -3244,7 +3373,7 @@ export async function fetchLiveTikTokCreatorVideos(
             isPlayableVerified: true,
             canInlineEmbed: true,
             inlineVideoId: vid,
-            directVideoUrl: playAddr || existing?.directVideoUrl,
+            directVideoUrl: undefined,
           };
 
           if (!existing) {
@@ -3324,6 +3453,7 @@ export function deduplicateAndRankDiscoveries(items: OnlineFoodDiscoveryItem[]):
           ? `https://www.tiktok.com/@${item.authorHandle.replace(/^@+/, '')}/video/${tiktokVid}`
           : item.sourceUrl,
         thumbnailUrl: cleanThumb,
+        directVideoUrl: isDirectVideoUrlFreshAndPlayable(item.directVideoUrl) ? item.directVideoUrl : undefined,
       });
       continue;
     }
@@ -3344,7 +3474,7 @@ export function deduplicateAndRankDiscoveries(items: OnlineFoodDiscoveryItem[]):
         canInlineEmbed: true,
         isPlayableVerified: true,
         thumbnailUrl: cleanThumb,
-        directVideoUrl: item.directVideoUrl,
+        directVideoUrl: isDirectVideoUrlFreshAndPlayable(item.directVideoUrl) ? item.directVideoUrl : undefined,
       });
       continue;
     }
@@ -3460,8 +3590,9 @@ function readCache(foods: FoodItem[]): OnlineDiscoveryFeedResult | null {
         .filter((it: OnlineFoodDiscoveryItem) => it.platform === 'tiktok' || it.platform === 'facebook' || !isKnownUnavailableVideo(it.sourceUrl))
         .map((it: OnlineFoodDiscoveryItem) => ({
           ...it,
-          canInlineEmbed: it.platform === 'tiktok' ? Boolean(extractTikTokVideoId(it.inlineVideoId || it.sourceUrl)) : it.platform === 'youtube',
+          canInlineEmbed: it.platform === 'tiktok' ? Boolean(extractTikTokVideoId(it.inlineVideoId || it.sourceUrl)) : true,
           inlineVideoId: it.platform === 'tiktok' ? extractTikTokVideoId(it.inlineVideoId || it.sourceUrl) || undefined : it.platform === 'facebook' ? undefined : it.inlineVideoId,
+          directVideoUrl: isDirectVideoUrlFreshAndPlayable(it.directVideoUrl) ? it.directVideoUrl : undefined,
           matchedFoodNameKh: it.matchedFoodId
             ? foodMap.get(it.matchedFoodId)?.nameKh || it.matchedFoodNameKh
             : it.matchedFoodNameKh,
@@ -3493,11 +3624,6 @@ export interface EmbedPlayerInfo {
 
 /**
  * Extracts iframe player embed URL and canonical watch URL safely for TikTok, Facebook, and YouTube.
- * CRITICAL:
- * - TikTok items use TikTok's official embed player (https://www.tiktok.com/player/v1/<19-digit-id>)
- *   and NEVER embed or link to YouTube!
- * - Facebook items link directly to the verified Facebook post/page and NEVER embed or link to YouTube!
- * - YouTube items use YouTube's official embed player (https://www.youtube.com/embed/<11-char-id>).
  */
 export function extractEmbedPlayerInfo(item: OnlineFoodDiscoveryItem): EmbedPlayerInfo {
   const url = (item.sourceUrl || item.trendingItem?.videoUrl || item.trendingItem?.sourceUrl || '').trim();
@@ -3519,8 +3645,8 @@ export function extractEmbedPlayerInfo(item: OnlineFoodDiscoveryItem): EmbedPlay
   if (item.platform === 'tiktok') {
     const tiktokVid = extractTikTokVideoId(item.inlineVideoId || url);
     const watchUrl = resolveOriginalSocialAccountUrl(item);
-    const cachedStream = tiktokVid ? tiktokStreamCacheByVid.get(tiktokVid) : undefined;
-    const directVideoUrl = cachedStream?.primaryUrl || item.directVideoUrl;
+    const syncStream = getCachedTikTokStreamUrl(item);
+    const directVideoUrl = syncStream?.primaryUrl;
     const fallbackStreamVid = resolveTikTokFallbackStreamId(item);
     return {
       canInlineEmbed: true,
@@ -3541,7 +3667,7 @@ export function extractEmbedPlayerInfo(item: OnlineFoodDiscoveryItem): EmbedPlay
       watchUrl,
       platform: 'facebook',
       videoId: fbStreamVid,
-      directVideoUrl: item.directVideoUrl,
+      directVideoUrl: isDirectVideoUrlFreshAndPlayable(item.directVideoUrl) ? item.directVideoUrl : undefined,
     };
   }
 

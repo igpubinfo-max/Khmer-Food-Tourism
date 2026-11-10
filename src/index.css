@@ -11,17 +11,17 @@
   --color-text-muted: #94A3B8;
   --color-gold-warm: #F59E0B;
 
-  /* Readable typography scale across Khmer, English, and Chinese with >= 1.65 line-height for Khmer subscripts */
-  --text-xs: 0.8125rem;     /* 13px (up from 12px) */
-  --text-xs--line-height: 1.65;
-  --text-sm: 0.9375rem;     /* 15px (up from 14px) */
-  --text-sm--line-height: 1.65;
-  --text-base: 1.0625rem;   /* 17px (up from 16px) */
-  --text-base--line-height: 1.68;
-  --text-lg: 1.1875rem;     /* 19px (up from 18px) */
-  --text-lg--line-height: 1.65;
-  --text-xl: 1.3125rem;     /* 21px (up from 20px) */
-  --text-xl--line-height: 1.6;
+  /* Balanced typography scale across Khmer, English, and Chinese with >= 1.68 line-height for Khmer subscripts */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.68;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.68;
+  --text-base: 1rem;
+  --text-base--line-height: 1.7;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.68;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.65;
 }
 
 :root {
@@ -90,9 +90,9 @@
   padding-left: var(--kft-safe-left, 0px);
   padding-right: var(--kft-safe-right, 0px);
   /* The bottom nav is a flex sibling (never overlays content); this breathing room
-     guarantees the last card/image can always be scrolled fully clear of it. */
-  padding-bottom: max(var(--kft-safe-bottom, 0px), 20px);
-  scroll-padding-bottom: 28px;
+     guarantees the last card/image/button can always be scrolled fully clear of it. */
+  padding-bottom: max(calc(var(--kft-safe-bottom, 0px) + 22px), 30px);
+  scroll-padding-bottom: 36px;
 }
 @media (prefers-reduced-motion: reduce) {
   #kft-main-scroll { scroll-behavior: auto; }
@@ -192,12 +192,12 @@
   will-change: auto;
 }
 
-/* Prevent tall Khmer top vowel diacritics (ែ, ី, ិ, ឺ, ំ, ៍) and bottom subscripts (ជើងអក្សរ) from being clipped by overflow:hidden / truncate */
+/* Prevent tall Khmer top vowel diacritics (ែ, ី, ិ, ឺ, ំ, ៍) and double-stacked bottom subscripts (ជើងអក្សរដូចជា ម្ហូ = ម + ្ហ + ូ) from being clipped */
 .font-moul,
 .font-moul .truncate {
-  line-height: 1.72 !important;
+  line-height: 1.75 !important;
   padding-top: 0.18em;
-  padding-bottom: 0.08em;
+  padding-bottom: 0.14em;
 }
 
 .font-khmer,
@@ -209,23 +209,29 @@
 .font-khmer label,
 .font-khmer select,
 .font-khmer input {
-  line-height: 1.65;
+  line-height: 1.68;
 }
 
 .truncate,
 .line-clamp-1,
-.line-clamp-2 {
-  line-height: 1.65 !important;
-  padding-top: 0.06em;
-  padding-bottom: 0.06em;
+.line-clamp-2,
+.line-clamp-3 {
+  line-height: 1.74 !important;
+  padding-top: 0.1em;
+  padding-bottom: 0.2em;
 }
 
-/* Fluid base typography: scales smoothly on narrow foldable cover screens (280px–360px) up to standard/tablet viewports */
+/* Fluid base typography: adapts smoothly across narrow foldable cover screens (280px–359px), standard phones (360px–539px), unfolded foldables (540px–900px), and tablets */
 @layer base {
   html {
-    font-size: clamp(15px, 4.1vw, 17px);
+    font-size: clamp(14px, 3.85vw, 16px);
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+  }
+  @media (max-width: 359px) {
+    html {
+      font-size: clamp(13px, 4.1vw, 14.5px);
+    }
   }
 }
 
@@ -240,48 +246,32 @@ img[src^="data:image"],
   -webkit-user-drag: none;
 }
 
-/* Proportionally bump micro text utilities with >= 1.65 line-height so Khmer, English, and Chinese badges, labels, and descriptions never clip vertically */
-.text-\[8px\] {
-  font-size: 9.5px !important;
-  line-height: 1.65 !important;
-}
-.text-\[9px\] {
-  font-size: 10.5px !important;
-  line-height: 1.65 !important;
-}
-.text-\[10px\] {
-  font-size: 11.5px !important;
-  line-height: 1.65 !important;
-}
-.text-\[11px\] {
-  font-size: 12.5px !important;
-  line-height: 1.65 !important;
-}
-.text-\[12px\] {
-  font-size: 13.5px !important;
-  line-height: 1.65 !important;
-}
-.text-\[13px\] {
-  font-size: 14.5px !important;
-  line-height: 1.65 !important;
-}
-.text-\[14px\] {
-  font-size: 15.5px !important;
-  line-height: 1.65 !important;
-}
+/* Ensure micro text utilities have >= 1.68 line-height so Khmer subscripts never clip vertically without inflating horizontal width */
+.text-\[8px\],
+.text-\[9px\],
+.text-\[9\.5px\],
+.text-\[10px\],
+.text-\[10\.5px\],
+.text-\[11px\],
+.text-\[11\.5px\],
+.text-\[12px\],
+.text-\[12\.5px\],
+.text-\[13px\],
+.text-\[14px\],
+.text-\[14\.5px\],
 .text-\[15px\] {
-  font-size: 16.25px !important;
-  line-height: 1.65 !important;
+  line-height: 1.68 !important;
 }
 
 /* iOS & Android Safe-Area Insets & Dynamic Viewport (100dvh) for Full-Screen Modals & Bottom Sheets */
 .fixed.inset-0 {
-  padding-top: max(var(--kft-safe-top, 0px), 0.5rem);
+  padding-top: max(var(--kft-safe-top, 0px), 0px);
   padding-left: max(var(--kft-safe-left, 0px), 0px);
   padding-right: max(var(--kft-safe-right, 0px), 0px);
 }
 
-.fixed.inset-0:not(.items-end) {
+.fixed.inset-0:not(.items-end):not(.items-stretch) {
+  padding-top: max(var(--kft-safe-top, 0px), 0.5rem);
   padding-bottom: max(var(--kft-safe-bottom, 0px), 0.5rem);
 }
 
@@ -297,10 +287,10 @@ img[src^="data:image"],
 .max-h-\[85vh\],
 .h-\[92vh\],
 .h-\[90vh\] {
-  max-height: calc(100dvh - var(--kft-safe-top, 0px) - 0.5rem) !important;
+  max-height: calc(100dvh - var(--kft-safe-top, 0px)) !important;
 }
 
-/* Narrow & Foldable Cover Screens (280px – 359px, e.g., Galaxy Z Fold cover, iPhone SE) */
+/* Narrow & Foldable Cover Screens (280px – 359px, e.g., Galaxy Z Fold5 cover, iPhone SE) */
 @media (max-width: 359px) {
   .px-3\.5 {
     padding-left: 0.625rem !important;
@@ -315,20 +305,33 @@ img[src^="data:image"],
   }
 }
 
-/* iPad, Tablet & Unfolded Foldable Responsive Adaptation (768px – 1366px+) */
-@media (min-width: 768px) {
-  .max-w-md {
-    max-width: 64rem !important;
-  }
-  /* Keep modal dialogs centered and comfortably proportioned on iPads & tablets */
-  .fixed.inset-0 > .max-w-sm,
+/* Full-width responsive adaptation across all phones, Galaxy Z Fold5 (cover & unfolded 580px–900px), and tablets */
+.max-w-md {
+  max-width: 100% !important;
+}
+
+@media (max-width: 767px) {
   .fixed.inset-0 > .max-w-md,
   .fixed.inset-0 > .max-w-lg,
   .fixed.inset-0 > .max-w-xl,
   .fixed.inset-0 > .max-w-2xl {
-    max-width: min(92vw, 42rem) !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 }
+
+@media (min-width: 768px) {
+  .fixed.inset-0 > .max-w-sm,
+  .fixed.inset-0 > .max-w-md,
+  .fixed.inset-0 > .max-w-lg,
+  .fixed.inset-0 > .max-w-xl,
+  .fixed.inset-0 > .max-w-2xl,
+  .fixed.inset-0 > .md\:max-w-2xl,
+  .fixed.inset-0 > .md\:max-w-3xl {
+    max-width: min(92vw, 48rem) !important;
+  }
+}
+
 @media (min-width: 1024px) {
   .max-w-md {
     max-width: 72rem !important;
@@ -337,7 +340,10 @@ img[src^="data:image"],
   .fixed.inset-0 > .max-w-md,
   .fixed.inset-0 > .max-w-lg,
   .fixed.inset-0 > .max-w-xl,
-  .fixed.inset-0 > .max-w-2xl {
-    max-width: min(88vw, 48rem) !important;
+  .fixed.inset-0 > .max-w-2xl,
+  .fixed.inset-0 > .md\:max-w-2xl,
+  .fixed.inset-0 > .md\:max-w-3xl,
+  .fixed.inset-0 > .lg\:max-w-3xl {
+    max-width: min(88vw, 54rem) !important;
   }
 }

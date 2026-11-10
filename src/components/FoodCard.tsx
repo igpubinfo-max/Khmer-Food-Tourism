@@ -32,10 +32,10 @@ const FoodCardView = React.memo<FoodCardViewProps>(
         style={{
           boxShadow: '0 4px 16px rgba(15, 23, 42, 0.06)',
         }}
-        className="kft-cv-card bg-white rounded-[22px] p-2.5 border border-slate-200/80 hover:border-emerald-600/40 hover:shadow-md transition-all cursor-pointer group flex items-center gap-3.5 font-khmer"
+        className="kft-cv-card bg-white rounded-[22px] p-2.5 sm:p-3.5 border border-slate-200/80 hover:border-emerald-600/40 hover:shadow-md transition-all cursor-pointer group flex items-stretch gap-2.5 min-[360px]:gap-3.5 font-khmer"
       >
-        {/* Left Dish Image Container */}
-        <div className="relative w-[118px] min-[360px]:w-[138px] sm:w-[154px] h-[118px] sm:h-[128px] rounded-[16px] overflow-hidden bg-slate-200 shrink-0">
+        {/* Left Dish Image Container (Proportional width & self-stretching height so text always fits comfortably) */}
+        <div className="relative w-[34%] min-w-[92px] max-w-[156px] min-h-[116px] sm:min-h-[132px] self-stretch rounded-[16px] overflow-hidden bg-slate-200 shrink-0">
           <img
             src={resolvedPhotoUrl}
             onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
@@ -89,11 +89,17 @@ const FoodCardView = React.memo<FoodCardViewProps>(
         {/* Right Content Column */}
         <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
           <div>
-            <h3 className="font-khmer font-extrabold text-[15.5px] sm:text-[16.5px] text-[#0F172A] group-hover:text-[#1B5E3A] transition leading-[1.65] py-0.5 line-clamp-2">
+            <h3
+              style={{ fontSize: 'clamp(14px, 3.8vw, 17.5px)' }}
+              className="font-khmer font-extrabold text-[#0F172A] group-hover:text-[#1B5E3A] transition leading-[1.7] py-0.5 line-clamp-2 break-words"
+            >
               {loc.name}
             </h3>
             {loc.description && (
-              <p className="text-[12px] text-slate-600 line-clamp-2 mt-1 leading-relaxed">
+              <p
+                style={{ fontSize: 'clamp(11.5px, 3.1vw, 13.5px)' }}
+                className="text-slate-600 line-clamp-2 sm:line-clamp-3 mt-0.5 leading-[1.68] break-words"
+              >
                 {loc.description}
               </p>
             )}
@@ -113,11 +119,11 @@ const FoodCardView = React.memo<FoodCardViewProps>(
                 style={{
                   background: 'linear-gradient(180deg, #2E7D52 0%, #1B5E3A 100%)',
                 }}
-                className="inline-flex items-center justify-between gap-2 px-3.5 py-1.5 rounded-full text-white text-xs font-bold shadow-2xs transition"
+                className="inline-flex items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 rounded-full text-white text-[11.5px] sm:text-xs font-bold shadow-2xs transition max-w-full"
               >
-                <span className="inline-flex items-center gap-1.5">
+                <span className="inline-flex items-center gap-1.5 min-w-0">
                   <Utensils className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                  <span>{tr(language, 'មើលលម្អិត', 'View Details', '查看详情')}</span>
+                  <span className="leading-[1.65]">{tr(language, 'មើលលម្អិត', 'View Details', '查看详情')}</span>
                 </span>
                 <ChevronRight className="w-3.5 h-3.5 text-white/90 shrink-0" />
               </span>

@@ -210,11 +210,11 @@ export const RestaurantDetailModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[65] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[65] flex items-stretch md:items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overscroll-none"
       onClick={() => setSelectedRestaurant(null)}
     >
       <div 
-        className="bg-white dark:bg-slate-900 w-full max-w-lg h-[90vh] sm:h-[85vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative border border-slate-200/80 dark:border-slate-800"
+        className="bg-white dark:bg-slate-900 w-full max-w-full md:max-w-2xl lg:max-w-3xl h-full md:h-[90dvh] rounded-none md:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative border-0 md:border border-slate-200/80 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Floating Controls */}

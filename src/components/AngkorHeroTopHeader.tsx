@@ -146,9 +146,9 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
       </div>
 
       {/* Top Overlay Header Row: Official App Logo on Left + Title + Bell + Profile */}
-      <div className="relative z-10 px-3.5 pt-2.5 flex items-start justify-between gap-2">
+      <div className="relative z-10 px-2.5 min-[360px]:px-3.5 sm:px-5 pt-2.5 flex items-start justify-between gap-1.5 min-[360px]:gap-2.5 max-w-6xl mx-auto">
         {/* Left: Official Rounded-Square Gold-Bordered App Logo + Khmer Title & English Subtitle */}
-        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+        <div className="flex items-center gap-2 min-[380px]:gap-2.5 min-w-0 flex-1">
           <button
             type="button"
             onClick={() => {
@@ -159,14 +159,14 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
             style={{
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.45)',
             }}
-            className="w-[46px] h-[46px] rounded-[13px] p-[1.5px] bg-gradient-to-b from-[#FDE047] via-[#D4AF37] to-[#9A6F1A] overflow-hidden shrink-0 cursor-pointer active:scale-95 transition"
+            className="w-10 h-10 min-[380px]:w-[46px] min-[380px]:h-[46px] rounded-[12px] min-[380px]:rounded-[13px] p-[1.5px] bg-gradient-to-b from-[#FDE047] via-[#D4AF37] to-[#9A6F1A] overflow-hidden shrink-0 cursor-pointer active:scale-95 transition"
             title={tr(language, 'ទំព័រដើម', 'Home', '首页')}
           >
             <img
               src="/logo-kft.png"
               alt="រសជាតិ និងទេសចរណ៍កម្ពុជា"
               decoding="async"
-              className="w-full h-full rounded-[11px] object-cover bg-[#064E3B]"
+              className="w-full h-full rounded-[10px] min-[380px]:rounded-[11px] object-cover bg-[#064E3B]"
               onError={(e) => {
                 const img = e.currentTarget as HTMLImageElement;
                 if (!img.dataset.fallback) {
@@ -182,16 +182,18 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
 
           <div className="min-w-0 flex-1 pt-0.5">
             <h1
-              className="font-khmer font-extrabold text-white text-[14.5px] sm:text-[16px] leading-tight truncate"
+              className="font-khmer font-extrabold text-white leading-[1.62] py-0.5 break-words"
               style={{
+                fontSize: 'clamp(12px, 3.6vw, 17px)',
                 textShadow: '0 1.5px 4px rgba(0, 0, 0, 0.78), 0 0 10px rgba(0, 0, 0, 0.4)',
               }}
             >
               រសជាតិ និងទេសចរណ៍កម្ពុជា
             </h1>
             <p
-              className="text-[11px] sm:text-[11.5px] font-extrabold text-white/95 tracking-tight truncate mt-0.5"
+              className="font-extrabold text-white/95 tracking-tight leading-snug break-words"
               style={{
+                fontSize: 'clamp(9.8px, 2.8vw, 12.5px)',
                 textShadow: '0 1px 3px rgba(0, 0, 0, 0.85)',
               }}
             >
@@ -307,7 +309,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
 
       {/* Home Mode: Translucent AI Search Strip (+20% Height = 46px) */}
       {mode === 'home' && (
-        <div className="absolute inset-x-0 bottom-3 z-20 px-3.5">
+        <div className="absolute inset-x-0 bottom-3 z-20 px-2.5 min-[360px]:px-3.5 sm:px-5 max-w-6xl mx-auto">
           <form
             onSubmit={(e) => {
               e.preventDefault();

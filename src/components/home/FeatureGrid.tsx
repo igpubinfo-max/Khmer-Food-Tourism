@@ -168,8 +168,8 @@ const FeatureGridImpl: React.FC<Props> = ({
 
             {/* Full readable label across Khmer, English, and Chinese without truncation or subscript clipping */}
             <span
-              className="relative z-10 font-khmer font-extrabold leading-[1.6] py-0.5 text-center break-words whitespace-normal w-full px-0.5 text-white"
-              style={{ fontSize: 'clamp(10px, 2.8vw, 11.5px)', textShadow: '0 1px 2px rgba(0,0,0,0.28)' }}
+              className="relative z-10 font-khmer font-extrabold leading-[1.76] pt-0.5 pb-1 text-center break-words whitespace-normal w-full px-0.5 text-white overflow-visible"
+              style={{ fontSize: 'clamp(9.5px, 2.7vw, 12px)', textShadow: '0 1px 2px rgba(0,0,0,0.28)' }}
             >
               {it.label}
             </span>

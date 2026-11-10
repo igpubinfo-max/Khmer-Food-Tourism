@@ -296,12 +296,12 @@ export const FoodView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-[#1E293B] text-[#1E293B] min-h-full font-khmer pb-8">
+    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-[#1E293B] min-h-full font-khmer pb-12">
       {/* 1. Header – Angkor Wat Hero Background */}
       <AngkorHeroTopHeader mode="food" foodCount={filteredFoods.length} />
 
       {/* Main Content Container rising smoothly from the Angkor Wat reflection */}
-      <div className="relative z-20 -mt-[82px] px-3.5 space-y-2.5">
+      <div className="relative z-20 -mt-[82px] px-2.5 min-[360px]:px-3.5 sm:px-5 space-y-2.5">
         {/* Compact Original Khmer Promotional Title Banner Directly Above the Food Search Bar */}
         <div className="flex justify-center">
           <div
@@ -310,7 +310,7 @@ export const FoodView: React.FC = () => {
               boxShadow:
                 '0 0 0 1px rgba(254, 243, 199, 0.55), 0 5px 14px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.16)',
             }}
-            className="relative w-full max-w-[336px] py-1 pl-2 pr-3 rounded-[14px] border border-[#F5C542]/85 flex items-center gap-2 overflow-hidden"
+            className="relative w-full max-w-[380px] sm:max-w-md py-1.5 pl-2.5 pr-3 rounded-[14px] border border-[#F5C542]/85 flex items-center gap-2 overflow-hidden"
           >
             {/* Subtle decorative green hills & gold Angkor Wat silhouette on the right */}
             <svg
@@ -362,14 +362,14 @@ export const FoodView: React.FC = () => {
             {/* Exact Original Khmer Title & Subtitle */}
             <div className="relative z-10 min-w-0 flex-1">
               <h2
-                className="font-khmer font-extrabold text-white leading-tight truncate"
-                style={{ fontSize: '12.5px', textShadow: '0 1px 3px rgba(0, 0, 0, 0.55)' }}
+                className="font-khmer font-extrabold text-white leading-[1.65] py-0.5 break-words"
+                style={{ fontSize: 'clamp(11.5px, 3.3vw, 13.5px)', textShadow: '0 1px 3px rgba(0, 0, 0, 0.55)' }}
               >
                 {tr(language, 'មុខម្ហូបខ្មែរ ទាំងអស់', 'All Cambodian Dishes', '柬埔寨全部美食')}
               </h2>
               <p
-                className="font-khmer font-bold text-[#FDE68A] leading-tight truncate mt-0.5"
-                style={{ fontSize: '9.5px', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                className="font-khmer font-bold text-[#FDE68A] leading-[1.62] py-0.5 break-words"
+                style={{ fontSize: 'clamp(9.2px, 2.6vw, 11px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
               >
                 {tr(language, 'រកឃើញរសជាតិដើមខ្មែរ គ្រប់ខេត្ត', 'Discover authentic Khmer flavors', '探索正宗高棉风味')}
               </p>
@@ -378,7 +378,7 @@ export const FoodView: React.FC = () => {
         </div>
 
         {/* 2. Main Search Bar – Large White Rounded Glassmorphism Search Bar + Separate Green Filter Button */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 min-[360px]:gap-2 min-w-0">
           <div
             style={{
               background: 'rgba(255, 255, 255, 0.92)',
@@ -386,12 +386,13 @@ export const FoodView: React.FC = () => {
               WebkitBackdropFilter: 'blur(12px)',
               boxShadow: '0 6px 20px rgba(15, 23, 42, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
             }}
-            className="flex-1 h-[44px] rounded-full border-[1.5px] border-white pl-3.5 pr-1.5 flex items-center gap-2"
+            className="flex-1 min-w-0 h-[44px] rounded-full border-[1.5px] border-white pl-2.5 min-[360px]:pl-3.5 pr-1.5 flex items-center gap-1.5 min-[360px]:gap-2"
           >
-            <Search className="w-4.5 h-4.5 text-slate-600 shrink-0" />
+            <Search className="w-4 h-4 min-[360px]:w-4.5 min-[360px]:h-4.5 text-slate-600 shrink-0" />
             <input
               ref={searchInputRef}
               type="text"
+              size={1}
               value={foodSearchQuery}
               onChange={(e) => setFoodSearchQuery(e.target.value)}
               onKeyDown={(e) => {
@@ -406,13 +407,13 @@ export const FoodView: React.FC = () => {
                 'Search dishes...',
                 '搜索高棉菜品...'
               )}
-              className="flex-1 min-w-0 bg-transparent text-[13px] font-khmer font-bold text-[#1E293B] placeholder:text-slate-500 focus:outline-none"
+              className="w-full flex-1 min-w-0 bg-transparent text-[12px] min-[360px]:text-[13px] font-khmer font-bold text-[#1E293B] placeholder:text-slate-500 focus:outline-none"
             />
             {foodSearchQuery && (
               <button
                 type="button"
                 onClick={() => setFoodSearchQuery('')}
-                className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer shrink-0"
                 aria-label="Clear"
               >
                 <X className="w-3.5 h-3.5" />
@@ -425,9 +426,9 @@ export const FoodView: React.FC = () => {
                 background: 'linear-gradient(180deg, #2E7D52 0%, #1B5E3A 100%)',
                 boxShadow: '0 2px 6px rgba(27, 94, 58, 0.35)',
               }}
-              className="h-[34px] px-3.5 rounded-full border-[1.5px] border-white/90 text-white text-[12px] font-khmer font-extrabold flex items-center gap-1.5 shrink-0 active:scale-95 transition cursor-pointer"
+              className="h-[34px] px-2.5 min-[360px]:px-3.5 rounded-full border-[1.5px] border-white/90 text-white text-[11px] min-[360px]:text-[12px] font-khmer font-extrabold flex items-center gap-1 min-[360px]:gap-1.5 shrink-0 active:scale-95 transition cursor-pointer"
             >
-              <Search className="w-3.5 h-3.5 text-white stroke-[2.4]" />
+              <Search className="w-3.5 h-3.5 text-white stroke-[2.4] shrink-0" />
               <span>{tr(language, 'ស្វែងរក', 'Search', '搜索')}</span>
             </button>
           </div>
@@ -462,7 +463,7 @@ export const FoodView: React.FC = () => {
           }}
           className="rounded-[24px] p-2.5 sm:p-3 border border-white"
         >
-          <div className="grid grid-cols-4 gap-2.5">
+          <div className="grid grid-cols-4 gap-1.5 min-[360px]:gap-2.5 sm:gap-3">
             {/* 1. គ្រប់មុខម្ហូប (All Dishes) – Yellow/Orange */}
             <button
               type="button"
@@ -475,7 +476,7 @@ export const FoodView: React.FC = () => {
                     ? '0 8px 18px rgba(217, 119, 6, 0.45), 0 0 0 2.5px #22C55E, inset 0 1.5px 1px rgba(255, 255, 255, 0.8)'
                     : '0 6px 14px rgba(217, 119, 6, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
               }}
-              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1.5 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
+              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
                 selectedCategory === 'all' ? 'border-white' : 'border-amber-200/70 opacity-95 hover:opacity-100'
               }`}
             >
@@ -485,10 +486,10 @@ export const FoodView: React.FC = () => {
                   background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)',
                 }}
               />
-              {renderCategoryIcon('all', 'w-7 h-7 drop-shadow-xs')}
+              {renderCategoryIcon('all', 'w-6 h-6 min-[360px]:w-7 min-[360px]:h-7 drop-shadow-xs')}
               <span
-                className="font-khmer font-extrabold text-[10.5px] sm:text-[11.5px] leading-[1.6] tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full"
-                style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
+                className="font-khmer font-extrabold leading-[1.75] pt-0.5 pb-1 tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full overflow-visible"
+                style={{ fontSize: 'clamp(9.2px, 2.55vw, 12.5px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
                 {tr(language, 'គ្រប់មុខម្ហូប', 'All Dishes', '全部美食')}
               </span>
@@ -506,7 +507,7 @@ export const FoodView: React.FC = () => {
                     ? '0 8px 18px rgba(29, 78, 216, 0.45), 0 0 0 2.5px #22C55E, inset 0 1.5px 1px rgba(255, 255, 255, 0.8)'
                     : '0 6px 14px rgba(29, 78, 216, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
               }}
-              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1.5 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
+              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
                 selectedCategory === 'samlor' ? 'border-white' : 'border-blue-200/70 opacity-95 hover:opacity-100'
               }`}
             >
@@ -516,10 +517,10 @@ export const FoodView: React.FC = () => {
                   background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)',
                 }}
               />
-              {renderCategoryIcon('samlor', 'w-7 h-7 drop-shadow-xs')}
+              {renderCategoryIcon('samlor', 'w-6 h-6 min-[360px]:w-7 min-[360px]:h-7 drop-shadow-xs')}
               <span
-                className="font-khmer font-extrabold text-[11.5px] sm:text-[12px] leading-[1.6] tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full"
-                style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
+                className="font-khmer font-extrabold leading-[1.75] pt-0.5 pb-1 tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full overflow-visible"
+                style={{ fontSize: 'clamp(10px, 2.75vw, 13px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
                 {tr(language, 'សម្ល', 'Soups & Curries', '高棉汤羹')}
               </span>
@@ -537,7 +538,7 @@ export const FoodView: React.FC = () => {
                     ? '0 8px 18px rgba(21, 128, 61, 0.45), 0 0 0 2.5px #F59E0B, inset 0 1.5px 1px rgba(255, 255, 255, 0.8)'
                     : '0 6px 14px rgba(21, 128, 61, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
               }}
-              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1.5 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
+              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
                 selectedCategory === 'cha' ? 'border-white' : 'border-emerald-200/70 opacity-95 hover:opacity-100'
               }`}
             >
@@ -547,10 +548,10 @@ export const FoodView: React.FC = () => {
                   background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)',
                 }}
               />
-              {renderCategoryIcon('cha', 'w-7 h-7 drop-shadow-xs')}
+              {renderCategoryIcon('cha', 'w-6 h-6 min-[360px]:w-7 min-[360px]:h-7 drop-shadow-xs')}
               <span
-                className="font-khmer font-extrabold text-[11px] sm:text-[11.5px] leading-[1.6] tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full"
-                style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
+                className="font-khmer font-extrabold leading-[1.75] pt-0.5 pb-1 tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full overflow-visible"
+                style={{ fontSize: 'clamp(9.5px, 2.65vw, 12.5px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
                 {tr(language, 'អាំង/ចៀន', 'Grilled & Fried', '烧烤/煎炸')}
               </span>
@@ -568,7 +569,7 @@ export const FoodView: React.FC = () => {
                     ? '0 8px 18px rgba(107, 33, 168, 0.45), 0 0 0 2.5px #22C55E, inset 0 1.5px 1px rgba(255, 255, 255, 0.8)'
                     : '0 6px 14px rgba(107, 33, 168, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
               }}
-              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1.5 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
+              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
                 selectedCategory === 'bong_aem' ? 'border-white' : 'border-purple-200/70 opacity-95 hover:opacity-100'
               }`}
             >
@@ -578,10 +579,10 @@ export const FoodView: React.FC = () => {
                   background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)',
                 }}
               />
-              {renderCategoryIcon('bong_aem', 'w-7 h-7 drop-shadow-xs')}
+              {renderCategoryIcon('bong_aem', 'w-6 h-6 min-[360px]:w-7 min-[360px]:h-7 drop-shadow-xs')}
               <span
-                className="font-khmer font-extrabold text-[10px] sm:text-[11px] leading-[1.6] tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full"
-                style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
+                className="font-khmer font-extrabold leading-[1.75] pt-0.5 pb-1 tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full overflow-visible"
+                style={{ fontSize: 'clamp(9px, 2.5vw, 12px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
                 {tr(language, 'បង្អែម/ភេសជ្ជៈ', 'Desserts & Drinks', '甜品/饮品')}
               </span>
@@ -640,7 +641,7 @@ export const FoodView: React.FC = () => {
                   </button>
                 )}
               </div>
-              <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+              <div className="flex gap-1.5 flex-wrap pb-0.5">
                 {TAG_FILTERS.map((t) => {
                   const active = tagFilter === t.id;
                   return (
@@ -700,7 +701,7 @@ export const FoodView: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-3.5">
             {displayedFoods.map((food) => (
               <FoodCard key={food.id} food={food} />
             ))}

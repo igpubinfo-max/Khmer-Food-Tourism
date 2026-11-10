@@ -616,10 +616,15 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
 const DISH_ID_TO_PROVINCE_MAP = new Map<string, string>();
 const PROVINCE_BY_ID_MAP = new Map<string, ProvinceFilterOption>();
 const PROVINCE_SIGNATURE_SET_MAP = new Map<string, Set<string>>();
+const PROVINCE_EN_REGEX_MAP = new Map<string, RegExp>();
 
 for (const prov of DISH_PROVINCES) {
   PROVINCE_BY_ID_MAP.set(prov.id, prov);
   PROVINCE_SIGNATURE_SET_MAP.set(prov.id, new Set(prov.signatureDishIds));
+  PROVINCE_EN_REGEX_MAP.set(
+    prov.id,
+    new RegExp(`(^|[^A-Za-z])${prov.en.replace(/ /g, '\\s+')}([^A-Za-z]|$)`, 'i')
+  );
   for (const fid of prov.signatureDishIds) {
     if (!DISH_ID_TO_PROVINCE_MAP.has(fid)) {
       DISH_ID_TO_PROVINCE_MAP.set(fid, prov.id);
@@ -656,8 +661,8 @@ export function detectDishProvince(food: FoodItem): string | null {
   const textEn = `${food.nameEn || ''} ${food.descriptionEn || ''} ${food.provinceEn || ''}`;
   let found: string | null = null;
   for (const p of DISH_PROVINCES) {
-    const re = new RegExp(`(^|[^A-Za-z])${p.en.replace(/ /g, '\\s+')}([^A-Za-z]|$)`, 'i');
-    if (textKh.includes(p.kh) || re.test(textEn)) {
+    const re = PROVINCE_EN_REGEX_MAP.get(p.id);
+    if (textKh.includes(p.kh) || (re && re.test(textEn))) {
       found = p.id;
       break;
     }
@@ -1093,11 +1098,43 @@ const PRIMARY_PRODUCT_GROUPS: ReadonlyArray<{
   },
 ];
 
+// Pre-normalized product groups & dish sub-tokens (computed once at module load instead of per-restaurant per-dish)
+const NORMALIZED_PRIMARY_PRODUCT_GROUPS = PRIMARY_PRODUCT_GROUPS.map((grp) => ({
+  ...grp,
+  normTokens: grp.tokens.map((tok) => normalizeKhmerFoodText(tok)).filter((nt) => nt.length >= 2),
+}));
+
+const NORMALIZED_KHMER_DISH_SUBTOKENS = KHMER_DISH_SUBTOKENS.map((tok) => ({
+  raw: tok,
+  norm: normalizeKhmerFoodText(tok),
+})).filter((x) => x.norm.length > 0);
+
+interface PrecomputedShopProfile {
+  isVerifiedForDisplay: boolean;
+  shopKind: ShopBusinessKind;
+  normShopName: string;
+  normCategory: string;
+  normDescription: string;
+  normInventoryList: Array<{ raw: string; norm: string }>;
+  cleanProvinceKh: string;
+  lowerProvinceEn: string;
+}
+
+const shopProfileWeakCache = new WeakMap<Restaurant, PrecomputedShopProfile>();
+
 /**
  * Classifies a restaurant/shop into its true primary business kind based on name, category, and inventory.
  * Ensures bread shops (`ហាងនំប៉័ង` / `Bakery` / `Cake`) and coffee-only shops are never confused with Khmer meal restaurants.
  */
 export function classifyShopBusinessKind(r: Restaurant): ShopBusinessKind {
+  if (r && typeof r === 'object') {
+    const cached = shopProfileWeakCache.get(r);
+    if (cached) return cached.shopKind;
+  }
+  return computeShopBusinessKindInternal(r);
+}
+
+function computeShopBusinessKindInternal(r: Restaurant): ShopBusinessKind {
   const nameText = normalizeKhmerFoodText(`${r.nameKh || ''} ${r.nameEn || ''} ${r.businessCategory || ''} ${r.categoryKh || ''} ${r.categoryEn || ''}`);
   const invText = normalizeKhmerFoodText(
     `${(r.signatureDishesKh || []).join(' ')} ${(r.signatureDishesEn || []).join(' ')} ${((r.menuItems || []).map((m) => `${m.nameKh || ''} ${m.nameEn || ''}`)).join(' ')}`
@@ -1144,6 +1181,15 @@ export function classifyShopBusinessKind(r: Restaurant): ShopBusinessKind {
  */
 export function verifyShopDataForDisplay(r: Restaurant | null | undefined): boolean {
   if (!r || !r.id) return false;
+  if (typeof r === 'object') {
+    const cached = shopProfileWeakCache.get(r);
+    if (cached) return cached.isVerifiedForDisplay;
+  }
+  return computeVerifyShopDataInternal(r);
+}
+
+function computeVerifyShopDataInternal(r: Restaurant | null | undefined): boolean {
+  if (!r || !r.id) return false;
   if (r.businessType === 'hotel') return false;
   if (r.status && r.status !== 'approved') return false;
   if (r.aiCategoryVerification?.detectedType && r.aiCategoryVerification.detectedType !== 'restaurant') {
@@ -1158,6 +1204,54 @@ export function verifyShopDataForDisplay(r: Restaurant | null | undefined): bool
     return false;
   }
   return true;
+}
+
+function getPrecomputedShopProfile(r: Restaurant): PrecomputedShopProfile {
+  const existing = shopProfileWeakCache.get(r);
+  if (existing) return existing;
+
+  const isVerifiedForDisplay = computeVerifyShopDataInternal(r);
+  const shopKind = computeShopBusinessKindInternal(r);
+
+  if (!isVerifiedForDisplay) {
+    const unverifiedProfile: PrecomputedShopProfile = {
+      isVerifiedForDisplay: false,
+      shopKind,
+      normShopName: '',
+      normCategory: '',
+      normDescription: '',
+      normInventoryList: [],
+      cleanProvinceKh: '',
+      lowerProvinceEn: '',
+    };
+    shopProfileWeakCache.set(r, unverifiedProfile);
+    return unverifiedProfile;
+  }
+
+  const zhLoc = getLocalizedRestaurant(r, 'zh');
+  const inventoryItemsRaw: string[] = [
+    ...(r.signatureDishesKh || []),
+    ...(r.signatureDishesEn || []),
+    ...(zhLoc.signatureDishes || []),
+    ...((r.menuItems || []).map((m) => m.nameKh || m.nameEn || '').filter(Boolean)),
+  ];
+
+  const profile: PrecomputedShopProfile = {
+    isVerifiedForDisplay: true,
+    shopKind,
+    normShopName: normalizeKhmerFoodText(`${r.nameKh || ''} ${r.nameEn || ''} ${zhLoc.name || ''}`),
+    normCategory: normalizeKhmerFoodText(`${r.categoryKh || ''} ${r.categoryEn || ''} ${r.cuisineType || ''} ${r.businessCategory || ''}`),
+    normDescription: normalizeKhmerFoodText(`${r.descriptionKh || ''} ${r.descriptionEn || ''}`),
+    normInventoryList: inventoryItemsRaw.map((item) => ({
+      raw: item,
+      norm: normalizeKhmerFoodText(item),
+    })),
+    cleanProvinceKh: (r.provinceKh || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim(),
+    lowerProvinceEn: (r.provinceEn || '').toLowerCase(),
+  };
+
+  shopProfileWeakCache.set(r, profile);
+  return profile;
 }
 
 export interface ProductShopMatchResult {
@@ -1180,8 +1274,9 @@ export function matchShopToProductQuery(
   rawQuery: string,
   targetFood?: FoodItem | null
 ): ProductShopMatchResult {
-  const shopKind = classifyShopBusinessKind(r);
-  if (!verifyShopDataForDisplay(r)) {
+  const profile = getPrecomputedShopProfile(r);
+  const { shopKind, isVerifiedForDisplay } = profile;
+  if (!isVerifiedForDisplay) {
     return { matches: false, score: 0, matchedInventoryItems: [], isExactProductMatch: false, shopKind };
   }
 
@@ -1198,12 +1293,11 @@ export function matchShopToProductQuery(
     return { matches: true, score: r.isVerified ? 50 : 25, matchedInventoryItems: [], isExactProductMatch: false, shopKind };
   }
 
-  // Detect which primary product group(s) the user is searching for
-  const matchedProductGroups = PRIMARY_PRODUCT_GROUPS.filter((grp) =>
-    grp.tokens.some((tok) => {
-      const normTok = normalizeKhmerFoodText(tok);
-      return normTok.length >= 2 && (includesKhmerToken(combinedSearchText, normTok) || combinedSearchText.includes(normTok));
-    })
+  // Detect which primary product group(s) the user is searching for using pre-normalized group tokens
+  const matchedProductGroups = NORMALIZED_PRIMARY_PRODUCT_GROUPS.filter((grp) =>
+    grp.normTokens.some(
+      (normTok) => includesKhmerToken(combinedSearchText, normTok) || combinedSearchText.includes(normTok)
+    )
   );
 
   // If both a specific dish group (e.g. `mi_suor` or `pleah_nhoam`) and a broader group matched, keep all matched groups
@@ -1238,21 +1332,7 @@ export function matchShopToProductQuery(
     return { matches: false, score: 0, matchedInventoryItems: [], isExactProductMatch: false, shopKind };
   }
 
-  const zhLoc = getLocalizedRestaurant(r, 'zh');
-  const inventoryItemsRaw: string[] = [
-    ...(r.signatureDishesKh || []),
-    ...(r.signatureDishesEn || []),
-    ...(zhLoc.signatureDishes || []),
-    ...((r.menuItems || []).map((m) => m.nameKh || m.nameEn || '').filter(Boolean)),
-  ];
-
-  const normShopName = normalizeKhmerFoodText(`${r.nameKh || ''} ${r.nameEn || ''} ${zhLoc.name || ''}`);
-  const normCategory = normalizeKhmerFoodText(`${r.categoryKh || ''} ${r.categoryEn || ''} ${r.cuisineType || ''} ${r.businessCategory || ''}`);
-  const normDescription = normalizeKhmerFoodText(`${r.descriptionKh || ''} ${r.descriptionEn || ''}`);
-  const normInventoryList = inventoryItemsRaw.map((item) => ({
-    raw: item,
-    norm: normalizeKhmerFoodText(item),
-  }));
+  const { normShopName, normCategory, normDescription, normInventoryList } = profile;
 
   let score = 0;
   let isExactProductMatch = false;
@@ -1284,9 +1364,7 @@ export function matchShopToProductQuery(
   // 2. Check Primary Product Group tokens (e.g. `មីសួរ` / `មីសួ` / `glass noodle`) against Shop Inventory & Shop Name
   if (primaryGroup) {
     let matchedPrimaryGroupInShop = false;
-    for (const tok of primaryGroup.tokens) {
-      const normTok = normalizeKhmerFoodText(tok);
-      if (!normTok) continue;
+    for (const normTok of primaryGroup.normTokens) {
       for (const inv of normInventoryList) {
         if (includesKhmerToken(inv.norm, normTok) || inv.norm.includes(normTok)) {
           score += 130;
@@ -1325,12 +1403,9 @@ export function matchShopToProductQuery(
   }
 
   // 4. Secondary sub-tokens from `KHMER_DISH_SUBTOKENS` (only when no primaryGroup was violated)
-  const activeSubtokens = KHMER_DISH_SUBTOKENS.filter((tok) => {
-    const nt = normalizeKhmerFoodText(tok);
-    return combinedSearchText.includes(nt);
-  });
-  for (const tok of activeSubtokens) {
-    const nt = normalizeKhmerFoodText(tok);
+  for (const sub of NORMALIZED_KHMER_DISH_SUBTOKENS) {
+    const nt = sub.norm;
+    if (!combinedSearchText.includes(nt)) continue;
     for (const inv of normInventoryList) {
       if (includesKhmerToken(inv.norm, nt)) {
         score += 28;
@@ -1379,6 +1454,19 @@ function haversineDistanceMeters(lat1: number, lon1: number, lat2: number, lon2:
   return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
 
+const verifiedPoolByArrayCache = new WeakMap<Restaurant[], Restaurant[]>();
+const provinceDishMatchCache = new Map<string, Restaurant[]>();
+let lastRestaurantsRefForCache: Restaurant[] | null = null;
+
+function getVerifiedRestaurantPool(restaurants: Restaurant[]): Restaurant[] {
+  if (!Array.isArray(restaurants) || restaurants.length === 0) return [];
+  const cached = verifiedPoolByArrayCache.get(restaurants);
+  if (cached) return cached;
+  const filtered = restaurants.filter((r) => verifyShopDataForDisplay(r));
+  verifiedPoolByArrayCache.set(restaurants, filtered);
+  return filtered;
+}
+
 export function getMatchingRestaurantsForProvinceDish(
   food: FoodItem,
   prov: ProvinceFilterOption,
@@ -1387,10 +1475,30 @@ export function getMatchingRestaurantsForProvinceDish(
   userCoords?: { lat: number; lng: number } | null,
   preferredProvinceKh?: string
 ): Restaurant[] {
-  const verifiedPool = restaurants.filter((r) => verifyShopDataForDisplay(r));
+  if (!food || !prov || !Array.isArray(restaurants) || restaurants.length === 0) {
+    return [];
+  }
+
+  const hasUserCoords = Boolean(userCoords && Number.isFinite(userCoords.lat) && Number.isFinite(userCoords.lng));
+  if (lastRestaurantsRefForCache !== restaurants) {
+    lastRestaurantsRefForCache = restaurants;
+    provinceDishMatchCache.clear();
+  }
+
+  const cacheKey = !hasUserCoords
+    ? `${food.id}|${prov.id}|${rotationSeed}|${preferredProvinceKh || ''}|${restaurants.length}`
+    : '';
+  if (cacheKey) {
+    const cachedResult = provinceDishMatchCache.get(cacheKey);
+    if (cachedResult) return cachedResult;
+  }
+
+  const verifiedPool = getVerifiedRestaurantPool(restaurants);
   const dishHash = computeDishHash(food, rotationSeed);
 
   const cleanTargetProv = (preferredProvinceKh || prov.kh || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
+  const cleanProvKh = prov.kh.trim();
+  const lowerProvEn = prov.en.toLowerCase();
 
   // Score every verified shop against the dish using strict product & inventory verification
   const matchingScored = verifiedPool
@@ -1398,21 +1506,22 @@ export function getMatchingRestaurantsForProvinceDish(
       const match = matchShopToProductQuery(r, food.nameKh, food);
       if (!match.matches || match.score <= 0) return null;
 
-      const distMeters =
-        userCoords && Number.isFinite(userCoords.lat) && Number.isFinite(userCoords.lng)
-          ? haversineDistanceMeters(userCoords.lat, userCoords.lng, r.latitude, r.longitude)
-          : Infinity;
+      const profile = getPrecomputedShopProfile(r);
+
+      const distMeters = hasUserCoords
+        ? haversineDistanceMeters(userCoords!.lat, userCoords!.lng, r.latitude, r.longitude)
+        : Infinity;
 
       const inUserOrTargetProvince =
         cleanTargetProv.length > 0 &&
         Boolean(
-          (r.provinceKh && r.provinceKh.replace(/^រាជធានី|^ខេត្ត/g, '').includes(cleanTargetProv)) ||
-            (r.provinceEn && r.provinceEn.toLowerCase().includes(prov.en.toLowerCase()))
+          (profile.cleanProvinceKh && profile.cleanProvinceKh.includes(cleanTargetProv)) ||
+            (profile.lowerProvinceEn && profile.lowerProvinceEn.includes(lowerProvEn))
         );
 
       const inDishHomeProvince = Boolean(
-        (r.provinceKh && r.provinceKh.includes(prov.kh.trim())) ||
-          (r.provinceEn && r.provinceEn.toLowerCase().includes(prov.en.toLowerCase()))
+        (r.provinceKh && r.provinceKh.includes(cleanProvKh)) ||
+          (profile.lowerProvinceEn && profile.lowerProvinceEn.includes(lowerProvEn))
       );
 
       let locationBonus = 0;
@@ -1456,6 +1565,10 @@ export function getMatchingRestaurantsForProvinceDish(
       unique.push(item.r);
     }
     if (unique.length >= 4) break;
+  }
+
+  if (cacheKey) {
+    provinceDishMatchCache.set(cacheKey, unique);
   }
 
   return unique;

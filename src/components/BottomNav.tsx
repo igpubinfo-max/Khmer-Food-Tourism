@@ -39,7 +39,7 @@ export const BottomNav: React.FC = () => {
       {/* Subtle luxury gold hairline highlight across top edge */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/55 to-transparent" />
 
-      <div className="max-w-md md:max-w-5xl lg:max-w-6xl mx-auto grid grid-cols-7 gap-0.5 px-1 py-1.5">
+      <div className="w-full max-w-6xl mx-auto grid grid-cols-7 gap-0.5 sm:gap-1.5 px-0.5 min-[360px]:px-1.5 sm:px-3 py-1.5">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -56,7 +56,7 @@ export const BottomNav: React.FC = () => {
                   setActiveTab(item.id);
                 }
               }}
-              className={`group relative min-h-[48px] min-w-0 flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all duration-200 cursor-pointer ${
+              className={`group relative min-h-[50px] min-w-0 flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all duration-200 cursor-pointer ${
                 isActive
                   ? 'bg-gradient-to-b from-amber-400/20 via-amber-500/10 to-amber-500/5 border border-amber-400/45 text-amber-300 shadow-[0_4px_14px_rgba(251,191,36,0.16)]'
                   : 'border border-transparent text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 active:scale-95'
@@ -72,11 +72,11 @@ export const BottomNav: React.FC = () => {
                     : 'text-slate-400 group-hover:text-slate-200'
                 }`}
               >
-                <Icon className="w-[19px] h-[19px] shrink-0" />
+                <Icon className="w-[18px] h-[18px] min-[360px]:w-[19px] min-[360px]:h-[19px] shrink-0" />
               </div>
               <span
-                style={{ fontSize: 'clamp(9.2px, 2.4vw, 11px)' }}
-                className={`mt-0.5 leading-[1.6] py-0.5 text-center max-w-full tracking-tight font-khmer whitespace-nowrap ${
+                style={{ fontSize: 'clamp(8.5px, 2.35vw, 11.5px)' }}
+                className={`mt-0.5 leading-[1.72] pt-0.5 pb-1 text-center max-w-full tracking-tight font-khmer whitespace-nowrap overflow-visible ${
                   isActive ? 'font-extrabold text-amber-300' : 'font-medium text-slate-400 group-hover:text-slate-200'
                 }`}
               >

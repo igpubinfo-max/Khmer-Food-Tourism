@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import {
   X, Utensils, ExternalLink, Navigation, Phone, Share2, Calendar,
   UtensilsCrossed, RefreshCw, ChefHat, CheckCircle2, Play,
-  Search, Sparkles, AlertCircle, RotateCcw, ChevronRight, Loader2, WifiOff, Bookmark
+  Search, Sparkles, AlertCircle, RotateCcw, ChevronRight, Loader2, WifiOff, Bookmark, Volume2, VolumeX
 } from 'lucide-react';
 import {
   TrendingFoodCategorySlug,
@@ -45,6 +45,8 @@ import {
   OnlineFoodDiscoveryItem,
   resolveOriginalSocialAccountUrl,
   resolvePlayableTikTokStreamUrl,
+  getCachedTikTokStreamUrl,
+  prewarmTikTokStreams,
 } from '../services/onlineFoodDiscoveryService';
 import { savedVideoRecordToDiscoveryItem } from '../services/userVideoCollectionService';
 
@@ -142,12 +144,15 @@ export const TrendingSocialModal: React.FC = () => {
     Record<string, { primaryUrl: string; backupUrl?: string; usingBackup?: boolean; failedAllDirect?: boolean }>
   >({});
   const [verifyingPlayItemId, setVerifyingPlayItemId] = useState<string | null>(null);
+  const [isVideoBuffering, setIsVideoBuffering] = useState<boolean>(false);
+  const [isVideoMuted, setIsVideoMuted] = useState<boolean>(false);
   const [isOffline, setIsOffline] = useState<boolean>(
     () => typeof navigator !== 'undefined' && navigator.onLine === false
   );
   const [isRetryingConnection, setIsRetryingConnection] = useState<boolean>(false);
   const [playerReloadKey, setPlayerReloadKey] = useState<number>(0);
   const activeIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const activeVideoRef = useRef<HTMLVideoElement | null>(null);
 
   /** Lightweight connectivity probe to prevent Android WebView raw error page when offline */
   const checkYouTubeConnectivity = useCallback(async (): Promise<boolean> => {
@@ -537,6 +542,68 @@ export const TrendingSocialModal: React.FC = () => {
     [filteredItems, visibleVideoCount]
   );
 
+  // Pre-warm visible TikTok MP4 streams in the background so user taps play instantaneously with 0ms wait
+  useEffect(() => {
+    if (!isTrendingSocialModalOpen || displayedVideos.length === 0) return;
+    let cancelled = false;
+    prewarmTikTokStreams(displayedVideos, 8)
+      .then((resolvedMap) => {
+        if (cancelled || Object.keys(resolvedMap).length === 0) return;
+        setResolvedDirectVideoUrls((prev) => {
+          const next = { ...prev };
+          for (const [id, entry] of Object.entries(resolvedMap)) {
+            if (!next[id] || (!next[id].primaryUrl && entry.primaryUrl)) {
+              next[id] = {
+                primaryUrl: entry.primaryUrl,
+                backupUrl: entry.backupUrl,
+                usingBackup: false,
+                failedAllDirect: false,
+              };
+            }
+          }
+          return next;
+        });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isTrendingSocialModalOpen, displayedVideos]);
+
+  // Stall watchdog: if a direct MP4 stream hangs at 0:00 for > 3.2s, auto-failover to backup MP4 or high-speed inline stream
+  useEffect(() => {
+    if (!activePlayerItemId || !isTrendingSocialModalOpen) return;
+    const currentEntry = resolvedDirectVideoUrls[activePlayerItemId];
+    if (currentEntry?.failedAllDirect) return;
+
+    const timer = setTimeout(() => {
+      const vidEl = activeVideoRef.current;
+      if (!vidEl) return;
+      if (vidEl.currentTime === 0 && vidEl.readyState < 3) {
+        setResolvedDirectVideoUrls((prev) => {
+          const curr = prev[activePlayerItemId];
+          if (curr && !curr.usingBackup && curr.backupUrl && curr.backupUrl !== curr.primaryUrl) {
+            return {
+              ...prev,
+              [activePlayerItemId]: { ...curr, usingBackup: true },
+            };
+          }
+          return {
+            ...prev,
+            [activePlayerItemId]: {
+              primaryUrl: curr?.primaryUrl || '',
+              backupUrl: curr?.backupUrl,
+              usingBackup: true,
+              failedAllDirect: true,
+            },
+          };
+        });
+      }
+    }, 3200);
+
+    return () => clearTimeout(timer);
+  }, [activePlayerItemId, isTrendingSocialModalOpen, resolvedDirectVideoUrls, playerReloadKey]);
+
   useEffect(() => {
     const node = loadMoreVideosRef.current;
     if (!node || visibleVideoCount >= filteredItems.length) return;
@@ -708,6 +775,7 @@ export const TrendingSocialModal: React.FC = () => {
   const handlePlayOrOpenItem = async (item: OnlineFoodDiscoveryItem) => {
     if (activePlayerItemId === item.id) {
       setActivePlayerItemId(null);
+      setIsVideoBuffering(false);
       return;
     }
 
@@ -718,19 +786,49 @@ export const TrendingSocialModal: React.FC = () => {
       return copy;
     });
 
+    setIsVideoMuted(false);
+
     if (typeof navigator !== 'undefined' && navigator.onLine === false) {
       setIsOffline(true);
+      setIsVideoBuffering(false);
       setActivePlayerItemId(item.id);
       return;
     }
 
-    setVerifyingPlayItemId(item.id);
+    setIsOffline(false);
+    setIsVideoBuffering(true);
 
     if (item.platform === 'tiktok') {
-      const [reachable, streamRes] = await Promise.all([
-        checkYouTubeConnectivity(),
+      const syncStream = getCachedTikTokStreamUrl(item);
+      if (syncStream?.primaryUrl) {
+        setResolvedDirectVideoUrls((prev) => ({
+          ...prev,
+          [item.id]: {
+            primaryUrl: syncStream.primaryUrl,
+            backupUrl: syncStream.backupUrl,
+            usingBackup: false,
+            failedAllDirect: false,
+          },
+        }));
+        setVerifyingPlayItemId(null);
+        // Mount <video> synchronously inside user gesture so Android & iOS grant unmuted autoplay!
+        setActivePlayerItemId(item.id);
+        return;
+      }
+
+      // Mount player synchronously to preserve mobile WebView user-activation token, while resolving stream in parallel
+      setActivePlayerItemId(item.id);
+      setVerifyingPlayItemId(item.id);
+
+      const streamRes = await Promise.race([
         resolvePlayableTikTokStreamUrl(item).catch(() => ({ primaryUrl: null, backupUrl: null })),
+        new Promise<{ primaryUrl: null; backupUrl: null }>((resolve) =>
+          setTimeout(() => resolve({ primaryUrl: null, backupUrl: null }), 2200)
+        ),
       ]);
+
+      setVerifyingPlayItemId((curr) => (curr === item.id ? null : curr));
+
       if (streamRes?.primaryUrl) {
         setResolvedDirectVideoUrls((prev) => ({
           ...prev,
@@ -742,16 +840,11 @@ export const TrendingSocialModal: React.FC = () => {
           },
         }));
       }
-      setVerifyingPlayItemId(null);
-      setIsOffline(!reachable && !streamRes?.primaryUrl && !item.directVideoUrl);
-      setActivePlayerItemId(item.id);
       return;
     }
 
-    const reachable = await checkYouTubeConnectivity();
+    // For Facebook & YouTube: mount inline player synchronously (0ms delay, preserving user gesture autoplay)
     setVerifyingPlayItemId(null);
-
-    setIsOffline(!reachable);
     setActivePlayerItemId(item.id);
   };
 
@@ -874,11 +967,11 @@ export const TrendingSocialModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200 overscroll-none"
+      className="fixed inset-0 z-50 flex items-stretch md:items-center justify-center bg-black/70 backdrop-blur-xs p-0 md:p-4 animate-in fade-in duration-200 overscroll-none"
       onClick={() => setIsTrendingSocialModalOpen(false)}
     >
       <div
-        className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden overscroll-contain"
+        className="w-full max-w-full md:max-w-2xl lg:max-w-3xl bg-white dark:bg-slate-900 rounded-none md:rounded-3xl border-0 md:border border-slate-200/80 dark:border-slate-800 shadow-2xl h-full md:h-[92dvh] max-h-full md:max-h-[92dvh] flex flex-col overflow-hidden overscroll-contain"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -969,7 +1062,7 @@ export const TrendingSocialModal: React.FC = () => {
         </div>
 
         {/* Platform Filter Bar: All / TikTok / Facebook / YouTube */}
-        <div className="px-2.5 py-2 bg-slate-950 border-b border-slate-800 flex items-center gap-1.5 shrink-0 font-khmer text-xs overflow-x-auto no-scrollbar">
+        <div className="px-2.5 py-2 bg-slate-950 border-b border-slate-800 flex items-center gap-1.5 flex-wrap shrink-0 font-khmer text-xs">
           {[
             { id: 'all' as const, label: tr(language, 'ទាំងអស់', 'All Platforms', '全部平台'), activeCls: 'bg-emerald-600 text-white' },
             { id: 'tiktok' as const, label: 'TikTok', activeCls: 'bg-black text-white border border-white/30' },
@@ -1018,7 +1111,7 @@ export const TrendingSocialModal: React.FC = () => {
         </div>
 
         {/* Category Tabs: 4 Categories + All Trending */}
-        <div className="p-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center gap-1.5 shrink-0 font-khmer text-xs overflow-x-auto no-scrollbar">
+        <div className="p-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center gap-1.5 flex-wrap shrink-0 font-khmer text-xs">
           {categories.map((c) => (
             <button
               key={c.id}
@@ -1037,7 +1130,7 @@ export const TrendingSocialModal: React.FC = () => {
         </div>
 
         {/* Location Selector Bar */}
-        <div className="px-3 py-1.5 bg-slate-900/40 border-b border-slate-800/80 flex items-center gap-1.5 overflow-x-auto no-scrollbar font-khmer text-xs shrink-0">
+        <div className="px-3 py-1.5 bg-slate-900/40 border-b border-slate-800/80 flex items-center gap-1.5 flex-wrap font-khmer text-xs shrink-0">
           <span className="text-[10px] text-slate-400 font-bold shrink-0">📍 {tr(language, 'ទីតាំង៖', 'City:', '城市：')}</span>
           {provinces.map((p) => (
             <button
@@ -1517,17 +1610,63 @@ export const TrendingSocialModal: React.FC = () => {
                         <div className="relative aspect-16/9 w-full bg-black overflow-hidden shadow-inner">
                           {activeDirectVideoUrl ? (
                             <video
+                              ref={activeVideoRef}
                               key={`${item.id}-${activeDirectVideoUrl}-${playerReloadKey}`}
                               src={activeDirectVideoUrl}
                               poster={item.thumbnailUrl}
                               controls
                               autoPlay
                               playsInline
+                              muted={isVideoMuted}
                               preload="auto"
+                              // @ts-expect-error referrerPolicy is supported on HTMLVideoElement in Chromium/WebKit
+                              referrerPolicy="no-referrer"
                               className="w-full h-full object-contain bg-black"
+                              onLoadStart={() => setIsVideoBuffering(true)}
+                              onLoadedMetadata={(e) => {
+                                const v = e.currentTarget;
+                                const playPromise = v.play();
+                                if (playPromise && typeof playPromise.catch === 'function') {
+                                  playPromise.catch(() => {
+                                    // If mobile OS blocks unmuted autoplay, fallback to muted autoplay immediately so it never freezes at 0:00
+                                    v.muted = true;
+                                    setIsVideoMuted(true);
+                                    v.play().catch(() => {});
+                                  });
+                                }
+                              }}
+                              onCanPlay={() => setIsVideoBuffering(false)}
+                              onPlaying={() => setIsVideoBuffering(false)}
+                              onTimeUpdate={(e) => {
+                                if (e.currentTarget.currentTime > 0 && isVideoBuffering) {
+                                  setIsVideoBuffering(false);
+                                }
+                              }}
+                              onWaiting={() => setIsVideoBuffering(true)}
+                              onStalled={() => {
+                                const v = activeVideoRef.current;
+                                if (v && v.currentTime === 0) {
+                                  setResolvedDirectVideoUrls((prev) => {
+                                    const curr = prev[item.id];
+                                    if (curr && !curr.usingBackup && curr.backupUrl && curr.backupUrl !== curr.primaryUrl) {
+                                      return { ...prev, [item.id]: { ...curr, usingBackup: true } };
+                                    }
+                                    return {
+                                      ...prev,
+                                      [item.id]: {
+                                        primaryUrl: curr?.primaryUrl || activeDirectVideoUrl,
+                                        backupUrl: curr?.backupUrl,
+                                        usingBackup: true,
+                                        failedAllDirect: true,
+                                      },
+                                    };
+                                  });
+                                }
+                              }}
                               onError={() => {
                                 if (typeof navigator !== 'undefined' && navigator.onLine === false) {
                                   setIsOffline(true);
+                                  setIsVideoBuffering(false);
                                   return;
                                 }
                                 setResolvedDirectVideoUrls((prev) => {
@@ -1566,9 +1705,12 @@ export const TrendingSocialModal: React.FC = () => {
                               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                               allowFullScreen
                               onLoad={(e) => {
+                                setIsVideoBuffering(false);
                                 try {
-                                  e.currentTarget.contentWindow?.postMessage(
-                                    JSON.stringify({ event: 'listening', id: item.id }),
+                                  const win = e.currentTarget.contentWindow;
+                                  win?.postMessage(JSON.stringify({ event: 'listening', id: item.id }), '*');
+                                  win?.postMessage(
+                                    JSON.stringify({ event: 'command', func: 'playVideo', args: [] }),
                                     '*'
                                   );
                                 } catch {
@@ -1576,6 +1718,7 @@ export const TrendingSocialModal: React.FC = () => {
                                 }
                               }}
                               onError={() => {
+                                setIsVideoBuffering(false);
                                 if (typeof navigator !== 'undefined' && navigator.onLine === false) {
                                   setIsOffline(true);
                                   return;
@@ -1583,6 +1726,36 @@ export const TrendingSocialModal: React.FC = () => {
                                 handleReplaceUnavailableVideo(item, false);
                               }}
                             />
+                          )}
+
+                          {/* Non-blocking buffering indicator while initial video frames load */}
+                          {(isVideoBuffering || isVerifyingThis) && (
+                            <div className="absolute inset-0 pointer-events-none flex items-center justify-center bg-black/25 z-10">
+                              <div className="px-3 py-1.5 rounded-full bg-black/75 border border-white/20 text-white text-[11px] font-bold flex items-center gap-2 shadow-lg">
+                                <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
+                                <span>{tr(language, 'កំពុងផ្ទុកវីដេអូ...', 'Loading video...', '正在加载视频...')}</span>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Tap-to-unmute pill if mobile OS required muted autoplay */}
+                          {activeDirectVideoUrl && isVideoMuted && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (activeVideoRef.current) {
+                                  activeVideoRef.current.muted = false;
+                                  activeVideoRef.current.volume = 1;
+                                  activeVideoRef.current.play().catch(() => {});
+                                }
+                                setIsVideoMuted(false);
+                              }}
+                              className="absolute bottom-12 left-3 z-20 px-3 py-1.5 rounded-full bg-emerald-600/95 hover:bg-emerald-500 text-white text-[11px] font-extrabold flex items-center gap-1.5 shadow-lg border border-white/30 cursor-pointer animate-pulse"
+                            >
+                              <VolumeX className="w-3.5 h-3.5" />
+                              <span>{tr(language, 'ចុចបើកសំឡេង', 'Tap to Unmute', '点击开启声音')}</span>
+                            </button>
                           )}
                           <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
                             <button

@@ -226,7 +226,7 @@ const MainScreen: React.FC = () => {
       >
         <Suspense
           fallback={
-            <div className="max-w-md mx-auto px-4 py-10 text-center text-sm text-slate-400" aria-busy="true">
+            <div className="w-full max-w-6xl mx-auto px-4 py-10 text-center text-sm text-slate-400" aria-busy="true">
               …
             </div>
           }
@@ -306,7 +306,7 @@ export default function App() {
     <AppProvider>
       {/* Locked Full-Screen Native Mobile App Shell (Zero dual scrollbars, Edge-to-Edge Safe Area aware) */}
       <div className="w-full h-full max-h-[100dvh] overflow-hidden bg-[#0F172A] text-[#F8FAFC] flex justify-center">
-        <div className="w-full max-w-md h-full max-h-[100dvh] flex flex-col overflow-hidden bg-[#0F172A] text-[#F8FAFC] relative shadow-none md:shadow-xl md:border-x md:border-slate-800">
+        <div className="w-full max-w-full lg:max-w-6xl h-full max-h-[100dvh] flex flex-col overflow-hidden bg-[#0F172A] text-[#F8FAFC] relative shadow-none lg:shadow-xl lg:border-x lg:border-slate-800">
           <MainScreen />
         </div>
       </div>

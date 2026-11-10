@@ -559,16 +559,16 @@ export const RestaurantView: React.FC = () => {
                 className="w-full h-full rounded-[14px] object-cover bg-[#064E3B]"
               />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <h1
-                className="font-moul text-sm sm:text-[15px] text-white leading-tight truncate"
-                style={{ textShadow: '0 2px 6px rgba(0,0,0,0.55)' }}
+                className="font-moul text-white leading-[1.68] py-0.5 break-words"
+                style={{ fontSize: 'clamp(11.5px, 3.4vw, 15.5px)', textShadow: '0 2px 6px rgba(0,0,0,0.55)' }}
               >
                 {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨美食与旅游')}
               </h1>
               <p
-                className="text-xs font-extrabold text-white/95 truncate mt-0.5"
-                style={{ textShadow: '0 1px 4px rgba(0,0,0,0.55)' }}
+                className="font-extrabold text-white/95 leading-snug break-words"
+                style={{ fontSize: 'clamp(9.8px, 2.8vw, 12px)', textShadow: '0 1px 4px rgba(0,0,0,0.55)' }}
               >
                 Cambodia Flavors &amp; Tourism
               </p>

@@ -461,7 +461,7 @@ export const GuideView: React.FC = () => {
   }, [bigPhraseId]);
 
   return (
-    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-6 font-khmer">
+    <div className="w-full max-w-6xl mx-auto px-2.5 min-[360px]:px-4 py-3 space-y-4 pb-10 font-khmer overflow-x-hidden">
       {/* Hero */}
       <section className="relative overflow-hidden p-4 rounded-3xl bg-gradient-to-br from-[#064E3B] via-[#065F46] to-[#047857] text-white border border-emerald-600/30 shadow-md">
         <div className="absolute -right-8 -top-10 w-32 h-32 rounded-full bg-amber-300/10 blur-2xl pointer-events-none" />
@@ -514,7 +514,7 @@ export const GuideView: React.FC = () => {
               role="tab"
               aria-selected={active}
               onClick={() => setTab(t.id)}
-              className={`py-2 px-1 rounded-xl flex flex-col items-center gap-0.5 text-[11px] font-bold transition cursor-pointer ${
+              className={`py-2 px-1 min-w-0 rounded-xl flex flex-col items-center gap-0.5 text-[11px] font-bold transition cursor-pointer ${
                 active
                   ? 'bg-[#064E3B] text-white shadow-xs'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-700'

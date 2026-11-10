@@ -16,6 +16,8 @@ import {
   LocateFixed,
   ChevronRight,
   ArrowLeft,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import {
   FoodItem,
@@ -40,6 +42,8 @@ import { getLocalizedFood, getLocalizedRestaurant } from '../utils/zhDynamicTran
 type RegionFilterId = 'all' | 'central' | 'tonle_sap' | 'coastal' | 'mekong' | 'highlands';
 type VipAiTasteId = 'heritage' | 'soup_kroeung' | 'grill_seafood' | 'street_dessert';
 
+const PROVINCIAL_DISH_BATCH_SIZE = 12;
+
 export const DailyDiscoveriesModal: React.FC = () => {
   const {
     isDailyDiscoveriesModalOpen,
@@ -60,42 +64,71 @@ export const DailyDiscoveriesModal: React.FC = () => {
   const [selectedProvinceId, setSelectedProvinceId] = useState<string>('all');
   const [selectedRegion, setSelectedRegion] = useState<RegionFilterId>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [debouncedQuery, setDebouncedQuery] = useState<string>('');
   const [isLocating, setIsLocating] = useState<boolean>(false);
   const [vipTasteProfile, setVipTasteProfile] = useState<VipAiTasteId | null>(null);
+  const [visibleDishCount, setVisibleDishCount] = useState<number>(PROVINCIAL_DISH_BATCH_SIZE);
+  const [isLoadingProvince, setIsLoadingProvince] = useState<boolean>(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const bodyScrollRef = useRef<HTMLDivElement | null>(null);
+  const loadMoreDishesRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setDebouncedQuery('');
+      return;
+    }
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 150);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     if (isDailyDiscoveriesModalOpen) {
       setSelectedProvinceId('all');
       setSelectedRegion('all');
       setSearchQuery('');
+      setDebouncedQuery('');
       setVipTasteProfile(null);
+      setVisibleDishCount(PROVINCIAL_DISH_BATCH_SIZE);
+      setLoadError(null);
     }
   }, [isDailyDiscoveriesModalOpen]);
 
+  useEffect(() => {
+    setVisibleDishCount(PROVINCIAL_DISH_BATCH_SIZE);
+  }, [selectedProvinceId, selectedRegion, debouncedQuery, vipTasteProfile]);
+
   const handleSelectProvince = (provId: string) => {
+    setLoadError(null);
+    setIsLoadingProvince(true);
     setSelectedProvinceId(provId);
+    setVisibleDishCount(PROVINCIAL_DISH_BATCH_SIZE);
     setTimeout(() => {
+      setIsLoadingProvince(false);
       if (bodyScrollRef.current) {
         bodyScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
       }
-    }, 30);
+    }, 40);
   };
 
   // Deduplicate and verify all dishes so no duplicate names or photos ever appear
   const verifiedDishes = useMemo(() => {
-    const base = organizeAndDeduplicateFoods(foods);
-    const seenIds = new Set<string>();
-    const seenPhotos = new Set<string>();
-    const result: FoodItem[] = [];
-    for (const f of base) {
-      if (!f || !f.id || !f.nameKh || !f.photoUrl) continue;
-      if (seenIds.has(f.id) || seenPhotos.has(f.photoUrl)) continue;
-      seenIds.add(f.id);
-      seenPhotos.add(f.photoUrl);
-      result.push(f);
+    try {
+      const base = organizeAndDeduplicateFoods(Array.isArray(foods) ? foods : []);
+      const seenIds = new Set<string>();
+      const seenPhotos = new Set<string>();
+      const result: FoodItem[] = [];
+      for (const f of base) {
+        if (!f || !f.id || !f.nameKh || !f.photoUrl) continue;
+        if (seenIds.has(f.id) || seenPhotos.has(f.photoUrl)) continue;
+        seenIds.add(f.id);
+        seenPhotos.add(f.photoUrl);
+        result.push(f);
+      }
+      return result;
+    } catch {
+      return [];
     }
-    return result;
   }, [foods]);
 
   // Count dishes per province across all 25 provinces & capital city
@@ -103,7 +136,9 @@ export const DailyDiscoveriesModal: React.FC = () => {
     const counts: Record<string, number> = {};
     for (const p of DISH_PROVINCES) {
       counts[p.id] = 0;
-      for (const f of verifiedDishes) {
+    }
+    for (const f of verifiedDishes) {
+      for (const p of DISH_PROVINCES) {
         if (doesDishBelongToProvince(f, p.id)) {
           counts[p.id] += 1;
         }
@@ -114,7 +149,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
 
   // Filter provinces by region and optional search query
   const visibleProvinces = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const q = debouncedQuery.trim().toLowerCase();
     return DISH_PROVINCES.filter((p) => {
       if (selectedRegion !== 'all' && p.region !== selectedRegion) {
         return false;
@@ -141,7 +176,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
       }
       return true;
     });
-  }, [selectedRegion, searchQuery, verifiedDishes, language]);
+  }, [selectedRegion, debouncedQuery, verifiedDishes, language]);
 
   // Currently selected province metadata (if a specific province is chosen)
   const activeProvinceMeta: ProvinceFilterOption | null = useMemo(() => {
@@ -151,107 +186,134 @@ export const DailyDiscoveriesModal: React.FC = () => {
 
   // Filter dishes by selected province, region, search query, and taste profile
   const filteredDishes = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    try {
+      const q = debouncedQuery.trim().toLowerCase();
 
-    const list = verifiedDishes.filter((food) => {
-      if (selectedProvinceId !== 'all') {
-        if (!doesDishBelongToProvince(food, selectedProvinceId)) {
-          return false;
-        }
-      } else if (selectedRegion !== 'all') {
-        const pid = detectDishProvince(food);
-        const provMeta = getProvinceOptionById(pid);
-        if (provMeta.region !== selectedRegion) {
-          return false;
-        }
-      }
-
-      if (vipTasteProfile) {
-        const cat = food.categorySlug;
-        if (vipTasteProfile === 'soup_kroeung' && cat !== 'soup' && cat !== 'salad') {
-          return false;
-        }
-        if (vipTasteProfile === 'grill_seafood' && cat !== 'grilled' && cat !== 'stirfry' && cat !== 'specialty') {
-          return false;
-        }
-        if (
-          vipTasteProfile === 'street_dessert' &&
-          cat !== 'dessert' &&
-          cat !== 'streetfood' &&
-          cat !== 'noodles' &&
-          cat !== 'cake' &&
-          cat !== 'drink'
-        ) {
-          return false;
-        }
-      }
-
-      if (q) {
-        const pid = selectedProvinceId !== 'all' ? selectedProvinceId : detectDishProvince(food);
-        const provMeta = getProvinceOptionById(pid);
-        const locFood = getLocalizedFood(food, language);
-        const matchName =
-          food.nameKh.toLowerCase().includes(q) ||
-          food.nameEn.toLowerCase().includes(q) ||
-          locFood.name.toLowerCase().includes(q);
-        const matchDesc =
-          (food.descriptionKh || '').toLowerCase().includes(q) ||
-          (food.descriptionEn || '').toLowerCase().includes(q) ||
-          locFood.description.toLowerCase().includes(q);
-        const matchProv =
-          provMeta.kh.toLowerCase().includes(q) ||
-          provMeta.fullKh.toLowerCase().includes(q) ||
-          provMeta.en.toLowerCase().includes(q) ||
-          provMeta.zh.toLowerCase().includes(q);
-        const matchIng = (food.ingredients || []).some(
-          (ing) =>
-            (ing.nameKh || '').toLowerCase().includes(q) ||
-            (ing.nameEn || '').toLowerCase().includes(q)
-        );
-        if (!matchName && !matchDesc && !matchProv && !matchIng) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-
-    // If "All Provinces" is selected and no search query, order so we showcase top signature dishes across all 25 provinces evenly
-    if (selectedProvinceId === 'all' && !q) {
-      const byProvince = new Map<string, FoodItem[]>();
-      for (const p of DISH_PROVINCES) {
-        byProvince.set(p.id, []);
-      }
-      for (const f of list) {
-        const pid = detectDishProvince(f) || 'phnom_penh';
-        byProvince.get(pid)?.push(f);
-      }
-      const interleaved: FoodItem[] = [];
-      let round = 0;
-      let added = true;
-      while (added && round < 10) {
-        added = false;
-        for (const p of DISH_PROVINCES) {
-          const bucket = byProvince.get(p.id);
-          if (bucket && bucket[round]) {
-            interleaved.push(bucket[round]);
-            added = true;
+      const list = verifiedDishes.filter((food) => {
+        if (selectedProvinceId !== 'all') {
+          if (!doesDishBelongToProvince(food, selectedProvinceId)) {
+            return false;
+          }
+        } else if (selectedRegion !== 'all') {
+          const pid = detectDishProvince(food);
+          const provMeta = getProvinceOptionById(pid);
+          if (provMeta.region !== selectedRegion) {
+            return false;
           }
         }
-        round++;
-      }
-      return interleaved;
-    }
 
-    return list;
+        if (vipTasteProfile) {
+          const cat = food.categorySlug;
+          if (vipTasteProfile === 'soup_kroeung' && cat !== 'soup' && cat !== 'salad') {
+            return false;
+          }
+          if (vipTasteProfile === 'grill_seafood' && cat !== 'grilled' && cat !== 'stirfry' && cat !== 'specialty') {
+            return false;
+          }
+          if (
+            vipTasteProfile === 'street_dessert' &&
+            cat !== 'dessert' &&
+            cat !== 'streetfood' &&
+            cat !== 'noodles' &&
+            cat !== 'cake' &&
+            cat !== 'drink'
+          ) {
+            return false;
+          }
+        }
+
+        if (q) {
+          const pid = selectedProvinceId !== 'all' ? selectedProvinceId : detectDishProvince(food);
+          const provMeta = getProvinceOptionById(pid);
+          const locFood = getLocalizedFood(food, language);
+          const matchName =
+            food.nameKh.toLowerCase().includes(q) ||
+            food.nameEn.toLowerCase().includes(q) ||
+            locFood.name.toLowerCase().includes(q);
+          const matchDesc =
+            (food.descriptionKh || '').toLowerCase().includes(q) ||
+            (food.descriptionEn || '').toLowerCase().includes(q) ||
+            locFood.description.toLowerCase().includes(q);
+          const matchProv =
+            provMeta.kh.toLowerCase().includes(q) ||
+            provMeta.fullKh.toLowerCase().includes(q) ||
+            provMeta.en.toLowerCase().includes(q) ||
+            provMeta.zh.toLowerCase().includes(q);
+          const matchIng = (food.ingredients || []).some(
+            (ing) =>
+              (ing.nameKh || '').toLowerCase().includes(q) ||
+              (ing.nameEn || '').toLowerCase().includes(q)
+          );
+          if (!matchName && !matchDesc && !matchProv && !matchIng) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      // If "All Provinces" is selected and no search query, order so we showcase top signature dishes across all 25 provinces evenly
+      if (selectedProvinceId === 'all' && !q) {
+        const byProvince = new Map<string, FoodItem[]>();
+        for (const p of DISH_PROVINCES) {
+          byProvince.set(p.id, []);
+        }
+        for (const f of list) {
+          const pid = detectDishProvince(f) || 'phnom_penh';
+          byProvince.get(pid)?.push(f);
+        }
+        const interleaved: FoodItem[] = [];
+        let round = 0;
+        let added = true;
+        while (added && round < 10) {
+          added = false;
+          for (const p of DISH_PROVINCES) {
+            const bucket = byProvince.get(p.id);
+            if (bucket && bucket[round]) {
+              interleaved.push(bucket[round]);
+              added = true;
+            }
+          }
+          round++;
+        }
+        return interleaved;
+      }
+
+      return list;
+    } catch {
+      return [];
+    }
   }, [
     verifiedDishes,
     selectedProvinceId,
     selectedRegion,
-    searchQuery,
+    debouncedQuery,
     language,
     vipTasteProfile,
   ]);
+
+  const displayedDishes = useMemo(
+    () => filteredDishes.slice(0, visibleDishCount),
+    [filteredDishes, visibleDishCount]
+  );
+
+  useEffect(() => {
+    if (!isDailyDiscoveriesModalOpen) return;
+    const node = loadMoreDishesRef.current;
+    if (!node || visibleDishCount >= filteredDishes.length) return;
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleDishCount((prev) => Math.min(filteredDishes.length, prev + PROVINCIAL_DISH_BATCH_SIZE));
+        }
+      },
+      { rootMargin: '320px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [isDailyDiscoveriesModalOpen, visibleDishCount, filteredDishes.length]);
 
   if (!isDailyDiscoveriesModalOpen) return null;
 
@@ -388,11 +450,11 @@ export const DailyDiscoveriesModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center bg-black/65 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-[90] flex items-stretch md:items-center justify-center bg-black/70 backdrop-blur-xs p-0 md:p-4 animate-in fade-in duration-200 overscroll-none"
       onClick={() => setIsDailyDiscoveriesModalOpen(false)}
     >
       <div
-        className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl max-h-[94dvh] flex flex-col overflow-hidden"
+        className="w-full max-w-full md:max-w-2xl lg:max-w-3xl bg-white dark:bg-slate-900 rounded-none md:rounded-3xl border-0 md:border border-slate-200/80 dark:border-slate-800 shadow-2xl h-full md:h-[92dvh] max-h-full md:max-h-[92dvh] flex flex-col overflow-hidden overscroll-contain"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -764,196 +826,258 @@ export const DailyDiscoveriesModal: React.FC = () => {
             </div>
           )}
 
+          {/* Loading Indicator when switching provinces */}
+          {isLoadingProvince && (
+            <div className="flex items-center justify-center gap-2.5 py-6 px-4 rounded-2xl bg-emerald-50/80 dark:bg-slate-800/80 border border-emerald-200/80 dark:border-slate-700 text-[#064E3B] dark:text-emerald-300 text-xs font-bold">
+              <Loader2 className="w-4 h-4 animate-spin text-emerald-600 shrink-0" />
+              <span>
+                {tr(
+                  language,
+                  'កំពុងទាញយកបញ្ជីមុខម្ហូបតាមខេត្ត-ក្រុងទាំង ២៥...',
+                  'Loading dishes across all 25 provinces...',
+                  '正在加载全柬 25 省市美食...'
+                )}
+              </span>
+            </div>
+          )}
+
+          {/* Graceful Error State */}
+          {loadError && (
+            <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/70 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-red-700 dark:text-red-300">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{loadError}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setLoadError(null);
+                  setVisibleDishCount(PROVINCIAL_DISH_BATCH_SIZE);
+                }}
+                className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-[11px] font-bold shrink-0 cursor-pointer"
+              >
+                {tr(language, 'សាកល្បងម្ដងទៀត', 'Retry', '重试')}
+              </button>
+            </div>
+          )}
+
           {/* Provincial Dishes List */}
-          {filteredDishes.length > 0 ? (
-            filteredDishes.map((food) => {
-              const pid =
-                selectedProvinceId !== 'all'
-                  ? selectedProvinceId
-                  : detectDishProvince(food);
-              const provMeta = getProvinceOptionById(pid);
-              const locFood = getLocalizedFood(food, language);
-              const matchedRests = getMatchingRestaurantsForProvinceDish(food, provMeta, restaurants);
-              const resolvedPhoto =
-                resolveFoodPhotoUrl(
-                  food.photoUrl,
-                  food.photoUpdatedAt,
-                  720,
-                  food.id
-                ) || '/welcome/hero-bg.webp';
+          {!isLoadingProvince && displayedDishes.length > 0 ? (
+            <>
+              {displayedDishes.map((food) => {
+                const pid =
+                  selectedProvinceId !== 'all'
+                    ? selectedProvinceId
+                    : detectDishProvince(food);
+                const provMeta = getProvinceOptionById(pid);
+                const locFood = getLocalizedFood(food, language);
+                const matchedRests = getMatchingRestaurantsForProvinceDish(food, provMeta, restaurants);
+                const resolvedPhoto =
+                  resolveFoodPhotoUrl(
+                    food.photoUrl,
+                    food.photoUpdatedAt,
+                    720,
+                    food.id
+                  ) || '/welcome/hero-bg.webp';
 
-              return (
-                <div
-                  key={food.id}
-                  className="rounded-3xl overflow-hidden bg-white dark:bg-slate-800/95 border border-slate-200/90 dark:border-slate-700/90 shadow-xs hover:shadow-md transition"
-                >
-                  {/* Dish Photo Header */}
+                return (
                   <div
-                    onClick={() => {
-                      setSelectedFood(food);
-                      setIsDailyDiscoveriesModalOpen(false);
-                    }}
-                    className="relative aspect-16/9 w-full overflow-hidden bg-slate-100 dark:bg-slate-800 cursor-pointer group"
+                    key={food.id}
+                    style={{ contentVisibility: 'auto', containIntrinsicSize: '380px' }}
+                    className="rounded-3xl overflow-hidden bg-white dark:bg-slate-800/95 border border-slate-200/90 dark:border-slate-700/90 shadow-xs hover:shadow-md transition"
                   >
-                    <img
-                      src={resolvedPhoto}
-                      alt={locFood.name}
-                      onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+                    {/* Dish Photo Header */}
+                    <div
+                      onClick={() => {
+                        setSelectedFood(food);
+                        setIsDailyDiscoveriesModalOpen(false);
+                      }}
+                      className="relative aspect-16/9 w-full overflow-hidden bg-slate-100 dark:bg-slate-800 cursor-pointer group"
+                    >
+                      <img
+                        src={resolvedPhoto}
+                        alt={locFood.name}
+                        onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
 
-                    {/* Top Left: Province & Category Badges */}
-                    <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectProvince(provMeta.id);
-                        }}
-                        className="px-2.5 py-0.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] font-black shadow-xs flex items-center gap-1 cursor-pointer"
-                      >
-                        <MapPin className="w-3 h-3 shrink-0" />
-                        <span>{getProvinceDisplayName(provMeta)}</span>
-                      </button>
-                      <span className="px-2.5 py-0.5 rounded-full bg-[#064E3B]/95 text-emerald-100 border border-emerald-400/30 text-[10px] font-bold shadow-xs">
-                        {locFood.category}
-                      </span>
+                      {/* Top Left: Province & Category Badges */}
+                      <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectProvince(provMeta.id);
+                          }}
+                          className="px-2.5 py-0.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] font-black shadow-xs flex items-center gap-1 cursor-pointer"
+                        >
+                          <MapPin className="w-3 h-3 shrink-0" />
+                          <span>{getProvinceDisplayName(provMeta)}</span>
+                        </button>
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#064E3B]/95 text-emerald-100 border border-emerald-400/30 text-[10px] font-bold shadow-xs">
+                          {locFood.category}
+                        </span>
+                      </div>
+
+                      {/* Top Right: Rating Badge */}
+                      <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/65 text-white text-[10px] font-bold flex items-center gap-1">
+                        <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                        <span>{(food.rating || 4.9).toFixed(1)}</span>
+                      </div>
+
+                      {/* Bottom Overlay: Dish Title */}
+                      <div className="absolute bottom-2.5 left-3 right-3 text-white">
+                        <h4 className="font-extrabold text-sm sm:text-base leading-snug drop-shadow line-clamp-1">
+                          {locFood.name}
+                        </h4>
+                      </div>
                     </div>
 
-                    {/* Top Right: Rating Badge */}
-                    <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/65 text-white text-[10px] font-bold flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                      <span>{(food.rating || 4.9).toFixed(1)}</span>
-                    </div>
+                    {/* Card Body: Concise Summary, Key Ingredients & Where to Find */}
+                    <div className="p-4 space-y-3.5">
+                      {/* 1. Concise Description */}
+                      <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed">
+                        {locFood.description}
+                      </p>
 
-                    {/* Bottom Overlay: Dish Title */}
-                    <div className="absolute bottom-2.5 left-3 right-3 text-white">
-                      <h4 className="font-extrabold text-sm sm:text-base leading-snug drop-shadow line-clamp-1">
-                        {locFood.name}
-                      </h4>
-                    </div>
-                  </div>
+                      {/* 2. Key Authentic Ingredients */}
+                      {locFood.ingredients && locFood.ingredients.length > 0 && (
+                        <div className="space-y-1.5">
+                          <div className="text-[11px] font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                            <Utensils className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span>
+                              {tr(
+                                language,
+                                `គ្រឿងផ្សំសំខាន់ៗ (${locFood.ingredients.length} មុខ)`,
+                                `Key Ingredients (${locFood.ingredients.length})`,
+                                `主要配料（${locFood.ingredients.length} 种）`
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {locFood.ingredients.slice(0, 4).map((ing, i) => {
+                              const shortIng = (ing.name || '')
+                                .split(/,|និង|\band\b|、/i)[0]
+                                .replace(/\s*\([^)]*\)/g, '')
+                                .trim();
+                              return (
+                                <span
+                                  key={i}
+                                  className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-slate-700/80 text-emerald-900 dark:text-emerald-200 border border-emerald-200/70 dark:border-slate-600 text-[11px] font-semibold"
+                                >
+                                  🌿 {shortIng || ing.name}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
 
-                  {/* Card Body: Concise Summary, Key Ingredients & Where to Find */}
-                  <div className="p-4 space-y-3.5">
-                    {/* 1. Concise Description */}
-                    <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed">
-                      {locFood.description}
-                    </p>
-
-                    {/* 2. Key Authentic Ingredients */}
-                    {locFood.ingredients && locFood.ingredients.length > 0 && (
-                      <div className="space-y-1.5">
-                        <div className="text-[11px] font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                          <Utensils className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      {/* 3. Where to Find & Verified Province Restaurants */}
+                      <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2">
+                        <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                           <span>
                             {tr(
                               language,
-                              `គ្រឿងផ្សំសំខាន់ៗ (${locFood.ingredients.length} មុខ)`,
-                              `Key Ingredients (${locFood.ingredients.length})`,
-                              `主要配料（${locFood.ingredients.length} 种）`
+                              `កន្លែងលក់ក្នុង${provMeta.fullKh}`,
+                              `Where to Find in ${provMeta.en}`,
+                              `${provMeta.zh}寻味地点`
                             )}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {locFood.ingredients.slice(0, 4).map((ing, i) => {
-                            const shortIng = (ing.name || '')
-                              .split(/,|និង|\band\b|、/i)[0]
-                              .replace(/\s*\([^)]*\)/g, '')
-                              .trim();
-                            return (
-                              <span
-                                key={i}
-                                className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-slate-700/80 text-emerald-900 dark:text-emerald-200 border border-emerald-200/70 dark:border-slate-600 text-[11px] font-semibold"
-                              >
-                                🌿 {shortIng || ing.name}
-                              </span>
-                            );
-                          })}
-                        </div>
+
+                        <p
+                          data-testid={`dish-where-to-find-${food.id}`}
+                          className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug"
+                        >
+                          📍 {getDishSpecificWhereToFind(food, provMeta, language)}
+                        </p>
+
+                        {matchedRests.length > 0 && (
+                          <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                            {matchedRests.slice(0, 2).map((rest) => {
+                              const rLoc = getLocalizedRestaurant(rest, language);
+                              return (
+                                <button
+                                  key={rest.id}
+                                  type="button"
+                                  data-testid={`dish-matched-rest-${food.id}-${rest.id}`}
+                                  onClick={() => {
+                                    setActiveTab('restaurants');
+                                    setSelectedRestaurant(rest);
+                                    setIsDailyDiscoveriesModalOpen(false);
+                                  }}
+                                  className="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 hover:border-emerald-500 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1 transition cursor-pointer"
+                                >
+                                  <Store className="w-3 h-3 text-emerald-600 shrink-0" />
+                                  <span className="truncate max-w-[150px]">{rLoc.name}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
-                    )}
 
-                    {/* 3. Where to Find & Verified Province Restaurants */}
-                    <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2">
-                      <div className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        <span>
-                          {tr(
-                            language,
-                            `កន្លែងលក់ក្នុង${provMeta.fullKh}`,
-                            `Where to Find in ${provMeta.en}`,
-                            `${provMeta.zh}寻味地点`
-                          )}
-                        </span>
+                      {/* 4. Action Buttons: Full Recipe & Interactive Map Navigation */}
+                      <div className="grid grid-cols-2 gap-2 pt-0.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedFood(food);
+                            setIsDailyDiscoveriesModalOpen(false);
+                          }}
+                          className="py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer"
+                        >
+                          <ChefHat className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                          <span className="truncate">
+                            {tr(language, 'មើលរូបមន្តពេញលេញ', 'Full Recipe', '查看完整食谱')}
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenProvinceMap(provMeta, food.nameKh)}
+                          className="py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer"
+                        >
+                          <Navigation className="w-3.5 h-3.5 text-blue-100 shrink-0" />
+                          <span className="truncate">
+                            {tr(language, 'ផែនទីនាំផ្លូវ', 'Map Navigation', '地图导航寻味')}
+                          </span>
+                        </button>
                       </div>
-
-                      <p
-                        data-testid={`dish-where-to-find-${food.id}`}
-                        className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug"
-                      >
-                        📍 {getDishSpecificWhereToFind(food, provMeta, language)}
-                      </p>
-
-                      {matchedRests.length > 0 && (
-                        <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                          {matchedRests.slice(0, 2).map((rest) => {
-                            const rLoc = getLocalizedRestaurant(rest, language);
-                            return (
-                              <button
-                                key={rest.id}
-                                type="button"
-                                data-testid={`dish-matched-rest-${food.id}-${rest.id}`}
-                                onClick={() => {
-                                  setActiveTab('restaurants');
-                                  setSelectedRestaurant(rest);
-                                  setIsDailyDiscoveriesModalOpen(false);
-                                }}
-                                className="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 hover:border-emerald-500 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1 transition cursor-pointer"
-                              >
-                                <Store className="w-3 h-3 text-emerald-600 shrink-0" />
-                                <span className="truncate max-w-[150px]">{rLoc.name}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* 4. Action Buttons: Full Recipe & Interactive Map Navigation */}
-                    <div className="grid grid-cols-2 gap-2 pt-0.5">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedFood(food);
-                          setIsDailyDiscoveriesModalOpen(false);
-                        }}
-                        className="py-2 px-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer"
-                      >
-                        <ChefHat className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                        <span className="truncate">
-                          {tr(language, 'មើលរូបមន្តពេញលេញ', 'Full Recipe', '查看完整食谱')}
-                        </span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleOpenProvinceMap(provMeta, food.nameKh)}
-                        className="py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer"
-                      >
-                        <Navigation className="w-3.5 h-3.5 text-blue-100 shrink-0" />
-                        <span className="truncate">
-                          {tr(language, 'ផែនទីនាំផ្លូវ', 'Map Navigation', '地图导航寻味')}
-                        </span>
-                      </button>
                     </div>
                   </div>
+                );
+              })}
+
+              {visibleDishCount < filteredDishes.length && (
+                <div ref={loadMoreDishesRef} className="pt-2 pb-4 flex flex-col items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVisibleDishCount((prev) =>
+                        Math.min(filteredDishes.length, prev + PROVINCIAL_DISH_BATCH_SIZE)
+                      )
+                    }
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-emerald-50 hover:bg-emerald-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-[#064E3B] dark:text-emerald-300 border border-emerald-200 dark:border-slate-700 text-xs font-extrabold flex items-center justify-center gap-2 shadow-2xs transition cursor-pointer"
+                  >
+                    <span>
+                      {tr(
+                        language,
+                        `បង្ហាញមុខម្ហូបបន្ថែមទៀត (${displayedDishes.length}/${filteredDishes.length})`,
+                        `Show More Dishes (${displayedDishes.length}/${filteredDishes.length})`,
+                        `加载更多美食 (${displayedDishes.length}/${filteredDishes.length})`
+                      )}
+                    </span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
                 </div>
-              );
-            })
-          ) : (
+              )}
+            </>
+          ) : !isLoadingProvince ? (
             /* Empty State */
             <div className="text-center py-12 px-4 space-y-3 bg-slate-50/70 dark:bg-slate-800/40 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
               <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center mx-auto">
@@ -993,7 +1117,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                 </span>
               </button>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

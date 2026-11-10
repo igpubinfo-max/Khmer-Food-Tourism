@@ -218,7 +218,7 @@ export const TourismView: React.FC = () => {
   }, [visibleCount, filteredDestinations.length]);
 
   return (
-    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-6">
+    <div className="w-full max-w-6xl mx-auto px-2.5 min-[360px]:px-4 py-3 space-y-4 pb-10 overflow-x-hidden">
       {/* Title Bar */}
       <div className="flex items-center justify-between gap-2">
         <div>

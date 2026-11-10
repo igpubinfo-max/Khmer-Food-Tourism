@@ -358,7 +358,7 @@ export const HomeView: React.FC = () => {
   );
 
   return (
-    <div className="max-w-md mx-auto bg-[#FBF9F5] text-slate-900 min-h-full font-khmer">
+    <div className="w-full max-w-6xl mx-auto bg-[#FBF9F5] text-slate-900 min-h-full font-khmer">
       {/* 1. Full-Bleed Angkor Wat Hero Header + Ask AI Bar (No Green Background) */}
       <AngkorHeroTopHeader
         mode="home"
@@ -369,19 +369,19 @@ export const HomeView: React.FC = () => {
       />
 
       {/* Rounded White/Cream Sheet Body */}
-      <div className="relative z-10 -mt-4 rounded-t-[28px] bg-[#F2F4F7] px-3.5 pt-3.5 pb-6 space-y-3.5 shadow-[0_-6px_22px_rgba(0,0,0,0.16)]">
+      <div className="relative z-10 -mt-4 rounded-t-[28px] bg-[#F2F4F7] px-2.5 min-[360px]:px-3.5 sm:px-5 pt-3.5 pb-10 space-y-3.5 shadow-[0_-6px_22px_rgba(0,0,0,0.16)]">
 
       {/* 2. Global Live Search Results Dropdown/Panel */}
       {searchResults && (
-        <div className="p-4 rounded-3xl bg-white dark:bg-slate-800 border-2 border-emerald-500 shadow-lg space-y-3 animate-in fade-in slide-in-from-top-2 duration-150">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-1.5">
-              <Search className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+        <div className="p-3.5 sm:p-4 rounded-3xl bg-white dark:bg-slate-800 border-2 border-emerald-500 shadow-lg space-y-3 animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Search className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white leading-[1.68] py-0.5">
                 {tr(language, `លទ្ធផលស្វែងរក (${searchResults.totalCount})`, `Search Results (${searchResults.totalCount})`, `搜索结果 (${searchResults.totalCount})`)}
               </h3>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => openAiAssistantWithQuery(globalSearchQuery, setIsWhatToEatModalOpen)}
@@ -392,7 +392,7 @@ export const HomeView: React.FC = () => {
               </button>
               <button
                 onClick={() => setGlobalSearchQuery('')}
-                className="text-xs text-rose-500 hover:text-rose-600 font-bold flex items-center gap-0.5"
+                className="text-xs text-rose-500 hover:text-rose-600 font-bold flex items-center gap-0.5 cursor-pointer"
               >
                 <span>{tr(language, 'បិទការស្វែងរក', 'Close', '关闭')}</span>
                 <X className="w-3.5 h-3.5" />
@@ -400,8 +400,8 @@ export const HomeView: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick Province Chips inside Home Search */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          {/* Quick Province Chips inside Home Search (wrapped so no chip is ever clipped on the right edge) */}
+          <div className="flex items-center gap-1.5 flex-wrap py-0.5">
             {homeProvinces.map((p) => {
               const cleanSel = (selectedProvince || '').replace(/^រាជធានី|^ខេត្ត/g, '').trim();
               const active = cleanSel === p.id || (!cleanSel && p.id === '');
@@ -424,7 +424,7 @@ export const HomeView: React.FC = () => {
 
           {/* Search Radius Controls (Near Me / GPS Distance Filter) */}
           <div className="flex items-center justify-between gap-2 flex-wrap pt-0.5">
-            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar text-[11px]">
+            <div className="flex items-center gap-1 flex-wrap text-[11px]">
               <span className="text-slate-500 dark:text-slate-400 font-bold shrink-0 mr-0.5">
                 {tr(language, 'ចម្ងាយ៖', 'Radius:', '距离：')}
               </span>
@@ -469,8 +469,8 @@ export const HomeView: React.FC = () => {
             </div>
           )}
 
-          {/* Result Filter Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs">
+          {/* Result Filter Tabs (wrapped so all categories remain 100% visible) */}
+          <div className="flex items-center gap-1.5 flex-wrap text-xs">
             <button
               onClick={() => setSearchTab('all')}
               className={`px-3 py-1 rounded-xl font-bold transition text-xs whitespace-nowrap cursor-pointer ${
@@ -636,11 +636,11 @@ export const HomeView: React.FC = () => {
                                   <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-bold">
                                     {tr(language, 'មុខម្ហូប', 'Dish', '菜品')}
                                   </span>
-                                  <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
+                                  <h4 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-2 break-words leading-[1.68] group-hover:text-emerald-600">
                                     {locF.name}
                                   </h4>
                                 </div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 break-words leading-[1.65] mt-0.5">
                                   {locF.description}
                                 </p>
                               </div>
@@ -680,11 +680,11 @@ export const HomeView: React.FC = () => {
                                   <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 text-[10px] font-bold">
                                     {tr(language, 'ហាងអាហារ', 'Restaurant', '餐厅')}
                                   </span>
-                                  <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
+                                  <h4 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-2 break-words leading-[1.68] group-hover:text-emerald-600">
                                     {locR.name}
                                   </h4>
                                 </div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 break-words leading-[1.65] mt-0.5">
                                   {locR.address} {rest.phone ? `• ${rest.phone}` : ''} {distKm ? `• ${distKm} km` : ''}
                                 </p>
                               </div>
@@ -745,11 +745,11 @@ export const HomeView: React.FC = () => {
                                   <span className="px-1.5 py-0.5 rounded-md bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300 text-[10px] font-bold">
                                     {tr(language, 'ទេសចរណ៍', 'Destination', '景点')}
                                   </span>
-                                  <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-emerald-600">
+                                  <h4 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-2 break-words leading-[1.68] group-hover:text-emerald-600">
                                     {locD.name}
                                   </h4>
                                 </div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 break-words leading-[1.65] mt-0.5">
                                   {locD.province} ({locD.category}) {distKm ? `• ${distKm} km` : ''}
                                 </p>
                               </div>
@@ -799,11 +799,11 @@ export const HomeView: React.FC = () => {
                                 <span className="px-1.5 py-0.5 rounded-md bg-blue-600 text-white text-[10px] font-bold shrink-0">
                                   Google Maps
                                 </span>
-                                <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-blue-600">
+                                <h4 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-2 break-words leading-[1.68] group-hover:text-blue-600">
                                   {extName}
                                 </h4>
                               </div>
-                              <p className="text-xs text-slate-600 dark:text-slate-300 truncate mt-0.5">
+                              <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 break-words leading-[1.65] mt-0.5">
                                 {extAddress} {distKm ? `• ${distKm} km` : ''}
                               </p>
                             </div>
