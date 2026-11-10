@@ -865,63 +865,59 @@ export const RestaurantView: React.FC = () => {
           </label>
         </div>
 
-        {/* Row 6: Add Your Shop Promotional Banner (Using Provided /welcome/shop-register-banner.png) */}
-        <div className="relative rounded-[24px] overflow-hidden shadow-md border border-emerald-700/25 bg-[#0A5C36]">
-          <div className="relative min-h-[124px] flex items-center">
-            <img
-              src="/welcome/shop-register-banner.png"
-              alt="Register Your Shop"
-              decoding="async"
-              className="absolute inset-0 w-full h-full object-cover object-left pointer-events-none"
-            />
-            {/* Decorative Red-Orange Location Pin Accent next to Storefront Roof */}
-            <span
-              className="pointer-events-none absolute left-[31%] top-5 w-6 h-6 rounded-full bg-gradient-to-b from-orange-400 to-red-600 border border-white/80 shadow-md flex items-center justify-center text-white"
-              aria-hidden="true"
-            >
-              <MapPin className="w-3.5 h-3.5 fill-white text-red-600" />
-            </span>
+        {/* Row 6: Add Your Shop Promotional Banner (Using New Gold-Bordered 3D /welcome/shop-register-banner.png) */}
+        <div className="space-y-2">
+          <div className="relative rounded-[20px] overflow-hidden shadow-[0_6px_18px_rgba(6,78,59,0.22)]">
+            <div className="relative min-h-[108px] sm:min-h-[114px] flex items-center">
+              <img
+                src="/welcome/shop-register-banner.png"
+                alt="Register Your Shop"
+                decoding="async"
+                className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none"
+              />
 
-            {/* Right-Side Heading, Description & Gold CTA Button */}
-            <div className="relative z-10 w-full pl-[38%] pr-3.5 py-3 space-y-2">
-              <div>
-                <h3
-                  className="font-extrabold text-base sm:text-[17px] text-white leading-tight"
-                  style={{ textShadow: '0 2px 4px rgba(0,0,0,0.35)' }}
+              {/* Right-Side Heading, Description & Gold CTA Button */}
+              <div className="relative z-10 w-full pl-[39%] pr-3.5 py-2.5 space-y-1.5">
+                <div>
+                  <h3
+                    className="font-khmer font-extrabold text-white leading-tight truncate"
+                    style={{ fontSize: '15px', textShadow: '0 2px 4px rgba(0,0,0,0.42)' }}
+                  >
+                    {tr(language, 'ចុះបញ្ជីហាងរបស់អ្នក', 'Register Your Shop', '入驻您的餐厅店铺')}
+                  </h3>
+                  <p
+                    className="font-khmer font-bold text-white/95 leading-snug mt-0.5 truncate"
+                    style={{ fontSize: '10.5px', textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}
+                  >
+                    {tr(
+                      language,
+                      'បង្ហាញហាងភោជនីយដ្ឋានរបស់អ្នកនៅលើកម្មវិធី',
+                      'Showcase your restaurant on the app',
+                      '在应用上展示您的餐厅与招牌菜'
+                    )}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddShopClick}
+                  style={{
+                    background: 'linear-gradient(180deg, #FDE047 0%, #FACC15 55%, #EAB308 100%)',
+                    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.75)',
+                    fontSize: '12px',
+                  }}
+                  className="w-full h-8.5 px-4 rounded-full border border-amber-200 text-slate-950 font-khmer font-extrabold inline-flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer"
                 >
-                  {tr(language, 'ចុះបញ្ជីហាងរបស់អ្នក', 'Register Your Shop', '入驻您的餐厅店铺')}
-                </h3>
-                <p
-                  className="text-[11px] sm:text-xs font-bold text-white/95 leading-snug mt-0.5"
-                  style={{ textShadow: '0 1px 3px rgba(0,0,0,0.35)' }}
-                >
-                  {tr(
-                    language,
-                    'បង្ហាញហាងភោជនីយដ្ឋានរបស់អ្នកនៅលើកម្មវិធី',
-                    'Showcase your restaurant on the app',
-                    '在应用上展示您的餐厅与招牌菜'
-                  )}
-                </p>
+                  <Plus className="w-4 h-4 stroke-[2.8] text-slate-950 shrink-0" />
+                  <span>{tr(language, 'បន្ថែមហាងថ្មី', 'Add New Shop', '添加新店铺')}</span>
+                </button>
               </div>
-
-              <button
-                type="button"
-                onClick={handleAddShopClick}
-                style={{
-                  background: 'linear-gradient(180deg, #FDE047 0%, #F59E0B 100%)',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.75)',
-                }}
-                className="w-full h-9 px-4 rounded-full border border-amber-200 text-slate-950 font-extrabold text-xs sm:text-[13px] inline-flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer"
-              >
-                <Plus className="w-4 h-4 stroke-[2.8] text-slate-950" />
-                <span>{tr(language, 'បន្ថែមហាងថ្មី', 'Add New Shop', '添加新店铺')}</span>
-              </button>
             </div>
           </div>
 
           {/* Admin / Existing Shop Owner Quick Actions */}
           {isAdmin ? (
-            <div className="relative z-10 px-3 pb-2.5 pt-2 bg-black/25 border-t border-white/15 grid grid-cols-2 gap-2">
+            <div className="relative z-10 p-2 rounded-2xl bg-[#0A5C36] border border-emerald-700/40 grid grid-cols-2 gap-2 shadow-xs">
               <button
                 type="button"
                 onClick={() => {
@@ -943,7 +939,7 @@ export const RestaurantView: React.FC = () => {
               </button>
             </div>
           ) : myExistingRest ? (
-            <div className="relative z-10 px-3 pb-2.5 pt-2 bg-black/25 border-t border-white/15 flex items-center justify-between gap-2">
+            <div className="relative z-10 px-3 py-2 rounded-2xl bg-[#0A5C36] border border-emerald-700/40 flex items-center justify-between gap-2 shadow-xs">
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 {myOwnedRestaurants.length > 1 ? (
                   <select

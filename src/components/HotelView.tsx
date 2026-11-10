@@ -872,100 +872,52 @@ export const HotelView: React.FC = () => {
         {/* =====================================================================
             HOTEL REGISTRATION BANNER (Matching Reference Image 1: 1-to-1)
             ===================================================================== */}
-        <div
-          style={{
-            background: 'linear-gradient(135deg, #06422A 0%, #0D5E3C 52%, #1A7A50 100%)',
-          }}
-          className="relative rounded-2xl p-3 sm:p-3.5 shadow-md overflow-hidden border border-emerald-700/60"
-        >
-          {/* Subtle light glow behind storefront */}
-          <div
-            className="pointer-events-none absolute -left-6 -bottom-6 w-36 h-36 rounded-full opacity-25"
-            style={{
-              background: 'radial-gradient(circle, rgba(253, 224, 71, 0.45) 0%, rgba(16, 185, 129, 0) 70%)',
-            }}
-          />
+        <div className="space-y-2">
+          <div className="relative rounded-[20px] overflow-hidden shadow-[0_6px_18px_rgba(6,78,59,0.22)]">
+            <div className="relative min-h-[108px] sm:min-h-[114px] flex items-center">
+              <img
+                src="/welcome/hotel-register-banner.png"
+                alt="Register Your Hotel or Guesthouse"
+                decoding="async"
+                className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none"
+              />
 
-          <div className="relative z-10 flex items-center gap-3">
-            {/* Left 3D Hotel / Storefront Illustration with Red/White Striped Awning & Plants */}
-            <div className="w-[104px] h-[86px] sm:w-[114px] sm:h-[92px] shrink-0 flex items-center justify-center select-none">
-              <svg viewBox="0 0 120 96" className="w-full h-full drop-shadow-md" fill="none">
-                {/* Ground Base Platform */}
-                <ellipse cx="60" cy="86" rx="52" ry="6" fill="#042F1E" fillOpacity="0.55" />
-                <rect x="18" y="79" width="84" height="5" rx="2.5" fill="#D6D3D1" />
-                {/* 3D Side Wall (Left Perspective) */}
-                <polygon points="24,30 34,22 34,79 24,79" fill="#D6C7B2" />
-                {/* Main Front Building Wall */}
-                <rect x="34" y="24" width="60" height="55" rx="2" fill="#F5EFE6" stroke="#D6C7B2" strokeWidth="1" />
-                {/* Roof Fascia Trim */}
-                <rect x="31" y="19" width="66" height="6" rx="2" fill="#E7DFD3" stroke="#C7B8A1" strokeWidth="1" />
-                {/* Warm Lit Interior Doorway */}
-                <rect x="41" y="44" width="19" height="35" rx="1.5" fill="#78350F" />
-                <rect x="43.5" y="46.5" width="14" height="30" rx="1" fill="#FDE68A" fillOpacity="0.85" />
-                <line x1="50.5" y1="46.5" x2="50.5" y2="76.5" stroke="#78350F" strokeWidth="1.5" />
-                {/* Warm Lit Display Window on Right */}
-                <rect x="65" y="44" width="22" height="22" rx="1.5" fill="#78350F" />
-                <rect x="67" y="46" width="18" height="18" rx="1" fill="#FEF08A" />
-                <line x1="76" y1="46" x2="76" y2="64" stroke="#78350F" strokeWidth="1.4" />
-                <line x1="67" y1="55" x2="85" y2="55" stroke="#78350F" strokeWidth="1.4" />
-                {/* Wooden Planter Box Under Window */}
-                <rect x="64" y="69" width="24" height="9" rx="1.5" fill="#B45309" stroke="#78350F" strokeWidth="1" />
-                {/* Red & White Striped 3D Awning */}
-                <polygon points="33,25 95,25 101,39 27,39" fill="#EF4444" />
-                <polygon points="33,25 41,25 38,39 27,39" fill="#DC2626" />
-                <polygon points="41,25 49,25 48,39 38,39" fill="#FFFFFF" />
-                <polygon points="49,25 57,25 58,39 48,39" fill="#EF4444" />
-                <polygon points="57,25 65,25 67,39 58,39" fill="#FFFFFF" />
-                <polygon points="65,25 73,25 76,39 67,39" fill="#EF4444" />
-                <polygon points="73,25 81,25 85,39 76,39" fill="#FFFFFF" />
-                <polygon points="81,25 89,25 93,39 85,39" fill="#EF4444" />
-                <polygon points="89,25 95,25 101,39 93,39" fill="#FFFFFF" />
-                {/* Scalloped Awning Valance */}
-                <path
-                  d="M27 39 Q32 44 37 39 Q42 44 47 39 Q52 44 57 39 Q62 44 67 39 Q72 44 77 39 Q82 44 87 39 Q92 44 97 39 L101 39 L27 39 Z"
-                  fill="#B91C1C"
-                />
-                {/* Left Potted Tropical Tree */}
-                <circle cx="19" cy="56" r="9" fill="#15803D" />
-                <circle cx="14" cy="62" r="7" fill="#22C55E" />
-                <circle cx="24" cy="61" r="7" fill="#16A34A" />
-                <rect x="17.5" y="65" width="3" height="8" fill="#78350F" />
-                <polygon points="13,72 25,72 23,80 15,80" fill="#D97706" />
-                {/* Right Potted Tropical Bush */}
-                <circle cx="101" cy="60" r="7.5" fill="#15803D" />
-                <circle cx="97" cy="65" r="5.5" fill="#22C55E" />
-                <circle cx="105" cy="65" r="5.5" fill="#16A34A" />
-                <polygon points="96,72 106,72 104.5,80 97.5,80" fill="#D97706" />
-              </svg>
-            </div>
+              {/* Right Headline, Supporting Text & Prominent Gold Rounded CTA Button */}
+              <div className="relative z-10 w-full pl-[41%] pr-3.5 py-2.5 space-y-1.5">
+                <div>
+                  <h3
+                    className="font-khmer font-extrabold text-white leading-tight truncate"
+                    style={{ fontSize: '14.5px', textShadow: '0 2px 4px rgba(0,0,0,0.42)' }}
+                  >
+                    {tr(language, 'ចុះបញ្ជីសណ្ឋាគារ ឬផ្ទះសំណាក់', 'Register Your Hotel or Guesthouse', '入驻您的酒店或客栈')}
+                  </h3>
+                  <p
+                    className="font-khmer font-bold text-white/95 leading-snug mt-0.5 truncate"
+                    style={{ fontSize: '10px', textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}
+                  >
+                    {tr(
+                      language,
+                      'បង្ហាញសណ្ឋាគារ ឬផ្ទះសំណាក់របស់អ្នកនៅខាងលើកម្មវិធី',
+                      'Showcase your hotel or guesthouse at the top of the app',
+                      '在应用顶部展示您的酒店或客栈'
+                    )}
+                  </p>
+                </div>
 
-            {/* Right Headline, Supporting Text & Prominent Yellow Rounded CTA Button */}
-            <div className="flex-1 min-w-0 space-y-1.5 text-center sm:text-left">
-              <div>
-                <h3 className="font-extrabold text-[15px] sm:text-base text-white font-khmer leading-tight">
-                  {tr(language, 'ចុះបញ្ជីសណ្ឋាគារ ឬផ្ទះសំណាក់', 'Register Your Hotel or Guesthouse', '入驻您的酒店或客栈')}
-                </h3>
-                <p className="text-[11px] font-medium text-emerald-50/95 font-khmer leading-snug mt-1">
-                  {tr(
-                    language,
-                    'បង្ហាញសណ្ឋាគារ ឬផ្ទះសំណាក់របស់អ្នកនៅខាងលើកម្មវិធី',
-                    'Showcase your hotel or guesthouse at the top of the app',
-                    '在应用顶部展示您的酒店或客栈'
-                  )}
-                </p>
+                <button
+                  type="button"
+                  onClick={handleAddHotelClick}
+                  style={{
+                    background: 'linear-gradient(180deg, #FDE047 0%, #FACC15 55%, #EAB308 100%)',
+                    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.75)',
+                    fontSize: '12px',
+                  }}
+                  className="w-full h-8.5 px-4 rounded-full border border-amber-200 text-slate-950 font-khmer font-extrabold inline-flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer"
+                >
+                  <Plus className="w-4 h-4 stroke-[2.8] text-slate-950 shrink-0" />
+                  <span>{tr(language, 'បន្ថែមសណ្ឋាគារ', 'Add Hotel', '添加酒店')}</span>
+                </button>
               </div>
-
-              <button
-                type="button"
-                onClick={handleAddHotelClick}
-                style={{
-                  background: 'linear-gradient(180deg, #FDE047 0%, #FACC15 55%, #EAB308 100%)',
-                }}
-                className="w-full h-9.5 px-4 rounded-full text-slate-950 font-extrabold text-xs sm:text-[13px] font-khmer inline-flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition cursor-pointer"
-              >
-                <Plus className="w-4 h-4 stroke-[2.6] text-slate-950 shrink-0" />
-                <span>{tr(language, 'បន្ថែមសណ្ឋាគារ', 'Add Hotel', '添加酒店')}</span>
-              </button>
             </div>
           </div>
 
@@ -985,7 +937,7 @@ export const HotelView: React.FC = () => {
 
           {/* Admin / Existing Owner Controls */}
           {isAdmin ? (
-            <div className="relative z-10 mt-2.5 pt-2 border-t border-white/15 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="relative z-10 p-2 rounded-2xl bg-[#0A5C36] border border-emerald-700/40 grid grid-cols-1 sm:grid-cols-2 gap-2 shadow-xs">
               <button
                 type="button"
                 onClick={() => {
@@ -1027,7 +979,7 @@ export const HotelView: React.FC = () => {
               </a>
             </div>
           ) : myExistingHotel ? (
-            <div className="relative z-10 mt-2.5 pt-2 border-t border-white/15 flex items-center justify-between gap-2">
+            <div className="relative z-10 px-3 py-2 rounded-2xl bg-[#0A5C36] border border-emerald-700/40 flex items-center justify-between gap-2 shadow-xs">
               <span className="min-w-0 flex-1 text-[11px] font-bold text-amber-200 truncate font-khmer">
                 {tr(
                   language,
