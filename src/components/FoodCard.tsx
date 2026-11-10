@@ -24,15 +24,18 @@ const FoodCardView = React.memo<FoodCardViewProps>(
     const loc = getLocalizedFood(food, language);
     const resolvedPhotoUrl = resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 400, food.id);
     const ratingVal = food.rating ?? 4.8;
-    const reviewCountVal = food.reviewCount && food.reviewCount > 0 ? food.reviewCount : 230;
+    const reviewCountVal = food.reviewCount && food.reviewCount > 0 ? food.reviewCount : 98;
 
     return (
       <div
         onClick={() => setSelectedFood(food)}
-        className="kft-cv-card bg-[#FCFBF8] rounded-2xl p-2.5 shadow-sm border border-slate-200/80 hover:border-emerald-600/40 hover:shadow-md transition-all cursor-pointer group flex items-center gap-3.5 font-khmer"
+        style={{
+          boxShadow: '0 4px 16px rgba(15, 23, 42, 0.06)',
+        }}
+        className="kft-cv-card bg-white rounded-[22px] p-2.5 border border-slate-200/80 hover:border-emerald-600/40 hover:shadow-md transition-all cursor-pointer group flex items-center gap-3.5 font-khmer"
       >
         {/* Left Dish Image Container */}
-        <div className="relative w-[142px] sm:w-[162px] h-[124px] sm:h-[134px] rounded-xl overflow-hidden bg-slate-200 shrink-0">
+        <div className="relative w-[138px] sm:w-[154px] h-[118px] sm:h-[128px] rounded-[16px] overflow-hidden bg-slate-200 shrink-0">
           <img
             src={resolvedPhotoUrl}
             onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
@@ -67,7 +70,7 @@ const FoodCardView = React.memo<FoodCardViewProps>(
             className={`absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full transition-transform active:scale-90 cursor-pointer ${
               bookmarked
                 ? 'bg-rose-500 text-white shadow-md'
-                : 'bg-black/60 hover:bg-black/75 text-white border border-white/25'
+                : 'bg-black/55 hover:bg-black/75 text-white border border-white/25'
             }`}
             aria-pressed={bookmarked}
             title={tr(language, 'រក្សាទុក', 'Save', '收藏')}
@@ -86,11 +89,11 @@ const FoodCardView = React.memo<FoodCardViewProps>(
         {/* Right Content Column */}
         <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
           <div>
-            <h3 className="font-khmer font-extrabold text-base sm:text-[17px] text-[#0F172A] group-hover:text-[#235D3A] transition leading-snug line-clamp-1">
+            <h3 className="font-khmer font-extrabold text-[15.5px] sm:text-[16.5px] text-[#0F172A] group-hover:text-[#1B5E3A] transition leading-snug line-clamp-1">
               {loc.name}
             </h3>
             {loc.description && (
-              <p className="text-xs text-slate-600 line-clamp-2 mt-1 leading-relaxed">
+              <p className="text-[12px] text-slate-600 line-clamp-2 mt-1 leading-relaxed">
                 {loc.description}
               </p>
             )}
@@ -106,7 +109,12 @@ const FoodCardView = React.memo<FoodCardViewProps>(
 
             {/* Dark Green Action Pill Button: [🍴 មើលលម្អិត >] */}
             <div>
-              <span className="inline-flex items-center justify-between gap-2 px-3.5 py-1.5 rounded-full bg-[#235D3A] group-hover:bg-[#1B4B2E] text-white text-xs font-bold shadow-2xs transition">
+              <span
+                style={{
+                  background: 'linear-gradient(180deg, #2E7D52 0%, #1B5E3A 100%)',
+                }}
+                className="inline-flex items-center justify-between gap-2 px-3.5 py-1.5 rounded-full text-white text-xs font-bold shadow-2xs transition"
+              >
                 <span className="inline-flex items-center gap-1.5">
                   <Utensils className="w-3.5 h-3.5 text-amber-300 shrink-0" />
                   <span>{tr(language, 'មើលលម្អិត', 'View Details', '查看详情')}</span>

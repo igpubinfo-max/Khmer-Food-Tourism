@@ -41,6 +41,7 @@ import {
   advanceVideoRotationCycle,
   getCurrentVideoRotationCycle,
   rotateLatestVideosForScope,
+  deduplicateSingleVideoList,
   OnlineFoodDiscoveryItem,
   resolveOriginalSocialAccountUrl,
 } from '../services/onlineFoodDiscoveryService';
@@ -276,7 +277,7 @@ export const TrendingSocialModal: React.FC = () => {
       }
       setHasError(false);
       try {
-        const nextCycle = force || isAutoCycle ? advanceVideoRotationCycle() : getCurrentVideoRotationCycle();
+        const nextCycle = advanceVideoRotationCycle();
         setRotationCycle(nextCycle);
 
         const res = await searchAndDiscoverSocialFood({
@@ -485,20 +486,22 @@ export const TrendingSocialModal: React.FC = () => {
     // If user typed a keyword while on a specific category tab and the matching video is in another category tab,
     // return the matching videos across categories (still strictly matching the searchQuery and provinceFilter!)
     if (strictMatches.length === 0 && debouncedSearchQuery.trim() && categoryFilter !== 'all') {
-      return discoveryItems.filter(
-        (item) => matchesProvince(item) && matchesExpandedYouTubeQuery(item, debouncedSearchQuery)
+      return deduplicateSingleVideoList(
+        discoveryItems.filter(
+          (item) => matchesProvince(item) && matchesExpandedYouTubeQuery(item, debouncedSearchQuery)
+        )
       );
     }
 
     if (!debouncedSearchQuery.trim() && strictMatches.length > 1) {
       return rotateLatestVideosForScope(
         strictMatches,
-        `${categoryFilter}|${provinceFilter}`,
+        `${platformFilter}|${categoryFilter}|${provinceFilter}`,
         rotationCycle
       );
     }
 
-    return strictMatches;
+    return deduplicateSingleVideoList(strictMatches);
   }, [discoveryItems, platformFilter, categoryFilter, provinceFilter, debouncedSearchQuery, rotationCycle]);
 
   useEffect(() => {

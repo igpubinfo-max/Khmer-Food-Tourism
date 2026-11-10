@@ -127,9 +127,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
           restaurant.pendingPhotoReplacement?.newPhotoUrl ||
           ''
       );
-      if (sanitized) return sanitized;
-      const idx = computeDeterministicHash(String(restaurant.id || 'shop')) % FALLBACK_SHOP_PHOTOS.length;
-      return FALLBACK_SHOP_PHOTOS[idx];
+      return sanitized;
     }, [
       restaurant.id,
       restaurant.photoUrl,

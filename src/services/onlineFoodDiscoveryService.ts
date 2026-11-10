@@ -1526,25 +1526,47 @@ interface VideoRotationState {
   cycle: number;
   lastRotatedAtMs: number;
   lastTopByScope: Record<string, string>;
+  recentTopIdsByScope?: Record<string, string[]>;
 }
+
+function generateRandomCycleSeed(prevCycle = 0): number {
+  let rand = Math.floor(Math.random() * 1_000_000_000) + 1;
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+      const buf = new Uint32Array(1);
+      crypto.getRandomValues(buf);
+      rand = (buf[0] % 1_000_000_000) + 1;
+    }
+  } catch {
+    // fallback to Math.random
+  }
+  if (rand === prevCycle) {
+    rand = (rand + 97531) % 1_000_000_000 + 1;
+  }
+  return rand;
+}
+
+let sessionInitialCycleAdvanced = false;
 
 function readVideoRotationState(): VideoRotationState {
   try {
     if (typeof localStorage === 'undefined') {
-      return { cycle: 1, lastRotatedAtMs: Date.now(), lastTopByScope: {} };
+      return { cycle: generateRandomCycleSeed(), lastRotatedAtMs: Date.now(), lastTopByScope: {}, recentTopIdsByScope: {} };
     }
     const raw = localStorage.getItem(VIDEO_ROTATION_STATE_KEY);
     if (!raw) {
-      return { cycle: 1, lastRotatedAtMs: Date.now(), lastTopByScope: {} };
+      return { cycle: generateRandomCycleSeed(), lastRotatedAtMs: Date.now(), lastTopByScope: {}, recentTopIdsByScope: {} };
     }
     const parsed = JSON.parse(raw);
     return {
-      cycle: typeof parsed?.cycle === 'number' && Number.isFinite(parsed.cycle) ? parsed.cycle : 1,
+      cycle: typeof parsed?.cycle === 'number' && Number.isFinite(parsed.cycle) ? parsed.cycle : generateRandomCycleSeed(),
       lastRotatedAtMs: typeof parsed?.lastRotatedAtMs === 'number' ? parsed.lastRotatedAtMs : Date.now(),
       lastTopByScope: parsed?.lastTopByScope && typeof parsed.lastTopByScope === 'object' ? parsed.lastTopByScope : {},
+      recentTopIdsByScope:
+        parsed?.recentTopIdsByScope && typeof parsed.recentTopIdsByScope === 'object' ? parsed.recentTopIdsByScope : {},
     };
   } catch {
-    return { cycle: 1, lastRotatedAtMs: Date.now(), lastTopByScope: {} };
+    return { cycle: generateRandomCycleSeed(), lastRotatedAtMs: Date.now(), lastTopByScope: {}, recentTopIdsByScope: {} };
   }
 }
 
@@ -1559,12 +1581,13 @@ function writeVideoRotationState(state: VideoRotationState): void {
 }
 
 /**
- * Advances the video rotation cycle (called every 60 seconds and on refresh/open)
- * so the same video never stays pinned at the top indefinitely.
+ * Advances the video rotation cycle with a fresh random seed (called on every app open, modal open, and refresh)
+ * so the user always sees a new random order and never sees the same videos repeated from previous opens.
  */
 export function advanceVideoRotationCycle(): number {
   const state = readVideoRotationState();
-  const nextCycle = (state.cycle || 0) + 1;
+  const nextCycle = generateRandomCycleSeed(state.cycle || 0);
+  sessionInitialCycleAdvanced = true;
   writeVideoRotationState({
     ...state,
     cycle: nextCycle,
@@ -1574,43 +1597,123 @@ export function advanceVideoRotationCycle(): number {
 }
 
 export function getCurrentVideoRotationCycle(): number {
+  // Always advance on the very first call of a fresh app open so reopening the app shows new random videos
+  if (!sessionInitialCycleAdvanced) {
+    return advanceVideoRotationCycle();
+  }
   const state = readVideoRotationState();
-  // Auto-advance if 60+ seconds have elapsed since the last rotation
   if (Date.now() - state.lastRotatedAtMs >= VIDEO_AUTO_REFRESH_INTERVAL_MS) {
     return advanceVideoRotationCycle();
   }
   return state.cycle || 1;
 }
 
+/** Strict single-list deduplication by item ID, playable video ID, normalized URL, and normalized title */
+export function deduplicateSingleVideoList(items: OnlineFoodDiscoveryItem[]): OnlineFoodDiscoveryItem[] {
+  const seenItemIds = new Set<string>();
+  const seenPlayableIds = new Set<string>();
+  const seenNormTitles = new Set<string>();
+  const out: OnlineFoodDiscoveryItem[] = [];
+
+  for (const item of items) {
+    if (!item) continue;
+    const itemId = (item.id || '').trim();
+    if (itemId && seenItemIds.has(itemId)) continue;
+
+    const playableVid = (
+      item.inlineVideoId ||
+      extractYouTubeVideoId(item.sourceUrl || '') ||
+      resolveInlineVideoIdForSocialItem(item)
+    ).trim();
+
+    if (playableVid && seenPlayableIds.has(playableVid)) continue;
+
+    const normTitle = `${(item.titleKh || '').trim().toLowerCase()}|${(item.titleEn || '').trim().toLowerCase()}`;
+    if (normTitle !== '|' && seenNormTitles.has(normTitle)) continue;
+
+    if (itemId) seenItemIds.add(itemId);
+    if (playableVid) seenPlayableIds.add(playableVid);
+    if (normTitle !== '|') seenNormTitles.add(normTitle);
+    out.push(item);
+  }
+  return out;
+}
+
 /**
- * Rotates the top/latest video tier so:
- * 1. The latest videos always appear first in the top tier.
- * 2. Every 60-second cycle rotates which latest video appears at #1.
- * 3. The previously pinned #1 video for this scope is guaranteed not to stay stuck at #1.
+ * Truly randomizes and rotates verified TikTok, Facebook, and YouTube videos on every app open or refresh:
+ * 1. Strictly deduplicates the list so no duplicate video, stream ID, or title ever appears in the same list.
+ * 2. Uses a seeded Fisher-Yates shuffle tied to the active random cycle so all verified videos rotate randomly.
+ * 3. Tracks the previously shown top videos per scope in localStorage and pushes them out of the top slots on the next open/refresh so the user never sees the same top videos repeated from previous opens.
  */
 export function rotateLatestVideosForScope(
   items: OnlineFoodDiscoveryItem[],
-  _scopeKey = 'all|all',
+  scopeKey = 'all|all',
   explicitCycle?: number
 ): OnlineFoodDiscoveryItem[] {
-  if (!Array.isArray(items) || items.length <= 1) return items;
+  const uniqueItems = deduplicateSingleVideoList(Array.isArray(items) ? items : []);
+  if (uniqueItems.length <= 1) return uniqueItems;
 
   const state = readVideoRotationState();
   const activeCycle = typeof explicitCycle === 'number' ? explicitCycle : state.cycle || 1;
 
-  // Keep the latest videos in the top rotation window (up to 12 newest items, or all if <= 12)
-  const windowSize = Math.min(items.length, Math.max(4, Math.min(12, items.length)));
-  const topLatestPool = items.slice(0, windowSize);
-  const olderRemainder = items.slice(windowSize);
+  // Deterministic PRNG seeded by activeCycle + scopeKey so React renders stay stable within the same cycle
+  let scopeHash = 2166136261;
+  for (let i = 0; i < scopeKey.length; i++) {
+    scopeHash ^= scopeKey.charCodeAt(i);
+    scopeHash = Math.imul(scopeHash, 16777619);
+  }
+  let seed = ((activeCycle ^ scopeHash) >>> 0) || 123456789;
+  const nextRand = (): number => {
+    seed = (seed + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 
-  const offset = ((activeCycle % topLatestPool.length) + topLatestPool.length) % topLatestPool.length;
+  // Fisher-Yates shuffle across the entire verified list
+  const shuffled = [...uniqueItems];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(nextRand() * (i + 1));
+    const tmp = shuffled[i];
+    shuffled[i] = shuffled[j];
+    shuffled[j] = tmp;
+  }
 
-  const rotatedTop = [
-    ...topLatestPool.slice(offset),
-    ...topLatestPool.slice(0, offset),
-  ];
+  // Push videos that appeared at the top in the previous cycle to the back so every open/refresh feels completely fresh
+  const prevCycleKey = `${scopeKey}__cycle`;
+  const prevRecordedCycle = Number(state.lastTopByScope?.[prevCycleKey] || 0);
+  const recentMap = state.recentTopIdsByScope || {};
+  const prevTopIds = new Set<string>(Array.isArray(recentMap[scopeKey]) ? recentMap[scopeKey] : []);
 
-  return [...rotatedTop, ...olderRemainder];
+  let finalOrder = shuffled;
+  if (prevTopIds.size > 0 && shuffled.length > prevTopIds.size) {
+    const freshFirst = shuffled.filter((it) => !prevTopIds.has(it.id));
+    const previouslyShown = shuffled.filter((it) => prevTopIds.has(it.id));
+    if (freshFirst.length > 0) {
+      finalOrder = [...freshFirst, ...previouslyShown];
+    }
+  }
+
+  // Record the new top IDs when a new cycle is active
+  if (prevRecordedCycle !== activeCycle) {
+    const memoryCount = Math.min(6, Math.max(1, Math.floor(finalOrder.length / 2)));
+    const newTopIds = finalOrder.slice(0, memoryCount).map((it) => it.id);
+    writeVideoRotationState({
+      ...state,
+      cycle: activeCycle,
+      lastTopByScope: {
+        ...(state.lastTopByScope || {}),
+        [scopeKey]: finalOrder[0]?.id || '',
+        [prevCycleKey]: String(activeCycle),
+      },
+      recentTopIdsByScope: {
+        ...recentMap,
+        [scopeKey]: newTopIds,
+      },
+    });
+  }
+
+  return finalOrder;
 }
 
 function detectProvinceFromVideoText(text: string): { provinceKh: string; provinceEn: string } {
