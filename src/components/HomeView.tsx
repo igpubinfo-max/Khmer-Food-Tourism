@@ -357,7 +357,7 @@ export const HomeView: React.FC = () => {
       />
 
       {/* Rounded White/Cream Sheet Body */}
-      <div className="relative z-10 -mt-5 rounded-t-[26px] bg-[#FBF9F5] px-3.5 pt-4 pb-6 space-y-3 shadow-[0_-6px_20px_rgba(0,0,0,0.14)]">
+      <div className="relative z-10 -mt-4 rounded-t-[28px] bg-[#F2F4F7] px-3.5 pt-3.5 pb-6 space-y-3.5 shadow-[0_-6px_22px_rgba(0,0,0,0.16)]">
 
       {/* 2. Global Live Search Results Dropdown/Panel */}
       {searchResults && (

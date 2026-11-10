@@ -561,12 +561,19 @@ export const HotelView: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F3F5F3] text-slate-900 pb-10">
       {/* =====================================================================
-          HERO HEADER — Angkor Wat Sunrise + Top Brand Bar + Deep Emerald Title Card
+          1. TOP EMERALD & ANGKOR WAT HERO HEADER (Matching OK.jpg / Reference Top Design)
           ===================================================================== */}
-      <div className="relative overflow-hidden bg-[#064E3B] pb-6 pt-3 px-3.5">
+      <div
+        className="relative w-full overflow-hidden pt-2.5 pb-6 px-3.5 select-none max-w-md mx-auto"
+        style={{
+          background: 'linear-gradient(135deg, #063822 0%, #0A4D31 48%, #12613E 100%)',
+          paddingTop: 'calc(var(--kft-safe-top, 0px) + 10px)',
+        }}
+      >
+        {/* Right-side Angkor Wat Temple & Palm Trees Photo Backdrop */}
         <img
           src="/welcome/angkor-lotus-hero.png"
-          alt="Angkor Wat Sunrise"
+          alt="Angkor Wat Cambodia"
           decoding="async"
           onError={(e) => {
             const img = e.currentTarget as HTMLImageElement;
@@ -575,119 +582,198 @@ export const HotelView: React.FC = () => {
               img.src = '/welcome/angkor-sunrise-hero.png';
             }
           }}
-          className="absolute inset-0 w-full h-full object-cover object-top"
+          className="absolute right-0 top-0 h-full w-[66%] object-cover object-top opacity-80 pointer-events-none"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-[#063824]/45 to-[#063824]/85" />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'linear-gradient(90deg, #073D26 0%, #09482E 38%, rgba(11,79,51,0.62) 66%, rgba(8,61,38,0.28) 100%)',
+          }}
+        />
 
-        <div className="relative z-10 max-w-md mx-auto space-y-3">
-          {/* Top App Brand Bar */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-11 h-11 rounded-xl border-2 border-[#D4AF37] overflow-hidden bg-[#064E3B] shadow-md shrink-0">
-                <img
-                  src="/app-logo-v200.png"
-                  alt="Cambodia Flavors & Tourism"
-                  onError={(e) => {
-                    const img = e.currentTarget as HTMLImageElement;
-                    if (!img.dataset.fallback) {
-                      img.dataset.fallback = '1';
-                      img.src = '/app-icon.png';
-                    }
-                  }}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-white font-extrabold text-[15px] sm:text-base font-khmer leading-tight truncate drop-shadow-xs">
-                  រសជាតិ និងទេសចរណ៍កម្ពុជា
-                </h1>
-                <p className="text-white/95 text-[11px] font-semibold tracking-tight truncate drop-shadow-xs">
-                  Cambodia Flavors &amp; Tourism
-                </p>
-              </div>
+        {/* Row 1: Gold-Framed App Logo + Brand Title + Right Notification & Profile Icons */}
+        <div className="relative z-10 flex items-center justify-between gap-2">
+          <div
+            onClick={() => setActiveTab('home')}
+            className="flex items-center gap-2.5 min-w-0 cursor-pointer"
+          >
+            <div className="w-11 h-11 rounded-xl p-[2px] bg-gradient-to-b from-[#FDE047] via-[#D4AF37] to-[#9A6F1A] shadow-md shrink-0">
+              <img
+                src="/app-logo-v200.png"
+                alt="Cambodia Flavors & Tourism"
+                onError={(e) => {
+                  const img = e.currentTarget as HTMLImageElement;
+                  if (!img.dataset.fallback) {
+                    img.dataset.fallback = '1';
+                    img.src = '/app-icon.png';
+                  }
+                }}
+                className="w-full h-full rounded-[9px] object-cover bg-[#064E3B]"
+              />
             </div>
-
-            {/* Right Controls: Notification Bell + Language Pill + More Button */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                type="button"
-                onClick={() => setIsNotificationsModalOpen(true)}
-                className="relative w-9 h-9 rounded-full bg-[#0B5B3E]/90 hover:bg-[#0B5B3E] border border-white/30 text-white flex items-center justify-center shadow-sm cursor-pointer active:scale-95 transition-transform"
-                title={tr(language, 'ការជូនដំណឹង', 'Notifications', '通知')}
+            <div className="min-w-0">
+              <h1
+                className="font-moul text-[13.5px] sm:text-sm text-white leading-tight truncate"
+                style={{ textShadow: '0 1px 4px rgba(0,0,0,0.45)' }}
               >
-                <Bell className="w-4 h-4" strokeWidth={2.2} />
-                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-extrabold flex items-center justify-center border border-white">
-                  {unreadNotificationsCount > 0 ? unreadNotificationsCount : 7}
-                </span>
-              </button>
-
-              <div className="h-8 px-2.5 rounded-full bg-[#0B5B3E]/90 border border-white/30 flex items-center gap-1 text-[10.5px] font-extrabold shadow-sm">
-                <button
-                  type="button"
-                  onClick={() => setLanguage('km')}
-                  className={`cursor-pointer transition-colors font-khmer ${
-                    language === 'km' ? 'text-[#FDE047]' : 'text-white/85 hover:text-white'
-                  }`}
-                >
-                  ខ្មែរ
-                </button>
-                <span className="text-white/40">/</span>
-                <button
-                  type="button"
-                  onClick={() => setLanguage('en')}
-                  className={`cursor-pointer transition-colors ${
-                    language === 'en' ? 'text-[#FDE047]' : 'text-white/85 hover:text-white'
-                  }`}
-                >
-                  EN
-                </button>
-                <span className="text-white/40">/</span>
-                <button
-                  type="button"
-                  onClick={() => setLanguage('zh')}
-                  className={`cursor-pointer transition-colors ${
-                    language === 'zh' ? 'text-[#FDE047]' : 'text-white/85 hover:text-white'
-                  }`}
-                >
-                  中文
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('profile')}
-                className="w-9 h-9 rounded-full bg-[#0B5B3E]/90 hover:bg-[#0B5B3E] border border-white/30 text-white flex items-center justify-center shadow-sm cursor-pointer active:scale-95 transition-transform"
-                title={tr(language, 'គណនី', 'Profile', '个人中心')}
+                {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨美食与旅游')}
+              </h1>
+              <p
+                className="text-[11px] font-bold text-white/95 truncate"
+                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.45)' }}
               >
-                <MoreVertical className="w-4 h-4" strokeWidth={2.2} />
-              </button>
-            </div>
-          </div>
-
-          {/* Overlaid Deep Emerald Title Card */}
-          <div className="rounded-2xl bg-gradient-to-r from-[#06422B]/95 via-[#0B5B3E]/95 to-[#0E6947]/95 border border-emerald-300/35 px-3.5 py-2.5 flex items-center gap-3 shadow-lg backdrop-blur-xs">
-            <div className="w-11 h-11 rounded-full bg-white/10 border border-white/35 flex items-center justify-center shrink-0 text-white">
-              <BedDouble className="w-5 h-5" strokeWidth={2.2} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="text-white font-extrabold text-[15px] sm:text-base font-khmer leading-tight truncate">
-                {tr(
-                  language,
-                  'សណ្ឋាគារ & ផ្ទះស្នាក់នៅ (Hotels & Stays)',
-                  'Hotels & Stays in Cambodia',
-                  '柬埔寨酒店与客栈 (Hotels & Stays)'
-                )}
-              </h2>
-              <p className="text-emerald-100/95 text-[11px] font-khmer mt-0.5 truncate">
-                {tr(
-                  language,
-                  'ស្វែងរកសណ្ឋាគារ ផ្ទះស្នាក់នៅ និងរីសតនៅទូទាំង ២៥ ខេត្ត-ក្រុង',
-                  'Search hotels, guesthouses & resorts across 25 provinces',
-                  '搜索柬埔寨 25 个省市的酒店、客栈与度假村'
-                )}
+                Cambodia Flavors &amp; Tourism
               </p>
             </div>
           </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Notification Bell Button with Red Dot Badge */}
+            <button
+              type="button"
+              onClick={() => setIsNotificationsModalOpen(true)}
+              aria-label={tr(language, 'ការជូនដំណឹង', 'Notifications', '通知')}
+              className="relative w-9 h-9 rounded-full bg-[#135E3B]/85 hover:bg-[#135E3B] border border-white/30 text-white flex items-center justify-center backdrop-blur-xs active:scale-95 transition cursor-pointer shadow-xs"
+            >
+              <Bell className="w-4 h-4 text-white" strokeWidth={2.2} />
+              <span className="absolute top-1 right-1.5 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-[#0C5536]" />
+            </button>
+
+            {/* Profile / Account Button (Clean White User Silhouette matching OK.jpg) */}
+            <button
+              type="button"
+              onClick={() => {
+                if (currentUser) {
+                  setActiveTab('profile');
+                } else {
+                  setIsAuthModalOpen(true);
+                }
+              }}
+              aria-label={tr(language, 'គណនី', 'Account', '账户')}
+              className="w-9 h-9 rounded-full bg-[#135E3B]/85 hover:bg-[#135E3B] border border-white/30 text-white flex items-center justify-center overflow-hidden backdrop-blur-xs active:scale-95 transition cursor-pointer shadow-xs"
+            >
+              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <circle cx="12" cy="9" r="3.6" />
+                <path d="M5.5 19.2c1.2-3.1 3.6-4.7 6.5-4.7s5.3 1.6 6.5 4.7a7.8 7.8 0 0 1-13 0z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Row 2: Hotel Icon + Page Heading directly on the Emerald-to-Angkor Hero Backdrop */}
+        <div className="relative z-10 mt-3.5 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <svg
+              className="w-9 h-9 text-white shrink-0 drop-shadow-xs"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M2 4v16" />
+              <path d="M2 8h18a2 2 0 0 1 2 2v10" />
+              <path d="M2 17h20" />
+              <path d="M6 8v9" />
+            </svg>
+            <div className="min-w-0">
+              <h2
+                className="font-extrabold text-[17px] sm:text-[18px] text-white leading-tight truncate font-khmer"
+                style={{ textShadow: '0 1px 4px rgba(0,0,0,0.45)' }}
+              >
+                {tr(
+                  language,
+                  'សណ្ឋាគារ និងផ្ទះស្នាក់នៅ',
+                  'Hotels & Stays in Cambodia',
+                  '柬埔寨酒店与客栈'
+                )}
+              </h2>
+              <p
+                className="text-xs font-semibold text-emerald-50/95 truncate"
+                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}
+              >
+                Hotels &amp; Stays
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 3: White Pill Search Input + Green "នៅជិតខ្ញុំ" Near Me Pill Button */}
+        <div className="relative z-10 mt-3 flex items-center gap-2">
+          <div className="flex-1 min-w-0 h-11 rounded-full bg-white shadow-md flex items-center pl-3.5 pr-2.5 gap-2 border border-white">
+            <Search className="w-5 h-5 text-slate-800 shrink-0" strokeWidth={2.3} />
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={hotelSearchQuery}
+              onChange={(e) => setHotelSearchQuery(e.target.value)}
+              placeholder={tr(
+                language,
+                'ស្វែងរកសណ្ឋាគារ, ផ្ទះស្នាក់នៅ, ទីតាំង...',
+                'Search hotels, guesthouses, locations...',
+                '搜索酒店、客栈、位置...'
+              )}
+              className="flex-1 min-w-0 bg-transparent text-xs sm:text-[13px] font-bold text-slate-900 placeholder-slate-400 focus:outline-none truncate font-khmer"
+            />
+            {hotelSearchQuery.trim() ? (
+              <button
+                type="button"
+                onClick={() => setHotelSearchQuery('')}
+                className="p-1 text-slate-400 hover:text-slate-700 shrink-0 cursor-pointer"
+                title={tr(language, 'សម្អាត', 'Clear', '清除')}
+              >
+                <X className="w-4 h-4" strokeWidth={2.2} />
+              </button>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => searchInputRef.current?.focus()}
+              className="p-1 text-[#0E6442] hover:text-[#08422A] shrink-0 cursor-pointer"
+              title={tr(language, 'ស្វែងរកដោយសំឡេង', 'Voice Search', '语音搜索')}
+            >
+              <Mic className="w-4 h-4" strokeWidth={2.2} />
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof navigator !== 'undefined' && navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                  (pos) => {
+                    setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+                    showToast(
+                      tr(
+                        language,
+                        '📍 បង្ហាញសណ្ឋាគារនៅជិតទីតាំងរបស់អ្នក!',
+                        '📍 Showing hotels near your location!',
+                        '📍 显示您附近的酒店！'
+                      ),
+                      'success'
+                    );
+                  },
+                  () => {
+                    showToast(
+                      tr(
+                        language,
+                        '📍 បង្ហាញសណ្ឋាគារពេញនិយមនៅជិតអ្នក',
+                        '📍 Showing popular hotels near you',
+                        '📍 显示您附近的热门酒店'
+                      ),
+                      'info'
+                    );
+                  }
+                );
+              }
+            }}
+            className="h-11 px-3.5 rounded-full font-extrabold text-xs inline-flex items-center gap-1.5 shrink-0 shadow-md border-[1.5px] bg-[#135E3B] hover:bg-[#0F4D30] text-white border-emerald-300/70 transition active:scale-95 cursor-pointer font-khmer"
+          >
+            <MapPin className="w-4 h-4 shrink-0 text-white fill-white/20" strokeWidth={2.2} />
+            <span>{tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近')}</span>
+          </button>
         </div>
       </div>
 
@@ -695,42 +781,6 @@ export const HotelView: React.FC = () => {
           MAIN LIGHT ROUNDED SHEET
           ===================================================================== */}
       <div className="relative z-10 -mt-3 rounded-t-[24px] bg-[#F3F5F3] px-3.5 pt-3.5 space-y-3 max-w-md mx-auto">
-        {/* White Pill Search Bar */}
-        <div className="h-11 rounded-full bg-white border border-slate-200/90 pl-3.5 pr-1.5 flex items-center gap-2 shadow-xs">
-          <Search className="w-5 h-5 text-[#0B5B3E] shrink-0" strokeWidth={2.3} />
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={hotelSearchQuery}
-            onChange={(e) => setHotelSearchQuery(e.target.value)}
-            placeholder={tr(
-              language,
-              'ស្វែងរកសណ្ឋាគារ, ផ្ទះស្នាក់នៅ, ទីតាំង...',
-              'Search hotels, guesthouses, locations...',
-              '搜索酒店、客栈、位置...'
-            )}
-            className="w-full bg-transparent text-[13px] font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none font-khmer"
-          />
-          {hotelSearchQuery.trim() && (
-            <button
-              type="button"
-              onClick={() => setHotelSearchQuery('')}
-              className="w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center shrink-0 cursor-pointer"
-              title={tr(language, 'សម្អាត', 'Clear', '清除')}
-            >
-              <X className="w-3.5 h-3.5" strokeWidth={2.2} />
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => searchInputRef.current?.focus()}
-            className="w-8 h-8 rounded-full bg-[#E8F3EE] hover:bg-[#D5EAE0] text-[#0B5B3E] flex items-center justify-center shrink-0 cursor-pointer transition-colors"
-            title={tr(language, 'ស្វែងរកដោយសំឡេង', 'Voice Search', '语音搜索')}
-          >
-            <Mic className="w-4 h-4" strokeWidth={2.2} />
-          </button>
-        </div>
-
         {/* 5 Category Filter Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
           {hotelCategoryPills.map((pill) => {
@@ -819,125 +869,114 @@ export const HotelView: React.FC = () => {
         </label>
 
         {/* =====================================================================
-            GOLD-BORDERED EMERALD "សមាជិក VIP" PROMO CARD
+            HOTEL REGISTRATION BANNER (Matching Reference Image 1: 1-to-1)
             ===================================================================== */}
-        <div className="relative rounded-2xl bg-gradient-to-br from-[#063824] via-[#0B4F35] to-[#176341] border-2 border-[#D4AF37] p-3.5 shadow-md overflow-hidden space-y-2.5">
-          {/* Decorative Golden Hotel SVG Illustration in Bottom-Right */}
-          <div className="absolute right-1.5 bottom-1 pointer-events-none opacity-95 select-none">
-            <svg width="68" height="62" viewBox="0 0 88 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Palm Fronds Behind Building */}
-              <path d="M18 68C8 56 4 46 6 38C12 42 18 50 22 64" stroke="#2E7D32" strokeWidth="3" strokeLinecap="round" />
-              <path d="M72 68C80 56 84 46 82 38C76 42 70 50 66 64" stroke="#2E7D32" strokeWidth="3" strokeLinecap="round" />
-              {/* Main 3D Gold Hotel Tower */}
-              <rect x="24" y="16" width="34" height="54" rx="3" fill="url(#goldGradMain)" stroke="#FDE047" strokeWidth="1.5" />
-              <path d="M58 20L70 26V70H58V20Z" fill="url(#goldGradSide)" stroke="#CA8A04" strokeWidth="1.2" />
-              {/* Roof Crown */}
-              <rect x="28" y="11" width="26" height="5" rx="1.5" fill="#FDE047" />
-              {/* Hotel Windows Grid */}
-              <rect x="30" y="23" width="6" height="6" rx="1" fill="#063824" />
-              <rect x="39" y="23" width="6" height="6" rx="1" fill="#063824" />
-              <rect x="48" y="23" width="5" height="6" rx="1" fill="#063824" />
-              <rect x="30" y="33" width="6" height="6" rx="1" fill="#063824" />
-              <rect x="39" y="33" width="6" height="6" rx="1" fill="#063824" />
-              <rect x="48" y="33" width="5" height="6" rx="1" fill="#063824" />
-              <rect x="30" y="43" width="6" height="6" rx="1" fill="#063824" />
-              <rect x="39" y="43" width="6" height="6" rx="1" fill="#063824" />
-              <rect x="48" y="43" width="5" height="6" rx="1" fill="#063824" />
-              <rect x="36" y="55" width="11" height="15" rx="1.5" fill="#063824" />
-              <line x1="14" y1="70" x2="76" y2="70" stroke="#FDE047" strokeWidth="2" strokeLinecap="round" />
-              <defs>
-                <linearGradient id="goldGradMain" x1="24" y1="16" x2="58" y2="70" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#FDE047" />
-                  <stop offset="0.5" stopColor="#F59E0B" />
-                  <stop offset="1" stopColor="#B45309" />
-                </linearGradient>
-                <linearGradient id="goldGradSide" x1="58" y1="20" x2="70" y2="70" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#D97706" />
-                  <stop offset="1" stopColor="#78350F" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
+        <div
+          style={{
+            background: 'linear-gradient(135deg, #06422A 0%, #0D5E3C 52%, #1A7A50 100%)',
+          }}
+          className="relative rounded-2xl p-3 sm:p-3.5 shadow-md overflow-hidden border border-emerald-700/60"
+        >
+          {/* Subtle light glow behind storefront */}
+          <div
+            className="pointer-events-none absolute -left-6 -bottom-6 w-36 h-36 rounded-full opacity-25"
+            style={{
+              background: 'radial-gradient(circle, rgba(253, 224, 71, 0.45) 0%, rgba(16, 185, 129, 0) 70%)',
+            }}
+          />
 
-          {/* Top Row: Crown Icon + VIP Title + Gold Detail Button */}
-          <div className="relative z-10 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-11 h-11 rounded-full bg-[#04281A] border-[1.5px] border-[#FDE047] flex items-center justify-center shrink-0 shadow-inner">
-                <Crown className="w-5 h-5 text-[#FDE047] fill-[#FDE047]" strokeWidth={2} />
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-[15px] font-extrabold text-[#FDE047] font-khmer leading-tight">
-                  {tr(language, 'សមាជិក VIP', 'VIP Membership', 'VIP 会员专属')}
+          <div className="relative z-10 flex items-center gap-3">
+            {/* Left 3D Hotel / Storefront Illustration with Red/White Striped Awning & Plants */}
+            <div className="w-[104px] h-[86px] sm:w-[114px] sm:h-[92px] shrink-0 flex items-center justify-center select-none">
+              <svg viewBox="0 0 120 96" className="w-full h-full drop-shadow-md" fill="none">
+                {/* Ground Base Platform */}
+                <ellipse cx="60" cy="86" rx="52" ry="6" fill="#042F1E" fillOpacity="0.55" />
+                <rect x="18" y="79" width="84" height="5" rx="2.5" fill="#D6D3D1" />
+                {/* 3D Side Wall (Left Perspective) */}
+                <polygon points="24,30 34,22 34,79 24,79" fill="#D6C7B2" />
+                {/* Main Front Building Wall */}
+                <rect x="34" y="24" width="60" height="55" rx="2" fill="#F5EFE6" stroke="#D6C7B2" strokeWidth="1" />
+                {/* Roof Fascia Trim */}
+                <rect x="31" y="19" width="66" height="6" rx="2" fill="#E7DFD3" stroke="#C7B8A1" strokeWidth="1" />
+                {/* Warm Lit Interior Doorway */}
+                <rect x="41" y="44" width="19" height="35" rx="1.5" fill="#78350F" />
+                <rect x="43.5" y="46.5" width="14" height="30" rx="1" fill="#FDE68A" fillOpacity="0.85" />
+                <line x1="50.5" y1="46.5" x2="50.5" y2="76.5" stroke="#78350F" strokeWidth="1.5" />
+                {/* Warm Lit Display Window on Right */}
+                <rect x="65" y="44" width="22" height="22" rx="1.5" fill="#78350F" />
+                <rect x="67" y="46" width="18" height="18" rx="1" fill="#FEF08A" />
+                <line x1="76" y1="46" x2="76" y2="64" stroke="#78350F" strokeWidth="1.4" />
+                <line x1="67" y1="55" x2="85" y2="55" stroke="#78350F" strokeWidth="1.4" />
+                {/* Wooden Planter Box Under Window */}
+                <rect x="64" y="69" width="24" height="9" rx="1.5" fill="#B45309" stroke="#78350F" strokeWidth="1" />
+                {/* Red & White Striped 3D Awning */}
+                <polygon points="33,25 95,25 101,39 27,39" fill="#EF4444" />
+                <polygon points="33,25 41,25 38,39 27,39" fill="#DC2626" />
+                <polygon points="41,25 49,25 48,39 38,39" fill="#FFFFFF" />
+                <polygon points="49,25 57,25 58,39 48,39" fill="#EF4444" />
+                <polygon points="57,25 65,25 67,39 58,39" fill="#FFFFFF" />
+                <polygon points="65,25 73,25 76,39 67,39" fill="#EF4444" />
+                <polygon points="73,25 81,25 85,39 76,39" fill="#FFFFFF" />
+                <polygon points="81,25 89,25 93,39 85,39" fill="#EF4444" />
+                <polygon points="89,25 95,25 101,39 93,39" fill="#FFFFFF" />
+                {/* Scalloped Awning Valance */}
+                <path
+                  d="M27 39 Q32 44 37 39 Q42 44 47 39 Q52 44 57 39 Q62 44 67 39 Q72 44 77 39 Q82 44 87 39 Q92 44 97 39 L101 39 L27 39 Z"
+                  fill="#B91C1C"
+                />
+                {/* Left Potted Tropical Tree */}
+                <circle cx="19" cy="56" r="9" fill="#15803D" />
+                <circle cx="14" cy="62" r="7" fill="#22C55E" />
+                <circle cx="24" cy="61" r="7" fill="#16A34A" />
+                <rect x="17.5" y="65" width="3" height="8" fill="#78350F" />
+                <polygon points="13,72 25,72 23,80 15,80" fill="#D97706" />
+                {/* Right Potted Tropical Bush */}
+                <circle cx="101" cy="60" r="7.5" fill="#15803D" />
+                <circle cx="97" cy="65" r="5.5" fill="#22C55E" />
+                <circle cx="105" cy="65" r="5.5" fill="#16A34A" />
+                <polygon points="96,72 106,72 104.5,80 97.5,80" fill="#D97706" />
+              </svg>
+            </div>
+
+            {/* Right Headline, Supporting Text & Prominent Yellow Rounded CTA Button */}
+            <div className="flex-1 min-w-0 space-y-1.5 text-center sm:text-left">
+              <div>
+                <h3 className="font-extrabold text-[15px] sm:text-base text-white font-khmer leading-tight">
+                  {tr(language, 'ចុះបញ្ជីសណ្ឋាគារ ឬផ្ទះសំណាក់', 'Register Your Hotel or Guesthouse', '入驻您的酒店或客栈')}
                 </h3>
-                <p className="text-[11px] text-white/95 font-khmer leading-snug truncate">
+                <p className="text-[11px] font-medium text-emerald-50/95 font-khmer leading-snug mt-1">
                   {tr(
                     language,
-                    'ទទួលបានអត្ថប្រយោជន៍ពិសេស និងតម្លៃពិសេស',
-                    'Unlock exclusive hotel benefits & special rates',
-                    '尊享专属酒店权益与特惠价格'
+                    'បង្ហាញសណ្ឋាគារ ឬផ្ទះសំណាក់របស់អ្នកនៅខាងលើកម្មវិធី',
+                    'Showcase your hotel or guesthouse at the top of the app',
+                    '在应用顶部展示您的酒店或客栈'
                   )}
                 </p>
               </div>
-            </div>
 
-            <button
-              type="button"
-              onClick={handleAddHotelClick}
-              className="px-3 py-1.5 rounded-full bg-gradient-to-r from-[#FDE047] via-[#F5C518] to-[#EAB308] hover:brightness-105 text-slate-950 font-extrabold text-[11px] font-khmer inline-flex items-center gap-1 shrink-0 shadow-xs cursor-pointer active:scale-95 transition-transform"
-            >
-              <span>{tr(language, 'មើលព័ត៌មានលម្អិត', 'View Details', '查看详情')}</span>
-              <span>→</span>
-            </button>
-          </div>
-
-          {/* Middle Row: Pricing Box + 4 Checkmarks */}
-          <div className="relative z-10 grid grid-cols-12 gap-2 items-center">
-            <div className="col-span-7 bg-[#04281A]/85 border border-[#D4AF37]/75 rounded-xl px-2.5 py-2.5 flex items-center justify-between gap-1.5">
-              <div className="flex items-center gap-1 min-w-0">
-                <Calendar className="w-3.5 h-3.5 text-[#FDE047] shrink-0" strokeWidth={2.2} />
-                <span className="text-white font-extrabold text-[11px] sm:text-xs font-khmer whitespace-nowrap">
-                  $6.99/30ថ្ងៃ
-                </span>
-              </div>
-              <div className="w-px h-5 bg-white/25 shrink-0" />
-              <div className="flex items-center gap-1 min-w-0">
-                <Calendar className="w-3.5 h-3.5 text-[#FDE047] shrink-0" strokeWidth={2.2} />
-                <span className="text-white font-extrabold text-[11px] sm:text-xs font-khmer whitespace-nowrap">
-                  $49.99/ឆ្នាំ
-                </span>
-              </div>
-            </div>
-
-            <div className="col-span-5 space-y-0.5 text-[10px] text-white/95 font-khmer leading-tight pr-8">
-              <div className="flex items-center gap-1 truncate">
-                <Check className="w-3 h-3 text-[#FDE047] shrink-0" strokeWidth={3} />
-                <span className="truncate">{tr(language, 'ទទួលបានតម្លៃពិសេស', 'Special Rates', '专属特惠价')}</span>
-              </div>
-              <div className="flex items-center gap-1 truncate">
-                <Check className="w-3 h-3 text-[#FDE047] shrink-0" strokeWidth={3} />
-                <span className="truncate">{tr(language, 'មានសិទ្ធិ VIP Badge', 'Gold VIP Badge', 'VIP 金色徽章')}</span>
-              </div>
-              <div className="flex items-center gap-1 truncate">
-                <Check className="w-3 h-3 text-[#FDE047] shrink-0" strokeWidth={3} />
-                <span className="truncate">{tr(language, 'មើលទីតាំងល្អៗមុនគេ', 'Top Placement', '置顶优先展示')}</span>
-              </div>
-              <div className="flex items-center gap-1 truncate">
-                <Check className="w-3 h-3 text-[#FDE047] shrink-0" strokeWidth={3} />
-                <span className="truncate">{tr(language, 'និងអត្ថប្រយោជន៍ផ្សេងៗទៀត', 'More Perks', '更多专属权益')}</span>
-              </div>
+              <button
+                type="button"
+                onClick={handleAddHotelClick}
+                style={{
+                  background: 'linear-gradient(180deg, #FDE047 0%, #FACC15 55%, #EAB308 100%)',
+                }}
+                className="w-full h-9.5 px-4 rounded-full text-slate-950 font-extrabold text-xs sm:text-[13px] font-khmer inline-flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition cursor-pointer"
+              >
+                <Plus className="w-4 h-4 stroke-[2.6] text-slate-950 shrink-0" />
+                <span>{tr(language, 'បន្ថែមសណ្ឋាគារ', 'Add Hotel', '添加酒店')}</span>
+              </button>
             </div>
           </div>
 
-          {/* Locked Notice if 1/1 VIP Slot Used by Shop */}
-          {!isAdmin && myExistingShop && (
-            <div className="relative z-10 p-2.5 rounded-xl bg-emerald-950/75 border border-amber-400/40 flex items-center gap-2 text-[11px] text-amber-200 font-khmer">
-              <Lock className="w-4 h-4 text-amber-400 shrink-0" strokeWidth={2} />
-              <span className="leading-snug">
+          {/* If user already used their 1 VIP slot on a Restaurant, show clear notice */}
+          {!isAdmin && myExistingShop && !myExistingHotel && (
+            <div className="relative z-10 mt-2.5 px-3 py-1.5 rounded-xl bg-amber-950/60 border border-amber-300/40 text-amber-200 text-[10.5px] font-semibold font-khmer flex items-center justify-between gap-2">
+              <span className="truncate">
                 {tr(
                   language,
                   `អ្នកបានប្រើសិទ្ធិ VIP បង្កើតហាងអាហារ «${myExistingShop.nameKh}» រួចហើយ (1/1) — មិនអាចបន្ថែមសណ្ឋាគារទៀតបានទេ។`,
                   `You already used your 1 VIP slot for Shop "${myExistingShop.nameEn || myExistingShop.nameKh}" (1/1) — cannot add a Hotel.`,
-                  `您已使用 1 个 VIP 名额添加餐厅“${myExistingShop.nameEn || myExistingShop.nameKh}”(1/1)，无法再添加酒店。`
+                  `您已使用 1 个 VIP 名额添加餐厅"${myExistingShop.nameEn || myExistingShop.nameKh}"(1/1)，无法再添加酒店。`
                 )}
               </span>
             </div>
@@ -945,7 +984,7 @@ export const HotelView: React.FC = () => {
 
           {/* Admin / Existing Owner Controls */}
           {isAdmin ? (
-            <div className="relative z-10 pt-1.5 border-t border-white/15 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="relative z-10 mt-2.5 pt-2 border-t border-white/15 grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -987,7 +1026,7 @@ export const HotelView: React.FC = () => {
               </a>
             </div>
           ) : myExistingHotel ? (
-            <div className="relative z-10 pt-2 border-t border-white/15 flex items-center justify-between gap-2">
+            <div className="relative z-10 mt-2.5 pt-2 border-t border-white/15 flex items-center justify-between gap-2">
               <span className="min-w-0 flex-1 text-[11px] font-bold text-amber-200 truncate font-khmer">
                 {tr(
                   language,

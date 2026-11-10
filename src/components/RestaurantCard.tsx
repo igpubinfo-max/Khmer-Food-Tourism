@@ -208,7 +208,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
         <article
           data-testid={`shop-featured-${restaurant.id}`}
           onClick={handleCardClick}
-          className="bg-white rounded-2xl p-2.5 border border-slate-200/90 shadow-xs hover:border-emerald-500/50 transition flex gap-3 items-stretch cursor-pointer font-khmer"
+          className="bg-slate-800/95 rounded-2xl p-2.5 border border-slate-700/90 shadow-md hover:border-amber-400/60 transition flex gap-3 items-stretch cursor-pointer font-khmer"
         >
           {/* Left Photo Box with Distance Pill & Heart Button (Matching OK.jpg) */}
           <div className="w-[144px] sm:w-[156px] min-h-[126px] rounded-xl overflow-hidden relative shrink-0 bg-slate-100">
@@ -254,11 +254,11 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
             <div>
               <div className="flex items-start justify-between gap-1.5">
                 <div className="min-w-0">
-                  <h4 className="font-extrabold text-[15px] sm:text-base text-slate-900 leading-snug truncate">
+                  <h4 className="font-extrabold text-[15px] sm:text-base text-white leading-snug truncate">
                     {restaurant.nameKh || loc.name}
                   </h4>
                   {restaurant.nameEn && restaurant.nameEn !== restaurant.nameKh && (
-                    <p className="text-xs font-bold text-slate-800 truncate leading-tight">
+                    <p className="text-xs font-bold text-slate-300 truncate leading-tight">
                       {restaurant.nameEn}
                     </p>
                   )}
@@ -269,8 +269,8 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
               {/* Rating Row */}
               <div className="flex items-center gap-1 mt-1 text-xs">
                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
-                <span className="font-extrabold text-slate-900">{ratingNum}</span>
-                <span className="text-slate-600 text-[11px] truncate">
+                <span className="font-extrabold text-amber-300">{ratingNum}</span>
+                <span className="text-slate-300 text-[11px] truncate">
                   ({reviewsNum} {tr(language, 'ការវាយតម្លៃ', 'reviews', '条评价')})
                 </span>
               </div>
@@ -280,14 +280,14 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
                 {tags.map((t, idx) => (
                   <span
                     key={idx}
-                    className="px-2 py-0.5 rounded-md bg-[#EBF3EE] text-[#115937] text-[10.5px] font-bold inline-flex items-center gap-1 border border-emerald-700/15"
+                    className="px-2 py-0.5 rounded-md bg-emerald-950/80 text-emerald-300 text-[10.5px] font-bold inline-flex items-center gap-1 border border-emerald-500/35"
                   >
                     {t.icon === 'coffee' ? (
-                      <Coffee className="w-3 h-3 text-[#115937] shrink-0" />
+                      <Coffee className="w-3 h-3 text-emerald-300 shrink-0" />
                     ) : t.icon === 'pot' ? (
-                      <Soup className="w-3 h-3 text-[#115937] shrink-0" />
+                      <Soup className="w-3 h-3 text-emerald-300 shrink-0" />
                     ) : (
-                      <Utensils className="w-3 h-3 text-[#115937] shrink-0" />
+                      <Utensils className="w-3 h-3 text-emerald-300 shrink-0" />
                     )}
                     <span>{t.label}</span>
                   </span>
@@ -309,7 +309,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
               <button
                 type="button"
                 onClick={handleOpenMapClick}
-                className="h-8 px-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs inline-flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer"
+                className="h-8 px-2.5 rounded-full bg-slate-900/90 hover:bg-slate-900 text-white border border-emerald-400/50 font-bold text-xs inline-flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer"
               >
                 <MapPin className="w-3.5 h-3.5 text-[#15653E] shrink-0" />
                 <span className="truncate">{tr(language, 'ផែនទី', 'Map', '地图')}</span>
@@ -325,9 +325,9 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
       <article
         data-testid={`shop-row-${restaurant.id}`}
         onClick={handleCardClick}
-        className="bg-white rounded-2xl p-2.5 border border-slate-200/90 shadow-2xs hover:border-emerald-500/50 transition flex items-center gap-3 cursor-pointer font-khmer"
+        className="bg-slate-800/95 rounded-2xl p-2.5 border border-slate-700/90 shadow-sm hover:border-amber-400/60 transition flex items-center gap-3 cursor-pointer font-khmer"
       >
-        <div className="w-16 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-200/70">
+        <div className="w-16 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-900 border border-amber-400/35">
           <ShopAvatar
             restaurant={{ ...restaurant, photoUrl: resolvedShopPhotoUrl }}
             allRestaurants={allRestaurants}
@@ -338,25 +338,25 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
 
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-1.5 min-w-0">
-            <h4 className="font-extrabold text-sm text-slate-900 truncate">
+            <h4 className="font-extrabold text-sm text-white truncate">
               {restaurant.nameKh || loc.name}
             </h4>
             {restaurant.nameEn && restaurant.nameEn !== restaurant.nameKh && (
-              <span className="text-xs font-semibold text-slate-700 truncate">
+              <span className="text-xs font-semibold text-slate-300 truncate">
                 {restaurant.nameEn}
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-600">
+          <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-300">
             <span className="inline-flex items-center gap-1">
               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
-              <strong className="font-extrabold text-slate-900">{ratingNum}</strong>
-              <span className="text-slate-500">({reviewsNum})</span>
+              <strong className="font-extrabold text-amber-300">{ratingNum}</strong>
+              <span className="text-slate-400">({reviewsNum})</span>
             </span>
-            <span className="text-slate-300">|</span>
-            <span className="inline-flex items-center gap-1 text-slate-800 font-semibold truncate">
-              <MapPin className="w-3.5 h-3.5 text-[#15653E] shrink-0" />
+            <span className="text-slate-600">|</span>
+            <span className="inline-flex items-center gap-1 text-emerald-300 font-semibold truncate">
+              <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
               <span>
                 {distanceStr} {tr(language, 'គម', 'km', '公里')}
               </span>
@@ -366,7 +366,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
 
         <div className="flex items-center gap-1.5 shrink-0">
           {adminActions}
-          <ChevronRight className="w-4 h-4 text-[#15653E] shrink-0" />
+          <ChevronRight className="w-4 h-4 text-amber-400 shrink-0" />
         </div>
       </article>
     );

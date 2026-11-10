@@ -43,7 +43,6 @@ import {
   rotateLatestVideosForScope,
   OnlineFoodDiscoveryItem,
   resolveOriginalSocialAccountUrl,
-  POPULAR_CAMBODIA_TIKTOK_ACCOUNTS,
 } from '../services/onlineFoodDiscoveryService';
 
 const VIDEO_BATCH_SIZE = 12;
@@ -939,30 +938,6 @@ export const TrendingSocialModal: React.FC = () => {
             </button>
           ))}
         </div>
-
-        {/* Popular Cambodian TikTok Creators Quick-Access Bar */}
-        {(platformFilter === 'all' || platformFilter === 'tiktok') && (
-          <div className="px-3 py-2 bg-slate-950/90 border-b border-slate-800/90 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0 font-khmer">
-            <span className="text-[10.5px] font-extrabold text-pink-400 whitespace-nowrap inline-flex items-center gap-1 shrink-0 pr-1">
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-              </svg>
-              <span>{tr(language, 'គណនី TikTok ល្បីៗ៖', 'Popular TikTok:', '热门 TikTok：')}</span>
-            </span>
-            {POPULAR_CAMBODIA_TIKTOK_ACCOUNTS.map((acc) => (
-              <button
-                key={acc.handle}
-                type="button"
-                onClick={() => openExternalUrlNativeSafe(acc.url)}
-                className="px-2.5 py-1 rounded-full bg-slate-900 hover:bg-pink-950/80 border border-pink-500/40 text-[11px] font-bold text-white whitespace-nowrap inline-flex items-center gap-1 transition active:scale-95 cursor-pointer shrink-0 shadow-2xs"
-                title={`${acc.displayName} (${acc.handle})`}
-              >
-                <span className="text-pink-300">{acc.handle}</span>
-                <ExternalLink className="w-2.5 h-2.5 text-pink-400 shrink-0" />
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Category Tabs: 4 Categories + All Trending */}
         <div className="p-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center gap-1.5 shrink-0 font-khmer text-xs overflow-x-auto no-scrollbar">

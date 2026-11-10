@@ -34,7 +34,7 @@ export const BottomNav: React.FC = () => {
     <nav
       id="kft-bottom-nav"
       aria-label={tr(language, 'ម៉ឺនុយមេខាងក្រោម', 'Primary bottom navigation', '底部主导航')}
-      className="relative shrink-0 w-full z-30 bg-gradient-to-b from-[#111A2E] via-[#0C1425] to-[#070C18] text-slate-200 border-t border-slate-700/80 shadow-[0_-10px_28px_rgba(2,6,23,0.65)] select-none"
+      className="relative shrink-0 w-full z-30 bg-gradient-to-b from-[#0C332B] via-[#08251F] to-[#051814] text-slate-200 border-t border-slate-700/80 shadow-[0_-10px_28px_rgba(2,6,23,0.65)] select-none"
     >
       {/* Subtle luxury gold hairline highlight across top edge */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/55 to-transparent" />

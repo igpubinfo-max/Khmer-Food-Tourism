@@ -270,7 +270,7 @@ export const FoodView: React.FC = () => {
   return (
     <div className="max-w-md mx-auto bg-[#1E293B] text-slate-900 min-h-full font-khmer">
       {/* 1. Full-Bleed Angkor Wat Hero Header (No Green Bar) */}
-      <AngkorHeroTopHeader mode="food" />
+      <AngkorHeroTopHeader mode="food" foodCount={filteredFoods.length} />
 
       {/* 2. Rounded Sheet directly below Angkor Wat Hero Header (No VIP button or opaque bar blocking Angkor Wat) */}
       <div className="relative z-10 -mt-3 rounded-t-[26px] bg-[#1E293B] pb-8 shadow-[0_-6px_20px_rgba(0,0,0,0.18)] overflow-hidden">
@@ -295,11 +295,11 @@ export const FoodView: React.FC = () => {
                   }
                   className={`rounded-2xl py-2.5 px-1.5 flex flex-col items-center justify-between gap-1.5 transition active:scale-95 cursor-pointer border ${
                     active
-                      ? 'text-white border-[#2E7D4F]'
-                      : 'bg-[#FAF9F5] text-[#0F172A] border-slate-200/90 hover:border-emerald-500/50 shadow-2xs'
+                      ? 'text-white border-amber-300/70'
+                      : 'bg-white/[0.07] text-white border-white/10 hover:border-amber-300/50 hover:bg-white/[0.12]'
                   }`}
                 >
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-black/10 bg-white shadow-2xs shrink-0">
+                  <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 bg-white shadow-md shrink-0 ${active ? 'border-amber-300' : 'border-white/30'}`}>
                     <img
                       src={cat.thumb}
                       alt={cat.nameKh}
@@ -310,7 +310,7 @@ export const FoodView: React.FC = () => {
                   </div>
                   <span
                     className={`font-khmer font-extrabold text-[11.5px] sm:text-xs leading-tight text-center truncate w-full ${
-                      active ? 'text-white' : 'text-[#0F172A]'
+                      active ? 'text-white' : 'text-slate-100'
                     }`}
                   >
                     {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
@@ -330,7 +330,7 @@ export const FoodView: React.FC = () => {
                 labelZh: '全部',
                 renderIcon: (active: boolean) => (
                   <svg
-                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-emerald-300' : 'text-[#235D3A]'}`}
+                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-emerald-100' : 'text-emerald-300'}`}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -351,7 +351,7 @@ export const FoodView: React.FC = () => {
                 labelZh: '早餐',
                 renderIcon: (active: boolean) => (
                   <svg
-                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-300' : 'text-[#235D3A]'}`}
+                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-300' : 'text-emerald-300'}`}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -374,7 +374,7 @@ export const FoodView: React.FC = () => {
                 labelZh: '午餐',
                 renderIcon: (active: boolean) => (
                   <svg
-                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-300' : 'text-amber-500'}`}
+                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-300' : 'text-amber-400'}`}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -395,7 +395,7 @@ export const FoodView: React.FC = () => {
                 labelZh: '晚餐',
                 renderIcon: (active: boolean) => (
                   <svg
-                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-200' : 'text-indigo-600'}`}
+                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-200' : 'text-indigo-300'}`}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -417,8 +417,8 @@ export const FoodView: React.FC = () => {
                   onClick={() => setMealTimeFilter(m.id)}
                   className={`h-9 px-2 rounded-full text-xs font-extrabold flex items-center justify-center gap-1.5 border transition active:scale-95 cursor-pointer ${
                     active
-                      ? 'bg-[#235D3A] text-white border-[#235D3A] shadow-xs'
-                      : 'bg-white text-[#1E293B] border-slate-200/90 hover:border-emerald-600/40 shadow-2xs'
+                      ? 'bg-[#15803D] text-white border-emerald-300/50 shadow-sm'
+                      : 'bg-white/[0.07] text-slate-100 border-white/15 hover:bg-white/[0.12]'
                   }`}
                 >
                   {m.renderIcon(active)}

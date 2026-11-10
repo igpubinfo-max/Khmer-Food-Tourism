@@ -13,6 +13,7 @@ import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHel
 
 interface AngkorHeroTopHeaderProps {
   mode: 'home' | 'food';
+  foodCount?: number;
   query?: string;
   onChangeQuery?: (val: string) => void;
   onAskAi?: (queryText?: string) => void;
@@ -21,6 +22,7 @@ interface AngkorHeroTopHeaderProps {
 
 export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
   mode,
+  foodCount,
   query = '',
   onChangeQuery,
   onAskAi,
@@ -89,7 +91,7 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
       {/* Full-Bleed Angkor Wat Sunrise & Lotus Pond Background */}
       <div className="absolute inset-0 overflow-hidden">
         <img
-          src="/welcome/angkor-lotus-hero.png"
+          src="/welcome/angkor-lotus-hero.jpg"
           alt="Angkor Wat Cambodia"
           decoding="async"
           className="w-full h-full object-cover object-top"
@@ -259,71 +261,36 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
         </div>
       </div>
 
-      {/* Home Mode: One Elegant Horizontal Strip with Semi-Transparent Background behind "Ask anything about food or snap a photo..." */}
+      {/* Home Mode: Wide Rounded AI Food Search Bar with Transparent Dark Background, Gold Border, Left Gold Camera Button & Right Orange AI Button */}
       {mode === 'home' && (
-        <div className="absolute inset-x-0 bottom-5 z-20 px-3">
+        <div className="absolute inset-x-0 bottom-6 z-20 px-3.5">
           <div
             style={{
-              background: 'linear-gradient(90deg, rgba(15, 23, 42, 0.38) 0%, rgba(15, 23, 42, 0.48) 50%, rgba(15, 23, 42, 0.38) 100%)',
-              backdropFilter: 'blur(6px)',
-              WebkitBackdropFilter: 'blur(6px)',
-              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.22)',
+              background: 'linear-gradient(90deg, rgba(15, 23, 42, 0.64) 0%, rgba(15, 23, 42, 0.72) 50%, rgba(15, 23, 42, 0.64) 100%)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
             }}
-            className="w-full h-[50px] rounded-full border border-[#FBBF24]/75 p-1 flex items-center gap-2"
+            className="w-full h-[50px] rounded-full border-[1.5px] border-[#FBBF24] p-1.5 flex items-center gap-2"
           >
-            {/* Left Premium 3D AI Smart Camera Lens Button */}
+            {/* Left Circular Gold Camera Recognition Button */}
             <button
               type="button"
               onClick={onOpenCameraAi}
               title={tr(language, 'ថតរូបម្ហូបដើម្បីសួរ AI', 'Snap food photo for AI', '拍照识别美食')}
               aria-label={tr(language, 'ថតរូបម្ហូបដើម្បីសួរ AI', 'Snap food photo for AI', '拍照识别美食')}
               style={{
-                background: 'linear-gradient(145deg, #FFFBEB 0%, #FEF3C7 45%, #FDE68A 100%)',
-                boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4), inset 0 1.5px 2px rgba(255, 255, 255, 0.95)',
+                background: 'linear-gradient(180deg, #FDE68A 0%, #F59E0B 100%)',
+                boxShadow: '0 2px 8px rgba(245, 158, 11, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.85)',
               }}
-              className="group relative w-10 h-10 rounded-full border-2 border-amber-400 hover:border-amber-300 flex items-center justify-center shrink-0 active:scale-95 transition cursor-pointer overflow-hidden"
+              className="group relative w-[38px] h-[38px] rounded-full border border-amber-200 flex items-center justify-center shrink-0 active:scale-95 transition cursor-pointer overflow-hidden"
             >
-              <svg className="w-5 h-5 drop-shadow-2xs group-hover:scale-105 transition-transform" viewBox="0 0 32 32" fill="none">
-                <defs>
-                  <linearGradient id="kftCamBodyGrad" x1="4" y1="7" x2="28" y2="26" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#0F766E" />
-                    <stop offset="55%" stopColor="#065F46" />
-                    <stop offset="100%" stopColor="#064E3B" />
-                  </linearGradient>
-                  <linearGradient id="kftCamLensGrad" x1="11" y1="12" x2="21" y2="22" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#38BDF8" />
-                    <stop offset="50%" stopColor="#0284C7" />
-                    <stop offset="100%" stopColor="#1E3A8A" />
-                  </linearGradient>
-                  <linearGradient id="kftCamGoldGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#FBBF24" />
-                    <stop offset="100%" stopColor="#D97706" />
-                  </linearGradient>
-                </defs>
-                <path d="M4 9V6.5C4 5.67 4.67 5 5.5 5H8" stroke="#D97706" strokeWidth="1.6" strokeLinecap="round" />
-                <path d="M28 9V6.5C28 5.67 27.33 5 26.5 5H24" stroke="#D97706" strokeWidth="1.6" strokeLinecap="round" />
-                <path d="M4 23v2.5C4 26.33 4.67 27 5.5 27H8" stroke="#D97706" strokeWidth="1.6" strokeLinecap="round" />
-                <path d="M28 23v2.5C28 26.33 27.33 27 26.5 27H24" stroke="#D97706" strokeWidth="1.6" strokeLinecap="round" />
-                <rect x="8.5" y="7" width="3.5" height="2" rx="0.8" fill="#D97706" />
-                <path
-                  d="M6.5 11C6.5 9.9 7.4 9 8.5 9H11L12.4 7.3C12.78 6.85 13.33 6.6 13.92 6.6H18.08C18.67 6.6 19.22 6.85 19.6 7.3L21 9H23.5C24.6 9 25.5 9.9 25.5 11V21.5C25.5 22.6 24.6 23.5 23.5 23.5H8.5C7.4 23.5 6.5 22.6 6.5 21.5V11Z"
-                  fill="url(#kftCamBodyGrad)"
-                  stroke="#FFFFFF"
-                  strokeWidth="1.2"
-                />
-                <circle cx="16" cy="16.5" r="5.4" fill="#FFFFFF" stroke="url(#kftCamGoldGrad)" strokeWidth="1.4" />
-                <circle cx="16" cy="16.5" r="3.8" fill="url(#kftCamLensGrad)" />
-                <circle cx="16" cy="16.5" r="1.6" fill="#0F172A" />
-                <circle cx="14.6" cy="15.1" r="1.05" fill="#FFFFFF" fillOpacity="0.92" />
-                <circle cx="17.3" cy="17.8" r="0.55" fill="#7DD3FC" fillOpacity="0.85" />
-                <path
-                  d="M22.8 10.2L23.35 11.65L24.8 12.2L23.35 12.75L22.8 14.2L22.25 12.75L20.8 12.2L22.25 11.65L22.8 10.2Z"
-                  fill="#FDE047"
-                />
+              <svg className="w-5 h-5 text-[#064E3B] group-hover:scale-105 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9.4 4.5a1.5 1.5 0 0 0-1.26.69L7.12 6.75H5A2.75 2.75 0 0 0 2.25 9.5v8.25A2.75 2.75 0 0 0 5 20.5h14a2.75 2.75 0 0 0 2.75-2.75V9.5A2.75 2.75 0 0 0 19 6.75h-2.12l-1.02-1.56a1.5 1.5 0 0 0-1.26-.69H9.4Zm2.6 4.75a4.25 4.25 0 1 1 0 8.5 4.25 4.25 0 0 1 0-8.5Zm0 1.75a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" />
               </svg>
             </button>
 
-            {/* Middle Ask AI / Search Input */}
+            {/* Middle Ask AI / Search Input (Preserving Exact Khmer Placeholder) */}
             <div className="flex-1 min-w-0 flex items-center px-1">
               <input
                 type="text"
@@ -341,7 +308,7 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
                   'Ask anything about food or snap a photo...',
                   '询问任何美食问题或拍照识别...'
                 )}
-                style={{ color: '#FFFFFF', textShadow: '0 1px 3px rgba(0,0,0,0.65)' }}
+                style={{ color: '#FFFFFF', textShadow: '0 1px 2px rgba(0,0,0,0.7)' }}
                 className="w-full bg-transparent text-xs sm:text-[13px] font-khmer font-extrabold text-white placeholder-white/95 focus:outline-none truncate"
               />
               {query && onChangeQuery && (
@@ -356,14 +323,18 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
               )}
             </div>
 
-            {/* Right សួរ AI Pill Button */}
+            {/* Subtle Vertical Divider */}
+            <span className="h-5 w-px bg-white/30 shrink-0" aria-hidden="true" />
+
+            {/* Right Orange សួរ AI Pill Button */}
             <button
               type="button"
               onClick={handleTriggerAskAi}
               style={{
-                background: 'linear-gradient(180deg, #F59E0B 0%, #D97706 100%)',
+                background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
+                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.35)',
               }}
-              className="h-9.5 px-3.5 rounded-full text-white font-khmer font-extrabold text-xs sm:text-[13px] flex items-center justify-center gap-1.5 shrink-0 shadow-sm active:scale-95 transition cursor-pointer"
+              className="h-[38px] px-3.5 rounded-full border border-orange-300/60 text-white font-khmer font-extrabold text-xs flex items-center justify-center gap-1.5 shrink-0 active:scale-95 transition cursor-pointer"
             >
               <Send className="w-3.5 h-3.5 text-white" />
               <span>{tr(language, 'សួរ AI', 'Ask AI', '问 AI')}</span>
@@ -374,29 +345,35 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
 
       {/* Food Mode: One Elegant Horizontal Strip with Semi-Transparent Background behind the Khmer Food Title, allowing Angkor Wat to remain clearly visible (NO VIP button on right) */}
       {mode === 'food' && (
-        <div className="absolute inset-x-0 bottom-5 z-20 px-3">
+        <div className="absolute inset-x-0 bottom-5 z-20 px-3.5">
           <div
             style={{
-              background: 'linear-gradient(90deg, rgba(15, 23, 42, 0.42) 0%, rgba(15, 23, 42, 0.30) 65%, rgba(15, 23, 42, 0.14) 100%)',
-              backdropFilter: 'blur(5px)',
-              WebkitBackdropFilter: 'blur(5px)',
-              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.18)',
+              background: 'linear-gradient(100deg, rgba(6, 78, 59, 0.94) 0%, rgba(15, 23, 42, 0.92) 100%)',
+              boxShadow: '0 8px 22px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255,255,255,0.14)',
             }}
-            className="w-full py-2 px-3.5 rounded-2xl border border-white/25 flex items-center gap-2.5"
+            className="relative w-full py-2.5 pl-3 pr-3.5 rounded-2xl border border-amber-300/50 flex items-center gap-3 overflow-hidden"
           >
-            <div className="w-8 h-8 rounded-full bg-amber-400/20 border border-amber-300/60 flex items-center justify-center shrink-0">
-              <svg className="w-4 h-4 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-gradient-to-b from-amber-300 to-amber-500" aria-hidden="true" />
+            <div className="ml-1 w-10 h-10 rounded-xl bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center shrink-0 shadow-md">
+              <svg className="w-5 h-5 text-emerald-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
                 <path d="M7 2v20" />
                 <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
               </svg>
             </div>
-            <h2
-              className="font-khmer font-extrabold text-base sm:text-lg text-white tracking-tight truncate"
-              style={{ textShadow: '0 2px 6px rgba(0,0,0,0.75)' }}
-            >
-              {tr(language, 'មុខម្ហូបខ្មែរ ទាំងអស់', 'All Cambodian Dishes', '柬埔寨全部美食')}
-            </h2>
+            <div className="min-w-0 flex-1">
+              <h2 className="font-khmer font-extrabold text-[15px] sm:text-base text-white leading-tight truncate">
+                {tr(language, 'មុខម្ហូបខ្មែរ ទាំងអស់', 'All Cambodian Dishes', '柬埔寨全部美食')}
+              </h2>
+              <p className="text-[10.5px] font-bold text-amber-200/90 leading-tight truncate">
+                {tr(language, 'រកឃើញរសជាតិដើមខ្មែរ គ្រប់ខេត្ត', 'Discover authentic Khmer flavors', '探索正宗高棉风味')}
+              </p>
+            </div>
+            {typeof foodCount === 'number' && (
+              <span className="shrink-0 px-2.5 py-1 rounded-full bg-amber-400 text-emerald-950 text-[11px] font-extrabold shadow-sm">
+                {foodCount}
+              </span>
+            )}
           </div>
         </div>
       )}
