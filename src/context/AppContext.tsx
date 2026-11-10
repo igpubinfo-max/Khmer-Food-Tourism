@@ -188,6 +188,17 @@ import {
   isUserExplicitlyCancelled,
   purgeCancelledUserFromLocalCaches,
 } from '../utils/securityIntegrityGuard';
+import {
+  type UserSavedVideoRecord,
+  getLocalUserSavedVideos,
+  syncUserVideoCollectionWithCloud,
+  toggleCollectVideoForUser,
+  removeCollectedVideoForUser,
+  isVideoCollectedByUser,
+  clearActiveVideoSessionCacheOnAccountSwitch,
+  syncUserPersonalVaultWithCloud,
+} from '../services/userVideoCollectionService';
+import type { OnlineFoodDiscoveryItem } from '../services/onlineFoodDiscoveryService';
 
 export type ActiveTab = 'home' | 'food' | 'restaurants' | 'hotels' | 'tourism' | 'guide' | 'profile';
 
@@ -281,10 +292,15 @@ interface AppContextType {
   lastUsersSyncedAt?: string | null;
   syncUsersNow?: () => Promise<boolean>;
   
-  // Bookmarks
+  // Bookmarks & Account-Isolated Saved Social Videos
   bookmarks: string[];
   toggleBookmark: (id: string) => void;
   isBookmarked: (id: string) => boolean;
+  savedVideos: UserSavedVideoRecord[];
+  toggleSavedVideo: (item: OnlineFoodDiscoveryItem) => Promise<boolean>;
+  removeSavedVideo: (videoIdOrUrl: string) => Promise<void>;
+  isVideoSaved: (item: OnlineFoodDiscoveryItem | { id?: string; videoId?: string; platform?: string; sourceUrl?: string; inlineVideoId?: string }) => boolean;
+  refreshUserSavedVideos: () => Promise<UserSavedVideoRecord[]>;
   
   // Food Actions
   addFood: (food: Omit<FoodItem, 'id' | 'rating' | 'reviewCount'>) => void;
@@ -2292,45 +2308,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, []);
 
-  const [bookmarks, setBookmarks] = useState<string[]>(() => {
+  const loadBookmarksForUserKey = (uid?: string | null): string[] => {
     try {
-      const savedV5 = localStorage.getItem('kft_bookmarks_v5');
-      if (savedV5 && savedV5 !== 'undefined' && savedV5 !== 'null') {
-        const parsedV5 = JSON.parse(savedV5);
-        if (Array.isArray(parsedV5)) {
-          const remapped = Array.from(
+      const userSuffix = uid && uid.trim() ? uid.trim() : 'guest';
+      const userKey = `kft_bookmarks_v5_${userSuffix}`;
+      const savedUserV5 = localStorage.getItem(userKey);
+      if (savedUserV5 && savedUserV5 !== 'undefined' && savedUserV5 !== 'null') {
+        const parsed = JSON.parse(savedUserV5);
+        if (Array.isArray(parsed)) {
+          return Array.from(
             new Set(
-              parsedV5
+              parsed
                 .filter((id): id is string => typeof id === 'string' && id.trim().length > 0)
                 .map((id) => remapDuplicateFoodIdToCanonical(id))
             )
           );
-          if (remapped.length !== parsedV5.length || remapped.some((id, idx) => id !== parsedV5[idx])) {
-            localStorage.setItem('kft_bookmarks_v5', JSON.stringify(remapped));
+        }
+      }
+      // One-time migration for the initial user on this device if per-user key doesn't exist yet
+      if (userSuffix !== 'guest' && !localStorage.getItem('kft_bookmarks_v5_migrated_per_user')) {
+        const savedLegacyV5 = localStorage.getItem('kft_bookmarks_v5');
+        localStorage.setItem('kft_bookmarks_v5_migrated_per_user', userSuffix);
+        if (savedLegacyV5 && savedLegacyV5 !== 'undefined' && savedLegacyV5 !== 'null') {
+          const parsedV5 = JSON.parse(savedLegacyV5);
+          if (Array.isArray(parsedV5)) {
+            const remapped = Array.from(
+              new Set(
+                parsedV5
+                  .filter((id): id is string => typeof id === 'string' && id.trim().length > 0)
+                  .map((id) => remapDuplicateFoodIdToCanonical(id))
+              )
+            );
+            localStorage.setItem(userKey, JSON.stringify(remapped));
+            return remapped;
           }
-          return remapped;
         }
       }
-      // One-time migration from legacy v4/v3: strip the old auto-populated ['food-1', 'dest-1'] defaults while preserving any real user-saved items
-      const legacySaved = localStorage.getItem('kft_bookmarks_v4') || localStorage.getItem('kft_bookmarks_v3');
-      localStorage.removeItem('kft_bookmarks_v4');
-      localStorage.removeItem('kft_bookmarks_v3');
-      if (legacySaved && legacySaved !== 'undefined' && legacySaved !== 'null') {
-        const parsedLegacy = JSON.parse(legacySaved);
-        if (Array.isArray(parsedLegacy)) {
-          const migrated = parsedLegacy.filter(
-            (id): id is string => typeof id === 'string' && id !== 'food-1' && id !== 'dest-1'
-          );
-          localStorage.setItem('kft_bookmarks_v5', JSON.stringify(migrated));
-          return migrated;
-        }
-      }
-      localStorage.setItem('kft_bookmarks_v5', '[]');
     } catch (e) {
-      console.warn('Failed to parse kft_bookmarks', e);
+      console.warn('Failed to parse per-user bookmarks', e);
     }
     return [];
-  });
+  };
+
+  const [bookmarks, setBookmarks] = useState<string[]>(() => loadBookmarksForUserKey(currentUser?.id));
+
+  // Account-Isolated Saved Social Videos (TikTok, Facebook, YouTube)
+  const [savedVideos, setSavedVideos] = useState<UserSavedVideoRecord[]>(() =>
+    getLocalUserSavedVideos(currentUser?.id)
+  );
 
   const [appSettings, setAppSettings] = useState<AppSettings>(() => {
     try {
@@ -2770,50 +2795,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [aiCheckIns]);
 
   // Personalized Wishlists (start empty — never pre-fill fake auto-favorites)
-  const defaultWishlistsTemplate: Wishlist[] = [
-    {
-      id: 'wl-default-1',
-      userId: currentUser?.id || 'guest',
-      nameKh: 'ហាងដែលចង់សាក',
-      nameEn: 'Restaurants to Try',
-      emoji: '🍽️',
-      isDefault: true,
-      items: [],
-      createdAt: '2026-10-21',
-    },
-    {
-      id: 'wl-default-2',
-      userId: currentUser?.id || 'guest',
-      nameKh: 'កន្លែងទៅជាមួយគ្រួសារ',
-      nameEn: 'Family Trip Spots',
-      emoji: '👨‍👩‍👧‍👦',
-      isDefault: true,
-      items: [],
-      createdAt: '2026-10-21',
-    },
-    {
-      id: 'wl-default-3',
-      userId: currentUser?.id || 'guest',
-      nameKh: 'កន្លែងចង់ទៅថ្ងៃអាទិត្យ',
-      nameEn: 'Sunday Hangouts',
-      emoji: '☀️',
-      isDefault: true,
-      items: [],
-      createdAt: '2026-10-21',
-    },
-  ];
+  const buildDefaultWishlistsForUser = (uid?: string | null): Wishlist[] => {
+    const userSuffix = uid && uid.trim() ? uid.trim() : 'guest';
+    return [
+      {
+        id: 'wl-default-1',
+        userId: userSuffix,
+        nameKh: 'ហាងដែលចង់សាក',
+        nameEn: 'Restaurants to Try',
+        emoji: '🍽️',
+        isDefault: true,
+        items: [],
+        createdAt: '2026-10-21',
+      },
+      {
+        id: 'wl-default-2',
+        userId: userSuffix,
+        nameKh: 'កន្លែងទៅជាមួយគ្រួសារ',
+        nameEn: 'Family Trip Spots',
+        emoji: '👨‍👩‍👧‍👦',
+        isDefault: true,
+        items: [],
+        createdAt: '2026-10-21',
+      },
+      {
+        id: 'wl-default-3',
+        userId: userSuffix,
+        nameKh: 'កន្លែងចង់ទៅថ្ងៃអាទិត្យ',
+        nameEn: 'Sunday Hangouts',
+        emoji: '☀️',
+        isDefault: true,
+        items: [],
+        createdAt: '2026-10-21',
+      },
+    ];
+  };
 
-  const [wishlists, setWishlists] = useState<Wishlist[]>(() => {
+  const loadWishlistsForUserKey = (uid?: string | null): Wishlist[] => {
+    const userSuffix = uid && uid.trim() ? uid.trim() : 'guest';
     try {
-      const uid = currentUser?.id || 'guest';
-      const v4Key = `kft_wishlists_v4_${uid}`;
+      const v4Key = `kft_wishlists_v4_${userSuffix}`;
       const savedV4 = localStorage.getItem(v4Key);
       if (savedV4 && savedV4 !== 'undefined' && savedV4 !== 'null') {
         const parsedV4 = JSON.parse(savedV4);
-        if (Array.isArray(parsedV4) && parsedV4.length > 0) return parsedV4;
+        if (Array.isArray(parsedV4) && parsedV4.length > 0) {
+          return parsedV4.filter((w: Wishlist) => !w.userId || w.userId === 'guest' || w.userId === userSuffix);
+        }
       }
       // Migrate from v3 while stripping the 3 legacy pre-seeded 2026-10-21 demo items (rest-1, dest-9, dest-29)
-      const v3Key = `kft_wishlists_v3_${uid}`;
+      const v3Key = `kft_wishlists_v3_${userSuffix}`;
       const savedV3 = localStorage.getItem(v3Key);
       localStorage.removeItem(v3Key);
       if (savedV3 && savedV3 !== 'undefined' && savedV3 !== 'null') {
@@ -2822,6 +2852,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const legacyAutoIds = new Set(['rest-1', 'dest-9', 'dest-29']);
           const migrated: Wishlist[] = parsedV3.map((w: Wishlist) => ({
             ...w,
+            userId: userSuffix,
             items: Array.isArray(w.items)
               ? w.items.filter(
                   (it) => !(it && it.addedAt === '2026-10-21' && legacyAutoIds.has(it.id))
@@ -2835,24 +2866,92 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.warn('Failed to parse wishlists', e);
     }
-    return defaultWishlistsTemplate;
-  });
+    return buildDefaultWishlistsForUser(userSuffix);
+  };
 
-  // User Trip Plans
-  const [tripPlans, setTripPlans] = useState<TripPlan[]>(() => {
+  const loadTripPlansForUserKey = (uid?: string | null): TripPlan[] => {
+    const userSuffix = uid && uid.trim() ? uid.trim() : 'guest';
     try {
-      localStorage.removeItem(`kft_trip_plans_v1_${currentUser?.id || 'guest'}`);
-      const storageKey = `kft_trip_plans_v2_${currentUser?.id || 'guest'}`;
+      localStorage.removeItem(`kft_trip_plans_v1_${userSuffix}`);
+      const storageKey = `kft_trip_plans_v2_${userSuffix}`;
       const saved = localStorage.getItem(storageKey);
       if (saved && saved !== 'undefined' && saved !== 'null') {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed.filter((p: TripPlan) => !p.userId || p.userId === 'guest' || p.userId === userSuffix);
+        }
       }
     } catch (e) {
       console.warn('Failed to parse trip plans', e);
     }
     return [];
-  });
+  };
+
+  const [wishlists, setWishlists] = useState<Wishlist[]>(() => loadWishlistsForUserKey(currentUser?.id));
+
+  // User Trip Plans
+  const [tripPlans, setTripPlans] = useState<TripPlan[]>(() => loadTripPlansForUserKey(currentUser?.id));
+
+  // Track which user ID currently owns the active in-memory bookmarks / wishlists / tripPlans / savedVideos
+  // so switching accounts NEVER writes the previous account's data into the new account's storage key!
+  const activePersonalDataOwnerIdRef = useRef<string>(currentUser?.id || 'guest');
+
+  useEffect(() => {
+    const targetOwnerId = currentUser?.id || 'guest';
+    if (activePersonalDataOwnerIdRef.current !== targetOwnerId) {
+      activePersonalDataOwnerIdRef.current = targetOwnerId;
+      clearActiveVideoSessionCacheOnAccountSwitch(currentUser?.id);
+
+      const nextBookmarks = loadBookmarksForUserKey(currentUser?.id);
+      const nextWishlists = loadWishlistsForUserKey(currentUser?.id);
+      const nextTripPlans = loadTripPlansForUserKey(currentUser?.id);
+      const nextVideos = getLocalUserSavedVideos(currentUser?.id);
+
+      setBookmarks(nextBookmarks);
+      setWishlists(nextWishlists);
+      setTripPlans(nextTripPlans);
+      setSavedVideos(nextVideos);
+
+      if (currentUser?.id) {
+        syncUserVideoCollectionWithCloud(currentUser.id, true)
+          .then((syncedVideos) => {
+            if (activePersonalDataOwnerIdRef.current === currentUser.id) {
+              setSavedVideos(syncedVideos);
+            }
+          })
+          .catch(() => {});
+
+        syncUserPersonalVaultWithCloud({
+          userId: currentUser.id,
+          localBookmarks: nextBookmarks,
+          localWishlists: nextWishlists,
+          localTripPlans: nextTripPlans,
+          pushMerged: true,
+        })
+          .then((vault) => {
+            if (!vault || activePersonalDataOwnerIdRef.current !== currentUser.id) return;
+            setBookmarks(vault.bookmarks);
+            setWishlists(vault.wishlists.length > 0 ? vault.wishlists : buildDefaultWishlistsForUser(currentUser.id));
+            setTripPlans(vault.tripPlans);
+            try {
+              localStorage.setItem(`kft_bookmarks_v5_${currentUser.id}`, JSON.stringify(vault.bookmarks));
+              localStorage.setItem(`kft_wishlists_v4_${currentUser.id}`, JSON.stringify(vault.wishlists));
+              localStorage.setItem(`kft_trip_plans_v2_${currentUser.id}`, JSON.stringify(vault.tripPlans));
+            } catch {}
+          })
+          .catch(() => {});
+      }
+    } else if (currentUser?.id) {
+      // Initial mount with an already-signed-in user: sync saved videos & personal vault from cloud in background
+      syncUserVideoCollectionWithCloud(currentUser.id, true)
+        .then((syncedVideos) => {
+          if (activePersonalDataOwnerIdRef.current === currentUser.id) {
+            setSavedVideos(syncedVideos);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [currentUser?.id]);
 
   // Helpful Notifications (with full Khmer, English & Simplified Chinese support + accurate targetIds & dates)
   const getRelativeDateIso = (daysAgo: number): string => {
@@ -2919,23 +3018,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   // Sync wishlists, trip plans & notifications to localStorage (debounced off critical path)
+  // Guarded by `activePersonalDataOwnerIdRef` so switching accounts never writes the previous user's state into the new user's key
   useEffect(() => {
     if (isInitialAuxMountRef.current.wishlists) {
       isInitialAuxMountRef.current.wishlists = false;
       return;
     }
-    const storageKey = `kft_wishlists_v4_${currentUser?.id || 'guest'}`;
+    const ownerId = currentUser?.id || 'guest';
+    if (activePersonalDataOwnerIdRef.current !== ownerId) return;
+    const storageKey = `kft_wishlists_v4_${ownerId}`;
     scheduleStorageWrite(storageKey, wishlists, 800);
-  }, [wishlists, currentUser]);
+  }, [wishlists, currentUser?.id]);
 
   useEffect(() => {
     if (isInitialAuxMountRef.current.tripPlans) {
       isInitialAuxMountRef.current.tripPlans = false;
       return;
     }
-    const storageKey = `kft_trip_plans_v2_${currentUser?.id || 'guest'}`;
+    const ownerId = currentUser?.id || 'guest';
+    if (activePersonalDataOwnerIdRef.current !== ownerId) return;
+    const storageKey = `kft_trip_plans_v2_${ownerId}`;
     scheduleStorageWrite(storageKey, tripPlans, 800);
-  }, [tripPlans, currentUser]);
+  }, [tripPlans, currentUser?.id]);
 
   useEffect(() => {
     if (isInitialAuxMountRef.current.notifications) {
@@ -4689,13 +4793,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     try {
+      const ownerId = currentUser?.id || 'guest';
+      if (activePersonalDataOwnerIdRef.current !== ownerId) return;
       if (bookmarks) {
-        localStorage.setItem('kft_bookmarks_v5', JSON.stringify(bookmarks));
+        localStorage.setItem(`kft_bookmarks_v5_${ownerId}`, JSON.stringify(bookmarks));
       }
     } catch (e) {
       console.warn('Storage sync failed for bookmarks:', e);
     }
-  }, [bookmarks]);
+  }, [bookmarks, currentUser?.id]);
 
   useEffect(() => {
     try {
@@ -5864,7 +5970,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, []);
 
-  // Bookmarking
+  // Bookmarking (Account-Isolated per User)
   const bookmarkSet = useMemo(() => new Set(bookmarks), [bookmarks]);
   const isBookmarked = useCallback((id: string) => bookmarkSet.has(id), [bookmarkSet]);
 
@@ -5874,7 +5980,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!exists) recordMeaningfulAction('favorite');
       const updated = exists ? prev.filter(item => item !== id) : [...prev, id];
       try {
-        localStorage.setItem('kft_bookmarks_v5', JSON.stringify(updated));
+        const ownerId = currentUser?.id || 'guest';
+        localStorage.setItem(`kft_bookmarks_v5_${ownerId}`, JSON.stringify(updated));
+        if (currentUser?.id) {
+          syncUserPersonalVaultWithCloud({
+            userId: currentUser.id,
+            localBookmarks: updated,
+            localWishlists: wishlists,
+            localTripPlans: tripPlans,
+            pushMerged: true,
+          }).catch(() => {});
+        }
       } catch {}
       showToast(
         exists 
@@ -5884,7 +6000,84 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       return updated;
     });
-  }, [language, showToast]);
+  }, [language, showToast, currentUser?.id, wishlists, tripPlans]);
+
+  // Account-Isolated Social Video Collection (TikTok, Facebook, YouTube)
+  const isVideoSaved = useCallback(
+    (item: OnlineFoodDiscoveryItem | { id?: string; videoId?: string; platform?: string; sourceUrl?: string; inlineVideoId?: string }): boolean => {
+      if (!currentUser?.id || !item) return false;
+      return isVideoCollectedByUser(currentUser.id, item);
+    },
+    [currentUser?.id, savedVideos]
+  );
+
+  const toggleSavedVideo = useCallback(
+    async (item: OnlineFoodDiscoveryItem): Promise<boolean> => {
+      if (!currentUser?.id) {
+        showToast(
+          tr(
+            language,
+            '🔒 សូមចូលគណនីរបស់អ្នកជាមុនសិន ដើម្បីរក្សាទុកវីដេអូផ្ទាល់ខ្លួន!',
+            '🔒 Please sign in to save videos to your personal account!',
+            '🔒 请先登录您的账号以收藏视频！'
+          ),
+          'warning'
+        );
+        setIsAuthModalOpen(true);
+        return false;
+      }
+      const res = await toggleCollectVideoForUser(currentUser.id, item);
+      setSavedVideos(res.videos);
+      showToast(
+        res.isSaved
+          ? tr(
+              language,
+              '✅ បានរក្សាទុកវីដេអូក្នុងគណនីរបស់អ្នក! (Synced to Cloud)',
+              '✅ Video saved to your personal account! (Synced to Cloud)',
+              '✅ 视频已收藏到您的个人账号！（已云端同步）'
+            )
+          : tr(
+              language,
+              'បានដកវីដេអូចេញពីបញ្ជីរក្សាទុករបស់អ្នក',
+              'Removed video from your saved collection',
+              '已从您的收藏列表中移除视频'
+            ),
+        res.isSaved ? 'success' : 'info'
+      );
+      return res.isSaved;
+    },
+    [currentUser?.id, language, showToast]
+  );
+
+  const removeSavedVideo = useCallback(
+    async (videoIdOrUrl: string): Promise<void> => {
+      if (!currentUser?.id) return;
+      const res = await removeCollectedVideoForUser(currentUser.id, videoIdOrUrl);
+      setSavedVideos(res.videos);
+      showToast(
+        tr(
+          language,
+          'បានដកវីដេអូចេញពីបញ្ជីរក្សាទុករបស់អ្នក',
+          'Removed video from your saved collection',
+          '已从您的收藏列表中移除视频'
+        ),
+        'info'
+      );
+    },
+    [currentUser?.id, language, showToast]
+  );
+
+  const refreshUserSavedVideos = useCallback(async (): Promise<UserSavedVideoRecord[]> => {
+    if (!currentUser?.id) {
+      setSavedVideos([]);
+      return [];
+    }
+    const synced = await syncUserVideoCollectionWithCloud(currentUser.id, true);
+    if (activePersonalDataOwnerIdRef.current === currentUser.id) {
+      setSavedVideos(synced);
+    }
+    return synced;
+  }, [currentUser?.id]);
 
   /**
    * Immediately synchronizes a newly logged-in / registered user against their atomic & aggregate
@@ -9187,6 +9380,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const logout = () => {
     revokeAdminSession();
     clearAdminToken();
+    clearActiveVideoSessionCacheOnAccountSwitch(null);
     try {
       localStorage.setItem('kft_explicit_logged_out_v1', '1');
       localStorage.removeItem('kft_current_user_v5');
@@ -9196,7 +9390,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       sessionStorage.removeItem('kft_admin_session_token');
     } catch {}
     lastCurrentUserSyncSigRef.current = '';
+    activePersonalDataOwnerIdRef.current = 'guest';
     setActiveManagedShopIdState(null);
+    setSavedVideos([]);
+    setBookmarks(loadBookmarksForUserKey('guest'));
+    setWishlists(loadWishlistsForUserKey('guest'));
+    setTripPlans(loadTripPlansForUserKey('guest'));
     setCurrentUser(null);
     latestSyncStateRef.current.currentUser = null;
     setIsAdminOpen(false);
@@ -16349,6 +16548,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         bookmarks,
         toggleBookmark,
         isBookmarked,
+        savedVideos,
+        toggleSavedVideo,
+        removeSavedVideo,
+        isVideoSaved,
+        refreshUserSavedVideos,
         addFood,
         updateFood,
         deleteFood,

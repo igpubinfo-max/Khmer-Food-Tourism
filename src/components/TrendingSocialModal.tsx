@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import {
   X, Utensils, ExternalLink, Navigation, Phone, Share2, Calendar,
   UtensilsCrossed, RefreshCw, ChefHat, CheckCircle2, Play,
-  Search, Sparkles, AlertCircle, RotateCcw, ChevronRight, Loader2, WifiOff
+  Search, Sparkles, AlertCircle, RotateCcw, ChevronRight, Loader2, WifiOff, Bookmark
 } from 'lucide-react';
 import {
   TrendingFoodCategorySlug,
@@ -45,6 +45,7 @@ import {
   OnlineFoodDiscoveryItem,
   resolveOriginalSocialAccountUrl,
 } from '../services/onlineFoodDiscoveryService';
+import { savedVideoRecordToDiscoveryItem } from '../services/userVideoCollectionService';
 
 const VIDEO_BATCH_SIZE = 12;
 
@@ -65,6 +66,11 @@ export const TrendingSocialModal: React.FC = () => {
     setSelectedRestaurant,
     setSelectedDestination,
     showToast,
+    savedVideos,
+    toggleSavedVideo,
+    isVideoSaved,
+    refreshUserSavedVideos,
+    setIsAuthModalOpen,
   } = useApp();
 
   const isKm = language === 'km';
@@ -78,7 +84,7 @@ export const TrendingSocialModal: React.FC = () => {
     const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 220);
     return () => clearTimeout(timer);
   }, [searchQuery]);
-  const [platformFilter, setPlatformFilter] = useState<'all' | 'tiktok' | 'facebook' | 'youtube'>('all');
+  const [platformFilter, setPlatformFilter] = useState<'all' | 'tiktok' | 'facebook' | 'youtube' | 'saved'>('all');
   const [categoryFilter, setCategoryFilter] = useState<TrendingFoodCategorySlug>('all');
 
   useEffect(() => {
@@ -102,6 +108,17 @@ export const TrendingSocialModal: React.FC = () => {
     window.addEventListener('kft:trending-platform', onPlatEvent);
     return () => window.removeEventListener('kft:trending-platform', onPlatEvent);
   }, []);
+  // Reset active inline player and refresh isolated user video collection when account switches
+  useEffect(() => {
+    setActivePlayerItemId(null);
+    setVerifyingPlayItemId(null);
+    if (platformFilter === 'saved' && (!currentUser?.id || currentUser.id === 'guest')) {
+      setPlatformFilter('all');
+    }
+    if (currentUser?.id && currentUser.id !== 'guest') {
+      refreshUserSavedVideos().catch(() => {});
+    }
+  }, [currentUser?.id, refreshUserSavedVideos]);
   const [provinceFilter, setProvinceFilter] = useState<string>('all');
   const [visibleVideoCount, setVisibleVideoCount] = useState<number>(VIDEO_BATCH_SIZE);
   const loadMoreVideosRef = useRef<HTMLDivElement | null>(null);
@@ -186,25 +203,12 @@ export const TrendingSocialModal: React.FC = () => {
   const handleReplaceUnavailableVideo = useCallback(
     (unavailableItem: OnlineFoodDiscoveryItem, notifyUser = false) => {
       if (unavailableItem.platform === 'tiktok' || unavailableItem.platform === 'facebook') {
-        const nextVid = getNextPlayableSocialVideoId(unavailableItem.inlineVideoId);
-        setDiscoveryItems((prev) =>
-          prev.map((x) =>
-            x.id === unavailableItem.id
-              ? {
-                  ...x,
-                  inlineVideoId: nextVid,
-                  sourceUrl: `https://www.youtube.com/watch?v=${nextVid}`,
-                  canInlineEmbed: true,
-                }
-              : x
-          )
-        );
-        setEmbedFallbackItemIds((prev) => {
-          const copy = { ...prev };
-          delete copy[unavailableItem.id];
-          return copy;
-        });
-        setPlayerReloadKey((prev) => prev + 1);
+        // CRITICAL: Never replace TikTok or Facebook videos with a YouTube video!
+        // Instead, show the direct official TikTok/Facebook creator link fallback UI cleanly.
+        setEmbedFallbackItemIds((prev) => ({
+          ...prev,
+          [unavailableItem.id]: true,
+        }));
         return;
       }
 
@@ -282,7 +286,7 @@ export const TrendingSocialModal: React.FC = () => {
 
         const res = await searchAndDiscoverSocialFood({
           query: '',
-          platform: 'youtube',
+          platform: 'all',
           categorySlug: 'all',
           foods,
           trendingFoods,
@@ -475,8 +479,17 @@ export const TrendingSocialModal: React.FC = () => {
       return Boolean(cleanSel && cleanItem.includes(cleanSel));
     };
 
-    const strictMatches = discoveryItems.filter((item) => {
-      if (platformFilter !== 'all' && item.platform !== platformFilter) return false;
+    const sourcePool: OnlineFoodDiscoveryItem[] =
+      platformFilter === 'saved'
+        ? (currentUser?.id && currentUser.id !== 'guest'
+            ? savedVideos
+                .filter((rec) => rec.userId === currentUser.id)
+                .map((rec) => savedVideoRecordToDiscoveryItem(rec))
+            : [])
+        : discoveryItems;
+
+    const strictMatches = sourcePool.filter((item) => {
+      if (platformFilter !== 'all' && platformFilter !== 'saved' && item.platform !== platformFilter) return false;
       if (categoryFilter !== 'all' && item.categorySlug !== categoryFilter) return false;
       if (!matchesProvince(item)) return false;
       if (debouncedSearchQuery.trim() && !matchesExpandedYouTubeQuery(item, debouncedSearchQuery)) return false;
@@ -493,7 +506,7 @@ export const TrendingSocialModal: React.FC = () => {
       );
     }
 
-    if (!debouncedSearchQuery.trim() && strictMatches.length > 1) {
+    if (platformFilter !== 'saved' && !debouncedSearchQuery.trim() && strictMatches.length > 1) {
       return rotateLatestVideosForScope(
         strictMatches,
         `${platformFilter}|${categoryFilter}|${provinceFilter}`,
@@ -502,7 +515,7 @@ export const TrendingSocialModal: React.FC = () => {
     }
 
     return deduplicateSingleVideoList(strictMatches);
-  }, [discoveryItems, platformFilter, categoryFilter, provinceFilter, debouncedSearchQuery, rotationCycle]);
+  }, [discoveryItems, savedVideos, currentUser?.id, platformFilter, categoryFilter, provinceFilter, debouncedSearchQuery, rotationCycle]);
 
   useEffect(() => {
     setVisibleVideoCount(VIDEO_BATCH_SIZE);
@@ -911,6 +924,16 @@ export const TrendingSocialModal: React.FC = () => {
             { id: 'tiktok' as const, label: 'TikTok', activeCls: 'bg-black text-white border border-white/30' },
             { id: 'facebook' as const, label: 'Facebook', activeCls: 'bg-[#1877F2] text-white' },
             { id: 'youtube' as const, label: 'YouTube', activeCls: 'bg-[#FF0000] text-white' },
+            {
+              id: 'saved' as const,
+              label: tr(
+                language,
+                `រក្សាទុក (${currentUser?.id && currentUser.id !== 'guest' ? savedVideos.length : 0})`,
+                `Saved (${currentUser?.id && currentUser.id !== 'guest' ? savedVideos.length : 0})`,
+                `已收藏 (${currentUser?.id && currentUser.id !== 'guest' ? savedVideos.length : 0})`
+              ),
+              activeCls: 'bg-amber-600 text-white border border-amber-300/40',
+            },
           ].map((plat) => (
             <button
               key={plat.id}
@@ -937,6 +960,7 @@ export const TrendingSocialModal: React.FC = () => {
                   <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.56 31.56 0 0 0 0 12a31.56 31.56 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.56 31.56 0 0 0 24 12a31.56 31.56 0 0 0-.5-5.81zM9.54 15.57V8.43L15.82 12l-6.28 3.57z" />
                 </svg>
               )}
+              {plat.id === 'saved' && <Bookmark className="w-3.5 h-3.5 fill-current" />}
               <span>{plat.label}</span>
             </button>
           ))}
@@ -1508,6 +1532,7 @@ export const TrendingSocialModal: React.FC = () => {
                           decoding="async"
                           onLoad={(e) => {
                             if (
+                              item.platform === 'youtube' &&
                               !isOffline &&
                               (typeof navigator === 'undefined' || navigator.onLine !== false) &&
                               e.currentTarget.naturalWidth > 0 &&
@@ -1517,14 +1542,18 @@ export const TrendingSocialModal: React.FC = () => {
                             }
                           }}
                           onError={(e) => {
-                            if (isOffline || (typeof navigator !== 'undefined' && navigator.onLine === false)) {
+                            if (
+                              item.platform !== 'youtube' ||
+                              isOffline ||
+                              (typeof navigator !== 'undefined' && navigator.onLine === false)
+                            ) {
                               const fallbackFood = item.matchedFoodId
                                 ? foods.find((x) => x.id === item.matchedFoodId)
                                 : undefined;
                               const fallbackSrc = fallbackFood
-                                ? resolveFoodPhotoUrl(fallbackFood.photoUrl, fallbackFood.id)
-                                : '/welcome/hero-bg.webp';
-                              if (e.currentTarget.src !== window.location.origin + fallbackSrc) {
+                                ? resolveFoodPhotoUrl(fallbackFood.photoUrl, fallbackFood.photoUpdatedAt, 640, fallbackFood.id)
+                                : '/foods/food-1.jpg';
+                              if (!e.currentTarget.src.endsWith(fallbackSrc)) {
                                 e.currentTarget.src = fallbackSrc;
                               }
                               return;
@@ -1629,11 +1658,44 @@ export const TrendingSocialModal: React.FC = () => {
                             {item.publishedOrUpdatedAt}
                           </span>
                         </span>
-                        <button
-                          type="button"
-                          onClick={() => openOriginalSocialAccount(item)}
-                          className="text-red-500 hover:text-red-400 font-bold flex items-center gap-1 cursor-pointer active:scale-95 transition"
-                        >
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!currentUser?.id || currentUser.id === 'guest') {
+                                showToast(
+                                  tr(
+                                    language,
+                                    'សូមចូលគណនីជាមុនសិន ដើម្បីរក្សាទុកវីដេអូផ្ទាល់ខ្លួនរបស់អ្នក',
+                                    'Please sign in to save videos to your personal collection',
+                                    '请先登录以将视频保存到您的个人收藏夹'
+                                  ),
+                                  'info'
+                                );
+                                setIsAuthModalOpen(true);
+                                return;
+                              }
+                              await toggleSavedVideo(item);
+                            }}
+                            className={`px-2 py-0.5 rounded-lg font-bold flex items-center gap-1 cursor-pointer active:scale-95 transition border ${
+                              isVideoSaved(item)
+                                ? 'bg-amber-500/20 text-amber-400 border-amber-400/50'
+                                : 'bg-slate-100 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:text-amber-400'
+                            }`}
+                          >
+                            <Bookmark className={`w-3 h-3 ${isVideoSaved(item) ? 'fill-current' : ''}`} />
+                            <span>
+                              {isVideoSaved(item)
+                                ? tr(language, 'បានរក្សាទុក', 'Saved', '已收藏')
+                                : tr(language, 'រក្សាទុក', 'Save', '收藏')}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openOriginalSocialAccount(item)}
+                            className="text-red-500 hover:text-red-400 font-bold flex items-center gap-1 cursor-pointer active:scale-95 transition"
+                          >
                           {renderPlatformVectorIcon(item.platform, 'w-3 h-3')}
                           <span>
                             {item.platform === 'tiktok'
@@ -1643,7 +1705,8 @@ export const TrendingSocialModal: React.FC = () => {
                               : tr(language, 'មើលលើ YouTube', 'View on YouTube', '在 YouTube 查看')}
                           </span>
                           <ExternalLink className="w-3 h-3" />
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -175,6 +175,130 @@ function decodeXmlEntities(str: string): string {
     .replace(/&#39;/g, "'");
 }
 
+
+const OFFICIAL_PRIORITY_TIKTOK_CREATORS: Array<{
+  handle: string;
+  displayName: string;
+  profileUrl: string;
+  defaultCategory: SocialDiscoveryItem['categorySlug'];
+  defaultThumb: string;
+}> = [
+  {
+    handle: 'eatame.eater',
+    displayName: 'Eatame (@eatame.eater)',
+    profileUrl: 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc',
+    defaultCategory: 'popular_food',
+    defaultThumb: '/foods/food-19.jpg',
+  },
+  {
+    handle: 'expressions_hub',
+    displayName: 'សារអាហារ - Expressions Hub (@expressions_hub)',
+    profileUrl: 'https://www.tiktok.com/@expressions_hub?is_from_webapp=1&sender_device=pc',
+    defaultCategory: 'famous_restaurant',
+    defaultThumb: '/foods/food-37.jpg',
+  },
+  {
+    handle: 'derdailyofficial',
+    displayName: 'DerDaily ដើរដេលី (@derdailyofficial)',
+    profileUrl: 'https://www.tiktok.com/@derdailyofficial?is_from_webapp=1&sender_device=pc',
+    defaultCategory: 'food_travel_vlog',
+    defaultThumb: '/foods/food-38.jpg',
+  },
+  {
+    handle: 'fatame.cooking',
+    displayName: 'Fatame (@fatame.cooking)',
+    profileUrl: 'https://www.tiktok.com/@fatame.cooking?is_from_webapp=1&sender_device=pc',
+    defaultCategory: 'popular_food',
+    defaultThumb: '/foods/food-21.jpg',
+  },
+  {
+    handle: 'foodwhisper_officials',
+    displayName: 'Food Whisper - ខ្សឹបឱ្យឃ្លាន (@foodwhisper_officials)',
+    profileUrl: 'https://www.tiktok.com/@foodwhisper_officials?is_from_webapp=1&sender_device=pc',
+    defaultCategory: 'popular_food',
+    defaultThumb: '/foods/food-24.jpg',
+  },
+];
+
+function tiktokSnowflakeToDate(videoId: string): string {
+  try {
+    const clean = videoId.trim();
+    if (!/^\d{18,20}$/.test(clean)) return new Date().toISOString().slice(0, 10);
+    const ms = Number(BigInt(clean) >> 32n) * 1000;
+    if (ms < 1514764800000 || ms > 2100000000000) return new Date().toISOString().slice(0, 10);
+    return new Date(ms).toISOString().slice(0, 10);
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
+}
+
+async function fetchPriorityTikTokCreatorEmbeds(): Promise<SocialDiscoveryItem[]> {
+  const discovered: SocialDiscoveryItem[] = [];
+  const foodFilterRe = /ម្ហូប|អាហារ|ញ៉ាំ|ឆ្ងាញ់|ធ្វើម្ហូប|សម្ល|អាំង|ចៀន|បង្អែម|ភេសជ្ជៈ|ហាង|ភោជនីយដ្ឋាន|ផ្សារ|កាហ្វេ|គុយទាវ|នំបញ្ចុក|អាម៉ុក|ឡុកឡាក់|បុកល្ហុង|សាច់អាំង|គ្រឿងសមុទ្រ|ត្រី|សាច់គោ|សាច់ជ្រូក|មាន់|ទា|បាយ|បបរ|មី|លត|នំ|ទេសចរណ៍|ដើរលេង|ភ្នំពេញ|សៀមរាប|កំពត|កែប|បាត់ដំបង|ព្រះសីហនុ|កំពង់ចាម|food|eat|cook|recipe|dish|restaurant|cafe|coffee|street\s*food|khmer|cambodia/i;
+
+  await Promise.allSettled(
+    OFFICIAL_PRIORITY_TIKTOK_CREATORS.map(async (creator) => {
+      try {
+        const res = await fetch(`https://www.tiktok.com/embed/@${creator.handle}`, {
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            Accept: 'text/html,application/xhtml+xml',
+          },
+        });
+        if (!res.ok) return;
+        const html = await res.text();
+        const match = html.match(
+          /<script id="__FRONTITY_CONNECT_STATE__" type="application\/json">([\s\S]*?)<\/script>/
+        );
+        if (!match || !match[1]) return;
+        const parsed = JSON.parse(match[1]);
+        const list = parsed?.source?.data?.[`/embed/@${creator.handle}`]?.videoList;
+        if (!Array.isArray(list)) return;
+
+        const isDedicatedFood = creator.handle !== 'derdailyofficial';
+        for (const v of list.slice(0, 6)) {
+          const vid = String(v?.id || '').trim();
+          if (!/^\d{15,22}$/.test(vid)) continue;
+          const desc = String(v?.desc || '').trim();
+          if (!isDedicatedFood && desc && !foodFilterRe.test(desc)) continue;
+          const pubDate = tiktokSnowflakeToDate(vid);
+          const cleanCaption = desc.replace(/#\S+/g, '').replace(/\s+/g, ' ').trim();
+          const title = cleanCaption.length >= 6 ? cleanCaption.slice(0, 95) : `វីដេអូម្ហូបថ្មីពី ${creator.displayName}`;
+
+          discovered.push({
+            id: `tt-live-${vid}`,
+            platform: 'tiktok',
+            titleKh: title,
+            titleEn: title,
+            titleZh: `${creator.displayName} 柬埔寨美食视频`,
+            descriptionKh: desc || `វីដេអូម្ហូបខ្មែរថ្មីពីគណនីផ្លូវការ @${creator.handle}`,
+            descriptionEn: desc || `Authentic Cambodian food video from @${creator.handle}`,
+            descriptionZh: desc || `来自 @${creator.handle} 的柬埔寨美食视频`,
+            thumbnailUrl: String(v?.coverUrl || v?.originCoverUrl || creator.defaultThumb),
+            sourceUrl: `https://www.tiktok.com/@${creator.handle}/video/${vid}`,
+            sourceName: creator.displayName,
+            authorHandle: `@${creator.handle}`,
+            publishedOrUpdatedAt: pubDate,
+            isLiveFetched: true,
+            verificationBadgeEn: 'TikTok Official Creator',
+            verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+            verificationBadgeZh: 'TikTok 官方美食创作者',
+            categorySlug: creator.defaultCategory,
+            provinceKh: 'រាជធានីភ្នំពេញ',
+            provinceEn: 'Phnom Penh',
+            relevanceScore: 99,
+          });
+        }
+      } catch {
+        // ignore individual creator fetch error
+      }
+    })
+  );
+
+  return discovered;
+}
+
 async function fetchApifyRecentItems(apifyToken: string): Promise<SocialDiscoveryItem[]> {
   if (!apifyToken) return [];
   const results: SocialDiscoveryItem[] = [];
@@ -267,8 +391,8 @@ Deno.serve(async (req: Request) => {
 
     // 1. TikTok & Facebook Discovery via Apify + Curated Cambodian Reviews
     if (platformFilter === 'all' || platformFilter === 'tiktok' || platformFilter === 'facebook') {
-      const apifyItems = await fetchApifyRecentItems(apifyToken);
-      const mergedSocial = [...apifyItems, ...CURATED_TIKTOK_FB_CAMBODIA_REVIEWS].filter((it) =>
+      const [apifyItems, liveTikTokCreators] = await Promise.all([fetchApifyRecentItems(apifyToken), fetchPriorityTikTokCreatorEmbeds()]);
+      const mergedSocial = [...liveTikTokCreators, ...apifyItems, ...CURATED_TIKTOK_FB_CAMBODIA_REVIEWS].filter((it) =>
         platformFilter === 'all' ? true : it.platform === platformFilter
       );
       items.push(...mergedSocial);

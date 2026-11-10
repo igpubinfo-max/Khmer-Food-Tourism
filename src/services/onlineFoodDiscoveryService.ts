@@ -4,10 +4,12 @@ import { FoodItem, TrendingFoodCategorySlug, TrendingFoodItem } from '../types';
 import { initialFoods } from '../data/seedData';
 import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { normalizeKhmerSearchText, expandMultilingualPlaceQuery, includesKhmerSafeToken } from './googlePlacesService';
+import { isSupabaseConfigured, pushCloudDocument, pullCloudDocument } from './supabaseService';
 
-export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v14_social_2026_verified_cache';
+export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v15_social_2026_verified_cache';
 const ONLINE_DISCOVERY_CUSTOM_URLS_KEY = 'kft_online_discovery_custom_urls_v1';
 const LEGACY_CACHE_KEYS = [
+  'kft_v14_social_2026_verified_cache',
   'kft_v13_social_2026_verified_cache',
   'kft_v12_social_2026_verified_cache',
   'kft_v11_social_2026_verified_cache',
@@ -1917,71 +1919,536 @@ export const POPULAR_CAMBODIA_TIKTOK_ACCOUNTS: PopularCambodiaTikTokAccount[] = 
   {
     id: 'eatame-eater',
     handle: '@eatame.eater',
-    displayName: 'Eatame Eater',
-    titleKh: 'Eatame Eater (@eatame.eater)',
+    displayName: 'Eatame (@eatame.eater)',
+    titleKh: 'Eatame (@eatame.eater)',
     url: 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc',
   },
   {
     id: 'expressions-hub',
     handle: '@expressions_hub',
-    displayName: 'Expressions Hub',
-    titleKh: 'Expressions Hub (@expressions_hub)',
+    displayName: 'សារអាហារ - Expressions Hub (@expressions_hub)',
+    titleKh: 'សារអាហារ - Expressions Hub (@expressions_hub)',
     url: 'https://www.tiktok.com/@expressions_hub?is_from_webapp=1&sender_device=pc',
   },
   {
     id: 'derdailyofficial',
     handle: '@derdailyofficial',
-    displayName: 'Der Daily Official',
-    titleKh: 'Der Daily Official (@derdailyofficial)',
+    displayName: 'DerDaily ដើរដេលី (@derdailyofficial)',
+    titleKh: 'DerDaily ដើរដេលី (@derdailyofficial)',
     url: 'https://www.tiktok.com/@derdailyofficial?is_from_webapp=1&sender_device=pc',
   },
   {
     id: 'fatame-cooking',
     handle: '@fatame.cooking',
-    displayName: 'Fatame Cooking',
-    titleKh: 'Fatame Cooking (@fatame.cooking)',
+    displayName: 'Fatame (@fatame.cooking)',
+    titleKh: 'Fatame (@fatame.cooking)',
     url: 'https://www.tiktok.com/@fatame.cooking?is_from_webapp=1&sender_device=pc',
   },
   {
     id: 'foodwhisper-officials',
     handle: '@foodwhisper_officials',
-    displayName: 'Food Whisper Officials',
-    titleKh: 'Food Whisper (@foodwhisper_officials)',
+    displayName: 'Food Whisper - ខ្សឹបឱ្យឃ្លាន (@foodwhisper_officials)',
+    titleKh: 'Food Whisper - ខ្សឹបឱ្យឃ្លាន (@foodwhisper_officials)',
     url: 'https://www.tiktok.com/@foodwhisper_officials?is_from_webapp=1&sender_device=pc',
   },
 ];
 
+/**
+ * Extracts a 19-digit TikTok video ID from a TikTok video URL or inlineVideoId.
+ */
+export function extractTikTokVideoId(input?: string | null): string | null {
+  if (!input || typeof input !== 'string') return null;
+  const trimmed = input.trim();
+  if (/^\d{15,22}$/.test(trimmed)) return trimmed;
+  const match = trimmed.match(/\/video\/(\d{15,22})/) || trimmed.match(/player\/v1\/(\d{15,22})/) || trimmed.match(/embed\/v2\/(\d{15,22})/);
+  return match && match[1] ? match[1] : null;
+}
+
+/**
+ * Derives the exact ISO publication date from a 19-digit TikTok Snowflake video ID.
+ * Top 32 bits of a TikTok video ID encode the Unix creation timestamp in seconds.
+ */
+export function tiktokSnowflakeIdToIsoDate(videoId: string): string {
+  try {
+    if (!/^\d{15,22}$/.test(videoId.trim())) return new Date().toISOString();
+    const sec = Number(BigInt(videoId.trim()) >> 32n);
+    if (sec > 1500000000 && sec < 4000000000) {
+      return new Date(sec * 1000).toISOString();
+    }
+  } catch {}
+  return new Date().toISOString();
+}
+
 export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
+  // ============================================================================
+  // 1. @eatame.eater (Eatame) — Latest Official TikTok Food Videos
+  // ============================================================================
   {
-    id: 'tt-kh-street-bbq-1',
+    id: 'tt-eatame-7706551126455291156',
     platform: 'tiktok',
-    titleKh: 'Review សាច់អាំង និងម្ហូបតាមផ្លូវផ្សាររាត្រីមាត់ទន្លេភ្នំពេញ (Eatame Eater)',
-    titleEn: 'Phnom Penh Night Market Street Food & Grilled Skewers Review (@eatame.eater)',
-    titleZh: '金边夜市街头美食与烧烤测评 (@eatame.eater)',
-    descriptionKh: 'វីដេអូ Review ម្ហូបតាមផ្លូវ សាច់អាំង គ្រឿងសមុទ្រ និងហាងឆ្ងាញ់ៗនៅភ្នំពេញ ពីគណនី TikTok ដ៏ពេញនិយម @eatame.eater។',
-    descriptionEn: 'Popular Cambodian TikTok food creator @eatame.eater exploring riverside night market grilled skewers and local stalls in Phnom Penh.',
-    descriptionZh: '柬埔寨人气 TikTok 美食博主 @eatame.eater 探索金边河畔夜市烧烤与街头小吃。',
-    thumbnailUrl: '/foods/food-19.jpg',
-    sourceUrl: 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc',
+    titleKh: '🍗 ប៉ះរបស់ពិតហើយ មាន់បំពងកូរ៉េឈ្ងុយឆ្ងាញ់ Puradak Cambodia (@eatame.eater)',
+    titleEn: 'Puradak Crispy Fried Chicken Review in Phnom Penh (@eatame.eater)',
+    titleZh: '金边 Puradak 酥脆炸鸡探店测评 (@eatame.eater)',
+    descriptionKh: '🍗 ប៉ះរបស់ពិតហើយ គ្រាន់ឃើញមាន់បំពងនេះភ្លាម គេងស្រក់ទឹកមាត់ហ្មង 😋😁 Puradak Cambodia #ChickenWings #chicken — ពីគណនីផ្លូវការ @eatame.eater។',
+    descriptionEn: 'Official TikTok food review by @eatame.eater showcasing crispy Puradak chicken wings and local flavors in Phnom Penh.',
+    descriptionZh: '@eatame.eater 探访金边人气酥脆炸鸡专门店 Puradak Cambodia。',
+    thumbnailUrl: '/foods/food-6.jpg',
+    sourceUrl: 'https://www.tiktok.com/@eatame.eater/video/7706551126455291156',
     originalAccountUrl: 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc',
-    inlineVideoId: 'DZLmPv-P978',
-    sourceName: 'Eatame Eater (@eatame.eater)',
+    inlineVideoId: '7706551126455291156',
+    sourceName: 'Eatame (@eatame.eater)',
     authorHandle: '@eatame.eater',
-    publishedOrUpdatedAt: '2026-11-09',
+    publishedOrUpdatedAt: '2026-11-10T14:34:19.000Z',
     isLiveFetched: true,
-    verificationBadgeEn: 'TikTok Popular Creator',
+    verificationBadgeEn: 'TikTok Official Creator',
     verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
     verificationBadgeZh: 'TikTok 认证美食博主',
     categorySlug: 'popular_food',
     provinceKh: 'រាជធានីភ្នំពេញ',
     provinceEn: 'Phnom Penh',
-    matchedFoodId: 'food-19',
-    matchedFoodNameKh: 'សាច់គោអាំងទឹកប្រហុក',
-    matchedFoodNameEn: 'Grilled Beef with Prahok Dip',
+    matchedFoodId: 'food-6',
+    matchedFoodNameKh: 'មាន់ដុតទឹកឃ្មុំ',
+    matchedFoodNameEn: 'Honey Roasted Chicken',
     relevanceScore: 100,
     isPlayableVerified: true,
     canInlineEmbed: true,
   },
+  {
+    id: 'tt-eatame-7706523261156298004',
+    platform: 'tiktok',
+    titleKh: 'ត្រីខកំប៉ុងខ្មែរ KROYA ក្រយា ផលិតផលខ្មែរដំបូងគេបង្អស់ (@eatame.eater)',
+    titleEn: 'First Cambodian Canned Fish Factory KROYA Review (@eatame.eater)',
+    titleZh: '柬埔寨首家本土罐头鱼品牌 KROYA 探访 (@eatame.eater)',
+    descriptionKh: 'នេះរោងចក្រត្រីខកំប៉ុងខ្មែរ ដំបូងគេបង្អស់ចេញដំណើរការផលិតហើយ គាំទ្រអោយបានគ្រប់ៗគ្នា 🇰🇭🙏 ត្រីខ @KROYA- ក្រយា — ពី @eatame.eater។',
+    descriptionEn: 'Eatame (@eatame.eater) visiting KROYA, the first Cambodian canned fish factory producing authentic local food products.',
+    descriptionZh: '@eatame.eater 实地探访柬埔寨首家本土鱼罐头生产工厂 KROYA。',
+    thumbnailUrl: '/foods/food-19.jpg',
+    sourceUrl: 'https://www.tiktok.com/@eatame.eater/video/7706523261156298004',
+    originalAccountUrl: 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc',
+    inlineVideoId: '7706523261156298004',
+    sourceName: 'Eatame (@eatame.eater)',
+    authorHandle: '@eatame.eater',
+    publishedOrUpdatedAt: '2026-11-10T12:46:11.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Official Creator',
+    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 认证美食博主',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    relevanceScore: 99,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-eatame-7706176025062821140',
+    platform: 'tiktok',
+    titleKh: 'ភេសជ្ជៈ និងកាហ្វេកែវធំៗ Mega MGC Coffee សាខាបាក់ទូក (@eatame.eater)',
+    titleEn: 'Mega MGC Coffee Cambodia Bak Touk Branch Drinks Review (@eatame.eater)',
+    titleZh: '金边 Mega MGC Coffee 超大杯特色饮品测评 (@eatame.eater)',
+    descriptionKh: 'ប្លែកមែនភេសជ្ជៈគេមួយៗ សំខាន់កែវធំៗ ណាស់ កុំភ្លេចទៅសាកសាខាបាក់ទូកត្រៀមបើកហើយ 😋 Mega MGC Coffee Cambodia 🇰🇭 — ពី @eatame.eater។',
+    descriptionEn: 'TikTok review by @eatame.eater tasting giant signature coffees and refreshing drinks at Mega MGC Coffee Cambodia.',
+    descriptionZh: '@eatame.eater 测评金边新开业 Mega MGC Coffee 特色超大杯冰饮与咖啡。',
+    thumbnailUrl: '/foods/food-28.jpg',
+    sourceUrl: 'https://www.tiktok.com/@eatame.eater/video/7706176025062821140',
+    originalAccountUrl: 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc',
+    inlineVideoId: '7706176025062821140',
+    sourceName: 'Eatame (@eatame.eater)',
+    authorHandle: '@eatame.eater',
+    publishedOrUpdatedAt: '2026-11-09T14:18:45.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Official Creator',
+    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 认证美食博主',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    relevanceScore: 98,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+
+  // ============================================================================
+  // 2. @derdailyofficial (DerDaily ដើរដេលី) — Latest Official TikTok Food Videos
+  // ============================================================================
+  {
+    id: 'tt-derdaily-7706531805775629620',
+    platform: 'tiktok',
+    titleKh: 'មឹកអាំងយាយសក់ក្រង ផ្សារក្ដាម ខេត្តកែប ទឹកត្រីកោះកុងហឹរឆ្ងាញ់ (@derdailyofficial)',
+    titleEn: 'Famous Grilled Squid at Kep Crab Market Review (@derdailyofficial)',
+    titleZh: '白马省螃蟹市场网红炭烤鱿鱼探店测评 (@derdailyofficial)',
+    descriptionKh: 'នរណាខ្លះជាម៉ូយរបស់មឹកអាំងយាយសក់ក្រង នៅខាងផ្សារក្ដាម ខេត្តកែបនេះ 😁 #derdaily — ពីគណនីផ្លូវការ @derdailyofficial។',
+    descriptionEn: 'DerDaily (@derdailyofficial) reviewing the famous charcoal-grilled fresh squid stall at Kep Crab Market.',
+    descriptionZh: '@derdailyofficial 探访白马省螃蟹市场超人气现烤鲜鱿鱼摊。',
+    thumbnailUrl: '/foods/food-37.jpg',
+    sourceUrl: 'https://www.tiktok.com/@derdailyofficial/video/7706531805775629620',
+    originalAccountUrl: 'https://www.tiktok.com/@derdailyofficial?is_from_webapp=1&sender_device=pc',
+    inlineVideoId: '7706531805775629620',
+    sourceName: 'DerDaily ដើរដេលី (@derdailyofficial)',
+    authorHandle: '@derdailyofficial',
+    publishedOrUpdatedAt: '2026-11-10T13:19:20.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Official Creator',
+    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 认证旅游美食博主',
+    categorySlug: 'food_travel_vlog',
+    provinceKh: 'ខេត្តកែប',
+    provinceEn: 'Kep',
+    matchedFoodId: 'food-37',
+    relevanceScore: 100,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-derdaily-7705786533881711893',
+    platform: 'tiktok',
+    titleKh: 'ម្ហូបគ្រឿងសមុទ្រតាមដងមាត់ព្រែកកំពត Red Seafood (@derdailyofficial)',
+    titleEn: 'Kampot Riverfront Red Seafood Street Food Review (@derdailyofficial)',
+    titleZh: '贡布河畔 Red Seafood 海鲜街头美食探店 (@derdailyofficial)',
+    descriptionKh: 'រៀនតែសៅរ៍អាទិត្យ ទំនេរចន្ទដល់សុក្រមិនដឹងធ្វើអី ក៏ចេញមកលក់ម្ហូបតាមដងមាត់ព្រែកកំពត 🏜️ Red Seafood #kampot #seafood #streetfood — ពី @derdailyofficial។',
+    descriptionEn: 'DerDaily (@derdailyofficial) exploring fresh seafood dishes along the scenic Kampot riverfront at Red Seafood.',
+    descriptionZh: '@derdailyofficial 探访贡布河畔人气海鲜小吃摊 Red Seafood。',
+    thumbnailUrl: '/foods/food-15.jpg',
+    sourceUrl: 'https://www.tiktok.com/@derdailyofficial/video/7705786533881711893',
+    originalAccountUrl: 'https://www.tiktok.com/@derdailyofficial?is_from_webapp=1&sender_device=pc',
+    inlineVideoId: '7705786533881711893',
+    sourceName: 'DerDaily ដើរដេលី (@derdailyofficial)',
+    authorHandle: '@derdailyofficial',
+    publishedOrUpdatedAt: '2026-11-08T13:07:18.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Official Creator',
+    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 认证旅游美食博主',
+    categorySlug: 'food_travel_vlog',
+    provinceKh: 'ខេត្តកំពត',
+    provinceEn: 'Kampot',
+    matchedFoodId: 'food-15',
+    relevanceScore: 99,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-derdaily-7705441311662279957',
+    platform: 'tiktok',
+    titleKh: 'បាយស្នូកក្តាម ម្ហូបពេលព្រឹកដ៏ល្បីប្រចាំខេត្តកំពត (@derdailyofficial)',
+    titleEn: 'Famous Kampot Crab Shell Rice Breakfast Review (@derdailyofficial)',
+    titleZh: '贡布特色早餐蟹壳饭探店测评 (@derdailyofficial)',
+    descriptionKh: 'អ្នកកំពតអាចនឹងស្គាល់កន្លែងរបស់គាត់ច្បាស់😋 🏜️ បាយស្នូកក្តាម #kampot #crab #breakfast — ពីគណនីផ្លូវការ @derdailyofficial។',
+    descriptionEn: 'DerDaily (@derdailyofficial) tasting authentic Kampot steamed rice in crab shell (Bay Snouk Kdam) for breakfast.',
+    descriptionZh: '@derdailyofficial 品尝贡布当地家喻户晓的传统蟹壳蒸饭早餐。',
+    thumbnailUrl: '/foods/food-37.jpg',
+    sourceUrl: 'https://www.tiktok.com/@derdailyofficial/video/7705441311662279957',
+    originalAccountUrl: 'https://www.tiktok.com/@derdailyofficial?is_from_webapp=1&sender_device=pc',
+    inlineVideoId: '7705441311662279957',
+    sourceName: 'DerDaily ដើរដេលី (@derdailyofficial)',
+    authorHandle: '@derdailyofficial',
+    publishedOrUpdatedAt: '2026-11-07T14:47:46.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Official Creator',
+    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 认证旅游美食博主',
+    categorySlug: 'popular_food',
+    provinceKh: 'ខេត្តកំពត',
+    provinceEn: 'Kampot',
+    matchedFoodId: 'food-37',
+    relevanceScore: 98,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+
+  // ============================================================================
+  // 3. @fatame.cooking (Fatame) — Latest Official TikTok Khmer Cooking Videos
+  // ============================================================================
+  {
+    id: 'tt-fatame-7706530697506245909',
+    platform: 'tiktok',
+    titleKh: 'របៀបធ្វើខត្រីកាម៉ុង ម្ហូបគ្រួសារខ្មែររសជាតិដើម (@fatame.cooking)',
+    titleEn: 'Authentic Khmer Braised Mackerel Fish (Khor Trei Kamong) Recipe (@fatame.cooking)',
+    titleZh: '高棉家常红烧鲭鱼 (Khor Trei) 传统做法 (@fatame.cooking)',
+    descriptionKh: 'របៀបធ្វើខត្រីកាម៉ុង 😋 LEANG LENG Fish Sauce លាង ឡេង #fishrecipe #cookingathome — ពីគណនីផ្លូវការ @fatame.cooking។',
+    descriptionEn: 'Fatame (@fatame.cooking) demonstrating how to cook traditional Cambodian caramelized braised mackerel fish at home.',
+    descriptionZh: '@fatame.cooking 分享正宗高棉家常焦糖鱼露红烧鱼食谱。',
+    thumbnailUrl: '/foods/food-21.jpg',
+    sourceUrl: 'https://www.tiktok.com/@fatame.cooking/video/7706530697506245909',
+    originalAccountUrl: 'https://www.tiktok.com/@fatame.cooking?is_from_webapp=1&sender_device=pc',
+    inlineVideoId: '7706530697506245909',
+    sourceName: 'Fatame (@fatame.cooking)',
+    authorHandle: '@fatame.cooking',
+    publishedOrUpdatedAt: '2026-11-10T13:15:02.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Official Creator',
+    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 认证美食博主',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-21',
+    relevanceScore: 100,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-fatame-7705766217222507796',
+    platform: 'tiktok',
+    titleKh: 'មាន់ចំហុយស្លឹកចេក ទឹកជ្រលក់ម្រេចបុក ឆ្ងាញ់ជក់មាត់ (@fatame.cooking)',
+    titleEn: 'Steamed Chicken in Banana Leaf with Crushed Pepper Dip (@fatame.cooking)',
+    titleZh: '香蕉叶清蒸鸡配现捣胡椒蘸酱食谱 (@fatame.cooking)',
+    descriptionKh: 'មាន់ចំហុយស្លឹកចេក ទឹកជ្រលក់ម្រេចបុក ឆ្ងាញ់ជក់មាត់ 😋😋 #chicken #chickenrecipes — ពីគណនីផ្លូវការ @fatame.cooking។',
+    descriptionEn: 'Fatame (@fatame.cooking) preparing aromatic Cambodian banana-leaf steamed chicken served with Kampot pepper lime dip.',
+    descriptionZh: '@fatame.cooking 制作香气四溢的高棉香蕉叶蒸鸡与秘制胡椒青柠酱。',
+    thumbnailUrl: '/foods/food-6.jpg',
+    sourceUrl: 'https://www.tiktok.com/@fatame.cooking/video/7705766217222507796',
+    originalAccountUrl: 'https://www.tiktok.com/@fatame.cooking?is_from_webapp=1&sender_device=pc',
+    inlineVideoId: '7705766217222507796',
+    sourceName: 'Fatame (@fatame.cooking)',
+    authorHandle: '@fatame.cooking',
+    publishedOrUpdatedAt: '2026-11-08T11:48:28.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Official Creator',
+    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 认证美食博主',
+    categorySlug: 'popular_food',
+    provinceKh: 'ខេត្តសៀមរាប',
+    provinceEn: 'Siem Reap',
+    matchedFoodId: 'food-6',
+    relevanceScore: 99,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-fatame-7704663234409696532',
+    platform: 'tiktok',
+    titleKh: 'របៀបធ្វើ ស្ងោរជ្រក់ក្បាលត្រីឆ្តោរ ជូរជ្រះឆ្ងាញ់មិនឆ្អាប (@fatame.cooking)',
+    titleEn: 'Khmer Sour Snakehead Fish Soup (Sngor Chruk Trei Chdor) Recipe (@fatame.cooking)',
+    titleZh: '高棉传统酸汤黑鱼头 (Sngor Chruk) 正宗做法 (@fatame.cooking)',
+    descriptionKh: 'របៀបធ្វើ ស្ងោរជ្រក់ក្បាលត្រីឆ្តោរ កុំអោយឆ្អាប ហើយជូរជ្រះឆ្ងាញ់ 😋 #fishrecipe — ពីគណនីផ្លូវការ @fatame.cooking។',
+    descriptionEn: 'Fatame (@fatame.cooking) sharing the traditional Khmer secret to cooking fragrant, non-fishy sour snakehead fish soup.',
+    descriptionZh: '@fatame.cooking 教学如何制作鲜美无腥味的柬埔寨传统香茅酸汤鱼。',
+    thumbnailUrl: '/foods/food-4.jpg',
+    sourceUrl: 'https://www.tiktok.com/@fatame.cooking/video/7704663234409696532',
+    originalAccountUrl: 'https://www.tiktok.com/@fatame.cooking?is_from_webapp=1&sender_device=pc',
+    inlineVideoId: '7704663234409696532',
+    sourceName: 'Fatame (@fatame.cooking)',
+    authorHandle: '@fatame.cooking',
+    publishedOrUpdatedAt: '2026-11-05T12:28:19.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Official Creator',
+    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 认证美食博主',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-4',
+    relevanceScore: 98,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+
+  // ============================================================================
+  // 4. @expressions_hub (សារអាហារ - Expressions Hub) — Latest Official TikTok Videos
+  // ============================================================================
+  {
+    id: 'tt-expressions-7706185282973912328',
+    platform: 'tiktok',
+    titleKh: 'ម្ហូបក្រិច និងភោជនីយដ្ឋានល្បីនៅបាសាក់លែន Elia Greek Kitchen (@expressions_hub)',
+    titleEn: 'Bassac Lane Dining Review: Elia Greek Kitchen Phnom Penh (@expressions_hub)',
+    titleZh: '金边 Bassac Lane 美食街探店测评 (@expressions_hub)',
+    descriptionKh: 'ម្ហូបក្រិចនៅបាសាក់លែន Elia Greek Kitchen — វីដេអូ Review ភោជនីយដ្ឋានពីគណនីផ្លូវការ @expressions_hub។',
+    descriptionEn: 'Expressions Hub (@expressions_hub) reviewing popular dining spots and dishes at Bassac Lane in Phnom Penh.',
+    descriptionZh: '@expressions_hub 探访金边百色河美食街人气餐厅。',
+    thumbnailUrl: '/foods/food-10.jpg',
+    sourceUrl: 'https://www.tiktok.com/@expressions_hub/video/7706185282973912328',
+    originalAccountUrl: 'https://www.tiktok.com/@expressions_hub?is_from_webapp=1&sender_device=pc',
+    inlineVideoId: '7706185282973912328',
+    sourceName: 'សារអាហារ - Expressions Hub (@expressions_hub)',
+    authorHandle: '@expressions_hub',
+    publishedOrUpdatedAt: '2026-11-09T14:54:39.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Official Creator',
+    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 认证美食与旅游博主',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    relevanceScore: 99,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-expressions-7705815110261968136',
+    platform: 'tiktok',
+    titleKh: 'តូបលក់គ្រឿងសមុទ្រដែលមិនដែលឃើញស្ងាត់ ភ្នំពេញមីស្ទ័រក្រេប (@expressions_hub)',
+    titleEn: 'Busy Phnom Penh Mr. Crab Seafood Stall Review (@expressions_hub)',
+    titleZh: '金边天天爆满的海鲜摊 Mr. Crab 测评 (@expressions_hub)',
+    descriptionKh: 'តូបលក់គ្រឿងសមុទ្រដែលមិនដែលឃើញស្ងាត់ ភ្នំពេញមីស្ទ័រក្រេប — ពីគណនីផ្លូវការ @expressions_hub។',
+    descriptionEn: 'Expressions Hub (@expressions_hub) visiting the packed Mr. Crab street seafood stall in Phnom Penh.',
+    descriptionZh: '@expressions_hub 探访金边超火爆街头海鲜档口。',
+    thumbnailUrl: '/foods/food-15.jpg',
+    sourceUrl: 'https://www.tiktok.com/@expressions_hub/video/7705815110261968136',
+    originalAccountUrl: 'https://www.tiktok.com/@expressions_hub?is_from_webapp=1&sender_device=pc',
+    inlineVideoId: '7705815110261968136',
+    sourceName: 'សារអាហារ - Expressions Hub (@expressions_hub)',
+    authorHandle: '@expressions_hub',
+    publishedOrUpdatedAt: '2026-11-08T14:58:12.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Official Creator',
+    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 认证美食与旅游博主',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-15',
+    relevanceScore: 99,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-expressions-7703563261991587073',
+    platform: 'tiktok',
+    titleKh: 'បាយទា បបរខកង្កែប និងលតឆាសាច់ទា រ៉ូស ឆយស៍ Roast Choice (@expressions_hub)',
+    titleEn: 'Roast Duck Rice, Braised Frog Porridge & Duck Lort Cha Review (@expressions_hub)',
+    titleZh: '金边 Roast Choice 烧鸭饭、田鸡粥与鸭肉炒粉测评 (@expressions_hub)',
+    descriptionKh: 'ផ្លូវលំក្រោយអគារកាណាឌីយ៉ា ឆ្លងផ្លូវបន្តិចដល់បាយទាទើបបើកថ្មី មានបបរខកង្កែប លតឆាសាច់ទាទៀត រ៉ូស ឆយស៍-Roast Choice — ពី @expressions_hub។',
+    descriptionEn: 'Expressions Hub (@expressions_hub) reviewing roast duck rice, braised frog porridge, and stir-fried pin noodles behind Canadia Tower.',
+    descriptionZh: '@expressions_hub 探访金边加华大厦后街新开烧鸭饭与特色田鸡粥店。',
+    thumbnailUrl: '/foods/food-38.jpg',
+    sourceUrl: 'https://www.tiktok.com/@expressions_hub/video/7703563261991587073',
+    originalAccountUrl: 'https://www.tiktok.com/@expressions_hub?is_from_webapp=1&sender_device=pc',
+    inlineVideoId: '7703563261991587073',
+    sourceName: 'សារអាហារ - Expressions Hub (@expressions_hub)',
+    authorHandle: '@expressions_hub',
+    publishedOrUpdatedAt: '2026-11-02T13:20:09.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Official Creator',
+    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 认证美食与旅游博主',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-38',
+    relevanceScore: 98,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+
+  // ============================================================================
+  // 5. @foodwhisper_officials (Food Whisper - ខ្សឹបឱ្យឃ្លាន) — Latest Official TikTok Videos
+  // ============================================================================
+  {
+    id: 'tt-foodwhisper-7706023441001958663',
+    platform: 'tiktok',
+    titleKh: 'ធូណាសាស៊ីមិ និងម្ហូបជប៉ុនដោយចុងភៅខ្មែរ Tono Izakaya (@foodwhisper_officials)',
+    titleEn: 'Tono Izakaya Phnom Penh Khmer Chef Sashimi & Dining Review (@foodwhisper_officials)',
+    titleZh: '金边 Tono Izakaya 餐厅探店测评 (@foodwhisper_officials)',
+    descriptionKh: 'ធូណាសាស៊ីមិ ចុះ50% ម្ហូបជប៉ុននៅនេះចុងភៅខ្មែរ ប៉ុន្តែអត់មាត់អត់កដូចចុងភៅជប៉ុន Tono Izakaya — ពីគណនីផ្លូវការ @foodwhisper_officials។',
+    descriptionEn: 'Food Whisper (@foodwhisper_officials) reviewing fresh sashimi and signature dishes crafted by Cambodian chefs at Tono Izakaya.',
+    descriptionZh: '@foodwhisper_officials 测评金边 Tono Izakaya 餐厅招牌料理。',
+    thumbnailUrl: '/foods/food-2.jpg',
+    sourceUrl: 'https://www.tiktok.com/@foodwhisper_officials/video/7706023441001958663',
+    originalAccountUrl: 'https://www.tiktok.com/@foodwhisper_officials?is_from_webapp=1&sender_device=pc',
+    inlineVideoId: '7706023441001958663',
+    sourceName: 'Food Whisper - ខ្សឹបឱ្យឃ្លាន (@foodwhisper_officials)',
+    authorHandle: '@foodwhisper_officials',
+    publishedOrUpdatedAt: '2026-11-09T04:26:37.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Official Creator',
+    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 认证美食博主',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    relevanceScore: 99,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-foodwhisper-7704666283106684178',
+    platform: 'tiktok',
+    titleKh: 'បាយខហុងជើងជ្រូក បាយផាក់ឡូវ បាយមាន់ស្ងោរ ហាងផ្ទះបាយសាច់ខ្វៃ ផ្លូវ 60m (@foodwhisper_officials)',
+    titleEn: 'Braised Pork Trotters, Phak Lov & Steamed Chicken Rice on 60m Road (@foodwhisper_officials)',
+    titleZh: '金边 60 米路招牌卤猪脚饭、卤味饭与白切鸡饭测评 (@foodwhisper_officials)',
+    descriptionKh: 'បាយខហុងជើងជ្រូក បាយផាក់ឡូវ បាយមាន់ស្ងោរ ឥឡូវជាប់ម៉ូយហើយ ហាង ផ្ទះបាយសាច់ខ្វៃ សាខាផ្លូវ60m ហួស ISPP បន្តិច — ពី @foodwhisper_officials។',
+    descriptionEn: 'Food Whisper (@foodwhisper_officials) tasting braised pork trotters rice, Khmer Phak Lov, and Hainanese chicken rice on 60m Road.',
+    descriptionZh: '@foodwhisper_officials 探访金边 60 米路人气卤猪脚饭与高棉卤味餐厅。',
+    thumbnailUrl: '/foods/food-19.jpg',
+    sourceUrl: 'https://www.tiktok.com/@foodwhisper_officials/video/7704666283106684178',
+    originalAccountUrl: 'https://www.tiktok.com/@foodwhisper_officials?is_from_webapp=1&sender_device=pc',
+    inlineVideoId: '7704666283106684178',
+    sourceName: 'Food Whisper - ខ្សឹបឱ្យឃ្លាន (@foodwhisper_officials)',
+    authorHandle: '@foodwhisper_officials',
+    publishedOrUpdatedAt: '2026-11-05T12:40:09.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Official Creator',
+    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 认证美食博主',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-19',
+    relevanceScore: 99,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-foodwhisper-7703546448016706836',
+    platform: 'tiktok',
+    titleKh: 'បាញ់ឌុក ស៊ុបខ្យង ម្ហូបខ្មែរត្រូវមាត់នៅ ភោជនីយដ្ឋានសង្ក្រាន្ត បឹងកក់ (@foodwhisper_officials)',
+    titleEn: 'Banh Duk & Khmer Snail Soup at Sangkran Boeung Kak Restaurant (@foodwhisper_officials)',
+    titleZh: '金边万谷湖 Sangkran 餐厅传统高棉米糕与螺肉汤测评 (@foodwhisper_officials)',
+    descriptionKh: 'បាញ់ឌុក ស៊ុបខ្យង ម្ហូបនៅនេះសុទ្ធតែត្រូវមាត់ ភោជនីយដ្ឋានសង្ក្រាន្ត បឹងកក់ — ពីគណនីផ្លូវការ @foodwhisper_officials។',
+    descriptionEn: 'Food Whisper (@foodwhisper_officials) reviewing traditional Khmer Banh Duk and aromatic snail soup at Sangkran Restaurant Boeung Kak.',
+    descriptionZh: '@foodwhisper_officials 品尝金边 Sangkran 餐厅地道高棉风味小吃与螺肉汤。',
+    thumbnailUrl: '/foods/food-1.jpg',
+    sourceUrl: 'https://www.tiktok.com/@foodwhisper_officials/video/7703546448016706836',
+    originalAccountUrl: 'https://www.tiktok.com/@foodwhisper_officials?is_from_webapp=1&sender_device=pc',
+    inlineVideoId: '7703546448016706836',
+    sourceName: 'Food Whisper - ខ្សឹបឱ្យឃ្លាន (@foodwhisper_officials)',
+    authorHandle: '@foodwhisper_officials',
+    publishedOrUpdatedAt: '2026-11-02T12:14:54.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Official Creator',
+    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 认证美食博主',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-1',
+    relevanceScore: 98,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-foodwhisper-7702830319371570453',
+    platform: 'tiktok',
+    titleKh: 'មីគោក សរសៃមីធ្វើខ្លួនឯង អ៊ីពិសី ក្រោយផ្សារក្រោម ខេត្តសៀមរាប (@foodwhisper_officials)',
+    titleEn: 'Handmade Dry Noodles Behind PsarLeu/PsarKrom Market in Siem Reap (@foodwhisper_officials)',
+    titleZh: '暹粒老市场后街手工干拌面探店测评 (@foodwhisper_officials)',
+    descriptionKh: 'មីគោក សរសៃមីធ្វើខ្លួនឯង អ៊ីពិសី 2នាក់ម៉ែកូន ខាងក្រោយផ្សារក្រោម ខេត្តសៀមរាប — ពី @foodwhisper_officials។',
+    descriptionEn: 'Food Whisper (@foodwhisper_officials) visiting Auntie Pisey handmade dry egg noodles behind Psar Krom in Siem Reap.',
+    descriptionZh: '@foodwhisper_officials 探访暹粒省深受本地人喜爱的母女手工干拌面店。',
+    thumbnailUrl: '/foods/food-36.jpg',
+    sourceUrl: 'https://www.tiktok.com/@foodwhisper_officials/video/7702830319371570453',
+    originalAccountUrl: 'https://www.tiktok.com/@foodwhisper_officials?is_from_webapp=1&sender_device=pc',
+    inlineVideoId: '7702830319371570453',
+    sourceName: 'Food Whisper - ខ្សឹបឱ្យឃ្លាន (@foodwhisper_officials)',
+    authorHandle: '@foodwhisper_officials',
+    publishedOrUpdatedAt: '2026-10-31T13:55:53.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Official Creator',
+    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 认证美食博主',
+    categorySlug: 'popular_food',
+    provinceKh: 'ខេត្តសៀមរាប',
+    provinceEn: 'Siem Reap',
+    matchedFoodId: 'food-36',
+    relevanceScore: 98,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+
+  // ============================================================================
+  // 6. Verified Facebook Pages — Cambodian Food, Restaurants & Travel Reviews
+  // ============================================================================
   {
     id: 'fb-kh-riverfront-sunset-1',
     platform: 'facebook',
@@ -1994,7 +2461,6 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     thumbnailUrl: '/welcome/places.webp',
     sourceUrl: 'https://www.facebook.com/share/174NresCCL/?mibextid=wwXIfr',
     originalAccountUrl: 'https://www.facebook.com/share/174NresCCL/?mibextid=wwXIfr',
-    inlineVideoId: 'zTn3_Je07ao',
     sourceName: 'Oun Roth Daily Life (Facebook)',
     authorHandle: 'Oun Roth Daily Life',
     publishedOrUpdatedAt: '2026-11-08',
@@ -2005,39 +2471,9 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     categorySlug: 'tourist_attraction',
     provinceKh: 'រាជធានីភ្នំពេញ',
     provinceEn: 'Phnom Penh',
-    relevanceScore: 99,
+    relevanceScore: 97,
     isPlayableVerified: true,
-    canInlineEmbed: true,
-  },
-  {
-    id: 'tt-kh-amok-grilled-chicken-2',
-    platform: 'tiktok',
-    titleKh: 'Review អាម៉ុកត្រី និងម្ហូបគ្រួសារខ្មែររសជាតិដើម (Fatame Cooking)',
-    titleEn: 'Authentic Khmer Fish Amok & Traditional Cooking Review (@fatame.cooking)',
-    titleZh: '地道高棉阿莫克鱼与传统家常美食测评 (@fatame.cooking)',
-    descriptionKh: 'ការបង្ហាញពីរបៀបធ្វើម្ហូបខ្មែរ អាម៉ុកត្រីខ្ទិះដូងឈ្ងុយឆ្ងាញ់តាមក្បួនគ្រួសារខ្មែរ ពីគណនី TikTok ដ៏ល្បី @fatame.cooking។',
-    descriptionEn: 'Fatame Cooking (@fatame.cooking) showcasing traditional steamed Fish Amok in banana leaf and authentic Khmer recipes.',
-    descriptionZh: '@fatame.cooking 测评传统香蕉叶蒸高棉阿莫克鱼与特色家常菜。',
-    thumbnailUrl: '/foods/food-21.jpg',
-    sourceUrl: 'https://www.tiktok.com/@fatame.cooking?is_from_webapp=1&sender_device=pc',
-    originalAccountUrl: 'https://www.tiktok.com/@fatame.cooking?is_from_webapp=1&sender_device=pc',
-    inlineVideoId: '9uKNNcDfttc',
-    sourceName: 'Fatame Cooking (@fatame.cooking)',
-    authorHandle: '@fatame.cooking',
-    publishedOrUpdatedAt: '2026-11-07',
-    isLiveFetched: true,
-    verificationBadgeEn: 'TikTok Popular Creator',
-    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
-    verificationBadgeZh: 'TikTok 认证美食博主',
-    categorySlug: 'popular_food',
-    provinceKh: 'ខេត្តសៀមរាប',
-    provinceEn: 'Siem Reap',
-    matchedFoodId: 'food-1',
-    matchedFoodNameKh: 'អាម៉ុកត្រី',
-    matchedFoodNameEn: 'Fish Amok',
-    relevanceScore: 99,
-    isPlayableVerified: true,
-    canInlineEmbed: true,
+    canInlineEmbed: false,
   },
   {
     id: 'fb-kh-kuyteav-morning-2',
@@ -2051,7 +2487,6 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     thumbnailUrl: '/foods/food-36.jpg',
     sourceUrl: 'https://www.facebook.com/profile.php?id=100027461302042',
     originalAccountUrl: 'https://www.facebook.com/profile.php?id=100027461302042',
-    inlineVideoId: 'RhtOc1LdaAg',
     sourceName: 'Delicious Food Channel (Facebook)',
     authorHandle: 'Delicious Food Channel',
     publishedOrUpdatedAt: '2026-11-06',
@@ -2065,36 +2500,9 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     matchedFoodId: 'food-36',
     matchedFoodNameKh: 'គុយទាវភ្នំពេញពិសេស',
     matchedFoodNameEn: 'Phnom Penh Special Noodle Soup',
-    relevanceScore: 98,
+    relevanceScore: 96,
     isPlayableVerified: true,
-    canInlineEmbed: true,
-  },
-  {
-    id: 'tt-kh-kampot-seafood-3',
-    platform: 'tiktok',
-    titleKh: 'Review ក្ដាមឆាម្រេចកំពត និងដំណើរកម្សាន្តតំបន់ទេសចរណ៍ល្បីៗ (Der Daily Official)',
-    titleEn: 'Kampot Pepper Crab & Cambodia Travel Vlog Review (@derdailyofficial)',
-    titleZh: '贡布青胡椒炒蟹与柬埔寨旅行探店测评 (@derdailyofficial)',
-    descriptionKh: 'ដំណើរកម្សាន្តភ្លក់ក្ដាមឆាម្រេចកំពត មឹកអាំងទឹកត្រីកោះកុង និងតំបន់ទេសចរណ៍ស្អាតៗ ពីគណនី TikTok @derdailyofficial។',
-    descriptionEn: 'TikTok travel & food vlog by @derdailyofficial tasting authentic Kampot green pepper crab and exploring top Cambodian destinations.',
-    descriptionZh: 'TikTok 旅行美食博主 @derdailyofficial 品尝地道贡布青胡椒炒蟹与探索热门景点。',
-    thumbnailUrl: '/foods/food-37.jpg',
-    sourceUrl: 'https://www.tiktok.com/@derdailyofficial?is_from_webapp=1&sender_device=pc',
-    originalAccountUrl: 'https://www.tiktok.com/@derdailyofficial?is_from_webapp=1&sender_device=pc',
-    inlineVideoId: 'G4wamhZFxfY',
-    sourceName: 'Der Daily Official (@derdailyofficial)',
-    authorHandle: '@derdailyofficial',
-    publishedOrUpdatedAt: '2026-11-05',
-    isLiveFetched: true,
-    verificationBadgeEn: 'TikTok Popular Creator',
-    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
-    verificationBadgeZh: 'TikTok 认证旅游博主',
-    categorySlug: 'food_travel_vlog',
-    provinceKh: 'ខេត្តកំពត',
-    provinceEn: 'Kampot',
-    relevanceScore: 98,
-    isPlayableVerified: true,
-    canInlineEmbed: true,
+    canInlineEmbed: false,
   },
   {
     id: 'fb-kh-siemreap-angkor-3',
@@ -2108,7 +2516,6 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     thumbnailUrl: '/welcome/angkor-sunrise-hero.png',
     sourceUrl: 'https://www.facebook.com/SuitcaseMonkeyTravel/',
     originalAccountUrl: 'https://www.facebook.com/SuitcaseMonkeyTravel/',
-    inlineVideoId: 'Wmr6Qaen9eo',
     sourceName: 'Suitcase Monkey Travel (Facebook)',
     authorHandle: 'SuitcaseMonkeyTravel',
     publishedOrUpdatedAt: '2026-11-04',
@@ -2119,39 +2526,9 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     categorySlug: 'tourist_attraction',
     provinceKh: 'ខេត្តសៀមរាប',
     provinceEn: 'Siem Reap',
-    relevanceScore: 97,
+    relevanceScore: 95,
     isPlayableVerified: true,
-    canInlineEmbed: true,
-  },
-  {
-    id: 'tt-kh-loklak-beef-4',
-    platform: 'tiktok',
-    titleKh: 'Review ឡុកឡាក់សាច់គោខ្មែរ និងភោជនីយដ្ឋានល្បីៗនៅភ្នំពេញ (Food Whisper Officials)',
-    titleEn: 'Cambodian Beef Lok Lak & Famous Restaurant Review (@foodwhisper_officials)',
-    titleZh: '高棉摇滚牛肉 (Lok Lak) 与金边人气餐厅测评 (@foodwhisper_officials)',
-    descriptionKh: 'វីដេអូ Review ឡុកឡាក់សាច់គោម្រេចកំពត និងមុខម្ហូបឆ្ងាញ់ៗតាមហាងល្បីៗ ពីគណនី TikTok @foodwhisper_officials។',
-    descriptionEn: 'TikTok food review by @foodwhisper_officials tasting sizzling Cambodian Beef Lok Lak with Kampot pepper lime dip.',
-    descriptionZh: 'TikTok 美食博主 @foodwhisper_officials 品尝正宗贡布胡椒青柠蘸酱高棉摇滚牛肉。',
-    thumbnailUrl: '/foods/food-2.jpg',
-    sourceUrl: 'https://www.tiktok.com/@foodwhisper_officials?is_from_webapp=1&sender_device=pc',
-    originalAccountUrl: 'https://www.tiktok.com/@foodwhisper_officials?is_from_webapp=1&sender_device=pc',
-    inlineVideoId: 'KSNG7aVSKIM',
-    sourceName: 'Food Whisper (@foodwhisper_officials)',
-    authorHandle: '@foodwhisper_officials',
-    publishedOrUpdatedAt: '2026-11-03',
-    isLiveFetched: true,
-    verificationBadgeEn: 'TikTok Popular Creator',
-    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
-    verificationBadgeZh: 'TikTok 认证美食博主',
-    categorySlug: 'popular_food',
-    provinceKh: 'រាជធានីភ្នំពេញ',
-    provinceEn: 'Phnom Penh',
-    matchedFoodId: 'food-2',
-    matchedFoodNameKh: 'ឡុកឡាក់សាច់គោ',
-    matchedFoodNameEn: 'Beef Lok Lak',
-    relevanceScore: 97,
-    isPlayableVerified: true,
-    canInlineEmbed: true,
+    canInlineEmbed: false,
   },
   {
     id: 'fb-kh-kohrong-island-4',
@@ -2165,7 +2542,6 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     thumbnailUrl: '/foods/food-15.jpg',
     sourceUrl: 'https://www.facebook.com/profile.php?id=100050432502216',
     originalAccountUrl: 'https://www.facebook.com/profile.php?id=100050432502216',
-    inlineVideoId: 'NmqRMR38Dhg',
     sourceName: 'Travel with Chad (Facebook)',
     authorHandle: 'TravelwithChad',
     publishedOrUpdatedAt: '2026-11-02',
@@ -2176,36 +2552,9 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     categorySlug: 'tourist_attraction',
     provinceKh: 'ខេត្តព្រះសីហនុ',
     provinceEn: 'Sihanoukville',
-    relevanceScore: 96,
+    relevanceScore: 95,
     isPlayableVerified: true,
-    canInlineEmbed: true,
-  },
-  {
-    id: 'tt-kh-walkstreet-night-5',
-    platform: 'tiktok',
-    titleKh: 'Review ម្ហូបពេញនិយម កាហ្វេ និងកន្លែងដើរលេងស្អាតៗ (Expressions Hub)',
-    titleEn: 'Cambodia Popular Food, Cafés & Lifestyle Review (@expressions_hub)',
-    titleZh: '柬埔寨人气美食、咖啡馆与生活探店测评 (@expressions_hub)',
-    descriptionKh: 'ដើរភ្លក់ម្ហូបឆ្ងាញ់ៗ ហាងកាហ្វេស្អាតៗ និងកន្លែងកម្សាន្តពេញនិយមនៅកម្ពុជា ពីគណនី TikTok @expressions_hub។',
-    descriptionEn: 'TikTok lifestyle & food creator @expressions_hub reviewing popular Cambodian food spots, cafés, and weekend hangouts.',
-    descriptionZh: 'TikTok 博主 @expressions_hub 探访柬埔寨热门美食、特色咖啡馆与休闲打卡地。',
-    thumbnailUrl: '/foods/food-10.jpg',
-    sourceUrl: 'https://www.tiktok.com/@expressions_hub?is_from_webapp=1&sender_device=pc',
-    originalAccountUrl: 'https://www.tiktok.com/@expressions_hub?is_from_webapp=1&sender_device=pc',
-    inlineVideoId: 'rlhQTyJzyVc',
-    sourceName: 'Expressions Hub (@expressions_hub)',
-    authorHandle: '@expressions_hub',
-    publishedOrUpdatedAt: '2026-11-01',
-    isLiveFetched: true,
-    verificationBadgeEn: 'TikTok Popular Creator',
-    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
-    verificationBadgeZh: 'TikTok 认证美食与旅游博主',
-    categorySlug: 'famous_restaurant',
-    provinceKh: 'រាជធានីភ្នំពេញ',
-    provinceEn: 'Phnom Penh',
-    relevanceScore: 96,
-    isPlayableVerified: true,
-    canInlineEmbed: true,
+    canInlineEmbed: false,
   },
   {
     id: 'fb-kh-battambang-tour-5',
@@ -2219,7 +2568,6 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     thumbnailUrl: '/foods/food-6.jpg',
     sourceUrl: 'https://www.facebook.com/share/1Dxqougma2/?mibextid=wwXIfr',
     originalAccountUrl: 'https://www.facebook.com/share/1Dxqougma2/?mibextid=wwXIfr',
-    inlineVideoId: '5E8_IX-kBDU',
     sourceName: 'Battambang Tour & Food (Facebook)',
     authorHandle: 'Battambang Tour Cambodia',
     publishedOrUpdatedAt: '2026-10-29',
@@ -2231,36 +2579,9 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     provinceKh: 'ខេត្តបាត់ដំបង',
     provinceEn: 'Battambang',
     matchedFoodId: 'food-6',
-    relevanceScore: 95,
+    relevanceScore: 94,
     isPlayableVerified: true,
-    canInlineEmbed: true,
-  },
-  {
-    id: 'tt-kh-street-coffee-6',
-    platform: 'tiktok',
-    titleKh: 'Review កាហ្វេទឹកដោះគោទឹកកកតាមផ្លូវ និងម្ហូបល្បីៗនៅកម្ពុជា (Eatame Eater)',
-    titleEn: 'Famous Cambodian Iced Condensed Milk Street Coffee & Snacks (@eatame.eater)',
-    titleZh: '柬埔寨街头冰炼乳咖啡与网红美食测评 (@eatame.eater)',
-    descriptionKh: 'វីដេអូ Review កាហ្វេទឹកដោះគោទឹកកកខ្មែរ ឆុងថ្មីៗឈ្ងុយឆ្ងាញ់ និងម្ហូបតាមផ្លូវល្បីៗ ពីគណនី @eatame.eater លើ TikTok។',
-    descriptionEn: 'TikTok review by @eatame.eater featuring Cambodia famous rich iced coffee with condensed milk and top local street stalls.',
-    descriptionZh: 'TikTok 热门测评：@eatame.eater 探访柬埔寨街头浓香冰炼乳咖啡与特色小吃。',
-    thumbnailUrl: '/foods/food-28.jpg',
-    sourceUrl: 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc',
-    originalAccountUrl: 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc',
-    inlineVideoId: 'bherGArgorU',
-    sourceName: 'Eatame Eater (@eatame.eater)',
-    authorHandle: '@eatame.eater',
-    publishedOrUpdatedAt: '2026-10-28',
-    isLiveFetched: true,
-    verificationBadgeEn: 'TikTok Popular Creator',
-    verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
-    verificationBadgeZh: 'TikTok 认证美食博主',
-    categorySlug: 'popular_food',
-    provinceKh: 'រាជធានីភ្នំពេញ',
-    provinceEn: 'Phnom Penh',
-    relevanceScore: 95,
-    isPlayableVerified: true,
-    canInlineEmbed: true,
+    canInlineEmbed: false,
   },
   {
     id: 'fb-kh-tonlebassac-buffet-6',
@@ -2274,7 +2595,6 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     thumbnailUrl: '/foods/food-1.jpg',
     sourceUrl: 'https://www.facebook.com/tonlebassac.restaurant/',
     originalAccountUrl: 'https://www.facebook.com/tonlebassac.restaurant/',
-    inlineVideoId: 'H_pibKmw1lo',
     sourceName: 'Tonle Bassac Restaurant (Facebook)',
     authorHandle: 'tonlebassac.restaurant',
     publishedOrUpdatedAt: '2026-10-27',
@@ -2288,7 +2608,7 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     matchedFoodId: 'food-1',
     relevanceScore: 94,
     isPlayableVerified: true,
-    canInlineEmbed: true,
+    canInlineEmbed: false,
   },
 ];
 
@@ -2359,21 +2679,19 @@ const VERIFIED_FACEBOOK_CREATOR_URLS_BY_KEY: Record<string, string> = {
 
 export function resolveOriginalSocialAccountUrl(item: Partial<OnlineFoodDiscoveryItem>): string {
   const itemId = (item.id || '').trim();
-  const inlineVid = (item.inlineVideoId || extractYouTubeVideoId(item.sourceUrl || '') || '').trim();
   const rawOriginal = (item.originalAccountUrl || '').trim();
   const rawSource = (item.sourceUrl || '').trim();
   const handle = (item.authorHandle || '').trim();
   const cleanHandle = handle.replace(/^@+/, '').replace(/\s+/g, '');
 
   if (item.platform === 'tiktok') {
-    if (itemId && VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[itemId]) {
-      return VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[itemId];
+    // Prefer direct TikTok video URL when available so users can open the exact video on TikTok
+    if (/^https?:\/\/(www\.|vm\.|vt\.)?tiktok\.com\/@[^/]+\/video\/\d+/i.test(rawSource)) {
+      return rawSource;
     }
-    if (cleanHandle && VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[cleanHandle.toLowerCase()]) {
-      return VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[cleanHandle.toLowerCase()];
-    }
-    if (inlineVid && VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[inlineVid]) {
-      return VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[inlineVid];
+    const tiktokVid = extractTikTokVideoId(item.inlineVideoId || rawSource);
+    if (tiktokVid && cleanHandle) {
+      return `https://www.tiktok.com/@${encodeURIComponent(cleanHandle)}/video/${tiktokVid}`;
     }
     if (/^https?:\/\/(www\.|vm\.|vt\.)?tiktok\.com\//i.test(rawOriginal)) {
       return rawOriginal;
@@ -2381,8 +2699,14 @@ export function resolveOriginalSocialAccountUrl(item: Partial<OnlineFoodDiscover
     if (/^https?:\/\/(www\.|vm\.|vt\.)?tiktok\.com\//i.test(rawSource)) {
       return rawSource;
     }
+    if (itemId && VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[itemId]) {
+      return VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[itemId];
+    }
+    if (cleanHandle && VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[cleanHandle.toLowerCase()]) {
+      return VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY[cleanHandle.toLowerCase()];
+    }
     if (cleanHandle) {
-      return `https://www.tiktok.com/@${encodeURIComponent(cleanHandle)}`;
+      return `https://www.tiktok.com/@${encodeURIComponent(cleanHandle)}?is_from_webapp=1&sender_device=pc`;
     }
     return 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc';
   }
@@ -2390,9 +2714,6 @@ export function resolveOriginalSocialAccountUrl(item: Partial<OnlineFoodDiscover
   if (item.platform === 'facebook') {
     if (itemId && VERIFIED_FACEBOOK_CREATOR_URLS_BY_KEY[itemId]) {
       return VERIFIED_FACEBOOK_CREATOR_URLS_BY_KEY[itemId];
-    }
-    if (inlineVid && VERIFIED_FACEBOOK_CREATOR_URLS_BY_KEY[inlineVid]) {
-      return VERIFIED_FACEBOOK_CREATOR_URLS_BY_KEY[inlineVid];
     }
     if (/^https?:\/\/(www\.|m\.|web\.)?(facebook\.com|fb\.watch)\//i.test(rawOriginal) && !/\/search\//i.test(rawOriginal)) {
       return rawOriginal;
@@ -2417,6 +2738,14 @@ export function resolveOriginalSocialAccountUrl(item: Partial<OnlineFoodDiscover
 }
 
 export function resolveInlineVideoIdForSocialItem(item: Partial<OnlineFoodDiscoveryItem>): string {
+  // CRITICAL: Never assign a YouTube video ID to a TikTok or Facebook item!
+  if (item.platform === 'tiktok') {
+    return extractTikTokVideoId(item.inlineVideoId || item.sourceUrl) || '';
+  }
+  if (item.platform === 'facebook') {
+    return '';
+  }
+
   if (item.inlineVideoId && /^[a-zA-Z0-9_-]{11}$/.test(item.inlineVideoId) && !isKnownUnavailableVideo(item.inlineVideoId)) {
     return item.inlineVideoId;
   }
@@ -2424,18 +2753,6 @@ export function resolveInlineVideoIdForSocialItem(item: Partial<OnlineFoodDiscov
   if (fromUrl && /^[a-zA-Z0-9_-]{11}$/.test(fromUrl) && !isKnownUnavailableVideo(fromUrl)) {
     return fromUrl;
   }
-  const text = `${item.id || ''} ${item.titleKh || ''} ${item.titleEn || ''} ${item.descriptionKh || ''} ${item.descriptionEn || ''} ${item.provinceKh || ''} ${item.provinceEn || ''}`.toLowerCase();
-  if (/អាម៉ុក|amok|មាន់អាំង|មាន់ដុត|chicken/.test(text)) return '9uKNNcDfttc';
-  if (/គុយទាវ|នំបញ្ចុក|kuy\s*teav|num\s*banh\s*chok|noodle/.test(text)) return 'RhtOc1LdaAg';
-  if (/កំពត|កែប|ក្តាម|ក្ដាម|គ្រឿងសមុទ្រ|kampot|kep|crab|seafood/.test(text)) return 'G4wamhZFxfY';
-  if (/សៀមរាប|អង្គរ|siem\s*reap|angkor/.test(text)) return 'Wmr6Qaen9eo';
-  if (/បាត់ដំបង|ឡូរី|battambang|bamboo/.test(text)) return '5E8_IX-kBDU';
-  if (/កោះរ៉ុង|ព្រះសីហនុ|កំពង់សោម|koh\s*rong|sihanouk/.test(text)) return 'NmqRMR38Dhg';
-  if (/កាហ្វេ|coffee|cafe|latte/.test(text)) return 'bherGArgorU';
-  if (/ឡុកឡាក់|lok\s*lak/.test(text)) return 'KSNG7aVSKIM';
-  if (/ប៊ូហ្វេ|buffet|ទន្លេបាសាក់|ភោជនីយដ្ឋាន/.test(text)) return 'H_pibKmw1lo';
-  if (/មាត់ទន្លេ|ថ្ងៃលិច|ទូក|riverfront|sunset|walk\s*street|ផ្លូវថ្មើរជើង/.test(text)) return 'zTn3_Je07ao';
-  if (/សាច់អាំង|ផ្សាររាត្រី|bbq|skewer|street\s*food/.test(text)) return 'DZLmPv-P978';
 
   let hash = 0;
   const seedStr = item.id || item.titleEn || item.titleKh || 'khmer';
@@ -2450,26 +2767,344 @@ export function getNextPlayableSocialVideoId(currentVideoId?: string): string {
   return FALLBACK_SOCIAL_INLINE_VIDEOS[(idx + 1) % FALLBACK_SOCIAL_INLINE_VIDEOS.length];
 }
 
+export const OFFICIAL_PRIORITY_TIKTOK_CREATORS: Array<{
+  handle: string;
+  displayName: string;
+  profileUrl: string;
+  defaultCategory: TrendingFoodCategorySlug;
+  defaultFoodThumb: string;
+}> = [
+  {
+    handle: 'eatame.eater',
+    displayName: 'Eatame (@eatame.eater)',
+    profileUrl: 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-19.jpg',
+  },
+  {
+    handle: 'expressions_hub',
+    displayName: 'សារអាហារ - Expressions Hub (@expressions_hub)',
+    profileUrl: 'https://www.tiktok.com/@expressions_hub?is_from_webapp=1&sender_device=pc',
+    defaultCategory: 'famous_restaurant',
+    defaultFoodThumb: '/foods/food-37.jpg',
+  },
+  {
+    handle: 'derdailyofficial',
+    displayName: 'DerDaily ដើរដេលី (@derdailyofficial)',
+    profileUrl: 'https://www.tiktok.com/@derdailyofficial?is_from_webapp=1&sender_device=pc',
+    defaultCategory: 'food_travel_vlog',
+    defaultFoodThumb: '/foods/food-38.jpg',
+  },
+  {
+    handle: 'fatame.cooking',
+    displayName: 'Fatame (@fatame.cooking)',
+    profileUrl: 'https://www.tiktok.com/@fatame.cooking?is_from_webapp=1&sender_device=pc',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-21.jpg',
+  },
+  {
+    handle: 'foodwhisper_officials',
+    displayName: 'Food Whisper - ខ្សឹបឱ្យឃ្លាន (@foodwhisper_officials)',
+    profileUrl: 'https://www.tiktok.com/@foodwhisper_officials?is_from_webapp=1&sender_device=pc',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-24.jpg',
+  },
+];
+
+const LIVE_TIKTOK_CREATORS_CACHE_KEY = 'kft_live_tiktok_creators_v1';
+const CLOUD_TIKTOK_DISCOVERED_DOC_KEY = 'kft_cloud_tiktok_discovered_videos_v1';
+const LIVE_TIKTOK_CREATORS_TTL_MS = 20 * 60 * 1000; // 20 minutes automatic discovery cycle
+
+const FOOD_TIKTOK_VIDEO_FILTER_RE =
+  /ម្ហូប|អាហារ|ញ៉ាំ|ឆ្ងាញ់|ធ្វើម្ហូប|សម្ល|អាំង|ចៀន|បង្អែម|ភេសជ្ជៈ|ហាង|ភោជនីយដ្ឋាន|ផ្សារ|កាហ្វេ|គុយទាវ|នំបញ្ចុក|អាម៉ុក|ឡុកឡាក់|បុកល្ហុង|សាច់អាំង|គ្រឿងសមុទ្រ|ត្រី|សាច់គោ|សាច់ជ្រូក|មាន់|ទា|បាយ|បបរ|មី|លត|នំ|ទេសចរណ៍|ដើរលេង|ភ្នំពេញ|សៀមរាប|កំពត|កែប|បាត់ដំបង|ព្រះសីហនុ|កំពង់ចាម|food|eat|cook|recipe|dish|restaurant|cafe|coffee|street\s*food|khmer|cambodia|mukbang|yummy|delicious|bbq|noodle|soup|dessert/i;
+
+/**
+ * Automatically discovers and synchronizes the latest videos from the 5 official priority TikTok creators:
+ * 1. @eatame.eater
+ * 2. @expressions_hub
+ * 3. @derdailyofficial
+ * 4. @fatame.cooking
+ * 5. @foodwhisper_officials
+ *
+ * Uses TikTok's public creator embed feed (/embed/@handle), extracts exact Snowflake timestamps,
+ * filters for authentic food/restaurant/tourism content, caches thumbnails, and synchronizes
+ * discovered videos with Supabase (kft_cloud_tiktok_discovered_videos_v1) without duplicates.
+ */
+export async function fetchLiveTikTokCreatorVideos(
+  forceRefresh = false,
+  foods: FoodItem[] = initialFoods
+): Promise<OnlineFoodDiscoveryItem[]> {
+  // 1. Check fresh local cache first when not force-refreshing
+  if (!forceRefresh) {
+    try {
+      const raw = localStorage.getItem(LIVE_TIKTOK_CREATORS_CACHE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const age = Date.now() - (Date.parse(parsed.updatedAt) || 0);
+        if (age < LIVE_TIKTOK_CREATORS_TTL_MS && Array.isArray(parsed.items) && parsed.items.length > 0) {
+          return parsed.items;
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  const byTikTokVideoId = new Map<string, OnlineFoodDiscoveryItem>();
+
+  // Seed with the verified 2026 baseline videos from the 5 priority creators
+  for (const item of CURATED_TIKTOK_FACEBOOK_REVIEWS) {
+    if (item.platform !== 'tiktok') continue;
+    const vid = extractTikTokVideoId(item.inlineVideoId || item.sourceUrl);
+    if (vid) {
+      byTikTokVideoId.set(vid, item);
+    }
+  }
+
+  // 2. Pull existing cloud-synchronized TikTok discoveries so all devices share newly discovered creator videos
+  if (isSupabaseConfigured() && (typeof navigator === 'undefined' || navigator.onLine !== false)) {
+    try {
+      const cloudDoc = await pullCloudDocument<{ updatedAt: string; items: OnlineFoodDiscoveryItem[] }>(
+        CLOUD_TIKTOK_DISCOVERED_DOC_KEY,
+        3500
+      );
+      if (Array.isArray(cloudDoc?.items)) {
+        for (const item of cloudDoc.items) {
+          if (!item || item.platform !== 'tiktok') continue;
+          const vid = extractTikTokVideoId(item.inlineVideoId || item.sourceUrl);
+          if (vid && !byTikTokVideoId.has(vid)) {
+            byTikTokVideoId.set(vid, {
+              ...item,
+              inlineVideoId: vid,
+              canInlineEmbed: true,
+              isPlayableVerified: true,
+            });
+          }
+        }
+      }
+    } catch {
+      // ignore offline/cloud timeout
+    }
+  }
+
+  // 3. Live discovery from the 5 priority TikTok creator embed endpoints
+  if (typeof navigator === 'undefined' || navigator.onLine !== false) {
+    const isNative = Boolean(Capacitor?.isNativePlatform?.());
+    let newlyDiscoveredCount = 0;
+
+    await Promise.allSettled(
+      OFFICIAL_PRIORITY_TIKTOK_CREATORS.map(async (creator) => {
+        const embedEndpoint = `https://www.tiktok.com/embed/@${creator.handle}`;
+        let html = '';
+
+        try {
+          if (isNative && CapacitorHttp?.get) {
+            const resp = await CapacitorHttp.get({
+              url: embedEndpoint,
+              headers: {
+                Accept: 'text/html,application/xhtml+xml',
+                'User-Agent':
+                  'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+              },
+              connectTimeout: 4500,
+              readTimeout: 4500,
+            });
+            if (resp && resp.status >= 200 && resp.status < 300 && typeof resp.data === 'string') {
+              html = resp.data;
+            }
+          } else {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 4000);
+            const res = await fetch(embedEndpoint, { signal: controller.signal });
+            clearTimeout(timer);
+            if (res.ok) {
+              html = await res.text();
+            }
+          }
+        } catch {
+          // Direct browser fetch may be blocked by CORS on web; handled by Edge Function or native CapacitorHttp
+        }
+
+        if (!html) return;
+        const stateMatch = html.match(
+          /<script id="__FRONTITY_CONNECT_STATE__" type="application\/json">([\s\S]*?)<\/script>/
+        );
+        if (!stateMatch || !stateMatch[1]) return;
+
+        const parsedState = JSON.parse(stateMatch[1]);
+        const creatorData = parsedState?.source?.data?.[`/embed/@${creator.handle}`];
+        const videoList = Array.isArray(creatorData?.videoList) ? creatorData.videoList : [];
+
+        const isDedicatedFoodChannel =
+          creator.handle === 'eatame.eater' ||
+          creator.handle === 'fatame.cooking' ||
+          creator.handle === 'foodwhisper_officials' ||
+          creator.handle === 'expressions_hub';
+
+        for (const rawVid of videoList) {
+          const vid = extractTikTokVideoId(String(rawVid?.id || ''));
+          if (!vid) continue;
+
+          const desc = String(rawVid?.desc || '').trim();
+          if (!isDedicatedFoodChannel && desc && !FOOD_TIKTOK_VIDEO_FILTER_RE.test(desc)) {
+            continue;
+          }
+
+          const isoDate = tiktokSnowflakeIdToIsoDate(vid);
+          const dateLabel = isoDate ? isoDate.slice(0, 10) : new Date().toISOString().slice(0, 10);
+          const coverUrl = String(rawVid?.coverUrl || rawVid?.originCoverUrl || '').trim();
+          const match = matchCambodianDish(desc, foods);
+          const cleanCaption = desc.replace(/#\S+/g, '').replace(/\s+/g, ' ').trim();
+          const titleKh =
+            cleanCaption.length >= 6
+              ? cleanCaption.slice(0, 95)
+              : `វីដេអូម្ហូបថ្មីពី ${creator.displayName} (@${creator.handle})`;
+
+          const existing = byTikTokVideoId.get(vid);
+          const updatedItem: OnlineFoodDiscoveryItem = {
+            id: existing?.id || `tt-live-${vid}`,
+            platform: 'tiktok',
+            titleKh: existing?.titleKh || titleKh,
+            titleEn:
+              existing?.titleEn ||
+              (cleanCaption.length >= 6
+                ? cleanCaption.slice(0, 95)
+                : `Latest Cambodian Food Review by ${creator.displayName} (@${creator.handle})`),
+            titleZh: existing?.titleZh || `${creator.displayName} 最新柬埔寨美食视频`,
+            descriptionKh:
+              desc ||
+              existing?.descriptionKh ||
+              `វីដេអូម្ហូប និងការធ្វើម្ហូបខ្មែរថ្មីៗពីគណនីផ្លូវការ @${creator.handle}។`,
+            descriptionEn:
+              desc ||
+              existing?.descriptionEn ||
+              `Authentic Cambodian food video from official creator @${creator.handle}.`,
+            descriptionZh:
+              existing?.descriptionZh ||
+              `来自官方创作者 @${creator.handle} 的柬埔寨美食视频。`,
+            thumbnailUrl: existing?.thumbnailUrl || coverUrl || creator.defaultFoodThumb,
+            sourceUrl: `https://www.tiktok.com/@${creator.handle}/video/${vid}`,
+            originalAccountUrl: creator.profileUrl,
+            sourceName: creator.displayName,
+            authorHandle: `@${creator.handle}`,
+            publishedOrUpdatedAt: dateLabel,
+            isLiveFetched: true,
+            verificationBadgeEn: 'TikTok Official Creator',
+            verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
+            verificationBadgeZh: 'TikTok 官方美食创作者',
+            categorySlug: existing?.categorySlug || creator.defaultCategory,
+            provinceKh: existing?.provinceKh || 'រាជធានីភ្នំពេញ',
+            provinceEn: existing?.provinceEn || 'Phnom Penh',
+            matchedFoodId: existing?.matchedFoodId || match?.food?.id || 'food-1',
+            matchedFoodNameKh: existing?.matchedFoodNameKh || match?.food?.nameKh,
+            matchedFoodNameEn: existing?.matchedFoodNameEn || match?.food?.nameEn,
+            relevanceScore: existing?.relevanceScore || 99,
+            isPlayableVerified: true,
+            canInlineEmbed: true,
+            inlineVideoId: vid,
+          };
+
+          if (!existing) {
+            newlyDiscoveredCount++;
+          }
+          byTikTokVideoId.set(vid, updatedItem);
+        }
+      })
+    );
+
+    const sortedTikToks = Array.from(byTikTokVideoId.values()).sort((a, b) => {
+      const vidA = extractTikTokVideoId(a.inlineVideoId || a.sourceUrl) || '0';
+      const vidB = extractTikTokVideoId(b.inlineVideoId || b.sourceUrl) || '0';
+      if (vidA.length >= 18 && vidB.length >= 18 && vidA !== vidB) {
+        return vidB.localeCompare(vidA);
+      }
+      return (Date.parse(b.publishedOrUpdatedAt) || 0) - (Date.parse(a.publishedOrUpdatedAt) || 0);
+    });
+
+    try {
+      localStorage.setItem(
+        LIVE_TIKTOK_CREATORS_CACHE_KEY,
+        JSON.stringify({
+          updatedAt: new Date().toISOString(),
+          items: sortedTikToks,
+        })
+      );
+    } catch {
+      // ignore storage quota
+    }
+
+    if (newlyDiscoveredCount > 0 && isSupabaseConfigured()) {
+      pushCloudDocument(
+        CLOUD_TIKTOK_DISCOVERED_DOC_KEY,
+        {
+          updatedAt: new Date().toISOString(),
+          items: sortedTikToks.slice(0, 60),
+        },
+        5000
+      ).catch(() => {});
+    }
+
+    return sortedTikToks;
+  }
+
+  return Array.from(byTikTokVideoId.values());
+}
+
 export function deduplicateAndRankDiscoveries(items: OnlineFoodDiscoveryItem[]): OnlineFoodDiscoveryItem[] {
   const seenVideoIds = new Set<string>();
   const seenUrls = new Set<string>();
   const unique: OnlineFoodDiscoveryItem[] = [];
 
   for (const item of items) {
-    if (item.platform === 'tiktok' || item.platform === 'facebook') {
-      const key = item.id || item.sourceUrl;
-      if (!key || seenUrls.has(key)) continue;
-      seenUrls.add(key);
-      const inlineVid = resolveInlineVideoIdForSocialItem(item);
+    if (item.platform === 'tiktok') {
+      const tiktokVid = extractTikTokVideoId(item.inlineVideoId || item.sourceUrl);
+      const dedupKey = tiktokVid ? `tiktok:${tiktokVid}` : (item.id || item.sourceUrl);
+      if (!dedupKey || seenUrls.has(dedupKey)) continue;
+      seenUrls.add(dedupKey);
+      if (tiktokVid) {
+        if (seenVideoIds.has(`tt:${tiktokVid}`)) continue;
+        seenVideoIds.add(`tt:${tiktokVid}`);
+      }
+
+      // Ensure thumbnail is NEVER a fake YouTube thumbnail if it doesn't belong to YouTube
+      const cleanThumb =
+        item.thumbnailUrl && !item.thumbnailUrl.includes('i.ytimg.com')
+          ? item.thumbnailUrl
+          : '/foods/food-1.jpg';
+
       unique.push({
         ...item,
-        inlineVideoId: inlineVid,
-        canInlineEmbed: true,
+        inlineVideoId: tiktokVid || undefined,
+        canInlineEmbed: Boolean(tiktokVid),
         isPlayableVerified: true,
-        thumbnailUrl: item.thumbnailUrl || `https://i.ytimg.com/vi/${inlineVid}/hqdefault.jpg`,
+        sourceUrl: tiktokVid && item.authorHandle
+          ? `https://www.tiktok.com/@${item.authorHandle.replace(/^@+/, '')}/video/${tiktokVid}`
+          : item.sourceUrl,
+        thumbnailUrl: cleanThumb,
       });
       continue;
     }
+
+    if (item.platform === 'facebook') {
+      const key = item.id || item.sourceUrl;
+      if (!key || seenUrls.has(key)) continue;
+      seenUrls.add(key);
+
+      const cleanThumb =
+        item.thumbnailUrl && !item.thumbnailUrl.includes('i.ytimg.com')
+          ? item.thumbnailUrl
+          : '/foods/food-2.jpg';
+
+      unique.push({
+        ...item,
+        inlineVideoId: undefined,
+        canInlineEmbed: false,
+        isPlayableVerified: true,
+        thumbnailUrl: cleanThumb,
+      });
+      continue;
+    }
+
     if (item.platform !== 'youtube') continue;
     const vid = extractYouTubeVideoId(item.sourceUrl);
     if (!vid || isKnownUnavailableVideo(vid)) continue;
@@ -2495,6 +3130,15 @@ export function deduplicateAndRankDiscoveries(items: OnlineFoodDiscoveryItem[]):
     const ta = Date.parse(a.publishedOrUpdatedAt) || 0;
     const tb = Date.parse(b.publishedOrUpdatedAt) || 0;
     if (tb !== ta) return tb - ta;
+
+    // Secondary sort for same-day TikTok Snowflake IDs so newest upload is always first
+    if (a.platform === 'tiktok' && b.platform === 'tiktok') {
+      const vidA = extractTikTokVideoId(a.inlineVideoId || a.sourceUrl) || '';
+      const vidB = extractTikTokVideoId(b.inlineVideoId || b.sourceUrl) || '';
+      if (vidA.length >= 18 && vidB.length >= 18 && vidA !== vidB) {
+        return vidB.localeCompare(vidA);
+      }
+    }
 
     return b.relevanceScore - a.relevanceScore;
   });
@@ -2526,9 +3170,16 @@ export async function fetchOnlineFoodDiscoveryFeed(params: {
     }
   }
 
-  const ytRes = await fetchYouTubeCambodianFoodVideos(foods);
+  const [ytRes, liveTikTokItems] = await Promise.all([
+    fetchYouTubeCambodianFoodVideos(foods),
+    fetchLiveTikTokCreatorVideos(Boolean(params.forceRefresh), foods).catch(() => []),
+  ]);
   const nowIso = new Date().toISOString();
-  const merged = deduplicateAndRankDiscoveries([...CURATED_TIKTOK_FACEBOOK_REVIEWS, ...ytRes.items]);
+  const merged = deduplicateAndRankDiscoveries([
+    ...liveTikTokItems,
+    ...CURATED_TIKTOK_FACEBOOK_REVIEWS,
+    ...ytRes.items,
+  ]);
 
   try {
     localStorage.setItem(
@@ -2565,8 +3216,8 @@ function readCache(foods: FoodItem[]): OnlineDiscoveryFeedResult | null {
         .filter((it: OnlineFoodDiscoveryItem) => it.platform === 'tiktok' || it.platform === 'facebook' || !isKnownUnavailableVideo(it.sourceUrl))
         .map((it: OnlineFoodDiscoveryItem) => ({
           ...it,
-          canInlineEmbed: true,
-          inlineVideoId: it.platform === 'tiktok' || it.platform === 'facebook' ? resolveInlineVideoIdForSocialItem(it) : it.inlineVideoId,
+          canInlineEmbed: it.platform === 'tiktok' ? Boolean(extractTikTokVideoId(it.inlineVideoId || it.sourceUrl)) : it.platform === 'youtube',
+          inlineVideoId: it.platform === 'tiktok' ? extractTikTokVideoId(it.inlineVideoId || it.sourceUrl) || undefined : it.platform === 'facebook' ? undefined : it.inlineVideoId,
           matchedFoodNameKh: it.matchedFoodId
             ? foodMap.get(it.matchedFoodId)?.nameKh || it.matchedFoodNameKh
             : it.matchedFoodNameKh,
@@ -2598,11 +3249,49 @@ export interface EmbedPlayerInfo {
 
 /**
  * Extracts iframe player embed URL and canonical watch URL safely for TikTok, Facebook, and YouTube.
- * Ensures 100% inline playback inside the app without redirecting users to an external browser.
+ * CRITICAL:
+ * - TikTok items use TikTok's official embed player (https://www.tiktok.com/player/v1/<19-digit-id>)
+ *   and NEVER embed or link to YouTube!
+ * - Facebook items link directly to the verified Facebook post/page and NEVER embed or link to YouTube!
+ * - YouTube items use YouTube's official embed player (https://www.youtube.com/embed/<11-char-id>).
  */
 export function extractEmbedPlayerInfo(item: OnlineFoodDiscoveryItem): EmbedPlayerInfo {
   const url = (item.sourceUrl || item.trendingItem?.videoUrl || item.trendingItem?.sourceUrl || '').trim();
-  const buildInlineEmbedUrl = (vid: string): string => {
+
+  if (item.platform === 'tiktok') {
+    const tiktokVid = extractTikTokVideoId(item.inlineVideoId || url);
+    const watchUrl = resolveOriginalSocialAccountUrl(item);
+    if (tiktokVid) {
+      return {
+        canInlineEmbed: true,
+        embedUrl: `https://www.tiktok.com/player/v1/${tiktokVid}?autoplay=1&rel=0&music_info=1&description=1`,
+        watchUrl,
+        platform: 'tiktok',
+        videoId: tiktokVid,
+        directVideoUrl: item.directVideoUrl,
+      };
+    }
+    return {
+      canInlineEmbed: false,
+      embedUrl: null,
+      watchUrl,
+      platform: 'tiktok',
+      directVideoUrl: item.directVideoUrl,
+    };
+  }
+
+  if (item.platform === 'facebook') {
+    const watchUrl = resolveOriginalSocialAccountUrl(item);
+    return {
+      canInlineEmbed: false,
+      embedUrl: null,
+      watchUrl,
+      platform: 'facebook',
+      directVideoUrl: item.directVideoUrl,
+    };
+  }
+
+  const buildYouTubeInlineEmbedUrl = (vid: string): string => {
     const params = new URLSearchParams({
       autoplay: '1',
       playsinline: '1',
@@ -2616,18 +3305,6 @@ export function extractEmbedPlayerInfo(item: OnlineFoodDiscoveryItem): EmbedPlay
     return `https://www.youtube.com/embed/${vid}?${params.toString()}`;
   };
 
-  if (item.platform === 'tiktok' || item.platform === 'facebook') {
-    const inlineVid = resolveInlineVideoIdForSocialItem(item);
-    return {
-      canInlineEmbed: true,
-      embedUrl: buildInlineEmbedUrl(inlineVid),
-      watchUrl: `https://www.youtube.com/watch?v=${inlineVid}`,
-      platform: item.platform,
-      videoId: inlineVid,
-      directVideoUrl: item.directVideoUrl,
-    };
-  }
-
   let vid = extractYouTubeVideoId(url);
 
   if (!vid && item.id.startsWith('yt-api-')) {
@@ -2639,13 +3316,13 @@ export function extractEmbedPlayerInfo(item: OnlineFoodDiscoveryItem): EmbedPlay
   }
 
   if (!vid || !/^[a-zA-Z0-9_-]{11}$/.test(vid) || isKnownUnavailableVideo(vid)) {
-    vid = resolveInlineVideoIdForSocialItem(item);
+    vid = resolveInlineVideoIdForSocialItem({ ...item, platform: 'youtube' });
   }
 
   const watchUrl = `https://www.youtube.com/watch?v=${vid}`;
   return {
     canInlineEmbed: true,
-    embedUrl: buildInlineEmbedUrl(vid),
+    embedUrl: buildYouTubeInlineEmbedUrl(vid),
     watchUrl,
     platform: 'youtube',
     videoId: vid,
@@ -2674,7 +3351,7 @@ const SUPABASE_ANON_KEY =
 
 /**
  * Reuses the Home Screen's normalizeKhmerSearchText and expandMultilingualPlaceQuery
- * so YouTube video filtering matches the exact same multilingual tokens as Home Screen search.
+ * so YouTube/TikTok/Facebook video filtering matches the exact same multilingual tokens as Home Screen search.
  */
 export function expandYouTubeSearchQueryTokens(rawQuery: string): string[] {
   const q = normalizeKhmerSearchText(rawQuery);
@@ -2706,9 +3383,9 @@ export function matchesExpandedYouTubeQuery(
 }
 
 /**
- * Unified YouTube 2025–2026 discovery and search:
- * 1. Uses fast local 30-min cache by default; only hits remote Edge Function on explicit forceRefresh.
- * 2. Merges with verified official 2025–2026 YouTube videos.
+ * Unified TikTok, Facebook & YouTube 2026 discovery and search:
+ * 1. Priority TikTok discovery from the 5 official Cambodian food creators (@eatame.eater, @expressions_hub, @derdailyofficial, @fatame.cooking, @foodwhisper_officials).
+ * 2. Merges with verified Facebook & YouTube food/travel videos.
  * 3. Supports multilingual synonym search across Khmer, English, and Chinese.
  */
 export async function searchAndDiscoverSocialFood(
@@ -2726,7 +3403,7 @@ export async function searchAndDiscoverSocialFood(
   let backendItems: OnlineFoodDiscoveryItem[] = [];
   let fromBackendEdge = false;
 
-  // Only call remote Supabase Edge Function when user explicitly taps Refresh (prevents background radio/CPU drain)
+  // Call remote Supabase Edge Function when user explicitly taps Refresh
   if (forceRefresh && !isAppCloneTampered() && (typeof navigator === 'undefined' || navigator.onLine !== false)) {
     try {
       const controller = new AbortController();
@@ -2748,11 +3425,34 @@ export async function searchAndDiscoverSocialFood(
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data?.items) && data.items.length > 0) {
-          const rawCandidates = data.items.slice(0, 16);
+          const rawCandidates = data.items.slice(0, 24);
           backendItems = rawCandidates
             .map((it: any) => {
-              if (it.platform === 'tiktok' || it.platform === 'facebook') {
-                // Skip legacy static fallback IDs from older Edge Function deployments since CURATED_TIKTOK_FACEBOOK_REVIEWS has verified creator accounts
+              if (it.platform === 'tiktok') {
+                if (/^(tt|fb)-kh-review-\d+$/i.test(String(it.id || ''))) {
+                  return null;
+                }
+                const tiktokVid = extractTikTokVideoId(it.inlineVideoId || it.sourceUrl || it.id);
+                if (!tiktokVid) return null;
+                const match = matchCambodianDish(
+                  `${it.titleEn || it.titleKh} ${it.descriptionEn || it.descriptionKh}`,
+                  foods
+                );
+                const resolvedAccountUrl = resolveOriginalSocialAccountUrl(it);
+                return {
+                  ...it,
+                  platform: 'tiktok' as const,
+                  sourceUrl: resolvedAccountUrl,
+                  originalAccountUrl: it.originalAccountUrl || resolvedAccountUrl,
+                  matchedFoodId: it.matchedFoodId || match?.food?.id,
+                  matchedFoodNameKh: it.matchedFoodNameKh || match?.food?.nameKh,
+                  matchedFoodNameEn: it.matchedFoodNameEn || match?.food?.nameEn,
+                  inlineVideoId: tiktokVid,
+                  isPlayableVerified: true,
+                  canInlineEmbed: true,
+                } as OnlineFoodDiscoveryItem;
+              }
+              if (it.platform === 'facebook') {
                 if (/^(tt|fb)-kh-review-\d+$/i.test(String(it.id || ''))) {
                   return null;
                 }
@@ -2763,15 +3463,15 @@ export async function searchAndDiscoverSocialFood(
                 const resolvedAccountUrl = resolveOriginalSocialAccountUrl(it);
                 return {
                   ...it,
-                  platform: it.platform as DiscoveryPlatformId,
+                  platform: 'facebook' as const,
                   sourceUrl: resolvedAccountUrl,
                   originalAccountUrl: resolvedAccountUrl,
                   matchedFoodId: it.matchedFoodId || match?.food?.id,
                   matchedFoodNameKh: it.matchedFoodNameKh || match?.food?.nameKh,
                   matchedFoodNameEn: it.matchedFoodNameEn || match?.food?.nameEn,
-                  inlineVideoId: resolveInlineVideoIdForSocialItem(it),
+                  inlineVideoId: undefined,
                   isPlayableVerified: true,
-                  canInlineEmbed: true,
+                  canInlineEmbed: false,
                 } as OnlineFoodDiscoveryItem;
               }
               const vid = extractYouTubeVideoId(it.sourceUrl || it.id || '');
@@ -2801,18 +3501,25 @@ export async function searchAndDiscoverSocialFood(
     }
   }
 
-  // Fetch base discovery feed
-  const baseFeed = await fetchOnlineFoodDiscoveryFeed({
-    foods,
-    trendingFoods,
-    forceRefresh,
-  });
+  // Fetch base discovery feed + live TikTok creator videos + live YouTube channel uploads in parallel
+  const [baseFeed, liveTikTokItems, liveChannelItems] = await Promise.all([
+    fetchOnlineFoodDiscoveryFeed({
+      foods,
+      trendingFoods,
+      forceRefresh,
+    }),
+    fetchLiveTikTokCreatorVideos(forceRefresh, foods).catch(() => []),
+    fetchLiveYouTubeChannelUploads(forceRefresh, foods).catch(() => []),
+  ]);
 
-  // Newest uploads straight from the official channel feeds (auto-detects new videos)
-  const liveChannelItems = await fetchLiveYouTubeChannelUploads(forceRefresh, foods).catch(() => []);
-
-  // Merge and deduplicate (sorted newest first, older videos below)
-  let combined = deduplicateAndRankDiscoveries([...CURATED_TIKTOK_FACEBOOK_REVIEWS, ...backendItems, ...liveChannelItems, ...baseFeed.items]);
+  // Merge and deduplicate (sorted newest publication date first)
+  let combined = deduplicateAndRankDiscoveries([
+    ...liveTikTokItems,
+    ...CURATED_TIKTOK_FACEBOOK_REVIEWS,
+    ...backendItems,
+    ...liveChannelItems,
+    ...baseFeed.items,
+  ]);
 
   // Apply category filter if specified and not 'all'
   if (categorySlug && categorySlug !== 'all') {
@@ -2823,7 +3530,6 @@ export async function searchAndDiscoverSocialFood(
   if (query.trim()) {
     combined = combined.filter((item) => matchesExpandedYouTubeQuery(item, query));
   } else if (!skipRotation) {
-    // Rotate the latest videos automatically so the same video never stays pinned at #1 indefinitely
     const activeCycle = forceRefresh ? advanceVideoRotationCycle() : getCurrentVideoRotationCycle();
     combined = rotateLatestVideosForScope(combined, `${categorySlug || 'all'}|all`, activeCycle);
   }

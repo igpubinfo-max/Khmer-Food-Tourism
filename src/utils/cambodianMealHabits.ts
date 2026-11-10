@@ -5,10 +5,10 @@ export type CambodianMealTime = 'breakfast' | 'lunch' | 'snack' | 'dinner';
 export type FoodCategoryTabId = 'all' | 'samlor' | 'cha' | 'bong_aem';
 
 const SWEET_DESSERT_OR_CAKE_RE =
-  /^បង្អែម|ចេកខ្ទិះ|សង់ខ្យា|អន្សម(?!ជ្រូក|ចៀន)|ក្រឡាន|បបរផ្អែម|បបរត្នោត|បបរត្រាវ|បបរសណ្តែក|បបរសណ្ដែក|បបរល្ពៅ|បាញ់ឌុក|លតស្វិត|នំផ្លែអាយ|នំកង|នំគម|នំចាក់ចុល|នំល្ពៅ|នំចេក|ចេកចៀន|ដំឡូង.*បំពង|អំបុក|ចាហួយ|តៅហ៊ូទឹកស្ករ|ទឹកកកឈូស|ការ៉េម|\bdessert\b|\bcustard\b|\bsweet\s*soup\b|\bsweet\s*pudding\b|\bice\s*cream\b/i;
+  /^បង្អែម|ចេកខ្ទិះ|សង់ខ្យា|អន្សម(?!ជ្រូក|ចៀន)|ក្រឡាន|បបរផ្អែម|បបរត្នោត|បបរត្រាវ|បបរសណ្តែក|បបរសណ្ដែក|បបរល្ពៅ|បាញ់ឌុក|បាញ់ចានឿក|បាយដំណើបស្វាយទុំ|លតស្វិត|លតអង្ករ|នំផ្លែអាយ|នំកង|នំគម|នំចាក់ចុល|នំល្ពៅ|នំចេក|ចេកចៀន|ដំឡូង.*បំពង|អំបុក|ចាហួយ|តៅហ៊ូទឹកស្ករ|ទឹកកកឈូស|ការ៉េម|\bdessert\b|\bcustard\b|\bsweet\s*soup\b|\bsweet\s*pudding\b|\bice\s*cream\b/i;
 
 const SAVORY_NON_DESSERT_EXCLUSION_RE =
-  /បាញ់ឆែវ|បាញ់ហយ|នំប៉័ង|គួង|ណែម|គូឆាយ|កាឆាយ|កចាយ|អន្សមជ្រូក|អន្សមចៀន|ពងទាកូន|ប្រហិត|នំគ្រក់|នំបញ្ចុក/i;
+  /បាញ់ឆែវ|បាញ់ហយ|នំប៉័ង|គួង|ណែម|គូឆាយ|កាឆាយ|កចាយ|នំត្រាវបំពង|អន្សមជ្រូក|អន្សមចៀន|ពងទាកូន|ប្រហិត|នំគ្រក់|នំបញ្ចុក|ទឹកគ្រឿង/i;
 
 const BEVERAGE_RE =
   /ភេសជ្ជៈ|^កាហ្វេ|^តែ(?!ងៀត)|^ទឹកអំពៅ|^ទឹកដូង|^ទឹកក្រឡុក|^ទឹកសណ្តែក|^ទឹកសណ្ដែក|^ទឹកផ្លែឈើ|^ទឹកត្រឡាច|^ទឹកមាត់ចាប|^ទឹកត្នោត|\bdrink\b|\bbeverage\b|\bsmoothie\b|\biced\s*tea\b|\bcoffee\b|\bcoconut\s*water\b|\bsugarcane\s*juice\b/i;
@@ -60,6 +60,8 @@ const AFTERNOON_SAVORY_SNACK_RE =
 
 export function isBeverageDish(food: FoodItem): boolean {
   if (!food) return false;
+  const kh = (food.nameKh || '').trim();
+  if (SAVORY_NON_DESSERT_EXCLUSION_RE.test(kh)) return false;
   if (food.categorySlug === 'drink') return true;
   if (isBeverageFood(food)) return true;
   const text = `${food.nameKh || ''} ${food.nameEn || ''} ${food.categoryKh || ''} ${food.categoryEn || ''}`;
@@ -87,34 +89,61 @@ export function isNoodleDishItem(food: FoodItem): boolean {
 }
 
 /**
- * Classifies every dish into exactly one of the 3 primary Food Screen tabs:
- * - 'samlor' (សម្ល: Soups, Curries, Stews, Braises & Savory Congees)
- * - 'cha' (អាំង/ចៀន: Grilled, Fried, Stir-Fried, Salads, Savory Rice & Noodles)
- * - 'bong_aem' (បង្អែម/ភេសជ្ជៈ: Desserts, Sweet Cakes & Beverages)
+ * Strictly checks if a dish belongs to the សម្ល (Cambodian Soups & Curries) category:
+ * Includes Cambodian soups (សម្ល, ស្ងោរ, ស៊ុប), curries (ការី), and steamed curry amok (អាម៉ុក).
+ * Excludes noodles, rice, congee, dry braised dishes, stir-fries, salads, grilled/fried items, and desserts/drinks.
+ */
+export function isSamlorSoupOrCurryDish(food: FoodItem): boolean {
+  if (!food || !food.id || !food.nameKh) return false;
+  if (isBeverageDish(food) || isSweetDessertOrCakeDish(food)) return false;
+  const kh = (food.nameKh || '').trim();
+  if (
+    /^(គុយទាវ|មី|លត|បាញ់កាញ់|បាញ់ស៊ុង|នំបញ្ចុក|បបរ|បាយ|ប្រហុក|ទឹកគ្រឿង|កាពិ|ផាក់ឡូវ|ផាកឡូវ|ត្រី.*ចំហុយ|ខួរជ្រូកខ|ខមុំា|ខត្រី|ខសាច់|ខជើងជ្រូក|ខកង្កែប|ហុងជើងជ្រូក)/i.test(
+      kh
+    )
+  ) {
+    return false;
+  }
+  return (
+    /^(សម្ល|ស្ងោរ|ស៊ុប|ការី|អាម៉ុក|ម្ជូរ|ឆ្នាំងភ្លើង|យ៉ាវហន|ខគោ)/i.test(kh) ||
+    /(សម្ល|ការី|អាម៉ុក|កកូរ|ម្ជូរ|ប្រហើរ|ស្ងោរ|ស៊ុប|ឆ្នាំងភ្លើង|យ៉ាវហន)/i.test(kh)
+  );
+}
+
+/**
+ * Strictly checks if a dish belongs to the អាំង/ចៀន (Grilled & Fried) category:
+ * Includes only grilled (អាំង/ដុត) and pan-fried / deep-fried (ចៀន/បំពង) food items.
+ * Excludes soups, curries, stir-fries (ឆា), fried rice (បាយឆា), noodle dishes, salads (ញាំ/ភ្លា/ជ្រក់/បុក), and desserts/drinks.
+ */
+export function isGrilledOrFriedDish(food: FoodItem): boolean {
+  if (!food || !food.id || !food.nameKh) return false;
+  if (isBeverageDish(food) || isSweetDessertOrCakeDish(food) || isSamlorSoupOrCurryDish(food)) {
+    return false;
+  }
+  const kh = (food.nameKh || '').trim();
+  if (
+    /^(ឆា|បាយ|មី|គុយទាវ|លត|នំបញ្ចុក|បាញ់កាញ់|បាញ់ស៊ុង|បបរ|សម្ល|ស្ងោរ|ស៊ុប|ញាំ|ភ្លា|ជ្រក់|បុក|ទឹកគ្រឿង|ឡុកឡាក់|ក្តាម.*ឆា|ក្ដាម.*ឆា|លាសឆា|បង្កងឆា|អយស្ទ័រស្រស់|ផាកឡូវ|ផាក់ឡូវ|ពងក្រួចកូន|ត្រីហើមក្រឡុក)/i.test(
+      kh
+    )
+  ) {
+    return false;
+  }
+  return /(អាំង|ចៀន|ដុត|បំពង|បាញ់ឆែវ|នំគ្រក់|សាច់ក្រក|សង្វាក់អាំង)/i.test(kh);
+}
+
+/**
+ * Classifies a dish into one of the primary Food Screen tabs ('samlor' | 'cha' | 'bong_aem')
+ * for meal-time scoring and general categorization.
  */
 export function resolveFoodScreenCategoryTab(food: FoodItem): Exclude<FoodCategoryTabId, 'all'> {
   if (isBeverageDish(food) || isSweetDessertOrCakeDish(food)) {
     return 'bong_aem';
   }
-  if (isNoodleDishItem(food)) {
-    return 'cha';
-  }
-  const kh = (food.nameKh || '').trim();
-  const title = `${kh} ${food.nameEn || ''}`;
-  if (
-    food.categorySlug === 'grilled' ||
-    food.categorySlug === 'stirfry' ||
-    food.categorySlug === 'salad' ||
-    /^បាយ|^នំប៉័ង|^ឆា|^អាំង|^ដុត|^ចៀន|^បំពង|^ឡុកឡាក់|^បុក|^ញាំ|^ភ្លា|^បាញ់ឆែវ|^នំគ្រក់|^ណែម|^គួង|^ប្រហិត/i.test(kh)
-  ) {
-    return 'cha';
-  }
-  if (
-    food.categorySlug === 'soup' ||
-    SAVORY_CONGEE_RE.test(title) ||
-    /^សម្ល|^ស្ងោរ|^ស៊ុប|^ខ|^អាម៉ុក|^ប្រហុក|^ទឹកគ្រឿង|^កាពិ|^ឆ្នាំងភ្លើង|^យ៉ាវហន/i.test(kh)
-  ) {
+  if (isSamlorSoupOrCurryDish(food)) {
     return 'samlor';
+  }
+  if (isGrilledOrFriedDish(food)) {
+    return 'cha';
   }
   const grp = classifyKhmerFoodPrimaryGroup(food);
   if (grp === 'samlor' || grp === 'sngor') return 'samlor';
@@ -122,9 +151,25 @@ export function resolveFoodScreenCategoryTab(food: FoodItem): Exclude<FoodCatego
   return 'cha';
 }
 
+/**
+ * Strict category filter for the 4 Food Menu category buttons:
+ * - 'all' (គ្រប់មុខម្ហូប): All food items
+ * - 'samlor' (សម្ល): Cambodian soups and curry dishes only
+ * - 'cha' (អាំង/ចៀន): Grilled and fried food only
+ * - 'bong_aem' (បង្អែម/ភេសជ្ជៈ): Desserts and beverages only
+ */
 export function matchesFoodScreenCategoryTab(food: FoodItem, catId: string): boolean {
-  if (!food || !food.id) return false;
+  if (!food || !food.id || !food.nameKh) return false;
   if (!catId || catId === 'all') return true;
+  if (catId === 'samlor') {
+    return isSamlorSoupOrCurryDish(food);
+  }
+  if (catId === 'cha') {
+    return isGrilledOrFriedDish(food);
+  }
+  if (catId === 'bong_aem') {
+    return isBeverageDish(food) || isSweetDessertOrCakeDish(food);
+  }
   return resolveFoodScreenCategoryTab(food) === catId;
 }
 
@@ -141,7 +186,7 @@ export function scoreCambodianDishForCategoryAndMealTime(
   const en = (food.nameEn || '').trim();
   const title = `${kh} ${en}`;
   const catTab = resolveFoodScreenCategoryTab(food);
-  const isCongee = catTab === 'samlor' && SAVORY_CONGEE_RE.test(title);
+  const isCongee = SAVORY_CONGEE_RE.test(title);
 
   if (slot === 'breakfast') {
     if (catTab === 'bong_aem') {
@@ -157,7 +202,6 @@ export function scoreCambodianDishForCategoryAndMealTime(
       if (/^សម្លប្រហើរ|^ស្ងោរ|^ខ/i.test(kh)) return 76;
       return 0;
     }
-    // catTab === 'cha' (Grill/Fry/Noodles/Rice)
     if (HEAVY_LUNCH_DINNER_ONLY_RE.test(kh)) return 0;
     if (/^បាយសាច់ជ្រូក|^គុយទាវ|^នំបញ្ចុក|^បាយមាន់|^នំប៉័ងប៉ាតេ/i.test(kh)) {
       return 100;
@@ -181,7 +225,6 @@ export function scoreCambodianDishForCategoryAndMealTime(
       if (LUNCH_SAMLOR_RE.test(kh)) return 100;
       return 84;
     }
-    // catTab === 'cha'
     if (/^នំប៉័ងប៉ាតេ|^បាយសាច់ជ្រូក$/i.test(kh)) return 0;
     if (LUNCH_CHA_RE.test(kh)) return 100;
     if (
@@ -216,7 +259,6 @@ export function scoreCambodianDishForCategoryAndMealTime(
     if (DINNER_SAMLOR_RE.test(kh)) return 94;
     return 80;
   }
-  // catTab === 'cha'
   if (/^នំប៉័ងប៉ាតេ|^បាយសាច់ជ្រូក$|^នំបញ្ចុកសម្លខ្មែរ$/i.test(kh)) return 0;
   if (DINNER_CHA_RE.test(kh)) return 100;
   if (
