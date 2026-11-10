@@ -201,8 +201,8 @@ export const FoodView: React.FC = () => {
       {/* 2. White/Cream Rounded Sheet */}
       <div className="relative z-10 -mt-6 rounded-t-[26px] bg-[#F6F4EE] pb-8 shadow-[0_-6px_20px_rgba(0,0,0,0.18)] overflow-hidden">
         {/* Top White Header Row: មុខម្ហូបខ្មែរ ទាំងអស់ on Left + Small [👑 VIP] Pill on Right */}
-        <div className="bg-white px-4 py-3.5 flex items-center justify-between gap-2 border-b border-slate-900/5">
-          <h2 className="font-khmer font-extrabold text-lg sm:text-xl text-[#0F172A] tracking-tight truncate">
+        <div className="bg-[#1E293B] px-4 py-3.5 flex items-center justify-between gap-2 border-b border-slate-700/80 shadow-sm">
+          <h2 className="font-khmer font-extrabold text-lg sm:text-xl text-white tracking-tight truncate">
             {tr(language, 'មុខម្ហូបខ្មែរ ទាំងអស់', 'All Cambodian Dishes', '柬埔寨全部美食')}
           </h2>
 
@@ -346,20 +346,21 @@ export const FoodView: React.FC = () => {
 
           {/* Search Bar + Green Circular Filter Button Row */}
           <div className="flex items-center gap-2.5">
-            <div className="flex-1 h-11 rounded-full bg-white border border-slate-200/90 shadow-2xs px-4 flex items-center gap-2.5">
-              <Search className="w-4 h-4 text-slate-700 shrink-0" />
+            <div className="flex-1 h-11 rounded-full bg-[#1E293B] border border-slate-600/90 shadow-sm px-4 flex items-center gap-2.5">
+              <Search className="w-4 h-4 text-white shrink-0" />
               <input
                 type="text"
                 value={foodSearchQuery}
                 onChange={(e) => setFoodSearchQuery(e.target.value)}
                 placeholder={tr(language, 'ស្វែងរកម្ហូប...', 'Search dishes...', '搜索高棉美食...')}
-                className="w-full bg-transparent text-xs sm:text-sm font-khmer font-semibold text-slate-800 placeholder-slate-500 focus:outline-none"
+                style={{ color: "#FFFFFF" }}
+                className="w-full bg-transparent text-xs sm:text-sm font-khmer font-bold text-white placeholder:text-white focus:outline-none"
               />
               {foodSearchQuery && (
                 <button
                   type="button"
                   onClick={() => setFoodSearchQuery('')}
-                  className="p-0.5 text-slate-400 hover:text-slate-700 cursor-pointer"
+                  className="p-0.5 text-white/80 hover:text-white cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -414,7 +415,7 @@ export const FoodView: React.FC = () => {
                         }`}
                       >
                         {t.id !== 'all' && <DishTagIcon id={t.id as DishTagId} className="w-3.5 h-3.5 shrink-0" />}
-                        <span>{tr(language, t.kh, t.en, t.zh)}</span>
+                        <span>{tr(language, t.labelKh, t.labelEn, t.labelZh)}</span>
                       </button>
                     );
                   })}

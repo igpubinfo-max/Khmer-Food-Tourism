@@ -4,7 +4,6 @@ import {
   Bell,
   Menu,
   ArrowLeft,
-  Camera,
   Send,
   X,
   QrCode,
@@ -385,15 +384,71 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
             }}
             className="w-full h-[54px] rounded-full border-2 border-[#E8B923] p-1.5 flex items-center gap-2"
           >
-            {/* Left Camera AI Button */}
+            {/* Left Premium 3D AI Smart Camera Lens Button */}
             <button
               type="button"
               onClick={onOpenCameraAi}
               title={tr(language, 'ថតរូបម្ហូបដើម្បីសួរ AI', 'Snap food photo for AI', '拍照识别美食')}
               aria-label={tr(language, 'ថតរូបម្ហូបដើម្បីសួរ AI', 'Snap food photo for AI', '拍照识别美食')}
-              className="w-10 h-10 rounded-full bg-white hover:bg-amber-50 text-amber-700 border border-amber-200/80 shadow-xs flex items-center justify-center shrink-0 active:scale-95 transition cursor-pointer"
+              style={{
+                background: 'linear-gradient(145deg, #FFFBEB 0%, #FEF3C7 45%, #FDE68A 100%)',
+                boxShadow: '0 3px 10px rgba(245, 158, 11, 0.45), inset 0 1.5px 2px rgba(255, 255, 255, 0.95)',
+              }}
+              className="group relative w-10 h-10 rounded-full border-2 border-amber-400 hover:border-amber-300 flex items-center justify-center shrink-0 active:scale-95 transition cursor-pointer overflow-hidden"
             >
-              <Camera className="w-5 h-5" />
+              {/* Rich Multi-Layer AI Camera Lens SVG */}
+              <svg className="w-6 h-6 drop-shadow-2xs group-hover:scale-105 transition-transform" viewBox="0 0 32 32" fill="none">
+                <defs>
+                  <linearGradient id="kftCamBodyGrad" x1="4" y1="7" x2="28" y2="26" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#0F766E" />
+                    <stop offset="55%" stopColor="#065F46" />
+                    <stop offset="100%" stopColor="#064E3B" />
+                  </linearGradient>
+                  <linearGradient id="kftCamLensGrad" x1="11" y1="12" x2="21" y2="22" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#38BDF8" />
+                    <stop offset="50%" stopColor="#0284C7" />
+                    <stop offset="100%" stopColor="#1E3A8A" />
+                  </linearGradient>
+                  <linearGradient id="kftCamGoldGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#FBBF24" />
+                    <stop offset="100%" stopColor="#D97706" />
+                  </linearGradient>
+                </defs>
+
+                {/* AI Scanner Corner Brackets */}
+                <path d="M4 9V6.5C4 5.67 4.67 5 5.5 5H8" stroke="#D97706" strokeWidth="1.6" strokeLinecap="round" />
+                <path d="M28 9V6.5C28 5.67 27.33 5 26.5 5H24" stroke="#D97706" strokeWidth="1.6" strokeLinecap="round" />
+                <path d="M4 23v2.5C4 26.33 4.67 27 5.5 27H8" stroke="#D97706" strokeWidth="1.6" strokeLinecap="round" />
+                <path d="M28 23v2.5C28 26.33 27.33 27 26.5 27H24" stroke="#D97706" strokeWidth="1.6" strokeLinecap="round" />
+
+                {/* Shutter Top Button */}
+                <rect x="8.5" y="7" width="3.5" height="2" rx="0.8" fill="#D97706" />
+
+                {/* Camera Body */}
+                <path
+                  d="M6.5 11C6.5 9.9 7.4 9 8.5 9H11L12.4 7.3C12.78 6.85 13.33 6.6 13.92 6.6H18.08C18.67 6.6 19.22 6.85 19.6 7.3L21 9H23.5C24.6 9 25.5 9.9 25.5 11V21.5C25.5 22.6 24.6 23.5 23.5 23.5H8.5C7.4 23.5 6.5 22.6 6.5 21.5V11Z"
+                  fill="url(#kftCamBodyGrad)"
+                  stroke="#FFFFFF"
+                  strokeWidth="1.2"
+                />
+
+                {/* Outer Gold Lens Ring */}
+                <circle cx="16" cy="16.5" r="5.4" fill="#FFFFFF" stroke="url(#kftCamGoldGrad)" strokeWidth="1.4" />
+
+                {/* Optical Sapphire/Cyan Lens Core */}
+                <circle cx="16" cy="16.5" r="3.8" fill="url(#kftCamLensGrad)" />
+
+                {/* Inner Pupil & Glass Glint */}
+                <circle cx="16" cy="16.5" r="1.6" fill="#0F172A" />
+                <circle cx="14.6" cy="15.1" r="1.05" fill="#FFFFFF" fillOpacity="0.92" />
+                <circle cx="17.3" cy="17.8" r="0.55" fill="#7DD3FC" fillOpacity="0.85" />
+
+                {/* AI Flash / Sparkle Star on Top Right of Camera */}
+                <path
+                  d="M22.8 10.2L23.35 11.65L24.8 12.2L23.35 12.75L22.8 14.2L22.25 12.75L20.8 12.2L22.25 11.65L22.8 10.2Z"
+                  fill="#FDE047"
+                />
+              </svg>
             </button>
 
             {/* Middle Ask AI / Search Input */}

@@ -16,6 +16,7 @@ import {
 import { shareRichContent } from '../utils/androidMediaHelper';
 import { openAiAssistantWithQuery, getAskAiButtonLabel } from '../utils/aiSearchBridge';
 import { tr, translateProvince } from '../utils/i18n';
+import { getFallbackAvatarDataUri } from '../utils/avatarHelper';
 import {
   getLocalizedFood,
   getLocalizedRestaurant,
@@ -41,6 +42,7 @@ import {
   getCurrentVideoRotationCycle,
   rotateLatestVideosForScope,
   OnlineFoodDiscoveryItem,
+  resolveOriginalSocialAccountUrl,
 } from '../services/onlineFoodDiscoveryService';
 
 const VIDEO_BATCH_SIZE = 12;

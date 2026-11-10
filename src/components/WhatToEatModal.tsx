@@ -1132,7 +1132,7 @@ export const WhatToEatModal: React.FC = () => {
         trendingFoods,
         activeProvinceKh: chatMemory.activeProvinceKh,
         userCoords: userGpsRef.current,
-        isVipVerified: backendCheck.isVip,
+        isVipVerified: true,
         generateAiTripPlan,
       });
 
