@@ -84,7 +84,7 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
   return (
     <div
       className={`relative w-full overflow-visible select-none ${
-        mode === 'home' ? 'h-[248px] sm:h-[262px]' : 'h-[196px] sm:h-[210px]'
+        mode === 'home' ? 'h-[248px] sm:h-[262px]' : 'h-[228px] sm:h-[242px]'
       }`}
       style={{ paddingTop: 'var(--kft-safe-top, 0px)' }}
     >
@@ -376,39 +376,102 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
         </div>
       )}
 
-      {/* Food Mode: Elegant Horizontal Strip behind Khmer Food Title */}
+      {/* Food Mode: Compact Centered Dark Emerald-Green Banner (30-35% shorter, no counter/arrow, Angkor silhouette) */}
       {mode === 'food' && (
-        <div className="absolute inset-x-0 bottom-5 z-20 px-3.5">
+        <>
+          {/* Soft bottom mist transition into the clean white Food sheet */}
           <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-8 z-10"
             style={{
-              background: 'linear-gradient(100deg, rgba(6, 78, 59, 0.94) 0%, rgba(15, 23, 42, 0.92) 100%)',
-              boxShadow: '0 8px 22px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255,255,255,0.14)',
+              background:
+                'linear-gradient(180deg, rgba(248, 250, 252, 0) 0%, rgba(248, 250, 252, 0.72) 70%, #F8FAFC 100%)',
             }}
-            className="relative w-full py-2.5 pl-3 pr-3.5 rounded-2xl border border-amber-300/50 flex items-center gap-3 overflow-hidden"
-          >
-            <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-gradient-to-b from-amber-300 to-amber-500" aria-hidden="true" />
-            <div className="ml-1 w-10 h-10 rounded-xl bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center shrink-0 shadow-md">
-              <svg className="w-5 h-5 text-emerald-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
-                <path d="M7 2v20" />
-                <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+          />
+          <div className="absolute inset-x-0 bottom-3 z-20 px-5 flex justify-center">
+            <div
+              style={{
+                background: 'linear-gradient(92deg, #043F2E 0%, #065F46 52%, #044E3A 100%)',
+                boxShadow:
+                  '0 0 0 1.5px rgba(254, 243, 199, 0.65), 0 6px 16px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.18)',
+              }}
+              className="relative w-full max-w-[356px] py-1.5 pl-2.5 pr-3 rounded-[18px] border-[1.5px] border-[#F5C542] flex items-center gap-2.5 overflow-hidden"
+            >
+              {/* Decorative subtle green hills & gold Angkor Wat silhouette on the right */}
+              <svg
+                className="pointer-events-none absolute right-0 bottom-0 h-full w-32 opacity-90"
+                viewBox="0 0 160 56"
+                fill="none"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M18 56C46 38 82 34 160 42V56H18Z"
+                  fill="rgba(16, 185, 129, 0.16)"
+                />
+                <path
+                  d="M52 56C78 44 114 40 160 47V56H52Z"
+                  fill="rgba(5, 150, 105, 0.24)"
+                />
+                {/* Gold Angkor Wat 5-tower silhouette */}
+                <g fill="#F5C542" fillOpacity="0.38" transform="translate(86, 10)">
+                  {/* Base terraces */}
+                  <rect x="4" y="34" width="52" height="3" rx="1" />
+                  <rect x="8" y="30" width="44" height="4" rx="1" />
+                  {/* Center main lotus tower */}
+                  <path d="M30 4 L34 14 L35 30 L25 30 L26 14 Z" />
+                  {/* Inner Left & Right towers */}
+                  <path d="M19 11 L22 18 L23 30 L15 30 L16 18 Z" />
+                  <path d="M41 11 L44 18 L45 30 L37 30 L38 18 Z" />
+                  {/* Outer Left & Right towers */}
+                  <path d="M10 18 L12.5 23 L13 30 L7 30 L7.5 23 Z" />
+                  <path d="M50 18 L52.5 23 L53 30 L47 30 L47.5 23 Z" />
+                </g>
               </svg>
+
+              {/* Left Gold Rounded Food Icon */}
+              <div
+                style={{
+                  background: 'linear-gradient(180deg, #FDE047 0%, #F59E0B 100%)',
+                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.6)',
+                }}
+                className="relative z-10 w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0"
+              >
+                <svg
+                  className="w-4.5 h-4.5 text-[#042F2E]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+                  <path d="M7 2v20" />
+                  <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+                </svg>
+              </div>
+
+              {/* Subtle Vertical Divider */}
+              <span className="relative z-10 h-6 w-px bg-white/25 shrink-0" aria-hidden="true" />
+
+              {/* Khmer Title & Subtitle (No counter badge, no right arrow) */}
+              <div className="relative z-10 min-w-0 flex-1 py-0.5">
+                <h2
+                  className="font-khmer font-extrabold text-white leading-tight truncate"
+                  style={{ fontSize: '13.5px', textShadow: '0 1px 3px rgba(0, 0, 0, 0.55)' }}
+                >
+                  {tr(language, 'មុខម្ហូបខ្មែរ ទាំងអស់', 'All Cambodian Dishes', '柬埔寨全部美食')}
+                </h2>
+                <p
+                  className="font-khmer font-bold text-[#FDE68A] leading-tight truncate mt-0.5"
+                  style={{ fontSize: '9.5px', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                >
+                  {tr(language, 'រកឃើញរសជាតិដើមខ្មែរ គ្រប់ខេត្ត', 'Discover authentic Khmer flavors', '探索正宗高棉风味')}
+                </p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="font-khmer font-extrabold text-[15px] sm:text-base text-white leading-tight truncate">
-                {tr(language, 'មុខម្ហូបខ្មែរ ទាំងអស់', 'All Cambodian Dishes', '柬埔寨全部美食')}
-              </h2>
-              <p className="text-[10.5px] font-bold text-amber-200/90 leading-tight truncate">
-                {tr(language, 'រកឃើញរសជាតិដើមខ្មែរ គ្រប់ខេត្ត', 'Discover authentic Khmer flavors', '探索正宗高棉风味')}
-              </p>
-            </div>
-            {typeof foodCount === 'number' && (
-              <span className="shrink-0 px-2.5 py-1 rounded-full bg-amber-400 text-emerald-950 text-[11px] font-extrabold shadow-sm">
-                {foodCount}
-              </span>
-            )}
           </div>
-        </div>
+        </>
       )}
     </div>
   );

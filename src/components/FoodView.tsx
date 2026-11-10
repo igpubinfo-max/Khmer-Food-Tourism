@@ -267,16 +267,88 @@ export const FoodView: React.FC = () => {
     return () => observer.disconnect();
   }, [visibleCount, filteredFoods.length]);
 
+  const renderCategoryIcon = (catId: string, active: boolean) => {
+    const iconColor = active ? 'text-white' : 'text-[#065F46]';
+    switch (catId) {
+      case 'all':
+        return (
+          <svg
+            className={`w-4 h-4 ${iconColor} shrink-0`}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+            <path d="M7 2v20" />
+            <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+          </svg>
+        );
+      case 'samlor':
+        return (
+          <svg
+            className={`w-4 h-4 ${iconColor} shrink-0`}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M4 12h16a1 1 0 0 1 1 1v.5a7.5 7.5 0 0 1-15 0V13a1 1 0 0 1 1-1Z" />
+            <path d="M7 20.5h10" />
+            <path d="M9.5 8.5c0-1.4.9-2.2.9-3.5" />
+            <path d="M14.5 8.5c0-1.4.9-2.2.9-3.5" />
+          </svg>
+        );
+      case 'cha':
+        return (
+          <svg
+            className={`w-4 h-4 ${iconColor} shrink-0`}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 7V4" />
+            <path d="M4 17a8 8 0 0 1 16 0" />
+            <path d="M2 17h20" />
+            <path d="M5 20h14" />
+          </svg>
+        );
+      default:
+        return (
+          <svg
+            className={`w-4 h-4 ${iconColor} shrink-0`}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M7 13h10l-1.2 7H8.2L7 13Z" />
+            <path d="M6 13c0-2.5 2-4.5 6-4.5s6 2 6 4.5" />
+            <path d="M12 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
+          </svg>
+        );
+    }
+  };
+
   return (
-    <div className="max-w-md mx-auto bg-[#1E293B] text-slate-900 min-h-full font-khmer">
-      {/* 1. Full-Bleed Angkor Wat Hero Header (No Green Bar) */}
+    <div className="max-w-md mx-auto bg-[#F8FAFC] text-[#1E293B] min-h-full font-khmer">
+      {/* 1. Full-Bleed Angkor Wat Hero Header with Compact Centered Emerald Banner */}
       <AngkorHeroTopHeader mode="food" foodCount={filteredFoods.length} />
 
-      {/* 2. Rounded Sheet directly below Angkor Wat Hero Header (No VIP button or opaque bar blocking Angkor Wat) */}
-      <div className="relative z-10 -mt-3 rounded-t-[26px] bg-[#1E293B] pb-8 shadow-[0_-6px_20px_rgba(0,0,0,0.18)] overflow-hidden">
+      {/* 2. Clean White / Soft-Slate Surface Below Angkor Wat Hero */}
+      <div className="relative z-10 -mt-1.5 rounded-t-[24px] bg-[#F8FAFC] pb-8 overflow-hidden">
         {/* Main Content Container */}
-        <div className="px-3.5 pt-3.5 space-y-3">
-          {/* 4 Square Illustrated Category Cards */}
+        <div className="px-3.5 pt-2.5 space-y-2.5">
+          {/* 4 Rounded Illustrated Category Cards with Arched Lower Label */}
           <div className="grid grid-cols-4 gap-2 sm:gap-2.5">
             {categories.map((cat) => {
               const active = selectedCategory === cat.id;
@@ -285,42 +357,59 @@ export const FoodView: React.FC = () => {
                   key={cat.id}
                   type="button"
                   onClick={() => setSelectedCategory(cat.id)}
-                  style={
+                  style={{
+                    boxShadow: active
+                      ? '0 6px 14px rgba(6, 95, 70, 0.24), 0 0 0 1px rgba(245, 197, 66, 0.35)'
+                      : '0 4px 12px rgba(15, 23, 42, 0.07)',
+                  }}
+                  className={`group relative rounded-[18px] overflow-hidden flex flex-col transition active:scale-95 cursor-pointer border-[2px] ${
                     active
-                      ? {
-                          background: 'linear-gradient(180deg, #43A067 0%, #1E5E3A 100%)',
-                          boxShadow: '0 4px 10px rgba(30, 94, 58, 0.28)',
-                        }
-                      : undefined
-                  }
-                  className={`rounded-2xl py-2.5 px-1.5 flex flex-col items-center justify-between gap-1.5 transition active:scale-95 cursor-pointer border ${
-                    active
-                      ? 'text-white border-amber-300/70'
-                      : 'bg-white/[0.07] text-white border-white/10 hover:border-amber-300/50 hover:bg-white/[0.12]'
+                      ? 'border-[#F5C542] bg-[#065F46]'
+                      : 'border-white bg-white hover:border-[#F5C542]/60'
                   }`}
                 >
-                  <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 bg-white shadow-md shrink-0 ${active ? 'border-amber-300' : 'border-white/30'}`}>
+                  {/* Top Authentic Cambodian Dish Photo */}
+                  <div className="relative w-full h-[58px] sm:h-[64px] overflow-hidden bg-slate-100">
                     <img
                       src={cat.thumb}
                       alt={cat.nameKh}
                       loading="lazy"
                       decoding="async"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                     />
                   </div>
-                  <span
-                    className={`font-khmer font-extrabold text-[11.5px] sm:text-xs leading-tight text-center truncate w-full ${
-                      active ? 'text-white' : 'text-slate-100'
+
+                  {/* Arched Lower Curve with Category Icon & Khmer Label */}
+                  <div
+                    style={
+                      active
+                        ? {
+                            background: 'linear-gradient(180deg, #16A34A 0%, #065F46 100%)',
+                          }
+                        : {
+                            background: 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)',
+                          }
+                    }
+                    className={`relative -mt-3 pt-1.5 pb-2 px-1 rounded-t-[50%] flex flex-col items-center justify-center gap-0.5 border-t ${
+                      active ? 'border-[#A7F3D0]/70 text-white' : 'border-slate-200/80 text-[#1E293B]'
                     }`}
                   >
-                    {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
-                  </span>
+                    {renderCategoryIcon(cat.id, active)}
+                    <span
+                      style={{ fontSize: '11px' }}
+                      className={`font-khmer font-extrabold leading-tight text-center truncate w-full ${
+                        active ? 'text-white' : 'text-[#1E293B]'
+                      }`}
+                    >
+                      {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
+                    </span>
+                  </div>
                 </button>
               );
             })}
           </div>
 
-                    {/* Meal-Time Filter Pills Row: ទាំងអស់ | ពេលព្រឹក | ពេលថ្ងៃ | ពេលល្ងាច */}
+          {/* Meal-Time Selection Buttons Row: ទាំងអស់ | ពេលព្រឹក | ពេលថ្ងៃ | ពេលល្ងាច */}
           <div className="grid grid-cols-4 gap-2">
             {[
               {
@@ -330,11 +419,11 @@ export const FoodView: React.FC = () => {
                 labelZh: '全部',
                 renderIcon: (active: boolean) => (
                   <svg
-                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-emerald-100' : 'text-emerald-300'}`}
+                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-white' : 'text-[#065F46]'}`}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="2.1"
+                    strokeWidth="2.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     aria-hidden="true"
@@ -351,11 +440,11 @@ export const FoodView: React.FC = () => {
                 labelZh: '早餐',
                 renderIcon: (active: boolean) => (
                   <svg
-                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-300' : 'text-emerald-300'}`}
+                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-white' : 'text-[#065F46]'}`}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="2.1"
+                    strokeWidth="2.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     aria-hidden="true"
@@ -374,11 +463,11 @@ export const FoodView: React.FC = () => {
                 labelZh: '午餐',
                 renderIcon: (active: boolean) => (
                   <svg
-                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-300' : 'text-amber-400'}`}
+                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-200' : 'text-[#F59E0B]'}`}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="2.1"
+                    strokeWidth="2.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     aria-hidden="true"
@@ -395,11 +484,11 @@ export const FoodView: React.FC = () => {
                 labelZh: '晚餐',
                 renderIcon: (active: boolean) => (
                   <svg
-                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-200' : 'text-indigo-300'}`}
+                    className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-white' : 'text-[#1E293B]'}`}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="2.1"
+                    strokeWidth="2.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     aria-hidden="true"
@@ -415,10 +504,22 @@ export const FoodView: React.FC = () => {
                   key={m.id}
                   type="button"
                   onClick={() => setMealTimeFilter(m.id)}
-                  className={`h-9 px-2 rounded-full text-xs font-extrabold flex items-center justify-center gap-1.5 border transition active:scale-95 cursor-pointer ${
+                  style={
                     active
-                      ? 'bg-[#15803D] text-white border-emerald-300/50 shadow-sm'
-                      : 'bg-white/[0.07] text-slate-100 border-white/15 hover:bg-white/[0.12]'
+                      ? {
+                          background: 'linear-gradient(180deg, #16A34A 0%, #065F46 100%)',
+                          boxShadow: '0 3px 10px rgba(6, 95, 70, 0.25)',
+                          fontSize: '11.5px',
+                        }
+                      : {
+                          boxShadow: '0 2px 8px rgba(15, 23, 42, 0.06)',
+                          fontSize: '11.5px',
+                        }
+                  }
+                  className={`h-9 px-2 rounded-full font-khmer font-extrabold flex items-center justify-center gap-1.5 border transition active:scale-95 cursor-pointer ${
+                    active
+                      ? 'text-white border-[#86EFAC]/50'
+                      : 'bg-white text-[#1E293B] border-slate-200/90 hover:border-[#065F46]/40'
                   }`}
                 >
                   {m.renderIcon(active)}
@@ -428,11 +529,16 @@ export const FoodView: React.FC = () => {
             })}
           </div>
 
-          {/* Search Bar (#1B2C40 with Right-Side Compact Green Search Button) + Circular Filter Button Row */}
+          {/* Clean White Rounded Search Bar + Dark Emerald Search Button + Circular Filter Button */}
           <div ref={dishListStartRef} className="flex items-center gap-2">
-            <div className="flex-1 h-11 rounded-full bg-[#1B2C40] border border-slate-600/80 shadow-sm pl-3.5 pr-1.5 flex items-center gap-2">
+            <div
+              style={{
+                boxShadow: '0 3px 12px rgba(15, 23, 42, 0.06), inset 0 1px 2px rgba(255, 255, 255, 0.9)',
+              }}
+              className="flex-1 h-11 rounded-full bg-white border border-slate-300/90 pl-3.5 pr-1.5 flex items-center gap-2"
+            >
               <svg
-                className="w-4 h-4 text-white shrink-0 pointer-events-none"
+                className="w-4.5 h-4.5 text-slate-500 shrink-0 pointer-events-none"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -456,15 +562,15 @@ export const FoodView: React.FC = () => {
                   }
                 }}
                 placeholder={tr(language, 'ស្វែងរកម្ហូប...', 'Search dishes...', '搜索高棉美食...')}
-                style={{ color: '#FFFFFF' }}
-                className="flex-1 min-w-0 bg-transparent text-xs sm:text-sm font-khmer font-bold text-white placeholder:text-white/90 focus:outline-none"
+                style={{ fontSize: '12.5px' }}
+                className="flex-1 min-w-0 bg-transparent font-khmer font-bold text-[#1E293B] placeholder:text-slate-400 focus:outline-none"
               />
               {foodSearchQuery && (
                 <button
                   type="button"
                   onClick={() => setFoodSearchQuery('')}
                   title={tr(language, 'សម្អាត', 'Clear', '清除')}
-                  className="p-1 rounded-full text-white/75 hover:text-white transition cursor-pointer shrink-0"
+                  className="p-1 rounded-full text-slate-400 hover:text-slate-700 transition cursor-pointer shrink-0"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -472,7 +578,12 @@ export const FoodView: React.FC = () => {
               <button
                 type="button"
                 onClick={handleExecuteFoodSearch}
-                className="h-8 px-3 rounded-full bg-[#15803D] hover:bg-[#166534] border border-emerald-400/35 text-white text-xs font-khmer font-extrabold flex items-center justify-center gap-1.5 shrink-0 shadow-2xs transition active:scale-95 cursor-pointer"
+                style={{
+                  background: 'linear-gradient(180deg, #059669 0%, #065F46 100%)',
+                  boxShadow: '0 2px 6px rgba(6, 95, 70, 0.28)',
+                  fontSize: '12px',
+                }}
+                className="h-8.5 px-3.5 rounded-full border border-emerald-400/40 text-white font-khmer font-extrabold flex items-center justify-center gap-1.5 shrink-0 transition active:scale-95 cursor-pointer"
               >
                 <svg
                   className="w-3.5 h-3.5 text-white shrink-0"
@@ -495,10 +606,21 @@ export const FoodView: React.FC = () => {
               type="button"
               onClick={() => setShowFilterDrawer((v) => !v)}
               title={tr(language, 'តម្រងខេត្ត និងសុខភាព', 'Province & Healthy Filters', '省份与健康筛选')}
-              className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 shadow-xs transition active:scale-95 cursor-pointer ${
+              style={
                 showFilterDrawer || provinceFilter !== '' || tagFilter !== 'all'
-                  ? 'bg-amber-500 text-slate-950'
-                  : 'bg-[#235D3A] hover:bg-[#1B4B2E] text-white'
+                  ? {
+                      background: 'linear-gradient(180deg, #FBBF24 0%, #D97706 100%)',
+                      boxShadow: '0 3px 10px rgba(217, 119, 6, 0.3)',
+                    }
+                  : {
+                      background: 'linear-gradient(180deg, #059669 0%, #065F46 100%)',
+                      boxShadow: '0 3px 10px rgba(6, 95, 70, 0.25)',
+                    }
+              }
+              className={`w-11 h-11 rounded-full border-2 border-white flex items-center justify-center shrink-0 transition active:scale-95 cursor-pointer ${
+                showFilterDrawer || provinceFilter !== '' || tagFilter !== 'all'
+                  ? 'text-slate-950'
+                  : 'text-white'
               }`}
             >
               <svg
