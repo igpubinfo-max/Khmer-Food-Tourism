@@ -89,22 +89,23 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
       {/* Full-Bleed High-Resolution Angkor Wat Sunrise/Sunset Hero Background */}
       <div className="absolute inset-0 overflow-hidden">
         <img
-          src="/welcome/home-angkor-hero-v2.jpg"
+          src={mode === 'food' ? '/welcome/food-angkor-hero.jpg' : '/welcome/home-angkor-hero-v2.jpg'}
           alt="Angkor Wat Cambodia"
+          loading="eager"
           decoding="async"
           className="w-full h-full object-cover"
           style={{
-            objectPosition: 'center 20%',
+            objectPosition: mode === 'food' ? 'center 14%' : 'center 20%',
           }}
           onError={(e) => {
             const img = e.currentTarget as HTMLImageElement;
             if (!img.dataset.fallback) {
               img.dataset.fallback = '1';
-              img.src = '/welcome/angkor-lotus-hero.jpg';
+              img.src = mode === 'food' ? '/welcome/shop-angkor-hero.jpg' : '/welcome/angkor-lotus-hero.jpg';
             }
           }}
         />
-        {/* Subtle top sky contrast gradient so white title & icons are always crisp while keeping rich blue sky */}
+        {/* Subtle top sky contrast gradient so white title & icons are always crisp while keeping rich sky */}
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-20"
           style={{
@@ -112,23 +113,36 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
               'linear-gradient(180deg, rgba(2, 24, 54, 0.42) 0%, rgba(2, 24, 54, 0.14) 65%, rgba(2, 24, 54, 0) 100%)',
           }}
         />
-        {/* Smooth cyan-to-white gradient fade & soft blur rising from the bottom of the hero background */}
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-20"
-          style={{
-            backdropFilter: 'blur(3.5px)',
-            WebkitBackdropFilter: 'blur(3.5px)',
-            maskImage: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0) 100%)',
-            WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0) 100%)',
-          }}
-        />
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-24"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(103, 214, 232, 0) 0%, rgba(152, 230, 244, 0.48) 44%, rgba(226, 246, 252, 0.88) 78%, #F8FAFC 100%)',
-          }}
-        />
+        {mode === 'home' ? (
+          <>
+            {/* Smooth cyan-to-white gradient fade & soft blur rising from the bottom of the Home hero background */}
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-20"
+              style={{
+                backdropFilter: 'blur(3.5px)',
+                WebkitBackdropFilter: 'blur(3.5px)',
+                maskImage: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0) 100%)',
+                WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0) 100%)',
+              }}
+            />
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-24"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(103, 214, 232, 0) 0%, rgba(152, 230, 244, 0.48) 44%, rgba(226, 246, 252, 0.88) 78%, #F8FAFC 100%)',
+              }}
+            />
+          </>
+        ) : (
+          /* Food Mode: Preserve lush emerald water reflection of Sunset Temple Reflections in Lush Cambodia and blend bottom edge smoothly */
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-14"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(248, 250, 252, 0) 0%, rgba(248, 250, 252, 0.72) 68%, #F8FAFC 100%)',
+            }}
+          />
+        )}
       </div>
 
       {/* Top Overlay Header Row: Official App Logo on Left + Title + Bell + Profile */}

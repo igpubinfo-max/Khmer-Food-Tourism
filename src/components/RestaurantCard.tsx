@@ -137,6 +137,11 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
       restaurant.pendingPhotoReplacement?.newPhotoUrl,
     ]);
 
+    const avatarRestaurant = useMemo(
+      () => ({ ...restaurant, photoUrl: resolvedShopPhotoUrl }),
+      [restaurant, resolvedShopPhotoUrl]
+    );
+
     const distanceStr = useMemo(() => {
       if (typeof distanceKm === 'number' && Number.isFinite(distanceKm) && distanceKm > 0) {
         return distanceKm < 10 ? distanceKm.toFixed(1) : Math.round(distanceKm).toString();
