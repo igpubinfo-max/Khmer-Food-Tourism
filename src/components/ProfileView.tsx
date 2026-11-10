@@ -720,9 +720,9 @@ export const ProfileView: React.FC = () => {
 
   const vipAndShopBenefitsCards = !isAdmin && !isIosAppStore ? (
     <div className="space-y-3 font-khmer">
-      {/* Card 1: Summarized 10 VIP Membership Benefits (Matching Shop Package Card Design) */}
-      <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#162032] via-[#132235] to-[#0B2926] border border-amber-400/80 space-y-2.5 shadow-md">
-        <div className="space-y-1.5">
+      {/* Card 1: Summarized 10 VIP Membership Benefits (Same Professional Design Style as Add Shop Section) */}
+      <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#064E3B] via-[#0B3B2E] to-[#162032] border-2 border-amber-400/80 space-y-2.5 shadow-md">
+        <div className="flex items-start justify-between gap-2 flex-wrap">
           <div className="font-extrabold text-xs sm:text-[13px] text-amber-300 flex items-center gap-1.5">
             <Crown className="w-4 h-4 text-amber-400 fill-amber-400 shrink-0" />
             <span>
@@ -734,11 +734,9 @@ export const ProfileView: React.FC = () => {
               )}
             </span>
           </div>
-          <div>
-            <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#064E3B] border border-emerald-500/40 text-amber-300 font-mono font-black text-[10.5px]">
-              {`${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d • $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90d • $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/yr`}
-            </span>
-          </div>
+          <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#064E3B] border border-amber-400/50 text-amber-300 font-mono font-black text-[10.5px]">
+            {`$${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d • $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90d • $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/yr`}
+          </span>
         </div>
         <ul className="space-y-1.5 text-[11px] text-slate-100">
           {SUMMARIZED_10_VIP_BENEFITS.map((b) => (
@@ -747,35 +745,50 @@ export const ProfileView: React.FC = () => {
             </li>
           ))}
         </ul>
-        <div className="pt-2 border-t border-slate-700/80 text-[10.5px] font-bold text-amber-300 leading-relaxed">
-          {tr(
-            language,
-            `🔒 កញ្ចប់សមាជិកភាព VIP (${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ, ${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90ថ្ងៃ ឬ ${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/ឆ្នាំ) — អាចសាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃ (Free Trial) សម្រាប់ជំនួយការ AI និងផែនការដើរលេង។`,
-            `🔒 Paid VIP Membership ($${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d, $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90d or $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/yr) — 7-Day Free Trial available for AI Assistant & Trip Planner.`,
-            `🔒 付费 VIP 会员（$${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天、$${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90天 或 $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/年）——支持 7 天免费试用 AI 助手与智能行程规划。`
-          )}
+        <div className="pt-2 border-t border-white/15 space-y-2">
+          <div className="text-[10.5px] font-bold text-amber-200 leading-relaxed">
+            {tr(
+              language,
+              `🔒 កញ្ចប់សមាជិកភាព VIP ($${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ, $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90ថ្ងៃ ឬ $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/ឆ្នាំ) — អាចសាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃ (Free Trial) សម្រាប់ជំនួយការ AI និងផែនការដើរលេង។`,
+              `🔒 Paid VIP Membership ($${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d, $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90d or $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/yr) — 7-Day Free Trial available for AI Assistant & Trip Planner.`,
+              `🔒 付费 VIP 会员（$${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天、$${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90天 或 $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/年）——支持 7 天免费试用 AI 助手与智能行程规划。`
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => openUpgradeVipModal()}
+            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-600 text-slate-950 font-black text-xs shadow-md border border-white/80 flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+          >
+            <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
+            <span>
+              {tr(
+                language,
+                'ដំឡើងទៅជាសមាជិក VIP ឥឡូវនេះ',
+                'Upgrade to VIP Membership Now',
+                '立即升级 VIP 会员'
+              )}
+            </span>
+          </button>
         </div>
       </div>
 
-      {/* Card 2: All-Inclusive 5 Shop Package Benefits (Exact Match to Reference Design) */}
-      <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#162032] via-[#132235] to-[#0B2926] border border-amber-400/80 space-y-2.5 shadow-md">
-        <div className="space-y-1.5">
+      {/* Card 2: All-Inclusive 5 Shop Listing Benefits (Same Professional Design Style as Add Shop Section) */}
+      <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#064E3B] via-[#0B3B2E] to-[#162032] border-2 border-amber-400/80 space-y-2.5 shadow-md">
+        <div className="flex items-start justify-between gap-2 flex-wrap">
           <div className="font-extrabold text-xs sm:text-[13px] text-amber-300 flex items-center gap-1.5">
-            <Crown className="w-4 h-4 text-amber-400 fill-amber-400 shrink-0" />
+            <Store className="w-4 h-4 text-amber-400 shrink-0" />
             <span>
               {tr(
                 language,
                 'កញ្ចប់ដាក់ហាងរួមបញ្ចូលទាំង ៥ មុខងារ (គ្មានទារថ្លៃបន្ថែម)',
-                'All-Inclusive Shop Package (All 5 Benefits Included)',
+                'All-Inclusive Shop Listing Package (All 5 Benefits Included)',
                 '全包店铺套餐（含全部 5 大权益，无额外广告费）'
               )}
             </span>
           </div>
-          <div>
-            <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#064E3B] border border-emerald-500/40 text-amber-300 font-mono font-black text-[10.5px]">
-              {`${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d • $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr`}
-            </span>
-          </div>
+          <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#064E3B] border border-amber-400/50 text-amber-300 font-mono font-black text-[10.5px]">
+            {`$${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d • $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr`}
+          </span>
         </div>
         <ul className="space-y-1.5 text-[11px] text-slate-100">
           {SHOP_ALL_INCLUSIVE_5_BENEFITS.map((b, i) => (
@@ -784,19 +797,39 @@ export const ProfileView: React.FC = () => {
             </li>
           ))}
         </ul>
-        <div className="pt-2 border-t border-slate-700/80 text-[10.5px] font-bold text-amber-300 leading-relaxed">
-          {tr(
-            language,
-            `🔒 កញ្ចប់ដាក់ហាងបង់ប្រាក់ (${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ ឬ ${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/ឆ្នាំ) — មិនរួមបញ្ចូលក្នុង Free Trial 7 ថ្ងៃឡើយ។ ការបង់ប្រាក់ធ្វើឡើងក្រោយពេល Admin ត្រួតពិនិត្យ និងអនុម័តព័ត៌មានហាង។`,
-            `🔒 Paid Shop Package ($${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d or $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr) — Not included in the 7-Day Free Trial. Payment is completed after Admin approves your shop details.`,
-            `🔒 付费店铺套餐（$${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天 或 $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/年）——不含在 7 天免费试用内，管理员审核通过后付款开通。`
-          )}
+        <div className="pt-2 border-t border-white/15 space-y-2">
+          <div className="text-[10.5px] font-bold text-amber-200 leading-relaxed">
+            {tr(
+              language,
+              `🔒 កញ្ចប់ដាក់ហាងបង់ប្រាក់ ($${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ ឬ $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/ឆ្នាំ) — មិនរួមបញ្ចូលក្នុង Free Trial 7 ថ្ងៃឡើយ។ ការបង់ប្រាក់ធ្វើឡើងក្រោយពេល Admin ត្រួតពិនិត្យ និងអនុម័តព័ត៌មានហាង។`,
+              `🔒 Paid Shop Package ($${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d or $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr) — Not included in the 7-Day Free Trial. Payment is completed after Admin approves your shop details.`,
+              `🔒 付费店铺套餐（$${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天 或 $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/年）——不含在 7 天免费试用内，管理员审核通过后付款开通。`
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              (window as any).__kft_vip_store_initial_mode = { mode: 'create' };
+              setIsVipAddRestaurantModalOpen(true);
+            }}
+            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-600 text-slate-950 font-black text-xs shadow-md border border-white/80 flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5] shrink-0" />
+            <span>
+              {tr(
+                language,
+                '+ ចុះបញ្ជីហាងរបស់អ្នកនៅលើកម្មវិធី',
+                '+ Register Your Shop on the App',
+                '+ 在应用上注册您的店铺'
+              )}
+            </span>
+          </button>
         </div>
       </div>
     </div>
   ) : null;
 
-  return (
+    return (
     <div className="max-w-md md:max-w-5xl lg:max-w-6xl mx-auto w-full px-3.5 md:px-6 py-3 space-y-3 pb-8">
       {/* User Header Profile Card */}
       <div className="shrink-0 p-3 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 shadow-xs">
@@ -1004,6 +1037,9 @@ export const ProfileView: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Directly Below Profile Card: (1) 10 VIP Benefits & (2) 5 Shop Listing Benefits */}
+      {vipAndShopBenefitsCards}
 
       {/* Admin Executive Hub OR Membership Status & VIP Upgrade Banner Card */}
       {isAdmin ? (

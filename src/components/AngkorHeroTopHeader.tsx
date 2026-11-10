@@ -1,19 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   Bell,
-  Menu,
   ArrowLeft,
   Send,
   X,
-  QrCode,
-  Heart,
-  ShieldCheck,
   Shield,
 } from 'lucide-react';
-import { IconSmartAssistant } from './icons/HandcraftedIcons';
 import { tr } from '../utils/i18n';
-import { isNativeIosApp, isAdminAccount } from '../types';
+import { isAdminAccount } from '../types';
 import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
 
 interface AngkorHeroTopHeaderProps {
@@ -38,15 +33,11 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
     currentUser,
     users,
     setIsAuthModalOpen,
-    setIsSupportModalOpen,
-    setIsQrScannerModalOpen,
-    setIsAiTripPlannerModalOpen,
     setIsNotificationsModalOpen,
     setIsAdminOpen,
     unreadNotificationsCount,
   } = useApp();
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [avatarTick, setAvatarTick] = useState(0);
 
   useEffect(() => {
@@ -80,23 +71,7 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
     void avatarTick;
     return resolveUserAvatarUrl(effectiveUser || { name: 'KH', role: 'user' });
   }, [effectiveUser, avatarTick]);
-  const menuRef = useRef<HTMLDivElement>(null);
   const isAdmin = isAdminAccount(currentUser);
-
-  useEffect(() => {
-    if (!isMenuOpen) return;
-    const handlePointerOutside = (e: MouseEvent | TouchEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handlePointerOutside);
-    document.addEventListener('touchstart', handlePointerOutside, { passive: true });
-    return () => {
-      document.removeEventListener('mousedown', handlePointerOutside);
-      document.removeEventListener('touchstart', handlePointerOutside);
-    };
-  }, [isMenuOpen]);
 
   const handleTriggerAskAi = () => {
     if (onAskAi) {
@@ -107,11 +82,11 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
   return (
     <div
       className={`relative w-full overflow-visible select-none ${
-        mode === 'home' ? 'h-[268px] sm:h-[282px]' : 'h-[192px] sm:h-[206px]'
+        mode === 'home' ? 'h-[268px] sm:h-[282px]' : 'h-[196px] sm:h-[210px]'
       }`}
       style={{ paddingTop: 'var(--kft-safe-top, 0px)' }}
     >
-      {/* Full-Bleed Angkor Wat Sunrise & Lotus Pond Background (No Green Bar) */}
+      {/* Full-Bleed Angkor Wat Sunrise & Lotus Pond Background */}
       <div className="absolute inset-0 overflow-hidden">
         <img
           src="/welcome/angkor-lotus-hero.png"
@@ -136,11 +111,11 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
         />
       </div>
 
-      {/* Top Overlay Header Row: Menu/Back + Real App Logo on Left + Title + Bell + Profile */}
+      {/* Top Overlay Header Row: Back Button (Food Mode Only) + Real App Logo on Left + Title + Bell + Profile */}
       <div className="relative z-20 px-3 pt-2.5 flex items-center justify-between gap-2">
-        {/* Left Side: Menu or Back Button + User's Real App Logo + App Name */}
+        {/* Left Side: Back Button (in food mode only; NO hamburger button on home screen) + Real App Logo + App Name */}
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          {mode === 'food' ? (
+          {mode === 'food' && (
             <button
               type="button"
               onClick={() => setActiveTab('home')}
@@ -149,94 +124,6 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-          ) : (
-            <div className="relative shrink-0" ref={menuRef}>
-              <button
-                type="button"
-                onClick={() => setIsMenuOpen((v) => !v)}
-                aria-label={tr(language, 'ម៉ឺនុយបន្ថែម', 'Menu', '菜单')}
-                className="w-9 h-9 rounded-full bg-black/25 hover:bg-black/40 border border-white/40 text-white flex items-center justify-center shrink-0 backdrop-blur-xs active:scale-95 transition cursor-pointer"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-
-              {isMenuOpen && (
-                <div className="absolute left-0 mt-2 w-60 rounded-2xl bg-slate-900/95 backdrop-blur-md text-white shadow-2xl border border-slate-700/90 py-1.5 z-50 font-khmer text-xs">
-                  {isAdmin && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        (window as any).__kft_admin_tab = 'stats';
-                        setIsAdminOpen(true);
-                      }}
-                      className="w-full px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-white/10 text-left text-amber-300 font-bold transition cursor-pointer"
-                    >
-                      <Shield className="w-4 h-4 text-amber-400 shrink-0" />
-                      <span>{tr(language, 'ផ្ទាំងរដ្ឋបាលប្រព័ន្ធ (Admin)', 'System Admin Panel', '系统管理后台')}</span>
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setIsAiTripPlannerModalOpen(true);
-                    }}
-                    className="w-full px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-white/10 text-left transition cursor-pointer"
-                  >
-                    <IconSmartAssistant className="w-4 h-4 text-amber-400 shrink-0" />
-                    <span className="font-bold text-amber-200">
-                      {tr(language, 'ជំនួយការឆ្លាតវៃ AI & រៀបចំដំណើរ', 'Smart AI & Trip Planner', 'AI 智能助手与行程规划')}
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setIsQrScannerModalOpen(true);
-                    }}
-                    className="w-full px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-white/10 text-left transition cursor-pointer"
-                  >
-                    <QrCode className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span className="font-semibold">
-                      {tr(language, 'ស្កេន QR Code ហាងអាហារ', 'Scan Restaurant QR Code', '扫描餐厅二维码')}
-                    </span>
-                  </button>
-
-                  {!isNativeIosApp() && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        setIsSupportModalOpen(true);
-                      }}
-                      className="w-full px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-white/10 text-left transition cursor-pointer"
-                    >
-                      <Heart className="w-4 h-4 text-rose-400 fill-rose-400 shrink-0" />
-                      <span className="font-semibold">
-                        {tr(language, 'គាំទ្រការអភិវឌ្ឍកម្មវិធី', 'Support App Development', '支持应用开发')}
-                      </span>
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      window.dispatchEvent(new CustomEvent('kft:open-privacy'));
-                    }}
-                    className="w-full px-3.5 py-2.5 flex items-center gap-2.5 hover:bg-white/10 text-left transition cursor-pointer border-t border-slate-800 mt-1 pt-2"
-                  >
-                    <ShieldCheck className="w-4 h-4 text-sky-400 shrink-0" />
-                    <span className="font-semibold text-slate-300">
-                      {tr(language, 'គោលការណ៍ឯកជនភាព', 'Privacy Policy', '隐私政策')}
-                    </span>
-                  </button>
-                </div>
-              )}
-            </div>
           )}
 
           {/* User's Real App Logo on the Left Side of Title */}
@@ -372,17 +259,17 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
         </div>
       </div>
 
-      {/* Home Mode: Cream & Gold Ask AI Bar positioned inside the bottom of the Angkor Wat Hero */}
+      {/* Home Mode: One Elegant Horizontal Strip with Semi-Transparent Background behind "Ask anything about food or snap a photo..." */}
       {mode === 'home' && (
-        <div className="absolute inset-x-3 bottom-7 z-20">
+        <div className="absolute inset-x-0 bottom-5 z-20 px-3">
           <div
             style={{
-              background: 'rgba(55, 65, 81, 0.80)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              boxShadow: '0 6px 18px rgba(0, 0, 0, 0.35)',
+              background: 'linear-gradient(90deg, rgba(15, 23, 42, 0.38) 0%, rgba(15, 23, 42, 0.48) 50%, rgba(15, 23, 42, 0.38) 100%)',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.22)',
             }}
-            className="w-full h-[54px] rounded-full border-2 border-[#E8B923] p-1.5 flex items-center gap-2"
+            className="w-full h-[50px] rounded-full border border-[#FBBF24]/75 p-1 flex items-center gap-2"
           >
             {/* Left Premium 3D AI Smart Camera Lens Button */}
             <button
@@ -392,12 +279,11 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
               aria-label={tr(language, 'ថតរូបម្ហូបដើម្បីសួរ AI', 'Snap food photo for AI', '拍照识别美食')}
               style={{
                 background: 'linear-gradient(145deg, #FFFBEB 0%, #FEF3C7 45%, #FDE68A 100%)',
-                boxShadow: '0 3px 10px rgba(245, 158, 11, 0.45), inset 0 1.5px 2px rgba(255, 255, 255, 0.95)',
+                boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4), inset 0 1.5px 2px rgba(255, 255, 255, 0.95)',
               }}
               className="group relative w-10 h-10 rounded-full border-2 border-amber-400 hover:border-amber-300 flex items-center justify-center shrink-0 active:scale-95 transition cursor-pointer overflow-hidden"
             >
-              {/* Rich Multi-Layer AI Camera Lens SVG */}
-              <svg className="w-6 h-6 drop-shadow-2xs group-hover:scale-105 transition-transform" viewBox="0 0 32 32" fill="none">
+              <svg className="w-5 h-5 drop-shadow-2xs group-hover:scale-105 transition-transform" viewBox="0 0 32 32" fill="none">
                 <defs>
                   <linearGradient id="kftCamBodyGrad" x1="4" y1="7" x2="28" y2="26" gradientUnits="userSpaceOnUse">
                     <stop offset="0%" stopColor="#0F766E" />
@@ -414,36 +300,22 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
                     <stop offset="100%" stopColor="#D97706" />
                   </linearGradient>
                 </defs>
-
-                {/* AI Scanner Corner Brackets */}
                 <path d="M4 9V6.5C4 5.67 4.67 5 5.5 5H8" stroke="#D97706" strokeWidth="1.6" strokeLinecap="round" />
                 <path d="M28 9V6.5C28 5.67 27.33 5 26.5 5H24" stroke="#D97706" strokeWidth="1.6" strokeLinecap="round" />
                 <path d="M4 23v2.5C4 26.33 4.67 27 5.5 27H8" stroke="#D97706" strokeWidth="1.6" strokeLinecap="round" />
                 <path d="M28 23v2.5C28 26.33 27.33 27 26.5 27H24" stroke="#D97706" strokeWidth="1.6" strokeLinecap="round" />
-
-                {/* Shutter Top Button */}
                 <rect x="8.5" y="7" width="3.5" height="2" rx="0.8" fill="#D97706" />
-
-                {/* Camera Body */}
                 <path
                   d="M6.5 11C6.5 9.9 7.4 9 8.5 9H11L12.4 7.3C12.78 6.85 13.33 6.6 13.92 6.6H18.08C18.67 6.6 19.22 6.85 19.6 7.3L21 9H23.5C24.6 9 25.5 9.9 25.5 11V21.5C25.5 22.6 24.6 23.5 23.5 23.5H8.5C7.4 23.5 6.5 22.6 6.5 21.5V11Z"
                   fill="url(#kftCamBodyGrad)"
                   stroke="#FFFFFF"
                   strokeWidth="1.2"
                 />
-
-                {/* Outer Gold Lens Ring */}
                 <circle cx="16" cy="16.5" r="5.4" fill="#FFFFFF" stroke="url(#kftCamGoldGrad)" strokeWidth="1.4" />
-
-                {/* Optical Sapphire/Cyan Lens Core */}
                 <circle cx="16" cy="16.5" r="3.8" fill="url(#kftCamLensGrad)" />
-
-                {/* Inner Pupil & Glass Glint */}
                 <circle cx="16" cy="16.5" r="1.6" fill="#0F172A" />
                 <circle cx="14.6" cy="15.1" r="1.05" fill="#FFFFFF" fillOpacity="0.92" />
                 <circle cx="17.3" cy="17.8" r="0.55" fill="#7DD3FC" fillOpacity="0.85" />
-
-                {/* AI Flash / Sparkle Star on Top Right of Camera */}
                 <path
                   d="M22.8 10.2L23.35 11.65L24.8 12.2L23.35 12.75L22.8 14.2L22.25 12.75L20.8 12.2L22.25 11.65L22.8 10.2Z"
                   fill="#FDE047"
@@ -469,8 +341,8 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
                   'Ask anything about food or snap a photo...',
                   '询问任何美食问题或拍照识别...'
                 )}
-                style={{ color: '#FFFFFF' }}
-                className="w-full bg-transparent text-xs sm:text-[13px] font-khmer font-bold text-white placeholder-white focus:outline-none truncate"
+                style={{ color: '#FFFFFF', textShadow: '0 1px 3px rgba(0,0,0,0.65)' }}
+                className="w-full bg-transparent text-xs sm:text-[13px] font-khmer font-extrabold text-white placeholder-white/95 focus:outline-none truncate"
               />
               {query && onChangeQuery && (
                 <button
@@ -491,11 +363,40 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
               style={{
                 background: 'linear-gradient(180deg, #F59E0B 0%, #D97706 100%)',
               }}
-              className="h-10 px-3.5 rounded-full text-white font-khmer font-extrabold text-xs sm:text-[13px] flex items-center justify-center gap-1.5 shrink-0 shadow-sm active:scale-95 transition cursor-pointer"
+              className="h-9.5 px-3.5 rounded-full text-white font-khmer font-extrabold text-xs sm:text-[13px] flex items-center justify-center gap-1.5 shrink-0 shadow-sm active:scale-95 transition cursor-pointer"
             >
               <Send className="w-3.5 h-3.5 text-white" />
               <span>{tr(language, 'សួរ AI', 'Ask AI', '问 AI')}</span>
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Food Mode: One Elegant Horizontal Strip with Semi-Transparent Background behind the Khmer Food Title, allowing Angkor Wat to remain clearly visible (NO VIP button on right) */}
+      {mode === 'food' && (
+        <div className="absolute inset-x-0 bottom-5 z-20 px-3">
+          <div
+            style={{
+              background: 'linear-gradient(90deg, rgba(15, 23, 42, 0.42) 0%, rgba(15, 23, 42, 0.30) 65%, rgba(15, 23, 42, 0.14) 100%)',
+              backdropFilter: 'blur(5px)',
+              WebkitBackdropFilter: 'blur(5px)',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.18)',
+            }}
+            className="w-full py-2 px-3.5 rounded-2xl border border-white/25 flex items-center gap-2.5"
+          >
+            <div className="w-8 h-8 rounded-full bg-amber-400/20 border border-amber-300/60 flex items-center justify-center shrink-0">
+              <svg className="w-4 h-4 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+                <path d="M7 2v20" />
+                <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+              </svg>
+            </div>
+            <h2
+              className="font-khmer font-extrabold text-base sm:text-lg text-white tracking-tight truncate"
+              style={{ textShadow: '0 2px 6px rgba(0,0,0,0.75)' }}
+            >
+              {tr(language, 'មុខម្ហូបខ្មែរ ទាំងអស់', 'All Cambodian Dishes', '柬埔寨全部美食')}
+            </h2>
           </div>
         </div>
       )}

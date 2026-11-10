@@ -123,6 +123,7 @@ export const FoodView: React.FC = () => {
         if (
           isNoodleDish(f) ||
           isDessertDish(f) ||
+          isVegetarianDish(f) ||
           f.categorySlug === 'drink' ||
           f.categorySlug === 'rice' ||
           f.categorySlug === 'salad' ||
@@ -135,26 +136,29 @@ export const FoodView: React.FC = () => {
         const grp = classifyKhmerFoodPrimaryGroup(f);
         return grp === 'samlor' || grp === 'sngor';
       }
-      case 'sngor':
-      case 'noodles':
-        return isNoodleDish(f);
       case 'cha': {
-        if (isNoodleDish(f) || isDessertDish(f) || f.categorySlug === 'drink' || f.categorySlug === 'soup') {
+        // Merged Noodles + Grill/Fry into "អាំង/ចៀន"
+        if (isDessertDish(f) || f.categorySlug === 'drink' || f.categorySlug === 'soup') {
           return false;
         }
-        if (f.categorySlug === 'grilled' || f.categorySlug === 'stirfry') return true;
+        if (isNoodleDish(f) || f.categorySlug === 'grilled' || f.categorySlug === 'stirfry') {
+          return true;
+        }
         return classifyKhmerFoodPrimaryGroup(f) === 'cha';
       }
       case 'bong_aem':
-        return isDessertDish(f);
-      case 'vegetarian':
-        return isVegetarianDish(f);
+        // Combined Desserts and Drinks into one button
+        return isDessertDish(f) || isVegetarianDish(f) || f.categorySlug === 'drink';
       default:
         return classifyKhmerFoodPrimaryGroup(f) === catId;
     }
   };
 
-  // 6 Square Illustrated Categories with verified 1-to-1 dish photos matching Khmer, English & Chinese labels
+  // 4 Square Illustrated Categories:
+  // 1. ទាំងអស់ (All)
+  // 2. សម្ល (Soups & Stews — renamed from ស៊ុប)
+  // 3. អាំង/ចៀន (Grill/Fry & Noodles merged)
+  // 4. បង្អែម/ភេសជ្ជៈ (Desserts & Drinks combined)
   const categories = useMemo(
     () => [
       {
@@ -166,17 +170,10 @@ export const FoodView: React.FC = () => {
       },
       {
         id: 'samlor',
-        nameKh: 'ស៊ុប',
-        nameEn: 'Soups',
-        nameZh: '汤羹',
+        nameKh: 'សម្ល',
+        nameEn: 'Soups & Stews',
+        nameZh: '高棉汤羹',
         thumb: '/foods/food-2.jpg', // Authentic Samlor Korko Soup (សម្លកកូរខ្មែរ)
-      },
-      {
-        id: 'sngor',
-        nameKh: 'មី',
-        nameEn: 'Noodles',
-        nameZh: '面条/粉',
-        thumb: '/foods/food-40.jpg', // Khmer Stir-Fried Noodles with Beef (មីឆាសាច់គោ)
       },
       {
         id: 'cha',
@@ -187,23 +184,16 @@ export const FoodView: React.FC = () => {
       },
       {
         id: 'bong_aem',
-        nameKh: 'បង្អែម',
-        nameEn: 'Desserts',
-        nameZh: '甜品',
-        thumb: '/foods/food-48.jpg', // Warm Banana in Sweet Coconut Cream Dessert (បង្អែមចេកខ្ទិះស្ករត្នោត)
-      },
-      {
-        id: 'vegetarian',
-        nameKh: 'ភេសជ្ជៈ/បួស',
-        nameEn: 'Drinks/Veg',
-        nameZh: '饮品/素食',
-        thumb: '/foods/food-197.jpg', // Chilled Fragrant Young Coconut Drink (ទឹកដូងក្រអូបស្រស់ត្រជាក់)
+        nameKh: 'បង្អែម/ភេសជ្ជៈ',
+        nameEn: 'Desserts & Drinks',
+        nameZh: '甜品/饮品',
+        thumb: '/foods/food-48.jpg', // Warm Banana in Sweet Coconut Cream Dessert
       },
     ],
     []
   );
 
-  // Meal-time matching dish IDs
+    // Meal-time matching dish IDs
   const mealTimeDishIds = useMemo(() => {
     if (mealTimeFilter === 'all') return null;
     const matched = getAuthenticCambodianDishesForMealTime(organizedFoods, mealTimeFilter);
@@ -282,51 +272,12 @@ export const FoodView: React.FC = () => {
       {/* 1. Full-Bleed Angkor Wat Hero Header (No Green Bar) */}
       <AngkorHeroTopHeader mode="food" />
 
-      {/* 2. White/Cream Rounded Sheet */}
-      <div className="relative z-10 -mt-6 rounded-t-[26px] bg-[#1E293B] pb-8 shadow-[0_-6px_20px_rgba(0,0,0,0.18)] overflow-hidden">
-        {/* Top White Header Row: មុខម្ហូបខ្មែរ ទាំងអស់ on Left + Small [👑 VIP] Pill on Right */}
-        <div className="bg-[#1E293B] px-4 py-3.5 flex items-center justify-between gap-2 border-b border-slate-700/80 shadow-sm">
-          <h2 className="font-khmer font-extrabold text-lg sm:text-xl text-white tracking-tight truncate">
-            {tr(language, 'មុខម្ហូបខ្មែរ ទាំងអស់', 'All Cambodian Dishes', '柬埔寨全部美食')}
-          </h2>
-
-          <div className="flex items-center gap-2 shrink-0">
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={() => {
-                  (window as any).__kft_admin_tab = 'food';
-                  (window as any).__kft_admin_open_add_food = true;
-                  setIsAdminOpen(true);
-                }}
-                className="h-9 px-3 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-extrabold inline-flex items-center gap-1 shadow-xs active:scale-95 transition cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{tr(language, 'បន្ថែម', 'Add', '添加')}</span>
-              </button>
-            )}
-
-            {/* Small Dark-Gold [👑 VIP] Pill Button on Right Side */}
-            <button
-              type="button"
-              onClick={() => openUpgradeVipModal()}
-              style={{
-                background: 'linear-gradient(180deg, #3A3222 0%, #231E14 100%)',
-                boxShadow: '0 3px 10px rgba(212, 175, 55, 0.25)',
-              }}
-              className="h-9 px-4 rounded-full border-2 border-[#D4AF37] text-[#FBBF24] font-extrabold text-sm inline-flex items-center gap-1.5 active:scale-95 transition cursor-pointer shrink-0"
-              title={tr(language, 'សមាជិកពិសេស VIP', 'VIP Membership', 'VIP 会员')}
-            >
-              <Crown className="w-4 h-4 fill-[#FBBF24] text-[#FBBF24] shrink-0" />
-              <span>VIP</span>
-            </button>
-          </div>
-        </div>
-
+      {/* 2. Rounded Sheet directly below Angkor Wat Hero Header (No VIP button or opaque bar blocking Angkor Wat) */}
+      <div className="relative z-10 -mt-3 rounded-t-[26px] bg-[#1E293B] pb-8 shadow-[0_-6px_20px_rgba(0,0,0,0.18)] overflow-hidden">
         {/* Main Content Container */}
-        <div className="px-3.5 pt-3 space-y-3">
-          {/* 6 Square Illustrated Category Cards */}
-          <div className="grid grid-cols-6 gap-1.5 sm:gap-2">
+        <div className="px-3.5 pt-3.5 space-y-3">
+          {/* 4 Square Illustrated Category Cards */}
+          <div className="grid grid-cols-4 gap-2 sm:gap-2.5">
             {categories.map((cat) => {
               const active = selectedCategory === cat.id;
               return (
@@ -342,13 +293,13 @@ export const FoodView: React.FC = () => {
                         }
                       : undefined
                   }
-                  className={`rounded-2xl py-2 px-1 flex flex-col items-center justify-between gap-1.5 transition active:scale-95 cursor-pointer border ${
+                  className={`rounded-2xl py-2.5 px-1.5 flex flex-col items-center justify-between gap-1.5 transition active:scale-95 cursor-pointer border ${
                     active
                       ? 'text-white border-[#2E7D4F]'
                       : 'bg-[#FAF9F5] text-[#0F172A] border-slate-200/90 hover:border-emerald-500/50 shadow-2xs'
                   }`}
                 >
-                  <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden border border-black/10 bg-white shadow-2xs shrink-0">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-black/10 bg-white shadow-2xs shrink-0">
                     <img
                       src={cat.thumb}
                       alt={cat.nameKh}
@@ -358,7 +309,7 @@ export const FoodView: React.FC = () => {
                     />
                   </div>
                   <span
-                    className={`font-khmer font-extrabold text-[11px] sm:text-xs leading-tight text-center truncate w-full ${
+                    className={`font-khmer font-extrabold text-[11.5px] sm:text-xs leading-tight text-center truncate w-full ${
                       active ? 'text-white' : 'text-[#0F172A]'
                     }`}
                   >
@@ -369,7 +320,7 @@ export const FoodView: React.FC = () => {
             })}
           </div>
 
-          {/* Meal-Time Filter Pills Row: ទាំងអស់ | ពេលព្រឹក | ពេលថ្ងៃ | ពេលល្ងាច */}
+                    {/* Meal-Time Filter Pills Row: ទាំងអស់ | ពេលព្រឹក | ពេលថ្ងៃ | ពេលល្ងាច */}
           <div className="grid grid-cols-4 gap-2">
             {[
               {

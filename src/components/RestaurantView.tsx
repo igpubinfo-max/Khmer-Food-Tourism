@@ -5,7 +5,6 @@ import {
   Restaurant,
   sortRestaurantsWithVipRotation,
   isAdminAccount,
-  getVipFeaturedRotationConfig,
   isStrictVerifiedCambodiaRestaurant,
   openExternalUrlNativeSafe,
   isHotelBusinessRecord,
@@ -18,7 +17,6 @@ import {
   MapPin,
   Search,
   Bell,
-  User as UserIcon,
   Mic,
   X,
   LayoutGrid,
@@ -37,9 +35,10 @@ import { isVipOwnerListing } from './listing/ListingUI';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
 import { analyzeSearchQuery, scoreSearchRecord, restaurantSearchFields } from '../utils/searchEngine';
 import { tr, translateProvince } from '../utils/i18n';
+import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { matchShopToProductQuery, verifyShopDataForDisplay } from '../utils/foodFilters';
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
-import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
+import { handleAvatarImageError } from '../utils/avatarHelper';
 
 const RESTAURANT_BATCH_SIZE = 40;
 
@@ -146,7 +145,6 @@ export const RestaurantView: React.FC = () => {
           );
         },
         () => {
-          // Default to Phnom Penh center if permission denied
           setUserCoords({ lat: 11.5564, lng: 104.9282 });
           showToast(
             tr(
@@ -322,34 +320,25 @@ export const RestaurantView: React.FC = () => {
       if (r.status !== 'approved' && currentUser?.role !== 'admin' && currentUser?.id !== r.ownerId) {
         return false;
       }
-      const v = verifyShopDataForDisplay(r);
-      if (!v.isValid) {
+      if (!verifyShopDataForDisplay(r)) {
         return false;
       }
-      if (seenIds.has(r.id)) return false;
-      seenIds.add(r.id);
+      const idStr = String(r.id);
+      if (seenIds.has(idStr)) return false;
+      seenIds.add(idStr);
       return true;
     });
-  }, [sessionShuffledRestaurants, currentUser]);
+  }, [sessionShuffledRestaurants, currentUser?.role, currentUser?.id, isAdmin]);
 
-  const cleanSelectedProvince = useMemo(
-    () => selectedProvince.replace(/^(ខេត្ត|រាជធានី)/, '').trim(),
-    [selectedProvince]
-  );
-
-  const rotationConfig = useMemo(
-    () => getVipFeaturedRotationConfig(appSettings),
-    [
-      appSettings.vipFeaturedRotationEnabled,
-      appSettings.vipFeaturedDurationDays,
-      appSettings.vipFeaturedRotationIntervalMinutes,
-      appSettings.manualFeaturedRestaurants,
-    ]
-  );
+  const cleanSelectedProvince = useMemo(() => {
+    const raw = (selectedProvince || '').trim();
+    if (!raw || raw === 'ទាំងអស់' || raw.toLowerCase() === 'all') return '';
+    return raw.replace(/^(ខេត្ត|រាជធានី)/, '').trim();
+  }, [selectedProvince]);
 
   const preRotatedRestaurants = useMemo(
-    () => sortRestaurantsWithVipRotation(validDirectoryRestaurants, users, nowTickMs, rotationConfig),
-    [validDirectoryRestaurants, users, nowTickMs, rotationConfig]
+    () => sortRestaurantsWithVipRotation(validDirectoryRestaurants, users, appSettings, nowTickMs),
+    [validDirectoryRestaurants, users, appSettings, nowTickMs]
   );
 
   const distanceMap = useMemo(() => {
@@ -369,10 +358,9 @@ export const RestaurantView: React.FC = () => {
     const rawTrimmed = debouncedShopSearchQuery.trim();
     const smartIntent = rawTrimmed ? parseSmartSearchIntent(rawTrimmed) : null;
     const effectiveProvince = cleanSelectedProvince || (smartIntent?.detectedProvinceKh || '');
-    const effectiveRawQuery =
-      smartIntent && smartIntent.cleanedKeywords && cleanSelectedProvince === ''
-        ? smartIntent.cleanedKeywords
-        : rawTrimmed;
+    const effectiveRawQuery = (
+      smartIntent?.isConversationalPrompt && smartIntent.coreQuery ? smartIntent.coreQuery : rawTrimmed
+    ).trim();
     const q = normalizeKhmerSearchText(effectiveRawQuery);
     const analyzed = effectiveRawQuery ? analyzeSearchQuery(effectiveRawQuery) : null;
 
@@ -393,24 +381,21 @@ export const RestaurantView: React.FC = () => {
 
       let relevance = 1;
       if (q && analyzed) {
-        relevance = scoreSearchRecord(restaurantSearchFields(r), analyzed);
+        const nameDetail = scoreSearchRecord(
+          analyzed,
+          restaurantSearchFields(r, [getLocalizedRestaurant(r, 'zh').name])
+        );
+        const productMatch = matchShopToProductQuery(r, effectiveRawQuery);
+        relevance = Math.max(nameDetail.score, productMatch.matches ? productMatch.score : 0);
         if (relevance <= 0) {
           const hay = normalizeKhmerSearchText(
             `${r.nameKh || ''} ${r.nameEn || ''} ${r.provinceKh || ''} ${r.provinceEn || ''} ${r.addressKh || ''} ${r.addressEn || ''} ${r.descriptionKh || ''} ${r.descriptionEn || ''} ${(r.signatureDishesKh || []).join(' ')} ${(r.signatureDishesEn || []).join(' ')}`
           );
           if (hay.includes(q)) {
             relevance = 25;
-          } else if (matchShopToProductQuery(r, effectiveRawQuery)) {
-            relevance = 40;
           }
         }
-        if (relevance > 0 && matchShopToProductQuery(r, effectiveRawQuery)) {
-          relevance += 20;
-        }
-        if (
-          smartIntent?.intentType === 'cafe' &&
-          classifyRestaurantCategory(r) === 'cafe_bistro'
-        ) {
+        if (smartIntent?.semanticCategory === 'cafe' && classifyRestaurantCategory(r) === 'cafe_bistro') {
           relevance += 35;
         }
       }
@@ -441,21 +426,17 @@ export const RestaurantView: React.FC = () => {
     debouncedShopSearchQuery,
   ]);
 
-  // Split into Section 1: "ហាងពេញនិយមជិតខ្ញុំ" (Featured Horizontal Cards) & Section 2: "បញ្ជីហាងបន្ថែម" (Compact Directory Rows)
+  // Split into Section 1: "ហាងពេញនិយមជិតខ្ញុំ" (2 Featured Horizontal Cards by default matching OK.jpg) & Section 2: "បញ្ជីហាងបន្ថែម" (Compact Directory Rows)
   const { featuredRestaurants, directoryRestaurants } = useMemo(() => {
     if (sortedRestaurants.length === 0) {
       return { featuredRestaurants: [], directoryRestaurants: [] };
     }
+    const targetFeaturedCount = showAllFeatured ? 12 : 2;
     const vipList = sortedRestaurants.filter((r) => isVipOwnerListing(r));
     const nonVipList = sortedRestaurants.filter((r) => !isVipOwnerListing(r));
-    const minFeaturedCount = showAllFeatured ? 10 : Math.max(2, vipList.length);
-    const featuredIds = new Set<string>(vipList.map((r) => r.id));
-    const featured: Restaurant[] = [...vipList];
-    for (const r of nonVipList) {
-      if (featured.length >= minFeaturedCount) break;
-      featuredIds.add(r.id);
-      featured.push(r);
-    }
+    const orderedForFeatured = [...vipList, ...nonVipList];
+    const featured = orderedForFeatured.slice(0, targetFeaturedCount);
+    const featuredIds = new Set<string>(featured.map((r) => r.id));
     const directory = sortedRestaurants.filter((r) => !featuredIds.has(r.id));
     return { featuredRestaurants: featured, directoryRestaurants: directory };
   }, [sortedRestaurants, showAllFeatured]);
@@ -494,7 +475,7 @@ export const RestaurantView: React.FC = () => {
       setIsVipAddRestaurantModalOpen(true);
       return;
     }
-    if (storeQuota.usedStoresCount < storeQuota.maxAllowedStores) {
+    if (storeQuota.usedStoresCount < storeQuota.totalAllowedStores) {
       (window as any).__kft_vip_store_initial_mode = { mode: 'create', businessType: 'restaurant' };
       setIsVipAddRestaurantModalOpen(true);
       return;
@@ -508,72 +489,95 @@ export const RestaurantView: React.FC = () => {
     setIsVipAddRestaurantModalOpen(true);
   };
 
-  const resolvedProfileAvatar = useMemo(
-    () => resolveUserAvatarUrl(currentUser || { name: 'KH', role: 'user' }),
-    [currentUser]
+  const hasCustomPhotoAvatar = Boolean(
+    currentUser?.avatar &&
+      !currentUser.avatar.startsWith('data:image/svg') &&
+      (currentUser.avatar.startsWith('http') || currentUser.avatar.startsWith('data:image/') || currentUser.avatar.startsWith('/'))
   );
 
   return (
     <div className="max-w-md mx-auto bg-[#F3F5F3] text-slate-900 min-h-full font-khmer pb-8">
       {/* =====================================================================
-          1. TOP EMERALD & ANGKOR WAT HERO HEADER (Matching Attached Reference)
+          1. TOP EMERALD & ANGKOR WAT HERO HEADER (Matching OK.jpg Top-to-Bottom)
           ===================================================================== */}
       <div
         className="relative w-full overflow-hidden pt-2.5 pb-6 px-3.5 select-none"
         style={{
-          background: 'linear-gradient(135deg, #073B25 0%, #0C5536 52%, #156A45 100%)',
+          background: 'linear-gradient(135deg, #063822 0%, #0A4D31 48%, #12613E 100%)',
           paddingTop: 'calc(var(--kft-safe-top, 0px) + 10px)',
         }}
       >
-        {/* Right-side Angkor Wat Temple Silhouette / Photo Backdrop */}
+        {/* Right-side Angkor Wat Temple & Palm Trees Photo Backdrop (Matching OK.jpg) */}
         <img
-          src="/hero/angkor-wat-sunrise.jpg"
-          alt="Angkor Wat"
-          className="absolute right-0 top-0 h-full w-[62%] object-cover object-center opacity-35 mix-blend-luminosity pointer-events-none"
+          src="/welcome/angkor-lotus-hero.png"
+          alt="Angkor Wat Cambodia"
+          decoding="async"
+          onError={(e) => {
+            const img = e.currentTarget as HTMLImageElement;
+            if (!img.dataset.fallback) {
+              img.dataset.fallback = '1';
+              img.src = '/welcome/angkor-sunrise-hero.png';
+            }
+          }}
+          className="absolute right-0 top-0 h-full w-[66%] object-cover object-top opacity-80 pointer-events-none"
         />
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'linear-gradient(90deg, #08422A 0%, rgba(11,79,53,0.92) 46%, rgba(15,92,61,0.45) 78%, rgba(11,79,53,0.75) 100%)',
+              'linear-gradient(90deg, #073D26 0%, #09482E 38%, rgba(11,79,51,0.62) 66%, rgba(8,61,38,0.28) 100%)',
           }}
         />
 
-        {/* Row 1: App Logo + Brand Title + Right Notification & Profile Icons */}
+        {/* Row 1: Gold-Framed App Logo + Brand Title + Right Notification & Profile Icons */}
         <div className="relative z-10 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-11 h-11 rounded-xl p-[1.5px] bg-gradient-to-b from-[#FDE047] via-[#D4AF37] to-[#9A6F1A] shadow-md shrink-0">
+          <div
+            onClick={() => setActiveTab('home')}
+            className="flex items-center gap-2.5 min-w-0 cursor-pointer"
+          >
+            <div className="w-11 h-11 rounded-xl p-[2px] bg-gradient-to-b from-[#FDE047] via-[#D4AF37] to-[#9A6F1A] shadow-md shrink-0">
               <img
-                src="/icons/app-logo-header.jpg"
+                src="/app-logo-v200.png"
                 alt="Cambodia Flavors & Tourism"
-                className="w-full h-full rounded-[10px] object-cover bg-[#064E3B]"
+                onError={(e) => {
+                  const img = e.currentTarget as HTMLImageElement;
+                  if (!img.dataset.fallback) {
+                    img.dataset.fallback = '1';
+                    img.src = '/app-icon.png';
+                  }
+                }}
+                className="w-full h-full rounded-[9px] object-cover bg-[#064E3B]"
               />
             </div>
             <div className="min-w-0">
-              <h1 className="font-moul text-[13px] sm:text-sm text-white leading-tight truncate drop-shadow-xs">
+              <h1
+                className="font-moul text-[13.5px] sm:text-sm text-white leading-tight truncate"
+                style={{ textShadow: '0 1px 4px rgba(0,0,0,0.45)' }}
+              >
                 {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨美食与旅游')}
               </h1>
-              <p className="text-[11px] font-bold text-emerald-100/90 truncate">
+              <p
+                className="text-[11px] font-bold text-white/95 truncate"
+                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.45)' }}
+              >
                 Cambodia Flavors &amp; Tourism
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* Notification Bell Button */}
+            {/* Notification Bell Button with Red Dot Badge */}
             <button
               type="button"
               onClick={() => setIsNotificationsModalOpen(true)}
               aria-label={tr(language, 'ការជូនដំណឹង', 'Notifications', '通知')}
-              className="relative w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 border border-white/25 text-white flex items-center justify-center backdrop-blur-xs active:scale-95 transition cursor-pointer"
+              className="relative w-9 h-9 rounded-full bg-[#135E3B]/85 hover:bg-[#135E3B] border border-white/30 text-white flex items-center justify-center backdrop-blur-xs active:scale-95 transition cursor-pointer shadow-xs"
             >
-              <Bell className="w-4 h-4 text-white" />
-              {unreadNotificationsCount > 0 && (
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-[#0C5536]" />
-              )}
+              <Bell className="w-4 h-4 text-white" strokeWidth={2.2} />
+              <span className="absolute top-1 right-1.5 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-[#0C5536]" />
             </button>
 
-            {/* Profile / Account Button */}
+            {/* Profile / Account Button (Clean White User Silhouette matching OK.jpg) */}
             <button
               type="button"
               onClick={() => {
@@ -584,57 +588,79 @@ export const RestaurantView: React.FC = () => {
                 }
               }}
               aria-label={tr(language, 'គណនី', 'Account', '账户')}
-              className="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 border border-white/30 text-white flex items-center justify-center overflow-hidden backdrop-blur-xs active:scale-95 transition cursor-pointer"
+              className="w-9 h-9 rounded-full bg-[#135E3B]/85 hover:bg-[#135E3B] border border-white/30 text-white flex items-center justify-center overflow-hidden backdrop-blur-xs active:scale-95 transition cursor-pointer shadow-xs"
             >
-              {currentUser ? (
+              {hasCustomPhotoAvatar && currentUser?.avatar ? (
                 <img
-                  src={resolvedProfileAvatar}
+                  src={currentUser.avatar}
                   alt={currentUser.name}
                   onError={(e) => handleAvatarImageError(e, currentUser)}
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <UserIcon className="w-4 h-4 text-white" />
+                <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <circle cx="12" cy="9" r="3.6" />
+                  <path d="M5.5 19.2c1.2-3.1 3.6-4.7 6.5-4.7s5.3 1.6 6.5 4.7a7.8 7.8 0 0 1-13 0z" />
+                </svg>
               )}
             </button>
           </div>
         </div>
 
-        {/* Row 2: Storefront Icon + "ស្វែងរកហាង និងភោជនីយដ្ឋាន" Page Heading */}
+        {/* Row 2: Storefront Icon + "ស្វែងរកហាង និងភោជនីយដ្ឋាន" Page Heading (Matching OK.jpg) */}
         <div className="relative z-10 mt-3.5 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-white/12 border border-white/25 flex items-center justify-center text-white shrink-0">
-              <Store className="w-5 h-5 text-white" strokeWidth={2} />
-            </div>
+            <svg
+              className="w-9 h-9 text-white shrink-0 drop-shadow-xs"
+              viewBox="0 0 36 36"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M5 13L7.5 6.5H28.5L31 13"
+                stroke="currentColor"
+                strokeWidth="2.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M4.5 13H31.5V15.2C31.5 17.2 29.9 18.8 27.9 18.8C25.9 18.8 24.3 17.2 24.3 15.2C24.3 17.2 22.7 18.8 20.7 18.8C18.7 18.8 17.1 17.2 17.1 15.2C17.1 17.2 15.5 18.8 13.5 18.8C11.5 18.8 9.9 17.2 9.9 15.2C9.9 17.2 8.3 18.8 6.3 18.8C4.8 18.8 4.5 17.2 4.5 15.2V13Z"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M7.5 18.8V29.5H28.5V18.8"
+                stroke="currentColor"
+                strokeWidth="2.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <rect x="11.5" y="22.5" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" />
+              <line x1="22.5" y1="22.5" x2="25.5" y2="22.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
             <div className="min-w-0">
-              <h2 className="font-extrabold text-base sm:text-lg text-white leading-tight truncate drop-shadow-xs">
+              <h2
+                className="font-extrabold text-[17px] sm:text-[18px] text-white leading-tight truncate"
+                style={{ textShadow: '0 1px 4px rgba(0,0,0,0.45)' }}
+              >
                 {tr(language, 'ស្វែងរកហាង និងភោជនីយដ្ឋាន', 'Find Restaurants & Shops', '搜索餐厅与店铺')}
               </h2>
-              <p className="text-xs font-medium text-emerald-100/90 truncate">
-                {tr(language, 'Restaurants & Shops', 'Cambodia Dining Directory', 'Restaurants & Shops')}
+              <p
+                className="text-xs font-semibold text-emerald-50/95 truncate"
+                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}
+              >
+                Restaurants &amp; Shops
               </p>
             </div>
           </div>
-
-          {isAdmin && (
-            <button
-              type="button"
-              onClick={() => {
-                (window as any).__kft_admin_tab = 'restaurants';
-                setIsAdminOpen(true);
-              }}
-              className="px-2.5 py-1.5 rounded-full bg-amber-400 text-slate-950 font-extrabold text-[11px] inline-flex items-center gap-1 shadow-xs shrink-0 cursor-pointer"
-            >
-              <Settings className="w-3.5 h-3.5" />
-              <span>Admin</span>
-            </button>
-          )}
         </div>
 
-        {/* Row 3: White Pill Search Input + Green "នៅជិតខ្ញុំ" (Near Me) Button */}
-        <div className="relative z-10 mt-3.5 flex items-center gap-2">
-          <div className="flex-1 min-w-0 h-11 rounded-full bg-white px-3.5 shadow-md flex items-center gap-2 border border-white/80">
-            <Search className="w-4 h-4 text-slate-600 shrink-0" />
+        {/* Row 3: White Pill Search Input + Green "នៅជិតខ្ញុំ" Near Me Pill Button */}
+        <div className="relative z-10 mt-3 flex items-center gap-2">
+          <div className="flex-1 min-w-0 h-11 rounded-full bg-white shadow-md flex items-center pl-3.5 pr-2.5 gap-2 border border-white">
+            <Search className="w-5 h-5 text-slate-800 shrink-0" strokeWidth={2.3} />
             <input
               type="text"
               value={shopSearchQuery}
@@ -642,8 +668,8 @@ export const RestaurantView: React.FC = () => {
               placeholder={tr(
                 language,
                 'ស្វែងរកហាង, ម្ហូប, តំបន់ ឬឈ្មោះ',
-                'Search shops, dishes, areas or names...',
-                '搜索店铺、菜品、地区或名称...'
+                'Search shop, dish, area or name...',
+                '搜索店铺、菜品、区域或名称...'
               )}
               className="flex-1 min-w-0 bg-transparent text-xs sm:text-[13px] font-bold text-slate-900 placeholder-slate-400 focus:outline-none truncate"
             />
@@ -663,31 +689,31 @@ export const RestaurantView: React.FC = () => {
               title={tr(language, 'ស្វែងរកលើផែនទី', 'Find on Map', '地图查找')}
               className="p-1 text-[#0E6442] hover:text-[#08422A] shrink-0 cursor-pointer"
             >
-              <Mic className="w-4 h-4" />
+              <Mic className="w-4 h-4" strokeWidth={2.2} />
             </button>
           </div>
 
           <button
             type="button"
             onClick={handleToggleNearMe}
-            className={`h-11 px-3.5 rounded-full font-extrabold text-xs inline-flex items-center gap-1.5 shrink-0 shadow-md border transition active:scale-95 cursor-pointer ${
+            className={`h-11 px-3.5 rounded-full font-extrabold text-xs inline-flex items-center gap-1.5 shrink-0 shadow-md border-[1.5px] transition active:scale-95 cursor-pointer ${
               nearMeActive
                 ? 'bg-amber-400 text-slate-950 border-amber-200'
-                : 'bg-[#166641] hover:bg-[#115334] text-white border-emerald-300/60'
+                : 'bg-[#135E3B] hover:bg-[#0F4D30] text-white border-emerald-300/70'
             }`}
           >
-            <MapPin className={`w-4 h-4 shrink-0 ${nearMeActive ? 'text-slate-950' : 'text-white'}`} />
+            <MapPin className={`w-4 h-4 shrink-0 ${nearMeActive ? 'text-slate-950' : 'text-white fill-white/20'}`} strokeWidth={2.2} />
             <span>{tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近')}</span>
           </button>
         </div>
       </div>
 
       {/* =====================================================================
-          2. MAIN ROUNDED SHEET CONTENT
+          2. MAIN ROUNDED SHEET CONTENT (Matching OK.jpg)
           ===================================================================== */}
-      <div className="relative z-10 -mt-3 rounded-t-[22px] bg-[#F3F5F3] px-3.5 pt-3 space-y-3">
-        {/* Row 1: 5 Primary Category Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+      <div className="relative z-10 -mt-3 rounded-t-[24px] bg-[#F3F5F3] px-3 pt-3 space-y-2.5">
+        {/* Row 1: 5 Primary Category Pills (All 5 visible on 1 row matching OK.jpg) */}
+        <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar pb-0.5">
           {primaryCategoryPills.map((cat) => {
             const Icon = cat.icon;
             const active = categoryFilter === cat.id;
@@ -696,32 +722,30 @@ export const RestaurantView: React.FC = () => {
                 key={cat.id}
                 type="button"
                 onClick={() => setCategoryFilter(cat.id)}
-                className={`h-9 px-3 rounded-full text-xs font-extrabold whitespace-nowrap inline-flex items-center gap-1.5 border transition active:scale-95 cursor-pointer shrink-0 ${
+                className={`h-8.5 px-2.5 rounded-full text-[11px] font-extrabold whitespace-nowrap inline-flex items-center justify-center gap-1 border transition active:scale-95 cursor-pointer shrink-0 ${
                   active
                     ? 'bg-[#15653E] text-white border-[#15653E] shadow-xs'
                     : 'bg-white text-slate-800 border-slate-200/90 hover:border-emerald-500/50 shadow-2xs'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-white' : 'text-[#15653E]'}`} />
+                <Icon className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-white' : 'text-[#15653E]'}`} strokeWidth={2} />
                 <span>{tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Row 2: 4 Secondary Filter / Sort Chips (តំបន់/ខេត្ត, ប្រភេទម្ហូប, ការវាយតម្លៃ, កម្រៀប) */}
-        <div className="grid grid-cols-4 gap-1.5">
+        {/* Row 2: 4 Secondary Filter / Sort Chips (តំបន់/ខេត្ត, ប្រភេទម្ហូប, ការវាយតម្លៃ, កម្រៀប - Full text, no truncation) */}
+        <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
           {/* Chip 1: Area / Province Select */}
-          <label className="relative h-8 px-2 rounded-full bg-white border border-slate-200/90 shadow-2xs flex items-center justify-between gap-1 text-[11px] font-bold text-slate-800 cursor-pointer overflow-hidden">
-            <span className="inline-flex items-center gap-1 min-w-0 truncate">
-              <MapPin className="w-3 h-3 text-[#15653E] shrink-0" />
-              <span className="truncate">
-                {cleanSelectedProvince
-                  ? language === 'km'
-                    ? cleanSelectedProvince
-                    : translateProvince(cleanSelectedProvince, language)
-                  : tr(language, 'តំបន់/ខេត្ត', 'Area', '地区')}
-              </span>
+          <label className="relative h-8 px-2.5 rounded-full bg-white border border-slate-200/90 shadow-2xs inline-flex items-center gap-1 text-[11px] font-bold text-slate-800 cursor-pointer whitespace-nowrap shrink-0">
+            <MapPin className="w-3 h-3 text-[#15653E] shrink-0" strokeWidth={2.2} />
+            <span>
+              {cleanSelectedProvince
+                ? language === 'km'
+                  ? cleanSelectedProvince
+                  : translateProvince(cleanSelectedProvince, language)
+                : tr(language, 'តំបន់/ខេត្ត', 'Area', '地区')}
             </span>
             <ChevronDown className="w-3 h-3 text-slate-500 shrink-0" />
             <select
@@ -739,15 +763,13 @@ export const RestaurantView: React.FC = () => {
           </label>
 
           {/* Chip 2: Cuisine Type Select */}
-          <label className="relative h-8 px-2 rounded-full bg-white border border-slate-200/90 shadow-2xs flex items-center justify-between gap-1 text-[11px] font-bold text-slate-800 cursor-pointer overflow-hidden">
-            <span className="inline-flex items-center gap-1 min-w-0 truncate">
-              <Utensils className="w-3 h-3 text-[#15653E] shrink-0" />
-              <span className="truncate">
-                {(() => {
-                  const found = cuisineOptions.find((c) => c.id === cuisineFilter) || cuisineOptions[0];
-                  return tr(language, found.nameKh, found.nameEn, found.nameZh);
-                })()}
-              </span>
+          <label className="relative h-8 px-2.5 rounded-full bg-white border border-slate-200/90 shadow-2xs inline-flex items-center gap-1 text-[11px] font-bold text-slate-800 cursor-pointer whitespace-nowrap shrink-0">
+            <Utensils className="w-3 h-3 text-[#15653E] shrink-0" strokeWidth={2.2} />
+            <span>
+              {(() => {
+                const found = cuisineOptions.find((c) => c.id === cuisineFilter) || cuisineOptions[0];
+                return tr(language, found.nameKh, found.nameEn, found.nameZh);
+              })()}
             </span>
             <ChevronDown className="w-3 h-3 text-slate-500 shrink-0" />
             <select
@@ -764,25 +786,23 @@ export const RestaurantView: React.FC = () => {
             </select>
           </label>
 
-          {/* Chip 3: Rating Filter */}
+          {/* Chip 3: Rating Filter (Full "ការវាយតម្លៃ" text visible matching OK.jpg) */}
           <button
             type="button"
             onClick={() =>
               setRatingFilter((prev) => (prev === 'all' ? '4.5' : prev === '4.5' ? '4.0' : 'all'))
             }
-            className={`h-8 px-2 rounded-full border shadow-2xs flex items-center justify-between gap-1 text-[11px] font-bold transition cursor-pointer ${
+            className={`h-8 px-2.5 rounded-full border shadow-2xs inline-flex items-center gap-1 text-[11px] font-bold whitespace-nowrap shrink-0 transition cursor-pointer ${
               ratingFilter !== 'all'
                 ? 'bg-emerald-50 border-emerald-500 text-[#0F5338]'
                 : 'bg-white border-slate-200/90 text-slate-800'
             }`}
           >
-            <span className="inline-flex items-center gap-1 min-w-0 truncate">
-              <Star className="w-3 h-3 text-[#15653E] shrink-0" />
-              <span className="truncate">
-                {ratingFilter === 'all'
-                  ? tr(language, 'ការវាយតម្លៃ', 'Rating', '评分')
-                  : `${ratingFilter}+ ⭐`}
-              </span>
+            <Star className="w-3 h-3 text-[#15653E] shrink-0" strokeWidth={2.2} />
+            <span>
+              {ratingFilter === 'all'
+                ? tr(language, 'ការវាយតម្លៃ', 'Rating', '评分')
+                : `${ratingFilter}+ ⭐`}
             </span>
             <ChevronDown className="w-3 h-3 text-slate-500 shrink-0" />
           </button>
@@ -795,14 +815,14 @@ export const RestaurantView: React.FC = () => {
                 prev === 'popular' ? 'nearest' : prev === 'nearest' ? 'rating' : 'popular'
               )
             }
-            className={`h-8 px-2 rounded-full border shadow-2xs flex items-center justify-center gap-1 text-[11px] font-bold transition cursor-pointer ${
+            className={`h-8 px-2.5 rounded-full border shadow-2xs inline-flex items-center gap-1 text-[11px] font-bold whitespace-nowrap shrink-0 transition cursor-pointer ${
               sortMode !== 'popular'
                 ? 'bg-emerald-50 border-emerald-500 text-[#0F5338]'
                 : 'bg-white border-slate-200/90 text-slate-800'
             }`}
           >
-            <SlidersHorizontal className="w-3 h-3 text-[#15653E] shrink-0" />
-            <span className="truncate">
+            <SlidersHorizontal className="w-3 h-3 text-[#15653E] shrink-0" strokeWidth={2.2} />
+            <span>
               {sortMode === 'popular'
                 ? tr(language, 'កម្រៀប', 'Sort', '排序')
                 : sortMode === 'nearest'
@@ -813,102 +833,101 @@ export const RestaurantView: React.FC = () => {
         </div>
 
         {/* =====================================================================
-            3. GREEN "ចុះបញ្ជីហាងរបស់អ្នក" PROMOTIONAL BANNER CARD
+            3. GREEN "ចុះបញ្ជីហាងរបស់អ្នក" PROMOTIONAL BANNER CARD (Matching OK.jpg)
             ===================================================================== */}
         <div
-          className="rounded-2xl p-3.5 shadow-md border border-emerald-400/35 relative overflow-hidden"
+          className="rounded-2xl p-3 shadow-md border border-emerald-400/35 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(125deg, #094B30 0%, #106240 55%, #0B4D32 100%)',
+            background: 'linear-gradient(125deg, #08442B 0%, #0E5D3B 55%, #0A4A30 100%)',
           }}
         >
           <div className="flex items-center gap-3">
-            {/* Custom 3D-Style Storefront Vector Illustration (Red/White Striped Awning + Warm Windows + Potted Plants) */}
-            <div className="w-[96px] h-[78px] shrink-0 flex items-center justify-center">
-              <svg viewBox="0 0 120 96" className="w-full h-full drop-shadow-md" fill="none">
-                {/* Ground Base */}
-                <ellipse cx="60" cy="88" rx="52" ry="6" fill="#052E1D" fillOpacity="0.55" />
-                <rect x="16" y="81" width="88" height="5" rx="2.5" fill="#D6D3D1" />
-
-                {/* Shop Building Body */}
-                <rect x="24" y="30" width="72" height="52" rx="4" fill="#F5F5F4" stroke="#D6D3D1" strokeWidth="1.5" />
-                <rect x="28" y="34" width="64" height="47" fill="#E7E5E4" />
-
-                {/* Warm Lit Shop Door & Window */}
-                <rect x="33" y="44" width="22" height="37" rx="2" fill="#78350F" />
-                <rect x="36" y="47" width="16" height="22" rx="1" fill="#FDE68A" />
-                <circle cx="52" cy="64" r="1.3" fill="#FBBF24" />
-
-                <rect x="59" y="44" width="29" height="24" rx="2" fill="#78350F" />
-                <rect x="61.5" y="46.5" width="24" height="19" rx="1" fill="#FEF08A" />
-                <line x1="73.5" y1="46.5" x2="73.5" y2="65.5" stroke="#92400E" strokeWidth="1.5" />
-                <line x1="61.5" y1="56" x2="85.5" y2="56" stroke="#92400E" strokeWidth="1.5" />
-
-                {/* Wooden Produce Stand */}
-                <rect x="62" y="70" width="25" height="11" rx="1.5" fill="#B45309" />
-                <rect x="60" y="68" width="29" height="3.5" rx="1" fill="#D97706" />
-
-                {/* Roof Cap */}
-                <rect x="21" y="20" width="78" height="6" rx="2" fill="#E7E5E4" />
-
+            {/* Left 3D-Style Red & White Striped Awning Storefront Illustration with Potted Plants */}
+            <div className="w-[100px] h-[82px] shrink-0 flex items-center justify-center select-none">
+              <svg viewBox="0 0 120 96" className="w-full h-full drop-shadow-md" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Ground Shadow Platform */}
+                <ellipse cx="60" cy="87" rx="52" ry="6" fill="#042818" fillOpacity="0.65" />
+                <ellipse cx="60" cy="85" rx="46" ry="4.5" fill="#1F7A4C" />
+                {/* Building Body */}
+                <rect x="24" y="34" width="70" height="49" rx="3" fill="#F5EFE6" stroke="#D6C7B2" strokeWidth="1.5" />
+                {/* Side Wall 3D Depth */}
+                <path d="M24 34L17 38V80L24 83V34Z" fill="#DFD3C3" />
+                {/* Door with Warm Light */}
+                <rect x="33" y="47" width="20" height="36" rx="1.5" fill="#7C4D2B" stroke="#5C371E" strokeWidth="1.5" />
+                <rect x="36" y="50" width="14" height="18" rx="1" fill="#FDE68A" />
+                <circle cx="50" cy="66" r="1.3" fill="#FDE047" />
+                {/* Right Shop Window with Warm Glow */}
+                <rect x="59" y="47" width="27" height="22" rx="2" fill="#FEF08A" stroke="#7C4D2B" strokeWidth="2" />
+                <line x1="72.5" y1="47" x2="72.5" y2="69" stroke="#7C4D2B" strokeWidth="1.5" />
+                <line x1="59" y1="58" x2="86" y2="58" stroke="#7C4D2B" strokeWidth="1.5" />
+                {/* Wooden Counter / Fruit Display Below Window */}
+                <rect x="61" y="72" width="24" height="10" rx="1.5" fill="#B45309" stroke="#78350F" strokeWidth="1.2" />
+                <circle cx="67" cy="71" r="2.5" fill="#EF4444" />
+                <circle cx="73" cy="71" r="2.5" fill="#F59E0B" />
+                <circle cx="79" cy="71" r="2.5" fill="#22C55E" />
+                {/* Roof Cornice */}
+                <rect x="21" y="16" width="76" height="5" rx="2" fill="#E7Dec8" />
                 {/* Red & White Striped Awning */}
-                <path d="M22 25H98L103 39H17L22 25Z" fill="#EF4444" />
-                <path d="M31 25H40L38 39H28L31 25Z" fill="#FFFFFF" />
-                <path d="M49 25H58L57 39H47L49 25Z" fill="#FFFFFF" />
-                <path d="M67 25H76L77 39H67L67 25Z" fill="#FFFFFF" />
-                <path d="M85 25H94L97 39H87L85 25Z" fill="#FFFFFF" />
-                {/* Scalloped Awning Bottom Edge */}
+                <path d="M22 20H96L102 35H16L22 20Z" fill="#FFFFFF" stroke="#B91C1C" strokeWidth="1" />
+                <path d="M22 20H32L30 35H16L22 20Z" fill="#DC2626" />
+                <path d="M41 20H51L51 35H39L41 20Z" fill="#DC2626" />
+                <path d="M60 20H70L72 35H60L60 20Z" fill="#DC2626" />
+                <path d="M79 20H89L94 35H82L79 20Z" fill="#DC2626" />
+                {/* Awning Scallops */}
                 <path
-                  d="M17 39C19.5 42.5 24.5 42.5 27 39C29.5 42.5 34.5 42.5 37 39C39.5 42.5 44.5 42.5 47 39C49.5 42.5 54.5 42.5 57 39C59.5 42.5 64.5 42.5 67 39C69.5 42.5 74.5 42.5 77 39C79.5 42.5 84.5 42.5 87 39C89.5 42.5 94.5 42.5 97 39C99 41.5 101.5 41.5 103 39"
-                  fill="#DC2626"
+                  d="M16 35C16 38 23 38 23 35C23 38 30 38 30 35C30 38 38 38 38 35C38 38 45 38 45 35C45 38 53 38 53 35C53 38 60 38 60 35C60 38 68 38 68 35C68 38 75 38 75 35C75 38 83 38 83 35C83 38 91 38 91 35C91 38 102 38 102 35"
+                  fill="#B91C1C"
                 />
-
-                {/* Left Potted Plant */}
-                <rect x="14" y="72" width="10" height="10" rx="2" fill="#D97706" />
-                <circle cx="19" cy="64" r="8" fill="#16A34A" />
-                <circle cx="15" cy="66" r="5.5" fill="#22C55E" />
-                <circle cx="22" cy="66" r="5.5" fill="#15803D" />
-
-                {/* Right Potted Plant */}
-                <rect x="95" y="73" width="9" height="9" rx="2" fill="#D97706" />
-                <circle cx="99.5" cy="66" r="7" fill="#16A34A" />
-                <circle cx="97" cy="67" r="5" fill="#22C55E" />
+                {/* Left Potted Bush */}
+                <circle cx="14" cy="60" r="8" fill="#16A34A" />
+                <circle cx="10" cy="65" r="6" fill="#22C55E" />
+                <circle cx="18" cy="65" r="6" fill="#15803D" />
+                <rect x="10" y="72" width="9" height="10" rx="2" fill="#D97706" />
+                {/* Right Potted Bush */}
+                <circle cx="103" cy="63" r="7" fill="#16A34A" />
+                <circle cx="99" cy="67" r="5" fill="#22C55E" />
+                <circle cx="107" cy="67" r="5" fill="#15803D" />
+                <rect x="99" y="73" width="8" height="9" rx="2" fill="#D97706" />
               </svg>
             </div>
 
-            {/* Right Text & Gold CTA Button */}
+            {/* Right Banner Text & Golden CTA Button */}
             <div className="flex-1 min-w-0 space-y-1.5">
-              <h3 className="font-extrabold text-[15px] sm:text-base text-white leading-tight">
-                {tr(language, 'ចុះបញ្ជីហាងរបស់អ្នក', 'Register Your Shop', '登记您的店铺')}
-              </h3>
-              <p className="text-[11px] text-emerald-100/95 leading-snug">
-                {tr(
-                  language,
-                  'បង្ហាញហាងភោជនីយដ្ឋានរបស់អ្នកនៅលើកម្មវិធី',
-                  'Showcase your restaurant or shop on the app',
-                  '在应用上展示您的餐厅或店铺'
-                )}
-              </p>
+              <div>
+                <h3 className="font-extrabold text-[15px] sm:text-base text-white leading-tight">
+                  {tr(language, 'ចុះបញ្ជីហាងរបស់អ្នក', 'Register Your Shop', '入驻您的餐厅店铺')}
+                </h3>
+                <p className="text-[11px] font-medium text-emerald-100/95 leading-snug mt-0.5">
+                  {tr(
+                    language,
+                    'បង្ហាញហាងភោជនីយដ្ឋានរបស់អ្នកនៅលើកម្មវិធី',
+                    'Showcase your restaurant on the app',
+                    '在应用上展示您的餐厅与招牌菜'
+                  )}
+                </p>
+              </div>
+
               <button
                 type="button"
                 onClick={handleAddShopClick}
                 style={{
-                  background: 'linear-gradient(180deg, #FDE047 0%, #EAB308 100%)',
+                  background: 'linear-gradient(180deg, #FDE047 0%, #FACC15 55%, #EAB308 100%)',
                 }}
-                className="w-full py-2 px-4 rounded-full text-slate-950 font-extrabold text-xs sm:text-[13px] shadow-md inline-flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer"
+                className="w-full h-9 px-4 rounded-full text-slate-950 font-extrabold text-xs sm:text-[13px] inline-flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition cursor-pointer"
               >
-                <Plus className="w-4 h-4 text-slate-950 stroke-[2.5]" />
+                <Plus className="w-4 h-4 stroke-[2.6] text-slate-950" />
                 <span>{tr(language, 'បន្ថែមហាងថ្មី', 'Add New Shop', '添加新店铺')}</span>
               </button>
             </div>
           </div>
 
-          {/* Owner / Admin Quick Controls */}
+          {/* Admin / Existing Shop Owner Quick Actions */}
           {isAdmin ? (
             <div className="mt-2.5 pt-2 border-t border-white/15 grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => {
-                  (window as any).__kft_admin_tab = 'restaurants';
+                  (window as any).__kft_admin_tab = 'shops';
                   setIsAdminOpen(true);
                 }}
                 className="py-1.5 px-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer"
@@ -951,7 +970,7 @@ export const RestaurantView: React.FC = () => {
             4. SHOP LISTINGS (Section 1: ហាងពេញនិយមជិតខ្ញុំ + Section 2: បញ្ជីហាងបន្ថែម)
             ===================================================================== */}
         {sortedRestaurants.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             {/* Section 1: ហាងពេញនិយមជិតខ្ញុំ (Popular Shops Near Me) */}
             {featuredRestaurants.length > 0 && (
               <div className="space-y-2.5">
@@ -965,7 +984,7 @@ export const RestaurantView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowAllFeatured((prev) => !prev)}
-                    className="text-xs font-extrabold text-[#15653E] hover:underline inline-flex items-center gap-0.5 cursor-pointer"
+                    className="text-xs font-extrabold text-slate-800 hover:text-[#15653E] inline-flex items-center gap-0.5 cursor-pointer"
                   >
                     <span>
                       {showAllFeatured
@@ -992,8 +1011,8 @@ export const RestaurantView: React.FC = () => {
             {/* Section 2: បញ្ជីហាងបន្ថែម (More Shops Directory) */}
             {displayedDirectoryRestaurants.length > 0 && (
               <div className="space-y-2">
-                <div className="flex items-center gap-2 pt-1">
-                  <Store className="w-5 h-5 text-[#15653E] shrink-0" />
+                <div className="flex items-center gap-2 pt-0.5">
+                  <Store className="w-5 h-5 text-[#15653E] shrink-0" strokeWidth={2.2} />
                   <h3 className="font-extrabold text-[15px] sm:text-base text-slate-900">
                     {tr(language, 'បញ្ជីហាងបន្ថែម', 'More Shops Directory', '更多店铺列表')}
                   </h3>

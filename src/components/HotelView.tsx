@@ -135,7 +135,7 @@ export const HotelView: React.FC = () => {
     setIsAdminOpen,
     setActiveTab,
     unreadNotificationsCount,
-    setIsNotificationsOpen,
+    setIsNotificationsModalOpen,
     showToast,
   } = useApp();
 
@@ -369,7 +369,11 @@ export const HotelView: React.FC = () => {
   const filteredHotels = useMemo(() => {
     const trimmedQ = debouncedSearchQuery.trim();
     const smartIntent = trimmedQ ? parseSmartSearchIntent(trimmedQ) : null;
-    const effectiveProvRaw = selectedProvince || smartIntent?.detectedProvinceKh || '';
+    const normSelProv =
+      selectedProvince && selectedProvince !== 'ទាំងអស់' && selectedProvince.toLowerCase() !== 'all'
+        ? selectedProvince
+        : '';
+    const effectiveProvRaw = normSelProv || smartIntent?.detectedProvinceKh || '';
     const cleanSelProv = effectiveProvRaw.replace(/^រាជធានី|^ខេត្ត/g, '').trim();
 
     const scoped = orderedHotels.filter((h) => {
@@ -468,7 +472,7 @@ export const HotelView: React.FC = () => {
   };
 
   const selectedProvinceDisplay = useMemo(() => {
-    if (!selectedProvince) {
+    if (!selectedProvince || selectedProvince === 'ទាំងអស់' || selectedProvince.toLowerCase() === 'all') {
       return tr(
         language,
         'គ្រប់រាជធានី-ខេត្តទាំង ២៥ (25 Provinces)',
@@ -561,9 +565,17 @@ export const HotelView: React.FC = () => {
           ===================================================================== */}
       <div className="relative overflow-hidden bg-[#064E3B] pb-6 pt-3 px-3.5">
         <img
-          src="/hero/angkor-wat-sunrise.jpg"
+          src="/welcome/angkor-lotus-hero.png"
           alt="Angkor Wat Sunrise"
-          className="absolute inset-0 w-full h-full object-cover object-center"
+          decoding="async"
+          onError={(e) => {
+            const img = e.currentTarget as HTMLImageElement;
+            if (!img.dataset.fallback) {
+              img.dataset.fallback = '1';
+              img.src = '/welcome/angkor-sunrise-hero.png';
+            }
+          }}
+          className="absolute inset-0 w-full h-full object-cover object-top"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-[#063824]/45 to-[#063824]/85" />
 
@@ -573,8 +585,15 @@ export const HotelView: React.FC = () => {
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-11 h-11 rounded-xl border-2 border-[#D4AF37] overflow-hidden bg-[#064E3B] shadow-md shrink-0">
                 <img
-                  src="/icons/app-logo-header.jpg"
+                  src="/app-logo-v200.png"
                   alt="Cambodia Flavors & Tourism"
+                  onError={(e) => {
+                    const img = e.currentTarget as HTMLImageElement;
+                    if (!img.dataset.fallback) {
+                      img.dataset.fallback = '1';
+                      img.src = '/app-icon.png';
+                    }
+                  }}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -592,7 +611,7 @@ export const HotelView: React.FC = () => {
             <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
-                onClick={() => setIsNotificationsOpen(true)}
+                onClick={() => setIsNotificationsModalOpen(true)}
                 className="relative w-9 h-9 rounded-full bg-[#0B5B3E]/90 hover:bg-[#0B5B3E] border border-white/30 text-white flex items-center justify-center shadow-sm cursor-pointer active:scale-95 transition-transform"
                 title={tr(language, 'ការជូនដំណឹង', 'Notifications', '通知')}
               >
