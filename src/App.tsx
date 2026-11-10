@@ -214,14 +214,14 @@ const MainScreen: React.FC = () => {
   return (
     <div className="flex-1 min-h-0 flex flex-col w-full h-full overflow-hidden relative bg-[#0F172A]">
       {/* Fixed Top Header — Hidden on Home & Food tabs where full-bleed Angkor Hero Header is used */}
-      {activeTab !== 'home' && activeTab !== 'food' && <Header />}
+      {activeTab !== 'home' && activeTab !== 'food' && activeTab !== 'restaurants' && activeTab !== 'hotels' && <Header />}
 
       {/* Single Bounded Scroll Container — Strictly sandwiched between Header and BottomNav */}
       <main
         id="kft-main-scroll"
         ref={mainScrollRef}
         className={`flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden overscroll-y-contain no-scrollbar relative ${
-          activeTab === 'home' || activeTab === 'food' ? 'bg-[#FBF9F5] text-slate-900' : 'dark bg-[#0F172A] text-[#F8FAFC]'
+          activeTab === 'home' || activeTab === 'food' || activeTab === 'restaurants' || activeTab === 'hotels' ? 'bg-[#F3F5F3] text-slate-900' : 'dark bg-[#0F172A] text-[#F8FAFC]'
         }`}
       >
         <Suspense
