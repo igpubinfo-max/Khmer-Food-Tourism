@@ -495,37 +495,47 @@ export const RestaurantView: React.FC = () => {
       (currentUser.avatar.startsWith('http') || currentUser.avatar.startsWith('data:image/') || currentUser.avatar.startsWith('/'))
   );
 
+  const nearestDistanceLabel = useMemo(() => {
+    const first = featuredRestaurants[0];
+    if (!first) return '0.8 km';
+    const d = distanceMap.get(first.id);
+    if (typeof d === 'number' && Number.isFinite(d) && d > 0) {
+      return `${d < 10 ? d.toFixed(1) : Math.round(d)} km`;
+    }
+    return '0.8 km';
+  }, [featuredRestaurants, distanceMap]);
+
   return (
-    <div className="max-w-md mx-auto bg-[#F3F5F3] text-slate-900 min-h-full font-khmer pb-8">
+    <div className="max-w-md mx-auto bg-[#F4F7F5] text-slate-900 min-h-full font-khmer pb-8">
       {/* =====================================================================
-          1. TOP EMERALD & ANGKOR WAT HERO HEADER (Matching OK.jpg Top-to-Bottom)
+          1. TOP ANGKOR WAT SUNSET & LAKE REFLECTION HERO + SEARCH + 5 CATEGORIES
           ===================================================================== */}
       <div
-        className="relative w-full overflow-hidden pt-2.5 pb-6 px-3.5 select-none"
+        className="relative w-full overflow-hidden pt-2.5 pb-4 px-3.5 select-none"
         style={{
-          background: 'linear-gradient(135deg, #063822 0%, #0A4D31 48%, #12613E 100%)',
           paddingTop: 'calc(var(--kft-safe-top, 0px) + 10px)',
         }}
       >
-        {/* Right-side Angkor Wat Temple & Palm Trees Photo Backdrop (Matching OK.jpg) */}
+        {/* Full-Bleed Angkor Wat Sunset & Emerald Lake Reflection Background */}
         <img
-          src="/welcome/angkor-lotus-hero.png"
+          src="/welcome/shop-angkor-hero.jpg"
           alt="Angkor Wat Cambodia"
           decoding="async"
           onError={(e) => {
             const img = e.currentTarget as HTMLImageElement;
             if (!img.dataset.fallback) {
               img.dataset.fallback = '1';
-              img.src = '/welcome/angkor-sunrise-hero.png';
+              img.src = '/welcome/angkor-lotus-hero.jpg';
             }
           }}
-          className="absolute right-0 top-0 h-full w-[66%] object-cover object-top opacity-80 pointer-events-none"
+          className="absolute inset-0 w-full h-full object-cover object-top pointer-events-none"
         />
+        {/* Subtle dark emerald top readability gradient */}
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-x-0 top-0 h-44 pointer-events-none"
           style={{
             background:
-              'linear-gradient(90deg, #073D26 0%, #09482E 38%, rgba(11,79,51,0.62) 66%, rgba(8,61,38,0.28) 100%)',
+              'linear-gradient(180deg, rgba(4, 47, 30, 0.72) 0%, rgba(6, 65, 42, 0.42) 55%, rgba(6, 65, 42, 0) 100%)',
           }}
         />
 
@@ -535,30 +545,30 @@ export const RestaurantView: React.FC = () => {
             onClick={() => setActiveTab('home')}
             className="flex items-center gap-2.5 min-w-0 cursor-pointer"
           >
-            <div className="w-11 h-11 rounded-xl p-[2px] bg-gradient-to-b from-[#FDE047] via-[#D4AF37] to-[#9A6F1A] shadow-md shrink-0">
+            <div className="w-12 h-12 rounded-2xl p-[2px] bg-gradient-to-b from-[#FDE047] via-[#D4AF37] to-[#9A6F1A] shadow-md shrink-0">
               <img
-                src="/app-logo-v200.png"
+                src="/logo-kft.png"
                 alt="Cambodia Flavors & Tourism"
                 onError={(e) => {
                   const img = e.currentTarget as HTMLImageElement;
                   if (!img.dataset.fallback) {
                     img.dataset.fallback = '1';
-                    img.src = '/app-icon.png';
+                    img.src = '/app-logo-v200.png';
                   }
                 }}
-                className="w-full h-full rounded-[9px] object-cover bg-[#064E3B]"
+                className="w-full h-full rounded-[14px] object-cover bg-[#064E3B]"
               />
             </div>
             <div className="min-w-0">
               <h1
-                className="font-moul text-[13.5px] sm:text-sm text-white leading-tight truncate"
-                style={{ textShadow: '0 1px 4px rgba(0,0,0,0.45)' }}
+                className="font-moul text-sm sm:text-[15px] text-white leading-tight truncate"
+                style={{ textShadow: '0 2px 6px rgba(0,0,0,0.55)' }}
               >
                 {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨美食与旅游')}
               </h1>
               <p
-                className="text-[11px] font-bold text-white/95 truncate"
-                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.45)' }}
+                className="text-xs font-extrabold text-white/95 truncate mt-0.5"
+                style={{ textShadow: '0 1px 4px rgba(0,0,0,0.55)' }}
               >
                 Cambodia Flavors &amp; Tourism
               </p>
@@ -571,13 +581,16 @@ export const RestaurantView: React.FC = () => {
               type="button"
               onClick={() => setIsNotificationsModalOpen(true)}
               aria-label={tr(language, 'ការជូនដំណឹង', 'Notifications', '通知')}
-              className="relative w-9 h-9 rounded-full bg-[#135E3B]/85 hover:bg-[#135E3B] border border-white/30 text-white flex items-center justify-center backdrop-blur-xs active:scale-95 transition cursor-pointer shadow-xs"
+              className="relative w-10 h-10 rounded-full bg-[#0F5A38]/85 hover:bg-[#0F5A38] border border-white/45 text-white flex items-center justify-center backdrop-blur-xs active:scale-95 transition cursor-pointer shadow-sm"
             >
-              <Bell className="w-4 h-4 text-white" strokeWidth={2.2} />
-              <span className="absolute top-1 right-1.5 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-[#0C5536]" />
+              <Bell className="w-5 h-5 text-white" strokeWidth={2.2} />
+              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-[#0F5A38]" />
+              {unreadNotificationsCount > 0 && (
+                <span className="sr-only">{unreadNotificationsCount}</span>
+              )}
             </button>
 
-            {/* Profile / Account Button (Clean White User Silhouette matching OK.jpg) */}
+            {/* Profile / Account Button */}
             <button
               type="button"
               onClick={() => {
@@ -588,7 +601,7 @@ export const RestaurantView: React.FC = () => {
                 }
               }}
               aria-label={tr(language, 'គណនី', 'Account', '账户')}
-              className="w-9 h-9 rounded-full bg-[#135E3B]/85 hover:bg-[#135E3B] border border-white/30 text-white flex items-center justify-center overflow-hidden backdrop-blur-xs active:scale-95 transition cursor-pointer shadow-xs"
+              className="w-10 h-10 rounded-full bg-[#0F5A38]/85 hover:bg-[#0F5A38] border border-white/45 text-white flex items-center justify-center overflow-hidden backdrop-blur-xs active:scale-95 transition cursor-pointer shadow-sm"
             >
               {hasCustomPhotoAvatar && currentUser?.avatar ? (
                 <img
@@ -599,68 +612,66 @@ export const RestaurantView: React.FC = () => {
                 />
               ) : (
                 <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <circle cx="12" cy="9" r="3.6" />
-                  <path d="M5.5 19.2c1.2-3.1 3.6-4.7 6.5-4.7s5.3 1.6 6.5 4.7a7.8 7.8 0 0 1-13 0z" />
+                  <circle cx="12" cy="8.5" r="3.8" />
+                  <path d="M5 19.5c1.3-3.3 3.8-5 7-5s5.7 1.7 7 5a8.5 8.5 0 0 1-14 0z" />
                 </svg>
               )}
             </button>
           </div>
         </div>
 
-        {/* Row 2: Storefront Icon + "ស្វែងរកហាង និងភោជនីយដ្ឋាន" Page Heading (Matching OK.jpg) */}
-        <div className="relative z-10 mt-3.5 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <svg
-              className="w-9 h-9 text-white shrink-0 drop-shadow-xs"
-              viewBox="0 0 36 36"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
+        {/* Row 2: Large White Storefront Icon + Khmer Page Title & English Subtitle */}
+        <div className="relative z-10 mt-4 flex items-center gap-3">
+          <svg
+            className="w-10 h-10 text-white shrink-0 drop-shadow-sm"
+            viewBox="0 0 36 36"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="M5 13L7.5 6.5H28.5L31 13"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M4.5 13H31.5V15.2C31.5 17.2 29.9 18.8 27.9 18.8C25.9 18.8 24.3 17.2 24.3 15.2C24.3 17.2 22.7 18.8 20.7 18.8C18.7 18.8 17.1 17.2 17.1 15.2C17.1 17.2 15.5 18.8 13.5 18.8C11.5 18.8 9.9 17.2 9.9 15.2C9.9 17.2 8.3 18.8 6.3 18.8C4.8 18.8 4.5 17.2 4.5 15.2V13Z"
+              stroke="currentColor"
+              strokeWidth="2.3"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M7.5 18.8V29.5H28.5V18.8"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <rect x="11.5" y="22.5" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2.1" />
+            <line x1="22.5" y1="23.5" x2="25.5" y2="23.5" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" />
+          </svg>
+          <div className="min-w-0">
+            <h2
+              className="font-extrabold text-[18px] sm:text-[19px] text-white leading-tight truncate"
+              style={{ textShadow: '0 2px 6px rgba(0,0,0,0.55)' }}
             >
-              <path
-                d="M5 13L7.5 6.5H28.5L31 13"
-                stroke="currentColor"
-                strokeWidth="2.3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M4.5 13H31.5V15.2C31.5 17.2 29.9 18.8 27.9 18.8C25.9 18.8 24.3 17.2 24.3 15.2C24.3 17.2 22.7 18.8 20.7 18.8C18.7 18.8 17.1 17.2 17.1 15.2C17.1 17.2 15.5 18.8 13.5 18.8C11.5 18.8 9.9 17.2 9.9 15.2C9.9 17.2 8.3 18.8 6.3 18.8C4.8 18.8 4.5 17.2 4.5 15.2V13Z"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M7.5 18.8V29.5H28.5V18.8"
-                stroke="currentColor"
-                strokeWidth="2.3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <rect x="11.5" y="22.5" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2" />
-              <line x1="22.5" y1="22.5" x2="25.5" y2="22.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-            <div className="min-w-0">
-              <h2
-                className="font-extrabold text-[17px] sm:text-[18px] text-white leading-tight truncate"
-                style={{ textShadow: '0 1px 4px rgba(0,0,0,0.45)' }}
-              >
-                {tr(language, 'ស្វែងរកហាង និងភោជនីយដ្ឋាន', 'Find Restaurants & Shops', '搜索餐厅与店铺')}
-              </h2>
-              <p
-                className="text-xs font-semibold text-emerald-50/95 truncate"
-                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}
-              >
-                Restaurants &amp; Shops
-              </p>
-            </div>
+              {tr(language, 'ស្វែងរកហាង និងភោជនីយដ្ឋាន', 'Find Restaurants & Shops', '搜索餐厅与店铺')}
+            </h2>
+            <p
+              className="text-xs sm:text-[13px] font-bold text-white/95 truncate"
+              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}
+            >
+              Restaurants &amp; Shops
+            </p>
           </div>
         </div>
 
-        {/* Row 3: White Pill Search Input + Green "នៅជិតខ្ញុំ" Near Me Pill Button */}
-        <div className="relative z-10 mt-3 flex items-center gap-2">
-          <div className="flex-1 min-w-0 h-11 rounded-full bg-white shadow-md flex items-center pl-3.5 pr-2.5 gap-2 border border-white">
-            <Search className="w-5 h-5 text-slate-800 shrink-0" strokeWidth={2.3} />
+        {/* Row 3: Large White Rounded Search Bar with Gold Border + Emerald Green Nearby Button */}
+        <div className="relative z-10 mt-3.5 flex items-center gap-2">
+          <div className="flex-1 min-w-0 h-12 rounded-full bg-white border-2 border-[#D4AF37] shadow-md flex items-center pl-3.5 pr-3 gap-2">
+            <Search className="w-5 h-5 text-[#0E5A35] shrink-0" strokeWidth={2.4} />
             <input
               type="text"
               value={shopSearchQuery}
@@ -671,7 +682,7 @@ export const RestaurantView: React.FC = () => {
                 'Search shop, dish, area or name...',
                 '搜索店铺、菜品、区域或名称...'
               )}
-              className="flex-1 min-w-0 bg-transparent text-xs sm:text-[13px] font-bold text-slate-900 placeholder-slate-400 focus:outline-none truncate"
+              className="flex-1 min-w-0 bg-transparent text-xs sm:text-[13px] font-bold text-slate-900 placeholder-slate-500 focus:outline-none truncate"
             />
             {shopSearchQuery ? (
               <button
@@ -687,33 +698,31 @@ export const RestaurantView: React.FC = () => {
               type="button"
               onClick={() => openGoogleMapsSearchModal('restaurant')}
               title={tr(language, 'ស្វែងរកលើផែនទី', 'Find on Map', '地图查找')}
-              className="p-1 text-[#0E6442] hover:text-[#08422A] shrink-0 cursor-pointer"
+              className="p-1 text-[#0E5A35] hover:text-[#083B22] shrink-0 cursor-pointer"
             >
-              <Mic className="w-4 h-4" strokeWidth={2.2} />
+              <Mic className="w-5 h-5" strokeWidth={2.2} />
             </button>
           </div>
 
           <button
             type="button"
             onClick={handleToggleNearMe}
-            className={`h-11 px-3.5 rounded-full font-extrabold text-xs inline-flex items-center gap-1.5 shrink-0 shadow-md border-[1.5px] transition active:scale-95 cursor-pointer ${
+            style={
               nearMeActive
-                ? 'bg-amber-400 text-slate-950 border-amber-200'
-                : 'bg-[#135E3B] hover:bg-[#0F4D30] text-white border-emerald-300/70'
+                ? { background: 'linear-gradient(180deg, #FDE047 0%, #EAB308 100%)' }
+                : { background: 'linear-gradient(180deg, #1E7E48 0%, #0D522C 100%)' }
+            }
+            className={`h-12 px-4 rounded-full font-extrabold text-xs sm:text-[13px] inline-flex items-center gap-1.5 shrink-0 shadow-md border-2 border-[#D4AF37] transition active:scale-95 cursor-pointer ${
+              nearMeActive ? 'text-slate-950' : 'text-white'
             }`}
           >
-            <MapPin className={`w-4 h-4 shrink-0 ${nearMeActive ? 'text-slate-950' : 'text-white fill-white/20'}`} strokeWidth={2.2} />
+            <MapPin className={`w-4 h-4 shrink-0 ${nearMeActive ? 'text-slate-950' : 'text-white fill-white/25'}`} strokeWidth={2.3} />
             <span>{tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近')}</span>
           </button>
         </div>
-      </div>
 
-      {/* =====================================================================
-          2. MAIN ROUNDED SHEET CONTENT (Matching OK.jpg)
-          ===================================================================== */}
-      <div className="relative z-10 -mt-3 rounded-t-[24px] bg-[#F3F5F3] px-3 pt-3 space-y-2.5">
-        {/* Row 1: 5 Primary Category Pills (All 5 visible on 1 row matching OK.jpg) */}
-        <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar pb-0.5">
+        {/* Row 4: 5 Large Rounded Category Buttons (Icon on Top + Khmer Label Below) */}
+        <div className="relative z-10 mt-3.5 grid grid-cols-5 gap-1.5 sm:gap-2">
           {primaryCategoryPills.map((cat) => {
             const Icon = cat.icon;
             const active = categoryFilter === cat.id;
@@ -722,32 +731,47 @@ export const RestaurantView: React.FC = () => {
                 key={cat.id}
                 type="button"
                 onClick={() => setCategoryFilter(cat.id)}
-                className={`h-8.5 px-2.5 rounded-full text-[11px] font-extrabold whitespace-nowrap inline-flex items-center justify-center gap-1 border transition active:scale-95 cursor-pointer shrink-0 ${
+                style={
                   active
-                    ? 'bg-[#15653E] text-white border-[#15653E] shadow-xs'
-                    : 'bg-white text-slate-800 border-slate-200/90 hover:border-emerald-500/50 shadow-2xs'
+                    ? {
+                        background: 'linear-gradient(180deg, #1E7E48 0%, #0B4D29 100%)',
+                        boxShadow: '0 4px 12px rgba(11, 77, 41, 0.28)',
+                      }
+                    : undefined
+                }
+                className={`rounded-2xl py-2.5 px-1 flex flex-col items-center justify-center gap-1 transition active:scale-95 cursor-pointer ${
+                  active
+                    ? 'text-white border-2 border-[#D4AF37]'
+                    : 'bg-white/95 hover:bg-white text-[#0F291E] border border-white shadow-sm'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-white' : 'text-[#15653E]'}`} strokeWidth={2} />
-                <span>{tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}</span>
+                <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-white' : 'text-[#0E5A35]'}`} strokeWidth={2.1} />
+                <span className="font-extrabold text-[11px] sm:text-xs leading-tight text-center truncate w-full">
+                  {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
+                </span>
               </button>
             );
           })}
         </div>
+      </div>
 
-        {/* Row 2: 4 Secondary Filter / Sort Chips (តំបន់/ខេត្ត, ប្រភេទម្ហូប, ការវាយតម្លៃ, កម្រៀប - Full text, no truncation) */}
-        <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
-          {/* Chip 1: Area / Province Select */}
-          <label className="relative h-8 px-2.5 rounded-full bg-white border border-slate-200/90 shadow-2xs inline-flex items-center gap-1 text-[11px] font-bold text-slate-800 cursor-pointer whitespace-nowrap shrink-0">
-            <MapPin className="w-3 h-3 text-[#15653E] shrink-0" strokeWidth={2.2} />
-            <span>
+      {/* =====================================================================
+          2. MAIN SHEET CONTENT: FILTERS, ADD SHOP BANNER & TRENDING SHOPS
+          ===================================================================== */}
+      <div className="relative z-10 px-3.5 pt-1 space-y-3">
+        {/* Row 5: 4 Rounded Filter & Sorting Controls */}
+        <div className="grid grid-cols-4 gap-1.5">
+          {/* Control 1: Location / Province */}
+          <label className="relative h-9 px-2 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
+            <MapPin className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
+            <span className="truncate">
               {cleanSelectedProvince
                 ? language === 'km'
                   ? cleanSelectedProvince
                   : translateProvince(cleanSelectedProvince, language)
                 : tr(language, 'តំបន់/ខេត្ត', 'Area', '地区')}
             </span>
-            <ChevronDown className="w-3 h-3 text-slate-500 shrink-0" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-500 shrink-0" />
             <select
               value={cleanSelectedProvince}
               onChange={(e) => setSelectedProvince(e.target.value)}
@@ -762,16 +786,16 @@ export const RestaurantView: React.FC = () => {
             </select>
           </label>
 
-          {/* Chip 2: Cuisine Type Select */}
-          <label className="relative h-8 px-2.5 rounded-full bg-white border border-slate-200/90 shadow-2xs inline-flex items-center gap-1 text-[11px] font-bold text-slate-800 cursor-pointer whitespace-nowrap shrink-0">
-            <Utensils className="w-3 h-3 text-[#15653E] shrink-0" strokeWidth={2.2} />
-            <span>
+          {/* Control 2: Food Category */}
+          <label className="relative h-9 px-2 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
+            <Utensils className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
+            <span className="truncate">
               {(() => {
                 const found = cuisineOptions.find((c) => c.id === cuisineFilter) || cuisineOptions[0];
                 return tr(language, found.nameKh, found.nameEn, found.nameZh);
               })()}
             </span>
-            <ChevronDown className="w-3 h-3 text-slate-500 shrink-0" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-500 shrink-0" />
             <select
               value={cuisineFilter}
               onChange={(e) => setCuisineFilter(e.target.value)}
@@ -786,118 +810,91 @@ export const RestaurantView: React.FC = () => {
             </select>
           </label>
 
-          {/* Chip 3: Rating Filter (Full "ការវាយតម្លៃ" text visible matching OK.jpg) */}
-          <button
-            type="button"
-            onClick={() =>
-              setRatingFilter((prev) => (prev === 'all' ? '4.5' : prev === '4.5' ? '4.0' : 'all'))
-            }
-            className={`h-8 px-2.5 rounded-full border shadow-2xs inline-flex items-center gap-1 text-[11px] font-bold whitespace-nowrap shrink-0 transition cursor-pointer ${
-              ratingFilter !== 'all'
-                ? 'bg-emerald-50 border-emerald-500 text-[#0F5338]'
-                : 'bg-white border-slate-200/90 text-slate-800'
-            }`}
-          >
-            <Star className="w-3 h-3 text-[#15653E] shrink-0" strokeWidth={2.2} />
-            <span>
-              {ratingFilter === 'all'
-                ? tr(language, 'ការវាយតម្លៃ', 'Rating', '评分')
-                : `${ratingFilter}+ ⭐`}
+          {/* Control 3: Rating */}
+          <label className="relative h-9 px-2 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
+            <Star className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
+            <span className="truncate">
+              {ratingFilter === '4.5'
+                ? '4.5+ ★'
+                : ratingFilter === '4.0'
+                  ? '4.0+ ★'
+                  : tr(language, 'ការវាយតម្លៃ', 'Rating', '评分')}
             </span>
-            <ChevronDown className="w-3 h-3 text-slate-500 shrink-0" />
-          </button>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+            <select
+              value={ratingFilter}
+              onChange={(e) => setRatingFilter(e.target.value as 'all' | '4.5' | '4.0')}
+              aria-label={tr(language, 'ការវាយតម្លៃ', 'Rating', '评分')}
+              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+            >
+              <option value="all">{tr(language, 'ការវាយតម្លៃ (ទាំងអស់)', 'All Ratings', '全部评分')}</option>
+              <option value="4.5">{tr(language, '4.5 ★ ឡើងទៅ', '4.5 ★ & Up', '4.5 ★ 及以上')}</option>
+              <option value="4.0">{tr(language, '4.0 ★ ឡើងទៅ', '4.0 ★ & Up', '4.0 ★ 及以上')}</option>
+            </select>
+          </label>
 
-          {/* Chip 4: Sort Mode */}
-          <button
-            type="button"
-            onClick={() =>
-              setSortMode((prev) =>
-                prev === 'popular' ? 'nearest' : prev === 'nearest' ? 'rating' : 'popular'
-              )
-            }
-            className={`h-8 px-2.5 rounded-full border shadow-2xs inline-flex items-center gap-1 text-[11px] font-bold whitespace-nowrap shrink-0 transition cursor-pointer ${
-              sortMode !== 'popular'
-                ? 'bg-emerald-50 border-emerald-500 text-[#0F5338]'
-                : 'bg-white border-slate-200/90 text-slate-800'
-            }`}
-          >
-            <SlidersHorizontal className="w-3 h-3 text-[#15653E] shrink-0" strokeWidth={2.2} />
-            <span>
-              {sortMode === 'popular'
-                ? tr(language, 'កម្រៀប', 'Sort', '排序')
-                : sortMode === 'nearest'
+          {/* Control 4: Advanced Filters / Sort */}
+          <label className="relative h-9 px-2 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
+            <span className="truncate">
+              {sortMode === 'nearest'
                 ? tr(language, 'ជិតបំផុត', 'Nearest', '最近')
-                : tr(language, 'ពិន្ទុខ្ពស់', 'Top Rated', '最高分')}
+                : sortMode === 'rating'
+                  ? tr(language, 'ពិន្ទុខ្ពស់', 'Top Rated', '最高分')
+                  : tr(language, 'កម្រៀប', 'Sort', '排序')}
             </span>
-          </button>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+            <select
+              value={sortMode}
+              onChange={(e) => {
+                const next = e.target.value as 'popular' | 'nearest' | 'rating';
+                if (next === 'nearest' && !nearMeActive) {
+                  handleToggleNearMe();
+                } else {
+                  setSortMode(next);
+                  if (next !== 'nearest') setNearMeActive(false);
+                }
+              }}
+              aria-label={tr(language, 'កម្រៀប', 'Sort', '排序')}
+              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+            >
+              <option value="popular">{tr(language, 'កម្រៀប៖ ពេញនិយម', 'Sort: Popular', '排序：最受欢迎')}</option>
+              <option value="nearest">{tr(language, 'កម្រៀប៖ ជិតខ្ញុំបំផុត', 'Sort: Nearest', '排序：距离最近')}</option>
+              <option value="rating">{tr(language, 'កម្រៀប៖ ពិន្ទុខ្ពស់បំផុត', 'Sort: Highest Rated', '排序：评分最高')}</option>
+            </select>
+          </label>
         </div>
 
-        {/* =====================================================================
-            3. GREEN "ចុះបញ្ជីហាងរបស់អ្នក" PROMOTIONAL BANNER CARD (Matching OK.jpg)
-            ===================================================================== */}
-        <div
-          className="rounded-2xl p-3 shadow-md border border-emerald-400/35 relative overflow-hidden"
-          style={{
-            background: 'linear-gradient(125deg, #08442B 0%, #0E5D3B 55%, #0A4A30 100%)',
-          }}
-        >
-          <div className="flex items-center gap-3">
-            {/* Left 3D-Style Red & White Striped Awning Storefront Illustration with Potted Plants */}
-            <div className="w-[100px] h-[82px] shrink-0 flex items-center justify-center select-none">
-              <svg viewBox="0 0 120 96" className="w-full h-full drop-shadow-md" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Ground Shadow Platform */}
-                <ellipse cx="60" cy="87" rx="52" ry="6" fill="#042818" fillOpacity="0.65" />
-                <ellipse cx="60" cy="85" rx="46" ry="4.5" fill="#1F7A4C" />
-                {/* Building Body */}
-                <rect x="24" y="34" width="70" height="49" rx="3" fill="#F5EFE6" stroke="#D6C7B2" strokeWidth="1.5" />
-                {/* Side Wall 3D Depth */}
-                <path d="M24 34L17 38V80L24 83V34Z" fill="#DFD3C3" />
-                {/* Door with Warm Light */}
-                <rect x="33" y="47" width="20" height="36" rx="1.5" fill="#7C4D2B" stroke="#5C371E" strokeWidth="1.5" />
-                <rect x="36" y="50" width="14" height="18" rx="1" fill="#FDE68A" />
-                <circle cx="50" cy="66" r="1.3" fill="#FDE047" />
-                {/* Right Shop Window with Warm Glow */}
-                <rect x="59" y="47" width="27" height="22" rx="2" fill="#FEF08A" stroke="#7C4D2B" strokeWidth="2" />
-                <line x1="72.5" y1="47" x2="72.5" y2="69" stroke="#7C4D2B" strokeWidth="1.5" />
-                <line x1="59" y1="58" x2="86" y2="58" stroke="#7C4D2B" strokeWidth="1.5" />
-                {/* Wooden Counter / Fruit Display Below Window */}
-                <rect x="61" y="72" width="24" height="10" rx="1.5" fill="#B45309" stroke="#78350F" strokeWidth="1.2" />
-                <circle cx="67" cy="71" r="2.5" fill="#EF4444" />
-                <circle cx="73" cy="71" r="2.5" fill="#F59E0B" />
-                <circle cx="79" cy="71" r="2.5" fill="#22C55E" />
-                {/* Roof Cornice */}
-                <rect x="21" y="16" width="76" height="5" rx="2" fill="#E7Dec8" />
-                {/* Red & White Striped Awning */}
-                <path d="M22 20H96L102 35H16L22 20Z" fill="#FFFFFF" stroke="#B91C1C" strokeWidth="1" />
-                <path d="M22 20H32L30 35H16L22 20Z" fill="#DC2626" />
-                <path d="M41 20H51L51 35H39L41 20Z" fill="#DC2626" />
-                <path d="M60 20H70L72 35H60L60 20Z" fill="#DC2626" />
-                <path d="M79 20H89L94 35H82L79 20Z" fill="#DC2626" />
-                {/* Awning Scallops */}
-                <path
-                  d="M16 35C16 38 23 38 23 35C23 38 30 38 30 35C30 38 38 38 38 35C38 38 45 38 45 35C45 38 53 38 53 35C53 38 60 38 60 35C60 38 68 38 68 35C68 38 75 38 75 35C75 38 83 38 83 35C83 38 91 38 91 35C91 38 102 38 102 35"
-                  fill="#B91C1C"
-                />
-                {/* Left Potted Bush */}
-                <circle cx="14" cy="60" r="8" fill="#16A34A" />
-                <circle cx="10" cy="65" r="6" fill="#22C55E" />
-                <circle cx="18" cy="65" r="6" fill="#15803D" />
-                <rect x="10" y="72" width="9" height="10" rx="2" fill="#D97706" />
-                {/* Right Potted Bush */}
-                <circle cx="103" cy="63" r="7" fill="#16A34A" />
-                <circle cx="99" cy="67" r="5" fill="#22C55E" />
-                <circle cx="107" cy="67" r="5" fill="#15803D" />
-                <rect x="99" y="73" width="8" height="9" rx="2" fill="#D97706" />
-              </svg>
-            </div>
+        {/* Row 6: Add Your Shop Promotional Banner (Using Provided /welcome/shop-register-banner.png) */}
+        <div className="relative rounded-[24px] overflow-hidden shadow-md border border-emerald-700/25 bg-[#0A5C36]">
+          <div className="relative min-h-[124px] flex items-center">
+            <img
+              src="/welcome/shop-register-banner.png"
+              alt="Register Your Shop"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover object-left pointer-events-none"
+            />
+            {/* Decorative Red-Orange Location Pin Accent next to Storefront Roof */}
+            <span
+              className="pointer-events-none absolute left-[31%] top-5 w-6 h-6 rounded-full bg-gradient-to-b from-orange-400 to-red-600 border border-white/80 shadow-md flex items-center justify-center text-white"
+              aria-hidden="true"
+            >
+              <MapPin className="w-3.5 h-3.5 fill-white text-red-600" />
+            </span>
 
-            {/* Right Banner Text & Golden CTA Button */}
-            <div className="flex-1 min-w-0 space-y-1.5">
+            {/* Right-Side Heading, Description & Gold CTA Button */}
+            <div className="relative z-10 w-full pl-[38%] pr-3.5 py-3 space-y-2">
               <div>
-                <h3 className="font-extrabold text-[15px] sm:text-base text-white leading-tight">
+                <h3
+                  className="font-extrabold text-base sm:text-[17px] text-white leading-tight"
+                  style={{ textShadow: '0 2px 4px rgba(0,0,0,0.35)' }}
+                >
                   {tr(language, 'ចុះបញ្ជីហាងរបស់អ្នក', 'Register Your Shop', '入驻您的餐厅店铺')}
                 </h3>
-                <p className="text-[11px] font-medium text-emerald-100/95 leading-snug mt-0.5">
+                <p
+                  className="text-[11px] sm:text-xs font-bold text-white/95 leading-snug mt-0.5"
+                  style={{ textShadow: '0 1px 3px rgba(0,0,0,0.35)' }}
+                >
                   {tr(
                     language,
                     'បង្ហាញហាងភោជនីយដ្ឋានរបស់អ្នកនៅលើកម្មវិធី',
@@ -911,11 +908,12 @@ export const RestaurantView: React.FC = () => {
                 type="button"
                 onClick={handleAddShopClick}
                 style={{
-                  background: 'linear-gradient(180deg, #FDE047 0%, #FACC15 55%, #EAB308 100%)',
+                  background: 'linear-gradient(180deg, #FDE047 0%, #F59E0B 100%)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.75)',
                 }}
-                className="w-full h-9 px-4 rounded-full text-slate-950 font-extrabold text-xs sm:text-[13px] inline-flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition cursor-pointer"
+                className="w-full h-9 px-4 rounded-full border border-amber-200 text-slate-950 font-extrabold text-xs sm:text-[13px] inline-flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer"
               >
-                <Plus className="w-4 h-4 stroke-[2.6] text-slate-950" />
+                <Plus className="w-4 h-4 stroke-[2.8] text-slate-950" />
                 <span>{tr(language, 'បន្ថែមហាងថ្មី', 'Add New Shop', '添加新店铺')}</span>
               </button>
             </div>
@@ -923,14 +921,14 @@ export const RestaurantView: React.FC = () => {
 
           {/* Admin / Existing Shop Owner Quick Actions */}
           {isAdmin ? (
-            <div className="mt-2.5 pt-2 border-t border-white/15 grid grid-cols-2 gap-2">
+            <div className="relative z-10 px-3 pb-2.5 pt-2 bg-black/25 border-t border-white/15 grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => {
                   (window as any).__kft_admin_tab = 'shops';
                   setIsAdminOpen(true);
                 }}
-                className="py-1.5 px-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                className="py-1.5 px-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/25 text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Settings className="w-3.5 h-3.5 text-amber-300 shrink-0" />
                 <span className="truncate">{tr(language, 'គ្រប់គ្រងហាងទាំងអស់', 'Manage All Shops', '管理全部店铺')}</span>
@@ -938,62 +936,94 @@ export const RestaurantView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsRestaurantCheckInModalOpen(true)}
-                className="py-1.5 px-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-emerald-50 border border-white/15 text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                className="py-1.5 px-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/25 text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <MapPin className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
-                <span className="truncate">{tr(language, 'ឆែកអ៊ីន & បញ្ជាក់ GPS', 'GPS Check-In', 'GPS 实地核验')}</span>
+                <MapPin className="w-3.5 h-3.5 text-emerald-200 shrink-0" />
+                <span className="truncate">{tr(language, 'ឆែកអ៊ីន GPS ហាង', 'GPS Check-In', 'GPS 实地核验')}</span>
               </button>
             </div>
           ) : myExistingRest ? (
-            <div className="mt-2.5 pt-2 border-t border-white/15 flex items-center justify-between gap-2">
-              <span className="min-w-0 flex-1 text-[11px] font-bold text-amber-200 truncate">
-                {tr(
-                  language,
-                  `ហាងរបស់ខ្ញុំ៖ ${myExistingRest.nameKh}`,
-                  `My Shop: ${myExistingRest.nameEn || myExistingRest.nameKh}`,
-                  `我的店铺：${myExistingRest.nameEn || myExistingRest.nameKh}`
+            <div className="relative z-10 px-3 pb-2.5 pt-2 bg-black/25 border-t border-white/15 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                {myOwnedRestaurants.length > 1 ? (
+                  <select
+                    value={myExistingRest.id}
+                    onChange={(e) => setActiveManagedShopId(e.target.value)}
+                    className="px-2 py-1 rounded-lg bg-black/25 border border-white/25 text-white font-bold text-[11px] focus:outline-none truncate max-w-[180px]"
+                  >
+                    {myOwnedRestaurants.map((r, i) => (
+                      <option key={r.id} value={r.id} className="text-slate-900">
+                        #{i + 1}: {r.nameKh || r.nameEn}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className="text-[11px] font-bold text-amber-200 truncate">
+                    🏪 {myExistingRest.nameKh || myExistingRest.nameEn}
+                  </span>
                 )}
-              </span>
+              </div>
               <button
                 type="button"
-                onClick={() => openManageMyVipStore(myExistingRest.id)}
-                className="py-1 px-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/25 text-[11px] font-bold flex items-center gap-1 shrink-0 cursor-pointer"
+                onClick={() => {
+                  (window as any).__kft_manage_initial_tab = 'info';
+                  openManageMyVipStore(myExistingRest.id);
+                }}
+                className="py-1 px-3 rounded-lg bg-white/20 hover:bg-white/30 text-white text-[11px] font-extrabold inline-flex items-center gap-1 shrink-0 cursor-pointer"
               >
-                <Edit2 className="w-3.5 h-3.5 text-amber-300" />
-                <span>{tr(language, 'កែប្រែហាងខ្ញុំ', 'Edit My Shop', '编辑我的店铺')}</span>
+                <Edit2 className="w-3 h-3" />
+                <span>{tr(language, 'កែប្រែហាងរបស់ខ្ញុំ', 'Edit My Shop', '管理我的店铺')}</span>
               </button>
             </div>
           ) : null}
         </div>
 
-        {/* =====================================================================
-            4. SHOP LISTINGS (Section 1: ហាងពេញនិយមជិតខ្ញុំ + Section 2: បញ្ជីហាងបន្ថែម)
-            ===================================================================== */}
-        {sortedRestaurants.length > 0 ? (
-          <div className="space-y-3.5">
+        {/* ===================================================================
+            3. TRENDING / NEARBY SHOPS & DIRECTORY
+            =================================================================== */}
+        {filteredRestaurants.length > 0 ? (
+          <div className="space-y-3.5 pt-0.5">
             {/* Section 1: ហាងពេញនិយមជិតខ្ញុំ (Popular Shops Near Me) */}
             {featuredRestaurants.length > 0 && (
               <div className="space-y-2.5">
-                <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-2xl bg-slate-800/90 border border-slate-700/80 shadow-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center shrink-0">
-                      <Flame className="w-4 h-4 text-amber-400 fill-amber-400 shrink-0" />
-                    </span>
-                    <h3 className="font-extrabold text-[15px] sm:text-base text-white">
-                      {tr(language, 'ហាងពេញនិយមជិតខ្ញុំ', 'Popular Shops Near Me', '附近热门店铺')}
-                    </h3>
+                <div className="flex items-center justify-between gap-1.5 px-0.5">
+                  <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                        <Flame className="w-5 h-5 text-orange-500 fill-amber-400" />
+                      </span>
+                      <h3 className="font-extrabold text-[15px] sm:text-base text-[#0F291E] truncate">
+                        {tr(language, 'ហាងពេញនិយមជិតខ្ញុំ', 'Popular Shops Near Me', '附近热门店铺')}
+                      </h3>
+                    </div>
+
+                    {/* Red Distance Pill Badge */}
+                    <button
+                      type="button"
+                      onClick={handleToggleNearMe}
+                      style={{
+                        background: 'linear-gradient(180deg, #EF4444 0%, #B91C1C 100%)',
+                      }}
+                      className="px-2.5 py-0.5 rounded-full text-white text-[11px] font-extrabold inline-flex items-center gap-1 shadow-xs active:scale-95 transition cursor-pointer shrink-0"
+                    >
+                      <MapPin className="w-3 h-3 text-white fill-white/25 shrink-0" />
+                      <span>
+                        {tr(language, 'ជិតខ្ញុំ', 'Near Me', '附近')} ({nearestDistanceLabel})
+                      </span>
+                    </button>
                   </div>
+
                   <button
                     type="button"
                     onClick={() => setShowAllFeatured((prev) => !prev)}
-                    className="px-2.5 py-1 rounded-full bg-emerald-600/25 hover:bg-emerald-600/40 border border-emerald-400/40 text-xs font-extrabold text-amber-300 inline-flex items-center gap-0.5 cursor-pointer transition"
+                    className="text-xs font-extrabold text-[#0E5A35] hover:underline inline-flex items-center gap-0.5 cursor-pointer shrink-0"
                   >
                     <span>
                       {showAllFeatured
-                        ? tr(language, 'បង្រួមវិញ', 'Show Less', '收起')
-                        : tr(language, 'មើលទាំងអស់', 'See All', '查看全部')}
+                        ? tr(language, 'បង្រួម', 'Show less', '收起')
+                        : tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
                     </span>
-                    <ChevronRight className="w-3.5 h-3.5 text-amber-300" />
+                    <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
@@ -1013,16 +1043,16 @@ export const RestaurantView: React.FC = () => {
             {/* Section 2: បញ្ជីហាងបន្ថែម (More Shops Directory) */}
             {displayedDirectoryRestaurants.length > 0 && (
               <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-2xl bg-slate-800/90 border border-slate-700/80 shadow-xs">
+                <div className="flex items-center justify-between gap-2 px-1 pt-1">
                   <div className="flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center shrink-0">
-                      <Store className="w-4 h-4 text-emerald-400 shrink-0" strokeWidth={2.2} />
+                    <span className="w-7 h-7 rounded-xl bg-[#0E5A35]/10 border border-[#0E5A35]/25 flex items-center justify-center shrink-0">
+                      <Store className="w-4 h-4 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
                     </span>
-                    <h3 className="font-extrabold text-[15px] sm:text-base text-white">
+                    <h3 className="font-extrabold text-[15px] sm:text-base text-[#0F291E]">
                       {tr(language, 'បញ្ជីហាងបន្ថែម', 'More Shops Directory', '更多店铺列表')}
                     </h3>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-amber-400/15 border border-amber-400/40 text-[11px] font-extrabold text-amber-300 font-mono">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#0E5A35]/10 border border-[#0E5A35]/25 text-[11px] font-extrabold text-[#0E5A35] font-mono">
                     {directoryRestaurants.length}
                   </span>
                 </div>
@@ -1045,7 +1075,7 @@ export const RestaurantView: React.FC = () => {
                       onClick={() =>
                         setVisibleCount((prev) => Math.min(directoryRestaurants.length, prev + RESTAURANT_BATCH_SIZE))
                       }
-                      className="px-5 py-2.5 rounded-full bg-[#15653E] hover:bg-[#105232] text-white text-xs font-extrabold shadow-xs cursor-pointer transition"
+                      className="px-5 py-2.5 rounded-full bg-[#0E5A35] hover:bg-[#094226] text-white text-xs font-extrabold shadow-xs cursor-pointer transition"
                     >
                       {tr(
                         language,
@@ -1060,9 +1090,9 @@ export const RestaurantView: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="py-12 px-4 text-center bg-slate-800/90 rounded-3xl border border-slate-700/80 text-slate-300 space-y-2.5 shadow-sm">
-            <Store className="w-10 h-10 mx-auto text-slate-300" strokeWidth={1.75} />
-            <p className="text-xs font-bold text-slate-200">
+          <div className="py-12 px-4 text-center bg-white rounded-3xl border border-slate-200 text-slate-600 space-y-2.5 shadow-xs">
+            <Store className="w-10 h-10 mx-auto text-slate-400" strokeWidth={1.75} />
+            <p className="text-xs font-bold text-slate-700">
               {debouncedShopSearchQuery.trim()
                 ? tr(
                     language,
@@ -1085,7 +1115,7 @@ export const RestaurantView: React.FC = () => {
                     `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${debouncedShopSearchQuery.trim()} Cambodia`)}`
                   )
                 }
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#15653E] text-white text-xs font-bold cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#0E5A35] text-white text-xs font-bold cursor-pointer"
               >
                 <MapPin className="w-3.5 h-3.5" />
                 {tr(language, 'ស្វែងរកនៅលើ Google Maps', 'Search on Google Maps', '在 Google 地图中搜索')}
