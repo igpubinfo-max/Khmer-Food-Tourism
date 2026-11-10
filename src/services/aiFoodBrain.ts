@@ -1188,10 +1188,7 @@ function buildFromEntry(
   if (entry.mode === 'drink') {
     const ranked = rankDrinkPairingDishes(foods, 'all');
     base.pairingCount = ranked.length;
-    if (!canUseVip) {
-      base.vipLock = true;
-      return base;
-    }
+    void canUseVip;
     const top = rotate(ranked.slice(0, 14), seed, 3).slice(0, 5);
     base.dishes = top.map(({ food, info }) =>
       toBrainDish(food, `${pairingKindsLabel(info.kinds, language)} — ${pairingReason(info, language)}`)

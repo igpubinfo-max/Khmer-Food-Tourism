@@ -394,7 +394,7 @@ export function getAiFoodAdvisorRecommendations(params: {
   language: Language;
   canUseVip?: boolean;
 }): AiFoodAdvisorOutput {
-  const { foods, restaurants, query, goal, seed, language, canUseVip = false } = params;
+  const { foods, restaurants, query, goal, seed, language, canUseVip = true } = params;
   const cleanQuery = normalizeSearchText(query);
   const hasActiveQuery = cleanQuery.length > 0;
   let hasTitleMatch = false;

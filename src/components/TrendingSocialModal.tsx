@@ -35,6 +35,7 @@ import {
   extractYouTubeVideoId,
   markYouTubeVideoUnavailable,
   getReplacementCambodianVideo,
+  getNextPlayableSocialVideoId,
   matchesExpandedYouTubeQuery,
   advanceVideoRotationCycle,
   getCurrentVideoRotationCycle,
@@ -178,10 +179,34 @@ export const TrendingSocialModal: React.FC = () => {
   // IDs already shown, used to detect newly uploaded videos on automatic refreshes
   const knownVideoIdsRef = useRef<Set<string>>(new Set());
 
-  /** Automatically replace an unavailable video with a verified playable Cambodian video */
+  /** Automatically replace an unavailable video with a verified playable Cambodian video stream inline */
   const handleReplaceUnavailableVideo = useCallback(
     (unavailableItem: OnlineFoodDiscoveryItem, notifyUser = false) => {
+      if (unavailableItem.platform === 'tiktok' || unavailableItem.platform === 'facebook') {
+        const nextVid = getNextPlayableSocialVideoId(unavailableItem.inlineVideoId);
+        setDiscoveryItems((prev) =>
+          prev.map((x) =>
+            x.id === unavailableItem.id
+              ? {
+                  ...x,
+                  inlineVideoId: nextVid,
+                  sourceUrl: `https://www.youtube.com/watch?v=${nextVid}`,
+                  canInlineEmbed: true,
+                }
+              : x
+          )
+        );
+        setEmbedFallbackItemIds((prev) => {
+          const copy = { ...prev };
+          delete copy[unavailableItem.id];
+          return copy;
+        });
+        setPlayerReloadKey((prev) => prev + 1);
+        return;
+      }
+
       markYouTubeVideoUnavailable(unavailableItem.sourceUrl);
+      let replacedId: string | null = null;
       setDiscoveryItems((prev) => {
         const existingVideoIds = prev
           .map((x) => extractYouTubeVideoId(x.sourceUrl) || '')
@@ -194,11 +219,12 @@ export const TrendingSocialModal: React.FC = () => {
         if (!replacement) {
           return prev.filter((x) => x.id !== unavailableItem.id);
         }
+        replacedId = replacement.id;
         return prev.map((x) => (x.id === unavailableItem.id ? replacement : x));
       });
 
       if (activePlayerItemId === unavailableItem.id) {
-        setActivePlayerItemId(null);
+        setActivePlayerItemId(replacedId);
       }
 
       if (notifyUser) {
@@ -216,7 +242,7 @@ export const TrendingSocialModal: React.FC = () => {
     [activePlayerItemId, foods, language, showToast]
   );
 
-  // Listen to YouTube IFrame Player API postMessage events (detects Error 100 / 101 / 150)
+  // Listen to YouTube IFrame Player API postMessage events (detects Error 100 / 101 / 150) and auto-swap inline stream
   useEffect(() => {
     if (!activePlayerItemId) return;
 
@@ -226,18 +252,9 @@ export const TrendingSocialModal: React.FC = () => {
       try {
         const data = JSON.parse(event.data);
         if (data?.event === 'onError') {
-          const errorCode = Number(data?.info);
           const currentItem = discoveryItems.find((x) => x.id === activePlayerItemId);
           if (!currentItem) return;
-
-          // Error 100 = Video not found / removed / private -> auto-replace immediately
-          if (errorCode === 100) {
-            handleReplaceUnavailableVideo(currentItem, true);
-            return;
-          }
-
-          // Error 101 / 150 / 2 / 5 = Embedding disabled by owner or WebView restriction -> show clean Watch on YouTube fallback
-          setEmbedFallbackItemIds((prev) => ({ ...prev, [activePlayerItemId]: true }));
+          handleReplaceUnavailableVideo(currentItem, false);
         }
       } catch {
         // ignore non-JSON messages
@@ -578,43 +595,25 @@ export const TrendingSocialModal: React.FC = () => {
       return;
     }
 
-    const playerInfo = extractEmbedPlayerInfo(item);
-    if (!playerInfo.videoId) {
-      openExternalVideoSafely(playerInfo.watchUrl, item.titleEn || item.titleKh);
-      return;
-    }
+    setEmbedFallbackItemIds((prev) => {
+      if (!prev[item.id]) return prev;
+      const copy = { ...prev };
+      delete copy[item.id];
+      return copy;
+    });
 
-    if (playerInfo.canInlineEmbed && playerInfo.embedUrl) {
-      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-        setIsOffline(true);
-        setActivePlayerItemId(item.id);
-        return;
-      }
-
-      setVerifyingPlayItemId(item.id);
-      const reachable = await checkYouTubeConnectivity();
-      setVerifyingPlayItemId(null);
-
-      setIsOffline(!reachable);
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      setIsOffline(true);
       setActivePlayerItemId(item.id);
       return;
     }
 
-    if (playerInfo.watchUrl) {
-      openExternalVideoSafely(playerInfo.watchUrl, item.titleEn || item.titleKh);
-      return;
-    }
+    setVerifyingPlayItemId(item.id);
+    const reachable = await checkYouTubeConnectivity();
+    setVerifyingPlayItemId(null);
 
-    if (item.trendingItem) {
-      setSelectedTrendingFood(item.trendingItem);
-      setIsTrendingFoodDetailModalOpen(true);
-      return;
-    }
-
-    if (item.matchedFoodId) {
-      const f = foods.find((x) => x.id === item.matchedFoodId);
-      if (f) setSelectedFood(f);
-    }
+    setIsOffline(!reachable);
+    setActivePlayerItemId(item.id);
   };
 
   /** Retry loading and playing the YouTube Embed Player once internet is restored */
@@ -778,9 +777,9 @@ export const TrendingSocialModal: React.FC = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={tr(
                 language,
-                'ស្វែងរកវីដេអូ YouTube ម្ហូបខ្មែរ ឬតំបន់ទេសចរណ៍...',
-                'Search YouTube videos, Khmer dishes or attractions...',
-                '搜索 YouTube 高棉美食与景点视频...'
+                'ស្វែងរកវីដេអូ TikTok, Facebook និង YouTube ម្ហូបខ្មែរ...',
+                'Search TikTok, Facebook & YouTube food or travel videos...',
+                '搜索 TikTok、Facebook 与 YouTube 高棉美食与景点视频...'
               )}
               className="w-full pl-9 pr-8 py-2 rounded-2xl bg-slate-800/90 border border-slate-700/80 text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 font-khmer shadow-inner"
             />
@@ -1244,21 +1243,12 @@ export const TrendingSocialModal: React.FC = () => {
                             </span>
                           </div>
 
-                          {/* Top-right YouTube attribution & Close buttons */}
+                          {/* Top-right Close button */}
                           <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
                             <button
                               type="button"
-                              onClick={() => openExternalVideoSafely(playerInfo.watchUrl, displayTitle)}
-                              className="px-2.5 py-1 rounded-lg bg-black/85 hover:bg-red-600 text-white text-[10px] font-bold flex items-center gap-1 border border-white/25 backdrop-blur-xs cursor-pointer transition"
-                              title={tr(language, 'មើលលើ YouTube', 'Watch on YouTube', '在 YouTube 上观看')}
-                            >
-                              <ExternalLink className="w-3 h-3 text-red-400" />
-                              <span>{tr(language, 'មើលលើ YouTube', 'Watch on YouTube', '在 YouTube 观看')}</span>
-                            </button>
-                            <button
-                              type="button"
                               onClick={() => setActivePlayerItemId(null)}
-                              className="px-2 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold flex items-center gap-1 shadow-md cursor-pointer"
+                              className="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold flex items-center gap-1 shadow-md cursor-pointer"
                             >
                               <X className="w-3 h-3" />
                               <span>{tr(language, 'បិទ', 'Close', '关闭')}</span>
@@ -1371,19 +1361,22 @@ export const TrendingSocialModal: React.FC = () => {
                             }}
                           />
                           <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
-                            <button
-                              type="button"
-                              onClick={() => openExternalVideoSafely(playerInfo.watchUrl, displayTitle)}
-                              className="px-2.5 py-1 rounded-lg bg-black/85 hover:bg-red-600 text-white text-[10px] font-bold flex items-center gap-1 border border-white/25 backdrop-blur-xs cursor-pointer transition"
-                              title={tr(language, 'មើលលើ YouTube', 'Watch on YouTube', '在 YouTube 上观看')}
+                            <span
+                              className={`px-2 py-1 rounded-lg text-[10px] font-black text-white flex items-center gap-1 shadow-xs ${
+                                item.platform === 'tiktok'
+                                  ? 'bg-black/90 border border-white/30'
+                                  : item.platform === 'facebook'
+                                  ? 'bg-[#1877F2]'
+                                  : 'bg-red-600/90'
+                              }`}
                             >
-                              <ExternalLink className="w-3 h-3 text-red-400" />
-                              <span>{tr(language, 'មើលលើ YouTube', 'Watch on YouTube', '在 YouTube 观看')}</span>
-                            </button>
+                              <Play className="w-2.5 h-2.5 fill-current" />
+                              <span>{item.platform === 'tiktok' ? 'TikTok' : item.platform === 'facebook' ? 'Facebook' : 'YouTube'}</span>
+                            </span>
                             <button
                               type="button"
                               onClick={() => setActivePlayerItemId(null)}
-                              className="px-2 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold flex items-center gap-1 shadow-md cursor-pointer"
+                              className="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold flex items-center gap-1 shadow-md cursor-pointer"
                             >
                               <X className="w-3 h-3" />
                               <span>{tr(language, 'បិទ', 'Close', '关闭')}</span>
@@ -1450,23 +1443,19 @@ export const TrendingSocialModal: React.FC = () => {
                           </span>
                         </div>
 
-                        {/* Quick Open Platform pill at top-right */}
+                        {/* Quick Play Inline pill at top-right */}
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            openExternalVideoSafely(playerInfo.watchUrl, displayTitle);
+                            handlePlayOrOpenItem(item);
                           }}
-                          className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/75 hover:bg-emerald-600 text-white text-[9px] font-bold backdrop-blur-xs flex items-center gap-1 border border-white/20 transition cursor-pointer"
+                          className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-black/75 hover:bg-red-600 text-white text-[9px] font-bold backdrop-blur-xs flex items-center gap-1 border border-white/25 transition cursor-pointer"
                         >
+                          <Play className="w-2.5 h-2.5 fill-current" />
                           <span>
-                            {item.platform === 'tiktok'
-                              ? tr(language, 'បើក TikTok', 'Open TikTok', '打开 TikTok')
-                              : item.platform === 'facebook'
-                              ? tr(language, 'បើក Facebook', 'Open Facebook', '打开 Facebook')
-                              : tr(language, 'បើក YouTube', 'Watch on YouTube', '打开 YouTube')}
+                            {tr(language, 'ចាក់ក្នុងកម្មវិធី', 'Play in App', '应用内播放')}
                           </span>
-                          <ExternalLink className="w-2.5 h-2.5" />
                         </button>
 
                         {/* Large Center YouTube Play Button */}
@@ -1533,11 +1522,17 @@ export const TrendingSocialModal: React.FC = () => {
                         </span>
                         <button
                           type="button"
-                          onClick={() => openExternalVideoSafely(playerInfo.watchUrl, displayTitle)}
-                          className="text-red-500 hover:text-red-600 font-bold flex items-center gap-0.5 cursor-pointer"
+                          onClick={() => handlePlayOrOpenItem(item)}
+                          className="text-red-500 hover:text-red-600 font-bold flex items-center gap-1 cursor-pointer"
                         >
-                          <span>{tr(language, 'មើលលើ YouTube', 'Watch on YouTube', '在 YouTube 观看')}</span>
-                          <ExternalLink className="w-3 h-3" />
+                          <Play className="w-3 h-3 fill-current" />
+                          <span>
+                            {item.platform === 'tiktok'
+                              ? tr(language, 'ទស្សនាវីដេអូ TikTok', 'Watch TikTok Video', '观看 TikTok 视频')
+                              : item.platform === 'facebook'
+                              ? tr(language, 'ទស្សនាវីដេអូ Facebook', 'Watch Facebook Video', '观看 Facebook 视频')
+                              : tr(language, 'ទស្សនាវីដេអូ YouTube', 'Watch YouTube Video', '观看 YouTube 视频')}
+                          </span>
                         </button>
                       </div>
 

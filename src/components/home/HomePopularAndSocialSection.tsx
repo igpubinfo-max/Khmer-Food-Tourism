@@ -105,13 +105,13 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
       {featuredThreeDishes.length > 0 && (
         <section className="space-y-2">
           <div className="flex items-center justify-between px-0.5">
-            <h3 className="font-khmer font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+            <h3 className="font-khmer font-extrabold text-sm sm:text-base text-[#0F172A]">
               {tr(language, 'ម្ហូបពេញនិយមនៅកម្ពុជា', 'Popular Dishes in Cambodia', '柬埔寨热门美食')}
             </h3>
             <button
               type="button"
               onClick={onSeeAllFoods}
-              className="inline-flex items-center gap-0.5 text-xs font-bold text-slate-700 dark:text-emerald-300 hover:text-[#064E3B] transition cursor-pointer"
+              className="inline-flex items-center gap-0.5 text-xs font-bold text-slate-700 hover:text-[#064E3B] transition cursor-pointer"
             >
               <span>{tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -137,7 +137,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
                 <div
                   key={food.id}
                   onClick={() => onOpenFood(food)}
-                  className="group relative aspect-square rounded-2xl overflow-hidden bg-slate-200 dark:bg-slate-800 shadow-sm border border-slate-200/80 dark:border-slate-700 cursor-pointer active:scale-[0.97] transition"
+                  className="group relative aspect-square rounded-2xl overflow-hidden bg-slate-200 shadow-sm border border-slate-200/80 cursor-pointer active:scale-[0.97] transition"
                 >
                   <img
                     src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 320, food.id)}
@@ -284,7 +284,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
               </svg>
             </button>
 
-            <h3 className="font-khmer font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white truncate ml-1">
+            <h3 className="font-khmer font-extrabold text-xs sm:text-sm text-[#0F172A] truncate ml-1">
               {tr(
                 language,
                 'Review ម្ហូប និងដំណើរកម្សាន្ត',
@@ -294,7 +294,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
             </h3>
           </div>
 
-          <ChevronRight className="w-4 h-4 text-slate-600 dark:text-slate-300 shrink-0 group-hover:translate-x-0.5 transition" />
+          <ChevronRight className="w-4 h-4 text-slate-700 shrink-0 group-hover:translate-x-0.5 transition" />
         </div>
 
         {/* 3 Video Thumbnail Cards */}
@@ -304,7 +304,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
               key={card.id}
               type="button"
               onClick={() => onOpenSocialReviews(card.platform)}
-              className="group relative h-24 sm:h-28 rounded-2xl overflow-hidden bg-slate-900 shadow-xs border border-slate-200/60 dark:border-slate-700 cursor-pointer active:scale-[0.97] transition"
+              className="group relative h-24 sm:h-28 rounded-2xl overflow-hidden bg-slate-900 shadow-xs border border-slate-200/70 cursor-pointer active:scale-[0.97] transition"
             >
               <img
                 src={card.thumb}

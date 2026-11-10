@@ -14,6 +14,7 @@ import { shuffleForCurrentSession } from '../utils/sessionShuffle';
 import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { HomeGreetingSearch } from './home/HomeGreetingSearch';
+import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
 import { TrendingFoodsRow } from './home/TrendingFoodsRow';
 import { HomeSkeleton, HomeEmptyState } from './home/HomeStates';
 import { FeatureGrid } from './home/FeatureGrid';
@@ -345,23 +346,18 @@ export const HomeView: React.FC = () => {
   );
 
   return (
-    <div className="max-w-md mx-auto px-4 py-2 space-y-2.5 pb-6 font-khmer">
-      {/* 1. Greeting + User Profile Card + debounced search bar */}
-      <HomeGreetingSearch
-        language={language}
-        userName={currentUser?.name}
-        currentUser={currentUser}
-        isVip={isVip}
-        onSignIn={handleSignIn}
-        onExploreProfile={handleExploreProfile}
-        onUpgradeVip={handleUpgradeVip}
-        onOpenAdminPanel={handleOpenAdminPanel}
+    <div className="max-w-md mx-auto bg-[#FBF9F5] text-slate-900 min-h-full font-khmer">
+      {/* 1. Full-Bleed Angkor Wat Hero Header + Ask AI Bar (No Green Background) */}
+      <AngkorHeroTopHeader
+        mode="home"
+        query={globalSearchQuery}
+        onChangeQuery={setGlobalSearchQuery}
         onAskAi={handleHomeAskAi}
         onOpenCameraAi={handleHomeCameraAi}
-        hint={getMealHint(mealSlot, language)}
-        query={globalSearchQuery}
-        onChange={setGlobalSearchQuery}
       />
+
+      {/* Rounded White/Cream Sheet Body */}
+      <div className="relative z-10 -mt-5 rounded-t-[26px] bg-[#FBF9F5] px-3.5 pt-4 pb-6 space-y-3 shadow-[0_-6px_20px_rgba(0,0,0,0.14)]">
 
       {/* 2. Global Live Search Results Dropdown/Panel */}
       {searchResults && (
@@ -1091,61 +1087,11 @@ export const HomeView: React.FC = () => {
                 onOpenSocialReviews={handleOpenSocialReviews}
               />
 
-              {/* 3. Meal-Time Reminder Card */}
+              {/* 3. Silent daily visit streak & native meal reminders */}
               <DailyHabitCard onOpenFood={setSelectedFood} />
 
-              {/* 4. Personalized picks for the current time of day */}
-              <ForYouSection
-                language={language}
-                slot={selectedMealSlot}
-                foods={forYouFoods}
-                onSelectSlot={handleSelectMealSlot}
-                onShuffle={handleShuffleMealDishes}
-                onOpenFood={setSelectedFood}
-                onSeeAll={handleSeeAllFoods}
-              />
-
-              {/* 4b. Traditional festival dishes (only while a festival is ongoing / about to start) */}
-              <FestivalFoodSection onOpenFood={setSelectedFood} />
-
-              {/* 5. Trending foods */}
-              {randomTrending.length > 0 ? (
-                <TrendingFoodsRow
-                  language={language}
-                  items={randomTrending}
-                  onOpen={handleOpenFoodDetail}
-                  onExploreAll={handleExploreAllTrending}
-                />
-              ) : (
-                <HomeEmptyState
-                  language={language}
-                  emoji="🍲"
-                  title={txt('មិនទាន់មានម្ហូបពេញនិយម', 'No featured dishes yet', '暂无精选美食')}
-                  message={txt('សូមមើលមុខម្ហូបទាំងអស់ក្នុងផ្ទាំងម្ហូប', 'Browse all dishes in the Food tab.', '请到“美食”页浏览全部菜品。')}
-                  actionLabel={txt('មើលមុខម្ហូប', 'Browse dishes', '浏览美食')}
-                  onAction={handleSeeAllFoods}
-                />
-              )}
-
-              {/* 6. Popular places (with quick province chips) */}
-              <PopularShops
-                language={language}
-                restaurants={restaurants}
-                onOpen={setSelectedRestaurant}
-                onSeeAll={handleSeeAllRestaurants}
-              />
-
-              {/* 7. Explore Cambodia */}
-              <PopularDestinations
-                language={language}
-                destinations={destinations}
-                onOpen={setSelectedDestination}
-                onSeeAll={handleSeeAllTourism}
-              />
-
-
-              {/* 9. VIP members manage their shop; everyone else sees one calm benefits card */}
-              {myRestaurants.length > 0 || isVip ? (
+              {/* 4. VIP shop owners manage their shop */}
+              {(myRestaurants.length > 0 || isVip) && (
                 <MyShopPanel
                   language={language}
                   shops={myRestaurants}
@@ -1161,14 +1107,13 @@ export const HomeView: React.FC = () => {
                   }}
                   onDelete={deleteRestaurant ? (shopId) => { deleteRestaurant(shopId); } : undefined}
                 />
-              ) : !isIosOrIpadAppStoreRuntime() ? (
-                <VipPerksCard language={language} onLearnMore={handleUpgradeVip} />
-              ) : null}
+              )}
             </>
           )}
         </>
         )
       )}
+      </div>
     </div>
   );
 };

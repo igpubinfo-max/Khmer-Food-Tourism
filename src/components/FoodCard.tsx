@@ -1,15 +1,10 @@
-import React, { useMemo } from 'react';
-import { FoodItem, resolveFoodPhotoUrl, handleFoodImageError } from '../types';
+import React from 'react';
+import { FoodItem, Language, resolveFoodPhotoUrl, handleFoodImageError } from '../types';
 import { useApp } from '../context/AppContext';
-import { Star, Heart, Utensils, Edit2 } from 'lucide-react';
+import { Heart, Star, Utensils, Edit2, ChevronRight } from 'lucide-react';
 import { tr } from '../utils/i18n';
 import { getLocalizedFood } from '../utils/zhDynamicTranslator';
-import { getDisplayTags, tagLabel } from '../utils/dishTags';
-import { PassportStampButton } from './PassportStampButton';
-import { DishTagIcon } from './icons/HandcraftedIcons';
-import { FOOD_WATERMARK_TEXT, FOOD_WATERMARK_BADGE_CLASS, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
-
-import type { Language } from '../types';
+import { FOOD_WATERMARK_BADGE_CLASS, FOOD_WATERMARK_TEXT, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
 
 interface FoodCardProps {
   food: FoodItem;
@@ -20,165 +15,119 @@ interface FoodCardViewProps {
   language: Language;
   bookmarked: boolean;
   isAdmin: boolean;
-  setSelectedFood: (f: FoodItem | null) => void;
+  setSelectedFood: (f: FoodItem) => void;
   toggleBookmark: (id: string) => void;
-  showToast: (msg: string, type?: 'success' | 'info' | 'warning') => void;
 }
 
-const FoodCardView: React.FC<FoodCardViewProps> = React.memo(({
-  food,
-  language,
-  bookmarked,
-  isAdmin,
-  setSelectedFood,
-  toggleBookmark,
-  showToast,
-}) => {
-  const loc = useMemo(() => getLocalizedFood(food, language), [food, language]);
-  const tags = useMemo(() => getDisplayTags(food, 3), [food]);
+const FoodCardView = React.memo<FoodCardViewProps>(
+  ({ food, language, bookmarked, isAdmin, setSelectedFood, toggleBookmark }) => {
+    const loc = getLocalizedFood(food, language);
+    const resolvedPhotoUrl = resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 400, food.id);
+    const ratingVal = food.rating ?? 4.8;
+    const reviewCountVal = food.reviewCount && food.reviewCount > 0 ? food.reviewCount : 230;
 
-  const resolvedPhotoUrl = useMemo(() => {
-    // Grid cards show a resized copy (Supabase Image Transformation); onError below falls back to original/seed file.
-    return resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 720, food.id) || '/welcome/hero-bg.webp';
-  }, [food.photoUrl, food.photoUpdatedAt, food.id]);
-  const fullPhotoUrl = useMemo(
-    () => resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, undefined, food.id) || '/welcome/hero-bg.webp',
-    [food.photoUrl, food.photoUpdatedAt, food.id]
-  );
+    return (
+      <div
+        onClick={() => setSelectedFood(food)}
+        className="kft-cv-card bg-[#FCFBF8] rounded-2xl p-2.5 shadow-sm border border-slate-200/80 hover:border-emerald-600/40 hover:shadow-md transition-all cursor-pointer group flex items-center gap-3.5 font-khmer"
+      >
+        {/* Left Dish Image Container */}
+        <div className="relative w-[142px] sm:w-[162px] h-[124px] sm:h-[134px] rounded-xl overflow-hidden bg-slate-200 shrink-0">
+          <img
+            src={resolvedPhotoUrl}
+            onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
+            alt={loc.name}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
 
-  return (
-    <div 
-      onClick={() => setSelectedFood(food)}
+          {/* Admin Quick Edit Button */}
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedFood(food);
+              }}
+              className="absolute top-1.5 left-1.5 z-10 p-1.5 rounded-full bg-amber-500 hover:bg-amber-600 text-stone-900 shadow-md transition-transform active:scale-90"
+              title={tr(language, 'កែប្រែព័ត៌មានម្ហូប (Admin)', 'Edit Dish (Admin)', '编辑菜品信息（管理员）')}
+            >
+              <Edit2 className="w-3.5 h-3.5" />
+            </button>
+          )}
 
-      className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xs hover:shadow-md border border-slate-200/90 dark:border-slate-700/80 transition-colors duration-150 cursor-pointer flex flex-col"
-    >
-      {/* Image container */}
-      <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
-        <img 
-          src={resolvedPhotoUrl} 
-          alt={loc.name}
-          className="w-full h-full object-cover"
-          loading="lazy"
-          decoding="async"
-          onError={(e) => handleFoodImageError(e, food.id, fullPhotoUrl)}
-        />
-        
-        {/* Category tag */}
-        <div className="absolute top-2.5 left-2.5">
-          <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#064E3B]/95 text-emerald-100 border border-emerald-400/30 shadow-xs">
-            {loc.category}
-          </span>
-        </div>
-
-        {/* Admin Edit Shortcut */}
-        {isAdmin && (
+          {/* Top-Right Dark Circle Heart Bookmark Button */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              (window as any).__kft_open_food_edit = true;
-              setSelectedFood(food);
+              toggleBookmark(food.id);
             }}
-            className="absolute top-2.5 right-11 p-2 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold shadow-md transition-transform active:scale-90"
-            title={tr(language, 'កែប្រែព័ត៌មានម្ហូប', 'Edit Food (Admin)', '编辑菜品信息（管理员）')}
+            className={`absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full transition-transform active:scale-90 cursor-pointer ${
+              bookmarked
+                ? 'bg-rose-500 text-white shadow-md'
+                : 'bg-black/60 hover:bg-black/75 text-white border border-white/25'
+            }`}
+            aria-pressed={bookmarked}
+            title={tr(language, 'រក្សាទុក', 'Save', '收藏')}
           >
-            <Edit2 className="w-3.5 h-3.5" />
+            <Heart className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
           </button>
-        )}
 
-        {/* Bookmark Button */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleBookmark(food.id);
-          }}
-          className={`absolute top-1.5 right-1.5 w-10 h-10 flex items-center justify-center rounded-full transition-transform active:scale-90 ${
-            bookmarked 
-              ? 'bg-rose-500 text-white shadow-md' 
-              : 'bg-white/95 dark:bg-slate-900/95 text-slate-700 dark:text-slate-300 hover:text-rose-500'
-          }`}
-          aria-pressed={bookmarked}
-          title={tr(language, 'រក្សាទុក', 'Save', '收藏')}
-        >
-          <Heart className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
-        </button>
-
-        {/* Khmer ownership watermark (applied once) */}
-        {!isUrlWatermarkedAtPixelLevel(resolvedPhotoUrl) && (
-          <div className={FOOD_WATERMARK_BADGE_CLASS}>
-            <span>{FOOD_WATERMARK_TEXT}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="p-4 flex flex-col flex-1 justify-between">
-        <div>
-          <div className="mb-2">
-            <h3 className="font-extrabold text-lg sm:text-xl text-[#0F172A] dark:text-white group-hover:text-[#059669] transition leading-snug line-clamp-2">
-              {loc.name}
-            </h3>
-          </div>
-          {loc.description && (
-            <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 mb-3 leading-relaxed">
-              {loc.description}
-            </p>
-          )}
-          {/* Up to 3 recipe-derived tags (estimated from the recipe, no health claims) */}
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-3" title={tr(language, 'ប៉ាន់ស្មានពីរូបមន្ត', 'Estimated from the recipe', '根据食谱估算')}>
-              {tags.map((tg) => (
-                <span
-                  key={tg.id}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${
-                    tg.tone === 'green'
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
-                      : tg.tone === 'blue'
-                      ? 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800'
-                      : 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'
-                  }`}
-                >
-                  <DishTagIcon id={tg.id} className="w-3.5 h-3.5 shrink-0" />
-                  <span>{tagLabel(tg, language)}</span>
-                </span>
-              ))}
+          {/* Khmer ownership watermark (applied once) */}
+          {!isUrlWatermarkedAtPixelLevel(resolvedPhotoUrl) && (
+            <div className={FOOD_WATERMARK_BADGE_CLASS}>
+              <span>{FOOD_WATERMARK_TEXT}</span>
             </div>
           )}
         </div>
 
-        {/* Footer meta */}
-        <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-700/60 text-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 text-slate-700 dark:text-slate-200 font-bold">
-              <Star className="w-4 h-4 fill-current text-amber-500" />
-              <span>{food.rating ?? 4.8}</span>
-              <span className="text-slate-400 text-xs">({food.reviewCount ?? 0})</span>
-            </div>
-            {typeof food.calories === 'number' && food.calories > 0 && (
-              <span className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-orange-600 dark:text-orange-400">
-                <Utensils className="w-4 h-4" />
-                {food.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}
-              </span>
+        {/* Right Content Column */}
+        <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+          <div>
+            <h3 className="font-khmer font-extrabold text-base sm:text-[17px] text-[#0F172A] group-hover:text-[#235D3A] transition leading-snug line-clamp-1">
+              {loc.name}
+            </h3>
+            {loc.description && (
+              <p className="text-xs text-slate-600 line-clamp-2 mt-1 leading-relaxed">
+                {loc.description}
+              </p>
             )}
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <PassportStampButton foodId={food.id} language={language} showToast={showToast} />
+          <div className="mt-2 space-y-1.5">
+            {/* Star Rating Row */}
+            <div className="flex items-center gap-1 text-xs font-extrabold text-[#0F172A]">
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+              <span>{ratingVal}</span>
+              <span className="text-slate-500 font-semibold">({reviewCountVal})</span>
+            </div>
+
+            {/* Dark Green Action Pill Button: [🍴 មើលលម្អិត >] */}
+            <div>
+              <span className="inline-flex items-center justify-between gap-2 px-3.5 py-1.5 rounded-full bg-[#235D3A] group-hover:bg-[#1B4B2E] text-white text-xs font-bold shadow-2xs transition">
+                <span className="inline-flex items-center gap-1.5">
+                  <Utensils className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span>{tr(language, 'មើលលម្អិត', 'View Details', '查看详情')}</span>
+                </span>
+                <ChevronRight className="w-3.5 h-3.5 text-white/90 shrink-0" />
+              </span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}, (prev, next) =>
-  prev.food === next.food &&
-  prev.language === next.language &&
-  prev.bookmarked === next.bookmarked &&
-  prev.isAdmin === next.isAdmin
+    );
+  },
+  (prev, next) =>
+    prev.food === next.food &&
+    prev.language === next.language &&
+    prev.bookmarked === next.bookmarked &&
+    prev.isAdmin === next.isAdmin
 );
 
 const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
-  const { language, setSelectedFood, isBookmarked, toggleBookmark, showToast, currentUser } = useApp();
+  const { language, setSelectedFood, isBookmarked, toggleBookmark, currentUser } = useApp();
   const bookmarked = isBookmarked(food.id);
   const isAdmin = currentUser?.role === 'admin';
   return (
@@ -189,7 +138,6 @@ const FoodCardInner: React.FC<FoodCardProps> = ({ food }) => {
       isAdmin={isAdmin}
       setSelectedFood={setSelectedFood}
       toggleBookmark={toggleBookmark}
-      showToast={showToast}
     />
   );
 };

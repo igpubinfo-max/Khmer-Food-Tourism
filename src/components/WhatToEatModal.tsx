@@ -336,11 +336,11 @@ export const WhatToEatModal: React.FC = () => {
   const [isTestingInlineKey, setIsTestingInlineKey] = useState(false);
   const [confirmedOwnerUpdates, setConfirmedOwnerUpdates] = useState<Record<string, 'confirmed' | 'cancelled'>>({});
   const [savedItineraryIds, setSavedItineraryIds] = useState<Record<string, boolean>>({});
-  const [backendVipVerified, setBackendVipVerified] = useState<boolean>(false);
+  const [backendVipVerified, setBackendVipVerified] = useState<boolean>(true);
   const [isVerifyingVipBackend, setIsVerifyingVipBackend] = useState<boolean>(false);
   const [showVipAiUpgradeNotice, setShowVipAiUpgradeNotice] = useState<boolean>(false);
   const userGpsRef = useRef<{ lat: number; lng: number } | null>(null);
-  const canUseAiAssistant = Boolean(canUseVip && backendVipVerified);
+  const canUseAiAssistant = true;
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Filters: Conversational Input, Category, Meal Time, Dietary / Health Style
@@ -398,38 +398,12 @@ export const WhatToEatModal: React.FC = () => {
     });
   };
 
-  // Verify VIP status through the Supabase backend whenever modal opens or user changes
+  // AI Assistant is publicly accessible to all users (Free, Guest, and VIP)
   useEffect(() => {
-    let cancelled = false;
-    if (!currentUser || !canUseVip) {
-      setBackendVipVerified(false);
-      setIsVerifyingVipBackend(false);
-      return;
-    }
-    setIsVerifyingVipBackend(true);
-    verifyUserVipStatusFromBackend(currentUser)
-      .then((res) => {
-        if (!cancelled) {
-          setBackendVipVerified(res.isVip);
-          if (res.isVip) {
-            setShowVipAiUpgradeNotice(false);
-          }
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setBackendVipVerified(Boolean(canUseVip));
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsVerifyingVipBackend(false);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [isWhatToEatModalOpen, currentUser, canUseVip]);
+    setBackendVipVerified(true);
+    setIsVerifyingVipBackend(false);
+    setShowVipAiUpgradeNotice(false);
+  }, [isWhatToEatModalOpen, currentUser]);
 
   const promptVipUpgradeForAiAssistant = () => {
     setShowVipAiUpgradeNotice(true);
@@ -1103,16 +1077,7 @@ export const WhatToEatModal: React.FC = () => {
     setForceBigCard(false);
 
     // 1. Strict Frontend + Backend VIP Verification before accepting any AI question or photo
-    if (!canUseVip) {
-      promptVipUpgradeForAiAssistant();
-      return;
-    }
-    const backendCheck = await verifyUserVipStatusFromBackend(currentUser);
-    setBackendVipVerified(backendCheck.isVip);
-    if (!backendCheck.isVip) {
-      promptVipUpgradeForAiAssistant();
-      return;
-    }
+    // Public AI access for all users (Free, Guest, and VIP)
     setShowVipAiUpgradeNotice(false);
 
     const userMsg: AiAssistantMessage = {
@@ -1349,16 +1314,7 @@ export const WhatToEatModal: React.FC = () => {
   const handleImagePicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
-    if (!canUseVip) {
-      promptVipUpgradeForAiAssistant();
-      return;
-    }
-    const vipCheck = await verifyUserVipStatusFromBackend(currentUser);
-    setBackendVipVerified(vipCheck.isVip);
-    if (!vipCheck.isVip) {
-      promptVipUpgradeForAiAssistant();
-      return;
-    }
+    // Public AI photo recognition access for all users
     if (!file) return;
     setImageError('');
     setIsPreparingImage(true);
@@ -1671,25 +1627,12 @@ export const WhatToEatModal: React.FC = () => {
             <h3 className="font-moul text-sm text-white truncate">
               {tr(language, 'ជំនួយការ AI ម្ហូបអាហារ', 'AI Food Assistant', 'AI 美食助手')}
             </h3>
-            <button
-              type="button"
-              onClick={() => {
-                if (!canUseAiAssistant) promptVipUpgradeForAiAssistant();
-              }}
-              aria-label={
-                canUseAiAssistant
-                  ? tr(language, 'សមាជិក VIP • បើករួច', 'VIP Active', 'VIP 已激活')
-                  : tr(language, 'សម្រាប់ VIP • VIP ONLY', 'VIP Only', 'VIP 专属')
-              }
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-extrabold shrink-0 cursor-pointer"
+            <span
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 text-[10px] font-extrabold shrink-0"
             >
-              {canUseAiAssistant ? (
-                <Crown className="w-3 h-3" strokeWidth={1.75} />
-              ) : (
-                <Lock className="w-3 h-3" strokeWidth={1.75} />
-              )}
-              <span>VIP</span>
-            </button>
+              <CheckCircle2 className="w-3 h-3 text-emerald-300" strokeWidth={1.75} />
+              <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}</span>
+            </span>
           </div>
           <button
             id="kft-wte-close-btn"

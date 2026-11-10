@@ -245,7 +245,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   // Payment-receipt checks are needed by people who are NOT VIP yet (they are paying to become VIP): they bypass the
   // VIP rule but have their own small daily allowance and must carry an image.
   const isPayment = req.headers.get('x-kft-purpose') === 'payment';
-  const enforceVip = Deno.env.get('FOOD_AI_ENFORCE_VIP') === 'true' && !isPayment;
+  const enforceVip = false; // Public AI Assistant access enabled for both Free and VIP users
   const [userDoc, pricingDoc] = userId
     ? await Promise.all([readUserDoc(userKvKey(userId)), getCachedPricingDoc()])
     : [null, null];

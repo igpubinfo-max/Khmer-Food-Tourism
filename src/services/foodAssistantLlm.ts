@@ -1112,13 +1112,7 @@ export async function askFoodAssistant(params: AskFoodAssistantParams): Promise<
   const text = (userText || '').trim();
   const hasImage = Boolean(image?.base64);
 
-  // Backend VIP verification before any LLM execution
-  if (!params.transport) {
-    const vipCheck = await verifyUserVipStatusFromBackend(params.currentUser);
-    if (!vipCheck.isVip) {
-      return { ok: false, reason: 'blocked', detail: 'vip_required' };
-    }
-  }
+  // AI Assistant is publicly accessible to all users (Free, Guest, and VIP)
 
   // Hard boundary BEFORE any network call: medical advice requests are never sent to the model.
   if (text && isMedicalOrHealthQuery(text)) {

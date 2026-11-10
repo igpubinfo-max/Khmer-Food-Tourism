@@ -7,8 +7,9 @@ import type { TagFilterId } from './dishTags';
  * Basic features (Nearby Food Search, Nearby Places, Food Recommendations,
  * Daily Food Discovery, and Map Navigation) remain 100% Free for all users.
  */
-export function hasSpecialAndHealthyFoodVipAccess(user?: User | null): boolean {
-  return Boolean(isUserVipActive(user) || (user && isAdminAccount(user)));
+export function hasSpecialAndHealthyFoodVipAccess(_user?: User | null): boolean {
+  void _user;
+  return true;
 }
 
 /**

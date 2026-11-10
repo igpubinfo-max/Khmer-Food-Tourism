@@ -213,14 +213,16 @@ const MainScreen: React.FC = () => {
 
   return (
     <div className="flex-1 min-h-0 flex flex-col w-full h-full overflow-hidden relative bg-[#0F172A]">
-      {/* Fixed Top Header — Never scrolls or recalculates sticky offsets */}
-      <Header />
+      {/* Fixed Top Header — Hidden on Home & Food tabs where full-bleed Angkor Hero Header is used */}
+      {activeTab !== 'home' && activeTab !== 'food' && <Header />}
 
       {/* Single Bounded Scroll Container — Strictly sandwiched between Header and BottomNav */}
       <main
         id="kft-main-scroll"
         ref={mainScrollRef}
-        className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden overscroll-y-contain no-scrollbar relative"
+        className={`flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden overscroll-y-contain no-scrollbar relative ${
+          activeTab === 'home' || activeTab === 'food' ? 'bg-[#FBF9F5] text-slate-900' : 'dark bg-[#0F172A] text-[#F8FAFC]'
+        }`}
       >
         <Suspense
           fallback={
@@ -303,7 +305,7 @@ export default function App() {
   return (
     <AppProvider>
       {/* Locked Full-Screen Native Mobile App Shell (Zero dual scrollbars, Edge-to-Edge Safe Area aware) */}
-      <div className="dark w-full h-full max-h-[100dvh] overflow-hidden bg-[#0F172A] text-[#F8FAFC] flex justify-center">
+      <div className="w-full h-full max-h-[100dvh] overflow-hidden bg-[#0F172A] text-[#F8FAFC] flex justify-center">
         <div className="w-full max-w-md h-full max-h-[100dvh] flex flex-col overflow-hidden bg-[#0F172A] text-[#F8FAFC] relative shadow-none md:shadow-xl md:border-x md:border-slate-800">
           <MainScreen />
         </div>

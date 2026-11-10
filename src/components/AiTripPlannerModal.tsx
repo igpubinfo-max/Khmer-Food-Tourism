@@ -100,27 +100,11 @@ export const AiTripPlannerModal: React.FC = () => {
     openUpgradeVipModal,
   } = useApp();
 
-  const canUseVipLocal = Boolean(isUserVipActive(currentUser) || (currentUser && isAdminAccount(currentUser)));
-  const [backendVipVerified, setBackendVipVerified] = useState<boolean>(false);
+  const canUseVipLocal = true;
+  const [backendVipVerified] = useState<boolean>(true);
   const canUseVip = Boolean(canUseVipLocal && backendVipVerified);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!currentUser || !canUseVipLocal) {
-      setBackendVipVerified(false);
-      return;
-    }
-    verifyUserVipStatusFromBackend(currentUser)
-      .then((res) => {
-        if (!cancelled) setBackendVipVerified(res.isVip);
-      })
-      .catch(() => {
-        if (!cancelled) setBackendVipVerified(canUseVipLocal);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [isAiTripPlannerModalOpen, currentUser, canUseVipLocal]);
+  // Real VIP status for Multi-Day (2-3 days) AI Trip Plans, while 1-Day AI Trip Plan is FREE for everyone
+  const hasRealVip = Boolean(isUserVipActive(currentUser) || isAdminAccount(currentUser));
 
   const promptVipForAi = () => {
     showToast(
@@ -224,33 +208,7 @@ export const AiTripPlannerModal: React.FC = () => {
   const handleAdvisorSearchSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     advisorInputRef.current?.blur();
-    if (!canUseVip) {
-      showToast(
-        tr(
-          language,
-          '👑 មុខងារសួរសំណួរទៅកាន់ជំនួយការ AI គឺសម្រាប់សមាជិក VIP ប៉ុណ្ណោះ! សូមដំឡើងទៅកាន់ VIP។',
-          '👑 Submitting questions to the AI Assistant is for VIP members only! Please upgrade to VIP.',
-          '👑 向 AI 助手提问仅限 VIP 会员使用！请升级 VIP。'
-        ),
-        'info'
-      );
-      openUpgradeVipModal();
-      return;
-    }
-    const backendCheck = await verifyUserVipStatusFromBackend(currentUser);
-    if (!backendCheck.isVip) {
-      showToast(
-        tr(
-          language,
-          '👑 គណនីរបស់អ្នកមិនទាន់មានសុពលភាព VIP នៅលើប្រព័ន្ធមេ (Server) ទេ។ សូមដំឡើងទៅកាន់ VIP!',
-          '👑 Your account does not have an active backend-verified VIP membership. Please upgrade to VIP!',
-          '👑 您的账户尚未通过服务器 VIP 验证，请升级 VIP 会员！'
-        ),
-        'info'
-      );
-      openUpgradeVipModal();
-      return;
-    }
+    // Public AI Advisor access enabled for all users
     if (!advisorPrompt.trim()) {
       const targetGoal = expandedGoalId || advisorGoal || 'quick_daily';
       setAdvisorGoal(targetGoal);
@@ -269,8 +227,8 @@ export const AiTripPlannerModal: React.FC = () => {
   if (!isAiTripPlannerModalOpen) return null;
 
   const handleGenerate = () => {
-    // Multi-day custom AI itinerary (2-3 days) or Luxury mode requires VIP
-    if (!canUseVip && (durationDays > 1 || budgetLevel === 'luxury')) {
+    // 1-Day Trip Plan is FREE for all users; Multi-day (2-3 days) or Luxury mode requires VIP
+    if (!hasRealVip && (durationDays > 1 || budgetLevel === 'luxury')) {
       showToast(
         tr(
           language,
@@ -340,7 +298,7 @@ export const AiTripPlannerModal: React.FC = () => {
   };
 
   const handleSave = () => {
-    if (!canUseVip) {
+    if (!hasRealVip) {
       showToast(
         tr(
           language,
@@ -1200,7 +1158,7 @@ export const AiTripPlannerModal: React.FC = () => {
                         { days: 2, labelKh: '២ ថ្ងៃ ១ យប់', labelEn: '2 Days 1 Night', labelZh: '2天1晚', vipOnly: true },
                         { days: 3, labelKh: '៣ ថ្ងៃ ២ យប់', labelEn: '3 Days 2 Nights', labelZh: '3天2晚', vipOnly: true },
                       ].map((d) => {
-                        const locked = d.vipOnly && !canUseVip;
+                        const locked = d.vipOnly && !hasRealVip;
                         return (
                           <button
                             key={d.days}

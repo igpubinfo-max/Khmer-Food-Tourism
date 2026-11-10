@@ -1,21 +1,23 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { FoodCard } from './FoodCard';
+import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
 import {
   FoodItem,
-  KHMER_FOOD_PRIMARY_CATEGORIES,
-  KhmerFoodPrimaryGroup,
   classifyKhmerFoodPrimaryGroup,
   organizeAndDeduplicateFoods,
 } from '../types';
-import { Utensils, Lock, Crown, MapPin, Soup, Award, Plus } from 'lucide-react';
+import { Utensils, Crown, MapPin, Plus, Search, Filter, X, Sun, Moon } from 'lucide-react';
 import { DISH_PROVINCES, detectDishProvince } from '../utils/foodFilters';
 import { TAG_FILTERS, matchesTagFilter, TagFilterId, DishTagId } from '../utils/dishTags';
 import { TAG_FILTER_EVENT, consumePendingTagFilter, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { tr } from '../utils/i18n';
-import { DishTagIcon, IconDishCategory, IconGrillFlame, IconHealthyLeaf, IconKhmerFoodBowl } from './icons/HandcraftedIcons';
+import { DishTagIcon } from './icons/HandcraftedIcons';
+import { getAuthenticCambodianDishesForMealTime } from '../utils/cambodianMealHabits';
 
 const PAGE_BATCH_SIZE = 20;
+
+type MealTimeFilter = 'all' | 'breakfast' | 'lunch' | 'dinner';
 
 export const FoodView: React.FC = () => {
   const { foods, language, currentUser, openUpgradeVipModal, showToast, setIsAdminOpen } = useApp();
@@ -27,14 +29,15 @@ export const FoodView: React.FC = () => {
   );
   const canUseVip = hasSpecialAndHealthyFoodVipAccess(currentUser);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [mealTimeFilter, setMealTimeFilter] = useState<MealTimeFilter>('all');
+  const [foodSearchQuery, setFoodSearchQuery] = useState<string>('');
+  const [showFilterDrawer, setShowFilterDrawer] = useState<boolean>(false);
   const [visibleCount, setVisibleCount] = useState<number>(PAGE_BATCH_SIZE);
   const [provinceFilter, setProvinceFilter] = useState<string>('');
-  // A tag chosen in the Smart Menu before this screen mounted (in-memory handoff, no storage, VIP-verified)
   const [initialTag] = useState<TagFilterId | null>(() => consumePendingTagFilter(currentUser));
   const [tagFilter, setTagFilter] = useState<TagFilterId>(canUseVip && initialTag ? initialTag : 'all');
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
 
-  // Smart Menu -> Food tab: pre-select the exact tag and show all matching dishes (VIP-only)
   useEffect(() => {
     const onTag = (e: Event) => {
       const id = (e as CustomEvent<TagFilterId>).detail;
@@ -51,408 +54,436 @@ export const FoodView: React.FC = () => {
     return () => window.removeEventListener(TAG_FILTER_EVENT, onTag);
   }, [canUseVip, currentUser]);
 
-  // Reset healthy tag filter if user logs out or loses VIP status
-  useEffect(() => {
-    if (!canUseVip && tagFilter !== 'all') {
-      setTagFilter('all');
-    }
-  }, [canUseVip, tagFilter]);
-
   useEffect(() => {
     setVisibleCount(PAGE_BATCH_SIZE);
-  }, [selectedCategory, provinceFilter, tagFilter]);
+  }, [selectedCategory, mealTimeFilter, foodSearchQuery, provinceFilter, tagFilter]);
 
-  // Deduplicate and sort all dishes in exact category order: សម្ល -> ឆា -> ស្ងោរ -> បង្អែម
   const organizedFoods = useMemo(() => organizeAndDeduplicateFoods(foods), [foods]);
 
   const isVegetarianDish = (f: FoodItem): boolean =>
     Boolean(
       f.isVegetarian ||
-        /បួស|\bvegetarian\b|\bvegan\b/i.test(`${f.nameKh} ${f.nameEn} ${f.categoryKh}`)
+        /បួស|\bvegetarian\b|\bvegan\b|ភេសជ្ជៈ|\bdrink\b/i.test(`${f.nameKh} ${f.nameEn} ${f.categoryKh}`)
     );
 
-  // Count dishes in each primary group
-  const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = {
-      all: organizedFoods.length,
-      vegetarian: 0,
-      samlor: 0,
-      cha: 0,
-      sngor: 0,
-      bong_aem: 0,
-    };
-    for (const f of organizedFoods) {
-      const grp = classifyKhmerFoodPrimaryGroup(f);
-      counts[grp] = (counts[grp] || 0) + 1;
-      if (isVegetarianDish(f)) {
-        counts.vegetarian = (counts.vegetarian || 0) + 1;
-      }
-    }
-    return counts;
-  }, [organizedFoods]);
+  // 6 Square Illustrated Categories matching the reference Food Menu design
+  const categories = useMemo(
+    () => [
+      {
+        id: 'all',
+        nameKh: 'ទាំងអស់',
+        nameEn: 'All',
+        nameZh: '全部',
+        thumb: '/foods/food-1.jpg',
+      },
+      {
+        id: 'samlor',
+        nameKh: 'ស៊ុប',
+        nameEn: 'Soups',
+        nameZh: '汤羹',
+        thumb: '/foods/food-2.jpg',
+      },
+      {
+        id: 'sngor',
+        nameKh: 'មី',
+        nameEn: 'Noodles',
+        nameZh: '面条/粉',
+        thumb: '/foods/food-6.jpg',
+      },
+      {
+        id: 'cha',
+        nameKh: 'អាំង/ចៀន',
+        nameEn: 'Grill/Fry',
+        nameZh: '烧烤/热炒',
+        thumb: '/foods/food-21.jpg',
+      },
+      {
+        id: 'bong_aem',
+        nameKh: 'បង្អែម',
+        nameEn: 'Desserts',
+        nameZh: '甜品',
+        thumb: '/foods/food-14.jpg',
+      },
+      {
+        id: 'vegetarian',
+        nameKh: 'ភេសជ្ជៈ/បួស',
+        nameEn: 'Drinks/Veg',
+        nameZh: '饮品/素食',
+        thumb: '/foods/food-25.jpg',
+      },
+    ],
+    []
+  );
 
-  // Ordered with ម្ហូបបួស (Vegetarian), សម្ល, ឆា, ស្ងោរ, បង្អែម
-  const categories: Array<{ id: string; nameKh: string; nameEn: string; nameZh: string; icon: React.ReactNode }> = [
-    { id: 'all', nameKh: 'ទាំងអស់', nameEn: 'All Dishes', nameZh: '全部菜品', icon: <IconDishCategory className="w-4 h-4" /> },
-    { id: 'vegetarian', nameKh: 'ម្ហូបបួស', nameEn: 'Vegetarian', nameZh: '高棉素食', icon: <IconHealthyLeaf className="w-4 h-4 text-emerald-500" /> },
-    { id: 'samlor', nameKh: 'សម្ល', nameEn: 'Soups & Curries', nameZh: '浓汤/咖喱', icon: <IconKhmerFoodBowl className="w-4 h-4" /> },
-    { id: 'cha', nameKh: 'ឆា & អាំង', nameEn: 'Stir-Fry & Grill', nameZh: '热炒/烧烤', icon: <IconGrillFlame className="w-4 h-4" /> },
-    { id: 'sngor', nameKh: 'ស្ងោរ & គុយទាវ', nameEn: 'Broths & Noodles', nameZh: '清汤/汤粉', icon: <Soup className="w-4 h-4 text-emerald-500" /> },
-    { id: 'bong_aem', nameKh: 'បង្អែម', nameEn: 'Desserts', nameZh: '高棉甜品', icon: <Award className="w-4 h-4 text-amber-500" /> },
-  ];
+  // Meal-time matching dish IDs
+  const mealTimeDishIds = useMemo(() => {
+    if (mealTimeFilter === 'all') return null;
+    const matched = getAuthenticCambodianDishesForMealTime(organizedFoods, mealTimeFilter, 120);
+    return new Set(matched.map((d) => d.id));
+  }, [organizedFoods, mealTimeFilter]);
 
-  const sectionZhMeta: Record<KhmerFoodPrimaryGroup, { titleZh: string; subtitleZh: string }> = {
-    samlor: { titleZh: '高棉传统浓汤与咖喱', subtitleZh: '传统高棉浓汤、阿莫克与红绿咖喱' },
-    cha: { titleZh: '高棉风味小炒与烤物', subtitleZh: '香茅热炒、摇滚牛肉粒、炙烤与凉拌菜' },
-    sngor: { titleZh: '清炖鲜汤、米粉与主食', subtitleZh: '酸汤、清汤、高棉米粉与特色饭面' },
-    bong_aem: { titleZh: '传统高棉甜品与糕点', subtitleZh: '椰奶甜汤、传统糕点与特色饮品' },
-  };
-
-  const filteredFoods = useMemo(() => {
-    return organizedFoods.filter((f) => {
-      if (!matchesTagFilter(f, tagFilter, canUseVip)) return false;
-      if (provinceFilter && detectDishProvince(f) !== provinceFilter) return false;
-      if (selectedCategory === 'vegetarian') {
-        return isVegetarianDish(f);
-      }
-      if (selectedCategory !== 'all') {
-        if (isVegetarianDish(f)) return false;
-        const grp = classifyKhmerFoodPrimaryGroup(f);
-        if (grp !== selectedCategory && f.categorySlug !== selectedCategory) {
-          return false;
-        }
-      }
-      return true;
-    });
-  }, [organizedFoods, selectedCategory, provinceFilter, tagFilter, canUseVip]);
-
-  // Provinces that actually appear in dish names/descriptions (no empty filter options)
   const provinceOptions = useMemo(() => {
     const counts = new Map<string, number>();
     for (const f of organizedFoods) {
-      const id = detectDishProvince(f);
-      if (id) counts.set(id, (counts.get(id) || 0) + 1);
+      const p = detectDishProvince(f);
+      if (p) counts.set(p, (counts.get(p) || 0) + 1);
     }
-    return DISH_PROVINCES.filter((p) => counts.has(p.id)).map((p) => ({ ...p, count: counts.get(p.id) || 0 }));
+    return DISH_PROVINCES.filter((p) => (counts.get(p.id) || 0) > 0).map((p) => ({
+      ...p,
+      count: counts.get(p.id) || 0,
+    }));
   }, [organizedFoods]);
 
-  const hasActiveFilters = selectedCategory !== 'all' || Boolean(provinceFilter) || tagFilter !== 'all';
-  const resetAllFilters = () => {
-    setSelectedCategory('all');
-    setProvinceFilter('');
-    setTagFilter('all');
-  };
-
-  useEffect(() => {
-    const node = loadMoreTriggerRef.current;
-    if (!node || visibleCount >= filteredFoods.length) return;
-    if (typeof IntersectionObserver === 'undefined') return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setVisibleCount((prev) => Math.min(filteredFoods.length, prev + PAGE_BATCH_SIZE));
-        }
-      },
-      { root: document.getElementById('kft-main-scroll'), rootMargin: '320px' }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [visibleCount, filteredFoods.length]);
+  const filteredFoods = useMemo(() => {
+    const q = foodSearchQuery.trim().toLowerCase();
+    return organizedFoods.filter((food) => {
+      const matchesCategory =
+        selectedCategory === 'all' ||
+        (selectedCategory === 'vegetarian'
+          ? isVegetarianDish(food)
+          : classifyKhmerFoodPrimaryGroup(food) === selectedCategory);
+      if (!matchesCategory) return false;
+      if (mealTimeDishIds && !mealTimeDishIds.has(food.id)) return false;
+      if (provinceFilter && detectDishProvince(food) !== provinceFilter) return false;
+      if (!matchesTagFilter(food, tagFilter)) return false;
+      if (q) {
+        const hay = `${food.nameKh || ''} ${food.nameEn || ''} ${food.descriptionKh || ''} ${food.descriptionEn || ''} ${food.categoryKh || ''}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [organizedFoods, selectedCategory, mealTimeDishIds, provinceFilter, tagFilter, foodSearchQuery]);
 
   const displayedFoods = useMemo(
     () => filteredFoods.slice(0, visibleCount),
     [filteredFoods, visibleCount]
   );
 
-  // Group displayedFoods by primary category in exact order: ម្ហូបបួស, សម្ល, ឆា, ស្ងោរ, បង្អែម
-  const groupedDisplayedSections = useMemo(() => {
-    const vegetarianItems: FoodItem[] = [];
-    const map: Record<KhmerFoodPrimaryGroup, FoodItem[]> = {
-      samlor: [],
-      cha: [],
-      sngor: [],
-      bong_aem: [],
-    };
-    for (const f of displayedFoods) {
-      if (isVegetarianDish(f)) {
-        vegetarianItems.push(f);
-      } else {
-        const grp = classifyKhmerFoodPrimaryGroup(f);
-        map[grp].push(f);
-      }
-    }
-    const sections: Array<{
-      meta: { id: string; nameKh: string; nameEn: string; titleZh: string };
-      items: FoodItem[];
-      totalInCategory: number;
-    }> = [];
+  const hasActiveFilters =
+    selectedCategory !== 'all' ||
+    mealTimeFilter !== 'all' ||
+    provinceFilter !== '' ||
+    tagFilter !== 'all' ||
+    foodSearchQuery.trim() !== '';
 
-    for (const meta of KHMER_FOOD_PRIMARY_CATEGORIES) {
-      if (map[meta.id].length > 0) {
-        sections.push({
-          meta: {
-            id: meta.id,
-            nameKh: meta.nameKh,
-            nameEn: meta.nameEn,
-            titleZh: sectionZhMeta[meta.id]?.titleZh || meta.nameEn,
-          },
-          items: map[meta.id],
-          totalInCategory: categoryCounts[meta.id] || 0,
-        });
-      }
-    }
+  const resetAllFilters = () => {
+    setSelectedCategory('all');
+    setMealTimeFilter('all');
+    setProvinceFilter('');
+    setTagFilter('all');
+    setFoodSearchQuery('');
+  };
 
-    if (vegetarianItems.length > 0) {
-      sections.push({
-        meta: {
-          id: 'vegetarian',
-          nameKh: 'ម្ហូបបួស',
-          nameEn: 'Vegetarian Dishes',
-          titleZh: '高棉传统素食',
-        },
-        items: vegetarianItems,
-        totalInCategory: categoryCounts.vegetarian || vegetarianItems.length,
-      });
-    }
+  useEffect(() => {
+    const node = loadMoreTriggerRef.current;
+    if (!node) return;
+    if (visibleCount >= filteredFoods.length) return;
 
-    return sections;
-  }, [displayedFoods, categoryCounts]);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first && first.isIntersecting) {
+          setVisibleCount((prev) => Math.min(filteredFoods.length, prev + PAGE_BATCH_SIZE));
+        }
+      },
+      { root: null, rootMargin: '320px 0px', threshold: 0.01 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [visibleCount, filteredFoods.length]);
 
   return (
-    <div className="max-w-md mx-auto px-4 py-3 space-y-4 pb-6">
-      {/* Header bar (Search removed — kept on Home Screen only; Insert Food strictly visible to Admin only) */}
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <h2 className="font-moul text-base sm:text-lg text-[#0F172A] dark:text-white flex items-center gap-2">
-            <Utensils className="w-5 h-5 text-[#059669]" />
-            <span>
-              {tr(language, 'មុខម្ហូបខ្មែរ និងរូបមន្តចម្អិន', 'Cambodian Dishes & Recipes', '柬埔寨传统美食与食谱')}
-            </span>
+    <div className="max-w-md mx-auto bg-[#F6F4EE] text-slate-900 min-h-full font-khmer">
+      {/* 1. Full-Bleed Angkor Wat Hero Header (No Green Bar) */}
+      <AngkorHeroTopHeader mode="food" />
+
+      {/* 2. White/Cream Rounded Sheet */}
+      <div className="relative z-10 -mt-6 rounded-t-[26px] bg-[#F6F4EE] pb-8 shadow-[0_-6px_20px_rgba(0,0,0,0.18)] overflow-hidden">
+        {/* Top White Header Row: មុខម្ហូបខ្មែរ ទាំងអស់ on Left + Small [👑 VIP] Pill on Right */}
+        <div className="bg-white px-4 py-3.5 flex items-center justify-between gap-2 border-b border-slate-900/5">
+          <h2 className="font-khmer font-extrabold text-lg sm:text-xl text-[#0F172A] tracking-tight truncate">
+            {tr(language, 'មុខម្ហូបខ្មែរ ទាំងអស់', 'All Cambodian Dishes', '柬埔寨全部美食')}
           </h2>
-        </div>
 
-        {isAdmin && (
-          <button
-            type="button"
-            onClick={() => {
-              (window as any).__kft_admin_tab = 'food';
-              (window as any).__kft_admin_open_add_food = true;
-              setIsAdminOpen(true);
-            }}
-            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold font-khmer shadow-xs transition active:scale-95 cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5 text-emerald-200" />
-            <span>{tr(language, 'បញ្ចូលមុខម្ហូប', 'Add Dish', '添加菜品')}</span>
-          </button>
-        )}
-      </div>
-
-      {/* Ordered Primary Category Pills: ទាំងអស់ | ១. សម្ល | ២. ឆា | ៣. ស្ងោរ | ៤. បង្អែម */}
-      <div className="bg-white dark:bg-slate-800/90 p-2.5 rounded-2xl border border-emerald-500/20 shadow-2xs space-y-2 font-khmer">
-        <div className="flex items-center justify-between px-1">
-          <span className="text-xs sm:text-sm font-bold text-[#064E3B] dark:text-emerald-300">
-            {tr(
-              language,
-              'ជ្រើសរើសប្រភេទម្ហូប',
-              'Browse by Category',
-              '按分类浏览'
-            )}
-          </span>
-        </div>
-        <div className="flex items-stretch gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-0.5">
-          {categories.map((cat) => {
-            const active = selectedCategory === cat.id;
-            return (
+          <div className="flex items-center gap-2 shrink-0">
+            {isAdmin && (
               <button
-                key={cat.id}
                 type="button"
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`flex-1 min-w-[48px] shrink-0 sm:shrink flex flex-col items-center justify-center py-2 px-0.5 rounded-xl text-center transition-all duration-150 cursor-pointer border ${
-                  active
-                    ? 'bg-gradient-to-b from-[#064E3B] to-[#047857] text-white font-black border-amber-400 shadow-sm scale-[1.02]'
-                    : 'bg-slate-50 dark:bg-slate-900/60 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700 hover:bg-emerald-50/60'
-                }`}
+                onClick={() => {
+                  (window as any).__kft_admin_tab = 'food';
+                  (window as any).__kft_admin_open_add_food = true;
+                  setIsAdminOpen(true);
+                }}
+                className="h-9 px-3 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-extrabold inline-flex items-center gap-1 shadow-xs active:scale-95 transition cursor-pointer"
               >
-                <span className="mb-1 flex items-center justify-center shrink-0">{cat.icon}</span>
-                <span className="text-[10px] sm:text-[11px] font-bold leading-tight truncate w-full px-0.5">
-                  {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
-                </span>
+                <Plus className="w-3.5 h-3.5" />
+                <span>{tr(language, 'បន្ថែម', 'Add', '添加')}</span>
               </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Dish tag filter (estimated from the recipe — VIP-only for healthy tags) */}
-      <div className="space-y-2 font-khmer">
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-xs sm:text-sm font-bold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
-            <IconHealthyLeaf className="w-4 h-4 shrink-0" />
-            <span>{canUseVip ? tr(language, 'ស្លាកប្រភេទម្ហូបសុខភាព និងពិសេស៖', 'Healthy & Special Dish Tags:', '健康与特色菜品标签：') : tr(language, 'ស្លាកប្រភេទម្ហូបពិសេស (VIP)៖', 'Special Dish Tags (VIP):', '特色菜品标签 (VIP)：')}</span>
-            {!canUseVip && (
-              <span className="px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-extrabold inline-flex items-center gap-0.5">
-                <Lock className="w-2.5 h-2.5" />
-                <span>VIP</span>
-              </span>
             )}
-          </span>
-          {!canUseVip && (
+
+            {/* Small Dark-Gold [👑 VIP] Pill Button on Right Side */}
             <button
               type="button"
               onClick={() => openUpgradeVipModal()}
-              className="px-3 py-1 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold inline-flex items-center gap-1 shadow-2xs active:scale-95 transition cursor-pointer"
+              style={{
+                background: 'linear-gradient(180deg, #3A3222 0%, #231E14 100%)',
+                boxShadow: '0 3px 10px rgba(212, 175, 55, 0.25)',
+              }}
+              className="h-9 px-4 rounded-full border-2 border-[#D4AF37] text-[#FBBF24] font-extrabold text-sm inline-flex items-center gap-1.5 active:scale-95 transition cursor-pointer shrink-0"
+              title={tr(language, 'សមាជិកពិសេស VIP', 'VIP Membership', 'VIP 会员')}
             >
-              <Crown className="w-3.5 h-3.5" />
-              <span>{tr(language, 'ដំឡើង VIP', 'Upgrade VIP', '升级 VIP')}</span>
+              <Crown className="w-4 h-4 fill-[#FBBF24] text-[#FBBF24] shrink-0" />
+              <span>VIP</span>
             </button>
-          )}
+          </div>
         </div>
-        <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
-          {TAG_FILTERS.map((t) => {
-            const active = tagFilter === t.id;
-            const isLockedTag = !canUseVip && t.id !== 'all';
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => {
-                  if (isLockedTag) {
-                    showToast(
-                      tr(
-                        language,
-                        'មុខងារស្លាកប្រភេទម្ហូបពិសេសសម្រាប់គណនី VIP • សូមដំឡើង VIP!',
-                        'Special Dish Tags are for VIP accounts — please upgrade to VIP!',
-                        '特色菜品标签仅限 VIP 账户，请先升级 VIP！'
-                      ),
-                      'info'
-                    );
-                    openUpgradeVipModal();
-                    return;
+
+        {/* Main Content Container */}
+        <div className="px-3.5 pt-3 space-y-3">
+          {/* 6 Square Illustrated Category Cards */}
+          <div className="grid grid-cols-6 gap-1.5 sm:gap-2">
+            {categories.map((cat) => {
+              const active = selectedCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat.id)}
+                  style={
+                    active
+                      ? {
+                          background: 'linear-gradient(180deg, #43A067 0%, #1E5E3A 100%)',
+                          boxShadow: '0 4px 10px rgba(30, 94, 58, 0.28)',
+                        }
+                      : undefined
                   }
-                  setTagFilter(t.id);
-                }}
-                aria-pressed={active}
-                className={`shrink-0 min-h-[40px] px-3.5 rounded-full text-xs sm:text-sm font-bold border transition cursor-pointer inline-flex items-center gap-1.5 ${
-                  active
-                    ? 'bg-[#064E3B] text-white border-[#064E3B]'
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600'
-                }`}
-              >
-                {t.id === 'all' ? (
-                  <IconDishCategory className="w-3.5 h-3.5 shrink-0" />
-                ) : (
-                  <DishTagIcon id={t.id as DishTagId} className="w-3.5 h-3.5 shrink-0" />
-                )}
-                <span>{tr(language, t.labelKh, t.labelEn, t.labelZh)}</span>
-                {isLockedTag && (
-                  <span className="px-1.5 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-extrabold inline-flex items-center gap-0.5">
-                    <Lock className="w-2.5 h-2.5" />
-                    VIP
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Province filter with ONE reset button */}
-      <div className="grid grid-cols-1 gap-2 font-khmer">
-        <label className="block">
-          <span className="flex items-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
-            <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            <span>{tr(language, 'ខេត្ត', 'Province', '省份')}</span>
-          </span>
-          <select
-            value={provinceFilter}
-            onChange={(e) => setProvinceFilter(e.target.value)}
-            className="w-full min-h-[44px] px-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-900 dark:text-white"
-          >
-            <option value="">{tr(language, 'គ្រប់ខេត្ត', 'All provinces', '全部省份')}</option>
-            {provinceOptions.map((p) => (
-              <option key={p.id} value={p.id}>
-                {tr(language, p.kh, p.en, p.zh)} ({p.count})
-              </option>
-            ))}
-          </select>
-        </label>
-        {hasActiveFilters && (
-          <button
-            type="button"
-            onClick={resetAllFilters}
-            className="min-h-[44px] rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold active:scale-[0.98] transition cursor-pointer"
-          >
-            ↺ {tr(language, 'កំណត់តម្រងឡើងវិញ', 'Reset filters', '重置筛选')}
-          </button>
-        )}
-      </div>
-
-      {filteredFoods.length === 0 ? (
-        <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 space-y-2 font-khmer shadow-xs">
-          <Utensils className="w-8 h-8 mx-auto text-slate-300" />
-          <p className="text-sm text-slate-600 dark:text-slate-300 font-semibold">
-            {tr(language, 'មិនមានមុខម្ហូបក្នុងផ្នែកនេះទេ', 'No matching dishes found', '未找到匹配的菜品')}
-          </p>
-          <p className="text-xs text-slate-400">
-            {tr(language, 'សូមប្រើប៊ូតុង «កំណត់តម្រងឡើងវិញ» ខាងលើ', 'Use the "Reset filters" button above', '请使用上方“重置筛选”按钮')}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {groupedDisplayedSections.map((section) => {
-            return (
-              <div key={section.meta.id} className="space-y-3">
-                {/* Category Section Banner Header */}
-                <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-gradient-to-r from-[#064E3B] via-[#047857] to-emerald-700 text-white shadow-sm border border-emerald-400/30 font-khmer">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0 border border-white/20">
-                      {section.meta.id === 'vegetarian' ? (
-                        <IconHealthyLeaf className="w-5 h-5 text-emerald-200" />
-                      ) : section.meta.id === 'samlor' ? (
-                        <IconKhmerFoodBowl className="w-5 h-5" />
-                      ) : section.meta.id === 'cha' ? (
-                        <IconGrillFlame className="w-5 h-5" />
-                      ) : section.meta.id === 'sngor' ? (
-                        <Soup className="w-5 h-5 text-emerald-200" />
-                      ) : (
-                        <Award className="w-5 h-5 text-amber-300" />
-                      )}
-                    </div>
-                    <h3 className="font-moul text-sm sm:text-base text-white truncate">
-                      {tr(language, section.meta.nameKh.replace(/^[០-៩0-9]+\.\s*/, ''), section.meta.nameEn.replace(/^[0-9]+\.\s*/, ''), section.meta.titleZh || section.meta.nameEn)}
-                    </h3>
+                  className={`rounded-2xl py-2 px-1 flex flex-col items-center justify-between gap-1.5 transition active:scale-95 cursor-pointer border ${
+                    active
+                      ? 'text-white border-[#2E7D4F]'
+                      : 'bg-[#FAF9F5] text-[#0F172A] border-slate-200/90 hover:border-emerald-500/50 shadow-2xs'
+                  }`}
+                >
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden border border-black/10 bg-white shadow-2xs shrink-0">
+                    <img
+                      src={cat.thumb}
+                      alt={cat.nameKh}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                </div>
+                  <span
+                    className={`font-khmer font-extrabold text-[11px] sm:text-xs leading-tight text-center truncate w-full ${
+                      active ? 'text-white' : 'text-[#0F172A]'
+                    }`}
+                  >
+                    {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
-                {/* Dishes in this category */}
-                <div className="grid grid-cols-1 gap-4">
-                  {section.items.map((food) => (
-                    <FoodCard key={food.id} food={food} />
-                  ))}
+          {/* Meal-Time Filter Pills Row: 📍 ទាំងអស់ | 🍴 ពេលព្រឹក | ☀️ ពេលថ្ងៃ | 🌙 ពេលល្ងាច */}
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              {
+                id: 'all' as MealTimeFilter,
+                labelKh: 'ទាំងអស់',
+                labelEn: 'All',
+                labelZh: '全部',
+                renderIcon: (active: boolean) => (
+                  <MapPin className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-emerald-300' : 'text-[#235D3A]'}`} />
+                ),
+              },
+              {
+                id: 'breakfast' as MealTimeFilter,
+                labelKh: 'ពេលព្រឹក',
+                labelEn: 'Morning',
+                labelZh: '早餐',
+                renderIcon: (active: boolean) => (
+                  <Utensils className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-300' : 'text-[#235D3A]'}`} />
+                ),
+              },
+              {
+                id: 'lunch' as MealTimeFilter,
+                labelKh: 'ពេលថ្ងៃ',
+                labelEn: 'Midday',
+                labelZh: '午餐',
+                renderIcon: (active: boolean) => (
+                  <Sun className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-300' : 'text-amber-500'}`} />
+                ),
+              },
+              {
+                id: 'dinner' as MealTimeFilter,
+                labelKh: 'ពេលល្ងាច',
+                labelEn: 'Evening',
+                labelZh: '晚餐',
+                renderIcon: (active: boolean) => (
+                  <Moon className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-amber-200' : 'text-indigo-600'}`} />
+                ),
+              },
+            ].map((m) => {
+              const active = mealTimeFilter === m.id;
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => setMealTimeFilter(m.id)}
+                  className={`h-9 px-2 rounded-full text-xs font-extrabold flex items-center justify-center gap-1.5 border transition active:scale-95 cursor-pointer ${
+                    active
+                      ? 'bg-[#235D3A] text-white border-[#235D3A] shadow-xs'
+                      : 'bg-white text-[#1E293B] border-slate-200/90 hover:border-emerald-600/40 shadow-2xs'
+                  }`}
+                >
+                  {m.renderIcon(active)}
+                  <span className="truncate">{tr(language, m.labelKh, m.labelEn, m.labelZh)}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Search Bar + Green Circular Filter Button Row */}
+          <div className="flex items-center gap-2.5">
+            <div className="flex-1 h-11 rounded-full bg-white border border-slate-200/90 shadow-2xs px-4 flex items-center gap-2.5">
+              <Search className="w-4 h-4 text-slate-700 shrink-0" />
+              <input
+                type="text"
+                value={foodSearchQuery}
+                onChange={(e) => setFoodSearchQuery(e.target.value)}
+                placeholder={tr(language, 'ស្វែងរកម្ហូប...', 'Search dishes...', '搜索高棉美食...')}
+                className="w-full bg-transparent text-xs sm:text-sm font-khmer font-semibold text-slate-800 placeholder-slate-500 focus:outline-none"
+              />
+              {foodSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setFoodSearchQuery('')}
+                  className="p-0.5 text-slate-400 hover:text-slate-700 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowFilterDrawer((v) => !v)}
+              title={tr(language, 'តម្រងខេត្ត និងសុខភាព', 'Province & Healthy Filters', '省份与健康筛选')}
+              className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 shadow-xs transition active:scale-95 cursor-pointer ${
+                showFilterDrawer || provinceFilter !== '' || tagFilter !== 'all'
+                  ? 'bg-amber-500 text-slate-950'
+                  : 'bg-[#235D3A] hover:bg-[#1B4B2E] text-white'
+              }`}
+            >
+              <Filter className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Expandable Province & Healthy Tags Filter Drawer */}
+          {(showFilterDrawer || provinceFilter !== '' || tagFilter !== 'all') && (
+            <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
+              {/* Healthy Dish Tag Chips */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-extrabold text-slate-800">
+                    {tr(language, 'តម្រងម្ហូបសុខភាព៖', 'Healthy Tags:', '健康营养筛选：')}
+                  </span>
+                  {hasActiveFilters && (
+                    <button
+                      type="button"
+                      onClick={resetAllFilters}
+                      className="text-xs font-bold text-rose-600 hover:underline cursor-pointer"
+                    >
+                      ↺ {tr(language, 'កំណត់ឡើងវិញ', 'Reset', '重置')}
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                  {TAG_FILTERS.map((t) => {
+                    const active = tagFilter === t.id;
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => setTagFilter(t.id)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center gap-1.5 border transition cursor-pointer ${
+                          active
+                            ? 'bg-[#235D3A] text-white border-[#235D3A]'
+                            : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-emerald-500'
+                        }`}
+                      >
+                        {t.id !== 'all' && <DishTagIcon id={t.id as DishTagId} className="w-3.5 h-3.5 shrink-0" />}
+                        <span>{tr(language, t.kh, t.en, t.zh)}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-            );
-          })}
 
-          {visibleCount < filteredFoods.length && (
-            <div ref={loadMoreTriggerRef} className="pt-2 flex justify-center">
+              {/* Province Select */}
+              <div className="space-y-1">
+                <label className="text-xs font-extrabold text-slate-800 flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-[#235D3A]" />
+                  <span>{tr(language, 'ជ្រើសរើសខេត្ត/តំបន់៖', 'Filter by Province:', '按省份筛选：')}</span>
+                </label>
+                <select
+                  value={provinceFilter}
+                  onChange={(e) => setProvinceFilter(e.target.value)}
+                  className="w-full h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                >
+                  <option value="">{tr(language, 'គ្រប់ខេត្តទាំងអស់', 'All Provinces', '全部省份')}</option>
+                  {provinceOptions.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {tr(language, p.kh, p.en, p.zh)} ({p.count})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Dish Cards List */}
+          {filteredFoods.length === 0 ? (
+            <div className="p-8 text-center bg-white rounded-3xl border border-slate-200 space-y-2 shadow-2xs">
+              <Utensils className="w-8 h-8 mx-auto text-slate-400" />
+              <p className="text-sm text-slate-700 font-bold">
+                {tr(language, 'មិនមានមុខម្ហូបក្នុងផ្នែកនេះទេ', 'No matching dishes found', '未找到匹配的菜品')}
+              </p>
               <button
                 type="button"
-                onClick={() => setVisibleCount((prev) => Math.min(filteredFoods.length, prev + PAGE_BATCH_SIZE))}
-                className="px-5 py-3 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-sm font-bold shadow-sm font-khmer cursor-pointer transition"
+                onClick={resetAllFilters}
+                className="px-4 py-2 rounded-full bg-[#235D3A] text-white text-xs font-bold cursor-pointer"
               >
-                {tr(
-                  language,
-                  `បង្ហាញមុខម្ហូបបន្ថែម (${displayedFoods.length} / ${filteredFoods.length})`,
-                  `Show More Dishes (${displayedFoods.length} / ${filteredFoods.length})`,
-                  `加载更多菜品 (${displayedFoods.length} / ${filteredFoods.length})`
-                )}
+                ↺ {tr(language, 'បង្ហាញមុខម្ហូបទាំងអស់ឡើងវិញ', 'Show All Dishes', '显示全部菜品')}
               </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {displayedFoods.map((food) => (
+                <FoodCard key={food.id} food={food} />
+              ))}
+
+              {visibleCount < filteredFoods.length && (
+                <div ref={loadMoreTriggerRef} className="pt-2 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setVisibleCount((prev) => Math.min(filteredFoods.length, prev + PAGE_BATCH_SIZE))}
+                    className="px-5 py-2.5 rounded-full bg-[#235D3A] hover:bg-[#1B4B2E] text-white text-xs font-bold shadow-xs cursor-pointer transition"
+                  >
+                    {tr(
+                      language,
+                      `បង្ហាញមុខម្ហូបបន្ថែម (${displayedFoods.length} / ${filteredFoods.length})`,
+                      `Show More Dishes (${displayedFoods.length} / ${filteredFoods.length})`,
+                      `加载更多菜品 (${displayedFoods.length} / ${filteredFoods.length})`
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
