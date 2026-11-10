@@ -214,7 +214,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
           className="bg-white rounded-[22px] p-2.5 border border-slate-200/85 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:border-emerald-500/60 transition flex gap-3 items-stretch cursor-pointer font-khmer"
         >
           {/* Left Photo Box with Distance Pill & Heart Button */}
-          <div className="w-[146px] sm:w-[158px] min-h-[132px] rounded-2xl overflow-hidden relative shrink-0 bg-slate-100">
+          <div className="w-[120px] min-[360px]:w-[146px] sm:w-[158px] min-h-[132px] rounded-2xl overflow-hidden relative shrink-0 bg-slate-100">
             <ShopAvatar
               restaurant={avatarRestaurant}
               allRestaurants={allRestaurants}
@@ -308,7 +308,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
                 style={{
                   background: 'linear-gradient(180deg, #1E7E48 0%, #0D522C 100%)',
                 }}
-                className="h-9 px-2.5 rounded-xl text-white font-extrabold text-xs inline-flex items-center justify-center gap-1.5 shadow-xs active:scale-95 transition cursor-pointer"
+                className="min-h-[40px] px-2.5 py-1 rounded-xl text-white font-extrabold text-xs inline-flex items-center justify-center gap-1.5 shadow-xs active:scale-95 transition cursor-pointer"
               >
                 <Phone className="w-3.5 h-3.5 text-white fill-white shrink-0" />
                 <span className="truncate">{tr(language, 'ទូរស័ព្ទ', 'Call', '电话')}</span>
@@ -317,7 +317,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
               <button
                 type="button"
                 onClick={handleOpenMapClick}
-                className="h-9 px-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-extrabold text-xs inline-flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 transition cursor-pointer"
+                className="min-h-[40px] px-2.5 py-1 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-extrabold text-xs inline-flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 transition cursor-pointer"
               >
                 <MapPin className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.3} />
                 <span className="truncate">{tr(language, 'ផែនទី', 'Map', '地图')}</span>

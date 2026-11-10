@@ -35,7 +35,7 @@ const FoodCardView = React.memo<FoodCardViewProps>(
         className="kft-cv-card bg-white rounded-[22px] p-2.5 border border-slate-200/80 hover:border-emerald-600/40 hover:shadow-md transition-all cursor-pointer group flex items-center gap-3.5 font-khmer"
       >
         {/* Left Dish Image Container */}
-        <div className="relative w-[138px] sm:w-[154px] h-[118px] sm:h-[128px] rounded-[16px] overflow-hidden bg-slate-200 shrink-0">
+        <div className="relative w-[118px] min-[360px]:w-[138px] sm:w-[154px] h-[118px] sm:h-[128px] rounded-[16px] overflow-hidden bg-slate-200 shrink-0">
           <img
             src={resolvedPhotoUrl}
             onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
@@ -89,7 +89,7 @@ const FoodCardView = React.memo<FoodCardViewProps>(
         {/* Right Content Column */}
         <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
           <div>
-            <h3 className="font-khmer font-extrabold text-[15.5px] sm:text-[16.5px] text-[#0F172A] group-hover:text-[#1B5E3A] transition leading-snug line-clamp-1">
+            <h3 className="font-khmer font-extrabold text-[15.5px] sm:text-[16.5px] text-[#0F172A] group-hover:text-[#1B5E3A] transition leading-[1.65] py-0.5 line-clamp-2">
               {loc.name}
             </h3>
             {loc.description && (

@@ -5,10 +5,9 @@ import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
 import {
   FoodItem,
   organizeAndDeduplicateFoods,
-  resolveFoodPhotoUrl,
 } from '../types';
 import { Utensils, Crown, MapPin, Plus, Search, Filter, X } from 'lucide-react';
-import { DISH_PROVINCES, detectDishProvince } from '../utils/foodFilters';
+import { DISH_PROVINCES, doesDishBelongToProvince } from '../utils/foodFilters';
 import { TAG_FILTERS, matchesTagFilter, TagFilterId, DishTagId } from '../utils/dishTags';
 import { TAG_FILTER_EVENT, consumePendingTagFilter, hasSpecialAndHealthyFoodVipAccess } from '../utils/smartHub';
 import { tr } from '../utils/i18n';
@@ -26,7 +25,6 @@ export const FoodView: React.FC = () => {
     currentUser,
     openUpgradeVipModal,
     setIsAdminOpen,
-    setSelectedFood,
   } = useApp();
   const isAdmin = Boolean(
     currentUser?.role === 'admin' ||
@@ -81,67 +79,26 @@ export const FoodView: React.FC = () => {
   }, [selectedCategory, mealTimeFilter, foodSearchQuery, provinceFilter, tagFilter]);
 
   const organizedFoods = useMemo(() => organizeAndDeduplicateFoods(foods), [foods]);
-
-  // 4 Full-Image Food Category Cards:
-  // 1. គ្រប់មុខម្ហូប (All Dishes)
-  // 2. សម្ល (Soups & Curries)
-  // 3. អាំង/ចៀន (Grilled & Fried)
-  // 4. បង្អែម/ភេសជ្ជៈ (Desserts & Beverages)
-  const categories = useMemo(
-    () => [
-      {
-        id: 'all',
-        nameKh: 'គ្រប់មុខម្ហូប',
-        nameEn: 'All Dishes',
-        nameZh: '全部美食',
-        thumb: '/foods/food-1.jpg',
-        overlayBg: 'linear-gradient(180deg, rgba(22, 101, 52, 0.88) 0%, rgba(6, 78, 59, 0.96) 100%)',
-      },
-      {
-        id: 'samlor',
-        nameKh: 'សម្ល',
-        nameEn: 'Soups & Curries',
-        nameZh: '高棉汤羹',
-        thumb: '/foods/food-2.jpg',
-        overlayBg: 'linear-gradient(180deg, rgba(180, 83, 9, 0.88) 0%, rgba(120, 53, 15, 0.96) 100%)',
-      },
-      {
-        id: 'cha',
-        nameKh: 'អាំង/ចៀន',
-        nameEn: 'Grilled & Fried',
-        nameZh: '烧烤/煎炸',
-        thumb: '/foods/food-21.jpg',
-        overlayBg: 'linear-gradient(180deg, rgba(185, 28, 28, 0.88) 0%, rgba(127, 29, 29, 0.96) 100%)',
-      },
-      {
-        id: 'bong_aem',
-        nameKh: 'បង្អែម/ភេសជ្ជៈ',
-        nameEn: 'Desserts & Drinks',
-        nameZh: '甜品/饮品',
-        thumb: '/foods/food-48.jpg',
-        overlayBg: 'linear-gradient(180deg, rgba(109, 40, 217, 0.88) 0%, rgba(76, 29, 149, 0.96) 100%)',
-      },
-    ],
-    []
-  );
-
   const provinceOptions = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const f of organizedFoods) {
-      const p = detectDishProvince(f);
-      if (p) counts.set(p, (counts.get(p) || 0) + 1);
-    }
-    return DISH_PROVINCES.filter((p) => (counts.get(p.id) || 0) > 0).map((p) => ({
-      ...p,
-      count: counts.get(p.id) || 0,
-    }));
+    return DISH_PROVINCES.map((p) => {
+      let count = 0;
+      for (const f of organizedFoods) {
+        if (doesDishBelongToProvince(f, p.id)) {
+          count += 1;
+        }
+      }
+      return {
+        ...p,
+        count,
+      };
+    });
   }, [organizedFoods]);
 
   const filteredFoods = useMemo(() => {
     const q = foodSearchQuery.trim().toLowerCase();
     const matched = organizedFoods.filter((food) => {
       if (!matchesFoodScreenCategoryTab(food, selectedCategory)) return false;
-      if (provinceFilter && detectDishProvince(food) !== provinceFilter) return false;
+      if (provinceFilter && !doesDishBelongToProvince(food, provinceFilter)) return false;
       if (!matchesTagFilter(food, tagFilter)) return false;
       if (q) {
         const hay = [
@@ -203,20 +160,6 @@ export const FoodView: React.FC = () => {
     () => filteredFoods.slice(0, visibleCount),
     [filteredFoods, visibleCount]
   );
-
-  // Top 4 showcase cards below the 4 colored buttons:
-  // When 'all' is selected, show the 4 category showcase cards.
-  // When a specific category ('samlor', 'cha', 'bong_aem') is selected, immediately show the top 4 matching dishes from that category!
-  const activeOverlayBg = useMemo(() => {
-    const found = categories.find((c) => c.id === selectedCategory);
-    return found?.overlayBg || 'linear-gradient(180deg, rgba(22, 101, 52, 0.88) 0%, rgba(6, 78, 59, 0.96) 100%)';
-  }, [categories, selectedCategory]);
-
-  const showcaseDishesForSelectedCategory = useMemo(() => {
-    if (selectedCategory === 'all') return [];
-    return filteredFoods.slice(0, 4);
-  }, [selectedCategory, filteredFoods]);
-
   const hasActiveFilters =
     selectedCategory !== 'all' ||
     mealTimeFilter !== 'all' ||
@@ -353,7 +296,7 @@ export const FoodView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-[#F8FAFC] text-[#1E293B] min-h-full font-khmer pb-8">
+    <div className="max-w-md mx-auto bg-[#1E293B] text-[#1E293B] min-h-full font-khmer pb-8">
       {/* 1. Header – Angkor Wat Hero Background */}
       <AngkorHeroTopHeader mode="food" foodCount={filteredFoods.length} />
 
@@ -532,7 +475,7 @@ export const FoodView: React.FC = () => {
                     ? '0 8px 18px rgba(217, 119, 6, 0.45), 0 0 0 2.5px #22C55E, inset 0 1.5px 1px rgba(255, 255, 255, 0.8)'
                     : '0 6px 14px rgba(217, 119, 6, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
               }}
-              className={`relative h-[78px] sm:h-[84px] rounded-[20px] flex flex-col items-center justify-center gap-1.5 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
+              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1.5 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
                 selectedCategory === 'all' ? 'border-white' : 'border-amber-200/70 opacity-95 hover:opacity-100'
               }`}
             >
@@ -544,7 +487,7 @@ export const FoodView: React.FC = () => {
               />
               {renderCategoryIcon('all', 'w-7 h-7 drop-shadow-xs')}
               <span
-                className="font-khmer font-extrabold text-[10.5px] sm:text-[11.5px] leading-tight tracking-tight px-1 truncate max-w-full"
+                className="font-khmer font-extrabold text-[10.5px] sm:text-[11.5px] leading-[1.6] tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full"
                 style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
                 {tr(language, 'គ្រប់មុខម្ហូប', 'All Dishes', '全部美食')}
@@ -563,7 +506,7 @@ export const FoodView: React.FC = () => {
                     ? '0 8px 18px rgba(29, 78, 216, 0.45), 0 0 0 2.5px #22C55E, inset 0 1.5px 1px rgba(255, 255, 255, 0.8)'
                     : '0 6px 14px rgba(29, 78, 216, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
               }}
-              className={`relative h-[78px] sm:h-[84px] rounded-[20px] flex flex-col items-center justify-center gap-1.5 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
+              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1.5 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
                 selectedCategory === 'samlor' ? 'border-white' : 'border-blue-200/70 opacity-95 hover:opacity-100'
               }`}
             >
@@ -575,7 +518,7 @@ export const FoodView: React.FC = () => {
               />
               {renderCategoryIcon('samlor', 'w-7 h-7 drop-shadow-xs')}
               <span
-                className="font-khmer font-extrabold text-[11.5px] sm:text-[12px] leading-tight tracking-tight px-1 truncate max-w-full"
+                className="font-khmer font-extrabold text-[11.5px] sm:text-[12px] leading-[1.6] tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full"
                 style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
                 {tr(language, 'សម្ល', 'Soups & Curries', '高棉汤羹')}
@@ -594,7 +537,7 @@ export const FoodView: React.FC = () => {
                     ? '0 8px 18px rgba(21, 128, 61, 0.45), 0 0 0 2.5px #F59E0B, inset 0 1.5px 1px rgba(255, 255, 255, 0.8)'
                     : '0 6px 14px rgba(21, 128, 61, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
               }}
-              className={`relative h-[78px] sm:h-[84px] rounded-[20px] flex flex-col items-center justify-center gap-1.5 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
+              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1.5 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
                 selectedCategory === 'cha' ? 'border-white' : 'border-emerald-200/70 opacity-95 hover:opacity-100'
               }`}
             >
@@ -606,7 +549,7 @@ export const FoodView: React.FC = () => {
               />
               {renderCategoryIcon('cha', 'w-7 h-7 drop-shadow-xs')}
               <span
-                className="font-khmer font-extrabold text-[11px] sm:text-[11.5px] leading-tight tracking-tight px-1 truncate max-w-full"
+                className="font-khmer font-extrabold text-[11px] sm:text-[11.5px] leading-[1.6] tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full"
                 style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
                 {tr(language, 'អាំង/ចៀន', 'Grilled & Fried', '烧烤/煎炸')}
@@ -625,7 +568,7 @@ export const FoodView: React.FC = () => {
                     ? '0 8px 18px rgba(107, 33, 168, 0.45), 0 0 0 2.5px #22C55E, inset 0 1.5px 1px rgba(255, 255, 255, 0.8)'
                     : '0 6px 14px rgba(107, 33, 168, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
               }}
-              className={`relative h-[78px] sm:h-[84px] rounded-[20px] flex flex-col items-center justify-center gap-1.5 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
+              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1.5 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
                 selectedCategory === 'bong_aem' ? 'border-white' : 'border-purple-200/70 opacity-95 hover:opacity-100'
               }`}
             >
@@ -637,7 +580,7 @@ export const FoodView: React.FC = () => {
               />
               {renderCategoryIcon('bong_aem', 'w-7 h-7 drop-shadow-xs')}
               <span
-                className="font-khmer font-extrabold text-[10px] sm:text-[11px] leading-tight tracking-tight px-1 truncate max-w-full"
+                className="font-khmer font-extrabold text-[10px] sm:text-[11px] leading-[1.6] tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full"
                 style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
                 {tr(language, 'បង្អែម/ភេសជ្ជៈ', 'Desserts & Drinks', '甜品/饮品')}
@@ -645,100 +588,6 @@ export const FoodView: React.FC = () => {
             </button>
           </div>
         </div>
-
-        {/* 4. Four Full-Image Cards Row – Shows 4 Categories in 'all' mode, or Top 4 Matching Dishes when a category is selected */}
-        <div className="grid grid-cols-4 gap-2">
-          {selectedCategory === 'all'
-            ? categories.map((cat) => {
-                const active = selectedCategory === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setSelectedCategory(cat.id)}
-                    style={{
-                      boxShadow: active
-                        ? '0 6px 16px rgba(34, 197, 94, 0.34), 0 0 0 1px rgba(34, 197, 94, 0.45)'
-                        : '0 4px 12px rgba(15, 23, 42, 0.08)',
-                    }}
-                    className={`group relative h-[86px] sm:h-[94px] rounded-[18px] overflow-hidden transition active:scale-95 cursor-pointer border-[2.5px] ${
-                      active
-                        ? 'border-[#22C55E]'
-                        : 'border-white hover:border-[#22C55E]/60'
-                    }`}
-                  >
-                    <img
-                      src={cat.thumb}
-                      alt={cat.nameKh}
-                      loading="lazy"
-                      decoding="async"
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                    />
-                    <div
-                      style={{
-                        background: cat.overlayBg,
-                        backdropFilter: 'blur(4px)',
-                        WebkitBackdropFilter: 'blur(4px)',
-                      }}
-                      className="absolute inset-x-0 bottom-0 pt-2 pb-1.5 px-1 rounded-t-[46%] border-t border-white/45 flex items-center justify-center gap-1 text-white"
-                    >
-                      {renderCategoryIcon(cat.id)}
-                      <span
-                        style={{
-                          fontSize: cat.id === 'bong_aem' || cat.id === 'all' ? '9.5px' : '10.5px',
-                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
-                        }}
-                        className="font-khmer font-extrabold leading-tight truncate text-white"
-                      >
-                        {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })
-            : showcaseDishesForSelectedCategory.map((dish) => {
-                const thumbUrl = resolveFoodPhotoUrl(dish.photoUrl, dish.photoUpdatedAt, 320, dish.id);
-                return (
-                  <button
-                    key={dish.id}
-                    type="button"
-                    onClick={() => setSelectedFood(dish)}
-                    style={{
-                      boxShadow: '0 5px 14px rgba(15, 23, 42, 0.1)',
-                    }}
-                    className="group relative h-[86px] sm:h-[94px] rounded-[18px] overflow-hidden transition active:scale-95 cursor-pointer border-[2px] border-[#22C55E]/85 hover:border-[#22C55E]"
-                  >
-                    <img
-                      src={thumbUrl}
-                      alt={dish.nameKh}
-                      loading="lazy"
-                      decoding="async"
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                    />
-                    <div
-                      style={{
-                        background: activeOverlayBg,
-                        backdropFilter: 'blur(4px)',
-                        WebkitBackdropFilter: 'blur(4px)',
-                      }}
-                      className="absolute inset-x-0 bottom-0 pt-2 pb-1.5 px-1.5 rounded-t-[42%] border-t border-white/45 flex items-center justify-center gap-1 text-white"
-                    >
-                      {renderCategoryIcon(selectedCategory, 'w-3 h-3')}
-                      <span
-                        style={{
-                          fontSize: '9.5px',
-                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.55)',
-                        }}
-                        className="font-khmer font-extrabold leading-tight truncate text-white"
-                      >
-                        {tr(language, dish.nameKh, dish.nameEn, dish.nameZh || dish.nameEn)}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-        </div>
-
         <div ref={dishListStartRef} />
 
         {/* Collapsible Filter Drawer (Province + Dietary Tags + Admin Add Dish) */}
@@ -851,13 +700,13 @@ export const FoodView: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {displayedFoods.map((food) => (
               <FoodCard key={food.id} food={food} />
             ))}
 
             {visibleCount < filteredFoods.length && (
-              <div ref={loadMoreTriggerRef} className="pt-2 flex justify-center">
+              <div ref={loadMoreTriggerRef} className="col-span-full pt-2 flex justify-center">
                 <button
                   type="button"
                   onClick={() => setVisibleCount((prev) => Math.min(filteredFoods.length, prev + PAGE_BATCH_SIZE))}

@@ -24,9 +24,9 @@ const SupportModal = lazy(() => import('./components/SupportModal').then((m) => 
 import { ExitConfirmModal } from './components/ExitConfirmModal';
 import { DeleteShopConfirmModal } from './components/DeleteShopConfirmModal';
 import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
-const WhatToEatModal = lazy(() => import('./components/WhatToEatModal').then((m) => ({ default: m.WhatToEatModal })));
+import { WhatToEatModal } from './components/WhatToEatModal';
 const NearMeModal = lazy(() => import('./components/NearMeModal').then((m) => ({ default: m.NearMeModal })));
-const DailyDiscoveriesModal = lazy(() => import('./components/DailyDiscoveriesModal').then((m) => ({ default: m.DailyDiscoveriesModal })));
+import { DailyDiscoveriesModal } from './components/DailyDiscoveriesModal';
 const WishlistsModal = lazy(() => import('./components/WishlistsModal').then((m) => ({ default: m.WishlistsModal })));
 const AiTripPlannerModal = lazy(() => import('./components/AiTripPlannerModal').then((m) => ({ default: m.AiTripPlannerModal })));
 const NotificationsModal = lazy(() => import('./components/NotificationsModal').then((m) => ({ default: m.NotificationsModal })));
@@ -221,7 +221,7 @@ const MainScreen: React.FC = () => {
         id="kft-main-scroll"
         ref={mainScrollRef}
         className={`flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden overscroll-y-contain no-scrollbar relative ${
-          activeTab === 'home' || activeTab === 'food' || activeTab === 'restaurants' || activeTab === 'hotels' ? 'bg-[#F3F5F3] text-slate-900' : 'dark bg-[#0F172A] text-[#F8FAFC]'
+          activeTab === 'food' ? 'bg-[#1E293B] text-slate-900' : activeTab === 'home' || activeTab === 'restaurants' || activeTab === 'hotels' ? 'bg-[#F3F5F3] text-slate-900' : 'dark bg-[#0F172A] text-[#F8FAFC]'
         }`}
       >
         <Suspense

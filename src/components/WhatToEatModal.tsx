@@ -289,6 +289,14 @@ const AccessBadge: React.FC<{ vip: boolean; className?: string }> = ({ vip, clas
   </span>
 );
 
+interface PersistedAiSessionState {
+  messages: AiAssistantMessage[];
+  memory: AiConversationMemory;
+  lastInput: string;
+}
+
+const aiSessionByUserMap = new Map<string, PersistedAiSessionState>();
+
 export const WhatToEatModal: React.FC = () => {
   const {
     isWhatToEatModalOpen,
@@ -343,8 +351,13 @@ export const WhatToEatModal: React.FC = () => {
   const canUseAiAssistant = true;
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  const userSessionKey = useMemo(
+    () => String(currentUser?.id || currentUser?.email || currentUser?.username || 'guest'),
+    [currentUser?.id, currentUser?.email, currentUser?.username]
+  );
+
   // Filters: Conversational Input, Category, Meal Time, Dietary / Health Style
-  const [cravingQuery, setCravingQuery] = useState<string>('');
+  const [cravingQuery, setCravingQuery] = useState<string>(() => aiSessionByUserMap.get(userSessionKey)?.lastInput || '');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [mealSlotFilter, setMealSlotFilter] = useState<MealSlotFilter>('auto');
   const [vipDietFilter, setVipDietFilter] = useState<VipDietFilter>('none');
@@ -360,16 +373,60 @@ export const WhatToEatModal: React.FC = () => {
   const [setPage, setSetPage] = useState(0);
   const [drinkShuffleSeed, setDrinkShuffleSeed] = useState<number>(() => Date.now());
 
-  // Multi-turn Conversational AI State
-  const [chatMessages, setChatMessages] = useState<AiAssistantMessage[]>([]);
-  const [chatMemory, setChatMemory] = useState<AiConversationMemory>({
-    lastDishes: [],
-    lastRestaurants: [],
-    lastDestinations: [],
-    activeProvinceKh: '',
-    lastQuery: '',
-    turnSeed: 1,
-  });
+  // Multi-turn Conversational AI State (preserved per user account session)
+  const [chatMessages, setChatMessages] = useState<AiAssistantMessage[]>(
+    () => aiSessionByUserMap.get(userSessionKey)?.messages || []
+  );
+  const [chatMemory, setChatMemory] = useState<AiConversationMemory>(
+    () =>
+      aiSessionByUserMap.get(userSessionKey)?.memory || {
+        lastDishes: [],
+        lastRestaurants: [],
+        lastDestinations: [],
+        activeProvinceKh: '',
+        lastQuery: '',
+        turnSeed: 1,
+      }
+  );
+
+  const prevUserSessionKeyRef = useRef<string>(userSessionKey);
+  useEffect(() => {
+    if (prevUserSessionKeyRef.current !== userSessionKey) {
+      prevUserSessionKeyRef.current = userSessionKey;
+      const saved = aiSessionByUserMap.get(userSessionKey);
+      if (saved && saved.messages.length > 0) {
+        setChatMessages(saved.messages);
+        setChatMemory(saved.memory);
+        setCravingQuery(saved.lastInput || '');
+      } else {
+        const roleChips = buildAgentRoleChips(language, currentUser, restaurants);
+        const ownerExtra = roleChips.filter((c) => c.id === 'agent_owner_assist');
+        setChatMessages([
+          buildWelcomeAssistantMessage(language, foods.length, restaurants.length, destinations.length, ownerExtra),
+        ]);
+        setChatMemory({
+          lastDishes: [],
+          lastRestaurants: [],
+          lastDestinations: [],
+          activeProvinceKh: '',
+          lastQuery: '',
+          turnSeed: 1,
+        });
+        setCravingQuery('');
+      }
+    }
+  }, [userSessionKey, language, currentUser, restaurants, foods.length, destinations.length]);
+
+  useEffect(() => {
+    const settledMessages = chatMessages.filter((m) => !m.isPending);
+    if (settledMessages.length > 0) {
+      aiSessionByUserMap.set(userSessionKey, {
+        messages: settledMessages,
+        memory: chatMemory,
+        lastInput: cravingQuery,
+      });
+    }
+  }, [userSessionKey, chatMessages, chatMemory, cravingQuery]);
 
   // Current dish index and history of seen dish IDs to prevent repetition across unlimited clicks
   const [currentDishId, setCurrentDishId] = useState<string>('');
@@ -460,9 +517,9 @@ export const WhatToEatModal: React.FC = () => {
       const pendingAiQuery = typeof window !== 'undefined' ? String((window as any).__kft_pending_ai_query || '').trim() : '';
       if (pendingAiQuery) {
         (window as any).__kft_pending_ai_query = '';
-        if (canUseVip) {
-          setCravingQuery(pendingAiQuery);
-        }
+        setDrinkMode(false);
+        setOpenGroup(null);
+        setCravingQuery(pendingAiQuery);
         setTimeout(() => {
           sendConversationalMessageRef.current?.(pendingAiQuery);
         }, 60);
@@ -476,9 +533,9 @@ export const WhatToEatModal: React.FC = () => {
       const q = String((e as CustomEvent<{ query?: string }>).detail?.query || (window as any).__kft_pending_ai_query || '').trim();
       if (!q || !isWhatToEatModalOpen) return;
       (window as any).__kft_pending_ai_query = '';
-      if (canUseVip) {
-        setCravingQuery(q);
-      }
+      setDrinkMode(false);
+      setOpenGroup(null);
+      setCravingQuery(q);
       setTimeout(() => {
         sendConversationalMessageRef.current?.(q);
       }, 60);
@@ -1376,6 +1433,7 @@ export const WhatToEatModal: React.FC = () => {
       lastQuery: '',
       turnSeed: 1,
     });
+    aiSessionByUserMap.delete(userSessionKey);
     setChatMessages([
       buildWelcomeAssistantMessage(language, foods.length, restaurants.length, destinations.length),
     ]);
@@ -3013,7 +3071,7 @@ export const WhatToEatModal: React.FC = () => {
                     testId: 'wte-tab-craving',
                     icon: Compass,
                     label: tr(language, 'ចំណង់', 'Taste', '口味'),
-                    value: cravingQuery.trim(),
+                    value: QUICK_CRAVING_CHIPS.some((c) => c.queryKh === cravingQuery.trim() || c.queryEn.toLowerCase() === cravingQuery.trim().toLowerCase() || c.queryZh === cravingQuery.trim()) ? cravingQuery.trim() : '',
                     active: cravingQuery.trim().length > 0,
                     vip: false,
                   },
@@ -3050,7 +3108,7 @@ export const WhatToEatModal: React.FC = () => {
                       }`}
                     >
                       <GroupIcon className="w-5 h-5 shrink-0" strokeWidth={1.75} />
-                      <span className="w-full text-[11px] font-bold leading-snug truncate text-center">
+                      <span className="w-full text-[11px] font-bold leading-[1.6] py-0.5 break-words whitespace-normal text-center">
                         {g.value || g.label}
                       </span>
                       {g.vip && !canUseVip && (

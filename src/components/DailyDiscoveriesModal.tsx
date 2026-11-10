@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   X,
@@ -13,23 +13,21 @@ import {
   RotateCcw,
   Utensils,
   Crown,
-  Lock,
   LocateFixed,
+  ChevronRight,
+  ArrowLeft,
 } from 'lucide-react';
 import {
   FoodItem,
-  isAdminAccount,
-  isUserVipActive,
   organizeAndDeduplicateFoods,
-  isGpipRegisteredRestaurant,
   resolveFoodPhotoUrl,
   handleFoodImageError,
-  openRestaurantGoogleExternal,
 } from '../types';
 import {
   DISH_PROVINCES,
   ProvinceFilterOption,
   detectDishProvince,
+  doesDishBelongToProvince,
   getProvinceOptionById,
   getMatchingRestaurantsForProvinceDish,
   getDishSpecificWhereToFind,
@@ -49,26 +47,40 @@ export const DailyDiscoveriesModal: React.FC = () => {
     foods,
     restaurants,
     language,
-    currentUser,
     setSelectedFood,
     setSelectedRestaurant,
     setSelectedProvince: setGlobalProvince,
     setActiveTab,
-    openUpgradeVipModal,
     showToast,
   } = useApp();
 
   const isKm = language === 'km';
   const isZh = language === 'zh';
-  const canUseVip = Boolean(
-    (isUserVipActive(currentUser) || (currentUser && isAdminAccount(currentUser)))
-  );
 
   const [selectedProvinceId, setSelectedProvinceId] = useState<string>('all');
   const [selectedRegion, setSelectedRegion] = useState<RegionFilterId>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLocating, setIsLocating] = useState<boolean>(false);
   const [vipTasteProfile, setVipTasteProfile] = useState<VipAiTasteId | null>(null);
+  const bodyScrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (isDailyDiscoveriesModalOpen) {
+      setSelectedProvinceId('all');
+      setSelectedRegion('all');
+      setSearchQuery('');
+      setVipTasteProfile(null);
+    }
+  }, [isDailyDiscoveriesModalOpen]);
+
+  const handleSelectProvince = (provId: string) => {
+    setSelectedProvinceId(provId);
+    setTimeout(() => {
+      if (bodyScrollRef.current) {
+        bodyScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 30);
+  };
 
   // Deduplicate and verify all dishes so no duplicate names or photos ever appear
   const verifiedDishes = useMemo(() => {
@@ -86,26 +98,50 @@ export const DailyDiscoveriesModal: React.FC = () => {
     return result;
   }, [foods]);
 
-  // Count dishes per province across all 25 provinces
+  // Count dishes per province across all 25 provinces & capital city
   const provinceDishCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const p of DISH_PROVINCES) {
       counts[p.id] = 0;
-    }
-    for (const f of verifiedDishes) {
-      const pid = detectDishProvince(f);
-      if (pid && counts[pid] !== undefined) {
-        counts[pid] += 1;
+      for (const f of verifiedDishes) {
+        if (doesDishBelongToProvince(f, p.id)) {
+          counts[p.id] += 1;
+        }
       }
     }
     return counts;
   }, [verifiedDishes]);
 
-  // Filter provinces by region
+  // Filter provinces by region and optional search query
   const visibleProvinces = useMemo(() => {
-    if (selectedRegion === 'all') return DISH_PROVINCES;
-    return DISH_PROVINCES.filter((p) => p.region === selectedRegion);
-  }, [selectedRegion]);
+    const q = searchQuery.trim().toLowerCase();
+    return DISH_PROVINCES.filter((p) => {
+      if (selectedRegion !== 'all' && p.region !== selectedRegion) {
+        return false;
+      }
+      if (q) {
+        const matchProvinceMeta =
+          p.kh.toLowerCase().includes(q) ||
+          p.fullKh.toLowerCase().includes(q) ||
+          p.en.toLowerCase().includes(q) ||
+          p.zh.toLowerCase().includes(q) ||
+          p.culinaryTitleKh.toLowerCase().includes(q) ||
+          p.culinaryTitleEn.toLowerCase().includes(q);
+        if (matchProvinceMeta) return true;
+        const hasMatchingDish = verifiedDishes.some((f) => {
+          if (!doesDishBelongToProvince(f, p.id)) return false;
+          const loc = getLocalizedFood(f, language);
+          return (
+            f.nameKh.toLowerCase().includes(q) ||
+            f.nameEn.toLowerCase().includes(q) ||
+            loc.name.toLowerCase().includes(q)
+          );
+        });
+        return hasMatchingDish;
+      }
+      return true;
+    });
+  }, [selectedRegion, searchQuery, verifiedDishes, language]);
 
   // Currently selected province metadata (if a specific province is chosen)
   const activeProvinceMeta: ProvinceFilterOption | null = useMemo(() => {
@@ -113,22 +149,24 @@ export const DailyDiscoveriesModal: React.FC = () => {
     return DISH_PROVINCES.find((p) => p.id === selectedProvinceId) || null;
   }, [selectedProvinceId]);
 
-  // Filter dishes by selected province, region,search query, and optional VIP AI taste profile
+  // Filter dishes by selected province, region, search query, and taste profile
   const filteredDishes = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
     const list = verifiedDishes.filter((food) => {
-      const pid = detectDishProvince(food);
-      const provMeta = getProvinceOptionById(pid);
-
-      if (selectedProvinceId !== 'all' && pid !== selectedProvinceId) {
-        return false;
+      if (selectedProvinceId !== 'all') {
+        if (!doesDishBelongToProvince(food, selectedProvinceId)) {
+          return false;
+        }
+      } else if (selectedRegion !== 'all') {
+        const pid = detectDishProvince(food);
+        const provMeta = getProvinceOptionById(pid);
+        if (provMeta.region !== selectedRegion) {
+          return false;
+        }
       }
-      if (selectedRegion !== 'all' && provMeta.region !== selectedRegion) {
-        return false;
-      }
 
-      if (canUseVip && vipTasteProfile) {
+      if (vipTasteProfile) {
         const cat = food.categorySlug;
         if (vipTasteProfile === 'soup_kroeung' && cat !== 'soup' && cat !== 'salad') {
           return false;
@@ -140,13 +178,17 @@ export const DailyDiscoveriesModal: React.FC = () => {
           vipTasteProfile === 'street_dessert' &&
           cat !== 'dessert' &&
           cat !== 'streetfood' &&
-          cat !== 'noodles'
+          cat !== 'noodles' &&
+          cat !== 'cake' &&
+          cat !== 'drink'
         ) {
           return false;
         }
       }
 
       if (q) {
+        const pid = selectedProvinceId !== 'all' ? selectedProvinceId : detectDishProvince(food);
+        const provMeta = getProvinceOptionById(pid);
         const locFood = getLocalizedFood(food, language);
         const matchName =
           food.nameKh.toLowerCase().includes(q) ||
@@ -208,7 +250,6 @@ export const DailyDiscoveriesModal: React.FC = () => {
     selectedRegion,
     searchQuery,
     language,
-    canUseVip,
     vipTasteProfile,
   ]);
 
@@ -230,6 +271,12 @@ export const DailyDiscoveriesModal: React.FC = () => {
     if (isKm) return p.culinaryTitleKh;
     if (isZh) return p.culinaryTitleZh;
     return p.culinaryTitleEn;
+  };
+
+  const getProvinceHistory = (p: ProvinceFilterOption) => {
+    if (isKm) return p.historyKh;
+    if (isZh) return p.historyZh;
+    return p.historyEn;
   };
 
   const getProvinceWhereToFind = (p: ProvinceFilterOption) => {
@@ -254,7 +301,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
             }
           }
           setSelectedRegion('all');
-          setSelectedProvinceId(closest.id);
+          handleSelectProvince(closest.id);
           setIsLocating(false);
           showToast(
             tr(
@@ -268,7 +315,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
         },
         () => {
           setSelectedRegion('all');
-          setSelectedProvinceId('phnom_penh');
+          handleSelectProvince('phnom_penh');
           setIsLocating(false);
           showToast(
             tr(
@@ -284,7 +331,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
       );
     } else {
       setSelectedRegion('all');
-      setSelectedProvinceId('phnom_penh');
+      handleSelectProvince('phnom_penh');
       setIsLocating(false);
     }
   };
@@ -304,20 +351,6 @@ export const DailyDiscoveriesModal: React.FC = () => {
   };
 
   const handleSelectVipTaste = (id: VipAiTasteId) => {
-    if (!canUseVip) {
-      showToast(
-        tr(
-          language,
-          '👑 មុខងារ AI ណែនាំម្ហូបប្រចាំខេត្តកម្រិតខ្ពស់ សម្រាប់សមាជិក VIP ប៉ុណ្ណោះ!',
-          '👑 Advanced AI Provincial Food Recommendations are reserved for VIP members!',
-          '👑 AI 各省美食智能推荐为 VIP 会员专属功能！'
-        ),
-        'info'
-      );
-      setIsDailyDiscoveriesModalOpen(false);
-      openUpgradeVipModal();
-      return;
-    }
     setVipTasteProfile((prev) => (prev === id ? null : id));
   };
 
@@ -348,18 +381,18 @@ export const DailyDiscoveriesModal: React.FC = () => {
     },
     {
       id: 'street_dessert',
-      emoji: '🍨',
+      emoji: '🍜',
       label: tr(language, 'គុយទាវ នំខ្មែរ & បង្អែម', 'Noodles & Desserts', '汤粉糕点与甜品'),
     },
   ];
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/65 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center bg-black/65 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200"
       onClick={() => setIsDailyDiscoveriesModalOpen(false)}
     >
       <div
-        className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl max-h-[94vh] flex flex-col overflow-hidden"
+        className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl max-h-[94dvh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -386,8 +419,8 @@ export const DailyDiscoveriesModal: React.FC = () => {
               <p className="text-[11px] text-emerald-100 font-khmer truncate mt-0.5">
                 {tr(
                   language,
-                  'មុខម្ហូបប្រចាំខេត្ត និងផែនទីហាងទាំង ២៥ ខេត្ត-ក្រុង',
-                  'Signature dishes & map across all 25 provinces',
+                  'មុខម្ហូបប្រចាំខេត្ត និងផែនទីហាងទាំង ២៥ រាជធានី-ខេត្ត',
+                  'Signature dishes & map across all 25 provinces & capital',
                   '全柬 25 省市代表菜与地图导航'
                 )}
               </p>
@@ -402,8 +435,8 @@ export const DailyDiscoveriesModal: React.FC = () => {
           </button>
         </div>
 
-        {/* Search, GPS Province Locator & 25-Province Selector Bar (FREE) */}
-        <div className="p-3 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 space-y-2.5 shrink-0 font-khmer">
+        {/* Search, GPS Province Locator & 25-Province Selector Bar */}
+        <div className="p-3 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 space-y-2 shrink-0 font-khmer">
           {/* Row 1: Search Input + Nearest Province GPS Button */}
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
@@ -424,7 +457,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -441,6 +474,26 @@ export const DailyDiscoveriesModal: React.FC = () => {
               <LocateFixed className={`w-3.5 h-3.5 text-amber-300 ${isLocating ? 'animate-spin' : ''}`} />
               <span>{tr(language, 'ខេត្តជិតខ្ញុំ', 'Near Me', '附近省份')}</span>
             </button>
+          </div>
+
+          {/* Row 1.5: Direct 25-Province & Capital City Dropdown Selector */}
+          <div className="flex items-center gap-2">
+            <select
+              aria-label={tr(language, 'ជ្រើសរើសរាជធានី-ខេត្តទាំង ២៥', 'Select from 25 Provinces & Capital', '选择柬埔寨 25 省市')}
+              value={selectedProvinceId}
+              onChange={(e) => handleSelectProvince(e.target.value)}
+              className="w-full px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-emerald-500/40 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-600 cursor-pointer"
+            >
+              <option value="all">
+                📍 {tr(language, `គ្រប់រាជធានី-ខេត្តទាំង ២៥ (25 Provinces • ${verifiedDishes.length} មុខម្ហូប)`, `All 25 Provinces & Capital (${verifiedDishes.length} Dishes)`, `全部 25 个省市（${verifiedDishes.length} 道代表菜）`)}
+              </option>
+              {DISH_PROVINCES.map((prov, index) => (
+                <option key={prov.id} value={prov.id}>
+                  {index + 1}. {getProvinceDisplayName(prov)} ({prov.en}) — {provinceDishCounts[prov.id] || 0}{' '}
+                  {tr(language, 'មុខម្ហូប', 'dishes', '道')}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Row 2: Region Filter Tabs */}
@@ -477,7 +530,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
             <button
               type="button"
-              onClick={() => setSelectedProvinceId('all')}
+              onClick={() => handleSelectProvince('all')}
               className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition whitespace-nowrap flex items-center gap-1 cursor-pointer shrink-0 ${
                 selectedProvinceId === 'all'
                   ? 'bg-[#064E3B] text-white shadow-xs'
@@ -487,7 +540,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
               <MapPin className="w-3.5 h-3.5 text-emerald-500" />
               <span>{tr(language, 'ទាំង ២៥ ខេត្ត-ក្រុង', 'All 25 Provinces', '全部 25 省市')}</span>
               <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono bg-emerald-500/20 text-current">
-                {verifiedDishes.length}
+                25
               </span>
             </button>
 
@@ -498,7 +551,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                 <button
                   key={prov.id}
                   type="button"
-                  onClick={() => setSelectedProvinceId(prov.id)}
+                  onClick={() => handleSelectProvince(prov.id)}
                   className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition whitespace-nowrap flex items-center gap-1 cursor-pointer shrink-0 ${
                     active
                       ? 'bg-[#064E3B] text-white shadow-xs ring-2 ring-amber-400/60'
@@ -521,7 +574,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
             })}
           </div>
 
-          {/* Row 4: VIP Advanced AI Provincial Food Matcher Bar */}
+          {/* Row 4: Provincial Food Taste Filter Bar */}
           <div className="p-2 rounded-2xl bg-gradient-to-r from-amber-50 via-white to-emerald-50/70 dark:from-slate-800 dark:via-slate-800/90 dark:to-amber-950/30 border border-amber-300/70 dark:border-amber-500/40 space-y-1.5">
             <div className="flex items-center justify-between gap-2">
               <span className="text-[11px] font-extrabold text-slate-900 dark:text-white flex items-center gap-1">
@@ -535,13 +588,19 @@ export const DailyDiscoveriesModal: React.FC = () => {
                   )}
                 </span>
               </span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-300 to-amber-500 text-slate-950 text-[9px] font-black shrink-0">
-                {canUseVip ? '👑 VIP ✓' : <><Lock className="w-2.5 h-2.5" /> 👑 VIP</>}
-              </span>
+              {vipTasteProfile && (
+                <button
+                  type="button"
+                  onClick={() => setVipTasteProfile(null)}
+                  className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 hover:underline cursor-pointer"
+                >
+                  {tr(language, 'បង្ហាញទាំងអស់', 'Reset', '重置')}
+                </button>
+              )}
             </div>
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
               {vipTasteOptions.map((opt) => {
-                const active = canUseVip && vipTasteProfile === opt.id;
+                const active = vipTasteProfile === opt.id;
                 return (
                   <button
                     key={opt.id}
@@ -563,22 +622,37 @@ export const DailyDiscoveriesModal: React.FC = () => {
         </div>
 
         {/* Main Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar font-khmer">
+        <div
+          ref={bodyScrollRef}
+          className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar font-khmer"
+        >
           {/* Selected Province Culinary Specialty & Interactive Map Banner */}
           {activeProvinceMeta ? (
             <div className="p-4 rounded-3xl bg-gradient-to-br from-[#064E3B] via-[#047857] to-slate-900 text-white shadow-md border border-emerald-400/30 space-y-3">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black">
-                    📍 {getProvinceDisplayName(activeProvinceMeta)}
-                  </span>
-                  <h4 className="font-moul text-xs sm:text-sm text-amber-200 mt-1.5 leading-snug">
-                    {getProvinceSpecialty(activeProvinceMeta)}
-                  </h4>
-                </div>
+              <div className="flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleSelectProvince('all')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 hover:bg-white/25 text-white text-[11px] font-bold border border-white/25 transition cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5 text-amber-300" />
+                  <span>{tr(language, 'បញ្ជីរាជធានី-ខេត្តទាំង ២៥', 'All 25 Provinces', '返回全部 25 省市')}</span>
+                </button>
                 <span className="px-2.5 py-1 rounded-xl bg-white/15 text-emerald-100 text-[10px] font-bold font-mono shrink-0">
                   {filteredDishes.length} {tr(language, 'មុខម្ហូប', 'Dishes', '道代表菜')}
                 </span>
+              </div>
+
+              <div>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black">
+                  📍 {getProvinceDisplayName(activeProvinceMeta)} ({activeProvinceMeta.en})
+                </span>
+                <h4 className="font-moul text-xs sm:text-sm text-amber-200 mt-1.5 leading-snug">
+                  {getProvinceSpecialty(activeProvinceMeta)}
+                </h4>
+                <p className="text-[11px] text-emerald-100/95 leading-relaxed mt-1.5">
+                  {getProvinceHistory(activeProvinceMeta)}
+                </p>
               </div>
 
               <div className="p-2.5 rounded-2xl bg-black/25 border border-white/15 text-[11px] text-emerald-100 flex items-start gap-2">
@@ -615,30 +689,77 @@ export const DailyDiscoveriesModal: React.FC = () => {
               </div>
             </div>
           ) : (
-            /* All 25 Provinces Overview Banner */
-            <div className="p-3 rounded-2xl bg-emerald-50/90 dark:bg-slate-800/90 border border-emerald-200 dark:border-slate-700 flex items-center justify-between gap-2 text-xs">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span className="w-8 h-8 rounded-xl bg-[#064E3B] text-amber-300 flex items-center justify-center shrink-0 font-black">
-                  25
-                </span>
-                <div className="min-w-0">
-                  <div className="font-bold text-slate-900 dark:text-white truncate">
-                    {tr(
-                      language,
-                      `ម្ហូបប្រពៃណីខ្មែរទាំង ២៥ ខេត្ត-ក្រុង (${filteredDishes.length} មុខ)`,
-                      `Authentic Dishes Across 25 Provinces (${filteredDishes.length})`,
-                      `全柬 25 省市代表美食（共 ${filteredDishes.length} 道）`
-                    )}
-                  </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                    {tr(
-                      language,
-                      'ចុចលើឈ្មោះខេត្តខាងលើ ដើម្បីមើលមុខម្ហូប និងផែនទី',
-                      'Tap a province chip above to explore dishes & map',
-                      '点击上方省份标签查看代表菜与地图'
-                    )}
+            /* Complete List of All 25 Cambodian Provinces & Capital City */
+            <div className="space-y-3">
+              <div className="p-3 rounded-2xl bg-emerald-50/90 dark:bg-slate-800/90 border border-emerald-200 dark:border-slate-700 flex items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="w-8 h-8 rounded-xl bg-[#064E3B] text-amber-300 flex items-center justify-center shrink-0 font-black">
+                    25
+                  </span>
+                  <div className="min-w-0">
+                    <div className="font-bold text-slate-900 dark:text-white truncate">
+                      {tr(
+                        language,
+                        `បញ្ជីរាជធានី-ខេត្តទាំង ២៥ (${visibleProvinces.length}/25 ទីតាំង • ${filteredDishes.length} មុខម្ហូប)`,
+                        `All 25 Cambodian Provinces & Capital (${visibleProvinces.length}/25)`,
+                        `柬埔寨全部 25 个省市列表（${visibleProvinces.length}/25）`
+                      )}
+                    </div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                      {tr(
+                        language,
+                        'ចុចលើខេត្ត-រាជធានីណាមួយខាងក្រោម ដើម្បីមើលមុខម្ហូបប្រចាំខេត្ត និងផែនទី',
+                        'Tap any province below to view its signature dishes & map',
+                        '点击下方任意省市查看代表美食与地图'
+                      )}
+                    </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Complete 25-Location Directory Grid (1 Capital + 24 Provinces = 25 Locations) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {visibleProvinces.map((prov) => {
+                  const globalNumber = DISH_PROVINCES.findIndex((p) => p.id === prov.id) + 1;
+                  const dishCount = provinceDishCounts[prov.id] || 0;
+                  return (
+                    <button
+                      key={prov.id}
+                      type="button"
+                      data-testid={`province-card-${prov.id}`}
+                      onClick={() => handleSelectProvince(prov.id)}
+                      className="w-full p-2.5 rounded-2xl bg-white dark:bg-slate-800/95 hover:bg-emerald-50/70 dark:hover:bg-slate-800 border border-slate-200/90 dark:border-slate-700 hover:border-emerald-500 transition flex items-center justify-between gap-2.5 text-left shadow-2xs cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <span className="w-7 h-7 rounded-xl bg-[#064E3B] text-amber-300 text-[11px] font-black font-mono flex items-center justify-center shrink-0 shadow-2xs">
+                          {globalNumber}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-extrabold text-xs text-slate-900 dark:text-white truncate group-hover:text-[#064E3B] dark:group-hover:text-emerald-300">
+                              {getProvinceDisplayName(prov)}
+                            </span>
+                            {!isKm && (
+                              <span className="text-[10px] text-slate-400 truncate">({prov.kh})</span>
+                            )}
+                            {isKm && (
+                              <span className="text-[10px] text-slate-400 font-sans truncate">({prov.en})</span>
+                            )}
+                          </div>
+                          <p className="text-[10.5px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                            {getProvinceSpecialty(prov)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-[#064E3B] dark:text-emerald-300 text-[10px] font-extrabold font-mono">
+                          {dishCount} {tr(language, 'មុខ', 'dishes', '道')}
+                        </span>
+                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition" />
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -646,16 +767,20 @@ export const DailyDiscoveriesModal: React.FC = () => {
           {/* Provincial Dishes List */}
           {filteredDishes.length > 0 ? (
             filteredDishes.map((food) => {
-              const pid = detectDishProvince(food);
+              const pid =
+                selectedProvinceId !== 'all'
+                  ? selectedProvinceId
+                  : detectDishProvince(food);
               const provMeta = getProvinceOptionById(pid);
               const locFood = getLocalizedFood(food, language);
               const matchedRests = getMatchingRestaurantsForProvinceDish(food, provMeta, restaurants);
-              const resolvedPhoto = resolveFoodPhotoUrl(
-                food.photoUrl,
-                food.photoUpdatedAt,
-                720,
-                food.id
-              ) || '/welcome/hero-bg.webp';
+              const resolvedPhoto =
+                resolveFoodPhotoUrl(
+                  food.photoUrl,
+                  food.photoUpdatedAt,
+                  720,
+                  food.id
+                ) || '/welcome/hero-bg.webp';
 
               return (
                 <div
@@ -685,7 +810,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelectedProvinceId(provMeta.id);
+                          handleSelectProvince(provMeta.id);
                         }}
                         className="px-2.5 py-0.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] font-black shadow-xs flex items-center gap-1 cursor-pointer"
                       >
@@ -846,7 +971,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                 <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto leading-relaxed">
                   {tr(
                     language,
-                    'សូមសម្អាតពាក្យស្វែងរក ឬជ្រើសរើសខេត្ត-ក្រុងផ្សេងទៀតដើម្បីមើលមុខម្ហូបប្រពៃណីទាំង ២៥ ខេត្ត-ក្រុង។',
+                    'សូមសម្អាតពាក្យស្វែងរក ឬជ្រើសរើសខេត្ត-ក្រុងផ្សេងទៀត ដើម្បីមើលមុខម្ហូបប្រពៃណីទាំង ២៥ ខេត្ត-ក្រុង។',
                     'Reset your search or select another province to explore traditional dishes across all 25 provinces.',
                     '请重置搜索词或选择其他省份，探索全柬 25 省市传统美食。'
                   )}

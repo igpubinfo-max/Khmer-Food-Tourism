@@ -139,7 +139,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
             className="pointer-events-none absolute inset-x-0 bottom-0 h-14"
             style={{
               background:
-                'linear-gradient(180deg, rgba(248, 250, 252, 0) 0%, rgba(248, 250, 252, 0.72) 68%, #F8FAFC 100%)',
+                'linear-gradient(180deg, rgba(30, 41, 59, 0) 0%, rgba(30, 41, 59, 0.72) 68%, #1E293B 100%)',
             }}
           />
         )}
@@ -305,10 +305,14 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
         </div>
       </div>
 
-      {/* Home Mode: Slim Horizontal Translucent AI Search Strip (50% Reduced Height) */}
+      {/* Home Mode: Translucent AI Search Strip (+20% Height = 46px) */}
       {mode === 'home' && (
-        <div className="absolute inset-x-0 bottom-3.5 z-20 px-3.5">
-          <div
+        <div className="absolute inset-x-0 bottom-3 z-20 px-3.5">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleTriggerAskAi();
+            }}
             style={{
               background: 'linear-gradient(90deg, rgba(15, 23, 42, 0.72) 0%, rgba(30, 41, 59, 0.68) 55%, rgba(15, 23, 42, 0.74) 100%)',
               backdropFilter: 'blur(12px)',
@@ -316,9 +320,9 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
               boxShadow:
                 '0 0 0 1px rgba(245, 197, 66, 0.45), 0 4px 14px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.16)',
             }}
-            className="w-full h-[38px] rounded-full px-1.5 flex items-center gap-2 border border-[#F5C542]/85"
+            className="w-full h-[46px] rounded-full px-2 flex items-center gap-2 border border-[#F5C542]/85"
           >
-            {/* Left Compact Glowing Gold Circle Camera Button */}
+            {/* Left Glowing Gold Circle Camera Button (Scaled +20% to 34px) */}
             <button
               type="button"
               onClick={() => onOpenCameraAi && onOpenCameraAi()}
@@ -326,10 +330,10 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
                 background: 'radial-gradient(circle at 35% 30%, #FFFBEB 0%, #FDE68A 58%, #F59E0B 100%)',
                 boxShadow: '0 0 8px rgba(251, 191, 36, 0.5), inset 0 1px 1.5px rgba(255, 255, 255, 0.9)',
               }}
-              className="w-[28px] h-[28px] rounded-full border border-[#F59E0B] flex items-center justify-center shrink-0 active:scale-95 transition cursor-pointer"
+              className="w-[34px] h-[34px] rounded-full border border-[#F59E0B] flex items-center justify-center shrink-0 active:scale-95 transition cursor-pointer"
               title={tr(language, 'ថតរូបម្ហូបដើម្បីសួរ AI', 'Snap food photo for AI', '拍照识菜')}
             >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+              <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none">
                 <path d="M4 8V6a2 2 0 0 1 2-2h2" stroke="#B45309" strokeWidth="2" strokeLinecap="round" />
                 <path d="M16 4h2a2 2 0 0 1 2 2v2" stroke="#B45309" strokeWidth="2" strokeLinecap="round" />
                 <path d="M20 16v2a2 2 0 0 1-2 2h-2" stroke="#B45309" strokeWidth="2" strokeLinecap="round" />
@@ -346,6 +350,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
             <div className="flex-1 min-w-0 flex items-center">
               <input
                 type="text"
+                enterKeyHint="send"
                 value={query}
                 onChange={(e) => onChangeQuery && onChangeQuery(e.target.value)}
                 onKeyDown={(e) => {
@@ -360,35 +365,34 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
                   'Ask anything about food or snap a photo...',
                   '询问任何美食问题或拍照识菜...'
                 )}
-                className="w-full bg-transparent text-white placeholder:text-white/95 text-[11.5px] sm:text-[12px] font-khmer font-extrabold focus:outline-none truncate"
+                className="w-full bg-transparent text-white placeholder:text-white/95 text-[12.5px] sm:text-[13px] font-khmer font-extrabold focus:outline-none truncate"
                 style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}
               />
               {query && (
                 <button
                   type="button"
                   onClick={() => onChangeQuery && onChangeQuery('')}
-                  className="p-0.5 text-white/75 hover:text-white shrink-0 cursor-pointer"
+                  className="p-1 text-white/75 hover:text-white shrink-0 cursor-pointer"
                   aria-label="Clear"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4" />
                 </button>
               )}
             </div>
 
-            {/* Right Slim Orange Pill Button: សួរ AI */}
+            {/* Right Orange Pill Button: សួរ AI (Scaled +20% to 34px) */}
             <button
-              type="button"
-              onClick={handleTriggerAskAi}
+              type="submit"
               style={{
                 background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
                 boxShadow: '0 2px 6px rgba(234, 88, 12, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
               }}
-              className="h-[28px] px-3 rounded-full text-white font-khmer font-extrabold text-[11px] flex items-center gap-1 shrink-0 active:scale-95 transition cursor-pointer border border-amber-200/50"
+              className="h-[34px] px-3.5 rounded-full text-white font-khmer font-extrabold text-[12px] flex items-center gap-1.5 shrink-0 active:scale-95 transition cursor-pointer border border-amber-200/50"
             >
-              <Send className="w-3 h-3 -rotate-12 stroke-[2.3]" />
+              <Send className="w-3.5 h-3.5 -rotate-12 stroke-[2.3]" />
               <span>{tr(language, 'សួរ AI', 'Ask AI', '问 AI')}</span>
             </button>
-          </div>
+          </form>
         </div>
       )}
     </div>

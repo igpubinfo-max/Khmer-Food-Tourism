@@ -1042,9 +1042,9 @@ export const HotelView: React.FC = () => {
           ===================================================================== */}
       <div className="px-3 pt-2.5 space-y-3">
         {/* Row 5: 4 Secondary Filter & Sort Dropdown Chips (Matching Shop Menu: តំបន់/ខេត្ត ∨ | ប្រភេទ ∨ | ការវាយតម្លៃ ∨ | កម្រៀប) */}
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="grid grid-cols-2 min-[420px]:grid-cols-4 gap-1.5">
           {/* Control 1: Province / Region Selector */}
-          <label className="relative h-9 px-2 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
+          <label className="relative min-h-[40px] px-2.5 py-1 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
             <MapPin className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
             <span className="truncate">{selectedProvinceShortLabel}</span>
             <ChevronDown className="w-3.5 h-3.5 text-slate-500 shrink-0" />
@@ -1064,7 +1064,7 @@ export const HotelView: React.FC = () => {
           </label>
 
           {/* Control 2: Stay Type Selector */}
-          <label className="relative h-9 px-2 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
+          <label className="relative min-h-[40px] px-2.5 py-1 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
             <BedDouble className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
             <span className="truncate">
               {categoryFilter === 'all'
@@ -1087,7 +1087,7 @@ export const HotelView: React.FC = () => {
           </label>
 
           {/* Control 3: Rating Selector */}
-          <label className="relative h-9 px-2 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
+          <label className="relative min-h-[40px] px-2.5 py-1 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
             <Star className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
             <span className="truncate">
               {ratingFilter === '4.5'
@@ -1110,7 +1110,7 @@ export const HotelView: React.FC = () => {
           </label>
 
           {/* Control 4: Sort Order (Defaults to Newest First) */}
-          <label className="relative h-9 px-2 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
+          <label className="relative min-h-[40px] px-2.5 py-1 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
             <SlidersHorizontal className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
             <span className="truncate">
               {sortMode === 'nearest'
@@ -1321,7 +1321,7 @@ export const HotelView: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="space-y-2.5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                   {featuredHotels.map((hotel) => {
                     const loc = getLocalizedDestination(hotel, language);
                     const isVipRecord = vipHotelIds.has(hotel.id);
@@ -1405,7 +1405,7 @@ export const HotelView: React.FC = () => {
                         className="bg-white rounded-[22px] p-2.5 border border-slate-200/85 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:border-emerald-500/60 transition flex gap-3 items-stretch cursor-pointer font-khmer"
                       >
                         {/* Left Icon / Verified Owner Photo Box with Distance Pill & Heart Button (Matching RestaurantCard) */}
-                        <div className="w-[146px] sm:w-[158px] min-h-[132px] rounded-2xl overflow-hidden relative shrink-0 bg-slate-100">
+                        <div className="w-[120px] min-[360px]:w-[146px] sm:w-[158px] min-h-[132px] rounded-2xl overflow-hidden relative shrink-0 bg-slate-100">
                           <HotelAvatar
                             hotel={hotel}
                             alt={loc.name}
@@ -1536,7 +1536,7 @@ export const HotelView: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {displayedDirectoryHotels.map((hotel) => {
                     const loc = getLocalizedDestination(hotel, language);
                     const isVipRecord = vipHotelIds.has(hotel.id);

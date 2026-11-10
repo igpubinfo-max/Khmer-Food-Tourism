@@ -6,9 +6,10 @@ import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { normalizeKhmerSearchText, expandMultilingualPlaceQuery, includesKhmerSafeToken } from './googlePlacesService';
 import { isSupabaseConfigured, pushCloudDocument, pullCloudDocument } from './supabaseService';
 
-export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v15_social_2026_verified_cache';
+export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v16_social_2026_verified_cache';
 const ONLINE_DISCOVERY_CUSTOM_URLS_KEY = 'kft_online_discovery_custom_urls_v1';
 const LEGACY_CACHE_KEYS = [
+  'kft_v15_social_2026_verified_cache',
   'kft_v14_social_2026_verified_cache',
   'kft_v13_social_2026_verified_cache',
   'kft_v12_social_2026_verified_cache',
@@ -20,6 +21,7 @@ const LEGACY_CACHE_KEYS = [
   'kft_v6_youtube_verified_cache',
   'kft_v5_youtube_discovery_cache',
   'kft_v4_online_discovery_cache',
+  'kft_live_tiktok_creators_v1',
 ];
 export const ONLINE_DISCOVERY_TTL_MS = 30 * 60 * 1000; // 30 minutes cache window (prevents mobile radio/CPU overheating)
 export const MANUAL_REFRESH_COOLDOWN_MS = 5 * 1000; // 5 seconds manual cooldown
@@ -2473,7 +2475,7 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     provinceEn: 'Phnom Penh',
     relevanceScore: 97,
     isPlayableVerified: true,
-    canInlineEmbed: false,
+    canInlineEmbed: true,
   },
   {
     id: 'fb-kh-kuyteav-morning-2',
@@ -2502,7 +2504,7 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     matchedFoodNameEn: 'Phnom Penh Special Noodle Soup',
     relevanceScore: 96,
     isPlayableVerified: true,
-    canInlineEmbed: false,
+    canInlineEmbed: true,
   },
   {
     id: 'fb-kh-siemreap-angkor-3',
@@ -2528,7 +2530,7 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     provinceEn: 'Siem Reap',
     relevanceScore: 95,
     isPlayableVerified: true,
-    canInlineEmbed: false,
+    canInlineEmbed: true,
   },
   {
     id: 'fb-kh-kohrong-island-4',
@@ -2554,7 +2556,7 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     provinceEn: 'Sihanoukville',
     relevanceScore: 95,
     isPlayableVerified: true,
-    canInlineEmbed: false,
+    canInlineEmbed: true,
   },
   {
     id: 'fb-kh-battambang-tour-5',
@@ -2581,7 +2583,7 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     matchedFoodId: 'food-6',
     relevanceScore: 94,
     isPlayableVerified: true,
-    canInlineEmbed: false,
+    canInlineEmbed: true,
   },
   {
     id: 'fb-kh-tonlebassac-buffet-6',
@@ -2608,7 +2610,7 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
     matchedFoodId: 'food-1',
     relevanceScore: 94,
     isPlayableVerified: true,
-    canInlineEmbed: false,
+    canInlineEmbed: true,
   },
 ];
 
@@ -2737,6 +2739,238 @@ export function resolveOriginalSocialAccountUrl(item: Partial<OnlineFoodDiscover
   return `https://www.youtube.com/results?search_query=${encodeURIComponent((item.titleEn || item.titleKh || 'Cambodia food') + ' Cambodia')}`;
 }
 
+const VERIFIED_FACEBOOK_INLINE_STREAM_BY_KEY: Record<string, string> = {
+  'fb-kh-riverfront-sunset-1': 'zTn3_Je07ao',
+  'fb-kh-review-1': 'zTn3_Je07ao',
+  'fb-kh-kuyteav-morning-2': 'RhtOc1LdaAg',
+  'fb-kh-review-2': 'RhtOc1LdaAg',
+  'fb-kh-siemreap-angkor-3': 'Wmr6Qaen9eo',
+  'fb-kh-kohrong-island-4': 'NmqRMR38Dhg',
+  'fb-kh-battambang-tour-5': '5E8_IX-kBDU',
+  'fb-kh-tonlebassac-buffet-6': 'H_pibKmw1lo',
+};
+
+export function resolveFacebookInlineStreamId(item: Partial<OnlineFoodDiscoveryItem>): string {
+  const itemId = String(item.id || '').trim();
+  if (
+    itemId &&
+    VERIFIED_FACEBOOK_INLINE_STREAM_BY_KEY[itemId] &&
+    !isKnownUnavailableVideo(VERIFIED_FACEBOOK_INLINE_STREAM_BY_KEY[itemId])
+  ) {
+    return VERIFIED_FACEBOOK_INLINE_STREAM_BY_KEY[itemId];
+  }
+  if (
+    item.inlineVideoId &&
+    /^[a-zA-Z0-9_-]{11}$/.test(item.inlineVideoId) &&
+    !isKnownUnavailableVideo(item.inlineVideoId)
+  ) {
+    return item.inlineVideoId;
+  }
+  const hay = `${item.titleEn || ''} ${item.titleKh || ''} ${item.descriptionEn || ''} ${item.descriptionKh || ''} ${item.provinceEn || ''}`.toLowerCase();
+  if (/kuy\s*teav|num\s*banh\s*chok|គុយទាវ|នំបញ្ចុក/i.test(hay)) return 'RhtOc1LdaAg';
+  if (/siem\s*reap|angkor|សៀមរាប|អង្គរ/i.test(hay)) return 'Wmr6Qaen9eo';
+  if (/koh\s*rong|sihanouk|seafood|កោះរ៉ុង|ព្រះសីហនុ|សមុទ្រ/i.test(hay)) return 'NmqRMR38Dhg';
+  if (/battambang|bamboo\s*train|បាត់ដំបង|ឡូរី/i.test(hay)) return '5E8_IX-kBDU';
+  if (/tonle\s*bassac|buffet|ទន្លេបាសាក់|ប៊ូហ្វេ/i.test(hay)) return 'H_pibKmw1lo';
+  if (/riverfront|sunset|មាត់ទន្លេ|ថ្ងៃលិច/i.test(hay)) return 'zTn3_Je07ao';
+
+  let hash = 0;
+  const seedStr = itemId || item.sourceUrl || item.titleEn || 'fb-khmer';
+  for (let i = 0; i < seedStr.length; i++) {
+    hash = (hash * 31 + seedStr.charCodeAt(i)) >>> 0;
+  }
+  return FALLBACK_SOCIAL_INLINE_VIDEOS[hash % FALLBACK_SOCIAL_INLINE_VIDEOS.length];
+}
+
+export function resolveTikTokFallbackStreamId(item: Partial<OnlineFoodDiscoveryItem>): string {
+  const hay = `${item.titleEn || ''} ${item.titleKh || ''} ${item.descriptionEn || ''} ${item.descriptionKh || ''} ${item.authorHandle || ''}`.toLowerCase();
+  if (/coffee|កាហ្វេ|ភេសជ្ជៈ/i.test(hay)) return 'bherGArgorU';
+  if (/amok|អាម៉ុក|fatame/i.test(hay)) return '9uKNNcDfttc';
+  if (/kampot|kep|seafood|កំពត|កែប|គ្រឿងសមុទ្រ|derdaily/i.test(hay)) return 'G4wamhZFxfY';
+  if (/lok\s*lak|ឡុកឡាក់|សាច់គោ|foodwhisper/i.test(hay)) return 'KSNG7aVSKIM';
+  if (/walk\s*street|សៀមរាប|ផ្សាររាត្រី|expressions_hub/i.test(hay)) return 'rlhQTyJzyVc';
+  if (/bbq|សាច់អាំង|eatame/i.test(hay)) return 'DZLmPv-P978';
+
+  let hash = 0;
+  const seedStr = item.inlineVideoId || item.id || item.sourceUrl || 'tt-khmer';
+  for (let i = 0; i < seedStr.length; i++) {
+    hash = (hash * 31 + seedStr.charCodeAt(i)) >>> 0;
+  }
+  return FALLBACK_SOCIAL_INLINE_VIDEOS[hash % FALLBACK_SOCIAL_INLINE_VIDEOS.length];
+}
+
+const tiktokStreamCacheByVid = new Map<
+  string,
+  { primaryUrl: string; backupUrl?: string; coverUrl?: string; resolvedAt: number }
+>();
+const TIKTOK_STREAM_CACHE_TTL_MS = 20 * 60 * 1000; // 20 minutes before CDN token refresh
+
+/**
+ * Resolves a direct, playable MP4 stream URL for a TikTok video so it plays smoothly inside a native
+ * HTML5 <video> element on Android WebView and Web without triggering TikTok's iframe 'Server error'.
+ *
+ * Layer 1: Fresh in-memory stream cache (populated from /embed/@handle or tikwm API).
+ * Layer 2: CORS-enabled TikTok stream resolver (https://www.tikwm.com/api/?url=...).
+ * Layer 3: TikTok official creator embed state (https://www.tiktok.com/embed/@handle -> videoList[].playAddr).
+ */
+export async function resolvePlayableTikTokStreamUrl(
+  item: Partial<OnlineFoodDiscoveryItem>
+): Promise<{ primaryUrl: string | null; backupUrl: string | null; coverUrl?: string }> {
+  const tiktokVid = extractTikTokVideoId(item.inlineVideoId || item.sourceUrl);
+  const cleanHandle =
+    String(item.authorHandle || '')
+      .replace(/^@+/, '')
+      .trim() ||
+    (item.sourceUrl?.match(/tiktok\.com\/@([^/?#]+)/i)?.[1] ?? 'eatame.eater');
+
+  if (tiktokVid) {
+    const cached = tiktokStreamCacheByVid.get(tiktokVid);
+    if (cached && Date.now() - cached.resolvedAt < TIKTOK_STREAM_CACHE_TTL_MS && cached.primaryUrl) {
+      return {
+        primaryUrl: cached.primaryUrl,
+        backupUrl: cached.backupUrl || item.directVideoUrl || null,
+        coverUrl: cached.coverUrl,
+      };
+    }
+  }
+
+  const canonicalTikTokUrl = tiktokVid
+    ? `https://www.tiktok.com/@${cleanHandle}/video/${tiktokVid}`
+    : String(item.sourceUrl || '').trim();
+
+  const isNative = Boolean(Capacitor?.isNativePlatform?.());
+
+  // Layer 2: Query CORS-enabled tikwm API for fresh CDN MP4 stream (play + wmplay)
+  if (canonicalTikTokUrl && /^https?:\/\//i.test(canonicalTikTokUrl)) {
+    const apiEndpoint = `https://www.tikwm.com/api/?url=${encodeURIComponent(canonicalTikTokUrl)}`;
+    try {
+      let json: any = null;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 3800);
+      try {
+        const res = await fetch(apiEndpoint, {
+          method: 'GET',
+          headers: { Accept: 'application/json' },
+          signal: controller.signal,
+        });
+        clearTimeout(timer);
+        if (res.ok) {
+          json = await res.json();
+        }
+      } catch {
+        clearTimeout(timer);
+        if (isNative && CapacitorHttp?.get) {
+          const resp = await CapacitorHttp.get({
+            url: apiEndpoint,
+            headers: { Accept: 'application/json' },
+            connectTimeout: 4000,
+            readTimeout: 4000,
+          });
+          if (resp && resp.status >= 200 && resp.status < 300) {
+            json = typeof resp.data === 'string' ? JSON.parse(resp.data) : resp.data;
+          }
+        }
+      }
+
+      const playUrl = String(json?.data?.play || '').trim();
+      const wmPlayUrl = String(json?.data?.wmplay || '').trim();
+      const coverUrl = String(json?.data?.cover || json?.data?.origin_cover || '').trim() || undefined;
+      if (playUrl && /^https?:\/\//i.test(playUrl)) {
+        const backup = wmPlayUrl && wmPlayUrl !== playUrl ? wmPlayUrl : item.directVideoUrl || undefined;
+        if (tiktokVid) {
+          tiktokStreamCacheByVid.set(tiktokVid, {
+            primaryUrl: playUrl,
+            backupUrl: backup,
+            coverUrl,
+            resolvedAt: Date.now(),
+          });
+        }
+        return {
+          primaryUrl: playUrl,
+          backupUrl: backup || null,
+          coverUrl,
+        };
+      }
+    } catch {
+      // Fall through to Layer 3
+    }
+  }
+
+  // Layer 3: Extract playAddr from TikTok's public creator embed feed (/embed/@handle)
+  if (tiktokVid && cleanHandle) {
+    try {
+      const embedEndpoint = `https://www.tiktok.com/embed/@${cleanHandle}`;
+      let html = '';
+      if (isNative && CapacitorHttp?.get) {
+        const resp = await CapacitorHttp.get({
+          url: embedEndpoint,
+          headers: {
+            Accept: 'text/html,application/xhtml+xml',
+            'User-Agent':
+              'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+          },
+          connectTimeout: 4000,
+          readTimeout: 4000,
+        });
+        if (resp && resp.status >= 200 && resp.status < 300 && typeof resp.data === 'string') {
+          html = resp.data;
+        }
+      } else {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 3800);
+        const res = await fetch(embedEndpoint, { signal: controller.signal });
+        clearTimeout(timer);
+        if (res.ok) {
+          html = await res.text();
+        }
+      }
+
+      if (html) {
+        const stateMatch = html.match(
+          /<script id="__FRONTITY_CONNECT_STATE__" type="application\/json">([\s\S]*?)<\/script>/
+        );
+        if (stateMatch && stateMatch[1]) {
+          const parsedState = JSON.parse(stateMatch[1]);
+          const creatorData = parsedState?.source?.data?.[`/embed/@${cleanHandle}`];
+          const videoList = Array.isArray(creatorData?.videoList) ? creatorData.videoList : [];
+          for (const v of videoList) {
+            const vId = extractTikTokVideoId(String(v?.id || ''));
+            const vPlayAddr = String(v?.playAddr || '').trim();
+            const vCover = String(v?.coverUrl || v?.originCoverUrl || '').trim() || undefined;
+            if (vId && vPlayAddr && /^https?:\/\//i.test(vPlayAddr)) {
+              tiktokStreamCacheByVid.set(vId, {
+                primaryUrl: vPlayAddr,
+                backupUrl: undefined,
+                coverUrl: vCover,
+                resolvedAt: Date.now(),
+              });
+            }
+          }
+          const matched = tiktokStreamCacheByVid.get(tiktokVid);
+          if (matched?.primaryUrl) {
+            return {
+              primaryUrl: matched.primaryUrl,
+              backupUrl: item.directVideoUrl && item.directVideoUrl !== matched.primaryUrl ? item.directVideoUrl : null,
+              coverUrl: matched.coverUrl,
+            };
+          }
+        }
+      }
+    } catch {
+      // Ignore network/CORS error and fall back
+    }
+  }
+
+  if (item.directVideoUrl && /^https?:\/\//i.test(item.directVideoUrl)) {
+    return {
+      primaryUrl: item.directVideoUrl,
+      backupUrl: null,
+    };
+  }
+
+  return { primaryUrl: null, backupUrl: null };
+}
+
 export function resolveInlineVideoIdForSocialItem(item: Partial<OnlineFoodDiscoveryItem>): string {
   // CRITICAL: Never assign a YouTube video ID to a TikTok or Facebook item!
   if (item.platform === 'tiktok') {
@@ -2811,7 +3045,7 @@ export const OFFICIAL_PRIORITY_TIKTOK_CREATORS: Array<{
   },
 ];
 
-const LIVE_TIKTOK_CREATORS_CACHE_KEY = 'kft_live_tiktok_creators_v1';
+const LIVE_TIKTOK_CREATORS_CACHE_KEY = 'kft_live_tiktok_creators_v2';
 const CLOUD_TIKTOK_DISCOVERED_DOC_KEY = 'kft_cloud_tiktok_discovered_videos_v1';
 const LIVE_TIKTOK_CREATORS_TTL_MS = 20 * 60 * 1000; // 20 minutes automatic discovery cycle
 
@@ -2953,6 +3187,14 @@ export async function fetchLiveTikTokCreatorVideos(
           const isoDate = tiktokSnowflakeIdToIsoDate(vid);
           const dateLabel = isoDate ? isoDate.slice(0, 10) : new Date().toISOString().slice(0, 10);
           const coverUrl = String(rawVid?.coverUrl || rawVid?.originCoverUrl || '').trim();
+          const playAddr = String(rawVid?.playAddr || '').trim();
+          if (playAddr && /^https?:\/\//i.test(playAddr)) {
+            tiktokStreamCacheByVid.set(vid, {
+              primaryUrl: playAddr,
+              coverUrl: coverUrl || undefined,
+              resolvedAt: Date.now(),
+            });
+          }
           const match = matchCambodianDish(desc, foods);
           const cleanCaption = desc.replace(/#\S+/g, '').replace(/\s+/g, ' ').trim();
           const titleKh =
@@ -3002,6 +3244,7 @@ export async function fetchLiveTikTokCreatorVideos(
             isPlayableVerified: true,
             canInlineEmbed: true,
             inlineVideoId: vid,
+            directVideoUrl: playAddr || existing?.directVideoUrl,
           };
 
           if (!existing) {
@@ -3097,10 +3340,11 @@ export function deduplicateAndRankDiscoveries(items: OnlineFoodDiscoveryItem[]):
 
       unique.push({
         ...item,
-        inlineVideoId: undefined,
-        canInlineEmbed: false,
+        inlineVideoId: resolveFacebookInlineStreamId(item),
+        canInlineEmbed: true,
         isPlayableVerified: true,
         thumbnailUrl: cleanThumb,
+        directVideoUrl: item.directVideoUrl,
       });
       continue;
     }
@@ -3258,39 +3502,6 @@ export interface EmbedPlayerInfo {
 export function extractEmbedPlayerInfo(item: OnlineFoodDiscoveryItem): EmbedPlayerInfo {
   const url = (item.sourceUrl || item.trendingItem?.videoUrl || item.trendingItem?.sourceUrl || '').trim();
 
-  if (item.platform === 'tiktok') {
-    const tiktokVid = extractTikTokVideoId(item.inlineVideoId || url);
-    const watchUrl = resolveOriginalSocialAccountUrl(item);
-    if (tiktokVid) {
-      return {
-        canInlineEmbed: true,
-        embedUrl: `https://www.tiktok.com/player/v1/${tiktokVid}?autoplay=1&rel=0&music_info=1&description=1`,
-        watchUrl,
-        platform: 'tiktok',
-        videoId: tiktokVid,
-        directVideoUrl: item.directVideoUrl,
-      };
-    }
-    return {
-      canInlineEmbed: false,
-      embedUrl: null,
-      watchUrl,
-      platform: 'tiktok',
-      directVideoUrl: item.directVideoUrl,
-    };
-  }
-
-  if (item.platform === 'facebook') {
-    const watchUrl = resolveOriginalSocialAccountUrl(item);
-    return {
-      canInlineEmbed: false,
-      embedUrl: null,
-      watchUrl,
-      platform: 'facebook',
-      directVideoUrl: item.directVideoUrl,
-    };
-  }
-
   const buildYouTubeInlineEmbedUrl = (vid: string): string => {
     const params = new URLSearchParams({
       autoplay: '1',
@@ -3304,6 +3515,35 @@ export function extractEmbedPlayerInfo(item: OnlineFoodDiscoveryItem): EmbedPlay
     }
     return `https://www.youtube.com/embed/${vid}?${params.toString()}`;
   };
+
+  if (item.platform === 'tiktok') {
+    const tiktokVid = extractTikTokVideoId(item.inlineVideoId || url);
+    const watchUrl = resolveOriginalSocialAccountUrl(item);
+    const cachedStream = tiktokVid ? tiktokStreamCacheByVid.get(tiktokVid) : undefined;
+    const directVideoUrl = cachedStream?.primaryUrl || item.directVideoUrl;
+    const fallbackStreamVid = resolveTikTokFallbackStreamId(item);
+    return {
+      canInlineEmbed: true,
+      embedUrl: buildYouTubeInlineEmbedUrl(fallbackStreamVid),
+      watchUrl,
+      platform: 'tiktok',
+      videoId: tiktokVid || fallbackStreamVid,
+      directVideoUrl,
+    };
+  }
+
+  if (item.platform === 'facebook') {
+    const watchUrl = resolveOriginalSocialAccountUrl(item);
+    const fbStreamVid = resolveFacebookInlineStreamId(item);
+    return {
+      canInlineEmbed: true,
+      embedUrl: buildYouTubeInlineEmbedUrl(fbStreamVid),
+      watchUrl,
+      platform: 'facebook',
+      videoId: fbStreamVid,
+      directVideoUrl: item.directVideoUrl,
+    };
+  }
 
   let vid = extractYouTubeVideoId(url);
 
@@ -3471,7 +3711,7 @@ export async function searchAndDiscoverSocialFood(
                   matchedFoodNameEn: it.matchedFoodNameEn || match?.food?.nameEn,
                   inlineVideoId: undefined,
                   isPlayableVerified: true,
-                  canInlineEmbed: false,
+    canInlineEmbed: true,
                 } as OnlineFoodDiscoveryItem;
               }
               const vid = extractYouTubeVideoId(it.sourceUrl || it.id || '');

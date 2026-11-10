@@ -615,12 +615,25 @@ export const DISH_PROVINCES: ProvinceFilterOption[] = [
 // Build fast O(1) lookup from food.id -> province id
 const DISH_ID_TO_PROVINCE_MAP = new Map<string, string>();
 const PROVINCE_BY_ID_MAP = new Map<string, ProvinceFilterOption>();
+const PROVINCE_SIGNATURE_SET_MAP = new Map<string, Set<string>>();
 
 for (const prov of DISH_PROVINCES) {
   PROVINCE_BY_ID_MAP.set(prov.id, prov);
+  PROVINCE_SIGNATURE_SET_MAP.set(prov.id, new Set(prov.signatureDishIds));
   for (const fid of prov.signatureDishIds) {
-    DISH_ID_TO_PROVINCE_MAP.set(fid, prov.id);
+    if (!DISH_ID_TO_PROVINCE_MAP.has(fid)) {
+      DISH_ID_TO_PROVINCE_MAP.set(fid, prov.id);
+    }
   }
+}
+
+export function doesDishBelongToProvince(food: FoodItem, provinceId: string | null | undefined): boolean {
+  if (!food || !provinceId || provinceId === 'all') return true;
+  const sigSet = PROVINCE_SIGNATURE_SET_MAP.get(provinceId);
+  if (sigSet && food.id && sigSet.has(food.id)) {
+    return true;
+  }
+  return detectDishProvince(food) === provinceId;
 }
 
 const provinceCache = new Map<string, string | null>();

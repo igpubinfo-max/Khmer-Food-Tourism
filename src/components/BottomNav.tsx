@@ -56,7 +56,7 @@ export const BottomNav: React.FC = () => {
                   setActiveTab(item.id);
                 }
               }}
-              className={`group relative flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all duration-200 cursor-pointer ${
+              className={`group relative min-h-[48px] min-w-0 flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all duration-200 cursor-pointer ${
                 isActive
                   ? 'bg-gradient-to-b from-amber-400/20 via-amber-500/10 to-amber-500/5 border border-amber-400/45 text-amber-300 shadow-[0_4px_14px_rgba(251,191,36,0.16)]'
                   : 'border border-transparent text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 active:scale-95'
@@ -66,16 +66,17 @@ export const BottomNav: React.FC = () => {
                 <span className="absolute -top-1.5 w-6 h-1 rounded-full bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-500 shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
               )}
               <div
-                className={`p-1 rounded-xl transition-transform duration-200 ${
+                className={`p-1 rounded-xl shrink-0 transition-transform duration-200 ${
                   isActive
                     ? 'text-amber-300 scale-105'
                     : 'text-slate-400 group-hover:text-slate-200'
                 }`}
               >
-                <Icon className="w-[19px] h-[19px]" />
+                <Icon className="w-[19px] h-[19px] shrink-0" />
               </div>
               <span
-                className={`text-[10px] sm:text-[11px] mt-0.5 leading-tight truncate max-w-full tracking-tight font-khmer ${
+                style={{ fontSize: 'clamp(9.2px, 2.4vw, 11px)' }}
+                className={`mt-0.5 leading-[1.6] py-0.5 text-center max-w-full tracking-tight font-khmer whitespace-nowrap ${
                   isActive ? 'font-extrabold text-amber-300' : 'font-medium text-slate-400 group-hover:text-slate-200'
                 }`}
               >

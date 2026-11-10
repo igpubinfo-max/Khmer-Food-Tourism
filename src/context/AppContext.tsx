@@ -2565,6 +2565,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const setIsWhatToEatModalOpen = (open: boolean) => {
+    if (open) {
+      setSelectedFoodRaw(null);
+      setSelectedRestaurantRaw(null);
+      setSelectedDestinationRaw(null);
+      setIsDailyDiscoveriesModalOpenRaw(false);
+      setIsNearMeModalOpenRaw(false);
+      setIsGoogleMapsSearchModalOpenRaw(false);
+    }
     setIsWhatToEatModalOpenRaw(open);
   };
 
@@ -2573,6 +2581,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const setIsDailyDiscoveriesModalOpen = (open: boolean) => {
+    if (open) {
+      setSelectedFoodRaw(null);
+      setSelectedRestaurantRaw(null);
+      setSelectedDestinationRaw(null);
+      setIsWhatToEatModalOpenRaw(false);
+      setIsNearMeModalOpenRaw(false);
+      setIsGoogleMapsSearchModalOpenRaw(false);
+    }
     setIsDailyDiscoveriesModalOpenRaw(open);
   };
 

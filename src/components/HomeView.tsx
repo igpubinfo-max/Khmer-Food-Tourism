@@ -301,10 +301,15 @@ export const HomeView: React.FC = () => {
 
   const handleFoodRecommendations = useCallback(() => setIsWhatToEatModalOpen(true), [setIsWhatToEatModalOpen]);
 
+  const [homeAiQuery, setHomeAiQuery] = useState<string>('');
+
   const handleDailyFoodDiscovery = useCallback(() => {
+    if (globalSearchQuery) {
+      setGlobalSearchQuery('');
+    }
     (window as any).__kft_daily_initial_category = 'food';
     setIsDailyDiscoveriesModalOpen(true);
-  }, [setIsDailyDiscoveriesModalOpen]);
+  }, [globalSearchQuery, setGlobalSearchQuery, setIsDailyDiscoveriesModalOpen]);
 
   const handleMapNavigation = useCallback(() => openGoogleMapsSearchModal('all'), [openGoogleMapsSearchModal]);
 
@@ -316,20 +321,27 @@ export const HomeView: React.FC = () => {
 
   const handleHomeAskAi = useCallback(
     (q?: string) => {
-      const cleanQ = (q ?? globalSearchQuery ?? '').trim();
+      const cleanQ = (q ?? homeAiQuery ?? '').trim();
+      if (globalSearchQuery) {
+        setGlobalSearchQuery('');
+      }
       if (cleanQ) {
+        setHomeAiQuery('');
         openAiAssistantWithQuery(cleanQ, setIsWhatToEatModalOpen);
       } else {
         setIsWhatToEatModalOpen(true);
       }
     },
-    [globalSearchQuery, setIsWhatToEatModalOpen]
+    [homeAiQuery, globalSearchQuery, setGlobalSearchQuery, setIsWhatToEatModalOpen]
   );
 
   const handleHomeCameraAi = useCallback(() => {
+    if (globalSearchQuery) {
+      setGlobalSearchQuery('');
+    }
     (window as any).__kft_wte_open_camera = true;
     setIsWhatToEatModalOpen(true);
-  }, [setIsWhatToEatModalOpen]);
+  }, [globalSearchQuery, setGlobalSearchQuery, setIsWhatToEatModalOpen]);
 
   const handleOpenHealthyFood = useCallback(() => {
     (window as any).__kft_wte_open_health = true;
@@ -350,8 +362,8 @@ export const HomeView: React.FC = () => {
       {/* 1. Full-Bleed Angkor Wat Hero Header + Ask AI Bar (No Green Background) */}
       <AngkorHeroTopHeader
         mode="home"
-        query={globalSearchQuery}
-        onChangeQuery={setGlobalSearchQuery}
+        query={homeAiQuery}
+        onChangeQuery={setHomeAiQuery}
         onAskAi={handleHomeAskAi}
         onOpenCameraAi={handleHomeCameraAi}
       />

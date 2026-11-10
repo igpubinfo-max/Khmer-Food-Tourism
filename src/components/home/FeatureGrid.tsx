@@ -37,7 +37,7 @@ const FeatureGridImpl: React.FC<Props> = ({
       gradientStyle: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
       onClick: onNearbyFoodSearch,
       renderIcon: () => (
-        <svg className="w-7 h-7 text-white drop-shadow-xs" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
           <path d="M24 5c-6.1 0-11 4.8-11 10.8 0 7.9 11 17.7 11 17.7s11-9.8 11-17.7C35 9.8 30.1 5 24 5Z" />
           <circle cx="24" cy="15.8" r="4" />
           <path d="M13 31l-5 9 11-2.5 5 2.5 5-2.5L40 40l-5-9" />
@@ -46,11 +46,11 @@ const FeatureGridImpl: React.FC<Props> = ({
     },
     {
       id: 'compare-dishes',
-      label: tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佐餐与饮品搭配'),
+      label: tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佳肴与饮品搭配'),
       gradientStyle: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
       onClick: onNearbyPlaces,
       renderIcon: () => (
-        <svg className="w-7 h-7 text-white drop-shadow-xs" viewBox="0 0 36 32" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 36 32" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <g transform="translate(2, 2) rotate(-10 10 14)">
             <path d="M6 2h8l-1 10a3 3 0 0 1-6 0L6 2z" />
             <path d="M6.5 6h7" />
@@ -75,7 +75,7 @@ const FeatureGridImpl: React.FC<Props> = ({
       gradientStyle: 'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)',
       onClick: onFoodRecommendations,
       renderIcon: () => (
-        <svg className="w-7 h-7 text-white drop-shadow-xs" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round">
+        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round">
           <path d="M18 8c0 3-2.5 4.5-2.5 7.5S18 20 18 20" />
           <path d="M24 6c0 3-2.5 4.5-2.5 7.5S24 18 24 18" />
           <path d="M30 8c0 3-2.5 4.5-2.5 7.5S30 20 30 20" />
@@ -90,7 +90,7 @@ const FeatureGridImpl: React.FC<Props> = ({
       gradientStyle: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
       onClick: onDailyFoodDiscovery,
       renderIcon: () => (
-        <svg className="w-7 h-7 drop-shadow-xs" viewBox="0 0 52 46" fill="none">
+        <svg className="w-7 h-7 drop-shadow-xs shrink-0" viewBox="0 0 52 46" fill="none">
           <path d="M26 4l5.4 3.1 6.2-.5 3.1 5.4 5.4 3.1-.5 6.2 3.1 5.4-3.1 5.4.5 6.2-5.4 3.1-3.1 5.4-6.2-.5L26 44l-5.4-3.1-6.2.5-3.1-5.4-5.4-3.1.5-6.2L3.3 21.3l3.1-5.4-.5-6.2 5.4-3.1 3.1-5.4 6.2.5L26 4z" fill="#FFFFFF" />
           <text x="26" y="29" textAnchor="middle" fill="#1558C0" fontFamily="sans-serif" fontSize="16" fontWeight="900">
             25
@@ -104,7 +104,7 @@ const FeatureGridImpl: React.FC<Props> = ({
       gradientStyle: 'linear-gradient(180deg, #F4B630 0%, #C67D0D 100%)',
       onClick: onMapNavigation,
       renderIcon: () => (
-        <svg className="w-7 h-7 text-white drop-shadow-xs" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
           <polygon points="8 12 18 8 30 12 40 8 40 36 30 40 18 36 8 40 8 12" />
           <path d="M18 8v28" />
           <path d="M30 12v28" />
@@ -119,7 +119,7 @@ const FeatureGridImpl: React.FC<Props> = ({
       gradientStyle: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',
       onClick: onSmartAiAssistant,
       renderIcon: () => (
-        <svg className="w-7 h-7 text-white drop-shadow-xs" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <line x1="24" y1="6" x2="24" y2="11" />
           <circle cx="24" cy="5" r="2" fill="currentColor" />
           <rect x="11" y="11" width="26" height="22" rx="9" fill="currentColor" fillOpacity="0.16" />
@@ -140,7 +140,7 @@ const FeatureGridImpl: React.FC<Props> = ({
       aria-label={tr(language, 'សេវាកម្មឆ្លាតវៃប្រចាំថ្ងៃ', 'Daily Smart Services', '日常智能服务')}
       className="rounded-[22px] bg-white p-2.5 shadow-[0_5px_18px_rgba(15,23,42,0.06)] border border-white"
     >
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
         {items.map((it) => (
           <button
             key={it.id}
@@ -151,7 +151,7 @@ const FeatureGridImpl: React.FC<Props> = ({
               background: it.gradientStyle,
               boxShadow: '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
             }}
-            className="group relative rounded-[16px] py-2 px-1 flex flex-col items-center justify-center gap-1 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
+            className="group relative min-h-[72px] rounded-[16px] py-2 px-1 flex flex-col items-center justify-center gap-1 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
           >
             {/* Subtle top glass highlight */}
             <span
@@ -161,15 +161,15 @@ const FeatureGridImpl: React.FC<Props> = ({
               }}
             />
 
-            {/* Crisp centered icon (~22% more compact) */}
-            <span className="relative z-10 flex items-center justify-center transition-transform group-hover:scale-105">
+            {/* Crisp centered icon */}
+            <span className="relative z-10 flex items-center justify-center transition-transform group-hover:scale-105 shrink-0">
               {it.renderIcon()}
             </span>
 
-            {/* Crisp 1-line Khmer label */}
+            {/* Full readable label across Khmer, English, and Chinese without truncation or subscript clipping */}
             <span
-              className="relative z-10 font-khmer font-extrabold leading-snug text-center truncate w-full px-0.5 text-white"
-              style={{ fontSize: '11.5px', textShadow: '0 1px 2px rgba(0,0,0,0.28)' }}
+              className="relative z-10 font-khmer font-extrabold leading-[1.6] py-0.5 text-center break-words whitespace-normal w-full px-0.5 text-white"
+              style={{ fontSize: 'clamp(10px, 2.8vw, 11.5px)', textShadow: '0 1px 2px rgba(0,0,0,0.28)' }}
             >
               {it.label}
             </span>

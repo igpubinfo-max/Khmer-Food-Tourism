@@ -746,7 +746,7 @@ export const RestaurantView: React.FC = () => {
                 }`}
               >
                 <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-white' : 'text-[#0E5A35]'}`} strokeWidth={2.1} />
-                <span className="font-extrabold text-[11px] sm:text-xs leading-tight text-center truncate w-full">
+                <span className="font-extrabold text-[10.5px] sm:text-xs leading-[1.55] py-0.5 text-center break-words whitespace-normal w-full">
                   {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
                 </span>
               </button>
@@ -760,9 +760,9 @@ export const RestaurantView: React.FC = () => {
           ===================================================================== */}
       <div className="relative z-10 px-3.5 pt-1 space-y-3">
         {/* Row 5: 4 Rounded Filter & Sorting Controls */}
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="grid grid-cols-2 min-[420px]:grid-cols-4 gap-1.5">
           {/* Control 1: Location / Province */}
-          <label className="relative h-9 px-2 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
+          <label className="relative min-h-[40px] px-2.5 py-1 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
             <MapPin className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
             <span className="truncate">
               {cleanSelectedProvince
@@ -787,7 +787,7 @@ export const RestaurantView: React.FC = () => {
           </label>
 
           {/* Control 2: Food Category */}
-          <label className="relative h-9 px-2 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
+          <label className="relative min-h-[40px] px-2.5 py-1 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
             <Utensils className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
             <span className="truncate">
               {(() => {
@@ -811,7 +811,7 @@ export const RestaurantView: React.FC = () => {
           </label>
 
           {/* Control 3: Rating */}
-          <label className="relative h-9 px-2 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
+          <label className="relative min-h-[40px] px-2.5 py-1 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
             <Star className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
             <span className="truncate">
               {ratingFilter === '4.5'
@@ -834,7 +834,7 @@ export const RestaurantView: React.FC = () => {
           </label>
 
           {/* Control 4: Advanced Filters / Sort */}
-          <label className="relative h-9 px-2 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
+          <label className="relative min-h-[40px] px-2.5 py-1 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
             <SlidersHorizontal className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
             <span className="truncate">
               {sortMode === 'nearest'
@@ -1023,7 +1023,7 @@ export const RestaurantView: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="space-y-2.5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                   {featuredRestaurants.map((restaurant) => (
                     <RestaurantCard
                       key={restaurant.id}
@@ -1053,7 +1053,7 @@ export const RestaurantView: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {displayedDirectoryRestaurants.map((restaurant) => (
                     <RestaurantCard
                       key={restaurant.id}

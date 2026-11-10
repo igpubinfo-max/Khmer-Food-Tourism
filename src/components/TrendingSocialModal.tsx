@@ -44,6 +44,7 @@ import {
   deduplicateSingleVideoList,
   OnlineFoodDiscoveryItem,
   resolveOriginalSocialAccountUrl,
+  resolvePlayableTikTokStreamUrl,
 } from '../services/onlineFoodDiscoveryService';
 import { savedVideoRecordToDiscoveryItem } from '../services/userVideoCollectionService';
 
@@ -137,6 +138,9 @@ export const TrendingSocialModal: React.FC = () => {
   // Active inline video player tracking & embed fallback state
   const [activePlayerItemId, setActivePlayerItemId] = useState<string | null>(null);
   const [embedFallbackItemIds, setEmbedFallbackItemIds] = useState<Record<string, boolean>>({});
+  const [resolvedDirectVideoUrls, setResolvedDirectVideoUrls] = useState<
+    Record<string, { primaryUrl: string; backupUrl?: string; usingBackup?: boolean; failedAllDirect?: boolean }>
+  >({});
   const [verifyingPlayItemId, setVerifyingPlayItemId] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState<boolean>(
     () => typeof navigator !== 'undefined' && navigator.onLine === false
@@ -203,12 +207,19 @@ export const TrendingSocialModal: React.FC = () => {
   const handleReplaceUnavailableVideo = useCallback(
     (unavailableItem: OnlineFoodDiscoveryItem, notifyUser = false) => {
       if (unavailableItem.platform === 'tiktok' || unavailableItem.platform === 'facebook') {
-        // CRITICAL: Never replace TikTok or Facebook videos with a YouTube video!
-        // Instead, show the direct official TikTok/Facebook creator link fallback UI cleanly.
+        const nextInlineVid = getNextPlayableSocialVideoId(unavailableItem.inlineVideoId);
+        setDiscoveryItems((prev) =>
+          prev.map((x) =>
+            x.id === unavailableItem.id
+              ? { ...x, inlineVideoId: nextInlineVid, canInlineEmbed: true }
+              : x
+          )
+        );
         setEmbedFallbackItemIds((prev) => ({
           ...prev,
-          [unavailableItem.id]: true,
+          [unavailableItem.id]: false,
         }));
+        setPlayerReloadKey((prev) => prev + 1);
         return;
       }
 
@@ -714,6 +725,29 @@ export const TrendingSocialModal: React.FC = () => {
     }
 
     setVerifyingPlayItemId(item.id);
+
+    if (item.platform === 'tiktok') {
+      const [reachable, streamRes] = await Promise.all([
+        checkYouTubeConnectivity(),
+        resolvePlayableTikTokStreamUrl(item).catch(() => ({ primaryUrl: null, backupUrl: null })),
+      ]);
+      if (streamRes?.primaryUrl) {
+        setResolvedDirectVideoUrls((prev) => ({
+          ...prev,
+          [item.id]: {
+            primaryUrl: streamRes.primaryUrl!,
+            backupUrl: streamRes.backupUrl || undefined,
+            usingBackup: false,
+            failedAllDirect: false,
+          },
+        }));
+      }
+      setVerifyingPlayItemId(null);
+      setIsOffline(!reachable && !streamRes?.primaryUrl && !item.directVideoUrl);
+      setActivePlayerItemId(item.id);
+      return;
+    }
+
     const reachable = await checkYouTubeConnectivity();
     setVerifyingPlayItemId(null);
 
@@ -721,13 +755,30 @@ export const TrendingSocialModal: React.FC = () => {
     setActivePlayerItemId(item.id);
   };
 
-  /** Retry loading and playing the YouTube Embed Player once internet is restored */
+  /** Retry loading and playing the inline video player once internet is restored */
   const handleRetryVideoPlayback = async (item: OnlineFoodDiscoveryItem) => {
     setIsRetryingConnection(true);
-    const reachable = await checkYouTubeConnectivity();
+    const [reachable, streamRes] = await Promise.all([
+      checkYouTubeConnectivity(),
+      item.platform === 'tiktok'
+        ? resolvePlayableTikTokStreamUrl(item).catch(() => ({ primaryUrl: null, backupUrl: null }))
+        : Promise.resolve({ primaryUrl: null, backupUrl: null }),
+    ]);
     setIsRetryingConnection(false);
 
-    if (reachable) {
+    if (streamRes?.primaryUrl) {
+      setResolvedDirectVideoUrls((prev) => ({
+        ...prev,
+        [item.id]: {
+          primaryUrl: streamRes.primaryUrl!,
+          backupUrl: streamRes.backupUrl || undefined,
+          usingBackup: false,
+          failedAllDirect: false,
+        },
+      }));
+    }
+
+    if (reachable || streamRes?.primaryUrl) {
       setIsOffline(false);
       setEmbedFallbackItemIds((prev) => ({ ...prev, [item.id]: false }));
       setPlayerReloadKey((prev) => prev + 1);
@@ -1317,6 +1368,15 @@ export const TrendingSocialModal: React.FC = () => {
                 const isPlayingInline = activePlayerItemId === item.id;
                 const isEmbedFallback = Boolean(embedFallbackItemIds[item.id] || !playerInfo.canInlineEmbed);
                 const isVerifyingThis = verifyingPlayItemId === item.id;
+                const directEntry = resolvedDirectVideoUrls[item.id];
+                const activeDirectVideoUrl =
+                  directEntry && !directEntry.failedAllDirect
+                    ? directEntry.usingBackup && directEntry.backupUrl
+                      ? directEntry.backupUrl
+                      : directEntry.primaryUrl
+                    : !directEntry?.failedAllDirect
+                    ? playerInfo.directVideoUrl || null
+                    : null;
 
                 return (
                   <div
@@ -1455,33 +1515,75 @@ export const TrendingSocialModal: React.FC = () => {
                         </div>
                       ) : (
                         <div className="relative aspect-16/9 w-full bg-black overflow-hidden shadow-inner">
-                          <iframe
-                            key={`${item.id}-${playerReloadKey}`}
-                            ref={activeIframeRef}
-                            src={playerInfo.embedUrl}
-                            title={displayTitle}
-                            className="w-full h-full border-0"
-                            referrerPolicy="strict-origin-when-cross-origin"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-                            allowFullScreen
-                            onLoad={(e) => {
-                              try {
-                                e.currentTarget.contentWindow?.postMessage(
-                                  JSON.stringify({ event: 'listening', id: item.id }),
-                                  '*'
-                                );
-                              } catch {
-                                // ignore cross-origin postMessage errors
-                              }
-                            }}
-                            onError={() => {
-                              if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-                                setIsOffline(true);
-                                return;
-                              }
-                              setEmbedFallbackItemIds((prev) => ({ ...prev, [item.id]: true }));
-                            }}
-                          />
+                          {activeDirectVideoUrl ? (
+                            <video
+                              key={`${item.id}-${activeDirectVideoUrl}-${playerReloadKey}`}
+                              src={activeDirectVideoUrl}
+                              poster={item.thumbnailUrl}
+                              controls
+                              autoPlay
+                              playsInline
+                              preload="auto"
+                              className="w-full h-full object-contain bg-black"
+                              onError={() => {
+                                if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+                                  setIsOffline(true);
+                                  return;
+                                }
+                                setResolvedDirectVideoUrls((prev) => {
+                                  const curr = prev[item.id];
+                                  if (
+                                    curr &&
+                                    !curr.usingBackup &&
+                                    curr.backupUrl &&
+                                    curr.backupUrl !== curr.primaryUrl
+                                  ) {
+                                    return {
+                                      ...prev,
+                                      [item.id]: { ...curr, usingBackup: true },
+                                    };
+                                  }
+                                  return {
+                                    ...prev,
+                                    [item.id]: {
+                                      primaryUrl: curr?.primaryUrl || activeDirectVideoUrl,
+                                      backupUrl: curr?.backupUrl,
+                                      usingBackup: true,
+                                      failedAllDirect: true,
+                                    },
+                                  };
+                                });
+                              }}
+                            />
+                          ) : (
+                            <iframe
+                              key={`${item.id}-${playerInfo.embedUrl}-${playerReloadKey}`}
+                              ref={activeIframeRef}
+                              src={playerInfo.embedUrl || ''}
+                              title={displayTitle}
+                              className="w-full h-full border-0"
+                              referrerPolicy="strict-origin-when-cross-origin"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                              allowFullScreen
+                              onLoad={(e) => {
+                                try {
+                                  e.currentTarget.contentWindow?.postMessage(
+                                    JSON.stringify({ event: 'listening', id: item.id }),
+                                    '*'
+                                  );
+                                } catch {
+                                  // ignore cross-origin postMessage errors
+                                }
+                              }}
+                              onError={() => {
+                                if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+                                  setIsOffline(true);
+                                  return;
+                                }
+                                handleReplaceUnavailableVideo(item, false);
+                              }}
+                            />
+                          )}
                           <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
                             <button
                               type="button"

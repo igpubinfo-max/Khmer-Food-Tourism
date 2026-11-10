@@ -327,12 +327,12 @@ export const TourismView: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
           {displayedDestinations.map((dest) => (
             <TouristCard key={dest.id} destination={dest} />
           ))}
           {visibleCount < filteredDestinations.length && (
-            <div ref={loadMoreTriggerRef} className="pt-2 flex justify-center">
+            <div ref={loadMoreTriggerRef} className="col-span-full pt-2 flex justify-center">
               <button
                 type="button"
                 onClick={() => setVisibleCount((prev) => Math.min(filteredDestinations.length, prev + TOURISM_BATCH_SIZE))}

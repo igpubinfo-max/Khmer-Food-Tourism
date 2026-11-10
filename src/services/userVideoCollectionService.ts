@@ -46,6 +46,8 @@ export interface UserSavedVideoRecord {
   thumbnailUrl: string;
   /** Optional inline video ID */
   inlineVideoId?: string;
+  /** Optional direct video stream URL */
+  directVideoUrl?: string;
   /** Category slug */
   categorySlug: TrendingFoodCategorySlug;
   /** Province in Khmer */
@@ -182,6 +184,7 @@ export function buildUserSavedVideoRecord(
     descriptionEn: item.descriptionEn || item.descriptionKh || '',
     thumbnailUrl: item.thumbnailUrl || '/foods/food-1.jpg',
     inlineVideoId: item.inlineVideoId,
+    directVideoUrl: item.directVideoUrl,
     categorySlug: item.categorySlug || 'popular_food',
     provinceKh: item.provinceKh || 'ភ្នំពេញ',
     provinceEn: item.provinceEn || 'Phnom Penh',
@@ -217,8 +220,9 @@ export function savedVideoRecordToDiscoveryItem(rec: UserSavedVideoRecord): Onli
     provinceEn: rec.provinceEn || 'Phnom Penh',
     relevanceScore: 99,
     isPlayableVerified: true,
-    canInlineEmbed: rec.platform !== 'facebook',
+    canInlineEmbed: true,
     inlineVideoId: rec.inlineVideoId,
+    directVideoUrl: rec.directVideoUrl,
   };
 }
 

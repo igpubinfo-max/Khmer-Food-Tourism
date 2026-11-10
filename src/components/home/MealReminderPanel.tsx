@@ -182,15 +182,17 @@ const MealReminderPanelInner: React.FC = () => {
         onClick={() => void onEnable()}
         disabled={busy}
         data-testid="meal-reminder-enable"
-        className="w-full min-h-[36px] flex items-center gap-2 rounded-xl bg-emerald-50/80 hover:bg-emerald-100/70 dark:bg-slate-900/50 border border-emerald-500/40 px-2.5 py-1 text-left active:scale-[0.98] transition cursor-pointer disabled:opacity-60"
+        className="w-full min-h-[44px] flex items-center justify-between gap-2.5 rounded-xl bg-emerald-50/80 hover:bg-emerald-100/70 dark:bg-slate-900/50 border border-emerald-500/40 px-3 py-2 text-left active:scale-[0.98] transition cursor-pointer disabled:opacity-60 font-khmer"
       >
-        <Bell className="w-4 h-4 text-[#064E3B] dark:text-emerald-300 shrink-0" strokeWidth={1.75} />
-        <span className="min-w-0 flex-1 truncate text-[12.5px] font-extrabold text-[#064E3B] dark:text-emerald-200 leading-snug">
-          {permission === 'denied' && settings.enabled
-            ? tr(language, 'ការជូនដំណឹងត្រូវបានបិទក្នុង Settings — ចុចព្យាយាមម្តងទៀត', 'Notifications blocked in Settings — tap to retry', '通知已被关闭 — 点击重试')
-            : tr(language, 'ការរំលឹកទទួលទានអាហារទៀងទាត់', 'Regular meal reminders', '规律用餐提醒')}
+        <span className="min-w-0 flex-1 flex items-center gap-2">
+          <Bell className="w-4.5 h-4.5 text-[#064E3B] dark:text-emerald-300 shrink-0" strokeWidth={1.9} />
+          <span className="min-w-0 flex-1 text-[12.5px] sm:text-[13px] font-extrabold text-[#064E3B] dark:text-emerald-200 leading-[1.65] py-0.5 break-words whitespace-normal">
+            {permission === 'denied' && settings.enabled
+              ? tr(language, 'ការជូនដំណឹងត្រូវបានបិទក្នុង Settings — ចុចព្យាយាមម្ដងទៀត', 'Notifications blocked in Settings — tap to retry', '通知已被关闭 — 点击重试')
+              : tr(language, 'ការរំលឹកទទួលទានអាហារទៀងទាត់', 'Regular meal reminders', '规律用餐提醒')}
+          </span>
         </span>
-        <span className="shrink-0 px-3 py-0.5 rounded-lg bg-emerald-600 text-white text-xs font-bold">
+        <span className="shrink-0 min-h-[34px] px-3.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-extrabold inline-flex items-center justify-center leading-relaxed">
           {busy ? '…' : tr(language, 'បើក', 'Turn on', '开启')}
         </span>
       </button>
@@ -202,63 +204,74 @@ const MealReminderPanelInner: React.FC = () => {
     .join(' · ');
 
   return (
-    <div data-testid="meal-reminder-panel" className="rounded-xl border border-emerald-500/40 bg-emerald-50/70 dark:bg-slate-900/50">
+    <div data-testid="meal-reminder-panel" className="rounded-xl border border-emerald-500/40 bg-emerald-50/70 dark:bg-slate-900/50 font-khmer">
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
-        className="w-full min-h-[36px] flex items-center gap-2 px-2.5 py-1 text-left cursor-pointer"
+        className="w-full min-h-[44px] flex flex-wrap items-center justify-between gap-x-2 gap-y-1 px-3 py-2 text-left cursor-pointer"
       >
-        <Bell className="w-4 h-4 text-[#064E3B] dark:text-emerald-300 shrink-0" strokeWidth={1.75} />
-        <span className="min-w-0 flex-1 truncate text-[12.5px] font-extrabold text-[#064E3B] dark:text-emerald-200 leading-snug">
-          {tr(language, 'ការរំលឹកទទួលទានអាហារទៀងទាត់', 'Regular meal reminders', '规律用餐提醒')}
+        <span className="min-w-0 flex-1 flex items-center gap-2">
+          <Bell className="w-4.5 h-4.5 text-[#064E3B] dark:text-emerald-300 shrink-0" strokeWidth={1.9} />
+          <span className="min-w-0 flex-1 text-[12.5px] sm:text-[13px] font-extrabold text-[#064E3B] dark:text-emerald-200 leading-[1.65] py-0.5 break-words whitespace-normal">
+            {tr(language, 'ការរំលឹកទទួលទានអាហារទៀងទាត់', 'Regular meal reminders', '规律用餐提醒')}
+          </span>
         </span>
-        <span className="shrink-0 text-[11px] font-mono font-bold text-slate-600 dark:text-slate-300">
-          {timesSummary || tr(language, 'មិនទាន់ជ្រើស', 'None', '未选择')}
+        <span className="flex items-center gap-1.5 shrink-0 ml-auto">
+          <span className="px-2 py-0.5 rounded-md bg-white/80 dark:bg-slate-800/80 border border-emerald-500/25 text-[11px] font-mono font-bold text-slate-700 dark:text-slate-200 whitespace-nowrap">
+            {timesSummary || tr(language, 'មិនទាន់ជ្រើស', 'None', '未选择')}
+          </span>
+          <ChevronDown className={`w-4.5 h-4.5 text-emerald-700 dark:text-emerald-300 shrink-0 transition ${expanded ? 'rotate-180' : ''}`} strokeWidth={1.9} />
         </span>
-        <ChevronDown className={`w-4 h-4 text-emerald-700 dark:text-emerald-300 shrink-0 transition ${expanded ? 'rotate-180' : ''}`} strokeWidth={1.75} />
       </button>
 
       {expanded && (
-        <div className="px-2.5 pb-2.5 space-y-2">
-          {REMINDER_SLOTS.map((slot) => {
-            const cfg = settings.slots[slot];
-            return (
-              <div key={slot} className="flex items-center gap-2">
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={cfg.on}
-                  aria-label={slotName(slot)}
-                  onClick={() => updateSlot(slot, { on: !cfg.on })}
-                  className={`relative w-11 h-6 rounded-full shrink-0 transition cursor-pointer ${cfg.on ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-600'}`}
+        <div className="px-3 pb-3 space-y-2.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {REMINDER_SLOTS.map((slot) => {
+              const cfg = settings.slots[slot];
+              return (
+                <div
+                  key={slot}
+                  className="flex flex-wrap items-center justify-between gap-x-2.5 gap-y-1.5 rounded-xl bg-white/85 dark:bg-slate-800/80 border border-emerald-500/25 px-2.5 py-2"
                 >
-                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${cfg.on ? 'translate-x-5' : ''}`} />
-                </button>
-                <span className="flex-1 min-w-0 text-[13px] font-bold text-slate-800 dark:text-slate-100 truncate">
-                  {slotName(slot)}
-                </span>
-                <input
-                  type="time"
-                  value={cfg.time}
-                  disabled={!cfg.on}
-                  onChange={(e) => updateSlot(slot, { time: e.target.value })}
-                  aria-label={`${slotName(slot)} time`}
-                  className="min-h-[40px] px-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono disabled:opacity-40"
-                />
-              </div>
-            );
-          })}
+                  <div className="flex items-center gap-2.5 min-w-[7.5rem] flex-1">
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={cfg.on}
+                      aria-label={slotName(slot)}
+                      onClick={() => updateSlot(slot, { on: !cfg.on })}
+                      className={`relative w-11 h-6 rounded-full shrink-0 transition cursor-pointer ${cfg.on ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-600'}`}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${cfg.on ? 'translate-x-5' : ''}`} />
+                    </button>
+                    <span className="text-[13px] font-extrabold text-slate-800 dark:text-slate-100 leading-[1.65] py-0.5 break-words whitespace-normal">
+                      {slotName(slot)}
+                    </span>
+                  </div>
+                  <input
+                    type="time"
+                    value={cfg.time}
+                    disabled={!cfg.on}
+                    onChange={(e) => updateSlot(slot, { time: e.target.value })}
+                    aria-label={`${slotName(slot)} time`}
+                    className="min-h-[40px] px-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono shrink-0 disabled:opacity-40"
+                  />
+                </div>
+              );
+            })}
+          </div>
 
           {/* Truth from the OS: when is the next reminder REALLY scheduled? */}
-          <p data-testid="meal-reminder-next" className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+          <p data-testid="meal-reminder-next" className="text-[11.5px] font-semibold text-slate-700 dark:text-slate-200 leading-[1.65] py-0.5">
             {next
               ? tr(language, `ការរំលឹកបន្ទាប់៖ ${describeNext(next)}`, `Next reminder: ${describeNext(next)}`, `下一次提醒：${describeNext(next)}`)
               : tr(language, 'មិនទាន់មានការរំលឹកដែលបានកំណត់ទេ', 'No reminder is scheduled yet', '尚无已安排的提醒')}
           </p>
 
           {exactState === 'denied' && (
-            <p className="text-[10.5px] leading-snug text-amber-800 dark:text-amber-200 bg-amber-100/70 dark:bg-amber-400/10 rounded-lg px-2 py-1">
+            <p className="text-[11px] leading-[1.65] text-amber-800 dark:text-amber-200 bg-amber-100/70 dark:bg-amber-400/10 rounded-lg px-2.5 py-1.5">
               {tr(
                 language,
                 'ទូរស័ព្ទអាចពន្យារការរំលឹកខ្លះៗ (ប៉ុន្មាននាទី)។ ចុច «ទៀងម៉ោង» ដើម្បីអនុញ្ញាតឱ្យរោទ៍ត្រង់នាទីដែលបានកំណត់។',
@@ -274,7 +287,7 @@ const MealReminderPanelInner: React.FC = () => {
               onClick={() => void onTest()}
               disabled={busy}
               data-testid="meal-reminder-test"
-              className="flex-1 min-w-[120px] min-h-[40px] rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-60"
+              className="flex-1 min-w-[120px] min-h-[44px] px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold leading-[1.6] transition cursor-pointer disabled:opacity-60"
             >
               {tr(language, 'សាកល្បងឥឡូវនេះ', 'Test now', '立即测试')}
             </button>
@@ -283,7 +296,7 @@ const MealReminderPanelInner: React.FC = () => {
                 type="button"
                 onClick={() => void onExactAlarm()}
                 data-testid="meal-reminder-exact"
-                className="flex-1 min-w-[120px] min-h-[40px] rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold transition cursor-pointer"
+                className="flex-1 min-w-[120px] min-h-[44px] px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold leading-[1.6] transition cursor-pointer"
               >
                 {tr(language, 'ទៀងម៉ោង', 'On-time', '准时')}
               </button>
@@ -292,7 +305,7 @@ const MealReminderPanelInner: React.FC = () => {
               type="button"
               onClick={() => void onDisable()}
               disabled={busy}
-              className="flex-1 min-w-[120px] min-h-[40px] rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700/60 transition cursor-pointer disabled:opacity-60"
+              className="flex-1 min-w-[120px] min-h-[44px] px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold leading-[1.6] hover:bg-slate-100 dark:hover:bg-slate-700/60 transition cursor-pointer disabled:opacity-60"
             >
               {tr(language, 'បិទការរំលឹកទាំងអស់', 'Turn off all', '全部关闭')}
             </button>
