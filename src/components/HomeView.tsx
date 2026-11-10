@@ -868,7 +868,7 @@ export const HomeView: React.FC = () => {
                   language={language}
                   foods={foods}
                   favoriteIds={bookmarks}
-                  onToggleFavorite={(fid) => toggleBookmark(fid, 'food')}
+                  onToggleFavorite={(fid) => toggleBookmark(fid)}
                   onOpenFood={setSelectedFood}
                   onSeeAllFoods={handleSeeAllFoods}
                   onOpenHealthyFood={handleOpenHealthyFood}
@@ -1079,7 +1079,7 @@ export const HomeView: React.FC = () => {
                 language={language}
                 foods={foods}
                 favoriteIds={bookmarks}
-                onToggleFavorite={(fid) => toggleBookmark(fid, 'food')}
+                onToggleFavorite={(fid) => toggleBookmark(fid)}
                 onOpenFood={setSelectedFood}
                 onSeeAllFoods={handleSeeAllFoods}
                 onOpenHealthyFood={handleOpenHealthyFood}

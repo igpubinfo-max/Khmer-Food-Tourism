@@ -163,7 +163,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
                     alt={loc.name}
                     loading="lazy"
                     decoding="async"
-                    onError={(e) => handleFoodImageError(e, food)}
+                    onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   {/* Bottom Dark Gradient Overlay for Crisp White Khmer Label */}

@@ -33,6 +33,7 @@ import {
   Home,
   Building2,
   Utensils,
+  Plus,
   X,
   Calendar,
   Check,

@@ -981,7 +981,7 @@ export const RestaurantView: React.FC = () => {
         {/* ===================================================================
             3. TRENDING / NEARBY SHOPS & DIRECTORY
             =================================================================== */}
-        {filteredRestaurants.length > 0 ? (
+        {sortedRestaurants.length > 0 ? (
           <div className="space-y-3.5 pt-0.5">
             {/* Section 1: ហាងពេញនិយមជិតខ្ញុំ (Popular Shops Near Me) */}
             {featuredRestaurants.length > 0 && (

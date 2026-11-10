@@ -68,28 +68,28 @@ export const PaymentSupportModal: React.FC = () => {
         ]
       : []),
     {
-      planId: consumerCatalog.plan30d.planId as OfficialPlanId,
+      planId: consumerCatalog.monthly30d.planId as OfficialPlanId,
       planType: 'quarterly' as const,
-      nameKh: consumerCatalog.plan30d.titleKm,
-      nameEn: consumerCatalog.plan30d.titleEn,
-      priceUsd: consumerCatalog.plan30d.priceUsd,
-      durationDays: consumerCatalog.plan30d.durationDays,
+      nameKh: consumerCatalog.monthly30d.titleKm,
+      nameEn: consumerCatalog.monthly30d.titleEn,
+      priceUsd: consumerCatalog.monthly30d.priceUsd,
+      durationDays: consumerCatalog.monthly30d.durationDays,
     },
     {
-      planId: consumerCatalog.plan90d.planId as OfficialPlanId,
+      planId: consumerCatalog.quarterly90d.planId as OfficialPlanId,
       planType: 'annual' as const,
-      nameKh: consumerCatalog.plan90d.titleKm,
-      nameEn: consumerCatalog.plan90d.titleEn,
-      priceUsd: consumerCatalog.plan90d.priceUsd,
-      durationDays: consumerCatalog.plan90d.durationDays,
+      nameKh: consumerCatalog.quarterly90d.titleKm,
+      nameEn: consumerCatalog.quarterly90d.titleEn,
+      priceUsd: consumerCatalog.quarterly90d.priceUsd,
+      durationDays: consumerCatalog.quarterly90d.durationDays,
     },
     {
-      planId: consumerCatalog.plan365d.planId as OfficialPlanId,
+      planId: consumerCatalog.yearly365d.planId as OfficialPlanId,
       planType: 'annual' as const,
-      nameKh: consumerCatalog.plan365d.titleKm,
-      nameEn: consumerCatalog.plan365d.titleEn,
-      priceUsd: consumerCatalog.plan365d.priceUsd,
-      durationDays: consumerCatalog.plan365d.durationDays,
+      nameKh: consumerCatalog.yearly365d.titleKm,
+      nameEn: consumerCatalog.yearly365d.titleEn,
+      priceUsd: consumerCatalog.yearly365d.priceUsd,
+      durationDays: consumerCatalog.yearly365d.durationDays,
     },
   ];
 
@@ -308,9 +308,9 @@ export const PaymentSupportModal: React.FC = () => {
     const livePlans = getDynamicVipPlans(latestSettings);
     const livePlanCfg =
       selectedPlanId === 'consumer_365d'
-        ? { priceUsd: liveCatalog.plan365d.priceUsd, durationDays: liveCatalog.plan365d.durationDays }
+        ? { priceUsd: liveCatalog.yearly365d.priceUsd, durationDays: liveCatalog.yearly365d.durationDays }
         : selectedPlanId === 'consumer_90d'
-        ? { priceUsd: liveCatalog.plan90d.priceUsd, durationDays: liveCatalog.plan90d.durationDays }
+        ? { priceUsd: liveCatalog.quarterly90d.priceUsd, durationDays: liveCatalog.quarterly90d.durationDays }
         : selectedPlanId === 'consumer_promo_30d'
         ? { priceUsd: liveCatalog.promo30dPlan.priceUsd, durationDays: liveCatalog.promo30dPlan.durationDays }
         : livePlans[selectedPlan];
