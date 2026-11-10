@@ -114,7 +114,7 @@ const FeatureGridImpl: React.FC<Props> = ({
     },
     {
       id: 'smart-ai',
-      label: tr(language, 'ជំនួយការឆ្លាតវៃ', 'Smart AI', '智能助手'),
+      label: tr(language, 'ជំនួយការឆ្លាតវៃ Ai', 'Smart AI', 'AI 智能助手'),
       gradientStyle: 'linear-gradient(180deg, #27AAA5 0%, #136B6E 100%)',
       onClick: onSmartAiAssistant,
       renderIcon: () => (

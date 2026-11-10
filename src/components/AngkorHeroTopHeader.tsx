@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   Bell,
-  User as UserIcon,
   Menu,
   ArrowLeft,
   Camera,
@@ -38,6 +37,7 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
     setLanguage,
     setActiveTab,
     currentUser,
+    users,
     setIsAuthModalOpen,
     setIsSupportModalOpen,
     setIsQrScannerModalOpen,
@@ -48,6 +48,39 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
   } = useApp();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [avatarTick, setAvatarTick] = useState(0);
+
+  useEffect(() => {
+    const onAvatarUpdated = () => setAvatarTick((t) => t + 1);
+    window.addEventListener('kft-avatar-cache-updated', onAvatarUpdated);
+    window.addEventListener('storage', onAvatarUpdated);
+    return () => {
+      window.removeEventListener('kft-avatar-cache-updated', onAvatarUpdated);
+      window.removeEventListener('storage', onAvatarUpdated);
+    };
+  }, []);
+
+  const effectiveUser = React.useMemo(() => {
+    void avatarTick;
+    if (!currentUser) return null;
+    const matched = Array.isArray(users)
+      ? users.find(
+          (u) =>
+            u.id === currentUser.id ||
+            (u.email && currentUser.email && u.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+            (u.name && currentUser.name && u.name.trim().toLowerCase() === currentUser.name.trim().toLowerCase())
+        )
+      : undefined;
+    if (matched && matched.avatar && (!currentUser.avatar || currentUser.avatar.startsWith('data:image/svg'))) {
+      return { ...currentUser, avatar: matched.avatar, cloudAvatarUrl: matched.cloudAvatarUrl || currentUser.cloudAvatarUrl };
+    }
+    return currentUser;
+  }, [currentUser, users, avatarTick]);
+
+  const resolvedProfileAvatar = React.useMemo(() => {
+    void avatarTick;
+    return resolveUserAvatarUrl(effectiveUser || { name: 'KH', role: 'user' });
+  }, [effectiveUser, avatarTick]);
   const menuRef = useRef<HTMLDivElement>(null);
   const isAdmin = isAdminAccount(currentUser);
 
@@ -276,18 +309,17 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
             }}
             title={tr(language, 'គណនីរបស់ខ្ញុំ', 'My Account', '我的账户')}
             aria-label={tr(language, 'គណនីរបស់ខ្ញុំ', 'My Account', '我的账户')}
-            className="w-9 h-9 rounded-full bg-black/25 hover:bg-black/40 border-2 border-white/80 text-white flex items-center justify-center overflow-hidden backdrop-blur-xs active:scale-95 transition cursor-pointer"
+            className="w-10 h-10 rounded-full bg-emerald-900/80 hover:bg-emerald-800 border-2 border-white shadow-md text-white flex items-center justify-center overflow-hidden active:scale-95 transition cursor-pointer shrink-0"
           >
-            {currentUser ? (
-              <img
-                src={resolveUserAvatarUrl(currentUser)}
-                alt={currentUser.name}
-                onError={(e) => handleAvatarImageError(e, currentUser)}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <UserIcon className="w-4 h-4 text-white" />
-            )}
+            <img
+              key={resolvedProfileAvatar}
+              src={resolvedProfileAvatar}
+              alt={effectiveUser?.name || 'Profile'}
+              referrerPolicy="no-referrer"
+              decoding="async"
+              onError={(e) => handleAvatarImageError(e, effectiveUser)}
+              className="w-full h-full object-cover"
+            />
           </button>
         </div>
       </div>
@@ -346,7 +378,9 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
         <div className="absolute inset-x-3 bottom-7 z-20">
           <div
             style={{
-              background: 'linear-gradient(180deg, #FFFDF5 0%, #FBE9A8 100%)',
+              background: 'rgba(55, 65, 81, 0.80)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
               boxShadow: '0 6px 18px rgba(0, 0, 0, 0.35)',
             }}
             className="w-full h-[54px] rounded-full border-2 border-[#E8B923] p-1.5 flex items-center gap-2"
@@ -380,14 +414,15 @@ export const AngkorHeroTopHeader: React.FC<AngkorHeroTopHeaderProps> = ({
                   'Ask anything about food or snap a photo...',
                   '询问任何美食问题或拍照识别...'
                 )}
-                className="w-full bg-transparent text-xs sm:text-[13px] font-khmer font-bold text-slate-800 placeholder-slate-600 focus:outline-none truncate"
+                style={{ color: '#FFFFFF' }}
+                className="w-full bg-transparent text-xs sm:text-[13px] font-khmer font-bold text-white placeholder-white focus:outline-none truncate"
               />
               {query && onChangeQuery && (
                 <button
                   type="button"
                   onClick={() => onChangeQuery('')}
                   aria-label="Clear"
-                  className="p-1 text-slate-500 hover:text-slate-800 shrink-0 cursor-pointer"
+                  className="p-1 text-white/80 hover:text-white shrink-0 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>

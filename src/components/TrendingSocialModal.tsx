@@ -589,6 +589,20 @@ export const TrendingSocialModal: React.FC = () => {
    *   never renders the raw `Web page not available / net::ERR_INTERNET_DISCONNECTED` screen
    * - If embedding is disabled, show the clear "Watch on YouTube" fallback UI
    */
+
+  /**
+   * Opens the creator's original TikTok, Facebook, or YouTube account/video URL
+   * when the user clicks the [TikTok], [Facebook], or [YouTube] button or creator account link.
+   */
+  const openOriginalSocialAccount = (item: OnlineFoodDiscoveryItem) => {
+    const targetUrl = resolveOriginalSocialAccountUrl(item);
+    try {
+      openExternalUrlNativeSafe(targetUrl);
+    } catch {
+      openExternalVideoSafely(targetUrl, item.titleEn || item.titleKh);
+    }
+  };
+
   const handlePlayOrOpenItem = async (item: OnlineFoodDiscoveryItem) => {
     if (activePlayerItemId === item.id) {
       setActivePlayerItemId(null);
@@ -1306,7 +1320,7 @@ export const TrendingSocialModal: React.FC = () => {
                             <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                               <button
                                 type="button"
-                                onClick={() => openExternalVideoSafely(playerInfo.watchUrl, displayTitle)}
+                                onClick={() => openOriginalSocialAccount(item)}
                                 className="px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-lg cursor-pointer"
                               >
                                 <Play className="w-3.5 h-3.5 fill-current" />
@@ -1361,18 +1375,31 @@ export const TrendingSocialModal: React.FC = () => {
                             }}
                           />
                           <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
-                            <span
-                              className={`px-2 py-1 rounded-lg text-[10px] font-black text-white flex items-center gap-1 shadow-xs ${
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openOriginalSocialAccount(item);
+                              }}
+                              title={
                                 item.platform === 'tiktok'
-                                  ? 'bg-black/90 border border-white/30'
+                                  ? tr(language, 'បើកគណនី TikTok ដើម', 'Open Original TikTok Account', '打开原 TikTok 账号')
                                   : item.platform === 'facebook'
-                                  ? 'bg-[#1877F2]'
-                                  : 'bg-red-600/90'
+                                  ? tr(language, 'បើកគណនី Facebook ដើម', 'Open Original Facebook Account', '打开原 Facebook 账号')
+                                  : tr(language, 'បើកគណនី YouTube ដើម', 'Open Original YouTube Channel', '打开原 YouTube 频道')
+                              }
+                              className={`px-2.5 py-1 rounded-lg text-[10px] font-black text-white flex items-center gap-1 shadow-md cursor-pointer active:scale-95 transition ${
+                                item.platform === 'tiktok'
+                                  ? 'bg-black/90 hover:bg-black border border-white/40'
+                                  : item.platform === 'facebook'
+                                  ? 'bg-[#1877F2] hover:bg-blue-600 border border-white/30'
+                                  : 'bg-red-600 hover:bg-red-700 border border-white/30'
                               }`}
                             >
                               <Play className="w-2.5 h-2.5 fill-current" />
                               <span>{item.platform === 'tiktok' ? 'TikTok' : item.platform === 'facebook' ? 'Facebook' : 'YouTube'}</span>
-                            </span>
+                              <ExternalLink className="w-2.5 h-2.5 ml-0.5 opacity-90" />
+                            </button>
                             <button
                               type="button"
                               onClick={() => setActivePlayerItemId(null)}
@@ -1423,39 +1450,48 @@ export const TrendingSocialModal: React.FC = () => {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
-                        {/* Platform & Verification Badge */}
-                        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-[9px] font-black shadow-xs text-white flex items-center gap-1 ${
+                        {/* Platform & Verification Badge (Click Platform Badge to Open Original Account) */}
+                        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap z-10">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openOriginalSocialAccount(item);
+                            }}
+                            className={`px-2.5 py-0.5 rounded-full text-[9px] font-black shadow-xs text-white flex items-center gap-1 cursor-pointer active:scale-95 transition ${
                               item.platform === 'tiktok'
-                                ? 'bg-black border border-white/30'
+                                ? 'bg-black hover:bg-slate-900 border border-white/40'
                                 : item.platform === 'facebook'
-                                ? 'bg-[#1877F2]'
-                                : 'bg-red-600'
+                                ? 'bg-[#1877F2] hover:bg-blue-600'
+                                : 'bg-red-600 hover:bg-red-700'
                             }`}
                           >
                             <Play className="w-2.5 h-2.5 fill-current" />
                             <span>{item.platform === 'tiktok' ? 'TikTok' : item.platform === 'facebook' ? 'Facebook' : 'YouTube'}</span>
-                          </span>
+                          </button>
                           <span className="px-2 py-0.5 rounded-full bg-black/70 text-emerald-200 text-[9px] font-bold backdrop-blur-xs flex items-center gap-1 border border-white/15">
                             <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
                             <span>{tr(language, item.verificationBadgeKh, item.verificationBadgeEn, item.verificationBadgeZh)}</span>
                           </span>
                         </div>
 
-                        {/* Quick Play Inline pill at top-right */}
+                        {/* Top-Right Direct Link to Original TikTok / Facebook / YouTube Account */}
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handlePlayOrOpenItem(item);
+                            openOriginalSocialAccount(item);
                           }}
-                          className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-black/75 hover:bg-red-600 text-white text-[9px] font-bold backdrop-blur-xs flex items-center gap-1 border border-white/25 transition cursor-pointer"
+                          className="absolute top-2.5 right-2.5 z-10 px-2.5 py-0.5 rounded-full bg-black/80 hover:bg-slate-900 text-white text-[9px] font-bold backdrop-blur-xs flex items-center gap-1 border border-white/30 transition cursor-pointer active:scale-95"
                         >
-                          <Play className="w-2.5 h-2.5 fill-current" />
                           <span>
-                            {tr(language, 'ចាក់ក្នុងកម្មវិធី', 'Play in App', '应用内播放')}
+                            {item.platform === 'tiktok'
+                              ? tr(language, 'បើក TikTok', 'Open TikTok', '打开 TikTok')
+                              : item.platform === 'facebook'
+                              ? tr(language, 'បើក Facebook', 'Open Facebook', '打开 Facebook')
+                              : tr(language, 'បើក YouTube', 'Open YouTube', '打开 YouTube')}
                           </span>
+                          <ExternalLink className="w-2.5 h-2.5" />
                         </button>
 
                         {/* Large Center YouTube Play Button */}
@@ -1469,14 +1505,27 @@ export const TrendingSocialModal: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* Title & Source Attribution */}
+                        {/* Title & Creator Profile Picture Attribution */}
                         <div className="absolute bottom-2.5 left-3 right-3">
                           <h4 className="font-moul text-xs sm:text-sm text-white drop-shadow leading-snug line-clamp-2">
                             {displayTitle}
                           </h4>
-                          <p className="text-[10px] text-amber-200 font-bold truncate mt-0.5">
-                            📡 {item.sourceName} • 📍 {displayProv}
-                          </p>
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openOriginalSocialAccount(item);
+                            }}
+                            className="inline-flex items-center gap-1.5 mt-1 max-w-full cursor-pointer hover:underline"
+                          >
+                            <img
+                              src={getFallbackAvatarDataUri(item.authorHandle || item.sourceName)}
+                              alt={item.sourceName}
+                              className="w-4 h-4 rounded-full object-cover border border-white/80 shrink-0"
+                            />
+                            <p className="text-[10px] text-amber-200 font-bold truncate">
+                              {item.sourceName} • 📍 {displayProv}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1522,17 +1571,17 @@ export const TrendingSocialModal: React.FC = () => {
                         </span>
                         <button
                           type="button"
-                          onClick={() => handlePlayOrOpenItem(item)}
-                          className="text-red-500 hover:text-red-600 font-bold flex items-center gap-1 cursor-pointer"
+                          onClick={() => openOriginalSocialAccount(item)}
+                          className="text-red-500 hover:text-red-400 font-bold flex items-center gap-1 cursor-pointer active:scale-95 transition"
                         >
-                          <Play className="w-3 h-3 fill-current" />
                           <span>
                             {item.platform === 'tiktok'
-                              ? tr(language, 'ទស្សនាវីដេអូ TikTok', 'Watch TikTok Video', '观看 TikTok 视频')
+                              ? tr(language, 'មើលលើ TikTok', 'View on TikTok', '在 TikTok 查看')
                               : item.platform === 'facebook'
-                              ? tr(language, 'ទស្សនាវីដេអូ Facebook', 'Watch Facebook Video', '观看 Facebook 视频')
-                              : tr(language, 'ទស្សនាវីដេអូ YouTube', 'Watch YouTube Video', '观看 YouTube 视频')}
+                              ? tr(language, 'មើលលើ Facebook', 'View on Facebook', '在 Facebook 查看')
+                              : tr(language, 'មើលលើ YouTube', 'View on YouTube', '在 YouTube 查看')}
                           </span>
+                          <ExternalLink className="w-3 h-3" />
                         </button>
                       </div>
 

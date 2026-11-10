@@ -232,7 +232,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
       </section>
 
       {/* 3. [TikTok] [Facebook] [YouTube] Review ម្ហូប និងដំណើរកម្សាន្ត > Section */}
-      <section className="rounded-3xl p-3 bg-[#FCFBF5] dark:bg-slate-800/95 border border-amber-200/70 dark:border-slate-700 shadow-sm space-y-2.5">
+      <section className="rounded-3xl p-3 bg-[#1E293B] border border-slate-700 shadow-sm space-y-2.5">
         {/* Header Row with TikTok, Facebook, and YouTube Icons */}
         <div
           onClick={() => onOpenSocialReviews('all')}
@@ -284,7 +284,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
               </svg>
             </button>
 
-            <h3 className="font-khmer font-extrabold text-xs sm:text-sm text-[#0F172A] truncate ml-1">
+            <h3 className="font-khmer font-extrabold text-xs sm:text-sm text-white truncate ml-1">
               {tr(
                 language,
                 'Review ម្ហូប និងដំណើរកម្សាន្ត',
@@ -294,7 +294,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
             </h3>
           </div>
 
-          <ChevronRight className="w-4 h-4 text-slate-700 shrink-0 group-hover:translate-x-0.5 transition" />
+          <ChevronRight className="w-4 h-4 text-white shrink-0 group-hover:translate-x-0.5 transition" />
         </div>
 
         {/* 3 Video Thumbnail Cards */}

@@ -913,6 +913,17 @@ export function getCachedUserAvatarForAccount(
       fallbackValid = cand;
     }
   }
+  // Fallback scan: check kft_user_avatar_cache_v1 for any custom uploaded photo on this device
+  const map = readAvatarCacheMap();
+  for (const [k, v] of Object.entries(map)) {
+    if (k.includes('admin')) continue;
+    if (typeof v === 'string' && v.startsWith('data:image/') && !v.startsWith('data:image/svg')) {
+      return v;
+    }
+    if (!fallbackValid && typeof v === 'string' && isCustomUploadedAvatarDataUrl(v)) {
+      fallbackValid = v;
+    }
+  }
   return fallbackValid;
 }
 
@@ -1014,8 +1025,11 @@ export function resolveUserAvatarUrl(
     return getAdminAvatarUrl();
   }
 
+  const socialTkAv = (user as any)?.socialAccounts?.tiktok?.avatarUrl;
+  const socialFbAv = (user as any)?.socialAccounts?.facebook?.avatarUrl;
   const normalizedDirect = normalizeAvatarUrl(user.avatar);
   const normalizedCloud = normalizeAvatarUrl(user.cloudAvatarUrl);
+  const normalizedSocial = normalizeAvatarUrl(socialTkAv) || normalizeAvatarUrl(socialFbAv);
 
   // If user.avatar is a direct custom data:image/, cache it across all account keys and return immediately
   if (normalizedDirect && normalizedDirect.startsWith('data:image/') && !normalizedDirect.startsWith('data:image/svg')) {
@@ -1050,6 +1064,9 @@ export function resolveUserAvatarUrl(
 
   if (cachedAccountAv) {
     return cachedAccountAv;
+  }
+  if (normalizedSocial) {
+    return normalizedSocial;
   }
 
   return getFallbackAvatarDataUri(user.name, user.role);

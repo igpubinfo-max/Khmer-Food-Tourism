@@ -5072,18 +5072,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           } else if (!isAdminAccount) {
             const matchedCurrent = result.mergedUsers.find(u => doesUserMatchTarget(u, liveCurrentUser));
             if (matchedCurrent) {
-              const liveHasCustomDataAvatar =
-                typeof liveCurrentUser.avatar === 'string' &&
-                liveCurrentUser.avatar.startsWith('data:image/') &&
-                !liveCurrentUser.avatar.startsWith('data:image/svg');
+              const liveHasValidAvatar =
+                !isPlaceholderOrInvalidAvatarUrl(liveCurrentUser.avatar);
               const matchedHasCustomDataAvatar =
-                typeof matchedCurrent.avatar === 'string' &&
-                matchedCurrent.avatar.startsWith('data:image/') &&
-                !matchedCurrent.avatar.startsWith('data:image/svg');
-              const preservedCurrent: User =
-                liveHasCustomDataAvatar && !matchedHasCustomDataAvatar
-                  ? { ...matchedCurrent, avatar: liveCurrentUser.avatar }
-                  : matchedCurrent;
+                isCustomUploadedAvatarDataUrl(matchedCurrent.avatar);
+              const cachedAv = getCachedUserAvatarForAccount(liveCurrentUser) || getCachedUserAvatarForAccount(matchedCurrent);
+              const bestAvatar =
+                isCustomUploadedAvatarDataUrl(liveCurrentUser.avatar)
+                  ? liveCurrentUser.avatar
+                  : matchedHasCustomDataAvatar
+                  ? matchedCurrent.avatar
+                  : cachedAv && isCustomUploadedAvatarDataUrl(cachedAv)
+                  ? cachedAv
+                  : liveHasValidAvatar
+                  ? liveCurrentUser.avatar
+                  : !isPlaceholderOrInvalidAvatarUrl(matchedCurrent.avatar)
+                  ? matchedCurrent.avatar
+                  : cachedAv || matchedCurrent.avatar;
+              const preservedCurrent: User = {
+                ...matchedCurrent,
+                avatar: bestAvatar,
+                cloudAvatarUrl: matchedCurrent.cloudAvatarUrl || liveCurrentUser.cloudAvatarUrl,
+              };
 
               if (JSON.stringify(preservedCurrent) !== JSON.stringify(liveCurrentUser)) {
                 const avSig = preservedCurrent.avatar ? `${preservedCurrent.avatar.length}:${preservedCurrent.avatar.slice(-24)}` : '';

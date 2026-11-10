@@ -132,6 +132,12 @@ export const ProfileView: React.FC = () => {
   const [isAvatarEditorOpen, setIsAvatarEditorOpen] = useState(false);
   const [avatarEditorSourceUrl, setAvatarEditorSourceUrl] = useState<string>('');
   const [isAvatarActionSheetOpen, setIsAvatarActionSheetOpen] = useState(false);
+  const [, setAvatarCacheTick] = useState(0);
+  useEffect(() => {
+    const onAv = () => setAvatarCacheTick((t) => t + 1);
+    window.addEventListener('kft-avatar-cache-updated', onAv);
+    return () => window.removeEventListener('kft-avatar-cache-updated', onAv);
+  }, []);
 
   // Automatic VIP Renewal Management State
   const [showProfileAutoRenewSetup, setShowProfileAutoRenewSetup] = useState(false);

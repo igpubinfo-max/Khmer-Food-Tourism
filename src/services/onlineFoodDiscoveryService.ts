@@ -33,6 +33,7 @@ export interface OnlineFoodDiscoveryItem {
   descriptionZh?: string;
   thumbnailUrl: string;
   sourceUrl: string;
+  originalAccountUrl?: string;
   sourceName: string;
   authorHandle?: string;
   publishedOrUpdatedAt: string; // ISO or YYYY-MM-DD
@@ -2144,6 +2145,41 @@ const FALLBACK_SOCIAL_INLINE_VIDEOS: readonly string[] = [
   '_ur5Tg0NFMU',
 ];
 
+
+export function resolveOriginalSocialAccountUrl(item: Partial<OnlineFoodDiscoveryItem>): string {
+  if (item.originalAccountUrl && /^https?:\/\//i.test(item.originalAccountUrl.trim())) {
+    return item.originalAccountUrl.trim();
+  }
+  const rawSource = (item.sourceUrl || '').trim();
+  const handle = (item.authorHandle || '').trim();
+  const cleanHandle = handle.replace(/^@+/, '').replace(/\s+/g, '');
+
+  if (item.platform === 'tiktok') {
+    if (/tiktok\.com/i.test(rawSource)) return rawSource;
+    if (cleanHandle) return `https://www.tiktok.com/@${encodeURIComponent(cleanHandle)}`;
+    const q = encodeURIComponent((item.titleEn || item.titleKh || 'Cambodia food review').trim());
+    return `https://www.tiktok.com/search?q=${q}`;
+  }
+
+  if (item.platform === 'facebook') {
+    if (/facebook\.com|fb\.watch/i.test(rawSource)) return rawSource;
+    if (cleanHandle && !cleanHandle.includes(' ')) {
+      return `https://www.facebook.com/${encodeURIComponent(cleanHandle)}`;
+    }
+    const q = encodeURIComponent((item.authorHandle || item.sourceName || item.titleEn || 'Cambodia Food Review').trim());
+    return `https://www.facebook.com/search/top?q=${q}`;
+  }
+
+  if (/^https?:\/\//i.test(rawSource)) {
+    return rawSource;
+  }
+  const vid = extractYouTubeVideoId(rawSource || item.inlineVideoId || '');
+  if (vid) {
+    return `https://www.youtube.com/watch?v=${vid}`;
+  }
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent((item.titleEn || item.titleKh || 'Cambodia food') + ' Cambodia')}`;
+}
+
 export function resolveInlineVideoIdForSocialItem(item: Partial<OnlineFoodDiscoveryItem>): string {
   if (item.inlineVideoId && /^[a-zA-Z0-9_-]{11}$/.test(item.inlineVideoId) && !isKnownUnavailableVideo(item.inlineVideoId)) {
     return item.inlineVideoId;
@@ -2487,6 +2523,7 @@ export async function searchAndDiscoverSocialFood(
                 return {
                   ...it,
                   platform: it.platform as DiscoveryPlatformId,
+                  originalAccountUrl: it.originalAccountUrl || it.sourceUrl,
                   matchedFoodId: it.matchedFoodId || match?.food?.id,
                   matchedFoodNameKh: it.matchedFoodNameKh || match?.food?.nameKh,
                   matchedFoodNameEn: it.matchedFoodNameEn || match?.food?.nameEn,

@@ -11,6 +11,7 @@ import { IconSmartAssistant } from './icons/HandcraftedIcons';
 import { openSmartHub } from '../utils/smartHub';
 import { tr } from '../utils/i18n';
 import { isNativeIosApp } from '../types';
+import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
 
 interface HeaderProps {
   onOpenSmartHub?: () => void;
@@ -25,10 +26,37 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
     setIsQrScannerModalOpen,
     setIsAiTripPlannerModalOpen,
     setIsNotificationsModalOpen,
+    currentUser,
+    users,
+    setIsAuthModalOpen,
     unreadNotificationsCount,
   } = useApp();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [avatarTick, setAvatarTick] = useState(0);
+
+  useEffect(() => {
+    const onAvatarUpdated = () => setAvatarTick((t) => t + 1);
+    window.addEventListener('kft-avatar-cache-updated', onAvatarUpdated);
+    return () => window.removeEventListener('kft-avatar-cache-updated', onAvatarUpdated);
+  }, []);
+
+  const effectiveUser = React.useMemo(() => {
+    void avatarTick;
+    if (!currentUser) return null;
+    const matched = Array.isArray(users)
+      ? users.find((u) => u.id === currentUser.id || (u.email && currentUser.email && u.email.toLowerCase() === currentUser.email.toLowerCase()))
+      : undefined;
+    if (matched && matched.avatar && (!currentUser.avatar || currentUser.avatar.startsWith('data:image/svg'))) {
+      return { ...currentUser, avatar: matched.avatar, cloudAvatarUrl: matched.cloudAvatarUrl || currentUser.cloudAvatarUrl };
+    }
+    return currentUser;
+  }, [currentUser, users, avatarTick]);
+
+  const resolvedProfileAvatar = React.useMemo(() => {
+    void avatarTick;
+    return resolveUserAvatarUrl(effectiveUser || { name: 'KH', role: 'user' });
+  }, [effectiveUser, avatarTick]);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -100,6 +128,31 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
 
         {/* Right Controls: Essential Actions + Clean More Menu */}
         <div className="flex items-center gap-1.5 shrink-0">
+          {/* Profile Picture Button */}
+          <button
+            type="button"
+            onClick={() => {
+              if (currentUser) {
+                setActiveTab('profile');
+              } else {
+                setIsAuthModalOpen(true);
+              }
+            }}
+            className="w-9 h-9 rounded-full bg-emerald-900 border-2 border-white shadow-sm overflow-hidden flex items-center justify-center transition active:scale-95 cursor-pointer shrink-0"
+            title={tr(language, 'គណនីរបស់ខ្ញុំ', 'My Account', '我的账户')}
+            aria-label={tr(language, 'គណនីរបស់ខ្ញុំ', 'My Account', '我的账户')}
+          >
+            <img
+              key={resolvedProfileAvatar}
+              src={resolvedProfileAvatar}
+              alt={effectiveUser?.name || 'Profile'}
+              referrerPolicy="no-referrer"
+              decoding="async"
+              onError={(e) => handleAvatarImageError(e, effectiveUser)}
+              className="w-full h-full object-cover"
+            />
+          </button>
+
           {/* Notifications Bell Button */}
           <button
             type="button"
