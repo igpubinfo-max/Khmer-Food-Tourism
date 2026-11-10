@@ -7,7 +7,7 @@ android {
         applicationId "com.khmerfood.tourism"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1523
+        versionCode 1524
         versionName "2.7.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         ndk {
