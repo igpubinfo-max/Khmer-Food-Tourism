@@ -1,8 +1,27 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { 
-  X, Navigation, Compass, Store, Mountain, 
-  Phone, Star, ArrowUpRight, LocateFixed, Loader2, MapPin, RefreshCw, Search, Sparkles, UtensilsCrossed, CheckCircle2
+import {
+  X,
+  Navigation,
+  Compass,
+  Store,
+  Mountain,
+  Phone,
+  Star,
+  ArrowUpRight,
+  LocateFixed,
+  Loader2,
+  MapPin,
+  RefreshCw,
+  Search,
+  Sparkles,
+  UtensilsCrossed,
+  CheckCircle2,
+  Utensils,
+  Soup,
+  Coffee,
+  Flame,
+  LayoutGrid,
 } from 'lucide-react';
 import {
   sanitizeDialablePhone,
@@ -19,9 +38,7 @@ import {
   FoodItem,
   Restaurant,
   TouristDestination,
-  isGpipRegisteredRestaurant,
   isPlaceLocationVerified,
-  isStrictVerifiedCambodiaRestaurant,
   openRestaurantGoogleExternal,
   openDestinationGoogleExternal,
 } from '../types';
@@ -33,7 +50,13 @@ import {
   verifyShopDataForDisplay,
 } from '../utils/foodFilters';
 import { normalizeKhmerFoodText } from '../utils/khmerFoodSearch';
-import { matchesSearchQuery, destinationSearchFields, analyzeSearchQuery, scoreSearchRecord, restaurantSearchFields } from '../utils/searchEngine';
+import {
+  matchesSearchQuery,
+  destinationSearchFields,
+  analyzeSearchQuery,
+  scoreSearchRecord,
+  restaurantSearchFields,
+} from '../utils/searchEngine';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { openAiAssistantWithQuery, getAskAiButtonLabel } from '../utils/aiSearchBridge';
 
@@ -57,23 +80,6 @@ export function calculateDistanceMeters(lat1: number, lon1: number, lat2: number
 
 export const MAX_NEARBY_RADIUS_METERS = 500;
 const LAST_KNOWN_GPS_STORAGE_KEY = 'kft_last_known_user_gps_v1';
-
-interface PhnomPenhSpotPreset {
-  id: string;
-  labelKh: string;
-  labelEn: string;
-  labelZh: string;
-  lat: number;
-  lng: number;
-}
-
-const PHNOM_PENH_SPOT_PRESETS: PhnomPenhSpotPreset[] = [
-  { id: 'bkk1', labelKh: 'បឹងកេងកង ១', labelEn: 'BKK1', labelZh: '万景岗1区', lat: 11.5515, lng: 104.9282 },
-  { id: 'riverside', labelKh: 'មាត់ទន្លេ និងព្រះបរមរាជវាំង', labelEn: 'Riverside & Palace', labelZh: '河畔与皇宫', lat: 11.5656, lng: 104.9314 },
-  { id: 'central_market', labelKh: 'ផ្សារថ្មី', labelEn: 'Central Market', labelZh: '中央市场', lat: 11.5696, lng: 104.9210 },
-  { id: 'independence', labelKh: 'វិមានឯករាជ្យ', labelEn: 'Independence Monument', labelZh: '独立纪念碑', lat: 11.5564, lng: 104.9282 },
-  { id: 'russian_market', labelKh: 'ផ្សារទួលទំពូង', labelEn: 'Russian Market', labelZh: '俄罗斯市场', lat: 11.5405, lng: 104.9144 },
-];
 
 const RADIUS_OPTIONS: { value: number; labelKh: string; labelEn: string; labelZh: string }[] = [
   { value: 500, labelKh: '៥០០ ម៉ែត្រ', labelEn: '500m', labelZh: '500米' },
@@ -116,11 +122,15 @@ function saveUserGps(coords: { lat: number; lng: number }) {
 }
 
 export const NearMeModal: React.FC = () => {
-  const { 
+  const {
     isNearMeModalOpen,
-    setIsWhatToEatModalOpen, setIsNearMeModalOpen, 
-    restaurants, destinations, language,
-    setSelectedRestaurant, setSelectedDestination 
+    setIsWhatToEatModalOpen,
+    setIsNearMeModalOpen,
+    restaurants,
+    destinations,
+    language,
+    setSelectedRestaurant,
+    setSelectedDestination,
   } = useApp();
 
   const [activeType, setActiveType] = useState<'restaurants' | 'destinations'>(() => {
@@ -168,9 +178,9 @@ export const NearMeModal: React.FC = () => {
       setQuickFilterId('all');
     }
   }, [isNearMeModalOpen]);
+
   const [geoStatus, setGeoStatus] = useState<'idle' | 'requesting' | 'granted' | 'fallback'>('idle');
-  const [manualProvince, setManualProvince] = useState<string>('រាជធានីភ្នំពេញ');
-  const [selectedPresetId, setSelectedPresetId] = useState<string>('gps');
+  const [manualProvince] = useState<string>('រាជធានីភ្នំពេញ');
   const [selectedRadiusMeters, setSelectedRadiusMeters] = useState<number>(MAX_NEARBY_RADIUS_METERS);
   const [isLoadingNearby, setIsLoadingNearby] = useState<boolean>(false);
   const [liveNearbyRestaurants, setLiveNearbyRestaurants] = useState<GooglePlaceCachedItem[]>([]);
@@ -234,7 +244,6 @@ export const NearMeModal: React.FC = () => {
 
   // Request GPS without back-to-back duplicate network bursts
   const requestLocation = (forceRefresh = false) => {
-    setSelectedPresetId('gps');
     setGeoStatus('requesting');
 
     const savedGps = userCoords || readSavedUserGps();
@@ -297,25 +306,6 @@ export const NearMeModal: React.FC = () => {
     }
   }, [isNearMeModalOpen]);
 
-  // Handle manual province switch if fallback
-  const handleProvinceChange = (prov: string) => {
-    setManualProvince(prov);
-    setSelectedPresetId('province');
-    const coords = provinceCenters[prov] || provinceCenters['រាជធានីភ្នំពេញ'];
-    setUserCoords(coords);
-    fetchLiveNearby500m(coords, true, selectedRadiusMeters);
-  };
-
-  // Handle Phnom Penh real location quick preset
-  const handleSelectSpotPreset = (preset: PhnomPenhSpotPreset) => {
-    setSelectedPresetId(preset.id);
-    setManualProvince('រាជធានីភ្នំពេញ');
-    const coords = { lat: preset.lat, lng: preset.lng };
-    setUserCoords(coords);
-    setGeoStatus('fallback');
-    fetchLiveNearby500m(coords, true, selectedRadiusMeters);
-  };
-
   const handleSelectRadius = (newRadius: number) => {
     setSelectedRadiusMeters(newRadius);
     fetchLiveNearby500m(baseCoords, true, newRadius);
@@ -326,7 +316,6 @@ export const NearMeModal: React.FC = () => {
     const mergedMap = new Map<string, Restaurant>();
     const maxCitySearchRadius = Math.max(selectedRadiusMeters, 15000);
 
-    // 1. Add existing verified-location in-app restaurants within user's city/location area
     for (const r of restaurants) {
       if (!verifyShopDataForDisplay(r)) continue;
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, r.latitude, r.longitude);
@@ -335,7 +324,6 @@ export const NearMeModal: React.FC = () => {
       }
     }
 
-    // 2. Merge live Google Places / Cambodia Street GPS places within user's city/location area
     for (const gp of liveNearbyRestaurants) {
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, gp.lat, gp.lng);
       if (dist > maxCitySearchRadius) continue;
@@ -355,19 +343,18 @@ export const NearMeModal: React.FC = () => {
     }
 
     return Array.from(mergedMap.values())
-      .map(r => {
+      .map((r) => {
         const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, r.latitude, r.longitude);
         return { ...r, distanceMeters: dist };
       })
-      .filter(r => Number.isFinite(r.distanceMeters) && r.distanceMeters <= maxCitySearchRadius)
+      .filter((r) => Number.isFinite(r.distanceMeters) && r.distanceMeters <= maxCitySearchRadius)
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
   }, [restaurants, liveNearbyRestaurants, baseCoords, selectedRadiusMeters]);
 
   const nearbyRestaurants = useMemo(() => {
-    return allVerifiedCityRestaurants.filter(r => r.distanceMeters <= selectedRadiusMeters);
+    return allVerifiedCityRestaurants.filter((r) => r.distanceMeters <= selectedRadiusMeters);
   }, [allVerifiedCityRestaurants, selectedRadiusMeters]);
 
-  // Merge & deduplicate Supabase destinations + Google Maps/Live nearby attractions, strictly within selectedRadiusMeters, sorted nearest first
   const nearbyDestinations = useMemo(() => {
     const mergedMap = new Map<string, TouristDestination>();
 
@@ -391,11 +378,11 @@ export const NearMeModal: React.FC = () => {
     }
 
     return Array.from(mergedMap.values())
-      .map(d => {
+      .map((d) => {
         const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, d.latitude, d.longitude);
         return { ...d, distanceMeters: dist };
       })
-      .filter(d => Number.isFinite(d.distanceMeters) && d.distanceMeters <= selectedRadiusMeters)
+      .filter((d) => Number.isFinite(d.distanceMeters) && d.distanceMeters <= selectedRadiusMeters)
       .sort((a, b) => a.distanceMeters - b.distanceMeters);
   }, [destinations, liveNearbyAttractions, baseCoords, selectedRadiusMeters]);
 
@@ -439,12 +426,10 @@ export const NearMeModal: React.FC = () => {
       return true;
     };
 
-    // Case 1: No search query — show verified restaurants within selectedRadiusMeters
     if (!rawQuery) {
       return nearbyRestaurants
         .filter((r) => {
           if (!passesQuickFilter(r)) return false;
-          // Exclude pure bread/bakery shops from general default food browsing unless Coffee/Bakery chip is selected
           if (quickFilterId !== 'coffee' && classifyShopBusinessKind(r) === 'bakery_bread') {
             return false;
           }
@@ -456,8 +441,6 @@ export const NearMeModal: React.FC = () => {
         }));
     }
 
-    // Case 2: Specific product/shop query (e.g., "មីសួ", "មីសួរសាច់មាន់", "គុយទាវ", etc.)
-    // Strictly match against product names, categories, keywords, and shop inventory, and reject unrelated shops (such as bread shops).
     const activeTargetFood =
       targetFood &&
       normalizeKhmerFoodText(rawQuery).includes(normalizeKhmerFoodText(targetFood.nameKh))
@@ -479,7 +462,6 @@ export const NearMeModal: React.FC = () => {
         if (!passesQuickFilter(r)) continue;
         const matchRes = matchShopToProductQuery(r, rawQuery, activeTargetFood);
         if (!matchRes.matches) {
-          // Shop-name search (exact / partial / typo-tolerant, Khmer + English + Chinese names)
           const nameDetail = scoreSearchRecord(nameQa, restaurantSearchFields(r, [getLocalizedRestaurant(r, 'zh').name]));
           if (!(nameDetail.matchedInName && nameDetail.score >= 200)) continue;
           results.push({
@@ -522,7 +504,6 @@ export const NearMeModal: React.FC = () => {
       return strictRadiusMatches;
     }
 
-    // If fewer than 3 shops within the tight radius sell this specific product, include verified shops in the user's city/location that genuinely sell it
     return evaluateCandidates(allVerifiedCityRestaurants);
   }, [nearbyRestaurants, allVerifiedCityRestaurants, nearbyQuery, targetFood, quickFilterId, selectedRadiusMeters]);
 
@@ -553,11 +534,15 @@ export const NearMeModal: React.FC = () => {
       if (quickFilterId === 'culture' && !/វត្ត|ប្រាសាទ|សារមន្ទីរ|វប្បធម៌|ប្រវត្តិ|temple|pagoda|museum|palace|heritage|វាំង|寺|庙|宫|博物馆|古迹/.test(haystack)) return false;
       if (quickFilterId === 'nature' && !/ធម្មជាតិ|សួន|ទន្លេ|ភ្នំ|បឹង|ឆ្នេរ|park|river|nature|garden|beach|mountain|自然|公园|河|山|海滩/.test(haystack)) return false;
       if (quickFilterId === 'leisure' && !/ផ្សារ|កម្សាន្ត|ដើរលេង|រមណីយដ្ឋាន|market|mall|walk|night|plaza|市场|夜市|步道|广场/.test(haystack)) return false;
-      if (q && !matchesSearchQuery(nearbyQuery, {
-        ...destinationSearchFields(d, [zhLoc.name]),
-        categories: [d.categoryKh, d.categoryEn, zhLoc.category, d.categorySlug],
-        texts: [d.descriptionKh, d.descriptionEn, zhLoc.description, zhLoc.address],
-      })) return false;
+      if (
+        q &&
+        !matchesSearchQuery(nearbyQuery, {
+          ...destinationSearchFields(d, [zhLoc.name]),
+          categories: [d.categoryKh, d.categoryEn, zhLoc.category, d.categorySlug],
+          texts: [d.descriptionKh, d.descriptionEn, zhLoc.description, zhLoc.address],
+        })
+      )
+        return false;
       return true;
     });
   }, [nearbyDestinations, nearbyQuery, quickFilterId]);
@@ -574,6 +559,7 @@ export const NearMeModal: React.FC = () => {
       : selectedRadiusMeters === 2000
       ? tr(language, '២ គ.ម', '2km', '2 公里')
       : tr(language, '៥ គ.ម', '5km', '5 公里');
+
   const formatDistanceLabel = (distMeters: number) => {
     if (distMeters <= 2000) {
       return `${distMeters} ${meterUnit}`;
@@ -581,6 +567,7 @@ export const NearMeModal: React.FC = () => {
     const km = (distMeters / 1000).toFixed(1);
     return `${km} ${tr(language, 'គ.ម', 'km', '公里')}`;
   };
+
   const cleanCardAddress = (rawAddr: string | undefined, provLabel: string) => {
     const cleaned = (rawAddr || '')
       .replace(/(?:\s*,\s*){2,}/g, ', ')
@@ -592,34 +579,98 @@ export const NearMeModal: React.FC = () => {
     return cleaned;
   };
 
+  // 6 Colorful Glossy Main Categories matching Reference Image 2 (Home Screen 3x2 grid)
+  const mainCategoryButtons = [
+    {
+      id: 'all',
+      type: 'restaurants' as const,
+      label: tr(language, 'ហាងទាំងអស់', 'All Shops', '全部店铺'),
+      count: nearbyRestaurants.length,
+      gradient: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
+      icon: <LayoutGrid className="w-5 h-5 text-white drop-shadow-xs" strokeWidth={2.2} />,
+    },
+    {
+      id: 'rice_khmer',
+      type: 'restaurants' as const,
+      label: tr(language, 'បាយ & ម្ហូបខ្មែរ', 'Rice & Khmer', '柬式简餐'),
+      gradient: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
+      icon: <Utensils className="w-5 h-5 text-white drop-shadow-xs" strokeWidth={2.2} />,
+    },
+    {
+      id: 'noodles',
+      type: 'restaurants' as const,
+      label: tr(language, 'គុយទាវ & មី', 'Noodles', '粉面汤品'),
+      gradient: 'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)',
+      icon: <Soup className="w-5 h-5 text-white drop-shadow-xs" strokeWidth={2.2} />,
+    },
+    {
+      id: 'coffee',
+      type: 'restaurants' as const,
+      label: tr(language, 'កាហ្វេ & ភេសជ្ជៈ', 'Café & Drinks', '咖啡饮品'),
+      gradient: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
+      icon: <Coffee className="w-5 h-5 text-white drop-shadow-xs" strokeWidth={2.2} />,
+    },
+    {
+      id: 'bbq_seafood',
+      type: 'restaurants' as const,
+      label: tr(language, 'សាច់អាំង & ស៊ុប', 'BBQ & Hotpot', '烧烤海鲜'),
+      gradient: 'linear-gradient(180deg, #F4B630 0%, #C67D0D 100%)',
+      icon: <Flame className="w-5 h-5 text-white drop-shadow-xs" strokeWidth={2.2} />,
+    },
+    {
+      id: 'destinations',
+      type: 'destinations' as const,
+      label: tr(language, 'កន្លែងជិតខ្ញុំ', 'Nearby Places', '附近景点'),
+      count: nearbyDestinations.length,
+      gradient: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',
+      icon: <Compass className="w-5 h-5 text-white drop-shadow-xs" strokeWidth={2.2} />,
+    },
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-stretch md:items-center justify-center bg-black/70 backdrop-blur-xs p-0 md:p-4 animate-in fade-in duration-200 overscroll-none">
-      <div 
-        className="w-full max-w-full md:max-w-2xl lg:max-w-3xl bg-white dark:bg-slate-900 rounded-none md:rounded-3xl border-0 md:border border-slate-200/80 dark:border-slate-800 shadow-2xl h-full md:h-[92dvh] max-h-full md:max-h-[92dvh] flex flex-col overflow-hidden overscroll-contain"
-        onClick={e => e.stopPropagation()}
+    <div
+      className="fixed inset-0 z-50 flex items-stretch md:items-center justify-center bg-black/60 backdrop-blur-xs p-0 md:p-4 animate-in fade-in duration-200 overscroll-none"
+      onClick={() => setIsNearMeModalOpen(false)}
+    >
+      <div
+        className="w-full max-w-full md:max-w-2xl lg:max-w-3xl bg-[#F4F7FA] text-slate-900 rounded-none md:rounded-3xl border-0 md:border border-slate-200/90 shadow-2xl h-full md:h-[92dvh] max-h-full md:max-h-[92vh] flex flex-col overflow-hidden overscroll-contain font-khmer"
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="p-4 bg-gradient-to-r from-[#064E3B] to-[#047857] text-white flex items-center justify-between shrink-0">
+        {/* Clean Header */}
+        <div
+          style={{
+            background: 'linear-gradient(92deg, #064E3B 0%, #047857 55%, #0D9488 100%)',
+          }}
+          className="px-4 py-3 text-white flex items-center justify-between shrink-0 shadow-sm"
+        >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-emerald-300 shadow-xs shrink-0">
-              {activeType === 'restaurants' ? <UtensilsCrossed className="w-5 h-5" /> : <Compass className="w-5 h-5" />}
+            <div
+              style={{
+                background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
+                boxShadow: '0 4px 10px rgba(234, 88, 12, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.6)',
+              }}
+              className="w-10 h-10 rounded-2xl border border-white/40 flex items-center justify-center text-white shrink-0"
+            >
+              {activeType === 'restaurants' ? (
+                <UtensilsCrossed className="w-5 h-5" />
+              ) : (
+                <Compass className="w-5 h-5" />
+              )}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-moul text-sm text-white truncate">
-                  {activeType === 'restaurants'
-                    ? tr(language, 'ស្វែងរកម្ហូបជិតខ្ញុំ', 'Nearby Food Search', '附近美食搜索')
-                    : tr(language, 'កន្លែងជិតខ្ញុំ', 'Nearby Places', '附近景点与好去处')}
-                </h3>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 text-[10px] font-extrabold shrink-0">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-300" />
-                  <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE Access', '免费使用')}</span>
+                <h2 className="font-moul text-xs sm:text-sm text-white leading-[1.7] py-0.5 truncate">
+                  {tr(language, 'ស្វែងរកម្ហូបជិតខ្ញុំ', 'Food & Shops Near Me', '附近美食与店铺')}
+                </h2>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 border border-white/35 text-white text-[10px] font-extrabold shrink-0">
+                  <CheckCircle2 className="w-3 h-3 text-amber-300" />
+                  <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}</span>
                 </span>
               </div>
-              <p className="text-[11px] text-emerald-100 font-khmer truncate">
+              <p className="text-[11px] text-emerald-50 font-khmer truncate">
                 {tr(
                   language,
-                  `ក្នុងរង្វង់ ${activeRadiusText} ពីទីតាំងរបស់អ្នក • នាំផ្លូវផ្ទាល់`,
+                  `ក្នុងរង្វង់ ${activeRadiusText} ពីទីតាំង GPS របស់អ្នក • នាំផ្លូវផ្ទាល់`,
                   `Within ${activeRadiusText} of your GPS • Direct map directions`,
                   `距离您当前位置 ${activeRadiusText} 以内 • 支持一键路线导航`
                 )}
@@ -628,177 +679,87 @@ export const NearMeModal: React.FC = () => {
           </div>
           <button
             onClick={() => setIsNearMeModalOpen(false)}
-            className="p-2 rounded-full hover:bg-white/10 text-emerald-100 hover:text-white transition cursor-pointer"
+            className="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition cursor-pointer shrink-0"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Location GPS Status bar & Province Switcher */}
-        <div className="px-3 pt-2.5 pb-2 bg-emerald-50/80 dark:bg-slate-800/80 border-b border-emerald-100 dark:border-slate-800 space-y-2 shrink-0">
-          <div className="flex items-center justify-between gap-2">
+        {/* Clean White Essential Control Bar: GPS Location + Search Shops + 6 Colorful Gradient Main Categories */}
+        <div className="px-3.5 pt-2.5 pb-3 bg-[#F4F7FA] border-b border-slate-200/80 space-y-2.5 shrink-0">
+          {/* Row 1: Essential GPS Location Status + Province Selector + Refresh GPS */}
+          <div className="flex items-center justify-between gap-2 flex-wrap bg-white px-3 py-2 rounded-2xl border border-slate-200/85 shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
             <div className="flex items-center gap-1.5 min-w-0">
-              <LocateFixed className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200 truncate font-khmer">
-                {geoStatus === 'granted' && selectedPresetId === 'gps'
+              <span className="w-6 h-6 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0">
+                <LocateFixed className="w-3.5 h-3.5 text-emerald-600" />
+              </span>
+              <span className="text-[11.5px] font-extrabold text-slate-800 truncate">
+                {geoStatus === 'granted'
                   ? tr(
                       language,
-                      `📍 GPS ផ្ទាល់ (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)}) • ${activeRadiusText}`,
-                      `📍 Live GPS (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)}) • ${activeRadiusText}`,
-                      `📍 实时 GPS (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)}) • ${activeRadiusText}`
+                      `GPS ផ្ទាល់ • ${localizedManualProvince}`,
+                      `Live GPS • ${localizedManualProvince}`,
+                      `实时 GPS • ${localizedManualProvince}`
                     )
                   : geoStatus === 'requesting'
                   ? tr(
                       language,
-                      `⏳ កំពុងចាប់ទីតាំង GPS (រង្វង់ ${activeRadiusText})...`,
-                      `⏳ Acquiring GPS (${activeRadiusText} radius)...`,
-                      `⏳ 正在获取 GPS（${activeRadiusText}范围）...`
+                      'កំពុងចាប់ទីតាំង GPS...',
+                      'Locating GPS...',
+                      '正在获取 GPS...'
                     )
                   : tr(
                       language,
-                      `ទីតាំង៖ ${localizedManualProvince} (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)}) • ${activeRadiusText}`,
-                      `Location: ${localizedManualProvince} (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)}) • ${activeRadiusText}`,
-                      `当前位置：${localizedManualProvince} (${baseCoords.lat.toFixed(4)}, ${baseCoords.lng.toFixed(4)}) • ${activeRadiusText}`
+                      `${localizedManualProvince} • ${activeRadiusText}`,
+                      `${localizedManualProvince} • ${activeRadiusText}`,
+                      `${localizedManualProvince} • ${activeRadiusText}`
                     )}
               </span>
             </div>
 
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0">
               <select
                 value={manualProvince}
-                onChange={e => handleProvinceChange(e.target.value)}
-                className="text-[10px] font-bold font-khmer px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-200"
+                onChange={(e) => handleProvinceChange(e.target.value)}
+                aria-label={tr(language, 'ជ្រើសរើសខេត្ត/ក្រុង', 'Select Province/City', '选择省份/城市')}
+                className="px-2 py-1 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-[10.5px] font-bold focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
               >
-                {Object.keys(provinceCenters).map(p => (
-                  <option key={p} value={p}>{translateProvince(p, language)}</option>
+                {Object.keys(provinceCenters).map((prov) => (
+                  <option key={prov} value={prov}>
+                    {translateProvince(prov, language)}
+                  </option>
                 ))}
               </select>
+
               <button
                 onClick={() => requestLocation(true)}
                 disabled={isLoadingNearby}
-                className="px-2.5 py-1 rounded-lg bg-[#064E3B] hover:bg-[#047857] disabled:opacity-60 text-white text-[10px] font-bold font-khmer transition shadow-2xs flex items-center gap-1 cursor-pointer"
+                style={{
+                  background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
+                }}
+                className="px-2.5 py-1 rounded-xl disabled:opacity-60 text-white text-[10.5px] font-extrabold transition shadow-2xs flex items-center gap-1 cursor-pointer shrink-0 active:scale-95"
               >
                 <RefreshCw className={`w-3 h-3 ${isLoadingNearby ? 'animate-spin' : ''}`} />
-                <span>{tr(language, 'ចាប់ទីតាំងឡើងវិញ', 'Refresh GPS', '刷新定位')}</span>
+                <span>{tr(language, 'GPS ថ្មី', 'GPS', '定位')}</span>
               </button>
             </div>
           </div>
 
-          {/* Real Phnom Penh 500m Hotspot Quick Switcher */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 font-khmer">
-            <button
-              onClick={() => requestLocation(false)}
-              className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap transition flex items-center gap-1 cursor-pointer ${
-                selectedPresetId === 'gps'
-                  ? 'bg-[#064E3B] text-white shadow-2xs'
-                  : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600'
-              }`}
-            >
-              <LocateFixed className="w-3 h-3" />
-              <span>{tr(language, 'GPS របស់ខ្ញុំ', 'My GPS', '我的 GPS')}</span>
-            </button>
-            {PHNOM_PENH_SPOT_PRESETS.map(spot => (
-              <button
-                key={spot.id}
-                onClick={() => handleSelectSpotPreset(spot)}
-                className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap transition flex items-center gap-1 cursor-pointer ${
-                  selectedPresetId === spot.id
-                    ? 'bg-emerald-600 text-white shadow-2xs'
-                    : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:border-emerald-400'
-                }`}
-              >
-                <MapPin className="w-2.5 h-2.5" />
-                <span>{tr(language, spot.labelKh, spot.labelEn, spot.labelZh)}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Radius Selector Chips (500m, 1km, 2km, Nearest) */}
-          <div className="flex items-center justify-between gap-1.5 pt-0.5 font-khmer">
-            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">
-              {tr(language, 'រង្វង់ស្វែងរក៖', 'Radius:', '搜索范围：')}
-            </span>
-            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
-              {RADIUS_OPTIONS.map(opt => (
-                <button
-                  key={opt.value}
-                  onClick={() => handleSelectRadius(opt.value)}
-                  className={`px-2 py-0.5 rounded-lg text-[10px] font-bold whitespace-nowrap transition cursor-pointer ${
-                    selectedRadiusMeters === opt.value
-                      ? 'bg-[#064E3B] text-white shadow-2xs'
-                      : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:border-emerald-400'
-                  }`}
-                >
-                  {tr(language, opt.labelKh, opt.labelEn, opt.labelZh)}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Tab switchers: Nearby Food Search vs Nearby Places */}
-        <div className="grid grid-cols-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 shrink-0 font-khmer">
-          <button
-            onClick={() => {
-              setActiveType('restaurants');
-              setQuickFilterId('all');
-            }}
-            className={`py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-              activeType === 'restaurants'
-                ? 'bg-white dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 shadow-xs'
-                : 'text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            <Store className="w-4 h-4" />
-            <span>{tr(language, 'ស្វែងរកម្ហូបជិតខ្ញុំ', 'Nearby Food & Shops', '附近美食与餐厅')}</span>
-            <span className="px-1.5 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-[10px]">
-              {filteredNearbyRestaurants.length}
-            </span>
-          </button>
-
-          <button
-            onClick={() => {
-              setActiveType('destinations');
-              setQuickFilterId('all');
-            }}
-            className={`py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-              activeType === 'destinations'
-                ? 'bg-white dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 shadow-xs'
-                : 'text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            <Mountain className="w-4 h-4" />
-            <span>{tr(language, 'កន្លែងជិតខ្ញុំ', 'Nearby Places', '附近景点好去处')}</span>
-            <span className="px-1.5 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-[10px]">
-              {filteredNearbyDestinations.length}
-            </span>
-          </button>
-        </div>
-
-        {/* Instant Dish / Place Filter Bar */}
-        <div className="px-3 py-2 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 space-y-1.5 shrink-0 font-khmer">
+          {/* Row 2: Clean White Rounded Search Shops Input */}
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="w-4 h-4 text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={nearbyQuery}
               onChange={(e) => setNearbyQuery(e.target.value)}
-              placeholder={
-                activeType === 'restaurants'
-                  ? tr(
-                      language,
-                      'វាយឈ្មោះមុខម្ហូប ឬហាងជិតអ្នក (ឧ. គុយទាវ, កាហ្វេ, បាយ)...',
-                      'Filter nearby dishes or shops (e.g. noodles, coffee, rice)...',
-                      '搜索附近的菜品或餐厅（如 粿条、咖啡、米饭）...'
-                    )
-                  : tr(
-                      language,
-                      'វាយឈ្មោះកន្លែងជិតអ្នក (ឧ. វត្ត, សួន, ផ្សារ, មាត់ទន្លេ)...',
-                      'Filter nearby places (e.g. pagoda, park, market, riverside)...',
-                      '搜索附近的景点或去处（如 寺庙、公园、市场、河畔）...'
-                    )
-              }
-              className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder={tr(
+                language,
+                'ស្វែងរកហាង ឬមុខម្ហូបជិតអ្នក (ឧ. គុយទាវ, កាហ្វេ, បាយ)...',
+                'Search nearby shops or dishes (e.g. noodles, coffee, rice)...',
+                '搜索附近的餐厅或菜品（如 粿条、咖啡、米饭）...'
+              )}
+              className="w-full h-10 pl-9 pr-8 rounded-2xl bg-white border border-slate-200/90 shadow-[0_2px_10px_rgba(15,23,42,0.04)] text-xs sm:text-[13px] font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 transition"
             />
             {nearbyQuery && (
               <button
@@ -809,10 +770,11 @@ export const NearMeModal: React.FC = () => {
                 }}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             )}
           </div>
+
           {nearbyQuery.trim().length >= 2 && (
             <div className="flex justify-end">
               <button
@@ -822,7 +784,10 @@ export const NearMeModal: React.FC = () => {
                   setIsNearMeModalOpen(false);
                   openAiAssistantWithQuery(q, setIsWhatToEatModalOpen);
                 }}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#064E3B] hover:bg-emerald-800 text-amber-300 text-[11px] font-bold shadow-2xs transition active:scale-95 cursor-pointer"
+                style={{
+                  background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
+                }}
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-white text-[11px] font-extrabold shadow-2xs transition active:scale-95 cursor-pointer"
               >
                 <Sparkles className="w-3 h-3" />
                 <span>{getAskAiButtonLabel(language)}</span>
@@ -830,44 +795,64 @@ export const NearMeModal: React.FC = () => {
             </div>
           )}
 
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
-            {(activeType === 'restaurants'
-              ? [
-                  { id: 'all', kh: 'ទាំងអស់', en: 'All Food', zh: '全部美食' },
-                  { id: 'rice_khmer', kh: '🍚 បាយ & ម្ហូបខ្មែរ', en: '🍚 Rice & Khmer', zh: '🍚 柬式简餐/米饭' },
-                  { id: 'noodles', kh: '🍜 គុយទាវ & មី', en: '🍜 Noodles & Soup', zh: '🍜 粉面与汤品' },
-                  { id: 'coffee', kh: '☕ កាហ្វេ & ភេសជ្ជៈ', en: '☕ Coffee & Café', zh: '☕ 咖啡与饮品' },
-                  { id: 'bbq_seafood', kh: '🦐 សាច់អាំង & ស៊ុប', en: '🦐 BBQ & Seafood', zh: '🦐 烧烤与海鲜' },
-                ]
-              : [
-                  { id: 'all', kh: 'ទាំងអស់', en: 'All Places', zh: '全部地点' },
-                  { id: 'culture', kh: '🏛️ វប្បធម៌ & វត្តអារាម', en: '🏛️ Culture & Temples', zh: '🏛️ 文化与古迹' },
-                  { id: 'nature', kh: '🌿 ធម្មជាតិ & សួន', en: '🌿 Parks & Nature', zh: '🌿 公园与自然' },
-                  { id: 'leisure', kh: '🎡 ផ្សារ & កន្លែងដើរលេង', en: '🎡 Markets & Leisure', zh: '🎡 市场与休闲' },
-                ]
-            ).map((chip) => (
-              <button
-                key={chip.id}
-                type="button"
-                onClick={() => setQuickFilterId(chip.id)}
-                className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap transition cursor-pointer ${
-                  quickFilterId === chip.id
-                    ? 'bg-[#064E3B] text-white shadow-2xs'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
-                }`}
-              >
-                {tr(language, chip.kh, chip.en, chip.zh)}
-              </button>
-            ))}
+          {/* Row 3: 6 Colorful Gradient Main Categories in a Clean White Card (Matching Reference Image 2) */}
+          <div className="rounded-[22px] bg-white p-2.5 shadow-[0_5px_18px_rgba(15,23,42,0.06)] border border-slate-200/85">
+            <div className="grid grid-cols-3 gap-2">
+              {mainCategoryButtons.map((card) => {
+                const active =
+                  card.type === 'destinations'
+                    ? activeType === 'destinations'
+                    : activeType === 'restaurants' && quickFilterId === card.id;
+                return (
+                  <button
+                    key={card.id}
+                    type="button"
+                    onClick={() => {
+                      if (card.type === 'destinations') {
+                        setActiveType('destinations');
+                        setQuickFilterId('all');
+                      } else {
+                        setActiveType('restaurants');
+                        setQuickFilterId(card.id);
+                      }
+                    }}
+                    aria-pressed={active}
+                    style={{
+                      background: card.gradient,
+                      boxShadow: active
+                        ? '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)'
+                        : '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
+                    }}
+                    className="group relative min-h-[68px] px-1.5 py-2 rounded-[16px] flex flex-col items-center justify-center gap-1 min-w-0 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
+                  >
+                    <span
+                      className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+                      style={{
+                        background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
+                      }}
+                    />
+                    <span className="relative z-10 text-white drop-shadow-xs shrink-0">
+                      {card.icon}
+                    </span>
+                    <span
+                      className="relative z-10 w-full font-khmer font-extrabold leading-[1.62] py-0.5 break-words whitespace-normal text-center text-white"
+                      style={{ fontSize: 'clamp(9.5px, 2.6vw, 11.5px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
+                    >
+                      {card.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        {/* Content list */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar font-khmer">
+        {/* Clean White Shop & Place Cards List */}
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-3 no-scrollbar bg-[#F8FAFC]">
           {isLoadingNearby ? (
-            <div className="py-14 px-4 text-center bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200/80 dark:border-slate-700 my-2">
+            <div className="py-14 px-4 text-center bg-white rounded-3xl border border-slate-200/90 shadow-xs my-2">
               <Loader2 className="w-8 h-8 mx-auto mb-3 text-emerald-600 animate-spin" />
-              <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm mb-1 font-khmer">
+              <h4 className="font-extrabold text-slate-900 text-sm mb-1 font-khmer">
                 {tr(
                   language,
                   `កំពុងស្វែងរកទីតាំងពិតក្នុងរង្វង់ ${activeRadiusText}...`,
@@ -875,7 +860,7 @@ export const NearMeModal: React.FC = () => {
                   `正在搜索 ${activeRadiusText} 范围内的真实地点...`
                 )}
               </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-slate-500">
                 {tr(
                   language,
                   'កំពុងស្វែងរកហាងអាហារ និងកន្លែងដើរលេងនៅក្បែរអ្នក...',
@@ -886,11 +871,11 @@ export const NearMeModal: React.FC = () => {
             </div>
           ) : activeType === 'restaurants' ? (
             filteredNearbyRestaurants.length === 0 ? (
-              <div className="py-12 px-4 text-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 my-2">
-                <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-[#064E3B] dark:text-emerald-400 shadow-xs">
+              <div className="py-12 px-4 text-center bg-white rounded-3xl border border-slate-200/90 shadow-xs my-2">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shadow-2xs">
                   <Compass className="w-7 h-7" />
                 </div>
-                <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm mb-1.5 font-khmer">
+                <h4 className="font-extrabold text-slate-900 text-sm mb-1.5 font-khmer">
                   {tr(
                     language,
                     `រកមិនឃើញហាងក្នុងរង្វង់ ${activeRadiusText} ទេ`,
@@ -898,7 +883,7 @@ export const NearMeModal: React.FC = () => {
                     `${activeRadiusText} 范围内未找到商家`
                   )}
                 </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto mb-4 leading-relaxed font-khmer">
+                <p className="text-xs text-slate-500 max-w-xs mx-auto mb-4 leading-relaxed font-khmer">
                   {tr(
                     language,
                     `មិនមានហាង ឬភោជនីយដ្ឋានក្នុងរង្វង់ ${activeRadiusText} ពីទីតាំង GPS របស់អ្នកឡើយ។ សូមសាកល្បងពង្រីករង្វង់ស្វែងរក ឬចាប់ទីតាំងឡើងវិញ។`,
@@ -909,10 +894,14 @@ export const NearMeModal: React.FC = () => {
                 <div className="flex items-center justify-center gap-2 flex-wrap">
                   {selectedRadiusMeters < 5000 && (
                     <button
-                      onClick={() => handleSelectRadius(selectedRadiusMeters === 500 ? 1000 : selectedRadiusMeters === 1000 ? 2000 : 5000)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-100 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 text-xs font-bold font-khmer rounded-xl transition cursor-pointer"
+                      onClick={() =>
+                        handleSelectRadius(
+                          selectedRadiusMeters === 500 ? 1000 : selectedRadiusMeters === 1000 ? 2000 : 5000
+                        )
+                      }
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-extrabold font-khmer rounded-full transition cursor-pointer"
                     >
-                      <MapPin className="w-3.5 h-3.5" />
+                      <MapPin className="w-3.5 h-3.5 text-emerald-600" />
                       <span>
                         {selectedRadiusMeters === 500
                           ? tr(language, 'ពង្រីកទៅ ១ គ.ម (1km)', 'Expand to 1km', '扩大至 1公里')
@@ -922,7 +911,10 @@ export const NearMeModal: React.FC = () => {
                   )}
                   <button
                     onClick={() => requestLocation(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#064E3B] text-white text-xs font-bold font-khmer rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
+                    style={{
+                      background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-white text-xs font-extrabold font-khmer rounded-full shadow-xs transition active:scale-95 cursor-pointer"
                   >
                     <LocateFixed className="w-4 h-4" />
                     <span>{tr(language, 'ចាប់ទីតាំងឡើងវិញ', 'Refresh GPS', '刷新定位')}</span>
@@ -930,170 +922,199 @@ export const NearMeModal: React.FC = () => {
                 </div>
               </div>
             ) : (
-              filteredNearbyRestaurants.map((r) => {
-                const rLoc = getLocalizedRestaurant(r, language);
-                const hasOfficialPhoto =
-                  Boolean(r.photoUrl) &&
-                  !r.photoUrl?.startsWith('data:image/svg+xml') &&
-                  (r.googleMapsMeta?.hasOfficialGooglePhoto !== false);
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {filteredNearbyRestaurants.map((r) => {
+                  const rLoc = getLocalizedRestaurant(r, language);
+                  const hasOfficialPhoto =
+                    Boolean(r.photoUrl) &&
+                    !r.photoUrl?.startsWith('data:image/svg+xml') &&
+                    r.googleMapsMeta?.hasOfficialGooglePhoto !== false;
 
-                return (
-                  <div
-                    key={r.id}
-                    onClick={() => {
-                      setSelectedRestaurant(r);
-                      setIsNearMeModalOpen(false);
-                    }}
-                    className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs hover:border-emerald-500 transition space-y-2.5 cursor-pointer"
-                  >
-                    <div className="flex gap-3">
-                      <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-100 shrink-0">
-                        <ShopAvatar
-                          restaurant={r}
-                          alt={rLoc.name}
-                          className="w-full h-full rounded-xl"
-                        />
-                        <span className="absolute bottom-0.5 right-1 bg-black/65 text-white/90 text-[7px] px-1 rounded-xs">
-                          {hasOfficialPhoto
-                            ? tr(language, 'រូបភាពហាង', 'Photo', '实景图')
-                            : tr(language, 'ផែនទី GPS', 'GPS Map', '地图点')}
-                        </span>
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-1">
-                          <h4 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedRestaurant(r);
-                              setIsNearMeModalOpen(false);
-                            }}
-                            className="font-bold text-xs sm:text-sm text-[#0F172A] dark:text-white truncate cursor-pointer hover:text-emerald-600"
-                          >
-                            {rLoc.name}
-                          </h4>
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-[#064E3B] dark:text-emerald-300 text-[11px] font-black shrink-0">
-                            📍 {formatDistanceLabel(r.distanceMeters)}
+                  return (
+                    <div
+                      key={r.id}
+                      onClick={() => {
+                        setSelectedRestaurant(r);
+                        setIsNearMeModalOpen(false);
+                      }}
+                      className="p-3 bg-white rounded-[22px] border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.05)] hover:border-emerald-500/60 transition space-y-2.5 cursor-pointer"
+                    >
+                      <div className="flex gap-3">
+                        <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200/70">
+                          <ShopAvatar
+                            restaurant={r}
+                            alt={rLoc.name}
+                            className="w-full h-full rounded-2xl object-cover"
+                          />
+                          <span className="absolute bottom-1 right-1 bg-black/65 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">
+                            {hasOfficialPhoto
+                              ? tr(language, 'រូបភាពហាង', 'Photo', '实景图')
+                              : tr(language, 'ផែនទី GPS', 'GPS Map', '地图点')}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
-                          <div className="flex items-center gap-0.5">
-                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                            <span className="font-bold">{r.rating > 0 ? r.rating.toFixed(1) : '4.5'}</span>
+                        <div className="flex-1 min-w-0 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-start justify-between gap-1.5">
+                              <h4
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedRestaurant(r);
+                                  setIsNearMeModalOpen(false);
+                                }}
+                                className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 leading-[1.6] truncate cursor-pointer hover:text-emerald-700"
+                              >
+                                {rLoc.name}
+                              </h4>
+                              <span
+                                style={{
+                                  background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
+                                }}
+                                className="px-2 py-0.5 rounded-full text-white text-[10.5px] font-extrabold shrink-0 shadow-2xs"
+                              >
+                                📍 {formatDistanceLabel(r.distanceMeters)}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2 mt-1 text-xs text-slate-600">
+                              <div className="flex items-center gap-0.5">
+                                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                <span className="font-extrabold text-slate-900">
+                                  {r.rating > 0 ? r.rating.toFixed(1) : '4.5'}
+                                </span>
+                              </div>
+                              <span>•</span>
+                              <span className="truncate font-semibold">
+                                {translateProvince(r.provinceKh || rLoc.province, language)}
+                              </span>
+                            </div>
+
+                            <p className="text-[11px] text-slate-500 truncate mt-1">
+                              {cleanCardAddress(rLoc.address, translateProvince(r.provinceKh || rLoc.province, language))}
+                            </p>
                           </div>
-                          <span>•</span>
-                          <span className="truncate">{translateProvince(r.provinceKh || rLoc.province, language)}</span>
+
+                          {r.matchedInventoryItems && r.matchedInventoryItems.length > 0 && (
+                            <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200/80 text-[10.5px] font-bold text-emerald-800 truncate max-w-full">
+                              <span className="truncate">
+                                🍜 {r.matchedInventoryItems.join(', ')}
+                              </span>
+                            </div>
+                          )}
                         </div>
+                      </div>
 
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-1">
-                          {cleanCardAddress(rLoc.address, translateProvince(r.provinceKh || rLoc.province, language))}
-                        </p>
+                      {/* Direct Directions & Call Action Buttons */}
+                      <div
+                        className="flex items-center gap-2 pt-2 border-t border-slate-100"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => openRestaurantGoogleExternal(r, 'directions', baseCoords)}
+                          style={{
+                            background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
+                          }}
+                          className="flex-1 py-2 px-3 text-white rounded-xl text-xs font-extrabold shadow-xs transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Navigation className="w-3.5 h-3.5 text-white" />
+                          <span>{tr(language, 'បង្ហាញផ្លូវ', 'Directions', '路线导航')}</span>
+                        </button>
 
-                        {r.matchedInventoryItems && r.matchedInventoryItems.length > 0 && (
-                          <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 truncate max-w-full">
-                            <span className="truncate">
-                              🍜 {tr(language, 'មានលក់៖', 'Sells:', '在售：')} {r.matchedInventoryItems.join(', ')}
-                            </span>
-                          </div>
+                        {sanitizeDialablePhone(r.phone) && (
+                          <a
+                            href={`tel:${sanitizeDialablePhone(r.phone)}`}
+                            style={{
+                              background: 'linear-gradient(180deg, #60A5FA 0%, #2563EB 100%)',
+                            }}
+                            className="p-2 text-white rounded-xl shadow-xs transition active:scale-95"
+                            title={r.phone}
+                          >
+                            <Phone className="w-4 h-4" />
+                          </a>
                         )}
+
+                        <button
+                          onClick={() => {
+                            setSelectedRestaurant(r);
+                            setIsNearMeModalOpen(false);
+                          }}
+                          className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition cursor-pointer"
+                          title={tr(language, 'ព័ត៌មានលម្អិត', 'Details', '查看详情')}
+                        >
+                          <ArrowUpRight className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
-
-                    {/* Direct Directions & Details Action Buttons */}
-                    <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-700/60" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        type="button"
-                        onClick={() => openRestaurantGoogleExternal(r, 'directions', baseCoords)}
-                        className="flex-1 py-2 px-3 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#064E3B] text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <Navigation className="w-3.5 h-3.5 text-emerald-300" />
-                        <span>{tr(language, 'បង្ហាញផ្លូវ', 'Directions', '路线导航')}</span>
-                      </button>
-
-                      {sanitizeDialablePhone(r.phone) && (
-                        <a
-                          href={`tel:${sanitizeDialablePhone(r.phone)}`}
-                          className="p-2 bg-emerald-50 hover:bg-emerald-100 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 rounded-xl transition"
-                          title={r.phone}
-                        >
-                          <Phone className="w-3.5 h-3.5" />
-                        </a>
-                      )}
-
-                      <button
-                        onClick={() => {
-                          setSelectedRestaurant(r);
-                          setIsNearMeModalOpen(false);
-                        }}
-                        className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition cursor-pointer"
-                        title={tr(language, 'ព័ត៌មានលម្អិត', 'Details', '查看详情')}
-                      >
-                        <ArrowUpRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })
-            )
-          ) : (
-            filteredNearbyDestinations.length === 0 ? (
-              <div className="py-12 px-4 text-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 my-2">
-                <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-[#064E3B] dark:text-emerald-400 shadow-xs">
-                  <Mountain className="w-7 h-7" />
-                </div>
-                <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm mb-1.5 font-khmer">
-                  {tr(
-                    language,
-                    `រកមិនឃើញកន្លែងដើរលេងក្នុងរង្វង់ ${activeRadiusText} ទេ`,
-                    `No spots found within ${activeRadiusText}`,
-                    `${activeRadiusText} 范围内未找到景点`
-                  )}
-                </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto mb-4 leading-relaxed font-khmer">
-                  {tr(
-                    language,
-                    `មិនមានកន្លែងកម្សាន្តក្នុងរង្វង់ ${activeRadiusText} ពីទីតាំង GPS របស់អ្នកឡើយ។ សូមសាកល្បងពង្រីករង្វង់ស្វែងរក ឬចាប់ទីតាំងឡើងវិញ។`,
-                    `No tourist spots were found within ${activeRadiusText} of your current GPS location. Try expanding the radius or refreshing your GPS.`,
-                    `您当前 GPS 位置 ${activeRadiusText} 以内暂无旅游景点。请尝试扩大搜索范围或刷新定位。`
-                  )}
-                </p>
-                <div className="flex items-center justify-center gap-2 flex-wrap">
-                  {selectedRadiusMeters < 5000 && (
-                    <button
-                      onClick={() => handleSelectRadius(selectedRadiusMeters === 500 ? 1000 : selectedRadiusMeters === 1000 ? 2000 : 5000)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-100 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 text-xs font-bold font-khmer rounded-xl transition cursor-pointer"
-                    >
-                      <MapPin className="w-3.5 h-3.5" />
-                      <span>
-                        {selectedRadiusMeters === 500
-                          ? tr(language, 'ពង្រីកទៅ ១ គ.ម (1km)', 'Expand to 1km', '扩大至 1公里')
-                          : tr(language, 'ពង្រីកទៅ ២ គ.ម (2km)', 'Expand to 2km', '扩大至 2公里')}
-                      </span>
-                    </button>
-                  )}
-                  <button
-                    onClick={() => requestLocation(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#064E3B] text-white text-xs font-bold font-khmer rounded-xl shadow-xs transition active:scale-95 cursor-pointer"
-                  >
-                    <LocateFixed className="w-4 h-4" />
-                    <span>{tr(language, 'ចាប់ទីតាំងឡើងវិញ', 'Refresh GPS', '刷新定位')}</span>
-                  </button>
-                </div>
+                  );
+                })}
               </div>
-            ) : (
-              filteredNearbyDestinations.map((d) => {
+            )
+          ) : filteredNearbyDestinations.length === 0 ? (
+            <div className="py-12 px-4 text-center bg-white rounded-3xl border border-slate-200/90 shadow-xs my-2">
+              <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shadow-2xs">
+                <Mountain className="w-7 h-7" />
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-sm mb-1.5 font-khmer">
+                {tr(
+                  language,
+                  `រកមិនឃើញកន្លែងដើរលេងក្នុងរង្វង់ ${activeRadiusText} ទេ`,
+                  `No spots found within ${activeRadiusText}`,
+                  `${activeRadiusText} 范围内未找到景点`
+                )}
+              </h4>
+              <p className="text-xs text-slate-500 max-w-xs mx-auto mb-4 leading-relaxed font-khmer">
+                {tr(
+                  language,
+                  `មិនមានកន្លែងកម្សាន្តក្នុងរង្វង់ ${activeRadiusText} ពីទីតាំង GPS របស់អ្នកឡើយ។ សូមសាកល្បងពង្រីករង្វង់ស្វែងរក ឬចាប់ទីតាំងឡើងវិញ។`,
+                  `No tourist spots were found within ${activeRadiusText} of your current GPS location. Try expanding the radius or refreshing your GPS.`,
+                  `您当前 GPS 位置 ${activeRadiusText} 以内暂无旅游景点。请尝试扩大搜索范围或刷新定位。`
+                )}
+              </p>
+              <div className="flex items-center justify-center gap-2 flex-wrap">
+                {selectedRadiusMeters < 5000 && (
+                  <button
+                    onClick={() =>
+                      handleSelectRadius(
+                        selectedRadiusMeters === 500 ? 1000 : selectedRadiusMeters === 1000 ? 2000 : 5000
+                      )
+                    }
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-extrabold font-khmer rounded-full transition cursor-pointer"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>
+                      {selectedRadiusMeters === 500
+                        ? tr(language, 'ពង្រីកទៅ ១ គ.ម (1km)', 'Expand to 1km', '扩大至 1公里')
+                        : tr(language, 'ពង្រីកទៅ ២ គ.ម (2km)', 'Expand to 2km', '扩大至 2公里')}
+                    </span>
+                  </button>
+                )}
+                <button
+                  onClick={() => requestLocation(true)}
+                  style={{
+                    background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-white text-xs font-extrabold font-khmer rounded-full shadow-xs transition active:scale-95 cursor-pointer"
+                >
+                  <LocateFixed className="w-4 h-4" />
+                  <span>{tr(language, 'ចាប់ទីតាំងឡើងវិញ', 'Refresh GPS', '刷新定位')}</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {filteredNearbyDestinations.map((d) => {
                 const dLoc = getLocalizedDestination(d, language);
                 const hasOfficialPhoto =
                   !d.photoUrl?.startsWith('data:image/svg+xml') &&
-                  (d.googleMapsMeta?.hasOfficialGooglePhoto !== false);
+                  d.googleMapsMeta?.hasOfficialGooglePhoto !== false;
                 return (
                   <div
                     key={d.id}
-                    className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs hover:border-emerald-500 transition space-y-2.5"
+                    className="p-3 bg-white rounded-[22px] border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.05)] hover:border-emerald-500/60 transition space-y-2.5"
                   >
                     <div className="flex gap-3">
-                      <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-100 shrink-0">
+                      <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200/70">
                         <img
                           src={d.photoUrl}
                           alt={dLoc.name}
@@ -1105,7 +1126,7 @@ export const NearMeModal: React.FC = () => {
                             target.src = buildPlaceSpecificNoPhotoSvg(d.nameKh, d.provinceKh, 'tourism');
                           }}
                         />
-                        <span className="absolute bottom-0.5 right-1 bg-black/65 text-white/90 text-[7px] px-1 rounded-xs">
+                        <span className="absolute bottom-1 right-1 bg-black/65 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">
                           {hasOfficialPhoto
                             ? tr(language, 'រូបភាពទីតាំង', 'Photo', '实景图')
                             : tr(language, 'ផែនទី GPS', 'GPS Map', '地图点')}
@@ -1113,8 +1134,8 @@ export const NearMeModal: React.FC = () => {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-1">
-                          <h4 
+                        <div className="flex items-start justify-between gap-1.5">
+                          <h4
                             onClick={() => {
                               if (String(d.id).startsWith('gplace_dest_')) {
                                 openDestinationGoogleExternal(d, 'directions', baseCoords);
@@ -1123,38 +1144,48 @@ export const NearMeModal: React.FC = () => {
                               setSelectedDestination(d);
                               setIsNearMeModalOpen(false);
                             }}
-                            className="font-bold text-xs sm:text-sm text-[#0F172A] dark:text-white truncate cursor-pointer hover:text-emerald-600"
+                            className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 leading-[1.6] truncate cursor-pointer hover:text-emerald-700"
                           >
                             {dLoc.name}
                           </h4>
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-[#064E3B] dark:text-emerald-300 text-[11px] font-black shrink-0">
+                          <span
+                            style={{
+                              background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
+                            }}
+                            className="px-2 py-0.5 rounded-full text-white text-[10.5px] font-extrabold shrink-0 shadow-2xs"
+                          >
                             📍 {formatDistanceLabel(d.distanceMeters)}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
-                          <span className="font-bold text-emerald-600">{dLoc.category}</span>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-slate-600">
+                          <span className="font-extrabold text-emerald-700">{dLoc.category}</span>
                           <span>•</span>
                           <div className="flex items-center gap-0.5">
                             <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                            <span className="font-bold">{d.rating > 0 ? d.rating.toFixed(1) : '4.6'}</span>
+                            <span className="font-extrabold text-slate-900">
+                              {d.rating > 0 ? d.rating.toFixed(1) : '4.6'}
+                            </span>
                           </div>
                         </div>
 
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-1">
+                        <p className="text-[11px] text-slate-500 truncate mt-1">
                           {cleanCardAddress(dLoc.address, translateProvince(d.provinceKh || dLoc.province, language))}
                         </p>
                       </div>
                     </div>
 
                     {/* Direct Navigation */}
-                    <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-700/60">
+                    <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
                       <button
                         type="button"
                         onClick={() => openDestinationGoogleExternal(d, 'directions', baseCoords)}
-                        className="flex-1 py-2 px-3 bg-gradient-to-r from-[#064E3B] to-[#047857] hover:from-[#047857] hover:to-[#064E3B] text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+                        style={{
+                          background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
+                        }}
+                        className="flex-1 py-2 px-3 text-white rounded-xl text-xs font-extrabold shadow-xs transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
                       >
-                        <Navigation className="w-3.5 h-3.5 text-emerald-300" />
+                        <Navigation className="w-3.5 h-3.5 text-white" />
                         <span>{tr(language, 'បង្ហាញផ្លូវ', 'Directions', '路线导航')}</span>
                       </button>
 
@@ -1167,7 +1198,7 @@ export const NearMeModal: React.FC = () => {
                           setSelectedDestination(d);
                           setIsNearMeModalOpen(false);
                         }}
-                        className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition cursor-pointer"
+                        className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition cursor-pointer"
                         title={tr(language, 'ព័ត៌មានលម្អិត', 'Details', '查看详情')}
                       >
                         <ArrowUpRight className="w-4 h-4" />
@@ -1175,8 +1206,8 @@ export const NearMeModal: React.FC = () => {
                     </div>
                   </div>
                 );
-              })
-            )
+              })}
+            </div>
           )}
         </div>
       </div>

@@ -318,16 +318,16 @@ export const TrendingSocialModal: React.FC = () => {
           showToast(
             tr(
               language,
-              `🆕 មានវីដេអូ YouTube ថ្មី ${newItems.length} ត្រូវបានបន្ថែមនៅខាងលើ`,
-              `🆕 ${newItems.length} new YouTube video(s) added to the top`,
-              `🆕 已在顶部添加 ${newItems.length} 条 YouTube 新视频`
+              `🆕 បានរកឃើញវីដេអូម្ហូបថ្មីចំនួន ${newItems.length} ពី TikTok, Facebook និង YouTube`,
+              `🆕 Discovered ${newItems.length} new food video(s) from TikTok, Facebook & YouTube`,
+              `🆕 已发现 ${newItems.length} 条来自 TikTok、Facebook 和 YouTube 的新美食视频`
             ),
             'info'
           );
         }
         setCooldownSec(res.cooldownRemainingSec);
 
-        if (force) {
+        if (force && !isAutoCycle) {
           if (res.cooldownRemainingSec > 0) {
             showToast(
               tr(
@@ -342,9 +342,9 @@ export const TrendingSocialModal: React.FC = () => {
             showToast(
               tr(
                 language,
-                `✅ បានពិនិត្យ និងបង្វិលវីដេអូ YouTube ថ្មីៗ (${res.items.length} វីដេអូ)`,
-                `✅ Refreshed & rotated latest YouTube videos (${res.items.length} videos)`,
-                `✅ 已刷新并轮换最新 YouTube 视频（共 ${res.items.length} 条）`
+                `✅ បានស្វែងរក និងធ្វើបច្ចុប្បន្នភាពវីដេអូម្ហូបថ្មីៗ (${res.items.length} វីដេអូ)`,
+                `✅ Refreshed & discovered latest food videos (${res.items.length} videos)`,
+                `✅ 已刷新并发现最新美食视频（共 ${res.items.length} 条）`
               ),
               'success'
             );
@@ -352,13 +352,13 @@ export const TrendingSocialModal: React.FC = () => {
         }
       } catch {
         setHasError(true);
-        if (force) {
+        if (force && !isAutoCycle) {
           showToast(
             tr(
               language,
-              '⚠️ មិនអាចទាញយកវីដេអូ YouTube បានទេ សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិត',
-              '⚠️ Could not load YouTube trending feed. Please check connection.',
-              '⚠️ 无法加载 YouTube 热门视频，请检查网络连接。'
+              '⚠️ មិនអាចទាញយកវីដេអូថ្មីបានទេ សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិត',
+              '⚠️ Could not load trending video feed. Please check connection.',
+              '⚠️ 无法加载热门视频，请检查网络连接。'
             ),
             'warning'
           );
@@ -375,12 +375,20 @@ export const TrendingSocialModal: React.FC = () => {
   const activePlayerItemIdRef = useRef<string | null>(null);
   activePlayerItemIdRef.current = activePlayerItemId;
 
-  // Initial load & rotation when modal opens, then automatic refresh & video rotation every 60 seconds (zero per-second re-renders)
+  // Initial load & rotation when modal opens, plus periodic background discovery when no inline video is playing
   const loadFeedRef = useRef(loadFeed);
   loadFeedRef.current = loadFeed;
   useEffect(() => {
     if (!isTrendingSocialModalOpen) return;
     loadFeedRef.current(false, false);
+
+    const autoDiscoverTimer = setInterval(() => {
+      if (!activePlayerItemIdRef.current) {
+        loadFeedRef.current(true, true);
+      }
+    }, 180 * 1000);
+
+    return () => clearInterval(autoDiscoverTimer);
   }, [isTrendingSocialModalOpen]);
 
   // Stop inline video when modal closes
@@ -967,11 +975,11 @@ export const TrendingSocialModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-stretch md:items-center justify-center bg-black/70 backdrop-blur-xs p-0 md:p-4 animate-in fade-in duration-200 overscroll-none"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200 overscroll-none"
       onClick={() => setIsTrendingSocialModalOpen(false)}
     >
       <div
-        className="w-full max-w-full md:max-w-2xl lg:max-w-3xl bg-white dark:bg-slate-900 rounded-none md:rounded-3xl border-0 md:border border-slate-200/80 dark:border-slate-800 shadow-2xl h-full md:h-[92dvh] max-h-full md:max-h-[92dvh] flex flex-col overflow-hidden overscroll-contain"
+        className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden overscroll-contain"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -1062,7 +1070,7 @@ export const TrendingSocialModal: React.FC = () => {
         </div>
 
         {/* Platform Filter Bar: All / TikTok / Facebook / YouTube */}
-        <div className="px-2.5 py-2 bg-slate-950 border-b border-slate-800 flex items-center gap-1.5 flex-wrap shrink-0 font-khmer text-xs">
+        <div className="px-2.5 py-2 bg-slate-950 border-b border-slate-800 flex items-center gap-1.5 shrink-0 font-khmer text-xs overflow-x-auto no-scrollbar">
           {[
             { id: 'all' as const, label: tr(language, 'ទាំងអស់', 'All Platforms', '全部平台'), activeCls: 'bg-emerald-600 text-white' },
             { id: 'tiktok' as const, label: 'TikTok', activeCls: 'bg-black text-white border border-white/30' },
@@ -1111,7 +1119,7 @@ export const TrendingSocialModal: React.FC = () => {
         </div>
 
         {/* Category Tabs: 4 Categories + All Trending */}
-        <div className="p-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center gap-1.5 flex-wrap shrink-0 font-khmer text-xs">
+        <div className="p-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center gap-1.5 shrink-0 font-khmer text-xs overflow-x-auto no-scrollbar">
           {categories.map((c) => (
             <button
               key={c.id}
@@ -1130,7 +1138,7 @@ export const TrendingSocialModal: React.FC = () => {
         </div>
 
         {/* Location Selector Bar */}
-        <div className="px-3 py-1.5 bg-slate-900/40 border-b border-slate-800/80 flex items-center gap-1.5 flex-wrap font-khmer text-xs shrink-0">
+        <div className="px-3 py-1.5 bg-slate-900/40 border-b border-slate-800/80 flex items-center gap-1.5 overflow-x-auto no-scrollbar font-khmer text-xs shrink-0">
           <span className="text-[10px] text-slate-400 font-bold shrink-0">📍 {tr(language, 'ទីតាំង៖', 'City:', '城市：')}</span>
           {provinces.map((p) => (
             <button

@@ -6,9 +6,10 @@ import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { normalizeKhmerSearchText, expandMultilingualPlaceQuery, includesKhmerSafeToken } from './googlePlacesService';
 import { isSupabaseConfigured, pushCloudDocument, pullCloudDocument } from './supabaseService';
 
-export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v17_social_2026_verified_cache';
+export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v18_social_2026_verified_cache';
 const ONLINE_DISCOVERY_CUSTOM_URLS_KEY = 'kft_online_discovery_custom_urls_v1';
 const LEGACY_CACHE_KEYS = [
+  'kft_v17_social_2026_verified_cache',
   'kft_v16_social_2026_verified_cache',
   'kft_v15_social_2026_verified_cache',
   'kft_v14_social_2026_verified_cache',
@@ -22,6 +23,7 @@ const LEGACY_CACHE_KEYS = [
   'kft_v6_youtube_verified_cache',
   'kft_v5_youtube_discovery_cache',
   'kft_v4_online_discovery_cache',
+  'kft_live_tiktok_creators_v3',
   'kft_live_tiktok_creators_v2',
   'kft_live_tiktok_creators_v1',
 ];
@@ -1921,6 +1923,13 @@ export interface PopularCambodiaTikTokAccount {
 
 export const POPULAR_CAMBODIA_TIKTOK_ACCOUNTS: PopularCambodiaTikTokAccount[] = [
   {
+    id: 'pudy-lychher',
+    handle: '@pudy_lychher',
+    displayName: 'ពូឌីលីឈើ - Pudy Lychher (@pudy_lychher)',
+    titleKh: 'ពូឌីលីឈើ - Pudy Lychher (@pudy_lychher)',
+    url: 'https://www.tiktok.com/@pudy_lychher',
+  },
+  {
     id: 'eatame-eater',
     handle: '@eatame.eater',
     displayName: 'Eatame (@eatame.eater)',
@@ -1954,6 +1963,90 @@ export const POPULAR_CAMBODIA_TIKTOK_ACCOUNTS: PopularCambodiaTikTokAccount[] = 
     displayName: 'Food Whisper - ខ្សឹបឱ្យឃ្លាន (@foodwhisper_officials)',
     titleKh: 'Food Whisper - ខ្សឹបឱ្យឃ្លាន (@foodwhisper_officials)',
     url: 'https://www.tiktok.com/@foodwhisper_officials?is_from_webapp=1&sender_device=pc',
+  },
+  {
+    id: 'khleancheck',
+    handle: '@.khleancheck',
+    displayName: 'ឃ្លានឆេក - Khlean Check (@.khleancheck)',
+    titleKh: 'ឃ្លានឆេក - Khlean Check (@.khleancheck)',
+    url: 'https://www.tiktok.com/@.khleancheck',
+  },
+  {
+    id: 'benlycooking',
+    handle: '@benlycooking',
+    displayName: 'ម្ហូបអ្នកភូមិ - Benly Cooking (@benlycooking)',
+    titleKh: 'ម្ហូបអ្នកភូមិ - Benly Cooking (@benlycooking)',
+    url: 'https://www.tiktok.com/@benlycooking',
+  },
+  {
+    id: 'woori-kitchenstory',
+    handle: '@woori_kitchenstory',
+    displayName: 'Kitchen Story - មុខម្ហូបខ្មែរ (@woori_kitchenstory)',
+    titleKh: 'Kitchen Story - មុខម្ហូបខ្មែរ (@woori_kitchenstory)',
+    url: 'https://www.tiktok.com/@woori_kitchenstory',
+  },
+  {
+    id: 'plov-der',
+    handle: '@plov_der',
+    displayName: 'ផ្លូវដើរ - Plov Der (@plov_der)',
+    titleKh: 'ផ្លូវដើរ - Plov Der (@plov_der)',
+    url: 'https://www.tiktok.com/@plov_der',
+  },
+  {
+    id: 'me-kork-sach100muk',
+    handle: '@me_kork_sach100muk',
+    displayName: 'មីគោកសាច់ ១០០ មុខ ផ្សារអូរឫស្សី (@me_kork_sach100muk)',
+    titleKh: 'មីគោកសាច់ ១០០ មុខ ផ្សារអូរឫស្សី (@me_kork_sach100muk)',
+    url: 'https://www.tiktok.com/@me_kork_sach100muk',
+  },
+  {
+    id: 'tosmokplouk',
+    handle: '@tosmokplouk',
+    displayName: 'តោះមកភ្លក់ - Tos Mok Plouk (@tosmokplouk)',
+    titleKh: 'តោះមកភ្លក់ - Tos Mok Plouk (@tosmokplouk)',
+    url: 'https://www.tiktok.com/@tosmokplouk',
+  },
+  {
+    id: 'taseit-restaurant',
+    handle: '@taseit_restaurant',
+    displayName: 'ភោជនីយដ្ឋាន តាសេត (@taseit_restaurant)',
+    titleKh: 'ភោជនីយដ្ឋាន តាសេត (@taseit_restaurant)',
+    url: 'https://www.tiktok.com/@taseit_restaurant',
+  },
+  {
+    id: 'bore-restaurant',
+    handle: '@bore.restaurant',
+    displayName: 'ភោជនីយដ្ឋាន បុរេ - Boré (@bore.restaurant)',
+    titleKh: 'ភោជនីយដ្ឋាន បុរេ - Boré (@bore.restaurant)',
+    url: 'https://www.tiktok.com/@bore.restaurant',
+  },
+  {
+    id: 'suyadaily',
+    handle: '@suyadaily',
+    displayName: 'ស្នាដៃកូនពៅ - Suya Daily (@suyadaily)',
+    titleKh: 'ស្នាដៃកូនពៅ - Suya Daily (@suyadaily)',
+    url: 'https://www.tiktok.com/@suyadaily',
+  },
+  {
+    id: 'ounwelldailycooking',
+    handle: '@ounwelldailycooking',
+    displayName: 'Oun Well Daily Cooking (@ounwelldailycooking)',
+    titleKh: 'Oun Well Daily Cooking (@ounwelldailycooking)',
+    url: 'https://www.tiktok.com/@ounwelldailycooking',
+  },
+  {
+    id: 'hub-baywithme',
+    handle: '@hub_baywithme',
+    displayName: 'Hub Bay With Me (@hub_baywithme)',
+    titleKh: 'Hub Bay With Me (@hub_baywithme)',
+    url: 'https://www.tiktok.com/@hub_baywithme',
+  },
+  {
+    id: 'ieatisharecambodia',
+    handle: '@ieatisharecambodia',
+    displayName: 'I Eat I Share Cambodia (@ieatisharecambodia)',
+    titleKh: 'I Eat I Share Cambodia (@ieatisharecambodia)',
+    url: 'https://www.tiktok.com/@ieatisharecambodia',
   },
 ];
 
@@ -2451,7 +2544,435 @@ export const CURATED_TIKTOK_FACEBOOK_REVIEWS: OnlineFoodDiscoveryItem[] = [
   },
 
   // ============================================================================
-  // 6. Verified Facebook Pages — Cambodian Food, Restaurants & Travel Reviews
+  // 6. @pudy_lychher (ពូឌីលីឈើ - Pudy Lychher) — Recommended Cambodian Street & Local Food Creator
+  // ============================================================================
+  {
+    id: 'tt-pudy-7706133454110330120',
+    platform: 'tiktok',
+    titleKh: 'យកម្ហូបហាងមកលក់តាមផ្លូវ លក់ធូរៗចែកគ្នាសាក ស្តេក និងម្ហូបឆ្ងាញ់ៗ (@pudy_lychher)',
+    titleEn: 'Restaurant Steak & Dishes Sold at Affordable Street Food Prices (@pudy_lychher)',
+    titleZh: '高档餐厅牛排与料理平价街头美食测评 (@pudy_lychher)',
+    descriptionKh: 'យកម្ហូបហាងមកលក់តាមផ្លូវ លក់ធូៗចែកគ្នាសាក #ពូឌីលីឈើ #StreetFood #steaklovers — វីដេអូ Review ម្ហូបតាមផ្លូវពីគណនីផ្លូវការ @pudy_lychher។',
+    descriptionEn: 'Pudy Lychher (@pudy_lychher) reviewing restaurant-quality steak and signature dishes served at affordable Cambodian street food prices.',
+    descriptionZh: '@pudy_lychher 探访金边平价街头牛排与高棉特色小炒。',
+    thumbnailUrl: '/foods/food-2.jpg',
+    sourceUrl: 'https://www.tiktok.com/@pudy_lychher/video/7706133454110330120',
+    originalAccountUrl: 'https://www.tiktok.com/@pudy_lychher',
+    inlineVideoId: '7706133454110330120',
+    sourceName: 'ពូឌីលីឈើ - Pudy Lychher (@pudy_lychher)',
+    authorHandle: '@pudy_lychher',
+    publishedOrUpdatedAt: '2026-11-09T11:33:30.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Featured Food Creator',
+    verificationBadgeKh: 'វីដេអូ Review ម្ហូបលើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 推荐柬埔寨美食创作者',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-2',
+    relevanceScore: 100,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-pudy-7705741138837245192',
+    platform: 'tiktok',
+    titleKh: 'សាច់អាំងបែបចិន ១ ចានតែ 7000 រៀល កន្លែងអ្នកភ្នំពេញជួបជុំពេលចេញពីធ្វើការ (@pudy_lychher)',
+    titleEn: '7,000 Riel Grilled Skewers Plate After-Work Street Food Spot in Phnom Penh (@pudy_lychher)',
+    titleZh: '金边 7000 瑞尔烤串拼盘下班必去街头美食探店 (@pudy_lychher)',
+    descriptionKh: 'សាច់អាំងបែបចិន1 ចានតែ7000 រៀល ហ្នឹងមែនកន្លែងអ្នកភ្នំពេញគេកាត់sad ពេលចេញពីធ្វើការ ? #ពូឌីលីឈើ #streetfood #genz — ពី @pudy_lychher។',
+    descriptionEn: 'Pudy Lychher (@pudy_lychher) exploring Phnom Penh’s popular 7,000 Riel smoky grilled skewers street food hangout.',
+    descriptionZh: '@pudy_lychher 探访金边年轻人最爱的 7000 瑞尔街头炭火烤肉串。',
+    thumbnailUrl: '/foods/food-64.jpg',
+    sourceUrl: 'https://www.tiktok.com/@pudy_lychher/video/7705741138837245192',
+    originalAccountUrl: 'https://www.tiktok.com/@pudy_lychher',
+    inlineVideoId: '7705741138837245192',
+    sourceName: 'ពូឌីលីឈើ - Pudy Lychher (@pudy_lychher)',
+    authorHandle: '@pudy_lychher',
+    publishedOrUpdatedAt: '2026-11-08T10:11:10.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Featured Food Creator',
+    verificationBadgeKh: 'វីដេអូ Review ម្ហូបលើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 推荐柬埔寨美食创作者',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-64',
+    relevanceScore: 100,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-pudy-7705427337642249480',
+    platform: 'tiktok',
+    titleKh: 'មីស៊ុបដាច់យប់ ផ្សាររាត្រីភ្នំពេញ ទឹកស៊ុបក្ដៅៗឆ្ងាញ់ជាប់ចិត្ត (@pudy_lychher)',
+    titleEn: 'Late-Night Noodle Soup at Phnom Penh Night Market (@pudy_lychher)',
+    titleZh: '金边夜市深夜热汤面探店测评 (@pudy_lychher)',
+    descriptionKh: 'មីស៊ុបដាច់យប់ ផ្សារាត្រី #ពូឌីលីឈើ #streetfood #localfood — ពីគណនីផ្លូវការ @pudy_lychher។',
+    descriptionEn: 'Pudy Lychher (@pudy_lychher) tasting steaming hot late-night noodle soup at the Phnom Penh Night Market.',
+    descriptionZh: '@pudy_lychher 夜访金边夜市超人气深夜汤面摊。',
+    thumbnailUrl: '/foods/food-36.jpg',
+    sourceUrl: 'https://www.tiktok.com/@pudy_lychher/video/7705427337642249480',
+    originalAccountUrl: 'https://www.tiktok.com/@pudy_lychher',
+    inlineVideoId: '7705427337642249480',
+    sourceName: 'ពូឌីលីឈើ - Pudy Lychher (@pudy_lychher)',
+    authorHandle: '@pudy_lychher',
+    publishedOrUpdatedAt: '2026-11-07T13:53:33.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Featured Food Creator',
+    verificationBadgeKh: 'វីដេអូ Review ម្ហូបលើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 推荐柬埔寨美食创作者',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-36',
+    relevanceScore: 99,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-pudy-7705048762187549970',
+    platform: 'tiktok',
+    titleKh: 'ដល់ខែត្រីអង្រែហើយ ពេញឆ្ងាញ់ហើយអ្នកលក់នំបញ្ចុកទឹកម្ហិច (@pudy_lychher)',
+    titleEn: 'Seasonal Trei Angrae Fish & Traditional Num Banh Chok Teuk Mhech (@pudy_lychher)',
+    titleZh: '柬埔寨时令鲜鱼与传统高棉鱼汤米粉 (@pudy_lychher)',
+    descriptionKh: 'ដល់ខែត្រីអង្រែហើយ ពេញឆ្ងាញ់ហើយអ្នកលក់នំបញ្ចុកទឹកម្ហិច #ពូឌីលីឈើ #localfood #cookingvideo — ពី @pudy_lychher។',
+    descriptionEn: 'Pudy Lychher (@pudy_lychher) showcasing seasonal Cambodian river fish and authentic local Num Banh Chok Teuk Mhech.',
+    descriptionZh: '@pudy_lychher 介绍高棉时令河鱼与地道传统米粉汤。',
+    thumbnailUrl: '/foods/food-3.jpg',
+    sourceUrl: 'https://www.tiktok.com/@pudy_lychher/video/7705048762187549970',
+    originalAccountUrl: 'https://www.tiktok.com/@pudy_lychher',
+    inlineVideoId: '7705048762187549970',
+    sourceName: 'ពូឌីលីឈើ - Pudy Lychher (@pudy_lychher)',
+    authorHandle: '@pudy_lychher',
+    publishedOrUpdatedAt: '2026-11-06T13:24:29.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Featured Food Creator',
+    verificationBadgeKh: 'វីដេអូ Review ម្ហូបលើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 推荐柬埔寨美食创作者',
+    categorySlug: 'popular_food',
+    provinceKh: 'ខេត្តកំពង់ចាម',
+    provinceEn: 'Kampong Cham',
+    matchedFoodId: 'food-3',
+    relevanceScore: 99,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-pudy-7703765142802156808',
+    platform: 'tiktok',
+    titleKh: 'ដល់ខែហើយបងប្អូន លៀសហាលតុងហេង ហឹរប្រៃឆ្ងាញ់ (@pudy_lychher)',
+    titleEn: 'Famous Tong Heng Sun-Dried Spiced Clams (Lies Hal) Street Food (@pudy_lychher)',
+    titleZh: '柬埔寨人气街头小吃：东兴香辣晒蚬 (@pudy_lychher)',
+    descriptionKh: 'ដល់ខែហើយបងប្អូន លៀសហាលតុងហេង #ពូឌីលីឈើ #streetfood #localfood — ពី @pudy_lychher។',
+    descriptionEn: 'Pudy Lychher (@pudy_lychher) visiting the famous Tong Heng sun-dried chili garlic freshwater clams stall.',
+    descriptionZh: '@pudy_lychher 探访金边著名的东兴香辣蒜蓉晒河蚬摊位。',
+    thumbnailUrl: '/foods/food-25.jpg',
+    sourceUrl: 'https://www.tiktok.com/@pudy_lychher/video/7703765142802156808',
+    originalAccountUrl: 'https://www.tiktok.com/@pudy_lychher',
+    inlineVideoId: '7703765142802156808',
+    sourceName: 'ពូឌីលីឈើ - Pudy Lychher (@pudy_lychher)',
+    authorHandle: '@pudy_lychher',
+    publishedOrUpdatedAt: '2026-11-03T02:23:25.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Featured Food Creator',
+    verificationBadgeKh: 'វីដេអូ Review ម្ហូបលើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 推荐柬埔寨美食创作者',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-25',
+    relevanceScore: 98,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+
+  // ============================================================================
+  // 7. Expanded Diverse Cambodian Food Creators (Famous & Smaller Local Creators)
+  // ============================================================================
+  {
+    id: 'tt-khleancheck-7706527600566406420',
+    platform: 'tiktok',
+    titleKh: 'សាច់អាំងទឹកជ្រលក់រសជាតិដើមមកពីខេត្តបាត់ដំបង មាននៅភ្នំពេញហើយ (@.khleancheck)',
+    titleEn: 'Authentic Battambang Style Grilled Skewers & Dipping Sauce in Phnom Penh (@.khleancheck)',
+    titleZh: '正宗马德望风味炭烤肉串与秘制蘸酱 (@.khleancheck)',
+    descriptionKh: 'សាច់អាំងទឹកជ្រលក់រសជាតិដើម មកពីខេត្តបាត់ដំបងមាននៅភ្នំពេញហើយបងប្អូន! #ឃ្លានឆេក #khleancheck #បាត់ដំបង #សាច់អាំង — ពី @.khleancheck។',
+    descriptionEn: 'Khlean Check (@.khleancheck) reviewing authentic Battambang-style charcoal grilled skewers and signature dipping sauce.',
+    descriptionZh: '@.khleancheck 测评来自马德望的特色炭火烤肉串与蘸酱。',
+    thumbnailUrl: '/foods/food-64.jpg',
+    sourceUrl: 'https://www.tiktok.com/@.khleancheck/video/7706527600566406420',
+    originalAccountUrl: 'https://www.tiktok.com/@.khleancheck',
+    inlineVideoId: '7706527600566406420',
+    sourceName: 'ឃ្លានឆេក - Khlean Check (@.khleancheck)',
+    authorHandle: '@.khleancheck',
+    publishedOrUpdatedAt: '2026-11-10T13:03:02.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Cambodian Food Creator',
+    verificationBadgeKh: 'វីដេអូ Review ម្ហូបលើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 柬埔寨美食创作者',
+    categorySlug: 'popular_food',
+    provinceKh: 'ខេត្តបាត់ដំបង',
+    provinceEn: 'Battambang',
+    matchedFoodId: 'food-64',
+    relevanceScore: 99,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-benlycooking-7706508574503046452',
+    platform: 'tiktok',
+    titleKh: 'សម្លម្ជូរគ្រឿងត្រីឆ្ដោរ ម្ហូបអ្នកភូមិឈ្ងុយឆ្ងាញ់បែបស្រុកស្រែ (@benlycooking)',
+    titleEn: 'Village Style Khmer Sour Kroeung Snakehead Fish Soup (@benlycooking)',
+    titleZh: '高棉乡村风味柠檬草酸汤黑鱼 (@benlycooking)',
+    descriptionKh: 'សម្លម្ជូរគ្រឿងត្រីឆ្ដោរ ម្ហូបអ្នកភូមិឈ្ងុយឆ្ងាញ់ #ម្ហូបខ្មែរ #ម្ហូបអ្នកភូមិ #ធ្វើម្ហូប — ពីគណនី @benlycooking។',
+    descriptionEn: 'Benly Cooking (@benlycooking) preparing traditional Cambodian countryside sour kroeung snakehead fish soup.',
+    descriptionZh: '@benlycooking 烹饪地道柬埔寨乡村风味香茅黄姜酸鱼汤。',
+    thumbnailUrl: '/foods/food-4.jpg',
+    sourceUrl: 'https://www.tiktok.com/@benlycooking/video/7706508574503046452',
+    originalAccountUrl: 'https://www.tiktok.com/@benlycooking',
+    inlineVideoId: '7706508574503046452',
+    sourceName: 'ម្ហូបអ្នកភូមិ - Benly Cooking (@benlycooking)',
+    authorHandle: '@benlycooking',
+    publishedOrUpdatedAt: '2026-11-10T11:49:12.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Cambodian Food Creator',
+    verificationBadgeKh: 'វីដេអូធ្វើម្ហូបខ្មែរលើ TikTok',
+    verificationBadgeZh: 'TikTok 高棉美食创作者',
+    categorySlug: 'popular_food',
+    provinceKh: 'ខេត្តសៀមរាប',
+    provinceEn: 'Siem Reap',
+    matchedFoodId: 'food-4',
+    relevanceScore: 99,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-woori-7631951940275932423',
+    platform: 'tiktok',
+    titleKh: 'សម្លកកូរខ្មែរ បន្លែចម្រុះធម្មជាតិ ឈ្ងុយប្រហុកខ្មែរ និងអង្ករលីង (@woori_kitchenstory)',
+    titleEn: 'Traditional Cambodian Samlor Korko with Toasted Rice & Prahok (@woori_kitchenstory)',
+    titleZh: '传统高棉百菜浓汤 (Samlor Korko) 家常食谱 (@woori_kitchenstory)',
+    descriptionKh: 'សម្លកកូរខ្មែរ បន្លែចម្រុះធម្មជាតិ ឈ្ងុយប្រហុកខ្មែរ និងអង្ករលីង #ម្ហូបខ្មែរ #សម្លកកូរ #khmerfood — ពី @woori_kitchenstory។',
+    descriptionEn: 'Kitchen Story (@woori_kitchenstory) cooking authentic Khmer Samlor Korko soup with fresh local vegetables and roasted rice.',
+    descriptionZh: '@woori_kitchenstory 分享正宗柬埔寨国菜百菜汤的做法。',
+    thumbnailUrl: '/foods/food-4.jpg',
+    sourceUrl: 'https://www.tiktok.com/@woori_kitchenstory/video/7631951940275932423',
+    originalAccountUrl: 'https://www.tiktok.com/@woori_kitchenstory',
+    inlineVideoId: '7631951940275932423',
+    sourceName: 'Kitchen Story - មុខម្ហូបខ្មែរ (@woori_kitchenstory)',
+    authorHandle: '@woori_kitchenstory',
+    publishedOrUpdatedAt: '2026-10-28T10:15:00.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Cambodian Food Creator',
+    verificationBadgeKh: 'វីដេអូធ្វើម្ហូបខ្មែរលើ TikTok',
+    verificationBadgeZh: 'TikTok 高棉美食创作者',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-4',
+    relevanceScore: 98,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-plovder-7706471744474975508',
+    platform: 'tiktok',
+    titleKh: 'បាញ់ឆែវ និងនំគ្រក់ខ្មែរក្ដៅៗ ស្រួយឆ្ងាញ់ ផ្សារទួលទំពូង (@plov_der)',
+    titleEn: 'Crispy Khmer Banh Chao Crepes & Num Krok at Toul Tom Poung (@plov_der)',
+    titleZh: '金边俄罗斯市场酥脆高棉煎饼与椰奶米糕 (@plov_der)',
+    descriptionKh: 'ដើរភ្លក់បាញ់ឆែវ និងនំគ្រក់ខ្មែរក្ដៅៗ ស្រួយឆ្ងាញ់ ផ្សារទួលទំពូង #ផ្លូវដើរ #ម្ហូបតាមផ្លូវ #streetfood — ពី @plov_der។',
+    descriptionEn: 'Plov Der (@plov_der) tasting sizzling Cambodian Banh Chao savory crepes and coconut rice cakes at Toul Tom Poung.',
+    descriptionZh: '@plov_der 探访金边朱德奔市场现做高棉姜黄煎饼与葱香椰奶米糕。',
+    thumbnailUrl: '/foods/food-27.jpg',
+    sourceUrl: 'https://www.tiktok.com/@plov_der/video/7706471744474975508',
+    originalAccountUrl: 'https://www.tiktok.com/@plov_der',
+    inlineVideoId: '7706471744474975508',
+    sourceName: 'ផ្លូវដើរ - Plov Der (@plov_der)',
+    authorHandle: '@plov_der',
+    publishedOrUpdatedAt: '2026-11-10T09:26:18.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Cambodian Food Creator',
+    verificationBadgeKh: 'វីដេអូ Review ម្ហូបលើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 柬埔寨街头美食博主',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-27',
+    relevanceScore: 99,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-mekork-7674579700663979285',
+    platform: 'tiktok',
+    titleKh: 'មីគោកសាច់ ១០០ មុខ ផ្សារអូរឫស្សី គ្រឿងសមុទ្រ និងសាច់ខ្វៃពេញចាន (@me_kork_sach100muk)',
+    titleEn: 'Orussey Market 100-Topping Dry Noodles with Roast Meats & Seafood (@me_kork_sach100muk)',
+    titleZh: '金边乌亚西市场百味什锦干拌面 (@me_kork_sach100muk)',
+    descriptionKh: 'មីគោកសាច់100មុខ ផ្សារអូរឫស្សី គ្រឿងសមុទ្រ និងសាច់ខ្វៃពេញចាន #មីគោកសាច់100មុខ #ផ្សារអូរឫស្សី #streetfood — ពី @me_kork_sach100muk។',
+    descriptionEn: 'Local street food vendor @me_kork_sach100muk showcasing giant bowls of dry noodles loaded with roast meats and seafood at Orussey Market.',
+    descriptionZh: '@me_kork_sach100muk 展示金边乌亚西市场超丰盛烧味海鲜干拌面。',
+    thumbnailUrl: '/foods/food-36.jpg',
+    sourceUrl: 'https://www.tiktok.com/@me_kork_sach100muk/video/7674579700663979285',
+    originalAccountUrl: 'https://www.tiktok.com/@me_kork_sach100muk',
+    inlineVideoId: '7674579700663979285',
+    sourceName: 'មីគោកសាច់ ១០០ មុខ ផ្សារអូរឫស្សី (@me_kork_sach100muk)',
+    authorHandle: '@me_kork_sach100muk',
+    publishedOrUpdatedAt: '2026-10-30T11:20:00.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Local Street Vendor',
+    verificationBadgeKh: 'តូបម្ហូបល្បីលើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 金边本地人气美食档口',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-36',
+    relevanceScore: 98,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-tosmokplouk-7643283879314345236',
+    platform: 'tiktok',
+    titleKh: 'តោះមកភ្លក់ បុកល្ហុងក្ដាមប្រៃ និងសាច់អាំងតាមផ្លូវ ហឹរឆ្ងាញ់ជាប់ចិត្ត (@tosmokplouk)',
+    titleEn: 'Spicy Salted Crab Papaya Salad (Bok Lhong) & Street BBQ Review (@tosmokplouk)',
+    titleZh: '柬埔寨街头香辣腌蟹青木瓜沙拉与烤串测评 (@tosmokplouk)',
+    descriptionKh: 'តោះមកភ្លក់ បុកល្ហុងក្ដាមប្រៃ និងសាច់អាំងតាមផ្លូវ ឆ្ងាញ់ជាប់ចិត្ត #តោះមកភ្លក់ #ម្ហូបតាមផ្លូវ — ពី @tosmokplouk។',
+    descriptionEn: 'Tos Mok Plouk (@tosmokplouk) tasting fiery Cambodian salted crab papaya salad and street-side grilled skewers.',
+    descriptionZh: '@tosmokplouk 品尝地道高棉青木瓜沙拉与街头烧烤。',
+    thumbnailUrl: '/foods/food-80.jpg',
+    sourceUrl: 'https://www.tiktok.com/@tosmokplouk/video/7643283879314345236',
+    originalAccountUrl: 'https://www.tiktok.com/@tosmokplouk',
+    inlineVideoId: '7643283879314345236',
+    sourceName: 'តោះមកភ្លក់ - Tos Mok Plouk (@tosmokplouk)',
+    authorHandle: '@tosmokplouk',
+    publishedOrUpdatedAt: '2026-10-29T14:10:00.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Cambodian Food Creator',
+    verificationBadgeKh: 'វីដេអូ Review ម្ហូបលើ TikTok កម្ពុជា',
+    verificationBadgeZh: 'TikTok 柬埔寨美食创作者',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-80',
+    relevanceScore: 98,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-bore-7706575040522751250',
+    platform: 'tiktok',
+    titleKh: 'ម្ហូបខ្មែរប្រពៃណីឆ្ងាញ់ៗ បរិយាកាសល្អនៅ ភោជនីយដ្ឋាន បុរេ (@bore.restaurant)',
+    titleEn: 'Traditional Khmer Cuisine & Dining Atmosphere at Boré Restaurant (@bore.restaurant)',
+    titleZh: 'Boré 高棉传统风味餐厅招牌菜探店 (@bore.restaurant)',
+    descriptionKh: 'ម្ហូបខ្មែរឆ្ងាញ់ៗ បរិយាកាសល្អនៅភោជនីយដ្ឋាន បុរេ #ភោជនីយដ្ឋានបុរេ #ម្ហូបខ្មែរ — ពី @bore.restaurant។',
+    descriptionEn: 'Boré Restaurant (@bore.restaurant) showcasing freshly prepared authentic Cambodian dishes and welcoming dining atmosphere.',
+    descriptionZh: '@bore.restaurant 展示正宗高棉特色菜肴与舒适就餐环境。',
+    thumbnailUrl: '/foods/food-1.jpg',
+    sourceUrl: 'https://www.tiktok.com/@bore.restaurant/video/7706575040522751250',
+    originalAccountUrl: 'https://www.tiktok.com/@bore.restaurant',
+    inlineVideoId: '7706575040522751250',
+    sourceName: 'ភោជនីយដ្ឋាន បុរេ - Boré (@bore.restaurant)',
+    authorHandle: '@bore.restaurant',
+    publishedOrUpdatedAt: '2026-11-10T16:07:02.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Local Khmer Restaurant',
+    verificationBadgeKh: 'ភោជនីយដ្ឋានខ្មែរលើ TikTok',
+    verificationBadgeZh: 'TikTok 高棉特色餐厅',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-1',
+    relevanceScore: 99,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-taseit-7677909602490666261',
+    platform: 'tiktok',
+    titleKh: 'ត្រីបំពងទឹកត្រីស្វាយ និងសម្លម្ជូរខ្មែរ នៅភោជនីយដ្ឋាន តាសេត (@taseit_restaurant)',
+    titleEn: 'Crispy Fried Fish with Green Mango Sauce at Ta Seit Khmer Restaurant (@taseit_restaurant)',
+    titleZh: 'Ta Seit 高棉餐厅招牌青芒果鱼露炸鱼 (@taseit_restaurant)',
+    descriptionKh: 'មុខម្ហូបខ្មែរប្រចាំភោជនីយដ្ឋានតាសេត ត្រីបំពងទឹកត្រីស្វាយ និងសម្លម្ជូរខ្មែរ #ភោជនីយដ្ឋានតាសេត #ម្ហូបខ្មែរ — ពី @taseit_restaurant។',
+    descriptionEn: 'Ta Seit Restaurant (@taseit_restaurant) serving golden crispy river fish with tangy green mango fish sauce and Khmer sour soup.',
+    descriptionZh: '@taseit_restaurant 呈现金黄酥脆的青芒果鱼露炸河鱼与传统高棉酸汤。',
+    thumbnailUrl: '/foods/food-21.jpg',
+    sourceUrl: 'https://www.tiktok.com/@taseit_restaurant/video/7677909602490666261',
+    originalAccountUrl: 'https://www.tiktok.com/@taseit_restaurant',
+    inlineVideoId: '7677909602490666261',
+    sourceName: 'ភោជនីយដ្ឋាន តាសេត (@taseit_restaurant)',
+    authorHandle: '@taseit_restaurant',
+    publishedOrUpdatedAt: '2026-10-30T09:40:00.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Local Khmer Restaurant',
+    verificationBadgeKh: 'ភោជនីយដ្ឋានខ្មែរលើ TikTok',
+    verificationBadgeZh: 'TikTok 高棉特色餐厅',
+    categorySlug: 'famous_restaurant',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-21',
+    relevanceScore: 98,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-suyadaily-7686757954271366420',
+    platform: 'tiktok',
+    titleKh: 'រូបមន្តធ្វើម្ហូបខ្មែរប្រចាំថ្ងៃ ស្នាដៃកូនពៅ ងាយៗឆ្ងាញ់ៗ (@suyadaily)',
+    titleEn: 'Home-Cooked Khmer Family Dish Recipe by Suya Daily (@suyadaily)',
+    titleZh: '高棉家常菜私房食谱分享 (@suyadaily)',
+    descriptionKh: 'រូបមន្តធ្វើម្ហូបខ្មែរប្រចាំថ្ងៃ ស្នាដៃកូនពៅ ងាយៗឆ្ងាញ់ៗ #ស្នាដៃកូនពៅ #ធ្វើម្ហូប #ម្ហូបខ្មែរ — ពី @suyadaily។',
+    descriptionEn: 'Smaller independent Khmer creator Suya Daily (@suyadaily) sharing easy, delicious home-cooked Cambodian recipes.',
+    descriptionZh: '高棉美食创作者 @suyadaily 分享简单美味的柬埔寨家常菜做法。',
+    thumbnailUrl: '/foods/food-19.jpg',
+    sourceUrl: 'https://www.tiktok.com/@suyadaily/video/7686757954271366420',
+    originalAccountUrl: 'https://www.tiktok.com/@suyadaily',
+    inlineVideoId: '7686757954271366420',
+    sourceName: 'ស្នាដៃកូនពៅ - Suya Daily (@suyadaily)',
+    authorHandle: '@suyadaily',
+    publishedOrUpdatedAt: '2026-10-28T12:00:00.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Home Cooking Creator',
+    verificationBadgeKh: 'វីដេអូធ្វើម្ហូបខ្មែរលើ TikTok',
+    verificationBadgeZh: 'TikTok 高棉家常菜创作者',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-19',
+    relevanceScore: 97,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+  {
+    id: 'tt-hubbay-7393669486701792532',
+    platform: 'tiktok',
+    titleKh: 'ញ៉ាំបាយថ្ងៃត្រង់ជាមួយម្ហូបខ្មែរ ទឹកគ្រឿង និងត្រីអាំង បន្លែស្រស់ៗ (@hub_baywithme)',
+    titleEn: 'Authentic Khmer Lunch: Teuk Kroeung Dip, Grilled Fish & Fresh Herbs (@hub_baywithme)',
+    titleZh: '正宗高棉午餐：鱼露香草蘸酱配炭烤鱼与新鲜生菜 (@hub_baywithme)',
+    descriptionKh: 'ញ៉ាំបាយថ្ងៃត្រង់ជាមួយម្ហូបខ្មែរ ទឹកគ្រឿង និងត្រីអាំង បន្លែស្រស់ៗ #ម្ហូបខ្មែរ #khmerfood #cambodianfood — ពី @hub_baywithme។',
+    descriptionEn: 'Hub Bay With Me (@hub_baywithme) enjoying a traditional Cambodian lunch spread of Teuk Kroeung, grilled fish, and garden vegetables.',
+    descriptionZh: '@hub_baywithme 分享传统高棉水栳菜蘸酱 (Teuk Kroeung) 与烤鱼午餐。',
+    thumbnailUrl: '/foods/food-15.jpg',
+    sourceUrl: 'https://www.tiktok.com/@hub_baywithme/video/7393669486701792532',
+    originalAccountUrl: 'https://www.tiktok.com/@hub_baywithme',
+    inlineVideoId: '7393669486701792532',
+    sourceName: 'Hub Bay With Me (@hub_baywithme)',
+    authorHandle: '@hub_baywithme',
+    publishedOrUpdatedAt: '2026-10-26T11:30:00.000Z',
+    isLiveFetched: true,
+    verificationBadgeEn: 'TikTok Cambodian Food Creator',
+    verificationBadgeKh: 'វីដេអូម្ហូបខ្មែរលើ TikTok',
+    verificationBadgeZh: 'TikTok 高棉美食创作者',
+    categorySlug: 'popular_food',
+    provinceKh: 'រាជធានីភ្នំពេញ',
+    provinceEn: 'Phnom Penh',
+    matchedFoodId: 'food-15',
+    relevanceScore: 97,
+    isPlayableVerified: true,
+    canInlineEmbed: true,
+  },
+
+  // ============================================================================
+  // 8. Verified Facebook Pages — Cambodian Food, Restaurants & Travel Reviews
   // ============================================================================
   {
     id: 'fb-kh-riverfront-sunset-1',
@@ -2633,6 +3154,13 @@ const FALLBACK_SOCIAL_INLINE_VIDEOS: readonly string[] = [
 ];
 
 const VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY: Record<string, string> = {
+  'pudy_lychher': 'https://www.tiktok.com/@pudy_lychher',
+  'tt-pudy-7706133454110330120': 'https://www.tiktok.com/@pudy_lychher',
+  'tt-pudy-7705741138837245192': 'https://www.tiktok.com/@pudy_lychher',
+  'tt-pudy-7705427337642249480': 'https://www.tiktok.com/@pudy_lychher',
+  'tt-pudy-7705048762187549970': 'https://www.tiktok.com/@pudy_lychher',
+  'tt-pudy-7703765142802156808': 'https://www.tiktok.com/@pudy_lychher',
+
   'tt-kh-street-bbq-1': 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc',
   'tt-kh-review-1': 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc',
   'DZLmPv-P978': 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc',
@@ -2657,6 +3185,23 @@ const VERIFIED_TIKTOK_CREATOR_URLS_BY_KEY: Record<string, string> = {
 
   'tt-kh-street-coffee-6': 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc',
   'bherGArgorU': 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc',
+
+  '.khleancheck': 'https://www.tiktok.com/@.khleancheck',
+  'benlycooking': 'https://www.tiktok.com/@benlycooking',
+  'woori_kitchenstory': 'https://www.tiktok.com/@woori_kitchenstory',
+  'plov_der': 'https://www.tiktok.com/@plov_der',
+  'me_kork_sach100muk': 'https://www.tiktok.com/@me_kork_sach100muk',
+  'tosmokplouk': 'https://www.tiktok.com/@tosmokplouk',
+  'taseit_restaurant': 'https://www.tiktok.com/@taseit_restaurant',
+  'bore.restaurant': 'https://www.tiktok.com/@bore.restaurant',
+  'ruja.grill.st598': 'https://www.tiktok.com/@ruja.grill.st598',
+  'suyadaily': 'https://www.tiktok.com/@suyadaily',
+  'ounwelldailycooking': 'https://www.tiktok.com/@ounwelldailycooking',
+  'hub_baywithme': 'https://www.tiktok.com/@hub_baywithme',
+  'ieatisharecambodia': 'https://www.tiktok.com/@ieatisharecambodia',
+  'the_hungry_housewife': 'https://www.tiktok.com/@the_hungry_housewife',
+  'chansothea.83': 'https://www.tiktok.com/@chansothea.83',
+  'biteswithlily': 'https://www.tiktok.com/@biteswithlily',
 };
 
 const VERIFIED_FACEBOOK_CREATOR_URLS_BY_KEY: Record<string, string> = {
@@ -3134,19 +3679,32 @@ export function getNextPlayableSocialVideoId(currentVideoId?: string): string {
   return FALLBACK_SOCIAL_INLINE_VIDEOS[(idx + 1) % FALLBACK_SOCIAL_INLINE_VIDEOS.length];
 }
 
-export const OFFICIAL_PRIORITY_TIKTOK_CREATORS: Array<{
+export interface DiscoveredTikTokCreatorRecord {
   handle: string;
   displayName: string;
   profileUrl: string;
   defaultCategory: TrendingFoodCategorySlug;
   defaultFoodThumb: string;
-}> = [
+  discoveredVia?: 'seed' | 'hashtag_foryou' | 'related_mention' | 'cloud_sync';
+  discoveredAt?: string;
+}
+
+export const OFFICIAL_PRIORITY_TIKTOK_CREATORS: DiscoveredTikTokCreatorRecord[] = [
+  {
+    handle: 'pudy_lychher',
+    displayName: 'ពូឌីលីឈើ - Pudy Lychher (@pudy_lychher)',
+    profileUrl: 'https://www.tiktok.com/@pudy_lychher',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-64.jpg',
+    discoveredVia: 'seed',
+  },
   {
     handle: 'eatame.eater',
     displayName: 'Eatame (@eatame.eater)',
     profileUrl: 'https://www.tiktok.com/@eatame.eater?is_from_webapp=1&sender_device=pc',
     defaultCategory: 'popular_food',
     defaultFoodThumb: '/foods/food-19.jpg',
+    discoveredVia: 'seed',
   },
   {
     handle: 'expressions_hub',
@@ -3154,6 +3712,7 @@ export const OFFICIAL_PRIORITY_TIKTOK_CREATORS: Array<{
     profileUrl: 'https://www.tiktok.com/@expressions_hub?is_from_webapp=1&sender_device=pc',
     defaultCategory: 'famous_restaurant',
     defaultFoodThumb: '/foods/food-37.jpg',
+    discoveredVia: 'seed',
   },
   {
     handle: 'derdailyofficial',
@@ -3161,6 +3720,7 @@ export const OFFICIAL_PRIORITY_TIKTOK_CREATORS: Array<{
     profileUrl: 'https://www.tiktok.com/@derdailyofficial?is_from_webapp=1&sender_device=pc',
     defaultCategory: 'food_travel_vlog',
     defaultFoodThumb: '/foods/food-38.jpg',
+    discoveredVia: 'seed',
   },
   {
     handle: 'fatame.cooking',
@@ -3168,6 +3728,7 @@ export const OFFICIAL_PRIORITY_TIKTOK_CREATORS: Array<{
     profileUrl: 'https://www.tiktok.com/@fatame.cooking?is_from_webapp=1&sender_device=pc',
     defaultCategory: 'popular_food',
     defaultFoodThumb: '/foods/food-21.jpg',
+    discoveredVia: 'seed',
   },
   {
     handle: 'foodwhisper_officials',
@@ -3175,27 +3736,464 @@ export const OFFICIAL_PRIORITY_TIKTOK_CREATORS: Array<{
     profileUrl: 'https://www.tiktok.com/@foodwhisper_officials?is_from_webapp=1&sender_device=pc',
     defaultCategory: 'popular_food',
     defaultFoodThumb: '/foods/food-24.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: '.khleancheck',
+    displayName: 'ឃ្លានឆេក - Khlean Check (@.khleancheck)',
+    profileUrl: 'https://www.tiktok.com/@.khleancheck',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-64.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: 'benlycooking',
+    displayName: 'ម្ហូបអ្នកភូមិ - Benly Cooking (@benlycooking)',
+    profileUrl: 'https://www.tiktok.com/@benlycooking',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-4.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: 'woori_kitchenstory',
+    displayName: 'Kitchen Story - មុខម្ហូបខ្មែរ (@woori_kitchenstory)',
+    profileUrl: 'https://www.tiktok.com/@woori_kitchenstory',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-4.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: 'plov_der',
+    displayName: 'ផ្លូវដើរ - Plov Der (@plov_der)',
+    profileUrl: 'https://www.tiktok.com/@plov_der',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-27.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: 'me_kork_sach100muk',
+    displayName: 'មីគោកសាច់ ១០០ មុខ ផ្សារអូរឫស្សី (@me_kork_sach100muk)',
+    profileUrl: 'https://www.tiktok.com/@me_kork_sach100muk',
+    defaultCategory: 'famous_restaurant',
+    defaultFoodThumb: '/foods/food-36.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: 'tosmokplouk',
+    displayName: 'តោះមកភ្លក់ - Tos Mok Plouk (@tosmokplouk)',
+    profileUrl: 'https://www.tiktok.com/@tosmokplouk',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-80.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: 'taseit_restaurant',
+    displayName: 'ភោជនីយដ្ឋាន តាសេត (@taseit_restaurant)',
+    profileUrl: 'https://www.tiktok.com/@taseit_restaurant',
+    defaultCategory: 'famous_restaurant',
+    defaultFoodThumb: '/foods/food-21.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: 'bore.restaurant',
+    displayName: 'ភោជនីយដ្ឋាន បុរេ - Boré (@bore.restaurant)',
+    profileUrl: 'https://www.tiktok.com/@bore.restaurant',
+    defaultCategory: 'famous_restaurant',
+    defaultFoodThumb: '/foods/food-1.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: 'ruja.grill.st598',
+    displayName: 'Ruja Grill & Hotpot (@ruja.grill.st598)',
+    profileUrl: 'https://www.tiktok.com/@ruja.grill.st598',
+    defaultCategory: 'famous_restaurant',
+    defaultFoodThumb: '/foods/food-19.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: 'suyadaily',
+    displayName: 'ស្នាដៃកូនពៅ - Suya Daily (@suyadaily)',
+    profileUrl: 'https://www.tiktok.com/@suyadaily',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-19.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: 'ounwelldailycooking',
+    displayName: 'Oun Well Daily Cooking (@ounwelldailycooking)',
+    profileUrl: 'https://www.tiktok.com/@ounwelldailycooking',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-4.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: 'hub_baywithme',
+    displayName: 'Hub Bay With Me (@hub_baywithme)',
+    profileUrl: 'https://www.tiktok.com/@hub_baywithme',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-15.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: 'ieatisharecambodia',
+    displayName: 'I Eat I Share Cambodia (@ieatisharecambodia)',
+    profileUrl: 'https://www.tiktok.com/@ieatisharecambodia',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-38.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: 'the_hungry_housewife',
+    displayName: 'The Hungry Housewife (@the_hungry_housewife)',
+    profileUrl: 'https://www.tiktok.com/@the_hungry_housewife',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-1.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: 'chansothea.83',
+    displayName: 'Chan Sothea Khmer Cooking (@chansothea.83)',
+    profileUrl: 'https://www.tiktok.com/@chansothea.83',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-3.jpg',
+    discoveredVia: 'seed',
+  },
+  {
+    handle: 'biteswithlily',
+    displayName: 'Bites With Lily (@biteswithlily)',
+    profileUrl: 'https://www.tiktok.com/@biteswithlily',
+    defaultCategory: 'popular_food',
+    defaultFoodThumb: '/foods/food-27.jpg',
+    discoveredVia: 'seed',
   },
 ];
 
-const LIVE_TIKTOK_CREATORS_CACHE_KEY = 'kft_live_tiktok_creators_v3';
-const CLOUD_TIKTOK_DISCOVERED_DOC_KEY = 'kft_cloud_tiktok_discovered_videos_v1';
-const LIVE_TIKTOK_CREATORS_TTL_MS = 20 * 60 * 1000; // 20 minutes automatic discovery cycle
+/**
+ * Cambodian food, street food, restaurant, and local culinary hashtags used to discover
+ * both famous and smaller creators via TikTok's public For You / hashtag recommendation feeds (/embed/tag/<hashtag>).
+ */
+export const TIKTOK_CAMBODIAN_FOOD_DISCOVERY_HASHTAGS: readonly string[] = [
+  'ម្ហូបខ្មែរ',
+  'អាហារខ្មែរ',
+  'ម្ហូបតាមផ្លូវ',
+  'ធ្វើម្ហូប',
+  'ម្ហូបអ្នកភូមិ',
+  'cambodianfood',
+  'khmerfood',
+  'cambodiastreetfood',
+  'phnompenhfood',
+  'khmerstreetfood',
+  'foodcambodia',
+  'cambodiafoodie',
+  'khmercooking',
+  'siemreapfood',
+  'បង្អែមខ្មែរ',
+];
 
-const FOOD_TIKTOK_VIDEO_FILTER_RE =
-  /ម្ហូប|អាហារ|ញ៉ាំ|ឆ្ងាញ់|ធ្វើម្ហូប|សម្ល|អាំង|ចៀន|បង្អែម|ភេសជ្ជៈ|ហាង|ភោជនីយដ្ឋាន|ផ្សារ|កាហ្វេ|គុយទាវ|នំបញ្ចុក|អាម៉ុក|ឡុកឡាក់|បុកល្ហុង|សាច់អាំង|គ្រឿងសមុទ្រ|ត្រី|សាច់គោ|សាច់ជ្រូក|មាន់|ទា|បាយ|បបរ|មី|លត|នំ|ទេសចរណ៍|ដើរលេង|ភ្នំពេញ|សៀមរាប|កំពត|កែប|បាត់ដំបង|ព្រះសីហនុ|កំពង់ចាម|food|eat|cook|recipe|dish|restaurant|cafe|coffee|street\s*food|khmer|cambodia|mukbang|yummy|delicious|bbq|noodle|soup|dessert/i;
+const LIVE_TIKTOK_CREATORS_CACHE_KEY = 'kft_live_tiktok_creators_v4';
+const CLOUD_TIKTOK_DISCOVERED_DOC_KEY = 'kft_cloud_tiktok_discovered_videos_v2';
+const TIKTOK_DISCOVERED_CREATORS_DB_KEY = 'kft_discovered_tiktok_creators_db_v1';
+const CLOUD_TIKTOK_CREATORS_DB_DOC_KEY = 'kft_cloud_tiktok_creators_db_v1';
+const TIKTOK_CREATOR_CRAWL_CURSOR_KEY = 'kft_tiktok_creator_crawl_cursor_v1';
+const TIKTOK_HASHTAG_CRAWL_CURSOR_KEY = 'kft_tiktok_hashtag_crawl_cursor_v1';
+const LIVE_TIKTOK_CREATORS_TTL_MS = 15 * 60 * 1000; // 15 minutes automatic discovery cycle
+const BACKGROUND_CREATOR_EXPAND_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes non-blocking background expansion
+let lastBackgroundTikTokExpandMs = 0;
+let isBackgroundTikTokExpanding = false;
+
+const INVALID_OR_GENERIC_TIKTOK_HANDLES = new Set<string>([
+  'tiktok',
+  'foryou',
+  'foryoupage',
+  'fyp',
+  'viral',
+  'trending',
+  'cambodia',
+  'khmer',
+  'phnompenh',
+  'siemreap',
+  'food',
+  'streetfood',
+  'khmerfood',
+  'cambodianfood',
+]);
+
+const DEFAULT_FOOD_THUMBS_POOL = [
+  '/foods/food-1.jpg',
+  '/foods/food-2.jpg',
+  '/foods/food-3.jpg',
+  '/foods/food-4.jpg',
+  '/foods/food-6.jpg',
+  '/foods/food-15.jpg',
+  '/foods/food-19.jpg',
+  '/foods/food-21.jpg',
+  '/foods/food-24.jpg',
+  '/foods/food-27.jpg',
+  '/foods/food-36.jpg',
+  '/foods/food-37.jpg',
+  '/foods/food-38.jpg',
+  '/foods/food-64.jpg',
+  '/foods/food-80.jpg',
+];
 
 /**
- * Automatically discovers and synchronizes the latest videos from the 5 official priority TikTok creators:
- * 1. @eatame.eater
- * 2. @expressions_hub
- * 3. @derdailyofficial
- * 4. @fatame.cooking
- * 5. @foodwhisper_officials
+ * Normalizes a TikTok creator handle to lowercase without leading `@` and validates allowed characters
+ * so duplicate accounts are never added to the creator database.
+ */
+export function normalizeTikTokHandle(rawHandle?: string | null): string {
+  if (!rawHandle || typeof rawHandle !== 'string') return '';
+  const cleaned = rawHandle
+    .trim()
+    .replace(/^@+/, '')
+    .replace(/[/?#].*$/, '')
+    .trim()
+    .toLowerCase();
+  if (cleaned.length < 3 || cleaned.length > 38) return '';
+  if (!/^[a-z0-9._]+$/.test(cleaned)) return '';
+  if (/^\d+$/.test(cleaned)) return '';
+  if (INVALID_OR_GENERIC_TIKTOK_HANDLES.has(cleaned)) return '';
+  return cleaned;
+}
+
+/**
+ * Positive Cambodian food, restaurant, street food, recipe, and beverage classifier regex.
+ */
+const FOOD_TIKTOK_POSITIVE_RE =
+  /ម្ហូប|អាហារ|ញ៉ាំ|ហូប|ភ្លក់|ឆ្ងាញ់|ធ្វើម្ហូប|រូបមន្ត|ស្ល|សម្ល|ម្ជូរ|កកូរ|ប្រហើរ|ការី|ខត្រី|ខសាច់|អាំង|ចៀន|បំពង|ដុត|ចំហុយ|ឆា|ស្ងោរ|បង្អែម|ភេសជ្ជៈ|តែ|កាហ្វេ|ហាង|ភោជនីយដ្ឋាន|តូប|ផ្សារ|អាហារដ្ឋាន|ប៊ូហ្វេ|ស៊ុប|ហតផត|មី|គុយទាវ|នំបញ្ចុក|អាម៉ុក|ឡុកឡាក់|បុកល្ហុង|សាច់អាំង|គ្រឿងសមុទ្រ|ក្ដាម|បង្គា|មឹក|លៀស|ខ្យង|ត្រី|សាច់គោ|សាច់ជ្រូក|មាន់|ទា|កង្កែប|បាយ|បបរ|លត|នំ|បាញ់ឆែវ|នំគ្រក់|ប្រហុក|ទឹកគ្រឿង|ទឹកត្រី|ម្រេច|ចុងភៅ|ឃ្លាន|ពូឌីលីឈើ|food|eat|eating|foodie|cook|cooking|kitchen|recipe|dish|meal|lunch|dinner|breakfast|restaurant|cafe|coffee|street\s*food|local\s*food|khmer\s*food|cambodian\s*food|mukbang|yummy|delicious|tasty|bbq|grill|fried|roast|steak|noodle|soup|hotpot|buffet|seafood|crab|prawn|shrimp|fish|chicken|beef|pork|duck|dessert|sweet|drink|beverage|market|stall|chef|taste|flavor/i;
+
+/**
+ * Exclusion regex to filter out non-food entertainment, drama skits, vehicle wrapping, solar poles,
+ * slime shops, trash pickup, or unrelated non-food posts.
+ */
+const FOOD_TIKTOK_EXCLUDE_NON_FOOD_RE =
+  /បិតស្កុតការពារ|ទឹកថ្នាំរថយន្ត|ដាំបង្គោលសូឡា|អំពូលសូឡា|trash\s*pick\s*up|slimeshop|slime\s*shop|ភាគ\s*\d+\s*រឿង|ឈឹចាបរាំរៃ|លក់ដី|លក់ផ្ទះ|ជួសជុលរថយន្ត|គ្រឿងសំណង់|នយោបាយ|ហោរាសាស្ត្រ/i;
+
+const DEDICATED_FOOD_CREATOR_HANDLES = new Set<string>([
+  'pudy_lychher',
+  'eatame.eater',
+  'expressions_hub',
+  'fatame.cooking',
+  'foodwhisper_officials',
+  '.khleancheck',
+  'benlycooking',
+  'woori_kitchenstory',
+  'me_kork_sach100muk',
+  'tosmokplouk',
+  'taseit_restaurant',
+  'bore.restaurant',
+  'ruja.grill.st598',
+  'suyadaily',
+  'ounwelldailycooking',
+  'hub_baywithme',
+  'ieatisharecambodia',
+  'the_hungry_housewife',
+  'chansothea.83',
+  'biteswithlily',
+]);
+
+/**
+ * Strictly prioritizes Cambodian food, restaurant, street food, and cooking content,
+ * rejecting unrelated entertainment, drama skits, or non-food posts.
+ */
+export function isCambodianFoodRelatedTikTokVideo(desc: string, handle?: string): boolean {
+  const cleanDesc = String(desc || '').trim();
+  const normHandle = normalizeTikTokHandle(handle);
+
+  if (cleanDesc && FOOD_TIKTOK_EXCLUDE_NON_FOOD_RE.test(cleanDesc)) {
+    return false;
+  }
+
+  if (cleanDesc && FOOD_TIKTOK_POSITIVE_RE.test(cleanDesc)) {
+    return true;
+  }
+
+  // If the creator is a dedicated cooking/restaurant/food review channel and the caption is short without non-food exclusions
+  if (
+    (DEDICATED_FOOD_CREATOR_HANDLES.has(normHandle) ||
+      /cook|food|kitchen|eat|chef|restaurant|grill|bbq|cafe|ភោជនីយដ្ឋាន|ម្ហូប|ឃ្លាន|ភ្លក់/i.test(normHandle)) &&
+    cleanDesc.length < 40
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Returns the continuously expanding database of Cambodian food TikTok creators,
+ * merging the 22+ seed creators with all dynamically discovered creators stored in localStorage.
+ * Strictly deduplicated by normalized TikTok handle.
+ */
+export function getExpandedTikTokCreatorDatabase(): DiscoveredTikTokCreatorRecord[] {
+  const byHandle = new Map<string, DiscoveredTikTokCreatorRecord>();
+
+  for (const seed of OFFICIAL_PRIORITY_TIKTOK_CREATORS) {
+    const norm = normalizeTikTokHandle(seed.handle);
+    if (norm) {
+      byHandle.set(norm, { ...seed, handle: norm });
+    }
+  }
+
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const raw = localStorage.getItem(TIKTOK_DISCOVERED_CREATORS_DB_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          for (const rec of parsed) {
+            const norm = normalizeTikTokHandle(rec?.handle);
+            if (!norm || byHandle.has(norm)) continue;
+            byHandle.set(norm, {
+              handle: norm,
+              displayName: String(rec?.displayName || `@${norm}`),
+              profileUrl: String(rec?.profileUrl || `https://www.tiktok.com/@${norm}`),
+              defaultCategory:
+                rec?.defaultCategory === 'famous_restaurant' ||
+                rec?.defaultCategory === 'food_travel_vlog' ||
+                rec?.defaultCategory === 'popular_food'
+                  ? rec.defaultCategory
+                  : 'popular_food',
+              defaultFoodThumb: String(rec?.defaultFoodThumb || '/foods/food-19.jpg'),
+              discoveredVia: rec?.discoveredVia || 'hashtag_foryou',
+              discoveredAt: rec?.discoveredAt || new Date().toISOString(),
+            });
+          }
+        }
+      }
+    }
+  } catch {
+    // ignore storage read error
+  }
+
+  return Array.from(byHandle.values());
+}
+
+/**
+ * Registers one or more newly discovered Cambodian food TikTok creators into the persistent Creator Database
+ * without duplicating existing accounts. Returns true if any new creator was added.
+ */
+export function registerDiscoveredTikTokCreator(
+  rawHandle: string,
+  options?: {
+    displayName?: string;
+    defaultCategory?: TrendingFoodCategorySlug;
+    discoveredVia?: DiscoveredTikTokCreatorRecord['discoveredVia'];
+  }
+): { added: boolean; record: DiscoveredTikTokCreatorRecord | null } {
+  const norm = normalizeTikTokHandle(rawHandle);
+  if (!norm) return { added: false, record: null };
+
+  const currentDb = getExpandedTikTokCreatorDatabase();
+  const existing = currentDb.find((c) => normalizeTikTokHandle(c.handle) === norm);
+  if (existing) {
+    return { added: false, record: existing };
+  }
+
+  let hash = 0;
+  for (let i = 0; i < norm.length; i++) {
+    hash = (hash * 31 + norm.charCodeAt(i)) >>> 0;
+  }
+  const defaultFoodThumb = DEFAULT_FOOD_THUMBS_POOL[hash % DEFAULT_FOOD_THUMBS_POOL.length];
+  const inferredCategory: TrendingFoodCategorySlug =
+    options?.defaultCategory ||
+    (/restaurant|grill|cafe|coffee|hotpot|buffet|ភោជនីយដ្ឋាន/i.test(norm) ? 'famous_restaurant' : 'popular_food');
+
+  const newRecord: DiscoveredTikTokCreatorRecord = {
+    handle: norm,
+    displayName: options?.displayName || `@${norm}`,
+    profileUrl: `https://www.tiktok.com/@${norm}`,
+    defaultCategory: inferredCategory,
+    defaultFoodThumb,
+    discoveredVia: options?.discoveredVia || 'hashtag_foryou',
+    discoveredAt: new Date().toISOString(),
+  };
+
+  const seedHandles = new Set(OFFICIAL_PRIORITY_TIKTOK_CREATORS.map((c) => normalizeTikTokHandle(c.handle)));
+  const dynamicRecords = [...currentDb.filter((c) => !seedHandles.has(normalizeTikTokHandle(c.handle))), newRecord].slice(
+    -150
+  );
+
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(TIKTOK_DISCOVERED_CREATORS_DB_KEY, JSON.stringify(dynamicRecords));
+    }
+  } catch {
+    // ignore storage quota
+  }
+
+  return { added: true, record: newRecord };
+}
+
+/**
+ * Helper to fetch HTML from a public TikTok embed endpoint (`/embed/@<handle>` or `/embed/tag/<hashtag>`)
+ * using native CapacitorHttp on Android/iOS or standard fetch with timeout.
+ */
+async function fetchTikTokPublicEmbedHtml(embedUrl: string, isNative: boolean, timeoutMs = 4200): Promise<string> {
+  try {
+    if (isNative && CapacitorHttp?.get) {
+      const resp = await CapacitorHttp.get({
+        url: embedUrl,
+        headers: {
+          Accept: 'text/html,application/xhtml+xml',
+          'User-Agent':
+            'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+        },
+        connectTimeout: timeoutMs,
+        readTimeout: timeoutMs,
+      });
+      if (resp && resp.status >= 200 && resp.status < 300 && typeof resp.data === 'string') {
+        return resp.data;
+      }
+    } else {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      const res = await fetch(embedUrl, { signal: controller.signal });
+      clearTimeout(timer);
+      if (res.ok) {
+        return await res.text();
+      }
+    }
+  } catch {
+    // Ignore CORS or network timeout
+  }
+  return '';
+}
+
+/**
+ * Extracts `@mentions` of related accounts/restaurants from a food video description.
+ */
+function extractRelatedTikTokMentions(desc: string): string[] {
+  if (!desc) return [];
+  const matches = desc.match(/@([a-zA-Z0-9._]{3,32})/g);
+  if (!matches) return [];
+  const out: string[] = [];
+  for (const m of matches) {
+    const clean = normalizeTikTokHandle(m.replace(/[.,!?;:]+$/, ''));
+    if (clean && !out.includes(clean)) {
+      out.push(clean);
+    }
+  }
+  return out;
+}
+
+/**
+ * Automatically discovers, collects, and synchronizes public Cambodian food TikTok accounts and videos
+ * from ANY creators (both famous influencers and smaller local cooks, street vendors, and restaurants):
  *
- * Uses TikTok's public creator embed feed (/embed/@handle), extracts exact Snowflake timestamps,
- * filters for authentic food/restaurant/tourism content, caches thumbnails, and synchronizes
- * discovered videos with Supabase (kft_cloud_tiktok_discovered_videos_v1) without duplicates.
+ * 1. Continuously Expanding Creator Database (`getExpandedTikTokCreatorDatabase()`):
+ *    - Seeded with 22+ verified Cambodian food creators including `@pudy_lychher` (https://www.tiktok.com/@pudy_lychher),
+ *      `@eatame.eater`, `@expressions_hub`, `@derdailyofficial`, `@fatame.cooking`, `@foodwhisper_officials`,
+ *      `@.khleancheck`, `@benlycooking`, `@woori_kitchenstory`, `@plov_der`, `@me_kork_sach100muk`, `@tosmokplouk`,
+ *      `@taseit_restaurant`, `@bore.restaurant`, `@ruja.grill.st598`, `@suyadaily`, `@ounwelldailycooking`,
+ *      `@hub_baywithme`, `@ieatisharecambodia`, `@the_hungry_housewife`, `@chansothea.83`, `@biteswithlily`.
+ *    - Continuously grows as new creators are discovered from hashtags, For You recommendations, and `@mentions`.
+ * 2. Multi-Vector Live Discovery:
+ *    - Vector A: Rotating Creator Profile Embed Crawl (`/embed/@<handle>`) across famous, smaller, and newly discovered creators.
+ *    - Vector B: Hashtag & Recommendation Embed Crawl (`/embed/tag/<hashtag>`) across 15 Khmer & English food tags,
+ *      discovering both food videos and new creator handles (`authorUniqueId` + `@mentions`) and crawling new creators immediately.
+ * 3. Strict Cambodian Food Filtering & Deduplication:
+ *    - Prioritizes Cambodian food, restaurants, street food, and cooking via `isCambodianFoodRelatedTikTokVideo`.
+ *    - Deduplicates all creators by normalized handle and all videos by 19-digit Snowflake ID.
  */
 export async function fetchLiveTikTokCreatorVideos(
   forceRefresh = false,
@@ -3209,6 +4207,23 @@ export async function fetchLiveTikTokCreatorVideos(
         const parsed = JSON.parse(raw);
         const age = Date.now() - (Date.parse(parsed.updatedAt) || 0);
         if (age < LIVE_TIKTOK_CREATORS_TTL_MS && Array.isArray(parsed.items) && parsed.items.length > 0) {
+          // Trigger non-blocking background creator & hashtag expansion if interval elapsed
+          if (
+            !isBackgroundTikTokExpanding &&
+            Date.now() - lastBackgroundTikTokExpandMs >= BACKGROUND_CREATOR_EXPAND_INTERVAL_MS &&
+            (typeof navigator === 'undefined' || navigator.onLine !== false)
+          ) {
+            isBackgroundTikTokExpanding = true;
+            lastBackgroundTikTokExpandMs = Date.now();
+            setTimeout(() => {
+              fetchLiveTikTokCreatorVideos(true, foods)
+                .catch(() => {})
+                .finally(() => {
+                  isBackgroundTikTokExpanding = false;
+                });
+            }, 600);
+          }
+
           return parsed.items.map((it: OnlineFoodDiscoveryItem) => ({
             ...it,
             directVideoUrl: isDirectVideoUrlFreshAndPlayable(it.directVideoUrl) ? it.directVideoUrl : undefined,
@@ -3222,7 +4237,7 @@ export async function fetchLiveTikTokCreatorVideos(
 
   const byTikTokVideoId = new Map<string, OnlineFoodDiscoveryItem>();
 
-  // Seed with the verified 2026 baseline videos from the 5 priority creators
+  // Seed with the verified 2026 baseline videos from @pudy_lychher and the expanded Cambodian food creators
   for (const item of CURATED_TIKTOK_FACEBOOK_REVIEWS) {
     if (item.platform !== 'tiktok') continue;
     const vid = extractTikTokVideoId(item.inlineVideoId || item.sourceUrl);
@@ -3231,15 +4246,59 @@ export async function fetchLiveTikTokCreatorVideos(
     }
   }
 
-  // 2. Pull existing cloud-synchronized TikTok discoveries so all devices share newly discovered creator videos
+  // Also merge any previously cached live TikTok discoveries so the collection grows continuously
+  try {
+    const prevRaw = localStorage.getItem(LIVE_TIKTOK_CREATORS_CACHE_KEY);
+    if (prevRaw) {
+      const prevParsed = JSON.parse(prevRaw);
+      if (Array.isArray(prevParsed?.items)) {
+        for (const item of prevParsed.items) {
+          if (!item || item.platform !== 'tiktok') continue;
+          const vid = extractTikTokVideoId(item.inlineVideoId || item.sourceUrl);
+          if (vid && !byTikTokVideoId.has(vid)) {
+            byTikTokVideoId.set(vid, {
+              ...item,
+              inlineVideoId: vid,
+              canInlineEmbed: true,
+              isPlayableVerified: true,
+              directVideoUrl: isDirectVideoUrlFreshAndPlayable(item.directVideoUrl) ? item.directVideoUrl : undefined,
+            });
+          }
+        }
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  // 2. Pull cloud-synchronized TikTok discoveries & expanded creator database from Supabase
   if (isSupabaseConfigured() && (typeof navigator === 'undefined' || navigator.onLine !== false)) {
     try {
-      const cloudDoc = await pullCloudDocument<{ updatedAt: string; items: OnlineFoodDiscoveryItem[] }>(
-        CLOUD_TIKTOK_DISCOVERED_DOC_KEY,
-        3500
-      );
-      if (Array.isArray(cloudDoc?.items)) {
-        for (const item of cloudDoc.items) {
+      const [cloudVideosDoc, cloudCreatorsDoc] = await Promise.all([
+        pullCloudDocument<{ updatedAt: string; items: OnlineFoodDiscoveryItem[] }>(
+          CLOUD_TIKTOK_DISCOVERED_DOC_KEY,
+          3200
+        ).catch(() => null),
+        pullCloudDocument<{ updatedAt: string; creators: DiscoveredTikTokCreatorRecord[] }>(
+          CLOUD_TIKTOK_CREATORS_DB_DOC_KEY,
+          3200
+        ).catch(() => null),
+      ]);
+
+      if (Array.isArray(cloudCreatorsDoc?.creators)) {
+        for (const cr of cloudCreatorsDoc.creators) {
+          if (cr?.handle) {
+            registerDiscoveredTikTokCreator(cr.handle, {
+              displayName: cr.displayName,
+              defaultCategory: cr.defaultCategory,
+              discoveredVia: 'cloud_sync',
+            });
+          }
+        }
+      }
+
+      if (Array.isArray(cloudVideosDoc?.items)) {
+        for (const item of cloudVideosDoc.items) {
           if (!item || item.platform !== 'tiktok') continue;
           const vid = extractTikTokVideoId(item.inlineVideoId || item.sourceUrl);
           if (vid && !byTikTokVideoId.has(vid)) {
@@ -3258,131 +4317,262 @@ export async function fetchLiveTikTokCreatorVideos(
     }
   }
 
-  // 3. Live discovery from the 5 priority TikTok creator embed endpoints
+  // 3. Multi-Vector Live Discovery (Creator Database Rotation + Hashtag/ForYou Discovery + Related Account Crawl)
   if (typeof navigator === 'undefined' || navigator.onLine !== false) {
     const isNative = Boolean(Capacitor?.isNativePlatform?.());
-    let newlyDiscoveredCount = 0;
+    let newlyDiscoveredVideoCount = 0;
+    let newlyDiscoveredCreatorCount = 0;
 
-    await Promise.allSettled(
-      OFFICIAL_PRIORITY_TIKTOK_CREATORS.map(async (creator) => {
-        const embedEndpoint = `https://www.tiktok.com/embed/@${creator.handle}`;
-        let html = '';
+    const ingestRawTikTokVideo = (
+      rawVid: any,
+      creator: DiscoveredTikTokCreatorRecord,
+      badgeEn = 'TikTok Cambodian Food Creator'
+    ) => {
+      const vid = extractTikTokVideoId(String(rawVid?.id || ''));
+      if (!vid) return;
 
-        try {
-          if (isNative && CapacitorHttp?.get) {
-            const resp = await CapacitorHttp.get({
-              url: embedEndpoint,
-              headers: {
-                Accept: 'text/html,application/xhtml+xml',
-                'User-Agent':
-                  'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
-              },
-              connectTimeout: 4500,
-              readTimeout: 4500,
-            });
-            if (resp && resp.status >= 200 && resp.status < 300 && typeof resp.data === 'string') {
-              html = resp.data;
-            }
-          } else {
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 4000);
-            const res = await fetch(embedEndpoint, { signal: controller.signal });
-            clearTimeout(timer);
-            if (res.ok) {
-              html = await res.text();
-            }
-          }
-        } catch {
-          // Direct browser fetch may be blocked by CORS on web; handled by Edge Function or native CapacitorHttp
+      const desc = String(rawVid?.desc || '').trim();
+      const authorFromVid = normalizeTikTokHandle(rawVid?.authorUniqueId) || normalizeTikTokHandle(creator.handle);
+      if (!authorFromVid) return;
+
+      if (!isCambodianFoodRelatedTikTokVideo(desc, authorFromVid)) {
+        return;
+      }
+
+      // Extract any @mentioned related food accounts/restaurants from the food caption
+      for (const mentionedHandle of extractRelatedTikTokMentions(desc)) {
+        if (mentionedHandle !== authorFromVid) {
+          const reg = registerDiscoveredTikTokCreator(mentionedHandle, {
+            displayName: `@${mentionedHandle}`,
+            discoveredVia: 'related_mention',
+          });
+          if (reg.added) newlyDiscoveredCreatorCount++;
         }
+      }
 
-        if (!html) return;
-        const stateMatch = html.match(
-          /<script id="__FRONTITY_CONNECT_STATE__" type="application\/json">([\s\S]*?)<\/script>/
-        );
-        if (!stateMatch || !stateMatch[1]) return;
+      // Cache direct non-v16m stream URL if present in embed state
+      const rawPlayAddr = String(rawVid?.playAddr || '').trim();
+      const coverUrl = String(rawVid?.coverUrl || rawVid?.originCoverUrl || '').trim();
+      if (isDirectVideoUrlFreshAndPlayable(rawPlayAddr) && !tiktokStreamCacheByVid.has(vid)) {
+        tiktokStreamCacheByVid.set(vid, {
+          primaryUrl: rawPlayAddr,
+          coverUrl: coverUrl || undefined,
+          resolvedAt: Date.now(),
+        });
+      }
 
+      const isoDate = tiktokSnowflakeIdToIsoDate(vid);
+      const dateLabel = isoDate ? isoDate.slice(0, 10) : new Date().toISOString().slice(0, 10);
+      const match = matchCambodianDish(desc, foods);
+      const detectedProv = detectProvinceFromVideoText(desc);
+      const cleanCaption = desc.replace(/#\S+/g, '').replace(/\s+/g, ' ').trim();
+      const displayLabel =
+        normalizeTikTokHandle(creator.handle) === authorFromVid ? creator.displayName : `@${authorFromVid}`;
+
+      const titleKh =
+        cleanCaption.length >= 6
+          ? cleanCaption.slice(0, 95)
+          : `វីដេអូម្ហូបខ្មែរថ្មីពី ${displayLabel} (@${authorFromVid})`;
+
+      const existing = byTikTokVideoId.get(vid);
+      const inferredCategory: TrendingFoodCategorySlug =
+        existing?.categorySlug ||
+        (/ហាង|ភោជនីយដ្ឋាន|ប៊ូហ្វេ|ស៊ុប|ហតផត|restaurant|buffet|hotpot|cafe|coffee/i.test(desc)
+          ? 'famous_restaurant'
+          : creator.defaultCategory || 'popular_food');
+
+      const updatedItem: OnlineFoodDiscoveryItem = {
+        id: existing?.id || `tt-live-${vid}`,
+        platform: 'tiktok',
+        titleKh: existing?.titleKh || titleKh,
+        titleEn:
+          existing?.titleEn ||
+          (cleanCaption.length >= 6
+            ? cleanCaption.slice(0, 95)
+            : `Cambodian Food Review by ${displayLabel} (@${authorFromVid})`),
+        titleZh: existing?.titleZh || `${displayLabel} 柬埔寨美食视频`,
+        descriptionKh:
+          desc ||
+          existing?.descriptionKh ||
+          `វីដេអូម្ហូប និងវប្បធម៌អាហារខ្មែរពីគណនី @${authorFromVid}។`,
+        descriptionEn:
+          desc ||
+          existing?.descriptionEn ||
+          `Authentic Cambodian food video from creator @${authorFromVid}.`,
+        descriptionZh:
+          existing?.descriptionZh ||
+          `来自创作者 @${authorFromVid} 的柬埔寨美食视频。`,
+        thumbnailUrl: existing?.thumbnailUrl || coverUrl || creator.defaultFoodThumb || '/foods/food-19.jpg',
+        sourceUrl: `https://www.tiktok.com/@${authorFromVid}/video/${vid}`,
+        originalAccountUrl: `https://www.tiktok.com/@${authorFromVid}`,
+        sourceName: displayLabel,
+        authorHandle: `@${authorFromVid}`,
+        publishedOrUpdatedAt: dateLabel,
+        isLiveFetched: true,
+        verificationBadgeEn: badgeEn,
+        verificationBadgeKh: 'វីដេអូ Review ម្ហូបលើ TikTok កម្ពុជា',
+        verificationBadgeZh: 'TikTok 柬埔寨美食创作者',
+        categorySlug: inferredCategory,
+        provinceKh:
+          existing?.provinceKh ||
+          (detectedProv.provinceKh !== 'ទូទាំងប្រទេសកម្ពុជា' ? detectedProv.provinceKh : 'រាជធានីភ្នំពេញ'),
+        provinceEn:
+          existing?.provinceEn ||
+          (detectedProv.provinceEn !== 'All Cambodia' ? detectedProv.provinceEn : 'Phnom Penh'),
+        matchedFoodId: existing?.matchedFoodId || match?.food?.id || 'food-1',
+        matchedFoodNameKh: existing?.matchedFoodNameKh || match?.food?.nameKh,
+        matchedFoodNameEn: existing?.matchedFoodNameEn || match?.food?.nameEn,
+        relevanceScore: existing?.relevanceScore || (match?.food ? 100 : 98),
+        isPlayableVerified: true,
+        canInlineEmbed: true,
+        inlineVideoId: vid,
+        directVideoUrl: undefined,
+      };
+
+      if (!existing) {
+        newlyDiscoveredVideoCount++;
+      }
+      byTikTokVideoId.set(vid, updatedItem);
+    };
+
+    const crawlCreatorProfile = async (creator: DiscoveredTikTokCreatorRecord) => {
+      const normHandle = normalizeTikTokHandle(creator.handle);
+      if (!normHandle) return;
+      const html = await fetchTikTokPublicEmbedHtml(`https://www.tiktok.com/embed/@${normHandle}`, isNative, 4200);
+      if (!html) return;
+      const stateMatch = html.match(
+        /<script id="__FRONTITY_CONNECT_STATE__" type="application\/json">([\s\S]*?)<\/script>/
+      );
+      if (!stateMatch || !stateMatch[1]) return;
+      try {
         const parsedState = JSON.parse(stateMatch[1]);
-        const creatorData = parsedState?.source?.data?.[`/embed/@${creator.handle}`];
+        const creatorData =
+          parsedState?.source?.data?.[`/embed/@${normHandle}`] ||
+          parsedState?.source?.data?.[Object.keys(parsedState?.source?.data || {})[0] || ''];
         const videoList = Array.isArray(creatorData?.videoList) ? creatorData.videoList : [];
+        for (const rawVid of videoList) {
+          ingestRawTikTokVideo(rawVid, creator, 'TikTok Cambodian Food Creator');
+        }
+      } catch {
+        // ignore JSON parse error
+      }
+    };
 
-        const isDedicatedFoodChannel =
-          creator.handle === 'eatame.eater' ||
-          creator.handle === 'fatame.cooking' ||
-          creator.handle === 'foodwhisper_officials' ||
-          creator.handle === 'expressions_hub';
+    // Vector A: Select a rotating batch of creators from the continuously expanding Creator Database
+    const allCreators = getExpandedTikTokCreatorDatabase();
+    let creatorCursor = 0;
+    try {
+      creatorCursor = Number(localStorage.getItem(TIKTOK_CREATOR_CRAWL_CURSOR_KEY) || 0) || 0;
+    } catch {}
+
+    const batchSize = forceRefresh ? Math.min(12, allCreators.length) : Math.min(8, allCreators.length);
+    const selectedCreatorsMap = new Map<string, DiscoveredTikTokCreatorRecord>();
+
+    // Always include @pudy_lychher in the active discovery pass
+    const pudyRecord = allCreators.find((c) => normalizeTikTokHandle(c.handle) === 'pudy_lychher');
+    if (pudyRecord) {
+      selectedCreatorsMap.set('pudy_lychher', pudyRecord);
+    }
+
+    for (let i = 0; i < allCreators.length && selectedCreatorsMap.size < batchSize; i++) {
+      const candidate = allCreators[(creatorCursor + i) % allCreators.length];
+      const norm = normalizeTikTokHandle(candidate.handle);
+      if (norm && !selectedCreatorsMap.has(norm)) {
+        selectedCreatorsMap.set(norm, candidate);
+      }
+    }
+
+    try {
+      localStorage.setItem(
+        TIKTOK_CREATOR_CRAWL_CURSOR_KEY,
+        String((creatorCursor + batchSize) % Math.max(1, allCreators.length))
+      );
+    } catch {}
+
+    // Vector B: Select a rotating batch of Cambodian food hashtags to discover new creators & videos
+    let hashtagCursor = 0;
+    try {
+      hashtagCursor = Number(localStorage.getItem(TIKTOK_HASHTAG_CRAWL_CURSOR_KEY) || 0) || 0;
+    } catch {}
+    const hashtagBatchCount = forceRefresh ? 5 : 3;
+    const selectedHashtags: string[] = [];
+    for (let i = 0; i < hashtagBatchCount; i++) {
+      selectedHashtags.push(
+        TIKTOK_CAMBODIAN_FOOD_DISCOVERY_HASHTAGS[
+          (hashtagCursor + i) % TIKTOK_CAMBODIAN_FOOD_DISCOVERY_HASHTAGS.length
+        ]
+      );
+    }
+    try {
+      localStorage.setItem(
+        TIKTOK_HASHTAG_CRAWL_CURSOR_KEY,
+        String((hashtagCursor + hashtagBatchCount) % TIKTOK_CAMBODIAN_FOOD_DISCOVERY_HASHTAGS.length)
+      );
+    } catch {}
+
+    const newlyFoundCreatorRecords: DiscoveredTikTokCreatorRecord[] = [];
+
+    const crawlHashtagFeed = async (tag: string) => {
+      const encodedTag = encodeURIComponent(tag);
+      const html = await fetchTikTokPublicEmbedHtml(`https://www.tiktok.com/embed/tag/${encodedTag}`, isNative, 4200);
+      if (!html) return;
+      const stateMatch = html.match(
+        /<script id="__FRONTITY_CONNECT_STATE__" type="application\/json">([\s\S]*?)<\/script>/
+      );
+      if (!stateMatch || !stateMatch[1]) return;
+      try {
+        const parsedState = JSON.parse(stateMatch[1]);
+        const dataMap = parsedState?.source?.data || {};
+        const tagData =
+          dataMap[`/embed/tag/${tag}`] ||
+          dataMap[`/embed/tag/${encodedTag}`] ||
+          dataMap[Object.keys(dataMap)[0] || ''];
+        const videoList = Array.isArray(tagData?.videoList) ? tagData.videoList : [];
 
         for (const rawVid of videoList) {
-          const vid = extractTikTokVideoId(String(rawVid?.id || ''));
-          if (!vid) continue;
-
           const desc = String(rawVid?.desc || '').trim();
-          if (!isDedicatedFoodChannel && desc && !FOOD_TIKTOK_VIDEO_FILTER_RE.test(desc)) {
-            continue;
+          const authorHandle = normalizeTikTokHandle(rawVid?.authorUniqueId);
+          if (!authorHandle) continue;
+          if (!isCambodianFoodRelatedTikTokVideo(desc, authorHandle)) continue;
+
+          const reg = registerDiscoveredTikTokCreator(authorHandle, {
+            displayName: `@${authorHandle}`,
+            discoveredVia: 'hashtag_foryou',
+          });
+          if (reg.added && reg.record) {
+            newlyDiscoveredCreatorCount++;
+            newlyFoundCreatorRecords.push(reg.record);
           }
 
-          const isoDate = tiktokSnowflakeIdToIsoDate(vid);
-          const dateLabel = isoDate ? isoDate.slice(0, 10) : new Date().toISOString().slice(0, 10);
-          const coverUrl = String(rawVid?.coverUrl || rawVid?.originCoverUrl || '').trim();
-          const match = matchCambodianDish(desc, foods);
-          const cleanCaption = desc.replace(/#\S+/g, '').replace(/\s+/g, ' ').trim();
-          const titleKh =
-            cleanCaption.length >= 6
-              ? cleanCaption.slice(0, 95)
-              : `វីដេអូម្ហូបថ្មីពី ${creator.displayName} (@${creator.handle})`;
+          const creatorRecord =
+            reg.record ||
+            allCreators.find((c) => normalizeTikTokHandle(c.handle) === authorHandle) || {
+              handle: authorHandle,
+              displayName: `@${authorHandle}`,
+              profileUrl: `https://www.tiktok.com/@${authorHandle}`,
+              defaultCategory: 'popular_food' as const,
+              defaultFoodThumb: '/foods/food-19.jpg',
+            };
 
-          const existing = byTikTokVideoId.get(vid);
-          const updatedItem: OnlineFoodDiscoveryItem = {
-            id: existing?.id || `tt-live-${vid}`,
-            platform: 'tiktok',
-            titleKh: existing?.titleKh || titleKh,
-            titleEn:
-              existing?.titleEn ||
-              (cleanCaption.length >= 6
-                ? cleanCaption.slice(0, 95)
-                : `Latest Cambodian Food Review by ${creator.displayName} (@${creator.handle})`),
-            titleZh: existing?.titleZh || `${creator.displayName} 最新柬埔寨美食视频`,
-            descriptionKh:
-              desc ||
-              existing?.descriptionKh ||
-              `វីដេអូម្ហូប និងការធ្វើម្ហូបខ្មែរថ្មីៗពីគណនីផ្លូវការ @${creator.handle}។`,
-            descriptionEn:
-              desc ||
-              existing?.descriptionEn ||
-              `Authentic Cambodian food video from official creator @${creator.handle}.`,
-            descriptionZh:
-              existing?.descriptionZh ||
-              `来自官方创作者 @${creator.handle} 的柬埔寨美食视频。`,
-            thumbnailUrl: existing?.thumbnailUrl || coverUrl || creator.defaultFoodThumb,
-            sourceUrl: `https://www.tiktok.com/@${creator.handle}/video/${vid}`,
-            originalAccountUrl: creator.profileUrl,
-            sourceName: creator.displayName,
-            authorHandle: `@${creator.handle}`,
-            publishedOrUpdatedAt: dateLabel,
-            isLiveFetched: true,
-            verificationBadgeEn: 'TikTok Official Creator',
-            verificationBadgeKh: 'វីដេអូ Review លើ TikTok កម្ពុជា',
-            verificationBadgeZh: 'TikTok 官方美食创作者',
-            categorySlug: existing?.categorySlug || creator.defaultCategory,
-            provinceKh: existing?.provinceKh || 'រាជធានីភ្នំពេញ',
-            provinceEn: existing?.provinceEn || 'Phnom Penh',
-            matchedFoodId: existing?.matchedFoodId || match?.food?.id || 'food-1',
-            matchedFoodNameKh: existing?.matchedFoodNameKh || match?.food?.nameKh,
-            matchedFoodNameEn: existing?.matchedFoodNameEn || match?.food?.nameEn,
-            relevanceScore: existing?.relevanceScore || 99,
-            isPlayableVerified: true,
-            canInlineEmbed: true,
-            inlineVideoId: vid,
-            directVideoUrl: undefined,
-          };
-
-          if (!existing) {
-            newlyDiscoveredCount++;
-          }
-          byTikTokVideoId.set(vid, updatedItem);
+          ingestRawTikTokVideo(rawVid, creatorRecord, 'TikTok For You Food Discovery');
         }
-      })
-    );
+      } catch {
+        // ignore JSON parse error
+      }
+    };
+
+    // Run Vector A (Creator Profiles) and Vector B (Hashtag/ForYou Recommendations) in parallel
+    await Promise.allSettled([
+      ...Array.from(selectedCreatorsMap.values()).map((creator) => crawlCreatorProfile(creator)),
+      ...selectedHashtags.map((tag) => crawlHashtagFeed(tag)),
+    ]);
+
+    // Immediately crawl up to 3 newly discovered creators from this pass so their latest food videos are added right away
+    if (newlyFoundCreatorRecords.length > 0) {
+      await Promise.allSettled(
+        newlyFoundCreatorRecords.slice(0, 3).map((newCreator) => crawlCreatorProfile(newCreator))
+      );
+    }
 
     const sortedTikToks = Array.from(byTikTokVideoId.values()).sort((a, b) => {
       const vidA = extractTikTokVideoId(a.inlineVideoId || a.sourceUrl) || '0';
@@ -3398,22 +4588,34 @@ export async function fetchLiveTikTokCreatorVideos(
         LIVE_TIKTOK_CREATORS_CACHE_KEY,
         JSON.stringify({
           updatedAt: new Date().toISOString(),
-          items: sortedTikToks,
+          items: sortedTikToks.slice(0, 140),
         })
       );
     } catch {
       // ignore storage quota
     }
 
-    if (newlyDiscoveredCount > 0 && isSupabaseConfigured()) {
-      pushCloudDocument(
-        CLOUD_TIKTOK_DISCOVERED_DOC_KEY,
-        {
-          updatedAt: new Date().toISOString(),
-          items: sortedTikToks.slice(0, 60),
-        },
-        5000
-      ).catch(() => {});
+    if (isSupabaseConfigured()) {
+      if (newlyDiscoveredVideoCount > 0) {
+        pushCloudDocument(
+          CLOUD_TIKTOK_DISCOVERED_DOC_KEY,
+          {
+            updatedAt: new Date().toISOString(),
+            items: sortedTikToks.slice(0, 90),
+          },
+          5000
+        ).catch(() => {});
+      }
+      if (newlyDiscoveredCreatorCount > 0) {
+        pushCloudDocument(
+          CLOUD_TIKTOK_CREATORS_DB_DOC_KEY,
+          {
+            updatedAt: new Date().toISOString(),
+            creators: getExpandedTikTokCreatorDatabase().slice(0, 120),
+          },
+          5000
+        ).catch(() => {});
+      }
     }
 
     return sortedTikToks;

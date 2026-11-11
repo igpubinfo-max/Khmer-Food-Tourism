@@ -343,60 +343,164 @@ export const AiTripPlannerModal: React.FC = () => {
     kh: string;
     en: string;
     zh: string;
+    shortKh: string;
+    shortEn: string;
+    shortZh: string;
     descKh: string;
     descEn: string;
     descZh: string;
     vipOnly: boolean;
+    gradientStyle: string;
+    renderIcon: () => React.ReactNode;
   }> = [
     {
       id: 'quick_daily',
       kh: 'អាហាររហ័ស & ងាយស្រួលប្រចាំថ្ងៃ',
       en: 'Quick & Convenient Daily Meal',
       zh: '快捷便利日常简餐',
+      shortKh: 'អាហាររហ័សប្រចាំថ្ងៃ',
+      shortEn: 'Quick Daily Meal',
+      shortZh: '快捷日常餐',
       descKh: 'ម្ហូបញ៉ាំប្រចាំថ្ងៃ រហ័ស ឆ្ងាញ់ និងសម្បូរបែប',
       descEn: 'Fast, tasty everyday dishes for breakfast, lunch, or dinner',
       descZh: '适合日常早午晚餐的快捷美味菜品',
       vipOnly: false,
+      gradientStyle: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
+      renderIcon: () => (
+        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 8c0 3-2.5 4.5-2.5 7.5S18 20 18 20" />
+          <path d="M24 6c0 3-2.5 4.5-2.5 7.5S24 18 24 18" />
+          <path d="M30 8c0 3-2.5 4.5-2.5 7.5S30 20 30 20" />
+          <path d="M9 24h30a15 15 0 0 1-30 0Z" fill="currentColor" fillOpacity="0.18" />
+          <path d="M16 40h16" />
+        </svg>
+      ),
     },
     {
       id: 'khmer_comfort',
       kh: 'ម្ហូបខ្មែរពេញនិយមប្រចាំថ្ងៃ',
       en: 'Daily Khmer Comfort Food',
       zh: '经典柬式家常美味',
+      shortKh: 'ម្ហូបខ្មែរពេញនិយម',
+      shortEn: 'Khmer Favorites',
+      shortZh: '经典柬式家常',
       descKh: 'សម្លខ្មែរ អាម៉ុក និងម្ហូបប្រពៃណីសម្រាប់គ្រួសារ',
       descEn: 'Authentic Cambodian soups, curries, and homestyle favorites',
       descZh: '正宗柬埔寨汤品、阿莫克与家常名菜',
       vipOnly: false,
+      gradientStyle: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
+      renderIcon: () => (
+        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 22c0-6.6 5.4-12 12-12s12 5.4 12 12H12Z" fill="currentColor" fillOpacity="0.18" />
+          <path d="M8 22h32" />
+          <path d="M11 22l2 12a4 4 0 0 0 4 3.4h14a4 4 0 0 0 4-3.4l2-12" />
+          <circle cx="24" cy="8" r="2" />
+        </svg>
+      ),
     },
     {
       id: 'vip_light_cal',
       kh: 'ម្ហូបចំហុយ & ស្ងោរប្រពៃណី',
       en: 'Steamed & Boiled Specialties',
       zh: '清蒸与炖汤精选',
+      shortKh: 'ម្ហូបចំហុយ & ស្ងោរ',
+      shortEn: 'Steamed & Boiled',
+      shortZh: '清蒸与炖汤',
       descKh: 'ម្ហូបចំហុយ ស៊ុបថ្លា និងសម្លប្រពៃណីរសជាតិស្រាលឆ្ងាញ់',
       descEn: 'Traditional steamed fish, clear soups & delicate Cambodian dishes',
       descZh: '传统清蒸鱼、清汤与风味清雅的柬式菜肴',
       vipOnly: true,
+      gradientStyle: 'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)',
+      renderIcon: () => (
+        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10 30c0-7.7 6.3-14 14-14s14 6.3 14 14H10Z" fill="currentColor" fillOpacity="0.18" />
+          <path d="M6 30h36" />
+          <path d="M12 35h24" />
+          <circle cx="24" cy="13" r="2.5" />
+        </svg>
+      ),
     },
     {
       id: 'vip_high_protein',
       kh: 'សាច់អាំង & គ្រឿងសមុទ្រពិសេស',
       en: 'Grilled & Seafood Specialties',
       zh: '炭烤与海鲜特色',
+      shortKh: 'សាច់អាំង & គ្រឿងសមុទ្រ',
+      shortEn: 'Grilled & Seafood',
+      shortZh: '炭烤与海鲜',
       descKh: 'មុខម្ហូបសាច់គោអាំង ត្រីដុត បង្គា និងគ្រឿងសមុទ្រស្រស់ៗ',
       descEn: 'Charcoal-grilled meats, roasted fish & fresh coastal seafood',
       descZh: '炭烤牛肉、烤鱼与新鲜海鲜特色菜',
       vipOnly: true,
+      gradientStyle: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
+      renderIcon: () => (
+        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M24 7c0 6-8 10-8 18a8 8 0 0 0 16 0c0-5-3-8.5-4.5-11.5C26 17 24 18 24 15V7Z" fill="currentColor" fillOpacity="0.20" />
+          <path d="M11 38h26" />
+          <path d="M15 42h18" />
+        </svg>
+      ),
     },
     {
       id: 'vip_group_feast',
       kh: 'អាហារជួបជុំគ្រួសារ & មិត្តភក្តិ',
       en: 'Family & Group Dining Match',
       zh: '家庭与朋友聚餐精选',
+      shortKh: 'អាហារជួបជុំគ្រួសារ',
+      shortEn: 'Family & Group',
+      shortZh: '家庭朋友聚餐',
       descKh: 'មុខម្ហូបឈុតធំ ស៊ុប សាច់អាំង និងហាងបរិយាកាសល្អ',
       descEn: 'Shareable platters, hotpots, grilled specialties & group venues',
       descZh: '适合多人分享的火锅、烧烤、大菜与聚会餐厅',
       vipOnly: true,
+      gradientStyle: 'linear-gradient(180deg, #F4B630 0%, #C67D0D 100%)',
+      renderIcon: () => (
+        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 36 32" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <g transform="translate(2, 2) rotate(-10 10 14)">
+            <path d="M6 2h8l-1 10a3 3 0 0 1-6 0L6 2z" fill="currentColor" fillOpacity="0.18" />
+            <path d="M6.5 6h7" />
+            <path d="M10 15v7" />
+            <path d="M7 22h6" />
+          </g>
+          <g transform="translate(14, 2) rotate(10 10 14)">
+            <path d="M6 2h8l-1 10a3 3 0 0 1-6 0L6 2z" fill="currentColor" fillOpacity="0.18" />
+            <path d="M6.5 6h7" />
+            <path d="M10 15v7" />
+            <path d="M7 22h6" />
+          </g>
+          <path d="M18 1v3" />
+          <path d="M14 2l1.5 2" />
+          <path d="M22 2l-1.5 2" />
+        </svg>
+      ),
+    },
+    {
+      id: 'any',
+      kh: 'ណែនាំគ្រប់មុខម្ហូបឆ្លាតវៃ AI',
+      en: 'All Smart AI Food Picks',
+      zh: '全部 AI 智能推荐菜品',
+      shortKh: 'ណែនាំគ្រប់មុខម្ហូប AI',
+      shortEn: 'All AI Food Picks',
+      shortZh: '全部 AI 推荐',
+      descKh: 'ពិនិត្យជម្រើសមុខម្ហូបឆ្ងាញ់ៗគ្រប់ប្រភេទដែលជ្រើសរើសដោយ AI',
+      descEn: 'Explore top-rated Cambodian dishes across all categories curated by AI',
+      descZh: '探索 AI 精选的全品类高分柬埔寨美食',
+      vipOnly: false,
+      gradientStyle: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',
+      renderIcon: () => (
+        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="24" y1="6" x2="24" y2="11" />
+          <circle cx="24" cy="5" r="2" fill="currentColor" />
+          <rect x="11" y="11" width="26" height="22" rx="9" fill="currentColor" fillOpacity="0.16" />
+          <path d="M7 20v5a2 2 0 0 0 2 2h2v-9H9a2 2 0 0 0-2 2Z" fill="currentColor" />
+          <path d="M41 20v5a2 2 0 0 1-2 2h-2v-9h2a2 2 0 0 1 2 2Z" fill="currentColor" />
+          <circle cx="18.5" cy="21" r="2.2" fill="currentColor" />
+          <circle cx="29.5" cy="21" r="2.2" fill="currentColor" />
+          <path d="M20 27c1.2 1.2 2.5 1.8 4 1.8s2.8-.6 4-1.8" />
+          <path d="M37 26c0 5-4 8-9 8h-3" />
+          <circle cx="24" cy="34" r="1.8" fill="currentColor" />
+        </svg>
+      ),
     },
   ];
 
@@ -406,7 +510,7 @@ export const AiTripPlannerModal: React.FC = () => {
       onClick={() => setIsAiTripPlannerModalOpen(false)}
     >
       <div
-        className="w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl max-h-[92vh] flex flex-col overflow-hidden"
+        className="w-full max-w-lg sm:max-w-xl bg-[#F4F7FA] text-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200/90 shadow-2xl max-h-[92vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -444,21 +548,21 @@ export const AiTripPlannerModal: React.FC = () => {
         </div>
 
         {/* 3-Mode Switcher Bar: AI Food Advisor | VIP Special Menu | AI Route Planner */}
-        <div className="grid grid-cols-3 p-1.5 bg-slate-100 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 gap-1 shrink-0 font-khmer">
+        <div className="grid grid-cols-3 p-1.5 bg-white border-b border-slate-200/90 gap-1.5 shrink-0 font-khmer shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
           <button
             type="button"
             onClick={() => setAssistantTab('food_advisor')}
-            className={`py-2 px-1.5 rounded-xl text-[11px] font-extrabold transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+            className={`py-2 px-1.5 rounded-xl text-[11px] font-extrabold transition flex flex-col items-center justify-center gap-0.5 cursor-pointer border ${
               assistantTab === 'food_advisor'
-                ? 'bg-white dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                ? 'bg-emerald-50/95 text-[#064E3B] border-emerald-500/40 shadow-2xs'
+                : 'bg-slate-50/80 text-slate-600 border-transparent hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <span className="flex items-center gap-1">
               <Utensils className="w-3.5 h-3.5 text-emerald-600" />
               <span className="truncate">{tr(language, 'រើសម្ហូបឆ្លាតវៃ', 'AI Food', '智能选餐')}</span>
             </span>
-            <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
+            <span className="text-[9px] font-bold text-emerald-700">
               {tr(language, 'ឥតគិតថ្លៃ + VIP', 'Free + VIP', '免费 + VIP')}
             </span>
           </button>
@@ -466,33 +570,36 @@ export const AiTripPlannerModal: React.FC = () => {
           <button
             type="button"
             onClick={() => setAssistantTab('healthy_vip')}
-            className={`py-2 px-1.5 rounded-xl text-[11px] font-extrabold transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+            className={`py-2 px-1.5 rounded-xl text-[11px] font-extrabold transition flex flex-col items-center justify-center gap-0.5 cursor-pointer border ${
               assistantTab === 'healthy_vip'
-                ? 'bg-white dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                ? 'bg-emerald-50/95 text-[#064E3B] border-emerald-500/40 shadow-2xs'
+                : 'bg-slate-50/80 text-slate-600 border-transparent hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <span className="flex items-center gap-1">
               <ChefHat className="w-3.5 h-3.5 text-amber-500" />
               <span className="truncate">{tr(language, 'ម្ហូបពិសេស', 'Special Menu', '特色菜单')}</span>
             </span>
-            <span className="text-[9px] font-black text-amber-600 dark:text-amber-400">👑 VIP</span>
+            <span className="text-[9px] font-black text-amber-600 inline-flex items-center gap-0.5">
+              <span>👑</span>
+              <span>VIP</span>
+            </span>
           </button>
 
           <button
             type="button"
             onClick={() => setAssistantTab('route_planner')}
-            className={`py-2 px-1.5 rounded-xl text-[11px] font-extrabold transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+            className={`py-2 px-1.5 rounded-xl text-[11px] font-extrabold transition flex flex-col items-center justify-center gap-0.5 cursor-pointer border ${
               assistantTab === 'route_planner'
-                ? 'bg-white dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                ? 'bg-emerald-50/95 text-[#064E3B] border-emerald-500/40 shadow-2xs'
+                : 'bg-slate-50/80 text-slate-600 border-transparent hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <span className="flex items-center gap-1">
-              <Compass className="w-3.5 h-3.5 text-teal-600" />
+              <Compass className="w-3.5 h-3.5 text-emerald-600" />
               <span className="truncate">{tr(language, 'ផែនការដើរលេង', 'Trip Planner', '行程规划')}</span>
             </span>
-            <span className="text-[9px] font-black text-amber-600 dark:text-amber-400">
+            <span className="text-[9px] font-black text-amber-600">
               {tr(language, '១ថ្ងៃឥតគិតថ្លៃ • VIP', '1d Free • VIP', '1日免费 • VIP')}
             </span>
           </button>
@@ -509,9 +616,9 @@ export const AiTripPlannerModal: React.FC = () => {
           {assistantTab === 'food_advisor' && (
             <div className="space-y-4">
               {/* Free vs VIP Banner */}
-              <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-white to-amber-50 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800 border border-emerald-200/80 dark:border-slate-700 flex items-center justify-between gap-2">
+              <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-white to-amber-50 border border-emerald-200/80 flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <div className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <div className="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
                     <Award className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                     <span>
                       {tr(
@@ -522,7 +629,7 @@ export const AiTripPlannerModal: React.FC = () => {
                       )}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  <p className="text-[11px] text-slate-500 mt-0.5">
                     {tr(
                       language,
                       'មុខងារមូលដ្ឋានឥតគិតថ្លៃ • មុខម្ហូបពិសេស និងជួបជុំសម្រាប់ VIP',
@@ -544,8 +651,8 @@ export const AiTripPlannerModal: React.FC = () => {
               </div>
 
               {/* Ask AI Search / Craving Box */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <div className="rounded-[22px] bg-white p-3 sm:p-3.5 shadow-[0_5px_18px_rgba(15,23,42,0.06)] border border-slate-200/85 space-y-2.5">
+                <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                   <Search className="w-3.5 h-3.5 text-emerald-600" />
                   <span>
                     {tr(
@@ -582,7 +689,7 @@ export const AiTripPlannerModal: React.FC = () => {
                         'e.g. rice, noodle soup, sour soup, grilled meat, beer food...',
                         '例如：米饭、粿条、酸汤、烤肉、下酒菜...'
                       )}
-                      className="w-full pl-3.5 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full pl-3.5 pr-8 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                     {advisorPrompt && (
                       <button
@@ -593,7 +700,7 @@ export const AiTripPlannerModal: React.FC = () => {
                           setAdvisorSeed(1);
                         }}
                         aria-label={tr(language, 'សម្អាត', 'Clear', '清除')}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600:text-white cursor-pointer"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -636,7 +743,7 @@ export const AiTripPlannerModal: React.FC = () => {
                         className={`px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap border transition cursor-pointer ${
                           isActive
                             ? 'bg-emerald-600 text-white border-emerald-500 shadow-2xs'
-                            : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-emerald-400'
+                            : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-400'
                         }`}
                       >
                         {tr(language, chip.labelKh, chip.labelEn, chip.labelZh)}
@@ -650,11 +757,11 @@ export const AiTripPlannerModal: React.FC = () => {
               {hasSearchPrompt && (
               <div
                 ref={advisorResultsRef}
-                className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-emerald-500/30 dark:border-emerald-500/30 space-y-2.5"
+                className="p-3.5 rounded-2xl bg-slate-50 border border-emerald-500/30 space-y-2.5"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <h4 className="text-xs font-extrabold text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
+                    <h4 className="text-xs font-extrabold text-[#064E3B] flex items-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                       <span>
                         {tr(
@@ -666,7 +773,7 @@ export const AiTripPlannerModal: React.FC = () => {
                       </span>
                     </h4>
                     {!aiAdvisorResults.brain && (
-                      <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-0.5 leading-snug">
+                      <p className="text-[11px] font-semibold text-slate-600 mt-0.5 leading-snug">
                         {aiAdvisorResults.aiSummaryText}
                       </p>
                     )}
@@ -708,7 +815,7 @@ export const AiTripPlannerModal: React.FC = () => {
                           setSelectedFood(dish);
                           setIsAiTripPlannerModalOpen(false);
                         }}
-                        className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 hover:border-emerald-500 flex items-center justify-between gap-2.5 cursor-pointer transition shadow-2xs"
+                        className="p-2.5 rounded-xl bg-white border border-slate-200/90 hover:border-emerald-500 flex items-center justify-between gap-2.5 cursor-pointer transition shadow-2xs"
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <img
@@ -720,22 +827,22 @@ export const AiTripPlannerModal: React.FC = () => {
                             className="w-14 h-14 rounded-xl object-cover shrink-0 bg-slate-200"
                           />
                           <div className="min-w-0">
-                            <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                            <div className="text-xs font-extrabold text-slate-900 truncate">
                               {loc.name}
                             </div>
-                            <div className="flex items-center gap-1.5 mt-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
+                            <div className="flex items-center gap-1.5 mt-0.5 text-[10px] font-bold text-emerald-700">
                               <span>🔥 {dish.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}</span>
                               <span>•</span>
                               <span>⭐ {dish.rating}</span>
                               <span>•</span>
                               <span>{loc.category}</span>
                             </div>
-                            <p className="text-[10.5px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                            <p className="text-[10.5px] text-slate-500 line-clamp-1 mt-0.5">
                               {loc.description}
                             </p>
                           </div>
                         </div>
-                        <span className="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 text-[10px] font-bold shrink-0 flex items-center gap-1">
+                        <span className="px-2 py-1 rounded-lg bg-emerald-50 text-[#064E3B] text-[10px] font-bold shrink-0 flex items-center gap-1">
                           <ChefHat className="w-3 h-3" />
                           <span>{tr(language, 'រូបមន្ត', 'Recipe', '食谱')}</span>
                         </span>
@@ -747,8 +854,8 @@ export const AiTripPlannerModal: React.FC = () => {
 
                 {/* Matching Restaurants with 1-Tap Navigation */}
                 {aiAdvisorResults.shops.length > 0 && (
-                  <div className="pt-2 border-t border-slate-200/80 dark:border-slate-700 space-y-1.5">
-                    <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                  <div className="pt-2 border-t border-slate-200/80 space-y-1.5">
+                    <div className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5 text-emerald-600" />
                       <span>
                         {tr(
@@ -764,7 +871,7 @@ export const AiTripPlannerModal: React.FC = () => {
                       return (
                         <div
                           key={shop.id}
-                          className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-2"
+                          className="p-2 rounded-xl bg-white border border-slate-200/80 flex items-center justify-between gap-2"
                         >
                           <div
                             onClick={() => {
@@ -773,7 +880,7 @@ export const AiTripPlannerModal: React.FC = () => {
                             }}
                             className="min-w-0 flex-1 cursor-pointer"
                           >
-                            <div className="text-xs font-bold text-slate-900 dark:text-white truncate hover:text-emerald-600">
+                            <div className="text-xs font-bold text-slate-900 truncate hover:text-emerald-600">
                               {sLoc.name}
                             </div>
                             <div className="text-[10px] text-slate-500 truncate">
@@ -796,55 +903,137 @@ export const AiTripPlannerModal: React.FC = () => {
               </div>
               )}
 
-              {/* Select Daily Goal (2 Free + 3 VIP) — Compact Dropdown Menu so screen isn't cluttered with excessive text */}
-              <div className="space-y-2.5" ref={(el) => { goalCardRefs.current[expandedGoalId || advisorGoal] = el; }}>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
-                  {tr(language, 'ជ្រើសរើសគោលបំណងអាហារថ្ងៃនេះ៖', 'Select your dining goal today:', '选择今日用餐目标：')}
-                </label>
+              {/* Select Daily Goal — 6 Colorful Distinct Gradient Category Buttons (Reference Image 2 Style) + Compact Selector */}
+              <div className="rounded-[22px] bg-white p-3 sm:p-3.5 shadow-[0_5px_18px_rgba(15,23,42,0.06)] border border-slate-200/85 space-y-2.5" ref={(el) => { goalCardRefs.current[expandedGoalId || advisorGoal] = el; }}>
+                <div className="flex items-center justify-between gap-2">
+                  <label className="text-xs font-extrabold text-slate-900 block">
+                    {tr(language, 'ជ្រើសរើសគោលបំណងអាហារថ្ងៃនេះ៖', 'Select your dining goal today:', '选择今日用餐目标：')}
+                  </label>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full">
+                    {tr(language, '6 ប្រភេទឆ្លាតវៃ AI', '6 Smart AI Categories', '6 大 AI 分类')}
+                  </span>
+                </div>
+
+                {/* 6 Colorful, Distinct Gradient Category Buttons (Matching Reference Image 2) */}
+                <div className="grid grid-cols-2 min-[360px]:grid-cols-3 gap-2 sm:gap-2.5">
+                  {advisorGoals.map((g) => {
+                    const isLocked = g.vipOnly && !canUseVip;
+                    const isSelected = expandedGoalId === g.id || (!expandedGoalId && advisorGoal === g.id);
+                    return (
+                      <button
+                        key={g.id}
+                        type="button"
+                        onClick={() => {
+                          if (isLocked) {
+                            showToast(
+                              tr(
+                                language,
+                                'មុខងារណែនាំមុខម្ហូបពិសេស និងជួបជុំ AI គឺសម្រាប់សមាជិក VIP!',
+                                'Special Culinary & Group Dining AI modes are for VIP members!',
+                                '特色美食与聚餐 AI 推荐仅限 VIP 会员！'
+                              ),
+                              'info'
+                            );
+                            openUpgradeVipModal();
+                            return;
+                          }
+                          if (advisorPrompt) {
+                            setAdvisorPrompt('');
+                          }
+                          setAdvisorGoal(g.id);
+                          setExpandedGoalId(g.id);
+                          setGoalSeed((s) => s + 1);
+                          setIsGoalDropdownOpen(false);
+                          scrollGoalIntoView(g.id);
+                        }}
+                        style={{
+                          background: g.gradientStyle,
+                          boxShadow: isSelected
+                            ? '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)'
+                            : '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
+                        }}
+                        className="group relative min-h-[76px] rounded-[16px] py-2 px-1.5 flex flex-col items-center justify-center gap-1 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
+                      >
+                        {/* Subtle top glass highlight */}
+                        <span
+                          className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+                          style={{
+                            background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
+                          }}
+                        />
+
+                        {/* Subtle Free / VIP Pill Badge in Top-Right Corner */}
+                        <span className="absolute top-1.5 right-1.5 z-10 px-1.5 py-[1px] rounded-full bg-black/25 backdrop-blur-[2px] border border-white/30 text-[8px] font-extrabold text-white leading-tight flex items-center gap-0.5">
+                          {g.vipOnly ? (
+                            <>
+                              {isLocked ? <Lock className="w-2 h-2 text-amber-300" /> : <Crown className="w-2 h-2 text-amber-300" />}
+                              <span>VIP</span>
+                            </>
+                          ) : (
+                            <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}</span>
+                          )}
+                        </span>
+
+                        {/* Attractive Centered Icon */}
+                        <span className="relative z-10 flex items-center justify-center transition-transform group-hover:scale-105 shrink-0 mt-1">
+                          {g.renderIcon()}
+                        </span>
+
+                        {/* Clear Khmer Typography */}
+                        <span
+                          className="relative z-10 font-khmer font-extrabold leading-[1.68] pt-0.5 pb-0.5 text-center break-words whitespace-normal w-full px-0.5 text-white overflow-visible"
+                          style={{ fontSize: 'clamp(9.5px, 2.7vw, 11.5px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
+                        >
+                          {tr(language, g.shortKh, g.shortEn, g.shortZh)}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
 
                 {(() => {
                   const activeGoalObj = advisorGoals.find((g) => g.id === (expandedGoalId || advisorGoal)) || advisorGoals[0];
                   return (
-                    <div className="relative">
+                    <div className="relative pt-0.5">
                       {/* Compact Dropdown Trigger Button */}
                       <button
                         type="button"
                         aria-expanded={isGoalDropdownOpen}
                         onClick={() => setIsGoalDropdownOpen((v) => !v)}
-                        className="w-full px-3.5 py-2.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 text-left flex items-center justify-between gap-2.5 shadow-2xs transition cursor-pointer"
+                        className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200/90 hover:border-emerald-500 text-left flex items-center justify-between gap-2.5 shadow-2xs transition cursor-pointer"
                       >
                         <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                          <span className="w-7 h-7 rounded-xl bg-emerald-600/10 dark:bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-[#064E3B] dark:text-emerald-400 shrink-0">
+                          <span className="w-7 h-7 rounded-xl bg-emerald-600/10 border border-emerald-500/25 flex items-center justify-center text-[#064E3B] shrink-0">
                             <Utensils className="w-3.5 h-3.5" strokeWidth={1.75} />
                           </span>
-                          <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                          <span className="text-xs font-extrabold text-slate-900 truncate">
                             {tr(language, activeGoalObj.kh, activeGoalObj.en, activeGoalObj.zh)}
                           </span>
                         </div>
 
                         <div className="flex items-center gap-1.5 shrink-0">
                           {activeGoalObj.vipOnly ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-black border border-amber-400/40">
-                              <Crown className="w-2.5 h-2.5" />
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-black border border-amber-300">
+                              <Crown className="w-2.5 h-2.5 text-amber-600" />
                               <span>VIP</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">
                               <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
                               <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}</span>
                             </span>
                           )}
                           {isGoalDropdownOpen ? (
-                            <ChevronUp className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <ChevronUp className="w-4 h-4 text-emerald-600 shrink-0" />
                           ) : (
-                            <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                            <ChevronDown className="w-4 h-4 text-slate-500 shrink-0" />
                           )}
                         </div>
                       </button>
 
                       {/* Dropdown Menu Options List */}
                       {isGoalDropdownOpen && (
-                        <div className="mt-1.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl divide-y divide-slate-100 dark:divide-slate-700/70 overflow-hidden z-20">
+                        <div className="mt-1.5 rounded-2xl bg-white border border-slate-200 shadow-xl divide-y divide-slate-100 overflow-hidden z-20">
                           {advisorGoals.map((g) => {
                             const isLocked = g.vipOnly && !canUseVip;
                             const isSelected = (expandedGoalId || advisorGoal) === g.id;
@@ -878,8 +1067,8 @@ export const AiTripPlannerModal: React.FC = () => {
                                 }}
                                 className={`w-full px-3.5 py-2.5 text-left flex items-center justify-between gap-2 transition cursor-pointer ${
                                   isSelected
-                                    ? 'bg-emerald-50 dark:bg-emerald-950/50 text-[#064E3B] dark:text-emerald-300'
-                                    : 'hover:bg-slate-50 dark:hover:bg-slate-700/60 text-slate-800 dark:text-slate-100'
+                                    ? 'bg-emerald-50 text-[#064E3B]'
+                                    : 'hover:bg-slate-50 text-slate-800'
                                 }`}
                               >
                                 <span className="text-xs font-bold truncate flex-1">
@@ -887,12 +1076,12 @@ export const AiTripPlannerModal: React.FC = () => {
                                 </span>
                                 <div className="flex items-center gap-1.5 shrink-0">
                                   {g.vipOnly ? (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-black border border-amber-400/40">
-                                      {isLocked ? <Lock className="w-2.5 h-2.5" /> : <Crown className="w-2.5 h-2.5" />}
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-black border border-amber-300">
+                                      {isLocked ? <Lock className="w-2.5 h-2.5 text-amber-600" /> : <Crown className="w-2.5 h-2.5 text-amber-600" />}
                                       <span>VIP</span>
                                     </span>
                                   ) : (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">
                                       <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
                                       <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}</span>
                                     </span>
@@ -909,10 +1098,10 @@ export const AiTripPlannerModal: React.FC = () => {
 
                 {/* Selected Goal Recommendations (Shown cleanly beneath the dropdown when a goal is selected) */}
                 {expandedGoalId && (
-                  <div className="p-3 rounded-2xl border border-emerald-500/35 bg-slate-50/90 dark:bg-slate-900/70 space-y-2.5">
+                  <div className="p-3 rounded-2xl border border-emerald-500/35 bg-slate-50/90 space-y-2.5">
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0 flex-1">
-                        <span className="text-[11px] font-extrabold text-[#064E3B] dark:text-emerald-300 block truncate">
+                        <span className="text-[11px] font-extrabold text-[#064E3B] block truncate">
                           {tr(
                             language,
                             `រកឃើញ ${goalAdvisorResults.totalMatchedCount} មុខម្ហូបសមស្រប`,
@@ -933,7 +1122,7 @@ export const AiTripPlannerModal: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setExpandedGoalId(null)}
-                          className="p-1.5 rounded-xl bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 cursor-pointer"
+                          className="p-1.5 rounded-xl bg-slate-200/70 text-slate-600 hover:text-slate-900 cursor-pointer"
                           aria-label="Close"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -952,7 +1141,7 @@ export const AiTripPlannerModal: React.FC = () => {
                               setSelectedFood(dish);
                               setIsAiTripPlannerModalOpen(false);
                             }}
-                            className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 hover:border-emerald-500 flex items-center justify-between gap-2.5 cursor-pointer text-left transition shadow-2xs active:scale-[0.99]"
+                            className="w-full p-2.5 rounded-xl bg-white border border-slate-200/90 hover:border-emerald-500 flex items-center justify-between gap-2.5 cursor-pointer text-left transition shadow-2xs active:scale-[0.99]"
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
                               <img
@@ -964,10 +1153,10 @@ export const AiTripPlannerModal: React.FC = () => {
                                 className="w-12 h-12 rounded-xl object-cover shrink-0 bg-slate-200"
                               />
                               <div className="min-w-0">
-                                <div className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                                <div className="text-xs font-extrabold text-slate-900 truncate">
                                   {loc.name}
                                 </div>
-                                <div className="flex items-center gap-1.5 mt-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 flex-wrap">
+                                <div className="flex items-center gap-1.5 mt-0.5 text-[10px] font-bold text-emerald-700 flex-wrap">
                                   <span>{dish.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}</span>
                                   <span>•</span>
                                   <span>★ {dish.rating}</span>
@@ -976,7 +1165,7 @@ export const AiTripPlannerModal: React.FC = () => {
                                 </div>
                               </div>
                             </div>
-                            <span className="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 text-[10px] font-bold shrink-0 flex items-center gap-1">
+                            <span className="px-2 py-1 rounded-lg bg-emerald-50 text-[#064E3B] text-[10px] font-bold shrink-0 flex items-center gap-1">
                               <ChefHat className="w-3 h-3" />
                               <span>{tr(language, 'រូបមន្ត', 'Recipe', '食谱')}</span>
                             </span>
@@ -986,8 +1175,8 @@ export const AiTripPlannerModal: React.FC = () => {
                     </div>
 
                     {goalAdvisorResults.shops.length > 0 && (
-                      <div className="pt-2 border-t border-slate-200/80 dark:border-slate-700 space-y-1.5">
-                        <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                      <div className="pt-2 border-t border-slate-200/80 space-y-1.5">
+                        <div className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
                           <MapPin className="w-3.5 h-3.5 text-emerald-600" />
                           <span>
                             {tr(
@@ -1003,7 +1192,7 @@ export const AiTripPlannerModal: React.FC = () => {
                           return (
                             <div
                               key={shop.id}
-                              className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-2"
+                              className="p-2 rounded-xl bg-white border border-slate-200/80 flex items-center justify-between gap-2"
                             >
                               <div
                                 onClick={() => {
@@ -1012,7 +1201,7 @@ export const AiTripPlannerModal: React.FC = () => {
                                 }}
                                 className="min-w-0 flex-1 cursor-pointer"
                               >
-                                <div className="text-xs font-bold text-slate-900 dark:text-white truncate hover:text-emerald-600">
+                                <div className="text-xs font-bold text-slate-900 truncate hover:text-emerald-600">
                                   {sLoc.name}
                                 </div>
                                 <div className="text-[10px] text-slate-500 truncate">
@@ -1060,11 +1249,11 @@ export const AiTripPlannerModal: React.FC = () => {
             <>
               {isGenerating ? (
                 <div className="py-16 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-3xl bg-emerald-100 dark:bg-emerald-950/60 text-[#064E3B] dark:text-emerald-400 flex items-center justify-center mx-auto border border-emerald-200 dark:border-emerald-800 shadow-sm animate-bounce">
+                  <div className="w-16 h-16 rounded-3xl bg-emerald-100 text-[#064E3B] flex items-center justify-center mx-auto border border-emerald-200 shadow-sm animate-bounce">
                     <Compass className="w-8 h-8" />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-bold text-sm text-[#0F172A] dark:text-white animate-pulse">
+                    <h4 className="font-bold text-sm text-[#0F172A] animate-pulse">
                       {generationStepText}
                     </h4>
                     <p className="text-xs text-slate-500">
@@ -1085,7 +1274,7 @@ export const AiTripPlannerModal: React.FC = () => {
                   {/* 1. Destination Province (All 25 Cambodian Provinces & Capital City) */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                         <MapPin className="w-4 h-4 text-emerald-600" />
                         <span>
                           {tr(
@@ -1096,7 +1285,7 @@ export const AiTripPlannerModal: React.FC = () => {
                           )}
                         </span>
                       </label>
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 text-[10px] font-bold">
                         {tr(language, '25 ខេត្ត/រាជធានី', '25 Provinces', '25 个省市')}
                       </span>
                     </div>
@@ -1104,7 +1293,7 @@ export const AiTripPlannerModal: React.FC = () => {
                     <select
                       value={selectedProvince}
                       onChange={(e) => setSelectedProvince(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl border border-emerald-500/40 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full px-3 py-2.5 rounded-xl border border-emerald-500/40 bg-slate-50 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     >
                       {ALL_25_CAMBODIA_PROVINCES.map((prov, idx) => (
                         <option key={prov.id} value={prov.id}>
@@ -1118,23 +1307,23 @@ export const AiTripPlannerModal: React.FC = () => {
                       ))}
                     </select>
 
-                    <div className="p-2.5 rounded-xl bg-emerald-50/80 dark:bg-slate-800/90 border border-emerald-500/30 space-y-1 text-[11px]">
+                    <div className="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-500/30 space-y-1 text-[11px]">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <span className="font-bold text-[#064E3B] dark:text-emerald-400">
+                        <span className="font-bold text-[#064E3B]">
                           📍 {tr(language, selectedProvinceMeta.nameKh, selectedProvinceMeta.nameEn, selectedProvinceMeta.nameZh)}
                         </span>
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600 dark:text-slate-300">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white dark:bg-slate-700">
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white">
                             <Compass className="w-3 h-3 text-emerald-500" />
                             {selectedProvinceMeta.destCount} {tr(language, 'តំបន់ទេសចរណ៍', 'Spots', '个景点')}
                           </span>
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white dark:bg-slate-700">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white">
                             <Utensils className="w-3 h-3 text-amber-500" />
                             {selectedProvinceMeta.restCount} {tr(language, 'ហាងអាហារ', 'Shops', '家餐厅')}
                           </span>
                         </div>
                       </div>
-                      <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                      <p className="text-slate-600 leading-relaxed">
                         ✨{' '}
                         {tr(
                           language,
@@ -1148,7 +1337,7 @@ export const AiTripPlannerModal: React.FC = () => {
 
                   {/* 2. Duration Days (1 Day FREE Preview, 2-3 Days VIP) */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                       <Calendar className="w-4 h-4 text-emerald-600" />
                       <span>{tr(language, '២. ចំនួនថ្ងៃធ្វើដំណើរ៖', '2. Duration:', '2. 行程天数：')}</span>
                     </label>
@@ -1182,7 +1371,7 @@ export const AiTripPlannerModal: React.FC = () => {
                             className={`p-2.5 rounded-xl text-xs font-bold transition text-center flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
                               durationDays === d.days
                                 ? 'bg-[#064E3B] text-white shadow-xs'
-                                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                                : 'bg-white text-slate-700 border border-slate-200'
                             }`}
                           >
                             <span>{tr(language, d.labelKh, d.labelEn, d.labelZh)}</span>
@@ -1200,7 +1389,7 @@ export const AiTripPlannerModal: React.FC = () => {
 
                   {/* 3. Budget Level */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                       <DollarSign className="w-4 h-4 text-emerald-600" />
                       <span>{tr(language, '៣. កម្រិតថវិកា៖', '3. Budget Level:', '3. 预算档次：')}</span>
                     </label>
@@ -1217,7 +1406,7 @@ export const AiTripPlannerModal: React.FC = () => {
                           className={`p-2 rounded-xl text-center transition cursor-pointer ${
                             budgetLevel === b.id
                               ? 'bg-[#064E3B] text-white shadow-xs'
-                              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                              : 'bg-white text-slate-700 border border-slate-200'
                           }`}
                         >
                           <div className="text-xs font-bold">{tr(language, b.labelKh, b.labelEn, b.labelZh)}</div>
@@ -1228,7 +1417,7 @@ export const AiTripPlannerModal: React.FC = () => {
 
                   {/* 4. Companions */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                       <Users className="w-4 h-4 text-emerald-600" />
                       <span>{tr(language, '៤. អ្នករួមដំណើរជាមួយ៖', '4. Companions:', '4. 同行伙伴：')}</span>
                     </label>
@@ -1246,7 +1435,7 @@ export const AiTripPlannerModal: React.FC = () => {
                           className={`p-2 rounded-xl text-center transition cursor-pointer ${
                             companion === c.id
                               ? 'bg-[#064E3B] text-white shadow-xs'
-                              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                              : 'bg-white text-slate-700 border border-slate-200'
                           }`}
                         >
                           <div className="text-base">{c.icon}</div>
@@ -1270,14 +1459,14 @@ export const AiTripPlannerModal: React.FC = () => {
               ) : (
                 /* Result Screen */
                 <div className="space-y-4">
-                  <div className="p-4 rounded-3xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-slate-800 dark:to-slate-800/80 border border-emerald-200 dark:border-slate-700 shadow-xs space-y-2.5">
+                  <div className="p-4 rounded-3xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 shadow-xs space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="px-2.5 py-1 rounded-full bg-[#064E3B] text-white text-[11px] font-bold">
                         📍 {translateProvince(generatedPlan.provinceKh, language)}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                    <div className="flex items-center gap-2 text-xs text-slate-600">
                       <span>
                         📅 {generatedPlan.durationDays} {tr(language, 'ថ្ងៃ', 'Days', '天')}
                       </span>
@@ -1301,14 +1490,14 @@ export const AiTripPlannerModal: React.FC = () => {
                       </button>
                       <button
                         onClick={handleShare}
-                        className="p-2 rounded-xl bg-white dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 border border-slate-200 dark:border-slate-600 shadow-2xs transition cursor-pointer"
+                        className="p-2 rounded-xl bg-white text-[#064E3B] border border-slate-200 shadow-2xs transition cursor-pointer"
                         title={tr(language, 'ចែករំលែក', 'Share', '分享')}
                       >
                         <Share2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setGeneratedPlan(null)}
-                        className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 transition cursor-pointer"
+                        className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer"
                         title={tr(language, 'រៀបចំថ្មី', 'Reset', '重新规划')}
                       >
                         <RefreshCw className="w-4 h-4" />
@@ -1317,7 +1506,7 @@ export const AiTripPlannerModal: React.FC = () => {
                   </div>
 
                   {/* Day Tabs */}
-                  <div className="flex gap-1.5 border-b border-slate-200 dark:border-slate-700 pb-2">
+                  <div className="flex gap-1.5 border-b border-slate-200 pb-2">
                     {generatedPlan.days.map((day) => (
                       <button
                         key={day.dayNumber}
@@ -1325,7 +1514,7 @@ export const AiTripPlannerModal: React.FC = () => {
                         className={`flex-1 py-2 rounded-xl text-xs font-bold transition text-center cursor-pointer ${
                           activeDayTab === day.dayNumber
                             ? 'bg-[#064E3B] text-white shadow-xs'
-                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                            : 'bg-white text-slate-600 border border-slate-200'
                         }`}
                       >
                         {tr(language, `ថ្ងៃទី ${day.dayNumber}`, `Day ${day.dayNumber}`, `第 ${day.dayNumber} 天`)}
@@ -1354,7 +1543,7 @@ export const AiTripPlannerModal: React.FC = () => {
                           return (
                             <div
                               key={idx}
-                              className="p-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-2"
+                              className="p-3 bg-white rounded-2xl border border-slate-200/90 shadow-xs space-y-2"
                             >
                               <div className="flex items-center justify-between">
                                 <span className="px-2 py-0.5 rounded-lg bg-emerald-100 text-[#064E3B] text-[10px] font-bold">
@@ -1377,10 +1566,10 @@ export const AiTripPlannerModal: React.FC = () => {
                                   />
                                 )}
                                 <div className="flex-1 min-w-0">
-                                  <h5 className="font-bold text-xs text-[#0F172A] dark:text-white leading-snug">
+                                  <h5 className="font-bold text-xs text-[#0F172A] leading-snug">
                                     {actTitle}
                                   </h5>
-                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                                  <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
                                     {actDesc}
                                   </p>
                                 </div>

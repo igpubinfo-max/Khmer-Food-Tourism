@@ -15,15 +15,17 @@ import { DishTagIcon, IconDishCategory, IconHealthyLeaf } from './icons/Handcraf
 // The six tag cards (recipe-based estimates only: no health/medical claims)
 const HUB_TAGS: DishTagId[] = ['light', 'steamed_boiled', 'grilled', 'vegetable_rich', 'protein_rich', 'vegetarian_friendly'];
 
-const toneBg = (tone: 'green' | 'blue' | 'amber') =>
-  tone === 'green'
-    ? 'bg-emerald-50 border-emerald-200 text-emerald-900 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-200'
-    : tone === 'blue'
-    ? 'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950/40 dark:border-blue-800 dark:text-blue-200'
-    : 'bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-200';
-
-const toneRing = (tone: 'green' | 'blue' | 'amber') =>
-  tone === 'green' ? 'border-emerald-600 ring-2 ring-emerald-500/40' : tone === 'blue' ? 'border-blue-600 ring-2 ring-blue-500/40' : 'border-amber-600 ring-2 ring-amber-500/40';
+const TAG_GRADIENTS: Record<DishTagId, string> = {
+  light: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
+  steamed_boiled: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
+  grilled: 'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)',
+  vegetable_rich: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
+  protein_rich: 'linear-gradient(180deg, #F4B630 0%, #C67D0D 100%)',
+  vegetarian_friendly: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',
+  fried: 'linear-gradient(180deg, #EA580C 0%, #9A3412 100%)',
+  spicy: 'linear-gradient(180deg, #DC2626 0%, #991B1B 100%)',
+  fish_sauce_prahok: 'linear-gradient(180deg, #7C3AED 0%, #4C1D95 100%)',
+};
 
 interface Props {
   foods: FoodItem[];
@@ -95,34 +97,34 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
 
   if (!canUseVip) {
     return (
-      <section className="space-y-2.5">
+      <section className="space-y-3">
         <div className="flex items-center justify-between gap-2">
           <div>
-            <h3 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
+            <h3 className="font-moul text-sm text-[#064E3B] flex items-center gap-1.5">
               <IconHealthyLeaf className="w-4 h-4 shrink-0" />
               <span>{tr(language, 'មុខម្ហូបសុខភាព និងជម្រើសពិសេស', 'Healthy & Light Dishes', '健康轻食与特色菜品')}</span>
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-slate-600">
               {tr(language, 'មុខងារពិសេសសម្រាប់សមាជិក VIP ប៉ុណ្ណោះ', 'Exclusive feature for VIP members only', 'VIP 会员专属功能')}
             </p>
           </div>
-          <span className="px-2.5 py-1 rounded-full bg-slate-900 text-amber-300 text-xs font-extrabold inline-flex items-center gap-1 shadow-xs shrink-0 border border-amber-400/40">
-            <Lock className="w-3.5 h-3.5" />
+          <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-extrabold inline-flex items-center gap-1 shadow-2xs shrink-0 border border-amber-300">
+            <Lock className="w-3.5 h-3.5 text-amber-600" />
             <span>VIP</span>
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 via-[#064E3B] to-slate-900 text-white border-2 border-amber-400/50 shadow-lg space-y-3">
+        <div className="p-3.5 rounded-[22px] bg-white text-slate-900 border border-slate-200/90 shadow-[0_5px_18px_rgba(15,23,42,0.06)] space-y-3">
           <div className="flex items-start gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 shadow-md">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 text-slate-950 flex items-center justify-center shrink-0 shadow-xs">
               <Crown className="w-6 h-6" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-400/20 border border-amber-300/40 text-amber-300 text-[10px] font-extrabold mb-1">
-                <Lock className="w-3 h-3" />
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-[10px] font-extrabold mb-1">
+                <Lock className="w-3 h-3 text-amber-600" />
                 <span>{tr(language, 'សម្រាប់សមាជិក VIP', 'VIP Members Only', '仅限 VIP 会员')}</span>
               </div>
-              <h4 className="text-sm font-extrabold text-white leading-snug">
+              <h4 className="text-sm font-extrabold text-slate-900 leading-snug">
                 {tr(
                   language,
                   'ដោះសោម៉ឺនុយពិសេស & ជម្រើសម្ហូបសុខភាព',
@@ -130,7 +132,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
                   '解锁特色菜单与健康饮食指南'
                 )}
               </h4>
-              <p className="text-xs text-emerald-100/90 mt-1 leading-relaxed">
+              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                 {tr(
                   language,
                   'ដំឡើងទៅគណនី VIP ដើម្បីប្រើប្រាស់ស្លាកម្ហូបសុខភាពទាំង ៦ ប្រភេទ ឈុតម្ហូបសុខភាពប្រចាំថ្ងៃ ៣ ពេល និងមុខងារពិសេសទាំងអស់។',
@@ -141,20 +143,40 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-1.5 text-[11px] text-emerald-100">
+          <div className="grid grid-cols-2 min-[360px]:grid-cols-3 gap-2">
             {HUB_TAGS.map((id) => {
               const def = DISH_TAG_DEFS[id];
               return (
-                <div
+                <button
                   key={id}
-                  className="px-2.5 py-1.5 rounded-xl bg-white/10 border border-white/15 flex items-center justify-between gap-1.5"
+                  type="button"
+                  onClick={() => (onUpgradeVip || openUpgradeVipModal)()}
+                  style={{
+                    background: TAG_GRADIENTS[id],
+                    boxShadow: '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
+                  }}
+                  className="group relative min-h-[74px] rounded-[16px] py-2 px-1.5 flex flex-col items-center justify-center gap-1 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
                 >
-                  <span className="truncate font-bold inline-flex items-center gap-1.5">
-                    <DishTagIcon id={id} className="w-3.5 h-3.5 shrink-0" />
-                    <span className="truncate">{tr(language, def.labelKh, def.labelEn, def.labelZh)}</span>
+                  <span
+                    className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+                    style={{
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
+                    }}
+                  />
+                  <span className="absolute top-1.5 right-1.5 z-10 px-1.5 py-[1px] rounded-full bg-black/25 border border-white/30 text-[8px] font-extrabold text-white flex items-center gap-0.5">
+                    <Lock className="w-2 h-2 text-amber-300" />
+                    <span>VIP</span>
                   </span>
-                  <Lock className="w-3 h-3 text-amber-300 shrink-0" />
-                </div>
+                  <span className="relative z-10 flex items-center justify-center text-white drop-shadow-xs mt-1">
+                    <DishTagIcon id={id} className="w-6 h-6 shrink-0" />
+                  </span>
+                  <span
+                    className="relative z-10 font-khmer font-extrabold leading-[1.68] text-center break-words whitespace-normal w-full px-0.5 text-white"
+                    style={{ fontSize: 'clamp(9.5px, 2.7vw, 11.5px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
+                  >
+                    {tr(language, def.labelKh, def.labelEn, def.labelZh)}
+                  </span>
+                </button>
               );
             })}
           </div>
@@ -163,13 +185,13 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
             <button
               type="button"
               onClick={() => (onUpgradeVip || openUpgradeVipModal)()}
-              className="w-full min-h-[48px] rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:brightness-105 text-slate-950 text-sm font-extrabold flex items-center justify-center gap-2 shadow-md active:scale-[0.98] transition cursor-pointer"
+              className="w-full min-h-[48px] rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:brightness-105 text-slate-950 text-sm font-extrabold flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition cursor-pointer"
             >
               <Crown className="w-4 h-4" />
               <span>{tr(language, 'ដំឡើងទៅ VIP ឥឡូវនេះ', 'Upgrade to VIP Now', '立即升级 VIP')}</span>
             </button>
-            <div className="flex items-center justify-center gap-1.5 text-[11px] text-emerald-200/90">
-              <CheckCircle2 className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-emerald-700 font-semibold">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               <span>
                 {tr(
                   language,
@@ -199,50 +221,66 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
   return (
     <section className="space-y-2.5">
       <div>
-        <h3 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300 flex items-center gap-1.5">
+        <h3 className="font-moul text-sm text-[#064E3B] flex items-center gap-1.5">
           <IconHealthyLeaf className="w-4 h-4 shrink-0" />
           <span>{tr(language, 'ស្លាកម្ហូបសុខភាព', 'Healthy Dish Tags', '健康菜品标签')}</span>
         </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+        <p className="text-xs text-slate-500">
           {tr(language, 'ជ្រើសរើសម្ហូបតាមស្លាក — ប៉ាន់ស្មានពីរូបមន្តប៉ុណ្ណោះ', 'Pick dishes by tag — estimated from the recipe only', '按标签挑选菜肴——仅根据食谱估算')}
         </p>
       </div>
 
-      {/* 6 compact category cards in a responsive 2-column grid */}
-      <div className="grid grid-cols-2 gap-2">
-        {HUB_TAGS.map((id) => {
-          const def = DISH_TAG_DEFS[id];
-          const list = byTag[id] || [];
-          const isSel = id === selected;
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => handleSelectTag(id)}
-              aria-pressed={isSel}
-              className={`p-2.5 rounded-xl border text-left flex flex-col justify-between gap-1 active:scale-[0.98] transition motion-reduce:transition-none cursor-pointer ${isSel ? toneRing(def.tone) : ''} ${toneBg(def.tone)}`}
-            >
-              <span className="flex items-center justify-between gap-1.5">
-                <span className="flex items-center gap-1.5 min-w-0">
-                  <DishTagIcon id={id} className="w-4 h-4 shrink-0" />
-                  <span className="text-xs font-extrabold leading-tight truncate">{tr(language, def.labelKh, def.labelEn, def.labelZh)}</span>
+      {/* 6 Colorful, Distinct Gradient Category Buttons (Matching Reference Image 2) */}
+      <div className="rounded-[22px] bg-white p-2.5 sm:p-3 shadow-[0_5px_18px_rgba(15,23,42,0.06)] border border-slate-200/85">
+        <div className="grid grid-cols-2 min-[360px]:grid-cols-3 gap-2 sm:gap-2.5">
+          {HUB_TAGS.map((id) => {
+            const def = DISH_TAG_DEFS[id];
+            const list = byTag[id] || [];
+            const isSel = id === selected;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => handleSelectTag(id)}
+                aria-pressed={isSel}
+                style={{
+                  background: TAG_GRADIENTS[id],
+                  boxShadow: isSel
+                    ? '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)'
+                    : '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
+                }}
+                className="group relative min-h-[76px] rounded-[16px] py-2 px-1.5 flex flex-col items-center justify-center gap-1 text-white active:scale-[0.96] transition cursor-pointer overflow-hidden"
+              >
+                <span
+                  className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+                  style={{
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
+                  }}
+                />
+                <span className="absolute top-1.5 right-1.5 z-10 px-1.5 py-[1px] rounded-full bg-black/25 border border-white/30 text-[8.5px] font-extrabold text-white">
+                  {list.length}
                 </span>
-                <span className="px-1.5 py-0.5 rounded-full bg-white/80 dark:bg-slate-900/70 text-[10px] font-extrabold shrink-0">
-                  {list.length} {tr(language, 'មុខ', 'dishes', '道')}
+                <span className="relative z-10 flex items-center justify-center text-white drop-shadow-xs mt-1">
+                  <DishTagIcon id={id} className="w-6 h-6 shrink-0" />
                 </span>
-              </span>
-              <span className="block text-[10px] leading-snug opacity-85 line-clamp-2">{tagBenefit(def, language)}</span>
-            </button>
-          );
-        })}
+                <span
+                  className="relative z-10 font-khmer font-extrabold leading-[1.68] text-center break-words whitespace-normal w-full px-0.5 text-white"
+                  style={{ fontSize: 'clamp(9.5px, 2.7vw, 11.5px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
+                >
+                  {tr(language, def.labelKh, def.labelEn, def.labelZh)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Inline recommended dishes */}
-      <div ref={recommendedRef} className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2.5">
-        <h4 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5 flex-wrap">
-          <DishTagIcon id={selected} className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+      <div ref={recommendedRef} className="p-3 rounded-2xl bg-white border border-slate-200 space-y-2.5">
+        <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-1.5 flex-wrap">
+          <DishTagIcon id={selected} className="w-4 h-4 shrink-0 text-emerald-600" />
           <span>{tr(language, 'ម្ហូបណែនាំក្នុងប្រភេទនេះ', 'Recommended Dishes in This Category', '本分类推荐菜品')}</span>
-          <span className="font-semibold text-slate-500 dark:text-slate-400"> · {tr(language, selDef.labelKh, selDef.labelEn, selDef.labelZh)}</span>
+          <span className="font-semibold text-slate-500"> · {tr(language, selDef.labelKh, selDef.labelEn, selDef.labelZh)}</span>
         </h4>
         {top.length === 0 && (
           <p className="text-xs text-slate-500">{tr(language, 'មិនទាន់មានម្ហូបក្នុងប្រភេទនេះ', 'No dishes in this category yet', '该分类暂无菜品')}</p>
@@ -253,16 +291,16 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
               key={f.id}
               type="button"
               onClick={() => onOpenFood(f)}
-              className="w-full flex items-center gap-3 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 text-left active:scale-[0.98] transition motion-reduce:transition-none cursor-pointer"
+              className="w-full flex items-center gap-3 p-2 rounded-xl bg-slate-50 border border-slate-200 text-left active:scale-[0.98] transition motion-reduce:transition-none cursor-pointer"
             >
               <img src={resolveFoodPhotoUrl(f.photoUrl, f.photoUpdatedAt, 320, f.id)} onError={(e) => handleFoodImageError(e, f.id, f.photoUrl)} alt={name(f)} loading="lazy" decoding="async" className="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-200" />
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-bold text-slate-900 dark:text-white leading-snug line-clamp-2">{name(f)}</span>
+                <span className="block text-sm font-bold text-slate-900 leading-snug line-clamp-2">{name(f)}</span>
                 <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-extrabold">
                   <Utensils className="w-3 h-3 shrink-0" />
                   <span>{f.calories ?? '—'} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}</span>
                 </span>
-                <span className="block mt-0.5 text-xs leading-snug text-slate-500 dark:text-slate-400 line-clamp-2">{tagCookingTip(selDef, language)}</span>
+                <span className="block mt-0.5 text-xs leading-snug text-slate-500 line-clamp-2">{tagCookingTip(selDef, language)}</span>
               </span>
               <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
             </button>
@@ -286,8 +324,8 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
       </div>
 
       {/* Daily balanced 3-meal idea */}
-      <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-50 to-emerald-50 dark:from-slate-800 dark:to-slate-800 border border-amber-200 dark:border-slate-700 space-y-2.5">
-        <h4 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+      <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-50 to-emerald-50 border border-amber-200 space-y-2.5">
+        <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
           <IconDishCategory className="w-4 h-4 shrink-0" />
           <span>{tr(language, 'ឈុតម្ហូបសុខភាពប្រចាំថ្ងៃ ៣ ពេល', 'Daily Balanced 3-Meal Idea', '每日均衡三餐搭配')}</span>
         </h4>
@@ -298,16 +336,16 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
               type="button"
               disabled={!m.food}
               onClick={() => m.food && onOpenFood(m.food)}
-              className="rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 p-1.5 text-center cursor-pointer active:scale-[0.97] disabled:opacity-50"
+              className="rounded-xl bg-white border border-slate-200 p-1.5 text-center cursor-pointer active:scale-[0.97] disabled:opacity-50"
             >
-              <span className="inline-flex items-center justify-center gap-1 text-xs font-extrabold text-slate-600 dark:text-slate-300">
+              <span className="inline-flex items-center justify-center gap-1 text-xs font-extrabold text-slate-600">
                 {m.icon}
                 <span>{m.label}</span>
               </span>
               {m.food ? (
                 <>
                   <img src={resolveFoodPhotoUrl(m.food.photoUrl, m.food.photoUpdatedAt, 320, m.food.id)} onError={(e) => handleFoodImageError(e, m.food!.id, m.food!.photoUrl)} alt={name(m.food)} loading="lazy" decoding="async" className="mt-1 w-full aspect-square rounded-lg object-cover bg-slate-200" />
-                  <span className="block mt-1 text-xs font-bold text-slate-900 dark:text-white leading-tight line-clamp-2 min-h-[30px]">{name(m.food)}</span>
+                  <span className="block mt-1 text-xs font-bold text-slate-900 leading-tight line-clamp-2 min-h-[30px]">{name(m.food)}</span>
                   <span className="inline-flex items-center justify-center gap-0.5 text-[11px] font-extrabold text-orange-600">
                     <Utensils className="w-3 h-3 shrink-0" />
                     <span>{m.food.calories} {tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}</span>
@@ -320,7 +358,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
           ))}
         </div>
         <div className="flex items-center justify-between gap-2">
-          <span className="text-xs font-extrabold text-emerald-800 dark:text-emerald-300">
+          <span className="text-xs font-extrabold text-emerald-800">
             {tr(language, `សរុបប្រហែល ${plan.totalKcal} គីឡូកាឡូរី`, `Total ≈ ${plan.totalKcal} kcal`, `合计约 ${plan.totalKcal} 千卡`)}
           </span>
           <button

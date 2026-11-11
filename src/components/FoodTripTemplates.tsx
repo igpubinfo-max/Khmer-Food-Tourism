@@ -239,24 +239,24 @@ export const FoodTripTemplates: React.FC = () => {
   const open = openId ? allTemplates.find((t) => t.id === openId) : null;
 
   return (
-    <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-50 to-emerald-50 dark:from-slate-800 dark:to-slate-800 border-2 border-amber-300/70 space-y-3 font-khmer">
+    <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-50 to-emerald-50 border-2 border-amber-300/70 space-y-3 font-khmer">
       {!open ? (
         <>
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div>
-              <h4 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300">
+              <h4 className="font-moul text-sm text-[#064E3B]">
                 🗺️ {tr(language, 'ដំណើរម្ហូប ១ ថ្ងៃ (រួចរាល់)', 'Ready-made 1-Day Food Trips', '现成一日美食行程')}
               </h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400">
+              <p className="text-xs text-slate-600">
                 {tr(language, 'កាលវិភាគក្នុងតំបន់ភូមិសាស្ត្រតែមួយ មិនលោតខេត្តឆ្ងាយឡើយ', 'Single-area geographic consistency for consecutive meals', '同一地理区域内一日行程规划，路线连贯无跨省跳跃')}
               </p>
             </div>
           </div>
 
           {/* Starting Area / Province Selector with GPS Button (All 25 Cambodian Provinces & Cities) */}
-          <div className="p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-emerald-200 dark:border-slate-700 space-y-1.5 shadow-2xs">
+          <div className="p-2.5 bg-white rounded-xl border border-emerald-200 space-y-1.5 shadow-2xs">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+              <span className="font-bold text-slate-800 flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-emerald-600" />
                 <span>{tr(language, 'ជ្រើសរើសតំបន់ចាប់ផ្តើម (២៥ ខេត្ត/រាជធានី)៖', 'Starting Area / Province (All 25):', '选择出发区域 / 省份（全柬 25 省市）：')}</span>
               </span>
@@ -264,7 +264,7 @@ export const FoodTripTemplates: React.FC = () => {
                 type="button"
                 onClick={handleGpsDetect}
                 disabled={isLocatingGps}
-                className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:underline cursor-pointer disabled:opacity-50"
               >
                 <LocateFixed className="w-3 h-3 text-emerald-600" />
                 <span>{isLocatingGps ? tr(language, 'កំពុងចាប់ GPS...', 'Locating...', '正在定位...') : tr(language, '📍 ចាប់ GPS ខ្ញុំ', '📍 Auto GPS', '📍 GPS 自动定位')}</span>
@@ -275,7 +275,7 @@ export const FoodTripTemplates: React.FC = () => {
               <select
                 value={selectedArea}
                 onChange={(e) => setSelectedArea(e.target.value)}
-                className="w-full text-xs font-bold font-khmer px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full text-xs font-bold font-khmer px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500/20"
               >
                 {ALL_25_FOOD_TRIP_PROVINCE_OPTIONS.map((opt) => (
                   <option key={opt.id} value={opt.id}>
@@ -293,17 +293,17 @@ export const FoodTripTemplates: React.FC = () => {
                 key={t.id}
                 type="button"
                 onClick={() => setOpenId(t.id)}
-                className="w-full min-h-[56px] flex items-center gap-3 p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-left active:scale-[0.98] transition cursor-pointer hover:border-emerald-500 shadow-2xs"
+                className="w-full min-h-[56px] flex items-center gap-3 p-2.5 rounded-xl bg-white border border-slate-200 text-left active:scale-[0.98] transition cursor-pointer hover:border-emerald-500 shadow-2xs"
               >
                 <span className="text-2xl shrink-0">{t.emoji}</span>
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center justify-between gap-1">
-                    <span className="block text-sm font-bold text-slate-900 dark:text-white leading-snug truncate">{tplTitle(t)}</span>
-                    <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold shrink-0">
+                    <span className="block text-sm font-bold text-slate-900 leading-snug truncate">{tplTitle(t)}</span>
+                    <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold shrink-0">
                       📍 {tplProvince(t)}
                     </span>
                   </span>
-                  <span className="block text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">{tplSub(t)}</span>
+                  <span className="block text-xs text-slate-500 line-clamp-1 mt-0.5">{tplSub(t)}</span>
                 </span>
               </button>
             ))}
@@ -315,19 +315,19 @@ export const FoodTripTemplates: React.FC = () => {
             <button
               type="button"
               onClick={() => setOpenId(null)}
-              className="w-11 h-11 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 cursor-pointer"
+              className="w-11 h-11 rounded-full bg-white border border-slate-200 flex items-center justify-center shrink-0 cursor-pointer"
               aria-label={tr(language, 'ត្រឡប់', 'Back', '返回')}
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h4 className="font-bold text-sm text-slate-900 dark:text-white leading-snug">{open.emoji} {tplTitle(open)}</h4>
-                <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
+                <h4 className="font-bold text-sm text-slate-900 leading-snug">{open.emoji} {tplTitle(open)}</h4>
+                <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold">
                   📍 {tplProvince(open)}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{tplSub(open)}</p>
+              <p className="text-xs text-slate-500">{tplSub(open)}</p>
             </div>
             <button
               type="button"
@@ -345,15 +345,15 @@ export const FoodTripTemplates: React.FC = () => {
             const lbl = SLOT_LABELS[slot.slot];
             return (
               <div key={slot.slot} className="space-y-1.5">
-                <p className="text-sm font-extrabold text-[#064E3B] dark:text-emerald-300">
+                <p className="text-sm font-extrabold text-[#064E3B]">
                   {lbl.emoji} {tr(language, lbl.kh, lbl.en, lbl.zh)}
                 </p>
                 {stops.map((st) => (
-                  <div key={`${slot.slot}-${st.key}`} className="flex items-center gap-2.5 p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                  <div key={`${slot.slot}-${st.key}`} className="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-slate-200">
                     {st.photoUrl && <img src={st.photoUrl} alt={st.name} loading="lazy" className="w-12 h-12 rounded-lg object-cover shrink-0 bg-slate-100" />}
                     <button type="button" onClick={st.onOpen} className="min-w-0 flex-1 text-left cursor-pointer">
-                      <span className="block text-sm font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug">{st.name}</span>
-                      <span className="text-[11px] text-slate-500 dark:text-slate-400">{typeEmoji(st.type)} {typeLabel(st.type)}</span>
+                      <span className="block text-sm font-bold text-slate-900 line-clamp-2 leading-snug">{st.name}</span>
+                      <span className="text-[11px] text-slate-500">{typeEmoji(st.type)} {typeLabel(st.type)}</span>
                     </button>
                     <button
                       type="button"

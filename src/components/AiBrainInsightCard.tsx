@@ -17,12 +17,12 @@ interface Props {
 }
 
 const MODE_STYLE: Record<AiBrainInsight['mode'], string> = {
-  bridge: 'from-emerald-50 via-white to-teal-50 dark:from-emerald-950/40 dark:via-slate-800 dark:to-teal-950/30 border-emerald-300/70 dark:border-emerald-700/50',
-  mood: 'from-sky-50 via-white to-emerald-50 dark:from-sky-950/30 dark:via-slate-800 dark:to-emerald-950/30 border-sky-300/70 dark:border-sky-700/50',
-  discover: 'from-violet-50 via-white to-amber-50 dark:from-violet-950/30 dark:via-slate-800 dark:to-amber-950/20 border-violet-300/70 dark:border-violet-700/50',
-  drink: 'from-amber-50 via-orange-50 to-rose-50 dark:from-amber-950/40 dark:via-slate-800 dark:to-rose-950/30 border-amber-400/70 dark:border-amber-600/50',
-  blocked: 'from-rose-50 via-white to-slate-50 dark:from-rose-950/30 dark:via-slate-800 dark:to-slate-900 border-rose-300/70 dark:border-rose-800/50',
-  scope_notice: 'from-amber-50 via-white to-emerald-50 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-950/30 border-amber-400/70 dark:border-amber-600/50',
+  bridge: 'from-emerald-50 via-white to-teal-50 border-emerald-300/70',
+  mood: 'from-sky-50 via-white to-emerald-50 border-sky-300/70',
+  discover: 'from-violet-50 via-white to-amber-50 border-violet-300/70',
+  drink: 'from-amber-50 via-orange-50 to-rose-50 border-amber-400/70',
+  blocked: 'from-rose-50 via-white to-slate-50 border-rose-300/70',
+  scope_notice: 'from-amber-50 via-white to-emerald-50 border-amber-400/70',
 };
 
 const ALLERGEN_ICON: Record<AllergenId, string> = {
@@ -55,7 +55,7 @@ export const AiBrainInsightCard: React.FC<Props> = ({
     >
       {/* Headline */}
       <div className="flex items-start gap-3">
-        <div className="w-11 h-11 rounded-2xl bg-white/90 dark:bg-slate-700/80 border border-black/5 dark:border-white/10 flex items-center justify-center shrink-0 shadow-xs">
+        <div className="w-11 h-11 rounded-2xl bg-white/90 border border-black/5 flex items-center justify-center shrink-0 shadow-xs">
           {insight.mode === 'drink' ? (
             <IconBeveragePairing className="w-6 h-6" />
           ) : insight.mode === 'blocked' ? (
@@ -65,16 +65,16 @@ export const AiBrainInsightCard: React.FC<Props> = ({
           )}
         </div>
         <div className="min-w-0">
-          <h4 className="text-sm font-extrabold text-slate-900 dark:text-white leading-relaxed">{insight.headline}</h4>
+          <h4 className="text-sm font-extrabold text-slate-900 leading-relaxed">{insight.headline}</h4>
           {insight.explanation && (
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mt-0.5">{insight.explanation}</p>
+            <p className="text-xs text-slate-600 leading-relaxed mt-0.5">{insight.explanation}</p>
           )}
         </div>
       </div>
 
       {/* Safety note */}
       {insight.safetyNote && (
-        <div className="flex items-start gap-2 p-2.5 rounded-xl bg-amber-100/80 dark:bg-amber-950/40 border border-amber-300/70 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
+        <div className="flex items-start gap-2 p-2.5 rounded-xl bg-amber-100/80 border border-amber-300/70 text-xs text-amber-900 leading-relaxed">
           <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{insight.safetyNote}</span>
         </div>
@@ -115,7 +115,7 @@ export const AiBrainInsightCard: React.FC<Props> = ({
               <div
                 key={food.id}
                 onClick={() => onPickFood?.(food)}
-                className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 hover:border-emerald-500 flex items-start gap-2.5 cursor-pointer transition shadow-2xs"
+                className="p-2.5 rounded-xl bg-white border border-slate-200/90 hover:border-emerald-500 flex items-start gap-2.5 cursor-pointer transition shadow-2xs"
               >
                 <img
                   src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 240, food.id)}
@@ -128,8 +128,8 @@ export const AiBrainInsightCard: React.FC<Props> = ({
                   className="w-14 h-14 rounded-xl object-cover shrink-0 bg-slate-200 select-none"
                 />
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-extrabold text-slate-900 dark:text-white leading-snug">{loc.name}</div>
-                  <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed mt-0.5 flex items-start gap-1">
+                  <div className="text-sm font-extrabold text-slate-900 leading-snug">{loc.name}</div>
+                  <p className="text-xs text-emerald-800 leading-relaxed mt-0.5 flex items-start gap-1">
                     <IconCravingSpark className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-500" />
                     <span>{reason}</span>
                   </p>
@@ -138,7 +138,7 @@ export const AiBrainInsightCard: React.FC<Props> = ({
                       {allergens.map((a) => (
                         <span
                           key={a}
-                          className="px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50 text-[11px] font-bold inline-flex items-center gap-1"
+                          className="px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 text-[11px] font-bold inline-flex items-center gap-1"
                         >
                           <ShieldAlert className="w-3 h-3 shrink-0" />
                           <span>{allergenLabel(a, language)}</span>
@@ -147,7 +147,7 @@ export const AiBrainInsightCard: React.FC<Props> = ({
                     </div>
                   )}
                 </div>
-                <span className="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-slate-700 text-[#064E3B] dark:text-emerald-300 text-[11px] font-bold shrink-0 flex items-center gap-1">
+                <span className="px-2 py-1 rounded-lg bg-emerald-50 text-[#064E3B] text-[11px] font-bold shrink-0 flex items-center gap-1">
                   <ChefHat className="w-3 h-3" />
                   <span>{tr(language, 'រូបមន្ត', 'Recipe', '食谱')}</span>
                 </span>
@@ -155,7 +155,7 @@ export const AiBrainInsightCard: React.FC<Props> = ({
             );
           })}
           {hasAllergens && (
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed flex items-center gap-1">
+            <p className="text-[11px] text-slate-500 leading-relaxed flex items-center gap-1">
               <ShieldAlert className="w-3.5 h-3.5 shrink-0 text-amber-500" />
               <span>{allergyFootnote(language)}</span>
             </p>
@@ -165,12 +165,12 @@ export const AiBrainInsightCard: React.FC<Props> = ({
 
       {/* Surprise */}
       {insight.surprise && (
-        <div className="p-3 rounded-xl bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 dark:from-amber-950/40 dark:via-slate-800 dark:to-amber-950/30 border border-amber-300/70 dark:border-amber-700/50">
-          <div className="text-xs font-extrabold text-amber-800 dark:text-amber-300 mb-0.5 flex items-center gap-1">
+        <div className="p-3 rounded-xl bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border border-amber-300/70">
+          <div className="text-xs font-extrabold text-amber-800 mb-0.5 flex items-center gap-1">
             <Award className="w-3.5 h-3.5 shrink-0 text-amber-600" />
             <span>{insight.surprise.title}</span>
           </div>
-          <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">{insight.surprise.text}</p>
+          <p className="text-xs text-slate-700 leading-relaxed">{insight.surprise.text}</p>
         </div>
       )}
 
@@ -178,7 +178,7 @@ export const AiBrainInsightCard: React.FC<Props> = ({
       {insight.tips.length > 0 && (
         <ul className="space-y-1">
           {insight.tips.map((tip, i) => (
-            <li key={i} className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed flex items-start gap-1.5">
+            <li key={i} className="text-xs text-slate-600 leading-relaxed flex items-start gap-1.5">
               <IconCravingSpark className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-500" />
               <span>{tip}</span>
             </li>
@@ -187,7 +187,7 @@ export const AiBrainInsightCard: React.FC<Props> = ({
       )}
 
       {insight.drinkDisclaimer && (
-        <p className="text-[11px] font-bold text-amber-800 dark:text-amber-300 leading-relaxed flex items-start gap-1.5">
+        <p className="text-[11px] font-bold text-amber-800 leading-relaxed flex items-start gap-1.5">
           <IconBeveragePairing className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>{insight.drinkDisclaimer}</span>
         </p>
@@ -201,7 +201,7 @@ export const AiBrainInsightCard: React.FC<Props> = ({
               key={c.id}
               type="button"
               onClick={() => onChip(c.query)}
-              className="px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-300/80 dark:border-slate-600 text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-emerald-500 hover:text-emerald-700 transition cursor-pointer active:scale-95"
+              className="px-3 py-1.5 rounded-full bg-white border border-slate-300/80 text-xs font-bold text-slate-700 hover:border-emerald-500 hover:text-emerald-700 transition cursor-pointer active:scale-95"
             >
               {c.label}
             </button>

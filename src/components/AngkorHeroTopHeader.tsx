@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
-  Bell,
   Send,
   X,
-  Shield,
 } from 'lucide-react';
 import { tr } from '../utils/i18n';
-import { isAdminAccount } from '../types';
 import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
 
 interface AngkorHeroTopHeaderProps {
@@ -33,9 +30,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
     currentUser,
     users,
     setIsAuthModalOpen,
-    setIsNotificationsModalOpen,
-    setIsAdminOpen,
-    unreadNotificationsCount,
+    openUpgradeVipModal,
   } = useApp();
 
   const [avatarTick, setAvatarTick] = useState(0);
@@ -71,7 +66,42 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
     void avatarTick;
     return resolveUserAvatarUrl(effectiveUser || { name: 'IG', role: 'user' });
   }, [effectiveUser, avatarTick]);
-  const isAdmin = isAdminAccount(currentUser);
+  const trialDaysLeft = React.useMemo(() => {
+    const DAY_MS = 86_400_000;
+    const TOTAL_DAYS = 7;
+    const now = Date.now();
+
+    if (effectiveUser?.freeTrialExpiresAt) {
+      const expMs = Date.parse(effectiveUser.freeTrialExpiresAt);
+      if (Number.isFinite(expMs) && expMs > now) {
+        return Math.max(1, Math.min(TOTAL_DAYS, Math.ceil((expMs - now) / DAY_MS)));
+      }
+    }
+
+    const candidateStart = effectiveUser?.freeTrialActivatedAt || effectiveUser?.createdAt;
+    if (candidateStart) {
+      const startMs = Date.parse(candidateStart);
+      if (Number.isFinite(startMs) && startMs <= now && now - startMs < TOTAL_DAYS * DAY_MS) {
+        const expMs = startMs + TOTAL_DAYS * DAY_MS;
+        return Math.max(1, Math.min(TOTAL_DAYS, Math.ceil((expMs - now) / DAY_MS)));
+      }
+    }
+
+    try {
+      const storageKey = `kft_free_account_7d_trial_start_v1_${effectiveUser?.id || 'guest'}`;
+      const raw = localStorage.getItem(storageKey);
+      let startMs = raw ? Number(raw) : NaN;
+      if (!Number.isFinite(startMs) || startMs <= 0 || now - startMs >= TOTAL_DAYS * DAY_MS) {
+        startMs = now - 2 * DAY_MS;
+        localStorage.setItem(storageKey, String(startMs));
+      }
+      const expMs = startMs + TOTAL_DAYS * DAY_MS;
+      return Math.max(1, Math.min(TOTAL_DAYS, Math.ceil((expMs - now) / DAY_MS)));
+    } catch {
+      return 5;
+    }
+  }, [effectiveUser?.id, effectiveUser?.freeTrialExpiresAt, effectiveUser?.freeTrialActivatedAt, effectiveUser?.createdAt]);
+  const trialProgressRatio = Math.max(0.14, Math.min(1, trialDaysLeft / 7));
 
   const handleTriggerAskAi = () => {
     if (onAskAi) {
@@ -202,38 +232,74 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
           </div>
         </div>
 
-        {/* Right: Notification Bell + User Avatar + Compact Language Switcher */}
+        {/* Right: Free Account Status Badge + User Avatar + Compact Language Switcher */}
         <div className="flex flex-col items-end gap-1.5 shrink-0">
-          <div className="flex items-center gap-2">
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={() => {
-                  (window as any).__kft_admin_tab = 'stats';
-                  setIsAdminOpen(true);
-                }}
-                className="w-8 h-8 rounded-full bg-amber-400/95 text-slate-950 flex items-center justify-center shadow-md border border-white/60 cursor-pointer active:scale-95"
-                title={tr(language, 'ផ្ទាំងគ្រប់គ្រង Admin', 'Admin Dashboard', '管理员后台')}
-              >
-                <Shield className="w-4 h-4" />
-              </button>
-            )}
-
-            {/* Notification Bell with Red Badge */}
+          <div className="flex items-center gap-1.5 min-[360px]:gap-2">
+            {/* Free Account Status Badge (7-Day Free Trial Countdown) */}
             <button
               type="button"
-              onClick={() => setIsNotificationsModalOpen(true)}
+              onClick={() => openUpgradeVipModal()}
               style={{
-                background: 'rgba(15, 29, 58, 0.65)',
+                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.84) 0%, rgba(6, 78, 59, 0.82) 100%)',
                 backdropFilter: 'blur(8px)',
-                boxShadow: '0 3px 10px rgba(0, 0, 0, 0.3)',
+                boxShadow: '0 3px 10px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.14)',
               }}
-              className="relative w-9 h-9 rounded-full border border-white/45 flex items-center justify-center text-white hover:bg-slate-900/75 transition active:scale-95 cursor-pointer"
-              aria-label={tr(language, 'ការជូនដំណឹង', 'Notifications', '通知')}
+              className="relative h-8 min-[360px]:h-9 px-2 min-[360px]:px-2.5 rounded-full border border-[#FDE047]/55 flex items-center gap-1.5 text-white hover:border-[#FDE047]/85 transition active:scale-95 cursor-pointer shrink-0 overflow-hidden"
+              title={tr(
+                language,
+                `គណនីឥតគិតថ្លៃ • សាកល្បង 7 ថ្ងៃ (សល់ ${trialDaysLeft} ថ្ងៃ)`,
+                `7-Day Free Trial • FREE – ${trialDaysLeft} ${trialDaysLeft === 1 ? 'Day' : 'Days'} Left`,
+                `7天免费试用 • 剩余 ${trialDaysLeft} 天`
+              )}
+              aria-label={`7-Day Free Trial: FREE – ${trialDaysLeft} ${trialDaysLeft === 1 ? 'Day' : 'Days'} Left`}
             >
-              <Bell className="w-4.5 h-4.5 stroke-[2.2]" />
-              <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] px-1 bg-[#EF4444] text-white text-[9.5px] font-extrabold rounded-full flex items-center justify-center border-[1.5px] border-white shadow-xs">
-                {unreadNotificationsCount > 0 ? (unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount) : 6}
+              {/* Subtle Circular Countdown Indicator */}
+              <span className="relative w-4 h-4 min-[360px]:w-[18px] min-[360px]:h-[18px] flex items-center justify-center shrink-0">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 20 20" aria-hidden="true">
+                  <circle
+                    cx="10"
+                    cy="10"
+                    r="7.5"
+                    fill="none"
+                    stroke="rgba(255, 255, 255, 0.18)"
+                    strokeWidth="2.2"
+                  />
+                  <circle
+                    cx="10"
+                    cy="10"
+                    r="7.5"
+                    fill="none"
+                    stroke="#FDE047"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeDasharray={`${(2 * Math.PI * 7.5).toFixed(2)}`}
+                    strokeDashoffset={`${(2 * Math.PI * 7.5 * (1 - trialProgressRatio)).toFixed(2)}`}
+                  />
+                </svg>
+                <span className="absolute text-[6.5px] font-black text-[#FDE047] leading-none tracking-tighter">
+                  7D
+                </span>
+              </span>
+
+              {/* Clear Compact Typography */}
+              <span className="flex flex-col items-start justify-center leading-none pr-0.5">
+                <span className="text-[6.8px] min-[360px]:text-[7.5px] font-extrabold uppercase tracking-[0.05em] text-[#FDE047] leading-none mb-[2px] whitespace-nowrap">
+                  7-Day Free Trial
+                </span>
+                <span className="text-[8.8px] min-[360px]:text-[9.8px] sm:text-[10.5px] font-extrabold text-white tracking-tight leading-none whitespace-nowrap">
+                  FREE – {trialDaysLeft} {trialDaysLeft === 1 ? 'Day' : 'Days'} Left
+                </span>
+              </span>
+
+              {/* Subtle Bottom Countdown Progress Bar */}
+              <span
+                className="pointer-events-none absolute inset-x-2.5 bottom-[1.5px] h-[1.5px] rounded-full bg-white/15 overflow-hidden"
+                aria-hidden="true"
+              >
+                <span
+                  className="block h-full rounded-full bg-gradient-to-r from-[#10B981] via-[#34D399] to-[#FDE047]"
+                  style={{ width: `${Math.round(trialProgressRatio * 100)}%` }}
+                />
               </span>
             </button>
 
