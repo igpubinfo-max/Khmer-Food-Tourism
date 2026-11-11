@@ -587,13 +587,14 @@ export const NearMeModal: React.FC = () => {
     return cleaned;
   };
 
-  // 6 Colorful Glossy Main Categories matching Reference Image 2 (Home Screen 3x2 grid)
+  // 6 Premium 3D Gold-Framed Main Categories (3x2 grid)
   const mainCategoryButtons = [
     {
       id: 'all',
       type: 'restaurants' as const,
       label: tr(language, 'ហាងទាំងអស់', 'All Shops', '全部店铺'),
       count: nearbyRestaurants.length,
+      imageSrc: '/categories/shop_cat_all.png',
       gradient: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
       icon: <LayoutGrid className="w-5 h-5 text-white drop-shadow-xs" strokeWidth={2.2} />,
     },
@@ -601,6 +602,7 @@ export const NearMeModal: React.FC = () => {
       id: 'rice_khmer',
       type: 'restaurants' as const,
       label: tr(language, 'បាយ & ម្ហូបខ្មែរ', 'Rice & Khmer', '柬式简餐'),
+      imageSrc: '/categories/nearme_cat_rice_khmer.png',
       gradient: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
       icon: <Utensils className="w-5 h-5 text-white drop-shadow-xs" strokeWidth={2.2} />,
     },
@@ -608,6 +610,7 @@ export const NearMeModal: React.FC = () => {
       id: 'noodles',
       type: 'restaurants' as const,
       label: tr(language, 'គុយទាវ & មី', 'Noodles', '粉面汤品'),
+      imageSrc: '/categories/nearme_cat_noodles.png',
       gradient: 'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)',
       icon: <Soup className="w-5 h-5 text-white drop-shadow-xs" strokeWidth={2.2} />,
     },
@@ -615,6 +618,7 @@ export const NearMeModal: React.FC = () => {
       id: 'coffee',
       type: 'restaurants' as const,
       label: tr(language, 'កាហ្វេ & ភេសជ្ជៈ', 'Café & Drinks', '咖啡饮品'),
+      imageSrc: '/categories/shop_cat_drinks.png',
       gradient: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
       icon: <Coffee className="w-5 h-5 text-white drop-shadow-xs" strokeWidth={2.2} />,
     },
@@ -622,6 +626,7 @@ export const NearMeModal: React.FC = () => {
       id: 'bbq_seafood',
       type: 'restaurants' as const,
       label: tr(language, 'សាច់អាំង & ស៊ុប', 'BBQ & Hotpot', '烧烤海鲜'),
+      imageSrc: '/categories/nearme_cat_bbq.png',
       gradient: 'linear-gradient(180deg, #F4B630 0%, #C67D0D 100%)',
       icon: <Flame className="w-5 h-5 text-white drop-shadow-xs" strokeWidth={2.2} />,
     },
@@ -630,6 +635,7 @@ export const NearMeModal: React.FC = () => {
       type: 'destinations' as const,
       label: tr(language, 'កន្លែងជិតខ្ញុំ', 'Nearby Places', '附近景点'),
       count: nearbyDestinations.length,
+      imageSrc: '/categories/shop_cat_nearme.png',
       gradient: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',
       icon: <Compass className="w-5 h-5 text-white drop-shadow-xs" strokeWidth={2.2} />,
     },
@@ -804,9 +810,15 @@ export const NearMeModal: React.FC = () => {
             </div>
           )}
 
-          {/* Row 3: 6 Colorful Gradient Main Categories in a Clean White Card (Matching Reference Image 2) */}
-          <div className="rounded-[22px] bg-white p-2.5 shadow-[0_5px_18px_rgba(15,23,42,0.06)] border border-slate-200/85">
-            <div className="grid grid-cols-3 gap-2">
+          {/* Row 3: 6 Premium 3D Gold-Framed Main Category Buttons (3×2 Grid) + Clear White Text Below Each Button */}
+          <div
+            style={{
+              background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.84) 0%, rgba(15, 23, 42, 0.94) 100%)',
+              boxShadow: '0 10px 28px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.14)',
+            }}
+            className="rounded-[24px] p-2.5 sm:p-3.5 border border-amber-400/25"
+          >
+            <div className="grid grid-cols-3 gap-x-2 sm:gap-x-3 gap-y-2.5 sm:gap-y-3">
               {mainCategoryButtons.map((card) => {
                 const active =
                   card.type === 'destinations'
@@ -826,29 +838,52 @@ export const NearMeModal: React.FC = () => {
                       }
                     }}
                     aria-pressed={active}
-                    style={{
-                      background: card.gradient,
-                      boxShadow: active
-                        ? '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)'
-                        : '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
-                    }}
-                    className="group relative min-h-[68px] px-1.5 py-2 rounded-[16px] flex flex-col items-center justify-center gap-1 min-w-0 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
+                    className="group relative flex flex-col items-center justify-start min-w-0 p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
                   >
-                    <span
-                      className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+                    {/* 3D Gold-Bordered Button Graphic */}
+                    <div
+                      className="relative w-full aspect-[2.12/1] flex items-center justify-center transition-all duration-200 rounded-[14px]"
                       style={{
-                        background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
+                        filter: active
+                          ? 'drop-shadow(0 0 8px rgba(250, 204, 21, 0.72)) drop-shadow(0 5px 10px rgba(15, 23, 42, 0.35))'
+                          : 'drop-shadow(0 5px 10px rgba(15, 23, 42, 0.32))',
+                        transform: active ? 'translateY(-1.5px) scale(1.02)' : 'none',
                       }}
-                    />
-                    <span className="relative z-10 text-white drop-shadow-xs shrink-0">
-                      {card.icon}
-                    </span>
+                    >
+                      <img
+                        src={card.imageSrc}
+                        alt={card.label}
+                        loading="eager"
+                        decoding="async"
+                        draggable={false}
+                        className="w-full h-full object-contain pointer-events-none select-none"
+                      />
+                    </div>
+
+                    {/* Clear White Title Below Each Button */}
                     <span
-                      className="relative z-10 w-full font-khmer font-extrabold leading-[1.62] py-0.5 break-words whitespace-normal text-center text-white"
-                      style={{ fontSize: 'clamp(11.4px, 3.12vw, 13.8px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
+                      className="mt-1 px-0.5 font-khmer font-extrabold leading-[1.62] text-center break-words whitespace-normal w-full transition-colors duration-150"
+                      style={{
+                        fontSize: 'clamp(11px, 3.05vw, 13.4px)',
+                        color: active ? '#FDE047' : '#FFFFFF',
+                        textShadow: active
+                          ? '0 1px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(250, 204, 21, 0.45)'
+                          : '0 1.5px 3px rgba(0, 0, 0, 0.90), 0 0 2px rgba(0, 0, 0, 0.75)',
+                      }}
                     >
                       {card.label}
                     </span>
+
+                    {/* Subtle Gold Active Indicator Bar Below Title */}
+                    {active && (
+                      <span
+                        className="mt-0.5 h-1 w-7 rounded-full"
+                        style={{
+                          background: 'linear-gradient(90deg, #FDE047 0%, #F59E0B 100%)',
+                          boxShadow: '0 0 6px rgba(250, 204, 21, 0.8)',
+                        }}
+                      />
+                    )}
                   </button>
                 );
               })}

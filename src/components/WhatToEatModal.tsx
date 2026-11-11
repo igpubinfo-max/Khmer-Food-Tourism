@@ -2983,14 +2983,14 @@ export const WhatToEatModal: React.FC = () => {
               );
             })()}
 
-            {/* 6 Colorful Gradient Category Buttons (Time, Type, Taste, Health, Beverage Pairings, Shuffle) */}
-            <div className="rounded-[22px] bg-white p-2.5 sm:p-3 shadow-[0_5px_18px_rgba(15,23,42,0.06)] border border-slate-200/85 space-y-2.5">
-              <div className="grid grid-cols-3 gap-2">
+            {/* 6 Premium 3D Gold-Framed Category Buttons (Time, Category, Taste, Healthy, Beverage Pairings, New Picks) */}
+            <div className="rounded-[22px] bg-white p-2 sm:p-2.5 shadow-[0_5px_18px_rgba(15,23,42,0.06)] border border-slate-200/85 space-y-2.5">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5 items-stretch">
                 {[
                   {
                     id: 'time' as const,
                     testId: 'wte-tab-time',
-                    icon: Clock,
+                    imageSrc: '/categories/ai_cat_time.png',
                     label: tr(language, 'ពេលវេលា', 'Time', '时段'),
                     value:
                       mealSlotFilter !== 'auto' && activeSlot
@@ -2998,12 +2998,11 @@ export const WhatToEatModal: React.FC = () => {
                         : '',
                     active: mealSlotFilter !== 'auto',
                     vip: false,
-                    gradient: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
                   },
                   {
                     id: 'type' as const,
                     testId: 'wte-tab-type',
-                    icon: Utensils,
+                    imageSrc: '/categories/ai_cat_category.png',
                     label: tr(language, 'ប្រភេទម្ហូប', 'Category', '菜品分类'),
                     value:
                       categoryFilter !== 'all' && activeCategory
@@ -3011,22 +3010,20 @@ export const WhatToEatModal: React.FC = () => {
                         : '',
                     active: categoryFilter !== 'all',
                     vip: false,
-                    gradient: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
                   },
                   {
                     id: 'craving' as const,
                     testId: 'wte-tab-craving',
-                    icon: Compass,
+                    imageSrc: '/categories/ai_cat_taste.png',
                     label: tr(language, 'ចំណង់រសជាតិ', 'Taste', '口味偏好'),
                     value: QUICK_CRAVING_CHIPS.some((c) => c.queryKh === cravingQuery.trim() || c.queryEn.toLowerCase() === cravingQuery.trim().toLowerCase() || c.queryZh === cravingQuery.trim()) ? cravingQuery.trim() : '',
                     active: hasMatchedCravingQuery,
                     vip: false,
-                    gradient: 'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)',
                   },
                   {
                     id: 'health' as const,
                     testId: 'wte-tab-health',
-                    icon: Leaf,
+                    imageSrc: '/categories/ai_cat_healthy.png',
                     label: tr(language, 'ម្ហូបសុខភាព', 'Healthy', '健康饮食'),
                     value:
                       vipDietFilter !== 'none' && activeHealth
@@ -3034,101 +3031,144 @@ export const WhatToEatModal: React.FC = () => {
                         : '',
                     active: vipDietFilter !== 'none',
                     vip: true,
-                    gradient: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
                   },
                 ].map((g) => {
-                  const GroupIcon = g.icon;
                   const isOpen = openGroup === g.id;
+                  const isHighlighted = isOpen || g.active;
+                  const displayText = g.value || g.label;
+                  const isLongText = displayText.length >= 13;
                   return (
                     <button
                       key={g.id}
                       type="button"
                       data-testid={g.testId}
+                      aria-pressed={isHighlighted}
                       onClick={() => {
                         setShowVipAiUpgradeNotice(false);
                         setOpenGroup((cur) => (cur === g.id ? null : g.id));
                       }}
-                      style={{
-                        background: g.gradient,
-                        boxShadow: isOpen || g.active
-                          ? '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)'
-                          : '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
-                      }}
-                      className="group relative min-h-[68px] px-1.5 py-2 rounded-[16px] flex flex-col items-center justify-center gap-1 min-w-0 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
+                      className={`group relative w-full min-w-0 aspect-[5/3] bg-transparent border-0 p-0 transition-all duration-150 active:scale-95 cursor-pointer select-none flex items-center justify-center ${
+                        isHighlighted ? 'scale-[1.02] z-10' : ''
+                      }`}
                     >
-                      <span
-                        className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+                      <img
+                        src={g.imageSrc}
+                        alt={displayText}
+                        loading="eager"
+                        decoding="async"
                         style={{
-                          background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
+                          filter: isHighlighted
+                            ? 'drop-shadow(0 0 2px #0F172A) drop-shadow(0 5px 12px rgba(245, 158, 11, 0.48)) brightness(1.04)'
+                            : 'drop-shadow(0 4px 10px rgba(15, 23, 42, 0.18))',
                         }}
+                        className="w-full h-full object-fill bg-transparent select-none pointer-events-none group-hover:brightness-[1.03] transition-all duration-150"
                       />
-                      <GroupIcon className="relative z-10 w-5 h-5 text-white drop-shadow-xs shrink-0" strokeWidth={2.2} />
-                      <span
-                        className="relative z-10 w-full font-khmer font-extrabold leading-[1.62] py-0.5 break-words whitespace-normal text-center text-white"
-                        style={{ fontSize: 'clamp(11.4px, 3.12vw, 13.8px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
-                      >
-                        {g.value || g.label}
-                      </span>
+
+                      {/* Centered Bold White Label Inside Button Directly Below the 3D Illustration */}
+                      <div className="pointer-events-none absolute inset-x-[4.5%] top-[66%] bottom-[7%] flex items-center justify-center px-0.5 overflow-visible">
+                        <span
+                          className="font-khmer font-extrabold text-white text-center leading-[1.35] tracking-tight whitespace-nowrap max-w-full truncate"
+                          style={{
+                            fontSize: isLongText
+                              ? 'clamp(8.8px, 2.38vw, 12.8px)'
+                              : 'clamp(10.5px, 2.95vw, 15px)',
+                            textShadow:
+                              '0 1.5px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(0, 0, 0, 0.68)',
+                          }}
+                        >
+                          {displayText}
+                        </span>
+                      </div>
+
                       {g.vip && !canUseVip && (
-                        <Crown className="absolute top-1.5 right-1.5 z-10 w-3 h-3 text-amber-200 drop-shadow-xs" strokeWidth={2} />
+                        <Crown className="absolute top-1.5 right-2 z-10 w-3.5 h-3.5 text-amber-200 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] pointer-events-none" strokeWidth={2.2} />
                       )}
                     </button>
                   );
                 })}
 
-                {/* 5th Gradient Button: Beverage Pairings */}
-                <button
-                  type="button"
-                  onClick={handleOpenDrinkPairing}
-                  style={{
-                    background: 'linear-gradient(180deg, #F4B630 0%, #C67D0D 100%)',
-                    boxShadow: drinkMode
-                      ? '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)'
-                      : '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
-                  }}
-                  className="group relative min-h-[68px] px-1.5 py-2 rounded-[16px] flex flex-col items-center justify-center gap-1 min-w-0 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
-                >
-                  <span
-                    className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
-                    style={{
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
-                    }}
-                  />
-                  <span className="relative z-10 text-white drop-shadow-xs shrink-0">
-                    <IconBeveragePairing className="w-5 h-5" />
-                  </span>
-                  <span
-                    className="relative z-10 w-full font-khmer font-extrabold leading-[1.62] py-0.5 break-words whitespace-normal text-center text-white"
-                    style={{ fontSize: 'clamp(11.4px, 3.12vw, 13.8px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
-                  >
-                    {tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佳肴配饮')}
-                  </span>
-                </button>
+                {/* 5th Premium 3D Button: Beverage Pairings */}
+                {(() => {
+                  const drinkLabel = tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佳肴配饮');
+                  const isLongDrink = drinkLabel.length >= 13;
+                  return (
+                    <button
+                      type="button"
+                      aria-pressed={drinkMode}
+                      onClick={handleOpenDrinkPairing}
+                      className={`group relative w-full min-w-0 aspect-[5/3] bg-transparent border-0 p-0 transition-all duration-150 active:scale-95 cursor-pointer select-none flex items-center justify-center ${
+                        drinkMode ? 'scale-[1.02] z-10' : ''
+                      }`}
+                    >
+                      <img
+                        src="/categories/ai_cat_drinks.png"
+                        alt={drinkLabel}
+                        loading="eager"
+                        decoding="async"
+                        style={{
+                          filter: drinkMode
+                            ? 'drop-shadow(0 0 2px #0F172A) drop-shadow(0 5px 12px rgba(245, 158, 11, 0.48)) brightness(1.04)'
+                            : 'drop-shadow(0 4px 10px rgba(15, 23, 42, 0.18))',
+                        }}
+                        className="w-full h-full object-fill bg-transparent select-none pointer-events-none group-hover:brightness-[1.03] transition-all duration-150"
+                      />
+                      <div className="pointer-events-none absolute inset-x-[4.5%] top-[66%] bottom-[7%] flex items-center justify-center px-0.5 overflow-visible">
+                        <span
+                          className="font-khmer font-extrabold text-white text-center leading-[1.35] tracking-tight whitespace-nowrap max-w-full"
+                          style={{
+                            fontSize: isLongDrink
+                              ? 'clamp(8.8px, 2.38vw, 12.8px)'
+                              : 'clamp(10.5px, 2.95vw, 15px)',
+                            textShadow:
+                              '0 1.5px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(0, 0, 0, 0.68)',
+                          }}
+                        >
+                          {drinkLabel}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })()}
 
-                {/* 6th Gradient Button: Shuffle / New AI Picks */}
-                <button
-                  type="button"
-                  onClick={handleShowAnother}
-                  style={{
-                    background: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',
-                    boxShadow: '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
-                  }}
-                  className="group relative min-h-[68px] px-1.5 py-2 rounded-[16px] flex flex-col items-center justify-center gap-1 min-w-0 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
-                >
-                  <span
-                    className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
-                    style={{
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
-                    }}
-                  />
-                  <Shuffle className={`relative z-10 w-5 h-5 text-white drop-shadow-xs shrink-0 ${isSpinning ? 'animate-spin' : ''}`} strokeWidth={2.2} />
-                  <span
-                    className="relative z-10 w-full font-khmer font-extrabold leading-[1.62] py-0.5 break-words whitespace-normal text-center text-white"
-                    style={{ fontSize: 'clamp(11.4px, 3.12vw, 13.8px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
-                  >
-                    {tr(language, 'ប្តូរមុខម្ហូបថ្មី', 'New Picks', '换一批推荐')}
-                  </span>
-                </button>
+                {/* 6th Premium 3D Button: New Picks / Shuffle */}
+                {(() => {
+                  const newPicksLabel = tr(language, 'ប្តូរមុខម្ហូបថ្មី', 'New Picks', '换一批推荐');
+                  const isLongNewPicks = newPicksLabel.length >= 13;
+                  return (
+                    <button
+                      type="button"
+                      onClick={handleShowAnother}
+                      className="group relative w-full min-w-0 aspect-[5/3] bg-transparent border-0 p-0 transition-all duration-150 active:scale-95 cursor-pointer select-none flex items-center justify-center"
+                    >
+                      <img
+                        src="/categories/ai_cat_new_picks.png"
+                        alt={newPicksLabel}
+                        loading="eager"
+                        decoding="async"
+                        style={{
+                          filter: 'drop-shadow(0 4px 10px rgba(15, 23, 42, 0.18))',
+                        }}
+                        className={`w-full h-full object-fill bg-transparent select-none pointer-events-none group-hover:brightness-[1.03] transition-all duration-150 ${
+                          isSpinning ? 'brightness-110 scale-[0.98]' : ''
+                        }`}
+                      />
+                      <div className="pointer-events-none absolute inset-x-[4.5%] top-[66%] bottom-[7%] flex items-center justify-center px-0.5 overflow-visible">
+                        <span
+                          className="font-khmer font-extrabold text-white text-center leading-[1.35] tracking-tight whitespace-nowrap max-w-full"
+                          style={{
+                            fontSize: isLongNewPicks
+                              ? 'clamp(8.8px, 2.38vw, 12.8px)'
+                              : 'clamp(10.5px, 2.95vw, 15px)',
+                            textShadow:
+                              '0 1.5px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(0, 0, 0, 0.68)',
+                          }}
+                        >
+                          {newPicksLabel}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })()}
               </div>
 
               {(mealSlotFilter !== 'auto' || categoryFilter !== 'all' || cravingQuery.trim() || vipDietFilter !== 'none') && (

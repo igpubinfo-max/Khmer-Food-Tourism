@@ -286,7 +286,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
               boxShadow:
                 '0 0 0 1px rgba(245, 197, 66, 0.45), 0 4px 14px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.16)',
             }}
-            className="w-[60%] mr-auto min-w-0 h-[46px] rounded-full px-2 flex items-center gap-1.5 border border-[#F5C542]/85"
+            className="w-full min-w-0 h-[46px] rounded-full px-2 flex items-center gap-1.5 border border-[#F5C542]/85"
           >
             {/* Left Glowing Gold Circle Camera Button (Scaled +20% to 34px) */}
             <button

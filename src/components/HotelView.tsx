@@ -969,7 +969,7 @@ export const HotelView: React.FC = () => {
         </div>
 
         {/* Row 1: Essential White Pill Search Bar + Inline GPS Near Me Button (Compact ~60% Width Aligned Left) */}
-        <div className="w-[60%] mr-auto flex items-center gap-2 min-w-0">
+        <div className="w-full flex items-center gap-2 min-w-0">
           <div
             style={{
               background: 'rgba(255, 255, 255, 0.96)',

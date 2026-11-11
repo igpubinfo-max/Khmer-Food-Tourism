@@ -357,7 +357,7 @@ export const FoodView: React.FC = () => {
         </div>
 
         {/* 2. Main Search Bar – Compact Left-Aligned (~60% Width, Shrunk 40% from Right to Left) + Separate Green Filter Button */}
-        <div className="w-[60%] mr-auto flex items-center gap-1.5 min-[360px]:gap-2 min-w-0">
+        <div className="w-full flex items-center gap-1.5 min-[360px]:gap-2 min-w-0">
           <div
             style={{
               background: 'rgba(255, 255, 255, 0.92)',

@@ -412,6 +412,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
   const categoryCards: Array<{
     id: VipAiTasteId;
     label: string;
+    imageSrc: string;
     gradient: string;
     shadow: string;
     activeRing: string;
@@ -420,6 +421,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
     {
       id: 'all',
       label: tr(language, 'គ្រប់មុខម្ហូប', 'All Dishes', '全部名菜'),
+      imageSrc: '/categories/prov_cat_all.png',
       gradient: 'linear-gradient(180deg, #FB923C 0%, #F97316 50%, #EA580C 100%)',
       shadow: '0 6px 14px rgba(234, 88, 12, 0.28), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
       activeRing: '0 8px 18px rgba(234, 88, 12, 0.42), 0 0 0 2.5px #16A34A, inset 0 1.5px 1px rgba(255, 255, 255, 0.85)',
@@ -428,6 +430,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
     {
       id: 'soup_kroeung',
       label: tr(language, 'សម្ល & ទឹកគ្រឿង', 'Soups & Kroeung', '浓汤与鱼酱'),
+      imageSrc: '/categories/prov_cat_soup.png',
       gradient: 'linear-gradient(180deg, #22C55E 0%, #16A34A 50%, #15803D 100%)',
       shadow: '0 6px 14px rgba(21, 128, 61, 0.28), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
       activeRing: '0 8px 18px rgba(21, 128, 61, 0.42), 0 0 0 2.5px #F59E0B, inset 0 1.5px 1px rgba(255, 255, 255, 0.85)',
@@ -436,6 +439,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
     {
       id: 'grill_seafood',
       label: tr(language, 'អាំង ឆា & សមុទ្រ', 'Grills & Seafood', '烧烤与海鲜'),
+      imageSrc: '/categories/prov_cat_grill.png',
       gradient: 'linear-gradient(180deg, #F472B6 0%, #EC4899 50%, #DB2777 100%)',
       shadow: '0 6px 14px rgba(219, 39, 119, 0.28), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
       activeRing: '0 8px 18px rgba(219, 39, 119, 0.42), 0 0 0 2.5px #16A34A, inset 0 1.5px 1px rgba(255, 255, 255, 0.85)',
@@ -444,6 +448,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
     {
       id: 'street_dessert',
       label: tr(language, 'គុយទាវ & បង្អែម', 'Noodles & Sweets', '汤粉与甜品'),
+      imageSrc: '/categories/prov_cat_noodles.png',
       gradient: 'linear-gradient(180deg, #60A5FA 0%, #3B82F6 50%, #2563EB 100%)',
       shadow: '0 6px 14px rgba(37, 99, 235, 0.28), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
       activeRing: '0 8px 18px rgba(37, 99, 235, 0.42), 0 0 0 2.5px #16A34A, inset 0 1.5px 1px rgba(255, 255, 255, 0.85)',
@@ -557,40 +562,73 @@ export const DailyDiscoveriesModal: React.FC = () => {
             </button>
           </div>
 
-          {/* Row 2: 4 Colorful Glossy Category Buttons (Matching Reference Image 2) */}
-          <div className="grid grid-cols-2 min-[340px]:grid-cols-4 gap-1.5 sm:gap-2.5">
-            {categoryCards.map((card) => {
-              const active = vipTasteProfile === card.id;
-              return (
-                <button
-                  key={card.id}
-                  type="button"
-                  onClick={() => setVipTasteProfile(card.id)}
-                  aria-pressed={active}
-                  style={{
-                    background: card.gradient,
-                    boxShadow: active ? card.activeRing : card.shadow,
-                  }}
-                  className={`relative min-h-[64px] sm:min-h-[70px] py-1.5 px-1 rounded-[18px] flex flex-col items-center justify-center gap-1 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
-                    active ? 'border-white' : 'border-white/50 opacity-95 hover:opacity-100'
-                  }`}
-                >
-                  <span
-                    className="pointer-events-none absolute -top-4 -left-4 w-12 h-10 rounded-full opacity-45"
-                    style={{
-                      background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)',
-                    }}
-                  />
-                  {card.icon}
-                  <span
-                    className="font-khmer font-extrabold leading-[1.65] py-0.5 text-center break-words whitespace-normal max-w-full"
-                    style={{ fontSize: 'clamp(11px, 3vw, 13.8px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
+          {/* Row 2: 4 Premium 3D Gold-Framed Category Buttons + Clear White Text Below Each Button */}
+          <div
+            style={{
+              background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.84) 0%, rgba(15, 23, 42, 0.94) 100%)',
+              boxShadow: '0 10px 28px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.14)',
+            }}
+            className="rounded-[22px] p-2 sm:p-3 border border-amber-400/25"
+          >
+            <div className="grid grid-cols-2 min-[340px]:grid-cols-4 gap-2 sm:gap-3">
+              {categoryCards.map((card) => {
+                const active = vipTasteProfile === card.id;
+                return (
+                  <button
+                    key={card.id}
+                    type="button"
+                    onClick={() => setVipTasteProfile(card.id)}
+                    aria-pressed={active}
+                    className="group relative flex flex-col items-center justify-start min-w-0 p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
                   >
-                    {card.label}
-                  </span>
-                </button>
-              );
-            })}
+                    {/* 3D Gold-Bordered Button Graphic */}
+                    <div
+                      className="relative w-full aspect-[2.12/1] flex items-center justify-center transition-all duration-200 rounded-[14px]"
+                      style={{
+                        filter: active
+                          ? 'drop-shadow(0 0 8px rgba(250, 204, 21, 0.72)) drop-shadow(0 5px 10px rgba(15, 23, 42, 0.35))'
+                          : 'drop-shadow(0 5px 10px rgba(15, 23, 42, 0.32))',
+                        transform: active ? 'translateY(-1.5px) scale(1.02)' : 'none',
+                      }}
+                    >
+                      <img
+                        src={card.imageSrc}
+                        alt={card.label}
+                        loading="eager"
+                        decoding="async"
+                        draggable={false}
+                        className="w-full h-full object-contain pointer-events-none select-none"
+                      />
+                    </div>
+
+                    {/* Clear White Title Below Each Button */}
+                    <span
+                      className="mt-1 px-0.5 font-khmer font-extrabold leading-[1.62] text-center break-words whitespace-normal w-full transition-colors duration-150"
+                      style={{
+                        fontSize: 'clamp(10.5px, 2.85vw, 13px)',
+                        color: active ? '#FDE047' : '#FFFFFF',
+                        textShadow: active
+                          ? '0 1px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(250, 204, 21, 0.45)'
+                          : '0 1.5px 3px rgba(0, 0, 0, 0.90), 0 0 2px rgba(0, 0, 0, 0.75)',
+                      }}
+                    >
+                      {card.label}
+                    </span>
+
+                    {/* Subtle Gold Active Indicator Bar Below Title */}
+                    {active && (
+                      <span
+                        className="mt-0.5 h-1 w-6 rounded-full"
+                        style={{
+                          background: 'linear-gradient(90deg, #FDE047 0%, #F59E0B 100%)',
+                          boxShadow: '0 0 6px rgba(250, 204, 21, 0.8)',
+                        }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Row 3: Clean Horizontal Province Pills */}

@@ -413,7 +413,7 @@ export const TourismView: React.FC = () => {
         </div>
 
         {/* Row 1: Essential Search Bar + GPS Near Me Button (Compact ~60% Width Aligned Left) */}
-        <div className="w-[60%] mr-auto flex items-center gap-2 min-w-0">
+        <div className="w-full flex items-center gap-2 min-w-0">
           <div
             style={{
               background: 'rgba(255, 255, 255, 0.96)',
@@ -470,15 +470,15 @@ export const TourismView: React.FC = () => {
           </div>
         </div>
 
-        {/* Row 2: 6 Premium 3D Gold-Framed Category Buttons + Compact 25-Province Selector Inside Clean White Card */}
+        {/* Row 2: 6 Premium 3D Gold-Framed Tourism Category Buttons (3×2 Grid) + Clear White Text Below Each Button + Compact 25-Province Selector */}
         <div
           style={{
-            background: '#FFFFFF',
-            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)',
+            background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.84) 0%, rgba(15, 23, 42, 0.94) 100%)',
+            boxShadow: '0 10px 28px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.14)',
           }}
-          className="rounded-[24px] p-2 sm:p-3 border border-slate-100 space-y-2.5"
+          className="rounded-[24px] p-2.5 sm:p-3.5 border border-amber-400/25 space-y-2.5"
         >
-          <div className="grid grid-cols-3 gap-1.5 min-[360px]:gap-2 sm:gap-2.5 items-stretch">
+          <div className="grid grid-cols-3 gap-x-2 sm:gap-x-3 gap-y-2.5 sm:gap-y-3">
             {primaryCategoryButtons.map((cat) => {
               const active = selectedCategory === cat.id;
               const label = tr(language, cat.nameKh, cat.nameEn, cat.nameZh);
@@ -489,45 +489,59 @@ export const TourismView: React.FC = () => {
                   type="button"
                   onClick={() => setSelectedCategory(cat.id)}
                   aria-pressed={active}
-                  className={`group relative w-full min-w-0 aspect-[5/3] bg-transparent border-0 p-0 transition-all duration-150 active:scale-95 cursor-pointer select-none flex items-center justify-center ${
-                    active ? 'scale-[1.02] z-10' : ''
-                  }`}
+                  className="group relative flex flex-col items-center justify-start min-w-0 p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
                 >
-                  <img
-                    src={cat.imageSrc}
-                    alt={label}
-                    loading="eager"
-                    decoding="async"
+                  {/* 3D Gold-Bordered Button Graphic */}
+                  <div
+                    className="relative w-full aspect-[2.12/1] flex items-center justify-center transition-all duration-200 rounded-[14px]"
                     style={{
                       filter: active
-                        ? 'drop-shadow(0 0 2px #0F172A) drop-shadow(0 5px 12px rgba(245, 158, 11, 0.48)) brightness(1.04)'
-                        : 'drop-shadow(0 4px 10px rgba(15, 23, 42, 0.18))',
+                        ? 'drop-shadow(0 0 8px rgba(250, 204, 21, 0.72)) drop-shadow(0 5px 10px rgba(15, 23, 42, 0.35))'
+                        : 'drop-shadow(0 5px 10px rgba(15, 23, 42, 0.32))',
+                      transform: active ? 'translateY(-1.5px) scale(1.02)' : 'none',
                     }}
-                    className="w-full h-full object-fill bg-transparent select-none pointer-events-none group-hover:brightness-[1.03] transition-all duration-150"
-                  />
-
-                  {/* Centered Bold White Label Inside Button Directly Below the 3D Illustration */}
-                  <div className="pointer-events-none absolute inset-x-[4.5%] top-[66%] bottom-[7%] flex items-center justify-center px-0.5 overflow-visible">
-                    <span
-                      className="font-khmer font-extrabold text-white text-center leading-[1.35] tracking-tight whitespace-nowrap max-w-full"
-                      style={{
-                        fontSize: cat.isLongLabel
-                          ? 'clamp(9.2px, 2.48vw, 13.2px)'
-                          : 'clamp(10.5px, 2.95vw, 15px)',
-                        textShadow:
-                          '0 1.5px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(0, 0, 0, 0.68)',
-                      }}
-                    >
-                      {label}
-                    </span>
+                  >
+                    <img
+                      src={cat.imageSrc}
+                      alt={label}
+                      loading="eager"
+                      decoding="async"
+                      draggable={false}
+                      className="w-full h-full object-contain pointer-events-none select-none"
+                    />
                   </div>
+
+                  {/* Clear White Title Below Each Button */}
+                  <span
+                    className="mt-1 px-0.5 font-khmer font-extrabold leading-[1.62] text-center break-words whitespace-normal w-full transition-colors duration-150"
+                    style={{
+                      fontSize: 'clamp(11px, 3.05vw, 13.4px)',
+                      color: active ? '#FDE047' : '#FFFFFF',
+                      textShadow: active
+                        ? '0 1px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(250, 204, 21, 0.45)'
+                        : '0 1.5px 3px rgba(0, 0, 0, 0.90), 0 0 2px rgba(0, 0, 0, 0.75)',
+                    }}
+                  >
+                    {label}
+                  </span>
+
+                  {/* Subtle Gold Active Indicator Bar Below Title */}
+                  {active && (
+                    <span
+                      className="mt-0.5 h-1 w-7 rounded-full"
+                      style={{
+                        background: 'linear-gradient(90deg, #FDE047 0%, #F59E0B 100%)',
+                        boxShadow: '0 0 6px rgba(250, 204, 21, 0.8)',
+                      }}
+                    />
+                  )}
                 </button>
               );
             })}
           </div>
 
-          {/* Compact 25-Province Selector Bar inside the White Card */}
-          <div className="flex items-center gap-2 pt-0.5">
+          {/* Compact 25-Province Selector Bar inside the Card */}
+          <div className="flex items-center gap-2 pt-1 border-t border-white/10">
             <div className="relative flex-1 min-w-0">
               <MapPin className="w-4 h-4 text-emerald-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <select
@@ -539,7 +553,7 @@ export const TourismView: React.FC = () => {
                   'Select Province / Capital (25 Provinces)',
                   '选择省份/直辖市（柬埔寨 25 省市）'
                 )}
-                className="w-full min-h-[40px] pl-9 pr-3 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200/90 text-xs font-extrabold text-slate-800 cursor-pointer focus:outline-none focus:border-emerald-500 transition"
+                className="w-full min-h-[40px] pl-9 pr-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200/90 text-xs font-extrabold text-slate-800 cursor-pointer focus:outline-none focus:border-emerald-500 transition shadow-xs"
               >
                 <option value="">
                   {tr(
@@ -551,7 +565,7 @@ export const TourismView: React.FC = () => {
                 </option>
                 {provinceOptions.map((p) => (
                   <option key={p.id} value={p.value}>
-                    {tr(language, p.fullKh, p.en, p.zh)}
+                    {tr(language, p.fullKh, p.en, p.zh)} ({p.count})
                   </option>
                 ))}
               </select>
