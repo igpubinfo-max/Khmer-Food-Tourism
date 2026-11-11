@@ -505,21 +505,21 @@ export const GuideView: React.FC = () => {
           </div>
         </div>
 
-        {/* Clean White Season & Meal Slot Status Card + 4 Colorful Gradient Guide Section Buttons */}
+        {/* Dark-Navy Glassmorphic Season & Meal Slot Status Card + 4 Premium 3D Gold-Framed Guide Section Buttons */}
         <div
           style={{
-            background: '#FFFFFF',
-            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.08)',
+            background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.84) 0%, rgba(15, 23, 42, 0.94) 100%)',
+            boxShadow: '0 10px 28px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.14)',
           }}
-          className="rounded-[24px] p-2.5 sm:p-3 border border-slate-100 space-y-2.5"
+          className="rounded-[24px] p-2.5 sm:p-3.5 border border-amber-400/25 space-y-2.5"
         >
           <div className="flex items-center justify-between gap-2 flex-wrap px-1">
-            <span className="text-xs font-extrabold text-slate-800">
+            <span className="text-xs font-extrabold text-white">
               {greeting}
               {firstName ? `, ${firstName}` : ''}
             </span>
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-900 text-[10px] font-extrabold">
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-emerald-100 text-[10px] font-extrabold">
                 {season.emoji} {pickTri(season.name, lang)} • {pickTri(season.range, lang)}
               </span>
               <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black">
@@ -531,35 +531,30 @@ export const GuideView: React.FC = () => {
           <div
             role="tablist"
             aria-label={tr(language, 'ផ្នែកណែនាំ', 'Guide sections', '指南分区')}
-            className="grid grid-cols-4 gap-2"
+            className="grid grid-cols-2 min-[340px]:grid-cols-4 gap-2 sm:gap-3 items-start"
           >
             {[
               {
                 id: 'foryou' as GuideTab,
-                icon: Award,
+                imageSrc: '/categories/guide_cat_foryou.png',
                 label: tr(language, 'សម្រាប់អ្នក', 'For You', '为你推荐'),
-                gradient: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
               },
               {
                 id: 'provinces' as GuideTab,
-                icon: MapPinned,
+                imageSrc: '/categories/guide_cat_provinces.png',
                 label: tr(language, 'ខេត្ត', 'Provinces', '省份'),
-                gradient: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
               },
               {
                 id: 'calendar' as GuideTab,
-                icon: CalendarDays,
+                imageSrc: '/categories/guide_cat_calendar.png',
                 label: tr(language, 'ប្រតិទិន', 'Calendar', '日历'),
-                gradient: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
               },
               {
                 id: 'tips' as GuideTab,
-                icon: Lightbulb,
+                imageSrc: '/categories/guide_cat_tips.png',
                 label: tr(language, 'គន្លឹះ', 'Tips', '实用'),
-                gradient: 'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)',
               },
             ].map((t) => {
-              const Icon = t.icon;
               const active = tab === t.id;
               return (
                 <button
@@ -568,27 +563,52 @@ export const GuideView: React.FC = () => {
                   role="tab"
                   aria-selected={active}
                   onClick={() => setTab(t.id)}
-                  style={{
-                    background: t.gradient,
-                    boxShadow: active
-                      ? '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)'
-                      : '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
-                  }}
-                  className="group relative min-h-[64px] px-1.5 py-2 rounded-[16px] flex flex-col items-center justify-center gap-1 min-w-0 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
+                  className="group relative flex flex-col items-center justify-start min-w-0 p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
                 >
-                  <span
-                    className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+                  {/* 3D Gold-Bordered Button Graphic */}
+                  <div
+                    className="relative w-full aspect-[2.12/1] flex items-center justify-center transition-all duration-200 rounded-[14px]"
                     style={{
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
+                      filter: active
+                        ? 'drop-shadow(0 0 8px rgba(250, 204, 21, 0.72)) drop-shadow(0 5px 10px rgba(15, 23, 42, 0.35))'
+                        : 'drop-shadow(0 5px 10px rgba(15, 23, 42, 0.32))',
+                      transform: active ? 'translateY(-1.5px) scale(1.02)' : 'none',
                     }}
-                  />
-                  <Icon className="relative z-10 w-5 h-5 text-white shrink-0 drop-shadow-xs" strokeWidth={2.2} />
+                  >
+                    <img
+                      src={t.imageSrc}
+                      alt={t.label}
+                      loading="eager"
+                      decoding="async"
+                      draggable={false}
+                      className="w-full h-full object-contain pointer-events-none select-none"
+                    />
+                  </div>
+
+                  {/* Clear White Title Below Each Button */}
                   <span
-                    className="relative z-10 font-khmer font-extrabold leading-[1.6] py-0.5 text-center break-words whitespace-normal max-w-full"
-                    style={{ fontSize: 'clamp(11px, 3vw, 13px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
+                    className="mt-1 px-0.5 font-khmer font-extrabold leading-[1.62] text-center break-words whitespace-normal w-full transition-colors duration-150"
+                    style={{
+                      fontSize: 'clamp(11px, 3.05vw, 13.4px)',
+                      color: active ? '#FDE047' : '#FFFFFF',
+                      textShadow: active
+                        ? '0 1px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(250, 204, 21, 0.45)'
+                        : '0 1.5px 3px rgba(0, 0, 0, 0.90), 0 0 2px rgba(0, 0, 0, 0.75)',
+                    }}
                   >
                     {t.label}
                   </span>
+
+                  {/* Subtle Gold Active Indicator Bar Below Title */}
+                  {active && (
+                    <span
+                      className="mt-0.5 h-1 w-7 rounded-full"
+                      style={{
+                        background: 'linear-gradient(90deg, #FDE047 0%, #F59E0B 100%)',
+                        boxShadow: '0 0 6px rgba(250, 204, 21, 0.8)',
+                      }}
+                    />
+                  )}
                 </button>
               );
             })}
