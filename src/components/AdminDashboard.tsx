@@ -1065,7 +1065,7 @@ export const AdminDashboard: React.FC = () => {
         <div className="flex items-center justify-between px-6 py-4 bg-[#064E3B] text-white shrink-0 border-b border-[#047857]">
           <div className="flex items-center gap-3.5">
             <div className="relative shrink-0">
-              <img 
+              <img loading="lazy" decoding="async" 
                 key={resolveUserAvatarUrl(currentUser)}
                 src={resolveUserAvatarUrl(currentUser)} 
                 alt={currentUser?.name || "Admin"} 
@@ -1630,7 +1630,7 @@ export const AdminDashboard: React.FC = () => {
                         {(ticket.receiptUrl || (ticket as any).receiptImageUrl) && (
                           <div className="p-2.5 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3">
-                              <img
+                              <img loading="lazy" decoding="async"
                                 src={ticket.receiptUrl || (ticket as any).receiptImageUrl}
                                 alt="User Receipt"
                                 onClick={() => setInspectingTicketReceipt(ticket.receiptUrl || (ticket as any).receiptImageUrl || null)}
@@ -1736,7 +1736,7 @@ export const AdminDashboard: React.FC = () => {
                                   </div>
                                   <p className="whitespace-pre-wrap leading-relaxed">{msg.message}</p>
                                   {msg.attachmentUrl && (
-                                    <img
+                                    <img loading="lazy" decoding="async"
                                       src={msg.attachmentUrl}
                                       alt="Attachment"
                                       onClick={() => setInspectingTicketReceipt(msg.attachmentUrl || null)}
@@ -1805,7 +1805,7 @@ export const AdminDashboard: React.FC = () => {
                         <X className="w-5 h-5" />
                       </button>
                     </div>
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={inspectingTicketReceipt}
                       alt="Receipt Full Preview"
                       className="max-h-[75vh] w-auto mx-auto object-contain rounded-xl"
@@ -2152,7 +2152,7 @@ export const AdminDashboard: React.FC = () => {
                               {authorizedProofUrl ? (
                                 <div className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800/60 flex items-center justify-between gap-3">
                                   <div className="flex items-center gap-2.5">
-                                    <img
+                                    <img loading="lazy" decoding="async"
                                       src={authorizedProofUrl}
                                       alt="Payment Proof Thumbnail"
                                       onClick={() => setInspectingProofTxn(t)}
@@ -2501,7 +2501,7 @@ export const AdminDashboard: React.FC = () => {
                     </div>
 
                     <div className="p-4 overflow-y-auto flex-1 bg-slate-950 flex items-center justify-center">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={getAuthorizedPaymentProof(inspectingProofTxn.id) || inspectingProofTxn.paymentProofUrl}
                         alt="Full Resolution Payment Receipt"
                         className="max-w-full max-h-[65vh] object-contain rounded-xl border border-slate-800"
@@ -2751,7 +2751,7 @@ export const AdminDashboard: React.FC = () => {
 
                     <div className="flex items-center gap-2.5">
                       {newFoodPhotoUrl && (
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={newFoodPhotoUrl}
                           alt="preview"
                           className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-300 dark:border-slate-600"
@@ -2787,7 +2787,7 @@ export const AdminDashboard: React.FC = () => {
                                     : 'border-slate-200 dark:border-slate-700 hover:border-emerald-400'
                                 }`}
                               >
-                                <img
+                                <img loading="lazy" decoding="async"
                                   src={cand.thumbUrl || cand.url}
                                   alt={cand.title}
                                   className="w-full h-full object-cover"
@@ -2962,7 +2962,7 @@ export const AdminDashboard: React.FC = () => {
                           className="p-3.5 rounded-xl bg-white dark:bg-stone-800 border border-amber-300 dark:border-amber-700 flex flex-col gap-3"
                         >
                           <div className="flex items-start gap-3 min-w-0">
-                            <img
+                            <img loading="lazy" decoding="async"
                               src={rest.photoUrl}
                               alt={rest.nameKh}
                               className="w-14 h-14 rounded-xl object-cover shrink-0 border border-amber-400"
@@ -3055,7 +3055,7 @@ export const AdminDashboard: React.FC = () => {
                           >
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                               <div className="flex items-start gap-3 min-w-0">
-                                <img
+                                <img loading="lazy" decoding="async"
                                   src={ch.photoUrl || rest.photoUrl}
                                   alt={ch.nameKh || rest.nameKh}
                                   className="w-14 h-14 rounded-xl object-cover shrink-0 border-2 border-amber-400"
@@ -3257,7 +3257,7 @@ export const AdminDashboard: React.FC = () => {
                               <span className="block text-[10px] font-bold text-amber-800 dark:text-amber-300 font-khmer mb-1">
                                 {isKm ? '២. រូបភាពហាងថ្មីដែលស្នើប្តូរ (Submitted)' : '2. Submitted Replacement Photo'}
                               </span>
-                              <img
+                              <img loading="lazy" decoding="async"
                                 src={resolveFoodPhotoUrl(req.newPhotoUrl)}
                                 alt="Submitted Replacement"
                                 className="w-full h-24 object-cover rounded-lg border border-amber-300 dark:border-amber-600"
@@ -3662,7 +3662,7 @@ export const AdminDashboard: React.FC = () => {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-3">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={checkIn.photoUrl}
                             alt={checkIn.restaurantNameKh}
                             className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700"
@@ -5573,7 +5573,7 @@ export const AdminDashboard: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="flex flex-col items-center justify-center p-3 bg-stone-50 dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-700">
-                    <img 
+                    <img loading="lazy" decoding="async" 
                       src={supportQrUrl} 
                       alt="Support KHQR Preview" 
                       className="w-36 h-auto max-h-48 object-contain rounded-xl border border-stone-300 shadow-sm"
@@ -6130,25 +6130,25 @@ export const AdminDashboard: React.FC = () => {
 
                 {/* Metric Summary Cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                  <div className="bg-white/10 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
+                  <div className="bg-white/10 p-3.5 rounded-2xl border border-white/10">
                     <div className="text-[10px] text-emerald-200 font-khmer">{isKm ? 'មុខម្ហូបសរុបបាន Audit' : 'Total Dishes Audited'}</div>
                     <div className="text-2xl font-bold font-mono text-white mt-1">{foods.length}</div>
                     <div className="text-[9px] text-emerald-200 font-khmer mt-0.5">✓ គ្រប់មុខម្ហូបទាំងអស់</div>
                   </div>
 
-                  <div className="bg-white/10 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
+                  <div className="bg-white/10 p-3.5 rounded-2xl border border-white/10">
                     <div className="text-[10px] text-emerald-200 font-khmer">{isKm ? 'ផ្ទៀងផ្ទាត់ត្រឹមត្រូវ ១០០%' : 'Verified & Accurate'}</div>
                     <div className="text-2xl font-bold font-mono text-emerald-200 mt-1">{verifiedFoods.length}</div>
                     <div className="text-[9px] text-emerald-200 font-khmer mt-0.5">✓ រូបភាពច្បាស់តាមមុខម្ហូប</div>
                   </div>
 
-                  <div className="bg-white/10 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
+                  <div className="bg-white/10 p-3.5 rounded-2xl border border-white/10">
                     <div className="text-[10px] text-emerald-200 font-khmer">{isKm ? 'ដកភាពជាន់គ្នាចេញ' : 'Duplicates Resolved'}</div>
                     <div className="text-2xl font-bold font-mono text-white mt-1">228</div>
                     <div className="text-[9px] text-emerald-200 font-khmer mt-0.5">0% Duplication rate</div>
                   </div>
 
-                  <div className="bg-white/10 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
+                  <div className="bg-white/10 p-3.5 rounded-2xl border border-white/10">
                     <div className="text-[10px] text-emerald-200 font-khmer">{isKm ? 'រង់ចាំរដ្ឋបាលពិនិត្យ' : 'Pending Admin Review'}</div>
                     <div className="text-2xl font-bold font-mono text-white mt-1">{flaggedFoods.length}</div>
                     <div className="text-[9px] text-emerald-200 font-khmer mt-0.5">{flaggedFoods.length > 0 ? 'ទាមទារការសម្រេច' : 'រួចរាល់ទាំងអស់'}</div>
@@ -6193,7 +6193,7 @@ export const AdminDashboard: React.FC = () => {
                         className="p-4 rounded-2xl border-2 border-amber-300 dark:border-amber-700/60 bg-amber-50/50 dark:bg-amber-950/20 space-y-3"
                       >
                         <div className="flex gap-3">
-                          <img 
+                          <img loading="lazy" decoding="async" 
                             src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 240, food.id)} 
                             onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
                             alt={food.nameKh}
@@ -6338,7 +6338,7 @@ export const AdminDashboard: React.FC = () => {
                       key={food.id}
                       className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 dark:border-stone-700 bg-white dark:bg-stone-900/50 flex gap-3 items-center hover:border-slate-300 dark:border-slate-600 transition shadow-xs"
                     >
-                      <img 
+                      <img loading="lazy" decoding="async" 
                         src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 240, food.id)} 
                         onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
                         alt={food.nameKh}

@@ -138,7 +138,7 @@ export const AvatarEditorModal: React.FC<AvatarEditorModalProps> = ({
               }`}
             >
               {previewDataUrl ? (
-                <img
+                <img loading="lazy" decoding="async"
                   src={previewDataUrl}
                   alt="Avatar Preview"
                   className={`w-full h-full object-cover transition-opacity duration-150 ${

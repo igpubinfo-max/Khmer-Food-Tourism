@@ -232,13 +232,10 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
             <button
               type="button"
               onClick={handleNavigateClick}
-              style={{
-                background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
-              }}
-              className="w-8 h-8 rounded-xl text-white flex items-center justify-center shadow-2xs active:scale-95 transition cursor-pointer"
+              className="kft-btn-map-icon"
               title={tr(language, 'បង្ហាញផ្លូវ', 'Directions', '导航')}
             >
-              <Navigation className="w-3.5 h-3.5" />
+              <Navigation className="w-3.5 h-3.5" strokeWidth={2.2} />
             </button>
 
             {isAdmin && (
@@ -262,14 +259,10 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
                 e.stopPropagation();
                 toggleBookmark(destination.id);
               }}
-              className={`p-1.5 rounded-lg transition active:scale-90 cursor-pointer ${
-                bookmarked
-                  ? 'bg-rose-500 text-white shadow-2xs'
-                  : 'bg-slate-100 text-slate-500 hover:text-rose-500'
-              }`}
+              className="kft-btn-fav"
               title={tr(language, 'រក្សាទុក', 'Save', '收藏')}
             >
-              <Heart className={`w-3.5 h-3.5 ${bookmarked ? 'fill-current' : ''}`} />
+              <Heart className={`w-4 h-4 ${bookmarked ? 'fill-rose-500 text-rose-500' : 'text-rose-500'}`} strokeWidth={2.2} />
             </button>
 
             <ChevronRight
@@ -340,14 +333,10 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
               e.stopPropagation();
               toggleBookmark(destination.id);
             }}
-            className={`absolute top-2.5 right-2.5 p-2 rounded-full transition-transform active:scale-90 z-10 cursor-pointer ${
-              bookmarked
-                ? 'bg-rose-500 text-white shadow-md'
-                : 'bg-white/95 text-slate-700 hover:text-rose-500 shadow-xs'
-            }`}
+            className="kft-btn-fav absolute top-2.5 right-2.5 z-10"
             title={tr(language, 'រក្សាទុក', 'Save', '收藏')}
           >
-            <Heart className={`w-3.5 h-3.5 ${bookmarked ? 'fill-current' : ''}`} />
+            <Heart className={`w-4 h-4 ${bookmarked ? 'fill-rose-500 text-rose-500' : 'text-rose-500'}`} strokeWidth={2.2} />
           </button>
 
           {/* Bottom-Left: Category Pill */}
@@ -393,11 +382,7 @@ const TouristCardView: React.FC<TouristCardViewProps> = React.memo(
             <button
               type="button"
               onClick={handleNavigateClick}
-              style={{
-                background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
-                boxShadow: '0 4px 10px rgba(21, 128, 61, 0.25)',
-              }}
-              className="min-h-[34px] px-3 py-1 rounded-full text-white font-extrabold text-xs inline-flex items-center gap-1.5 active:scale-95 transition cursor-pointer shrink-0 leading-[1.6]"
+              className="kft-btn-map shrink-0"
             >
               <Navigation className="w-3.5 h-3.5 text-white shrink-0" strokeWidth={2.2} />
               <span>{tr(language, 'បង្ហាញផ្លូវ', 'Directions', '导航')}</span>

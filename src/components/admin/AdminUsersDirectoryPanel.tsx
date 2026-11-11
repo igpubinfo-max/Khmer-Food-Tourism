@@ -2377,7 +2377,7 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
           >
             <div className="flex items-start justify-between gap-3 border-b border-stone-200 dark:border-stone-800 pb-3">
               <div className="flex items-center gap-3">
-                <img
+                <img loading="lazy" decoding="async"
                   src={resolveUserAvatarUrl(inspectedUserRecord.user)}
                   alt={inspectedUserRecord.user.name}
                   onError={(e) => handleAvatarImageError(e, inspectedUserRecord.user)}

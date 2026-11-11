@@ -1773,7 +1773,7 @@ export const WhatToEatModal: React.FC = () => {
               <div className="flex items-center gap-2 p-2 rounded-xl bg-amber-50 border border-amber-200">
                 {pendingImage && (
                   <>
-                    <img src={pendingImage.previewDataUrl} alt="" className="w-12 h-12 rounded-lg object-cover border border-amber-300 shrink-0" />
+                    <img loading="lazy" decoding="async" src={pendingImage.previewDataUrl} alt="" className="w-12 h-12 rounded-lg object-cover border border-amber-300 shrink-0" />
                     <span className="text-[11px] font-bold text-amber-900 flex-1 min-w-0">
                       {tr(language, 'រូបភាពរួចរាល់ — វាយសំណួរបន្ថែម (ជាជម្រើស) រួចចុច «សួរ AI»', 'Photo ready — add a question (optional), then tap “Ask AI”', '照片已就绪 —（可选）补充问题后点击“发送”')}
                     </span>
@@ -1783,7 +1783,7 @@ export const WhatToEatModal: React.FC = () => {
                   </>
                 )}
                 {isPreparingImage && (
-                  <span className="text-[11px] font-bold text-amber-900 animate-pulse">
+                  <span className="text-[11px] font-bold text-amber-900">
                     {tr(language, 'កំពុងរៀបចំរូបភាព...', 'Preparing photo...', '正在处理照片...')}
                   </span>
                 )}
@@ -1830,7 +1830,7 @@ export const WhatToEatModal: React.FC = () => {
                     <div key={msg.id} className="flex justify-end">
                       <div className="max-w-[85%] px-3 py-2 rounded-2xl rounded-tr-xs bg-[#064E3B] text-white text-xs font-bold leading-relaxed shadow-2xs space-y-1.5">
                         {msg.imagePreviewUrl && (
-                          <img src={msg.imagePreviewUrl} alt="" className="w-40 max-w-full rounded-xl border border-white/30 object-cover" />
+                          <img loading="lazy" decoding="async" src={msg.imagePreviewUrl} alt="" className="w-40 max-w-full rounded-xl border border-white/30 object-cover" />
                         )}
                         <div>{msg.text}</div>
                       </div>
@@ -2186,7 +2186,7 @@ export const WhatToEatModal: React.FC = () => {
                                       <Award className="w-3 h-3 text-amber-900" />
                                       {tr(language, 'មុខម្ហូបទី ១', 'Top Dish', '首选菜品')}
                                     </span>
-                                    <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold">
+                                    <span className="px-2 py-0.5 rounded-full bg-black/60 text-white text-[10px] font-bold">
                                       {rpLoc.category}
                                     </span>
                                   </div>
@@ -2562,7 +2562,7 @@ export const WhatToEatModal: React.FC = () => {
                                       }}
                                       className="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer"
                                     >
-                                      <img
+                                      <img decoding="async"
                                         src={h.photoUrl}
                                         alt={language === 'km' ? h.nameKh : h.nameEn}
                                         loading="lazy"
@@ -2683,7 +2683,7 @@ export const WhatToEatModal: React.FC = () => {
                                   key={item.id}
                                   className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2.5"
                                 >
-                                  <img
+                                  <img decoding="async"
                                     src={item.photoUrl}
                                     alt={item.foodNameKh}
                                     loading="lazy"
@@ -3581,7 +3581,7 @@ export const WhatToEatModal: React.FC = () => {
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent pointer-events-none" />
 
-                      <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/55 backdrop-blur-xs text-white text-[11px] font-bold font-khmer">
+                      <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/55 text-white text-[11px] font-bold font-khmer">
                         {currentLoc.category}
                       </span>
 
@@ -3857,7 +3857,7 @@ export const WhatToEatModal: React.FC = () => {
                       >
                         <div className="space-y-1">
                           <div className="relative aspect-16/10 rounded-lg overflow-hidden bg-slate-200">
-                            <img
+                            <img loading="lazy" decoding="async"
                               src={resolveFoodPhotoUrl(cDish.photoUrl, cDish.photoUpdatedAt, 480, cDish.id)}
                               alt={cLoc.name}
                               onError={(e) => handleFoodImageError(e, cDish.id, cDish.photoUrl)}

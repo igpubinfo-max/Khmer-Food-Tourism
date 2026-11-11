@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useDeferredValue } from 'react';
 import { useApp } from '../context/AppContext';
 import { TouristCard } from './TouristCard';
-import { AngkorHeroTopHeader, AccountTrialStatusBar } from './AngkorHeroTopHeader';
+import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
 import {
   Compass,
   MapPin,
@@ -26,7 +26,7 @@ import {
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 
-const TOURISM_BATCH_SIZE = 24;
+const TOURISM_BATCH_SIZE = 18;
 const DEFAULT_PP_COORDS = { lat: 11.5564, lng: 104.9282 };
 
 function haversineDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -99,71 +99,59 @@ export const TourismView: React.FC = () => {
     }
   };
 
-  // 6 Colorful Glossy Gradient Category Buttons Matching Reference Image 2
+  // 6 Premium 3D Gold-Framed Category Buttons
   const primaryCategoryButtons = useMemo(
     () => [
       {
         id: 'all',
+        imageSrc: '/categories/travel_cat_all.png',
         nameKh: 'ទាំងអស់',
         nameEn: 'All Places',
         nameZh: '全部景点',
-        icon: Compass,
-        gradient: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
-        shadow: '0 5px 12px rgba(217, 78, 8, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
-        activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(217, 78, 8, 0.45)',
+        isLongLabel: false,
       },
       {
         id: 'temple',
+        imageSrc: '/categories/travel_cat_temples.png',
         nameKh: 'ប្រាសាទបុរាណ',
         nameEn: 'Temples',
         nameZh: '古迹与寺庙',
-        icon: Landmark,
-        gradient: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
-        shadow: '0 5px 12px rgba(13, 102, 48, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
-        activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(13, 102, 48, 0.45)',
+        isLongLabel: language === 'km',
       },
       {
         id: 'nature',
+        imageSrc: '/categories/travel_cat_nature.png',
         nameKh: 'ធម្មជាតិ & ទឹកធ្លាក់',
         nameEn: 'Nature & Falls',
         nameZh: '自然与瀑布',
-        icon: Trees,
-        gradient: 'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)',
-        shadow: '0 5px 12px rgba(196, 29, 75, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
-        activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(196, 29, 75, 0.45)',
+        isLongLabel: true,
       },
       {
         id: 'beach',
+        imageSrc: '/categories/travel_cat_beach.png',
         nameKh: 'កោះ & ឆ្នេរសមុទ្រ',
         nameEn: 'Islands & Beaches',
         nameZh: '海岛与海滩',
-        icon: Waves,
-        gradient: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
-        shadow: '0 5px 12px rgba(18, 84, 199, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
-        activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(18, 84, 199, 0.45)',
+        isLongLabel: true,
       },
       {
         id: 'mountain',
+        imageSrc: '/categories/travel_cat_mountain.png',
         nameKh: 'ភ្នំ & ឧទ្យានជាតិ',
         nameEn: 'Mountains',
-        nameZh: '高山与国家公园',
-        icon: Mountain,
-        gradient: 'linear-gradient(180deg, #F4B630 0%, #C67D0D 100%)',
-        shadow: '0 5px 12px rgba(198, 125, 13, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
-        activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(198, 125, 13, 0.45)',
+        nameZh: '高山与森林',
+        isLongLabel: language === 'km',
       },
       {
         id: 'cultural',
+        imageSrc: '/categories/travel_cat_culture.png',
         nameKh: 'វប្បធម៌ & ពេញនិយម',
         nameEn: 'Culture & Popular',
         nameZh: '文化与热门',
-        icon: Sparkles,
-        gradient: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',
-        shadow: '0 5px 12px rgba(14, 103, 105, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
-        activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(14, 103, 105, 0.45)',
+        isLongLabel: true,
       },
     ],
-    []
+    [language]
   );
 
   // Exclude hotels (categorySlug === 'hotel') since Hotels have their own dedicated BottomNav menu tab
@@ -392,9 +380,9 @@ export const TourismView: React.FC = () => {
 
       {/* 2. MAIN CONTENT CONTAINER (Dark Slate #1E293B + Clean White Cards & 6 Colorful Category Buttons) */}
       <div className="relative z-20 -mt-[82px] px-3 min-[360px]:px-4 sm:px-5 space-y-3 bg-[#1E293B]/0">
-        {/* Compact Promotional Title Banner (Left) + 7-Day Free Trial / Account Status Banner Below Language Selector (Right) */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pl-0.5 sm:pl-1">
-          <div className="relative py-1 pl-1 pr-2 bg-transparent flex items-center gap-2.5 min-w-0 flex-1">
+        {/* Compact Promotional Title Banner (Aligned Left) */}
+        <div className="flex items-center justify-start pl-0.5 sm:pl-1">
+          <div className="relative py-1 pl-1 pr-2 bg-transparent inline-flex items-center gap-2.5 max-w-[65%] min-w-0">
             <div
               style={{
                 background: 'linear-gradient(180deg, #FDE047 0%, #F59E0B 100%)',
@@ -422,13 +410,10 @@ export const TourismView: React.FC = () => {
               </p>
             </div>
           </div>
-
-          {/* 7-Day Free Trial / Account Status Banner below the Language Selector & out of the temple area */}
-          <AccountTrialStatusBar inline className="ml-auto" />
         </div>
 
-        {/* Row 1: Essential Search Bar + GPS Near Me Button */}
-        <div className="flex items-center gap-2">
+        {/* Row 1: Essential Search Bar + GPS Near Me Button (Compact ~60% Width Aligned Left) */}
+        <div className="w-[60%] mr-auto flex items-center gap-2 min-w-0">
           <div
             style={{
               background: 'rgba(255, 255, 255, 0.96)',
@@ -441,6 +426,7 @@ export const TourismView: React.FC = () => {
             <Search className="w-5 h-5 text-slate-500 shrink-0" strokeWidth={2.3} />
             <input
               type="text"
+              size={1}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={tr(
@@ -484,43 +470,57 @@ export const TourismView: React.FC = () => {
           </div>
         </div>
 
-        {/* Row 2: 6 Colorful Gradient Category Buttons + Compact 25-Province Selector Inside Clean White Card */}
+        {/* Row 2: 6 Premium 3D Gold-Framed Category Buttons + Compact 25-Province Selector Inside Clean White Card */}
         <div
           style={{
             background: '#FFFFFF',
             boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)',
           }}
-          className="rounded-[24px] p-2.5 sm:p-3 border border-slate-100 space-y-2.5"
+          className="rounded-[24px] p-2 sm:p-3 border border-slate-100 space-y-2.5"
         >
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-1.5 min-[360px]:gap-2 sm:gap-2.5 items-stretch">
             {primaryCategoryButtons.map((cat) => {
-              const Icon = cat.icon;
               const active = selectedCategory === cat.id;
+              const label = tr(language, cat.nameKh, cat.nameEn, cat.nameZh);
               return (
                 <button
                   key={cat.id}
+                  id={`kft-travel-cat-${cat.id}-btn`}
                   type="button"
                   onClick={() => setSelectedCategory(cat.id)}
                   aria-pressed={active}
-                  style={{
-                    background: cat.gradient,
-                    boxShadow: active ? cat.activeRing : cat.shadow,
-                  }}
-                  className="group relative min-h-[68px] px-1.5 py-2 rounded-[16px] flex flex-col items-center justify-center gap-1 min-w-0 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
+                  className={`group relative w-full min-w-0 aspect-[5/3] bg-transparent border-0 p-0 transition-all duration-150 active:scale-95 cursor-pointer select-none flex items-center justify-center ${
+                    active ? 'scale-[1.02] z-10' : ''
+                  }`}
                 >
-                  <span
-                    className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+                  <img
+                    src={cat.imageSrc}
+                    alt={label}
+                    loading="eager"
+                    decoding="async"
                     style={{
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
+                      filter: active
+                        ? 'drop-shadow(0 0 2px #0F172A) drop-shadow(0 5px 12px rgba(245, 158, 11, 0.48)) brightness(1.04)'
+                        : 'drop-shadow(0 4px 10px rgba(15, 23, 42, 0.18))',
                     }}
+                    className="w-full h-full object-fill bg-transparent select-none pointer-events-none group-hover:brightness-[1.03] transition-all duration-150"
                   />
-                  <Icon className="relative z-10 w-5 h-5 text-white shrink-0 drop-shadow-xs" strokeWidth={2.2} />
-                  <span
-                    className="relative z-10 font-khmer font-extrabold leading-[1.62] py-0.5 text-center break-words whitespace-normal w-full"
-                    style={{ fontSize: 'clamp(11.4px, 3.12vw, 13.8px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
-                  >
-                    {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
-                  </span>
+
+                  {/* Centered Bold White Label Inside Button Directly Below the 3D Illustration */}
+                  <div className="pointer-events-none absolute inset-x-[4.5%] top-[66%] bottom-[7%] flex items-center justify-center px-0.5 overflow-visible">
+                    <span
+                      className="font-khmer font-extrabold text-white text-center leading-[1.35] tracking-tight whitespace-nowrap max-w-full"
+                      style={{
+                        fontSize: cat.isLongLabel
+                          ? 'clamp(9.2px, 2.48vw, 13.2px)'
+                          : 'clamp(10.5px, 2.95vw, 15px)',
+                        textShadow:
+                          '0 1.5px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(0, 0, 0, 0.68)',
+                      }}
+                    >
+                      {label}
+                    </span>
+                  </div>
                 </button>
               );
             })}
@@ -561,9 +561,9 @@ export const TourismView: React.FC = () => {
               <button
                 type="button"
                 onClick={resetAllFilters}
-                className="min-h-[40px] px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-extrabold active:scale-95 transition cursor-pointer shrink-0"
+                className="kft-btn-reset"
               >
-                ↺ {tr(language, 'កំណត់ឡើងវិញ', 'Reset', '重置')}
+                <span>↺ {tr(language, 'កំណត់ឡើងវិញ', 'Reset', '重置')}</span>
               </button>
             )}
           </div>
@@ -579,19 +579,17 @@ export const TourismView: React.FC = () => {
               </h2>
             </div>
 
-            <button
-              type="button"
-              onClick={handleToggleNearMe}
-              style={{
-                background: nearMeActive
-                  ? 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)'
-                  : 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
-              }}
-              className="px-2.5 py-0.5 rounded-full text-white text-[11px] font-extrabold inline-flex items-center gap-1 shadow-2xs active:scale-95 transition cursor-pointer shrink-0"
-            >
-              <MapPin className="w-3 h-3 text-white fill-white/25 shrink-0" />
-              <span>{tr(language, 'ជិតខ្ញុំ', 'Near Me', '附近')}</span>
-            </button>
+            {nearMeActive && (
+              <span
+                style={{
+                  background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
+                }}
+                className="px-2.5 py-0.5 rounded-full text-white text-[11px] font-extrabold inline-flex items-center gap-1 shadow-2xs shrink-0 select-none"
+              >
+                <MapPin className="w-3 h-3 text-white fill-white/25 shrink-0" />
+                <span>{tr(language, 'ជិតខ្ញុំ', 'Near Me', '附近')}</span>
+              </span>
+            )}
           </div>
 
           <span className="px-3 py-1 rounded-full bg-white border border-slate-200/90 shadow-2xs text-xs font-extrabold text-slate-800 shrink-0">
@@ -640,10 +638,7 @@ export const TourismView: React.FC = () => {
                   onClick={() =>
                     setVisibleCount((prev) => Math.min(filteredDestinations.length, prev + TOURISM_BATCH_SIZE))
                   }
-                  style={{
-                    background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
-                  }}
-                  className="px-5 py-2.5 rounded-full text-white text-xs font-extrabold shadow-xs font-khmer cursor-pointer transition active:scale-95"
+                  className="kft-btn-load-more"
                 >
                   {tr(
                     language,

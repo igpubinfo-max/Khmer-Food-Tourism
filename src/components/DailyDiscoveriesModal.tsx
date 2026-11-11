@@ -922,7 +922,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                         }}
                         className="relative aspect-16/9 w-full overflow-hidden bg-slate-100 cursor-pointer group"
                       >
-                        <img
+                        <img decoding="async"
                           src={resolvedPhoto}
                           alt={locFood.name}
                           onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}

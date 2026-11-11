@@ -230,7 +230,7 @@ export const TouristDetailModal: React.FC = () => {
         >
           <button
             onClick={() => setSelectedDestination(null)}
-            className="p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md text-white shadow pointer-events-auto transition active:scale-90"
+            className="kft-btn-modal-icon pointer-events-auto"
             title="បិទ"
           >
             <X className="w-4 h-4" />
@@ -242,21 +242,11 @@ export const TouristDetailModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsEditingAdminDest(!isEditingAdminDest)}
-                  className="py-1.5 px-3 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5 border border-white/60"
+                  className="py-1.5 px-3 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs shadow-lg transition active:scale-90 flex items-center gap-1.5 border border-white/60"
                   title={isKm ? 'កែប្រែព័ត៌មាន & រូបភាព (Admin)' : 'Edit Details & Photos (Admin)'}
                 >
                   <Edit2 className="w-3.5 h-3.5" />
                   <span className="font-khmer">{isEditingAdminDest ? (isKm ? 'មើលធម្មតា' : 'View') : (isKm ? 'កែប្រែ (Admin)' : 'Edit')}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsImageModalOpen(true)}
-                  className="py-1.5 px-3 rounded-full bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5 border border-white/20"
-                  title={language === 'km' ? 'ផ្លាស់ប្តូររូបភាព' : 'Change Photo'}
-                >
-                  <Camera className="w-3.5 h-3.5 text-white" />
-                  <span className="font-khmer">{language === 'km' ? 'ប្តូររូបភាព' : 'Change Photo'}</span>
                 </button>
               </>
             )}
@@ -272,7 +262,7 @@ export const TouristDetailModal: React.FC = () => {
                 provinceKh: selectedDestination.provinceKh,
                 rating: selectedDestination.rating,
               })}
-              className="p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md shadow transition active:scale-90 text-amber-300"
+              className="kft-btn-modal-icon !text-amber-300"
               title={language === 'km' ? 'ដាក់ក្នុងបញ្ជីចង់ទៅ' : 'Add to Wishlist'}
             >
               <Bookmark className="w-4 h-4 fill-current" />
@@ -280,8 +270,8 @@ export const TouristDetailModal: React.FC = () => {
 
             <button
               onClick={() => toggleBookmark(selectedDestination.id)}
-              className={`p-2.5 rounded-full backdrop-blur-md shadow transition active:scale-90 ${
-                bookmarked ? 'bg-rose-500 text-white' : 'bg-black/50 hover:bg-black/70 text-white'
+              className={`kft-btn-modal-icon ${
+                bookmarked ? '!bg-rose-500 text-white' : ''
               }`}
               title="រក្សាទុក"
             >
@@ -318,7 +308,7 @@ export const TouristDetailModal: React.FC = () => {
                   {isKm ? 'រូបភាពតំបន់ទេសចរណ៍ (Photo URL / Upload)' : 'Destination Photo'}
                 </label>
                 <div className="relative aspect-16/10 rounded-xl overflow-hidden bg-slate-900 border border-amber-400/50">
-                  <img
+                  <img loading="lazy" decoding="async"
                     key={editPhotoUrl || selectedDestination.photoUrl}
                     src={editPhotoUrl || selectedDestination.photoUrl}
                     alt="Preview"
@@ -521,7 +511,7 @@ export const TouristDetailModal: React.FC = () => {
           {/* Hero Image or Clean Destination Icon Banner */}
           {(activeHeroPhoto || selectedDestination.photoUrl || '').trim() ? (
             <div className="relative h-64 sm:h-72 w-full bg-slate-800">
-              <img 
+              <img loading="lazy" decoding="async" 
                 key={activeHeroPhoto || selectedDestination.photoUrl}
                 src={activeHeroPhoto || selectedDestination.photoUrl} 
                 alt={loc.name}
@@ -542,7 +532,7 @@ export const TouristDetailModal: React.FC = () => {
               </div>
 
               {/* Reference Image Label (រូបភាពយោង) */}
-              <div className="absolute bottom-2.5 right-3 z-10 px-1.5 py-0.5 rounded bg-black/55 backdrop-blur-xs text-[8px] sm:text-[9px] text-white/85 font-khmer border border-white/15 select-none pointer-events-none shadow-2xs">
+              <div className="absolute bottom-2.5 right-3 z-10 px-1.5 py-0.5 rounded bg-black/55 text-[8px] sm:text-[9px] text-white/85 font-khmer border border-white/15 select-none pointer-events-none shadow-2xs">
                 <span>{tr(language, 'រូបភាពយោង', 'Reference photo', '参考图片')}</span>
               </div>
             </div>
@@ -593,7 +583,7 @@ export const TouristDetailModal: React.FC = () => {
                             : 'border-slate-200 dark:border-slate-700 opacity-80 hover:opacity-100'
                         }`}
                       >
-                        <img
+                        <img decoding="async"
                           src={gUrl}
                           alt={`${loc.name} ${gIdx + 1}`}
                           loading="lazy"
@@ -643,9 +633,9 @@ export const TouristDetailModal: React.FC = () => {
               {selectedDestination.phone && (
                 <a
                   href={`tel:${selectedDestination.phone.replace(/\s+/g, '')}`}
-                  className="sm:col-span-2 w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 hover:from-amber-700 hover:to-orange-700 text-white text-xs sm:text-sm font-bold shadow-md transition active:scale-98 cursor-pointer font-khmer"
+                  className="kft-btn-call sm:col-span-2 w-full !py-3 !px-4 !rounded-2xl !text-xs sm:!text-sm"
                 >
-                  <Phone className="w-4 h-4 shrink-0" />
+                  <Phone className="w-4 h-4 fill-white shrink-0" />
                   <span>
                     {tr(
                       language,
@@ -659,7 +649,7 @@ export const TouristDetailModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => openDestinationGoogleExternal(selectedDestination, 'maps')}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md transition active:scale-98 cursor-pointer"
+                className="kft-btn-map w-full !py-3 !px-4 !rounded-2xl"
               >
                 <MapPin className="w-4 h-4 shrink-0" />
                 <span>{tr(language, 'បើកមើលលើ Google Maps', 'Open in Google Maps', '在 Google 地图中查看')}</span>
@@ -668,7 +658,7 @@ export const TouristDetailModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => openDestinationGoogleExternal(selectedDestination, 'directions')}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white text-xs font-bold shadow-md transition active:scale-98 cursor-pointer"
+                className="kft-btn-map w-full !py-3 !px-4 !rounded-2xl"
               >
                 <Compass className="w-4 h-4 shrink-0" />
                 <span>{tr(language, 'នាំផ្លូវទៅកាន់ទីតាំង', 'Navigate / Directions', '开始路线导航')}</span>

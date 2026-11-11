@@ -464,7 +464,7 @@ export const FoodDetailModal: React.FC = () => {
               if (isSpeaking) window.speechSynthesis.cancel();
               setSelectedFood(null);
             }}
-            className="p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md text-white shadow pointer-events-auto transition active:scale-90"
+            className="kft-btn-modal-icon pointer-events-auto"
             title={tr(language, 'បិទ', 'Close', '关闭')}
           >
             <X className="w-4 h-4" />
@@ -477,7 +477,7 @@ export const FoodDetailModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsEditingAdminFood(!isEditingAdminFood)}
-                  className="py-1.5 px-3 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5 border border-white/60"
+                  className="py-1.5 px-3 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs shadow-lg transition active:scale-90 flex items-center gap-1.5 border border-white/60"
                   title={tr(language, 'កែប្រែព័ត៌មាន និងរូបភាព', 'Edit Details & Photos (Admin)', '编辑详情与图片（管理员）')}
                 >
                   <Edit2 className="w-3.5 h-3.5" />
@@ -493,7 +493,7 @@ export const FoodDetailModal: React.FC = () => {
                       setConfirmAdminDelete(true);
                     }
                   }}
-                  className={`py-1.5 px-3 rounded-full font-black text-xs shadow-lg backdrop-blur-md transition active:scale-90 flex items-center gap-1.5 border border-white/60 ${
+                  className={`py-1.5 px-3 rounded-full font-black text-xs shadow-lg transition active:scale-90 flex items-center gap-1.5 border border-white/60 ${
                     confirmAdminDelete
                       ? 'bg-rose-600 hover:bg-rose-700 text-white'
                       : 'bg-rose-500/90 hover:bg-rose-600 text-white'
@@ -513,8 +513,8 @@ export const FoodDetailModal: React.FC = () => {
             {/* Audio Reader */}
             <button
               onClick={handleSpeak}
-              className={`p-2.5 rounded-full backdrop-blur-md shadow transition active:scale-90 ${
-                isSpeaking ? 'bg-[#10B981] text-white animate-pulse' : 'bg-black/50 hover:bg-black/70 text-white'
+              className={`kft-btn-modal-icon ${
+                isSpeaking ? '!bg-[#10B981] text-white' : ''
               }`}
               title={tr(language, 'ស្តាប់សម្លេងអានរូបមន្ត', 'Listen to recipe audio', '语音朗读食谱')}
             >
@@ -533,7 +533,7 @@ export const FoodDetailModal: React.FC = () => {
                 priceDisplay: selectedFood.calories ? `${selectedFood.calories} ${tr(language, 'គីឡូកាឡូរី', 'kcal', '千卡')}` : undefined,
                 rating: selectedFood.rating,
               })}
-              className="p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md shadow transition active:scale-90 text-amber-300"
+              className="kft-btn-modal-icon !text-amber-300"
               title={tr(language, 'ដាក់ក្នុងបញ្ជីចង់ញ៉ាំ', 'Save to wishlist', '加入收藏清单')}
             >
               <Bookmark className="w-4 h-4 fill-current" />
@@ -542,8 +542,8 @@ export const FoodDetailModal: React.FC = () => {
             {/* Favorite */}
             <button
               onClick={() => toggleBookmark(selectedFood.id)}
-              className={`p-2.5 rounded-full backdrop-blur-md shadow transition active:scale-90 ${
-                bookmarked ? 'bg-rose-500 text-white' : 'bg-black/50 hover:bg-black/70 text-white'
+              className={`kft-btn-modal-icon ${
+                bookmarked ? '!bg-rose-500 text-white' : ''
               }`}
               title={tr(language, 'រក្សាទុក', 'Save', '收藏')}
             >
@@ -586,7 +586,7 @@ export const FoodDetailModal: React.FC = () => {
                   title={'រូបភាពរបស់ខ្ញុំ'}
                   className="relative aspect-16/10 rounded-xl overflow-hidden bg-slate-900 border border-amber-400/50 cursor-pointer group"
                 >
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={resolveFoodPhotoUrl(editPhotoUrl || selectedFood.photoUrl, selectedFood.photoUpdatedAt, undefined, selectedFood.id)}
                     alt="Preview"
                     onError={(e) => handleFoodImageError(e, selectedFood.id, selectedFood.photoUrl)}
@@ -665,7 +665,7 @@ export const FoodDetailModal: React.FC = () => {
                           editPhotoUrl === cand.url ? 'border-amber-500 ring-2 ring-amber-400/50' : 'border-slate-200'
                         }`}
                       >
-                        <img src={cand.url} alt={cand.title} className="w-full h-full object-cover" />
+                        <img loading="lazy" decoding="async" src={cand.url} alt={cand.title} className="w-full h-full object-cover" />
                       </button>
                     ))}
                   </div>
@@ -985,7 +985,7 @@ export const FoodDetailModal: React.FC = () => {
           <>
           {/* Hero Image */}
           <div className="relative h-64 sm:h-72 w-full bg-slate-800">
-            <img 
+            <img loading="lazy" decoding="async" 
               src={resolveFoodPhotoUrl(selectedFood.photoUrl, selectedFood.photoUpdatedAt, undefined, selectedFood.id)} 
               alt={loc.name}
               referrerPolicy="no-referrer"
@@ -1080,7 +1080,7 @@ export const FoodDetailModal: React.FC = () => {
                                 : 'border-slate-200 dark:border-slate-700 hover:border-emerald-400'
                             }`}
                           >
-                            <img
+                            <img loading="lazy" decoding="async"
                               src={cand.url}
                               alt={cand.title}
                               className="w-full h-full object-cover group-hover:scale-105 transition duration-200"

@@ -60,22 +60,18 @@ const FoodCardView = React.memo<FoodCardViewProps>(
             </button>
           )}
 
-          {/* Top-Right Dark Circle Heart Bookmark Button */}
+          {/* Top-Right Unified Circle Heart Bookmark Button */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               toggleBookmark(food.id);
             }}
-            className={`absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full transition-transform active:scale-90 cursor-pointer ${
-              bookmarked
-                ? 'bg-rose-500 text-white shadow-md'
-                : 'bg-black/55 hover:bg-black/75 text-white border border-white/25'
-            }`}
+            className="kft-btn-fav absolute top-2 right-2"
             aria-pressed={bookmarked}
             title={tr(language, 'រក្សាទុក', 'Save', '收藏')}
           >
-            <Heart className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
+            <Heart className={`w-4 h-4 ${bookmarked ? 'fill-rose-500 text-rose-500' : 'text-rose-500'}`} strokeWidth={2.2} />
           </button>
 
           {/* Khmer ownership watermark (applied once) */}
@@ -113,18 +109,11 @@ const FoodCardView = React.memo<FoodCardViewProps>(
               <span className="text-slate-500 font-semibold">({reviewCountVal})</span>
             </div>
 
-            {/* Dark Green Action Pill Button: [🍴 មើលលម្អិត >] */}
+            {/* Unified Green Action Pill Button: [🍴 មើលលម្អិត >] */}
             <div>
-              <span
-                style={{
-                  background: 'linear-gradient(180deg, #2E7D52 0%, #1B5E3A 100%)',
-                }}
-                className="inline-flex items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 rounded-full text-white text-[11.5px] sm:text-xs font-bold shadow-2xs transition max-w-full"
-              >
-                <span className="inline-flex items-center gap-1.5 min-w-0">
-                  <Utensils className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                  <span className="leading-[1.65]">{tr(language, 'មើលលម្អិត', 'View Details', '查看详情')}</span>
-                </span>
+              <span className="kft-btn-details max-w-full">
+                <Utensils className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                <span>{tr(language, 'មើលលម្អិត', 'View Details', '查看详情')}</span>
                 <ChevronRight className="w-3.5 h-3.5 text-white/90 shrink-0" />
               </span>
             </div>

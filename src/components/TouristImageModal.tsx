@@ -453,7 +453,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
 
             <div className="relative aspect-16/10 rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-inner group">
               {photoUrl ? (
-                <img 
+                <img loading="lazy" decoding="async" 
                   src={photoUrl} 
                   alt="Destination Preview" 
                   className={`w-full h-full ${fitMode === 'cover' ? 'object-cover' : 'object-contain'}`}
@@ -475,7 +475,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
 
               {/* Size reduction badge if compressed */}
               {fileDetails && (
-                <div className="absolute bottom-2.5 right-2.5 px-2.5 py-1 bg-emerald-950/80 backdrop-blur-md rounded-lg text-emerald-300 text-[10px] font-mono border border-emerald-500/40 flex items-center gap-1 shadow">
+                <div className="absolute bottom-2.5 right-2.5 px-2.5 py-1 bg-emerald-950/80 rounded-lg text-emerald-300 text-[10px] font-mono border border-emerald-500/40 flex items-center gap-1 shadow">
                   <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                   <span>{fileDetails.origSize} ➔ {fileDetails.compSize}</span>
                 </div>

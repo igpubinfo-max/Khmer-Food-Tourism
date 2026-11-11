@@ -51,7 +51,7 @@ export const MyShopPanel: React.FC<Props> = ({ language, shops, usedStores, tota
               key={shop.id}
               className="flex items-center gap-3 p-3 rounded-2xl bg-white dark:bg-slate-800/70 border border-slate-200/80 dark:border-white/10 shadow-sm"
             >
-              <img
+              <img decoding="async"
                 src={shop.photoUrl || FALLBACK_IMG}
                 alt={shop.nameKh}
                 loading="lazy"

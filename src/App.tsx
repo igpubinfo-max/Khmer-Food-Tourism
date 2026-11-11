@@ -14,19 +14,19 @@ const SmartHubMenuModal = lazy(() => import('./components/SmartHubMenuModal').th
 const FoodDetailModal = lazy(() => import('./components/FoodDetailModal').then((m) => ({ default: m.FoodDetailModal })));
 const RestaurantDetailModal = lazy(() => import('./components/RestaurantDetailModal').then((m) => ({ default: m.RestaurantDetailModal })));
 const TouristDetailModal = lazy(() => import('./components/TouristDetailModal').then((m) => ({ default: m.TouristDetailModal })));
-import { AuthModal } from './components/AuthModal';
+const AuthModal = lazy(() => import('./components/AuthModal').then((m) => ({ default: m.AuthModal })));
 import { WelcomeScreenModal, WELCOME_SESSION_KEY } from './components/WelcomeScreenModal';
 const AddRestaurantModal = lazy(() => import('./components/AddRestaurantModal').then((m) => ({ default: m.AddRestaurantModal })));
 const ManageMenuModal = lazy(() => import('./components/ManageMenuModal').then((m) => ({ default: m.ManageMenuModal })));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard').then((m) => ({ default: m.AdminDashboard })));
-import { AdminLoginModal } from './components/AdminLoginModal';
+const AdminLoginModal = lazy(() => import('./components/AdminLoginModal').then((m) => ({ default: m.AdminLoginModal })));
 const SupportModal = lazy(() => import('./components/SupportModal').then((m) => ({ default: m.SupportModal })));
-import { ExitConfirmModal } from './components/ExitConfirmModal';
-import { DeleteShopConfirmModal } from './components/DeleteShopConfirmModal';
-import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
-import { WhatToEatModal } from './components/WhatToEatModal';
+const ExitConfirmModal = lazy(() => import('./components/ExitConfirmModal').then((m) => ({ default: m.ExitConfirmModal })));
+const DeleteShopConfirmModal = lazy(() => import('./components/DeleteShopConfirmModal').then((m) => ({ default: m.DeleteShopConfirmModal })));
+const PrivacyPolicyModal = lazy(() => import('./components/PrivacyPolicyModal').then((m) => ({ default: m.PrivacyPolicyModal })));
+const WhatToEatModal = lazy(() => import('./components/WhatToEatModal').then((m) => ({ default: m.WhatToEatModal })));
 const NearMeModal = lazy(() => import('./components/NearMeModal').then((m) => ({ default: m.NearMeModal })));
-import { DailyDiscoveriesModal } from './components/DailyDiscoveriesModal';
+const DailyDiscoveriesModal = lazy(() => import('./components/DailyDiscoveriesModal').then((m) => ({ default: m.DailyDiscoveriesModal })));
 const WishlistsModal = lazy(() => import('./components/WishlistsModal').then((m) => ({ default: m.WishlistsModal })));
 const AiTripPlannerModal = lazy(() => import('./components/AiTripPlannerModal').then((m) => ({ default: m.AiTripPlannerModal })));
 const NotificationsModal = lazy(() => import('./components/NotificationsModal').then((m) => ({ default: m.NotificationsModal })));
@@ -61,6 +61,7 @@ const MainScreen: React.FC = () => {
     isAddRestaurantModalOpen,
     isManageMenuModalOpen,
     managingRestaurant,
+    pendingDeleteRestaurant,
     isAdminOpen,
     isAdminLoginModalOpen,
     isSupportModalOpen,
@@ -276,12 +277,14 @@ const MainScreen: React.FC = () => {
         {selectedDestination && <TouristDetailModal />}
         {isUpgradeVipModalOpen && <UpgradeVipModal />}
         {isAuthModalOpen && <AuthModal />}
+        {Boolean(pendingDeleteRestaurant) && <DeleteShopConfirmModal />}
+        {isGlobalPrivacyOpen && (
+          <PrivacyPolicyModal
+            isOpen={isGlobalPrivacyOpen}
+            onClose={() => setIsGlobalPrivacyOpen(false)}
+          />
+        )}
       </Suspense>
-      <DeleteShopConfirmModal />
-      <PrivacyPolicyModal
-        isOpen={isGlobalPrivacyOpen}
-        onClose={() => setIsGlobalPrivacyOpen(false)}
-      />
 
       {/* Notifications */}
       {toast && <Toast />}

@@ -719,7 +719,7 @@ export const ManageMenuModal: React.FC = () => {
             ) : vipState === 'pending_vip' ? (
               <div className="py-8 space-y-3">
                 <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto shadow-md ring-4 ring-amber-400/20">
-                  <Clock className="w-8 h-8 animate-pulse" />
+                  <Clock className="w-8 h-8" />
                 </div>
                 <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 text-xs font-bold font-sans">
                   PENDING_ADMIN_APPROVAL
@@ -848,7 +848,7 @@ export const ManageMenuModal: React.FC = () => {
             }`}
           >
             {currentRest.status === 'pending' ? (
-              <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5 animate-pulse" />
+              <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
             ) : (
               <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
             )}
@@ -2219,7 +2219,7 @@ export const ManageMenuModal: React.FC = () => {
                         }}
                         className="w-28 h-28 p-1.5 rounded-xl bg-white border-2 border-emerald-500/50 shrink-0 cursor-pointer"
                       >
-                        <img src="/images/aba_qr_code_only.png" alt="ABA KHQR" className="w-full h-full object-contain" />
+                        <img loading="lazy" decoding="async" src="/images/aba_qr_code_only.png" alt="ABA KHQR" className="w-full h-full object-contain" />
                       </button>
                       <div className="min-w-0 flex-1 space-y-1.5 text-xs">
                         <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1">

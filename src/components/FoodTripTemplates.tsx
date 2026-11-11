@@ -350,7 +350,7 @@ export const FoodTripTemplates: React.FC = () => {
                 </p>
                 {stops.map((st) => (
                   <div key={`${slot.slot}-${st.key}`} className="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-slate-200">
-                    {st.photoUrl && <img src={st.photoUrl} alt={st.name} loading="lazy" className="w-12 h-12 rounded-lg object-cover shrink-0 bg-slate-100" />}
+                    {st.photoUrl && <img decoding="async" src={st.photoUrl} alt={st.name} loading="lazy" className="w-12 h-12 rounded-lg object-cover shrink-0 bg-slate-100" />}
                     <button type="button" onClick={st.onOpen} className="min-w-0 flex-1 text-left cursor-pointer">
                       <span className="block text-sm font-bold text-slate-900 line-clamp-2 leading-snug">{st.name}</span>
                       <span className="text-[11px] text-slate-500">{typeEmoji(st.type)} {typeLabel(st.type)}</span>

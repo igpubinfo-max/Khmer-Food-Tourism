@@ -401,3 +401,328 @@ img[src^="data:image"],
     max-width: min(88vw, 54rem) !important;
   }
 }
+
+/* ============================================================================
+   UNIFIED PREMIUM BUTTON DESIGN SYSTEM (Khmer / English / Chinese Safe)
+   Every button sharing the same name or function across the entire app uses
+   100% identical visual styling, typography (line-height >= 1.65), gradients,
+   borders, shadows, icon spacing, and active states.
+   ============================================================================ */
+
+/* 1. Inline Search Button inside Search Bar (Food, Shop, Hotel, Tourism) */
+.kft-btn-search-inline {
+  min-height: 36px;
+  padding: 0.25rem 0.85rem;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #1E7A4C 0%, #0E5A35 100%);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 2px 6px rgba(14, 90, 53, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+  font-family: 'Kantumruy Pro', 'Noto Sans Khmer', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 0.75rem;
+  line-height: 1.68;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.kft-btn-search-inline:hover {
+  filter: brightness(1.06);
+}
+.kft-btn-search-inline:active {
+  transform: scale(0.95);
+}
+
+/* 2. Call / Contact Button ("ទូរស័ព្ទ / Call / 电话") */
+.kft-btn-call {
+  min-height: 38px;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(180deg, #22C55E 0%, #15803D 100%);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  box-shadow: 0 3px 10px rgba(21, 128, 61, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  color: #FFFFFF;
+  font-family: 'Kantumruy Pro', 'Noto Sans Khmer', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 0.75rem;
+  line-height: 1.68;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.kft-btn-call:hover {
+  filter: brightness(1.06);
+}
+.kft-btn-call:active {
+  transform: scale(0.95);
+}
+
+/* 3. Map / Directions Button ("ផែនទី / Map / 地图" & "បង្ហាញផ្លូវ / Directions / 导航") */
+.kft-btn-map {
+  min-height: 38px;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(180deg, #3B82F6 0%, #1D4ED8 100%);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  box-shadow: 0 3px 10px rgba(29, 78, 216, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  color: #FFFFFF;
+  font-family: 'Kantumruy Pro', 'Noto Sans Khmer', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 0.75rem;
+  line-height: 1.68;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.kft-btn-map:hover {
+  filter: brightness(1.06);
+}
+.kft-btn-map:active {
+  transform: scale(0.95);
+}
+
+/* 4. Compact Map Icon-Only Button (Directory Rows in Shop, Hotel, Tourism) */
+.kft-btn-map-icon {
+  width: 2.125rem;
+  height: 2.125rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(180deg, #3B82F6 0%, #1D4ED8 100%);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  box-shadow: 0 2px 6px rgba(29, 78, 216, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.kft-btn-map-icon:hover {
+  filter: brightness(1.06);
+}
+.kft-btn-map-icon:active {
+  transform: scale(0.95);
+}
+
+/* 5. View Details Pill Button ("មើលលម្អិត / View Details / 查看详情") */
+.kft-btn-details {
+  min-height: 36px;
+  padding: 0.25rem 0.9rem;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #1E7A4C 0%, #0E5A35 100%);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 3px 8px rgba(14, 90, 53, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+  font-family: 'Kantumruy Pro', 'Noto Sans Khmer', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 0.75rem;
+  line-height: 1.68;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.kft-btn-details:hover {
+  filter: brightness(1.06);
+}
+.kft-btn-details:active {
+  transform: scale(0.95);
+}
+
+/* 6. See All / Show Less Pill Button ("មើលទាំងអស់ / See all / 查看全部") */
+.kft-btn-see-all {
+  min-height: 32px;
+  padding: 0.2rem 0.75rem;
+  border-radius: 9999px;
+  background: #FFFFFF;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+  color: #1E293B;
+  font-family: 'Kantumruy Pro', 'Noto Sans Khmer', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 0.75rem;
+  line-height: 1.68;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+.kft-btn-see-all:hover {
+  background: #F8FAFC;
+}
+.kft-btn-see-all:active {
+  transform: scale(0.95);
+}
+
+/* 7. Warm Orange-Gold Primary CTA Button ("+ បន្ថែមហាងថ្មី", "+ បន្ថែមសណ្ឋាគារ", "សួរ AI") */
+.kft-btn-cta-orange {
+  min-height: 38px;
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #FB923C 0%, #EA580C 100%);
+  border: 1.5px solid #FDE68A;
+  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  color: #FFFFFF;
+  font-family: 'Kantumruy Pro', 'Noto Sans Khmer', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 0.75rem;
+  line-height: 1.68;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.kft-btn-cta-orange:hover {
+  filter: brightness(1.06);
+}
+.kft-btn-cta-orange:active {
+  transform: scale(0.95);
+}
+
+/* 8. Unified Circular Heart Favorite Button */
+.kft-btn-fav {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+  color: #F43F5E;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+.kft-btn-fav:hover {
+  background: #FFFFFF;
+}
+.kft-btn-fav:active {
+  transform: scale(0.9);
+}
+
+/* 9. Unified Modal Top Floating Icon / Close Button */
+.kft-btn-modal-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+.kft-btn-modal-icon:hover {
+  background: rgba(15, 23, 42, 0.82);
+}
+.kft-btn-modal-icon:active {
+  transform: scale(0.9);
+}
+
+/* 10. Unified Reset / Clear Filters Button */
+.kft-btn-reset {
+  min-height: 38px;
+  padding: 0.35rem 0.85rem;
+  border-radius: 0.75rem;
+  background: #FFF1F2;
+  border: 1px solid #FECDD3;
+  color: #BE123C;
+  font-family: 'Kantumruy Pro', 'Noto Sans Khmer', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 0.75rem;
+  line-height: 1.68;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+.kft-btn-reset:hover {
+  background: #FFE4E6;
+}
+.kft-btn-reset:active {
+  transform: scale(0.95);
+}
+
+/* 11. Unified Show More / Load More Pagination Button */
+.kft-btn-load-more {
+  min-height: 42px;
+  padding: 0.5rem 1.35rem;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #22C55E 0%, #15803D 100%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  color: #FFFFFF;
+  font-family: 'Kantumruy Pro', 'Noto Sans Khmer', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 0.75rem;
+  line-height: 1.68;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.kft-btn-load-more:hover {
+  filter: brightness(1.06);
+}
+.kft-btn-load-more:active {
+  transform: scale(0.95);
+}
+
+/* 12. Unified Secondary Action Pill ("គ្រប់គ្រង / Manage", "កែប្រែហាង / Edit Shop") */
+.kft-btn-secondary-pill {
+  min-height: 36px;
+  padding: 0.25rem 0.8rem;
+  border-radius: 9999px;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  color: #1E293B;
+  font-family: 'Kantumruy Pro', 'Noto Sans Khmer', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 0.72rem;
+  line-height: 1.68;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+.kft-btn-secondary-pill:hover {
+  background: #E2E8F0;
+}
+.kft-btn-secondary-pill:active {
+  transform: scale(0.95);
+}
+

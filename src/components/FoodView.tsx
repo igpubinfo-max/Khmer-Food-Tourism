@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { FoodCard } from './FoodCard';
-import { AngkorHeroTopHeader, AccountTrialStatusBar } from './AngkorHeroTopHeader';
+import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
 import {
   FoodItem,
   organizeAndDeduplicateFoods,
@@ -14,7 +14,7 @@ import { tr } from '../utils/i18n';
 import { DishTagIcon } from './icons/HandcraftedIcons';
 import { matchesFoodScreenCategoryTab } from '../utils/cambodianMealHabits';
 
-const PAGE_BATCH_SIZE = 20;
+const PAGE_BATCH_SIZE = 16;
 
 type MealTimeFilter = 'all' | 'breakfast' | 'lunch' | 'dinner';
 
@@ -309,9 +309,9 @@ export const FoodView: React.FC = () => {
 
       {/* Main Content Container rising smoothly from the Angkor Wat reflection */}
       <div className="relative z-20 -mt-[82px] px-2.5 min-[360px]:px-3.5 sm:px-5 space-y-2.5">
-        {/* Compact Original Khmer Promotional Title Banner (Left) + 7-Day Free Trial / Account Status Banner Below Language Selector (Right) */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pl-0.5 sm:pl-1">
-          <div className="relative py-1 pl-1 pr-2 bg-transparent flex items-center gap-2.5 min-w-0 flex-1">
+        {/* Compact Original Khmer Promotional Title Banner (Aligned Left) */}
+        <div className="flex items-center justify-start pl-0.5 sm:pl-1">
+          <div className="relative py-1 pl-1 pr-2 bg-transparent inline-flex items-center gap-2.5 max-w-[65%] min-w-0">
             {/* Left Yellow Food Icon */}
             <div
               style={{
@@ -354,13 +354,10 @@ export const FoodView: React.FC = () => {
               </p>
             </div>
           </div>
-
-          {/* 7-Day Free Trial / Account Status Banner below the Language Selector & out of the temple area */}
-          <AccountTrialStatusBar inline className="ml-auto" />
         </div>
 
-        {/* 2. Main Search Bar – Large White Rounded Glassmorphism Search Bar + Separate Green Filter Button */}
-        <div className="flex items-center gap-1.5 min-[360px]:gap-2 min-w-0">
+        {/* 2. Main Search Bar – Compact Left-Aligned (~60% Width, Shrunk 40% from Right to Left) + Separate Green Filter Button */}
+        <div className="w-[60%] mr-auto flex items-center gap-1.5 min-[360px]:gap-2 min-w-0">
           <div
             style={{
               background: 'rgba(255, 255, 255, 0.92)',
@@ -404,11 +401,7 @@ export const FoodView: React.FC = () => {
             <button
               type="button"
               onClick={handleExecuteFoodSearch}
-              style={{
-                background: 'linear-gradient(180deg, #2E7D52 0%, #1B5E3A 100%)',
-                boxShadow: '0 2px 6px rgba(27, 94, 58, 0.35)',
-              }}
-              className="h-[34px] px-2.5 min-[360px]:px-3.5 rounded-full border-[1.5px] border-white/90 text-white text-[11px] min-[360px]:text-[12px] font-khmer font-extrabold flex items-center gap-1 min-[360px]:gap-1.5 shrink-0 active:scale-95 transition cursor-pointer"
+              className="kft-btn-search-inline"
             >
               <Search className="w-3.5 h-3.5 text-white stroke-[2.4] shrink-0" />
               <span>{tr(language, 'ស្វែងរក', 'Search', '搜索')}</span>
@@ -555,9 +548,9 @@ export const FoodView: React.FC = () => {
                   <button
                     type="button"
                     onClick={resetAllFilters}
-                    className="text-[11px] font-extrabold text-rose-600 hover:underline cursor-pointer"
+                    className="kft-btn-reset"
                   >
-                    {tr(language, 'សម្អាតតម្រង', 'Reset All', '重置筛选')}
+                    <span>↺ {tr(language, 'កំណត់ឡើងវិញ', 'Reset', '重置')}</span>
                   </button>
                 )}
               </div>
@@ -650,7 +643,7 @@ export const FoodView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setVisibleCount((prev) => Math.min(filteredFoods.length, prev + PAGE_BATCH_SIZE))}
-                  className="px-5 py-2.5 rounded-full bg-[#235D3A] hover:bg-[#1B4B2E] text-white text-xs font-bold shadow-xs cursor-pointer transition"
+                  className="kft-btn-load-more"
                 >
                   {tr(
                     language,

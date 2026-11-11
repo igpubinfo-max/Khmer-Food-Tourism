@@ -419,7 +419,7 @@ export const PaymentSupportModal: React.FC = () => {
         {/* Header */}
         <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 px-5 py-4 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+            <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center border border-white/30">
               <MessageSquare className="w-5 h-5 text-amber-100" />
             </div>
             <div>
@@ -483,7 +483,7 @@ export const PaymentSupportModal: React.FC = () => {
               `留言记录 (${myTickets.length})`
             )}
             {unreadRepliesCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.2 bg-red-600 text-white text-[10px] font-extrabold rounded-full animate-pulse">
+              <span className="ml-1 px-1.5 py-0.2 bg-red-600 text-white text-[10px] font-extrabold rounded-full">
                 {unreadRepliesCount}
               </span>
             )}
@@ -640,7 +640,7 @@ export const PaymentSupportModal: React.FC = () => {
                 {receiptDataUrl ? (
                   <div className="space-y-2.5">
                     <div className="relative rounded-2xl border-2 border-emerald-400 bg-emerald-50/40 p-3 flex items-center gap-3">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={receiptDataUrl}
                         alt="Payment Receipt Preview"
                         className="w-20 h-24 object-cover rounded-xl border border-emerald-300 shadow-sm"
@@ -933,7 +933,7 @@ export const PaymentSupportModal: React.FC = () => {
                                 </p>
                                 {msg.attachmentUrl && (
                                   <div className="mt-2">
-                                    <img
+                                    <img loading="lazy" decoding="async"
                                       src={msg.attachmentUrl}
                                       alt="Attached Receipt"
                                       className="max-h-44 rounded-xl border border-black/10 object-contain bg-black/5"
@@ -950,7 +950,7 @@ export const PaymentSupportModal: React.FC = () => {
                       <div className="p-3 bg-white border-t border-gray-200 space-y-2">
                         {replyAttachmentUrl && (
                           <div className="flex items-center gap-2 bg-amber-50 p-2 rounded-xl border border-amber-200">
-                            <img
+                            <img loading="lazy" decoding="async"
                               src={replyAttachmentUrl}
                               alt="Reply attachment"
                               className="w-12 h-12 object-cover rounded-lg"

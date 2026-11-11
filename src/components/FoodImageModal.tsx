@@ -315,7 +315,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
             <div className="rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-800/60 shadow-xs max-w-sm mx-auto">
               <div className="relative aspect-[16/10] bg-slate-900 flex items-center justify-center overflow-hidden">
                 {photoUrl ? (
-                  <img 
+                  <img loading="lazy" decoding="async" 
                     src={resolveFoodPhotoUrl(photoUrl, food.photoUpdatedAt, undefined, food.id)} 
                     onError={(e) => handleFoodImageError(e, food.id, photoUrl)}
                     alt={food.nameKh} 
@@ -329,7 +329,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                     <span>{isKm ? 'មិនទាន់មានរូបភាព' : 'No photo selected'}</span>
                   </div>
                 )}
-                <div className="absolute top-2 left-2 bg-[#064E3B]/80 backdrop-blur-xs text-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">
+                <div className="absolute top-2 left-2 bg-[#064E3B]/80 text-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">
                   {food.categoryKh}
                 </div>
               </div>
@@ -439,7 +439,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
                             : 'border-slate-200 dark:border-slate-700 hover:border-emerald-400'
                         }`}
                       >
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={cand.thumbUrl || cand.url}
                           alt={cand.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-200"

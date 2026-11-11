@@ -902,7 +902,7 @@ export const ProfileView: React.FC = () => {
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3 flex-1 min-w-0">
                 <div className="relative shrink-0">
-                  <img 
+                  <img loading="lazy" 
                     key={resolveUserAvatarUrl(currentUser)}
                     src={resolveUserAvatarUrl(currentUser)} 
                     alt={currentUser.name} 
@@ -2759,28 +2759,32 @@ export const ProfileView: React.FC = () => {
       )}
 
       {/* Avatar Crop & Rotate Modal */}
-      <AvatarEditorModal
-        isOpen={isAvatarEditorOpen}
-        onClose={() => {
-          setIsAvatarEditorOpen(false);
-          setAvatarEditorSourceUrl('');
-        }}
-        initialImageUrl={avatarEditorSourceUrl}
-        onSave={handleSaveAvatarFromEditor}
-        onPickNewImage={() => {
-          setIsAvatarEditorOpen(false);
-          setTimeout(() => handleTriggerAvatarPicker(), 150);
-        }}
-        language={language}
-        isVip={isVip}
-        isAdmin={isAdmin}
-      />
+      {isAvatarEditorOpen && (
+        <AvatarEditorModal
+          isOpen={isAvatarEditorOpen}
+          onClose={() => {
+            setIsAvatarEditorOpen(false);
+            setAvatarEditorSourceUrl('');
+          }}
+          initialImageUrl={avatarEditorSourceUrl}
+          onSave={handleSaveAvatarFromEditor}
+          onPickNewImage={() => {
+            setIsAvatarEditorOpen(false);
+            setTimeout(() => handleTriggerAvatarPicker(), 150);
+          }}
+          language={language}
+          isVip={isVip}
+          isAdmin={isAdmin}
+        />
+      )}
 
       {/* Privacy Policy Modal */}
-      <PrivacyPolicyModal 
-        isOpen={isPrivacyModalOpen} 
-        onClose={() => setIsPrivacyModalOpen(false)} 
-      />
+      {isPrivacyModalOpen && (
+        <PrivacyPolicyModal
+          isOpen={isPrivacyModalOpen}
+          onClose={() => setIsPrivacyModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

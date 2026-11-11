@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { AngkorHeroTopHeader, AccountTrialStatusBar } from './AngkorHeroTopHeader';
+import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
 import {
   TouristDestination,
   Restaurant,
@@ -50,7 +50,7 @@ import { tr } from '../utils/i18n';
 import { getLocalizedDestination } from '../utils/zhDynamicTranslator';
 import { resolveUserAvatarUrl, handleAvatarImageError } from '../utils/avatarHelper';
 
-const HOTEL_BATCH_SIZE = 36;
+const HOTEL_BATCH_SIZE = 24;
 
 /**
  * Clean vector hotel/storefront icon matching DefaultShopIcon in Shop Menu.
@@ -853,6 +853,7 @@ export const HotelView: React.FC = () => {
       nameEn: 'All Stays',
       nameZh: '全部住宿',
       icon: LayoutGrid,
+      imageSrc: '/categories/hotel_cat_all.png',
       gradient: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
       shadow: '0 5px 12px rgba(217, 78, 8, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
       activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(217, 78, 8, 0.45)',
@@ -863,6 +864,7 @@ export const HotelView: React.FC = () => {
       nameEn: 'Hotels',
       nameZh: '星级酒店',
       icon: BedDouble,
+      imageSrc: '/categories/hotel_cat_hotels.png',
       gradient: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
       shadow: '0 5px 12px rgba(13, 102, 48, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
       activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(13, 102, 48, 0.45)',
@@ -873,6 +875,7 @@ export const HotelView: React.FC = () => {
       nameEn: 'VIP Hotels',
       nameZh: 'VIP 酒店',
       icon: Crown,
+      imageSrc: '/categories/hotel_cat_vip.png',
       gradient: 'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)',
       shadow: '0 5px 12px rgba(196, 29, 75, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
       activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(196, 29, 75, 0.45)',
@@ -883,6 +886,7 @@ export const HotelView: React.FC = () => {
       nameEn: 'Guesthouses',
       nameZh: '民宿客栈',
       icon: Home,
+      imageSrc: '/categories/hotel_cat_guesthouses.png',
       gradient: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
       shadow: '0 5px 12px rgba(18, 84, 199, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
       activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(18, 84, 199, 0.45)',
@@ -893,6 +897,7 @@ export const HotelView: React.FC = () => {
       nameEn: 'Resorts',
       nameZh: '度假村',
       icon: Sparkles,
+      imageSrc: '/categories/hotel_cat_resorts.png',
       gradient: 'linear-gradient(180deg, #F4B630 0%, #C67D0D 100%)',
       shadow: '0 5px 12px rgba(198, 125, 13, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
       activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(198, 125, 13, 0.45)',
@@ -903,6 +908,7 @@ export const HotelView: React.FC = () => {
       nameEn: 'Villas',
       nameZh: '精品别墅',
       icon: Building2,
+      imageSrc: '/categories/hotel_cat_villas.png',
       gradient: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',
       shadow: '0 5px 12px rgba(14, 103, 105, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
       activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(14, 103, 105, 0.45)',
@@ -930,9 +936,9 @@ export const HotelView: React.FC = () => {
 
       {/* 2. MAIN CONTENT CONTAINER Rising Smoothly from Angkor Hero into Dark Slate (#1E293B) */}
       <div className="relative z-20 -mt-[82px] px-3 min-[360px]:px-4 sm:px-5 space-y-3 bg-[#1E293B]/0">
-        {/* Compact Promotional Title Banner (Left) + 7-Day Free Trial / Account Status Banner Below Language Selector (Right) */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pl-0.5 sm:pl-1">
-          <div className="relative py-1 pl-1 pr-2 bg-transparent flex items-center gap-2.5 min-w-0 flex-1">
+        {/* Compact Promotional Title Banner (Aligned Left) */}
+        <div className="flex items-center justify-start pl-0.5 sm:pl-1">
+          <div className="relative py-1 pl-1 pr-2 bg-transparent inline-flex items-center gap-2.5 max-w-[65%] min-w-0">
             <div
               style={{
                 background: 'linear-gradient(180deg, #FDE047 0%, #F59E0B 100%)',
@@ -960,13 +966,10 @@ export const HotelView: React.FC = () => {
               </p>
             </div>
           </div>
-
-          {/* 7-Day Free Trial / Account Status Banner below the Language Selector & out of the temple area */}
-          <AccountTrialStatusBar inline className="ml-auto" />
         </div>
 
-        {/* Row 1: Essential White Pill Search Bar + Inline GPS Near Me Button */}
-        <div className="flex items-center gap-2">
+        {/* Row 1: Essential White Pill Search Bar + Inline GPS Near Me Button (Compact ~60% Width Aligned Left) */}
+        <div className="w-[60%] mr-auto flex items-center gap-2 min-w-0">
           <div
             style={{
               background: 'rgba(255, 255, 255, 0.96)',
@@ -980,6 +983,7 @@ export const HotelView: React.FC = () => {
             <input
               ref={searchInputRef}
               type="text"
+              size={1}
               value={hotelSearchQuery}
               onChange={(e) => setHotelSearchQuery(e.target.value)}
               placeholder={tr(
@@ -1029,57 +1033,84 @@ export const HotelView: React.FC = () => {
           </div>
         </div>
 
-        {/* Row 2: 6 Colorful Gradient Category Buttons + Compact 25-Province Selector Inside Clean White Card */}
+        {/* Row 2: 6 Premium 3D Gold-Framed Hotel Category Buttons (3×2 Grid) + Clear White Text Below Each Button + Compact 25-Province Selector */}
         <div
           style={{
-            background: '#FFFFFF',
-            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)',
+            background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.84) 0%, rgba(15, 23, 42, 0.94) 100%)',
+            boxShadow: '0 10px 28px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.14)',
           }}
-          className="rounded-[24px] p-2.5 sm:p-3 border border-slate-100 space-y-2.5"
+          className="rounded-[24px] p-2.5 sm:p-3.5 border border-amber-400/25 space-y-2.5"
         >
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-x-2 sm:gap-x-3 gap-y-2.5 sm:gap-y-3">
             {primaryHotelCategoryButtons.map((cat) => {
-              const Icon = cat.icon;
               const active = categoryFilter === cat.id;
+              const titleText = tr(language, cat.nameKh, cat.nameEn, cat.nameZh);
               return (
                 <button
                   key={cat.id}
                   type="button"
                   onClick={() => setCategoryFilter(cat.id)}
                   aria-pressed={active}
-                  style={{
-                    background: cat.gradient,
-                    boxShadow: active ? cat.activeRing : cat.shadow,
-                  }}
-                  className="group relative min-h-[68px] px-1.5 py-2 rounded-[16px] flex flex-col items-center justify-center gap-1 min-w-0 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
+                  className="group relative flex flex-col items-center justify-start min-w-0 p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
                 >
-                  <span
-                    className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+                  {/* 3D Gold-Bordered Button Graphic */}
+                  <div
+                    className="relative w-full aspect-[2.12/1] flex items-center justify-center transition-all duration-200 rounded-[14px]"
                     style={{
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
+                      filter: active
+                        ? 'drop-shadow(0 0 8px rgba(250, 204, 21, 0.72)) drop-shadow(0 5px 10px rgba(15, 23, 42, 0.35))'
+                        : 'drop-shadow(0 5px 10px rgba(15, 23, 42, 0.32))',
+                      transform: active ? 'translateY(-1.5px) scale(1.02)' : 'none',
                     }}
-                  />
-                  <Icon className="relative z-10 w-5 h-5 text-white shrink-0 drop-shadow-xs" strokeWidth={2.2} />
-                  <span
-                    className="relative z-10 font-khmer font-extrabold leading-[1.62] py-0.5 text-center break-words whitespace-normal w-full"
-                    style={{ fontSize: 'clamp(11.4px, 3.12vw, 13.8px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
                   >
-                    {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
+                    <img
+                      src={cat.imageSrc}
+                      alt={titleText}
+                      loading="eager"
+                      decoding="async"
+                      draggable={false}
+                      className="w-full h-full object-contain pointer-events-none select-none"
+                    />
+                  </div>
+
+                  {/* Clear White Title Below Each Button */}
+                  <span
+                    className="mt-1 px-0.5 font-khmer font-extrabold leading-[1.62] text-center break-words whitespace-normal w-full transition-colors duration-150"
+                    style={{
+                      fontSize: 'clamp(11px, 3.05vw, 13.4px)',
+                      color: active ? '#FDE047' : '#FFFFFF',
+                      textShadow: active
+                        ? '0 1px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(250, 204, 21, 0.45)'
+                        : '0 1.5px 3px rgba(0, 0, 0, 0.90), 0 0 2px rgba(0, 0, 0, 0.75)',
+                    }}
+                  >
+                    {titleText}
                   </span>
+
+                  {/* Subtle Gold Active Indicator Bar Below Title */}
+                  {active && (
+                    <span
+                      className="mt-0.5 h-1 w-7 rounded-full"
+                      style={{
+                        background: 'linear-gradient(90deg, #FDE047 0%, #F59E0B 100%)',
+                        boxShadow: '0 0 6px rgba(250, 204, 21, 0.8)',
+                      }}
+                    />
+                  )}
                 </button>
               );
             })}
           </div>
 
-          {/* Compact 25-Province Selector Bar inside the White Card */}
-          <div className="flex items-center gap-2 pt-0.5">
+          {/* Compact 25-Province Selector Bar inside the Card */}
+          <div className="flex items-center gap-2 pt-1 border-t border-white/10">
             <div className="relative flex-1 min-w-0">
               <MapPin className="w-4 h-4 text-emerald-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <select
                 value={selectedProvince}
                 onChange={(e) => setSelectedProvince(e.target.value)}
                 aria-label={tr(language, 'ជ្រើសរើសខេត្ត-ក្រុងទាំង ២៥', 'Select Province (25 Provinces)', '选择省份（25个省市）')}
-                className="w-full min-h-[40px] pl-9 pr-3 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200/90 text-xs font-extrabold text-slate-800 cursor-pointer focus:outline-none focus:border-emerald-500 transition"
+                className="w-full min-h-[40px] pl-9 pr-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200/90 text-xs font-extrabold text-slate-800 cursor-pointer focus:outline-none focus:border-emerald-500 transition shadow-xs"
               >
                 <option value="">
                   {tr(language, 'គ្រប់ខេត្ត-ក្រុងទាំង ២៥', 'All 25 Provinces & Capital', '全部 25 个省市')}
@@ -1096,9 +1127,9 @@ export const HotelView: React.FC = () => {
               <button
                 type="button"
                 onClick={resetAllHotelFilters}
-                className="min-h-[40px] px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-extrabold active:scale-95 transition cursor-pointer shrink-0"
+                className="kft-btn-reset"
               >
-                ↺ {tr(language, 'កំណត់ឡើងវិញ', 'Reset', '重置')}
+                <span>↺ {tr(language, 'កំណត់ឡើងវិញ', 'Reset', '重置')}</span>
               </button>
             )}
           </div>
@@ -1138,7 +1169,7 @@ export const HotelView: React.FC = () => {
                   (window as any).__kft_admin_tab = 'hotels';
                   setIsAdminOpen(true);
                 }}
-                className="h-9 px-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-[11px] font-extrabold inline-flex items-center gap-1 cursor-pointer"
+                className="kft-btn-secondary-pill"
               >
                 <Settings className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
                 <span>{tr(language, 'គ្រប់គ្រង', 'Manage', '管理')}</span>
@@ -1149,9 +1180,9 @@ export const HotelView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => openManageMyVipStore(myExistingHotel.id)}
-                className="h-9 px-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-[11px] font-extrabold inline-flex items-center gap-1 cursor-pointer"
+                className="kft-btn-secondary-pill"
               >
-                <Edit2 className="w-3 h-3 text-emerald-700" />
+                <Edit2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
                 <span>{tr(language, 'កែប្រែសណ្ឋាគារខ្ញុំ', 'Edit Hotel', '编辑酒店')}</span>
               </button>
             )}
@@ -1159,11 +1190,7 @@ export const HotelView: React.FC = () => {
             <button
               type="button"
               onClick={handleAddHotelClick}
-              style={{
-                background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
-                boxShadow: '0 4px 10px rgba(234, 88, 12, 0.25)',
-              }}
-              className="h-9 px-3.5 rounded-full text-white font-extrabold text-xs inline-flex items-center gap-1 active:scale-95 transition cursor-pointer"
+              className="kft-btn-cta-orange"
             >
               <Plus className="w-4 h-4 stroke-[2.6] shrink-0" />
               <span>{tr(language, 'បន្ថែមសណ្ឋាគារ', 'Add Hotel', '添加酒店')}</span>
@@ -1188,35 +1215,31 @@ export const HotelView: React.FC = () => {
                       </h3>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={handleToggleNearMe}
+                    <span
                       style={{
                         background:
                           sortMode === 'nearest'
                             ? 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)'
                             : 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
                       }}
-                      className="px-2.5 py-0.5 rounded-full text-white text-[11px] font-extrabold inline-flex items-center gap-1 shadow-2xs active:scale-95 transition cursor-pointer shrink-0"
+                      className="px-2.5 py-0.5 rounded-full text-white text-[11px] font-extrabold inline-flex items-center gap-1 shadow-2xs shrink-0 select-none"
                     >
                       <MapPin className="w-3 h-3 text-white fill-white/25 shrink-0" />
-                      <span>
-                        {tr(language, 'ជិតខ្ញុំ', 'Near Me', '附近')} ({nearestDistanceLabel})
-                      </span>
-                    </button>
+                      <span>{nearestDistanceLabel}</span>
+                    </span>
                   </div>
 
                   <button
                     type="button"
                     onClick={() => setShowAllFeatured((prev) => !prev)}
-                    className="px-3 py-1 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 shadow-2xs text-xs font-extrabold text-slate-800 inline-flex items-center gap-0.5 cursor-pointer shrink-0"
+                    className="kft-btn-see-all"
                   >
                     <span>
                       {showAllFeatured
                         ? tr(language, 'បង្រួម', 'Show less', '收起')
                         : tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
                     </span>
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                   </button>
                 </div>
 
@@ -1285,9 +1308,9 @@ export const HotelView: React.FC = () => {
                               toggleBookmark(hotel.id);
                             }}
                             aria-label={tr(language, 'រក្សាទុក', 'Bookmark', '收藏')}
-                            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/95 hover:bg-white shadow-sm flex items-center justify-center text-rose-500 active:scale-90 transition cursor-pointer"
+                            className="kft-btn-fav absolute top-2 right-2"
                           >
-                            <Heart className={`w-3.5 h-3.5 ${bookmarked ? 'fill-rose-500 text-rose-500' : 'text-rose-500'}`} strokeWidth={2.2} />
+                            <Heart className={`w-4 h-4 ${bookmarked ? 'fill-rose-500 text-rose-500' : 'text-rose-500'}`} strokeWidth={2.2} />
                           </button>
 
                           {/* Bottom-left VIP Badge */}
@@ -1371,10 +1394,7 @@ export const HotelView: React.FC = () => {
                             <button
                               type="button"
                               onClick={handleCallHotel}
-                              style={{
-                                background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
-                              }}
-                              className="min-h-[36px] px-2 py-1 rounded-xl text-white font-extrabold text-xs inline-flex items-center justify-center gap-1 shadow-xs active:scale-95 transition cursor-pointer leading-[1.6]"
+                              className="kft-btn-call"
                             >
                               <Phone className="w-3.5 h-3.5 text-white fill-white shrink-0" />
                               <span className="break-words">{tr(language, 'ទូរស័ព្ទ', 'Call', '电话')}</span>
@@ -1386,10 +1406,7 @@ export const HotelView: React.FC = () => {
                                 e.stopPropagation();
                                 openDestinationGoogleExternal(hotel, 'maps');
                               }}
-                              style={{
-                                background: 'linear-gradient(180deg, #60A5FA 0%, #2563EB 100%)',
-                              }}
-                              className="min-h-[36px] px-2 py-1 rounded-xl text-white font-extrabold text-xs inline-flex items-center justify-center gap-1 shadow-xs active:scale-95 transition cursor-pointer leading-[1.6]"
+                              className="kft-btn-map"
                             >
                               <Navigation className="w-3.5 h-3.5 text-white shrink-0" strokeWidth={2.2} />
                               <span className="break-words">{tr(language, 'ផែនទី', 'Map', '地图')}</span>
@@ -1491,10 +1508,7 @@ export const HotelView: React.FC = () => {
                               openDestinationGoogleExternal(hotel, 'maps');
                             }}
                             aria-label={tr(language, 'ផែនទី', 'Map', '地图')}
-                            style={{
-                              background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
-                            }}
-                            className="w-8 h-8 rounded-xl text-white flex items-center justify-center shadow-2xs active:scale-95 transition cursor-pointer"
+                            className="kft-btn-map-icon"
                           >
                             <Navigation className="w-3.5 h-3.5 text-white fill-white/20" strokeWidth={2.3} />
                           </button>
@@ -1533,10 +1547,7 @@ export const HotelView: React.FC = () => {
                       onClick={() =>
                         setVisibleCount((prev) => Math.min(directoryHotels.length, prev + HOTEL_BATCH_SIZE))
                       }
-                      style={{
-                        background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
-                      }}
-                      className="px-5 py-2.5 rounded-full text-white text-xs font-extrabold shadow-xs cursor-pointer transition active:scale-95"
+                      className="kft-btn-load-more"
                     >
                       {tr(
                         language,
@@ -1589,6 +1600,7 @@ export const HotelView: React.FC = () => {
       </div>
 
       {/* Direct Hotel Photo Upload Modal for Admin */}
+      {Boolean(hotelForImageEdit) && (
       <TouristImageModal
         destination={hotelForImageEdit}
         isOpen={Boolean(hotelForImageEdit)}
@@ -1611,6 +1623,7 @@ export const HotelView: React.FC = () => {
         }}
         isKm={language === 'km'}
       />
+      )}
     </div>
   );
 };

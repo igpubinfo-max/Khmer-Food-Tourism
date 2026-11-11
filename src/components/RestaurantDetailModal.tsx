@@ -224,7 +224,7 @@ export const RestaurantDetailModal: React.FC = () => {
         >
           <button
             onClick={() => setSelectedRestaurant(null)}
-            className="p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md text-white shadow pointer-events-auto transition active:scale-90"
+            className="kft-btn-modal-icon pointer-events-auto"
             title={tr(language, 'បិទ', 'Close', '关闭')}
           >
             <X className="w-4 h-4" />
@@ -242,57 +242,10 @@ export const RestaurantDetailModal: React.FC = () => {
                 provinceKh: selectedRestaurant.provinceKh,
                 rating: selectedRestaurant.rating,
               })}
-              className="p-2.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white shadow transition active:scale-95 border border-white/20"
+              className="kft-btn-modal-icon !text-amber-300"
               title={tr(language, 'ដាក់ក្នុងបញ្ជីចង់ទៅ', 'Add to Wishlist', '加入心愿单')}
             >
-              <Bookmark className="w-4 h-4 text-amber-300" />
-            </button>
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={() => {
-                  (window as any).__kft_manage_initial_tab = 'info';
-                  setManagingRestaurant(selectedRestaurant);
-                  setIsManageMenuModalOpen(true);
-                }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black shadow transition active:scale-95 font-khmer border border-white/50 cursor-pointer"
-                title={tr(language, 'កែប្រែព័ត៌មាន & រូបភាពហាង (Admin)', 'Edit Store Details & Photos (Admin)', '编辑店铺信息与照片（管理员）')}
-              >
-                <Edit2 className="w-3.5 h-3.5" />
-                <span>{tr(language, 'កែប្រែហាង (Edit)', 'Edit Store', '编辑店铺')}</span>
-              </button>
-            )}
-
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={() => deleteRestaurant(selectedRestaurant.id)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-black shadow transition active:scale-95 font-khmer border border-white/40 cursor-pointer"
-                title={tr(language, 'លុបហាងនេះ (Admin)', 'Delete Shop (Admin)', '删除店铺（管理员）')}
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>{tr(language, 'លុបហាង', 'Delete', '删除')}</span>
-              </button>
-            )}
-
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={handleOpenPhotoEditor}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-xs font-bold shadow transition active:scale-95 font-khmer border border-white/20"
-                title={tr(language, 'ប្តូររូបភាពហាង (Admin)', 'Change Shop Photo (Admin)', '更换店铺照片（管理员）')}
-              >
-                <Camera className="w-3.5 h-3.5 text-emerald-300" />
-                <span>{tr(language, 'ប្តូររូបភាព', 'Change Photo', '更换照片')}</span>
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={handleCallRestaurant}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold shadow transition active:scale-95"
-            >
-              <Phone className="w-3.5 h-3.5" />
-              <span>{tr(language, 'ហៅទូរស័ព្ទ', 'Call', '致电')}</span>
+              <Bookmark className="w-4 h-4 fill-current" />
             </button>
           </div>
         </div>
@@ -412,9 +365,9 @@ export const RestaurantDetailModal: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCallRestaurant}
-                className="sm:col-span-2 w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 hover:from-amber-700 hover:to-orange-700 text-white text-xs sm:text-sm font-bold shadow-md transition active:scale-98 cursor-pointer font-khmer"
+                className="kft-btn-call sm:col-span-2 w-full !py-3 !px-4 !rounded-2xl !text-xs sm:!text-sm"
               >
-                <Phone className="w-4 h-4 shrink-0" />
+                <Phone className="w-4 h-4 fill-white shrink-0" />
                 <span>
                   {displayPhone
                     ? tr(
@@ -439,7 +392,7 @@ export const RestaurantDetailModal: React.FC = () => {
                     trackRestaurantMap(selectedRestaurant.id);
                   }
                 }}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md transition active:scale-98 cursor-pointer font-khmer"
+                className="kft-btn-map w-full !py-3 !px-4 !rounded-2xl"
               >
                 <MapPin className="w-4 h-4 shrink-0" />
                 <span>{tr(language, 'បើកមើលលើ Google Maps', 'Open in Google Maps', '在 Google 地图中查看')}</span>
@@ -453,7 +406,7 @@ export const RestaurantDetailModal: React.FC = () => {
                     trackRestaurantMap(selectedRestaurant.id);
                   }
                 }}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white text-xs font-bold shadow-md transition active:scale-98 cursor-pointer font-khmer"
+                className="kft-btn-map w-full !py-3 !px-4 !rounded-2xl"
               >
                 <Compass className="w-4 h-4 shrink-0" />
                 <span>{tr(language, 'នាំផ្លូវទៅកាន់ទីតាំង', 'Navigate / Directions', '开始路线导航')}</span>

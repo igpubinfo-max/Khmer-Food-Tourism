@@ -120,7 +120,7 @@ export const UpgradeVipModal: React.FC = () => {
         titleEn: p.titleEn,
         days: p.durationDays,
         priceUsd: p.priceUsd,
-        badgeText: tr(language, p.badgeKm, p.badgeEn, zhBadge),
+        badgeText: tr(language, p.badgeKm || '', p.badgeEn || '', zhBadge),
         isPopular: p.planId === 'consumer_90d' || p.planId === 'consumer_365d',
       });
     }
@@ -974,7 +974,7 @@ export const UpgradeVipModal: React.FC = () => {
 
               <div className="p-4 rounded-2xl bg-slate-50 border-2 border-amber-400/60 text-left space-y-3">
                 {(paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl) && (
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl}
                     alt="Payment Proof Preview"
                     className="w-full max-h-56 object-contain rounded-xl border border-slate-200 bg-white p-1"
@@ -1034,7 +1034,7 @@ export const UpgradeVipModal: React.FC = () => {
           {paymentState === 'PENDING_ADMIN_APPROVAL' && (
             <div className="p-4 rounded-[22px] bg-white border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.10)] text-center space-y-4 animate-fade-in text-slate-900">
               <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-md ring-4 ring-amber-400/20">
-                <Clock className="w-8 h-8 animate-pulse" />
+                <Clock className="w-8 h-8" />
               </div>
 
               <div>
@@ -1070,7 +1070,7 @@ export const UpgradeVipModal: React.FC = () => {
 
               <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-2.5">
                 {(paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl) && (
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl}
                     alt="Uploaded Payment Proof"
                     className="w-full max-h-48 object-contain rounded-xl border border-slate-200 bg-white p-1"
@@ -1438,7 +1438,7 @@ export const UpgradeVipModal: React.FC = () => {
                     title={tr(language, 'ចុចលើរូប QR ដើម្បីរក្សាទុកទៅក្នុង រូបភាពរបស់ខ្ញុំ', 'Tap QR code to save original image to រូបភាពរបស់ខ្ញុំ', '点击二维码保存原图到 រូបភាពរបស់ខ្ញុំ')}
                     className="w-[42%] max-w-[162px] p-1.5 bg-white rounded-2xl shadow-sm border-2 border-emerald-500/40 hover:border-emerald-500 flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition"
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={qrCodeDataUrl}
                       alt="ABA KHQR Code"
                       className="w-full aspect-square object-contain rounded-lg select-none"
@@ -1520,7 +1520,7 @@ export const UpgradeVipModal: React.FC = () => {
                         PDF
                       </div>
                     ) : (
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={paymentProofDraft.dataUrl}
                         alt="Selected Payment Proof Preview"
                         className="w-10 h-10 object-cover rounded-lg bg-white border border-slate-200 shrink-0"

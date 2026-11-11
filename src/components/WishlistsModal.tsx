@@ -253,7 +253,7 @@ export const WishlistsModal: React.FC = () => {
         {targetWishlistItem && (
           <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-900/40 flex items-center justify-between gap-3 shrink-0 font-khmer">
             <div className="flex items-center gap-2.5 min-w-0">
-              <img src={targetWishlistItem.photoUrl} alt="" className="w-10 h-10 rounded-xl object-cover shrink-0" />
+              <img loading="lazy" decoding="async" src={targetWishlistItem.photoUrl} alt="" className="w-10 h-10 rounded-xl object-cover shrink-0" />
               <div className="min-w-0">
                 <div className="text-[10px] text-amber-800 dark:text-amber-300 font-bold">
                   {tr(language, 'ជ្រើសរើសបញ្ជីដើម្បីរក្សាទុក៖', 'Save to which wishlist?', '选择要保存到的心愿单：')}
@@ -403,7 +403,7 @@ export const WishlistsModal: React.FC = () => {
                       className="w-14 h-14 rounded-xl shrink-0"
                     />
                   ) : item.photoUrl ? (
-                    <img src={item.photoUrl} alt="" className="w-14 h-14 rounded-xl object-cover shrink-0 bg-slate-100" />
+                    <img loading="lazy" decoding="async" src={item.photoUrl} alt="" className="w-14 h-14 rounded-xl object-cover shrink-0 bg-slate-100" />
                   ) : (
                     <div className="w-14 h-14 rounded-xl bg-emerald-50 dark:bg-slate-700 flex items-center justify-center shrink-0 text-xl">
                       {item.type === 'food' ? '🍲' : '🌄'}

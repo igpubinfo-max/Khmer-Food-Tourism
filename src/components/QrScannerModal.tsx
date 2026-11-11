@@ -360,7 +360,7 @@ export const QrScannerModal: React.FC = () => {
                   <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
                     {isKm ? '🖼️ រូបភាពដែលបានជ្រើសរើស៖' : '🖼️ Selected Image Preview:'}
                   </p>
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={selectedQrImagePreview}
                     alt="Selected QR Preview"
                     className="max-h-44 mx-auto rounded-xl object-contain border border-slate-200 dark:border-slate-700 bg-white p-1"
@@ -390,7 +390,7 @@ export const QrScannerModal: React.FC = () => {
                   <canvas ref={canvasRef} className="hidden" />
                   
                   {/* Scanner Laser Overlay */}
-                  <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 h-0.5 bg-emerald-400 shadow-[0_0_10px_#10B981] animate-pulse" />
+                  <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 h-0.5 bg-emerald-400 shadow-[0_0_10px_#10B981]" />
                   <div className="absolute inset-8 border-2 border-emerald-400/80 rounded-2xl pointer-events-none" />
                 </div>
               )}

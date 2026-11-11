@@ -68,7 +68,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
               className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer"
             >
               <div className="relative shrink-0">
-                <img
+                <img loading="lazy"
                   key={resolveUserAvatarUrl(currentUser)}
                   src={resolveUserAvatarUrl(currentUser)}
                   alt={currentUser.name}
@@ -120,7 +120,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
               aria-label={tr(language, 'គណនីរបស់ខ្ញុំ', 'My profile', '我的账户')}
               className="relative shrink-0 cursor-pointer active:scale-95 transition"
             >
-              <img
+              <img loading="lazy"
                 key={resolveUserAvatarUrl(currentUser)}
                 src={resolveUserAvatarUrl(currentUser)}
                 alt={currentUser.name}
@@ -185,7 +185,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
 
       {/* Angkor Wat Sunrise Hero Banner + Ask AI Bar */}
       <div className="relative rounded-3xl overflow-hidden shadow-md border border-amber-500/30 bg-slate-950">
-        <img
+        <img loading="lazy" decoding="async"
           src="/welcome/angkor-sunrise-hero.png"
           alt="Angkor Wat Sunrise"
           className="w-full h-36 sm:h-40 object-cover object-center block"
@@ -213,7 +213,7 @@ const HomeGreetingSearchInner: React.FC<Props> = ({
           </h2>
 
           {/* Ask AI Bar: [Camera] + [Search/Ask AI Input] + [សួរ AI Button] */}
-          <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-amber-400/45 shadow-lg">
+          <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-slate-900/90 border border-amber-400/45 shadow-lg">
             {/* Left Camera Button */}
             <button
               type="button"

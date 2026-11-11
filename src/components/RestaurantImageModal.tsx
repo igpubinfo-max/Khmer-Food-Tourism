@@ -346,7 +346,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
 
             <div className="relative aspect-16/9 w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-inner">
               {photoUrl ? (
-                <img
+                <img loading="lazy" decoding="async"
                   src={photoUrl}
                   alt="Restaurant Profile Preview"
                   className="w-full h-full object-cover transition-all duration-300"
@@ -363,7 +363,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
               </div>
 
               {isProcessing && (
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex flex-col items-center justify-center text-white gap-2">
+                <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white gap-2">
                   <RefreshCw className="w-6 h-6 animate-spin text-emerald-400" />
                   <span className="text-xs">{isKm ? 'កំពុងដំណើរការរូបភាព...' : 'Processing image...'}</span>
                 </div>
@@ -379,7 +379,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
                       photoUrl === imgUrl ? 'border-emerald-600 ring-2 ring-emerald-500/40' : 'border-emerald-300 dark:border-emerald-700'
                     }`}
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={imgUrl}
                       alt={`Shop ${i + 1}`}
                       onClick={() => setPhotoUrl(imgUrl)}

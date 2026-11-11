@@ -173,10 +173,10 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
             <button
               type="button"
               onClick={onSeeAllFoods}
-              className="px-3 py-1 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 shadow-2xs inline-flex items-center gap-0.5 text-xs font-khmer font-extrabold text-slate-800 transition active:scale-95 cursor-pointer shrink-0"
+              className="kft-btn-see-all"
             >
               <span>{tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}</span>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+              <ChevronRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
             </button>
           </div>
 
@@ -244,7 +244,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
                     }}
                   />
 
-                  {/* Top-right Heart Icon */}
+                  {/* Top-right Unified Heart Icon */}
                   <button
                     type="button"
                     onClick={(e) => {
@@ -256,9 +256,9 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
                       }
                     }}
                     aria-label="Favorite"
-                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/35 hover:bg-black/55 border border-white/30 backdrop-blur-xs flex items-center justify-center text-white transition cursor-pointer"
+                    className="kft-btn-fav absolute top-2 right-2"
                   >
-                    <Heart className={`w-4 h-4 ${isFav ? 'fill-rose-500 text-rose-500' : 'text-white'}`} />
+                    <Heart className={`w-4 h-4 ${isFav ? 'fill-rose-500 text-rose-500' : 'text-rose-500'}`} strokeWidth={2.2} />
                   </button>
 
                   {/* Bottom Centered Dish Title (Strictly confined to bottom third, max 2 lines) */}

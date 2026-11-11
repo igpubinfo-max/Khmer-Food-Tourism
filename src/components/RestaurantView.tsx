@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
-import { AngkorHeroTopHeader, AccountTrialStatusBar } from './AngkorHeroTopHeader';
+import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
 import {
   Restaurant,
   sortRestaurantsWithVipRotation,
@@ -42,7 +42,7 @@ import { DISH_PROVINCES, matchShopToProductQuery, verifyShopDataForDisplay } fro
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 import { handleAvatarImageError } from '../utils/avatarHelper';
 
-const RESTAURANT_BATCH_SIZE = 40;
+const RESTAURANT_BATCH_SIZE = 24;
 
 function haversineDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const toRad = (deg: number) => (deg * Math.PI) / 180;
@@ -271,7 +271,7 @@ export const RestaurantView: React.FC = () => {
     return subCat === tabId;
   };
 
-  // 6 Colorful Glossy Category Cards matching Reference Image 2 (Home Screen 3x2 grid)
+  // 6 Premium 3D Gold-Bordered Category Buttons in 3x2 Grid
   const primaryCategoryPills = [
     {
       id: 'all',
@@ -279,9 +279,8 @@ export const RestaurantView: React.FC = () => {
       nameEn: 'All Shops',
       nameZh: '全部店铺',
       icon: LayoutGrid,
-      gradient: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
-      shadow: '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
-      activeRing: '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)',
+      imageSrc: '/categories/shop_cat_all.png',
+      accentColor: '#F59E0B',
     },
     {
       id: 'restaurant_dining',
@@ -289,9 +288,8 @@ export const RestaurantView: React.FC = () => {
       nameEn: 'Restaurants',
       nameZh: '餐厅',
       icon: Utensils,
-      gradient: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
-      shadow: '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
-      activeRing: '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)',
+      imageSrc: '/categories/shop_cat_restaurant.png',
+      accentColor: '#22C55E',
     },
     {
       id: 'cafe_bistro',
@@ -299,9 +297,8 @@ export const RestaurantView: React.FC = () => {
       nameEn: 'Café',
       nameZh: '咖啡馆',
       icon: Coffee,
-      gradient: 'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)',
-      shadow: '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
-      activeRing: '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)',
+      imageSrc: '/categories/shop_cat_cafe.png',
+      accentColor: '#F43F5E',
     },
     {
       id: 'drinks_boba',
@@ -309,9 +306,8 @@ export const RestaurantView: React.FC = () => {
       nameEn: 'Drinks',
       nameZh: '饮品',
       icon: CupSoda,
-      gradient: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
-      shadow: '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
-      activeRing: '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)',
+      imageSrc: '/categories/shop_cat_drinks.png',
+      accentColor: '#3B82F6',
     },
     {
       id: 'fast_street',
@@ -319,9 +315,8 @@ export const RestaurantView: React.FC = () => {
       nameEn: 'Fast Food',
       nameZh: '快餐小吃',
       icon: Sandwich,
-      gradient: 'linear-gradient(180deg, #F4B630 0%, #C67D0D 100%)',
-      shadow: '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
-      activeRing: '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)',
+      imageSrc: '/categories/shop_cat_fastfood.png',
+      accentColor: '#EAB308',
     },
     {
       id: 'near_me_toggle',
@@ -329,9 +324,8 @@ export const RestaurantView: React.FC = () => {
       nameEn: 'Near Me',
       nameZh: '附近店铺',
       icon: MapPin,
-      gradient: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',
-      shadow: '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
-      activeRing: '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)',
+      imageSrc: '/categories/shop_cat_nearme.png',
+      accentColor: '#14B8A6',
     },
   ];
 
@@ -615,9 +609,9 @@ export const RestaurantView: React.FC = () => {
 
       {/* 2. MAIN CONTENT CONTAINER rising smoothly from the Angkor Wat reflection (100% Matching Food Menu) */}
       <div className="relative z-20 -mt-[82px] px-2.5 min-[360px]:px-3.5 sm:px-5 space-y-2.5">
-        {/* Compact Khmer Promotional Title Banner (Left) + 7-Day Free Trial / Account Status Banner Below Language Selector (Right) */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pl-0.5 sm:pl-1">
-          <div className="relative py-1 pl-1 pr-2 bg-transparent flex items-center gap-2.5 min-w-0 flex-1">
+        {/* Compact Khmer Promotional Title Banner (Aligned Left) */}
+        <div className="flex items-center justify-start pl-0.5 sm:pl-1">
+          <div className="relative py-1 pl-1 pr-2 bg-transparent inline-flex items-center gap-2.5 max-w-[65%] min-w-0">
             {/* Left Yellow Shop / Restaurant Icon */}
             <div
               style={{
@@ -653,13 +647,10 @@ export const RestaurantView: React.FC = () => {
               </p>
             </div>
           </div>
-
-          {/* 7-Day Free Trial / Account Status Banner below the Language Selector & out of the temple area */}
-          <AccountTrialStatusBar inline className="ml-auto" />
         </div>
 
-        {/* Row 1: Main Search Bar – Large White Rounded Glassmorphism Search Bar + Separate Green Filter Button (100% Matching Food Menu) */}
-        <div className="flex items-center gap-1.5 min-[360px]:gap-2 min-w-0">
+        {/* Row 1: Main Search Bar – Compact Left-Aligned (~60% Width, Shrunk 40% from Right to Left) + Separate Green Filter Button */}
+        <div className="w-[60%] mr-auto flex items-center gap-1.5 min-[360px]:gap-2 min-w-0">
           <div
             style={{
               background: 'rgba(255, 255, 255, 0.92)',
@@ -703,11 +694,7 @@ export const RestaurantView: React.FC = () => {
             <button
               type="button"
               onClick={handleExecuteShopSearch}
-              style={{
-                background: 'linear-gradient(180deg, #2E7D52 0%, #1B5E3A 100%)',
-                boxShadow: '0 2px 6px rgba(27, 94, 58, 0.35)',
-              }}
-              className="h-[34px] px-2.5 min-[360px]:px-3.5 rounded-full border-[1.5px] border-white/90 text-white text-[11px] min-[360px]:text-[12px] font-khmer font-extrabold flex items-center gap-1 min-[360px]:gap-1.5 shrink-0 active:scale-95 transition cursor-pointer"
+              className="kft-btn-search-inline"
             >
               <Search className="w-3.5 h-3.5 text-white stroke-[2.4] shrink-0" />
               <span>{tr(language, 'ស្វែងរក', 'Search', '搜索')}</span>
@@ -754,9 +741,9 @@ export const RestaurantView: React.FC = () => {
                     setShopSearchQuery('');
                     setDebouncedShopSearchQuery('');
                   }}
-                  className="text-[11px] font-extrabold text-rose-600 hover:underline cursor-pointer"
+                  className="kft-btn-reset"
                 >
-                  {tr(language, 'សម្អាតតម្រង', 'Reset All', '重置筛选')}
+                  <span>↺ {tr(language, 'កំណត់ឡើងវិញ', 'Reset', '重置')}</span>
                 </button>
               )}
             </div>
@@ -785,17 +772,16 @@ export const RestaurantView: React.FC = () => {
           </div>
         )}
 
-        {/* Row 2: 6 Colorful Gradient Category Buttons in Clean White Card (Matching Reference Image 2) */}
+        {/* Row 2: 6 Premium 3D Gold-Bordered Category Buttons in 3x2 Layout with Clear White Text Below Each Illustration */}
         <div
           style={{
-            background: '#FFFFFF',
-            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)',
+            background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(22, 38, 59, 0.96) 100%)',
+            boxShadow: '0 10px 26px rgba(2, 6, 23, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
           }}
-          className="rounded-[24px] p-2.5 sm:p-3 border border-slate-100"
+          className="rounded-[24px] px-2.5 py-3 sm:px-3.5 sm:py-3.5 border border-[#F59E0B]/35"
         >
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-x-2 sm:gap-x-3 gap-y-2.5 sm:gap-y-3">
             {primaryCategoryPills.map((cat) => {
-              const Icon = cat.icon;
               const active = cat.id === 'near_me_toggle' ? nearMeActive : categoryFilter === cat.id;
               return (
                 <button
@@ -809,25 +795,48 @@ export const RestaurantView: React.FC = () => {
                     }
                   }}
                   aria-pressed={active}
-                  style={{
-                    background: cat.gradient,
-                    boxShadow: active ? cat.activeRing : cat.shadow,
-                  }}
-                  className="group relative min-h-[68px] px-1.5 py-2 rounded-[16px] flex flex-col items-center justify-center gap-1 min-w-0 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
+                  className="group relative flex flex-col items-center justify-start min-w-0 transition-transform duration-200 active:scale-[0.95] cursor-pointer focus:outline-none bg-transparent border-0 p-0"
                 >
+                  {/* 3D Gold-Bordered Category Illustration Button */}
+                  <div
+                    className={`relative w-full aspect-[720/340] flex items-center justify-center rounded-[16px] transition-all duration-200 ${
+                      active
+                        ? 'scale-[1.03] drop-shadow-[0_6px_14px_rgba(245,158,11,0.52)]'
+                        : 'drop-shadow-[0_5px_12px_rgba(0,0,0,0.38)] hover:scale-[1.02]'
+                    }`}
+                  >
+                    <img decoding="async"
+                      src={cat.imageSrc}
+                      alt={tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
+                      className="w-full h-full object-contain select-none pointer-events-none"
+                      loading="eager"
+                      draggable={false}
+                    />
+                  </div>
+
+                  {/* Clear White Text Title Directly Below Button / Illustration */}
                   <span
-                    className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+                    className={`mt-1 font-khmer font-extrabold leading-[1.45] text-center break-words whitespace-normal w-full px-0.5 transition-colors ${
+                      active ? 'text-[#FDE68A]' : 'text-white'
+                    }`}
                     style={{
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
+                      fontSize: 'clamp(11px, 3.05vw, 13.5px)',
+                      textShadow: active
+                        ? '0 1px 4px rgba(0, 0, 0, 0.9), 0 0 10px rgba(245, 158, 11, 0.55)'
+                        : '0 1.5px 3px rgba(0, 0, 0, 0.85), 0 0 6px rgba(0, 0, 0, 0.5)',
                     }}
-                  />
-                  <Icon className="relative z-10 w-5 h-5 text-white shrink-0 drop-shadow-xs" strokeWidth={2.2} />
-                  <span
-                    className="relative z-10 font-khmer font-extrabold leading-[1.62] py-0.5 text-center break-words whitespace-normal w-full"
-                    style={{ fontSize: 'clamp(11.4px, 3.12vw, 13.8px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
                   >
                     {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
                   </span>
+
+                  {/* Subtle Gold Active Indicator Pill */}
+                  <span
+                    className={`mt-0.5 h-[3px] rounded-full transition-all duration-200 ${
+                      active
+                        ? 'w-8 bg-gradient-to-r from-[#FDE047] via-[#F59E0B] to-[#FDE047] shadow-[0_0_8px_rgba(245,158,11,0.8)]'
+                        : 'w-0 bg-transparent'
+                    }`}
+                  />
                 </button>
               );
             })}
@@ -869,7 +878,7 @@ export const RestaurantView: React.FC = () => {
                     (window as any).__kft_admin_tab = 'shops';
                     setIsAdminOpen(true);
                   }}
-                  className="h-9 px-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-[11px] font-extrabold inline-flex items-center gap-1 cursor-pointer"
+                  className="kft-btn-secondary-pill"
                 >
                   <Settings className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
                   <span>{tr(language, 'គ្រប់គ្រង', 'Manage', '管理')}</span>
@@ -877,7 +886,7 @@ export const RestaurantView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsRestaurantCheckInModalOpen(true)}
-                  className="h-9 px-3 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold inline-flex items-center gap-1 cursor-pointer"
+                  className="kft-btn-secondary-pill"
                 >
                   <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                   <span>GPS</span>
@@ -892,9 +901,9 @@ export const RestaurantView: React.FC = () => {
                   (window as any).__kft_manage_initial_tab = 'info';
                   openManageMyVipStore(myExistingRest.id);
                 }}
-                className="h-9 px-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-[11px] font-extrabold inline-flex items-center gap-1 cursor-pointer"
+                className="kft-btn-secondary-pill"
               >
-                <Edit2 className="w-3 h-3 text-emerald-700" />
+                <Edit2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
                 <span>{tr(language, 'កែប្រែហាង', 'Edit Shop', '管理店铺')}</span>
               </button>
             )}
@@ -902,11 +911,7 @@ export const RestaurantView: React.FC = () => {
             <button
               type="button"
               onClick={handleAddShopClick}
-              style={{
-                background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
-                boxShadow: '0 4px 10px rgba(234, 88, 12, 0.25)',
-              }}
-              className="h-9 px-3.5 rounded-full text-white font-extrabold text-xs inline-flex items-center gap-1 active:scale-95 transition cursor-pointer"
+              className="kft-btn-cta-orange"
             >
               <Plus className="w-4 h-4 stroke-[2.6] shrink-0" />
               <span>{tr(language, 'បន្ថែមហាងថ្មី', 'Add Shop', '添加店铺')}</span>
@@ -933,36 +938,32 @@ export const RestaurantView: React.FC = () => {
                       </h3>
                     </div>
 
-                    {/* GPS Distance Pill Badge */}
-                    <button
-                      type="button"
-                      onClick={handleToggleNearMe}
+                    {/* Non-redundant GPS Distance Status Pill (Near Me toggle is in the 6-button grid above) */}
+                    <span
                       style={{
                         background: nearMeActive
                           ? 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)'
                           : 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
                       }}
-                      className="px-2.5 py-0.5 rounded-full text-white text-[11px] font-extrabold inline-flex items-center gap-1 shadow-2xs active:scale-95 transition cursor-pointer shrink-0"
+                      className="px-2.5 py-0.5 rounded-full text-white text-[11px] font-extrabold inline-flex items-center gap-1 shadow-2xs shrink-0 select-none"
                     >
                       <MapPin className="w-3 h-3 text-white fill-white/25 shrink-0" />
-                      <span>
-                        {tr(language, 'ជិតខ្ញុំ', 'Near Me', '附近')} ({nearestDistanceLabel})
-                      </span>
-                    </button>
+                      <span>{nearestDistanceLabel}</span>
+                    </span>
                   </div>
 
-                  {/* White Rounded Pill "មើលទាំងអស់ >" Matching Reference Image 2 */}
+                  {/* Unified White Rounded Pill "មើលទាំងអស់ >" */}
                   <button
                     type="button"
                     onClick={() => setShowAllFeatured((prev) => !prev)}
-                    className="px-3 py-1 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 shadow-2xs text-xs font-extrabold text-slate-800 inline-flex items-center gap-0.5 cursor-pointer shrink-0"
+                    className="kft-btn-see-all"
                   >
                     <span>
                       {showAllFeatured
                         ? tr(language, 'បង្រួម', 'Show less', '收起')
                         : tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
                     </span>
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                   </button>
                 </div>
 
@@ -1019,10 +1020,7 @@ export const RestaurantView: React.FC = () => {
                       onClick={() =>
                         setVisibleCount((prev) => Math.min(directoryRestaurants.length, prev + RESTAURANT_BATCH_SIZE))
                       }
-                      style={{
-                        background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
-                      }}
-                      className="px-5 py-2.5 rounded-full text-white text-xs font-extrabold shadow-xs cursor-pointer transition active:scale-95"
+                      className="kft-btn-load-more"
                     >
                       {tr(
                         language,

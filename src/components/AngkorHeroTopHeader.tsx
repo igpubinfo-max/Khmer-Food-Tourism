@@ -155,7 +155,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
             className="w-10 h-10 min-[380px]:w-[46px] min-[380px]:h-[46px] rounded-[12px] min-[380px]:rounded-[13px] p-[1.5px] bg-gradient-to-b from-[#FDE047] via-[#D4AF37] to-[#9A6F1A] overflow-hidden shrink-0 cursor-pointer active:scale-95 transition"
             title={tr(language, 'ទំព័រដើម', 'Home', '首页')}
           >
-            <img
+            <img loading="lazy"
               src="/logo-kft.png"
               alt="រសជាតិ និងទេសចរណ៍កម្ពុជា"
               decoding="async"
@@ -212,7 +212,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
                   : tr(language, 'ចូលគណនី', 'Sign In', '登录')
               }
             >
-              <img
+              <img loading="lazy"
                 src={resolvedProfileAvatar}
                 alt={effectiveUser?.name || 'IG'}
                 decoding="async"
@@ -286,7 +286,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
               boxShadow:
                 '0 0 0 1px rgba(245, 197, 66, 0.45), 0 4px 14px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.16)',
             }}
-            className="w-full h-[46px] rounded-full px-2 flex items-center gap-2 border border-[#F5C542]/85"
+            className="w-[60%] mr-auto min-w-0 h-[46px] rounded-full px-2 flex items-center gap-1.5 border border-[#F5C542]/85"
           >
             {/* Left Glowing Gold Circle Camera Button (Scaled +20% to 34px) */}
             <button
@@ -316,6 +316,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
             <div className="flex-1 min-w-0 flex items-center">
               <input
                 type="text"
+                size={1}
                 enterKeyHint="send"
                 value={query}
                 onChange={(e) => onChangeQuery && onChangeQuery(e.target.value)}
@@ -331,7 +332,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
                   'Ask anything about food or snap a photo...',
                   '询问任何美食问题或拍照识菜...'
                 )}
-                className="w-full bg-transparent text-white placeholder:text-white/95 text-[12.5px] sm:text-[13px] font-khmer font-extrabold focus:outline-none truncate"
+                className="w-full min-w-0 bg-transparent text-white placeholder:text-white/95 text-[12px] sm:text-[13px] font-khmer font-extrabold focus:outline-none truncate"
                 style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}
               />
               {query && (
@@ -346,16 +347,16 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
               )}
             </div>
 
-            {/* Right Orange Pill Button: សួរ AI (Scaled +20% to 34px) */}
+            {/* Right Orange Pill Button: សួរ AI */}
             <button
               type="submit"
               style={{
                 background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
                 boxShadow: '0 2px 6px rgba(234, 88, 12, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
               }}
-              className="h-[34px] px-3.5 rounded-full text-white font-khmer font-extrabold text-[12px] flex items-center gap-1.5 shrink-0 active:scale-95 transition cursor-pointer border border-amber-200/50"
+              className="h-[34px] px-2.5 sm:px-3.5 rounded-full text-white font-khmer font-extrabold text-[11.5px] sm:text-[12px] flex items-center gap-1 sm:gap-1.5 shrink-0 active:scale-95 transition cursor-pointer border border-amber-200/50 whitespace-nowrap"
             >
-              <Send className="w-3.5 h-3.5 -rotate-12 stroke-[2.3]" />
+              <Send className="w-3.5 h-3.5 -rotate-12 stroke-[2.3] shrink-0" />
               <span>{tr(language, 'សួរ AI', 'Ask AI', '问 AI')}</span>
             </button>
           </form>

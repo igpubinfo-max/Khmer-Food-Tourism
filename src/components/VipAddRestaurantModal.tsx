@@ -1880,7 +1880,7 @@ export const VipAddRestaurantModal: React.FC = () => {
                 }}
                 className="w-60 sm:w-68 max-w-full mx-auto rounded-2xl overflow-hidden border-2 border-amber-400 shadow-sm bg-white cursor-pointer active:scale-[0.985] transition block p-0"
               >
-                <img
+                <img loading="lazy" decoding="async"
                   src="/images/aba_khqr_official_kimseng.png"
                   alt="ABA KHQR — KIMSENG CHEA"
                   className="w-full h-auto object-contain block bg-white"
@@ -2098,7 +2098,7 @@ export const VipAddRestaurantModal: React.FC = () => {
             )}
 
             {/* Action Buttons: Edit vs Confirm & Submit */}
-            <div className="grid grid-cols-2 gap-2.5 pt-1 sticky bottom-0 -mx-4 px-4 py-2.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-t border-slate-200 dark:border-slate-800">
+            <div className="grid grid-cols-2 gap-2.5 pt-1 sticky bottom-0 -mx-4 px-4 py-2.5 bg-white/95 dark:bg-slate-900/95 border-t border-slate-200 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setIsPreviewStep(false)}
@@ -2334,7 +2334,7 @@ export const VipAddRestaurantModal: React.FC = () => {
                           className="w-full text-left p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center gap-2.5 hover:border-amber-400 active:scale-[0.99] transition cursor-pointer"
                         >
                           {item.photoUrl ? (
-                            <img
+                            <img decoding="async"
                               src={item.photoUrl}
                               alt={item.nameKh || item.nameEn}
                               loading="lazy"
@@ -2971,7 +2971,7 @@ export const VipAddRestaurantModal: React.FC = () => {
                     >
                       {coverPhoto ? (
                         <>
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={coverPhoto}
                             alt={tr(language, 'រូបភាពហាង', 'Shop photo', '店铺照片')}
                             className="w-full h-full object-cover"
@@ -3153,7 +3153,7 @@ export const VipAddRestaurantModal: React.FC = () => {
 
             {/* Sticky Submit Bar (always reachable on mobile) */}
             {!isSelectingExisting && (
-              <div className="shrink-0 px-4 pt-2.5 pb-3 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm space-y-1.5">
+              <div className="shrink-0 px-4 pt-2.5 pb-3 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 space-y-1.5">
                 {submitAttempted && Object.keys(errors).length > 0 && (
                   <div className="text-[11px] font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />

@@ -117,6 +117,7 @@ export default defineConfig({
     kftVersionManifestPlugin(),
   ],
   build: {
+    emptyOutDir: true,
     sourcemap: false,
     minify: true,
     chunkSizeWarningLimit: 1000,

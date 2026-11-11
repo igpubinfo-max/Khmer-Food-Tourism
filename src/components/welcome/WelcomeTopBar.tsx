@@ -17,7 +17,7 @@ export const WelcomeTopBar: React.FC<Props> = ({ language, onLanguage }) => (
   >
     <div className="flex items-center gap-1.5">
       <div
-        className="inline-flex items-center gap-0.5 bg-black/50 backdrop-blur-md rounded-full p-1 border border-white/25 shadow-lg"
+        className="inline-flex items-center gap-0.5 bg-black/50 rounded-full p-1 border border-white/25 shadow-lg"
         role="group"
         aria-label="Language"
       >

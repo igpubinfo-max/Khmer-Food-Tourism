@@ -661,7 +661,7 @@ export const NotificationsModal: React.FC = () => {
                       >
                         {!n.isRead ? (
                           <>
-                            <CircleDot className="w-2.5 h-2.5 text-emerald-500 animate-pulse" />
+                            <CircleDot className="w-2.5 h-2.5 text-emerald-500" />
                             <span>{tr(language, 'ថ្មី • មិនទាន់អាន', 'Unread', '未读')}</span>
                           </>
                         ) : (
@@ -694,7 +694,7 @@ export const NotificationsModal: React.FC = () => {
                   {/* Main Content with Thumbnail Image */}
                   <div className="flex items-start gap-3">
                     {n.photoUrl && (
-                      <img
+                      <img decoding="async"
                         src={n.photoUrl}
                         alt={getNotificationTitle(n)}
                         onError={(e) => {

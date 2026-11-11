@@ -556,7 +556,7 @@ export const AiTripPlannerModal: React.FC = () => {
             className="group flex flex-col items-center justify-start gap-1 min-w-0 cursor-pointer transition-transform active:scale-95 focus:outline-none"
           >
             <div className="w-full aspect-[1024/536] flex items-center justify-center">
-              <img
+              <img loading="lazy"
                 src="/welcome/ai-category-food.png"
                 alt={tr(language, 'រើសម្ហូបឆ្លាតវៃ', 'AI Food', '智能选餐')}
                 decoding="async"
@@ -587,7 +587,7 @@ export const AiTripPlannerModal: React.FC = () => {
             className="group flex flex-col items-center justify-start gap-1 min-w-0 cursor-pointer transition-transform active:scale-95 focus:outline-none"
           >
             <div className="w-full aspect-[1024/536] flex items-center justify-center">
-              <img
+              <img loading="lazy"
                 src="/welcome/ai-category-special-menu.png"
                 alt={tr(language, 'ម្ហូបពិសេស', 'Special Menu', '特色菜单')}
                 decoding="async"
@@ -619,7 +619,7 @@ export const AiTripPlannerModal: React.FC = () => {
             className="group flex flex-col items-center justify-start gap-1 min-w-0 cursor-pointer transition-transform active:scale-95 focus:outline-none"
           >
             <div className="w-full aspect-[1024/536] flex items-center justify-center">
-              <img
+              <img loading="lazy"
                 src="/welcome/ai-category-trip-planner.png"
                 alt={tr(language, 'ផែនការដើរលេង', 'Trip Planner', '行程规划')}
                 decoding="async"
@@ -1002,7 +1002,7 @@ export const AiTripPlannerModal: React.FC = () => {
                         />
 
                         {/* Subtle Free / VIP Pill Badge in Top-Right Corner */}
-                        <span className="absolute top-1.5 right-1.5 z-10 px-1.5 py-[1px] rounded-full bg-black/25 backdrop-blur-[2px] border border-white/30 text-[8px] font-extrabold text-white leading-tight flex items-center gap-0.5">
+                        <span className="absolute top-1.5 right-1.5 z-10 px-1.5 py-[1px] rounded-full bg-black/25-[2px] border border-white/30 text-[8px] font-extrabold text-white leading-tight flex items-center gap-0.5">
                           {g.vipOnly ? (
                             <>
                               {isLocked ? <Lock className="w-2 h-2 text-amber-300" /> : <Crown className="w-2 h-2 text-amber-300" />}
@@ -1598,7 +1598,7 @@ export const AiTripPlannerModal: React.FC = () => {
 
                               <div className="flex gap-3">
                                 {act.photoUrl && (
-                                  <img
+                                  <img loading="lazy" decoding="async"
                                     src={act.photoUrl}
                                     alt=""
                                     className="w-16 h-16 rounded-xl object-cover shrink-0"

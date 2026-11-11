@@ -142,7 +142,7 @@ export const ShopMultiPhotoUploader: React.FC<ShopMultiPhotoUploaderProps> = ({
       <div className="flex items-center gap-3">
         <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-emerald-500 shrink-0 bg-slate-200 dark:bg-slate-700">
           {currentPhoto ? (
-            <img
+            <img loading="lazy" decoding="async"
               src={currentPhoto}
               alt="Shop Photo"
               className="w-full h-full object-cover"

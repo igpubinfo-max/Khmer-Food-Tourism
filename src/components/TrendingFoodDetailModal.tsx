@@ -179,7 +179,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
       >
         {/* Hero Photo Banner */}
         <div className="relative aspect-16/10 w-full overflow-hidden bg-slate-950 shrink-0">
-          <img 
+          <img loading="lazy" 
             src={displayPhotoUrl} 
             alt={displayFoodName}
             decoding="async"
@@ -193,7 +193,7 @@ export const TrendingFoodDetailModal: React.FC = () => {
             type="button"
             onClick={handleClose}
             aria-label={tr(language, 'បិទ', 'Close', '关闭')}
-            className="absolute top-3 right-3 p-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white transition backdrop-blur-xs cursor-pointer z-20"
+            className="absolute top-3 right-3 p-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white transition cursor-pointer z-20"
           >
             <X className="w-5 h-5" />
           </button>
@@ -205,12 +205,12 @@ export const TrendingFoodDetailModal: React.FC = () => {
               <span>{tr(language, 'វីដេអូពេញនិយម', 'Featured Video', '热门视频')}</span>
             </span>
             {item.socialViews && (
-              <span className="px-2 py-0.5 rounded-lg bg-black/60 text-pink-200 text-[10px] font-bold backdrop-blur-xs">
+              <span className="px-2 py-0.5 rounded-lg bg-black/60 text-pink-200 text-[10px] font-bold">
                 👁️ {item.socialViews}
               </span>
             )}
             {item.socialLikes && (
-              <span className="px-2 py-0.5 rounded-lg bg-black/60 text-rose-300 text-[10px] font-bold backdrop-blur-xs">
+              <span className="px-2 py-0.5 rounded-lg bg-black/60 text-rose-300 text-[10px] font-bold">
                 ❤️ {item.socialLikes}
               </span>
             )}

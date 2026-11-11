@@ -1124,7 +1124,7 @@ export const NearMeModal: React.FC = () => {
                   >
                     <div className="flex gap-3">
                       <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200/70">
-                        <img
+                        <img decoding="async"
                           src={d.photoUrl}
                           alt={dLoc.name}
                           className="w-full h-full object-cover"

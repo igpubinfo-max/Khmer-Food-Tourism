@@ -259,7 +259,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
                   onToggleBookmark(restaurant.id);
                 }}
                 aria-label={tr(language, 'រក្សាទុក', 'Bookmark', '收藏')}
-                className="w-8 h-8 rounded-full bg-white/95 hover:bg-white shadow-sm flex items-center justify-center text-rose-500 active:scale-90 transition cursor-pointer"
+                className="kft-btn-fav"
               >
                 <Heart className={`w-4 h-4 ${bookmarked ? 'fill-rose-500 text-rose-500' : 'text-rose-500'}`} strokeWidth={2.2} />
               </button>
@@ -306,7 +306,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
                 onToggleBookmark(restaurant.id);
               }}
               aria-label={tr(language, 'រក្សាទុក', 'Bookmark', '收藏')}
-              className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/95 hover:bg-white shadow-sm flex items-center justify-center text-rose-500 active:scale-90 transition cursor-pointer"
+              className="kft-btn-fav absolute top-2 right-2"
             >
               <Heart className={`w-4 h-4 ${bookmarked ? 'fill-rose-500 text-rose-500' : 'text-rose-500'}`} strokeWidth={2.2} />
             </button>
@@ -373,10 +373,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
               <button
                 type="button"
                 onClick={handleCallClick}
-                style={{
-                  background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
-                }}
-                className="min-h-[38px] px-2 py-1 rounded-xl text-white font-extrabold text-xs inline-flex items-center justify-center gap-1 shadow-xs active:scale-95 transition cursor-pointer leading-[1.6]"
+                className="kft-btn-call"
               >
                 <Phone className="w-3.5 h-3.5 text-white fill-white shrink-0" />
                 <span className="break-words">{tr(language, 'ទូរស័ព្ទ', 'Call', '电话')}</span>
@@ -385,10 +382,7 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
               <button
                 type="button"
                 onClick={handleOpenMapClick}
-                style={{
-                  background: 'linear-gradient(180deg, #60A5FA 0%, #2563EB 100%)',
-                }}
-                className="min-h-[38px] px-2 py-1 rounded-xl text-white font-extrabold text-xs inline-flex items-center justify-center gap-1 shadow-xs active:scale-95 transition cursor-pointer leading-[1.6]"
+                className="kft-btn-map"
               >
                 <Navigation className="w-3.5 h-3.5 text-white shrink-0" strokeWidth={2.2} />
                 <span className="break-words">{tr(language, 'ផែនទី', 'Map', '地图')}</span>
@@ -447,13 +441,10 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
           <button
             type="button"
             onClick={handleOpenMapClick}
-            style={{
-              background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
-            }}
-            className="w-8 h-8 rounded-xl text-white flex items-center justify-center shadow-2xs active:scale-95 transition cursor-pointer"
+            className="kft-btn-map-icon"
             title={tr(language, 'ផែនទី', 'Map', '地图')}
           >
-            <Navigation className="w-3.5 h-3.5" />
+            <Navigation className="w-3.5 h-3.5" strokeWidth={2.2} />
           </button>
           {adminActions}
           <ChevronRight

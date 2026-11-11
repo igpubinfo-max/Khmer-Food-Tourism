@@ -45,7 +45,7 @@ export const WelcomeSlides: React.FC<Props> = ({ language, onLanguage, onFinish 
           <div className="w-full max-w-sm flex flex-col items-center">
             {/* Centered App Icon positioned directly above the offline panel */}
             <div className="mb-3 sm:mb-4 flex items-center justify-center">
-              <img
+              <img loading="lazy"
                 src={WELCOME_IMAGES.logo}
                 alt="Cambodia Flavors & Tourism"
                 width={144}

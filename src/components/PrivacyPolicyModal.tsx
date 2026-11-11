@@ -103,7 +103,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
                 CAMBODIA
               </span>
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-700 p-[2px] shadow-md">
-                <img
+                <img loading="lazy" decoding="async"
                   src="/icon-192.png?v=2.5.4"
                   alt="Cambodia Flavors & Tourism"
                   className="w-full h-full rounded-[14px] object-cover bg-[#064E3B]"

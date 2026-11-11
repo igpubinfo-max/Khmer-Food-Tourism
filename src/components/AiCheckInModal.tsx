@@ -328,7 +328,7 @@ export const AiCheckInModal: React.FC = () => {
               <div className="relative">
                 <div className="w-20 h-20 rounded-full border-4 border-emerald-500/30 border-t-emerald-500 animate-spin" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <ShieldCheck className="w-8 h-8 text-emerald-500 animate-pulse" />
+                  <ShieldCheck className="w-8 h-8 text-emerald-500" />
                 </div>
               </div>
               <div className="space-y-1">
@@ -347,7 +347,7 @@ export const AiCheckInModal: React.FC = () => {
             <div className="space-y-4">
               {/* Photo preview banner */}
               <div className="relative aspect-16/9 w-full rounded-2xl overflow-hidden bg-slate-900 shadow-md border border-slate-200 dark:border-slate-700">
-                <img src={photoDataUrl} alt="Check-in Preview" className="w-full h-full object-cover" />
+                <img loading="lazy" decoding="async" src={photoDataUrl} alt="Check-in Preview" className="w-full h-full object-cover" />
                 <div className="absolute bottom-2 left-2 flex items-center gap-1.5">
                   <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold shadow-xs flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" />

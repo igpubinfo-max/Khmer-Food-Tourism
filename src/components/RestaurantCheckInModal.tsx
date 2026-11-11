@@ -466,7 +466,7 @@ export const RestaurantCheckInModal: React.FC = () => {
 
                 {photoDataUrl ? (
                   <div className="relative rounded-2xl overflow-hidden bg-slate-950 h-40 border border-slate-200 dark:border-slate-700">
-                    <img src={photoDataUrl} alt="Venue photo" className="w-full h-40 object-cover" />
+                    <img loading="lazy" decoding="async" src={photoDataUrl} alt="Venue photo" className="w-full h-40 object-cover" />
                     <button
                       onClick={() => setPhotoDataUrl('')}
                       className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 text-white hover:bg-black transition"
@@ -619,7 +619,7 @@ export const RestaurantCheckInModal: React.FC = () => {
                           }`}
                         >
                           <div className="flex items-center gap-2.5">
-                            <img 
+                            <img loading="lazy" decoding="async" 
                               src={match.restaurant.photoUrl} 
                               alt={match.restaurant.nameKh}
                               className="w-10 h-10 rounded-xl object-cover shrink-0" 

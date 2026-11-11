@@ -16,7 +16,7 @@ import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedDestination, getLocalizedFood, getLocalizedRestaurant, toConciseSummary } from '../utils/zhDynamicTranslator';
 import { copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import { ShopAvatar } from './icons/DefaultShopIcon';
-import { AngkorHeroTopHeader, AccountTrialStatusBar } from './AngkorHeroTopHeader';
+import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
 import {
   BookOpen, Award, MapPinned, CalendarDays, Lightbulb, Heart, Star, Store, Compass, Utensils,
   ChevronRight, Copy, Lock, CheckCircle2, Route, Navigation, Maximize2, X, PhoneCall, ShieldAlert, Clock,
@@ -468,9 +468,9 @@ export const GuideView: React.FC = () => {
 
       {/* 2. Main Content Container rising smoothly from the Angkor Wat reflection into Dark Slate (#1E293B) */}
       <div className="relative z-20 -mt-[82px] px-2.5 min-[360px]:px-3.5 sm:px-5 space-y-3.5">
-        {/* Compact Promotional Title Banner (Left) + 7-Day Free Trial / Account Status Banner Below Language Selector (Right) */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pl-0.5 sm:pl-1">
-          <div className="relative py-1 pl-1 pr-2 bg-transparent flex items-center gap-2.5 min-w-0 flex-1">
+        {/* Compact Promotional Title Banner (Aligned Left) */}
+        <div className="flex items-center justify-start pl-0.5 sm:pl-1">
+          <div className="relative py-1 pl-1 pr-2 bg-transparent inline-flex items-center gap-2.5 max-w-[65%] min-w-0">
             <div
               style={{
                 background: 'linear-gradient(180deg, #FDE047 0%, #F59E0B 100%)',
@@ -503,8 +503,6 @@ export const GuideView: React.FC = () => {
               </p>
             </div>
           </div>
-
-          <AccountTrialStatusBar inline className="ml-auto" />
         </div>
 
         {/* Clean White Season & Meal Slot Status Card + 4 Colorful Gradient Guide Section Buttons */}

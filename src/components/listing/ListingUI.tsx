@@ -3,6 +3,7 @@ import {
   BadgeCheck,
   ChevronRight,
   MapPin,
+  Navigation,
   Phone,
   Plus,
   Search,
@@ -317,18 +318,18 @@ export const ListingFeaturedCard: React.FC<ListingFeaturedCardProps> = ({
             {phone && (
               <a
                 href={`tel:${phone.replace(/\s+/g, '')}`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-[11px] font-bold transition-colors leading-[1.5]"
+                className="kft-btn-call"
               >
-                <Phone className="w-4 h-4" strokeWidth={ICON_STROKE} />
-                <span>{tr(language, 'ហៅ', 'Call', '致电')}</span>
+                <Phone className="w-3.5 h-3.5 text-white fill-white shrink-0" />
+                <span>{tr(language, 'ទូរស័ព្ទ', 'Call', '电话')}</span>
               </a>
             )}
             <button
               type="button"
               onClick={onOpenMap}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold cursor-pointer transition-colors hover:bg-slate-800 leading-[1.5]"
+              className="kft-btn-map"
             >
-              <MapPin className="w-4 h-4" strokeWidth={ICON_STROKE} />
+              <Navigation className="w-3.5 h-3.5 text-white shrink-0" strokeWidth={2.2} />
               <span>{tr(language, 'ផែនទី', 'Map', '地图')}</span>
             </button>
           </div>

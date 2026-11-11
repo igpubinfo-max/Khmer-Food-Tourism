@@ -667,7 +667,7 @@ export const AdminLoginModal: React.FC = () => {
 
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-white/10 rounded-2xl border border-white/20 shadow-inner text-amber-300">
-                  <KeyRound className="w-6 h-6 animate-pulse" />
+                  <KeyRound className="w-6 h-6" />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
@@ -703,7 +703,7 @@ export const AdminLoginModal: React.FC = () => {
               {/* Lockout Warning Banner */}
               {pinLockoutSeconds > 0 && (
                 <div className="p-3.5 bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-800 rounded-2xl text-xs text-red-800 dark:text-red-200 font-khmer flex items-start gap-2.5 text-left">
-                  <Clock className="w-5 h-5 text-red-600 shrink-0 mt-0.5 animate-pulse" />
+                  <Clock className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold block text-red-700 dark:text-red-300">
                       {tr(
@@ -899,7 +899,7 @@ export const AdminLoginModal: React.FC = () => {
               {/* Lockout Warning Banner */}
               {lockoutSeconds > 0 && (
                 <div className="p-3.5 bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-800 rounded-2xl text-xs text-red-800 dark:text-red-200 font-khmer flex items-start gap-2.5">
-                  <Clock className="w-5 h-5 text-red-600 shrink-0 mt-0.5 animate-pulse" />
+                  <Clock className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold block text-red-700 dark:text-red-300">
                       {isKm ? 'គណនីត្រូវបានចាក់សោរបណ្តោះអាសន្ន!' : 'Account Temporarily Locked!'}
@@ -926,7 +926,7 @@ export const AdminLoginModal: React.FC = () => {
                     <div className="py-2 flex flex-col items-center text-center space-y-3 font-khmer">
                       {/* Admin Photo & Verified Identity */}
                       <div className="relative">
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={getAdminAvatarUrl()}
                           alt="Chea Savuth Admin"
                           referrerPolicy="no-referrer"
@@ -958,7 +958,7 @@ export const AdminLoginModal: React.FC = () => {
                           disabled={biometricLoading || lockoutSeconds > 0}
                           className="w-full py-4 px-4 bg-gradient-to-r from-[#064E3B] via-[#047857] to-[#059669] hover:from-[#047857] hover:to-[#064E3B] text-white font-bold rounded-2xl shadow-lg border border-emerald-400/40 flex items-center justify-center gap-3 transition-all active:scale-[0.98] cursor-pointer text-sm font-khmer disabled:opacity-50"
                         >
-                          <Fingerprint className="w-6 h-6 text-emerald-200 animate-pulse" />
+                          <Fingerprint className="w-6 h-6 text-emerald-200" />
                           <span>
                             {biometricLoading
                               ? (isKm ? 'កំពុងផ្ទៀងផ្ទាត់ស្នាមមេដៃ...' : 'Verifying Biometric...')

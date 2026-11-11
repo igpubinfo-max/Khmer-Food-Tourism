@@ -491,7 +491,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
         {/* Top Header (Compact & Always Accessible) */}
         <div className="bg-gradient-to-r from-emerald-900 via-teal-800 to-emerald-900 text-white px-3.5 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2.5 shrink-0 z-30 shadow-md">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/25 shrink-0 shadow-inner">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/15 flex items-center justify-center border border-white/25 shrink-0 shadow-inner">
               <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-300" />
             </div>
             <div className="min-w-0">
@@ -762,7 +762,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
 
           {/* Sticky Results Summary & Batch Import Toolbar */}
           {results.length > 0 && (
-            <div className="sticky top-0 z-20 px-3.5 sm:px-6 py-2.5 bg-indigo-50/95 backdrop-blur-md border-b border-indigo-200 flex items-center justify-between gap-2 flex-wrap shadow-sm">
+            <div className="sticky top-0 z-20 px-3.5 sm:px-6 py-2.5 bg-indigo-50/95 border-b border-indigo-200 flex items-center justify-between gap-2 flex-wrap shadow-sm">
               <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-700 text-white text-xs font-extrabold shadow-sm">
                   <span>📊</span>
@@ -957,7 +957,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                     >
                       {/* Top Image & Badges */}
                       <div className="relative h-44 bg-slate-900 overflow-hidden">
-                        <img
+                        <img decoding="async"
                           src={place.photoUrl}
                           alt={displayTitle}
                           className="w-full h-full object-cover"
@@ -987,7 +987,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                               : tr(language, '🍽️ ហាងអាហារ / កាហ្វេ', '🍽️ Restaurant / Café', '🍽️ 餐厅 / 咖啡馆')}
                           </span>
                           {place.provinceKh && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-black/60 text-white backdrop-blur-sm">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-black/60 text-white">
                               📍 {translateProvinceName(place.provinceKh, place.provinceEn || place.provinceKh, language)}
                             </span>
                           )}

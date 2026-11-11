@@ -639,7 +639,7 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={item.photoUrl}
                         alt={item.nameKh}
                         className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700 bg-slate-100"

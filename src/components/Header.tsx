@@ -98,7 +98,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
           className="flex items-center gap-2 cursor-pointer group min-w-0 flex-1"
         >
           <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-700 p-[1.5px] flex items-center justify-center shadow-md group-hover:scale-105 transition shrink-0">
-            <img
+            <img loading="lazy" decoding="async"
               src="/logo-kft.png"
               alt="រសជាតិ និងទេសចរណ៍កម្ពុជា"
               className="w-full h-full rounded-[10px] object-cover bg-[#064E3B]"
@@ -148,7 +148,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
             title={tr(language, 'គណនីរបស់ខ្ញុំ', 'My Account', '我的账户')}
             aria-label={tr(language, 'គណនីរបស់ខ្ញុំ', 'My Account', '我的账户')}
           >
-            <img
+            <img loading="lazy"
               key={resolvedProfileAvatar}
               src={resolvedProfileAvatar}
               alt={effectiveUser?.name || 'Profile'}
