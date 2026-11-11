@@ -13,6 +13,7 @@ import { TAG_FILTER_EVENT, consumePendingTagFilter, hasSpecialAndHealthyFoodVipA
 import { tr } from '../utils/i18n';
 import { DishTagIcon } from './icons/HandcraftedIcons';
 import { matchesFoodScreenCategoryTab } from '../utils/cambodianMealHabits';
+import { smoothScrollToElement } from '../utils/smoothScroll';
 
 const PAGE_BATCH_SIZE = 16;
 
@@ -45,6 +46,10 @@ export const FoodView: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const dishListStartRef = useRef<HTMLDivElement | null>(null);
 
+  const scrollToDishList = () => {
+    smoothScrollToElement(dishListStartRef.current, { offsetTop: 10 });
+  };
+
   const handleExecuteFoodSearch = () => {
     const trimmed = foodSearchQuery.trim();
     if (!trimmed) {
@@ -55,7 +60,7 @@ export const FoodView: React.FC = () => {
       setFoodSearchQuery(trimmed);
     }
     searchInputRef.current?.blur();
-    dishListStartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    scrollToDishList();
   };
 
   useEffect(() => {
@@ -303,7 +308,7 @@ export const FoodView: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-[#1E293B] min-h-full font-khmer pb-12">
+    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-[#1E293B] min-h-full font-khmer pb-20">
       {/* 1. Header – Angkor Wat Hero Background */}
       <AngkorHeroTopHeader mode="food" foodCount={filteredFoods.length} />
 
@@ -485,7 +490,7 @@ export const FoodView: React.FC = () => {
                   type="button"
                   onClick={() => {
                     setSelectedCategory(cat.id);
-                    dishListStartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    scrollToDishList();
                   }}
                   aria-pressed={active}
                   className="group relative w-full min-w-0 aspect-[560/460] bg-transparent border-0 p-0 active:scale-95 transition-transform cursor-pointer select-none flex items-center justify-center"
@@ -521,7 +526,6 @@ export const FoodView: React.FC = () => {
             })}
           </div>
         </div>
-        <div ref={dishListStartRef} />
 
         {/* Collapsible Filter Drawer (Province + Dietary Tags + Admin Add Dish) */}
         {showFilterDrawer && (
@@ -617,6 +621,8 @@ export const FoodView: React.FC = () => {
           </div>
         )}
 
+        <div ref={dishListStartRef} id="kft-dish-list-section" className="scroll-mt-3" />
+
         {/* 6. Food Listing Cards */}
         {filteredFoods.length === 0 ? (
           <div className="p-8 text-center bg-white rounded-3xl border border-slate-200 space-y-2 shadow-2xs">
@@ -633,7 +639,7 @@ export const FoodView: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-3.5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-3.5 min-h-[65vh] content-start">
             {displayedFoods.map((food) => (
               <FoodCard key={food.id} food={food} />
             ))}

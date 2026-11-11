@@ -12,6 +12,7 @@ import {
   resolveFoodPhotoUrl,
 } from '../types';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
+import { smoothScrollToElement } from '../utils/smoothScroll';
 import {
   BedDouble,
   Edit2,
@@ -293,6 +294,11 @@ export const HotelView: React.FC = () => {
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const hotelListStartRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToHotelList = () => {
+    smoothScrollToElement(hotelListStartRef.current, { offsetTop: 10 });
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -930,7 +936,7 @@ export const HotelView: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-12 overflow-x-hidden">
+    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-20 overflow-x-hidden">
       {/* 1. Shared Master Hero Header with 7-Day Free Trial Badge (Matching Reference Image 2) */}
       <AngkorHeroTopHeader mode="food" />
 
@@ -1013,6 +1019,7 @@ export const HotelView: React.FC = () => {
                 } else {
                   handleToggleNearMe();
                 }
+                scrollToHotelList();
               }}
               style={
                 sortMode === 'nearest'
@@ -1049,7 +1056,11 @@ export const HotelView: React.FC = () => {
                 <button
                   key={cat.id}
                   type="button"
-                  onClick={() => setCategoryFilter(cat.id)}
+                  id={`kft-hotel-cat-${cat.id}-btn`}
+                  onClick={() => {
+                    setCategoryFilter(cat.id);
+                    scrollToHotelList();
+                  }}
                   aria-pressed={active}
                   className="group relative flex flex-col items-center justify-start min-w-0 p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
                 >
@@ -1108,7 +1119,10 @@ export const HotelView: React.FC = () => {
               <MapPin className="w-4 h-4 text-emerald-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <select
                 value={selectedProvince}
-                onChange={(e) => setSelectedProvince(e.target.value)}
+                onChange={(e) => {
+                  setSelectedProvince(e.target.value);
+                  scrollToHotelList();
+                }}
                 aria-label={tr(language, 'ជ្រើសរើសខេត្ត-ក្រុងទាំង ២៥', 'Select Province (25 Provinces)', '选择省份（25个省市）')}
                 className="w-full min-h-[40px] pl-9 pr-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200/90 text-xs font-extrabold text-slate-800 cursor-pointer focus:outline-none focus:border-emerald-500 transition shadow-xs"
               >
@@ -1198,11 +1212,13 @@ export const HotelView: React.FC = () => {
           </div>
         </div>
 
+        <div ref={hotelListStartRef} id="kft-hotel-list-section" className="scroll-mt-3" />
+
         {/* =====================================================================
             3. HOTEL LISTINGS (Clean White Cards on Dark Slate #1E293B)
             ===================================================================== */}
         {filteredHotels.length > 0 ? (
-          <div className="space-y-4 pt-0.5">
+          <div className="space-y-4 pt-0.5 min-h-[65vh]">
             {/* Section 1: សណ្ឋាគារពេញនិយមជិតខ្ញុំ (Popular Hotels Near Me - Clean White Featured Cards) */}
             {featuredHotels.length > 0 && (
               <div className="space-y-2.5">

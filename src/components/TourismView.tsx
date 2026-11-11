@@ -15,6 +15,7 @@ import {
   Flame,
 } from 'lucide-react';
 import { shuffleForCurrentSession } from '../utils/sessionShuffle';
+import { smoothScrollToElement } from '../utils/smoothScroll';
 import { DISH_PROVINCES } from '../utils/foodFilters';
 import { tr } from '../utils/i18n';
 import {
@@ -55,6 +56,11 @@ export const TourismView: React.FC = () => {
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [visibleCount, setVisibleCount] = useState<number>(TOURISM_BATCH_SIZE);
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
+  const tourismListStartRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToTourismList = () => {
+    smoothScrollToElement(tourismListStartRef.current, { offsetTop: 10 });
+  };
 
   useEffect(() => {
     setVisibleCount(TOURISM_BATCH_SIZE);
@@ -374,7 +380,7 @@ export const TourismView: React.FC = () => {
   }, [visibleCount, filteredDestinations.length]);
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-12 overflow-x-hidden">
+    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-20 overflow-x-hidden">
       {/* 1. Shared Master Hero Header with Free Account Status Badge */}
       <AngkorHeroTopHeader mode="food" />
 
@@ -450,7 +456,10 @@ export const TourismView: React.FC = () => {
 
             <button
               type="button"
-              onClick={handleToggleNearMe}
+              onClick={() => {
+                handleToggleNearMe();
+                scrollToTourismList();
+              }}
               style={
                 nearMeActive
                   ? {
@@ -487,7 +496,10 @@ export const TourismView: React.FC = () => {
                   key={cat.id}
                   id={`kft-travel-cat-${cat.id}-btn`}
                   type="button"
-                  onClick={() => setSelectedCategory(cat.id)}
+                  onClick={() => {
+                    setSelectedCategory(cat.id);
+                    scrollToTourismList();
+                  }}
                   aria-pressed={active}
                   className="group relative flex flex-col items-center justify-start min-w-0 p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
                 >
@@ -546,7 +558,10 @@ export const TourismView: React.FC = () => {
               <MapPin className="w-4 h-4 text-emerald-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <select
                 value={selectedProvince}
-                onChange={(e) => setSelectedProvince(e.target.value)}
+                onChange={(e) => {
+                  setSelectedProvince(e.target.value);
+                  scrollToTourismList();
+                }}
                 aria-label={tr(
                   language,
                   'ជ្រើសរើសរាជធានី-ខេត្ត (២៥ ខេត្ត/ក្រុង)',
@@ -582,6 +597,8 @@ export const TourismView: React.FC = () => {
             )}
           </div>
         </div>
+
+        <div ref={tourismListStartRef} id="kft-tourism-list-section" className="scroll-mt-3" />
 
         {/* Row 3: Section Title Bar on Dark Slate (#1E293B) */}
         <div className="flex items-center justify-between gap-2 px-0.5 pt-0.5">
@@ -637,7 +654,7 @@ export const TourismView: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 min-h-[65vh] content-start">
             {displayedDestinations.map((dest) => (
               <TouristCard
                 key={dest.id}

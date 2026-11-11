@@ -50,6 +50,7 @@ import {
 } from './icons/HandcraftedIcons';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { tr } from '../utils/i18n';
+import { smoothScrollToElement } from '../utils/smoothScroll';
 import { FOOD_WATERMARK_TEXT, FOOD_WATERMARK_BADGE_CLASS, isUrlWatermarkedAtPixelLevel } from '../utils/foodWatermark';
 import { grantAiConsent } from '../services/aiConsent';
 import { getLocalizedFood, getLocalizedRestaurant, getLocalizedDestination } from '../utils/zhDynamicTranslator';
@@ -2984,8 +2985,16 @@ export const WhatToEatModal: React.FC = () => {
             })()}
 
             {/* 6 Premium 3D Gold-Framed Category Buttons (Time, Category, Taste, Healthy, Beverage Pairings, New Picks) */}
-            <div className="rounded-[22px] bg-white p-2 sm:p-2.5 shadow-[0_5px_18px_rgba(15,23,42,0.06)] border border-slate-200/85 space-y-2.5">
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5 items-stretch">
+            <div
+              className="rounded-[24px] p-2.5 sm:p-3.5 border border-amber-400/25 space-y-2.5"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(15, 23, 42, 0.84) 0%, rgba(15, 23, 42, 0.94) 100%)',
+                boxShadow:
+                  '0 8px 24px rgba(2, 6, 23, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+              }}
+            >
+              <div className="grid grid-cols-3 gap-x-2 gap-y-2.5 sm:gap-x-3 sm:gap-y-3 items-start">
                 {[
                   {
                     id: 'time' as const,
@@ -3047,42 +3056,55 @@ export const WhatToEatModal: React.FC = () => {
                         setShowVipAiUpgradeNotice(false);
                         setOpenGroup((cur) => (cur === g.id ? null : g.id));
                       }}
-                      className={`group relative w-full min-w-0 aspect-[5/3] bg-transparent border-0 p-0 transition-all duration-150 active:scale-95 cursor-pointer select-none flex items-center justify-center ${
-                        isHighlighted ? 'scale-[1.02] z-10' : ''
-                      }`}
+                      className="group relative w-full min-w-0 bg-transparent border-0 p-0 transition-all duration-200 active:scale-95 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
                     >
-                      <img
-                        src={g.imageSrc}
-                        alt={displayText}
-                        loading="eager"
-                        decoding="async"
-                        style={{
-                          filter: isHighlighted
-                            ? 'drop-shadow(0 0 2px #0F172A) drop-shadow(0 5px 12px rgba(245, 158, 11, 0.48)) brightness(1.04)'
-                            : 'drop-shadow(0 4px 10px rgba(15, 23, 42, 0.18))',
-                        }}
-                        className="w-full h-full object-fill bg-transparent select-none pointer-events-none group-hover:brightness-[1.03] transition-all duration-150"
-                      />
+                      {/* 3D Gold-Framed Pill Illustration */}
+                      <div
+                        className={`relative w-full aspect-[2.12/1] flex items-center justify-center transition-all duration-200 rounded-[14px] ${
+                          isHighlighted ? 'scale-[1.03] z-10' : 'opacity-95 group-hover:opacity-100'
+                        }`}
+                      >
+                        <img
+                          src={g.imageSrc}
+                          alt={displayText}
+                          loading="eager"
+                          decoding="async"
+                          style={{
+                            filter: isHighlighted
+                              ? 'drop-shadow(0 0 2px #FDE047) drop-shadow(0 5px 14px rgba(245, 158, 11, 0.55)) brightness(1.05)'
+                              : 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.42))',
+                          }}
+                          className="w-full h-full object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-all duration-200"
+                        />
 
-                      {/* Centered Bold White Label Inside Button Directly Below the 3D Illustration */}
-                      <div className="pointer-events-none absolute inset-x-[4.5%] top-[66%] bottom-[7%] flex items-center justify-center px-0.5 overflow-visible">
+                        {g.vip && !canUseVip && (
+                          <Crown className="absolute top-1 right-1.5 z-10 w-3.5 h-3.5 text-amber-200 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] pointer-events-none" strokeWidth={2.2} />
+                        )}
+
+                        {isHighlighted && (
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)]"
+                          />
+                        )}
+                      </div>
+
+                      {/* Clear White Text Title Below Button */}
+                      <div className="w-full flex items-center justify-center px-0.5 pt-0.5 min-h-[20px]">
                         <span
-                          className="font-khmer font-extrabold text-white text-center leading-[1.35] tracking-tight whitespace-nowrap max-w-full truncate"
+                          className="font-khmer font-extrabold text-center leading-[1.45] tracking-tight whitespace-nowrap max-w-full truncate"
                           style={{
                             fontSize: isLongText
-                              ? 'clamp(8.8px, 2.38vw, 12.8px)'
-                              : 'clamp(10.5px, 2.95vw, 15px)',
+                              ? 'clamp(9.6px, 2.6vw, 12px)'
+                              : 'clamp(11px, 3.05vw, 13.4px)',
+                            color: isHighlighted ? '#FDE047' : '#FFFFFF',
                             textShadow:
-                              '0 1.5px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(0, 0, 0, 0.68)',
+                              '0 1.5px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.55)',
                           }}
                         >
                           {displayText}
                         </span>
                       </div>
-
-                      {g.vip && !canUseVip && (
-                        <Crown className="absolute top-1.5 right-2 z-10 w-3.5 h-3.5 text-amber-200 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] pointer-events-none" strokeWidth={2.2} />
-                      )}
                     </button>
                   );
                 })}
@@ -3096,31 +3118,44 @@ export const WhatToEatModal: React.FC = () => {
                       type="button"
                       aria-pressed={drinkMode}
                       onClick={handleOpenDrinkPairing}
-                      className={`group relative w-full min-w-0 aspect-[5/3] bg-transparent border-0 p-0 transition-all duration-150 active:scale-95 cursor-pointer select-none flex items-center justify-center ${
-                        drinkMode ? 'scale-[1.02] z-10' : ''
-                      }`}
+                      className="group relative w-full min-w-0 bg-transparent border-0 p-0 transition-all duration-200 active:scale-95 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
                     >
-                      <img
-                        src="/categories/ai_cat_drinks.png"
-                        alt={drinkLabel}
-                        loading="eager"
-                        decoding="async"
-                        style={{
-                          filter: drinkMode
-                            ? 'drop-shadow(0 0 2px #0F172A) drop-shadow(0 5px 12px rgba(245, 158, 11, 0.48)) brightness(1.04)'
-                            : 'drop-shadow(0 4px 10px rgba(15, 23, 42, 0.18))',
-                        }}
-                        className="w-full h-full object-fill bg-transparent select-none pointer-events-none group-hover:brightness-[1.03] transition-all duration-150"
-                      />
-                      <div className="pointer-events-none absolute inset-x-[4.5%] top-[66%] bottom-[7%] flex items-center justify-center px-0.5 overflow-visible">
+                      <div
+                        className={`relative w-full aspect-[2.12/1] flex items-center justify-center transition-all duration-200 rounded-[14px] ${
+                          drinkMode ? 'scale-[1.03] z-10' : 'opacity-95 group-hover:opacity-100'
+                        }`}
+                      >
+                        <img
+                          src="/categories/ai_cat_drinks.png"
+                          alt={drinkLabel}
+                          loading="eager"
+                          decoding="async"
+                          style={{
+                            filter: drinkMode
+                              ? 'drop-shadow(0 0 2px #FDE047) drop-shadow(0 5px 14px rgba(245, 158, 11, 0.55)) brightness(1.05)'
+                              : 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.42))',
+                          }}
+                          className="w-full h-full object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-all duration-200"
+                        />
+
+                        {drinkMode && (
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)]"
+                          />
+                        )}
+                      </div>
+
+                      <div className="w-full flex items-center justify-center px-0.5 pt-0.5 min-h-[20px]">
                         <span
-                          className="font-khmer font-extrabold text-white text-center leading-[1.35] tracking-tight whitespace-nowrap max-w-full"
+                          className="font-khmer font-extrabold text-center leading-[1.45] tracking-tight whitespace-nowrap max-w-full truncate"
                           style={{
                             fontSize: isLongDrink
-                              ? 'clamp(8.8px, 2.38vw, 12.8px)'
-                              : 'clamp(10.5px, 2.95vw, 15px)',
+                              ? 'clamp(9.6px, 2.6vw, 12px)'
+                              : 'clamp(11px, 3.05vw, 13.4px)',
+                            color: drinkMode ? '#FDE047' : '#FFFFFF',
                             textShadow:
-                              '0 1.5px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(0, 0, 0, 0.68)',
+                              '0 1.5px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.55)',
                           }}
                         >
                           {drinkLabel}
@@ -3138,29 +3173,33 @@ export const WhatToEatModal: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleShowAnother}
-                      className="group relative w-full min-w-0 aspect-[5/3] bg-transparent border-0 p-0 transition-all duration-150 active:scale-95 cursor-pointer select-none flex items-center justify-center"
+                      className="group relative w-full min-w-0 bg-transparent border-0 p-0 transition-all duration-200 active:scale-95 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
                     >
-                      <img
-                        src="/categories/ai_cat_new_picks.png"
-                        alt={newPicksLabel}
-                        loading="eager"
-                        decoding="async"
-                        style={{
-                          filter: 'drop-shadow(0 4px 10px rgba(15, 23, 42, 0.18))',
-                        }}
-                        className={`w-full h-full object-fill bg-transparent select-none pointer-events-none group-hover:brightness-[1.03] transition-all duration-150 ${
-                          isSpinning ? 'brightness-110 scale-[0.98]' : ''
-                        }`}
-                      />
-                      <div className="pointer-events-none absolute inset-x-[4.5%] top-[66%] bottom-[7%] flex items-center justify-center px-0.5 overflow-visible">
+                      <div className="relative w-full aspect-[2.12/1] flex items-center justify-center transition-all duration-200 rounded-[14px] opacity-95 group-hover:opacity-100">
+                        <img
+                          src="/categories/ai_cat_new_picks.png"
+                          alt={newPicksLabel}
+                          loading="eager"
+                          decoding="async"
+                          style={{
+                            filter: 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.42))',
+                          }}
+                          className={`w-full h-full object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-all duration-200 ${
+                            isSpinning ? 'brightness-110 scale-[0.98]' : ''
+                          }`}
+                        />
+                      </div>
+
+                      <div className="w-full flex items-center justify-center px-0.5 pt-0.5 min-h-[20px]">
                         <span
-                          className="font-khmer font-extrabold text-white text-center leading-[1.35] tracking-tight whitespace-nowrap max-w-full"
+                          className="font-khmer font-extrabold text-center leading-[1.45] tracking-tight whitespace-nowrap max-w-full truncate"
                           style={{
                             fontSize: isLongNewPicks
-                              ? 'clamp(8.8px, 2.38vw, 12.8px)'
-                              : 'clamp(10.5px, 2.95vw, 15px)',
+                              ? 'clamp(9.6px, 2.6vw, 12px)'
+                              : 'clamp(11px, 3.05vw, 13.4px)',
+                            color: '#FFFFFF',
                             textShadow:
-                              '0 1.5px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(0, 0, 0, 0.68)',
+                              '0 1.5px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.55)',
                           }}
                         >
                           {newPicksLabel}
@@ -3187,9 +3226,9 @@ export const WhatToEatModal: React.FC = () => {
                       setSpinCount((c) => c + 1);
                       scrollToResultsSection();
                     }}
-                    className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-bold text-slate-700 inline-flex items-center gap-1 cursor-pointer"
+                    className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 text-[11px] font-bold text-white inline-flex items-center gap-1 cursor-pointer transition"
                   >
-                    <RotateCcw className="w-3 h-3" strokeWidth={1.75} />
+                    <RotateCcw className="w-3 h-3 text-amber-300" strokeWidth={1.75} />
                     <span>{tr(language, 'កំណត់ឡើងវិញ', 'Reset', '重置')}</span>
                   </button>
                 </div>

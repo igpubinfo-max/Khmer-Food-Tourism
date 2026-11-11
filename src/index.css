@@ -101,9 +101,7 @@
   padding-bottom: max(calc(var(--kft-safe-bottom, 0px) + 22px), 30px);
   scroll-padding-bottom: 36px;
 }
-@media (prefers-reduced-motion: reduce) {
-  #kft-main-scroll { scroll-behavior: auto; }
-}
+/* Keep smooth scrolling active for programmatic category-to-list navigation */
 
 /* Bottom navigation: fixed to the bottom of the app shell, never overlapping content */
 #kft-bottom-nav {

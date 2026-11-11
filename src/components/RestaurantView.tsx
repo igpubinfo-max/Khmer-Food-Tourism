@@ -41,6 +41,7 @@ import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { DISH_PROVINCES, matchShopToProductQuery, verifyShopDataForDisplay } from '../utils/foodFilters';
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 import { handleAvatarImageError } from '../utils/avatarHelper';
+import { smoothScrollToElement } from '../utils/smoothScroll';
 
 const RESTAURANT_BATCH_SIZE = 24;
 
@@ -111,12 +112,14 @@ export const RestaurantView: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const shopListStartRef = useRef<HTMLDivElement | null>(null);
 
+  const scrollToShopList = () => {
+    smoothScrollToElement(shopListStartRef.current, { offsetTop: 10 });
+  };
+
   const handleExecuteShopSearch = () => {
     setDebouncedShopSearchQuery(shopSearchQuery);
     searchInputRef.current?.blur();
-    if (shopSearchQuery.trim() && shopListStartRef.current) {
-      shopListStartRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    scrollToShopList();
   };
 
   useEffect(() => {
@@ -603,7 +606,7 @@ export const RestaurantView: React.FC = () => {
   }, [featuredRestaurants, distanceMap]);
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-12">
+    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-20">
       {/* 1. Shared Master Hero Header with Free Account Status Badge (100% Matching Food Menu) */}
       <AngkorHeroTopHeader mode="food" />
 
@@ -756,7 +759,10 @@ export const RestaurantView: React.FC = () => {
               </label>
               <select
                 value={cleanSelectedProvince}
-                onChange={(e) => setSelectedProvince(e.target.value || 'ទាំងអស់')}
+                onChange={(e) => {
+                  setSelectedProvince(e.target.value || 'ទាំងអស់');
+                  scrollToShopList();
+                }}
                 className="w-full h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600"
               >
                 <option value="">
@@ -787,12 +793,18 @@ export const RestaurantView: React.FC = () => {
                 <button
                   key={cat.id}
                   type="button"
+                  id={`kft-shop-cat-${cat.id}-btn`}
                   onClick={() => {
                     if (cat.id === 'near_me_toggle') {
                       handleToggleNearMe();
+                    } else if (cat.id === 'all') {
+                      setCategoryFilter('all');
+                      setNearMeActive(false);
+                      setSortMode('popular');
                     } else {
                       setCategoryFilter(cat.id);
                     }
+                    scrollToShopList();
                   }}
                   aria-pressed={active}
                   className="group relative flex flex-col items-center justify-start min-w-0 transition-transform duration-200 active:scale-[0.95] cursor-pointer focus:outline-none bg-transparent border-0 p-0"
@@ -919,13 +931,13 @@ export const RestaurantView: React.FC = () => {
           </div>
         </div>
 
-        <div ref={shopListStartRef} />
+        <div ref={shopListStartRef} id="kft-shop-list-section" className="scroll-mt-3" />
 
         {/* ===================================================================
             3. NEARBY & POPULAR SHOPS LISTINGS
             =================================================================== */}
         {sortedRestaurants.length > 0 ? (
-          <div className="space-y-4 pt-0.5">
+          <div className="space-y-4 pt-0.5 min-h-[65vh]">
             {/* Section 1: ហាងពេញនិយមជិតខ្ញុំ (Popular Shops Near Me) */}
             {featuredRestaurants.length > 0 && (
               <div className="space-y-2.5">

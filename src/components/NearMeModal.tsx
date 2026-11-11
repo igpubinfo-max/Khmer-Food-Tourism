@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   X,
@@ -59,6 +59,7 @@ import {
 } from '../utils/searchEngine';
 import { ShopAvatar } from './icons/DefaultShopIcon';
 import { openAiAssistantWithQuery, getAskAiButtonLabel } from '../utils/aiSearchBridge';
+import { smoothScrollToElement } from '../utils/smoothScroll';
 
 // Haversine formula for distance between 2 GPS coordinates in meters
 export function calculateDistanceMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -140,6 +141,15 @@ export const NearMeModal: React.FC = () => {
   const [nearbyQuery, setNearbyQuery] = useState<string>('');
   const [targetFood, setTargetFood] = useState<FoodItem | null>(null);
   const [quickFilterId, setQuickFilterId] = useState<string>('all');
+  const nearMeScrollRef = useRef<HTMLDivElement | null>(null);
+  const nearbyListStartRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToNearbyShopList = () => {
+    smoothScrollToElement(nearbyListStartRef.current, {
+      containerEl: nearMeScrollRef.current,
+      offsetTop: 8,
+    });
+  };
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(() => readSavedUserGps());
 
   useEffect(() => {
@@ -701,8 +711,9 @@ export const NearMeModal: React.FC = () => {
           </button>
         </div>
 
+        <div ref={nearMeScrollRef} className="flex-1 overflow-y-auto no-scrollbar bg-[#1E293B]">
         {/* Essential Control Bar: GPS Location + Search Shops + 6 Colorful Gradient Main Categories */}
-        <div className="px-3.5 pt-2.5 pb-3 bg-[#1E293B] border-b border-slate-700/80 space-y-2.5 shrink-0">
+        <div className="px-3.5 pt-2.5 pb-3 bg-[#1E293B] border-b border-slate-700/80 space-y-2.5">
           {/* Row 1: Essential GPS Location Status + Province Selector + Refresh GPS */}
           <div className="flex items-center justify-between gap-2 flex-wrap bg-white px-3 py-2 rounded-2xl border border-slate-200/85 shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
             <div className="flex items-center gap-1.5 min-w-0 flex-1">
@@ -828,6 +839,7 @@ export const NearMeModal: React.FC = () => {
                   <button
                     key={card.id}
                     type="button"
+                    id={`kft-nearme-cat-${card.id}-btn`}
                     onClick={() => {
                       if (card.type === 'destinations') {
                         setActiveType('destinations');
@@ -836,6 +848,7 @@ export const NearMeModal: React.FC = () => {
                         setActiveType('restaurants');
                         setQuickFilterId(card.id);
                       }
+                      scrollToNearbyShopList();
                     }}
                     aria-pressed={active}
                     className="group relative flex flex-col items-center justify-start min-w-0 p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
@@ -891,8 +904,10 @@ export const NearMeModal: React.FC = () => {
           </div>
         </div>
 
+        <div ref={nearbyListStartRef} id="kft-nearby-shop-list-section" className="scroll-mt-2" />
+
         {/* Shop & Place Cards List */}
-        <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-3 no-scrollbar bg-[#1E293B]">
+        <div className="p-3.5 sm:p-4 pb-16 space-y-3 bg-[#1E293B] min-h-[75vh]">
           {isLoadingNearby ? (
             <div className="py-14 px-4 text-center bg-white rounded-3xl border border-slate-200/90 shadow-xs my-2">
               <Loader2 className="w-8 h-8 mx-auto mb-3 text-emerald-600 animate-spin" />
@@ -1253,6 +1268,7 @@ export const NearMeModal: React.FC = () => {
               })}
             </div>
           )}
+        </div>
         </div>
       </div>
     </div>

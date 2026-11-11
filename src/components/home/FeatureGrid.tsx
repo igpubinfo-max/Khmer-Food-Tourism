@@ -76,40 +76,51 @@ const FeatureGridImpl: React.FC<Props> = ({
   return (
     <section
       aria-label={tr(language, 'សេវាកម្មឆ្លាតវៃប្រចាំថ្ងៃ', 'Daily Smart Services', '日常智能服务')}
-      className="rounded-[24px] bg-white/96 p-2 sm:p-3 shadow-[0_6px_20px_rgba(15,23,42,0.08)] border border-white"
+      style={{
+        background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.96) 100%)',
+        boxShadow: '0 10px 28px rgba(15, 23, 42, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.14)',
+      }}
+      className="rounded-[24px] p-2.5 sm:p-3.5 border border-amber-400/25"
     >
-      <div className="grid grid-cols-3 gap-1.5 min-[360px]:gap-2 sm:gap-2.5 items-stretch">
+      <div className="grid grid-cols-3 gap-x-2 sm:gap-x-3 gap-y-2.5 sm:gap-y-3 items-start">
         {items.map((it) => (
           <button
             key={it.id}
             id={`kft-feature-${it.id}-btn`}
             type="button"
             onClick={it.onClick}
-            className="group relative w-full min-w-0 aspect-[5/3] bg-transparent border-0 p-0 transition-transform active:scale-95 cursor-pointer select-none flex items-center justify-center"
+            className="group relative flex flex-col items-center justify-start w-full min-w-0 p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
           >
-            <img
-              src={it.imageSrc}
-              alt={it.label}
-              loading="eager"
-              decoding="async"
-              className="w-full h-full object-fill bg-transparent select-none pointer-events-none drop-shadow-[0_4px_10px_rgba(15,23,42,0.18)] group-hover:brightness-[1.03] transition-all duration-150"
-            />
-
-            {/* Centered Bold White Label Inside Button Directly Below the 3D Illustration */}
-            <div className="pointer-events-none absolute inset-x-[4.5%] top-[63%] bottom-[8%] flex items-center justify-center px-0.5 overflow-visible">
-              <span
-                className="font-khmer font-extrabold text-white text-center leading-[1.35] tracking-tight whitespace-nowrap max-w-full"
-                style={{
-                  fontSize: it.isLongLabel
-                    ? 'clamp(9.4px, 2.55vw, 13.5px)'
-                    : 'clamp(10.5px, 2.95vw, 15px)',
-                  textShadow:
-                    '0 1.5px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.65)',
-                }}
-              >
-                {it.label}
-              </span>
+            {/* 3D Gold-Bordered Category Illustration Button */}
+            <div
+              className="relative w-full aspect-[2.12/1] flex items-center justify-center transition-all duration-200 rounded-[14px] group-hover:scale-[1.02]"
+              style={{
+                filter: 'drop-shadow(0 5px 10px rgba(15, 23, 42, 0.35))',
+              }}
+            >
+              <img
+                src={it.imageSrc}
+                alt={it.label}
+                loading="eager"
+                decoding="async"
+                draggable={false}
+                className="w-full h-full object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-all duration-150"
+              />
             </div>
+
+            {/* Clear White Text Title Directly Below Each Illustration */}
+            <span
+              className="mt-1 px-0.5 font-khmer font-extrabold leading-[1.52] text-center break-words whitespace-normal w-full transition-colors duration-150 group-hover:text-[#FDE047]"
+              style={{
+                fontSize: it.isLongLabel
+                  ? 'clamp(10px, 2.75vw, 12.6px)'
+                  : 'clamp(11px, 3.05vw, 13.4px)',
+                color: '#FFFFFF',
+                textShadow: '0 1.5px 3px rgba(0, 0, 0, 0.90), 0 0 2px rgba(0, 0, 0, 0.75)',
+              }}
+            >
+              {it.label}
+            </span>
           </button>
         ))}
       </div>
