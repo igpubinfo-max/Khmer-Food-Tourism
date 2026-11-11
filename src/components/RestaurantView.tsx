@@ -5,6 +5,10 @@ import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
 import {
   Restaurant,
   sortRestaurantsWithVipRotation,
+  getVipFeaturedRotationState,
+  isSeedRestaurantId,
+  hasApprovedShopPhoto,
+  getRestaurantApprovedAtMs,
   isAdminAccount,
   isStrictVerifiedCambodiaRestaurant,
   openExternalUrlNativeSafe,
@@ -329,7 +333,13 @@ export const RestaurantView: React.FC = () => {
 
   const validDirectoryRestaurants = useMemo(() => {
     const seenIds = new Set<string>();
-    return sessionShuffledRestaurants.filter((r) => {
+    const seenNameKeys = new Set<string>();
+    // Prioritize non-seed (user/VIP-submitted) shops before seed shops so duplicates never shadow user submissions
+    const customFirst = [
+      ...sessionShuffledRestaurants.filter((r) => r && !isSeedRestaurantId(r.id)),
+      ...sessionShuffledRestaurants.filter((r) => r && isSeedRestaurantId(r.id)),
+    ];
+    return customFirst.filter((r) => {
       if (isHotelBusinessRecord(r)) {
         return false;
       }
@@ -353,7 +363,10 @@ export const RestaurantView: React.FC = () => {
       }
       const idStr = String(r.id);
       if (seenIds.has(idStr)) return false;
+      const normNameKey = `${normalizeKhmerSearchText(r.nameKh || r.nameEn || '')}::${(r.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim()}`;
+      if (normNameKey.length > 3 && seenNameKeys.has(normNameKey)) return false;
       seenIds.add(idStr);
+      if (normNameKey.length > 3) seenNameKeys.add(normNameKey);
       return true;
     });
   }, [sessionShuffledRestaurants, currentUser?.role, currentUser?.id, isAdmin]);
@@ -454,19 +467,59 @@ export const RestaurantView: React.FC = () => {
     debouncedShopSearchQuery,
   ]);
 
+  const rotationState = useMemo(
+    () => getVipFeaturedRotationState(validDirectoryRestaurants, users, appSettings, nowTickMs),
+    [validDirectoryRestaurants, users, appSettings, nowTickMs]
+  );
+
   const { featuredRestaurants, directoryRestaurants } = useMemo(() => {
     if (sortedRestaurants.length === 0) {
       return { featuredRestaurants: [], directoryRestaurants: [] };
     }
-    const targetFeaturedCount = showAllFeatured ? 12 : 4;
-    const vipList = sortedRestaurants.filter((r) => isVipOwnerListing(r));
-    const nonVipList = sortedRestaurants.filter((r) => !isVipOwnerListing(r));
-    const orderedForFeatured = [...vipList, ...nonVipList];
-    const featured = orderedForFeatured.slice(0, targetFeaturedCount);
+
+    const activeRotatingShopId =
+      rotationState.eligibleQueue.length > 0
+        ? rotationState.eligibleQueue[rotationState.currentSlotIndex % rotationState.eligibleQueue.length]?.id
+        : null;
+
+    // Score eligible shops according to the app's existing ranking criteria (not submission time alone):
+    // 1. Active manual schedule / 24h VIP boost (`currentlyFeaturedIds`)
+    // 2. Fair VIP rotation slot (`activeRotatingShopId`)
+    // 3. Eligible VIP / user-submitted shop status (`isVipOwnerListing` / `!isSeedRestaurantId`)
+    // 4. Verified custom shop photo (`hasApprovedShopPhoto`)
+    // 5. Rating & review count quality score
+    const computeShopRankScore = (r: Restaurant): number => {
+      let score = 0;
+      if (rotationState.primaryFeaturedShop?.restaurant.id === r.id) score += 10000;
+      else if (rotationState.currentlyFeaturedIds.has(r.id)) score += 8000;
+      if (activeRotatingShopId && r.id === activeRotatingShopId) score += 5000;
+      if (isVipOwnerListing(r)) score += 2000;
+      if (!isSeedRestaurantId(r.id)) score += 1000;
+      if (hasApprovedShopPhoto(r)) score += 500;
+      score += Number(r.rating || 4.5) * 40;
+      score += Math.min(200, Number(r.reviewCount || 0) * 0.25);
+      return score;
+    };
+
+    const isDefaultOrder = !debouncedShopSearchQuery.trim() && sortMode === 'popular';
+    const eligibleList = sortedRestaurants.filter((r) => isVipOwnerListing(r) || !isSeedRestaurantId(r.id));
+    const regularList = sortedRestaurants.filter((r) => !isVipOwnerListing(r) && isSeedRestaurantId(r.id));
+
+    if (isDefaultOrder && eligibleList.length > 1) {
+      eligibleList.sort((a, b) => {
+        const diff = computeShopRankScore(b) - computeShopRankScore(a);
+        if (Math.abs(diff) > 0.01) return diff;
+        return getRestaurantApprovedAtMs(b) - getRestaurantApprovedAtMs(a);
+      });
+    }
+
+    const orderedAll = isDefaultOrder ? [...eligibleList, ...regularList] : sortedRestaurants;
+    const targetFeaturedCount = showAllFeatured ? Math.min(12, Math.max(4, eligibleList.length)) : 1;
+    const featured = orderedAll.slice(0, targetFeaturedCount);
     const featuredIds = new Set<string>(featured.map((r) => r.id));
-    const directory = sortedRestaurants.filter((r) => !featuredIds.has(r.id));
+    const directory = orderedAll.filter((r) => !featuredIds.has(r.id));
     return { featuredRestaurants: featured, directoryRestaurants: directory };
-  }, [sortedRestaurants, showAllFeatured]);
+  }, [sortedRestaurants, showAllFeatured, rotationState, debouncedShopSearchQuery, sortMode]);
 
   const displayedDirectoryRestaurants = useMemo(
     () => directoryRestaurants.slice(0, visibleCount),
@@ -777,12 +830,12 @@ export const RestaurantView: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className={featuredRestaurants.length === 1 ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 md:grid-cols-2 gap-3'}>
                   {featuredRestaurants.map((restaurant) => (
                     <RestaurantCard
                       key={restaurant.id}
                       restaurant={restaurant}
-                      variant="featured"
+                      variant="hero"
                       distanceKm={distanceMap.get(restaurant.id) ?? null}
                     />
                   ))}

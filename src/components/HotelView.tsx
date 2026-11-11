@@ -36,7 +36,10 @@ import {
   Flame,
   SlidersHorizontal,
   LayoutGrid,
+  Navigation,
 } from 'lucide-react';
+import { ListingFeaturedCard } from './listing/ListingUI';
+import { normalizeKhmerSearchText } from '../services/googlePlacesService';
 import { TouristImageModal } from './TouristImageModal';
 import { rankBySearchRelevance, destinationSearchFields, analyzeSearchQuery } from '../utils/searchEngine';
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
@@ -117,7 +120,14 @@ function hasVerifiedCustomHotelPhoto(hotel: TouristDestination): string {
   ) {
     return '';
   }
-  if (hotel.isCustomPhoto || hotel.isAdminEdited || raw.startsWith('data:image/') || raw.includes('supabase.co')) {
+  if (
+    hotel.isCustomPhoto ||
+    hotel.isAdminEdited ||
+    raw.startsWith('data:image/') ||
+    raw.includes('supabase.co') ||
+    raw.startsWith('http') ||
+    raw.startsWith('/')
+  ) {
     return resolveFoodPhotoUrl(raw);
   }
   return '';
@@ -201,8 +211,10 @@ function calculateDistanceKm(
 
 function extractAddedTimestampMs(record: any, fallbackIndex: number): number {
   const candidates = [
+    record?.approvedAt,
     record?.createdAt,
     record?.submittedAt,
+    record?.created_at,
     record?.updatedAt,
     record?.adminEditedAt,
     record?.locationVerifiedAt,
@@ -221,7 +233,7 @@ function extractAddedTimestampMs(record: any, fallbackIndex: number): number {
     const num = Number(numMatch[1]);
     if (Number.isFinite(num) && num > 0) return num;
   }
-  // Later index in `restaurants` array means more recently added
+  // Fallback preserves chronological submission order in array
   return 1_700_000_000_000 + fallbackIndex * 1000;
 }
 
@@ -305,10 +317,13 @@ export const HotelView: React.FC = () => {
     }
   }, []);
 
-  // Convert any user/owner-added Hotel records (from `restaurants` where `isHotelBusinessRecord(r)`) into TouristDestination format, sorted NEWEST FIRST
+  // Convert any user/owner-added Hotel records (from `restaurants` where `isHotelBusinessRecord(r)`) into TouristDestination format,
+  // sorted EARLIEST APPROVED FIRST (TOP 1 = earliest approved hotel submission)
   const { vipAddedHotelDestinations, addedHotelTimestampMap } = useMemo(() => {
     const tsMap = new Map<string, number>();
     const list: TouristDestination[] = [];
+    const seenIds = new Set<string>();
+    const seenNameKeys = new Set<string>();
 
     restaurants.forEach((r: Restaurant, idx: number) => {
       if (
@@ -318,9 +333,24 @@ export const HotelView: React.FC = () => {
       ) {
         return;
       }
+      const idStr = String(r.id || '').trim();
+      if (!idStr || seenIds.has(idStr)) return;
+      const normNameKey = `${normalizeKhmerSearchText(r.nameKh || r.nameEn || '')}::${(r.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim()}`;
+      if (normNameKey.length > 3 && seenNameKeys.has(normNameKey)) return;
+
+      seenIds.add(idStr);
+      if (normNameKey.length > 3) seenNameKeys.add(normNameKey);
+
       const catInfo = inferBusinessTypeAndCategory(r);
-      const ts = extractAddedTimestampMs(r, idx + 1000);
+      const ts = extractAddedTimestampMs(r, idx + 1);
       tsMap.set(r.id, ts);
+
+      const resolvedPhoto =
+        r.profileImage ||
+        r.photoUrl ||
+        r.thumbnailUrl ||
+        (Array.isArray(r.galleryPhotos) && r.galleryPhotos[0]) ||
+        '';
 
       list.push({
         id: r.id,
@@ -331,7 +361,7 @@ export const HotelView: React.FC = () => {
         categoryEn: r.categoryEn || catInfo.shortEn,
         descriptionKh: r.descriptionKh || `${r.nameKh} — កន្លែងស្នាក់នៅស្អាត និងមានផាសុកភាព។`,
         descriptionEn: r.descriptionEn || `${r.nameEn || r.nameKh} — Verified accommodation in ${r.provinceEn}.`,
-        photoUrl: r.profileImage || r.photoUrl || '',
+        photoUrl: resolvedPhoto,
         galleryPhotos: r.galleryPhotos || [],
         provinceKh: r.provinceKh,
         provinceEn: r.provinceEn,
@@ -353,7 +383,7 @@ export const HotelView: React.FC = () => {
           ? r.signatureDishesKh
           : ['បន្ទប់ស្អាត មានម៉ាស៊ីនត្រជាក់ Wi-Fi និងចំណតរថយន្តសុវត្ថិភាព'],
         isFeatured: true,
-        isCustomPhoto: Boolean(r.profileImage || r.photoUrl),
+        isCustomPhoto: Boolean(resolvedPhoto),
         locationVerificationStatus: 'verified' as const,
       });
     });
@@ -363,13 +393,17 @@ export const HotelView: React.FC = () => {
       if (!d || d.categorySlug !== 'hotel') return;
       if (d.isAdminEdited || d.isCustomPhoto || !/^dest-hotel-\d+$/i.test(String(d.id || ''))) {
         if (!tsMap.has(d.id)) {
-          tsMap.set(d.id, extractAddedTimestampMs(d, idx));
+          tsMap.set(d.id, extractAddedTimestampMs(d, idx + 5000));
         }
       }
     });
 
-    // Sort user/owner-added hotels strictly Newest First (highest timestamp first)
-    list.sort((a, b) => (tsMap.get(b.id) || 0) - (tsMap.get(a.id) || 0));
+    // Sort user/owner-added hotels strictly Earliest Approved First (lowest timestamp first -> TOP 1)
+    list.sort((a, b) => {
+      const diff = (tsMap.get(a.id) || 0) - (tsMap.get(b.id) || 0);
+      if (diff !== 0) return diff;
+      return String(a.id).localeCompare(String(b.id));
+    });
 
     return { vipAddedHotelDestinations: list, addedHotelTimestampMap: tsMap };
   }, [restaurants, destinations, isAdmin, currentUser?.id]);
@@ -379,11 +413,24 @@ export const HotelView: React.FC = () => {
     [vipAddedHotelDestinations, addedHotelTimestampMap]
   );
 
-  // Combine user/owner newly added hotels (Newest First) + seed hotels from `destinations`
+  // Combine user/owner approved hotels (Earliest Approved First) + deduplicated seed hotels from `destinations`
   const allHotels = useMemo<TouristDestination[]>(() => {
     const seedHotels = destinations.filter((d) => Boolean(d && d.categorySlug === 'hotel'));
-    const customIds = new Set(vipAddedHotelDestinations.map((d) => d.id));
-    return [...vipAddedHotelDestinations, ...seedHotels.filter((d) => !customIds.has(d.id))];
+    const seenIds = new Set(vipAddedHotelDestinations.map((d) => d.id));
+    const seenNameKeys = new Set(
+      vipAddedHotelDestinations
+        .map((d) => `${normalizeKhmerSearchText(d.nameKh || d.nameEn || '')}::${(d.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim()}`)
+        .filter((k) => k.length > 3)
+    );
+    const dedupedSeed = seedHotels.filter((d) => {
+      if (!d || seenIds.has(d.id)) return false;
+      const normKey = `${normalizeKhmerSearchText(d.nameKh || d.nameEn || '')}::${(d.provinceKh || '').replace(/^(ខេត្ត|រាជធានី)/, '').trim()}`;
+      if (normKey.length > 3 && seenNameKeys.has(normKey)) return false;
+      seenIds.add(d.id);
+      if (normKey.length > 3) seenNameKeys.add(normKey);
+      return true;
+    });
+    return [...vipAddedHotelDestinations, ...dedupedSeed];
   }, [destinations, vipAddedHotelDestinations]);
 
   const classifyHotelSubCategory = (h: TouristDestination): string => {
@@ -493,13 +540,17 @@ export const HotelView: React.FC = () => {
     });
   }, [categoryMatchedHotels]);
 
-  // Order: Newly added user/business-owner hotels FIRST (strictly Newest First, never shuffled), then standard hotels
+  // Order: User/business-owner approved hotels FIRST (strictly Earliest Approved First -> TOP 1, never shuffled), then standard hotels
   const orderedHotels = useMemo(() => {
-    const newlyAdded = allHotels
+    const userSubmitted = allHotels
       .filter((h) => userAddedHotelIds.has(h.id))
-      .sort((a, b) => (addedHotelTimestampMap.get(b.id) || 0) - (addedHotelTimestampMap.get(a.id) || 0));
+      .sort((a, b) => {
+        const diff = (addedHotelTimestampMap.get(a.id) || 0) - (addedHotelTimestampMap.get(b.id) || 0);
+        if (diff !== 0) return diff;
+        return String(a.id).localeCompare(String(b.id));
+      });
     const regularHotels = allHotels.filter((h) => !userAddedHotelIds.has(h.id));
-    return [...newlyAdded, ...shuffleForCurrentSession(regularHotels)];
+    return [...userSubmitted, ...shuffleForCurrentSession(regularHotels)];
   }, [allHotels, userAddedHotelIds, addedHotelTimestampMap]);
 
   const distanceMap = useMemo(() => {
@@ -551,12 +602,16 @@ export const HotelView: React.FC = () => {
       } else if (sortMode === 'rating') {
         scoped = [...scoped].sort((a, b) => (b.rating || 4.6) - (a.rating || 4.6));
       } else {
-        // 'newest' or 'popular': guarantee user/owner newly added hotels are ALWAYS at the very top (Newest First)
-        const newestUserHotels = scoped
+        // Automatic priority sorting: Earliest approved user-submitted hotel gets TOP 1 and appears first
+        const priorityUserHotels = scoped
           .filter((h) => userAddedHotelIds.has(h.id))
-          .sort((a, b) => (addedHotelTimestampMap.get(b.id) || 0) - (addedHotelTimestampMap.get(a.id) || 0));
+          .sort((a, b) => {
+            const diff = (addedHotelTimestampMap.get(a.id) || 0) - (addedHotelTimestampMap.get(b.id) || 0);
+            if (diff !== 0) return diff;
+            return String(a.id).localeCompare(String(b.id));
+          });
         const restHotels = scoped.filter((h) => !userAddedHotelIds.has(h.id));
-        scoped = [...newestUserHotels, ...restHotels];
+        scoped = [...priorityUserHotels, ...restHotels];
       }
       return scoped;
     }
@@ -572,10 +627,19 @@ export const HotelView: React.FC = () => {
       (h) => destinationSearchFields(h, [getLocalizedDestination(h, 'zh').name, classifyHotelSubCategory(h)]),
       {
         bucketSize: 100,
-        tieBreak: (a, b) =>
-          (addedHotelTimestampMap.get(b.id) || 0) - (addedHotelTimestampMap.get(a.id) || 0) ||
-          (b.rating || 0) - (a.rating || 0) ||
-          (a.nameEn || a.nameKh || '').localeCompare(b.nameEn || b.nameKh || ''),
+        tieBreak: (a, b) => {
+          const aUser = userAddedHotelIds.has(a.id);
+          const bUser = userAddedHotelIds.has(b.id);
+          if (aUser && !bUser) return -1;
+          if (!aUser && bUser) return 1;
+          if (aUser && bUser) {
+            return (addedHotelTimestampMap.get(a.id) || 0) - (addedHotelTimestampMap.get(b.id) || 0);
+          }
+          return (
+            (b.rating || 0) - (a.rating || 0) ||
+            (a.nameEn || a.nameKh || '').localeCompare(b.nameEn || b.nameKh || '')
+          );
+        },
       }
     );
   }, [
@@ -590,13 +654,14 @@ export const HotelView: React.FC = () => {
     addedHotelTimestampMap,
   ]);
 
-  // Split into Section 1: "សណ្ឋាគារពេញនិយមជិតខ្ញុំ" (Featured Cards, with all newly added user/owner hotels at the very top) & Section 2: "បញ្ជីសណ្ឋាគារបន្ថែម" (Compact Directory Rows matching Shop Menu)
+  // Split into Section 1: TOP 1 Earliest Approved Hotel (Featured Card matching Reference Image 3)
+  // & Section 2: Subsequent Hotels in Compact Directory Cards (matching Reference Image 2 / Shop Menu)
   const { featuredHotels, directoryHotels } = useMemo(() => {
     if (filteredHotels.length === 0) {
       return { featuredHotels: [], directoryHotels: [] };
     }
     const newlyAddedInFiltered = filteredHotels.filter((h) => userAddedHotelIds.has(h.id));
-    const baseTargetCount = showAllFeatured ? 12 : Math.max(2, newlyAddedInFiltered.length);
+    const baseTargetCount = showAllFeatured ? Math.min(12, Math.max(4, newlyAddedInFiltered.length)) : 1;
     const featured = filteredHotels.slice(0, baseTargetCount);
     const featuredIds = new Set<string>(featured.map((h) => h.id));
     const directory = filteredHotels.filter((h) => !featuredIds.has(h.id));
@@ -780,7 +845,7 @@ export const HotelView: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-[#F4F7F5] text-slate-900 min-h-full font-khmer pb-8 overflow-x-hidden">
+    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-12 overflow-x-hidden">
       {/* =====================================================================
           1. TOP ANGKOR WAT SUNSET & LAKE REFLECTION HERO + SEARCH + CATEGORIES
              (Matching Shop Menu 1-to-1)
@@ -1273,32 +1338,33 @@ export const HotelView: React.FC = () => {
         </div>
 
         {/* =====================================================================
-            HOTEL LISTINGS (Matching Shop Menu: Featured Section + Compact Directory Section)
+            HOTEL LISTINGS (Matching Shop Menu: TOP 1 Featured Card + Compact Directory Cards)
             ===================================================================== */}
         {filteredHotels.length > 0 ? (
           <div className="space-y-4">
-            {/* Section 1: សណ្ឋាគារពេញនិយមជិតខ្ញុំ (Newest User/Owner Added Hotels First + Featured Cards) */}
+            {/* Section 1: សណ្ឋាគារពេញនិយមជិតខ្ញុំ (TOP 1 Earliest Approved Hotel in Large Featured Card) */}
             {featuredHotels.length > 0 && (
               <div className="space-y-2.5">
-                <div className="flex items-center justify-between gap-1.5 px-0.5">
+                <div className="flex items-center justify-between gap-2 px-0.5">
                   <div className="flex items-center gap-2 min-w-0 flex-wrap">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="w-5 h-5 flex items-center justify-center shrink-0">
-                        <Flame className="w-5 h-5 text-orange-500 fill-amber-400" />
-                      </span>
-                      <h3 className="font-extrabold text-[15px] sm:text-base text-[#0F291E] leading-[1.65] break-words">
+                      <Flame className="w-5 h-5 text-orange-400 fill-amber-400 shrink-0" />
+                      <h3 className="font-extrabold text-[15px] sm:text-base text-white leading-[1.65] break-words">
                         {tr(language, 'សណ្ឋាគារពេញនិយមជិតខ្ញុំ', 'Popular Hotels Near Me', '附近热门酒店')}
                       </h3>
                     </div>
 
-                    {/* Red Distance Pill Badge */}
+                    {/* GPS Distance Pill Badge */}
                     <button
                       type="button"
                       onClick={handleToggleNearMe}
                       style={{
-                        background: 'linear-gradient(180deg, #EF4444 0%, #B91C1C 100%)',
+                        background:
+                          sortMode === 'nearest'
+                            ? 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)'
+                            : 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
                       }}
-                      className="px-2.5 py-0.5 rounded-full text-white text-[11px] font-extrabold inline-flex items-center gap-1 shadow-xs active:scale-95 transition cursor-pointer shrink-0"
+                      className="px-2.5 py-0.5 rounded-full text-white text-[11px] font-extrabold inline-flex items-center gap-1 shadow-2xs active:scale-95 transition cursor-pointer shrink-0"
                     >
                       <MapPin className="w-3 h-3 text-white fill-white/25 shrink-0" />
                       <span>
@@ -1307,37 +1373,38 @@ export const HotelView: React.FC = () => {
                     </button>
                   </div>
 
+                  {/* White Rounded Pill "មើលទាំងអស់ >" Matching Reference Image 2 */}
                   <button
                     type="button"
                     onClick={() => setShowAllFeatured((prev) => !prev)}
-                    className="text-xs font-extrabold text-[#0E5A35] hover:underline inline-flex items-center gap-0.5 cursor-pointer shrink-0"
+                    className="px-3 py-1 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 shadow-2xs text-xs font-extrabold text-slate-800 inline-flex items-center gap-0.5 cursor-pointer shrink-0"
                   >
                     <span>
                       {showAllFeatured
                         ? tr(language, 'បង្រួម', 'Show less', '收起')
                         : tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
                     </span>
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                <div className={featuredHotels.length === 1 ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 md:grid-cols-2 gap-3'}>
                   {featuredHotels.map((hotel) => {
                     const loc = getLocalizedDestination(hotel, language);
                     const isVipRecord = vipHotelIds.has(hotel.id);
-                    const isUserNew = userAddedHotelIds.has(hotel.id);
                     const bookmarked = isBookmarked(hotel.id);
                     const hash = getDeterministicHash(hotel.id);
                     const displayRating =
                       hotel.rating && hotel.rating > 0
-                        ? Number(hotel.rating).toFixed(1)
-                        : (4.6 + (hash % 4) * 0.1).toFixed(1);
+                        ? Number(Number(hotel.rating).toFixed(1))
+                        : Number((4.6 + (hash % 4) * 0.1).toFixed(1));
                     const displayReviews =
                       hotel.reviewCount && hotel.reviewCount > 0
                         ? hotel.reviewCount
                         : 95 + (hash % 210);
-                    const distanceKm = distanceMap.get(hotel.id) ?? getDeterministicDistanceKm(hotel.id);
-                    const amenityChips = getAmenityChipsForHotel(hotel);
+                    const featuredCoverUrl =
+                      hasVerifiedCustomHotelPhoto(hotel) ||
+                      (hotel.photoUrl ? resolveFoodPhotoUrl(hotel.photoUrl) : '');
 
                     const adminActions = isAdmin ? (
                       <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
@@ -1398,145 +1465,79 @@ export const HotelView: React.FC = () => {
                     ) : null;
 
                     return (
-                      <article
+                      <ListingFeaturedCard
                         key={hotel.id}
-                        data-testid={`hotel-featured-${hotel.id}`}
-                        onClick={() => setSelectedDestination(hotel)}
-                        className="bg-white rounded-[22px] p-2.5 border border-slate-200/85 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:border-emerald-500/60 transition flex gap-3 items-stretch cursor-pointer font-khmer"
-                      >
-                        {/* Left Icon / Verified Owner Photo Box with Distance Pill & Heart Button (Matching RestaurantCard) */}
-                        <div className="w-[100px] min-[340px]:w-[120px] min-[380px]:w-[146px] sm:w-[158px] min-h-[132px] rounded-2xl overflow-hidden relative shrink-0 bg-slate-100">
-                          <HotelAvatar
-                            hotel={hotel}
-                            alt={loc.name}
-                            className="w-full h-full rounded-2xl"
-                          />
-
-                          {/* Top-left Distance Badge */}
-                          <span className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-black/65 backdrop-blur-xs text-white text-[11px] font-extrabold inline-flex items-center gap-1 shadow-xs">
-                            <MapPin className="w-3 h-3 text-white fill-white/25 shrink-0" />
-                            <span>
-                              {distanceKm} {tr(language, 'km', 'km', '公里')}
-                            </span>
-                          </span>
-
-                          {/* Top-right Heart Bookmark Button */}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleBookmark(hotel.id);
-                            }}
-                            aria-label={tr(language, 'រក្សាទុក', 'Bookmark', '收藏')}
-                            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white hover:bg-slate-50 shadow-sm flex items-center justify-center text-rose-500 active:scale-90 transition cursor-pointer"
-                          >
-                            <Heart className={`w-4 h-4 ${bookmarked ? 'fill-rose-500 text-rose-500' : 'text-rose-500'}`} strokeWidth={2.2} />
-                          </button>
-
-                          {/* VIP / New Badge */}
-                          {(isVipRecord || isUserNew) && (
-                            <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 text-[9.5px] font-black inline-flex items-center gap-1 shadow-xs">
-                              <Crown className="w-2.5 h-2.5 fill-slate-950" />
-                              <span>{tr(language, 'ថ្មី • VIP', 'NEW • VIP', '新入驻 • VIP')}</span>
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Right Info & Call / Map Buttons (Matching RestaurantCard 1-to-1) */}
-                        <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                          <div>
-                            <div className="flex items-start justify-between gap-1.5">
-                              <div className="min-w-0 flex-1">
-                                <h4 className="font-extrabold text-[14.5px] sm:text-base text-slate-900 leading-[1.65] line-clamp-2 break-words">
-                                  {hotel.nameKh || loc.name}
-                                </h4>
-                                {hotel.nameEn && hotel.nameEn !== hotel.nameKh && (
-                                  <p className="text-xs font-bold text-slate-600 line-clamp-1 break-words mt-0.5 leading-[1.5]">
-                                    {hotel.nameEn}
-                                  </p>
-                                )}
-                              </div>
-                              {adminActions}
-                            </div>
-
-                            {/* Rating & Review Count */}
-                            <div className="flex items-center gap-1 mt-1 text-xs flex-wrap">
-                              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
-                              <span className="font-extrabold text-slate-900">{displayRating}</span>
-                              <span className="text-slate-500 font-semibold leading-[1.5]">
-                                ({displayReviews} {tr(language, 'ការវាយតម្លៃ', 'reviews', '条评价')})
-                              </span>
-                            </div>
-
-                            {/* Category / Amenity Tags */}
-                            <div className="flex items-center gap-1.5 flex-wrap mt-2">
-                              {amenityChips.map((chip, idx) => (
-                                <span
-                                  key={idx}
-                                  className="px-2.5 py-0.5 rounded-lg bg-[#EBF5EE] border border-[#CDE5D4] text-[#0E5A35] text-[11px] font-bold inline-flex items-center gap-1"
-                                >
-                                  {renderAmenityIcon(chip.icon)}
-                                  <span>{chip.label}</span>
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Bottom Call & Map Pill Buttons */}
-                          <div className="grid grid-cols-2 gap-2 pt-2" onClick={(e) => e.stopPropagation()}>
+                        testId={`hotel-featured-${hotel.id}`}
+                        language={language}
+                        coverUrl={featuredCoverUrl}
+                        fallbackIcon={BedDouble}
+                        title={hotel.nameKh || loc.name}
+                        province={loc.province || hotel.provinceKh}
+                        address={hotel.addressKh || hotel.addressEn || loc.province || hotel.provinceKh}
+                        description={
+                          loc.description ||
+                          hotel.descriptionKh ||
+                          (hotel.highlightsKh?.length ? hotel.highlightsKh.join(', ') : '') ||
+                          tr(
+                            language,
+                            'កន្លែងស្នាក់នៅស្អាត មានផាសុកភាព និងសេវាកម្មល្អ។',
+                            'Clean, comfortable accommodation with great service.',
+                            '干净舒适的住宿体验与优质服务。'
+                          )
+                        }
+                        rating={displayRating}
+                        reviewCount={displayReviews}
+                        priceText={hotel.priceRange || '$'}
+                        phone={hotel.phone}
+                        badgeLabel={tr(language, 'ផ្សព្វផ្សាយ • សណ្ឋាគារ VIP', 'Promoted • VIP Hotel', '推广 • VIP 酒店')}
+                        onOpen={() => setSelectedDestination(hotel)}
+                        onOpenMap={() => openDestinationGoogleExternal(hotel, 'maps')}
+                        topRightActions={
+                          <>
+                            {adminActions}
                             <button
                               type="button"
-                              onClick={() => {
-                                if (hotel.phone) {
-                                  window.location.href = `tel:${hotel.phone.replace(/\s+/g, '')}`;
-                                } else {
-                                  setSelectedDestination(hotel);
-                                }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleBookmark(hotel.id);
                               }}
-                              style={{
-                                background: 'linear-gradient(180deg, #1E7E48 0%, #0D522C 100%)',
-                              }}
-                              className="min-h-[36px] px-2 py-1 rounded-xl text-white font-extrabold text-xs inline-flex items-center justify-center gap-1 shadow-xs active:scale-95 transition cursor-pointer leading-[1.6]"
+                              aria-label={tr(language, 'រក្សាទុក', 'Bookmark', '收藏')}
+                              className="w-8 h-8 rounded-full bg-white/95 hover:bg-white shadow-sm flex items-center justify-center text-rose-500 active:scale-90 transition cursor-pointer"
                             >
-                              <Phone className="w-3.5 h-3.5 text-white fill-white shrink-0" />
-                              <span className="break-words">{tr(language, 'ទូរស័ព្ទ', 'Call', '电话')}</span>
+                              <Heart className={`w-4 h-4 ${bookmarked ? 'fill-rose-500 text-rose-500' : 'text-rose-500'}`} strokeWidth={2.2} />
                             </button>
-
-                            <button
-                              type="button"
-                              onClick={() => openDestinationGoogleExternal(hotel, 'maps')}
-                              className="min-h-[36px] px-2 py-1 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-extrabold text-xs inline-flex items-center justify-center gap-1 shadow-2xs active:scale-95 transition cursor-pointer leading-[1.6]"
-                            >
-                              <MapPin className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.3} />
-                              <span className="break-words">{tr(language, 'ផែនទី', 'Map', '地图')}</span>
-                            </button>
-                          </div>
-                        </div>
-                      </article>
+                          </>
+                        }
+                      />
                     );
                   })}
                 </div>
               </div>
             )}
 
-            {/* Section 2: បញ្ជីសណ្ឋាគារបន្ថែម (More Hotels Directory - Compact Rows with Icon matching Shop Menu) */}
+            {/* Section 2: បញ្ជីសណ្ឋាគារបន្ថែម (More Hotels Directory - Compact List Cards Matching Shop Menu / Reference Image 2) */}
             {displayedDirectoryHotels.length > 0 && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2 px-1 pt-1">
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between gap-2 px-0.5 pt-1">
                   <div className="flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-xl bg-[#0E5A35]/10 border border-[#0E5A35]/25 flex items-center justify-center shrink-0">
-                      <BedDouble className="w-4 h-4 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
+                    <span
+                      style={{
+                        background: 'linear-gradient(180deg, #60A5FA 0%, #2563EB 100%)',
+                      }}
+                      className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 text-white shadow-2xs"
+                    >
+                      <BedDouble className="w-4 h-4 shrink-0" strokeWidth={2.2} />
                     </span>
-                    <h3 className="font-extrabold text-[15px] sm:text-base text-[#0F291E]">
+                    <h3 className="font-extrabold text-[15px] sm:text-base text-white leading-[1.6]">
                       {tr(language, 'បញ្ជីសណ្ឋាគារបន្ថែម', 'More Hotels Directory', '更多酒店列表')}
                     </h3>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#0E5A35]/10 border border-[#0E5A35]/25 text-[11px] font-extrabold text-[#0E5A35] font-mono">
+                  <span className="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 text-[11px] font-extrabold text-slate-800 font-mono shadow-2xs">
                     {directoryHotels.length}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                   {displayedDirectoryHotels.map((hotel) => {
                     const loc = getLocalizedDestination(hotel, language);
                     const isVipRecord = vipHotelIds.has(hotel.id);
@@ -1556,19 +1557,19 @@ export const HotelView: React.FC = () => {
                         key={hotel.id}
                         data-testid={`hotel-row-${hotel.id}`}
                         onClick={() => setSelectedDestination(hotel)}
-                        className="bg-white rounded-2xl p-2.5 border border-slate-200/85 shadow-2xs hover:border-emerald-500/60 transition flex items-center gap-3 cursor-pointer font-khmer"
+                        className="bg-white rounded-[20px] p-2.5 border border-slate-200/90 shadow-[0_4px_14px_rgba(15,23,42,0.04)] hover:border-emerald-500/60 transition flex items-center gap-3 cursor-pointer font-khmer"
                       >
-                        <div className="w-16 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-200">
+                        <div className="w-16 h-14 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-200/80">
                           <HotelAvatar
                             hotel={hotel}
                             alt={loc.name}
-                            className="w-full h-full rounded-xl"
+                            className="w-full h-full object-cover rounded-xl"
                           />
                         </div>
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-baseline gap-1.5 min-w-0 flex-wrap">
-                            <h4 className="font-extrabold text-sm text-slate-900 leading-[1.65] line-clamp-2 break-words">
+                            <h4 className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 leading-[1.65] line-clamp-2 break-words">
                               {hotel.nameKh || loc.name}
                             </h4>
                             {hotel.nameEn && hotel.nameEn !== hotel.nameKh && (
@@ -1582,11 +1583,11 @@ export const HotelView: React.FC = () => {
                             <span className="inline-flex items-center gap-1">
                               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
                               <strong className="font-extrabold text-slate-900">{displayRating}</strong>
-                              <span className="text-slate-500">({displayReviews})</span>
+                              <span className="text-slate-400">({displayReviews})</span>
                             </span>
                             <span className="text-slate-300">|</span>
-                            <span className="inline-flex items-center gap-1 text-slate-700 font-bold">
-                              <MapPin className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" />
+                            <span className="inline-flex items-center gap-1 text-emerald-700 font-extrabold">
+                              <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                               <span>
                                 {distanceKm} {tr(language, 'km', 'km', '公里')}
                               </span>
@@ -1594,7 +1595,22 @@ export const HotelView: React.FC = () => {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0">
+                        <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openDestinationGoogleExternal(hotel, 'maps');
+                            }}
+                            aria-label={tr(language, 'ផែនទី', 'Map', '地图')}
+                            style={{
+                              background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
+                            }}
+                            className="w-8 h-8 rounded-xl text-white flex items-center justify-center shadow-2xs active:scale-95 transition cursor-pointer"
+                          >
+                            <Navigation className="w-3.5 h-3.5 text-white fill-white/20" strokeWidth={2.3} />
+                          </button>
+
                           {isAdmin && (
                             <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                               <button
@@ -1615,7 +1631,7 @@ export const HotelView: React.FC = () => {
                               </button>
                             </div>
                           )}
-                          <ChevronRight className="w-5 h-5 text-slate-400" strokeWidth={2.2} />
+                          <ChevronRight className="w-4 h-4 text-slate-400" strokeWidth={2.2} />
                         </div>
                       </article>
                     );
@@ -1629,7 +1645,10 @@ export const HotelView: React.FC = () => {
                       onClick={() =>
                         setVisibleCount((prev) => Math.min(directoryHotels.length, prev + HOTEL_BATCH_SIZE))
                       }
-                      className="px-5 py-2.5 rounded-full bg-[#0E5A35] hover:bg-[#094226] text-white text-xs font-extrabold shadow-xs cursor-pointer transition"
+                      style={{
+                        background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
+                      }}
+                      className="px-5 py-2.5 rounded-full text-white text-xs font-extrabold shadow-xs cursor-pointer transition active:scale-95"
                     >
                       {tr(
                         language,

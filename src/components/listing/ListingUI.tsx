@@ -223,9 +223,9 @@ export const ListingFeaturedCard: React.FC<ListingFeaturedCardProps> = ({
     <div
       data-testid={testId}
       onClick={onOpen}
-      className="group overflow-hidden rounded-2xl cursor-pointer bg-white dark:bg-slate-800 border border-emerald-700/30 dark:border-emerald-500/30 shadow-xs transition-colors active:scale-[0.995]"
+      className="group overflow-hidden rounded-2xl cursor-pointer bg-[#1E293B] border border-emerald-500/35 shadow-md transition-colors active:scale-[0.995]"
     >
-      <div className="relative h-40 sm:h-44 w-full bg-emerald-900">
+      <div className="relative h-44 sm:h-48 w-full bg-emerald-950">
         {activeCover && !coverFailed ? (
           <img
             src={activeCover}
@@ -257,7 +257,7 @@ export const ListingFeaturedCard: React.FC<ListingFeaturedCardProps> = ({
         )}
 
         <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap font-khmer">
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-400 text-slate-950 text-[11px] font-black">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-400 text-slate-950 text-[11px] font-black shadow-2xs">
             <BadgeCheck className="w-4 h-4 shrink-0" strokeWidth={ICON_STROKE} />
             <span>{badgeLabel}</span>
           </span>
@@ -278,28 +278,28 @@ export const ListingFeaturedCard: React.FC<ListingFeaturedCardProps> = ({
         )}
       </div>
 
-      <div className="p-4 space-y-3 font-khmer">
+      <div className="p-4 space-y-3 font-khmer bg-[#1E293B] text-white">
         <div className="space-y-1.5">
-          <h3 className="font-extrabold text-base sm:text-lg leading-snug text-[#0F172A] dark:text-white line-clamp-2">
+          <h3 className="font-extrabold text-base sm:text-lg leading-[1.65] text-white line-clamp-2 break-words">
             {title}
           </h3>
           {address && (
-            <div className="flex items-start gap-1.5 text-xs text-slate-600 dark:text-slate-300">
-              <MapPin className="w-4 h-4 shrink-0 mt-px text-emerald-600 dark:text-emerald-400" strokeWidth={ICON_STROKE} />
-              <span className="line-clamp-2">{address}</span>
+            <div className="flex items-start gap-1.5 text-xs text-slate-300">
+              <MapPin className="w-4 h-4 shrink-0 mt-px text-emerald-400" strokeWidth={ICON_STROKE} />
+              <span className="line-clamp-2 leading-[1.6] break-words">{address}</span>
             </div>
           )}
         </div>
 
         {description && (
-          <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300 line-clamp-2">{description}</p>
+          <p className="text-xs leading-[1.65] text-slate-300 line-clamp-2 break-words">{description}</p>
         )}
 
-        <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/70">
+        <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-700/80">
           <div className="flex items-center gap-2 min-w-0 text-xs">
             {typeof rating === 'number' && (
-              <span className="inline-flex items-center gap-1 font-bold text-slate-800 dark:text-slate-200">
-                <Star className="w-4 h-4 text-amber-500 fill-amber-500" strokeWidth={ICON_STROKE} />
+              <span className="inline-flex items-center gap-1 font-bold text-white">
+                <Star className="w-4 h-4 text-amber-400 fill-amber-400" strokeWidth={ICON_STROKE} />
                 <span>{rating}</span>
                 {typeof reviewCount === 'number' && reviewCount > 0 && (
                   <span className="text-[11px] font-medium text-slate-400">({reviewCount})</span>
@@ -307,7 +307,7 @@ export const ListingFeaturedCard: React.FC<ListingFeaturedCardProps> = ({
               </span>
             )}
             {priceText && (
-              <span className="px-2 py-0.5 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[11px] font-bold border border-amber-200/70 dark:border-amber-800/60 truncate">
+              <span className="px-2 py-0.5 rounded-lg bg-amber-950/75 text-amber-300 text-[11px] font-bold border border-amber-700/60 truncate">
                 {priceText}
               </span>
             )}
@@ -317,7 +317,7 @@ export const ListingFeaturedCard: React.FC<ListingFeaturedCardProps> = ({
             {phone && (
               <a
                 href={`tel:${phone.replace(/\s+/g, '')}`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-[11px] font-bold transition-colors leading-[1.5]"
               >
                 <Phone className="w-4 h-4" strokeWidth={ICON_STROKE} />
                 <span>{tr(language, 'ហៅ', 'Call', '致电')}</span>
@@ -326,7 +326,7 @@ export const ListingFeaturedCard: React.FC<ListingFeaturedCardProps> = ({
             <button
               type="button"
               onClick={onOpenMap}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 text-emerald-800 dark:text-emerald-300 border border-emerald-700/40 dark:border-emerald-500/40 text-[11px] font-bold cursor-pointer transition-colors hover:bg-emerald-50 dark:hover:bg-slate-800"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold cursor-pointer transition-colors hover:bg-slate-800 leading-[1.5]"
             >
               <MapPin className="w-4 h-4" strokeWidth={ICON_STROKE} />
               <span>{tr(language, 'ផែនទី', 'Map', '地图')}</span>

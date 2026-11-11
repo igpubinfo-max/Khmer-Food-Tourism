@@ -425,140 +425,81 @@ export const FoodView: React.FC = () => {
           </button>
         </div>
 
-        {/* 3. Four Colored Category Filter Buttons in a Soft White Container */}
+        {/* 3. Four Premium PNG Category Buttons with Category Names Directly Below Each Image */}
         <div
           style={{
-            background: 'rgba(255, 255, 255, 0.92)',
+            background: 'rgba(255, 255, 255, 0.96)',
             backdropFilter: 'blur(10px)',
             WebkitBackdropFilter: 'blur(10px)',
             boxShadow: '0 8px 22px rgba(15, 23, 42, 0.08)',
           }}
-          className="rounded-[24px] p-2.5 sm:p-3 border border-white"
+          className="rounded-[24px] px-2.5 py-3 sm:px-3.5 sm:py-3.5 border border-white"
         >
-          <div className="grid grid-cols-4 gap-1.5 min-[360px]:gap-2.5 sm:gap-3">
-            {/* 1. គ្រប់មុខម្ហូប (All Dishes) – Yellow/Orange */}
-            <button
-              type="button"
-              onClick={() => setSelectedCategory('all')}
-              aria-pressed={selectedCategory === 'all'}
-              style={{
-                background: 'linear-gradient(180deg, #FBBF24 0%, #F59E0B 48%, #D97706 100%)',
-                boxShadow:
-                  selectedCategory === 'all'
-                    ? '0 8px 18px rgba(217, 119, 6, 0.45), 0 0 0 2.5px #22C55E, inset 0 1.5px 1px rgba(255, 255, 255, 0.8)'
-                    : '0 6px 14px rgba(217, 119, 6, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
-              }}
-              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
-                selectedCategory === 'all' ? 'border-white' : 'border-amber-200/70 opacity-95 hover:opacity-100'
-              }`}
-            >
-              <span
-                className="pointer-events-none absolute -top-4 -left-4 w-14 h-12 rounded-full opacity-45"
-                style={{
-                  background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)',
-                }}
-              />
-              {renderCategoryIcon('all', 'w-6 h-6 min-[360px]:w-7 min-[360px]:h-7 drop-shadow-xs')}
-              <span
-                className="font-khmer font-extrabold leading-[1.75] pt-0.5 pb-1 tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full overflow-visible"
-                style={{ fontSize: 'clamp(11px, 3.06vw, 15px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
-              >
-                {tr(language, 'គ្រប់មុខម្ហូប', 'All Dishes', '全部美食')}
-              </span>
-            </button>
-
-            {/* 2. សម្ល (Cambodian Soups & Curries) – Blue */}
-            <button
-              type="button"
-              onClick={() => setSelectedCategory('samlor')}
-              aria-pressed={selectedCategory === 'samlor'}
-              style={{
-                background: 'linear-gradient(180deg, #60A5FA 0%, #3B82F6 48%, #1D4ED8 100%)',
-                boxShadow:
-                  selectedCategory === 'samlor'
-                    ? '0 8px 18px rgba(29, 78, 216, 0.45), 0 0 0 2.5px #22C55E, inset 0 1.5px 1px rgba(255, 255, 255, 0.8)'
-                    : '0 6px 14px rgba(29, 78, 216, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
-              }}
-              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
-                selectedCategory === 'samlor' ? 'border-white' : 'border-blue-200/70 opacity-95 hover:opacity-100'
-              }`}
-            >
-              <span
-                className="pointer-events-none absolute -top-4 -left-4 w-14 h-12 rounded-full opacity-45"
-                style={{
-                  background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)',
-                }}
-              />
-              {renderCategoryIcon('samlor', 'w-6 h-6 min-[360px]:w-7 min-[360px]:h-7 drop-shadow-xs')}
-              <span
-                className="font-khmer font-extrabold leading-[1.75] pt-0.5 pb-1 tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full overflow-visible"
-                style={{ fontSize: 'clamp(12px, 3.3vw, 15.6px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
-              >
-                {tr(language, 'សម្ល', 'Soups & Curries', '高棉汤羹')}
-              </span>
-            </button>
-
-            {/* 3. អាំង/ចៀន (Grilled & Fried Food) – Green */}
-            <button
-              type="button"
-              onClick={() => setSelectedCategory('cha')}
-              aria-pressed={selectedCategory === 'cha'}
-              style={{
-                background: 'linear-gradient(180deg, #4ADE80 0%, #22C55E 48%, #15803D 100%)',
-                boxShadow:
-                  selectedCategory === 'cha'
-                    ? '0 8px 18px rgba(21, 128, 61, 0.45), 0 0 0 2.5px #F59E0B, inset 0 1.5px 1px rgba(255, 255, 255, 0.8)'
-                    : '0 6px 14px rgba(21, 128, 61, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
-              }}
-              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
-                selectedCategory === 'cha' ? 'border-white' : 'border-emerald-200/70 opacity-95 hover:opacity-100'
-              }`}
-            >
-              <span
-                className="pointer-events-none absolute -top-4 -left-4 w-14 h-12 rounded-full opacity-45"
-                style={{
-                  background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)',
-                }}
-              />
-              {renderCategoryIcon('cha', 'w-6 h-6 min-[360px]:w-7 min-[360px]:h-7 drop-shadow-xs')}
-              <span
-                className="font-khmer font-extrabold leading-[1.75] pt-0.5 pb-1 tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full overflow-visible"
-                style={{ fontSize: 'clamp(11.4px, 3.18vw, 15px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
-              >
-                {tr(language, 'អាំង/ចៀន', 'Grilled & Fried', '烧烤/煎炸')}
-              </span>
-            </button>
-
-            {/* 4. បង្អែម/ភេសជ្ជៈ (Desserts & Beverages) – Purple */}
-            <button
-              type="button"
-              onClick={() => setSelectedCategory('bong_aem')}
-              aria-pressed={selectedCategory === 'bong_aem'}
-              style={{
-                background: 'linear-gradient(180deg, #C084FC 0%, #9333EA 48%, #6B21A8 100%)',
-                boxShadow:
-                  selectedCategory === 'bong_aem'
-                    ? '0 8px 18px rgba(107, 33, 168, 0.45), 0 0 0 2.5px #22C55E, inset 0 1.5px 1px rgba(255, 255, 255, 0.8)'
-                    : '0 6px 14px rgba(107, 33, 168, 0.32), inset 0 1.5px 1px rgba(255, 255, 255, 0.65)',
-              }}
-              className={`relative min-h-[82px] sm:min-h-[88px] py-1.5 px-1 rounded-[20px] flex flex-col items-center justify-center gap-1 text-white overflow-hidden active:scale-95 transition cursor-pointer border ${
-                selectedCategory === 'bong_aem' ? 'border-white' : 'border-purple-200/70 opacity-95 hover:opacity-100'
-              }`}
-            >
-              <span
-                className="pointer-events-none absolute -top-4 -left-4 w-14 h-12 rounded-full opacity-45"
-                style={{
-                  background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)',
-                }}
-              />
-              {renderCategoryIcon('bong_aem', 'w-6 h-6 min-[360px]:w-7 min-[360px]:h-7 drop-shadow-xs')}
-              <span
-                className="font-khmer font-extrabold leading-[1.75] pt-0.5 pb-1 tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full overflow-visible"
-                style={{ fontSize: 'clamp(10.8px, 3vw, 14.4px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
-              >
-                {tr(language, 'បង្អែម/ភេសជ្ជៈ', 'Desserts & Drinks', '甜品/饮品')}
-              </span>
-            </button>
+          <div className="grid grid-cols-4 gap-2 min-[360px]:gap-2.5 sm:gap-3.5 items-start">
+            {[
+              {
+                id: 'all',
+                imageSrc: '/categories/food_cat_all.png',
+                nameKh: 'គ្រប់មុខម្ហូប',
+                nameEn: 'All Dishes',
+                nameZh: '全部美食',
+              },
+              {
+                id: 'samlor',
+                imageSrc: '/categories/food_cat_samlor.png',
+                nameKh: 'សម្ល',
+                nameEn: 'Soups & Curries',
+                nameZh: '高棉汤羹',
+              },
+              {
+                id: 'cha',
+                imageSrc: '/categories/food_cat_cha.png',
+                nameKh: 'អាំង/ចៀន',
+                nameEn: 'Grilled & Fried',
+                nameZh: '烧烤/煎炸',
+              },
+              {
+                id: 'bong_aem',
+                imageSrc: '/categories/food_cat_dessert.png',
+                nameKh: 'បង្អែម/ភេសជ្ជៈ',
+                nameEn: 'Desserts & Drinks',
+                nameZh: '甜品/饮品',
+              },
+            ].map((cat) => {
+              const active = selectedCategory === cat.id;
+              const label = tr(language, cat.nameKh, cat.nameEn, cat.nameZh);
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat.id)}
+                  aria-pressed={active}
+                  className="group flex flex-col items-center justify-start gap-1.5 w-full min-w-0 bg-transparent border-0 p-0 active:scale-95 transition-transform cursor-pointer select-none"
+                >
+                  <div className="w-full aspect-[560/460] bg-transparent flex items-center justify-center relative transition-opacity duration-150">
+                    <img
+                      src={cat.imageSrc}
+                      alt={label}
+                      className={`w-full h-full object-contain bg-transparent select-none pointer-events-none transition-all duration-150 ${
+                        active
+                          ? 'drop-shadow-[0_6px_14px_rgba(21,128,61,0.42)] brightness-[1.03]'
+                          : 'drop-shadow-[0_4px_10px_rgba(15,23,42,0.15)] opacity-95 group-hover:opacity-100'
+                      }`}
+                      loading="eager"
+                      decoding="async"
+                    />
+                  </div>
+                  <span
+                    className={`font-khmer font-extrabold leading-[1.58] pt-0.5 px-0.5 text-center break-words whitespace-normal w-full transition-colors ${
+                      active ? 'text-[#15803D]' : 'text-[#0F172A] group-hover:text-[#15803D]'
+                    }`}
+                    style={{ fontSize: 'clamp(11px, 3.05vw, 14.4px)' }}
+                  >
+                    {label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
         <div ref={dishListStartRef} />

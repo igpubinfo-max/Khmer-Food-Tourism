@@ -21,17 +21,18 @@ import {
   Soup,
   CupSoda,
   Navigation,
+  Store,
 } from 'lucide-react';
 import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
 import { ShopAvatar } from './icons/DefaultShopIcon';
-import { isVipOwnerListing } from './listing/ListingUI';
+import { ListingFeaturedCard, isVipOwnerListing } from './listing/ListingUI';
 
 import type { Language } from '../types';
 
 export interface RestaurantCardProps {
   restaurant: Restaurant;
-  variant?: 'featured' | 'compact';
+  variant?: 'hero' | 'featured' | 'compact';
   distanceKm?: number | null;
 }
 
@@ -40,7 +41,7 @@ interface RestaurantCardViewProps {
   allRestaurants: Restaurant[];
   language: Language;
   isAdmin: boolean;
-  variant: 'featured' | 'compact';
+  variant: 'hero' | 'featured' | 'compact';
   distanceKm?: number | null;
   bookmarked: boolean;
   onToggleBookmark: (id: string) => void;
@@ -213,6 +214,60 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
         </button>
       </div>
     ) : null;
+
+    if (variant === 'hero') {
+      return (
+        <ListingFeaturedCard
+          testId={`shop-featured-${restaurant.id}`}
+          language={language}
+          coverUrl={resolvedShopPhotoUrl}
+          fallbackIcon={Store}
+          title={restaurant.nameKh || loc.name}
+          province={loc.province}
+          address={loc.address || restaurant.addressKh || restaurant.addressEn}
+          description={
+            loc.description ||
+            (language === 'km' && restaurant.signatureDishesKh?.length
+              ? restaurant.signatureDishesKh.join(', ')
+              : restaurant.signatureDishesEn?.length
+              ? restaurant.signatureDishesEn.join(', ')
+              : '') ||
+            tr(
+              language,
+              'ម្ហូបខ្មែរប្រពៃណី, ម្ហូបពិសេសប្រចាំហាង',
+              'Authentic Khmer cuisine & house specialties.',
+              '正宗柬式美食与招牌特色菜。'
+            )
+          }
+          rating={typeof restaurant.rating === 'number' ? restaurant.rating : 0}
+          reviewCount={restaurant.reviewCount}
+          priceText={restaurant.priceLevel || '$'}
+          phone={restaurant.phone}
+          badgeLabel={tr(language, 'ផ្សព្វផ្សាយ • ហាង VIP', 'Promoted • VIP Shop', '推广 • VIP 店铺')}
+          onOpen={handleCardClick}
+          onOpenMap={() => {
+            trackRestaurantMap(restaurant.id);
+            openExternalUrlNativeSafe(getRestaurantDirectGoogleMapsUrl(restaurant));
+          }}
+          topRightActions={
+            <>
+              {adminActions}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleBookmark(restaurant.id);
+                }}
+                aria-label={tr(language, 'រក្សាទុក', 'Bookmark', '收藏')}
+                className="w-8 h-8 rounded-full bg-white/95 hover:bg-white shadow-sm flex items-center justify-center text-rose-500 active:scale-90 transition cursor-pointer"
+              >
+                <Heart className={`w-4 h-4 ${bookmarked ? 'fill-rose-500 text-rose-500' : 'text-rose-500'}`} strokeWidth={2.2} />
+              </button>
+            </>
+          }
+        />
+      );
+    }
 
     if (variant === 'featured') {
       return (
