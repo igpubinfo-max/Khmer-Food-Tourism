@@ -15,9 +15,9 @@ interface Props {
 
 interface FeatureItem {
   id: string;
+  imageSrc: string;
   label: string;
-  gradientStyle: string;
-  renderIcon: () => React.ReactNode;
+  isLongLabel?: boolean;
   onClick: () => void;
 }
 
@@ -33,161 +33,83 @@ const FeatureGridImpl: React.FC<Props> = ({
   const items: FeatureItem[] = [
     {
       id: 'nearby-food',
+      imageSrc: '/categories/home_cat_nearby_food.png',
       label: tr(language, 'ម្ហូបជិតខ្ញុំ', 'Nearby Food', '附近美食'),
-      gradientStyle: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
       onClick: onNearbyFoodSearch,
-      renderIcon: () => (
-        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M24 5c-6.1 0-11 4.8-11 10.8 0 7.9 11 17.7 11 17.7s11-9.8 11-17.7C35 9.8 30.1 5 24 5Z" />
-          <circle cx="24" cy="15.8" r="4" />
-          <path d="M13 31l-5 9 11-2.5 5 2.5 5-2.5L40 40l-5-9" />
-        </svg>
-      ),
     },
     {
       id: 'compare-dishes',
-      label: tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佳肴与饮品搭配'),
-      gradientStyle: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
+      imageSrc: '/categories/home_cat_drinks.png',
+      label: tr(language, 'ម្ហូបអមភេសជ្ជៈ', 'Beverage Pairings', '佳肴与饮品'),
+      isLongLabel: true,
       onClick: onNearbyPlaces,
-      renderIcon: () => (
-        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 36 32" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <g transform="translate(2, 2) rotate(-10 10 14)">
-            <path d="M6 2h8l-1 10a3 3 0 0 1-6 0L6 2z" />
-            <path d="M6.5 6h7" />
-            <path d="M10 15v7" />
-            <path d="M7 22h6" />
-          </g>
-          <g transform="translate(14, 2) rotate(10 10 14)">
-            <path d="M6 2h8l-1 10a3 3 0 0 1-6 0L6 2z" />
-            <path d="M6.5 6h7" />
-            <path d="M10 15v7" />
-            <path d="M7 22h6" />
-          </g>
-          <path d="M18 1v3" />
-          <path d="M14 2l1.5 2" />
-          <path d="M22 2l-1.5 2" />
-        </svg>
-      ),
     },
     {
       id: 'food-recommend',
+      imageSrc: '/categories/home_cat_recommend.png',
       label: tr(language, 'ណែនាំម្ហូប', 'Food Picks', '美食推荐'),
-      gradientStyle: 'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)',
       onClick: onFoodRecommendations,
-      renderIcon: () => (
-        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M18 8c0 3-2.5 4.5-2.5 7.5S18 20 18 20" />
-          <path d="M24 6c0 3-2.5 4.5-2.5 7.5S24 18 24 18" />
-          <path d="M30 8c0 3-2.5 4.5-2.5 7.5S30 20 30 20" />
-          <path d="M9 24h30a15 15 0 0 1-30 0Z" fill="currentColor" fillOpacity="0.18" />
-          <path d="M16 40h16" />
-        </svg>
-      ),
     },
     {
       id: 'daily-food',
+      imageSrc: '/categories/home_cat_province_food.png',
       label: tr(language, 'ម្ហូបតាមខេត្ត', 'Food by Province', '各省美食'),
-      gradientStyle: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
+      isLongLabel: language === 'en',
       onClick: onDailyFoodDiscovery,
-      renderIcon: () => (
-        <svg className="w-8 h-7 drop-shadow-xs shrink-0" viewBox="0 0 60 48" fill="none">
-          <path
-            d="M6.2 14.2 10.4 9.5l5.1-2.7 7.6-.8 6.8 1.2 4.9-.5 3.6 2.8 4.4-4.1 6.7-2.2 4.8.6 1.9 3.6-1.8 4.6.9 4.2-2.6 3.7 2.8 4.1-.7 4.7-4.5 2.5-5.6.9-2.8 3.6 3.2 2.4-.9 2.6-4.9.4-3.7-2.2-4.8.8-3.4 4.1-6.2.8-5.1-1.2-2.1-3.4 2.4-2.8-3.1-1.9-4.6-4.3-1.4-4.8-3.8-4.2-.8-4.6 1.8-3.2Z"
-            fill="#FFFFFF"
-            stroke="rgba(255,255,255,0.65)"
-            strokeWidth="0.9"
-            strokeLinejoin="round"
-          />
-          <text
-            x="29.5"
-            y="29.2"
-            textAnchor="middle"
-            fill="#1558C0"
-            fontFamily="system-ui, -apple-system, sans-serif"
-            fontSize="15.5"
-            fontWeight="900"
-            letterSpacing="-0.5"
-          >
-            25
-          </text>
-        </svg>
-      ),
     },
     {
       id: 'map-nav',
+      imageSrc: '/categories/home_cat_map_route.png',
       label: tr(language, 'ផែនទីធ្វើដំណើរ', 'Map Route', '地图导航'),
-      gradientStyle: 'linear-gradient(180deg, #F4B630 0%, #C67D0D 100%)',
+      isLongLabel: language === 'km',
       onClick: onMapNavigation,
-      renderIcon: () => (
-        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-          <polygon points="8 12 18 8 30 12 40 8 40 36 30 40 18 36 8 40 8 12" />
-          <path d="M18 8v28" />
-          <path d="M30 12v28" />
-          <path d="M31 13c-3 0-5.5 2.4-5.5 5.4 0 3.9 5.5 9.1 5.5 9.1s5.5-5.2 5.5-9.1c0-3-2.5-5.4-5.5-5.4z" fill="#F4B630" stroke="#FFFFFF" strokeWidth="2.4" />
-          <circle cx="31" cy="18.2" r="1.8" fill="#FFFFFF" />
-        </svg>
-      ),
     },
     {
       id: 'smart-ai',
+      imageSrc: '/categories/home_cat_smart_ai.png',
       label: tr(language, 'ជំនួយការឆ្លាតវៃ Ai', 'Smart AI', 'AI 智能助手'),
-      gradientStyle: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',
+      isLongLabel: language === 'km',
       onClick: onSmartAiAssistant,
-      renderIcon: () => (
-        <svg className="w-7 h-7 text-white drop-shadow-xs shrink-0" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="24" y1="6" x2="24" y2="11" />
-          <circle cx="24" cy="5" r="2" fill="currentColor" />
-          <rect x="11" y="11" width="26" height="22" rx="9" fill="currentColor" fillOpacity="0.16" />
-          <path d="M7 20v5a2 2 0 0 0 2 2h2v-9H9a2 2 0 0 0-2 2Z" fill="currentColor" />
-          <path d="M41 20v5a2 2 0 0 1-2 2h-2v-9h2a2 2 0 0 1 2 2Z" fill="currentColor" />
-          <circle cx="18.5" cy="21" r="2.2" fill="currentColor" />
-          <circle cx="29.5" cy="21" r="2.2" fill="currentColor" />
-          <path d="M20 27c1.2 1.2 2.5 1.8 4 1.8s2.8-.6 4-1.8" />
-          <path d="M37 26c0 5-4 8-9 8h-3" />
-          <circle cx="24" cy="34" r="1.8" fill="currentColor" />
-        </svg>
-      ),
     },
   ];
 
   return (
     <section
       aria-label={tr(language, 'សេវាកម្មឆ្លាតវៃប្រចាំថ្ងៃ', 'Daily Smart Services', '日常智能服务')}
-      className="rounded-[22px] bg-white p-2.5 shadow-[0_5px_18px_rgba(15,23,42,0.06)] border border-white"
+      className="rounded-[24px] bg-white/96 p-2 sm:p-3 shadow-[0_6px_20px_rgba(15,23,42,0.08)] border border-white"
     >
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+      <div className="grid grid-cols-3 gap-1.5 min-[360px]:gap-2 sm:gap-2.5 items-stretch">
         {items.map((it) => (
           <button
             key={it.id}
             id={`kft-feature-${it.id}-btn`}
             type="button"
             onClick={it.onClick}
-            style={{
-              background: it.gradientStyle,
-              boxShadow: '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
-            }}
-            className="group relative min-h-[72px] rounded-[16px] py-2 px-1 flex flex-col items-center justify-center gap-1 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
+            className="group relative w-full min-w-0 aspect-[2/1] bg-transparent border-0 p-0 transition-transform active:scale-95 cursor-pointer select-none flex items-center justify-center"
           >
-            {/* Subtle top glass highlight */}
-            <span
-              className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
-              style={{
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0) 100%)',
-              }}
+            <img
+              src={it.imageSrc}
+              alt={it.label}
+              loading="eager"
+              decoding="async"
+              className="w-full h-full object-contain bg-transparent select-none pointer-events-none drop-shadow-[0_4px_10px_rgba(15,23,42,0.18)] group-hover:brightness-[1.03] transition-all duration-150"
             />
 
-            {/* Crisp centered icon */}
-            <span className="relative z-10 flex items-center justify-center transition-transform group-hover:scale-105 shrink-0">
-              {it.renderIcon()}
-            </span>
-
-            {/* Full readable label across Khmer, English, and Chinese without truncation or subscript clipping */}
-            <span
-              className="relative z-10 font-khmer font-extrabold leading-[1.76] pt-0.5 pb-1 text-center break-words whitespace-normal w-full px-0.5 text-white overflow-visible"
-              style={{ fontSize: 'clamp(11.4px, 3.24vw, 14.4px)', textShadow: '0 1px 2px rgba(0,0,0,0.28)' }}
-            >
-              {it.label}
-            </span>
+            {/* Centered Bold White Label Inside Button Directly Below the 3D Illustration */}
+            <div className="pointer-events-none absolute inset-x-[5%] top-[64%] bottom-[8.5%] flex items-center justify-center px-0.5 overflow-visible">
+              <span
+                className="font-khmer font-extrabold text-white text-center leading-[1.35] tracking-tight whitespace-nowrap max-w-full"
+                style={{
+                  fontSize: it.isLongLabel
+                    ? 'clamp(9.4px, 2.55vw, 13.5px)'
+                    : 'clamp(10.5px, 2.95vw, 15px)',
+                  textShadow:
+                    '0 1.5px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.65)',
+                }}
+              >
+                {it.label}
+              </span>
+            </div>
           </button>
         ))}
       </div>
