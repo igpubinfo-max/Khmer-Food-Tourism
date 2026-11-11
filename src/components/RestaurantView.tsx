@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { RestaurantCard } from './RestaurantCard';
-import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
+import { AngkorHeroTopHeader, AccountTrialStatusBar } from './AngkorHeroTopHeader';
 import {
   Restaurant,
   sortRestaurantsWithVipRotation,
@@ -31,13 +31,14 @@ import {
   Plus,
   ChevronRight,
   Flame,
+  Filter,
 } from 'lucide-react';
 import { isVipOwnerListing } from './listing/ListingUI';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
 import { analyzeSearchQuery, scoreSearchRecord, restaurantSearchFields } from '../utils/searchEngine';
 import { tr } from '../utils/i18n';
 import { getLocalizedRestaurant } from '../utils/zhDynamicTranslator';
-import { matchShopToProductQuery, verifyShopDataForDisplay } from '../utils/foodFilters';
+import { DISH_PROVINCES, matchShopToProductQuery, verifyShopDataForDisplay } from '../utils/foodFilters';
 import { parseSmartSearchIntent } from '../utils/aiSearchBridge';
 import { handleAvatarImageError } from '../utils/avatarHelper';
 
@@ -62,6 +63,7 @@ export const RestaurantView: React.FC = () => {
     language,
     setLanguage,
     selectedProvince,
+    setSelectedProvince,
     setIsVipAddRestaurantModalOpen,
     currentUser,
     setIsAuthModalOpen,
@@ -103,8 +105,19 @@ export const RestaurantView: React.FC = () => {
   const [shopSearchQuery, setShopSearchQuery] = useState<string>('');
   const [debouncedShopSearchQuery, setDebouncedShopSearchQuery] = useState<string>('');
   const [visibleCount, setVisibleCount] = useState<number>(RESTAURANT_BATCH_SIZE);
+  const [showFilterDrawer, setShowFilterDrawer] = useState<boolean>(false);
   const [nowTickMs, setNowTickMs] = useState<number>(() => Date.now());
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const shopListStartRef = useRef<HTMLDivElement | null>(null);
+
+  const handleExecuteShopSearch = () => {
+    setDebouncedShopSearchQuery(shopSearchQuery);
+    searchInputRef.current?.blur();
+    if (shopSearchQuery.trim() && shopListStartRef.current) {
+      shopListStartRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -422,10 +435,18 @@ export const RestaurantView: React.FC = () => {
 
       let relevance = 1;
       if (q && analyzed) {
-        const nameDetail = scoreSearchRecord(
-          analyzed,
-          restaurantSearchFields(r, [getLocalizedRestaurant(r, 'zh').name])
-        );
+        const subCatKey = classifyRestaurantCategory(r);
+        const extraCatLabels =
+          subCatKey === 'cafe_bistro'
+            ? 'កាហ្វេ cafe coffee bistro តែគុជ ភេសជ្ជៈ drinks boba 咖啡 饮品'
+            : subCatKey === 'bbq_grill'
+              ? 'សាច់អាំង bbq grill ភោជនីយដ្ឋាន restaurant 烧烤 餐厅'
+              : subCatKey === 'seafood_riverside'
+                ? 'គ្រឿងសមុទ្រ seafood មាត់ទន្លេ riverside ភោជនីយដ្ឋាន restaurant 海鲜 餐厅'
+                : 'ភោជនីយដ្ឋាន អាហារដ្ឋាន ហាងអាហារ អាហាររហ័ស restaurant dining fast food 餐厅 快餐';
+        const searchFields = restaurantSearchFields(r, [getLocalizedRestaurant(r, 'zh').name]);
+        searchFields.categories = [...(searchFields.categories || []), extraCatLabels];
+        const nameDetail = scoreSearchRecord(analyzed, searchFields);
         const productMatch = matchShopToProductQuery(r, effectiveRawQuery);
         relevance = Math.max(nameDetail.score, productMatch.matches ? productMatch.score : 0);
         if (relevance <= 0) {
@@ -589,67 +610,180 @@ export const RestaurantView: React.FC = () => {
 
   return (
     <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-12">
-      {/* 1. Shared Master Hero Header with Free Account Status Badge */}
+      {/* 1. Shared Master Hero Header with Free Account Status Badge (100% Matching Food Menu) */}
       <AngkorHeroTopHeader mode="food" />
 
-      {/* 2. MAIN CONTENT CONTAINER (Dark Slate #1E293B + Clean White Cards & Colorful Category Buttons) */}
-      <div className="relative z-20 -mt-12 px-3 min-[360px]:px-4 sm:px-5 space-y-3.5 bg-[#1E293B] pt-1">
-        {/* Row 1: Essential Search Bar + GPS Location Button */}
-        <div className="flex items-center gap-2">
+      {/* 2. MAIN CONTENT CONTAINER rising smoothly from the Angkor Wat reflection (100% Matching Food Menu) */}
+      <div className="relative z-20 -mt-[82px] px-2.5 min-[360px]:px-3.5 sm:px-5 space-y-2.5">
+        {/* Compact Khmer Promotional Title Banner (Left) + 7-Day Free Trial / Account Status Banner Below Language Selector (Right) */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pl-0.5 sm:pl-1">
+          <div className="relative py-1 pl-1 pr-2 bg-transparent flex items-center gap-2.5 min-w-0 flex-1">
+            {/* Left Yellow Shop / Restaurant Icon */}
+            <div
+              style={{
+                background: 'linear-gradient(180deg, #FDE047 0%, #F59E0B 100%)',
+                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.26), inset 0 1px 1px rgba(255, 255, 255, 0.65)',
+              }}
+              className="relative z-10 w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0"
+            >
+              <Store className="w-4 h-4 text-[#042F2E]" strokeWidth={2.4} />
+            </div>
+
+            {/* Thin Vertical Divider Line */}
+            <span className="relative z-10 h-6 w-px bg-white/35 shrink-0" aria-hidden="true" />
+
+            {/* Shop & Restaurant Title & Subtitle */}
+            <div className="relative z-10 min-w-0">
+              <h2
+                className="font-khmer font-extrabold text-white leading-[1.65] py-0.5 break-words"
+                style={{ fontSize: 'clamp(13.8px, 3.96vw, 16.2px)', textShadow: '0 1px 3px rgba(0, 0, 0, 0.65)' }}
+              >
+                {tr(language, 'ហាងអាហារ និងកាហ្វេ', 'Restaurants & Cafés', '餐厅与美食店铺')}
+              </h2>
+              <p
+                className="font-khmer font-bold text-[#FDE68A] leading-[1.62] py-0.5 break-words"
+                style={{ fontSize: 'clamp(11px, 3.12vw, 13.2px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)' }}
+              >
+                {tr(
+                  language,
+                  'ហាងល្បីៗ និងទីតាំងជិតអ្នកគ្រប់ខេត្ត',
+                  'Top shops & nearby dining in all provinces',
+                  '探索全柬热门餐厅、咖啡馆与附近店铺'
+                )}
+              </p>
+            </div>
+          </div>
+
+          {/* 7-Day Free Trial / Account Status Banner below the Language Selector & out of the temple area */}
+          <AccountTrialStatusBar inline className="ml-auto" />
+        </div>
+
+        {/* Row 1: Main Search Bar – Large White Rounded Glassmorphism Search Bar + Separate Green Filter Button (100% Matching Food Menu) */}
+        <div className="flex items-center gap-1.5 min-[360px]:gap-2 min-w-0">
           <div
             style={{
-              background: 'rgba(255, 255, 255, 0.96)',
+              background: 'rgba(255, 255, 255, 0.92)',
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
-              boxShadow: '0 8px 24px rgba(15, 23, 42, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1)',
+              boxShadow: '0 6px 20px rgba(15, 23, 42, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
             }}
-            className="flex-1 min-w-0 min-h-[48px] py-1 rounded-full border border-white pl-3.5 pr-2 flex items-center gap-2"
+            className="flex-1 min-w-0 h-[44px] rounded-full border-[1.5px] border-white pl-2.5 min-[360px]:pl-3.5 pr-1.5 flex items-center gap-1.5 min-[360px]:gap-2"
           >
-            <Search className="w-5 h-5 text-slate-500 shrink-0" strokeWidth={2.3} />
+            <Search className="w-4 h-4 min-[360px]:w-4.5 min-[360px]:h-4.5 text-slate-600 shrink-0" />
             <input
+              ref={searchInputRef}
               type="text"
+              size={1}
               value={shopSearchQuery}
               onChange={(e) => setShopSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleExecuteShopSearch();
+                }
+              }}
               placeholder={tr(
                 language,
-                'ស្វែងរកហាង, មុខម្ហូប ឬតំបន់ជិតអ្នក...',
-                'Search shops, dishes, or nearby area...',
-                '搜索店铺、菜品或附近区域...'
+                'ស្វែងរកឈ្មោះហាង ប្រភេទហាង ឬទីតាំង...',
+                'Search shop name, category, or location...',
+                '搜索店铺名称、类型或位置...'
               )}
-              className="flex-1 min-w-0 bg-transparent text-xs sm:text-[13.5px] font-bold text-slate-900 placeholder-slate-400 focus:outline-none truncate"
+              className="w-full flex-1 min-w-0 bg-transparent text-[12px] min-[360px]:text-[13px] font-khmer font-bold text-[#1E293B] placeholder:text-slate-500 focus:outline-none"
             />
             {shopSearchQuery && (
               <button
                 type="button"
                 onClick={() => setShopSearchQuery('')}
+                className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer shrink-0"
                 aria-label={tr(language, 'សម្អាត', 'Clear', '清除')}
-                className="p-1 text-slate-400 hover:text-slate-700 shrink-0 cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
-
             <button
               type="button"
-              onClick={handleToggleNearMe}
-              style={
-                nearMeActive
-                  ? {
-                      background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
-                      boxShadow: '0 4px 12px rgba(21, 128, 61, 0.35)',
-                    }
-                  : {
-                      background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
-                      boxShadow: '0 4px 12px rgba(234, 88, 12, 0.35)',
-                    }
-              }
-              className="min-h-[36px] px-2.5 min-[360px]:px-3.5 py-1 rounded-full text-white font-extrabold text-xs inline-flex items-center gap-1.5 shrink-0 border border-white/80 transition active:scale-95 cursor-pointer leading-[1.6]"
+              onClick={handleExecuteShopSearch}
+              style={{
+                background: 'linear-gradient(180deg, #2E7D52 0%, #1B5E3A 100%)',
+                boxShadow: '0 2px 6px rgba(27, 94, 58, 0.35)',
+              }}
+              className="h-[34px] px-2.5 min-[360px]:px-3.5 rounded-full border-[1.5px] border-white/90 text-white text-[11px] min-[360px]:text-[12px] font-khmer font-extrabold flex items-center gap-1 min-[360px]:gap-1.5 shrink-0 active:scale-95 transition cursor-pointer"
             >
-              <MapPin className="w-3.5 h-3.5 text-white fill-white/25 shrink-0" strokeWidth={2.3} />
-              <span>{tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近')}</span>
+              <Search className="w-3.5 h-3.5 text-white stroke-[2.4] shrink-0" />
+              <span>{tr(language, 'ស្វែងរក', 'Search', '搜索')}</span>
             </button>
           </div>
+
+          {/* Separate Circular Green Filter Icon Button (100% Matching Food Menu) */}
+          <button
+            type="button"
+            onClick={() => setShowFilterDrawer((prev) => !prev)}
+            style={{
+              background: 'linear-gradient(180deg, #2E7D52 0%, #1B5E3A 100%)',
+              boxShadow: '0 6px 16px rgba(15, 23, 42, 0.16)',
+            }}
+            className={`relative w-[44px] h-[44px] rounded-full border-[2px] border-white flex items-center justify-center shrink-0 transition active:scale-95 cursor-pointer text-white ${
+              showFilterDrawer || cleanSelectedProvince || categoryFilter !== 'all' || nearMeActive
+                ? 'ring-2 ring-[#22C55E]'
+                : ''
+            }`}
+            title={tr(language, 'តម្រងហាងអាហារ', 'Filter Shops', '筛选店铺')}
+          >
+            <Filter className="w-4.5 h-4.5 stroke-[2.2]" />
+            {(Boolean(cleanSelectedProvince) || categoryFilter !== 'all' || nearMeActive) && (
+              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-amber-400 border-2 border-white" />
+            )}
+          </button>
         </div>
+
+        {/* Collapsible Shop Filter Drawer (Province + Category + Near Me GPS) */}
+        {showFilterDrawer && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-3.5 shadow-sm space-y-3 text-slate-900">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold text-slate-900">
+                {tr(language, 'តម្រងស្វែងរកហាងអាហារ និងទីតាំង', 'Shop & Location Filters', '店铺与位置筛选')}
+              </span>
+              {(cleanSelectedProvince || categoryFilter !== 'all' || nearMeActive || shopSearchQuery.trim()) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedProvince('ទាំងអស់');
+                    setCategoryFilter('all');
+                    setNearMeActive(false);
+                    setSortMode('popular');
+                    setShopSearchQuery('');
+                    setDebouncedShopSearchQuery('');
+                  }}
+                  className="text-[11px] font-extrabold text-rose-600 hover:underline cursor-pointer"
+                >
+                  {tr(language, 'សម្អាតតម្រង', 'Reset All', '重置筛选')}
+                </button>
+              )}
+            </div>
+
+            {/* Province Select */}
+            <div className="space-y-1">
+              <label className="text-xs font-extrabold text-slate-800 flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5 text-[#235D3A]" />
+                <span>{tr(language, 'ជ្រើសរើសខេត្ត/រាជធានី (២៥ ខេត្ត-ក្រុង)៖', 'Filter by Province (25 Provinces):', '按省份/城市筛选（25个省市）：')}</span>
+              </label>
+              <select
+                value={cleanSelectedProvince}
+                onChange={(e) => setSelectedProvince(e.target.value || 'ទាំងអស់')}
+                className="w-full h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+              >
+                <option value="">
+                  {tr(language, 'គ្រប់រាជធានី-ខេត្តទាំង ២៥', 'All 25 Provinces & Capital', '全柬 25 个省市')}
+                </option>
+                {DISH_PROVINCES.map((p) => (
+                  <option key={p.id} value={p.kh}>
+                    {tr(language, p.fullKh, p.en, p.zh)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
 
         {/* Row 2: 6 Colorful Gradient Category Buttons in Clean White Card (Matching Reference Image 2) */}
         <div
@@ -779,6 +913,8 @@ export const RestaurantView: React.FC = () => {
             </button>
           </div>
         </div>
+
+        <div ref={shopListStartRef} />
 
         {/* ===================================================================
             3. NEARBY & POPULAR SHOPS LISTINGS

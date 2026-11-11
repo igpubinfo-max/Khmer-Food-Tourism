@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
+import { AngkorHeroTopHeader, AccountTrialStatusBar } from './AngkorHeroTopHeader';
 import {
   TouristDestination,
   Restaurant,
@@ -930,9 +930,9 @@ export const HotelView: React.FC = () => {
 
       {/* 2. MAIN CONTENT CONTAINER Rising Smoothly from Angkor Hero into Dark Slate (#1E293B) */}
       <div className="relative z-20 -mt-[82px] px-3 min-[360px]:px-4 sm:px-5 space-y-3 bg-[#1E293B]/0">
-        {/* Compact Promotional Title Banner Directly Above Search Bar (Matching Image 2 Style) */}
-        <div className="flex justify-start pl-0.5 sm:pl-1">
-          <div className="relative py-1 pl-1 pr-2 bg-transparent flex items-center gap-2.5">
+        {/* Compact Promotional Title Banner (Left) + 7-Day Free Trial / Account Status Banner Below Language Selector (Right) */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pl-0.5 sm:pl-1">
+          <div className="relative py-1 pl-1 pr-2 bg-transparent flex items-center gap-2.5 min-w-0 flex-1">
             <div
               style={{
                 background: 'linear-gradient(180deg, #FDE047 0%, #F59E0B 100%)',
@@ -950,16 +950,19 @@ export const HotelView: React.FC = () => {
                 className="font-khmer font-extrabold text-white leading-[1.65] py-0.5 break-words"
                 style={{ fontSize: 'clamp(13.8px, 3.96vw, 16.2px)', textShadow: '0 1px 3px rgba(0, 0, 0, 0.65)' }}
               >
-                {tr(language, 'ស្វែងរកសណ្ឋាគារ និងផ្ទះសំណាក់', 'Find Hotels & Guesthouses', '查找酒店与客栈')}
+                {tr(language, 'សណ្ឋាគារ និងផ្ទះសំណាក់', 'Hotels & Guesthouses', '查找酒店与客栈')}
               </h2>
               <p
                 className="font-khmer font-bold text-[#FDE68A] leading-[1.62] py-0.5 break-words"
                 style={{ fontSize: 'clamp(11px, 3.12vw, 13.2px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)' }}
               >
-                {tr(language, 'កន្លែងស្នាក់នៅស្អាត មានផាសុកភាព គ្រប់ខេត្ត', 'Clean & comfortable stays in every province', '全柬各省舒适住宿推荐')}
+                {tr(language, 'កន្លែងស្នាក់នៅស្អាត គ្រប់ខេត្ត', 'Clean & comfortable stays everywhere', '全柬各省舒适住宿推荐')}
               </p>
             </div>
           </div>
+
+          {/* 7-Day Free Trial / Account Status Banner below the Language Selector & out of the temple area */}
+          <AccountTrialStatusBar inline className="ml-auto" />
         </div>
 
         {/* Row 1: Essential White Pill Search Bar + Inline GPS Near Me Button */}

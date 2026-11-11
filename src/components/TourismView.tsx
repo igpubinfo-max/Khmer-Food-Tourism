@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useDeferredValue } from 'react';
 import { useApp } from '../context/AppContext';
 import { TouristCard } from './TouristCard';
-import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
+import { AngkorHeroTopHeader, AccountTrialStatusBar } from './AngkorHeroTopHeader';
 import {
   Compass,
   MapPin,
@@ -391,7 +391,42 @@ export const TourismView: React.FC = () => {
       <AngkorHeroTopHeader mode="food" />
 
       {/* 2. MAIN CONTENT CONTAINER (Dark Slate #1E293B + Clean White Cards & 6 Colorful Category Buttons) */}
-      <div className="relative z-20 -mt-12 px-3 min-[360px]:px-4 sm:px-5 space-y-3.5 bg-[#1E293B] pt-1">
+      <div className="relative z-20 -mt-[82px] px-3 min-[360px]:px-4 sm:px-5 space-y-3 bg-[#1E293B]/0">
+        {/* Compact Promotional Title Banner (Left) + 7-Day Free Trial / Account Status Banner Below Language Selector (Right) */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pl-0.5 sm:pl-1">
+          <div className="relative py-1 pl-1 pr-2 bg-transparent flex items-center gap-2.5 min-w-0 flex-1">
+            <div
+              style={{
+                background: 'linear-gradient(180deg, #FDE047 0%, #F59E0B 100%)',
+                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.26), inset 0 1px 1px rgba(255, 255, 255, 0.65)',
+              }}
+              className="relative z-10 w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0"
+            >
+              <Landmark className="w-4 h-4 text-[#042F2E]" strokeWidth={2.4} />
+            </div>
+
+            <span className="relative z-10 h-6 w-px bg-white/35 shrink-0" aria-hidden="true" />
+
+            <div className="relative z-10 min-w-0">
+              <h2
+                className="font-khmer font-extrabold text-white leading-[1.65] py-0.5 break-words"
+                style={{ fontSize: 'clamp(13.8px, 3.96vw, 16.2px)', textShadow: '0 1px 3px rgba(0, 0, 0, 0.65)' }}
+              >
+                {tr(language, 'តំបន់ទេសចរណ៍កម្ពុជា', 'Tourism & Destinations', '旅游景点与度假胜地')}
+              </h2>
+              <p
+                className="font-khmer font-bold text-[#FDE68A] leading-[1.62] py-0.5 break-words"
+                style={{ fontSize: 'clamp(11px, 3.12vw, 13.2px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)' }}
+              >
+                {tr(language, 'ប្រាសាទ ធម្មជាតិ និងឆ្នេរគ្រប់ខេត្ត', 'Temples, nature & beaches across Cambodia', '探索全柬古迹、自然风光与海滩')}
+              </p>
+            </div>
+          </div>
+
+          {/* 7-Day Free Trial / Account Status Banner below the Language Selector & out of the temple area */}
+          <AccountTrialStatusBar inline className="ml-auto" />
+        </div>
+
         {/* Row 1: Essential Search Bar + GPS Near Me Button */}
         <div className="flex items-center gap-2">
           <div

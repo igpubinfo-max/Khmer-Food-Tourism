@@ -232,76 +232,78 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
           </div>
         </div>
 
-        {/* Right: Free Account Status Badge + User Avatar + Compact Language Switcher */}
+        {/* Right: User Avatar + Language Switcher + (Optional Account Banner Below Language Selector) */}
         <div className="flex flex-col items-end gap-1.5 shrink-0">
           <div className="flex items-center gap-1.5 min-[360px]:gap-2">
-            {/* Free Account Status Badge (7-Day Free Trial Countdown) */}
-            <button
-              type="button"
-              onClick={() => openUpgradeVipModal()}
-              style={{
-                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.84) 0%, rgba(6, 78, 59, 0.82) 100%)',
-                backdropFilter: 'blur(8px)',
-                boxShadow: '0 3px 10px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.14)',
-              }}
-              className="relative min-h-[34px] min-[360px]:min-h-[38px] py-1 px-2 min-[360px]:px-2.5 rounded-full border border-[#FDE047]/55 flex items-center gap-1.5 text-white hover:border-[#FDE047]/85 transition active:scale-95 cursor-pointer shrink-0 overflow-hidden"
-              title={tr(
-                language,
-                `គណនីឥតគិតថ្លៃ • សាកល្បង 7 ថ្ងៃ (សល់ ${trialDaysLeft} ថ្ងៃ)`,
-                `7-Day Free Trial • FREE – ${trialDaysLeft} ${trialDaysLeft === 1 ? 'Day' : 'Days'} Left`,
-                `7天免费试用 • 剩余 ${trialDaysLeft} 天`
-              )}
-              aria-label={`7-Day Free Trial: FREE – ${trialDaysLeft} ${trialDaysLeft === 1 ? 'Day' : 'Days'} Left`}
-            >
-              {/* Subtle Circular Countdown Indicator */}
-              <span className="relative w-4 h-4 min-[360px]:w-[18px] min-[360px]:h-[18px] flex items-center justify-center shrink-0">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 20 20" aria-hidden="true">
-                  <circle
-                    cx="10"
-                    cy="10"
-                    r="7.5"
-                    fill="none"
-                    stroke="rgba(255, 255, 255, 0.18)"
-                    strokeWidth="2.2"
-                  />
-                  <circle
-                    cx="10"
-                    cy="10"
-                    r="7.5"
-                    fill="none"
-                    stroke="#FDE047"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeDasharray={`${(2 * Math.PI * 7.5).toFixed(2)}`}
-                    strokeDashoffset={`${(2 * Math.PI * 7.5 * (1 - trialProgressRatio)).toFixed(2)}`}
-                  />
-                </svg>
-                <span className="absolute text-[6.5px] font-black text-[#FDE047] leading-none tracking-tighter">
-                  7D
-                </span>
-              </span>
-
-              {/* Clear Compact Typography */}
-              <span className="flex flex-col items-start justify-center leading-none pr-0.5">
-                <span className="text-[6.8px] min-[360px]:text-[7.5px] font-extrabold uppercase tracking-[0.05em] text-[#FDE047] leading-none mb-[2px] whitespace-nowrap">
-                  7-Day Free Trial
-                </span>
-                <span className="text-[8.8px] min-[360px]:text-[9.8px] sm:text-[10.5px] font-extrabold text-white tracking-tight leading-none whitespace-nowrap">
-                  FREE – {trialDaysLeft} {trialDaysLeft === 1 ? 'Day' : 'Days'} Left
-                </span>
-              </span>
-
-              {/* Subtle Bottom Countdown Progress Bar */}
-              <span
-                className="pointer-events-none absolute inset-x-2.5 bottom-[1.5px] h-[1.5px] rounded-full bg-white/15 overflow-hidden"
-                aria-hidden="true"
+            {/* On Home mode, keep the banner in the header if desired, or move out */}
+            {mode === 'home' && (
+              <button
+                type="button"
+                onClick={() => openUpgradeVipModal()}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.84) 0%, rgba(6, 78, 59, 0.82) 100%)',
+                  backdropFilter: 'blur(8px)',
+                  boxShadow: '0 3px 10px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.14)',
+                }}
+                className="relative min-h-[34px] min-[360px]:min-h-[38px] py-1 px-2 min-[360px]:px-2.5 rounded-full border border-[#FDE047]/55 flex items-center gap-1.5 text-white hover:border-[#FDE047]/85 transition active:scale-95 cursor-pointer shrink-0 overflow-hidden"
+                title={tr(
+                  language,
+                  `គណនីឥតគិតថ្លៃ • សាកល្បង 7 ថ្ងៃ (សល់ ${trialDaysLeft} ថ្ងៃ)`,
+                  `7-Day Free Trial • FREE – ${trialDaysLeft} ${trialDaysLeft === 1 ? 'Day' : 'Days'} Left`,
+                  `7天免费试用 • 剩余 ${trialDaysLeft} 天`
+                )}
+                aria-label={`7-Day Free Trial: FREE – ${trialDaysLeft} ${trialDaysLeft === 1 ? 'Day' : 'Days'} Left`}
               >
+                {/* Subtle Circular Countdown Indicator */}
+                <span className="relative w-4 h-4 min-[360px]:w-[18px] min-[360px]:h-[18px] flex items-center justify-center shrink-0">
+                  <svg className="w-full h-full -rotate-90" viewBox="0 0 20 20" aria-hidden="true">
+                    <circle
+                      cx="10"
+                      cy="10"
+                      r="7.5"
+                      fill="none"
+                      stroke="rgba(255, 255, 255, 0.18)"
+                      strokeWidth="2.2"
+                    />
+                    <circle
+                      cx="10"
+                      cy="10"
+                      r="7.5"
+                      fill="none"
+                      stroke="#FDE047"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeDasharray={`${(2 * Math.PI * 7.5).toFixed(2)}`}
+                      strokeDashoffset={`${(2 * Math.PI * 7.5 * (1 - trialProgressRatio)).toFixed(2)}`}
+                    />
+                  </svg>
+                  <span className="absolute text-[6.5px] font-black text-[#FDE047] leading-none tracking-tighter">
+                    7D
+                  </span>
+                </span>
+
+                {/* Clear Compact Typography */}
+                <span className="flex flex-col items-start justify-center leading-none pr-0.5">
+                  <span className="text-[6.8px] min-[360px]:text-[7.5px] font-extrabold uppercase tracking-[0.05em] text-[#FDE047] leading-none mb-[2px] whitespace-nowrap">
+                    7-Day Free Trial
+                  </span>
+                  <span className="text-[8.8px] min-[360px]:text-[9.8px] sm:text-[10.5px] font-extrabold text-white tracking-tight leading-none whitespace-nowrap">
+                    FREE – {trialDaysLeft} {trialDaysLeft === 1 ? 'Day' : 'Days'} Left
+                  </span>
+                </span>
+
+                {/* Subtle Bottom Countdown Progress Bar */}
                 <span
-                  className="block h-full rounded-full bg-gradient-to-r from-[#10B981] via-[#34D399] to-[#FDE047]"
-                  style={{ width: `${Math.round(trialProgressRatio * 100)}%` }}
-                />
-              </span>
-            </button>
+                  className="pointer-events-none absolute inset-x-2.5 bottom-[1.5px] h-[1.5px] rounded-full bg-white/15 overflow-hidden"
+                  aria-hidden="true"
+                >
+                  <span
+                    className="block h-full rounded-full bg-gradient-to-r from-[#10B981] via-[#34D399] to-[#FDE047]"
+                    style={{ width: `${Math.round(trialProgressRatio * 100)}%` }}
+                  />
+                </span>
+              </button>
+            )}
 
             {/* User Profile Circle */}
             <button
@@ -327,7 +329,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
             </button>
           </div>
 
-          {/* Language Pill Switcher (ខ្មែរ | EN | 中文) */}
+          {/* Language Pill Switcher (ខ្មែរ | EN | 中文) - Kept in current exact position */}
           <div
             style={{
               background: 'rgba(15, 23, 42, 0.68)',
@@ -463,6 +465,141 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
           </form>
         </div>
       )}
+    </div>
+  );
+};
+
+/**
+ * Clean 7-Day Free Trial / Account Status Banner
+ * Placed outside the Angkor Wat background area, below the language selector/top header
+ * on all four menus (Food, Shop, Hotel, Tourism) to reveal more of the temple scenery.
+ */
+export const AccountTrialStatusBar: React.FC<{ className?: string; inline?: boolean }> = ({
+  className = '',
+  inline = false,
+}) => {
+  const {
+    language,
+    currentUser,
+    users,
+    openUpgradeVipModal,
+  } = useApp();
+
+  const effectiveUser = React.useMemo(() => {
+    if (!currentUser) return null;
+    return (Array.isArray(users) && users.find((u) => u.id === currentUser.id)) || currentUser;
+  }, [currentUser, users]);
+
+  const trialDaysLeft = React.useMemo(() => {
+    const TOTAL_DAYS = 7;
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const now = Date.now();
+
+    if (effectiveUser?.freeTrialExpiresAt) {
+      const expMs = Date.parse(effectiveUser.freeTrialExpiresAt);
+      if (Number.isFinite(expMs)) {
+        if (expMs > now) {
+          const diffDays = Math.ceil((expMs - now) / DAY_MS);
+          return Math.max(1, Math.min(TOTAL_DAYS, diffDays));
+        }
+        return 0;
+      }
+    }
+
+    const candidateStart = effectiveUser?.freeTrialActivatedAt || effectiveUser?.createdAt;
+    if (candidateStart) {
+      const startMs = Date.parse(candidateStart);
+      if (Number.isFinite(startMs) && startMs <= now && now - startMs < TOTAL_DAYS * DAY_MS) {
+        const expMs = startMs + TOTAL_DAYS * DAY_MS;
+        return Math.max(1, Math.min(TOTAL_DAYS, Math.ceil((expMs - now) / DAY_MS)));
+      }
+    }
+
+    try {
+      const storageKey = `kft_free_account_7d_trial_start_v1_${effectiveUser?.id || 'guest'}`;
+      const raw = localStorage.getItem(storageKey);
+      let startMs = raw ? Number(raw) : NaN;
+      if (!Number.isFinite(startMs) || startMs <= 0 || now - startMs >= TOTAL_DAYS * DAY_MS) {
+        startMs = now - 2 * DAY_MS;
+        localStorage.setItem(storageKey, String(startMs));
+      }
+      const expMs = startMs + TOTAL_DAYS * DAY_MS;
+      return Math.max(1, Math.min(TOTAL_DAYS, Math.ceil((expMs - now) / DAY_MS)));
+    } catch {
+      return 5;
+    }
+  }, [effectiveUser?.id, effectiveUser?.freeTrialExpiresAt, effectiveUser?.freeTrialActivatedAt, effectiveUser?.createdAt]);
+
+  const trialProgressRatio = Math.max(0.14, Math.min(1, trialDaysLeft / 7));
+
+  return (
+    <div className={`${inline ? 'inline-flex shrink-0' : 'w-full flex justify-end px-1 sm:px-1.5'} ${className}`}>
+      <button
+        type="button"
+        onClick={() => openUpgradeVipModal()}
+        style={{
+          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(6, 78, 59, 0.90) 100%)',
+          backdropFilter: 'blur(8px)',
+          boxShadow: '0 3px 12px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.16)',
+        }}
+        className="relative min-h-[34px] min-[360px]:min-h-[38px] py-1 px-2.5 min-[360px]:px-3 rounded-full border border-[#FDE047]/65 flex items-center gap-1.5 text-white hover:border-[#FDE047]/90 transition active:scale-95 cursor-pointer shrink-0 overflow-hidden"
+        title={tr(
+          language,
+          `គណនីឥតគិតថ្លៃ • សាកល្បង 7 ថ្ងៃ (សល់ ${trialDaysLeft} ថ្ងៃ)`,
+          `7-Day Free Trial • FREE – ${trialDaysLeft} ${trialDaysLeft === 1 ? 'Day' : 'Days'} Left`,
+          `7天免费试用 • 剩余 ${trialDaysLeft} 天`
+        )}
+        aria-label={`7-Day Free Trial: FREE – ${trialDaysLeft} ${trialDaysLeft === 1 ? 'Day' : 'Days'} Left`}
+      >
+        {/* Circular Countdown Indicator */}
+        <span className="relative w-4 h-4 min-[360px]:w-[18px] min-[360px]:h-[18px] flex items-center justify-center shrink-0">
+          <svg className="w-full h-full -rotate-90" viewBox="0 0 20 20" aria-hidden="true">
+            <circle
+              cx="10"
+              cy="10"
+              r="7.5"
+              fill="none"
+              stroke="rgba(255, 255, 255, 0.18)"
+              strokeWidth="2.2"
+            />
+            <circle
+              cx="10"
+              cy="10"
+              r="7.5"
+              fill="none"
+              stroke="#FDE047"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeDasharray={`${(2 * Math.PI * 7.5).toFixed(2)}`}
+              strokeDashoffset={`${(2 * Math.PI * 7.5 * (1 - trialProgressRatio)).toFixed(2)}`}
+            />
+          </svg>
+          <span className="absolute text-[6.5px] font-black text-[#FDE047] leading-none tracking-tighter">
+            7D
+          </span>
+        </span>
+
+        {/* Clear Compact Typography */}
+        <span className="flex flex-col items-start justify-center leading-none pr-0.5">
+          <span className="text-[7px] min-[360px]:text-[7.5px] font-extrabold uppercase tracking-[0.05em] text-[#FDE047] leading-none mb-[2px] whitespace-nowrap">
+            7-Day Free Trial
+          </span>
+          <span className="text-[9px] min-[360px]:text-[10px] sm:text-[10.5px] font-extrabold text-white tracking-tight leading-none whitespace-nowrap">
+            FREE – {trialDaysLeft} {trialDaysLeft === 1 ? 'Day' : 'Days'} Left
+          </span>
+        </span>
+
+        {/* Subtle Bottom Countdown Progress Bar */}
+        <span
+          className="pointer-events-none absolute inset-x-2.5 bottom-[1.5px] h-[1.5px] rounded-full bg-white/15 overflow-hidden"
+          aria-hidden="true"
+        >
+          <span
+            className="block h-full rounded-full bg-gradient-to-r from-[#10B981] via-[#34D399] to-[#FDE047]"
+            style={{ width: `${Math.round(trialProgressRatio * 100)}%` }}
+          />
+        </span>
+      </button>
     </div>
   );
 };

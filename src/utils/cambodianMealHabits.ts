@@ -1,8 +1,9 @@
 import { classifyKhmerFoodPrimaryGroup, type FoodItem } from '../types';
 import { isBeverageFood, isSweetOrBeverageFood } from './khmerFoodSearch';
+import { getDishTagIds } from './dishTags';
 
 export type CambodianMealTime = 'breakfast' | 'lunch' | 'snack' | 'dinner';
-export type FoodCategoryTabId = 'all' | 'samlor' | 'cha' | 'bong_aem';
+export type FoodCategoryTabId = 'all' | 'samlor' | 'cha' | 'vegetarian' | 'bong_aem';
 
 const SWEET_DESSERT_OR_CAKE_RE =
   /^បង្អែម|ចេកខ្ទិះ|សង់ខ្យា|អន្សម(?!ជ្រូក|ចៀន)|ក្រឡាន|បបរផ្អែម|បបរត្នោត|បបរត្រាវ|បបរសណ្តែក|បបរសណ្ដែក|បបរល្ពៅ|បាញ់ឌុក|បាញ់ចានឿក|បាយដំណើបស្វាយទុំ|លតស្វិត|លតអង្ករ|នំផ្លែអាយ|នំកង|នំគម|នំចាក់ចុល|នំល្ពៅ|នំចេក|ចេកចៀន|ដំឡូង.*បំពង|អំបុក|ចាហួយ|តៅហ៊ូទឹកស្ករ|ទឹកកកឈូស|ការ៉េម|\bdessert\b|\bcustard\b|\bsweet\s*soup\b|\bsweet\s*pudding\b|\bice\s*cream\b/i;
@@ -132,7 +133,25 @@ export function isGrilledOrFriedDish(food: FoodItem): boolean {
 }
 
 /**
- * Classifies a dish into one of the primary Food Screen tabs ('samlor' | 'cha' | 'bong_aem')
+ * Strictly checks if a dish belongs to the ម្ហូបបួស (Vegetarian Food) category:
+ * Includes all dedicated vegetarian dishes (`isVegetarian === true`, `ម្ហូបបួស` / `បួស` / `Vegetarian` / `Vegan` in name/category)
+ * as well as plant-based savory dishes tagged `'vegetarian_friendly'`.
+ */
+export function isVegetarianDish(food: FoodItem): boolean {
+  if (!food || !food.id || !food.nameKh) return false;
+  if (food.isVegetarian) return true;
+  const text = `${food.nameKh || ''} ${food.nameEn || ''} ${food.categoryKh || ''} ${food.categoryEn || ''}`;
+  if (/ម្ហូបបួស|បួស|\bvegetarian\b|\bvegan\b|\bplant[\s-]*based\b|素食|纯素|斋/i.test(text)) {
+    return true;
+  }
+  if (isBeverageDish(food) || isSweetDessertOrCakeDish(food)) {
+    return false;
+  }
+  return getDishTagIds(food).includes('vegetarian_friendly');
+}
+
+/**
+ * Classifies a dish into one of the primary Food Screen tabs ('samlor' | 'cha' | 'vegetarian' | 'bong_aem')
  * for meal-time scoring and general categorization.
  */
 export function resolveFoodScreenCategoryTab(food: FoodItem): Exclude<FoodCategoryTabId, 'all'> {
@@ -152,10 +171,11 @@ export function resolveFoodScreenCategoryTab(food: FoodItem): Exclude<FoodCatego
 }
 
 /**
- * Strict category filter for the 4 Food Menu category buttons:
+ * Strict category filter for the 5 Food Menu category buttons:
  * - 'all' (គ្រប់មុខម្ហូប): All food items
  * - 'samlor' (សម្ល): Cambodian soups and curry dishes only
  * - 'cha' (អាំង/ចៀន): Grilled and fried food only
+ * - 'vegetarian' (ម្ហូបបួស): Vegetarian & plant-based dishes
  * - 'bong_aem' (បង្អែម/ភេសជ្ជៈ): Desserts and beverages only
  */
 export function matchesFoodScreenCategoryTab(food: FoodItem, catId: string): boolean {
@@ -166,6 +186,9 @@ export function matchesFoodScreenCategoryTab(food: FoodItem, catId: string): boo
   }
   if (catId === 'cha') {
     return isGrilledOrFriedDish(food);
+  }
+  if (catId === 'vegetarian') {
+    return isVegetarianDish(food);
   }
   if (catId === 'bong_aem') {
     return isBeverageDish(food) || isSweetDessertOrCakeDish(food);

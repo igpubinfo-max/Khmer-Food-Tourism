@@ -16,6 +16,7 @@ import { tr, translateProvince } from '../utils/i18n';
 import { getLocalizedDestination, getLocalizedFood, getLocalizedRestaurant, toConciseSummary } from '../utils/zhDynamicTranslator';
 import { copyTextNativeOrWeb } from '../utils/androidMediaHelper';
 import { ShopAvatar } from './icons/DefaultShopIcon';
+import { AngkorHeroTopHeader, AccountTrialStatusBar } from './AngkorHeroTopHeader';
 import {
   BookOpen, Award, MapPinned, CalendarDays, Lightbulb, Heart, Star, Store, Compass, Utensils,
   ChevronRight, Copy, Lock, CheckCircle2, Route, Navigation, Maximize2, X, PhoneCall, ShieldAlert, Clock,
@@ -107,9 +108,9 @@ const MiniCard: React.FC<MiniCardProps> = React.memo(
           onOpen();
         }
       }}
-      className="group w-40 shrink-0 snap-start rounded-2xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 shadow-xs cursor-pointer active:scale-[0.98] transition"
+      className="group w-40 shrink-0 snap-start rounded-2xl overflow-hidden bg-white border border-slate-200/90 shadow-xs cursor-pointer active:scale-[0.98] transition"
     >
-      <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-700 overflow-hidden">
+      <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
         {customMedia || <Thumb src={image} alt={title} className="w-full h-full object-cover" />}
         {tag && (
           <span className="absolute top-1.5 left-1.5 max-w-[78%] truncate px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#064E3B]/95 text-emerald-100 border border-emerald-400/30">
@@ -126,7 +127,7 @@ const MiniCard: React.FC<MiniCardProps> = React.memo(
               onToggleSave();
             }}
             className={`absolute top-1 right-1 w-8 h-8 rounded-full flex items-center justify-center transition active:scale-90 ${
-              saved ? 'bg-rose-500 text-white' : 'bg-white/95 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300'
+              saved ? 'bg-rose-500 text-white' : 'bg-white/95 text-slate-600'
             }`}
           >
             <Heart className={`w-3.5 h-3.5 ${saved ? 'fill-current' : ''}`} />
@@ -134,18 +135,18 @@ const MiniCard: React.FC<MiniCardProps> = React.memo(
         )}
       </div>
       <div className="p-2.5 space-y-0.5">
-        <h4 className="text-xs font-extrabold text-slate-900 dark:text-white line-clamp-1 font-khmer">{title}</h4>
-        <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 font-khmer">{subtitle}</p>
+        <h4 className="text-xs font-extrabold text-slate-900 line-clamp-1 font-khmer">{title}</h4>
+        <p className="text-[10px] text-slate-500 line-clamp-1 font-khmer">{subtitle}</p>
         <div className="flex items-center justify-between gap-1 pt-0.5 min-h-[16px]">
           {typeof rating === 'number' && rating > 0 ? (
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400">
+            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-600">
               <Star className="w-3 h-3 fill-current" />
               {rating.toFixed(1)}
             </span>
           ) : (
             <span />
           )}
-          {meta && <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300">{meta}</span>}
+          {meta && <span className="text-[10px] font-bold text-emerald-700">{meta}</span>}
         </div>
       </div>
     </div>
@@ -160,11 +161,11 @@ const SectionTitle: React.FC<{ icon: React.ReactNode; title: string; subtitle?: 
 }) => (
   <div className="flex items-end justify-between gap-2">
     <div className="min-w-0">
-      <h3 className="font-moul text-xs sm:text-sm text-[#0F172A] dark:text-white flex items-center gap-1.5 leading-snug">
-        <span className="text-[#064E3B] dark:text-emerald-400 shrink-0">{icon}</span>
+      <h3 className="font-moul text-xs sm:text-sm text-white flex items-center gap-1.5 leading-[1.7] py-0.5">
+        <span className="text-amber-400 shrink-0">{icon}</span>
         <span>{title}</span>
       </h3>
-      {subtitle && <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-khmer leading-snug">{subtitle}</p>}
+      {subtitle && <p className="text-[11px] text-slate-300 mt-0.5 font-khmer leading-[1.6]">{subtitle}</p>}
     </div>
     {action}
   </div>
@@ -187,21 +188,21 @@ const ListRow: React.FC<ListRowProps> = React.memo(({ image, title, subtitle, ba
   <button
     type="button"
     onClick={onOpen}
-    className="w-full p-2.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 flex items-center gap-3 text-left transition active:scale-[0.99] hover:border-emerald-400/60 cursor-pointer"
+    className="w-full p-2.5 rounded-2xl bg-white border border-slate-200/90 flex items-center gap-3 text-left transition active:scale-[0.99] hover:border-emerald-400/60 cursor-pointer shadow-2xs"
   >
-    <Thumb src={image} alt={title} className="w-14 h-14 rounded-xl object-cover shrink-0 bg-slate-100 dark:bg-slate-700" />
+    <Thumb src={image} alt={title} className="w-14 h-14 rounded-xl object-cover shrink-0 bg-slate-100" />
     <div className="min-w-0 flex-1">
-      <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white line-clamp-1 font-khmer">{title}</h4>
-      <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 font-khmer">{subtitle}</p>
+      <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 line-clamp-1 font-khmer">{title}</h4>
+      <p className="text-[11px] text-slate-500 line-clamp-1 font-khmer">{subtitle}</p>
       <div className="flex items-center gap-2 mt-0.5">
         {typeof rating === 'number' && rating > 0 && (
-          <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400">
+          <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-600">
             <Star className="w-3 h-3 fill-current" />
             {rating.toFixed(1)}
           </span>
         )}
         {badge && (
-          <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
+          <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-700">
             <CheckCircle2 className="w-3 h-3" />
             {badge}
           </span>
@@ -461,71 +462,140 @@ export const GuideView: React.FC = () => {
   }, [bigPhraseId]);
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-2.5 min-[360px]:px-4 py-3 space-y-4 pb-10 font-khmer overflow-x-hidden">
-      {/* Hero */}
-      <section className="relative overflow-hidden p-4 rounded-3xl bg-gradient-to-br from-[#064E3B] via-[#065F46] to-[#047857] text-white border border-emerald-600/30 shadow-md">
-        <div className="absolute -right-8 -top-10 w-32 h-32 rounded-full bg-amber-300/10 blur-2xl pointer-events-none" />
-        <div className="relative space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0">
-              <BookOpen className="w-5 h-5 text-amber-300" />
+    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-slate-900 min-h-full font-khmer pb-12 overflow-x-hidden">
+      {/* 1. Shared Master Hero Header with Angkor Wat Backdrop */}
+      <AngkorHeroTopHeader mode="food" />
+
+      {/* 2. Main Content Container rising smoothly from the Angkor Wat reflection into Dark Slate (#1E293B) */}
+      <div className="relative z-20 -mt-[82px] px-2.5 min-[360px]:px-3.5 sm:px-5 space-y-3.5">
+        {/* Compact Promotional Title Banner (Left) + 7-Day Free Trial / Account Status Banner Below Language Selector (Right) */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pl-0.5 sm:pl-1">
+          <div className="relative py-1 pl-1 pr-2 bg-transparent flex items-center gap-2.5 min-w-0 flex-1">
+            <div
+              style={{
+                background: 'linear-gradient(180deg, #FDE047 0%, #F59E0B 100%)',
+                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.26), inset 0 1px 1px rgba(255, 255, 255, 0.65)',
+              }}
+              className="relative z-10 w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0"
+            >
+              <BookOpen className="w-4 h-4 text-[#042F2E]" strokeWidth={2.4} />
             </div>
-            <div className="min-w-0">
-              <p className="text-[11px] text-emerald-200 truncate">
-                {greeting}
-                {firstName ? `, ${firstName}` : ''}
-              </p>
-              <h2 className="font-moul text-sm sm:text-base leading-snug">
-                {tr(language, 'ណែនាំ & ស្វែងយល់', 'Guide & Discover', '指南与发现')}
+
+            <span className="relative z-10 h-6 w-px bg-white/35 shrink-0" aria-hidden="true" />
+
+            <div className="relative z-10 min-w-0">
+              <h2
+                className="font-khmer font-extrabold text-white leading-[1.65] py-0.5 break-words"
+                style={{ fontSize: 'clamp(13.8px, 3.96vw, 16.2px)', textShadow: '0 1px 3px rgba(0, 0, 0, 0.65)' }}
+              >
+                {tr(language, 'មគ្គុទ្ទេសក៍ និងស្វែងយល់', 'Cambodia Guide & Discover', '柬埔寨旅游与美食指南')}
               </h2>
+              <p
+                className="font-khmer font-bold text-[#FDE68A] leading-[1.62] py-0.5 break-words"
+                style={{ fontSize: 'clamp(11px, 3.12vw, 13.2px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)' }}
+              >
+                {tr(
+                  language,
+                  'ជម្រើសម្ហូប ប្រតិទិនបុណ្យ និងគន្លឹះសំខាន់ៗ',
+                  'Dish picks, festival calendar & travel tips',
+                  '精选高棉美食、节庆日历与实用贴士'
+                )}
+              </p>
             </div>
           </div>
-          <p className="text-[11px] text-emerald-100/95 leading-relaxed">
-            {tr(
-              language,
-              'ជម្រើសម្ហូប ទីកន្លែង ប្រតិទិនបុណ្យ និងគន្លឹះដំណើរកម្សាន្តសម្រាប់ប្រទេសកម្ពុជា',
-              'Dish picks, places, a festival calendar and practical tips for exploring Cambodia',
-              '为探索柬埔寨准备的美食推荐、景点、节庆日历与实用贴士'
-            )}
-          </p>
-          <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-            <span className="px-2.5 py-1 rounded-full bg-white/15 border border-white/20 text-[10px] font-bold">
-              {season.emoji} {pickTri(season.name, lang)} • {pickTri(season.range, lang)}
+
+          <AccountTrialStatusBar inline className="ml-auto" />
+        </div>
+
+        {/* Clean White Season & Meal Slot Status Card + 4 Colorful Gradient Guide Section Buttons */}
+        <div
+          style={{
+            background: '#FFFFFF',
+            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.08)',
+          }}
+          className="rounded-[24px] p-2.5 sm:p-3 border border-slate-100 space-y-2.5"
+        >
+          <div className="flex items-center justify-between gap-2 flex-wrap px-1">
+            <span className="text-xs font-extrabold text-slate-800">
+              {greeting}
+              {firstName ? `, ${firstName}` : ''}
             </span>
-            <span className="px-2.5 py-1 rounded-full bg-amber-300 text-slate-950 text-[10px] font-black">
-              {activeSlot.emoji} {pickTri(MEAL_SLOTS.find((s) => s.id === currentSlotId)!.label, lang)}
-            </span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-900 text-[10px] font-extrabold">
+                {season.emoji} {pickTri(season.name, lang)} • {pickTri(season.range, lang)}
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black">
+                {activeSlot.emoji} {pickTri(MEAL_SLOTS.find((s) => s.id === currentSlotId)!.label, lang)}
+              </span>
+            </div>
+          </div>
+
+          <div
+            role="tablist"
+            aria-label={tr(language, 'ផ្នែកណែនាំ', 'Guide sections', '指南分区')}
+            className="grid grid-cols-4 gap-2"
+          >
+            {[
+              {
+                id: 'foryou' as GuideTab,
+                icon: Award,
+                label: tr(language, 'សម្រាប់អ្នក', 'For You', '为你推荐'),
+                gradient: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
+              },
+              {
+                id: 'provinces' as GuideTab,
+                icon: MapPinned,
+                label: tr(language, 'ខេត្ត', 'Provinces', '省份'),
+                gradient: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
+              },
+              {
+                id: 'calendar' as GuideTab,
+                icon: CalendarDays,
+                label: tr(language, 'ប្រតិទិន', 'Calendar', '日历'),
+                gradient: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
+              },
+              {
+                id: 'tips' as GuideTab,
+                icon: Lightbulb,
+                label: tr(language, 'គន្លឹះ', 'Tips', '实用'),
+                gradient: 'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)',
+              },
+            ].map((t) => {
+              const Icon = t.icon;
+              const active = tab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setTab(t.id)}
+                  style={{
+                    background: t.gradient,
+                    boxShadow: active
+                      ? '0 6px 14px rgba(15, 23, 42, 0.22), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)'
+                      : '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
+                  }}
+                  className="group relative min-h-[64px] px-1.5 py-2 rounded-[16px] flex flex-col items-center justify-center gap-1 min-w-0 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
+                >
+                  <span
+                    className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+                    style={{
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
+                    }}
+                  />
+                  <Icon className="relative z-10 w-5 h-5 text-white shrink-0 drop-shadow-xs" strokeWidth={2.2} />
+                  <span
+                    className="relative z-10 font-khmer font-extrabold leading-[1.6] py-0.5 text-center break-words whitespace-normal max-w-full"
+                    style={{ fontSize: 'clamp(11px, 3vw, 13px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
+                  >
+                    {t.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
-      </section>
-
-      {/* Segmented navigation */}
-      <div
-        role="tablist"
-        aria-label={tr(language, 'ផ្នែកណែនាំ', 'Guide sections', '指南分区')}
-        className="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700"
-      >
-        {tabs.map((t) => {
-          const active = tab === t.id;
-          return (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => setTab(t.id)}
-              className={`py-2 px-1 min-w-0 rounded-xl flex flex-col items-center justify-center gap-0.5 text-[10.5px] min-[360px]:text-[11px] font-bold transition cursor-pointer ${
-                active
-                  ? 'bg-[#064E3B] text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-700'
-              }`}
-            >
-              {t.icon}
-              <span className="leading-[1.6] text-center break-words whitespace-normal max-w-full">{t.label}</span>
-            </button>
-          );
-        })}
-      </div>
 
       {/* ------------------------------------------------------------------ */}
       {/* FOR YOU                                                            */}
@@ -567,16 +637,16 @@ export const GuideView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsAiTripPlannerModalOpen(true)}
-                className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 flex items-center gap-2.5 text-left transition active:scale-[0.98] cursor-pointer"
+                className="p-3 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex items-center gap-2.5 text-left transition active:scale-[0.98] cursor-pointer"
               >
                 <span className="w-9 h-9 rounded-xl bg-[#064E3B] text-amber-300 flex items-center justify-center shrink-0">
                   <Route className="w-4 h-4" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-xs font-extrabold text-slate-900 dark:text-white leading-[1.62] break-words">
+                  <span className="block text-xs font-extrabold text-slate-900 leading-[1.62] break-words">
                     {tr(language, 'ផែនការដើរលេង AI', 'AI Trip Planner', 'AI 行程规划')}
                   </span>
-                  <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                  <span className="flex items-center gap-1 text-[10px] text-emerald-700 font-bold">
                     <CheckCircle2 className="w-3 h-3 shrink-0" />
                     <span>{tr(language, 'បើកភ្លាមៗ • FREE', 'Open now • FREE', '免费使用')}</span>
                   </span>
@@ -585,16 +655,16 @@ export const GuideView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsNearMeModalOpen(true)}
-                className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 flex items-center gap-2.5 text-left transition active:scale-[0.98] cursor-pointer"
+                className="p-3 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex items-center gap-2.5 text-left transition active:scale-[0.98] cursor-pointer"
               >
                 <span className="w-9 h-9 rounded-xl bg-[#064E3B] text-amber-300 flex items-center justify-center shrink-0">
                   <Navigation className="w-4 h-4" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-xs font-extrabold text-slate-900 dark:text-white leading-[1.62] break-words">
+                  <span className="block text-xs font-extrabold text-slate-900 leading-[1.62] break-words">
                     {tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近')}
                   </span>
-                  <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                  <span className="flex items-center gap-1 text-[10px] text-emerald-700 font-bold">
                     <CheckCircle2 className="w-3 h-3 shrink-0" />
                     <span>{tr(language, 'តាម GPS • FREE', 'Using GPS • FREE', '免费定位')}</span>
                   </span>
@@ -621,7 +691,7 @@ export const GuideView: React.FC = () => {
                     className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border transition cursor-pointer ${
                       active
                         ? 'bg-emerald-700 text-white border-emerald-600 shadow-xs'
-                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                        : 'bg-white text-slate-700 border-slate-200'
                     }`}
                   >
                     {s.emoji} {pickTri(s.label, lang)}
@@ -633,7 +703,7 @@ export const GuideView: React.FC = () => {
             {mealPicks.length > 0 ? (
               <HScroll>{mealPicks.map(renderFoodCard)}</HScroll>
             ) : (
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              <p className="text-[11px] text-slate-500">
                 {tr(language, 'មិនទាន់មានម្ហូបសម្រាប់ពេលនេះទេ', 'No dishes available for this time yet.', '该时段暂无菜品。')}
               </p>
             )}
@@ -654,7 +724,7 @@ export const GuideView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setActiveTab('food')}
-                    className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 shrink-0 cursor-pointer"
+                    className="text-[11px] font-bold text-emerald-700 shrink-0 cursor-pointer"
                   >
                     {tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
                   </button>
@@ -679,7 +749,7 @@ export const GuideView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setActiveTab('tourism')}
-                    className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 shrink-0 cursor-pointer"
+                    className="text-[11px] font-bold text-emerald-700 shrink-0 cursor-pointer"
                   >
                     {tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
                   </button>
@@ -700,7 +770,7 @@ export const GuideView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setActiveTab('restaurants')}
-                    className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 shrink-0 cursor-pointer"
+                    className="text-[11px] font-bold text-emerald-700 shrink-0 cursor-pointer"
                   >
                     {tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
                   </button>
@@ -737,7 +807,7 @@ export const GuideView: React.FC = () => {
                       className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border transition cursor-pointer ${
                         active
                           ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
-                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                          : 'bg-white text-slate-700 border-slate-200'
                       }`}
                     >
                       {provinceName(g)}
@@ -749,10 +819,10 @@ export const GuideView: React.FC = () => {
 
               {activeGroup && (
                 <div className="space-y-4">
-                  <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/50 dark:to-teal-950/40 border border-emerald-200/80 dark:border-emerald-800/50 flex items-center justify-between gap-3">
+                  <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 flex items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300 leading-[1.7] py-0.5 break-words">{provinceName(activeGroup)}</h3>
-                      <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5 leading-[1.55]">
+                      <h3 className="font-moul text-sm text-[#064E3B] leading-[1.7] py-0.5 break-words">{provinceName(activeGroup)}</h3>
+                      <p className="text-[11px] text-slate-600 mt-0.5 leading-[1.55]">
                         {tr(
                           language,
                           `${activeGroup.places.length} កន្លែងទេសចរណ៍ • ${activeGroup.shops.length} ហាងអាហារ`,
@@ -772,7 +842,7 @@ export const GuideView: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => goToProvince(activeGroup.key, 'tourism')}
-                            className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 shrink-0 cursor-pointer"
+                            className="text-[11px] font-bold text-emerald-700 shrink-0 cursor-pointer"
                           >
                             {tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
                           </button>
@@ -805,7 +875,7 @@ export const GuideView: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => goToProvince(activeGroup.key, 'restaurants')}
-                            className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 shrink-0 cursor-pointer"
+                            className="text-[11px] font-bold text-emerald-700 shrink-0 cursor-pointer"
                           >
                             {tr(language, 'មើលទាំងអស់', 'See all', '查看全部')}
                           </button>
@@ -841,16 +911,16 @@ export const GuideView: React.FC = () => {
       {/* ------------------------------------------------------------------ */}
       {tab === 'calendar' && (
         <div className="space-y-5">
-          <section className="p-4 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 space-y-1.5">
+          <section className="p-4 rounded-3xl bg-white border border-slate-200/90 space-y-1.5">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="font-moul text-xs sm:text-sm text-[#0F172A] dark:text-white">
+              <h3 className="font-moul text-xs sm:text-sm text-[#0F172A]">
                 {season.emoji} {pickTri(season.name, lang)}
               </h3>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold shrink-0">
+              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold shrink-0">
                 {pickTri(season.range, lang)}
               </span>
             </div>
-            <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{pickTri(season.tip, lang)}</p>
+            <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed">{pickTri(season.tip, lang)}</p>
           </section>
 
           {seasonalNow.length > 0 && (
@@ -864,14 +934,14 @@ export const GuideView: React.FC = () => {
                 {seasonalNow.map((s) => (
                   <div
                     key={s.name.en}
-                    className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 flex items-start gap-3"
+                    className="p-3 rounded-2xl bg-white border border-slate-200/90 flex items-start gap-3"
                   >
-                    <span className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-xl shrink-0">
+                    <span className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-xl shrink-0">
                       {s.emoji}
                     </span>
                     <div className="min-w-0">
-                      <h4 className="text-xs font-extrabold text-slate-900 dark:text-white">{pickTri(s.name, lang)}</h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">{pickTri(s.note, lang)}</p>
+                      <h4 className="text-xs font-extrabold text-slate-900">{pickTri(s.name, lang)}</h4>
+                      <p className="text-[11px] text-slate-500 leading-snug">{pickTri(s.note, lang)}</p>
                     </div>
                   </div>
                 ))}
@@ -896,21 +966,21 @@ export const GuideView: React.FC = () => {
                   key={f.id}
                   className={`p-3.5 rounded-2xl border space-y-2.5 ${
                     f.isOngoingToday
-                      ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-400 dark:border-rose-600 shadow-sm'
+                      ? 'bg-rose-50 border-rose-400 shadow-sm'
                       : idx === 0
-                      ? 'bg-amber-50 dark:bg-amber-950/25 border-amber-300/80 dark:border-amber-700/60 shadow-xs'
-                      : 'bg-white dark:bg-slate-800 border-slate-200/90 dark:border-slate-700'
+                      ? 'bg-amber-50 border-amber-300/80 shadow-xs'
+                      : 'bg-white border-slate-200/90'
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-12 shrink-0 text-center p-1.5 rounded-2xl bg-emerald-50 dark:bg-slate-700/70 border border-emerald-200/60 dark:border-slate-600">
+                    <div className="w-12 shrink-0 text-center p-1.5 rounded-2xl bg-emerald-50 border border-emerald-200/60">
                       <div className="text-2xl leading-none">{f.emoji}</div>
-                      <div className="mt-1 text-[10px] font-black text-[#064E3B] dark:text-emerald-300">{monthLabel(f.month, lang)}</div>
-                      <div className="text-[9px] font-bold text-slate-500 dark:text-slate-400">{f.activeYear}</div>
+                      <div className="mt-1 text-[10px] font-black text-[#064E3B]">{monthLabel(f.month, lang)}</div>
+                      <div className="text-[9px] font-bold text-slate-500">{f.activeYear}</div>
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white leading-snug">
+                        <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 leading-snug">
                           {pickTri(f.name, lang)}
                         </h4>
                         <span
@@ -919,30 +989,30 @@ export const GuideView: React.FC = () => {
                               ? 'bg-rose-600 text-white'
                               : idx === 0
                               ? 'bg-amber-400 text-slate-950 shadow-2xs'
-                              : 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300'
+                              : 'bg-emerald-100 text-emerald-800'
                           }`}
                         >
                           {pickTri(f.countdownBadge, lang)}
                         </span>
                       </div>
 
-                      <p className="text-[11px] font-bold text-[#064E3B] dark:text-emerald-300 mt-1">
+                      <p className="text-[11px] font-bold text-[#064E3B] mt-1">
                         📅 {pickTri(f.formattedDateRange, lang)}
                       </p>
 
                       {/* Explicit Duration Pill */}
                       <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700/80 text-slate-800 dark:text-slate-200 text-[10px] font-bold border border-slate-200 dark:border-slate-600">
-                          <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 text-slate-800 text-[10px] font-bold border border-slate-200">
+                          <Clock className="w-3 h-3 text-amber-600 shrink-0" />
                           <span>{tr(language, 'រយៈពេល៖', 'Duration:', '时长：')} {pickTri(f.durationLabel, lang)}</span>
                         </span>
                       </div>
 
-                      <p className="text-[11px] sm:text-xs text-slate-700 dark:text-slate-200 mt-2 leading-relaxed">{toConciseSummary(pickTri(f.about, lang), lang)}</p>
+                      <p className="text-[11px] sm:text-xs text-slate-700 mt-2 leading-relaxed">{toConciseSummary(pickTri(f.about, lang), lang)}</p>
                     </div>
                   </div>
                   <div className="text-[11px] leading-snug">
-                    <p className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200">
+                    <p className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-900">
                       🍽️ <span className="font-bold">{tr(language, 'ម្ហូបប្រចាំពិធី៖', 'Festival Foods:', '节日美食：')}</span> {pickTri(f.foods, lang)}
                     </p>
                   </div>
@@ -967,17 +1037,17 @@ export const GuideView: React.FC = () => {
         <div className="space-y-5">
           {/* Dedicated Police & Emergency Contacts Section */}
           {(tipFilter === 'all' || tipFilter === 'safety') && (
-            <section className="p-4 rounded-3xl bg-gradient-to-br from-rose-50 via-amber-50/70 to-white dark:from-rose-950/40 dark:via-slate-900 dark:to-slate-800 border-2 border-rose-300 dark:border-rose-800/80 space-y-3 shadow-xs">
+            <section className="p-4 rounded-3xl bg-gradient-to-br from-rose-50 via-amber-50/70 to-white border-2 border-rose-300 space-y-3 shadow-xs">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   <span className="w-9 h-9 rounded-xl bg-rose-600 text-white flex items-center justify-center shadow-xs shrink-0">
                     <ShieldAlert className="w-5 h-5" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-moul text-xs sm:text-sm text-rose-900 dark:text-rose-200 leading-[1.7] py-0.5 break-words">
+                    <h3 className="font-moul text-xs sm:text-sm text-rose-900 leading-[1.7] py-0.5 break-words">
                       {tr(language, '🚨 លេខទូរស័ព្ទប៉ូលីស & សង្គ្រោះបន្ទាន់ (24 ម៉ោង)', '🚨 Police & Emergency Hotlines (24/7)', '🚨 柬埔寨警察与紧急救援电话（24小时）')}
                     </h3>
-                    <p className="text-[10px] text-rose-700 dark:text-rose-300 leading-[1.55] break-words">
+                    <p className="text-[10px] text-rose-700 leading-[1.55] break-words">
                       {tr(language, 'ចុចលើលេខទូរស័ព្ទខាងក្រោមដើម្បីហៅចេញភ្លាមៗក្នុងករណីមានអាសន្ន', 'Tap any emergency number below to dial immediately', '遇到紧急情况请点击下方号码直接拨打')}
                     </p>
                   </div>
@@ -988,17 +1058,17 @@ export const GuideView: React.FC = () => {
                 {EMERGENCY_CONTACTS.map((ec) => (
                   <div
                     key={ec.id}
-                    className="p-2.5 rounded-2xl bg-white dark:bg-slate-800/90 border border-rose-200/80 dark:border-slate-700 flex items-center justify-between gap-2.5"
+                    className="p-2.5 rounded-2xl bg-white border border-rose-200/80 flex items-center justify-between gap-2.5"
                   >
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                      <span className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/60 flex items-center justify-center text-lg shrink-0">
+                      <span className="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center text-lg shrink-0">
                         {ec.emoji}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <h4 className="text-xs font-extrabold text-slate-900 dark:text-white leading-[1.6] break-words">
+                        <h4 className="text-xs font-extrabold text-slate-900 leading-[1.6] break-words">
                           {pickTri(ec.name, lang)}
                         </h4>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-[1.55] break-words">
+                        <p className="text-[10px] text-slate-500 leading-[1.55] break-words">
                           {pickTri(ec.note, lang)}
                         </p>
                       </div>
@@ -1032,7 +1102,7 @@ export const GuideView: React.FC = () => {
                     className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border transition cursor-pointer ${
                       active
                         ? 'bg-emerald-700 text-white border-emerald-600 shadow-xs'
-                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                        : 'bg-white text-slate-700 border-slate-200'
                     }`}
                   >
                     {c.emoji} {pickTri(c.label, lang)}
@@ -1044,14 +1114,14 @@ export const GuideView: React.FC = () => {
               {visibleTips.map((t) => (
                 <li
                   key={t.id}
-                  className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 flex items-start gap-3"
+                  className="p-3 rounded-2xl bg-white border border-slate-200/90 flex items-start gap-3"
                 >
-                  <span className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-xl shrink-0">
+                  <span className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-xl shrink-0">
                     {t.emoji}
                   </span>
                   <div className="min-w-0">
-                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">{pickTri(t.title, lang)}</h4>
-                    <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 leading-relaxed mt-0.5">{toConciseSummary(pickTri(t.body, lang), lang)}</p>
+                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">{pickTri(t.title, lang)}</h4>
+                    <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed mt-0.5">{toConciseSummary(pickTri(t.body, lang), lang)}</p>
                   </div>
                 </li>
               ))}
@@ -1073,12 +1143,12 @@ export const GuideView: React.FC = () => {
               {PHRASES.map((p) => (
                 <li
                   key={p.id}
-                  className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 flex items-center gap-2"
+                  className="p-3 rounded-2xl bg-white border border-slate-200/90 flex items-center gap-2"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-extrabold text-[#064E3B] dark:text-emerald-300 font-khmer leading-snug">{p.khmer}</p>
-                    <p className="text-[10px] italic text-slate-500 dark:text-slate-400">{p.roman}</p>
-                    <p className="text-[11px] text-slate-700 dark:text-slate-200 mt-0.5">
+                    <p className="text-sm font-extrabold text-[#064E3B] font-khmer leading-snug">{p.khmer}</p>
+                    <p className="text-[10px] italic text-slate-500">{p.roman}</p>
+                    <p className="text-[11px] text-slate-700 mt-0.5">
                       {lang === 'zh' ? p.zh : p.en}
                     </p>
                   </div>
@@ -1086,7 +1156,7 @@ export const GuideView: React.FC = () => {
                     type="button"
                     onClick={() => setBigPhraseId(p.id)}
                     aria-label={tr(language, 'បង្ហាញអក្សរធំ', 'Show in big text', '放大显示')}
-                    className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0 active:scale-90 transition cursor-pointer"
+                    className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 active:scale-90 transition cursor-pointer"
                   >
                     <Maximize2 className="w-4 h-4" />
                   </button>
@@ -1126,6 +1196,7 @@ export const GuideView: React.FC = () => {
           <p className="mt-2 text-sm text-white/80">{lang === 'zh' ? bigPhrase.zh : bigPhrase.en}</p>
         </div>
       )}
+      </div>
     </div>
   );
 };

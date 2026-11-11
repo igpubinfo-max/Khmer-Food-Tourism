@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { FoodCard } from './FoodCard';
-import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
+import { AngkorHeroTopHeader, AccountTrialStatusBar } from './AngkorHeroTopHeader';
 import {
   FoodItem,
   organizeAndDeduplicateFoods,
@@ -120,10 +120,17 @@ export const FoodView: React.FC = () => {
       return matched;
     }
 
-    // Prioritize signature / non-vegetarian dishes of the selected category first in a deterministic order
+    // Prioritize signature dishes of the selected category first in a deterministic order
     const getCategoryPriority = (f: FoodItem): number => {
       const kh = (f.nameKh || '').trim();
-      const isVeg = Boolean(f.isVegetarian || /បួស|\bvegetarian\b|\bvegan\b/i.test(`${kh} ${f.nameEn || ''}`));
+      const isVeg = Boolean(f.isVegetarian || /បួស|\bvegetarian\b|\bvegan\b/i.test(`${kh} ${f.nameEn || ''} ${f.categoryKh || ''}`));
+
+      if (selectedCategory === 'vegetarian') {
+        if (f.isVegetarian) return 1;
+        if (/បួស|\bvegetarian\b|\bvegan\b/i.test(`${kh} ${f.nameEn || ''} ${f.categoryKh || ''}`)) return 2;
+        return 3;
+      }
+
       const vegPenalty = isVeg ? 50 : 0;
 
       if (selectedCategory === 'samlor') {
@@ -302,9 +309,9 @@ export const FoodView: React.FC = () => {
 
       {/* Main Content Container rising smoothly from the Angkor Wat reflection */}
       <div className="relative z-20 -mt-[82px] px-2.5 min-[360px]:px-3.5 sm:px-5 space-y-2.5">
-        {/* Compact Original Khmer Promotional Title Banner Directly Above the Food Search Bar (Transparent Background) */}
-        <div className="flex justify-start pl-0.5 sm:pl-1">
-          <div className="relative py-1 pl-1 pr-2 bg-transparent flex items-center gap-2.5">
+        {/* Compact Original Khmer Promotional Title Banner (Left) + 7-Day Free Trial / Account Status Banner Below Language Selector (Right) */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pl-0.5 sm:pl-1">
+          <div className="relative py-1 pl-1 pr-2 bg-transparent flex items-center gap-2.5 min-w-0 flex-1">
             {/* Left Yellow Food Icon */}
             <div
               style={{
@@ -347,6 +354,9 @@ export const FoodView: React.FC = () => {
               </p>
             </div>
           </div>
+
+          {/* 7-Day Free Trial / Account Status Banner below the Language Selector & out of the temple area */}
+          <AccountTrialStatusBar inline className="ml-auto" />
         </div>
 
         {/* 2. Main Search Bar – Large White Rounded Glassmorphism Search Bar + Separate Green Filter Button */}
@@ -425,7 +435,7 @@ export const FoodView: React.FC = () => {
           </button>
         </div>
 
-        {/* 3. Four Premium PNG Category Buttons with Category Names Inside Each Button */}
+        {/* 3. Five Premium PNG Category Buttons with Category Names Inside Each Button */}
         <div
           style={{
             background: 'rgba(255, 255, 255, 0.96)',
@@ -433,9 +443,9 @@ export const FoodView: React.FC = () => {
             WebkitBackdropFilter: 'blur(10px)',
             boxShadow: '0 8px 22px rgba(15, 23, 42, 0.08)',
           }}
-          className="rounded-[24px] p-2 sm:p-3 border border-white"
+          className="rounded-[24px] p-1.5 min-[360px]:p-2 sm:p-3 border border-white"
         >
-          <div className="grid grid-cols-4 gap-1.5 min-[360px]:gap-2 sm:gap-3 items-stretch">
+          <div className="grid grid-cols-5 gap-1 min-[360px]:gap-1.5 sm:gap-2.5 items-stretch">
             {[
               {
                 id: 'all',
@@ -459,6 +469,13 @@ export const FoodView: React.FC = () => {
                 nameZh: '烧烤/煎炸',
               },
               {
+                id: 'vegetarian',
+                imageSrc: '/categories/food_cat_vegetarian.png',
+                nameKh: 'ម្ហូបបួស',
+                nameEn: 'Vegetarian',
+                nameZh: '素食菜肴',
+              },
+              {
                 id: 'bong_aem',
                 imageSrc: '/categories/food_cat_dessert.png',
                 nameKh: 'បង្អែម/ភេសជ្ជៈ',
@@ -468,14 +485,17 @@ export const FoodView: React.FC = () => {
             ].map((cat) => {
               const active = selectedCategory === cat.id;
               const label = tr(language, cat.nameKh, cat.nameEn, cat.nameZh);
-              const isLongKh = language === 'km' && cat.id === 'bong_aem';
+              const isLongKh = language === 'km' && (cat.id === 'bong_aem' || cat.id === 'all');
               return (
                 <button
                   key={cat.id}
                   type="button"
-                  onClick={() => setSelectedCategory(cat.id)}
+                  onClick={() => {
+                    setSelectedCategory(cat.id);
+                    dishListStartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                  }}
                   aria-pressed={active}
-                  className="group relative w-full aspect-[560/460] bg-transparent border-0 p-0 active:scale-95 transition-transform cursor-pointer select-none flex items-center justify-center"
+                  className="group relative w-full min-w-0 aspect-[560/460] bg-transparent border-0 p-0 active:scale-95 transition-transform cursor-pointer select-none flex items-center justify-center"
                 >
                   <img
                     src={cat.imageSrc}
@@ -489,13 +509,13 @@ export const FoodView: React.FC = () => {
                     decoding="async"
                   />
                   {/* Centered Large Bold WHITE Label Inside Button Directly Below the Food Illustration */}
-                  <div className="pointer-events-none absolute inset-x-[5%] top-[69%] bottom-[6.5%] flex items-center justify-center px-0.5 overflow-visible">
+                  <div className="pointer-events-none absolute inset-x-[4%] top-[69%] bottom-[6.5%] flex items-center justify-center px-0.5 overflow-visible">
                     <span
                       className="font-khmer font-extrabold text-white text-center leading-[1.35] tracking-tight whitespace-nowrap max-w-full"
                       style={{
                         fontSize: isLongKh
-                          ? 'clamp(9.6px, 2.65vw, 13.5px)'
-                          : 'clamp(11px, 3.05vw, 15px)',
+                          ? 'clamp(8.5px, 2.25vw, 13px)'
+                          : 'clamp(9.8px, 2.6vw, 14.5px)',
                         textShadow:
                           '0 1.5px 3px rgba(0, 0, 0, 0.85), 0 0 8px rgba(0, 0, 0, 0.55)',
                       }}
