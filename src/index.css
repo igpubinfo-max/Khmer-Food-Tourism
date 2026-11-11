@@ -12,16 +12,23 @@
   --color-gold-warm: #F59E0B;
 
   /* Balanced typography scale across Khmer, English, and Chinese with >= 1.68 line-height for Khmer subscripts */
-  --text-xs: 0.75rem;
+  /* +20% Typography scale across Khmer, English, and Simplified Chinese with >= 1.68 line-height for Khmer subscripts */
+  --text-2xs: 0.825rem;
+  --text-2xs--line-height: 1.68;
+  --text-xs: 0.9rem;
   --text-xs--line-height: 1.68;
-  --text-sm: 0.875rem;
+  --text-sm: 1.05rem;
   --text-sm--line-height: 1.68;
-  --text-base: 1rem;
+  --text-base: 1.2rem;
   --text-base--line-height: 1.7;
-  --text-lg: 1.125rem;
+  --text-lg: 1.35rem;
   --text-lg--line-height: 1.68;
-  --text-xl: 1.25rem;
+  --text-xl: 1.5rem;
   --text-xl--line-height: 1.65;
+  --text-2xl: 1.8rem;
+  --text-2xl--line-height: 1.6;
+  --text-3xl: 2.25rem;
+  --text-3xl--line-height: 1.55;
 }
 
 :root {
@@ -246,21 +253,48 @@ img[src^="data:image"],
   -webkit-user-drag: none;
 }
 
-/* Ensure micro text utilities have >= 1.68 line-height so Khmer subscripts never clip vertically without inflating horizontal width */
-.text-\[8px\],
-.text-\[9px\],
-.text-\[9\.5px\],
-.text-\[10px\],
-.text-\[10\.5px\],
-.text-\[11px\],
-.text-\[11\.5px\],
-.text-\[12px\],
-.text-\[12\.5px\],
-.text-\[13px\],
-.text-\[14px\],
-.text-\[14\.5px\],
-.text-\[15px\] {
-  line-height: 1.68 !important;
+/* +20% (1.20x) Responsive Font Size Scale for all arbitrary pixel text utilities across Khmer, English, and Chinese */
+.text-\[6\.5px\] { font-size: 0.4875rem !important; line-height: 1.35 !important; }
+.text-\[6\.8px\] { font-size: 0.51rem !important; line-height: 1.35 !important; }
+.text-\[7\.5px\] { font-size: 0.5625rem !important; line-height: 1.4 !important; }
+.text-\[8px\] { font-size: 0.6rem !important; line-height: 1.68 !important; }
+.text-\[8\.5px\] { font-size: 0.6375rem !important; line-height: 1.68 !important; }
+.text-\[8\.8px\] { font-size: 0.66rem !important; line-height: 1.45 !important; }
+.text-\[9px\] { font-size: 0.675rem !important; line-height: 1.68 !important; }
+.text-\[9\.5px\] { font-size: 0.7125rem !important; line-height: 1.68 !important; }
+.text-\[9\.8px\] { font-size: 0.735rem !important; line-height: 1.5 !important; }
+.text-\[10px\] { font-size: 0.75rem !important; line-height: 1.68 !important; }
+.text-\[10\.5px\] { font-size: 0.7875rem !important; line-height: 1.68 !important; }
+.text-\[11px\] { font-size: 0.825rem !important; line-height: 1.68 !important; }
+.text-\[11\.5px\] { font-size: 0.8625rem !important; line-height: 1.68 !important; }
+.text-\[12px\] { font-size: 0.9rem !important; line-height: 1.68 !important; }
+.text-\[12\.5px\] { font-size: 0.9375rem !important; line-height: 1.68 !important; }
+.text-\[13px\] { font-size: 0.975rem !important; line-height: 1.68 !important; }
+.text-\[13\.5px\] { font-size: 1.0125rem !important; line-height: 1.68 !important; }
+.text-\[14px\] { font-size: 1.05rem !important; line-height: 1.68 !important; }
+.text-\[14\.5px\] { font-size: 1.0875rem !important; line-height: 1.68 !important; }
+.text-\[15px\] { font-size: 1.125rem !important; line-height: 1.68 !important; }
+.text-\[15\.5px\] { font-size: 1.1625rem !important; line-height: 1.68 !important; }
+.text-\[16px\] { font-size: 1.2rem !important; line-height: 1.68 !important; }
+.text-\[18px\] { font-size: 1.35rem !important; line-height: 1.65 !important; }
+
+@media (min-width: 360px) {
+  .min-\[360px\]\:text-\[7\.5px\] { font-size: 0.5625rem !important; line-height: 1.4 !important; }
+  .min-\[360px\]\:text-\[9\.8px\] { font-size: 0.735rem !important; line-height: 1.5 !important; }
+  .min-\[360px\]\:text-\[11px\] { font-size: 0.825rem !important; line-height: 1.68 !important; }
+  .min-\[360px\]\:text-\[12px\] { font-size: 0.9rem !important; line-height: 1.68 !important; }
+  .min-\[360px\]\:text-\[13px\] { font-size: 0.975rem !important; line-height: 1.68 !important; }
+}
+
+@media (min-width: 640px) {
+  .sm\:text-\[9px\] { font-size: 0.675rem !important; line-height: 1.68 !important; }
+  .sm\:text-\[10\.5px\] { font-size: 0.7875rem !important; line-height: 1.68 !important; }
+  .sm\:text-\[11px\] { font-size: 0.825rem !important; line-height: 1.68 !important; }
+  .sm\:text-\[13px\] { font-size: 0.975rem !important; line-height: 1.68 !important; }
+  .sm\:text-\[13\.5px\] { font-size: 1.0125rem !important; line-height: 1.68 !important; }
+  .sm\:text-\[15px\] { font-size: 1.125rem !important; line-height: 1.68 !important; }
+  .sm\:text-\[15\.5px\] { font-size: 1.1625rem !important; line-height: 1.68 !important; }
+  .sm\:text-\[18px\] { font-size: 1.35rem !important; line-height: 1.65 !important; }
 }
 
 /* iOS & Android Safe-Area Insets & Dynamic Viewport (100dvh) for Full-Screen Modals & Bottom Sheets */

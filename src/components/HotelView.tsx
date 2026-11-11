@@ -837,13 +837,13 @@ export const HotelView: React.FC = () => {
             <div className="min-w-0 flex-1">
               <h1
                 className="font-moul text-white leading-[1.68] py-0.5 break-words"
-                style={{ fontSize: 'clamp(11.5px, 3.4vw, 15.5px)', textShadow: '0 2px 6px rgba(0,0,0,0.55)' }}
+                style={{ fontSize: 'clamp(13.8px, 4.08vw, 18.6px)', textShadow: '0 2px 6px rgba(0,0,0,0.55)' }}
               >
                 {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨美食与旅游')}
               </h1>
               <p
                 className="font-extrabold text-white/95 leading-snug break-words"
-                style={{ fontSize: 'clamp(9.8px, 2.8vw, 12px)', textShadow: '0 1px 4px rgba(0,0,0,0.55)' }}
+                style={{ fontSize: 'clamp(11.8px, 3.36vw, 14.4px)', textShadow: '0 1px 4px rgba(0,0,0,0.55)' }}
               >
                 Cambodia Flavors &amp; Tourism
               </p>
@@ -1159,13 +1159,13 @@ export const HotelView: React.FC = () => {
                 <div>
                   <h3
                     className="font-khmer font-extrabold text-white leading-[1.65] break-words"
-                    style={{ fontSize: 'clamp(12px, 3.5vw, 14.5px)', textShadow: '0 2px 4px rgba(0,0,0,0.42)' }}
+                    style={{ fontSize: 'clamp(14.4px, 4.2vw, 17.4px)', textShadow: '0 2px 4px rgba(0,0,0,0.42)' }}
                   >
                     {tr(language, 'ចុះបញ្ជីសណ្ឋាគារ ឬផ្ទះសំណាក់', 'Register Your Hotel or Guesthouse', '入驻您的酒店或客栈')}
                   </h3>
                   <p
                     className="font-khmer font-bold text-white/95 leading-[1.55] mt-0.5 break-words"
-                    style={{ fontSize: '10px', textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}
+                    style={{ fontSize: '14.4px', textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}
                   >
                     {tr(
                       language,
@@ -1182,7 +1182,7 @@ export const HotelView: React.FC = () => {
                   style={{
                     background: 'linear-gradient(180deg, #FDE047 0%, #FACC15 55%, #EAB308 100%)',
                     boxShadow: '0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.75)',
-                    fontSize: '12px',
+                    fontSize: '14.4px',
                   }}
                   className="w-full min-h-[34px] py-1 px-3 rounded-full border border-amber-200 text-slate-950 font-khmer font-extrabold inline-flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer leading-[1.6]"
                 >

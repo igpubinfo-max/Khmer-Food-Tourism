@@ -90,14 +90,14 @@ const FoodCardView = React.memo<FoodCardViewProps>(
         <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
           <div>
             <h3
-              style={{ fontSize: 'clamp(14px, 3.8vw, 17.5px)' }}
+              style={{ fontSize: 'clamp(16.8px, 4.56vw, 21px)' }}
               className="font-khmer font-extrabold text-[#0F172A] group-hover:text-[#1B5E3A] transition leading-[1.7] py-0.5 line-clamp-2 break-words"
             >
               {loc.name}
             </h3>
             {loc.description && (
               <p
-                style={{ fontSize: 'clamp(11.5px, 3.1vw, 13.5px)' }}
+                style={{ fontSize: 'clamp(13.8px, 3.72vw, 16.2px)' }}
                 className="text-slate-600 line-clamp-2 sm:line-clamp-3 mt-0.5 leading-[1.68] break-words"
               >
                 {loc.description}

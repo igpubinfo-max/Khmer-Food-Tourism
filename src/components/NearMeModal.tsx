@@ -845,7 +845,7 @@ export const NearMeModal: React.FC = () => {
                     </span>
                     <span
                       className="relative z-10 w-full font-khmer font-extrabold leading-[1.62] py-0.5 break-words whitespace-normal text-center text-white"
-                      style={{ fontSize: 'clamp(9.5px, 2.6vw, 11.5px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
+                      style={{ fontSize: 'clamp(11.4px, 3.12vw, 13.8px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
                     >
                       {card.label}
                     </span>

@@ -214,7 +214,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
             <h1
               className="font-khmer font-extrabold text-white leading-[1.62] py-0.5 break-words"
               style={{
-                fontSize: 'clamp(12px, 3.6vw, 17px)',
+                fontSize: 'clamp(14.4px, 4.32vw, 20.4px)',
                 textShadow: '0 1.5px 4px rgba(0, 0, 0, 0.78), 0 0 10px rgba(0, 0, 0, 0.4)',
               }}
             >
@@ -223,7 +223,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
             <p
               className="font-extrabold text-white/95 tracking-tight leading-snug break-words"
               style={{
-                fontSize: 'clamp(9.8px, 2.8vw, 12.5px)',
+                fontSize: 'clamp(11.8px, 3.36vw, 15px)',
                 textShadow: '0 1px 3px rgba(0, 0, 0, 0.85)',
               }}
             >
@@ -244,7 +244,7 @@ const AngkorHeroTopHeaderInner: React.FC<AngkorHeroTopHeaderProps> = ({
                 backdropFilter: 'blur(8px)',
                 boxShadow: '0 3px 10px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.14)',
               }}
-              className="relative h-8 min-[360px]:h-9 px-2 min-[360px]:px-2.5 rounded-full border border-[#FDE047]/55 flex items-center gap-1.5 text-white hover:border-[#FDE047]/85 transition active:scale-95 cursor-pointer shrink-0 overflow-hidden"
+              className="relative min-h-[34px] min-[360px]:min-h-[38px] py-1 px-2 min-[360px]:px-2.5 rounded-full border border-[#FDE047]/55 flex items-center gap-1.5 text-white hover:border-[#FDE047]/85 transition active:scale-95 cursor-pointer shrink-0 overflow-hidden"
               title={tr(
                 language,
                 `គណនីឥតគិតថ្លៃ • សាកល្បង 7 ថ្ងៃ (សល់ ${trialDaysLeft} ថ្ងៃ)`,

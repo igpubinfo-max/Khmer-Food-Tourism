@@ -302,37 +302,9 @@ export const FoodView: React.FC = () => {
 
       {/* Main Content Container rising smoothly from the Angkor Wat reflection */}
       <div className="relative z-20 -mt-[82px] px-2.5 min-[360px]:px-3.5 sm:px-5 space-y-2.5">
-        {/* Compact Original Khmer Promotional Title Banner Directly Above the Food Search Bar */}
-        <div className="flex justify-center">
-          <div
-            style={{
-              background: 'linear-gradient(92deg, #043F2E 0%, #065F46 52%, #044E3A 100%)',
-              boxShadow:
-                '0 0 0 1px rgba(254, 243, 199, 0.55), 0 5px 14px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.16)',
-            }}
-            className="relative w-full max-w-[380px] sm:max-w-md py-1.5 pl-2.5 pr-3 rounded-[14px] border border-[#F5C542]/85 flex items-center gap-2 overflow-hidden"
-          >
-            {/* Subtle decorative green hills & gold Angkor Wat silhouette on the right */}
-            <svg
-              className="pointer-events-none absolute right-0 bottom-0 h-full w-28 opacity-85"
-              viewBox="0 0 160 56"
-              fill="none"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <path d="M18 56C46 38 82 34 160 42V56H18Z" fill="rgba(16, 185, 129, 0.16)" />
-              <path d="M52 56C78 44 114 40 160 47V56H52Z" fill="rgba(5, 150, 105, 0.24)" />
-              <g fill="#F5C542" fillOpacity="0.34" transform="translate(88, 10)">
-                <rect x="4" y="34" width="52" height="3" rx="1" />
-                <rect x="8" y="30" width="44" height="4" rx="1" />
-                <path d="M30 4 L34 14 L35 30 L25 30 L26 14 Z" />
-                <path d="M19 11 L22 18 L23 30 L15 30 L16 18 Z" />
-                <path d="M41 11 L44 18 L45 30 L37 30 L38 18 Z" />
-                <path d="M10 18 L12.5 23 L13 30 L7 30 L7.5 23 Z" />
-                <path d="M50 18 L52.5 23 L53 30 L47 30 L47.5 23 Z" />
-              </g>
-            </svg>
-
+        {/* Compact Original Khmer Promotional Title Banner Directly Above the Food Search Bar (Transparent Background) */}
+        <div className="flex justify-start pl-0.5 sm:pl-1">
+          <div className="relative py-1 pl-1 pr-2 bg-transparent flex items-center gap-2.5">
             {/* Left Yellow Food Icon */}
             <div
               style={{
@@ -356,20 +328,20 @@ export const FoodView: React.FC = () => {
               </svg>
             </div>
 
-            {/* Subtle Vertical Divider */}
-            <span className="relative z-10 h-5 w-px bg-white/25 shrink-0" aria-hidden="true" />
+            {/* Thin Vertical Divider Line */}
+            <span className="relative z-10 h-6 w-px bg-white/35 shrink-0" aria-hidden="true" />
 
             {/* Exact Original Khmer Title & Subtitle */}
-            <div className="relative z-10 min-w-0 flex-1">
+            <div className="relative z-10 min-w-0">
               <h2
                 className="font-khmer font-extrabold text-white leading-[1.65] py-0.5 break-words"
-                style={{ fontSize: 'clamp(11.5px, 3.3vw, 13.5px)', textShadow: '0 1px 3px rgba(0, 0, 0, 0.55)' }}
+                style={{ fontSize: 'clamp(13.8px, 3.96vw, 16.2px)', textShadow: '0 1px 3px rgba(0, 0, 0, 0.65)' }}
               >
                 {tr(language, 'មុខម្ហូបខ្មែរ ទាំងអស់', 'All Cambodian Dishes', '柬埔寨全部美食')}
               </h2>
               <p
                 className="font-khmer font-bold text-[#FDE68A] leading-[1.62] py-0.5 break-words"
-                style={{ fontSize: 'clamp(9.2px, 2.6vw, 11px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)' }}
+                style={{ fontSize: 'clamp(11px, 3.12vw, 13.2px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)' }}
               >
                 {tr(language, 'រកឃើញរសជាតិដើមខ្មែរ គ្រប់ខេត្ត', 'Discover authentic Khmer flavors', '探索正宗高棉风味')}
               </p>
@@ -489,7 +461,7 @@ export const FoodView: React.FC = () => {
               {renderCategoryIcon('all', 'w-6 h-6 min-[360px]:w-7 min-[360px]:h-7 drop-shadow-xs')}
               <span
                 className="font-khmer font-extrabold leading-[1.75] pt-0.5 pb-1 tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full overflow-visible"
-                style={{ fontSize: 'clamp(9.2px, 2.55vw, 12.5px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
+                style={{ fontSize: 'clamp(11px, 3.06vw, 15px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
                 {tr(language, 'គ្រប់មុខម្ហូប', 'All Dishes', '全部美食')}
               </span>
@@ -520,7 +492,7 @@ export const FoodView: React.FC = () => {
               {renderCategoryIcon('samlor', 'w-6 h-6 min-[360px]:w-7 min-[360px]:h-7 drop-shadow-xs')}
               <span
                 className="font-khmer font-extrabold leading-[1.75] pt-0.5 pb-1 tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full overflow-visible"
-                style={{ fontSize: 'clamp(10px, 2.75vw, 13px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
+                style={{ fontSize: 'clamp(12px, 3.3vw, 15.6px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
                 {tr(language, 'សម្ល', 'Soups & Curries', '高棉汤羹')}
               </span>
@@ -551,7 +523,7 @@ export const FoodView: React.FC = () => {
               {renderCategoryIcon('cha', 'w-6 h-6 min-[360px]:w-7 min-[360px]:h-7 drop-shadow-xs')}
               <span
                 className="font-khmer font-extrabold leading-[1.75] pt-0.5 pb-1 tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full overflow-visible"
-                style={{ fontSize: 'clamp(9.5px, 2.65vw, 12.5px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
+                style={{ fontSize: 'clamp(11.4px, 3.18vw, 15px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
                 {tr(language, 'អាំង/ចៀន', 'Grilled & Fried', '烧烤/煎炸')}
               </span>
@@ -582,7 +554,7 @@ export const FoodView: React.FC = () => {
               {renderCategoryIcon('bong_aem', 'w-6 h-6 min-[360px]:w-7 min-[360px]:h-7 drop-shadow-xs')}
               <span
                 className="font-khmer font-extrabold leading-[1.75] pt-0.5 pb-1 tracking-tight px-0.5 text-center break-words whitespace-normal max-w-full overflow-visible"
-                style={{ fontSize: 'clamp(9px, 2.5vw, 12px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
+                style={{ fontSize: 'clamp(10.8px, 3vw, 14.4px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
               >
                 {tr(language, 'បង្អែម/ភេសជ្ជៈ', 'Desserts & Drinks', '甜品/饮品')}
               </span>

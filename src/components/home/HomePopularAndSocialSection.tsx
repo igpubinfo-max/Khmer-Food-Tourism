@@ -165,7 +165,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
               </svg>
               <h3
                 className="font-khmer font-extrabold text-[#0F172A] leading-[1.68] py-0.5 break-words"
-                style={{ fontSize: 'clamp(13px, 3.6vw, 16px)' }}
+                style={{ fontSize: 'clamp(15.6px, 4.32vw, 19.2px)' }}
               >
                 {tr(language, 'ម្ហូបពេញនិយមនៅកម្ពុជា', 'Popular Dishes in Cambodia', '柬埔寨热门美食')}
               </h3>
@@ -238,7 +238,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
                   <div className="absolute inset-x-1 bottom-1.5 text-center">
                     <span
                       className="font-khmer font-extrabold text-white leading-[1.72] py-0.5 line-clamp-1 block"
-                      style={{ fontSize: 'clamp(10.5px, 2.9vw, 13.5px)', textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}
+                      style={{ fontSize: 'clamp(12.6px, 3.48vw, 16.2px)', textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}
                     >
                       {displayTitle}
                     </span>
@@ -271,13 +271,13 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
             <div className="min-w-0 flex-1">
               <div
                 className="font-khmer font-extrabold text-[#0F291E] leading-[1.68] py-0.5 break-words"
-                style={{ fontSize: 'clamp(11.5px, 3.1vw, 13.5px)' }}
+                style={{ fontSize: 'clamp(13.8px, 3.72vw, 16.2px)' }}
               >
                 {tr(language, 'ម្ហូបសុខភាព', 'Healthy Food', '健康养生美食')}
               </div>
               <div
                 className="font-khmer font-bold text-[#1E4620]/95 leading-[1.65] py-0.5 break-words line-clamp-2"
-                style={{ fontSize: 'clamp(9.5px, 2.6vw, 11px)' }}
+                style={{ fontSize: 'clamp(11.4px, 3.12vw, 13.2px)' }}
               >
                 {tr(language, 'ជ្រើសរើសម្ហូបបំប៉នសុខភាព', 'Nutritious guide', '精选营养健康餐')}
               </div>
@@ -313,7 +313,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
             <div className="min-w-0 flex-1">
               <div
                 className="font-khmer font-extrabold text-[#0F172A] leading-[1.68] py-0.5 break-words"
-                style={{ fontSize: 'clamp(11.5px, 3.1vw, 13.5px)' }}
+                style={{ fontSize: 'clamp(13.8px, 3.72vw, 16.2px)' }}
               >
                 {tr(language, 'ជំនួយការ AI ម្ហូបអាហារ', 'AI Food Assistant', 'AI 美食助手')}
               </div>
@@ -400,7 +400,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
 
             <h3
               className="font-khmer font-extrabold text-white leading-[1.68] py-0.5 break-words"
-              style={{ fontSize: 'clamp(11px, 3.1vw, 14px)' }}
+              style={{ fontSize: 'clamp(13.2px, 3.72vw, 16.8px)' }}
             >
               {tr(
                 language,

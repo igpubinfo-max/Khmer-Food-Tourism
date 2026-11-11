@@ -584,7 +584,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                   {card.icon}
                   <span
                     className="font-khmer font-extrabold leading-[1.65] py-0.5 text-center break-words whitespace-normal max-w-full"
-                    style={{ fontSize: 'clamp(9.2px, 2.5vw, 11.5px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
+                    style={{ fontSize: 'clamp(11px, 3vw, 13.8px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.25)' }}
                   >
                     {card.label}
                   </span>

@@ -75,7 +75,7 @@ export const BottomNav: React.FC = () => {
                 <Icon className="w-[18px] h-[18px] min-[360px]:w-[19px] min-[360px]:h-[19px] shrink-0" />
               </div>
               <span
-                style={{ fontSize: 'clamp(8.5px, 2.35vw, 11.5px)' }}
+                style={{ fontSize: 'clamp(10.2px, 2.82vw, 13.8px)' }}
                 className={`mt-0.5 leading-[1.72] pt-0.5 pb-1 text-center max-w-full tracking-tight font-khmer whitespace-nowrap overflow-visible ${
                   isActive ? 'font-extrabold text-amber-300' : 'font-medium text-slate-400 group-hover:text-slate-200'
                 }`}

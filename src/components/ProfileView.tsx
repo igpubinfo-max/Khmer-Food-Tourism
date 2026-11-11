@@ -894,7 +894,7 @@ export const ProfileView: React.FC = () => {
   ) : null;
 
     return (
-    <div className="max-w-md md:max-w-5xl lg:max-w-6xl mx-auto w-full px-3 sm:px-5 py-3.5 space-y-3.5 pb-8 bg-[#F8FAFC] text-slate-900">
+    <div className="max-w-md md:max-w-5xl lg:max-w-6xl mx-auto w-full min-h-full px-3 sm:px-5 py-3.5 space-y-3.5 pb-8 bg-[#1E293B] text-slate-900">
       {/* User Header Profile Card */}
       <div className="shrink-0 p-4 rounded-[24px] bg-white border border-slate-200/90 shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
         {currentUser ? (
@@ -985,7 +985,7 @@ export const ProfileView: React.FC = () => {
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <h2 className="font-moul text-base sm:text-lg text-slate-900 dark:text-white leading-snug tracking-wide break-words">
+                      <h2 className="font-moul text-base sm:text-lg text-slate-900 leading-snug tracking-wide break-words">
                         {currentUser.name}
                       </h2>
                       <button
@@ -1082,7 +1082,7 @@ export const ProfileView: React.FC = () => {
               <UserIcon className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-base text-[#0F172A] dark:text-white">
+              <h3 className="font-bold text-base text-[#0F172A]">
                 {tr(language, 'សូមចូលគណនីរបស់អ្នក', 'Please Sign In', '请登录您的账户')}
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
@@ -2421,7 +2421,7 @@ export const ProfileView: React.FC = () => {
       {!isAdmin && activeSubTab === 'bookmarks' && (
         <div className="space-y-4">
           {savedFoods.length === 0 && savedDestinations.length === 0 && savedRestaurants.length === 0 ? (
-            <div className="text-center py-8 text-slate-400 text-xs space-y-1 font-khmer">
+            <div className="text-center py-8 text-slate-300 text-xs space-y-1 font-khmer">
               <Heart className="w-8 h-8 mx-auto text-slate-300" />
               <p>{isKm ? 'មិនទាន់មានមុខម្ហូប ឬកន្លែងកម្សាន្តដែលបានរក្សាទុកនៅឡើយទេ' : 'No saved items yet'}</p>
             </div>

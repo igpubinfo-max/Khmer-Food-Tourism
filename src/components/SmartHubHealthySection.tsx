@@ -172,7 +172,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
                   </span>
                   <span
                     className="relative z-10 font-khmer font-extrabold leading-[1.68] text-center break-words whitespace-normal w-full px-0.5 text-white"
-                    style={{ fontSize: 'clamp(9.5px, 2.7vw, 11.5px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
+                    style={{ fontSize: 'clamp(11.4px, 3.24vw, 13.8px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
                   >
                     {tr(language, def.labelKh, def.labelEn, def.labelZh)}
                   </span>
@@ -265,7 +265,7 @@ export const SmartHubHealthySection: React.FC<Props> = ({ foods, onViewAll, onOp
                 </span>
                 <span
                   className="relative z-10 font-khmer font-extrabold leading-[1.68] text-center break-words whitespace-normal w-full px-0.5 text-white"
-                  style={{ fontSize: 'clamp(9.5px, 2.7vw, 11.5px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
+                  style={{ fontSize: 'clamp(11.4px, 3.24vw, 13.8px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
                 >
                   {tr(language, def.labelKh, def.labelEn, def.labelZh)}
                 </span>
