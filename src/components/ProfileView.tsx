@@ -450,8 +450,8 @@ export const ProfileView: React.FC = () => {
               >
                 <span className="text-base">📈</span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">{isKm ? 'ស្ថិតិ Live Analytics' : 'Live Analytics'}</div>
-                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ ចុចមើលចំនួនអ្នកមើល & Call' : '✓ Tap to view stats'}</div>
+                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">{tr(language, 'ស្ថិតិ Live Analytics', 'Live Analytics', '实时访问统计')}</div>
+                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{tr(language, '✓ ចុចមើលចំនួនអ្នកមើល & Call', '✓ Tap to view stats', '✓ 点击查看浏览与致电')}</div>
                 </div>
               </button>
 
@@ -465,8 +465,8 @@ export const ProfileView: React.FC = () => {
               >
                 <span className="text-base">👑</span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">{isKm ? 'ផ្លាកសញ្ញា Golden VIP' : 'Golden VIP Badge'}</div>
-                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ បង្ហាញលើ Profile & ហាង' : '✓ Active on Profile & Shop'}</div>
+                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">{tr(language, 'ផ្លាកសញ្ញា Golden VIP', 'Golden VIP Badge', '黄金 VIP 认证标识')}</div>
+                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{tr(language, '✓ បង្ហាញលើ Profile & ហាង', '✓ Active on Profile & Shop', '✓ 在个人主页与店铺展示')}</div>
                 </div>
               </button>
 
@@ -490,8 +490,8 @@ export const ProfileView: React.FC = () => {
               >
                 <span className="text-base">📸</span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">{isKm ? 'រូបថតហាងផ្លូវការ HD' : 'Official HD Shop Photo'}</div>
-                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ ចុចកែប្រែរូបតំណាងហាង' : '✓ Tap to update shop photo'}</div>
+                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">{tr(language, 'រូបថតហាងផ្លូវការ HD', 'Official HD Shop Photo', '官方高清店铺图片')}</div>
+                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{tr(language, '✓ ចុចកែប្រែរូបតំណាងហាង', '✓ Tap to update shop photo', '✓ 点击更新店铺照片')}</div>
                 </div>
               </button>
 
@@ -513,8 +513,8 @@ export const ProfileView: React.FC = () => {
               >
                 <span className="text-base">🎥</span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">{isKm ? 'វីដេអូផ្សព្វផ្សាយហាង' : 'Video Promotion'}</div>
-                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ ចុចភ្ជាប់វីដេអូ TikTok & FB' : '✓ Tap to manage Reels'}</div>
+                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">{tr(language, 'វីដេអូផ្សព្វផ្សាយហាង', 'Video Promotion', '店铺短视频推广')}</div>
+                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{tr(language, '✓ ចុចភ្ជាប់វីដេអូ TikTok & FB', '✓ Tap to manage Reels', '✓ 点击绑定 TikTok 与 FB 视频')}</div>
                 </div>
               </button>
 
@@ -526,14 +526,14 @@ export const ProfileView: React.FC = () => {
                 <span className="text-base">🗺️</span>
                 <div className="min-w-0 flex-1">
                   <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">
-                    {isKm ? 'ស្វែងរកទីតាំងលើ Google Maps (Places API)' : 'Google Maps Places Search (VIP Access)'}
+                    {tr(language, 'ស្វែងរកទីតាំងលើ Google Maps (Places API)', 'Google Maps Places Search (VIP Access)', 'Google 地图地点搜索 (VIP 专属)')}
                   </div>
                   <div className="text-[9px] text-emerald-700 dark:text-emerald-300 font-bold">
-                    {isKm ? '✓ ស្វែងរកហាងកាហ្វេ ភោជនីយដ្ឋាន & តំបន់ទេសចរណ៍ទូទាំងកម្ពុជា' : '✓ Search cafés, restaurants & places across Cambodia'}
+                    {tr(language, '✓ ស្វែងរកហាងកាហ្វេ ភោជនីយដ្ឋាន & តំបន់ទេសចរណ៍ទូទាំងកម្ពុជា', '✓ Search cafés, restaurants & places across Cambodia', '✓ 搜索全柬埔寨咖啡馆、餐厅与旅游景点')}
                   </div>
                 </div>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-black shrink-0">
-                  {isKm ? 'បើកស្វែងរក' : 'Search'}
+                  {tr(language, 'បើកស្វែងរក', 'Search', '搜索')}
                 </span>
               </button>
             </div>

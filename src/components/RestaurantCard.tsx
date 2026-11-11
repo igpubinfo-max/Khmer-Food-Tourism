@@ -222,9 +222,9 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
           language={language}
           coverUrl={resolvedShopPhotoUrl}
           fallbackIcon={Store}
-          title={restaurant.nameKh || loc.name}
+          title={loc.name || restaurant.nameKh}
           province={loc.province}
-          address={loc.address || restaurant.addressKh || restaurant.addressEn}
+          address={loc.address || restaurant.addressEn || restaurant.addressKh}
           description={
             loc.description ||
             (language === 'km' && restaurant.signatureDishesKh?.length
@@ -326,9 +326,9 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
               <div className="flex items-start justify-between gap-1.5">
                 <div className="min-w-0 flex-1">
                   <h4 className="font-extrabold text-[14.5px] sm:text-[15.5px] text-slate-900 leading-[1.65] line-clamp-2 break-words">
-                    {restaurant.nameKh || loc.name}
+                    {loc.name || restaurant.nameKh}
                   </h4>
-                  {restaurant.nameEn && restaurant.nameEn !== restaurant.nameKh && (
+                  {language === 'km' && restaurant.nameEn && restaurant.nameEn !== restaurant.nameKh && (
                     <p className="text-xs font-bold text-slate-500 line-clamp-1 break-words mt-0.5 leading-[1.5]">
                       {restaurant.nameEn}
                     </p>
@@ -418,9 +418,9 @@ const RestaurantCardView: React.FC<RestaurantCardViewProps> = React.memo(
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-1.5 min-w-0 flex-wrap">
             <h4 className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 leading-[1.65] line-clamp-2 break-words">
-              {restaurant.nameKh || loc.name}
+              {loc.name || restaurant.nameKh}
             </h4>
-            {restaurant.nameEn && restaurant.nameEn !== restaurant.nameKh && (
+            {language === 'km' && restaurant.nameEn && restaurant.nameEn !== restaurant.nameKh && (
               <span className="text-xs font-semibold text-slate-500 line-clamp-1 break-words">
                 {restaurant.nameEn}
               </span>

@@ -219,13 +219,33 @@
   line-height: 1.68;
 }
 
-.truncate,
-.line-clamp-1,
-.line-clamp-2,
-.line-clamp-3 {
+.truncate {
   line-height: 1.74 !important;
   padding-top: 0.1em;
   padding-bottom: 0.2em;
+}
+
+.line-clamp-1,
+.line-clamp-2,
+.line-clamp-3 {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  line-height: 1.65 !important;
+  padding-top: 0.08em;
+  padding-bottom: 0.14em;
+}
+
+.line-clamp-1 {
+  -webkit-line-clamp: 1 !important;
+}
+
+.line-clamp-2 {
+  -webkit-line-clamp: 2 !important;
+}
+
+.line-clamp-3 {
+  -webkit-line-clamp: 3 !important;
 }
 
 /* Fluid base typography: adapts smoothly across narrow foldable cover screens (280px–359px), standard phones (360px–539px), unfolded foldables (540px–900px), and tablets */

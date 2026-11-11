@@ -101,12 +101,18 @@ export const UpgradeVipModal: React.FC = () => {
         titleEn: p.titleEn,
         days: p.durationDays,
         priceUsd: p.priceUsd,
-        badgeText: isKm ? (p.badgeKm || '១ ដងគត់ក្រោយសាកល្បង') : (p.badgeEn || 'Post-Trial Special'),
+        badgeText: tr(language, p.badgeKm || '១ ដងគត់ក្រោយសាកល្បង', p.badgeEn || 'Post-Trial Special', '试用后专属特惠'),
         isWinbackPromo: true,
       });
     }
     for (const p of [consumerCatalog.monthlyPlan, consumerCatalog.quarterlyPlan, consumerCatalog.yearlyPlan]) {
       if (!p.enabled) continue;
+      const zhBadge =
+        p.planId === 'consumer_90d'
+          ? '超值季度'
+          : p.planId === 'consumer_365d'
+          ? '年度最划算'
+          : '月度体验';
       list.push({
         id: p.durationDays >= 300 ? 'annual' : 'quarterly',
         planId: p.planId,
@@ -114,12 +120,12 @@ export const UpgradeVipModal: React.FC = () => {
         titleEn: p.titleEn,
         days: p.durationDays,
         priceUsd: p.priceUsd,
-        badgeText: isKm ? p.badgeKm : p.badgeEn,
+        badgeText: tr(language, p.badgeKm, p.badgeEn, zhBadge),
         isPopular: p.planId === 'consumer_90d' || p.planId === 'consumer_365d',
       });
     }
     return list;
-  }, [consumerCatalog, canClaimWinback099, isKm]);
+  }, [consumerCatalog, canClaimWinback099, language]);
 
   const dynamicBenefits = useMemo(() => getDynamicVipBenefits(appSettings), [appSettings]);
   const isVipConfigValid = useMemo(

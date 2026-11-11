@@ -2098,7 +2098,10 @@ function computeLocalizedFood(food: FoodItem, lang: Language) {
 
   if (lang === 'en') {
     const diffEn = formatDifficultyByLang(food.difficulty, 'en');
-    const cleanEnName = sanitizeStrictLanguageText(food.nameEn, 'en');
+    const cleanEnName = sanitizeStrictLanguageText(
+      (food.nameEn || '').replace(/\s*[\(（][^\)）]*[\)）]\s*/g, ' '),
+      'en'
+    );
     const conciseEn = toConciseSummary(food.descriptionEn, 'en');
     return {
       name: cleanEnName,

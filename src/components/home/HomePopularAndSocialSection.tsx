@@ -192,7 +192,34 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
                   : food.id === 'food-36' || food.id === 'food-6'
                   ? 'គុយទាវខ្មែរ'
                   : food.nameKh.replace(/\s*\([^)]*\)\s*/g, '').trim() || food.nameKh;
-              const displayTitle = language === 'km' ? shortKhName : loc.name;
+              const shortEnName = (() => {
+                let s = (loc.name || '')
+                  .replace(/\s*[\(（][^\)）]*[\)）]\s*/g, ' ')
+                  .replace(/\s+/g, ' ')
+                  .trim();
+                if (s.length > 22) {
+                  s = s
+                    .replace(
+                      /^(?:(?:Authentic|Traditional|Cambodian|Khmer|Royal|Classic|Savory|Crispy|Homestyle|Street-Style|Siem Reap|Battambang|Kampot|Kep|Kulen Mountain|Phnom Penh|Preah Dak Village)\s+)+/i,
+                      ''
+                    )
+                    .trim();
+                }
+                if (s.length > 22 && /\s+(?:with|in|topped with|served with)\s+/i.test(s)) {
+                  const head = s.split(/\s+(?:with|in|topped with|served with)\s+/i)[0].trim();
+                  if (head.length >= 8) s = head;
+                }
+                return s || loc.name;
+              })();
+              const shortZhName = (loc.name || '')
+                .replace(/\s*[\(（][^\)）]*[\)）]\s*/g, '')
+                .trim();
+              const displayTitle =
+                language === 'km'
+                  ? shortKhName
+                  : language === 'zh'
+                  ? shortZhName || loc.name
+                  : shortEnName;
 
               return (
                 <div
@@ -208,12 +235,12 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
                     onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  {/* Bottom Dark Gradient Overlay for Crisp White Khmer Label */}
+                  {/* Bottom Dark Gradient Overlay for Crisp White Label */}
                   <div
                     className="pointer-events-none absolute inset-0"
                     style={{
                       background:
-                        'linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0) 42%, rgba(0,0,0,0.82) 100%)',
+                        'linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.84) 100%)',
                     }}
                   />
 
@@ -234,11 +261,20 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
                     <Heart className={`w-4 h-4 ${isFav ? 'fill-rose-500 text-rose-500' : 'text-white'}`} />
                   </button>
 
-                  {/* Bottom Centered Dish Title */}
-                  <div className="absolute inset-x-1 bottom-1.5 text-center">
+                  {/* Bottom Centered Dish Title (Strictly confined to bottom third, max 2 lines) */}
+                  <div className="pointer-events-none absolute inset-x-1 bottom-1.5 max-h-[42%] flex items-end justify-center text-center overflow-hidden">
                     <span
-                      className="font-khmer font-extrabold text-white leading-[1.72] py-0.5 line-clamp-1 block"
-                      style={{ fontSize: 'clamp(12.6px, 3.48vw, 16.2px)', textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}
+                      className="font-khmer font-extrabold text-white line-clamp-2 break-words w-full"
+                      style={{
+                        fontSize:
+                          language === 'en'
+                            ? 'clamp(10.8px, 2.95vw, 13.5px)'
+                            : language === 'zh'
+                            ? 'clamp(11.5px, 3.15vw, 14.5px)'
+                            : 'clamp(11.8px, 3.25vw, 15px)',
+                        lineHeight: language === 'km' ? 1.52 : 1.24,
+                        textShadow: '0 1.5px 4px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.65)',
+                      }}
                     >
                       {displayTitle}
                     </span>

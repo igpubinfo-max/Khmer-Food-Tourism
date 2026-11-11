@@ -1302,7 +1302,7 @@ export const HotelView: React.FC = () => {
                           <div>
                             <div className="flex items-start justify-between gap-1.5">
                               <h4 className="font-extrabold text-sm sm:text-[15px] text-slate-900 leading-[1.6] line-clamp-2 break-words">
-                                {hotel.nameKh || loc.name}
+                                {loc.name || hotel.nameKh}
                               </h4>
                               {isAdmin && (
                                 <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -1348,7 +1348,7 @@ export const HotelView: React.FC = () => {
                               </span>
                               <span className="text-slate-300">•</span>
                               <span className="text-emerald-700 font-bold truncate">
-                                {loc.province || hotel.provinceKh}
+                                {loc.province || hotel.provinceEn || hotel.provinceKh}
                               </span>
                             </div>
 
@@ -1458,9 +1458,9 @@ export const HotelView: React.FC = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-baseline gap-1.5 min-w-0 flex-wrap">
                             <h4 className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 leading-[1.65] line-clamp-2 break-words">
-                              {hotel.nameKh || loc.name}
+                              {loc.name || hotel.nameKh}
                             </h4>
-                            {hotel.nameEn && hotel.nameEn !== hotel.nameKh && (
+                            {language === 'km' && hotel.nameEn && hotel.nameEn !== hotel.nameKh && (
                               <span className="text-xs font-semibold text-slate-500 line-clamp-1 break-words">
                                 {hotel.nameEn}
                               </span>

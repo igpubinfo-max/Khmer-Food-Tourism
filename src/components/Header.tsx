@@ -95,7 +95,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
             const mainEl = document.getElementById('kft-main-scroll');
             if (mainEl) mainEl.scrollTop = 0;
           }}
-          className="flex items-center gap-2.5 cursor-pointer group min-w-0 flex-1"
+          className="flex items-center gap-2 cursor-pointer group min-w-0 flex-1"
         >
           <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-700 p-[1.5px] flex items-center justify-center shadow-md group-hover:scale-105 transition shrink-0">
             <img
@@ -112,14 +112,20 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
             />
           </div>
           <div className="min-w-0 flex-1 pt-0.5">
-            <h1 className="font-moul text-[11.5px] min-[360px]:text-[12px] sm:text-[13px] tracking-wide text-white leading-[1.68] pt-0.5 pb-0.5 break-words">
+            <h1
+              className={`${
+                language === 'km'
+                  ? 'font-moul text-[11px] min-[360px]:text-[11.5px] sm:text-[13px] leading-[1.65]'
+                  : 'font-khmer font-extrabold text-[12px] min-[360px]:text-[13px] sm:text-[14.5px] leading-[1.28]'
+              } tracking-tight text-white pt-0.5 pb-0.5 line-clamp-2 break-words`}
+            >
               {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨风味与旅游')}
             </h1>
-            <p className="text-[10px] text-amber-300 font-semibold leading-[1.55] pt-0.5 pb-0.5 break-words">
+            <p className="text-[9.5px] min-[360px]:text-[10px] text-amber-300 font-semibold leading-[1.35] pt-0.5 pb-0.5 line-clamp-1">
               {tr(
                 language,
                 'ស្វែងយល់អាហារ • ទីតាំង • បទពិសោធន៍',
-                'Discover Food • Places • Experiences',
+                'Food • Places • Experiences',
                 '探索美食 • 景点 • 文化体验'
               )}
             </p>
@@ -169,21 +175,35 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
             )}
           </button>
 
-          {/* Language Toggle Pill: ខ្មែរ / EN / 中文 */}
-          <button
-            type="button"
-            onClick={() =>
-              setLanguage(language === 'km' ? 'en' : language === 'en' ? 'zh' : 'km')
-            }
-            className="px-2 h-9 rounded-xl bg-white/15 hover:bg-white/25 text-[11px] font-extrabold tracking-wide flex items-center gap-1 border border-white/25 transition active:scale-95 cursor-pointer shrink-0"
+          {/* Language Switcher Pill: ខ្មែរ / EN / 中文 (Direct tap on each language) */}
+          <div
+            className="h-9 px-1 rounded-xl bg-white/15 border border-white/25 text-[11px] font-extrabold tracking-wide inline-flex items-center gap-0.5 shrink-0"
             title="ប្តូរភាសា / Switch Language / 切换语言 (ខ្មែរ • EN • 中文)"
           >
-            <span className={language === 'km' ? 'text-amber-300' : 'text-white/70'}>ខ្មែរ</span>
-            <span className="text-white/30">/</span>
-            <span className={language === 'en' ? 'text-amber-300' : 'text-white/70'}>EN</span>
-            <span className="text-white/30">/</span>
-            <span className={language === 'zh' ? 'text-amber-300' : 'text-white/70'}>中文</span>
-          </button>
+            {(
+              [
+                { code: 'km', label: 'ខ្មែរ' },
+                { code: 'en', label: 'EN' },
+                { code: 'zh', label: '中文' },
+              ] as const
+            ).map((lang, idx) => {
+              const active = language === lang.code;
+              return (
+                <React.Fragment key={lang.code}>
+                  {idx > 0 && <span className="text-white/30 select-none">/</span>}
+                  <button
+                    type="button"
+                    onClick={() => setLanguage(lang.code)}
+                    className={`px-1.5 py-0.5 rounded-lg transition active:scale-95 cursor-pointer ${
+                      active ? 'text-amber-300 bg-black/25' : 'text-white/75 hover:text-white'
+                    }`}
+                  >
+                    {lang.label}
+                  </button>
+                </React.Fragment>
+              );
+            })}
+          </div>
 
           {/* Overflow Menu Button (Smart Menu, QR, Install, Support — No Admin Login or Duplicate Bell) */}
           <div className="relative" ref={menuRef}>

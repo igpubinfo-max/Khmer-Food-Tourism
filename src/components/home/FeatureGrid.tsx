@@ -85,18 +85,18 @@ const FeatureGridImpl: React.FC<Props> = ({
             id={`kft-feature-${it.id}-btn`}
             type="button"
             onClick={it.onClick}
-            className="group relative w-full min-w-0 aspect-[2/1] bg-transparent border-0 p-0 transition-transform active:scale-95 cursor-pointer select-none flex items-center justify-center"
+            className="group relative w-full min-w-0 aspect-[5/3] bg-transparent border-0 p-0 transition-transform active:scale-95 cursor-pointer select-none flex items-center justify-center"
           >
             <img
               src={it.imageSrc}
               alt={it.label}
               loading="eager"
               decoding="async"
-              className="w-full h-full object-contain bg-transparent select-none pointer-events-none drop-shadow-[0_4px_10px_rgba(15,23,42,0.18)] group-hover:brightness-[1.03] transition-all duration-150"
+              className="w-full h-full object-fill bg-transparent select-none pointer-events-none drop-shadow-[0_4px_10px_rgba(15,23,42,0.18)] group-hover:brightness-[1.03] transition-all duration-150"
             />
 
             {/* Centered Bold White Label Inside Button Directly Below the 3D Illustration */}
-            <div className="pointer-events-none absolute inset-x-[5%] top-[64%] bottom-[8.5%] flex items-center justify-center px-0.5 overflow-visible">
+            <div className="pointer-events-none absolute inset-x-[4.5%] top-[63%] bottom-[8%] flex items-center justify-center px-0.5 overflow-visible">
               <span
                 className="font-khmer font-extrabold text-white text-center leading-[1.35] tracking-tight whitespace-nowrap max-w-full"
                 style={{
