@@ -548,21 +548,34 @@ export const AiTripPlannerModal: React.FC = () => {
         </div>
 
         {/* 3-Mode Switcher Bar: AI Food Advisor | VIP Special Menu | AI Route Planner */}
-        <div className="grid grid-cols-3 p-1.5 bg-[#1E293B] border-b border-slate-700/80 gap-1.5 shrink-0 font-khmer shadow-[0_2px_10px_rgba(15,23,42,0.16)]">
+        <div className="grid grid-cols-3 px-2.5 sm:px-3.5 py-2.5 bg-[#1E293B] border-b border-slate-700/80 gap-2 sm:gap-3 shrink-0 font-khmer shadow-[0_2px_10px_rgba(15,23,42,0.16)]">
           <button
             type="button"
             onClick={() => setAssistantTab('food_advisor')}
-            className={`py-2 px-1 rounded-xl text-[10.5px] sm:text-[11px] font-extrabold transition flex flex-col items-center justify-center gap-0.5 cursor-pointer border min-w-0 ${
-              assistantTab === 'food_advisor'
-                ? 'bg-emerald-50 text-[#064E3B] border-emerald-400 shadow-2xs'
-                : 'bg-white/95 text-slate-700 border-slate-200/80 hover:bg-white hover:text-slate-900'
-            }`}
+            aria-pressed={assistantTab === 'food_advisor'}
+            className="group flex flex-col items-center justify-start gap-1 min-w-0 cursor-pointer transition-transform active:scale-95 focus:outline-none"
           >
-            <span className="flex items-center justify-center gap-1 flex-wrap text-center leading-[1.6]">
-              <Utensils className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span className="break-words">{tr(language, 'រើសម្ហូបឆ្លាតវៃ', 'AI Food', '智能选餐')}</span>
+            <div className="w-full aspect-[1024/536] flex items-center justify-center">
+              <img
+                src="/welcome/ai-category-food.png"
+                alt={tr(language, 'រើសម្ហូបឆ្លាតវៃ', 'AI Food', '智能选餐')}
+                decoding="async"
+                draggable={false}
+                className={`w-full h-full object-contain select-none pointer-events-none transition-all duration-200 ${
+                  assistantTab === 'food_advisor'
+                    ? 'scale-[1.03] drop-shadow-[0_4px_12px_rgba(250,204,21,0.45)]'
+                    : 'opacity-90 group-hover:opacity-100 drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)]'
+                }`}
+              />
+            </div>
+            <span
+              className={`text-[11px] min-[360px]:text-xs sm:text-[13px] font-extrabold leading-[1.65] text-center break-words w-full transition-colors ${
+                assistantTab === 'food_advisor' ? 'text-amber-300' : 'text-white group-hover:text-amber-200'
+              }`}
+            >
+              {tr(language, 'រើសម្ហូបឆ្លាតវៃ', 'AI Food', '智能选餐')}
             </span>
-            <span className="text-[9px] font-bold text-emerald-700 leading-[1.4]">
+            <span className="text-[9.5px] sm:text-[10px] font-bold text-emerald-300 leading-[1.4] text-center break-words">
               {tr(language, 'ឥតគិតថ្លៃ + VIP', 'Free + VIP', '免费 + VIP')}
             </span>
           </button>
@@ -570,17 +583,30 @@ export const AiTripPlannerModal: React.FC = () => {
           <button
             type="button"
             onClick={() => setAssistantTab('healthy_vip')}
-            className={`py-2 px-1 rounded-xl text-[10.5px] sm:text-[11px] font-extrabold transition flex flex-col items-center justify-center gap-0.5 cursor-pointer border min-w-0 ${
-              assistantTab === 'healthy_vip'
-                ? 'bg-emerald-50 text-[#064E3B] border-emerald-400 shadow-2xs'
-                : 'bg-white/95 text-slate-700 border-slate-200/80 hover:bg-white hover:text-slate-900'
-            }`}
+            aria-pressed={assistantTab === 'healthy_vip'}
+            className="group flex flex-col items-center justify-start gap-1 min-w-0 cursor-pointer transition-transform active:scale-95 focus:outline-none"
           >
-            <span className="flex items-center justify-center gap-1 flex-wrap text-center leading-[1.6]">
-              <ChefHat className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-              <span className="break-words">{tr(language, 'ម្ហូបពិសេស', 'Special Menu', '特色菜单')}</span>
+            <div className="w-full aspect-[1024/536] flex items-center justify-center">
+              <img
+                src="/welcome/ai-category-special-menu.png"
+                alt={tr(language, 'ម្ហូបពិសេស', 'Special Menu', '特色菜单')}
+                decoding="async"
+                draggable={false}
+                className={`w-full h-full object-contain select-none pointer-events-none transition-all duration-200 ${
+                  assistantTab === 'healthy_vip'
+                    ? 'scale-[1.03] drop-shadow-[0_4px_12px_rgba(250,204,21,0.45)]'
+                    : 'opacity-90 group-hover:opacity-100 drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)]'
+                }`}
+              />
+            </div>
+            <span
+              className={`text-[11px] min-[360px]:text-xs sm:text-[13px] font-extrabold leading-[1.65] text-center break-words w-full transition-colors ${
+                assistantTab === 'healthy_vip' ? 'text-amber-300' : 'text-white group-hover:text-amber-200'
+              }`}
+            >
+              {tr(language, 'ម្ហូបពិសេស', 'Special Menu', '特色菜单')}
             </span>
-            <span className="text-[9px] font-black text-amber-600 inline-flex items-center gap-0.5 leading-[1.4]">
+            <span className="text-[9.5px] sm:text-[10px] font-black text-amber-400 inline-flex items-center justify-center gap-0.5 leading-[1.4]">
               <span>👑</span>
               <span>VIP</span>
             </span>
@@ -589,17 +615,30 @@ export const AiTripPlannerModal: React.FC = () => {
           <button
             type="button"
             onClick={() => setAssistantTab('route_planner')}
-            className={`py-2 px-1 rounded-xl text-[10.5px] sm:text-[11px] font-extrabold transition flex flex-col items-center justify-center gap-0.5 cursor-pointer border min-w-0 ${
-              assistantTab === 'route_planner'
-                ? 'bg-emerald-50 text-[#064E3B] border-emerald-400 shadow-2xs'
-                : 'bg-white/95 text-slate-700 border-slate-200/80 hover:bg-white hover:text-slate-900'
-            }`}
+            aria-pressed={assistantTab === 'route_planner'}
+            className="group flex flex-col items-center justify-start gap-1 min-w-0 cursor-pointer transition-transform active:scale-95 focus:outline-none"
           >
-            <span className="flex items-center justify-center gap-1 flex-wrap text-center leading-[1.6]">
-              <Compass className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span className="break-words">{tr(language, 'ផែនការដើរលេង', 'Trip Planner', '行程规划')}</span>
+            <div className="w-full aspect-[1024/536] flex items-center justify-center">
+              <img
+                src="/welcome/ai-category-trip-planner.png"
+                alt={tr(language, 'ផែនការដើរលេង', 'Trip Planner', '行程规划')}
+                decoding="async"
+                draggable={false}
+                className={`w-full h-full object-contain select-none pointer-events-none transition-all duration-200 ${
+                  assistantTab === 'route_planner'
+                    ? 'scale-[1.03] drop-shadow-[0_4px_12px_rgba(250,204,21,0.45)]'
+                    : 'opacity-90 group-hover:opacity-100 drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)]'
+                }`}
+              />
+            </div>
+            <span
+              className={`text-[11px] min-[360px]:text-xs sm:text-[13px] font-extrabold leading-[1.65] text-center break-words w-full transition-colors ${
+                assistantTab === 'route_planner' ? 'text-amber-300' : 'text-white group-hover:text-amber-200'
+              }`}
+            >
+              {tr(language, 'ផែនការដើរលេង', 'Trip Planner', '行程规划')}
             </span>
-            <span className="text-[9px] font-black text-amber-600 leading-[1.4]">
+            <span className="text-[9.5px] sm:text-[10px] font-black text-amber-400 leading-[1.4] text-center break-words">
               {tr(language, '១ថ្ងៃឥតគិតថ្លៃ • VIP', '1d Free • VIP', '1日免费 • VIP')}
             </span>
           </button>

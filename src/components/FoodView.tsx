@@ -425,7 +425,7 @@ export const FoodView: React.FC = () => {
           </button>
         </div>
 
-        {/* 3. Four Premium PNG Category Buttons with Category Names Directly Below Each Image */}
+        {/* 3. Four Premium PNG Category Buttons with Category Names Inside Each Button */}
         <div
           style={{
             background: 'rgba(255, 255, 255, 0.96)',
@@ -433,9 +433,9 @@ export const FoodView: React.FC = () => {
             WebkitBackdropFilter: 'blur(10px)',
             boxShadow: '0 8px 22px rgba(15, 23, 42, 0.08)',
           }}
-          className="rounded-[24px] px-2.5 py-3 sm:px-3.5 sm:py-3.5 border border-white"
+          className="rounded-[24px] p-2 sm:p-3 border border-white"
         >
-          <div className="grid grid-cols-4 gap-2 min-[360px]:gap-2.5 sm:gap-3.5 items-start">
+          <div className="grid grid-cols-4 gap-1.5 min-[360px]:gap-2 sm:gap-3 items-stretch">
             {[
               {
                 id: 'all',
@@ -448,55 +448,61 @@ export const FoodView: React.FC = () => {
                 id: 'samlor',
                 imageSrc: '/categories/food_cat_samlor.png',
                 nameKh: 'សម្ល',
-                nameEn: 'Soups & Curries',
+                nameEn: 'Soups',
                 nameZh: '高棉汤羹',
               },
               {
                 id: 'cha',
                 imageSrc: '/categories/food_cat_cha.png',
                 nameKh: 'អាំង/ចៀន',
-                nameEn: 'Grilled & Fried',
+                nameEn: 'Grill/Fry',
                 nameZh: '烧烤/煎炸',
               },
               {
                 id: 'bong_aem',
                 imageSrc: '/categories/food_cat_dessert.png',
                 nameKh: 'បង្អែម/ភេសជ្ជៈ',
-                nameEn: 'Desserts & Drinks',
+                nameEn: 'Desserts',
                 nameZh: '甜品/饮品',
               },
             ].map((cat) => {
               const active = selectedCategory === cat.id;
               const label = tr(language, cat.nameKh, cat.nameEn, cat.nameZh);
+              const isLongKh = language === 'km' && cat.id === 'bong_aem';
               return (
                 <button
                   key={cat.id}
                   type="button"
                   onClick={() => setSelectedCategory(cat.id)}
                   aria-pressed={active}
-                  className="group flex flex-col items-center justify-start gap-1.5 w-full min-w-0 bg-transparent border-0 p-0 active:scale-95 transition-transform cursor-pointer select-none"
+                  className="group relative w-full aspect-[560/460] bg-transparent border-0 p-0 active:scale-95 transition-transform cursor-pointer select-none flex items-center justify-center"
                 >
-                  <div className="w-full aspect-[560/460] bg-transparent flex items-center justify-center relative transition-opacity duration-150">
-                    <img
-                      src={cat.imageSrc}
-                      alt={label}
-                      className={`w-full h-full object-contain bg-transparent select-none pointer-events-none transition-all duration-150 ${
-                        active
-                          ? 'drop-shadow-[0_6px_14px_rgba(21,128,61,0.42)] brightness-[1.03]'
-                          : 'drop-shadow-[0_4px_10px_rgba(15,23,42,0.15)] opacity-95 group-hover:opacity-100'
-                      }`}
-                      loading="eager"
-                      decoding="async"
-                    />
-                  </div>
-                  <span
-                    className={`font-khmer font-extrabold leading-[1.58] pt-0.5 px-0.5 text-center break-words whitespace-normal w-full transition-colors ${
-                      active ? 'text-[#15803D]' : 'text-[#0F172A] group-hover:text-[#15803D]'
+                  <img
+                    src={cat.imageSrc}
+                    alt={label}
+                    className={`w-full h-full object-contain bg-transparent select-none pointer-events-none transition-all duration-150 ${
+                      active
+                        ? 'drop-shadow-[0_6px_14px_rgba(21,128,61,0.45)] brightness-[1.03]'
+                        : 'drop-shadow-[0_4px_10px_rgba(15,23,42,0.16)] opacity-95 group-hover:opacity-100'
                     }`}
-                    style={{ fontSize: 'clamp(11px, 3.05vw, 14.4px)' }}
-                  >
-                    {label}
-                  </span>
+                    loading="eager"
+                    decoding="async"
+                  />
+                  {/* Centered Large Bold WHITE Label Inside Button Directly Below the Food Illustration */}
+                  <div className="pointer-events-none absolute inset-x-[5%] top-[69%] bottom-[6.5%] flex items-center justify-center px-0.5 overflow-visible">
+                    <span
+                      className="font-khmer font-extrabold text-white text-center leading-[1.35] tracking-tight whitespace-nowrap max-w-full"
+                      style={{
+                        fontSize: isLongKh
+                          ? 'clamp(9.6px, 2.65vw, 13.5px)'
+                          : 'clamp(11px, 3.05vw, 15px)',
+                        textShadow:
+                          '0 1.5px 3px rgba(0, 0, 0, 0.85), 0 0 8px rgba(0, 0, 0, 0.55)',
+                      }}
+                    >
+                      {label}
+                    </span>
+                  </div>
                 </button>
               );
             })}

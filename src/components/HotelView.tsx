@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
+import { AngkorHeroTopHeader } from './AngkorHeroTopHeader';
 import {
   TouristDestination,
   Restaurant,
@@ -37,6 +38,7 @@ import {
   SlidersHorizontal,
   LayoutGrid,
   Navigation,
+  Sparkles,
 } from 'lucide-react';
 import { ListingFeaturedCard } from './listing/ListingUI';
 import { normalizeKhmerSearchText } from '../services/googlePlacesService';
@@ -844,155 +846,134 @@ export const HotelView: React.FC = () => {
     }
   };
 
+  const primaryHotelCategoryButtons = [
+    {
+      id: 'all',
+      nameKh: 'ទាំងអស់',
+      nameEn: 'All Stays',
+      nameZh: '全部住宿',
+      icon: LayoutGrid,
+      gradient: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
+      shadow: '0 5px 12px rgba(217, 78, 8, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
+      activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(217, 78, 8, 0.45)',
+    },
+    {
+      id: 'hotel_stay',
+      nameKh: 'សណ្ឋាគារ',
+      nameEn: 'Hotels',
+      nameZh: '星级酒店',
+      icon: BedDouble,
+      gradient: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
+      shadow: '0 5px 12px rgba(13, 102, 48, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
+      activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(13, 102, 48, 0.45)',
+    },
+    {
+      id: 'verified_big',
+      nameKh: 'សណ្ឋាគារ VIP',
+      nameEn: 'VIP Hotels',
+      nameZh: 'VIP 酒店',
+      icon: Crown,
+      gradient: 'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)',
+      shadow: '0 5px 12px rgba(196, 29, 75, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
+      activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(196, 29, 75, 0.45)',
+    },
+    {
+      id: 'guesthouse',
+      nameKh: 'ផ្ទះស្នាក់នៅ',
+      nameEn: 'Guesthouses',
+      nameZh: '民宿客栈',
+      icon: Home,
+      gradient: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
+      shadow: '0 5px 12px rgba(18, 84, 199, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
+      activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(18, 84, 199, 0.45)',
+    },
+    {
+      id: 'luxury_resort',
+      nameKh: 'រីសត',
+      nameEn: 'Resorts',
+      nameZh: '度假村',
+      icon: Sparkles,
+      gradient: 'linear-gradient(180deg, #F4B630 0%, #C67D0D 100%)',
+      shadow: '0 5px 12px rgba(198, 125, 13, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
+      activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(198, 125, 13, 0.45)',
+    },
+    {
+      id: 'boutique_villa',
+      nameKh: 'វីឡា/ប៊ូទិក',
+      nameEn: 'Villas',
+      nameZh: '精品别墅',
+      icon: Building2,
+      gradient: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',
+      shadow: '0 5px 12px rgba(14, 103, 105, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.35)',
+      activeRing: '0 0 0 3px #1E293B, 0 6px 14px rgba(14, 103, 105, 0.45)',
+    },
+  ];
+
+  const hasActiveHotelFilters =
+    categoryFilter !== 'all' ||
+    Boolean(selectedProvince && selectedProvince !== 'ទាំងអស់' && selectedProvince.toLowerCase() !== 'all') ||
+    Boolean(hotelSearchQuery.trim()) ||
+    sortMode === 'nearest';
+
+  const resetAllHotelFilters = () => {
+    setCategoryFilter('all');
+    setSelectedProvince('');
+    setHotelSearchQuery('');
+    setRatingFilter('all');
+    setSortMode('newest');
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-12 overflow-x-hidden">
-      {/* =====================================================================
-          1. TOP ANGKOR WAT SUNSET & LAKE REFLECTION HERO + SEARCH + CATEGORIES
-             (Matching Shop Menu 1-to-1)
-          ===================================================================== */}
-      <div
-        className="relative w-full overflow-hidden pt-2.5 pb-4 px-3.5 select-none"
-        style={{
-          paddingTop: 'calc(var(--kft-safe-top, 0px) + 10px)',
-        }}
-      >
-        {/* Full-Bleed Angkor Wat Sunset & Emerald Lake Reflection Background */}
-        <img
-          src="/welcome/shop-angkor-hero.jpg"
-          alt="Angkor Wat Cambodia"
-          decoding="async"
-          onError={(e) => {
-            const img = e.currentTarget as HTMLImageElement;
-            if (!img.dataset.fallback) {
-              img.dataset.fallback = '1';
-              img.src = '/welcome/angkor-lotus-hero.jpg';
-            }
-          }}
-          className="absolute inset-0 w-full h-full object-cover object-top pointer-events-none"
-        />
-        {/* Subtle dark emerald top readability gradient */}
-        <div
-          className="absolute inset-x-0 top-0 h-44 pointer-events-none"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(4, 47, 30, 0.72) 0%, rgba(6, 65, 42, 0.42) 55%, rgba(6, 65, 42, 0) 100%)',
-          }}
-        />
+      {/* 1. Shared Master Hero Header with 7-Day Free Trial Badge (Matching Reference Image 2) */}
+      <AngkorHeroTopHeader mode="food" />
 
-        {/* Row 1: Gold-Framed App Logo + Brand Title + Right Notification & Profile Icons */}
-        <div className="relative z-10 flex items-center justify-between gap-2">
-          <div
-            onClick={() => setActiveTab('home')}
-            className="flex items-center gap-2.5 min-w-0 cursor-pointer"
-          >
-            <div className="w-12 h-12 rounded-2xl p-[2px] bg-gradient-to-b from-[#FDE047] via-[#D4AF37] to-[#9A6F1A] shadow-md shrink-0">
-              <img
-                src="/logo-kft.png"
-                alt="Cambodia Flavors & Tourism"
-                onError={(e) => {
-                  const img = e.currentTarget as HTMLImageElement;
-                  if (!img.dataset.fallback) {
-                    img.dataset.fallback = '1';
-                    img.src = '/app-logo-v200.png';
-                  }
-                }}
-                className="w-full h-full rounded-[14px] object-cover bg-[#064E3B]"
-              />
+      {/* 2. MAIN CONTENT CONTAINER Rising Smoothly from Angkor Hero into Dark Slate (#1E293B) */}
+      <div className="relative z-20 -mt-[82px] px-3 min-[360px]:px-4 sm:px-5 space-y-3 bg-[#1E293B]/0">
+        {/* Compact Promotional Title Banner Directly Above Search Bar (Matching Image 2 Style) */}
+        <div className="flex justify-start pl-0.5 sm:pl-1">
+          <div className="relative py-1 pl-1 pr-2 bg-transparent flex items-center gap-2.5">
+            <div
+              style={{
+                background: 'linear-gradient(180deg, #FDE047 0%, #F59E0B 100%)',
+                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.26), inset 0 1px 1px rgba(255, 255, 255, 0.65)',
+              }}
+              className="relative z-10 w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0"
+            >
+              <BedDouble className="w-4 h-4 text-[#042F2E]" strokeWidth={2.4} />
             </div>
-            <div className="min-w-0 flex-1">
-              <h1
-                className="font-moul text-white leading-[1.68] py-0.5 break-words"
-                style={{ fontSize: 'clamp(13.8px, 4.08vw, 18.6px)', textShadow: '0 2px 6px rgba(0,0,0,0.55)' }}
+
+            <span className="relative z-10 h-6 w-px bg-white/35 shrink-0" aria-hidden="true" />
+
+            <div className="relative z-10 min-w-0">
+              <h2
+                className="font-khmer font-extrabold text-white leading-[1.65] py-0.5 break-words"
+                style={{ fontSize: 'clamp(13.8px, 3.96vw, 16.2px)', textShadow: '0 1px 3px rgba(0, 0, 0, 0.65)' }}
               >
-                {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨美食与旅游')}
-              </h1>
+                {tr(language, 'ស្វែងរកសណ្ឋាគារ និងផ្ទះសំណាក់', 'Find Hotels & Guesthouses', '查找酒店与客栈')}
+              </h2>
               <p
-                className="font-extrabold text-white/95 leading-snug break-words"
-                style={{ fontSize: 'clamp(11.8px, 3.36vw, 14.4px)', textShadow: '0 1px 4px rgba(0,0,0,0.55)' }}
+                className="font-khmer font-bold text-[#FDE68A] leading-[1.62] py-0.5 break-words"
+                style={{ fontSize: 'clamp(11px, 3.12vw, 13.2px)', textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)' }}
               >
-                Cambodia Flavors &amp; Tourism
+                {tr(language, 'កន្លែងស្នាក់នៅស្អាត មានផាសុកភាព គ្រប់ខេត្ត', 'Clean & comfortable stays in every province', '全柬各省舒适住宿推荐')}
               </p>
             </div>
           </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Notification Bell Button with Red Dot Badge */}
-            <button
-              type="button"
-              onClick={() => setIsNotificationsModalOpen(true)}
-              aria-label={tr(language, 'ការជូនដំណឹង', 'Notifications', '通知')}
-              className="relative w-10 h-10 rounded-full bg-[#0F5A38]/85 hover:bg-[#0F5A38] border border-white/45 text-white flex items-center justify-center backdrop-blur-xs active:scale-95 transition cursor-pointer shadow-sm"
-            >
-              <Bell className="w-5 h-5 text-white" strokeWidth={2.2} />
-              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-[#0F5A38]" />
-              {unreadNotificationsCount > 0 && (
-                <span className="sr-only">{unreadNotificationsCount}</span>
-              )}
-            </button>
-
-            {/* Profile / Account Button */}
-            <button
-              type="button"
-              onClick={() => {
-                if (currentUser) {
-                  setActiveTab('profile');
-                } else {
-                  setIsAuthModalOpen(true);
-                }
-              }}
-              aria-label={tr(language, 'គណនី', 'Account', '账户')}
-              className="w-10 h-10 rounded-full bg-[#0F5A38]/85 hover:bg-[#0F5A38] border border-white/45 text-white flex items-center justify-center overflow-hidden backdrop-blur-xs active:scale-95 transition cursor-pointer shadow-sm"
-            >
-              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <circle cx="12" cy="9" r="3.6" />
-                <path d="M5.5 19.2c1.2-3.1 3.6-4.7 6.5-4.7s5.3 1.6 6.5 4.7a7.8 7.8 0 0 1-13 0z" />
-              </svg>
-            </button>
-          </div>
         </div>
 
-        {/* Row 2: Clean Storefront/Hotel Icon + Page Heading directly on the Hero Backdrop (Matching Shop Menu) */}
-        <div className="relative z-10 mt-3.5 flex items-center gap-2.5 min-w-0">
-          <svg
-            className="w-9 h-9 text-white shrink-0 drop-shadow-sm"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
+        {/* Row 1: Essential White Pill Search Bar + Inline GPS Near Me Button */}
+        <div className="flex items-center gap-2">
+          <div
+            style={{
+              background: 'rgba(255, 255, 255, 0.96)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 8px 24px rgba(15, 23, 42, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1)',
+            }}
+            className="flex-1 min-w-0 min-h-[48px] py-1 rounded-full border border-white pl-3.5 pr-2 flex items-center gap-2"
           >
-            <path d="M3 9l1.8-5h14.4L21 9" />
-            <path d="M3 9c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3" />
-            <path d="M5 12v8h14v-8" />
-            <path d="M9 20v-5h6v5" />
-          </svg>
-          <div className="min-w-0 flex-1">
-            <h2
-              className="font-extrabold text-[16px] sm:text-[18px] text-white leading-[1.65] break-words"
-              style={{ textShadow: '0 2px 6px rgba(0,0,0,0.6)' }}
-            >
-              {tr(
-                language,
-                'ស្វែងរកសណ្ឋាគារ និងផ្ទះសំណាក់',
-                'Find Hotels & Guesthouses',
-                '查找酒店与客栈'
-              )}
-            </h2>
-            <p
-              className="text-xs font-bold text-white/95 leading-[1.5] break-words"
-              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}
-            >
-              Hotels &amp; Stays
-            </p>
-          </div>
-        </div>
-
-        {/* Row 3: White Pill Search Input + Green "នៅជិតខ្ញុំ" Near Me Pill Button */}
-        <div className="relative z-10 mt-3 flex items-center gap-2">
-          <div className="flex-1 min-w-0 min-h-[44px] py-1 rounded-full bg-white shadow-md flex items-center pl-3.5 pr-2.5 gap-2 border border-white/90">
-            <Search className="w-5 h-5 text-slate-800 shrink-0" strokeWidth={2.3} />
+            <Search className="w-5 h-5 text-slate-500 shrink-0" strokeWidth={2.3} />
             <input
               ref={searchInputRef}
               type="text"
@@ -1000,11 +981,11 @@ export const HotelView: React.FC = () => {
               onChange={(e) => setHotelSearchQuery(e.target.value)}
               placeholder={tr(
                 language,
-                'ស្វែងរកសណ្ឋាគារ, ផ្ទះសំណាក់, តំបន់ ឬឈ្មោះ...',
-                'Search hotel, guesthouse, area, or name...',
-                '搜索酒店、客栈、地区或名称...'
+                'ស្វែងរកសណ្ឋាគារ, ផ្ទះសំណាក់ ឬតំបន់ជិតអ្នក...',
+                'Search hotel, guesthouse, or nearby area...',
+                '搜索酒店、客栈或附近区域...'
               )}
-              className="flex-1 min-w-0 bg-transparent text-xs sm:text-[13px] font-bold text-slate-900 placeholder-slate-500 focus:outline-none truncate font-khmer"
+              className="flex-1 min-w-0 bg-transparent text-xs sm:text-[13.5px] font-bold text-slate-900 placeholder-slate-400 focus:outline-none truncate font-khmer"
             />
             {hotelSearchQuery.trim() ? (
               <button
@@ -1016,333 +997,183 @@ export const HotelView: React.FC = () => {
                 <X className="w-4 h-4" strokeWidth={2.2} />
               </button>
             ) : null}
+
             <button
               type="button"
-              onClick={() => searchInputRef.current?.focus()}
-              className="p-1 text-[#0E5A35] hover:text-[#083B22] shrink-0 cursor-pointer"
-              title={tr(language, 'ស្វែងរកដោយសំឡេង', 'Voice Search', '语音搜索')}
-            >
-              <Mic className="w-4.5 h-4.5" strokeWidth={2.2} />
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleToggleNearMe}
-            style={{
-              background:
-                sortMode === 'nearest'
-                  ? 'linear-gradient(180deg, #16A34A 0%, #0D6E32 100%)'
-                  : 'linear-gradient(180deg, #1E7E48 0%, #0F5330 100%)',
-            }}
-            className="min-h-[44px] px-3 sm:px-3.5 py-1 rounded-full font-extrabold text-xs text-white inline-flex items-center gap-1.5 shrink-0 shadow-md border border-white/60 transition active:scale-95 cursor-pointer leading-[1.6]"
-          >
-            <MapPin className="w-4 h-4 shrink-0 text-white fill-white/20" strokeWidth={2.3} />
-            <span>{tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近')}</span>
-          </button>
-        </div>
-
-        {/* Row 4: Primary Category Filter Pills Inside Hero (Matching Shop Menu) */}
-        <div className="relative z-10 mt-3 flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-          {hotelCategoryPills.map((pill) => {
-            const active = categoryFilter === pill.id;
-            return (
-              <button
-                key={pill.id}
-                type="button"
-                onClick={() => setCategoryFilter(pill.id)}
-                style={
-                  active
-                    ? {
-                        background: 'linear-gradient(180deg, #1E7E48 0%, #0E532F 100%)',
-                      }
-                    : undefined
-                }
-                className={`h-9 px-3 rounded-full text-xs font-extrabold inline-flex items-center gap-1.5 shrink-0 transition cursor-pointer shadow-xs ${
-                  active
-                    ? 'text-white border border-white/70'
-                    : 'bg-white/95 text-slate-900 border border-white hover:bg-white'
-                }`}
-              >
-                {pill.icon === 'grid' && (
-                  <LayoutGrid className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-[#0E5A35]'}`} strokeWidth={2.2} />
-                )}
-                {pill.icon === 'bed' && (
-                  <BedDouble className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-[#0E5A35]'}`} strokeWidth={2.2} />
-                )}
-                {pill.icon === 'crown' && (
-                  <Crown className={`w-3.5 h-3.5 ${active ? 'text-[#FDE047]' : 'text-[#0E5A35]'}`} strokeWidth={2.2} />
-                )}
-                {pill.icon === 'home' && (
-                  <Home className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-[#0E5A35]'}`} strokeWidth={2.2} />
-                )}
-                {pill.icon === 'palm' && (
-                  <svg
-                    className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-[#0E5A35]'}`}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M13 8c0-2.76-2.46-5-5.5-5S2 5.24 2 8h2l1-1 1 1h4" />
-                    <path d="M13 7.14A5.82 5.82 0 0 1 16.5 6c3.04 0 5.5 2.24 5.5 5h-3l-1-1-1 1h-3" />
-                    <path d="M5.89 9.71c-2.15 2.15-2.3 5.47-.35 7.43l4.24-4.25.7-.7.71-.71 2.12-2.12c-1.95-1.96-5.27-1.8-7.42.35z" />
-                    <path d="M11 15.5c.5 2.5-.17 4.5-1 6.5h4c2-5.5-.5-12-1-14" />
-                  </svg>
-                )}
-                {pill.icon === 'building' && (
-                  <Building2 className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-[#0E5A35]'}`} strokeWidth={2.2} />
-                )}
-                <span>{tr(language, pill.nameKh, pill.nameEn, pill.nameZh)}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* =====================================================================
-          MAIN CONTENT SHEET (Matching Shop Menu 1-to-1)
-          ===================================================================== */}
-      <div className="px-3 pt-2.5 space-y-3">
-        {/* Row 5: 4 Secondary Filter & Sort Dropdown Chips (Matching Shop Menu: តំបន់/ខេត្ត ∨ | ប្រភេទ ∨ | ការវាយតម្លៃ ∨ | កម្រៀប) */}
-        <div className="grid grid-cols-2 min-[420px]:grid-cols-4 gap-1.5">
-          {/* Control 1: Province / Region Selector */}
-          <label className="relative min-h-[40px] px-2.5 py-1 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
-            <MapPin className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
-            <span className="truncate">{selectedProvinceShortLabel}</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-            <select
-              value={selectedProvince}
-              onChange={(e) => setSelectedProvince(e.target.value)}
-              aria-label={tr(language, 'តំបន់/ខេត្ត', 'Province', '省份/地区')}
-              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-            >
-              <option value="">{tr(language, 'គ្រប់ខេត្ត-ក្រុងទាំង ២៥', 'All 25 Provinces', '全部 25 个省市')}</option>
-              {provinceOptions.map((p) => (
-                <option key={p.id} value={p.value}>
-                  {tr(language, p.fullKh, p.en, p.zh)} ({p.count})
-                </option>
-              ))}
-            </select>
-          </label>
-
-          {/* Control 2: Stay Type Selector */}
-          <label className="relative min-h-[40px] px-2.5 py-1 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
-            <BedDouble className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
-            <span className="truncate">
-              {categoryFilter === 'all'
-                ? tr(language, 'ប្រភេទស្នាក់នៅ', 'Stay Type', '住宿类型')
-                : hotelCategoryPills.find((c) => c.id === categoryFilter)?.nameKh || tr(language, 'ប្រភេទស្នាក់នៅ', 'Stay Type', '住宿类型')}
-            </span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              aria-label={tr(language, 'ប្រភេទស្នាក់នៅ', 'Stay Type', '住宿类型')}
-              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-            >
-              {hotelCategoryPills.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {tr(language, c.nameKh, c.nameEn, c.nameZh)}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          {/* Control 3: Rating Selector */}
-          <label className="relative min-h-[40px] px-2.5 py-1 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
-            <Star className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
-            <span className="truncate">
-              {ratingFilter === '4.5'
-                ? '4.5+ ★'
-                : ratingFilter === '4.0'
-                  ? '4.0+ ★'
-                  : tr(language, 'ការវាយតម្លៃ', 'Rating', '评分')}
-            </span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-            <select
-              value={ratingFilter}
-              onChange={(e) => setRatingFilter(e.target.value as 'all' | '4.5' | '4.0')}
-              aria-label={tr(language, 'ការវាយតម្លៃ', 'Rating', '评分')}
-              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-            >
-              <option value="all">{tr(language, 'ការវាយតម្លៃ (ទាំងអស់)', 'All Ratings', '全部评分')}</option>
-              <option value="4.5">{tr(language, '4.5 ★ ឡើងទៅ', '4.5 ★ & Up', '4.5 ★ 及以上')}</option>
-              <option value="4.0">{tr(language, '4.0 ★ ឡើងទៅ', '4.0 ★ & Up', '4.0 ★ 及以上')}</option>
-            </select>
-          </label>
-
-          {/* Control 4: Sort Order (Defaults to Newest First) */}
-          <label className="relative min-h-[40px] px-2.5 py-1 rounded-full bg-white border border-slate-200/90 shadow-xs flex items-center justify-center gap-1 text-[11px] font-extrabold text-slate-800 cursor-pointer whitespace-nowrap overflow-hidden">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.2} />
-            <span className="truncate">
-              {sortMode === 'nearest'
-                ? tr(language, 'ជិតបំផុត', 'Nearest', '最近')
-                : sortMode === 'rating'
-                  ? tr(language, 'ពិន្ទុខ្ពស់', 'Top Rated', '最高分')
-                  : tr(language, 'ថ្មីបំផុត', 'Newest', '最新')}
-            </span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-            <select
-              value={sortMode}
-              onChange={(e) => {
-                const next = e.target.value as 'newest' | 'popular' | 'nearest' | 'rating';
-                if (next === 'nearest' && !userCoords) {
-                  handleToggleNearMe();
+              onClick={() => {
+                if (sortMode === 'nearest') {
+                  setSortMode('newest');
                 } else {
-                  setSortMode(next);
+                  handleToggleNearMe();
                 }
               }}
-              aria-label={tr(language, 'កម្រៀប', 'Sort', '排序')}
-              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+              style={
+                sortMode === 'nearest'
+                  ? {
+                      background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
+                      boxShadow: '0 4px 12px rgba(21, 128, 61, 0.35)',
+                    }
+                  : {
+                      background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
+                      boxShadow: '0 4px 12px rgba(234, 88, 12, 0.35)',
+                    }
+              }
+              className="min-h-[36px] px-2.5 min-[360px]:px-3.5 py-1 rounded-full text-white font-extrabold text-xs inline-flex items-center gap-1.5 shrink-0 border border-white/80 transition active:scale-95 cursor-pointer leading-[1.6]"
             >
-              <option value="newest">{tr(language, 'កម្រៀប៖ ថ្មីបំផុត (Newest First)', 'Sort: Newest First', '排序：最新添加优先')}</option>
-              <option value="popular">{tr(language, 'កម្រៀប៖ ពេញនិយម', 'Sort: Popular', '排序：最受欢迎')}</option>
-              <option value="nearest">{tr(language, 'កម្រៀប៖ ជិតខ្ញុំបំផុត', 'Sort: Nearest', '排序：距离最近')}</option>
-              <option value="rating">{tr(language, 'កម្រៀប៖ ពិន្ទុខ្ពស់បំផុត', 'Sort: Highest Rated', '排序：评分最高')}</option>
-            </select>
-          </label>
+              <MapPin className="w-3.5 h-3.5 text-white fill-white/25 shrink-0" strokeWidth={2.3} />
+              <span>{tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近')}</span>
+            </button>
+          </div>
         </div>
 
-        {/* =====================================================================
-            ROW 6: HOTEL REGISTRATION BANNER (Using Same Storefront Icon Banner as Shop Menu)
-            ===================================================================== */}
-        <div className="space-y-2">
-          <div className="relative rounded-[20px] overflow-hidden shadow-[0_6px_18px_rgba(6,78,59,0.22)]">
-            <div className="relative min-h-[108px] sm:min-h-[114px] flex items-center">
-              <img
-                src="/welcome/hotel-register-banner.png"
-                alt="Register Your Hotel or Guesthouse"
-                decoding="async"
-                className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none"
-              />
-
-              {/* Right Headline, Supporting Text & Prominent Gold Rounded CTA Button */}
-              <div className="relative z-10 w-full pl-[36%] sm:pl-[39%] pr-3.5 py-2.5 space-y-1.5">
-                <div>
-                  <h3
-                    className="font-khmer font-extrabold text-white leading-[1.65] break-words"
-                    style={{ fontSize: 'clamp(14.4px, 4.2vw, 17.4px)', textShadow: '0 2px 4px rgba(0,0,0,0.42)' }}
-                  >
-                    {tr(language, 'ចុះបញ្ជីសណ្ឋាគារ ឬផ្ទះសំណាក់', 'Register Your Hotel or Guesthouse', '入驻您的酒店或客栈')}
-                  </h3>
-                  <p
-                    className="font-khmer font-bold text-white/95 leading-[1.55] mt-0.5 break-words"
-                    style={{ fontSize: '14.4px', textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}
-                  >
-                    {tr(
-                      language,
-                      'បង្ហាញសណ្ឋាគារ ឬផ្ទះសំណាក់របស់អ្នកនៅខាងលើកម្មវិធី',
-                      'Showcase your hotel or guesthouse at the top of the app',
-                      '在应用顶部展示您的酒店或客栈'
-                    )}
-                  </p>
-                </div>
-
+        {/* Row 2: 6 Colorful Gradient Category Buttons + Compact 25-Province Selector Inside Clean White Card */}
+        <div
+          style={{
+            background: '#FFFFFF',
+            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)',
+          }}
+          className="rounded-[24px] p-2.5 sm:p-3 border border-slate-100 space-y-2.5"
+        >
+          <div className="grid grid-cols-3 gap-2">
+            {primaryHotelCategoryButtons.map((cat) => {
+              const Icon = cat.icon;
+              const active = categoryFilter === cat.id;
+              return (
                 <button
+                  key={cat.id}
                   type="button"
-                  onClick={handleAddHotelClick}
+                  onClick={() => setCategoryFilter(cat.id)}
+                  aria-pressed={active}
                   style={{
-                    background: 'linear-gradient(180deg, #FDE047 0%, #FACC15 55%, #EAB308 100%)',
-                    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.75)',
-                    fontSize: '14.4px',
+                    background: cat.gradient,
+                    boxShadow: active ? cat.activeRing : cat.shadow,
                   }}
-                  className="w-full min-h-[34px] py-1 px-3 rounded-full border border-amber-200 text-slate-950 font-khmer font-extrabold inline-flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer leading-[1.6]"
+                  className="group relative min-h-[68px] px-1.5 py-2 rounded-[16px] flex flex-col items-center justify-center gap-1 min-w-0 text-white transition active:scale-[0.96] cursor-pointer overflow-hidden"
                 >
-                  <Plus className="w-4 h-4 stroke-[2.8] text-slate-950 shrink-0" />
-                  <span>{tr(language, 'បន្ថែមសណ្ឋាគារ', 'Add Hotel', '添加酒店')}</span>
+                  <span
+                    className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+                    style={{
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
+                    }}
+                  />
+                  <Icon className="relative z-10 w-5 h-5 text-white shrink-0 drop-shadow-xs" strokeWidth={2.2} />
+                  <span
+                    className="relative z-10 font-khmer font-extrabold leading-[1.62] py-0.5 text-center break-words whitespace-normal w-full"
+                    style={{ fontSize: 'clamp(11.4px, 3.12vw, 13.8px)', textShadow: '0 1px 2px rgba(0,0,0,0.30)' }}
+                  >
+                    {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
+                  </span>
                 </button>
-              </div>
+              );
+            })}
+          </div>
+
+          {/* Compact 25-Province Selector Bar inside the White Card */}
+          <div className="flex items-center gap-2 pt-0.5">
+            <div className="relative flex-1 min-w-0">
+              <MapPin className="w-4 h-4 text-emerald-600 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <select
+                value={selectedProvince}
+                onChange={(e) => setSelectedProvince(e.target.value)}
+                aria-label={tr(language, 'ជ្រើសរើសខេត្ត-ក្រុងទាំង ២៥', 'Select Province (25 Provinces)', '选择省份（25个省市）')}
+                className="w-full min-h-[40px] pl-9 pr-3 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200/90 text-xs font-extrabold text-slate-800 cursor-pointer focus:outline-none focus:border-emerald-500 transition"
+              >
+                <option value="">
+                  {tr(language, 'គ្រប់ខេត្ត-ក្រុងទាំង ២៥', 'All 25 Provinces & Capital', '全部 25 个省市')}
+                </option>
+                {provinceOptions.map((p) => (
+                  <option key={p.id} value={p.value}>
+                    {tr(language, p.fullKh, p.en, p.zh)} ({p.count})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {hasActiveHotelFilters && (
+              <button
+                type="button"
+                onClick={resetAllHotelFilters}
+                className="min-h-[40px] px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-extrabold active:scale-95 transition cursor-pointer shrink-0"
+              >
+                ↺ {tr(language, 'កំណត់ឡើងវិញ', 'Reset', '重置')}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Row 3: Compact Clean White Register Hotel Bar (Matching Shop Menu Row 3) */}
+        <div className="bg-white rounded-[20px] p-3 border border-slate-200/85 shadow-[0_4px_14px_rgba(15,23,42,0.04)] flex items-center justify-between gap-2.5 flex-wrap text-slate-900">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <span
+              style={{
+                background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
+              }}
+              className="w-9 h-9 rounded-xl text-white flex items-center justify-center shrink-0 shadow-xs"
+            >
+              <BedDouble className="w-4.5 h-4.5" strokeWidth={2.2} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-extrabold text-xs sm:text-sm text-slate-900 leading-[1.65] break-words">
+                {tr(language, 'ចុះបញ្ជីសណ្ឋាគារ ឬផ្ទះសំណាក់', 'Register Your Hotel or Guesthouse', '入驻您的酒店或客栈')}
+              </h3>
+              <p className="text-[11px] text-slate-500 leading-[1.6] break-words">
+                {tr(
+                  language,
+                  'បង្ហាញសណ្ឋាគារ ផ្ទះសំណាក់ និងទីតាំង GPS របស់អ្នកនៅលើកម្មវិធី',
+                  'Showcase your hotel and GPS directions on the app',
+                  '在应用中展示您的酒店与 GPS 导航路线'
+                )}
+              </p>
             </div>
           </div>
 
-          {/* If user already used their 1 VIP slot on a Restaurant, show clear notice */}
-          {!isAdmin && myExistingShop && !myExistingHotel && (
-            <div className="relative z-10 mt-2.5 px-3 py-1.5 rounded-xl bg-amber-950/60 border border-amber-300/40 text-amber-200 text-[10.5px] font-semibold font-khmer flex items-center justify-between gap-2">
-              <span className="leading-[1.6] break-words">
-                {tr(
-                  language,
-                  `អ្នកបានប្រើសិទ្ធិ VIP បង្កើតហាងអាហារ «${myExistingShop.nameKh}» រួចហើយ (1/1) — មិនអាចបន្ថែមសណ្ឋាគារទៀតបានទេ។`,
-                  `You already used your 1 VIP slot for Shop "${myExistingShop.nameEn || myExistingShop.nameKh}" (1/1) — cannot add a Hotel.`,
-                  `您已使用 1 个 VIP 名额添加餐厅"${myExistingShop.nameEn || myExistingShop.nameKh}"(1/1)，无法再添加酒店。`
-                )}
-              </span>
-            </div>
-          )}
-
-          {/* Admin / Existing Owner Controls */}
-          {isAdmin ? (
-            <div className="relative z-10 p-2 rounded-2xl bg-[#0A5C36] border border-emerald-700/40 grid grid-cols-1 sm:grid-cols-2 gap-2 shadow-xs">
+          <div className="flex items-center gap-1.5 shrink-0">
+            {isAdmin && (
               <button
                 type="button"
                 onClick={() => {
                   (window as any).__kft_admin_tab = 'hotels';
                   setIsAdminOpen(true);
                 }}
-                className="w-full py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer font-khmer leading-[1.6]"
+                className="h-9 px-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-[11px] font-extrabold inline-flex items-center gap-1 cursor-pointer"
               >
-                <Settings className="w-3.5 h-3.5 text-amber-300 shrink-0" strokeWidth={2} />
-                <span className="break-words">
-                  {tr(language, 'គ្រប់គ្រងសណ្ឋាគារទាំងអស់', 'Manage All Hotels', '管理全部酒店')}
-                </span>
+                <Settings className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                <span>{tr(language, 'គ្រប់គ្រង', 'Manage', '管理')}</span>
               </button>
-              <a
-                href="/templates/KhmerFoodTourism_Hotel_Photo_Insert_Template.xlsx"
-                download="KhmerFoodTourism_Hotel_Photo_Insert_Template.xlsx"
-                onClick={() =>
-                  showToast(
-                    tr(
-                      language,
-                      'កំពុងទាញយកគំរូ Excel សម្រាប់ដាក់រូបភាពសណ្ឋាគារ...',
-                      'Downloading Hotel Photo Excel Template...',
-                      '正在下载酒店图片 Excel 模板...'
-                    ),
-                    'success'
-                  )
-                }
-                className="w-full py-1.5 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer font-khmer leading-[1.6]"
-              >
-                <Download className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
-                <span className="break-words">
-                  {tr(
-                    language,
-                    'ទាញយកគំរូ Excel ដាក់រូបសណ្ឋាគារ (.xlsx)',
-                    'Download Excel Photo Template (.xlsx)',
-                    '下载酒店图片 Excel 模板 (.xlsx)'
-                  )}
-                </span>
-              </a>
-            </div>
-          ) : myExistingHotel ? (
-            <div className="relative z-10 px-3 py-2 rounded-2xl bg-[#0A5C36] border border-emerald-700/40 flex items-center justify-between gap-2 shadow-xs flex-wrap">
-              <span className="min-w-0 flex-1 text-[11px] font-bold text-amber-200 leading-[1.6] break-words font-khmer">
-                {tr(
-                  language,
-                  `សណ្ឋាគាររបស់ខ្ញុំ៖ ${myExistingHotel.nameKh}`,
-                  `My Hotel: ${myExistingHotel.nameEn || myExistingHotel.nameKh}`,
-                  `我的酒店：${myExistingHotel.nameEn || myExistingHotel.nameKh}`
-                )}
-              </span>
+            )}
+
+            {!isAdmin && myExistingHotel && (
               <button
                 type="button"
                 onClick={() => openManageMyVipStore(myExistingHotel.id)}
-                className="py-1 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/25 text-[11px] font-bold flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer font-khmer"
+                className="h-9 px-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-[11px] font-extrabold inline-flex items-center gap-1 cursor-pointer"
               >
-                <Edit2 className="w-3.5 h-3.5 text-amber-300" strokeWidth={2} />
-                <span>{tr(language, 'កែប្រែសណ្ឋាគារខ្ញុំ', 'Edit My Hotel', '编辑我的酒店')}</span>
+                <Edit2 className="w-3 h-3 text-emerald-700" />
+                <span>{tr(language, 'កែប្រែសណ្ឋាគារខ្ញុំ', 'Edit Hotel', '编辑酒店')}</span>
               </button>
-            </div>
-          ) : null}
+            )}
+
+            <button
+              type="button"
+              onClick={handleAddHotelClick}
+              style={{
+                background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
+                boxShadow: '0 4px 10px rgba(234, 88, 12, 0.25)',
+              }}
+              className="h-9 px-3.5 rounded-full text-white font-extrabold text-xs inline-flex items-center gap-1 active:scale-95 transition cursor-pointer"
+            >
+              <Plus className="w-4 h-4 stroke-[2.6] shrink-0" />
+              <span>{tr(language, 'បន្ថែមសណ្ឋាគារ', 'Add Hotel', '添加酒店')}</span>
+            </button>
+          </div>
         </div>
 
         {/* =====================================================================
-            HOTEL LISTINGS (Matching Shop Menu: TOP 1 Featured Card + Compact Directory Cards)
+            3. HOTEL LISTINGS (Clean White Cards on Dark Slate #1E293B)
             ===================================================================== */}
         {filteredHotels.length > 0 ? (
-          <div className="space-y-4">
-            {/* Section 1: សណ្ឋាគារពេញនិយមជិតខ្ញុំ (TOP 1 Earliest Approved Hotel in Large Featured Card) */}
+          <div className="space-y-4 pt-0.5">
+            {/* Section 1: សណ្ឋាគារពេញនិយមជិតខ្ញុំ (Popular Hotels Near Me - Clean White Featured Cards) */}
             {featuredHotels.length > 0 && (
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between gap-2 px-0.5">
@@ -1354,7 +1185,6 @@ export const HotelView: React.FC = () => {
                       </h3>
                     </div>
 
-                    {/* GPS Distance Pill Badge */}
                     <button
                       type="button"
                       onClick={handleToggleNearMe}
@@ -1373,7 +1203,6 @@ export const HotelView: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* White Rounded Pill "មើលទាំងអស់ >" Matching Reference Image 2 */}
                   <button
                     type="button"
                     onClick={() => setShowAllFeatured((prev) => !prev)}
@@ -1388,7 +1217,7 @@ export const HotelView: React.FC = () => {
                   </button>
                 </div>
 
-                <div className={featuredHotels.length === 1 ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 md:grid-cols-2 gap-3'}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {featuredHotels.map((hotel) => {
                     const loc = getLocalizedDestination(hotel, language);
                     const isVipRecord = vipHotelIds.has(hotel.id);
@@ -1396,126 +1225,182 @@ export const HotelView: React.FC = () => {
                     const hash = getDeterministicHash(hotel.id);
                     const displayRating =
                       hotel.rating && hotel.rating > 0
-                        ? Number(Number(hotel.rating).toFixed(1))
-                        : Number((4.6 + (hash % 4) * 0.1).toFixed(1));
+                        ? Number(hotel.rating).toFixed(1)
+                        : (4.6 + (hash % 4) * 0.1).toFixed(1);
                     const displayReviews =
                       hotel.reviewCount && hotel.reviewCount > 0
                         ? hotel.reviewCount
                         : 95 + (hash % 210);
-                    const featuredCoverUrl =
-                      hasVerifiedCustomHotelPhoto(hotel) ||
-                      (hotel.photoUrl ? resolveFoodPhotoUrl(hotel.photoUrl) : '');
+                    const distanceKm = distanceMap.get(hotel.id) ?? getDeterministicDistanceKm(hotel.id);
+                    const distanceStr = distanceKm < 10 ? distanceKm.toFixed(1) : Math.round(distanceKm).toString();
+                    const amenityChips = getAmenityChipsForHotel(hotel);
 
-                    const adminActions = isAdmin ? (
-                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                        {!isVipRecord && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setHotelForImageEdit(hotel);
-                            }}
-                            className="p-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white transition-colors active:scale-95 cursor-pointer"
-                            title={tr(language, 'ប្តូររូបភាពសណ្ឋាគារ', 'Upload / Change Hotel Photo', '更换酒店图片')}
-                          >
-                            <Camera className="w-3.5 h-3.5" strokeWidth={2} />
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (isVipRecord) {
-                              openManageMyVipStore(hotel.id);
-                            } else {
-                              (window as any).__kft_open_dest_edit = true;
-                              setSelectedDestination(hotel);
-                            }
-                          }}
-                          className="p-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 transition-colors active:scale-95 cursor-pointer"
-                          title={tr(language, 'កែប្រែព័ត៌មាន & ទីតាំង GPS', 'Edit Info & GPS', '编辑信息与定位')}
-                        >
-                          <Edit2 className="w-3.5 h-3.5" strokeWidth={2} />
-                        </button>
-                        {!isVipRecord && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (
-                                window.confirm(
-                                  tr(
-                                    language,
-                                    `តើអ្នកពិតជាចង់លុបសណ្ឋាគារ «${hotel.nameKh}» មែនទេ?`,
-                                    `Delete hotel "${hotel.nameEn}"?`,
-                                    `确定删除酒店“${hotel.nameEn}”吗？`
-                                  )
-                                )
-                              ) {
-                                deleteDestination(hotel.id);
-                              }
-                            }}
-                            className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white transition-colors active:scale-95 cursor-pointer"
-                            title={tr(language, 'លុបសណ្ឋាគារ', 'Delete Hotel', '删除酒店')}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
-                          </button>
-                        )}
-                      </div>
-                    ) : null;
+                    const handleCallHotel = (e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      const rawPhone = String(hotel.phone || '').trim();
+                      const firstPhone = rawPhone.split(/[\/,;]/)[0]?.replace(/[^0-9+]/g, '') || '';
+                      if (firstPhone.length >= 6) {
+                        window.location.href = `tel:${firstPhone}`;
+                      } else {
+                        setSelectedDestination(hotel);
+                      }
+                    };
 
                     return (
-                      <ListingFeaturedCard
+                      <article
                         key={hotel.id}
-                        testId={`hotel-featured-${hotel.id}`}
-                        language={language}
-                        coverUrl={featuredCoverUrl}
-                        fallbackIcon={BedDouble}
-                        title={hotel.nameKh || loc.name}
-                        province={loc.province || hotel.provinceKh}
-                        address={hotel.addressKh || hotel.addressEn || loc.province || hotel.provinceKh}
-                        description={
-                          loc.description ||
-                          hotel.descriptionKh ||
-                          (hotel.highlightsKh?.length ? hotel.highlightsKh.join(', ') : '') ||
-                          tr(
-                            language,
-                            'កន្លែងស្នាក់នៅស្អាត មានផាសុកភាព និងសេវាកម្មល្អ។',
-                            'Clean, comfortable accommodation with great service.',
-                            '干净舒适的住宿体验与优质服务。'
-                          )
-                        }
-                        rating={displayRating}
-                        reviewCount={displayReviews}
-                        priceText={hotel.priceRange || '$'}
-                        phone={hotel.phone}
-                        badgeLabel={tr(language, 'ផ្សព្វផ្សាយ • សណ្ឋាគារ VIP', 'Promoted • VIP Hotel', '推广 • VIP 酒店')}
-                        onOpen={() => setSelectedDestination(hotel)}
-                        onOpenMap={() => openDestinationGoogleExternal(hotel, 'maps')}
-                        topRightActions={
-                          <>
-                            {adminActions}
+                        data-testid={`hotel-featured-${hotel.id}`}
+                        onClick={() => setSelectedDestination(hotel)}
+                        className="bg-white rounded-[22px] p-2.5 border border-slate-200/90 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:border-emerald-500/60 transition flex gap-3 items-stretch cursor-pointer font-khmer text-slate-900"
+                      >
+                        {/* Left Photo Box with Distance Pill & Heart Button */}
+                        <div className="w-[100px] min-[340px]:w-[120px] min-[380px]:w-[144px] sm:w-[156px] min-h-[130px] rounded-2xl overflow-hidden relative shrink-0 bg-slate-100 border border-slate-100">
+                          <HotelAvatar
+                            hotel={hotel}
+                            alt={loc.name}
+                            className="w-full h-full object-cover"
+                          />
+
+                          {/* Top-left Distance Badge */}
+                          <span
+                            style={{
+                              background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
+                            }}
+                            className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full text-white text-[10.5px] font-extrabold inline-flex items-center gap-1 shadow-xs"
+                          >
+                            <MapPin className="w-3 h-3 text-white fill-white/25 shrink-0" />
+                            <span>
+                              {distanceStr} {tr(language, 'km', 'km', '公里')}
+                            </span>
+                          </span>
+
+                          {/* Top-right Heart Bookmark Button */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleBookmark(hotel.id);
+                            }}
+                            aria-label={tr(language, 'រក្សាទុក', 'Bookmark', '收藏')}
+                            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/95 hover:bg-white shadow-sm flex items-center justify-center text-rose-500 active:scale-90 transition cursor-pointer"
+                          >
+                            <Heart className={`w-3.5 h-3.5 ${bookmarked ? 'fill-rose-500 text-rose-500' : 'text-rose-500'}`} strokeWidth={2.2} />
+                          </button>
+
+                          {/* Bottom-left VIP Badge */}
+                          <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9.5px] font-extrabold inline-flex items-center gap-1 shadow-xs">
+                            <Crown className="w-2.5 h-2.5 text-slate-950 shrink-0" />
+                            <span>{tr(language, 'សណ្ឋាគារ VIP', 'VIP Hotel', 'VIP 酒店')}</span>
+                          </span>
+                        </div>
+
+                        {/* Right Info Column */}
+                        <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                          <div>
+                            <div className="flex items-start justify-between gap-1.5">
+                              <h4 className="font-extrabold text-sm sm:text-[15px] text-slate-900 leading-[1.6] line-clamp-2 break-words">
+                                {hotel.nameKh || loc.name}
+                              </h4>
+                              {isAdmin && (
+                                <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                  {!isVipRecord && (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setHotelForImageEdit(hotel);
+                                      }}
+                                      className="p-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white transition-colors active:scale-95 cursor-pointer"
+                                      title={tr(language, 'ប្តូររូបភាពសណ្ឋាគារ', 'Upload / Change Hotel Photo', '更换酒店图片')}
+                                    >
+                                      <Camera className="w-3.5 h-3.5" strokeWidth={2} />
+                                    </button>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (isVipRecord) {
+                                        openManageMyVipStore(hotel.id);
+                                      } else {
+                                        (window as any).__kft_open_dest_edit = true;
+                                        setSelectedDestination(hotel);
+                                      }
+                                    }}
+                                    className="p-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 transition-colors active:scale-95 cursor-pointer"
+                                    title={tr(language, 'កែប្រែព័ត៌មាន & ទីតាំង GPS', 'Edit Info & GPS', '编辑信息与定位')}
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5" strokeWidth={2} />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Rating & Province */}
+                            <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-600 flex-wrap">
+                              <span className="inline-flex items-center gap-1">
+                                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                                <strong className="font-extrabold text-slate-900">{displayRating}</strong>
+                                <span className="text-slate-400">({displayReviews})</span>
+                              </span>
+                              <span className="text-slate-300">•</span>
+                              <span className="text-emerald-700 font-bold truncate">
+                                {loc.province || hotel.provinceKh}
+                              </span>
+                            </div>
+
+                            {/* Amenity Tags */}
+                            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                              {amenityChips.map((chip, idx) => (
+                                <span
+                                  key={idx}
+                                  className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200/80 text-[10.5px] font-bold text-slate-700 inline-flex items-center gap-1"
+                                >
+                                  {renderAmenityIcon(chip.icon)}
+                                  <span>{chip.label}</span>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Bottom Action Buttons: Call/Details + Map Navigation */}
+                          <div className="grid grid-cols-2 gap-1.5 mt-2.5 pt-2 border-t border-slate-100" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              onClick={handleCallHotel}
+                              style={{
+                                background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
+                              }}
+                              className="min-h-[36px] px-2 py-1 rounded-xl text-white font-extrabold text-xs inline-flex items-center justify-center gap-1 shadow-xs active:scale-95 transition cursor-pointer leading-[1.6]"
+                            >
+                              <Phone className="w-3.5 h-3.5 text-white fill-white shrink-0" />
+                              <span className="break-words">{tr(language, 'ទូរស័ព្ទ', 'Call', '电话')}</span>
+                            </button>
+
                             <button
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                toggleBookmark(hotel.id);
+                                openDestinationGoogleExternal(hotel, 'maps');
                               }}
-                              aria-label={tr(language, 'រក្សាទុក', 'Bookmark', '收藏')}
-                              className="w-8 h-8 rounded-full bg-white/95 hover:bg-white shadow-sm flex items-center justify-center text-rose-500 active:scale-90 transition cursor-pointer"
+                              style={{
+                                background: 'linear-gradient(180deg, #60A5FA 0%, #2563EB 100%)',
+                              }}
+                              className="min-h-[36px] px-2 py-1 rounded-xl text-white font-extrabold text-xs inline-flex items-center justify-center gap-1 shadow-xs active:scale-95 transition cursor-pointer leading-[1.6]"
                             >
-                              <Heart className={`w-4 h-4 ${bookmarked ? 'fill-rose-500 text-rose-500' : 'text-rose-500'}`} strokeWidth={2.2} />
+                              <Navigation className="w-3.5 h-3.5 text-white shrink-0" strokeWidth={2.2} />
+                              <span className="break-words">{tr(language, 'ផែនទី', 'Map', '地图')}</span>
                             </button>
-                          </>
-                        }
-                      />
+                          </div>
+                        </div>
+                      </article>
                     );
                   })}
                 </div>
               </div>
             )}
 
-            {/* Section 2: បញ្ជីសណ្ឋាគារបន្ថែម (More Hotels Directory - Compact List Cards Matching Shop Menu / Reference Image 2) */}
+            {/* Section 2: បញ្ជីសណ្ឋាគារបន្ថែម (More Hotels Directory - Compact Clean White Cards) */}
             {displayedDirectoryHotels.length > 0 && (
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between gap-2 px-0.5 pt-1">
@@ -1557,7 +1442,7 @@ export const HotelView: React.FC = () => {
                         key={hotel.id}
                         data-testid={`hotel-row-${hotel.id}`}
                         onClick={() => setSelectedDestination(hotel)}
-                        className="bg-white rounded-[20px] p-2.5 border border-slate-200/90 shadow-[0_4px_14px_rgba(15,23,42,0.04)] hover:border-emerald-500/60 transition flex items-center gap-3 cursor-pointer font-khmer"
+                        className="bg-white rounded-[20px] p-2.5 border border-slate-200/90 shadow-[0_4px_14px_rgba(15,23,42,0.04)] hover:border-emerald-500/60 transition flex items-center gap-3 cursor-pointer font-khmer text-slate-900"
                       >
                         <div className="w-16 h-14 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-200/80">
                           <HotelAvatar
@@ -1665,7 +1550,7 @@ export const HotelView: React.FC = () => {
         ) : (
           <div className="py-12 text-center text-slate-500 space-y-2 font-khmer bg-white rounded-2xl border border-slate-200/80 p-6">
             <BedDouble className="w-10 h-10 mx-auto text-slate-300" strokeWidth={1.75} />
-            <p className="text-xs">
+            <p className="text-xs font-bold text-slate-600">
               {debouncedSearchQuery.trim()
                 ? tr(
                     language,
