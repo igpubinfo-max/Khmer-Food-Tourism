@@ -112,10 +112,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSmartHub }) => {
             />
           </div>
           <div className="min-w-0 flex-1 pt-0.5">
-            <h1 className="font-moul text-[12px] sm:text-[13px] tracking-wide text-white leading-relaxed pt-0.5 pb-0.5 truncate">
+            <h1 className="font-moul text-[11.5px] min-[360px]:text-[12px] sm:text-[13px] tracking-wide text-white leading-[1.68] pt-0.5 pb-0.5 break-words">
               {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨风味与旅游')}
             </h1>
-            <p className="text-[10px] text-amber-300 font-semibold leading-relaxed pt-0.5 pb-0.5 truncate">
+            <p className="text-[10px] text-amber-300 font-semibold leading-[1.55] pt-0.5 pb-0.5 break-words">
               {tr(
                 language,
                 'ស្វែងយល់អាហារ • ទីតាំង • បទពិសោធន៍',

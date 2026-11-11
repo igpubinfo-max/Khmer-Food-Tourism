@@ -17,6 +17,83 @@ interface Props {
   onOpenSocialReviews: (platform?: 'all' | 'tiktok' | 'facebook' | 'youtube') => void;
 }
 
+const LAST_POPULAR_3_STORAGE_KEY = 'kft_last_popular_3_dish_ids_v1';
+let sessionPopular3DishIds: string[] | null = null;
+
+function selectSessionRandomThreeDishes(foods: FoodItem[]): FoodItem[] {
+  if (!foods || foods.length === 0) return [];
+  const byId = new Map(foods.map((f) => [f.id, f]));
+
+  // Keep the 3 chosen dishes stable within the current app launch session
+  if (sessionPopular3DishIds && sessionPopular3DishIds.length === 3) {
+    const resolved = sessionPopular3DishIds
+      .map((id) => byId.get(id))
+      .filter((f): f is FoodItem => Boolean(f));
+    if (resolved.length === 3) return resolved;
+  }
+
+  let previousSessionIds = new Set<string>();
+  try {
+    const raw = localStorage.getItem(LAST_POPULAR_3_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        previousSessionIds = new Set(parsed.filter((id): id is string => typeof id === 'string'));
+      }
+    }
+  } catch {
+    // ignore storage errors
+  }
+
+  // Prefer dishes with photos from the existing food database
+  const withPhotos = foods.filter((f) => Boolean(f.photoUrl && f.photoUrl.trim()));
+  const basePool = withPhotos.length >= 3 ? withPhotos : foods;
+
+  // Exclude previous session's 3 dishes whenever possible
+  const nonRepeatingPool = basePool.filter((f) => !previousSessionIds.has(f.id));
+  const candidatePool = nonRepeatingPool.length >= 3 ? nonRepeatingPool : basePool;
+
+  // Fisher-Yates shuffle using crypto.getRandomValues when available for true per-launch randomness
+  const shuffled = [...candidatePool];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    let rand = Math.random();
+    if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
+      const buf = new Uint32Array(1);
+      window.crypto.getRandomValues(buf);
+      rand = buf[0] / (0xffffffff + 1);
+    }
+    const j = Math.floor(rand * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  const picks: FoodItem[] = [];
+  for (const item of shuffled) {
+    if (picks.length >= 3) break;
+    if (!picks.some((p) => p.id === item.id)) {
+      picks.push(item);
+    }
+  }
+
+  // Fallback if nonRepeatingPool had < 3 unique items
+  if (picks.length < 3) {
+    for (const item of basePool) {
+      if (picks.length >= 3) break;
+      if (!picks.some((p) => p.id === item.id)) {
+        picks.push(item);
+      }
+    }
+  }
+
+  sessionPopular3DishIds = picks.map((p) => p.id);
+  try {
+    localStorage.setItem(LAST_POPULAR_3_STORAGE_KEY, JSON.stringify(sessionPopular3DishIds));
+  } catch {
+    // ignore storage errors
+  }
+
+  return picks;
+}
+
 const HomePopularAndSocialSectionInner: React.FC<Props> = ({
   language,
   foods,
@@ -28,47 +105,8 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
   onOpenAiAssistant,
   onOpenSocialReviews,
 }) => {
-  // Select 3 signature popular Cambodian dishes (prioritizing Fish Amok, Grilled Chicken, Khmer Noodle Soup)
-  const featuredThreeDishes = useMemo(() => {
-    if (!foods || foods.length === 0) return [];
-    const byId = new Map(foods.map((f) => [f.id, f]));
-    const picks: FoodItem[] = [];
-
-    const findMatch = (predicate: (f: FoodItem) => boolean) =>
-      foods.find((f) => !picks.some((p) => p.id === f.id) && predicate(f));
-
-    // 1. អាម៉ុកត្រី (Fish Amok)
-    const amok =
-      byId.get('food-1') ||
-      findMatch((f) => /អាម៉ុក|amok/i.test(`${f.nameKh} ${f.nameEn}`));
-    if (amok) picks.push(amok);
-
-    // 2. មាន់អាំង (Grilled Chicken)
-    const grilledChicken =
-      byId.get('food-21') ||
-      byId.get('food-118') ||
-      findMatch((f) => /មាន់អាំង|មាន់ដុត|grilled chicken/i.test(`${f.nameKh} ${f.nameEn}`));
-    if (grilledChicken && !picks.some((p) => p.id === grilledChicken.id)) {
-      picks.push(grilledChicken);
-    }
-
-    // 3. គុយទាវខ្មែរ (Khmer Kuy Teav Noodle Soup)
-    const kuyTeav =
-      byId.get('food-36') ||
-      byId.get('food-6') ||
-      findMatch((f) => /គុយទាវ|kuy teav|noodle soup/i.test(`${f.nameKh} ${f.nameEn}`));
-    if (kuyTeav && !picks.some((p) => p.id === kuyTeav.id)) {
-      picks.push(kuyTeav);
-    }
-
-    for (const f of foods) {
-      if (picks.length >= 3) break;
-      if (!picks.some((p) => p.id === f.id)) {
-        picks.push(f);
-      }
-    }
-    return picks.slice(0, 3);
-  }, [foods]);
+  // Display 3 food images randomly on every app launch, avoiding repeating the previous session's 3 dishes
+  const featuredThreeDishes = useMemo(() => selectSessionRandomThreeDishes(foods), [foods]);
 
   const socialPreviewCards = useMemo(
     () => [
@@ -153,7 +191,7 @@ const HomePopularAndSocialSectionInner: React.FC<Props> = ({
                   ? 'មាន់អាំង'
                   : food.id === 'food-36' || food.id === 'food-6'
                   ? 'គុយទាវខ្មែរ'
-                  : food.nameKh;
+                  : food.nameKh.replace(/\s*\([^)]*\)\s*/g, '').trim() || food.nameKh;
               const displayTitle = language === 'km' ? shortKhName : loc.name;
 
               return (

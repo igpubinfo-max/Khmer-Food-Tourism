@@ -180,7 +180,7 @@ export const NearMeModal: React.FC = () => {
   }, [isNearMeModalOpen]);
 
   const [geoStatus, setGeoStatus] = useState<'idle' | 'requesting' | 'granted' | 'fallback'>('idle');
-  const [manualProvince] = useState<string>('រាជធានីភ្នំពេញ');
+  const [manualProvince, setManualProvince] = useState<string>('រាជធានីភ្នំពេញ');
   const [selectedRadiusMeters, setSelectedRadiusMeters] = useState<number>(MAX_NEARBY_RADIUS_METERS);
   const [isLoadingNearby, setIsLoadingNearby] = useState<boolean>(false);
   const [liveNearbyRestaurants, setLiveNearbyRestaurants] = useState<GooglePlaceCachedItem[]>([]);
@@ -218,6 +218,14 @@ export const NearMeModal: React.FC = () => {
   const baseCoords = useMemo(() => {
     return userCoords || provinceCenters[manualProvince] || provinceCenters['រាជធានីភ្នំពេញ'];
   }, [userCoords, manualProvince]);
+
+  const handleProvinceChange = (prov: string) => {
+    setManualProvince(prov);
+    const center = provinceCenters[prov] || provinceCenters['រាជធានីភ្នំពេញ'];
+    setUserCoords(center);
+    setGeoStatus('fallback');
+    void fetchLiveNearby500m(center, false, selectedRadiusMeters);
+  };
 
   const fetchLiveNearby500m = async (
     coords: { lat: number; lng: number },
@@ -633,17 +641,18 @@ export const NearMeModal: React.FC = () => {
       onClick={() => setIsNearMeModalOpen(false)}
     >
       <div
-        className="w-full max-w-full md:max-w-2xl lg:max-w-3xl bg-[#F4F7FA] text-slate-900 rounded-none md:rounded-3xl border-0 md:border border-slate-200/90 shadow-2xl h-full md:h-[92dvh] max-h-full md:max-h-[92vh] flex flex-col overflow-hidden overscroll-contain font-khmer"
+        className="w-full max-w-full md:max-w-2xl lg:max-w-3xl bg-[#1E293B] text-slate-900 rounded-none md:rounded-3xl border-0 md:border border-slate-700/80 shadow-2xl h-full md:h-[92dvh] max-h-full md:max-h-[92vh] flex flex-col overflow-hidden overscroll-contain font-khmer"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Clean Header */}
         <div
           style={{
             background: 'linear-gradient(92deg, #064E3B 0%, #047857 55%, #0D9488 100%)',
+            paddingTop: 'max(var(--kft-safe-top, 0px), 0.75rem)',
           }}
-          className="px-4 py-3 text-white flex items-center justify-between shrink-0 shadow-sm"
+          className="px-3.5 sm:px-4 pb-3 text-white flex items-center justify-between shrink-0 shadow-sm"
         >
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div
               style={{
                 background: 'linear-gradient(180deg, #FB923C 0%, #EA580C 100%)',
@@ -657,9 +666,9 @@ export const NearMeModal: React.FC = () => {
                 <Compass className="w-5 h-5" />
               )}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="font-moul text-xs sm:text-sm text-white leading-[1.7] py-0.5 truncate">
+                <h2 className="font-moul text-xs sm:text-sm text-white leading-[1.7] py-0.5 break-words">
                   {tr(language, 'ស្វែងរកម្ហូបជិតខ្ញុំ', 'Food & Shops Near Me', '附近美食与店铺')}
                 </h2>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 border border-white/35 text-white text-[10px] font-extrabold shrink-0">
@@ -667,7 +676,7 @@ export const NearMeModal: React.FC = () => {
                   <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费')}</span>
                 </span>
               </div>
-              <p className="text-[11px] text-emerald-50 font-khmer truncate">
+              <p className="text-[11px] text-emerald-50 font-khmer leading-[1.55] break-words">
                 {tr(
                   language,
                   `ក្នុងរង្វង់ ${activeRadiusText} ពីទីតាំង GPS របស់អ្នក • នាំផ្លូវផ្ទាល់`,
@@ -686,15 +695,15 @@ export const NearMeModal: React.FC = () => {
           </button>
         </div>
 
-        {/* Clean White Essential Control Bar: GPS Location + Search Shops + 6 Colorful Gradient Main Categories */}
-        <div className="px-3.5 pt-2.5 pb-3 bg-[#F4F7FA] border-b border-slate-200/80 space-y-2.5 shrink-0">
+        {/* Essential Control Bar: GPS Location + Search Shops + 6 Colorful Gradient Main Categories */}
+        <div className="px-3.5 pt-2.5 pb-3 bg-[#1E293B] border-b border-slate-700/80 space-y-2.5 shrink-0">
           {/* Row 1: Essential GPS Location Status + Province Selector + Refresh GPS */}
           <div className="flex items-center justify-between gap-2 flex-wrap bg-white px-3 py-2 rounded-2xl border border-slate-200/85 shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
-            <div className="flex items-center gap-1.5 min-w-0">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
               <span className="w-6 h-6 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0">
                 <LocateFixed className="w-3.5 h-3.5 text-emerald-600" />
               </span>
-              <span className="text-[11.5px] font-extrabold text-slate-800 truncate">
+              <span className="text-[11.5px] font-extrabold text-slate-800 leading-[1.6] break-words">
                 {geoStatus === 'granted'
                   ? tr(
                       language,
@@ -847,8 +856,8 @@ export const NearMeModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Clean White Shop & Place Cards List */}
-        <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-3 no-scrollbar bg-[#F8FAFC]">
+        {/* Shop & Place Cards List */}
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-3 no-scrollbar bg-[#1E293B]">
           {isLoadingNearby ? (
             <div className="py-14 px-4 text-center bg-white rounded-3xl border border-slate-200/90 shadow-xs my-2">
               <Loader2 className="w-8 h-8 mx-auto mb-3 text-emerald-600 animate-spin" />
@@ -962,7 +971,7 @@ export const NearMeModal: React.FC = () => {
                                   setSelectedRestaurant(r);
                                   setIsNearMeModalOpen(false);
                                 }}
-                                className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 leading-[1.6] truncate cursor-pointer hover:text-emerald-700"
+                                className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 leading-[1.65] line-clamp-2 break-words cursor-pointer hover:text-emerald-700"
                               >
                                 {rLoc.name}
                               </h4>
@@ -976,7 +985,7 @@ export const NearMeModal: React.FC = () => {
                               </span>
                             </div>
 
-                            <div className="flex items-center gap-2 mt-1 text-xs text-slate-600">
+                            <div className="flex items-center gap-2 mt-1 text-xs text-slate-600 flex-wrap">
                               <div className="flex items-center gap-0.5">
                                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                                 <span className="font-extrabold text-slate-900">
@@ -984,19 +993,19 @@ export const NearMeModal: React.FC = () => {
                                 </span>
                               </div>
                               <span>•</span>
-                              <span className="truncate font-semibold">
+                              <span className="font-semibold leading-[1.5]">
                                 {translateProvince(r.provinceKh || rLoc.province, language)}
                               </span>
                             </div>
 
-                            <p className="text-[11px] text-slate-500 truncate mt-1">
+                            <p className="text-[11px] text-slate-500 line-clamp-2 break-words leading-[1.55] mt-1">
                               {cleanCardAddress(rLoc.address, translateProvince(r.provinceKh || rLoc.province, language))}
                             </p>
                           </div>
 
                           {r.matchedInventoryItems && r.matchedInventoryItems.length > 0 && (
-                            <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200/80 text-[10.5px] font-bold text-emerald-800 truncate max-w-full">
-                              <span className="truncate">
+                            <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200/80 text-[10.5px] font-bold text-emerald-800 max-w-full">
+                              <span className="line-clamp-1 break-words leading-[1.5]">
                                 🍜 {r.matchedInventoryItems.join(', ')}
                               </span>
                             </div>
@@ -1144,7 +1153,7 @@ export const NearMeModal: React.FC = () => {
                               setSelectedDestination(d);
                               setIsNearMeModalOpen(false);
                             }}
-                            className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 leading-[1.6] truncate cursor-pointer hover:text-emerald-700"
+                            className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 leading-[1.65] line-clamp-2 break-words cursor-pointer hover:text-emerald-700"
                           >
                             {dLoc.name}
                           </h4>
@@ -1158,7 +1167,7 @@ export const NearMeModal: React.FC = () => {
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2 mt-1 text-xs text-slate-600">
+                        <div className="flex items-center gap-2 mt-1 text-xs text-slate-600 flex-wrap">
                           <span className="font-extrabold text-emerald-700">{dLoc.category}</span>
                           <span>•</span>
                           <div className="flex items-center gap-0.5">
@@ -1169,7 +1178,7 @@ export const NearMeModal: React.FC = () => {
                           </div>
                         </div>
 
-                        <p className="text-[11px] text-slate-500 truncate mt-1">
+                        <p className="text-[11px] text-slate-500 line-clamp-2 break-words leading-[1.55] mt-1">
                           {cleanCardAddress(dLoc.address, translateProvince(d.provinceKh || dLoc.province, language))}
                         </p>
                       </div>

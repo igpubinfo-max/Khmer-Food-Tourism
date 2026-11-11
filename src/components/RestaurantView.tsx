@@ -535,12 +535,12 @@ export const RestaurantView: React.FC = () => {
   }, [featuredRestaurants, distanceMap]);
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-[#F8FAFC] text-slate-900 min-h-full font-khmer pb-12">
+    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-white min-h-full font-khmer pb-12">
       {/* 1. Shared Master Hero Header with Free Account Status Badge */}
       <AngkorHeroTopHeader mode="food" />
 
-      {/* 2. MAIN CONTENT CONTAINER (Matching Reference Image 2 Clean White Style) */}
-      <div className="relative z-20 -mt-12 px-3 min-[360px]:px-4 sm:px-5 space-y-3.5">
+      {/* 2. MAIN CONTENT CONTAINER (Dark Slate #1E293B + Clean White Cards & Colorful Category Buttons) */}
+      <div className="relative z-20 -mt-12 px-3 min-[360px]:px-4 sm:px-5 space-y-3.5 bg-[#1E293B] pt-1">
         {/* Row 1: Essential Search Bar + GPS Location Button */}
         <div className="flex items-center gap-2">
           <div
@@ -550,7 +550,7 @@ export const RestaurantView: React.FC = () => {
               WebkitBackdropFilter: 'blur(12px)',
               boxShadow: '0 8px 24px rgba(15, 23, 42, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1)',
             }}
-            className="flex-1 min-w-0 h-12 rounded-full border border-white pl-3.5 pr-2 flex items-center gap-2"
+            className="flex-1 min-w-0 min-h-[48px] py-1 rounded-full border border-white pl-3.5 pr-2 flex items-center gap-2"
           >
             <Search className="w-5 h-5 text-slate-500 shrink-0" strokeWidth={2.3} />
             <input
@@ -590,7 +590,7 @@ export const RestaurantView: React.FC = () => {
                       boxShadow: '0 4px 12px rgba(234, 88, 12, 0.35)',
                     }
               }
-              className="h-9 px-3.5 rounded-full text-white font-extrabold text-xs inline-flex items-center gap-1.5 shrink-0 border border-white/80 transition active:scale-95 cursor-pointer"
+              className="min-h-[36px] px-2.5 min-[360px]:px-3.5 py-1 rounded-full text-white font-extrabold text-xs inline-flex items-center gap-1.5 shrink-0 border border-white/80 transition active:scale-95 cursor-pointer leading-[1.6]"
             >
               <MapPin className="w-3.5 h-3.5 text-white fill-white/25 shrink-0" strokeWidth={2.3} />
               <span>{tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近')}</span>
@@ -658,11 +658,11 @@ export const RestaurantView: React.FC = () => {
             >
               <Store className="w-4.5 h-4.5" strokeWidth={2.2} />
             </span>
-            <div className="min-w-0">
-              <h3 className="font-extrabold text-xs sm:text-sm text-slate-900 leading-[1.6] truncate">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-extrabold text-xs sm:text-sm text-slate-900 leading-[1.65] break-words">
                 {tr(language, 'ចុះបញ្ជីហាងរបស់អ្នកដោយឥតគិតថ្លៃ', 'Register Your Shop on the App', '入驻您的餐厅店铺')}
               </h3>
-              <p className="text-[11px] text-slate-500 truncate">
+              <p className="text-[11px] text-slate-500 leading-[1.6] break-words">
                 {tr(
                   language,
                   'បង្ហាញហាងភោជនីយដ្ឋាន និងទីតាំង GPS របស់អ្នកនៅលើកម្មវិធី',
@@ -737,9 +737,9 @@ export const RestaurantView: React.FC = () => {
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between gap-2 px-0.5">
                   <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                    <div className="flex items-center gap-1.5">
-                      <Flame className="w-5 h-5 text-orange-500 fill-amber-400 shrink-0" />
-                      <h3 className="font-extrabold text-[15px] sm:text-base text-slate-900 leading-[1.6] truncate">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Flame className="w-5 h-5 text-orange-400 fill-amber-400 shrink-0" />
+                      <h3 className="font-extrabold text-[15px] sm:text-base text-white leading-[1.65] break-words">
                         {tr(language, 'ហាងពេញនិយមជិតខ្ញុំ', 'Popular Shops Near Me', '附近热门店铺')}
                       </h3>
                     </div>
@@ -803,11 +803,11 @@ export const RestaurantView: React.FC = () => {
                     >
                       <Store className="w-4 h-4 shrink-0" strokeWidth={2.2} />
                     </span>
-                    <h3 className="font-extrabold text-[15px] sm:text-base text-slate-900 leading-[1.6]">
+                    <h3 className="font-extrabold text-[15px] sm:text-base text-white leading-[1.6]">
                       {tr(language, 'បញ្ជីហាងបន្ថែម', 'More Shops Directory', '更多店铺列表')}
                     </h3>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 text-[11px] font-extrabold text-slate-700 font-mono shadow-2xs">
+                  <span className="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 text-[11px] font-extrabold text-slate-800 font-mono shadow-2xs">
                     {directoryRestaurants.length}
                   </span>
                 </div>

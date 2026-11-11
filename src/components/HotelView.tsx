@@ -780,7 +780,7 @@ export const HotelView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-[#F4F7F5] text-slate-900 min-h-full font-khmer pb-8">
+    <div className="w-full max-w-6xl mx-auto bg-[#F4F7F5] text-slate-900 min-h-full font-khmer pb-8 overflow-x-hidden">
       {/* =====================================================================
           1. TOP ANGKOR WAT SUNSET & LAKE REFLECTION HERO + SEARCH + CATEGORIES
              (Matching Shop Menu 1-to-1)
@@ -903,9 +903,9 @@ export const HotelView: React.FC = () => {
             <path d="M5 12v8h14v-8" />
             <path d="M9 20v-5h6v5" />
           </svg>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h2
-              className="font-extrabold text-[17px] sm:text-[18px] text-white leading-tight truncate"
+              className="font-extrabold text-[16px] sm:text-[18px] text-white leading-[1.65] break-words"
               style={{ textShadow: '0 2px 6px rgba(0,0,0,0.6)' }}
             >
               {tr(
@@ -916,7 +916,7 @@ export const HotelView: React.FC = () => {
               )}
             </h2>
             <p
-              className="text-xs font-bold text-white/95 truncate"
+              className="text-xs font-bold text-white/95 leading-[1.5] break-words"
               style={{ textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}
             >
               Hotels &amp; Stays
@@ -926,7 +926,7 @@ export const HotelView: React.FC = () => {
 
         {/* Row 3: White Pill Search Input + Green "នៅជិតខ្ញុំ" Near Me Pill Button */}
         <div className="relative z-10 mt-3 flex items-center gap-2">
-          <div className="flex-1 min-w-0 h-11 rounded-full bg-white shadow-md flex items-center pl-3.5 pr-2.5 gap-2 border border-white/90">
+          <div className="flex-1 min-w-0 min-h-[44px] py-1 rounded-full bg-white shadow-md flex items-center pl-3.5 pr-2.5 gap-2 border border-white/90">
             <Search className="w-5 h-5 text-slate-800 shrink-0" strokeWidth={2.3} />
             <input
               ref={searchInputRef}
@@ -970,7 +970,7 @@ export const HotelView: React.FC = () => {
                   ? 'linear-gradient(180deg, #16A34A 0%, #0D6E32 100%)'
                   : 'linear-gradient(180deg, #1E7E48 0%, #0F5330 100%)',
             }}
-            className="h-11 px-3.5 rounded-full font-extrabold text-xs text-white inline-flex items-center gap-1.5 shrink-0 shadow-md border border-white/60 transition active:scale-95 cursor-pointer"
+            className="min-h-[44px] px-3 sm:px-3.5 py-1 rounded-full font-extrabold text-xs text-white inline-flex items-center gap-1.5 shrink-0 shadow-md border border-white/60 transition active:scale-95 cursor-pointer leading-[1.6]"
           >
             <MapPin className="w-4 h-4 shrink-0 text-white fill-white/20" strokeWidth={2.3} />
             <span>{tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近')}</span>
@@ -1155,16 +1155,16 @@ export const HotelView: React.FC = () => {
               />
 
               {/* Right Headline, Supporting Text & Prominent Gold Rounded CTA Button */}
-              <div className="relative z-10 w-full pl-[39%] pr-3.5 py-2.5 space-y-1.5">
+              <div className="relative z-10 w-full pl-[36%] sm:pl-[39%] pr-3.5 py-2.5 space-y-1.5">
                 <div>
                   <h3
-                    className="font-khmer font-extrabold text-white leading-tight truncate"
-                    style={{ fontSize: '14.5px', textShadow: '0 2px 4px rgba(0,0,0,0.42)' }}
+                    className="font-khmer font-extrabold text-white leading-[1.65] break-words"
+                    style={{ fontSize: 'clamp(12px, 3.5vw, 14.5px)', textShadow: '0 2px 4px rgba(0,0,0,0.42)' }}
                   >
                     {tr(language, 'ចុះបញ្ជីសណ្ឋាគារ ឬផ្ទះសំណាក់', 'Register Your Hotel or Guesthouse', '入驻您的酒店或客栈')}
                   </h3>
                   <p
-                    className="font-khmer font-bold text-white/95 leading-snug mt-0.5 truncate"
+                    className="font-khmer font-bold text-white/95 leading-[1.55] mt-0.5 break-words"
                     style={{ fontSize: '10px', textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}
                   >
                     {tr(
@@ -1184,7 +1184,7 @@ export const HotelView: React.FC = () => {
                     boxShadow: '0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.75)',
                     fontSize: '12px',
                   }}
-                  className="w-full h-8.5 px-4 rounded-full border border-amber-200 text-slate-950 font-khmer font-extrabold inline-flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer"
+                  className="w-full min-h-[34px] py-1 px-3 rounded-full border border-amber-200 text-slate-950 font-khmer font-extrabold inline-flex items-center justify-center gap-1.5 active:scale-95 transition cursor-pointer leading-[1.6]"
                 >
                   <Plus className="w-4 h-4 stroke-[2.8] text-slate-950 shrink-0" />
                   <span>{tr(language, 'បន្ថែមសណ្ឋាគារ', 'Add Hotel', '添加酒店')}</span>
@@ -1196,7 +1196,7 @@ export const HotelView: React.FC = () => {
           {/* If user already used their 1 VIP slot on a Restaurant, show clear notice */}
           {!isAdmin && myExistingShop && !myExistingHotel && (
             <div className="relative z-10 mt-2.5 px-3 py-1.5 rounded-xl bg-amber-950/60 border border-amber-300/40 text-amber-200 text-[10.5px] font-semibold font-khmer flex items-center justify-between gap-2">
-              <span className="truncate">
+              <span className="leading-[1.6] break-words">
                 {tr(
                   language,
                   `អ្នកបានប្រើសិទ្ធិ VIP បង្កើតហាងអាហារ «${myExistingShop.nameKh}» រួចហើយ (1/1) — មិនអាចបន្ថែមសណ្ឋាគារទៀតបានទេ។`,
@@ -1216,10 +1216,10 @@ export const HotelView: React.FC = () => {
                   (window as any).__kft_admin_tab = 'hotels';
                   setIsAdminOpen(true);
                 }}
-                className="w-full py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer font-khmer"
+                className="w-full py-1.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer font-khmer leading-[1.6]"
               >
                 <Settings className="w-3.5 h-3.5 text-amber-300 shrink-0" strokeWidth={2} />
-                <span className="truncate">
+                <span className="break-words">
                   {tr(language, 'គ្រប់គ្រងសណ្ឋាគារទាំងអស់', 'Manage All Hotels', '管理全部酒店')}
                 </span>
               </button>
@@ -1237,10 +1237,10 @@ export const HotelView: React.FC = () => {
                     'success'
                   )
                 }
-                className="w-full py-1.5 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer font-khmer"
+                className="w-full py-1.5 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer font-khmer leading-[1.6]"
               >
                 <Download className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
-                <span className="truncate">
+                <span className="break-words">
                   {tr(
                     language,
                     'ទាញយកគំរូ Excel ដាក់រូបសណ្ឋាគារ (.xlsx)',
@@ -1251,8 +1251,8 @@ export const HotelView: React.FC = () => {
               </a>
             </div>
           ) : myExistingHotel ? (
-            <div className="relative z-10 px-3 py-2 rounded-2xl bg-[#0A5C36] border border-emerald-700/40 flex items-center justify-between gap-2 shadow-xs">
-              <span className="min-w-0 flex-1 text-[11px] font-bold text-amber-200 truncate font-khmer">
+            <div className="relative z-10 px-3 py-2 rounded-2xl bg-[#0A5C36] border border-emerald-700/40 flex items-center justify-between gap-2 shadow-xs flex-wrap">
+              <span className="min-w-0 flex-1 text-[11px] font-bold text-amber-200 leading-[1.6] break-words font-khmer">
                 {tr(
                   language,
                   `សណ្ឋាគាររបស់ខ្ញុំ៖ ${myExistingHotel.nameKh}`,
@@ -1282,11 +1282,11 @@ export const HotelView: React.FC = () => {
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between gap-1.5 px-0.5">
                   <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 min-w-0">
                       <span className="w-5 h-5 flex items-center justify-center shrink-0">
                         <Flame className="w-5 h-5 text-orange-500 fill-amber-400" />
                       </span>
-                      <h3 className="font-extrabold text-[15px] sm:text-base text-[#0F291E] truncate">
+                      <h3 className="font-extrabold text-[15px] sm:text-base text-[#0F291E] leading-[1.65] break-words">
                         {tr(language, 'សណ្ឋាគារពេញនិយមជិតខ្ញុំ', 'Popular Hotels Near Me', '附近热门酒店')}
                       </h3>
                     </div>
@@ -1405,7 +1405,7 @@ export const HotelView: React.FC = () => {
                         className="bg-white rounded-[22px] p-2.5 border border-slate-200/85 shadow-[0_6px_20px_rgba(15,23,42,0.06)] hover:border-emerald-500/60 transition flex gap-3 items-stretch cursor-pointer font-khmer"
                       >
                         {/* Left Icon / Verified Owner Photo Box with Distance Pill & Heart Button (Matching RestaurantCard) */}
-                        <div className="w-[120px] min-[360px]:w-[146px] sm:w-[158px] min-h-[132px] rounded-2xl overflow-hidden relative shrink-0 bg-slate-100">
+                        <div className="w-[100px] min-[340px]:w-[120px] min-[380px]:w-[146px] sm:w-[158px] min-h-[132px] rounded-2xl overflow-hidden relative shrink-0 bg-slate-100">
                           <HotelAvatar
                             hotel={hotel}
                             alt={loc.name}
@@ -1446,12 +1446,12 @@ export const HotelView: React.FC = () => {
                         <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                           <div>
                             <div className="flex items-start justify-between gap-1.5">
-                              <div className="min-w-0">
-                                <h4 className="font-extrabold text-[15px] sm:text-base text-slate-900 leading-snug truncate">
+                              <div className="min-w-0 flex-1">
+                                <h4 className="font-extrabold text-[14.5px] sm:text-base text-slate-900 leading-[1.65] line-clamp-2 break-words">
                                   {hotel.nameKh || loc.name}
                                 </h4>
                                 {hotel.nameEn && hotel.nameEn !== hotel.nameKh && (
-                                  <p className="text-xs font-bold text-slate-600 truncate mt-0.5">
+                                  <p className="text-xs font-bold text-slate-600 line-clamp-1 break-words mt-0.5 leading-[1.5]">
                                     {hotel.nameEn}
                                   </p>
                                 )}
@@ -1460,10 +1460,10 @@ export const HotelView: React.FC = () => {
                             </div>
 
                             {/* Rating & Review Count */}
-                            <div className="flex items-center gap-1 mt-1 text-xs">
+                            <div className="flex items-center gap-1 mt-1 text-xs flex-wrap">
                               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
                               <span className="font-extrabold text-slate-900">{displayRating}</span>
-                              <span className="text-slate-500 font-semibold truncate">
+                              <span className="text-slate-500 font-semibold leading-[1.5]">
                                 ({displayReviews} {tr(language, 'ការវាយតម្លៃ', 'reviews', '条评价')})
                               </span>
                             </div>
@@ -1496,19 +1496,19 @@ export const HotelView: React.FC = () => {
                               style={{
                                 background: 'linear-gradient(180deg, #1E7E48 0%, #0D522C 100%)',
                               }}
-                              className="h-9 px-2.5 rounded-xl text-white font-extrabold text-xs inline-flex items-center justify-center gap-1.5 shadow-xs active:scale-95 transition cursor-pointer"
+                              className="min-h-[36px] px-2 py-1 rounded-xl text-white font-extrabold text-xs inline-flex items-center justify-center gap-1 shadow-xs active:scale-95 transition cursor-pointer leading-[1.6]"
                             >
                               <Phone className="w-3.5 h-3.5 text-white fill-white shrink-0" />
-                              <span className="truncate">{tr(language, 'ទូរស័ព្ទ', 'Call', '电话')}</span>
+                              <span className="break-words">{tr(language, 'ទូរស័ព្ទ', 'Call', '电话')}</span>
                             </button>
 
                             <button
                               type="button"
                               onClick={() => openDestinationGoogleExternal(hotel, 'maps')}
-                              className="h-9 px-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-extrabold text-xs inline-flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 transition cursor-pointer"
+                              className="min-h-[36px] px-2 py-1 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-extrabold text-xs inline-flex items-center justify-center gap-1 shadow-2xs active:scale-95 transition cursor-pointer leading-[1.6]"
                             >
                               <MapPin className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" strokeWidth={2.3} />
-                              <span className="truncate">{tr(language, 'ផែនទី', 'Map', '地图')}</span>
+                              <span className="break-words">{tr(language, 'ផែនទី', 'Map', '地图')}</span>
                             </button>
                           </div>
                         </div>
@@ -1567,25 +1567,25 @@ export const HotelView: React.FC = () => {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-baseline gap-1.5 min-w-0">
-                            <h4 className="font-extrabold text-sm text-slate-900 truncate">
+                          <div className="flex items-baseline gap-1.5 min-w-0 flex-wrap">
+                            <h4 className="font-extrabold text-sm text-slate-900 leading-[1.65] line-clamp-2 break-words">
                               {hotel.nameKh || loc.name}
                             </h4>
                             {hotel.nameEn && hotel.nameEn !== hotel.nameKh && (
-                              <span className="text-xs font-semibold text-slate-500 truncate">
+                              <span className="text-xs font-semibold text-slate-500 line-clamp-1 break-words">
                                 {hotel.nameEn}
                               </span>
                             )}
                           </div>
 
-                          <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-600">
+                          <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-600 flex-wrap">
                             <span className="inline-flex items-center gap-1">
                               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
                               <strong className="font-extrabold text-slate-900">{displayRating}</strong>
                               <span className="text-slate-500">({displayReviews})</span>
                             </span>
                             <span className="text-slate-300">|</span>
-                            <span className="inline-flex items-center gap-1 text-slate-700 font-bold truncate">
+                            <span className="inline-flex items-center gap-1 text-slate-700 font-bold">
                               <MapPin className="w-3.5 h-3.5 text-[#0E5A35] shrink-0" />
                               <span>
                                 {distanceKm} {tr(language, 'km', 'km', '公里')}

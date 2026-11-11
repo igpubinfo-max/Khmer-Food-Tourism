@@ -435,11 +435,12 @@ export function translateUniversalDishQuery(dishQuery: string): UniversalDishTra
   const englishMatch = clean.match(/[A-Za-z][A-Za-z0-9\s'-]{1,}/);
   if (englishMatch && !/[\u1780-\u17FF\u4E00-\u9FFF]/.test(clean)) {
     const extractedEn = englishMatch[0].trim();
+    const isFoodTerm = FOOD_CULINARY_SIGNAL_RE.test(extractedEn);
     return {
       enName: extractedEn,
       wikiQuery: extractedEn,
-      mealDbQuery: extractedEn,
-      hasLexiconMatch: true,
+      mealDbQuery: isFoodTerm ? extractedEn : undefined,
+      hasLexiconMatch: isFoodTerm,
     };
   }
 
@@ -454,7 +455,7 @@ export function translateUniversalDishQuery(dishQuery: string): UniversalDishTra
   };
 }
 
-const SESSION_CACHE_STORAGE_KEY = 'kft_open_dish_photo_cache_v3';
+const SESSION_CACHE_STORAGE_KEY = 'kft_open_dish_photo_cache_v4';
 const memoryPhotoCache = new Map<string, string>();
 const inFlightPhotoRequests = new Map<string, Promise<string | null>>();
 
@@ -801,7 +802,12 @@ async function queryWikimediaCommonsBitmap(term: string, relevanceQuery?: string
       for (const p of pages) {
         const title = String(p?.title || '');
         if (NON_FOOD_WIKI_PAGE_RE.test(title)) continue;
-        if (relevanceQuery && !isTitleRelevantToDish(relevanceQuery, title.replace(/^File:/i, '').replace(/\.[a-z]{3,4}$/i, ''))) continue;
+        if (relevanceQuery) {
+          const cleanFileTitle = title.replace(/^File:/i, '').replace(/\.[a-z]{3,4}$/i, '');
+          if (!isTitleRelevantToDish(relevanceQuery, cleanFileTitle) || !FOOD_CULINARY_SIGNAL_RE.test(cleanFileTitle)) {
+            continue;
+          }
+        }
         const rawUrl = p?.imageinfo?.[0]?.thumburl || p?.imageinfo?.[0]?.url;
         const valid = isValidFoodImageUrl(rawUrl, title);
         if (valid) return valid;
@@ -813,6 +819,9 @@ async function queryWikimediaCommonsBitmap(term: string, relevanceQuery?: string
   return null;
 }
 
+const NON_FOOD_GREETING_OR_CHITCHAT_RE =
+  /^(?:hello|hi|hey|yo|good\s*(?:morning|afternoon|evening|night)|how\s*are\s*you|what'?s\s*up|thanks?|thank\s*you|ok(?:ay)?|yes|no|help|test|who\s*are\s*you|សួស្តី|ជំរាបសួរ|ជម្រាបសួរ|អរគុណ|បាទ|ចាស|សុខសប្បាយ|你好|您好|谢谢|早上好|晚上好)(?:\s|[!?.។؟])*$/i;
+
 /**
  * Fetches an authentic, legal, strictly food-verified Open-API dish photo for ANY out-of-catalog dish
  * in Khmer (any spelling/dialect), English, or Chinese.
@@ -821,6 +830,7 @@ export async function fetchUniversalDishPhotoFromOpenApis(dishQuery: string): Pr
   hydratePhotoCacheFromSession();
   const rawTrimmed = (dishQuery || '').replace(/[?？!！។«»"']/g, ' ').replace(/\s+/g, ' ').trim();
   if (!rawTrimmed) return null;
+  if (NON_FOOD_GREETING_OR_CHITCHAT_RE.test(rawTrimmed)) return null;
   // A sentence / question / criteria phrase is not a dish: never go fishing for a "matching" photo.
   if (isQuestionOrCriteriaQuery(rawTrimmed)) return null;
 

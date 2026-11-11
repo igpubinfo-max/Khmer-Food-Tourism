@@ -46,13 +46,29 @@ export const IconFoodPicks: React.FC<IconProps> = ({ className = 'w-5 h-5', ...p
   </svg>
 );
 
-/** 4. Food by Province — Folded 25-province map with culinary heritage badge */
+/** 4. Food by Province — Recognizable Cambodia map silhouette with 25 centered inside */
 export const IconProvinceFood: React.FC<IconProps> = ({ className = 'w-5 h-5', ...props }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.85} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
-    <path d="M3.5 6.2 9 4l6 2.2 5.5-2.2v13.8L15 20l-6-2.2-5.5 2.2V6.2Z" fill="currentColor" fillOpacity={0.14} />
-    <path d="M9 4v13.8" />
-    <path d="M15 6.2V20" />
-    <circle cx={12} cy={11.5} r={2.3} fill="currentColor" fillOpacity={0.28} />
+  <svg viewBox="0 0 60 48" fill="none" className={className} {...props}>
+    <path
+      d="M6.2 14.2 10.4 9.5l5.1-2.7 7.6-.8 6.8 1.2 4.9-.5 3.6 2.8 4.4-4.1 6.7-2.2 4.8.6 1.9 3.6-1.8 4.6.9 4.2-2.6 3.7 2.8 4.1-.7 4.7-4.5 2.5-5.6.9-2.8 3.6 3.2 2.4-.9 2.6-4.9.4-3.7-2.2-4.8.8-3.4 4.1-6.2.8-5.1-1.2-2.1-3.4 2.4-2.8-3.1-1.9-4.6-4.3-1.4-4.8-3.8-4.2-.8-4.6 1.8-3.2Z"
+      fill="currentColor"
+      fillOpacity={0.22}
+      stroke="currentColor"
+      strokeWidth={2.4}
+      strokeLinejoin="round"
+    />
+    <text
+      x="29.5"
+      y="29.5"
+      textAnchor="middle"
+      fill="currentColor"
+      fontFamily="system-ui, -apple-system, sans-serif"
+      fontSize="15.5"
+      fontWeight="900"
+      letterSpacing="-0.5"
+    >
+      25
+    </text>
   </svg>
 );
 

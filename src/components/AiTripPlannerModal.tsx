@@ -510,18 +510,18 @@ export const AiTripPlannerModal: React.FC = () => {
       onClick={() => setIsAiTripPlannerModalOpen(false)}
     >
       <div
-        className="w-full max-w-lg sm:max-w-xl bg-[#F4F7FA] text-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200/90 shadow-2xl max-h-[92vh] flex flex-col overflow-hidden"
+        className="w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-3xl bg-[#1E293B] text-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-700/80 shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 bg-gradient-to-r from-[#064E3B] via-emerald-800 to-[#047857] text-white flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div className="p-3.5 sm:p-4 bg-gradient-to-r from-[#064E3B] via-emerald-800 to-[#047857] text-white flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 text-slate-950 flex items-center justify-center shadow-sm shrink-0">
               <IconSmartAssistant className="w-5 h-5" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h3 className="font-moul text-sm text-white truncate">
+                <h3 className="font-moul text-xs sm:text-sm text-white leading-[1.7] py-0.5 break-words">
                   {tr(language, 'ជំនួយការឆ្លាតវៃ AI', 'Smart AI Assistant', 'AI 智能助手')}
                 </h3>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black shadow-2xs shrink-0">
@@ -529,7 +529,7 @@ export const AiTripPlannerModal: React.FC = () => {
                   <span>{canUseVip ? 'VIP ✓' : 'VIP'}</span>
                 </span>
               </div>
-              <p className="text-[11px] text-emerald-100 font-khmer truncate">
+              <p className="text-[11px] text-emerald-100 font-khmer leading-[1.55] break-words">
                 {tr(
                   language,
                   'ជំនួយការរើសម្ហូបប្រចាំថ្ងៃ រូបមន្តម្ហូប និងរៀបផែនការដើរលេង AI',
@@ -548,21 +548,21 @@ export const AiTripPlannerModal: React.FC = () => {
         </div>
 
         {/* 3-Mode Switcher Bar: AI Food Advisor | VIP Special Menu | AI Route Planner */}
-        <div className="grid grid-cols-3 p-1.5 bg-white border-b border-slate-200/90 gap-1.5 shrink-0 font-khmer shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
+        <div className="grid grid-cols-3 p-1.5 bg-[#1E293B] border-b border-slate-700/80 gap-1.5 shrink-0 font-khmer shadow-[0_2px_10px_rgba(15,23,42,0.16)]">
           <button
             type="button"
             onClick={() => setAssistantTab('food_advisor')}
-            className={`py-2 px-1.5 rounded-xl text-[11px] font-extrabold transition flex flex-col items-center justify-center gap-0.5 cursor-pointer border ${
+            className={`py-2 px-1 rounded-xl text-[10.5px] sm:text-[11px] font-extrabold transition flex flex-col items-center justify-center gap-0.5 cursor-pointer border min-w-0 ${
               assistantTab === 'food_advisor'
-                ? 'bg-emerald-50/95 text-[#064E3B] border-emerald-500/40 shadow-2xs'
-                : 'bg-slate-50/80 text-slate-600 border-transparent hover:bg-slate-100 hover:text-slate-900'
+                ? 'bg-emerald-50 text-[#064E3B] border-emerald-400 shadow-2xs'
+                : 'bg-white/95 text-slate-700 border-slate-200/80 hover:bg-white hover:text-slate-900'
             }`}
           >
-            <span className="flex items-center gap-1">
-              <Utensils className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="truncate">{tr(language, 'រើសម្ហូបឆ្លាតវៃ', 'AI Food', '智能选餐')}</span>
+            <span className="flex items-center justify-center gap-1 flex-wrap text-center leading-[1.6]">
+              <Utensils className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span className="break-words">{tr(language, 'រើសម្ហូបឆ្លាតវៃ', 'AI Food', '智能选餐')}</span>
             </span>
-            <span className="text-[9px] font-bold text-emerald-700">
+            <span className="text-[9px] font-bold text-emerald-700 leading-[1.4]">
               {tr(language, 'ឥតគិតថ្លៃ + VIP', 'Free + VIP', '免费 + VIP')}
             </span>
           </button>
@@ -570,17 +570,17 @@ export const AiTripPlannerModal: React.FC = () => {
           <button
             type="button"
             onClick={() => setAssistantTab('healthy_vip')}
-            className={`py-2 px-1.5 rounded-xl text-[11px] font-extrabold transition flex flex-col items-center justify-center gap-0.5 cursor-pointer border ${
+            className={`py-2 px-1 rounded-xl text-[10.5px] sm:text-[11px] font-extrabold transition flex flex-col items-center justify-center gap-0.5 cursor-pointer border min-w-0 ${
               assistantTab === 'healthy_vip'
-                ? 'bg-emerald-50/95 text-[#064E3B] border-emerald-500/40 shadow-2xs'
-                : 'bg-slate-50/80 text-slate-600 border-transparent hover:bg-slate-100 hover:text-slate-900'
+                ? 'bg-emerald-50 text-[#064E3B] border-emerald-400 shadow-2xs'
+                : 'bg-white/95 text-slate-700 border-slate-200/80 hover:bg-white hover:text-slate-900'
             }`}
           >
-            <span className="flex items-center gap-1">
-              <ChefHat className="w-3.5 h-3.5 text-amber-500" />
-              <span className="truncate">{tr(language, 'ម្ហូបពិសេស', 'Special Menu', '特色菜单')}</span>
+            <span className="flex items-center justify-center gap-1 flex-wrap text-center leading-[1.6]">
+              <ChefHat className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <span className="break-words">{tr(language, 'ម្ហូបពិសេស', 'Special Menu', '特色菜单')}</span>
             </span>
-            <span className="text-[9px] font-black text-amber-600 inline-flex items-center gap-0.5">
+            <span className="text-[9px] font-black text-amber-600 inline-flex items-center gap-0.5 leading-[1.4]">
               <span>👑</span>
               <span>VIP</span>
             </span>
@@ -589,17 +589,17 @@ export const AiTripPlannerModal: React.FC = () => {
           <button
             type="button"
             onClick={() => setAssistantTab('route_planner')}
-            className={`py-2 px-1.5 rounded-xl text-[11px] font-extrabold transition flex flex-col items-center justify-center gap-0.5 cursor-pointer border ${
+            className={`py-2 px-1 rounded-xl text-[10.5px] sm:text-[11px] font-extrabold transition flex flex-col items-center justify-center gap-0.5 cursor-pointer border min-w-0 ${
               assistantTab === 'route_planner'
-                ? 'bg-emerald-50/95 text-[#064E3B] border-emerald-500/40 shadow-2xs'
-                : 'bg-slate-50/80 text-slate-600 border-transparent hover:bg-slate-100 hover:text-slate-900'
+                ? 'bg-emerald-50 text-[#064E3B] border-emerald-400 shadow-2xs'
+                : 'bg-white/95 text-slate-700 border-slate-200/80 hover:bg-white hover:text-slate-900'
             }`}
           >
-            <span className="flex items-center gap-1">
-              <Compass className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="truncate">{tr(language, 'ផែនការដើរលេង', 'Trip Planner', '行程规划')}</span>
+            <span className="flex items-center justify-center gap-1 flex-wrap text-center leading-[1.6]">
+              <Compass className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span className="break-words">{tr(language, 'ផែនការដើរលេង', 'Trip Planner', '行程规划')}</span>
             </span>
-            <span className="text-[9px] font-black text-amber-600">
+            <span className="text-[9px] font-black text-amber-600 leading-[1.4]">
               {tr(language, '១ថ្ងៃឥតគិតថ្លៃ • VIP', '1d Free • VIP', '1日免费 • VIP')}
             </span>
           </button>
@@ -608,7 +608,7 @@ export const AiTripPlannerModal: React.FC = () => {
         {/* Content Body */}
         <div
           ref={contentScrollRef}
-          className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] p-4 pb-8 space-y-4 font-khmer"
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] p-4 pb-[calc(var(--kft-safe-bottom,0px)+2rem)] space-y-4 font-khmer bg-[#1E293B]"
         >
           {/* =====================================================================
               TAB 1: AI DAILY FOOD & CRAVING ADVISOR (FREE PREVIEW + VIP ADVANCED)
@@ -1253,10 +1253,10 @@ export const AiTripPlannerModal: React.FC = () => {
                     <Compass className="w-8 h-8" />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-bold text-sm text-[#0F172A] animate-pulse">
+                    <h4 className="font-bold text-sm text-white animate-pulse">
                       {generationStepText}
                     </h4>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-300">
                       {tr(
                         language,
                         'រៀបចំកន្លែងញ៉ាំ និងកន្លែងកម្សាន្តដ៏ល្អបំផុតជូនអ្នក...',
@@ -1274,8 +1274,8 @@ export const AiTripPlannerModal: React.FC = () => {
                   {/* 1. Destination Province (All 25 Cambodian Provinces & Capital City) */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                        <MapPin className="w-4 h-4 text-emerald-600" />
+                      <label className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                        <MapPin className="w-4 h-4 text-emerald-400" />
                         <span>
                           {tr(
                             language,
@@ -1285,7 +1285,7 @@ export const AiTripPlannerModal: React.FC = () => {
                           )}
                         </span>
                       </label>
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 text-[10px] font-bold">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
                         {tr(language, '25 ខេត្ត/រាជធានី', '25 Provinces', '25 个省市')}
                       </span>
                     </div>
@@ -1293,7 +1293,7 @@ export const AiTripPlannerModal: React.FC = () => {
                     <select
                       value={selectedProvince}
                       onChange={(e) => setSelectedProvince(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl border border-emerald-500/40 bg-slate-50 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full px-3 py-2.5 rounded-xl border border-emerald-500/40 bg-white text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     >
                       {ALL_25_CAMBODIA_PROVINCES.map((prov, idx) => (
                         <option key={prov.id} value={prov.id}>
@@ -1307,7 +1307,7 @@ export const AiTripPlannerModal: React.FC = () => {
                       ))}
                     </select>
 
-                    <div className="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-500/30 space-y-1 text-[11px]">
+                    <div className="p-2.5 rounded-xl bg-emerald-50/95 border border-emerald-500/30 space-y-1 text-[11px]">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
                         <span className="font-bold text-[#064E3B]">
                           📍 {tr(language, selectedProvinceMeta.nameKh, selectedProvinceMeta.nameEn, selectedProvinceMeta.nameZh)}
@@ -1337,8 +1337,8 @@ export const AiTripPlannerModal: React.FC = () => {
 
                   {/* 2. Duration Days (1 Day FREE Preview, 2-3 Days VIP) */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                      <Calendar className="w-4 h-4 text-emerald-600" />
+                    <label className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4 text-emerald-400" />
                       <span>{tr(language, '២. ចំនួនថ្ងៃធ្វើដំណើរ៖', '2. Duration:', '2. 行程天数：')}</span>
                     </label>
                     <div className="grid grid-cols-3 gap-2">
@@ -1389,8 +1389,8 @@ export const AiTripPlannerModal: React.FC = () => {
 
                   {/* 3. Budget Level */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                      <DollarSign className="w-4 h-4 text-emerald-600" />
+                    <label className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                      <DollarSign className="w-4 h-4 text-emerald-400" />
                       <span>{tr(language, '៣. កម្រិតថវិកា៖', '3. Budget Level:', '3. 预算档次：')}</span>
                     </label>
                     <div className="grid grid-cols-3 gap-2">
@@ -1417,8 +1417,8 @@ export const AiTripPlannerModal: React.FC = () => {
 
                   {/* 4. Companions */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                      <Users className="w-4 h-4 text-emerald-600" />
+                    <label className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                      <Users className="w-4 h-4 text-emerald-400" />
                       <span>{tr(language, '៤. អ្នករួមដំណើរជាមួយ៖', '4. Companions:', '4. 同行伙伴：')}</span>
                     </label>
                     <div className="grid grid-cols-4 gap-1.5">

@@ -5,7 +5,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1534;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1535;
 export const APP_RELEASE_DATE = '2026-11-11';
 
 /**
@@ -635,7 +635,14 @@ const resolveFoodPhotoUrlFull = (
     trimmed = trimmed.replace('/storage/v1/render/image/public/', '/storage/v1/object/public/').split('?')[0];
   }
   if (isEphemeralDeadImageUrl(trimmed)) {
-    return seedFallbackPath ? `${seedFallbackPath}?v=${APP_BUILD_CODE}` : '/welcome/hero-bg.webp';
+    return seedFallbackPath ? `${seedFallbackPath}?v=${APP_BUILD_CODE}` : `/foods/food-1.jpg?v=${APP_BUILD_CODE}`;
+  }
+  if (
+    seedFallbackPath &&
+    /^https?:\/\//i.test(trimmed) &&
+    !trimmed.includes('/storage/v1/object/public/')
+  ) {
+    return `${seedFallbackPath}?v=${APP_BUILD_CODE}`;
   }
   if (trimmed.startsWith('data:') || trimmed.startsWith('blob:')) {
     return trimmed;
@@ -655,7 +662,7 @@ const resolveFoodPhotoUrlFull = (
  * Multi-stage `<img>` error recovery for food cards/modals:
  * 1) Direct non-transformed cloud URL (if a transformed URL ever failed)
  * 2) Bundled local `/foods/food-<N>.jpg` asset (for `food-1` .. `food-307`)
- * 3) Bundled `/welcome/hero-bg.webp` hero fallback (prevents broken-image icon permanently)
+ * 3) Bundled `/foods/food-1.jpg` authentic Cambodian food fallback (prevents broken-image icon permanently)
  */
 export const handleFoodImageError = (
   e: { currentTarget: HTMLImageElement },
@@ -692,8 +699,9 @@ export const handleFoodImageError = (
   }
 
   img.dataset.kftFallbackStage = '3';
-  if (!img.src.includes('/welcome/hero-bg.webp')) {
-    img.src = '/welcome/hero-bg.webp';
+  const defaultFoodFallback = `/foods/food-1.jpg?v=${APP_BUILD_CODE}`;
+  if (!img.src.includes('/foods/food-1.jpg')) {
+    img.src = defaultFoodFallback;
   }
 };
 

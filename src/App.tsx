@@ -221,7 +221,7 @@ const MainScreen: React.FC = () => {
         id="kft-main-scroll"
         ref={mainScrollRef}
         className={`flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden overscroll-y-contain no-scrollbar relative ${
-          activeTab === 'food' ? 'bg-[#1E293B] text-slate-900' : activeTab === 'home' || activeTab === 'restaurants' || activeTab === 'hotels' ? 'bg-[#F3F5F3] text-slate-900' : 'dark bg-[#0F172A] text-[#F8FAFC]'
+          activeTab === 'food' ? 'bg-[#1E293B] text-slate-900' : activeTab === 'home' || activeTab === 'restaurants' || activeTab === 'hotels' || activeTab === 'profile' ? 'bg-[#F3F5F3] text-slate-900' : 'dark bg-[#0F172A] text-[#F8FAFC]'
         }`}
       >
         <Suspense

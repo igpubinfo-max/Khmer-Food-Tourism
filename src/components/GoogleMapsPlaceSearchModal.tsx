@@ -487,7 +487,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-[55] flex flex-col sm:items-center sm:justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-sm overflow-hidden">
-      <div className="bg-white sm:rounded-3xl max-w-5xl w-full h-[100dvh] sm:h-auto sm:max-h-[94vh] flex flex-col overflow-hidden shadow-2xl border-0 sm:border border-emerald-200 animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-[#1E293B] sm:rounded-3xl max-w-5xl w-full h-[100dvh] sm:h-auto sm:max-h-[94vh] flex flex-col overflow-hidden shadow-2xl border-0 sm:border border-slate-700/80 animate-in fade-in zoom-in-95 duration-200">
         {/* Top Header (Compact & Always Accessible) */}
         <div className="bg-gradient-to-r from-emerald-900 via-teal-800 to-emerald-900 text-white px-3.5 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2.5 shrink-0 z-30 shadow-md">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -536,7 +536,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
         {/* Unified Scrollable Body — Eliminates Nested Scroll Traps & Fixed-Height Overflow on Android */}
         <div
           ref={scrollContainerRef}
-          className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] bg-slate-100/70"
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] bg-[#1E293B]"
         >
           {typeof navigator !== 'undefined' && navigator.onLine === false && (
             <div className="mx-3.5 sm:mx-5 mt-3 p-3 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-start gap-2.5">
@@ -560,7 +560,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
             </div>
           )}
           {/* Search & Add Shop Clearly Separated Sections */}
-          <div ref={searchFormTopRef} className="p-3.5 sm:p-5 bg-slate-50 border-b border-slate-200 space-y-3 font-khmer">
+          <div ref={searchFormTopRef} className="p-3.5 sm:p-5 bg-[#1E293B] border-b border-slate-700/80 space-y-3 font-khmer">
             {/* SECTION 1: SEARCH SHOPS ON GOOGLE MAPS */}
             <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-2.5">
               <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -837,11 +837,11 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
           )}
 
           {/* Main Content / Results List */}
-          <div className="p-3.5 sm:p-6 space-y-4">
+          <div className="p-3.5 sm:p-6 space-y-4 bg-[#1E293B]">
           {isLoading ? (
             <div className="py-16 text-center space-y-3">
-              <RefreshCw className="w-10 h-10 text-emerald-600 animate-spin mx-auto" />
-              <p className="text-sm font-bold text-slate-700">
+              <RefreshCw className="w-10 h-10 text-emerald-400 animate-spin mx-auto" />
+              <p className="text-sm font-bold text-white">
                 {tr(
                   language,
                   'កំពុងស្វែងរកទិន្នន័យពិតពី Google Maps Platform...',
@@ -849,7 +849,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                   '正在通过 Google Maps 平台搜索真实地点数据...'
                 )}
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-300">
                 {tr(
                   language,
                   'កំពុងទាញយកឈ្មោះ អាសយដ្ឋាន រូបភាព និងទីតាំងផែនទី...',
@@ -860,11 +860,11 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
             </div>
           ) : results.length === 0 ? (
             <div className="py-10 px-4 text-center max-w-lg mx-auto space-y-4">
-              <div className="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-inner">
+              <div className="w-16 h-16 rounded-3xl bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 flex items-center justify-center mx-auto shadow-inner">
                 <MapPin className="w-8 h-8" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-base font-extrabold text-slate-800">
+                <h3 className="text-base font-extrabold text-white leading-[1.65]">
                   {query.trim()
                     ? tr(
                         language,
@@ -879,7 +879,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                         '搜索柬埔寨真实餐厅、店铺与旅游景点'
                       )}
                 </h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="text-xs text-slate-300 leading-relaxed">
                   {tr(
                     language,
                     'វាយបញ្ចូលឈ្មោះទីតាំងជាភាសាខ្មែរ អង់គ្លេស ឬចិន រួចចុច «ស្វែងរក» ឬចុចប៊ូតុងខាងក្រោមដើម្បីបើកស្វែងរកទីតាំងនេះផ្ទាល់នៅលើផែនទី Google Maps។',
@@ -1274,7 +1274,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
               </div>
 
               {/* Pagination & Load More from Google Maps */}
-              <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-200 flex-wrap">
+              <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-700/80 flex-wrap">
                 <div className="flex items-center gap-2 flex-wrap">
                   <button
                     type="button"
@@ -1289,7 +1289,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
                     <span>{tr(language, 'ទំព័រមុន', 'Prev', '上一页')}</span>
                   </button>
 
-                  <span className="text-xs font-bold text-slate-700 px-2">
+                  <span className="text-xs font-bold text-slate-200 px-2">
                     {tr(
                       language,
                       `ទំព័រ ${currentPage} នៃ ${totalPages} (បង្ហាញ ${(currentPage - 1) * ITEMS_PER_PAGE + 1}–${Math.min(currentPage * ITEMS_PER_PAGE, results.length)} នៃ ${results.length} ទីតាំង)`,
@@ -1363,7 +1363,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
           </div>
 
           {/* Footer Policy & Attribution Compliance (Inside Scroll Container with Android Safe Area Padding) */}
-          <div className="px-4 sm:px-6 pt-3 pb-16 sm:pb-5 bg-white border-t border-slate-200 flex items-center justify-between gap-2 text-[11px] text-slate-500 flex-wrap">
+          <div className="px-4 sm:px-6 pt-3 pb-16 sm:pb-5 bg-[#1E293B] border-t border-slate-700/80 flex items-center justify-between gap-2 text-[11px] text-slate-300 flex-wrap">
             <div className="flex items-center gap-2">
               <span>
                 {tr(

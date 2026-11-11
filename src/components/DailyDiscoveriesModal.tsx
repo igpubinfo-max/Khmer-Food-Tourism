@@ -457,17 +457,18 @@ export const DailyDiscoveriesModal: React.FC = () => {
       onClick={() => setIsDailyDiscoveriesModalOpen(false)}
     >
       <div
-        className="w-full max-w-full md:max-w-2xl lg:max-w-3xl bg-[#F8FAFC] text-slate-900 rounded-none md:rounded-3xl border-0 md:border border-slate-200/90 shadow-2xl h-full md:h-[92dvh] max-h-full md:max-h-[92dvh] flex flex-col overflow-hidden overscroll-contain font-khmer"
+        className="w-full max-w-full md:max-w-2xl lg:max-w-3xl bg-[#1E293B] text-slate-900 rounded-none md:rounded-3xl border-0 md:border border-slate-700/80 shadow-2xl h-full md:h-[92dvh] max-h-full md:max-h-[92dvh] flex flex-col overflow-hidden overscroll-contain font-khmer"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Clean Emerald & Gold Header */}
         <div
           style={{
             background: 'linear-gradient(92deg, #064E3B 0%, #047857 55%, #0D9488 100%)',
+            paddingTop: 'max(var(--kft-safe-top, 0px), 0.875rem)',
           }}
-          className="px-4 py-3.5 text-white flex items-center justify-between shrink-0 shadow-sm"
+          className="px-3.5 sm:px-4 pb-3.5 text-white flex items-center justify-between shrink-0 shadow-sm"
         >
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div
               style={{
                 background: 'linear-gradient(180deg, #60A5FA 0%, #2563EB 100%)',
@@ -477,9 +478,9 @@ export const DailyDiscoveriesModal: React.FC = () => {
             >
               <IconProvinceFood className="w-5 h-5" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h3 className="font-moul text-xs sm:text-sm text-white leading-[1.7] py-0.5">
+                <h3 className="font-moul text-xs sm:text-sm text-white leading-[1.7] py-0.5 break-words">
                   {tr(
                     language,
                     'ស្វែងយល់ម្ហូបតាមខេត្ត-ក្រុងទាំង ២៥',
@@ -492,7 +493,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                   <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费浏览')}</span>
                 </span>
               </div>
-              <p className="text-[11px] text-emerald-50 font-khmer truncate">
+              <p className="text-[11px] text-emerald-50 font-khmer leading-[1.55] break-words">
                 {tr(
                   language,
                   'មុខម្ហូបប្រចាំខេត្ត និងផែនទីហាងទាំង ២៥ រាជធានី-ខេត្ត',
@@ -511,8 +512,8 @@ export const DailyDiscoveriesModal: React.FC = () => {
           </button>
         </div>
 
-        {/* Clean White Control Bar: Search + GPS Nearest Province + 4 Colorful Category Cards */}
-        <div className="px-3.5 pt-3 pb-2.5 bg-white border-b border-slate-200/80 space-y-2.5 shrink-0 shadow-[0_4px_12px_rgba(15,23,42,0.03)]">
+        {/* Control Bar: Search + GPS Nearest Province + 4 Colorful Category Cards */}
+        <div className="px-3.5 pt-3 pb-2.5 bg-[#1E293B] border-b border-slate-700/80 space-y-2.5 shrink-0 shadow-[0_4px_12px_rgba(15,23,42,0.18)]">
           {/* Row 1: Rounded White Search Bar + Glossy GPS Nearest Province Button */}
           <div className="flex items-center gap-2">
             <div className="relative flex-1 min-w-0">
@@ -527,7 +528,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                   'Search dish or province...',
                   '搜索菜名或省市...'
                 )}
-                className="w-full h-10 pl-9 pr-8 rounded-full bg-slate-50 border border-slate-200/90 text-xs sm:text-[13px] font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 transition"
+                className="w-full h-10 pl-9 pr-8 rounded-full bg-white border border-slate-200/90 text-xs sm:text-[13px] font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 transition"
               />
               {searchQuery && (
                 <button
@@ -557,7 +558,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
           </div>
 
           {/* Row 2: 4 Colorful Glossy Category Buttons (Matching Reference Image 2) */}
-          <div className="grid grid-cols-4 gap-1.5 sm:gap-2.5">
+          <div className="grid grid-cols-2 min-[340px]:grid-cols-4 gap-1.5 sm:gap-2.5">
             {categoryCards.map((card) => {
               const active = vipTasteProfile === card.id;
               return (
@@ -659,10 +660,10 @@ export const DailyDiscoveriesModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Scrollable Content on Bright Clean Surface */}
+        {/* Main Scrollable Content on Dark Slate (#1E293B) Surface */}
         <div
           ref={bodyScrollRef}
-          className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-4 no-scrollbar bg-[#F8FAFC]"
+          className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-4 no-scrollbar bg-[#1E293B]"
         >
           {/* Selected Province Culinary Specialty & Interactive Map Banner */}
           {activeProvinceMeta ? (
@@ -708,17 +709,17 @@ export const DailyDiscoveriesModal: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5 pt-0.5">
+              <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-2.5 pt-0.5">
                 <button
                   type="button"
                   onClick={() => handleOpenProvinceMap(activeProvinceMeta)}
                   style={{
                     background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
                   }}
-                  className="py-2.5 px-3 rounded-xl text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95 cursor-pointer"
+                  className="py-2.5 px-3 rounded-xl text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95 cursor-pointer leading-[1.6]"
                 >
                   <Navigation className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">
+                  <span className="break-words">
                     {tr(language, 'ផែនទីម្ហូបក្នុងខេត្ត', 'Province Food Map', '省内美食地图')}
                   </span>
                 </button>
@@ -728,10 +729,10 @@ export const DailyDiscoveriesModal: React.FC = () => {
                   style={{
                     background: 'linear-gradient(180deg, #60A5FA 0%, #2563EB 100%)',
                   }}
-                  className="py-2.5 px-3 rounded-xl text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95 cursor-pointer"
+                  className="py-2.5 px-3 rounded-xl text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95 cursor-pointer leading-[1.6]"
                 >
                   <Store className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">
+                  <span className="break-words">
                     {tr(language, 'មើលហាងក្នុងខេត្តនេះ', 'Province Shops', '查看本省餐厅')}
                   </span>
                 </button>
@@ -741,7 +742,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
             /* Complete List of All 25 Cambodian Provinces & Capital City on Clean White Cards */
             <div className="space-y-3">
               <div className="p-3 rounded-2xl bg-white border border-slate-200/90 shadow-[0_4px_14px_rgba(15,23,42,0.04)] flex items-center justify-between gap-2 text-xs">
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <span
                     style={{
                       background: 'linear-gradient(180deg, #60A5FA 0%, #2563EB 100%)',
@@ -750,8 +751,8 @@ export const DailyDiscoveriesModal: React.FC = () => {
                   >
                     25
                   </span>
-                  <div className="min-w-0">
-                    <div className="font-extrabold text-slate-900 truncate leading-[1.6]">
+                  <div className="min-w-0 flex-1">
+                    <div className="font-extrabold text-slate-900 leading-[1.65] break-words">
                       {tr(
                         language,
                         `បញ្ជីរាជធានី-ខេត្តទាំង ២៥ (${visibleProvinces.length}/25 ទីតាំង • ${filteredDishes.length} មុខម្ហូប)`,
@@ -759,7 +760,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                         `柬埔寨全部 25 个省市列表（${visibleProvinces.length}/25）`
                       )}
                     </div>
-                    <div className="text-[11px] text-slate-500 truncate">
+                    <div className="text-[11px] text-slate-500 leading-[1.55] break-words">
                       {tr(
                         language,
                         'ចុចលើខេត្ត-រាជធានីណាមួយខាងក្រោម ដើម្បីមើលមុខម្ហូបប្រចាំខេត្ត និងផែនទី',
@@ -796,18 +797,18 @@ export const DailyDiscoveriesModal: React.FC = () => {
                           {globalNumber}
                         </span>
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-extrabold text-[13px] text-slate-900 truncate leading-[1.6] group-hover:text-emerald-700">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-extrabold text-[13px] text-slate-900 leading-[1.65] break-words group-hover:text-emerald-700">
                               {getProvinceDisplayName(prov)}
                             </span>
                             {!isKm && (
-                              <span className="text-[10.5px] text-slate-500 truncate">({prov.kh})</span>
+                              <span className="text-[10.5px] text-slate-500 leading-[1.5] break-words">({prov.kh})</span>
                             )}
                             {isKm && (
-                              <span className="text-[10.5px] text-slate-500 font-sans truncate">({prov.en})</span>
+                              <span className="text-[10.5px] text-slate-500 font-sans leading-[1.5] break-words">({prov.en})</span>
                             )}
                           </div>
-                          <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                          <p className="text-[11px] text-slate-500 line-clamp-2 break-words leading-[1.55] mt-0.5">
                             {getProvinceSpecialty(prov)}
                           </p>
                         </div>
@@ -864,8 +865,8 @@ export const DailyDiscoveriesModal: React.FC = () => {
           {!isLoadingProvince && displayedDishes.length > 0 && (
             <div className="flex items-center justify-between pt-1 px-0.5">
               <div className="flex items-center gap-1.5">
-                <Flame className="w-5 h-5 text-orange-500 fill-amber-400 shrink-0" />
-                <h4 className="font-extrabold text-[15px] sm:text-base text-slate-900 leading-[1.6]">
+                <Flame className="w-5 h-5 text-orange-400 fill-amber-400 shrink-0" />
+                <h4 className="font-extrabold text-[15px] sm:text-base text-white leading-[1.6]">
                   {activeProvinceMeta
                     ? tr(
                         language,
@@ -890,7 +891,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
           {/* Provincial Dishes List on Clean White Cards */}
           {!isLoadingProvince && displayedDishes.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 gap-3.5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                 {displayedDishes.map((food) => {
                   const pid =
                     selectedProvinceId !== 'all'
@@ -1030,7 +1031,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                                     className="px-2.5 py-1 rounded-xl bg-white hover:border-emerald-500 border border-slate-200 text-[10.5px] font-extrabold text-slate-800 flex items-center gap-1 shadow-2xs transition cursor-pointer"
                                   >
                                     <Store className="w-3 h-3 text-emerald-600 shrink-0" />
-                                    <span className="truncate max-w-[160px]">{rLoc.name}</span>
+                                    <span className="line-clamp-1 break-words max-w-[200px] leading-[1.5]">{rLoc.name}</span>
                                   </button>
                                 );
                               })}
@@ -1039,7 +1040,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                         </div>
 
                         {/* 4. Action Buttons: Full Recipe & Interactive Map Navigation */}
-                        <div className="grid grid-cols-2 gap-2.5 pt-0.5">
+                        <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-2.5 pt-0.5">
                           <button
                             type="button"
                             onClick={() => {
@@ -1049,10 +1050,10 @@ export const DailyDiscoveriesModal: React.FC = () => {
                             style={{
                               background: 'linear-gradient(180deg, #22C55E 0%, #15803D 100%)',
                             }}
-                            className="py-2.5 px-3 rounded-xl text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95 cursor-pointer"
+                            className="py-2.5 px-3 rounded-xl text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95 cursor-pointer leading-[1.6]"
                           >
                             <ChefHat className="w-4 h-4 text-white shrink-0" />
-                            <span className="truncate">
+                            <span className="break-words">
                               {tr(language, 'មើលរូបមន្តពេញលេញ', 'Full Recipe', '查看完整食谱')}
                             </span>
                           </button>
@@ -1063,10 +1064,10 @@ export const DailyDiscoveriesModal: React.FC = () => {
                             style={{
                               background: 'linear-gradient(180deg, #60A5FA 0%, #2563EB 100%)',
                             }}
-                            className="py-2.5 px-3 rounded-xl text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95 cursor-pointer"
+                            className="py-2.5 px-3 rounded-xl text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95 cursor-pointer leading-[1.6]"
                           >
                             <Navigation className="w-3.5 h-3.5 text-white shrink-0" />
-                            <span className="truncate">
+                            <span className="break-words">
                               {tr(language, 'ផែនទីនាំផ្លូវ', 'Map Navigation', '地图导航寻味')}
                             </span>
                           </button>

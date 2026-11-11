@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import {
   X, Utensils, ExternalLink, Navigation, Phone, Share2, Calendar,
   UtensilsCrossed, RefreshCw, ChefHat, CheckCircle2, Play,
-  Search, Sparkles, AlertCircle, RotateCcw, ChevronRight, Loader2, WifiOff, Bookmark, Volume2, VolumeX
+  Search, Sparkles, AlertCircle, RotateCcw, ChevronRight, Loader2, WifiOff, Volume2, VolumeX
 } from 'lucide-react';
 import {
   TrendingFoodCategorySlug,
@@ -70,10 +70,7 @@ export const TrendingSocialModal: React.FC = () => {
     setSelectedDestination,
     showToast,
     savedVideos,
-    toggleSavedVideo,
-    isVideoSaved,
     refreshUserSavedVideos,
-    setIsAuthModalOpen,
   } = useApp();
 
   const isKm = language === 'km';
@@ -979,22 +976,22 @@ export const TrendingSocialModal: React.FC = () => {
       onClick={() => setIsTrendingSocialModalOpen(false)}
     >
       <div
-        className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden overscroll-contain"
+        className="w-full max-w-lg md:max-w-2xl lg:max-w-3xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden overscroll-contain"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="p-3.5 bg-[#064E3B] text-white flex items-center justify-between shrink-0 border-b border-emerald-700/60">
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div className="w-10 h-10 rounded-2xl bg-emerald-800/80 border border-emerald-500/30 flex items-center justify-center text-emerald-100 shadow-xs shrink-0">
               <Utensils className="w-5 h-5" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h3 className="font-moul text-xs sm:text-sm text-white truncate">
+                <h3 className="font-moul text-xs sm:text-sm text-white leading-[1.7] py-0.5 break-words">
                   {tr(language, 'វីដេអូម្ហូប និងទេសចរណ៍កម្ពុជា', 'Cambodia Food & Travel Videos', '柬埔寨美食与旅行视频')}
                 </h3>
               </div>
-              <p className="text-[11px] text-pink-200 font-khmer truncate">
+              <p className="text-[11px] text-pink-200 font-khmer leading-[1.55] break-words">
                 {tr(
                   language,
                   `បានធ្វើបច្ចុប្បន្នភាព៖ ${formattedLastChecked}`,
@@ -1076,16 +1073,6 @@ export const TrendingSocialModal: React.FC = () => {
             { id: 'tiktok' as const, label: 'TikTok', activeCls: 'bg-black text-white border border-white/30' },
             { id: 'facebook' as const, label: 'Facebook', activeCls: 'bg-[#1877F2] text-white' },
             { id: 'youtube' as const, label: 'YouTube', activeCls: 'bg-[#FF0000] text-white' },
-            {
-              id: 'saved' as const,
-              label: tr(
-                language,
-                `រក្សាទុក (${currentUser?.id && currentUser.id !== 'guest' ? savedVideos.length : 0})`,
-                `Saved (${currentUser?.id && currentUser.id !== 'guest' ? savedVideos.length : 0})`,
-                `已收藏 (${currentUser?.id && currentUser.id !== 'guest' ? savedVideos.length : 0})`
-              ),
-              activeCls: 'bg-amber-600 text-white border border-amber-300/40',
-            },
           ].map((plat) => (
             <button
               key={plat.id}
@@ -1112,7 +1099,6 @@ export const TrendingSocialModal: React.FC = () => {
                   <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.56 31.56 0 0 0 0 12a31.56 31.56 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.55 9.38.55 9.38.55s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.56 31.56 0 0 0 24 12a31.56 31.56 0 0 0-.5-5.81zM9.54 15.57V8.43L15.82 12l-6.28 3.57z" />
                 </svg>
               )}
-              {plat.id === 'saved' && <Bookmark className="w-3.5 h-3.5 fill-current" />}
               <span>{plat.label}</span>
             </button>
           ))}
@@ -1157,7 +1143,7 @@ export const TrendingSocialModal: React.FC = () => {
         </div>
 
         {/* Results & Video List */}
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-4 no-scrollbar font-khmer text-xs [-webkit-overflow-scrolling:touch]">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 pb-[calc(var(--kft-safe-bottom,0px)+1.5rem)] space-y-4 no-scrollbar font-khmer text-xs [-webkit-overflow-scrolling:touch]">
           {/* Loading Skeleton */}
           {isRefreshing && discoveryItems.length === 0 ? (
             <div className="space-y-4">
@@ -1942,38 +1928,6 @@ export const TrendingSocialModal: React.FC = () => {
                           </span>
                         </span>
                         <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              if (!currentUser?.id || currentUser.id === 'guest') {
-                                showToast(
-                                  tr(
-                                    language,
-                                    'សូមចូលគណនីជាមុនសិន ដើម្បីរក្សាទុកវីដេអូផ្ទាល់ខ្លួនរបស់អ្នក',
-                                    'Please sign in to save videos to your personal collection',
-                                    '请先登录以将视频保存到您的个人收藏夹'
-                                  ),
-                                  'info'
-                                );
-                                setIsAuthModalOpen(true);
-                                return;
-                              }
-                              await toggleSavedVideo(item);
-                            }}
-                            className={`px-2 py-0.5 rounded-lg font-bold flex items-center gap-1 cursor-pointer active:scale-95 transition border ${
-                              isVideoSaved(item)
-                                ? 'bg-amber-500/20 text-amber-400 border-amber-400/50'
-                                : 'bg-slate-100 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:text-amber-400'
-                            }`}
-                          >
-                            <Bookmark className={`w-3 h-3 ${isVideoSaved(item) ? 'fill-current' : ''}`} />
-                            <span>
-                              {isVideoSaved(item)
-                                ? tr(language, 'បានរក្សាទុក', 'Saved', '已收藏')
-                                : tr(language, 'រក្សាទុក', 'Save', '收藏')}
-                            </span>
-                          </button>
                           <button
                             type="button"
                             onClick={() => openOriginalSocialAccount(item)}

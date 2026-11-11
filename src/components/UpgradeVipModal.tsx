@@ -227,7 +227,7 @@ export const UpgradeVipModal: React.FC = () => {
       setSubmissionTimestamp(userLatestVipTxn.createdAt);
     }
 
-    if (isUserVipActive(currentUser)) {
+    if (isUserVipActive(currentUser) && !isFreeTrial7d) {
       setPaymentState('APPROVED');
     } else if (userLatestVipTxn?.status === 'needs_more_info') {
       setPaymentState('NEEDS_MORE_INFO');
@@ -698,7 +698,13 @@ export const UpgradeVipModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-[95] flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
+    <div
+      style={{
+        paddingTop: 'max(var(--kft-safe-top, 0px), 0.5rem)',
+        paddingBottom: 'max(var(--kft-safe-bottom, 0px), 0.5rem)',
+      }}
+      className="fixed inset-0 z-[95] flex items-center justify-center px-2 sm:px-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto"
+    >
       {/* Hidden File Inputs for Payment Proof Upload (Gallery & Camera) */}
       <input
         ref={proofGalleryInputRef}
@@ -717,21 +723,26 @@ export const UpgradeVipModal: React.FC = () => {
       />
 
       <div 
-        className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-amber-500/30 my-auto"
+        className="relative w-full max-w-lg md:max-w-xl bg-[#1E293B] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-700/80 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="relative px-4 py-2.5 bg-gradient-to-r from-[#064E3B] via-[#047857] to-amber-700 text-white shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5 min-w-0">
+        <div
+          style={{
+            background: 'linear-gradient(92deg, #064E3B 0%, #047857 55%, #0D9488 100%)',
+          }}
+          className="relative px-4 py-2.5 text-white shrink-0 shadow-xs"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div className="p-2 rounded-2xl bg-amber-400 text-slate-900 shadow-md shrink-0">
                 <Crown className="w-5 h-5 fill-slate-900" />
               </div>
-              <div className="min-w-0">
-                <h3 className="font-moul text-sm text-white truncate">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-moul text-xs sm:text-sm text-white leading-[1.7] py-0.5 break-words">
                   {tr(language, 'ដំឡើងសមាជិកភាព VIP', 'Upgrade to VIP', '升级 VIP 会员')}
                 </h3>
-                <p className="text-[11px] text-amber-200 font-khmer truncate">
+                <p className="text-[11px] text-amber-200 font-khmer leading-[1.55] break-words">
                   {tr(
                     language,
                     `ជំនួយការ AI ម្ហូប & ទេសចរណ៍ (${consumerCatalog.paidAiDailyLimit} ដង/ថ្ងៃ) • ផែនការដើរលេងពិសេស`,
@@ -752,27 +763,27 @@ export const UpgradeVipModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto max-h-[calc(100dvh-6.5rem)] p-3 space-y-3 font-khmer">
+        {/* Modal Body — Dark Slate (#1E293B) Modern UI with Clean White Cards */}
+        <div className="flex-1 overflow-y-auto max-h-[calc(100dvh-6.5rem)] p-3 space-y-3 font-khmer bg-[#1E293B]">
           {/* STATE 3: APPROVED (Displayed ONLY after Administrator approves in Admin Dashboard) */}
           {paymentState === 'APPROVED' && isVip && (
-            <div className="py-6 text-center space-y-4 animate-scale-up">
+            <div className="p-4 rounded-[22px] bg-white border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.10)] text-center space-y-4 animate-scale-up text-slate-900">
               <div className="relative w-20 h-20 mx-auto">
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg ring-8 ring-amber-400/20">
                   <Crown className="w-10 h-10 text-white fill-white" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 p-1 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900">
+                <div className="absolute -bottom-1 -right-1 p-1 bg-emerald-500 rounded-full border-2 border-white">
                   <CheckCircle className="w-5 h-5 text-white" />
                 </div>
               </div>
 
               <div>
-                <h4 className="font-moul text-lg text-slate-900 dark:text-white mt-2">
+                <h4 className="font-moul text-lg text-slate-900 mt-2">
                   {isFreeTrial7d
                     ? tr(language, '🎁 កំពុងប្រើការសាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃ!', '🎁 7-Day Consumer Free Trial Active!', '🎁 7 天免费试用生效中！')
                     : tr(language, '🎉 សមាជិកភាព VIP បង់ប្រាក់ត្រូវបានអនុម័ត!', '🎉 Paid VIP Membership Approved!', '🎉 付费 VIP 会员已获批生效！')}
                 </h4>
-                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-sm mx-auto leading-relaxed">
+                <p className="text-xs text-slate-600 mt-1 max-w-sm mx-auto leading-relaxed">
                   {isFreeTrial7d
                     ? tr(
                         language,
@@ -789,10 +800,10 @@ export const UpgradeVipModal: React.FC = () => {
                 </p>
               </div>
 
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-left space-y-2">
-                <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 dark:border-slate-700">
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-left space-y-2">
+                <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">
                   <span className="text-slate-500">{tr(language, 'ស្ថានភាពគណនី៖', 'Account Status:', '账户状态：')}</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <span className="font-bold text-emerald-600 flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>{tr(language, `VIP សកម្ម (${remainingDays} ថ្ងៃ)`, `VIP Active (${remainingDays} Days)`, `VIP 已生效（${remainingDays} 天）`)}</span>
                   </span>
@@ -800,7 +811,7 @@ export const UpgradeVipModal: React.FC = () => {
                 {currentUser?.subscriptionExpiryDate && (
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500">{tr(language, 'ថ្ងៃផុតកំណត់៖', 'Expiration Date:', '到期日期：')}</span>
-                    <span className="font-mono font-bold text-slate-900 dark:text-white">
+                    <span className="font-mono font-bold text-slate-900">
                       {currentUser.subscriptionExpiryDate.split('T')[0]}
                     </span>
                   </div>
@@ -808,22 +819,22 @@ export const UpgradeVipModal: React.FC = () => {
               </div>
 
               {/* Automatic VIP Renewal Toggle, Cancel Subscription & Billing Dates Card for Active VIP Members */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-left space-y-2.5">
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-2.5">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
                       <RefreshCw className="w-4 h-4" strokeWidth={1.75} />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <div className="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
                         <span className="truncate">
                           {tr(language, 'កុងតាក់បន្តសុពលភាពស្វ័យប្រវត្តិ', 'Auto-Renewal Toggle', '自动续费开关')}
                         </span>
                         <span
                           className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase shrink-0 ${
                             currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
-                              ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300'
-                              : 'bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-rose-100 text-rose-700'
                           }`}
                         >
                           {currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
@@ -858,7 +869,7 @@ export const UpgradeVipModal: React.FC = () => {
                     className={`relative inline-flex h-7 w-13 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                       currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
                         ? 'bg-emerald-500'
-                        : 'bg-slate-300 dark:bg-slate-600'
+                        : 'bg-slate-300'
                     }`}
                   >
                     <span
@@ -873,19 +884,19 @@ export const UpgradeVipModal: React.FC = () => {
 
                 {/* Next Billing Date & Membership Expiration Date */}
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-                    <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                  <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+                    <div className="text-[10px] font-bold text-slate-500">
                       {tr(language, 'ថ្ងៃផុតកំណត់សមាជិកភាព', 'Membership Expiration Date', '会员到期日')}
                     </div>
-                    <div className="text-xs font-black text-slate-900 dark:text-white mt-0.5 font-mono">
+                    <div className="text-xs font-black text-slate-900 mt-0.5 font-mono">
                       {currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}
                     </div>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-                    <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                  <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+                    <div className="text-[10px] font-bold text-slate-500">
                       {tr(language, 'ថ្ងៃបង់ប្រាក់បន្ទាប់', 'Next Billing Date', '下次续费日期')}
                     </div>
-                    <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 mt-0.5 font-mono">
+                    <div className="text-xs font-black text-emerald-600 mt-0.5 font-mono">
                       {currentUser?.autoRenew !== false && !currentUser?.autoRenewCancelledAt
                         ? currentUser?.subscriptionExpiryDate
                           ? currentUser.subscriptionExpiryDate.split('T')[0]
@@ -901,12 +912,12 @@ export const UpgradeVipModal: React.FC = () => {
                     onClick={() => {
                       cancelVipAutoRenew();
                     }}
-                    className="w-full py-2.5 px-3.5 rounded-xl bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/60 dark:hover:bg-rose-900/80 text-rose-700 dark:text-rose-300 text-xs font-extrabold transition cursor-pointer"
+                    className="w-full py-2.5 px-3.5 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-extrabold transition cursor-pointer"
                   >
                     {tr(language, 'បោះបង់ការជាវ (Cancel Subscription)', 'Cancel Subscription', '取消订阅 (Cancel Subscription)')}
                   </button>
                 ) : (
-                  <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                  <div className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 text-[11px] text-slate-600 leading-relaxed">
                     {tr(
                       language,
                       `✅ ការបន្តស្វ័យប្រវត្តិត្រូវបានបិទ (OFF)។ មិនមានការកាត់ប្រាក់បន្ថែមទៀតទេ ហើយគណនី VIP នៅតែមានសុពលភាពរហូតដល់ថ្ងៃទី ${currentUser?.subscriptionExpiryDate ? currentUser.subscriptionExpiryDate.split('T')[0] : '—'}។`,
@@ -920,7 +931,10 @@ export const UpgradeVipModal: React.FC = () => {
               <div className="space-y-2">
                 <button
                   onClick={handleClose}
-                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
+                  style={{
+                    background: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
+                  }}
+                  className="w-full py-3 px-4 rounded-2xl text-white font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
                 >
                   <span>{tr(language, '🚀 បន្តប្រើប្រាស់កម្មវិធី', '🚀 Continue to App', '🚀 继续使用应用')}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -931,16 +945,16 @@ export const UpgradeVipModal: React.FC = () => {
 
           {/* STATE 2B: NEEDS_MORE_INFO */}
           {paymentState === 'NEEDS_MORE_INFO' && (
-            <div className="py-5 text-center space-y-4 animate-fade-in">
-              <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto shadow-md ring-4 ring-amber-400/20">
+            <div className="p-4 rounded-[22px] bg-white border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.10)] text-center space-y-4 animate-fade-in text-slate-900">
+              <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-md ring-4 ring-amber-400/20">
                 <MessageSquareWarning className="w-8 h-8" />
               </div>
 
               <div>
-                <h4 className="font-moul text-base text-slate-900 dark:text-white mt-2">
+                <h4 className="font-moul text-base text-slate-900 mt-2">
                   {tr(language, '💬 រដ្ឋបាលស្នើសុំវិក្កយបត្របង់ប្រាក់បន្ថែម', '💬 Admin Requested Clearer Receipt', '💬 管理员请求上传更清晰的付款凭证')}
                 </h4>
-                <p className="text-xs text-amber-700 dark:text-amber-300 mt-1 max-w-sm mx-auto leading-relaxed font-semibold">
+                <p className="text-xs text-amber-700 mt-1 max-w-sm mx-auto leading-relaxed font-semibold">
                   {userLatestVipTxn?.adminRequestNote ||
                     userLatestVipTxn?.notes ||
                     tr(
@@ -952,12 +966,12 @@ export const UpgradeVipModal: React.FC = () => {
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border-2 border-amber-400/60 text-left space-y-3">
+              <div className="p-4 rounded-2xl bg-slate-50 border-2 border-amber-400/60 text-left space-y-3">
                 {(paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl) && (
                   <img
                     src={paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl}
                     alt="Payment Proof Preview"
-                    className="w-full max-h-56 object-contain rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1"
+                    className="w-full max-h-56 object-contain rounded-xl border border-slate-200 bg-white p-1"
                   />
                 )}
 
@@ -965,7 +979,10 @@ export const UpgradeVipModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={handlePickReceiptFromGallery}
-                    className="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
+                    style={{
+                      background: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
+                    }}
+                    className="py-2.5 px-3 rounded-xl text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
                   >
                     <Upload className="w-4 h-4" />
                     <span>{tr(language, 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ')}</span>
@@ -973,7 +990,10 @@ export const UpgradeVipModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => proofCameraInputRef.current?.click()}
-                    className="py-2.5 px-3 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    style={{
+                      background: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',
+                    }}
+                    className="py-2.5 px-3 rounded-xl text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                   >
                     <Camera className="w-4 h-4" />
                     <span>{tr(language, 'ថតរូបវិក្កយបត្រ', 'Take Photo', '拍摄凭证')}</span>
@@ -984,7 +1004,10 @@ export const UpgradeVipModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleUploadProofToExistingRequest}
-                    className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition cursor-pointer"
+                    style={{
+                      background: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
+                    }}
+                    className="w-full py-3 px-4 rounded-xl text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition cursor-pointer"
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     <span>{tr(language, '📤 បញ្ជូនវិក្កយបត្រថ្មីទៅរដ្ឋបាល', '📤 Submit Updated Receipt to Admin', '📤 提交新凭证给管理员')}</span>
@@ -1003,16 +1026,16 @@ export const UpgradeVipModal: React.FC = () => {
 
           {/* STATE 2: PENDING_ADMIN_APPROVAL */}
           {paymentState === 'PENDING_ADMIN_APPROVAL' && (
-            <div className="py-5 text-center space-y-4 animate-fade-in">
-              <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto shadow-md ring-4 ring-amber-400/20">
+            <div className="p-4 rounded-[22px] bg-white border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.10)] text-center space-y-4 animate-fade-in text-slate-900">
+              <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-md ring-4 ring-amber-400/20">
                 <Clock className="w-8 h-8 animate-pulse" />
               </div>
 
               <div>
-                <h4 className="font-moul text-base text-slate-900 dark:text-white mt-2">
+                <h4 className="font-moul text-base text-slate-900 mt-2">
                   {tr(language, '⏳ កំពុងរង់ចាំរដ្ឋបាលអនុម័ត', '⏳ Pending Admin Approval', '⏳ 等待管理员审核')}
                 </h4>
-                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-sm mx-auto leading-relaxed">
+                <p className="text-xs text-slate-600 mt-1 max-w-sm mx-auto leading-relaxed">
                   {tr(
                     language,
                     'សំណើរបស់អ្នកត្រូវបានបញ្ជូនរួចរាល់។ រដ្ឋបាលនឹងពិនិត្យវិក្កយបត្រ និងបើកដំណើរការ VIP ជូនអ្នក។',
@@ -1022,16 +1045,16 @@ export const UpgradeVipModal: React.FC = () => {
                 </p>
               </div>
 
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-left space-y-2">
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-left space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500">{tr(language, 'កញ្ចប់ដែលបានស្នើសុំ៖', 'Requested Plan:', '申请套餐：')}</span>
-                  <span className="font-bold text-slate-900 dark:text-white">
+                  <span className="font-bold text-slate-900">
                     ${(userLatestVipTxn?.amountUsd || selectedPlan.priceUsd).toFixed(2)} ({userLatestVipTxn?.durationDays || selectedPlan.days} {tr(language, 'ថ្ងៃ', 'Days', '天')})
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500">{tr(language, 'ភស្តុតាងបង់ប្រាក់៖', 'Payment Receipt:', '付款凭证：')}</span>
-                  <span className={`font-bold ${userLatestVipTxn?.paymentProofUrl || paymentProofDraft ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                  <span className={`font-bold ${userLatestVipTxn?.paymentProofUrl || paymentProofDraft ? 'text-emerald-600' : 'text-amber-600'}`}>
                     {userLatestVipTxn?.paymentProofUrl || paymentProofDraft
                       ? tr(language, '✅ បានភ្ជាប់វិក្កយបត្រ', '✅ Receipt Attached', '✅ 已附上凭证')
                       : tr(language, 'មិនទាន់ភ្ជាប់រូបភាព', 'Not attached yet', '尚未附上凭证')}
@@ -1039,12 +1062,12 @@ export const UpgradeVipModal: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-left space-y-2.5">
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-2.5">
                 {(paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl) && (
                   <img
                     src={paymentProofDraft?.dataUrl || userLatestVipTxn?.paymentProofUrl}
                     alt="Uploaded Payment Proof"
-                    className="w-full max-h-48 object-contain rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1"
+                    className="w-full max-h-48 object-contain rounded-xl border border-slate-200 bg-white p-1"
                   />
                 )}
 
@@ -1052,7 +1075,10 @@ export const UpgradeVipModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={handlePickReceiptFromGallery}
-                    className="flex-1 py-2 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-900 dark:text-amber-200 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    style={{
+                      background: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
+                    }}
+                    className="flex-1 py-2 px-3 rounded-xl text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                   >
                     <Upload className="w-3.5 h-3.5" />
                     <span>
@@ -1066,7 +1092,10 @@ export const UpgradeVipModal: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleUploadProofToExistingRequest}
-                      className="py-2 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition cursor-pointer"
+                      style={{
+                        background: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
+                      }}
+                      className="py-2 px-3.5 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition cursor-pointer"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>{tr(language, 'រក្សាទុកវិក្កយបត្រថ្មី', 'Save New Receipt', '保存新凭证')}</span>
@@ -1086,16 +1115,16 @@ export const UpgradeVipModal: React.FC = () => {
 
           {/* STATE 4: REJECTED */}
           {paymentState === 'REJECTED' && (
-            <div className="py-6 text-center space-y-4 animate-fade-in">
-              <div className="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-600 flex items-center justify-center mx-auto shadow-md">
+            <div className="p-4 rounded-[22px] bg-white border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.10)] text-center space-y-4 animate-fade-in text-slate-900">
+              <div className="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto shadow-md">
                 <XCircle className="w-9 h-9" />
               </div>
 
               <div>
-                <h4 className="font-moul text-sm text-slate-900 dark:text-white mt-2">
+                <h4 className="font-moul text-sm text-slate-900 mt-2">
                   {tr(language, '❌ សំណើទូទាត់ត្រូវបានបដិសេធដោយរដ្ឋបាល', '❌ Payment Request Rejected', '❌ 付款申请未通过审核')}
                 </h4>
-                <p className="text-xs text-rose-600 dark:text-rose-400 mt-1 max-w-sm mx-auto leading-relaxed">
+                <p className="text-xs text-rose-600 mt-1 max-w-sm mx-auto leading-relaxed">
                   {userLatestVipTxn?.notes ||
                     tr(
                       language,
@@ -1108,7 +1137,10 @@ export const UpgradeVipModal: React.FC = () => {
 
               <button
                 onClick={handleRestartSession}
-                className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition cursor-pointer shadow-md"
+                style={{
+                  background: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
+                }}
+                className="w-full py-2.5 px-4 rounded-xl text-white text-xs font-bold transition cursor-pointer shadow-md"
               >
                 {tr(language, '🔄 បង្កើតសំណើទូទាត់ប្រាក់ថ្មី', '🔄 Start New Payment Request', '🔄 重新发起付款申请')}
               </button>
@@ -1117,16 +1149,16 @@ export const UpgradeVipModal: React.FC = () => {
 
           {/* STATE 5: PAYMENT_FAILED */}
           {paymentState === 'PAYMENT_FAILED' && (
-            <div className="py-6 text-center space-y-4 animate-fade-in">
-              <div className="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-600 flex items-center justify-center mx-auto shadow-md">
+            <div className="p-4 rounded-[22px] bg-white border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.10)] text-center space-y-4 animate-fade-in text-slate-900">
+              <div className="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto shadow-md">
                 <AlertCircle className="w-8 h-8" />
               </div>
 
               <div>
-                <h4 className="font-moul text-sm text-slate-900 dark:text-white mt-2">
+                <h4 className="font-moul text-sm text-slate-900 mt-2">
                   {tr(language, 'សំណើទូទាត់មិនជោគជ័យ', 'Payment Request Failed', '付款申请提交失败')}
                 </h4>
-                <p className="text-xs text-rose-600 dark:text-rose-400 mt-1 max-w-sm mx-auto leading-relaxed">
+                <p className="text-xs text-rose-600 mt-1 max-w-sm mx-auto leading-relaxed">
                   {errorMessage ||
                     tr(
                       language,
@@ -1140,13 +1172,16 @@ export const UpgradeVipModal: React.FC = () => {
               <div className="grid grid-cols-2 gap-2 pt-2">
                 <button
                   onClick={handleRestartSession}
-                  className="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition cursor-pointer shadow-md"
+                  style={{
+                    background: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
+                  }}
+                  className="py-2.5 px-4 rounded-xl text-white text-xs font-bold transition cursor-pointer shadow-md"
                 >
                   {tr(language, '🔄 ព្យាយាមម្តងទៀត', '🔄 Try Again', '🔄 重试')}
                 </button>
                 <button
                   onClick={() => setPaymentState('AWAITING_PAYMENT')}
-                  className="py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                  className="py-2.5 px-4 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                 >
                   {tr(language, 'ត្រឡប់ក្រោយ', 'Back', '返回')}
                 </button>
@@ -1156,16 +1191,16 @@ export const UpgradeVipModal: React.FC = () => {
 
           {/* STATE 6: EXPIRED */}
           {paymentState === 'EXPIRED' && (
-            <div className="py-6 text-center space-y-4 animate-fade-in">
-              <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto shadow-md">
+            <div className="p-4 rounded-[22px] bg-white border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.10)] text-center space-y-4 animate-fade-in text-slate-900">
+              <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-md">
                 <Clock className="w-8 h-8" />
               </div>
 
               <div>
-                <h4 className="font-moul text-sm text-slate-900 dark:text-white mt-2">
+                <h4 className="font-moul text-sm text-slate-900 mt-2">
                   {tr(language, 'វគ្គទូទាត់ប្រាក់បានផុតកំណត់', 'Payment Session Expired', '付款会话已过期')}
                 </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
+                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
                   {tr(
                     language,
                     'វគ្គទូទាត់នេះបានផុតកំណត់។ សូមចុចប៊ូតុងខាងក្រោមដើម្បីបង្កើតវគ្គទូទាត់ថ្មី។',
@@ -1177,7 +1212,10 @@ export const UpgradeVipModal: React.FC = () => {
 
               <button
                 onClick={handleRestartSession}
-                className="w-full py-2.5 px-4 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white text-xs font-bold transition shadow-md cursor-pointer"
+                style={{
+                  background: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
+                }}
+                className="w-full py-2.5 px-4 rounded-xl text-white text-xs font-bold transition shadow-md cursor-pointer"
               >
                 {tr(language, '🔄 បង្កើតវគ្គទូទាត់ថ្មី', '🔄 Start New Payment Session', '🔄 开始新的付款会话')}
               </button>
@@ -1185,24 +1223,24 @@ export const UpgradeVipModal: React.FC = () => {
           )}
 
           {paymentState === 'AWAITING_PAYMENT' && !consumerCatalog.consumerVipEnabled && (
-            <div className="p-5 rounded-2xl bg-emerald-50 dark:bg-slate-800 border border-emerald-300 dark:border-slate-700 text-center space-y-2.5">
-              <div className="font-bold text-sm text-slate-900 dark:text-white">
+            <div className="p-5 rounded-2xl bg-white border border-emerald-300 text-center space-y-2.5 shadow-xs">
+              <div className="font-bold text-sm text-slate-900">
                 {tr(language, '🌿 ការប្រើប្រាស់កម្មវិធីគឺឥតគិតថ្លៃ!', '🌿 Core App Browsing is Free!', '🌿 核心浏览功能免费开放！')}
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
+              <p className="text-xs text-slate-600">
                 {tr(language, 'ការមើលម្ហូប ហាង សណ្ឋាគារ តំបន់ទេសចរណ៍ និងផែនទី គឺ FREE ជារៀងរហូត។', 'Browsing dishes, shops, hotels, attractions, and maps is FREE forever.', '浏览美食、餐厅、酒店、景点与地图永久免费。')}
               </p>
             </div>
           )}
 
-          {/* STATE 1: AWAITING_PAYMENT — Clean, Short 4-Step VIP Payment Screen */}
+          {/* STATE 1: AWAITING_PAYMENT — Clean, Short 4-Step VIP Payment Screen on Dark Slate (#1E293B) */}
           {paymentState === 'AWAITING_PAYMENT' && isVipConfigValid && (
             <div className="space-y-2.5">
               {/* If user has a pending verification request, show a friendly status bar without blocking the upgrade flow */}
               {(userLatestVipTxn?.status === 'pending_verification' ||
                 userLatestVipTxn?.status === 'needs_more_info') && (
-                <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 flex items-center justify-between gap-2 text-xs">
-                  <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200 font-semibold">
+                <div className="p-3 rounded-2xl bg-white border border-amber-300 shadow-xs flex items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2 text-amber-800 font-semibold">
                     <Clock className="w-4 h-4 text-amber-600 shrink-0" />
                     <span>
                       {tr(
@@ -1223,9 +1261,9 @@ export const UpgradeVipModal: React.FC = () => {
                 </div>
               )}
 
-              {/* Free Forever Core Browsing Reassurance Banner */}
-              <div className="p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-700/70 text-[11px] text-emerald-900 dark:text-emerald-200 font-bold flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              {/* Free Forever Core Browsing Reassurance Banner (Clean White Card) */}
+              <div className="p-2.5 rounded-2xl bg-white border border-emerald-200/90 shadow-[0_4px_12px_rgba(15,23,42,0.08)] text-[11px] text-emerald-950 font-bold flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                 <span>
                   {tr(
                     language,
@@ -1238,9 +1276,9 @@ export const UpgradeVipModal: React.FC = () => {
 
               {/* 1-Time 7-Day Free Consumer VIP Trial Card */}
               {canClaimTrial7d && (
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-50 via-yellow-50 to-emerald-50 dark:from-amber-950/40 dark:via-slate-800 dark:to-emerald-950/40 border-2 border-amber-400 shadow-xs space-y-2">
+                <div className="p-3 rounded-2xl bg-white border-2 border-amber-400 shadow-[0_4px_14px_rgba(15,23,42,0.10)] space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <div className="font-extrabold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <div className="font-extrabold text-xs text-slate-900 flex items-center gap-1.5">
                       <Crown className="w-4 h-4 text-amber-500 fill-amber-500 shrink-0" />
                       <span>
                         {tr(
@@ -1255,7 +1293,7 @@ export const UpgradeVipModal: React.FC = () => {
                       {tr(language, '១ ដងគត់', '1-Time Only', '仅限 1 次')}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-snug">
+                  <p className="text-[11px] text-slate-700 leading-snug">
                     {tr(
                       language,
                       `បើកប្រើជំនួយការ AI (${consumerCatalog.trialAiDailyLimit} ដង/ថ្ងៃ) និងផែនការដើរលេង ដោយឥតគិតថ្លៃ ${consumerCatalog.trialPlan.durationDays} ថ្ងៃ (មិនរួមបញ្ចូលកញ្ចប់ដាក់ហាងទេ)។`,
@@ -1267,12 +1305,15 @@ export const UpgradeVipModal: React.FC = () => {
                     type="button"
                     disabled={isClaimingTrial}
                     onClick={handleClaimFreeTrial}
-                    className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-xs shadow-sm flex items-center justify-center gap-1.5 transition active:scale-98 cursor-pointer disabled:opacity-60"
+                    style={{
+                      background: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
+                    }}
+                    className="w-full py-2.5 px-3 rounded-xl text-white font-black text-xs shadow-sm flex items-center justify-center gap-1.5 transition active:scale-98 cursor-pointer disabled:opacity-60"
                   >
                     {isClaimingTrial ? (
                       <RefreshCw className="w-4 h-4 animate-spin shrink-0" />
                     ) : (
-                      <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
+                      <Crown className="w-4 h-4 fill-white shrink-0" />
                     )}
                     <span>
                       {tr(
@@ -1288,7 +1329,7 @@ export const UpgradeVipModal: React.FC = () => {
 
               {/* Post-Trial Win-Back Highlight Banner ($0.99 vs 90-day $6.99 Saver) */}
               {canClaimWinback099 && (
-                <div className="p-2.5 rounded-2xl bg-amber-100/80 dark:bg-amber-950/50 border border-amber-400 text-[11px] text-amber-950 dark:text-amber-200 font-bold">
+                <div className="p-2.5 rounded-2xl bg-white border border-amber-400 text-[11px] text-amber-950 font-bold shadow-xs">
                   {tr(
                     language,
                     `✨ ផ្តល់ជូនពិសេសក្រោយសាកល្បង៖ ខែដំបូងត្រឹមតែ $${consumerCatalog.promo30dPlan.priceUsd.toFixed(2)} (30 ថ្ងៃ) ឬជ្រើសកញ្ចប់សន្សំ 90 ថ្ងៃ $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)} (-22%)!`,
@@ -1298,65 +1339,82 @@ export const UpgradeVipModal: React.FC = () => {
                 </div>
               )}
 
-              {/* Official Consumer VIP Plan Selector ($0.99 post-trial / $2.99 / $6.99 / $19.99) */}
-              <div className="grid grid-cols-2 gap-2">
-                {dynamicPlansList.map((plan) => {
-                  const isSelected = selectedPlan?.planId === plan.planId;
-                  return (
-                    <div
-                      key={plan.planId}
-                      onClick={() => handleSelectPlan(plan)}
-                      className={`relative px-3 py-2.5 rounded-2xl border-2 cursor-pointer transition text-left flex items-center justify-between gap-2 ${
-                        isSelected
-                          ? 'bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-600/20 border-amber-500 shadow-sm ring-2 ring-amber-400/30'
-                          : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-amber-300'
-                      }`}
-                    >
-                      {plan.badgeText && (
+              {/* Official Consumer VIP Plan Selector inside Clean White Container with Colorful Gradient Plan Cards (Matching Reference Image 2) */}
+              <div className="p-2.5 rounded-[22px] bg-white border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.10)] space-y-2">
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  {dynamicPlansList.map((plan, idx) => {
+                    const isSelected = selectedPlan?.planId === plan.planId;
+                    const planGradients = [
+                      'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
+                      'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
+                      'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
+                      'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)',
+                    ];
+                    const cardGradient = planGradients[idx % planGradients.length];
+                    return (
+                      <div
+                        key={plan.planId}
+                        onClick={() => handleSelectPlan(plan)}
+                        style={{
+                          background: cardGradient,
+                          boxShadow: isSelected
+                            ? '0 6px 14px rgba(15, 23, 42, 0.25), 0 0 0 2.5px #064E3B, inset 0 1px 1px rgba(255, 255, 255, 0.45)'
+                            : '0 4px 10px rgba(15, 23, 42, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.36)',
+                        }}
+                        className="relative px-3 py-2.5 rounded-[16px] cursor-pointer transition active:scale-[0.98] text-left flex items-center justify-between gap-2 text-white"
+                      >
                         <span
-                          className={`absolute -top-2 right-2 px-2 py-px rounded-full text-white text-[9px] font-black tracking-wide font-khmer shadow-xs ${
-                            plan.isWinbackPromo
-                              ? 'bg-gradient-to-r from-rose-500 to-amber-500'
-                              : 'bg-gradient-to-r from-emerald-600 to-teal-600'
+                          className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-[16px]"
+                          style={{
+                            background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)',
+                          }}
+                        />
+                        {plan.badgeText && (
+                          <span
+                            className={`absolute -top-2 right-2 z-20 px-2 py-px rounded-full text-slate-950 text-[9px] font-black tracking-wide font-khmer shadow-xs ${
+                              plan.isWinbackPromo
+                                ? 'bg-amber-300'
+                                : 'bg-white border border-emerald-500/40 text-emerald-900'
+                            }`}
+                          >
+                            {plan.badgeText}
+                          </span>
+                        )}
+                        <div className="relative z-10 min-w-0">
+                          <div className="text-[11px] font-extrabold text-white/95 truncate drop-shadow-2xs">
+                            {isKm ? plan.titleKh : plan.titleEn}
+                          </div>
+                          <div className="flex items-baseline gap-1 mt-0.5">
+                            <span className="font-moul text-base sm:text-lg text-white font-mono leading-tight drop-shadow-2xs">
+                              {'$'}{plan.priceUsd.toFixed(2)}
+                            </span>
+                            <span className="text-[10px] text-white/90 font-bold">
+                              / {tr(language, `${plan.days}ថ្ងៃ`, `${plan.days}d`, `${plan.days}天`)}
+                            </span>
+                          </div>
+                        </div>
+                        <div
+                          className={`relative z-10 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                            isSelected ? 'border-white bg-white text-emerald-700' : 'border-white/75 bg-white/15'
                           }`}
                         >
-                          {plan.badgeText}
-                        </span>
-                      )}
-                      <div className="min-w-0">
-                        <div className="text-[11px] font-extrabold text-slate-700 dark:text-slate-200 truncate">
-                          {isKm ? plan.titleKh : plan.titleEn}
-                        </div>
-                        <div className="flex items-baseline gap-1 mt-0.5">
-                          <span className="font-moul text-base sm:text-lg text-slate-900 dark:text-white font-mono leading-tight">
-                            {'$'}{plan.priceUsd.toFixed(2)}
-                          </span>
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">
-                            / {tr(language, `${plan.days}ថ្ងៃ`, `${plan.days}d`, `${plan.days}天`)}
-                          </span>
+                          {isSelected && <div className="w-2 h-2 rounded-full bg-emerald-600" />}
                         </div>
                       </div>
-                      <div
-                        className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                          isSelected ? 'border-amber-500 bg-amber-500 text-white' : 'border-slate-300'
-                        }`}
-                      >
-                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+
+                <div className="px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-[10.5px] text-slate-700 font-bold flex items-center justify-between gap-2">
+                  <span>🤖 {tr(language, `កូតា AI៖ ${consumerCatalog.paidAiDailyLimit} ដង/ថ្ងៃ`, `AI Quota: ${consumerCatalog.paidAiDailyLimit}/day`, `AI 配额：每日 ${consumerCatalog.paidAiDailyLimit} 次`)}</span>
+                  <span>🏪 {tr(language, 'កញ្ចប់ដាក់ហាងគិតដាច់ដោយឡែក', 'Shop Package is separate', '开店套餐单独计费')}</span>
+                </div>
               </div>
 
-              <div className="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 text-[10.5px] text-slate-600 dark:text-slate-300 flex items-center justify-between gap-2">
-                <span>🤖 {tr(language, `កូតា AI៖ ${consumerCatalog.paidAiDailyLimit} ដង/ថ្ងៃ`, `AI Quota: ${consumerCatalog.paidAiDailyLimit}/day`, `AI 配额：每日 ${consumerCatalog.paidAiDailyLimit} 次`)}</span>
-                <span>🏪 {tr(language, 'កញ្ចប់ដាក់ហាងគិតដាច់ដោយឡែក', 'Shop Package is separate', '开店套餐单独计费')}</span>
-              </div>
-
-              {/* STEP 1 & 2: Scan / save ABA KHQR + pay via ABA Mobile */}
-              <div className="p-3 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm space-y-2.5">
+              {/* STEP 1 & 2: Scan / save ABA KHQR + pay via ABA Mobile (Clean White Card) */}
+              <div className="p-3 rounded-[22px] bg-white border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.10)] space-y-2.5">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5 min-w-0">
+                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 flex items-center gap-1.5 min-w-0">
                     <QrCode className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span className="truncate">
                       {tr(language, '១. ស្កេន ឬរក្សាទុកកូដ QR', '1. Scan or save ABA KHQR', '1. 扫描或保存二维码')}
@@ -1382,11 +1440,11 @@ export const UpgradeVipModal: React.FC = () => {
                   </button>
 
                   <div className="flex-1 min-w-0 flex flex-col justify-between gap-2">
-                    <div className="p-2 rounded-2xl bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700">
-                      <div className="text-[11px] font-bold text-slate-700 dark:text-slate-200 leading-snug">
+                    <div className="p-2 rounded-2xl bg-sky-50 border border-sky-200">
+                      <div className="text-[11px] font-bold text-slate-700 leading-snug">
                         {tr(language, 'ឈ្មោះគណនី៖ ជា គីមសេង', 'Account: CHEA KIMSENG', '账户：CHEA KIMSENG')}
                       </div>
-                      <div className="font-mono font-extrabold text-sm text-[#004B87] dark:text-sky-400 leading-tight mt-0.5">
+                      <div className="font-mono font-extrabold text-sm text-[#004B87] leading-tight mt-0.5">
                         095 245 959
                       </div>
                     </div>
@@ -1394,7 +1452,7 @@ export const UpgradeVipModal: React.FC = () => {
                       <button
                         type="button"
                         onClick={handleSaveQrImage}
-                        className="py-2 px-2 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
+                        className="py-2 px-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer border border-slate-200"
                       >
                         <Download className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         <span className="truncate">{tr(language, 'រក្សាទុក QR', 'Save QR', '保存二维码')}</span>
@@ -1402,7 +1460,7 @@ export const UpgradeVipModal: React.FC = () => {
                       <button
                         type="button"
                         onClick={handleCopyAccount}
-                        className="py-2 px-2 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700"
+                        className="py-2 px-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer border border-slate-200"
                       >
                         {hasCopiedAccount ? (
                           <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -1421,9 +1479,12 @@ export const UpgradeVipModal: React.FC = () => {
 
                 <button
                   onClick={handleLaunchAbaApp}
-                  className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#004B87] via-[#005a9e] to-[#004B87] hover:from-[#003966] hover:to-[#003966] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
+                  style={{
+                    background: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
+                  }}
+                  className="w-full py-2.5 px-4 rounded-2xl text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
                 >
-                  <ExternalLink className="w-4 h-4 text-sky-200 shrink-0" />
+                  <ExternalLink className="w-4 h-4 text-white shrink-0" />
                   <span>
                     {tr(
                       language,
@@ -1435,10 +1496,10 @@ export const UpgradeVipModal: React.FC = () => {
                 </button>
               </div>
 
-              {/* STEP 3 & 4: Upload receipt + submit for admin approval */}
-              <div className="p-3 rounded-3xl bg-amber-50/60 dark:bg-slate-800/80 border border-amber-500/40 space-y-2">
+              {/* STEP 3 & 4: Upload receipt + submit for admin approval (Clean White Card) */}
+              <div className="p-3 rounded-[22px] bg-white border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.10)] space-y-2.5">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5 min-w-0">
+                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 flex items-center gap-1.5 min-w-0">
                     <ImageIcon className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span className="truncate">
                       {tr(language, '៣. អាប់ឡូតវិក្កយបត្របង់ប្រាក់', '3. Upload the payment receipt', '3. 上传付款凭证截图')}
@@ -1447,7 +1508,7 @@ export const UpgradeVipModal: React.FC = () => {
                 </div>
 
                 {paymentProofDraft && (
-                  <div className="flex items-center gap-2 p-1.5 rounded-xl bg-emerald-50/80 dark:bg-slate-900/90 border border-emerald-300 dark:border-emerald-700/60 animate-fade-in">
+                  <div className="flex items-center gap-2 p-1.5 rounded-xl bg-emerald-50 border border-emerald-300 animate-fade-in">
                     {paymentProofDraft.mimeType === 'application/pdf' ? (
                       <div className="w-10 h-10 rounded-lg bg-rose-600 text-white font-extrabold text-[10px] flex items-center justify-center shrink-0">
                         PDF
@@ -1456,17 +1517,17 @@ export const UpgradeVipModal: React.FC = () => {
                       <img
                         src={paymentProofDraft.dataUrl}
                         alt="Selected Payment Proof Preview"
-                        className="w-10 h-10 object-cover rounded-lg bg-white border border-slate-200 dark:border-slate-800 shrink-0"
+                        className="w-10 h-10 object-cover rounded-lg bg-white border border-slate-200 shrink-0"
                       />
                     )}
-                    <span className="flex-1 min-w-0 text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                    <span className="flex-1 min-w-0 text-xs font-bold text-emerald-800 flex items-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                       <span className="truncate">{paymentProofDraft.fileName}</span>
                     </span>
                     <button
                       type="button"
                       onClick={() => setPaymentProofDraft(null)}
-                      className="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-600 hover:bg-rose-200 transition cursor-pointer shrink-0"
+                      className="p-1.5 rounded-lg bg-rose-100 text-rose-600 hover:bg-rose-200 transition cursor-pointer shrink-0"
                       title={tr(language, 'លុបរូបភាព', 'Remove image', '删除图片')}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -1479,13 +1540,14 @@ export const UpgradeVipModal: React.FC = () => {
                     type="button"
                     onClick={handlePickReceiptFromGallery}
                     disabled={isProcessingProofImage}
-                    className="py-2.5 px-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-extrabold text-xs shadow-md flex items-center justify-center gap-1.5 transition active:scale-98 cursor-pointer disabled:opacity-60"
+                    style={{
+                      background: 'linear-gradient(180deg, #FF9933 0%, #D94E08 100%)',
+                    }}
+                    className="py-2.5 px-3 rounded-2xl text-white font-extrabold text-xs shadow-sm flex items-center justify-center gap-1.5 transition active:scale-98 cursor-pointer disabled:opacity-60"
                   >
                     <Upload className="w-4 h-4 shrink-0" />
                     <span className="truncate">
-                      {paymentProofDraft
-                        ? tr(language, 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ')
-                        : tr(language, 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ')}
+                      {tr(language, 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ', 'រូបភាពរបស់ខ្ញុំ')}
                     </span>
                   </button>
 
@@ -1493,15 +1555,18 @@ export const UpgradeVipModal: React.FC = () => {
                     type="button"
                     onClick={() => proofCameraInputRef.current?.click()}
                     disabled={isProcessingProofImage}
-                    className="py-2.5 px-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-600 transition active:scale-98 cursor-pointer disabled:opacity-60"
+                    style={{
+                      background: 'linear-gradient(180deg, #22AAA3 0%, #0E6769 100%)',
+                    }}
+                    className="py-2.5 px-3 rounded-2xl text-white font-extrabold text-xs shadow-sm flex items-center justify-center gap-1.5 transition active:scale-98 cursor-pointer disabled:opacity-60"
                   >
-                    <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <Camera className="w-4 h-4 text-white shrink-0" />
                     <span className="truncate">{tr(language, 'ថតរូបវិក្កយបត្រ', 'Take Photo', '拍摄凭证')}</span>
                   </button>
                 </div>
 
                 {/* Automatic VIP Renewal Consent (ON by Default with Clear User Consent, Cancel Anytime) */}
-                <label className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-slate-900/70 border border-emerald-400/50 dark:border-emerald-700/60 flex items-start gap-2.5 cursor-pointer select-none">
+                <label className="p-2.5 rounded-xl bg-emerald-50/90 border border-emerald-300 flex items-start gap-2.5 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={autoRenewOptIn}
@@ -1511,9 +1576,9 @@ export const UpgradeVipModal: React.FC = () => {
                     }}
                     className="mt-0.5 w-4 h-4 rounded accent-emerald-600 shrink-0 cursor-pointer"
                   />
-                  <div className="flex-1 min-w-0 text-[11px] text-slate-700 dark:text-slate-200 leading-snug">
-                    <div className="font-extrabold text-emerald-800 dark:text-emerald-300 flex items-center gap-1">
-                      <RefreshCw className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" strokeWidth={2} />
+                  <div className="flex-1 min-w-0 text-[11px] text-slate-800 leading-snug">
+                    <div className="font-extrabold text-emerald-900 flex items-center gap-1">
+                      <RefreshCw className="w-3.5 h-3.5 text-emerald-600 shrink-0" strokeWidth={2} />
                       <span>
                         {tr(
                           language,
@@ -1523,7 +1588,7 @@ export const UpgradeVipModal: React.FC = () => {
                         )}
                       </span>
                     </div>
-                    <p className="text-[10.5px] text-slate-600 dark:text-slate-400 mt-0.5">
+                    <p className="text-[10.5px] text-slate-600 mt-0.5">
                       {tr(
                         language,
                         'ប្រព័ន្ធនឹងផ្ញើសាររំលឹកមុនផុតកំណត់ ៣ ថ្ងៃ ហើយបន្តសុពលភាពតែពេលការបង់ប្រាក់ជោគជ័យប៉ុណ្ណោះ។ អ្នកអាចបិទ (Turn OFF) បានគ្រប់ពេលនៅក្នុងផ្ទាំង សមាជិកភាព។',
@@ -1537,7 +1602,10 @@ export const UpgradeVipModal: React.FC = () => {
                 <button
                   onClick={handleSubmitPaymentForAdminApproval}
                   disabled={isSubmittingRequest || isProcessingProofImage}
-                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-[#064E3B] hover:from-emerald-700 hover:to-[#047857] text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer disabled:opacity-50"
+                  style={{
+                    background: 'linear-gradient(180deg, #2EA856 0%, #0D6630 100%)',
+                  }}
+                  className="w-full py-3 px-4 rounded-2xl text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer disabled:opacity-50"
                 >
                   {isSubmittingRequest ? (
                     <>
@@ -1546,7 +1614,7 @@ export const UpgradeVipModal: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <BadgeCheck className="w-4 h-4 text-emerald-200 shrink-0" />
+                      <BadgeCheck className="w-4 h-4 text-white shrink-0" />
                       <span>
                         {tr(
                           language,
@@ -1565,15 +1633,15 @@ export const UpgradeVipModal: React.FC = () => {
         </div>
 
         {/* Modal Footer / Prominent App Version Bar */}
-        <div className="px-4 py-1.5 bg-slate-100 dark:bg-slate-950/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 font-mono shrink-0">
-          <span className="font-semibold text-slate-600 dark:text-slate-400">
+        <div className="px-4 py-1.5 bg-[#1E293B] border-t border-slate-700/80 flex items-center justify-between text-[11px] text-slate-300 font-mono shrink-0">
+          <span className="font-semibold text-slate-300">
             {tr(language, 'រសជាតិ និងទេសចរណ៍កម្ពុជា', 'Cambodia Flavors & Tourism', '柬埔寨美食与旅游')} {APP_VERSION} ({APP_BUILD_CODE})
           </span>
           <a
             href="/privacy-policy.html"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-emerald-600 dark:text-emerald-400 font-medium hover:underline"
+            className="text-emerald-400 font-medium hover:underline"
           >
             {tr(language, 'គោលការណ៍ឯកជនភាព', 'Privacy Policy', '隐私政策')}
           </a>

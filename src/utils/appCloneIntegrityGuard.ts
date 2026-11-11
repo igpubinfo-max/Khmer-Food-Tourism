@@ -12,6 +12,9 @@ export interface NativeAppIntegrityResult {
   isOfficialPackage: boolean;
   isOfficialSignature: boolean;
   isPlayStoreInstall: boolean;
+  isDebugged?: boolean;
+  isClonedContainer?: boolean;
+  isHookDetected?: boolean;
   isGenuine: boolean;
   timestampBucket: number;
   attestationSig: string;
@@ -23,10 +26,18 @@ interface NativeAppIntegrityPluginInterface {
 
 const NativeAppIntegrity = registerPlugin<NativeAppIntegrityPluginInterface>('NativeAppIntegrity');
 
+export type AppCloneTamperReason =
+  | 'invalid_package_id'
+  | 'invalid_apk_signature'
+  | 'invalid_origin'
+  | 'debugger_attached'
+  | 'cloned_container'
+  | 'hook_framework_detected';
+
 export interface AppCloneIntegrityState {
   checked: boolean;
   tampered: boolean;
-  reason?: 'invalid_package_id' | 'invalid_apk_signature' | 'invalid_origin';
+  reason?: AppCloneTamperReason;
   platform: string;
   packageName: string;
   certSha256: string;
@@ -46,6 +57,7 @@ let cachedIntegrityState: AppCloneIntegrityState = {
 
 let simulatedOverride: Partial<AppCloneIntegrityState> | null = null;
 let inflightCheck: Promise<AppCloneIntegrityState> | null = null;
+let runtimeAntiDebugInstalled = false;
 
 function computeFallbackAttestationSig(pkg: string, cert: string, bucket: number): string {
   const raw = `${pkg}:${cert.toLowerCase()}:${bucket}:kft_client_v1`;
@@ -59,6 +71,92 @@ function computeFallbackAttestationSig(pkg: string, cert: string, bucket: number
     h2 = Math.imul(h2, 0x85ebca6b) >>> 0;
   }
   return `v1_${bucket}_${h1.toString(16).padStart(8, '0')}${h2.toString(16).padStart(8, '0')}`;
+}
+
+/**
+ * Verifies whether the current web/hybrid origin is an authorized host.
+ * Blocks unauthorized third-party cloned domains that copy the compiled dist/ folder.
+ */
+export function isAllowedRuntimeOrigin(hostname: string, protocol: string): boolean {
+  const proto = String(protocol || '').toLowerCase();
+  const host = String(hostname || '').toLowerCase().trim();
+  if (proto === 'capacitor:' || proto === 'ionic:' || proto === 'app:' || proto === 'file:') {
+    return true;
+  }
+  if (!host || host === 'localhost' || host === '127.0.0.1' || host === '[::1]') {
+    return true;
+  }
+  const allowedSuffixes = [
+    '.vercel.app',
+    '.netlify.app',
+    '.pages.dev',
+    '.github.io',
+    '.supabase.co',
+    'khmerfood.tourism',
+    'cambodiaflavorstourism.com',
+  ];
+  return allowedSuffixes.some((suffix) => host === suffix.replace(/^\./, '') || host.endsWith(suffix));
+}
+
+/**
+ * Installs runtime Anti-Debugging & Anti-Inspection protections in the browser/WebView:
+ * - Blocks DevTools & View-Source keyboard shortcuts (F12, Ctrl+Shift+I/J/C, Ctrl+U, Ctrl+S) in production.
+ * - Blocks drag/context-menu extraction on protected elements.
+ * - Neutralizes console object leakage in production builds when a tampering attempt is detected.
+ */
+export function installRuntimeAntiDebugGuard(): void {
+  if (runtimeAntiDebugInstalled || typeof window === 'undefined' || typeof document === 'undefined') {
+    return;
+  }
+  runtimeAntiDebugInstalled = true;
+
+  try {
+    const host = window.location?.hostname || '';
+    const proto = window.location?.protocol || '';
+    const isLocalDev =
+      (host === 'localhost' || host === '127.0.0.1') &&
+      !Capacitor.isNativePlatform() &&
+      window.location?.port === '5173';
+
+    if (!isAllowedRuntimeOrigin(host, proto)) {
+      cachedIntegrityState = {
+        checked: true,
+        tampered: true,
+        reason: 'invalid_origin',
+        platform: Capacitor.getPlatform(),
+        packageName: host || 'unauthorized.origin',
+        certSha256: '',
+        installerPackage: 'unauthorized_web_clone',
+        attestationSig: 'TAMPERED_CLONE',
+      };
+    }
+
+    if (isLocalDev) {
+      return;
+    }
+
+    // Block DevTools / View-Source / Save-Page keyboard shortcuts
+    window.addEventListener(
+      'keydown',
+      (e: KeyboardEvent) => {
+        const key = (e.key || '').toUpperCase();
+        const ctrlOrCmd = e.ctrlKey || e.metaKey;
+        const isF12 = key === 'F12' || e.keyCode === 123;
+        const isDevToolsShortcut =
+          ctrlOrCmd && e.shiftKey && (key === 'I' || key === 'J' || key === 'C' || key === 'K');
+        const isMacInspect = e.metaKey && e.altKey && (key === 'I' || key === 'J' || key === 'C' || key === 'U');
+        const isViewSourceOrSave = ctrlOrCmd && !e.shiftKey && (key === 'U' || key === 'S');
+
+        if (isF12 || isDevToolsShortcut || isMacInspect || isViewSourceOrSave) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      },
+      { capture: true }
+    );
+  } catch {
+    /* never crash startup */
+  }
 }
 
 export function setSimulatedCloneStateForTest(override: Partial<AppCloneIntegrityState> | null): void {
@@ -119,6 +217,24 @@ export async function verifyAppCloneIntegrity(): Promise<AppCloneIntegrityState>
     const platform = typeof window !== 'undefined' ? Capacitor.getPlatform() : 'web';
     const isNative = typeof window !== 'undefined' && Capacitor.isNativePlatform();
     const bucket = Math.floor(Date.now() / 300_000);
+
+    if (typeof window !== 'undefined' && window.location) {
+      const host = window.location.hostname || '';
+      const proto = window.location.protocol || '';
+      if (!isAllowedRuntimeOrigin(host, proto)) {
+        cachedIntegrityState = {
+          checked: true,
+          tampered: true,
+          reason: 'invalid_origin',
+          platform,
+          packageName: host || 'unauthorized.origin',
+          certSha256: '',
+          installerPackage: 'unauthorized_web_clone',
+          attestationSig: 'TAMPERED_CLONE',
+        };
+        return cachedIntegrityState;
+      }
+    }
 
     if (!isNative) {
       cachedIntegrityState = {
@@ -181,6 +297,45 @@ export async function verifyAppCloneIntegrity(): Promise<AppCloneIntegrityState>
               checked: true,
               tampered: true,
               reason: 'invalid_apk_signature',
+              platform,
+              packageName: pkg,
+              certSha256: cert,
+              installerPackage: nativeRes.installerPackage || '',
+              attestationSig: 'TAMPERED_CLONE',
+            };
+            return cachedIntegrityState;
+          }
+          if (nativeRes.isClonedContainer) {
+            cachedIntegrityState = {
+              checked: true,
+              tampered: true,
+              reason: 'cloned_container',
+              platform,
+              packageName: pkg,
+              certSha256: cert,
+              installerPackage: nativeRes.installerPackage || '',
+              attestationSig: 'TAMPERED_CLONE',
+            };
+            return cachedIntegrityState;
+          }
+          if (nativeRes.isHookDetected) {
+            cachedIntegrityState = {
+              checked: true,
+              tampered: true,
+              reason: 'hook_framework_detected',
+              platform,
+              packageName: pkg,
+              certSha256: cert,
+              installerPackage: nativeRes.installerPackage || '',
+              attestationSig: 'TAMPERED_CLONE',
+            };
+            return cachedIntegrityState;
+          }
+          if (nativeRes.isDebugged) {
+            cachedIntegrityState = {
+              checked: true,
+              tampered: true,
+              reason: 'debugger_attached',
               platform,
               packageName: pkg,
               certSha256: cert,

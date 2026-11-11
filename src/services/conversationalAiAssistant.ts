@@ -364,6 +364,13 @@ function findBestDishInQuery(query: string, foods: FoodItem[], fallbackDishes: F
 export function detectOutOfCatalogDishName(rawQuery: string, foods: FoodItem[]): string | null {
   const trimmedRaw = (rawQuery || '').trim();
   if (!trimmedRaw) return null;
+  if (
+    /^(?:hello|hi|hey|yo|good\s*(?:morning|afternoon|evening|night)|how\s*are\s*you|what'?s\s*up|thanks?|thank\s*you|ok(?:ay)?|yes|no|help|test|who\s*are\s*you|សួស្តី|ជំរាបសួរ|ជម្រាបសួរ|អរគុណ|បាទ|ចាស|សុខសប្បាយ|你好|您好|谢谢|早上好|晚上好)(?:\s|[!?.។؟])*$/i.test(
+      trimmedRaw
+    )
+  ) {
+    return null;
+  }
   if (isMedicalOrHealthQuery(trimmedRaw)) return null;
   if (MORE_FOLLOWUP_RE.test(trimmedRaw)) return null;
   if (DRINK_PAIRING_INTENT_RE.test(trimmedRaw)) return null;
@@ -399,6 +406,11 @@ export function detectOutOfCatalogDishName(rawQuery: string, foods: FoodItem[]):
     (parsed.excludedProteins && parsed.excludedProteins.length > 0) ||
     (parsed.occasionIntents && parsed.occasionIntents.length > 0)
   ) {
+    return null;
+  }
+
+  // Require an explicit culinary/food lexicon match so non-food words (e.g. "Hello") are never treated as dish names
+  if (!translateUniversalDishQuery(cleanDish).hasLexiconMatch) {
     return null;
   }
 

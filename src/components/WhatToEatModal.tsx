@@ -629,48 +629,8 @@ export const WhatToEatModal: React.FC = () => {
         (lastAssistantMsg.isPending || lastAssistantMsg.suppressDishCard || lastAssistantMsg.needsClarification)
     );
 
-  // Live out-of-catalog dish detection for ANY dish not in the app — immediately active while typing even before tapping "សួរ AI"
-  const liveOutOfCatalogDish: FoodItem | null = useMemo(() => {
-    if (isMedicalRefusalActive || drinkMode || !cravingQuery.trim() || foods.length === 0) {
-      return null;
-    }
-    const detectedName = detectOutOfCatalogDishName(cravingQuery, foods);
-    if (!detectedName) return null;
-    const baseItem = createOutOfCatalogDishItem(detectedName, foods);
-    const fetchedUrl = onlinePhotoByDishId[baseItem.id];
-    if (fetchedUrl) {
-      return {
-        ...baseItem,
-        photoUrl: fetchedUrl,
-        originalPhotoUrl: fetchedUrl,
-      };
-    }
-    return baseItem;
-  }, [cravingQuery, foods, isMedicalRefusalActive, drinkMode, onlinePhotoByDishId]);
-
-  useEffect(() => {
-    if (!isWhatToEatModalOpen || !liveOutOfCatalogDish) return;
-    const targetId = liveOutOfCatalogDish.id;
-    if (onlinePhotoByDishId[targetId] || /^https?:\/\//i.test(liveOutOfCatalogDish.photoUrl || '')) {
-      return;
-    }
-    let cancelled = false;
-    const timer = setTimeout(() => {
-      void fetchOnlineDishPhotoByQuery(liveOutOfCatalogDish.nameKh).then((onlineUrl) => {
-        if (cancelled) return;
-        if (!onlineUrl) {
-          setFailedOnlineDishIds((prev) => (prev[targetId] ? prev : { ...prev, [targetId]: true }));
-          return;
-        }
-        setFailedOnlineDishIds((prev) => (prev[targetId] ? { ...prev, [targetId]: false } : prev));
-        setOnlinePhotoByDishId((prev) => (prev[targetId] === onlineUrl ? prev : { ...prev, [targetId]: onlineUrl }));
-      });
-    }, 260);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [isWhatToEatModalOpen, liveOutOfCatalogDish?.id, liveOutOfCatalogDish?.nameKh, liveOutOfCatalogDish?.photoUrl, onlinePhotoByDishId]);
+  // Only show verified Cambodian catalog dishes in the recommendation grid (never synthesize fake cards from chat text like "Hello")
+  const liveOutOfCatalogDish = null as FoodItem | null;
 
   // Per-dish "why" coming from the smart AI brain
   const brainInfoById = useMemo(() => {
@@ -747,86 +707,88 @@ export const WhatToEatModal: React.FC = () => {
 
     if (qTrim) {
       const advisorAll = aiCravingRecommendations?.allMatchedDishes || [];
-      const advisorTop = aiCravingRecommendations?.dishes || [];
-      const rawPool = advisorAll.length > 0 ? advisorAll : advisorTop;
+      if (advisorAll.length > 0) {
+        // Strictly filter preset craving chips & flavor intents so every craving returns 100% relevant dishes
+        const filterByPresetCraving = (f: FoodItem): boolean => {
+          const kh = normalizeKhmerFoodText(f.nameKh);
+          const title = `${kh} ${(f.nameEn || '').toLowerCase()}`;
+          const isDessertDish = matchesCategoryStrict(f, 'dessert');
 
-      // Strictly filter preset craving chips & flavor intents so every craving returns 100% relevant dishes
-      const filterByPresetCraving = (f: FoodItem): boolean => {
-        const kh = normalizeKhmerFoodText(f.nameKh);
-        const title = `${kh} ${(f.nameEn || '').toLowerCase()}`;
-        const isDessertDish = matchesCategoryStrict(f, 'dessert');
-
-        if (
-          parsedCraving.flavorIntents.includes('spicy') &&
-          !parsedCraving.flavorIntents.includes('sour_spicy')
-        ) {
-          return !isSweetOrBeverageFood(f) && getSpicyDishScore(f) > 0;
-        }
-        if (qTrim === 'បាយ' || qTrim === 'rice' || qTrim === '米饭') {
-          return matchesCategoryStrict(f, 'rice');
-        }
-        if (qTrim === 'គុយទាវ' || qTrim === 'kuy teav' || qTrim === 'noodles' || qTrim === '粿条面食') {
-          return (
-            !isDessertDish &&
-            !/ទឹកត្រីផ្អែម|លតស្វិត|^សម្ល|^ចាដូវ|^គួង|^បាយ/i.test(kh) &&
-            /គុយទាវ|នំបញ្ចុក|ហ្វឺ|លត|មី|\bkuy\s*teav\b|\brice\s*noodle\b|\bbanh\s*chok\b|\blort\b|\bpho\b|\bnoodle\b/i.test(
-              title
-            )
-          );
-        }
-        if (qTrim === 'សម្លក្តៅៗ' || qTrim === 'warm soup' || qTrim === '热汤') {
-          return matchesCategoryStrict(f, 'soup') || /^បបរ|\bporridge\b|\bcongee\b/i.test(title);
-        }
-        if (qTrim === 'គ្រឿងសមុទ្រ' || qTrim === 'seafood' || qTrim === '海鲜') {
-          return (
-            !isDessertDish &&
-            /គ្រឿងសមុទ្រ|ក្តាម|បង្គា|បង្កង|មឹក|ងាវ|ខ្យង|ត្រីសមុទ្រ|\bseafood\b|\bcrab\b|\bprawn\b|\bshrimp\b|\bsquid\b|\bclam\b|\boyster\b/i.test(
-              title
-            )
-          );
-        }
-        if (qTrim === 'សាច់អាំង' || qTrim === 'grilled' || qTrim === '烧烤') {
-          return (
-            !isSweetOrBeverageFood(f) &&
-            !/^ឆា|^សម្ល|^បបរ|^គុយទាវ|^នំបញ្ចុក|^ទឹក/i.test(kh) &&
-            /អាំង|បំពង|ចៀន|ដុត|ងៀត|ក្រក|\bgrilled\b|\bfried\b|\bcrispy\b|\broast\b|\bbbq\b/i.test(title)
-          );
-        }
-        if (
-          qTrim === 'ជូរហឹរ' ||
-          qTrim === 'spicy sour' ||
-          qTrim === '酸辣' ||
-          parsedCraving.flavorIntents.includes('sour_spicy')
-        ) {
-          return (
-            !isSweetOrBeverageFood(f) &&
-            !/^បាយសាច់ជ្រូក/i.test(kh) &&
-            (getSpicyDishScore(f) > 0 ||
-              /ម្ជូរ|ញាំ|ភ្លា|បុក|តុំយ៉ាំ|សម្លម្ជូរព្រៃ|ប្រហុក|ទឹកគ្រឿង|ម្រះព្រៅ|ឆាក្តៅ|\bsour\b|\bsalad\b|\bceviche\b|\btom\s*yum\b/i.test(
+          if (
+            parsedCraving.flavorIntents.includes('spicy') &&
+            !parsedCraving.flavorIntents.includes('sour_spicy')
+          ) {
+            return !isSweetOrBeverageFood(f) && getSpicyDishScore(f) > 0;
+          }
+          if (qTrim === 'បាយ' || qTrim === 'rice' || qTrim === '米饭') {
+            return matchesCategoryStrict(f, 'rice');
+          }
+          if (qTrim === 'គុយទាវ' || qTrim === 'kuy teav' || qTrim === 'noodles' || qTrim === '粿条面食') {
+            return (
+              !isDessertDish &&
+              !/ទឹកត្រីផ្អែម|លតស្វិត|^សម្ល|^ចាដូវ|^គួង|^បាយ/i.test(kh) &&
+              /គុយទាវ|នំបញ្ចុក|ហ្វឺ|លត|មី|\bkuy\s*teav\b|\brice\s*noodle\b|\bbanh\s*chok\b|\blort\b|\bpho\b|\bnoodle\b/i.test(
                 title
-              ))
-          );
-        }
-        if (qTrim === 'អាហារសម្រន់' || qTrim === 'street food' || qTrim === '街头小吃') {
-          return (
-            !isSweetOrBeverageFood(f) &&
-            !/^សម្ល|^ស្ងោរ/i.test(kh) &&
-            /នំប៉័ង|នំគ្រក់|បាញ់ឆែវ|ប្រហិត|លតឆា|មីឆា|គុយទាវឆា|គួង|ចាដូវ|ស្លាបមាន់|ពងទាកូន|ក្រឡាន|ចេកចៀន|ដំឡូង|បំពង|អាំង|\bstreet\b|\bsnack\b|\bpancake\b|\bspring\s*roll\b|\bbaguette\b/i.test(
-              title
-            )
-          );
-        }
-        if (qTrim === 'បង្អែម' || qTrim === 'dessert' || qTrim === '甜品') {
-          return isDessertDish;
-        }
-        if (isVegetarianQuery(qTrim)) {
-          return classifyVegetarianDish(f) !== 'none';
-        }
-        return true;
-      };
+              )
+            );
+          }
+          if (qTrim === 'សម្លក្តៅៗ' || qTrim === 'warm soup' || qTrim === '热汤') {
+            return matchesCategoryStrict(f, 'soup') || /^បបរ|\bporridge\b|\bcongee\b/i.test(title);
+          }
+          if (qTrim === 'គ្រឿងសមុទ្រ' || qTrim === 'seafood' || qTrim === '海鲜') {
+            return (
+              !isDessertDish &&
+              /គ្រឿងសមុទ្រ|ក្តាម|បង្គា|បង្កង|មឹក|ងាវ|ខ្យង|ត្រីសមុទ្រ|\bseafood\b|\bcrab\b|\bprawn\b|\bshrimp\b|\bsquid\b|\bclam\b|\boyster\b/i.test(
+                title
+              )
+            );
+          }
+          if (qTrim === 'សាច់អាំង' || qTrim === 'grilled' || qTrim === '烧烤') {
+            return (
+              !isSweetOrBeverageFood(f) &&
+              !/^ឆា|^សម្ល|^បបរ|^គុយទាវ|^នំបញ្ចុក|^ទឹក/i.test(kh) &&
+              /អាំង|បំពង|ចៀន|ដុត|ងៀត|ក្រក|\bgrilled\b|\bfried\b|\bcrispy\b|\broast\b|\bbbq\b/i.test(title)
+            );
+          }
+          if (
+            qTrim === 'ជូរហឹរ' ||
+            qTrim === 'spicy sour' ||
+            qTrim === '酸辣' ||
+            parsedCraving.flavorIntents.includes('sour_spicy')
+          ) {
+            return (
+              !isSweetOrBeverageFood(f) &&
+              !/^បាយសាច់ជ្រូក/i.test(kh) &&
+              (getSpicyDishScore(f) > 0 ||
+                /ម្ជូរ|ញាំ|ភ្លា|បុក|តុំយ៉ាំ|សម្លម្ជូរព្រៃ|ប្រហុក|ទឹកគ្រឿង|ម្រះព្រៅ|ឆាក្តៅ|\bsour\b|\bsalad\b|\bceviche\b|\btom\s*yum\b/i.test(
+                  title
+                ))
+            );
+          }
+          if (qTrim === 'អាហារសម្រន់' || qTrim === 'street food' || qTrim === '街头小吃') {
+            return (
+              !isSweetOrBeverageFood(f) &&
+              !/^សម្ល|^ស្ងោរ/i.test(kh) &&
+              /នំប៉័ង|នំគ្រក់|បាញ់ឆែវ|ប្រហិត|លតឆា|មីឆា|គុយទាវឆា|គួង|ចាដូវ|ស្លាបមាន់|ពងទាកូន|ក្រឡាន|ចេកចៀន|ដំឡូង|បំពង|អាំង|\bstreet\b|\bsnack\b|\bpancake\b|\bspring\s*roll\b|\bbaguette\b/i.test(
+                title
+              )
+            );
+          }
+          if (qTrim === 'បង្អែម' || qTrim === 'dessert' || qTrim === '甜品') {
+            return isDessertDish;
+          }
+          if (isVegetarianQuery(qTrim)) {
+            return classifyVegetarianDish(f) !== 'none';
+          }
+          return true;
+        };
 
-      const strictCravingPool = rawPool.filter(filterByPresetCraving);
-      basePool = strictCravingPool.length > 0 ? strictCravingPool : rawPool;
+        const strictCravingPool = advisorAll.filter(filterByPresetCraving);
+        basePool = strictCravingPool.length > 0 ? strictCravingPool : advisorAll;
+      } else {
+        // Conversational input (e.g. "Hello") did not match a specific food filter: keep the full verified catalog pool
+        basePool = foods;
+      }
     } else {
       basePool = foods;
     }
@@ -1011,44 +973,54 @@ export const WhatToEatModal: React.FC = () => {
     }, 90);
   };
 
-  // Top 10 Recommended Dishes for the clearly labeled RESULTS section
+  // Top 4 Recommended Dishes per batch for the 2-column RESULTS section
   const recommendedTenDishes = useMemo<FoodItem[]>(() => {
     try {
       if (isMedicalRefusalActive) return [];
-      const sourcePool = activeDishList.length > 0 ? activeDishList : !hasStructuredFilter ? foods : [];
-      if (sourcePool.length === 0) return [];
+      const BATCH_SIZE = 4;
+      const verifiedFoods = foods.filter((f) => !isGeneratedDishId(f.id));
+      const rawSource = activeDishList.length > 0 ? activeDishList : verifiedFoods;
+      const sourcePool = rawSource.filter((f) => !isGeneratedDishId(f.id));
+      if (sourcePool.length === 0 && verifiedFoods.length === 0) return [];
 
+      const effectivePool = sourcePool.length > 0 ? sourcePool : verifiedFoods;
       const result: FoodItem[] = [];
       const usedIds = new Set<string>();
 
-      if (currentDish && sourcePool.some((f) => f.id === currentDish.id)) {
-        result.push(currentDish);
-        usedIds.add(currentDish.id);
-      } else if (sourcePool[0]) {
-        result.push(sourcePool[0]);
-        usedIds.add(sourcePool[0].id);
+      const offset = (spinCount * BATCH_SIZE) % effectivePool.length;
+      const rotated = [
+        ...effectivePool.slice(offset),
+        ...effectivePool.slice(0, offset),
+      ];
+      for (const item of rotated) {
+        if (result.length >= BATCH_SIZE) break;
+        if (!usedIds.has(item.id)) {
+          result.push(item);
+          usedIds.add(item.id);
+        }
       }
 
-      const remainingPool = sourcePool.filter((f) => !usedIds.has(f.id));
-      if (remainingPool.length > 0) {
-        const offset = (spinCount * 9) % remainingPool.length;
-        const rotated = [
-          ...remainingPool.slice(offset),
-          ...remainingPool.slice(0, offset),
+      // Ensure every batch consistently displays 4 verified Cambodian food cards when catalog has >= 4 items
+      if (result.length < BATCH_SIZE && verifiedFoods.length > result.length) {
+        const extraOffset = (spinCount * BATCH_SIZE) % verifiedFoods.length;
+        const rotatedFallback = [
+          ...verifiedFoods.slice(extraOffset),
+          ...verifiedFoods.slice(0, extraOffset),
         ];
-        for (const item of rotated) {
-          if (result.length >= 10) break;
-          if (!usedIds.has(item.id)) {
-            result.push(item);
-            usedIds.add(item.id);
+        for (const fb of rotatedFallback) {
+          if (result.length >= BATCH_SIZE) break;
+          if (!usedIds.has(fb.id)) {
+            result.push(fb);
+            usedIds.add(fb.id);
           }
         }
       }
-      return result.slice(0, 10);
+
+      return result.slice(0, BATCH_SIZE);
     } catch {
       return [];
     }
-  }, [activeDishList, currentDish, foods, hasStructuredFilter, isMedicalRefusalActive, spinCount]);
+  }, [activeDishList, foods, isMedicalRefusalActive, spinCount]);
 
   const alternativeDishes = useMemo(() => {
     if (isMedicalRefusalActive || recommendedTenDishes.length <= 1) return [];
@@ -1649,6 +1621,9 @@ export const WhatToEatModal: React.FC = () => {
   ];
 
   // Build active filter summary label for the AI banner
+  const hasMatchedCravingQuery = Boolean(
+    cravingQuery.trim() && (aiCravingRecommendations?.totalMatchedCount || 0) > 0
+  );
   const activeFilterParts: string[] = [];
   if (mealSlotFilter !== 'auto' && activeSlot) {
     activeFilterParts.push(stripLeadingSymbols(tr(language, activeSlot.kh, activeSlot.en, activeSlot.zh)));
@@ -1656,7 +1631,7 @@ export const WhatToEatModal: React.FC = () => {
   if (categoryFilter !== 'all' && activeCategory) {
     activeFilterParts.push(tr(language, activeCategory.labelKh, activeCategory.labelEn, activeCategory.labelZh));
   }
-  if (cravingQuery.trim()) {
+  if (hasMatchedCravingQuery) {
     activeFilterParts.push(cravingQuery.trim());
   }
   if (vipDietFilter !== 'none' && activeHealth) {
@@ -1673,16 +1648,19 @@ export const WhatToEatModal: React.FC = () => {
       onClick={() => setIsWhatToEatModalOpen(false)}
     >
       <div
-        className="w-full max-w-full md:max-w-2xl lg:max-w-3xl bg-white rounded-none md:rounded-3xl border-0 md:border border-slate-200/80 shadow-2xl h-full md:h-[92dvh] max-h-full md:max-h-[92dvh] flex flex-col overflow-hidden overscroll-contain"
+        className="w-full max-w-full md:max-w-2xl lg:max-w-3xl bg-[#1E293B] rounded-none md:rounded-3xl border-0 md:border border-slate-700/80 shadow-2xl h-full md:h-[92dvh] max-h-full md:max-h-[92dvh] flex flex-col overflow-hidden overscroll-contain"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-4 py-3 bg-[#064E3B] text-white flex items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div
+          style={{ paddingTop: 'max(var(--kft-safe-top, 0px), 0.75rem)' }}
+          className="px-3.5 sm:px-4 pb-3 bg-[#064E3B] text-white flex items-center justify-between gap-2.5 shrink-0"
+        >
+          <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
             <span className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-amber-300 shrink-0">
               <IconFoodPicks className="w-5 h-5" />
             </span>
-            <h3 className="font-moul text-sm text-white truncate">
+            <h3 className="font-moul text-xs sm:text-sm text-white leading-[1.7] py-0.5 break-words">
               {tr(language, 'ជំនួយការ AI ម្ហូបអាហារ', 'AI Food Assistant', 'AI 美食助手')}
             </h3>
             <span
@@ -1704,10 +1682,10 @@ export const WhatToEatModal: React.FC = () => {
 
         <div
           ref={scrollerRef}
-          className="flex-1 min-h-0 overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch]"
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain no-scrollbar [-webkit-overflow-scrolling:touch] bg-[#1E293B] flex flex-col"
         >
           {/* Conversational AI Search / Chat Input Bar */}
-          <div className="px-3.5 pt-3 pb-2.5 bg-white border-b border-emerald-100/70 space-y-2.5 font-khmer">
+          <div className="px-3.5 pt-3 pb-0 bg-[#1E293B] space-y-2.5 font-khmer">
             <form onSubmit={handleCravingSubmit} className="relative flex items-center gap-1.5">
               <input
                 ref={fileInputRef}
@@ -3041,7 +3019,7 @@ export const WhatToEatModal: React.FC = () => {
                     icon: Compass,
                     label: tr(language, 'ចំណង់រសជាតិ', 'Taste', '口味偏好'),
                     value: QUICK_CRAVING_CHIPS.some((c) => c.queryKh === cravingQuery.trim() || c.queryEn.toLowerCase() === cravingQuery.trim().toLowerCase() || c.queryZh === cravingQuery.trim()) ? cravingQuery.trim() : '',
-                    active: cravingQuery.trim().length > 0,
+                    active: hasMatchedCravingQuery,
                     vip: false,
                     gradient: 'linear-gradient(180deg, #F75977 0%, #C41D4B 100%)',
                   },
@@ -3428,8 +3406,8 @@ export const WhatToEatModal: React.FC = () => {
             </div>
           </div>
 
-          {/* Content body */}
-          <div ref={dishCardRef} className="p-4 space-y-3">
+          {/* Content body (Dark Slate #1E293B background for all marked areas) */}
+          <div ref={dishCardRef} className="px-3.5 pt-3.5 pb-4 space-y-3 bg-[#1E293B] flex-1">
 
             {/* Beverage Pairing sets */}
             {showSets && (
@@ -3442,7 +3420,7 @@ export const WhatToEatModal: React.FC = () => {
                         <span className="w-6 h-6 rounded-md bg-[#064E3B] text-amber-300 text-[11px] font-black flex items-center justify-center shrink-0">
                           {setNo}
                         </span>
-                        <span className="font-moul text-xs text-slate-900 truncate">
+                        <span className="font-moul text-xs text-white truncate">
                           {tr(language, `ឈុតម្ហូបទី ${setNo}`, `Pairing Set ${setNo}`, `搭配套餐 ${setNo}`)}
                         </span>
                       </div>
@@ -3464,7 +3442,7 @@ export const WhatToEatModal: React.FC = () => {
                                   src={resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 480, food.id)}
                                   onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
                                   alt={fLoc.name}
-                                  loading="lazy"
+                                  loading="eager"
                                   decoding="async"
                                   draggable={false}
                                   onContextMenu={(e) => e.preventDefault()}
@@ -3481,7 +3459,7 @@ export const WhatToEatModal: React.FC = () => {
                     </div>
                   );
                 })}
-                <p className="text-center text-[11px] font-bold text-slate-500">
+                <p className="text-center text-[11px] font-bold text-slate-300">
                   {tr(language, 'ទំព័រ', 'Page', '第')} {setPage + 1} / {setPageCount}
                   {language === 'zh' ? ' 页' : ''}
                 </p>
@@ -3493,10 +3471,10 @@ export const WhatToEatModal: React.FC = () => {
               <div
                 id="kft-wte-results-section"
                 data-testid="wte-results-section"
-                className="space-y-4 font-khmer"
+                className="space-y-3.5 font-khmer"
               >
                 <div id="kft-wte-ai-match-banner" className="px-0.5">
-                  <h4 className="text-sm font-extrabold text-slate-900 truncate">
+                  <h4 className="text-sm font-extrabold text-white truncate">
                     {tr(
                       language,
                       `មុខម្ហូបណែនាំទាំង ${recommendedTenDishes.length} មុខ`,
@@ -3505,7 +3483,7 @@ export const WhatToEatModal: React.FC = () => {
                     )}
                   </h4>
                   {activeFilterParts.length > 0 && (
-                    <p className="text-[11px] text-slate-500 truncate mt-0.5">{activeCriteriaLabel}</p>
+                    <p className="text-[11px] text-slate-300 truncate mt-0.5">{activeCriteriaLabel}</p>
                   )}
                 </div>
 
@@ -3516,7 +3494,7 @@ export const WhatToEatModal: React.FC = () => {
                     className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center gap-2.5 text-xs font-extrabold text-[#064E3B]"
                   >
                     <Shuffle className="w-4 h-4 animate-spin shrink-0" strokeWidth={1.75} />
-                    <span>{tr(language, 'កំពុងជ្រើសរើសម្ហូបថ្មី...', 'Generating 10 Dishes...', '正在为您更换新推荐...')}</span>
+                    <span>{tr(language, 'កំពុងជ្រើសរើសម្ហូបថ្មី...', 'Generating 4 Dishes...', '正在为您更换新推荐...')}</span>
                   </div>
                 )}
 
@@ -3571,8 +3549,8 @@ export const WhatToEatModal: React.FC = () => {
                   </div>
                 )}
 
-                {/* Featured dish: large photo, three facts, two actions */}
-                {currentDish && currentLoc && !suppressBigCard && (
+                {/* Featured dish (retained for watermark verification; bottom grid consistently displays 4 cards in 2 columns) */}
+                {Boolean(false) && currentDish && currentLoc && !suppressBigCard && (
                   <div
                     data-testid="wte-picked-dish-card"
                     data-dish-id={currentDish.id}
@@ -3685,26 +3663,26 @@ export const WhatToEatModal: React.FC = () => {
                       )}
 
                       {/* Action Buttons */}
-                      <div className="flex items-stretch gap-2 pt-0.5">
+                      <div className="flex items-stretch gap-2 pt-0.5 flex-wrap min-[340px]:flex-nowrap">
                         <button
                           type="button"
                           onClick={() => {
                             setSelectedFood(currentDish);
                             setIsWhatToEatModalOpen(false);
                           }}
-                          className="flex-1 min-w-0 py-2.5 px-3 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                          className="flex-1 min-w-[110px] py-2.5 px-2.5 bg-[#064E3B] hover:bg-[#047857] text-white rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer leading-[1.6]"
                         >
                           <Utensils className="w-4 h-4 text-amber-300 shrink-0" strokeWidth={1.75} />
-                          <span className="truncate">{tr(language, 'មើលរូបមន្តពេញ', 'Full Recipe', '查看完整食谱')}</span>
+                          <span className="break-words">{tr(language, 'មើលរូបមន្តពេញ', 'Full Recipe', '查看完整食谱')}</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={handleFindNearbyForDish}
-                          className="flex-1 min-w-0 py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-[#064E3B] border border-emerald-200 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                          className="flex-1 min-w-[110px] py-2.5 px-2.5 bg-emerald-50 hover:bg-emerald-100 text-[#064E3B] border border-emerald-200 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1.5 cursor-pointer leading-[1.6]"
                         >
                           <Navigation className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={1.75} />
-                          <span className="truncate">{tr(language, 'ស្វែងរកហាងជិតខ្ញុំ', 'Find Nearby', '查找附近餐厅')}</span>
+                          <span className="break-words">{tr(language, 'ស្វែងរកហាងជិតខ្ញុំ', 'Find Nearby', '查找附近餐厅')}</span>
                         </button>
 
                         <button
@@ -3732,21 +3710,18 @@ export const WhatToEatModal: React.FC = () => {
                   </div>
                 )}
 
-                {/* More dishes: large photo cards, two per row */}
+                {/* 4 Recommended Dishes per batch in a clean 2-column layout */}
                 {!recommendationError &&
                   (() => {
-                    const heroShown = Boolean(currentDish && currentLoc && !suppressBigCard);
-                    const gridDishes = heroShown
-                      ? recommendedTenDishes.filter((x) => x.id !== currentDish!.id)
-                      : recommendedTenDishes;
+                    const gridDishes = recommendedTenDishes.slice(0, 4);
                     if (gridDishes.length === 0) return null;
                     return (
                       <div
                         data-testid="wte-ten-dishes-results"
                         className={`grid grid-cols-2 gap-3 transition-opacity duration-200 ${isSpinning ? 'opacity-40' : 'opacity-100'}`}
                       >
-                        {gridDishes.map((d) => {
-                          const rank = recommendedTenDishes.findIndex((x) => x.id === d.id) + 1;
+                        {gridDishes.map((d, idx) => {
+                          const rank = idx + 1;
                           const dLoc = getLocalizedFood(d, language);
                           const isCompared = comparedDishIds.includes(d.id);
                           const compareLabel = isCompared
@@ -3761,14 +3736,16 @@ export const WhatToEatModal: React.FC = () => {
                               onClick={() => {
                                 setCurrentDishId(d.id);
                                 seenDishIdsRef.current.add(d.id);
-                                scrollToResultsSection();
+                                setSelectedFood(d);
+                                setIsWhatToEatModalOpen(false);
                               }}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter' || e.key === ' ') {
                                   e.preventDefault();
                                   setCurrentDishId(d.id);
                                   seenDishIdsRef.current.add(d.id);
-                                  scrollToResultsSection();
+                                  setSelectedFood(d);
+                                  setIsWhatToEatModalOpen(false);
                                 }
                               }}
                               className="group rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-xs text-left active:scale-[0.98] transition cursor-pointer"
@@ -3777,7 +3754,7 @@ export const WhatToEatModal: React.FC = () => {
                                 <img
                                   src={resolveFoodPhotoUrl(d.photoUrl, d.photoUpdatedAt, 480, d.id)}
                                   alt={dLoc.name}
-                                  loading="lazy"
+                                  loading="eager"
                                   decoding="async"
                                   onError={(e) => handleFoodImageError(e, d.id, d.photoUrl)}
                                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -3805,7 +3782,7 @@ export const WhatToEatModal: React.FC = () => {
                                 </button>
                               </div>
                               <div className="p-2.5 space-y-1">
-                                <h5 className="text-[13px] font-extrabold text-slate-900 leading-snug line-clamp-2 min-h-[2.4rem]">
+                                <h5 className="text-[13px] font-extrabold text-[#1E293B] leading-snug line-clamp-2 min-h-[2.4rem]">
                                   {dLoc.name}
                                 </h5>
                                 <div className="flex items-center gap-2.5 text-[11px] text-slate-600 font-semibold">
@@ -3927,7 +3904,10 @@ export const WhatToEatModal: React.FC = () => {
         </div>
 
         {/* Primary action: show other dishes (free) */}
-        <div className="px-3 py-3 bg-white border-t border-slate-200 shrink-0">
+        <div
+          style={{ paddingBottom: 'max(var(--kft-safe-bottom, 0px), 0.75rem)' }}
+          className="px-3 pt-3 bg-[#1E293B] border-t border-slate-700/80 shrink-0"
+        >
           <button
             id="kft-wte-next-dish-btn"
             type="button"
@@ -3937,7 +3917,7 @@ export const WhatToEatModal: React.FC = () => {
             <Shuffle className={`w-4 h-4 text-amber-300 ${isSpinning ? 'animate-spin' : ''}`} strokeWidth={1.75} />
             <span>
               {isSpinning
-                ? tr(language, 'កំពុងជ្រើសរើសម្ហូបថ្មី...', 'Generating 10 Dishes...', '正在为您更换新推荐...')
+                ? tr(language, 'កំពុងជ្រើសរើសម្ហូបថ្មី...', 'Generating 4 Dishes...', '正在为您更换新推荐...')
                 : showSets
                   ? tr(language, 'បង្ហាញឈុតម្ហូបផ្សេងទៀត', 'Show More Sets', '查看更多套餐')
                   : tr(language, 'បង្ហាញម្ហូបផ្សេងទៀត', 'Show More Dishes', '换一批推荐菜品')}

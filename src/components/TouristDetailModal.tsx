@@ -224,7 +224,10 @@ export const TouristDetailModal: React.FC = () => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Controls */}
-        <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
+        <div
+          style={{ top: 'max(var(--kft-safe-top, 0px), 0.75rem)' }}
+          className="absolute left-3 right-3 z-20 flex items-center justify-between gap-2 pointer-events-none"
+        >
           <button
             onClick={() => setSelectedDestination(null)}
             className="p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md text-white shadow pointer-events-auto transition active:scale-90"
@@ -544,7 +547,10 @@ export const TouristDetailModal: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="relative pt-16 pb-5 px-4 sm:px-6 bg-gradient-to-br from-[#064E3B] via-[#093228] to-slate-900 border-b border-emerald-500/30 flex items-center gap-3.5">
+            <div
+              style={{ paddingTop: 'calc(max(var(--kft-safe-top, 0px), 0.75rem) + 3.25rem)' }}
+              className="relative pb-5 px-4 sm:px-6 bg-gradient-to-br from-[#064E3B] via-[#093228] to-slate-900 border-b border-emerald-500/30 flex items-center gap-3.5"
+            >
               <DefaultDestinationIcon
                 categorySlug={selectedDestination.categorySlug}
                 className="w-14 h-14 rounded-2xl border border-emerald-400/40 shadow-md"

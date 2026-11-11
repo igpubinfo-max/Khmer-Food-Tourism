@@ -4,6 +4,7 @@ import './index.css'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { sanitizeStartupCurrentUser } from './utils/securityIntegrityGuard.ts'
+import { installRuntimeAntiDebugGuard } from './utils/appCloneIntegrityGuard.ts'
 import {
   APP_VERSION_NAME,
   APP_BUILD_CODE,
@@ -712,6 +713,11 @@ try {
 } catch (e) {
   console.warn('Version migration warning:', e);
 }
+
+// 1b. Runtime Anti-Debugging & Anti-Clone Origin Guard
+try {
+  installRuntimeAntiDebugGuard();
+} catch {}
 
 // 2. Startup Session & VIP Self-Healing Check
 try {

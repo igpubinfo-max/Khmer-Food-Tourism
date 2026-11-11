@@ -90,9 +90,24 @@ const FeatureGridImpl: React.FC<Props> = ({
       gradientStyle: 'linear-gradient(180deg, #3290FA 0%, #1254C7 100%)',
       onClick: onDailyFoodDiscovery,
       renderIcon: () => (
-        <svg className="w-7 h-7 drop-shadow-xs shrink-0" viewBox="0 0 52 46" fill="none">
-          <path d="M26 4l5.4 3.1 6.2-.5 3.1 5.4 5.4 3.1-.5 6.2 3.1 5.4-3.1 5.4.5 6.2-5.4 3.1-3.1 5.4-6.2-.5L26 44l-5.4-3.1-6.2.5-3.1-5.4-5.4-3.1.5-6.2L3.3 21.3l3.1-5.4-.5-6.2 5.4-3.1 3.1-5.4 6.2.5L26 4z" fill="#FFFFFF" />
-          <text x="26" y="29" textAnchor="middle" fill="#1558C0" fontFamily="sans-serif" fontSize="16" fontWeight="900">
+        <svg className="w-8 h-7 drop-shadow-xs shrink-0" viewBox="0 0 60 48" fill="none">
+          <path
+            d="M6.2 14.2 10.4 9.5l5.1-2.7 7.6-.8 6.8 1.2 4.9-.5 3.6 2.8 4.4-4.1 6.7-2.2 4.8.6 1.9 3.6-1.8 4.6.9 4.2-2.6 3.7 2.8 4.1-.7 4.7-4.5 2.5-5.6.9-2.8 3.6 3.2 2.4-.9 2.6-4.9.4-3.7-2.2-4.8.8-3.4 4.1-6.2.8-5.1-1.2-2.1-3.4 2.4-2.8-3.1-1.9-4.6-4.3-1.4-4.8-3.8-4.2-.8-4.6 1.8-3.2Z"
+            fill="#FFFFFF"
+            stroke="rgba(255,255,255,0.65)"
+            strokeWidth="0.9"
+            strokeLinejoin="round"
+          />
+          <text
+            x="29.5"
+            y="29.2"
+            textAnchor="middle"
+            fill="#1558C0"
+            fontFamily="system-ui, -apple-system, sans-serif"
+            fontSize="15.5"
+            fontWeight="900"
+            letterSpacing="-0.5"
+          >
             25
           </text>
         </svg>

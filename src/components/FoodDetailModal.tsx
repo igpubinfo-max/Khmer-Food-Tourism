@@ -455,7 +455,10 @@ export const FoodDetailModal: React.FC = () => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Floating Controls */}
-        <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
+        <div
+          style={{ top: 'max(var(--kft-safe-top, 0px), 0.75rem)' }}
+          className="absolute left-3 right-3 z-20 flex items-center justify-between gap-2 pointer-events-none"
+        >
           <button
             onClick={() => {
               if (isSpeaking) window.speechSynthesis.cancel();

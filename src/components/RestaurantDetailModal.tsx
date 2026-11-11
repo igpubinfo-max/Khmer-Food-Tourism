@@ -218,7 +218,10 @@ export const RestaurantDetailModal: React.FC = () => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Floating Controls */}
-        <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
+        <div
+          style={{ top: 'max(var(--kft-safe-top, 0px), 0.75rem)' }}
+          className="absolute left-3 right-3 z-20 flex items-center justify-between gap-2 pointer-events-none"
+        >
           <button
             onClick={() => setSelectedRestaurant(null)}
             className="p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md text-white shadow pointer-events-auto transition active:scale-90"
@@ -345,7 +348,10 @@ export const RestaurantDetailModal: React.FC = () => {
             }
 
             return (
-              <div className="relative pt-16 pb-5 px-4 sm:px-6 bg-gradient-to-br from-[#064E3B] via-[#093228] to-slate-900 border-b border-emerald-500/30 flex items-center gap-3.5">
+              <div
+                style={{ paddingTop: 'calc(max(var(--kft-safe-top, 0px), 0.75rem) + 3.25rem)' }}
+                className="relative pb-5 px-4 sm:px-6 bg-gradient-to-br from-[#064E3B] via-[#093228] to-slate-900 border-b border-emerald-500/30 flex items-center gap-3.5"
+              >
                 <ShopAvatar
                   restaurant={{
                     ...selectedRestaurant,

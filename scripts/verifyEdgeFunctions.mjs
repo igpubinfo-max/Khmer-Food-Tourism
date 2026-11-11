@@ -747,4 +747,27 @@ ok('PDF & screenshot support + centralized Used-Trx & Audit Log SQL (supabase_ab
   }
 });
 
+ok('Code Obfuscation + Anti-Debugging + Anti-Clone Check (Vite, ProGuard, MainActivity, NativeAppIntegrity, Runtime Guard)', () => {
+  const viteCfg = read('vite.config.ts');
+  assert.ok(viteCfg.includes("sourcemap: false"), 'production sourcemaps disabled');
+  assert.ok(viteCfg.includes("entryFileNames: 'assets/k-[hash].js'") && viteCfg.includes("chunkFileNames: 'assets/c-[hash].js'"), 'Rollup chunk and entry filenames are obfuscated');
+
+  const proguard = read('android/app/proguard-rules.pro');
+  assert.ok(proguard.includes('-renamesourcefileattribute SourceFile'), 'ProGuard renames Java source file attributes');
+  assert.ok(!proguard.includes('-keepattributes SourceFile,LineNumberTable'), 'ProGuard strips original source line tables');
+
+  const mainAct = read('android/app/src/main/java/com/khmerfood/tourism/MainActivity.java');
+  assert.ok(mainAct.includes('WebView.setWebContentsDebuggingEnabled(false)'), 'MainActivity disables WebView remote debugging in release builds');
+
+  const nativeInt = read('android/app/src/main/java/com/khmerfood/tourism/NativeAppIntegrityPlugin.java');
+  assert.ok(nativeInt.includes('detectDebuggerAttached') && nativeInt.includes('detectClonedMultiSpaceContainer') && nativeInt.includes('detectHookFrameworks'), 'NativeAppIntegrityPlugin detects debuggers, app-cloner containers, and Xposed/Frida hooks');
+
+  const guardTs = read('src/utils/appCloneIntegrityGuard.ts');
+  assert.ok(guardTs.includes('installRuntimeAntiDebugGuard') && guardTs.includes('isAllowedRuntimeOrigin'), 'Runtime anti-debug and origin guard exported');
+
+  const mainTsx = read('src/main.tsx');
+  assert.ok(mainTsx.includes('installRuntimeAntiDebugGuard()'), 'main.tsx installs runtime anti-debug guard at startup');
+});
+
 console.log(`\n[edge] ALL ${passed} CHECKS PASSED`);
+

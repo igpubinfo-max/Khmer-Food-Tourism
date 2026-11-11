@@ -7,7 +7,7 @@ import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 import { 
   User as UserIcon, Heart, Shield, Store, 
   Globe, LogOut, RefreshCw, ShieldCheck, CheckCircle2,
-  Bell, Compass, Bookmark, Plus, Trash2, ChevronRight,
+  Bell, Compass, Bookmark, Plus, Trash2, ChevronRight, ChevronDown,
   Edit2, Check, X as CloseIcon, Crown, Award, Copy, Clock, MessageSquare, Mail, Settings, Camera, RotateCw, RotateCcw
 } from 'lucide-react';
 import {
@@ -128,6 +128,8 @@ export const ProfileView: React.FC = () => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState('');
   const [showSupportDetails, setShowSupportDetails] = useState(false);
+  const [isVip10BenefitsExpanded, setIsVip10BenefitsExpanded] = useState(false);
+  const [isShopHotelBenefitsExpanded, setIsShopHotelBenefitsExpanded] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [isSavingAvatar, setIsSavingAvatar] = useState(false);
   const [isAvatarEditorOpen, setIsAvatarEditorOpen] = useState(false);
@@ -425,7 +427,7 @@ export const ProfileView: React.FC = () => {
               >
                 <span className="text-base">🚀</span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'ចំណាត់ថ្នាក់ស្វែងរកកំពូល' : 'Top Search Rank'}</div>
+                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">{isKm ? 'ចំណាត់ថ្នាក់ស្វែងរកកំពូល' : 'Top Search Rank'}</div>
                   <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{tr(language, '✓ អាទិភាពបង្ហាញមុខគេ', '✓ Priority Placement', '✓ 优先展示已开启')}</div>
                 </div>
               </button>
@@ -448,7 +450,7 @@ export const ProfileView: React.FC = () => {
               >
                 <span className="text-base">📈</span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'ស្ថិតិ Live Analytics' : 'Live Analytics'}</div>
+                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">{isKm ? 'ស្ថិតិ Live Analytics' : 'Live Analytics'}</div>
                   <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ ចុចមើលចំនួនអ្នកមើល & Call' : '✓ Tap to view stats'}</div>
                 </div>
               </button>
@@ -463,7 +465,7 @@ export const ProfileView: React.FC = () => {
               >
                 <span className="text-base">👑</span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'ផ្លាកសញ្ញា Golden VIP' : 'Golden VIP Badge'}</div>
+                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">{isKm ? 'ផ្លាកសញ្ញា Golden VIP' : 'Golden VIP Badge'}</div>
                   <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ បង្ហាញលើ Profile & ហាង' : '✓ Active on Profile & Shop'}</div>
                 </div>
               </button>
@@ -488,7 +490,7 @@ export const ProfileView: React.FC = () => {
               >
                 <span className="text-base">📸</span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'រូបថតហាងផ្លូវការ HD' : 'Official HD Shop Photo'}</div>
+                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">{isKm ? 'រូបថតហាងផ្លូវការ HD' : 'Official HD Shop Photo'}</div>
                   <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ ចុចកែប្រែរូបតំណាងហាង' : '✓ Tap to update shop photo'}</div>
                 </div>
               </button>
@@ -511,7 +513,7 @@ export const ProfileView: React.FC = () => {
               >
                 <span className="text-base">🎥</span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-slate-900 dark:text-white truncate">{isKm ? 'វីដេអូផ្សព្វផ្សាយហាង' : 'Video Promotion'}</div>
+                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">{isKm ? 'វីដេអូផ្សព្វផ្សាយហាង' : 'Video Promotion'}</div>
                   <div className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">{isKm ? '✓ ចុចភ្ជាប់វីដេអូ TikTok & FB' : '✓ Tap to manage Reels'}</div>
                 </div>
               </button>
@@ -523,7 +525,7 @@ export const ProfileView: React.FC = () => {
               >
                 <span className="text-base">🗺️</span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-bold text-slate-900 dark:text-white truncate">
+                  <div className="font-bold text-slate-900 dark:text-white leading-[1.6] break-words">
                     {isKm ? 'ស្វែងរកទីតាំងលើ Google Maps (Places API)' : 'Google Maps Places Search (VIP Access)'}
                   </div>
                   <div className="text-[9px] text-emerald-700 dark:text-emerald-300 font-bold">
@@ -538,9 +540,9 @@ export const ProfileView: React.FC = () => {
 
             {/* Interactive VIP Live Analytics & Food Video Reels Quick Panel (Requires Active Paid Shop Package) */}
             {selectedVipPowerPanel === 'analytics' && isShopSubscriptionActive(myRestaurants[0]) && (
-              <div className="mt-2 p-3 rounded-2xl bg-gradient-to-br from-emerald-950 to-slate-900 text-white border border-emerald-500/40 space-y-2.5 animate-fade-in">
+              <div className="mt-2 p-3.5 rounded-2xl bg-white border border-emerald-200 shadow-xs space-y-2.5 animate-fade-in">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-amber-300 flex items-center gap-1.5">
+                  <span className="text-[11px] font-bold text-slate-900 flex items-center gap-1.5">
                     <span>📈</span>
                     <span>
                       {isKm
@@ -548,38 +550,38 @@ export const ProfileView: React.FC = () => {
                         : 'Real-Time VIP Live Analytics'}
                     </span>
                   </span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[9px] font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-bold">
                     ● LIVE
                   </span>
                 </div>
                 <div className="grid grid-cols-4 gap-1.5 text-center">
-                  <div className="p-2 rounded-xl bg-white/10 border border-white/10">
-                    <div className="text-sm font-black font-mono text-amber-300">
+                  <div className="p-2 rounded-xl bg-amber-50/70 border border-amber-200/80">
+                    <div className="text-sm font-black font-mono text-amber-700">
                       {myRestaurants[0]?.analytics?.views ?? 0}
                     </div>
-                    <div className="text-[9px] text-slate-300">{tr(language, 'អ្នកចូលមើល', 'Views', '浏览')}</div>
+                    <div className="text-[9px] text-slate-600">{tr(language, 'អ្នកចូលមើល', 'Views', '浏览')}</div>
                   </div>
-                  <div className="p-2 rounded-xl bg-white/10 border border-white/10">
-                    <div className="text-sm font-black font-mono text-emerald-300">
+                  <div className="p-2 rounded-xl bg-emerald-50/70 border border-emerald-200/80">
+                    <div className="text-sm font-black font-mono text-emerald-700">
                       {myRestaurants[0]?.analytics?.phoneClicks ?? 0}
                     </div>
-                    <div className="text-[9px] text-slate-300">{tr(language, 'ចុចខល', 'Calls', '致电')}</div>
+                    <div className="text-[9px] text-slate-600">{tr(language, 'ចុចខល', 'Calls', '致电')}</div>
                   </div>
-                  <div className="p-2 rounded-xl bg-white/10 border border-white/10">
-                    <div className="text-sm font-black font-mono text-sky-300">
+                  <div className="p-2 rounded-xl bg-sky-50/70 border border-sky-200/80">
+                    <div className="text-sm font-black font-mono text-sky-700">
                       {myRestaurants[0]?.analytics?.mapClicks ?? 0}
                     </div>
-                    <div className="text-[9px] text-slate-300">{tr(language, 'ចុចផែនទី', 'Maps', '导航')}</div>
+                    <div className="text-[9px] text-slate-600">{tr(language, 'ចុចផែនទី', 'Maps', '导航')}</div>
                   </div>
-                  <div className="p-2 rounded-xl bg-white/10 border border-white/10">
-                    <div className="text-sm font-black font-mono text-purple-300">
+                  <div className="p-2 rounded-xl bg-purple-50/70 border border-purple-200/80">
+                    <div className="text-sm font-black font-mono text-purple-700">
                       {myRestaurants[0]?.analytics?.shareClicks ?? 0}
                     </div>
-                    <div className="text-[9px] text-slate-300">{tr(language, 'ចែករំលែក', 'Shares', '分享')}</div>
+                    <div className="text-[9px] text-slate-600">{tr(language, 'ចែករំលែក', 'Shares', '分享')}</div>
                   </div>
                 </div>
                 <div className="space-y-2 pt-1">
-                  <div className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-400/40 text-[11px] text-amber-100 leading-relaxed font-khmer">
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-700 leading-relaxed font-khmer">
                     {tr(
                       language,
                       'តាមដានចំនួនអ្នកចូលមើល ការហៅទូរស័ព្ទ និងការស្វែងរកទីតាំងហាងរបស់អ្នកដោយផ្ទាល់។',
@@ -595,41 +597,37 @@ export const ProfileView: React.FC = () => {
                         setManagingRestaurant(myRestaurants[0]);
                         setIsManageMenuModalOpen(true);
                       }}
-                      className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-600 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 border-2 border-white/60 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
+                      className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#F59E0B] via-[#F97316] to-[#EA580C] hover:from-[#D97706] hover:to-[#C2410C] text-white font-black text-xs shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
                     >
-                      <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
+                      <Crown className="w-4 h-4 fill-white shrink-0" />
                       <span>{isKm ? '📊 បើកផ្ទាំងស្ថិតិលម្អិត & គ្រប់គ្រងហាង VIP (1/1 ហាង)' : '📊 Open Full Store Analytics & Hub (1/1 Store)'}</span>
                     </button>
                   ) : (
-                    <div className="relative p-1 rounded-2xl group">
-                      {/* Softly blinking glowing lights around border */}
-
-                      <button
-                        type="button"
-                        onClick={() => setIsVipAddRestaurantModalOpen(true)}
-                        className="relative w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 font-black text-xs sm:text-sm border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
-                      >
-                        <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
-                        <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក' : '+ Register Your VIP Restaurant'}</span>
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsVipAddRestaurantModalOpen(true)}
+                      className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#10B981] via-[#059669] to-[#047857] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-md"
+                    >
+                      <Crown className="w-4 h-4 fill-white shrink-0" />
+                      <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក' : '+ Register Your VIP Restaurant'}</span>
+                    </button>
                   )}
                 </div>
               </div>
             )}
 
             {selectedVipPowerPanel === 'reels' && (
-              <div className="mt-2 p-3 rounded-2xl bg-gradient-to-br from-slate-900 to-amber-950 text-white border border-amber-400/50 space-y-2 animate-fade-in">
+              <div className="mt-2 p-3.5 rounded-2xl bg-white border border-amber-200 shadow-xs space-y-2 animate-fade-in">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-amber-300 flex items-center gap-1.5">
+                  <span className="text-[11px] font-bold text-slate-900 flex items-center gap-1.5">
                     <span>🎥</span>
                     <span>{isKm ? 'គ្រប់គ្រងវីដេអូម្ហូប Food Video Reels (TikTok & Facebook)' : 'Food Video Reels Manager'}</span>
                   </span>
-                  <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black">
+                  <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[9px] font-black">
                     ACTIVE
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-200 leading-relaxed">
+                <p className="text-[10px] text-slate-600 leading-relaxed">
                   {isKm
                     ? 'ភ្ជាប់វីដេអូម្ហូបពី TikTok, Facebook Reels ឬ YouTube ទៅលើទំព័រហាង VIP របស់អ្នក និងទស្សនាវីដេអូម្ហូបកំពុងល្បី។'
                     : 'Attach TikTok, Facebook Reels, or YouTube food videos directly to your VIP store page.'}
@@ -659,7 +657,7 @@ export const ProfileView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsTrendingSocialModalOpen(true)}
-                    className="py-2 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-[11px] transition cursor-pointer"
+                    className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] transition cursor-pointer"
                   >
                     {isKm ? '🔥 មើល Reels ល្បីៗ' : '🔥 Watch Trending Reels'}
                   </button>
@@ -669,17 +667,17 @@ export const ProfileView: React.FC = () => {
 
             {/* Prominent Always-Visible VIP Store Registration / Management Banner */}
             {selectedVipPowerPanel !== 'analytics' && (
-              <div className="mt-2 p-3.5 rounded-2xl bg-gradient-to-br from-[#064E3B] via-emerald-900 to-slate-900 text-white border-2 border-amber-400/70 shadow-md space-y-2.5">
+              <div className="mt-2 p-3.5 rounded-2xl bg-white border border-emerald-200 shadow-xs space-y-2.5">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-black text-amber-300 flex items-center gap-1.5">
-                    <Crown className="w-4 h-4 fill-amber-300 text-amber-300 shrink-0" />
+                  <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                    <Crown className="w-4 h-4 fill-amber-500 text-amber-500 shrink-0" />
                     <span>{isKm ? 'សិទ្ធិចុះបញ្ជីហាង VIP ពិសេស' : 'VIP Store Priority Registration'}</span>
                   </span>
-                  <span className="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[9px] font-black">
                     {myRestaurants[0] ? (isKm ? '1/1 ហាង' : '1/1 Store') : (isKm ? '១ គណនី = ១ ហាង' : '1 Account = 1 Store')}
                   </span>
                 </div>
-                <p className="text-[11px] text-amber-50/95 leading-relaxed font-medium">
+                <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
                   {isKm
                     ? 'គ្រប់គ្រងរូបភាពហាង ទីតាំងផែនទី និងព័ត៌មានទំនាក់ទំនងហាងរបស់អ្នក។'
                     : 'Manage your shop photo, map location, and contact details so diners can easily find your restaurant.'}
@@ -692,25 +690,23 @@ export const ProfileView: React.FC = () => {
                       setManagingRestaurant(myRestaurants[0]);
                       setIsManageMenuModalOpen(true);
                     }}
-                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-600 text-slate-950 font-black text-xs shadow-md border-2 border-white/70 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
+                    className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#10B981] via-[#059669] to-[#047857] text-white font-black text-xs shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
                   >
                     <Store className="w-4 h-4 shrink-0" />
                     <span>{isKm ? '✏️ គ្រប់គ្រងហាង VIP របស់អ្នក (1/1 ហាង)' : '✏️ Manage Your VIP Store (1/1)'}</span>
                   </button>
                 ) : (
-                  <div className="relative p-1 rounded-2xl group">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        (window as any).__kft_vip_add_mode = 'add_new';
-                        setIsVipAddRestaurantModalOpen(true);
-                      }}
-                      className="relative w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-500 text-slate-950 font-black text-xs sm:text-sm border-2 border-white/90 vip-glow-btn flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-lg"
-                    >
-                      <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
-                      <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      (window as any).__kft_vip_add_mode = 'add_new';
+                      setIsVipAddRestaurantModalOpen(true);
+                    }}
+                    className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#10B981] via-[#059669] to-[#047857] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-sm"
+                  >
+                    <Crown className="w-4 h-4 fill-white shrink-0" />
+                    <span>{isKm ? '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)' : '+ Register Your VIP Restaurant (1 Store)'}</span>
+                  </button>
                 )}
               </div>
             )}
@@ -720,119 +716,187 @@ export const ProfileView: React.FC = () => {
 
   const vipAndShopBenefitsCards = !isAdmin && !isIosAppStore ? (
     <div className="space-y-3 font-khmer">
-      {/* Card 1: Summarized 10 VIP Membership Benefits (Same Professional Design Style as Add Shop Section) */}
-      <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#064E3B] via-[#0B3B2E] to-[#162032] border-2 border-amber-400/80 space-y-2.5 shadow-md">
-        <div className="flex items-start justify-between gap-2 flex-wrap">
-          <div className="font-extrabold text-xs sm:text-[13px] text-amber-300 flex items-center gap-1.5">
-            <Crown className="w-4 h-4 text-amber-400 fill-amber-400 shrink-0" />
-            <span>
+      {/* Card 1: Collapsible 10 VIP Membership Benefits (Clean Modern White Card with Colorful Glossy Accents) */}
+      <div className="p-3.5 sm:p-4 rounded-[24px] bg-white border border-slate-200/90 shadow-[0_8px_24px_rgba(15,23,42,0.06)] space-y-2.5">
+        <div
+          role="button"
+          tabIndex={0}
+          aria-expanded={isVip10BenefitsExpanded}
+          onClick={() => setIsVip10BenefitsExpanded((prev) => !prev)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setIsVip10BenefitsExpanded((prev) => !prev);
+            }
+          }}
+          className="flex items-start justify-between gap-2.5 cursor-pointer select-none group"
+        >
+          <div className="flex items-start gap-2.5 min-w-0 flex-1">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-b from-[#FBBF24] via-[#F59E0B] to-[#D97706] text-white shadow-[0_4px_12px_rgba(217,119,6,0.28)] flex items-center justify-center shrink-0 mt-0.5">
+              <Crown className="w-5 h-5 fill-white" />
+            </div>
+            <div className="min-w-0 flex-1 space-y-1">
+              <div className="font-extrabold text-xs sm:text-[13.5px] text-slate-900 leading-[1.6]">
+                {tr(
+                  language,
+                  'អត្ថប្រយោជន៍ទាំង ១០ ក្នុងការចុះឈ្មោះជា VIP',
+                  'All 10 VIP Membership Benefits Included',
+                  '注册 VIP 会员包含全部 10 大专属特权'
+                )}
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="inline-block px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-300 text-amber-800 font-mono font-black text-[10.5px]">
+                  {`$${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d • $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90d • $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/yr`}
+                </span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 group-hover:bg-amber-100/70 text-slate-700 text-[10.5px] font-bold transition">
+                  <span>
+                    {isVip10BenefitsExpanded
+                      ? tr(language, 'លាក់អត្ថប្រយោជន៍', 'Hide Benefits', '收起特权')
+                      : tr(language, 'មើលអត្ថប្រយោជន៍ទាំង ១០', 'View 10 Benefits', '查看 10 项特权')}
+                  </span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 text-slate-600 transition-transform duration-200 ${
+                      isVip10BenefitsExpanded ? 'rotate-180' : ''
+                    }`}
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {isVip10BenefitsExpanded && (
+          <div className="p-3 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-2 animate-fade-in">
+            <ul className="space-y-1.5 text-[11.5px] text-slate-800 font-medium">
+              {SUMMARIZED_10_VIP_BENEFITS.map((b) => (
+                <li key={b.id} className="leading-[1.65]">
+                  {isKm ? b.km : language === 'zh' ? b.zh : b.en}
+                </li>
+              ))}
+            </ul>
+            <div className="pt-2 border-t border-amber-200/70 text-[10.5px] font-bold text-amber-900 leading-[1.65]">
               {tr(
                 language,
-                'អត្ថប្រយោជន៍ទាំង ១០ ក្នុងការចុះឈ្មោះជា VIP (គ្មានទារថ្លៃបន្ថែម)',
-                'All 10 VIP Membership Benefits Included (No Extra Fees)',
-                '注册 VIP 会员包含全部 10 大专属特权（无额外费用）'
+                `🔒 កញ្ចប់សមាជិកភាព VIP ($${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ, $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90ថ្ងៃ ឬ $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/ឆ្នាំ) — អាចសាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃ (Free Trial) សម្រាប់ជំនួយការ AI និងផែនការដើរលេង។`,
+                `🔒 Paid VIP Membership ($${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d, $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90d or $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/yr) — 7-Day Free Trial available for AI Assistant & Trip Planner.`,
+                `🔒 付费 VIP 会员（$${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天、$${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90天 或 $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/年）——支持 7 天免费试用 AI 助手与智能行程规划。`
               )}
-            </span>
+            </div>
           </div>
-          <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#064E3B] border border-amber-400/50 text-amber-300 font-mono font-black text-[10.5px]">
-            {`$${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d • $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90d • $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/yr`}
-          </span>
-        </div>
-        <ul className="space-y-1.5 text-[11px] text-slate-100">
-          {SUMMARIZED_10_VIP_BENEFITS.map((b) => (
-            <li key={b.id} className="leading-snug">
-              {isKm ? b.km : language === 'zh' ? b.zh : b.en}
-            </li>
-          ))}
-        </ul>
-        <div className="pt-2 border-t border-white/15 space-y-2">
-          <div className="text-[10.5px] font-bold text-amber-200 leading-relaxed">
+        )}
+
+        <button
+          type="button"
+          onClick={() => openUpgradeVipModal()}
+          className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#F59E0B] via-[#F97316] to-[#EA580C] hover:from-[#D97706] hover:to-[#C2410C] text-white font-extrabold text-xs sm:text-[13px] shadow-[0_6px_16px_rgba(234,88,12,0.25)] flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer leading-[1.55]"
+        >
+          <Crown className="w-4 h-4 fill-white shrink-0" />
+          <span>
             {tr(
               language,
-              `🔒 កញ្ចប់សមាជិកភាព VIP ($${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ, $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90ថ្ងៃ ឬ $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/ឆ្នាំ) — អាចសាកល្បងឥតគិតថ្លៃ 7 ថ្ងៃ (Free Trial) សម្រាប់ជំនួយការ AI និងផែនការដើរលេង។`,
-              `🔒 Paid VIP Membership ($${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d, $${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90d or $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/yr) — 7-Day Free Trial available for AI Assistant & Trip Planner.`,
-              `🔒 付费 VIP 会员（$${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天、$${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)}/90天 或 $${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)}/年）——支持 7 天免费试用 AI 助手与智能行程规划。`
+              'ដំឡើងទៅជាសមាជិក VIP ឥឡូវនេះ',
+              'Upgrade to VIP Membership Now',
+              '立即升级 VIP 会员'
             )}
-          </div>
-          <button
-            type="button"
-            onClick={() => openUpgradeVipModal()}
-            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-600 text-slate-950 font-black text-xs shadow-md border border-white/80 flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
-          >
-            <Crown className="w-4 h-4 fill-slate-950 shrink-0" />
-            <span>
-              {tr(
-                language,
-                'ដំឡើងទៅជាសមាជិក VIP ឥឡូវនេះ',
-                'Upgrade to VIP Membership Now',
-                '立即升级 VIP 会员'
-              )}
-            </span>
-          </button>
-        </div>
+          </span>
+        </button>
       </div>
 
-      {/* Card 2: All-Inclusive 5 Shop Listing Benefits (Same Professional Design Style as Add Shop Section) */}
-      <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#064E3B] via-[#0B3B2E] to-[#162032] border-2 border-amber-400/80 space-y-2.5 shadow-md">
-        <div className="flex items-start justify-between gap-2 flex-wrap">
-          <div className="font-extrabold text-xs sm:text-[13px] text-amber-300 flex items-center gap-1.5">
-            <Store className="w-4 h-4 text-amber-400 shrink-0" />
-            <span>
+      {/* Card 2: Collapsible Shop & Hotel Registration Benefits (Clean Modern White Card with Emerald Accents) */}
+      <div className="p-3.5 sm:p-4 rounded-[24px] bg-white border border-slate-200/90 shadow-[0_8px_24px_rgba(15,23,42,0.06)] space-y-2.5">
+        <div
+          role="button"
+          tabIndex={0}
+          aria-expanded={isShopHotelBenefitsExpanded}
+          onClick={() => setIsShopHotelBenefitsExpanded((prev) => !prev)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setIsShopHotelBenefitsExpanded((prev) => !prev);
+            }
+          }}
+          className="flex items-start justify-between gap-2.5 cursor-pointer select-none group"
+        >
+          <div className="flex items-start gap-2.5 min-w-0 flex-1">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-b from-[#34D399] via-[#16A34A] to-[#146C32] text-white shadow-[0_4px_12px_rgba(22,163,74,0.26)] flex items-center justify-center shrink-0 mt-0.5">
+              <Store className="w-5 h-5" />
+            </div>
+            <div className="min-w-0 flex-1 space-y-1">
+              <div className="font-extrabold text-xs sm:text-[13.5px] text-slate-900 leading-[1.6]">
+                {tr(
+                  language,
+                  'កញ្ចប់ដាក់ហាង និងសណ្ឋាគាររួមបញ្ចូលទាំង ៥ មុខងារ',
+                  'Shop & Hotel Registration Package (All 5 Benefits)',
+                  '店铺与酒店全包入驻套餐（含全部 5 大权益）'
+                )}
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="inline-block px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-800 font-mono font-black text-[10.5px]">
+                  {`$${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d • $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr`}
+                </span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 group-hover:bg-emerald-100/70 text-slate-700 text-[10.5px] font-bold transition">
+                  <span>
+                    {isShopHotelBenefitsExpanded
+                      ? tr(language, 'លាក់អត្ថប្រយោជន៍', 'Hide Benefits', '收起权益')
+                      : tr(language, 'មើលអត្ថប្រយោជន៍ទាំង ៥', 'View 5 Benefits', '查看 5 项权益')}
+                  </span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 text-slate-600 transition-transform duration-200 ${
+                      isShopHotelBenefitsExpanded ? 'rotate-180' : ''
+                    }`}
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {isShopHotelBenefitsExpanded && (
+          <div className="p-3 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-2 animate-fade-in">
+            <ul className="space-y-1.5 text-[11.5px] text-slate-800 font-medium">
+              {SHOP_ALL_INCLUSIVE_5_BENEFITS.map((b, i) => (
+                <li key={i} className="leading-[1.65]">
+                  {isKm ? b.km : language === 'zh' ? b.zh : b.en}
+                </li>
+              ))}
+            </ul>
+            <div className="pt-2 border-t border-emerald-200/70 text-[10.5px] font-bold text-emerald-900 leading-[1.65]">
               {tr(
                 language,
-                'កញ្ចប់ដាក់ហាងរួមបញ្ចូលទាំង ៥ មុខងារ (គ្មានទារថ្លៃបន្ថែម)',
-                'All-Inclusive Shop Listing Package (All 5 Benefits Included)',
-                '全包店铺套餐（含全部 5 大权益，无额外广告费）'
+                `🔒 កញ្ចប់ដាក់ហាងបង់ប្រាក់ ($${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ ឬ $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/ឆ្នាំ) — មិនរួមបញ្ចូលក្នុង Free Trial 7 ថ្ងៃឡើយ។ ការបង់ប្រាក់ធ្វើឡើងក្រោយពេល Admin ត្រួតពិនិត្យ និងអនុម័តព័ត៌មានហាង។`,
+                `🔒 Paid Shop Package ($${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d or $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr) — Not included in the 7-Day Free Trial. Payment is completed after Admin approves your shop details.`,
+                `🔒 付费店铺套餐（$${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天 或 $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/年）——不含在 7 天免费试用内，管理员审核通过后付款开通。`
               )}
-            </span>
+            </div>
           </div>
-          <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#064E3B] border border-amber-400/50 text-amber-300 font-mono font-black text-[10.5px]">
-            {`$${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d • $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr`}
-          </span>
-        </div>
-        <ul className="space-y-1.5 text-[11px] text-slate-100">
-          {SHOP_ALL_INCLUSIVE_5_BENEFITS.map((b, i) => (
-            <li key={i} className="leading-snug">
-              {isKm ? b.km : language === 'zh' ? b.zh : b.en}
-            </li>
-          ))}
-        </ul>
-        <div className="pt-2 border-t border-white/15 space-y-2">
-          <div className="text-[10.5px] font-bold text-amber-200 leading-relaxed">
+        )}
+
+        <button
+          type="button"
+          onClick={() => {
+            (window as any).__kft_vip_store_initial_mode = { mode: 'create' };
+            setIsVipAddRestaurantModalOpen(true);
+          }}
+          className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#10B981] via-[#059669] to-[#047857] hover:from-[#059669] hover:to-[#065F46] text-white font-extrabold text-xs sm:text-[13px] shadow-[0_6px_16px_rgba(5,150,105,0.24)] flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer leading-[1.55]"
+        >
+          <Plus className="w-4 h-4 stroke-[2.5] shrink-0" />
+          <span>
             {tr(
               language,
-              `🔒 កញ្ចប់ដាក់ហាងបង់ប្រាក់ ($${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30ថ្ងៃ ឬ $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/ឆ្នាំ) — មិនរួមបញ្ចូលក្នុង Free Trial 7 ថ្ងៃឡើយ។ ការបង់ប្រាក់ធ្វើឡើងក្រោយពេល Admin ត្រួតពិនិត្យ និងអនុម័តព័ត៌មានហាង។`,
-              `🔒 Paid Shop Package ($${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30d or $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/yr) — Not included in the 7-Day Free Trial. Payment is completed after Admin approves your shop details.`,
-              `🔒 付费店铺套餐（$${shopCatalog.monthlyPlan.priceUsd.toFixed(2)}/30天 或 $${(shopCatalog.earlyBirdRemaining > 0 && shopCatalog.earlyBirdPlan.enabled ? shopCatalog.earlyBirdPlan.priceUsd : shopCatalog.yearlyPlan.priceUsd).toFixed(2)}/年）——不含在 7 天免费试用内，管理员审核通过后付款开通。`
+              '+ ចុះបញ្ជីហាងរបស់អ្នកនៅលើកម្មវិធី',
+              '+ Register Your Shop on the App',
+              '+ 在应用上注册您的店铺'
             )}
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              (window as any).__kft_vip_store_initial_mode = { mode: 'create' };
-              setIsVipAddRestaurantModalOpen(true);
-            }}
-            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-600 text-slate-950 font-black text-xs shadow-md border border-white/80 flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5] shrink-0" />
-            <span>
-              {tr(
-                language,
-                '+ ចុះបញ្ជីហាងរបស់អ្នកនៅលើកម្មវិធី',
-                '+ Register Your Shop on the App',
-                '+ 在应用上注册您的店铺'
-              )}
-            </span>
-          </button>
-        </div>
+          </span>
+        </button>
       </div>
     </div>
   ) : null;
 
     return (
-    <div className="max-w-md md:max-w-5xl lg:max-w-6xl mx-auto w-full px-3.5 md:px-6 py-3 space-y-3 pb-8">
+    <div className="max-w-md md:max-w-5xl lg:max-w-6xl mx-auto w-full px-3 sm:px-5 py-3.5 space-y-3.5 pb-8 bg-[#F8FAFC] text-slate-900">
       {/* User Header Profile Card */}
-      <div className="shrink-0 p-3 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 shadow-xs">
+      <div className="shrink-0 p-4 rounded-[24px] bg-white border border-slate-200/90 shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
         {currentUser ? (
           <div className="space-y-2">
             <div className="flex items-start justify-between gap-3">
@@ -983,7 +1047,7 @@ export const ProfileView: React.FC = () => {
                       )}
                       {currentUser.email && !currentUser.email.endsWith('@phone.kh') && (
                         <p className="text-xs text-slate-600 dark:text-slate-400 font-mono flex items-center gap-1 min-w-0">
-                          <span>✉️</span> <span className="truncate">{currentUser.email}</span>
+                          <span>✉️</span> <span className="break-all">{currentUser.email}</span>
                         </p>
                       )}
                     </div>
@@ -1319,70 +1383,54 @@ export const ProfileView: React.FC = () => {
         </div>
       ) : null}
 
-      {/* 2-Row × 3-Column Profile Menu Grid (My Shop, Shop List, Plans, Saved, Membership, Settings) */}
+      {/* 2-Row × 3-Column Profile Menu Grid (My Shop, Shop List, Plans, Saved, Membership, Settings) — Home Screen Glossy 6-Button Style */}
       {!isAdmin && (
         <div
           role="tablist"
           aria-label={tr(language, 'ម៉ឺនុយគណនី', 'Profile menu', '个人中心菜单')}
-          className="grid grid-cols-3 gap-2 font-khmer shrink-0"
+          className="rounded-[26px] bg-white p-2.5 sm:p-3.5 shadow-[0_8px_26px_rgba(15,23,42,0.06)] border border-slate-100 grid grid-cols-3 gap-2.5 font-khmer shrink-0"
         >
-          {/* 1. My Shop */}
+          {/* 1. My Shop (Glossy Orange) */}
           <button
             type="button"
             role="tab"
             aria-selected={activeSubTab === 'myrestaurant'}
             onClick={() => setActiveSubTab('myrestaurant')}
-            className={`min-h-[70px] p-2 rounded-2xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer active:scale-95 ${
+            className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#FF9F43] via-[#F97316] to-[#D9530F] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'myrestaurant'
-                ? 'bg-gradient-to-br from-[#064E3B] to-[#047857] text-white border-emerald-400/60 shadow-md'
-                : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border-slate-200/90 dark:border-slate-700 hover:border-emerald-500/50'
+                ? 'border-white ring-3 ring-orange-500/50 shadow-[0_6px_16px_rgba(234,88,12,0.34)] scale-[1.01]'
+                : 'border-orange-300/60 shadow-[0_4px_12px_rgba(234,88,12,0.22)] opacity-95 hover:opacity-100'
             }`}
           >
-            <div
-              className={`w-7 h-7 rounded-xl flex items-center justify-center ${
-                activeSubTab === 'myrestaurant'
-                  ? 'bg-white/15 text-amber-300'
-                  : 'bg-emerald-50 dark:bg-slate-700/80 text-[#064E3B] dark:text-emerald-300'
-              }`}
-            >
-              <Store className="w-4 h-4" />
-            </div>
-            <span className="text-[11px] font-extrabold leading-tight truncate max-w-full">
+            <span className="pointer-events-none absolute inset-x-2 top-0.5 h-3.5 rounded-t-[14px] bg-gradient-to-b from-white/35 to-transparent" />
+            <Store className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-xs shrink-0" />
+            <span className="text-[11.5px] sm:text-xs font-extrabold leading-[1.55] drop-shadow-xs">
               {tr(language, 'ហាងខ្ញុំ', 'My Shop', '我的店铺')}
             </span>
           </button>
 
-          {/* 2. Shop List */}
+          {/* 2. Shop List (Glossy Emerald Green) */}
           <button
             type="button"
             role="tab"
             data-testid="profile-grid-wishlists"
             aria-selected={activeSubTab === 'wishlists'}
             onClick={() => setActiveSubTab('wishlists')}
-            className={`min-h-[70px] p-2 rounded-2xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer active:scale-95 ${
+            className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#34D399] via-[#16A34A] to-[#146C32] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'wishlists'
-                ? 'bg-gradient-to-br from-[#064E3B] to-[#047857] text-white border-emerald-400/60 shadow-md'
-                : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border-slate-200/90 dark:border-slate-700 hover:border-emerald-500/50'
+                ? 'border-white ring-3 ring-emerald-500/50 shadow-[0_6px_16px_rgba(22,163,74,0.34)] scale-[1.01]'
+                : 'border-emerald-300/60 shadow-[0_4px_12px_rgba(22,163,74,0.22)] opacity-95 hover:opacity-100'
             }`}
           >
-            <div
-              className={`w-7 h-7 rounded-xl flex items-center justify-center ${
-                activeSubTab === 'wishlists'
-                  ? 'bg-white/15 text-amber-300'
-                  : 'bg-teal-50 dark:bg-slate-700/80 text-teal-700 dark:text-teal-300'
-              }`}
-            >
-              <Bookmark className="w-4 h-4" />
-            </div>
-            <span className="text-[11px] font-extrabold leading-tight truncate max-w-full">
+            <span className="pointer-events-none absolute inset-x-2 top-0.5 h-3.5 rounded-t-[14px] bg-gradient-to-b from-white/35 to-transparent" />
+            <Bookmark className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-xs shrink-0" />
+            <span className="text-[11.5px] sm:text-xs font-extrabold leading-[1.55] drop-shadow-xs">
               {tr(language, 'បញ្ជីហាង', 'Shop List', '店铺清单')}
-              <span className="ml-1 text-[10px] opacity-80">
-                ({wishlists.length})
-              </span>
+              <span className="ml-0.5 text-[10px] opacity-90">({wishlists.length})</span>
             </span>
           </button>
 
-          {/* 3. Plans */}
+          {/* 3. Plans (Glossy Rose Pink) */}
           <button
             type="button"
             role="tab"
@@ -1394,107 +1442,79 @@ export const ProfileView: React.FC = () => {
               }
               setActiveSubTab('tripplans');
             }}
-            className={`min-h-[70px] p-2 rounded-2xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer active:scale-95 ${
+            className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#FB7185] via-[#E11D48] to-[#BE123C] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'tripplans'
-                ? 'bg-gradient-to-br from-[#064E3B] to-[#047857] text-white border-emerald-400/60 shadow-md'
-                : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border-slate-200/90 dark:border-slate-700 hover:border-emerald-500/50'
+                ? 'border-white ring-3 ring-rose-500/50 shadow-[0_6px_16px_rgba(225,29,72,0.34)] scale-[1.01]'
+                : 'border-rose-300/60 shadow-[0_4px_12px_rgba(225,29,72,0.22)] opacity-95 hover:opacity-100'
             }`}
           >
-            <div
-              className={`w-7 h-7 rounded-xl flex items-center justify-center ${
-                activeSubTab === 'tripplans'
-                  ? 'bg-white/15 text-amber-300'
-                  : 'bg-sky-50 dark:bg-slate-700/80 text-sky-700 dark:text-sky-300'
-              }`}
-            >
-              <Compass className="w-4 h-4" />
-            </div>
-            <span className="text-[11px] font-extrabold leading-tight truncate max-w-full">
+            <span className="pointer-events-none absolute inset-x-2 top-0.5 h-3.5 rounded-t-[14px] bg-gradient-to-b from-white/35 to-transparent" />
+            <Compass className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-xs shrink-0" />
+            <span className="text-[11.5px] sm:text-xs font-extrabold leading-[1.55] drop-shadow-xs">
               {tr(language, 'ផែនការ', 'Plans', '行程计划')}
-              <span className="ml-1 text-[10px] opacity-80">
+              <span className="ml-0.5 text-[10px] opacity-90">
                 {!isVip && currentUser?.role !== 'admin' ? '🔒' : `(${tripPlans.length})`}
               </span>
             </span>
           </button>
 
-          {/* 4. Saved */}
+          {/* 4. Saved (Glossy Ocean Blue) */}
           <button
             type="button"
             role="tab"
             data-testid="profile-grid-saved"
             aria-selected={activeSubTab === 'bookmarks'}
             onClick={() => setActiveSubTab('bookmarks')}
-            className={`min-h-[70px] p-2 rounded-2xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer active:scale-95 ${
+            className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#60A5FA] via-[#2563EB] to-[#1D4ED8] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'bookmarks'
-                ? 'bg-gradient-to-br from-[#064E3B] to-[#047857] text-white border-emerald-400/60 shadow-md'
-                : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border-slate-200/90 dark:border-slate-700 hover:border-emerald-500/50'
+                ? 'border-white ring-3 ring-blue-500/50 shadow-[0_6px_16px_rgba(37,99,235,0.34)] scale-[1.01]'
+                : 'border-blue-300/60 shadow-[0_4px_12px_rgba(37,99,235,0.22)] opacity-95 hover:opacity-100'
             }`}
           >
-            <div
-              className={`w-7 h-7 rounded-xl flex items-center justify-center ${
-                activeSubTab === 'bookmarks'
-                  ? 'bg-white/15 text-rose-300'
-                  : 'bg-rose-50 dark:bg-slate-700/80 text-rose-600 dark:text-rose-400'
-              }`}
-            >
-              <Heart className="w-4 h-4" />
-            </div>
-            <span className="text-[11px] font-extrabold leading-tight truncate max-w-full">
+            <span className="pointer-events-none absolute inset-x-2 top-0.5 h-3.5 rounded-t-[14px] bg-gradient-to-b from-white/35 to-transparent" />
+            <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-xs shrink-0" />
+            <span className="text-[11.5px] sm:text-xs font-extrabold leading-[1.55] drop-shadow-xs">
               {tr(language, 'រក្សាទុក', 'Saved', '已收藏')}
-              <span className="ml-1 text-[10px] opacity-80">
+              <span className="ml-0.5 text-[10px] opacity-90">
                 ({savedFoods.length + savedDestinations.length + savedRestaurants.length})
               </span>
             </span>
           </button>
 
-          {/* 5. Membership */}
+          {/* 5. Membership (Glossy Gold Amber) */}
           <button
             type="button"
             role="tab"
             aria-selected={activeSubTab === 'membership'}
             onClick={() => setActiveSubTab('membership')}
-            className={`min-h-[70px] p-2 rounded-2xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer active:scale-95 ${
+            className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#FBBF24] via-[#D97706] to-[#B45309] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'membership'
-                ? 'bg-gradient-to-br from-amber-500 to-amber-600 text-slate-950 border-amber-300 shadow-md'
-                : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border-slate-200/90 dark:border-slate-700 hover:border-amber-400/60'
+                ? 'border-white ring-3 ring-amber-500/50 shadow-[0_6px_16px_rgba(217,119,6,0.34)] scale-[1.01]'
+                : 'border-amber-300/60 shadow-[0_4px_12px_rgba(217,119,6,0.22)] opacity-95 hover:opacity-100'
             }`}
           >
-            <div
-              className={`w-7 h-7 rounded-xl flex items-center justify-center ${
-                activeSubTab === 'membership'
-                  ? 'bg-slate-950/15 text-slate-950'
-                  : 'bg-amber-50 dark:bg-slate-700/80 text-amber-600 dark:text-amber-400'
-              }`}
-            >
-              <Crown className="w-4 h-4" />
-            </div>
-            <span className="text-[11px] font-extrabold leading-tight truncate max-w-full">
+            <span className="pointer-events-none absolute inset-x-2 top-0.5 h-3.5 rounded-t-[14px] bg-gradient-to-b from-white/35 to-transparent" />
+            <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-xs shrink-0" />
+            <span className="text-[11.5px] sm:text-xs font-extrabold leading-[1.55] drop-shadow-xs">
               {tr(language, 'សមាជិកភាព', 'Membership', '尊享会员')}
             </span>
           </button>
 
-          {/* 6. Settings */}
+          {/* 6. Settings (Glossy Teal) */}
           <button
             type="button"
             role="tab"
             aria-selected={activeSubTab === 'settings'}
             onClick={() => setActiveSubTab('settings')}
-            className={`min-h-[70px] p-2 rounded-2xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer active:scale-95 ${
+            className={`relative overflow-hidden min-h-[74px] sm:min-h-[82px] px-2 py-2.5 rounded-[20px] bg-gradient-to-b from-[#2DD4BF] via-[#0D9488] to-[#115E59] text-white border flex flex-col items-center justify-center gap-1.5 text-center transition-all cursor-pointer active:scale-95 ${
               activeSubTab === 'settings'
-                ? 'bg-gradient-to-br from-[#064E3B] to-[#047857] text-white border-emerald-400/60 shadow-md'
-                : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border-slate-200/90 dark:border-slate-700 hover:border-emerald-500/50'
+                ? 'border-white ring-3 ring-teal-500/50 shadow-[0_6px_16px_rgba(13,148,136,0.34)] scale-[1.01]'
+                : 'border-teal-300/60 shadow-[0_4px_12px_rgba(13,148,136,0.22)] opacity-95 hover:opacity-100'
             }`}
           >
-            <div
-              className={`w-7 h-7 rounded-xl flex items-center justify-center ${
-                activeSubTab === 'settings'
-                  ? 'bg-white/15 text-amber-300'
-                  : 'bg-slate-100 dark:bg-slate-700/80 text-slate-700 dark:text-slate-300'
-              }`}
-            >
-              <Settings className="w-4 h-4" />
-            </div>
-            <span className="text-[11px] font-extrabold leading-tight truncate max-w-full">
+            <span className="pointer-events-none absolute inset-x-2 top-0.5 h-3.5 rounded-t-[14px] bg-gradient-to-b from-white/35 to-transparent" />
+            <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-xs shrink-0" />
+            <span className="text-[11.5px] sm:text-xs font-extrabold leading-[1.55] drop-shadow-xs">
               {tr(language, 'ការកំណត់', 'Settings', '设置')}
             </span>
           </button>
@@ -1578,10 +1598,10 @@ export const ProfileView: React.FC = () => {
                       className="w-16 h-16 rounded-2xl border border-slate-200 shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-[#0F172A] dark:text-white text-sm truncate">
+                      <h4 className="font-bold text-[#0F172A] dark:text-white text-sm leading-[1.65] break-words">
                         {isKm ? restaurant.nameKh : restaurant.nameEn}
                       </h4>
-                      <p className="text-[10px] text-slate-500 truncate">{restaurant.addressKh}</p>
+                      <p className="text-[10px] text-slate-500 leading-[1.55] break-words">{restaurant.addressKh}</p>
                       <p className="text-[10px] text-[#059669] font-mono mt-0.5">📞 {restaurant.phone}</p>
                     </div>
                   </div>
@@ -1697,11 +1717,11 @@ export const ProfileView: React.FC = () => {
                   <div className="p-2 rounded-2xl bg-amber-400 text-slate-900 shadow-md shrink-0">
                     <Crown className="w-6 h-6 fill-slate-900" />
                   </div>
-                  <div className="min-w-0">
-                    <h4 className="font-moul text-sm text-slate-900 dark:text-white truncate">
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-moul text-sm text-slate-900 dark:text-white leading-[1.7] py-0.5 break-words">
                       {tr(language, 'ទំព័រសមាជិកភាព VIP', 'VIP Membership Page', 'VIP 会员专属中心')}
                     </h4>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-[1.55] break-words">
                       {tr(
                         language,
                         `សាកល្បង ${consumerCatalog.trialDays} ថ្ងៃ FREE • ${consumerCatalog.monthlyPlan.priceUsd.toFixed(2)} (${consumerCatalog.monthlyPlan.durationDays} ថ្ងៃ) • ${consumerCatalog.quarterlyPlan.priceUsd.toFixed(2)} (${consumerCatalog.quarterlyPlan.durationDays} ថ្ងៃ) • ${consumerCatalog.yearlyPlan.priceUsd.toFixed(2)} (365 ថ្ងៃ)`,

@@ -514,14 +514,14 @@ export const GuideView: React.FC = () => {
               role="tab"
               aria-selected={active}
               onClick={() => setTab(t.id)}
-              className={`py-2 px-1 min-w-0 rounded-xl flex flex-col items-center gap-0.5 text-[11px] font-bold transition cursor-pointer ${
+              className={`py-2 px-1 min-w-0 rounded-xl flex flex-col items-center justify-center gap-0.5 text-[10.5px] min-[360px]:text-[11px] font-bold transition cursor-pointer ${
                 active
                   ? 'bg-[#064E3B] text-white shadow-xs'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-700'
               }`}
             >
               {t.icon}
-              <span className="leading-tight truncate max-w-full">{t.label}</span>
+              <span className="leading-[1.6] text-center break-words whitespace-normal max-w-full">{t.label}</span>
             </button>
           );
         })}
@@ -563,7 +563,7 @@ export const GuideView: React.FC = () => {
           </section>
 
           {!isAdmin && (
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-2.5">
               <button
                 type="button"
                 onClick={() => setIsAiTripPlannerModalOpen(true)}
@@ -572,12 +572,12 @@ export const GuideView: React.FC = () => {
                 <span className="w-9 h-9 rounded-xl bg-[#064E3B] text-amber-300 flex items-center justify-center shrink-0">
                   <Route className="w-4 h-4" />
                 </span>
-                <span className="min-w-0">
-                  <span className="block text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                <span className="min-w-0 flex-1">
+                  <span className="block text-xs font-extrabold text-slate-900 dark:text-white leading-[1.62] break-words">
                     {tr(language, 'ផែនការដើរលេង AI', 'AI Trip Planner', 'AI 行程规划')}
                   </span>
                   <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-                    <CheckCircle2 className="w-3 h-3" />
+                    <CheckCircle2 className="w-3 h-3 shrink-0" />
                     <span>{tr(language, 'បើកភ្លាមៗ • FREE', 'Open now • FREE', '免费使用')}</span>
                   </span>
                 </span>
@@ -590,12 +590,12 @@ export const GuideView: React.FC = () => {
                 <span className="w-9 h-9 rounded-xl bg-[#064E3B] text-amber-300 flex items-center justify-center shrink-0">
                   <Navigation className="w-4 h-4" />
                 </span>
-                <span className="min-w-0">
-                  <span className="block text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                <span className="min-w-0 flex-1">
+                  <span className="block text-xs font-extrabold text-slate-900 dark:text-white leading-[1.62] break-words">
                     {tr(language, 'នៅជិតខ្ញុំ', 'Near Me', '附近')}
                   </span>
                   <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-                    <CheckCircle2 className="w-3 h-3" />
+                    <CheckCircle2 className="w-3 h-3 shrink-0" />
                     <span>{tr(language, 'តាម GPS • FREE', 'Using GPS • FREE', '免费定位')}</span>
                   </span>
                 </span>
@@ -750,9 +750,9 @@ export const GuideView: React.FC = () => {
               {activeGroup && (
                 <div className="space-y-4">
                   <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/50 dark:to-teal-950/40 border border-emerald-200/80 dark:border-emerald-800/50 flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <h3 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300 truncate">{provinceName(activeGroup)}</h3>
-                      <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-moul text-sm text-[#064E3B] dark:text-emerald-300 leading-[1.7] py-0.5 break-words">{provinceName(activeGroup)}</h3>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5 leading-[1.55]">
                         {tr(
                           language,
                           `${activeGroup.places.length} កន្លែងទេសចរណ៍ • ${activeGroup.shops.length} ហាងអាហារ`,
@@ -969,15 +969,15 @@ export const GuideView: React.FC = () => {
           {(tipFilter === 'all' || tipFilter === 'safety') && (
             <section className="p-4 rounded-3xl bg-gradient-to-br from-rose-50 via-amber-50/70 to-white dark:from-rose-950/40 dark:via-slate-900 dark:to-slate-800 border-2 border-rose-300 dark:border-rose-800/80 space-y-3 shadow-xs">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
                   <span className="w-9 h-9 rounded-xl bg-rose-600 text-white flex items-center justify-center shadow-xs shrink-0">
                     <ShieldAlert className="w-5 h-5" />
                   </span>
-                  <div className="min-w-0">
-                    <h3 className="font-moul text-xs sm:text-sm text-rose-900 dark:text-rose-200 truncate">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-moul text-xs sm:text-sm text-rose-900 dark:text-rose-200 leading-[1.7] py-0.5 break-words">
                       {tr(language, '🚨 លេខទូរស័ព្ទប៉ូលីស & សង្គ្រោះបន្ទាន់ (24 ម៉ោង)', '🚨 Police & Emergency Hotlines (24/7)', '🚨 柬埔寨警察与紧急救援电话（24小时）')}
                     </h3>
-                    <p className="text-[10px] text-rose-700 dark:text-rose-300">
+                    <p className="text-[10px] text-rose-700 dark:text-rose-300 leading-[1.55] break-words">
                       {tr(language, 'ចុចលើលេខទូរស័ព្ទខាងក្រោមដើម្បីហៅចេញភ្លាមៗក្នុងករណីមានអាសន្ន', 'Tap any emergency number below to dial immediately', '遇到紧急情况请点击下方号码直接拨打')}
                     </p>
                   </div>
@@ -990,15 +990,15 @@ export const GuideView: React.FC = () => {
                     key={ec.id}
                     className="p-2.5 rounded-2xl bg-white dark:bg-slate-800/90 border border-rose-200/80 dark:border-slate-700 flex items-center justify-between gap-2.5"
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <span className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/60 flex items-center justify-center text-lg shrink-0">
                         {ec.emoji}
                       </span>
-                      <div className="min-w-0">
-                        <h4 className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                      <div className="min-w-0 flex-1">
+                        <h4 className="text-xs font-extrabold text-slate-900 dark:text-white leading-[1.6] break-words">
                           {pickTri(ec.name, lang)}
                         </h4>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-[1.55] break-words">
                           {pickTri(ec.note, lang)}
                         </p>
                       </div>

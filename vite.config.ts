@@ -88,12 +88,18 @@ function kftVersionManifestPlugin(): Plugin {
     configurePreviewServer(server) {
       server.middlewares.use(handleFreeGmapsProxy);
     },
-    generateBundle() {
+    generateBundle(_options, bundle) {
       this.emitFile({
         type: 'asset',
         fileName: 'version.json',
         source: buildManifestJson(),
       });
+      // Strip residual block comments in emitted JS chunks for extra code obfuscation
+      for (const item of Object.values(bundle)) {
+        if (item.type === 'chunk' && typeof item.code === 'string') {
+          item.code = item.code.replace(/\/\*![\s\S]*?\*\//g, '');
+        }
+      }
     },
   };
 }
@@ -116,34 +122,37 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
+        entryFileNames: 'assets/k-[hash].js',
+        chunkFileNames: 'assets/c-[hash].js',
+        assetFileNames: 'assets/a-[hash][extname]',
         manualChunks(id) {
           const norm = id.replace(/\\/g, '/');
           if (norm.includes('/src/data/seedRacCambodiaTourDestinations')) {
-            return 'data-rac-destinations';
+            return 'k0';
           }
           if (norm.includes('/src/data/seedHotels100')) {
-            return 'data-hotels';
+            return 'k1';
           }
           if (norm.includes('/src/data/seedDestinations') || norm.includes('/src/data/touristDestinationsList')) {
-            return 'data-destinations';
+            return 'k2';
           }
           if (norm.includes('/src/data/seedFoods') || norm.includes('/src/data/seedAdditional100Foods')) {
-            return 'data-foods';
+            return 'k3';
           }
           if (norm.includes('/src/data/seedRestaurants')) {
-            return 'data-restaurants';
+            return 'k4';
           }
           if (norm.includes('/src/data/zhCompleteTranslations') || norm.includes('/src/utils/zhDynamicTranslator')) {
-            return 'data-zh-translations';
+            return 'k5';
           }
           if (norm.includes('node_modules/react') || norm.includes('node_modules/scheduler')) {
-            return 'vendor-react';
+            return 'v0';
           }
           if (norm.includes('node_modules/firebase') || norm.includes('node_modules/@firebase')) {
-            return 'vendor-firebase';
+            return 'v1';
           }
-          if (norm.includes('node_modules/tesseract.js')) return 'vendor-ocr';
-          if (norm.includes('node_modules/lucide-react')) return 'vendor-icons';
+          if (norm.includes('node_modules/tesseract.js')) return 'v2';
+          if (norm.includes('node_modules/lucide-react')) return 'v3';
         },
       },
     },

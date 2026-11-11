@@ -1,19 +1,23 @@
 package com.khmerfood.tourism;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 import android.os.Build;
+import android.os.Debug;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Locale;
 
 @CapacitorPlugin(name = "NativeAppIntegrity")
 public class NativeAppIntegrityPlugin extends Plugin {
@@ -33,10 +37,14 @@ public class NativeAppIntegrityPlugin extends Plugin {
             boolean isOfficialPkg = OFFICIAL_PACKAGE.equals(pkg);
             boolean isOfficialSig = OFFICIAL_CERT_SHA256.equalsIgnoreCase(certSha256);
             boolean isPlayStore = "com.android.vending".equals(installer);
-            boolean isGenuine = isOfficialPkg && isOfficialSig;
+            boolean isDebugged = detectDebuggerAttached(context);
+            boolean isClonedContainer = detectClonedMultiSpaceContainer(context, pkg);
+            boolean isHookDetected = detectHookFrameworks();
+
+            boolean isGenuine = isOfficialPkg && isOfficialSig && !isDebugged && !isClonedContainer && !isHookDetected;
 
             long bucket = System.currentTimeMillis() / 300000L; // 5-minute window
-            String rawAttest = pkg + ":" + certSha256.toLowerCase() + ":" + bucket + ":kft_native_v1";
+            String rawAttest = pkg + ":" + certSha256.toLowerCase(Locale.US) + ":" + bucket + ":kft_native_v1";
             String attestSig = sha256Hex(rawAttest.getBytes(StandardCharsets.UTF_8));
 
             JSObject ret = new JSObject();
@@ -46,6 +54,9 @@ public class NativeAppIntegrityPlugin extends Plugin {
             ret.put("isOfficialPackage", isOfficialPkg);
             ret.put("isOfficialSignature", isOfficialSig);
             ret.put("isPlayStoreInstall", isPlayStore);
+            ret.put("isDebugged", isDebugged);
+            ret.put("isClonedContainer", isClonedContainer);
+            ret.put("isHookDetected", isHookDetected);
             ret.put("isGenuine", isGenuine);
             ret.put("timestampBucket", bucket);
             ret.put("attestationSig", attestSig);
@@ -53,6 +64,78 @@ public class NativeAppIntegrityPlugin extends Plugin {
         } catch (Exception e) {
             call.reject("Integrity check failed: " + e.getMessage(), e);
         }
+    }
+
+    private boolean detectDebuggerAttached(Context context) {
+        try {
+            if (Debug.isDebuggerConnected() || Debug.waitingForDebugger()) {
+                return true;
+            }
+            boolean isDebuggableFlag = (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+            // Only flag release-signed builds that somehow have JDWP debugger attached
+            if (!isDebuggableFlag && Debug.isDebuggerConnected()) {
+                return true;
+            }
+        } catch (Exception ignored) {
+        }
+        return false;
+    }
+
+    private boolean detectClonedMultiSpaceContainer(Context context, String expectedPackage) {
+        try {
+            File filesDir = context.getFilesDir();
+            if (filesDir == null) return false;
+            String path = filesDir.getAbsolutePath().toLowerCase(Locale.US);
+            // Must contain the official package name inside its private data directory
+            if (!path.contains(expectedPackage.toLowerCase(Locale.US))) {
+                return true;
+            }
+            // Known Android App Cloner / Parallel Space / Dual App virtual container markers
+            String[] clonerMarkers = new String[] {
+                "parallel_intl",
+                "com.lbe.parallel",
+                "com.excelliance.dualaid",
+                "com.ludashi.dualspace",
+                "io.va.exposed",
+                "virtualapp",
+                "multiapp",
+                "com.polestar.super.clone",
+                "com.applisto.appcloner"
+            };
+            for (String marker : clonerMarkers) {
+                if (path.contains(marker)) {
+                    return true;
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return false;
+    }
+
+    private boolean detectHookFrameworks() {
+        try {
+            String[] suspiciousClasses = new String[] {
+                "de.robv.android.xposed.XposedBridge",
+                "de.robv.android.xposed.XC_MethodHook",
+                "com.saurik.substrate.MS$2"
+            };
+            for (String cls : suspiciousClasses) {
+                try {
+                    Class.forName(cls);
+                    return true;
+                } catch (ClassNotFoundException ignored) {
+                }
+            }
+            throw new Exception("kft_stack_probe");
+        } catch (Exception e) {
+            for (StackTraceElement frame : e.getStackTrace()) {
+                String cn = frame.getClassName().toLowerCase(Locale.US);
+                if (cn.contains("xposed") || cn.contains("frida") || cn.contains("substrate")) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @SuppressWarnings("deprecation")

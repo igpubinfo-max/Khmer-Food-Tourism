@@ -217,8 +217,8 @@ const MealReminderPanelInner: React.FC = () => {
             {tr(language, 'ការរំលឹកទទួលទានអាហារទៀងទាត់', 'Regular meal reminders', '规律用餐提醒')}
           </span>
         </span>
-        <span className="flex items-center gap-1.5 shrink-0 ml-auto">
-          <span className="px-2 py-0.5 rounded-md bg-white/80 dark:bg-slate-800/80 border border-emerald-500/25 text-[11px] font-mono font-bold text-slate-700 dark:text-slate-200 whitespace-nowrap">
+        <span className="flex items-center gap-1.5 shrink-0 ml-auto max-w-full">
+          <span className="px-2 py-0.5 rounded-md bg-white/80 dark:bg-slate-800/80 border border-emerald-500/25 text-[11px] font-mono font-bold text-slate-700 dark:text-slate-200 break-words whitespace-normal leading-[1.4]">
             {timesSummary || tr(language, 'មិនទាន់ជ្រើស', 'None', '未选择')}
           </span>
           <ChevronDown className={`w-4.5 h-4.5 text-emerald-700 dark:text-emerald-300 shrink-0 transition ${expanded ? 'rotate-180' : ''}`} strokeWidth={1.9} />
@@ -233,9 +233,9 @@ const MealReminderPanelInner: React.FC = () => {
               return (
                 <div
                   key={slot}
-                  className="flex flex-wrap items-center justify-between gap-x-2.5 gap-y-1.5 rounded-xl bg-white/85 dark:bg-slate-800/80 border border-emerald-500/25 px-2.5 py-2"
+                  className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 rounded-xl bg-white/85 dark:bg-slate-800/80 border border-emerald-500/25 px-2.5 py-2"
                 >
-                  <div className="flex items-center gap-2.5 min-w-[7.5rem] flex-1">
+                  <div className="flex items-center gap-2 min-w-[6.5rem] flex-1">
                     <button
                       type="button"
                       role="switch"
@@ -246,7 +246,7 @@ const MealReminderPanelInner: React.FC = () => {
                     >
                       <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${cfg.on ? 'translate-x-5' : ''}`} />
                     </button>
-                    <span className="text-[13px] font-extrabold text-slate-800 dark:text-slate-100 leading-[1.65] py-0.5 break-words whitespace-normal">
+                    <span className="text-[12.5px] sm:text-[13px] font-extrabold text-slate-800 dark:text-slate-100 leading-[1.65] py-0.5 break-words whitespace-normal">
                       {slotName(slot)}
                     </span>
                   </div>
@@ -256,7 +256,7 @@ const MealReminderPanelInner: React.FC = () => {
                     disabled={!cfg.on}
                     onChange={(e) => updateSlot(slot, { time: e.target.value })}
                     aria-label={`${slotName(slot)} time`}
-                    className="min-h-[40px] px-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono shrink-0 disabled:opacity-40"
+                    className="min-h-[38px] px-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm font-mono shrink-0 disabled:opacity-40"
                   />
                 </div>
               );
