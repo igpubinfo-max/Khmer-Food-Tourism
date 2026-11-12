@@ -71,6 +71,17 @@ export const TourismView: React.FC = () => {
     setVisibleCount(TOURISM_BATCH_SIZE);
   }, [selectedCategory, selectedProvince, deferredSearchQuery, nearMeActive]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).__kft_tourism_near_me) {
+      (window as any).__kft_tourism_near_me = undefined;
+      setSelectedCategory('all');
+      if (!nearMeActive) {
+        handleToggleNearMe();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, []);
+
   const handleToggleNearMe = () => {
     if (nearMeActive) {
       setNearMeActive(false);

@@ -2421,9 +2421,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isGoogleMapsSearchModalOpen, setIsGoogleMapsSearchModalOpenRaw] = useState(false);
   const [googleMapsSearchInitialTab, setGoogleMapsSearchInitialTab] = useState<'restaurant' | 'tourism' | 'all'>('all');
   const setIsGoogleMapsSearchModalOpen = (open: boolean) => {
+    if (open) {
+      setSelectedFoodRaw(null);
+      setSelectedRestaurantRaw(null);
+      setSelectedDestinationRaw(null);
+    }
     setIsGoogleMapsSearchModalOpenRaw(open);
   };
   const openGoogleMapsSearchModal = (initialTab: 'restaurant' | 'tourism' | 'all' = 'all') => {
+    setSelectedFoodRaw(null);
+    setSelectedRestaurantRaw(null);
+    setSelectedDestinationRaw(null);
     setGoogleMapsSearchInitialTab(initialTab);
     setIsGoogleMapsSearchModalOpenRaw(true);
   };
@@ -2577,6 +2585,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const setIsNearMeModalOpen = (open: boolean) => {
+    if (open) {
+      setSelectedFoodRaw(null);
+      setSelectedRestaurantRaw(null);
+      setSelectedDestinationRaw(null);
+      setIsWhatToEatModalOpenRaw(false);
+      setIsDailyDiscoveriesModalOpenRaw(false);
+      setIsAiTripPlannerModalOpenRaw(false);
+      setIsGoogleMapsSearchModalOpenRaw(false);
+    }
     setIsNearMeModalOpenRaw(open);
   };
 
@@ -2587,16 +2604,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSelectedDestinationRaw(null);
       setIsWhatToEatModalOpenRaw(false);
       setIsNearMeModalOpenRaw(false);
+      setIsAiTripPlannerModalOpenRaw(false);
       setIsGoogleMapsSearchModalOpenRaw(false);
     }
     setIsDailyDiscoveriesModalOpenRaw(open);
   };
 
   const setIsWishlistsModalOpen = (open: boolean) => {
+    if (open) {
+      setSelectedFoodRaw(null);
+      setSelectedRestaurantRaw(null);
+      setSelectedDestinationRaw(null);
+    }
     setIsWishlistsModalOpenRaw(open);
   };
 
   const setIsAiTripPlannerModalOpen = (open: boolean) => {
+    if (open) {
+      setSelectedFoodRaw(null);
+      setSelectedRestaurantRaw(null);
+      setSelectedDestinationRaw(null);
+      setIsWhatToEatModalOpenRaw(false);
+      setIsDailyDiscoveriesModalOpenRaw(false);
+      setIsNearMeModalOpenRaw(false);
+      setIsGoogleMapsSearchModalOpenRaw(false);
+    }
     setIsAiTripPlannerModalOpenRaw(open);
   };
 
@@ -2711,6 +2743,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsWhatToEatModalOpenRaw(false);
       setIsDailyDiscoveriesModalOpenRaw(false);
       setIsWishlistsModalOpenRaw(false);
+      setIsAiTripPlannerModalOpenRaw(false);
       setIsGoogleMapsSearchModalOpenRaw(false);
     }
     setSelectedRestaurantRaw(r);
@@ -2729,6 +2762,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsWhatToEatModalOpenRaw(false);
       setIsDailyDiscoveriesModalOpenRaw(false);
       setIsWishlistsModalOpenRaw(false);
+      setIsAiTripPlannerModalOpenRaw(false);
       setIsGoogleMapsSearchModalOpenRaw(false);
     }
     setSelectedFoodRaw(f);
@@ -2749,6 +2783,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsWhatToEatModalOpenRaw(false);
       setIsDailyDiscoveriesModalOpenRaw(false);
       setIsWishlistsModalOpenRaw(false);
+      setIsAiTripPlannerModalOpenRaw(false);
       setIsGoogleMapsSearchModalOpenRaw(false);
     }
     setSelectedDestinationRaw(d);

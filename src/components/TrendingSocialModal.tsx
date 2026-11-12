@@ -94,6 +94,8 @@ export const TrendingSocialModal: React.FC = () => {
       if (initPlat === 'tiktok' || initPlat === 'facebook' || initPlat === 'youtube' || initPlat === 'all') {
         setPlatformFilter(initPlat);
         (window as any).__kft_trending_initial_platform = undefined;
+      } else {
+        setPlatformFilter('all');
       }
     }
   }, [isTrendingSocialModalOpen]);

@@ -276,7 +276,7 @@ export const GuideView: React.FC = () => {
   );
   const rankedDestinations = useMemo(
     () =>
-      [...destinations].sort(
+      destinations.filter((d) => d && d.categorySlug !== 'hotel').sort(
         (a, b) =>
           Number(Boolean(b.isFeatured)) - Number(Boolean(a.isFeatured)) ||
           ratingScore(b.rating, b.reviewCount) - ratingScore(a.rating, a.reviewCount)
@@ -338,7 +338,9 @@ export const GuideView: React.FC = () => {
       }
       return g;
     };
-    for (const d of destinations) ensure(d.provinceKh, d.provinceEn)?.places.push(d);
+    for (const d of destinations) {
+      if (d && d.categorySlug !== 'hotel') ensure(d.provinceKh, d.provinceEn)?.places.push(d);
+    }
     for (const r of directoryShops) ensure(r.provinceKh, r.provinceEn)?.shops.push(r);
     return Array.from(map.values()).sort((a, b) => b.places.length + b.shops.length - (a.places.length + a.shops.length));
   }, [destinations, directoryShops]);
@@ -670,7 +672,11 @@ export const GuideView: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setIsNearMeModalOpen(true)}
+                onClick={() => {
+                  (window as any).__kft_near_me_initial_tab = 'restaurants';
+                  window.dispatchEvent(new CustomEvent('kft:near-me-tab', { detail: 'restaurants' }));
+                  setIsNearMeModalOpen(true);
+                }}
                 className="p-3 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex items-center gap-2.5 text-left transition active:scale-[0.98] cursor-pointer"
               >
                 <span className="w-9 h-9 rounded-xl bg-[#064E3B] text-amber-300 flex items-center justify-center shrink-0">

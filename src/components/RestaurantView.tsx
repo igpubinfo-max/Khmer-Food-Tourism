@@ -900,7 +900,7 @@ export const RestaurantView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    (window as any).__kft_admin_tab = 'shops';
+                    (window as any).__kft_admin_tab = 'restaurants';
                     setIsAdminOpen(true);
                   }}
                   className="kft-btn-secondary-pill"

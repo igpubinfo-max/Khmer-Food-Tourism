@@ -133,12 +133,10 @@ export const NearMeModal: React.FC = () => {
     language,
     setSelectedRestaurant,
     setSelectedDestination,
+    setActiveTab,
   } = useApp();
 
-  const [activeType, setActiveType] = useState<'restaurants' | 'destinations'>(() => {
-    const init = typeof window !== 'undefined' ? (window as any).__kft_near_me_initial_tab : null;
-    return init === 'destinations' ? 'destinations' : 'restaurants';
-  });
+  const [activeType, setActiveType] = useState<'restaurants' | 'destinations'>('restaurants');
   const [nearbyQuery, setNearbyQuery] = useState<string>('');
   const [targetFood, setTargetFood] = useState<FoodItem | null>(null);
   const [quickFilterId, setQuickFilterId] = useState<string>('all');
@@ -176,11 +174,8 @@ export const NearMeModal: React.FC = () => {
 
   useEffect(() => {
     if (isNearMeModalOpen && typeof window !== 'undefined') {
-      const initTab = (window as any).__kft_near_me_initial_tab;
-      if (initTab === 'restaurants' || initTab === 'destinations') {
-        setActiveType(initTab);
-        (window as any).__kft_near_me_initial_tab = undefined;
-      }
+      (window as any).__kft_near_me_initial_tab = undefined;
+      setActiveType('restaurants');
       const initFood = (window as any).__kft_near_me_initial_food;
       if (initFood && typeof initFood === 'object') {
         setTargetFood(initFood as FoodItem);
@@ -394,6 +389,7 @@ export const NearMeModal: React.FC = () => {
     const mergedMap = new Map<string, TouristDestination>();
 
     for (const d of destinations) {
+      if (!d || d.categorySlug === 'hotel') continue;
       if (!isPlaceLocationVerified(d)) continue;
       const dist = calculateDistanceMeters(baseCoords.lat, baseCoords.lng, d.latitude, d.longitude);
       if (dist <= selectedRadiusMeters) {
@@ -854,12 +850,15 @@ export const NearMeModal: React.FC = () => {
                     id={`kft-nearme-cat-${card.id}-btn`}
                     onClick={() => {
                       if (card.type === 'destinations') {
-                        setActiveType('destinations');
-                        setQuickFilterId('all');
-                      } else {
-                        setActiveType('restaurants');
-                        setQuickFilterId(card.id);
+                        if (typeof window !== 'undefined') {
+                          (window as any).__kft_tourism_near_me = true;
+                        }
+                        setIsNearMeModalOpen(false);
+                        setActiveTab('tourism');
+                        return;
                       }
+                      setActiveType('restaurants');
+                      setQuickFilterId(card.id);
                       scrollToNearbyShopList(true);
                     }}
                     aria-pressed={active}

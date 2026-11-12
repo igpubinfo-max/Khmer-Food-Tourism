@@ -118,8 +118,25 @@ export const AdminUsersDirectoryPanel: React.FC<{ onNavigateToShop?: (shopId: st
   const [isSyncingShopLinks, setIsSyncingShopLinks] = useState(false);
 
   // Search, Filters & Sorting state (with 280ms debounce for smooth Server-Side Search & Pagination)
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(() => {
+    const initial = typeof window !== 'undefined' ? String((window as any).__kft_admin_user_initial_search || '').trim() : '';
+    if (initial) {
+      delete (window as any).__kft_admin_user_initial_search;
+      return initial;
+    }
+    return '';
+  });
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(() => searchQuery);
+
+  useEffect(() => {
+    const initial = typeof window !== 'undefined' ? String((window as any).__kft_admin_user_initial_search || '').trim() : '';
+    if (initial) {
+      delete (window as any).__kft_admin_user_initial_search;
+      setSubView('directory');
+      setSearchQuery(initial);
+      setDebouncedSearchQuery(initial);
+    }
+  }, []);
   const [serverPageUsers, setServerPageUsers] = useState<User[]>([]);
   const [serverTotalCount, setServerTotalCount] = useState<number | null>(null);
   const [serverLatencyMs, setServerLatencyMs] = useState<number | null>(null);

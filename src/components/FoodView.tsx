@@ -545,7 +545,8 @@ export const FoodView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      (window as any).__kft_admin_tab = 'foods';
+                      (window as any).__kft_admin_tab = 'food';
+                      (window as any).__kft_admin_open_add_food = true;
                       setIsAdminOpen(true);
                     }}
                     className="px-2.5 py-1 rounded-full bg-amber-400 text-slate-950 text-[11px] font-extrabold flex items-center gap-1 cursor-pointer"

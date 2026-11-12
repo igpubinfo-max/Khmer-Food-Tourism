@@ -480,54 +480,59 @@ export const WhatToEatModal: React.FC = () => {
 
   // Initialize welcome message when modal opens or language changes
   useEffect(() => {
-    if (isWhatToEatModalOpen) {
-      if (chatMessages.length === 0) {
-        const roleChips = buildAgentRoleChips(language, currentUser, restaurants);
-        const ownerExtra = roleChips.filter((c) => c.id === 'agent_owner_assist');
-        setChatMessages([
-          buildWelcomeAssistantMessage(language, foods.length, restaurants.length, destinations.length, ownerExtra),
-        ]);
-      }
-      if ((window as any).__kft_wte_open_drink_pairing || (window as any).__kft_wte_open_compare_mode) {
-        (window as any).__kft_wte_open_drink_pairing = false;
-        (window as any).__kft_wte_open_compare_mode = false;
-        setComparedDishIds([]);
-        setDrinkMode(true);
-        setCravingQuery('');
-        setOpenGroup(null);
-        setSetPage(0);
-        setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
-        setTimeout(() => {
-          if (scrollerRef.current) {
-            scrollerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-          } else {
-            drinkPairingTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }, 60);
-      }
-      if ((window as any).__kft_wte_open_health) {
-        (window as any).__kft_wte_open_health = false;
-        setDrinkMode(false);
-        setOpenGroup('health');
-      }
-      if ((window as any).__kft_wte_open_camera) {
-        (window as any).__kft_wte_open_camera = false;
-        setTimeout(() => {
-          fileInputRef.current?.click();
-        }, 120);
-      }
-      const pendingAiQuery = typeof window !== 'undefined' ? String((window as any).__kft_pending_ai_query || '').trim() : '';
-      if (pendingAiQuery) {
-        (window as any).__kft_pending_ai_query = '';
-        setDrinkMode(false);
-        setOpenGroup(null);
-        setCravingQuery(pendingAiQuery);
-        setTimeout(() => {
-          sendConversationalMessageRef.current?.(pendingAiQuery);
-        }, 60);
-      }
+    if (isWhatToEatModalOpen && chatMessages.length === 0) {
+      const roleChips = buildAgentRoleChips(language, currentUser, restaurants);
+      const ownerExtra = roleChips.filter((c) => c.id === 'agent_owner_assist');
+      setChatMessages([
+        buildWelcomeAssistantMessage(language, foods.length, restaurants.length, destinations.length, ownerExtra),
+      ]);
     }
-  }, [isWhatToEatModalOpen, language, foods, restaurants.length, destinations.length, chatMessages.length]);
+  }, [isWhatToEatModalOpen, language, foods, restaurants.length, destinations.length, chatMessages.length, currentUser]);
+
+  // Consume entry navigation flags exactly once when WhatToEatModal opens
+  useEffect(() => {
+    if (!isWhatToEatModalOpen) return;
+    if ((window as any).__kft_wte_open_drink_pairing || (window as any).__kft_wte_open_compare_mode) {
+      (window as any).__kft_wte_open_drink_pairing = false;
+      (window as any).__kft_wte_open_compare_mode = false;
+      setComparedDishIds([]);
+      setDrinkMode(true);
+      setCravingQuery('');
+      setOpenGroup(null);
+      setSetPage(0);
+      setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
+      setTimeout(() => {
+        if (scrollerRef.current) {
+          scrollerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          drinkPairingTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 60);
+    } else if ((window as any).__kft_wte_open_health) {
+      (window as any).__kft_wte_open_health = false;
+      setDrinkMode(false);
+      setOpenGroup('health');
+    } else {
+      setDrinkMode(false);
+      setOpenGroup(null);
+    }
+    if ((window as any).__kft_wte_open_camera) {
+      (window as any).__kft_wte_open_camera = false;
+      setTimeout(() => {
+        fileInputRef.current?.click();
+      }, 120);
+    }
+    const pendingAiQuery = typeof window !== 'undefined' ? String((window as any).__kft_pending_ai_query || '').trim() : '';
+    if (pendingAiQuery) {
+      (window as any).__kft_pending_ai_query = '';
+      setDrinkMode(false);
+      setOpenGroup(null);
+      setCravingQuery(pendingAiQuery);
+      setTimeout(() => {
+        sendConversationalMessageRef.current?.(pendingAiQuery);
+      }, 60);
+    }
+  }, [isWhatToEatModalOpen]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -3090,6 +3095,7 @@ export const WhatToEatModal: React.FC = () => {
                       aria-pressed={isHighlighted}
                       onClick={() => {
                         setShowVipAiUpgradeNotice(false);
+                        setDrinkMode(false);
                         setOpenGroup((cur) => (cur === g.id ? null : g.id));
                       }}
                       className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-all duration-200 active:scale-95 cursor-pointer select-none flex flex-col items-center justify-start gap-1"

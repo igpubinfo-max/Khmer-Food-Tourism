@@ -542,7 +542,9 @@ export const RestaurantDetailModal: React.FC = () => {
                       type="button"
                       onClick={() => {
                         (window as any).__kft_manage_initial_tab = 'video';
-                        setManagingRestaurant(selectedRestaurant);
+                        const targetShop = selectedRestaurant;
+                        setSelectedRestaurant(null);
+                        setManagingRestaurant(targetShop);
                         setIsManageMenuModalOpen(true);
                       }}
                       className="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-[10px] transition cursor-pointer"
@@ -598,7 +600,9 @@ export const RestaurantDetailModal: React.FC = () => {
                   <button
                     onClick={() => {
                       (window as any).__kft_manage_initial_tab = 'info';
-                      setManagingRestaurant(selectedRestaurant);
+                      const targetShop = selectedRestaurant;
+                      setSelectedRestaurant(null);
+                      setManagingRestaurant(targetShop);
                       setIsManageMenuModalOpen(true);
                     }}
                     className="px-3 py-2 rounded-xl bg-[#064E3B] hover:bg-[#047857] text-white font-bold text-xs shadow flex items-center gap-1.5 transition active:scale-95 cursor-pointer"

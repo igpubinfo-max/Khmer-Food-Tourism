@@ -21,7 +21,7 @@ import {
   ExternalLink,
   RefreshCw,
 } from 'lucide-react';
-import { AppNotification } from '../types';
+import { AppNotification, isHotelBusinessRecord } from '../types';
 import { tr, translateTextToChinese, translateProvince } from '../utils/i18n';
 import {
   loadNotificationPreferences,
@@ -206,7 +206,7 @@ export const NotificationsModal: React.FC = () => {
     if (n.targetType === 'restaurant' && n.targetId) {
       const r = restaurants.find((x) => x.id === n.targetId) || restaurants[0];
       if (r) {
-        setActiveTab('restaurants');
+        setActiveTab(isHotelBusinessRecord(r) ? 'hotels' : 'restaurants');
         setSelectedRestaurant(r);
         setIsNotificationsModalOpen(false);
         return;
@@ -215,7 +215,7 @@ export const NotificationsModal: React.FC = () => {
     if (n.targetType === 'destination' && n.targetId) {
       const d = destinations.find((x) => x.id === n.targetId) || destinations[0];
       if (d) {
-        setActiveTab('tourism');
+        setActiveTab(d.categorySlug === 'hotel' ? 'hotels' : 'tourism');
         setSelectedDestination(d);
         setIsNotificationsModalOpen(false);
         return;

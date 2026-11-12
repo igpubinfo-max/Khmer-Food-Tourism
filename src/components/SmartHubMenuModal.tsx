@@ -133,6 +133,8 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
               className={rowCls}
               onClick={() => {
                 onClose();
+                (window as any).__kft_near_me_initial_tab = 'restaurants';
+                window.dispatchEvent(new CustomEvent('kft:near-me-tab', { detail: 'restaurants' }));
                 setIsNearMeModalOpen(true);
               }}
             >
@@ -226,6 +228,8 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
               className={rowCls}
               onClick={() => {
                 onClose();
+                (window as any).__kft_trending_initial_platform = 'youtube';
+                window.dispatchEvent(new CustomEvent('kft:trending-platform', { detail: 'youtube' }));
                 setIsTrendingSocialModalOpen(true);
               }}
             >

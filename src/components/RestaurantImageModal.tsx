@@ -298,7 +298,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200 font-khmer">
+    <div className="fixed inset-0 z-[90] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200 font-khmer">
       <div
         className="bg-white dark:bg-slate-900 w-full max-w-lg max-h-[92vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200/90 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}

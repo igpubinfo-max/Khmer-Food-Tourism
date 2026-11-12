@@ -1246,7 +1246,7 @@ export const ProfileView: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => { (window as any).__kft_admin_tab = 'payments'; setIsAdminOpen(true); }}
+                onClick={() => { (window as any).__kft_admin_tab = 'transactions'; setIsAdminOpen(true); }}
                 className="p-3.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/70 dark:bg-slate-900/60 dark:hover:bg-slate-700/70 border border-slate-200/90 dark:border-slate-700 flex items-start gap-3 text-left transition cursor-pointer"
               >
                 <div className="p-2.5 rounded-xl bg-amber-500 text-slate-950 shrink-0">
