@@ -61,8 +61,21 @@ public class NativeAbaLauncherPlugin extends Plugin {
 
         PackageManager pm = context.getPackageManager();
         JSObject ret = new JSObject();
+        String paymentUrl = call.getString("paymentUrl", "https://pay.ababank.com/oRF8/tyy7642t");
 
         try {
+            if (paymentUrl != null && paymentUrl.startsWith("https://pay.ababank.com/")) {
+                try {
+                    Intent payLinkIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(paymentUrl));
+                    payLinkIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(payLinkIntent);
+                    ret.put("success", true);
+                    ret.put("method", "aba_paylink");
+                    call.resolve(ret);
+                    return;
+                } catch (Exception ignored) {
+                }
+            }
             for (String pkg : ABA_PACKAGES) {
                 try {
                     Intent launchIntent = pm.getLaunchIntentForPackage(pkg);

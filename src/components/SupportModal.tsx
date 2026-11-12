@@ -56,13 +56,13 @@ export const SupportModal: React.FC = () => {
   };
 
   const officialQrUrl =
-    appSettings.supportQrImageUrl && appSettings.supportQrImageUrl !== '/donation-qr.png'
+    appSettings.supportQrImageUrl && appSettings.supportQrImageUrl !== '/donation-qr.png' && appSettings.supportQrImageUrl !== '/images/aba_khqr_official_kimseng.png'
       ? appSettings.supportQrImageUrl
-      : '/images/aba_khqr_official_kimseng.png';
+      : '/images/aba_khqr_official_savuth.png';
 
   const handleDownloadQr = async () => {
     try {
-      const res = await savePngDataUrlToGallery(officialQrUrl, 'ABA-KHQR-KIMSENG-CHEA-095245959.png');
+      const res = await savePngDataUrlToGallery(officialQrUrl, 'ABA-KHQR-CHEA-SAVUTH-000056833.png');
       showToast(
         res.duplicate
           ? tr(language, '✅ រូបភាព ABA QR ច្បាប់ដើមមាននៅក្នុង រូបភាពរបស់ខ្ញុំ រួចហើយ!', '✅ Original ABA QR image is already in My Photos!', '✅ 原始 ABA 二维码图片已在我的照片中！')
@@ -140,12 +140,12 @@ export const SupportModal: React.FC = () => {
               >
                 <img
                   src={officialQrUrl}
-                  alt="ABA KHQR — KIMSENG CHEA"
+                  alt="ABA KHQR — CHEA SAVUTH"
                   loading="lazy"
                   decoding="async"
                   className="w-full h-auto object-contain rounded-lg block"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/aba_khqr_official_kimseng.png';
+                    (e.target as HTMLImageElement).src = '/images/aba_khqr_official_savuth.png';
                   }}
                 />
               </button>
@@ -161,18 +161,33 @@ export const SupportModal: React.FC = () => {
                   {tr(language, 'ឈ្មោះគណនីទទួល៖', 'Beneficiary Name:', '收款账户名称：')}
                 </div>
                 <div className="text-xs font-bold text-red-800">
-                  {appSettings.supportAccountName}
+                  {appSettings.supportAccountName && !appSettings.supportAccountName.toUpperCase().includes('KIMSENG')
+                    ? appSettings.supportAccountName
+                    : 'CHEA SAVUTH'}
+                </div>
+                <div className="text-[11px] font-mono font-bold text-stone-800 pt-0.5">
+                  USD: 000 056 833 • KHR: 003 787 096
                 </div>
               </div>
             </div>
 
-            <button
-              onClick={handleDownloadQr}
-              className="flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-stone-50 text-stone-700 font-medium rounded-xl text-xs border border-stone-200 shadow-sm transition-all cursor-pointer"
-            >
-              <Download className="w-3.5 h-3.5 text-red-600" />
-              <span className="font-khmer">{tr(language, 'រក្សាទុករូបភាព QR Code', 'Save QR Image', '保存二维码图片')}</span>
-            </button>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                onClick={handleDownloadQr}
+                className="flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-stone-50 text-stone-700 font-medium rounded-xl text-xs border border-stone-200 shadow-sm transition-all cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5 text-red-600" />
+                <span className="font-khmer">{tr(language, 'រក្សាទុករូបភាព QR Code', 'Save QR Image', '保存二维码图片')}</span>
+              </button>
+              <a
+                href="https://pay.ababank.com/oRF8/tyy7642t"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#004B87] hover:bg-[#003966] text-white font-bold rounded-xl text-xs shadow-sm transition-all cursor-pointer"
+              >
+                <span className="font-khmer">{tr(language, 'បង់ប្រាក់តាម ABA PayLink', 'Send Payment via ABA Link', '通过 ABA 链接付款')}</span>
+              </a>
+            </div>
           </div>
 
           {/* Support Message */}

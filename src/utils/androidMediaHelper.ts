@@ -158,13 +158,13 @@ export async function savePngDataUrlToGallery(
  */
 export async function shareQrImageNativeOrWeb(
   imageUrl: string,
-  title: string = 'ABA KHQR — KIMSENG CHEA (095 245 959)'
+  title: string = 'ABA KHQR — CHEA SAVUTH (000 056 833)'
 ): Promise<{ shared: boolean }> {
   if (Capacitor.isNativePlatform()) {
     try {
       const res = await NativeMediaLauncher.shareContent({
         title,
-        text: `${title}\nUSD Account: 095 245 959\nKHR Account: 012 719 946`,
+        text: `${title}\nUSD Account: 000 056 833\nKHR Account: 003 787 096\nPayLink: https://pay.ababank.com/oRF8/tyy7642t`,
         photoUrl: imageUrl,
       });
       if (res?.shared) {
@@ -178,11 +178,11 @@ export async function shareQrImageNativeOrWeb(
     const resp = await fetch(imageUrl);
     if (resp.ok && typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
       const blob = await resp.blob();
-      const file = new File([blob], 'ABA-KHQR-KIMSENG-CHEA.png', { type: 'image/png' });
+      const file = new File([blob], 'ABA-KHQR-CHEA-SAVUTH-000056833.png', { type: 'image/png' });
       if (!navigator.canShare || navigator.canShare({ files: [file] })) {
         await navigator.share({
           title,
-          text: `${title}\nUSD: 095 245 959 | KHR: 012 719 946`,
+          text: `${title}\nUSD: 000 056 833 | KHR: 003 787 096 | https://pay.ababank.com/oRF8/tyy7642t`,
           files: [file],
         });
         return { shared: true };
@@ -191,7 +191,7 @@ export async function shareQrImageNativeOrWeb(
   } catch (e: any) {
     if (e?.name === 'AbortError') return { shared: false };
   }
-  await savePngDataUrlToGallery(imageUrl, 'ABA-KHQR-KIMSENG-CHEA.png');
+  await savePngDataUrlToGallery(imageUrl, 'ABA-KHQR-CHEA-SAVUTH-000056833.png');
   return { shared: true };
 }
 

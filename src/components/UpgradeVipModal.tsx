@@ -353,7 +353,7 @@ export const UpgradeVipModal: React.FC = () => {
 
   const handleSaveQrImage = async () => {
     try {
-      const fileName = `ABA-KHQR-KIMSENG-CHEA-095245959.png`;
+      const fileName = `ABA-KHQR-CHEA-SAVUTH-000056833.png`;
       const result = await savePngDataUrlToGallery(qrCodeDataUrl, fileName);
       showToast(
         result.duplicate
@@ -368,22 +368,22 @@ export const UpgradeVipModal: React.FC = () => {
 
   const handleShareQrImage = async () => {
     try {
-      await shareQrImageNativeOrWeb(qrCodeDataUrl, 'ABA KHQR — KIMSENG CHEA (095 245 959)');
+      await shareQrImageNativeOrWeb(qrCodeDataUrl, 'ABA KHQR — CHEA SAVUTH (000 056 833)');
     } catch {
       handleSaveQrImage();
     }
   };
 
   const handleCopyAccount = () => {
-    navigator.clipboard.writeText('095 245 959');
+    navigator.clipboard.writeText('000 056 833');
     setHasCopiedAccount(true);
     setTimeout(() => setHasCopiedAccount(false), 3000);
     showToast(
       tr(
         language,
-        '✅ បានចម្លងលេខគណនី ABA៖ 095 245 959 (CHEA KIMSENG)!',
-        '✅ Copied ABA Account: 095 245 959 (CHEA KIMSENG)!',
-        '✅ 已复制 ABA 账号：095 245 959 (CHEA KIMSENG)！'
+        '✅ បានចម្លងលេខគណនី ABA៖ 000 056 833 (CHEA SAVUTH)!',
+        '✅ Copied ABA Account: 000 056 833 (CHEA SAVUTH)!',
+        '✅ 已复制 ABA 账号：000 056 833 (CHEA SAVUTH)！'
       ),
       'success'
     );
@@ -393,7 +393,7 @@ export const UpgradeVipModal: React.FC = () => {
   const handleLaunchAbaApp = async () => {
     // Auto-save clean QR image to device Photos so user can tap "Upload QR" inside ABA Mobile Scan
     handleSaveQrImage();
-    navigator.clipboard?.writeText('095 245 959').catch(() => {});
+    navigator.clipboard?.writeText('000 056 833').catch(() => {});
 
     let launchedNatively = false;
     try {
@@ -402,7 +402,8 @@ export const UpgradeVipModal: React.FC = () => {
         const NativeAbaLauncher = registerPlugin<any>('NativeAbaLauncher');
         if (NativeAbaLauncher && typeof NativeAbaLauncher.openAbaMobile === 'function') {
           const res = await NativeAbaLauncher.openAbaMobile({
-            amount: selectedPlan.priceUsd.toString()
+            amount: selectedPlan.priceUsd.toString(),
+            paymentUrl: 'https://pay.ababank.com/oRF8/tyy7642t'
           });
           if (res?.success) {
             launchedNatively = true;
@@ -426,12 +427,9 @@ export const UpgradeVipModal: React.FC = () => {
 
     if (!launchedNatively) {
       try {
-        window.location.href = 'intent://#Intent;scheme=abamobilebank;package=com.paygo24.ibank;end';
-        setTimeout(() => {
-          window.location.href = 'abamobilebank://';
-        }, 300);
+        window.open('https://pay.ababank.com/oRF8/tyy7642t', '_blank', 'noopener,noreferrer');
       } catch {
-        window.location.href = 'abamobilebank://';
+        window.location.href = 'https://pay.ababank.com/oRF8/tyy7642t';
       }
     }
 
@@ -656,7 +654,7 @@ export const UpgradeVipModal: React.FC = () => {
         {
           enabled: autoRenewOptIn,
           paymentMethod: 'KHQR',
-          paymentLabel: 'ABA KHQR (095 245 959)',
+          paymentLabel: 'ABA KHQR (000 056 833)',
           explicitConsent: autoRenewOptIn,
         },
         liveSelected.planId
@@ -1445,11 +1443,20 @@ export const UpgradeVipModal: React.FC = () => {
                   <div className="flex-1 min-w-0 flex flex-col justify-between gap-2">
                     <div className="p-2 rounded-2xl bg-sky-50 border border-sky-200">
                       <div className="text-[11px] font-bold text-slate-700 leading-snug">
-                        {tr(language, 'ឈ្មោះគណនី៖ ជា គីមសេង', 'Account: CHEA KIMSENG', '账户：CHEA KIMSENG')}
+                        {tr(language, 'ឈ្មោះគណនី៖ CHEA SAVUTH', 'Account: CHEA SAVUTH', '账户：CHEA SAVUTH')}
                       </div>
                       <div className="font-mono font-extrabold text-sm text-[#004B87] leading-tight mt-0.5">
-                        095 245 959
+                        000 056 833
                       </div>
+                      <a
+                        href="https://pay.ababank.com/oRF8/tyy7642t"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 hover:underline break-all"
+                      >
+                        <ExternalLink className="w-3 h-3 shrink-0" />
+                        <span>pay.ababank.com/oRF8/tyy7642t</span>
+                      </a>
                     </div>
                     <div className="grid grid-cols-2 gap-1.5">
                       <button

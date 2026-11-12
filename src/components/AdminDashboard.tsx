@@ -2511,8 +2511,8 @@ export const AdminDashboard: React.FC = () => {
                     <div className="p-4 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 font-khmer">
                       <span className="text-xs text-slate-600 dark:text-slate-300">
                         {isKm
-                          ? 'សូមផ្ទៀងផ្ទាត់ចំនួនទឹកប្រាក់ កាលបរិច្ឆេទ និងគណនីទទួល CHEA KIMSENG (095 245 959)'
-                          : 'Verify amount, date, and recipient CHEA KIMSENG (095 245 959)'}
+                          ? 'សូមផ្ទៀងផ្ទាត់ចំនួនទឹកប្រាក់ កាលបរិច្ឆេទ និងគណនីទទួល CHEA SAVUTH (000 056 833)'
+                          : 'Verify amount, date, and recipient CHEA SAVUTH (000 056 833)'}
                       </span>
                       <div className="flex items-center gap-2">
                         {(inspectingProofTxn.status === 'pending_verification' ||

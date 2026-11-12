@@ -203,17 +203,17 @@ export const QrScannerModal: React.FC = () => {
 
     // Check if ABA KHQR
     if (trimmed.includes('abaakhppxxx') || trimmed.includes('abaP2P') || trimmed.startsWith('00020101')) {
-      const isDual = trimmed.includes('095245959') || trimmed.includes('012719946') || trimmed.includes('KIMSENG CHEA');
+      const isDual = trimmed.includes('000056833') || trimmed.includes('003787096') || trimmed.includes('SAVUTH CHEA') || trimmed.includes('CHEA SAVUTH');
       setScanResult({
         raw: trimmed,
         type: 'aba_khqr',
         title: isKm ? '🏦 ABA KHQR Payment Code' : '🏦 ABA KHQR Payment Code',
         details: isDual 
-          ? (isKm ? 'កូដទូទាត់ផ្លូវការ ABA KHQR៖ KIMSENG CHEA (USD 095 245 959 / KHR 012 719 946)' : 'Official ABA KHQR: KIMSENG CHEA (USD 095 245 959 / KHR 012 719 946)')
+          ? (isKm ? 'កូដទូទាត់ផ្លូវការ ABA KHQR៖ CHEA SAVUTH (USD 000 056 833 / KHR 003 787 096)' : 'Official ABA KHQR: CHEA SAVUTH (USD 000 056 833 / KHR 003 787 096)')
           : (isKm ? 'កូដទូទាត់ ABA KHQR ត្រឹមត្រូវតាមស្ដង់ដារបាគង' : 'Valid ABA KHQR merchant payment code'),
-        merchantName: isDual ? 'KIMSENG CHEA' : 'ABA Merchant',
-        usdAccount: '095 245 959',
-        khrAccount: '012 719 946'
+        merchantName: isDual ? 'CHEA SAVUTH' : 'ABA Merchant',
+        usdAccount: '000 056 833',
+        khrAccount: '003 787 096'
       });
       return;
     }

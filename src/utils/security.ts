@@ -440,11 +440,11 @@ export interface OwnershipCertificate {
 }
 
 // Encoded master constants so simple global string find/replace does not easily strip the cryptographic seal
-const _O_NAME = [67, 72, 69, 65, 32, 75, 73, 77, 83, 69, 78, 71].map(c => String.fromCharCode(c)).join(''); // CHEA KIMSENG
-const _O_ABA = [48, 57, 53, 32, 50, 52, 53, 32, 57, 53, 57].map(c => String.fromCharCode(c)).join(''); // 095 245 959
+const _O_NAME = [67, 72, 69, 65, 32, 83, 65, 86, 85, 84, 72].map(c => String.fromCharCode(c)).join(''); // CHEA SAVUTH
+const _O_ABA = [48, 48, 48, 32, 48, 53, 54, 32, 56, 51, 51].map(c => String.fromCharCode(c)).join(''); // 000 056 833
 const _O_ADMIN = [99, 104, 101, 97, 115, 97, 118, 117, 116, 104].map(c => String.fromCharCode(c)).join(''); // cheasavuth
 const _O_APP_ID = 'com.khmerfood.tourism';
-const _O_SIGNATURE = 'KFT-IP-SEAL-CHEA-KIMSENG-SAVUTH-095245959-VERIFIED';
+const _O_SIGNATURE = 'KFT-IP-SEAL-CHEA-SAVUTH-000056833-VERIFIED';
 
 export const getOfficialOwnershipCertificate = (): OwnershipCertificate => ({
   ownerFullName: _O_NAME,
@@ -522,8 +522,8 @@ export const verifyAppOwnershipAndDomainIntegrity = (currentSettings?: {
     tamperReasonKh = `⛔ រកឃើញការលួចចម្លងកម្មវិធីខុសច្បាប់លើដែន (Domain): "${hostname}"។ កម្មវិធីផ្លូវការគឺជាកម្មសិទ្ធិបញ្ញាផ្តាច់មុខរបស់លោក CHEA KIMSENG / CHEA SAVUTH (igpubinfo-max.github.io)។`;
     tamperReasonEn = `⛔ Unauthorized clone detected on domain "${hostname}". This application is the exclusive intellectual property of CHEA KIMSENG / CHEA SAVUTH.`;
   } else if (!merchantIntegrityPassed) {
-    tamperReasonKh = `⛔ រកឃើញការកែប្រែឈ្មោះម្ចាស់គណនីធនាគារខុសច្បាប់! កម្មសិទ្ធិផ្លូវការគឺរបស់ CHEA KIMSENG (${_O_ABA}) ប៉ុណ្ណោះ។`;
-    tamperReasonEn = `⛔ Unauthorized modification of official merchant ownership detected! Official owner: CHEA KIMSENG (${_O_ABA}).`;
+    tamperReasonKh = `⛔ រកឃើញការកែប្រែឈ្មោះម្ចាស់គណនីធនាគារខុសច្បាប់! កម្មសិទ្ធិផ្លូវការគឺរបស់ CHEA SAVUTH (${_O_ABA}) ប៉ុណ្ណោះ។`;
+    tamperReasonEn = `⛔ Unauthorized modification of official merchant ownership detected! Official owner: CHEA SAVUTH (${_O_ABA}).`;
   }
 
   return {

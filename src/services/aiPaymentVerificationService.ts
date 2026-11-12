@@ -10,6 +10,9 @@ import { checkDuplicateTransaction } from './paymentService';
 const USED_RECEIPT_HASHES_KEY = 'kft_used_receipt_hashes_v1';
 
 export const OFFICIAL_RECIPIENT_NAMES = [
+  'CHEA SAVUTH',
+  'SAVUTH CHEA',
+  'SAVUTH',
   'KIM SENG',
   'KIMSENG',
   'CHEA KIMSENG',
@@ -19,6 +22,8 @@ export const OFFICIAL_RECIPIENT_NAMES = [
 ];
 
 export const OFFICIAL_RECIPIENT_ACCOUNTS = [
+  '000056833',
+  '003787096',
   '095245959',
   '012719946',
 ];
@@ -139,7 +144,7 @@ export function parseAbaReceiptOcrText(rawText: string): Partial<ExtractedReceip
     const allDigitMatches = [...normalized.matchAll(/\b(\d{10,18})\b/g)];
     for (const m of allDigitMatches) {
       const candidate = m[1];
-      if (candidate !== '095245959' && candidate !== '012719946') {
+      if (candidate !== '000056833' && candidate !== '003787096' && candidate !== '095245959' && candidate !== '012719946') {
         trxId = candidate;
         break;
       }
@@ -169,7 +174,7 @@ export function parseAbaReceiptOcrText(rawText: string): Partial<ExtractedReceip
   let recipientAccount: string | undefined;
   const toAccMatch =
     normalized.match(/To\s*account\s*[:.\-]?\s*([0-9]{2,4}[\s\-]?[0-9]{3}[\s\-]?[0-9]{3,4})/i) ||
-    normalized.match(/(095\s*245\s*959|012\s*719\s*946|\b0\d{2}\s+\d{3}\s+\d{3,4}\b)/);
+    normalized.match(/(000\s*056\s*833|003\s*787\s*096|095\s*245\s*959|012\s*719\s*946|\b0\d{2}\s+\d{3}\s+\d{3,4}\b)/);
   if (toAccMatch && toAccMatch[1]) {
     recipientAccount = toAccMatch[1].trim();
   }
@@ -456,6 +461,8 @@ export function isOfficialKimSengRecipient(
   const cleanAcc = (recipientAccount || '').replace(/\D+/g, '');
 
   const nameMatched =
+    cleanName.includes('SAVUTH') ||
+    (cleanName.includes('CHEA') && cleanName.includes('SAVUTH')) ||
     cleanName.includes('KIM SENG') ||
     cleanName.includes('KIMSENG') ||
     (cleanName.includes('CHEA') && cleanName.includes('SENG'));
@@ -578,17 +585,17 @@ export async function verifyAbaPaymentAndReceipt(params: {
 
   const recipientCheck: AbaVerificationCheckItem = {
     passed: recipientMatched,
-    expected: 'Kim Seng / CHEA KIMSENG (095 245 959)',
+    expected: 'CHEA SAVUTH / SAVUTH CHEA (000 056 833)',
     detected: detectedRecipientDisplay || 'រង់ចាំការពិនិត្យពីរដ្ឋបាល',
     reasonKh: recipientMatched
       ? `✅ ឈ្មោះគណនីអ្នកទទួលត្រូវគ្នា៖ ${detectedRecipientDisplay}`
       : detectedRecipientDisplay
-      ? `❌ ឈ្មោះអ្នកទទួលលើវិក្កយបត្រគឺ "${detectedRecipientDisplay}" មិនមែនគណនី "Kim Seng / CHEA KIMSENG" ទេ!`
+      ? `❌ ឈ្មោះអ្នកទទួលលើវិក្កយបត្រគឺ "${detectedRecipientDisplay}" មិនមែនគណនី "CHEA SAVUTH (000 056 833)" ទេ!`
       : '⏳ រង់ចាំរដ្ឋបាលពិនិត្យឈ្មោះគណនីអ្នកទទួលលើវិក្កយបត្រ',
     reasonEn: recipientMatched
       ? `✅ Recipient account matches: ${detectedRecipientDisplay}`
       : detectedRecipientDisplay
-      ? `❌ Receipt recipient "${detectedRecipientDisplay}" does NOT match "Kim Seng / CHEA KIMSENG"!`
+      ? `❌ Receipt recipient "${detectedRecipientDisplay}" does NOT match "CHEA SAVUTH (000 056 833)"!`
       : '⏳ Awaiting administrator verification of recipient account on receipt',
   };
 
@@ -791,12 +798,12 @@ export async function verifyAbaPaymentAndReceipt(params: {
 
   if (canAutoApprove) {
     summaryKh = `✅ បានផ្ទៀងផ្ទាត់ជោគជ័យ 100%៖ វិក្កយបត្រ ABA ត្រូវគ្នាជាមួយគណនី "${
-      extracted.recipientName || 'Kim Seng'
+      extracted.recipientName || 'CHEA SAVUTH'
     }", ចំនួនទឹកប្រាក់ $${expectedAmountUsd.toFixed(2)} USD, លេខប្រតិបត្តិការ (${
       extracted.trxId
     }) និងកាលបរិច្ឆេទ (${extracted.transactionDate})។ អនុម័តបើកដំណើរការ VIP!`;
     summaryEn = `✅ 100% Verified: ABA receipt matches recipient "${
-      extracted.recipientName || 'Kim Seng'
+      extracted.recipientName || 'CHEA SAVUTH'
     }", amount $${expectedAmountUsd.toFixed(2)} USD, Trx. ID (${
       extracted.trxId
     }), and date (${extracted.transactionDate}). Approved for VIP activation!`;

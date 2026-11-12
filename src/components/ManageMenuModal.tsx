@@ -2213,7 +2213,7 @@ export const ManageMenuModal: React.FC = () => {
                         type="button"
                         onClick={async () => {
                           try {
-                            await savePngDataUrlToGallery('/images/aba_qr_code_only.png', 'ABA-KHQR-KIMSENG-CHEA-095245959.png');
+                            await savePngDataUrlToGallery('/images/aba_qr_code_only.png', 'ABA-KHQR-CHEA-SAVUTH-000056833.png');
                             showToast(isKm ? '✅ បានរក្សាទុក ABA QR ទៅក្នុង រូបភាពរបស់ខ្ញុំ!' : '✅ Saved ABA QR to Gallery!', 'success');
                           } catch {}
                         }}
@@ -2224,9 +2224,9 @@ export const ManageMenuModal: React.FC = () => {
                       <div className="min-w-0 flex-1 space-y-1.5 text-xs">
                         <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
                           <QrCode className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                          <span>ABA KHQR • CHEA KIMSENG</span>
+                          <span>ABA KHQR • CHEA SAVUTH</span>
                         </div>
-                        <div className="font-mono font-black text-sm text-[#004B87] dark:text-sky-400">095 245 959</div>
+                        <div className="font-mono font-black text-sm text-[#004B87] dark:text-sky-400">000 056 833</div>
                         <div className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
                           {tr(
                             language,
@@ -2239,7 +2239,7 @@ export const ManageMenuModal: React.FC = () => {
                           type="button"
                           onClick={async () => {
                             try {
-                              await savePngDataUrlToGallery('/images/aba_qr_code_only.png', 'ABA-KHQR-KIMSENG-CHEA-095245959.png');
+                              await savePngDataUrlToGallery('/images/aba_qr_code_only.png', 'ABA-KHQR-CHEA-SAVUTH-000056833.png');
                               showToast(isKm ? '✅ បានរក្សាទុក ABA QR!' : '✅ Saved ABA QR!', 'success');
                             } catch {}
                           }}
@@ -2248,6 +2248,14 @@ export const ManageMenuModal: React.FC = () => {
                           <Download className="w-3 h-3 text-emerald-600" />
                           <span>{isKm ? 'រក្សាទុក QR' : 'Save QR'}</span>
                         </button>
+                        <a
+                          href="https://pay.ababank.com/oRF8/tyy7642t"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-1.5 px-2.5 py-1.5 rounded-xl bg-[#004B87] text-white text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>{isKm ? 'បង់តាម ABA Link' : 'Pay via ABA Link'}</span>
+                        </a>
                       </div>
                     </div>
 
