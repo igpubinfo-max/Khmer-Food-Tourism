@@ -583,7 +583,7 @@ export const FoodDetailModal: React.FC = () => {
                 </label>
                 <div
                   onClick={handlePickDevicePhoto}
-                  title={'រូបភាពរបស់ខ្ញុំ'}
+                  title={tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的照片')}
                   className="relative aspect-16/10 rounded-xl overflow-hidden bg-slate-900 border border-amber-400/50 cursor-pointer group"
                 >
                   <img loading="lazy" decoding="async"
@@ -595,7 +595,7 @@ export const FoodDetailModal: React.FC = () => {
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                     <span className="px-3 py-1.5 rounded-full bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg">
                       <Upload className="w-3.5 h-3.5" />
-                      {'រូបភាពរបស់ខ្ញុំ'}
+                      {tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的照片')}
                     </span>
                   </div>
                 </div>
@@ -623,7 +623,7 @@ export const FoodDetailModal: React.FC = () => {
                     className="py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Camera className="w-3.5 h-3.5" />
-                    <span>{'រូបភាពរបស់ខ្ញុំ'}</span>
+                    <span>{tr(language, 'រូបភាពរបស់ខ្ញុំ', 'My Photos', '我的照片')}</span>
                   </button>
                 </div>
                 {editPhotoUrl && editPhotoUrl !== selectedFood.photoUrl && (

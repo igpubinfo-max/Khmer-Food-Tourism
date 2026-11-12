@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { AlertTriangle, CheckCircle2, RefreshCw, Send, Server, ShieldCheck, Trash2 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { tr } from '../../utils/i18n';
 import { fetchServerUserCounts, flushCloudOutbox, getCloudOutboxSize } from '../../services/supabaseService';
 import {
   clearIntegrityLog,
@@ -17,7 +18,6 @@ import {
  */
 export const AdminUserDataSafetyCard: React.FC = () => {
   const { language, users, currentUser, showToast, syncUsersNow } = useApp();
-  const isKm = language === 'km';
   const [busy, setBusy] = useState(false);
   const [server, setServer] = useState<{ ok: boolean; status: number; total: number; vipActive: number; error?: string } | null>(null);
   const [logVersion, setLogVersion] = useState(0);
@@ -41,26 +41,40 @@ export const AdminUserDataSafetyCard: React.FC = () => {
       setOutbox(getCloudOutboxSize());
       if (!res.ok) {
         showToast(
-          isKm
-            ? `âš ï¸ áž˜áž·áž“áž¢áž¶áž…áž¢áž¶áž“áž˜áž¼áž›ážŠáŸ’áž‹áž¶áž“áž‘áž·áž“áŸ’áž“áž“áŸáž™áž€ážŽáŸ’ážáž¶áž›áž”áž¶áž“ (${res.error || res.status})`
-            : `âš ï¸ Central database unreachable (${res.error || res.status})`,
+          tr(
+            language,
+            `⚠️ មិនអាចអានមូលដ្ឋានទិន្នន័យកណ្ដាលបាន (${res.error || res.status})`,
+            `⚠️ Central database unreachable (${res.error || res.status})`,
+            `⚠️ 无法连接中央数据库 (${res.error || res.status})`
+          ),
           'error'
         );
       } else if (res.total > realUsers.length) {
         showToast(
-          isKm
-            ? `âš ï¸ Server áž˜áž¶áž“áž¢áŸ’áž“áž€áž”áŸ’ážšáž¾ ${res.total} áž…áŸ’ážšáž¾áž“áž‡áž¶áž„áž§áž”áž€ážšážŽáŸáž“áŸáŸ‡ (${realUsers.length}) â€” ážŸáž¼áž˜áž…áž»áž… Sync`
-            : `âš ï¸ Server has ${res.total} users vs ${realUsers.length} on this device â€” press Sync`,
+          tr(
+            language,
+            `⚠️ Server មានអ្នកប្រើ ${res.total} ច្រើនជាងឧបករណ៍នេះ (${realUsers.length}) — សូមចុច Sync`,
+            `⚠️ Server has ${res.total} users vs ${realUsers.length} on this device — press Sync`,
+            `⚠️ 服务器有 ${res.total} 位用户，多于本设备 (${realUsers.length}) — 请点击同步`
+          ),
           'info'
         );
       } else {
-        showToast(isKm ? 'âœ… áž‘áž·áž“áŸ’áž“áž“áŸáž™áž¢áŸ’áž“áž€áž”áŸ’ážšáž¾ážáŸ’ážšáž¼ážœáž‚áŸ’áž“áž¶' : 'âœ… User data consistent with server', 'success');
+        showToast(
+          tr(
+            language,
+            '✅ ទិន្នន័យអ្នកប្រើត្រូវគ្នា',
+            '✅ User data consistent with server',
+            '✅ 用户数据与服务器一致'
+          ),
+          'success'
+        );
       }
     } finally {
       setLogVersion((v) => v + 1);
       setBusy(false);
     }
-  }, [realUsers, currentUser?.id, showToast, isKm]);
+  }, [realUsers, currentUser?.id, showToast, language]);
 
   const retryOutbox = useCallback(async () => {
     setBusy(true);
@@ -68,13 +82,18 @@ export const AdminUserDataSafetyCard: React.FC = () => {
       const r = await flushCloudOutbox(60);
       setOutbox(r.remaining);
       showToast(
-        isKm ? `áž”áž¶áž“áž•áŸ’áž‰áž¾ ${r.flushed} â€¢ áž“áŸ…ážŸáž›áŸ‹ ${r.remaining}` : `Delivered ${r.flushed} â€¢ ${r.remaining} remaining`,
+        tr(
+          language,
+          `បានផ្ញើ ${r.flushed} • នៅសល់ ${r.remaining}`,
+          `Delivered ${r.flushed} • ${r.remaining} remaining`,
+          `已发送 ${r.flushed} 项 • 剩余 ${r.remaining} 项`
+        ),
         r.remaining === 0 ? 'success' : 'info'
       );
     } finally {
       setBusy(false);
     }
-  }, [showToast, isKm]);
+  }, [showToast, language]);
 
   const serverBlocked = server && !server.ok;
   const mismatch = server && server.ok && server.total > realUsers.length;
@@ -85,12 +104,22 @@ export const AdminUserDataSafetyCard: React.FC = () => {
         <div>
           <h4 className="font-bold text-sm text-stone-900 dark:text-stone-100 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>{isKm ? 'áž€áž¶ážšáž–áž¶ážšáž‘áž·áž“áŸ’áž“áž“áŸáž™áž¢áŸ’áž“áž€áž”áŸ’ážšáž¾ (Server áž‘áž›áŸ‹áž“áž¹áž„ áž§áž”áž€ážšážŽáŸ)' : 'User Data Safety (Server vs Device)'}</span>
+            <span>
+              {tr(
+                language,
+                'ការពារទិន្នន័យអ្នកប្រើ (Server ទល់នឹង ឧបករណ៍)',
+                'User Data Safety (Server vs Device)',
+                '用户数据安全保护（服务器对比本设备）'
+              )}
+            </span>
           </h4>
           <p className="text-[11px] text-stone-500 mt-0.5">
-            {isKm
-              ? 'ážšáž€ážƒáž¾áž‰áž”áž‰áŸ’áž áž¶áž˜áž»áž“áž–áŸáž›áž‘áž·áž“áŸ’áž“áž“áŸáž™áž”áž¶ážáŸ‹ â€¢ Outbox áž’áž¶áž“áž¶ážáž¶áž‚ážŽáž“áž¸ážáŸ’áž˜áž¸áž˜áž·áž“áž”áž¶ážáŸ‹áž–áŸáž› Server ážŠáž¶áž…áŸ‹'
-              : 'Detects problems before data is lost â€¢ Outbox guarantees new accounts survive server outages'}
+            {tr(
+              language,
+              'រកឃើញបញ្ហាមុនពេលទិន្នន័យបាត់ • Outbox ធានាថាគណនីថ្មីមិនបាត់ពេល Server ដាច់',
+              'Detects problems before data is lost • Outbox guarantees new accounts survive server outages',
+              '在数据丢失前检测异常 • 发件箱确保服务器中断期间新账户不会丢失'
+            )}
           </p>
         </div>
         <div className="flex gap-2">
@@ -101,7 +130,7 @@ export const AdminUserDataSafetyCard: React.FC = () => {
             className="px-3 py-2 rounded-xl bg-[#064E3B] hover:bg-emerald-900 text-white text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${busy ? 'animate-spin' : ''}`} />
-            <span>{isKm ? 'áž–áž·áž“áž·ážáŸ’áž™ Server áž¥áž¡áž¼ážœáž“áŸáŸ‡' : 'Check server now'}</span>
+            <span>{tr(language, 'ពិនិត្យ Server ឥឡូវនេះ', 'Check server now', '立即检查服务器')}</span>
           </button>
           {syncUsersNow && (
             <button
@@ -118,7 +147,7 @@ export const AdminUserDataSafetyCard: React.FC = () => {
               }}
               className="px-3 py-2 rounded-xl bg-white dark:bg-stone-900 border border-emerald-600 text-emerald-700 dark:text-emerald-300 text-xs font-bold cursor-pointer"
             >
-              {isKm ? 'Sync' : 'Sync'}
+              {tr(language, 'ធ្វើសមកាលកម្ម', 'Sync', '同步')}
             </button>
           )}
         </div>
@@ -127,25 +156,25 @@ export const AdminUserDataSafetyCard: React.FC = () => {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
         <div className="p-2 rounded-xl bg-stone-50 dark:bg-stone-900">
           <div className="text-lg font-black text-stone-900 dark:text-white">{realUsers.length}</div>
-          <div className="text-[10px] text-stone-500">{isKm ? 'áž§áž”áž€ážšážŽáŸáž“áŸáŸ‡' : 'This device'}</div>
+          <div className="text-[10px] text-stone-500">{tr(language, 'ឧបករណ៍នេះ', 'This device', '本设备')}</div>
         </div>
         <div className="p-2 rounded-xl bg-stone-50 dark:bg-stone-900">
           <div className="text-lg font-black text-stone-900 dark:text-white flex items-center justify-center gap-1">
             <Server className="w-3.5 h-3.5 text-sky-600" />
-            {server ? (server.ok ? server.total : 'â€”') : '?'}
+            {server ? (server.ok ? server.total : '—') : '?'}
           </div>
-          <div className="text-[10px] text-stone-500">{isKm ? 'Server áž€ážŽáŸ’ážáž¶áž›' : 'Central server'}</div>
+          <div className="text-[10px] text-stone-500">{tr(language, 'Server កណ្ដាល', 'Central server', '中央服务器')}</div>
         </div>
         <div className="p-2 rounded-xl bg-stone-50 dark:bg-stone-900">
           <div className="text-lg font-black text-amber-600">
             {localVip}
             {server && server.ok ? ` / ${server.vipActive}` : ''}
           </div>
-          <div className="text-[10px] text-stone-500">{isKm ? 'VIP (áž§áž”áž€ážšážŽáŸ/Server)' : 'VIP (device/server)'}</div>
+          <div className="text-[10px] text-stone-500">{tr(language, 'VIP (ឧបករណ៍/Server)', 'VIP (device/server)', 'VIP（本机/服务器）')}</div>
         </div>
         <div className="p-2 rounded-xl bg-stone-50 dark:bg-stone-900">
           <div className={`text-lg font-black ${outbox > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>{outbox}</div>
-          <div className="text-[10px] text-stone-500">{isKm ? 'ážšáž„áŸ‹áž…áž¶áŸ†áž•áŸ’áž‰áž¾ (Outbox)' : 'Pending uploads'}</div>
+          <div className="text-[10px] text-stone-500">{tr(language, 'រង់ចាំផ្ញើ (Outbox)', 'Pending uploads', '待上传队列')}</div>
         </div>
       </div>
 
@@ -153,11 +182,22 @@ export const AdminUserDataSafetyCard: React.FC = () => {
         <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 text-xs text-rose-900 dark:text-rose-200 flex gap-2">
           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
           <div>
-            <b>{isKm ? 'áž˜áž¼áž›ážŠáŸ’áž‹áž¶áž“áž‘áž·áž“áŸ’áž“áž“áŸáž™áž€ážŽáŸ’ážáž¶áž›áž˜áž·áž“ážŠáŸ†ážŽáž¾ážšáž€áž¶ážšáŸ–' : 'Central database is not serving requests:'}</b> {server?.error || `HTTP ${server?.status}`}
+            <b>
+              {tr(
+                language,
+                'មូលដ្ឋានទិន្នន័យកណ្ដាលមិនដំណើរការ៖',
+                'Central database is not serving requests:',
+                '中央数据库未响应请求：'
+              )}
+            </b>{' '}
+            {server?.error || `HTTP ${server?.status}`}
             <div className="mt-1">
-              {isKm
-                ? 'áž€áŸ’áž“áž»áž„áž¢áŸ†áž¡áž»áž„áž–áŸáž›áž“áŸáŸ‡ áž‚ážŽáž“áž¸ážáŸ’áž˜áž¸/VIP ážáŸ’ážšáž¼ážœáž”áž¶áž“ážšáž€áŸ’ážŸáž¶áž€áŸ’áž“áž»áž„ Outbox áž áž¾áž™áž“áž¹áž„áž•áŸ’áž‰áž¾ážŠáŸ„áž™ážŸáŸ’ážœáŸáž™áž”áŸ’ážšážœážáŸ’ážáž·áž–áŸáž› Server ážáŸ’ážšáž¡áž”áŸ‹áž˜áž€ážœáž·áž‰áŸ” ážŸáž¼áž˜ážŠáŸ†áž¡áž¾áž„ Supabase Plan áž¬áž”áž·áž‘ Spend CapáŸ”'
-                : 'New accounts/VIP changes are held in the outbox and delivered automatically when the server recovers. Upgrade the Supabase plan or lift the spend cap.'}
+              {tr(
+                language,
+                'ក្នុងអំឡុងពេលនេះ គណនីថ្មី/VIP ត្រូវបានរក្សាក្នុង Outbox ហើយនឹងផ្ញើដោយស្វ័យប្រវត្តិពេល Server ត្រឡប់មកវិញ។ សូមដំឡើង Supabase Plan ឬបិទ Spend Cap។',
+                'New accounts/VIP changes are held in the outbox and delivered automatically when the server recovers. Upgrade the Supabase plan or lift the spend cap.',
+                '在此期间，新账户与 VIP 变更已保存在发件箱中，待服务器恢复后将自动同步。请升级 Supabase 套餐或解除消费限额。'
+              )}
             </div>
           </div>
         </div>
@@ -166,22 +206,25 @@ export const AdminUserDataSafetyCard: React.FC = () => {
         <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 text-xs text-amber-900 dark:text-amber-200 flex gap-2">
           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
-            {isKm
-              ? `Server áž˜áž¶áž“áž¢áŸ’áž“áž€áž”áŸ’ážšáž¾ ${server?.total} áž”áŸ‰áž»áž“áŸ’ážáŸ‚áž§áž”áž€ážšážŽáŸáž“áŸáŸ‡áž”áž„áŸ’áž áž¶áž‰ ${realUsers.length}áŸ” áž…áž»áž… Sync ážŠáž¾áž˜áŸ’áž”áž¸áž‘áž¶áž‰áž™áž€áž‘áž¶áŸ†áž„áž¢ážŸáŸ‹ (áž”áŸ’ážšáž–áŸáž“áŸ’áž’áž˜áž·áž“ážŸážšážŸáŸážšáž‡áž¶áž“áŸ‹ Server áž‘áŸ)áŸ”`
-              : `Server has ${server?.total} users but this device shows ${realUsers.length}. Press Sync to pull them all (the app will not overwrite the server).`}
+            {tr(
+              language,
+              `Server មានអ្នកប្រើ ${server?.total} ប៉ុន្តែឧបករណ៍នេះបង្ហាញ ${realUsers.length}។ ចុច Sync ដើម្បីទាញយកទាំងអស់ (ប្រព័ន្ធមិនសរសេរជាន់ Server ទេ)។`,
+              `Server has ${server?.total} users but this device shows ${realUsers.length}. Press Sync to pull them all (the app will not overwrite the server).`,
+              `服务器共有 ${server?.total} 位用户，但本设备仅显示 ${realUsers.length} 位。请点击同步拉取全部数据（应用不会覆盖服务器数据）。`
+            )}
           </span>
         </div>
       )}
       {server && server.ok && !mismatch && (
         <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 text-xs text-emerald-900 dark:text-emerald-200 flex gap-2 items-center">
           <CheckCircle2 className="w-4 h-4 shrink-0" />
-          <span>{isKm ? 'áž§áž”áž€ážšážŽáŸ áž“áž·áž„ Server ážáŸ’ážšáž¼ážœáž‚áŸ’áž“áž¶' : 'Device and server are in agreement'}</span>
+          <span>{tr(language, 'ឧបករណ៍ និង Server ត្រូវគ្នា', 'Device and server are in agreement', '本设备与服务器数据完全一致')}</span>
         </div>
       )}
 
       <div className="flex flex-wrap gap-2 text-[11px] text-stone-600 dark:text-stone-300">
         <span>
-          {isKm ? 'áž€áŸ†ážŽážáŸ‹ážáŸ’ážšáž¶ážáŸ’áž–ážŸáŸ‹áž”áŸ†áž•áž»ážáŸ–' : 'Confirmed high-water:'} <b>{highWater.count}</b> ({highWater.vipCount} VIP)
+          {tr(language, 'កំណត់ត្រាខ្ពស់បំផុត៖', 'Confirmed high-water:', '历史最高记录：')} <b>{highWater.count}</b> ({highWater.vipCount} VIP)
         </span>
         {outbox > 0 && (
           <button
@@ -191,17 +234,19 @@ export const AdminUserDataSafetyCard: React.FC = () => {
             className="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-bold inline-flex items-center gap-1 cursor-pointer"
           >
             <Send className="w-3 h-3" />
-            {isKm ? 'áž•áŸ’áž‰áž¾ Outbox áž¥áž¡áž¼ážœáž“áŸáŸ‡' : 'Retry outbox now'}
+            {tr(language, 'ផ្ញើ Outbox ឥឡូវនេះ', 'Retry outbox now', '立即重试发件箱')}
           </button>
         )}
       </div>
 
       {audit.length > 0 && (
         <div className="text-[11px] space-y-0.5">
-          <div className="font-bold text-stone-700 dark:text-stone-200">{isKm ? 'áž”áŸ’ážšážœážáŸ’ážáž· Update (áž˜áž»áž“ â†’ áž€áŸ’ážšáŸ„áž™)' : 'Update history (before â†’ after)'}</div>
+          <div className="font-bold text-stone-700 dark:text-stone-200">
+            {tr(language, 'ប្រវត្តិ Update (មុន → ក្រោយ)', 'Update history (before → after)', '更新历史（更新前 → 更新后）')}
+          </div>
           {audit.map((a, i) => (
             <div key={i} className={a.usersAfter < a.usersBefore || a.vipAfter < a.vipBefore ? 'text-rose-600 font-bold' : 'text-stone-600 dark:text-stone-300'}>
-              {String(a.from)} â†’ {String(a.to)}: users {a.usersBefore}â†’{a.usersAfter}, VIP {a.vipBefore}â†’{a.vipAfter}
+              {String(a.from)} → {String(a.to)}: users {a.usersBefore}→{a.usersAfter}, VIP {a.vipBefore}→{a.vipAfter}
             </div>
           ))}
         </div>
@@ -209,7 +254,9 @@ export const AdminUserDataSafetyCard: React.FC = () => {
 
       <div className="text-[11px] space-y-1">
         <div className="flex items-center justify-between">
-          <span className="font-bold text-stone-700 dark:text-stone-200">{isKm ? 'áž€áŸ†ážŽážáŸ‹áž áŸážáž» Integrity' : 'Integrity log'}</span>
+          <span className="font-bold text-stone-700 dark:text-stone-200">
+            {tr(language, 'កំណត់ហេតុ Integrity', 'Integrity log', '数据完整性日志')}
+          </span>
           {log.length > 0 && (
             <button
               type="button"
@@ -220,12 +267,12 @@ export const AdminUserDataSafetyCard: React.FC = () => {
               className="text-stone-400 hover:text-rose-600 inline-flex items-center gap-1 cursor-pointer"
             >
               <Trash2 className="w-3 h-3" />
-              {isKm ? 'ážŸáž˜áŸ’áž¢áž¶áž' : 'Clear'}
+              {tr(language, 'សម្អាត', 'Clear', '清空')}
             </button>
           )}
         </div>
         {log.length === 0 ? (
-          <div className="text-stone-400">{isKm ? 'áž‚áŸ’áž˜áž¶áž“áž”áž‰áŸ’áž áž¶' : 'No events'}</div>
+          <div className="text-stone-400">{tr(language, 'គ្មានបញ្ហា', 'No events', '暂无异常记录')}</div>
         ) : (
           log.map((e, i) => (
             <div
@@ -238,7 +285,7 @@ export const AdminUserDataSafetyCard: React.FC = () => {
                   : 'bg-stone-50 dark:bg-stone-900 text-stone-600 dark:text-stone-300'
               }`}
             >
-              <span className="font-mono">{e.at.slice(5, 19).replace('T', ' ')}</span> <b>{e.code}</b> â€” {e.message}
+              <span className="font-mono">{e.at.slice(5, 19).replace('T', ' ')}</span> <b>{e.code}</b> — {e.message}
             </div>
           ))
         )}

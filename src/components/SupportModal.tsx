@@ -65,8 +65,8 @@ export const SupportModal: React.FC = () => {
       const res = await savePngDataUrlToGallery(officialQrUrl, 'ABA-KHQR-KIMSENG-CHEA-095245959.png');
       showToast(
         res.duplicate
-          ? tr(language, '✅ រូបភាព ABA QR ច្បាប់ដើមមាននៅក្នុង រូបភាពរបស់ខ្ញុំ រួចហើយ!', '✅ Original ABA QR image is already in រូបភាពរបស់ខ្ញុំ!', '✅ 原始 ABA 二维码图片已在 រូបភាពរបស់ខ្ញុំ 中！')
-          : tr(language, '✅ បានរក្សាទុករូបភាព ABA QR ច្បាប់ដើមទៅក្នុង រូបភាពរបស់ខ្ញុំ រួចរាល់!', '✅ Saved original ABA QR image to រូបភាពរបស់ខ្ញុំ!', '✅ 已保存原始 ABA 二维码图片到 រូបភាពរបស់ខ្ញុំ！'),
+          ? tr(language, '✅ រូបភាព ABA QR ច្បាប់ដើមមាននៅក្នុង រូបភាពរបស់ខ្ញុំ រួចហើយ!', '✅ Original ABA QR image is already in My Photos!', '✅ 原始 ABA 二维码图片已在我的照片中！')
+          : tr(language, '✅ បានរក្សាទុករូបភាព ABA QR ច្បាប់ដើមទៅក្នុង រូបភាពរបស់ខ្ញុំ រួចរាល់!', '✅ Saved original ABA QR image to My Photos!', '✅ 已保存原始 ABA 二维码图片到我的照片！'),
         'success'
       );
     } catch {
@@ -135,7 +135,7 @@ export const SupportModal: React.FC = () => {
               <button
                 type="button"
                 onClick={handleDownloadQr}
-                title={tr(language, 'ចុចលើរូប QR ដើម្បីរក្សាទុកក្នុង រូបភាពរបស់ខ្ញុំ', 'Tap QR to save original image to រូបភាពរបស់ខ្ញុំ', '点击二维码保存原图到 រូបភាពរបស់ខ្ញុំ')}
+                title={tr(language, 'ចុចលើរូប QR ដើម្បីរក្សាទុកក្នុង រូបភាពរបស់ខ្ញុំ', 'Tap QR to save original image to My Photos', '点击二维码保存原图到我的照片')}
                 className="relative w-full rounded-xl overflow-hidden border border-stone-200 bg-white p-0 cursor-pointer active:scale-[0.985] transition block"
               >
                 <img

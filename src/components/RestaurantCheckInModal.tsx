@@ -488,7 +488,7 @@ export const RestaurantCheckInModal: React.FC = () => {
                       className="p-3 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex flex-col items-center justify-center gap-1 transition cursor-pointer"
                     >
                       <ImageIcon className="w-5 h-5 text-amber-500" />
-                      <span>{'រូបភាពរបស់ខ្ញុំ'}</span>
+                      <span>{isKm ? 'រូបភាពរបស់ខ្ញុំ' : 'My Photos'}</span>
                     </button>
                   </div>
                 )}

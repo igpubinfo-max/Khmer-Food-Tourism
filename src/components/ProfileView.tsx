@@ -2731,7 +2731,7 @@ export const ProfileView: React.FC = () => {
               >
                 <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span className="flex-1 text-left">
-                  {tr(language, '📷 ជ្រើសរូបថ្មីពី រូបភាពរបស់ខ្ញុំ', '📷 រូបភាពរបស់ខ្ញុំ', '📷 រូបភាពរបស់ខ្ញុំ')}
+                  {tr(language, '📷 ជ្រើសរូបថ្មីពី រូបភាពរបស់ខ្ញុំ', '📷 My Photos', '📷 我的照片')}
                 </span>
               </button>
 

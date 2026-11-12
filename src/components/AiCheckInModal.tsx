@@ -285,7 +285,7 @@ export const AiCheckInModal: React.FC = () => {
                     <ImageIcon className="w-7 h-7 text-slate-600 dark:text-slate-300" />
                   </div>
                   <span className="font-bold text-xs text-center">
-                    {'រូបភាពរបស់ខ្ញុំ'}
+                    {isKm ? 'រូបភាពរបស់ខ្ញុំ' : 'My Photos'}
                   </span>
                 </button>
               </div>

@@ -1155,7 +1155,7 @@ export const RAW_30_VEGETARIAN_DISHES: VegetarianDishSeed[] = [
     "catKh": "ម្ហូបបាយ / ម្ហូបបួស",
     "catEn": "Rice Dishes / Vegetarian",
     "catZh": "素食米饭 / 香菇脚炒饭",
-    "descKh": "បាយឆាគល់ផ្សិតបួស ឆាជាមួយការ៉ុត សណ្តែកខៀវ គ្រាប់ពោតផ្អែម និងពងមាន់លើភ្លើងខ្លាំងឱ្យគ្រាប់បាយរ่วนឈ្ងុយ។",
+    "descKh": "បាយឆាគល់ផ្សិតបួស ឆាជាមួយការ៉ុត សណ្តែកខៀវ គ្រាប់ពោតផ្អែម និងពងមាន់លើភ្លើងខ្លាំងឱ្យគ្រាប់បាយផុសឈ្ងុយ។",
     "descEn": "Fragrant fried rice wok-tossed with chewy seasoned mushroom stems, carrots, green peas, sweet corn niblets, and egg.",
     "descZh": "香浓劲道的香菇脚素炒饭，配胡萝卜丁、青豆、甜玉米粒与鸡蛋旺火快炒。",
     "prepTime": "១០ នាទី",

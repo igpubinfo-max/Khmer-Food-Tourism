@@ -479,12 +479,10 @@ export const AccountTrialStatusBar: React.FC<{ className?: string; inline?: bool
         {/* Clear Compact Typography */}
         <span className="flex flex-col items-start justify-center leading-none pr-0.5">
           <span className="text-[7px] min-[360px]:text-[7.5px] font-extrabold uppercase tracking-[0.05em] text-[#FDE047] leading-none mb-[2px] whitespace-nowrap">
-            {tr(language, '7-Day Free Trial', '7-Day Free Trial', '7天免费试用')}
+            {tr(language, 'សាកល្បង ៧ ថ្ងៃឥតគិតថ្លៃ', '7-Day Free Trial', '7天免费试用')}
           </span>
           <span className="text-[9px] min-[360px]:text-[10px] sm:text-[10.5px] font-extrabold text-white tracking-tight leading-none whitespace-nowrap">
-            {language === 'zh'
-              ? `免费 • 剩余 ${trialDaysLeft} 天`
-              : `FREE – ${trialDaysLeft} ${trialDaysLeft === 1 ? 'Day' : 'Days'} Left`}
+            {tr(language, `ឥតគិតថ្លៃ • នៅសល់ ${trialDaysLeft} ថ្ងៃ`, `FREE – ${trialDaysLeft} ${trialDaysLeft === 1 ? 'Day' : 'Days'} Left`, `免费 • 剩余 ${trialDaysLeft} 天`)}
           </span>
         </span>
 

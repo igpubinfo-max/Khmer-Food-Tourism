@@ -3067,7 +3067,7 @@ export const WhatToEatModal: React.FC = () => {
                       {/* 3D Gold-Framed Pill Illustration */}
                       <div
                         className={`kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px] ${
-                          isHighlighted ? 'scale-[1.03] z-10' : 'opacity-95 group-hover:opacity-100'
+                          isHighlighted ? 'z-10' : 'opacity-95 group-hover:opacity-100'
                         }`}
                       >
                         <img

@@ -22,7 +22,7 @@ interface FoodCardViewProps {
 const FoodCardView = React.memo<FoodCardViewProps>(
   ({ food, language, bookmarked, isAdmin, setSelectedFood, toggleBookmark }) => {
     const loc = getLocalizedFood(food, language);
-    const resolvedPhotoUrl = resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 400, food.id);
+    const resolvedPhotoUrl = resolveFoodPhotoUrl(food.photoUrl, food.photoUpdatedAt, 480, food.id);
     const ratingVal = food.rating ?? 4.8;
     const reviewCountVal = food.reviewCount && food.reviewCount > 0 ? food.reviewCount : 98;
 
@@ -32,17 +32,17 @@ const FoodCardView = React.memo<FoodCardViewProps>(
         style={{
           boxShadow: '0 4px 16px rgba(15, 23, 42, 0.06)',
         }}
-        className="kft-cv-card bg-white rounded-[22px] p-2.5 sm:p-3.5 border border-slate-200/80 hover:border-emerald-600/40 hover:shadow-md transition-all cursor-pointer group flex items-stretch gap-2.5 min-[360px]:gap-3.5 font-khmer"
+        className="kft-cv-card bg-white rounded-[22px] p-2.5 sm:p-3.5 border border-slate-200/80 hover:border-emerald-600/40 hover:shadow-md transition-all cursor-pointer group flex items-center gap-2.5 min-[360px]:gap-3 sm:gap-3.5 font-khmer"
       >
-        {/* Left Dish Image Container (Proportional width & self-stretching height so text always fits comfortably) */}
-        <div className="relative w-[34%] min-w-[92px] max-w-[156px] min-h-[116px] sm:min-h-[132px] self-stretch rounded-[16px] overflow-hidden bg-slate-200 shrink-0">
+        {/* Left Dish Image Container: +20% larger size & 100% locked 1:1 square aspect ratio across every card */}
+        <div className="relative w-[41%] min-w-[110px] max-w-[186px] aspect-square self-center rounded-[16px] overflow-hidden bg-slate-100 border border-slate-200/60 shrink-0">
           <img
             src={resolvedPhotoUrl}
             onError={(e) => handleFoodImageError(e, food.id, food.photoUrl)}
             alt={loc.name}
             loading="lazy"
             decoding="async"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
           />
 
           {/* Admin Quick Edit Button */}
@@ -82,26 +82,26 @@ const FoodCardView = React.memo<FoodCardViewProps>(
           )}
         </div>
 
-        {/* Right Content Column */}
-        <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+        {/* Right Content Column: balanced height & consistent alignment beside the square image */}
+        <div className="flex-1 min-w-0 self-stretch flex flex-col justify-between py-0.5">
           <div>
             <h3
-              style={{ fontSize: 'clamp(16.8px, 4.56vw, 21px)' }}
-              className="font-khmer font-extrabold text-[#0F172A] group-hover:text-[#1B5E3A] transition leading-[1.7] py-0.5 line-clamp-2 break-words"
+              style={{ fontSize: 'clamp(16px, 4.35vw, 20.5px)' }}
+              className="font-khmer font-extrabold text-[#0F172A] group-hover:text-[#1B5E3A] transition leading-[1.68] py-0.5 line-clamp-2 break-words"
             >
               {loc.name}
             </h3>
             {loc.description && (
               <p
-                style={{ fontSize: 'clamp(13.8px, 3.72vw, 16.2px)' }}
-                className="text-slate-600 line-clamp-2 sm:line-clamp-3 mt-0.5 leading-[1.68] break-words"
+                style={{ fontSize: 'clamp(13.2px, 3.55vw, 15.8px)' }}
+                className="text-slate-600 line-clamp-2 sm:line-clamp-3 mt-0.5 leading-[1.65] min-h-[3.3em] break-words"
               >
                 {loc.description}
               </p>
             )}
           </div>
 
-          <div className="mt-2 space-y-1.5">
+          <div className="mt-1.5 space-y-1.5">
             {/* Star Rating Row */}
             <div className="flex items-center gap-1 text-xs font-extrabold text-[#0F172A]">
               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
@@ -113,7 +113,7 @@ const FoodCardView = React.memo<FoodCardViewProps>(
             <div>
               <span className="kft-btn-details max-w-full">
                 <Utensils className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                <span>{tr(language, 'មើលលម្អិត', 'View Details', '查看详情')}</span>
+                <span className="truncate">{tr(language, 'មើលលម្អិត', 'View Details', '查看详情')}</span>
                 <ChevronRight className="w-3.5 h-3.5 text-white/90 shrink-0" />
               </span>
             </div>

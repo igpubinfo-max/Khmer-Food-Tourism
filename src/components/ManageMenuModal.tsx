@@ -512,7 +512,7 @@ export const ManageMenuModal: React.FC = () => {
   const handleAddGalleryPhoto = (url: string) => {
     if (!url.trim()) return;
     if (storeGalleryPhotos.length >= 30) {
-      showToast(isKm ? 'អាចបន្ថែម រូបភាពរបស់ខ្ញុំ អតិបរមា ៣០ សន្លឹក!' : 'Max 30 រូបភាពរបស់ខ្ញុំ allowed!', 'warning');
+      showToast(isKm ? 'អាចបន្ថែម រូបភាពរបស់ខ្ញុំ អតិបរមា ៣០ សន្លឹក!' : 'Max 30 photos allowed!', 'warning');
       return;
     }
     if (!storeGalleryPhotos.includes(url.trim())) {
@@ -1764,7 +1764,7 @@ export const ManageMenuModal: React.FC = () => {
                     <span>
                       {isUploadingShopPhoto
                         ? tr(language, 'កំពុងពិនិត្យ...', 'Checking...', '审核中...')
-                        : tr(language, '🖼️ រូបភាពរបស់ខ្ញុំ', '🖼️ រូបភាពរបស់ខ្ញុំ', '🖼️ រូបភាពរបស់ខ្ញុំ')}
+                        : tr(language, '🖼️ រូបភាពរបស់ខ្ញុំ', '🖼️ My Photos', '🖼️ 我的照片')}
                     </span>
                   </button>
 

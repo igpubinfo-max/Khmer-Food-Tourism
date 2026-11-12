@@ -769,7 +769,7 @@ img[src^="data:image"],
   min-width: 0;
   overflow: visible;
   box-sizing: border-box;
-  padding: 2px 1px;
+  padding: 0;
 }
 .kft-cat-img-wrap {
   position: relative;

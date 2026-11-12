@@ -912,7 +912,7 @@ export const GUIDE_TIPS: GuideTip[] = [
     body: {
       km: 'ប្រើទាំងដុល្លារអាមេរិក និងប្រាក់រៀល។ អត្រាទូទៅគឺប្រហាក់ប្រហែល ៤,០០០៛–៤,១០០៛ ស្មើ ១ ដុល្លារ ហើយលុយអាប់ក្រោម ១ ដុល្លារនឹងអាប់ជារៀល។',
       en: 'Both US dollars and Cambodian Riel circulate together. Approx. 4,000–4,100៛ ≈ US$1, with change under $1 given in Riel.',
-      zh: '美元与瑞尔同时流通，约 4,000–4,100៛ ≈ 1 美元，1美元以下找零通常给瑞尔。',
+      zh: '美元与瑞尔同时流通，约 4,000–4,100 瑞尔 ≈ 1 美元，1美元以下找零通常给瑞尔。',
     },
   },
   {

@@ -820,10 +820,8 @@ export const RestaurantView: React.FC = () => {
                   <div
                     className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] transition-all duration-200 rounded-[14px]"
                     style={{
-                      filter: active
-                        ? 'drop-shadow(0 0 8px rgba(250, 204, 21, 0.72)) drop-shadow(0 5px 10px rgba(15, 23, 42, 0.35))'
-                        : 'drop-shadow(0 5px 10px rgba(15, 23, 42, 0.32))',
-                      transform: active ? 'translateY(-1.5px) scale(1.02)' : 'none',
+                      filter: 'drop-shadow(0 4px 8px rgba(2, 6, 23, 0.42))',
+                      transform: 'none',
                     }}
                   >
                     <img

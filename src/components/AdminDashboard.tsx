@@ -689,7 +689,7 @@ export const AdminDashboard: React.FC = () => {
       } else {
         showToast(
           isKm
-            ? `មិនพบរូបភាពដែលត្រូវគ្នា 100% សម្រាប់ «${dest.nameKh}» ទេ (រក្សាទុក Icon លំនាំដើម)`
+            ? `មិនរកឃើញរូបភាពដែលត្រូវគ្នា 100% សម្រាប់ «${dest.nameKh}» ទេ (រក្សាទុក Icon លំនាំដើម)`
             : `No verified matching photo found for "${dest.nameEn}" (keeping default placeholder icon).`,
           'info'
         );
@@ -2693,7 +2693,7 @@ export const AdminDashboard: React.FC = () => {
                           <span>
                             {isUploadingNewFoodPhoto
                               ? (isKm ? 'កំពុងផ្ទុក...' : 'Uploading...')
-                              : 'រូបភាពរបស់ខ្ញុំ'}
+                              : (isKm ? 'រូបភាពរបស់ខ្ញុំ' : 'My Photos')}
                           </span>
                         </button>
 
@@ -2761,7 +2761,7 @@ export const AdminDashboard: React.FC = () => {
                         type="text"
                         value={newFoodPhotoUrl}
                         onChange={(e) => setNewFoodPhotoUrl(e.target.value)}
-                        placeholder="https://... ឬ រូបភាពរបស់ខ្ញុំ"
+                        placeholder={isKm ? 'https://... ឬ រូបភាពរបស់ខ្ញុំ' : 'https://... or My Photos'}
                         className="w-full px-2.5 py-1.5 rounded-lg border bg-white dark:bg-stone-700"
                       />
                     </div>
@@ -2833,7 +2833,7 @@ export const AdminDashboard: React.FC = () => {
                         type="button"
                         onClick={() => setSelectedFoodForImageEdit(food)}
                         className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#064E3B] dark:bg-emerald-950/40 dark:text-emerald-400 font-bold text-[11px] font-khmer flex items-center gap-1 transition shadow-2xs border border-slate-200 dark:border-slate-700"
-                        title={'រូបភាពរបស់ខ្ញុំ'}
+                        title={isKm ? 'រូបភាពរបស់ខ្ញុំ' : 'My Photos'}
                       >
                         <Camera className="w-3.5 h-3.5 text-[#059669]" />
                         <span>{isKm ? 'កែរូបថត' : 'Photo'}</span>

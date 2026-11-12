@@ -91,7 +91,8 @@ for (const file of files) {
   if (zhTranslationFiles.test(file)) {
     for (const m of text.matchAll(new RegExp(String.raw`\[\s*(${STR})\s*,\s*(${STR})\s*,\s*(${STR})\s*\]`, 'g')))
       checkZh(file, text, m.index, unq(m[3]), unq(m[2]), 'tuple');
-    for (const m of text.matchAll(new RegExp(String.raw`^\s*(${STR})\s*:\s*(${STR})\s*,?\s*$`, 'gm'))) {
+    const zhMapText = text.replace(/const EXACT_EN_TO_KM_MAP[\s\S]*?^\};/m, (s) => s.replace(/[^\n]/g, ' '));
+    for (const m of zhMapText.matchAll(new RegExp(String.raw`^\s*(${STR})\s*:\s*(${STR})\s*,?\s*$`, 'gm'))) {
       const key = unq(m[1]);
       const val = unq(m[2]);
       if (['Khmer', 'English', 'Simplified Chinese'].includes(key)) continue; // language-name endonyms are intentional

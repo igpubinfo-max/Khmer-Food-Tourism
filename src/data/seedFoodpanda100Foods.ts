@@ -59,7 +59,7 @@ export const foodpanda100Foods: FoodItem[] = [
       },
       {
         "stepNumber": 2,
-        "instructionKh": "បង់ស្លឹកផ្ទីស្រស់ចូល ปรุงរសជាតិដោយទឹកត្រី អំបិល និងស្ករត្នោតបន្តិច។",
+        "instructionKh": "បង់ស្លឹកផ្ទីស្រស់ចូល ផ្សំរសជាតិដោយទឹកត្រី អំបិល និងស្ករត្នោតបន្តិច។",
         "instructionEn": "Add the fresh amaranth greens and season lightly with fish sauce, salt, and a pinch of sugar.",
         "instructionZh": "放入新鲜苋菜叶煮软，加鱼露、盐和少许糖调味。"
       },
@@ -131,7 +131,7 @@ export const foodpanda100Foods: FoodItem[] = [
       },
       {
         "stepNumber": 2,
-        "instructionKh": "ដាក់បន្លែស្ពៃចូល ปรุงដោយទឹកត្រីនិងអំបិលឱ្យល្មមមាត់។",
+        "instructionKh": "ដាក់បន្លែស្ពៃចូល ផ្សំរសជាតិដោយទឹកត្រីនិងអំបិលឱ្យល្មមមាត់។",
         "instructionEn": "Add the cabbage pieces and season with fish sauce and sea salt.",
         "instructionZh": "加入白菜段煮熟，用鱼露和海盐调味。"
       },
@@ -302,7 +302,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "categoryKh": "ម្ហូបត្រី និងគ្រឿងសមុទ្រ",
     "categoryEn": "Fish & Seafood",
     "categoryZh": "河鲜与海鲜",
-    "descriptionKh": "បង្កងទន្លេធំៗបំពងស្រួយសំបក ឆាเคลือบជាមួយក្រហមពងទាប្រៃ ខ្ទឹមស និងស្លឹកខ្ទឹម ឈ្ងុយឆ្ងាញ់ពិសេស។",
+    "descriptionKh": "បង្កងទន្លេធំៗបំពងស្រួយសំបក ឆាប្រឡាក់ជាមួយក្រហមពងទាប្រៃ ខ្ទឹមស និងស្លឹកខ្ទឹម ឈ្ងុយឆ្ងាញ់ពិសេស។",
     "descriptionEn": "Succulent Mekong giant river prawns flash-fried and wok-tossed in a creamy, velvety salted duck egg yolk and garlic glaze.",
     "descriptionZh": "肥美湄公河大头虾酥炸后，裹满起沙流油的咸鸭蛋黄蒜香酱汁，鲜香浓郁。",
     "photoUrl": "/foods/food-235.jpg",
@@ -995,7 +995,7 @@ export const foodpanda100Foods: FoodItem[] = [
       },
       {
         "stepNumber": 2,
-        "instructionKh": "ដាក់ផ្សិតចំបើង ប៉េងប៉ោះ និងស្លឹកក្រូចសើចចូល ปรุงដោយទឹកត្រីនិងស្ករត្នោតបន្តិច។",
+        "instructionKh": "ដាក់ផ្សិតចំបើង ប៉េងប៉ោះ និងស្លឹកក្រូចសើចចូល ផ្សំរសជាតិដោយទឹកត្រីនិងស្ករត្នោតបន្តិច។",
         "instructionEn": "Add straw mushrooms, tomatoes, and kaffir lime leaves, seasoning with fish sauce and palm sugar.",
         "instructionZh": "加入草菇、番茄与柠檬叶，用鱼露和少许棕榈糖调味。"
       },
@@ -1067,7 +1067,7 @@ export const foodpanda100Foods: FoodItem[] = [
       },
       {
         "stepNumber": 2,
-        "instructionKh": "បង់ផ្សិតម្ជុលនិងស្លឹកក្រូចសើចចូល ปรุงដោយទឹកត្រីនិងស្ករត្នោតបន្តិច។",
+        "instructionKh": "បង់ផ្សិតម្ជុលនិងស្លឹកក្រូចសើចចូល ផ្សំរសជាតិដោយទឹកត្រីនិងស្ករត្នោតបន្តិច។",
         "instructionEn": "Add enoki mushrooms and kaffir lime leaves, seasoning with fish sauce and palm sugar.",
         "instructionZh": "放入金针菇和柠檬叶，加鱼露和棕榈糖调味。"
       },
@@ -1145,7 +1145,7 @@ export const foodpanda100Foods: FoodItem[] = [
       },
       {
         "stepNumber": 3,
-        "instructionKh": "ปรุงទឹកត្រី ទឹកក្រូចឆ្មារ ម្ទេសខ្មាំង និងរោយជីរពង់ទាកូនខ្ទឹមសបំពង។",
+        "instructionKh": "ផ្សំរសជាតិដោយទឹកត្រី ទឹកក្រូចឆ្មារ ម្ទេសខ្មាំង និងរោយជីរពង់ទាកូនខ្ទឹមសបំពង។",
         "instructionEn": "Season with fish sauce, lime juice, and chilies, and garnish with Vietnamese coriander and fried garlic.",
         "instructionZh": "加鱼露、青柠汁与辣椒调味，撒上越南香菜和炸蒜酥即可。"
       }
@@ -1355,7 +1355,7 @@ export const foodpanda100Foods: FoodItem[] = [
       },
       {
         "stepNumber": 2,
-        "instructionKh": "ដាក់ពងត្រីចូលរម្ងាស់ថ្នមៗឱ្យឆ្អិនមូលល្អ ปรุงដោយទឹកត្រីនិងស្ករត្នោតបន្តិច។",
+        "instructionKh": "ដាក់ពងត្រីចូលរម្ងាស់ថ្នមៗឱ្យឆ្អិនមូលល្អ ផ្សំរសជាតិដោយទឹកត្រីនិងស្ករត្នោតបន្តិច។",
         "instructionEn": "Gently poach the fish roe until firm and cooked through, seasoning with fish sauce.",
         "instructionZh": "轻轻放入河鱼籽慢火煮熟定型，加鱼露调味。"
       },
@@ -1427,7 +1427,7 @@ export const foodpanda100Foods: FoodItem[] = [
       },
       {
         "stepNumber": 2,
-        "instructionKh": "ដាក់សាច់និងត្រប់ទាំងពីរមុខចូលឆាលើភ្លើងខ្លាំង ปรุงដោយស្ករត្នោតនិងទឹកត្រីបន្តិច។",
+        "instructionKh": "ដាក់សាច់និងត្រប់ទាំងពីរមុខចូលឆាលើភ្លើងខ្លាំង ផ្សំរសជាតិដោយស្ករត្នោតនិងទឹកត្រីបន្តិច។",
         "instructionEn": "Add the sliced meat and eggplants over high heat, seasoning with palm sugar and fish sauce.",
         "instructionZh": "大火下入肉片与双茄翻炒，加棕榈糖与少许鱼露调味。"
       },
@@ -1958,7 +1958,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "categoryKh": "សម្ល និង ស៊ុប",
     "categoryEn": "Soups & Stews",
     "categoryZh": "汤羹与炖菜",
-    "descriptionKh": "ខម៉ាំត្រីជាមួយសាច់ជ្រូកបីជាន់ ត្រីរ៉ស់ និងបន្លែត្រប់ ម្រះ ពោតបារាំង មានរសជាតិเข้มข้นឈ្ងុយឆ្ងាញ់។",
+    "descriptionKh": "ខម៉ាំត្រីជាមួយសាច់ជ្រូកបីជាន់ ត្រីរ៉ស់ និងបន្លែត្រប់ ម្រះ ពោតបារាំង មានរសជាតិដិតឈ្ងុយឆ្ងាញ់។",
     "descriptionEn": "Rich, aromatic Cambodian stew simmered with fermented fish mam broth, pork belly, snakehead fish fillets, eggplant, and okra.",
     "descriptionZh": "以柬式腌鱼汤底慢炖五花肉、黑鱼片、茄子、苦瓜与秋葵，汤浓味美。",
     "photoUrl": "/foods/food-258.jpg",
@@ -2429,7 +2429,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "steps": [
       {
         "stepNumber": 1,
-        "instructionKh": "ដាំទឹកស៊ីអ៊ីវ ទឹក និងស្ករឱ្យពុះរលាយចូលគ្នា រួចទុកឱ្យត្រជាក់สนិទ។",
+        "instructionKh": "ដាំទឹកស៊ីអ៊ីវ ទឹក និងស្ករឱ្យពុះរលាយចូលគ្នា រួចទុកឱ្យត្រជាក់ស្និទ្ធ។",
         "instructionEn": "Simmer soy sauce, water, and sugar until dissolved, then cool completely.",
         "instructionZh": "将酱油、水和糖煮沸化开，完全放凉备用。"
       },
@@ -5309,7 +5309,7 @@ export const foodpanda100Foods: FoodItem[] = [
     "steps": [
       {
         "stepNumber": 1,
-        "instructionKh": "បោកសាច់ត្រីឆ្លាតជាមួយទឹកអំបិលតិចៗ ខ្ទឹមស ម្រេច និងស្លឹកខ្ទឹម រហូតដល់សាច់ត្រីស្វិតหนึបល្អ។",
+        "instructionKh": "បោកសាច់ត្រីឆ្លាតជាមួយទឹកអំបិលតិចៗ ខ្ទឹមស ម្រេច និងស្លឹកខ្ទឹម រហូតដល់សាច់ត្រីស្វិតល្អ។",
         "instructionEn": "Whip and slap the featherback fish paste with salted water, garlic, pepper, and scallions until very elastic.",
         "instructionZh": "将刀鱼肉糜加淡盐水、蒜泥、胡椒和葱花反复摔打至极富弹性。"
       },

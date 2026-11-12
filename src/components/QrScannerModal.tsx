@@ -191,7 +191,7 @@ export const QrScannerModal: React.FC = () => {
     } catch (err: any) {
       setIsProcessingImage(false);
       showToast(
-        err?.message || (isKm ? 'មិនអាចអានរូបភាពពី រូបភាពរបស់ខ្ញុំ បានទេ។' : 'Could not read image from រូបភាពរបស់ខ្ញុំ.'),
+        err?.message || (isKm ? 'មិនអាចអានរូបភាពពី រូបភាពរបស់ខ្ញុំ បានទេ។' : 'Could not read image from My Photos.'),
         'warning'
       );
     }
@@ -344,14 +344,14 @@ export const QrScannerModal: React.FC = () => {
                   <h4 className="font-bold text-slate-900 dark:text-white text-sm">
                     {isProcessingImage
                       ? (isKm ? 'កំពុងអាន និងស្កេនរូបភាព QR...' : 'Scanning QR image...')
-                      : (isKm ? 'ជ្រើសរើសរូបថតកូដ QR ពី រូបភាពរបស់ខ្ញុំ' : 'Pick QR Code Photo from រូបភាពរបស់ខ្ញុំ')}
+                      : (isKm ? 'ជ្រើសរើសរូបថតកូដ QR ពី រូបភាពរបស់ខ្ញុំ' : 'Pick QR Code Photo from My Photos')}
                   </h4>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                     {isKm ? 'គាំទ្ររូបថត Screenshot ឬរូប QR (PNG, JPG, JPEG)' : 'Supports screenshots or saved QR images (PNG, JPG, JPEG)'}
                   </p>
                 </div>
                 <span className="px-4 py-2 rounded-xl bg-[#064E3B] text-white font-bold text-xs shadow-sm">
-                  {'📂 រូបភាពរបស់ខ្ញុំ'}
+                  {isKm ? '📂 រូបភាពរបស់ខ្ញុំ' : '📂 My Photos'}
                 </span>
               </button>
 

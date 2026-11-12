@@ -93,9 +93,10 @@ const FeatureGridImpl: React.FC<Props> = ({
           >
             {/* 3D Gold-Bordered Category Illustration Button */}
             <div
-              className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px] group-hover:scale-[1.02]"
+              className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200"
               style={{
-                filter: 'drop-shadow(0 5px 10px rgba(15, 23, 42, 0.35))',
+                filter: 'drop-shadow(0 4px 8px rgba(2, 6, 23, 0.42))',
+                transform: 'none',
               }}
             >
               <img

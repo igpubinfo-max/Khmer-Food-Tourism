@@ -4835,7 +4835,7 @@ export const initial100Restaurants: Restaurant[] = [
     "created_at": "2026-03-01T00:00:00.000Z",
     "nameKh": "ភោជនីយដ្ឋានឥណ្ឌាម៉ូស៊ូសូ",
     "nameEn": "MUSUSO Indian restaurant",
-    "descriptionKh": "ភោជនីយដ្ឋានឥណ្ឌាម៉ូស៊ូសូ (MUSUSO Indian Restaurant) បម្រើម្ហូបឥណ្ឌាแท้ៗនៅរាជធានីភ្នំពេញ។",
+    "descriptionKh": "ភោជនីយដ្ឋានឥណ្ឌាម៉ូស៊ូសូ (MUSUSO Indian Restaurant) បម្រើម្ហូបឥណ្ឌាដើមសុទ្ធសាធនៅរាជធានីភ្នំពេញ។",
     "descriptionEn": "MUSUSO Indian restaurant is a verified Cambodian and international restaurant at No. 82 Street 446, Khan Chamkarmon, Phnom Penh in Phnom Penh, known for authentic flavors, quality ingredients, and attentive service.",
     "photoUrl": "",
     "galleryPhotos": [],

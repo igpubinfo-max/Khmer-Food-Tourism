@@ -222,8 +222,8 @@ export const PaymentSupportModal: React.FC = () => {
             tr(
               language,
               '✅ បានជ្រើសរើសរូបភាពវិក្កយបត្រពី រូបភាពរបស់ខ្ញុំ រួចរាល់!',
-              '✅ Selected receipt image from រូបភាពរបស់ខ្ញុំ!',
-              '✅ 已从 រូបភាពរបស់ខ្ញុំ 选择付款凭证截图！'
+              '✅ Selected receipt image from My Photos!',
+              '✅ 已从我的照片中选择付款凭证截图！'
             ),
             'success'
           );
@@ -742,8 +742,8 @@ export const PaymentSupportModal: React.FC = () => {
                         : tr(
                             language,
                             '📸 រូបភាពរបស់ខ្ញុំ (ជ្រើសរើសរូបភាពវិក្កយបត្របង់ប្រាក់)',
-                            '📸 រូបភាពរបស់ខ្ញុំ (ABA Payment Receipt)',
-                            '📸 រូបភាពរបស់ខ្ញុំ (ABA 付款凭证)'
+                            '📸 My Photos (ABA Payment Receipt)',
+                            '📸 我的照片 (ABA 付款凭证)'
                           )}
                     </span>
                     <span className="text-[11px] text-gray-500">

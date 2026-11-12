@@ -349,7 +349,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
             <div className="flex items-center justify-between">
               <span className="font-bold text-[#0F172A] dark:text-slate-200 flex items-center gap-1.5">
                 <Smartphone className="w-4 h-4 text-[#059669]" />
-                {isKm ? '១. ជ្រើសរើសពី រូបភាពរបស់ខ្ញុំ' : '1. រូបភាពរបស់ខ្ញុំ'}
+                {isKm ? '១. ជ្រើសរើសពី រូបភាពរបស់ខ្ញុំ' : '1. Choose from My Photos'}
               </span>
               <span className="text-[10px] text-slate-400">JPG, PNG, WebP</span>
             </div>
@@ -372,7 +372,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
               <span>
                 {isProcessing 
                   ? (isKm ? 'កំពុងដំណើរការ និងបង្រួមរូបភាព...' : 'Optimizing image...') 
-                  : 'រូបភាពរបស់ខ្ញុំ'}
+                  : (isKm ? 'រូបភាពរបស់ខ្ញុំ' : 'My Photos')}
               </span>
             </button>
             <p className="text-[10px] text-slate-500 text-center">

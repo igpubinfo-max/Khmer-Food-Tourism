@@ -758,7 +758,7 @@ export const EXTENDED_PHNOM_PENH_CAMBODIA_PLACES: GooglePlaceCachedItem[] = [
     googlePlaceId: '',
     nameKh: 'ភោជនីយដ្ឋាន ចានបាយ (Jaan Bai Restaurant)',
     nameEn: 'Jaan Bai Restaurant Battambang',
-    nameZh: '马德望 Jaan Bai 餐厅 (ចានបាយ)',
+    nameZh: '马德望 Jaan Bai 餐厅',
     category: 'restaurant',
     primaryTypeDisplayName: 'Cambodian restaurant • ភោជនីយដ្ឋានម្ហូបខ្មែរទំនើប',
     editorialSummary: 'Social enterprise restaurant by Cambodian Children’s Fund serving acclaimed modern Khmer cuisine, homemade dumplings, and craft cocktails in downtown Battambang.',
