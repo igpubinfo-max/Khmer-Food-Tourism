@@ -796,16 +796,38 @@ img[src^="data:image"],
 .kft-khmer-modal-header {
   position: relative;
   isolation: isolate;
-  background-color: #1E293B !important;
+  background-color: #045b29 !important;
   background-image: url('/banners/Untitled-3.png') !important;
-  background-size: calc(100% - 8px) calc(100% - 6px) !important;
-  background-position: center bottom 3px !important;
+  background-size: 100% 100% !important;
+  background-position: center center !important;
   background-repeat: no-repeat !important;
   border-bottom: 1px solid rgba(16, 185, 129, 0.28) !important;
-  padding-bottom: 0.85rem !important;
   overflow: hidden;
 }
-.kft-khmer-modal-header > * {
+.kft-khmer-modal-header > *:not(.absolute) {
   position: relative;
   z-index: 10;
+}
+.kft-khmer-modal-header > .absolute {
+  z-index: 20;
+}
+
+/* 15. Login Modal Top Header Banner (auth_login_header_banner.jpg) */
+.kft-khmer-login-header {
+  position: relative;
+  isolation: isolate;
+  background-color: #035c1f !important;
+  background-image: linear-gradient(180deg, rgba(0, 30, 10, 0.22) 0%, rgba(0, 30, 10, 0.10) 100%), url('/banners/auth_login_header_banner.jpg') !important;
+  background-size: 100% 100% !important;
+  background-position: center bottom !important;
+  background-repeat: no-repeat !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.35) !important;
+  overflow: hidden;
+}
+.kft-khmer-login-header > *:not(.absolute) {
+  position: relative;
+  z-index: 10;
+}
+.kft-khmer-login-header > .absolute {
+  z-index: 20;
 }

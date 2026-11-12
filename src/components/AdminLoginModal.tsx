@@ -656,7 +656,7 @@ export const AdminLoginModal: React.FC = () => {
         {adminStep === 'pin' ? (
           <div className="flex flex-col flex-1">
             {/* Header */}
-            <div className="kft-khmer-modal-header relative text-white p-5">
+            <div className="kft-khmer-login-header relative text-white p-5">
               <button
                 onClick={() => setIsAdminLoginModalOpen(false)}
                 className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-emerald-200 hover:text-white transition-colors cursor-pointer"
