@@ -1888,7 +1888,7 @@ export const VipAddRestaurantModal: React.FC = () => {
               </button>
               <div className="space-y-1">
                 <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
-                  CHEA SAVUTH (000 056 833)
+                  CHEA SAVUTH (USD: 000 056 833 • KHR: 003 787 096)
                 </div>
                 <div className="text-sm font-black text-emerald-700 dark:text-emerald-400 font-mono">
                   ${quota.additionalStoreFeeUsd.toFixed(2)} USD

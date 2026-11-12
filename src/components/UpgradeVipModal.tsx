@@ -1445,8 +1445,11 @@ export const UpgradeVipModal: React.FC = () => {
                       <div className="text-[11px] font-bold text-slate-700 leading-snug">
                         {tr(language, 'ឈ្មោះគណនី៖ CHEA SAVUTH', 'Account: CHEA SAVUTH', '账户：CHEA SAVUTH')}
                       </div>
-                      <div className="font-mono font-extrabold text-sm text-[#004B87] leading-tight mt-0.5">
-                        000 056 833
+                      <div className="font-mono font-extrabold text-xs sm:text-sm text-[#004B87] leading-tight mt-0.5">
+                        USD: 000 056 833
+                      </div>
+                      <div className="font-mono font-bold text-[11px] text-emerald-700 leading-tight mt-0.5">
+                        KHR: 003 787 096
                       </div>
                       <a
                         href="https://pay.ababank.com/oRF8/tyy7642t"

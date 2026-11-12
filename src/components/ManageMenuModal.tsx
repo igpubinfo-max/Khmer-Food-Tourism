@@ -2226,7 +2226,7 @@ export const ManageMenuModal: React.FC = () => {
                           <QrCode className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                           <span>ABA KHQR • CHEA SAVUTH</span>
                         </div>
-                        <div className="font-mono font-black text-sm text-[#004B87] dark:text-sky-400">000 056 833</div>
+                        <div className="font-mono font-black text-xs sm:text-sm text-[#004B87] dark:text-sky-400">USD: 000 056 833 • KHR: 003 787 096</div>
                         <div className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
                           {tr(
                             language,

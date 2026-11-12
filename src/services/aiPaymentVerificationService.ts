@@ -151,15 +151,27 @@ export function parseAbaReceiptOcrText(rawText: string): Partial<ExtractedReceip
     }
   }
 
-  // 2. Extract Amount & Currency (e.g. "-55.00 USD", "-2.99 USD", "2.99 USD", "$2.99")
+  // 2. Extract Amount & Currency (supports both USD e.g. "-2.99 USD" / "$2.99" and KHR e.g. "-12,000 KHR" / "12,200 ៛")
   let amountUsd: number | undefined;
   let currency = 'USD';
+  const khrMatches = [
+    ...normalized.matchAll(/[-+–—]?\s*([0-9]{1,3}(?:,[0-9]{3})+|\d{4,8})(?:\.\d{1,2})?\s*(KHR|៛|RIEL)/gi),
+    ...normalized.matchAll(/(KHR|៛)\s*[-+–—]?\s*([0-9]{1,3}(?:,[0-9]{3})+|\d{4,8})(?:\.\d{1,2})?/gi),
+  ];
   const amountMatches = [
     ...normalized.matchAll(/[-+–—]?\s*\$?\s*(\d{1,6}(?:\.\d{2}))\s*(USD|KHR|\$)/gi),
     ...normalized.matchAll(/(USD|\$)\s*[-+–—]?\s*(\d{1,6}(?:\.\d{2}))/gi),
   ];
 
-  if (amountMatches.length > 0) {
+  if (khrMatches.length > 0) {
+    const first = khrMatches[0];
+    const numStr = (/^\d/.test(first[1]) ? first[1] : first[2]).replace(/,/g, '');
+    const parsedVal = parseFloat(numStr);
+    if (!Number.isNaN(parsedVal) && parsedVal >= 1000) {
+      amountUsd = parsedVal;
+      currency = 'KHR';
+    }
+  } else if (amountMatches.length > 0) {
     const first = amountMatches[0];
     const numStr = /^\d/.test(first[1]) ? first[1] : first[2];
     const curStr = /^\d/.test(first[1]) ? first[2] : first[1];
@@ -322,10 +334,10 @@ async function extractReceiptViaGeminiVision(
 {
   "isAbaReceipt": boolean,
   "trxId": string or null (the Trx. ID / Reference number on the receipt),
-  "amountUsd": number or null (the numeric payment amount in USD, positive number e.g. 2.99 or 6.99 or 59.99),
+  "amountUsd": number or null (the numeric payment amount printed on the receipt as a positive number, e.g. 2.99 for USD or 12000 for KHR),
   "currency": "USD" or "KHR",
-  "recipientName": string or null (the recipient account name at the top of the ABA receipt, e.g. "CHEA KIMSENG" or "SONLEAK ROUERN"),
-  "recipientAccount": string or null (the "To account" number, e.g. "095 245 959" or "010 339 036"),
+  "recipientName": string or null (the recipient account name at the top of the ABA receipt, e.g. "CHEA SAVUTH" or "SAVUTH CHEA"),
+  "recipientAccount": string or null (the "To account" number, e.g. "000 056 833" or "003 787 096"),
   "transactionDate": string or null (the "Transaction date" printed on the receipt, e.g. "Oct 23, 2025 06:31 PM"),
   "senderName": string or null (the "From" name on the receipt),
   "paymentStatus": "completed" | "pending" | "failed" | "unknown",
@@ -600,35 +612,43 @@ export async function verifyAbaPaymentAndReceipt(params: {
   };
 
   // ============================================================================
-  // CHECK 2: Payment Amount ($2.99 USD for 30 Days or $6.99 USD for 90 Days)
+  // CHECK 2: Payment Amount (Supports both USD and Khmer Riel KHR @ ~4,000-4,150 KHR/USD)
   // ============================================================================
   const detectedAmount = extracted.amountUsd;
+  const detectedCurrency = (extracted.currency || 'USD').toUpperCase();
+  const isKhrPayment = detectedCurrency === 'KHR' || (detectedAmount !== undefined && detectedAmount >= 3500);
+  const minExpectedKhr = Math.floor(expectedAmountUsd * 3950);
+  const maxExpectedKhr = Math.ceil(expectedAmountUsd * 4250);
+  const standardExpectedKhr = Math.round((expectedAmountUsd * 4100) / 100) * 100;
+
   const amountMatched =
     detectedAmount !== undefined &&
-    Math.abs(detectedAmount - expectedAmountUsd) < 0.05 &&
-    (extracted.currency || 'USD').toUpperCase() === 'USD';
+    (isKhrPayment
+      ? (detectedAmount >= minExpectedKhr && detectedAmount <= maxExpectedKhr) ||
+        Math.abs(detectedAmount - expectedAmountUsd) < 0.05
+      : Math.abs(detectedAmount - expectedAmountUsd) < 0.05);
+
+  const formattedDetectedAmount =
+    detectedAmount !== undefined
+      ? isKhrPayment && detectedAmount >= 1000
+        ? `${Math.round(detectedAmount).toLocaleString()} KHR (≈ ${(detectedAmount / 4100).toFixed(2)} USD)`
+        : `${detectedAmount.toFixed(2)} ${detectedCurrency}`
+      : 'រង់ចាំការពិនិត្យពីរដ្ឋបាល';
 
   const amountCheck: AbaVerificationCheckItem = {
     passed: amountMatched,
-    expected: `$${expectedAmountUsd.toFixed(2)} USD (${expectedDurationDays} Days)`,
-    detected:
-      detectedAmount !== undefined
-        ? `$${detectedAmount.toFixed(2)} ${extracted.currency || 'USD'}`
-        : 'រង់ចាំការពិនិត្យពីរដ្ឋបាល',
+    expected: `${expectedAmountUsd.toFixed(2)} USD / ≈ ${standardExpectedKhr.toLocaleString()} KHR (${expectedDurationDays} Days)`,
+    detected: formattedDetectedAmount,
     reasonKh: amountMatched
-      ? `✅ ចំនួនទឹកប្រាក់ត្រូវគ្នា៖ $${detectedAmount!.toFixed(2)} USD`
+      ? `✅ ចំនួនទឹកប្រាក់ត្រូវគ្នា៖ ${formattedDetectedAmount}`
       : detectedAmount !== undefined
-      ? `❌ ចំនួនទឹកប្រាក់លើវិក្កយបត្រ ($${detectedAmount.toFixed(2)} ${
-          extracted.currency || 'USD'
-        }) មិនត្រូវជាមួយកញ្ចប់ VIP ($${expectedAmountUsd.toFixed(2)} USD) ទេ!`
-      : `⏳ រង់ចាំរដ្ឋបាលពិនិត្យចំនួនទឹកប្រាក់ $${expectedAmountUsd.toFixed(2)} USD លើវិក្កយបត្រ`,
+      ? `❌ ចំនួនទឹកប្រាក់លើវិក្កយបត្រ (${formattedDetectedAmount}) មិនត្រូវជាមួយកញ្ចប់ VIP (${expectedAmountUsd.toFixed(2)} USD ឬ ≈ ${standardExpectedKhr.toLocaleString()} រៀល) ទេ!`
+      : `⏳ រង់ចាំរដ្ឋបាលពិនិត្យចំនួនទឹកប្រាក់ ${expectedAmountUsd.toFixed(2)} USD (≈ ${standardExpectedKhr.toLocaleString()} រៀល) លើវិក្កយបត្រ`,
     reasonEn: amountMatched
-      ? `✅ Payment amount matches: $${detectedAmount!.toFixed(2)} USD`
+      ? `✅ Payment amount matches: ${formattedDetectedAmount}`
       : detectedAmount !== undefined
-      ? `❌ Receipt amount ($${detectedAmount.toFixed(2)} ${
-          extracted.currency || 'USD'
-        }) does NOT match expected VIP plan ($${expectedAmountUsd.toFixed(2)} USD)!`
-      : `⏳ Awaiting administrator verification of payment amount ($${expectedAmountUsd.toFixed(2)} USD)`,
+      ? `❌ Receipt amount (${formattedDetectedAmount}) does NOT match expected VIP plan (${expectedAmountUsd.toFixed(2)} USD or ≈ ${standardExpectedKhr.toLocaleString()} KHR)!`
+      : `⏳ Awaiting administrator verification of payment amount (${expectedAmountUsd.toFixed(2)} USD / ≈ ${standardExpectedKhr.toLocaleString()} KHR)`,
   };
 
   // ============================================================================
