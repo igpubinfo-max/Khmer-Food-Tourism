@@ -59,6 +59,8 @@
   body,
   #root {
     width: 100%;
+    max-width: 100vw;
+    min-width: 0;
     height: 100%;
     height: 100dvh;
     max-height: 100dvh;
@@ -69,6 +71,8 @@
     overscroll-behavior: none;
     background-color: #0F172A;
     color: #F8FAFC;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   /* Smooth scrolling and hide default scrollbars for mobile feel */
@@ -90,8 +94,12 @@
 
 /* Dedicated single scroll container for the native App Shell */
 #kft-main-scroll {
+  width: 100%;
+  max-width: 100vw;
+  min-width: 0;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+  overscroll-behavior-x: none;
   overflow-anchor: none;
   scroll-behavior: smooth;
   padding-left: var(--kft-safe-left, 0px);
@@ -724,3 +732,62 @@ img[src^="data:image"],
   transform: scale(0.95);
 }
 
+/* 13. Smooth Continuous Horizontal Touch Scrolling & Foldable-Safe Category Button System */
+.kft-hscroll,
+.overflow-x-auto {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  max-width: 100%;
+  min-width: 0;
+}
+.kft-hscroll::-webkit-scrollbar,
+.overflow-x-auto::-webkit-scrollbar {
+  display: none;
+}
+
+/* Zero Intrinsic Flex Width Blowout for 3D Category Buttons (260px Z Fold5 cover screen to 1200px+) */
+.kft-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.kft-cat-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: visible;
+  box-sizing: border-box;
+  padding: 2px 1px;
+}
+.kft-cat-img-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 2.12 / 1;
+  overflow: visible;
+}
+.kft-cat-img-wrap > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: contain;
+}

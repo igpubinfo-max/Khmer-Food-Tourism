@@ -118,6 +118,34 @@ const MainScreen: React.FC = () => {
     window.addEventListener('kft:open-privacy-policy', openPrivacy);
     return () => window.removeEventListener('kft:open-privacy-policy', openPrivacy);
   }, []);
+
+  // Synchronize viewport width on foldable screen transitions (e.g., Samsung Galaxy Z Fold5 fold/unfold)
+  useEffect(() => {
+    const syncViewport = () => {
+      try {
+        if (window.scrollX !== 0) {
+          window.scrollTo(0, window.scrollY);
+        }
+        const vw = window.visualViewport?.width || window.innerWidth || document.documentElement.clientWidth;
+        if (vw > 0) {
+          document.documentElement.style.setProperty('--kft-vw', `${Math.round(vw)}px`);
+        }
+      } catch {
+        // Ignore viewport read errors
+      }
+    };
+    syncViewport();
+    window.addEventListener('resize', syncViewport, { passive: true });
+    window.addEventListener('orientationchange', syncViewport, { passive: true });
+    window.addEventListener('kft:viewport-change', syncViewport as EventListener);
+    window.visualViewport?.addEventListener('resize', syncViewport, { passive: true });
+    return () => {
+      window.removeEventListener('resize', syncViewport);
+      window.removeEventListener('orientationchange', syncViewport);
+      window.removeEventListener('kft:viewport-change', syncViewport as EventListener);
+      window.visualViewport?.removeEventListener('resize', syncViewport);
+    };
+  }, []);
   useEffect(() => {
     (window as any).__kft_is_smart_hub_open = Boolean(isSmartHubOpen && hasVipAccess);
     return () => {
@@ -213,7 +241,7 @@ const MainScreen: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col w-full h-full overflow-hidden relative bg-[#0F172A]">
+    <div className="flex-1 min-h-0 min-w-0 max-w-full flex flex-col w-full h-full overflow-hidden relative bg-[#0F172A]">
       {/* Fixed Top Header — Hidden on Home, Food, Shop, Hotel, Tourism & Guide tabs where full-bleed Angkor Hero Header is used */}
       {activeTab !== 'home' && activeTab !== 'food' && activeTab !== 'restaurants' && activeTab !== 'hotels' && activeTab !== 'tourism' && activeTab !== 'guide' && <Header />}
 
@@ -221,7 +249,7 @@ const MainScreen: React.FC = () => {
       <main
         id="kft-main-scroll"
         ref={mainScrollRef}
-        className={`flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden overscroll-y-contain no-scrollbar relative ${
+        className={`flex-1 min-h-0 min-w-0 max-w-full w-full overflow-y-auto overflow-x-hidden overscroll-y-contain no-scrollbar relative ${
           activeTab === 'food' || activeTab === 'restaurants' || activeTab === 'hotels' || activeTab === 'tourism' || activeTab === 'guide' || activeTab === 'profile' ? 'bg-[#1E293B] text-slate-900' : activeTab === 'home' ? 'bg-[#F3F5F3] text-slate-900' : 'dark bg-[#0F172A] text-[#F8FAFC]'
         }`}
       >
@@ -308,8 +336,8 @@ export default function App() {
   return (
     <AppProvider>
       {/* Locked Full-Screen Native Mobile App Shell (Zero dual scrollbars, Edge-to-Edge Safe Area aware) */}
-      <div className="w-full h-full max-h-[100dvh] overflow-hidden bg-[#0F172A] text-[#F8FAFC] flex justify-center">
-        <div className="w-full max-w-full lg:max-w-6xl h-full max-h-[100dvh] flex flex-col overflow-hidden bg-[#0F172A] text-[#F8FAFC] relative shadow-none lg:shadow-xl lg:border-x lg:border-slate-800">
+      <div className="w-full max-w-[100vw] min-w-0 h-full max-h-[100dvh] overflow-hidden bg-[#0F172A] text-[#F8FAFC] flex justify-center">
+        <div className="w-full max-w-full min-w-0 lg:max-w-6xl h-full max-h-[100dvh] flex flex-col overflow-hidden bg-[#0F172A] text-[#F8FAFC] relative shadow-none lg:shadow-xl lg:border-x lg:border-slate-800">
           <MainScreen />
         </div>
       </div>

@@ -172,7 +172,7 @@ const SectionTitle: React.FC<{ icon: React.ReactNode; title: string; subtitle?: 
 );
 
 const HScroll: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="-mx-4 px-4 flex gap-3 overflow-x-auto no-scrollbar snap-x pb-1">{children}</div>
+  <div className="kft-hscroll -mx-3.5 px-3.5 sm:-mx-4 sm:px-4 flex gap-3 overflow-x-auto no-scrollbar snap-x scroll-pl-3.5 sm:scroll-pl-4 pb-1">{children}</div>
 );
 
 interface ListRowProps {
@@ -511,7 +511,7 @@ export const GuideView: React.FC = () => {
             background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.84) 0%, rgba(15, 23, 42, 0.94) 100%)',
             boxShadow: '0 10px 28px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.14)',
           }}
-          className="rounded-[24px] p-2.5 sm:p-3.5 border border-amber-400/25 space-y-2.5"
+          className="w-full max-w-full min-w-0 rounded-[24px] p-2 min-[360px]:p-2.5 sm:p-3.5 border border-amber-400/25 space-y-2.5"
         >
           <div className="flex items-center justify-between gap-2 flex-wrap px-1">
             <span className="text-xs font-extrabold text-white">
@@ -563,11 +563,11 @@ export const GuideView: React.FC = () => {
                   role="tab"
                   aria-selected={active}
                   onClick={() => setTab(t.id)}
-                  className="group relative flex flex-col items-center justify-start min-w-0 p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
+                  className="kft-cat-btn group relative flex flex-col items-center justify-start w-full max-w-full min-w-0 overflow-visible p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
                 >
                   {/* 3D Gold-Bordered Button Graphic */}
                   <div
-                    className="relative w-full aspect-[2.12/1] flex items-center justify-center transition-all duration-200 rounded-[14px]"
+                    className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px]"
                     style={{
                       filter: active
                         ? 'drop-shadow(0 0 8px rgba(250, 204, 21, 0.72)) drop-shadow(0 5px 10px rgba(15, 23, 42, 0.35))'
@@ -581,7 +581,7 @@ export const GuideView: React.FC = () => {
                       loading="eager"
                       decoding="async"
                       draggable={false}
-                      className="w-full h-full object-contain pointer-events-none select-none"
+                      className="block w-full h-full max-w-full min-w-0 min-h-0 object-contain pointer-events-none select-none"
                     />
                   </div>
 
@@ -698,7 +698,7 @@ export const GuideView: React.FC = () => {
               title={tr(language, 'ញ៉ាំអ្វីល្អឥឡូវនេះ?', 'What to eat right now', '现在吃什么')}
               subtitle={pickTri(activeSlot.hint, lang)}
             />
-            <div className="flex gap-1.5 overflow-x-auto no-scrollbar -mx-4 px-4">
+            <div className="kft-hscroll flex gap-1.5 overflow-x-auto no-scrollbar -mx-3.5 px-3.5 sm:-mx-4 sm:px-4 py-0.5">
               {MEAL_SLOTS.map((s) => {
                 const active = s.id === activeSlot.id;
                 return (
@@ -706,7 +706,7 @@ export const GuideView: React.FC = () => {
                     key={s.id}
                     type="button"
                     onClick={() => setMealOverride(s.id)}
-                    className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border transition cursor-pointer ${
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border transition cursor-pointer ${
                       active
                         ? 'bg-emerald-700 text-white border-emerald-600 shadow-xs'
                         : 'bg-white text-slate-700 border-slate-200'
@@ -814,7 +814,7 @@ export const GuideView: React.FC = () => {
             <p className="text-xs text-slate-500">{tr(language, 'មិនទាន់មានទិន្នន័យ', 'No data available yet.', '暂无数据。')}</p>
           ) : (
             <>
-              <div className="flex gap-1.5 overflow-x-auto no-scrollbar -mx-4 px-4 py-0.5">
+              <div className="kft-hscroll flex gap-1.5 overflow-x-auto no-scrollbar -mx-3.5 px-3.5 sm:-mx-4 sm:px-4 py-0.5">
                 {provinceGroups.map((g) => {
                   const active = activeGroup?.key === g.key;
                   return (
@@ -822,7 +822,7 @@ export const GuideView: React.FC = () => {
                       key={g.key}
                       type="button"
                       onClick={() => setProvinceKey(g.key)}
-                      className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border transition cursor-pointer ${
+                      className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border transition cursor-pointer ${
                         active
                           ? 'bg-[#064E3B] text-white border-[#064E3B] shadow-xs'
                           : 'bg-white text-slate-700 border-slate-200'
@@ -1109,7 +1109,7 @@ export const GuideView: React.FC = () => {
               icon={<Lightbulb className="w-4 h-4" />}
               title={tr(language, `គន្លឹះដំណើរកម្សាន្ត & ញ៉ាំអាហារ (${GUIDE_TIPS.length} គន្លឹះ)`, `Travel & dining tips (${GUIDE_TIPS.length} tips)`, `旅行与用餐实用贴士（共 ${GUIDE_TIPS.length} 条）`)}
             />
-            <div className="flex gap-1.5 overflow-x-auto no-scrollbar -mx-4 px-4">
+            <div className="kft-hscroll flex gap-1.5 overflow-x-auto no-scrollbar -mx-3.5 px-3.5 sm:-mx-4 sm:px-4 py-0.5">
               {TIP_CATEGORIES.map((c) => {
                 const active = tipFilter === c.id;
                 return (
@@ -1117,7 +1117,7 @@ export const GuideView: React.FC = () => {
                     key={c.id}
                     type="button"
                     onClick={() => setTipFilter(c.id)}
-                    className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border transition cursor-pointer ${
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap border transition cursor-pointer ${
                       active
                         ? 'bg-emerald-700 text-white border-emerald-600 shadow-xs'
                         : 'bg-white text-slate-700 border-slate-200'

@@ -22,7 +22,7 @@ const TrendingFoodsRowInner: React.FC<Props> = ({ language, items, onOpen, onExp
       actionLabel={onExploreAll ? tr(language, 'មើលវីដេអូម្ហូប', 'Food videos', '美食视频') : undefined}
       onAction={onExploreAll}
     />
-    <div className="-mx-4 px-4 flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-pl-4 pb-1">
+    <div className="kft-hscroll -mx-2.5 px-2.5 min-[360px]:-mx-3.5 min-[360px]:px-3.5 sm:-mx-5 sm:px-5 flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-pl-2.5 min-[360px]:scroll-pl-3.5 sm:scroll-pl-5 pb-1">
       {(items || []).map((item, index) => {
         if (!item || !item.id) return null;
         const safeKh = item.foodNameKh || item.foodNameEn || 'ម្ហូបខ្មែរ';

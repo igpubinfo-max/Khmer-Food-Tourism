@@ -111,8 +111,13 @@ export const RestaurantView: React.FC = () => {
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const shopListStartRef = useRef<HTMLDivElement | null>(null);
+  const shopCategoryCardRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToShopList = () => {
+  const scrollToShopList = (keepCategoriesVisible = false) => {
+    if (keepCategoriesVisible && shopCategoryCardRef.current) {
+      smoothScrollToElement(shopCategoryCardRef.current, { offsetTop: 8, onlyIfOutOfView: true });
+      return;
+    }
     smoothScrollToElement(shopListStartRef.current, { offsetTop: 10 });
   };
 
@@ -780,15 +785,17 @@ export const RestaurantView: React.FC = () => {
 
         {/* Row 2: 6 Premium 3D Gold-Bordered Category Buttons in 3x2 Layout with Clear White Text Below Each Illustration */}
         <div
+          ref={shopCategoryCardRef}
           style={{
-            background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(22, 38, 59, 0.96) 100%)',
-            boxShadow: '0 10px 26px rgba(2, 6, 23, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
+            background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.96) 100%)',
+            boxShadow: '0 10px 28px rgba(15, 23, 42, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.14)',
           }}
-          className="rounded-[24px] px-2.5 py-3 sm:px-3.5 sm:py-3.5 border border-[#F59E0B]/35"
+          className="w-full max-w-full min-w-0 rounded-[24px] p-2 min-[360px]:p-2.5 sm:p-3.5 border border-amber-400/25"
         >
-          <div className="grid grid-cols-3 gap-x-2 sm:gap-x-3 gap-y-2.5 sm:gap-y-3">
+          <div className="kft-cat-grid grid grid-cols-3 gap-x-1.5 min-[360px]:gap-x-2 sm:gap-x-3 gap-y-2 min-[360px]:gap-y-2.5 sm:gap-y-3 items-start">
             {primaryCategoryPills.map((cat) => {
               const active = cat.id === 'near_me_toggle' ? nearMeActive : categoryFilter === cat.id;
+              const titleText = tr(language, cat.nameKh, cat.nameEn, cat.nameZh);
               return (
                 <button
                   key={cat.id}
@@ -804,23 +811,26 @@ export const RestaurantView: React.FC = () => {
                     } else {
                       setCategoryFilter(cat.id);
                     }
-                    scrollToShopList();
+                    scrollToShopList(true);
                   }}
                   aria-pressed={active}
-                  className="group relative flex flex-col items-center justify-start min-w-0 transition-transform duration-200 active:scale-[0.95] cursor-pointer focus:outline-none bg-transparent border-0 p-0"
+                  className="kft-cat-btn group relative flex flex-col items-center justify-start w-full max-w-full min-w-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none bg-transparent border-0 select-none"
                 >
                   {/* 3D Gold-Bordered Category Illustration Button */}
                   <div
-                    className={`relative w-full aspect-[720/340] flex items-center justify-center rounded-[16px] transition-all duration-200 ${
-                      active
-                        ? 'scale-[1.03] drop-shadow-[0_6px_14px_rgba(245,158,11,0.52)]'
-                        : 'drop-shadow-[0_5px_12px_rgba(0,0,0,0.38)] hover:scale-[1.02]'
-                    }`}
+                    className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] transition-all duration-200 rounded-[14px]"
+                    style={{
+                      filter: active
+                        ? 'drop-shadow(0 0 8px rgba(250, 204, 21, 0.72)) drop-shadow(0 5px 10px rgba(15, 23, 42, 0.35))'
+                        : 'drop-shadow(0 5px 10px rgba(15, 23, 42, 0.32))',
+                      transform: active ? 'translateY(-1.5px) scale(1.02)' : 'none',
+                    }}
                   >
-                    <img decoding="async"
+                    <img
+                      decoding="async"
                       src={cat.imageSrc}
-                      alt={tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
-                      className="w-full h-full object-contain select-none pointer-events-none"
+                      alt={titleText}
+                      className="block w-full h-full max-w-full min-w-0 min-h-0 object-contain select-none pointer-events-none"
                       loading="eager"
                       draggable={false}
                     />
@@ -828,27 +838,28 @@ export const RestaurantView: React.FC = () => {
 
                   {/* Clear White Text Title Directly Below Button / Illustration */}
                   <span
-                    className={`mt-1 font-khmer font-extrabold leading-[1.45] text-center break-words whitespace-normal w-full px-0.5 transition-colors ${
-                      active ? 'text-[#FDE68A]' : 'text-white'
-                    }`}
+                    className="mt-1 px-0.5 font-khmer font-extrabold leading-[1.62] text-center break-words whitespace-normal w-full transition-colors duration-150"
                     style={{
-                      fontSize: 'clamp(11px, 3.05vw, 13.5px)',
+                      fontSize: 'clamp(11px, 3.05vw, 13.4px)',
+                      color: active ? '#FDE047' : '#FFFFFF',
                       textShadow: active
-                        ? '0 1px 4px rgba(0, 0, 0, 0.9), 0 0 10px rgba(245, 158, 11, 0.55)'
-                        : '0 1.5px 3px rgba(0, 0, 0, 0.85), 0 0 6px rgba(0, 0, 0, 0.5)',
+                        ? '0 1px 3px rgba(0, 0, 0, 0.92), 0 0 8px rgba(250, 204, 21, 0.45)'
+                        : '0 1.5px 3px rgba(0, 0, 0, 0.90), 0 0 2px rgba(0, 0, 0, 0.75)',
                     }}
                   >
-                    {tr(language, cat.nameKh, cat.nameEn, cat.nameZh)}
+                    {titleText}
                   </span>
 
-                  {/* Subtle Gold Active Indicator Pill */}
-                  <span
-                    className={`mt-0.5 h-[3px] rounded-full transition-all duration-200 ${
-                      active
-                        ? 'w-8 bg-gradient-to-r from-[#FDE047] via-[#F59E0B] to-[#FDE047] shadow-[0_0_8px_rgba(245,158,11,0.8)]'
-                        : 'w-0 bg-transparent'
-                    }`}
-                  />
+                  {/* Subtle Gold Active Indicator Bar Below Title */}
+                  {active && (
+                    <span
+                      className="mt-0.5 h-1 w-7 rounded-full"
+                      style={{
+                        background: 'linear-gradient(90deg, #FDE047 0%, #F59E0B 100%)',
+                        boxShadow: '0 0 6px rgba(250, 204, 21, 0.8)',
+                      }}
+                    />
+                  )}
                 </button>
               );
             })}

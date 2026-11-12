@@ -89,7 +89,7 @@ const ForYouSectionInner: React.FC<Props> = ({
 
       {onSelectSlot && (
         <div className="flex items-center justify-between gap-1.5">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1">
+          <div className="kft-hscroll flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1 min-w-0 py-0.5">
             {ALL_SLOTS.map((s) => {
               const m = SLOT_META[s];
               const Icon = m.icon;
@@ -99,7 +99,7 @@ const ForYouSectionInner: React.FC<Props> = ({
                   key={s}
                   type="button"
                   onClick={() => onSelectSlot(s)}
-                  className={`px-2.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center gap-1 transition cursor-pointer ${
+                  className={`shrink-0 px-2.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center gap-1 transition cursor-pointer ${
                     active
                       ? 'bg-[#064E3B] text-amber-300 shadow-xs'
                       : 'bg-white dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-white/10'

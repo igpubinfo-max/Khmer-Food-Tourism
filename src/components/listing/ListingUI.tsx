@@ -445,7 +445,7 @@ interface ListingPillsProps {
 }
 
 export const ListingPills: React.FC<ListingPillsProps> = ({ items, activeId, onSelect }) => (
-  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
+  <div className="kft-hscroll flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5 pb-0.5 w-full max-w-full min-w-0">
     {items.map((item) => {
       const active = item.id === activeId;
       return (
@@ -453,7 +453,7 @@ export const ListingPills: React.FC<ListingPillsProps> = ({ items, activeId, onS
           key={item.id || 'all'}
           type="button"
           onClick={() => onSelect(item.id)}
-          className={`px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-colors cursor-pointer border ${
+          className={`shrink-0 px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-colors cursor-pointer border ${
             active
               ? 'bg-emerald-800 border-emerald-800 text-white font-bold'
               : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-50 dark:hover:bg-slate-700'

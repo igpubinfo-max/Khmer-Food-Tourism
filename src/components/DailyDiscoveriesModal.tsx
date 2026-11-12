@@ -568,7 +568,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
               background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.84) 0%, rgba(15, 23, 42, 0.94) 100%)',
               boxShadow: '0 10px 28px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.14)',
             }}
-            className="rounded-[22px] p-2 sm:p-3 border border-amber-400/25"
+            className="w-full max-w-full min-w-0 overflow-hidden rounded-[22px] p-2 sm:p-3 border border-amber-400/25"
           >
             <div className="grid grid-cols-2 min-[340px]:grid-cols-4 gap-2 sm:gap-3">
               {categoryCards.map((card) => {
@@ -579,11 +579,11 @@ export const DailyDiscoveriesModal: React.FC = () => {
                     type="button"
                     onClick={() => setVipTasteProfile(card.id)}
                     aria-pressed={active}
-                    className="group relative flex flex-col items-center justify-start min-w-0 p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
+                    className="kft-cat-btn group relative flex flex-col items-center justify-start w-full max-w-full min-w-0 overflow-visible p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
                   >
                     {/* 3D Gold-Bordered Button Graphic */}
                     <div
-                      className="relative w-full aspect-[2.12/1] flex items-center justify-center transition-all duration-200 rounded-[14px]"
+                      className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px]"
                       style={{
                         filter: active
                           ? 'drop-shadow(0 0 8px rgba(250, 204, 21, 0.72)) drop-shadow(0 5px 10px rgba(15, 23, 42, 0.35))'
@@ -597,7 +597,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
                         loading="eager"
                         decoding="async"
                         draggable={false}
-                        className="w-full h-full object-contain pointer-events-none select-none"
+                        className="block w-full h-full max-w-full min-w-0 min-h-0 object-contain pointer-events-none select-none"
                       />
                     </div>
 
@@ -632,7 +632,7 @@ export const DailyDiscoveriesModal: React.FC = () => {
           </div>
 
           {/* Row 3: Clean Horizontal Province Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
+          <div className="kft-hscroll flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5 pb-0.5 w-full max-w-full min-w-0">
             <button
               type="button"
               onClick={() => handleSelectProvince('all')}

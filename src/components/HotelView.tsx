@@ -295,8 +295,13 @@ export const HotelView: React.FC = () => {
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const hotelListStartRef = useRef<HTMLDivElement | null>(null);
+  const hotelCategoryCardRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToHotelList = () => {
+  const scrollToHotelList = (keepCategoriesVisible = false) => {
+    if (keepCategoriesVisible && hotelCategoryCardRef.current) {
+      smoothScrollToElement(hotelCategoryCardRef.current, { offsetTop: 8, onlyIfOutOfView: true });
+      return;
+    }
     smoothScrollToElement(hotelListStartRef.current, { offsetTop: 10 });
   };
 
@@ -1042,13 +1047,14 @@ export const HotelView: React.FC = () => {
 
         {/* Row 2: 6 Premium 3D Gold-Framed Hotel Category Buttons (3×2 Grid) + Clear White Text Below Each Button + Compact 25-Province Selector */}
         <div
+          ref={hotelCategoryCardRef}
           style={{
             background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.84) 0%, rgba(15, 23, 42, 0.94) 100%)',
             boxShadow: '0 10px 28px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.14)',
           }}
-          className="rounded-[24px] p-2.5 sm:p-3.5 border border-amber-400/25 space-y-2.5"
+          className="w-full max-w-full min-w-0 rounded-[24px] p-2 min-[360px]:p-2.5 sm:p-3.5 border border-amber-400/25 space-y-2.5"
         >
-          <div className="grid grid-cols-3 gap-x-2 sm:gap-x-3 gap-y-2.5 sm:gap-y-3">
+          <div className="kft-cat-grid grid grid-cols-3 gap-x-1.5 min-[360px]:gap-x-2 sm:gap-x-3 gap-y-2 min-[360px]:gap-y-2.5 sm:gap-y-3 items-start">
             {primaryHotelCategoryButtons.map((cat) => {
               const active = categoryFilter === cat.id;
               const titleText = tr(language, cat.nameKh, cat.nameEn, cat.nameZh);
@@ -1059,14 +1065,14 @@ export const HotelView: React.FC = () => {
                   id={`kft-hotel-cat-${cat.id}-btn`}
                   onClick={() => {
                     setCategoryFilter(cat.id);
-                    scrollToHotelList();
+                    scrollToHotelList(true);
                   }}
                   aria-pressed={active}
-                  className="group relative flex flex-col items-center justify-start min-w-0 p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
+                  className="kft-cat-btn group relative flex flex-col items-center justify-start w-full max-w-full min-w-0 overflow-visible p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
                 >
                   {/* 3D Gold-Bordered Button Graphic */}
                   <div
-                    className="relative w-full aspect-[2.12/1] flex items-center justify-center transition-all duration-200 rounded-[14px]"
+                    className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px]"
                     style={{
                       filter: active
                         ? 'drop-shadow(0 0 8px rgba(250, 204, 21, 0.72)) drop-shadow(0 5px 10px rgba(15, 23, 42, 0.35))'
@@ -1080,7 +1086,7 @@ export const HotelView: React.FC = () => {
                       loading="eager"
                       decoding="async"
                       draggable={false}
-                      className="w-full h-full object-contain pointer-events-none select-none"
+                      className="block w-full h-full max-w-full min-w-0 min-h-0 object-contain pointer-events-none select-none"
                     />
                   </div>
 

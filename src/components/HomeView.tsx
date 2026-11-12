@@ -358,7 +358,7 @@ export const HomeView: React.FC = () => {
   );
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-[#FBF9F5] text-slate-900 min-h-full font-khmer">
+    <div className="w-full max-w-6xl min-w-0 mx-auto bg-[#FBF9F5] text-slate-900 min-h-full font-khmer overflow-x-hidden">
       {/* 1. Full-Bleed Angkor Wat Hero Header + Ask AI Bar (No Green Background) */}
       <AngkorHeroTopHeader
         mode="home"
@@ -369,7 +369,7 @@ export const HomeView: React.FC = () => {
       />
 
       {/* Rounded White/Cream Sheet Body */}
-      <div className="relative z-10 -mt-4 rounded-t-[28px] bg-[#F2F4F7] px-2.5 min-[360px]:px-3.5 sm:px-5 pt-3.5 pb-10 space-y-3.5 shadow-[0_-6px_22px_rgba(0,0,0,0.16)]">
+      <div className="relative z-10 -mt-4 w-full max-w-full min-w-0 overflow-x-hidden rounded-t-[28px] bg-[#F2F4F7] px-2.5 min-[360px]:px-3.5 sm:px-5 pt-3.5 pb-10 space-y-3.5 shadow-[0_-6px_22px_rgba(0,0,0,0.16)]">
 
       {/* 2. Global Live Search Results Dropdown/Panel */}
       {searchResults && (

@@ -970,7 +970,13 @@ export const WhatToEatModal: React.FC = () => {
 
   const scrollToResultsSection = () => {
     setTimeout(() => {
-      dishCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (!dishCardRef.current || !scrollerRef.current) return;
+      const scrollerRect = scrollerRef.current.getBoundingClientRect();
+      const cardRect = dishCardRef.current.getBoundingClientRect();
+      // Only scroll if the dish card is below the visible area of the modal scroller
+      if (cardRect.top > scrollerRect.bottom - 120) {
+        dishCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     }, 90);
   };
 
@@ -2986,7 +2992,7 @@ export const WhatToEatModal: React.FC = () => {
 
             {/* 6 Premium 3D Gold-Framed Category Buttons (Time, Category, Taste, Healthy, Beverage Pairings, New Picks) */}
             <div
-              className="rounded-[24px] p-2.5 sm:p-3.5 border border-amber-400/25 space-y-2.5"
+              className="w-full max-w-full min-w-0 overflow-hidden rounded-[24px] p-2 min-[360px]:p-2.5 sm:p-3.5 border border-amber-400/25 space-y-2.5"
               style={{
                 background:
                   'linear-gradient(180deg, rgba(15, 23, 42, 0.84) 0%, rgba(15, 23, 42, 0.94) 100%)',
@@ -2994,7 +3000,7 @@ export const WhatToEatModal: React.FC = () => {
                   '0 8px 24px rgba(2, 6, 23, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
               }}
             >
-              <div className="grid grid-cols-3 gap-x-2 gap-y-2.5 sm:gap-x-3 sm:gap-y-3 items-start">
+              <div className="kft-cat-grid grid grid-cols-3 gap-x-1.5 min-[360px]:gap-x-2 sm:gap-x-3 gap-y-2 min-[360px]:gap-y-2.5 sm:gap-y-3 items-start">
                 {[
                   {
                     id: 'time' as const,
@@ -3056,11 +3062,11 @@ export const WhatToEatModal: React.FC = () => {
                         setShowVipAiUpgradeNotice(false);
                         setOpenGroup((cur) => (cur === g.id ? null : g.id));
                       }}
-                      className="group relative w-full min-w-0 bg-transparent border-0 p-0 transition-all duration-200 active:scale-95 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
+                      className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-all duration-200 active:scale-95 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
                     >
                       {/* 3D Gold-Framed Pill Illustration */}
                       <div
-                        className={`relative w-full aspect-[2.12/1] flex items-center justify-center transition-all duration-200 rounded-[14px] ${
+                        className={`kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px] ${
                           isHighlighted ? 'scale-[1.03] z-10' : 'opacity-95 group-hover:opacity-100'
                         }`}
                       >
@@ -3074,7 +3080,7 @@ export const WhatToEatModal: React.FC = () => {
                               ? 'drop-shadow(0 0 2px #FDE047) drop-shadow(0 5px 14px rgba(245, 158, 11, 0.55)) brightness(1.05)'
                               : 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.42))',
                           }}
-                          className="w-full h-full object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-all duration-200"
+                          className="block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-all duration-150"
                         />
 
                         {g.vip && !canUseVip && (
@@ -3092,7 +3098,7 @@ export const WhatToEatModal: React.FC = () => {
                       {/* Clear White Text Title Below Button */}
                       <div className="w-full flex items-center justify-center px-0.5 pt-0.5 min-h-[20px]">
                         <span
-                          className="font-khmer font-extrabold text-center leading-[1.45] tracking-tight whitespace-nowrap max-w-full truncate"
+                          className="font-khmer font-extrabold text-center leading-[1.5] tracking-tight break-words whitespace-normal w-full"
                           style={{
                             fontSize: isLongText
                               ? 'clamp(9.6px, 2.6vw, 12px)'
@@ -3118,10 +3124,10 @@ export const WhatToEatModal: React.FC = () => {
                       type="button"
                       aria-pressed={drinkMode}
                       onClick={handleOpenDrinkPairing}
-                      className="group relative w-full min-w-0 bg-transparent border-0 p-0 transition-all duration-200 active:scale-95 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
+                      className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-all duration-200 active:scale-95 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
                     >
                       <div
-                        className={`relative w-full aspect-[2.12/1] flex items-center justify-center transition-all duration-200 rounded-[14px] ${
+                        className={`kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px] ${
                           drinkMode ? 'scale-[1.03] z-10' : 'opacity-95 group-hover:opacity-100'
                         }`}
                       >
@@ -3135,7 +3141,7 @@ export const WhatToEatModal: React.FC = () => {
                               ? 'drop-shadow(0 0 2px #FDE047) drop-shadow(0 5px 14px rgba(245, 158, 11, 0.55)) brightness(1.05)'
                               : 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.42))',
                           }}
-                          className="w-full h-full object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-all duration-200"
+                          className="block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-all duration-150"
                         />
 
                         {drinkMode && (
@@ -3148,7 +3154,7 @@ export const WhatToEatModal: React.FC = () => {
 
                       <div className="w-full flex items-center justify-center px-0.5 pt-0.5 min-h-[20px]">
                         <span
-                          className="font-khmer font-extrabold text-center leading-[1.45] tracking-tight whitespace-nowrap max-w-full truncate"
+                          className="font-khmer font-extrabold text-center leading-[1.5] tracking-tight break-words whitespace-normal w-full"
                           style={{
                             fontSize: isLongDrink
                               ? 'clamp(9.6px, 2.6vw, 12px)'
@@ -3173,9 +3179,9 @@ export const WhatToEatModal: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleShowAnother}
-                      className="group relative w-full min-w-0 bg-transparent border-0 p-0 transition-all duration-200 active:scale-95 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
+                      className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-all duration-200 active:scale-95 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
                     >
-                      <div className="relative w-full aspect-[2.12/1] flex items-center justify-center transition-all duration-200 rounded-[14px] opacity-95 group-hover:opacity-100">
+                      <div className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px] opacity-95 group-hover:opacity-100">
                         <img
                           src="/categories/ai_cat_new_picks.png"
                           alt={newPicksLabel}
@@ -3184,7 +3190,7 @@ export const WhatToEatModal: React.FC = () => {
                           style={{
                             filter: 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.42))',
                           }}
-                          className={`w-full h-full object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-all duration-200 ${
+                          className={`block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-all duration-200 ${
                             isSpinning ? 'brightness-110 scale-[0.98]' : ''
                           }`}
                         />
@@ -3192,7 +3198,7 @@ export const WhatToEatModal: React.FC = () => {
 
                       <div className="w-full flex items-center justify-center px-0.5 pt-0.5 min-h-[20px]">
                         <span
-                          className="font-khmer font-extrabold text-center leading-[1.45] tracking-tight whitespace-nowrap max-w-full truncate"
+                          className="font-khmer font-extrabold text-center leading-[1.5] tracking-tight break-words whitespace-normal w-full"
                           style={{
                             fontSize: isLongNewPicks
                               ? 'clamp(9.6px, 2.6vw, 12px)'
@@ -3422,7 +3428,7 @@ export const WhatToEatModal: React.FC = () => {
               {/* Beverage Pairings sub-filter chips when active */}
               <div ref={drinkPairingTopRef} className="scroll-mt-2">
                 {drinkMode && (
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="kft-hscroll flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
                     {([
                       {
                         id: 'all' as const,
@@ -3453,7 +3459,7 @@ export const WhatToEatModal: React.FC = () => {
                           setDrinkKind(k.id);
                           setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
                         }}
-                        className={`px-3 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 transition cursor-pointer ${
+                        className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 transition cursor-pointer ${
                           drinkKind === k.id
                             ? 'bg-[#064E3B] text-white border border-[#064E3B]'
                             : 'bg-white text-slate-700 border border-emerald-200'
@@ -3474,7 +3480,7 @@ export const WhatToEatModal: React.FC = () => {
                           setIsSpinning(false);
                         }, 180);
                       }}
-                      className="px-3 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 transition active:scale-95 cursor-pointer"
+                      className="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 transition active:scale-95 cursor-pointer"
                     >
                       <Shuffle className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
                       <span>{tr(language, 'ចាប់ឈុតថ្មីចៃដន្យ', 'Randomize Sets', '随机生成新套餐')}</span>

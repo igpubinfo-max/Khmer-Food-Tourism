@@ -64,7 +64,7 @@ const PopularShopsInner: React.FC<Props> = ({ language, restaurants, onOpen, onS
         onAction={onSeeAll}
       />
 
-      <div className="-mx-4 px-4 flex gap-2 overflow-x-auto no-scrollbar">
+      <div className="kft-hscroll -mx-2.5 px-2.5 min-[360px]:-mx-3.5 min-[360px]:px-3.5 sm:-mx-5 sm:px-5 flex gap-2 overflow-x-auto no-scrollbar py-0.5">
         {PROVINCES.map((p) => {
           const active = province === p.id;
           return (
@@ -95,7 +95,7 @@ const PopularShopsInner: React.FC<Props> = ({ language, restaurants, onOpen, onS
           )}
         </div>
       ) : (
-        <div className="-mx-4 px-4 flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-pl-4 pb-1">
+        <div className="kft-hscroll -mx-2.5 px-2.5 min-[360px]:-mx-3.5 min-[360px]:px-3.5 sm:-mx-5 sm:px-5 flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-pl-2.5 min-[360px]:scroll-pl-3.5 sm:scroll-pl-5 pb-1">
           {visible.map((rest) => {
             const loc = getLocalizedRestaurant(rest, language);
             const featured = isRestaurantPremiumActive(rest);

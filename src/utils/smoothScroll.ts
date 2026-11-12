@@ -1,16 +1,19 @@
-﻿/**
- * Smoothly scrolls a scrollable container (defaults to `#kft-main-scroll`)
- * so that `targetEl` is positioned clearly at the top of the visible area
- * (`offsetTop` pixels below the container's top edge).
+/**
+ * Smoothly scrolls a scrollable container (defaults to #kft-main-scroll)
+ * so that 	argetEl is positioned clearly at the top of the visible area
+ * (offsetTop pixels below the container's top edge).
  *
- * Works reliably across all Android WebViews, iOS Safari, and desktop browsers,
- * including environments where `prefers-reduced-motion: reduce` is enabled.
+ * When onlyIfOutOfView: true is set (used for category button grids),
+ * it never scrolls the category buttons off the top of the screen; it only
+ * scrolls if the category grid is partially above the top edge so both the
+ * 6 category buttons and the listings below remain in full view.
  */
 export interface SmoothScrollOptions {
   containerEl?: HTMLElement | null;
   containerId?: string;
   offsetTop?: number;
   delayMs?: number;
+  onlyIfOutOfView?: boolean;
 }
 
 const activeAnimations = new WeakMap<HTMLElement, number>();
@@ -54,6 +57,7 @@ export function smoothScrollToElement(
 ): void {
   const offsetTop = options?.offsetTop ?? 10;
   const delayMs = options?.delayMs ?? 35;
+  const onlyIfOutOfView = options?.onlyIfOutOfView ?? false;
 
   const runScroll = () => {
     if (!targetEl) return;
@@ -66,7 +70,15 @@ export function smoothScrollToElement(
     if (scrollContainer) {
       const containerRect = scrollContainer.getBoundingClientRect();
       const targetRect = targetEl.getBoundingClientRect();
-      const rawTop = scrollContainer.scrollTop + (targetRect.top - containerRect.top) - offsetTop;
+      const relativeTop = targetRect.top - containerRect.top;
+
+      // If onlyIfOutOfView is true and the category grid is already fully visible near the top,
+      // do not scroll it off the top edge!
+      if (onlyIfOutOfView && relativeTop >= 4 && relativeTop <= containerRect.height * 0.45) {
+        return;
+      }
+
+      const rawTop = scrollContainer.scrollTop + relativeTop - offsetTop;
       const maxScroll = Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight);
       const nextTop = Math.max(0, Math.min(Math.round(rawTop), maxScroll));
 
@@ -86,7 +98,7 @@ export function smoothScrollToElement(
       }
     } else {
       try {
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } catch {
         targetEl.scrollIntoView();
       }

@@ -45,8 +45,13 @@ export const FoodView: React.FC = () => {
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const dishListStartRef = useRef<HTMLDivElement | null>(null);
+  const dishCategoryCardRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToDishList = () => {
+  const scrollToDishList = (keepCategoriesVisible = false) => {
+    if (keepCategoriesVisible && dishCategoryCardRef.current) {
+      smoothScrollToElement(dishCategoryCardRef.current, { offsetTop: 8, onlyIfOutOfView: true });
+      return;
+    }
     smoothScrollToElement(dishListStartRef.current, { offsetTop: 10 });
   };
 
@@ -308,7 +313,7 @@ export const FoodView: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-[#1E293B] text-[#1E293B] min-h-full font-khmer pb-20">
+    <div className="w-full max-w-6xl min-w-0 mx-auto bg-[#1E293B] text-[#1E293B] min-h-full font-khmer pb-20 overflow-x-hidden">
       {/* 1. Header – Angkor Wat Hero Background */}
       <AngkorHeroTopHeader mode="food" foodCount={filteredFoods.length} />
 
@@ -435,15 +440,16 @@ export const FoodView: React.FC = () => {
 
         {/* 3. Five Premium PNG Category Buttons with Category Names Inside Each Button */}
         <div
+          ref={dishCategoryCardRef}
           style={{
             background: 'rgba(255, 255, 255, 0.96)',
             backdropFilter: 'blur(10px)',
             WebkitBackdropFilter: 'blur(10px)',
             boxShadow: '0 8px 22px rgba(15, 23, 42, 0.08)',
           }}
-          className="rounded-[24px] p-1.5 min-[360px]:p-2 sm:p-3 border border-white"
+          className="w-full max-w-full min-w-0 rounded-[24px] p-1.5 min-[360px]:p-2 sm:p-3 border border-white"
         >
-          <div className="grid grid-cols-5 gap-1 min-[360px]:gap-1.5 sm:gap-2.5 items-stretch">
+          <div className="grid grid-cols-5 gap-1 min-[360px]:gap-1.5 sm:gap-2.5 items-stretch w-full max-w-full min-w-0">
             {[
               {
                 id: 'all',
@@ -490,15 +496,15 @@ export const FoodView: React.FC = () => {
                   type="button"
                   onClick={() => {
                     setSelectedCategory(cat.id);
-                    scrollToDishList();
+                    scrollToDishList(true);
                   }}
                   aria-pressed={active}
-                  className="group relative w-full min-w-0 aspect-[560/460] bg-transparent border-0 p-0 active:scale-95 transition-transform cursor-pointer select-none flex items-center justify-center"
+                  className="group relative block w-full max-w-full min-w-0 min-h-0 aspect-[560/460] overflow-visible bg-transparent border-0 p-0 active:scale-95 transition-transform cursor-pointer select-none"
                 >
                   <img
                     src={cat.imageSrc}
                     alt={label}
-                    className={`w-full h-full object-contain bg-transparent select-none pointer-events-none transition-all duration-150 ${
+                    className={`block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none transition-all duration-150 ${
                       active
                         ? 'drop-shadow-[0_6px_14px_rgba(21,128,61,0.45)] brightness-[1.03]'
                         : 'drop-shadow-[0_4px_10px_rgba(15,23,42,0.16)] opacity-95 group-hover:opacity-100'
