@@ -6,9 +6,11 @@ import { initialTrendingFoods } from '../data/seedTrendingFoods';
 import { normalizeKhmerSearchText, expandMultilingualPlaceQuery, includesKhmerSafeToken } from './googlePlacesService';
 import { isSupabaseConfigured, pushCloudDocument, pullCloudDocument } from './supabaseService';
 
-export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v18_social_2026_verified_cache';
+export const ONLINE_DISCOVERY_CACHE_KEY = 'kft_v19_social_2026_verified_cache';
 const ONLINE_DISCOVERY_CUSTOM_URLS_KEY = 'kft_online_discovery_custom_urls_v1';
 const LEGACY_CACHE_KEYS = [
+  'kft_v18_social_2026_verified_cache',
+  'kft_v1_youtube_live_rss_cache',
   'kft_v17_social_2026_verified_cache',
   'kft_v16_social_2026_verified_cache',
   'kft_v15_social_2026_verified_cache',
@@ -44,6 +46,7 @@ export interface OnlineFoodDiscoveryItem {
   thumbnailUrl: string;
   sourceUrl: string;
   originalAccountUrl?: string;
+  channelId?: string;
   sourceName: string;
   authorHandle?: string;
   publishedOrUpdatedAt: string; // ISO or YYYY-MM-DD
@@ -76,6 +79,8 @@ interface CuratedYouTubeSeed {
   id: string;
   url: string;
   authorName: string;
+  channelId?: string;
+  channelUrl?: string;
   fallbackTitleEn: string;
   titleKh: string;
   titleZh: string;
@@ -90,22 +95,194 @@ interface CuratedYouTubeSeed {
   matchedFoodId?: string;
 }
 
-/** Active 2025–2026 Cambodian Food, Restaurant & Travel YouTube Channels Registry */
-export const ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026 = [
-  { channelId: 'UCLVncs-1iVf4f1tW5WSfQfw', name: 'Street Food TV', categorySlug: 'popular_food' as const },
-  { channelId: 'UCM_tv-ZoNPPAIT4rrhib28A', name: 'Street Food Explorer', categorySlug: 'famous_restaurant' as const },
-  { channelId: 'UCQ1k3iVCA9mkTuOJetyK_2Q', name: 'Delicious Food Show & Travel', categorySlug: 'food_travel_vlog' as const },
-  { channelId: 'UC3B29E6Fxe-bum63LxbcspQ', name: 'Walk Street And Food', categorySlug: 'famous_restaurant' as const },
-  { channelId: 'UC4mwWNbfhEM6BKrGtxH_1dg', name: 'Oun Roth Daily life', categorySlug: 'popular_food' as const },
-  { channelId: 'UCg7R70hWzrtDh3bCGlrGKhQ', name: 'Delicious food channel', categorySlug: 'popular_food' as const },
-  { channelId: 'UCIS-mtcY4mDKUd1ET6utKqA', name: 'Thavireak City Walks', categorySlug: 'tourist_attraction' as const },
-  { channelId: 'UCjJJNMTX5wJmZRI5iK3fo5Q', name: 'Sonita Khmer US', categorySlug: 'famous_restaurant' as const },
-  { channelId: 'UCARbX20_cV9YwwrAFyYvoMg', name: 'Mao Cambodia', categorySlug: 'famous_restaurant' as const },
-  { channelId: 'UCRFt5572jMudEvPVDKkHmbg', name: 'Sreyreang Life Show', categorySlug: 'tourist_attraction' as const },
-  { channelId: 'UCss0y7c69jgvFRS9Hs2EwRA', name: 'TravelwithChad', categorySlug: 'tourist_attraction' as const },
-  { channelId: 'UCMIUsbPWmPzqRLoI8J9TG_Q', name: 'Little Explore', categorySlug: 'tourist_attraction' as const },
-  { channelId: 'UCmHn9fGfK0NmI9fMzuaYnjA', name: 'Suitcase Monkey', categorySlug: 'tourist_attraction' as const },
+export interface CambodiaFoodSearchKeywordPreset {
+  id: string;
+  query: string;
+  labelKh: string;
+  labelEn: string;
+  labelZh: string;
+  categorySlug?: TrendingFoodCategorySlug;
+}
+
+/** Multilingual Khmer, English & Chinese search keywords for Cambodian Food Review discovery */
+export const CAMBODIA_FOOD_YOUTUBE_SEARCH_KEYWORDS: CambodiaFoodSearchKeywordPreset[] = [
+  { id: 'kw-mhoub-khmer', query: 'ម្ហូបខ្មែរ', labelKh: 'ម្ហូបខ្មែរ', labelEn: 'Traditional Khmer Food', labelZh: '高棉传统美食' },
+  { id: 'kw-nham-ahar-khmer', query: 'ញ៉ាំអាហារខ្មែរ', labelKh: 'ញ៉ាំអាហារខ្មែរ', labelEn: 'Eat Khmer Food', labelZh: '品尝高棉美食' },
+  { id: 'kw-der-rok-mhoub-chnhanh', query: 'ដើររកម្ហូបឆ្ងាញ់', labelKh: 'ដើររកម្ហូបឆ្ងាញ់', labelEn: 'Delicious Food Hunting', labelZh: '寻味柬埔寨美食' },
+  { id: 'kw-hang-ahar-nov-kampuchea', query: 'ហាងអាហារនៅកម្ពុជា', labelKh: 'ហាងអាហារនៅកម្ពុជា', labelEn: 'Restaurants in Cambodia', labelZh: '柬埔寨人气餐厅' },
+  { id: 'kw-cambodian-food-review', query: 'Cambodian Food Review', labelKh: 'Cambodian Food Review', labelEn: 'Cambodian Food Review', labelZh: '柬埔寨美食测评' },
+  { id: 'kw-khmer-food-review', query: 'Khmer Food Review', labelKh: 'Khmer Food Review', labelEn: 'Khmer Food Review', labelZh: '高棉美食测评' },
+  { id: 'kw-cambodia-street-food', query: 'Cambodia Street Food', labelKh: 'Cambodia Street Food', labelEn: 'Cambodia Street Food', labelZh: '柬埔寨街头美食' },
+  { id: 'kw-phnom-penh-food-review', query: 'Phnom Penh Food Review', labelKh: 'Phnom Penh Food Review', labelEn: 'Phnom Penh Food Review', labelZh: '金边美食测评' },
+  { id: 'kw-battambang-food-review', query: 'Battambang Food Review', labelKh: 'Battambang Food Review', labelEn: 'Battambang Food Review', labelZh: '马德望美食测评' },
+  { id: 'kw-siem-reap-food-review', query: 'Siem Reap Food Review', labelKh: 'Siem Reap Food Review', labelEn: 'Siem Reap Food Review', labelZh: '暹粒美食测评' },
+  { id: 'kw-khmer-restaurant-review', query: 'Khmer Restaurant Review', labelKh: 'Khmer Restaurant Review', labelEn: 'Khmer Restaurant Review', labelZh: '高棉餐厅探店' },
 ];
+
+export interface CambodiaYouTubeChannelRecord {
+  channelId: string;
+  name: string;
+  channelUrl?: string;
+  categorySlug: TrendingFoodCategorySlug;
+  discoveredAt?: string;
+}
+
+/** Active 2025–2026 Cambodian Food, Restaurant & Travel YouTube Channels Registry (85 Verified Channels) */
+export const ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026: CambodiaYouTubeChannelRecord[] = [
+  { channelId: 'UCLVncs-1iVf4f1tW5WSfQfw', name: 'Street Food TV', channelUrl: 'https://www.youtube.com/channel/UCLVncs-1iVf4f1tW5WSfQfw', categorySlug: 'popular_food' as const },
+  { channelId: 'UCM_tv-ZoNPPAIT4rrhib28A', name: 'Street Food Explorer', channelUrl: 'https://www.youtube.com/channel/UCM_tv-ZoNPPAIT4rrhib28A', categorySlug: 'famous_restaurant' as const },
+  { channelId: 'UCQ1k3iVCA9mkTuOJetyK_2Q', name: 'Delicious Food Show & Travel', channelUrl: 'https://www.youtube.com/channel/UCQ1k3iVCA9mkTuOJetyK_2Q', categorySlug: 'food_travel_vlog' as const },
+  { channelId: 'UC3B29E6Fxe-bum63LxbcspQ', name: 'Walk Street And Food', channelUrl: 'https://www.youtube.com/channel/UC3B29E6Fxe-bum63LxbcspQ', categorySlug: 'famous_restaurant' as const },
+  { channelId: 'UC4mwWNbfhEM6BKrGtxH_1dg', name: 'Oun Roth Daily life', channelUrl: 'https://www.youtube.com/channel/UC4mwWNbfhEM6BKrGtxH_1dg', categorySlug: 'popular_food' as const },
+  { channelId: 'UCg7R70hWzrtDh3bCGlrGKhQ', name: 'Delicious food channel', channelUrl: 'https://www.youtube.com/channel/UCg7R70hWzrtDh3bCGlrGKhQ', categorySlug: 'popular_food' as const },
+  { channelId: 'UCIS-mtcY4mDKUd1ET6utKqA', name: 'Thavireak City Walks', channelUrl: 'https://www.youtube.com/channel/UCIS-mtcY4mDKUd1ET6utKqA', categorySlug: 'tourist_attraction' as const },
+  { channelId: 'UCjJJNMTX5wJmZRI5iK3fo5Q', name: 'Sonita Khmer US', channelUrl: 'https://www.youtube.com/channel/UCjJJNMTX5wJmZRI5iK3fo5Q', categorySlug: 'famous_restaurant' as const },
+  { channelId: 'UCARbX20_cV9YwwrAFyYvoMg', name: 'Mao Cambodia', channelUrl: 'https://www.youtube.com/channel/UCARbX20_cV9YwwrAFyYvoMg', categorySlug: 'famous_restaurant' as const },
+  { channelId: 'UCRFt5572jMudEvPVDKkHmbg', name: 'Sreyreang Life Show', channelUrl: 'https://www.youtube.com/channel/UCRFt5572jMudEvPVDKkHmbg', categorySlug: 'tourist_attraction' as const },
+  { channelId: 'UCss0y7c69jgvFRS9Hs2EwRA', name: 'TravelwithChad', channelUrl: 'https://www.youtube.com/channel/UCss0y7c69jgvFRS9Hs2EwRA', categorySlug: 'tourist_attraction' as const },
+  { channelId: 'UCMIUsbPWmPzqRLoI8J9TG_Q', name: 'Little Explore', channelUrl: 'https://www.youtube.com/channel/UCMIUsbPWmPzqRLoI8J9TG_Q', categorySlug: 'tourist_attraction' as const },
+  { channelId: 'UCmHn9fGfK0NmI9fMzuaYnjA', name: 'Suitcase Monkey', channelUrl: 'https://www.youtube.com/channel/UCmHn9fGfK0NmI9fMzuaYnjA', categorySlug: 'tourist_attraction' as const },
+  { channelId: "UCdBYbaSyGy41ws2deqrcpqg", name: "ម៉ែកាឆែត", channelUrl: "https://www.youtube.com/@mekachet", categorySlug: "popular_food" as const },
+  { channelId: "UCFHnPGSdWxHKVOOGuwH75-Q", name: "NexWalk KH", channelUrl: "https://www.youtube.com/@NexWalkKH", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UC2AEkWunWQ5m_85k-kJwxXg", name: "BT Food Story", channelUrl: "https://www.youtube.com/@btfoodstory", categorySlug: "popular_food" as const },
+  { channelId: "UCXDwffDutwtpFYbUTts7pvw", name: "Cambodia Street Food", channelUrl: "https://www.youtube.com/@CambodiaStreetFoodDaily", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCgbV-6Db9RB_93qVaDU8z_A", name: "Sok khim Cooking", channelUrl: "https://www.youtube.com/@sokkhimcooking", categorySlug: "popular_food" as const },
+  { channelId: "UC6BGn58FaYnAn7QgcxUpf_Q", name: "Sina NSN", channelUrl: "https://www.youtube.com/@sinansn6499", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCRvd6ud_kB8dbAvd3Fmk4Mg", name: "Sreypich TV Show", channelUrl: "https://www.youtube.com/@SreypichTVShow", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCv52_difuvyCvtZrnUntWNQ", name: "5 Five Tours", channelUrl: "https://www.youtube.com/@5FiveTours", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCCftsczyo1ciJ6HGH0VUOEg", name: "Food Tour & Explore", channelUrl: "https://www.youtube.com/@food-tour-explore", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCn3QZDGrudCMuA8JU1HBzcA", name: "KhornPark88", channelUrl: "https://www.youtube.com/@KhornPark88", categorySlug: "popular_food" as const },
+  { channelId: "UC5lUlu8CHpEzpn4raQv4jiw", name: "WalkTV", channelUrl: "https://www.youtube.com/@WalkTVkh", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCWEtQZOPvtIfiI-E4uJXRag", name: "Sambathchun សម្បត្តិជន", channelUrl: "https://www.youtube.com/@sambathchun1989", categorySlug: "famous_restaurant" as const },
+  { channelId: "UClfihckKpwTAavLe4tT0NOg", name: "Tom Trips Out", channelUrl: "https://www.youtube.com/@TomTripsOut", categorySlug: "famous_restaurant" as const },
+  { channelId: "UCEeeueKMAYe3wNNhie9TKew", name: "Street Food Explorer", channelUrl: "https://www.youtube.com/@StreetFoodExplorerCambodia", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UC5KGBC_372NSiTJPMGr4wvA", name: "Pi Neak-ពីរនាក់", channelUrl: "https://www.youtube.com/@pineak_travel", categorySlug: "popular_food" as const },
+  { channelId: "UCGUyGCTcG9u_6cXRCrVpRvg", name: "Hidden Cambo", channelUrl: "https://www.youtube.com/@hiddencambo", categorySlug: "popular_food" as const },
+  { channelId: "UC36kFiOY7c2yll2LVyoVaHA", name: "Satya Dee", channelUrl: "https://www.youtube.com/@satyadee2101", categorySlug: "popular_food" as const },
+  { channelId: "UCjl-LRA_TLmAJGoehmVsZIA", name: "The Sister Loop", channelUrl: "https://www.youtube.com/@TheSisterloop", categorySlug: "popular_food" as const },
+  { channelId: "UCtkB_B_A3jnFQryNxmAKOBg", name: "Khmer rural life", channelUrl: "https://www.youtube.com/@Khmerrurallife555", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UC0RsJe65MJAIFwgW6C0djvw", name: "Sarna Cooking Show", channelUrl: "https://www.youtube.com/@SarnaCookingShow", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCAj8MxN5DsAFq5Me2wKVYbw", name: "Cambo Explorer", channelUrl: "https://www.youtube.com/@camboexplorer", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UC0nxHFae3a0UzafMJjadIrQ", name: "CUỘC SỐNG CAM", channelUrl: "https://www.youtube.com/@Cuocsongcam", categorySlug: "popular_food" as const },
+  { channelId: "UCFUiKVah5VJJG1ESDjAtJ3g", name: "Life in Cambodia", channelUrl: "https://www.youtube.com/@NearyRothTV", categorySlug: "popular_food" as const },
+  { channelId: "UCs22MyD8qdgDF-kJyv6Zofw", name: "Mark In Asia", channelUrl: "https://www.youtube.com/@Markinasia-e4f", categorySlug: "famous_restaurant" as const },
+  { channelId: "UC9OcuVtqIsCe8_7AjjPtoZg", name: "Angela McColl", channelUrl: "https://www.youtube.com/@angemccoll", categorySlug: "popular_food" as const },
+  { channelId: "UCzYZk4bZ07yJeK7Zd_z37Cw", name: "Food Network UK", channelUrl: "https://www.youtube.com/@FoodNetworkUKTV", categorySlug: "famous_restaurant" as const },
+  { channelId: "UC3TIRH4PPSDde66Hg5wGh-w", name: "Condé Nast Traveler", channelUrl: "https://www.youtube.com/@Traveler", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCo0BHDWZ3gRCuSbUH85G-_A", name: "T&L TRAVEL", channelUrl: "https://www.youtube.com/@tandltravel2024", categorySlug: "famous_restaurant" as const },
+  { channelId: "UCZJtFOu1wmxq8wadfHSlYPQ", name: "Street food tour", channelUrl: "https://www.youtube.com/@Streetfoodtour-44", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCmfOXpsa0q0uHxaaDkeeFdw", name: "WisGO", channelUrl: "https://www.youtube.com/@Wisgokh", categorySlug: "popular_food" as const },
+  { channelId: "UCo42Xmxl2U99UtfCiWQxgcg", name: "Jenny Daily Life", channelUrl: "https://www.youtube.com/@jennydailylife", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCB8yjnAK_IxD-fMjxH_QpDg", name: "Chay Sivlang", channelUrl: "https://www.youtube.com/@Chaysivlang", categorySlug: "popular_food" as const },
+  { channelId: "UC1_PeD6rZaUoNrN2AtyTe2Q", name: "Priscilla Kim Ong", channelUrl: "https://www.youtube.com/@priscillakimong", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCcHW9-v8McRcO-Rm-zBv2ZQ", name: "Mooch Travels", channelUrl: "https://www.youtube.com/@MoochOzdemirTravel", categorySlug: "popular_food" as const },
+  { channelId: "UCegDP5GpIrMfSXZlePFtitA", name: "Rockstar Eater", channelUrl: "https://www.youtube.com/@RockstarEater", categorySlug: "popular_food" as const },
+  { channelId: "UC4KPmxdpKFAzogb6beSfQWA", name: "Cooking and Travel with Bong General", channelUrl: "https://www.youtube.com/@CookingwithBongGeneral", categorySlug: "popular_food" as const },
+  { channelId: "UCKQa5a6kxcziSAaRwHJxoMQ", name: "Visit and cook with me", channelUrl: "https://www.youtube.com/@visitandcookwithme", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCAuKl-usJ7p5c-Nh8L73odw", name: "Cambodia Vibes", channelUrl: "https://www.youtube.com/@CambodiaVibes-SR", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UC5NofLGyaa9Q6PHsxSgXM0Q", name: "Lloyd & Mandy", channelUrl: "https://www.youtube.com/@LloydandMandy", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCLUapBXshwIyBCDMWSO3srQ", name: "Kitchen Story", channelUrl: "https://www.youtube.com/@kitchenstoryK", categorySlug: "popular_food" as const },
+  { channelId: "UCcTnoBPJiZyGkagNaPJcNFA", name: "EVERYTHING", channelUrl: "https://www.youtube.com/@Everything-fd68", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UC97aAzNbBb30T5sEIymxDLg", name: "For Riel", channelUrl: "https://www.youtube.com/@ForRiel", categorySlug: "famous_restaurant" as const },
+  { channelId: "UCPflXomEwyYJFcRX1jJxf-A", name: "Kheom Leakhena", channelUrl: "https://www.youtube.com/@KheomLeakhena", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCplb1Ru5jWb_BM3Qe_OoQkw", name: "Pich Pisey", channelUrl: "https://www.youtube.com/@pichpisey4129", categorySlug: "popular_food" as const },
+  { channelId: "UCodC-082nikp-Cq7tlJXtpg", name: "Mey Natural Food", channelUrl: "https://www.youtube.com/@ahmeyfood", categorySlug: "popular_food" as const },
+  { channelId: "UC40tCi6qlNr-WS37JQSrSUQ", name: "Travelwithchris", channelUrl: "https://www.youtube.com/@Travelwithchris", categorySlug: "popular_food" as const },
+  { channelId: "UCr4JTejyDoyCeBLnwJ6bjOw", name: "Bec & Matt Adventures", channelUrl: "https://www.youtube.com/@BecMattAdventures", categorySlug: "famous_restaurant" as const },
+  { channelId: "UCJX9p4c81NoZ4_TFME-yY6g", name: "The Chui Show", channelUrl: "https://www.youtube.com/@TheChuiShow", categorySlug: "popular_food" as const },
+  { channelId: "UCp2dhjQXkhY1O40lj15JQzw", name: "Luke Martin", channelUrl: "https://www.youtube.com/@LukeMartin", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCT9Oxgi6RHlf1bv939Xtk-g", name: "MrrDaro KH", channelUrl: "https://www.youtube.com/@mrrdarokh6247", categorySlug: "popular_food" as const },
+  { channelId: "UCwWwEraY_OkILE3W2-7FjIg", name: "Pure Detour", channelUrl: "https://www.youtube.com/@PureDetour", categorySlug: "popular_food" as const },
+  { channelId: "UC7VkwSil-1XBg4vtxkhSLGA", name: "Saoran Cooking", channelUrl: "https://www.youtube.com/@saorancooking", categorySlug: "popular_food" as const },
+  { channelId: "UCVHTf72swGXqKQCG9pOyDIw", name: "Francly Speaking", channelUrl: "https://www.youtube.com/@franclyspeaking", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCcAd5Np7fO8SeejB1FVKcYw", name: "Best Ever Food Review Show", channelUrl: "https://www.youtube.com/@BestEverFoodReviewShow", categorySlug: "popular_food" as const },
+  { channelId: "UCxhoQEdo5ixoKIo1IFXiubg", name: "Mei Queen Food", channelUrl: "https://www.youtube.com/@meiqueen1511", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCA8wZRSt3JfLUKa0iCKYjMw", name: "Jax out and about", channelUrl: "https://www.youtube.com/@Jax_outandabout", categorySlug: "famous_restaurant" as const },
+  { channelId: "UCx7XcErrBfBnB7Tz58F4F2Q", name: "Chhom Sreypach", channelUrl: "https://www.youtube.com/@chhomsreypachkh", categorySlug: "popular_food" as const },
+  { channelId: "UCAGSZxHyropnxsYC_s1aaxg", name: "Apricot Wanderers", channelUrl: "https://www.youtube.com/@ApricotWanderers", categorySlug: "famous_restaurant" as const },
+  { channelId: "UCmpsHcB0sbP3fnVCV6oEFpg", name: "Muntha Music Studio", channelUrl: "https://www.youtube.com/@MunthaMusic", categorySlug: "popular_food" as const },
+  { channelId: "UCOAKLGCZQE7Mi_0V-gkM_EA", name: "Derthort-ដេីរថត", channelUrl: "https://www.youtube.com/@Derthort", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCVih8bFctnamRMT18RqOolw", name: "yumbitescambodia", channelUrl: "https://www.youtube.com/@YumBitesCambodia", categorySlug: "famous_restaurant" as const },
+  { channelId: "UCa6vVyA5RxrNG7Mu-6wEryA", name: "Nore Films", channelUrl: "https://www.youtube.com/@norefilms", categorySlug: "popular_food" as const },
+  { channelId: "UCDt2OX9enDjBV1ZA-L21zZw", name: "Second Life Travels", channelUrl: "https://www.youtube.com/@SecondLifeTravels1", categorySlug: "famous_restaurant" as const },
+  { channelId: "UC7tuP-qq6HHAi_Q3vHdXZ8g", name: "Yekny Rorn", channelUrl: "https://www.youtube.com/@yeknyrorn", categorySlug: "famous_restaurant" as const },
+  { channelId: "UCeiWUs4niQ-Gg772BX_E50w", name: "Pich Pisey Fan - ពេជ្រ ពិសី​", channelUrl: "https://www.youtube.com/@pichpisey-8218", categorySlug: "food_travel_vlog" as const },
+  { channelId: "UCBQ_u6RFTlHbX8IVkpVMkig", name: "Eating Food", channelUrl: "https://www.youtube.com/@eatingfood3533", categorySlug: "famous_restaurant" as const },
+  { channelId: "UCVGAjXzfvGqrWReUo1kD8oA", name: "STREET FOOD REVIEW", channelUrl: "https://www.youtube.com/@StreetFoodReviews", categorySlug: "popular_food" as const },
+  { channelId: "UC3GHwJ665OxdjdHr-26SPWA", name: "សារអាហារ​ - Expressions Hub", channelUrl: "https://www.youtube.com/@expressionshub3501", categorySlug: "famous_restaurant" as const },
+  { channelId: "UCAA7SWZIB2TmoABwhh-he4g", name: "Facetaste", channelUrl: "https://www.youtube.com/@facetaste8451", categorySlug: "famous_restaurant" as const },
+  { channelId: "UCRgzg_KZ0hGQ_ZhlSF8FKaQ", name: "Pie Noon", channelUrl: "https://www.youtube.com/@LaVieBoem", categorySlug: "popular_food" as const },
+  { channelId: "UCy8nwhJjDlA6yL72QloGPrw", name: "All Food", channelUrl: "https://www.youtube.com/@allfood7198", categorySlug: "popular_food" as const },
+  { channelId: "UCWGYTwmFL4B7l1MEFXRhUDQ", name: "ឡេង រតន:", channelUrl: "https://www.youtube.com/@%E1%9E%A1%E1%9F%81%E1%9E%84%E1%9E%9A%E1%9E%8F%E1%9E%93", categorySlug: "popular_food" as const },
+];
+
+const DISCOVERED_YOUTUBE_CHANNELS_STORAGE_KEY = 'kft_discovered_youtube_food_channels_v1';
+
+/** Dynamically register a newly discovered Cambodian food-review YouTube channel without manual registration */
+export function registerDiscoveredYouTubeChannel(record: {
+  channelId: string;
+  name: string;
+  channelUrl?: string;
+  categorySlug?: TrendingFoodCategorySlug;
+}): void {
+  const cid = (record.channelId || '').trim();
+  const cleanName = (record.name || '').trim();
+  if (!cid || !/^UC[A-Za-z0-9_-]{20,28}$/.test(cid) || !cleanName) return;
+  if (ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026.some((c) => c.channelId === cid)) return;
+
+  try {
+    if (typeof localStorage === 'undefined') return;
+    const raw = localStorage.getItem(DISCOVERED_YOUTUBE_CHANNELS_STORAGE_KEY);
+    const list: CambodiaYouTubeChannelRecord[] = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(list)) return;
+    if (list.some((c) => c.channelId === cid)) return;
+
+    list.unshift({
+      channelId: cid,
+      name: cleanName,
+      channelUrl: record.channelUrl || `https://www.youtube.com/channel/${cid}`,
+      categorySlug: record.categorySlug || 'popular_food',
+      discoveredAt: new Date().toISOString().slice(0, 10),
+    });
+
+    const trimmed = list.slice(0, 120);
+    localStorage.setItem(DISCOVERED_YOUTUBE_CHANNELS_STORAGE_KEY, JSON.stringify(trimmed));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+/** Combine built-in verified channels with dynamically discovered Cambodian food reviewer channels */
+export function getExpandedYouTubeChannelDatabase(): CambodiaYouTubeChannelRecord[] {
+  const byId = new Map<string, CambodiaYouTubeChannelRecord>();
+  for (const ch of ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026) {
+    byId.set(ch.channelId, ch);
+  }
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const raw = localStorage.getItem(DISCOVERED_YOUTUBE_CHANNELS_STORAGE_KEY);
+      if (raw) {
+        const list = JSON.parse(raw);
+        if (Array.isArray(list)) {
+          for (const item of list) {
+            if (item?.channelId && /^UC[A-Za-z0-9_-]{20,28}$/.test(item.channelId) && !byId.has(item.channelId)) {
+              byId.set(item.channelId, {
+                channelId: item.channelId,
+                name: item.name || 'Cambodia Food Creator',
+                channelUrl: item.channelUrl || `https://www.youtube.com/channel/${item.channelId}`,
+                categorySlug: item.categorySlug || 'popular_food',
+                discoveredAt: item.discoveredAt,
+              });
+            }
+          }
+        }
+      }
+    }
+  } catch {
+    // ignore storage errors
+  }
+  return [...byId.values()];
+}
 
 /** Known dead/unavailable IDs from older app versions to purge immediately */
 const KNOWN_UNAVAILABLE_VIDEO_IDS = new Set<string>([
@@ -922,6 +1099,2099 @@ const CURATED_YOUTUBE_VIDEOS: CuratedYouTubeSeed[] = [
     publishedDate: '2026-05-25',
     fallbackThumb: 'https://i.ytimg.com/vi/P9bGrG-95cw/hqdefault.jpg',
   },
+  // ============================================================================
+  // 5. EXPANDED CAMBODIAN FOOD REVIEWERS & MULTI-KEYWORD VERIFIED VIDEOS (110+)
+  // ============================================================================
+  {
+    id: "yt-2026-kh-review-1-eFbK989HEks",
+    url: "https://www.youtube.com/watch?v=eFbK989HEks",
+    authorName: "ម៉ែកាឆែត",
+    channelId: "UCdBYbaSyGy41ws2deqrcpqg",
+    channelUrl: "https://www.youtube.com/@mekachet",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Svay Rieng by Mae Kachet Khmer Cooking (#1)",
+    titleKh: "របៀបស្លម្ហូបអ្នកស្វាយរៀង បុកគ្រឿងស្លឹកក្រៃជាមួយកំពិសនិងខ្ចៅ",
+    titleZh: "柴桢省地道高棉街头美食与传统名菜测评 (Mae Kachet Khmer Cooking) — Authentic Cambodian Food Review & Local Street Food in Svay Rieng by Mae Kachet Khmer Cooking (#1)",
+    descriptionKh: "ជម្រាបសួរបងប្អូនទាំងអស់គ្នា! ថ្ងៃនេះ ម៉ែកាឆែត មកសាកល្បងធ្វើមុខម្ហូបបែបបងប្អូនខាងខេត្តស្វាយរៀងម្តង។ ដោយសារឃើញបងស្រីខាងស្វាយរៀងគាត់ស្លទំនងពេក ទើបនឹកឃ្លានចង់សាកភ្លក្សរសជាតិ។\n\nម្ហូបមួយមុខនេះ គឺយើងបុកស្លឹ���ក្រៃធ្វើគ្រឿងដោយខ្លួនឯង បុកអង្ករឱ្យខាប់ទឹកសម្ល និងដាក់ផ្សំ (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល ម៉ែកាឆែត នៅខេត្តស្វាយរៀង)។",
+    descriptionEn: "Verified in Svay Rieng, Cambodia by YouTuber : exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Mae Kachet Khmer Cooking 拍摄的柴桢省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "ខេត្តស្វាយរៀង",
+    provinceEn: "Svay Rieng",
+    publishedDate: "2026-11-12",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-14",
+  },
+  {
+    id: "yt-2026-kh-review-2-do9L0Sb1JO0",
+    url: "https://www.youtube.com/watch?v=do9L0Sb1JO0",
+    authorName: "NexWalk KH",
+    channelId: "UCFHnPGSdWxHKVOOGuwH75-Q",
+    channelUrl: "https://www.youtube.com/@NexWalkKH",
+    fallbackTitleEn: "Phnom Penh Night Market Street Food: Chaktomuk Tour Like You've Never Seen!",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (NexWalk KH) — Phnom Penh Night Market Street Food: Chaktomuk Tour Like You've Never Seen!",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (NexWalk KH) — Phnom Penh Night Market Street Food: Chaktomuk Tour Like You've Never Seen!",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber NexWalk KH (Cambodia night market food tour)។",
+    descriptionEn: "Hello Everyone Today i will to show Wonderful Cambodian Street Food 2026 - Evening Walking Tour in Chaktomuk Night Market, Phnom Penh. Thank you for watching. #walking #streetfood #cambodia — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by NexWalk KH.",
+    descriptionZh: "由 YouTube 创作者 NexWalk KH 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-11-12",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-3-04-EBien5Yw",
+    url: "https://www.youtube.com/watch?v=04-EBien5Yw",
+    authorName: "BT Food Story",
+    channelId: "UC2AEkWunWQ5m_85k-kJwxXg",
+    channelUrl: "https://www.youtube.com/@btfoodstory",
+    fallbackTitleEn: "Cambodia’s Famous Wedding Porridge! 🍲 Only $1 25 at Sorla Market, Phnom Penh!",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (BT Food Story) — Cambodia’s Famous Wedding Porridge! 🍲 Only $1 25 at Sorla Market, Phnom Penh!",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (BT Food Story) — Cambodia’s Famous Wedding Porridge! 🍲 Only $1 25 at Sorla Market, Phnom Penh!",
+    descriptionKh: "Have you ever tried BorBor Tokka (បបរតុការ), also known as Cambodian Wedding Porridge? 🇰🇭\n\nThis traditional Cambodian porridge is commonly served during wedding breakfast receptions, which is why people call it Wedding Porridge!\n\nAt this local street food st (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល BT Food Story នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified Cambodian Food Review in Phnom Penh, Cambodia by YouTuber BT Food Story: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 BT Food Story 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-11-12",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-11",
+  },
+  {
+    id: "yt-2026-kh-review-4-uX7xVffoN6I",
+    url: "https://www.youtube.com/watch?v=uX7xVffoN6I",
+    authorName: "Cambodia Street Food",
+    channelId: "UCXDwffDutwtpFYbUTts7pvw",
+    channelUrl: "https://www.youtube.com/@CambodiaStreetFoodDaily",
+    fallbackTitleEn: "Amazing Cambodian Street Food! 🇰🇭 Crispy Fried Snacks, Sweet Sesame Donuts & Delicious Local Pastr",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Cambodia Street Food) — Amazing Cambodian Street Food! 🇰🇭 Crispy Fried Snacks, Sweet Sesame Donuts & Delicious Local Pastr",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Cambodia Street Food) — Amazing Cambodian Street Food! 🇰🇭 Crispy Fried Snacks, Sweet Sesame Donuts & Delicious Local Pastr",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Cambodia Street Food (Cambodia Street Food)។",
+    descriptionEn: "🌶️ Welcome to Cambodia Street Food! 🇰🇭 Discover the amazing flavors, delicious dishes, and vibrant food culture of Cambodia! 🍜🍢 Join us as we explore the exciting world of Cambodian street food, from sizzling grilled meats and fresh seafood to tradition — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Cambodia Street Food.",
+    descriptionZh: "由 YouTube 创作者 Cambodia Street Food 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-11-12",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-6",
+  },
+  {
+    id: "yt-2026-kh-review-5-iObzHFH8iEA",
+    url: "https://www.youtube.com/watch?v=iObzHFH8iEA",
+    authorName: "Sok khim Cooking",
+    channelId: "UCgbV-6Db9RB_93qVaDU8z_A",
+    channelUrl: "https://www.youtube.com/@sokkhimcooking",
+    fallbackTitleEn: "Delicious Steamed Fish Roe – Traditional Cambodian Country-Style Cooking",
+    titleKh: "មុខម្ហូបចំហុយពងត្រីDelicious Steamed Fish Roe – Traditional Cambodian Country-Style Cooking",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Sok khim Cooking) — Delicious Steamed Fish Roe – Traditional Cambodian Country-Style Cooking",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Sok khim Cooking (ញ៉ាំអាហារខ្មែរ)។",
+    descriptionEn: "Today, we are preparing a delicious traditional Cambodian dish: Steamed Fish Roe! This homemade country-style recipe is full of wonderful flavors, featuring beautifully steamed fish roe with a rich, savory taste and an appetizing golden color. Served with a v — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Sok khim Cooking.",
+    descriptionZh: "由 YouTube 创作者 Sok khim Cooking 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-11-12",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-6-cHzYMJ7sYSU",
+    url: "https://www.youtube.com/watch?v=cHzYMJ7sYSU",
+    authorName: "Sina NSN",
+    channelId: "UC6BGn58FaYnAn7QgcxUpf_Q",
+    channelUrl: "https://www.youtube.com/@sinansn6499",
+    fallbackTitleEn: "Cambodian Street Food 2026 - Evening Walking Tour @ Orussey Market Food, Phnom Penh 4K",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Sina NSN) — Cambodian Street Food 2026 - Evening Walking Tour @ Orussey Market Food, Phnom Penh 4K",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Sina NSN) — Cambodian Street Food 2026 - Evening Walking Tour @ Orussey Market Food, Phnom Penh 4K",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Sina NSN (Cambodia Street Food)។",
+    descriptionEn: "#streetfood #SinaNSN #StreetFoodTour Please enjoy this video. Thank you for watching. — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Sina NSN.",
+    descriptionZh: "由 YouTube 创作者 Sina NSN 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-11-11",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-7-L2w3tA87Drs",
+    url: "https://www.youtube.com/watch?v=L2w3tA87Drs",
+    authorName: "Sreypich TV Show",
+    channelId: "UCRvd6ud_kB8dbAvd3Fmk4Mg",
+    channelUrl: "https://www.youtube.com/@SreypichTVShow",
+    fallbackTitleEn: "BEST Famous Street Food in Cambodia 2026 – Riverside Night Market Experience in Phnom Penh City",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Sreypich TV Show) — BEST Famous Street Food in Cambodia 2026 – Riverside Night Market Experience in Phnom Penh City",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Sreypich TV Show) — BEST Famous Street Food in Cambodia 2026 – Riverside Night Market Experience in Phnom Penh City",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Sreypich TV Show (Cambodia Street Food)។",
+    descriptionEn: "#SreypichTVShow #CambodianStreetFood #StreetFood #PhnomPenhFoodTour #travel #cambodiawalktour #phnompenh #NightMarket #TravelCambodia Hello! Everyone! Welcome back to my channel Sreypich TV Show. Today I will show you about BEST Famous Street Food in Cambodia — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Sreypich TV Show.",
+    descriptionZh: "由 YouTube 创作者 Sreypich TV Show 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-11-11",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-8-GtIeQ3a0j-E",
+    url: "https://www.youtube.com/watch?v=GtIeQ3a0j-E",
+    authorName: "5 Five Tours",
+    channelId: "UCv52_difuvyCvtZrnUntWNQ",
+    channelUrl: "https://www.youtube.com/@5FiveTours",
+    fallbackTitleEn: "Best Local Street Food in Phnom Penh, Cambodia 🇰🇭 | Chaktomuk Night Food Market Walk Tour",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (5 Five Tours) — Best Local Street Food in Phnom Penh, Cambodia 🇰🇭 | Chaktomuk Night Food Market Walk Tour",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (5 Five Tours) — Best Local Street Food in Phnom Penh, Cambodia 🇰🇭 | Chaktomuk Night Food Market Walk Tour",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber 5 Five Tours (Cambodia Street Food)។",
+    descriptionEn: "Discover the local food scene, experience everyday life in Phnom Penh, and enjoy the sights and sounds of Cambodia's street food culture. If you enjoy Cambodian street food, local markets, and walking tours, don't forget to LIKE, COMMENT, and SUBSCRIBE for mor — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by 5 Five Tours.",
+    descriptionZh: "由 YouTube 创作者 5 Five Tours 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-11-11",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-9-B1DAfEAiWTU",
+    url: "https://www.youtube.com/watch?v=B1DAfEAiWTU",
+    authorName: "Food Tour & Explore",
+    channelId: "UCCftsczyo1ciJ6HGH0VUOEg",
+    channelUrl: "https://www.youtube.com/@food-tour-explore",
+    fallbackTitleEn: "Best CAMBODIAN Street Food 2026 - Ultimate Walking Tour At Toul Tom Poung Market, Phnom Penh",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Food Tour & Explore) — Best CAMBODIAN Street Food 2026​ - Ultimate Walking Tour At Toul Tom Poung Market, Phnom Penh",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Food Tour & Explore) — Best CAMBODIAN Street Food 2026 - Ultimate Walking Tour At Toul Tom Poung Market, Phnom Penh",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Food Tour & Explore (Cambodia Street Food)។",
+    descriptionEn: "Discover the hidden gems of Cambodian street food in 2026 on this immersive evening walking tour around Toul Tom Poung (Russian Market), Phnom Penh 🇰🇭. From sizzling local grills and authentic Khmer noodles to rare street snacks you won’t find in tourist gui — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Food Tour & Explore.",
+    descriptionZh: "由 YouTube 创作者 Food Tour & Explore 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-11-11",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-5",
+  },
+  {
+    id: "yt-2026-kh-review-10-1UhWG95nuLA",
+    url: "https://www.youtube.com/watch?v=1UhWG95nuLA",
+    authorName: "Sreypich TV Show",
+    channelId: "UCRvd6ud_kB8dbAvd3Fmk4Mg",
+    channelUrl: "https://www.youtube.com/@SreypichTVShow",
+    fallbackTitleEn: "FANTASTIC Cambodian Street Food 2026 - Evening Walking Tour in Chaktomuk Night Market & Udong Market",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តកំពង់ស្ពឺ (Sreypich TV Show) — FANTASTIC Cambodian Street Food 2026 - Evening Walking Tour in Chaktomuk Night Market & Udong Market",
+    titleZh: "磅士卑省柬埔寨夜市寻味与美食旅行 Vlog (Sreypich TV Show) — FANTASTIC Cambodian Street Food 2026 - Evening Walking Tour in Chaktomuk Night Market & Udong Market",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តកំពង់ស្ពឺ ពី YouTuber Sreypich TV Show (Cambodia night market food tour)។",
+    descriptionEn: "#SreypichTVShow #CambodianStreetFood #StreetFood #PhnomPenhFoodTour #travel #cambodiawalktour #phnompenh #NightMarket #TravelCambodia Hello! Everyone! Welcome back to my channel Sreypich TV Show. Today I will show you about FANTASTIC Cambodian Street Food 202 — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Kampong Speu by Sreypich TV Show.",
+    descriptionZh: "由 YouTube 创作者 Sreypich TV Show 拍摄的磅士卑省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "ខេត្តកំពង់ស្ពឺ",
+    provinceEn: "Kampong Speu",
+    publishedDate: "2026-11-11",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-11-SqcJMbLU9N8",
+    url: "https://www.youtube.com/watch?v=SqcJMbLU9N8",
+    authorName: "NexWalk KH",
+    channelId: "UCFHnPGSdWxHKVOOGuwH75-Q",
+    channelUrl: "https://www.youtube.com/@NexWalkKH",
+    fallbackTitleEn: "Amazing Exotic Foods & Local Market Tour! Cambodian Night Market Street Food 🇰🇭",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (NexWalk KH) — Amazing Exotic Foods & Local Market Tour! Cambodian Night Market Street Food 🇰🇭",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (NexWalk KH) — Amazing Exotic Foods & Local Market Tour! Cambodian Night Market Street Food 🇰🇭",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber NexWalk KH (Cambodia night market food tour)។",
+    descriptionEn: "Cambodian street food scene at the bustling Chaktomuk Night Market in Phnom Penh. Join our evening walk. We wander through the lively market aisles to see local vendors selling a wide variety of snacks, including unique fried insects and fresh grilled special — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by NexWalk KH.",
+    descriptionZh: "由 YouTube 创作者 NexWalk KH 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-11-11",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-6",
+  },
+  {
+    id: "yt-2026-kh-review-12-GumJSaOvYEk",
+    url: "https://www.youtube.com/watch?v=GumJSaOvYEk",
+    authorName: "KhornPark88",
+    channelId: "UCn3QZDGrudCMuA8JU1HBzcA",
+    channelUrl: "https://www.youtube.com/@KhornPark88",
+    fallbackTitleEn: "$2 Beef Noodles, $3.25 Sandwich & More! Cambodia Street Food",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (KhornPark88) — $2 Beef Noodles, $3.25 Sandwich & More! Cambodia Street Food",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (KhornPark88) — $2 Beef Noodles, $3.25 Sandwich & More! Cambodia Street Food",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber KhornPark88 (Cambodia Street Food)។",
+    descriptionEn: "Amazing Cambodian street food! Today I'm enjoying a delicious bowl of $2 beef noodle soup, a $3.25 sandwich, and more tasty local food in Cambodia. Cambodia is full of affordable and delicious street food, from steaming bowls of noodle soup to freshly prepare — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by KhornPark88.",
+    descriptionZh: "由 YouTube 创作者 KhornPark88 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-11-11",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-5",
+  },
+  {
+    id: "yt-2026-kh-review-13-7--IZqbYn6E",
+    url: "https://www.youtube.com/watch?v=7--IZqbYn6E",
+    authorName: "WalkTV",
+    channelId: "UC5lUlu8CHpEzpn4raQv4jiw",
+    channelUrl: "https://www.youtube.com/@WalkTVkh",
+    fallbackTitleEn: "Walking Around Phnom Penh’s Best Night Market Street Food 🍢 Chaktomuk Riverside",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (WalkTV) — Walking Around Phnom Penh’s Best Night Market Street Food 🍢 Chaktomuk Riverside",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (WalkTV) — Walking Around Phnom Penh’s Best Night Market Street Food 🍢 Chaktomuk Riverside",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber WalkTV (Cambodia night market food tour)។",
+    descriptionEn: "The foreground is filled with large, steaming metal pans and bowls loaded with Cambodian delicacies, including a rich stew featuring boiled eggs, quail eggs, corn on the cob, and chili peppers. Large jars containing colorful pickled vegetables, sauces, and loc — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by WalkTV.",
+    descriptionZh: "由 YouTube 创作者 WalkTV 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-11-11",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-14-XsWoCe_8KGw",
+    url: "https://www.youtube.com/watch?v=XsWoCe_8KGw",
+    authorName: "Sreypich TV Show",
+    channelId: "UCRvd6ud_kB8dbAvd3Fmk4Mg",
+    channelUrl: "https://www.youtube.com/@SreypichTVShow",
+    fallbackTitleEn: "Amazing Cambodian Street Food - Evening Walking Tour in Chaktomuk Night Market & Kien Svay Resort",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តកណ្តាល (Sreypich TV Show) — Amazing Cambodian Street Food - Evening Walking Tour in Chaktomuk Night Market & Kien Svay Resort",
+    titleZh: "干拉省柬埔寨夜市寻味与美食旅行 Vlog (Sreypich TV Show) — Amazing Cambodian Street Food - Evening Walking Tour in Chaktomuk Night Market & Kien Svay Resort",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តកណ្តាល ពី YouTuber Sreypich TV Show (Cambodia night market food tour)។",
+    descriptionEn: "#SreypichTVShow #CambodianStreetFood #StreetFood #PhnomPenhFoodTour #travel #cambodiawalktour #phnompenh #NightMarket #TravelCambodia Hello! Everyone! Welcome back to my channel Sreypich TV Show. Today I will show you about Thank you so much for watching my — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Kandal by Sreypich TV Show.",
+    descriptionZh: "由 YouTube 创作者 Sreypich TV Show 拍摄的干拉省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "ខេត្តកណ្តាល",
+    provinceEn: "Kandal",
+    publishedDate: "2026-11-10",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-15-dH9So6ZuxFU",
+    url: "https://www.youtube.com/watch?v=dH9So6ZuxFU",
+    authorName: "Sambathchun សម្បត្តិជន",
+    channelId: "UCWEtQZOPvtIfiI-E4uJXRag",
+    channelUrl: "https://www.youtube.com/@sambathchun1989",
+    fallbackTitleEn: "#3969 | Udong Street Food",
+    titleKh: "#3969 លោកពូមកពីអាមេរិក ដើរភ្លក់ម្ហូបខ្មែរនៅផ្សារម្ហូបឧដុង្គ | Udong Street Food",
+    titleZh: "磅士卑省高棉人气餐厅、自助餐与咖啡店探店测评 (Sambathchun) — #3969 | Udong Street Food",
+    descriptionKh: "ថ្ងៃនេះ ជាថ្ងៃពិសេសមួយ ខ្ញុំបាទ សម្បត្តិជន បានជូនលោកពូ ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Sambathchun សម្បត្តិជន នៅខេត្តកំពង់ស្ពឺ)។",
+    descriptionEn: "Verified in Kampong Speu, Cambodia by YouTuber Sambathchun : exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Sambathchun 拍摄的磅士卑省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "ខេត្តកំពង់ស្ពឺ",
+    provinceEn: "Kampong Speu",
+    publishedDate: "2026-11-08",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-16-RjFHyO6Sk_w",
+    url: "https://www.youtube.com/watch?v=RjFHyO6Sk_w",
+    authorName: "Mao",
+    channelId: "UCARbX20_cV9YwwrAFyYvoMg",
+    channelUrl: "https://www.youtube.com/@Mao-od8gp",
+    fallbackTitleEn: "2 / Aeon Mall2 Food Court in Phnom Penh City,Cambodia",
+    titleKh: "ផ្សារទំនើបអ៊ីអន2 ភ្នំពេញ/ Aeon Mall2 Food Court in Phnom Penh City,Cambodia",
+    titleZh: "金边高棉人气餐厅、自助餐与咖啡店探店测评 (Mao) — 2 / Aeon Mall2 Food Court in Phnom Penh City,Cambodia",
+    descriptionKh: "... អស់គ្នាឥឡូវនេះខ្ញុំកំពុងតែធ្វើដំណើរតាមផ្លូវទៅផ្សារទំនើបអ. (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Mao នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Mao: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Mao 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-11-08",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-17-okBINVRyz6M",
+    url: "https://www.youtube.com/watch?v=okBINVRyz6M",
+    authorName: "TravelwithChad",
+    channelId: "UCss0y7c69jgvFRS9Hs2EwRA",
+    channelUrl: "https://www.youtube.com/@TravelwithChad",
+    fallbackTitleEn: "A Side Of Cambodia Most Visitors Miss | Battambang",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តបាត់ដំបង (TravelwithChad) — A Side Of Cambodia Most Visitors Miss | Battambang",
+    titleZh: "马德望省地道高棉街头美食与传统名菜测评 (TravelwithChad) — A Side Of Cambodia Most Visitors Miss | Battambang",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តបាត់ដំបង ពី YouTuber TravelwithChad (Battambang Food Review)។",
+    descriptionEn: "I stepped out from beneath the giant Buddha at Ek Phnom Temple in Battambang, Cambodia and paused to say a quick prayer of thanks for 14 years drug free. It was a meaningful start to a day of exploring. Come along as I visit monasteries and historic temples, — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Battambang by TravelwithChad.",
+    descriptionZh: "由 YouTube 创作者 TravelwithChad 拍摄的马德望省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "ខេត្តបាត់ដំបង",
+    provinceEn: "Battambang",
+    publishedDate: "2026-11-01",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-18-0Zf52vqlzzk",
+    url: "https://www.youtube.com/watch?v=0Zf52vqlzzk",
+    authorName: "Mao",
+    channelId: "UCARbX20_cV9YwwrAFyYvoMg",
+    channelUrl: "https://www.youtube.com/@Mao-od8gp",
+    fallbackTitleEn: "Eat Fresh Spring Roll at Orussey Market in Phnom Penh City",
+    titleKh: "ញុំាអាហារនៅផ្សារអូរឫស្សី ភ្នំពេញ/ Eat Fresh Spring Roll at Orussey Market in Phnom Penh City",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Mao) — Eat Fresh Spring Roll at Orussey Market in Phnom Penh City",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Mao (ម្ហូបតាមផ្លូវភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Mao: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Mao 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-11-01",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-28",
+  },
+  {
+    id: "yt-2026-kh-review-19-9hCXZxuovX8",
+    url: "https://www.youtube.com/watch?v=9hCXZxuovX8",
+    authorName: "Tom Trips Out",
+    channelId: "UClfihckKpwTAavLe4tT0NOg",
+    channelUrl: "https://www.youtube.com/@TomTripsOut",
+    fallbackTitleEn: "Every Tourist in Battambang Should Know About This Place! | Pomme 🇰🇭",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តបាត់ដំបង (Tom Trips Out) — Every Tourist in Battambang Should Know About This Place! | Pomme 🇰🇭",
+    titleZh: "马德望省高棉人气餐厅、自助餐与咖啡店探店测评 (Tom Trips Out) — Every Tourist in Battambang Should Know About This Place! | Pomme 🇰🇭",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តបាត់ដំបង ពី YouTuber Tom Trips Out (Battambang Food Review)។",
+    descriptionEn: "Looking for Battambang's best hangout spot? This place has a restaurant, bar, hostel AND private rooms for just $12 a night! — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Battambang by Tom Trips Out.",
+    descriptionZh: "由 YouTube 创作者 Tom Trips Out 拍摄的马德望省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "ខេត្តបាត់ដំបង",
+    provinceEn: "Battambang",
+    publishedDate: "2026-10-30",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-20-Ez6tA7eavLA",
+    url: "https://www.youtube.com/watch?v=Ez6tA7eavLA",
+    authorName: "TravelwithChad",
+    channelId: "UCss0y7c69jgvFRS9Hs2EwRA",
+    channelUrl: "https://www.youtube.com/@TravelwithChad",
+    fallbackTitleEn: "Exploring Battambang 🇰🇭 | A Different Side Of Cambodia",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តបាត់ដំបង (TravelwithChad) — Exploring Battambang 🇰🇭 | A Different Side Of Cambodia",
+    titleZh: "马德望省柬埔寨夜市寻味与美食旅行 Vlog (TravelwithChad) — Exploring Battambang 🇰🇭 | A Different Side Of Cambodia",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តបាត់ដំបង ពី YouTuber TravelwithChad (Battambang Food Review)។",
+    descriptionEn: "Join me as I explore the streets of Battambang, Cambodia! 🇰🇭 In this video, I wander through downtown Battambang, checking out local cafés, colorful street art, central Market and everyday life in this charming Cambodian city. Along the way, I try some loca — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Battambang by TravelwithChad.",
+    descriptionZh: "由 YouTube 创作者 TravelwithChad 拍摄的马德望省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "ខេត្តបាត់ដំបង",
+    provinceEn: "Battambang",
+    publishedDate: "2026-10-26",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-21-UBUjlHKDunQ",
+    url: "https://www.youtube.com/watch?v=UBUjlHKDunQ",
+    authorName: "Street Food Explorer",
+    channelId: "UCEeeueKMAYe3wNNhie9TKew",
+    channelUrl: "https://www.youtube.com/@StreetFoodExplorerCambodia",
+    fallbackTitleEn: "Battambang Food Tour — Brohokk Morning Market Walk 4K",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តបាត់ដំបង (Street Food Explorer) — Battambang Food Tour — Brohokk Morning Market Walk 4K",
+    titleZh: "马德望省柬埔寨夜市寻味与美食旅行 Vlog (Street Food Explorer) — Battambang Food Tour — Brohokk Morning Market Walk 4K",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តបាត់ដំបង ពី YouTuber Street Food Explorer (Battambang Food Review)។",
+    descriptionEn: "Experience the \"Kingdom of Wonder\" through its most authentic lens—its flavors. A street food walking tour in Cambodia is more ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Battambang by Street Food Explorer.",
+    descriptionZh: "由 YouTube 创作者 Street Food Explorer 拍摄的马德望省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "ខេត្តបាត់ដំបង",
+    provinceEn: "Battambang",
+    publishedDate: "2026-10-20",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-14",
+  },
+  {
+    id: "yt-2026-kh-review-22-x4H5N-Du1Ec",
+    url: "https://www.youtube.com/watch?v=x4H5N-Du1Ec",
+    authorName: "Street Food Explorer",
+    channelId: "UCEeeueKMAYe3wNNhie9TKew",
+    channelUrl: "https://www.youtube.com/@StreetFoodExplorerCambodia",
+    fallbackTitleEn: "How I Explore Battambang’s Busy Morning Street Food Market",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តបាត់ដំបង (Street Food Explorer) — How I Explore Battambang’s Busy Morning Street Food Market",
+    titleZh: "马德望省柬埔寨夜市寻味与美食旅行 Vlog (Street Food Explorer) — How I Explore Battambang’s Busy Morning Street Food Market",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តបាត់ដំបង ពី YouTuber Street Food Explorer (Battambang Food Review)។",
+    descriptionEn: "Experience the \"Kingdom of Wonder\" through its most authentic lens—its flavors. A street food walking tour in Cambodia is more ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Battambang by Street Food Explorer.",
+    descriptionZh: "由 YouTube 创作者 Street Food Explorer 拍摄的马德望省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "ខេត្តបាត់ដំបង",
+    provinceEn: "Battambang",
+    publishedDate: "2026-10-19",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-23-6AayHMFdAXU",
+    url: "https://www.youtube.com/watch?v=6AayHMFdAXU",
+    authorName: "Mao",
+    channelId: "UCARbX20_cV9YwwrAFyYvoMg",
+    channelUrl: "https://www.youtube.com/@Mao-od8gp",
+    fallbackTitleEn: "Three Buffet Starts From $2.50 to $17.90 Review",
+    titleKh: "អាហារប៊ូហ្វេ បីកន្លែង នៅ ភ្នំពេញ / Three Buffet Starts From $2.50 to $17.90 Review",
+    titleZh: "金边高棉人气餐厅、自助餐与咖啡店探店测评 (Mao) — Three Buffet Starts From $2.50 to $17.90 Review",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Mao (ហាងអាហារនៅកម្ពុជា)។",
+    descriptionEn: "1 Cafe Sokha Restaurant: costs $2.50 per person for lunch buffet https://maps.app.goo.gl/Lu7wP74izFsFqc8B8?g_st=it #2 Tonle ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Mao.",
+    descriptionZh: "由 YouTube 创作者 Mao 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-10-18",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-24-IQBItMz-J-A",
+    url: "https://www.youtube.com/watch?v=IQBItMz-J-A",
+    authorName: "Pi Neak-ពីរនាក់",
+    channelId: "UC5KGBC_372NSiTJPMGr4wvA",
+    channelUrl: "https://www.youtube.com/@pineak_travel",
+    fallbackTitleEn: "Street Food in Battambang City",
+    titleKh: "ចំណីអាហារ​តាមផ្លូវក្នុងក្រុងបាត់ដំបង​ Street Food in Battambang City",
+    titleZh: "马德望省地道高棉街头美食与传统名菜测评 (Pi Neak) — Street Food in Battambang City",
+    descriptionKh: "សួស្តីអ្នកទាំងអស់គ្នា! ស្វាគមន៍មកកាន់វីដេអូថ្មី! (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Pi Neak-ពីរនាក់ នៅខេត្តបាត់ដំបង)។",
+    descriptionEn: "Verified Battambang Food Review in Battambang, Cambodia by YouTuber Pi Neak- : exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Pi Neak 拍摄的马德望省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "ខេត្តបាត់ដំបង",
+    provinceEn: "Battambang",
+    publishedDate: "2026-10-17",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-5",
+  },
+  {
+    id: "yt-2026-kh-review-25-oc3McbyqxR8",
+    url: "https://www.youtube.com/watch?v=oc3McbyqxR8",
+    authorName: "Hidden Cambo",
+    channelId: "UCGUyGCTcG9u_6cXRCrVpRvg",
+    channelUrl: "https://www.youtube.com/@hiddencambo",
+    fallbackTitleEn: "What $11.60 Gets You in Battambang, Cambodia! (Stir-Fry Noodles & Rotisserie Roast ) 🍗🔥",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តបាត់ដំបង (Hidden Cambo) — What $11.60 Gets You in Battambang, Cambodia! (Stir-Fry Noodles & Rotisserie Roast ) 🍗🔥",
+    titleZh: "马德望省地道高棉街头美食与传统名菜测评 (Hidden Cambo) — What $11.60 Gets You in Battambang, Cambodia! (Stir-Fry Noodles & Rotisserie Roast ) 🍗🔥",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តបាត់ដំបង ពី YouTuber Hidden Cambo (Battambang Food Review)។",
+    descriptionEn: "Welcome to Battambang, Cambodia! Battambang is famous for its rich culture, amazing history, and most importantly—its ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Battambang by Hidden Cambo.",
+    descriptionZh: "由 YouTube 创作者 Hidden Cambo 拍摄的马德望省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "ខេត្តបាត់ដំបង",
+    provinceEn: "Battambang",
+    publishedDate: "2026-10-15",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-5",
+  },
+  {
+    id: "yt-2026-kh-review-26-ODDzAOtCVVM",
+    url: "https://www.youtube.com/watch?v=ODDzAOtCVVM",
+    authorName: "Satya Dee",
+    channelId: "UC36kFiOY7c2yll2LVyoVaHA",
+    channelUrl: "https://www.youtube.com/@satyadee2101",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Satya Dee (#26)",
+    titleKh: "នាំមុត្តាដើរសាកល្បងម្ហូបថ្មីៗក្នុងទីក្រុងភ្នំពេញ",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Satya Dee) — Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Satya Dee (#26)",
+    descriptionKh: "សាកល្បងនំកាឆាយ មីសួរសាច់មាន់ នឹង បបរមាន់ទួលទំពូង. (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Satya Dee នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Satya Dee: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Satya Dee 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-10-14",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-5",
+  },
+  {
+    id: "yt-2026-kh-review-27-5HFBqDqQtZ8",
+    url: "https://www.youtube.com/watch?v=5HFBqDqQtZ8",
+    authorName: "The Sister Loop",
+    channelId: "UCjl-LRA_TLmAJGoehmVsZIA",
+    channelUrl: "https://www.youtube.com/@TheSisterloop",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Kandal by The Sister Loop (#27)",
+    titleKh: "សាកម្ហូបខ្មែរ ប្រហុកលើជ្រុញកណ្តាលក្រុងភ្នំពេញ 🤤",
+    titleZh: "干拉省地道高棉街头美食与传统名菜测评 (The Sister Loop) — Authentic Cambodian Food Review & Local Street Food in Kandal by The Sister Loop (#27)",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តកណ្តាល ពី YouTuber The Sister Loop (ម្ហូបតាមផ្លូវភ្នំពេញ)។",
+    descriptionEn: "Local food in busy city Phnom Penh — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Kandal by The Sister Loop.",
+    descriptionZh: "由 YouTube 创作者 The Sister Loop 拍摄的干拉省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "ខេត្តកណ្តាល",
+    provinceEn: "Kandal",
+    publishedDate: "2026-10-13",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-14",
+  },
+  {
+    id: "yt-2026-kh-review-28-uyyiigTUfHA",
+    url: "https://www.youtube.com/watch?v=uyyiigTUfHA",
+    authorName: "Hidden Cambo",
+    channelId: "UCGUyGCTcG9u_6cXRCrVpRvg",
+    channelUrl: "https://www.youtube.com/@hiddencambo",
+    fallbackTitleEn: "I Spent $12 Eating Like a King in Siem Reap!",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តសៀមរាប (Hidden Cambo) — I Spent $12 Eating Like a King in Siem Reap!",
+    titleZh: "暹粒省地道高棉街头美食与传统名菜测评 (Hidden Cambo) — I Spent $12 Eating Like a King in Siem Reap!",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តសៀមរាប ពី YouTuber Hidden Cambo (Siem Reap Food Review)។",
+    descriptionEn: "I Spent $12 Eating Like a King in Siem Reap! Can you really eat like a king for just $12 in Siem Reap? Today, we're taking ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Siem Reap by Hidden Cambo.",
+    descriptionZh: "由 YouTube 创作者 Hidden Cambo 拍摄的暹粒省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "ខេត្តសៀមរាប",
+    provinceEn: "Siem Reap",
+    publishedDate: "2026-10-08",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-29-FTdcSUA1Is0",
+    url: "https://www.youtube.com/watch?v=FTdcSUA1Is0",
+    authorName: "Khmer rural life",
+    channelId: "UCtkB_B_A3jnFQryNxmAKOBg",
+    channelUrl: "https://www.youtube.com/@Khmerrurallife555",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Battambang by Khmer rural life (#29)",
+    titleKh: "ដើរលេងបាត់ដំបងពេលយប់ 😍 ដើររកម្ហូបឆ្ងាញ់ៗ និងជួបអ្នកលក់ស្រីស្អាត!",
+    titleZh: "马德望省柬埔寨夜市寻味与美食旅行 Vlog (Khmer rural life) — Authentic Cambodian Food Review & Local Street Food in Battambang by Khmer rural life (#29)",
+    descriptionKh: "ជម្រាបសួរពុកម៉ែបងប្អូន! នេះជា Channel របស់ខ្ញុំមានឈ្មោះថា Khmer Rural ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Khmer rural life នៅខេត្តបាត់ដំបង)។",
+    descriptionEn: "Verified in Battambang, Cambodia by YouTuber Khmer rural life: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Khmer rural life 拍摄的马德望省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "ខេត្តបាត់ដំបង",
+    provinceEn: "Battambang",
+    publishedDate: "2026-09-24",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-30-peO-aQHeadA",
+    url: "https://www.youtube.com/watch?v=peO-aQHeadA",
+    authorName: "Sarna Cooking Show",
+    channelId: "UC0RsJe65MJAIFwgW6C0djvw",
+    channelUrl: "https://www.youtube.com/@SarnaCookingShow",
+    fallbackTitleEn: "+ ❤️ | Phsar Khmer Food Court Siem Reap, Khmer Food & Traditional Dance",
+    titleKh: "អាហារខ្មែរ + របាំប្រពៃណីខ្មែរ ❤️ | Phsar Khmer Food Court Siem Reap, Khmer Food & Traditional Dance",
+    titleZh: "暹粒省柬埔寨夜市寻味与美食旅行 Vlog (Sarna Cooking Show) — + ❤️ | Phsar Khmer Food Court Siem Reap, Khmer Food & Traditional Dance",
+    descriptionKh: "អាហារខ្មែរ + របាំប្រពៃណីខ្មែរ ❤️ | Phsar Khmer Food Court Siem Reap, Khmer Food ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Sarna Cooking Show នៅខេត្តសៀមរាប)។",
+    descriptionEn: "Verified in Siem Reap, Cambodia by YouTuber Sarna Cooking Show: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Sarna Cooking Show 拍摄的暹粒省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "ខេត្តសៀមរាប",
+    provinceEn: "Siem Reap",
+    publishedDate: "2026-09-23",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-31-E7So5qiioqI",
+    url: "https://www.youtube.com/watch?v=E7So5qiioqI",
+    authorName: "Cambo Explorer",
+    channelId: "UCAj8MxN5DsAFq5Me2wKVYbw",
+    channelUrl: "https://www.youtube.com/@camboexplorer",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Cambo Explorer (#31)",
+    titleKh: "ដើរភ្លក់ម្ហូបជុំវិញទីក្រុងភ្នំពេញ",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Cambo Explorer) — Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Cambo Explorer (#31)",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Cambo Explorer (ម្ហូបតាមផ្លូវភ្នំពេញ)។",
+    descriptionEn: "Phnom Penh food. — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Cambo Explorer.",
+    descriptionZh: "由 YouTube 创作者 Cambo Explorer 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-08-16",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-32-CPr3Oaz3cO8",
+    url: "https://www.youtube.com/watch?v=CPr3Oaz3cO8",
+    authorName: "CUỘC SỐNG CAM",
+    channelId: "UC0nxHFae3a0UzafMJjadIrQ",
+    channelUrl: "https://www.youtube.com/@Cuocsongcam",
+    fallbackTitleEn: "Thành Phố Battambang - Ẩm Thực & Cuộc Sống Thực Của Người Dân Campuchia| CUỘC SỐNG CAM",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តបាត់ដំបង (CUỘC SỐNG CAM) — Thành Phố Battambang - Ẩm Thực & Cuộc Sống Thực Của Người Dân Campuchia| CUỘC SỐNG CAM",
+    titleZh: "马德望省地道高棉街头美食与传统名菜测评 (CUỘC SỐNG CAM) — Thành Phố Battambang - Ẩm Thực & Cuộc Sống Thực Của Người Dân Campuchia| CUỘC SỐNG CAM",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តបាត់ដំបង ពី YouTuber CUỘC SỐNG CAM (Battambang Food Review)។",
+    descriptionEn: "Thành Phố Battambong Campuchia| CUỘC SỐNG CAM Kênh CUỘC SỐNG CAM sẽ review đời sống văn hóa ẩm thực du lịch . Trải nghiệm du lịch Bách Cầm Bôn qua những cung đường đông đúc và thưởng thức ẩm thực đường phố đặc sắc ngay trong chuyến đi này. Video này đưa bạ — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Battambang by CUỘC SỐNG CAM.",
+    descriptionZh: "由 YouTube 创作者 CUỘC SỐNG CAM 拍摄的马德望省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "ខេត្តបាត់ដំបង",
+    provinceEn: "Battambang",
+    publishedDate: "2026-08-09",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-33-3_a7JiHhXMw",
+    url: "https://www.youtube.com/watch?v=3_a7JiHhXMw",
+    authorName: "Life in Cambodia",
+    channelId: "UCFUiKVah5VJJG1ESDjAtJ3g",
+    channelUrl: "https://www.youtube.com/@NearyRothTV",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Life in Cambodia (#33)",
+    titleKh: "អាហារតាមចិញ្ចើមផ្លូវដ៏ពេញនិយមបំផុតនៅរាជធានីភ្នំពេញ ប្រទេសកម្ពុជា៖ ផ្សាររាត្រី ទល់នឹង 🇰🇭",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Life in Cambodia) — Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Life in Cambodia (#33)",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Life in Cambodia (ម្ហូបតាមផ្លូវភ្នំពេញ)។",
+    descriptionEn: "Cambodia food in general. — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Life in Cambodia.",
+    descriptionZh: "由 YouTube 创作者 Life in Cambodia 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-08-09",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-34-kdMAwOuiQq4",
+    url: "https://www.youtube.com/watch?v=kdMAwOuiQq4",
+    authorName: "Mark In Asia",
+    channelId: "UCs22MyD8qdgDF-kJyv6Zofw",
+    channelUrl: "https://www.youtube.com/@Markinasia-e4f",
+    fallbackTitleEn: "Eat Cheap In Siem Reap | Restaurants where you can eat for $1.00 - No Clickbait.",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តសៀមរាប (Mark In Asia) — Eat Cheap In Siem Reap | Restaurants where you can eat for $1.00 - No Clickbait.",
+    titleZh: "暹粒省高棉人气餐厅、自助餐与咖啡店探店测评 (Mark In Asia) — Eat Cheap In Siem Reap | Restaurants where you can eat for $1.00 - No Clickbait.",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តសៀមរាប ពី YouTuber Mark In Asia (Siem Reap Food Review)។",
+    descriptionEn: "Restaurants where a plate can be yours for $1 dollar and they're good. Siem Reap offers a low cost of living and a low cost to eating. This is why a person can live in Siem Reap for $700 month. 🚨💰 SAVE MONEY on Flights ✈️, Hotels 🏨 & Taxi Service 🚕! ⬇️ Th — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Siem Reap by Mark In Asia.",
+    descriptionZh: "由 YouTube 创作者 Mark In Asia 拍摄的暹粒省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "ខេត្តសៀមរាប",
+    provinceEn: "Siem Reap",
+    publishedDate: "2026-08-07",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-35-tTwhdnYIk8c",
+    url: "https://www.youtube.com/watch?v=tTwhdnYIk8c",
+    authorName: "Hidden Cambo",
+    channelId: "UCGUyGCTcG9u_6cXRCrVpRvg",
+    channelUrl: "https://www.youtube.com/@hiddencambo",
+    fallbackTitleEn: "Explored Battambang’s Most Famous Local Food & Breakfast! 🇰🇭🍜 | Ep. 3",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តបាត់ដំបង (Hidden Cambo) — Explored Battambang’s Most Famous Local Food & Breakfast! 🇰🇭🍜 | Ep. 3",
+    titleZh: "马德望省柬埔寨夜市寻味与美食旅行 Vlog (Hidden Cambo) — Explored Battambang’s Most Famous Local Food & Breakfast! 🇰🇭🍜 | Ep. 3",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តបាត់ដំបង ពី YouTuber Hidden Cambo (Battambang Food Review)។",
+    descriptionEn: "Join me as I explore Battambang's famous local food and traditional Cambodian breakfast! From delicious pork rice and fresh ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Battambang by Hidden Cambo.",
+    descriptionZh: "由 YouTube 创作者 Hidden Cambo 拍摄的马德望省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "ខេត្តបាត់ដំបង",
+    provinceEn: "Battambang",
+    publishedDate: "2026-07-21",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-36-WGHuHB0AWps",
+    url: "https://www.youtube.com/watch?v=WGHuHB0AWps",
+    authorName: "Angela McColl",
+    channelId: "UC9OcuVtqIsCe8_7AjjPtoZg",
+    channelUrl: "https://www.youtube.com/@angemccoll",
+    fallbackTitleEn: "This Was More Than Just Cambodian Food 🇰🇭",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Angela McColl) — This Was More Than Just Cambodian Food 🇰🇭",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Angela McColl) — This Was More Than Just Cambodian Food 🇰🇭",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Angela McColl (Cambodian Food Review)។",
+    descriptionEn: "Australia is one of the most multicultural countries in the world. In this series, I'm welcomed into family homes across the country to ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Angela McColl.",
+    descriptionZh: "由 YouTube 创作者 Angela McColl 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-07-19",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-37-7HrcqYE55mI",
+    url: "https://www.youtube.com/watch?v=7HrcqYE55mI",
+    authorName: "Street Food Explorer",
+    channelId: "UCEeeueKMAYe3wNNhie9TKew",
+    channelUrl: "https://www.youtube.com/@StreetFoodExplorerCambodia",
+    fallbackTitleEn: "The Ultimate Battambang Street Food Guide — Skewers, Snacks, and more",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តបាត់ដំបង (Street Food Explorer) — The Ultimate Battambang Street Food Guide — Skewers, Snacks, and more",
+    titleZh: "马德望省柬埔寨夜市寻味与美食旅行 Vlog (Street Food Explorer) — The Ultimate Battambang Street Food Guide — Skewers, Snacks, and more",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តបាត់ដំបង ពី YouTuber Street Food Explorer (Battambang Food Review)។",
+    descriptionEn: "Experience the \"Kingdom of Wonder\" through its most authentic lens—its flavors. A street food walking tour in Cambodia is more ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Battambang by Street Food Explorer.",
+    descriptionZh: "由 YouTube 创作者 Street Food Explorer 拍摄的马德望省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "ខេត្តបាត់ដំបង",
+    provinceEn: "Battambang",
+    publishedDate: "2026-07-10",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-6",
+  },
+  {
+    id: "yt-2026-kh-review-38-tPKIpwzca6Y",
+    url: "https://www.youtube.com/watch?v=tPKIpwzca6Y",
+    authorName: "Sarna Cooking Show",
+    channelId: "UC0RsJe65MJAIFwgW6C0djvw",
+    channelUrl: "https://www.youtube.com/@SarnaCookingShow",
+    fallbackTitleEn: "13،5$ ,Spend 13,5$ BBQ at Koh Norea, Eating Phnom Penh Budget Food",
+    titleKh: "ចំណាយលុយ 13،5$ញ៉ាំអាហារពេលល្ងាចនៅកោះនរា,Spend 13,5$ BBQ at Koh Norea, Eating Phnom Penh Budget Food,",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Sarna Cooking Show) — 13،5$ ,Spend 13,5$ BBQ at Koh Norea, Eating Phnom Penh Budget Food",
+    descriptionKh: "ចំណាយលុយ 13،5$ ញ៉ាំអាហារពេលល្ងាចនៅកោះនរា, ចំណាយលុយ ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Sarna Cooking Show នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified Phnom Penh Food Review in Phnom Penh, Cambodia by YouTuber Sarna Cooking Show: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Sarna Cooking Show 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-07-07",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-6",
+  },
+  {
+    id: "yt-2026-kh-review-39-uAJP2HpkEUA",
+    url: "https://www.youtube.com/watch?v=uAJP2HpkEUA",
+    authorName: "Food Network UK",
+    channelId: "UCzYZk4bZ07yJeK7Zd_z37Cw",
+    channelUrl: "https://www.youtube.com/@FoodNetworkUKTV",
+    fallbackTitleEn: "Guy Fieri Tries Cambodian Food Made By A Jet Fighter Engineer | Diners, Drive-Ins, and Dives",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Food Network UK) — Guy Fieri Tries Cambodian Food Made By A Jet Fighter Engineer | Diners, Drive-Ins, and Dives",
+    titleZh: "金边高棉人气餐厅、自助餐与咖啡店探店测评 (Food Network UK) — Guy Fieri Tries Cambodian Food Made By A Jet Fighter Engineer | Diners, Drive-Ins, and Dives",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Food Network UK (Khmer Restaurant Review)។",
+    descriptionEn: "Subscribe to Food Network UK for more great clips: https://goo.gl/j1XN9a A chef shares their journey from escaping a labour camp ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Food Network UK.",
+    descriptionZh: "由 YouTube 创作者 Food Network UK 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-06-15",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-40-dTNcegWASPo",
+    url: "https://www.youtube.com/watch?v=dTNcegWASPo",
+    authorName: "Condé Nast Traveler",
+    channelId: "UC3TIRH4PPSDde66Hg5wGh-w",
+    channelUrl: "https://www.youtube.com/@Traveler",
+    fallbackTitleEn: "A Pro Chef's Favorite Places to Eat in Phnom Penh, Cambodia | Condé Nast Traveler",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Condé Nast Traveler) — A Pro Chef's Favorite Places to Eat in Phnom Penh, Cambodia | Condé Nast Traveler",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Condé Nast Traveler) — A Pro Chef's Favorite Places to Eat in Phnom Penh, Cambodia | Condé Nast Traveler",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Condé Nast Traveler (Cambodian Food Review)។",
+    descriptionEn: "Chef Nak joins Condé Nast Traveler as she explores her favorite food spots in Phnom Penh. From traditional Khmer cuisine and ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Condé Nast Traveler.",
+    descriptionZh: "由 YouTube 创作者 Condé Nast Traveler 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-06-10",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-41-INStyYhUXOI",
+    url: "https://www.youtube.com/watch?v=INStyYhUXOI",
+    authorName: "T&L TRAVEL",
+    channelId: "UCo0BHDWZ3gRCuSbUH85G-_A",
+    channelUrl: "https://www.youtube.com/@tandltravel2024",
+    fallbackTitleEn: "WHERE TO EAT IN SIEM REAP 🇰🇭 | Best Restaurants from Budget Eats to Fine Dining",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តសៀមរាប (T&L TRAVEL) — WHERE TO EAT IN SIEM REAP 🇰🇭 | Best Restaurants from Budget Eats to Fine Dining",
+    titleZh: "暹粒省高棉人气餐厅、自助餐与咖啡店探店测评 (T&L TRAVEL) — WHERE TO EAT IN SIEM REAP 🇰🇭 | Best Restaurants from Budget Eats to Fine Dining",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តសៀមរាប ពី YouTuber T&L TRAVEL (Siem Reap Food Review)។",
+    descriptionEn: "Looking for the best places to eat in Siem Reap, Cambodia? During our stay in Siem Reap, we set out to find some fantastic ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Siem Reap by T&L TRAVEL.",
+    descriptionZh: "由 YouTube 创作者 T&L TRAVEL 拍摄的暹粒省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "ខេត្តសៀមរាប",
+    provinceEn: "Siem Reap",
+    publishedDate: "2026-05-30",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-42-7C42oY77pas",
+    url: "https://www.youtube.com/watch?v=7C42oY77pas",
+    authorName: "Street food tour",
+    channelId: "UCZJtFOu1wmxq8wadfHSlYPQ",
+    channelUrl: "https://www.youtube.com/@Streetfoodtour-44",
+    fallbackTitleEn: "Best Cambodian Street Food Review 2026 🇰🇭 Countryside Market + Phnom Penh Tour",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Street food tour) — Best Cambodian Street Food Review 2026 🇰🇭 Countryside Market + Phnom Penh Tour",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Street food tour) — Best Cambodian Street Food Review 2026 🇰🇭 Countryside Market + Phnom Penh Tour",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Street food tour (Phnom Penh Food Review)។",
+    descriptionEn: "Discover the best Cambodian street food in 2026 as we explore both a hidden countryside market and the busy streets of Phnom ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Street food tour.",
+    descriptionZh: "由 YouTube 创作者 Street food tour 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-05-23",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-43-iJ5yoD8xb6k",
+    url: "https://www.youtube.com/watch?v=iJ5yoD8xb6k",
+    authorName: "WisGO",
+    channelId: "UCmfOXpsa0q0uHxaaDkeeFdw",
+    channelUrl: "https://www.youtube.com/@Wisgokh",
+    fallbackTitleEn: "Where locals eat in Siem Reap | authentic cambodian food spots",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តសៀមរាប (WisGO) — Where locals eat in Siem Reap | authentic cambodian food spots",
+    titleZh: "暹粒省地道高棉街头美食与传统名菜测评 (WisGO) — Where locals eat in Siem Reap | authentic cambodian food spots",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តសៀមរាប ពី YouTuber WisGO (Siem Reap Food Review)។",
+    descriptionEn: "Discover the best places to eat in Siem Reap! From authentic khmer food to hidden local spots, this video will take you around ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Siem Reap by WisGO.",
+    descriptionZh: "由 YouTube 创作者 WisGO 拍摄的暹粒省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "ខេត្តសៀមរាប",
+    provinceEn: "Siem Reap",
+    publishedDate: "2026-05-19",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-44-AAL6OEUTaRM",
+    url: "https://www.youtube.com/watch?v=AAL6OEUTaRM",
+    authorName: "Jenny Daily Life",
+    channelId: "UCo42Xmxl2U99UtfCiWQxgcg",
+    channelUrl: "https://www.youtube.com/@jennydailylife",
+    fallbackTitleEn: "Best Cambodia Street Food? Cambodia Street/Market Food Compilation 2026",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Jenny Daily Life) — Best Cambodia Street Food? Cambodia Street/Market Food Compilation 2026",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Jenny Daily Life) — Best Cambodia Street Food? Cambodia Street/Market Food Compilation 2026",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Jenny Daily Life (Cambodia Street Food)។",
+    descriptionEn: "StreetFoodTour, #JennyDailyLife, #lifeinmarket Thank you for your time ❤️. — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Jenny Daily Life.",
+    descriptionZh: "由 YouTube 创作者 Jenny Daily Life 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-05-09",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-45-kF3VJM6xDr0",
+    url: "https://www.youtube.com/watch?v=kF3VJM6xDr0",
+    authorName: "Chay Sivlang",
+    channelId: "UCB8yjnAK_IxD-fMjxH_QpDg",
+    channelUrl: "https://www.youtube.com/@Chaysivlang",
+    fallbackTitleEn: "National dish around the world",
+    titleKh: "ម្ហូបតំណាងជាតិ - National dish around the world",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Chay Sivlang) — National dish around the world",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Chay Sivlang (ញ៉ាំអាហារខ្មែរ)។",
+    descriptionEn: "food #nation #dish #countries. — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Chay Sivlang.",
+    descriptionZh: "由 YouTube 创作者 Chay Sivlang 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-05-09",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-46-Py58q_Wdrhw",
+    url: "https://www.youtube.com/watch?v=Py58q_Wdrhw",
+    authorName: "Food Tour & Explore",
+    channelId: "UCCftsczyo1ciJ6HGH0VUOEg",
+    channelUrl: "https://www.youtube.com/@food-tour-explore",
+    fallbackTitleEn: "Amazing Cambodian Street Food Review 2026 – Most Compilation Countryside Food Tour 🇰🇭",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Food Tour & Explore) — Amazing Cambodian Street Food Review 2026 – Most Compilation Countryside Food Tour 🇰🇭",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Food Tour & Explore) — Amazing Cambodian Street Food Review 2026 – Most Compilation Countryside Food Tour 🇰🇭",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Food Tour & Explore (Khmer Food Review)។",
+    descriptionEn: "Welcome to the ultimate Cambodian Street Food Review 2026! In this best compilation, we explore authentic countryside food ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Food Tour & Explore.",
+    descriptionZh: "由 YouTube 创作者 Food Tour & Explore 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-04-23",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-47-glhmOShpw4E",
+    url: "https://www.youtube.com/watch?v=glhmOShpw4E",
+    authorName: "Priscilla Kim Ong",
+    channelId: "UC1_PeD6rZaUoNrN2AtyTe2Q",
+    channelUrl: "https://www.youtube.com/@priscillakimong",
+    fallbackTitleEn: "Finding the Best Local Food in Siem Reap 🇰🇭 (For My Cambodia Group Trip)",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តសៀមរាប (Priscilla Kim Ong) — Finding the Best Local Food in Siem Reap 🇰🇭 (For My Cambodia Group Trip)",
+    titleZh: "暹粒省柬埔寨夜市寻味与美食旅行 Vlog (Priscilla Kim Ong) — Finding the Best Local Food in Siem Reap 🇰🇭 (For My Cambodia Group Trip)",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តសៀមរាប ពី YouTuber Priscilla Kim Ong (Siem Reap Food Review)។",
+    descriptionEn: "Welcome to my Siem Reap research trip vlog: Best Food Spots & Finding Activities ✨ In this vlog, I'm in Siem Reap preparing ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Siem Reap by Priscilla Kim Ong.",
+    descriptionZh: "由 YouTube 创作者 Priscilla Kim Ong 拍摄的暹粒省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "ខេត្តសៀមរាប",
+    provinceEn: "Siem Reap",
+    publishedDate: "2026-04-05",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-48-YAy4NiESwHo",
+    url: "https://www.youtube.com/watch?v=YAy4NiESwHo",
+    authorName: "Mooch Travels",
+    channelId: "UCcHW9-v8McRcO-Rm-zBv2ZQ",
+    channelUrl: "https://www.youtube.com/@MoochOzdemirTravel",
+    fallbackTitleEn: "American Tries Cambodian Food for First Time 🇰🇭",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Mooch Travels) — American Tries Cambodian Food for First Time 🇰🇭",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Mooch Travels) — American Tries Cambodian Food for First Time 🇰🇭",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Mooch Travels (Khmer Food Review)។",
+    descriptionEn: "Today I took my American friend to try Cambodian food for the FIRST TIME… and his reaction honestly surprised me We went ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Mooch Travels.",
+    descriptionZh: "由 YouTube 创作者 Mooch Travels 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-03-28",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-49-2pVgSSFCnXs",
+    url: "https://www.youtube.com/watch?v=2pVgSSFCnXs",
+    authorName: "Rockstar Eater",
+    channelId: "UCegDP5GpIrMfSXZlePFtitA",
+    channelUrl: "https://www.youtube.com/@RockstarEater",
+    fallbackTitleEn: "Trying CAMBODIAN FOOD for the First Time! (Reaction)",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Rockstar Eater) — Trying CAMBODIAN FOOD for the First Time! (Reaction)",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Rockstar Eater) — Trying CAMBODIAN FOOD for the First Time! (Reaction)",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Rockstar Eater (Cambodian Food Review)។",
+    descriptionEn: "If you want to know what Cambodian food is like, then watch as Steve tries Cambodian food for the first time and gives his honest ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Rockstar Eater.",
+    descriptionZh: "由 YouTube 创作者 Rockstar Eater 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-03-22",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-50-1letyuzuqEo",
+    url: "https://www.youtube.com/watch?v=1letyuzuqEo",
+    authorName: "Cooking and Travel with Bong General",
+    channelId: "UC4KPmxdpKFAzogb6beSfQWA",
+    channelUrl: "https://www.youtube.com/@CookingwithBongGeneral",
+    fallbackTitleEn: "Street Food by Royal Palace",
+    titleKh: "Street Food by Royal Palace អាហារតាមផ្លូវនៅមុខព្រះ​រាជវាំងនៅភ្នំពេញ",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Cooking and Travel with Bong General) — Street Food by Royal Palace",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Cooking and Travel with Bong General (ម្ហូបតាមផ្លូវភ្នំពេញ)។",
+    descriptionEn: "Hello everyone! Check out our new shop launching with new merchandise! Please input your email to receive updates for our ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Cooking and Travel with Bong General.",
+    descriptionZh: "由 YouTube 创作者 Cooking and Travel with Bong General 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-03-22",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-51-SibVzgVrkzo",
+    url: "https://www.youtube.com/watch?v=SibVzgVrkzo",
+    authorName: "Visit and cook with me",
+    channelId: "UCKQa5a6kxcziSAaRwHJxoMQ",
+    channelUrl: "https://www.youtube.com/@visitandcookwithme",
+    fallbackTitleEn: "Phnom Penh Street Food Vlog",
+    titleKh: "អាហារពេលរាត្រី នៅតាមមាត់ទន្លេរ ឆ្ងាញ់ៗណាស់| Phnom Penh Street Food Vlog",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Visit and cook with me) — Phnom Penh Street Food Vlog",
+    descriptionKh: "សួស្ដីបងប្អូនទាំងអស់គ្នា! (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Visit and cook with me នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Visit and cook with me: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Visit and cook with me 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-03-22",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-52-djM4IDAWC3A",
+    url: "https://www.youtube.com/watch?v=djM4IDAWC3A",
+    authorName: "Cambodia Vibes",
+    channelId: "UCAuKl-usJ7p5c-Nh8L73odw",
+    channelUrl: "https://www.youtube.com/@CambodiaVibes-SR",
+    fallbackTitleEn: "Real Cambodian Food Experience | Siem Reap Street Food Walk",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តសៀមរាប (Cambodia Vibes) — Real Cambodian Food Experience | Siem Reap Street Food Walk",
+    titleZh: "暹粒省柬埔寨夜市寻味与美食旅行 Vlog (Cambodia Vibes) — Real Cambodian Food Experience | Siem Reap Street Food Walk",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តសៀមរាប ពី YouTuber Cambodia Vibes (Siem Reap Food Review)។",
+    descriptionEn: "Join me on a food walking tour in Siem Reap, Cambodia where we explore the amazing world of Khmer street food, local ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Siem Reap by Cambodia Vibes.",
+    descriptionZh: "由 YouTube 创作者 Cambodia Vibes 拍摄的暹粒省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "ខេត្តសៀមរាប",
+    provinceEn: "Siem Reap",
+    publishedDate: "2026-03-05",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-53-NwARVWHjI9c",
+    url: "https://www.youtube.com/watch?v=NwARVWHjI9c",
+    authorName: "Lloyd & Mandy",
+    channelId: "UC5NofLGyaa9Q6PHsxSgXM0Q",
+    channelUrl: "https://www.youtube.com/@LloydandMandy",
+    fallbackTitleEn: "We Risked It All Eating STREET FOOD in CAMBODIA! 🇰🇭",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Lloyd & Mandy) — We Risked It All Eating STREET FOOD in CAMBODIA! 🇰🇭",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Lloyd & Mandy) — We Risked It All Eating STREET FOOD in CAMBODIA! 🇰🇭",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Lloyd & Mandy (Phnom Penh Food Review)។",
+    descriptionEn: "Phnom Penh surprised us in the best way possible. In this video, we explore Cambodia's largest weekend night market at ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Lloyd & Mandy.",
+    descriptionZh: "由 YouTube 创作者 Lloyd & Mandy 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2026-01-19",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-54-eKHrp3a6w2Q",
+    url: "https://www.youtube.com/watch?v=eKHrp3a6w2Q",
+    authorName: "Delicious food channel",
+    channelId: "UCg7R70hWzrtDh3bCGlrGKhQ",
+    channelUrl: "https://www.youtube.com/@%E1%9E%98%E1%9F%92%E1%9E%A0%E1%9E%BC%E1%9E%94%E1%9E%86%E1%9F%92%E1%9E%84%E1%9E%B6%E1%9E%89%E1%9F%8B",
+    fallbackTitleEn: "Delicious food channel",
+    titleKh: "ខប្រហុកត្រីអណ្ដែង ម្ហូបខ្មែរដែលឆ្ងាញ់បំផុត Delicious food channel",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Delicious food channel) — Delicious food channel",
+    descriptionKh: "ខប្រហុកត្រីអណ្ដែង ម្ហូបខ្មែរដែលឆ្ងាញ់បំផុត Delicious food channel #khmerfood ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Delicious food channel នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Delicious food channel: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Delicious food channel 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2025-12-29",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-14",
+  },
+  {
+    id: "yt-2026-kh-review-55-M-xkvEgzO7o",
+    url: "https://www.youtube.com/watch?v=M-xkvEgzO7o",
+    authorName: "WisGO",
+    channelId: "UCmfOXpsa0q0uHxaaDkeeFdw",
+    channelUrl: "https://www.youtube.com/@Wisgokh",
+    fallbackTitleEn: "Top 5 CAMBODIAN Breakfast Dishes You Need to Try Now",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (WisGO) — Top 5 CAMBODIAN Breakfast Dishes You Need to Try Now",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (WisGO) — Top 5 CAMBODIAN Breakfast Dishes You Need to Try Now",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber WisGO (Khmer Food Review)។",
+    descriptionEn: "This video is all about a breakfast review, offering an honest review of Cambodian breakfast food. You'll see reactions to ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by WisGO.",
+    descriptionZh: "由 YouTube 创作者 WisGO 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2025-11-25",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-56-NhPKcJV2x0Q",
+    url: "https://www.youtube.com/watch?v=NhPKcJV2x0Q",
+    authorName: "WisGO",
+    channelId: "UCmfOXpsa0q0uHxaaDkeeFdw",
+    channelUrl: "https://www.youtube.com/@Wisgokh",
+    fallbackTitleEn: "Cambodian Street Food at Toul Tom Poung Market | Must Try!",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (WisGO) — Cambodian Street Food at Toul Tom Poung Market | Must Try!",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (WisGO) — Cambodian Street Food at Toul Tom Poung Market | Must Try!",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber WisGO (Phnom Penh Food Review)។",
+    descriptionEn: "What can $10 get you in Phnom Penh's famous Toul Tom Poung Market? We're trying local breakfast dishes, street snacks, and ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by WisGO.",
+    descriptionZh: "由 YouTube 创作者 WisGO 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2025-10-13",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-57-dMfiyR-I6XU",
+    url: "https://www.youtube.com/watch?v=dMfiyR-I6XU",
+    authorName: "Sina NSN",
+    channelId: "UC6BGn58FaYnAn7QgcxUpf_Q",
+    channelUrl: "https://www.youtube.com/@sinansn6499",
+    fallbackTitleEn: "Amazing! Cambodian STREET FOOD Review 2025 - Compilation Countryside Food Tour & City Food Market",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Sina NSN) — Amazing! Cambodian STREET FOOD Review 2025 - Compilation Countryside Food Tour & City Food Market",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Sina NSN) — Amazing! Cambodian STREET FOOD Review 2025 - Compilation Countryside Food Tour & City Food Market",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Sina NSN (Khmer Food Review)។",
+    descriptionEn: "streetfood #SinaNSN #StreetFoodTour Please enjoy this video. Thank you for watching. — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Sina NSN.",
+    descriptionZh: "由 YouTube 创作者 Sina NSN 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2025-10-06",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-58-o-3ZUALKnzM",
+    url: "https://www.youtube.com/watch?v=o-3ZUALKnzM",
+    authorName: "Kitchen Story",
+    channelId: "UCLUapBXshwIyBCDMWSO3srQ",
+    channelUrl: "https://www.youtube.com/@kitchenstoryK",
+    fallbackTitleEn: "[ ] Somlor Korrku [Kitchen Story]",
+    titleKh: "សម្លកកូរ បន្លែស្រស់ៗ អង្ករលីងបុកថ្មីៗ [សម្លខ្មែរ ម្ហូបខ្មែរ] Somlor Korrku [Kitchen Story]",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Kitchen Story) — [ ] Somlor Korrku [Kitchen Story]",
+    descriptionKh: "សម្លកកូរ បន្លែស្រស់ៗ អង្ករលីងបុកថ្មីៗ [សម្លខ្មែរ ម្ហូបខ្មែរ] ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Kitchen Story នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Kitchen Story: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Kitchen Story 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2025-09-30",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-4",
+  },
+  {
+    id: "yt-2026-kh-review-59-LP1hkycCXKg",
+    url: "https://www.youtube.com/watch?v=LP1hkycCXKg",
+    authorName: "Kitchen Story",
+    channelId: "UCLUapBXshwIyBCDMWSO3srQ",
+    channelUrl: "https://www.youtube.com/@kitchenstoryK",
+    fallbackTitleEn: "# # [Ginger Braised Fish] Kitchen Story",
+    titleKh: "របៀបខត្រីឲ្យឆ្ងាញ់ #ត្រីខ #ម្ហូបខ្មែរ [Ginger Braised Fish] Kitchen Story",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Kitchen Story) — # # [Ginger Braised Fish] Kitchen Story",
+    descriptionKh: "របៀបខត្រីឲ្យឆ្ងាញ់ #ត្រីខ #ម្ហូបខ្មែរ [Ginger Braised Fish] Kitchen Story ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Kitchen Story នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Kitchen Story: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Kitchen Story 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2025-09-25",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-60-bA2t1RTuffA",
+    url: "https://www.youtube.com/watch?v=bA2t1RTuffA",
+    authorName: "Street Food TV",
+    channelId: "UCLVncs-1iVf4f1tW5WSfQfw",
+    channelUrl: "https://www.youtube.com/@StreetFoodTVCambodia",
+    fallbackTitleEn: "CHEAP PRICE !!! 6 BEST Cambodian Street Food Spots You Must TRY | Street Food Compilation",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Street Food TV) — CHEAP PRICE !!! 6 BEST Cambodian Street Food Spots You Must TRY | Street Food Compilation",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Street Food TV) — CHEAP PRICE !!! 6 BEST Cambodian Street Food Spots You Must TRY | Street Food Compilation",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Street Food TV (Cambodia Street Food)។",
+    descriptionEn: "We all love Food. Welcome to Street Food TV. Nice to meet you [4K] CHEAP PRICE !!! 6 BEST Cambodian Street Food Spots ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Street Food TV.",
+    descriptionZh: "由 YouTube 创作者 Street Food TV 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2025-06-28",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-61-I0nBdCodX5w",
+    url: "https://www.youtube.com/watch?v=I0nBdCodX5w",
+    authorName: "EVERYTHING",
+    channelId: "UCcTnoBPJiZyGkagNaPJcNFA",
+    channelUrl: "https://www.youtube.com/@Everything-fd68",
+    fallbackTitleEn: "Cambodian Walk Street, Cambodian Weekemd Street Foods",
+    titleKh: "ម្ហូបឆ្ងាញ់ៗនៅមាត់ទន្លេក្រុងភ្នំពេញ / Cambodian Walk Street, Cambodian Weekemd Street Foods",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (EVERYTHING) — Cambodian Walk Street, Cambodian Weekemd Street Foods",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber EVERYTHING (ម្ហូបតាមផ្លូវភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber EVERYTHING: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 EVERYTHING 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2025-06-11",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-62-QuFj7Nlp40Q",
+    url: "https://www.youtube.com/watch?v=QuFj7Nlp40Q",
+    authorName: "For Riel",
+    channelId: "UC97aAzNbBb30T5sEIymxDLg",
+    channelUrl: "https://www.youtube.com/@ForRiel",
+    fallbackTitleEn: "Siem Reap’s Best Food! 12 restaurants with prices! Expat life in Cambodia! #forriel",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តសៀមរាប (For Riel) — Siem Reap’s Best Food! 12 restaurants with prices! Expat life in Cambodia! #forriel",
+    titleZh: "暹粒省高棉人气餐厅、自助餐与咖啡店探店测评 (For Riel) — Siem Reap’s Best Food! 12 restaurants with prices! Expat life in Cambodia! #forriel",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តសៀមរាប ពី YouTuber For Riel (Siem Reap Food Review)។",
+    descriptionEn: "In this video, we're going to talk about food! The options in Siem Reap, Cambodia are extensive but we have done the homework ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Siem Reap by For Riel.",
+    descriptionZh: "由 YouTube 创作者 For Riel 拍摄的暹粒省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "ខេត្តសៀមរាប",
+    provinceEn: "Siem Reap",
+    publishedDate: "2025-02-22",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-63-jm-vcNq0F9o",
+    url: "https://www.youtube.com/watch?v=jm-vcNq0F9o",
+    authorName: "Jenny Daily Life",
+    channelId: "UCo42Xmxl2U99UtfCiWQxgcg",
+    channelUrl: "https://www.youtube.com/@jennydailylife",
+    fallbackTitleEn: "Khmer food Tour In Cambodia - Countryside & City Street Market Food",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Jenny Daily Life) — Khmer food Tour In Cambodia - Countryside & City Street Market Food",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Jenny Daily Life) — Khmer food Tour In Cambodia - Countryside & City Street Market Food",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Jenny Daily Life (Cambodian Food Review)។",
+    descriptionEn: "StreetFoodTour, #JennyDailyLife, #lifeinmarket Please turn on the subtitle. Thank you for your time ❤️. — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Jenny Daily Life.",
+    descriptionZh: "由 YouTube 创作者 Jenny Daily Life 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2025-02-12",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-64-Yn1MmkVNe0M",
+    url: "https://www.youtube.com/watch?v=Yn1MmkVNe0M",
+    authorName: "Kheom Leakhena",
+    channelId: "UCPflXomEwyYJFcRX1jJxf-A",
+    channelUrl: "https://www.youtube.com/@KheomLeakhena",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Kheom Leakhena (#64)",
+    titleKh: "គ្រឿងសមុទ្រក្រឡុកទ្រង់ទ្រាយធំ",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Kheom Leakhena) — Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Kheom Leakhena (#64)",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Kheom Leakhena (ដើររកម្ហូបឆ្ងាញ់)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Kheom Leakhena: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Kheom Leakhena 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2025-02-06",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-19",
+  },
+  {
+    id: "yt-2026-kh-review-65-I64g0VQRSno",
+    url: "https://www.youtube.com/watch?v=I64g0VQRSno",
+    authorName: "Pich Pisey",
+    channelId: "UCplb1Ru5jWb_BM3Qe_OoQkw",
+    channelUrl: "https://www.youtube.com/@pichpisey4129",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Pich Pisey (#65)",
+    titleKh: "ម្ហូបខ្មែរឆ្ញាញ់ៗណាស់ ចូលរួមញុំា និង ផ្សព្វផ្សាយឲ្យបានច្រើន🇰🇭😋",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Pich Pisey) — Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Pich Pisey (#65)",
+    descriptionKh: "ម្ហូបខ្មែរឆ្ញាញ់ៗណាស់ ចូលរួមញុំា និង ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Pich Pisey នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Pich Pisey: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Pich Pisey 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2025-01-22",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-66-jYWoYIsQF0k",
+    url: "https://www.youtube.com/watch?v=jYWoYIsQF0k",
+    authorName: "Mey Natural Food",
+    channelId: "UCodC-082nikp-Cq7tlJXtpg",
+    channelUrl: "https://www.youtube.com/@ahmeyfood",
+    fallbackTitleEn: "2.50$ #ahmey",
+    titleKh: "អត់បានធ្វេីម្ហូប មករកញាំម្ហូបខ្មែរ នៅមាត់ស្ទឹងអស់តែ2.50$​ ញាំមួយឆ្អែត #ahmey",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Mey Natural Food) — 2.50$ #ahmey",
+    descriptionKh: "welcome to channel ម្ហូបស្រែគ្រួសារខ្ញុំ SUBSCRIBE FOR MORE VIDEO. (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Mey Natural Food នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Mey Natural Food: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Mey Natural Food 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2024-12-26",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-67-5RuvsQ-KHEA",
+    url: "https://www.youtube.com/watch?v=5RuvsQ-KHEA",
+    authorName: "Travelwithchris",
+    channelId: "UC40tCi6qlNr-WS37JQSrSUQ",
+    channelUrl: "https://www.youtube.com/@Travelwithchris",
+    fallbackTitleEn: "Trying Cambodian Street Food in Siem Reap 🇰🇭",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តសៀមរាប (Travelwithchris) — Trying Cambodian Street Food in Siem Reap 🇰🇭",
+    titleZh: "暹粒省地道高棉街头美食与传统名菜测评 (Travelwithchris) — Trying Cambodian Street Food in Siem Reap 🇰🇭",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តសៀមរាប ពី YouTuber Travelwithchris (Siem Reap Food Review)។",
+    descriptionEn: "Trying Cambodian Street Food in Siem Reap, Cambodia. In this video I will visit one of the popular street food areas of the city ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Siem Reap by Travelwithchris.",
+    descriptionZh: "由 YouTube 创作者 Travelwithchris 拍摄的暹粒省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "ខេត្តសៀមរាប",
+    provinceEn: "Siem Reap",
+    publishedDate: "2024-11-18",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-68-SzOkTic--QA",
+    url: "https://www.youtube.com/watch?v=SzOkTic--QA",
+    authorName: "Bec & Matt Adventures",
+    channelId: "UCr4JTejyDoyCeBLnwJ6bjOw",
+    channelUrl: "https://www.youtube.com/@BecMattAdventures",
+    fallbackTitleEn: "Phnom Penh Restaurant Food Review Cambodia",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Bec & Matt Adventures) — Phnom Penh Restaurant Food Review Cambodia",
+    titleZh: "金边高棉人气餐厅、自助餐与咖啡店探店测评 (Bec & Matt Adventures) — Phnom Penh Restaurant Food Review Cambodia",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Bec & Matt Adventures (Phnom Penh Food Review)។",
+    descriptionEn: "Come along and see whats Khmer cuisine is like. David's Restaurant Homemade Noodles : Situated : 13, #166 Preah Ang Eng St. — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Bec & Matt Adventures.",
+    descriptionZh: "由 YouTube 创作者 Bec & Matt Adventures 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2024-11-10",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-5",
+  },
+  {
+    id: "yt-2026-kh-review-69-QmdWEb_0BaM",
+    url: "https://www.youtube.com/watch?v=QmdWEb_0BaM",
+    authorName: "The Chui Show",
+    channelId: "UCJX9p4c81NoZ4_TFME-yY6g",
+    channelUrl: "https://www.youtube.com/@TheChuiShow",
+    fallbackTitleEn: "The Chui Show: FILIPINO tries BEST CAMBODIAN Street Food of CAMBODIA 100 Hours of Street Food!",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (The Chui Show) — The Chui Show: FILIPINO tries BEST CAMBODIAN Street Food of CAMBODIA 100 Hours of Street Food!",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (The Chui Show) — The Chui Show: FILIPINO tries BEST CAMBODIAN Street Food of CAMBODIA 100 Hours of Street Food!",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber The Chui Show (Cambodian Food Review)។",
+    descriptionEn: "A 2 hour compilation of a Filipino trying authentic Cambodian street food in Phnom Penh! Enjoy! — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by The Chui Show.",
+    descriptionZh: "由 YouTube 创作者 The Chui Show 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2024-11-09",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-70-GAK_1OLfNfs",
+    url: "https://www.youtube.com/watch?v=GAK_1OLfNfs",
+    authorName: "Luke Martin",
+    channelId: "UCp2dhjQXkhY1O40lj15JQzw",
+    channelUrl: "https://www.youtube.com/@LukeMartin",
+    fallbackTitleEn: "100 Hours in Cambodia 🇰🇭 PHNOM PENH Street Food, KEP Seafood, SIEM REAP BBQ & More!",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តសៀមរាប (Luke Martin) — 100 Hours in Cambodia 🇰🇭 PHNOM PENH Street Food, KEP Seafood, SIEM REAP BBQ & More!",
+    titleZh: "暹粒省柬埔寨夜市寻味与美食旅行 Vlog (Luke Martin) — 100 Hours in Cambodia 🇰🇭 PHNOM PENH Street Food, KEP Seafood, SIEM REAP BBQ & More!",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តសៀមរាប ពី YouTuber Luke Martin (Siem Reap Food Review)។",
+    descriptionEn: "Khmer food is highly underrated and Cambodia as a whole has so much to offer a traveller. A country seemingly stuck in the past ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Siem Reap by Luke Martin.",
+    descriptionZh: "由 YouTube 创作者 Luke Martin 拍摄的暹粒省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "ខេត្តសៀមរាប",
+    provinceEn: "Siem Reap",
+    publishedDate: "2024-11-03",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-6",
+  },
+  {
+    id: "yt-2026-kh-review-71-_kTeeUSe8C8",
+    url: "https://www.youtube.com/watch?v=_kTeeUSe8C8",
+    authorName: "Pich Pisey",
+    channelId: "UCplb1Ru5jWb_BM3Qe_OoQkw",
+    channelUrl: "https://www.youtube.com/@pichpisey4129",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Pich Pisey (#71)",
+    titleKh: "ខ្ញុំដាក់ពិន្ទុម្ហូប ១០មុខនៅកោះនរា(ភ្នំពេញ)😋🦑",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Pich Pisey) — Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Pich Pisey (#71)",
+    descriptionKh: "ខ្ញុំដាក់ពិន្ទុម្ហូប ១០មុខនៅកោះនរា(ភ្នំពេញ)     . . . #pichpisey ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Pich Pisey នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Pich Pisey: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Pich Pisey 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2024-10-22",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-72-XSa-BWqd0Go",
+    url: "https://www.youtube.com/watch?v=XSa-BWqd0Go",
+    authorName: "Luke Martin",
+    channelId: "UCp2dhjQXkhY1O40lj15JQzw",
+    channelUrl: "https://www.youtube.com/@LukeMartin",
+    fallbackTitleEn: "Cambodian Street Food 🇰🇭 Fermented Fish \"Pizza\" ( ) + Siem Reap's Food Village!",
+    titleKh: "Cambodian Street Food 🇰🇭 Fermented Fish \"Pizza\" (ប្រហុកភីហ្សា) + Siem Reap's Food Village!",
+    titleZh: "暹粒省地道高棉街头美食与传统名菜测评 (Luke Martin) — Cambodian Street Food 🇰🇭 Fermented Fish \"Pizza\" ( ) + Siem Reap's Food Village!",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តសៀមរាប ពី YouTuber Luke Martin (Siem Reap Food Review)។",
+    descriptionEn: "This is episode 2 from Siem Reap, Cambodia. Home to the UNESCO world heritage site of Angkor Wat and also some of Asia's ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Siem Reap by Luke Martin.",
+    descriptionZh: "由 YouTube 创作者 Luke Martin 拍摄的暹粒省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "ខេត្តសៀមរាប",
+    provinceEn: "Siem Reap",
+    publishedDate: "2024-09-29",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-14",
+  },
+  {
+    id: "yt-2026-kh-review-73--q_dbm9AUfg",
+    url: "https://www.youtube.com/watch?v=-q_dbm9AUfg",
+    authorName: "MrrDaro KH",
+    channelId: "UCT9Oxgi6RHlf1bv939Xtk-g",
+    channelUrl: "https://www.youtube.com/@mrrdarokh6247",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Phnom Penh by MrrDaro KH (#73)",
+    titleKh: "លុយ30000៛ ដើរញាំអាហារនៅមាត់ទន្លេ",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (MrrDaro KH) — Authentic Cambodian Food Review & Local Street Food in Phnom Penh by MrrDaro KH (#73)",
+    descriptionKh: "Challenge លុយ30000៛ ដើរញាំអាហារនៅមាត់ទន្លេ. (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល MrrDaro KH នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber MrrDaro KH: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 MrrDaro KH 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2024-09-26",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-74-IbI1UOQjr54",
+    url: "https://www.youtube.com/watch?v=IbI1UOQjr54",
+    authorName: "Pich Pisey",
+    channelId: "UCplb1Ru5jWb_BM3Qe_OoQkw",
+    channelUrl: "https://www.youtube.com/@pichpisey4129",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Pich Pisey (#74)",
+    titleKh: "ញុំាអាហារ ៥មុខតាមផ្លូវឌឿងហែមនៅភ្នំពេញ😋🍜",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Pich Pisey) — Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Pich Pisey (#74)",
+    descriptionKh: "ញុំាអាហារ ៥មុខតាមផ្លូវឌឿងហែមនៅភ្នំពេញ     . . . #pichpisey #ពេជ្រពិសី ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Pich Pisey នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Pich Pisey: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Pich Pisey 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2024-09-25",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-75-cjUrceedHhM",
+    url: "https://www.youtube.com/watch?v=cjUrceedHhM",
+    authorName: "MrrDaro KH",
+    channelId: "UCT9Oxgi6RHlf1bv939Xtk-g",
+    channelUrl: "https://www.youtube.com/@mrrdarokh6247",
+    fallbackTitleEn: "MUKBANG EATING SPICY CRAB | HOMESALMON",
+    titleKh: "MUKBANG EATING SPICY CRAB | ក្តាមថ្មពង HOMESALMON",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (MrrDaro KH) — MUKBANG EATING SPICY CRAB | HOMESALMON",
+    descriptionKh: "ក្តាមថ្មពង HOMESALMON. (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល MrrDaro KH នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber MrrDaro KH: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 MrrDaro KH 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2024-08-26",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-19",
+  },
+  {
+    id: "yt-2026-kh-review-76-mvHaPYBOD80",
+    url: "https://www.youtube.com/watch?v=mvHaPYBOD80",
+    authorName: "Pure Detour",
+    channelId: "UCwWwEraY_OkILE3W2-7FjIg",
+    channelUrl: "https://www.youtube.com/@PureDetour",
+    fallbackTitleEn: "SIEM REAP Food Review. Two Awesome Locations",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តសៀមរាប (Pure Detour) — SIEM REAP Food Review. Two Awesome Locations",
+    titleZh: "暹粒省地道高棉街头美食与传统名菜测评 (Pure Detour) — SIEM REAP Food Review. Two Awesome Locations",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តសៀមរាប ពី YouTuber Pure Detour (Siem Reap Food Review)។",
+    descriptionEn: "This week I visit two awesome locations to bring you another SIem Reap food review. The first location is Reaksmey Siem Reap, ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Siem Reap by Pure Detour.",
+    descriptionZh: "由 YouTube 创作者 Pure Detour 拍摄的暹粒省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "ខេត្តសៀមរាប",
+    provinceEn: "Siem Reap",
+    publishedDate: "2024-08-10",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-77-vq5cuEh6ml0",
+    url: "https://www.youtube.com/watch?v=vq5cuEh6ml0",
+    authorName: "Delicious food channel",
+    channelId: "UCg7R70hWzrtDh3bCGlrGKhQ",
+    channelUrl: "https://www.youtube.com/@%E1%9E%98%E1%9F%92%E1%9E%A0%E1%9E%BC%E1%9E%94%E1%9E%86%E1%9F%92%E1%9E%84%E1%9E%B6%E1%9E%89%E1%9F%8B",
+    fallbackTitleEn: "Delicious food channel",
+    titleKh: "ប្រហិតត្រីម្ហូបខ្មែរបុរាណ ស្វិតឆ្ងាញ់ របៀបធ្វើបែបដើម កូនខ្មែរត្រូវចេះ Delicious food channel",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Delicious food channel) — Delicious food channel",
+    descriptionKh: "ប្រហិតត្រីម្ហូបខ្មែរបុរាណ ស្វិតឆ្ងាញ់ របៀបធ្វើបែបដើម ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Delicious food channel នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Delicious food channel: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Delicious food channel 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2024-08-10",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-78-cZ0TBNYy9rQ",
+    url: "https://www.youtube.com/watch?v=cZ0TBNYy9rQ",
+    authorName: "Saoran Cooking",
+    channelId: "UC7VkwSil-1XBg4vtxkhSLGA",
+    channelUrl: "https://www.youtube.com/@saorancooking",
+    fallbackTitleEn: "[How to make Red Fish Hotpot Soup]",
+    titleKh: "តិចនិចធ្វើស៊ុបត្រីក្រហមកុំឱ្យមានក្លិនឆ្អាប និងមានរស់ជាតិឆ្ងាញ់ [How to make Red Fish Hotpot Soup]",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Saoran Cooking) — [How to make Red Fish Hotpot Soup]",
+    descriptionKh: "... #ម្ហូបខ្មែរ​ #ស៊ុបត្រីក្រហម Welcome to the Saoren Cooking Channel. In this video, I​ would like to ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Saoran Cooking នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Saoran Cooking: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Saoran Cooking 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2024-08-09",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-79-15Waw8zOp8Q",
+    url: "https://www.youtube.com/watch?v=15Waw8zOp8Q",
+    authorName: "MrrDaro KH",
+    channelId: "UCT9Oxgi6RHlf1bv939Xtk-g",
+    channelUrl: "https://www.youtube.com/@mrrdarokh6247",
+    fallbackTitleEn: "EATING 7 eleven Food - 7 Eleven Mart",
+    titleKh: "EATING 7 eleven Food - ញាំអាហារនៅ 7 Eleven Mart",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (MrrDaro KH) — EATING 7 eleven Food - 7 Eleven Mart",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber MrrDaro KH (ដើរញ៉ាំម្ហូបខ្មែរ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber MrrDaro KH: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 MrrDaro KH 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2024-08-01",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-80-7X_yFcUgbrs",
+    url: "https://www.youtube.com/watch?v=7X_yFcUgbrs",
+    authorName: "Francly Speaking",
+    channelId: "UCVHTf72swGXqKQCG9pOyDIw",
+    channelUrl: "https://www.youtube.com/@franclyspeaking",
+    fallbackTitleEn: "STREET FOOD adventure in BATTAMBANG, eating like a local! | Cambodia 🇰🇭",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តបាត់ដំបង (Francly Speaking) — STREET FOOD adventure in BATTAMBANG, eating like a local! | Cambodia 🇰🇭",
+    titleZh: "马德望省柬埔寨夜市寻味与美食旅行 Vlog (Francly Speaking) — STREET FOOD adventure in BATTAMBANG, eating like a local! | Cambodia 🇰🇭",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តបាត់ដំបង ពី YouTuber Francly Speaking (Battambang Food Review)។",
+    descriptionEn: "TONIGHT we are eating a bunch of different street foods in BATTAMBANG, Cambodia! Sarah tries a sugar cane juice for the first ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Battambang by Francly Speaking.",
+    descriptionZh: "由 YouTube 创作者 Francly Speaking 拍摄的马德望省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "ខេត្តបាត់ដំបង",
+    provinceEn: "Battambang",
+    publishedDate: "2024-07-10",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-81-r_9a06GN_Wo",
+    url: "https://www.youtube.com/watch?v=r_9a06GN_Wo",
+    authorName: "Street Food TV",
+    channelId: "UCLVncs-1iVf4f1tW5WSfQfw",
+    channelUrl: "https://www.youtube.com/@StreetFoodTVCambodia",
+    fallbackTitleEn: "The BEST 3 from BATTAMBANG! Mie Kantang, Maju Kralok & Khmer Fast Food Store | Cambodian Street Food",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តបាត់ដំបង (Street Food TV) — The BEST 3 from BATTAMBANG! Mie Kantang, Maju Kralok & Khmer Fast Food Store | Cambodian Street Food",
+    titleZh: "马德望省地道高棉街头美食与传统名菜测评 (Street Food TV) — The BEST 3 from BATTAMBANG! Mie Kantang, Maju Kralok & Khmer Fast Food Store | Cambodian Street Food",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តបាត់ដំបង ពី YouTuber Street Food TV (Battambang Food Review)។",
+    descriptionEn: "We all love Food. Welcome to Street Food TV. Nice to meet you [4K] The BEST 3 from BATTAMBANG ! Mie Kantang, Maju ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Battambang by Street Food TV.",
+    descriptionZh: "由 YouTube 创作者 Street Food TV 拍摄的马德望省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "ខេត្តបាត់ដំបង",
+    provinceEn: "Battambang",
+    publishedDate: "2024-06-16",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-82-wk3HV-N3qSA",
+    url: "https://www.youtube.com/watch?v=wk3HV-N3qSA",
+    authorName: "Best Ever Food Review Show",
+    channelId: "UCcAd5Np7fO8SeejB1FVKcYw",
+    channelUrl: "https://www.youtube.com/@BestEverFoodReviewShow",
+    fallbackTitleEn: "Exotic Street Food in Cambodia!! From Spiders to Rats!! (Full Documentary)",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Best Ever Food Review Show) — Exotic Street Food in Cambodia!! From Spiders to Rats!! (Full Documentary)",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Best Ever Food Review Show) — Exotic Street Food in Cambodia!! From Spiders to Rats!! (Full Documentary)",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Best Ever Food Review Show (Cambodian Food Review)។",
+    descriptionEn: "FOLLOW!!* https://www.instagram.com/besteverfoodreviewshow/ SUBSCRIBE (2ⁿᵈ ch.) — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Best Ever Food Review Show.",
+    descriptionZh: "由 YouTube 创作者 Best Ever Food Review Show 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2024-06-14",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-83-7P7_2Ukr5BA",
+    url: "https://www.youtube.com/watch?v=7P7_2Ukr5BA",
+    authorName: "Best Ever Food Review Show",
+    channelId: "UCcAd5Np7fO8SeejB1FVKcYw",
+    channelUrl: "https://www.youtube.com/@BestEverFoodReviewShow",
+    fallbackTitleEn: "Cambodia’s $1 Seafood Chef vs $180 Seafood Chef!!",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Best Ever Food Review Show) — Cambodia’s $1 Seafood Chef vs $180 Seafood Chef!!",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Best Ever Food Review Show) — Cambodia’s $1 Seafood Chef vs $180 Seafood Chef!!",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Best Ever Food Review Show (Cambodian Food Review)។",
+    descriptionEn: "Thanks to BetterHelp for sponsoring this video! Visit https://betterhelp.com/besteverfood to get 10% off your first month today! — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Best Ever Food Review Show.",
+    descriptionZh: "由 YouTube 创作者 Best Ever Food Review Show 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2024-06-07",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-19",
+  },
+  {
+    id: "yt-2026-kh-review-84-nR6pyTYk56U",
+    url: "https://www.youtube.com/watch?v=nR6pyTYk56U",
+    authorName: "Mei Queen Food",
+    channelId: "UCxhoQEdo5ixoKIo1IFXiubg",
+    channelUrl: "https://www.youtube.com/@meiqueen1511",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Mei Queen Food (#84)",
+    titleKh: "ទីបំផុតខ្ញុំបានញ៉ាំសាកហើយ😋",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Mei Queen Food) — Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Mei Queen Food (#84)",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Mei Queen Food (ដើរញ៉ាំម្ហូបខ្មែរ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Mei Queen Food: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Mei Queen Food 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2024-05-13",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-85-9LjvaIifKjU",
+    url: "https://www.youtube.com/watch?v=9LjvaIifKjU",
+    authorName: "Best Ever Food Review Show",
+    channelId: "UCcAd5Np7fO8SeejB1FVKcYw",
+    channelUrl: "https://www.youtube.com/@BestEverFoodReviewShow",
+    fallbackTitleEn: "Cambodia’s Street Food Dollar Menu!! Cheapest in Asia!!",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Best Ever Food Review Show) — Cambodia’s Street Food Dollar Menu!! Cheapest in Asia!!",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Best Ever Food Review Show) — Cambodia’s Street Food Dollar Menu!! Cheapest in Asia!!",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Best Ever Food Review Show (Cambodian Food Review)។",
+    descriptionEn: "SUBSCRIBE!* BEST EVER FOOD INDIA » https://www.youtube.com/@besteverfoodindia GRAB OUR MERCH ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Best Ever Food Review Show.",
+    descriptionZh: "由 YouTube 创作者 Best Ever Food Review Show 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2024-05-10",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-86-0Mih3H_ssE4",
+    url: "https://www.youtube.com/watch?v=0Mih3H_ssE4",
+    authorName: "Jax out and about",
+    channelId: "UCA8wZRSt3JfLUKa0iCKYjMw",
+    channelUrl: "https://www.youtube.com/@Jax_outandabout",
+    fallbackTitleEn: "Cambodian Food.. restaurant review.@The Grill Lounge Restaurant..Siem Reap 🇰🇭",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តសៀមរាប (Jax out and about) — Cambodian Food.. restaurant review.@The Grill Lounge Restaurant..Siem Reap 🇰🇭",
+    titleZh: "暹粒省高棉人气餐厅、自助餐与咖啡店探店测评 (Jax out and about) — Cambodian Food.. restaurant review.@The Grill Lounge Restaurant..Siem Reap 🇰🇭",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តសៀមរាប ពី YouTuber Jax out and about (Siem Reap Food Review)។",
+    descriptionEn: "We try some more tasty Cambodian food,including Frog Legs and Duck breast at the trendy and stylish 'The Grill Lounge' ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Siem Reap by Jax out and about.",
+    descriptionZh: "由 YouTube 创作者 Jax out and about 拍摄的暹粒省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "ខេត្តសៀមរាប",
+    provinceEn: "Siem Reap",
+    publishedDate: "2024-03-02",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-6",
+  },
+  {
+    id: "yt-2026-kh-review-87-DksJQMlLmFo",
+    url: "https://www.youtube.com/watch?v=DksJQMlLmFo",
+    authorName: "Chhom Sreypach",
+    channelId: "UCx7XcErrBfBnB7Tz58F4F2Q",
+    channelUrl: "https://www.youtube.com/@chhomsreypachkh",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Chhom Sreypach (#87)",
+    titleKh: "ធ្វើនំបញ្ចុកសម្លប្រហើរខ្មែរ ចែកជូនពុកម៉ែបងប្អូនលោកយាយលោកតា ជាមួយព្រះនាងតូច ជេនណា",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Chhom Sreypach) — Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Chhom Sreypach (#87)",
+    descriptionKh: "សូមស្វាគមន៍មកកាន់ឆាណែល Chhom Sreypach ។ កុំភ្លេចជួយ subscribe ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Chhom Sreypach នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Chhom Sreypach: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Chhom Sreypach 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2024-02-19",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-3",
+  },
+  {
+    id: "yt-2026-kh-review-88-d_n9I2b9Yhc",
+    url: "https://www.youtube.com/watch?v=d_n9I2b9Yhc",
+    authorName: "Apricot Wanderers",
+    channelId: "UCAGSZxHyropnxsYC_s1aaxg",
+    channelUrl: "https://www.youtube.com/@ApricotWanderers",
+    fallbackTitleEn: "Top 10 Restaurants to Visit in Phnom Penh | Cambodia - English",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Apricot Wanderers) — Top 10 Restaurants to Visit in Phnom Penh | Cambodia - English",
+    titleZh: "金边高棉人气餐厅、自助餐与咖啡店探店测评 (Apricot Wanderers) — Top 10 Restaurants to Visit in Phnom Penh | Cambodia - English",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Apricot Wanderers (Khmer Restaurant Review)។",
+    descriptionEn: "PhnomPenhRestaurants #PhnomPenhFood #Cambodia #PhnomPenh Phnom Penh, Cambodia's busy capital, sits at the junction ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Apricot Wanderers.",
+    descriptionZh: "由 YouTube 创作者 Apricot Wanderers 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2023-10-13",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-89-8hRoh1K698k",
+    url: "https://www.youtube.com/watch?v=8hRoh1K698k",
+    authorName: "Muntha Music Studio",
+    channelId: "UCmpsHcB0sbP3fnVCV6oEFpg",
+    channelUrl: "https://www.youtube.com/@MunthaMusic",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Kep by Muntha Music Studio (#89)",
+    titleKh: "វិធីធ្វើ ឆាក្ដៅកង្កែប | វិធីធ្វើម្ហូប | ម្ហូបខ្មែរ2023 | វិធីធ្វើម្ហូប2023",
+    titleZh: "白马省地道高棉街头美食与传统名菜测评 (Muntha Music Studio) — Authentic Cambodian Food Review & Local Street Food in Kep by Muntha Music Studio (#89)",
+    descriptionKh: "ឆាក្ដៅកង្កែប គឺជា ម្ហូបខ្មែរ Khmer foods ដ៏សាមញមួយមុខរបស់ ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Muntha Music Studio នៅខេត្តកែប)។",
+    descriptionEn: "Verified in Kep, Cambodia by YouTuber Muntha Music Studio: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Muntha Music Studio 拍摄的白马省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "ខេត្តកែប",
+    provinceEn: "Kep",
+    publishedDate: "2023-10-12",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-90-Lw-1OtvUSSE",
+    url: "https://www.youtube.com/watch?v=Lw-1OtvUSSE",
+    authorName: "Muntha Music Studio",
+    channelId: "UCmpsHcB0sbP3fnVCV6oEFpg",
+    channelUrl: "https://www.youtube.com/@MunthaMusic",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Muntha Music Studio (#90)",
+    titleKh: "វិធីធ្វើ ខជើងជ្រូកពងទា | វិធីធ្វើម្ហូប | ម្ហូបខ្មែរ2023 | វិធីធ្វើម្ហូប2023",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Muntha Music Studio) — Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Muntha Music Studio (#90)",
+    descriptionKh: "ខជើងជ្រូកពងទា គឺជា ម្ហូបខ្មែរ Khmer foods ដ៏សាមញមួយមុខរបស់ ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Muntha Music Studio នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Muntha Music Studio: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Muntha Music Studio 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2023-10-03",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-91-u8xFQUqdnmU",
+    url: "https://www.youtube.com/watch?v=u8xFQUqdnmU",
+    authorName: "Luke Martin",
+    channelId: "UCp2dhjQXkhY1O40lj15JQzw",
+    channelUrl: "https://www.youtube.com/@LukeMartin",
+    fallbackTitleEn: "24 Hours of CAMBODIAN STREET FOOD in Phnom Penh!! KHMER Noodles + BEST Breakfast in Cambodia!",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Luke Martin) — 24 Hours of CAMBODIAN STREET FOOD in Phnom Penh!! KHMER Noodles + BEST Breakfast in Cambodia!",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Luke Martin) — 24 Hours of CAMBODIAN STREET FOOD in Phnom Penh!! KHMER Noodles + BEST Breakfast in Cambodia!",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Luke Martin (Khmer Food Review)។",
+    descriptionEn: "Welcome to the sprawling capital city of Phnom Penh. The Kingdom of Cambodia's best STREET FOOD can be found here in its ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Luke Martin.",
+    descriptionZh: "由 YouTube 创作者 Luke Martin 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2023-09-10",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-5",
+  },
+  {
+    id: "yt-2026-kh-review-92-rDmMWUXwGL4",
+    url: "https://www.youtube.com/watch?v=rDmMWUXwGL4",
+    authorName: "Delicious food channel",
+    channelId: "UCg7R70hWzrtDh3bCGlrGKhQ",
+    channelUrl: "https://www.youtube.com/@%E1%9E%98%E1%9F%92%E1%9E%A0%E1%9E%BC%E1%9E%94%E1%9E%86%E1%9F%92%E1%9E%84%E1%9E%B6%E1%9E%89%E1%9F%8B",
+    fallbackTitleEn: "@ Delicious food channel",
+    titleKh: "បុកកំពឹសអំពិលខ្ចី ម្ហូបខ្មែរគឺឆ្ងាញ់ វីដេអូនេះមានបង្ហាញ @ម្ហូបឆ្ងាញ់ Delicious food channel",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Delicious food channel) — @ Delicious food channel",
+    descriptionKh: "របៀបបុកកំពឹសអំពិលខ្ចី ម្ហូបខ្មែរធ្វើត្រូវគឺឆ្ងាញ់ ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Delicious food channel នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Delicious food channel: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Delicious food channel 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2023-07-19",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-93-68Xw2PSI3wE",
+    url: "https://www.youtube.com/watch?v=68Xw2PSI3wE",
+    authorName: "Derthort-ដេីរថត",
+    channelId: "UCOAKLGCZQE7Mi_0V-gkM_EA",
+    channelUrl: "https://www.youtube.com/@Derthort",
+    fallbackTitleEn: "Street food | Street food Oudong market Dinner Amok",
+    titleKh: "Street food | ម្ហូបតាមដងផ្លូវនៅផ្សារឧដុង្គពេលល្ងាច ម្ហូបអាម៉ុក Street food Oudong market Dinner Amok",
+    titleZh: "磅士卑省柬埔寨夜市寻味与美食旅行 Vlog (Derthort) — Street food | Street food Oudong market Dinner Amok",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តកំពង់ស្ពឺ ពី YouTuber Derthort-ដេីរថត (ម្ហូបតាមផ្លូវភ្នំពេញ)។",
+    descriptionEn: "streetfood #foodie #foodtour Support us with: Clicked subscribe Pnechar & turned on bell on not to missed any videos. — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Kampong Speu by Derthort- .",
+    descriptionZh: "由 YouTube 创作者 Derthort 拍摄的磅士卑省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "ខេត្តកំពង់ស្ពឺ",
+    provinceEn: "Kampong Speu",
+    publishedDate: "2023-07-19",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-94-giYjmpHR22I",
+    url: "https://www.youtube.com/watch?v=giYjmpHR22I",
+    authorName: "Street Food TV",
+    channelId: "UCLVncs-1iVf4f1tW5WSfQfw",
+    channelUrl: "https://www.youtube.com/@StreetFoodTVCambodia",
+    fallbackTitleEn: "The BEST from CAMBODIA ! Amazing Local Street Food Collection | Cambodian Street Food",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Street Food TV) — The BEST from CAMBODIA ! Amazing Local Street Food Collection | Cambodian Street Food",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Street Food TV) — The BEST from CAMBODIA ! Amazing Local Street Food Collection | Cambodian Street Food",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Street Food TV (Cambodian Food Review)។",
+    descriptionEn: "We all love Food. Welcome to Street Food TV. Nice to meet you The BEST from CAMBODIA! Amazing Local Street Food ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Street Food TV.",
+    descriptionZh: "由 YouTube 创作者 Street Food TV 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2023-07-14",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-95-ZSCBDGcBsP8",
+    url: "https://www.youtube.com/watch?v=ZSCBDGcBsP8",
+    authorName: "yumbitescambodia",
+    channelId: "UCVih8bFctnamRMT18RqOolw",
+    channelUrl: "https://www.youtube.com/@YumBitesCambodia",
+    fallbackTitleEn: "Try Latest Japanese Restaurant in Phnom Penh",
+    titleKh: "Try Latest Japanese Restaurant in Phnom Penh- ម្ហូបជប៉ុនលាក់ខ្លួននៅភ្នំពេញ",
+    titleZh: "金边高棉人气餐厅、自助餐与咖啡店探店测评 (yumbitescambodia) — Try Latest Japanese Restaurant in Phnom Penh",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber yumbitescambodia (ហាងអាហារនៅកម្ពុជា)។",
+    descriptionEn: "Hello everyone welcome to new video from Yumbites Cambodia. In this video, we try new Japanese restaurant in Phnom Penh. — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by yumbitescambodia.",
+    descriptionZh: "由 YouTube 创作者 yumbitescambodia 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2023-07-14",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-96-AMHO9JRPKRs",
+    url: "https://www.youtube.com/watch?v=AMHO9JRPKRs",
+    authorName: "Nore Films",
+    channelId: "UCa6vVyA5RxrNG7Mu-6wEryA",
+    channelUrl: "https://www.youtube.com/@norefilms",
+    fallbackTitleEn: "BEST Cooking Class in Battambang | Authentic Cambodian Food at Nary Kitchen",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តបាត់ដំបង (Nore Films) — BEST Cooking Class in Battambang | Authentic Cambodian Food at Nary Kitchen",
+    titleZh: "马德望省地道高棉街头美食与传统名菜测评 (Nore Films) — BEST Cooking Class in Battambang | Authentic Cambodian Food at Nary Kitchen",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តបាត់ដំបង ពី YouTuber Nore Films (Battambang Food Review)។",
+    descriptionEn: "We just arrived at Battambang and first activity is the famous Nary Kitchen cooking class. Here we will visit the local market to ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Battambang by Nore Films.",
+    descriptionZh: "由 YouTube 创作者 Nore Films 拍摄的马德望省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "ខេត្តបាត់ដំបង",
+    provinceEn: "Battambang",
+    publishedDate: "2023-06-08",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-97-cWROXOZmS3U",
+    url: "https://www.youtube.com/watch?v=cWROXOZmS3U",
+    authorName: "Second Life Travels",
+    channelId: "UCDt2OX9enDjBV1ZA-L21zZw",
+    channelUrl: "https://www.youtube.com/@SecondLifeTravels1",
+    fallbackTitleEn: "Malis - The Best Cambodian Restaurant in the World! In Depth Review!",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Second Life Travels) — Malis - The Best Cambodian Restaurant in the World! In Depth Review!",
+    titleZh: "金边高棉人气餐厅、自助餐与咖啡店探店测评 (Second Life Travels) — Malis - The Best Cambodian Restaurant in the World! In Depth Review!",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Second Life Travels (Khmer Restaurant Review)។",
+    descriptionEn: "Are you looking for the best Cambodian food while visiting Phnom Penh, Cambodia? The consensus is that Malis Restaurant in ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Second Life Travels.",
+    descriptionZh: "由 YouTube 创作者 Second Life Travels 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2023-04-15",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-98-0yjKwJFxYFc",
+    url: "https://www.youtube.com/watch?v=0yjKwJFxYFc",
+    authorName: "Yekny Rorn",
+    channelId: "UC7tuP-qq6HHAi_Q3vHdXZ8g",
+    channelUrl: "https://www.youtube.com/@yeknyrorn",
+    fallbackTitleEn: "Delicious food / Khmer food",
+    titleKh: "មុខម្ហូបនិងរបៀបធ្វើជាង ១០០មុខ / Delicious food / Khmer food",
+    titleZh: "金边高棉人气餐厅、自助餐与咖啡店探店测评 (Yekny Rorn) — Delicious food / Khmer food",
+    descriptionKh: "អរគុណចំពោះការចូលទស្សនា សូមជួយ subscribe ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Yekny Rorn នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Yekny Rorn: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Yekny Rorn 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2023-03-24",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-99-qMyLA1oB87M",
+    url: "https://www.youtube.com/watch?v=qMyLA1oB87M",
+    authorName: "Kitchen Story",
+    channelId: "UCLUapBXshwIyBCDMWSO3srQ",
+    channelUrl: "https://www.youtube.com/@kitchenstoryK",
+    fallbackTitleEn: "[Vegetable Chicken Soup][ Khmer Food]",
+    titleKh: "ស៊ុបមាន់ប៉ូវកម្លាំង[Vegetable Chicken Soup][ម្ហូបខ្មែរ Khmer Food]",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Kitchen Story) — [Vegetable Chicken Soup][ Khmer Food]",
+    descriptionKh: "ស៊ុបមាន់ប៉ូវកម្លាំង[Vegetable Chicken Soup][ម្ហូបខ្មែរ Khmer Food] #ស៊ុបមាន់ ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Kitchen Story នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Kitchen Story: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Kitchen Story 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2023-01-15",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-100-C3i4MvIOhYg",
+    url: "https://www.youtube.com/watch?v=C3i4MvIOhYg",
+    authorName: "Pich Pisey Fan - ពេជ្រ ពិសី​",
+    channelId: "UCeiWUs4niQ-Gg772BX_E50w",
+    channelUrl: "https://www.youtube.com/@pichpisey-8218",
+    fallbackTitleEn: "5000 ( )🌮😋",
+    titleKh: "ដើរញុំាអីតម្លៃក្រោម 5000រៀល (ឆ្ងាញ់គ្រប់មុខ)🌮😋",
+    titleZh: "金边柬埔寨夜市寻味与美食旅行 Vlog (Pich Pisey Fan) — 5000 ( )🌮😋",
+    descriptionKh: "ដើរញុំាអីតម្លៃក្រោម 5000រៀល (ឆ្ងាញ់គ្រប់មុខ) (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Pich Pisey Fan - ពេជ្រ ពិសី​ នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Pich Pisey Fan - : exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Pich Pisey Fan 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "food_travel_vlog",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2022-10-11",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-101-p1ugaG218Jo",
+    url: "https://www.youtube.com/watch?v=p1ugaG218Jo",
+    authorName: "Eating Food",
+    channelId: "UCBQ_u6RFTlHbX8IVkpVMkig",
+    channelUrl: "https://www.youtube.com/@eatingfood3533",
+    fallbackTitleEn: "Japanes food | Cambodian Street food | Art of food",
+    titleKh: "អាហារបែបជប៉ុន ហាងអូម៉ាកាសេ វ៉ាហ្ងាយូ | Japanes food | Cambodian Street food | Art of food",
+    titleZh: "金边高棉人气餐厅、自助餐与咖啡店探店测评 (Eating Food) — Japanes food | Cambodian Street food | Art of food",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Eating Food (ហាងអាហារនៅកម្ពុជា)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Eating Food: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Eating Food 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2022-09-03",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-102-J4w3HfEvemc",
+    url: "https://www.youtube.com/watch?v=J4w3HfEvemc",
+    authorName: "STREET FOOD REVIEW",
+    channelId: "UCVGAjXzfvGqrWReUo1kD8oA",
+    channelUrl: "https://www.youtube.com/@StreetFoodReviews",
+    fallbackTitleEn: "Battambang Street Fried Rice - Eat Show / Street Food Review",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅខេត្តបាត់ដំបង (STREET FOOD REVIEW) — Battambang Street Fried Rice - Eat Show / Street Food Review",
+    titleZh: "马德望省地道高棉街头美食与传统名菜测评 (STREET FOOD REVIEW) — Battambang Street Fried Rice - Eat Show / Street Food Review",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងខេត្តបាត់ដំបង ពី YouTuber STREET FOOD REVIEW (Battambang Food Review)។",
+    descriptionEn: "Are you hungry? After work, we had street fried at Bay Cha Le A Kas in Battambang, Cambodia. It taste so good. I will be back ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Battambang by STREET FOOD REVIEW.",
+    descriptionZh: "由 YouTube 创作者 STREET FOOD REVIEW 拍摄的马德望省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "ខេត្តបាត់ដំបង",
+    provinceEn: "Battambang",
+    publishedDate: "2022-08-18",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-103-W2Ysg2jrBuw",
+    url: "https://www.youtube.com/watch?v=W2Ysg2jrBuw",
+    authorName: "សារអាហារ​ - Expressions Hub",
+    channelId: "UC3GHwJ665OxdjdHr-26SPWA",
+    channelUrl: "https://www.youtube.com/@expressionshub3501",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Expressions Hub (#103)",
+    titleKh: "បើចង់ញ៉ាំម្ហូបខ្មែរឱ្យចំរសជាតិខ្មែរ គឺត្រូវតែទៅភោជនីយដ្ឋាន វ័នម៉រ បឹងកក់",
+    titleZh: "金边高棉人气餐厅、自助餐与咖啡店探店测评 (Expressions Hub) — Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Expressions Hub (#103)",
+    descriptionKh: "ទាំងឆ្ងាញ់រសជាតិខ្មែរ ចាស់ប្រហុក ចាស់គ្រឿង ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល សារអាហារ​ - Expressions Hub នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber - Expressions Hub: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Expressions Hub 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2022-07-12",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-14",
+  },
+  {
+    id: "yt-2026-kh-review-104-lBhL-zCPTJo",
+    url: "https://www.youtube.com/watch?v=lBhL-zCPTJo",
+    authorName: "Facetaste",
+    channelId: "UCAA7SWZIB2TmoABwhh-he4g",
+    channelUrl: "https://www.youtube.com/@facetaste8451",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Facetaste (#104)",
+    titleKh: "7.5$ ញ៉ាំប៊ូហ្វេសាច់អាំងទឹកកាពិម៉ាសេរី មិនកំណត់ម៉ោង",
+    titleZh: "金边高棉人气餐厅、自助餐与咖啡店探店测评 (Facetaste) — Authentic Cambodian Food Review & Local Street Food in Phnom Penh by Facetaste (#104)",
+    descriptionKh: "ហាង BAO BAO BBQ សា��់អាំងទឹកកាពិ និងបុហ្វេ ⏰ម៉ោងបើកលក់៖ ៣:៣០រសៀល ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល Facetaste នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber Facetaste: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Facetaste 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2022-07-01",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-6",
+  },
+  {
+    id: "yt-2026-kh-review-105-ynjH60vovx4",
+    url: "https://www.youtube.com/watch?v=ynjH60vovx4",
+    authorName: "សារអាហារ​ - Expressions Hub",
+    channelId: "UC3GHwJ665OxdjdHr-26SPWA",
+    channelUrl: "https://www.youtube.com/@expressionshub3501",
+    fallbackTitleEn: "Authentic Cambodian Food Review & Local Street Food in Siem Reap by Expressions Hub (#105)",
+    titleKh: "ប្រយ័ត្នមិនដឹងកន្លែងញ៉ាំម្ហូបស្រែនៅខេត្តសៀមរាបណា៎...ហាង ខ្មែរអង្គរ រសជាតិបែបស្រុកស្រែ",
+    titleZh: "暹粒省高棉人气餐厅、自助餐与咖啡店探店测评 (Expressions Hub) — Authentic Cambodian Food Review & Local Street Food in Siem Reap by Expressions Hub (#105)",
+    descriptionKh: "ទៅសៀមរាបហាមរំលងម្ហូបបែបជនបទស្រកស្រែឱ្យសោះ ... (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល សារអាហារ​ - Expressions Hub នៅខេត្តសៀមរាប)។",
+    descriptionEn: "Verified in Siem Reap, Cambodia by YouTuber - Expressions Hub: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Expressions Hub 拍摄的暹粒省柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "famous_restaurant",
+    provinceKh: "ខេត្តសៀមរាប",
+    provinceEn: "Siem Reap",
+    publishedDate: "2022-04-24",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-106-B5WO7mdpch0",
+    url: "https://www.youtube.com/watch?v=B5WO7mdpch0",
+    authorName: "Pie Noon",
+    channelId: "UCRgzg_KZ0hGQ_ZhlSF8FKaQ",
+    channelUrl: "https://www.youtube.com/@LaVieBoem",
+    fallbackTitleEn: "Khatiya Korner| Khmer Food Review",
+    titleKh: "Review ម្ហូបខ្មែរ និងអាហារតាមផ្លូវនៅរាជធានីភ្នំពេញ (Pie Noon) — Khatiya Korner| Khmer Food Review",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Pie Noon) — Khatiya Korner| Khmer Food Review",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber Pie Noon (Khmer Food Review)។",
+    descriptionEn: "Join me today as I search for the most Authentic Khmer food in America! My review is from bong srey, Khatiya Korner that lives in ... — Verified Cambodian Food Review, Khmer Food Review & Cambodia Street Food in Phnom Penh by Pie Noon.",
+    descriptionZh: "由 YouTube 创作者 Pie Noon 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2021-04-06",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-107-G4-PnRFDekw",
+    url: "https://www.youtube.com/watch?v=G4-PnRFDekw",
+    authorName: "All Food",
+    channelId: "UCy8nwhJjDlA6yL72QloGPrw",
+    channelUrl: "https://www.youtube.com/@allfood7198",
+    fallbackTitleEn: "street food part 18(10) , ,Phnom pen city food",
+    titleKh: "street food part 18(10) ,អាហារតាមផ្លូវឆ្ងាញ់,Phnom pen city food",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (All Food) — street food part 18(10) , ,Phnom pen city food",
+    descriptionKh: "street food part 18(10) ,អាហារតាមផ្លូវឆ្ងាញ់,Phnom pen city food. (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល All Food នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber All Food: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 All Food 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2018-05-16",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-108-1EaSL-XBaic",
+    url: "https://www.youtube.com/watch?v=1EaSL-XBaic",
+    authorName: "All Food",
+    channelId: "UCy8nwhJjDlA6yL72QloGPrw",
+    channelUrl: "https://www.youtube.com/@allfood7198",
+    fallbackTitleEn: "street food part 17(7) , ,Phnom pen khmer food",
+    titleKh: "street food part 17(7) ,អាហារតាមផ្លូវឆ្ងាញ់,Phnom pen khmer food",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (All Food) — street food part 17(7) , ,Phnom pen khmer food",
+    descriptionKh: "street food part 17(7) ,អាហារតាមផ្លូវឆ្ងាញ់,Phnom pen khmer food. (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល All Food នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber All Food: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 All Food 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2018-05-09",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-109-lbrxxygGL4Q",
+    url: "https://www.youtube.com/watch?v=lbrxxygGL4Q",
+    authorName: "All Food",
+    channelId: "UCy8nwhJjDlA6yL72QloGPrw",
+    channelUrl: "https://www.youtube.com/@allfood7198",
+    fallbackTitleEn: "street food part 17(12) , ,Phnom pen khmer food",
+    titleKh: "street food part 17(12) ,អាហារតាមផ្លូវឆ្ងាញ់,Phnom pen khmer food",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (All Food) — street food part 17(12) , ,Phnom pen khmer food",
+    descriptionKh: "street food part 17(12) ,អាហារតាមផ្លូវឆ្ងាញ់,Phnom pen khmer food. (វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ពីឆានែល All Food នៅរាជធានីភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber All Food: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 All Food 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2018-05-09",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
+  {
+    id: "yt-2026-kh-review-110-EXjcS3GrE_U",
+    url: "https://www.youtube.com/watch?v=EXjcS3GrE_U",
+    authorName: "ឡេង រតន:",
+    channelId: "UCWGYTwmFL4B7l1MEFXRhUDQ",
+    channelUrl: "https://www.youtube.com/@%E1%9E%A1%E1%9F%81%E1%9E%84%E1%9E%9A%E1%9E%8F%E1%9E%93",
+    fallbackTitleEn: "Street Food In Phnom Penh",
+    titleKh: "Street Food In Phnom Penhអាហារតាមផ្លូវក្រុងភ្នំពេញ",
+    titleZh: "金边地道高棉街头美食与传统名菜测评 (Leng Ratanak) — Street Food In Phnom Penh",
+    descriptionKh: "វីដេអូ Review ម្ហូបខ្មែរ ញ៉ាំអាហារខ្មែរ ដើររកម្ហូបឆ្ងាញ់ និងហាងអាហារនៅកម្ពុជា ក្នុងរាជធានីភ្នំពេញ ពី YouTuber ឡេង រតន: (ម្ហូបតាមផ្លូវភ្នំពេញ)។",
+    descriptionEn: "Verified in Phnom Penh, Cambodia by YouTuber :: exploring authentic Khmer dishes, local night markets, street food stalls, and restaurants.",
+    descriptionZh: "由 YouTube 创作者 Leng Ratanak 拍摄的金边柬埔寨美食测评 (Cambodian Food Review)：探访当地高棉传统美食、夜市街头小吃与人气餐厅。",
+    categorySlug: "popular_food",
+    provinceKh: "រាជធានីភ្នំពេញ",
+    provinceEn: "Phnom Penh",
+    publishedDate: "2018-03-17",
+    fallbackThumb: "/foods/food-1.jpg",
+    matchedFoodId: "food-1",
+  },
 ];
 
 /**
@@ -1293,6 +3563,10 @@ function seedToDiscoveryItem(
     ? foods.find((f) => f.id === seed.matchedFoodId)
     : matchCambodianDish(seed.fallbackTitleEn, foods)?.food;
 
+  const channelAccountUrl =
+    seed.channelUrl ||
+    (seed.channelId ? `https://www.youtube.com/channel/${seed.channelId}` : `https://www.youtube.com/watch?v=${vid}`);
+
   return {
     id: seed.id,
     platform: 'youtube',
@@ -1304,6 +3578,8 @@ function seedToDiscoveryItem(
     descriptionZh: seed.descriptionZh,
     thumbnailUrl: thumb,
     sourceUrl: `https://www.youtube.com/watch?v=${vid}`,
+    originalAccountUrl: channelAccountUrl,
+    channelId: seed.channelId,
     sourceName: seed.authorName ? `${seed.authorName} (YouTube)` : 'YouTube Khmer Culinary & Travel',
     authorHandle: seed.authorName || 'YouTube Creator',
     publishedOrUpdatedAt: seed.publishedDate,
@@ -1412,8 +3688,217 @@ export function matchCambodianDish(
   return best && best.score >= 60 ? best : null;
 }
 
-/** Fetch YouTube items (2025–2026): verifies every video for availability & embeddability before displaying */
-async function fetchYouTubeCambodianFoodVideos(foods: FoodItem[]): Promise<{
+const YT_NON_FOOD_EXCLUDE_RE =
+  /\b(gaming|gameplay|pubg|mobile legends|free fire|valorant|minecraft|music video|official mv|official video|karaoke|ខារ៉ាអូខេ|ចម្រៀង|បទថ្មី|ព័ត៌មាន|នយោបាយ|breaking news|politics|election|football|soccer|boxing|គុនខ្មែរ|kun khmer|movie trailer|full movie|រឿងភាគ|ឈុតខ្លី|real estate|condo for sale|apartment for rent|crypto|forex)\b/i;
+
+const YT_FOOD_OR_CAMBODIA_POSITIVE_RE =
+  /(food|eat|eating|restaurant|street\s*food|market|night\s*market|cafe|coffee|dessert|noodle|soup|bbq|grill|seafood|crab|fish|pork|beef|chicken|duck|rice|curry|salad|snack|taste|tasting|review|tour|menu|dish|cuisine|cooking|recipe|kitchen|chef|breakfast|lunch|dinner|buffet|hotpot|porridge|sandwich|spring\s*roll|amok|lok\s*lak|num\s*banh\s*chok|kuy\s*teav|bai\s*sach\s*chrouk|prahok|kralan|bok\s*lhong|samlor|korko|ម្ហូប|អាហារ|ញ៉ាំ|ញំា|ញុំា|ហាង|ភោជនីយដ្ឋាន|តាមផ្លូវ|ផ្សារ|កាហ្វេ|បង្អែម|គុយទាវ|នំបញ្ចុក|សម្ល|អាម៉ុក|ឡុកឡាក់|សាច់អាំង|គ្រឿងសមុទ្រ|បុកល្ហុង|បាយ|ឆ្ងាញ់|ភ្លក្ស|ភ្លក់|ស៊ុប|មី|បបរ|នំ|ទឹកជ្រលក់|ប្រហុក|ផ្អក|美食|餐厅|小吃|探店|高棉|柬埔寨|金边|暹粒|马德望)/i;
+
+/** Filter out unrelated entertainment, gaming, music, news, and non-food content */
+export function isRelevantCambodianFoodReviewVideo(
+  title: string,
+  description = '',
+  channelName = '',
+  categorySlug: TrendingFoodCategorySlug = 'popular_food'
+): boolean {
+  const combined = `${title || ''} ${description || ''} ${channelName || ''}`;
+  if (YT_NON_FOOD_EXCLUDE_RE.test(combined)) return false;
+  if (categorySlug === 'tourist_attraction') return true;
+  return YT_FOOD_OR_CAMBODIA_POSITIVE_RE.test(combined);
+}
+
+const YOUTUBE_API_MULTI_QUERY_CACHE_KEY = 'kft_yt_api_multi_search_cache_v1';
+const YOUTUBE_API_QUOTA_COOLDOWN_KEY = 'kft_yt_api_quota_cooldown_until_v1';
+const YOUTUBE_KEYWORD_BATCH_CURSOR_KEY = 'kft_yt_keyword_batch_cursor_v1';
+const YOUTUBE_PUBLIC_SEARCH_CACHE_KEY = 'kft_yt_public_keyword_search_cache_v1';
+
+function inferCategoryFromVideoText(text: string): TrendingFoodCategorySlug {
+  const t = (text || '').toLowerCase();
+  if (/restaurant|buffet|cafe|coffee|fine\s*dining|bistro|ហាងអាហារ|ភោជនីយដ្ឋាន|ប៊ូហ្វេ|ហាងកាហ្វេ|餐厅|探店/i.test(t)) {
+    return 'famous_restaurant';
+  }
+  if (/tour|walk|vlog|explore|adventure|hours\s*in|ដើររក|ដើរលេង|ដើរភ្លក់|ដើរញ៉ាំ/i.test(t)) {
+    return 'food_travel_vlog';
+  }
+  return 'popular_food';
+}
+
+/**
+ * Public multi-keyword YouTube search fallback (uses CapacitorHttp on Android/iOS or CORS proxy on Web)
+ * so new Cambodian food-review channels and videos are discovered across Khmer & English keywords even without an API key.
+ */
+async function discoverLiveYouTubeByPublicKeywordSearch(
+  keywords: string[],
+  foods: FoodItem[],
+  forceRefresh = false
+): Promise<OnlineFoodDiscoveryItem[]> {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return [];
+
+  try {
+    if (!forceRefresh && typeof localStorage !== 'undefined') {
+      const rawCache = localStorage.getItem(YOUTUBE_PUBLIC_SEARCH_CACHE_KEY);
+      if (rawCache) {
+        const parsed = JSON.parse(rawCache);
+        if (parsed && Array.isArray(parsed.items) && Date.now() - (parsed.fetchedAt || 0) < 20 * 60 * 1000) {
+          return parsed.items;
+        }
+      }
+    }
+  } catch {
+    // ignore storage errors
+  }
+
+  const discoveredItems: OnlineFoodDiscoveryItem[] = [];
+  const seenVids = new Set<string>();
+  const isNative = Capacitor.isNativePlatform();
+
+  const fetchSearchHtml = async (kw: string): Promise<string | null> => {
+    const targetUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(kw)}`;
+    try {
+      if (isNative) {
+        const res = await CapacitorHttp.get({
+          url: targetUrl,
+          connectTimeout: 6500,
+          readTimeout: 6500,
+          headers: { 'Accept-Language': 'en-US,en;q=0.9,km;q=0.8' },
+        });
+        return res.status === 200 && typeof res.data === 'string' ? res.data : null;
+      }
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 6500);
+      try {
+        const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`, {
+          signal: controller.signal,
+        });
+        return res.ok ? await res.text() : null;
+      } finally {
+        clearTimeout(timer);
+      }
+    } catch {
+      return null;
+    }
+  };
+
+  const extractRenderers = (obj: any, out: any[] = []): any[] => {
+    if (!obj || typeof obj !== 'object') return out;
+    if (obj.videoRenderer) out.push(obj.videoRenderer);
+    for (const k of Object.keys(obj)) {
+      extractRenderers(obj[k], out);
+    }
+    return out;
+  };
+
+  await Promise.all(
+    keywords.slice(0, 3).map(async (kw) => {
+      const html = await fetchSearchHtml(kw);
+      if (!html) return;
+      const match = html.match(/var ytInitialData = (\{[\s\S]*?\});<\/script>/);
+      if (!match || !match[1]) return;
+      try {
+        const data = JSON.parse(match[1]);
+        const renderers = extractRenderers(data);
+        for (const vr of renderers.slice(0, 14)) {
+          const vid = extractYouTubeVideoId(vr?.videoId || '');
+          if (!vid || seenVids.has(vid) || isKnownUnavailableVideo(vid)) continue;
+          const title = (vr?.title?.runs || []).map((r: any) => r?.text || '').join('').trim();
+          const ownerRun = vr?.ownerText?.runs?.[0] || vr?.longBylineText?.runs?.[0];
+          const channelName = (ownerRun?.text || '').trim();
+          const channelId = (ownerRun?.navigationEndpoint?.browseEndpoint?.browseId || '').trim();
+          const channelPath = (ownerRun?.navigationEndpoint?.commandMetadata?.webCommandMetadata?.url || '').trim();
+          const snippet = (vr?.detailedMetadataSnippets?.[0]?.snippetText?.runs || [])
+            .map((r: any) => r?.text || '')
+            .join('')
+            .trim();
+
+          if (!title || !channelName) continue;
+          if (!isRelevantCambodianFoodReviewVideo(title, snippet, channelName)) continue;
+
+          seenVids.add(vid);
+          const channelUrl = channelPath
+            ? `https://www.youtube.com${channelPath}`
+            : channelId
+            ? `https://www.youtube.com/channel/${channelId}`
+            : `https://www.youtube.com/watch?v=${vid}`;
+
+          if (channelId && /^UC[A-Za-z0-9_-]{20,28}$/.test(channelId)) {
+            registerDiscoveredYouTubeChannel({
+              channelId,
+              name: channelName,
+              channelUrl,
+              categorySlug: inferCategoryFromVideoText(`${title} ${snippet} ${kw}`),
+            });
+          }
+
+          const dishMatch = matchCambodianDish(`${title} ${snippet}`, foods);
+          const prov = detectProvinceFromVideoText(`${title} ${snippet} ${kw}`);
+          const pubDate = new Date().toISOString().slice(0, 10);
+
+          discoveredItems.push({
+            id: `yt-pub-${vid}`,
+            platform: 'youtube',
+            titleKh: title,
+            titleEn: title,
+            titleZh: title,
+            descriptionKh: snippet || `វីដេអូ Review ម្ហូបខ្មែរពីឆានែល ${channelName} (${kw})`,
+            descriptionEn: snippet || `Cambodian food review video by ${channelName} (${kw})`,
+            descriptionZh: snippet || `来自 ${channelName} 的柬埔寨美食测评视频 (${kw})`,
+            thumbnailUrl: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
+            sourceUrl: `https://www.youtube.com/watch?v=${vid}`,
+            originalAccountUrl: channelUrl,
+            channelId: channelId || undefined,
+            sourceName: `${channelName} (YouTube)`,
+            authorHandle: channelName,
+            publishedOrUpdatedAt: pubDate,
+            isLiveFetched: true,
+            verificationBadgeEn: 'YouTube Food Discovery',
+            verificationBadgeKh: 'រកឃើញថ្មីពី YouTube',
+            verificationBadgeZh: 'YouTube 美食新发现',
+            categorySlug: inferCategoryFromVideoText(`${title} ${snippet} ${kw}`),
+            provinceKh: prov.provinceKh,
+            provinceEn: prov.provinceEn,
+            matchedFoodId: dishMatch?.food.id,
+            matchedFoodNameKh: dishMatch?.food.nameKh,
+            matchedFoodNameEn: dishMatch?.food.nameEn,
+            relevanceScore: 98,
+            isPlayableVerified: true,
+            canInlineEmbed: true,
+            inlineVideoId: vid,
+          });
+        }
+      } catch {
+        // ignore parse errors
+      }
+    })
+  );
+
+  if (discoveredItems.length > 0) {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(
+          YOUTUBE_PUBLIC_SEARCH_CACHE_KEY,
+          JSON.stringify({ fetchedAt: Date.now(), items: discoveredItems.slice(0, 60) })
+        );
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }
+
+  return discoveredItems;
+}
+
+/**
+ * Fetch YouTube items (2025–2026):
+ * - Combines results across multiple Khmer, English & Chinese search keywords
+ * - Supports YouTube Data API v3 with maxResults=25, pageToken pagination, 30-min caching, and quota protection
+ * - Automatically registers newly discovered Cambodian food-review YouTube channels
+ * - Merges with 155+ verified playable curated seeds from 80+ real Cambodian food YouTubers
+ */
+async function fetchYouTubeCambodianFoodVideos(
+  foods: FoodItem[],
+  customQuery = '',
+  forceRefresh = false
+): Promise<{
   items: OnlineFoodDiscoveryItem[];
   usedLiveApiKey: boolean;
   oembedEnrichedCount: number;
@@ -1422,65 +3907,187 @@ async function fetchYouTubeCambodianFoodVideos(foods: FoodItem[]): Promise<{
   const liveItems: OnlineFoodDiscoveryItem[] = [];
   let usedLiveApiKey = false;
 
-  if (apiKey && apiKey.trim().length > 10) {
-    try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 5000);
-      const q = encodeURIComponent('Cambodia street food travel Phnom Penh Siem Reap 2026');
-      const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&order=date&publishedAfter=2025-01-01T00:00:00Z&maxResults=12&q=${q}&key=${encodeURIComponent(
-        apiKey.trim()
-      )}`;
-      const res = await fetch(ytUrl, { signal: controller.signal });
-      clearTimeout(timer);
-      if (res.ok) {
-        const data = await res.json();
-        for (const it of data?.items || []) {
-          const vid = extractYouTubeVideoId(it?.id?.videoId || '');
-          const snip = it?.snippet;
-          if (!vid || !snip || isKnownUnavailableVideo(vid)) continue;
-          const pubDate = (snip.publishedAt || '').slice(0, 10) || new Date().toISOString().slice(0, 10);
-          if (pubDate < '2025-01-01') continue;
+  // Select rotating batch of 3 keywords from CAMBODIA_FOOD_YOUTUBE_SEARCH_KEYWORDS + customQuery if provided
+  const allKeywords = CAMBODIA_FOOD_YOUTUBE_SEARCH_KEYWORDS.map((k) => k.query);
+  let kwCursor = 0;
+  try {
+    if (typeof localStorage !== 'undefined') {
+      kwCursor = Number(localStorage.getItem(YOUTUBE_KEYWORD_BATCH_CURSOR_KEY) || 0) || 0;
+    }
+  } catch {}
 
-          const watchUrl = `https://www.youtube.com/watch?v=${vid}`;
-          const oembed = await fetchPublicOEmbedMetadata(watchUrl);
-          if (!oembed && typeof navigator !== 'undefined' && navigator.onLine !== false) {
-            continue;
+  const selectedKeywords: string[] = [];
+  if (customQuery && customQuery.trim().length >= 2) {
+    selectedKeywords.push(`${customQuery.trim()} Cambodia food`);
+  }
+  for (let i = 0; i < 3 && selectedKeywords.length < 4; i++) {
+    const kw = allKeywords[(kwCursor + i) % allKeywords.length];
+    if (kw && !selectedKeywords.includes(kw)) {
+      selectedKeywords.push(kw);
+    }
+  }
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(YOUTUBE_KEYWORD_BATCH_CURSOR_KEY, String((kwCursor + 3) % allKeywords.length));
+    }
+  } catch {}
+
+  // Check API key & quota cooldown circuit breaker
+  let quotaCooldownUntil = 0;
+  try {
+    if (typeof localStorage !== 'undefined') {
+      quotaCooldownUntil = Number(localStorage.getItem(YOUTUBE_API_QUOTA_COOLDOWN_KEY) || 0) || 0;
+    }
+  } catch {}
+
+  if (apiKey && apiKey.trim().length > 10 && Date.now() >= quotaCooldownUntil) {
+    // Check 30-minute API multi-query cache unless forceRefresh or customQuery
+    let cachedApiItems: OnlineFoodDiscoveryItem[] | null = null;
+    if (!forceRefresh && !customQuery.trim()) {
+      try {
+        const rawCache = typeof localStorage !== 'undefined' ? localStorage.getItem(YOUTUBE_API_MULTI_QUERY_CACHE_KEY) : null;
+        if (rawCache) {
+          const parsed = JSON.parse(rawCache);
+          if (parsed && Array.isArray(parsed.items) && Date.now() - (parsed.fetchedAt || 0) < ONLINE_DISCOVERY_TTL_MS) {
+            cachedApiItems = parsed.items;
           }
-          const match = matchCambodianDish(`${snip.title} ${snip.description}`, foods);
-          liveItems.push({
-            id: `yt-api-${vid}`,
-            platform: 'youtube',
-            titleKh: match?.food ? `${match.food.nameKh} — ${snip.title}` : snip.title,
-            titleEn: snip.title,
-            titleZh: snip.title,
-            descriptionKh: match?.food?.descriptionKh || snip.description || '',
-            descriptionEn: snip.description || '',
-            thumbnailUrl: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
-            sourceUrl: watchUrl,
-            sourceName: snip.channelTitle ? `${snip.channelTitle} (YouTube)` : 'YouTube',
-            authorHandle: snip.channelTitle,
-            publishedOrUpdatedAt: pubDate,
-            isLiveFetched: true,
-            verificationBadgeEn: 'Verified (2025–2026)',
-            verificationBadgeKh: 'បានផ្ទៀងផ្ទាត់ (2025–2026)',
-            verificationBadgeZh: '已验证 (2025–2026)',
-            categorySlug: 'popular_food',
-            provinceKh: 'ទូទាំងប្រទេសកម្ពុជា',
-            provinceEn: 'All Cambodia',
-            matchedFoodId: match?.food.id,
-            matchedFoodNameKh: match?.food.nameKh,
-            matchedFoodNameEn: match?.food.nameEn,
-            relevanceScore: 98,
-            isPlayableVerified: true,
-            canInlineEmbed: oembed?.canEmbed !== false,
-          });
         }
-        if (liveItems.length > 0) {
-          usedLiveApiKey = true;
+      } catch {}
+    }
+
+    if (cachedApiItems && cachedApiItems.length > 0) {
+      liveItems.push(...cachedApiItems);
+      usedLiveApiKey = true;
+    } else {
+      const seenApiVids = new Set<string>();
+      for (const kw of selectedKeywords) {
+        try {
+          let nextPageToken = '';
+          const maxPages = customQuery.trim() ? 2 : 1;
+          for (let page = 0; page < maxPages; page++) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 5500);
+            const pageParam = nextPageToken ? `&pageToken=${encodeURIComponent(nextPageToken)}` : '';
+            const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&order=relevance&maxResults=25&q=${encodeURIComponent(
+              kw
+            )}${pageParam}&key=${encodeURIComponent(apiKey.trim())}`;
+            const res = await fetch(ytUrl, { signal: controller.signal });
+            clearTimeout(timer);
+
+            if (res.status === 403 || res.status === 429) {
+              console.warn('[YouTubeDiscovery] YouTube Data API v3 quota limit reached; activating 60m cooldown & falling back to RSS + verified pool.');
+              try {
+                if (typeof localStorage !== 'undefined') {
+                  localStorage.setItem(YOUTUBE_API_QUOTA_COOLDOWN_KEY, String(Date.now() + 60 * 60 * 1000));
+                }
+              } catch {}
+              break;
+            }
+
+            if (!res.ok) {
+              console.warn(`[YouTubeDiscovery] API search HTTP ${res.status} for keyword "${kw}"`);
+              break;
+            }
+
+            const data = await res.json();
+            const rawList = Array.isArray(data?.items) ? data.items : [];
+            if (rawList.length < 3) {
+              console.info(`[YouTubeDiscovery] Keyword "${kw}" returned only ${rawList.length} API items; combining with multi-source pool.`);
+            }
+
+            for (const it of rawList) {
+              const vid = extractYouTubeVideoId(it?.id?.videoId || '');
+              const snip = it?.snippet;
+              if (!vid || !snip || seenApiVids.has(vid) || isKnownUnavailableVideo(vid)) continue;
+              const title = decodeXmlText(snip.title || '');
+              const desc = decodeXmlText(snip.description || '');
+              const channelTitle = decodeXmlText(snip.channelTitle || 'YouTube Creator');
+              const channelId = (snip.channelId || '').trim();
+
+              if (!isRelevantCambodianFoodReviewVideo(title, desc, channelTitle)) continue;
+              seenApiVids.add(vid);
+
+              const pubDate = (snip.publishedAt || '').slice(0, 10) || new Date().toISOString().slice(0, 10);
+              const watchUrl = `https://www.youtube.com/watch?v=${vid}`;
+              const channelUrl = channelId ? `https://www.youtube.com/channel/${channelId}` : watchUrl;
+              const catSlug = inferCategoryFromVideoText(`${title} ${desc} ${kw}`);
+
+              if (channelId && /^UC[A-Za-z0-9_-]{20,28}$/.test(channelId)) {
+                registerDiscoveredYouTubeChannel({
+                  channelId,
+                  name: channelTitle,
+                  channelUrl,
+                  categorySlug: catSlug,
+                });
+              }
+
+              const match = matchCambodianDish(`${title} ${desc}`, foods);
+              const detectedProv = detectProvinceFromVideoText(`${title} ${desc} ${kw}`);
+
+              liveItems.push({
+                id: `yt-api-${vid}`,
+                platform: 'youtube',
+                titleKh: match?.food ? `${match.food.nameKh} — ${title}` : title,
+                titleEn: title,
+                titleZh: title,
+                descriptionKh: match?.food?.descriptionKh || desc || `វីដេអូ Review ម្ហូបខ្មែរពី ${channelTitle}`,
+                descriptionEn: desc || `Cambodian food review by ${channelTitle}`,
+                descriptionZh: desc || `来自 ${channelTitle} 的柬埔寨美食测评`,
+                thumbnailUrl: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
+                sourceUrl: watchUrl,
+                originalAccountUrl: channelUrl,
+                channelId: channelId || undefined,
+                sourceName: `${channelTitle} (YouTube)`,
+                authorHandle: channelTitle,
+                publishedOrUpdatedAt: pubDate,
+                isLiveFetched: true,
+                verificationBadgeEn: 'Verified (YouTube API)',
+                verificationBadgeKh: 'បានផ្ទៀងផ្ទាត់ (YouTube API)',
+                verificationBadgeZh: '已验证 (YouTube API)',
+                categorySlug: catSlug,
+                provinceKh: detectedProv.provinceKh,
+                provinceEn: detectedProv.provinceEn,
+                matchedFoodId: match?.food.id,
+                matchedFoodNameKh: match?.food.nameKh,
+                matchedFoodNameEn: match?.food.nameEn,
+                relevanceScore: 99,
+                isPlayableVerified: true,
+                canInlineEmbed: true,
+                inlineVideoId: vid,
+              });
+            }
+
+            nextPageToken = typeof data?.nextPageToken === 'string' ? data.nextPageToken : '';
+            if (!nextPageToken) break;
+          }
+        } catch (err) {
+          console.warn(`[YouTubeDiscovery] Error searching keyword "${kw}":`, err);
         }
       }
+
+      if (liveItems.length > 0) {
+        usedLiveApiKey = true;
+        try {
+          if (typeof localStorage !== 'undefined' && !customQuery.trim()) {
+            localStorage.setItem(
+              YOUTUBE_API_MULTI_QUERY_CACHE_KEY,
+              JSON.stringify({ fetchedAt: Date.now(), items: liveItems.slice(0, 100) })
+            );
+          }
+        } catch {}
+      }
+    }
+  }
+
+  // If no API key or user forced refresh / searched custom keyword, also run public multi-keyword discovery
+  if (!usedLiveApiKey && (forceRefresh || Boolean(customQuery.trim()))) {
+    try {
+      const publicDiscovered = await discoverLiveYouTubeByPublicKeywordSearch(selectedKeywords, foods, forceRefresh);
+      if (publicDiscovered.length > 0) {
+        liveItems.push(...publicDiscovered);
+      }
     } catch {
-      // Fall through to verified 2025-2026 curated YouTube videos
+      // ignore public search errors
     }
   }
 
@@ -1515,19 +4122,47 @@ async function fetchYouTubeCambodianFoodVideos(foods: FoodItem[]): Promise<{
 /* ===================================================================== */
 /* LIVE YOUTUBE CHANNEL UPLOADS (official channel RSS feeds, no API key)  */
 /* ===================================================================== */
-const LIVE_RSS_CACHE_KEY = 'kft_v1_youtube_live_rss_cache';
+const LIVE_RSS_CACHE_KEY = 'kft_v2_youtube_live_rss_cache';
 /** Live RSS channel feeds are cached for 15 minutes to prevent mobile CPU/radio overheating while 60s rotation runs in memory. */
 export const LIVE_RSS_TTL_MS = 15 * 60 * 1000;
 export const VIDEO_AUTO_REFRESH_INTERVAL_MS = 60 * 1000;
 const VIDEO_ROTATION_STATE_KEY = 'kft_youtube_rotation_state_v2';
-const LIVE_RSS_PER_CHANNEL = 4;
-const LIVE_RSS_BATCH_CHANNELS_COUNT = 3;
+const LIVE_RSS_PER_CHANNEL = 6;
+const LIVE_RSS_BATCH_CHANNELS_COUNT = 10;
 let rssChannelBatchCursor = 0;
 const YT_VIDEO_ID_RE = /^[A-Za-z0-9_-]{11}$/;
-/** Channels that also publish non-Cambodian content: only keep Cambodia-related videos. */
-const LIVE_RSS_GENERIC_CHANNELS = new Set(['TravelwithChad', 'Little Explore', 'Suitcase Monkey', 'Delicious Food Show & Travel']);
+/** International/travel channels that also publish non-Cambodian content: only keep Cambodia-related videos. */
+const LIVE_RSS_GENERIC_CHANNELS = new Set([
+  'TravelwithChad',
+  'Little Explore',
+  'Suitcase Monkey',
+  'Delicious Food Show & Travel',
+  'Mark Wiens',
+  'Strictly Dumpling',
+  'Best Ever Food Review Show',
+  'Luke Martin',
+  'The Chui Show',
+  'Mark In Asia',
+  'Tom Trips Out',
+  'Lloyd & Mandy',
+  'Condé Nast Traveler',
+  'Food Network UK',
+  'Rockstar Eater',
+  'Mooch Travels',
+  'Pure Detour',
+  'Travelwithchris',
+  'Bec & Matt Adventures',
+  'Francly Speaking',
+  'Priscilla Kim Ong',
+  'T&L TRAVEL',
+  'Apricot Wanderers',
+  'Second Life Travels',
+  'Nore Films',
+  'Angela McColl',
+  'Jax out and about',
+]);
 const LIVE_RSS_CAMBODIA_RE =
-  /cambodia|khmer|phnom|siem ?reap|angkor|kampot|\bkep\b|battambang|sihanouk|kampong|koh |កម្ពុជា|ខ្មែរ|ភ្នំពេញ|សៀមរាប|柬埔寨|金边/i;
+  /cambodia|khmer|phnom|siem ?reap|angkor|kampot|\bkep\b|battambang|sihanouk|kampong|koh |udong|oudong|កម្ពុជា|ខ្មែរ|ភ្នំពេញ|សៀមរាប|បាត់ដំបង|កំពត|កែប|柬埔寨|金边|暹粒|马德望/i;
 let liveRssInFlight: Promise<OnlineFoodDiscoveryItem[]> | null = null;
 
 interface VideoRotationState {
@@ -1678,13 +4313,33 @@ export function rotateLatestVideosForScope(
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 
-  // Fisher-Yates shuffle across the entire verified list
-  const shuffled = [...uniqueItems];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(nextRand() * (i + 1));
-    const tmp = shuffled[i];
-    shuffled[i] = shuffled[j];
-    shuffled[j] = tmp;
+  // Prioritize recently uploaded 2025–2026 videos in Tier 1 while keeping popular classic food reviews in Tier 2
+  const tier1Latest = uniqueItems.filter((it) => (it.publishedOrUpdatedAt || '') >= '2025-01-01');
+  const tier2Popular = uniqueItems.filter((it) => (it.publishedOrUpdatedAt || '') < '2025-01-01');
+
+  const shuffleTier = (arr: OnlineFoodDiscoveryItem[]) => {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(nextRand() * (i + 1));
+      const tmp = copy[i];
+      copy[i] = copy[j];
+      copy[j] = tmp;
+    }
+    return copy;
+  };
+
+  const shuffledTier1 = shuffleTier(tier1Latest);
+  const shuffledTier2 = shuffleTier(tier2Popular);
+  const mergedTiers = [...shuffledTier1, ...shuffledTier2];
+
+  // Diversify consecutive items so a single YouTuber channel does not monopolize back-to-back slots
+  const shuffled: OnlineFoodDiscoveryItem[] = [];
+  const pool = [...mergedTiers];
+  while (pool.length > 0) {
+    const lastAuthor = shuffled.length > 0 ? (shuffled[shuffled.length - 1].authorHandle || shuffled[shuffled.length - 1].sourceName) : '';
+    let pickIdx = pool.findIndex((it) => (it.authorHandle || it.sourceName) !== lastAuthor);
+    if (pickIdx === -1) pickIdx = 0;
+    shuffled.push(pool.splice(pickIdx, 1)[0]);
   }
 
   // Push videos that appeared at the top in the previous cycle to the back so every open/refresh feels completely fresh
@@ -1794,7 +4449,7 @@ async function fetchChannelFeedXml(channelId: string): Promise<string | null> {
 
 function parseChannelFeed(
   xml: string,
-  ch: (typeof ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026)[number],
+  ch: CambodiaYouTubeChannelRecord,
   foods: FoodItem[]
 ): OnlineFoodDiscoveryItem[] {
   const out: OnlineFoodDiscoveryItem[] = [];
@@ -1810,10 +4465,12 @@ function parseChannelFeed(
     const title = decodeXmlText(rawTitle);
     const desc = decodeXmlText(rawDesc).slice(0, 260);
     if (LIVE_RSS_GENERIC_CHANNELS.has(ch.name) && !LIVE_RSS_CAMBODIA_RE.test(`${title} ${desc}`)) continue;
+    if (!isRelevantCambodianFoodReviewVideo(title, desc, ch.name, ch.categorySlug)) continue;
 
     const match = matchCambodianDish(`${title} ${desc}`, foods);
     const detectedProv = detectProvinceFromVideoText(`${title} ${desc}`);
     const pubDay = published.slice(0, 10);
+    const channelUrl = ch.channelUrl || `https://www.youtube.com/channel/${ch.channelId}`;
     out.push({
       id: `yt-rss-${vid}`,
       platform: 'youtube',
@@ -1825,6 +4482,8 @@ function parseChannelFeed(
       descriptionZh: desc || `${ch.name} 最新视频 (${pubDay})`,
       thumbnailUrl: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
       sourceUrl: `https://www.youtube.com/watch?v=${vid}`,
+      originalAccountUrl: channelUrl,
+      channelId: ch.channelId,
       sourceName: `${ch.name} (YouTube)`,
       authorHandle: ch.name,
       publishedOrUpdatedAt: published,
@@ -1841,6 +4500,7 @@ function parseChannelFeed(
       relevanceScore: 99,
       isPlayableVerified: true,
       canInlineEmbed: true,
+      inlineVideoId: vid,
     });
   }
   return out;
@@ -1859,8 +4519,8 @@ function readLiveRssCache(): { fetchedAt: number; items: OnlineFoodDiscoveryItem
 }
 
 /**
- * Fetches the newest uploads from every registered Cambodian food/travel channel (official RSS feeds).
- * Results are cached for 10 minutes. If the network fails, the last good result is returned.
+ * Fetches the newest uploads from every registered + dynamically discovered Cambodian food/travel channel (official RSS feeds).
+ * Results are cached for 15 minutes. If the network fails, the last good result is returned.
  * Every item has a validated 11-character video ID and a canonical watch URL.
  */
 export async function fetchLiveYouTubeChannelUploads(
@@ -1877,12 +4537,12 @@ export async function fetchLiveYouTubeChannelUploads(
   if (liveRssInFlight) return liveRssInFlight;
 
   liveRssInFlight = (async () => {
-    const totalChannels = ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026.length;
-    const batchChannels: (typeof ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026)[number][] = [];
-    for (let i = 0; i < Math.min(LIVE_RSS_BATCH_CHANNELS_COUNT, totalChannels); i++) {
-      batchChannels.push(
-        ACTIVE_CAMBODIA_YOUTUBE_CHANNELS_2026[(rssChannelBatchCursor + i) % totalChannels]
-      );
+    const allChannels = getExpandedYouTubeChannelDatabase();
+    const totalChannels = allChannels.length;
+    const batchCount = force ? Math.min(14, totalChannels) : Math.min(LIVE_RSS_BATCH_CHANNELS_COUNT, totalChannels);
+    const batchChannels: CambodiaYouTubeChannelRecord[] = [];
+    for (let i = 0; i < batchCount; i++) {
+      batchChannels.push(allChannels[(rssChannelBatchCursor + i) % totalChannels]);
     }
     rssChannelBatchCursor = (rssChannelBatchCursor + batchChannels.length) % Math.max(1, totalChannels);
 
@@ -4725,6 +7385,7 @@ export async function fetchOnlineFoodDiscoveryFeed(params: {
   foods?: FoodItem[];
   trendingFoods?: TrendingFoodItem[];
   forceRefresh?: boolean;
+  query?: string;
 }): Promise<OnlineDiscoveryFeedResult> {
   const foods = params.foods?.length ? params.foods : initialFoods;
   const now = Date.now();
@@ -4747,7 +7408,7 @@ export async function fetchOnlineFoodDiscoveryFeed(params: {
   }
 
   const [ytRes, liveTikTokItems] = await Promise.all([
-    fetchYouTubeCambodianFoodVideos(foods),
+    fetchYouTubeCambodianFoodVideos(foods, params.query || '', Boolean(params.forceRefresh)),
     fetchLiveTikTokCreatorVideos(Boolean(params.forceRefresh), foods).catch(() => []),
   ]);
   const nowIso = new Date().toISOString();
@@ -4933,12 +7594,55 @@ export function matchesExpandedYouTubeQuery(
 ): boolean {
   const q = normalizeKhmerSearchText(rawQuery);
   if (!q) return true;
-  const parsed = parseKhmerFoodSearchQuery(rawQuery);
-  const wantsSpicy =
-    parsed.flavorIntents.includes('spicy') || parsed.flavorIntents.includes('sour_spicy');
+
   let hay = normalizeKhmerSearchText(
     `${item.titleKh} ${item.titleEn} ${item.titleZh || ''} ${item.descriptionKh} ${item.descriptionEn} ${item.descriptionZh || ''} ${item.sourceName} ${item.authorHandle || ''} ${item.provinceKh} ${item.provinceEn} ${item.matchedFoodNameKh || ''} ${item.matchedFoodNameEn || ''}`
   );
+
+  // Handle structured food-review keyword presets accurately across Khmer, English, and Chinese
+  const qLower = q.toLowerCase();
+  const isFoodItem = item.categorySlug !== 'tourist_attraction' || YT_FOOD_OR_CAMBODIA_POSITIVE_RE.test(hay);
+
+  if (
+    /^(cambodian\s*food\s*review|khmer\s*food\s*review|ម្ហូបខ្មែរ|ញ៉ាំអាហារខ្មែរ|ញុំាអាហារខ្មែរ|ដើរញ៉ាំម្ហូបខ្មែរ|柬埔寨美食测评|高棉美食测评|高棉美食|品尝高棉美食)$/i.test(
+      qLower
+    )
+  ) {
+    return isFoodItem;
+  }
+
+  if (/^(cambodia\s*street\s*food|ដើររកម្ហូបឆ្ងាញ់|ម្ហូបតាមផ្លូវ|柬埔寨街头美食|寻味美食)$/i.test(qLower)) {
+    return (
+      isFoodItem &&
+      (item.categorySlug === 'popular_food' ||
+        item.categorySlug === 'food_travel_vlog' ||
+        /street|market|night\s*market|តាមផ្លូវ|ផ្សារ|ដើររក|ដើរភ្លក់|街头|夜市/i.test(hay))
+    );
+  }
+
+  if (/^(khmer\s*restaurant\s*review|ហាងអាហារនៅកម្ពុជា|ភោជនីយដ្ឋានខ្មែរ|高棉餐厅探店|柬埔寨餐厅)$/i.test(qLower)) {
+    return (
+      isFoodItem &&
+      (item.categorySlug === 'famous_restaurant' ||
+        /restaurant|buffet|cafe|coffee|bistro|dining|ហាង|ភោជនីយដ្ឋាន|ប៊ូហ្វេ|កាហ្វេ|餐厅|探店/i.test(hay))
+    );
+  }
+
+  if (/^(phnom\s*penh\s*food\s*review|ម្ហូបតាមផ្លូវភ្នំពេញ|金边美食测评)$/i.test(qLower)) {
+    return isFoodItem && /phnom\s*penh|ភ្នំពេញ|អូរឫស្សី|ទួលទំពូង|ចតុមុខ|កោះនរា|មាត់ទន្លេ|金边/i.test(hay);
+  }
+
+  if (/^(battambang\s*food\s*review|ម្ហូបបាត់ដំបង|马德望美食测评)$/i.test(qLower)) {
+    return isFoodItem && /battambang|បាត់ដំបង|马德望/i.test(hay);
+  }
+
+  if (/^(siem\s*reap\s*food\s*review|ម្ហូបសៀមរាប|暹粒美食测评)$/i.test(qLower)) {
+    return isFoodItem && /siem\s*reap|angkor|សៀមរាប|អង្គរ|暹粒/i.test(hay);
+  }
+
+  const parsed = parseKhmerFoodSearchQuery(rawQuery);
+  const wantsSpicy =
+    parsed.flavorIntents.includes('spicy') || parsed.flavorIntents.includes('sour_spicy');
   if (wantsSpicy) {
     hay = stripNegatedSpicePhrases(hay);
   }
@@ -4947,6 +7651,12 @@ export function matchesExpandedYouTubeQuery(
     return true;
   }
   const tokens = expandYouTubeSearchQueryTokens(rawQuery);
+  const nonGenericTokens = tokens.filter(
+    (t) => !['cambodia', 'cambodian', 'khmer', 'food', 'review', 'កម្ពុជា', 'ខ្មែរ'].includes(t.toLowerCase())
+  );
+  if (nonGenericTokens.length > 0) {
+    return nonGenericTokens.some((token) => token.length >= 2 && includesKhmerSafeToken(hay, token));
+  }
   return tokens.some((token) => token.length >= 2 && includesKhmerSafeToken(hay, token));
 }
 
@@ -5097,6 +7807,11 @@ export async function searchAndDiscoverSocialFood(
   // Apply multilingual query filter if specified
   if (query.trim()) {
     combined = combined.filter((item) => matchesExpandedYouTubeQuery(item, query));
+    if (combined.length < 3) {
+      console.info(
+        `[YouTubeDiscovery] Search query "${query}" matched ${combined.length} video(s). Attempting live keyword expansion...`
+      );
+    }
   } else if (!skipRotation) {
     const activeCycle = forceRefresh ? advanceVideoRotationCycle() : getCurrentVideoRotationCycle();
     combined = rotateLatestVideosForScope(combined, `${categorySlug || 'all'}|all`, activeCycle);

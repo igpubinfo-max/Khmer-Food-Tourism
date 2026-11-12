@@ -35,6 +35,7 @@ import {
 import { FoodItem, isGpipRegisteredRestaurant, isHotelBusinessRecord, openExternalUrlNativeSafe, openRestaurantGoogleExternal, resolveFoodPhotoUrl, handleFoodImageError, isIosOrIpadAppStoreRuntime } from '../types';
 import {
   buildAgentRoleChips,
+  checkAndIncrementDailyTierAiQuota,
   recordAiAgentTelemetryEvent,
   resolveAiAgentUserRole,
   tryExecuteAiAgentTurn,
@@ -1200,6 +1201,35 @@ export const WhatToEatModal: React.FC = () => {
         scrollChatToTop();
         return;
       }
+    }
+
+    const quotaCheck = checkAndIncrementDailyTierAiQuota(currentUser);
+    if (!quotaCheck.allowed) {
+      const limitReply: AiAssistantMessage = {
+        id: `quota-${Date.now()}`,
+        role: 'assistant',
+        text: quotaCheck.isFreeTrial
+          ? tr(
+              language,
+              `⏳ អ្នកបានប្រើកូតា AI ប្រចាំថ្ងៃសម្រាប់សាកល្បងឥតគិតថ្លៃ ៧ ថ្ងៃអស់ហើយ (${quotaCheck.usedToday}/${quotaCheck.dailyLimit} ដងក្នុង ១ ថ្ងៃ)។ សូមដំឡើងទៅ VIP ពេញលេញ ដើម្បីទទួលបានរហូតដល់ 80 ដង/ថ្ងៃ និងមុខងារពិសេសទាំង ១០!`,
+              `⏳ You have reached your 7-Day Free Trial daily AI limit (${quotaCheck.usedToday}/${quotaCheck.dailyLimit} requests/day). Upgrade to full VIP for up to 80 requests/day and all 10 VIP benefits!`,
+              `⏳ 您今日的 7 天免费试用 AI 额度已用完（${quotaCheck.usedToday}/${quotaCheck.dailyLimit} 次/天）。升级完整 VIP 可享每日 80 次额度及全部 10 项特权！`
+            )
+          : tr(
+              language,
+              `⏳ អ្នកបានប្រើកូតា AI ប្រចាំថ្ងៃអស់ហើយ (${quotaCheck.usedToday}/${quotaCheck.dailyLimit} ដងក្នុង ១ ថ្ងៃ)។ សូមបើកសាកល្បងឥតគិតថ្លៃ ៧ ថ្ងៃ (15 ដង/ថ្ងៃ) ឬដំឡើង VIP (80 ដង/ថ្ងៃ)!`,
+              `⏳ You have reached your daily AI limit (${quotaCheck.usedToday}/${quotaCheck.dailyLimit} requests/day). Start your 7-Day Free Trial (15/day) or upgrade to VIP (80/day)!`,
+              `⏳ 您今日的 AI 提问额度已达上限（${quotaCheck.usedToday}/${quotaCheck.dailyLimit} 次/天）。开启 7 天免费试用（15 次/天）或升级 VIP（80 次/天）！`
+            ),
+        timestamp: new Date().toISOString(),
+        intent: 'ai_agent_action',
+        source: 'rules',
+        suppressDishCard: true,
+      };
+      setChatMessages((prev) => [...prev.slice(-12), userMsg, limitReply]);
+      setShowVipAiUpgradeNotice(true);
+      scrollChatToTop();
+      return;
     }
 
     const activeUserRole = resolveAiAgentUserRole(currentUser, restaurants);

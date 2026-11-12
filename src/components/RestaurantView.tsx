@@ -11,6 +11,7 @@ import {
   getRestaurantApprovedAtMs,
   isAdminAccount,
   isStrictVerifiedCambodiaRestaurant,
+  isShopSubscriptionActive,
   openExternalUrlNativeSafe,
   isHotelBusinessRecord,
 } from '../types';
@@ -461,6 +462,9 @@ export const RestaurantView: React.FC = () => {
         }
         if (smartIntent?.semanticCategory === 'cafe' && classifyRestaurantCategory(r) === 'cafe_bistro') {
           relevance += 35;
+        }
+        if (relevance > 0 && isShopSubscriptionActive(r)) {
+          relevance += 250;
         }
       }
 

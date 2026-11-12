@@ -5,7 +5,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1560;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1561;
 export const APP_RELEASE_DATE = '2026-11-12';
 
 /**
@@ -1452,6 +1452,7 @@ export interface RestaurantReview {
   userId: string;
   userName: string;
   userAvatar?: string;
+  isVipUser?: boolean;
   rating: number; // 1 to 5
   comment?: string;
   createdAt: string;
@@ -3023,13 +3024,26 @@ export const getRestaurantRatingSummary = (
 };
 
 // Helper to determine if a restaurant has an active Premium membership
-export const isRestaurantPremiumActive = (restaurant?: Restaurant | null): boolean => {
+export const isRestaurantPremiumActive = (
+  restaurant?: Partial<Restaurant> | null,
+  nowOverrideMs?: number
+): boolean => {
   if (!restaurant) return false;
-  if (restaurant.membershipTier !== 'premium') return false;
-  if (restaurant.paymentStatus !== 'verified') return false;
-  if (!restaurant.membershipExpiresAt) return false;
-  const expiryTime = parseSafeDateMs(restaurant.membershipExpiresAt);
-  return expiryTime > Date.now();
+  if (restaurant.id && isSeedRestaurantId(restaurant.id)) return false;
+  if (restaurant.status && restaurant.status !== 'approved') return false;
+  const hasActiveFlag =
+    restaurant.membershipTier === 'premium' ||
+    restaurant.paymentStatus === 'verified' ||
+    restaurant.shopPaymentStatus === 'active';
+  if (!hasActiveFlag) return false;
+  const expRaw =
+    restaurant.shopSubscriptionExpiresAt ||
+    restaurant.subscriptionExpiresAt ||
+    restaurant.membershipExpiresAt;
+  if (!expRaw) return false;
+  const expiryTime = parseSafeDateMs(expRaw);
+  const nowMs = typeof nowOverrideMs === 'number' ? nowOverrideMs : getAuthoritativeServerNowMs();
+  return expiryTime > nowMs;
 };
 
 export type VipAccountState = 'admin' | 'approved_vip' | 'pending_vip' | 'expired_vip' | 'regular_unpaid';
@@ -3636,6 +3650,22 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
     return {
       ...reconciledUser,
       vipPlanDays: actualPlanDays,
+    };
+  }
+
+  if (
+    !isPermanentVipEmail(reconciledUser.email) &&
+    expMs > 0 &&
+    expMs <= nowMs &&
+    (reconciledUser.membershipTier === 'premium_vip' ||
+      reconciledUser.subscriptionStatus === 'active' ||
+      reconciledUser.vipStatus === 'active')
+  ) {
+    return {
+      ...reconciledUser,
+      membershipTier: 'free',
+      subscriptionStatus: 'expired',
+      vipStatus: 'expired',
     };
   }
 
@@ -4605,7 +4635,7 @@ export const isConsumerPromo099Eligible = (user?: User | null): boolean => {
   if (!user || isAdminAccount(user)) return false;
   if (isUserVipActive(user)) return false;
   if (user.promo099Used) return false;
-  const hadTrial = Boolean(user.freeTrialActivated || user.freeTrialActivatedAt || user.freeTrialExpiresAt);
+  const hadTrial = Boolean(user.freeTrialActivated || user.freeTrialActivatedAt || user.freeTrialExpiresAt || user.vipPlanType === 'trial_7d' || (user as any).activePlanId === 'consumer_trial_7d' || (user as any).hasUsedFreeTrial || (user as any).trialClaimedAt);
   if (!hadTrial) return false;
   const nowMs = getAuthoritativeServerNowMs();
   const trialExpMs = parseSafeDateMs(user.freeTrialExpiresAt || user.subscriptionExpiryDate || user.vipExpiresAt);
@@ -4623,6 +4653,11 @@ export const isShopSubscriptionActive = (
   if (!restaurant || !restaurant.id) return false;
   if (isSeedRestaurantId(restaurant.id)) return false;
   if (restaurant.status !== 'approved') return false;
+  const hasActiveFlag =
+    restaurant.shopPaymentStatus === 'active' ||
+    restaurant.paymentStatus === 'verified' ||
+    restaurant.membershipTier === 'premium';
+  if (!hasActiveFlag) return false;
   const nowMs = typeof nowOverrideMs === 'number' ? nowOverrideMs : getAuthoritativeServerNowMs();
   const expRaw =
     restaurant.shopSubscriptionExpiresAt ||
@@ -5204,8 +5239,24 @@ export const getVipFeaturedRotationState = (
     (a, b) => getRestaurantApprovedAtMs(b.restaurant) - getRestaurantApprovedAtMs(a.restaurant)
   );
 
-  // After the 24-hour window expires, shops are NOT re-added to currentlyFeatured so they return to the normal listing order.
+  // 2. Fair VIP rotation slot: after initial 24h boost, eligible VIP shops rotate fairly at the top
   const rotatingQueueIndex = eligibleQueue.length > 0 ? currentSlotIndex % eligibleQueue.length : 0;
+  if (eligibleQueue.length > 0) {
+    const rotatingShop = eligibleQueue[rotatingQueueIndex];
+    if (rotatingShop && !currentlyFeaturedIds.has(rotatingShop.id)) {
+      const remSlotMs = Math.max(0, slotEndMs - nowMs);
+      currentlyFeatured.push({
+        restaurant: rotatingShop,
+        reason: 'rotation_slot',
+        slotStartIso,
+        slotEndIso,
+        remainingMs: remSlotMs,
+        remainingHours: Math.max(1, Math.ceil(remSlotMs / (1000 * 60 * 60))),
+        queueIndex: rotatingQueueIndex,
+      });
+      currentlyFeaturedIds.add(rotatingShop.id);
+    }
+  }
   const nextRotatingShop =
     eligibleQueue.length > 1
       ? eligibleQueue[(rotatingQueueIndex + 1) % eligibleQueue.length]

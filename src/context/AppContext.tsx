@@ -4607,30 +4607,59 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
 
-      // 3. Immediately downgrade any restaurants owned by expired VIP accounts
-      if (expiredUserIds.size > 0) {
-        setRestaurants((prev) => {
-          let restChanged = false;
-          const nextRests = prev.map((r) => {
-            if (r.ownerId && expiredUserIds.has(r.ownerId) && (r.membershipTier === 'premium' || r.isPromoted)) {
-              restChanged = true;
-              return {
-                ...r,
-                membershipTier: 'free' as MembershipTier,
-                isPromoted: false,
-                paymentStatus: 'unpaid' as const,
-              };
-            }
-            return r;
-          });
-          if (restChanged) {
-            try {
-              localStorage.setItem('kft_restaurants_real_v13', JSON.stringify(nextRests));
-            } catch {}
+      // 3. Synchronize restaurant VIP / Store Subscription expiration (protecting active paid Shop Packages & downgrading expired shops)
+      setRestaurants((prev) => {
+        let restChanged = false;
+        const liveUsersList = latestSyncStateRef.current.users || users;
+        const nextRests = prev.map((r) => {
+          if (isSeedRestaurantId(r.id)) return r;
+          if (r.ownerId === 'admin-authorized-single' && r.isAdminEdited) return r;
+
+          const shopExpRaw =
+            r.shopSubscriptionExpiresAt ||
+            r.subscriptionExpiresAt ||
+            r.membershipExpiresAt;
+          const shopExpMs = parseSafeDateMs(shopExpRaw) || 0;
+          const hasIndependentActiveShopSub =
+            Boolean(r.activeShopPlanId && String(r.activeShopPlanId).startsWith('shop_')) &&
+            shopExpMs > nowMs;
+
+          const ownerUser = liveUsersList.find((u) =>
+            doesUserMatchTarget(u, { id: r.ownerId, email: r.ownerEmail, phone: r.ownerPhone })
+          );
+          const isCoveredByOwnerPaidVip =
+            Boolean(ownerUser && isUserPaidVipActive(ownerUser)) &&
+            (r.storeSlotNumber || 1) <= 1 + (ownerUser?.paidAdditionalStoreSlots || 0);
+
+          const isOwnerNewlyExpired = Boolean(r.ownerId && expiredUserIds.has(r.ownerId));
+          const isShopSubExpired = shopExpMs > 0 && shopExpMs <= nowMs;
+
+          if (
+            (r.membershipTier === 'premium' || r.isPromoted || r.shopPaymentStatus === 'active') &&
+            (isOwnerNewlyExpired || isShopSubExpired) &&
+            !hasIndependentActiveShopSub &&
+            !isCoveredByOwnerPaidVip
+          ) {
+            restChanged = true;
+            return {
+              ...r,
+              membershipTier: 'free' as MembershipTier,
+              isPromoted: false,
+              isPromotedBadge: false,
+              shopPaymentStatus: 'expired' as const,
+              paymentStatus: 'unpaid' as const,
+            };
           }
-          return restChanged ? nextRests : prev;
+          return r;
         });
-      }
+        if (restChanged) {
+          latestSyncStateRef.current.restaurants = nextRests;
+          try {
+            localStorage.setItem('kft_restaurants_real_v13', JSON.stringify(nextRests));
+          } catch {}
+        }
+        return restChanged ? nextRests : prev;
+      });
 
       if (reminderLogChanged) {
         try {
@@ -6736,32 +6765,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       safeSetCriticalAccountStorage('kft_current_user_v5', updatedCurrent);
     }
 
-    // Upgrade any custom restaurants owned by this user
-    setRestaurants(prev => {
-      let restChanged = false;
-      const nextRests = prev.map(r => {
-        if (
-          !isSeedRestaurantId(r.id) &&
-          doesUserMatchTarget({ id: r.ownerId, email: r.ownerEmail, phone: r.ownerPhone }, finalApproved)
-        ) {
-          restChanged = true;
-          return {
-            ...r,
-            membershipTier: 'premium' as MembershipTier,
-            membershipExpiresAt: finalApproved.subscriptionExpiryDate,
-            isPromoted: true,
-            isVerified: true,
-            paymentStatus: 'verified' as const,
-          };
+    // Upgrade custom restaurants owned by this user ONLY for Paid Consumer VIP (NEVER during 7-Day Consumer Free Trial)
+    if (!isTrialGrant) {
+      const allowedPaidVipSlots = 1 + (finalApproved.paidAdditionalStoreSlots || 0);
+      const rotationCfg = getVipFeaturedRotationConfig(appSettingsRef.current);
+      const nowApproveIso = new Date().toISOString();
+      const featuredUntilIso = new Date(Date.now() + rotationCfg.durationMs).toISOString();
+      setRestaurants(prev => {
+        let restChanged = false;
+        const nextRests = prev.map(r => {
+          if (
+            !isSeedRestaurantId(r.id) &&
+            doesUserMatchTarget({ id: r.ownerId, email: r.ownerEmail, phone: r.ownerPhone }, finalApproved) &&
+            (r.storeSlotNumber || 1) <= allowedPaidVipSlots
+          ) {
+            restChanged = true;
+            const existingShopExpRaw =
+              r.shopSubscriptionExpiresAt ||
+              r.subscriptionExpiresAt ||
+              r.membershipExpiresAt;
+            const existingShopExpMs = parseSafeDateMs(existingShopExpRaw) || 0;
+            const newVipExpMs = parseSafeDateMs(finalApproved.subscriptionExpiryDate) || 0;
+            const effectiveExpIso =
+              existingShopExpMs > newVipExpMs && existingShopExpRaw
+                ? existingShopExpRaw
+                : finalApproved.subscriptionExpiryDate;
+            return {
+              ...r,
+              membershipTier: 'premium' as MembershipTier,
+              membershipExpiresAt: effectiveExpIso,
+              subscriptionExpiresAt: effectiveExpIso,
+              shopSubscriptionExpiresAt: effectiveExpIso,
+              isPromoted: r.status === 'approved',
+              isVerified: r.status === 'approved' ? true : r.isVerified,
+              paymentStatus: 'verified' as const,
+              shopPaymentStatus: r.status === 'approved' ? ('active' as const) : r.shopPaymentStatus,
+              featuredFromAt: r.featuredFromAt || (r.status === 'approved' ? nowApproveIso : undefined),
+              featuredUntilAt: r.featuredUntilAt || (r.status === 'approved' ? featuredUntilIso : undefined),
+            };
+          }
+          return r;
+        });
+        if (restChanged) {
+          latestSyncStateRef.current.restaurants = nextRests;
+          scheduleStorageWrite('kft_restaurants_real_v13', nextRests, 300);
         }
-        return r;
+        return restChanged ? nextRests : prev;
       });
-      if (restChanged) {
-        latestSyncStateRef.current.restaurants = nextRests;
-        scheduleStorageWrite('kft_restaurants_real_v13', nextRests, 300);
-      }
-      return restChanged ? nextRests : prev;
-    });
+    }
 
     // Push to ALL candidate atomic keys + aggregate cloud tables so cross-device login always finds active VIP
     if (isSupabaseConfigured()) {
@@ -10183,24 +10234,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isPendingPayment || isPendingManualReview
         ? 'pending'
         : (targetToReplace?.status || 'approved');
-    const inheritedShopActive = Boolean(targetToReplace && isShopSubscriptionActive(targetToReplace));
+    const slotNumber = targetToReplace
+      ? targetToReplace.storeSlotNumber || 1
+      : quota.usedStoresCount + 1;
+    const isOwnerPaidVipSlot = Boolean(
+      !isAdmin && isUserPaidVipActive(currentUser) && slotNumber <= Math.max(1, quota.totalAllowedStores)
+    );
+    const inheritedShopActive = Boolean(
+      (targetToReplace && isShopSubscriptionActive(targetToReplace)) || isOwnerPaidVipSlot
+    );
     const finalIsVerified = !isPendingManualReview && !isPendingPayment && (targetToReplace ? Boolean(targetToReplace.isVerified) : true);
     const finalIsPromoted = finalStatus === 'approved' && (isAdmin || inheritedShopActive);
 
     const nowIso = new Date().toISOString();
     const adminDefaultExpiryIso = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
-    const inheritedExpiryIso =
+    const ownerPaidVipExpiryIso = currentUser.subscriptionExpiryDate || currentUser.vipExpiresAt;
+    const replacedRawExpiryIso =
       targetToReplace?.shopSubscriptionExpiresAt ||
       targetToReplace?.subscriptionExpiresAt ||
       targetToReplace?.membershipExpiresAt;
+    const replacedExpMs = parseSafeDateMs(replacedRawExpiryIso) || 0;
+    const ownerVipExpMs = parseSafeDateMs(ownerPaidVipExpiryIso) || 0;
+    const inheritedExpiryIso =
+      replacedExpMs >= ownerVipExpMs && replacedRawExpiryIso
+        ? replacedRawExpiryIso
+        : isOwnerPaidVipSlot
+        ? ownerPaidVipExpiryIso
+        : replacedRawExpiryIso;
     const rotationCfg = getVipFeaturedRotationConfig(appSettings);
     const featuredUntilIso = new Date(Date.now() + rotationCfg.durationMs).toISOString();
     const uniqueShopId = targetToReplace
       ? targetToReplace.id
       : (restData as any).id || `rest-vip-${currentUser.id}-${Date.now()}`;
-    const slotNumber = targetToReplace
-      ? targetToReplace.storeSlotNumber || 1
-      : quota.usedStoresCount + 1;
 
     const newRest: Restaurant = normalizeRestaurant({
       ...restData,
@@ -10824,6 +10889,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       userId: currentUser.id,
       userName: currentUser.name,
       userAvatar: currentUser.avatar,
+      isVipUser: Boolean(isAdminAccount(currentUser) || isUserVipActive(currentUser)),
       rating: clampedRating,
       comment: comment?.trim() || undefined,
       createdAt: nowIso,
@@ -11162,14 +11228,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           businessCategory: inferBusinessTypeAndCategory(r).businessCategory,
           categoryKh: inferBusinessTypeAndCategory(r).categoryKh,
           categoryEn: inferBusinessTypeAndCategory(r).categoryEn,
-          status: 'approved',
-          isVerified: true,
-          isPromoted: isShopSubscriptionActive(r) || Boolean(r.isAdminEdited && r.ownerId === 'admin-authorized-single'),
-          membershipTier: (isShopSubscriptionActive(r) || Boolean(r.isAdminEdited && r.ownerId === 'admin-authorized-single')) ? 'premium' : 'free',
-          shopPaymentStatus: isShopSubscriptionActive(r) ? 'active' : (r.shopPaymentStatus === 'pending_verification' ? 'pending_verification' : 'awaiting_payment'),
-          approvedAt: nowIso,
-          featuredFromAt: isShopSubscriptionActive(r) ? nowIso : r.featuredFromAt,
-          featuredUntilAt: isShopSubscriptionActive(r) ? featuredUntilIso : r.featuredUntilAt,
+          ...(() => {
+            const liveUsersList = latestSyncStateRef.current.users || users;
+            const ownerUser = liveUsersList.find((u) =>
+              doesUserMatchTarget(u, { id: r.ownerId, email: r.ownerEmail, phone: r.ownerPhone })
+            );
+            const isOwnerPaidVipSlot =
+              Boolean(ownerUser && isUserPaidVipActive(ownerUser)) &&
+              (r.storeSlotNumber || 1) <= 1 + (ownerUser?.paidAdditionalStoreSlots || 0);
+            const ownerVipExpIso = ownerUser?.subscriptionExpiryDate || ownerUser?.vipExpiresAt;
+            const existingExpRaw =
+              r.shopSubscriptionExpiresAt || r.subscriptionExpiresAt || r.membershipExpiresAt;
+            const existingExpMs = parseSafeDateMs(existingExpRaw) || 0;
+            const ownerExpMs = parseSafeDateMs(ownerVipExpIso) || 0;
+            const effectiveExpIso =
+              existingExpMs >= ownerExpMs && existingExpRaw
+                ? existingExpRaw
+                : isOwnerPaidVipSlot
+                ? ownerVipExpIso
+                : existingExpRaw;
+            const shopActiveAfterApproval =
+              isShopSubscriptionActive({
+                ...r,
+                status: 'approved',
+                membershipTier: isOwnerPaidVipSlot ? 'premium' : r.membershipTier,
+                shopSubscriptionExpiresAt: effectiveExpIso,
+              }) ||
+              isOwnerPaidVipSlot ||
+              Boolean(r.isAdminEdited && r.ownerId === 'admin-authorized-single');
+            return {
+              status: 'approved' as const,
+              isVerified: true,
+              isPromoted: shopActiveAfterApproval,
+              membershipTier: (shopActiveAfterApproval ? 'premium' : 'free') as MembershipTier,
+              membershipExpiresAt: effectiveExpIso || r.membershipExpiresAt,
+              subscriptionExpiresAt: effectiveExpIso || r.subscriptionExpiresAt,
+              shopSubscriptionExpiresAt: effectiveExpIso || r.shopSubscriptionExpiresAt,
+              paymentStatus: shopActiveAfterApproval ? ('verified' as const) : r.paymentStatus,
+              shopPaymentStatus: shopActiveAfterApproval
+                ? ('active' as const)
+                : r.shopPaymentStatus === 'pending_verification'
+                ? ('pending_verification' as const)
+                : ('awaiting_payment' as const),
+              approvedAt: nowIso,
+              featuredFromAt: shopActiveAfterApproval ? nowIso : r.featuredFromAt,
+              featuredUntilAt: shopActiveAfterApproval ? featuredUntilIso : r.featuredUntilAt,
+            };
+          })(),
           updatedAt: nowIso,
           aiCategoryVerification: (() => {
             const biz = inferBusinessTypeAndCategory(r);

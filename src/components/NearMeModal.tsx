@@ -39,6 +39,7 @@ import {
   Restaurant,
   TouristDestination,
   isPlaceLocationVerified,
+  isShopSubscriptionActive,
   openRestaurantGoogleExternal,
   openDestinationGoogleExternal,
 } from '../types';
@@ -379,7 +380,14 @@ export const NearMeModal: React.FC = () => {
   }, [restaurants, liveNearbyRestaurants, baseCoords, selectedRadiusMeters]);
 
   const nearbyRestaurants = useMemo(() => {
-    return allVerifiedCityRestaurants.filter((r) => r.distanceMeters <= selectedRadiusMeters);
+    return allVerifiedCityRestaurants
+      .filter((r) => r.distanceMeters <= selectedRadiusMeters)
+      .sort((a, b) => {
+        const aVip = isShopSubscriptionActive(a) ? 1 : 0;
+        const bVip = isShopSubscriptionActive(b) ? 1 : 0;
+        if (bVip !== aVip) return bVip - aVip;
+        return a.distanceMeters - b.distanceMeters;
+      });
   }, [allVerifiedCityRestaurants, selectedRadiusMeters]);
 
   const nearbyDestinations = useMemo(() => {
@@ -991,6 +999,8 @@ export const NearMeModal: React.FC = () => {
                     !r.photoUrl?.startsWith('data:image/svg+xml') &&
                     r.googleMapsMeta?.hasOfficialGooglePhoto !== false;
 
+                  const isVipShop = isShopSubscriptionActive(r);
+
                   return (
                     <div
                       key={r.id}
@@ -998,7 +1008,11 @@ export const NearMeModal: React.FC = () => {
                         setSelectedRestaurant(r);
                         setIsNearMeModalOpen(false);
                       }}
-                      className="p-3 bg-white rounded-[22px] border border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.05)] hover:border-emerald-500/60 transition space-y-2.5 cursor-pointer"
+                      className={`p-3 bg-white rounded-[22px] border transition space-y-2.5 cursor-pointer ${
+                        isVipShop
+                          ? 'border-amber-400 ring-1 ring-amber-400/50 shadow-[0_6px_20px_rgba(245,158,11,0.16)]'
+                          : 'border-slate-200/90 shadow-[0_6px_18px_rgba(15,23,42,0.05)] hover:border-emerald-500/60'
+                      }`}
                     >
                       <div className="flex gap-3">
                         <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200/70">
@@ -1007,6 +1021,11 @@ export const NearMeModal: React.FC = () => {
                             alt={rLoc.name}
                             className="w-full h-full rounded-2xl object-cover"
                           />
+                          {isVipShop && (
+                            <span className="absolute top-1 left-1 bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 text-[8px] font-extrabold px-1.5 py-0.5 rounded-full shadow-xs">
+                              👑 VIP GPS
+                            </span>
+                          )}
                           <span className="absolute bottom-1 right-1 bg-black/65 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">
                             {hasOfficialPhoto
                               ? tr(language, 'រូបភាពហាង', 'Photo', '实景图')

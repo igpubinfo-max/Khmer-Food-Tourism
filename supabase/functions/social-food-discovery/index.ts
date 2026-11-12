@@ -69,6 +69,31 @@ const ACTIVE_CAMBODIA_CHANNELS_2026: Array<{
   { channelId: 'UCARbX20_cV9YwwrAFyYvoMg', name: 'Mao Cambodia', categorySlug: 'famous_restaurant', provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
   { channelId: 'UCRFt5572jMudEvPVDKkHmbg', name: 'Sreyreang Life Show', categorySlug: 'tourist_attraction', provinceKh: 'ខេត្តកំពត', provinceEn: 'Kampot' },
   { channelId: 'UCMIUsbPWmPzqRLoI8J9TG_Q', name: 'Little Explore', categorySlug: 'tourist_attraction', provinceKh: 'ខេត្តកោះកុង', provinceEn: 'Koh Kong' },
+  { channelId: "UCdBYbaSyGy41ws2deqrcpqg", name: "ម៉ែកាឆែត", categorySlug: "popular_food", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UCFHnPGSdWxHKVOOGuwH75-Q", name: "NexWalk KH", categorySlug: "food_travel_vlog", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UC2AEkWunWQ5m_85k-kJwxXg", name: "BT Food Story", categorySlug: "popular_food", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UCXDwffDutwtpFYbUTts7pvw", name: "Cambodia Street Food", categorySlug: "food_travel_vlog", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UCgbV-6Db9RB_93qVaDU8z_A", name: "Sok khim Cooking", categorySlug: "popular_food", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UC6BGn58FaYnAn7QgcxUpf_Q", name: "Sina NSN", categorySlug: "food_travel_vlog", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UCRvd6ud_kB8dbAvd3Fmk4Mg", name: "Sreypich TV Show", categorySlug: "food_travel_vlog", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UCv52_difuvyCvtZrnUntWNQ", name: "5 Five Tours", categorySlug: "food_travel_vlog", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UCCftsczyo1ciJ6HGH0VUOEg", name: "Food Tour & Explore", categorySlug: "food_travel_vlog", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UCn3QZDGrudCMuA8JU1HBzcA", name: "KhornPark88", categorySlug: "popular_food", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UC5lUlu8CHpEzpn4raQv4jiw", name: "WalkTV", categorySlug: "food_travel_vlog", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UCWEtQZOPvtIfiI-E4uJXRag", name: "Sambathchun សម្បត្តិជន", categorySlug: "famous_restaurant", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UClfihckKpwTAavLe4tT0NOg", name: "Tom Trips Out", categorySlug: "famous_restaurant", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UCEeeueKMAYe3wNNhie9TKew", name: "Street Food Explorer", categorySlug: "food_travel_vlog", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UC5KGBC_372NSiTJPMGr4wvA", name: "Pi Neak-ពីរនាក់", categorySlug: "popular_food", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UCGUyGCTcG9u_6cXRCrVpRvg", name: "Hidden Cambo", categorySlug: "popular_food", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UC36kFiOY7c2yll2LVyoVaHA", name: "Satya Dee", categorySlug: "popular_food", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UCjl-LRA_TLmAJGoehmVsZIA", name: "The Sister Loop", categorySlug: "popular_food", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UCtkB_B_A3jnFQryNxmAKOBg", name: "Khmer rural life", categorySlug: "food_travel_vlog", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UC0RsJe65MJAIFwgW6C0djvw", name: "Sarna Cooking Show", categorySlug: "food_travel_vlog", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UCAj8MxN5DsAFq5Me2wKVYbw", name: "Cambo Explorer", categorySlug: "food_travel_vlog", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UC0nxHFae3a0UzafMJjadIrQ", name: "CUỘC SỐNG CAM", categorySlug: "popular_food", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UCFUiKVah5VJJG1ESDjAtJ3g", name: "Life in Cambodia", categorySlug: "popular_food", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UCs22MyD8qdgDF-kJyv6Zofw", name: "Mark In Asia", categorySlug: "famous_restaurant", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
+  { channelId: "UC9OcuVtqIsCe8_7AjjPtoZg", name: "Angela McColl", categorySlug: "popular_food", provinceKh: 'រាជធានីភ្នំពេញ', provinceEn: 'Phnom Penh' },
 ];
 
 const CURATED_TIKTOK_FB_CAMBODIA_REVIEWS: SocialDiscoveryItem[] = [
@@ -596,7 +621,7 @@ Deno.serve(async (req: Request) => {
 
       if (youtubeApiKey) {
         try {
-          const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=12&order=date&publishedAfter=2025-01-01T00:00:00Z&q=${encodeURIComponent(
+          const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=25&order=relevance&q=${encodeURIComponent(
             searchQ
           )}&key=${encodeURIComponent(youtubeApiKey)}`;
           const ytRes = await fetch(ytUrl);

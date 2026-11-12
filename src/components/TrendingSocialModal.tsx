@@ -47,10 +47,11 @@ import {
   resolvePlayableTikTokStreamUrl,
   getCachedTikTokStreamUrl,
   prewarmTikTokStreams,
+  CAMBODIA_FOOD_YOUTUBE_SEARCH_KEYWORDS,
 } from '../services/onlineFoodDiscoveryService';
 import { savedVideoRecordToDiscoveryItem } from '../services/userVideoCollectionService';
 
-const VIDEO_BATCH_SIZE = 12;
+const VIDEO_BATCH_SIZE = 20;
 
 export const TrendingSocialModal: React.FC = () => {
   const {
@@ -541,7 +542,16 @@ export const TrendingSocialModal: React.FC = () => {
 
   useEffect(() => {
     setVisibleVideoCount(VIDEO_BATCH_SIZE);
-  }, [categoryFilter, provinceFilter, debouncedSearchQuery]);
+  }, [platformFilter, categoryFilter, provinceFilter, debouncedSearchQuery]);
+
+  const uniqueCreatorCount = useMemo(() => {
+    const authors = new Set<string>();
+    for (const it of filteredItems) {
+      const a = (it.authorHandle || it.sourceName || '').trim().toLowerCase();
+      if (a) authors.add(a);
+    }
+    return authors.size;
+  }, [filteredItems]);
 
   const displayedVideos = useMemo(
     () => filteredItems.slice(0, visibleVideoCount),
@@ -766,8 +776,11 @@ export const TrendingSocialModal: React.FC = () => {
     }
   };
 
-  const openOriginalSocialAccount = (item: OnlineFoodDiscoveryItem) => {
-    const targetUrl = resolveOriginalSocialAccountUrl(item);
+  const openOriginalSocialAccount = (item: OnlineFoodDiscoveryItem, preferChannelUrl = false) => {
+    const targetUrl =
+      preferChannelUrl && item.platform === 'youtube' && item.originalAccountUrl
+        ? item.originalAccountUrl
+        : resolveOriginalSocialAccountUrl(item);
     const cap = typeof window !== 'undefined' ? (window as any).Capacitor : undefined;
     if (cap?.isNativePlatform?.() && cap?.Plugins?.NativeAbaLauncher?.openExternalUrl) {
       cap.Plugins.NativeAbaLauncher.openExternalUrl({ url: targetUrl }).catch(() => {
@@ -1141,6 +1154,37 @@ export const TrendingSocialModal: React.FC = () => {
               {tr(language, p.labelKh, p.labelEn, p.labelZh)}
             </button>
           ))}
+        </div>
+
+        {/* Multilingual Food Review Search Keywords Bar + Active Channel/Video Stats */}
+        <div className="px-3 py-1.5 bg-slate-950/80 border-b border-slate-800/80 flex items-center gap-1.5 overflow-x-auto no-scrollbar font-khmer text-xs shrink-0">
+          <span className="px-2 py-0.5 rounded-md bg-emerald-950/90 border border-emerald-700/60 text-emerald-300 text-[10px] font-bold whitespace-nowrap shrink-0">
+            🎬 {filteredItems.length} {tr(language, 'វីដេអូ', 'Videos', '视频')} • {uniqueCreatorCount}{' '}
+            {tr(language, 'ឆានែល', 'Channels', '频道')}
+          </span>
+          {CAMBODIA_FOOD_YOUTUBE_SEARCH_KEYWORDS.map((kw) => {
+            const isSelected = searchQuery.trim().toLowerCase() === kw.query.toLowerCase();
+            return (
+              <button
+                key={kw.id}
+                type="button"
+                onClick={() => {
+                  if (isSelected) {
+                    setSearchQuery('');
+                  } else {
+                    setSearchQuery(kw.query);
+                  }
+                }}
+                className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap transition cursor-pointer border ${
+                  isSelected
+                    ? 'bg-rose-600 text-white border-rose-400 shadow-2xs'
+                    : 'bg-slate-800/90 text-slate-300 hover:text-white border-slate-700'
+                }`}
+              >
+                🔍 {tr(language, kw.labelKh, kw.labelEn, kw.labelZh)}
+              </button>
+            );
+          })}
         </div>
 
         {/* Results & Video List */}
@@ -1896,7 +1940,7 @@ export const TrendingSocialModal: React.FC = () => {
                           <div
                             onClick={(e) => {
                               e.stopPropagation();
-                              openOriginalSocialAccount(item);
+                              openOriginalSocialAccount(item, true);
                             }}
                             className="inline-flex items-center gap-1.5 mt-1 max-w-full cursor-pointer hover:underline"
                           >

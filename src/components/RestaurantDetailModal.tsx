@@ -38,6 +38,7 @@ export const RestaurantDetailModal: React.FC = () => {
     language, 
     showToast,
     currentUser,
+    users,
     setManagingRestaurant,
     setIsManageMenuModalOpen,
     openManageMyVipStore,
@@ -784,7 +785,19 @@ export const RestaurantDetailModal: React.FC = () => {
                       className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80 text-xs space-y-1"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-800 dark:text-slate-200">{rev.userName}</span>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="font-bold text-slate-800 dark:text-slate-200 truncate">{rev.userName}</span>
+                          {(rev.isVipUser ||
+                            Boolean(
+                              Array.isArray(users) &&
+                                users.some((u) => u.id === rev.userId && isUserVipActive(u))
+                            )) && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 text-[9px] font-extrabold shadow-2xs shrink-0">
+                              <Crown className="w-2.5 h-2.5 fill-current" />
+                              VIP
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center gap-0.5 text-amber-500">
                           {Array.from({ length: 5 }).map((_, idx) => (
                             <Star

@@ -5777,12 +5777,20 @@ export function performUnifiedCambodiaSearch(
 
   // Rank by relevance (exact name → partial → typo → category/address), keeping the previous order
   // (VIP / distance) as a deterministic tie-breaker within the same relevance tier.
-  const rankStable = <T,>(list: T[], fieldsOf: (x: T) => SearchableFields): T[] =>
+  const rankStable = <T,>(list: T[], fieldsOf: (x: T) => SearchableFields, isVipBoost?: (x: T) => boolean): T[] =>
     list
-      .map((item, idx) => ({ item, idx, tier: Math.floor(scoreSearchRecord(unifiedQa, fieldsOf(item)).score / 100) }))
+      .map((item, idx) => {
+        const baseScore = scoreSearchRecord(unifiedQa, fieldsOf(item)).score;
+        const vipBonus = baseScore > 0 && isVipBoost?.(item) ? 2 : 0;
+        return { item, idx, tier: Math.floor(baseScore / 100) + vipBonus };
+      })
       .sort((a, b) => b.tier - a.tier || a.idx - b.idx)
       .map((x) => x.item);
-  const rankedRestaurants = rankStable(mergedRestaurants, (r) => restaurantSearchFields(r, [getLocalizedRestaurant(r, 'zh').name]));
+  const rankedRestaurants = rankStable(
+    mergedRestaurants,
+    (r) => restaurantSearchFields(r, [getLocalizedRestaurant(r, 'zh').name]),
+    (r) => Boolean(r.membershipTier === 'premium' || r.shopPaymentStatus === 'active' || r.isPromoted)
+  );
   const rankedDestinations = rankStable(mergedDestinations, (d) => destinationSearchFields(d, [getLocalizedDestination(d, 'zh').name]));
   const rankedExternal = rankStable(externalPlaces, buildPlaceSearchFields);
 

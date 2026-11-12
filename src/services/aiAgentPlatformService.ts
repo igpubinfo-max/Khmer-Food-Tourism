@@ -459,20 +459,25 @@ function checkRateLimit(userKey: string): boolean {
 
 const DAILY_AI_USAGE_STORAGE_KEY = 'kft_daily_ai_tier_usage_v1';
 
-function checkAndIncrementDailyTierAiQuota(user?: User | null): {
+export function checkAndIncrementDailyTierAiQuota(user?: User | null): {
   allowed: boolean;
   usedToday: number;
   dailyLimit: number;
   isFreeTrial: boolean;
 } {
-  if (!user || isAdminAccount(user)) {
+  if (isAdminAccount(user)) {
     return { allowed: true, usedToday: 0, dailyLimit: 9999, isFreeTrial: false };
   }
   const catalog = getConsumerVipPricingCatalog();
   const isFreeTrial = isUserOnConsumerFreeTrial(user);
-  const dailyLimit = isUserVipActive(user) && !isFreeTrial ? catalog.paidAiDailyLimit : Math.max(50, catalog.trialAiDailyLimit || 50);
+  const isPaidVip = isUserVipActive(user) && !isFreeTrial;
+  const dailyLimit = isPaidVip
+    ? catalog.paidAiDailyLimit
+    : isFreeTrial
+    ? catalog.trialAiDailyLimit
+    : 5;
   const todayKey = new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
-  const bucketKey = `${user.id || 'user'}:${todayKey}`;
+  const bucketKey = `${user?.id || 'guest'}:${todayKey}`;
 
   try {
     const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(DAILY_AI_USAGE_STORAGE_KEY) : null;

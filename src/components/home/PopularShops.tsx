@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Star, MapPin } from 'lucide-react';
 import type { Language, Restaurant } from '../../types';
-import { isRestaurantPremiumActive, isGpipRegisteredRestaurant, isStrictVerifiedCambodiaRestaurant, hasApprovedShopPhoto } from '../../types';
+import { isRestaurantPremiumActive, isShopSubscriptionActive, isGpipRegisteredRestaurant, isStrictVerifiedCambodiaRestaurant, hasApprovedShopPhoto } from '../../types';
 import { tr } from '../../utils/i18n';
 import { getLocalizedRestaurant } from '../../utils/zhDynamicTranslator';
 import { SectionHeader } from './SectionHeader';
@@ -33,14 +33,19 @@ const PopularShopsInner: React.FC<Props> = ({ language, restaurants, onOpen, onS
     );
     // Precompute ranking score once in O(N) to prevent CPU spikes in sort comparisons
     const scored = approved.map((r) => {
+      const isActiveVipShop = isShopSubscriptionActive(r) || isRestaurantPremiumActive(r);
+      const isWithin24hBoost =
+        isActiveVipShop &&
+        Boolean(r.featuredUntilAt && Date.parse(r.featuredUntilAt) > Date.now());
       const s =
+        (isWithin24hBoost ? 8000 : 0) +
+        (isActiveVipShop ? 5000 : 0) +
         (hasApprovedShopPhoto(r) ? 10000 : 0) +
         (r.photoUpdatedAt ? 500 : 0) +
         (r.isVerified ? 2000 : 0) +
         (isGpipRegisteredRestaurant(r) ? 1000 : 0) +
         (r.rating || 0) * 20 +
-        Math.min(r.reviewCount || 0, 200) * 0.15 +
-        (isRestaurantPremiumActive(r) ? 6 : 0);
+        Math.min(r.reviewCount || 0, 200) * 0.15;
       return { r, s };
     });
     scored.sort((a, b) => b.s - a.s);
