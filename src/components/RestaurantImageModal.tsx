@@ -304,7 +304,7 @@ export const RestaurantImageModal: React.FC<RestaurantImageModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-[#064E3B] to-[#047857] text-white">
+        <div className="kft-khmer-modal-header px-5 pt-3.5 pb-4 flex items-center justify-between text-white">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-xl bg-white/10 text-emerald-200">
               <Camera className="w-5 h-5" />

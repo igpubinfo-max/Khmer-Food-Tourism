@@ -189,7 +189,7 @@ export const AiCheckInModal: React.FC = () => {
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 bg-gradient-to-r from-[#064E3B] via-[#065F46] to-slate-900 text-white flex items-center justify-between shrink-0 border-b border-emerald-500/30">
+        <div className="kft-khmer-modal-header px-4 sm:px-5 pt-3 pb-3.5 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 shadow-md">
               <Camera className="w-5 h-5" />

@@ -1661,7 +1661,7 @@ export const WhatToEatModal: React.FC = () => {
         {/* Header */}
         <div
           style={{ paddingTop: 'max(var(--kft-safe-top, 0px), 0.75rem)' }}
-          className="px-3.5 sm:px-4 pb-3 bg-[#064E3B] text-white flex items-center justify-between gap-2.5 shrink-0"
+          className="kft-khmer-modal-header px-4 sm:px-5 pb-3.5 text-white flex items-center justify-between gap-2.5 shrink-0"
         >
           <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
             <span className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-amber-300 shrink-0">

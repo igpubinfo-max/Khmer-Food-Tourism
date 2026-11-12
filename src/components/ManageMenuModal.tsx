@@ -576,7 +576,7 @@ export const ManageMenuModal: React.FC = () => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with Active Shop Identity & Shop Switcher */}
-        <div className="px-4 sm:px-5 py-3.5 border-b border-[#047857] bg-[#064E3B] text-white space-y-2.5">
+        <div className="kft-khmer-modal-header px-4 sm:px-5 pt-3 pb-3.5 text-white space-y-2.5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-10 h-10 rounded-xl overflow-hidden bg-emerald-500/20 border border-emerald-400/40 shrink-0 flex items-center justify-center">

@@ -1422,7 +1422,7 @@ export const VipAddRestaurantModal: React.FC = () => {
         />
 
         {/* Header */}
-        <div className="px-4 py-3.5 bg-gradient-to-r from-[#064E3B] to-emerald-800 text-white flex items-center justify-between shrink-0">
+        <div className="kft-khmer-modal-header px-4 sm:px-5 pt-3 pb-3.5 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="p-2 rounded-xl bg-amber-400 text-slate-950 shadow-xs shrink-0">
               <Store className="w-5 h-5" />

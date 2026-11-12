@@ -261,7 +261,7 @@ export const QrScannerModal: React.FC = () => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 bg-gradient-to-r from-[#064E3B] via-[#047857] to-emerald-800 text-white flex items-center justify-between shrink-0">
+        <div className="kft-khmer-modal-header px-5 pt-3.5 pb-4 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-2xl bg-white/20 text-white">
               <QrCode className="w-5 h-5" />

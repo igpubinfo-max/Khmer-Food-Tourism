@@ -378,7 +378,7 @@ export const TouristImageModal: React.FC<TouristImageModalProps> = ({
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[#047857] flex items-center justify-between bg-[#064E3B] text-white">
+        <div className="kft-khmer-modal-header px-5 pt-3.5 pb-4 flex items-center justify-between text-white">
           <div className="flex items-center gap-2.5">
             <div className="p-2 bg-white/10 text-emerald-300 rounded-xl border border-white/20">
               <ImageIcon className="w-4 h-4" />

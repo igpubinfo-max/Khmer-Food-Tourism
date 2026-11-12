@@ -515,7 +515,7 @@ export const AuthModal: React.FC<{ isMandatoryGate?: boolean }> = ({ isMandatory
     <div className="fixed inset-0 z-[115] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto font-sans">
       <div className="relative w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
         {/* Top Header Banner */}
-        <div className="relative p-5 pb-4 bg-gradient-to-br from-[#064E3B] via-[#047857] to-[#022C22] text-white text-center">
+        <div className="kft-khmer-modal-header relative p-5 pb-4 text-white text-center">
           <div className="w-12 h-12 mx-auto rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-2 shadow-inner">
             <Utensils className="w-6 h-6 text-emerald-300" />
           </div>

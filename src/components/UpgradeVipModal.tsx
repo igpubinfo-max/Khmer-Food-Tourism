@@ -734,10 +734,7 @@ export const UpgradeVipModal: React.FC = () => {
       >
         {/* Modal Header */}
         <div
-          style={{
-            background: 'linear-gradient(92deg, #064E3B 0%, #047857 55%, #0D9488 100%)',
-          }}
-          className="relative px-4 py-2.5 text-white shrink-0 shadow-xs"
+          className="kft-khmer-modal-header relative px-4 sm:px-5 pt-3 pb-3.5 text-white shrink-0 shadow-xs"
         >
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0 flex-1">

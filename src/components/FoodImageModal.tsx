@@ -247,7 +247,7 @@ export const FoodImageModal: React.FC<FoodImageModalProps> = ({
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 bg-[#064E3B] text-white flex items-center justify-between border-b border-[#047857]">
+        <div className="kft-khmer-modal-header px-5 pt-3.5 pb-4 text-white flex items-center justify-between">
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
               <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-emerald-200">

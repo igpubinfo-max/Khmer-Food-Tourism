@@ -408,7 +408,7 @@ export const GoogleMapsShopImporterModal: React.FC<GoogleMapsShopImporterModalPr
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-4 py-3.5 bg-gradient-to-r from-[#064E3B] via-emerald-800 to-teal-800 text-white flex items-center justify-between shrink-0">
+        <div className="kft-khmer-modal-header px-4 sm:px-5 pt-3 pb-3.5 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="p-2 rounded-xl bg-amber-400 text-slate-950 shadow-xs shrink-0">
               <Globe className="w-5 h-5" />

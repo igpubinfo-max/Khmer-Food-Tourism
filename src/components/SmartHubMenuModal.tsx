@@ -97,7 +97,7 @@ export const SmartHubMenuModal: React.FC<Props> = ({ onClose }) => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-4 py-3.5 bg-gradient-to-r from-[#064E3B] via-emerald-800 to-[#047857] text-white flex items-center justify-between gap-3 shrink-0">
+        <div className="kft-khmer-modal-header px-4 sm:px-5 pt-3 pb-3.5 text-white flex items-center justify-between gap-3 shrink-0">
           <div className="min-w-0">
             <h2 className="font-moul text-base text-amber-300">
               {tr(language, 'ម៉ឺនុយពិសេស', 'Explore Hub', '精选菜单')}

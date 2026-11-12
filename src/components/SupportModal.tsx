@@ -81,7 +81,7 @@ export const SupportModal: React.FC = () => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="relative bg-[#064E3B] text-white p-6 pb-5 border-b border-[#047857]">
+        <div className="kft-khmer-modal-header relative text-white p-5 pb-4">
           <button
             onClick={() => setIsSupportModalOpen(false)}
             className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-emerald-200 hover:text-white transition-colors cursor-pointer"

@@ -791,3 +791,21 @@ img[src^="data:image"],
   min-height: 0;
   object-fit: contain;
 }
+
+/* 14. Unified Compact Green Khmer Angkor Wat Decorative Header Banner (Untitled-3.png) */
+.kft-khmer-modal-header {
+  position: relative;
+  isolation: isolate;
+  background-color: #1E293B !important;
+  background-image: url('/banners/Untitled-3.png') !important;
+  background-size: calc(100% - 8px) calc(100% - 6px) !important;
+  background-position: center bottom 3px !important;
+  background-repeat: no-repeat !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.28) !important;
+  padding-bottom: 0.85rem !important;
+  overflow: hidden;
+}
+.kft-khmer-modal-header > * {
+  position: relative;
+  z-index: 10;
+}

@@ -981,7 +981,7 @@ export const TrendingSocialModal: React.FC = () => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-3.5 bg-[#064E3B] text-white flex items-center justify-between shrink-0 border-b border-emerald-700/60">
+        <div className="kft-khmer-modal-header px-4 sm:px-5 pt-3 pb-3.5 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div className="w-10 h-10 rounded-2xl bg-emerald-800/80 border border-emerald-500/30 flex items-center justify-center text-emerald-100 shadow-xs shrink-0">
               <Utensils className="w-5 h-5" />

@@ -489,7 +489,7 @@ export const GoogleMapsPlaceSearchModal: React.FC = () => {
     <div className="fixed inset-0 z-[55] flex flex-col sm:items-center sm:justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-sm overflow-hidden">
       <div className="bg-[#1E293B] sm:rounded-3xl max-w-5xl w-full h-[100dvh] sm:h-auto sm:max-h-[94vh] flex flex-col overflow-hidden shadow-2xl border-0 sm:border border-slate-700/80 animate-in fade-in zoom-in-95 duration-200">
         {/* Top Header (Compact & Always Accessible) */}
-        <div className="bg-gradient-to-r from-emerald-900 via-teal-800 to-emerald-900 text-white px-3.5 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2.5 shrink-0 z-30 shadow-md">
+        <div className="kft-khmer-modal-header text-white px-4 sm:px-6 pt-3 pb-3.5 flex items-center justify-between gap-2.5 shrink-0 z-30 shadow-md">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/15 flex items-center justify-center border border-white/25 shrink-0 shadow-inner">
               <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-300" />

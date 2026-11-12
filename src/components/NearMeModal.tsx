@@ -672,10 +672,9 @@ export const NearMeModal: React.FC = () => {
         {/* Clean Header */}
         <div
           style={{
-            background: 'linear-gradient(92deg, #064E3B 0%, #047857 55%, #0D9488 100%)',
-            paddingTop: 'max(var(--kft-safe-top, 0px), 0.75rem)',
+            paddingTop: 'max(var(--kft-safe-top, 0px), 0.625rem)',
           }}
-          className="px-3.5 sm:px-4 pb-3 text-white flex items-center justify-between shrink-0 shadow-sm"
+          className="kft-khmer-modal-header px-4 sm:px-5 pb-3.5 text-white flex items-center justify-between shrink-0 shadow-sm"
         >
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div
