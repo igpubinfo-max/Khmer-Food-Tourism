@@ -9,7 +9,6 @@ import {
   MapPin,
   Search,
   Navigation,
-  CheckCircle2,
   RotateCcw,
   Utensils,
   LocateFixed,
@@ -465,56 +464,44 @@ export const DailyDiscoveriesModal: React.FC = () => {
         className="w-full max-w-full md:max-w-2xl lg:max-w-3xl bg-[#1E293B] text-slate-900 rounded-none md:rounded-3xl border-0 md:border border-slate-700/80 shadow-2xl h-full md:h-[92dvh] max-h-full md:max-h-[92dvh] flex flex-col overflow-hidden overscroll-contain font-khmer"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Clean Emerald & Gold Header */}
+        {/* Green Khmer-Themed Header Banner (Picture 2 Artwork & Proportions, Empty Text Area) */}
         <div
           style={{
-            background: 'linear-gradient(92deg, #064E3B 0%, #047857 55%, #0D9488 100%)',
-            paddingTop: 'max(var(--kft-safe-top, 0px), 0.875rem)',
+            paddingTop: 'max(var(--kft-safe-top, 0px), 0.375rem)',
           }}
-          className="px-3.5 sm:px-4 pb-3.5 text-white flex items-center justify-between shrink-0 shadow-sm"
+          className="px-2 sm:px-3 pt-1.5 pb-1 bg-[#1E293B] shrink-0"
         >
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div
-              style={{
-                background: 'linear-gradient(180deg, #60A5FA 0%, #2563EB 100%)',
-                boxShadow: '0 4px 10px rgba(37, 99, 235, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.6)',
-              }}
-              className="w-10 h-10 rounded-2xl border border-white/40 flex items-center justify-center text-white shrink-0"
-            >
-              <IconProvinceFood className="w-5 h-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <h3 className="font-moul text-xs sm:text-sm text-white leading-[1.7] py-0.5 break-words">
-                  {tr(
-                    language,
-                    'ស្វែងយល់ម្ហូបតាមខេត្ត-ក្រុងទាំង ២៥',
-                    'Discover Cambodian Food by Province',
-                    '按省份探索柬埔寨 25 省市传统美食'
-                  )}
-                </h3>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 border border-white/35 text-white text-[10px] font-extrabold shrink-0">
-                  <CheckCircle2 className="w-3 h-3 text-amber-300" />
-                  <span>{tr(language, 'ឥតគិតថ្លៃ', 'FREE', '免费浏览')}</span>
-                </span>
+          <div className="relative w-full aspect-[1004/252] min-h-[72px] sm:min-h-[88px] flex items-center justify-between px-3.5 sm:px-5 overflow-hidden select-none">
+            <img
+              src="/banners/province_food_header_banner.png"
+              alt=""
+              aria-hidden="true"
+              loading="eager"
+              decoding="async"
+              draggable={false}
+              className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none drop-shadow-[0_6px_14px_rgba(2,6,23,0.45)]"
+            />
+            <div className="relative z-10 flex items-center gap-2.5 min-w-0 flex-1">
+              <div
+                style={{
+                  background: 'linear-gradient(180deg, #60A5FA 0%, #2563EB 100%)',
+                  boxShadow: '0 4px 10px rgba(37, 99, 235, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.6)',
+                }}
+                className="w-10 h-10 rounded-2xl border border-white/40 flex items-center justify-center text-white shrink-0"
+              >
+                <IconProvinceFood className="w-5 h-5" />
               </div>
-              <p className="text-[11px] text-emerald-50 font-khmer leading-[1.55] break-words">
-                {tr(
-                  language,
-                  'មុខម្ហូបប្រចាំខេត្ត និងផែនទីហាងទាំង ២៥ រាជធានី-ខេត្ត',
-                  'Signature dishes & map across all 25 provinces & capital',
-                  '全柬 25 省市代表菜与地图导航'
-                )}
-              </p>
+              {/* Empty text area reserved for custom Khmer and English text */}
+              <div className="min-w-0 flex-1" />
             </div>
+            <button
+              onClick={() => setIsDailyDiscoveriesModalOpen(false)}
+              className="relative z-10 w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition cursor-pointer shrink-0 border border-white/25 shadow-sm"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button
-            onClick={() => setIsDailyDiscoveriesModalOpen(false)}
-            className="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition cursor-pointer shrink-0"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
         {/* Control Bar: Search + GPS Nearest Province + 4 Colorful Category Cards */}
