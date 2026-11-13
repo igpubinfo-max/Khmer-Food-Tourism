@@ -37,6 +37,10 @@ function animateScrollToTarget(
     cancelAnimationFrame(prevRaf);
   }
 
+  // Ensure CSS scroll-behavior: smooth on #kft-main-scroll does not conflict
+  // with per-frame requestAnimationFrame scrollTop updates.
+  container.style.scrollBehavior = 'auto';
+
   const startTop = container.scrollTop;
   const initialTargetTop = computeTargetScrollTop(container, targetEl, offsetTop);
   if (Math.abs(initialTargetTop - startTop) < 2) {

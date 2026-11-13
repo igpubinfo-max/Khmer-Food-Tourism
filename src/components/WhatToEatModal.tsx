@@ -502,11 +502,7 @@ export const WhatToEatModal: React.FC = () => {
       setOpenGroup(null);
       setSetPage(0);
       setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
-      smoothScrollToElement(drinkPairingTopRef.current || dishCardRef.current, {
-        containerEl: scrollerRef.current,
-        offsetTop: 8,
-        delayMs: 55,
-      });
+      // No auto-scroll in AI Food Assistant
     } else if ((window as any).__kft_wte_open_health) {
       (window as any).__kft_wte_open_health = false;
       setDrinkMode(false);
@@ -973,12 +969,8 @@ export const WhatToEatModal: React.FC = () => {
 
   const [recommendationError, setRecommendationError] = useState<string>('');
 
-  const scrollToResultsSection = (targetEl?: HTMLElement | null) => {
-    smoothScrollToElement(targetEl || dishCardRef.current, {
-      containerEl: scrollerRef.current,
-      offsetTop: 8,
-      delayMs: 45,
-    });
+  const scrollToResultsSection = (_targetEl?: HTMLElement | null) => {
+    // No auto-scroll in AI Food Assistant per user preference
   };
 
   // Top 4 Recommended Dishes per batch for the 2-column RESULTS section
@@ -3080,15 +3072,7 @@ export const WhatToEatModal: React.FC = () => {
                         setDrinkMode(false);
                         const willOpen = openGroup !== g.id;
                         setOpenGroup(willOpen ? g.id : null);
-                        if (willOpen) {
-                          smoothScrollToElement(expandedGroupPanelRef.current || dishCardRef.current, {
-                            containerEl: scrollerRef.current,
-                            offsetTop: 8,
-                            delayMs: 45,
-                          });
-                        } else {
-                          scrollToResultsSection(dishCardRef.current);
-                        }
+                        // Keep AI Food Assistant category buttons in place without auto-scrolling
                       }}
                       className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-all duration-200 active:scale-95 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
                     >
@@ -3477,7 +3461,7 @@ export const WhatToEatModal: React.FC = () => {
           </div>
 
           {/* Content body (Dark Slate #1E293B background for all marked areas) */}
-          <div ref={dishCardRef} className="px-3.5 pt-3.5 pb-8 space-y-3 bg-[#1E293B] flex-1 min-h-[85dvh] scroll-mt-2">
+          <div ref={dishCardRef} className="px-3.5 pt-3.5 pb-8 space-y-3 bg-[#1E293B] flex-1 scroll-mt-2">
 
             {/* Beverage Pairing sets */}
             {showSets && (

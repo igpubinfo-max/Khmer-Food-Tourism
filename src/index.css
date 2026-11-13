@@ -101,7 +101,7 @@
   overscroll-behavior-y: contain;
   overscroll-behavior-x: none;
   overflow-anchor: none;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   padding-left: var(--kft-safe-left, 0px);
   padding-right: var(--kft-safe-right, 0px);
   /* The bottom nav is a flex sibling (never overlays content); this breathing room
