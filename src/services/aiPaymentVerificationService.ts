@@ -878,12 +878,15 @@ export async function verifyAbaPaymentAndReceipt(params: {
   // ============================================================================
   // FINAL DECISION: Auto-Approve ONLY if ALL 5 checks pass 100%
   // ============================================================================
-  const canAutoApprove =
+  // STRICT SECURITY RULE: Never auto-approve VIP payments on client or via AI OCR.
+  // Every payment must remain in pending_verification until an authorized Admin manually approves it.
+  const allChecksPassed =
     recipientCheck.passed &&
     amountCheck.passed &&
     trxIdCheck.passed &&
     dateCheck.passed &&
     antiReplayCheck.passed;
+  const canAutoApprove = false;
 
   const isHighConfidenceAiExtraction =
     extracted.extractionSource === 'gemini_vision' ||
@@ -912,17 +915,17 @@ export async function verifyAbaPaymentAndReceipt(params: {
   let summaryKh = '';
   let summaryEn = '';
 
-  if (canAutoApprove) {
-    summaryKh = `✅ បានផ្ទៀងផ្ទាត់ជោគជ័យ 100%៖ វិក្កយបត្រ ABA ត្រូវគ្នាជាមួយគណនី "${
+  if (allChecksPassed) {
+    summaryKh = `⏳ បឋម៖ វិក្កយបត្រ ABA ត្រូវគ្នាជាមួយគណនី "${
       extracted.recipientName || 'CHEA SAVUTH'
-    }", ចំនួនទឹកប្រាក់ $${expectedAmountUsd.toFixed(2)} USD, លេខប្រតិបត្តិការ (${
+    }", ចំនួនទឹកប្រាក់ ${expectedAmountUsd.toFixed(2)} USD, លេខប្រតិបត្តិការ (${
       extracted.trxId
-    }) និងកាលបរិច្ឆេទ (${extracted.transactionDate})។ អនុម័តបើកដំណើរការ VIP!`;
-    summaryEn = `✅ 100% Verified: ABA receipt matches recipient "${
+    }) និងកាលបរិច្ឆេទ (${extracted.transactionDate})។ កំពុងរង់ចាំរដ្ឋបាល (Admin) ពិនិត្យ និងអនុម័តបើកដំណើរការ VIP។`;
+    summaryEn = `⏳ Pre-check passed: ABA receipt matches recipient "${
       extracted.recipientName || 'CHEA SAVUTH'
-    }", amount $${expectedAmountUsd.toFixed(2)} USD, Trx. ID (${
+    }", amount ${expectedAmountUsd.toFixed(2)} USD, Trx. ID (${
       extracted.trxId
-    }), and date (${extracted.transactionDate}). Approved for VIP activation!`;
+    }), and date (${extracted.transactionDate}). Awaiting manual Admin approval to activate VIP.`;
   } else if (hasExplicitMismatch) {
     const failedReasonsKh = [
       !recipientCheck.passed ? recipientCheck.reasonKh : '',
@@ -953,11 +956,7 @@ export async function verifyAbaPaymentAndReceipt(params: {
   }
 
   return {
-    status: canAutoApprove
-      ? 'verified'
-      : hasExplicitMismatch
-      ? 'rejected_mismatch'
-      : 'flagged_manual_review',
+    status: hasExplicitMismatch ? 'rejected_mismatch' : 'flagged_manual_review',
     canAutoApprove,
     verifiedAt,
     verificationMethod:

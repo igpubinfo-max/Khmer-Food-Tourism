@@ -1094,6 +1094,19 @@ export const VipAddRestaurantModal: React.FC = () => {
   // Validate form and open Preview screen before submitting
   const handleProceedToPreview = (e: React.FormEvent) => {
     e.preventDefault();
+    if (requiresAdditionalPayment) {
+      showToast(
+        tr(
+          language,
+          `🔒 សូមបង់ប្រាក់កញ្ចប់${businessType === 'hotel' ? 'សណ្ឋាគារ' : 'ហាង'} (${selectedShopPlan.priceUsd.toFixed(2)} USD / ${selectedShopPlan.durationDays} ថ្ងៃ) តាម ABA KHQR ជាមុនសិន!`,
+          `🔒 Payment Required: Please complete the ${businessType === 'hotel' ? 'Hotel' : 'Shop'} Package payment (${selectedShopPlan.priceUsd.toFixed(2)} USD / ${selectedShopPlan.durationDays} Days) first!`,
+          `🔒 需先付款：请先完成${businessType === 'hotel' ? '酒店' : '店铺'}套餐付款 (${selectedShopPlan.priceUsd.toFixed(2)} USD / ${selectedShopPlan.durationDays} 天)！`
+        ),
+        'warning'
+      );
+      setActiveTab('pay_additional_slot');
+      return;
+    }
     setSubmitAttempted(true);
     const errs = validateForm();
     const errKeys = Object.keys(errs);
@@ -1536,7 +1549,7 @@ export const VipAddRestaurantModal: React.FC = () => {
                 setActiveTab(requiresAdditionalPayment ? 'pay_additional_slot' : 'create_form');
               }}
               className={`flex-1 py-2 px-3 rounded-xl font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                activeTab === 'create_form'
+                activeTab === 'create_form' || activeTab === 'pay_additional_slot'
                   ? 'bg-[#064E3B] text-white shadow-xs'
                   : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
               }`}
@@ -1914,9 +1927,9 @@ export const VipAddRestaurantModal: React.FC = () => {
               <p className="text-[11px] text-slate-700 dark:text-slate-200 leading-relaxed">
                 {tr(
                   language,
-                  'គណនីឥតគិតថ្លៃមិនអាចបន្ថែមហាង ឬសណ្ឋាគារដោយមិនបង់ប្រាក់បានទេ។ សូមជ្រើសរើសកញ្ចប់ 30 ថ្ងៃ ($6.99) ឬ 365 ថ្ងៃ ($49.99) រួចស្កេនបង់ប្រាក់តាម ABA KHQR ខាងក្រោមដើម្បីបើកសិទ្ធិដាក់ហាង ឬសណ្ឋាគារ។',
-                  'Free users cannot add a Shop or Hotel without payment. Please select the 30-Day ($6.99) or 365-Day ($49.99) plan and pay via ABA KHQR below to unlock Shop/Hotel registration.',
-                  '免费用户无法免费添加店铺或酒店。请选择 30 天（$6.99）或 365 天（$49.99）套餐并通过下方 ABA KHQR 付款后解锁。'
+                  'ដើម្បីបន្ថែមហាងអាហារ ឬសណ្ឋាគារថ្មី តម្រូវឱ្យបង់ប្រាក់ជាមុនសិន។ សូមជ្រើសរើសកញ្ចប់ 30 ថ្ងៃ ($6.99) ឬ 365 ថ្ងៃ ($49.99) រួចស្កេនបង់ប្រាក់តាម ABA KHQR ខាងក្រោមដើម្បីបើកសិទ្ធិដាក់ហាង ឬសណ្ឋាគារ។',
+                  'Payment is required first before adding a new Shop or Hotel. Please select the 30-Day ($6.99) or 365-Day ($49.99) plan and pay via ABA KHQR below to unlock registration.',
+                  '添加新店铺或酒店必须先付款。请选择 30 天（$6.99）或 365 天（$49.99）套餐并通过下方 ABA KHQR 付款后解锁。'
                 )}
               </p>
               {quota.pendingAdditionalStoreTransaction && (
@@ -2284,6 +2297,45 @@ export const VipAddRestaurantModal: React.FC = () => {
             className="flex-1 min-h-0 flex flex-col font-khmer text-xs"
           >
             <div className="p-4 space-y-3 overflow-y-auto flex-1 overscroll-contain">
+              {/* Status Banner when Admin or Verified Paid Store Slot is active */}
+              {isAdmin ? (
+                <div className="p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-400/70 flex items-center justify-between gap-2 text-[11px]">
+                  <span className="font-bold text-emerald-900 dark:text-emerald-200">
+                    {tr(
+                      language,
+                      '👑 គណនី Admin អាចបន្ថែមហាងផ្ទាល់ (អ្នកប្រើទូទៅត្រូវបង់ $6.99 ឬ $49.99 ជាមុនសិន)',
+                      '👑 Admin Mode (Regular users must pay $6.99 or $49.99 first)',
+                      '👑 管理员模式（普通用户必须先支付 $6.99 或 $49.99）'
+                    )}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('pay_additional_slot')}
+                    className="px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-[10px] shrink-0 cursor-pointer"
+                  >
+                    {tr(language, '💳 មើលផ្ទាំងបង់ប្រាក់', '💳 Preview Payment', '💳 查看付款界面')}
+                  </button>
+                </div>
+              ) : quota.remainingAvailableSlots > 0 ? (
+                <div className="p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-400/70 flex items-center justify-between gap-2 text-[11px]">
+                  <span className="font-bold text-emerald-900 dark:text-emerald-200">
+                    {tr(
+                      language,
+                      `✅ អ្នកបានបង់ប្រាក់បើកសិទ្ធិបន្ថែមហាងរួចហើយ (សល់ ${quota.remainingAvailableSlots} ហាង)`,
+                      `✅ Paid Store Slot Verified (${quota.remainingAvailableSlots} slot available)`,
+                      `✅ 已验证付费店铺名额（剩余 ${quota.remainingAvailableSlots} 个）`
+                    )}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('pay_additional_slot')}
+                    className="px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-[10px] shrink-0 cursor-pointer"
+                  >
+                    {tr(language, '💳 មើលផ្ទាំងបង់ប្រាក់', '💳 Payment Info', '💳 付款信息')}
+                  </button>
+                </div>
+              ) : null}
+
               {/* Mode Switcher: Add New vs Existing Listing */}
               <div className="p-1 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 grid grid-cols-2 gap-1">
                 <button

@@ -5,7 +5,7 @@ export const APP_VERSION_NAME: string =
     ? __KFT_VERSION_NAME__.trim().replace(/^v/i, '')
     : '2.7.0';
 export const APP_VERSION = `v${APP_VERSION_NAME}`;
-export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1575;
+export const APP_BUILD_CODE: number = typeof __KFT_BUILD_CODE__ === 'number' ? __KFT_BUILD_CODE__ : 1576;
 export const APP_RELEASE_DATE = '2026-11-13';
 
 /**
@@ -826,7 +826,7 @@ export const VIP_SUBSCRIPTION_DAYS = 90;
 export const VIP_QUARTERLY_PRICE_USD = 2.99;
 export const VIP_QUARTERLY_DAYS = 30;
 export const DEFAULT_ADDITIONAL_STORE_FEE_USD = 6.99;
-export const DEFAULT_INCLUDED_FREE_STORES = 1;
+export const DEFAULT_INCLUDED_FREE_STORES = 0;
 
 export type VipPlanType = 'quarterly' | 'annual';
 
@@ -3437,6 +3437,22 @@ export const sanitizeVipMembershipHistoryEntry = (
 /**
  * Normalizes legacy $4.99 / $9.99 30-day or $24.99 90-day prices on RegistrationTransaction records.
  */
+/**
+ * Returns true if a transaction was auto-marked 'verified' by the legacy AI/OCR auto-approver
+ * rather than approved by an authorized human Administrator.
+ */
+export const isUnapprovedAiAutoVerifiedTransaction = (
+  txn?: Partial<RegistrationTransaction> | null
+): boolean => {
+  if (!txn) return false;
+  const vb = String(txn.verifiedBy || '').trim();
+  if (!vb) return false;
+  if (/Admin|Chea\s*Savuth|រដ្ឋបាល|Google\s*Play\s*Billing/i.test(vb) && !/^AI\s*&/i.test(vb)) {
+    return false;
+  }
+  return /^AI\s*&|Auto-Approved|ai_auto_approve|Kim\s*Seng\s*Verified|ai-payment-verifier/i.test(vb);
+};
+
 export const sanitizeLegacyVipTransactionPricing = (
   txn: RegistrationTransaction
 ): RegistrationTransaction => {
@@ -3504,11 +3520,11 @@ export const sanitizeLegacyVipTransactionPricing = (
       const recDate = aiVerificationReport.extractedReceipt?.transactionDate || txn.createdAt;
       aiVerificationReport = {
         ...aiVerificationReport,
-        status: 'verified',
-        canAutoApprove: true,
+        status: 'flagged_manual_review',
+        canAutoApprove: false,
         confidenceScore: 100,
-        summaryKh: `✅ បានផ្ទៀងផ្ទាត់ជោគជ័យ 100%៖ វិក្កយបត្រ ABA ត្រូវគ្នាជាមួយគណនី "${recName}", ចំនួនទឹកប្រាក់ ${(amountUsd || 0).toFixed(2)} USD, លេខប្រតិបត្តិការ (${rawExtractedTrx}) និងកាលបរិច្ឆេទ (${recDate})។ អនុម័តបើកដំណើរការដោយស្វ័យប្រវត្តិ!`,
-        summaryEn: `✅ 100% Verified: ABA receipt matches recipient "${recName}", amount ${(amountUsd || 0).toFixed(2)} USD, Trx. ID (${rawExtractedTrx}), and date (${recDate}). Auto-approved!`,
+        summaryKh: `⏳ បឋម៖ វិក្កយបត្រ ABA ត្រូវគ្នាជាមួយគណនី "${recName}", ចំនួនទឹកប្រាក់ ${(amountUsd || 0).toFixed(2)} USD, លេខប្រតិបត្តិការ (${rawExtractedTrx}) និងកាលបរិច្ឆេទ (${recDate})។ កំពុងរង់ចាំរដ្ឋបាលពិនិត្យ និងអនុម័ត!`,
+        summaryEn: `⏳ Pre-check passed: ABA receipt matches recipient "${recName}", amount ${(amountUsd || 0).toFixed(2)} USD, Trx. ID (${rawExtractedTrx}), and date (${recDate}). Awaiting Admin approval!`,
         checks: {
           ...aiVerificationReport.checks,
           trxId: {
@@ -3522,6 +3538,30 @@ export const sanitizeLegacyVipTransactionPricing = (
       };
       changed = true;
     }
+  }
+
+  if (aiVerificationReport && aiVerificationReport.canAutoApprove) {
+    aiVerificationReport = {
+      ...aiVerificationReport,
+      canAutoApprove: false,
+      status: aiVerificationReport.status === 'verified' ? 'flagged_manual_review' : aiVerificationReport.status,
+    };
+    changed = true;
+  }
+
+  // Demote any transaction that was auto-verified by AI without human Admin approval back to pending_verification
+  if (txn.status === 'verified' && isUnapprovedAiAutoVerifiedTransaction(txn)) {
+    return {
+      ...txn,
+      amountUsd,
+      notes,
+      status: 'pending_verification',
+      paymentStatus: 'pending_verification',
+      verifiedBy: undefined,
+      verifiedAt: undefined,
+      expiresAt: undefined,
+      aiVerificationReport,
+    };
   }
 
   if (!changed) return txn;
@@ -3563,17 +3603,39 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
     };
   }
 
-  // Explicit Admin VIP Cancellation must immediately strip all leftover VIP & trial fields
+  // Preserve pending / awaiting-admin-approval payment requests strictly as non-VIP ('free' / 'pending')
+  if (
+    user.subscriptionStatus === 'pending' ||
+    user.paymentStatus === 'paid_pending_approval' ||
+    user.paymentStatus === 'pending_verification'
+  ) {
+    return {
+      ...user,
+      membershipTier: 'free',
+      subscriptionStatus: 'pending',
+      paymentStatus: user.paymentStatus === 'pending_verification' ? 'pending_verification' : 'paid_pending_approval',
+      vipStatus: 'none',
+      subscriptionExpiryDate: undefined,
+      vipExpiresAt: undefined,
+      vipCancelledAt: undefined,
+      freeTrialActivated: false,
+      freeTrialExpiresAt: undefined,
+    };
+  }
+
+  // Explicit Admin VIP Cancellation or Rejection must immediately strip all leftover VIP & trial fields
   if (
     (user.subscriptionStatus as string) === 'cancelled' ||
     (user.paymentStatus as string) === 'cancelled' ||
+    (user.paymentStatus as string) === 'rejected' ||
+    (user.paymentStatus as string) === 'failed' ||
     (Boolean(user.vipCancelledAt) && user.subscriptionStatus !== 'active')
   ) {
     return {
       ...user,
       membershipTier: 'free',
       subscriptionStatus: 'cancelled',
-      paymentStatus: 'cancelled',
+      paymentStatus: (user.paymentStatus as string) === 'rejected' || (user.paymentStatus as string) === 'failed' ? user.paymentStatus : 'cancelled',
       vipStatus: 'none',
       subscriptionExpiryDate: undefined,
       vipExpiresAt: undefined,
@@ -3592,7 +3654,8 @@ export const sanitizeUserVipPlanAndExpiry = (user: User): User => {
   let expMs = parseSafeDateMs(rawExpiry);
 
   let reconciledUser: User = user;
-  if (user.freeTrialActivated || freeTrialStartMs > 0 || isServerTrialRef) {
+  // Only reconcile genuine 7-day Consumer Free Trial records (never retired 30-day check-in rewards or cancelled/unapproved users)
+  if ((user.freeTrialActivated || isServerTrialRef) && !user.foodCheckInRewardAt) {
     const trialDays =
       typeof user.freeTrialDurationDays === 'number' && user.freeTrialDurationDays >= 1
         ? user.freeTrialDurationDays
@@ -5055,21 +5118,13 @@ export const getUserStoreQuotaSummary = (
     : [];
 
   const verifiedAdditionalStoreTransactions = userAdditionalTxns.filter(
-    (t) =>
-      t.status === 'verified' ||
-      (t.status === 'pending_verification' &&
-        t.aiVerificationReport?.canAutoApprove === true &&
-        t.aiVerificationReport?.status === 'verified' &&
-        (t.aiVerificationReport?.confidenceScore ?? 0) >= 90)
+    (t) => t.status === 'verified' && !isUnapprovedAiAutoVerifiedTransaction(t)
   );
   const pendingAdditionalStoreTxns = userAdditionalTxns.filter(
     (t) =>
-      (t.status === 'pending_verification' || t.status === 'needs_more_info') &&
-      !(
-        t.aiVerificationReport?.canAutoApprove === true &&
-        t.aiVerificationReport?.status === 'verified' &&
-        (t.aiVerificationReport?.confidenceScore ?? 0) >= 90
-      )
+      t.status === 'pending_verification' ||
+      t.status === 'needs_more_info' ||
+      (t.status === 'verified' && isUnapprovedAiAutoVerifiedTransaction(t))
   );
   const pendingAdditionalStoreTransaction = pendingAdditionalStoreTxns[0] || null;
 
@@ -5080,13 +5135,9 @@ export const getUserStoreQuotaSummary = (
     ? user.paidAdditionalStoreSlots
     : 0;
 
-  // Strict separation: 7-Day Consumer Free Trial NEVER includes a free shop slot or free store replacement.
-  const isPaidVip = isUserPaidVipActive(user);
-  const includedFreeStores = isAdmin
-    ? 9999
-    : isPaidVip
-    ? DEFAULT_INCLUDED_FREE_STORES
-    : 0;
+  // Strict payment-first rule: Adding a Shop or Hotel ALWAYS requires a paid Shop/Hotel slot ($6.99 / 30d or $49.99 / 365d).
+  // Consumer VIP ($2.99 / $6.99 90d / $19.99 365d), Free Trial, and Free accounts get 0 free store slots.
+  const includedFreeStores = isAdmin ? 9999 : 0;
 
   const totalAllowedStores = isAdmin
     ? 9999
@@ -5094,7 +5145,7 @@ export const getUserStoreQuotaSummary = (
   const usedStoresCount = ownedStores.length;
   const remainingAvailableSlots = Math.max(0, totalAllowedStores - usedStoresCount);
   const canCreateNewStoreWithoutPayment = isAdmin || remainingAvailableSlots > 0;
-  const canReplaceExistingStoreForFree = isAdmin || (totalAllowedStores > 0 && usedStoresCount > 0);
+  const canReplaceExistingStoreForFree = isAdmin;
   const canEditExistingFree = true;
 
   return {

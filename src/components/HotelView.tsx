@@ -1047,7 +1047,7 @@ export const HotelView: React.FC = () => {
                     scrollToHotelList(true);
                   }}
                   aria-pressed={active}
-                  className="kft-cat-btn group relative flex flex-col items-center justify-start w-full max-w-full min-w-0 overflow-visible p-0 bg-transparent border-0 transition-transform duration-150 active:scale-[0.95] cursor-pointer focus:outline-none select-none"
+                  className="kft-cat-btn group relative flex flex-col items-center justify-start w-full max-w-full min-w-0 overflow-visible p-0 bg-transparent border-0 transition-colors duration-150 cursor-pointer focus:outline-none select-none"
                 >
                   {/* 3D Gold-Bordered Button Graphic */}
                   <div
@@ -1072,15 +1072,14 @@ export const HotelView: React.FC = () => {
                   </span>
 
                   {/* Subtle Gold Active Indicator Bar Below Title */}
-                  {active && (
-                    <span
-                      className="mt-0.5 h-1 w-7 rounded-full"
+                  <span
+                      aria-hidden="true"
+                      className={`mt-0.5 h-1 w-7 rounded-full transition-opacity duration-150 ${active ? 'opacity-100' : 'opacity-0'}`}
                       style={{
                         background: 'linear-gradient(90deg, #FDE047 0%, #F59E0B 100%)',
                         boxShadow: '0 0 6px rgba(250, 204, 21, 0.8)',
                       }}
                     />
-                  )}
                 </button>
               );
             })}

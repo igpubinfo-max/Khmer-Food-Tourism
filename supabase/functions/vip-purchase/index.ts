@@ -397,7 +397,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       dupOwnerUserId = String(receiptRows[0].user_id || '');
     }
   }
-  const autoApprove = Deno.env.get('VIP_AUTO_APPROVE') !== 'false';
+  const autoApprove = false; // STRICT RULE: Admin approval must never be bypassed
 
   const baseRow = {
     user_id: userId,

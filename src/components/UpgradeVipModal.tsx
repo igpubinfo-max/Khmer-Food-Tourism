@@ -159,6 +159,7 @@ export const UpgradeVipModal: React.FC = () => {
 
   // Payment Lifecycle State
   const [paymentState, setPaymentState] = useState<PaymentStatusFlow>('AWAITING_PAYMENT');
+  const dismissedRejectedTxnIdRef = useRef<string | null>(null);
   const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isRestoring, setIsRestoring] = useState(false);
@@ -250,12 +251,17 @@ export const UpgradeVipModal: React.FC = () => {
       setSubmissionTimestamp(userLatestVipTxn.createdAt);
     }
 
-    if (isUserVipActive(currentUser) && !isFreeTrial7d) {
-      setPaymentState('APPROVED');
+    if (userLatestVipTxn?.status === 'pending_verification') {
+      setPaymentState('PENDING_ADMIN_APPROVAL');
     } else if (userLatestVipTxn?.status === 'needs_more_info') {
       setPaymentState('NEEDS_MORE_INFO');
-    } else if (userLatestVipTxn?.status === 'pending_verification' && paymentState === 'PENDING_ADMIN_APPROVAL') {
-      setPaymentState('PENDING_ADMIN_APPROVAL');
+    } else if (isUserVipActive(currentUser) && !isFreeTrial7d) {
+      setPaymentState('APPROVED');
+    } else if (
+      (userLatestVipTxn?.status === 'rejected' || userLatestVipTxn?.status === 'failed') &&
+      dismissedRejectedTxnIdRef.current !== userLatestVipTxn.id
+    ) {
+      setPaymentState('REJECTED');
     } else {
       setPaymentState('AWAITING_PAYMENT');
     }
@@ -363,6 +369,9 @@ export const UpgradeVipModal: React.FC = () => {
   };
 
   const handleRestartSession = () => {
+    if (userLatestVipTxn?.id) {
+      dismissedRejectedTxnIdRef.current = userLatestVipTxn.id;
+    }
     setCustomTxnRef(`ABA-KHQR-${selectedPlan.days}D-${Date.now().toString(36).toUpperCase()}`);
     setSessionExpiryTime(Date.now() + 15 * 60 * 1000);
     setPaymentState('AWAITING_PAYMENT');

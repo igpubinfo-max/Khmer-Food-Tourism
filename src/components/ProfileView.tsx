@@ -664,11 +664,11 @@ export const ProfileView: React.FC = () => {
                     <span>{tr(language, 'សិទ្ធិចុះបញ្ជីហាង VIP ពិសេស', 'VIP Store Priority Registration', 'VIP 店铺优先入驻')}</span>
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[9px] font-black">
-                    {myRestaurants[0] ? (tr(language, '1/1 ហាង', '1/1 Store', '1/1 家店铺')) : (tr(language, '១ គណនី = ១ ហាង', '1 Account = 1 Store', '1 个账户 = 1 家店铺'))}
+                    {myRestaurants[0] ? (tr(language, `${myRestaurants.length} ហាង`, `${myRestaurants.length} Store(s)`, `${myRestaurants.length} 家店铺`)) : '$6.99/30d • $49.99/365d'}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
-                  {tr(language, 'គ្រប់គ្រងរូបភាពហាង ទីតាំងផែនទី និងព័ត៌មានទំនាក់ទំនងហាងរបស់អ្នក។', 'Manage your shop photo, map location, and contact details so diners can easily find your restaurant.', '管理您的店铺照片、地图位置和联系方式，方便食客轻松找到您的餐厅。')}
+                  {tr(language, 'គ្រប់គ្រងរូបភាពហាង ទីតាំងផែនទី និងព័ត៌មានទំនាក់ទំនងហាងរបស់អ្នក (បន្ថែមហាងថ្មី៖ $6.99 / 30 ថ្ងៃ ឬ $49.99 / 365 ថ្ងៃ)។', 'Manage your shop photo, map location, and contact details (Add New Shop: $6.99 / 30 Days or $49.99 / 365 Days).', '管理您的店铺照片、地图位置和联系方式（添加新店铺：$6.99/30天 或 $49.99/365天）。')}
                 </p>
                 {myRestaurants[0] ? (
                   <button
@@ -681,19 +681,19 @@ export const ProfileView: React.FC = () => {
                     className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#10B981] via-[#059669] to-[#047857] text-white font-black text-xs shadow-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
                   >
                     <Store className="w-4 h-4 shrink-0" />
-                    <span>{tr(language, '✏️ គ្រប់គ្រងហាង VIP របស់អ្នក (1/1 ហាង)', '✏️ Manage Your VIP Store (1/1)', '✏️ 管理您的 VIP 店铺 (1/1)')}</span>
+                    <span>{tr(language, `✏️ គ្រប់គ្រងហាងរបស់អ្នក (${myRestaurants.length} ហាង)`, `✏️ Manage Your Store (${myRestaurants.length})`, `✏️ 管理您的店铺 (${myRestaurants.length})`)}</span>
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={() => {
-                      (window as any).__kft_vip_add_mode = 'add_new';
+                      (window as any).__kft_vip_store_initial_mode = { mode: 'create' };
                       setIsVipAddRestaurantModalOpen(true);
                     }}
                     className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#10B981] via-[#059669] to-[#047857] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer shadow-sm"
                   >
                     <Crown className="w-4 h-4 fill-white shrink-0" />
-                    <span>{tr(language, '+ ចុះបញ្ជីហាង VIP របស់អ្នក (1 ហាង)', '+ Register Your VIP Restaurant (1 Store)', '+ 注册您的 VIP 餐厅 (1 家店铺)')}</span>
+                    <span>{tr(language, '+ បន្ថែមហាង / សណ្ឋាគារថ្មី ($6.99 / $49.99)', '+ Add New Shop / Hotel ($6.99 / $49.99)', '+ 添加新店铺 / 酒店 ($6.99 / $49.99)')}</span>
                   </button>
                 )}
               </div>

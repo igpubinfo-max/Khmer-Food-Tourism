@@ -969,8 +969,11 @@ export const WhatToEatModal: React.FC = () => {
 
   const [recommendationError, setRecommendationError] = useState<string>('');
 
-  const scrollToResultsSection = (_targetEl?: HTMLElement | null) => {
-    // No auto-scroll in AI Food Assistant per user preference
+  const scrollToResultsSection = (targetEl?: HTMLElement | null) => {
+    smoothScrollToElement(targetEl || dishCardRef.current, {
+      containerEl: scrollerRef.current,
+      offsetTop: 8,
+    });
   };
 
   // Top 4 Recommended Dishes per batch for the 2-column RESULTS section
@@ -1445,6 +1448,7 @@ export const WhatToEatModal: React.FC = () => {
     setShowVipAiUpgradeNotice(false);
     setRecommendationError('');
     setForceBigCard(true);
+    scrollToResultsSection(dishCardRef.current);
     if (showSets) {
       setIsSpinning(true);
       setTimeout(() => {
@@ -1578,16 +1582,13 @@ export const WhatToEatModal: React.FC = () => {
   const MealIcon = currentMealInfo.icon;
 
   const handleOpenDrinkPairing = () => {
-    const nextDrinkMode = !drinkMode;
     setComparedDishIds([]);
-    setDrinkMode(nextDrinkMode);
-    if (nextDrinkMode) {
-      setSetPage(0);
-      setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
-    }
+    setDrinkMode(true);
+    setSetPage(0);
+    setDrinkShuffleSeed(Date.now() + Math.floor(Math.random() * 100000));
     setCravingQuery('');
     setOpenGroup(null);
-    scrollToResultsSection(nextDrinkMode ? drinkPairingTopRef.current || dishCardRef.current : dishCardRef.current);
+    scrollToResultsSection(drinkPairingTopRef.current || dishCardRef.current);
   };
 
   const activeSlot = MEAL_SLOTS.find((s) => s.id === mealSlotFilter);
@@ -3072,9 +3073,13 @@ export const WhatToEatModal: React.FC = () => {
                         setDrinkMode(false);
                         const willOpen = openGroup !== g.id;
                         setOpenGroup(willOpen ? g.id : null);
-                        // Keep AI Food Assistant category buttons in place without auto-scrolling
+                        scrollToResultsSection(
+                          willOpen
+                            ? expandedGroupPanelRef.current || dishCardRef.current
+                            : dishCardRef.current
+                        );
                       }}
-                      className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-all duration-200 active:scale-95 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
+                      className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-colors duration-150 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
                     >
                       {/* 3D Gold-Framed Pill Illustration */}
                       <div
@@ -3120,11 +3125,11 @@ export const WhatToEatModal: React.FC = () => {
                       type="button"
                       aria-pressed={drinkMode}
                       onClick={handleOpenDrinkPairing}
-                      className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-all duration-200 active:scale-95 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
+                      className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-colors duration-150 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
                     >
                       <div
-                        className={`kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px] ${
-                          drinkMode ? 'scale-[1.03] z-10' : 'opacity-95 group-hover:opacity-100'
+                        className={`kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-opacity duration-150 rounded-[14px] ${
+                          drinkMode ? 'z-10 opacity-100' : 'opacity-95 group-hover:opacity-100'
                         }`}
                       >
                         <img
@@ -3159,9 +3164,9 @@ export const WhatToEatModal: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleShowAnother}
-                      className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-all duration-200 active:scale-95 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
+                      className="kft-cat-btn group relative w-full max-w-full min-w-0 overflow-visible bg-transparent border-0 p-0 transition-colors duration-150 cursor-pointer select-none flex flex-col items-center justify-start gap-1"
                     >
-                      <div className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-all duration-200 rounded-[14px] opacity-95 group-hover:opacity-100">
+                      <div className="kft-cat-img-wrap relative w-full max-w-full min-w-0 min-h-0 aspect-[2.12/1] overflow-visible transition-opacity duration-150 rounded-[14px] opacity-95 group-hover:opacity-100">
                         <img
                           src="/categories/ai_cat_new_picks.png"
                           alt={newPicksLabel}
@@ -3169,8 +3174,8 @@ export const WhatToEatModal: React.FC = () => {
                           style={{
                             transform: 'none',
                           }}
-                          className={`block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-all duration-200 ${
-                            isSpinning ? 'brightness-110 scale-[0.98]' : ''
+                          className={`block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none group-hover:brightness-[1.04] transition-opacity duration-150 ${
+                            isSpinning ? 'brightness-110' : ''
                           }`}
                         />
                       </div>
@@ -3208,8 +3213,9 @@ export const WhatToEatModal: React.FC = () => {
               )}
 
               {/* Expanded options panel */}
+              <div ref={expandedGroupPanelRef} className="scroll-mt-2">
               {openGroup && (
-                <div ref={expandedGroupPanelRef} className="p-2.5 rounded-2xl bg-emerald-50/80 border border-emerald-200 scroll-mt-2">
+                <div className="p-2.5 rounded-2xl bg-emerald-50/80 border border-emerald-200">
                   <div className="flex flex-wrap gap-1.5">
                     {openGroup === 'time' &&
                       MEAL_SLOTS.map((slot) => {
@@ -3391,6 +3397,7 @@ export const WhatToEatModal: React.FC = () => {
                   </div>
                 </div>
               )}
+              </div>
 
               {/* Beverage Pairings sub-filter chips when active */}
               <div ref={drinkPairingTopRef} className="scroll-mt-2">
@@ -3461,7 +3468,7 @@ export const WhatToEatModal: React.FC = () => {
           </div>
 
           {/* Content body (Dark Slate #1E293B background for all marked areas) */}
-          <div ref={dishCardRef} className="px-3.5 pt-3.5 pb-8 space-y-3 bg-[#1E293B] flex-1 scroll-mt-2">
+          <div ref={dishCardRef} className="px-3.5 pt-3.5 pb-12 space-y-3 bg-[#1E293B] flex-1 min-h-[85vh] scroll-mt-2">
 
             {/* Beverage Pairing sets */}
             {showSets && (

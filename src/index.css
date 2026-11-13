@@ -768,6 +768,14 @@ img[src^="data:image"],
   overflow: visible;
   box-sizing: border-box;
   padding: 0;
+  transform: none !important;
+  -webkit-transform: none !important;
+}
+.kft-cat-btn:hover,
+.kft-cat-btn:active,
+.kft-cat-btn:focus {
+  transform: none !important;
+  -webkit-transform: none !important;
 }
 .kft-cat-img-wrap {
   position: relative;

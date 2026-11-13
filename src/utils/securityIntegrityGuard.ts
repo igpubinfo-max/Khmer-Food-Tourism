@@ -23,6 +23,7 @@ import {
   resolveUserActualVipPlanDays,
   sanitizeUserVipPlanAndExpiry,
   sanitizeVipMembershipHistoryEntry,
+  isUnapprovedAiAutoVerifiedTransaction,
 } from '../types';
 import { verifyAdminSession, createAdminSession, revokeAdminSession } from './security';
 
@@ -218,8 +219,45 @@ export function isUserExplicitlyCancelled(u: Partial<User> | null | undefined): 
   return (
     u.subscriptionStatus === 'cancelled' ||
     u.paymentStatus === 'cancelled' ||
-    (Boolean(u.vipCancelledAt) && u.subscriptionStatus !== 'active')
+    (Boolean(u.vipCancelledAt) && u.subscriptionStatus !== 'active' && u.subscriptionStatus !== 'pending')
   );
+}
+
+/**
+ * Checks if a user's current transactionRef belongs to a pending or unapproved AI-auto-verified transaction
+ * in localStorage (kft_transactions_v4 / kft_transactions_v3).
+ */
+export function hasUnapprovedOrPendingTransactionForUser(targetUser: Partial<User> | null | undefined): {
+  unapprovedRefs: Set<string>;
+  isCurrentRefUnapproved: boolean;
+} {
+  const unapprovedRefs = new Set<string>();
+  const verifiedAdminRefs = new Set<string>();
+  if (!targetUser) return { unapprovedRefs, isCurrentRefUnapproved: false };
+  try {
+    if (typeof localStorage !== 'undefined') {
+      for (const txnKey of ['kft_transactions_v4', 'kft_transactions_v3']) {
+        const txns = getCachedParsedLocalStorage(txnKey);
+        if (!Array.isArray(txns)) continue;
+        for (const t of txns) {
+          if (!t || !doesUserMatchCandidate(t, targetUser)) continue;
+          const ref = String(t.transactionRef || '').trim();
+          if (!ref) continue;
+          if (t.status === 'verified' && !isUnapprovedAiAutoVerifiedTransaction(t)) {
+            verifiedAdminRefs.add(ref);
+          } else if (t.status === 'pending_verification' || isUnapprovedAiAutoVerifiedTransaction(t)) {
+            unapprovedRefs.add(ref);
+          }
+        }
+      }
+    }
+  } catch {}
+  for (const vRef of verifiedAdminRefs) {
+    unapprovedRefs.delete(vRef);
+  }
+  const curRef = String(targetUser.transactionRef || '').trim();
+  const isCurrentRefUnapproved = Boolean(curRef && unapprovedRefs.has(curRef));
+  return { unapprovedRefs, isCurrentRefUnapproved };
 }
 
 /**
@@ -453,6 +491,8 @@ export function findLocalAuthoritativeVipEntitlement(
     return { found: false, expiryMs: 0, paidAdditionalStoreSlots: bestSlots };
   }
 
+  const { unapprovedRefs } = hasUnapprovedOrPendingTransactionForUser(targetUser);
+
   let bestExpMs = 0;
   let bestStartIso: string | undefined;
   let bestTxnRef: string | undefined;
@@ -463,6 +503,17 @@ export function findLocalAuthoritativeVipEntitlement(
     if (!rawCand || typeof rawCand !== 'object') return;
     if (!doesUserMatchCandidate(rawCand, targetUser)) return;
     if (isUserExplicitlyCancelled(rawCand)) return;
+    if (
+      rawCand.subscriptionStatus === 'pending' ||
+      rawCand.paymentStatus === 'paid_pending_approval' ||
+      rawCand.paymentStatus === 'pending_verification'
+    ) {
+      return;
+    }
+    const candRef = String(rawCand.transactionRef || '').trim();
+    if (candRef && unapprovedRefs.has(candRef)) {
+      return;
+    }
     const cand = sanitizeUserVipPlanAndExpiry(rawCand as User);
     if (typeof cand.paidAdditionalStoreSlots === 'number' && cand.paidAdditionalStoreSlots > bestSlots) {
       bestSlots = cand.paidAdditionalStoreSlots;
@@ -532,7 +583,7 @@ export function findLocalAuthoritativeVipEntitlement(
         }
         if (Array.isArray(snap?.verifiedTransactions)) {
           for (const t of snap.verifiedTransactions) {
-            if (!t || t.status !== 'verified' || t.type === 'additional_store_slot') continue;
+            if (!t || t.status !== 'verified' || isUnapprovedAiAutoVerifiedTransaction(t) || t.type === 'additional_store_slot') continue;
             if (!doesUserMatchCandidate(t, targetUser)) continue;
             const txnStartMs = parseSafeDateMs(t.verifiedAt || t.createdAt);
             if (latestCancelMs > 0 && txnStartMs <= latestCancelMs) continue;
@@ -552,7 +603,7 @@ export function findLocalAuthoritativeVipEntitlement(
         const txns = getCachedParsedLocalStorage(txnKey);
         if (Array.isArray(txns)) {
           for (const t of txns) {
-            if (!t || t.status !== 'verified') continue;
+            if (!t || t.status !== 'verified' || isUnapprovedAiAutoVerifiedTransaction(t)) continue;
             if (!doesUserMatchCandidate(t, targetUser)) continue;
             if (t.type === 'additional_store_slot') continue;
             const txnStartMs = parseSafeDateMs(t.verifiedAt || t.createdAt);
@@ -691,11 +742,28 @@ export async function verifyAndSanitizeUserSession(
     sanitized.membershipTier === 'premium_vip';
 
   const nowServerMs = getAuthoritativeServerNowMs();
+  const { isCurrentRefUnapproved } = hasUnapprovedOrPendingTransactionForUser(sanitized);
   const entitlement = findLocalAuthoritativeVipEntitlement(sanitized, authoritativeCloudUsers);
+  if (isCurrentRefUnapproved && !entitlement.found) {
+    sanitized.membershipTier = 'free';
+    sanitized.subscriptionStatus = 'pending';
+    sanitized.paymentStatus = 'paid_pending_approval';
+    sanitized.vipStatus = 'none';
+    delete sanitized.subscriptionExpiryDate;
+    delete sanitized.vipExpiresAt;
+    sanitized.freeTrialActivated = false;
+    delete sanitized.freeTrialExpiresAt;
+    sanitized.integritySeal = await computeUserIntegritySeal(sanitized);
+    try {
+      localStorage.setItem('kft_current_user_v5', JSON.stringify(sanitized));
+    } catch {}
+    return { user: sanitized, tampered: false };
+  }
   const ownExpMs = parseSafeDateMs(
     sanitized.subscriptionExpiryDate || sanitized.vipExpiresAt || (sanitized.freeTrialActivated ? sanitized.freeTrialExpiresAt : undefined)
   );
   const hasOwnValidFutureExpiry =
+    !isCurrentRefUnapproved &&
     (isVipClaimed || sanitized.freeTrialActivated) &&
     sanitized.subscriptionStatus !== 'cancelled' &&
     sanitized.paymentStatus !== 'cancelled' &&
@@ -871,12 +939,27 @@ export function sanitizeStartupCurrentUser(): { tampered: boolean; user: any | n
         updated = true;
       }
 
+      const { isCurrentRefUnapproved: startupRefUnapproved } = hasUnapprovedOrPendingTransactionForUser(parsed);
       const entitlement = !isExplicitlyCancelled
         ? findLocalAuthoritativeVipEntitlement(parsed)
         : { found: false, expiryMs: 0 };
 
+      if (startupRefUnapproved && !entitlement.found) {
+        parsed.membershipTier = 'free';
+        parsed.subscriptionStatus = 'pending';
+        parsed.paymentStatus = 'paid_pending_approval';
+        parsed.vipStatus = 'none';
+        delete parsed.subscriptionExpiryDate;
+        delete parsed.vipExpiresAt;
+        parsed.freeTrialActivated = false;
+        delete parsed.freeTrialExpiresAt;
+        parsed.integritySeal = computeUserIntegritySealSync(parsed);
+        updated = true;
+      }
+
       const ownExpMs = parseSafeDateMs(parsed.subscriptionExpiryDate || parsed.vipExpiresAt);
-      const hasOwnValidFutureExpiry = !isExplicitlyCancelled && isVipClaimed && ownExpMs > Date.now();
+      const hasOwnValidFutureExpiry =
+        !isExplicitlyCancelled && !startupRefUnapproved && isVipClaimed && ownExpMs > Date.now();
 
       if (entitlement.found || hasOwnValidFutureExpiry) {
         const bestExpMs = Math.max(

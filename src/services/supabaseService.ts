@@ -33,6 +33,7 @@ import {
   sanitizeUserVipPlanAndExpiry,
   sanitizeVipMembershipHistoryEntry,
   sanitizeLegacyVipTransactionPricing,
+  isUnapprovedAiAutoVerifiedTransaction,
   isDeprecatedDemoSeedTransaction,
   inferBusinessTypeAndCategory,
 } from '../types';
@@ -990,21 +991,25 @@ export async function mergeAndPushTransactionsToCloud(
     ]);
 
     const txnMap = new Map<string, RegistrationTransaction>();
-    for (const ct of Array.isArray(cloudTxns) ? cloudTxns : []) {
-      if (ct && ct.id && !deletedSet.has(ct.id) && !isDeprecatedDemoSeedTransaction(ct)) {
+    for (const rawCt of Array.isArray(cloudTxns) ? cloudTxns : []) {
+      if (rawCt && rawCt.id && !deletedSet.has(rawCt.id) && !isDeprecatedDemoSeedTransaction(rawCt)) {
+        const ct = sanitizeLegacyVipTransactionPricing(rawCt);
         txnMap.set(ct.id, ct);
       }
     }
-    for (const lt of cleanLocalTxns) {
-      if (!lt || !lt.id || deletedSet.has(lt.id) || isDeprecatedDemoSeedTransaction(lt)) continue;
+    for (const rawLt of cleanLocalTxns) {
+      if (!rawLt || !rawLt.id || deletedSet.has(rawLt.id) || isDeprecatedDemoSeedTransaction(rawLt)) continue;
+      const lt = sanitizeLegacyVipTransactionPricing(rawLt);
       const existing = txnMap.get(lt.id);
       if (!existing) {
         txnMap.set(lt.id, lt);
       } else {
-        // Keep 'verified' status if either record is verified unless explicitly rejected/failed more recently
-        const localVerified = lt.status === 'verified';
-        const cloudVerified = existing.status === 'verified';
-        if (cloudVerified && !localVerified && lt.status === 'pending_verification') {
+        // Keep Admin-approved 'verified' status if either record is genuinely Admin-verified unless explicitly rejected/failed
+        const localVerified = lt.status === 'verified' && !isUnapprovedAiAutoVerifiedTransaction(lt);
+        const cloudVerified = existing.status === 'verified' && !isUnapprovedAiAutoVerifiedTransaction(existing);
+        if (lt.status === 'rejected' || lt.status === 'needs_more_info') {
+          txnMap.set(lt.id, { ...existing, ...lt, paymentProofUrl: lt.paymentProofUrl || existing.paymentProofUrl });
+        } else if (cloudVerified && !localVerified && lt.status === 'pending_verification') {
           txnMap.set(lt.id, { ...lt, ...existing, paymentProofUrl: lt.paymentProofUrl || existing.paymentProofUrl });
         } else {
           txnMap.set(lt.id, { ...existing, ...lt, paymentProofUrl: lt.paymentProofUrl || existing.paymentProofUrl });
@@ -2598,7 +2603,9 @@ export function normalizeVipExpiryOnUser(rawUser: User): User {
   if (
     rawUser.subscriptionStatus === 'cancelled' ||
     rawUser.paymentStatus === 'cancelled' ||
-    (Boolean(rawUser.vipCancelledAt) && rawUser.subscriptionStatus !== 'active')
+    (Boolean(rawUser.vipCancelledAt) &&
+      rawUser.subscriptionStatus !== 'active' &&
+      rawUser.subscriptionStatus !== 'pending')
   ) {
     return {
       ...rawUser,
@@ -2865,17 +2872,14 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
     ),
     // Server-verified 7-Day Free Trial fields survive merges across updates and devices (unless VIP was explicitly cancelled).
     freeTrialActivated:
+      first.freeTrialActivated === false ||
+      second.freeTrialActivated === false ||
       first.subscriptionStatus === 'cancelled' ||
       second.subscriptionStatus === 'cancelled' ||
       first.paymentStatus === 'cancelled' ||
       second.paymentStatus === 'cancelled'
         ? false
-        : Boolean(
-            first.freeTrialActivated ||
-              second.freeTrialActivated ||
-              first.freeTrialActivatedAt ||
-              second.freeTrialActivatedAt
-          ) || undefined,
+        : Boolean(first.freeTrialActivated || second.freeTrialActivated) || undefined,
     freeTrialActivatedAt:
       [first.freeTrialActivatedAt, second.freeTrialActivatedAt]
         .filter((v): v is string => typeof v === 'string' && v.length > 0 && v !== 'granted')
@@ -3022,11 +3026,11 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
   const isFirstExplicitlyCancelled =
     first.subscriptionStatus === 'cancelled' ||
     first.paymentStatus === 'cancelled' ||
-    (Boolean(first.vipCancelledAt) && first.subscriptionStatus !== 'active');
+    (Boolean(first.vipCancelledAt) && first.subscriptionStatus !== 'active' && first.subscriptionStatus !== 'pending');
   const isSecondExplicitlyCancelled =
     second.subscriptionStatus === 'cancelled' ||
     second.paymentStatus === 'cancelled' ||
-    (Boolean(second.vipCancelledAt) && second.subscriptionStatus !== 'active');
+    (Boolean(second.vipCancelledAt) && second.subscriptionStatus !== 'active' && second.subscriptionStatus !== 'pending');
 
   if (isFirstExplicitlyCancelled || isSecondExplicitlyCancelled) {
     const effectiveCancelMs = Math.max(
@@ -3040,6 +3044,28 @@ export function mergeTwoUserRecordsCanonical(first: User, second: User): User {
       second.vipCancelledAt ||
       first.vipCancelledAt ||
       new Date(nowMs).toISOString();
+
+    const isSecondPendingPayment =
+      !isSecondExplicitlyCancelled &&
+      (second.subscriptionStatus === 'pending' ||
+        second.paymentStatus === 'paid_pending_approval' ||
+        second.paymentStatus === 'pending_verification');
+
+    if (isSecondPendingPayment) {
+      return normalizeVipExpiryOnUser({
+        ...baseMerged,
+        membershipTier: 'free',
+        subscriptionStatus: 'pending',
+        subscriptionExpiryDate: undefined,
+        vipExpiresAt: undefined,
+        vipStatus: 'none',
+        paymentStatus: second.paymentStatus || 'paid_pending_approval',
+        transactionRef: second.transactionRef || first.transactionRef,
+        freeTrialActivated: false,
+        freeTrialExpiresAt: undefined,
+        vipCancelledAt: undefined,
+      });
+    }
 
     // A cancelled record is only superseded if the other record is an active VIP whose subscriptionStartDate is strictly newer than the cancellation
     const isFirstNewerRegrant =
@@ -3972,7 +3998,7 @@ export async function syncAllAppDataWithSupabase(localState: {
     const allTxnsCombined = [
       ...(Array.isArray(cloudTxns) ? cloudTxns : []),
       ...(Array.isArray(localState.transactions) ? localState.transactions : []),
-    ];
+    ].map(t => (t && t.id ? sanitizeLegacyVipTransactionPricing(t) : t));
     const allTicketsCombined = [
       ...(Array.isArray(cloudTickets) ? cloudTickets : []),
       ...(Array.isArray(localState.supportTickets) ? localState.supportTickets : []),
@@ -4349,6 +4375,7 @@ export async function syncAllAppDataWithSupabase(localState: {
       const verifiedFutureTxns = userTxns.filter(
         t =>
           t.status === 'verified' &&
+          !isUnapprovedAiAutoVerifiedTransaction(t) &&
           t.type !== 'additional_store_slot' &&
           Boolean(t.expiresAt) &&
           parseSafeDateMs(t.expiresAt) > nowReconcileMs
@@ -4431,31 +4458,33 @@ export async function syncAllAppDataWithSupabase(localState: {
     const txnMap = new Map<string, RegistrationTransaction>();
     let cloudHadDeprecatedSeedTxns = false;
     if (Array.isArray(cloudTxns)) {
-      for (const t of cloudTxns) {
-        if (isDeprecatedDemoSeedTransaction(t)) {
+      for (const rawT of cloudTxns) {
+        if (isDeprecatedDemoSeedTransaction(rawT)) {
           cloudHadDeprecatedSeedTxns = true;
           continue;
         }
         if (
-          t &&
-          t.id &&
-          !deletedTxnIdSet.has(t.id) &&
-          !isActivityUserDeleted(t.userId || t.ownerId, t.userEmail, t.phone)
+          rawT &&
+          rawT.id &&
+          !deletedTxnIdSet.has(rawT.id) &&
+          !isActivityUserDeleted(rawT.userId || rawT.ownerId, rawT.userEmail, rawT.phone)
         ) {
+          const t = sanitizeLegacyVipTransactionPricing(rawT);
           txnMap.set(t.id, t);
         }
       }
     }
-    for (const t of localState.transactions) {
+    for (const rawT of localState.transactions) {
       if (
-        !t ||
-        !t.id ||
-        isDeprecatedDemoSeedTransaction(t) ||
-        deletedTxnIdSet.has(t.id) ||
-        isActivityUserDeleted(t.userId || t.ownerId, t.userEmail, t.phone)
+        !rawT ||
+        !rawT.id ||
+        isDeprecatedDemoSeedTransaction(rawT) ||
+        deletedTxnIdSet.has(rawT.id) ||
+        isActivityUserDeleted(rawT.userId || rawT.ownerId, rawT.userEmail, rawT.phone)
       ) {
         continue;
       }
+      const t = sanitizeLegacyVipTransactionPricing(rawT);
       const existing = txnMap.get(t.id);
       if (!existing) {
         txnMap.set(t.id, t);

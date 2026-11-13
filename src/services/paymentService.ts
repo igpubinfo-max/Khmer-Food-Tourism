@@ -12,6 +12,7 @@ import {
   resolveOfficialPlanById,
   DEFAULT_ADDITIONAL_STORE_FEE_USD,
   parseSafeDateMs,
+  isUnapprovedAiAutoVerifiedTransaction,
 } from '../types';
 
 export const VIP_ANNUAL_PRICE_USD = 6.99;
@@ -610,7 +611,7 @@ export function checkEligibleRestoration(
 
   // Look for any verified VIP subscription transaction associated with this user
   const matching = transactions.filter(t => {
-    if (!t || t.status !== 'verified') return false;
+    if (!t || t.status !== 'verified' || isUnapprovedAiAutoVerifiedTransaction(t)) return false;
     if (t.type === 'additional_store_slot') return false;
     const isVipType =
       t.type === 'user_vip_upgrade' ||

@@ -102,6 +102,8 @@ export async function verifyVipPurchaseOnServer(params: {
   deviceHash?: string | null;
   identityHashes?: string[];
 }): Promise<ServerPurchaseOutcome> {
+  // STRICT RULE: Never call remote auto-grant on receipt submission; all payments must remain PENDING until Admin approval.
+  if (Boolean(1)) return { kind: 'unavailable' };
   if (isAppCloneTampered()) return { kind: 'unavailable' };
   const cfg = getCloudApiConfig();
   if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || typeof fetch === 'undefined') return { kind: 'unavailable' };

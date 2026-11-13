@@ -489,14 +489,16 @@ export const FoodView: React.FC = () => {
                     scrollToDishList();
                   }}
                   aria-pressed={active}
-                  className="group relative block w-full max-w-full min-w-0 min-h-0 aspect-[560/460] overflow-visible bg-transparent border-0 p-0 active:scale-95 transition-transform cursor-pointer select-none"
+                  style={{ transform: 'none' }}
+                  className="kft-cat-btn group relative block w-full max-w-full min-w-0 min-h-0 aspect-[560/460] overflow-visible bg-transparent border-0 p-0 transition-opacity duration-150 cursor-pointer select-none"
                 >
                   <img
                     src={cat.imageSrc}
                     alt={label}
-                    className={`block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none transition-transform duration-150 ${
+                    style={{ transform: 'none' }}
+                    className={`block w-full h-full max-w-full min-w-0 min-h-0 object-contain bg-transparent select-none pointer-events-none transition-opacity duration-150 ${
                       active
-                        ? 'scale-[1.02]'
+                        ? 'opacity-100'
                         : 'opacity-95 group-hover:opacity-100'
                     }`}
                     loading="eager"

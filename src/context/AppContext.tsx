@@ -4034,6 +4034,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     const txnExpMs = eligibleTxn?.expiresAt ? parseSafeDateMs(eligibleTxn.expiresAt) : 0;
 
+    const hasPendingVipTxn = transactions.some(
+      t =>
+        t &&
+        t.type === 'user_vip_upgrade' &&
+        t.status === 'pending_verification' &&
+        doesUserMatchTarget({ id: t.userId || t.ownerId, email: t.userEmail, phone: t.phone }, currentUser)
+    );
+    if (
+      !eligibleTxn &&
+      hasPendingVipTxn &&
+      (!matchedInUsers || matchedInUsers.membershipTier !== 'premium_vip' || matchedInUsers.subscriptionStatus === 'pending') &&
+      !isUserOnConsumerFreeTrial(currentUser)
+    ) {
+      if (
+        currentUser.membershipTier === 'premium_vip' ||
+        currentUser.subscriptionStatus === 'active' ||
+        Boolean(currentUser.subscriptionExpiryDate)
+      ) {
+        const demotedPending: User = {
+          ...currentUser,
+          ...(matchedInUsers || {}),
+          id: matchedInUsers?.id || currentUser.id,
+          membershipTier: 'free',
+          subscriptionStatus: 'pending',
+          paymentStatus: 'paid_pending_approval',
+          vipStatus: 'none',
+          subscriptionExpiryDate: undefined,
+          vipExpiresAt: undefined,
+          freeTrialActivated: false,
+          freeTrialExpiresAt: undefined,
+        };
+        demotedPending.integritySeal = computeUserIntegritySealSync(demotedPending);
+        setCurrentUser(demotedPending);
+        latestSyncStateRef.current.currentUser = demotedPending;
+        safeSetCriticalAccountStorage('kft_current_user_v5', demotedPending);
+      }
+      return;
+    }
+
     // 3. Check resolved VIP-approved support tickets
     let ticketExpMs = 0;
     let ticketStartIso: string | undefined;
@@ -4672,7 +4711,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           );
           const isCoveredByOwnerPaidVip =
             Boolean(ownerUser && isUserPaidVipActive(ownerUser)) &&
-            (r.storeSlotNumber || 1) <= 1 + (ownerUser?.paidAdditionalStoreSlots || 0);
+            (r.storeSlotNumber || 1) <= (ownerUser?.paidAdditionalStoreSlots || 0);
 
           const isOwnerNewlyExpired = Boolean(r.ownerId && expiredUserIds.has(r.ownerId));
           const isShopSubExpired = shopExpMs > 0 && shopExpMs <= nowMs;
@@ -4924,9 +4963,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [transactions]);
 
-  // Automatically approve any pending transaction whose AI verification report passed 100%
-  // (including transactions healed from placeholder Trx ID false-negatives like TXN-STORE-MWELW67V-697)
+  // STRICT PAYMENT RULE: Never auto-approve pending transactions via AI.
+  // Every payment must remain in 'pending_verification' until an authorized Admin manually approves it.
   useEffect(() => {
+    const allowAiAutoApprove = Boolean(0);
+    if (!allowAiAutoApprove) return;
     if (!Array.isArray(transactions) || transactions.length === 0) return;
     const candidates = transactions.filter(t => {
       if (!t || t.status !== 'pending_verification') return false;
@@ -6928,7 +6969,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Upgrade custom restaurants owned by this user ONLY for Paid Consumer VIP (NEVER during 7-Day Consumer Free Trial)
     if (!isTrialGrant) {
-      const allowedPaidVipSlots = 1 + (finalApproved.paidAdditionalStoreSlots || 0);
+      const allowedPaidVipSlots = finalApproved.paidAdditionalStoreSlots || 0;
       const rotationCfg = getVipFeaturedRotationConfig(appSettingsRef.current);
       const nowApproveIso = new Date().toISOString();
       const featuredUntilIso = new Date(Date.now() + rotationCfg.durationMs).toISOString();
@@ -8564,7 +8605,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       sanitized.additionalStoreFeeUsd = Math.round(val * 100) / 100;
     }
     if (sanitized.includedFreeStoresPerVip !== undefined) {
-      sanitized.includedFreeStoresPerVip = Math.max(1, Math.round(Number(sanitized.includedFreeStoresPerVip) || 1));
+      sanitized.includedFreeStoresPerVip = Math.max(0, Math.round(Number(sanitized.includedFreeStoresPerVip) || 0));
     }
     if (sanitized.vipFeaturedRotationEnabled !== undefined) {
       sanitized.vipFeaturedRotationEnabled = Boolean(sanitized.vipFeaturedRotationEnabled);
@@ -11344,7 +11385,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             );
             const isOwnerPaidVipSlot =
               Boolean(ownerUser && isUserPaidVipActive(ownerUser)) &&
-              (r.storeSlotNumber || 1) <= 1 + (ownerUser?.paidAdditionalStoreSlots || 0);
+              (r.storeSlotNumber || 1) <= (ownerUser?.paidAdditionalStoreSlots || 0);
             const ownerVipExpIso = ownerUser?.subscriptionExpiryDate || ownerUser?.vipExpiresAt;
             const existingExpRaw =
               r.shopSubscriptionExpiresAt || r.subscriptionExpiresAt || r.membershipExpiresAt;
@@ -13454,17 +13495,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       reason: rejectionReason,
     }).then(() => refreshCentralizedPaymentRegistry().catch(() => {})).catch(() => {});
 
-    setTransactions(prev => prev.map(t => {
-      if (t.id !== txnId) return t;
-      return {
-        ...t,
-        status: 'rejected',
-        paymentStatus: 'failed',
-        notes: rejectionReason,
-        verifiedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
-        verifiedBy: adminIdentity,
-      };
-    }));
+    setTransactions(prev => {
+      const nextTxns = prev.map(t => {
+        if (t.id !== txnId) return t;
+        return {
+          ...t,
+          status: 'rejected' as const,
+          paymentStatus: 'failed' as const,
+          expiresAt: undefined,
+          notes: rejectionReason,
+          verifiedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
+          verifiedBy: adminIdentity,
+        };
+      });
+      skipNextTransactionsCloudPushRef.current = false;
+      latestSyncStateRef.current.transactions = nextTxns;
+      try {
+        localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTxns));
+      } catch {}
+      if (isSupabaseConfigured()) {
+        mergeAndPushTransactionsToCloud(nextTxns).catch(() => {});
+      }
+      return nextTxns;
+    });
 
     // Record Admin Audit Log
     try {
@@ -13512,33 +13565,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
 
       setUsers(prev => {
+        let updatedTargetUser: User | null = null;
         const nextUsers: User[] = prev.map(u => {
-          if (u.id !== targetUserId) return u;
+          if (!doesUserMatchTarget(u, { id: targetUserId, email: matchedTxn.userEmail, phone: matchedTxn.phone })) return u;
           const prevHist = Array.isArray(u.vipMembershipHistory) ? u.vipMembershipHistory : [];
-          return {
+          const keepVip = isUserVipActive(u);
+          const nextU: User = {
             ...u,
-            membershipTier: isUserVipActive(u) ? u.membershipTier : 'free',
-            subscriptionStatus: isUserVipActive(u) ? u.subscriptionStatus : 'cancelled',
-            paymentStatus: (isUserVipActive(u) ? 'verified' : 'failed') as User['paymentStatus'],
+            membershipTier: keepVip ? u.membershipTier : 'free',
+            subscriptionStatus: keepVip ? u.subscriptionStatus : 'cancelled',
+            paymentStatus: (keepVip ? 'verified' : 'rejected') as User['paymentStatus'],
             vipMembershipHistory: [rejectHistEntry, ...prevHist.filter(h => h.id !== rejectHistEntry.id)].slice(0, 50),
           };
+          updatedTargetUser = nextU;
+          return nextU;
         });
         safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+        latestSyncStateRef.current.users = nextUsers;
+        if (updatedTargetUser && isSupabaseConfigured()) {
+          upsertSingleUserToCloud(updatedTargetUser, deletedUsers).catch(() => {});
+          pushCloudDocument('kft_cloud_users_v2', nextUsers).catch(() => {});
+          pushCloudDocument('kft_cloud_users_v1', nextUsers).catch(() => {});
+        }
         return nextUsers;
       });
 
-      if (currentUser?.id === targetUserId) {
+      if (currentUser && doesUserMatchTarget(currentUser, { id: targetUserId, email: matchedTxn.userEmail, phone: matchedTxn.phone })) {
         setCurrentUser(prev => {
           if (!prev) return null;
           const prevHist = Array.isArray(prev.vipMembershipHistory) ? prev.vipMembershipHistory : [];
+          const keepVip = isUserVipActive(prev);
           const updatedCur: User = {
             ...prev,
-            membershipTier: isUserVipActive(prev) ? prev.membershipTier : 'free',
-            subscriptionStatus: isUserVipActive(prev) ? prev.subscriptionStatus : 'cancelled',
-            paymentStatus: isUserVipActive(prev) ? 'verified' : 'failed',
+            membershipTier: keepVip ? prev.membershipTier : 'free',
+            subscriptionStatus: keepVip ? prev.subscriptionStatus : 'cancelled',
+            paymentStatus: keepVip ? 'verified' : 'rejected',
             vipMembershipHistory: [rejectHistEntry, ...prevHist.filter(h => h.id !== rejectHistEntry.id)].slice(0, 50),
           };
           safeSetCriticalAccountStorage('kft_current_user_v5', updatedCur);
+          latestSyncStateRef.current.currentUser = updatedCur;
           return updatedCur;
         });
       }
@@ -13839,19 +13904,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('Payment proof vault save warning:', e);
     }
 
-    setTransactions(prev =>
-      prev.map(t => {
+    setTransactions(prev => {
+      const nextTxns = prev.map(t => {
         if (t.id !== txnId) return t;
         return {
           ...t,
-          status: t.status === 'needs_more_info' ? 'pending_verification' : t.status,
+          status: (t.status === 'needs_more_info' ? 'pending_verification' : t.status) as RegistrationTransaction['status'],
           paymentProofUrl: proofDataUrl,
           paymentProofUploadedAt: nowIso.replace('T', ' ').slice(0, 16),
           paymentProofFileName: fileName,
           paymentProofMimeType: mimeType,
         };
-      })
-    );
+      });
+      skipNextTransactionsCloudPushRef.current = false;
+      latestSyncStateRef.current.transactions = nextTxns;
+      try {
+        localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTxns));
+      } catch {}
+      if (isSupabaseConfigured()) {
+        mergeAndPushTransactionsToCloud(nextTxns).catch(() => {});
+      }
+      return nextTxns;
+    });
 
     if (doesUserMatchTarget(currentUser, { id: matchedTxn.userId, email: matchedTxn.userEmail })) {
       const alreadyVip = isUserVipActive(currentUser);
@@ -13943,6 +14017,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     const effectiveAmountUsd = amountUsd ?? resolvedPlan.priceUsd;
     const effectiveDurationDays = durationDays ?? resolvedPlan.durationDays;
+
+    // STRICT PAYMENT RULE: Route all VIP upgrade requests through pending Admin verification
+    const requireManualAdminApproval = Boolean(1);
+    if (requireManualAdminApproval) {
+      const subRes = await submitVipUpgradeRequest(
+        effectiveDurationDays,
+        effectiveAmountUsd,
+        transactionRef,
+        `VIP Upgrade Request (${resolvedPlan.nameEn} - ${effectiveAmountUsd.toFixed(2)} / ${effectiveDurationDays} days via ${paymentMethod}) — Awaiting Admin Approval`
+      );
+      return { success: subRes.success, error: subRes.error };
+    }
 
     try {
       const req: PaymentVerificationRequest = {
@@ -14408,10 +14494,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ? aiReport.extractedReceipt.trxId
         : cleanTrxRef;
 
-    const isAutoVerified = Boolean(
-      serverGrant ||
-      (aiReport && aiReport.canAutoApprove && aiReport.status === 'verified' && aiReport.confidenceScore >= 90)
-    );
+    // STRICT PAYMENT RULE: Shop package payments require manual Admin verification & approval
+    const isAutoVerified = false;
     const existingExpRaw =
       targetShop.shopSubscriptionExpiresAt || targetShop.subscriptionExpiresAt || targetShop.membershipExpiresAt;
     const existingExpMs = parseSafeDateMs(existingExpRaw);
@@ -14622,11 +14706,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (existingPending && !isVipRenewMode) {
       const updatedRef =
         (transactionRef || '').trim().toUpperCase() || existingPending.transactionRef;
-      setTransactions(prev =>
-        prev.map(t =>
+      setTransactions(prev => {
+        const nextTxns = prev.map(t =>
           t.id === existingPending.id
             ? {
                 ...t,
+                planId: resolvedConsumerPlanId,
                 planType,
                 amountUsd: validPrice,
                 durationDays: validDays,
@@ -14639,8 +14724,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                   : t.paymentProofUploadedAt,
               }
             : t
-        )
-      );
+        );
+        skipNextTransactionsCloudPushRef.current = false;
+        latestSyncStateRef.current.transactions = nextTxns;
+        try {
+          localStorage.setItem('kft_transactions_v4', JSON.stringify(nextTxns));
+        } catch {}
+        if (isSupabaseConfigured()) {
+          mergeAndPushTransactionsToCloud(nextTxns).catch(() => {});
+        }
+        return nextTxns;
+      });
       if (paymentProofData?.dataUrl) {
         uploadPaymentProofToTransaction(
           existingPending.id,
@@ -14783,10 +14877,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ? aiReport.extractedReceipt.trxId
         : cleanTrxRef;
 
-    const isAutoVerified = Boolean(
-      serverGrant ||
-      (aiReport && aiReport.canAutoApprove && aiReport.status === 'verified' && aiReport.confidenceScore >= 90)
-    );
+    // STRICT PAYMENT RULE: Users must NEVER receive VIP status automatically upon submitting a payment request.
+    // Every payment request remains 'pending_verification' until an authorized Admin manually approves it.
+    const isAutoVerified = false;
 
     // When the SERVER granted the VIP, use exactly the dates it stored so this device and the database agree.
     const { startDate, expiryDate } = serverGrant
@@ -14931,16 +15024,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       membershipTier: alreadyVip ? 'premium_vip' : 'free',
       subscriptionStatus: alreadyVip ? 'active' : 'pending',
       paymentStatus: alreadyVip ? 'verified' : 'paid_pending_approval',
+      subscriptionExpiryDate: alreadyVip ? currentUser.subscriptionExpiryDate : undefined,
+      vipExpiresAt: alreadyVip ? currentUser.vipExpiresAt : undefined,
+      vipStatus: alreadyVip ? 'active' : 'none',
+      vipCancelledAt: undefined,
       paymentMethod: 'KHQR',
       transactionRef: effectiveTrxRef,
       ...autoRenewExtraFields,
     };
 
     setCurrentUser(pendingUser);
+    latestSyncStateRef.current.currentUser = pendingUser;
     safeSetCriticalAccountStorage('kft_current_user_v5', pendingUser);
     setUsers(prev => {
       const nextUsers = prev.map(u => (doesUserMatchTarget(u, currentUser) ? pendingUser : u));
+      latestSyncStateRef.current.users = nextUsers;
       safeSetCriticalAccountStorage('kft_users_v5', nextUsers);
+      if (isSupabaseConfigured()) {
+        upsertSingleUserToCloud(pendingUser, deletedUsers).catch(() => {});
+        pushCloudDocument('kft_cloud_users_v2', nextUsers).catch(() => {});
+        pushCloudDocument('kft_cloud_users_v1', nextUsers).catch(() => {});
+      }
       return nextUsers;
     });
 
@@ -15294,12 +15398,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           currentTransactionId: pendingTxn.id,
           existingTransactions: transactions,
         }).catch(() => undefined);
-        const autoApprovedNow = Boolean(
-          recheckReport &&
-          recheckReport.canAutoApprove &&
-          recheckReport.status === 'verified' &&
-          recheckReport.confidenceScore >= 90
-        );
+        const autoApprovedNow = false;
         if (recheckReport) {
           setTransactions(prev =>
             prev.map(t =>
@@ -15399,12 +15498,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ? aiReport.extractedReceipt.trxId
         : cleanTrxRef;
 
-    const isAutoVerified = Boolean(
-      aiReport &&
-      aiReport.canAutoApprove &&
-      aiReport.status === 'verified' &&
-      aiReport.confidenceScore >= 90
-    );
+    const isAutoVerified = false;
 
     if (isAutoVerified) {
       recordVerifiedTransaction(effectiveTrxRef);
@@ -15582,12 +15676,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     )}`;
 
     const aiReport = input.aiVerificationReport;
-    const isAutoApprovedByAi = Boolean(
-      input.receiptUrl &&
-        aiReport &&
-        aiReport.canAutoApprove &&
-        aiReport.status === 'verified'
-    );
+    const isAutoApprovedByAi = false;
 
     const userLatestTxn = transactions.find(t => t.userId === currentUser.id);
     const autoRef = (
